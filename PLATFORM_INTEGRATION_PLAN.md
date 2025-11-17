@@ -26,22 +26,22 @@
 
 ---
 
-### **2. Blaze (Blackbox AI)**
-**What it is:** AI-powered code generation and completion platform
+### **2. Blaxel (Agentic Network Platform)**
+**What it is:** Platform for building and deploying multi-agent AI systems
 **Key Features:**
-- Code generation from natural language
-- Multi-language support
-- Context-aware suggestions
-- Real-time code completion
-- API access available
+- Agentic network architecture (multi-agent workflows)
+- Complex task orchestration
+- Agent collaboration
+- Web-based interface at https://app.blaxel.ai/
+- API for agent invocation
 
 **Best Use in Our Project:**
-- 🎯 **Code generation enhancement** (better quality outputs)
-- 🔧 **Alternative generation backend** (specialized for code)
-- 📝 **Code explanation service** (technical analysis)
-- 🎨 **UI code generation** (generate boilerplate)
+- 🎯 **Complex workflows** (multi-step reasoning)
+- 🔧 **Architecture design** (high-level system thinking)
+- 📝 **Multi-file operations** (coordinated changes)
+- 🎨 **Advanced refactoring** (agents working together)
 
-**Integration Point:** `core/llm.py` - Add Blaze client for code tasks
+**Integration Point:** `core/llm.py` - Add Blaxel client for complex tasks
 
 ---
 
@@ -66,9 +66,9 @@
 
 ## 🎯 STRATEGIC INTEGRATION PLAN
 
-### **Phase 1: Multi-Backend LLM Support (Day 6)**
+### **Phase 1: Multi-Backend Support (Day 6)**
 
-**Objective:** Add SambaNova + Blaze as LLM backends
+**Objective:** Add SambaNova + Blaxel as backends
 
 ```python
 # core/llm.py enhancement
@@ -78,12 +78,12 @@ class LLMClient:
         self.hf_client = ...      # ✅ Existing
         self.ollama_client = ...  # ✅ Existing
         self.sambanova_client = ... # 🆕 NEW
-        self.blaze_client = ...   # 🆕 NEW
+        self.blaxel_client = ...  # 🆕 NEW (Agentic)
     
     async def stream_chat(self, prompt, provider="auto"):
         # Auto-select best provider based on:
         # - Speed requirements
-        # - Task type (code vs general)
+        # - Task complexity (simple vs multi-step)
         # - Availability
         # - Rate limits
         
@@ -92,14 +92,14 @@ class LLMClient:
         
         if provider == "sambanova":
             return self._stream_sambanova(prompt)
-        elif provider == "blaze":
-            return self._stream_blaze(prompt)
+        elif provider == "blaxel":
+            return self._stream_blaxel(prompt)  # Agentic workflow
         # ... existing providers
 ```
 
 **Benefits:**
 - ⚡ **Speed comparison** (benchmark all providers)
-- 🎯 **Task-specific routing** (code tasks → Blaze, general → SambaNova)
+- 🎯 **Task-specific routing** (complex → Blaxel, fast → SambaNova)
 - 🔄 **Redundancy** (if one fails, fallback to others)
 - 📊 **Performance metrics** (which is fastest/best quality)
 

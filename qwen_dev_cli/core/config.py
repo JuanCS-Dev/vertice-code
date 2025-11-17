@@ -35,8 +35,8 @@ class Config:
     sambanova_api_key: Optional[str] = None
     sambanova_model: str = "Meta-Llama-3.1-8B-Instruct"
     
-    # Blaze (Blackbox AI - code specialist)
-    blaze_api_key: Optional[str] = None
+    # Blaxel (Agentic Network platform)
+    blaxel_api_key: Optional[str] = None
     
     # Ollama (optional local mode)
     ollama_enabled: bool = False
@@ -64,8 +64,8 @@ class Config:
         if self.sambanova_api_key is None:
             self.sambanova_api_key = os.getenv("SAMBANOVA_API_KEY")
         
-        if self.blaze_api_key is None:
-            self.blaze_api_key = os.getenv("BLAZE_API_KEY")
+        if self.blaxel_api_key is None:
+            self.blaxel_api_key = os.getenv("BLAXEL_API_KEY")
         
         if os.getenv("OLLAMA_ENABLED"):
             self.ollama_enabled = os.getenv("OLLAMA_ENABLED").lower() == "true"

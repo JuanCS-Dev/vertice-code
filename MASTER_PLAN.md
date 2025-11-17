@@ -595,25 +595,25 @@ MORNING (3h): 🌅 - SambaNova Integration
     - Time: 30min
     - Commit: "SambaNova performance validated"
 
-AFTERNOON (3h): ☀️ - Blaze Integration
-[ ] Task 6.4: Blaze (Blackbox AI) setup
-    - Research: Blaze API docs
-    - Get: API key
-    - Test: Code generation endpoint
+AFTERNOON (3h): ☀️ - Blaxel Integration
+[ ] Task 6.4: Blaxel (Agentic Network) research
+    - Research: Blaxel platform & API docs
+    - Understand: Agent invocation patterns
+    - Test: API endpoint with key
     - Time: 1h
-    - Commit: "Blaze research & testing"
+    - Commit: "Blaxel research & testing"
 
-[ ] Task 6.5: Blaze client implementation
-    - Create: BlazeClient class in llm.py
-    - Implement: Code generation optimized
-    - Implement: Task detection (code vs general)
-    - Test: Code generation quality
+[ ] Task 6.5: Blaxel client implementation
+    - Create: BlaxelClient class in llm.py
+    - Implement: Agent workflow invocation
+    - Implement: Complex task routing
+    - Test: Agentic workflow quality
     - Time: 1.5h
-    - Commit: "Blaze client implementation"
+    - Commit: "Blaxel agentic integration"
 
 [ ] Task 6.6: Multi-backend UI selector
     - Add: Provider dropdown in Gradio UI
-    - Options: [Auto, HF, SambaNova, Blaze, Ollama]
+    - Options: [Auto, HF, SambaNova, Blaxel, Ollama]
     - Wire: Provider selection to LLM client
     - Test: Can switch between providers
     - Time: 30min
@@ -627,7 +627,7 @@ EVENING (1h): 🌙
     - Time: 1h
     - Commit: "Performance dashboard"
 
-CHECKPOINT: ✅ SambaNova + Blaze working, speed boost achieved!
+CHECKPOINT: ✅ SambaNova + Blaxel working, multi-provider system operational!
 
 ┌─────────────────────────────────────────────────────────┐
 │ DAY 7: MODAL DEPLOYMENT + INTELLIGENT ROUTING          │
@@ -664,9 +664,9 @@ MORNING (3h): 🌅 - Modal Setup
 AFTERNOON (3h): ☀️ - Intelligent Routing
 [ ] Task 7.4: Provider Router implementation
     - Create: core/provider_router.py
-    - Implement: Task classification (code vs general)
+    - Implement: Task classification (simple vs complex)
     - Implement: Provider selection logic
-    - Rules: Code tasks → Blaze, Speed → SambaNova, Quality → Modal
+    - Rules: Complex → Blaxel, Speed → SambaNova, Quality → Modal
     - Time: 2h
     - Commit: "Intelligent provider routing"
 
@@ -680,14 +680,14 @@ AFTERNOON (3h): ☀️ - Intelligent Routing
 
 EVENING (1h): 🌙 - Testing & Benchmarking
 [ ] Task 7.6: Multi-provider benchmark
-    - Test: All 5 providers (HF, SambaNova, Blaze, Modal, Ollama)
+    - Test: All 5 providers (HF, SambaNova, Blaxel, Modal, Ollama)
     - Measure: TTFT, throughput, quality per provider
     - Document: Performance matrix
     - Update: test_integration.py with new tests
     - Time: 1h
     - Commit: "Multi-provider benchmarks complete"
 
-CHECKPOINT: ✅ All 5 backends working, intelligent routing operational!
+CHECKPOINT: ✅ All 5 backends working, intelligent agentic routing operational!
     - Test: Fixes work
     - Time: 2h
     - Commit: "Bug fixes from testing"

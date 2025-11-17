@@ -37,10 +37,11 @@ class LLMClient:
             except ImportError:
                 print("⚠️  OpenAI SDK not installed (needed for SambaNova)")
         
-        # Blaze (code-specialized)
-        self.blaze_client = None
-        if hasattr(config, 'blaze_api_key') and config.blaze_api_key:
-            # Will implement Blaze client when API details confirmed
+        # Blaxel (Agentic Network platform)
+        self.blaxel_client = None
+        if hasattr(config, 'blaxel_api_key') and config.blaxel_api_key:
+            # Will implement Blaxel client when API details confirmed
+            # Blaxel is an agentic network platform, not a simple LLM
             pass
         
         # Default provider
@@ -86,8 +87,8 @@ class LLMClient:
         if provider == "sambanova" and self.sambanova_client:
             async for chunk in self._stream_sambanova(messages, max_tokens, temperature):
                 yield chunk
-        elif provider == "blaze" and self.blaze_client:
-            async for chunk in self._stream_blaze(messages, max_tokens, temperature):
+        elif provider == "blaxel" and self.blaxel_client:
+            async for chunk in self._stream_blaxel(messages, max_tokens, temperature):
                 yield chunk
         elif provider == "ollama" and self.ollama_client:
             async for chunk in self._stream_ollama(messages, max_tokens, temperature):
@@ -99,10 +100,11 @@ class LLMClient:
     
     def _select_best_provider(self, prompt: str) -> str:
         """Simple provider selection logic."""
-        # Code generation tasks -> Blaze (if available)
-        code_keywords = ["write", "generate", "create", "function", "class", "code"]
-        if any(kw in prompt.lower() for kw in code_keywords) and self.blaze_client:
-            return "blaze"
+        # Complex multi-step tasks -> Blaxel (if available)
+        # Blaxel is agentic network, good for complex workflows
+        complex_keywords = ["refactor", "architecture", "design", "multi", "complex"]
+        if any(kw in prompt.lower() for kw in complex_keywords) and self.blaxel_client:
+            return "blaxel"
         
         # Fast responses -> SambaNova (if available)
         if self.sambanova_client:
@@ -167,15 +169,16 @@ class LLMClient:
         except Exception as e:
             yield f"❌ SambaNova Error: {str(e)}"
     
-    async def _stream_blaze(
+    async def _stream_blaxel(
         self,
         messages: list,
         max_tokens: int,
         temperature: float
     ) -> AsyncGenerator[str, None]:
-        """Stream from Blaze (code-specialized)."""
-        # Placeholder for Blaze implementation
-        yield "⚠️ Blaze integration coming soon"
+        """Stream from Blaxel (Agentic Network)."""
+        # Placeholder for Blaxel implementation
+        # Blaxel is an agentic network platform - needs API research
+        yield "⚠️ Blaxel integration coming soon (agentic network platform)"
     
     async def _stream_ollama(
         self,
@@ -239,8 +242,8 @@ class LLMClient:
             available.append("HuggingFace")
         if self.sambanova_client:
             available.append("SambaNova")
-        if self.blaze_client:
-            available.append("Blaze")
+        if self.blaxel_client:
+            available.append("Blaxel")
         if self.ollama_client:
             available.append("Ollama")
         
@@ -256,8 +259,8 @@ class LLMClient:
             providers.append("hf")
         if self.sambanova_client:
             providers.append("sambanova")
-        if self.blaze_client:
-            providers.append("blaze")
+        if self.blaxel_client:
+            providers.append("blaxel")
         if self.ollama_client:
             providers.append("ollama")
         providers.append("auto")  # Always available
