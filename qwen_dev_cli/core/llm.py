@@ -80,21 +80,37 @@ class LLMClient:
             })
         messages.append({"role": "user", "content": prompt})
         
+        # Validate provider
+        valid_providers = ["hf", "sambanova", "blaxel", "ollama", "auto"]
+        if provider not in valid_providers:
+            raise ValueError(
+                f"Invalid provider '{provider}'. "
+                f"Valid options: {valid_providers}"
+            )
+        
         # Route to appropriate provider
         if provider == "auto":
             provider = self._select_best_provider(prompt)
         
-        if provider == "sambanova" and self.sambanova_client:
+        if provider == "sambanova":
+            if not self.sambanova_client:
+                raise RuntimeError("SambaNova client not initialized. Check API key.")
             async for chunk in self._stream_sambanova(messages, max_tokens, temperature):
                 yield chunk
-        elif provider == "blaxel" and self.blaxel_client:
+        elif provider == "blaxel":
+            if not self.blaxel_client:
+                raise RuntimeError("Blaxel client not initialized. Check API key.")
             async for chunk in self._stream_blaxel(messages, max_tokens, temperature):
                 yield chunk
-        elif provider == "ollama" and self.ollama_client:
+        elif provider == "ollama":
+            if not self.ollama_client:
+                raise RuntimeError("Ollama client not initialized. Enable in config.")
             async for chunk in self._stream_ollama(messages, max_tokens, temperature):
                 yield chunk
         else:
-            # Default to HuggingFace
+            # HuggingFace
+            if not self.hf_client:
+                raise RuntimeError("HuggingFace client not initialized. Check API token.")
             async for chunk in self._stream_hf(messages, max_tokens, temperature):
                 yield chunk
     
