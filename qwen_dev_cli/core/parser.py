@@ -241,10 +241,15 @@ class ResponseParser:
                         raw_response=response
                     )
                 
-                # Normalize args field
+                # Normalize args field (support both "args" and "arguments")
                 if "args" not in item:
-                    item["args"] = {}
-                elif not isinstance(item["args"], dict):
+                    # Try "arguments" as fallback
+                    if "arguments" in item:
+                        item["args"] = item.pop("arguments")
+                    else:
+                        item["args"] = {}
+                
+                if not isinstance(item["args"], dict):
                     return ParseResult(
                         success=False,
                         error="'args' must be a dict",

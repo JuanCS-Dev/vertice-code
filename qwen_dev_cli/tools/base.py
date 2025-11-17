@@ -30,7 +30,10 @@ class Tool(ABC):
     """Base class for all tools."""
     
     def __init__(self):
-        self.name: str = self.__class__.__name__.replace("Tool", "").lower()
+        # Convert CamelCase to snake_case for consistency
+        import re
+        class_name = self.__class__.__name__.replace("Tool", "")
+        self.name: str = re.sub(r'(?<!^)(?=[A-Z])', '_', class_name).lower()
         self.category: ToolCategory = ToolCategory.FILE_READ
         self.description: str = ""
         self.parameters: Dict[str, Any] = {}

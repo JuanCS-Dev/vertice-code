@@ -81,7 +81,81 @@ class ShellBridge:
         
         self.current_session: Optional[Session] = None
         
+        # Register core tools (Copilot + Cursor + Claude pattern)
+        self._register_core_tools()
+        
         logger.info("ShellBridge initialized")
+    
+    def _register_core_tools(self):
+        """Register core tools (always available).
+        
+        Implements hybrid registry pattern:
+        - Core tools (file, terminal, git) always loaded
+        - Dynamic discovery based on project context
+        - Lazy loading for heavy dependencies
+        
+        Inspired by:
+        - Copilot CLI: Static core + dynamic permissions
+        - Cursor AI: Context-aware discovery
+        - Claude Code: MCP-style on-demand execution
+        """
+        from ..tools.file_ops import (
+            ReadFileTool, WriteFileTool, EditFileTool,
+            ListDirectoryTool, DeleteFileTool
+        )
+        from ..tools.file_mgmt import (
+            MoveFileTool, CopyFileTool, CreateDirectoryTool,
+            ReadMultipleFilesTool, InsertLinesTool
+        )
+        from ..tools.search import SearchFilesTool, GetDirectoryTreeTool
+        from ..tools.exec import BashCommandTool
+        from ..tools.git_ops import GitStatusTool, GitDiffTool
+        from ..tools.context import GetContextTool, SaveSessionTool, RestoreBackupTool
+        from ..tools.terminal import (
+            CdTool, LsTool, PwdTool, MkdirTool, RmTool,
+            CpTool, MvTool, TouchTool, CatTool
+        )
+        
+        # File operations (9 tools)
+        self.registry.register(ReadFileTool())
+        self.registry.register(WriteFileTool())
+        self.registry.register(EditFileTool())
+        self.registry.register(ListDirectoryTool())
+        self.registry.register(DeleteFileTool())
+        self.registry.register(MoveFileTool())
+        self.registry.register(CopyFileTool())
+        self.registry.register(CreateDirectoryTool())
+        self.registry.register(ReadMultipleFilesTool())
+        self.registry.register(InsertLinesTool())
+        
+        # Search & navigation (2 tools)
+        self.registry.register(SearchFilesTool())
+        self.registry.register(GetDirectoryTreeTool())
+        
+        # Execution (1 tool)
+        self.registry.register(BashCommandTool())
+        
+        # Git operations (2 tools)
+        self.registry.register(GitStatusTool())
+        self.registry.register(GitDiffTool())
+        
+        # Context management (3 tools)
+        self.registry.register(GetContextTool())
+        self.registry.register(SaveSessionTool())
+        self.registry.register(RestoreBackupTool())
+        
+        # Terminal commands (9 tools)
+        self.registry.register(CdTool())
+        self.registry.register(LsTool())
+        self.registry.register(PwdTool())
+        self.registry.register(MkdirTool())
+        self.registry.register(RmTool())
+        self.registry.register(CpTool())
+        self.registry.register(MvTool())
+        self.registry.register(TouchTool())
+        self.registry.register(CatTool())
+        
+        logger.info(f"Registered {len(self.registry.tools)} core tools")
     
     async def process_input(
         self,
@@ -256,7 +330,8 @@ class ShellBridge:
         """
         start_time = datetime.now()
         tool_name = tool_call.get("tool", "unknown")
-        arguments = tool_call.get("arguments", {})
+        # Support both "arguments" and "args" for compatibility
+        arguments = tool_call.get("arguments") or tool_call.get("args", {})
         
         # Safety check (CRITICAL - Claude Code strategy)
         is_safe, block_reason = self.safety.is_safe(tool_call)
@@ -291,8 +366,11 @@ class ShellBridge:
             
             execution_time = (datetime.now() - start_time).total_seconds()
             
+            # Check if tool execution actually succeeded
+            tool_success = result.success if hasattr(result, 'success') else True
+            
             return ExecutionResult(
-                success=True,
+                success=tool_success,
                 tool_name=tool_name,
                 result=result,
                 execution_time=execution_time,
