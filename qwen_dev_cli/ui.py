@@ -210,6 +210,18 @@ def create_ui() -> gr.Blocks:
                         show_label=False
                     )
                 
+                # Performance Dashboard (NEW!)
+                with gr.Accordion("⚡ Performance", open=True):
+                    perf_display = gr.Markdown(
+                        """
+                        **Last Response:**
+                        - Provider: Not used yet
+                        - TTFT: - ms
+                        - Total Time: - s
+                        """,
+                        label="Performance Metrics"
+                    )
+                
                 # Stats (collapsible on mobile)
                 with gr.Accordion("📊 Stats", open=False):
                     stats_display = gr.JSON(
@@ -239,26 +251,47 @@ def create_ui() -> gr.Blocks:
         
         def respond_stream(message: str, history: List, temp: float, max_tok: int, stream: bool, provider: str) -> Generator:
             """Handle chat response with streaming support and provider selection."""
+            import time
+            
             if not message.strip():
-                yield history
+                yield history, None
                 return
             
             # Add user message
             history.append({"role": "user", "content": message})
             history.append({"role": "assistant", "content": ""})
             
+            # Track performance
+            start_time = time.time()
+            first_token_time = None
+            used_provider = provider if provider != "auto" else "auto (selecting...)"
+            
             if stream:
                 # Streaming mode
                 async def stream_response():
+                    nonlocal first_token_time, used_provider
                     full_response = ""
                     try:
                         async for chunk in llm_client.stream_chat(message, temperature=temp, max_tokens=max_tok, provider=provider):
+                            if first_token_time is None:
+                                first_token_time = time.time()
                             full_response += chunk
                             history[-1]["content"] = full_response
-                            yield history
+                            
+                            # Update perf info in real-time
+                            elapsed = (time.time() - start_time) * 1000
+                            ttft = (first_token_time - start_time) * 1000 if first_token_time else elapsed
+                            
+                            perf_info = f"""
+**Last Response:**
+- Provider: `{used_provider}`
+- TTFT: {ttft:.0f}ms
+- Streaming: {elapsed:.0f}ms elapsed
+"""
+                            yield history, perf_info
                     except Exception as e:
                         history[-1]["content"] = f"❌ Error: {str(e)}"
-                        yield history
+                        yield history, None
                 
                 # Run async generator
                 loop = asyncio.new_event_loop()
@@ -278,10 +311,21 @@ def create_ui() -> gr.Blocks:
                 try:
                     response = asyncio.run(llm_client.generate(message, temperature=temp, max_tokens=max_tok, provider=provider))
                     history[-1]["content"] = response
+                    
+                    # Calculate performance
+                    total_time = time.time() - start_time
+                    perf_info = f"""
+**Last Response:**
+- Provider: `{provider}`
+- Total Time: {total_time:.2f}s
+- Mode: Non-streaming
+"""
+                    yield history, perf_info
                 except Exception as e:
                     history[-1]["content"] = f"❌ Error: {str(e)}"
+                    perf_info = f"❌ Error occurred"
                 
-                yield history
+                yield history, perf_info
         
         def upload_files(files) -> Tuple[str, dict]:
             """Handle file uploads."""
@@ -313,7 +357,7 @@ def create_ui() -> gr.Blocks:
         def retry_last(history: List, last_msg: str, temp: float, max_tok: int, stream: bool, provider: str) -> Generator:
             """Retry last message."""
             if not last_msg:
-                yield history
+                yield history, None
                 return
             
             # Remove last exchange
@@ -332,7 +376,7 @@ def create_ui() -> gr.Blocks:
         send_btn.click(
             respond_stream,
             inputs=[msg_input, chatbot, temperature, max_tokens, stream_enabled, provider_dropdown],
-            outputs=[chatbot]
+            outputs=[chatbot, perf_display]
         ).then(
             lambda: ("", context_builder.get_stats()),
             outputs=[msg_input, stats_display]
@@ -345,7 +389,7 @@ def create_ui() -> gr.Blocks:
         msg_input.submit(
             respond_stream,
             inputs=[msg_input, chatbot, temperature, max_tokens, stream_enabled, provider_dropdown],
-            outputs=[chatbot]
+            outputs=[chatbot, perf_display]
         ).then(
             lambda: ("", context_builder.get_stats()),
             outputs=[msg_input, stats_display]
@@ -359,7 +403,7 @@ def create_ui() -> gr.Blocks:
         retry_btn.click(
             retry_last,
             inputs=[chatbot, last_user_msg, temperature, max_tokens, stream_enabled, provider_dropdown],
-            outputs=[chatbot]
+            outputs=[chatbot, perf_display]
         )
         
         file_upload.change(upload_files, inputs=[file_upload], outputs=[context_status, stats_display])
