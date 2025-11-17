@@ -1,8 +1,26 @@
 """Configuration management for qwen-dev-cli."""
 
 import os
+from pathlib import Path
 from typing import Optional
 from dataclasses import dataclass
+
+
+# Load .env file if it exists
+def load_env():
+    """Load environment variables from .env file."""
+    env_file = Path(__file__).parent.parent.parent / ".env"
+    if env_file.exists():
+        with open(env_file) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    key, value = line.split('=', 1)
+                    os.environ[key.strip()] = value.strip()
+
+
+# Load env before defining config
+load_env()
 
 
 @dataclass
