@@ -127,6 +127,19 @@ class ContextBuilder:
         
         return "\n".join(context_parts)
     
+    def build_context(self) -> Dict[str, str]:
+        """Build context dictionary (alias for testing).
+        
+        Returns:
+            Dictionary with context information including cwd
+        """
+        return {
+            'cwd': os.getcwd(),
+            'working_dir': os.getcwd(),
+            'files': self.files,
+            'file_count': len(self.files)
+        }
+    
     def inject_to_prompt(self, prompt: str) -> str:
         """Inject context into user prompt.
         

@@ -378,6 +378,32 @@ class ConversationManager:
                 self.transition_state(ConversationState.IDLE, "all_tools_completed_successfully")
             # If error, state is already ERROR
     
+    async def add_turn(
+        self,
+        user_input: str,
+        assistant_response: str,
+        tool_calls: List[Dict[str, Any]] = None
+    ) -> ConversationTurn:
+        """
+        Helper method to add a complete turn (for testing/simple cases).
+        
+        Args:
+            user_input: User's input
+            assistant_response: Assistant's response
+            tool_calls: Optional tool calls
+            
+        Returns:
+            The created turn
+        """
+        turn = self.start_turn(user_input)
+        self.add_llm_response(turn, assistant_response)
+        
+        if tool_calls:
+            self.add_tool_calls(turn, tool_calls)
+        
+        self.transition_state(ConversationState.IDLE, "turn_completed")
+        return turn
+    
     def _categorize_error(self, error: str) -> str:
         """
         Categorize error for recovery strategy.

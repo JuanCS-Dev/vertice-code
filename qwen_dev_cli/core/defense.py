@@ -396,3 +396,36 @@ class ContextCompactor:
             summary += f" about: {', '.join(keywords[:3])}"
         
         return summary
+
+
+@dataclass
+class DefenseResult:
+    """Result of defense validation."""
+    is_safe: bool
+    confidence: float
+    reason: Optional[str] = None
+
+
+class PromptDefense:
+    """
+    Unified defense interface for constitutional compliance.
+    Wrapper around PromptInjectionDefender for cleaner API.
+    """
+    
+    def __init__(self):
+        self.defender = PromptInjectionDefender()
+    
+    def validate_input(self, user_input: str) -> DefenseResult:
+        """
+        Validate user input for safety.
+        
+        Returns:
+            DefenseResult with is_safe, confidence, and reason
+        """
+        detection = self.defender.detect(user_input)
+        
+        return DefenseResult(
+            is_safe=not detection.is_malicious,
+            confidence=detection.confidence,
+            reason=detection.reason
+        )
