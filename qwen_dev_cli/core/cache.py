@@ -44,7 +44,7 @@ class LRUCache:
             return self._cache[key]
         return None
     
-    def set(self, key: str, value: Any):
+    def set(self, key: str, value: Any) -> None:
         """Set value, evict if needed."""
         if key in self._cache:
             self._cache.move_to_end(key)
@@ -53,7 +53,7 @@ class LRUCache:
             if len(self._cache) > self._maxsize:
                 self._cache.popitem(last=False)
     
-    def clear(self):
+    def clear(self) -> None:
         """Clear all cached items."""
         self._cache.clear()
     
@@ -105,7 +105,7 @@ class DiskCache:
         
         return None
     
-    def set(self, key: str, value: Any, ttl: float = 3600):
+    def set(self, key: str, value: Any, ttl: float = 3600) -> None:
         """Set value with TTL (default 1 hour)."""
         conn = sqlite3.connect(str(self.db_path))
         conn.execute(
@@ -172,12 +172,12 @@ class PerformanceCache:
         self._stats.misses += 1
         return None
     
-    def set(self, key: str, value: Any, ttl: float = 3600):
+    def set(self, key: str, value: Any, ttl: float = 3600) -> None:
         """Set value in all tiers."""
         self._memory.set(key, value)
         self._disk.set(key, value, ttl)
     
-    def clear(self):
+    def clear(self) -> None:
         """Clear all caches."""
         self._memory.clear()
         # Don't clear disk by default (persistent)

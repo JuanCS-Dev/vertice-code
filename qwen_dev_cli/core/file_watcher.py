@@ -44,7 +44,7 @@ class FileWatcher:
         self._callbacks: list[Callable] = []
         self._running = False
     
-    def add_callback(self, callback: Callable[[FileEvent], None]):
+    def add_callback(self, callback: Callable[[FileEvent], None]) -> None:
         """Register callback for file events."""
         self._callbacks.append(callback)
     
@@ -157,7 +157,7 @@ class RecentFilesTracker:
         self._files: deque = deque(maxlen=maxsize)
         self._timestamps: Dict[str, float] = {}
     
-    def add(self, file_path: str):
+    def add(self, file_path: str) -> None:
         """Add file to recent list."""
         # Remove if exists (to update position)
         if file_path in self._files:
