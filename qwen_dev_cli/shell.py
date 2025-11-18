@@ -27,7 +27,6 @@ from .core.recovery import (
 # Import LLM client (using existing implementation)
 try:
     from .core.llm import llm_client as default_llm_client
-from .intelligence.workflows import WorkflowOrchestrator
 except ImportError:
     default_llm_client = None
 from .tools.base import ToolRegistry
@@ -673,6 +672,10 @@ Tool calls: {len(self.context.tool_calls)}
             return False, None
             return False, None
         
+        elif cmd.startswith("/explain "):
+            explanation = explain_command(cmd[9:])
+            self.console.print(f"\n💡 {explanation}")
+            return False, None
         else:
             return False, f"Unknown command: {cmd}"
     
