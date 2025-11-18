@@ -20,6 +20,7 @@ import asyncio
 import time
 import random
 import logging
+import os
 from typing import AsyncGenerator, Optional, Dict, Any, List
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -218,6 +219,16 @@ class LLMClient:
         if config.hf_token:
             self.hf_client = InferenceClient(token=config.hf_token)
         
+
+        self.nebius_client = None
+        nebius_key = os.getenv("NEBIUS_API_KEY")
+        if nebius_key:
+            try:
+                from .providers.nebius import NebiusProvider
+                self.nebius_client = NebiusProvider(api_key=nebius_key)
+                logger.info("Nebius provider initialized")
+            except Exception as e:
+                logger.warning(f"Nebius init failed: {e}")
         self.ollama_client = None
         if config.ollama_enabled:
             try:
@@ -227,7 +238,7 @@ class LLMClient:
                 logger.warning("Ollama not installed")
         
         # Provider priority for failover
-        self.provider_priority = ["hf", "ollama"]
+        self.provider_priority = ["nebius", "hf", "ollama"]
         self.default_provider = "auto"
     
     def _calculate_backoff(self, attempt: int) -> float:
@@ -308,6 +319,8 @@ class LLMClient:
         """Get list of providers for failover."""
         available = []
         
+        if self.nebius_client:
+            available.append("nebius")
         if self.hf_client:
             available.append("hf")
         if self.ollama_client:
@@ -357,7 +370,11 @@ class LLMClient:
                 chunks_received = 0
                 
                 # Select provider stream method
-                if provider == "ollama":
+                if provider == "nebius":
+                    if not self.nebius_client:
+                        raise RuntimeError("Nebius not initialized")
+                    stream_gen = self._stream_nebius(messages, max_tokens, temperature)
+                elif provider == "ollama":
                     if not self.ollama_client:
                         raise RuntimeError("Ollama not initialized")
                     stream_gen = self._stream_ollama(messages, max_tokens, temperature)
@@ -442,6 +459,24 @@ class LLMClient:
                     
         except Exception as e:
             logger.error(f"HF Error: {str(e)}")
+            raise
+    
+    async def _stream_nebius(
+        self,
+        messages: list,
+        max_tokens: int,
+        temperature: float
+    ) -> AsyncGenerator[str, None]:
+        """Stream from Nebius Qwen models."""
+        try:
+            async for chunk in self.nebius_client.stream_chat(
+                messages=messages,
+                max_tokens=max_tokens,
+                temperature=temperature
+            ):
+                yield chunk
+        except Exception as e:
+            logger.error(f"Nebius Error: {str(e)}")
             raise
     
     async def _stream_ollama(
