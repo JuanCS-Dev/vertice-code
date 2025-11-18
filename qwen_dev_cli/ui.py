@@ -144,7 +144,6 @@ def create_ui() -> gr.Blocks:
                         **Available Providers:**
                         - `auto` - Intelligent routing (recommended)
                         - `hf` - HuggingFace (baseline, 1514ms TTFT)
-                        - `sambanova` - SambaNova (fast, 1161ms TTFT, 23% ↑)
                         - `ollama` - Local inference (privacy-first)
                         """,
                         visible=True

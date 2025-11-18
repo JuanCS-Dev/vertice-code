@@ -236,10 +236,7 @@ class LLMClient:
                 import ollama
                 self.ollama_client = ollama
             except ImportError:
-                logger.warning("Ollama not installed")
-        
-        self.sambanova_client = None
-        if hasattr(config, 'sambanova_api_key') and config.sambanova_api_key:
+                logger.warning("Ollama not installed")        if hasattr(config, 'sambanova_api_key') and config.sambanova_api_key:
             try:
                 from openai import OpenAI
                 self.sambanova_client = OpenAI(
@@ -254,7 +251,7 @@ class LLMClient:
             pass  # Placeholder for future
         
         # Provider priority for failover (Cursor AI strategy)
-        self.provider_priority = ["hf", "sambanova", "ollama"]
+        self.provider_priority = ["hf", "ollama"]
         self.default_provider = "auto"
     
     def _calculate_backoff(self, attempt: int) -> float:
@@ -489,14 +486,7 @@ class LLMClient:
                     break
         
         # All providers failed
-        raise RuntimeError(f"All providers failed. Last error: {last_error}")
-        
-        if provider == "sambanova":
-            if not self.sambanova_client:
-                raise RuntimeError("SambaNova client not initialized. Check API key.")
-            async for chunk in self._stream_sambanova(messages, max_tokens, temperature):
-                yield chunk
-        elif provider == "blaxel":
+        raise RuntimeError(f"All providers failed. Last error: {last_error}")        elif provider == "blaxel":
             if not self.blaxel_client:
                 raise RuntimeError("Blaxel client not initialized. Check API key.")
             async for chunk in self._stream_blaxel(messages, max_tokens, temperature):
@@ -526,10 +516,7 @@ class LLMClient:
         """
         available = []
         
-        # Check availability and circuit breaker state
-        if self.sambanova_client:
-            available.append("sambanova")
-        if self.hf_client:
+        # Check availability and circuit breaker state        if self.hf_client:
             available.append("hf")
         if self.ollama_client:
             available.append("ollama")
@@ -587,25 +574,7 @@ class LLMClient:
                 start_time = time.time()
                 chunks_received = 0
                 
-                # Select provider stream method
-                if provider == "sambanova":
-                    if not self.sambanova_client:
-                        raise RuntimeError("SambaNova not initialized")
-                    stream_gen = self._stream_sambanova(messages, max_tokens, temperature)
-                elif provider == "ollama":
-                    if not self.ollama_client:
-                        raise RuntimeError("Ollama not initialized")
-                    stream_gen = self._stream_ollama(messages, max_tokens, temperature)
-                else:  # hf
-                    if not self.hf_client:
-                        raise RuntimeError("HuggingFace not initialized")
-                    stream_gen = self._stream_hf(messages, max_tokens, temperature)
-                
-                # Stream chunks
-                async for chunk in stream_gen:
-                    chunks_received += 1
-                    yield chunk
-                
+                # Select provider stream method                
                 # Success
                 latency = time.time() - start_time
                 if self.metrics:
@@ -681,18 +650,7 @@ class LLMClient:
                     yield chunk.choices[0].delta.content
                     
         except Exception as e:
-            yield f"❌ HF Error: {str(e)}"
-    
-    async def _stream_sambanova(
-        self,
-        messages: list,
-        max_tokens: int,
-        temperature: float
-    ) -> AsyncGenerator[str, None]:
-        """Stream from SambaNova (OpenAI-compatible)."""
-        try:
-            loop = asyncio.get_event_loop()
-            
+            yield f"❌ HF Error: {str(e)}"            
             def _generate():
                 return self.sambanova_client.chat.completions.create(
                     model="Meta-Llama-3.1-8B-Instruct",
@@ -781,9 +739,7 @@ class LLMClient:
         available = []
         
         if self.hf_client:
-            available.append("HuggingFace")
-        if self.sambanova_client:
-            available.append("SambaNova")
+            available.append("HuggingFace")            available.append("SambaNova")
         if self.blaxel_client:
             available.append("Blaxel")
         if self.ollama_client:
@@ -798,10 +754,7 @@ class LLMClient:
         """Get list of available providers."""
         providers = []
         if self.hf_client:
-            providers.append("hf")
-        if self.sambanova_client:
-            providers.append("sambanova")
-        if self.blaxel_client:
+            providers.append("hf")        if self.blaxel_client:
             providers.append("blaxel")
         if self.ollama_client:
             providers.append("ollama")

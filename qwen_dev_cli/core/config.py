@@ -32,8 +32,6 @@ class Config:
     hf_model: str = "Qwen/Qwen2.5-Coder-7B-Instruct"
     
     # SambaNova Cloud (ultra-fast inference)
-    sambanova_api_key: Optional[str] = None
-    sambanova_model: str = "Meta-Llama-3.1-8B-Instruct"
     
     # Blaxel (Agentic Network platform)
     blaxel_api_key: Optional[str] = None
@@ -61,8 +59,6 @@ class Config:
         if self.hf_token is None:
             self.hf_token = os.getenv("HF_TOKEN")
         
-        if self.sambanova_api_key is None:
-            self.sambanova_api_key = os.getenv("SAMBANOVA_API_KEY")
         
         if self.blaxel_api_key is None:
             self.blaxel_api_key = os.getenv("BLAXEL_API_KEY")
