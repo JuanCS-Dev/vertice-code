@@ -16,6 +16,13 @@ from rich.syntax import Syntax
 from rich.table import Table
 
 from .core.context import ContextBuilder
+from .core.conversation import ConversationManager, ConversationState
+from .core.recovery import (
+    ErrorRecoveryEngine,
+    RecoveryContext,
+    ErrorCategory,
+    create_recovery_context
+)
 
 # Import LLM client (using existing implementation)
 try:
@@ -68,13 +75,32 @@ class SessionContext:
 
 
 class InteractiveShell:
-    """Tool-based interactive shell (Claude Code-level)."""
+    """Tool-based interactive shell (Claude Code-level) with multi-turn conversation."""
     
-    def __init__(self, llm_client=None):
+    def __init__(self, llm_client=None, session_id: Optional[str] = None):
         self.console = Console()
         self.llm = llm_client or default_llm_client
         self.context = SessionContext()
         self.context_builder = ContextBuilder()
+        
+        # Phase 2.3: Multi-turn conversation manager
+        if session_id is None:
+            import uuid
+            session_id = f"shell_{int(asyncio.get_event_loop().time() * 1000)}"
+        
+        self.conversation = ConversationManager(
+            session_id=session_id,
+            max_context_tokens=4000,
+            enable_auto_recovery=True,
+            max_recovery_attempts=2  # Constitutional P6
+        )
+        
+        # Phase 3.1: Error recovery engine
+        self.recovery_engine = ErrorRecoveryEngine(
+            llm_client=self.llm,
+            max_attempts=2,  # Constitutional P6
+            enable_learning=True
+        )
         
         # Setup prompt session
         history_file = Path.home() / ".qwen_shell_history"
@@ -151,8 +177,163 @@ class InteractiveShell:
         )
         self.console.print(welcome)
     
+    async def _execute_with_recovery(
+        self,
+        tool,
+        tool_name: str,
+        args: Dict[str, Any],
+        turn
+    ):
+        """
+        Execute tool with error recovery loop (Phase 3.1).
+        
+        Implements Constitutional Layer 4: Verify-Fix-Execute loop
+        
+        Args:
+            tool: Tool instance
+            tool_name: Tool name
+            args: Tool arguments
+            turn: Current conversation turn
+        
+        Returns:
+            Tool result or None if recovery failed
+        """
+        max_attempts = self.recovery_engine.max_attempts
+        
+        for attempt in range(1, max_attempts + 1):
+            try:
+                # Execute tool
+                result = await tool.execute(**args)
+                
+                # Track tool call (legacy)
+                self.context.track_tool_call(tool_name, args, result)
+                
+                # Phase 2.3: Track in conversation
+                self.conversation.add_tool_result(
+                    turn, tool_name, args, result,
+                    success=result.success,
+                    error=None if result.success else str(result.data)
+                )
+                
+                # Check if successful
+                if result.success:
+                    # Success! Record if this was a recovery
+                    if attempt > 1:
+                        self.console.print(f"[green]✓ Recovered on attempt {attempt}[/green]")
+                        # Record successful recovery
+                        # (recovery_context would be from previous attempt)
+                    
+                    return result
+                
+                # Tool executed but returned failure
+                error_msg = str(result.data)
+                
+                # If last attempt, fail
+                if attempt >= max_attempts:
+                    self.console.print(
+                        f"[red]✗ {tool_name} failed after {max_attempts} attempts[/red]"
+                    )
+                    return None
+                
+                # Attempt recovery (Constitutional P6: mandatory diagnosis)
+                self.console.print(
+                    f"[yellow]⚠ Attempt {attempt} failed, attempting recovery...[/yellow]"
+                )
+                
+                # Create recovery context
+                recovery_ctx = await create_recovery_context(
+                    self.conversation,
+                    turn,
+                    tool_name,
+                    args,
+                    error_msg,
+                    max_attempts=max_attempts
+                )
+                recovery_ctx.attempt_number = attempt
+                
+                # Attempt recovery
+                recovery_result = await self.recovery_engine.attempt_recovery(recovery_ctx)
+                
+                if not recovery_result.success or not recovery_result.corrected_args:
+                    # Recovery failed
+                    self.console.print(
+                        f"[red]✗ Recovery failed: {recovery_result.escalation_reason}[/red]"
+                    )
+                    return None
+                
+                # Show diagnosis
+                if recovery_ctx.diagnosis:
+                    self.console.print(f"[dim]Diagnosis: {recovery_ctx.diagnosis[:100]}...[/dim]")
+                
+                # Update args for next attempt
+                if recovery_result.corrected_tool:
+                    tool_name = recovery_result.corrected_tool
+                    tool = self.registry.get(tool_name)
+                    if not tool:
+                        self.console.print(f"[red]✗ Corrected tool not found: {tool_name}[/red]")
+                        return None
+                
+                args = recovery_result.corrected_args
+                self.console.print(f"[cyan]↻ Retrying with corrected parameters...[/cyan]")
+                
+            except Exception as e:
+                # Exception during execution
+                error_msg = str(e)
+                
+                # Phase 2.3: Track exception
+                self.conversation.add_tool_result(
+                    turn, tool_name, args, None,
+                    success=False, error=error_msg
+                )
+                
+                # If last attempt, fail
+                if attempt >= max_attempts:
+                    self.console.print(
+                        f"[red]✗ {tool_name} exception after {max_attempts} attempts: {error_msg}[/red]"
+                    )
+                    return None
+                
+                # Attempt recovery for exception
+                self.console.print(
+                    f"[yellow]⚠ Exception on attempt {attempt}, attempting recovery...[/yellow]"
+                )
+                
+                # Create recovery context
+                recovery_ctx = await create_recovery_context(
+                    self.conversation,
+                    turn,
+                    tool_name,
+                    args,
+                    error_msg,
+                    max_attempts=max_attempts
+                )
+                recovery_ctx.attempt_number = attempt
+                
+                # Attempt recovery
+                recovery_result = await self.recovery_engine.attempt_recovery(recovery_ctx)
+                
+                if not recovery_result.success or not recovery_result.corrected_args:
+                    self.console.print(
+                        f"[red]✗ Recovery failed: {recovery_result.escalation_reason}[/red]"
+                    )
+                    return None
+                
+                # Update for retry
+                if recovery_result.corrected_tool:
+                    tool_name = recovery_result.corrected_tool
+                    tool = self.registry.get(tool_name)
+                
+                args = recovery_result.corrected_args
+                self.console.print(f"[cyan]↻ Retrying after exception...[/cyan]")
+        
+        # Should not reach here, but just in case
+        return None
+    
     async def _process_tool_calls(self, user_input: str) -> str:
-        """Process user input and execute tools via LLM with professional prompts."""
+        """Process user input and execute tools via LLM with conversation context (Phase 2.3)."""
+        # Phase 2.3: Start new conversation turn
+        turn = self.conversation.start_turn(user_input)
+        
         try:
             # Import professional prompts (Phase 1.1 complete!)
             from .prompts import (
@@ -178,9 +359,11 @@ Current context:
 - Working directory: {self.context.cwd}
 - Modified files: {list(self.context.modified_files) if self.context.modified_files else 'none'}
 - Read files: {list(self.context.read_files) if self.context.read_files else 'none'}
+- Conversation turns: {len(self.conversation.turns)}
+- Context usage: {self.conversation.context_window.get_usage_percentage():.0%}
 
 INSTRUCTIONS:
-1. Analyze the user's request
+1. Analyze the user's request (consider conversation history)
 2. If it requires tools, respond ONLY with a JSON array of tool calls
 3. If no tools needed, respond with helpful text
 
@@ -202,10 +385,17 @@ Response: [{{"tool": "searchfiles", "args": {{"pattern": "TODO", "file_pattern":
 User: "what time is it?"
 Response: I don't have a tool to check the current time, but I can help you with code-related tasks."""
             
+            # Phase 2.3: Include conversation context (Layer 3: Tool result feedback loop)
             messages = [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_input}
+                {"role": "system", "content": system_prompt}
             ]
+            
+            # Add conversation history (last 3 turns for context)
+            context_messages = self.conversation.get_context_for_llm(include_last_n=3)
+            messages.extend(context_messages)
+            
+            # Add current user input
+            messages.append({"role": "user", "content": user_input})
             
             # Get LLM response
             response = await self.llm.generate_async(
@@ -216,6 +406,10 @@ Response: I don't have a tool to check the current time, but I can help you with
             
             # Parse response
             response_text = response.get("content", "")
+            tokens_used = response.get("tokens_used", len(response_text) // 4)
+            
+            # Phase 2.3: Add LLM response to turn
+            self.conversation.add_llm_response(turn, response_text, tokens_used=tokens_used)
             
             # Try to parse as tool calls
             try:
@@ -227,18 +421,26 @@ Response: I don't have a tool to check the current time, but I can help you with
                     tool_calls = json.loads(json_str)
                     
                     if isinstance(tool_calls, list) and tool_calls:
-                        return await self._execute_tool_calls(tool_calls)
+                        # Phase 2.3: Add tool calls to turn
+                        self.conversation.add_tool_calls(turn, tool_calls)
+                        return await self._execute_tool_calls(tool_calls, turn)
             except (json.JSONDecodeError, ValueError):
                 pass
             
             # If not tool calls, return as regular response
+            # Phase 2.3: Transition to IDLE (no tools to execute)
+            self.conversation.transition_state(ConversationState.IDLE, "text_response_only")
             return response_text
             
         except Exception as e:
+            # Phase 2.3: Mark error in turn
+            turn.error = str(e)
+            turn.error_category = "system"
+            self.conversation.transition_state(ConversationState.ERROR, f"exception: {type(e).__name__}")
             return f"Error: {str(e)}"
     
-    async def _execute_tool_calls(self, tool_calls: list[Dict[str, Any]]) -> str:
-        """Execute a sequence of tool calls."""
+    async def _execute_tool_calls(self, tool_calls: list[Dict[str, Any]], turn) -> str:
+        """Execute a sequence of tool calls with conversation tracking (Phase 2.3)."""
         results = []
         
         for call in tool_calls:
@@ -247,7 +449,14 @@ Response: I don't have a tool to check the current time, but I can help you with
             
             tool = self.registry.get(tool_name)
             if not tool:
-                results.append(f"❌ Unknown tool: {tool_name}")
+                error_msg = f"Unknown tool: {tool_name}"
+                results.append(f"❌ {error_msg}")
+                
+                # Phase 2.3: Track tool failure
+                self.conversation.add_tool_result(
+                    turn, tool_name, args, None, 
+                    success=False, error=error_msg
+                )
                 continue
             
             # Show what we're doing
@@ -258,11 +467,15 @@ Response: I don't have a tool to check the current time, but I can help you with
             if tool_name in ['getcontext', 'savesession']:
                 args['session_context'] = self.context
             
-            # Execute tool
-            result = await tool.execute(**args)
+            # Execute tool with Phase 3.1: Error recovery loop
+            result = await self._execute_with_recovery(
+                tool, tool_name, args, turn
+            )
             
-            # Track tool call
-            self.context.track_tool_call(tool_name, args, result)
+            if not result:
+                # Recovery failed completely
+                results.append(f"❌ {tool_name} failed after recovery attempts")
+                continue
             
             # Format result
             if result.success:
