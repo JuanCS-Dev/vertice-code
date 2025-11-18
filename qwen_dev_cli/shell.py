@@ -749,6 +749,7 @@ Tool calls: {len(self.context.tool_calls)}
         self.console.print(f"\n{explanation.format()}\n")
     
     async def run(self):
+        """Interactive REPL with Cursor+Claude+Gemini best practices."""
         self._show_welcome()
         
         # Initialize suggestion engine
@@ -761,72 +762,46 @@ Tool calls: {len(self.context.tool_calls)}
         async def file_watcher_loop():
             while True:
                 self.file_watcher.check_updates()
-                await asyncio.sleep(1.0)  # Check every second
+                await asyncio.sleep(1.0)
         
         watcher_task = asyncio.create_task(file_watcher_loop())
         
         try:
             while True:
                 try:
-                    # Get user input
-                    user_input = await self.session.prompt_async("┃ > ")
+                    # [IDLE] Get user input
+                    user_input = await self.session.prompt_async("qwen> ")
                     
+                    # Handle empty input
                     if not user_input.strip():
                         continue
                     
-                    # Build rich context for intelligence features
-                    rich_ctx = build_rich_context(
-                        current_command=user_input,
-                        command_history=self.context.history[-10:],
-                        recent_errors=[],
-                        working_dir="."
-                    )
-                
-                    # Check risk before execution
-                    risk = assess_risk(user_input)
-                    if risk.requires_confirmation:
-                        warning = get_risk_warning(risk, user_input)
-                        self.console.print(f"\n{warning}\n")
-                        confirm = input("Continue? [y/N]: ")
-                        if confirm.lower() != 'y':
-                            continue
-                
-                    # Handle system commands
-                    if user_input.startswith("/"):
+                    # Handle system commands (quit, help, etc)
+                    if user_input.strip().lower() in ['quit', 'exit', 'q']:
+                        self.console.print("[cyan]👋 Goodbye![/cyan]")
+                        break
+                    elif user_input.strip().lower() == 'help':
+                        self._show_help()
+                        continue
+                    elif user_input.startswith("/"):
                         should_exit, message = await self._handle_system_command(user_input)
                         if message:
-                            self.console.print(f"[red]{message}[/red]")
+                            self.console.print(message)
                         if should_exit:
                             break
                         continue
-                
-                    # Process with tools
-                    response = await self._process_tool_calls(user_input)
-                
-                    if response:
-                        # Show response
-                        if response.startswith("✓") or response.startswith("❌"):
-                            # Tool execution result
-                            self.console.print(response)
-                        else:
-                            # Regular LLM response
-                            md = Markdown(response)
-                            self.console.print(md)
                     
-                        # Show intelligent suggestions after response
-                        suggestions = suggestion_engine.generate_suggestions(rich_ctx, max_suggestions=3)
-                        if suggestions.suggestions:
-                            self.console.print("\n[dim]💡 Suggestions:[/dim]")
-                            for i, sugg in enumerate(suggestions.suggestions[:3], 1):
-                                self.console.print(f"  {i}. {sugg}")
-                            self.console.print()
+                    # [THINKING] Process request with LLM
+                    await self._process_request_with_llm(user_input, suggestion_engine)
                 
                 except KeyboardInterrupt:
+                    self.console.print("\n[dim]Use 'quit' to exit[/dim]")
                     continue
                 except EOFError:
                     break
                 except Exception as e:
-                    self.console.print(f"[red]Error: {str(e)}[/red]")
+                    # Claude pattern: Never crash, specific error handling
+                    await self._handle_error(e, user_input)
         
         finally:
             # Cleanup
@@ -836,6 +811,242 @@ Tool calls: {len(self.context.tool_calls)}
                 await watcher_task
             except asyncio.CancelledError:
                 pass
+    
+    async def _process_request_with_llm(self, user_input: str, suggestion_engine):
+        """
+        Process user request with LLM using Cursor+Claude+Gemini patterns.
+        
+        Cursor: Multi-step breakdown with visual feedback
+        Claude: Explicit state machine + tiered safety
+        Gemini: Visual hierarchy + typography
+        """
+        import time
+        
+        # Build context (Cursor: auto context injection)
+        rich_ctx = build_rich_context(
+            current_command=user_input,
+            command_history=self.context.history[-10:],
+            recent_errors=[],
+            working_dir=os.getcwd()
+        )
+        
+        # Step 1/3: Analyze request (Cursor: multi-step breakdown)
+        self.console.print("[cyan][THINKING][/cyan] Step 1/3: Analyzing request...")
+        start_time = time.time()
+        
+        # Get LLM suggestion
+        try:
+            suggestion = await self._get_command_suggestion(user_input, rich_ctx)
+        except Exception as e:
+            self.console.print(f"[red]❌ LLM failed: {e}[/red]")
+            self.console.print("[yellow]💡 Tip: Check your API key (HF_TOKEN)[/yellow]")
+            return
+        
+        elapsed = time.time() - start_time
+        self.console.print(f"[cyan][THINKING][/cyan] Step 2/3: Command ready [dim]({elapsed:.1f}s)[/dim] ✓")
+        
+        # Step 3/3: Show suggestion (Gemini: visual hierarchy)
+        self.console.print()
+        self.console.print(f"[dim]You:[/dim] {user_input}")
+        self.console.print()
+        self.console.print("[bold]💡 Suggested action:[/bold]")
+        self.console.print(f"   [cyan]{suggestion}[/cyan]")
+        self.console.print()
+        
+        # Assess risk (Claude: tiered safety)
+        risk = assess_risk(suggestion)
+        safety_level = self._get_safety_level(suggestion)
+        
+        if safety_level == 2:  # Dangerous (rm, dd, etc)
+            self.console.print("[red]⚠️  DANGEROUS COMMAND[/red]")
+            self.console.print(f"[yellow]This will: {risk.description}[/yellow]")
+            confirm = input("Type command name to confirm: ").strip()
+            if confirm != suggestion.split()[0]:
+                self.console.print("[yellow]Cancelled[/yellow]")
+                return
+        elif safety_level == 1:  # Needs confirmation (cp, mv, git)
+            self.console.print("[yellow]⚠️  Requires confirmation[/yellow]")
+        else:  # Safe (ls, pwd, echo)
+            self.console.print("[green]✓ Safe command[/green]")
+        
+        # [CONFIRMING] Ask user
+        if safety_level >= 1:
+            confirm = input("Execute? [y/N] ").strip().lower()
+        else:
+            confirm = input("Execute? [Y/n] ").strip().lower()
+            if not confirm:  # Default yes for safe commands
+                confirm = 'y'
+        
+        if confirm not in ['y', 'yes']:
+            self.console.print("[dim]Cancelled[/dim]")
+            return
+        
+        # [EXECUTING] Run command
+        self.console.print("[cyan][EXECUTING][/cyan] Running command...")
+        self.console.print()
+        
+        try:
+            result = await self._execute_command(suggestion)
+            
+            # Show result
+            if result.get('success'):
+                self.console.print("[green]✓ Success[/green]")
+                if result.get('output'):
+                    self.console.print(result['output'])
+            else:
+                self.console.print("[red]❌ Failed[/red]")
+                if result.get('error'):
+                    self.console.print(f"[red]{result['error']}[/red]")
+        
+        except Exception as e:
+            self.console.print(f"[red]❌ Execution failed: {e}[/red]")
+        
+        # Add to history
+        self.context.history.append(user_input)
+    
+    async def _get_command_suggestion(self, user_request: str, context: dict) -> str:
+        """Get command suggestion from LLM."""
+        if not self.llm:
+            # Fallback: basic regex parsing (Claude: graceful degradation)
+            return self._fallback_suggest(user_request)
+        
+        # Build prompt with context (Cursor: context injection)
+        prompt = f"""User request: {user_request}
+Current directory: {context.get('working_dir', '.')}
+OS: {context.get('os', 'Linux')}
+
+Suggest ONE shell command to accomplish this task.
+Output ONLY the command, no explanation, no markdown."""
+        
+        # Call LLM
+        response = await self.llm.generate(prompt)
+        
+        # Parse command from response
+        command = self._extract_command(response)
+        return command
+    
+    def _fallback_suggest(self, user_request: str) -> str:
+        """Fallback suggestion using regex (when LLM unavailable)."""
+        req_lower = user_request.lower()
+        
+        # Simple pattern matching
+        if 'large file' in req_lower or 'big file' in req_lower:
+            return "find . -type f -size +100M"
+        elif 'process' in req_lower and 'memory' in req_lower:
+            return "ps aux --sort=-%mem | head -10"
+        elif 'disk' in req_lower and ('space' in req_lower or 'usage' in req_lower):
+            return "df -h"
+        elif 'list' in req_lower and 'file' in req_lower:
+            return "ls -lah"
+        else:
+            return f"# Could not parse: {user_request}"
+    
+    def _extract_command(self, llm_response: str) -> str:
+        """Extract command from LLM response."""
+        # Remove markdown code blocks
+        import re
+        code_block = re.search(r'```(?:bash|sh)?\s*\n?(.*?)\n?```', llm_response, re.DOTALL)
+        if code_block:
+            return code_block.group(1).strip()
+        
+        # Remove common prefixes
+        lines = llm_response.strip().split('\n')
+        for line in lines:
+            line = line.strip()
+            if line and not line.startswith('#') and not line.startswith('$'):
+                return line
+        
+        return llm_response.strip()
+    
+    def _get_safety_level(self, command: str) -> int:
+        """
+        Get safety level (Claude pattern: tiered confirmations).
+        
+        Level 0: Safe (auto-execute with default yes)
+        Level 1: Confirm once (standard operations)
+        Level 2: Dangerous (double confirmation)
+        """
+        cmd = command.split()[0] if command else ""
+        
+        LEVEL_0_SAFE = {'ls', 'pwd', 'echo', 'cat', 'head', 'tail', 'grep', 'find', 'df', 'du', 'ps', 'top'}
+        LEVEL_2_DANGEROUS = {'rm', 'rmdir', 'dd', 'mkfs', 'fdisk', 'format', ':(){:|:&};:'}
+        
+        if cmd in LEVEL_0_SAFE:
+            return 0
+        elif cmd in LEVEL_2_DANGEROUS or 'rm -rf' in command:
+            return 2
+        else:
+            return 1  # Default: confirm once
+    
+    async def _execute_command(self, command: str) -> dict:
+        """Execute shell command and return result."""
+        from .tools.exec import BashCommandTool
+        
+        bash = BashCommandTool()
+        result = await bash.execute(command=command)
+        
+        if result.success:
+            return {
+                'success': True,
+                'output': result.data['stdout'],
+                'error': result.data.get('stderr')
+            }
+        else:
+            return {
+                'success': False,
+                'error': result.error or 'Command failed'
+            }
+    
+    async def _handle_error(self, error: Exception, user_input: str):
+        """
+        Handle errors gracefully (Claude pattern: specific error handlers).
+        Never crash, always suggest fix.
+        """
+        error_type = type(error).__name__
+        
+        # Specific handlers
+        if isinstance(error, PermissionError):
+            self.console.print("[red]❌ Permission denied[/red]")
+            self.console.print("[yellow]💡 Try: sudo {user_input}[/yellow]")
+        elif isinstance(error, FileNotFoundError):
+            self.console.print("[red]❌ File or command not found[/red]")
+            self.console.print("[yellow]💡 Check if the file exists or install the command[/yellow]")
+        elif isinstance(error, TimeoutError):
+            self.console.print("[red]❌ Operation timed out[/red]")
+            self.console.print("[yellow]💡 Check network connection or increase timeout[/yellow]")
+        else:
+            # Generic fallback
+            self.console.print(f"[red]❌ Error: {error_type}[/red]")
+            self.console.print(f"[dim]{str(error)}[/dim]")
+            self.console.print("[yellow]💡 Try rephrasing your request[/yellow]")
+    
+    def _show_help(self):
+        """Show help message (Gemini: visual hierarchy)."""
+        help_text = """
+[bold cyan]Qwen CLI - AI-Powered Shell Assistant[/bold cyan]
+
+[bold]Commands:[/bold]
+  Just type what you want in natural language!
+  
+[bold]Examples:[/bold]
+  • "list large files"
+  • "find files modified today"
+  • "show processes using most memory"
+  
+[bold]System commands:[/bold]
+  • [cyan]help[/cyan]  - Show this help
+  • [cyan]quit[/cyan]  - Exit shell
+  • [cyan]/metrics[/cyan] - Show metrics
+  • [cyan]/explain <cmd>[/cyan] - Explain a command
+
+[bold]Safety:[/bold]
+  ✓ Safe commands auto-execute (ls, pwd)
+  ⚠️  Regular commands ask confirmation (cp, mv)
+  🚨 Dangerous commands double-confirm (rm, dd)
+
+[dim]Powered by Qwen + Constitutional AI[/dim]
+"""
+        self.console.print(help_text)
 
 
 async def main():
