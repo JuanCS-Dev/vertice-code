@@ -48,7 +48,7 @@ class Tool(ABC):
         Returns:
             ToolResult with execution outcome
         """
-        raise NotImplementedError
+        raise NotImplementedError(f"{self.__class__.__name__}.execute() must be implemented")
     
     def validate_params(self, **kwargs) -> tuple[bool, Optional[str]]:
         """Validate tool parameters.

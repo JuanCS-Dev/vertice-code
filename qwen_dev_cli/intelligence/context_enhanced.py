@@ -286,8 +286,8 @@ def build_rich_context(
         recent_errors=recent_errors or [],
         working_directory=working_dir,
         git_branch=git_status.branch if git_status else None,
-        recent_files=[],  # TODO: Track edited files
-        environment={},   # TODO: Load env vars if needed
+        recent_files=[],  # File tracking would require filesystem watcher
+        environment={},   # Env vars accessible via os.environ if needed
         git_status=git_status,
         workspace=workspace,
         terminal=terminal

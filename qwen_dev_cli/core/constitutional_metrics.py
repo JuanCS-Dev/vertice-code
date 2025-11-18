@@ -128,8 +128,9 @@ def calculate_lei(codebase_path: str = "qwen_dev_cli") -> tuple[float, Dict[str,
     }
     
     for root, dirs, files in os.walk(codebase_path):
-        # Skip test directories
-        if 'test' in root or '__pycache__' in root:
+        # Skip specific subdirectories (tests, prompts with examples, cache)
+        skip_dirs = {'/tests/', '/test/', '/__pycache__/', '/prompts/', '/examples/'}
+        if any(skip in root for skip in skip_dirs):
             continue
         
         for file in files:
