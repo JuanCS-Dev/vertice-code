@@ -74,7 +74,6 @@ class CircuitBreaker:
             return True, "Circuit closed"
         
         if self.state == CircuitState.OPEN:
-            # Check if recovery timeout elapsed
             if self.last_failure_time and \
                (time.time() - self.last_failure_time) >= self.recovery_timeout:
                 self.state = CircuitState.HALF_OPEN
@@ -203,18 +202,7 @@ class LLMClient:
         enable_rate_limiting: bool = True,
         enable_telemetry: bool = True
     ):
-        """Initialize resilient LLM client.
-        
-        Args:
-            max_retries: Maximum retry attempts (Codex strategy)
-            base_delay: Base delay for exponential backoff (seconds)
-            max_delay: Maximum delay between retries (seconds)
-            timeout: Request timeout (seconds)
-            enable_circuit_breaker: Enable circuit breaker (Gemini strategy)
-            enable_rate_limiting: Enable rate limiting (Cursor AI strategy)
-            enable_telemetry: Enable metrics tracking (Codex strategy)
-        """
-        # Configuration
+        """Initialize resilient LLM client."""
         self.max_retries = max_retries
         self.base_delay = base_delay
         self.max_delay = max_delay
@@ -236,173 +224,26 @@ class LLMClient:
                 import ollama
                 self.ollama_client = ollama
             except ImportError:
-                logger.warning("Ollama not installed")        if hasattr(config, 'sambanova_api_key') and config.sambanova_api_key:
-            try:
-                from openai import OpenAI
-                self.sambanova_client = OpenAI(
-                    api_key=config.sambanova_api_key,
-                    base_url="https://api.sambanova.ai/v1"
-                )
-            except ImportError:
-                logger.warning("OpenAI SDK not installed (needed for SambaNova)")
+                logger.warning("Ollama not installed")
         
-        self.blaxel_client = None
-        if hasattr(config, 'blaxel_api_key') and config.blaxel_api_key:
-            pass  # Placeholder for future
-        
-        # Provider priority for failover (Cursor AI strategy)
+        # Provider priority for failover
         self.provider_priority = ["hf", "ollama"]
         self.default_provider = "auto"
     
     def _calculate_backoff(self, attempt: int) -> float:
-        """Calculate exponential backoff with jitter (Codex strategy).
-        
-        Args:
-            attempt: Retry attempt number (0-indexed)
-            
-        Returns:
-            Delay in seconds
-        """
-        # Exponential: base_delay * (2 ** attempt)
+        """Calculate exponential backoff with jitter."""
         delay = min(self.base_delay * (2 ** attempt), self.max_delay)
-        
-        # Add jitter (10-30% random variation)
         jitter = random.uniform(0.1, 0.3) * delay
-        
         return delay + jitter
     
     def _should_retry(self, error: Exception) -> bool:
-        """Determine if error is retryable (Claude strategy).
-        
-        Args:
-            error: Exception that occurred
-            
-        Returns:
-            True if should retry
-        """
-        # Retryable errors (transient)
+        """Determine if error is retryable."""
         retryable_errors = [
-            "timeout",
-            "429",  # Rate limit
-            "500",  # Server error
-            "502",  # Bad gateway
-            "503",  # Service unavailable
-            "504",  # Gateway timeout
-            "connection",
-            "network"
+            "timeout", "429", "500", "502", "503", "504",
+            "connection", "network"
         ]
-        
         error_str = str(error).lower()
         return any(err in error_str for err in retryable_errors)
-    
-    async def _execute_with_resilience(
-        self,
-        provider: str,
-        func,
-        *args,
-        **kwargs
-    ) -> Any:
-        """Execute function with full resilience patterns.
-        
-        Implements:
-        - Circuit breaker (Gemini)
-        - Rate limiting (Cursor AI)
-        - Retry with exponential backoff (Codex)
-        - Timeout (Gemini)
-        - Telemetry (Codex)
-        
-        Args:
-            provider: Provider name
-            func: Async function to execute
-            *args, **kwargs: Function arguments
-            
-        Returns:
-            Function result
-            
-        Raises:
-            Exception if all retries exhausted
-        """
-        # Circuit breaker check
-        if self.circuit_breaker:
-            can_attempt, reason = self.circuit_breaker.can_attempt()
-            if not can_attempt:
-                if self.metrics:
-                    self.metrics.circuit_breaker_blocks += 1
-                raise RuntimeError(f"Circuit breaker: {reason}")
-        
-        # Rate limiting check
-        if self.rate_limiter:
-            can_proceed, wait_time = self.rate_limiter.can_proceed()
-            if not can_proceed:
-                logger.warning(f"Rate limited, waiting {wait_time:.1f}s")
-                if self.metrics:
-                    self.metrics.rate_limited_requests += 1
-                await asyncio.sleep(wait_time)
-        
-        # Retry loop
-        last_error = None
-        for attempt in range(self.max_retries + 1):
-            try:
-                start_time = time.time()
-                
-                # Execute with timeout
-                result = await asyncio.wait_for(
-                    func(*args, **kwargs),
-                    timeout=self.timeout
-                )
-                
-                latency = time.time() - start_time
-                
-                # Success - record metrics
-                if self.metrics:
-                    self.metrics.record_success(provider, latency)
-                if self.circuit_breaker:
-                    self.circuit_breaker.record_success()
-                if self.rate_limiter:
-                    self.rate_limiter.record_request()
-                
-                if attempt > 0:
-                    logger.info(f"✅ Succeeded after {attempt} retries")
-                
-                return result
-                
-            except asyncio.TimeoutError as e:
-                last_error = e
-                logger.warning(f"⏱️  Timeout after {self.timeout}s (attempt {attempt + 1}/{self.max_retries + 1})")
-                
-            except Exception as e:
-                last_error = e
-                logger.warning(f"❌ Error: {str(e)[:100]} (attempt {attempt + 1}/{self.max_retries + 1})")
-                
-                # Check if retryable
-                if not self._should_retry(e):
-                    logger.error(f"Non-retryable error: {type(e).__name__}")
-                    if self.metrics:
-                        self.metrics.record_failure(provider)
-                    raise
-            
-            # Record failure for circuit breaker
-            if self.circuit_breaker:
-                self.circuit_breaker.record_failure()
-            
-            # Last attempt failed
-            if attempt >= self.max_retries:
-                if self.metrics:
-                    self.metrics.record_failure(provider)
-                break
-            
-            # Calculate backoff delay
-            delay = self._calculate_backoff(attempt)
-            logger.info(f"🔄 Retrying in {delay:.1f}s...")
-            
-            if self.metrics:
-                self.metrics.retried_requests += 1
-            
-            await asyncio.sleep(delay)
-        
-        # All retries exhausted
-        logger.error(f"❌ All {self.max_retries + 1} attempts failed")
-        raise last_error
     
     async def stream_chat(
         self,
@@ -413,26 +254,7 @@ class LLMClient:
         provider: Optional[str] = None,
         enable_failover: bool = True
     ) -> AsyncGenerator[str, None]:
-        """Stream chat completion with full resilience.
-        
-        Features:
-        - Automatic failover between providers (Cursor AI)
-        - Circuit breaker protection (Gemini)
-        - Rate limiting (Cursor AI)
-        - Retry with exponential backoff (Codex)
-        - Timeout management (Gemini)
-        
-        Args:
-            prompt: User prompt
-            context: Optional context to inject
-            max_tokens: Maximum tokens to generate
-            temperature: Sampling temperature
-            provider: Provider to use ("hf", "sambanova", "ollama", "auto")
-            enable_failover: Enable automatic failover to backup providers
-            
-        Yields:
-            Generated text chunks
-        """
+        """Stream chat completion with full resilience."""
         max_tokens = max_tokens or config.max_tokens
         temperature = temperature or config.temperature
         provider = provider or self.default_provider
@@ -452,7 +274,6 @@ class LLMClient:
         else:
             providers_to_try = [provider]
             if enable_failover:
-                # Add backup providers
                 providers_to_try.extend([p for p in self.provider_priority if p != provider])
         
         # Try providers with failover
@@ -461,7 +282,6 @@ class LLMClient:
             try:
                 logger.info(f"🔌 Attempting provider: {current_provider}")
                 
-                # Route to provider-specific stream method
                 async for chunk in self._stream_with_provider(
                     current_provider,
                     messages,
@@ -470,53 +290,25 @@ class LLMClient:
                 ):
                     yield chunk
                 
-                # Success - no need to try other providers
                 return
                 
             except Exception as e:
                 last_error = e
                 logger.error(f"❌ Provider {current_provider} failed: {str(e)[:100]}")
                 
-                # Try next provider if available
                 if providers_to_try.index(current_provider) < len(providers_to_try) - 1:
                     logger.info(f"🔄 Failing over to next provider...")
                     continue
                 else:
-                    # No more providers to try
                     break
         
-        # All providers failed
-        raise RuntimeError(f"All providers failed. Last error: {last_error}")        elif provider == "blaxel":
-            if not self.blaxel_client:
-                raise RuntimeError("Blaxel client not initialized. Check API key.")
-            async for chunk in self._stream_blaxel(messages, max_tokens, temperature):
-                yield chunk
-        elif provider == "ollama":
-            if not self.ollama_client:
-                raise RuntimeError("Ollama client not initialized. Enable in config.")
-            async for chunk in self._stream_ollama(messages, max_tokens, temperature):
-                yield chunk
-        else:
-            # HuggingFace
-            if not self.hf_client:
-                raise RuntimeError("HuggingFace client not initialized. Check API token.")
-            async for chunk in self._stream_hf(messages, max_tokens, temperature):
-                yield chunk
+        raise RuntimeError(f"All providers failed. Last error: {last_error}")
     
     def _get_failover_providers(self) -> List[str]:
-        """Get list of providers for failover (Cursor AI strategy).
-        
-        Returns providers in priority order based on:
-        - Availability
-        - Recent success rate
-        - Circuit breaker state
-        
-        Returns:
-            List of provider names
-        """
+        """Get list of providers for failover."""
         available = []
         
-        # Check availability and circuit breaker state        if self.hf_client:
+        if self.hf_client:
             available.append("hf")
         if self.ollama_client:
             available.append("ollama")
@@ -530,7 +322,7 @@ class LLMClient:
             
             available.sort(key=success_rate, reverse=True)
         
-        return available or ["hf"]  # Fallback to HF
+        return available or ["hf"]
     
     async def _stream_with_provider(
         self,
@@ -539,17 +331,7 @@ class LLMClient:
         max_tokens: int,
         temperature: float
     ) -> AsyncGenerator[str, None]:
-        """Stream from specific provider with resilience.
-        
-        Args:
-            provider: Provider name
-            messages: Chat messages
-            max_tokens: Max tokens
-            temperature: Sampling temperature
-            
-        Yields:
-            Text chunks
-        """
+        """Stream from specific provider with resilience."""
         # Circuit breaker check
         if self.circuit_breaker:
             can_attempt, reason = self.circuit_breaker.can_attempt()
@@ -574,7 +356,21 @@ class LLMClient:
                 start_time = time.time()
                 chunks_received = 0
                 
-                # Select provider stream method                
+                # Select provider stream method
+                if provider == "ollama":
+                    if not self.ollama_client:
+                        raise RuntimeError("Ollama not initialized")
+                    stream_gen = self._stream_ollama(messages, max_tokens, temperature)
+                else:  # hf
+                    if not self.hf_client:
+                        raise RuntimeError("HuggingFace not initialized")
+                    stream_gen = self._stream_hf(messages, max_tokens, temperature)
+                
+                # Stream chunks
+                async for chunk in stream_gen:
+                    chunks_received += 1
+                    yield chunk
+                
                 # Success
                 latency = time.time() - start_time
                 if self.metrics:
@@ -587,13 +383,12 @@ class LLMClient:
                 if attempt > 0:
                     logger.info(f"✅ Streaming succeeded after {attempt} retries")
                 
-                return  # Success
+                return
                 
             except Exception as e:
                 last_error = e
                 logger.warning(f"❌ Stream error: {str(e)[:100]} (attempt {attempt + 1}/{self.max_retries + 1})")
                 
-                # Check if retryable
                 if not self._should_retry(e):
                     logger.error(f"Non-retryable error: {type(e).__name__}")
                     if self.metrics:
@@ -602,17 +397,14 @@ class LLMClient:
                         self.circuit_breaker.record_failure()
                     raise
                 
-                # Record failure
                 if self.circuit_breaker:
                     self.circuit_breaker.record_failure()
                 
-                # Last attempt
                 if attempt >= self.max_retries:
                     if self.metrics:
                         self.metrics.record_failure(provider)
                     break
                 
-                # Backoff and retry
                 delay = self._calculate_backoff(attempt)
                 logger.info(f"🔄 Retrying stream in {delay:.1f}s...")
                 if self.metrics:
@@ -620,7 +412,6 @@ class LLMClient:
                 
                 await asyncio.sleep(delay)
         
-        # All retries exhausted
         logger.error(f"❌ All {self.max_retries + 1} stream attempts failed")
         raise last_error
     
@@ -650,35 +441,8 @@ class LLMClient:
                     yield chunk.choices[0].delta.content
                     
         except Exception as e:
-            yield f"❌ HF Error: {str(e)}"            
-            def _generate():
-                return self.sambanova_client.chat.completions.create(
-                    model="Meta-Llama-3.1-8B-Instruct",
-                    messages=messages,
-                    max_tokens=max_tokens,
-                    temperature=temperature,
-                    stream=True
-                )
-            
-            stream = await loop.run_in_executor(None, _generate)
-            
-            for chunk in stream:
-                if chunk.choices and chunk.choices[0].delta.content:
-                    yield chunk.choices[0].delta.content
-                    
-        except Exception as e:
-            yield f"❌ SambaNova Error: {str(e)}"
-    
-    async def _stream_blaxel(
-        self,
-        messages: list,
-        max_tokens: int,
-        temperature: float
-    ) -> AsyncGenerator[str, None]:
-        """Stream from Blaxel (Agentic Network)."""
-        # Placeholder for Blaxel implementation
-        # Blaxel is an agentic network platform - needs API research
-        yield "⚠️ Blaxel integration coming soon (agentic network platform)"
+            logger.error(f"HF Error: {str(e)}")
+            raise
     
     async def _stream_ollama(
         self,
@@ -703,7 +467,8 @@ class LLMClient:
                     yield chunk['message']['content']
                     
         except Exception as e:
-            yield f"❌ Ollama Error: {str(e)}"
+            logger.error(f"Ollama Error: {str(e)}")
+            raise
     
     async def generate(
         self,
@@ -713,35 +478,18 @@ class LLMClient:
         temperature: Optional[float] = None,
         provider: Optional[str] = None
     ) -> str:
-        """Generate complete response (non-streaming).
-        
-        Args:
-            prompt: User prompt
-            context: Optional context
-            max_tokens: Maximum tokens
-            temperature: Sampling temperature
-            provider: Provider to use
-            
-        Returns:
-            Complete generated text
-        """
+        """Generate complete response (non-streaming)."""
         chunks = []
         async for chunk in self.stream_chat(prompt, context, max_tokens, temperature, provider):
             chunks.append(chunk)
         return "".join(chunks)
     
     def validate(self) -> tuple[bool, str]:
-        """Validate at least one LLM backend is available.
-        
-        Returns:
-            Tuple of (is_valid, message)
-        """
+        """Validate at least one LLM backend is available."""
         available = []
         
         if self.hf_client:
-            available.append("HuggingFace")            available.append("SambaNova")
-        if self.blaxel_client:
-            available.append("Blaxel")
+            available.append("HuggingFace")
         if self.ollama_client:
             available.append("Ollama")
         
@@ -754,32 +502,25 @@ class LLMClient:
         """Get list of available providers."""
         providers = []
         if self.hf_client:
-            providers.append("hf")        if self.blaxel_client:
-            providers.append("blaxel")
+            providers.append("hf")
         if self.ollama_client:
             providers.append("ollama")
-        providers.append("auto")  # Always available
+        providers.append("auto")
         return providers
     
     def get_metrics(self) -> Dict[str, Any]:
-        """Get telemetry metrics (Codex strategy).
-        
-        Returns:
-            Dictionary with metrics
-        """
+        """Get telemetry metrics."""
         if not self.metrics:
             return {"telemetry": "disabled"}
         
         stats = self.metrics.get_stats()
         
-        # Add circuit breaker status
         if self.circuit_breaker:
             stats["circuit_breaker"] = {
                 "state": self.circuit_breaker.state.value,
                 "failures": self.circuit_breaker.failures
             }
         
-        # Add rate limiter status
         if self.rate_limiter:
             stats["rate_limiter"] = {
                 "requests_last_minute": len(self.rate_limiter.request_times),
@@ -802,7 +543,7 @@ class LLMClient:
             logger.info("Metrics reset")
 
 
-# Global LLM client instance with production-grade resilience
+# Global LLM client instance
 llm_client = LLMClient(
     max_retries=3,
     base_delay=1.0,

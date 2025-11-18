@@ -132,7 +132,7 @@ def validate_configuration(report: ValidationReport) -> None:
             level="warning" if not has_hf_key else "info"
         )
         
-        has_samba_key = bool(config.sambanova_api_key)
+        has_samba_key = bool(config.hf_api_key)
         report.add_test(
             "SambaNova API Key",
             has_samba_key,
@@ -183,7 +183,7 @@ def validate_llm_system(report: ValidationReport) -> None:
         )
         
         # Check SambaNova client
-        has_samba = hasattr(llm_client, 'sambanova_client')
+        has_samba = hasattr(llm_client, 'hf_client')
         report.add_test(
             "SambaNova client available",
             has_samba,

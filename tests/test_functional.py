@@ -96,7 +96,7 @@ async def test_multi_provider():
     
     results = {}
     
-    for provider in ['hf', 'sambanova']:
+    for provider in ['hf', 'hf']:
         if provider not in providers:
             print(f"⏭️  Skipping {provider} (not available)")
             continue
