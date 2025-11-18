@@ -302,7 +302,7 @@
 
 ### **Issue 1: Config Attribute Names**
 - **Found:** Validation using wrong attribute names
-- **Fixed:** Updated to hf_token, hf_model
+- **Fixed:** Updated to hf_XXXXXXXXXXXXXXXXXXXXXXXXXXXXX, hf_XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 - **Status:** ✅ RESOLVED
 
 ### **Issue 2: Provider Validation Missing**

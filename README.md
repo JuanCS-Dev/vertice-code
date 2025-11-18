@@ -9,6 +9,8 @@
 
 > A hybrid CLI + Web code assistant that leverages Model Context Protocol (MCP) for context-aware code explanations and generation. Privacy-first, mobile-friendly, and lightning fast.
 
+📁 **[View Complete Project Structure](PROJECT_STRUCTURE.md)**
+
 ---
 
 ## ✨ Features
@@ -107,19 +109,50 @@ python -m qwen_dev_cli
 
 ```
 qwen-dev-cli/
-├── qwen_dev_cli/
-│   ├── core/
-│   │   ├── llm.py          # LLM client
-│   │   ├── mcp.py          # MCP filesystem server
-│   │   ├── context.py      # Context building
-│   │   └── config.py       # Configuration
-│   ├── cli.py              # Typer CLI interface
-│   ├── ui.py               # Gradio Blocks UI
-│   └── utils.py            # Helpers
-├── tests/                  # Test suite
+├── qwen_dev_cli/           # Core application
+│   ├── core/               # Business logic layer
+│   │   ├── llm.py          # LLM client abstraction
+│   │   ├── mcp.py          # MCP server integration
+│   │   ├── context.py      # Context management
+│   │   └── config.py       # Configuration handling
+│   ├── integration/        # External integrations
+│   │   ├── parser.py       # Shell command parsing
+│   │   └── workflow.py     # Workflow orchestration
+│   ├── tools/              # MCP tools implementation
+│   │   ├── shell.py        # Shell execution tools
+│   │   └── terminal.py     # Terminal utilities
+│   ├── prompts/            # System prompts
+│   ├── cli.py              # CLI interface (Typer)
+│   ├── shell.py            # Interactive shell
+│   └── ui.py               # Web interface (Gradio)
+│
+├── tests/                  # Comprehensive test suite
+│   ├── test_*.py           # Unit & integration tests
+│   ├── validate_*.py       # Validation scripts
+│   └── __init__.py         # Test package
+│
+├── docs/                   # Documentation hub
+│   ├── planning/           # Project planning docs
+│   │   ├── MASTER_PLAN.md  # Master roadmap
+│   │   └── DAILY_LOG.md    # Development journal
+│   ├── reports/            # Status & audit reports
+│   │   ├── VALIDATION_REPORT.md
+│   │   ├── AUDIT_REPORT.md
+│   │   └── *_SUMMARY.md    # Various summaries
+│   └── research/           # Technical research
+│       └── PHASE_*.md      # Phase-specific research
+│
+├── examples/               # Usage examples
+│   └── example_parser_usage.py
+│
+├── benchmarks/             # Performance benchmarks
+│   └── benchmark_llm.py
+│
 ├── scripts/                # Utility scripts
-├── pyproject.toml          # Project metadata
-└── requirements.txt        # Dependencies
+│
+├── pyproject.toml          # Project metadata (Poetry)
+├── requirements.txt        # Python dependencies
+└── pytest.ini              # Test configuration
 ```
 
 ---
@@ -131,6 +164,15 @@ This project showcases Model Context Protocol integration through:
 1. **Filesystem Server** - Direct file access for context injection
 2. **Context Building** - Smart file selection and prompt construction
 3. **Hybrid Approach** - CLI tools + Web interface working together
+4. **Shell Tools** - Command execution and terminal integration
+5. **Workflow Orchestration** - Multi-step task automation
+
+### Key Features
+- ✅ **Parser Integration** - Intelligent shell command parsing
+- ✅ **Terminal Tools** - Safe command execution with validation
+- ✅ **Context Management** - Advanced context window handling
+- ✅ **LLM Resilience** - Automatic retry and fallback strategies
+- ✅ **Workflow System** - Complex task orchestration
 
 ---
 
@@ -150,6 +192,8 @@ This project is deployed on HuggingFace Spaces for instant access:
 - **Throughput**: 12-18 tokens/sec
 - **Cold Start**: ~5s (HF API) / ~45s (Ollama)
 - **Mobile Support**: 320px+ width
+- **Test Coverage**: 90%+ across all modules
+- **Resilience**: Automatic retry with exponential backoff
 
 ---
 
@@ -158,6 +202,22 @@ This project is deployed on HuggingFace Spaces for instant access:
 This is a hackathon project for the **MCP 1st Birthday Hackathon** (Anthropic + Gradio).
 
 Contributions welcome after the hackathon concludes!
+
+### Development Setup
+
+```bash
+# Install development dependencies
+pip install -r requirements.txt
+
+# Run tests
+pytest
+
+# Run specific test suite
+pytest tests/test_parser.py -v
+
+# Run benchmarks
+python benchmarks/benchmark_llm.py
+```
 
 ---
 

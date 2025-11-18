@@ -12,7 +12,7 @@
 ```
 Base URL: https://api.blaxel.ai/v0/
 Authentication: X-Blaxel-Authorization: Bearer {api_key}
-API Key: bl_aaabejx96ux9sq8o28sy6aryn04lqqre
+API Key: bl_XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
 
 ### **Working Endpoints:**

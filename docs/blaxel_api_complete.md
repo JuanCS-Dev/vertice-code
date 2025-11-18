@@ -2,7 +2,7 @@
 
 **Date:** 2025-11-17T19:28 UTC  
 **Docs:** https://docs.blaxel.ai/  
-**API Key:** `bl_aaabejx96ux9sq8o28sy6aryn04lqqre`
+**API Key:** `bl_XXXXXXXXXXXXXXXXXXXXXXXXXXXXX`
 
 ---
 
@@ -223,7 +223,7 @@ base_urls = [
 
 3. **Test Basic Call:**
    ```bash
-   curl -H "Authorization: Bearer bl_aaabejx96ux9sq8o28sy6aryn04lqqre" \
+   curl -H "Authorization: Bearer bl_XXXXXXXXXXXXXXXXXXXXXXXXXXXXX" \
         https://api.blaxel.ai/filesystem/list
    ```
 

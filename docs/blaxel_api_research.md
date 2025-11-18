@@ -9,7 +9,7 @@
 
 ## 📋 WHAT WE KNOW ABOUT BLAXEL
 
-**API Key:** `bl_aaabwhnyvqaaw6xgdf52j9mqprew780d`
+**API Key:** `bl_XXXXXXXXXXXXXXXXXXXXXXXXXXXXX`
 
 **Platform Type:** Agentic Network - Multi-agent AI system builder
 
@@ -39,7 +39,7 @@ Endpoints (probable):
 ### **Hypothesis 2: OpenAI-Compatible**
 ```
 Base URL: https://api.blaxel.ai/v1
-Headers: Authorization: Bearer bl_aaabwhnyvqaaw6xgdf52j9mqprew780d
+Headers: Authorization: Bearer bl_XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 Request (similar to OpenAI):
 {
@@ -80,7 +80,7 @@ endpoints = [
 ]
 
 headers = {
-    "Authorization": "Bearer bl_aaabwhnyvqaaw6xgdf52j9mqprew780d",
+    "Authorization": "Bearer bl_XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
     "Content-Type": "application/json"
 }
 

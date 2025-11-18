@@ -27,7 +27,7 @@
 4. What models does it use?
 5. Best use case for our project?
 
-**API Key format:** `bl_aaabwhnyvqaaw6xgdf52j9mqprew780d`
+**API Key format:** `bl_XXXXXXXXXXXXXXXXXXXXXXXXXXXXX`
 
 ---
 

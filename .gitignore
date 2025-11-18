@@ -54,4 +54,8 @@ htmlcov/
 *.bak
 temp/
 tmp/
-.env
+
+# Project specific
+.qwen_backups/
+test_results.log
+=6.0.0
