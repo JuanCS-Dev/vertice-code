@@ -22,6 +22,94 @@
       ],
       "last_modified": 1763403191.3565843
     },
+    "examples/palette_demo.py": {
+      "path": "examples/palette_demo.py",
+      "hash": "ed156c616d298ced",
+      "symbols": [
+        {
+          "name": "print_header",
+          "type": "function",
+          "file_path": "examples/palette_demo.py",
+          "line_number": 22,
+          "docstring": "Print styled header.",
+          "signature": "print_header(text)",
+          "parent": null
+        },
+        {
+          "name": "print_command",
+          "type": "function",
+          "file_path": "examples/palette_demo.py",
+          "line_number": 29,
+          "docstring": "Print command result.",
+          "signature": "print_command(cmd, score, highlight)",
+          "parent": null
+        },
+        {
+          "name": "main",
+          "type": "function",
+          "file_path": "examples/palette_demo.py",
+          "line_number": 50,
+          "docstring": "Run command palette demo.",
+          "signature": "main()",
+          "parent": null
+        }
+      ],
+      "imports": [
+        "sys",
+        "pathlib",
+        "qwen_dev_cli.tui.components.palette",
+        "qwen_dev_cli.tui.theme"
+      ],
+      "last_modified": 1763505466.1588447
+    },
+    "examples/showcase_all.py": {
+      "path": "examples/showcase_all.py",
+      "hash": "f261dc8fa86fa21a",
+      "symbols": [
+        {
+          "name": "print_title",
+          "type": "function",
+          "file_path": "examples/showcase_all.py",
+          "line_number": 29,
+          "docstring": "Print showcase title.",
+          "signature": "print_title()",
+          "parent": null
+        },
+        {
+          "name": "section",
+          "type": "function",
+          "file_path": "examples/showcase_all.py",
+          "line_number": 51,
+          "docstring": "Print section divider.",
+          "signature": "section(title, icon)",
+          "parent": null
+        },
+        {
+          "name": "main",
+          "type": "function",
+          "file_path": "examples/showcase_all.py",
+          "line_number": 58,
+          "docstring": "Run complete showcase.",
+          "signature": "main()",
+          "parent": null
+        }
+      ],
+      "imports": [
+        "sys",
+        "time",
+        "pathlib",
+        "qwen_dev_cli.intelligence.indexer",
+        "qwen_dev_cli.tui.components.toasts",
+        "qwen_dev_cli.tui.components.palette",
+        "qwen_dev_cli.tui.components.tree",
+        "qwen_dev_cli.tui.wisdom",
+        "qwen_dev_cli.tui.theme",
+        "rich.console",
+        "rich.panel",
+        "rich.text"
+      ],
+      "last_modified": 1763506142.9022684
+    },
     "examples/tui_demo.py": {
       "path": "examples/tui_demo.py",
       "hash": "789471a45dfc82e8",
@@ -104,6 +192,39 @@
       ],
       "last_modified": 1763504498.0253081
     },
+    "examples/tree_demo.py": {
+      "path": "examples/tree_demo.py",
+      "hash": "5221199789413a26",
+      "symbols": [
+        {
+          "name": "print_header",
+          "type": "function",
+          "file_path": "examples/tree_demo.py",
+          "line_number": 19,
+          "docstring": "Print styled header.",
+          "signature": "print_header(text)",
+          "parent": null
+        },
+        {
+          "name": "main",
+          "type": "function",
+          "file_path": "examples/tree_demo.py",
+          "line_number": 26,
+          "docstring": "Run file tree demo.",
+          "signature": "main()",
+          "parent": null
+        }
+      ],
+      "imports": [
+        "sys",
+        "pathlib",
+        "qwen_dev_cli.tui.components.tree",
+        "qwen_dev_cli.tui.theme",
+        "rich.console",
+        "subprocess"
+      ],
+      "last_modified": 1763505730.9899905
+    },
     "examples/example_parser_usage.py": {
       "path": "examples/example_parser_usage.py",
       "hash": "d3aa6008858bc48a",
@@ -124,6 +245,38 @@
         "qwen_dev_cli.core.llm"
       ],
       "last_modified": 1763417479.5812702
+    },
+    "examples/toasts_demo.py": {
+      "path": "examples/toasts_demo.py",
+      "hash": "2d1fc4c82b13f470",
+      "symbols": [
+        {
+          "name": "render_toast",
+          "type": "function",
+          "file_path": "examples/toasts_demo.py",
+          "line_number": 19,
+          "docstring": "Render a toast as text (simple version).",
+          "signature": "render_toast(toast, width)",
+          "parent": null
+        },
+        {
+          "name": "main",
+          "type": "function",
+          "file_path": "examples/toasts_demo.py",
+          "line_number": 58,
+          "docstring": "Demo toast system.",
+          "signature": "main()",
+          "parent": null
+        }
+      ],
+      "imports": [
+        "sys",
+        "time",
+        "pathlib",
+        "qwen_dev_cli.tui.components.toasts",
+        "qwen_dev_cli.tui.theme"
+      ],
+      "last_modified": 1763505180.622998
     },
     "tests/test_parser.py": {
       "path": "tests/test_parser.py",
