@@ -32,12 +32,12 @@ __status__ = "Phase 3 Complete - Advanced Components"
 from .message import MessageBox, Message, create_assistant_message, create_user_message
 from .status import StatusBadge, StatusLevel, Spinner, SpinnerStyle, create_processing_indicator
 from .progress import ProgressBar, ProgressState, create_progress_bar
-from .code import CodeBlock, CodeSnippet, HighlightStyle
+from .code import CodeBlock, CodeSnippet, InlineCode, create_code_block
 from .diff import DiffViewer, DiffMode, DiffLine
 
 # Advanced components (Cursor-inspired)
 from .file_tree import FileTree, FileNode, FileType, create_file_tree
-from .pills import ContextPill, PillBar, PillType, create_file_pill, create_function_pill
+from .pills import ContextPill, PillContainer, PillType, create_pill_from_file
 from .toasts import (
     Toast, ToastManager, ToastType,
     show_success, show_error, show_info, show_warning, show_wisdom,
@@ -53,12 +53,12 @@ __all__ = [
     "MessageBox", "Message", "create_assistant_message", "create_user_message",
     "StatusBadge", "StatusLevel", "Spinner", "SpinnerStyle", "create_processing_indicator",
     "ProgressBar", "ProgressState", "create_progress_bar",
-    "CodeBlock", "CodeSnippet", "HighlightStyle",
+    "CodeBlock", "CodeSnippet", "InlineCode", "create_code_block",
     "DiffViewer", "DiffMode", "DiffLine",
     
     # Advanced
     "FileTree", "FileNode", "FileType", "create_file_tree",
-    "ContextPill", "PillBar", "PillType", "create_file_pill", "create_function_pill",
+    "ContextPill", "PillContainer", "PillType", "create_pill_from_file",
     "Toast", "ToastManager", "ToastType",
     "show_success", "show_error", "show_info", "show_warning", "show_wisdom",
     "create_toast_manager",

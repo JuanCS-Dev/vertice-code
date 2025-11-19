@@ -472,3 +472,31 @@ async def show_progress(
         await asyncio.sleep(delay)
     
     console.print()
+
+
+# =============================================================================
+# FACTORY FUNCTIONS
+# =============================================================================
+
+def create_progress_bar(
+    current: int = 0,
+    total: int = 100,
+    description: str = "Processing"
+) -> ProgressBar:
+    """
+    Create a progress bar with default settings.
+    
+    Args:
+        current: Current progress value
+        total: Total progress value
+        description: Progress description
+        
+    Returns:
+        Configured ProgressBar instance
+        
+    Example:
+        bar = create_progress_bar(0, 100, "Loading files")
+        bar.update(50)
+        console.print(bar.render())
+    """
+    return ProgressBar(current, total, description)
