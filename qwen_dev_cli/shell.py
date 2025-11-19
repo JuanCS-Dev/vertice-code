@@ -2,6 +2,7 @@
 
 import asyncio
 import os
+import time
 import json
 from typing import Optional, Dict, Any
 from pathlib import Path
@@ -117,7 +118,7 @@ class InteractiveShell:
         
         # Phase 2.3: Multi-turn conversation manager
         if session_id is None:
-            import uuid
+            session_id = f"shell_{int(time.time() * 1000)}"
             session_id = f"shell_{int(asyncio.get_event_loop().time() * 1000)}"
         
         self.conversation = ConversationManager(
