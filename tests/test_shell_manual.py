@@ -121,7 +121,7 @@ async def test_with_mock_llm():
     result = await bash_tool.execute(command="echo 'test'")
     
     if result.success:
-        output = result.output if isinstance(result.output, str) else result.output.get("stdout", "")
+        output = result.data.get("stdout", "") if isinstance(result.data, dict) else str(result.data)
         print(f"✓ Bash tool works: {output.strip()}")
     else:
         print(f"✗ Bash tool failed: {result.error}")
@@ -149,7 +149,7 @@ async def test_real_command():
     print("\n1. Test: echo")
     result = await bash_tool.execute(command="echo 'Shell is alive!'")
     if result.success:
-        output = result.output if isinstance(result.output, str) else result.output.get("stdout", "")
+        output = result.data.get("stdout", "") if isinstance(result.data, dict) else str(result.data)
         print(f"✓ Output: {output.strip()}")
     else:
         print(f"✗ Failed: {result.error}")
@@ -159,7 +159,7 @@ async def test_real_command():
     print("\n2. Test: find large files")
     result = await bash_tool.execute(command="find . -type f -size +10M 2>/dev/null | head -5")
     if result.success:
-        output = result.output if isinstance(result.output, str) else result.output.get("stdout", "")
+        output = result.data.get("stdout", "") if isinstance(result.data, dict) else str(result.data)
         if output.strip():
             print(f"✓ Found files:\n{output.strip()}")
         else:
@@ -172,7 +172,7 @@ async def test_real_command():
     print("\n3. Test: pwd")
     result = await bash_tool.execute(command="pwd")
     if result.success:
-        print(f"✓ CWD: {result.output.strip()}")
+        print(f"✓ CWD: {result.data.strip()}")
     else:
         print(f"✗ Failed: {result.error}")
         return False
