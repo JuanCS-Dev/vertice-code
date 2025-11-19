@@ -29,9 +29,10 @@ __version__ = "3.0.0"
 __status__ = "Phase 3 Complete - Advanced Components"
 
 # Core components
-from .message import MessageBox, Message, MessageRole, create_assistant_message, create_user_message
+from ._enums import MessageRole, ProgressStyle
+from .message import MessageBox, Message, create_assistant_message, create_user_message
 from .status import StatusBadge, StatusLevel, Spinner, SpinnerStyle, create_processing_indicator
-from .progress import ProgressBar, ProgressState, ProgressStyle, create_progress_bar
+from .progress import ProgressBar, ProgressState, create_progress_bar
 from .code import CodeBlock, CodeSnippet, InlineCode, create_code_block
 from .diff import DiffViewer, DiffMode, DiffLine
 

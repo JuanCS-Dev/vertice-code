@@ -78,8 +78,7 @@ class Command:
         action: Function to execute
         enabled: Is command enabled
     """
-    name: str
-    id: str = ""
+    id: str
     title: str
     description: str
     category: CommandCategory

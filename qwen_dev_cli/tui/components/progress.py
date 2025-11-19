@@ -38,15 +38,6 @@ from rich.text import Text
 from ..theme import COLORS
 from ..styles import PRESET_STYLES
 
-from enum import Enum
-
-class ProgressStyle(Enum):
-    """Progress bar styles."""
-    BAR = "bar"
-    SPINNER = "spinner"
-    DOTS = "dots"
-
-
 
 @dataclass
 class ProgressState:
