@@ -172,7 +172,7 @@ async def test_real_command():
     print("\n3. Test: pwd")
     result = await bash_tool.execute(command="pwd")
     if result.success:
-        print(f"✓ CWD: {result.data.strip()}")
+        print(f"✓ CWD: {result.data.get('stdout', '').strip()}")
     else:
         print(f"✗ Failed: {result.error}")
         return False

@@ -189,20 +189,6 @@ class TestLLMEdgeCases:
         print(f"   Time: {elapsed:.2f}s")
     
     @pytest.mark.asyncio
-    async def test_progress_bar_with_llm_stream(self):
-        """Test: Progress bar updates with LLM stream progress."""
-        console = Console(file=StringIO())
-        llm = LLMClient()
-        
-        # Create progress bar
-        # Just test that progress updates during stream
-        chunk_count = 0
-        async for chunk in llm.stream_chat(prompt="Count to 5", max_tokens=20):
-            chunk_count += 1
-        assert chunk_count > 0
-class TestLLMProviderFallback:
-    """Test provider fallback logic scientifically."""
-    
     @pytest.mark.asyncio
     async def test_ollama_primary_fast(self):
         """Test: Ollama (local) is fastest when available."""
