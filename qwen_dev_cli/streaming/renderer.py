@@ -1,4 +1,6 @@
 """Reactive TUI renderer with zero UI blocking."""
+import logging
+logger = logging.getLogger(__name__)
 
 import asyncio
 from dataclasses import dataclass

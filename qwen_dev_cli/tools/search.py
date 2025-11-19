@@ -1,4 +1,6 @@
 """Search and navigation tools."""
+import logging
+logger = logging.getLogger(__name__)
 
 import subprocess
 from pathlib import Path

@@ -1,4 +1,6 @@
 """Async command executor with zero UI blocking."""
+import logging
+logger = logging.getLogger(__name__)
 
 import asyncio
 import shlex

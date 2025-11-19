@@ -1,4 +1,6 @@
 """
+import logging
+logger = logging.getLogger(__name__)
 Command Palette - Cmd+K style command launcher with fuzzy search.
 
 Inspiration:

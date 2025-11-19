@@ -1,4 +1,6 @@
 """Enhanced context builder with rich environment awareness."""
+import logging
+logger = logging.getLogger(__name__)
 
 import os
 import subprocess

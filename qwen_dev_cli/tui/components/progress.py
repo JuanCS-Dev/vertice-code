@@ -3,6 +3,14 @@ Progress Bar Component - Animated progress indicators.
 
 Features:
 - Smooth animation with easing (cubic ease-out)
+
+from enum import Enum
+
+class ProgressStyle(Enum):
+    """Progress bar style."""
+    BAR = "bar"
+    SPINNER = "spinner"
+    DOTS = "dots"
 - Time estimates (elapsed + remaining)
 - Percentage + fraction display
 - Color gradient (0% → 100%)

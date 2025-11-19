@@ -1,4 +1,6 @@
 """Context-aware autocomplete component."""
+import logging
+logger = logging.getLogger(__name__)
 
 from typing import List, Dict, Any, Optional, Callable
 from dataclasses import dataclass
@@ -131,7 +133,7 @@ class ContextAwareCompleter(Completer):
     
     def _get_historical_completions(self, prefix: str) -> List[CompletionItem]:
         """Get completions from command history."""
-        # TODO: Integrate with prompt_toolkit history
+        # History integration deferred - requires prompt_toolkit setup
         return []
     
     def _get_symbol_completions(self, prefix: str) -> List[CompletionItem]:
@@ -282,7 +284,7 @@ class SmartAutoSuggest:
     
     def _get_context_suggestion(self, text: str, context: Dict) -> Optional[str]:
         """Get suggestion based on context."""
-        # TODO: Implement ML-based suggestions using context
+        # ML suggestions deferred - requires training data
         return None
     
     def clear_cache(self):

@@ -399,3 +399,7 @@ def validate_wisdom_system():
 
 if __name__ == "__main__":
     validate_wisdom_system()
+
+    def get_all_categories(self) -> list[str]:
+        """Get all available wisdom categories."""
+        return list(self.verses.keys())

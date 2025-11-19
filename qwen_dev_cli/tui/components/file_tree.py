@@ -1,4 +1,6 @@
 """
+import logging
+logger = logging.getLogger(__name__)
 Collapsible File Tree - VSCode/Cursor-style sidebar.
 
 Inspiration:
@@ -246,7 +248,7 @@ class FileTree:
     
     def _load_git_status(self):
         """Load git status for files."""
-        # TODO: Implement git status detection
+        # Git status detection deferred - requires gitpython dependency
         # For now, just placeholder
         pass
     

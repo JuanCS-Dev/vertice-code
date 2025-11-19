@@ -1,4 +1,6 @@
 """Real-time stream processing (Producer-Consumer pattern)."""
+import logging
+logger = logging.getLogger(__name__)
 
 import asyncio
 from dataclasses import dataclass
