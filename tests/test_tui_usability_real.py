@@ -53,13 +53,16 @@ class TestVertice30Compliance:
         print(f"✅ P1: LEI = 0.0 - Zero placeholders across {len(list(tui_dir.rglob('*.py')))} files")
     
     def test_p2_quality_over_speed(self):
-        """Test quality animations."""
+        """Test that animations use quality easing functions."""
+        # Test that Animator exists and can be instantiated
         from qwen_dev_cli.tui.animations import Animator, AnimationConfig
+        
         config = AnimationConfig()
         animator = Animator(config)
-        # Just verify it exists and instantiates
-        assert animator is not None
-
+        
+        # Verify animator has easing functions
+        assert hasattr(animator, "ease_out") or hasattr(animator, "cubic_ease_out")
+        
     def test_p3_incremental_phases(self):
         """P3: 4 phases of incremental development."""
         
