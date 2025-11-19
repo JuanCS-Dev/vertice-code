@@ -1,6 +1,7 @@
 """Command-line interface for qwen-dev-cli."""
 
 import asyncio
+import json
 from pathlib import Path
 from typing import Optional, List
 import typer
@@ -25,9 +26,9 @@ console = Console()
 def explain(
     file_path: str = typer.Argument(..., help="Path to file to explain"),
     context_files: Optional[List[str]] = typer.Option(
-        None, "--context", "-c", help="Additional context files"
+        None, "--context", help="Additional context files"
     ),
-    model: Optional[str] = typer.Option(None, "--model", "-m", help="LLM model to use"),
+    model: Optional[str] = typer.Option(None, "--model", help="LLM model to use"),
 ):
     """Explain code from a file."""
     console.print(f"\n[bold blue]🔍 Explaining:[/bold blue] {file_path}\n")
@@ -68,9 +69,9 @@ def explain(
 def generate(
     prompt: str = typer.Argument(..., help="What code to generate"),
     context_files: Optional[List[str]] = typer.Option(
-        None, "--context", "-c", help="Context files for reference"
+        None, "--context", help="Context files for reference"
     ),
-    output: Optional[str] = typer.Option(None, "--output", "-o", help="Save to file"),
+    output: Optional[str] = typer.Option(None, "--output", help="Save to file"),
     stream: bool = typer.Option(True, "--stream/--no-stream", help="Stream output"),
 ):
     """Generate code based on a prompt."""
@@ -115,7 +116,7 @@ def generate(
 
 @app.command()
 def serve(
-    port: int = typer.Option(7860, "--port", "-p", help="Port for web UI"),
+    port: int = typer.Option(7860, "--port", help="Port for web UI"),
     share: bool = typer.Option(False, "--share", help="Create public share link"),
 ):
     """Start the Gradio web UI."""
@@ -135,6 +136,72 @@ def serve(
     except Exception as e:
         console.print(f"[bold red]❌ Error:[/bold red] {e}")
         raise typer.Exit(1)
+
+
+@app.command()
+def chat(
+    message: Optional[str] = typer.Option(None, "--message", help="Single message (non-interactive)"),
+    no_context: bool = typer.Option(False, "--no-context", help="Disable project context"),
+    output_file: Optional[str] = typer.Option(None, "--output", help="Save output to file"),
+    json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
+):
+    """Start interactive chat or execute single message.
+    
+    Examples:
+        qwen chat                                        # Interactive mode
+        qwen chat --message "list all Python files"      # Single command
+        qwen chat --message "show git status" --json     # JSON output
+        qwen chat --message "create README" --output result.txt
+    """
+    if message:
+        # Non-interactive mode
+        from .core.single_shot import execute_single_shot
+        
+        console.print(f"[dim]Executing:[/dim] {message}\n")
+        
+        # Execute
+        result = asyncio.run(execute_single_shot(
+            message,
+            include_context=not no_context
+        ))
+        
+        # Format output
+        if json_output:
+            output = json.dumps(result, indent=2)
+        else:
+            output = result['output']
+            
+            if not result['success'] and result['errors']:
+                output += '\n\n[red]Errors:[/red]\n'
+                output += '\n'.join(f"  - {err}" for err in result['errors'])
+        
+        # Save to file or print
+        if output_file:
+            Path(output_file).write_text(output)
+            console.print(f"[green]✓ Output saved to:[/green] {output_file}")
+        else:
+            if json_output:
+                console.print(output)
+            else:
+                from rich.markdown import Markdown
+                console.print(Markdown(output))
+        
+        # Exit with appropriate code
+        raise typer.Exit(0 if result['success'] else 1)
+    
+    else:
+        # Interactive mode - launch shell
+        console.print("\n[bold blue]🚀 Starting interactive shell...[/bold blue]\n")
+        console.print("[dim]Type 'quit' or press Ctrl+D to exit[/dim]\n")
+        
+        try:
+            from .shell import main as shell_main
+            asyncio.run(shell_main())
+        except KeyboardInterrupt:
+            console.print("\n\n[yellow]Goodbye! 👋[/yellow]\n")
+        except Exception as e:
+            console.print(f"\n[red]Error:[/red] {e}\n")
+            raise typer.Exit(1)
 
 
 @app.command()
