@@ -332,8 +332,19 @@ app.add_typer(sessions_app, name="sessions")
 def list_sessions(
     limit: int = typer.Option(10, "--limit", "-n", help="Number of sessions to show"),
     all_sessions: bool = typer.Option(False, "--all", "-a", help="Show all sessions"),
+    cwd_filter: Optional[str] = typer.Option(None, "--cwd", help="Filter by working directory (substring)"),
+    min_messages: Optional[int] = typer.Option(None, "--min-messages", help="Minimum number of messages"),
+    sort_by: str = typer.Option("activity", "--sort", help="Sort by: activity, messages, files"),
 ):
-    """List all saved sessions."""
+    """List all saved sessions with filtering and sorting.
+    
+    Examples:
+        qwen sessions list                          # Show 10 most recent
+        qwen sessions list --all                    # Show all sessions
+        qwen sessions list --cwd python-app         # Filter by directory
+        qwen sessions list --min-messages 5         # Sessions with 5+ messages
+        qwen sessions list --sort messages          # Sort by message count
+    """
     from .session import SessionManager
     from rich.table import Table
     from datetime import datetime
@@ -345,12 +356,38 @@ def list_sessions(
         console.print("[yellow]No sessions found[/yellow]")
         return
     
+    # Apply filters (AIR GAP #3)
+    if cwd_filter:
+        sessions = [s for s in sessions if cwd_filter.lower() in s['cwd'].lower()]
+        if not sessions:
+            console.print(f"[yellow]No sessions found matching cwd: {cwd_filter}[/yellow]")
+            return
+    
+    if min_messages is not None:
+        sessions = [s for s in sessions if s['messages'] >= min_messages]
+        if not sessions:
+            console.print(f"[yellow]No sessions found with {min_messages}+ messages[/yellow]")
+            return
+    
+    # Apply sorting (AIR GAP #3)
+    if sort_by == "messages":
+        sessions = sorted(sessions, key=lambda s: s['messages'], reverse=True)
+    elif sort_by == "files":
+        sessions = sorted(sessions, key=lambda s: s['files_read'], reverse=True)
+    # Default: already sorted by activity (most recent first)
+    
     # Apply limit
+    total_matching = len(sessions)
     if not all_sessions:
         sessions = sessions[:limit]
     
-    # Create table
-    table = Table(title=f"Saved Sessions ({len(sessions)} total)")
+    # Create table with filter info
+    title = f"Saved Sessions ({len(sessions)}"
+    if total_matching != len(manager.list_sessions()):
+        title += f" of {total_matching} matching"
+    title += f" total: {len(manager.list_sessions())})"
+    
+    table = Table(title=title)
     table.add_column("ID", style="cyan", no_wrap=True)
     table.add_column("Working Directory", style="blue")
     table.add_column("Messages", justify="right", style="green")
@@ -378,8 +415,17 @@ def list_sessions(
     
     console.print(table)
     
-    if not all_sessions and len(manager.list_sessions()) > limit:
-        console.print(f"\n[dim]Showing {limit} of {len(manager.list_sessions())} sessions. Use --all to see all.[/dim]")
+    # Show helpful hints
+    if not all_sessions and total_matching > limit:
+        console.print(f"\n[dim]Showing {len(sessions)} of {total_matching} matching sessions. Use --all to see all.[/dim]")
+    
+    if cwd_filter or min_messages:
+        filters = []
+        if cwd_filter:
+            filters.append(f"cwd='{cwd_filter}'")
+        if min_messages:
+            filters.append(f"messages≥{min_messages}")
+        console.print(f"[dim]Filters applied: {', '.join(filters)}[/dim]")
 
 
 @sessions_app.command("show")
