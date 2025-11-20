@@ -65,20 +65,32 @@ class SessionState:
             
         Returns:
             SessionState instance
+            
+        Raises:
+            ValueError: If required fields are missing
         """
-        return cls(
-            session_id=data['session_id'],
-            cwd=Path(data['cwd']),
-            history=data.get('history', []),
-            conversation=data.get('conversation', []),
-            context=data.get('context', {}),
-            files_read=set(data.get('files_read', [])),
-            files_modified=set(data.get('files_modified', [])),
-            tool_calls_count=data.get('tool_calls_count', 0),
-            created_at=datetime.fromisoformat(data['created_at']),
-            last_activity=datetime.fromisoformat(data['last_activity']),
-            metadata=data.get('metadata', {}),
-        )
+        # Validate required fields
+        required_fields = ['session_id', 'cwd', 'created_at', 'last_activity']
+        missing = [f for f in required_fields if f not in data]
+        if missing:
+            raise ValueError(f"Missing required fields in session data: {', '.join(missing)}")
+        
+        try:
+            return cls(
+                session_id=data['session_id'],
+                cwd=Path(data['cwd']),
+                history=data.get('history', []),
+                conversation=data.get('conversation', []),
+                context=data.get('context', {}),
+                files_read=set(data.get('files_read', [])),
+                files_modified=set(data.get('files_modified', [])),
+                tool_calls_count=data.get('tool_calls_count', 0),
+                created_at=datetime.fromisoformat(data['created_at']),
+                last_activity=datetime.fromisoformat(data['last_activity']),
+                metadata=data.get('metadata', {}),
+            )
+        except (ValueError, TypeError) as e:
+            raise ValueError(f"Invalid session data format: {e}")
     
     def update_activity(self):
         """Update last activity timestamp."""
