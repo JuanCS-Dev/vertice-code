@@ -319,6 +319,256 @@ def shell():
         traceback.print_exc()
 
 
+# Session management commands
+sessions_app = typer.Typer(
+    name="sessions",
+    help="Manage saved sessions",
+    add_completion=False
+)
+app.add_typer(sessions_app, name="sessions")
+
+
+@sessions_app.command("list")
+def list_sessions(
+    limit: int = typer.Option(10, "--limit", "-n", help="Number of sessions to show"),
+    all_sessions: bool = typer.Option(False, "--all", "-a", help="Show all sessions"),
+    cwd_filter: Optional[str] = typer.Option(None, "--cwd", help="Filter by working directory (substring)"),
+    min_messages: Optional[int] = typer.Option(None, "--min-messages", help="Minimum number of messages"),
+    sort_by: str = typer.Option("activity", "--sort", help="Sort by: activity, messages, files"),
+):
+    """List all saved sessions with filtering and sorting.
+    
+    Examples:
+        qwen sessions list                          # Show 10 most recent
+        qwen sessions list --all                    # Show all sessions
+        qwen sessions list --cwd python-app         # Filter by directory
+        qwen sessions list --min-messages 5         # Sessions with 5+ messages
+        qwen sessions list --sort messages          # Sort by message count
+    """
+    from .session import SessionManager
+    from rich.table import Table
+    from datetime import datetime
+    
+    manager = SessionManager()
+    sessions = manager.list_sessions()
+    
+    if not sessions:
+        console.print("[yellow]No sessions found[/yellow]")
+        return
+    
+    # Apply filters (AIR GAP #3)
+    if cwd_filter:
+        sessions = [s for s in sessions if cwd_filter.lower() in s['cwd'].lower()]
+        if not sessions:
+            console.print(f"[yellow]No sessions found matching cwd: {cwd_filter}[/yellow]")
+            return
+    
+    if min_messages is not None:
+        sessions = [s for s in sessions if s['messages'] >= min_messages]
+        if not sessions:
+            console.print(f"[yellow]No sessions found with {min_messages}+ messages[/yellow]")
+            return
+    
+    # Apply sorting (AIR GAP #3)
+    if sort_by == "messages":
+        sessions = sorted(sessions, key=lambda s: s['messages'], reverse=True)
+    elif sort_by == "files":
+        sessions = sorted(sessions, key=lambda s: s['files_read'], reverse=True)
+    # Default: already sorted by activity (most recent first)
+    
+    # Apply limit
+    total_matching = len(sessions)
+    if not all_sessions:
+        sessions = sessions[:limit]
+    
+    # Create table with filter info
+    title = f"Saved Sessions ({len(sessions)}"
+    if total_matching != len(manager.list_sessions()):
+        title += f" of {total_matching} matching"
+    title += f" total: {len(manager.list_sessions())})"
+    
+    table = Table(title=title)
+    table.add_column("ID", style="cyan", no_wrap=True)
+    table.add_column("Working Directory", style="blue")
+    table.add_column("Messages", justify="right", style="green")
+    table.add_column("Files", justify="right", style="yellow")
+    table.add_column("Last Activity", style="magenta")
+    
+    for session in sessions:
+        last_activity = datetime.fromisoformat(session['last_activity'])
+        age = datetime.now() - last_activity
+        
+        if age.days > 0:
+            age_str = f"{age.days}d ago"
+        elif age.seconds > 3600:
+            age_str = f"{age.seconds // 3600}h ago"
+        else:
+            age_str = f"{age.seconds // 60}m ago"
+        
+        table.add_row(
+            session['id'],
+            session['cwd'],
+            str(session['messages']),
+            str(session['files_read']),
+            age_str
+        )
+    
+    console.print(table)
+    
+    # Show helpful hints
+    if not all_sessions and total_matching > limit:
+        console.print(f"\n[dim]Showing {len(sessions)} of {total_matching} matching sessions. Use --all to see all.[/dim]")
+    
+    if cwd_filter or min_messages:
+        filters = []
+        if cwd_filter:
+            filters.append(f"cwd='{cwd_filter}'")
+        if min_messages:
+            filters.append(f"messages≥{min_messages}")
+        console.print(f"[dim]Filters applied: {', '.join(filters)}[/dim]")
+
+
+@sessions_app.command("show")
+def show_session(
+    session_id: str = typer.Argument(..., help="Session ID to show"),
+):
+    """Show detailed information about a session."""
+    from .session import SessionManager
+    from rich.panel import Panel
+    from rich.tree import Tree
+    
+    manager = SessionManager()
+    
+    try:
+        state = manager.load_session(session_id)
+    except FileNotFoundError:
+        console.print(f"[red]Session '{session_id}' not found[/red]")
+        raise typer.Exit(1)
+    
+    # Create tree
+    tree = Tree(f"[bold cyan]Session: {session_id}[/bold cyan]")
+    
+    # Basic info
+    info = tree.add("[yellow]📋 Information[/yellow]")
+    info.add(f"Working Directory: {state.cwd}")
+    info.add(f"Created: {state.created_at.strftime('%Y-%m-%d %H:%M:%S')}")
+    info.add(f"Last Activity: {state.last_activity.strftime('%Y-%m-%d %H:%M:%S')}")
+    
+    # Statistics
+    stats = tree.add("[green]📊 Statistics[/green]")
+    stats.add(f"Messages: {len(state.conversation)}")
+    stats.add(f"Files Read: {len(state.files_read)}")
+    stats.add(f"Files Modified: {len(state.files_modified)}")
+    stats.add(f"Tool Calls: {state.tool_calls_count}")
+    
+    # Files
+    if state.files_read:
+        files = tree.add("[blue]📂 Files Read[/blue]")
+        for f in sorted(state.files_read)[:10]:
+            files.add(f)
+        if len(state.files_read) > 10:
+            files.add(f"[dim]... and {len(state.files_read) - 10} more[/dim]")
+    
+    if state.files_modified:
+        modified = tree.add("[magenta]✏️  Files Modified[/magenta]")
+        for f in sorted(state.files_modified):
+            modified.add(f)
+    
+    console.print(tree)
+
+
+@sessions_app.command("delete")
+def delete_session(
+    session_id: str = typer.Argument(..., help="Session ID to delete"),
+    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
+):
+    """Delete a session."""
+    from .session import SessionManager
+    
+    manager = SessionManager()
+    
+    # Check if exists
+    try:
+        state = manager.load_session(session_id)
+    except FileNotFoundError:
+        console.print(f"[red]Session '{session_id}' not found[/red]")
+        raise typer.Exit(1)
+    
+    # Confirmation
+    if not force:
+        confirm = typer.confirm(f"Delete session {session_id}?")
+        if not confirm:
+            console.print("[yellow]Cancelled[/yellow]")
+            raise typer.Exit(0)
+    
+    # Delete
+    manager.delete_session(session_id)
+    console.print(f"[green]✅ Session {session_id} deleted[/green]")
+
+
+@sessions_app.command("cleanup")
+def cleanup_sessions(
+    days: int = typer.Option(30, "--days", "-d", help="Delete sessions older than N days"),
+    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
+):
+    """Clean up old sessions."""
+    from .session import SessionManager
+    
+    manager = SessionManager()
+    
+    if not force:
+        confirm = typer.confirm(f"Delete sessions older than {days} days?")
+        if not confirm:
+            console.print("[yellow]Cancelled[/yellow]")
+            raise typer.Exit(0)
+    
+    deleted = manager.cleanup_old_sessions(days=days)
+    
+    if deleted > 0:
+        console.print(f"[green]✅ Deleted {deleted} old sessions[/green]")
+    else:
+        console.print("[yellow]No old sessions to delete[/yellow]")
+
+
+@app.command()
+def resume(
+    session_id: Optional[str] = typer.Argument(None, help="Session ID to resume (or latest)"),
+):
+    """Resume a previous session."""
+    from .session import SessionManager
+    from .shell import InteractiveShell
+    
+    manager = SessionManager()
+    
+    # Get session
+    if session_id:
+        try:
+            state = manager.load_session(session_id)
+        except FileNotFoundError:
+            console.print(f"[red]Session '{session_id}' not found[/red]")
+            raise typer.Exit(1)
+    else:
+        state = manager.get_latest_session()
+        if not state:
+            console.print("[yellow]No sessions found[/yellow]")
+            raise typer.Exit(1)
+    
+    console.print(f"[cyan]Resuming session {state.session_id}...[/cyan]")
+    console.print(f"[dim]Working directory: {state.cwd}[/dim]")
+    console.print(f"[dim]Messages: {len(state.conversation)}, Files: {len(state.files_read)}[/dim]\n")
+    
+    # Start shell with restored state
+    try:
+        shell_instance = InteractiveShell(session_state=state)
+        asyncio.run(shell_instance.run())
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Shell interrupted[/yellow]")
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        import traceback
+        traceback.print_exc()
+
+
 def main():
     """Entry point for CLI."""
     app()
