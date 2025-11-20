@@ -12,6 +12,7 @@ from rich.panel import Panel
 from rich.syntax import Syntax
 
 from qwen_dev_cli.integration.sandbox import get_sandbox, SandboxResult
+from qwen_dev_cli.integration.safety import safety_validator
 from qwen_dev_cli.commands import SlashCommand, slash_registry
 
 logger = logging.getLogger(__name__)
@@ -73,6 +74,17 @@ async def handle_sandbox(args: str, context: Dict[str, Any]) -> str:
     if '--readonly' in command:
         readonly = True
         command = command.replace('--readonly', '').strip()
+    
+    # Safety validation before execution
+    tool_call = {
+        "tool": "bash_command",
+        "arguments": {"command": command}
+    }
+    is_safe, reason = safety_validator.is_safe(tool_call)
+    
+    if not is_safe:
+        console.print(f"\n[yellow]⚠️  Safety Warning:[/yellow] {reason}")
+        console.print("[dim]Command will execute in isolated sandbox anyway.[/dim]\n")
     
     console.print(f"\n[cyan]🔒 Executing in sandbox:[/cyan] {command}")
     console.print(f"[dim]Directory: {cwd}[/dim]")

@@ -156,6 +156,59 @@ class TestSandboxCommand:
         result = await handle_sandbox("echo test", context)
         
         assert "Error" in result or "failed" in result.lower()
+    
+    @patch('qwen_dev_cli.commands.sandbox.get_sandbox')
+    @patch('qwen_dev_cli.commands.sandbox.safety_validator')
+    async def test_safety_validation_warning(self, mock_validator, mock_get_sandbox):
+        """Test that dangerous commands show safety warning."""
+        mock_sandbox = Mock()
+        mock_sandbox.is_available.return_value = True
+        mock_sandbox.execute.return_value = SandboxResult(
+            exit_code=0,
+            stdout="",
+            stderr="",
+            duration_ms=100.0,
+            container_id="abc",
+            success=True
+        )
+        mock_get_sandbox.return_value = mock_sandbox
+        
+        # Mock safety validator to flag command as unsafe
+        mock_validator.is_safe.return_value = (False, "Dangerous pattern detected")
+        
+        context = {'cwd': Path.cwd()}
+        result = await handle_sandbox("rm -rf /", context)
+        
+        # Should show warning but still execute in sandbox
+        assert mock_validator.is_safe.called
+        assert mock_sandbox.execute.called
+    
+    @patch('qwen_dev_cli.commands.sandbox.get_sandbox')
+    @patch('qwen_dev_cli.commands.sandbox.safety_validator')
+    async def test_safety_validation_safe_command(self, mock_validator, mock_get_sandbox):
+        """Test that safe commands pass validation."""
+        mock_sandbox = Mock()
+        mock_sandbox.is_available.return_value = True
+        mock_sandbox.execute.return_value = SandboxResult(
+            exit_code=0,
+            stdout="test output",
+            stderr="",
+            duration_ms=100.0,
+            container_id="abc",
+            success=True
+        )
+        mock_get_sandbox.return_value = mock_sandbox
+        
+        # Mock safety validator to approve command
+        mock_validator.is_safe.return_value = (True, None)
+        
+        context = {'cwd': Path.cwd()}
+        result = await handle_sandbox("echo safe command", context)
+        
+        # Should execute without warning
+        assert mock_validator.is_safe.called
+        assert mock_sandbox.execute.called
+        assert "test output" in result
 
 
 class TestSandboxCommandHelp:
