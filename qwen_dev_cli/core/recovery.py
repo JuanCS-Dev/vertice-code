@@ -12,10 +12,16 @@ Inspired by:
 - Claude Code: Self-healing code execution
 - GitHub Copilot: Error correction suggestions
 - Cursor AI: Context-aware debugging
+
+DAY 7 ENHANCEMENTS:
+- Exponential backoff with jitter
+- Circuit breaker pattern
+- Sophisticated retry policies
 """
 
 import logging
 import time
+import random
 from typing import Dict, Any, Optional, List, Tuple
 from dataclasses import dataclass
 from enum import Enum
@@ -541,3 +547,249 @@ async def create_recovery_context(
         user_intent=turn.user_input,
         previous_commands=previous_cmds,
     )
+
+
+# ============================================================================
+# DAY 7 ENHANCEMENTS: Sophisticated Retry Logic
+# ============================================================================
+
+class RetryPolicy:
+    """Sophisticated retry policy with exponential backoff and jitter.
+    
+    Implements best practices:
+    - Exponential backoff to prevent thundering herd
+    - Jitter to prevent synchronized retries
+    - Max delay cap to prevent excessive waits
+    - Smart retry decisions based on error type
+    """
+    
+    def __init__(
+        self,
+        base_delay: float = 1.0,
+        max_delay: float = 60.0,
+        exponential_base: float = 2.0,
+        jitter: bool = True
+    ):
+        """Initialize retry policy.
+        
+        Args:
+            base_delay: Base delay in seconds (default: 1.0)
+            max_delay: Maximum delay in seconds (default: 60.0)
+            exponential_base: Base for exponential backoff (default: 2.0)
+            jitter: Add random jitter (default: True)
+        """
+        self.base_delay = base_delay
+        self.max_delay = max_delay
+        self.exponential_base = exponential_base
+        self.jitter = jitter
+    
+    def get_delay(self, attempt: int) -> float:
+        """Calculate delay for attempt with exponential backoff.
+        
+        Formula: min(base * (exp_base ^ (attempt - 1)), max_delay) + jitter
+        
+        Args:
+            attempt: Attempt number (1-indexed)
+        
+        Returns:
+            Delay in seconds
+        """
+        # Calculate exponential delay
+        delay = self.base_delay * (self.exponential_base ** (attempt - 1))
+        
+        # Cap at max delay
+        delay = min(delay, self.max_delay)
+        
+        # Add jitter (0-25% of delay)
+        if self.jitter:
+            jitter_amount = delay * 0.25 * random.random()
+            delay += jitter_amount
+        
+        return delay
+    
+    def should_retry(
+        self,
+        attempt: int,
+        max_attempts: int,
+        error: Exception
+    ) -> bool:
+        """Decide if we should retry based on error type.
+        
+        Args:
+            attempt: Current attempt number
+            max_attempts: Maximum attempts allowed
+            error: Exception that occurred
+        
+        Returns:
+            True if should retry, False otherwise
+        """
+        # Never retry beyond max attempts
+        if attempt >= max_attempts:
+            return False
+        
+        # Never retry on user interrupts
+        if isinstance(error, (KeyboardInterrupt, SystemExit)):
+            return False
+        
+        # Check if error is transient (retryable)
+        error_str = str(error).lower()
+        transient_patterns = [
+            'timeout', 'timed out',
+            'connection', 'connect',
+            'temporary', 'temporarily',
+            'unavailable', 'not available',
+            'rate limit', 'too many requests',
+            'service unavailable',
+            'bad gateway', '502', '503', '504'
+        ]
+        
+        is_transient = any(pattern in error_str for pattern in transient_patterns)
+        
+        if is_transient:
+            logger.info(f"Error appears transient, will retry: {error}")
+            return True
+        
+        # Don't retry on permanent errors
+        permanent_patterns = [
+            'not found', '404',
+            'unauthorized', '401', '403',
+            'forbidden',
+            'invalid', 'malformed',
+            'syntax error', 'parse error'
+        ]
+        
+        is_permanent = any(pattern in error_str for pattern in permanent_patterns)
+        
+        if is_permanent:
+            logger.info(f"Error appears permanent, won't retry: {error}")
+            return False
+        
+        # Default: retry unknown errors (conservative approach)
+        return True
+
+
+class RecoveryCircuitBreaker:
+    """Circuit breaker for recovery system to prevent cascading failures.
+    
+    States:
+    - CLOSED: Normal operation, allow all requests
+    - OPEN: Too many failures, reject all requests for timeout period
+    - HALF_OPEN: Testing if system recovered, allow limited requests
+    
+    Prevents:
+    - Infinite loops of failed recoveries
+    - Resource exhaustion from repeated failures
+    - Cascading failures across system
+    """
+    
+    def __init__(
+        self,
+        failure_threshold: int = 5,
+        success_threshold: int = 2,
+        timeout: float = 60.0
+    ):
+        """Initialize circuit breaker.
+        
+        Args:
+            failure_threshold: Failures before opening circuit
+            success_threshold: Successes to close circuit from half-open
+            timeout: Seconds to wait before testing recovery (half-open)
+        """
+        self.failure_threshold = failure_threshold
+        self.success_threshold = success_threshold
+        self.timeout = timeout
+        
+        self.failure_count = 0
+        self.success_count = 0
+        self.state = "CLOSED"  # CLOSED, OPEN, HALF_OPEN
+        self.last_failure_time: Optional[float] = None
+        
+        logger.info(
+            f"Initialized RecoveryCircuitBreaker "
+            f"(failures={failure_threshold}, successes={success_threshold}, "
+            f"timeout={timeout}s)"
+        )
+    
+    def record_success(self):
+        """Record successful recovery attempt."""
+        self.success_count += 1
+        
+        if self.state == "HALF_OPEN":
+            if self.success_count >= self.success_threshold:
+                # Recovered! Close circuit
+                self.state = "CLOSED"
+                self.failure_count = 0
+                self.success_count = 0
+                logger.info("Circuit breaker: CLOSED (system recovered)")
+        
+        elif self.state == "CLOSED":
+            # Reset failure count on success
+            self.failure_count = max(0, self.failure_count - 1)
+    
+    def record_failure(self):
+        """Record failed recovery attempt."""
+        self.failure_count += 1
+        self.success_count = 0
+        self.last_failure_time = time.time()
+        
+        if self.state == "CLOSED" and self.failure_count >= self.failure_threshold:
+            # Too many failures! Open circuit
+            self.state = "OPEN"
+            logger.warning(
+                f"Circuit breaker: OPEN ({self.failure_count} consecutive failures)"
+            )
+        
+        elif self.state == "HALF_OPEN":
+            # Failed during testing, reopen circuit
+            self.state = "OPEN"
+            logger.warning("Circuit breaker: OPEN (failed during half-open test)")
+    
+    def should_allow_recovery(self) -> Tuple[bool, str]:
+        """Check if recovery attempt is allowed.
+        
+        Returns:
+            (allowed, reason)
+        """
+        if self.state == "CLOSED":
+            return True, "Circuit closed, normal operation"
+        
+        if self.state == "OPEN":
+            # Check if timeout has passed
+            if self.last_failure_time is None:
+                self.state = "HALF_OPEN"
+                return True, "Circuit half-open (testing)"
+            
+            elapsed = time.time() - self.last_failure_time
+            if elapsed >= self.timeout:
+                self.state = "HALF_OPEN"
+                self.success_count = 0
+                logger.info(
+                    f"Circuit breaker: HALF_OPEN (testing after {elapsed:.1f}s)"
+                )
+                return True, "Circuit half-open (testing recovery)"
+            else:
+                remaining = self.timeout - elapsed
+                return False, f"Circuit open, retry in {remaining:.0f}s"
+        
+        # HALF_OPEN: allow limited attempts
+        return True, "Circuit half-open, testing recovery"
+    
+    def get_status(self) -> Dict[str, Any]:
+        """Get circuit breaker status."""
+        return {
+            "state": self.state,
+            "failure_count": self.failure_count,
+            "success_count": self.success_count,
+            "last_failure": self.last_failure_time,
+            "failure_threshold": self.failure_threshold,
+            "success_threshold": self.success_threshold,
+            "timeout": self.timeout
+        }
+    
+    def reset(self):
+        """Reset circuit breaker to closed state."""
+        self.state = "CLOSED"
+        self.failure_count = 0
+        self.success_count = 0
+        self.last_failure_time = None
+        logger.info("Circuit breaker: RESET to CLOSED")

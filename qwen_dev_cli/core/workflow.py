@@ -915,3 +915,301 @@ class WorkflowEngine:
             critiques=critiques,
             final_context=context
         )
+
+
+# ============================================================================
+# DAY 7 ENHANCEMENTS: Git Rollback & Partial Rollback
+# ============================================================================
+
+class GitRollback:
+    """Git-based rollback for code changes.
+    
+    Provides checkpoint/rollback functionality using git commits.
+    Allows atomic rollback of multi-file changes.
+    """
+    
+    def __init__(self):
+        """Initialize git rollback manager."""
+        self.commits_made: List[str] = []
+        self.checkpoints: Dict[str, str] = {}  # checkpoint_id -> commit_sha
+    
+    async def create_checkpoint_commit(self, message: str) -> Optional[str]:
+        """Create checkpoint git commit.
+        
+        Args:
+            message: Checkpoint message
+        
+        Returns:
+            Commit SHA or None if failed
+        """
+        try:
+            import subprocess
+            
+            # Check if in git repo
+            result = subprocess.run(
+                ["git", "rev-parse", "--git-dir"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            
+            if result.returncode != 0:
+                logger.warning("Not in a git repository, cannot create checkpoint")
+                return None
+            
+            # Check if there are changes
+            result = subprocess.run(
+                ["git", "status", "--porcelain"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            
+            if not result.stdout.strip():
+                logger.info("No changes to checkpoint")
+                return None
+            
+            # Stage all changes
+            subprocess.run(
+                ["git", "add", "-A"],
+                capture_output=True,
+                timeout=10
+            )
+            
+            # Commit with checkpoint tag
+            commit_msg = f"[QWEN-CHECKPOINT] {message}"
+            result = subprocess.run(
+                ["git", "commit", "-m", commit_msg],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            
+            if result.returncode != 0:
+                logger.error(f"Failed to create checkpoint: {result.stderr}")
+                return None
+            
+            # Get commit SHA
+            result = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            
+            sha = result.stdout.strip()
+            self.commits_made.append(sha)
+            
+            logger.info(f"Created checkpoint commit: {sha[:7]} - {message}")
+            return sha
+            
+        except Exception as e:
+            logger.error(f"Failed to create checkpoint: {e}")
+            return None
+    
+    async def rollback_to_checkpoint(self, checkpoint_sha: str) -> bool:
+        """Rollback to checkpoint commit.
+        
+        Args:
+            checkpoint_sha: Commit SHA to rollback to
+        
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            import subprocess
+            
+            # Reset to checkpoint (keep working directory changes in case of partial rollback)
+            result = subprocess.run(
+                ["git", "reset", "--hard", checkpoint_sha],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            
+            if result.returncode != 0:
+                logger.error(f"Rollback failed: {result.stderr}")
+                return False
+            
+            logger.info(f"Rolled back to {checkpoint_sha[:7]}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Rollback failed: {e}")
+            return False
+    
+    async def rollback_last_checkpoint(self) -> bool:
+        """Rollback to last checkpoint made.
+        
+        Returns:
+            True if successful, False otherwise
+        """
+        if not self.commits_made:
+            logger.warning("No checkpoints to rollback to")
+            return False
+        
+        last_checkpoint = self.commits_made[-1]
+        success = await self.rollback_to_checkpoint(last_checkpoint)
+        
+        if success:
+            self.commits_made.pop()
+        
+        return success
+    
+    def get_checkpoints(self) -> List[str]:
+        """Get list of checkpoint commits.
+        
+        Returns:
+            List of commit SHAs
+        """
+        return self.commits_made.copy()
+    
+    def clear_checkpoints(self):
+        """Clear checkpoint history."""
+        self.commits_made.clear()
+        self.checkpoints.clear()
+
+
+class PartialRollback:
+    """Granular rollback of individual operations.
+    
+    Maintains a stack of reversible operations that can be undone
+    individually or in groups. Useful for fine-grained error recovery.
+    """
+    
+    def __init__(self):
+        """Initialize partial rollback manager."""
+        self.operations: List[Dict[str, Any]] = []
+    
+    def add_operation(
+        self,
+        op_type: str,
+        data: Dict[str, Any],
+        reversible: bool = True
+    ):
+        """Add reversible operation to stack.
+        
+        Args:
+            op_type: Type of operation (file_write, file_delete, etc)
+            data: Operation data needed for rollback
+            reversible: Whether operation can be reversed
+        """
+        self.operations.append({
+            'type': op_type,
+            'data': data,
+            'timestamp': time.time(),
+            'reversible': reversible
+        })
+        
+        logger.debug(f"Added operation to rollback stack: {op_type}")
+    
+    async def rollback_last_n(self, n: int) -> Tuple[int, int]:
+        """Rollback last N operations.
+        
+        Args:
+            n: Number of operations to rollback
+        
+        Returns:
+            (successful_rollbacks, failed_rollbacks)
+        """
+        successful = 0
+        failed = 0
+        
+        for _ in range(min(n, len(self.operations))):
+            op = self.operations.pop()
+            
+            if not op['reversible']:
+                logger.warning(f"Operation {op['type']} is not reversible")
+                failed += 1
+                continue
+            
+            try:
+                await self._rollback_operation(op)
+                successful += 1
+            except Exception as e:
+                logger.error(f"Failed to rollback {op['type']}: {e}")
+                failed += 1
+        
+        logger.info(f"Rolled back {successful}/{successful+failed} operations")
+        return successful, failed
+    
+    async def rollback_until(self, target_timestamp: float) -> Tuple[int, int]:
+        """Rollback operations until target timestamp.
+        
+        Args:
+            target_timestamp: Rollback operations after this time
+        
+        Returns:
+            (successful_rollbacks, failed_rollbacks)
+        """
+        count = 0
+        for op in reversed(self.operations):
+            if op['timestamp'] <= target_timestamp:
+                break
+            count += 1
+        
+        return await self.rollback_last_n(count)
+    
+    async def _rollback_operation(self, op: Dict[str, Any]):
+        """Rollback single operation.
+        
+        Args:
+            op: Operation to rollback
+        """
+        op_type = op['type']
+        data = op['data']
+        
+        if op_type == 'file_write':
+            # Restore from backup
+            if 'backup_path' in data:
+                import shutil
+                shutil.copy(data['backup_path'], data['file_path'])
+                logger.debug(f"Restored {data['file_path']} from backup")
+        
+        elif op_type == 'file_delete':
+            # Restore deleted file
+            if 'backup_content' in data:
+                Path(data['file_path']).write_text(data['backup_content'])
+                logger.debug(f"Restored deleted file {data['file_path']}")
+        
+        elif op_type == 'file_edit':
+            # Restore previous content
+            if 'original_content' in data:
+                Path(data['file_path']).write_text(data['original_content'])
+                logger.debug(f"Restored original content of {data['file_path']}")
+        
+        elif op_type == 'command_execute':
+            # Most commands are irreversible
+            logger.warning(
+                f"Cannot rollback command execution: {data.get('command', 'unknown')}"
+            )
+        
+        else:
+            logger.warning(f"Unknown operation type: {op_type}")
+    
+    def get_operations(self) -> List[Dict[str, Any]]:
+        """Get list of tracked operations.
+        
+        Returns:
+            List of operation dictionaries
+        """
+        return self.operations.copy()
+    
+    def clear_operations(self):
+        """Clear operations stack."""
+        self.operations.clear()
+    
+    def get_summary(self) -> Dict[str, Any]:
+        """Get summary of operations.
+        
+        Returns:
+            Summary dictionary
+        """
+        return {
+            'total_operations': len(self.operations),
+            'reversible': sum(1 for op in self.operations if op['reversible']),
+            'irreversible': sum(1 for op in self.operations if not op['reversible']),
+            'types': list(set(op['type'] for op in self.operations)),
+            'oldest': self.operations[0]['timestamp'] if self.operations else None,
+            'newest': self.operations[-1]['timestamp'] if self.operations else None
+        }
