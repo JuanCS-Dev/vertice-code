@@ -1,0 +1,125 @@
+# Qwen Dev CLI - Project Configuration Example
+# Place this file as .qwenrc in your project root
+
+# Project metadata
+project:
+  name: qwen-dev-cli
+  type: python
+  version: 1.0.0
+  description: AI-powered code assistant with MCP integration
+
+# Coding rules and conventions
+rules:
+  # List of coding rules (passed to LLM as context)
+  rules:
+    - "Use type hints for all functions and class attributes"
+    - "Write docstrings in Google style"
+    - "Follow PEP 8 style guide (max line length: 100)"
+    - "Use f-strings for string formatting"
+    - "Prefer pathlib.Path over os.path"
+    - "Use dataclasses for data structures"
+    - "Handle exceptions explicitly with try/except"
+    - "Write unit tests for all new functions"
+  
+  style_guide: "PEP 8"
+  max_line_length: 100
+  use_type_hints: true
+  docstring_style: "google"
+
+# Safety and security settings
+safety:
+  # Paths where file operations are allowed
+  allowed_paths:
+    - ./qwen_dev_cli
+    - ./tests
+    - ./docs
+    - ./examples
+  
+  # Commands that are blocked (dangerous operations)
+  dangerous_commands:
+    - "rm -rf"
+    - "chmod 777"
+    - "dd if="
+    - "mkfs"
+    - "> /dev/"
+  
+  # Commands that require user approval before execution
+  require_approval:
+    - "git push"
+    - "docker run"
+    - "pip install"
+    - "npm install"
+    - "cargo publish"
+  
+  # Maximum file size in MB for operations
+  max_file_size_mb: 10
+  
+  # Enable sandbox mode (experimental)
+  enable_sandbox: false
+
+# Automation hooks
+hooks:
+  # Commands run after writing a new file
+  # Variables: {file}, {file_name}, {file_stem}, {dir}
+  post_write:
+    - "ruff check {file}"
+    - "black {file}"
+  
+  # Commands run after editing an existing file
+  post_edit:
+    - "ruff format {file}"
+  
+  # Commands run after deleting a file
+  post_delete: []
+  
+  # Commands run before git commit
+  pre_commit:
+    - "pytest tests/ --tb=short"
+    - "ruff check ."
+    - "mypy qwen_dev_cli/"
+
+# Context management
+context:
+  # Maximum tokens for context window
+  max_tokens: 32000
+  
+  # Include git information in context
+  include_git: true
+  
+  # Include test files in context
+  include_tests: true
+  
+  # Include documentation in context
+  include_docs: true
+  
+  # Patterns to exclude from context
+  exclude_patterns:
+    - "**/__pycache__/**"
+    - "**/node_modules/**"
+    - "**/venv/**"
+    - "**/.venv/**"
+    - "**/.git/**"
+    - "**/*.pyc"
+    - "**/.DS_Store"
+    - "**/build/**"
+    - "**/dist/**"
+  
+  # File extensions to include in context
+  file_extensions:
+    - ".py"
+    - ".js"
+    - ".ts"
+    - ".jsx"
+    - ".tsx"
+    - ".rs"
+    - ".go"
+    - ".java"
+    - ".cpp"
+    - ".c"
+    - ".h"
+    - ".md"
+    - ".txt"
+    - ".yaml"
+    - ".yml"
+    - ".json"
+    - ".toml"
