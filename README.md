@@ -58,24 +58,24 @@
 
 ```
 ┌─────────────────────────────────────────────┐
-│         QWEN-DEV-CLI                        │
+│                QWEN-DEV-CLI                 │
 ├─────────────────────────────────────────────┤
 │                                             │
-│  CLI (Typer)         Web UI (Gradio 6)      │
-│  ├─ explain          ├─ Chat interface     │
-│  ├─ generate         ├─ Streaming          │
-│  └─ serve            └─ Mobile responsive  │
+│   CLI (Typer)         Web UI (Gradio 6)     │
+│   ├─ explain          ├─ Chat interface     │
+│   ├─ generate         ├─ Streaming          │
+│   └─ serve            └─ Mobile responsive  │
 │                                             │
 ├─────────────────────────────────────────────┤
-│         Core Business Logic                 │
-│  ├─ LLM Client (HF API + Ollama)           │
-│  ├─ MCP Manager (Filesystem)               │
-│  └─ Context Builder                        │
+│          Core Business Logic                │
+│      ├─ LLM Client (Gemini API + Ollama)    │
+│      ├─ MCP Manager (Filesystem)            │
+│      └─ Context Builder                     │
 ├─────────────────────────────────────────────┤
 │         External Services                   │
-│  ├─ HuggingFace Inference API              │
-│  ├─ Ollama (Optional)                      │
-│  └─ MCP Filesystem Server                  │
+│  ├─ HuggingFace Inference API               │
+│  ├─ Ollama (Optional)                       │
+│  └─ MCP Filesystem Server                   │
 └─────────────────────────────────────────────┘
 ```
 
@@ -332,7 +332,8 @@ MIT License - see [LICENSE](LICENSE) for details.
 ---
 
 ## 🙏 Acknowledgments
-
+- **GOD** - HE IS
+- **Google** - For the amazing Gemini 3, and all GCloud ecosys, and for all the support
 - **Anthropic** - For the amazing Claude and MCP
 - **Gradio Team** - For the excellent UI framework
 - **HuggingFace** - For Inference API and Spaces hosting
