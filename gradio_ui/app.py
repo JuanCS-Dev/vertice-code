@@ -315,11 +315,10 @@ def create_ui() -> gr.Blocks:
     # Combine minimal CSS with glassmorphism CSS
     combined_css = MINIMAL_CSS + "\n\n" + get_glassmorphism_css()
 
+    # Gradio 6: theme and css go in launch(), not Blocks()
     with gr.Blocks(
         title="Qwen Dev CLI · 27 MCP Tools · Constitutional AI",
-        theme=theme,
-        theme_mode="auto",  # Gradio 6: Auto dark/light mode toggle!
-        css=combined_css,
+        fill_height=True,  # Gradio 6: Better layout
     ) as demo:
         
         # State Management
@@ -371,12 +370,10 @@ def create_ui() -> gr.Blocks:
             # Center: Chat + Input
             with gr.Column(scale=3, min_width=500):
                 
-                # Chat
+                # Chat (Gradio 6: always uses "messages" format, no type parameter)
                 chatbot = gr.Chatbot(
                     label="Dev Session",
-                    type="messages",
                     height=400,
-                    show_copy_button=True,
                     render_markdown=True,
                     avatar_images=(None, None),
                 )
@@ -454,20 +451,25 @@ def create_ui() -> gr.Blocks:
             fn=lambda: "", outputs=[msg_input]
         )
 
-    return demo
+    # Gradio 6: Return theme and css for launch()
+    return demo, theme, combined_css
 
 # --- LAUNCHER ---
 
 if __name__ == "__main__":
     port = int(os.getenv("GRADIO_SERVER_PORT", "7861"))
     
-    demo = create_ui()
+    # Gradio 6: create_ui returns demo, theme, css
+    demo, theme, css = create_ui()
     
     print(f"🚀 Launching Qwen Dev CLI UI on port {port}")
     
+    # Gradio 6: theme and css go in launch()
     demo.launch(
         server_name="0.0.0.0",
         server_port=port,
         share=False,
         show_error=True,
+        theme=theme,
+        css=css,
     )
