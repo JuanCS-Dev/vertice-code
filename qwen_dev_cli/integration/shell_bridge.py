@@ -112,7 +112,7 @@ class ShellBridge:
         from ..tools.web_access import (
             PackageSearchTool, FetchURLTool, DownloadFileTool, HTTPRequestTool
         )
-        from ..tools.exec import BashCommandTool
+        from ..tools.exec_hardened import BashCommandTool
         from ..tools.git_ops import GitStatusTool, GitDiffTool
         from ..tools.context import GetContextTool, SaveSessionTool, RestoreBackupTool
         from ..tools.terminal import (
