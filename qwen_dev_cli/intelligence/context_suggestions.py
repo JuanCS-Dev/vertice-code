@@ -103,12 +103,18 @@ class ContextSuggestionEngine:
                 
                 elif isinstance(node, ast.ImportFrom):
                     module = node.module or ''
+                    # Mark relative imports
+                    is_relative = node.level > 0
+                    relative_prefix = '.' * node.level if is_relative else ''
+                    
                     for alias in node.names:
+                        full_name = f"{relative_prefix}{module}.{alias.name}" if module else f"{relative_prefix}{alias.name}"
                         imports.append({
-                            'name': f"{module}.{alias.name}" if module else alias.name,
+                            'name': full_name,
                             'type': 'from_import',
                             'line': node.lineno,
-                            'module': module
+                            'module': module,
+                            'relative': is_relative
                         })
                 
                 # Definitions
@@ -174,16 +180,19 @@ class ContextSuggestionEngine:
         if not context or 'error' in context:
             return []
         
-        # 1. Imported files
+        # 1. Imported files (only internal project imports)
         for imp in context.get('imports', []):
-            imported_file = self._resolve_import(imp['name'], file_path)
-            if imported_file and imported_file.exists():
-                recommendations.append(FileRecommendation(
-                    file_path=imported_file,
-                    reason=f"Imported as '{imp['name']}'",
-                    relevance_score=0.9,
-                    relationship_type='import'
-                ))
+            # Skip stdlib and external packages
+            import_name = imp['name']
+            if self._is_internal_import(import_name):
+                imported_file = self._resolve_import(import_name, file_path)
+                if imported_file and imported_file.exists():
+                    recommendations.append(FileRecommendation(
+                        file_path=imported_file,
+                        reason=f"Imported as '{import_name}'",
+                        relevance_score=0.9,
+                        relationship_type='import'
+                    ))
         
         # 2. Test files
         test_file = self._find_test_file(file_path)
@@ -229,13 +238,67 @@ class ContextSuggestionEngine:
         
         return unique_recommendations
     
+    def _is_internal_import(self, import_name: str) -> bool:
+        """Check if import is internal to project."""
+        # Relative imports are always internal
+        if import_name.startswith('.'):
+            return True
+        
+        # Check if starts with known project modules
+        first_part = import_name.split('.')[0]
+        
+        # Common stdlib modules to skip
+        stdlib_modules = {
+            'os', 'sys', 'time', 'json', 'asyncio', 'pathlib', 'typing',
+            'dataclasses', 'enum', 're', 'logging', 'datetime', 'collections',
+            'functools', 'itertools', 'subprocess', 'shutil', 'tempfile',
+            'argparse', 'configparser', 'io', 'abc', 'contextlib'
+        }
+        
+        if first_part in stdlib_modules:
+            return False
+        
+        # Common third-party packages to skip
+        third_party = {
+            'rich', 'pytest', 'prompt_toolkit', 'google', 'openai',
+            'huggingface_hub', 'docker', 'httpx', 'pydantic', 'fastapi',
+            'gradio', 'typer', 'click', 'requests', 'numpy', 'pandas'
+        }
+        
+        if first_part in third_party:
+            return False
+        
+        # If it starts with project name, it's internal
+        project_modules = {'qwen_dev_cli', 'tests'}
+        if first_part in project_modules:
+            return True
+        
+        # Check if file exists in project
+        parts = import_name.split('.')
+        candidate = self.project_root / Path('/'.join(parts)).with_suffix('.py')
+        return candidate.exists()
+    
     def _resolve_import(self, import_name: str, current_file: Path) -> Optional[Path]:
         """Resolve import to file path."""
         # Handle relative imports
         if import_name.startswith('.'):
             base_dir = current_file.parent
+            # Strip leading dots and last component (which is the symbol name)
             parts = import_name.lstrip('.').split('.')
-            return base_dir / '/'.join(parts) + '.py'
+            
+            if len(parts) > 1:
+                # e.g., .core.context.ContextBuilder -> try core/context.py
+                module_parts = parts[:-1]  # All but last
+                candidate = base_dir / Path('/'.join(module_parts)).with_suffix('.py')
+                if candidate.exists():
+                    return candidate
+                
+                # Try as package
+                candidate = base_dir / '/'.join(module_parts) / '__init__.py'
+                if candidate.exists():
+                    return candidate
+            
+            return None
         
         # Handle absolute imports (simplified)
         parts = import_name.split('.')
