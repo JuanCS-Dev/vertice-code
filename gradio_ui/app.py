@@ -17,7 +17,7 @@ from components.output_display import create_output_display
 from components.status_bar import create_status_bar
 
 # Import backend integration
-from qwen_dev_cli.shell import InteractiveShell
+from backend.cli_bridge import CLIBridge
 
 
 class QwenGradioUI:
@@ -25,16 +25,20 @@ class QwenGradioUI:
     
     def __init__(self):
         """Initialize UI with CLI backend."""
-        self.shell = InteractiveShell()
+        self.cli = CLIBridge()
         self.theme = create_glass_theme()
         
     def build(self) -> gr.Blocks:
         """Build the complete UI with glassmorphism."""
         
+        # Load custom CSS
+        css_file = Path(__file__).parent / "styles" / "main.css"
+        custom_css = css_file.read_text() if css_file.exists() else ""
+        
         with gr.Blocks(
             theme=self.theme,
             title="🚀 QWEN-DEV-CLI",
-            css_paths=[Path(__file__).parent / "styles" / "main.css"],
+            css=custom_css,
             head=self._get_custom_head()
         ) as demo:
             
@@ -97,12 +101,16 @@ class QwenGradioUI:
         """Wire up interactive behavior."""
         
         def process_command(command: str):
-            """Process user command and stream output."""
+            """Process user command via CLI backend."""
             if not command.strip():
                 return "", "❌ Empty command"
             
-            # Execute command (no async for now)
-            result = f"✅ Executed: {command}\n🎉 Done!"
+            # Execute via CLI bridge (streaming)
+            output_chunks = []
+            for chunk in self.cli.execute_command(command):
+                output_chunks.append(chunk)
+            
+            result = "\n".join(output_chunks)
             return "", result
         
         # Submit on Enter or button click
@@ -112,14 +120,7 @@ class QwenGradioUI:
             outputs=[command_input, output_display],
         )
     
-    async def _execute_command(self, command: str):
-        """Execute command via CLI backend with streaming."""
-        # TODO: Connect to InteractiveShell
-        # For now, mock streaming
-        yield "⏳ Processing..."
-        yield f"✅ Executed: {command}"
-        yield "🎉 Done!"
-    
+
     def launch(self, **kwargs):
         """Launch the Gradio app."""
         demo = self.build()
