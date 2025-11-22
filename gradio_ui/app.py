@@ -503,7 +503,7 @@ def create_ui() -> tuple[gr.Blocks, str, str]:
             fn=lambda: "", outputs=[msg_input]
         )
         
-        # Auto-refresh telemetry every 2 seconds
+        # Auto-refresh telemetry every 5 seconds (avoid DDoS)
         def refresh_metrics():
             metrics = _monitor.get_metrics()
             return (
@@ -513,7 +513,7 @@ def create_ui() -> tuple[gr.Blocks, str, str]:
                 render_terminal_logs(metrics["logs"])
             )
         
-        timer = gr.Timer(2)
+        timer = gr.Timer(5)  # Increased to 5s to reduce re-render spam
         timer.tick(
             refresh_metrics,
             outputs=[gauge_html, chart_html, status_html, log_display]
@@ -536,7 +536,11 @@ if __name__ == "__main__":
     print(f"🔧 Backend: {_bridge.backend_label}")
     
     # CRITICAL: Enable queue before launch (required for gr.Timer and streaming)
-    demo.queue(max_size=10)
+    # Increased concurrency to handle Timer ticks without DDoS errors
+    demo.queue(
+        max_size=20,
+        default_concurrency_limit=10
+    )
     
     # Gradio 6: theme and css go in launch()
     demo.launch(
