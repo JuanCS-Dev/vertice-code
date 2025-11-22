@@ -33,6 +33,7 @@ from qwen_dev_cli.agents.refactorer import RefactorerAgent
 from qwen_dev_cli.agents.reviewer import ReviewerAgent
 from qwen_dev_cli.agents.security import SecurityAgent
 from qwen_dev_cli.agents.performance import PerformanceAgent
+from qwen_dev_cli.agents.testing import TestingAgent
 
 __all__ = [
     "AgentCapability",
@@ -47,4 +48,5 @@ __all__ = [
     "ReviewerAgent",
     "SecurityAgent",
     "PerformanceAgent",
+    "TestingAgent",
 ]

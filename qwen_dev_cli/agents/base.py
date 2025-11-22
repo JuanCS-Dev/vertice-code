@@ -38,6 +38,8 @@ class AgentRole(str, Enum):
     REVIEWER = "reviewer"  # Quality validation, READ_ONLY + GIT
     SECURITY = "security"  # Vulnerability scanning, READ_ONLY + BASH_EXEC
     PERFORMANCE = "performance"  # Performance analysis, READ_ONLY + BASH_EXEC
+    TESTING = "testing"  # Test generation and quality, READ_ONLY + BASH_EXEC
+    REFACTOR = "refactor"  # Code quality analysis, READ_ONLY + BASH_EXEC
 
 
 class AgentCapability(str, Enum):
