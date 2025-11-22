@@ -52,6 +52,13 @@ class AgentCapability(str, Enum):
     DESIGN = "design"  # Planning only, no execution
 
 
+class TaskStatus(str, Enum):
+    """Task execution status."""
+    PENDING = "pending"
+    SUCCESS = "success"
+    FAILED = "failed"
+
+
 class AgentTask(BaseModel):
     """Task definition passed to an agent.
     
@@ -72,6 +79,17 @@ class AgentTask(BaseModel):
     model_config = {"frozen": True}  # Immutable after creation
 
 
+# Alias for Day 3 agent tests
+class TaskContext(BaseModel):
+    """Simplified task context for Day 3 agents (alias compatible with tests)."""
+    task_id: str
+    description: str
+    working_dir: Any  # Path type
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+    
+    model_config = {"arbitrary_types_allowed": True}
+
+
 class AgentResponse(BaseModel):
     """Response returned by an agent after execution.
     
@@ -89,6 +107,15 @@ class AgentResponse(BaseModel):
     error: Optional[str] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
     timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+
+# Alias for Day 3 agent tests
+class TaskResult(BaseModel):
+    """Task result (alias compatible with tests)."""
+    task_id: str
+    status: "TaskStatus"
+    output: Dict[str, Any] = Field(default_factory=dict)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
 class CapabilityViolationError(Exception):
