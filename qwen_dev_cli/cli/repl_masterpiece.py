@@ -58,6 +58,10 @@ from .intent_detector import IntentDetector
 from qwen_dev_cli.core.llm import LLMClient
 from qwen_dev_cli.ui.command_palette import CommandCategory
 
+# Phase 2: Integration Coordinator
+from qwen_dev_cli.core.integration_coordinator import Coordinator
+from qwen_dev_cli.core.integration_types import EventType
+
 # Setup clean logging
 from qwen_dev_cli.core.logging_setup import setup_logging
 setup_logging()
@@ -194,6 +198,10 @@ class MasterpieceREPL:
         self.llm_client = LLMClient()
         self.context = ShellContext()
         self.intent_detector = IntentDetector()
+        
+        # PHASE 2: Integration Coordinator (Central Nervous System)
+        self.coordinator = Coordinator(cwd=os.getcwd())
+        console.print("[dim]✨ Integration coordinator initialized[/dim]")
         
         # TUI enhancements ✨ (já implementados!)
         try:
@@ -343,7 +351,7 @@ class MasterpieceREPL:
             enable_history_search=True,
             complete_while_typing=True,
             complete_in_thread=True,
-            mouse_support=True,
+            mouse_support=False,  # DISABLED: Allow terminal mouse (copy/paste/select)
             placeholder="Ask anything or type / for commands...",
             style=clean_style,
             multiline=False,
@@ -855,7 +863,15 @@ class MasterpieceREPL:
         if message != original:
             console.print(f"[dim]🔄 Context: {message}[/dim]")
 
-        # Smart tool detection
+        # PHASE 2: Try coordinator first (agent auto-routing)
+        coordinator_response = await self.coordinator.process_message(message)
+        
+        if coordinator_response:
+            # Agent handled the message
+            console.print(f"\n{coordinator_response}\n")
+            return
+
+        # Smart tool detection (fallback if no agent)
         msg_lower = message.lower()
         
         # File operations
@@ -882,7 +898,7 @@ class MasterpieceREPL:
                 await self._process_tool('/git', 'diff')
                 return
 
-        # SMART AGENT DETECTION 🧠
+        # FALLBACK: Old agent detection (kept for compatibility)
         should_use_agent, detected_agent = self.intent_detector.should_use_agent(message)
         
         if should_use_agent and detected_agent:

@@ -1,0 +1,4 @@
+#!/bin/bash
+# JuanCS Dev CLI - Clean launcher (no warnings)
+cd "$(dirname "$0")"
+python3 qwen_dev_cli/shell_enhanced.py 2>/dev/null
