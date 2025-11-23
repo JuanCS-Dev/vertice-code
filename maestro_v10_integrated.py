@@ -50,6 +50,11 @@ from qwen_dev_cli.agents.executor import (
     ExecutionMode,
     SecurityLevel
 )
+from qwen_dev_cli.agents.architect import ArchitectAgent
+from qwen_dev_cli.agents.security import SecurityAgent
+from qwen_dev_cli.agents.performance import PerformanceAgent
+from qwen_dev_cli.agents.testing import TestingAgent
+from qwen_dev_cli.agents.documentation import DocumentationAgent
 from qwen_dev_cli.agents.data_agent_production import create_data_agent
 from qwen_dev_cli.agents.devops_agent import create_devops_agent
 
@@ -98,68 +103,94 @@ class Orchestrator:
             'planner': PlannerAgent(llm_client, mcp_client),
             'reviewer': ReviewerAgent(llm_client, mcp_client),
             'refactorer': RefactorerAgent(llm_client, mcp_client, explorer),  # Pass explorer directly
+            'architect': ArchitectAgent(llm_client, mcp_client),
+            'security': SecurityAgent(llm_client, mcp_client),
+            'performance': PerformanceAgent(llm_client, mcp_client),
+            'testing': TestingAgent(llm_client, mcp_client),
+            'documentation': DocumentationAgent(llm_client, mcp_client),
             'data': create_data_agent(llm_client, mcp_client, enable_thinking=True),  # DataAgent v1.0
             'devops': create_devops_agent(llm_client, mcp_client, auto_remediate=False, policy_mode="require_approval")  # DevOpsAgent v1.0
         }
     
     def route(self, prompt: str) -> str:
-        """Intelligent routing based on keywords (Gemini 2.5 pattern)"""
+        """Intelligent routing based on keywords - Priority ordered to avoid conflicts"""
         p = prompt.lower()
 
-        # 1. System/Bash commands (SimpleExecutorAgent)
-        # Google Best Practice: Detect action-oriented queries
-        executor_keywords = [
-            # Process management
-            'process', 'running', 'kill', 'ps', 'top',
-            # File system
-            'list files', 'find', 'locate', 'disk usage', 'df',
-            # System info
-            'whoami', 'hostname', 'date', 'uptime', 'uname',
-            # Directory operations
-            'pwd', 'current directory', 'where am i',
-            # Network
-            'ping', 'curl', 'wget', 'netstat',
-            # Generic commands
-            'run', 'execute', 'command', 'bash', 'shell',
-            'show', 'display', 'get', 'check status'
-        ]
+        # PRIORITY 1: Specific multi-word patterns (most specific first)
+        if any(w in p for w in ['unit test', 'integration test', 'test case', 'write test', 'generate test']):
+            return 'testing'
 
+        # Check for dockerfile BEFORE documentation (avoid "generate doc" conflict)
+        if 'dockerfile' in p or 'docker file' in p:
+            return 'devops'
+
+        if any(w in p for w in ['write doc', 'api doc', 'docstring', 'readme']):
+            return 'documentation'
+
+        # PRIORITY 2: Domain-specific operations (high specificity)
+        if any(w in p for w in ['database', 'schema', 'query', 'sql', 'migration',
+                                 'table', 'index', 'postgres', 'mysql', 'db']):
+            return 'data'
+
+        if any(w in p for w in ['deploy', 'deployment', 'docker', 'dockerfile', 'container',
+                                 'kubernetes', 'k8s', 'pod', 'helm', 'argocd', 'ci/cd',
+                                 'pipeline', 'terraform', 'iac', 'infrastructure', 'incident', 'outage']):
+            return 'devops'
+
+        # PRIORITY 3: Code operations (medium specificity)
+        if any(w in p for w in ['review', 'audit', 'grade', 'lint']):
+            return 'reviewer'
+
+        if any(w in p for w in ['refactor', 'rename', 'extract', 'inline', 'modernize', 'clean up']):
+            return 'refactorer'
+
+        if any(w in p for w in ['explore', 'map', 'graph', 'blast radius', 'dependencies', 'structure']):
+            return 'explorer'
+
+        # PRIORITY 4: Design & Analysis (medium specificity)
+        # Check architecture BEFORE document catch-all (avoid "document architecture" conflict)
+        if any(w in p for w in ['architecture', 'system design', 'architect', 'uml', 'diagram', 'component']):
+            return 'architect'
+
+        # Check security with expanded keywords (check, find, vulnerabilities)
+        if any(w in p for w in ['security', 'vulnerability', 'vulnerabilities', 'exploit', 'cve', 'owasp',
+                                 'injection', 'xss', 'csrf', 'penetration', 'check for', 'find security']):
+            return 'security'
+
+        if any(w in p for w in ['performance', 'bottleneck', 'profil', 'benchmark',
+                                 'slow', 'latency', 'throughput']):
+            return 'performance'
+
+        # PRIORITY 5: Planning (lower specificity - but NOT if deployment)
+        if any(w in p for w in ['break down', 'strategy', 'roadmap', 'sop', 'how to']):
+            return 'planner'
+
+        # Check plan (generic keyword - low priority)
+        if 'plan' in p and 'deploy' not in p:
+            return 'planner'
+
+        # PRIORITY 6: Catch-all single keywords (lowest priority - checked LAST)
+        # Check test BEFORE security (avoid "test security" routing to security)
+        if 'test' in p:
+            return 'testing'
+
+        # Check document AFTER architect (avoid "document architecture" conflict)
+        if 'document' in p or 'comment' in p or 'explain' in p:
+            return 'documentation'
+
+        # PRIORITY 6: Bash/System commands (specific commands only)
+        executor_keywords = [
+            'ls', 'pwd', 'cd', 'mkdir', 'rm', 'cp', 'mv',  # File ops
+            'ps', 'kill', 'top', 'htop',  # Process
+            'curl', 'wget', 'ping', 'netstat',  # Network
+            'git status', 'git diff', 'git log',  # Git
+            'run', 'execute', 'command', 'bash', 'shell',  # Generic execution
+        ]
         if any(keyword in p for keyword in executor_keywords):
             return 'executor'
 
-        # 2. DevOps Operations (DevOpsAgent) - Infrastructure, K8s, Docker, CI/CD
-        if any(w in p for w in ['deploy', 'deployment', 'docker', 'dockerfile', 'container', 'kubernetes', 'k8s',
-                                 'pod', 'service', 'helm', 'argocd', 'ci/cd', 'pipeline', 'github actions',
-                                 'gitlab ci', 'terraform', 'iac', 'infrastructure', 'incident', 'outage',
-                                 'health check', 'rollback', 'canary', 'blue-green']):
-            return 'devops'
-
-        # 3. Database Operations (DataAgent) - Check BEFORE review/plan to avoid conflicts
-        if any(w in p for w in ['database', 'schema', 'query', 'sql', 'migration', 'optimize query',
-                                 'table', 'index', 'postgres', 'mysql', 'db', 'analyze schema',
-                                 'plan migration', 'db performance', 'analyze table']):
-            return 'data'
-
-        # 3. Code Review (ReviewerAgent)
-        elif any(w in p for w in ['review', 'audit', 'grade', 'lint']):
-            return 'reviewer'
-
-        # 4. Planning/Decomposition (PlannerAgent)
-        elif any(w in p for w in ['plan', 'break down', 'strategy', 'roadmap', 'sop', 'how to']):
-            return 'planner'
-
-        # 5. Code Refactoring (RefactorerAgent)
-        elif any(w in p for w in ['refactor', 'rename', 'extract', 'inline', 'modernize', 'clean up']):
-            return 'refactorer'
-
-        # 6. Codebase Exploration (ExplorerAgent)
-        elif any(w in p for w in ['explore', 'map', 'graph', 'blast radius', 'dependencies', 'structure']):
-            return 'explorer'
-
-        # Default: Simple executor for ambiguous queries
-        # Anthropic Best Practice: Prefer lightweight agents over complex planning
-        else:
-            return 'executor'
+        # Default: Executor for everything else
+        return 'executor'
     
     async def execute(self, prompt: str, context: Dict = None) -> AgentResponse:
         """Route and execute with real agents"""
@@ -233,6 +264,16 @@ class Renderer:
             self._render_refactor(response)
         elif agent_name == 'explorer':
             self._render_explorer(response)
+        elif agent_name == 'architect':
+            self._render_architect(response)
+        elif agent_name == 'security':
+            self._render_security(response)
+        elif agent_name == 'performance':
+            self._render_performance(response)
+        elif agent_name == 'testing':
+            self._render_testing(response)
+        elif agent_name == 'documentation':
+            self._render_documentation(response)
         elif agent_name == 'data':
             self._render_data(response)
         elif agent_name == 'devops':
@@ -396,7 +437,32 @@ class Renderer:
                 self.c.print(json.dumps(data, indent=2))
         else:
             self.c.print(str(data))
-    
+
+    def _render_architect(self, res: AgentResponse):
+        """Render ArchitectAgent output"""
+        self.c.print("\n[bold cyan]🏛️  ARCHITECTURE DESIGN[/bold cyan]\n")
+        self._render_generic(res)
+
+    def _render_security(self, res: AgentResponse):
+        """Render SecurityAgent output"""
+        self.c.print("\n[bold red]🔒 SECURITY ANALYSIS[/bold red]\n")
+        self._render_generic(res)
+
+    def _render_performance(self, res: AgentResponse):
+        """Render PerformanceAgent output"""
+        self.c.print("\n[bold yellow]⚡ PERFORMANCE OPTIMIZATION[/bold yellow]\n")
+        self._render_generic(res)
+
+    def _render_testing(self, res: AgentResponse):
+        """Render TestingAgent output"""
+        self.c.print("\n[bold green]🧪 TEST GENERATION[/bold green]\n")
+        self._render_generic(res)
+
+    def _render_documentation(self, res: AgentResponse):
+        """Render DocumentationAgent output"""
+        self.c.print("\n[bold blue]📚 DOCUMENTATION[/bold blue]\n")
+        self._render_generic(res)
+
     def _render_data(self, res: AgentResponse):
         """Render DataAgent v1.0 output"""
         data = res.data
