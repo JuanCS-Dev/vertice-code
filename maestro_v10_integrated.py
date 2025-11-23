@@ -50,6 +50,7 @@ from qwen_dev_cli.agents.executor import (
     ExecutionMode,
     SecurityLevel
 )
+from qwen_dev_cli.agents.data_agent_production import create_data_agent
 
 # Import TUI Components (30 FPS optimized)
 from qwen_dev_cli.tui.maestro_layout import MaestroLayout, CyberpunkHeader
@@ -95,7 +96,8 @@ class Orchestrator:
             'explorer': explorer,
             'planner': PlannerAgent(llm_client, mcp_client),
             'reviewer': ReviewerAgent(llm_client, mcp_client),
-            'refactorer': RefactorerAgent(llm_client, mcp_client, explorer)  # Pass explorer directly
+            'refactorer': RefactorerAgent(llm_client, mcp_client, explorer),  # Pass explorer directly
+            'data': create_data_agent(llm_client, mcp_client, enable_thinking=True)  # DataAgent v1.0
         }
     
     def route(self, prompt: str) -> str:
@@ -123,19 +125,25 @@ class Orchestrator:
         if any(keyword in p for keyword in executor_keywords):
             return 'executor'
 
-        # 2. Code Review (ReviewerAgent)
-        elif any(w in p for w in ['review', 'audit', 'analyze', 'grade', 'lint']):
+        # 2. Database Operations (DataAgent) - Check BEFORE review/plan to avoid conflicts
+        if any(w in p for w in ['database', 'schema', 'query', 'sql', 'migration', 'optimize query',
+                                 'table', 'index', 'postgres', 'mysql', 'db', 'analyze schema',
+                                 'plan migration', 'db performance', 'analyze table']):
+            return 'data'
+
+        # 3. Code Review (ReviewerAgent)
+        elif any(w in p for w in ['review', 'audit', 'grade', 'lint']):
             return 'reviewer'
 
-        # 3. Planning/Decomposition (PlannerAgent)
+        # 4. Planning/Decomposition (PlannerAgent)
         elif any(w in p for w in ['plan', 'break down', 'strategy', 'roadmap', 'sop', 'how to']):
             return 'planner'
 
-        # 4. Code Refactoring (RefactorerAgent)
+        # 5. Code Refactoring (RefactorerAgent)
         elif any(w in p for w in ['refactor', 'rename', 'extract', 'inline', 'modernize', 'clean up']):
             return 'refactorer'
 
-        # 5. Codebase Exploration (ExplorerAgent)
+        # 6. Codebase Exploration (ExplorerAgent)
         elif any(w in p for w in ['explore', 'map', 'graph', 'blast radius', 'dependencies', 'structure']):
             return 'explorer'
 
@@ -216,6 +224,8 @@ class Renderer:
             self._render_refactor(response)
         elif agent_name == 'explorer':
             self._render_explorer(response)
+        elif agent_name == 'data':
+            self._render_data(response)
         else:
             self._render_generic(response)
     
@@ -376,6 +386,85 @@ class Renderer:
         else:
             self.c.print(str(data))
     
+    def _render_data(self, res: AgentResponse):
+        """Render DataAgent v1.0 output"""
+        data = res.data
+
+        if not isinstance(data, dict):
+            self.c.print(Markdown(str(data)))
+            return
+
+        # Header
+        self.c.print("\n[bold cyan]🗄️  DATABASE ANALYSIS[/bold cyan]\n")
+
+        # Response
+        response_text = data.get('response', '')
+        if response_text:
+            self.c.print(Markdown(response_text))
+            self.c.print()
+
+        # Schema issues (if present)
+        if 'schema_issues' in data:
+            issues = data['schema_issues']
+            if issues:
+                self.c.print("[bold yellow]⚠️  Schema Issues Found:[/bold yellow]")
+                for issue in issues[:5]:  # Show top 5
+                    severity_icon = {
+                        'critical': '🔴',
+                        'high': '🟠',
+                        'medium': '🟡',
+                        'low': '🟢',
+                    }.get(issue.get('severity', 'medium'), '⚪')
+
+                    desc = issue.get('description', 'No description')
+                    rec = issue.get('recommendation', '')
+
+                    self.c.print(f"  {severity_icon} {desc}")
+                    if rec:
+                        self.c.print(f"     💡 {rec}")
+                self.c.print()
+
+        # Query optimization (if present)
+        if 'optimization' in data:
+            opt = data['optimization']
+            improvement = opt.get('improvement_percent', 0)
+            confidence = opt.get('confidence_score', 0)
+
+            self.c.print(f"[bold green]⚡ Query Optimization:[/bold green]")
+            self.c.print(f"  Improvement: [bold]{improvement}%[/bold]")
+            self.c.print(f"  Confidence: {confidence:.0%}")
+
+            if 'required_indexes' in opt:
+                indexes = opt['required_indexes']
+                if indexes:
+                    self.c.print(f"  Indexes needed: {', '.join(indexes)}")
+            self.c.print()
+
+        # Migration plan (if present)
+        if 'migration' in data:
+            migration = data['migration']
+            risk = migration.get('risk_level', 'medium')
+            downtime = migration.get('estimated_downtime_seconds', 0)
+            online = migration.get('can_run_online', False)
+
+            risk_icon = {
+                'critical': '🔴',
+                'high': '🟠',
+                'medium': '🟡',
+                'low': '🟢',
+            }.get(risk, '⚪')
+
+            self.c.print(f"[bold blue]🏗️  Migration Plan:[/bold blue]")
+            self.c.print(f"  {risk_icon} Risk: {risk.upper()}")
+            self.c.print(f"  ⏱️  Downtime: {downtime}s")
+            self.c.print(f"  {'✅' if online else '❌'} Can run online: {online}")
+            self.c.print()
+
+        # Thinking trace (if present)
+        if res.reasoning and res.reasoning != "Direct generation (thinking disabled)":
+            self.c.print("[dim]💭 Reasoning:[/dim]")
+            self.c.print(f"[dim]{res.reasoning[:200]}...[/dim]\n")
+
     def _render_generic(self, res: AgentResponse):
         """Generic renderer for unknown responses"""
         if isinstance(res.data, str):
@@ -384,7 +473,7 @@ class Renderer:
             self.c.print(json.dumps(res.data, indent=2))
         else:
             self.c.print(str(res.data))
-        
+
         if res.reasoning:
             self.c.print(f"\n[dim]{res.reasoning}[/dim]\n")
 
@@ -658,6 +747,7 @@ class Shell:
   /clear, /c           clear screen
   /help, /h            show this help
   /agents              list available agents
+  /data                quick access to DataAgent
   /commands [query]    fuzzy search commands
   /permissions         manage command permissions
 
@@ -668,19 +758,54 @@ class Shell:
   "plan..."        → Planner v5.0 (GOAP planning)
   "refactor..."    → Refactorer v8.0 (Transactional surgery)
   "explore..."     → Explorer (Knowledge graph)
-  "run/exec..."    → SimpleExecutor (bash commands)
+  "database..."    → DataAgent v1.0 (Schema + Query optimization)
+  "run/exec..."    → Executor (bash commands)
 
 [bold]Examples:[/bold]
   review qwen_dev_cli/agents/base.py
   plan implement user authentication
   refactor extract method from process_payment
   explore map the codebase
+  analyze schema for users table
+  optimize query SELECT * FROM orders
   list running processes""",
                 title="💡 Help",
                 border_style="blue"
             )
             self.c.print()
             self.c.print(help_panel)
+            self.c.print()
+            return True
+
+        if c == '/data':
+            # Quick access to DataAgent with info panel
+            info_panel = Panel(
+                """[bold cyan]🗄️  DataAgent v1.0 - Database Operations[/bold cyan]
+
+[bold]Capabilities:[/bold]
+  • Schema Analysis (detect issues, recommend fixes)
+  • Query Optimization (70%+ improvements)
+  • Migration Planning (risk assessment + rollback)
+  • Extended Thinking (5000 token budget)
+
+[bold]Usage Examples:[/bold]
+  analyze schema for users table
+  optimize query SELECT * FROM orders WHERE status='pending'
+  plan migration to add email_verified column
+  review database indexes
+
+[bold]Quick Commands:[/bold]
+  database help              Show database-specific help
+  schema issues              Analyze current schema
+  query performance          Get query optimization tips
+
+[dim]💡 Tip: DataAgent automatically activates for database keywords
+(schema, query, sql, migration, table, index, etc.)[/dim]""",
+                title="🗄️  DataAgent Quick Reference",
+                border_style="cyan"
+            )
+            self.c.print()
+            self.c.print(info_panel)
             self.c.print()
             return True
 
@@ -740,6 +865,12 @@ class Shell:
             explorer = tree.add("[bold blue]🗺️ Explorer[/bold blue]")
             explorer.add("[dim]Knowledge graph construction[/dim]")
             explorer.add("[dim]Blast radius analysis[/dim]")
+
+            data = tree.add("[bold cyan]🗄️ DataAgent v1.0[/bold cyan]")
+            data.add("[dim]Schema analysis & optimization[/dim]")
+            data.add("[dim]Query optimization (70%+ improvements)[/dim]")
+            data.add("[dim]Migration planning with rollback[/dim]")
+            data.add("[dim]Extended thinking (5000 token budget)[/dim]")
 
             self.c.print()
             self.c.print(tree)
