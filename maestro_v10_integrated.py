@@ -45,7 +45,7 @@ from qwen_dev_cli.agents.planner import PlannerAgent
 from qwen_dev_cli.agents.reviewer import ReviewerAgent
 from qwen_dev_cli.agents.refactorer import RefactorerAgent
 from qwen_dev_cli.agents.explorer import ExplorerAgent
-from qwen_dev_cli.agents.executor_nextgen import (
+from qwen_dev_cli.agents.executor import (
     NextGenExecutorAgent,
     ExecutionMode,
     SecurityLevel
