@@ -21,6 +21,13 @@ import time
 import random
 import logging
 import os
+import warnings
+
+# Silence gRPC/glog warnings at SDK level
+os.environ.setdefault('GRPC_VERBOSITY', 'ERROR')
+os.environ.setdefault('GLOG_minloglevel', '3')
+warnings.filterwarnings('ignore', message='.*ALTS.*')
+
 from typing import AsyncGenerator, Optional, Dict, Any, List
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -228,8 +235,9 @@ class LLMClient:
         self._ollama_client = None
         
         # Provider priority for failover (Gemini first - most powerful)
+        # GEMINI FIRST ALWAYS - fastest and best quality
         self.provider_priority = ["gemini", "nebius", "hf", "ollama"]
-        self.default_provider = "auto"
+        self.default_provider = "gemini"  # FORCE GEMINI, not auto
 
     @property
     def hf_client(self):
@@ -364,18 +372,19 @@ class LLMClient:
         raise RuntimeError(f"All providers failed. Last error: {last_error}")
     
     def _get_failover_providers(self) -> List[str]:
-        """Get list of providers for failover."""
+        """Get list of providers for failover - GEMINI FIRST ALWAYS."""
         available = []
         
-        # Check which providers are available
-        if self.ollama_client:
-            available.append("ollama")
+        # FORCE GEMINI FIRST (fastest and most powerful)
         if self.gemini_client:
             available.append("gemini")
         if self.nebius_client:
             available.append("nebius")
         if self.hf_client:
             available.append("hf")
+        # Ollama LAST (slowest)
+        if self.ollama_client:
+            available.append("ollama")
         
         # Sort by success rate if telemetry enabled
         if self.metrics and self.metrics.provider_stats:
@@ -468,10 +477,12 @@ class LLMClient:
                 
             except Exception as e:
                 last_error = e
-                logger.warning(f"❌ Stream error: {str(e)[:100]} (attempt {attempt + 1}/{self.max_retries + 1})")
+                # SILENT MODE: Apenas log debug para erros intermediários
+                logger.debug(f"Provider {provider} failed: {str(e)[:100]} (attempt {attempt + 1})")
                 
                 if not self._should_retry(e):
-                    logger.error(f"Non-retryable error: {type(e).__name__}")
+                    # Não mostrar erro se há fallback disponível
+                    logger.debug(f"Non-retryable error: {type(e).__name__}")
                     if self.metrics:
                         self.metrics.record_failure(provider)
                     if self.circuit_breaker:

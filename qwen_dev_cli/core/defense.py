@@ -114,7 +114,8 @@ class PromptInjectionDefender:
         is_malicious = max_confidence >= 0.75
         
         # Sanitize input
-        sanitized = self._sanitize(user_input)
+        from ..security_hardening import PromptSanitiser
+        sanitized = PromptSanitiser.sanitise(user_input)
         
         reason = None
         if is_malicious:

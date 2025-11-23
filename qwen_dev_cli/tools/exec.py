@@ -41,9 +41,9 @@ class BashCommandTool(ValidatedTool):
     async def _execute_validated(self, command: str, cwd: Optional[str] = None, timeout: int = 30) -> ToolResult:
         """Execute bash command."""
         try:
-            # Check for dangerous commands
-            dangerous = ['rm -rf /', 'chmod -R 777', 'dd if=', ':(){:|:&};:']
-            if any(d in command for d in dangerous):
+            # Validate command using CommandValidator
+            from ..security_hardening import CommandValidator
+            if not CommandValidator.validate(command):
                 return ToolResult(
                     success=False,
                     error=f"Dangerous command blocked: {command}"

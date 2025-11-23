@@ -315,13 +315,16 @@ def config_show():
 
 @app.command()
 def shell():
-    """Start interactive shell with tool-based architecture."""
-    from .shell import InteractiveShell
+    """Start interactive AI shell (SIMPLE VERSION)."""
+    from .shell_simple import SimpleShell
+    import asyncio
+    import os
     
-    console.print("[cyan]Starting interactive shell...[/cyan]")
+    print("✓ Loaded .env from", os.getenv("ENV_FILE", ".env"))
+    print("Starting simple shell...")
     
     try:
-        shell_instance = InteractiveShell()
+        shell_instance = SimpleShell()
         asyncio.run(shell_instance.run())
     except KeyboardInterrupt:
         console.print("\n[yellow]Shell interrupted[/yellow]")

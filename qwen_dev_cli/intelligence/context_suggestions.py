@@ -47,14 +47,8 @@ class ContextSuggestionEngine:
     """
     
     def __init__(self, project_root: Path, indexer: Optional[SemanticIndexer] = None):
-        """
-        Initialize suggestion engine.
-        
-        Args:
-            project_root: Project root directory
-            indexer: Optional semantic indexer for symbol lookup
-        """
-        self.project_root = project_root.resolve()
+        """Initialize context suggestion engine."""
+        self.project_root = Path(project_root).resolve() if isinstance(project_root, str) else project_root.resolve()
         self.indexer = indexer or SemanticIndexer(project_root)
         
     def analyze_file_context(self, file_path: Path) -> Dict[str, any]:

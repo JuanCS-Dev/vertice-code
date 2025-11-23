@@ -54,9 +54,10 @@ Issues = "https://github.com/JuanCS-Dev/qwen-dev-cli/issues"
 
 [project.scripts]
 qwen-dev = "qwen_dev_cli.__main__:main"
-neuroshell-code = "qwen_dev_cli.shell:main"
+neuroshell-code = "qwen_dev_cli.shell_simple:main"
 neuroshell-fast = "qwen_dev_cli.shell_fast:main"
 neuroshell = "qwen_dev_cli.shell_fast:main"
+qwen = "qwen_dev_cli.__main__:main"
 
 [tool.black]
 line-length = 100

@@ -157,8 +157,10 @@ class ConfigLoader:
         Returns:
             True if command is dangerous
         """
+        from ..security_hardening import normalise_command
+        norm_cmd = normalise_command(command)
         for pattern in self.config.safety.dangerous_commands:
-            if pattern in command:
+            if pattern in norm_cmd:
                 return True
         return False
     

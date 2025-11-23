@@ -201,6 +201,10 @@ class MasterpieceREPL:
         
         # PHASE 2: Integration Coordinator (Central Nervous System)
         self.coordinator = Coordinator(cwd=os.getcwd())
+        
+        # Register agents (Phase 2.2)
+        self._register_agents()
+        
         console.print("[dim]✨ Integration coordinator initialized[/dim]")
         
         # TUI enhancements ✨ (já implementados!)
@@ -234,6 +238,180 @@ class MasterpieceREPL:
         # Commands
         self.commands = self._load_commands()
         self.session = self._create_session()
+    
+    def _format_agent_output(self, agent_name: str, response, intent_type) -> str:
+        """Format agent output beautifully (human-readable).
+        
+        Boris Cherny: "Code is read 10x more than written. So is output."
+        """
+        from rich.text import Text
+        from rich.panel import Panel
+        from rich import box
+        
+        # Handle errors
+        if not response.success:
+            return f"❌ **{agent_name} Failed**\n\n{response.error}"
+        
+        # Special formatting for ReviewerAgent v3.0
+        if agent_name == "ReviewerAgent" and isinstance(response.data, dict):
+            # Extract report (agent wraps it in 'report' key)
+            data = response.data.get('report', response.data)
+            
+            # Header
+            score = data.get('score', 0)
+            approved = data.get('approved', False)
+            metrics = data.get('metrics', [])
+            
+            lines = [
+                "# 🔍 CODE REVIEW COMPLETE (v3.0 - McCabe Analysis)\n",
+                f"**Score:** {score}/100",
+                f"**Status:** {'✅ APPROVED for merge' if approved else '❌ CHANGES REQUIRED'}\n",
+            ]
+            
+            # Function Metrics
+            if metrics:
+                lines.append("## 📊 Function Complexity Analysis\n")
+                for m in metrics[:10]:  # Show top 10
+                    lines.append(f"- `{m.get('function_name')}`: Complexity={m.get('complexity')}, Args={m.get('args_count')}, LOC={m.get('loc')}")
+                if len(metrics) > 10:
+                    lines.append(f"  ... and {len(metrics) - 10} more functions")
+                lines.append("")
+            
+            # Issues (new structure)
+            issues = data.get('issues', [])
+            if issues:
+                # Group by severity
+                critical = [i for i in issues if i.get('severity') == 'CRITICAL']
+                high = [i for i in issues if i.get('severity') == 'HIGH']
+                medium = [i for i in issues if i.get('severity') == 'MEDIUM']
+                
+                if critical:
+                    lines.append("## 🚨 CRITICAL Issues\n")
+                    for issue in critical:
+                        lines.append(f"- **{issue.get('file')}:{issue.get('line')}** [{issue.get('category')}]")
+                        lines.append(f"  {issue.get('message')}")
+                        if issue.get('suggestion'):
+                            lines.append(f"  💡 *{issue.get('suggestion')}*")
+                    lines.append("")
+                
+                if high:
+                    lines.append("## ⚠️ HIGH Priority\n")
+                    for issue in high:
+                        lines.append(f"- **{issue.get('file')}:{issue.get('line')}** - {issue.get('message')}")
+                    lines.append("")
+                
+                if medium:
+                    lines.append("## 📝 Medium Priority\n")
+                    for issue in medium:
+                        lines.append(f"- {issue.get('file')}:{issue.get('line')} - {issue.get('message')}")
+                    lines.append("")
+            
+            # Summary
+            summary = data.get('summary', '')
+            if summary:
+                lines.append("## Summary\n")
+                lines.append(summary)
+                lines.append("")
+            
+            # Next Steps
+            next_steps = data.get('next_steps', [])
+            if next_steps:
+                lines.append("## 🎯 Next Steps\n")
+                for step in next_steps:
+                    lines.append(f"- {step}")
+            
+            return "\n".join(lines)
+        
+        # Generic formatting for other agents
+        if isinstance(response.data, dict):
+            # Try to extract meaningful info
+            summary = response.data.get('summary', response.data.get('result', ''))
+            if summary:
+                return f"**{agent_name} Result:**\n\n{summary}"
+            
+            # Fallback: format dict nicely
+            import json
+            formatted = json.dumps(response.data, indent=2)
+            return f"**{agent_name} Result:**\n\n```json\n{formatted}\n```"
+        
+        # Plain string output
+        return str(response.data)
+    
+    def _register_agents(self):
+        """Register all agents with coordinator (Phase 2.2).
+        
+        Creates adapter to convert between agent.execute() and coordinator.invoke().
+        """
+        from qwen_dev_cli.core.integration_types import IntentType, AgentResponse
+        from qwen_dev_cli.agents.base import AgentTask
+        
+        # Agent adapter: convert execute(AgentTask) → invoke(request, context)
+        async def make_agent_adapter(agent_class, intent_type):
+            """Create adapter for agent."""
+            # Initialize agent with required dependencies
+            agent_instance = agent_class(
+                llm_client=self.llm_client,
+                mcp_client=None  # Optional for now
+            )
+            
+            async def adapter_invoke(request: str, context: dict) -> AgentResponse:
+                """Adapt agent.execute() to coordinator protocol."""
+                import re
+                
+                # Extract file paths from request (e.g., "review file.py")
+                file_matches = re.findall(r'[\w\-./]+\.[\w]+', request)
+                
+                # Enrich context with extracted files
+                enriched_context = dict(context) if context else {}
+                if file_matches:
+                    enriched_context['files'] = file_matches
+                    enriched_context['target_files'] = file_matches  # Agent might use this
+                
+                # Create AgentTask from request
+                task = AgentTask(
+                    request=request,
+                    context=enriched_context,
+                    session_id="shell_session"
+                )
+                
+                # Execute agent
+                response = await agent_instance.execute(task)
+                
+                # Format output beautifully (Boris Cherny: UX matters)
+                output = self._format_agent_output(
+                    agent_class.__name__,
+                    response,
+                    intent_type
+                )
+                
+                return {
+                    "success": response.success,
+                    "output": output,
+                    "metadata": response.metadata,
+                    "execution_time_ms": 0.0,
+                    "tokens_used": None
+                }
+            
+            return adapter_invoke
+        
+        # Register ReviewerAgent only (Phase 2.2 - incremental)
+        try:
+            reviewer_adapter = asyncio.run(make_agent_adapter(ReviewerAgent, IntentType.REVIEW))
+            
+            # Wrap in a class that has invoke method (protocol compliance)
+            class AgentWrapper:
+                def __init__(self, invoke_func):
+                    self.invoke = invoke_func
+            
+            self.coordinator.register_agent(
+                IntentType.REVIEW,
+                AgentWrapper(reviewer_adapter)
+            )
+            
+            console.print("[dim]  → ReviewerAgent registered[/dim]")
+            
+        except Exception as e:
+            console.print(f"[yellow]⚠️  Agent registration failed: {e}[/yellow]")
 
     def _load_commands(self) -> Dict[str, Dict]:
         """Load commands with rich metadata."""
@@ -267,6 +445,18 @@ class MasterpieceREPL:
                 "description": "Show session status",
                 "category": CommandCategory.SYSTEM,
                 "handler": self._cmd_status
+            },
+            "/expand": {
+                "icon": "📖",
+                "description": "Show full last response",
+                "category": CommandCategory.SYSTEM,
+                "handler": self._cmd_expand
+            },
+            "/mode": {
+                "icon": "🎛️",
+                "description": "Change output mode (auto/full/minimal)",
+                "category": CommandCategory.SYSTEM,
+                "handler": self._cmd_mode
             },
             
             # Agents
@@ -383,6 +573,11 @@ class MasterpieceREPL:
             """Clear screen"""
             console.clear()
 
+        @bindings.add("c-o")
+        def expand_response(event):
+            """Expand last response"""
+            self._cmd_expand("")
+
         return bindings
 
     def _get_prompt(self):
@@ -431,7 +626,7 @@ class MasterpieceREPL:
                 for cmd, meta in items:
                     console.print(f"  {meta['icon']} [cyan]{cmd:14}[/cyan] [dim]{meta['description']}[/dim]")
         
-        console.print("\n[dim]💡 Ctrl+P palette • Tab autocomplete • Natural chat[/dim]\n")
+        console.print("\n[dim]💡 Ctrl+P palette • Ctrl+O expand • Tab autocomplete • Natural chat[/dim]\n")
 
     def _cmd_exit(self, _):
         """Exit with style."""
@@ -502,6 +697,8 @@ class MasterpieceREPL:
 💭 DREAM mode: [yellow]{'ON' if self.dream_mode else 'OFF'}[/yellow]
 🤖 Current agent: [magenta]{self.current_agent or 'None'}[/magenta]
 📁 Context: [blue]{len(self.context.file_history)} files[/blue]
+
+[dim]Shortcuts: Ctrl+P (palette) • Ctrl+O (expand) • Ctrl+D (dream) • Ctrl+L (clear)[/dim]
             """,
             border_style="cyan",
             title="📊 Status"

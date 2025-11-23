@@ -10,7 +10,7 @@ from typing import Optional, List, Tuple, Callable, Any, Dict
 from dataclasses import dataclass
 
 from prompt_toolkit import PromptSession
-from prompt_toolkit.completion import Completer, Completion, PathCompleter
+from prompt_toolkit.completion import Completer, Completion, PathCompleter, ThreadedCompleter
 from prompt_toolkit.document import Document
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
@@ -28,6 +28,7 @@ class InputContext:
     """Context for intelligent input processing."""
     
     cwd: str
+    env: Dict[str, str]
     recent_files: List[str]
     command_history: List[str]
     session_data: Dict[str, Any]
@@ -96,7 +97,11 @@ class IntelligentCompleter(Completer):
     
     def __init__(self, context: InputContext):
         self.context = context
-        self.path_completer = PathCompleter(expanduser=True)
+        # Use lambda to dynamically get current CWD from context (Thread Safety Fix)
+        self.path_completer = PathCompleter(
+            expanduser=True,
+            get_paths=lambda: [self.context.cwd]
+        )
         self.commands = [
             '/help', '/exit', '/clear', '/history', '/context',
             '/files', '/git', '/search', '/test', '/commit'
@@ -144,6 +149,7 @@ class EnhancedInputSession:
     ):
         self.context = context or InputContext(
             cwd=os.getcwd(),
+            env=os.environ.copy(),  # Initialize with current env
             recent_files=[],
             command_history=[],
             session_data={}
@@ -156,7 +162,7 @@ class EnhancedInputSession:
         self.session: PromptSession[str] = PromptSession(
             history=FileHistory(str(history_file)) if history_file else None,
             auto_suggest=AutoSuggestFromHistory(),
-            completer=IntelligentCompleter(self.context),
+            completer=ThreadedCompleter(IntelligentCompleter(self.context)),
             complete_while_typing=True,
             key_bindings=self.kb,
             multiline=False,  # We handle multiline manually
@@ -168,23 +174,8 @@ class EnhancedInputSession:
         self.in_multiline = False
     
     def _create_key_bindings(self) -> KeyBindings:
-        """Create custom key bindings."""
+        """Setup keyboard shortcuts (Cursor/Claude inspiration)."""
         kb = KeyBindings()
-        
-        @kb.add(Keys.ControlD)
-        def _exit(event: Any) -> None:
-            """Exit on Ctrl+D."""
-            event.app.exit(result=None)
-        
-        @kb.add(Keys.ControlC)
-        def _cancel(event: Any) -> None:
-            """Cancel current input on Ctrl+C."""
-            if self.in_multiline:
-                self.multi_line_buffer = []
-                self.in_multiline = False
-                event.app.current_buffer.reset()
-            else:
-                event.app.current_buffer.reset()
         
         @kb.add(Keys.ControlR)
         def _search(event: Any) -> None:
@@ -303,7 +294,7 @@ class EnhancedInput:
     Phase 5.2 addition for test support.
     """
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.cursor_position = 0
         self.text = ""
         self.history = []

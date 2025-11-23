@@ -81,6 +81,15 @@ class ShellSession:
     
     async def execute(self, command: str, timeout: float = 30.0) -> dict:
         """Execute command and return output."""
+        from ...security_hardening import CommandValidator
+        if not CommandValidator.validate(command):
+            return {
+                "success": False,
+                "error": f"Dangerous command blocked: {command}",
+                "session_id": self.session_id,
+                "command": command
+            }
+
         if not self._running:
             await self.start()
         

@@ -187,6 +187,7 @@ class InteractiveShell:
         history_file = Path.home() / ".qwen_shell_history"
         self.input_context = InputContext(
             cwd=str(Path.cwd()),
+            env=os.environ.copy(),
             recent_files=[],
             command_history=[],
             session_data={}
@@ -227,30 +228,24 @@ class InteractiveShell:
         # Dashboard (Integration Sprint Week 1: Day 3 - Task 1.6)
         self.dashboard = Dashboard(console=self.console, max_history=5)
         
-        # LSP Client (Week 3 Day 3 - Code Intelligence)
-        self.lsp_client = LSPClient(root_path=Path.cwd())
+        # LSP Client (Week 3 Day 3 - Code Intelligence) - LAZY LOADED
+        self._lsp_client = None
         self._lsp_initialized = False
         
-        # Semantic Indexer (MUST be initialized before ContextSuggestionEngine)
-        self.indexer = SemanticIndexer(root_path=os.getcwd())
-        self.indexer.load_cache()  # Load from cache if available
+        # Semantic Indexer - LAZY LOADED (background initialization)
+        self._indexer = None
         self._indexer_initialized = False
         self._auto_index_task = None  # Week 3 Day 1: Background indexing task
         
-        # Context Suggestions (Week 4 Day 1 - Smart Recommendations)
-        from .intelligence.context_suggestions import ContextSuggestionEngine
-        self.suggestion_engine = ContextSuggestionEngine(
-            project_root=Path.cwd(),
-            indexer=self.indexer
-        )
+        # Context Suggestions (Week 4 Day 1 - Smart Recommendations) - LAZY LOADED
+        self._suggestion_engine = None
         
         # Week 4 Day 1: Consolidated context manager (wraps ContextAwarenessEngine)
         from .core.context_manager_consolidated import ConsolidatedContextManager
         self.context_manager = ConsolidatedContextManager(max_tokens=100_000)
         
-        # Week 4 Day 2: Refactoring engine
-        from .refactoring.engine import RefactoringEngine
-        self.refactoring_engine = RefactoringEngine(project_root=Path.cwd())
+        # Week 4 Day 2: Refactoring engine - LAZY LOADED
+        self._refactoring_engine = None
         
         # Legacy session (fallback)
         self.session = PromptSession(
@@ -262,9 +257,9 @@ class InteractiveShell:
         self.registry = ToolRegistry()
         self._register_tools()
         
-        # Day 5: DevSquad Orchestration (Initialized after registry)
+        # Day 5: DevSquad Orchestration - LAZY LOADED
         self.mcp_client = MCPClient(self.registry)
-        self.squad = DevSquad(self.llm, self.mcp_client)
+        self._squad = None
         
         # Phase 4.3: Async executor for parallel tool execution
         self.async_executor = AsyncExecutor(max_parallel=5)
@@ -278,6 +273,57 @@ class InteractiveShell:
         self.file_watcher.start()
         
         # Note: Semantic indexer moved earlier (before ContextSuggestionEngine)
+    
+    # ========== LAZY-LOADED PROPERTIES (Phase 1: Startup Optimization) ==========
+    
+    @property
+    def lsp_client(self):
+        """Lazy-loaded LSP client for code intelligence."""
+        if self._lsp_client is None:
+            self._lsp_client = LSPClient(root_path=Path.cwd())
+            self.console.print("[dim]🔧 Initialized LSP client[/dim]")
+        return self._lsp_client
+    
+    @property
+    def indexer(self):
+        """Lazy-loaded semantic indexer."""
+        if self._indexer is None:
+            self._indexer = SemanticIndexer(root_path=os.getcwd())
+            self._indexer.load_cache()
+            self.console.print("[dim]📚 Loaded semantic index[/dim]")
+        return self._indexer
+    
+    @property
+    def suggestion_engine(self):
+        """Lazy-loaded context suggestion engine."""
+        if self._suggestion_engine is None:
+            from .intelligence.context_suggestions import ContextSuggestionEngine
+            self._suggestion_engine = ContextSuggestionEngine(
+                project_root=Path.cwd(),
+                indexer=self.indexer  # This will trigger indexer lazy load
+            )
+            self.console.print("[dim]💡 Initialized suggestion engine[/dim]")
+        return self._suggestion_engine
+    
+    @property
+    def refactoring_engine(self):
+        """Lazy-loaded refactoring engine."""
+        if self._refactoring_engine is None:
+            from .refactoring.engine import RefactoringEngine
+            self._refactoring_engine = RefactoringEngine(project_root=Path.cwd())
+            self.console.print("[dim]🔨 Initialized refactoring engine[/dim]")
+        return self._refactoring_engine
+    
+    @property
+    def squad(self):
+        """Lazy-loaded DevSquad orchestrator."""
+        if self._squad is None:
+            self._squad = DevSquad(self.llm, self.mcp_client)
+            self.console.print("[dim]👥 Assembled DevSquad[/dim]")
+        return self._squad
+    
+    # ========== END LAZY-LOADED PROPERTIES ==========
+    
     
     def _register_tools(self):
         """Register all available tools."""
@@ -1801,6 +1847,7 @@ Context Optimizer:
         from .intelligence.patterns import register_builtin_patterns
         register_builtin_patterns(suggestion_engine)
         
+        
         # Start background file watcher task
         async def file_watcher_loop():
             while True:
@@ -1882,15 +1929,8 @@ Context Optimizer:
                     # [THINKING] Process request with LLM
                     success = True
                     try:
-                        # Start workflow visualization (Task 1.4)
-                        self.workflow_viz.start_workflow("Process User Request")
-                        self.workflow_viz.add_step("parse_input", "Parsing user input", StepStatus.RUNNING)
-                        
+                        # Process with LLM (workflow viz disabled - fixing bugs)
                         await self._process_request_with_llm(user_input, suggestion_engine)
-                        
-                        # Complete workflow
-                        self.workflow_viz.update_step_status("parse_input", StepStatus.COMPLETED)
-                        self.workflow_viz.complete_workflow()
                         
                         # Show token usage after LLM response (Integration Sprint Week 1: Task 1.2)
                         if self.context_engine.window.current_output_tokens > 0:
@@ -2000,38 +2040,48 @@ Context Optimizer:
             working_dir=os.getcwd()
         )
         
-        # Step 1/3: Analyze request (Cursor: multi-step breakdown)
-        self.state_transition.transition_to("thinking")
-        self.workflow_viz.add_step("analyze", "Analyzing request", StepStatus.RUNNING)
-        
-        # Track operation in dashboard (Task 1.6)
-        op_id = f"llm_{int(time.time() * 1000)}"
-        operation = Operation(
-            id=op_id,
-            type="llm",
-            description=f"Process: {user_input[:40]}...",
-            status=OperationStatus.RUNNING
-        )
-        self.dashboard.add_operation(operation)
-        
-        # Animated status message (Task 1.5)
+        # Show analyzing status
         from rich.text import Text
-        text = Text("[THINKING] Step 1/3: Analyzing request...", style="cyan")
+        text = Text("💭 Analyzing request...", style="cyan")
         self.console.print(text)
         start_time = time.time()
         
-        # Get LLM suggestion
+        # PHASE 2: Stream LLM response with visual feedback (simplified - no workflow viz for now)
         try:
-            suggestion = await self._get_command_suggestion(user_input, rich_ctx)
-            self.workflow_viz.update_step_status("analyze", StepStatus.COMPLETED)
+            from .shell.streaming_integration import stream_llm_response
+            
+            # Build system prompt (fix - convert list items to strings)
+            recent_files_str = ', '.join([
+                str(f) if isinstance(f, dict) else f 
+                for f in context_dict.get('recent_files', [])[:5]
+            ])
+            
+            system_prompt = f"""You are an AI code assistant with access to the following context:
+
+Project: {os.getcwd()}
+Recent files: {recent_files_str}
+Git status: {context_dict.get('git_status', 'N/A')}
+
+Provide clear, actionable suggestions."""
+            
+            # Stream the response with visual feedback
+            suggestion = await stream_llm_response(
+                llm_client=self.llm,
+                prompt=user_input,
+                console=self.console,
+                workflow_viz=None,  # Disabled for now
+                context_engine=self.context_engine,
+                system_prompt=system_prompt
+            )
+            
         except Exception as e:
-            self.workflow_viz.update_step_status("analyze", StepStatus.FAILED)
             self.console.print(f"[red]❌ LLM failed: {e}[/red]")
-            self.console.print("[yellow]💡 Tip: Check your API key (HF_TOKEN)[/yellow]")
+            self.console.print("[yellow]💡 Tip: Check your API key (GEMINI_API_KEY or HF_TOKEN)[/yellow]")
             return
         
         elapsed = time.time() - start_time
-        self.console.print(f"[cyan][THINKING][/cyan] Step 2/3: Command ready [dim]({elapsed:.1f}s)[/dim] ✓")
+        self.console.print(f"[dim]✓ Response generated in {elapsed:.1f}s[/dim]")
+        
         
         # Step 3/3: Show suggestion (Gemini: visual hierarchy)
         self.console.print()
@@ -2289,9 +2339,83 @@ Output ONLY the command, no explanation, no markdown."""
     async def _execute_command(self, command: str) -> dict:
         """Execute shell command and return result."""
         from .tools.exec_hardened import BashCommandTool
+        import os
+        import shlex
         
+        # Handle state changes manually via Context (Thread Safety Fix)
+        cmd_parts = command.strip().split()
+        if cmd_parts:
+            # Handle 'cd'
+            if cmd_parts[0] == 'cd':
+                target_dir = cmd_parts[1] if len(cmd_parts) > 1 else os.path.expanduser('~')
+                try:
+                    # Expand user/vars using CONTEXT env
+                    # We need to manually expand vars since we aren't using os.environ
+                    # Simple expansion for $HOME and $VAR
+                    for key, val in self.enhanced_input.context.env.items():
+                        target_dir = target_dir.replace(f"${key}", val)
+                    
+                    target_dir = os.path.expanduser(target_dir)
+                    
+                    # Resolve relative paths against CONTEXT cwd
+                    if not os.path.isabs(target_dir):
+                        target_dir = os.path.abspath(os.path.join(self.enhanced_input.context.cwd, target_dir))
+                    
+                    if os.path.isdir(target_dir):
+                        # Update Context CWD (No os.chdir!)
+                        self.enhanced_input.context.cwd = target_dir
+                        self.console.print(f"[dim]📁 Changed directory to: {target_dir}[/dim]")
+                        return {'success': True, 'output': '', 'error': None}
+                    else:
+                        return {'success': False, 'error': f"cd: no such file or directory: {target_dir}"}
+                except Exception as e:
+                    return {'success': False, 'error': str(e)}
+
+            # Handle 'export'
+            if cmd_parts[0] == 'export':
+                try:
+                    # Re-parse with shlex to handle quotes
+                    parts = shlex.split(command)
+                    if len(parts) > 1:
+                        arg = parts[1]
+                        if '=' in arg:
+                            key, val = arg.split('=', 1)
+                            
+                            # Expand variables using CONTEXT env
+                            for env_key, env_val in self.enhanced_input.context.env.items():
+                                val = val.replace(f"${env_key}", env_val)
+                            
+                            # Update Context Env (No os.environ!)
+                            self.enhanced_input.context.env[key] = val
+                            self.console.print(f"[dim]✓ Exported: {key}={val}[/dim]")
+                            return {'success': True, 'output': '', 'error': None}
+                except Exception as e:
+                    return {'success': False, 'error': str(e)}
+
+            # Handle 'unset'
+            if cmd_parts[0] == 'unset':
+                try:
+                    for key in cmd_parts[1:]:
+                        self.enhanced_input.context.env.pop(key, None)
+                    return {'success': True, 'output': '', 'error': None}
+                except Exception as e:
+                    return {'success': False, 'error': str(e)}
+
+        # PHASE 2: Execute with visual feedback
         bash = BashCommandTool()
-        result = await bash.execute(command=command)
+        
+        # Show execution status (streaming indicator)
+        with self.console.status(
+            f"[cyan]⚡ Executing:[/cyan] {command[:60]}...",
+            spinner="dots"
+        ):
+            result = await bash.execute(
+                command=command, 
+                interactive=True, 
+                cwd=self.enhanced_input.context.cwd,
+                env=self.enhanced_input.context.env
+            )
+        
         
         if result.success:
             return {

@@ -2,7 +2,22 @@
 
 from typing import List, Dict, Callable, Optional
 from dataclasses import dataclass
+from enum import Enum
 import re
+
+
+class CommandCategory(Enum):
+    """Command categories."""
+    AGENT = "agent"
+    SYSTEM = "system"
+    HELP = "help"
+    UI = "ui"
+    TOOL = "tool"
+    EDIT = "edit"
+    CONTEXT = "context"
+    SESSION = "session"
+    TIMELINE = "timeline"
+    ACCESSIBILITY = "accessibility"
 
 
 @dataclass

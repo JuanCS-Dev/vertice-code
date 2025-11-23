@@ -423,37 +423,22 @@ class SecurityAgent(BaseAgent):
         return vulns
 
     def _detect_eval_usage(self, file: Path, content: str) -> List[Vulnerability]:
-        """Detect eval/exec usage via AST analysis."""
+        """Detect eval/exec usage via EvalExecDetector."""
+        detections = EvalExecDetector.detect(content)
         vulns = []
-
-        try:
-            tree = ast.parse(content)
-
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Call):
-                    func_name = None
-                    if isinstance(node.func, ast.Name):
-                        func_name = node.func.id
-                    elif isinstance(node.func, ast.Attribute):
-                        func_name = node.func.attr
-
-                    if func_name in ("eval", "exec", "__import__"):
-                        vulns.append(
-                            Vulnerability(
-                                type=VulnerabilityType.EVAL_USAGE,
-                                severity=SeverityLevel.CRITICAL,
-                                file=str(file),
-                                line=node.lineno,
-                                code_snippet=f"{func_name}(...)",
-                                description=f"{func_name}() allows arbitrary code execution",
-                                remediation="Avoid eval/exec. Use ast.literal_eval() for safe evaluation",
-                                cwe_id="CWE-95",
-                            )
-                        )
-
-        except SyntaxError:
-            pass  # Skip files with syntax errors
-
+        for lineno, description in detections:
+            vulns.append(
+                Vulnerability(
+                    type=VulnerabilityType.EVAL_USAGE,
+                    severity=SeverityLevel.CRITICAL,
+                    file=str(file),
+                    line=lineno,
+                    code_snippet=description,
+                    description=description,
+                    remediation="Avoid eval/exec. Use ast.literal_eval() for safe evaluation",
+                    cwe_id="CWE-95",
+                )
+            )
         return vulns
 
     async def _detect_secrets(self, target: Path) -> List[Secret]:

@@ -12,24 +12,48 @@ logger = logging.getLogger(__name__)
 class GeminiProvider:
     """Google Gemini API provider."""
     
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: Optional[str] = None, model_name: str = None):
         """Initialize Gemini provider.
         
         Args:
             api_key: Gemini API key (defaults to GEMINI_API_KEY env var)
+            model_name: Model name override
         """
         self.api_key = api_key or os.getenv("GEMINI_API_KEY")
-        self.model_name = os.getenv("GEMINI_MODEL", "gemini-pro")
+        # FORCE 2.0 Flash (fastest) - ignore env if not set properly
+        default_model = "gemini-2.0-flash-exp"
+        env_model = os.getenv("GEMINI_MODEL", "")
+        
+        # Only use env if it's a 2.0 model, otherwise use fastest
+        if "2.0" in env_model or "flash-thinking" in env_model:
+            self.model_name = model_name or env_model
+        else:
+            self.model_name = model_name or default_model
         self._client = None
         self._genai = None
+        self.generation_config = None
         
     def _ensure_genai(self):
         """Lazy load genai SDK."""
         if self._genai is None:
             try:
+                # Suppress gRPC warnings during import
+                import sys
+                import io
+                _original_stderr = sys.stderr
+                sys.stderr = io.StringIO()
+                
                 import google.generativeai as genai
+                
+                # Restore stderr
+                sys.stderr = _original_stderr
+                
                 self._genai = genai
                 self._genai.configure(api_key=self.api_key)
+                self.generation_config = self._genai.GenerationConfig(
+                    temperature=0.7,
+                    max_output_tokens=8192,
+                )
                 logger.info("Lazy loaded google.generativeai")
             except ImportError:
                 logger.error("google-generativeai not installed")
@@ -43,6 +67,8 @@ class GeminiProvider:
                 self._ensure_genai()
                 try:
                     self._client = self._genai.GenerativeModel(self.model_name)
+                    # FORCE visible confirmation
+                    print(f"✅ Gemini: {self.model_name}")
                     logger.info(f"Gemini provider initialized with model: {self.model_name}")
                 except Exception as e:
                     logger.error(f"Failed to initialize Gemini: {e}")
@@ -119,16 +145,24 @@ class GeminiProvider:
         try:
             prompt = self._format_messages(messages)
             
-            # Create generator function for streaming
+            # Create generator function for streaming (suppress stderr for gRPC)
             def _stream():
-                return self.client.generate_content(
-                    prompt,
-                    generation_config={
-                        'max_output_tokens': max_tokens,
-                        'temperature': temperature,
-                    },
-                    stream=True
-                )
+                import sys
+                import io
+                _original_stderr = sys.stderr
+                sys.stderr = io.StringIO()
+                try:
+                    result = self.client.generate_content(
+                        prompt,
+                        generation_config={
+                            'max_output_tokens': max_tokens,
+                            'temperature': temperature,
+                        },
+                        stream=True
+                    )
+                    return result
+                finally:
+                    sys.stderr = _original_stderr
             
             # Run streaming in thread pool and yield chunks
             loop = asyncio.get_event_loop()
@@ -148,18 +182,58 @@ class GeminiProvider:
     async def stream_chat(
         self,
         messages: List[Dict[str, str]],
-        max_tokens: int = 2048,
+        system_prompt: Optional[str] = None,
+        max_tokens: int = 8192,
         temperature: float = 0.7,
         **kwargs
     ) -> AsyncGenerator[str, None]:
         """
-        Alias for stream_generate to maintain compatibility.
-        
-        Some parts of the codebase call stream_chat() instead of stream_generate().
-        This method delegates to stream_generate().
+        Streaming VERDADEIRO e seguro com suporte a system_prompt.
         """
-        async for chunk in self.stream_generate(messages, max_tokens, temperature, **kwargs):
-            yield chunk
+        if not self.is_available():
+            raise RuntimeError("Gemini provider not available")
+        
+        try:
+            # Converte formato OpenAI/Standard para Gemini History
+            history = []
+            last_user_msg = ""
+            
+            if system_prompt:
+                # Hack funcional para Gemini: System instruction como primeira user message
+                history.append({"role": "user", "parts": [f"System Instruction: {system_prompt}"]})
+                history.append({"role": "model", "parts": ["Understood. I will follow these instructions."]})
+
+            for msg in messages[:-1]:  # Todos exceto o último (que é o prompt atual)
+                role = "user" if msg["role"] == "user" else "model"
+                content = msg.get("content", "")
+                history.append({"role": role, "parts": [content]})
+            
+            last_user_msg = messages[-1]["content"] if messages else ""
+
+            chat = self.client.start_chat(history=history)
+            
+            # AQUI ESTAVA O BUG: O método send_message com stream=True precisa ser iterado corretamente
+            def _stream():
+                return chat.send_message(
+                    last_user_msg,
+                    generation_config=self.generation_config or {
+                        'max_output_tokens': max_tokens,
+                        'temperature': temperature,
+                    },
+                    stream=True
+                )
+            
+            loop = asyncio.get_event_loop()
+            response = await loop.run_in_executor(None, _stream)
+            
+            for chunk in response:
+                if chunk.text:
+                    yield chunk.text
+                await asyncio.sleep(0)  # Yield control
+                    
+        except Exception as e:
+            logger.error(f"Gemini streaming error: {e}")
+            yield f"\n[System Error: {str(e)}]"
     
     def _format_messages(self, messages: List[Dict[str, str]]) -> str:
         """Format messages for Gemini.
