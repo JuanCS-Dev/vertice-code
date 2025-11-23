@@ -1280,6 +1280,9 @@ class Shell:
                 self.c.print(response_panel)
                 self.c.print()
 
+                # Show ready prompt to indicate MAESTRO is ready for next command
+                self.c.print("[dim]Ready for next command...[/dim]\n")
+
                 # Tick FPS counter
                 self.fps_counter.tick()
 
