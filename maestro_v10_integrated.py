@@ -51,6 +51,7 @@ from qwen_dev_cli.agents.executor import (
     SecurityLevel
 )
 from qwen_dev_cli.agents.data_agent_production import create_data_agent
+from qwen_dev_cli.agents.devops_agent import create_devops_agent
 
 # Import TUI Components (30 FPS optimized)
 from qwen_dev_cli.tui.maestro_layout import MaestroLayout, CyberpunkHeader
@@ -97,7 +98,8 @@ class Orchestrator:
             'planner': PlannerAgent(llm_client, mcp_client),
             'reviewer': ReviewerAgent(llm_client, mcp_client),
             'refactorer': RefactorerAgent(llm_client, mcp_client, explorer),  # Pass explorer directly
-            'data': create_data_agent(llm_client, mcp_client, enable_thinking=True)  # DataAgent v1.0
+            'data': create_data_agent(llm_client, mcp_client, enable_thinking=True),  # DataAgent v1.0
+            'devops': create_devops_agent(llm_client, mcp_client, auto_remediate=False, policy_mode="require_approval")  # DevOpsAgent v1.0
         }
     
     def route(self, prompt: str) -> str:
@@ -125,7 +127,14 @@ class Orchestrator:
         if any(keyword in p for keyword in executor_keywords):
             return 'executor'
 
-        # 2. Database Operations (DataAgent) - Check BEFORE review/plan to avoid conflicts
+        # 2. DevOps Operations (DevOpsAgent) - Infrastructure, K8s, Docker, CI/CD
+        if any(w in p for w in ['deploy', 'deployment', 'docker', 'dockerfile', 'container', 'kubernetes', 'k8s',
+                                 'pod', 'service', 'helm', 'argocd', 'ci/cd', 'pipeline', 'github actions',
+                                 'gitlab ci', 'terraform', 'iac', 'infrastructure', 'incident', 'outage',
+                                 'health check', 'rollback', 'canary', 'blue-green']):
+            return 'devops'
+
+        # 3. Database Operations (DataAgent) - Check BEFORE review/plan to avoid conflicts
         if any(w in p for w in ['database', 'schema', 'query', 'sql', 'migration', 'optimize query',
                                  'table', 'index', 'postgres', 'mysql', 'db', 'analyze schema',
                                  'plan migration', 'db performance', 'analyze table']):
@@ -226,6 +235,8 @@ class Renderer:
             self._render_explorer(response)
         elif agent_name == 'data':
             self._render_data(response)
+        elif agent_name == 'devops':
+            self._render_devops(response)
         else:
             self._render_generic(response)
     
@@ -458,6 +469,113 @@ class Renderer:
             self.c.print(f"  {risk_icon} Risk: {risk.upper()}")
             self.c.print(f"  ⏱️  Downtime: {downtime}s")
             self.c.print(f"  {'✅' if online else '❌'} Can run online: {online}")
+            self.c.print()
+
+        # Thinking trace (if present)
+        if res.reasoning and res.reasoning != "Direct generation (thinking disabled)":
+            self.c.print("[dim]💭 Reasoning:[/dim]")
+            self.c.print(f"[dim]{res.reasoning[:200]}...[/dim]\n")
+
+    def _render_devops(self, res: AgentResponse):
+        """Render DevOpsAgent v1.0 output"""
+        data = res.data
+
+        if not isinstance(data, dict):
+            self.c.print(Markdown(str(data)))
+            return
+
+        # Header
+        self.c.print("\n[bold cyan]🚀 DEVOPS OPERATIONS[/bold cyan]\n")
+
+        # Response
+        response_text = data.get('response', '')
+        if response_text:
+            self.c.print(Markdown(response_text))
+            self.c.print()
+
+        # Incident detection (if present)
+        if 'incident' in data:
+            incident = data['incident']
+            severity = incident.get('severity', 'medium')
+            severity_icon = {
+                'p0': '🔴',
+                'p1': '🟠',
+                'p2': '🟡',
+                'p3': '🟢',
+            }.get(severity.lower(), '⚪')
+
+            self.c.print(f"[bold red]🚨 Incident Detected:[/bold red]")
+            self.c.print(f"  {severity_icon} Severity: {severity.upper()}")
+            self.c.print(f"  📝 Description: {incident.get('description', 'N/A')}")
+            self.c.print(f"  🎯 Root Cause: {incident.get('root_cause', 'Investigating...')}")
+
+            actions = incident.get('recommended_actions', [])
+            if actions:
+                self.c.print(f"  💡 Recommended Actions:")
+                for action in actions[:3]:
+                    self.c.print(f"     • {action}")
+
+            can_auto = incident.get('can_auto_remediate', False)
+            self.c.print(f"  {'✅' if can_auto else '❌'} Auto-remediation: {'ENABLED' if can_auto else 'REQUIRES APPROVAL'}")
+            self.c.print()
+
+        # Dockerfile generation (if present)
+        if 'dockerfile' in data:
+            self.c.print("[bold green]🐳 Dockerfile Generated:[/bold green]")
+            dockerfile_preview = data['dockerfile'][:300] + "..."
+            self.c.print(f"[dim]{dockerfile_preview}[/dim]")
+
+            features = data.get('security_features', [])
+            if features:
+                self.c.print("[bold]Security Features:[/bold]")
+                for feature in features:
+                    self.c.print(f"  ✓ {feature}")
+            self.c.print()
+
+        # Kubernetes manifests (if present)
+        if 'deployment.yaml' in data or 'manifests' in data:
+            self.c.print("[bold blue]☸️  Kubernetes Manifests Generated:[/bold blue]")
+
+            if 'gitops_enabled' in data and data['gitops_enabled']:
+                self.c.print("  ✅ GitOps: ENABLED (ArgoCD auto-sync)")
+
+            features = data.get('features', [])
+            if features:
+                for feature in features:
+                    self.c.print(f"  ✓ {feature}")
+            self.c.print()
+
+        # CI/CD Pipeline (if present)
+        if 'pipeline' in data or 'github-actions.yml' in data:
+            self.c.print("[bold magenta]⚙️  CI/CD Pipeline Generated:[/bold magenta]")
+            self.c.print("  ✓ Automated testing")
+            self.c.print("  ✓ Docker multi-arch build")
+            self.c.print("  ✓ GitOps deployment")
+            self.c.print("  ✓ Zero manual steps")
+            self.c.print()
+
+        # Infrastructure health (if present)
+        if 'health_score' in data or 'overall_score' in data:
+            score = data.get('health_score', data.get('overall_score', 0))
+            score_icon = '🟢' if score >= 90 else '🟡' if score >= 70 else '🔴'
+
+            self.c.print(f"[bold green]📊 Infrastructure Health:[/bold green]")
+            self.c.print(f"  {score_icon} Overall Score: [bold]{score:.1f}%[/bold]")
+
+            predicted = data.get('predicted_issues', [])
+            if predicted:
+                self.c.print("  ⚠️  Predicted Issues:")
+                for issue in predicted[:3]:
+                    self.c.print(f"     • {issue}")
+            self.c.print()
+
+        # Terraform (if present)
+        if 'main.tf' in data or 'terraform' in data:
+            self.c.print("[bold cyan]🏗️  Terraform IaC Generated:[/bold cyan]")
+            features = data.get('features', [])
+            if features:
+                for feature in features[:5]:
+                    self.c.print(f"  ✓ {feature}")
             self.c.print()
 
         # Thinking trace (if present)

@@ -34,6 +34,7 @@ class AgentRole(str, Enum):
     TESTING = "testing"
     DOCUMENTATION = "documentation"
     DATABASE = "database"
+    DEVOPS = "devops"
     REFACTOR = "refactor"  # Alias for compatibility
 
 class AgentCapability(str, Enum):
@@ -228,6 +229,9 @@ class BaseAgent(abc.ABC):
             "db_query": AgentCapability.DATABASE,
             "db_execute": AgentCapability.DATABASE,
             "db_schema": AgentCapability.DATABASE,
+            "k8s_action": AgentCapability.BASH_EXEC,  # DevOps: Kubernetes operations
+            "docker_build": AgentCapability.BASH_EXEC,  # DevOps: Docker operations
+            "argocd_sync": AgentCapability.BASH_EXEC,  # DevOps: ArgoCD operations
         }
         
         required = tool_map.get(tool_name)
