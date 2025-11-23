@@ -33,6 +33,7 @@ class AgentRole(str, Enum):
     PERFORMANCE = "performance"
     TESTING = "testing"
     DOCUMENTATION = "documentation"
+    DATABASE = "database"
     REFACTOR = "refactor"  # Alias for compatibility
 
 class AgentCapability(str, Enum):
@@ -41,6 +42,7 @@ class AgentCapability(str, Enum):
     BASH_EXEC = "bash_exec"
     GIT_OPS = "git_ops"
     DESIGN = "design"
+    DATABASE = "database"
 
 class TaskStatus(str, Enum):
     PENDING = "pending"
@@ -166,6 +168,44 @@ class BaseAgent(abc.ABC):
             self.logger.error(f"LLM Call failed: {e}")
             raise
 
+    async def _stream_llm(
+        self,
+        prompt: str,
+        system_prompt: Optional[str] = None,
+        **kwargs: Any,
+    ):
+        """Stream LLM responses token by token for 30 FPS updates.
+
+        Yields:
+            str: Individual tokens as they arrive from LLM
+        """
+        final_sys_prompt = system_prompt or self.system_prompt
+        try:
+            # Use stream_chat for real-time token delivery
+            if hasattr(self.llm_client, 'stream_chat'):
+                async for chunk in self.llm_client.stream_chat(
+                    prompt=prompt,
+                    context=final_sys_prompt,
+                    **kwargs,
+                ):
+                    yield chunk
+            elif hasattr(self.llm_client, 'stream'):
+                async for chunk in self.llm_client.stream(
+                    prompt=prompt,
+                    system_prompt=final_sys_prompt,
+                    **kwargs,
+                ):
+                    yield chunk
+            else:
+                # Fallback: call non-streaming and yield whole response
+                response = await self._call_llm(prompt, system_prompt, **kwargs)
+                yield response
+
+            self.execution_count += 1
+        except Exception as e:
+            self.logger.error(f"LLM Stream failed: {e}")
+            raise
+
     def _can_use_tool(self, tool_name: str) -> bool:
         """Strict capability enforcement."""
         # Mapping definition (Expanded for v2)
@@ -185,6 +225,9 @@ class BaseAgent(abc.ABC):
             "git_commit": AgentCapability.GIT_OPS,
             "git_push": AgentCapability.GIT_OPS,
             "git_status": AgentCapability.GIT_OPS,
+            "db_query": AgentCapability.DATABASE,
+            "db_execute": AgentCapability.DATABASE,
+            "db_schema": AgentCapability.DATABASE,
         }
         
         required = tool_map.get(tool_name)
