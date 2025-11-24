@@ -87,7 +87,10 @@ class MaestroShellUI:
         self.frame_count = 0
         self.start_time = 0.0
 
-        # Throttle refresh to 30 FPS (33.3ms minimum interval)
+        # Pause state (for approval dialogs)
+        self._paused = False
+
+                # Throttle refresh to 30 FPS (33.3ms minimum interval)
         self._last_refresh = 0.0
         self._min_refresh_interval = 0.033  # 33ms = 30 FPS
 
@@ -297,6 +300,58 @@ class MaestroShellUI:
                 pass
             finally:
                 self.live = None
+
+
+    # ========================================================================
+    # PATCH: PAUSE/RESUME METHODS (Fix for approval loop)
+    # Added by streaming_fix patch - 2025-11-24 12:16
+    # ========================================================================
+
+    def pause(self):
+        """
+        Pause the live display for user input.
+        
+        This is CRITICAL for approval dialogs - the Live display
+        must be stopped before requesting console input, otherwise
+        the screen will flicker/flash uncontrollably.
+        """
+        self._paused = True
+        if self.live and self.live.is_started:
+            try:
+                self.live.stop()
+            except Exception:
+                pass
+    
+    def resume(self):
+        """
+        Resume the live display after user input.
+        """
+        self._paused = False
+        if self.live:
+            if not self.live.is_started:
+                try:
+                    self.live.start()
+                    self.refresh_display(force=True)
+                except Exception:
+                    pass
+        else:
+            try:
+                self.live = Live(
+                    self.layout,
+                    console=self.console,
+                    refresh_per_second=30,
+                    screen=False,
+                    transient=False
+                )
+                self.live.start()
+                self.refresh_display(force=True)
+            except Exception:
+                pass
+    
+    @property
+    def is_paused(self) -> bool:
+        """Check if display is paused."""
+        return getattr(self, '_paused', False)
 
     # ========================================================================
     # HIGH-LEVEL API FOR AGENTS
