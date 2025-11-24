@@ -23,6 +23,38 @@ class MCPManager:
         self.context_builder = ContextBuilder()
         self.enabled = True
     
+    async def call_tool(self, tool_name: str, arguments: Dict) -> Dict:
+        """
+        Tool calling interface for agents.
+        Provides basic filesystem operations.
+        """
+        try:
+            if tool_name == "read_file":
+                path = Path(arguments.get("path", ""))
+                if path.exists():
+                    return {
+                        "success": True,
+                        "content": path.read_text(encoding='utf-8')
+                    }
+                return {"success": False, "error": f"File not found: {path}"}
+            
+            elif tool_name == "write_file":
+                path = Path(arguments.get("path", ""))
+                content = arguments.get("content", "")
+                path.write_text(content, encoding='utf-8')
+                return {"success": True}
+            
+            elif tool_name == "list_files":
+                pattern = arguments.get("pattern", "*.py")
+                files = self.list_files(pattern)
+                return {"success": True, "files": [str(f) for f in files]}
+            
+            else:
+                return {"success": False, "error": f"Unknown tool: {tool_name}"}
+        
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
     def list_files(self, pattern: str = "*.py", recursive: bool = True) -> List[str]:
         """List files in root directory.
         

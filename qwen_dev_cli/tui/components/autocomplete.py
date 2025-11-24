@@ -89,22 +89,27 @@ class ContextAwareCompleter(Completer):
         """Get tool name completions."""
         if not self.tools_registry:
             return []
-        
+
         completions = []
-        for tool_name in self.tools_registry.list_tools():
-            if tool_name.startswith(prefix.lower()):
-                tool = self.tools_registry.get_tool(tool_name)
-                score = self._calculate_prefix_score(prefix, tool_name)
-                
-                completions.append(CompletionItem(
-                    text=tool_name,
-                    display=f"🔧 {tool_name}",
-                    type=CompletionType.TOOL,
-                    description=tool.description if tool else None,
-                    score=score + 10.0,  # Boost tool completions
-                    metadata={"tool": tool_name}
-                ))
-        
+        try:
+            # Use get_all() instead of list_tools() (correct API)
+            all_tools = self.tools_registry.get_all()
+
+            for tool_name, tool in all_tools.items():
+                if tool_name.startswith(prefix.lower()):
+                    score = self._calculate_prefix_score(prefix, tool_name)
+
+                    completions.append(CompletionItem(
+                        text=tool_name,
+                        display=f"🔧 {tool_name}",
+                        type=CompletionType.TOOL,
+                        description=getattr(tool, 'description', None),
+                        score=score + 10.0,  # Boost tool completions
+                        metadata={"tool": tool_name}
+                    ))
+        except Exception as e:
+            logger.debug(f"Failed to get tool completions: {e}")
+
         return completions
     
     def _get_file_completions(self, prefix: str) -> List[CompletionItem]:

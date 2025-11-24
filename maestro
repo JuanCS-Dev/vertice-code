@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Maestro Shell v7.0 Entry Point
+MAESTRO v10.0 INTEGRATED - Entry Point
 """
 import sys
 from pathlib import Path
@@ -13,8 +13,8 @@ sys.path.insert(0, str(project_root))
 from dotenv import load_dotenv
 load_dotenv()
 
-# Launch
-from qwen_dev_cli.maestro import app
+# Launch the integrated v10.0 shell
+from maestro_v10_integrated import main
 
 if __name__ == "__main__":
-    app()
+    main()

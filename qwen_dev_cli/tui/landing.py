@@ -27,9 +27,6 @@ try:
 except ImportError:
     pyfiglet = None
 
-from ..theme import COLORS
-from ..styles import PRESET_STYLES
-
 # 2025 Neon Palette
 NEON_CYAN = "#00ffff"
 NEON_GREEN = "#00ff00"
@@ -224,3 +221,10 @@ class LandingScreen:
 
 def create_landing_screen(console: Optional[Console] = None) -> LandingScreen:
     return LandingScreen(console)
+
+def show_landing_screen(console: Console, duration: float = 2.0):
+    """Show landing screen for specified duration"""
+    screen = LandingScreen(console)
+    console.clear()
+    console.print(screen.render())
+    time.sleep(duration)

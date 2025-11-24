@@ -44,18 +44,52 @@ htmlcov/
 .mypy_cache/
 .ruff_cache/
 
-# Environment
+# Environment Variables (SENSITIVE - NEVER COMMIT)
 .env
+.env.*
+!.env.example
 .env.local
+.env.backup
 *.log
+*.key
+*.pem
+*.p12
+credentials.json
+secrets/
+.secrets/
 
 # Temporary files
 *.tmp
 *.bak
+*.backup
+*_backup*
+*.swp
+*.swo
 temp/
 tmp/
 
 # Project specific
 .qwen_backups/
+.backup/
 test_results.log
-=6.0.0
+.qwen_history
+
+# Test artifacts and logs
+test_*.log
+*.coverage*
+htmlcov/
+.pytest_cache/
+
+# IDE and OS
+.DS_Store
+.vscode/
+.idea/
+*.sublime-*
+
+# Documentation (temporary - will organize)
+*_REPORT.md
+*_SUMMARY.md
+TESTE_*.md
+test_*.py
+maestro_v*.py
+!maestro_v10_integrated.py

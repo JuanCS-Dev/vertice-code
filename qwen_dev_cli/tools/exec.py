@@ -39,17 +39,13 @@ class BashCommandTool(ValidatedTool):
 
     
     async def _execute_validated(self, command: str, cwd: Optional[str] = None, timeout: int = 30) -> ToolResult:
-        """Execute bash command."""
+        """Execute bash command.
+
+        NOTE: Command validation is now handled by SimpleExecutorAgent
+        using Claude Code Nov 2025 allowlist pattern. This tool just executes.
+        """
         try:
-            # Validate command using CommandValidator
-            from ..security_hardening import CommandValidator
-            if not CommandValidator.validate(command):
-                return ToolResult(
-                    success=False,
-                    error=f"Dangerous command blocked: {command}"
-                )
-            
-            # Execute command
+            # Execute command (validation done by agent layer)
             proc = await asyncio.create_subprocess_shell(
                 command,
                 stdout=asyncio.subprocess.PIPE,

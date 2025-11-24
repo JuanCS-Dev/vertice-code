@@ -518,8 +518,8 @@ class CodeGraphAnalysisAgent:
                         fix_suggestion="Refactor to break the cycle - extract shared logic or use dependency injection",
                         confidence=1.0
                     ))
-        except:
-            pass  # Graph might be empty or invalid
+        except Exception as e:
+            self.logger.debug(f"Failed to detect cyclic imports: {e}")  # Graph might be empty or invalid
         
         # 2. Detect dead code (unreachable nodes)
         if len(graph.nodes) > 0:
@@ -533,8 +533,8 @@ class CodeGraphAnalysisAgent:
                     try:
                         reachable.update(nx.descendants(graph, entry))
                         reachable.add(entry)
-                    except:
-                        pass
+                    except Exception as e:
+                        self.logger.debug(f"Failed to find descendants for {entry}: {e}")
                 
                 # Dead code = nodes not reachable from any entry point
                 dead_nodes = set(graph.nodes) - reachable
@@ -606,8 +606,8 @@ class CodeGraphAnalysisAgent:
                             fix_suggestion="Consider flattening the architecture or breaking into smaller modules",
                             confidence=0.8
                         ))
-                except:
-                    pass
+                except Exception as e:
+                    self.logger.debug(f"Failed to calculate call chain depth for {entry}: {e}")
         
         return issues
 
@@ -739,8 +739,8 @@ class ReviewerAgent(BaseAgent):
                     self.security_agent.file_path = fname
                     sec_issues = await self.security_agent.analyze(content, tree)
                     all_issues.extend(sec_issues)
-                except:
-                    pass  # Already caught syntax errors above
+                except Exception as e:
+                    self.logger.debug(f"Security analysis failed for {fname}: {e}")  # Already caught syntax errors above
                 
                 # Performance analysis
                 perf_issues = await self.performance_agent.analyze(content, all_metrics)

@@ -88,6 +88,29 @@ COLORS = {
     'text': '#c9d1d9',              # Alias for text_primary
     'dim': '#8b949e',               # Alias for text_secondary
     'reset': '\033[0m',             # ANSI reset
+
+    # ========================================================================
+    # MAESTRO v10.0 - Cyberpunk 2025 Neon Palette
+    # ========================================================================
+    # Primary neon accents for MAESTRO streaming UI
+    'neon_cyan': '#00d9ff',         # Executor agent, live indicators
+    'neon_purple': '#9d4edd',       # Planner agent, processing states
+    'neon_green': '#10b981',        # Success states, confirmations
+    'neon_yellow': '#fbbf24',       # Warnings, highlights
+    'neon_red': '#ef4444',          # Errors, critical alerts
+    'neon_blue': '#3b82f6',         # File operations, info
+    'neon_pink': '#ec4899',         # Special features, AI responses
+
+    # Background layers for glassmorphism
+    'bg_deep': '#0a0e27',           # Deepest background layer
+    'bg_card': '#0f1629',           # Card backgrounds
+    'bg_elevated': '#1a2332',       # Elevated/hover elements
+
+    # MAESTRO-specific semantic colors
+    'maestro_live': '#10b981',      # Live indicator (pulsing green)
+    'maestro_thinking': '#9d4edd',  # Agent thinking state
+    'maestro_executing': '#00d9ff', # Agent executing state
+    'maestro_complete': '#10b981',  # Agent complete state
 }
 
 
