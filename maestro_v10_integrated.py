@@ -92,8 +92,8 @@ class Orchestrator:
                 llm_client=llm_client,
                 mcp_client=mcp_client,
                 execution_mode=ExecutionMode.LOCAL,  # Fast local execution
-                security_level=SecurityLevel.STANDARD,  # Claude Code-compatible
-                approval_callback=approval_callback,
+                security_level=SecurityLevel.PERMISSIVE,  # No approval required (per Architect request)
+                approval_callback=None,  # Disabled: approval system too intrusive
                 config={
                     "timeout": 30.0,
                     "max_retries": 3
