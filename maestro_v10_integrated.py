@@ -1437,10 +1437,11 @@ class Shell:
                         cmd_executed = result.data.get('command', '')
                         response_panel = Panel(
                             response_content,
-                            title=f"[bold bright_green]✅ {agent_name.title()}[/bold bright_green]",
-                            subtitle=f"[dim]$ {cmd_executed}[/dim]" if cmd_executed else None,
-                            border_style="bright_green",
-                            padding=(1, 2)
+                            title=f"[bold bright_cyan]✅ {agent_name.title()}[/bold bright_cyan]",
+                            subtitle=f"[dim bright_cyan]$ {cmd_executed}[/dim]" if cmd_executed else None,
+                            border_style="bright_cyan",  # NEON CYAN instead of green
+                            padding=(1, 2),
+                            expand=False  # Prevent text truncation
                         )
                     else:
                         # Other agent output (Planner, Reviewer, Refactorer, Explorer)
