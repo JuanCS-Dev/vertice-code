@@ -33,6 +33,8 @@ dependencies = [
     "huggingface-hub>=0.20.0",
     "mcp>=1.0.0",
     "pyfiglet>=1.0.0",
+    "pyperclip>=1.8.0",
+    "textual>=0.47.0",
 ]
 
 [project.optional-dependencies]
@@ -53,11 +55,19 @@ Repository = "https://github.com/JuanCS-Dev/qwen-dev-cli"
 Issues = "https://github.com/JuanCS-Dev/qwen-dev-cli/issues"
 
 [project.scripts]
+# Main unified entry point
+juancs = "qwen_dev_cli.main:cli_main"
+jcs = "qwen_dev_cli.main:cli_main"
+
+# TUI (Textual-based)
+juancs-tui = "qwen_cli.app:main"
+
+# Legacy entries (for backwards compatibility)
 qwen-dev = "qwen_dev_cli.__main__:main"
 neuroshell-code = "qwen_dev_cli.shell_simple:main"
 neuroshell-fast = "qwen_dev_cli.shell_fast:main"
 neuroshell = "qwen_dev_cli.shell_fast:main"
-qwen = "qwen_dev_cli.__main__:main"
+qwen = "qwen_dev_cli.main:cli_main"
 
 [tool.black]
 line-length = 100
@@ -83,5 +93,5 @@ python_functions = ["test_*"]
 addopts = "-v --tb=short"
 
 [tool.setuptools.packages.find]
-include = ["qwen_dev_cli*"]
+include = ["qwen_dev_cli*", "qwen_cli*"]
 namespaces = false
