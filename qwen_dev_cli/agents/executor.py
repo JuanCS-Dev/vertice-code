@@ -888,3 +888,9 @@ COMMAND:"""
     async def _decide(self, observations: List[Dict], context: Dict[str, Any]) -> str:
         """No decision needed - single-shot execution."""
         return "complete"
+
+
+# Alias for backward compatibility with tests
+ExecutorAgent = NextGenExecutorAgent
+
+__all__ = ['NextGenExecutorAgent', 'ExecutorAgent']

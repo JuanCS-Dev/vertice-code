@@ -35,6 +35,9 @@ from qwen_dev_cli.agents.security import SecurityAgent
 from qwen_dev_cli.agents.performance import PerformanceAgent
 from qwen_dev_cli.agents.testing import TestingAgent
 from qwen_dev_cli.agents.executor import NextGenExecutorAgent
+
+# Alias for backward compatibility with tests
+ExecutorAgent = NextGenExecutorAgent
 from qwen_dev_cli.agents.documentation import DocumentationAgent
 
 __all__ = [
@@ -52,5 +55,6 @@ __all__ = [
     "PerformanceAgent",
     "TestingAgent",
     "NextGenExecutorAgent",
+    "ExecutorAgent",  # Alias for backward compatibility
     "DocumentationAgent",
 ]

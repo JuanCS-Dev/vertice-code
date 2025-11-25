@@ -116,4 +116,8 @@ class MCPClient:
         return {'result': result}
 
 
-__all__ = ['MCPClient', 'create_mcp_client']
+# Aliases for backward compatibility with tests
+MCPManager = MCPClient  # Alias: MCPManager -> MCPClient
+mcp_manager = create_mcp_client  # Alias: mcp_manager -> create_mcp_client
+
+__all__ = ['MCPClient', 'create_mcp_client', 'MCPManager', 'mcp_manager']

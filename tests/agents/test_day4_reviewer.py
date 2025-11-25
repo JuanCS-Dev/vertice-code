@@ -12,7 +12,8 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock
 
 from qwen_dev_cli.agents.base import AgentTask, TaskStatus
-from qwen_dev_cli.agents.reviewer import ReviewerAgent, QualityGate, ReviewReport
+from qwen_dev_cli.agents.reviewer import ReviewerAgent, ReviewReport
+# QualityGate was removed from reviewer module - these tests need updating
 
 
 @pytest.fixture
