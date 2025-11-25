@@ -167,7 +167,7 @@ class EnhancedInputSession:
             key_bindings=self.kb,
             multiline=False,  # We handle multiline manually
             enable_history_search=True,
-            mouse_support=True
+            mouse_support=False  # DISABLED: Allow terminal copy/paste/select
         )
         
         self.multi_line_buffer: List[str] = []

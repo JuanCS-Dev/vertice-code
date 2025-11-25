@@ -416,10 +416,12 @@ class SelectableStatic(Static):
 
     def on_mouse_down(self, event: events.MouseDown) -> None:
         """Start selection on mouse down."""
-        if event.button == 1:  # Left click
-            self.selection_start = event.offset
-            self.selection_end = event.offset
-            self.capture_mouse()
+        # DISABLED: Allow terminal native mouse for copy/paste
+        # if event.button == 1:  # Left click
+        #     self.selection_start = event.offset
+        #     self.selection_end = event.offset
+        #     self.capture_mouse()
+        pass
 
     def on_mouse_move(self, event: events.MouseMove) -> None:
         """Update selection while dragging."""
@@ -2825,7 +2827,8 @@ class QwenApp(App):
 def main() -> None:
     """Run the QWEN CLI application."""
     app = QwenApp()
-    app.run()
+    # mouse=False allows terminal native mouse for copy/paste/select
+    app.run(mouse=False)
 
 
 if __name__ == "__main__":
