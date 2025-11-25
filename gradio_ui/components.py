@@ -288,3 +288,78 @@ def render_terminal_logs(logs: List[str]) -> str:
         }}
     </style>
     """
+
+
+def render_docker_progress(percentage: float, label: str = "Processing") -> str:
+    """
+    Progress bar estilo Docker build - Hackathon Visual
+
+    Características:
+    - Barra horizontal com gradient cyan
+    - Percentual centralizado
+    - Glow neon
+    - Animação suave na transição
+    """
+    percentage = max(0.0, min(100.0, percentage))
+
+    return f"""
+    <div class="docker-progress">
+        <div class="docker-progress-bar" style="width: {percentage}%;"></div>
+        <div class="docker-progress-text">{label} - {percentage:.0f}%</div>
+    </div>
+    """
+
+
+def render_latency_chart(values: List[int], current: str = "0ms") -> str:
+    """
+    Sparkline chart para latência - Hackathon Visual
+
+    Características:
+    - Barras verticais estilo sparkline
+    - Última barra destacada em laranja
+    - Altura proporcional ao valor
+    - Hover com glow
+    """
+    if not values:
+        values = [0]
+
+    max_val = max(values) if values else 1
+    bars = ""
+
+    for i, v in enumerate(values):
+        height = int((v / max_val) * 40) if max_val > 0 else 4
+        # Última barra em laranja, resto em cyan
+        color = "#f59e0b" if i == len(values) - 1 else "#00D9FF"
+        bars += f'<div class="latency-bar" style="height: {height}px; background: linear-gradient(180deg, {color} 0%, {color}99 100%);"></div>'
+
+    return f"""
+    <div style="padding: 8px;">
+        <div class="latency-label">Latency (ms)</div>
+        <div class="latency-chart">{bars}</div>
+        <div class="latency-value">{current}</div>
+    </div>
+    """
+
+
+def render_dual_status(model: str, env: str) -> str:
+    """
+    Status cards lado a lado - Hackathon Visual
+
+    Características:
+    - Dois cards com labels
+    - Model em cyan, Environment em verde
+    - Layout grid responsivo
+    - Estilo minimalista
+    """
+    return f"""
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px;">
+        <div class="status-card">
+            <div class="status-card-label">Model</div>
+            <div class="status-card-value status-card-value-cyan">{model}</div>
+        </div>
+        <div class="status-card status-card-green">
+            <div class="status-card-label">Environment</div>
+            <div class="status-card-value status-card-value-green">{env}</div>
+        </div>
+    </div>
+    """

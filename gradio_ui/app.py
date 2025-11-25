@@ -27,6 +27,9 @@ from .components import (
     render_bar_chart,
     render_dual_gauge,
     render_terminal_logs,
+    render_docker_progress,
+    render_latency_chart,
+    render_dual_status,
 )
 
 PROJECT_ROOT = Path.cwd()
@@ -40,6 +43,10 @@ class SystemMonitor:
         self.token_usage = 0
         self.token_limit = 1000000
         self.safety_history = [0.85, 0.9, 0.88, 0.95, 0.92, 0.94]
+        self.latency_history = [45, 52, 38, 67, 42, 55, 48, 61, 39, 50]  # Last 10 latency values (ms)
+        self.current_latency = 50  # Current latency in ms
+        self.progress = 0.0  # Current progress (0-100)
+        self.progress_label = "Ready"
         self.logs = [
             f"{time.strftime('%H:%M:%S')} - [INFO] System initialized via MCP protocol",
             f"{time.strftime('%H:%M:%S')} - [INFO] Loaded Constitutional AI constraints",
@@ -59,6 +66,16 @@ class SystemMonitor:
         # Always update safety on token increment for live feel
         self.safety_history.pop(0)
         self.safety_history.append(random.uniform(0.88, 0.98))
+        # Update latency with realistic variance
+        self.latency_history.pop(0)
+        new_latency = random.randint(30, 80)
+        self.latency_history.append(new_latency)
+        self.current_latency = new_latency
+
+    def set_progress(self, percentage: float, label: str = "Processing"):
+        """Set current progress bar state."""
+        self.progress = max(0.0, min(100.0, percentage))
+        self.progress_label = label
     
     def get_metrics(self):
         """Get current system metrics."""
@@ -66,6 +83,10 @@ class SystemMonitor:
             "token_pct": (self.token_usage / self.token_limit) * 100,
             "token_str": f"{self.token_usage // 1000}k / {self.token_limit // 1000}k",
             "safety_data": self.safety_history,
+            "latency_data": self.latency_history,
+            "latency_current": f"{self.current_latency}ms",
+            "progress": self.progress,
+            "progress_label": self.progress_label,
             "logs": self.logs[-8:]
         }
 
@@ -242,7 +263,7 @@ async def stream_conversation(
         session_id: Persistent session identifier
         
     Yields:
-        Tuple of (history, logs_html, session_id, gauge1, chart, gauge2)
+        Tuple of (history, logs_html, session_id, gauge1, chart, status, progress, latency)
     """
     if not message.strip():
         metrics = _monitor.get_metrics()
@@ -252,7 +273,9 @@ async def stream_conversation(
             session_id,
             render_gauge(metrics["token_pct"], "TOKEN BUDGET", metrics["token_str"]),
             render_bar_chart(metrics["safety_data"], "SAFETY INDEX"),
-            render_dual_gauge(99, "MODEL", 100, "ENV")
+            render_dual_status(_bridge.backend_label, "Production"),
+            render_docker_progress(metrics["progress"], metrics["progress_label"]),
+            render_latency_chart(metrics["latency_data"], metrics["latency_current"])
         )
         return
 
@@ -266,7 +289,8 @@ async def stream_conversation(
     # Add thinking state
     history.append({"role": "assistant", "content": "⏳ Analyzing request..."})
     _monitor.add_log("INFO", f"Processing: {message[:40]}...")
-    
+    _monitor.set_progress(10, "Initializing")
+
     metrics = _monitor.get_metrics()
     yield (
         history,
@@ -274,7 +298,9 @@ async def stream_conversation(
         session_value,
         render_gauge(metrics["token_pct"], "TOKEN BUDGET", metrics["token_str"]),
         render_bar_chart(metrics["safety_data"], "SAFETY INDEX"),
-        render_dual_gauge(99, "MODEL", 100, "ENV")
+        render_dual_status(_bridge.backend_label, "Production"),
+        render_docker_progress(metrics["progress"], metrics["progress_label"]),
+        render_latency_chart(metrics["latency_data"], metrics["latency_current"])
     )
 
     start = time.monotonic()
@@ -287,25 +313,31 @@ async def stream_conversation(
             chunk_text = chunk or ""
             chunk_count += 1
             live_text += chunk_text
-            
+
             # Simulate token usage (in real impl, get from backend)
             _monitor.increment_tokens(len(chunk_text.split()))
-            
+
+            # Update progress based on streaming (simulated)
+            progress_pct = min(90, 20 + chunk_count * 5)
+            _monitor.set_progress(progress_pct, "Streaming")
+
             # Update chat with streaming cursor
             history[-1]["content"] = live_text + " ▌"
-            
+
             # Get updated metrics
             metrics = _monitor.get_metrics()
-            
+
             yield (
                 history,
                 render_terminal_logs(metrics["logs"]),
                 session_value,
                 render_gauge(metrics["token_pct"], "TOKEN BUDGET", metrics["token_str"]),
                 render_bar_chart(metrics["safety_data"], "SAFETY INDEX"),
-                render_dual_gauge(99, "MODEL", 100, "ENV")
+                render_dual_status(_bridge.backend_label, "Production"),
+                render_docker_progress(metrics["progress"], metrics["progress_label"]),
+                render_latency_chart(metrics["latency_data"], metrics["latency_current"])
             )
-            
+
             # CRITICAL: Yield to event loop (Gradio 6 async best practice)
             # Prevents blocking Uvicorn when stream is very fast
             await asyncio.sleep(0)
@@ -316,10 +348,11 @@ async def stream_conversation(
         error_details = traceback.format_exc()
         print(f"❌ STREAM ERROR: {e}")
         print(error_details)
-        
+
         error_msg = f"❌ **Error**: {str(e)}"
         history[-1]["content"] = error_msg
         _monitor.add_log("ERROR", str(e))
+        _monitor.set_progress(0, "Error")
         metrics = _monitor.get_metrics()
         yield (
             history,
@@ -327,14 +360,17 @@ async def stream_conversation(
             session_value,
             render_gauge(metrics["token_pct"], "TOKEN BUDGET", metrics["token_str"]),
             render_bar_chart(metrics["safety_data"], "SAFETY INDEX"),
-            render_dual_gauge(99, "MODEL", 100, "ENV")
+            render_dual_status(_bridge.backend_label, "Production"),
+            render_docker_progress(0, "Error"),
+            render_latency_chart(metrics["latency_data"], metrics["latency_current"])
         )
         return
 
     # Complete state - remove cursor
     history[-1]["content"] = live_text
     _monitor.add_log("SUCCESS", f"Task completed. {chunk_count} chunks processed.")
-    
+    _monitor.set_progress(100, "Complete")
+
     # Final metrics
     metrics = _monitor.get_metrics()
     yield (
@@ -343,7 +379,9 @@ async def stream_conversation(
         session_value,
         render_gauge(metrics["token_pct"], "TOKEN BUDGET", metrics["token_str"]),
         render_bar_chart(metrics["safety_data"], "SAFETY INDEX"),
-        render_dual_gauge(99, "MODEL", 100, "ENV")
+        render_dual_status(_bridge.backend_label, "Production"),
+        render_docker_progress(100, "Complete"),
+        render_latency_chart(metrics["latency_data"], metrics["latency_current"])
     )
 
 # --- LOAD CYBERPUNK CSS ---
@@ -388,13 +426,26 @@ def create_ui() -> tuple[gr.Blocks, str, str]:
         # State Management
         session_state = gr.State(value=None)
         
-        # HEADER (Cyberpunk Style)
-        with gr.Row(elem_classes="mb-2 items-center border-b border-gray-800 pb-2"):
-            with gr.Column(scale=1):
-                gr.Markdown("# GEMINI-CLI-2", elem_classes="text-2xl font-bold text-white tracking-tighter cyber-glow")
-                gr.Markdown("THE BOSS // NEW STANDARD", elem_classes="text-[10px] text-cyber-accent tracking-[0.3em] -mt-2")
-            with gr.Column(scale=1):
-                gr.Markdown("Resistance is futile.", elem_classes="text-right text-red-500 text-xs font-mono animate-pulse")
+        # HEADER (Window-style like desktop app)
+        with gr.Row(elem_classes="window-header"):
+            gr.HTML("""
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="window-controls">
+                        <span class="ctrl-close"></span>
+                        <span class="ctrl-minimize"></span>
+                        <span class="ctrl-maximize"></span>
+                    </div>
+                    <span style="font-family: 'Segoe UI', monospace; font-size: 14px; color: #E6E6E6; letter-spacing: 0.05em;">
+                        JuanCS Dev-Code
+                    </span>
+                    <span style="color: #00D9FF; font-size: 10px; margin-left: 8px;">MCP Hackathon</span>
+                </div>
+            """)
+            gr.HTML("""
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <span style="color: #6272a4; font-size: 12px;">v0.0.2</span>
+                </div>
+            """)
         
         # Main Layout: 3-Column Cyberpunk
         with gr.Row(equal_height=True):
@@ -430,13 +481,14 @@ def create_ui() -> tuple[gr.Blocks, str, str]:
 
             # COLUMN 2: WORKSPACE (Chat + Input)
             with gr.Column(scale=3):
-                # Chat
+                # Chat (Gradio 6: buttons instead of show_copy_button)
                 chatbot = gr.Chatbot(
                     label="Dev Session",
                     height=400,
                     render_markdown=True,
                     avatar_images=(None, None),
-                    elem_classes="cyber-glass"
+                    elem_classes="cyber-glass",
+                    buttons=["copy"],  # Gradio 6
                 )
                 
                 # Input Area
@@ -450,6 +502,12 @@ def create_ui() -> tuple[gr.Blocks, str, str]:
                         autofocus=True,
                     )
                 
+                # Docker Progress Bar
+                progress_html = gr.HTML(
+                    value=render_docker_progress(0, "Ready"),
+                    elem_classes="docker-progress-container"
+                )
+
                 # Terminal Logs (HTML)
                 log_display = gr.HTML(
                     value=render_terminal_logs(_monitor.logs[-8:]),
@@ -474,10 +532,16 @@ def create_ui() -> tuple[gr.Blocks, str, str]:
                         value=render_bar_chart(initial_metrics["safety_data"], "SAFETY INDEX")
                     )
                 
-                # Status Mini-Gauges
+                # Status Cards (Model/Environment)
                 with gr.Group(elem_classes="cyber-glass h-24"):
                     status_html = gr.HTML(
-                        value=render_dual_gauge(99, "MODEL", 100, "ENV")
+                        value=render_dual_status(_bridge.backend_label, "Production")
+                    )
+
+                # Latency Sparkline Chart
+                with gr.Group(elem_classes="cyber-glass h-28"):
+                    latency_html = gr.HTML(
+                        value=render_latency_chart(initial_metrics["latency_data"], initial_metrics["latency_current"])
                     )
                 
                 # Refresh Button (replaces Timer to avoid queue/join errors)
@@ -505,11 +569,11 @@ def create_ui() -> tuple[gr.Blocks, str, str]:
             outputs=[file_explorer]
         )
         
-        # Submit message (cyberpunk version with 6 outputs)
+        # Submit message (cyberpunk version with 8 outputs)
         msg_input.submit(
             fn=stream_conversation,
             inputs=[msg_input, chatbot, session_state],
-            outputs=[chatbot, log_display, session_state, gauge_html, chart_html, status_html]
+            outputs=[chatbot, log_display, session_state, gauge_html, chart_html, status_html, progress_html, latency_html]
         ).then(
             fn=lambda: "", outputs=[msg_input]
         )
@@ -520,14 +584,16 @@ def create_ui() -> tuple[gr.Blocks, str, str]:
             return (
                 render_gauge(metrics["token_pct"], "TOKEN BUDGET", metrics["token_str"]),
                 render_bar_chart(metrics["safety_data"], "SAFETY INDEX"),
-                render_dual_gauge(99, "MODEL", 100, "ENV"),
+                render_dual_status(_bridge.backend_label, "Production"),
+                render_docker_progress(metrics["progress"], metrics["progress_label"]),
+                render_latency_chart(metrics["latency_data"], metrics["latency_current"]),
                 render_terminal_logs(metrics["logs"])
             )
-        
+
         # Wire refresh button (avoids ERR_CONNECTION_REFUSED from gr.Timer)
         refresh_btn.click(
             refresh_metrics,
-            outputs=[gauge_html, chart_html, status_html, log_display]
+            outputs=[gauge_html, chart_html, status_html, progress_html, latency_html, log_display]
         )
 
     # Gradio 6: Return tuple (demo, theme, css) for launch()
