@@ -58,16 +58,16 @@ class AllowedCommand:
 
 
 @dataclass
-class ExecutionResult:
+class SafeExecutionResult:
     """
-    Result of command execution.
+    Result of safe command execution.
 
     Attributes:
         success: Whether command completed successfully
         exit_code: Process exit code
         stdout: Standard output
         stderr: Standard error
-        command: The command that was executed
+        command: The command that was executed (string form)
         error_message: Human-readable error if failed
     """
     success: bool
@@ -446,7 +446,7 @@ class SafeCommandExecutor:
             result[category].append(f"{cmd.name}: {cmd.description}")
         return result
 
-    async def execute(self, command: str) -> ExecutionResult:
+    async def execute(self, command: str) -> SafeExecutionResult:
         """
         Execute command securely.
 
@@ -454,13 +454,13 @@ class SafeCommandExecutor:
             command: Command to execute
 
         Returns:
-            ExecutionResult with output and status
+            SafeExecutionResult with output and status
         """
         # Validate command
         is_allowed, reason = self.is_command_allowed(command)
         if not is_allowed:
             logger.warning(f"Blocked command: {command} - {reason}")
-            return ExecutionResult(
+            return SafeExecutionResult(
                 success=False,
                 exit_code=-1,
                 stdout="",
@@ -475,7 +475,7 @@ class SafeCommandExecutor:
 
         if not allowed:
             # Should never happen if is_allowed passed, but defensive
-            return ExecutionResult(
+            return SafeExecutionResult(
                 success=False,
                 exit_code=-1,
                 stdout="",
@@ -507,7 +507,7 @@ class SafeCommandExecutor:
             except asyncio.TimeoutError:
                 proc.kill()
                 await proc.wait()
-                return ExecutionResult(
+                return SafeExecutionResult(
                     success=False,
                     exit_code=-1,
                     stdout="",
@@ -519,7 +519,7 @@ class SafeCommandExecutor:
             stdout_str = stdout.decode("utf-8", errors="replace") if stdout else ""
             stderr_str = stderr.decode("utf-8", errors="replace") if stderr else ""
 
-            return ExecutionResult(
+            return SafeExecutionResult(
                 success=proc.returncode == 0,
                 exit_code=proc.returncode or 0,
                 stdout=stdout_str,
@@ -529,7 +529,7 @@ class SafeCommandExecutor:
             )
 
         except FileNotFoundError:
-            return ExecutionResult(
+            return SafeExecutionResult(
                 success=False,
                 exit_code=-1,
                 stdout="",
@@ -538,7 +538,7 @@ class SafeCommandExecutor:
                 error_message=f"Command not found: {base_cmd}"
             )
         except PermissionError:
-            return ExecutionResult(
+            return SafeExecutionResult(
                 success=False,
                 exit_code=-1,
                 stdout="",
@@ -548,7 +548,7 @@ class SafeCommandExecutor:
             )
         except Exception as e:
             logger.exception(f"Unexpected error executing command: {command}")
-            return ExecutionResult(
+            return SafeExecutionResult(
                 success=False,
                 exit_code=-1,
                 stdout="",

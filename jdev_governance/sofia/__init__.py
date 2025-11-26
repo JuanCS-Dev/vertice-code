@@ -33,7 +33,7 @@
 ║                                                                                  ║
 ║  Uso Rápido:                                                                     ║
 ║                                                                                  ║
-║      from third_party.sofia import quick_start_sofia                             ║
+║      from jdev_governance.sofia import quick_start_sofia                         ║
 ║                                                                                  ║
 ║      sofia = quick_start_sofia()  # Já iniciada!                                 ║
 ║                                                                                  ║

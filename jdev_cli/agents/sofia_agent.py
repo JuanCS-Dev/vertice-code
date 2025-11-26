@@ -1,10 +1,10 @@
 """
 ╔══════════════════════════════════════════════════════════════════════════════════╗
 ║                                                                                  ║
-║                   SOFIA INTEGRATED AGENT - qwen-dev-cli                          ║
+║                    SOFIA INTEGRATED AGENT - jdev_cli                             ║
 ║                        Conselheiro Sábio Integrado                               ║
 ║                                                                                  ║
-║  Wrapper que integra o SofiaAgent (third_party) com BaseAgent do qwen-dev-cli   ║
+║  Wrapper que integra o SofiaAgent (jdev_governance) com BaseAgent do jdev_cli   ║
 ║                                                                                  ║
 ║  "Você não substitui sabedoria humana - você a cultiva."                        ║
 ║                                                                                  ║
@@ -15,7 +15,7 @@
 ║  4. Pre-Execution Counsel: Counsel before risky actions                          ║
 ║                                                                                  ║
 ║  Version: 1.0.0                                                                  ║
-║  Author: Claude Code (Sonnet 4.5) + qwen-dev-cli Team                           ║
+║  Author: Claude Code (Sonnet 4.5) + Juan Dev Code Team                          ║
 ║                                                                                  ║
 ╚══════════════════════════════════════════════════════════════════════════════════╝
 """

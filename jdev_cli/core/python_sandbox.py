@@ -104,7 +104,7 @@ class SandboxConfig:
 
 
 @dataclass
-class ExecutionResult:
+class SandboxResult:
     """Result of sandboxed Python execution."""
     success: bool
     output: str
@@ -115,7 +115,7 @@ class ExecutionResult:
     violations: List[str] = field(default_factory=list)
 
     @classmethod
-    def failure(cls, error: str, violations: Optional[List[str]] = None) -> "ExecutionResult":
+    def failure(cls, error: str, violations: Optional[List[str]] = None) -> "SandboxResult":
         """Create a failed result."""
         return cls(
             success=False,
@@ -412,7 +412,7 @@ class PythonSandbox:
         code: str,
         globals_dict: Optional[Dict[str, Any]] = None,
         locals_dict: Optional[Dict[str, Any]] = None,
-    ) -> ExecutionResult:
+    ) -> SandboxResult:
         """
         Execute Python code in sandbox.
 
@@ -422,14 +422,14 @@ class PythonSandbox:
             locals_dict: Additional local variables
 
         Returns:
-            ExecutionResult with output and status
+            SandboxResult with output and status
         """
         start_time = time.time()
 
         # Step 1: Validate code with AST analysis
         is_safe, violations = self.validate_code(code)
         if not is_safe:
-            return ExecutionResult.failure(
+            return SandboxResult.failure(
                 error="Code failed security validation",
                 violations=violations
             )
@@ -479,7 +479,7 @@ class PythonSandbox:
         globals_dict: Dict[str, Any],
         locals_dict: Dict[str, Any],
         start_time: float
-    ) -> ExecutionResult:
+    ) -> SandboxResult:
         """Execute code with basic restrictions."""
         stdout_capture = io.StringIO()
         stderr_capture = io.StringIO()
@@ -490,7 +490,7 @@ class PythonSandbox:
 
             execution_time = time.time() - start_time
 
-            return ExecutionResult(
+            return SandboxResult(
                 success=True,
                 output=stdout_capture.getvalue(),
                 execution_time=execution_time,
@@ -498,12 +498,12 @@ class PythonSandbox:
             )
 
         except SecurityViolation as e:
-            return ExecutionResult.failure(
+            return SandboxResult.failure(
                 error=f"Security violation: {e.message}",
                 violations=[f"{e.violation_type}: {e.message}"]
             )
         except Exception as e:
-            return ExecutionResult.failure(
+            return SandboxResult.failure(
                 error=f"Execution error: {type(e).__name__}: {e}",
                 violations=[traceback.format_exc()]
             )
@@ -514,7 +514,7 @@ class PythonSandbox:
         globals_dict: Dict[str, Any],
         locals_dict: Dict[str, Any],
         start_time: float
-    ) -> ExecutionResult:
+    ) -> SandboxResult:
         """Execute code with resource limits using multiprocessing."""
 
         def run_in_subprocess(code: str, queue: multiprocessing.Queue):
@@ -569,7 +569,7 @@ class PythonSandbox:
                 if process.is_alive():
                     process.kill()
 
-                return ExecutionResult.failure(
+                return SandboxResult.failure(
                     error=f"Execution timed out after {self.config.max_execution_time}s",
                     violations=["TIMEOUT"]
                 )
@@ -578,7 +578,7 @@ class PythonSandbox:
                 result = queue.get_nowait()
                 execution_time = time.time() - start_time
 
-                return ExecutionResult(
+                return SandboxResult(
                     success=result['success'],
                     output=result['output'],
                     error=result['error'],
@@ -586,13 +586,13 @@ class PythonSandbox:
                     execution_time=execution_time,
                 )
 
-            return ExecutionResult.failure(
+            return SandboxResult.failure(
                 error="No result from subprocess",
                 violations=["SUBPROCESS_ERROR"]
             )
 
         except Exception as e:
-            return ExecutionResult.failure(
+            return SandboxResult.failure(
                 error=f"Subprocess error: {e}",
                 violations=["SUBPROCESS_ERROR"]
             )
@@ -603,7 +603,7 @@ class PythonSandbox:
 
 # Convenience functions
 
-def execute_python_safe(code: str, timeout: float = 5.0) -> ExecutionResult:
+def execute_python_safe(code: str, timeout: float = 5.0) -> SandboxResult:
     """Execute Python code with standard security."""
     config = SandboxConfig(
         level=SandboxLevel.STANDARD,
@@ -613,7 +613,7 @@ def execute_python_safe(code: str, timeout: float = 5.0) -> ExecutionResult:
     return sandbox.execute(code)
 
 
-def execute_python_strict(code: str, timeout: float = 3.0) -> ExecutionResult:
+def execute_python_strict(code: str, timeout: float = 3.0) -> SandboxResult:
     """Execute Python code with strict security."""
     config = SandboxConfig(
         level=SandboxLevel.STRICT,
@@ -641,7 +641,7 @@ __all__ = [
     'SandboxLevel',
     'SecurityViolation',
     'SandboxConfig',
-    'ExecutionResult',
+    'SandboxResult',
     'ASTSecurityAnalyzer',
     'SafeBuiltins',
     'SafeImporter',

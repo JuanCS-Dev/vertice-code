@@ -109,9 +109,8 @@ def main(
 def _run_tui():
     """Run the interactive Textual TUI."""
     try:
-        from jdev_tui.app import QwenApp
-        app_instance = QwenApp()
-        app_instance.run()
+        from jdev_cli.ui_launcher import launch_tui
+        launch_tui()
     except ImportError as e:
         console.print(f"[red]Error importing TUI:[/red] {e}")
         console.print("[dim]Falling back to legacy shell...[/dim]")
@@ -140,7 +139,7 @@ async def _run_headless(
     import json
 
     try:
-        from jdev_tui.core.bridge import get_bridge
+        from jdev_cli.ui_launcher import get_bridge
 
         bridge = get_bridge()
 
@@ -279,7 +278,7 @@ def chat(
 def status():
     """Show system status."""
     try:
-        from jdev_tui.core.bridge import get_bridge
+        from jdev_cli.ui_launcher import get_bridge
 
         bridge = get_bridge()
 
@@ -318,8 +317,10 @@ def status():
 def agents():
     """List available agents."""
     try:
-        from jdev_tui.core.bridge import AGENT_REGISTRY
+        from jdev_cli.ui_launcher import get_agent_registry
         from rich.table import Table
+
+        AGENT_REGISTRY = get_agent_registry()
 
         table = Table(title="Available Agents")
         table.add_column("Name", style="cyan")
@@ -344,7 +345,7 @@ def agents():
 def tools():
     """List available tools."""
     try:
-        from jdev_tui.core.bridge import get_bridge
+        from jdev_cli.ui_launcher import get_bridge
 
         bridge = get_bridge()
         console.print(bridge.get_tool_list())

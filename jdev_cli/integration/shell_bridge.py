@@ -28,8 +28,8 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class ExecutionResult:
-    """Result of tool execution."""
+class ToolExecutionResult:
+    """Result of tool execution (distinct from command ExecutionResult)."""
     success: bool
     tool_name: str
     result: Any
@@ -251,7 +251,7 @@ class ShellBridge:
         self,
         llm_response: str,
         session_id: Optional[str] = None,
-    ) -> List[ExecutionResult]:
+    ) -> List[ToolExecutionResult]:
         """Execute tool calls from LLM response.
         
         This is the lower-level API for direct tool execution.
@@ -289,7 +289,7 @@ class ShellBridge:
         self,
         tool_calls: List[Dict[str, Any]],
         session: Session,
-    ) -> List[ExecutionResult]:
+    ) -> List[ToolExecutionResult]:
         """Execute list of tool calls with safety validation.
         
         Args:
@@ -322,7 +322,7 @@ class ShellBridge:
         self,
         tool_call: Dict[str, Any],
         session: Session,
-    ) -> ExecutionResult:
+    ) -> ToolExecutionResult:
         """Execute single tool with full safety pipeline.
         
         Pipeline:
@@ -347,7 +347,7 @@ class ShellBridge:
         is_safe, block_reason = self.safety.is_safe(tool_call)
         if not is_safe:
             logger.warning(f"Tool call blocked: {block_reason}")
-            return ExecutionResult(
+            return ToolExecutionResult(
                 success=False,
                 tool_name=tool_name,
                 result=None,
@@ -359,7 +359,7 @@ class ShellBridge:
         try:
             # Get tool from registry
             if tool_name not in self.registry.tools:
-                return ExecutionResult(
+                return ToolExecutionResult(
                     success=False,
                     tool_name=tool_name,
                     result=None,
@@ -379,7 +379,7 @@ class ShellBridge:
             # Check if tool execution actually succeeded
             tool_success = result.success if hasattr(result, 'success') else True
             
-            return ExecutionResult(
+            return ToolExecutionResult(
                 success=tool_success,
                 tool_name=tool_name,
                 result=result,
@@ -390,7 +390,7 @@ class ShellBridge:
             logger.error(f"Tool execution failed: {e}", exc_info=True)
             execution_time = (datetime.now() - start_time).total_seconds()
             
-            return ExecutionResult(
+            return ToolExecutionResult(
                 success=False,
                 tool_name=tool_name,
                 result=None,
@@ -454,7 +454,7 @@ class ShellBridge:
         
         return "\n".join(context_parts)
     
-    def _format_execution_result(self, result: ExecutionResult) -> str:
+    def _format_execution_result(self, result: ToolExecutionResult) -> str:
         """Format execution result for display."""
         if result.blocked:
             return f"🚫 {result.tool_name}: BLOCKED - {result.block_reason}\n"

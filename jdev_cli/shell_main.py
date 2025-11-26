@@ -1669,7 +1669,7 @@ Context Optimizer:
         self.console.print("\n[bold cyan]📊 Constitutional Metrics[/bold cyan]\n")
         
         metrics = generate_constitutional_report(
-            codebase_path="qwen_dev_cli",
+            codebase_path="jdev_cli",
             completeness=0.95,
             precision=0.98,
             recall=0.92

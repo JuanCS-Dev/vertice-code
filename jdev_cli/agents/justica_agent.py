@@ -1,11 +1,11 @@
 """
 🏛️ Justiça Integrated Agent - Constitutional Governance for Multi-Agent Systems
 
-This module provides the integration layer between the qwen-dev-cli agent framework
+This module provides the integration layer between the jdev_cli agent framework
 and the Justiça constitutional governance framework.
 
 Architecture:
-    - Wraps third_party.justica.JusticaAgent as a BaseAgent
+    - Wraps jdev_governance.justica.JusticaAgent as a BaseAgent
     - Provides pre-execution governance hooks for all agent operations
     - Enforces constitutional principles through trust-based verification
     - Exposes governance metrics for UI/monitoring

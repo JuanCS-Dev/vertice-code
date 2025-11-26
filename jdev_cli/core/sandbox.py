@@ -96,31 +96,8 @@ class ResourceLimits:
         )
 
 
-@dataclass
-class ExecutionResult:
-    """Result of command execution."""
-    success: bool
-    exit_code: int
-    stdout: str
-    stderr: str
-    timed_out: bool = False
-    resource_exceeded: bool = False
-    execution_time: float = 0.0
-    command: List[str] = field(default_factory=list)
-    working_directory: Optional[str] = None
-    error_message: Optional[str] = None
-
-    @classmethod
-    def failure(cls, error: str, command: Optional[List[str]] = None) -> "ExecutionResult":
-        """Create a failed execution result."""
-        return cls(
-            success=False,
-            exit_code=-1,
-            stdout="",
-            stderr=error,
-            command=command or [],
-            error_message=error
-        )
+# ExecutionResult imported from canonical source
+from jdev_cli.core.execution import ExecutionResult
 
 
 class SecureExecutor:

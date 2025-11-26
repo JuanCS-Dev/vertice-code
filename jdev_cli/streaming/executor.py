@@ -13,8 +13,8 @@ from .streams import StreamProcessor, StreamType, LineBufferedStreamReader
 
 
 @dataclass
-class ExecutionResult:
-    """Command execution result."""
+class StreamingExecutionResult:
+    """Command execution result for streaming executor."""
     exit_code: int
     stdout: str
     stderr: str
@@ -36,7 +36,7 @@ class AsyncCommandExecutor:
         shell: bool = True,
         timeout: Optional[float] = None,
         stream_callback: Optional[callable] = None
-    ) -> ExecutionResult:
+    ) -> StreamingExecutionResult:
         """Execute command with real-time streaming."""
         import time
         start_time = time.time()
@@ -106,7 +106,7 @@ class AsyncCommandExecutor:
             
             duration = time.time() - start_time
             
-            return ExecutionResult(
+            return StreamingExecutionResult(
                 exit_code=process.returncode,
                 stdout=''.join(stdout_lines),
                 stderr=''.join(stderr_lines),
@@ -115,7 +115,7 @@ class AsyncCommandExecutor:
             )
         
         except Exception as e:
-            return ExecutionResult(
+            return StreamingExecutionResult(
                 exit_code=-1,
                 stdout='',
                 stderr=str(e),
@@ -127,11 +127,11 @@ class AsyncCommandExecutor:
         self,
         commands: list[str],
         max_concurrent: int = 5
-    ) -> list[ExecutionResult]:
+    ) -> list[StreamingExecutionResult]:
         """Execute multiple commands in parallel."""
         semaphore = asyncio.Semaphore(max_concurrent)
         
-        async def execute_with_limit(cmd: str) -> ExecutionResult:
+        async def execute_with_limit(cmd: str) -> StreamingExecutionResult:
             async with semaphore:
                 return await self.execute(cmd)
         

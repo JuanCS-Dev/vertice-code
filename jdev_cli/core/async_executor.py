@@ -26,9 +26,9 @@ class ToolCall:
 
 
 @dataclass
-class ExecutionResult:
-    """Result of parallel execution."""
-    
+class ParallelExecutionResult:
+    """Result of parallel tool execution."""
+
     results: Dict[str, Any]
     execution_time_ms: float
     parallelism_factor: float  # How much parallelism achieved
@@ -48,7 +48,7 @@ class AsyncExecutor:
         self,
         tool_calls: List[ToolCall],
         execute_fn
-    ) -> ExecutionResult:
+    ) -> ParallelExecutionResult:
         """Execute tools in parallel where possible.
         
         Args:
@@ -56,7 +56,7 @@ class AsyncExecutor:
             execute_fn: Async function to execute single tool
             
         Returns:
-            ExecutionResult with all results and timing
+            ParallelExecutionResult with all results and timing
         """
         import time
         start = time.time()
@@ -101,7 +101,7 @@ class AsyncExecutor:
         )
         parallelism = total_time_sequential / execution_time if execution_time > 0 else 1.0
         
-        return ExecutionResult(
+        return ParallelExecutionResult(
             results=results,
             execution_time_ms=execution_time,
             parallelism_factor=parallelism

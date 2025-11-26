@@ -23,8 +23,8 @@ Architecture:
 
 Usage:
     ```python
-    from third_party.justica import JusticaAgent, JusticaConfig, EnforcementMode
-    from third_party.justica import create_default_constitution
+    from jdev_governance.justica import JusticaAgent, JusticaConfig, EnforcementMode
+    from jdev_governance.justica import create_default_constitution
 
     config = JusticaConfig(
         agent_id="my-agent",
