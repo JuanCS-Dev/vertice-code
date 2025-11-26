@@ -1,7 +1,7 @@
 """
 planner/types.py: Domain Types for Planning System.
 
-Contains all Enums, Pydantic Models, and dataclasses used by the planner.
+Contains Enums and lightweight dataclasses used by the planner.
 Extracted from planner.py for better modularity (Boris Cherny pattern).
 
 Groups:
@@ -10,7 +10,10 @@ Groups:
 - Planning Modes (Claude Code pattern)
 - Confidence Ratings (Devin pattern)
 - Multi-Plan (Verbalized Sampling - Zhang et al. 2025)
-- SOP & Execution Models
+
+NOTE: SOPStep, ExecutionStage, and ExecutionPlan are defined in agent.py
+because they have complex fields tightly coupled with PlannerAgent.
+They are re-exported from __init__.py for convenience.
 """
 
 from __future__ import annotations
@@ -21,7 +24,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 
 # ============================================================================
@@ -293,109 +296,8 @@ class MultiPlanResult(BaseModel):
 
 
 # ============================================================================
-# SOP & EXECUTION MODELS
+# SOP & EXECUTION MODELS - See agent.py
 # ============================================================================
-
-class SOPStep(BaseModel):
-    """Standard Operating Procedure step."""
-    step_number: int
-    title: str
-    description: str
-    agent: str
-    tools_required: List[str] = Field(default_factory=list)
-    expected_output: str = ""
-    validation_criteria: List[str] = Field(default_factory=list)
-    estimated_tokens: int = 1000
-    priority: AgentPriority = AgentPriority.MEDIUM
-    dependencies: List[int] = Field(default_factory=list)
-    checkpoint: Optional[CheckpointType] = None
-    confidence: Optional[StepConfidence] = None
-
-    @field_validator('dependencies')
-    @classmethod
-    def validate_no_self_dependency(cls, v, info):
-        """Ensure step doesn't depend on itself."""
-        step_num = info.data.get('step_number', 0)
-        if step_num in v:
-            raise ValueError(f"Step {step_num} cannot depend on itself")
-        return v
-
-
-class ExecutionStage(BaseModel):
-    """A stage in the execution plan (groups of parallel steps)."""
-    stage_number: int
-    name: str
-    steps: List[SOPStep]
-    strategy: ExecutionStrategy = ExecutionStrategy.SEQUENTIAL
-    checkpoint: Optional[CheckpointType] = None
-
-
-class ExecutionPlan(BaseModel):
-    """Complete execution plan with stages and metadata."""
-    plan_id: str = Field(default_factory=lambda: f"plan-{uuid.uuid4().hex[:8]}")
-    title: str
-    objective: str
-    stages: List[ExecutionStage]
-    total_estimated_tokens: int = 0
-    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
-    clarifications: List[ClarificationResponse] = Field(default_factory=list)
-    mode: PlanningMode = PlanningMode.PLANNING
-    artifact_path: Optional[str] = None
-
-    @property
-    def total_steps(self) -> int:
-        return sum(len(stage.steps) for stage in self.stages)
-
-    def to_markdown(self) -> str:
-        """Convert plan to markdown artifact."""
-        lines = [
-            f"# {self.title}",
-            "",
-            f"**Plan ID:** {self.plan_id}",
-            f"**Created:** {self.created_at}",
-            f"**Mode:** {self.mode.value}",
-            "",
-            "## Objective",
-            self.objective,
-            "",
-            "---",
-            "",
-        ]
-
-        for stage in self.stages:
-            lines.append(f"## Stage {stage.stage_number}: {stage.name}")
-            lines.append(f"*Strategy: {stage.strategy.value}*")
-            lines.append("")
-
-            for step in stage.steps:
-                conf_str = ""
-                if step.confidence:
-                    conf_str = f" [{step.confidence.level.value}: {step.confidence.score:.0%}]"
-
-                lines.append(f"### Step {step.step_number}: {step.title}{conf_str}")
-                lines.append(f"**Agent:** {step.agent}")
-                lines.append(f"**Priority:** {step.priority.value}")
-                lines.append("")
-                lines.append(step.description)
-                lines.append("")
-
-                if step.tools_required:
-                    lines.append(f"**Tools:** {', '.join(step.tools_required)}")
-
-                if step.dependencies:
-                    lines.append(f"**Depends on:** Steps {step.dependencies}")
-
-                if step.validation_criteria:
-                    lines.append("**Validation:**")
-                    for crit in step.validation_criteria:
-                        lines.append(f"- [ ] {crit}")
-
-                lines.append("")
-
-            lines.append("---")
-            lines.append("")
-
-        lines.append(f"**Total Steps:** {self.total_steps}")
-        lines.append(f"**Estimated Tokens:** {self.total_estimated_tokens:,}")
-
-        return "\n".join(lines)
+# NOTE: SOPStep, ExecutionStage, and ExecutionPlan are defined in agent.py
+# because they have complex fields and are tightly coupled with PlannerAgent.
+# They are re-exported from __init__.py for convenience.

@@ -22,7 +22,7 @@ Example:
     from qwen_dev_cli.agents.planner.goap import GOAPPlanner, WorldState
 """
 
-# Re-export types
+# Re-export types (enums and lightweight models)
 from .types import (
     # Enums
     ExecutionStrategy,
@@ -34,14 +34,21 @@ from .types import (
     # Dataclasses
     StepConfidence,
     PlanProbabilities,
-    # Pydantic Models
+    # Pydantic Models (lightweight)
     ClarifyingQuestion,
     ClarificationResponse,
     AlternativePlan,
     MultiPlanResult,
+)
+
+# SOPStep, ExecutionStage, ExecutionPlan, ExecutionEvent, ExecutionMonitor
+# are in agent.py (complex, tightly coupled with PlannerAgent)
+from .agent import (
     SOPStep,
     ExecutionStage,
     ExecutionPlan,
+    ExecutionEvent,
+    ExecutionMonitor,
 )
 
 # Re-export GOAP
@@ -55,12 +62,8 @@ from .goap import (
 # Re-export dependency analysis
 from .dependency import DependencyAnalyzer
 
-# Re-export validation
-from .validation import (
-    PlanValidator,
-    ExecutionEvent,
-    ExecutionMonitor,
-)
+# Re-export validation (only PlanValidator - ExecutionEvent/Monitor are in agent.py)
+from .validation import PlanValidator
 
 # Re-export PlannerAgent from agent module
 from .agent import PlannerAgent
