@@ -86,31 +86,31 @@ def validate_imports(report: ValidationReport) -> None:
     
     # Test core imports
     try:
-        from qwen_dev_cli.core import config
+        from jdev_cli.core import config
         report.add_test("Import core.config", True)
     except Exception as e:
         report.add_test("Import core.config", False, f"Error: {e}")
     
     try:
-        from qwen_dev_cli.core import llm
+        from jdev_cli.core import llm
         report.add_test("Import core.llm", True)
     except Exception as e:
         report.add_test("Import core.llm", False, f"Error: {e}")
     
     try:
-        from qwen_dev_cli.core import context
+        from jdev_cli.core import context
         report.add_test("Import core.context", True)
     except Exception as e:
         report.add_test("Import core.context", False, f"Error: {e}")
     
     try:
-        from qwen_dev_cli.core import mcp
+        from jdev_cli.core import mcp
         report.add_test("Import core.mcp", True)
     except Exception as e:
         report.add_test("Import core.mcp", False, f"Error: {e}")
     
     try:
-        from qwen_dev_cli import ui
+        from jdev_cli import ui
         report.add_test("Import ui", True)
     except Exception as e:
         report.add_test("Import ui", False, f"Error: {e}")
@@ -121,7 +121,7 @@ def validate_configuration(report: ValidationReport) -> None:
     report.add_section("2. CONFIGURATION VALIDATION")
     
     try:
-        from qwen_dev_cli.core.config import config
+        from jdev_cli.core.config import config
         
         # Check required API keys
         has_hf_key = bool(config.hf_token)
@@ -164,7 +164,7 @@ def validate_llm_system(report: ValidationReport) -> None:
     report.add_section("3. LLM SYSTEM VALIDATION")
     
     try:
-        from qwen_dev_cli.core.llm import llm_client
+        from jdev_cli.core.llm import llm_client
         
         # Test available providers
         providers = llm_client.get_available_providers()
@@ -212,7 +212,7 @@ def validate_context_system(report: ValidationReport) -> None:
     report.add_section("4. CONTEXT MANAGEMENT VALIDATION")
     
     try:
-        from qwen_dev_cli.core.context import context_builder
+        from jdev_cli.core.context import context_builder
         
         # Test context builder methods
         report.add_test(
@@ -247,7 +247,7 @@ def validate_mcp_system(report: ValidationReport) -> None:
     report.add_section("5. MCP SYSTEM VALIDATION")
     
     try:
-        from qwen_dev_cli.core.mcp import mcp_manager
+        from jdev_cli.core.mcp import mcp_manager
         
         # Check MCP manager
         report.add_test(
@@ -277,7 +277,7 @@ def validate_ui_system(report: ValidationReport) -> None:
     report.add_section("6. UI SYSTEM VALIDATION")
     
     try:
-        from qwen_dev_cli.ui import create_ui
+        from jdev_cli.ui import create_ui
         
         # Test UI creation
         ui = create_ui()
@@ -305,13 +305,13 @@ def validate_file_structure(report: ValidationReport) -> None:
     base_path = Path(__file__).parent
     
     required_files = [
-        "qwen_dev_cli/__init__.py",
-        "qwen_dev_cli/core/__init__.py",
-        "qwen_dev_cli/core/config.py",
-        "qwen_dev_cli/core/llm.py",
-        "qwen_dev_cli/core/context.py",
-        "qwen_dev_cli/core/mcp.py",
-        "qwen_dev_cli/ui.py",
+        "jdev_cli/__init__.py",
+        "jdev_cli/core/__init__.py",
+        "jdev_cli/core/config.py",
+        "jdev_cli/core/llm.py",
+        "jdev_cli/core/context.py",
+        "jdev_cli/core/mcp.py",
+        "jdev_cli/ui.py",
         "requirements.txt",
         "README.md",
         "MASTER_PLAN.md",
@@ -349,7 +349,7 @@ def validate_constitutional_compliance(report: ValidationReport) -> None:
     
     # Article 3: Eficiência de Tokens
     try:
-        from qwen_dev_cli.core.llm import llm_client
+        from jdev_cli.core.llm import llm_client
         has_streaming = hasattr(llm_client, 'stream_chat')
         report.add_test(
             "Art. 3: Eficiência - Streaming support",
@@ -362,7 +362,7 @@ def validate_constitutional_compliance(report: ValidationReport) -> None:
     # Article 4: Composabilidade Hierárquica
     report.add_test(
         "Art. 4: Composabilidade - Modular structure",
-        (base_path / "qwen_dev_cli" / "core").is_dir(),
+        (base_path / "jdev_cli" / "core").is_dir(),
         "Hierarchical architecture"
     )
     
@@ -396,7 +396,7 @@ def validate_air_gaps(report: ValidationReport) -> None:
     report.add_section("9. AIR GAPS & ERROR HANDLING")
     
     try:
-        from qwen_dev_cli.core.llm import llm_client
+        from jdev_cli.core.llm import llm_client
         
         # Test graceful degradation (multi-provider system)
         providers = llm_client.get_available_providers()
@@ -408,7 +408,7 @@ def validate_air_gaps(report: ValidationReport) -> None:
         )
         
         # Test error handling in config
-        from qwen_dev_cli.core.config import config
+        from jdev_cli.core.config import config
         report.add_test(
             "Config has error handling",
             True,  # Config loads without crashing
@@ -416,7 +416,7 @@ def validate_air_gaps(report: ValidationReport) -> None:
         )
         
         # Test context safety
-        from qwen_dev_cli.core.context import context_builder
+        from jdev_cli.core.context import context_builder
         try:
             context_builder.clear()
             report.add_test(
@@ -438,7 +438,7 @@ def validate_performance(report: ValidationReport) -> None:
     try:
         # Test import speed
         start = time.time()
-        from qwen_dev_cli.core import llm, config, context, mcp
+        from jdev_cli.core import llm, config, context, mcp
         import_time = (time.time() - start) * 1000
         
         report.add_test(
@@ -449,7 +449,7 @@ def validate_performance(report: ValidationReport) -> None:
         
         # Test UI creation speed
         start = time.time()
-        from qwen_dev_cli.ui import create_ui
+        from jdev_cli.ui import create_ui
         ui = create_ui()
         ui_time = (time.time() - start) * 1000
         

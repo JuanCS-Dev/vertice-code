@@ -4,7 +4,7 @@ import pytest
 from pathlib import Path
 from datetime import datetime
 
-from qwen_dev_cli.hooks import HookContext
+from jdev_cli.hooks import HookContext
 
 
 class TestHookContext:

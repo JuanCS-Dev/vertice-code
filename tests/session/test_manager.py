@@ -6,8 +6,8 @@ import json
 from pathlib import Path
 from datetime import datetime, timedelta
 
-from qwen_dev_cli.session.manager import SessionManager
-from qwen_dev_cli.session.state import SessionState
+from jdev_cli.session.manager import SessionManager
+from jdev_cli.session.state import SessionState
 
 
 class TestSessionManager:

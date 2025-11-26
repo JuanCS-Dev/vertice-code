@@ -5,7 +5,7 @@ Tests 60fps target and render optimization
 
 import pytest
 import time
-from qwen_dev_cli.tui.components.workflow_visualizer import (
+from jdev_cli.tui.components.workflow_visualizer import (
     WorkflowVisualizer,
     WorkflowStep,
     StepStatus

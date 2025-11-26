@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Dict, List
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from qwen_dev_cli.agents.testing import (
+from jdev_cli.agents.testing import (
     TestingAgent,
     TestCase,
     TestType,
@@ -39,7 +39,7 @@ from qwen_dev_cli.agents.testing import (
     MutationResult,
     FlakyTest,
 )
-from qwen_dev_cli.agents.base import (
+from jdev_cli.agents.base import (
     AgentTask,
     TaskStatus,
     AgentRole,

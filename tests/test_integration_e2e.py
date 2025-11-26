@@ -14,10 +14,10 @@ import pytest
 import asyncio
 from pathlib import Path
 from unittest.mock import Mock, AsyncMock, patch
-from qwen_dev_cli.shell import InteractiveShell, SessionContext
-from qwen_dev_cli.tools.base import ToolResult
-from qwen_dev_cli.tui.components.workflow_visualizer import StepStatus
-from qwen_dev_cli.tui.components.dashboard import OperationStatus
+from jdev_cli.shell import InteractiveShell, SessionContext
+from jdev_cli.tools.base import ToolResult
+from jdev_cli.tui.components.workflow_visualizer import StepStatus
+from jdev_cli.tui.components.dashboard import OperationStatus
 
 
 class TestEndToEndIntegration:

@@ -7,13 +7,13 @@ import pytest
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
-from qwen_dev_cli.agents.architect import ArchitectAgent
-from qwen_dev_cli.agents.explorer import ExplorerAgent
-from qwen_dev_cli.agents.planner import PlannerAgent
-from qwen_dev_cli.agents.refactorer import RefactorerAgent
-from qwen_dev_cli.agents.reviewer import ReviewerAgent
-from qwen_dev_cli.agents.base import AgentTask
-from qwen_dev_cli.orchestration.squad import DevSquad
+from jdev_cli.agents.architect import ArchitectAgent
+from jdev_cli.agents.explorer import ExplorerAgent
+from jdev_cli.agents.planner import PlannerAgent
+from jdev_cli.agents.refactorer import RefactorerAgent
+from jdev_cli.agents.reviewer import ReviewerAgent
+from jdev_cli.agents.base import AgentTask
+from jdev_cli.orchestration.squad import DevSquad
 
 
 class TestArchitectStressPart2:
@@ -389,7 +389,7 @@ class TestPerformanceDegradation:
     @pytest.mark.asyncio
     async def test_memory_manager_performance(self):
         """Test MemoryManager doesn't degrade."""
-        from qwen_dev_cli.orchestration.memory import MemoryManager
+        from jdev_cli.orchestration.memory import MemoryManager
         
         manager = MemoryManager()
         
@@ -432,7 +432,7 @@ class TestRaceConditions:
     @pytest.mark.asyncio
     async def test_concurrent_memory_access(self):
         """Test concurrent memory access."""
-        from qwen_dev_cli.orchestration.memory import MemoryManager
+        from jdev_cli.orchestration.memory import MemoryManager
         
         manager = MemoryManager()
         session_id = manager.create_session("test")

@@ -21,13 +21,13 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from rich.console import Console
 
-from qwen_dev_cli.tui.theme import COLORS
-from qwen_dev_cli.tui.styles import get_rich_theme, PRESET_STYLES
-from qwen_dev_cli.tui.components.message import MessageBox, Message
-from qwen_dev_cli.tui.components.status import StatusBadge, StatusLevel, Spinner, SpinnerStyle
-from qwen_dev_cli.tui.components.progress import ProgressBar
-from qwen_dev_cli.tui.components.code import CodeBlock
-from qwen_dev_cli.tui.components.diff import DiffViewer, DiffMode
+from jdev_cli.tui.theme import COLORS
+from jdev_cli.tui.styles import get_rich_theme, PRESET_STYLES
+from jdev_cli.tui.components.message import MessageBox, Message
+from jdev_cli.tui.components.status import StatusBadge, StatusLevel, Spinner, SpinnerStyle
+from jdev_cli.tui.components.progress import ProgressBar
+from jdev_cli.tui.components.code import CodeBlock
+from jdev_cli.tui.components.diff import DiffViewer, DiffMode
 
 
 async def demo_messages(console: Console):

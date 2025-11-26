@@ -17,14 +17,14 @@ from unittest.mock import Mock, AsyncMock, patch
 from pathlib import Path
 import tempfile
 
-from qwen_dev_cli.core.recovery import (
+from jdev_cli.core.recovery import (
     ErrorRecoveryEngine,
     RecoveryContext,
     ErrorCategory,
     RetryPolicy,
     RecoveryCircuitBreaker
 )
-from qwen_dev_cli.core.workflow import (
+from jdev_cli.core.workflow import (
     GitRollback,
     PartialRollback
 )
@@ -315,7 +315,7 @@ class TestConstitutionalCompliance:
     def test_p1_completude_no_placeholders(self):
         """P1: Code must be complete, no TODOs or placeholders."""
         import inspect
-        from qwen_dev_cli.core import recovery, workflow
+        from jdev_cli.core import recovery, workflow
         
         # Check recovery module
         source_recovery = inspect.getsource(recovery)
@@ -354,8 +354,8 @@ class TestConstitutionalCompliance:
     
     def test_p4_rastreabilidade_full_docstrings(self):
         """P4: Traceability - all public functions documented."""
-        from qwen_dev_cli.core.recovery import RetryPolicy, RecoveryCircuitBreaker
-        from qwen_dev_cli.core.workflow import GitRollback, PartialRollback
+        from jdev_cli.core.recovery import RetryPolicy, RecoveryCircuitBreaker
+        from jdev_cli.core.workflow import GitRollback, PartialRollback
         
         # Check key classes have docstrings
         assert RetryPolicy.__doc__ is not None

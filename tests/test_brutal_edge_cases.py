@@ -9,7 +9,7 @@ Critério: Se quebrar aqui, vai quebrar na demo.
 import pytest
 import asyncio
 from unittest.mock import MagicMock, AsyncMock, patch
-from qwen_dev_cli.shell import InteractiveShell
+from jdev_cli.shell import InteractiveShell
 
 
 class TestImpossibleInputs:

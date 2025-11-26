@@ -3,7 +3,7 @@
 MEGA TEST E2E - PROVA CABAL
 ===========================
 
-Comprehensive test of all qwen_cli components.
+Comprehensive test of all jdev_tui components.
 Generates PROVA-CABAL.md report.
 """
 
@@ -59,17 +59,17 @@ def main():
     # =========================================================================
     section("1. CORE IMPORTS")
 
-    test("Import qwen_cli.app",
-         "from qwen_cli.app import QwenApp")
+    test("Import jdev_tui.app",
+         "from jdev_tui.app import QwenApp")
 
-    test("Import qwen_cli.core",
-         "from qwen_cli.core import Bridge, OutputFormatter, ToolCallParser")
+    test("Import jdev_tui.core",
+         "from jdev_tui.core import Bridge, OutputFormatter, ToolCallParser")
 
-    test("Import qwen_dev_cli.tools",
-         "from qwen_dev_cli.tools.base import Tool, ToolRegistry")
+    test("Import jdev_cli.tools",
+         "from jdev_cli.tools.base import Tool, ToolRegistry")
 
-    test("Import qwen_dev_cli.agents",
-         "from qwen_dev_cli.agents.base import BaseAgent")
+    test("Import jdev_cli.agents",
+         "from jdev_cli.agents.base import BaseAgent")
 
     # =========================================================================
     # 2. BRIDGE
@@ -77,19 +77,19 @@ def main():
     section("2. BRIDGE INITIALIZATION")
 
     test("Bridge creates",
-         "from qwen_cli.core import Bridge; b = Bridge()")
+         "from jdev_tui.core import Bridge; b = Bridge()")
 
     test("Bridge has LLM",
-         "from qwen_cli.core import Bridge; b = Bridge(); assert b.llm is not None")
+         "from jdev_tui.core import Bridge; b = Bridge(); assert b.llm is not None")
 
     test("Bridge has governance",
-         "from qwen_cli.core import Bridge; b = Bridge(); assert b.governance is not None")
+         "from jdev_tui.core import Bridge; b = Bridge(); assert b.governance is not None")
 
     test("Bridge has tools",
-         "from qwen_cli.core import Bridge; b = Bridge(); assert b.tools is not None")
+         "from jdev_tui.core import Bridge; b = Bridge(); assert b.tools is not None")
 
     test("Bridge has autocomplete",
-         "from qwen_cli.core import Bridge; b = Bridge(); assert b.autocomplete is not None")
+         "from jdev_tui.core import Bridge; b = Bridge(); assert b.autocomplete is not None")
 
     # =========================================================================
     # 3. TOOLS
@@ -97,19 +97,19 @@ def main():
     section("3. TOOL REGISTRY")
 
     test("ToolBridge loads tools",
-         "from qwen_cli.core.bridge import ToolBridge; tb = ToolBridge(); tools = tb.list_tools(); assert len(tools) >= 10, f'Only {len(tools)} tools'")
+         "from jdev_tui.core.bridge import ToolBridge; tb = ToolBridge(); tools = tb.list_tools(); assert len(tools) >= 10, f'Only {len(tools)} tools'")
 
     test("Tool schemas generate",
-         "from qwen_cli.core.bridge import ToolBridge; tb = ToolBridge(); schemas = tb.get_schemas_for_llm(); assert len(schemas) >= 5")
+         "from jdev_tui.core.bridge import ToolBridge; tb = ToolBridge(); schemas = tb.get_schemas_for_llm(); assert len(schemas) >= 5")
 
     test("File tools present",
-         "from qwen_cli.core.bridge import ToolBridge; tb = ToolBridge(); tools = tb.list_tools(); assert any('read' in t.lower() for t in tools)")
+         "from jdev_tui.core.bridge import ToolBridge; tb = ToolBridge(); tools = tb.list_tools(); assert any('read' in t.lower() for t in tools)")
 
     test("Bash tool present",
-         "from qwen_cli.core.bridge import ToolBridge; tb = ToolBridge(); tools = tb.list_tools(); assert any('bash' in t.lower() for t in tools)")
+         "from jdev_tui.core.bridge import ToolBridge; tb = ToolBridge(); tools = tb.list_tools(); assert any('bash' in t.lower() for t in tools)")
 
     test("Git tools present",
-         "from qwen_cli.core.bridge import ToolBridge; tb = ToolBridge(); tools = tb.list_tools(); assert any('git' in t.lower() for t in tools)")
+         "from jdev_tui.core.bridge import ToolBridge; tb = ToolBridge(); tools = tb.list_tools(); assert any('git' in t.lower() for t in tools)")
 
     # =========================================================================
     # 4. AGENTS
@@ -122,7 +122,7 @@ def main():
 
     for agent in agents:
         test(f"Agent: {agent}",
-             f"from qwen_cli.core.bridge import AgentManager, GeminiClient; am = AgentManager(GeminiClient()); assert '{agent}' in am.available_agents")
+             f"from jdev_tui.core.bridge import AgentManager, GeminiClient; am = AgentManager(GeminiClient()); assert '{agent}' in am.available_agents")
 
     # =========================================================================
     # 5. TOOL CALL PARSER
@@ -130,13 +130,13 @@ def main():
     section("5. TOOL CALL PARSER")
 
     test("Extract tool calls",
-         'from qwen_cli.core.bridge import ToolCallParser; calls = ToolCallParser.extract(\'[TOOL_CALL:write_file:{"path":"test.txt"}]\'); assert len(calls) == 1')
+         'from jdev_tui.core.bridge import ToolCallParser; calls = ToolCallParser.extract(\'[TOOL_CALL:write_file:{"path":"test.txt"}]\'); assert len(calls) == 1')
 
     test("Remove markers",
-         "from qwen_cli.core.bridge import ToolCallParser; clean = ToolCallParser.remove('Before [TOOL_CALL:x:{}] After'); assert '[TOOL_CALL' not in clean")
+         "from jdev_tui.core.bridge import ToolCallParser; clean = ToolCallParser.remove('Before [TOOL_CALL:x:{}] After'); assert '[TOOL_CALL' not in clean")
 
     test("Roundtrip",
-         "from qwen_cli.core.bridge import ToolCallParser; marker = ToolCallParser.format_marker('test', {'a': 1}); calls = ToolCallParser.extract(marker); assert calls[0][0] == 'test'")
+         "from jdev_tui.core.bridge import ToolCallParser; marker = ToolCallParser.format_marker('test', {'a': 1}); calls = ToolCallParser.extract(marker); assert calls[0][0] == 'test'")
 
     # =========================================================================
     # 6. OUTPUT FORMATTER
@@ -144,16 +144,16 @@ def main():
     section("6. OUTPUT FORMATTER")
 
     test("format_response",
-         "from qwen_cli.core.output_formatter import OutputFormatter; from rich.panel import Panel; p = OutputFormatter.format_response('test'); assert isinstance(p, Panel)")
+         "from jdev_tui.core.output_formatter import OutputFormatter; from rich.panel import Panel; p = OutputFormatter.format_response('test'); assert isinstance(p, Panel)")
 
     test("format_tool_result",
-         "from qwen_cli.core.output_formatter import OutputFormatter; OutputFormatter.format_tool_result('test', True, 'data')")
+         "from jdev_tui.core.output_formatter import OutputFormatter; OutputFormatter.format_tool_result('test', True, 'data')")
 
     test("format_code_block",
-         "from qwen_cli.core.output_formatter import OutputFormatter; OutputFormatter.format_code_block('print(1)', 'python')")
+         "from jdev_tui.core.output_formatter import OutputFormatter; OutputFormatter.format_code_block('print(1)', 'python')")
 
     test("Truncates long content",
-         "from qwen_cli.core.output_formatter import OutputFormatter; from io import StringIO; from rich.console import Console; c = Console(file=StringIO()); c.print(OutputFormatter.format_response('x'*10000)); assert 'truncat' in c.file.getvalue().lower()")
+         "from jdev_tui.core.output_formatter import OutputFormatter; from io import StringIO; from rich.console import Console; c = Console(file=StringIO()); c.print(OutputFormatter.format_response('x'*10000)); assert 'truncat' in c.file.getvalue().lower()")
 
     # =========================================================================
     # 7. AUTOCOMPLETE
@@ -161,13 +161,13 @@ def main():
     section("7. AUTOCOMPLETE")
 
     test("AutocompleteBridge init",
-         "from qwen_cli.core.bridge import AutocompleteBridge, ToolBridge; AutocompleteBridge(ToolBridge())")
+         "from jdev_tui.core.bridge import AutocompleteBridge, ToolBridge; AutocompleteBridge(ToolBridge())")
 
     test("Completions for /",
-         "from qwen_cli.core.bridge import AutocompleteBridge, ToolBridge; ab = AutocompleteBridge(ToolBridge()); comps = ab.get_completions('/h'); assert len(comps) > 0")
+         "from jdev_tui.core.bridge import AutocompleteBridge, ToolBridge; ab = AutocompleteBridge(ToolBridge()); comps = ab.get_completions('/h'); assert len(comps) > 0")
 
     test("Completions for tools",
-         "from qwen_cli.core.bridge import AutocompleteBridge, ToolBridge; ab = AutocompleteBridge(ToolBridge()); comps = ab.get_completions('read'); assert len(comps) > 0")
+         "from jdev_tui.core.bridge import AutocompleteBridge, ToolBridge; ab = AutocompleteBridge(ToolBridge()); comps = ab.get_completions('read'); assert len(comps) > 0")
 
     # =========================================================================
     # 8. GOVERNANCE
@@ -175,13 +175,13 @@ def main():
     section("8. GOVERNANCE")
 
     test("GovernanceObserver init",
-         "from qwen_cli.core.bridge import GovernanceObserver; GovernanceObserver()")
+         "from jdev_tui.core.bridge import GovernanceObserver; GovernanceObserver()")
 
     test("Risk assessment",
-         "from qwen_cli.core.bridge import GovernanceObserver; go = GovernanceObserver(); go.assess_risk('rm -rf /')")
+         "from jdev_tui.core.bridge import GovernanceObserver; go = GovernanceObserver(); go.assess_risk('rm -rf /')")
 
     test("Observer mode",
-         "from qwen_cli.core.bridge import GovernanceObserver; go = GovernanceObserver(); assert go.config.block_on_violation == False")
+         "from jdev_tui.core.bridge import GovernanceObserver; go = GovernanceObserver(); assert go.config.block_on_violation == False")
 
     # =========================================================================
     # 9. SYSTEM PROMPT
@@ -189,10 +189,10 @@ def main():
     section("9. SYSTEM PROMPT")
 
     test("Contains tools",
-         "from qwen_cli.core.bridge import Bridge; b = Bridge(); prompt = b._get_system_prompt(); assert 'tool' in prompt.lower()")
+         "from jdev_tui.core.bridge import Bridge; b = Bridge(); prompt = b._get_system_prompt(); assert 'tool' in prompt.lower()")
 
     test("Action focused",
-         "from qwen_cli.core.bridge import Bridge; b = Bridge(); prompt = b._get_system_prompt(); assert 'action' in prompt.lower() or 'execute' in prompt.lower()")
+         "from jdev_tui.core.bridge import Bridge; b = Bridge(); prompt = b._get_system_prompt(); assert 'action' in prompt.lower() or 'execute' in prompt.lower()")
 
     # =========================================================================
     # SUMMARY
@@ -216,7 +216,7 @@ def main():
 
     # Get tool and agent counts
     try:
-        from qwen_cli.core.bridge import ToolBridge, AgentManager, GeminiClient
+        from jdev_tui.core.bridge import ToolBridge, AgentManager, GeminiClient
         tb = ToolBridge()
         tools = tb.list_tools()
         am = AgentManager(GeminiClient())

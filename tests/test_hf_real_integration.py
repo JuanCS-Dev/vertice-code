@@ -1,8 +1,8 @@
 """Real-world integration tests using HuggingFace API - PRODUCTION VALIDATION"""
 import pytest
 import os
-from qwen_dev_cli.core.llm import LLMClient
-from qwen_dev_cli.core.context import ContextBuilder
+from jdev_cli.core.llm import LLMClient
+from jdev_cli.core.context import ContextBuilder
 
 class TestHFRealIntegration:
     """Test real LLM behavior with actual API calls"""

@@ -22,9 +22,9 @@ from pathlib import Path
 from unittest.mock import Mock, MagicMock, patch, AsyncMock
 from typing import Optional
 
-from qwen_dev_cli.shell import InteractiveShell
-from qwen_dev_cli.tools.exec_hardened import BashCommandTool
-from qwen_dev_cli.core.conversation import ConversationState
+from jdev_cli.shell import InteractiveShell
+from jdev_cli.tools.exec_hardened import BashCommandTool
+from jdev_cli.core.conversation import ConversationState
 
 
 @pytest.fixture(autouse=True)

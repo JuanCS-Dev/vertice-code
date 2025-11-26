@@ -8,7 +8,7 @@ import pytest
 import os
 import asyncio
 
-from qwen_dev_cli.core.providers.gemini import GeminiProvider
+from jdev_cli.core.providers.gemini import GeminiProvider
 
 
 # Skip tests if no API key

@@ -10,8 +10,8 @@ Validates:
 
 import pytest
 import time
-from qwen_dev_cli.core.metrics import MetricsCollector, MetricsAggregator
-from qwen_dev_cli.core.defense import (
+from jdev_cli.core.metrics import MetricsCollector, MetricsAggregator
+from jdev_cli.core.defense import (
     PromptInjectionDefender,
     AutoCritic,
     ContextCompactor

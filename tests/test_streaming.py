@@ -2,7 +2,7 @@
 
 import pytest
 import asyncio
-from qwen_dev_cli.streaming import (
+from jdev_cli.streaming import (
     AsyncCommandExecutor,
     ExecutionResult,
     ReactiveRenderer,

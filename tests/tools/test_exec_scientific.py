@@ -22,7 +22,7 @@ import signal
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-from qwen_dev_cli.tools.exec_hardened import (
+from jdev_cli.tools.exec_hardened import (
     BashCommandToolHardened,
     CommandValidator,
     ExecutionLimits

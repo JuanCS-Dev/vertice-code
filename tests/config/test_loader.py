@@ -4,8 +4,8 @@ import pytest
 import tempfile
 from pathlib import Path
 
-from qwen_dev_cli.config.loader import ConfigLoader
-from qwen_dev_cli.config.schema import QwenConfig
+from jdev_cli.config.loader import ConfigLoader
+from jdev_cli.config.schema import QwenConfig
 
 
 class TestConfigLoader:

@@ -15,7 +15,7 @@ from pathlib import Path
 import tempfile
 import time
 
-from qwen_dev_cli.integration.sandbox import (
+from jdev_cli.integration.sandbox import (
     SandboxExecutor,
     SandboxResult,
     get_sandbox

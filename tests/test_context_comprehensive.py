@@ -3,7 +3,7 @@
 import pytest
 import tempfile
 from pathlib import Path
-from qwen_dev_cli.core.context import ContextBuilder, context_builder
+from jdev_cli.core.context import ContextBuilder, context_builder
 
 
 class TestContextBuilderBasics:

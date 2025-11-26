@@ -2,12 +2,12 @@
 
 import pytest
 from unittest.mock import MagicMock, patch, AsyncMock
-from qwen_dev_cli.shell import InteractiveShell
-from qwen_dev_cli.orchestration.squad import WorkflowResult, WorkflowStatus
+from jdev_cli.shell import InteractiveShell
+from jdev_cli.orchestration.squad import WorkflowResult, WorkflowStatus
 
 @pytest.fixture
 def mock_squad_class():
-    with patch("qwen_dev_cli.shell.DevSquad") as mock_class:
+    with patch("jdev_cli.shell.DevSquad") as mock_class:
         squad_instance = MagicMock()
         result = WorkflowResult(
             request="test",
@@ -22,7 +22,7 @@ def mock_squad_class():
 async def test_shell_squad_command(mock_squad_class):
     """Test /squad command in shell."""
     # Mock MCPClient to avoid real init
-    with patch("qwen_dev_cli.shell.MCPClient"):
+    with patch("jdev_cli.shell.MCPClient"):
         shell = InteractiveShell()
     shell.console = MagicMock()
     
@@ -43,7 +43,7 @@ async def test_shell_squad_command(mock_squad_class):
 async def test_shell_workflow_list_command():
     """Test /workflow list command in shell."""
     # Mock MCPClient and DevSquad
-    with patch("qwen_dev_cli.shell.MCPClient"), patch("qwen_dev_cli.shell.DevSquad"):
+    with patch("jdev_cli.shell.MCPClient"), patch("jdev_cli.shell.DevSquad"):
         shell = InteractiveShell()
     shell.console = MagicMock()
     
@@ -66,7 +66,7 @@ async def test_shell_workflow_list_command():
 async def test_shell_workflow_run_command(mock_squad_class):
     """Test /workflow run command in shell."""
     # Mock MCPClient
-    with patch("qwen_dev_cli.shell.MCPClient"):
+    with patch("jdev_cli.shell.MCPClient"):
         shell = InteractiveShell()
     shell.console = MagicMock()
     

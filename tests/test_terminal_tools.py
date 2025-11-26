@@ -6,7 +6,7 @@ import tempfile
 import os
 from pathlib import Path
 
-from qwen_dev_cli.tools.terminal import (
+from jdev_cli.tools.terminal import (
     CdTool, LsTool, PwdTool, MkdirTool, RmTool,
     CpTool, MvTool, TouchTool, CatTool
 )

@@ -9,8 +9,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
 
-from qwen_dev_cli.core.integration_coordinator import Coordinator, SimpleEventBus
-from qwen_dev_cli.core.integration_types import (
+from jdev_cli.core.integration_coordinator import Coordinator, SimpleEventBus
+from jdev_cli.core.integration_types import (
     AgentResponse,
     Event,
     EventType,
@@ -41,10 +41,10 @@ def coordinator(event_bus, tmp_path):
 @pytest.fixture
 def mock_context():
     """Create mock rich context (uses existing dataclass structure)."""
-    from qwen_dev_cli.intelligence.context_enhanced import (
+    from jdev_cli.intelligence.context_enhanced import (
         RichContext, GitStatus, WorkspaceInfo, TerminalInfo
     )
-    from qwen_dev_cli.intelligence.types import Context
+    from jdev_cli.intelligence.types import Context
     
     # Create base context
     base = Context(

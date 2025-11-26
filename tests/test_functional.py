@@ -13,7 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from qwen_dev_cli.core.llm import llm_client
+from jdev_cli.core.llm import llm_client
 
 
 async def test_basic_generation():
@@ -170,7 +170,7 @@ async def test_context_builder():
     print("🧪 TEST 5: CONTEXT BUILDER")
     print("="*80)
     
-    from qwen_dev_cli.core.context import context_builder
+    from jdev_cli.core.context import context_builder
     
     try:
         # Test stats

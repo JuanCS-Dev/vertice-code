@@ -1,6 +1,6 @@
 """Test script for MCP manager."""
 
-from qwen_dev_cli.core.mcp import MCPManager
+from jdev_cli.core.mcp import MCPManager
 
 def test_mcp_manager():
     """Test MCP manager functionality."""

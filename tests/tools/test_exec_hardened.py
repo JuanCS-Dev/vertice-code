@@ -12,7 +12,7 @@ import os
 import tempfile
 from pathlib import Path
 
-from qwen_dev_cli.tools.exec_hardened import (
+from jdev_cli.tools.exec_hardened import (
     BashCommandToolHardened,
     CommandValidator,
     ExecutionLimits
@@ -333,7 +333,7 @@ class TestBackwardCompatibility:
     @pytest.mark.asyncio
     async def test_bash_command_tool_alias_works(self):
         """BashCommandTool alias works."""
-        from qwen_dev_cli.tools.exec_hardened import BashCommandTool
+        from jdev_cli.tools.exec_hardened import BashCommandTool
         
         tool = BashCommandTool()
         result = await tool.execute(command="echo test")

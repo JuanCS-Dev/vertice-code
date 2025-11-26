@@ -2,8 +2,8 @@
 
 import asyncio
 from dotenv import load_dotenv
-from qwen_dev_cli.core.llm import llm_client
-from qwen_dev_cli.core.config import config
+from jdev_cli.core.llm import llm_client
+from jdev_cli.core.config import config
 
 # Load environment variables
 load_dotenv()

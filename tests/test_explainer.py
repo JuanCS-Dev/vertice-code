@@ -4,14 +4,14 @@ Boris Cherny: Test all public APIs, edge cases, and integrations.
 """
 
 import pytest
-from qwen_dev_cli.explainer import (
+from jdev_cli.explainer import (
     ExplanationEngine,
     explain_command,
     Explanation,
     ExplanationLevel,
     CommandBreakdown
 )
-from qwen_dev_cli.intelligence.context_enhanced import (
+from jdev_cli.intelligence.context_enhanced import (
     RichContext,
     ExpertiseLevel
 )

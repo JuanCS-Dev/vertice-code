@@ -8,10 +8,10 @@ import pytest
 import asyncio
 import os
 from pathlib import Path
-from qwen_dev_cli.core.llm import LLMClient
-from qwen_dev_cli.core.mcp_client import MCPClient
-from qwen_dev_cli.tools.registry_helper import get_default_registry
-from qwen_dev_cli.orchestration.squad import DevSquad, WorkflowStatus
+from jdev_cli.core.llm import LLMClient
+from jdev_cli.core.mcp_client import MCPClient
+from jdev_cli.tools.registry_helper import get_default_registry
+from jdev_cli.orchestration.squad import DevSquad, WorkflowStatus
 
 # Skip if no keys are present
 requires_api_key = pytest.mark.skipif(

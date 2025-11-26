@@ -5,7 +5,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from rich.console import Console
-from qwen_dev_cli.tui.landing import create_landing_screen
+from jdev_cli.tui.landing import create_landing_screen
 
 def verify():
     console = Console()

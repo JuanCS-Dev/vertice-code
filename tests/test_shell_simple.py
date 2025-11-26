@@ -7,7 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from qwen_dev_cli.tools.exec import BashCommandTool
+from jdev_cli.tools.exec import BashCommandTool
 
 
 async def test_manual_scenario():

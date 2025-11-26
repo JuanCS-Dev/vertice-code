@@ -10,7 +10,7 @@ Tests all parsing strategies + new features:
 import pytest
 import json
 from pathlib import Path
-from qwen_dev_cli.core.parser import ResponseParser, ParseResult, ParseStrategy
+from jdev_cli.core.parser import ResponseParser, ParseResult, ParseStrategy
 
 
 @pytest.fixture

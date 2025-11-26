@@ -5,8 +5,8 @@ Tests completos do Planner Agent com todos os edge cases.
 import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch
-from qwen_dev_cli.agents.planner import PlannerAgent
-from qwen_dev_cli.agents.base import AgentRole, TaskContext, TaskStatus
+from jdev_cli.agents.planner import PlannerAgent
+from jdev_cli.agents.base import AgentRole, TaskContext, TaskStatus
 
 
 class TestPlannerImplementationPlanning:

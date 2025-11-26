@@ -8,8 +8,8 @@ Demonstrates:
 """
 
 import asyncio
-from qwen_dev_cli.core.parser import ResponseParser
-from qwen_dev_cli.core.llm import LLMClient
+from jdev_cli.core.parser import ResponseParser
+from jdev_cli.core.llm import LLMClient
 
 
 async def main():

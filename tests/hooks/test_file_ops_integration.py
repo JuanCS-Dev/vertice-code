@@ -11,10 +11,10 @@ import shutil
 from pathlib import Path
 from unittest.mock import Mock, AsyncMock, patch
 
-from qwen_dev_cli.tools.file_ops import WriteFileTool, EditFileTool
-from qwen_dev_cli.hooks import HookExecutor, HookEvent, HookContext
-from qwen_dev_cli.config.loader import ConfigLoader
-from qwen_dev_cli.config.schema import QwenConfig, HooksConfig
+from jdev_cli.tools.file_ops import WriteFileTool, EditFileTool
+from jdev_cli.hooks import HookExecutor, HookEvent, HookContext
+from jdev_cli.config.loader import ConfigLoader
+from jdev_cli.config.schema import QwenConfig, HooksConfig
 
 
 class TestFileOpsHooksIntegration:

@@ -6,7 +6,7 @@ import tempfile
 import shutil
 from pathlib import Path
 
-from qwen_dev_cli.hooks import (
+from jdev_cli.hooks import (
     HookExecutor,
     HookEvent,
     HookContext

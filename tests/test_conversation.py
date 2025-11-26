@@ -9,7 +9,7 @@ import time
 from pathlib import Path
 import tempfile
 
-from qwen_dev_cli.core.conversation import (
+from jdev_cli.core.conversation import (
     ConversationManager,
     ConversationState,
     ConversationTurn,

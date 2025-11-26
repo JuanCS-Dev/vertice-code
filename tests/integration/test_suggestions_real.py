@@ -8,7 +8,7 @@ Scientific Validation - Boris Cherny
 
 import pytest
 from pathlib import Path
-from qwen_dev_cli.intelligence.context_suggestions import ContextSuggestionEngine
+from jdev_cli.intelligence.context_suggestions import ContextSuggestionEngine
 
 
 class TestRealProjectIntegration:
@@ -19,7 +19,7 @@ class TestRealProjectIntegration:
         project_root = Path(__file__).parent.parent.parent
         engine = ContextSuggestionEngine(project_root=project_root)
         
-        shell_py = project_root / "qwen_dev_cli" / "shell.py"
+        shell_py = project_root / "jdev_cli" / "shell.py"
         assert shell_py.exists(), "shell.py not found"
         
         # Get recommendations
@@ -47,7 +47,7 @@ class TestRealProjectIntegration:
         project_root = Path(__file__).parent.parent.parent
         engine = ContextSuggestionEngine(project_root=project_root)
         
-        lsp_client = project_root / "qwen_dev_cli" / "intelligence" / "lsp_client.py"
+        lsp_client = project_root / "jdev_cli" / "intelligence" / "lsp_client.py"
         assert lsp_client.exists(), "lsp_client.py not found"
         
         recommendations = engine.suggest_related_files(lsp_client, max_suggestions=10)
@@ -64,7 +64,7 @@ class TestRealProjectIntegration:
         engine = ContextSuggestionEngine(project_root=project_root)
         
         # Pick a file that might have issues
-        shell_py = project_root / "qwen_dev_cli" / "shell.py"
+        shell_py = project_root / "jdev_cli" / "shell.py"
         
         suggestions = engine.suggest_edits(shell_py)
         
@@ -82,7 +82,7 @@ class TestRealProjectIntegration:
         project_root = Path(__file__).parent.parent.parent
         engine = ContextSuggestionEngine(project_root=project_root)
         
-        shell_py = project_root / "qwen_dev_cli" / "shell.py"
+        shell_py = project_root / "jdev_cli" / "shell.py"
         context = engine.analyze_file_context(shell_py)
         
         # Validate context structure

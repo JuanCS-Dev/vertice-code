@@ -11,11 +11,11 @@ from pathlib import Path
 # Add project to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from qwen_dev_cli.core.llm import LLMClient
-from qwen_dev_cli.core.token_tracker import TokenTracker
-from qwen_dev_cli.session.manager import SessionManager
-from qwen_dev_cli.tools.base import ToolRegistry
-from qwen_dev_cli.tools.file_ops import ReadFileTool, ListDirectoryTool
+from jdev_cli.core.llm import LLMClient
+from jdev_cli.core.token_tracker import TokenTracker
+from jdev_cli.session.manager import SessionManager
+from jdev_cli.tools.base import ToolRegistry
+from jdev_cli.tools.file_ops import ReadFileTool, ListDirectoryTool
 from rich.console import Console
 
 

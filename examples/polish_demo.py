@@ -25,25 +25,25 @@ from rich.panel import Panel
 from rich.text import Text
 from rich.table import Table
 
-from qwen_dev_cli.tui.feedback import (
+from jdev_cli.tui.feedback import (
     MicroInteraction,
     LoadingState,
     StateTransition,
     HapticFeedback,
 )
-from qwen_dev_cli.tui.animations import (
+from jdev_cli.tui.animations import (
     Animator,
     AnimationConfig,
     LoadingAnimation,
     Easing,
 )
-from qwen_dev_cli.tui.accessibility import (
+from jdev_cli.tui.accessibility import (
     generate_accessibility_report,
     KeyboardNavigation,
     ScreenReaderText,
 )
-from qwen_dev_cli.tui.theme import COLORS
-from qwen_dev_cli.tui.wisdom import get_random_verse
+from jdev_cli.tui.theme import COLORS
+from jdev_cli.tui.wisdom import get_random_verse
 
 
 def demo_micro_interactions(console: Console):

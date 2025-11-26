@@ -8,7 +8,7 @@ import pytest
 import os
 import tempfile
 from pathlib import Path
-from qwen_dev_cli.agents.documentation import DocumentationAgent
+from jdev_cli.agents.documentation import DocumentationAgent
 
 # Skip if no API key (CI environment)
 pytestmark = pytest.mark.skipif(

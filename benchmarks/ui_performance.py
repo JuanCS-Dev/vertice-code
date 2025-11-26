@@ -19,11 +19,11 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.panel import Panel
 from rich.tree import Tree
 
-from qwen_dev_cli.tui.components.enhanced_progress import EnhancedProgress
-from qwen_dev_cli.tui.components.dashboard import StatusDashboard
-from qwen_dev_cli.tui.components.workflow_visualizer import WorkflowVisualizer
-from qwen_dev_cli.tui.input_enhanced import EnhancedInput
-from qwen_dev_cli.tui.context_awareness import ContextAwareness
+from jdev_cli.tui.components.enhanced_progress import EnhancedProgress
+from jdev_cli.tui.components.dashboard import StatusDashboard
+from jdev_cli.tui.components.workflow_visualizer import WorkflowVisualizer
+from jdev_cli.tui.input_enhanced import EnhancedInput
+from jdev_cli.tui.context_awareness import ContextAwareness
 
 
 @dataclass

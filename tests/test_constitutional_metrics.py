@@ -6,7 +6,7 @@ Validates LEI, HRI, CPI calculations per Constituição Vértice v3.0.
 import pytest
 import tempfile
 import os
-from qwen_dev_cli.core.constitutional_metrics import (
+from jdev_cli.core.constitutional_metrics import (
     calculate_lei,
     calculate_hri,
     calculate_cpi,

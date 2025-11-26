@@ -6,7 +6,7 @@ Boris Cherny Implementation - Week 4 Day 1
 
 import pytest
 from pathlib import Path
-from qwen_dev_cli.intelligence.context_suggestions import (
+from jdev_cli.intelligence.context_suggestions import (
     ContextSuggestionEngine,
     FileRecommendation,
     CodeSuggestion

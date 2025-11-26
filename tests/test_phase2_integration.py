@@ -12,13 +12,13 @@ import os
 import tempfile
 from pathlib import Path
 
-from qwen_dev_cli.integration import (
+from jdev_cli.integration import (
     SafetyValidator,
     SessionManager,
     ShellBridge,
     ExecutionResult,
 )
-from qwen_dev_cli.core.parser import ResponseParser
+from jdev_cli.core.parser import ResponseParser
 
 
 class TestSafetyValidator:

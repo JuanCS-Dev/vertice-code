@@ -6,17 +6,17 @@ import tempfile
 import shutil
 from pathlib import Path
 
-from qwen_dev_cli.tools.file_ops import (
+from jdev_cli.tools.file_ops import (
     ReadFileTool, WriteFileTool, EditFileTool,
     ListDirectoryTool, DeleteFileTool
 )
-from qwen_dev_cli.tools.file_mgmt import (
+from jdev_cli.tools.file_mgmt import (
     MoveFileTool, CopyFileTool, CreateDirectoryTool,
     ReadMultipleFilesTool, InsertLinesTool
 )
-from qwen_dev_cli.tools.search import SearchFilesTool, GetDirectoryTreeTool
-from qwen_dev_cli.tools.exec import BashCommandTool
-from qwen_dev_cli.tools.git_ops import GitStatusTool, GitDiffTool
+from jdev_cli.tools.search import SearchFilesTool, GetDirectoryTreeTool
+from jdev_cli.tools.exec import BashCommandTool
+from jdev_cli.tools.git_ops import GitStatusTool, GitDiffTool
 
 
 async def test_file_ops():

@@ -7,13 +7,13 @@ import os
 from pathlib import Path
 import time
 
-from qwen_dev_cli.core.cache import (
+from jdev_cli.core.cache import (
     LRUCache, DiskCache, PerformanceCache, cache_key
 )
-from qwen_dev_cli.core.async_executor import (
+from jdev_cli.core.async_executor import (
     AsyncExecutor, ToolCall, detect_dependencies
 )
-from qwen_dev_cli.core.file_watcher import (
+from jdev_cli.core.file_watcher import (
     FileWatcher, RecentFilesTracker, FileEvent
 )
 

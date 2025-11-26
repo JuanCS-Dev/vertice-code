@@ -6,9 +6,9 @@ NOTA: Testes de integração interna, NÃO com sistema externo ainda.
 import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
-from qwen_dev_cli.agents.planner import PlannerAgent
-from qwen_dev_cli.agents.refactorer import RefactorerAgent
-from qwen_dev_cli.agents.base import AgentRole, TaskContext, TaskStatus, TaskResult
+from jdev_cli.agents.planner import PlannerAgent
+from jdev_cli.agents.refactorer import RefactorerAgent
+from jdev_cli.agents.base import AgentRole, TaskContext, TaskStatus, TaskResult
 
 
 class TestPlannerRefactorerCollaboration:

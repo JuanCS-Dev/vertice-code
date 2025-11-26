@@ -15,7 +15,7 @@ import pytest
 import asyncio
 import os
 from huggingface_hub import InferenceClient
-from qwen_dev_cli.core.config import config
+from jdev_cli.core.config import config
 import numpy as np
 
 

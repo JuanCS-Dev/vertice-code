@@ -16,7 +16,7 @@ async def test_tool_execution():
     """Test direct tool execution."""
     console.print(Panel("🧪 Test 1: Direct Tool Execution", style="cyan"))
     
-    from qwen_dev_cli.tools.file_ops import ReadFileTool
+    from jdev_cli.tools.file_ops import ReadFileTool
     
     tool = ReadFileTool()
     result = await tool.execute(path="README.md")
@@ -33,8 +33,8 @@ async def test_tool_registry():
     """Test tool registration and lookup."""
     console.print(Panel("🧪 Test 2: Tool Registry", style="cyan"))
     
-    from qwen_dev_cli.tools.base import ToolRegistry
-    from qwen_dev_cli.tools.file_ops import ReadFileTool, WriteFileTool
+    from jdev_cli.tools.base import ToolRegistry
+    from jdev_cli.tools.file_ops import ReadFileTool, WriteFileTool
     
     registry = ToolRegistry()
     registry.register(ReadFileTool())
@@ -55,7 +55,7 @@ async def test_session_context():
     """Test session context tracking."""
     console.print(Panel("🧪 Test 3: Session Context", style="cyan"))
     
-    from qwen_dev_cli.shell import SessionContext
+    from jdev_cli.shell import SessionContext
     
     ctx = SessionContext()
     ctx.track_tool_call("readfile", {"path": "test.py"}, {"success": True})
@@ -71,7 +71,7 @@ async def test_file_workflow():
     """Test complete file modification workflow."""
     console.print(Panel("🧪 Test 4: File Modification Workflow", style="cyan"))
     
-    from qwen_dev_cli.tools.file_ops import WriteFileTool, ReadFileTool, EditFileTool
+    from jdev_cli.tools.file_ops import WriteFileTool, ReadFileTool, EditFileTool
     
     with tempfile.TemporaryDirectory() as tmpdir:
         test_file = Path(tmpdir) / "workflow_test.py"
@@ -103,7 +103,7 @@ async def test_file_workflow():
         assert "python" in result.data, "Edit not applied"
         
         # Step 5: Check backup exists
-        backup_dir = Path(".qwen_backups")
+        backup_dir = Path(".jdev_backups")
         assert backup_dir.exists(), "Backup directory not created"
         
     console.print("  ✅ File workflow works")
@@ -115,12 +115,12 @@ async def test_search_functionality():
     """Test search across files."""
     console.print(Panel("🧪 Test 5: Search Functionality", style="cyan"))
     
-    from qwen_dev_cli.tools.search import SearchFilesTool
+    from jdev_cli.tools.search import SearchFilesTool
     
     search_tool = SearchFilesTool()
     result = await search_tool.execute(
         pattern="def",
-        path="qwen_dev_cli/tools",
+        path="jdev_cli/tools",
         file_pattern="*.py"
     )
     
@@ -136,7 +136,7 @@ async def test_git_integration():
     """Test git operations."""
     console.print(Panel("🧪 Test 6: Git Integration", style="cyan"))
     
-    from qwen_dev_cli.tools.git_ops import GitStatusTool, GitDiffTool
+    from jdev_cli.tools.git_ops import GitStatusTool, GitDiffTool
     
     # Test git status
     status_tool = GitStatusTool()
@@ -164,7 +164,7 @@ async def test_bash_execution():
     """Test bash command execution."""
     console.print(Panel("🧪 Test 7: Bash Execution", style="cyan"))
     
-    from qwen_dev_cli.tools.exec import BashCommandTool
+    from jdev_cli.tools.exec import BashCommandTool
     
     bash_tool = BashCommandTool()
     
@@ -191,9 +191,9 @@ async def test_multi_tool_workflow():
     """Test workflow with multiple tools."""
     console.print(Panel("🧪 Test 8: Multi-Tool Workflow", style="cyan"))
     
-    from qwen_dev_cli.tools.file_ops import WriteFileTool
-    from qwen_dev_cli.tools.search import SearchFilesTool, GetDirectoryTreeTool
-    from qwen_dev_cli.tools.git_ops import GitStatusTool
+    from jdev_cli.tools.file_ops import WriteFileTool
+    from jdev_cli.tools.search import SearchFilesTool, GetDirectoryTreeTool
+    from jdev_cli.tools.git_ops import GitStatusTool
     
     with tempfile.TemporaryDirectory() as tmpdir:
         # Create test files
@@ -227,7 +227,7 @@ async def test_shell_initialization():
     """Test shell can be initialized."""
     console.print(Panel("🧪 Test 9: Shell Initialization", style="cyan"))
     
-    from qwen_dev_cli.shell import InteractiveShell
+    from jdev_cli.shell import InteractiveShell
     
     shell = InteractiveShell()
     
@@ -244,7 +244,7 @@ async def test_tool_schemas():
     """Test all tool schemas are valid."""
     console.print(Panel("🧪 Test 10: Tool Schema Validation", style="cyan"))
     
-    from qwen_dev_cli.shell import InteractiveShell
+    from jdev_cli.shell import InteractiveShell
     
     shell = InteractiveShell()
     schemas = shell.registry.get_schemas()

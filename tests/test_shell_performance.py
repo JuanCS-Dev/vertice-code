@@ -8,7 +8,7 @@ Shell Performance & Real Usage Testing Suite
 import pytest
 import time
 from unittest.mock import patch
-from qwen_dev_cli.shell import InteractiveShell
+from jdev_cli.shell import InteractiveShell
 
 
 class TestPerformance:
@@ -16,7 +16,7 @@ class TestPerformance:
     
     def test_initialization_speed(self):
         """Shell init < 1s"""
-        with patch('qwen_dev_cli.shell.default_llm_client'):
+        with patch('jdev_cli.shell.default_llm_client'):
             start = time.perf_counter()
             shell = InteractiveShell()
             init_ms = (time.perf_counter() - start) * 1000
@@ -27,7 +27,7 @@ class TestPerformance:
     
     def test_tool_access_speed(self):
         """Tool registry access < 50ms"""
-        with patch('qwen_dev_cli.shell.default_llm_client'):
+        with patch('jdev_cli.shell.default_llm_client'):
             shell = InteractiveShell()
             
             start = time.perf_counter()
@@ -44,7 +44,7 @@ class TestEdgeCases:
     
     @pytest.fixture
     def shell(self):
-        with patch('qwen_dev_cli.shell.default_llm_client'):
+        with patch('jdev_cli.shell.default_llm_client'):
             return InteractiveShell()
     
     def test_unicode(self, shell):
@@ -75,7 +75,7 @@ class TestRealUsage:
     
     @pytest.fixture
     def shell(self):
-        with patch('qwen_dev_cli.shell.default_llm_client'):
+        with patch('jdev_cli.shell.default_llm_client'):
             return InteractiveShell()
     
     def test_dev_workflow(self, shell):
@@ -112,7 +112,7 @@ class TestIntegration:
     
     def test_all_components_loaded(self):
         """All required components present"""
-        with patch('qwen_dev_cli.shell.default_llm_client'):
+        with patch('jdev_cli.shell.default_llm_client'):
             shell = InteractiveShell()
             
             required = [
@@ -128,7 +128,7 @@ class TestIntegration:
     
     def test_tool_registry_populated(self):
         """Tool registry has core tools"""
-        with patch('qwen_dev_cli.shell.default_llm_client'):
+        with patch('jdev_cli.shell.default_llm_client'):
             shell = InteractiveShell()
             schemas = shell.registry.get_schemas()
             
@@ -144,7 +144,7 @@ class TestIntegration:
     
     def test_conversation_manager_active(self):
         """Conversation manager functional"""
-        with patch('qwen_dev_cli.shell.default_llm_client'):
+        with patch('jdev_cli.shell.default_llm_client'):
             shell = InteractiveShell()
             
             assert shell.conversation is not None
@@ -157,14 +157,14 @@ class TestConstitutional:
     
     def test_p6_recovery_limits(self):
         """P6: Max 2 recovery attempts enforced"""
-        with patch('qwen_dev_cli.shell.default_llm_client'):
+        with patch('jdev_cli.shell.default_llm_client'):
             shell = InteractiveShell()
             assert shell.recovery_engine.max_attempts == 2
             print("\n✅ P6: Recovery limited to 2 attempts")
     
     def test_p5_concurrency_control(self):
         """P5: Async concurrency controlled"""
-        with patch('qwen_dev_cli.shell.default_llm_client'):
+        with patch('jdev_cli.shell.default_llm_client'):
             shell = InteractiveShell()
             assert hasattr(shell.async_executor, '_max_parallel')
             assert shell.async_executor._max_parallel == 5
@@ -172,14 +172,14 @@ class TestConstitutional:
     
     def test_phase_4_3_async_executor(self):
         """Phase 4.3: Async executor implemented"""
-        with patch('qwen_dev_cli.shell.default_llm_client'):
+        with patch('jdev_cli.shell.default_llm_client'):
             shell = InteractiveShell()
             assert shell.async_executor is not None
             print("\n✅ Phase 4.3: Async executor active")
     
     def test_phase_4_4_file_watcher(self):
         """Phase 4.4: File watcher implemented"""
-        with patch('qwen_dev_cli.shell.default_llm_client'):
+        with patch('jdev_cli.shell.default_llm_client'):
             shell = InteractiveShell()
             assert shell.file_watcher is not None
             assert shell.recent_files is not None
@@ -191,7 +191,7 @@ class TestMetrics:
     
     def test_complete_baseline(self):
         """Collect complete performance baseline"""
-        with patch('qwen_dev_cli.shell.default_llm_client'):
+        with patch('jdev_cli.shell.default_llm_client'):
             # Initialization
             t0 = time.perf_counter()
             shell = InteractiveShell()

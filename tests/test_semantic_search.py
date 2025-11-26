@@ -10,8 +10,8 @@ import pytest
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock
-from qwen_dev_cli.tools.search import SearchFilesTool
-from qwen_dev_cli.intelligence.indexer import SemanticIndexer, Symbol
+from jdev_cli.tools.search import SearchFilesTool
+from jdev_cli.intelligence.indexer import SemanticIndexer, Symbol
 
 
 class TestSemanticSearch:

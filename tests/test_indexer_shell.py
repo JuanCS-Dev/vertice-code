@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Test indexer integration with shell."""
 
-from qwen_dev_cli.intelligence.indexer import SemanticIndexer
+from jdev_cli.intelligence.indexer import SemanticIndexer
 import time
 
 print("🔍 Testing Indexer Integration\n")

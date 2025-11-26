@@ -11,8 +11,8 @@ import pytest
 import asyncio
 from pathlib import Path
 
-from qwen_dev_cli.integration.shell_bridge import ShellBridge
-from qwen_dev_cli.tools.exec_hardened import BashCommandTool, ExecutionLimits
+from jdev_cli.integration.shell_bridge import ShellBridge
+from jdev_cli.tools.exec_hardened import BashCommandTool, ExecutionLimits
 
 
 class TestShellBridgeIntegration:
@@ -68,7 +68,7 @@ class TestCLIIntegration:
     @pytest.mark.asyncio
     async def test_shell_loads_hardened_bash(self):
         """Shell loads hardened bash tool."""
-        from qwen_dev_cli.shell import InteractiveShell
+        from jdev_cli.shell import InteractiveShell
         
         # This should not raise
         shell = InteractiveShell()
@@ -79,7 +79,7 @@ class TestCLIIntegration:
     @pytest.mark.asyncio
     async def test_single_shot_uses_hardened_bash(self):
         """Single-shot commands use hardened bash."""
-        from qwen_dev_cli.core.single_shot import SingleShotExecutor
+        from jdev_cli.core.single_shot import SingleShotExecutor
         
         executor = SingleShotExecutor()
         
@@ -230,7 +230,7 @@ class TestBackwardCompatibility:
     @pytest.mark.asyncio
     async def test_old_import_style_works(self):
         """Old import style still works via alias."""
-        from qwen_dev_cli.tools.exec_hardened import BashCommandTool
+        from jdev_cli.tools.exec_hardened import BashCommandTool
         
         tool = BashCommandTool()
         result = await tool.execute(command="echo 'backward compat'")
@@ -240,8 +240,8 @@ class TestBackwardCompatibility:
     
     def test_tool_registry_compatibility(self):
         """Tool registry still recognizes bash_command."""
-        from qwen_dev_cli.tools.base import ToolRegistry
-        from qwen_dev_cli.tools.exec_hardened import BashCommandTool
+        from jdev_cli.tools.base import ToolRegistry
+        from jdev_cli.tools.exec_hardened import BashCommandTool
         
         registry = ToolRegistry()
         tool = BashCommandTool()

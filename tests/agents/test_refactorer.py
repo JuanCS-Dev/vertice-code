@@ -8,8 +8,8 @@ import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock
 
-from qwen_dev_cli.agents.refactorer import RefactorerAgent
-from qwen_dev_cli.agents.base import AgentTask, AgentCapability, AgentRole
+from jdev_cli.agents.refactorer import RefactorerAgent
+from jdev_cli.agents.base import AgentTask, AgentCapability, AgentRole
 
 
 class TestRefactorerBasic:

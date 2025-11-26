@@ -2,7 +2,7 @@
 import pytest
 from pathlib import Path
 
-from qwen_dev_cli.tools.web_access import (
+from jdev_cli.tools.web_access import (
     PackageSearchTool,
     FetchURLTool,
     DownloadFileTool,

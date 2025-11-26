@@ -7,7 +7,7 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from qwen_dev_cli.core.lazy_loader import LazyLoader
+from jdev_cli.core.lazy_loader import LazyLoader
 
 async def verify_plugins():
     print("🔍 Verifying Shell Integrity & Plugins...")

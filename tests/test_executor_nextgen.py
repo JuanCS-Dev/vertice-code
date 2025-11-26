@@ -11,7 +11,7 @@ from pathlib import Path
 from datetime import datetime
 
 # Import our agent
-from qwen_dev_cli.agents.executor import (
+from jdev_cli.agents.executor import (
     NextGenExecutorAgent,
     ExecutionMode,
     SecurityLevel,
@@ -21,9 +21,9 @@ from qwen_dev_cli.agents.executor import (
     CommandResult,
     ExecutionMetrics,
 )
-from qwen_dev_cli.agents.base import AgentTask, AgentResponse
-from qwen_dev_cli.core.llm import LLMClient
-from qwen_dev_cli.core.mcp_client import MCPClient
+from jdev_cli.agents.base import AgentTask, AgentResponse
+from jdev_cli.core.llm import LLMClient
+from jdev_cli.core.mcp_client import MCPClient
 
 
 # ============================================================================

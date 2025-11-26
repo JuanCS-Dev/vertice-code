@@ -13,13 +13,13 @@ Test Coverage:
 
 import pytest
 from pathlib import Path
-from qwen_dev_cli.tui.input_enhanced import MultiLineMode, IntelligentCompleter, InputContext
-from qwen_dev_cli.tui.components.autocomplete import (
+from jdev_cli.tui.input_enhanced import MultiLineMode, IntelligentCompleter, InputContext
+from jdev_cli.tui.components.autocomplete import (
     ContextAwareCompleter,
     CompletionItem,
     CompletionType
 )
-from qwen_dev_cli.tui.history import CommandHistory, HistoryEntry
+from jdev_cli.tui.history import CommandHistory, HistoryEntry
 from datetime import datetime
 from prompt_toolkit.document import Document
 

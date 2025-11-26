@@ -10,9 +10,9 @@ Tests Constitutional Requirements:
 
 import asyncio
 import pytest
-from qwen_dev_cli.streaming.executor import AsyncCommandExecutor
-from qwen_dev_cli.streaming.renderer import ReactiveRenderer, RenderEvent, RenderEventType
-from qwen_dev_cli.streaming.streams import StreamProcessor, StreamType
+from jdev_cli.streaming.executor import AsyncCommandExecutor
+from jdev_cli.streaming.renderer import ReactiveRenderer, RenderEvent, RenderEventType
+from jdev_cli.streaming.streams import StreamProcessor, StreamType
 
 
 @pytest.mark.asyncio
@@ -132,7 +132,7 @@ async def test_no_buffering():
 @pytest.mark.asyncio
 async def test_integration_shell_streaming():
     """Integration: Shell uses streaming for bash commands."""
-    from qwen_dev_cli.tools.exec import BashCommandTool
+    from jdev_cli.tools.exec import BashCommandTool
     
     tool = BashCommandTool()
     

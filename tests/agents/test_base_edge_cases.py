@@ -12,7 +12,7 @@ Tests cover:
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from qwen_dev_cli.agents.base import (
+from jdev_cli.agents.base import (
     AgentCapability,
     AgentRole,
     AgentTask,

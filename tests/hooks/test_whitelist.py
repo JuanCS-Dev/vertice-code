@@ -1,7 +1,7 @@
 """Tests for safe command whitelist."""
 
 import pytest
-from qwen_dev_cli.hooks import SafeCommandWhitelist
+from jdev_cli.hooks import SafeCommandWhitelist
 
 
 class TestSafeCommandWhitelist:

@@ -5,9 +5,9 @@ Tests de casos extremos e situações limites.
 import pytest
 from pathlib import Path
 from unittest.mock import Mock
-from qwen_dev_cli.agents.planner import PlannerAgent
-from qwen_dev_cli.agents.refactorer import RefactorerAgent
-from qwen_dev_cli.agents.base import TaskContext, TaskStatus
+from jdev_cli.agents.planner import PlannerAgent
+from jdev_cli.agents.refactorer import RefactorerAgent
+from jdev_cli.agents.base import TaskContext, TaskStatus
 import string
 import random
 

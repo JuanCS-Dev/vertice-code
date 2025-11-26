@@ -4,7 +4,7 @@ import pytest
 from datetime import datetime
 from pathlib import Path
 
-from qwen_dev_cli.session.state import SessionState
+from jdev_cli.session.state import SessionState
 
 
 class TestSessionState:

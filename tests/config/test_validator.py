@@ -4,8 +4,8 @@ import pytest
 import tempfile
 from pathlib import Path
 
-from qwen_dev_cli.config.validator import ConfigValidator
-from qwen_dev_cli.config.schema import QwenConfig, SafetyConfig, ContextConfig, RulesConfig, HooksConfig
+from jdev_cli.config.validator import ConfigValidator
+from jdev_cli.config.schema import QwenConfig, SafetyConfig, ContextConfig, RulesConfig, HooksConfig
 
 
 class TestPathValidation:

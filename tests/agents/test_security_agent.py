@@ -23,8 +23,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from qwen_dev_cli.agents.base import AgentRole, AgentTask
-from qwen_dev_cli.agents.security import (
+from jdev_cli.agents.base import AgentRole, AgentTask
+from jdev_cli.agents.security import (
     SecurityAgent,
     SeverityLevel,
     VulnerabilityType,
@@ -645,7 +645,7 @@ class TestSecurityAgentIntegration:
     @pytest.mark.asyncio
     async def test_agent_capabilities(self, security_agent):
         """Test agent has READ_ONLY + BASH_EXEC capabilities."""
-        from qwen_dev_cli.agents.base import AgentCapability
+        from jdev_cli.agents.base import AgentCapability
 
         assert AgentCapability.READ_ONLY in security_agent.capabilities
         assert AgentCapability.BASH_EXEC in security_agent.capabilities

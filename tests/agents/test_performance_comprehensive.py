@@ -19,8 +19,8 @@ import tempfile
 from pathlib import Path
 from typing import Any, Dict, List
 
-from qwen_dev_cli.agents.base import AgentTask
-from qwen_dev_cli.agents.performance import (
+from jdev_cli.agents.base import AgentTask
+from jdev_cli.agents.performance import (
     PerformanceAgent,
     BottleneckType,
     ComplexityLevel,

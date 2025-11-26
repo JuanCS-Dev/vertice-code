@@ -1,7 +1,7 @@
 """Tests for web search tools."""
 import pytest
 
-from qwen_dev_cli.tools.web_search import WebSearchTool, SearchDocumentationTool
+from jdev_cli.tools.web_search import WebSearchTool, SearchDocumentationTool
 
 
 class TestWebSearchTool:

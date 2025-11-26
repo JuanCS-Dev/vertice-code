@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from qwen_dev_cli.agents.base import AgentRole, AgentTask
-from qwen_dev_cli.agents.security import SecurityAgent
+from jdev_cli.agents.base import AgentRole, AgentTask
+from jdev_cli.agents.security import SecurityAgent
 
 
 @pytest.fixture

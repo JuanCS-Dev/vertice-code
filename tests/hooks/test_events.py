@@ -1,7 +1,7 @@
 """Tests for hook events enumeration."""
 
 import pytest
-from qwen_dev_cli.hooks import HookEvent, HookPriority
+from jdev_cli.hooks import HookEvent, HookPriority
 
 
 class TestHookEvent:

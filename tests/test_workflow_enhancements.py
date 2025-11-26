@@ -11,7 +11,7 @@ import shutil
 from pathlib import Path
 from unittest.mock import Mock, patch, AsyncMock
 
-from qwen_dev_cli.core.workflow import (
+from jdev_cli.core.workflow import (
     GitRollback,
     PartialRollback
 )

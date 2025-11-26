@@ -5,8 +5,8 @@ Tests completos do Refactorer Agent com todos os edge cases.
 import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch
-from qwen_dev_cli.agents.refactorer import RefactorerAgent
-from qwen_dev_cli.agents.base import AgentRole, TaskContext, TaskStatus
+from jdev_cli.agents.refactorer import RefactorerAgent
+from jdev_cli.agents.base import AgentRole, TaskContext, TaskStatus
 
 
 class TestRefactorerCodeSmells:

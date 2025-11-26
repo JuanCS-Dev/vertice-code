@@ -29,10 +29,10 @@ from unittest.mock import Mock, AsyncMock, patch
 # Add project to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from qwen_dev_cli.core.llm import LLMClient
-from qwen_dev_cli.core.mcp_client import MCPClient
-from qwen_dev_cli.tools.base import ToolRegistry, ToolResult
-from qwen_dev_cli.agents.base import AgentTask, AgentResponse
+from jdev_cli.core.llm import LLMClient
+from jdev_cli.core.mcp_client import MCPClient
+from jdev_cli.tools.base import ToolRegistry, ToolResult
+from jdev_cli.agents.base import AgentTask, AgentResponse
 
 
 # ==============================================================================

@@ -13,8 +13,8 @@ import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock
 
-from qwen_dev_cli.agents.architect import ArchitectAgent
-from qwen_dev_cli.agents.base import AgentTask, AgentCapability
+from jdev_cli.agents.architect import ArchitectAgent
+from jdev_cli.agents.base import AgentTask, AgentCapability
 
 
 class TestArchitectAgentInitialization:

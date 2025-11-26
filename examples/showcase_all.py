@@ -15,12 +15,12 @@ from pathlib import Path
 # Add parent to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from qwen_dev_cli.intelligence.indexer import SemanticIndexer
-from qwen_dev_cli.tui.components.toasts import ToastManager, ToastType
-from qwen_dev_cli.tui.components.palette import CommandPalette, Command, CommandCategory
-from qwen_dev_cli.tui.components.tree import FileTree
-from qwen_dev_cli.tui.wisdom import wisdom_system
-from qwen_dev_cli.tui.theme import COLORS
+from jdev_cli.intelligence.indexer import SemanticIndexer
+from jdev_cli.tui.components.toasts import ToastManager, ToastType
+from jdev_cli.tui.components.palette import CommandPalette, Command, CommandCategory
+from jdev_cli.tui.components.tree import FileTree
+from jdev_cli.tui.wisdom import wisdom_system
+from jdev_cli.tui.theme import COLORS
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text

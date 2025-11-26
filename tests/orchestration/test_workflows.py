@@ -1,7 +1,7 @@
 """Tests for WorkflowLibrary."""
 
 import pytest
-from qwen_dev_cli.orchestration.workflows import WorkflowLibrary, WorkflowType
+from jdev_cli.orchestration.workflows import WorkflowLibrary, WorkflowType
 
 def test_workflow_library_initialization():
     """Test that library initializes with default workflows."""

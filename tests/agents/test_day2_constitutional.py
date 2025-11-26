@@ -15,9 +15,9 @@ import ast
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from qwen_dev_cli.agents.testing import TestingAgent
-from qwen_dev_cli.agents.refactor import RefactorAgent
-from qwen_dev_cli.agents.base import AgentTask, AgentRole, AgentCapability
+from jdev_cli.agents.testing import TestingAgent
+from jdev_cli.agents.refactor import RefactorAgent
+from jdev_cli.agents.base import AgentTask, AgentRole, AgentCapability
 
 
 # ============================================================================
@@ -33,7 +33,7 @@ class TestConstitutionalCompliance:
         agent = TestingAgent(model=MagicMock())
         
         # Check source code
-        source_file = Path("qwen_dev_cli/agents/testing.py")
+        source_file = Path("jdev_cli/agents/testing.py")
         if source_file.exists():
             content = source_file.read_text()
             assert "TODO" not in content
@@ -45,7 +45,7 @@ class TestConstitutionalCompliance:
         """Art. II: Zero placeholders in RefactorAgent."""
         agent = RefactorAgent(model=MagicMock())
         
-        source_file = Path("qwen_dev_cli/agents/refactor.py")
+        source_file = Path("jdev_cli/agents/refactor.py")
         if source_file.exists():
             content = source_file.read_text()
             assert "TODO" not in content

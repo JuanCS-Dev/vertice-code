@@ -8,9 +8,9 @@ import os
 import time
 from pathlib import Path
 from dotenv import load_dotenv
-from qwen_dev_cli.agents.planner import PlannerAgent
-from qwen_dev_cli.agents.refactorer import RefactorerAgent
-from qwen_dev_cli.agents.base import TaskContext, TaskStatus, AgentRole
+from jdev_cli.agents.planner import PlannerAgent
+from jdev_cli.agents.refactorer import RefactorerAgent
+from jdev_cli.agents.base import TaskContext, TaskStatus, AgentRole
 
 # Carregar .env ANTES de qualquer teste
 load_dotenv()

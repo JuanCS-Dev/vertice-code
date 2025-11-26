@@ -24,7 +24,7 @@ def event_loop():
 @pytest.fixture(scope="function")
 def mock_config():
     """Mock configuration for testing."""
-    from qwen_dev_cli.core.config import Config
+    from jdev_cli.core.config import Config
     
     config = Config()
     config.model_name = "test-model"

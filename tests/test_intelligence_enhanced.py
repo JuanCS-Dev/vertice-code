@@ -4,14 +4,14 @@ Testing: Risk assessment, workflows, rich context.
 """
 
 import pytest
-from qwen_dev_cli.intelligence.risk import (
+from jdev_cli.intelligence.risk import (
     assess_risk, RiskLevel, get_risk_warning
 )
-from qwen_dev_cli.intelligence.context_enhanced import (
+from jdev_cli.intelligence.context_enhanced import (
     RichContext, ExpertiseLevel, RiskTolerance,
     GitStatus, WorkspaceInfo, build_rich_context
 )
-from qwen_dev_cli.intelligence.workflows import (
+from jdev_cli.intelligence.workflows import (
     GitWorkflow, NpmWorkflow, PythonWorkflow, WorkflowOrchestrator
 )
 
@@ -228,7 +228,7 @@ class TestIntegration:
     
     def test_full_git_workflow_with_risk(self):
         """Test complete git workflow with risk assessment."""
-        from qwen_dev_cli.intelligence.risk import assess_risk
+        from jdev_cli.intelligence.risk import assess_risk
         
         # Scenario: User wants to commit and push with force
         ctx = RichContext(

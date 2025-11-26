@@ -37,41 +37,41 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Import REAL v6.0 Agents
-from qwen_dev_cli.core.llm import LLMClient
-from qwen_dev_cli.core.mcp_client import MCPClient
-from qwen_dev_cli.tools.base import ToolRegistry
-from qwen_dev_cli.agents.base import AgentTask, AgentResponse
-from qwen_dev_cli.agents.planner import PlannerAgent
-from qwen_dev_cli.agents.reviewer import ReviewerAgent
-from qwen_dev_cli.agents.refactorer import RefactorerAgent
-from qwen_dev_cli.agents.explorer import ExplorerAgent
-from qwen_dev_cli.agents.executor import (
+from jdev_cli.core.llm import LLMClient
+from jdev_cli.core.mcp_client import MCPClient
+from jdev_cli.tools.base import ToolRegistry
+from jdev_cli.agents.base import AgentTask, AgentResponse
+from jdev_cli.agents.planner import PlannerAgent
+from jdev_cli.agents.reviewer import ReviewerAgent
+from jdev_cli.agents.refactorer import RefactorerAgent
+from jdev_cli.agents.explorer import ExplorerAgent
+from jdev_cli.agents.executor import (
     NextGenExecutorAgent,
     ExecutionMode,
     SecurityLevel
 )
-from qwen_dev_cli.agents.architect import ArchitectAgent
-from qwen_dev_cli.agents.security import SecurityAgent
-from qwen_dev_cli.agents.performance import PerformanceAgent
-from qwen_dev_cli.agents.testing import TestingAgent
-from qwen_dev_cli.agents.documentation import DocumentationAgent
-from qwen_dev_cli.agents.data_agent_production import create_data_agent
-from qwen_dev_cli.agents.devops_agent import create_devops_agent
+from jdev_cli.agents.architect import ArchitectAgent
+from jdev_cli.agents.security import SecurityAgent
+from jdev_cli.agents.performance import PerformanceAgent
+from jdev_cli.agents.testing import TestingAgent
+from jdev_cli.agents.documentation import DocumentationAgent
+from jdev_cli.agents.data_agent_production import create_data_agent
+from jdev_cli.agents.devops_agent import create_devops_agent
 
 # Import TUI Components (30 FPS optimized)
-from qwen_dev_cli.tui.maestro_layout import MaestroLayout, CyberpunkHeader
-from qwen_dev_cli.tui.components.agent_routing import AgentRoutingDisplay
-from qwen_dev_cli.tui.components.streaming_display import StreamingResponseDisplay
-from qwen_dev_cli.tui.components.autocomplete import ContextAwareCompleter, create_completer
-from qwen_dev_cli.tui.components.slash_completer import CombinedCompleter
-from qwen_dev_cli.tui.performance import PerformanceMonitor, FPSCounter
-from qwen_dev_cli.tui.landing import show_landing_screen
-from qwen_dev_cli.ui.command_palette import CommandPalette, Command, CommandCategory
+from jdev_cli.tui.maestro_layout import MaestroLayout, CyberpunkHeader
+from jdev_cli.tui.components.agent_routing import AgentRoutingDisplay
+from jdev_cli.tui.components.streaming_display import StreamingResponseDisplay
+from jdev_cli.tui.components.autocomplete import ContextAwareCompleter, create_completer
+from jdev_cli.tui.components.slash_completer import CombinedCompleter
+from jdev_cli.tui.performance import PerformanceMonitor, FPSCounter
+from jdev_cli.tui.landing import show_landing_screen
+from jdev_cli.ui.command_palette import CommandPalette, Command, CommandCategory
 
 # Import MAESTRO v10.0 Shell UI Components (Definitive Edition)
-from qwen_dev_cli.tui.components.maestro_shell_ui import MaestroShellUI
-from qwen_dev_cli.tui.components.maestro_data_structures import AgentState, AgentStatus, MetricsData
-from qwen_dev_cli.core.file_tracker import FileOperationTracker
+from jdev_cli.tui.components.maestro_shell_ui import MaestroShellUI
+from jdev_cli.tui.components.maestro_data_structures import AgentState, AgentStatus, MetricsData
+from jdev_cli.core.file_tracker import FileOperationTracker
 
 # ═══════════════════════════════════════════════════════════════════
 # ORCHESTRATOR - The Brain
@@ -801,8 +801,8 @@ class Shell:
             tool_registry = ToolRegistry()
 
             # Register filesystem tools (use existing implementations)
-            from qwen_dev_cli.tools.file_ops import ReadFileTool, WriteFileTool, EditFileTool
-            from qwen_dev_cli.tools.file_mgmt import (
+            from jdev_cli.tools.file_ops import ReadFileTool, WriteFileTool, EditFileTool
+            from jdev_cli.tools.file_mgmt import (
                 CreateDirectoryTool,
                 MoveFileTool,
                 CopyFileTool
@@ -815,16 +815,16 @@ class Shell:
             tool_registry.register(CopyFileTool())
 
             # Register execution tools (use existing)
-            from qwen_dev_cli.tools.exec import BashCommandTool
+            from jdev_cli.tools.exec import BashCommandTool
             tool_registry.register(BashCommandTool())
 
             # Register search tools (use existing)
-            from qwen_dev_cli.tools.search import SearchFilesTool, GetDirectoryTreeTool
+            from jdev_cli.tools.search import SearchFilesTool, GetDirectoryTreeTool
             tool_registry.register(SearchFilesTool())
             tool_registry.register(GetDirectoryTreeTool())
 
             # Register git tools (use existing)
-            from qwen_dev_cli.tools.git_ops import GitStatusTool, GitDiffTool
+            from jdev_cli.tools.git_ops import GitStatusTool, GitDiffTool
             tool_registry.register(GitStatusTool())
             tool_registry.register(GitDiffTool())
 
@@ -982,7 +982,7 @@ class Shell:
   "run/exec..."    → Executor (bash commands)
 
 [bold]Examples:[/bold]
-  review qwen_dev_cli/agents/base.py
+  review jdev_cli/agents/base.py
   plan implement user authentication
   refactor extract method from process_payment
   explore map the codebase

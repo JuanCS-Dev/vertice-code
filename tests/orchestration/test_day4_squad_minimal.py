@@ -7,8 +7,8 @@ Focus: Core functionality validation with real agent integration.
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from qwen_dev_cli.agents.base import AgentResponse
-from qwen_dev_cli.orchestration.squad import DevSquad, WorkflowStatus
+from jdev_cli.agents.base import AgentResponse
+from jdev_cli.orchestration.squad import DevSquad, WorkflowStatus
 
 
 @pytest.fixture

@@ -10,11 +10,11 @@ Total: 100+ tests with REAL code validation
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from qwen_dev_cli.agents.refactor import RefactorAgent
+from jdev_cli.agents.refactor import RefactorAgent
 # NOTE: These classes were planned but not implemented in refactorer module
 # Tests using them will be skipped until implementation
 # CodeSmell, CodeIssue, ComplexityMetrics, MaintainabilityIndex, RefactoringPattern
-from qwen_dev_cli.agents.base import AgentTask, AgentRole
+from jdev_cli.agents.base import AgentTask, AgentRole
 
 
 class TestSmellDetection:

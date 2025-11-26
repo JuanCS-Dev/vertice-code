@@ -10,11 +10,11 @@ from unittest.mock import Mock, AsyncMock
 from pathlib import Path
 import tempfile
 
-from qwen_dev_cli.core.conversation import ConversationManager, ConversationState
-from qwen_dev_cli.core.recovery import (
+from jdev_cli.core.conversation import ConversationManager, ConversationState
+from jdev_cli.core.recovery import (
     ErrorRecoveryEngine, ErrorCategory, RecoveryContext, RecoveryStrategy
 )
-from qwen_dev_cli.core.workflow import (
+from jdev_cli.core.workflow import (
     WorkflowEngine, WorkflowStep, DependencyGraph, AutoCritique, ThoughtPath
 )
 

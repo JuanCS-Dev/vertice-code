@@ -13,8 +13,8 @@ import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock
 
-from qwen_dev_cli.agents.explorer import ExplorerAgent
-from qwen_dev_cli.agents.base import AgentTask
+from jdev_cli.agents.explorer import ExplorerAgent
+from jdev_cli.agents.base import AgentTask
 
 
 class TestExplorerTokenBudgetEdgeCases:

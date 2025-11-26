@@ -77,6 +77,15 @@ test_results.log
 *.BROKEN_BACKUP*
 *_backup_*
 
+# Archive (legacy code - not tracked)
+.archive/
+
+# Personal/local development notes
+.juancs/
+
+# Plan files (temporary)
+.qwen/plans/
+
 # Test artifacts and logs
 test_*.log
 *.coverage*
@@ -89,10 +98,5 @@ htmlcov/
 .idea/
 *.sublime-*
 
-# Documentation (temporary - will organize)
-*_REPORT.md
-*_SUMMARY.md
-TESTE_*.md
-test_*.py
-maestro_v*.py
-!maestro_v10_integrated.py
+# Hypothesis test cache
+.hypothesis/

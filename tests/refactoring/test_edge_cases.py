@@ -5,7 +5,7 @@ Scientific Validation - Boris Cherny
 
 import pytest
 from pathlib import Path
-from qwen_dev_cli.refactoring.engine import RefactoringEngine
+from jdev_cli.refactoring.engine import RefactoringEngine
 
 
 class TestRenameEdgeCases:

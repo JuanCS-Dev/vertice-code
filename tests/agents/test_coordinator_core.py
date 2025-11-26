@@ -5,7 +5,7 @@ Tests básicos de funcionamento do Coordinator sem integração.
 import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
-from qwen_dev_cli.agents.base import AgentRole, AgentCapability, TaskContext, TaskResult, TaskStatus
+from jdev_cli.agents.base import AgentRole, AgentCapability, TaskContext, TaskResult, TaskStatus
 
 
 class TestCoordinatorInitialization:

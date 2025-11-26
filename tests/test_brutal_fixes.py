@@ -16,15 +16,15 @@ import tempfile
 import time
 
 # Imports for session tests
-from qwen_dev_cli.session.manager import SessionManager
-from qwen_dev_cli.session.state import SessionState
+from jdev_cli.session.manager import SessionManager
+from jdev_cli.session.state import SessionState
 
 # Imports for token tracking
-from qwen_dev_cli.core.token_tracker import TokenTracker
-from qwen_dev_cli.core.llm import LLMClient
+from jdev_cli.core.token_tracker import TokenTracker
+from jdev_cli.core.llm import LLMClient
 
 # Imports for preview
-from qwen_dev_cli.tui.components.preview import DiffGenerator
+from jdev_cli.tui.components.preview import DiffGenerator
 
 
 class TestSessionAtomicWrites:

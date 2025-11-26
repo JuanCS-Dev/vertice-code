@@ -20,8 +20,8 @@ import time
 from io import StringIO
 from rich.console import Console
 
-from qwen_dev_cli.core.llm import LLMClient
-from qwen_dev_cli.tui.components import (
+from jdev_cli.core.llm import LLMClient
+from jdev_cli.tui.components import (
     MessageBox, 
     Message,
     ProgressBar,
@@ -29,7 +29,7 @@ from qwen_dev_cli.tui.components import (
     StatusBadge,
     StatusLevel
 )
-from qwen_dev_cli.tui.wisdom import WisdomSystem
+from jdev_cli.tui.wisdom import WisdomSystem
 
 
 class TestLLMEdgeCases:

@@ -4,9 +4,9 @@ Tests finais de validação de production readiness.
 """
 import pytest
 from pathlib import Path
-from qwen_dev_cli.agents.planner import PlannerAgent
-from qwen_dev_cli.agents.refactorer import RefactorerAgent
-from qwen_dev_cli.agents.base import TaskContext, TaskStatus
+from jdev_cli.agents.planner import PlannerAgent
+from jdev_cli.agents.refactorer import RefactorerAgent
+from jdev_cli.agents.base import TaskContext, TaskStatus
 
 
 class TestProductionReadinessPlannerCore:

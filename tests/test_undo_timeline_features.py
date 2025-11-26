@@ -5,8 +5,8 @@ Constitutional compliance: P2 (Validação), P3 (Correção)
 
 import pytest
 from datetime import datetime, timedelta
-from qwen_dev_cli.tui.components.preview import UndoRedoStack, UndoRedoState
-from qwen_dev_cli.tui.components.execution_timeline import (
+from jdev_cli.tui.components.preview import UndoRedoStack, UndoRedoState
+from jdev_cli.tui.components.execution_timeline import (
     ExecutionTimeline,
     TimelinePlayback,
     TimelineEvent

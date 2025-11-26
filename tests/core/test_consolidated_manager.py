@@ -1,6 +1,6 @@
 """Tests for Consolidated Context Manager - Week 4 Day 1"""
 import pytest
-from qwen_dev_cli.core.context_manager_consolidated import ConsolidatedContextManager
+from jdev_cli.core.context_manager_consolidated import ConsolidatedContextManager
 
 class TestConsolidatedManager:
     def test_init(self):

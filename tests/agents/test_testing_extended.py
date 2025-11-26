@@ -22,7 +22,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
-from qwen_dev_cli.agents.testing import (
+from jdev_cli.agents.testing import (
     TestingAgent,
     TestCase,
     TestType,
@@ -30,7 +30,7 @@ from qwen_dev_cli.agents.testing import (
     CoverageReport,
     MutationResult,
 )
-from qwen_dev_cli.agents.base import AgentTask, AgentRole
+from jdev_cli.agents.base import AgentTask, AgentRole
 
 
 # ============================================================================

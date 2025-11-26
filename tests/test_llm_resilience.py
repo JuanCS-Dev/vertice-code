@@ -12,7 +12,7 @@ import pytest
 import asyncio
 import time
 from unittest.mock import Mock, AsyncMock, patch
-from qwen_dev_cli.core.llm import (
+from jdev_cli.core.llm import (
     LLMClient,
     CircuitBreaker,
     CircuitState,

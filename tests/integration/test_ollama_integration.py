@@ -2,8 +2,8 @@
 
 import pytest
 import asyncio
-from qwen_dev_cli.core.llm import LLMClient
-from qwen_dev_cli.core.config import config
+from jdev_cli.core.llm import LLMClient
+from jdev_cli.core.config import config
 
 pytestmark = pytest.mark.asyncio
 

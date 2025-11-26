@@ -6,7 +6,7 @@ Boris Cherny - Week 4 Day 4 (Dogfooding)
 
 import pytest
 from pathlib import Path
-from qwen_dev_cli.shell import InteractiveShell
+from jdev_cli.shell import InteractiveShell
 
 
 class TestShellStartup:

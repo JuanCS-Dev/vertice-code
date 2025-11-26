@@ -30,8 +30,8 @@ from rich.panel import Panel
 from rich.columns import Columns
 from rich.text import Text
 
-from qwen_dev_cli.tui.theme import COLORS
-from qwen_dev_cli.tui.components import (
+from jdev_cli.tui.theme import COLORS
+from jdev_cli.tui.components import (
     FileTree,
     PillBar,
     ToastManager,
@@ -41,7 +41,7 @@ from qwen_dev_cli.tui.components import (
     ContextAwareCompleter,
     create_completer
 )
-from qwen_dev_cli.tui.biblical_wisdom import get_random_wisdom
+from jdev_cli.tui.biblical_wisdom import get_random_wisdom
 
 
 async def demo_file_tree(console: Console):

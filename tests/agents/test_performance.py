@@ -19,8 +19,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from qwen_dev_cli.agents.base import AgentTask
-from qwen_dev_cli.agents.performance import (
+from jdev_cli.agents.base import AgentTask
+from jdev_cli.agents.performance import (
     BottleneckType,
     ComplexityLevel,
     PerformanceAgent,

@@ -1,6 +1,6 @@
 """Consolidated Context Tests - Week 4 Day 1"""
 import pytest
-from qwen_dev_cli.tui.components.context_awareness import ContextAwarenessEngine, ContentType
+from jdev_cli.tui.components.context_awareness import ContextAwarenessEngine, ContentType
 
 class TestConsolidation:
     def test_lru_features(self):

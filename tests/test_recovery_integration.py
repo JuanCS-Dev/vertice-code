@@ -7,7 +7,7 @@ import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock, patch
 
-from qwen_dev_cli.core.recovery import (
+from jdev_cli.core.recovery import (
     ErrorRecoveryEngine,
     RecoveryContext,
     ErrorCategory,

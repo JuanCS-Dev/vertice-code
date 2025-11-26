@@ -8,7 +8,7 @@ import pytest
 import tempfile
 from pathlib import Path
 
-from qwen_dev_cli.tools.preview_mixin import (
+from jdev_cli.tools.preview_mixin import (
     PreviewMixin,
     PreviewableWriteTool,
     get_undo_manager,

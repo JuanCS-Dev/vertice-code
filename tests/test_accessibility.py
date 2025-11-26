@@ -12,8 +12,8 @@ from unittest.mock import Mock, patch
 from rich.console import Console
 from io import StringIO
 
-from qwen_dev_cli.tui.accessibility import AccessibilityManager
-from qwen_dev_cli.tui.input_enhanced import EnhancedInput
+from jdev_cli.tui.accessibility import AccessibilityManager
+from jdev_cli.tui.input_enhanced import EnhancedInput
 
 
 class TestAccessibility:

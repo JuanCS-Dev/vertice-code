@@ -3,7 +3,7 @@
 
 import asyncio
 import time
-from qwen_dev_cli.streaming import (
+from jdev_cli.streaming import (
     AsyncCommandExecutor,
     ReactiveRenderer,
     ConcurrentRenderer,

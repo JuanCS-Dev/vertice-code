@@ -17,11 +17,11 @@ import os
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from qwen_dev_cli.core.llm import LLMClient
-from qwen_dev_cli.core.mcp_client import MCPClient
-from qwen_dev_cli.tools.registry_helper import get_default_registry
-from qwen_dev_cli.orchestration.squad import DevSquad, WorkflowStatus, WorkflowPhase
-from qwen_dev_cli.orchestration.workflows import WorkflowLibrary
+from jdev_cli.core.llm import LLMClient
+from jdev_cli.core.mcp_client import MCPClient
+from jdev_cli.tools.registry_helper import get_default_registry
+from jdev_cli.orchestration.squad import DevSquad, WorkflowStatus, WorkflowPhase
+from jdev_cli.orchestration.workflows import WorkflowLibrary
 
 # Skip if no API keys
 requires_api_key = pytest.mark.skipif(
@@ -70,7 +70,7 @@ async def test_e2e_jwt_authentication(real_squad, tmp_path):
         print(f"\n🚀 E2E Test: {request}")
         
         # Mock Refactorer execution to avoid actual file changes
-        with patch('qwen_dev_cli.agents.refactorer.RefactorerAgent.execute') as mock_refactor:
+        with patch('jdev_cli.agents.refactorer.RefactorerAgent.execute') as mock_refactor:
             mock_refactor.return_value = AsyncMock(
                 success=True,
                 data={"steps_completed": 5, "files_modified": ["app/auth.py"]},
@@ -127,7 +127,7 @@ async def test_e2e_setup_fastapi_project(real_squad, tmp_path):
         print(f"   Steps: {len(workflow.steps)}")
         
         # Mock Refactorer to avoid actual execution
-        with patch('qwen_dev_cli.agents.refactorer.RefactorerAgent.execute') as mock_refactor:
+        with patch('jdev_cli.agents.refactorer.RefactorerAgent.execute') as mock_refactor:
             mock_refactor.return_value = AsyncMock(
                 success=True,
                 data={"steps_completed": len(workflow.steps)},
@@ -200,8 +200,8 @@ async def test_e2e_self_correction():
     Validates that Refactorer has retry logic capability.
     Note: This is a simplified test that validates the agent structure.
     """
-    from qwen_dev_cli.agents.refactorer import RefactorerAgent
-    from qwen_dev_cli.agents.base import AgentTask
+    from jdev_cli.agents.refactorer import RefactorerAgent
+    from jdev_cli.agents.base import AgentTask
     
     print(f"\n🚀 E2E Test: Self-Correction")
     
@@ -253,7 +253,7 @@ async def test_e2e_constitutional_ai(real_squad):
     print(f"   Request: {request}")
     
     # Mock Refactorer to return code with eval()
-    with patch('qwen_dev_cli.agents.refactorer.RefactorerAgent.execute') as mock_refactor:
+    with patch('jdev_cli.agents.refactorer.RefactorerAgent.execute') as mock_refactor:
         mock_refactor.return_value = AsyncMock(
             success=True,
             data={

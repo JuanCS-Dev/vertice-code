@@ -1,7 +1,7 @@
 """Tests for configuration schema."""
 
 import pytest
-from qwen_dev_cli.config.schema import (
+from jdev_cli.config.schema import (
     QwenConfig,
     ProjectConfig,
     RulesConfig,

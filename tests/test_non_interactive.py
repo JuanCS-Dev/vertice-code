@@ -6,8 +6,8 @@ import tempfile
 from pathlib import Path
 from typer.testing import CliRunner
 
-from qwen_dev_cli.cli import app
-from qwen_dev_cli.core.single_shot import SingleShotExecutor, execute_single_shot
+from jdev_cli.cli import app
+from jdev_cli.core.single_shot import SingleShotExecutor, execute_single_shot
 
 
 runner = CliRunner()

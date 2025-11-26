@@ -11,7 +11,7 @@ Tests cover:
 import pytest
 from datetime import datetime
 
-from qwen_dev_cli.orchestration.memory import (
+from jdev_cli.orchestration.memory import (
     MemoryManager,
     SharedContext,
 )

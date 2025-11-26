@@ -11,7 +11,7 @@ import shutil
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from qwen_dev_cli.hooks import (
+from jdev_cli.hooks import (
     HookExecutor,
     HookEvent,
     HookContext,

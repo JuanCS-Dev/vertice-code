@@ -6,12 +6,12 @@ Tests actual API calls with real Qwen models.
 import pytest
 import asyncio
 import os
-from qwen_dev_cli.core.llm import LLMClient
+from jdev_cli.core.llm import LLMClient
 
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_nebius_qwen_72b_basic():
+async def test_nebius_model_72b_basic():
     """Test basic generation with Qwen2.5-72B."""
     if not os.getenv("NEBIUS_API_KEY"):
         pytest.skip("NEBIUS_API_KEY not set")

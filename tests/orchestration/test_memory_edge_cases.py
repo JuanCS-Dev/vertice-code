@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 from threading import Thread
 from typing import List
 
-from qwen_dev_cli.orchestration.memory import (
+from jdev_cli.orchestration.memory import (
     MemoryManager,
     SharedContext,
 )

@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 from typing import Dict, List
 from unittest.mock import MagicMock, AsyncMock
-from qwen_dev_cli.agents.documentation import DocumentationAgent
+from jdev_cli.agents.documentation import DocumentationAgent
 
 
 # ============================================================================

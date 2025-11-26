@@ -7,9 +7,9 @@ Boris Cherny: "Tests or it didn't happen."
 import pytest
 from typing import Dict, Any
 
-from qwen_dev_cli.tools.validated import ValidatedTool, validate_tool_inputs
-from qwen_dev_cli.tools.base import ToolResult
-from qwen_dev_cli.core.validation import Required, TypeCheck, ValidationResultImpl
+from jdev_cli.tools.validated import ValidatedTool, validate_tool_inputs
+from jdev_cli.tools.base import ToolResult
+from jdev_cli.core.validation import Required, TypeCheck, ValidationResultImpl
 
 
 class MockValidatedTool(ValidatedTool):

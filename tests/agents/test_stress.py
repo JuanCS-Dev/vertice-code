@@ -16,14 +16,14 @@ import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 
-from qwen_dev_cli.agents.architect import ArchitectAgent
-from qwen_dev_cli.agents.explorer import ExplorerAgent
-from qwen_dev_cli.agents.planner import PlannerAgent
-from qwen_dev_cli.agents.refactorer import RefactorerAgent
-from qwen_dev_cli.agents.reviewer import ReviewerAgent
-from qwen_dev_cli.agents.base import AgentTask
-from qwen_dev_cli.orchestration.squad import DevSquad
-from qwen_dev_cli.orchestration.memory import MemoryManager
+from jdev_cli.agents.architect import ArchitectAgent
+from jdev_cli.agents.explorer import ExplorerAgent
+from jdev_cli.agents.planner import PlannerAgent
+from jdev_cli.agents.refactorer import RefactorerAgent
+from jdev_cli.agents.reviewer import ReviewerAgent
+from jdev_cli.agents.base import AgentTask
+from jdev_cli.orchestration.squad import DevSquad
+from jdev_cli.orchestration.memory import MemoryManager
 
 
 class TestArchitectStressTests:

@@ -5,7 +5,7 @@ Real-time token usage and optimization tests
 
 import pytest
 from datetime import datetime
-from qwen_dev_cli.tui.components.context_awareness import (
+from jdev_cli.tui.components.context_awareness import (
     ContextAwarenessEngine,
     TokenUsageSnapshot,
     ContextWindow

@@ -10,7 +10,7 @@ from unittest.mock import Mock, AsyncMock, MagicMock
 from pathlib import Path
 import tempfile
 
-from qwen_dev_cli.core.workflow import (
+from jdev_cli.core.workflow import (
     WorkflowEngine,
     WorkflowStep,
     ThoughtPath,

@@ -20,7 +20,7 @@ from typing import Any, Dict, List
 from datetime import datetime
 
 # Import production code
-from qwen_dev_cli.agents.data_agent_production import (
+from jdev_cli.agents.data_agent_production import (
     DataAgent,
     create_data_agent,
     SchemaIssue,
@@ -31,10 +31,10 @@ from qwen_dev_cli.agents.data_agent_production import (
     DatabaseType,
 )
 
-from qwen_dev_cli.agents.llm_adapter import LLMClientAdapter, wrap_llm_client
+from jdev_cli.agents.llm_adapter import LLMClientAdapter, wrap_llm_client
 
 # Import YOUR base types
-from qwen_dev_cli.agents.base import AgentTask, AgentResponse
+from jdev_cli.agents.base import AgentTask, AgentResponse
 
 
 # ============================================================================

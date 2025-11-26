@@ -1,7 +1,7 @@
 """Tests for session validation."""
 
 import pytest
-from qwen_dev_cli.session.state import SessionState
+from jdev_cli.session.state import SessionState
 
 
 class TestSessionValidation:

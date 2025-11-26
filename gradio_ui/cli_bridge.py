@@ -17,7 +17,7 @@ import httpx
 from .config import load_api_settings
 
 try:
-    from qwen_dev_cli.integration.shell_bridge import ShellBridge
+    from jdev_cli.integration.shell_bridge import ShellBridge
 except Exception:  # pragma: no cover - optional dependency during UI dev
     ShellBridge = None  # type: ignore
 

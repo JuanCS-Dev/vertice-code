@@ -16,7 +16,7 @@ from typing import Any
 import tempfile
 import os
 
-from qwen_dev_cli.core.types import (
+from jdev_cli.core.types import (
     MessageRole,
     ErrorCategory,
     WorkflowState,
@@ -25,7 +25,7 @@ from qwen_dev_cli.core.types import (
     is_file_path,
 )
 
-from qwen_dev_cli.core.errors import (
+from jdev_cli.core.errors import (
     QwenError,
     ErrorContext,
     SyntaxError,
@@ -43,7 +43,7 @@ from qwen_dev_cli.core.errors import (
     ToolError,
 )
 
-from qwen_dev_cli.core.validation import (
+from jdev_cli.core.validation import (
     ValidationResultImpl,
     Required,
     TypeCheck,
@@ -136,14 +136,14 @@ class TestErrors:
         with pytest.raises(Exception):  # Should raise FrozenInstanceError
             context.file = "other.py"  # type: ignore
     
-    def test_qwen_error_basic(self):
+    def test_jdev_error_basic(self):
         """Test basic QwenError creation."""
         error = QwenError("Something went wrong")
         assert error.message == "Something went wrong"
         assert error.context is None
         assert not error.recoverable
     
-    def test_qwen_error_with_context(self):
+    def test_jdev_error_with_context(self):
         """Test QwenError with context."""
         context = ErrorContext(
             category=ErrorCategory.SYNTAX,
@@ -155,7 +155,7 @@ class TestErrors:
         assert error.context == context
         assert error.recoverable
     
-    def test_qwen_error_serialization(self):
+    def test_jdev_error_serialization(self):
         """Test error serialization to dict."""
         context = ErrorContext(category=ErrorCategory.RUNTIME, file="script.py")
         error = QwenError("Runtime error", context=context)
@@ -470,14 +470,14 @@ class TestFileSystemValidation:
     def test_path_exists_valid(self):
         """Test PathExists with existing path."""
         with tempfile.NamedTemporaryFile() as tmp:
-            from qwen_dev_cli.core.validation import PathExists
+            from jdev_cli.core.validation import PathExists
             validator = PathExists()
             result = validator.validate(tmp.name)
             assert result.valid
     
     def test_path_exists_invalid(self):
         """Test PathExists with non-existent path."""
-        from qwen_dev_cli.core.validation import PathExists
+        from jdev_cli.core.validation import PathExists
         validator = PathExists()
         result = validator.validate("/this/path/does/not/exist")
         assert not result.valid
@@ -485,7 +485,7 @@ class TestFileSystemValidation:
     def test_file_exists_valid(self):
         """Test FileExists with existing file."""
         with tempfile.NamedTemporaryFile() as tmp:
-            from qwen_dev_cli.core.validation import FileExists
+            from jdev_cli.core.validation import FileExists
             validator = FileExists()
             result = validator.validate(tmp.name)
             assert result.valid
@@ -493,7 +493,7 @@ class TestFileSystemValidation:
     def test_file_exists_directory(self):
         """Test FileExists with directory (should fail)."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            from qwen_dev_cli.core.validation import FileExists
+            from jdev_cli.core.validation import FileExists
             validator = FileExists()
             result = validator.validate(tmpdir)
             assert not result.valid
@@ -502,7 +502,7 @@ class TestFileSystemValidation:
     def test_directory_exists_valid(self):
         """Test DirectoryExists with existing directory."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            from qwen_dev_cli.core.validation import DirectoryExists
+            from jdev_cli.core.validation import DirectoryExists
             validator = DirectoryExists()
             result = validator.validate(tmpdir)
             assert result.valid
@@ -514,7 +514,7 @@ class TestFileSystemValidation:
             tmp.flush()
             
             try:
-                from qwen_dev_cli.core.validation import ReadableFile
+                from jdev_cli.core.validation import ReadableFile
                 validator = ReadableFile()
                 result = validator.validate(tmp.name)
                 assert result.valid

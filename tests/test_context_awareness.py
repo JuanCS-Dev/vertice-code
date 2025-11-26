@@ -7,8 +7,8 @@ import os
 from pathlib import Path
 import pytest
 
-from qwen_dev_cli.shell import InteractiveShell, SessionContext
-from qwen_dev_cli.core.context import ContextBuilder
+from jdev_cli.shell import InteractiveShell, SessionContext
+from jdev_cli.core.context import ContextBuilder
 
 
 class TestSessionContext:

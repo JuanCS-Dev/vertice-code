@@ -1,13 +1,13 @@
 """Tests for MCP integration."""
 import pytest
 import asyncio
-from qwen_dev_cli.integrations.mcp import (
+from jdev_cli.integrations.mcp import (
     MCPConfig,
     ShellSession,
     ShellManager,
     QwenMCPServer
 )
-from qwen_dev_cli.tools.registry_helper import get_default_registry
+from jdev_cli.tools.registry_helper import get_default_registry
 
 
 class TestMCPConfig:

@@ -4,7 +4,7 @@ Boris Cherny: Tests are documentation. They show how the code should be used.
 """
 
 import pytest
-from qwen_dev_cli.intelligence.types import (
+from jdev_cli.intelligence.types import (
     Suggestion,
     SuggestionType,
     SuggestionConfidence,
@@ -12,8 +12,8 @@ from qwen_dev_cli.intelligence.types import (
     SuggestionPattern,
     SuggestionResult
 )
-from qwen_dev_cli.intelligence.engine import SuggestionEngine
-from qwen_dev_cli.intelligence.patterns import BUILTIN_PATTERNS, register_builtin_patterns
+from jdev_cli.intelligence.engine import SuggestionEngine
+from jdev_cli.intelligence.patterns import BUILTIN_PATTERNS, register_builtin_patterns
 
 
 class TestTypes:
