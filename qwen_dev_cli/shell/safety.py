@@ -21,8 +21,16 @@ SAFE_COMMANDS: Set[str] = {
 
 DANGEROUS_COMMANDS: Set[str] = {
     'rm', 'rmdir', 'dd', 'mkfs', 'fdisk', 'format',
-    ':(){:|:&};:', 'shutdown', 'reboot', 'init',
+    'shutdown', 'reboot', 'init',
     'kill', 'pkill', 'killall',
+}
+
+# Dangerous patterns that should be detected anywhere in command
+DANGEROUS_PATTERNS: Set[str] = {
+    ':(){:|:&};:',  # Fork bomb
+    ':(){ :|:& };:',  # Fork bomb with spaces
+    '/dev/sda',  # Direct disk access
+    '/dev/null',  # Can be dangerous in redirects
 }
 
 
@@ -43,6 +51,11 @@ def get_safety_level(command: str) -> int:
     """
     if not command:
         return 1
+
+    # Check for dangerous patterns first (full string match)
+    for pattern in DANGEROUS_PATTERNS:
+        if pattern in command:
+            return 2
 
     # Check for dangerous commands anywhere in the command string (handles chains)
     tokens = re.split(r'[;&|]', command)

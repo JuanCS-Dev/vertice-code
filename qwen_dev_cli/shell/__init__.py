@@ -20,10 +20,6 @@ Usage:
 from .repl import main
 from .context import SessionContext
 
-# Re-export from shell_main for backward compatibility
-# InteractiveShell is still in shell_main.py (gradual migration)
-from qwen_dev_cli.shell_main import InteractiveShell
-
 # Export safety utilities
 from .safety import (
     get_safety_level,
@@ -36,6 +32,22 @@ from .safety import (
 
 # Export tool executor
 from .tool_executor import ToolExecutor, ExecutionAttempt
+
+
+def __getattr__(name: str):
+    """
+    Lazy import for InteractiveShell to avoid circular import.
+
+    shell/__init__.py imports shell_main.InteractiveShell
+    shell_main.py imports shell.context.SessionContext
+
+    Using __getattr__ breaks the cycle.
+    """
+    if name == "InteractiveShell":
+        from qwen_dev_cli.shell_main import InteractiveShell
+        return InteractiveShell
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 __all__ = [
     # Main classes
