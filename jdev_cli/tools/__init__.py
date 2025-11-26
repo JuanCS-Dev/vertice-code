@@ -6,21 +6,25 @@ Tool Categories:
 - File Operations: ReadFileTool, WriteFileTool, EditFileTool, etc.
 - Search: SearchFilesTool, GlobTool, GrepTool
 - Execution: BashCommandTool, BackgroundTaskTool
-- Git: GitStatusTool, GitDiffTool
+- Git: GitStatusTool, GitDiffTool, GitCommitTool, GitPRCreateTool
 - Context: GetContextTool, MemoryReadTool, MemoryWriteTool
 - Planning: EnterPlanModeTool, ExitPlanModeTool
 - User Interaction: AskUserQuestionTool
 - Web: WebFetchTool, WebSearchTool
 - Notebooks: NotebookReadTool, NotebookEditTool
+- Media: ImageReadTool, PDFReadTool
 - Subagents: TaskTool
 
-Claude Code Parity:
+Claude Code Parity (Sprints 1-3):
 - Memory system (CLAUDE.md/MEMORY.md)
 - AskUserQuestion for user interaction
 - Edit replace_all for bulk replacements
 - NotebookEdit for Jupyter notebooks
 - EnterPlanMode/ExitPlanMode for structured planning
 - Task tool with resume capability
+- Image/PDF reading (Sprint 3)
+- Git commit workflow with safety protocols (Sprint 3)
+- Context auto-compact (Sprint 3)
 """
 
 # Base classes
@@ -75,10 +79,29 @@ from .plan_mode import (
     reset_plan_state,
 )
 
+# Media tools (Sprint 3)
+from .media_tools import (
+    ImageReadTool,
+    PDFReadTool,
+    ScreenshotReadTool,
+    get_media_tools,
+)
+
+# Git workflow tools (Sprint 3)
+from .git_workflow import (
+    GitStatusEnhancedTool,
+    GitCommitTool,
+    GitLogTool,
+    GitDiffEnhancedTool,
+    GitPRCreateTool,
+    get_git_workflow_tools,
+    validate_git_command,
+)
+
 # Execution tools
 from .exec_hardened import BashCommandTool
 
-# Git tools
+# Git tools (legacy)
 from .git_ops import GitStatusTool, GitDiffTool
 
 # Context tools
@@ -144,9 +167,22 @@ __all__ = [
     "get_plan_mode_tools",
     "get_plan_state",
     "reset_plan_state",
+    # Media tools (Sprint 3)
+    "ImageReadTool",
+    "PDFReadTool",
+    "ScreenshotReadTool",
+    "get_media_tools",
+    # Git workflow (Sprint 3)
+    "GitStatusEnhancedTool",
+    "GitCommitTool",
+    "GitLogTool",
+    "GitDiffEnhancedTool",
+    "GitPRCreateTool",
+    "get_git_workflow_tools",
+    "validate_git_command",
     # Execution
     "BashCommandTool",
-    # Git
+    # Git (legacy)
     "GitStatusTool",
     "GitDiffTool",
     # Context
