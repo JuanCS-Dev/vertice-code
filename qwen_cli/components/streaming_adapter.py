@@ -63,15 +63,16 @@ class StreamingResponseWidget(Static):
         width: 100%;
         height: auto;
         min-height: 1;
+        color: $foreground;
     }
 
     StreamingResponseWidget.streaming {
-        border-left: solid $accent 2;
+        border-left: solid $primary;
         padding-left: 1;
     }
 
     StreamingResponseWidget.plain-mode {
-        border-left: dashed yellow 1;
+        border-left: dashed $warning;
     }
     """
 

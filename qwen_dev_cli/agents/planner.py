@@ -1475,7 +1475,8 @@ RESPOND WITH PURE JSON ONLY.
         """
         Streaming execution for PlannerAgent.
 
-        Enables real-time token display in MAESTRO UI PLANNER panel.
+        Claude Code Style: Generates plan internally, then streams formatted markdown.
+        Does NOT stream raw JSON tokens to UI.
 
         Yields:
             Dict with format {"type": "status"|"thinking"|"result", "data": ...}
@@ -1492,6 +1493,13 @@ RESPOND WITH PURE JSON ONLY.
             # PHASE 2: Build Prompt
             yield {"type": "status", "data": "🎯 Generating plan..."}
 
+            # Detect language and add instruction
+            try:
+                from qwen_cli.core.language_detector import LanguageDetector
+                lang_instruction = LanguageDetector.get_prompt_instruction(task.request)
+            except ImportError:
+                lang_instruction = None
+
             prompt = f"""Create an execution plan for the following request:
 
 REQUEST: {task.request}
@@ -1499,11 +1507,40 @@ REQUEST: {task.request}
 CONTEXT:
 - Working Directory: {cwd}
 
-Generate a comprehensive plan with clear steps, dependencies, and success criteria.
-Respond with a valid JSON object containing the plan structure."""
+Generate a comprehensive plan with clear steps. Respond with a valid JSON object using this EXACT format:
 
-            # PHASE 3: Stream LLM Response (CRITICAL!)
+{{
+  "goal": "Brief description of the goal",
+  "strategy_overview": "High-level approach",
+  "sops": [
+    {{
+      "id": "step-1",
+      "action": "Description of what to do",
+      "role": "executor",
+      "confidence_score": 0.8,
+      "definition_of_done": "How to verify completion"
+    }},
+    {{
+      "id": "step-2",
+      "action": "Next action...",
+      "role": "executor",
+      "confidence_score": 0.7,
+      "definition_of_done": "Verification criteria"
+    }}
+  ],
+  "risk_assessment": "LOW|MEDIUM|HIGH",
+  "rollback_strategy": "How to undo if needed",
+  "estimated_duration": "Time estimate"
+}}
+
+Include 3-7 concrete, actionable steps in the sops array.
+
+{f'IMPORTANT: {lang_instruction}' if lang_instruction else ''}"""
+
+            # PHASE 3: Generate LLM Response (internal - NOT streamed to UI)
+            # Claude Code pattern: Generate internally, format, then stream formatted output
             response_buffer = []
+            token_count = 0
 
             async for token in self.llm_client.stream(
                 prompt=prompt,
@@ -1512,16 +1549,33 @@ Respond with a valid JSON object containing the plan structure."""
                 temperature=0.3
             ):
                 response_buffer.append(token)
-                yield {"type": "thinking", "data": token}  # Real-time streaming!
+                token_count += 1
+                # Show progress indicator every 50 tokens (Claude Code style)
+                if token_count % 50 == 0:
+                    yield {"type": "status", "data": f"🎯 Generating plan... ({token_count} tokens)"}
 
             llm_response = ''.join(response_buffer)
 
-            # PHASE 4: Process
+            # PHASE 4: Process and Format
             yield {"type": "status", "data": "⚙️ Processing plan..."}
 
             plan = self._robust_json_parse(llm_response) if hasattr(self, '_robust_json_parse') else {"raw_response": llm_response}
 
-            # PHASE 5: Return Result
+            # PHASE 5: Generate Formatted Markdown (Claude Code style)
+            yield {"type": "status", "data": "📝 Formatting plan..."}
+
+            # Use _format_plan_as_markdown to create beautiful output
+            formatted_markdown = self._format_plan_as_markdown(plan, task)
+
+            # PHASE 6: Stream the formatted markdown LINE BY LINE
+            # CRITICAL: Stream by lines to avoid cutting words in the middle!
+            # This also helps the BlockDetector identify markdown blocks properly
+            lines = formatted_markdown.split('\n')
+            for line in lines:
+                yield {"type": "thinking", "data": line + "\n"}
+                await asyncio.sleep(0.005)  # 5ms delay for smooth visual
+
+            # PHASE 7: Return Result (NO formatted_markdown - already streamed!)
             yield {"type": "status", "data": "✅ Plan complete!"}
 
             yield {
@@ -1531,6 +1585,7 @@ Respond with a valid JSON object containing the plan structure."""
                     data={
                         "plan": plan,
                         "sops": plan.get("sops", []) if isinstance(plan, dict) else [],
+                        # NOTE: formatted_markdown NOT included to avoid duplication
                     },
                     reasoning=f"Generated plan with {len(plan.get('sops', []) if isinstance(plan, dict) else [])} steps"
                 )
@@ -1856,7 +1911,15 @@ Respond with ONLY the JSON, no explanation."""
         ])
 
         stages = plan_data.get("stages", [])
-        sops = plan_data.get("sops", [])
+        # Fallback: accept multiple common formats for steps
+        sops = (
+            plan_data.get("sops") or
+            plan_data.get("steps") or
+            plan_data.get("tasks") or
+            plan_data.get("actions") or
+            (plan_data.get("plan") if isinstance(plan_data.get("plan"), list) else None) or
+            []
+        )
 
         if stages:
             for stage in stages:
@@ -1872,12 +1935,50 @@ Respond with ONLY the JSON, no explanation."""
                     lines.append(f"  - ✅ Done when: {step.get('definition_of_done', 'Completed')}")
                 lines.append("")
         elif sops:
-            for step in sops:
-                confidence = step.get("confidence_score", 0.7)
+            for i, step in enumerate(sops, 1):
+                # Handle case where step is just a string
+                if isinstance(step, str):
+                    action = step
+                    step_id = f"step-{i}"
+                    role = "executor"
+                    confidence = 0.7
+                    done_when = "Completed"
+                elif isinstance(step, dict):
+                    # Robust field extraction with fallbacks
+                    step_id = step.get("id") or step.get("step_id") or f"step-{i}"
+                    action = (
+                        step.get("action") or
+                        step.get("description") or
+                        step.get("task") or
+                        step.get("name") or
+                        step.get("title") or
+                        "No description"
+                    )
+                    role = step.get("role") or step.get("agent") or step.get("type") or "executor"
+                    raw_conf = step.get("confidence_score") or step.get("confidence") or 0.7
+                    try:
+                        confidence = float(raw_conf)
+                    except (ValueError, TypeError):
+                        confidence = 0.7
+                    done_when = (
+                        step.get("definition_of_done") or
+                        step.get("done_when") or
+                        step.get("success_criteria") or
+                        step.get("criteria") or
+                        "Completed"
+                    )
+                else:
+                    # Unknown type, convert to string
+                    action = str(step)
+                    step_id = f"step-{i}"
+                    role = "executor"
+                    confidence = 0.7
+                    done_when = "Completed"
+
                 conf_emoji = "🟢" if confidence >= 0.8 else "🟡" if confidence >= 0.6 else "🔴"
-                lines.append(f"- [ ] **{step.get('id')}** ({step.get('role')}): {step.get('action')}")
+                lines.append(f"- [ ] **{step_id}** ({role}): {action}")
                 lines.append(f"  - {conf_emoji} Confidence: {confidence:.0%}")
-                lines.append(f"  - ✅ Done when: {step.get('definition_of_done', 'Completed')}")
+                lines.append(f"  - ✅ Done when: {done_when}")
             lines.append("")
 
         # Add risk assessment
