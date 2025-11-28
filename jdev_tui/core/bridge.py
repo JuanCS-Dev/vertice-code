@@ -86,6 +86,7 @@ from .llm_client import (
     GeminiClient,
     ToolCallParser,
 )
+from .parsing.stream_filter import StreamFilter
 
 # Agents Bridge - Agent registry and routing
 from .agents_bridge import (
@@ -453,6 +454,8 @@ Current working directory: {os.getcwd()}
         for iteration in range(self.MAX_TOOL_ITERATIONS):
             # Stream from LLM with context
             response_chunks = []
+            stream_filter = StreamFilter()
+            
             async for chunk in client.stream(
                 current_message,
                 system_prompt=system_prompt,
@@ -460,9 +463,18 @@ Current working directory: {os.getcwd()}
                 tools=self.tools.get_schemas_for_llm()
             ):
                 response_chunks.append(chunk)
+                
+                # Filter chunk to prevent raw JSON leakage
+                filtered_chunk = stream_filter.process_chunk(chunk)
+                
                 # Don't yield tool call markers directly - process them
-                if not chunk.startswith("[TOOL_CALL:"):
-                    yield chunk
+                if filtered_chunk and not filtered_chunk.startswith("[TOOL_CALL:"):
+                    yield filtered_chunk
+            
+            # Flush any remaining text in filter
+            remaining = stream_filter.flush()
+            if remaining and not remaining.startswith("[TOOL_CALL:"):
+                yield remaining
 
             # Accumulate response
             accumulated = "".join(response_chunks)

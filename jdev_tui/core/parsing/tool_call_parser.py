@@ -94,6 +94,14 @@ FUNC_PATTERN = re.compile(
     re.DOTALL
 )
 
+# Pattern for legacy JSON format ({"tool": "name", "args": {...}})
+# This is the format we just removed from the prompt, but we keep support
+# in case the model hallucinates it or for backward compatibility.
+LEGACY_JSON_PATTERN = re.compile(
+    r'\{\s*"tool"\s*:\s*"(\w+)"\s*,\s*"args"\s*:\s*(\{[^}]+\})\s*\}',
+    re.DOTALL
+)
+
 
 # =============================================================================
 # TOOL CALL PARSER
@@ -131,6 +139,7 @@ class ToolCallParser:
     MARKER_PATTERN = MARKER_PATTERN
     ANTHROPIC_PATTERN = ANTHROPIC_PATTERN
     JSON_FUNC_PATTERN = JSON_FUNC_PATTERN
+    LEGACY_JSON_PATTERN = LEGACY_JSON_PATTERN
     FUNC_PATTERN = FUNC_PATTERN
     KNOWN_TOOLS = KNOWN_TOOLS
 
@@ -272,6 +281,17 @@ class ToolCallParser:
                 if args:  # Only add if we got valid args
                     _add_result(func_name, args)
 
+        # 6. Check for legacy JSON format ({"tool": "name", "args": {...}})
+        legacy_matches = ToolCallParser.LEGACY_JSON_PATTERN.findall(text)
+        for name, args_str in legacy_matches:
+            if name in KNOWN_TOOLS:
+                try:
+                    args = json.loads(args_str)
+                    _add_result(name, args)
+                except json.JSONDecodeError as e:
+                    logger.debug(f"Failed to parse legacy JSON args: {e}")
+                    continue
+
         return results
 
     @staticmethod
@@ -348,6 +368,9 @@ class ToolCallParser:
             Cleaned text without markers
         """
         text = MARKER_PATTERN.sub('', text)
+        
+        # Remove legacy JSON patterns
+        text = LEGACY_JSON_PATTERN.sub('', text)
 
         # Also remove code blocks containing only tool calls
         lines = text.split('\n')

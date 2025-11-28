@@ -34,6 +34,7 @@ from jdev_tui.core.parsing.tool_call_parser import (
     ToolCallParser,
     KNOWN_TOOLS,
 )
+from jdev_tui.core.schema_adapter import SchemaAdapter
 from jdev_tui.core.streaming.gemini_stream import (
     GeminiStreamConfig,
     GeminiStreamer,
@@ -152,19 +153,25 @@ class GeminiClient:
 
             declarations = []
             for schema in self._tool_schemas:
-                params = schema.get("parameters", {})
-                if not params.get("type"):
-                    params["type"] = "object"
-                if "properties" not in params:
-                    params["properties"] = {}
-
-                declarations.append(
-                    FunctionDeclaration(
-                        name=schema["name"],
-                        description=schema.get("description", ""),
-                        parameters=params
+                try:
+                    # Use SchemaAdapter to transform and validate
+                    gemini_schema = SchemaAdapter.to_gemini_schema(schema)
+                    
+                    declarations.append(
+                        FunctionDeclaration(
+                            name=gemini_schema["name"],
+                            description=gemini_schema["description"],
+                            parameters=gemini_schema["parameters"]
+                        )
                     )
-                )
+                except Exception as e:
+                    logger.error(f"Failed to adapt schema for {schema.get('name')}: {e}")
+                    # Continue to try other tools, or raise if strict
+                    continue
+
+            if not declarations:
+                logger.warning("No valid tool declarations built")
+                return None
 
             self._gemini_tools = [GeminiTool(function_declarations=declarations)]
             return self._gemini_tools
@@ -173,6 +180,8 @@ class GeminiClient:
             logger.warning("google-generativeai not available for function calling")
             return None
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             logger.error(f"Failed to build Gemini tools: {e}")
             return None
 

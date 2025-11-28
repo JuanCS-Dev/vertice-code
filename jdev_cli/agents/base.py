@@ -215,6 +215,12 @@ class BaseAgent(abc.ABC):
             "k8s_action": AgentCapability.BASH_EXEC,  # DevOps: Kubernetes operations
             "docker_build": AgentCapability.BASH_EXEC,  # DevOps: Docker operations
             "argocd_sync": AgentCapability.BASH_EXEC,  # DevOps: ArgoCD operations
+            # Web Tools (Enabled by default for READ_ONLY)
+            "web_search": AgentCapability.READ_ONLY,
+            "search_documentation": AgentCapability.READ_ONLY,
+            "fetch_url": AgentCapability.READ_ONLY,
+            "package_search": AgentCapability.READ_ONLY,
+            "download_file": AgentCapability.FILE_EDIT,  # Writes to disk
         }
         
         required = tool_map.get(tool_name)

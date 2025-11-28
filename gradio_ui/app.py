@@ -216,50 +216,81 @@ def _get_mcp_tools_df() -> pd.DataFrame:
 
 def handle_file_upload(files):
     """Process uploaded files, copy to workspace, and return status message."""
-    if not files:
-        return "No files uploaded"
-    
-    # Create uploads directory in workspace if it doesn't exist
-    uploads_dir = PROJECT_ROOT / "uploads"
-    uploads_dir.mkdir(exist_ok=True)
-    
-    uploaded_info = []
-    copied_count = 0
-    
-    for file_path in files:
-        if file_path:
+    import traceback
+
+    try:
+        if not files:
+            return "📁 Arraste arquivos aqui para upload"
+
+        # Create uploads directory in workspace if it doesn't exist
+        uploads_dir = PROJECT_ROOT / "uploads"
+        uploads_dir.mkdir(exist_ok=True)
+
+        uploaded_info = []
+        copied_count = 0
+
+        # Handle different input types (Gradio can send string, list, or None)
+        if isinstance(files, str):
+            files = [files]
+        elif not isinstance(files, (list, tuple)):
+            files = [files] if files else []
+
+        for file_item in files:
+            if not file_item:
+                continue
+
+            # Gradio 6 pode enviar string path ou objeto com .name
+            if hasattr(file_item, 'name'):
+                file_path = file_item.name
+            else:
+                file_path = str(file_item)
+
             source_path = Path(file_path)
-            if source_path.exists():
-                size = source_path.stat().st_size
-                size_str = f"{size / 1024:.1f} KB" if size < 1024 * 1024 else f"{size / (1024 * 1024):.1f} MB"
-                
-                # Copy file to workspace uploads directory
-                try:
-                    dest_path = uploads_dir / source_path.name
-                    
-                    # Handle duplicate names
-                    counter = 1
-                    while dest_path.exists():
-                        stem = source_path.stem
-                        suffix = source_path.suffix
-                        dest_path = uploads_dir / f"{stem}_{counter}{suffix}"
-                        counter += 1
-                    
-                    # Copy file
-                    shutil.copy2(source_path, dest_path)
-                    
-                    relative_path = dest_path.relative_to(PROJECT_ROOT)
-                    uploaded_info.append(f"✓ **{source_path.name}** ({size_str}) → `{relative_path}`")
-                    copied_count += 1
-                except Exception as e:
-                    uploaded_info.append(f"✗ **{source_path.name}** - Error: {str(e)}")
-    
-    if uploaded_info:
-        status_msg = f"**✅ Uploaded {copied_count}/{len([f for f in files if f])} file(s) to workspace:**\n\n" + "\n".join(uploaded_info)
-        if copied_count > 0:
-            status_msg += f"\n\n📁 Files saved to: `uploads/` directory"
-        return status_msg
-    return "No files uploaded"
+
+            if not source_path.exists():
+                uploaded_info.append(f"✗ Arquivo não encontrado: `{source_path.name}`")
+                continue
+
+            # Skip directories (Gradio não suporta upload de pastas diretamente)
+            if source_path.is_dir():
+                uploaded_info.append(f"⚠️ Pastas não suportadas: `{source_path.name}`")
+                continue
+
+            size = source_path.stat().st_size
+            size_str = f"{size / 1024:.1f} KB" if size < 1024 * 1024 else f"{size / (1024 * 1024):.1f} MB"
+
+            try:
+                dest_path = uploads_dir / source_path.name
+
+                # Handle duplicate names
+                counter = 1
+                while dest_path.exists():
+                    stem = source_path.stem
+                    suffix = source_path.suffix
+                    dest_path = uploads_dir / f"{stem}_{counter}{suffix}"
+                    counter += 1
+
+                # Copy file
+                shutil.copy2(source_path, dest_path)
+
+                relative_path = dest_path.relative_to(PROJECT_ROOT)
+                uploaded_info.append(f"✅ **{source_path.name}** ({size_str})")
+                copied_count += 1
+            except Exception as e:
+                uploaded_info.append(f"❌ **{source_path.name}** - {str(e)}")
+
+        if uploaded_info:
+            if copied_count > 0:
+                status_msg = f"**📁 {copied_count} arquivo(s) enviado(s):**\n" + "\n".join(uploaded_info)
+            else:
+                status_msg = "**⚠️ Nenhum arquivo copiado:**\n" + "\n".join(uploaded_info)
+            return status_msg
+        return "📁 Nenhum arquivo selecionado"
+
+    except Exception as e:
+        error_msg = f"❌ Erro no upload: {str(e)}"
+        print(f"[UPLOAD ERROR] {traceback.format_exc()}")
+        return error_msg
 
 # --- CORE LOGIC ---
 
@@ -521,9 +552,12 @@ def create_ui() -> tuple[gr.Blocks, str, str]:
                     label="Dev Session",
                     height=400,
                     render_markdown=True,
+                    line_breaks=True,
+                    layout="bubble",
                     avatar_images=(None, None),
-                    elem_classes="cyber-glass mb-2", # Add margin bottom to separate from input
-                    buttons=["copy"],  # Gradio 6
+                    elem_classes="cyber-glass mb-2",
+                    buttons=["copy"],
+                    sanitize_html=False,  # Permite HTML para formatação
                 )
                 
                 # Input Area

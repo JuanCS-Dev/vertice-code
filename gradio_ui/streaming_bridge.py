@@ -308,6 +308,51 @@ class GradioStreamingBridge:
         # Current streaming state
         self._current_metrics: Optional[StreamingMetrics] = None
 
+    def _sanitize_tool_calls(self, chunk: str) -> str:
+        """
+        Converte JSON tool calls em formato amigável para Gradio.
+
+        Transforma:
+        - {"tool": "bash_command", "args": {"command": "..."}} → ```bash\n...\n```
+        - write_file("path", "content") → 📝 **Escrevendo:** `path`
+        """
+        import re
+
+        # Pattern para tool calls JSON
+        json_patterns = [
+            # {"tool": "bash_command", "args": {"command": "..."}}
+            (r'\{\s*"tool"\s*:\s*"(\w+)"\s*,\s*"args"\s*:\s*\{[^}]*"command"\s*:\s*"([^"]+)"[^}]*\}\s*\}',
+             lambda m: f"```bash\n{m.group(2)}\n```"),
+            # Nested: {"tool":{"tool":"bash_command"...}}
+            (r'\{"tool"\s*:\s*\{[^}]*"command"\s*:\s*"([^"]+)"[^}]*\}\s*\}',
+             lambda m: f"```bash\n{m.group(1)}\n```"),
+        ]
+
+        result = chunk
+        for pattern, replacement in json_patterns:
+            result = re.sub(pattern, replacement, result, flags=re.DOTALL)
+
+        # Pattern para function calls Python-style
+        func_patterns = [
+            # write_file("path", "content")
+            (r'write_file\s*\(\s*["\']([^"\']+)["\']',
+             lambda m: f'📝 **Escrevendo arquivo:** `{m.group(1)}`'),
+            # read_file("path")
+            (r'read_file\s*\(\s*["\']([^"\']+)["\']',
+             lambda m: f'📖 **Lendo arquivo:** `{m.group(1)}`'),
+            # execute_python("path")
+            (r'execute_python\s*\(\s*["\']([^"\']+)["\']',
+             lambda m: f'🐍 **Executando:** `{m.group(1)}`'),
+            # bash_command("cmd")
+            (r'bash_command\s*\(\s*["\']([^"\']+)["\']',
+             lambda m: f"```bash\n{m.group(1)}\n```"),
+        ]
+
+        for pattern, replacement in func_patterns:
+            result = re.sub(pattern, replacement, result)
+
+        return result
+
     def initialize(self) -> bool:
         """
         Initialize the bridge and GeminiClient.
@@ -488,6 +533,9 @@ class GradioStreamingBridge:
                     filtered_chunk = self._dedup_filter.filter_chunk(chunk)
                     if not filtered_chunk:
                         continue
+
+                    # Sanitize tool call JSON to friendly format
+                    filtered_chunk = self._sanitize_tool_calls(filtered_chunk)
 
                     response += filtered_chunk
                     self._current_metrics.total_chars += len(filtered_chunk)

@@ -208,41 +208,27 @@ while(task_not_complete):
     tool_protocol = """
 ## Tool Use Protocol
 
-When you need to take action, call tools using this format:
-
-```json
-{"tool": "tool_name", "args": {"param1": "value1", "param2": "value2"}}
-```
+You have access to native tools. USE THEM DIRECTLY.
 
 ### Rules:
 
-1. **One tool per message** for sequential operations with dependencies
-2. **Multiple tools** when operations are independent (parallel)
-3. **Always include required parameters**
-4. **Use exact tool names** from the available list
-5. **Validate paths** - use relative paths from cwd when possible
+1. **DO NOT output JSON text** for tool calls. Use the native tool calling capability.
+2. **One tool per message** for sequential operations with dependencies.
+3. **Multiple tools** when operations are independent (parallel).
+4. **Always include required parameters**.
+5. **Use exact tool names** from the available list.
+6. **Validate paths** - use relative paths from cwd when possible.
 
 ### Examples:
 
 **Read a file:**
-```json
-{"tool": "read_file", "args": {"path": "src/main.py"}}
-```
-
-**Write a file:**
-```json
-{"tool": "write_file", "args": {"path": "utils.py", "content": "def hello():\\n    return 'Hello'"}}
-```
+Call the `read_file` tool with `path="src/main.py"`.
 
 **Run a command:**
-```json
-{"tool": "bash", "args": {"command": "npm test"}}
-```
+Call the `bash` tool with `command="npm test"`.
 
 **Search for code:**
-```json
-{"tool": "grep", "args": {"pattern": "TODO", "path": "."}}
-```
+Call the `grep` tool with `pattern="TODO"` and `path="."`.
 """
 
     # ========================================================================
