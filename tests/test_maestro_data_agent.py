@@ -13,7 +13,7 @@ import os
 # Add project to path
 sys.path.insert(0, os.path.dirname(__file__))
 
-from maestro_v10_integrated import Orchestrator
+from scripts.maestro_v10_integrated import Orchestrator
 
 
 # Mock LLM for testing

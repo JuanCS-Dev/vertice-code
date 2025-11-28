@@ -5,7 +5,7 @@ Constitutional Audit: All 12 Agents Instantiation Test
 Verifica se TODOS os 12 agents podem ser criados sem erros.
 """
 
-from maestro_v10_integrated import Orchestrator
+from scripts.maestro_v10_integrated import Orchestrator
 
 class MockLLM:
     async def generate(self, *args, **kwargs):
