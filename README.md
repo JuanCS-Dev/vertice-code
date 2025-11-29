@@ -13,6 +13,14 @@
 
 ---
 
+<div align="center">
+  <img src="assets/prometheus.gif" alt="Prometheus CLI Demo" width="100%">
+  <br>
+  <em>Prometheus Architecture: Planning -> Building -> Evolving</em>
+</div>
+
+---
+
 ## 🚨 The Problem: "Dumb" Agents
 Current AI agents are **reactive**. They receive a prompt, call a tool, and pray it works.
 *   ❌ **No Memory**: They forget what worked 5 minutes ago.
