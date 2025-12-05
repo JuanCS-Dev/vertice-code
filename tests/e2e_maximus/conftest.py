@@ -83,7 +83,7 @@ def mock_maximus_tribunal(
 def mock_maximus_memory(
     maximus_base_url: str,  # pylint: disable=redefined-outer-name
     mock_factory: MaximusMockFactory,  # pylint: disable=redefined-outer-name
-) -> respx.MockRouter:
+) -> Generator[respx.MockRouter, None, None]:
     """Mock MAXIMUS Memory endpoints."""
     with respx.mock(assert_all_called=False) as router:
         router.get(f"{maximus_base_url}/health").respond(
@@ -108,7 +108,7 @@ def mock_maximus_memory(
 def mock_maximus_factory(
     maximus_base_url: str,  # pylint: disable=redefined-outer-name
     mock_factory: MaximusMockFactory,  # pylint: disable=redefined-outer-name
-) -> respx.MockRouter:
+) -> Generator[respx.MockRouter, None, None]:
     """Mock MAXIMUS Factory endpoints."""
     with respx.mock(assert_all_called=False) as router:
         router.get(f"{maximus_base_url}/health").respond(
@@ -133,7 +133,7 @@ def mock_maximus_factory(
 def mock_maximus_all(
     maximus_base_url: str,  # pylint: disable=redefined-outer-name
     mock_factory: MaximusMockFactory,  # pylint: disable=redefined-outer-name
-) -> respx.MockRouter:
+) -> Generator[respx.MockRouter, None, None]:
     """Mock all MAXIMUS endpoints."""
     with respx.mock(assert_all_called=False) as router:
         # Health
