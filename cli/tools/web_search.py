@@ -1,4 +1,4 @@
-"""Web search tool using DuckDuckGo."""
+"""Web search tool using DuckDuckGo with rate limiting."""
 import logging
 from typing import Optional
 
@@ -6,6 +6,7 @@ from ddgs import DDGS
 
 from .base import ToolResult, ToolCategory
 from .validated import ValidatedTool
+from core.resilience import get_search_limiter, RateLimitError
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +70,22 @@ class WebSearchTool(ValidatedTool):
                 )
                 time_range = None
 
+            # Rate limiting - acquire before search
+            limiter = get_search_limiter()
+            try:
+                await limiter.acquire(domain="duckduckgo.com")
+            except RateLimitError as e:
+                logger.warning(f"Search rate limited: {e}")
+                return ToolResult(
+                    success=False,
+                    error=f"Search rate limit exceeded. Try again in {e.retry_after:.1f}s",
+                    metadata={
+                        "rate_limited": True,
+                        "retry_after": e.retry_after,
+                        "query": query
+                    }
+                )
+
             logger.info(f"Web search: query='{query}', max_results={max_results}, time_range={time_range}")
 
             # Execute search
@@ -102,6 +119,9 @@ class WebSearchTool(ValidatedTool):
                 })
 
             logger.info(f"Web search successful: {len(results)} results")
+
+            # Record success for rate limiter
+            limiter.record_success()
 
             return ToolResult(
                 success=True,

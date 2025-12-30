@@ -722,17 +722,38 @@ tests/performance/test_reconnect.py
 - Consent audit logging
 - @requires_consent decorator
 
+#### Fase 1.3: Rate Limiting Global - COMPLETO ✅
+| Item | Status | Arquivo | Testes |
+|------|--------|---------|--------|
+| WebRateLimiter | ✅ | `core/resilience/web_rate_limiter.py` | 26 |
+| WebFetch 10 req/min | ✅ | `cli/tools/parity/web_tools.py` | 26 |
+| WebSearch 5 req/min | ✅ | `cli/tools/web_search.py` | 26 |
+| Exponential backoff | ✅ | `core/resilience/web_rate_limiter.py` | 26 |
+
+**Arquivos criados**:
+- `core/resilience/web_rate_limiter.py` (350 linhas)
+- `tests/core/test_web_rate_limiter.py` (26 testes)
+
+**Features implementadas**:
+- Token bucket algorithm com burst support
+- Singleton registry para rate limiters globais
+- Per-domain rate limiting opcional
+- Exponential backoff com jitter
+- Adaptive rate adjustment
+- execute_with_retry() para retry automático
+
 ### Métricas de Qualidade
 | Métrica | Valor | Target | Status |
 |---------|-------|--------|--------|
 | Lint (ruff) | 0 erros | 0 | ✅ |
 | Type annotations | 100% | 100% | ✅ |
-| Testes | 159 | - | ✅ |
+| Testes | 185 | - | ✅ |
 | Coverage | ~75% | ≥80% | ⚠️ |
 
 **Breakdown de Testes**:
 - Phase 1.1 (Unified Agent): 22 testes
 - Phase 1.2 (Strict Mode): 24 testes
+- Phase 1.3 (Rate Limiting): 26 testes
 - Phase 2 (Streaming): 20 testes
 - Phase 3 (MCP Security): 93 testes
 
@@ -742,7 +763,9 @@ tests/performance/test_reconnect.py
 
 ## PRÓXIMOS PASSOS
 
-1. ~~**Fase 3: MCP 2025-11-25** - OAuth 2.1 + PKCE, Elicitation, Consent~~ ✅
-2. **Fase 4: A2A v0.3** - Protocol Buffers, gRPC, Security Cards
-3. **Fase 5: TUI Lightweight** - Split Bridge, otimizar handlers
-4. **Fase 7: Testes Compliance** - JSON Schema validation, stress tests
+1. ~~**Fase 1: Fundação** - Unified Agent, Strict Mode, Rate Limiting~~ ✅
+2. ~~**Fase 2: Streaming** - Heartbeat, Backpressure, Reconnect~~ ✅
+3. ~~**Fase 3: MCP 2025-11-25** - OAuth 2.1 + PKCE, Elicitation, Consent~~ ✅
+4. **Fase 4: A2A v0.3** - Protocol Buffers, gRPC, Security Cards
+5. **Fase 5: TUI Lightweight** - Split Bridge, otimizar handlers
+6. **Fase 7: Testes Compliance** - JSON Schema validation, stress tests

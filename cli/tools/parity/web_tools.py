@@ -8,6 +8,11 @@ Contains:
 - WebFetchTool: Fetch URL and convert to text/markdown
 - WebSearchTool: Search the web with DuckDuckGo
 
+Features:
+- Global rate limiting (10 req/min fetch, 5 req/min search)
+- Exponential backoff on rate limit hits
+- Per-domain tracking
+
 Author: JuanCS Dev
 Date: 2025-11-27
 """
@@ -29,6 +34,7 @@ from vertice_cli.tools._parity_utils import (
     DEFAULT_CACHE_TTL,
     MAX_FETCH_SIZE,
 )
+from core.resilience import get_fetch_limiter, get_search_limiter, RateLimitError
 
 logger = logging.getLogger(__name__)
 
@@ -101,7 +107,7 @@ class WebFetchTool(Tool):
             logger.debug(f"Upgraded URL to HTTPS: {url}")
 
         try:
-            # Check cache
+            # Check cache first (no rate limit for cached content)
             if url in self._cache:
                 content, cached_at = self._cache[url]
                 if time.time() - cached_at < self._cache_ttl:
@@ -115,6 +121,19 @@ class WebFetchTool(Tool):
                             "cache_age": int(time.time() - cached_at)
                         }
                     )
+
+            # Rate limiting - acquire before fetch
+            limiter = get_fetch_limiter()
+            domain = urllib.parse.urlparse(url).netloc
+            try:
+                await limiter.acquire(domain=domain)
+            except RateLimitError as e:
+                logger.warning(f"Rate limited for {url}: {e}")
+                return ToolResult(
+                    success=False,
+                    error=f"Rate limit exceeded. Try again in {e.retry_after:.1f}s",
+                    metadata={"rate_limited": True, "retry_after": e.retry_after}
+                )
 
             # Fetch URL
             req = urllib.request.Request(
@@ -169,6 +188,9 @@ class WebFetchTool(Tool):
             if len(self._cache) > 100:
                 oldest = min(self._cache.items(), key=lambda x: x[1][1])
                 del self._cache[oldest[0]]
+
+            # Record success for rate limiter
+            limiter.record_success()
 
             return ToolResult(
                 success=True,
@@ -277,6 +299,18 @@ class WebSearchTool(Tool):
             blocked_domains = []
 
         try:
+            # Rate limiting - acquire before search
+            limiter = get_search_limiter()
+            try:
+                await limiter.acquire(domain="duckduckgo.com")
+            except RateLimitError as e:
+                logger.warning(f"Search rate limited: {e}")
+                return ToolResult(
+                    success=False,
+                    error=f"Search rate limit exceeded. Try again in {e.retry_after:.1f}s",
+                    metadata={"rate_limited": True, "retry_after": e.retry_after}
+                )
+
             # Use DuckDuckGo HTML search (no API key needed)
             encoded_query = urllib.parse.quote(query)
             url = f"https://html.duckduckgo.com/html/?q={encoded_query}"
@@ -320,6 +354,9 @@ class WebSearchTool(Tool):
             # Format citations (Claude Code parity)
             sources = self._format_sources(results)
             sources_markdown = self._format_sources_markdown(results)
+
+            # Record success for rate limiter
+            limiter.record_success()
 
             return ToolResult(
                 success=True,
