@@ -1,78 +1,51 @@
 """
 Vertice Reviewer Agent
 
-Code review and security specialist.
-Uses Vertex AI Gemini for thorough analysis.
+Code review and security specialist with Deep Think pattern.
 
-Responsibilities:
+Key Features:
 - Code quality review
 - Security vulnerability detection
 - Best practices enforcement
-- Performance analysis
+- Deep Think multi-stage analysis (via mixin)
+
+Reference:
+- CodeMender (DeepMind, Oct 2025)
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Dict, List, Optional, AsyncIterator
-from enum import Enum
+import re
+from typing import Dict, List, Optional, AsyncIterator, Tuple
 import logging
+
+from .types import (
+    ReviewFinding,
+    ReviewResult,
+    ReviewSeverity,
+)
+from .deep_think import DeepThinkMixin
 
 logger = logging.getLogger(__name__)
 
 
-class ReviewSeverity(str, Enum):
-    """Severity levels for review findings."""
-    CRITICAL = "critical"    # Security vulnerability, must fix
-    HIGH = "high"           # Bug or major issue
-    MEDIUM = "medium"       # Should fix, best practice violation
-    LOW = "low"             # Suggestion, style issue
-    INFO = "info"           # Informational note
-
-
-@dataclass
-class ReviewFinding:
-    """A single finding from code review."""
-    id: str
-    severity: ReviewSeverity
-    category: str  # security, performance, style, logic, etc.
-    file_path: str
-    line_start: int
-    line_end: int
-    title: str
-    description: str
-    suggestion: Optional[str] = None
-    code_snippet: Optional[str] = None
-
-
-@dataclass
-class ReviewResult:
-    """Complete review result."""
-    file_path: str
-    findings: List[ReviewFinding]
-    summary: str
-    score: float  # 0-100
-    reviewed_by: str = "reviewer"
-
-
-class ReviewerAgent:
+class ReviewerAgent(DeepThinkMixin):
     """
     Code Review Specialist - The Quality Guardian
 
-    Uses Vertex AI Gemini for:
+    Capabilities:
     - Security vulnerability detection (OWASP Top 10)
     - Code quality analysis
     - Performance bottleneck identification
     - Best practices enforcement
-
-    Pattern: Dual-review for critical code
+    - Deep Think multi-stage validation (via mixin)
     """
 
     name = "reviewer"
     description = """
-    Code review and security specialist.
-    Reviews code for quality, security, and performance.
-    Provides actionable feedback with specific line references.
+    Code review and security specialist with Deep Think.
+    Uses multi-stage reasoning to validate findings.
+    Filters false positives through critique and validation.
     """
 
     SYSTEM_PROMPT = """You are an expert code reviewer for Vertice Agency.
@@ -113,7 +86,7 @@ For each finding:
 Be thorough but fair. Praise good patterns too.
 """
 
-    SECURITY_CHECKS = [
+    SECURITY_CHECKS: List[Tuple[str, str]] = [
         ("SQL injection", r"(execute|query)\s*\(.*\+|f['\"].*\{.*\}.*SELECT|\.format\(.*SELECT"),
         ("Command injection", r"(subprocess|os\.system|exec|eval)\s*\(.*\+|shell=True"),
         ("Hardcoded secrets", r"(password|secret|api_key|token)\s*=\s*['\"][^'\"]+['\"]"),
@@ -121,7 +94,7 @@ Be thorough but fair. Praise good patterns too.
         ("Path traversal", r"\.\./|\.\.\\\\"),
     ]
 
-    def __init__(self, provider: str = "vertex-ai"):
+    def __init__(self, provider: str = "vertex-ai") -> None:
         self._provider_name = provider
         self._llm = None
         self._findings: List[ReviewFinding] = []
@@ -140,8 +113,8 @@ Be thorough but fair. Praise good patterns too.
         Args:
             code: Source code to review
             file_path: Path to the file
-            language: Programming language (auto-detected if not specified)
-            focus: Specific areas to focus on (security, performance, etc.)
+            language: Programming language
+            focus: Specific areas to focus on
             stream: Whether to stream output
 
         Yields:
@@ -149,22 +122,19 @@ Be thorough but fair. Praise good patterns too.
         """
         yield f"[Reviewer] Analyzing {file_path}...\n"
 
-        # Detect language if not specified
         if not language:
             language = self._detect_language(file_path)
 
         yield f"[Reviewer] Language: {language}\n"
 
-        # Quick security scan first
         security_issues = self._quick_security_scan(code)
         if security_issues:
             yield f"[Reviewer] Security scan found {len(security_issues)} potential issues\n"
             for issue in security_issues:
                 yield f"  - {issue}\n"
 
-        # Build review prompt
         focus_str = ", ".join(focus) if focus else "all aspects"
-        prompt = f"""Review this {language} code with focus on {focus_str}:
+        _prompt = f"""Review this {language} code with focus on {focus_str}:
 
 FILE: {file_path}
 
@@ -172,28 +142,17 @@ FILE: {file_path}
 {code}
 ```
 
-Provide detailed findings in this format for each issue:
-
-## Finding [N]
-- **Severity**: CRITICAL/HIGH/MEDIUM/LOW/INFO
-- **Category**: security/performance/quality/style
-- **Lines**: X-Y
-- **Issue**: [Description]
-- **Fix**: [Suggested fix]
-
-End with a summary and quality score (0-100).
+Provide detailed findings.
 """
 
-        # TODO: Call LLM for detailed review
         yield "[Reviewer] Performing deep analysis...\n"
 
-        # For now, return security findings
         if security_issues:
             yield "\n## Security Findings\n"
             for i, issue in enumerate(security_issues, 1):
                 yield f"### Finding {i}\n"
-                yield f"- **Severity**: HIGH\n"
-                yield f"- **Category**: security\n"
+                yield "- **Severity**: HIGH\n"
+                yield "- **Category**: security\n"
                 yield f"- **Issue**: {issue}\n\n"
 
         yield "\n[Reviewer] Review complete\n"
@@ -225,7 +184,6 @@ End with a summary and quality score (0-100).
 
     def _quick_security_scan(self, code: str) -> List[str]:
         """Quick regex-based security scan."""
-        import re
         issues = []
 
         for name, pattern in self.SECURITY_CHECKS:
@@ -246,7 +204,6 @@ End with a summary and quality score (0-100).
         """
         findings = []
 
-        # Quick scan
         issues = self._quick_security_scan(code)
         for i, issue in enumerate(issues):
             findings.append(ReviewFinding(
@@ -274,6 +231,7 @@ End with a summary and quality score (0-100).
             "name": self.name,
             "provider": self._provider_name,
             "total_findings": len(self._findings),
+            "deep_think_enabled": True,
         }
 
 

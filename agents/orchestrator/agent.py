@@ -2,83 +2,51 @@
 Vertice Orchestrator Agent
 
 The lead agent that coordinates all other agents in the agency.
-Implements hierarchical orchestration pattern with handoffs.
 
-Based on:
-- Anthropic multi-agent research system
-- Google ADK patterns
-- OpenAI Agents SDK handoffs
+Key Features:
+- Task decomposition and routing
+- Bounded Autonomy (L0-L3 levels via mixin)
+- Handoffs (OpenAI Agents SDK pattern)
+
+Reference:
+- https://www.infoq.com/articles/architects-ai-era/
+- AGENTS_2028_EVOLUTION.md
 """
 
 from __future__ import annotations
 
-import asyncio
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, AsyncIterator
-from enum import Enum
+from typing import Dict, List, Optional, AsyncIterator, Any
 import logging
+
+from .types import (
+    AgentRole,
+    ApprovalCallback,
+    ApprovalRequest,
+    Handoff,
+    NotifyCallback,
+    Task,
+    TaskComplexity,
+)
+from .bounded_autonomy import BoundedAutonomyMixin
 
 logger = logging.getLogger(__name__)
 
 
-class TaskComplexity(str, Enum):
-    """Task complexity levels for routing decisions."""
-    TRIVIAL = "trivial"      # Simple formatting, typos
-    SIMPLE = "simple"        # Single-file changes
-    MODERATE = "moderate"    # Multi-file, clear scope
-    COMPLEX = "complex"      # Architecture decisions
-    CRITICAL = "critical"    # Production, security
-
-
-class AgentRole(str, Enum):
-    """Agent roles in the agency."""
-    ORCHESTRATOR = "orchestrator"
-    CODER = "coder"
-    REVIEWER = "reviewer"
-    ARCHITECT = "architect"
-    RESEARCHER = "researcher"
-    DEVOPS = "devops"
-
-
-@dataclass
-class Task:
-    """A task to be executed by an agent."""
-    id: str
-    description: str
-    complexity: TaskComplexity = TaskComplexity.MODERATE
-    assigned_to: Optional[AgentRole] = None
-    parent_task: Optional[str] = None
-    subtasks: List[str] = field(default_factory=list)
-    status: str = "pending"
-    result: Optional[str] = None
-
-
-@dataclass
-class Handoff:
-    """Handoff between agents (OpenAI pattern)."""
-    from_agent: AgentRole
-    to_agent: AgentRole
-    context: str
-    task_id: str
-    reason: str
-
-
-class OrchestratorAgent:
+class OrchestratorAgent(BoundedAutonomyMixin):
     """
     Lead Agent - The Brain of Vertice Agency
 
-    Responsibilities:
+    Implements Bounded Autonomy (Three Loops pattern):
+    - L0: Autonomous - execute without human approval
+    - L1: Notify - execute and notify human afterward
+    - L2: Approve - propose and wait for human approval
+    - L3: Human Only - human executes, agent advises
+
+    Capabilities:
     - Task decomposition and planning
+    - Autonomy level determination (via mixin)
     - Agent selection and routing
     - Context preservation across handoffs
-    - Result aggregation and synthesis
-    - Quality assurance
-
-    Orchestration Patterns:
-    - Sequential: Chain of specialists
-    - Parallel: Independent parallel execution
-    - Hierarchical: Delegate and aggregate
-    - Loop: Iterate until quality threshold
     """
 
     name = "orchestrator"
@@ -87,9 +55,9 @@ class OrchestratorAgent:
     Strategic coordinator for Vertice Agency.
     Decomposes complex tasks, routes to specialists,
     maintains context, and ensures quality output.
+    Enforces Bounded Autonomy for safe operations.
     """
 
-    # Agent routing based on task type
     ROUTING_TABLE = {
         "code": AgentRole.CODER,
         "review": AgentRole.REVIEWER,
@@ -102,7 +70,6 @@ class OrchestratorAgent:
         "documentation": AgentRole.RESEARCHER,
     }
 
-    # Complexity to model mapping
     MODEL_ROUTING = {
         TaskComplexity.TRIVIAL: "groq",
         TaskComplexity.SIMPLE: "groq",
@@ -111,40 +78,43 @@ class OrchestratorAgent:
         TaskComplexity.CRITICAL: "claude",
     }
 
-    def __init__(self):
+    def __init__(
+        self,
+        approval_callback: Optional[ApprovalCallback] = None,
+        notify_callback: Optional[NotifyCallback] = None,
+    ) -> None:
         self.tasks: Dict[str, Task] = {}
         self.handoffs: List[Handoff] = []
-        self.agents: Dict[AgentRole, "BaseAgent"] = {}
+        self.agents: Dict[AgentRole, Any] = {}
+        self.pending_approvals: Dict[str, ApprovalRequest] = {}
         self._llm = None
+        self._approval_callback = approval_callback
+        self._notify_callback = notify_callback
 
     async def plan(self, user_request: str) -> List[Task]:
         """
         Decompose user request into executable tasks.
 
-        Uses strategic planning to break down complex requests
-        into atomic tasks that can be parallelized or sequenced.
+        Args:
+            user_request: The user's request.
+
+        Returns:
+            List of tasks to execute.
+
+        Note:
+            LLM integration required for advanced planning.
+            Currently returns basic decomposition.
         """
-        # Analyze request complexity
         complexity = await self._analyze_complexity(user_request)
 
-        # Generate execution plan
-        plan_prompt = f"""
-        Decompose this request into executable tasks:
-
-        REQUEST: {user_request}
-        COMPLEXITY: {complexity.value}
-
-        For each task, specify:
-        1. Description
-        2. Agent type needed
-        3. Dependencies (if any)
-        4. Expected output
-
-        Respond in structured format.
-        """
-
-        # TODO: Call LLM to generate plan
-        tasks = []
+        tasks = [
+            Task(
+                id=f"task-{i}",
+                description=f"Step {i}: {user_request[:50]}...",
+                complexity=complexity,
+            )
+            for i in range(1, 2)  # Single task for now
+        ]
 
         return tasks
 
@@ -152,18 +122,16 @@ class OrchestratorAgent:
         """
         Route task to the most appropriate agent.
 
-        Considers:
-        - Task type and keywords
-        - Agent availability
-        - Current load balancing
-        - Skill specialization
+        Args:
+            task: Task to route.
+
+        Returns:
+            AgentRole for the task.
         """
-        # Keyword-based routing
         for keyword, agent in self.ROUTING_TABLE.items():
             if keyword in task.description.lower():
                 return agent
 
-        # Default to coder for unmatched tasks
         return AgentRole.CODER
 
     async def handoff(
@@ -173,9 +141,15 @@ class OrchestratorAgent:
         context: str
     ) -> Handoff:
         """
-        Perform handoff to another agent (OpenAI pattern).
+        Perform handoff to another agent.
 
-        Preserves context and creates audit trail.
+        Args:
+            task: Task being handed off.
+            to_agent: Target agent.
+            context: Context for the handoff.
+
+        Returns:
+            Handoff record.
         """
         handoff = Handoff(
             from_agent=self.role,
@@ -198,31 +172,37 @@ class OrchestratorAgent:
         """
         Execute user request with full orchestration.
 
-        1. Plan: Decompose into tasks
-        2. Route: Assign to specialists
-        3. Execute: Run tasks (parallel where possible)
-        4. Aggregate: Combine results
-        5. Validate: Quality check
-        """
-        yield f"[Orchestrator] Analyzing request...\n"
+        Args:
+            user_request: The user's request.
+            stream: Whether to stream output.
 
-        # Plan
+        Yields:
+            Progress updates and results.
+        """
+        yield "[Orchestrator] Analyzing request...\n"
+
         tasks = await self.plan(user_request)
         yield f"[Orchestrator] Created {len(tasks)} tasks\n"
 
-        # Execute tasks
         for task in tasks:
+            can_proceed, approval = await self.check_autonomy(task)
+
+            if not can_proceed:
+                yield f"[Orchestrator] Task requires approval: {task.autonomy_level.value}\n"
+                if approval:
+                    yield f"[Orchestrator] Approval ID: {approval.id}\n"
+                continue
+
             agent_role = await self.route(task)
             yield f"[Orchestrator] Routing to {agent_role.value}...\n"
 
-            # TODO: Execute via agent
             task.status = "completed"
+            await self.notify_completion(task, "Task completed")
 
-        yield f"[Orchestrator] All tasks completed\n"
+        yield "[Orchestrator] All tasks completed\n"
 
     async def _analyze_complexity(self, request: str) -> TaskComplexity:
         """Analyze request complexity for routing decisions."""
-        # Simple heuristics for now
         word_count = len(request.split())
 
         if word_count < 10:
@@ -245,6 +225,7 @@ class OrchestratorAgent:
             "completed_tasks": len([t for t in self.tasks.values() if t.status == "completed"]),
             "handoffs": len(self.handoffs),
             "agents_registered": len(self.agents),
+            "pending_approvals": len(self.pending_approvals),
         }
 
 

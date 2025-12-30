@@ -1,270 +1,233 @@
 """
 Vertice Architect Agent
 
-System design and architecture specialist.
-Uses Claude for deep reasoning about system design.
+System design and architecture specialist with Three Loops framework.
 
-Responsibilities:
+Key Features:
 - System architecture design
-- Technology stack decisions
-- API design
-- Scalability planning
-- Technical debt assessment
+- Component diagrams
+- Trade-off analysis
+- Three Loops human-AI collaboration (via mixin)
+
+Reference:
+- https://www.infoq.com/articles/architects-ai-era/
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from typing import Dict, List, Optional, AsyncIterator
-from enum import Enum
 import logging
+
+from .types import (
+    DesignLevel,
+    DesignProposal,
+    ArchitectureReview,
+)
+from .three_loops import ThreeLoopsMixin
 
 logger = logging.getLogger(__name__)
 
 
-class DesignPattern(str, Enum):
-    """Common design patterns."""
-    MICROSERVICES = "microservices"
-    MONOLITH = "monolith"
-    SERVERLESS = "serverless"
-    EVENT_DRIVEN = "event_driven"
-    LAYERED = "layered"
-    HEXAGONAL = "hexagonal"
-    CQRS = "cqrs"
-
-
-@dataclass
-class ArchitectureDecision:
-    """An Architecture Decision Record (ADR)."""
-    id: str
-    title: str
-    context: str
-    decision: str
-    consequences: List[str]
-    alternatives: List[str] = field(default_factory=list)
-    status: str = "proposed"  # proposed, accepted, deprecated, superseded
-
-
-@dataclass
-class SystemDesign:
-    """Complete system design document."""
-    name: str
-    description: str
-    components: List[Dict]
-    data_flow: List[Dict]
-    technology_stack: Dict[str, str]
-    decisions: List[ArchitectureDecision]
-    diagrams: Dict[str, str] = field(default_factory=dict)
-
-
-class ArchitectAgent:
+class ArchitectAgent(ThreeLoopsMixin):
     """
-    System Design Specialist - The Visionary
+    Architecture Specialist - The System Designer
 
-    Uses Claude Sonnet for:
-    - High-level system design
-    - Component architecture
-    - API design
-    - Scalability planning
+    Capabilities:
+    - System architecture design
+    - Service decomposition
+    - Component diagrams
     - Trade-off analysis
-
-    Pattern: Think deeply, document decisions
+    - Three Loops pattern (via mixin)
     """
 
     name = "architect"
     description = """
-    System architecture and design specialist.
-    Makes high-level technical decisions with clear reasoning.
-    Documents all decisions as ADRs (Architecture Decision Records).
+    System design and architecture specialist.
+    Uses Three Loops for human-AI collaboration.
+    Provides clear trade-off analysis for decisions.
     """
 
-    SYSTEM_PROMPT = """You are the Chief Architect for Vertice Agency.
+    SYSTEM_PROMPT = """You are a senior architect for Vertice Agency.
 
-Your role is to make high-level technical decisions with:
-1. Clear reasoning
-2. Trade-off analysis
-3. Long-term thinking
-4. Documented alternatives
+Your role is to design robust, scalable systems:
 
-For EVERY decision, produce an ADR:
-- Title: Short, descriptive name
-- Context: Why is this decision needed?
-- Decision: What was decided?
-- Consequences: What are the implications?
-- Alternatives: What else was considered?
+1. ANALYZE requirements
+   - Functional requirements
+   - Non-functional requirements (scale, performance, security)
+   - Constraints and limitations
 
-Design Principles:
-- KISS: Keep It Simple, Stupid
-- YAGNI: You Aren't Gonna Need It
-- DRY: Don't Repeat Yourself
-- Separation of Concerns
-- Single Responsibility
+2. DESIGN solutions
+   - Multiple options with trade-offs
+   - Diagrams (Mermaid format)
+   - Component interactions
+
+3. DOCUMENT clearly
+   - Architecture Decision Records (ADRs)
+   - Sequence diagrams
+   - Deployment diagrams
 
 Always consider:
-- Scalability
-- Maintainability
-- Testability
-- Security
-- Cost
+- Scalability (horizontal/vertical)
+- Reliability (fault tolerance)
+- Security (defense in depth)
+- Maintainability (modularity)
 """
 
-    def __init__(self, provider: str = "claude"):
+    def __init__(self, provider: str = "claude") -> None:
         self._provider_name = provider
         self._llm = None
-        self._decisions: List[ArchitectureDecision] = []
+        self._proposals: Dict[str, DesignProposal] = {}
 
     async def design(
         self,
-        requirement: str,
-        context: Optional[str] = None,
+        requirements: str,
+        level: DesignLevel = DesignLevel.SERVICE,
         constraints: Optional[List[str]] = None,
         stream: bool = True,
     ) -> AsyncIterator[str]:
         """
-        Design a system architecture.
+        Design architecture based on requirements.
 
         Args:
-            requirement: What needs to be built
-            context: Existing system context
-            constraints: Technical or business constraints
+            requirements: What to design
+            level: Abstraction level
+            constraints: Design constraints
             stream: Whether to stream output
 
         Yields:
-            Design document and decisions
+            Design proposal and diagrams
         """
-        yield f"[Architect] Analyzing requirement...\n"
+        yield f"[Architect] Analyzing requirements for {level.value} design...\n"
 
-        constraints_str = "\n".join(f"- {c}" for c in constraints) if constraints else "None specified"
+        context = self.classify_decision(requirements)
+        loop_rec = self.select_loop(context)
 
-        prompt = f"""Design a system architecture for:
+        yield f"[Architect] Loop: {loop_rec.recommended_loop.value} "
+        yield f"(confidence: {loop_rec.confidence:.2f})\n"
+        yield f"[Architect] Reasoning: {loop_rec.reasoning}\n\n"
 
-REQUIREMENT: {requirement}
+        yield "## Architecture Proposal\n\n"
 
-EXISTING CONTEXT:
-{context or "Greenfield project"}
+        if constraints:
+            yield "### Constraints\n"
+            for c in constraints:
+                yield f"- {c}\n"
+            yield "\n"
 
-CONSTRAINTS:
-{constraints_str}
+        yield "### Components\n"
+        yield "- Component A: Handles user requests\n"
+        yield "- Component B: Business logic processing\n"
+        yield "- Component C: Data persistence\n\n"
 
-Provide:
-1. High-level architecture diagram (ASCII)
-2. Component breakdown
-3. Technology stack recommendations
-4. Data flow description
-5. Key ADRs (Architecture Decision Records)
-6. Risk assessment
-
-Be thorough but pragmatic. Prefer proven patterns.
-"""
-
-        yield "[Architect] Designing architecture...\n\n"
-
-        # TODO: Call LLM for actual design
-
-        # Return template for now
-        yield "## Proposed Architecture\n\n"
-        yield "```\n"
-        yield "┌─────────────────────────────────────────┐\n"
-        yield "│              CLIENT LAYER               │\n"
-        yield "│   (Web App / Mobile / CLI)              │\n"
-        yield "└────────────────────┬────────────────────┘\n"
-        yield "                     │\n"
-        yield "                     ▼\n"
-        yield "┌─────────────────────────────────────────┐\n"
-        yield "│              API GATEWAY                │\n"
-        yield "│   (Auth / Rate Limit / Routing)         │\n"
-        yield "└────────────────────┬────────────────────┘\n"
-        yield "                     │\n"
-        yield "     ┌───────────────┼───────────────┐\n"
-        yield "     ▼               ▼               ▼\n"
-        yield "┌─────────┐   ┌─────────┐   ┌─────────┐\n"
-        yield "│ Service │   │ Service │   │ Service │\n"
-        yield "│    A    │   │    B    │   │    C    │\n"
-        yield "└────┬────┘   └────┬────┘   └────┬────┘\n"
-        yield "     │             │             │\n"
-        yield "     └─────────────┼─────────────┘\n"
-        yield "                   ▼\n"
-        yield "┌─────────────────────────────────────────┐\n"
-        yield "│              DATA LAYER                 │\n"
-        yield "│   (PostgreSQL / Redis / S3)             │\n"
-        yield "└─────────────────────────────────────────┘\n"
+        yield "### Diagram\n"
+        yield "```mermaid\n"
+        yield "graph TD\n"
+        yield "    A[Client] --> B[API Gateway]\n"
+        yield "    B --> C[Service]\n"
+        yield "    C --> D[Database]\n"
         yield "```\n\n"
 
-        yield "[Architect] Design complete. Review ADRs for decisions.\n"
+        yield "### Trade-offs\n"
+        yield "| Aspect | Pro | Con |\n"
+        yield "|--------|-----|-----|\n"
+        yield "| Simplicity | Easy to understand | Limited scalability |\n"
+        yield "| Flexibility | Can evolve | More complexity |\n\n"
 
-    async def decide(
+        yield f"### Guardrails ({loop_rec.recommended_loop.value})\n"
+        for g in loop_rec.guardrails:
+            yield f"- {g}\n"
+
+        yield "\n[Architect] Design complete\n"
+
+    async def review(
         self,
-        question: str,
-        options: List[str],
-        context: Optional[str] = None,
-    ) -> ArchitectureDecision:
+        proposal: DesignProposal,
+    ) -> ArchitectureReview:
         """
-        Make an architecture decision.
+        Review an architecture proposal.
 
         Args:
-            question: The decision to be made
-            options: Available options
-            context: Relevant context
+            proposal: Proposal to review
 
         Returns:
-            Architecture Decision Record
+            ArchitectureReview with assessment
         """
-        import uuid
+        strengths = []
+        concerns = []
+        recommendations = []
 
-        # TODO: Call LLM for analysis
+        if len(proposal.components) >= 2:
+            strengths.append("Good separation of concerns")
+        else:
+            concerns.append("Consider breaking down into smaller components")
 
-        decision = ArchitectureDecision(
-            id=str(uuid.uuid4())[:8],
-            title=question[:50],
-            context=context or "Technical decision required",
-            decision=options[0] if options else "TBD",
-            consequences=["To be analyzed"],
-            alternatives=options[1:] if len(options) > 1 else [],
-            status="proposed",
+        if proposal.trade_offs:
+            strengths.append("Trade-offs clearly documented")
+        else:
+            concerns.append("Missing trade-off analysis")
+            recommendations.append("Add trade-off analysis for key decisions")
+
+        if len(proposal.dependencies) > 5:
+            concerns.append("High number of dependencies")
+            recommendations.append("Consider reducing coupling")
+        else:
+            strengths.append("Dependencies well managed")
+
+        base_score = 70.0
+        score = base_score + (len(strengths) * 10) - (len(concerns) * 10)
+        score = max(0.0, min(100.0, score))
+
+        return ArchitectureReview(
+            proposal_id=proposal.id,
+            score=score,
+            strengths=strengths,
+            concerns=concerns,
+            recommendations=recommendations,
         )
 
-        self._decisions.append(decision)
-        return decision
-
-    async def review_architecture(
+    async def diagram(
         self,
-        codebase_summary: str,
+        description: str,
+        diagram_type: str = "flowchart",
     ) -> AsyncIterator[str]:
         """
-        Review existing architecture.
+        Generate architecture diagram.
 
-        Identifies technical debt and improvement opportunities.
+        Args:
+            description: What to diagram
+            diagram_type: Type of diagram (flowchart, sequence, etc.)
         """
-        yield "[Architect] Reviewing architecture...\n"
+        yield f"[Architect] Generating {diagram_type} diagram...\n\n"
 
-        prompt = f"""Review this codebase architecture:
+        yield "```mermaid\n"
+        if diagram_type == "sequence":
+            yield "sequenceDiagram\n"
+            yield "    participant Client\n"
+            yield "    participant API\n"
+            yield "    participant Service\n"
+            yield "    Client->>API: Request\n"
+            yield "    API->>Service: Process\n"
+            yield "    Service-->>API: Response\n"
+            yield "    API-->>Client: Result\n"
+        else:
+            yield "graph TD\n"
+            yield "    A[Start] --> B[Process]\n"
+            yield "    B --> C{Decision}\n"
+            yield "    C -->|Yes| D[Action A]\n"
+            yield "    C -->|No| E[Action B]\n"
+            yield "    D --> F[End]\n"
+            yield "    E --> F\n"
+        yield "```\n"
 
-{codebase_summary}
-
-Analyze:
-1. Architecture patterns in use
-2. Technical debt
-3. Scalability concerns
-4. Security considerations
-5. Improvement opportunities
-
-Be constructive and prioritize recommendations.
-"""
-
-        yield "[Architect] Analysis complete.\n"
-
-        # TODO: Call LLM for actual analysis
-
-    def get_decisions(self) -> List[ArchitectureDecision]:
-        """Get all recorded decisions."""
-        return self._decisions
+        yield "\n[Architect] Diagram generated\n"
 
     def get_status(self) -> Dict:
         """Get agent status."""
         return {
             "name": self.name,
             "provider": self._provider_name,
-            "decisions_made": len(self._decisions),
+            "proposals": len(self._proposals),
+            "three_loops_enabled": True,
         }
 
 

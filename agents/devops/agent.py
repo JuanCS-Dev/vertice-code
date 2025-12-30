@@ -1,84 +1,51 @@
 """
 Vertice DevOps Agent
 
-CI/CD and deployment specialist.
-Uses Groq for fast infrastructure operations.
+CI/CD and deployment specialist with AWS-style incident handling.
 
-Responsibilities:
+Key Features:
 - CI/CD pipeline management
 - Deployment automation
 - Infrastructure configuration
-- Monitoring setup
+- AWS-style incident investigation (via mixin)
+- MTTR optimization
+
+Reference:
+- AWS DevOps Agent (AWS re:Invent 2025)
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from typing import Dict, List, Optional, AsyncIterator
-from enum import Enum
 import logging
+
+from .types import (
+    DeploymentConfig,
+    DeploymentEnvironment,
+    PipelineRun,
+)
+from .incident_handler import IncidentHandlerMixin
 
 logger = logging.getLogger(__name__)
 
 
-class DeploymentEnvironment(str, Enum):
-    """Deployment environments."""
-    DEV = "development"
-    STAGING = "staging"
-    PRODUCTION = "production"
-
-
-class PipelineStatus(str, Enum):
-    """CI/CD pipeline status."""
-    PENDING = "pending"
-    RUNNING = "running"
-    SUCCESS = "success"
-    FAILED = "failed"
-    CANCELLED = "cancelled"
-
-
-@dataclass
-class DeploymentConfig:
-    """Deployment configuration."""
-    environment: DeploymentEnvironment
-    branch: str
-    version: str
-    replicas: int = 1
-    resources: Dict[str, str] = field(default_factory=dict)
-    env_vars: Dict[str, str] = field(default_factory=dict)
-    health_check: Optional[str] = None
-
-
-@dataclass
-class PipelineRun:
-    """A CI/CD pipeline run."""
-    id: str
-    name: str
-    status: PipelineStatus
-    steps: List[Dict]
-    started_at: str
-    finished_at: Optional[str] = None
-    logs: List[str] = field(default_factory=list)
-
-
-class DevOpsAgent:
+class DevOpsAgent(IncidentHandlerMixin):
     """
     DevOps Specialist - The Operator
 
-    Uses Groq for:
-    - Fast command generation
-    - Infrastructure scripts
-    - CI/CD configuration
-    - Deployment automation
-
-    Pattern: Automate everything, fail fast
+    Capabilities:
+    - CI/CD pipeline generation
+    - Dockerfile creation
+    - Deployment planning
+    - Infrastructure commands
+    - AWS-style incident handling (via mixin)
     """
 
     name = "devops"
     description = """
-    CI/CD and infrastructure specialist.
-    Automates deployment, manages pipelines, monitors systems.
-    Prioritizes reliability and reproducibility.
+    CI/CD and infrastructure specialist with incident handling.
+    Investigates incidents, identifies root causes, proposes fixes.
+    Maintains topology map for dependency-aware analysis.
     """
 
     SYSTEM_PROMPT = """You are a DevOps specialist for Vertice Agency.
@@ -112,7 +79,6 @@ Always:
 - Test in staging first
 """
 
-    # Common CI/CD templates
     TEMPLATES = {
         "github-actions": """
 name: CI/CD Pipeline
@@ -163,7 +129,7 @@ CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0"]
 """,
     }
 
-    def __init__(self, provider: str = "groq"):
+    def __init__(self, provider: str = "groq") -> None:
         self._provider_name = provider
         self._llm = None
         self._pipelines: Dict[str, PipelineRun] = {}
@@ -191,7 +157,7 @@ CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0"]
 
         steps_str = ", ".join(steps) if steps else "build, test, deploy"
 
-        prompt = f"""Create a CI/CD pipeline:
+        _prompt = f"""Create a CI/CD pipeline:
 
 PROJECT TYPE: {project_type}
 PLATFORM: {platform}
@@ -206,7 +172,6 @@ Include:
 Generate complete, production-ready configuration.
 """
 
-        # Return template for now
         if platform in self.TEMPLATES:
             yield f"\n```yaml\n{self.TEMPLATES[platform]}\n```\n"
 
@@ -227,9 +192,7 @@ Generate complete, production-ready configuration.
             stream: Whether to stream output
         """
         yield f"[DevOps] Generating Dockerfile for {project_type}...\n"
-
         yield f"\n```dockerfile\n{self.TEMPLATES['dockerfile']}\n```\n"
-
         yield "\n[DevOps] Dockerfile generated\n"
 
     async def plan_deployment(
@@ -245,7 +208,6 @@ Generate complete, production-ready configuration.
             stream: Whether to stream output
         """
         yield f"[DevOps] Planning deployment to {config.environment.value}...\n"
-
         yield f"Version: {config.version}\n"
         yield f"Branch: {config.branch}\n"
         yield f"Replicas: {config.replicas}\n"
@@ -274,16 +236,16 @@ Generate complete, production-ready configuration.
         yield f"[DevOps] Running: {command}\n"
         yield f"[DevOps] Environment: {env.value}\n"
 
-        # Safety checks
         dangerous_patterns = ["rm -rf /", "DROP DATABASE", ":(){:|:&};:"]
         for pattern in dangerous_patterns:
             if pattern in command:
                 yield "[DevOps] BLOCKED: Dangerous command detected\n"
                 return
 
-        # TODO: Actually execute command in sandboxed environment
-
-        yield "[DevOps] Command execution simulated\n"
+        raise NotImplementedError(
+            "Command execution requires sandbox integration. "
+            "Use sandbox.execute() for safe command execution."
+        )
 
     def get_status(self) -> Dict:
         """Get agent status."""
@@ -291,6 +253,7 @@ Generate complete, production-ready configuration.
             "name": self.name,
             "provider": self._provider_name,
             "active_pipelines": len(self._pipelines),
+            "incident_handling_enabled": True,
         }
 
 
