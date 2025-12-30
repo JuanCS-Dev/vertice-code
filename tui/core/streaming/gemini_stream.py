@@ -10,6 +10,9 @@ Provides streaming support for Gemini API with:
 - Timeout protection with chunk stall detection
 - Tool call marker generation
 
+For production-grade features (heartbeat, backpressure, reconnect),
+see: production_stream.py
+
 Author: JuanCS Dev
 Date: 2025-11-27
 """
@@ -57,7 +60,15 @@ MARKDOWN TABLES - CRITICAL:
 
 @dataclass
 class GeminiStreamConfig:
-    """Configuration for Gemini streaming."""
+    """Configuration for Gemini streaming.
+
+    Production-grade features (2025-12-30):
+    - heartbeat_interval: SSE heartbeat to prevent connection reset
+    - backpressure_queue_size: Bounded queue for flow control
+    - checkpoint_interval: Chunks between checkpoints for reconnect
+    - max_reconnect_attempts: Maximum reconnection attempts
+    - reconnect_base_delay: Base delay for exponential backoff
+    """
     model_name: str = "gemini-2.0-flash"
     api_key: str = ""
     temperature: float = 1.0
@@ -67,6 +78,12 @@ class GeminiStreamConfig:
     init_timeout: float = 10.0
     stream_timeout: float = 60.0
     chunk_timeout: float = 30.0
+    # Production-grade streaming config
+    heartbeat_interval: float = 30.0  # SSE heartbeat every 30s (RFC 6797)
+    backpressure_queue_size: int = 100  # Max chunks in queue before backpressure
+    checkpoint_interval: int = 10  # Save checkpoint every N chunks
+    max_reconnect_attempts: int = 3  # Max reconnect attempts on network failure
+    reconnect_base_delay: float = 1.0  # Base delay for exponential backoff
 
     def __post_init__(self) -> None:
         """Validate configuration."""
@@ -76,6 +93,10 @@ class GeminiStreamConfig:
             raise ValueError("max_output_tokens must be >= 1")
         if self.init_timeout <= 0:
             raise ValueError("init_timeout must be > 0")
+        if self.heartbeat_interval <= 0:
+            raise ValueError("heartbeat_interval must be > 0")
+        if self.backpressure_queue_size < 1:
+            raise ValueError("backpressure_queue_size must be >= 1")
 
 
 # =============================================================================

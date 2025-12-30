@@ -1,13 +1,28 @@
-"""Base tool class and utilities for tool-based architecture."""
+"""
+Base tool class and utilities for tool-based architecture.
+
+Implements 2025 tool schema standards:
+- Anthropic strict mode (structured-outputs-2025-11-13)
+- OpenAI function calling
+- Google Gemini function declarations
+
+References:
+- https://platform.claude.com/docs/en/build-with-claude/structured-outputs
+- https://openai.github.io/openai-agents-python/
+- https://ai.google.dev/gemini-api/docs/function-calling
+"""
+
+from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from enum import Enum
 
 
 class ToolCategory(Enum):
     """Tool categories for organization."""
+
     FILE_READ = "file_read"
     FILE_WRITE = "file_write"
     FILE_MGMT = "file_mgmt"
@@ -16,11 +31,13 @@ class ToolCategory(Enum):
     GIT = "git"
     CONTEXT = "context"
     SYSTEM = "system"
+    WEB = "web"
 
 
 @dataclass
 class ToolResult:
     """Result from tool execution."""
+
     success: bool
     data: Any = None
     error: Optional[str] = None
@@ -28,47 +45,65 @@ class ToolResult:
 
     @property
     def output(self) -> Any:
-        """Alias for data."""
-        return self.data
-
-    @property
-    def output(self) -> Any:
         """Alias for data (API compatibility)."""
         return self.data
 
 
-
 class Tool(ABC):
-    """Base class for all tools."""
+    """Base class for all tools.
 
-    def __init__(self):
-        # Convert CamelCase to snake_case for consistency
+    Implements 2025 schema standards:
+    - strict: true (Anthropic structured outputs)
+    - additionalProperties: false (required for strict mode)
+    - input_schema format (Anthropic/OpenAI compatible)
+
+    Example:
+        >>> class MyTool(Tool):
+        ...     def __init__(self):
+        ...         super().__init__()
+        ...         self.description = "Does something useful"
+        ...         self.parameters = {
+        ...             "query": {"type": "string", "description": "Search query", "required": True}
+        ...         }
+        ...
+        >>> tool = MyTool()
+        >>> schema = tool.get_schema()
+        >>> schema["strict"]
+        True
+    """
+
+    def __init__(self) -> None:
+        """Initialize tool with auto-generated name from class."""
         import re
+
         class_name = self.__class__.__name__.replace("Tool", "")
-        self.name: str = re.sub(r'(?<!^)(?=[A-Z])', '_', class_name).lower()
+        self.name: str = re.sub(r"(?<!^)(?=[A-Z])", "_", class_name).lower()
         self.category: ToolCategory = ToolCategory.FILE_READ
         self.description: str = ""
         self.parameters: Dict[str, Any] = {}
+        self._examples: Optional[List[Dict[str, Any]]] = None
 
     @abstractmethod
-    async def _execute_validated(self, **kwargs) -> ToolResult:
+    async def _execute_validated(self, **kwargs: Any) -> ToolResult:
         """Execute the tool with given parameters.
-        
+
         Args:
             **kwargs: Tool-specific parameters
-            
+
         Returns:
             ToolResult with execution outcome
         """
-        raise NotImplementedError(f"{self.__class__.__name__}.execute() must be implemented")
+        raise NotImplementedError(
+            f"{self.__class__.__name__}.execute() must be implemented"
+        )
 
-    def validate_params(self, **kwargs) -> tuple[bool, Optional[str]]:
+    def validate_params(self, **kwargs: Any) -> tuple[bool, Optional[str]]:
         """Validate tool parameters.
-        
+
         Returns:
-            (is_valid, error_message)
+            Tuple of (is_valid, error_message)
         """
-        required = [k for k, v in self.parameters.items() if v.get('required', False)]
+        required = [k for k, v in self.parameters.items() if v.get("required", False)]
         missing = [k for k in required if k not in kwargs]
 
         if missing:
@@ -76,17 +111,94 @@ class Tool(ABC):
 
         return True, None
 
-    def get_schema(self) -> Dict[str, Any]:
-        """Get tool schema for LLM tool use."""
-        return {
+    def get_schema(self, strict: bool = True) -> Dict[str, Any]:
+        """Get tool schema for LLM tool use.
+
+        Implements Anthropic 2025 structured outputs format:
+        - strict: true at top level (constrained decoding)
+        - additionalProperties: false (required for strict mode)
+        - input_schema format for Anthropic API
+
+        Args:
+            strict: Enable strict mode for guaranteed schema compliance.
+                    Default True for production reliability.
+
+        Returns:
+            Tool schema compatible with Anthropic, OpenAI, and Gemini APIs
+        """
+        # Build properties without 'required' key (goes in schema level)
+        properties = {}
+        for name, spec in self.parameters.items():
+            prop = {k: v for k, v in spec.items() if k != "required"}
+            properties[name] = prop
+
+        # Get required fields
+        required = [k for k, v in self.parameters.items() if v.get("required", False)]
+
+        # Build input_schema (Anthropic format)
+        input_schema: Dict[str, Any] = {
+            "type": "object",
+            "properties": properties,
+            "required": required,
+        }
+
+        # Strict mode requires additionalProperties: false
+        if strict:
+            input_schema["additionalProperties"] = False
+
+        # Build final schema
+        schema: Dict[str, Any] = {
             "name": self.name,
             "description": self.description,
-            "parameters": {
-                "type": "object",
-                "properties": self.parameters,
-                "required": [k for k, v in self.parameters.items() if v.get('required', False)]
-            }
+            "input_schema": input_schema,
         }
+
+        # Add strict flag at top level (Anthropic 2025 format)
+        if strict:
+            schema["strict"] = True
+
+        # Add examples if provided (helps model accuracy)
+        if self._examples:
+            schema["examples"] = self._examples
+
+        return schema
+
+    def get_schema_openai(self) -> Dict[str, Any]:
+        """Get OpenAI-compatible function schema.
+
+        Returns:
+            Schema in OpenAI function calling format
+        """
+        base = self.get_schema(strict=True)
+        return {
+            "type": "function",
+            "function": {
+                "name": base["name"],
+                "description": base["description"],
+                "parameters": base["input_schema"],
+            },
+        }
+
+    def get_schema_gemini(self) -> Dict[str, Any]:
+        """Get Google Gemini-compatible function declaration.
+
+        Returns:
+            Schema in Gemini function declaration format
+        """
+        base = self.get_schema(strict=True)
+        return {
+            "name": base["name"],
+            "description": base["description"],
+            "parameters": base["input_schema"],
+        }
+
+    def set_examples(self, examples: List[Dict[str, Any]]) -> None:
+        """Set usage examples for better model accuracy.
+
+        Args:
+            examples: List of example inputs/outputs
+        """
+        self._examples = examples
 
 
 class ToolRegistry:

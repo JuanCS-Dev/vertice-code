@@ -6,9 +6,11 @@ Extracted from Bridge GOD CLASS (Nov 2025 Refactoring).
 
 Features:
 - AgentInfo: Metadata about agents
-- AGENT_REGISTRY: 14 specialized agents
+- AGENT_REGISTRY: 14 specialized agents + 6 core agents
 - AgentRouter: Intelligent intent-based routing (PT-BR + EN)
 - AgentManager: Lazy-loading agent lifecycle management
+
+Updated 2025-12-30: Integration with unified Agent system (core.agents).
 """
 
 from __future__ import annotations
@@ -18,19 +20,45 @@ import re
 from dataclasses import dataclass
 from typing import Any, AsyncIterator, Dict, List, Optional, TYPE_CHECKING
 
+# Import unified Agent system
+from core.agents import Agent, AgentConfig, Handoff
+
 if TYPE_CHECKING:
     from .llm_client import GeminiClient
 
 
 @dataclass
 class AgentInfo:
-    """Metadata about an agent."""
+    """Metadata about an agent.
+
+    Attributes:
+        name: Agent identifier
+        role: Agent role/type
+        description: What the agent does
+        capabilities: List of capability strings
+        module_path: Python module path for import
+        class_name: Class name to instantiate
+        is_core: Whether this is a core agent (from agents/)
+    """
     name: str
     role: str
     description: str
     capabilities: List[str]
     module_path: str
     class_name: str
+    is_core: bool = False
+
+    def to_unified_agent(self) -> Agent:
+        """Convert to unified Agent instance.
+
+        Creates a lightweight Agent wrapper for schema generation.
+        """
+        return Agent(
+            name=self.name,
+            instructions=self.description,
+            tools=[],  # Tools loaded separately
+            config=AgentConfig(enable_tracing=True),
+        )
 
 
 # Agent registry - lazy loaded
@@ -146,6 +174,63 @@ AGENT_REGISTRY: Dict[str, AgentInfo] = {
         capabilities=["schema_analysis", "query_optimization", "migration"],
         module_path="vertice_cli.agents.data_agent_production",
         class_name="DataAgent",
+    ),
+    # =========================================================================
+    # CORE AGENTS (from agents/ - Phase 3 Evolution)
+    # =========================================================================
+    "orchestrator_core": AgentInfo(
+        name="orchestrator_core",
+        role="ORCHESTRATOR",
+        description="Multi-agent coordination with bounded autonomy",
+        capabilities=["orchestration", "handoff", "bounded_autonomy"],
+        module_path="agents.orchestrator.agent",
+        class_name="OrchestratorAgent",
+        is_core=True,
+    ),
+    "coder_core": AgentInfo(
+        name="coder_core",
+        role="CODER",
+        description="Darwin-Gödel code evolution with auto-correction",
+        capabilities=["code_generation", "auto_correction", "darwin_godel"],
+        module_path="agents.coder.agent",
+        class_name="CoderAgent",
+        is_core=True,
+    ),
+    "reviewer_core": AgentInfo(
+        name="reviewer_core",
+        role="REVIEWER",
+        description="Deep-think code review with metacognition",
+        capabilities=["deep_review", "metacognition", "three_loops"],
+        module_path="agents.reviewer.agent",
+        class_name="ReviewerAgent",
+        is_core=True,
+    ),
+    "architect_core": AgentInfo(
+        name="architect_core",
+        role="ARCHITECT",
+        description="System design with agentic RAG",
+        capabilities=["architecture", "agentic_rag", "design_patterns"],
+        module_path="agents.architect.agent",
+        class_name="ArchitectAgent",
+        is_core=True,
+    ),
+    "researcher_core": AgentInfo(
+        name="researcher_core",
+        role="RESEARCHER",
+        description="Technical research with three-loop learning",
+        capabilities=["research", "three_loops", "knowledge_synthesis"],
+        module_path="agents.researcher.agent",
+        class_name="ResearcherAgent",
+        is_core=True,
+    ),
+    "devops_core": AgentInfo(
+        name="devops_core",
+        role="DEVOPS",
+        description="Infrastructure with incident handler",
+        capabilities=["devops", "incident_handler", "infrastructure"],
+        module_path="agents.devops.agent",
+        class_name="DevOpsAgent",
+        is_core=True,
     ),
 }
 
@@ -678,7 +763,7 @@ class AgentManager:
                     plan_text = "".join(plan_chunks)
                     self._last_plan = plan_text
                     # Log that plan was saved
-                    yield f"\n💾 *Plan saved. Say 'create the files' or 'make it real' to execute.*\n"
+                    yield "\n💾 *Plan saved. Say 'create the files' or 'make it real' to execute.*\n"
                 return
             except Exception as e:
                 yield f"⚠️ Streaming failed: {e}\n"
@@ -709,7 +794,7 @@ class AgentManager:
                         if arch.get('estimated_complexity'):
                             yield f"\n**Complexity:** {arch['estimated_complexity']}\n"
                         if data.get('recommendations'):
-                            yield f"\n**Recommendations:**\n"
+                            yield "\n**Recommendations:**\n"
                             for rec in data['recommendations']:
                                 yield f"- {rec}\n"
                     # ExplorerAgent results
@@ -953,9 +1038,40 @@ class AgentManager:
         return None
 
 
+def get_unified_agents() -> Dict[str, Agent]:
+    """Get all agents as unified Agent instances.
+
+    Returns:
+        Dictionary mapping agent names to Agent instances
+    """
+    return {
+        name: info.to_unified_agent()
+        for name, info in AGENT_REGISTRY.items()
+    }
+
+
+def get_core_agents() -> Dict[str, AgentInfo]:
+    """Get only core agents (from agents/).
+
+    Returns:
+        Dictionary of core agent info
+    """
+    return {
+        name: info
+        for name, info in AGENT_REGISTRY.items()
+        if info.is_core
+    }
+
+
 __all__ = [
     'AgentInfo',
     'AGENT_REGISTRY',
     'AgentRouter',
     'AgentManager',
+    # Unified Agent integration
+    'Agent',
+    'AgentConfig',
+    'Handoff',
+    'get_unified_agents',
+    'get_core_agents',
 ]
