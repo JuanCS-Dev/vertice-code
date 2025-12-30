@@ -1,39 +1,17 @@
 """
-╔══════════════════════════════════════════════════════════════════════════════════╗
-║                                                                                  ║
-║                        GOVERNANCE PIPELINE                                       ║
-║                                                                                  ║
-║  Orchestrator-Worker pattern for multi-agent governance                         ║
-║                                                                                  ║
-║  Based on Nov 2025 best practices:                                              ║
-║  - Anthropic: "Orchestrator-worker where lead agent coordinates process         ║
-║                while delegating to specialized subagents that operate in         ║
-║                parallel" (90.2% performance improvement)                         ║
-║  - Google: "Agent identities tied to Cloud IAM, Model Armor protection"        ║
-║  - MCP: "Security & governance layer, single audit trail"                      ║
-║                                                                                  ║
-║  Architecture:                                                                   ║
-║  ```                                                                             ║
-║  User Request                                                                    ║
-║      ↓                                                                           ║
-║  Maestro (Orchestrator)                                                          ║
-║      ↓                                                                           ║
-║  Governance Pipeline                                                             ║
-║      ├── Justiça (Governance) ──┐                                               ║
-║      └── Sofia (Counsel)        ├──→ PARALLEL EXECUTION                         ║
-║                                 ┘                                                ║
-║      ↓                                                                           ║
-║  Worker Agent (if approved)                                                      ║
-║  ```                                                                             ║
-║                                                                                  ║
-╚══════════════════════════════════════════════════════════════════════════════════╝
+Governance Pipeline
+===================
+
+Orchestrator-Worker pattern for multi-agent governance with parallel execution.
+
+Architecture: User Request -> Maestro -> [Justiça + Sofia] PARALLEL -> Worker
 """
 
 import asyncio
 import uuid
 import logging
 from datetime import datetime, timezone
-from typing import Tuple, Optional, Dict, Any
+from typing import Any, Dict, Optional, Tuple
 
 from vertice_cli.agents.base import AgentTask, AgentResponse, BaseAgent
 from vertice_cli.agents.justica_agent import JusticaIntegratedAgent
@@ -46,19 +24,7 @@ tracer = get_tracer()
 
 
 def _detect_circular_references(obj: Any, visited: Optional[set] = None, max_depth: int = 100) -> bool:
-    """
-    Detect circular references in nested objects.
-
-    🔒 SECURITY FIX (AIR GAP #22-23, #48-49): Prevents infinite loops
-
-    Args:
-        obj: Object to check
-        visited: Set of visited object IDs
-        max_depth: Maximum recursion depth
-
-    Returns:
-        bool: True if circular reference detected
-    """
+    """Detect circular references to prevent infinite loops."""
     if visited is None:
         visited = set()
 
@@ -90,23 +56,10 @@ def _detect_circular_references(obj: Any, visited: Optional[set] = None, max_dep
 
 
 class GovernancePipeline:
-    """
-    Governance pipeline using Orchestrator-Worker pattern.
+    """Governance pipeline using Orchestrator-Worker pattern.
 
-    Principles (from research):
-    1. **Narrow Permissions**: "read and route" only for orchestrator
-    2. **Context Isolation**: Each agent has independent context window
-    3. **Parallel Execution**: Governance checks run simultaneously
-    4. **Observability**: OpenTelemetry traces with correlation IDs
-    5. **Fail-Safe**: Block by default on error
-
-    Example:
-        >>> pipeline = GovernancePipeline(justica, sofia)
-        >>> approved, reason, traces = await pipeline.pre_execution_check(
-        ...     task, agent_id="executor", risk_level="HIGH"
-        ... )
-        >>> if approved:
-        ...     response = await agent.execute(task)
+    Runs Justiça (governance) and Sofia (counsel) checks in parallel.
+    Features: Context isolation, parallel execution, fail-safe mode.
     """
 
     def __init__(
@@ -118,22 +71,7 @@ class GovernancePipeline:
         enable_observability: bool = True,
         fail_safe: bool = True
     ):
-        """
-        Initialize governance pipeline.
-
-        Args:
-            justica: Justiça governance agent
-            sofia: Sofia counselor agent
-            enable_governance: Enable Justiça checks
-            enable_counsel: Enable Sofia counsel
-            enable_observability: Enable OpenTelemetry tracing
-            fail_safe: Block on error (recommended: True)
-
-        Raises:
-            TypeError: If justica or sofia have wrong type
-            ValueError: If justica or sofia are None
-        """
-        # 🔒 INPUT VALIDATION (AIR GAP #12-15): Validate critical parameters
+        """Initialize governance pipeline with Justiça and Sofia agents."""
         if justica is None:
             raise ValueError("justica cannot be None")
         if sofia is None:
@@ -152,7 +90,6 @@ class GovernancePipeline:
                 f"got {type(sofia).__name__}"
             )
 
-        # Boolean validation
         if not isinstance(enable_governance, bool):
             raise TypeError(f"enable_governance must be bool, got {type(enable_governance).__name__}")
         if not isinstance(enable_counsel, bool):
@@ -181,34 +118,16 @@ class GovernancePipeline:
         agent_id: str,
         risk_level: str = "MEDIUM"
     ) -> Tuple[bool, Optional[str], Dict[str, Any]]:
-        """
-        Execute governance checks BEFORE agent action.
-
-        Runs Justiça and Sofia in PARALLEL (Anthropic pattern: 90% faster).
+        """Execute governance checks BEFORE agent action (parallel).
 
         Args:
-            task: The task to be executed
-            agent_id: ID of agent requesting execution
-            risk_level: Risk level (LOW, MEDIUM, HIGH, CRITICAL)
+            task: Task to be executed
+            agent_id: Agent requesting execution
+            risk_level: LOW, MEDIUM, HIGH, or CRITICAL
 
         Returns:
-            Tuple of:
-            - approved (bool): True if all checks pass
-            - reason (Optional[str]): Blocking reason if not approved
-            - traces (Dict): Observability traces
-
-        Raises:
-            TypeError: If parameters have wrong type
-            ValueError: If parameters are None or invalid
-
-        Example:
-            >>> approved, reason, traces = await pipeline.pre_execution_check(
-            ...     task, "executor", "HIGH"
-            ... )
-            >>> if not approved:
-            ...     return error_response(reason)
+            Tuple of (approved, reason, traces)
         """
-        # 🔒 INPUT VALIDATION (AIR GAP #24-28, #51-52): Validate all parameters
         if task is None:
             raise ValueError("task cannot be None")
         if not isinstance(task, AgentTask):
@@ -226,12 +145,10 @@ class GovernancePipeline:
         if not isinstance(risk_level, str):
             raise TypeError(f"risk_level must be str, got {type(risk_level).__name__}")
 
-        # Validate risk_level is one of the allowed values
         valid_risk_levels = {"LOW", "MEDIUM", "HIGH", "CRITICAL"}
         if risk_level not in valid_risk_levels:
             raise ValueError(f"risk_level must be one of {valid_risk_levels}, got '{risk_level}'")
 
-        # 🔒 CIRCULAR REFERENCE CHECK (AIR GAP #22-23, #48-49)
         if _detect_circular_references(task.context):
             raise ValueError("Circular reference detected in task.context - potential infinite loop")
 
@@ -424,9 +341,45 @@ class GovernancePipeline:
                 # ESCALATE if professional help required
                 if counsel.requires_professional:
                     logger.warning(f"[{correlation_id}] Professional referral required")
-                    # TODO: Implement escalation mechanism
+                    await self._escalate_to_professional(
+                        correlation_id=correlation_id,
+                        agent_id=agent_id,
+                        counsel=counsel,
+                        task_context=task.context
+                    )
 
             return result
+
+    async def _escalate_to_professional(
+        self,
+        correlation_id: str,
+        agent_id: str,
+        counsel: Any,
+        task_context: Dict[str, Any]
+    ) -> None:
+        """Escalate to professional human review (non-blocking)."""
+        escalation_record = {
+            "correlation_id": correlation_id,
+            "agent_id": agent_id,
+            "escalation_type": "professional_referral",
+            "counsel_type": getattr(counsel, "counsel_type", "unknown"),
+            "confidence": getattr(counsel, "confidence", 0.0),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "context_summary": str(task_context)[:500]  # Truncate for logging
+        }
+
+        logger.warning(
+            f"[{correlation_id}] ESCALATION: Professional referral triggered. "
+            f"Agent: {agent_id}, Type: {escalation_record['counsel_type']}"
+        )
+
+        # Record escalation for audit trail
+        with trace_operation(
+            "governance.escalation",
+            {"correlation_id": correlation_id, "type": "professional_referral"}
+        ) as span:
+            span.set_attribute("escalation.agent_id", agent_id)
+            span.set_attribute("escalation.requires_professional", True)
 
     async def execute_with_governance(
         self,
@@ -434,28 +387,15 @@ class GovernancePipeline:
         task: AgentTask,
         risk_level: str = "MEDIUM"
     ) -> AgentResponse:
-        """
-        Execute agent with complete governance pipeline.
-
-        Flow:
-        1. Pre-execution checks (parallel: Justiça + Sofia)
-        2. Execute agent (if approved)
-        3. Post-execution metrics (background task)
+        """Execute agent with governance pipeline.
 
         Args:
-            agent: The agent to execute
+            agent: Agent to execute
             task: Task to execute
-            risk_level: Risk level for pre-execution counsel
+            risk_level: Risk level (default: MEDIUM)
 
         Returns:
-            AgentResponse with execution result + governance metadata
-
-        Example:
-            >>> response = await pipeline.execute_with_governance(
-            ...     executor_agent, task, risk_level="HIGH"
-            ... )
-            >>> if not response.success:
-            ...     print(f"Blocked: {response.error}")
+            AgentResponse with governance metadata
         """
         correlation_id = str(uuid.uuid4())
 
@@ -532,20 +472,29 @@ class GovernancePipeline:
         success: bool,
         correlation_id: str
     ) -> None:
-        """
-        Update metrics in background (non-blocking).
-
-        This runs as a background task to avoid blocking main execution.
-        """
+        """Update Justiça trust metrics in background (non-blocking)."""
         try:
-            # Update trust scores in Justiça
-            if success:
-                logger.debug(f"[{correlation_id}] Updating metrics for {agent_id} (success)")
-            else:
-                logger.debug(f"[{correlation_id}] Updating metrics for {agent_id} (failure)")
+            with trace_operation(
+                "governance.metrics_update",
+                {"correlation_id": correlation_id, "agent_id": agent_id}
+            ) as span:
+                span.set_attribute("metrics.success", success)
 
-            # TODO: Implement actual metrics update
-            # await self.justica.update_trust_score(agent_id, success)
+                if success:
+                    logger.debug(f"[{correlation_id}] Recording success for {agent_id}")
+                    # Record successful execution in Justiça metrics
+                    if hasattr(self.justica, 'record_execution_success'):
+                        await self.justica.record_execution_success(agent_id, correlation_id)
+                else:
+                    logger.debug(f"[{correlation_id}] Recording failure for {agent_id}")
+                    # Record failed execution (may affect trust score)
+                    if hasattr(self.justica, 'record_execution_failure'):
+                        await self.justica.record_execution_failure(agent_id, correlation_id)
+
+                # Log current trust score for observability
+                current_trust = self.justica.get_trust_score(agent_id)
+                span.set_attribute("metrics.trust_score", current_trust)
+                logger.debug(f"[{correlation_id}] Agent {agent_id} trust score: {current_trust:.2f}")
 
         except Exception as e:
             logger.error(f"Failed to update metrics: {e}")

@@ -1,31 +1,19 @@
 """
-A2A Protocol Buffers Generated Code
-===================================
+A2A Protocol Protobuf Definitions
+=================================
 
-Auto-generated protobuf and gRPC code for A2A v0.3 protocol.
-
-DO NOT EDIT these files manually - regenerate using:
-    cd proto && make proto
-
-Reference:
-- A2A Spec: https://a2a-protocol.org/latest/specification/
-- Protobuf: https://protobuf.dev/
-
-Author: JuanCS Dev
-Date: 2025-12-30
+Generated from .proto files using grpcio-tools.
 """
-
-from __future__ import annotations
 
 # Common types
 from .common_pb2 import (
     PartType,
+    ErrorSeverity,
     TextPart,
     FilePart,
     DataPart,
     Part,
     Artifact,
-    ErrorSeverity,
     Error,
 )
 
@@ -33,8 +21,8 @@ from .common_pb2 import (
 from .message_pb2 import (
     MessageRole,
     Message,
-    StreamEventType,
     StreamChunk,
+    StreamEventType,
     TaskStatusUpdate,
 )
 
@@ -54,16 +42,9 @@ from .task_pb2 import (
 
 # Agent Card types
 from .agent_card_pb2 import (
-    AgentCapabilities,
-    AgentSkill,
-    SkillExample,
-    SecuritySchemeType,
-    SecurityScheme,
-    OAuth2Config,
-    OpenIDConnectConfig,
-    SupportedInterface,
-    AgentCardSignature,
     AgentCard,
+    AgentSkill,
+    AgentCapabilities,
     GetAgentCardRequest,
     GetAgentCardResponse,
 )
@@ -72,32 +53,32 @@ from .agent_card_pb2 import (
 from .service_pb2 import (
     SubscribeTaskRequest,
     HealthCheckRequest,
-    HealthStatus,
     HealthCheckResponse,
+    HealthStatus,
 )
 
-# gRPC stubs
+# gRPC service
 from .service_pb2_grpc import (
-    A2AServiceStub,
     A2AServiceServicer,
+    A2AServiceStub,
     add_A2AServiceServicer_to_server,
 )
 
 __all__ = [
     # Common
     "PartType",
+    "ErrorSeverity",
     "TextPart",
     "FilePart",
     "DataPart",
     "Part",
     "Artifact",
-    "ErrorSeverity",
     "Error",
     # Message
     "MessageRole",
     "Message",
-    "StreamEventType",
     "StreamChunk",
+    "StreamEventType",
     "TaskStatusUpdate",
     # Task
     "TaskState",
@@ -111,25 +92,18 @@ __all__ = [
     "CancelTaskRequest",
     "CancelTaskResponse",
     # Agent Card
-    "AgentCapabilities",
-    "AgentSkill",
-    "SkillExample",
-    "SecuritySchemeType",
-    "SecurityScheme",
-    "OAuth2Config",
-    "OpenIDConnectConfig",
-    "SupportedInterface",
-    "AgentCardSignature",
     "AgentCard",
+    "AgentSkill",
+    "AgentCapabilities",
     "GetAgentCardRequest",
     "GetAgentCardResponse",
     # Service
     "SubscribeTaskRequest",
     "HealthCheckRequest",
-    "HealthStatus",
     "HealthCheckResponse",
+    "HealthStatus",
     # gRPC
-    "A2AServiceStub",
     "A2AServiceServicer",
+    "A2AServiceStub",
     "add_A2AServiceServicer_to_server",
 ]

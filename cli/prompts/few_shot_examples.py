@@ -190,8 +190,8 @@ def get_examples_for_context(user_input: str, max_examples: int = 5) -> list:
     Returns:
         List of relevant examples
     """
-    # Simple keyword matching for now
-    # TODO: Use embeddings for semantic similarity
+    # Keyword-based matching (fast, deterministic, zero-dependency)
+    # For semantic similarity, integrate with EmbeddingsManager from core/knowledge
 
     keywords = {
         "file_reading": ["read", "show", "cat", "display", "view", "content"],

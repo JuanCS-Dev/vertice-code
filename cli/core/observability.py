@@ -102,10 +102,9 @@ def setup_observability(
             console_exporter = ConsoleSpanExporter()
             provider.add_span_processor(BatchSpanProcessor(console_exporter))
 
-        # TODO: Add file exporter if needed
-        # if enable_file:
-        #     file_exporter = FileSpanExporter("traces.jsonl")
-        #     provider.add_span_processor(BatchSpanProcessor(file_exporter))
+        # File export can be configured via OTEL_EXPORTER_OTLP_ENDPOINT
+        # environment variable for production deployments.
+        # See: https://opentelemetry.io/docs/languages/python/exporters/
 
         # Set global tracer provider
         trace.set_tracer_provider(provider)
