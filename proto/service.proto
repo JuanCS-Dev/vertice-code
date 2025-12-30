@@ -1,0 +1,132 @@
+// A2A Protocol - gRPC Service
+// ===========================
+//
+// gRPC service definition for A2A v0.3 protocol.
+//
+// Reference:
+// - A2A Spec: https://a2a-protocol.org/latest/specification/
+// - gRPC Best Practices: https://grpc.io/docs/guides/
+//
+// Author: JuanCS Dev
+// Date: 2025-12-30
+
+syntax = "proto3";
+
+package a2a;
+
+option java_package = "com.vertice.a2a";
+option java_outer_classname = "ServiceProto";
+option go_package = "github.com/vertice/a2a/proto";
+
+import "task.proto";
+import "message.proto";
+import "agent_card.proto";
+
+
+// =============================================================================
+// A2A SERVICE
+// =============================================================================
+
+// A2A Protocol gRPC Service.
+//
+// Primary interface for agent-to-agent communication.
+// Supports both unary and streaming RPC methods.
+service A2AService {
+  // ==========================================================================
+  // MESSAGE OPERATIONS
+  // ==========================================================================
+
+  // Send a message to the agent (unary).
+  // Creates or continues a task based on the request.
+  rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
+
+  // Send a message and receive streaming response.
+  // Returns incremental chunks as the agent processes.
+  rpc SendStreamingMessage(SendMessageRequest) returns (stream StreamChunk);
+
+  // ==========================================================================
+  // TASK OPERATIONS
+  // ==========================================================================
+
+  // Get a task by ID.
+  rpc GetTask(GetTaskRequest) returns (Task);
+
+  // List tasks with optional filtering.
+  rpc ListTasks(ListTasksRequest) returns (ListTasksResponse);
+
+  // Cancel an in-progress task.
+  rpc CancelTask(CancelTaskRequest) returns (CancelTaskResponse);
+
+  // Subscribe to task updates (server streaming).
+  rpc SubscribeTaskUpdates(SubscribeTaskRequest) returns (stream StreamChunk);
+
+  // ==========================================================================
+  // DISCOVERY OPERATIONS
+  // ==========================================================================
+
+  // Get agent card for discovery.
+  rpc GetAgentCard(GetAgentCardRequest) returns (GetAgentCardResponse);
+
+  // Health check endpoint.
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+
+// =============================================================================
+// SUBSCRIPTION REQUESTS
+// =============================================================================
+
+// Request to subscribe to task updates.
+message SubscribeTaskRequest {
+  // Task ID to subscribe to.
+  string task_id = 1;
+
+  // Include previous events (replay).
+  bool include_history = 2;
+
+  // Start from sequence number.
+  int64 from_sequence = 3;
+}
+
+
+// =============================================================================
+// HEALTH CHECK
+// =============================================================================
+
+// Health check request.
+message HealthCheckRequest {
+  // Optional service to check.
+  string service = 1;
+}
+
+
+// Health status.
+enum HealthStatus {
+  // Unknown health status.
+  HEALTH_STATUS_UNSPECIFIED = 0;
+
+  // Service is healthy.
+  HEALTH_STATUS_HEALTHY = 1;
+
+  // Service is degraded but functional.
+  HEALTH_STATUS_DEGRADED = 2;
+
+  // Service is unhealthy.
+  HEALTH_STATUS_UNHEALTHY = 3;
+}
+
+
+// Health check response.
+message HealthCheckResponse {
+  // Overall health status.
+  HealthStatus status = 1;
+
+  // Service version.
+  string version = 2;
+
+  // Uptime in seconds.
+  int64 uptime_seconds = 3;
+
+  // Component health details.
+  map<string, HealthStatus> components = 4;
+}

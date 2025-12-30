@@ -1,0 +1,219 @@
+// A2A Protocol - Task Types
+// =========================
+//
+// Task lifecycle management for A2A v0.3 protocol.
+//
+// Reference:
+// - A2A Spec: https://a2a-protocol.org/latest/specification/
+//
+// Author: JuanCS Dev
+// Date: 2025-12-30
+
+syntax = "proto3";
+
+package a2a;
+
+option java_package = "com.vertice.a2a";
+option java_outer_classname = "TaskProto";
+option go_package = "github.com/vertice/a2a/proto";
+
+import "google/protobuf/timestamp.proto";
+import "common.proto";
+import "message.proto";
+
+
+// =============================================================================
+// TASK STATE
+// =============================================================================
+
+// Task lifecycle states per A2A v0.3 specification.
+//
+// Flow: SUBMITTED -> WORKING -> [COMPLETED|FAILED|CANCELLED|INPUT_REQUIRED]
+// INPUT_REQUIRED -> WORKING (after user provides input)
+enum TaskState {
+  // Unspecified state - required by protobuf best practices.
+  TASK_STATE_UNSPECIFIED = 0;
+
+  // Task has been submitted but not yet started.
+  TASK_STATE_SUBMITTED = 1;
+
+  // Task is actively being processed.
+  TASK_STATE_WORKING = 2;
+
+  // Task completed successfully (terminal).
+  TASK_STATE_COMPLETED = 3;
+
+  // Task failed with error (terminal).
+  TASK_STATE_FAILED = 4;
+
+  // Task was cancelled by user/system (terminal).
+  TASK_STATE_CANCELLED = 5;
+
+  // Task requires additional input to proceed (non-terminal).
+  TASK_STATE_INPUT_REQUIRED = 6;
+
+  // Task was rejected by agent (terminal).
+  TASK_STATE_REJECTED = 7;
+
+  // Task requires out-of-band authentication (non-terminal).
+  TASK_STATE_AUTH_REQUIRED = 8;
+}
+
+
+// =============================================================================
+// TASK
+// =============================================================================
+
+// A2A Task with full lifecycle management.
+//
+// Tasks are the primary unit of work in A2A protocol.
+// They progress through defined states and can contain
+// messages, artifacts, and metadata.
+message Task {
+  // Unique task identifier.
+  string id = 1;
+
+  // Current task state.
+  TaskState state = 2;
+
+  // Messages exchanged during task.
+  repeated Message messages = 3;
+
+  // Artifacts produced by task.
+  repeated Artifact artifacts = 4;
+
+  // State transition history.
+  repeated TaskStateTransition history = 5;
+
+  // Task creation timestamp.
+  google.protobuf.Timestamp created_at = 6;
+
+  // Last update timestamp.
+  google.protobuf.Timestamp updated_at = 7;
+
+  // Agent ID processing this task.
+  string agent_id = 8;
+
+  // Context ID for task correlation.
+  string context_id = 9;
+
+  // Task metadata.
+  map<string, string> metadata = 10;
+
+  // Error information (if state is FAILED).
+  Error error = 11;
+}
+
+
+// Record of a task state transition.
+message TaskStateTransition {
+  // Previous state.
+  TaskState from_state = 1;
+
+  // New state.
+  TaskState to_state = 2;
+
+  // Transition timestamp.
+  google.protobuf.Timestamp timestamp = 3;
+
+  // Optional reason for transition.
+  string reason = 4;
+}
+
+
+// =============================================================================
+// TASK REQUESTS/RESPONSES
+// =============================================================================
+
+// Request to send a message and potentially create/update a task.
+message SendMessageRequest {
+  // Message to send.
+  Message message = 1;
+
+  // Existing task ID (optional - creates new task if not provided).
+  string task_id = 2;
+
+  // Session ID for conversation continuity.
+  string session_id = 3;
+
+  // Request metadata.
+  map<string, string> metadata = 4;
+}
+
+
+// Response to SendMessage request.
+message SendMessageResponse {
+  // The task (created or updated).
+  Task task = 1;
+
+  // Agent's response message.
+  Message response = 2;
+}
+
+
+// Request to get task by ID.
+message GetTaskRequest {
+  // Task ID to retrieve.
+  string task_id = 1;
+
+  // Include message history.
+  bool include_messages = 2;
+
+  // Include artifacts.
+  bool include_artifacts = 3;
+
+  // Include state transition history.
+  bool include_history = 4;
+}
+
+
+// Request to list tasks.
+message ListTasksRequest {
+  // Filter by state (empty = all states).
+  repeated TaskState states = 1;
+
+  // Maximum number of tasks to return.
+  int32 limit = 2;
+
+  // Pagination cursor.
+  string cursor = 3;
+
+  // Filter by agent ID.
+  string agent_id = 4;
+
+  // Filter by context ID.
+  string context_id = 5;
+}
+
+
+// Response to ListTasks request.
+message ListTasksResponse {
+  // List of tasks matching criteria.
+  repeated Task tasks = 1;
+
+  // Next page cursor (empty if no more results).
+  string next_cursor = 2;
+
+  // Total count (if available).
+  int64 total_count = 3;
+}
+
+
+// Request to cancel a task.
+message CancelTaskRequest {
+  // Task ID to cancel.
+  string task_id = 1;
+
+  // Reason for cancellation.
+  string reason = 2;
+}
+
+
+// Response to CancelTask request.
+message CancelTaskResponse {
+  // Updated task.
+  Task task = 1;
+
+  // Whether cancellation was successful.
+  bool success = 2;
+}

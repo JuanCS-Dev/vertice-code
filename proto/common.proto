@@ -1,0 +1,169 @@
+// A2A Protocol - Common Types
+// ===========================
+//
+// Common type definitions for A2A v0.3 protocol.
+//
+// Reference:
+// - A2A Spec: https://a2a-protocol.org/latest/specification/
+// - Protobuf Best Practices: https://protobuf.dev/best-practices/dos-donts/
+//
+// Author: JuanCS Dev
+// Date: 2025-12-30
+
+syntax = "proto3";
+
+package a2a;
+
+option java_package = "com.vertice.a2a";
+option java_outer_classname = "CommonProto";
+option go_package = "github.com/vertice/a2a/proto";
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+
+
+// =============================================================================
+// PART TYPES
+// =============================================================================
+
+// Content part type discriminator.
+enum PartType {
+  // Unspecified part type - required by protobuf best practices.
+  PART_TYPE_UNSPECIFIED = 0;
+
+  // Text content part.
+  PART_TYPE_TEXT = 1;
+
+  // File content part (binary or reference).
+  PART_TYPE_FILE = 2;
+
+  // Structured data part (JSON-like).
+  PART_TYPE_DATA = 3;
+}
+
+
+// Text content part.
+message TextPart {
+  // The text content.
+  string text = 1;
+
+  // Optional MIME type (default: text/plain).
+  string mime_type = 2;
+}
+
+
+// File content part.
+message FilePart {
+  // File name or identifier.
+  string name = 1;
+
+  // MIME type of the file.
+  string mime_type = 2;
+
+  // File content - one of:
+  oneof content {
+    // Base64-encoded inline content.
+    bytes inline_data = 3;
+
+    // URI reference to external content.
+    string uri = 4;
+  }
+}
+
+
+// Structured data part (JSON-like).
+message DataPart {
+  // Data schema identifier (optional).
+  string schema = 1;
+
+  // The structured data.
+  google.protobuf.Struct data = 2;
+}
+
+
+// Generic message part - can be text, file, or data.
+message Part {
+  // Part type discriminator.
+  PartType type = 1;
+
+  // Part content - one of:
+  oneof content {
+    TextPart text = 2;
+    FilePart file = 3;
+    DataPart data = 4;
+  }
+
+  // Optional metadata for this part.
+  map<string, string> metadata = 5;
+}
+
+
+// =============================================================================
+// ARTIFACT
+// =============================================================================
+
+// Artifact produced by task execution.
+message Artifact {
+  // Unique artifact identifier.
+  string id = 1;
+
+  // Human-readable name.
+  string name = 2;
+
+  // MIME type of artifact content.
+  string mime_type = 3;
+
+  // Artifact content - one of:
+  oneof content {
+    // Base64-encoded inline content.
+    bytes inline_data = 4;
+
+    // URI reference to external content.
+    string uri = 5;
+  }
+
+  // Creation timestamp.
+  google.protobuf.Timestamp created_at = 6;
+
+  // Optional metadata.
+  map<string, string> metadata = 7;
+}
+
+
+// =============================================================================
+// ERROR
+// =============================================================================
+
+// Error severity level.
+enum ErrorSeverity {
+  // Unspecified severity.
+  ERROR_SEVERITY_UNSPECIFIED = 0;
+
+  // Informational - not an error.
+  ERROR_SEVERITY_INFO = 1;
+
+  // Warning - non-fatal issue.
+  ERROR_SEVERITY_WARNING = 2;
+
+  // Error - operation failed but recoverable.
+  ERROR_SEVERITY_ERROR = 3;
+
+  // Fatal - unrecoverable error.
+  ERROR_SEVERITY_FATAL = 4;
+}
+
+
+// Protocol error representation.
+message Error {
+  // Error code (application-specific or JSON-RPC standard).
+  int32 code = 1;
+
+  // Human-readable error message.
+  string message = 2;
+
+  // Error severity.
+  ErrorSeverity severity = 3;
+
+  // Additional error details.
+  google.protobuf.Struct details = 4;
+}

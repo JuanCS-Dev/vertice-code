@@ -25,11 +25,14 @@ from .types import (
     ReviewSeverity,
 )
 from .deep_think import DeepThinkMixin
+from agents.base import BaseAgent
+from core.resilience import ResilienceMixin
+from core.caching import CachingMixin
 
 logger = logging.getLogger(__name__)
 
 
-class ReviewerAgent(DeepThinkMixin):
+class ReviewerAgent(ResilienceMixin, CachingMixin, DeepThinkMixin, BaseAgent):
     """
     Code Review Specialist - The Quality Guardian
 
@@ -95,6 +98,7 @@ Be thorough but fair. Praise good patterns too.
     ]
 
     def __init__(self, provider: str = "vertex-ai") -> None:
+        super().__init__()  # Initialize BaseAgent (observability)
         self._provider_name = provider
         self._llm = None
         self._findings: List[ReviewFinding] = []

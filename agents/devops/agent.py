@@ -25,11 +25,14 @@ from .types import (
     PipelineRun,
 )
 from .incident_handler import IncidentHandlerMixin
+from agents.base import BaseAgent
+from core.resilience import ResilienceMixin
+from core.caching import CachingMixin
 
 logger = logging.getLogger(__name__)
 
 
-class DevOpsAgent(IncidentHandlerMixin):
+class DevOpsAgent(ResilienceMixin, CachingMixin, IncidentHandlerMixin, BaseAgent):
     """
     DevOps Specialist - The Operator
 
@@ -130,6 +133,7 @@ CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0"]
     }
 
     def __init__(self, provider: str = "groq") -> None:
+        super().__init__()  # Initialize BaseAgent (observability)
         self._provider_name = provider
         self._llm = None
         self._pipelines: Dict[str, PipelineRun] = {}

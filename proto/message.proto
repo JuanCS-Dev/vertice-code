@@ -1,0 +1,146 @@
+// A2A Protocol - Message Types
+// ============================
+//
+// Message definitions for A2A v0.3 protocol communication.
+//
+// Reference:
+// - A2A Spec: https://a2a-protocol.org/latest/specification/
+//
+// Author: JuanCS Dev
+// Date: 2025-12-30
+
+syntax = "proto3";
+
+package a2a;
+
+option java_package = "com.vertice.a2a";
+option java_outer_classname = "MessageProto";
+option go_package = "github.com/vertice/a2a/proto";
+
+import "google/protobuf/timestamp.proto";
+import "common.proto";
+
+
+// =============================================================================
+// MESSAGE ROLE
+// =============================================================================
+
+// Role of the message sender in A2A communication.
+enum MessageRole {
+  // Unspecified role - required by protobuf best practices.
+  MESSAGE_ROLE_UNSPECIFIED = 0;
+
+  // Message from the user/client.
+  MESSAGE_ROLE_USER = 1;
+
+  // Message from the agent.
+  MESSAGE_ROLE_AGENT = 2;
+
+  // System-level message.
+  MESSAGE_ROLE_SYSTEM = 3;
+}
+
+
+// =============================================================================
+// MESSAGE
+// =============================================================================
+
+// A2A protocol message.
+//
+// Messages are the primary unit of communication between client and agent.
+// They support multi-part content including text, files, and structured data.
+message Message {
+  // Unique message identifier.
+  string id = 1;
+
+  // Role of the sender.
+  MessageRole role = 2;
+
+  // Message parts (multi-modal content).
+  repeated Part parts = 3;
+
+  // Message timestamp.
+  google.protobuf.Timestamp timestamp = 4;
+
+  // Context ID for conversation threading.
+  string context_id = 5;
+
+  // Task ID this message belongs to.
+  string task_id = 6;
+
+  // Optional metadata.
+  map<string, string> metadata = 7;
+}
+
+
+// =============================================================================
+// STREAMING EVENTS
+// =============================================================================
+
+// Type of streaming event.
+enum StreamEventType {
+  // Unspecified event type.
+  STREAM_EVENT_TYPE_UNSPECIFIED = 0;
+
+  // Task status update event.
+  STREAM_EVENT_TYPE_STATUS_UPDATE = 1;
+
+  // Message chunk event.
+  STREAM_EVENT_TYPE_MESSAGE_CHUNK = 2;
+
+  // Artifact update event.
+  STREAM_EVENT_TYPE_ARTIFACT_UPDATE = 3;
+
+  // Error event.
+  STREAM_EVENT_TYPE_ERROR = 4;
+
+  // Heartbeat event (keepalive).
+  STREAM_EVENT_TYPE_HEARTBEAT = 5;
+}
+
+
+// Streaming response chunk.
+message StreamChunk {
+  // Event type.
+  StreamEventType event_type = 1;
+
+  // Task ID this chunk relates to.
+  string task_id = 2;
+
+  // Sequence number for ordering.
+  int64 sequence = 3;
+
+  // Chunk content - one of:
+  oneof content {
+    // Text delta for incremental updates.
+    string text_delta = 4;
+
+    // Full message (for non-streaming parts).
+    Message message = 5;
+
+    // Artifact update.
+    Artifact artifact = 6;
+
+    // Task status update.
+    TaskStatusUpdate status_update = 7;
+
+    // Error information.
+    Error error = 8;
+  }
+
+  // Timestamp.
+  google.protobuf.Timestamp timestamp = 9;
+}
+
+
+// Task status update in streaming context.
+message TaskStatusUpdate {
+  // New task state.
+  string state = 1;
+
+  // Optional status message.
+  string message = 2;
+
+  // Progress percentage (0-100), if applicable.
+  int32 progress = 3;
+}

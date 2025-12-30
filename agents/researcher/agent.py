@@ -21,11 +21,14 @@ import logging
 
 from .types import ResearchReport
 from .agentic_rag import AgenticRAGMixin
+from agents.base import BaseAgent
+from core.resilience import ResilienceMixin
+from core.caching import CachingMixin
 
 logger = logging.getLogger(__name__)
 
 
-class ResearcherAgent(AgenticRAGMixin):
+class ResearcherAgent(ResilienceMixin, CachingMixin, AgenticRAGMixin, BaseAgent):
     """
     Research Specialist - The Knowledge Hunter
 
@@ -77,6 +80,7 @@ Say "I couldn't find..." if unsure.
     }
 
     def __init__(self, provider: str = "vertex-ai") -> None:
+        super().__init__()  # Initialize BaseAgent (observability)
         self._provider_name = provider
         self._llm = None
         self._cache: Dict[str, ResearchReport] = {}

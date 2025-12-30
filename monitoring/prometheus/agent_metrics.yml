@@ -1,0 +1,43 @@
+# Prometheus Configuration for Vertice Agents
+# Scrapes resilience and caching metrics from the agent API
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'vertice_agents'
+    static_configs:
+      - targets: ['localhost:8000']
+        labels:
+          service: 'vertice-agency'
+          environment: 'development'
+    metrics_path: '/metrics'
+    scheme: 'http'
+
+  - job_name: 'vertice_resilience'
+    static_configs:
+      - targets: ['localhost:8000']
+    metrics_path: '/metrics/resilience'
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'resilience_.*'
+        action: keep
+
+  - job_name: 'vertice_caching'
+    static_configs:
+      - targets: ['localhost:8000']
+    metrics_path: '/metrics/cache'
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'cache_.*'
+        action: keep
+
+# Alert rules for production monitoring
+rule_files:
+  - 'alerts/*.yml'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []

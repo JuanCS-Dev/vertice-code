@@ -24,11 +24,14 @@ from .types import (
     ArchitectureReview,
 )
 from .three_loops import ThreeLoopsMixin
+from agents.base import BaseAgent
+from core.resilience import ResilienceMixin
+from core.caching import CachingMixin
 
 logger = logging.getLogger(__name__)
 
 
-class ArchitectAgent(ThreeLoopsMixin):
+class ArchitectAgent(ResilienceMixin, CachingMixin, ThreeLoopsMixin, BaseAgent):
     """
     Architecture Specialist - The System Designer
 
@@ -74,6 +77,7 @@ Always consider:
 """
 
     def __init__(self, provider: str = "claude") -> None:
+        super().__init__()  # Initialize BaseAgent (observability)
         self._provider_name = provider
         self._llm = None
         self._proposals: Dict[str, DesignProposal] = {}

@@ -1,0 +1,276 @@
+// A2A Protocol - Agent Card
+// =========================
+//
+// Agent Card definition for A2A v0.3 discovery.
+// Served at /.well-known/agent.json
+//
+// Reference:
+// - A2A Spec: https://a2a-protocol.org/latest/specification/
+//
+// Author: JuanCS Dev
+// Date: 2025-12-30
+
+syntax = "proto3";
+
+package a2a;
+
+option java_package = "com.vertice.a2a";
+option java_outer_classname = "AgentCardProto";
+option go_package = "github.com/vertice/a2a/proto";
+
+import "google/protobuf/struct.proto";
+
+
+// =============================================================================
+// AGENT CAPABILITIES
+// =============================================================================
+
+// Optional features the agent supports.
+message AgentCapabilities {
+  // Supports streaming responses.
+  bool streaming = 1;
+
+  // Supports push notifications.
+  bool push_notifications = 2;
+
+  // Provides state transition history.
+  bool state_transition_history = 3;
+
+  // Supports extended agent card.
+  bool supports_extended_agent_card = 4;
+
+  // Protocol extensions supported.
+  repeated string extensions = 5;
+}
+
+
+// =============================================================================
+// AGENT SKILL
+// =============================================================================
+
+// A discrete function the agent can perform.
+message AgentSkill {
+  // Unique skill identifier.
+  string id = 1;
+
+  // Human-readable skill name.
+  string name = 2;
+
+  // Skill description.
+  string description = 3;
+
+  // JSON Schema for skill input.
+  google.protobuf.Struct input_schema = 4;
+
+  // JSON Schema for skill output.
+  google.protobuf.Struct output_schema = 5;
+
+  // Usage examples.
+  repeated SkillExample examples = 6;
+
+  // Categorization tags.
+  repeated string tags = 7;
+}
+
+
+// Example of skill usage.
+message SkillExample {
+  // Example input.
+  google.protobuf.Struct input = 1;
+
+  // Expected output.
+  google.protobuf.Struct output = 2;
+
+  // Description of this example.
+  string description = 3;
+}
+
+
+// =============================================================================
+// SECURITY SCHEMES
+// =============================================================================
+
+// Type of security scheme.
+enum SecuritySchemeType {
+  // Unspecified type.
+  SECURITY_SCHEME_TYPE_UNSPECIFIED = 0;
+
+  // API Key authentication.
+  SECURITY_SCHEME_TYPE_API_KEY = 1;
+
+  // OAuth 2.0 authentication.
+  SECURITY_SCHEME_TYPE_OAUTH2 = 2;
+
+  // OpenID Connect authentication.
+  SECURITY_SCHEME_TYPE_OPENID_CONNECT = 3;
+
+  // Mutual TLS authentication.
+  SECURITY_SCHEME_TYPE_MTLS = 4;
+
+  // HTTP Bearer token.
+  SECURITY_SCHEME_TYPE_HTTP_BEARER = 5;
+}
+
+
+// Security scheme definition.
+message SecurityScheme {
+  // Scheme type.
+  SecuritySchemeType type = 1;
+
+  // Scheme name/identifier.
+  string name = 2;
+
+  // Description.
+  string description = 3;
+
+  // OAuth2 configuration (if type is OAUTH2).
+  OAuth2Config oauth2 = 4;
+
+  // OpenID Connect configuration (if type is OPENID_CONNECT).
+  OpenIDConnectConfig oidc = 5;
+}
+
+
+// OAuth 2.0 configuration.
+message OAuth2Config {
+  // Authorization endpoint.
+  string authorization_url = 1;
+
+  // Token endpoint.
+  string token_url = 2;
+
+  // Refresh token endpoint.
+  string refresh_url = 3;
+
+  // Available scopes.
+  map<string, string> scopes = 4;
+
+  // Supported grant types.
+  repeated string grant_types = 5;
+
+  // PKCE support (required for OAuth 2.1).
+  bool pkce_required = 6;
+}
+
+
+// OpenID Connect configuration.
+message OpenIDConnectConfig {
+  // Discovery URL (.well-known/openid-configuration).
+  string discovery_url = 1;
+}
+
+
+// =============================================================================
+// SUPPORTED INTERFACES
+// =============================================================================
+
+// Protocol interface binding.
+message SupportedInterface {
+  // Interface type (e.g., "grpc", "http+json", "jsonrpc").
+  string type = 1;
+
+  // Interface URL.
+  string url = 2;
+
+  // Interface version.
+  string version = 3;
+}
+
+
+// =============================================================================
+// AGENT CARD SIGNATURE (JWS)
+// =============================================================================
+
+// JWS signature for Agent Card authentication.
+// Reference: RFC 7515 (JWS), RFC 8785 (JCS)
+message AgentCardSignature {
+  // Protected header (Base64URL-encoded).
+  // Must include: alg, typ, kid
+  string protected = 1;
+
+  // JWS signature (Base64URL-encoded).
+  string signature = 2;
+
+  // JWK Set URL for key retrieval.
+  string jku = 3;
+}
+
+
+// =============================================================================
+// AGENT CARD
+// =============================================================================
+
+// Agent Card - Machine-readable manifest for A2A discovery.
+//
+// Typically served at /.well-known/agent.json
+// Describes agent identity, capabilities, skills, and security.
+message AgentCard {
+  // Unique agent identifier.
+  string agent_id = 1;
+
+  // Human-readable agent name.
+  string name = 2;
+
+  // Agent description.
+  string description = 3;
+
+  // Agent version (semver).
+  string version = 4;
+
+  // Provider/organization name.
+  string provider = 5;
+
+  // Agent capabilities.
+  AgentCapabilities capabilities = 6;
+
+  // Skills the agent can perform.
+  repeated AgentSkill skills = 7;
+
+  // Supported protocol interfaces (in preference order).
+  repeated SupportedInterface supported_interfaces = 8;
+
+  // Security schemes for authentication.
+  map<string, SecurityScheme> security_schemes = 9;
+
+  // Default input content modes.
+  repeated string default_input_modes = 10;
+
+  // Default output content modes.
+  repeated string default_output_modes = 11;
+
+  // Documentation URL.
+  string documentation_url = 12;
+
+  // Terms of service URL.
+  string terms_of_service_url = 13;
+
+  // Privacy policy URL.
+  string privacy_policy_url = 14;
+
+  // JWS signatures for card authentication.
+  repeated AgentCardSignature signatures = 15;
+
+  // Additional metadata.
+  map<string, string> metadata = 16;
+}
+
+
+// =============================================================================
+// AGENT CARD REQUESTS
+// =============================================================================
+
+// Request to get agent card.
+message GetAgentCardRequest {
+  // Agent ID (optional - defaults to server's card).
+  string agent_id = 1;
+
+  // Include extended information.
+  bool include_extended = 2;
+}
+
+
+// Response with agent card.
+message GetAgentCardResponse {
+  // The agent card.
+  AgentCard card = 1;
+}

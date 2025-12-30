@@ -28,11 +28,14 @@ from .types import (
     TaskComplexity,
 )
 from .bounded_autonomy import BoundedAutonomyMixin
+from agents.base import BaseAgent
+from core.resilience import ResilienceMixin
+from core.caching import CachingMixin
 
 logger = logging.getLogger(__name__)
 
 
-class OrchestratorAgent(BoundedAutonomyMixin):
+class OrchestratorAgent(ResilienceMixin, CachingMixin, BoundedAutonomyMixin, BaseAgent):
     """
     Lead Agent - The Brain of Vertice Agency
 
@@ -83,6 +86,7 @@ class OrchestratorAgent(BoundedAutonomyMixin):
         approval_callback: Optional[ApprovalCallback] = None,
         notify_callback: Optional[NotifyCallback] = None,
     ) -> None:
+        super().__init__()  # Initialize BaseAgent (observability)
         self.tasks: Dict[str, Task] = {}
         self.handoffs: List[Handoff] = []
         self.agents: Dict[AgentRole, Any] = {}

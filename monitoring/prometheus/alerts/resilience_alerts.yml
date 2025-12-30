@@ -1,0 +1,60 @@
+# Resilience Alert Rules for Vertice Agents
+
+groups:
+  - name: resilience_alerts
+    rules:
+      - alert: HighErrorRate
+        expr: rate(resilience_errors_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate for {{ $labels.agent }}"
+          description: "Agent {{ $labels.agent }} has error rate > 10% for 5 minutes"
+
+      - alert: CircuitBreakerOpen
+        expr: resilience_circuit_state == 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Circuit breaker open for {{ $labels.provider }}"
+          description: "Circuit breaker for provider {{ $labels.provider }} is open"
+
+      - alert: HighRetryRate
+        expr: rate(resilience_retries_total[5m]) / rate(resilience_calls_total[5m]) > 0.3
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High retry rate for {{ $labels.agent }}"
+          description: "Agent {{ $labels.agent }} retry rate > 30%"
+
+      - alert: RateLimitHit
+        expr: increase(resilience_rate_limits_total[1m]) > 5
+        for: 1m
+        labels:
+          severity: info
+        annotations:
+          summary: "Rate limit hit for {{ $labels.provider }}"
+          description: "Provider {{ $labels.provider }} hit rate limit 5+ times in 1 minute"
+
+  - name: cache_alerts
+    rules:
+      - alert: LowCacheHitRate
+        expr: cache_hit_rate < 0.5
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "Low cache hit rate for {{ $labels.agent }}"
+          description: "Cache hit rate < 50% for 10 minutes - consider cache tuning"
+
+      - alert: CacheEvictionHigh
+        expr: rate(cache_evictions_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High cache eviction rate"
+          description: "Cache evicting > 10 entries/min - consider increasing size"

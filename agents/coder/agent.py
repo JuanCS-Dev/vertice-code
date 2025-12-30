@@ -33,11 +33,14 @@ from .types import (
     GeneratedCode,
 )
 from .darwin_godel import DarwinGodelMixin
+from agents.base import BaseAgent
+from core.resilience import ResilienceMixin
+from core.caching import CachingMixin
 
 logger = logging.getLogger(__name__)
 
 
-class CoderAgent(DarwinGodelMixin):
+class CoderAgent(ResilienceMixin, CachingMixin, DarwinGodelMixin, BaseAgent):
     """
     Code Generation Specialist
 
@@ -87,6 +90,7 @@ ALWAYS:
 """
 
     def __init__(self) -> None:
+        super().__init__()  # Initialize BaseAgent (observability)
         self._llm = None
         self._provider = None
 

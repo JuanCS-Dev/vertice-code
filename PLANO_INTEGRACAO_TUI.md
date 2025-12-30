@@ -742,13 +742,48 @@ tests/performance/test_reconnect.py
 - Adaptive rate adjustment
 - execute_with_retry() para retry automático
 
+#### Fase 4: A2A v0.3 Compliance - COMPLETO ✅
+| Item | Status | Arquivo | Testes |
+|------|--------|---------|--------|
+| Protocol Buffers | ✅ | `proto/*.proto` | 10 |
+| gRPC A2AService | ✅ | `core/protocols/grpc_server.py` | 18 |
+| TaskStore | ✅ | `core/protocols/grpc_server.py` | 8 |
+| JWS Signer (RFC 7515) | ✅ | `core/security/jws.py` | 15 |
+| JCS Canonical (RFC 8785) | ✅ | `core/security/jws.py` | 3 |
+
+**Arquivos criados**:
+- `proto/common.proto` (Part, Artifact, Error types)
+- `proto/message.proto` (Message, StreamChunk types)
+- `proto/task.proto` (Task, TaskState, lifecycle)
+- `proto/agent_card.proto` (AgentCard, Skills, Security)
+- `proto/service.proto` (A2AService gRPC definition)
+- `proto/Makefile` (Proto compilation)
+- `core/protocols/proto/__init__.py` (Generated exports)
+- `core/protocols/grpc_server.py` (450 linhas - gRPC service)
+- `core/security/jws.py` (450 linhas - JWS/JCS signing)
+- `tests/core/test_a2a_phase4.py` (54 testes)
+
+**Features implementadas**:
+- Proto3 definitions for A2A v0.3 spec
+- TaskState enum (9 states per spec)
+- gRPC service with streaming support
+- SendMessage, GetTask, ListTasks, CancelTask RPCs
+- SubscribeTaskUpdates (server streaming)
+- Health check endpoint
+- JWS RS256/ES256/EdDSA algorithms
+- RFC 8785 JSON Canonicalization
+- SignedAgentCard with multi-signature support
+- KeyManager for RSA/EC key generation
+
+---
+
 ### Métricas de Qualidade
 | Métrica | Valor | Target | Status |
 |---------|-------|--------|--------|
 | Lint (ruff) | 0 erros | 0 | ✅ |
 | Type annotations | 100% | 100% | ✅ |
-| Testes | 185 | - | ✅ |
-| Coverage | ~75% | ≥80% | ⚠️ |
+| Testes | 239 | - | ✅ |
+| Coverage | ~78% | ≥80% | ⚠️ |
 
 **Breakdown de Testes**:
 - Phase 1.1 (Unified Agent): 22 testes
@@ -756,8 +791,9 @@ tests/performance/test_reconnect.py
 - Phase 1.3 (Rate Limiting): 26 testes
 - Phase 2 (Streaming): 20 testes
 - Phase 3 (MCP Security): 93 testes
+- Phase 4 (A2A v0.3): 54 testes
 
-**Nota**: Coverage ~75% devido a métodos async de streaming que requerem mocks complexos da API Gemini. As partes críticas estão 100% testadas.
+**Nota**: Coverage ~78% devido a métodos async de streaming que requerem mocks complexos da API Gemini. As partes críticas estão 100% testadas.
 
 ---
 
@@ -766,6 +802,6 @@ tests/performance/test_reconnect.py
 1. ~~**Fase 1: Fundação** - Unified Agent, Strict Mode, Rate Limiting~~ ✅
 2. ~~**Fase 2: Streaming** - Heartbeat, Backpressure, Reconnect~~ ✅
 3. ~~**Fase 3: MCP 2025-11-25** - OAuth 2.1 + PKCE, Elicitation, Consent~~ ✅
-4. **Fase 4: A2A v0.3** - Protocol Buffers, gRPC, Security Cards
+4. ~~**Fase 4: A2A v0.3** - Protocol Buffers, gRPC, Security Cards~~ ✅
 5. **Fase 5: TUI Lightweight** - Split Bridge, otimizar handlers
 6. **Fase 7: Testes Compliance** - JSON Schema validation, stress tests
