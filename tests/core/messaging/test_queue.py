@@ -7,7 +7,7 @@ SCALE & SUSTAIN Phase 3.3 validation.
 import asyncio
 import pytest
 
-from jdev_core.messaging import (
+from vertice_core.messaging import (
     Message,
     MessageStatus,
     QueueConfig,

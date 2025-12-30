@@ -14,7 +14,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("functional_test")
 
-from jdev_tui.core.tools_bridge import ToolBridge
+from vertice_tui.core.tools_bridge import ToolBridge
 
 # Test Workspace
 TEST_DIR = "test_workspace"

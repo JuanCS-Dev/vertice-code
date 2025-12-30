@@ -314,7 +314,7 @@ class TestCoordinatorEdgeCases:
 
 
 class TestCoordinatorConstitutionalCompliance:
-    """Tests de aderência à Constituição Vértice"""
+    """Tests de aderência à Constituicao Vertice"""
 
     def test_coordinator_respects_token_budget(self):
         """Deve respeitar orçamento de tokens (P6)"""

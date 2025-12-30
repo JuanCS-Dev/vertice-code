@@ -292,7 +292,7 @@ $ maestro agent plan "Add authentication"
 🛡️  Initializing Constitutional Governance...
 ⚠️  Governance initialization failed: <error>
 ⚠️  Running without governance (degraded mode)
-✓ Vértice-MAXIMUS Online
+✓ Vertice-MAXIMUS Online
 
 ⚡ PLANNER activated
 ```

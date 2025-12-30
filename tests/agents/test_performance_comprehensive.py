@@ -18,8 +18,8 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from jdev_cli.agents.base import AgentTask
-from jdev_cli.agents.performance import (
+from vertice_cli.agents.base import AgentTask
+from vertice_cli.agents.performance import (
     PerformanceAgent,
     BottleneckType,
     ComplexityLevel,
@@ -816,7 +816,7 @@ def issues():
 
 @pytest.mark.asyncio
 async def test_constitutional_compliance(agent):
-    """Test Constituição Vértice compliance."""
+    """Test Constituicao Vertice compliance."""
     # Agent must have correct role and capabilities
     assert agent.role == "performance"
     assert "read_only" in [c.value for c in agent.capabilities]

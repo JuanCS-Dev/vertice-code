@@ -33,40 +33,40 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Import REAL v6.0 Agents
-from jdev_cli.core.llm import LLMClient
-from jdev_cli.core.mcp_client import MCPClient
-from jdev_cli.tools.base import ToolRegistry
-from jdev_cli.agents.base import AgentTask, AgentResponse
-from jdev_cli.agents.planner import PlannerAgent
-from jdev_cli.agents.reviewer import ReviewerAgent
-from jdev_cli.agents.refactorer import RefactorerAgent
-from jdev_cli.agents.explorer import ExplorerAgent
-from jdev_cli.agents.executor import (
+from vertice_cli.core.llm import LLMClient
+from vertice_cli.core.mcp_client import MCPClient
+from vertice_cli.tools.base import ToolRegistry
+from vertice_cli.agents.base import AgentTask, AgentResponse
+from vertice_cli.agents.planner import PlannerAgent
+from vertice_cli.agents.reviewer import ReviewerAgent
+from vertice_cli.agents.refactorer import RefactorerAgent
+from vertice_cli.agents.explorer import ExplorerAgent
+from vertice_cli.agents.executor import (
     NextGenExecutorAgent,
     ExecutionMode,
     SecurityLevel
 )
-from jdev_cli.agents.architect import ArchitectAgent
-from jdev_cli.agents.security import SecurityAgent
-from jdev_cli.agents.performance import PerformanceAgent
-from jdev_cli.agents.testing import TestingAgent
-from jdev_cli.agents.documentation import DocumentationAgent
-from jdev_cli.agents.data_agent_production import create_data_agent
-from jdev_cli.agents.devops_agent import create_devops_agent
+from vertice_cli.agents.architect import ArchitectAgent
+from vertice_cli.agents.security import SecurityAgent
+from vertice_cli.agents.performance import PerformanceAgent
+from vertice_cli.agents.testing import TestingAgent
+from vertice_cli.agents.documentation import DocumentationAgent
+from vertice_cli.agents.data_agent_production import create_data_agent
+from vertice_cli.agents.devops_agent import create_devops_agent
 
 # Import TUI Components (30 FPS optimized)
-from jdev_cli.tui.maestro_layout import MaestroLayout
-from jdev_cli.tui.components.agent_routing import AgentRoutingDisplay
-from jdev_cli.tui.components.streaming_display import StreamingResponseDisplay
-from jdev_cli.tui.components.autocomplete import create_completer
-from jdev_cli.tui.components.slash_completer import CombinedCompleter
-from jdev_cli.tui.performance import PerformanceMonitor, FPSCounter
-from jdev_cli.tui.landing import show_landing_screen
-from jdev_cli.ui.command_palette import CommandPalette, Command, CommandCategory
+from vertice_cli.tui.maestro_layout import MaestroLayout
+from vertice_cli.tui.components.agent_routing import AgentRoutingDisplay
+from vertice_cli.tui.components.streaming_display import StreamingResponseDisplay
+from vertice_cli.tui.components.autocomplete import create_completer
+from vertice_cli.tui.components.slash_completer import CombinedCompleter
+from vertice_cli.tui.performance import PerformanceMonitor, FPSCounter
+from vertice_cli.tui.landing import show_landing_screen
+from vertice_cli.ui.command_palette import CommandPalette, Command, CommandCategory
 
 # Import MAESTRO v10.0 Shell UI Components (Definitive Edition)
-from jdev_cli.tui.components.maestro_shell_ui import MaestroShellUI
-from jdev_cli.core.file_tracker import FileOperationTracker
+from vertice_cli.tui.components.maestro_shell_ui import MaestroShellUI
+from vertice_cli.core.file_tracker import FileOperationTracker
 
 # ═══════════════════════════════════════════════════════════════════
 # ORCHESTRATOR - The Brain
@@ -796,8 +796,8 @@ class Shell:
             tool_registry = ToolRegistry()
 
             # Register filesystem tools (use existing implementations)
-            from jdev_cli.tools.file_ops import ReadFileTool, WriteFileTool, EditFileTool
-            from jdev_cli.tools.file_mgmt import (
+            from vertice_cli.tools.file_ops import ReadFileTool, WriteFileTool, EditFileTool
+            from vertice_cli.tools.file_mgmt import (
                 CreateDirectoryTool,
                 MoveFileTool,
                 CopyFileTool
@@ -810,16 +810,16 @@ class Shell:
             tool_registry.register(CopyFileTool())
 
             # Register execution tools (use existing)
-            from jdev_cli.tools.exec import BashCommandTool
+            from vertice_cli.tools.exec import BashCommandTool
             tool_registry.register(BashCommandTool())
 
             # Register search tools (use existing)
-            from jdev_cli.tools.search import SearchFilesTool, GetDirectoryTreeTool
+            from vertice_cli.tools.search import SearchFilesTool, GetDirectoryTreeTool
             tool_registry.register(SearchFilesTool())
             tool_registry.register(GetDirectoryTreeTool())
 
             # Register git tools (use existing)
-            from jdev_cli.tools.git_ops import GitStatusTool, GitDiffTool
+            from vertice_cli.tools.git_ops import GitStatusTool, GitDiffTool
             tool_registry.register(GitStatusTool())
             tool_registry.register(GitDiffTool())
 
@@ -977,7 +977,7 @@ class Shell:
   "run/exec..."    → Executor (bash commands)
 
 [bold]Examples:[/bold]
-  review jdev_cli/agents/base.py
+  review vertice_cli/agents/base.py
   plan implement user authentication
   refactor extract method from process_payment
   explore map the codebase

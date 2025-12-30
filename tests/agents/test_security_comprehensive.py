@@ -23,8 +23,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from jdev_cli.agents.base import AgentTask
-from jdev_cli.agents.security import (
+from vertice_cli.agents.base import AgentTask
+from vertice_cli.agents.security import (
     SecurityAgent,
     SeverityLevel,
     VulnerabilityType,
@@ -940,13 +940,13 @@ eval(user_input)
     @pytest.mark.asyncio
     async def test_agent_role_assignment(self, security_agent):
         """Verify agent has correct role."""
-        from jdev_cli.agents.base import AgentRole
+        from vertice_cli.agents.base import AgentRole
         assert security_agent.role == AgentRole.SECURITY
 
     @pytest.mark.asyncio
     async def test_agent_capabilities(self, security_agent):
         """Verify agent has correct capabilities."""
-        from jdev_cli.agents.base import AgentCapability
+        from vertice_cli.agents.base import AgentCapability
         assert AgentCapability.READ_ONLY in security_agent.capabilities
         assert AgentCapability.BASH_EXEC in security_agent.capabilities
 
@@ -1024,7 +1024,7 @@ def bad_function(user_input, password):
 
     @pytest.mark.asyncio
     async def test_constitutional_compliance(self, security_agent, temp_dir):
-        """Verify agent follows Vértice Constitution principles."""
+        """Verify agent follows Vertice Constitution principles."""
         # Princípio P6: Eficiência de Token (no waste)
         file = temp_dir / "test.py"
         file.write_text('print("hello")')

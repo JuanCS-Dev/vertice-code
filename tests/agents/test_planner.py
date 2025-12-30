@@ -8,8 +8,8 @@ import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock
 
-from jdev_cli.agents.planner import PlannerAgent
-from jdev_cli.agents.base import AgentTask, AgentCapability, AgentRole
+from vertice_cli.agents.planner import PlannerAgent
+from vertice_cli.agents.base import AgentTask, AgentCapability, AgentRole
 
 
 class TestPlannerBasic:

@@ -1,0 +1,73 @@
+{
+  "agent_id": "devops",
+  "name": "DevOps",
+  "description": "CI/CD and infrastructure specialist. Automation, deployment, and monitoring.",
+  "version": "1.0.0",
+  "provider": "groq",
+  "model": "llama-3.3-70b-versatile",
+
+  "capabilities": [
+    "cicd_pipeline",
+    "dockerfile_generation",
+    "kubernetes_config",
+    "deployment_planning",
+    "infrastructure_automation",
+    "monitoring_setup"
+  ],
+
+  "skills": [
+    "git_ops",
+    "deployment",
+    "containerization"
+  ],
+
+  "endpoints": {
+    "create_pipeline": "devops.create_pipeline",
+    "generate_dockerfile": "devops.generate_dockerfile",
+    "plan_deployment": "devops.plan_deployment",
+    "run_command": "devops.run_command"
+  },
+
+  "cost_tier": "free",
+  "speed_tier": "ultra_fast",
+  "quality_tier": "high",
+
+  "platforms": [
+    "github-actions",
+    "gitlab-ci",
+    "docker",
+    "kubernetes",
+    "terraform"
+  ],
+
+  "invoke_when": [
+    "task.type == 'deployment'",
+    "task.type == 'cicd'",
+    "task.type == 'infrastructure'",
+    "task.requires_automation == true"
+  ],
+
+  "handoff_to": [
+    "reviewer"
+  ],
+
+  "safety_constraints": {
+    "blocked_commands": [
+      "rm -rf /",
+      "mkfs",
+      "dd if=",
+      ":(){:|:&};:"
+    ],
+    "requires_approval": [
+      "production_deployment",
+      "database_migration",
+      "secret_rotation"
+    ]
+  },
+
+  "metadata": {
+    "role": "specialist",
+    "autonomy_level": "L2_HUMAN_VETO",
+    "created": "2025-12-29"
+  }
+}

@@ -706,4 +706,4 @@ qwen_dev_cli/core/token_tracker.py → bridge.py
 
 ---
 
-*Documento gerado em 2025-11-25 por Claude Opus 4.5 sob Constituição Vértice v3.0*
+*Documento gerado em 2025-11-25 por Claude Opus 4.5 sob Constituicao Vertice v3.0*

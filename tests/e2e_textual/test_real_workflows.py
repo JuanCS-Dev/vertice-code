@@ -25,7 +25,7 @@ class TestFileOperations:
         )
 
         try:
-            from jdev_cli.tools.file_ops import WriteFileTool, ReadFileTool
+            from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
 
             write_tool = WriteFileTool()
             read_tool = ReadFileTool()
@@ -86,7 +86,7 @@ if __name__ == "__main__":
         )
 
         try:
-            from jdev_cli.tools.file_ops import WriteFileTool, EditFileTool, ReadFileTool
+            from vertice_cli.tools.file_ops import WriteFileTool, EditFileTool, ReadFileTool
 
             write_tool = WriteFileTool()
             edit_tool = EditFileTool()
@@ -147,7 +147,7 @@ class TestSearchOperations:
         )
 
         try:
-            from jdev_cli.tools.search import SearchFilesTool
+            from vertice_cli.tools.search import SearchFilesTool
 
             search_tool = SearchFilesTool()
 
@@ -197,7 +197,7 @@ class TestSearchOperations:
         )
 
         try:
-            from jdev_cli.tools.search import SearchFilesTool
+            from vertice_cli.tools.search import SearchFilesTool
 
             search_tool = SearchFilesTool()
 
@@ -243,7 +243,7 @@ class TestProjectCreation:
         )
 
         try:
-            from jdev_cli.tools.file_ops import WriteFileTool
+            from vertice_cli.tools.file_ops import WriteFileTool
 
             write_tool = WriteFileTool()
 
@@ -367,7 +367,7 @@ class TestGitOperations:
         )
 
         try:
-            from jdev_cli.tools.git_ops import GitStatusTool
+            from vertice_cli.tools.git_ops import GitStatusTool
 
             status_tool = GitStatusTool()
 
@@ -415,7 +415,7 @@ class TestPlanMode:
         )
 
         try:
-            from jdev_cli.tools.plan_mode import (
+            from vertice_cli.tools.plan_mode import (
                 EnterPlanModeTool,
                 ExitPlanModeTool,
                 get_plan_state,
@@ -428,7 +428,7 @@ class TestPlanMode:
             exit_tool = ExitPlanModeTool()
 
             # Enter plan mode
-            plan_file = temp_project / ".jdev" / "plans" / "e2e_plan.md"
+            plan_file = temp_project / ".vertice" / "plans" / "e2e_plan.md"
             enter_result = await enter_tool._execute_validated(
                 task_description="E2E Test Planning",
                 plan_file=str(plan_file)
@@ -490,8 +490,8 @@ class TestCombinedWorkflow:
         )
 
         try:
-            from jdev_cli.tools.search import SearchFilesTool
-            from jdev_cli.tools.file_ops import ReadFileTool, EditFileTool
+            from vertice_cli.tools.search import SearchFilesTool
+            from vertice_cli.tools.file_ops import ReadFileTool, EditFileTool
 
             search_tool = SearchFilesTool()
             read_tool = ReadFileTool()

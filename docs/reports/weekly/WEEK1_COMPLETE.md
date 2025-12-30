@@ -225,7 +225,7 @@ We're ready for Week 2 (Dogfooding + Tools). The Integration-First strategy work
 
 ---
 
-**Prepared by:** Gemini-Vértice MAXIMUS  
-**Doctrine:** Constituição Vértice v3.0  
+**Prepared by:** Gemini-Vertice MAXIMUS  
+**Doctrine:** Constituicao Vertice v3.0  
 **Method:** Integration-First Development  
 **Date:** 2025-11-20 18:30 UTC

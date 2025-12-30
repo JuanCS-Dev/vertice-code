@@ -1,6 +1,6 @@
 """Tests for configuration schema."""
 
-from jdev_cli.config.schema import (
+from vertice_cli.config.schema import (
     QwenConfig,
     ProjectConfig,
     RulesConfig,

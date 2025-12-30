@@ -106,27 +106,27 @@ LLM First Token        800ms    2000ms   5000ms
 
 | Module | Files | Avg CC | Max CC | Risk |
 |--------|-------|--------|--------|------|
-| jdev_tui/core | 12 | 8.2 | 16.43 | 🔴 HIGH |
-| jdev_cli/agents | 24 | 5.04 | 12.1 | 🟡 MEDIUM |
-| jdev_cli/core | 15 | 6.8 | 11.2 | 🟡 MEDIUM |
-| jdev_cli/tools | 18 | 4.2 | 8.5 | 🟢 LOW |
-| jdev_cli/tui | 22 | 7.1 | 15.0 | 🟡 MEDIUM |
+| vertice_tui/core | 12 | 8.2 | 16.43 | 🔴 HIGH |
+| vertice_cli/agents | 24 | 5.04 | 12.1 | 🟡 MEDIUM |
+| vertice_cli/core | 15 | 6.8 | 11.2 | 🟡 MEDIUM |
+| vertice_cli/tools | 18 | 4.2 | 8.5 | 🟢 LOW |
+| vertice_cli/tui | 22 | 7.1 | 15.0 | 🟡 MEDIUM |
 
 ### 2.2 Coupling Metrics
 
 **Afferent Coupling (Ca) - Who depends on me:**
 ```
-jdev_cli.agents.base      Ca = 9  (HIGH - core interface)
-jdev_cli.tools.base       Ca = 7  (HIGH - core interface)
-jdev_cli.core.llm         Ca = 5  (MEDIUM)
-jdev_tui.core.bridge      Ca = 4  (MEDIUM)
+vertice_cli.agents.base      Ca = 9  (HIGH - core interface)
+vertice_cli.tools.base       Ca = 7  (HIGH - core interface)
+vertice_cli.core.llm         Ca = 5  (MEDIUM)
+vertice_tui.core.bridge      Ca = 4  (MEDIUM)
 ```
 
 **Efferent Coupling (Ce) - Who I depend on:**
 ```
-jdev_tui/core/bridge.py   Ce = 12 (HIGH - god class)
-jdev_cli/shell_main.py    Ce = 15 (VERY HIGH)
-jdev_cli/agents/planner   Ce = 8  (MEDIUM)
+vertice_tui/core/bridge.py   Ce = 12 (HIGH - god class)
+vertice_cli/shell_main.py    Ce = 15 (VERY HIGH)
+vertice_cli/agents/planner   Ce = 8  (MEDIUM)
 ```
 
 **Instability Index (I = Ce / (Ca + Ce)):**

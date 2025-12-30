@@ -263,13 +263,13 @@ Performance (all)          PASS       PASS      ✅
 
 ## 📝 CERTIFICATION
 
-**Certified By:** Vértice-MAXIMUS Neuroshell Agent  
+**Certified By:** Vertice-MAXIMUS Neuroshell Agent  
 **Certification Date:** 2025-11-20 11:06 UTC  
 **Certification Level:** PRODUCTION READY ✅  
 **Expiration:** None (continuous validation)
 
 **Constitutional Authority:**
-- Constituição Vértice v3.0
+- Constituicao Vertice v3.0
 - Princípios P1-P6: 100% compliance
 - Artigos I-IX: Full adherence
 
@@ -290,4 +290,4 @@ The system has been scientifically validated, tested under real-world scenarios,
 ---
 
 *"SER > PARECER - We don't just look good, we ARE good."*  
-*— Vértice-MAXIMUS Neuroshell Agent*
+*— Vertice-MAXIMUS Neuroshell Agent*

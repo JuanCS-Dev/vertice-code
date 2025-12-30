@@ -12,8 +12,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from jdev_cli.core.providers.maximus_provider import MaximusProvider
-from jdev_cli.core.providers.maximus_config import MaximusConfig, TransportMode
+from vertice_cli.core.providers.maximus_provider import MaximusProvider
+from vertice_cli.core.providers.maximus_config import MaximusConfig, TransportMode
 
 
 class TestMaximusProviderInit:
@@ -328,7 +328,7 @@ class TestMaximusProviderInitialization:
         provider: MaximusProvider = MaximusProvider()
 
         with patch(
-            'jdev_cli.core.providers.maximus_provider.create_http_client'
+            'vertice_cli.core.providers.maximus_provider.create_http_client'
         ) as mock_create:
             mock_client: AsyncMock = AsyncMock()
             mock_response: MagicMock = MagicMock()
@@ -349,7 +349,7 @@ class TestMaximusProviderInitialization:
         provider._initialized = True
 
         with patch(
-            'jdev_cli.core.providers.maximus_provider.create_http_client'
+            'vertice_cli.core.providers.maximus_provider.create_http_client'
         ) as mock_create:
             await provider._ensure_initialized()
 

@@ -6,7 +6,7 @@ This directory contains comprehensive project documentation organized by topic.
 
 ### Architecture & Design
 - `ARCHITECTURE.md` - System architecture and design decisions
-- `CONSTITUIÇÃO_VÉRTICE_v3.0.md` - Constitutional principles and guidelines
+- `CONSTITUIÇÃO_VERTICE_v3.0.md` - Constitutional principles and guidelines
 
 ### Development & Testing
 - `DAY*_*.md` - Daily validation and progress reports

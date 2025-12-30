@@ -12,7 +12,7 @@
 
 ### Quick Stats
 - **Codebase Size**: ~122K lines of Python
-- **Modules**: 4 core (jdev_core, jdev_cli, jdev_tui, prometheus)
+- **Modules**: 4 core (vertice_core, vertice_cli, vertice_tui, prometheus)
 - **Packages**: 56 sub-packages
 - **Documentation**: 264 markdown files
 - **Tests**: Test suite exists (needs collection fixes)
@@ -25,13 +25,13 @@
 
 #### ✅ Strengths
 1. **Clean Dependency Direction**
-   - `jdev_core` has ZERO upstream dependencies
+   - `vertice_core` has ZERO upstream dependencies
    - Perfect adherence to dependency inversion principle
    - No circular imports detected
 
 2. **Modular Design**
-   - Clear separation: `jdev_core` (infra), `jdev_cli` (logic), `jdev_tui` (UI)
-   - Well-defined interfaces in `jdev_core/interfaces/`
+   - Clear separation: `vertice_core` (infra), `vertice_cli` (logic), `vertice_tui` (UI)
+   - Well-defined interfaces in `vertice_core/interfaces/`
    - Proper use of facade pattern (`Bridge` class)
 
 3. **SOLID Principles**
@@ -46,7 +46,7 @@
 
 2. **Minor Code Smells**
    - Some utility function duplication across modules
-   - Opportunity to consolidate common patterns in `jdev_core`
+   - Opportunity to consolidate common patterns in `vertice_core`
 
 #### Recommendations
 | Priority | Action | Effort |
@@ -127,12 +127,12 @@
 - **Medium**: 1 issue (exec() in PythonSandbox - expected)
 
 ##### Issues Found
-1. **[B324] MD5 Hash Usage** - `jdev_cli/core/prompt_shield.py:311`
+1. **[B324] MD5 Hash Usage** - `vertice_cli/core/prompt_shield.py:311`
    - **Context**: Used for caching, not security
    - **Fix**: Add `usedforsecurity=False` flag
    - **Priority**: 🟡 MEDIUM
 
-2. **[B102] exec() Usage** - `jdev_cli/core/python_sandbox.py:524`
+2. **[B102] exec() Usage** - `vertice_cli/core/python_sandbox.py:524`
    - **Context**: Expected in sandbox environment
    - **Status**: ✅ ACCEPTABLE (sandboxed execution)
 
@@ -187,7 +187,7 @@
 1. **World Model Simulation** (SimuRA) - Unique
 2. **6-Type Memory System** (MIRIX) - Unique
 3. **Co-Evolution Loop** (Agent0) - Unique
-4. **Constitutional Governance** (Vértice v3.0) - Unique
+4. **Constitutional Governance** (Vertice v3.0) - Unique
 5. **Native Gemini Integration** - Differentiator
 
 ---

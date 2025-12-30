@@ -1,0 +1,60 @@
+{
+  "agent_id": "researcher",
+  "name": "Researcher",
+  "description": "Documentation and research specialist. Fast information retrieval and synthesis.",
+  "version": "1.0.0",
+  "provider": "vertex-ai",
+  "model": "gemini-2.0-flash",
+
+  "capabilities": [
+    "documentation_lookup",
+    "web_search",
+    "knowledge_synthesis",
+    "codebase_search",
+    "summarization"
+  ],
+
+  "skills": [
+    "research",
+    "documentation",
+    "summarization"
+  ],
+
+  "endpoints": {
+    "research": "researcher.research",
+    "lookup_docs": "researcher.lookup_docs",
+    "search_codebase": "researcher.search_codebase",
+    "summarize": "researcher.summarize"
+  },
+
+  "cost_tier": "enterprise",
+  "speed_tier": "fast",
+  "quality_tier": "high",
+
+  "documentation_sources": {
+    "python": "https://docs.python.org/3/",
+    "javascript": "https://developer.mozilla.org/",
+    "typescript": "https://www.typescriptlang.org/docs/",
+    "react": "https://react.dev/",
+    "rust": "https://doc.rust-lang.org/",
+    "go": "https://go.dev/doc/"
+  },
+
+  "invoke_when": [
+    "task.type == 'research'",
+    "task.type == 'documentation'",
+    "task.requires_information == true",
+    "query.needs_web_search == true"
+  ],
+
+  "handoff_to": [
+    "coder",
+    "architect"
+  ],
+
+  "metadata": {
+    "role": "specialist",
+    "autonomy_level": "L0_AUTONOMOUS",
+    "created": "2025-12-29"
+  }
+}

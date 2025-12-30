@@ -27,11 +27,11 @@ from unittest.mock import patch
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from jdev_cli.core.input_validator import InputValidator
-from jdev_cli.core.atomic_ops import AtomicFileOps
-from jdev_cli.core.error_presenter import ErrorPresenter
-from jdev_cli.core.session_manager import SessionManager
-from jdev_cli.core.audit_logger import AuditLogger, AuditEventType
+from vertice_cli.core.input_validator import InputValidator
+from vertice_cli.core.atomic_ops import AtomicFileOps
+from vertice_cli.core.error_presenter import ErrorPresenter
+from vertice_cli.core.session_manager import SessionManager
+from vertice_cli.core.audit_logger import AuditLogger, AuditEventType
 
 
 # ==============================================================================

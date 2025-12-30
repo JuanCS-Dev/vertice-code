@@ -25,7 +25,7 @@ The qwen-dev-cli sandbox system provides **isolated Docker-based execution** for
 - **LEI = 0.0** - No learning from sandbox execution
 - **FPC = 100%** - Explicit permission required
 - **HRI = 1.0** - Human controls all settings
-- Safety First (Artigo IV, Constituição Vértice v3.0)
+- Safety First (Artigo IV, Constituicao Vertice v3.0)
 
 ---
 
@@ -443,7 +443,7 @@ if risky_operation:
 ## License
 
 Part of qwen-dev-cli project.
-Constituição Vértice v3.0 compliant.
+Constituicao Vertice v3.0 compliant.
 
 ---
 

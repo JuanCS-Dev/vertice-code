@@ -25,7 +25,7 @@ from dataclasses import dataclass, field
 # Add project to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from jdev_cli.tools.base import ToolRegistry, ToolResult
+from vertice_cli.tools.base import ToolRegistry, ToolResult
 
 
 # ==============================================================================

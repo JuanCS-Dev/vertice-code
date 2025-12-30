@@ -24,24 +24,24 @@ from rich.panel import Panel
 from rich.text import Text
 from rich.table import Table
 
-from jdev_cli.tui.feedback import (
+from vertice_cli.tui.feedback import (
     MicroInteraction,
     LoadingState,
     StateTransition,
     HapticFeedback,
 )
-from jdev_cli.tui.animations import (
+from vertice_cli.tui.animations import (
     Animator,
     AnimationConfig,
     LoadingAnimation,
 )
-from jdev_cli.tui.accessibility import (
+from vertice_cli.tui.accessibility import (
     generate_accessibility_report,
     KeyboardNavigation,
     ScreenReaderText,
 )
-from jdev_cli.tui.theme import COLORS
-from jdev_cli.tui.wisdom import get_random_verse
+from vertice_cli.tui.theme import COLORS
+from vertice_cli.tui.wisdom import get_random_verse
 
 
 def demo_micro_interactions(console: Console):

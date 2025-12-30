@@ -2,15 +2,15 @@
 
 Tests that PlannerAgent gracefully handles missing context files like CLAUDE.md.
 
-Compliance: Vértice Constitution v3.0
+Compliance: Vertice Constitution v3.0
 - P3: Fail gracefully with clear messages
 - P1: Zero placeholders, complete tests
 """
 
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
-from jdev_cli.agents.planner import PlannerAgent
-from jdev_cli.agents.base import AgentTask
+from vertice_cli.agents.planner import PlannerAgent
+from vertice_cli.agents.base import AgentTask
 
 
 class TestCLAUDEmdOptional:
@@ -183,7 +183,7 @@ class TestPlannerWithoutContext:
     @pytest.fixture
     def mock_mcp_with_tools(self):
         """Create mock MCP with registered tools."""
-        from jdev_cli.tools.base import ToolRegistry
+        from vertice_cli.tools.base import ToolRegistry
 
         registry = ToolRegistry()
 
@@ -248,8 +248,8 @@ class TestContextFileDocumentation:
     @pytest.mark.asyncio
     async def test_error_message_mentions_creating_claude_md(self, caplog):
         """Error messages should suggest creating CLAUDE.md."""
-        from jdev_cli.tools.base import ToolRegistry
-        from jdev_cli.core.mcp_client import MCPClient
+        from vertice_cli.tools.base import ToolRegistry
+        from vertice_cli.core.mcp_client import MCPClient
 
         llm = Mock()
         llm.generate = AsyncMock(return_value="output")

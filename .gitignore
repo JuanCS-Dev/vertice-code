@@ -119,3 +119,22 @@ streaming-fix-package.tar.gz
 
 # Scripts are now in scripts/ directory and should be tracked
 logs/
+
+# Temporary HuggingFace scripts
+.fallback_patch_design.py
+.list_spaces.py
+.make_private.py
+.make_public.py
+.quota_patch_design.py
+.temp_download_space.py
+.upload_*.py
+
+# Temporary test files
+test_agency.py
+test_vertice_providers.py
+
+# Temporary markdown files (root level)
+HF_COMMUNITY_POSTS.md
+PROMETHEUS_FLIGHT_TEST.md
+PROTECT_API.md
+SETUP_API_KEY.md

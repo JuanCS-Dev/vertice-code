@@ -7,7 +7,7 @@ import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock
 
-from jdev_cli.core.recovery import (
+from vertice_cli.core.recovery import (
     ErrorRecoveryEngine,
     RecoveryContext,
     ErrorCategory

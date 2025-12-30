@@ -15,7 +15,7 @@ import json
 from pathlib import Path
 from unittest.mock import patch, MagicMock, AsyncMock
 
-from jdev_tui.core.hooks_manager import HooksManager
+from vertice_tui.core.hooks_manager import HooksManager
 
 
 # =============================================================================
@@ -548,7 +548,7 @@ class TestExecuteHook:
         """Test graceful handling when hooks module unavailable."""
         hooks_manager.set_hook("post_write", ["echo test"])
 
-        with patch.dict("sys.modules", {"jdev_cli.hooks": None}):
+        with patch.dict("sys.modules", {"vertice_cli.hooks": None}):
             # Force reimport error
             hooks_manager._hooks_executor = None
             result = await hooks_manager.execute_hook("post_write", "/path/to/file.py")
@@ -577,7 +577,7 @@ class TestExecuteHook:
 
         # Mock the imports
         with patch.object(hooks_manager, "_hooks_executor", mock_executor):
-            with patch("jdev_tui.core.hooks_manager.HooksManager._ensure_initialized"):
+            with patch("vertice_tui.core.hooks_manager.HooksManager._ensure_initialized"):
                 hooks_manager._initialized = True
                 hooks_manager._hooks_config = {
                     "post_write": {"enabled": True, "commands": ["ruff check $FILE"]}
@@ -588,7 +588,7 @@ class TestExecuteHook:
                 mock_hook_context = MagicMock()
 
                 with patch.dict("sys.modules", {
-                    "jdev_cli.hooks": MagicMock(
+                    "vertice_cli.hooks": MagicMock(
                         HookEvent=mock_hook_event,
                         HookContext=mock_hook_context,
                         HookExecutor=MagicMock

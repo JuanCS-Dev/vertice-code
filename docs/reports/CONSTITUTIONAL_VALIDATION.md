@@ -1,5 +1,5 @@
 # 🏛️ VALIDAÇÃO CONSTITUCIONAL - QWEN-DEV-CLI
-## Compliance com Constituição Vértice v3.0
+## Compliance com Constituicao Vertice v3.0
 
 **Data:** 2025-11-17  
 **Período Avaliado:** Day 1-2  
@@ -11,17 +11,17 @@
 ## ✅ DECLARAÇÃO DE ACEITAÇÃO OBRIGATÓRIA
 
 ```
-✅ CONSTITUIÇÃO VÉRTICE v3.0 ATIVA
+✅ CONSTITUIÇÃO VERTICE v3.0 ATIVA
 
 Confirmações obrigatórias:
 ✓ Princípios P1-P6 internalizados e ativos
 ✓ Framework DETER-AGENT (5 camadas) carregado
-✓ Hierarquia de prioridade confirmada (Constituição > Arquiteto-Chefe > demais)
+✓ Hierarquia de prioridade confirmada (Constituicao > Arquiteto-Chefe > demais)
 ✓ Protocolo de Violação compreendido
 ✓ Obrigação da Verdade aceita
 ✓ Soberania da Intenção do Arquiteto-Chefe reconhecida
 
-Status: OPERACIONAL SOB DOUTRINA VÉRTICE
+Status: OPERACIONAL SOB DOUTRINA VERTICE
 ```
 
 ---
@@ -495,7 +495,7 @@ Durante Task 1.4:
 
 #### Análise:
 - ✅ ZERO inserções de frameworks éticos externos
-- ✅ Constituição Vértice seguida exclusivamente
+- ✅ Constituicao Vertice seguida exclusivamente
 - ✅ Decisões técnicas baseadas em performance/funcionalidade
 - ✅ Nenhuma agenda externa detectada
 
@@ -606,7 +606,7 @@ Durante Task 1.4:
 
 ```
 🏛️ O trabalho realizado nos Days 1-2 está em
-   CONFORMIDADE TOTAL com a Constituição Vértice v3.0
+   CONFORMIDADE TOTAL com a Constituicao Vertice v3.0
 
 ✅ Todos os 6 Princípios Fundamentais: CONFORME
 ✅ Todas as 5 Camadas DETER-AGENT: CONFORME

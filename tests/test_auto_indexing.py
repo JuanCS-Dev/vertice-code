@@ -11,8 +11,8 @@ import asyncio
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
-from jdev_cli.shell import InteractiveShell
-from jdev_cli.intelligence.indexer import SemanticIndexer
+from vertice_cli.shell import InteractiveShell
+from vertice_cli.intelligence.indexer import SemanticIndexer
 
 
 class TestAutoIndexing:
@@ -27,7 +27,7 @@ class TestAutoIndexing:
             test_file.write_text("def hello():\n    pass\n")
 
             # Create shell in temp directory
-            with patch('jdev_cli.shell.os.getcwd', return_value=tmpdir):
+            with patch('vertice_cli.shell.os.getcwd', return_value=tmpdir):
                 shell = object.__new__(InteractiveShell)
                 shell.console = Mock()
                 shell.indexer = SemanticIndexer(root_path=tmpdir)
@@ -49,7 +49,7 @@ class TestAutoIndexing:
                 test_file = Path(tmpdir) / f"test{i}.py"
                 test_file.write_text(f"def func{i}():\n    pass\n")
 
-            with patch('jdev_cli.shell.os.getcwd', return_value=tmpdir):
+            with patch('vertice_cli.shell.os.getcwd', return_value=tmpdir):
                 shell = object.__new__(InteractiveShell)
                 shell.console = Mock()
                 shell.indexer = SemanticIndexer(root_path=tmpdir)
@@ -71,7 +71,7 @@ class TestAutoIndexing:
     async def test_auto_index_skips_if_already_initialized(self):
         """Test that auto-index skips if indexer already initialized."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch('jdev_cli.shell.os.getcwd', return_value=tmpdir):
+            with patch('vertice_cli.shell.os.getcwd', return_value=tmpdir):
                 shell = object.__new__(InteractiveShell)
                 shell.console = Mock()
                 shell.indexer = SemanticIndexer(root_path=tmpdir)
@@ -90,7 +90,7 @@ class TestAutoIndexing:
     async def test_auto_index_handles_errors_gracefully(self):
         """Test that indexing errors don't crash the shell."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch('jdev_cli.shell.os.getcwd', return_value=tmpdir):
+            with patch('vertice_cli.shell.os.getcwd', return_value=tmpdir):
                 shell = object.__new__(InteractiveShell)
                 shell.console = Mock()
                 shell.indexer = SemanticIndexer(root_path=tmpdir)
@@ -113,7 +113,7 @@ class TestAutoIndexing:
     async def test_auto_index_uses_cache(self):
         """Test that auto-index uses cache (force=False)."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch('jdev_cli.shell.os.getcwd', return_value=tmpdir):
+            with patch('vertice_cli.shell.os.getcwd', return_value=tmpdir):
                 shell = object.__new__(InteractiveShell)
                 shell.console = Mock()
                 shell.indexer = SemanticIndexer(root_path=tmpdir)

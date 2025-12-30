@@ -6,7 +6,7 @@ import tempfile
 import shutil
 from pathlib import Path
 
-from jdev_cli.hooks import (
+from vertice_cli.hooks import (
     HookExecutor,
     HookEvent,
     HookContext

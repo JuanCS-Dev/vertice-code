@@ -20,7 +20,7 @@ class TestFileOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_write_file_basic(self, temp_project):
         """Test basic file writing."""
-        from jdev_cli.tools.file_ops import WriteFileTool
+        from vertice_cli.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
         result = await tool._execute_validated(
@@ -35,7 +35,7 @@ class TestFileOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_write_file_nested_dirs(self, temp_project):
         """Test writing to nested directories."""
-        from jdev_cli.tools.file_ops import WriteFileTool
+        from vertice_cli.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
         result = await tool._execute_validated(
@@ -50,7 +50,7 @@ class TestFileOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_write_file_large_content(self, temp_project):
         """Test writing large files (10MB)."""
-        from jdev_cli.tools.file_ops import WriteFileTool
+        from vertice_cli.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
         large_content = "x" * (10 * 1024 * 1024)  # 10MB
@@ -66,7 +66,7 @@ class TestFileOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_write_file_unicode(self, temp_project):
         """Test writing unicode content."""
-        from jdev_cli.tools.file_ops import WriteFileTool
+        from vertice_cli.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
         unicode_content = "Hello 世界 🌍 Привет مرحبا"
@@ -82,7 +82,7 @@ class TestFileOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_write_file_special_chars(self, temp_project):
         """Test writing files with special characters in name."""
-        from jdev_cli.tools.file_ops import WriteFileTool
+        from vertice_cli.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
         # Note: some chars not allowed in filenames
@@ -96,7 +96,7 @@ class TestFileOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_read_file_basic(self, temp_project):
         """Test basic file reading."""
-        from jdev_cli.tools.file_ops import ReadFileTool
+        from vertice_cli.tools.file_ops import ReadFileTool
 
         test_file = temp_project / "read.py"
         test_file.write_text("def foo():\n    pass")
@@ -111,7 +111,7 @@ class TestFileOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_read_file_line_range(self, temp_project):
         """Test reading specific line ranges."""
-        from jdev_cli.tools.file_ops import ReadFileTool
+        from vertice_cli.tools.file_ops import ReadFileTool
 
         test_file = temp_project / "lines.txt"
         test_file.write_text("line1\nline2\nline3\nline4\nline5")
@@ -130,7 +130,7 @@ class TestFileOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_read_file_empty(self, temp_project):
         """Test reading empty file."""
-        from jdev_cli.tools.file_ops import ReadFileTool
+        from vertice_cli.tools.file_ops import ReadFileTool
 
         test_file = temp_project / "empty.txt"
         test_file.write_text("")
@@ -144,7 +144,7 @@ class TestFileOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_read_file_nonexistent(self, temp_project):
         """Test reading non-existent file."""
-        from jdev_cli.tools.file_ops import ReadFileTool
+        from vertice_cli.tools.file_ops import ReadFileTool
 
         tool = ReadFileTool()
         result = await tool._execute_validated(
@@ -157,7 +157,7 @@ class TestFileOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_edit_file_single_replacement(self, temp_project):
         """Test single edit replacement."""
-        from jdev_cli.tools.file_ops import EditFileTool
+        from vertice_cli.tools.file_ops import EditFileTool
 
         test_file = temp_project / "edit.py"
         test_file.write_text("def old_name():\n    pass")
@@ -178,7 +178,7 @@ class TestFileOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_edit_file_multiple_edits(self, temp_project):
         """Test multiple edits in sequence."""
-        from jdev_cli.tools.file_ops import EditFileTool
+        from vertice_cli.tools.file_ops import EditFileTool
 
         test_file = temp_project / "multi.py"
         test_file.write_text("a = 1\nb = 2\nc = 3")
@@ -202,7 +202,7 @@ class TestFileOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_edit_file_replace_all(self, temp_project):
         """Test replace_all flag."""
-        from jdev_cli.tools.file_ops import EditFileTool
+        from vertice_cli.tools.file_ops import EditFileTool
 
         test_file = temp_project / "replaceall.py"
         test_file.write_text("foo\nfoo\nfoo")
@@ -223,7 +223,7 @@ class TestFileOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_edit_file_search_not_found(self, temp_project):
         """Test edit when search string not found."""
-        from jdev_cli.tools.file_ops import EditFileTool
+        from vertice_cli.tools.file_ops import EditFileTool
 
         test_file = temp_project / "notfound.py"
         test_file.write_text("hello world")
@@ -242,7 +242,7 @@ class TestFileOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_edit_file_creates_backup(self, temp_project):
         """Test backup creation."""
-        from jdev_cli.tools.file_ops import EditFileTool
+        from vertice_cli.tools.file_ops import EditFileTool
 
         test_file = temp_project / "backup.py"
         original = "original content"
@@ -266,7 +266,7 @@ class TestFileOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_list_directory_basic(self, temp_project):
         """Test basic directory listing."""
-        from jdev_cli.tools.file_ops import ListDirectoryTool
+        from vertice_cli.tools.file_ops import ListDirectoryTool
 
         # Create some files
         (temp_project / "file1.py").write_text("")
@@ -283,7 +283,7 @@ class TestFileOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_list_directory_recursive(self, temp_project):
         """Test recursive directory listing."""
-        from jdev_cli.tools.file_ops import ListDirectoryTool
+        from vertice_cli.tools.file_ops import ListDirectoryTool
 
         (temp_project / "a" / "b").mkdir(parents=True)
         (temp_project / "a" / "file1.py").write_text("")
@@ -301,7 +301,7 @@ class TestFileOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_list_directory_pattern(self, temp_project):
         """Test directory listing with pattern."""
-        from jdev_cli.tools.file_ops import ListDirectoryTool
+        from vertice_cli.tools.file_ops import ListDirectoryTool
 
         (temp_project / "test.py").write_text("")
         (temp_project / "test.txt").write_text("")
@@ -319,7 +319,7 @@ class TestFileOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_delete_file_to_trash(self, temp_project):
         """Test file deletion to trash."""
-        from jdev_cli.tools.file_ops import DeleteFileTool
+        from vertice_cli.tools.file_ops import DeleteFileTool
 
         test_file = temp_project / "delete_me.txt"
         test_file.write_text("delete this")
@@ -339,7 +339,7 @@ class TestFileOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_delete_file_permanent(self, temp_project):
         """Test permanent file deletion."""
-        from jdev_cli.tools.file_ops import DeleteFileTool
+        from vertice_cli.tools.file_ops import DeleteFileTool
 
         test_file = temp_project / "permanent_delete.txt"
         test_file.write_text("gone forever")
@@ -360,7 +360,7 @@ class TestSearchOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_search_basic_pattern(self, sample_python_project):
         """Test basic pattern search."""
-        from jdev_cli.tools.search import SearchFilesTool
+        from vertice_cli.tools.search import SearchFilesTool
 
         tool = SearchFilesTool()
         result = await tool._execute_validated(
@@ -375,7 +375,7 @@ class TestSearchOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_search_case_insensitive(self, temp_project):
         """Test case-insensitive search."""
-        from jdev_cli.tools.search import SearchFilesTool
+        from vertice_cli.tools.search import SearchFilesTool
 
         (temp_project / "test.txt").write_text("Hello\nHELLO\nhello")
 
@@ -393,7 +393,7 @@ class TestSearchOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_search_case_sensitive(self, temp_project):
         """Test case-sensitive search."""
-        from jdev_cli.tools.search import SearchFilesTool
+        from vertice_cli.tools.search import SearchFilesTool
 
         (temp_project / "test.txt").write_text("Hello\nHELLO\nhello")
 
@@ -411,7 +411,7 @@ class TestSearchOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_search_with_file_pattern(self, temp_project):
         """Test search with file pattern filter."""
-        from jdev_cli.tools.search import SearchFilesTool
+        from vertice_cli.tools.search import SearchFilesTool
 
         (temp_project / "test.py").write_text("def foo(): pass")
         (temp_project / "test.txt").write_text("def foo(): pass")
@@ -431,7 +431,7 @@ class TestSearchOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_search_regex_pattern(self, temp_project):
         """Test regex pattern search."""
-        from jdev_cli.tools.search import SearchFilesTool
+        from vertice_cli.tools.search import SearchFilesTool
 
         (temp_project / "code.py").write_text("def func1():\n    pass\ndef func2():\n    pass")
 
@@ -448,7 +448,7 @@ class TestSearchOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_search_max_results(self, temp_project):
         """Test max results limit."""
-        from jdev_cli.tools.search import SearchFilesTool
+        from vertice_cli.tools.search import SearchFilesTool
 
         content = "\n".join([f"line {i}" for i in range(100)])
         (temp_project / "many.txt").write_text(content)
@@ -467,7 +467,7 @@ class TestSearchOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_search_no_matches(self, temp_project):
         """Test search with no matches."""
-        from jdev_cli.tools.search import SearchFilesTool
+        from vertice_cli.tools.search import SearchFilesTool
 
         (temp_project / "test.txt").write_text("hello world")
 
@@ -484,7 +484,7 @@ class TestSearchOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_directory_tree_basic(self, temp_project):
         """Test basic directory tree."""
-        from jdev_cli.tools.search import GetDirectoryTreeTool
+        from vertice_cli.tools.search import GetDirectoryTreeTool
 
         (temp_project / "a").mkdir()
         (temp_project / "b").mkdir()
@@ -500,7 +500,7 @@ class TestSearchOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_directory_tree_max_depth(self, temp_project):
         """Test directory tree with depth limit."""
-        from jdev_cli.tools.search import GetDirectoryTreeTool
+        from vertice_cli.tools.search import GetDirectoryTreeTool
 
         (temp_project / "a" / "b" / "c" / "d").mkdir(parents=True)
 
@@ -520,7 +520,7 @@ class TestGitOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_git_status_clean_repo(self, temp_project):
         """Test git status on clean repo."""
-        from jdev_cli.tools.git_ops import GitStatusTool
+        from vertice_cli.tools.git_ops import GitStatusTool
 
         # Initialize git repo
         subprocess.run(["git", "init"], cwd=temp_project, capture_output=True)
@@ -536,7 +536,7 @@ class TestGitOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_git_status_with_changes(self, temp_project):
         """Test git status with modifications."""
-        from jdev_cli.tools.git_ops import GitStatusTool
+        from vertice_cli.tools.git_ops import GitStatusTool
 
         # Setup git
         subprocess.run(["git", "init"], cwd=temp_project, capture_output=True)
@@ -561,7 +561,7 @@ class TestGitOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_git_status_untracked_files(self, temp_project):
         """Test git status with untracked files."""
-        from jdev_cli.tools.git_ops import GitStatusTool
+        from vertice_cli.tools.git_ops import GitStatusTool
 
         subprocess.run(["git", "init"], cwd=temp_project, capture_output=True)
         subprocess.run(["git", "config", "user.email", "test@test.com"], cwd=temp_project)
@@ -578,7 +578,7 @@ class TestGitOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_git_diff_no_changes(self, temp_project):
         """Test git diff with no changes."""
-        from jdev_cli.tools.git_ops import GitDiffTool
+        from vertice_cli.tools.git_ops import GitDiffTool
 
         subprocess.run(["git", "init"], cwd=temp_project, capture_output=True)
         subprocess.run(["git", "config", "user.email", "test@test.com"], cwd=temp_project)
@@ -593,7 +593,7 @@ class TestGitOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_git_diff_with_changes(self, temp_project):
         """Test git diff with modifications."""
-        from jdev_cli.tools.git_ops import GitDiffTool
+        from vertice_cli.tools.git_ops import GitDiffTool
 
         subprocess.run(["git", "init"], cwd=temp_project, capture_output=True)
         subprocess.run(["git", "config", "user.email", "test@test.com"], cwd=temp_project)
@@ -616,7 +616,7 @@ class TestGitOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_git_diff_staged(self, temp_project):
         """Test git diff for staged changes."""
-        from jdev_cli.tools.git_ops import GitDiffTool
+        from vertice_cli.tools.git_ops import GitDiffTool
 
         subprocess.run(["git", "init"], cwd=temp_project, capture_output=True)
         subprocess.run(["git", "config", "user.email", "test@test.com"], cwd=temp_project)
@@ -642,7 +642,7 @@ class TestGitOperationsComprehensive:
     @pytest.mark.asyncio
     async def test_git_diff_specific_file(self, temp_project):
         """Test git diff for specific file."""
-        from jdev_cli.tools.git_ops import GitDiffTool
+        from vertice_cli.tools.git_ops import GitDiffTool
 
         subprocess.run(["git", "init"], cwd=temp_project, capture_output=True)
         subprocess.run(["git", "config", "user.email", "test@test.com"], cwd=temp_project)

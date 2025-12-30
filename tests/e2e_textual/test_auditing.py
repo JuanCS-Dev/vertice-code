@@ -25,7 +25,7 @@ class TestSecurityAudit:
         )
 
         try:
-            from jdev_cli.tools.search import SearchFilesTool
+            from vertice_cli.tools.search import SearchFilesTool
 
             search_tool = SearchFilesTool()
 
@@ -90,8 +90,8 @@ class TestSecurityAudit:
         )
 
         try:
-            from jdev_cli.tools.file_ops import WriteFileTool
-            from jdev_cli.tools.search import SearchFilesTool
+            from vertice_cli.tools.file_ops import WriteFileTool
+            from vertice_cli.tools.search import SearchFilesTool
 
             write_tool = WriteFileTool()
             search_tool = SearchFilesTool()
@@ -212,8 +212,8 @@ class TestCodeQualityAudit:
         )
 
         try:
-            from jdev_cli.tools.file_ops import WriteFileTool
-            from jdev_cli.tools.search import SearchFilesTool
+            from vertice_cli.tools.file_ops import WriteFileTool
+            from vertice_cli.tools.search import SearchFilesTool
 
             write_tool = WriteFileTool()
             search_tool = SearchFilesTool()
@@ -381,7 +381,7 @@ OLD_CONSTANT = "not used"
         )
 
         try:
-            from jdev_cli.tools.search import SearchFilesTool
+            from vertice_cli.tools.search import SearchFilesTool
 
             search_tool = SearchFilesTool()
 
@@ -458,8 +458,8 @@ class TestComplianceAudit:
         )
 
         try:
-            from jdev_cli.tools.file_ops import WriteFileTool
-            from jdev_cli.tools.search import SearchFilesTool
+            from vertice_cli.tools.file_ops import WriteFileTool
+            from vertice_cli.tools.search import SearchFilesTool
 
             write_tool = WriteFileTool()
             search_tool = SearchFilesTool()
@@ -556,7 +556,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
         )
 
         try:
-            from jdev_cli.tools.search import SearchFilesTool
+            from vertice_cli.tools.search import SearchFilesTool
 
             search_tool = SearchFilesTool()
 

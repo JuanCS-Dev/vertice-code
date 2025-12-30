@@ -66,7 +66,7 @@
 
 ---
 
-## ✅ CONSTITUTIONAL COMPLIANCE (Vértice v3.0)
+## ✅ CONSTITUTIONAL COMPLIANCE (Vertice v3.0)
 
 ### **Princípio P1: Completude Obrigatória**
 - ✅ Zero TODO/FIXME/XXX in source code
@@ -248,7 +248,7 @@ Classes starting with `Test` confuse pytest collector. Solutions:
 - [x] No code duplication
 - [x] Production-ready
 
-### **Constitutional Compliance (Vértice v3.0)**
+### **Constitutional Compliance (Vertice v3.0)**
 - [x] P1: Completude Obrigatória
 - [x] P2: Validação Preventiva
 - [x] P3: Ceticismo Crítico
@@ -300,6 +300,6 @@ Classes starting with `Test` confuse pytest collector. Solutions:
 ---
 
 **Validated By:** Scientific Method + Constitutional AI  
-**Approved By:** Boris Cherny Standards + Vértice v3.0  
+**Approved By:** Boris Cherny Standards + Vertice v3.0  
 **Timestamp:** 2025-11-22 10:15:54 BRT  
 **Commit:** Ready for final commit

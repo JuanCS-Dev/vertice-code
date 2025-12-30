@@ -7,14 +7,14 @@ SCALE & SUSTAIN Phase 3.4 validation.
 import asyncio
 import pytest
 
-from jdev_core.multitenancy import (
+from vertice_core.multitenancy import (
     Tenant,
     TenantContext,
     get_current_tenant,
     set_current_tenant,
     tenant_context,
 )
-from jdev_core.multitenancy.context import (
+from vertice_core.multitenancy.context import (
     require_tenant,
     require_active_tenant,
     TenantAware,

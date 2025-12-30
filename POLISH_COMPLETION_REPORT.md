@@ -84,11 +84,11 @@ hashlib.md5(content.encode()).hexdigest()
 hashlib.md5(content.encode(), usedforsecurity=False).hexdigest()
 ```
 
-**File**: `jdev_cli/core/prompt_shield.py:311`
+**File**: `vertice_cli/core/prompt_shield.py:311`
 
 **Validation**:
 ```bash
-bandit -r jdev_cli/core/prompt_shield.py -ll
+bandit -r vertice_cli/core/prompt_shield.py -ll
 # Result: ✅ No issues found
 ```
 

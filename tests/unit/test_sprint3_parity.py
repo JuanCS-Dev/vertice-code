@@ -20,12 +20,12 @@ class TestImageReadTool:
 
     def test_tool_import(self):
         """Test tool can be imported."""
-        from jdev_cli.tools.media_tools import ImageReadTool
+        from vertice_cli.tools.media_tools import ImageReadTool
         assert ImageReadTool is not None
 
     def test_tool_creation(self):
         """Test tool creation."""
-        from jdev_cli.tools.media_tools import ImageReadTool
+        from vertice_cli.tools.media_tools import ImageReadTool
 
         tool = ImageReadTool()
         assert tool.name == "image_read"
@@ -33,7 +33,7 @@ class TestImageReadTool:
 
     def test_supported_formats(self):
         """Test supported format list."""
-        from jdev_cli.tools.media_tools import ImageReadTool
+        from vertice_cli.tools.media_tools import ImageReadTool
 
         tool = ImageReadTool()
         assert ".png" in tool.SUPPORTED_FORMATS
@@ -44,7 +44,7 @@ class TestImageReadTool:
     @pytest.mark.asyncio
     async def test_read_nonexistent_image(self):
         """Test reading nonexistent image."""
-        from jdev_cli.tools.media_tools import ImageReadTool
+        from vertice_cli.tools.media_tools import ImageReadTool
 
         tool = ImageReadTool()
         result = await tool._execute_validated(file_path="/nonexistent/image.png")
@@ -55,7 +55,7 @@ class TestImageReadTool:
     @pytest.mark.asyncio
     async def test_read_unsupported_format(self):
         """Test reading unsupported format."""
-        from jdev_cli.tools.media_tools import ImageReadTool
+        from vertice_cli.tools.media_tools import ImageReadTool
 
         with tempfile.NamedTemporaryFile(suffix=".xyz", delete=False) as f:
             f.write(b"fake data")
@@ -73,7 +73,7 @@ class TestImageReadTool:
     @pytest.mark.asyncio
     async def test_read_valid_png(self):
         """Test reading a valid PNG file."""
-        from jdev_cli.tools.media_tools import ImageReadTool
+        from vertice_cli.tools.media_tools import ImageReadTool
 
         # Create a minimal valid PNG
         png_data = (
@@ -112,12 +112,12 @@ class TestPDFReadTool:
 
     def test_tool_import(self):
         """Test tool can be imported."""
-        from jdev_cli.tools.media_tools import PDFReadTool
+        from vertice_cli.tools.media_tools import PDFReadTool
         assert PDFReadTool is not None
 
     def test_tool_creation(self):
         """Test tool creation."""
-        from jdev_cli.tools.media_tools import PDFReadTool
+        from vertice_cli.tools.media_tools import PDFReadTool
 
         tool = PDFReadTool()
         assert tool.name == "pdf_read"
@@ -126,7 +126,7 @@ class TestPDFReadTool:
     @pytest.mark.asyncio
     async def test_read_nonexistent_pdf(self):
         """Test reading nonexistent PDF."""
-        from jdev_cli.tools.media_tools import PDFReadTool
+        from vertice_cli.tools.media_tools import PDFReadTool
 
         tool = PDFReadTool()
         result = await tool._execute_validated(file_path="/nonexistent/doc.pdf")
@@ -137,7 +137,7 @@ class TestPDFReadTool:
     @pytest.mark.asyncio
     async def test_read_non_pdf_file(self):
         """Test reading non-PDF file."""
-        from jdev_cli.tools.media_tools import PDFReadTool
+        from vertice_cli.tools.media_tools import PDFReadTool
 
         with tempfile.NamedTemporaryFile(suffix=".txt", delete=False) as f:
             f.write(b"not a pdf")
@@ -162,7 +162,7 @@ class TestGitSafety:
 
     def test_validate_safe_command(self):
         """Test safe commands pass validation."""
-        from jdev_cli.tools.git_workflow import validate_git_command
+        from vertice_cli.tools.git_workflow import validate_git_command
 
         is_safe, reason = validate_git_command("git status")
         assert is_safe is True
@@ -175,7 +175,7 @@ class TestGitSafety:
 
     def test_block_force_push(self):
         """Test force push is blocked."""
-        from jdev_cli.tools.git_workflow import validate_git_command
+        from vertice_cli.tools.git_workflow import validate_git_command
 
         is_safe, reason = validate_git_command("git push --force origin main")
         assert is_safe is False
@@ -183,7 +183,7 @@ class TestGitSafety:
 
     def test_block_hard_reset(self):
         """Test hard reset is blocked."""
-        from jdev_cli.tools.git_workflow import validate_git_command
+        from vertice_cli.tools.git_workflow import validate_git_command
 
         is_safe, reason = validate_git_command("git reset --hard HEAD~1")
         assert is_safe is False
@@ -191,7 +191,7 @@ class TestGitSafety:
 
     def test_block_config(self):
         """Test git config is blocked."""
-        from jdev_cli.tools.git_workflow import validate_git_command
+        from vertice_cli.tools.git_workflow import validate_git_command
 
         is_safe, reason = validate_git_command("git config user.email evil@hack.com")
         assert is_safe is False
@@ -199,7 +199,7 @@ class TestGitSafety:
 
     def test_block_no_verify(self):
         """Test --no-verify is blocked."""
-        from jdev_cli.tools.git_workflow import validate_git_command
+        from vertice_cli.tools.git_workflow import validate_git_command
 
         is_safe, reason = validate_git_command("git commit --no-verify -m 'test'")
         assert is_safe is False
@@ -211,12 +211,12 @@ class TestGitCommitTool:
 
     def test_tool_import(self):
         """Test tool can be imported."""
-        from jdev_cli.tools.git_workflow import GitCommitTool
+        from vertice_cli.tools.git_workflow import GitCommitTool
         assert GitCommitTool is not None
 
     def test_tool_creation(self):
         """Test tool creation."""
-        from jdev_cli.tools.git_workflow import GitCommitTool
+        from vertice_cli.tools.git_workflow import GitCommitTool
 
         tool = GitCommitTool()
         assert tool.name == "git_commit"
@@ -225,7 +225,7 @@ class TestGitCommitTool:
 
     def test_build_commit_message(self):
         """Test commit message building."""
-        from jdev_cli.tools.git_workflow import GitCommitTool
+        from vertice_cli.tools.git_workflow import GitCommitTool
 
         tool = GitCommitTool()
 
@@ -245,12 +245,12 @@ class TestGitPRCreateTool:
 
     def test_tool_import(self):
         """Test tool can be imported."""
-        from jdev_cli.tools.git_workflow import GitPRCreateTool
+        from vertice_cli.tools.git_workflow import GitPRCreateTool
         assert GitPRCreateTool is not None
 
     def test_tool_creation(self):
         """Test tool creation."""
-        from jdev_cli.tools.git_workflow import GitPRCreateTool
+        from vertice_cli.tools.git_workflow import GitPRCreateTool
 
         tool = GitPRCreateTool()
         assert tool.name == "git_pr_create"
@@ -259,7 +259,7 @@ class TestGitPRCreateTool:
 
     def test_build_pr_body(self):
         """Test PR body building."""
-        from jdev_cli.tools.git_workflow import GitPRCreateTool
+        from vertice_cli.tools.git_workflow import GitPRCreateTool
 
         tool = GitPRCreateTool()
 
@@ -277,13 +277,13 @@ class TestContextCompactor:
 
     def test_import(self):
         """Test compactor can be imported."""
-        from jdev_cli.core.context_compact import ContextCompactor, get_context_compactor
+        from vertice_cli.core.context_compact import ContextCompactor, get_context_compactor
         assert ContextCompactor is not None
         assert get_context_compactor is not None
 
     def test_creation(self):
         """Test compactor creation."""
-        from jdev_cli.core.context_compact import ContextCompactor
+        from vertice_cli.core.context_compact import ContextCompactor
 
         compactor = ContextCompactor(max_tokens=10000)
         assert compactor.max_tokens == 10000
@@ -291,7 +291,7 @@ class TestContextCompactor:
 
     def test_add_entry(self):
         """Test adding entries."""
-        from jdev_cli.core.context_compact import ContextCompactor
+        from vertice_cli.core.context_compact import ContextCompactor
 
         compactor = ContextCompactor(max_tokens=10000)
 
@@ -303,7 +303,7 @@ class TestContextCompactor:
 
     def test_auto_priority(self):
         """Test automatic priority assignment."""
-        from jdev_cli.core.context_compact import ContextCompactor
+        from vertice_cli.core.context_compact import ContextCompactor
 
         compactor = ContextCompactor()
 
@@ -321,7 +321,7 @@ class TestContextCompactor:
 
     def test_should_compact(self):
         """Test compaction trigger."""
-        from jdev_cli.core.context_compact import ContextCompactor
+        from vertice_cli.core.context_compact import ContextCompactor
 
         compactor = ContextCompactor(max_tokens=100, compact_threshold=0.5)
 
@@ -335,7 +335,7 @@ class TestContextCompactor:
 
     def test_deduplication(self):
         """Test duplicate removal."""
-        from jdev_cli.core.context_compact import ContextCompactor, reset_context_compactor
+        from vertice_cli.core.context_compact import ContextCompactor, reset_context_compactor
 
         reset_context_compactor()
         compactor = ContextCompactor(max_tokens=100000)
@@ -353,7 +353,7 @@ class TestContextCompactor:
 
     def test_get_context(self):
         """Test context retrieval."""
-        from jdev_cli.core.context_compact import ContextCompactor
+        from vertice_cli.core.context_compact import ContextCompactor
 
         compactor = ContextCompactor()
         compactor.add_entry("Hello", entry_type="user")
@@ -366,7 +366,7 @@ class TestContextCompactor:
 
     def test_stats(self):
         """Test statistics."""
-        from jdev_cli.core.context_compact import ContextCompactor
+        from vertice_cli.core.context_compact import ContextCompactor
 
         compactor = ContextCompactor(max_tokens=1000)
         compactor.add_entry("Test", entry_type="user")
@@ -388,7 +388,7 @@ class TestSprint3Integration:
 
     def test_all_tools_importable(self):
         """Test all Sprint 3 tools are importable."""
-        from jdev_cli.tools import (
+        from vertice_cli.tools import (
             ImageReadTool,
             PDFReadTool,
             GitCommitTool,
@@ -402,7 +402,7 @@ class TestSprint3Integration:
 
     def test_helper_functions(self):
         """Test helper functions return tools."""
-        from jdev_cli.tools import get_media_tools, get_git_workflow_tools
+        from vertice_cli.tools import get_media_tools, get_git_workflow_tools
 
         media_tools = get_media_tools()
         assert len(media_tools) >= 3
@@ -412,7 +412,7 @@ class TestSprint3Integration:
 
     def test_context_compactor_singleton(self):
         """Test context compactor singleton."""
-        from jdev_cli.core.context_compact import (
+        from vertice_cli.core.context_compact import (
             get_context_compactor,
             reset_context_compactor
         )

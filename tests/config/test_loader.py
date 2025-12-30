@@ -3,7 +3,7 @@
 import tempfile
 from pathlib import Path
 
-from jdev_cli.config.loader import ConfigLoader
+from vertice_cli.config.loader import ConfigLoader
 
 
 class TestConfigLoader:

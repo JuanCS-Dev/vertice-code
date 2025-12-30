@@ -1,6 +1,6 @@
 """Tests for WorkflowLibrary."""
 
-from jdev_cli.orchestration.workflows import WorkflowLibrary, WorkflowType
+from vertice_cli.orchestration.workflows import WorkflowLibrary, WorkflowType
 
 def test_workflow_library_initialization():
     """Test that library initializes with default workflows."""

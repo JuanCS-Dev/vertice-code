@@ -1,6 +1,6 @@
 # 🔒 AUDITORIA CONSTITUCIONAL - DAY 5: SANDBOX SYSTEM
 **Data:** 2025-11-20 01:41 UTC  
-**Auditor:** Vértice-MAXIMUS (Constitutional AI Agent)  
+**Auditor:** Vertice-MAXIMUS (Constitutional AI Agent)  
 **Mandate:** BRUTAL HONESTY + SCIENTIFIC RIGOR  
 **Scope:** Docker Sandbox + Safety Validator + Edge Cases + Real-World Usage
 
@@ -637,8 +637,8 @@ O **Sandbox System** está **98.5% production-ready** com **ZERO air gaps críti
 ---
 
 **Assinatura Digital:**  
-Vértice-MAXIMUS Constitutional AI Agent  
-Audit completed under Constituição Vértice v3.0  
+Vertice-MAXIMUS Constitutional AI Agent  
+Audit completed under Constituicao Vertice v3.0  
 Initial Audit: 2025-11-20 01:41:00 UTC  
 Final Review: 2025-11-20 01:46:00 UTC  
 

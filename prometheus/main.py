@@ -1,10 +1,7 @@
 """
 🔥 PROMETHEUS: Self-Evolving Meta-Agent
 
-Entry point for Blaxel deployment and standalone usage.
-
-Deploy to Blaxel:
-    bl deploy --name prometheus
+Local-first agent with self-evolution capabilities.
 
 Run locally:
     python -m prometheus "your task here"
@@ -29,23 +26,10 @@ import os
 import asyncio
 from typing import AsyncIterator, Optional
 
-# Try to import Blaxel SDK
-try:
-    from blaxel.core import Agent, tool
-    BLAXEL_AVAILABLE = True
-except ImportError:
-    BLAXEL_AVAILABLE = False
 
-    # Mock decorators for standalone use
-    def tool(func):
-        return func
-
-    class Agent:
-        name = ""
-        description = ""
-
-        def __init__(self):
-            pass
+def tool(func):
+    """Decorator for agent tools."""
+    return func
 
 
 # Import PROMETHEUS components
@@ -53,7 +37,7 @@ from .core.llm_client import GeminiClient
 from .core.orchestrator import PrometheusOrchestrator
 
 
-class PrometheusAgent(Agent if BLAXEL_AVAILABLE else object):
+class PrometheusAgent:
     """
     🔥 PROMETHEUS: The Agent That Builds Itself
 
@@ -85,9 +69,6 @@ analysis, and multi-step reasoning.
 
     def __init__(self, api_key: Optional[str] = None):
         """Initialize PROMETHEUS agent."""
-        if BLAXEL_AVAILABLE:
-            super().__init__()
-
         # Get API key
         self.api_key = (
             api_key or
@@ -225,7 +206,7 @@ analysis, and multi-step reasoning.
 
     async def run(self, prompt: str) -> AsyncIterator[str]:
         """
-        Main entry point for Blaxel.
+        Main entry point for streaming execution.
 
         Streams execution output.
         """
@@ -244,7 +225,7 @@ analysis, and multi-step reasoning.
         return await self._llm.generate(message)
 
 
-# Create singleton instance for Blaxel
+# Create singleton instance
 agent = PrometheusAgent()
 
 

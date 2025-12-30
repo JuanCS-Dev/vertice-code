@@ -28,8 +28,8 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 
-from jdev_cli.tui.theme import COLORS
-from jdev_cli.tui.components import (
+from vertice_cli.tui.theme import COLORS
+from vertice_cli.tui.components import (
     FileTree,
     PillBar,
     ToastManager,
@@ -38,7 +38,7 @@ from jdev_cli.tui.components import (
     create_tool_pill,
     create_completer
 )
-from jdev_cli.tui.biblical_wisdom import get_random_wisdom
+from vertice_cli.tui.biblical_wisdom import get_random_wisdom
 
 
 async def demo_file_tree(console: Console):

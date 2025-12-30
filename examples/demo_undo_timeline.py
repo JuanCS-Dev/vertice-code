@@ -6,8 +6,8 @@ Showcase das features que elevam nosso CLI ao nível Cursor
 
 import time
 from rich.console import Console
-from jdev_cli.tui.components.preview import UndoRedoStack
-from jdev_cli.tui.components.execution_timeline import (
+from vertice_cli.tui.components.preview import UndoRedoStack
+from vertice_cli.tui.components.execution_timeline import (
     ExecutionTimeline,
     TimelinePlayback
 )

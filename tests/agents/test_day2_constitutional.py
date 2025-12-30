@@ -2,7 +2,7 @@
 Day 2 Constitutional Compliance & End-to-End Validation Tests
 
 52+ tests validating:
-1. Constitutional compliance (Constituição Vértice v3.0)
+1. Constitutional compliance (Constituicao Vertice v3.0)
 2. Real-world end-to-end scenarios
 3. Integration between Testing and Refactor agents
 4. Production-ready validation
@@ -14,9 +14,9 @@ import pytest
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from jdev_cli.agents.testing import TestingAgent
-from jdev_cli.agents.refactor import RefactorAgent
-from jdev_cli.agents.base import AgentTask, AgentRole, AgentCapability
+from vertice_cli.agents.testing import TestingAgent
+from vertice_cli.agents.refactor import RefactorAgent
+from vertice_cli.agents.base import AgentTask, AgentRole, AgentCapability
 
 
 # ============================================================================
@@ -24,7 +24,7 @@ from jdev_cli.agents.base import AgentTask, AgentRole, AgentCapability
 # ============================================================================
 
 class TestConstitutionalCompliance:
-    """Tests for Constituição Vértice v3.0 compliance."""
+    """Tests for Constituicao Vertice v3.0 compliance."""
 
     @pytest.mark.asyncio
     async def test_article2_zero_placeholders_testing(self):
@@ -32,7 +32,7 @@ class TestConstitutionalCompliance:
         agent = TestingAgent(model=MagicMock())
 
         # Check source code
-        source_file = Path("jdev_cli/agents/testing.py")
+        source_file = Path("vertice_cli/agents/testing.py")
         if source_file.exists():
             content = source_file.read_text()
             assert "TODO" not in content
@@ -44,7 +44,7 @@ class TestConstitutionalCompliance:
         """Art. II: Zero placeholders in RefactorAgent."""
         agent = RefactorAgent(model=MagicMock())
 
-        source_file = Path("jdev_cli/agents/refactor.py")
+        source_file = Path("vertice_cli/agents/refactor.py")
         if source_file.exists():
             content = source_file.read_text()
             assert "TODO" not in content

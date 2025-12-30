@@ -9,8 +9,8 @@ Validates:
 """
 
 import pytest
-from jdev_cli.core.metrics import MetricsCollector
-from jdev_cli.core.defense import (
+from vertice_cli.core.metrics import MetricsCollector
+from vertice_cli.core.defense import (
     PromptInjectionDefender,
     AutoCritic,
     ContextCompactor

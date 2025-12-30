@@ -32,7 +32,7 @@ class TestV6DataModels:
 
     def test_clarifying_question_model(self):
         """ClarifyingQuestion deve ter campos corretos."""
-        from jdev_cli.agents.planner import ClarifyingQuestion
+        from vertice_cli.agents.planner import ClarifyingQuestion
 
         q = ClarifyingQuestion(
             question="What is the scope?",
@@ -49,7 +49,7 @@ class TestV6DataModels:
 
     def test_clarification_response_model(self):
         """ClarificationResponse deve ter campos corretos."""
-        from jdev_cli.agents.planner import ClarificationResponse
+        from vertice_cli.agents.planner import ClarificationResponse
 
         r = ClarificationResponse(
             question_id="q-123",
@@ -63,7 +63,7 @@ class TestV6DataModels:
 
     def test_planning_mode_enum(self):
         """PlanningMode deve ter 3 modos."""
-        from jdev_cli.agents.planner import PlanningMode
+        from vertice_cli.agents.planner import PlanningMode
 
         assert PlanningMode.EXPLORATION.value == "exploration"
         assert PlanningMode.PLANNING.value == "planning"
@@ -71,7 +71,7 @@ class TestV6DataModels:
 
     def test_confidence_level_enum(self):
         """ConfidenceLevel deve ter 5 níveis."""
-        from jdev_cli.agents.planner import ConfidenceLevel
+        from vertice_cli.agents.planner import ConfidenceLevel
 
         assert ConfidenceLevel.CERTAIN.value == "certain"
         assert ConfidenceLevel.CONFIDENT.value == "confident"
@@ -89,7 +89,7 @@ class TestStepConfidence:
 
     def test_step_confidence_from_score_high(self):
         """Score alto deve resultar em CERTAIN."""
-        from jdev_cli.agents.planner import StepConfidence, ConfidenceLevel
+        from vertice_cli.agents.planner import StepConfidence, ConfidenceLevel
 
         conf = StepConfidence.from_score(0.95, "Test reasoning")
 
@@ -99,7 +99,7 @@ class TestStepConfidence:
 
     def test_step_confidence_from_score_low(self):
         """Score baixo deve resultar em SPECULATIVE."""
-        from jdev_cli.agents.planner import StepConfidence, ConfidenceLevel
+        from vertice_cli.agents.planner import StepConfidence, ConfidenceLevel
 
         conf = StepConfidence.from_score(0.2, "Uncertain task")
 
@@ -108,7 +108,7 @@ class TestStepConfidence:
 
     def test_step_confidence_clamping(self):
         """Score deve ser clampado em [0, 1]."""
-        from jdev_cli.agents.planner import StepConfidence
+        from vertice_cli.agents.planner import StepConfidence
 
         conf_high = StepConfidence.from_score(1.5)
         conf_low = StepConfidence.from_score(-0.5)
@@ -118,7 +118,7 @@ class TestStepConfidence:
 
     def test_step_confidence_with_risks(self):
         """StepConfidence deve aceitar lista de riscos."""
-        from jdev_cli.agents.planner import StepConfidence
+        from vertice_cli.agents.planner import StepConfidence
 
         risks = ["Complex dependency", "External API"]
         conf = StepConfidence.from_score(0.6, "Test", risks)
@@ -135,7 +135,7 @@ class TestSOPStepConfidence:
 
     def test_sop_step_has_confidence_fields(self):
         """SOPStep deve ter campos de confidence."""
-        from jdev_cli.agents.planner import SOPStep
+        from vertice_cli.agents.planner import SOPStep
 
         step = SOPStep(
             id="step-1",
@@ -154,7 +154,7 @@ class TestSOPStepConfidence:
 
     def test_sop_step_confidence_default(self):
         """SOPStep deve ter confidence padrão de 0.7."""
-        from jdev_cli.agents.planner import SOPStep
+        from vertice_cli.agents.planner import SOPStep
 
         step = SOPStep(
             id="step-1",
@@ -168,7 +168,7 @@ class TestSOPStepConfidence:
 
     def test_sop_step_confidence_validation(self):
         """SOPStep deve validar confidence entre 0 e 1."""
-        from jdev_cli.agents.planner import SOPStep
+        from vertice_cli.agents.planner import SOPStep
         from pydantic import ValidationError
 
         with pytest.raises(ValidationError):
@@ -191,7 +191,7 @@ class TestExecutionPlanV6:
 
     def test_execution_plan_has_v6_fields(self):
         """ExecutionPlan deve ter campos v6.0."""
-        from jdev_cli.agents.planner import ExecutionPlan, PlanningMode
+        from vertice_cli.agents.planner import ExecutionPlan, PlanningMode
 
         plan = ExecutionPlan(
             plan_id="plan-123",
@@ -209,7 +209,7 @@ class TestExecutionPlanV6:
 
     def test_execution_plan_clarifying_questions(self):
         """ExecutionPlan deve suportar clarifying questions."""
-        from jdev_cli.agents.planner import (
+        from vertice_cli.agents.planner import (
             ExecutionPlan,
             ClarifyingQuestion,
             ClarificationResponse
@@ -240,7 +240,7 @@ class TestPlannerAgentV6:
 
     def test_planner_agent_init_v6(self):
         """PlannerAgent deve aceitar parâmetros v6.0."""
-        from jdev_cli.agents.planner import PlannerAgent, PlanningMode
+        from vertice_cli.agents.planner import PlannerAgent, PlanningMode
 
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
@@ -258,7 +258,7 @@ class TestPlannerAgentV6:
 
     def test_planner_agent_callbacks(self):
         """PlannerAgent deve aceitar callbacks."""
-        from jdev_cli.agents.planner import PlannerAgent
+        from vertice_cli.agents.planner import PlannerAgent
 
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
@@ -285,7 +285,7 @@ class TestConfidenceCalculation:
 
     def test_calculate_step_confidence_familiar_role(self):
         """Roles familiares devem aumentar confidence."""
-        from jdev_cli.agents.planner import PlannerAgent, SOPStep
+        from vertice_cli.agents.planner import PlannerAgent, SOPStep
 
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
@@ -308,7 +308,7 @@ class TestConfidenceCalculation:
 
     def test_calculate_step_confidence_unfamiliar_role(self):
         """Roles não familiares devem gerar risco."""
-        from jdev_cli.agents.planner import PlannerAgent, SOPStep
+        from vertice_cli.agents.planner import PlannerAgent, SOPStep
 
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
@@ -331,7 +331,7 @@ class TestConfidenceCalculation:
 
     def test_calculate_step_confidence_high_dependencies(self):
         """Muitas dependências devem diminuir confidence."""
-        from jdev_cli.agents.planner import PlannerAgent, SOPStep
+        from vertice_cli.agents.planner import PlannerAgent, SOPStep
 
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
@@ -360,7 +360,7 @@ class TestConfidenceSummary:
 
     def test_confidence_summary_high(self):
         """Confidence alta deve ter emoji verde."""
-        from jdev_cli.agents.planner import PlannerAgent
+        from vertice_cli.agents.planner import PlannerAgent
 
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
@@ -372,7 +372,7 @@ class TestConfidenceSummary:
 
     def test_confidence_summary_moderate(self):
         """Confidence moderada deve ter emoji amarelo."""
-        from jdev_cli.agents.planner import PlannerAgent
+        from vertice_cli.agents.planner import PlannerAgent
 
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
@@ -384,7 +384,7 @@ class TestConfidenceSummary:
 
     def test_confidence_summary_low(self):
         """Confidence baixa deve ter emoji vermelho."""
-        from jdev_cli.agents.planner import PlannerAgent
+        from vertice_cli.agents.planner import PlannerAgent
 
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
@@ -404,7 +404,7 @@ class TestPlanArtifact:
 
     def test_format_plan_as_markdown(self):
         """_format_plan_as_markdown deve gerar markdown válido."""
-        from jdev_cli.agents.planner import PlannerAgent, AgentTask
+        from vertice_cli.agents.planner import PlannerAgent, AgentTask
 
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
@@ -443,7 +443,7 @@ class TestPlanArtifact:
     @pytest.mark.asyncio
     async def test_generate_plan_artifact_creates_file(self):
         """_generate_plan_artifact deve criar arquivo."""
-        from jdev_cli.agents.planner import PlannerAgent, AgentTask
+        from vertice_cli.agents.planner import PlannerAgent, AgentTask
 
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
@@ -480,7 +480,7 @@ class TestExplorationMode:
     @pytest.mark.asyncio
     async def test_explore_returns_analysis(self):
         """explore() deve retornar análise."""
-        from jdev_cli.agents.planner import (
+        from vertice_cli.agents.planner import (
             PlannerAgent,
             AgentTask
         )
@@ -502,7 +502,7 @@ class TestExplorationMode:
     @pytest.mark.asyncio
     async def test_explore_restricts_capabilities(self):
         """explore() deve restringir para READ_ONLY."""
-        from jdev_cli.agents.planner import (
+        from vertice_cli.agents.planner import (
             PlannerAgent,
             AgentTask,
             AgentCapability
@@ -547,7 +547,7 @@ class TestClarifyingQuestionsGeneration:
     @pytest.mark.asyncio
     async def test_generate_clarifying_questions_with_llm(self):
         """_generate_clarifying_questions deve usar LLM."""
-        from jdev_cli.agents.planner import PlannerAgent, AgentTask
+        from vertice_cli.agents.planner import PlannerAgent, AgentTask
 
         mock_llm = AsyncMock()
         mock_llm.generate = AsyncMock(return_value='''
@@ -572,7 +572,7 @@ class TestClarifyingQuestionsGeneration:
     @pytest.mark.asyncio
     async def test_generate_clarifying_questions_fallback(self):
         """_generate_clarifying_questions deve ter fallback."""
-        from jdev_cli.agents.planner import PlannerAgent, AgentTask
+        from vertice_cli.agents.planner import PlannerAgent, AgentTask
 
         mock_llm = AsyncMock()
         mock_llm.generate = AsyncMock(side_effect=Exception("LLM error"))
@@ -598,7 +598,7 @@ class TestExecuteWithClarification:
     @pytest.mark.asyncio
     async def test_execute_with_clarification_basic(self):
         """execute_with_clarification deve funcionar."""
-        from jdev_cli.agents.planner import (
+        from vertice_cli.agents.planner import (
             PlannerAgent,
             AgentTask
         )
@@ -631,7 +631,7 @@ class TestBackwardCompatibility:
 
     def test_planner_agent_works_without_v6_params(self):
         """PlannerAgent deve funcionar sem parâmetros v6."""
-        from jdev_cli.agents.planner import PlannerAgent
+        from vertice_cli.agents.planner import PlannerAgent
 
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
@@ -644,7 +644,7 @@ class TestBackwardCompatibility:
 
     def test_sop_step_works_without_confidence(self):
         """SOPStep deve funcionar sem campos de confidence."""
-        from jdev_cli.agents.planner import SOPStep
+        from vertice_cli.agents.planner import SOPStep
 
         # v5 style creation
         step = SOPStep(
@@ -662,7 +662,7 @@ class TestBackwardCompatibility:
 
     def test_execution_plan_works_without_v6_fields(self):
         """ExecutionPlan deve funcionar sem campos v6."""
-        from jdev_cli.agents.planner import ExecutionPlan
+        from vertice_cli.agents.planner import ExecutionPlan
 
         # v5 style creation
         plan = ExecutionPlan(
@@ -686,7 +686,7 @@ class TestMultiPlanDataModels:
 
     def test_plan_strategy_enum(self):
         """PlanStrategy deve ter 3 estratégias."""
-        from jdev_cli.agents.planner import PlanStrategy
+        from vertice_cli.agents.planner import PlanStrategy
 
         assert PlanStrategy.STANDARD.value == "standard"
         assert PlanStrategy.ACCELERATOR.value == "accelerator"
@@ -694,7 +694,7 @@ class TestMultiPlanDataModels:
 
     def test_plan_probabilities_dataclass(self):
         """PlanProbabilities deve calcular scores corretamente."""
-        from jdev_cli.agents.planner import PlanProbabilities
+        from vertice_cli.agents.planner import PlanProbabilities
 
         probs = PlanProbabilities(
             success=0.8,
@@ -713,7 +713,7 @@ class TestMultiPlanDataModels:
 
     def test_plan_probabilities_risk_reward(self):
         """PlanProbabilities deve calcular risk/reward ratio."""
-        from jdev_cli.agents.planner import PlanProbabilities
+        from vertice_cli.agents.planner import PlanProbabilities
 
         probs = PlanProbabilities(
             success=0.9,
@@ -730,7 +730,7 @@ class TestMultiPlanDataModels:
 
     def test_plan_probabilities_display(self):
         """PlanProbabilities deve formatar para display."""
-        from jdev_cli.agents.planner import PlanProbabilities
+        from vertice_cli.agents.planner import PlanProbabilities
 
         probs = PlanProbabilities(
             success=0.85,
@@ -755,7 +755,7 @@ class TestAlternativePlan:
 
     def test_alternative_plan_creation(self):
         """AlternativePlan deve ser criado corretamente."""
-        from jdev_cli.agents.planner import AlternativePlan, PlanStrategy
+        from vertice_cli.agents.planner import AlternativePlan, PlanStrategy
 
         plan = AlternativePlan(
             strategy=PlanStrategy.STANDARD,
@@ -776,7 +776,7 @@ class TestAlternativePlan:
 
     def test_alternative_plan_probabilities_property(self):
         """AlternativePlan deve expor PlanProbabilities."""
-        from jdev_cli.agents.planner import AlternativePlan, PlanStrategy
+        from vertice_cli.agents.planner import AlternativePlan, PlanStrategy
 
         plan = AlternativePlan(
             strategy=PlanStrategy.ACCELERATOR,
@@ -795,7 +795,7 @@ class TestAlternativePlan:
 
     def test_alternative_plan_overall_score(self):
         """AlternativePlan deve calcular overall_score."""
-        from jdev_cli.agents.planner import AlternativePlan, PlanStrategy
+        from vertice_cli.agents.planner import AlternativePlan, PlanStrategy
 
         plan = AlternativePlan(
             strategy=PlanStrategy.LATERAL,
@@ -820,7 +820,7 @@ class TestMultiPlanResult:
 
     def test_multi_plan_result_creation(self):
         """MultiPlanResult deve ser criado corretamente."""
-        from jdev_cli.agents.planner import (
+        from vertice_cli.agents.planner import (
             MultiPlanResult,
             AlternativePlan,
             PlanStrategy
@@ -857,7 +857,7 @@ class TestMultiPlanResult:
 
     def test_multi_plan_result_get_plan(self):
         """MultiPlanResult.get_plan deve retornar plano correto."""
-        from jdev_cli.agents.planner import (
+        from vertice_cli.agents.planner import (
             MultiPlanResult,
             AlternativePlan,
             PlanStrategy
@@ -899,7 +899,7 @@ class TestMultiPlanResult:
 
     def test_multi_plan_result_to_markdown(self):
         """MultiPlanResult.to_markdown deve gerar markdown válido."""
-        from jdev_cli.agents.planner import (
+        from vertice_cli.agents.planner import (
             MultiPlanResult,
             AlternativePlan,
             PlanStrategy
@@ -944,7 +944,7 @@ class TestPlannerMultiPlan:
 
     def test_create_fallback_plan(self):
         """_create_fallback_plan deve criar plano básico."""
-        from jdev_cli.agents.planner import (
+        from vertice_cli.agents.planner import (
             PlannerAgent,
             AgentTask,
             PlanStrategy
@@ -966,7 +966,7 @@ class TestPlannerMultiPlan:
 
     def test_select_best_plan_picks_highest_score(self):
         """_select_best_plan deve escolher maior score."""
-        from jdev_cli.agents.planner import (
+        from vertice_cli.agents.planner import (
             PlannerAgent,
             AgentTask,
             AlternativePlan,
@@ -1003,7 +1003,7 @@ class TestPlannerMultiPlan:
 
     def test_build_comparison_summary(self):
         """_build_comparison_summary deve gerar resumo."""
-        from jdev_cli.agents.planner import (
+        from vertice_cli.agents.planner import (
             PlannerAgent,
             AlternativePlan,
             PlanStrategy
@@ -1042,7 +1042,7 @@ class TestPlannerMultiPlan:
     @pytest.mark.asyncio
     async def test_generate_multi_plan_returns_result(self):
         """generate_multi_plan deve retornar MultiPlanResult."""
-        from jdev_cli.agents.planner import (
+        from vertice_cli.agents.planner import (
             PlannerAgent,
             AgentTask,
             MultiPlanResult
@@ -1077,7 +1077,7 @@ class TestPlannerMultiPlan:
     @pytest.mark.asyncio
     async def test_execute_with_multi_plan_auto_select(self):
         """execute_with_multi_plan com auto_select=True."""
-        from jdev_cli.agents.planner import PlannerAgent, AgentTask
+        from vertice_cli.agents.planner import PlannerAgent, AgentTask
 
         mock_llm = AsyncMock()
         mock_llm.generate = AsyncMock(return_value='''
@@ -1102,7 +1102,7 @@ class TestPlannerMultiPlan:
     @pytest.mark.asyncio
     async def test_execute_with_multi_plan_no_auto_select(self):
         """execute_with_multi_plan com auto_select=False retorna opções."""
-        from jdev_cli.agents.planner import PlannerAgent, AgentTask
+        from vertice_cli.agents.planner import PlannerAgent, AgentTask
 
         mock_llm = AsyncMock()
         mock_llm.generate = AsyncMock(return_value='''

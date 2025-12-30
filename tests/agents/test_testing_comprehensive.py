@@ -26,7 +26,7 @@ Philosophy (Boris Cherny):
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from jdev_cli.agents.testing import (
+from vertice_cli.agents.testing import (
     TestingAgent,
     TestCase,
     TestType,
@@ -34,7 +34,7 @@ from jdev_cli.agents.testing import (
     CoverageReport,
     MutationResult,
 )
-from jdev_cli.agents.base import (
+from vertice_cli.agents.base import (
     AgentTask,
     AgentRole,
     AgentCapability,

@@ -71,7 +71,7 @@ Wrapper do Justiça framework como BaseAgent, fornecendo governança constitucio
 - `mcp_client: Any` - Cliente MCP para ferramentas
 - `enforcement_mode: EnforcementMode` - Modo de enforcement (default: NORMATIVE)
 - `verbose_ui: bool` - Exibir painéis de governança (default: True)
-- `constitution: Constitution` - Constituição customizada (default: 5 princípios)
+- `constitution: Constitution` - Constituicao customizada (default: 5 princípios)
 - `audit_backend: str` - Backend de auditoria ("console", "file", "memory")
 - `system_prompt: str` - System prompt customizado (opcional)
 

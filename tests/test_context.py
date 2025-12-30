@@ -1,6 +1,6 @@
 """Test script for ContextBuilder."""
 
-from jdev_cli.core.context import ContextBuilder
+from vertice_cli.core.context import ContextBuilder
 
 def test_context_builder():
     """Test context builder functionality."""

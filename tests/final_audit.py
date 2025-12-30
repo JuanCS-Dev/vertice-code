@@ -26,7 +26,7 @@ class TestFinalAirgap(unittest.IsolatedAsyncioTestCase):
         """
         print("\n🧪 Testing Physical Airgap (Remote File Access)...")
 
-        from jdev_cli.core.providers.prometheus_provider import PrometheusProvider
+        from vertice_cli.core.providers.prometheus_provider import PrometheusProvider
 
         # Mock the orchestrator
         provider = PrometheusProvider()
@@ -53,7 +53,7 @@ class TestFinalAirgap(unittest.IsolatedAsyncioTestCase):
         """
         print("\n🧪 Testing State Airgap (Provider Switching)...")
 
-        from jdev_cli.core.providers.prometheus_provider import PrometheusProvider
+        from vertice_cli.core.providers.prometheus_provider import PrometheusProvider
 
         provider = PrometheusProvider()
 
@@ -78,7 +78,7 @@ class TestFinalAirgap(unittest.IsolatedAsyncioTestCase):
         """
         print("\n🧪 Testing Visual Airgap (Streaming Desync)...")
 
-        from jdev_cli.tui.components.block_detector import BlockDetector, BlockType
+        from vertice_cli.tui.components.block_detector import BlockDetector, BlockType
 
         detector = BlockDetector()
 
@@ -108,7 +108,7 @@ class TestFinalAirgap(unittest.IsolatedAsyncioTestCase):
         """
         print("\n🧪 Testing Protocol Airgap (MCP Timeout)...")
 
-        from jdev_cli.core.mcp import MCPClient
+        from vertice_cli.core.mcp import MCPClient
 
         # Check constants
         print(f"  Default Timeout: {MCPClient.TOOL_TIMEOUT}s")
@@ -129,7 +129,7 @@ class TestFinalAirgap(unittest.IsolatedAsyncioTestCase):
 
         # Simulate missing env
         with patch.dict(os.environ, {}, clear=True):
-            from jdev_cli.core.providers.prometheus_provider import PrometheusProvider
+            from vertice_cli.core.providers.prometheus_provider import PrometheusProvider
             provider = PrometheusProvider()
 
             if not provider.is_available():

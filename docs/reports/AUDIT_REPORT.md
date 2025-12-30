@@ -1,6 +1,6 @@
 # 🔍 AUDIT REPORT - VERDADE ABSOLUTA v1.0
 **Date:** 2025-11-17 20:14 UTC  
-**Framework:** Constituição da Verdade Absoluta  
+**Framework:** Constituicao da Verdade Absoluta  
 **Auditor:** Copilot CLI (Verdade Mode Ativado)
 
 ---
@@ -741,7 +741,7 @@ Projeto está **funcional mas não robusto**. Com 1-2 dias de fixing CRITICAL is
 ---
 
 **AUDIT COMPLETE.**  
-**Framework Applied: Constituição da Verdade Absoluta v1.0**  
+**Framework Applied: Constituicao da Verdade Absoluta v1.0**  
 **Honestidade: 100% ✅**  
 **Recommendations: Brutal mas Acionáveis ✅**  
 **Time to Fix: 6-8 hours (CRITICAL + HIGH) ✅**

@@ -11,9 +11,9 @@ import pytest
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock
-from jdev_cli.shell import InteractiveShell
-from jdev_cli.intelligence.indexer import SemanticIndexer
-from jdev_cli.tools.search import SearchFilesTool
+from vertice_cli.shell import InteractiveShell
+from vertice_cli.intelligence.indexer import SemanticIndexer
+from vertice_cli.tools.search import SearchFilesTool
 
 
 class TestRealWorldUsage:
@@ -278,12 +278,12 @@ class TestPerformance:
 
 
 class TestConstitutionalCompliance:
-    """Test Constituição Vértice compliance."""
+    """Test Constituicao Vertice compliance."""
 
     def test_no_todos_in_new_code(self):
         """P1: Verify no TODOs in Week 3 Day 1 code."""
         files_to_check = [
-            'jdev_cli/tools/search.py',  # Only new file
+            'vertice_cli/tools/search.py',  # Only new file
         ]
 
         for filepath in files_to_check:
@@ -300,8 +300,8 @@ class TestConstitutionalCompliance:
 
     def test_type_hints_present(self):
         """P1: Verify type hints in critical functions."""
-        from jdev_cli.shell import InteractiveShell
-        from jdev_cli.tools.search import SearchFilesTool
+        from vertice_cli.shell import InteractiveShell
+        from vertice_cli.tools.search import SearchFilesTool
 
         # Check shell._auto_index_background has hints
         method = InteractiveShell._auto_index_background
@@ -315,14 +315,14 @@ class TestConstitutionalCompliance:
         """P2: Verify error handling in critical paths."""
         # Verify _auto_index_background has try/except
         import inspect
-        from jdev_cli.shell import InteractiveShell
+        from vertice_cli.shell import InteractiveShell
 
         source = inspect.getsource(InteractiveShell._auto_index_background)
         assert 'try:' in source, "Missing error handling in _auto_index_background"
         assert 'except' in source, "Missing exception handling"
 
         # Verify _semantic_search has try/except
-        from jdev_cli.tools.search import SearchFilesTool
+        from vertice_cli.tools.search import SearchFilesTool
         source = inspect.getsource(SearchFilesTool._semantic_search)
         assert 'try:' in source, "Missing error handling in _semantic_search"
         assert 'except' in source, "Missing exception handling"

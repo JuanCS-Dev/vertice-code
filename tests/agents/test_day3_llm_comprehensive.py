@@ -8,9 +8,9 @@ import os
 import time
 from pathlib import Path
 from dotenv import load_dotenv
-from jdev_cli.agents.planner import PlannerAgent
-from jdev_cli.agents.refactorer import RefactorerAgent
-from jdev_cli.agents.base import TaskContext, TaskStatus
+from vertice_cli.agents.planner import PlannerAgent
+from vertice_cli.agents.refactorer import RefactorerAgent
+from vertice_cli.agents.base import TaskContext, TaskStatus
 
 # Carregar .env ANTES de qualquer teste
 load_dotenv()

@@ -9,7 +9,7 @@ Tests all parsing strategies + new features:
 
 import pytest
 import json
-from jdev_cli.core.parser import ResponseParser, ParseStrategy
+from vertice_cli.core.parser import ResponseParser, ParseStrategy
 
 
 @pytest.fixture

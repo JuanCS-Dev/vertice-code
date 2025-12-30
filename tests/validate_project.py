@@ -3,7 +3,7 @@
 COMPREHENSIVE PROJECT VALIDATION SUITE
 Validates functionality, air gaps, constitutionality, and behavior.
 
-Following CONSTITUIÇÃO VÉRTICE v3.0 - Article 7: Testing Philosophy
+Following CONSTITUIÇÃO VERTICE v3.0 - Article 7: Testing Philosophy
 """
 
 import sys
@@ -113,7 +113,7 @@ def validate_configuration(report: ValidationReport) -> None:
     report.add_section("2. CONFIGURATION VALIDATION")
 
     try:
-        from jdev_cli.core.config import config
+        from vertice_cli.core.config import config
 
         # Check required API keys
         has_hf_key = bool(config.hf_token)
@@ -156,7 +156,7 @@ def validate_llm_system(report: ValidationReport) -> None:
     report.add_section("3. LLM SYSTEM VALIDATION")
 
     try:
-        from jdev_cli.core.llm import llm_client
+        from vertice_cli.core.llm import llm_client
 
         # Test available providers
         providers = llm_client.get_available_providers()
@@ -204,7 +204,7 @@ def validate_context_system(report: ValidationReport) -> None:
     report.add_section("4. CONTEXT MANAGEMENT VALIDATION")
 
     try:
-        from jdev_cli.core.context import context_builder
+        from vertice_cli.core.context import context_builder
 
         # Test context builder methods
         report.add_test(
@@ -239,7 +239,7 @@ def validate_mcp_system(report: ValidationReport) -> None:
     report.add_section("5. MCP SYSTEM VALIDATION")
 
     try:
-        from jdev_cli.core.mcp import mcp_manager
+        from vertice_cli.core.mcp import mcp_manager
 
         # Check MCP manager
         report.add_test(
@@ -269,7 +269,7 @@ def validate_ui_system(report: ValidationReport) -> None:
     report.add_section("6. UI SYSTEM VALIDATION")
 
     try:
-        from jdev_cli.ui import create_ui
+        from vertice_cli.ui import create_ui
 
         # Test UI creation
         ui = create_ui()
@@ -297,13 +297,13 @@ def validate_file_structure(report: ValidationReport) -> None:
     base_path = Path(__file__).parent
 
     required_files = [
-        "jdev_cli/__init__.py",
-        "jdev_cli/core/__init__.py",
-        "jdev_cli/core/config.py",
-        "jdev_cli/core/llm.py",
-        "jdev_cli/core/context.py",
-        "jdev_cli/core/mcp.py",
-        "jdev_cli/ui.py",
+        "vertice_cli/__init__.py",
+        "vertice_cli/core/__init__.py",
+        "vertice_cli/core/config.py",
+        "vertice_cli/core/llm.py",
+        "vertice_cli/core/context.py",
+        "vertice_cli/core/mcp.py",
+        "vertice_cli/ui.py",
         "requirements.txt",
         "README.md",
         "MASTER_PLAN.md",
@@ -320,8 +320,8 @@ def validate_file_structure(report: ValidationReport) -> None:
 
 
 def validate_constitutional_compliance(report: ValidationReport) -> None:
-    """Validate constitutional compliance (CONSTITUIÇÃO VÉRTICE v3.0)."""
-    report.add_section("8. CONSTITUTIONAL COMPLIANCE (VÉRTICE v3.0)")
+    """Validate constitutional compliance (CONSTITUIÇÃO VERTICE v3.0)."""
+    report.add_section("8. CONSTITUTIONAL COMPLIANCE (VERTICE v3.0)")
 
     base_path = Path(__file__).parent
 
@@ -341,7 +341,7 @@ def validate_constitutional_compliance(report: ValidationReport) -> None:
 
     # Article 3: Eficiência de Tokens
     try:
-        from jdev_cli.core.llm import llm_client
+        from vertice_cli.core.llm import llm_client
         has_streaming = hasattr(llm_client, 'stream_chat')
         report.add_test(
             "Art. 3: Eficiência - Streaming support",
@@ -354,7 +354,7 @@ def validate_constitutional_compliance(report: ValidationReport) -> None:
     # Article 4: Composabilidade Hierárquica
     report.add_test(
         "Art. 4: Composabilidade - Modular structure",
-        (base_path / "jdev_cli" / "core").is_dir(),
+        (base_path / "vertice_cli" / "core").is_dir(),
         "Hierarchical architecture"
     )
 
@@ -388,7 +388,7 @@ def validate_air_gaps(report: ValidationReport) -> None:
     report.add_section("9. AIR GAPS & ERROR HANDLING")
 
     try:
-        from jdev_cli.core.llm import llm_client
+        from vertice_cli.core.llm import llm_client
 
         # Test graceful degradation (multi-provider system)
         providers = llm_client.get_available_providers()
@@ -407,7 +407,7 @@ def validate_air_gaps(report: ValidationReport) -> None:
         )
 
         # Test context safety
-        from jdev_cli.core.context import context_builder
+        from vertice_cli.core.context import context_builder
         try:
             context_builder.clear()
             report.add_test(
@@ -439,7 +439,7 @@ def validate_performance(report: ValidationReport) -> None:
 
         # Test UI creation speed
         start = time.time()
-        from jdev_cli.ui import create_ui
+        from vertice_cli.ui import create_ui
         ui = create_ui()
         ui_time = (time.time() - start) * 1000
 
@@ -456,7 +456,7 @@ def validate_performance(report: ValidationReport) -> None:
 def main():
     """Run comprehensive validation."""
     print("\n🔍 Starting Comprehensive Project Validation...")
-    print("📜 Following CONSTITUIÇÃO VÉRTICE v3.0 protocols\n")
+    print("📜 Following CONSTITUIÇÃO VERTICE v3.0 protocols\n")
 
     report = ValidationReport()
 

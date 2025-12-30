@@ -1,7 +1,7 @@
 # 🔍 CONTEXTO SISTÊMICO COMPLETO - QWEN-DEV-CLI
 
 **Gerado em:** 2025-11-19 19:25 UTC  
-**Executor:** Claude (Copilot CLI) sob Constituição Vértice v3.0  
+**Executor:** Claude (Copilot CLI) sob Constituicao Vertice v3.0  
 **Status:** ✅ ANÁLISE COMPLETA E VALIDADA
 
 ---
@@ -903,5 +903,5 @@ Se o objetivo é **trabalhar no CLI/shell interativo**, as áreas de foco seriam
 
 ---
 
-**Relatório gerado sob Constituição Vértice v3.0**  
+**Relatório gerado sob Constituicao Vertice v3.0**  
 **Status:** ✅ CONTEXTO SISTÊMICO COMPLETO E VALIDADO

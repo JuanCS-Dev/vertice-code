@@ -3,8 +3,8 @@ Day 3 - Planner Comprehensive Tests (Boris Cherny Standards)
 Tests completos do Planner Agent com todos os edge cases.
 """
 from pathlib import Path
-from jdev_cli.agents.planner import PlannerAgent
-from jdev_cli.agents.base import TaskContext, TaskStatus
+from vertice_cli.agents.planner import PlannerAgent
+from vertice_cli.agents.base import TaskContext, TaskStatus
 
 
 class TestPlannerImplementationPlanning:
@@ -465,7 +465,7 @@ class TestPlannerEdgeCases:
 
 
 class TestPlannerConstitutionalCompliance:
-    """Tests de aderência à Constituição"""
+    """Tests de aderência à Constituicao"""
 
     def test_planner_respects_token_budget(self):
         """Deve respeitar budget de tokens"""

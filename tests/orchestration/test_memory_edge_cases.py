@@ -14,7 +14,7 @@ from datetime import timedelta
 from threading import Thread
 from typing import List
 
-from jdev_cli.orchestration.memory import (
+from vertice_cli.orchestration.memory import (
     MemoryManager,
     SharedContext,
 )

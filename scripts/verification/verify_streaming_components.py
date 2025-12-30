@@ -10,9 +10,9 @@ from rich.console import Console
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from jdev_tui.core.streaming.soft_buffer import SoftBuffer
-from jdev_cli.tui.components.block_detector import BlockDetector, BlockType
-from jdev_cli.tui.components.streaming_markdown import BlockWidgetFactory
+from vertice_tui.core.streaming.soft_buffer import SoftBuffer
+from vertice_cli.tui.components.block_detector import BlockDetector, BlockType
+from vertice_cli.tui.components.streaming_markdown import BlockWidgetFactory
 
 console = Console()
 

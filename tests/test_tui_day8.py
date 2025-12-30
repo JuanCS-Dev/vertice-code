@@ -18,7 +18,7 @@ from io import StringIO
 
 from rich.console import Console
 
-from jdev_cli.tui.components.enhanced_progress import (
+from vertice_cli.tui.components.enhanced_progress import (
     EnhancedProgressDisplay,
     WorkflowProgress,
     StageProgress,
@@ -26,7 +26,7 @@ from jdev_cli.tui.components.enhanced_progress import (
     OperationType,
     ThinkingIndicator,
 )
-from jdev_cli.tui.components.dashboard import (
+from vertice_cli.tui.components.dashboard import (
     Dashboard,
     Operation,
     OperationStatus,
@@ -34,7 +34,7 @@ from jdev_cli.tui.components.dashboard import (
     SystemMetrics,
     ContextWindowInfo,
 )
-from jdev_cli.tui.components.markdown_enhanced import (
+from vertice_cli.tui.components.markdown_enhanced import (
     EnhancedMarkdown,
     CodeBlock,
     DiffViewer,

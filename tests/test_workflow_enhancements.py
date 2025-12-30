@@ -10,7 +10,7 @@ import tempfile
 import shutil
 from pathlib import Path
 
-from jdev_cli.core.workflow import (
+from vertice_cli.core.workflow import (
     GitRollback,
     PartialRollback
 )

@@ -76,7 +76,7 @@ def real_llm_client(use_real_llm, llm_provider):
         pytest.skip("Real LLM not requested (use --real-llm)")
 
     # Try to create client based on provider
-    from jdev_cli.core.llm import LLMClient
+    from vertice_cli.core.llm import LLMClient
 
     provider_key = REAL_LLM_PROVIDERS.get(llm_provider)
     if not provider_key:

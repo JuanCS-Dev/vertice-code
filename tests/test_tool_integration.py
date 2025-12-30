@@ -1,5 +1,5 @@
 """
-Tests for Tool Integration in jdev_tui
+Tests for Tool Integration in vertice_tui
 ======================================
 
 Tests the ToolCallParser, OutputFormatter, and Bridge tool execution.
@@ -18,8 +18,8 @@ from io import StringIO
 from rich.console import Console
 
 # Import components to test
-from jdev_tui.core.bridge import ToolCallParser
-from jdev_tui.core.output_formatter import OutputFormatter
+from vertice_tui.core.bridge import ToolCallParser
+from vertice_tui.core.output_formatter import OutputFormatter
 
 
 # =============================================================================
@@ -206,7 +206,7 @@ class TestBridgeToolConfiguration:
 
     def test_get_system_prompt_contains_tools(self):
         """Test that system prompt includes tool information."""
-        from jdev_tui.core.bridge import Bridge
+        from vertice_tui.core.bridge import Bridge
 
         bridge = Bridge()
         prompt = bridge._get_system_prompt()
@@ -217,7 +217,7 @@ class TestBridgeToolConfiguration:
 
     def test_configure_llm_tools_sets_schemas(self):
         """Test that _configure_llm_tools sets tool schemas on LLM."""
-        from jdev_tui.core.bridge import Bridge
+        from vertice_tui.core.bridge import Bridge
 
         bridge = Bridge()
 
@@ -243,7 +243,7 @@ class TestBridgeChatIntegration:
     @pytest.mark.asyncio
     async def test_chat_without_tool_calls(self):
         """Test chat that doesn't trigger tool calls."""
-        from jdev_tui.core.bridge import Bridge
+        from vertice_tui.core.bridge import Bridge
 
         bridge = Bridge()
 
@@ -264,7 +264,7 @@ class TestBridgeChatIntegration:
     @pytest.mark.asyncio
     async def test_chat_with_tool_call_detection(self):
         """Test that tool calls are detected in LLM response."""
-        from jdev_tui.core.bridge import Bridge
+        from vertice_tui.core.bridge import Bridge
 
         bridge = Bridge()
 
@@ -301,7 +301,7 @@ class TestToolBridgeRegistry:
 
     def test_tool_bridge_initializes(self):
         """Test that ToolBridge can be created."""
-        from jdev_tui.core.bridge import ToolBridge
+        from vertice_tui.core.bridge import ToolBridge
 
         bridge = ToolBridge()
 
@@ -310,7 +310,7 @@ class TestToolBridgeRegistry:
 
     def test_tool_bridge_lists_tools(self):
         """Test that ToolBridge can list tools."""
-        from jdev_tui.core.bridge import ToolBridge
+        from vertice_tui.core.bridge import ToolBridge
 
         bridge = ToolBridge()
         tools = bridge.list_tools()
@@ -320,7 +320,7 @@ class TestToolBridgeRegistry:
 
     def test_tool_bridge_get_schemas(self):
         """Test that ToolBridge can get schemas for LLM."""
-        from jdev_tui.core.bridge import ToolBridge
+        from vertice_tui.core.bridge import ToolBridge
 
         bridge = ToolBridge()
         schemas = bridge.get_schemas_for_llm()

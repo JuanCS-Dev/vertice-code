@@ -24,10 +24,10 @@ import asyncio
 from unittest.mock import Mock, AsyncMock
 
 # Import everything
-from jdev_cli.maestro_governance import MaestroGovernance
-from jdev_cli.agents.base import AgentTask
-from jdev_cli.core.llm import LLMClient
-from jdev_cli.core.mcp_client import MCPClient
+from vertice_cli.maestro_governance import MaestroGovernance
+from vertice_cli.agents.base import AgentTask
+from vertice_cli.core.llm import LLMClient
+from vertice_cli.core.mcp_client import MCPClient
 
 
 # ============================================================================
@@ -234,7 +234,7 @@ class TestSeniorProgrammer:
         """Senior dev tests if permission system is solid"""
         # ISSUE: Can we escalate permissions?
 
-        from jdev_cli.core.agent_identity import AGENT_IDENTITIES, AgentPermission
+        from vertice_cli.core.agent_identity import AGENT_IDENTITIES, AgentPermission
 
         # Try to modify permissions (should fail with immutable dict)
         try:
@@ -502,7 +502,7 @@ class TestVibeCoder:
         """Vibe coder typos agent name"""
         # ISSUE: Helpful error with suggestions?
 
-        from jdev_cli.core.agent_identity import get_agent_identity
+        from vertice_cli.core.agent_identity import get_agent_identity
 
         identity = get_agent_identity("executer")  # Typo: should be "executor"
 
@@ -828,7 +828,7 @@ class TestScriptKiddie:
         """Script kiddie tries timing attack to leak info"""
         # ISSUE: Are operations constant time?
 
-        from jdev_cli.core.agent_identity import get_agent_identity
+        from vertice_cli.core.agent_identity import get_agent_identity
 
         import time
 
@@ -870,7 +870,7 @@ class TestScriptKiddie:
         """Script kiddie exploits race condition"""
         # ISSUE: Can permissions be changed mid-execution?
 
-        from jdev_cli.core.agent_identity import get_agent_identity
+        from vertice_cli.core.agent_identity import get_agent_identity
 
         async def modify_permissions():
             await asyncio.sleep(0.01)

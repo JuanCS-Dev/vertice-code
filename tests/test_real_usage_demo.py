@@ -11,11 +11,11 @@ from pathlib import Path
 # Add project to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from jdev_cli.core.llm import LLMClient
-from jdev_cli.core.token_tracker import TokenTracker
-from jdev_cli.session.manager import SessionManager
-from jdev_cli.tools.base import ToolRegistry
-from jdev_cli.tools.file_ops import ReadFileTool, ListDirectoryTool
+from vertice_cli.core.llm import LLMClient
+from vertice_cli.core.token_tracker import TokenTracker
+from vertice_cli.session.manager import SessionManager
+from vertice_cli.tools.base import ToolRegistry
+from vertice_cli.tools.file_ops import ReadFileTool, ListDirectoryTool
 from rich.console import Console
 
 

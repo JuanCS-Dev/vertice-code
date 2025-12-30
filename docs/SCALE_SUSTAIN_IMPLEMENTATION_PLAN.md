@@ -23,7 +23,7 @@ Este plano detalha a estratégia cirúrgica para escalar o sistema juan-dev-code
 ### 1.1 Refatoração do Bridge (Semanas 1-3)
 
 #### Diagnóstico
-- **Localização**: `jdev_tui/core/bridge.py`
+- **Localização**: `vertice_tui/core/bridge.py`
 - **LOC**: 1,461
 - **Métodos**: 74 (GOD CLASS)
 - **Responsabilidades identificadas**: 17 grupos distintos
@@ -38,7 +38,7 @@ Métodos a extrair:
 - get_todos()
 - clear_todos()
 
-Localização destino: jdev_tui/core/managers/todo_manager.py
+Localização destino: vertice_tui/core/managers/todo_manager.py
 Interface: ITodoManager
 Impacto: -4 métodos do Bridge
 ```
@@ -52,7 +52,7 @@ Métodos a extrair:
 - get_auth_status()
 - refresh_token()
 
-Localização destino: jdev_tui/core/managers/auth_manager.py
+Localização destino: vertice_tui/core/managers/auth_manager.py
 Interface: IAuthManager
 Impacto: -5 métodos do Bridge
 ```
@@ -65,7 +65,7 @@ Métodos a extrair:
 - forget()
 - get_memory_stats()
 
-Localização destino: jdev_tui/core/managers/memory_manager.py
+Localização destino: vertice_tui/core/managers/memory_manager.py
 Interface: IMemoryManager
 Impacto: -4 métodos do Bridge
 ```
@@ -79,7 +79,7 @@ Métodos a extrair:
 - compact_context()
 - get_context_stats()
 
-Localização destino: jdev_tui/core/managers/context_manager.py
+Localização destino: vertice_tui/core/managers/context_manager.py
 Interface: IContextManager
 Impacto: -5 métodos do Bridge
 ```
@@ -90,7 +90,7 @@ Métodos a extrair:
 - get_system_status()
 - get_health_check()
 
-Localização destino: jdev_tui/core/managers/status_manager.py
+Localização destino: vertice_tui/core/managers/status_manager.py
 Interface: IStatusManager
 Impacto: -2 métodos do Bridge
 ```
@@ -101,7 +101,7 @@ Métodos a extrair:
 - create_pr()
 - create_draft_pr()
 
-Localização destino: jdev_tui/core/managers/pr_manager.py
+Localização destino: vertice_tui/core/managers/pr_manager.py
 Interface: IPullRequestManager
 Impacto: -2 métodos do Bridge
 ```
@@ -113,8 +113,8 @@ Impacto: -2 métodos do Bridge
 - **Padrão**: Facade mantido, delegação para managers
 
 #### Ordem de Execução
-1. Criar diretório `jdev_tui/core/managers/`
-2. Criar interfaces em `jdev_tui/core/interfaces/`
+1. Criar diretório `vertice_tui/core/managers/`
+2. Criar interfaces em `vertice_tui/core/interfaces/`
 3. Extrair TodoManager (menor, validar padrão)
 4. Extrair StatusManager (simples)
 5. Extrair PullRequestManager (simples)
@@ -129,7 +129,7 @@ Impacto: -2 métodos do Bridge
 ### 1.2 Redução de Complexidade Ciclomática (Semanas 4-5)
 
 #### Diagnóstico
-- **Localização**: `jdev_cli/shell_main.py`
+- **Localização**: `vertice_cli/shell_main.py`
 - **LOC**: 2,514
 - **CC atual**: 16.43 (crítico)
 - **Hotspot**: `_handle_system_command()` - 677 linhas, CC ~45-50
@@ -162,7 +162,7 @@ class CommandDispatcher:
             return await handler.execute(args)
         return CommandResult.unknown(command)
 
-Localização: jdev_cli/handlers/command_dispatcher.py
+Localização: vertice_cli/handlers/command_dispatcher.py
 ```
 
 **1.2.2 LSPCommandHandler** (Redução: -20 a -25 CC)
@@ -179,7 +179,7 @@ class LSPCommandHandler:
     async def handle_diagnostics(self, params) -> DiagnosticsResult: ...
     async def handle_formatting(self, params) -> FormattingResult: ...
 
-Localização: jdev_cli/handlers/lsp_handler.py
+Localização: vertice_cli/handlers/lsp_handler.py
 ```
 
 **1.2.3 ToolResultFormatter** (Redução: -10 a -12 CC)
@@ -202,7 +202,7 @@ class ToolResultFormatter:
         formatter = self._formatters.get(tool_name, format_generic)
         return formatter(result)
 
-Localização: jdev_cli/formatters/tool_formatter.py
+Localização: vertice_cli/formatters/tool_formatter.py
 ```
 
 **1.2.4 InputHandler** (Redução: -5 a -8 CC)
@@ -214,7 +214,7 @@ class InputHandler:
     def validate_input(self, parsed: ParsedInput) -> ValidationResult: ...
     def preprocess_input(self, validated: ParsedInput) -> str: ...
 
-Localização: jdev_cli/handlers/input_handler.py
+Localização: vertice_cli/handlers/input_handler.py
 ```
 
 #### Resultado Esperado
@@ -224,7 +224,7 @@ Localização: jdev_cli/handlers/input_handler.py
 - **Manutenibilidade**: Cada handler testável isoladamente
 
 #### Ordem de Execução
-1. Criar `jdev_cli/handlers/` se não existir
+1. Criar `vertice_cli/handlers/` se não existir
 2. Extrair CommandDispatcher (maior impacto)
 3. Extrair LSPCommandHandler (segundo maior)
 4. Extrair ToolResultFormatter (padrão registry)
@@ -242,11 +242,11 @@ Localização: jdev_cli/handlers/input_handler.py
 
 | Tipo | Localização 1 | Localização 2 | Status |
 |------|--------------|---------------|--------|
-| CircuitBreaker | jdev_cli/core/llm.py:52 | jdev_tui/core/llm_client.py:61 | Diferentes |
-| CircuitState | jdev_cli/core/llm.py:44 | jdev_tui/core/llm_client.py:33 | Idênticos |
+| CircuitBreaker | vertice_cli/core/llm.py:52 | vertice_tui/core/llm_client.py:61 | Diferentes |
+| CircuitState | vertice_cli/core/llm.py:44 | vertice_tui/core/llm_client.py:33 | Idênticos |
 | BlockType | block_detector.py:17 | block_renderers.py:48 | String vs Auto |
 | AgentIdentity | agent_identity.py:71 | protocol.py:149 | Diferentes propósitos |
-| AgentRole | jdev_core/types.py:51 | protocol.py:52 | Subset |
+| AgentRole | vertice_core/types.py:51 | protocol.py:52 | Subset |
 | AgentPriority | planner/types.py | planner/priority.py | Duplicado |
 | CheckpointType | planner/types.py | planner/checkpoint.py | Duplicado |
 | Action | planner/types.py | planner/actions.py | Duplicado |
@@ -255,7 +255,7 @@ Localização: jdev_cli/handlers/input_handler.py
 
 **1.3.1 Criar Estrutura Unificada de Tipos**
 ```
-jdev_core/
+vertice_core/
 ├── types/
 │   ├── __init__.py          # Re-exports públicos
 │   ├── circuit.py            # CircuitBreaker, CircuitState
@@ -267,7 +267,7 @@ jdev_core/
 
 **1.3.2 CircuitBreaker Unificado**
 ```python
-# jdev_core/types/circuit.py
+# vertice_core/types/circuit.py
 
 from enum import Enum, auto
 from dataclasses import dataclass
@@ -303,7 +303,7 @@ class CircuitBreaker:
 
 **1.3.3 BlockType Unificado**
 ```python
-# jdev_core/types/blocks.py
+# vertice_core/types/blocks.py
 
 from enum import Enum
 
@@ -321,7 +321,7 @@ class BlockType(Enum):
 
 **1.3.4 AgentIdentity Consolidado**
 ```python
-# jdev_core/types/agents.py
+# vertice_core/types/agents.py
 
 from enum import Enum
 from dataclasses import dataclass
@@ -373,12 +373,12 @@ class AgentIdentity:
 
 # Exemplo de deprecation
 import warnings
-from jdev_core.types import CircuitBreaker as _CircuitBreaker
+from vertice_core.types import CircuitBreaker as _CircuitBreaker
 
 class CircuitBreaker(_CircuitBreaker):
     def __init__(self, *args, **kwargs):
         warnings.warn(
-            "Import from jdev_core.types.circuit instead",
+            "Import from vertice_core.types.circuit instead",
             DeprecationWarning,
             stacklevel=2
         )
@@ -388,7 +388,7 @@ class CircuitBreaker(_CircuitBreaker):
 #### Resultado Esperado
 - **Duplicação**: 10.9% → ~5% (-54%)
 - **Tipos consolidados**: 8 → 1 localização cada
-- **Imports padronizados**: `from jdev_core.types import X`
+- **Imports padronizados**: `from vertice_core.types import X`
 
 ---
 
@@ -541,7 +541,7 @@ class PluginLoader:
 #### Interfaces Principais
 
 ```python
-# jdev_core/interfaces/__init__.py
+# vertice_core/interfaces/__init__.py
 
 from abc import ABC, abstractmethod
 from typing import AsyncIterator, Optional, Dict, Any, List

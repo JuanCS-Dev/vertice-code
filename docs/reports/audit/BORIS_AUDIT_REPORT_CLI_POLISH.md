@@ -489,7 +489,7 @@ Autocomplete: hover, goto, refs, diag, complete, signature
 
 ## ✅ CONSTITUTIONAL COMPLIANCE
 
-### **Princípios Vértice v3.0:**
+### **Princípios Vertice v3.0:**
 - ✅ **P1 (Completude):** No TODOs, no placeholders
 - ✅ **P2 (Validação):** All APIs validated
 - ✅ **P3 (Ceticismo):** Error handling robust

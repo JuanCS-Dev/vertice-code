@@ -2,17 +2,17 @@
 """Quick test for streaming fix"""
 
 import asyncio
-from jdev_cli.core.llm import LLMClient
-from jdev_cli.core.mcp_client import MCPClient
-from jdev_cli.agents.executor import NextGenExecutorAgent, ExecutionMode, SecurityLevel
-from jdev_cli.agents.base import AgentTask
+from vertice_cli.core.llm import LLMClient
+from vertice_cli.core.mcp_client import MCPClient
+from vertice_cli.agents.executor import NextGenExecutorAgent, ExecutionMode, SecurityLevel
+from vertice_cli.agents.base import AgentTask
 
 async def main():
     # Initialize clients
     llm = LLMClient()
 
     # Initialize MCP with empty registry (test doesn't need real tools)
-    from jdev_cli.tools.base import ToolRegistry
+    from vertice_cli.tools.base import ToolRegistry
     registry = ToolRegistry()
     mcp = MCPClient(registry)
 

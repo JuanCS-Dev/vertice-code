@@ -2,8 +2,8 @@
 
 import asyncio
 from dotenv import load_dotenv
-from jdev_cli.core.llm import llm_client
-from jdev_cli.core.config import config
+from vertice_cli.core.llm import llm_client
+from vertice_cli.core.config import config
 
 # Load environment variables
 load_dotenv()

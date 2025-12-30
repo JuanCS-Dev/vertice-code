@@ -1,5 +1,5 @@
 # 🏛️ CONSTITUTIONAL ADHERENCE REPORT
-## QWEN-DEV-CLI vs CONSTITUIÇÃO VÉRTICE v3.0
+## QWEN-DEV-CLI vs CONSTITUIÇÃO VERTICE v3.0
 
 **Generated:** 2025-11-17 23:24 UTC  
 **Project:** qwen-dev-cli (GitHub Copilot CLI clone)  
@@ -10,7 +10,7 @@
 
 ## ✅ EXECUTIVE SUMMARY: **95% ADHERENT** 🔥
 
-**qwen-dev-cli implementa NATURALMENTE os princípios da Constituição Vértice v3.0!**
+**qwen-dev-cli implementa NATURALMENTE os princípios da Constituicao Vertice v3.0!**
 
 Nossa arquitetura tool-based, parser robusto, safety validator e session management já seguem os 5 layers do DETER-AGENT framework:
 
@@ -32,7 +32,7 @@ Nossa arquitetura tool-based, parser robusto, safety validator e session managem
 
 #### **Artigo I: A Célula de Desenvolvimento Híbrida**
 
-**Constituição diz:**
+**Constituicao diz:**
 > "Arquiteto-Chefe (Humano) + Co-Arquiteto Cético (IA) + Executores Táticos (IAs)"
 
 **qwen-dev-cli implementa:**
@@ -48,7 +48,7 @@ Nossa arquitetura tool-based, parser robusto, safety validator e session managem
 
 #### **Artigo II: O Padrão Pagani (Qualidade Inquebrável)**
 
-**Constituição diz:**
+**Constituicao diz:**
 > "99% de qualidade ou não entregar. Métricas: LEI < 1.0, HRI < 0.1, CPI > 0.9"
 
 **qwen-dev-cli implementa:**
@@ -66,7 +66,7 @@ Nossa arquitetura tool-based, parser robusto, safety validator e session managem
 
 #### **Artigo III: Princípio da Confiança Zero**
 
-**Constituição diz:**
+**Constituicao diz:**
 > "Todo artefato (código LLM, output, etc) é NÃO-CONFIÁVEL até validado"
 
 **qwen-dev-cli implementa:**
@@ -86,7 +86,7 @@ Nossa arquitetura tool-based, parser robusto, safety validator e session managem
 
 #### **🔴 LAYER 1: Camada Constitucional (Controle Estratégico)**
 
-**Constituição exige:**
+**Constituicao exige:**
 > "System prompts estruturados + Few-shot examples + Anti-prompt-injection"
 
 **qwen-dev-cli implementa:**
@@ -117,7 +117,7 @@ Nossa arquitetura tool-based, parser robusto, safety validator e session managem
 
 #### **🟠 LAYER 2: Camada de Deliberação (Controle Cognitivo)**
 
-**Constituição exige:**
+**Constituicao exige:**
 > "Tree-of-Thought planning + Auto-crítica + Lazy execution detection"
 
 **qwen-dev-cli implementa:**
@@ -149,7 +149,7 @@ Nossa arquitetura tool-based, parser robusto, safety validator e session managem
 
 #### **🟡 LAYER 3: Camada de Gerenciamento de Estado (Controle de Memória)**
 
-**Constituição exige:**
+**Constituicao exige:**
 > "Context compaction + Progressive disclosure + Sub-agents isolation"
 
 **qwen-dev-cli implementa:**
@@ -182,7 +182,7 @@ Nossa arquitetura tool-based, parser robusto, safety validator e session managem
 
 #### **🟢 LAYER 4: Camada de Execução (Controle Operacional)**
 
-**Constituição exige:**
+**Constituicao exige:**
 > "Tool Use Mandatório + CRANE + Verify-Fix-Execute loop + Anti-regression"
 
 **qwen-dev-cli implementa:**
@@ -221,7 +221,7 @@ Nossa arquitetura tool-based, parser robusto, safety validator e session managem
 
 #### **🔵 LAYER 5: Camada de Incentivo (Controle Comportamental)**
 
-**Constituição exige:**
+**Constituicao exige:**
 > "Preference-as-Reward + Determinism metrics (LEI, HRI, CPI) + Evaluation"
 
 **qwen-dev-cli implementa:**
@@ -329,7 +329,7 @@ TARGET BY NOV 30: 95%+
 
 ### **Failure Taxonomy Coverage**
 
-**From Constituição Anexo G - Failures Mitigated:**
+**From Constituicao Anexo G - Failures Mitigated:**
 
 | Failure Type | qwen-dev-cli Mitigation | Status |
 |--------------|------------------------|--------|
@@ -407,7 +407,7 @@ TARGET BY NOV 30: 95%+
 
 ## 📊 METRICS COMPARISON
 
-### **Constituição Vértice Standards:**
+### **Constituicao Vertice Standards:**
 
 | Metric | Target | qwen-dev-cli Current | Status |
 |--------|--------|---------------------|--------|
@@ -422,7 +422,7 @@ TARGET BY NOV 30: 95%+
 
 ## 🎯 CONCLUSION: **HIGHLY ADHERENT**
 
-**qwen-dev-cli está 88-90% aderente à Constituição Vértice v3.0!**
+**qwen-dev-cli está 88-90% aderente à Constituicao Vertice v3.0!**
 
 ### **Strengths (95-100%):**
 ✅ Tool execution layer (PERFECT!)  
@@ -453,8 +453,8 @@ TARGET BY NOV 30: 95%+
 
 ## 📚 REFERENCES
 
-**Constituição Vértice v3.0:**
-- Path: `/home/maximus/Downloads/CONSTITUIÇÃO_VÉRTICE_v3.0.md`
+**Constituicao Vertice v3.0:**
+- Path: `/home/maximus/Downloads/CONSTITUIÇÃO_VERTICE_v3.0.md`
 - Framework: DETER-AGENT (5 layers)
 - Standards: LEI < 1.0, HRI < 0.1, CPI > 0.9
 

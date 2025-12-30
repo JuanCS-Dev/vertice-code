@@ -3,8 +3,8 @@ Day 3 - Refactorer Comprehensive Tests (Boris Cherny Standards)
 Tests completos do Refactorer Agent com todos os edge cases.
 """
 from pathlib import Path
-from jdev_cli.agents.refactorer import RefactorerAgent
-from jdev_cli.agents.base import TaskContext, TaskStatus
+from vertice_cli.agents.refactorer import RefactorerAgent
+from vertice_cli.agents.base import TaskContext, TaskStatus
 
 
 class TestRefactorerCodeSmells:
@@ -623,7 +623,7 @@ class TestRefactorerEdgeCases:
 
 
 class TestRefactorerConstitutionalCompliance:
-    """Tests de aderência à Constituição"""
+    """Tests de aderência à Constituicao"""
 
     def test_refactorer_produces_zero_technical_debt(self):
         """Deve produzir zero technical debt (Artigo VII)"""

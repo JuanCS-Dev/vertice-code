@@ -15,7 +15,7 @@ import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from jdev_cli.agents.planner import (
+from vertice_cli.agents.planner import (
     ExecutionMonitor,
     ExecutionEvent,
     ExecutionStrategy,

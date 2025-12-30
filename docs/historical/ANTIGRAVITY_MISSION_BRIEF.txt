@@ -53,7 +53,7 @@ ISSUE #3: Text Truncation
 ║                  PHILOSOPHY (CRITICAL)                            ║
 ╚═══════════════════════════════════════════════════════════════════╝
 
-This system follows "CONSTITUIÇÃO VÉRTICE v3.0":
+This system follows "CONSTITUIÇÃO VERTICE v3.0":
   - P1: Completeness (zero TODOs, zero placeholders)
   - P3: Critical Skepticism (don't assume, verify)
   - P6: Token Efficiency (surgical changes only)
@@ -86,7 +86,7 @@ Key Files:
 If completely stuck:
   1. Check git log (recent fixes documented)
   2. Read CONSTITUTIONAL_FIX_REPORT.md
-  3. Consult docs/CONSTITUIÇÃO_VÉRTICE_v3.0.md
+  3. Consult docs/CONSTITUIÇÃO_VERTICE_v3.0.md
   
 Rollback if needed:
   git reset --hard HEAD~1

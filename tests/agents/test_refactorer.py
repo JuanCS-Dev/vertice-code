@@ -7,8 +7,8 @@ Validates step execution, self-correction, validation.
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from jdev_cli.agents.refactorer import RefactorerAgent
-from jdev_cli.agents.base import AgentTask, AgentCapability, AgentRole
+from vertice_cli.agents.refactorer import RefactorerAgent
+from vertice_cli.agents.base import AgentTask, AgentCapability, AgentRole
 
 
 class TestRefactorerBasic:

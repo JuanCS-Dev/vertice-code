@@ -1,6 +1,6 @@
 # RELATÓRIO COMPLETO DE PROBLEMAS - qwen-dev-cli
 **Data**: 2025-11-24
-**Auditor**: Claude Code (Executor Tático sob Constituição Vértice v3.0)
+**Auditor**: Claude Code (Executor Tático sob Constituicao Vertice v3.0)
 **Sistema**: qwen-dev-cli (commit e8a56f2)
 **Metodologia**: ULTRATHINK Deep Testing + Constitutional Audit
 
@@ -563,7 +563,7 @@ pip install -e .
 
 ## 📈 MÉTRICAS CONSTITUCIONAIS
 
-### Conformidade com Vértice v3.0
+### Conformidade com Vertice v3.0
 
 | Métrica | Valor Atual | Target | Status |
 |---------|-------------|--------|--------|
@@ -650,6 +650,6 @@ class MCPClient:
 
 ---
 
-**Relatório gerado seguindo Constituição Vértice v3.0**
+**Relatório gerado seguindo Constituicao Vertice v3.0**
 **Princípios aplicados**: P1-P6, DETER-AGENT Framework
 **Nível de confiança**: 9/10 (testado empiricamente)

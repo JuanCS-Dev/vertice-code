@@ -1,6 +1,6 @@
 """Test script for MCP manager."""
 
-from jdev_cli.core.mcp import MCPManager
+from vertice_cli.core.mcp import MCPManager
 
 def test_mcp_manager():
     """Test MCP manager functionality."""

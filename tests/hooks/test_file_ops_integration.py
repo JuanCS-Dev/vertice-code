@@ -10,9 +10,9 @@ import shutil
 from pathlib import Path
 from unittest.mock import Mock
 
-from jdev_cli.tools.file_ops import WriteFileTool, EditFileTool
-from jdev_cli.hooks import HookExecutor
-from jdev_cli.config.schema import QwenConfig, HooksConfig
+from vertice_cli.tools.file_ops import WriteFileTool, EditFileTool
+from vertice_cli.hooks import HookExecutor
+from vertice_cli.config.schema import QwenConfig, HooksConfig
 
 
 class TestFileOpsHooksIntegration:

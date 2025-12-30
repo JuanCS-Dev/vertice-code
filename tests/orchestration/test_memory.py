@@ -10,7 +10,7 @@ Tests cover:
 
 from datetime import datetime
 
-from jdev_cli.orchestration.memory import (
+from vertice_cli.orchestration.memory import (
     MemoryManager,
     SharedContext,
 )

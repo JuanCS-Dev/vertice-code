@@ -13,13 +13,13 @@ Test Coverage:
 
 import pytest
 from pathlib import Path
-from jdev_cli.tui.input_enhanced import MultiLineMode, IntelligentCompleter, InputContext
-from jdev_cli.tui.components.autocomplete import (
+from vertice_cli.tui.input_enhanced import MultiLineMode, IntelligentCompleter, InputContext
+from vertice_cli.tui.components.autocomplete import (
     ContextAwareCompleter,
     CompletionItem,
     CompletionType
 )
-from jdev_cli.tui.history import CommandHistory, HistoryEntry
+from vertice_cli.tui.history import CommandHistory, HistoryEntry
 from datetime import datetime
 from prompt_toolkit.document import Document
 

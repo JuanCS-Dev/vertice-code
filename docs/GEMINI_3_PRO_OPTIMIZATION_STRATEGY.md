@@ -4,7 +4,7 @@
 **Clearance:** OMNI-ROOT
 
 ## 1. EXECUTIVE SUMMARY
-This document defines the "PhD-Level" optimization strategy for the Vértice Ecosystem, specifically tailored for **Gemini 3 Pro**. We are moving from a "compatible" integration to a **"Native"** integration, leveraging the full sovereign capabilities of the model.
+This document defines the "PhD-Level" optimization strategy for the Vertice Ecosystem, specifically tailored for **Gemini 3 Pro**. We are moving from a "compatible" integration to a **"Native"** integration, leveraging the full sovereign capabilities of the model.
 
 ## 2. GEMINI 3 PRO ARCHITECTURE (Simulated/Native)
 
@@ -25,7 +25,7 @@ The current implementation uses standard REST-like behavior wrapped in threads.
 
 ## 3. IMPLEMENTATION AUDIT & FIXES
 
-### 3.1. `jdev_cli/core/providers/gemini.py` Refactor
+### 3.1. `vertice_cli/core/providers/gemini.py` Refactor
 *   **Current State:**
     *   Naive token count.
     *   Manual history construction (`_format_messages`).

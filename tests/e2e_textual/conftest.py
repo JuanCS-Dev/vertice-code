@@ -93,7 +93,7 @@ def screenshots_dir():
 @pytest.fixture
 def temp_project():
     """Create a temporary project directory for testing."""
-    tmpdir = tempfile.mkdtemp(prefix="jdev_e2e_")
+    tmpdir = tempfile.mkdtemp(prefix="vertice_e2e_")
 
     # Initialize as git repo
     os.system(f"cd {tmpdir} && git init -q")

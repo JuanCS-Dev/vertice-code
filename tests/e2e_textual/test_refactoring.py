@@ -24,7 +24,7 @@ class TestCodeRefactoring:
         )
 
         try:
-            from jdev_cli.tools.file_ops import ReadFileTool, EditFileTool
+            from vertice_cli.tools.file_ops import ReadFileTool, EditFileTool
 
             read_tool = ReadFileTool()
             edit_tool = EditFileTool()
@@ -134,7 +134,7 @@ class DataProcessor:
         )
 
         try:
-            from jdev_cli.tools.file_ops import WriteFileTool, EditFileTool
+            from vertice_cli.tools.file_ops import WriteFileTool, EditFileTool
 
             write_tool = WriteFileTool()
             edit_tool = EditFileTool()
@@ -262,7 +262,7 @@ def process_guests(guests: List[Dict[str, Any]]) -> List[Dict[str, str]]:
         )
 
         try:
-            from jdev_cli.tools.file_ops import ReadFileTool, EditFileTool
+            from vertice_cli.tools.file_ops import ReadFileTool, EditFileTool
 
             read_tool = ReadFileTool()
             edit_tool = EditFileTool()
@@ -337,7 +337,7 @@ if not API_KEY:
         )
 
         try:
-            from jdev_cli.tools.file_ops import ReadFileTool, EditFileTool
+            from vertice_cli.tools.file_ops import ReadFileTool, EditFileTool
 
             read_tool = ReadFileTool()
             edit_tool = EditFileTool()
@@ -436,8 +436,8 @@ class TestBulkRefactoring:
         )
 
         try:
-            from jdev_cli.tools.file_ops import EditFileTool
-            from jdev_cli.tools.search import SearchFilesTool
+            from vertice_cli.tools.file_ops import EditFileTool
+            from vertice_cli.tools.search import SearchFilesTool
 
             edit_tool = EditFileTool()
             search_tool = SearchFilesTool()

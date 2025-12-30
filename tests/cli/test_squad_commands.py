@@ -3,14 +3,14 @@
 import pytest
 from unittest.mock import MagicMock, patch, AsyncMock
 from typer.testing import CliRunner
-from jdev_cli.cli import app
-from jdev_cli.orchestration.squad import WorkflowResult, WorkflowStatus
+from vertice_cli.cli import app
+from vertice_cli.orchestration.squad import WorkflowResult, WorkflowStatus
 
 runner = CliRunner()
 
 @pytest.fixture
 def mock_squad():
-    with patch("jdev_cli.cli.get_squad") as mock:
+    with patch("vertice_cli.cli.get_squad") as mock:
         squad_instance = MagicMock()
         # Mock execute_workflow to return a dummy result
         result = WorkflowResult(

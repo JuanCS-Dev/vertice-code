@@ -60,7 +60,7 @@ grep -r "class.*Agent" qwen_dev_cli/agents/*.py | head -20
 **Documentação Obrigatória:**
 ```bash
 # Ler a CONSTITUIÇÃO (framework filosófico e técnico)
-cat docs/CONSTITUIÇÃO_VÉRTICE_v3.0.md | head -200
+cat docs/CONSTITUIÇÃO_VERTICE_v3.0.md | head -200
 
 # Ler relatórios de correções anteriores
 cat CONSTITUTIONAL_FIX_REPORT.md
@@ -589,7 +589,7 @@ border_style="rgb(0,255,255)"  # Cyan puro
 ## 📚 **RECURSOS**
 
 ### **Documentação Interna:**
-- `docs/CONSTITUIÇÃO_VÉRTICE_v3.0.md` - Framework filosófico
+- `docs/CONSTITUIÇÃO_VERTICE_v3.0.md` - Framework filosófico
 - `CONSTITUTIONAL_FIX_REPORT.md` - Fix anterior (Gemini model)
 - `UI_FIX_EXECUTOR_PANEL.md` - Fix anterior (UI)
 
@@ -610,7 +610,7 @@ echo "✅ All systems operational"
 echo "✅ All tests passing"
 echo "✅ Constitutional compliance verified"
 echo ""
-echo "Status: OPERACIONAL SOB DOUTRINA VÉRTICE"
+echo "Status: OPERACIONAL SOB DOUTRINA VERTICE"
 ```
 
 ---
@@ -629,6 +629,6 @@ echo "Status: OPERACIONAL SOB DOUTRINA VÉRTICE"
 - Leia os logs com atenção
 - Use `git diff` para ver o que mudou
 - Execute testes isolados para isolar o problema
-- Consulte a Constituição para entender a filosofia do sistema
+- Consulte a Constituicao para entender a filosofia do sistema
 
 **Você consegue! 💪🤖**

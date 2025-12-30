@@ -12,7 +12,7 @@ Based on pytest patterns from Anthropic's Claude Code.
 import pytest
 import json
 
-from jdev_tui.core.history_manager import HistoryManager
+from vertice_tui.core.history_manager import HistoryManager
 
 
 # =============================================================================
@@ -23,7 +23,7 @@ from jdev_tui.core.history_manager import HistoryManager
 def temp_paths(tmp_path):
     """Create temporary paths for history and sessions."""
     return {
-        "history_file": tmp_path / ".jdev_tui_history",
+        "history_file": tmp_path / ".vertice_tui_history",
         "session_dir": tmp_path / ".juancs" / "sessions"
     }
 

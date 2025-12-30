@@ -9,10 +9,10 @@ import pytest
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from jdev_cli.core.llm import llm_client
-from jdev_cli.core.context import context_builder
-from jdev_cli.core.mcp import mcp_manager
-from jdev_cli.core.config import config
+from vertice_cli.core.llm import llm_client
+from vertice_cli.core.context import context_builder
+from vertice_cli.core.mcp import mcp_manager
+from vertice_cli.core.config import config
 
 
 class _TestMetrics:
@@ -385,7 +385,7 @@ def test_10_constitutional_compliance():
 
     # P1: Completude - No placeholders
     print("  Checking P1 (Completude)...")
-    with open("jdev_cli/core/llm.py") as f:
+    with open("vertice_cli/core/llm.py") as f:
         content = f.read()
         assert "TODO" not in content, "Found TODO in llm.py"
         assert "FIXME" not in content, "Found FIXME in llm.py"
@@ -415,7 +415,7 @@ def test_10_constitutional_compliance():
 
     # P5: Consciência Sistêmica - Modular architecture
     print("  Checking P5 (Consciência)...")
-    from jdev_cli.core import llm, context, mcp, config as cfg
+    from vertice_cli.core import llm, context, mcp, config as cfg
     assert llm is not None, "LLM module missing"
     assert context is not None, "Context module missing"
     assert mcp is not None, "MCP module missing"

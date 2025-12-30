@@ -25,8 +25,8 @@ class TestMultiToolWorkflows:
         )
 
         try:
-            from jdev_cli.tools.search import SearchFilesTool
-            from jdev_cli.tools.file_ops import ReadFileTool, EditFileTool
+            from vertice_cli.tools.search import SearchFilesTool
+            from vertice_cli.tools.file_ops import ReadFileTool, EditFileTool
 
             search_tool = SearchFilesTool()
             read_tool = ReadFileTool()
@@ -94,7 +94,7 @@ class TestMultiToolWorkflows:
         )
 
         try:
-            from jdev_cli.tools.file_ops import WriteFileTool, ReadFileTool
+            from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
 
             write_tool = WriteFileTool()
             read_tool = ReadFileTool()
@@ -214,8 +214,8 @@ class TestCalculator:
         )
 
         try:
-            from jdev_cli.tools.file_ops import EditFileTool
-            from jdev_cli.tools.git_ops import GitStatusTool, GitDiffTool
+            from vertice_cli.tools.file_ops import EditFileTool
+            from vertice_cli.tools.git_ops import GitStatusTool, GitDiffTool
 
             edit_tool = EditFileTool()
             status_tool = GitStatusTool()
@@ -292,7 +292,7 @@ class TestComplexScenarios:
         )
 
         try:
-            from jdev_cli.tools.file_ops import WriteFileTool
+            from vertice_cli.tools.file_ops import WriteFileTool
 
             write_tool = WriteFileTool()
 
@@ -579,8 +579,8 @@ class TestAuthService:
         )
 
         try:
-            from jdev_cli.tools.search import SearchFilesTool
-            from jdev_cli.tools.file_ops import ReadFileTool, EditFileTool
+            from vertice_cli.tools.search import SearchFilesTool
+            from vertice_cli.tools.file_ops import ReadFileTool, EditFileTool
 
             search_tool = SearchFilesTool()
             read_tool = ReadFileTool()

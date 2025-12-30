@@ -2,7 +2,7 @@
 
 Tests the factory functions that provide zero-config tool registration.
 
-Compliance: Vértice Constitution v3.0
+Compliance: Vertice Constitution v3.0
 - Artigo II: Cobertura ≥90%
 - P1: Zero placeholders, código completo
 - P3: Testes cobrem edge cases
@@ -11,14 +11,14 @@ Compliance: Vértice Constitution v3.0
 import pytest
 from unittest.mock import Mock, patch
 
-from jdev_cli.tools.registry_setup import (
+from vertice_cli.tools.registry_setup import (
     setup_default_tools,
     setup_minimal_tools,
     setup_readonly_tools,
     setup_custom_tools
 )
-from jdev_cli.tools.base import ToolRegistry
-from jdev_cli.core.mcp_client import MCPClient
+from vertice_cli.tools.base import ToolRegistry
+from vertice_cli.core.mcp_client import MCPClient
 
 
 class TestSetupDefaultTools:
@@ -237,7 +237,7 @@ class TestEdgeCases:
         assert len(registry.tools) == 0
         assert isinstance(mcp, MCPClient)
 
-    @patch('jdev_cli.tools.registry_setup.logger')
+    @patch('vertice_cli.tools.registry_setup.logger')
     def test_logging_on_successful_setup(self, mock_logger):
         """Successful setup should log info message."""
         setup_default_tools()
@@ -264,13 +264,13 @@ class TestIntegrationWithAgents:
 
     def test_agent_can_use_registered_tools(self):
         """Agent should be able to use tools from default setup."""
-        from jdev_cli.core.llm import LLMClient
+        from vertice_cli.core.llm import LLMClient
 
         llm = LLMClient()
         registry, mcp = setup_default_tools()
 
         # Criar um agente simples (ExplorerAgent não precisa de contexto)
-        from jdev_cli.agents.explorer import ExplorerAgent
+        from vertice_cli.agents.explorer import ExplorerAgent
 
         agent = ExplorerAgent(llm, mcp)
 

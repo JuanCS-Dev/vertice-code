@@ -1,6 +1,6 @@
 # 🔴 BRUTAL REALITY AUDIT - ZERO TOLERÂNCIA
 
-**Auditor:** Vértice-MAXIMUS (Senior Code Auditor)  
+**Auditor:** Vertice-MAXIMUS (Senior Code Auditor)  
 **Data:** 2025-11-20 20:30 UTC  
 **Contratante:** OpenAI (Acesso Judicial)  
 **Target:** qwen-dev-cli v0.1.0  
@@ -496,7 +496,7 @@ Após Fase 2 (3h): ✅ OK para PRODUÇÃO
 
 ---
 
-**Assinado:** Vértice-MAXIMUS, Senior Code Auditor  
+**Assinado:** Vertice-MAXIMUS, Senior Code Auditor  
 **Data:** 2025-11-20 20:30 UTC  
 **Próxima Auditoria:** Após Fase 0 fixes (estimado: 1 dia)
 

@@ -8,7 +8,7 @@ import pytest
 import os
 import asyncio
 
-from jdev_cli.core.providers.gemini import GeminiProvider
+from vertice_cli.core.providers.gemini import GeminiProvider
 
 
 # Skip tests if no API key

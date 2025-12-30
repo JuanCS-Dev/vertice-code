@@ -13,7 +13,7 @@ Tests:
 import pytest
 from hypothesis import given, strategies as st, settings
 
-from jdev_tui.core.safe_executor import (
+from vertice_tui.core.safe_executor import (
     SafeCommandExecutor,
     AllowedCommand,
     SafeExecutionResult,

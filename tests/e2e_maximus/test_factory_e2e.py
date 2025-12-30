@@ -20,7 +20,7 @@ import httpx
 import pytest
 import respx
 
-from jdev_cli.core.providers.maximus_provider import MaximusProvider
+from vertice_cli.core.providers.maximus_provider import MaximusProvider
 
 
 class TestFactoryGenerate:

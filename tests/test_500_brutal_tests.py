@@ -2,8 +2,8 @@
 import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock
-from jdev_cli.maestro_governance import MaestroGovernance
-from jdev_cli.agents.base import AgentTask, AgentResponse, AgentRole
+from vertice_cli.maestro_governance import MaestroGovernance
+from vertice_cli.agents.base import AgentTask, AgentResponse, AgentRole
 
 
 def test_001_type_confusion():

@@ -6,8 +6,8 @@ Created: 2025-11-20 15:00 UTC (DAY 8 Phase 5)
 """
 
 import pytest
-from jdev_cli.tui.input_enhanced import MultiLineMode
-from jdev_cli.tui.components.workflow_visualizer import WorkflowVisualizer, WorkflowStep, StepStatus
+from vertice_cli.tui.input_enhanced import MultiLineMode
+from vertice_cli.tui.components.workflow_visualizer import WorkflowVisualizer, WorkflowStep, StepStatus
 
 
 class TestMultiLineMode:

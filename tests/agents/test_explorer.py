@@ -14,8 +14,8 @@ import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock
 
-from jdev_cli.agents.explorer import ExplorerAgent
-from jdev_cli.agents.base import AgentTask, AgentCapability
+from vertice_cli.agents.explorer import ExplorerAgent
+from vertice_cli.agents.base import AgentTask, AgentCapability
 
 
 class TestExplorerAgentInitialization:

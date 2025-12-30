@@ -1,5 +1,5 @@
 """Tests for Consolidated Context Manager - Week 4 Day 1"""
-from jdev_cli.core.context_manager_consolidated import ConsolidatedContextManager
+from vertice_cli.core.context_manager_consolidated import ConsolidatedContextManager
 
 class TestConsolidatedManager:
     def test_init(self):

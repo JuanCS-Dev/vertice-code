@@ -9,7 +9,7 @@ from __future__ import annotations
 import pytest
 from unittest.mock import AsyncMock, patch
 
-from jdev_tui.core.maximus_client import MaximusClient, MaximusStreamConfig
+from vertice_tui.core.maximus_client import MaximusClient, MaximusStreamConfig
 
 
 class TestMaximusClientInit:

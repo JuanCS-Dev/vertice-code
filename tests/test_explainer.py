@@ -4,13 +4,13 @@ Boris Cherny: Test all public APIs, edge cases, and integrations.
 """
 
 import pytest
-from jdev_cli.explainer import (
+from vertice_cli.explainer import (
     ExplanationEngine,
     explain_command,
     Explanation,
     ExplanationLevel
 )
-from jdev_cli.intelligence.context_enhanced import (
+from vertice_cli.intelligence.context_enhanced import (
     RichContext,
     ExpertiseLevel
 )

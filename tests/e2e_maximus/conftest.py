@@ -20,9 +20,9 @@ from typing import Any, AsyncIterator, Generator, List
 import pytest
 import respx
 
-from jdev_cli.core.providers.maximus_config import MaximusConfig
-from jdev_cli.core.providers.maximus_provider import MaximusProvider
-from jdev_cli.core.providers.resilience import CircuitBreakerConfig, RetryConfig
+from vertice_cli.core.providers.maximus_config import MaximusConfig
+from vertice_cli.core.providers.maximus_provider import MaximusProvider
+from vertice_cli.core.providers.resilience import CircuitBreakerConfig, RetryConfig
 
 from .mock_builders import MaximusMockFactory
 

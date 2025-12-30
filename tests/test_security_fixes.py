@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 from typer.testing import CliRunner
 
-from jdev_cli.cli import app, validate_output_path
+from vertice_cli.cli import app, validate_output_path
 
 
 runner = CliRunner()

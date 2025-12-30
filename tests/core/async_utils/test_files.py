@@ -7,7 +7,7 @@ SCALE & SUSTAIN Phase 3.1 validation.
 
 import pytest
 
-from jdev_core.async_utils import (
+from vertice_core.async_utils import (
     read_file,
     write_file,
     read_json,

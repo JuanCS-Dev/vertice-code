@@ -1,7 +1,7 @@
 """Tests for session validation."""
 
 import pytest
-from jdev_cli.session.state import SessionState
+from vertice_cli.session.state import SessionState
 
 
 class TestSessionValidation:

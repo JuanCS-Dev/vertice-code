@@ -11,13 +11,13 @@ This test suite covers:
 """
 
 import pytest
-from jdev_cli.agents.sofia_agent import (
+from vertice_cli.agents.sofia_agent import (
     SofiaIntegratedAgent,
     create_sofia_agent,
     CounselResponse,
     CounselMetrics,
 )
-from jdev_cli.agents.base import AgentTask, AgentRole
+from vertice_cli.agents.base import AgentTask, AgentRole
 
 
 # ════════════════════════════════════════════════════════════════════════════════

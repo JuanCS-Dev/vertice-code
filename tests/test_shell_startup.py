@@ -4,7 +4,7 @@ Test shell startup and initialization order.
 Boris Cherny - Week 4 Day 4 (Dogfooding)
 """
 
-from jdev_cli.shell import InteractiveShell
+from vertice_cli.shell import InteractiveShell
 
 
 class TestShellStartup:

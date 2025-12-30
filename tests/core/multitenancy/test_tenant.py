@@ -6,13 +6,13 @@ SCALE & SUSTAIN Phase 3.4 validation.
 
 import pytest
 
-from jdev_core.multitenancy import (
+from vertice_core.multitenancy import (
     Tenant,
     TenantConfig,
     TenantStatus,
     TenantTier,
 )
-from jdev_core.multitenancy.tenant import TenantRegistry
+from vertice_core.multitenancy.tenant import TenantRegistry
 
 
 class TestTenantTier:

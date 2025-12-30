@@ -10,7 +10,7 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from jdev_cli.core.providers.gemini import GeminiProvider
+from vertice_cli.core.providers.gemini import GeminiProvider
 from dotenv import load_dotenv
 
 # Load environment variables

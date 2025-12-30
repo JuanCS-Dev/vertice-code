@@ -1,6 +1,6 @@
 """Tests for hook events enumeration."""
 
-from jdev_cli.hooks import HookEvent, HookPriority
+from vertice_cli.hooks import HookEvent, HookPriority
 
 
 class TestHookEvent:

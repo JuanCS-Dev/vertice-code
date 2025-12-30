@@ -21,13 +21,13 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from rich.console import Console
 
-from jdev_cli.tui.theme import COLORS
-from jdev_cli.tui.styles import get_rich_theme
-from jdev_cli.tui.components.message import MessageBox, Message
-from jdev_cli.tui.components.status import StatusBadge, StatusLevel, Spinner, SpinnerStyle
-from jdev_cli.tui.components.progress import ProgressBar
-from jdev_cli.tui.components.code import CodeBlock
-from jdev_cli.tui.components.diff import DiffViewer, DiffMode
+from vertice_cli.tui.theme import COLORS
+from vertice_cli.tui.styles import get_rich_theme
+from vertice_cli.tui.components.message import MessageBox, Message
+from vertice_cli.tui.components.status import StatusBadge, StatusLevel, Spinner, SpinnerStyle
+from vertice_cli.tui.components.progress import ProgressBar
+from vertice_cli.tui.components.code import CodeBlock
+from vertice_cli.tui.components.diff import DiffViewer, DiffMode
 
 
 async def demo_messages(console: Console):

@@ -2,7 +2,7 @@
 
 **Date:** 2025-11-18
 **Codebase:** qwen-dev-cli
-**Standard:** Constituição Vértice v3.0
+**Standard:** Constituicao Vertice v3.0
 
 ---
 

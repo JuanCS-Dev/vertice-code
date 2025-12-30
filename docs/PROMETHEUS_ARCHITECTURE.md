@@ -388,7 +388,7 @@ GOOGLE_API_KEY=your_api_key
 GEMINI_API_KEY=your_api_key
 
 # Optional
-JDEV_PROVIDER=auto  # auto, prometheus, gemini
+VERTICE_PROVIDER=auto  # auto, prometheus, gemini
 PROMETHEUS_ENABLE_EVOLUTION=false
 PROMETHEUS_MEMORY_CONSOLIDATION_INTERVAL=10
 ```

@@ -11,12 +11,12 @@ from pathlib import Path
 # Add parent to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from jdev_cli.tui.components.palette import (
+from vertice_cli.tui.components.palette import (
     CommandPalette,
     Command,
     CommandCategory
 )
-from jdev_cli.tui.theme import COLORS
+from vertice_cli.tui.theme import COLORS
 
 
 def print_header(text: str):

@@ -22,7 +22,7 @@ Date: 2025-11-26
 
 import pytest
 
-from jdev_tui.core.output_formatter import (
+from vertice_tui.core.output_formatter import (
     tool_executing_markup,
     tool_success_markup,
     tool_error_markup,
@@ -223,18 +223,18 @@ class TestStreamingWidgetEdgeCases:
 
     def test_widget_import(self):
         """Widget should import without errors."""
-        from jdev_tui.components.streaming_adapter import StreamingResponseWidget
+        from vertice_tui.components.streaming_adapter import StreamingResponseWidget
         assert StreamingResponseWidget is not None
 
     def test_widget_initialization(self):
         """Widget should initialize with markdown enabled."""
-        from jdev_tui.components.streaming_adapter import StreamingResponseWidget
+        from vertice_tui.components.streaming_adapter import StreamingResponseWidget
         widget = StreamingResponseWidget(enable_markdown=True)
         assert widget._enable_markdown is True
 
     def test_widget_markdown_disabled(self):
         """Widget should work with markdown disabled."""
-        from jdev_tui.components.streaming_adapter import StreamingResponseWidget
+        from vertice_tui.components.streaming_adapter import StreamingResponseWidget
         widget = StreamingResponseWidget(enable_markdown=False)
         assert widget._enable_markdown is False
 
@@ -244,13 +244,13 @@ class TestBridgeStreamingSafety:
 
     def test_bridge_import(self):
         """Bridge should import without errors."""
-        from jdev_tui.core.bridge import Bridge
+        from vertice_tui.core.bridge import Bridge
         assert Bridge is not None
 
     def test_bridge_no_rich_in_source(self):
         """Bridge source should not contain Rich markup in yield statements."""
         import inspect
-        from jdev_tui.core import bridge as bridge_module
+        from vertice_tui.core import bridge as bridge_module
 
         source = inspect.getsource(bridge_module)
 

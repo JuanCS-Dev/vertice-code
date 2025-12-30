@@ -5,7 +5,7 @@ Tests 60fps target and render optimization
 
 import pytest
 import time
-from jdev_cli.tui.components.workflow_visualizer import (
+from vertice_cli.tui.components.workflow_visualizer import (
     WorkflowVisualizer,
     StepStatus
 )

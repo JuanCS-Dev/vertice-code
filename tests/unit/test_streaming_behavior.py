@@ -23,7 +23,7 @@ class TestAgentRoutingBehavior:
     @pytest.mark.asyncio
     async def test_routing_output_is_markdown(self):
         """Agent routing should produce Markdown, not Rich markup."""
-        from jdev_tui.core.output_formatter import agent_routing_markup
+        from vertice_tui.core.output_formatter import agent_routing_markup
 
         # Simulate various routing scenarios
         outputs = [
@@ -46,8 +46,8 @@ class TestAgentRoutingBehavior:
     @pytest.mark.asyncio
     async def test_full_routing_flow_simulation(self):
         """Simulate complete routing flow and verify all outputs."""
-        from jdev_tui.core.output_formatter import agent_routing_markup
-        from jdev_tui.core.agents_bridge import AGENT_REGISTRY
+        from vertice_tui.core.output_formatter import agent_routing_markup
+        from vertice_tui.core.agents_bridge import AGENT_REGISTRY
 
         # Simulate what bridge.chat() yields during routing
         agent_name = "security"
@@ -71,7 +71,7 @@ class TestToolExecutionBehavior:
     @pytest.mark.asyncio
     async def test_tool_execution_markers(self):
         """Tool execution markers should be Markdown."""
-        from jdev_tui.core.output_formatter import (
+        from vertice_tui.core.output_formatter import (
             tool_executing_markup,
             tool_success_markup,
             tool_error_markup,
@@ -93,7 +93,7 @@ class TestToolExecutionBehavior:
     @pytest.mark.asyncio
     async def test_tool_output_has_visual_indicators(self):
         """Tool outputs should have clear visual indicators."""
-        from jdev_tui.core.output_formatter import (
+        from vertice_tui.core.output_formatter import (
             tool_executing_markup,
             tool_success_markup,
             tool_error_markup,
@@ -116,7 +116,7 @@ class TestStreamingWidgetBehavior:
 
     def test_widget_accepts_markdown_content(self):
         """Widget should accept and store Markdown content."""
-        from jdev_tui.components.streaming_adapter import StreamingResponseWidget
+        from vertice_tui.components.streaming_adapter import StreamingResponseWidget
 
         widget = StreamingResponseWidget(enable_markdown=True)
 
@@ -139,8 +139,8 @@ class TestStreamingWidgetBehavior:
 
     def test_widget_content_has_no_rich(self):
         """Content streamed should never have Rich markup."""
-        from jdev_tui.components.streaming_adapter import StreamingResponseWidget
-        from jdev_tui.core.output_formatter import (
+        from vertice_tui.components.streaming_adapter import StreamingResponseWidget
+        from vertice_tui.core.output_formatter import (
             tool_executing_markup,
             agent_routing_markup,
         )
@@ -174,7 +174,7 @@ class TestBridgeChatBehavior:
         # We can't easily run bridge.chat() without full setup,
         # but we can verify the helper functions it uses
 
-        from jdev_tui.core.output_formatter import (
+        from vertice_tui.core.output_formatter import (
             tool_executing_markup,
             tool_success_markup,
             tool_error_markup,
@@ -214,7 +214,7 @@ class TestRealWorldScenarios:
     @pytest.mark.asyncio
     async def test_security_audit_flow(self):
         """Simulate security audit agent routing."""
-        from jdev_tui.core.output_formatter import agent_routing_markup
+        from vertice_tui.core.output_formatter import agent_routing_markup
 
         # User asks: "check security of this code"
         routing = agent_routing_markup("security", 0.92)
@@ -227,7 +227,7 @@ class TestRealWorldScenarios:
     @pytest.mark.asyncio
     async def test_code_review_flow(self):
         """Simulate code review flow."""
-        from jdev_tui.core.output_formatter import (
+        from vertice_tui.core.output_formatter import (
             tool_executing_markup,
             tool_success_markup,
         )
@@ -247,7 +247,7 @@ class TestRealWorldScenarios:
     @pytest.mark.asyncio
     async def test_error_scenario(self):
         """Simulate error during tool execution."""
-        from jdev_tui.core.output_formatter import tool_error_markup
+        from vertice_tui.core.output_formatter import tool_error_markup
 
         # Various error messages that might occur
         errors = [
@@ -271,7 +271,7 @@ class TestMarkdownRenderingCompatibility:
     def test_output_renders_without_error(self):
         """Output should render in RichMarkdown without errors."""
         from rich.markdown import Markdown as RichMarkdown
-        from jdev_tui.core.output_formatter import (
+        from vertice_tui.core.output_formatter import (
             tool_executing_markup,
             tool_success_markup,
             tool_error_markup,

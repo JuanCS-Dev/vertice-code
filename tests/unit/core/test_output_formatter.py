@@ -16,7 +16,7 @@ from rich.text import Text
 from rich.markdown import Markdown
 from rich.syntax import Syntax
 
-from jdev_tui.core.output_formatter import (
+from vertice_tui.core.output_formatter import (
     OutputFormatter,
     Colors,
     Icons,

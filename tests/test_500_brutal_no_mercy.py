@@ -20,10 +20,10 @@ import gc
 import threading
 import time
 
-from jdev_cli.maestro_governance import MaestroGovernance
-from jdev_cli.core.governance_pipeline import GovernancePipeline
-from jdev_cli.agents.base import AgentTask, AgentResponse, AgentRole
-from jdev_cli.core.agent_identity import get_agent_identity, AGENT_IDENTITIES
+from vertice_cli.maestro_governance import MaestroGovernance
+from vertice_cli.core.governance_pipeline import GovernancePipeline
+from vertice_cli.agents.base import AgentTask, AgentResponse, AgentRole
+from vertice_cli.core.agent_identity import get_agent_identity, AGENT_IDENTITIES
 
 # ============================================================================
 # CATEGORIA 1: TYPE INJECTION (100 testes) - Tests 1-100

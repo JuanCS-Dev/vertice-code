@@ -5,7 +5,7 @@ Real-time token usage and optimization tests
 
 import pytest
 from datetime import datetime
-from jdev_cli.tui.components.context_awareness import (
+from vertice_cli.tui.components.context_awareness import (
     ContextAwarenessEngine,
     TokenUsageSnapshot
 )

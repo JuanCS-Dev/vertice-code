@@ -6,7 +6,7 @@ SCALE & SUSTAIN Phase 3.1 validation.
 
 import pytest
 
-from jdev_core.async_utils import (
+from vertice_core.async_utils import (
     run_command,
     run_shell,
     run_many,

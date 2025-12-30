@@ -7,12 +7,12 @@ SCALE & SUSTAIN Phase 3.3 validation.
 import asyncio
 import pytest
 
-from jdev_core.messaging import (
+from vertice_core.messaging import (
     Event,
     EventBus,
     event_handler,
 )
-from jdev_core.messaging.events import (
+from vertice_core.messaging.events import (
     TaskStartedEvent,
     TaskCompletedEvent,
 )

@@ -2,7 +2,7 @@
      │ PROMETHEUS ECOSYSTEM INTEGRATION PLAN                                                                         │
      │                                                                                                               │
      │ Data: 2025-11-27                                                                                              │
-     │ Objetivo: Integrar PROMETHEUS (Self-Evolving Meta-Agent) no ecossistema jdev_cli (Shell CLI, MCP, Gradio UI)  │
+     │ Objetivo: Integrar PROMETHEUS (Self-Evolving Meta-Agent) no ecossistema vertice_cli (Shell CLI, MCP, Gradio UI)  │
      │ Executor: Google Gemini CLI (Gemini 3)                                                                        │
      │ Hackathon: Blaxel MCP Hackathon - Nov 2025                                                                    │
      │                                                                                                               │
@@ -26,7 +26,7 @@
      │ 0.1 Estrutura do Projeto                                                                                      │
      │                                                                                                               │
      │ qwen-dev-cli/                                                                                                 │
-     │ ├── jdev_cli/                    # Shell CLI principal                                                        │
+     │ ├── vertice_cli/                    # Shell CLI principal                                                        │
      │ │   ├── shell_main.py            # 1,858 linhas - Interactive REPL                                            │
      │ │   ├── cli_app.py               # Click-based CLI                                                            │
      │ │   ├── core/                                                                                                 │
@@ -45,7 +45,7 @@
      │ │       ├── tools.py             # MCPToolsAdapter                                                            │
      │ │       └── config.py            # MCPConfig                                                                  │
      │ │                                                                                                             │
-     │ ├── jdev_tui/                    # Textual TUI                                                                │
+     │ ├── vertice_tui/                    # Textual TUI                                                                │
      │ │   ├── app.py                   # 576 linhas - QwenApp                                                       │
      │ │   ├── core/                                                                                                 │
      │ │   │   ├── bridge.py            # 1,058 linhas - Facade principal                                            │
@@ -84,10 +84,10 @@
      │                                                                                                               │
      │ | Componente | Arquivo Alvo                     | Classe/Função         | Tipo de Integração |                │
      │ |------------|----------------------------------|-----------------------|--------------------|                │
-     │ | Shell CLI  | jdev_tui/core/bridge.py          | Bridge.chat()         | LLM Provider       |                │
-     │ | Shell CLI  | jdev_tui/core/llm_client.py      | GeminiClient          | Wrapper/Replace    |                │
-     │ | MCP        | jdev_cli/tools/registry_setup.py | setup_default_tools() | Tool Registration  |                │
-     │ | MCP        | jdev_cli/core/mcp.py             | MCPClient             | PROMETHEUS Tools   |                │
+     │ | Shell CLI  | vertice_tui/core/bridge.py          | Bridge.chat()         | LLM Provider       |                │
+     │ | Shell CLI  | vertice_tui/core/llm_client.py      | GeminiClient          | Wrapper/Replace    |                │
+     │ | MCP        | vertice_cli/tools/registry_setup.py | setup_default_tools() | Tool Registration  |                │
+     │ | MCP        | vertice_cli/core/mcp.py             | MCPClient             | PROMETHEUS Tools   |                │
      │ | Gradio     | gradio_ui/streaming_bridge.py    | GradioStreamingBridge | Agent Integration  |                │
      │ | Gradio     | gradio_ui/app.py                 | stream_conversation() | UI Updates         |                │
      │                                                                                                               │
@@ -97,7 +97,7 @@
      │                         │                                                                                     │
      │          ┌──────────────┼──────────────┐                                                                      │
      │          ▼              ▼              ▼                                                                      │
-     │       jdev_tui      gradio_ui      CLI direct                                                                 │
+     │       vertice_tui      gradio_ui      CLI direct                                                                 │
      │          │              │              │                                                                      │
      │          ▼              ▼              ▼                                                                      │
      │       Bridge    StreamingBridge   InteractiveShell                                                            │
@@ -120,7 +120,7 @@
      │                         │                                                                                     │
      │          ┌──────────────┼──────────────┐                                                                      │
      │          ▼              ▼              ▼                                                                      │
-     │       jdev_tui      gradio_ui      CLI direct                                                                 │
+     │       vertice_tui      gradio_ui      CLI direct                                                                 │
      │          │              │              │                                                                      │
      │          ▼              ▼              ▼                                                                      │
      │       Bridge    StreamingBridge   InteractiveShell                                                            │
@@ -217,12 +217,12 @@
      │                                                                                                               │
      │ 1.1 Criar PrometheusProvider                                                                                  │
      │                                                                                                               │
-     │ Arquivo: jdev_cli/core/providers/prometheus_provider.py                                                       │
+     │ Arquivo: vertice_cli/core/providers/prometheus_provider.py                                                       │
      │                                                                                                               │
      │ """                                                                                                           │
      │ PROMETHEUS Provider - LLM Provider wrapping PrometheusOrchestrator.                                           │
      │                                                                                                               │
-     │ Integra o PROMETHEUS como provider de LLM no ecossistema jdev_cli,                                            │
+     │ Integra o PROMETHEUS como provider de LLM no ecossistema vertice_cli,                                            │
      │ permitindo uso transparente em Shell CLI, MCP e Gradio UI.                                                    │
      │ """                                                                                                           │
      │                                                                                                               │
@@ -365,7 +365,7 @@
      │                                                                                                               │
      │ 1.2 Registrar Provider                                                                                        │
      │                                                                                                               │
-     │ Arquivo: jdev_cli/core/providers/__init__.py                                                                  │
+     │ Arquivo: vertice_cli/core/providers/__init__.py                                                                  │
      │                                                                                                               │
      │ Adicionar ao final:                                                                                           │
      │ from .prometheus_provider import PrometheusProvider, PrometheusConfig                                         │
@@ -380,7 +380,7 @@
      │                                                                                                               │
      │ 1.3 Atualizar Provider Manager                                                                                │
      │                                                                                                               │
-     │ Arquivo: jdev_cli/managers/provider_manager.py                                                                │
+     │ Arquivo: vertice_cli/managers/provider_manager.py                                                                │
      │                                                                                                               │
      │ Adicionar PROMETHEUS como provider type:                                                                      │
      │ class ProviderType(Enum):                                                                                     │
@@ -398,7 +398,7 @@
      │                                                                                                               │
      │ 2.1 Criar PrometheusClient para TUI                                                                           │
      │                                                                                                               │
-     │ Arquivo: jdev_tui/core/prometheus_client.py                                                                   │
+     │ Arquivo: vertice_tui/core/prometheus_client.py                                                                   │
      │                                                                                                               │
      │ """                                                                                                           │
      │ PROMETHEUS Client for TUI - Streaming integration.                                                            │
@@ -412,7 +412,7 @@
      │ from dataclasses import dataclass, field                                                                      │
      │ from datetime import datetime                                                                                 │
      │                                                                                                               │
-     │ from jdev_cli.core.providers.prometheus_provider import PrometheusProvider, PrometheusConfig                  │
+     │ from vertice_cli.core.providers.prometheus_provider import PrometheusProvider, PrometheusConfig                  │
      │                                                                                                               │
      │                                                                                                               │
      │ @dataclass                                                                                                    │
@@ -525,14 +525,14 @@
      │                                                                                                               │
      │ 2.2 Atualizar Bridge para Suportar PROMETHEUS (AUTO-DETECT MODE)                                              │
      │                                                                                                               │
-     │ Arquivo: jdev_tui/core/bridge.py                                                                              │
+     │ Arquivo: vertice_tui/core/bridge.py                                                                              │
      │                                                                                                               │
      │ PREFERÊNCIA DO USUÁRIO: Auto-detect - Detectar complexidade da task e escolher provider automaticamente.      │
      │                                                                                                               │
      │ Adicionar método de seleção de provider com auto-detect:                                                      │
      │                                                                                                               │
      │ # No início do arquivo, adicionar import:                                                                     │
-     │ from jdev_tui.core.prometheus_client import PrometheusClient, PrometheusStreamConfig                          │
+     │ from vertice_tui.core.prometheus_client import PrometheusClient, PrometheusStreamConfig                          │
      │ import re                                                                                                     │
      │                                                                                                               │
      │ # Padrões para detectar tasks complexas que devem usar PROMETHEUS                                             │
@@ -558,7 +558,7 @@
      │         # ... existing code ...                                                                               │
      │                                                                                                               │
      │         # Provider selection: auto, prometheus, or gemini                                                     │
-     │         self._provider_mode = os.getenv("JDEV_PROVIDER", "auto")  # DEFAULT: auto                             │
+     │         self._provider_mode = os.getenv("VERTICE_PROVIDER", "auto")  # DEFAULT: auto                             │
      │         self._prometheus_client: Optional[PrometheusClient] = None                                            │
      │         self._task_complexity_cache: Dict[str, str] = {}                                                      │
      │                                                                                                               │
@@ -623,7 +623,7 @@
      │         - Complex tasks (multi-step, memory-dependent, simulation) → PROMETHEUS                               │
      │         - Simple tasks (questions, greetings, quick lookups) → Gemini                                         │
      │                                                                                                               │
-     │         Override with JDEV_PROVIDER=prometheus or JDEV_PROVIDER=gemini                                        │
+     │         Override with VERTICE_PROVIDER=prometheus or VERTICE_PROVIDER=gemini                                        │
      │         """                                                                                                   │
      │         client, provider_name = self._get_client(message)                                                     │
      │                                                                                                               │
@@ -649,7 +649,7 @@
      │                                                                                                               │
      │ 2.3 Adicionar Comando /prometheus                                                                             │
      │                                                                                                               │
-     │ Arquivo: jdev_tui/handlers/basic.py                                                                           │
+     │ Arquivo: vertice_tui/handlers/basic.py                                                                           │
      │                                                                                                               │
      │ Adicionar handler para comandos PROMETHEUS:                                                                   │
      │                                                                                                               │
@@ -701,7 +701,7 @@
      │                                                                                                               │
      │ 3.1 Criar PROMETHEUS Tools para MCP (EXPANDIDO - 8+ Tools)                                                    │
      │                                                                                                               │
-     │ Arquivo: jdev_cli/tools/prometheus_tools.py                                                                   │
+     │ Arquivo: vertice_cli/tools/prometheus_tools.py                                                                   │
      │                                                                                                               │
      │ PREFERÊNCIA DO USUÁRIO: Expandido (8+) - Incluir reflect, create_tool, get_status, benchmark.                 │
      │                                                                                                               │
@@ -726,8 +726,8 @@
      │ """                                                                                                           │
      │                                                                                                               │
      │ from typing import Optional, Dict, Any, List                                                                  │
-     │ from jdev_cli.tools.base import Tool, ToolResult, ToolCategory                                                │
-     │ from jdev_cli.tools.validated import ValidatedTool                                                            │
+     │ from vertice_cli.tools.base import Tool, ToolResult, ToolCategory                                                │
+     │ from vertice_cli.tools.validated import ValidatedTool                                                            │
      │                                                                                                               │
      │                                                                                                               │
      │ class PrometheusExecuteTool(ValidatedTool):                                                                   │
@@ -779,7 +779,7 @@
      │     ) -> ToolResult:                                                                                          │
      │         """Execute task via PROMETHEUS."""                                                                    │
      │         if not self._provider:                                                                                │
-     │             from jdev_cli.core.providers.prometheus_provider import PrometheusProvider                        │
+     │             from vertice_cli.core.providers.prometheus_provider import PrometheusProvider                        │
      │             self._provider = PrometheusProvider()                                                             │
      │                                                                                                               │
      │         try:                                                                                                  │
@@ -844,7 +844,7 @@
      │     ) -> ToolResult:                                                                                          │
      │         """Query memory."""                                                                                   │
      │         if not self._provider:                                                                                │
-     │             from jdev_cli.core.providers.prometheus_provider import PrometheusProvider                        │
+     │             from vertice_cli.core.providers.prometheus_provider import PrometheusProvider                        │
      │             self._provider = PrometheusProvider()                                                             │
      │                                                                                                               │
      │         try:                                                                                                  │
@@ -893,7 +893,7 @@
      │     ) -> ToolResult:                                                                                          │
      │         """Simulate action."""                                                                                │
      │         if not self._provider:                                                                                │
-     │             from jdev_cli.core.providers.prometheus_provider import PrometheusProvider                        │
+     │             from vertice_cli.core.providers.prometheus_provider import PrometheusProvider                        │
      │             self._provider = PrometheusProvider()                                                             │
      │                                                                                                               │
      │         try:                                                                                                  │
@@ -972,7 +972,7 @@
      │     ) -> ToolResult:                                                                                          │
      │         """Run evolution."""                                                                                  │
      │         if not self._provider:                                                                                │
-     │             from jdev_cli.core.providers.prometheus_provider import PrometheusProvider                        │
+     │             from vertice_cli.core.providers.prometheus_provider import PrometheusProvider                        │
      │             self._provider = PrometheusProvider()                                                             │
      │                                                                                                               │
      │         try:                                                                                                  │
@@ -1031,7 +1031,7 @@
      │     ) -> ToolResult:                                                                                          │
      │         """Trigger reflection."""                                                                             │
      │         if not self._provider:                                                                                │
-     │             from jdev_cli.core.providers.prometheus_provider import PrometheusProvider                        │
+     │             from vertice_cli.core.providers.prometheus_provider import PrometheusProvider                        │
      │             self._provider = PrometheusProvider()                                                             │
      │                                                                                                               │
      │         try:                                                                                                  │
@@ -1096,7 +1096,7 @@
      │     ) -> ToolResult:                                                                                          │
      │         """Create new tool."""                                                                                │
      │         if not self._provider:                                                                                │
-     │             from jdev_cli.core.providers.prometheus_provider import PrometheusProvider                        │
+     │             from vertice_cli.core.providers.prometheus_provider import PrometheusProvider                        │
      │             self._provider = PrometheusProvider()                                                             │
      │                                                                                                               │
      │         try:                                                                                                  │
@@ -1154,7 +1154,7 @@
      │     ) -> ToolResult:                                                                                          │
      │         """Get status."""                                                                                     │
      │         if not self._provider:                                                                                │
-     │             from jdev_cli.core.providers.prometheus_provider import PrometheusProvider                        │
+     │             from vertice_cli.core.providers.prometheus_provider import PrometheusProvider                        │
      │             self._provider = PrometheusProvider()                                                             │
      │                                                                                                               │
      │         try:                                                                                                  │
@@ -1212,7 +1212,7 @@
      │     ) -> ToolResult:                                                                                          │
      │         """Run benchmark."""                                                                                  │
      │         if not self._provider:                                                                                │
-     │             from jdev_cli.core.providers.prometheus_provider import PrometheusProvider                        │
+     │             from vertice_cli.core.providers.prometheus_provider import PrometheusProvider                        │
      │             self._provider = PrometheusProvider()                                                             │
      │                                                                                                               │
      │         try:                                                                                                  │
@@ -1257,7 +1257,7 @@
      │                                                                                                               │
      │ 3.2 Registrar Tools no Registry (8 TOOLS)                                                                     │
      │                                                                                                               │
-     │ Arquivo: jdev_cli/tools/registry_setup.py                                                                     │
+     │ Arquivo: vertice_cli/tools/registry_setup.py                                                                     │
      │                                                                                                               │
      │ PREFERÊNCIA DO USUÁRIO: Expandido (8+ tools)                                                                  │
      │                                                                                                               │
@@ -1270,7 +1270,7 @@
      │                                                                                                               │
      │     # PROMETHEUS Tools (Self-Evolving Meta-Agent) - EXPANDED SET                                              │
      │     try:                                                                                                      │
-     │         from jdev_cli.tools.prometheus_tools import (                                                         │
+     │         from vertice_cli.tools.prometheus_tools import (                                                         │
      │             # Core tools (4)                                                                                  │
      │             PrometheusExecuteTool,                                                                            │
      │             PrometheusMemoryQueryTool,                                                                        │
@@ -1304,7 +1304,7 @@
      │                                                                                                               │
      │ 3.3 Atualizar MCPClient                                                                                       │
      │                                                                                                               │
-     │ Arquivo: jdev_cli/core/mcp.py                                                                                 │
+     │ Arquivo: vertice_cli/core/mcp.py                                                                                 │
      │                                                                                                               │
      │ Adicionar constantes para PROMETHEUS tools:                                                                   │
      │                                                                                                               │
@@ -1386,7 +1386,7 @@
      │     def _ensure_provider(self):                                                                               │
      │         """Initialize PROMETHEUS provider."""                                                                 │
      │         if self._provider is None:                                                                            │
-     │             from jdev_cli.core.providers.prometheus_provider import PrometheusProvider                        │
+     │             from vertice_cli.core.providers.prometheus_provider import PrometheusProvider                        │
      │             self._provider = PrometheusProvider()                                                             │
      │                                                                                                               │
      │     def _ensure_loop(self):                                                                                   │
@@ -1834,7 +1834,7 @@
      │                                                                                                               │
      │     @pytest.fixture                                                                                           │
      │     def provider(self):                                                                                       │
-     │         from jdev_cli.core.providers.prometheus_provider import PrometheusProvider                            │
+     │         from vertice_cli.core.providers.prometheus_provider import PrometheusProvider                            │
      │         return PrometheusProvider()                                                                           │
      │                                                                                                               │
      │     def test_initialization(self, provider):                                                                  │
@@ -1877,7 +1877,7 @@
      │                                                                                                               │
      │     @pytest.fixture                                                                                           │
      │     def execute_tool(self):                                                                                   │
-     │         from jdev_cli.tools.prometheus_tools import PrometheusExecuteTool                                     │
+     │         from vertice_cli.tools.prometheus_tools import PrometheusExecuteTool                                     │
      │         return PrometheusExecuteTool()                                                                        │
      │                                                                                                               │
      │     def test_tool_schema(self, execute_tool):                                                                 │
@@ -1942,7 +1942,7 @@
      │     @pytest.mark.asyncio                                                                                      │
      │     async def test_cli_prometheus_flow(self):                                                                 │
      │         """Test CLI to PROMETHEUS flow."""                                                                    │
-     │         from jdev_tui.core.prometheus_client import PrometheusClient                                          │
+     │         from vertice_tui.core.prometheus_client import PrometheusClient                                          │
      │                                                                                                               │
      │         client = PrometheusClient()                                                                           │
      │                                                                                                               │
@@ -1958,7 +1958,7 @@
      │     @pytest.mark.asyncio                                                                                      │
      │     async def test_mcp_prometheus_tool(self):                                                                 │
      │         """Test MCP PROMETHEUS tool."""                                                                       │
-     │         from jdev_cli.core.mcp import create_mcp_client                                                       │
+     │         from vertice_cli.core.mcp import create_mcp_client                                                       │
      │                                                                                                               │
      │         mcp = create_mcp_client()                                                                             │
      │                                                                                                               │
@@ -1971,7 +1971,7 @@
      │     @pytest.mark.asyncio                                                                                      │
      │     async def test_memory_persistence(self):                                                                  │
      │         """Test that memory persists across calls."""                                                         │
-     │         from jdev_cli.core.providers.prometheus_provider import PrometheusProvider                            │
+     │         from vertice_cli.core.providers.prometheus_provider import PrometheusProvider                            │
      │                                                                                                               │
      │         provider = PrometheusProvider()                                                                       │
      │                                                                                                               │
@@ -2011,7 +2011,7 @@
      │     """Validate PrometheusProvider."""                                                                        │
      │     print("1. Testing PrometheusProvider...")                                                                 │
      │     try:                                                                                                      │
-     │         from jdev_cli.core.providers.prometheus_provider import PrometheusProvider                            │
+     │         from vertice_cli.core.providers.prometheus_provider import PrometheusProvider                            │
      │         provider = PrometheusProvider()                                                                       │
      │                                                                                                               │
      │         if not provider.is_available():                                                                       │
@@ -2029,7 +2029,7 @@
      │     """Validate MCP tools registration."""                                                                    │
      │     print("2. Testing MCP Tools...")                                                                          │
      │     try:                                                                                                      │
-     │         from jdev_cli.core.mcp import create_mcp_client                                                       │
+     │         from vertice_cli.core.mcp import create_mcp_client                                                       │
      │         mcp = create_mcp_client()                                                                             │
      │                                                                                                               │
      │         tools = await mcp.list_tools()                                                                        │
@@ -2052,7 +2052,7 @@
      │     """Validate streaming functionality."""                                                                   │
      │     print("3. Testing Streaming...")                                                                          │
      │     try:                                                                                                      │
-     │         from jdev_tui.core.prometheus_client import PrometheusClient                                          │
+     │         from vertice_tui.core.prometheus_client import PrometheusClient                                          │
      │         client = PrometheusClient()                                                                           │
      │                                                                                                               │
      │         chunks = 0                                                                                            │
@@ -2149,7 +2149,7 @@
      │ Via Shell CLI:                                                                                                │
      │                                                                                                               │
      │ # Ativar PROMETHEUS mode                                                                                      │
-     │ python -m jdev_tui                                                                                            │
+     │ python -m vertice_tui                                                                                            │
      │                                                                                                               │
      │ # No shell, digite:                                                                                           │
      │ /prometheus enable                                                                                            │
@@ -2167,7 +2167,7 @@
      │ Via MCP:                                                                                                      │
      │                                                                                                               │
      │ # Rodar servidor MCP                                                                                          │
-     │ python -m jdev_cli.cli_mcp                                                                                    │
+     │ python -m vertice_cli.cli_mcp                                                                                    │
      │                                                                                                               │
      │ # Em outro terminal, usar tools:                                                                              │
      │ # prometheus_execute, prometheus_memory_query, prometheus_simulate                                            │
@@ -2247,7 +2247,7 @@
      │ ├─────────────────────────────────────────────────────────────────────────┤                                   │
      │ │                                                                          │                                  │
      │ │  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐                │                                    │
-     │ │  │   jdev_tui   │   │  gradio_ui   │   │   CLI MCP    │                │                                    │
+     │ │  │   vertice_tui   │   │  gradio_ui   │   │   CLI MCP    │                │                                    │
      │ │  │  (Textual)   │   │   (Web)      │   │   Server     │                │                                    │
      │ │  └──────┬───────┘   └──────┬───────┘   └──────┬───────┘                │                                    │
      │ │         │                  │                  │                         │                                   │
@@ -2334,23 +2334,23 @@
      │                                                                                                               │
      │ Fase 1: Provider Layer                                                                                        │
      │                                                                                                               │
-     │ - Criar jdev_cli/core/providers/prometheus_provider.py                                                        │
-     │ - Registrar em jdev_cli/core/providers/__init__.py                                                            │
-     │ - Atualizar jdev_cli/managers/provider_manager.py                                                             │
+     │ - Criar vertice_cli/core/providers/prometheus_provider.py                                                        │
+     │ - Registrar em vertice_cli/core/providers/__init__.py                                                            │
+     │ - Atualizar vertice_cli/managers/provider_manager.py                                                             │
      │ - Testar inicialização básica                                                                                 │
      │                                                                                                               │
      │ Fase 2: Shell CLI Integration                                                                                 │
      │                                                                                                               │
-     │ - Criar jdev_tui/core/prometheus_client.py                                                                    │
-     │ - Atualizar jdev_tui/core/bridge.py                                                                           │
+     │ - Criar vertice_tui/core/prometheus_client.py                                                                    │
+     │ - Atualizar vertice_tui/core/bridge.py                                                                           │
      │ - Adicionar comandos /prometheus em handlers                                                                  │
      │ - Testar streaming no TUI                                                                                     │
      │                                                                                                               │
      │ Fase 3: MCP Integration                                                                                       │
      │                                                                                                               │
-     │ - Criar jdev_cli/tools/prometheus_tools.py                                                                    │
-     │ - Registrar em jdev_cli/tools/registry_setup.py                                                               │
-     │ - Atualizar timeouts em jdev_cli/core/mcp.py                                                                  │
+     │ - Criar vertice_cli/tools/prometheus_tools.py                                                                    │
+     │ - Registrar em vertice_cli/tools/registry_setup.py                                                               │
+     │ - Atualizar timeouts em vertice_cli/core/mcp.py                                                                  │
      │ - Testar tools via MCP                                                                                        │
      │                                                                                                               │
      │ Fase 4: Gradio UI Integration                                                                                 │
@@ -2377,11 +2377,11 @@
      │ ---                                                                                                           │
      │ ARQUIVOS CRÍTICOS (LEITURA OBRIGATÓRIA ANTES DE IMPLEMENTAR)                                                  │
      │                                                                                                               │
-     │ 1. Provider Base: jdev_cli/core/providers/gemini.py (padrão a seguir)                                         │
-     │ 2. Bridge Principal: jdev_tui/core/bridge.py (ponto de integração)                                            │
-     │ 3. LLM Client: jdev_tui/core/llm_client.py (interface de streaming)                                           │
-     │ 4. MCP Client: jdev_cli/core/mcp.py (padrão MCP)                                                              │
-     │ 5. Tool Base: jdev_cli/tools/base.py (interface de tools)                                                     │
+     │ 1. Provider Base: vertice_cli/core/providers/gemini.py (padrão a seguir)                                         │
+     │ 2. Bridge Principal: vertice_tui/core/bridge.py (ponto de integração)                                            │
+     │ 3. LLM Client: vertice_tui/core/llm_client.py (interface de streaming)                                           │
+     │ 4. MCP Client: vertice_cli/core/mcp.py (padrão MCP)                                                              │
+     │ 5. Tool Base: vertice_cli/tools/base.py (interface de tools)                                                     │
      │ 6. Gradio Bridge: gradio_ui/streaming_bridge.py (padrão Gradio)                                               │
      │ 7. PROMETHEUS Main: prometheus/main.py (agente principal)                                                     │
      │ 8. PROMETHEUS Orchestrator: prometheus/core/orchestrator.py (coordenador)                                     │

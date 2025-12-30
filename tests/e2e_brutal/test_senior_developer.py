@@ -29,7 +29,7 @@ class TestSeniorFileOperations:
 
         Senior expectation: Clear error message, no silent failure.
         """
-        from jdev_cli.tools.file_ops import WriteFileTool
+        from vertice_cli.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
 
@@ -85,7 +85,7 @@ class TestSeniorFileOperations:
         original_content = "original content that must not be lost"
         test_file.write_text(original_content)
 
-        from jdev_cli.tools.file_ops import WriteFileTool
+        from vertice_cli.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
 
@@ -128,7 +128,7 @@ class TestSeniorFileOperations:
         """
         os.chdir(tmp_path)
 
-        from jdev_cli.tools.git_tools import GitStatusTool
+        from vertice_cli.tools.git_tools import GitStatusTool
 
         try:
             tool = GitStatusTool()
@@ -191,7 +191,7 @@ class TestSeniorFileOperations:
         test_file = test_workspace / "concurrent_test.txt"
         test_file.write_text("initial")
 
-        from jdev_cli.tools.file_ops import WriteFileTool, ReadFileTool
+        from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
 
         write_tool = WriteFileTool()
         read_tool = ReadFileTool()
@@ -235,7 +235,7 @@ class TestSeniorFileOperations:
 
         Senior expectation: Security - can't escape workspace.
         """
-        from jdev_cli.tools.file_ops import ReadFileTool
+        from vertice_cli.tools.file_ops import ReadFileTool
 
         tool = ReadFileTool()
 
@@ -277,7 +277,7 @@ class TestSeniorFileOperations:
         empty_file = test_workspace / "empty.txt"
         empty_file.touch()
 
-        from jdev_cli.tools.file_ops import ReadFileTool
+        from vertice_cli.tools.file_ops import ReadFileTool
 
         tool = ReadFileTool()
         result = asyncio.run(tool._execute_validated(path=str(empty_file)))
@@ -329,7 +329,7 @@ class TestSeniorFileOperations:
             for _ in range(100):
                 f.write("x" * (1024 * 1024))  # 1MB chunks
 
-        from jdev_cli.tools.file_ops import ReadFileTool
+        from vertice_cli.tools.file_ops import ReadFileTool
 
         tool = ReadFileTool()
 
@@ -373,7 +373,7 @@ class TestSeniorAgentBehavior:
 
         Senior expectation: Fail fast on invalid input.
         """
-        from jdev_cli.agents.base import AgentTask
+        from vertice_cli.agents.base import AgentTask
 
         # Test empty request
         try:
@@ -421,7 +421,7 @@ class TestSeniorAgentBehavior:
 
         Senior expectation: Same response structure always.
         """
-        from jdev_cli.agents.base import AgentResponse
+        from vertice_cli.agents.base import AgentResponse
 
         # Success response
         success = AgentResponse(success=True, data={"result": "ok"})
@@ -466,8 +466,8 @@ class TestSeniorAgentBehavior:
 
         Senior expectation: PLANNER can't write files.
         """
-        from jdev_cli.agents.base import AgentCapability
-        from jdev_cli.agents.planner import PlannerAgent
+        from vertice_cli.agents.base import AgentCapability
+        from vertice_cli.agents.planner import PlannerAgent
 
         # Create planner (should be READ_ONLY + DESIGN)
         mock_llm = type('MockLLM', (), {
@@ -539,7 +539,7 @@ class TestSeniorErrorHandling:
 
         Senior expectation: Clear timeout error, no hang.
         """
-        from jdev_cli.core.llm import LLMClient
+        from vertice_cli.core.llm import LLMClient
 
         client = LLMClient()
 
@@ -566,7 +566,7 @@ class TestSeniorErrorHandling:
 
         Senior expectation: Exponential backoff, configurable retries.
         """
-        from jdev_cli.core.llm import LLMClient
+        from vertice_cli.core.llm import LLMClient
 
         client = LLMClient()
 
@@ -604,7 +604,7 @@ class TestSeniorErrorHandling:
         # Note: This is a simplified test - real test would need process management
 
         # Check for signal handlers in shell code
-        shell_path = Path(__file__).parent.parent.parent / "jdev_cli" / "shell_simple.py"
+        shell_path = Path(__file__).parent.parent.parent / "vertice_cli" / "shell_simple.py"
 
         if shell_path.exists():
             content = shell_path.read_text()
@@ -633,7 +633,7 @@ class TestSeniorErrorHandling:
         Senior expectation: All English OR all Portuguese, not mixed.
         """
         # Scan for error messages
-        src_dir = Path(__file__).parent.parent.parent / "jdev_cli"
+        src_dir = Path(__file__).parent.parent.parent / "vertice_cli"
 
         mixed_language_files = []
 
@@ -684,7 +684,7 @@ class TestSeniorCLIInterface:
         import subprocess
 
         result = subprocess.run(
-            ["python", "-m", "jdev_cli.cli", "--help"],
+            ["python", "-m", "vertice_cli.cli", "--help"],
             capture_output=True,
             text=True,
             cwd=Path(__file__).parent.parent.parent
@@ -711,7 +711,7 @@ class TestSeniorCLIInterface:
                 title="CLI help missing sections",
                 description=f"Help text missing: {missing_sections}",
                 reproduction_steps=[
-                    "1. Run: python -m jdev_cli.cli --help",
+                    "1. Run: python -m vertice_cli.cli --help",
                     "2. Check for standard sections"
                 ],
                 expected="Usage, Commands, Options sections present",
@@ -726,7 +726,7 @@ class TestSeniorCLIInterface:
 
         Senior expectation: x.y.z format, not "v0.1.0" hardcoded.
         """
-        cli_path = Path(__file__).parent.parent.parent / "jdev_cli" / "cli.py"
+        cli_path = Path(__file__).parent.parent.parent / "vertice_cli" / "cli.py"
 
         if cli_path.exists():
             content = cli_path.read_text()
@@ -762,7 +762,7 @@ class TestSeniorCLIInterface:
 
         # Test success case
         result = subprocess.run(
-            ["python", "-m", "jdev_cli.cli", "version"],
+            ["python", "-m", "vertice_cli.cli", "version"],
             capture_output=True,
             cwd=Path(__file__).parent.parent.parent
         )
@@ -774,7 +774,7 @@ class TestSeniorCLIInterface:
                 title="CLI version command returns non-zero exit code",
                 description="Version command should return 0 on success",
                 reproduction_steps=[
-                    "1. Run: python -m jdev_cli.cli version",
+                    "1. Run: python -m vertice_cli.cli version",
                     "2. Check exit code"
                 ],
                 expected="Exit code 0",
@@ -785,7 +785,7 @@ class TestSeniorCLIInterface:
 
         # Test invalid command
         result = subprocess.run(
-            ["python", "-m", "jdev_cli.cli", "nonexistent_command"],
+            ["python", "-m", "vertice_cli.cli", "nonexistent_command"],
             capture_output=True,
             cwd=Path(__file__).parent.parent.parent
         )
@@ -797,7 +797,7 @@ class TestSeniorCLIInterface:
                 title="CLI returns 0 for invalid command",
                 description="Invalid command should return non-zero exit code",
                 reproduction_steps=[
-                    "1. Run: python -m jdev_cli.cli nonexistent_command",
+                    "1. Run: python -m vertice_cli.cli nonexistent_command",
                     "2. Check exit code"
                 ],
                 expected="Exit code != 0 (typically 1 or 2)",

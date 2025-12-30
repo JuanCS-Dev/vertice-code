@@ -27,27 +27,27 @@ import gc
 import tracemalloc
 
 # Import components to test
-from jdev_cli.tui.components.maestro_shell_ui import (
+from vertice_cli.tui.components.maestro_shell_ui import (
     MaestroShellUI,
     AgentStreamPanel
 )
-from jdev_cli.tui.components.agent_stream_panel import (
+from vertice_cli.tui.components.agent_stream_panel import (
     AgentStreamPanel
 )
-from jdev_cli.tui.components.file_operations_panel import (
+from vertice_cli.tui.components.file_operations_panel import (
     FileOperationsPanel
 )
-from jdev_cli.tui.components.metrics_dashboard import (
+from vertice_cli.tui.components.metrics_dashboard import (
     MetricsDashboard
 )
-from jdev_cli.tui.components.maestro_data_structures import (
+from vertice_cli.tui.components.maestro_data_structures import (
     AgentState,
     AgentStatus,
     FileOperation,
     FileStatus,
     MetricsData
 )
-from jdev_cli.tui.theme import COLORS
+from vertice_cli.tui.theme import COLORS
 
 from rich.console import Console
 from rich.text import Text

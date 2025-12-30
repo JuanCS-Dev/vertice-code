@@ -1,5 +1,5 @@
 """
-Constitutional compliance testing (Vértice v3.0).
+Constitutional compliance testing (Vertice v3.0).
 
 Tests validate adherence to:
     - Princípio P1: Completude Obrigatória
@@ -17,7 +17,7 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock
 import inspect
 
-from jdev_cli.agents.base import (
+from vertice_cli.agents.base import (
     AgentCapability,
     AgentRole,
     AgentTask,
@@ -39,8 +39,8 @@ class TestConstitutionalP1Completude:
 
     def test_no_todo_comments_in_source(self) -> None:
         """Verify no TODO/FIXME comments in source code."""
-        import jdev_cli.agents.base as base_module
-        import jdev_cli.orchestration.memory as memory_module
+        import vertice_cli.agents.base as base_module
+        import vertice_cli.orchestration.memory as memory_module
 
         base_source = inspect.getsource(base_module)
         memory_source = inspect.getsource(memory_module)
@@ -53,7 +53,7 @@ class TestConstitutionalP1Completude:
 
     def test_all_methods_have_implementation(self) -> None:
         """Verify all methods have real implementations, not just pass."""
-        import jdev_cli.agents.base as base_module
+        import vertice_cli.agents.base as base_module
 
         for name, obj in inspect.getmembers(base_module):
             if inspect.isclass(obj) and issubclass(obj, BaseAgent) and obj != BaseAgent:
@@ -219,7 +219,7 @@ class TestConstitutionalP4Rastreabilidade:
 
     def test_shared_context_tracks_updates(self) -> None:
         """Test that SharedContext tracks creation and update times."""
-        from jdev_cli.orchestration.memory import SharedContext
+        from vertice_cli.orchestration.memory import SharedContext
 
         context = SharedContext(user_request="Test")
 
@@ -253,7 +253,7 @@ class TestConstitutionalP5ConscienciaSistemica:
 
     def test_memory_manager_supports_coordination(self) -> None:
         """Test that MemoryManager enables multi-agent coordination."""
-        from jdev_cli.orchestration.memory import MemoryManager
+        from vertice_cli.orchestration.memory import MemoryManager
 
         manager = MemoryManager()
         session_id = manager.create_session("Test")
@@ -269,7 +269,7 @@ class TestConstitutionalP5ConscienciaSistemica:
 
     def test_shared_context_has_agent_specific_fields(self) -> None:
         """Test that SharedContext has fields for each agent type."""
-        from jdev_cli.orchestration.memory import SharedContext
+        from vertice_cli.orchestration.memory import SharedContext
 
         context = SharedContext(user_request="Test")
 
@@ -396,7 +396,7 @@ class TestTypeSafetyCompliance:
 
     def test_all_public_methods_have_type_hints(self) -> None:
         """Test that all public methods have complete type hints."""
-        import jdev_cli.agents.base as base_module
+        import vertice_cli.agents.base as base_module
 
         for name, obj in inspect.getmembers(base_module):
             if inspect.isclass(obj):

@@ -8,7 +8,7 @@ Coverage Target: 100% (100+ tests)
 import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, AsyncMock
-from jdev_cli.agents.documentation import DocumentationAgent
+from vertice_cli.agents.documentation import DocumentationAgent
 
 
 # ============================================================================

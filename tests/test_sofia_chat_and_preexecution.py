@@ -18,13 +18,13 @@ from datetime import datetime, timezone
 from unittest.mock import Mock
 from uuid import UUID
 
-from jdev_cli.agents.sofia_agent import (
+from vertice_cli.agents.sofia_agent import (
     SofiaChatMode,
     CounselResponse,
     create_sofia_agent,
 )
 
-from jdev_governance.sofia import (
+from vertice_governance.sofia import (
     SofiaCounsel,
     CounselType,
     VirtueType,

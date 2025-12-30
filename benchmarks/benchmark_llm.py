@@ -2,7 +2,7 @@
 
 import asyncio
 import time
-from jdev_cli.core.llm import llm_client
+from vertice_cli.core.llm import llm_client
 
 
 async def benchmark_performance():

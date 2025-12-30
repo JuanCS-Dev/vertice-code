@@ -2,7 +2,7 @@
 
 **Date**: 2025-11-24  
 **Implementation Time**: ~2 hours  
-**Compliance**: Vértice Constitution v3.0  
+**Compliance**: Vertice Constitution v3.0  
 **Status**: ✅ ALL CRITICAL FIXES COMPLETE
 
 ---
@@ -408,7 +408,7 @@ task = AgentTask(request="test")  # ✅ No warning
 
 ## COMPLIANCE VERIFICATION
 
-### Vértice Constitution v3.0
+### Vertice Constitution v3.0
 
 ✅ **P1 - Completude Obrigatória**
 - Zero placeholders in all code
@@ -484,7 +484,7 @@ All 9 identified problems have been resolved:
 ---
 
 **Implementation By**: Claude Code (Anthropic Sonnet 4.5)  
-**Compliance**: Vértice Constitution v3.0  
+**Compliance**: Vertice Constitution v3.0  
 **Date**: 2025-11-24  
 **Quality Grade**: A++ (Production Spectacular)
 

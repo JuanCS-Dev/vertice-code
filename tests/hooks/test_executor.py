@@ -4,7 +4,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import Mock
 
-from jdev_cli.hooks import (
+from vertice_cli.hooks import (
     HookExecutor,
     HookEvent,
     HookContext,

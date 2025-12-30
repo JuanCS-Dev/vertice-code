@@ -20,8 +20,8 @@ import tempfile
 import os
 from pathlib import Path
 
-from jdev_cli.shell import InteractiveShell
-from jdev_cli.tools.exec_hardened import BashCommandTool
+from vertice_cli.shell import InteractiveShell
+from vertice_cli.tools.exec_hardened import BashCommandTool
 
 
 @pytest.fixture(autouse=True)

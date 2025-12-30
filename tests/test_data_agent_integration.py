@@ -7,8 +7,8 @@ Quick smoke test to verify DataAgent works with the current infrastructure.
 """
 
 import asyncio
-from jdev_cli.agents.data_agent_production import create_data_agent
-from jdev_cli.agents.base import AgentTask, AgentRole, AgentCapability
+from vertice_cli.agents.data_agent_production import create_data_agent
+from vertice_cli.agents.base import AgentTask, AgentRole, AgentCapability
 
 # Mock LLM for testing
 class SimpleMockLLM:

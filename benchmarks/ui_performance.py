@@ -19,11 +19,11 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.panel import Panel
 from rich.tree import Tree
 
-from jdev_cli.tui.components.enhanced_progress import EnhancedProgress
-from jdev_cli.tui.components.dashboard import StatusDashboard
-from jdev_cli.tui.components.workflow_visualizer import WorkflowVisualizer
-from jdev_cli.tui.input_enhanced import EnhancedInput
-from jdev_cli.tui.context_awareness import ContextAwareness
+from vertice_cli.tui.components.enhanced_progress import EnhancedProgress
+from vertice_cli.tui.components.dashboard import StatusDashboard
+from vertice_cli.tui.components.workflow_visualizer import WorkflowVisualizer
+from vertice_cli.tui.input_enhanced import EnhancedInput
+from vertice_cli.tui.context_awareness import ContextAwareness
 
 
 @dataclass

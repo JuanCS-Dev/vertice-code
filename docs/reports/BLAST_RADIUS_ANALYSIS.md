@@ -1,8 +1,8 @@
-# BLAST RADIUS ANALYSIS - juan-dev-code (jdev_tui + jdev_cli)
+# BLAST RADIUS ANALYSIS - juan-dev-code (vertice_tui + vertice_cli)
 ## Mapa de Dependências Críticas e Propagação de Falhas
 
 **Análise Data:** 2025-11-26
-**Escopo:** jdev_tui, jdev_cli, jdev_core, jdev_governance
+**Escopo:** vertice_tui, vertice_cli, vertice_core, vertice_governance
 **Foco:** Identificação de pontos únicos de falha (SPOF) e efeitos de cascata
 
 ---
@@ -29,7 +29,7 @@
 
 | Aspecto | Descrição |
 |---------|-----------|
-| **Componente** | `GeminiClient` (jdev_tui/core/llm_client.py) |
+| **Componente** | `GeminiClient` (vertice_tui/core/llm_client.py) |
 | **Dependências Diretas** | `google.generativeai` SDK, `httpx` (fallback) |
 | **Impacto se Falhar** | **5 (CRÍTICO)** - Toda IA pausa |
 | **Tem Fallback?** | Parcial: httpx direct API (sem garantia) |
@@ -60,7 +60,7 @@ GeminiClient._ensure_initialized()
 
 | Aspecto | Descrição |
 |---------|-----------|
-| **Componente** | `MCPClient` (jdev_cli/core/mcp.py) |
+| **Componente** | `MCPClient` (vertice_cli/core/mcp.py) |
 | **Dependências Diretas** | `ToolRegistry`, subprocess (em tools) |
 | **Impacto se Falhar** | **5 (CRÍTICO)** - Zero ferramentas |
 | **Tem Fallback?** | NÃO |
@@ -130,7 +130,7 @@ Bridge.read_memory()
 
 | Propriedade | Valor |
 |-------------|-------|
-| **Arquivo** | jdev_tui/core/bridge.py |
+| **Arquivo** | vertice_tui/core/bridge.py |
 | **Linhas** | 1444 (GOD CLASS refatorada) |
 | **Dependências Diretas** | 12 módulos |
 | **Estado Compartilhado** | `_session_tokens`, `_todos`, threading.Lock (2) |
@@ -187,7 +187,7 @@ Bridge.chat(message, auto_route=True)
 
 **Agents Lazy-Loaded (Risco):**
 ```
-AGENT_REGISTRY[agent_name].module_path = "jdev_cli.agents.executor"
+AGENT_REGISTRY[agent_name].module_path = "vertice_cli.agents.executor"
                         ↓ import dinâmico
                         ↓ PODE FALHAR (ImportError)
                         ↓ Agent não instanciado
@@ -362,7 +362,7 @@ routing = self.agents.router.route(message)  # Lê padrões
 
 ## SEÇÃO 5: ANÁLISE DETALHADA POR COMPONENTE
 
-### 5.1 jdev_tui/core/bridge.py
+### 5.1 vertice_tui/core/bridge.py
 
 **Características:**
 - 1444 linhas (GOD CLASS refatorada para Facade)
@@ -401,7 +401,7 @@ _plan_mode_lock = threading.Lock()  # OK
 
 ---
 
-### 5.2 jdev_tui/core/llm_client.py
+### 5.2 vertice_tui/core/llm_client.py
 
 **Características:**
 - Streaming Gemini client
@@ -446,7 +446,7 @@ _ensure_initialized() ← PODE HANGAR
 
 ---
 
-### 5.3 jdev_cli/agents/base.py
+### 5.3 vertice_cli/agents/base.py
 
 **Características:**
 - Abstract base para todos os 14 agentes
@@ -455,7 +455,7 @@ _ensure_initialized() ← PODE HANGAR
 
 **Dependências Críticas:**
 ```python
-from jdev_core.types import AgentTask, AgentResponse  # OK
+from vertice_core.types import AgentTask, AgentResponse  # OK
 # llm_client via self.llm_client (dependência runtime)
 # mcp_client via self.mcp_client (pode ser None!)
 ```
@@ -495,7 +495,7 @@ response = await self.llm_client.generate(
 
 ---
 
-### 5.4 jdev_cli/agents/executor.py
+### 5.4 vertice_cli/agents/executor.py
 
 **Características:**
 - NextGen CLI Code Executor Agent (Nov 2025)
@@ -533,7 +533,7 @@ from ..core.llm import LLMClient  # ← Pode falhar
 
 ---
 
-### 5.5 jdev_cli/core/llm.py
+### 5.5 vertice_cli/core/llm.py
 
 **Características:**
 - Production-grade multi-backend LLM client
@@ -555,9 +555,9 @@ class RateLimiter:
     # IMPLEMENTADO CORRETAMENTE
 ```
 
-**MAS:** Não é usado em llm_client.py (jdev_tui/core/)!
-- GeminiClient in jdev_tui não usa CircuitBreaker/RateLimiter
-- Apenas LLMClient em jdev_cli/core/ tem resiliência
+**MAS:** Não é usado em llm_client.py (vertice_tui/core/)!
+- GeminiClient in vertice_tui não usa CircuitBreaker/RateLimiter
+- Apenas LLMClient em vertice_cli/core/ tem resiliência
 - **DESCONEXÃO: 2 implementações diferentes**
 
 ---
@@ -568,7 +568,7 @@ class RateLimiter:
 
 **Tempo: 0:00**
 ```
-Usuário inicia jdev-tui
+Usuário inicia vertice-tui
 ↓
 Bridge.__init__() called
   ├─ GeminiClient() instanciado (api_key verificado)
@@ -646,7 +646,7 @@ Bridge.chat() with auto_route=True
   ├─ routing = agents.router.route(message)
   │   └─ Matches: "planner" (confidence=0.8)
   ├─ invoke_agent('planner', message)
-  │   ├─ IMPORT jdev_cli.agents.planner ← FALHA (module not found)
+  │   ├─ IMPORT vertice_cli.agents.planner ← FALHA (module not found)
   │   ├─ CATCH: ImportError (silencioso!)
   │   └─ Agente não instanciado
   └─ ERROR: Agent invocation failed
@@ -748,7 +748,7 @@ async def _ensure_initialized(self) -> bool:
 
 2. **Implemente Circuit Breaker em llm_client.py**
 ```python
-from jdev_cli.core.llm import CircuitBreaker
+from vertice_cli.core.llm import CircuitBreaker
 
 class GeminiClient:
     def __init__(self, ...):
@@ -831,9 +831,9 @@ async def stream_with_retry(self, prompt, system_prompt, max_retries=3):
 ### Priority 3 (SEMANA 2)
 
 7. **Combine implementações de resiliência**
-   - Unify CircuitBreaker entre jdev_cli.core.llm e jdev_tui.core.llm_client
-   - Use jdev_cli.core.llm como "source of truth"
-   - jdev_tui.llm_client importa de lá
+   - Unify CircuitBreaker entre vertice_cli.core.llm e vertice_tui.core.llm_client
+   - Use vertice_cli.core.llm como "source of truth"
+   - vertice_tui.llm_client importa de lá
 
 8. **Implemente health check periódico**
 ```python

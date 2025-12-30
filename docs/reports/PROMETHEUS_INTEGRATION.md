@@ -24,7 +24,7 @@ bl deploy
 bl run agent prometheus --data '{"inputs": "Your task here"}'
 
 # Via qwen-dev-cli (auto-detect mode)
-jdev "Implement a binary search algorithm"
+vertice "Implement a binary search algorithm"
 ```
 
 ### 3. Test Integration
@@ -104,15 +104,15 @@ python tests/prometheus/stress_test.py
 
 | Component | File | Description |
 |-----------|------|-------------|
-| **Provider** | `jdev_cli/core/providers/prometheus_provider.py` | LLM provider interface |
-| **Client** | `jdev_tui/core/prometheus_client.py` | TUI streaming client |
-| **Tools** | `jdev_cli/tools/prometheus_tools.py` | 8 MCP tools |
+| **Provider** | `vertice_cli/core/providers/prometheus_provider.py` | LLM provider interface |
+| **Client** | `vertice_tui/core/prometheus_client.py` | TUI streaming client |
+| **Tools** | `vertice_cli/tools/prometheus_tools.py` | 8 MCP tools |
 
 ### 3. UI Integration
 
 | Component | File | Description |
 |-----------|------|-------------|
-| **Bridge** | `jdev_tui/core/bridge.py` | Auto-detect routing |
+| **Bridge** | `vertice_tui/core/bridge.py` | Auto-detect routing |
 | **Gradio Bridge** | `gradio_ui/prometheus_bridge.py` | Gradio streaming |
 | **Dashboard** | `gradio_ui/prometheus_components.py` | UI components |
 
@@ -182,7 +182,7 @@ bl run agent prometheus --data '{"inputs": "Write a Python function to check if 
 
 ```bash
 # Start the shell
-python -m jdev_cli
+python -m vertice_cli
 
 # Type your request (auto-routes to PROMETHEUS for complex tasks)
 > Implement a recursive factorial function with memoization
@@ -228,13 +228,13 @@ qwen-dev-cli/
 │   └── tools/
 │       └── tool_factory.py             # AutoTools
 │
-├── jdev_cli/                           # CLI Integration
+├── vertice_cli/                           # CLI Integration
 │   ├── core/providers/
 │   │   └── prometheus_provider.py      # LLM Provider
 │   └── tools/
 │       └── prometheus_tools.py         # 8 MCP Tools
 │
-├── jdev_tui/                           # TUI Integration
+├── vertice_tui/                           # TUI Integration
 │   └── core/
 │       ├── bridge.py                   # Auto-detect Routing
 │       └── prometheus_client.py        # Streaming Client

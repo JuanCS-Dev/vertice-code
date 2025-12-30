@@ -16,7 +16,7 @@ The **ReviewerAgent** is your uncompromising quality guardian. It analyzes every
 2. **Security** - SQL injection, XSS, secrets, command injection
 3. **Testing** - Coverage, edge cases, assertions
 4. **Performance** - Complexity, memory, I/O patterns
-5. **Constitutional AI** - Vértice v3.0 compliance (LEI, HRI, CPI)
+5. **Constitutional AI** - Vertice v3.0 compliance (LEI, HRI, CPI)
 
 **Philosophy (Boris Cherny):**
 > "Quality is not negotiable. Fix it now or fix it later at 10x cost."
@@ -283,7 +283,7 @@ data = json.loads(validated_input)
 
 ### 5. Constitutional AI Gate
 
-**Checks (Vértice v3.0 Compliance):**
+**Checks (Vertice v3.0 Compliance):**
 - **LEI (Lazy Execution Index):** < 1.0 (no TODOs, placeholders)
 - **HRI (Human Readability Index):** ≥ 0.9 (clear, maintainable)
 - **CPI (Constitutional Principles Index):** ≥ 0.9 (SOLID, DRY, KISS)
@@ -552,7 +552,7 @@ if not constitutional["passed"]:
 ## 📚 See Also
 
 - **[RefactorerAgent](./REFACTORER.md)** - Produces code for Reviewer
-- **[Constitutional AI](../../CONSTITUIÇÃO_VÉRTICE_v3.0.md)** - Full doctrine
+- **[Constitutional AI](../../CONSTITUIÇÃO_VERTICE_v3.0.md)** - Full doctrine
 - **[DevSquad Quickstart](../guides/DEVSQUAD_QUICKSTART.md)** - Full workflow
 - **[Security Best Practices](../guides/SECURITY.md)** - Secure coding guide
 

@@ -3,7 +3,7 @@
 **Data**: 2025-11-24
 **Auditor**: Claude Code (Sonnet 4.5)
 **Escopo**: Agent Justiça & Agent Sofia Integration
-**Framework**: CONSTITUIÇÃO_VÉRTICE_v3.0.md
+**Framework**: CONSTITUIÇÃO_VERTICE_v3.0.md
 
 ---
 

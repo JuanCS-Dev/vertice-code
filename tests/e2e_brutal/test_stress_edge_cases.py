@@ -30,7 +30,7 @@ class TestConcurrency:
         test_file = test_workspace / "concurrent_read.txt"
         test_file.write_text("test content " * 1000)
 
-        from jdev_cli.tools.file_ops import ReadFileTool
+        from vertice_cli.tools.file_ops import ReadFileTool
 
         tool = ReadFileTool()
 
@@ -88,7 +88,7 @@ class TestConcurrency:
         """
         test_file = test_workspace / "concurrent_write.txt"
 
-        from jdev_cli.tools.file_ops import WriteFileTool
+        from vertice_cli.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
 
@@ -173,7 +173,7 @@ class TestLargeInputs:
 
         Edge: 50MB file write.
         """
-        from jdev_cli.tools.file_ops import WriteFileTool
+        from vertice_cli.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
 
@@ -229,7 +229,7 @@ class TestLargeInputs:
 
         Edge: Command > 100KB.
         """
-        from jdev_cli.agents.executor import CodeExecutionEngine, ExecutionMode
+        from vertice_cli.agents.executor import CodeExecutionEngine, ExecutionMode
 
         engine = CodeExecutionEngine(mode=ExecutionMode.LOCAL, timeout=5.0)
 
@@ -269,7 +269,7 @@ class TestLargeInputs:
             (many_files_dir / f"file_{i:04d}.txt").write_text(f"content {i}")
 
         # Test listing
-        from jdev_cli.tools.file_ops import ListFilesTool
+        from vertice_cli.tools.file_ops import ListFilesTool
 
         try:
             tool = ListFilesTool()
@@ -343,7 +343,7 @@ class TestUnicode:
             "日本語ファイル.txt",
         ]
 
-        from jdev_cli.tools.file_ops import WriteFileTool, ReadFileTool
+        from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
 
         write_tool = WriteFileTool()
         read_tool = ReadFileTool()
@@ -409,7 +409,7 @@ class TestUnicode:
             "\u200b\u200c\u200d",  # Zero-width characters
         ]
 
-        from jdev_cli.tools.file_ops import WriteFileTool, ReadFileTool
+        from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
 
         write_tool = WriteFileTool()
         read_tool = ReadFileTool()
@@ -458,7 +458,7 @@ class TestUnicode:
             "file$dollar.txt",
         ]
 
-        from jdev_cli.tools.file_ops import WriteFileTool
+        from vertice_cli.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
 

@@ -2,12 +2,12 @@
 
 ## Project Metrics
 - **Total Lines of Code**: ~122,187 (Python)
-- **Core Modules**: 4 (jdev_cli, jdev_tui, jdev_core, prometheus)
+- **Core Modules**: 4 (vertice_cli, vertice_tui, vertice_core, prometheus)
 - **Package Structure**: Well-organized with proper __init__.py files
 
 ## Module Overview
 
-### jdev_core (Foundation Layer)
+### vertice_core (Foundation Layer)
 **Purpose**: Shared types, interfaces, and utilities
 **Key Components**:
 - `types/` - Unified type system (agents, circuit breaker, models)
@@ -17,7 +17,7 @@
 - `messaging/` - Event bus (Redis, in-memory)
 - `async_utils/` - Async file/HTTP operations
 
-### jdev_cli (Business Logic)
+### vertice_cli (Business Logic)
 **Purpose**: CLI commands, agents, and tools
 **Key Components**:
 - `agents/` - 14+ specialized agents (planner, executor, explorer, etc.)
@@ -25,7 +25,7 @@
 - `core/` - Integration logic
 - `intelligence/` - Advanced features (PROMETHEUS, MIRIX)
 
-### jdev_tui (User Interface)
+### vertice_tui (User Interface)
 **Purpose**: Terminal UI and streaming
 **Key Components**:
 - `core/` - Bridge, LLM client, streaming, parsing
@@ -42,16 +42,16 @@
 ## Dependency Analysis
 
 ### ✅ **Clean Architecture** (Good)
-- `jdev_core` has NO imports from `jdev_cli` or `jdev_tui`
-- `jdev_tui` and `jdev_cli` properly depend on `jdev_core`
+- `vertice_core` has NO imports from `vertice_cli` or `vertice_tui`
+- `vertice_tui` and `vertice_cli` properly depend on `vertice_core`
 - Dependency inversion principle followed
 
 ### Dependency Flow
 ```
-jdev_core (foundation, 0 upstream deps)
+vertice_core (foundation, 0 upstream deps)
     ↑
-    ├── jdev_cli (business logic)
-    └── jdev_tui (UI + integration)
+    ├── vertice_cli (business logic)
+    └── vertice_tui (UI + integration)
 ```
 
 ### Circular Dependency Check
@@ -60,7 +60,7 @@ jdev_core (foundation, 0 upstream deps)
 ## Architectural Patterns
 
 ### ✅ Identified Patterns
-1. **Facade Pattern**: `Bridge` class in jdev_tui/core/bridge.py
+1. **Facade Pattern**: `Bridge` class in vertice_tui/core/bridge.py
 2. **Strategy Pattern**: LLM client abstraction (Gemini, Prometheus)
 3. **Observer Pattern**: Event messaging system
 4. **Factory Pattern**: Tool creation and registration
@@ -72,13 +72,13 @@ jdev_core (foundation, 0 upstream deps)
 
 #### ✅ Single Responsibility
 - Each module has a clear, focused purpose
-- `jdev_core` = shared infrastructure
-- `jdev_cli` = domain logic
-- `jdev_tui` = presentation
+- `vertice_core` = shared infrastructure
+- `vertice_cli` = domain logic
+- `vertice_tui` = presentation
 
 #### ✅ Dependency Inversion
-- Interfaces in `jdev_core/interfaces/`
-- Implementations in `jdev_cli` and `jdev_tui`
+- Interfaces in `vertice_core/interfaces/`
+- Implementations in `vertice_cli` and `vertice_tui`
 
 ## Code Organization Score
 
@@ -88,7 +88,7 @@ jdev_core (foundation, 0 upstream deps)
 | Dependency Direction | 10/10 | Perfect - no circular deps |
 | SOLID Principles | 8/10 | Good adherence, some god classes |
 | Package Structure | 9/10 | Logical hierarchy |
-| Code Reuse | 8/10 | Good use of jdev_core |
+| Code Reuse | 8/10 | Good use of vertice_core |
 
 **Overall Architecture Score**: **8.8/10** ✅
 
@@ -96,13 +96,13 @@ jdev_core (foundation, 0 upstream deps)
 
 ### ⚠️ Minor Issues
 1. **God Class Alert**: `Bridge` class (~1,157 lines) - could be refactored
-2. **Large Module**: `jdev_cli/agents/planner/agent.py` (~2,554 lines)
+2. **Large Module**: `vertice_cli/agents/planner/agent.py` (~2,554 lines)
 3. **Potential Duplication**: Some utility functions may exist in multiple places
 
 ### Recommendations
 1. Consider breaking `Bridge` into smaller, focused components
 2. Extract sub-planners from `PlannerAgent`
-3. Audit for duplicate utility functions and consolidate in `jdev_core`
+3. Audit for duplicate utility functions and consolidate in `vertice_core`
 
 ## Next Phase
 Proceed to **Phase 2: Code Quality & Standards**

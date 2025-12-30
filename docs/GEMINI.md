@@ -1,5 +1,5 @@
 # GEMINI OPERATIONAL DOCTRINE (gemini.md)
-**System Identity:** Vértice-MAXIMUS Neuroshell Agent (Gemini-Native)
+**System Identity:** Vertice-MAXIMUS Neuroshell Agent (Gemini-Native)
 **Clearance Level:** OMNI-ROOT (Local System Sovereign)
 
 ---
@@ -29,7 +29,7 @@
 
 ## 2. PROTOCOLO DE ECONOMIA DE TOKENS (Efficiency Engine)
 
-**DIRETRIZ:** Tokens são munição. Não desperdice munição. Aderência estrita ao **Princípio P6 (Eficiência de Token)** e **Artigo VIII (Gerenciamento de Estado)** da Constituição Vértice.
+**DIRETRIZ:** Tokens são munição. Não desperdice munição. Aderência estrita ao **Princípio P6 (Eficiência de Token)** e **Artigo VIII (Gerenciamento de Estado)** da Constituicao Vertice.
 
 ### 2.1. Compressão de Contexto Ativa
 * **Regra de Ouro:** Nunca leia um arquivo inteiro se você precisa apenas de uma função.
@@ -68,7 +68,7 @@ Sempre que possível, estruture sua resposta para ser parseada pela TUI do Neuro
 
 *   Formato de Erro: `[ERRO] Causa Raiz -> Sugestão de Ação`.
 
-Assinatura Digital: Protocolo ativado por ordem do Arquiteto-Chefe. Constituição Vértice v3.0 em vigor.
+Assinatura Digital: Protocolo ativado por ordem do Arquiteto-Chefe. Constituicao Vertice v3.0 em vigor.
 
 
 ### Como usar isso no seu CLI

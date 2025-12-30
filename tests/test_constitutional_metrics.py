@@ -1,12 +1,12 @@
 """Tests for constitutional metrics.
 
-Validates LEI, HRI, CPI calculations per Constituição Vértice v3.0.
+Validates LEI, HRI, CPI calculations per Constituicao Vertice v3.0.
 """
 
 import pytest
 import tempfile
 import os
-from jdev_cli.core.constitutional_metrics import (
+from vertice_cli.core.constitutional_metrics import (
     calculate_lei,
     calculate_hri,
     calculate_cpi,

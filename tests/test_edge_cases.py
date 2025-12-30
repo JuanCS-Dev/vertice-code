@@ -10,11 +10,11 @@ from unittest.mock import Mock, AsyncMock
 from pathlib import Path
 import tempfile
 
-from jdev_cli.core.conversation import ConversationManager, ConversationState
-from jdev_cli.core.recovery import (
+from vertice_cli.core.conversation import ConversationManager, ConversationState
+from vertice_cli.core.recovery import (
     ErrorRecoveryEngine, ErrorCategory, RecoveryContext
 )
-from jdev_cli.core.workflow import (
+from vertice_cli.core.workflow import (
     WorkflowStep, DependencyGraph, AutoCritique, ThoughtPath,
     CheckpointManager, Transaction
 )

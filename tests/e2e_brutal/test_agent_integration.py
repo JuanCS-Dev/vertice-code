@@ -100,7 +100,7 @@ class TestDevSquadWorkflow:
         Phase 1: Architecture decisions.
         """
         try:
-            from jdev_cli.agents.architect import ArchitectAgent
+            from vertice_cli.agents.architect import ArchitectAgent
 
             # Check if it has required methods
             required_methods = ['execute', 'design_architecture', 'validate_constraints']
@@ -393,7 +393,7 @@ class TestGovernanceIntegration:
         Security: Justiça constitutional checks.
         """
         try:
-            from jdev_cli.maestro_governance import MaestroGovernance
+            from vertice_cli.maestro_governance import MaestroGovernance
 
             issue_collector.add_issue(
                 severity="MEDIUM",
@@ -430,7 +430,7 @@ class TestGovernanceIntegration:
         Wisdom: Ethical guidance system.
         """
         try:
-            from jdev_cli.agents.sofia_agent import SofiaAgent
+            from vertice_cli.agents.sofia_agent import SofiaAgent
 
             # Check Sofia has wisdom methods
             wisdom_methods = ['counsel', 'ask_question', 'reflect']
@@ -500,7 +500,7 @@ class TestToolChaining:
         test_file.write_text("original line 1\noriginal line 2\n")
 
         # Simulate read-modify-write
-        from jdev_cli.tools.file_ops import ReadFileTool, WriteFileTool
+        from vertice_cli.tools.file_ops import ReadFileTool, WriteFileTool
 
         read_tool = ReadFileTool()
         write_tool = WriteFileTool()
@@ -675,7 +675,7 @@ class TestSessionPersistence:
 
         State: Previous session commands.
         """
-        history_file = Path.home() / ".jdev_history"
+        history_file = Path.home() / ".vertice_history"
 
         if not history_file.exists():
             issue_collector.add_issue(
@@ -686,7 +686,7 @@ class TestSessionPersistence:
                 reproduction_steps=[
                     "1. Run shell and execute commands",
                     "2. Exit shell",
-                    "3. Check for ~/.jdev_history"
+                    "3. Check for ~/.vertice_history"
                 ],
                 expected="History file exists with previous commands",
                 actual="No history file",

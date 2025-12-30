@@ -257,4 +257,4 @@ As issues de segurança (20 do Script Kid) devem ser priorizadas, seguidas pelas
 ---
 
 *Relatório gerado pela Suíte de Testes E2E Brutal v1.0*
-*Constituição Vértice v3.0 - Princípio P4: Rastreabilidade Total*
+*Constituicao Vertice v3.0 - Princípio P4: Rastreabilidade Total*

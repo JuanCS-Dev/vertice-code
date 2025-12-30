@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from jdev_cli.agents.base import AgentRole, AgentTask
-from jdev_cli.agents.security import SecurityAgent
+from vertice_cli.agents.base import AgentRole, AgentTask
+from vertice_cli.agents.security import SecurityAgent
 
 
 @pytest.fixture

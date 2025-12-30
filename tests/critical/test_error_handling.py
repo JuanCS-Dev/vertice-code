@@ -24,7 +24,7 @@ class TestErrorUtilsModule:
 
     def test_module_imports(self):
         """error_utils deve importar sem erro."""
-        from jdev_cli.core.error_utils import (
+        from vertice_cli.core.error_utils import (
             log_error,
             log_warning,
             log_retry,
@@ -42,7 +42,7 @@ class TestErrorUtilsModule:
 
     def test_log_error_includes_type(self):
         """log_error deve incluir tipo do erro."""
-        from jdev_cli.core.error_utils import log_error
+        from vertice_cli.core.error_utils import log_error
 
         mock_logger = MagicMock()
         error = ValueError("test error message")
@@ -56,7 +56,7 @@ class TestErrorUtilsModule:
 
     def test_log_warning_no_traceback(self):
         """log_warning não deve incluir traceback."""
-        from jdev_cli.core.error_utils import log_warning
+        from vertice_cli.core.error_utils import log_warning
 
         mock_logger = MagicMock()
         error = RuntimeError("minor issue")
@@ -68,7 +68,7 @@ class TestErrorUtilsModule:
 
     def test_log_retry_escalates_near_max(self):
         """log_retry deve escalar para ERROR perto do máximo."""
-        from jdev_cli.core.error_utils import log_retry
+        from vertice_cli.core.error_utils import log_retry
 
         mock_logger = MagicMock()
         error = TimeoutError("connection timeout")
@@ -93,7 +93,7 @@ class TestUserFriendlyMessages:
 
     def test_connection_error_is_friendly(self):
         """ConnectionError deve ter mensagem amigável."""
-        from jdev_cli.core.error_utils import format_error_for_user
+        from vertice_cli.core.error_utils import format_error_for_user
 
         error = ConnectionError("Failed to establish connection")
         message = format_error_for_user(error)
@@ -105,7 +105,7 @@ class TestUserFriendlyMessages:
 
     def test_timeout_error_is_friendly(self):
         """TimeoutError deve ter mensagem amigável."""
-        from jdev_cli.core.error_utils import format_error_for_user
+        from vertice_cli.core.error_utils import format_error_for_user
 
         error = TimeoutError("Request timed out after 30s")
         message = format_error_for_user(error)
@@ -114,7 +114,7 @@ class TestUserFriendlyMessages:
 
     def test_file_not_found_shows_path(self):
         """FileNotFoundError deve mostrar o path."""
-        from jdev_cli.core.error_utils import format_error_for_user
+        from vertice_cli.core.error_utils import format_error_for_user
 
         error = FileNotFoundError("missing.txt")
         message = format_error_for_user(error)
@@ -123,7 +123,7 @@ class TestUserFriendlyMessages:
 
     def test_context_is_prepended(self):
         """Contexto deve aparecer na mensagem."""
-        from jdev_cli.core.error_utils import format_error_for_user
+        from vertice_cli.core.error_utils import format_error_for_user
 
         error = ValueError("invalid value")
         message = format_error_for_user(error, context="Processing config")
@@ -140,21 +140,21 @@ class TestRetryableErrorDetection:
 
     def test_timeout_is_retryable(self):
         """TimeoutError deve ser retryable."""
-        from jdev_cli.core.error_utils import is_retryable_error
+        from vertice_cli.core.error_utils import is_retryable_error
 
         error = TimeoutError("connection timeout")
         assert is_retryable_error(error) is True
 
     def test_connection_error_is_retryable(self):
         """ConnectionError deve ser retryable."""
-        from jdev_cli.core.error_utils import is_retryable_error
+        from vertice_cli.core.error_utils import is_retryable_error
 
         error = ConnectionError("network unreachable")
         assert is_retryable_error(error) is True
 
     def test_validation_error_not_retryable(self):
         """ValidationError não deve ser retryable."""
-        from jdev_cli.core.error_utils import is_retryable_error
+        from vertice_cli.core.error_utils import is_retryable_error
 
         # Simula erro de validação
         class ValidationError(ValueError):
@@ -165,7 +165,7 @@ class TestRetryableErrorDetection:
 
     def test_auth_error_not_retryable(self):
         """Erros de autenticação não devem ser retryable."""
-        from jdev_cli.core.error_utils import is_retryable_error
+        from vertice_cli.core.error_utils import is_retryable_error
 
         # Erro com mensagem de auth
         error = Exception("authentication failed: invalid api key")
@@ -173,7 +173,7 @@ class TestRetryableErrorDetection:
 
     def test_file_not_found_not_retryable(self):
         """FileNotFoundError não deve ser retryable."""
-        from jdev_cli.core.error_utils import is_retryable_error
+        from vertice_cli.core.error_utils import is_retryable_error
 
         error = FileNotFoundError("file.txt not found")
         assert is_retryable_error(error) is False
@@ -188,7 +188,7 @@ class TestErrorResultCreation:
 
     def test_error_result_has_required_fields(self):
         """create_error_result deve ter campos obrigatórios."""
-        from jdev_cli.core.error_utils import create_error_result
+        from vertice_cli.core.error_utils import create_error_result
 
         error = ValueError("test error")
         result = create_error_result(error)
@@ -201,7 +201,7 @@ class TestErrorResultCreation:
 
     def test_error_result_includes_context(self):
         """create_error_result deve incluir contexto quando fornecido."""
-        from jdev_cli.core.error_utils import create_error_result
+        from vertice_cli.core.error_utils import create_error_result
 
         error = RuntimeError("operation failed")
         result = create_error_result(error, context="Processing file")
@@ -219,7 +219,7 @@ class TestErrorContextManager:
 
     def test_context_manager_logs_error(self):
         """ErrorContext deve logar erros automaticamente."""
-        from jdev_cli.core.error_utils import ErrorContext
+        from vertice_cli.core.error_utils import ErrorContext
 
         mock_logger = MagicMock()
 
@@ -231,7 +231,7 @@ class TestErrorContextManager:
 
     def test_context_manager_can_suppress(self):
         """ErrorContext pode suprimir erros se configurado."""
-        from jdev_cli.core.error_utils import ErrorContext
+        from vertice_cli.core.error_utils import ErrorContext
 
         mock_logger = MagicMock()
 
@@ -244,7 +244,7 @@ class TestErrorContextManager:
 
     def test_context_manager_passes_extra(self):
         """ErrorContext deve passar extras para o log."""
-        from jdev_cli.core.error_utils import ErrorContext
+        from vertice_cli.core.error_utils import ErrorContext
 
         mock_logger = MagicMock()
 
@@ -265,7 +265,7 @@ class TestNoSensitiveDataLeak:
 
     def test_api_key_not_in_user_message(self):
         """API keys não devem aparecer em mensagens para usuário."""
-        from jdev_cli.core.error_utils import format_error_for_user
+        from vertice_cli.core.error_utils import format_error_for_user
 
         # Simula erro que contém API key
         error = Exception("Failed with key: sk-1234567890abcdef")
@@ -278,7 +278,7 @@ class TestNoSensitiveDataLeak:
 
     def test_error_message_truncated(self):
         """Mensagens muito longas devem ser truncadas."""
-        from jdev_cli.core.error_utils import log_error
+        from vertice_cli.core.error_utils import log_error
 
         mock_logger = MagicMock()
 

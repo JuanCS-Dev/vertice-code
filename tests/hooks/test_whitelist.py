@@ -1,6 +1,6 @@
 """Tests for safe command whitelist."""
 
-from jdev_cli.hooks import SafeCommandWhitelist
+from vertice_cli.hooks import SafeCommandWhitelist
 
 
 class TestSafeCommandWhitelist:

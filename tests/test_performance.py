@@ -6,13 +6,13 @@ import tempfile
 from pathlib import Path
 import time
 
-from jdev_cli.core.cache import (
+from vertice_cli.core.cache import (
     LRUCache, DiskCache, PerformanceCache, cache_key
 )
-from jdev_cli.core.async_executor import (
+from vertice_cli.core.async_executor import (
     AsyncExecutor, ToolCall, detect_dependencies
 )
-from jdev_cli.core.file_watcher import (
+from vertice_cli.core.file_watcher import (
     FileWatcher, RecentFilesTracker
 )
 

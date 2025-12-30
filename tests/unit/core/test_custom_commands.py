@@ -15,7 +15,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import patch
 
-from jdev_tui.core.custom_commands import CustomCommandsManager
+from vertice_tui.core.custom_commands import CustomCommandsManager
 
 
 class TestCustomCommandsManagerInit:

@@ -13,8 +13,8 @@ Validates:
 """
 
 import pytest
-from jdev_cli.agents.base import AgentRole
-from jdev_cli.core.agent_identity import (
+from vertice_cli.agents.base import AgentRole
+from vertice_cli.core.agent_identity import (
     get_agent_identity,
     AGENT_IDENTITIES,
     AgentPermission,
@@ -164,7 +164,7 @@ class TestConstitutionalAuditFixes:
     def test_governance_pipeline_imports(self):
         """Test that GovernancePipeline imports correctly."""
         # Should not raise ImportError
-        from jdev_cli.core.governance_pipeline import GovernancePipeline
+        from vertice_cli.core.governance_pipeline import GovernancePipeline
 
         assert GovernancePipeline is not None
         assert hasattr(GovernancePipeline, "pre_execution_check")
@@ -172,7 +172,7 @@ class TestConstitutionalAuditFixes:
 
     def test_observability_imports(self):
         """Test that observability module imports correctly."""
-        from jdev_cli.core.observability import (
+        from vertice_cli.core.observability import (
             get_tracer,
             trace_operation,
             setup_observability

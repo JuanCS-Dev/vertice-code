@@ -25,7 +25,7 @@ PROMETHEUS is a **Self-Evolving Cognitive Architecture** built on the **Model Co
 ### 🏗️ The Hydraulic Architecture
 ![PROMETHEUS Blueprint](assets/images/hackathon_blueprint.jpg)
 
-1.  **Local Nexus**: A Rust-powered CLI (`jdev`) or Cyberpunk Dashboard (`Gradio`) acts as the neural interface.
+1.  **Local Nexus**: A Rust-powered CLI (`vertice`) or Cyberpunk Dashboard (`Gradio`) acts as the neural interface.
 2.  **Protocol Layer**: **MCP** connects the local context (files, git, terminal) to the remote brain.
 3.  **Remote Cortex**: A **Blaxel Serverless Agent** running **Gemini 3 Pro**.
 4.  **Cognitive Engines**:

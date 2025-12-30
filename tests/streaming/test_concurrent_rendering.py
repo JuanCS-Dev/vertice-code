@@ -1,7 +1,7 @@
 """Tests for concurrent rendering."""
 import pytest
 import asyncio
-from jdev_cli.streaming import ConcurrentRenderer
+from vertice_cli.streaming import ConcurrentRenderer
 
 
 @pytest.mark.asyncio

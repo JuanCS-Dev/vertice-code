@@ -318,7 +318,7 @@ test_screenshots/
 
 ---
 
-**Maintained by:** Vértice-MAXIMUS (Gemini-Native)  
+**Maintained by:** Vertice-MAXIMUS (Gemini-Native)  
 **Standard:** Enterprise-Grade Organization  
 **Compliance:** 100%  
 

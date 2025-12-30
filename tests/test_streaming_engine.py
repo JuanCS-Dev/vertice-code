@@ -3,7 +3,7 @@
 import pytest
 import asyncio
 import time
-from jdev_cli.core.streaming_engine import StreamingEngine
+from vertice_cli.core.streaming_engine import StreamingEngine
 
 async def mock_generator(count: int, delay: float = 0.01):
     """Simulate LLM streaming tokens."""

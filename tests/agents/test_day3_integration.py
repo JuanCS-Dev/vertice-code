@@ -5,9 +5,9 @@ NOTA: Testes de integração interna, NÃO com sistema externo ainda.
 """
 from pathlib import Path
 from unittest.mock import patch
-from jdev_cli.agents.planner import PlannerAgent
-from jdev_cli.agents.refactorer import RefactorerAgent
-from jdev_cli.agents.base import TaskContext, TaskStatus
+from vertice_cli.agents.planner import PlannerAgent
+from vertice_cli.agents.refactorer import RefactorerAgent
+from vertice_cli.agents.base import TaskContext, TaskStatus
 
 
 class TestPlannerRefactorerCollaboration:

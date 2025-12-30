@@ -1,0 +1,167 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# VERTICE-CODE AGENCY CONFIGURATION
+# The Ultimate AI Code Agency - December 2025
+# ══════════════════════════════════════════════════════════════════════════════
+
+agency:
+  name: "Vertice"
+  version: "2.0.0"
+  description: "Enterprise Multi-Agent Code Intelligence Agency"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SOVEREIGNTY LEVELS (Constitutional AI Pattern)
+# ══════════════════════════════════════════════════════════════════════════════
+sovereignty:
+  L0_AUTONOMOUS:  # Agents decide alone
+    - code_formatting
+    - linting
+    - test_generation
+    - documentation_updates
+    - dependency_updates_minor
+
+  L1_CONSENSUS:   # Requires multi-agent agreement
+    - architectural_changes
+    - new_dependencies_major
+    - api_contract_changes
+    - refactoring_large
+
+  L2_HUMAN_VETO:  # Human can veto (24h window)
+    - deployment_staging
+    - security_policy_changes
+    - budget_allocation
+
+  L3_HUMAN_REQUIRED:  # Human MUST approve
+    - deployment_production
+    - external_communications
+    - financial_transactions
+    - legal_commitments
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ORCHESTRATION PATTERNS (Google ADK + Microsoft Azure)
+# ══════════════════════════════════════════════════════════════════════════════
+orchestration:
+  default_pattern: "hierarchical"
+  patterns:
+    sequential:
+      description: "Chain agents in linear order"
+      use_when: "deterministic_workflow"
+    parallel:
+      description: "Run agents simultaneously"
+      use_when: "independent_tasks"
+    hierarchical:
+      description: "Orchestrator delegates to specialists"
+      use_when: "complex_multi_step"
+    loop:
+      description: "Iterate until condition met"
+      use_when: "refinement_needed"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# AGENT ROSTER
+# ══════════════════════════════════════════════════════════════════════════════
+agents:
+  orchestrator:
+    role: "lead"
+    model: "claude-opus-4"
+    description: "Strategic planning, task decomposition, agent coordination"
+
+  coder:
+    role: "specialist"
+    model: "groq-llama-70b"
+    description: "Fast code generation, bulk operations"
+
+  reviewer:
+    role: "specialist"
+    model: "vertex-gemini-flash"
+    description: "Code review, security audit, quality assurance"
+
+  architect:
+    role: "specialist"
+    model: "claude-sonnet-4"
+    description: "System design, architecture decisions"
+
+  researcher:
+    role: "specialist"
+    model: "vertex-gemini-flash"
+    description: "Documentation lookup, web search, knowledge retrieval"
+
+  devops:
+    role: "specialist"
+    model: "groq-llama-70b"
+    description: "CI/CD, deployment, infrastructure"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# LLM PROVIDERS (Free Tier Priority)
+# ══════════════════════════════════════════════════════════════════════════════
+providers:
+  priority_order:
+    - groq          # 14,400 req/day FREE
+    - cerebras      # 1M tokens/day FREE
+    - vertex-ai     # Your enterprise quota
+    - mistral       # 1B tokens/month FREE
+    - openrouter    # Multi-model gateway
+    - azure-openai  # Enterprise GPT-4
+
+  routing:
+    simple_tasks: ["groq", "cerebras"]
+    complex_tasks: ["vertex-ai", "azure-openai"]
+    critical_tasks: ["vertex-ai", "azure-openai"]
+    bulk_operations: ["groq", "mistral"]
+
+# ══════════════════════════════════════════════════════════════════════════════
+# MEMORY SYSTEM (MIRIX-inspired 6-type memory)
+# ══════════════════════════════════════════════════════════════════════════════
+memory:
+  types:
+    working:
+      description: "Active task context"
+      persistence: "session"
+
+    episodic:
+      description: "Session transcripts and history"
+      persistence: "permanent"
+
+    semantic:
+      description: "Knowledge graph and facts"
+      persistence: "permanent"
+      backend: "lancedb"
+
+    procedural:
+      description: "Learned patterns and strategies"
+      persistence: "permanent"
+
+    meta:
+      description: "Self-reflection and improvement logs"
+      persistence: "permanent"
+
+    social:
+      description: "Agent interaction patterns"
+      persistence: "permanent"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SKILLS (Anthropic Pattern)
+# ══════════════════════════════════════════════════════════════════════════════
+skills:
+  locations:
+    - ".vertice/skills"      # Agency-level skills
+    - "skills"               # Project skills
+    - "~/.vertice/skills"    # User-level skills
+
+  format: "SKILL.md"         # Anthropic standard
+
+  bundled_dirs:
+    - scripts      # Executable scripts
+    - references   # Documentation context
+    - assets       # Templates, configs
+
+# ══════════════════════════════════════════════════════════════════════════════
+# HOOKS (Event-driven automation)
+# ══════════════════════════════════════════════════════════════════════════════
+hooks:
+  location: ".vertice/hooks"
+  events:
+    - pre_task
+    - post_task
+    - pre_commit
+    - post_commit
+    - on_error
+    - on_handoff

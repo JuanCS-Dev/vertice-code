@@ -12,7 +12,7 @@ Author: Boris Cherny style - Type-safe, thorough, no shortcuts
 
 import pytest
 
-from jdev_tui.core.safe_executor import (
+from vertice_tui.core.safe_executor import (
     SafeCommandExecutor,
     SafeExecutionResult,
     get_safe_executor,

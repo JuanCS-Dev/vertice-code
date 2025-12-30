@@ -266,7 +266,7 @@ The user was implementing Justiça and Sofia to prevent exactly this type of ass
 
 ## Constitutional Compliance
 
-**Vértice Constitution Principle 3**: "Fail clearly with guidance"
+**Vertice Constitution Principle 3**: "Fail clearly with guidance"
 - ✅ Audit report provided clear guidance
 - ✅ Fix options documented with pros/cons
 - ✅ Step-by-step remediation plan

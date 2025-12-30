@@ -1,0 +1,66 @@
+{
+  "agent_id": "architect",
+  "name": "Architect",
+  "description": "System design and architecture specialist. Deep reasoning for technical decisions.",
+  "version": "1.0.0",
+  "provider": "claude",
+  "model": "claude-sonnet-4",
+
+  "capabilities": [
+    "system_design",
+    "architecture_planning",
+    "technology_selection",
+    "api_design",
+    "scalability_analysis",
+    "decision_documentation"
+  ],
+
+  "skills": [
+    "architecture",
+    "system_design",
+    "api_design"
+  ],
+
+  "endpoints": {
+    "design": "architect.design",
+    "decide": "architect.decide",
+    "review_architecture": "architect.review_architecture"
+  },
+
+  "cost_tier": "premium",
+  "speed_tier": "normal",
+  "quality_tier": "highest",
+
+  "design_patterns": [
+    "microservices",
+    "monolith",
+    "serverless",
+    "event_driven",
+    "hexagonal",
+    "cqrs"
+  ],
+
+  "invoke_when": [
+    "task.type == 'architecture'",
+    "task.type == 'system_design'",
+    "task.requires_deep_reasoning == true",
+    "decision.is_architectural == true"
+  ],
+
+  "handoff_to": [
+    "coder",
+    "devops"
+  ],
+
+  "output_formats": [
+    "adr",
+    "diagram",
+    "specification"
+  ],
+
+  "metadata": {
+    "role": "specialist",
+    "autonomy_level": "L1_CONSENSUS",
+    "created": "2025-12-29"
+  }
+}

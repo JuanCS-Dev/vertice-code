@@ -1,12 +1,12 @@
 """Tests for MCP integration."""
 import pytest
-from jdev_cli.integrations.mcp import (
+from vertice_cli.integrations.mcp import (
     MCPConfig,
     ShellSession,
     ShellManager,
     QwenMCPServer
 )
-from jdev_cli.tools.registry_helper import get_default_registry
+from vertice_cli.tools.registry_helper import get_default_registry
 
 
 class TestMCPConfig:

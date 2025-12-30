@@ -15,7 +15,7 @@ from pathlib import Path
 import tempfile
 import os
 
-from jdev_cli.core.types import (
+from vertice_cli.core.types import (
     MessageRole,
     ErrorCategory,
     WorkflowState,
@@ -24,7 +24,7 @@ from jdev_cli.core.types import (
     is_file_path,
 )
 
-from jdev_cli.core.errors import (
+from vertice_cli.core.errors import (
     QwenError,
     ErrorContext,
     SyntaxError,
@@ -42,7 +42,7 @@ from jdev_cli.core.errors import (
     ToolError,
 )
 
-from jdev_cli.core.validation import (
+from vertice_cli.core.validation import (
     ValidationResultImpl,
     Required,
     TypeCheck,
@@ -135,14 +135,14 @@ class TestErrors:
         with pytest.raises(Exception):  # Should raise FrozenInstanceError
             context.file = "other.py"  # type: ignore
 
-    def test_jdev_error_basic(self):
+    def test_vertice_error_basic(self):
         """Test basic QwenError creation."""
         error = QwenError("Something went wrong")
         assert error.message == "Something went wrong"
         assert error.context is None
         assert not error.recoverable
 
-    def test_jdev_error_with_context(self):
+    def test_vertice_error_with_context(self):
         """Test QwenError with context."""
         context = ErrorContext(
             category=ErrorCategory.SYNTAX,
@@ -154,7 +154,7 @@ class TestErrors:
         assert error.context == context
         assert error.recoverable
 
-    def test_jdev_error_serialization(self):
+    def test_vertice_error_serialization(self):
         """Test error serialization to dict."""
         context = ErrorContext(category=ErrorCategory.RUNTIME, file="script.py")
         error = QwenError("Runtime error", context=context)
@@ -469,14 +469,14 @@ class TestFileSystemValidation:
     def test_path_exists_valid(self):
         """Test PathExists with existing path."""
         with tempfile.NamedTemporaryFile() as tmp:
-            from jdev_cli.core.validation import PathExists
+            from vertice_cli.core.validation import PathExists
             validator = PathExists()
             result = validator.validate(tmp.name)
             assert result.valid
 
     def test_path_exists_invalid(self):
         """Test PathExists with non-existent path."""
-        from jdev_cli.core.validation import PathExists
+        from vertice_cli.core.validation import PathExists
         validator = PathExists()
         result = validator.validate("/this/path/does/not/exist")
         assert not result.valid
@@ -484,7 +484,7 @@ class TestFileSystemValidation:
     def test_file_exists_valid(self):
         """Test FileExists with existing file."""
         with tempfile.NamedTemporaryFile() as tmp:
-            from jdev_cli.core.validation import FileExists
+            from vertice_cli.core.validation import FileExists
             validator = FileExists()
             result = validator.validate(tmp.name)
             assert result.valid
@@ -492,7 +492,7 @@ class TestFileSystemValidation:
     def test_file_exists_directory(self):
         """Test FileExists with directory (should fail)."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            from jdev_cli.core.validation import FileExists
+            from vertice_cli.core.validation import FileExists
             validator = FileExists()
             result = validator.validate(tmpdir)
             assert not result.valid
@@ -501,7 +501,7 @@ class TestFileSystemValidation:
     def test_directory_exists_valid(self):
         """Test DirectoryExists with existing directory."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            from jdev_cli.core.validation import DirectoryExists
+            from vertice_cli.core.validation import DirectoryExists
             validator = DirectoryExists()
             result = validator.validate(tmpdir)
             assert result.valid
@@ -513,7 +513,7 @@ class TestFileSystemValidation:
             tmp.flush()
 
             try:
-                from jdev_cli.core.validation import ReadableFile
+                from vertice_cli.core.validation import ReadableFile
                 validator = ReadableFile()
                 result = validator.validate(tmp.name)
                 assert result.valid

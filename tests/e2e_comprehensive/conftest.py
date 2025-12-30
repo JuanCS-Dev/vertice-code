@@ -14,7 +14,7 @@ from pathlib import Path
 @pytest.fixture
 def temp_project():
     """Create a temporary project directory."""
-    temp_dir = Path(tempfile.mkdtemp(prefix="jdev_e2e_comp_"))
+    temp_dir = Path(tempfile.mkdtemp(prefix="vertice_e2e_comp_"))
     yield temp_dir
     shutil.rmtree(temp_dir, ignore_errors=True)
 

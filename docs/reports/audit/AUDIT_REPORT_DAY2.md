@@ -1,7 +1,7 @@
 # 🔬 SCIENTIFIC AUDIT REPORT - DAY 2 IMPLEMENTATION
 
 **Date:** 2025-11-20  
-**Auditor:** Vértice-MAXIMUS (Constitutional AI)  
+**Auditor:** Vertice-MAXIMUS (Constitutional AI)  
 **Scope:** Non-interactive mode (`qwen chat --message`)  
 **Test Duration:** 45 minutes  
 **Total Tests:** 20  
@@ -489,7 +489,7 @@ if not tool:
 
 ---
 
-**Auditor:** Vértice-MAXIMUS Neuroshell Agent  
+**Auditor:** Vertice-MAXIMUS Neuroshell Agent  
 **Timestamp:** 2025-11-20 20:22 UTC  
 **Compliance:** Constitutional AI v3.0  
 **Next Action:** Implement fixes for Bugs #1-3

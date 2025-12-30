@@ -16,7 +16,7 @@ import warnings
 from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
 
-from jdev_cli.agents.base import (
+from vertice_cli.agents.base import (
     AgentRole,
     AgentCapability,
     TaskStatus,

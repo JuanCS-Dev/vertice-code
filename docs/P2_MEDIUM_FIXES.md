@@ -2,7 +2,7 @@
 
 **Date**: 2025-11-24  
 **Status**: ✅ RESOLVED  
-**Compliance**: Vértice Constitution v3.0 - P4 (Rastreabilidade)
+**Compliance**: Vertice Constitution v3.0 - P4 (Rastreabilidade)
 
 ---
 
@@ -185,4 +185,4 @@ ExplorerAgent functions correctly despite empty results in some tests. The agent
 
 **Document Version**: 1.0  
 **Last Updated**: 2025-11-24  
-**Compliance**: Vértice Constitution v3.0 - P4 (Rastreabilidade Total)
+**Compliance**: Vertice Constitution v3.0 - P4 (Rastreabilidade Total)

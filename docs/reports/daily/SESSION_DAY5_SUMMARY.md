@@ -260,8 +260,8 @@ The qwen-dev-cli now has:
 ---
 
 **Assinatura Digital:**  
-Vértice-MAXIMUS Constitutional AI Agent  
-Session completed under Constituição Vértice v3.0  
+Vertice-MAXIMUS Constitutional AI Agent  
+Session completed under Constituicao Vertice v3.0  
 Date: 2025-11-20 01:50:00 UTC  
 
 **🎉 DAY 5 COMPLETE! READY FOR DAY 6!** 🚀

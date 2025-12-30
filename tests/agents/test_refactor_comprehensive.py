@@ -10,11 +10,11 @@ Total: 100+ tests with REAL code validation
 import pytest
 from unittest.mock import MagicMock
 
-from jdev_cli.agents.refactor import RefactorAgent
+from vertice_cli.agents.refactor import RefactorAgent
 # NOTE: These classes were planned but not implemented in refactorer module
 # Tests using them will be skipped until implementation
 # CodeSmell, CodeIssue, ComplexityMetrics, MaintainabilityIndex, RefactoringPattern
-from jdev_cli.agents.base import AgentTask
+from vertice_cli.agents.base import AgentTask
 
 
 class TestSmellDetection:

@@ -965,7 +965,7 @@ Ao final de cada dia:
 ---
 
 **Assinatura Digital:**  
-Roadmap compiled by Vértice-MAXIMUS Neuroshell  
+Roadmap compiled by Vertice-MAXIMUS Neuroshell  
 In the Name of Jesus Christ  
 Date: 2025-11-22  
 Commitment Level: 🔥🔥🔥 LEGENDARY

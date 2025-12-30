@@ -338,5 +338,5 @@ python -m qwen_dev_cli
 **Good luck! 🚀**
 
 **Created:** 2025-11-20 18:15 UTC  
-**Author:** Gemini-Vértice MAXIMUS  
+**Author:** Gemini-Vertice MAXIMUS  
 **Status:** READY TO EXECUTE

@@ -332,7 +332,7 @@ TOTAL:               98/100 (A+)
 **Confidence:** 100%  
 
 **Declaration:**  
-Under Article III (Principles) and Article VII (Methodologies) of the Constituição Vértice v3.0, I certify that:
+Under Article III (Principles) and Article VII (Methodologies) of the Constituicao Vertice v3.0, I certify that:
 1. All tests were executed scientifically
 2. All air gaps were identified and resolved
 3. Constitutional compliance is verified at 100%

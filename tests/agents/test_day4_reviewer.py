@@ -11,8 +11,8 @@ Philosophy (Boris Cherny):
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from jdev_cli.agents.base import AgentTask
-from jdev_cli.agents.reviewer import ReviewerAgent
+from vertice_cli.agents.base import AgentTask
+from vertice_cli.agents.reviewer import ReviewerAgent
 # QualityGate was removed from reviewer module - these tests need updating
 
 

@@ -1,0 +1,63 @@
+{
+  "agent_id": "coder",
+  "name": "Coder",
+  "description": "Fast code generation specialist using free-tier LLMs for bulk operations.",
+  "version": "1.0.0",
+  "provider": "groq",
+  "model": "llama-3.3-70b-versatile",
+
+  "capabilities": [
+    "code_generation",
+    "code_refactoring",
+    "bug_fixing",
+    "test_generation",
+    "documentation"
+  ],
+
+  "skills": [
+    "code_generation",
+    "testing",
+    "refactoring"
+  ],
+
+  "endpoints": {
+    "generate": "coder.generate",
+    "refactor": "coder.refactor",
+    "fix_bug": "coder.fix_bug"
+  },
+
+  "cost_tier": "free",
+  "speed_tier": "ultra_fast",
+  "quality_tier": "high",
+
+  "rate_limits": {
+    "requests_per_day": 14400,
+    "tokens_per_minute": 30000
+  },
+
+  "invoke_when": [
+    "task.type == 'code_generation'",
+    "task.type == 'refactoring'",
+    "task.type == 'bug_fix'",
+    "task.is_bulk == true"
+  ],
+
+  "handoff_to": [
+    "reviewer"
+  ],
+
+  "languages": [
+    "python",
+    "javascript",
+    "typescript",
+    "go",
+    "rust",
+    "java"
+  ],
+
+  "metadata": {
+    "role": "specialist",
+    "autonomy_level": "L0_AUTONOMOUS",
+    "created": "2025-12-29"
+  }
+}

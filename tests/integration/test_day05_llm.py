@@ -6,10 +6,10 @@ to be present in the environment. It performs real network calls.
 
 import pytest
 import os
-from jdev_cli.core.llm import LLMClient
-from jdev_cli.core.mcp_client import MCPClient
-from jdev_cli.tools.registry_helper import get_default_registry
-from jdev_cli.orchestration.squad import DevSquad, WorkflowStatus
+from vertice_cli.core.llm import LLMClient
+from vertice_cli.core.mcp_client import MCPClient
+from vertice_cli.tools.registry_helper import get_default_registry
+from vertice_cli.orchestration.squad import DevSquad, WorkflowStatus
 
 # Skip if no keys are present
 requires_api_key = pytest.mark.skipif(

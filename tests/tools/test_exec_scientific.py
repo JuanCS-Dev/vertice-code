@@ -17,7 +17,7 @@ import pytest
 import tempfile
 from pathlib import Path
 
-from jdev_cli.tools.exec_hardened import (
+from vertice_cli.tools.exec_hardened import (
     BashCommandToolHardened,
     CommandValidator,
     ExecutionLimits

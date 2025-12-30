@@ -6,7 +6,7 @@ import tempfile
 import os
 from pathlib import Path
 
-from jdev_cli.tools.terminal import (
+from vertice_cli.tools.terminal import (
     CdTool, LsTool, PwdTool, MkdirTool, RmTool,
     CpTool, MvTool, TouchTool, CatTool
 )

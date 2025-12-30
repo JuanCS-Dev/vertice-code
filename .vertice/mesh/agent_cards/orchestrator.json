@@ -1,0 +1,54 @@
+{
+  "agent_id": "orchestrator",
+  "name": "Orchestrator",
+  "description": "Lead coordinator for Vertice Agency. Strategic planning, task decomposition, and agent coordination.",
+  "version": "1.0.0",
+  "provider": "claude",
+  "model": "claude-opus-4",
+
+  "capabilities": [
+    "task_planning",
+    "agent_routing",
+    "context_preservation",
+    "quality_assurance",
+    "result_aggregation"
+  ],
+
+  "skills": [
+    "strategic_planning",
+    "task_decomposition",
+    "multi_agent_coordination",
+    "handoff_management"
+  ],
+
+  "endpoints": {
+    "plan": "orchestrator.plan",
+    "route": "orchestrator.route",
+    "execute": "orchestrator.execute",
+    "handoff": "orchestrator.handoff"
+  },
+
+  "cost_tier": "premium",
+  "speed_tier": "normal",
+  "quality_tier": "highest",
+
+  "invoke_when": [
+    "task.complexity >= 'complex'",
+    "task.requires_coordination == true",
+    "task.subtasks > 2"
+  ],
+
+  "handoff_to": [
+    "coder",
+    "reviewer",
+    "architect",
+    "researcher",
+    "devops"
+  ],
+
+  "metadata": {
+    "role": "lead",
+    "autonomy_level": "L1_CONSENSUS",
+    "created": "2025-12-29"
+  }
+}

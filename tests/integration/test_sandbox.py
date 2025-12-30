@@ -14,7 +14,7 @@ import pytest
 from pathlib import Path
 import tempfile
 
-from jdev_cli.integration.sandbox import (
+from vertice_cli.integration.sandbox import (
     SandboxExecutor,
     SandboxResult,
     get_sandbox

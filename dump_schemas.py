@@ -5,7 +5,7 @@ import os
 # Add project root to path
 sys.path.append(os.getcwd())
 
-from jdev_tui.core.tools_bridge import ToolBridge
+from vertice_tui.core.tools_bridge import ToolBridge
 
 def dump_schemas():
     print("🚀 Initializing ToolBridge...")

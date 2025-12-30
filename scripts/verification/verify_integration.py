@@ -8,7 +8,7 @@ sys.path.append(os.getcwd())
 def test_prometheus_client():
     print("\n--- Testing PrometheusClient ---")
     try:
-        from jdev_tui.core.prometheus_client import PrometheusClient
+        from vertice_tui.core.prometheus_client import PrometheusClient
         client = PrometheusClient()
         print("✅ PrometheusClient instantiated successfully.")
     except Exception as e:
@@ -35,7 +35,7 @@ def test_auto_detect():
 def test_mcp_tools():
     print("\n--- Testing MCP Tools Registration ---")
     try:
-        from jdev_cli.tools.registry_setup import setup_default_tools
+        from vertice_cli.tools.registry_setup import setup_default_tools
 
         registry, _ = setup_default_tools(include_prometheus=True)
 

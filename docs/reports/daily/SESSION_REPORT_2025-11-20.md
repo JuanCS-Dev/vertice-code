@@ -1,7 +1,7 @@
 # 📊 SESSION REPORT - 2025-11-20
 
 **Arquiteto-Chefe:** JuanCS-Dev  
-**Executor Tático:** Constitutional AI (Vértice-MAXIMUS)  
+**Executor Tático:** Constitutional AI (Vertice-MAXIMUS)  
 **Sessão:** Day 2 - Week 1: Foundation  
 **Duração:** 3 horas (17:00 - 20:15 UTC)  
 **Branch:** `feature/non-interactive-mode-v2`
@@ -313,6 +313,6 @@ Next: Day 3 - Project config system (.qwenrc)
 
 **Status:** ✅ DAY 2 COMPLETED - READY FOR DAY 3
 
-**Signed:** Vértice-MAXIMUS Neuroshell Agent  
+**Signed:** Vertice-MAXIMUS Neuroshell Agent  
 **Timestamp:** 2025-11-20 20:15 UTC  
 **Compliance:** 100% Constitutional Adherence

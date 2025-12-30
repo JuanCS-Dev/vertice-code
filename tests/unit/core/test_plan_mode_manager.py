@@ -15,7 +15,7 @@ from pathlib import Path
 from unittest.mock import patch
 import threading
 
-from jdev_tui.core.plan_mode_manager import PlanModeManager
+from vertice_tui.core.plan_mode_manager import PlanModeManager
 
 
 class TestPlanModeManagerInit:

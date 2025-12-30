@@ -3,7 +3,7 @@ import asyncio
 import sys
 sys.path.insert(0, '/home/maximus/qwen-dev-cli')
 
-from jdev_cli.core.llm import llm_client
+from vertice_cli.core.llm import llm_client
 
 async def test_nebius():
     print("🧪 Testing Nebius...")

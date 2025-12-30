@@ -24,7 +24,7 @@ def event_loop():
 @pytest.fixture(scope="function")
 def mock_config():
     """Mock configuration for testing."""
-    from jdev_cli.core.config import Config
+    from vertice_cli.core.config import Config
 
     config = Config()
     config.model_name = "test-model"

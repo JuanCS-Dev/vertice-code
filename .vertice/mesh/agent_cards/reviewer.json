@@ -1,0 +1,58 @@
+{
+  "agent_id": "reviewer",
+  "name": "Reviewer",
+  "description": "Code review and security specialist. Thorough analysis of code quality and vulnerabilities.",
+  "version": "1.0.0",
+  "provider": "vertex-ai",
+  "model": "gemini-2.0-flash",
+
+  "capabilities": [
+    "code_review",
+    "security_audit",
+    "performance_analysis",
+    "best_practices_check",
+    "vulnerability_detection"
+  ],
+
+  "skills": [
+    "code_review",
+    "security_audit"
+  ],
+
+  "endpoints": {
+    "review": "reviewer.review",
+    "security_audit": "reviewer.security_audit",
+    "analyze": "reviewer.analyze"
+  },
+
+  "cost_tier": "enterprise",
+  "speed_tier": "fast",
+  "quality_tier": "high",
+
+  "security_checks": [
+    "sql_injection",
+    "xss",
+    "command_injection",
+    "path_traversal",
+    "hardcoded_secrets",
+    "insecure_deserialization"
+  ],
+
+  "invoke_when": [
+    "task.type == 'code_review'",
+    "task.type == 'security_audit'",
+    "task.requires_approval == true",
+    "code.is_critical == true"
+  ],
+
+  "handoff_to": [
+    "coder",
+    "architect"
+  ],
+
+  "metadata": {
+    "role": "specialist",
+    "autonomy_level": "L1_CONSENSUS",
+    "created": "2025-12-29"
+  }
+}

@@ -2,7 +2,7 @@
 
 **Date**: 2025-11-24  
 **Version**: qwen-dev-cli v2.0  
-**Compliance**: Vértice Constitution v3.0 - P3 (Clear Error Messages)
+**Compliance**: Vertice Constitution v3.0 - P3 (Clear Error Messages)
 
 ---
 
@@ -374,4 +374,4 @@ Use this checklist to track your migration progress:
 
 **Document Version**: 1.0  
 **Last Updated**: 2025-11-24  
-**Compliance**: Vértice Constitution v3.0 - P3 (Ceticismo Crítico)
+**Compliance**: Vertice Constitution v3.0 - P3 (Ceticismo Crítico)

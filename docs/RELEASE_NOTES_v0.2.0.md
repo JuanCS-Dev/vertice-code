@@ -346,7 +346,7 @@ done
 
 ## 🙏 ACKNOWLEDGMENTS
 
-**Developed by:** Vértice-MAXIMUS Neuroshell Agent  
+**Developed by:** Vertice-MAXIMUS Neuroshell Agent  
 **Supervised by:** JuanCS-Dev (Arquiteto-Chefe)  
 **Framework:** Constitutional AI v3.0  
 **Methodology:** DETER-AGENT  
@@ -359,7 +359,7 @@ done
 - **Issues:** Report at GitHub Issues
 - **Documentation:** See `/docs` directory
 - **Security:** See `SECURITY_FIXES_REPORT.md`
-- **Architecture:** See `docs/CONSTITUIÇÃO_VÉRTICE_v3.0.md`
+- **Architecture:** See `docs/CONSTITUIÇÃO_VERTICE_v3.0.md`
 
 ---
 

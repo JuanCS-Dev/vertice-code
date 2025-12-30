@@ -20,8 +20,8 @@ class TestParallelToolExecution:
     @pytest.mark.asyncio
     async def test_parallel_independent_reads(self, sample_python_project):
         """Test parallel execution of independent read operations."""
-        from jdev_tui.core.parallel_executor import ParallelToolExecutor
-        from jdev_cli.tools.file_ops import ReadFileTool
+        from vertice_tui.core.parallel_executor import ParallelToolExecutor
+        from vertice_cli.tools.file_ops import ReadFileTool
 
         read_tool = ReadFileTool()
 
@@ -48,8 +48,8 @@ class TestParallelToolExecution:
     @pytest.mark.asyncio
     async def test_parallel_independent_searches(self, sample_python_project):
         """Test parallel execution of independent searches."""
-        from jdev_tui.core.parallel_executor import ParallelToolExecutor
-        from jdev_cli.tools.search import SearchFilesTool
+        from vertice_tui.core.parallel_executor import ParallelToolExecutor
+        from vertice_cli.tools.search import SearchFilesTool
 
         search_tool = SearchFilesTool()
 
@@ -75,8 +75,8 @@ class TestParallelToolExecution:
     @pytest.mark.asyncio
     async def test_sequential_dependent_write_read(self, temp_project):
         """Test sequential execution of dependent write->read."""
-        from jdev_tui.core.parallel_executor import ParallelToolExecutor, detect_tool_dependencies
-        from jdev_cli.tools.file_ops import WriteFileTool, ReadFileTool
+        from vertice_tui.core.parallel_executor import ParallelToolExecutor, detect_tool_dependencies
+        from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
 
         write_tool = WriteFileTool()
         read_tool = ReadFileTool()
@@ -107,8 +107,8 @@ class TestParallelToolExecution:
     @pytest.mark.asyncio
     async def test_sequential_write_edit_read(self, temp_project):
         """Test sequential execution of write->edit->read chain."""
-        from jdev_tui.core.parallel_executor import ParallelToolExecutor
-        from jdev_cli.tools.file_ops import WriteFileTool, EditFileTool, ReadFileTool
+        from vertice_tui.core.parallel_executor import ParallelToolExecutor
+        from vertice_cli.tools.file_ops import WriteFileTool, EditFileTool, ReadFileTool
 
         write_tool = WriteFileTool()
         edit_tool = EditFileTool()
@@ -143,8 +143,8 @@ class TestParallelToolExecution:
     @pytest.mark.asyncio
     async def test_parallel_writes_different_files(self, temp_project):
         """Test parallel writes to different files."""
-        from jdev_tui.core.parallel_executor import ParallelToolExecutor
-        from jdev_cli.tools.file_ops import WriteFileTool
+        from vertice_tui.core.parallel_executor import ParallelToolExecutor
+        from vertice_cli.tools.file_ops import WriteFileTool
 
         write_tool = WriteFileTool()
 
@@ -168,8 +168,8 @@ class TestParallelToolExecution:
     @pytest.mark.asyncio
     async def test_mixed_parallel_sequential(self, temp_project):
         """Test mixed parallel and sequential execution."""
-        from jdev_tui.core.parallel_executor import ParallelToolExecutor
-        from jdev_cli.tools.file_ops import WriteFileTool, ReadFileTool
+        from vertice_tui.core.parallel_executor import ParallelToolExecutor
+        from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
 
         write_tool = WriteFileTool()
         read_tool = ReadFileTool()
@@ -200,7 +200,7 @@ class TestParallelToolExecution:
     @pytest.mark.asyncio
     async def test_dependency_detection_same_file(self, temp_project):
         """Test dependency detection for operations on same file."""
-        from jdev_tui.core.parallel_executor import detect_tool_dependencies
+        from vertice_tui.core.parallel_executor import detect_tool_dependencies
 
         test_file = str(temp_project / "same.txt")
         tool_calls = [
@@ -222,8 +222,8 @@ class TestParallelToolExecution:
     @pytest.mark.asyncio
     async def test_max_parallel_limit(self, temp_project):
         """Test that parallel execution respects max limit."""
-        from jdev_tui.core.parallel_executor import ParallelToolExecutor
-        from jdev_cli.tools.file_ops import WriteFileTool
+        from vertice_tui.core.parallel_executor import ParallelToolExecutor
+        from vertice_cli.tools.file_ops import WriteFileTool
 
         write_tool = WriteFileTool()
 
@@ -245,8 +245,8 @@ class TestParallelToolExecution:
     @pytest.mark.asyncio
     async def test_error_in_parallel_execution(self, temp_project):
         """Test error handling in parallel execution."""
-        from jdev_tui.core.parallel_executor import ParallelToolExecutor
-        from jdev_cli.tools.file_ops import ReadFileTool
+        from vertice_tui.core.parallel_executor import ParallelToolExecutor
+        from vertice_cli.tools.file_ops import ReadFileTool
 
         read_tool = ReadFileTool()
 
@@ -274,7 +274,7 @@ class TestDependencyDetection:
 
     def test_detect_read_write_dependency(self):
         """Test detecting read->write dependency."""
-        from jdev_tui.core.parallel_executor import detect_tool_dependencies
+        from vertice_tui.core.parallel_executor import detect_tool_dependencies
 
         tool_calls = [
             ("read_file", {"path": "test.txt"}),
@@ -288,7 +288,7 @@ class TestDependencyDetection:
 
     def test_detect_write_edit_dependency(self):
         """Test detecting write->edit dependency."""
-        from jdev_tui.core.parallel_executor import detect_tool_dependencies
+        from vertice_tui.core.parallel_executor import detect_tool_dependencies
 
         tool_calls = [
             ("write_file", {"path": "test.txt", "content": "original"}),
@@ -301,7 +301,7 @@ class TestDependencyDetection:
 
     def test_detect_multiple_edits_sequential(self):
         """Test multiple edits to same file are sequential."""
-        from jdev_tui.core.parallel_executor import detect_tool_dependencies
+        from vertice_tui.core.parallel_executor import detect_tool_dependencies
 
         tool_calls = [
             ("write_file", {"path": "test.txt", "content": "v1"}),
@@ -316,7 +316,7 @@ class TestDependencyDetection:
 
     def test_detect_git_operations_sequential(self):
         """Test git operations are sequential."""
-        from jdev_tui.core.parallel_executor import detect_tool_dependencies
+        from vertice_tui.core.parallel_executor import detect_tool_dependencies
 
         tool_calls = [
             ("git_status", {"path": "."}),
@@ -332,7 +332,7 @@ class TestDependencyDetection:
 
     def test_independent_files_no_dependency(self):
         """Test operations on different files have no dependency."""
-        from jdev_tui.core.parallel_executor import detect_tool_dependencies
+        from vertice_tui.core.parallel_executor import detect_tool_dependencies
 
         tool_calls = [
             ("write_file", {"path": "file1.txt", "content": "a"}),
@@ -354,8 +354,8 @@ class TestConcurrentStressTest:
     @pytest.mark.asyncio
     async def test_many_parallel_reads(self, sample_python_project):
         """Test many parallel reads (50+)."""
-        from jdev_tui.core.parallel_executor import ParallelToolExecutor
-        from jdev_cli.tools.file_ops import ReadFileTool
+        from vertice_tui.core.parallel_executor import ParallelToolExecutor
+        from vertice_cli.tools.file_ops import ReadFileTool
 
         read_tool = ReadFileTool()
 
@@ -377,8 +377,8 @@ class TestConcurrentStressTest:
     @pytest.mark.asyncio
     async def test_many_sequential_writes(self, temp_project):
         """Test many writes to same file (sequential)."""
-        from jdev_tui.core.parallel_executor import ParallelToolExecutor
-        from jdev_cli.tools.file_ops import WriteFileTool, EditFileTool
+        from vertice_tui.core.parallel_executor import ParallelToolExecutor
+        from vertice_cli.tools.file_ops import WriteFileTool, EditFileTool
 
         write_tool = WriteFileTool()
         edit_tool = EditFileTool()
@@ -413,8 +413,8 @@ class TestConcurrentStressTest:
     @pytest.mark.asyncio
     async def test_complex_dependency_graph(self, temp_project):
         """Test complex dependency graph with multiple chains."""
-        from jdev_tui.core.parallel_executor import ParallelToolExecutor
-        from jdev_cli.tools.file_ops import WriteFileTool, ReadFileTool
+        from vertice_tui.core.parallel_executor import ParallelToolExecutor
+        from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
 
         write_tool = WriteFileTool()
         read_tool = ReadFileTool()

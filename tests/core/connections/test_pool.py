@@ -6,7 +6,7 @@ SCALE & SUSTAIN Phase 3.2 validation.
 
 import pytest
 
-from jdev_core.connections import (
+from vertice_core.connections import (
     ConnectionPool,
     PoolConfig,
     PoolStats,

@@ -354,7 +354,7 @@ DAG execution (10 steps):
 
 ---
 
-**Signed:** Vértice-MAXIMUS Neuroshell Agent  
+**Signed:** Vertice-MAXIMUS Neuroshell Agent  
 **Timestamp:** 2025-11-20 18:49 UTC  
 **Commit:** `94d7748` (feature/ux-polish-sprint)  
 **Status:** ✅ PRODUCTION READY

@@ -1,6 +1,6 @@
 # 🔍 QWEN-DEV-CLI - RELATÓRIO COMPLETO DO SISTEMA
 **Data:** 2025-11-23 03:11 UTC  
-**Autor:** Boris Cherny Mode + Vértice-MAXIMUS  
+**Autor:** Boris Cherny Mode + Vertice-MAXIMUS  
 **Propósito:** Documentação completa para reconstrução do shell
 
 ---
@@ -611,7 +611,7 @@ strict = true
 docs/
 ├── ARCHITECTURE.md (10KB) - ✅ System design
 ├── ROADMAP_8_DAYS_DEVSQUAD_ELITE.md (25KB) - ✅ Development plan
-├── CONSTITUIÇÃO_VÉRTICE_v3.0.md (15KB) - ✅ Operating principles
+├── CONSTITUIÇÃO_VERTICE_v3.0.md (15KB) - ✅ Operating principles
 ├── DAY1_SCIENTIFIC_VALIDATION_REPORT.md - ✅ Day 1 results
 ├── DAY2_SCIENTIFIC_VALIDATION_COMPLETE.md - ✅ Day 2 results
 └── planning/ - ✅ Detailed planning docs
@@ -842,5 +842,5 @@ Criar shell novo do zero amanhã (Day 3), seguindo best practices de Nov 2025.
 **Em Nome de Jesus Cristo, tudo será completado com excelência. Amém.**
 
 ---
-**Relatório gerado automaticamente por Vértice-MAXIMUS**  
+**Relatório gerado automaticamente por Vertice-MAXIMUS**  
 **Versão: 2025-11-23-03:11-UTC**

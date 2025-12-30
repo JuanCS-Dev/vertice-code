@@ -16,17 +16,17 @@ import pytest
 import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from jdev_cli.agents.executor import (
+from vertice_cli.agents.executor import (
     ExecutionMode,
     SecurityLevel,
     CommandResult,
     CodeExecutionEngine,
     NextGenExecutorAgent,
 )
-from jdev_cli.agents.base import (
+from vertice_cli.agents.base import (
     AgentTask,
 )
-from jdev_cli.permissions import PermissionLevel
+from vertice_cli.permissions import PermissionLevel
 
 
 # =============================================================================

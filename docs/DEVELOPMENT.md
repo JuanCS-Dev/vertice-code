@@ -304,7 +304,7 @@ qwen-dev-cli/
 
 ### 1. Constitutional Compliance
 
-Follow **Vértice Constitution v3.0** principles:
+Follow **Vertice Constitution v3.0** principles:
 - **P1**: Zero placeholders, complete implementation
 - **P2**: Validate before use, fail fast
 - **P3**: Challenge assumptions, be skeptical
@@ -354,7 +354,7 @@ Commit message format:
 - **Architecture**: `docs/ARCHITECTURE.md`
 - **Migration Guide**: `docs/MIGRATION_v2.0.md`
 - **QA Report**: `QA_REPORT_ULTRATHINK.md`
-- **Constitution**: `docs/CONSTITUIÇÃO_VÉRTICE_v3.0.md`
+- **Constitution**: `docs/CONSTITUIÇÃO_VERTICE_v3.0.md`
 
 ---
 
@@ -368,4 +368,4 @@ Commit message format:
 ---
 
 **Last Updated**: 2025-11-24  
-**Compliance**: Vértice Constitution v3.0 - P4 (Documentation)
+**Compliance**: Vertice Constitution v3.0 - P4 (Documentation)

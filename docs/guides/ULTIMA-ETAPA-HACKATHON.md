@@ -152,8 +152,8 @@ echo "Agente: 'rm -rf /' ❌ SEM SIMULAÇÃO!"
 **Visual**: Mostrar sistema de memória
 **Comandos**:
 # Mostrar MIRIX em ação
-jdev memory list
-jdev memory recall "last error"
+vertice memory list
+vertice memory recall "last error"
 **Narração/Texto na tela**:
 "MIRIX: 6 tipos de memória
 - Core: System prompt
@@ -166,7 +166,7 @@ jdev memory recall "last error"
 ## CENA 4: PROMETHEUS - SimuRA World Model (40s)
 **Visual**: Mostrar simulação ANTES de agir
 **Comandos**:
-jdev simulate "git push --force"
+vertice simulate "git push --force"
 **Mostrar**:
 - Árvore MCTS com 3 futuros
 - Future 1: ✅ Success (+10)
@@ -180,7 +180,7 @@ jdev simulate "git push --force"
 ## CENA 5: PROMETHEUS - Agent0 Evolution (40s)
 **Visual**: Mostrar ciclo de co-evolução
 **Comandos**:
-jdev agent0 evolve --show-cycle
+vertice agent0 evolve --show-cycle
 **Mostrar**:
 Curriculum Agent → Desafio
 Executor Agent → Tenta resolver
@@ -247,7 +247,7 @@ echo ""
 sleep 5
 # === CENA 3: MIRIX ===
 echo "=== CENA 3: MIRIX MEMORY ==="
-jdev memory list || echo "📝 MIRIX: 6 tipos de memória persistente"
+vertice memory list || echo "📝 MIRIX: 6 tipos de memória persistente"
 sleep 3
 # === CENA 4: SimuRA ===
 echo "=== CENA 4: SimuRA SIMULATION ==="
@@ -733,7 +733,7 @@ PROMETHEUS is a self-evolving AI agent ecosystem built on the Model Context Prot
 - MIRIX: 6-type persistent memory system
 - SimuRA: MCTS world model for action simulation
 - Agent0: Co-evolution loop for self-improvement
-- Constitutional Governance (Vértice v3.0)
+- Constitutional Governance (Vertice v3.0)
 🛠️ Tech Stack:
 - Gemini 3 Pro (2M context window)
 - Blaxel Serverless Infrastructure
@@ -784,7 +784,7 @@ PROMETHEUS is a self-evolving AI agent ecosystem built on the Model Context Prot
 🧠 MIRIX - 6-type persistent memory (episodic, procedural, semantic, resource, vault, core)
 🌍 SimuRA - MCTS-based world model for action simulation
 🔄 Agent0 - Co-evolution loop for continuous self-improvement
-⚖️ Constitutional Governance - Vértice v3.0 framework
+⚖️ Constitutional Governance - Vertice v3.0 framework
 Tech Stack: Gemini 3 Pro, Blaxel Serverless, MCP, Gradio 6
 Watch the demo: [link]
 Explore the code: [link]
@@ -811,7 +811,7 @@ Key innovations:
 - SimuRA World Model: Uses Monte Carlo Tree Search (MCTS) to simulate 3 potential futures before executing any action, reducing catastrophic errors by 94%
 - MIRIX Memory System: 6-type persistent memory (Core, Episodic, Semantic, Procedural, Resource, Vault) enabling cross-session learning
 - Agent0 Co-Evolution: Curriculum Agent generates challenges, Executor attempts solutions, Reflection Engine critiques, creating a continuous improvement loop
-- Constitutional Governance: Vértice v3.0 framework for formal safety protocols
+- Constitutional Governance: Vertice v3.0 framework for formal safety protocols
 Built with Gemini 3 Pro (2M context window), deployed on Blaxel serverless infrastructure, integrated with MCP for standardized tool access, and featuring a Gradio 6 cyberpunk dashboard.
 PROMETHEUS represents a paradigm shift from "agents that execute" to "agents that think, simulate, and evolve."
 Gradio Space (se tiver): Link ou N/A

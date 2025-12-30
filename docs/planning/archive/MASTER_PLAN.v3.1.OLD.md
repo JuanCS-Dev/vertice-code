@@ -463,13 +463,13 @@ Tarefas:
 
 1. **⚠️ Tree-of-Thought Planning (Layer 2 - Deliberation)**
    - **Status:** NOT IMPLEMENTED
-   - **Required by:** Constituição Vértice v3.0, Artigo VII (Camada de Deliberação)
+   - **Required by:** Constituicao Vertice v3.0, Artigo VII (Camada de Deliberação)
    - **Implementation:** Phase 3.2 (Multi-Step Workflow) + Phase 2.3 (Conversation state machine)
    - **LOC Estimate:** ~400 (integrated into workflow.py + conversation.py)
 
 2. **⚠️ Métricas Formais LEI/HRI/CPI (Layer 5 - Incentive)**
    - **Status:** PARTIAL (tracking exists, formal calculation missing)
-   - **Required by:** Constituição Vértice v3.0, Artigo X (Camada de Incentivo)
+   - **Required by:** Constituicao Vertice v3.0, Artigo X (Camada de Incentivo)
    - **Implementation:** Enhance qwen_dev_cli/core/metrics.py
    - **LOC Estimate:** ~150 (add formal metric calculations)
    - **Metrics:**

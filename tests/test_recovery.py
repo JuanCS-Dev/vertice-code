@@ -7,7 +7,7 @@ Tests error recovery engine, diagnosis, and auto-correction.
 import pytest
 from unittest.mock import Mock, AsyncMock
 
-from jdev_cli.core.recovery import (
+from vertice_cli.core.recovery import (
     ErrorRecoveryEngine,
     ErrorCategory,
     RecoveryStrategy,

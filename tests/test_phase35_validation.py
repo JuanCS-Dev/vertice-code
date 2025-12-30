@@ -10,8 +10,8 @@ Tests Constitutional Requirements:
 
 import asyncio
 import pytest
-from jdev_cli.streaming.executor import AsyncCommandExecutor
-from jdev_cli.streaming.renderer import ReactiveRenderer, RenderEvent, RenderEventType
+from vertice_cli.streaming.executor import AsyncCommandExecutor
+from vertice_cli.streaming.renderer import ReactiveRenderer, RenderEvent, RenderEventType
 
 
 @pytest.mark.asyncio
@@ -131,7 +131,7 @@ async def test_no_buffering():
 @pytest.mark.asyncio
 async def test_integration_shell_streaming():
     """Integration: Shell uses streaming for bash commands."""
-    from jdev_cli.tools.exec import BashCommandTool
+    from vertice_cli.tools.exec import BashCommandTool
 
     tool = BashCommandTool()
 

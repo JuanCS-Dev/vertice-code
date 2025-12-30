@@ -1,5 +1,5 @@
 """
-🎯 REAL Usability Testing - Vértice 3.0 Compliance
+🎯 REAL Usability Testing - Vertice 3.0 Compliance
 
 Philosophy:
 - Test what matters: User experience, not coverage
@@ -21,12 +21,12 @@ from io import StringIO
 
 
 class TestVertice30Compliance:
-    """Validate Constituição Vértice 3.0 core principles."""
+    """Validate Constituicao Vertice 3.0 core principles."""
 
     def test_p1_zero_placeholders_lei(self):
         """P1: LEI Score = 0.0 - Zero placeholders."""
 
-        tui_dir = Path(__file__).parent.parent / "jdev_cli" / "tui"
+        tui_dir = Path(__file__).parent.parent / "vertice_cli" / "tui"
 
         # Forbidden patterns
         forbidden = ["TODO", "FIXME", "PLACEHOLDER", "XXX", "HACK", "TEMP"]
@@ -55,7 +55,7 @@ class TestVertice30Compliance:
     def test_p3_incremental_phases(self):
         """P3: 4 phases of incremental development."""
 
-        tui_dir = Path(__file__).parent.parent / "jdev_cli" / "tui"
+        tui_dir = Path(__file__).parent.parent / "vertice_cli" / "tui"
         components_dir = tui_dir / "components"
 
         # Phase 1: Foundation
@@ -83,7 +83,7 @@ class TestVertice30Compliance:
     def test_p5_biblical_wisdom(self):
         """P5: Biblical wisdom integration."""
 
-        from jdev_cli.tui.wisdom import get_random_verse, get_verse_for_operation, get_loading_message
+        from vertice_cli.tui.wisdom import get_random_verse, get_verse_for_operation, get_loading_message
 
         # Test random verse
         verse = get_random_verse(max_width=80)
@@ -120,7 +120,7 @@ class TestVertice30Compliance:
     def test_p8_accessibility_wcag(self):
         """P8: WCAG AA/AAA compliance."""
 
-        from jdev_cli.tui.accessibility import calculate_contrast_ratio
+        from vertice_cli.tui.accessibility import calculate_contrast_ratio
 
         # Test contrast ratio calculation
         white_on_dark = calculate_contrast_ratio("#FFFFFF", "#0d1117")
@@ -140,7 +140,7 @@ class TestRealUsability:
     def test_biblical_loading_messages(self):
         """Loading messages use Biblical wisdom."""
 
-        from jdev_cli.tui.wisdom import get_loading_message
+        from vertice_cli.tui.wisdom import get_loading_message
 
         messages = []
         for i in range(5):
@@ -154,7 +154,7 @@ class TestRealUsability:
     def test_message_components_work(self):
         """Message components render without error."""
 
-        from jdev_cli.tui.components.message import Message, MessageRole, create_assistant_message
+        from vertice_cli.tui.components.message import Message, MessageRole, create_assistant_message
 
         # Test message creation
         msg = create_assistant_message("Hello, this is a test!")
@@ -174,7 +174,7 @@ class TestRealUsability:
     def test_status_badges_clear(self):
         """Status badges provide clear feedback."""
 
-        from jdev_cli.tui.components.status import StatusBadge, StatusLevel
+        from vertice_cli.tui.components.status import StatusBadge, StatusLevel
 
         # Test each status level
         levels = [StatusLevel.INFO, StatusLevel.SUCCESS, StatusLevel.WARNING, StatusLevel.ERROR]
@@ -189,7 +189,7 @@ class TestRealUsability:
     def test_diff_viewer_modes(self):
         """Diff viewer has multiple display modes."""
 
-        from jdev_cli.tui.components.diff import DiffMode
+        from vertice_cli.tui.components.diff import DiffMode
 
         # Verify modes exist
         modes = list(DiffMode)
@@ -203,7 +203,7 @@ class TestIntegration:
     def test_theme_colors_accessible(self):
         """Theme colors are accessible everywhere."""
 
-        from jdev_cli.tui.theme import COLORS
+        from vertice_cli.tui.theme import COLORS
 
         required_colors = [
             'bg_primary', 'bg_secondary',
@@ -219,7 +219,7 @@ class TestIntegration:
     def test_components_use_consistent_theme(self):
         """Components reference theme colors."""
 
-        from jdev_cli.tui.components import message, status, progress
+        from vertice_cli.tui.components import message, status, progress
 
         # Verify imports work (they reference theme internally)
         assert message is not None
@@ -234,7 +234,7 @@ class TestPerformance:
     def test_rendering_fast(self):
         """Component rendering is fast enough."""
 
-        from jdev_cli.tui.components.message import create_assistant_message
+        from vertice_cli.tui.components.message import create_assistant_message
 
         console = Console(file=StringIO())
 
@@ -253,7 +253,7 @@ class TestPerformance:
     def test_theme_lookup_fast(self):
         """Theme color lookups are instant."""
 
-        from jdev_cli.tui.theme import COLORS
+        from vertice_cli.tui.theme import COLORS
 
         start = time.time()
         for i in range(10000):
@@ -274,7 +274,7 @@ def test_generate_final_report():
     print()
     print("📖 'The LORD is my strength and my shield' - Psalm 28:7")
     print()
-    print("✅ VÉRTICE 3.0 COMPLIANCE: PASSED")
+    print("✅ VERTICE 3.0 COMPLIANCE: PASSED")
     print("  • P1: Zero placeholders (LEI = 0.0)")
     print("  • P2: Quality-first design")
     print("  • P3: 4-phase incremental development")

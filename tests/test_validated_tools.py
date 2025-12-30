@@ -7,9 +7,9 @@ Boris Cherny: "Tests or it didn't happen."
 import pytest
 from typing import Dict, Any
 
-from jdev_cli.tools.validated import ValidatedTool, validate_tool_inputs
-from jdev_cli.tools.base import ToolResult
-from jdev_cli.core.validation import Required, TypeCheck
+from vertice_cli.tools.validated import ValidatedTool, validate_tool_inputs
+from vertice_cli.tools.base import ToolResult
+from vertice_cli.core.validation import Required, TypeCheck
 
 
 class MockValidatedTool(ValidatedTool):

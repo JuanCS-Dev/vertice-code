@@ -46,7 +46,7 @@
 ## 🔬 OS TRÊS PILARES
 
 ### **1. GOD (Princípios Imutáveis)**
-- Constituição Vértice v3.0
+- Constituicao Vertice v3.0
 - Framework DETER-AGENT
 - Zero Trust Architecture
 - Antifragilidade Sistêmica
@@ -102,7 +102,7 @@ Cada erro fortalece o sistema:
 
 ### 4. Determinismo
 ```
-Input + Constituição + Deliberação = Output Previsível
+Input + Constituicao + Deliberação = Output Previsível
 (não há sorte, apenas método)
 ```
 
@@ -114,7 +114,7 @@ Input + Constituição + Deliberação = Output Previsível
 
 **DIA 1-2: GOD (Fundação)**
 - Estudar MCP spec completamente
-- Definir Constituição Vértice
+- Definir Constituicao Vertice
 - Escolher stack (Python + MCP + Multi-LLM)
 
 **DIA 3-4: HUMAN (Arquitetura)**

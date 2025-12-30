@@ -11,8 +11,8 @@ from pathlib import Path
 # Add parent to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from jdev_cli.intelligence.indexer import SemanticIndexer
-from jdev_cli.tui.theme import COLORS
+from vertice_cli.intelligence.indexer import SemanticIndexer
+from vertice_cli.tui.theme import COLORS
 import time
 
 
@@ -96,9 +96,9 @@ def main():
     # Simulate error trace
     fake_error = f"""
 Traceback (most recent call last):
-  File "{root}/jdev_cli/shell.py", line 150, in process_command
+  File "{root}/vertice_cli/shell.py", line 150, in process_command
     result = await self.execute_tool(cmd)
-  File "{root}/jdev_cli/tools/exec.py", line 45, in execute
+  File "{root}/vertice_cli/tools/exec.py", line 45, in execute
     raise ValueError("Invalid command")
 ValueError: Invalid command
 """
@@ -121,7 +121,7 @@ ValueError: Invalid command
     # Demo 3: Dependency analysis
     print_header("🔗 Demo 3: Dependency Graph")
 
-    test_file = "jdev_cli/shell.py"
+    test_file = "vertice_cli/shell.py"
     if test_file in indexer.file_index:
         print(f"{COLORS['info']}Analyzing: {test_file}{COLORS['reset']}\n")
 

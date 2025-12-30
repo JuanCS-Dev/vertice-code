@@ -3,9 +3,9 @@ Day 3 - Production Readiness Tests (Boris Cherny Standards)
 Tests finais de validação de production readiness.
 """
 from pathlib import Path
-from jdev_cli.agents.planner import PlannerAgent
-from jdev_cli.agents.refactorer import RefactorerAgent
-from jdev_cli.agents.base import TaskContext, TaskStatus
+from vertice_cli.agents.planner import PlannerAgent
+from vertice_cli.agents.refactorer import RefactorerAgent
+from vertice_cli.agents.base import TaskContext, TaskStatus
 
 
 class TestProductionReadinessPlannerCore:

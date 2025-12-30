@@ -533,7 +533,7 @@ Constitutional:      100/100 ✅
 ---
 
 **Assinatura Digital:**  
-Vértice-MAXIMUS Neuroshell Agent  
+Vertice-MAXIMUS Neuroshell Agent  
 Constitutional AI v3.0  
 Scientific Validation Complete - 2025-11-20 12:00 UTC  
 

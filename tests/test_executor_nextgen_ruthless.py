@@ -24,7 +24,7 @@ import asyncio
 import time
 
 # Import the beast
-from jdev_cli.agents.executor import (
+from vertice_cli.agents.executor import (
     NextGenExecutorAgent,
     ExecutionMode,
     SecurityLevel,
@@ -32,7 +32,7 @@ from jdev_cli.agents.executor import (
     AdvancedSecurityValidator,
     CodeExecutionEngine,
 )
-from jdev_cli.agents.base import AgentTask, AgentResponse
+from vertice_cli.agents.base import AgentTask, AgentResponse
 
 
 # ============================================================================

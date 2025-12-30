@@ -1,7 +1,7 @@
 """
 Scientific Security Tests for SafeCommandExecutor
 
-Based on ACTUAL implementation in jdev_tui/core/safe_executor.py
+Based on ACTUAL implementation in vertice_tui/core/safe_executor.py
 Tests real behavior, not imaginary features.
 
 Implementation details (READ FROM FILE):
@@ -14,7 +14,7 @@ Implementation details (READ FROM FILE):
 """
 
 import pytest
-from jdev_tui.core.safe_executor import (
+from vertice_tui.core.safe_executor import (
     SafeCommandExecutor,
     CommandCategory,
     get_safe_executor,

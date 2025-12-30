@@ -2,7 +2,7 @@
 
 **Date:** 2025-11-17  
 **Time:** 19:51 UTC  
-**Validation Framework:** CONSTITUIÇÃO VÉRTICE v3.0 Compliant
+**Validation Framework:** CONSTITUIÇÃO VERTICE v3.0 Compliant
 
 ---
 
@@ -370,7 +370,7 @@
 ## 🔟 VALIDATION METHODOLOGY
 
 This validation followed:
-- CONSTITUIÇÃO VÉRTICE v3.0 protocols
+- CONSTITUIÇÃO VERTICE v3.0 protocols
 - Scientific testing methodology
 - Real-world behavior testing
 - Performance benchmarking
@@ -385,13 +385,13 @@ This validation followed:
 
 **Date:** 2025-11-17  
 **Validator:** Comprehensive Test Suite v1.0  
-**Framework:** VÉRTICE v3.0  
+**Framework:** VERTICE v3.0  
 
 ---
 
 ## 📝 ATTESTATION
 
-This validation report certifies that **qwen-dev-cli** has undergone comprehensive testing and meets all requirements specified in the CONSTITUIÇÃO VÉRTICE v3.0.
+This validation report certifies that **qwen-dev-cli** has undergone comprehensive testing and meets all requirements specified in the CONSTITUIÇÃO VERTICE v3.0.
 
 The system is:
 - ✅ Functionally complete

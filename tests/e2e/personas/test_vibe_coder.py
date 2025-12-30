@@ -24,9 +24,9 @@ from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from jdev_cli.core.input_enhancer import InputEnhancer
-from jdev_cli.core.error_presenter import ErrorPresenter
-from jdev_cli.core.context_tracker import ContextTracker
+from vertice_cli.core.input_enhancer import InputEnhancer
+from vertice_cli.core.error_presenter import ErrorPresenter
+from vertice_cli.core.context_tracker import ContextTracker
 
 
 # ==============================================================================

@@ -5,14 +5,14 @@
 
 | ID | Componente | Tipo | Caminho Arquivo | Severidade | Tem Fallback? | Risco Principal |
 |----|-----------|------|------------------|-----------|---------------|-----------------|
-| 1 | GeminiClient | API External | jdev_tui/core/llm_client.py | **5** | Sim (weak) | Timeout 60s, Sem retry, Sem circuit breaker |
-| 2 | MCPClient | Internal Service | jdev_cli/core/mcp.py | **5** | Não | Zero ferramentas se falha, Sem fallback |
-| 3 | BaseAgent._stream_llm() | LLM Interface | jdev_cli/agents/base.py | **4** | Não | Sem timeout, Sem retry logic |
-| 4 | Bridge (Facade) | Central Hub | jdev_tui/core/bridge.py | **5** | Parcial | 1444 linhas, 12 deps, 2 locks, estado mutável |
-| 5 | ExecutorAgent | Execution | jdev_cli/agents/executor.py | **4** | Não | subprocess sem timeout, Import dependencies |
-| 6 | ToolBridge.registry | Tool Registry | jdev_tui/core/tools_bridge.py | **3** | Sim | 7 importações silenciosamente falham |
-| 7 | HistoryManager.context | State | jdev_tui/core/history_manager.py | **3** | Não | Race condition, sem lock, mutável |
-| 8 | AgentRouter.route() | Intent Detection | jdev_tui/core/agents_bridge.py | **2** | Sim | Confidence threshold = 0.5 (arbitrary) |
+| 1 | GeminiClient | API External | vertice_tui/core/llm_client.py | **5** | Sim (weak) | Timeout 60s, Sem retry, Sem circuit breaker |
+| 2 | MCPClient | Internal Service | vertice_cli/core/mcp.py | **5** | Não | Zero ferramentas se falha, Sem fallback |
+| 3 | BaseAgent._stream_llm() | LLM Interface | vertice_cli/agents/base.py | **4** | Não | Sem timeout, Sem retry logic |
+| 4 | Bridge (Facade) | Central Hub | vertice_tui/core/bridge.py | **5** | Parcial | 1444 linhas, 12 deps, 2 locks, estado mutável |
+| 5 | ExecutorAgent | Execution | vertice_cli/agents/executor.py | **4** | Não | subprocess sem timeout, Import dependencies |
+| 6 | ToolBridge.registry | Tool Registry | vertice_tui/core/tools_bridge.py | **3** | Sim | 7 importações silenciosamente falham |
+| 7 | HistoryManager.context | State | vertice_tui/core/history_manager.py | **3** | Não | Race condition, sem lock, mutável |
+| 8 | AgentRouter.route() | Intent Detection | vertice_tui/core/agents_bridge.py | **2** | Sim | Confidence threshold = 0.5 (arbitrary) |
 | 9 | File I/O | Filesystem | bridge.py:174,1325 | **4** | Não | Sem timeout, NFS hang risk |
 | 10 | Singleton get_bridge() | Initialization | bridge.py:1390 | **2** | Sim | Double-check locking race condition |
 
@@ -154,18 +154,18 @@ Impacto se cai: Arquivo preso indefinidamente
 ### IMPORTAÇÕES CRÍTICAS (Dynamic Load Risk)
 
 ```python
-# jdev_tui/core/bridge.py
+# vertice_tui/core/bridge.py
 from .governance import GovernanceObserver              # OK (sempre carrega)
 from .llm_client import GeminiClient                    # CRÍTICO - falha = sem IA
 from .agents_bridge import AgentManager                 # CRÍTICO - falha = sem agents
 from .tools_bridge import ToolBridge                    # MÉDIO - falha = sem tools
 from .ui_bridge import CommandPaletteBridge             # BAIXO - falha = sem UI helpers
 
-# jdev_cli/agents/base.py (dynamic)
-from jdev_core.types import AgentTask, AgentResponse    # Crítico se falha
+# vertice_cli/agents/base.py (dynamic)
+from vertice_core.types import AgentTask, AgentResponse    # Crítico se falha
 
 # Lazy imports (agent registration)
-AGENT_REGISTRY["executor"].module_path = "jdev_cli.agents.executor"
+AGENT_REGISTRY["executor"].module_path = "vertice_cli.agents.executor"
                                          ↓ import dinâmico quando invocado
                                          ↓ PODE FALHAR = ImportError
 ```
@@ -176,13 +176,13 @@ AGENT_REGISTRY["executor"].module_path = "jdev_cli.agents.executor"
 
 | Componente | Implementado? | Localização | Efetivo? |
 |-----------|--------------|-------------|----------|
-| **GeminiClient** | NÃO | jdev_tui/core/llm_client.py | - |
-| **LLMClient** | **SIM** | jdev_cli/core/llm.py:52 | Não usado em TUI |
-| **RateLimiter** | **SIM** | jdev_cli/core/llm.py:103 | Não usado em TUI |
-| **BaseAgent retry** | NÃO | jdev_cli/agents/base.py | - |
-| **MCP Client** | NÃO | jdev_cli/core/mcp.py | - |
+| **GeminiClient** | NÃO | vertice_tui/core/llm_client.py | - |
+| **LLMClient** | **SIM** | vertice_cli/core/llm.py:52 | Não usado em TUI |
+| **RateLimiter** | **SIM** | vertice_cli/core/llm.py:103 | Não usado em TUI |
+| **BaseAgent retry** | NÃO | vertice_cli/agents/base.py | - |
+| **MCP Client** | NÃO | vertice_cli/core/mcp.py | - |
 
-**PROBLEMA:** Resiliência implementada em jdev_cli mas não usada em jdev_tui!
+**PROBLEMA:** Resiliência implementada em vertice_cli mas não usada em vertice_tui!
 
 ---
 

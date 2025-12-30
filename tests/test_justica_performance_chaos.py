@@ -32,8 +32,8 @@ import pytest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from jdev_cli.agents.justica_agent import JusticaIntegratedAgent
-from jdev_governance.justica import EnforcementMode
+from vertice_cli.agents.justica_agent import JusticaIntegratedAgent
+from vertice_governance.justica import EnforcementMode
 
 
 # ============================================================================

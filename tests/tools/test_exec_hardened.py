@@ -10,7 +10,7 @@ import pytest
 import tempfile
 from pathlib import Path
 
-from jdev_cli.tools.exec_hardened import (
+from vertice_cli.tools.exec_hardened import (
     BashCommandToolHardened,
     CommandValidator,
     ExecutionLimits
@@ -331,7 +331,7 @@ class TestBackwardCompatibility:
     @pytest.mark.asyncio
     async def test_bash_command_tool_alias_works(self):
         """BashCommandTool alias works."""
-        from jdev_cli.tools.exec_hardened import BashCommandTool
+        from vertice_cli.tools.exec_hardened import BashCommandTool
 
         tool = BashCommandTool()
         result = await tool.execute(command="echo test")

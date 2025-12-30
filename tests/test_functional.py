@@ -3,7 +3,7 @@
 FUNCTIONAL TESTING SUITE
 Tests real LLM functionality, streaming, multi-provider routing.
 
-Following CONSTITUIÇÃO VÉRTICE v3.0 - Real behavior validation
+Following CONSTITUIÇÃO VERTICE v3.0 - Real behavior validation
 """
 
 import sys
@@ -13,7 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from jdev_cli.core.llm import llm_client
+from vertice_cli.core.llm import llm_client
 
 
 async def test_basic_generation():
@@ -170,7 +170,7 @@ async def test_context_builder():
     print("🧪 TEST 5: CONTEXT BUILDER")
     print("="*80)
 
-    from jdev_cli.core.context import context_builder
+    from vertice_cli.core.context import context_builder
 
     try:
         # Test stats

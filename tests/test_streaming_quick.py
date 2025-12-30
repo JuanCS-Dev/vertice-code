@@ -14,7 +14,7 @@ async def test_llm_generate_stream():
     """Test 1: LLMClient.generate_stream() exists"""
     print("🔍 Test 1: Verificando LLMClient.generate_stream()...")
 
-    from jdev_cli.core.llm import LLMClient
+    from vertice_cli.core.llm import LLMClient
 
     client = LLMClient()
 
@@ -32,7 +32,7 @@ async def test_planner_execute_streaming():
     """Test 2: PlannerAgent.execute_streaming() exists"""
     print("\n🔍 Test 2: Verificando PlannerAgent.execute_streaming()...")
 
-    from jdev_cli.agents.planner import PlannerAgent
+    from vertice_cli.agents.planner import PlannerAgent
     import inspect
 
     # Check method exists in class definition

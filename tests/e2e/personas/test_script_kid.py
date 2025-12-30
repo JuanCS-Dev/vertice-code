@@ -25,11 +25,11 @@ from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from jdev_cli.core.input_validator import InputValidator
-from jdev_cli.core.sandbox import SecureExecutor
-from jdev_cli.core.python_sandbox import PythonSandbox
-from jdev_cli.core.prompt_shield import PromptShield
-from jdev_cli.core.audit_logger import AuditLogger, AuditEventType
+from vertice_cli.core.input_validator import InputValidator
+from vertice_cli.core.sandbox import SecureExecutor
+from vertice_cli.core.python_sandbox import PythonSandbox
+from vertice_cli.core.prompt_shield import PromptShield
+from vertice_cli.core.audit_logger import AuditLogger, AuditEventType
 
 
 # ==============================================================================

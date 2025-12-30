@@ -3,7 +3,7 @@
 
 import asyncio
 import time
-from jdev_cli.streaming import (
+from vertice_cli.streaming import (
     AsyncCommandExecutor,
     ReactiveRenderer,
     ConcurrentRenderer,

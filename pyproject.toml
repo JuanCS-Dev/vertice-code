@@ -3,16 +3,16 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "juan-dev-code"
+name = "vertice-code"
 version = "1.0.0"
-description = "AI-Powered Code Assistant with MCP Integration - Privacy-First, Mobile-Friendly, Lightning Fast"
+description = "Vertice-Code: Enterprise Multi-LLM Orchestration - Intelligent Routing, Free Tier Priority, Constitutional AI"
 readme = "README.md"
 authors = [
     {name = "Juan Carlos de Souza", email = "juancs.dev@gmail.com"}
 ]
 license = {text = "MIT"}
 requires-python = ">=3.11"
-keywords = ["ai", "code-assistant", "mcp", "gradio", "cli", "juancs"]
+keywords = ["ai", "code-assistant", "mcp", "llm", "multi-model", "vertice", "orchestration"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -25,16 +25,17 @@ classifiers = [
 ]
 
 dependencies = [
-    "gradio>=5.0.0",
     "typer>=0.9.0",
     "rich>=13.0.0",
     "httpx>=0.27.0",
     "python-dotenv>=1.0.0",
-    "huggingface-hub>=0.20.0",
     "mcp>=1.0.0",
     "pyfiglet>=1.0.0",
     "pyperclip>=1.8.0",
     "textual>=0.47.0",
+    # Multi-LLM Providers
+    "google-cloud-aiplatform>=1.38.0",
+    "groq>=0.4.0",
 ]
 
 [project.optional-dependencies]
@@ -48,13 +49,10 @@ dev = [
 fast = [
     "uvloop>=0.18.0",
 ]
-# Hackathon Day 30 - Deploy dependencies
-hackathon = [
-    "modal>=0.64.0",
-    "google-generativeai>=0.8.0",
-]
-gemini = [
-    "google-generativeai>=0.8.0",
+# Additional LLM providers (optional)
+providers = [
+    "mistralai>=0.1.0",
+    "cohere>=4.0.0",
 ]
 
 [project.urls]
@@ -63,17 +61,13 @@ Repository = "https://github.com/JuanCS-Dev/juan-dev-code"
 Issues = "https://github.com/JuanCS-Dev/juan-dev-code/issues"
 
 [project.scripts]
-# Main unified entry point
-juancs = "jdev_cli.main:cli_main"
-jcs = "jdev_cli.main:cli_main"
-j_dev-code = "jdev_cli.main:cli_main"
+# Main CLI entry point
+vertice = "vertice_cli.main:cli_main"
+vtc = "vertice_cli.main:cli_main"
+vertice-code = "vertice_cli.main:cli_main"
 
 # TUI (Textual-based)
-juancs-tui = "jdev_tui.app:main"
-
-# Hackathon Day 30 - Deploy entry points
-juancs-gradio = "gradio_ui.app:create_ui"
-juancs-agent = "blaxel_agent:cli_main"
+vertice-tui = "vertice_tui.app:main"
 
 [tool.black]
 line-length = 100
@@ -99,5 +93,5 @@ python_functions = ["test_*"]
 addopts = "-v --tb=short"
 
 [tool.setuptools.packages.find]
-include = ["jdev_cli*", "jdev_tui*", "jdev_core*", "jdev_governance*", "gradio_ui*", "prometheus*"]
+include = ["vertice_cli*", "vertice_tui*", "vertice_core*", "vertice_governance*", "prometheus*"]
 namespaces = false

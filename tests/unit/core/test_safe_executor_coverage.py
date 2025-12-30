@@ -27,7 +27,7 @@ import tempfile
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from jdev_tui.core.safe_executor import (
+from vertice_tui.core.safe_executor import (
     SafeCommandExecutor,
     get_safe_executor,
 )
@@ -615,12 +615,12 @@ class TestSingletonPatternComprehensive:
 
     def setup_method(self):
         """Reset singleton state before each test."""
-        import jdev_tui.core.safe_executor as se_module
+        import vertice_tui.core.safe_executor as se_module
         se_module._executor = None
 
     def teardown_method(self):
         """Reset singleton state after each test."""
-        import jdev_tui.core.safe_executor as se_module
+        import vertice_tui.core.safe_executor as se_module
         se_module._executor = None
 
     # =========================================================================
@@ -788,7 +788,7 @@ class TestSingletonPatternComprehensive:
 
     def test_global_executor_variable_set_on_first_call(self) -> None:
         """Global _executor should be set on first call."""
-        import jdev_tui.core.safe_executor as se_module
+        import vertice_tui.core.safe_executor as se_module
 
         assert se_module._executor is None
 
@@ -799,7 +799,7 @@ class TestSingletonPatternComprehensive:
 
     def test_global_executor_not_reset_on_subsequent_calls(self) -> None:
         """Global _executor should not be reset on subsequent calls."""
-        import jdev_tui.core.safe_executor as se_module
+        import vertice_tui.core.safe_executor as se_module
 
         executor1 = get_safe_executor()
         first_id = id(se_module._executor)

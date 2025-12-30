@@ -59,7 +59,7 @@ class TortureValidator:
 
     async def setup(self):
         """Initialize PROMETHEUS."""
-        from jdev_cli.core.providers.prometheus_provider import PrometheusProvider
+        from vertice_cli.core.providers.prometheus_provider import PrometheusProvider
         self.provider = PrometheusProvider()
         await self.provider._ensure_initialized()
 

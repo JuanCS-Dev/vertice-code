@@ -8,8 +8,8 @@ Demonstrates:
 """
 
 import asyncio
-from jdev_cli.core.parser import ResponseParser
-from jdev_cli.core.llm import LLMClient
+from vertice_cli.core.parser import ResponseParser
+from vertice_cli.core.llm import LLMClient
 
 
 async def main():

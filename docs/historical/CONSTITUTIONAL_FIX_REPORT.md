@@ -16,7 +16,7 @@ Sistema Maestro v10.0 estava falhando com erro **429 (Quota Exceeded)** ao tenta
 3. **API key antiga** com quota esgotada
 
 ### **Solução Implementada**
-✅ **3 Incisões Cirúrgicas** em conformidade com Constituição Vértice v3.0:
+✅ **3 Incisões Cirúrgicas** em conformidade com Constituicao Vertice v3.0:
 - **Incisão #1:** `gemini.py` - Respeitar `.env` incondicionalmente
 - **Incisão #2:** `llm.py` - Fortalecer failover com detecção de quota
 - **Incisão #3:** `maestro_v10_integrated.py` - Corrigir comentário enganoso
@@ -302,7 +302,7 @@ maestro_v10_integrated.py.backup
 ## 📚 **REFERÊNCIAS**
 
 ### **Documentação**
-- [Constituição Vértice v3.0](docs/CONSTITUIÇÃO_VÉRTICE_v3.0.md)
+- [Constituicao Vertice v3.0](docs/CONSTITUIÇÃO_VERTICE_v3.0.md)
 - [Gemini API Rate Limits](https://ai.google.dev/gemini-api/docs/rate-limits)
 - [Nebius AI Studio](https://nebius.com)
 
@@ -315,7 +315,7 @@ maestro_v10_integrated.py.backup
 
 ## ✅ **DECLARAÇÃO DE CONFORMIDADE**
 
-Este trabalho foi executado em **estrita conformidade** com a **Constituição Vértice v3.0**, respeitando:
+Este trabalho foi executado em **estrita conformidade** com a **Constituicao Vertice v3.0**, respeitando:
 
 ✅ **Artigo I** - Célula de Desenvolvimento Híbrida  
 ✅ **Artigo II** - Padrão Pagani (Qualidade Inquebrável)  
@@ -323,9 +323,9 @@ Este trabalho foi executado em **estrita conformidade** com a **Constituição V
 ✅ **Artigo IX** - Camada de Execução (Controle Operacional)  
 ✅ **Anexo F** - Métricas de Determinismo
 
-**Ratificação:** Maximus, Arquiteto-Chefe do Sistema Vértice  
+**Ratificação:** Maximus, Arquiteto-Chefe do Sistema Vertice  
 **Data:** 2024-11-24 22:50 UTC  
-**Status:** ✅ **OPERACIONAL SOB DOUTRINA VÉRTICE**
+**Status:** ✅ **OPERACIONAL SOB DOUTRINA VERTICE**
 
 ---
 

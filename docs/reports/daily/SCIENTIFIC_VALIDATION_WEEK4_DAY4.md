@@ -51,7 +51,7 @@ Pass Rate: 99.4%
 
 ---
 
-## ✅ CONSTITUIÇÃO VÉRTICE - COMPLIANCE AUDIT
+## ✅ CONSTITUIÇÃO VERTICE - COMPLIANCE AUDIT
 
 ### **P1: COMPLETUDE (Completeness)**
 **Status:** ✅ COMPLIANT
@@ -378,7 +378,7 @@ Documentation: ⚠️ Needs user guide
 **Compliance Status:** ✅ **APPROVED**
 
 **Reasoning:**
-1. All 6 Principles of Constituição Vértice satisfied
+1. All 6 Principles of Constituicao Vertice satisfied
 2. Week 4 work meets Boris Cherny standards
 3. Dogfooding validated production readiness
 4. Critical bugs found and fixed before production

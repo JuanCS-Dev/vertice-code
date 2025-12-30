@@ -5,7 +5,7 @@
 ```mermaid
 graph TB
     subgraph "Local Nexus 🖥️"
-        CLI[jdev CLI<br/>Rust-style Python]
+        CLI[vertice CLI<br/>Rust-style Python]
         TUI[Textual TUI<br/>Matrix Style]
         Gradio[Gradio Dashboard<br/>Cyberpunk UI]
     end

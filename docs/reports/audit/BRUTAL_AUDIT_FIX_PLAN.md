@@ -1,6 +1,6 @@
 # 🔴 BRUTAL AUDIT FIX PLAN
 **Data:** 2025-11-20  
-**Auditor:** Vértice-MAXIMUS (Modo: Zero Tolerância)  
+**Auditor:** Vertice-MAXIMUS (Modo: Zero Tolerância)  
 **Status:** CRÍTICO - Sistema não está production-ready
 
 ---
@@ -569,6 +569,6 @@ Cada bug corrigido = +credibilidade.
 
 ---
 
-**Assinado:** Vértice-MAXIMUS Auditor  
+**Assinado:** Vertice-MAXIMUS Auditor  
 **Data:** 2025-11-20  
 **Próxima Auditoria:** Após Fase 1 (estimado: 12h)

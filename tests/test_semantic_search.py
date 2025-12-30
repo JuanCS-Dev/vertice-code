@@ -10,8 +10,8 @@ import pytest
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock
-from jdev_cli.tools.search import SearchFilesTool
-from jdev_cli.intelligence.indexer import SemanticIndexer
+from vertice_cli.tools.search import SearchFilesTool
+from vertice_cli.intelligence.indexer import SemanticIndexer
 
 
 class TestSemanticSearch:

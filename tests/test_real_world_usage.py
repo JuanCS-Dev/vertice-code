@@ -3,9 +3,9 @@ import pytest
 import asyncio
 import os
 from pathlib import Path
-from jdev_cli.core.llm import LLMClient
-from jdev_cli.core.context import ContextBuilder
-from jdev_cli.core.config import Config
+from vertice_cli.core.llm import LLMClient
+from vertice_cli.core.context import ContextBuilder
+from vertice_cli.core.config import Config
 
 
 @pytest.fixture

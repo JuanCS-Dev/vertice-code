@@ -5,17 +5,17 @@ import asyncio
 import tempfile
 from pathlib import Path
 
-from jdev_cli.tools.file_ops import (
+from vertice_cli.tools.file_ops import (
     ReadFileTool, WriteFileTool, EditFileTool,
     ListDirectoryTool
 )
-from jdev_cli.tools.file_mgmt import (
+from vertice_cli.tools.file_mgmt import (
     MoveFileTool, CopyFileTool, CreateDirectoryTool,
     ReadMultipleFilesTool, InsertLinesTool
 )
-from jdev_cli.tools.search import SearchFilesTool, GetDirectoryTreeTool
-from jdev_cli.tools.exec import BashCommandTool
-from jdev_cli.tools.git_ops import GitStatusTool, GitDiffTool
+from vertice_cli.tools.search import SearchFilesTool, GetDirectoryTreeTool
+from vertice_cli.tools.exec import BashCommandTool
+from vertice_cli.tools.git_ops import GitStatusTool, GitDiffTool
 
 
 async def test_file_ops():

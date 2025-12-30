@@ -18,7 +18,7 @@ class TestPlannerAgentAPI:
     def test_planner_can_be_imported(self):
         """Test planner agent can be imported."""
         try:
-            from jdev_cli.agents.planner.agent import PlannerAgent
+            from vertice_cli.agents.planner.agent import PlannerAgent
             assert PlannerAgent is not None
         except ImportError as e:
             pytest.fail(f"Failed to import PlannerAgent: {e}")
@@ -26,7 +26,7 @@ class TestPlannerAgentAPI:
     def test_planner_module_structure(self):
         """Test planner module has expected structure."""
         try:
-            from jdev_cli.agents import planner
+            from vertice_cli.agents import planner
             assert hasattr(planner, 'PlannerAgent')
         except (ImportError, AttributeError) as e:
             pytest.skip(f"Planner module structure different: {e}")
@@ -38,7 +38,7 @@ class TestArchitectAgentAPI:
     def test_architect_can_be_imported(self):
         """Test architect agent can be imported."""
         try:
-            from jdev_cli.agents.architect import ArchitectAgent
+            from vertice_cli.agents.architect import ArchitectAgent
             assert ArchitectAgent is not None
         except ImportError as e:
             pytest.skip(f"ArchitectAgent not found: {e}")
@@ -46,7 +46,7 @@ class TestArchitectAgentAPI:
     def test_architect_is_class(self):
         """Test architect is a class."""
         try:
-            from jdev_cli.agents.architect import ArchitectAgent
+            from vertice_cli.agents.architect import ArchitectAgent
             assert isinstance(ArchitectAgent, type)
         except ImportError:
             pytest.skip("ArchitectAgent not found")
@@ -58,7 +58,7 @@ class TestReviewerAgentAPI:
     def test_reviewer_can_be_imported(self):
         """Test reviewer agent can be imported."""
         try:
-            from jdev_cli.agents.reviewer import ReviewerAgent
+            from vertice_cli.agents.reviewer import ReviewerAgent
             assert ReviewerAgent is not None
         except ImportError as e:
             pytest.skip(f"ReviewerAgent not found: {e}")
@@ -66,7 +66,7 @@ class TestReviewerAgentAPI:
     def test_reviewer_is_class(self):
         """Test reviewer is a class."""
         try:
-            from jdev_cli.agents.reviewer import ReviewerAgent
+            from vertice_cli.agents.reviewer import ReviewerAgent
             assert isinstance(ReviewerAgent, type)
         except ImportError:
             pytest.skip("ReviewerAgent not found")
@@ -78,7 +78,7 @@ class TestExecutorAgentAPI:
     def test_executor_can_be_imported(self):
         """Test executor agent can be imported."""
         try:
-            from jdev_cli.agents.executor import NextGenExecutorAgent
+            from vertice_cli.agents.executor import NextGenExecutorAgent
             assert NextGenExecutorAgent is not None
         except ImportError as e:
             pytest.skip(f"NextGenExecutorAgent not found: {e}")
@@ -86,7 +86,7 @@ class TestExecutorAgentAPI:
     def test_executor_is_class(self):
         """Test executor is a class."""
         try:
-            from jdev_cli.agents.executor import NextGenExecutorAgent
+            from vertice_cli.agents.executor import NextGenExecutorAgent
             assert isinstance(NextGenExecutorAgent, type)
         except ImportError:
             pytest.skip("NextGenExecutorAgent not found")
@@ -98,7 +98,7 @@ class TestOtherAgents:
     def test_explorer_agent_exists(self):
         """Test explorer agent can be imported."""
         try:
-            from jdev_cli.agents.explorer import ExplorerAgent
+            from vertice_cli.agents.explorer import ExplorerAgent
             assert ExplorerAgent is not None
         except ImportError:
             pytest.skip("ExplorerAgent not found")
@@ -106,7 +106,7 @@ class TestOtherAgents:
     def test_security_agent_exists(self):
         """Test security agent can be imported."""
         try:
-            from jdev_cli.agents.security import SecurityAgent
+            from vertice_cli.agents.security import SecurityAgent
             assert SecurityAgent is not None
         except ImportError:
             pytest.skip("SecurityAgent not found")
@@ -114,7 +114,7 @@ class TestOtherAgents:
     def test_refactor_agent_exists(self):
         """Test refactor agent can be imported."""
         try:
-            from jdev_cli.agents.refactor import RefactorAgent
+            from vertice_cli.agents.refactor import RefactorAgent
             assert RefactorAgent is not None
         except ImportError:
             pytest.skip("RefactorAgent not found")
@@ -122,7 +122,7 @@ class TestOtherAgents:
     def test_documentation_agent_exists(self):
         """Test documentation agent can be imported."""
         try:
-            from jdev_cli.agents.documentation import DocumentationAgent
+            from vertice_cli.agents.documentation import DocumentationAgent
             assert DocumentationAgent is not None
         except ImportError:
             pytest.skip("DocumentationAgent not found")
@@ -130,7 +130,7 @@ class TestOtherAgents:
     def test_performance_agent_exists(self):
         """Test performance agent can be imported."""
         try:
-            from jdev_cli.agents.performance import PerformanceAgent
+            from vertice_cli.agents.performance import PerformanceAgent
             assert PerformanceAgent is not None
         except ImportError:
             pytest.skip("PerformanceAgent not found")
@@ -138,7 +138,7 @@ class TestOtherAgents:
     def test_devops_agent_exists(self):
         """Test devops agent can be imported."""
         try:
-            from jdev_cli.agents.devops_agent import DevOpsAgent
+            from vertice_cli.agents.devops_agent import DevOpsAgent
             assert DevOpsAgent is not None
         except ImportError:
             pytest.skip("DevOpsAgent not found")
@@ -150,7 +150,7 @@ class TestAgentBaseClass:
     def test_base_agent_exists(self):
         """Test base agent can be imported."""
         try:
-            from jdev_cli.agents.base import BaseAgent
+            from vertice_cli.agents.base import BaseAgent
             assert BaseAgent is not None
         except ImportError as e:
             pytest.fail(f"Failed to import BaseAgent: {e}")
@@ -158,7 +158,7 @@ class TestAgentBaseClass:
     def test_base_agent_is_class(self):
         """Test base agent is a class."""
         try:
-            from jdev_cli.agents.base import BaseAgent
+            from vertice_cli.agents.base import BaseAgent
             assert isinstance(BaseAgent, type)
         except ImportError:
             pytest.fail("BaseAgent not found")

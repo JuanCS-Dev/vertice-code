@@ -7,7 +7,7 @@ Tests:
 
 import time
 
-from jdev_cli.core.recovery import (
+from vertice_cli.core.recovery import (
     RetryPolicy,
     RecoveryCircuitBreaker
 )

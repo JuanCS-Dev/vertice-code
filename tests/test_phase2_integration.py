@@ -12,7 +12,7 @@ import os
 import tempfile
 from pathlib import Path
 
-from jdev_cli.integration import (
+from vertice_cli.integration import (
     SafetyValidator,
     SessionManager,
     ShellBridge,

@@ -5,9 +5,9 @@ NOTA: Estes testes usam LLM REAL via API. Sem mocks, sem placeholders.
 """
 import pytest
 from pathlib import Path
-from jdev_cli.agents.planner import PlannerAgent
-from jdev_cli.agents.refactorer import RefactorerAgent
-from jdev_cli.agents.base import TaskContext, TaskStatus, AgentRole
+from vertice_cli.agents.planner import PlannerAgent
+from vertice_cli.agents.refactorer import RefactorerAgent
+from vertice_cli.agents.base import TaskContext, TaskStatus, AgentRole
 import time
 import os
 

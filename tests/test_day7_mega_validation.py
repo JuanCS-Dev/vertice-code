@@ -14,14 +14,14 @@ import pytest
 import time
 from unittest.mock import Mock, AsyncMock
 
-from jdev_cli.core.recovery import (
+from vertice_cli.core.recovery import (
     ErrorRecoveryEngine,
     RecoveryContext,
     ErrorCategory,
     RetryPolicy,
     RecoveryCircuitBreaker
 )
-from jdev_cli.core.workflow import (
+from vertice_cli.core.workflow import (
     GitRollback,
     PartialRollback
 )
@@ -312,7 +312,7 @@ class TestConstitutionalCompliance:
     def test_p1_completude_no_placeholders(self):
         """P1: Code must be complete, no TODOs or placeholders."""
         import inspect
-        from jdev_cli.core import recovery, workflow
+        from vertice_cli.core import recovery, workflow
 
         # Check recovery module
         source_recovery = inspect.getsource(recovery)
@@ -351,8 +351,8 @@ class TestConstitutionalCompliance:
 
     def test_p4_rastreabilidade_full_docstrings(self):
         """P4: Traceability - all public functions documented."""
-        from jdev_cli.core.recovery import RetryPolicy, RecoveryCircuitBreaker
-        from jdev_cli.core.workflow import GitRollback, PartialRollback
+        from vertice_cli.core.recovery import RetryPolicy, RecoveryCircuitBreaker
+        from vertice_cli.core.workflow import GitRollback, PartialRollback
 
         # Check key classes have docstrings
         assert RetryPolicy.__doc__ is not None

@@ -1,11 +1,11 @@
 """End-to-end integration tests for complete workflows."""
 
-from jdev_cli.shell import InteractiveShell
-from jdev_cli.core.cache import get_cache
-from jdev_cli.intelligence.engine import get_engine
-from jdev_cli.explainer import explain_command
-from jdev_cli.intelligence.context_enhanced import build_rich_context
-from jdev_cli.core.constitutional_metrics import generate_constitutional_report
+from vertice_cli.shell import InteractiveShell
+from vertice_cli.core.cache import get_cache
+from vertice_cli.intelligence.engine import get_engine
+from vertice_cli.explainer import explain_command
+from vertice_cli.intelligence.context_enhanced import build_rich_context
+from vertice_cli.core.constitutional_metrics import generate_constitutional_report
 
 
 class TestE2EIntegration:
@@ -34,7 +34,7 @@ class TestE2EIntegration:
     def test_suggestion_engine(self):
         """Suggestion engine should provide suggestions."""
         engine = get_engine()
-        from jdev_cli.intelligence.patterns import register_builtin_patterns
+        from vertice_cli.intelligence.patterns import register_builtin_patterns
 
         register_builtin_patterns(engine)
 
@@ -60,7 +60,7 @@ class TestE2EIntegration:
     def test_constitutional_metrics(self):
         """Constitutional metrics should be calculable."""
         metrics = generate_constitutional_report(
-            codebase_path="jdev_cli",
+            codebase_path="vertice_cli",
             completeness=0.95,
             precision=0.98,
             recall=0.92
@@ -80,14 +80,14 @@ class TestFeatureIntegration:
 
     def test_risk_assessment_import(self):
         """Risk assessment should be importable."""
-        from jdev_cli.intelligence.risk import assess_risk, RiskLevel
+        from vertice_cli.intelligence.risk import assess_risk, RiskLevel
 
         risk = assess_risk("rm -rf /")
         assert risk.level == RiskLevel.CRITICAL
 
     def test_workflows_import(self):
         """Workflows should be importable."""
-        from jdev_cli.intelligence.workflows import (
+        from vertice_cli.intelligence.workflows import (
             WorkflowOrchestrator
         )
 
@@ -96,14 +96,14 @@ class TestFeatureIntegration:
 
     def test_async_executor_import(self):
         """Async executor should be importable."""
-        from jdev_cli.core.async_executor import AsyncExecutor
+        from vertice_cli.core.async_executor import AsyncExecutor
 
         executor = AsyncExecutor()
         assert executor._max_parallel == 5
 
     def test_file_watcher_import(self):
         """File watcher should be importable."""
-        from jdev_cli.core.file_watcher import FileWatcher
+        from vertice_cli.core.file_watcher import FileWatcher
 
         watcher = FileWatcher(".")
         assert watcher.root_path is not None

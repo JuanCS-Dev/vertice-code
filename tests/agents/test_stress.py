@@ -15,14 +15,14 @@ import pytest
 import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from jdev_cli.agents.architect import ArchitectAgent
-from jdev_cli.agents.explorer import ExplorerAgent
-from jdev_cli.agents.planner import PlannerAgent
-from jdev_cli.agents.refactorer import RefactorerAgent
-from jdev_cli.agents.reviewer import ReviewerAgent
-from jdev_cli.agents.base import AgentTask
-from jdev_cli.orchestration.squad import DevSquad
-from jdev_cli.orchestration.memory import MemoryManager
+from vertice_cli.agents.architect import ArchitectAgent
+from vertice_cli.agents.explorer import ExplorerAgent
+from vertice_cli.agents.planner import PlannerAgent
+from vertice_cli.agents.refactorer import RefactorerAgent
+from vertice_cli.agents.reviewer import ReviewerAgent
+from vertice_cli.agents.base import AgentTask
+from vertice_cli.orchestration.squad import DevSquad
+from vertice_cli.orchestration.memory import MemoryManager
 
 
 class TestArchitectStressTests:

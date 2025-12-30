@@ -6,7 +6,7 @@ Tests actual API calls with real Qwen models.
 import pytest
 import asyncio
 import os
-from jdev_cli.core.llm import LLMClient
+from vertice_cli.core.llm import LLMClient
 
 
 @pytest.mark.asyncio

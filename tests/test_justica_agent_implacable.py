@@ -35,11 +35,11 @@ import pytest
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from jdev_cli.agents.justica_agent import (
+from vertice_cli.agents.justica_agent import (
     JusticaIntegratedAgent,
 )
-from jdev_cli.agents.base import AgentTask, AgentResponse, AgentRole
-from jdev_governance.justica import (
+from vertice_cli.agents.base import AgentTask, AgentResponse, AgentRole
+from vertice_governance.justica import (
     EnforcementMode,
 )
 
@@ -170,7 +170,7 @@ class TestInitialization:
 
     def test_init_capabilities_correct(self, justica_agent):
         """TEST 007: Capabilities devem incluir READ_ONLY e FILE_EDIT."""
-        from jdev_cli.agents.base import AgentCapability
+        from vertice_cli.agents.base import AgentCapability
 
         assert AgentCapability.READ_ONLY in justica_agent.capabilities
         assert AgentCapability.FILE_EDIT in justica_agent.capabilities
@@ -1526,7 +1526,7 @@ class TestIntegration:
     @pytest.mark.asyncio
     async def test_constitution_customization(self, mock_llm_client, mock_mcp_client):
         """TEST 098: Constitution customizada."""
-        from jdev_governance.justica import Constitution, ConstitutionalPrinciple
+        from vertice_governance.justica import Constitution, ConstitutionalPrinciple
 
         custom_constitution = Constitution(
             principles=[

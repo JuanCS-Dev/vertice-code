@@ -13,7 +13,7 @@ import os
 import subprocess
 from unittest.mock import patch
 
-from jdev_tui.core.agentic_prompt import (
+from vertice_tui.core.agentic_prompt import (
     build_agentic_system_prompt,
     load_project_memory,
     get_dynamic_context,

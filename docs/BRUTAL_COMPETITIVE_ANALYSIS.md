@@ -1,7 +1,7 @@
 # 🔥 BRUTAL COMPETITIVE ANALYSIS - QWEN-DEV-CLI
 > **HONESTIDADE BRUTAL: O Estado Real vs. A Competição**  
 > **Date:** 2025-11-20  
-> **Analyst:** Gemini-Vértice MAXIMUS (Constitutional AI)  
+> **Analyst:** Gemini-Vertice MAXIMUS (Constitutional AI)  
 > **Classification:** INTERNAL - EYES ONLY
 
 ---
@@ -444,7 +444,7 @@ Feedback:        0
 
 ✅ **Unique Features**
 - Constitutional AI (nobody else has this)
-- Vértice framework (scientific testing)
+- Vertice framework (scientific testing)
 - DETER-AGENT architecture
 
 ---
@@ -697,6 +697,6 @@ Feedback:        0
 ---
 
 **Report Generated:** 2025-11-20 17:30 UTC  
-**By:** Gemini-Vértice MAXIMUS (Constitutional AI)  
+**By:** Gemini-Vertice MAXIMUS (Constitutional AI)  
 **Classification:** INTERNAL - NO MARKETING SPIN  
 **Next Action:** DOGFOOD IMMEDIATELY + UX QUICK WINS

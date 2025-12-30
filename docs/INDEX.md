@@ -147,7 +147,7 @@
 
 ---
 
-**Maintained by:** Vértice-MAXIMUS (Gemini-Native)  
+**Maintained by:** Vertice-MAXIMUS (Gemini-Native)  
 **Documentation Standard:** Enterprise-Grade  
 **Compliance:** 100%
 

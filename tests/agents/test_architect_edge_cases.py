@@ -13,8 +13,8 @@ import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock
 
-from jdev_cli.agents.architect import ArchitectAgent
-from jdev_cli.agents.base import AgentTask
+from vertice_cli.agents.architect import ArchitectAgent
+from vertice_cli.agents.base import AgentTask
 
 
 class TestArchitectBoundaryConditions:

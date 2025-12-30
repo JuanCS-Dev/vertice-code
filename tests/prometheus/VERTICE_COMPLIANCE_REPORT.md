@@ -1,4 +1,4 @@
-# PROMETHEUS - Validação Constituição Vértice v3.0
+# PROMETHEUS - Validação Constituicao Vertice v3.0
 
 > **Relatório de Conformidade DETER-AGENT**
 >
@@ -191,7 +191,7 @@
 ```
 ╔═══════════════════════════════════════════════════════════════════╗
 ║                                                                    ║
-║         ✅ PROMETHEUS - CERTIFICADO CONSTITUIÇÃO VÉRTICE          ║
+║         ✅ PROMETHEUS - CERTIFICADO CONSTITUIÇÃO VERTICE          ║
 ║                                                                    ║
 ║  Framework: DETER-AGENT v3.0                                      ║
 ║  Camadas Validadas: 5/5                                           ║

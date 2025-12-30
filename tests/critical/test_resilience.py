@@ -25,7 +25,7 @@ class TestGracefulDegradation:
 
     def test_tool_result_error_is_clear(self):
         """ToolResult de erro deve ter mensagem clara."""
-        from jdev_cli.tools.base import ToolResult
+        from vertice_cli.tools.base import ToolResult
 
         error_result = ToolResult(
             success=False,
@@ -39,7 +39,7 @@ class TestGracefulDegradation:
 
     def test_agent_response_error_has_reasoning(self):
         """AgentResponse de erro deve explicar o que aconteceu."""
-        from jdev_cli.agents.base import AgentResponse
+        from vertice_cli.agents.base import AgentResponse
 
         error_response = AgentResponse(
             success=False,
@@ -55,7 +55,7 @@ class TestGracefulDegradation:
     @pytest.mark.asyncio
     async def test_llm_timeout_handled(self):
         """Timeout de LLM deve ser tratado e não travar."""
-        from jdev_cli.core.llm import LLMClient
+        from vertice_cli.core.llm import LLMClient
 
         client = LLMClient()
 
@@ -88,7 +88,7 @@ class TestErrorMessageQuality:
 
     def test_validation_error_shows_what_failed(self):
         """Erro de validação deve mostrar o que falhou."""
-        from jdev_cli.core.input_validator import validate_command
+        from vertice_cli.core.input_validator import validate_command
 
         result = validate_command("rm -rf /", allow_shell=False)
 
@@ -101,7 +101,7 @@ class TestErrorMessageQuality:
 
     def test_tool_error_includes_context(self):
         """Erro de tool deve incluir contexto."""
-        from jdev_cli.tools.base import ToolResult
+        from vertice_cli.tools.base import ToolResult
 
         # Simula erro de arquivo não encontrado
         error = ToolResult(
@@ -115,7 +115,7 @@ class TestErrorMessageQuality:
 
     def test_agent_error_is_actionable(self):
         """Erro de agente deve sugerir ação."""
-        from jdev_cli.agents.base import AgentResponse
+        from vertice_cli.agents.base import AgentResponse
 
         # Um bom erro deve dizer o que fazer
         response = AgentResponse(
@@ -139,7 +139,7 @@ class TestRecoveryFromFailures:
 
     def test_tool_registry_survives_bad_tool(self):
         """Registry deve sobreviver a tool com erro."""
-        from jdev_cli.tools.base import ToolRegistry
+        from vertice_cli.tools.base import ToolRegistry
 
         registry = ToolRegistry()
 
@@ -159,7 +159,7 @@ class TestRecoveryFromFailures:
 
     def test_agent_task_with_empty_request(self):
         """AgentTask com request vazio não deve crashar."""
-        from jdev_cli.agents.base import AgentTask
+        from vertice_cli.agents.base import AgentTask
 
         # Pode aceitar ou rejeitar, mas não deve crashar
         try:
@@ -180,7 +180,7 @@ class TestEdgeCases:
 
     def test_unicode_in_file_path(self):
         """Unicode em path não deve crashar."""
-        from jdev_cli.core.input_validator import validate_file_path
+        from vertice_cli.core.input_validator import validate_file_path
 
         unicode_paths = [
             "文件.txt",
@@ -200,7 +200,7 @@ class TestEdgeCases:
 
     def test_very_long_input(self):
         """Input muito longo não deve travar."""
-        from jdev_cli.core.input_validator import InputValidator
+        from vertice_cli.core.input_validator import InputValidator
 
         validator = InputValidator()
 
@@ -225,7 +225,7 @@ class TestEdgeCases:
 
     def test_special_characters_in_command(self):
         """Caracteres especiais em comando não devem crashar."""
-        from jdev_cli.core.input_validator import validate_command
+        from vertice_cli.core.input_validator import validate_command
 
         special_commands = [
             "echo 'test'",
@@ -245,8 +245,8 @@ class TestEdgeCases:
 
     def test_null_and_none_handling(self):
         """None e valores nulos devem ser tratados."""
-        from jdev_cli.tools.base import ToolResult
-        from jdev_cli.agents.base import AgentResponse
+        from vertice_cli.tools.base import ToolResult
+        from vertice_cli.agents.base import AgentResponse
 
         # ToolResult com None
         result = ToolResult(success=True, data=None)
@@ -271,7 +271,7 @@ class TestConcurrentOperations:
     @pytest.mark.asyncio
     async def test_multiple_tool_calls_dont_interfere(self):
         """Múltiplas chamadas de tool não devem interferir."""
-        from jdev_cli.tools.base import ToolResult
+        from vertice_cli.tools.base import ToolResult
 
         results = []
 
@@ -293,7 +293,7 @@ class TestConcurrentOperations:
 
     def test_block_detector_thread_safe(self):
         """BlockDetector deve ser thread-safe (ou pelo menos não crashar)."""
-        from jdev_cli.tui.components.block_detector import BlockDetector
+        from vertice_cli.tui.components.block_detector import BlockDetector
         import threading
 
         detector = BlockDetector()
@@ -330,7 +330,7 @@ class TestResilienceSmokeTest:
 
     def test_system_starts_without_config_file(self):
         """Sistema deve iniciar mesmo sem arquivo de config."""
-        from jdev_cli.config.loader import ConfigLoader
+        from vertice_cli.config.loader import ConfigLoader
 
         # Deve ter defaults
         loader = ConfigLoader()
@@ -347,8 +347,8 @@ class TestResilienceSmokeTest:
 
     def test_can_create_objects_without_side_effects(self):
         """Criar objetos não deve ter side effects."""
-        from jdev_cli.agents.base import AgentTask, AgentResponse
-        from jdev_cli.tools.base import ToolResult
+        from vertice_cli.agents.base import AgentTask, AgentResponse
+        from vertice_cli.tools.base import ToolResult
 
         # Criar múltiplos objetos
         for i in range(100):

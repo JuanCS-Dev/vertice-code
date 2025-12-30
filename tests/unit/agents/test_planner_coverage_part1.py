@@ -11,7 +11,7 @@ import json
 import pytest
 from unittest.mock import MagicMock
 
-from jdev_cli.agents.planner import (
+from vertice_cli.agents.planner import (
     PlannerAgent,
     DependencyAnalyzer,
     SOPStep,

@@ -8,9 +8,9 @@ from pathlib import Path
 
 async def test_lsp_features():
     print("🧪 LSP Features...")
-    from jdev_cli.intelligence.lsp_client import Language, LSPClient
+    from vertice_cli.intelligence.lsp_client import Language, LSPClient
 
-    test_file = Path("jdev_cli/intelligence/lsp_client.py")
+    test_file = Path("vertice_cli/intelligence/lsp_client.py")
     assert test_file.exists(), "Test file not found"
 
     lang = Language.detect(test_file)
@@ -24,7 +24,7 @@ async def test_lsp_features():
 
 async def test_refactoring():
     print("\n🧪 Refactoring Engine...")
-    from jdev_cli.refactoring.engine import RefactoringEngine
+    from vertice_cli.refactoring.engine import RefactoringEngine
 
     engine = RefactoringEngine(project_root=Path.cwd())
 
@@ -45,13 +45,13 @@ async def test_refactoring():
 
 async def test_context_suggestions():
     print("\n🧪 Context Suggestions...")
-    from jdev_cli.intelligence.context_suggestions import ContextSuggestionEngine
-    from jdev_cli.intelligence.indexer import SemanticIndexer
+    from vertice_cli.intelligence.context_suggestions import ContextSuggestionEngine
+    from vertice_cli.intelligence.indexer import SemanticIndexer
 
     indexer = SemanticIndexer(root_path=Path.cwd())
     engine = ContextSuggestionEngine(project_root=Path.cwd(), indexer=indexer)
 
-    test_file = (Path.cwd() / "jdev_cli" / "shell.py").resolve()
+    test_file = (Path.cwd() / "vertice_cli" / "shell.py").resolve()
     suggestions = engine.suggest_related_files(test_file, max_suggestions=3)
 
     assert len(suggestions) > 0, "No suggestions returned"
