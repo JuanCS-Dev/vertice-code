@@ -689,21 +689,60 @@ tests/performance/test_reconnect.py
 **Arquivos modificados**:
 - `tui/core/agents_bridge.py` (1077 linhas - 20 agents totais)
 
+#### Fase 3: MCP 2025-11-25 Compliance - COMPLETO ✅
+| Item | Status | Arquivo | Testes |
+|------|--------|---------|--------|
+| PKCE S256 (RFC 7636) | ✅ | `core/security/pkce.py` | 18 |
+| OAuth 2.1 Client | ✅ | `core/security/oauth21.py` | 19 |
+| Elicitation Protocol | ✅ | `core/protocols/elicitation.py` | 25 |
+| User Consent Flow | ✅ | `core/security/consent.py` | 31 |
+
+**Arquivos criados**:
+- `core/security/__init__.py` (módulo security)
+- `core/security/pkce.py` (100 linhas - PKCE implementation)
+- `core/security/oauth21.py` (557 linhas - OAuth 2.1 client)
+- `core/security/consent.py` (350 linhas - User consent)
+- `core/protocols/elicitation.py` (430 linhas - Form/URL elicitation)
+- `tests/core/security/test_pkce.py` (18 testes)
+- `tests/core/security/test_oauth21.py` (19 testes)
+- `tests/core/security/test_consent.py` (31 testes)
+- `tests/core/protocols/test_elicitation.py` (25 testes)
+
+**Features implementadas**:
+- PKCE code verifier (43-128 chars, unreserved chars only)
+- S256 code challenge (BASE64URL(SHA256(verifier)))
+- RFC 7636 Appendix B test vector validation
+- OAuth 2.1 Authorization Code Flow
+- Protected Resource Metadata (RFC 9728)
+- Authorization Server Metadata (RFC 8414)
+- Token refresh with rotation support
+- Elicitation form mode (JSON Schema)
+- Elicitation URL mode (SEP-1036 - OAuth, payments)
+- Consent levels (NONE, NOTIFY, CONFIRM, ELEVATED)
+- Consent audit logging
+- @requires_consent decorator
+
 ### Métricas de Qualidade
 | Métrica | Valor | Target | Status |
 |---------|-------|--------|--------|
 | Lint (ruff) | 0 erros | 0 | ✅ |
 | Type annotations | 100% | 100% | ✅ |
-| Testes | 66 | - | ✅ |
-| Coverage | 73% | ≥80% | ⚠️ |
+| Testes | 159 | - | ✅ |
+| Coverage | ~75% | ≥80% | ⚠️ |
 
-**Nota**: Coverage de 73% devido a métodos async de streaming que requerem mocks complexos da API Gemini. As partes críticas (checkpoint, config, reconnect) estão 100% testadas.
+**Breakdown de Testes**:
+- Phase 1.1 (Unified Agent): 22 testes
+- Phase 1.2 (Strict Mode): 24 testes
+- Phase 2 (Streaming): 20 testes
+- Phase 3 (MCP Security): 93 testes
+
+**Nota**: Coverage ~75% devido a métodos async de streaming que requerem mocks complexos da API Gemini. As partes críticas estão 100% testadas.
 
 ---
 
 ## PRÓXIMOS PASSOS
 
-1. **Fase 3: MCP 2025-11-25** - OAuth 2.1 + PKCE, Elicitation, Consent
+1. ~~**Fase 3: MCP 2025-11-25** - OAuth 2.1 + PKCE, Elicitation, Consent~~ ✅
 2. **Fase 4: A2A v0.3** - Protocol Buffers, gRPC, Security Cards
 3. **Fase 5: TUI Lightweight** - Split Bridge, otimizar handlers
 4. **Fase 7: Testes Compliance** - JSON Schema validation, stress tests
