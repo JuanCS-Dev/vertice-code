@@ -2,7 +2,8 @@
 Basic Command Handler.
 
 Handles: /help, /clear, /quit, /exit, /run, /read, /agents, /status,
-         /tools, /palette, /history, /context, /context-clear
+         /tools, /palette, /history, /context, /context-clear,
+         /providers, /model
 """
 
 from __future__ import annotations
@@ -48,6 +49,8 @@ class BasicCommandHandler:
             "/context": self._handle_context,
             "/context-clear": self._handle_context_clear,
             "/prometheus": self._handle_prometheus,
+            "/providers": self._handle_providers,
+            "/model": self._handle_model,
         }
 
         handler = handlers.get(command)
@@ -230,3 +233,78 @@ class BasicCommandHandler:
 - `/prometheus enable`   - Enable PROMETHEUS mode
 - `/prometheus disable`  - Disable PROMETHEUS mode
 """)
+
+    async def _handle_providers(self, args: str, view: "ResponseView") -> None:
+        """Handle /providers command - Show all available LLM providers."""
+        try:
+            providers = self.bridge.llm.get_available_providers()
+            status = self.bridge.llm.get_provider_status()
+
+            lines = [
+                "## 🌐 LLM Providers\n",
+                "**Available providers:** " + ", ".join(providers) if providers else "No providers available",
+                "\n### Status Report\n",
+                f"```\n{status}\n```",
+                "\n### Provider Priority (FREE FIRST)\n",
+                "| Priority | Provider | Tier | Daily Limit |",
+                "|----------|----------|------|-------------|",
+                "| 1 | Groq | Free | 14,400 req |",
+                "| 2 | Cerebras | Free | 1M tokens |",
+                "| 3 | Mistral | Free | 1B tokens/month |",
+                "| 4 | OpenRouter | Free | 200 req |",
+                "| 5 | Gemini | API Key | Quota |",
+                "| 6 | Vertex AI | Enterprise | GCP |",
+                "| 7 | Azure OpenAI | Enterprise | Azure |",
+                "\n**Tip:** Set API keys to enable more providers.",
+            ]
+            view.add_system_message("\n".join(lines))
+        except Exception as e:
+            view.add_error(f"Failed to get providers: {e}")
+
+    async def _handle_model(self, args: str, view: "ResponseView") -> None:
+        """Handle /model command - Show or switch model/provider."""
+        if not args:
+            # Show current model info
+            current = self.bridge.llm.model_name
+            providers = self.bridge.llm.get_available_providers()
+            view.add_system_message(
+                f"## 🤖 Current Model\n\n"
+                f"- **Model:** `{current}`\n"
+                f"- **Available Providers:** {', '.join(providers) if providers else 'None'}\n\n"
+                f"Use `/model <name>` to switch providers.\n"
+                f"Examples:\n"
+                f"- `/model groq` - Switch to Groq (ultra-fast)\n"
+                f"- `/model cerebras` - Switch to Cerebras (fastest)\n"
+                f"- `/model vertex-ai` - Switch to Vertex AI (enterprise)\n"
+            )
+        else:
+            # Switch to specified provider
+            provider_name = args.strip().lower()
+            try:
+                if hasattr(self.bridge.llm, '_vertice_client') and self.bridge.llm._vertice_client:
+                    client = self.bridge.llm._vertice_client
+                    available = client.get_available_providers()
+
+                    if provider_name in available:
+                        # Switch provider
+                        if client.set_preferred_provider(provider_name):
+                            new_order = client.get_priority_order()
+                            view.add_system_message(
+                                f"## ✅ Switched to {provider_name}\n\n"
+                                f"- **Active:** `{provider_name}`\n"
+                                f"- **Priority:** {' → '.join(new_order)}\n"
+                                f"- **Fallback:** Auto (if {provider_name} fails)"
+                            )
+                        else:
+                            view.add_error(f"Failed to switch to `{provider_name}`")
+                    else:
+                        view.add_error(
+                            f"Provider `{provider_name}` not available.\n"
+                            f"Available: {', '.join(available)}"
+                        )
+                else:
+                    view.add_system_message(
+                        f"VerticeClient not active. Using direct {self.bridge.llm.model_name}"
+                    )
+            except Exception as e:
+                view.add_error(f"Failed to switch: {e}")

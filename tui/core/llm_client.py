@@ -12,6 +12,11 @@ Components extracted to dedicated modules:
 This module provides:
 - GeminiClient: Main client with function calling support
 - Re-exports for backward compatibility
+
+VERTEX AI INTEGRATION (Dec 2025):
+- When GOOGLE_CLOUD_PROJECT is set, uses Vertex AI (enterprise quota)
+- Falls back to direct Gemini API only when Vertex AI unavailable
+- Like GPT via Azure, Gemini via Vertex AI avoids consumer API limits
 """
 
 from __future__ import annotations
@@ -19,7 +24,10 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
-from typing import Any, AsyncIterator, Dict, List, Optional
+from typing import Any, AsyncIterator, Dict, List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    pass  # Future type hints if needed
 
 # Import from extracted modules
 from vertice_tui.core.resilience_patterns.circuit_breaker import (
@@ -91,6 +99,10 @@ class GeminiClient:
             temperature: Generation temperature (0-2, default 1.0)
             max_output_tokens: Maximum response tokens (default 8192)
             circuit_breaker_config: Optional circuit breaker configuration
+
+        Note:
+            When GOOGLE_CLOUD_PROJECT is set, uses Vertex AI (enterprise quota).
+            Falls back to direct Gemini API only when Vertex AI unavailable.
         """
         self.api_key = (
             api_key
@@ -101,7 +113,13 @@ class GeminiClient:
         self.temperature = temperature
         self.max_output_tokens = max_output_tokens
 
-        # Streaming configuration
+        # Multi-provider integration (Dec 2025)
+        # VerticeClient handles all providers with FREE FIRST priority
+        self._vertice_client: Optional[Any] = None
+        self._use_multi_provider = False
+        self._init_multi_provider()
+
+        # Streaming configuration (fallback to direct API)
         self._stream_config = GeminiStreamConfig(
             model_name=self.model_name,
             api_key=self.api_key or "",
@@ -128,6 +146,83 @@ class GeminiClient:
                 half_open_max_calls=3,
             )
         )
+
+    def _init_multi_provider(self) -> None:
+        """Initialize VerticeClient for unified multi-provider routing.
+
+        Priority order (handled by VerticeClient):
+        1. Groq, Cerebras, Mistral (FREE FIRST)
+        2. Gemini, Vertex AI, Azure (Enterprise)
+        3. Direct Gemini API (Fallback)
+        """
+        # Try VerticeClient (unified router)
+        try:
+            from vertice_core.clients import get_client
+
+            self._vertice_client = get_client()
+            available = self._vertice_client.get_available_providers()
+
+            if available:
+                self._use_multi_provider = True
+                logger.info(
+                    f"✅ VerticeClient enabled: {len(available)} providers "
+                    f"({', '.join(available[:3])}{'...' if len(available) > 3 else ''})"
+                )
+                return
+
+        except ImportError:
+            logger.debug("VerticeClient not available")
+        except Exception as e:
+            logger.debug(f"VerticeClient init failed: {e}")
+
+        self._vertice_client = None
+        logger.debug("Using direct Gemini API (VerticeClient unavailable)")
+
+    def get_available_providers(self) -> List[str]:
+        """Get list of available LLM providers.
+
+        Returns:
+            List of provider names (groq, cerebras, vertex-ai, etc.)
+        """
+        if self._vertice_client:
+            return self._vertice_client.get_available_providers()
+        elif self.api_key:
+            return ["gemini"]
+        return []
+
+    def get_provider_status(self) -> str:
+        """Get status report of all providers.
+
+        Returns:
+            Human-readable status report
+        """
+        if self._vertice_client:
+            status = self._vertice_client.get_provider_status()
+            current = status.get("current_provider", "none")
+            providers = status.get("providers", {})
+            available = [k for k, v in providers.items() if v.get("available")]
+            return f"VerticeClient: {current} ({len(available)} available)"
+        elif self.api_key:
+            return "Gemini Direct API: ✅ Active"
+        return "No providers available"
+
+    def get_current_provider_name(self) -> str:
+        """Get the name of the current/primary provider.
+
+        Returns:
+            Provider name (e.g., 'groq', 'cerebras', 'vertex-ai', 'gemini')
+        """
+        if self._vertice_client:
+            available = self._vertice_client.get_available_providers()
+            current = self._vertice_client.current_provider
+            if current:
+                return current
+            if available:
+                return available[0]
+            return "vertice"
+        elif self.api_key:
+            return "gemini"
+        return "none"
 
     def set_tools(self, schemas: List[Dict[str, Any]]) -> None:
         """
@@ -218,7 +313,12 @@ class GeminiClient:
         **kwargs: Any,
     ) -> AsyncIterator[str]:
         """
-        Stream response from Gemini.
+        Stream response using intelligent multi-provider routing.
+
+        Priority:
+        1. VerticeRouter (Groq, Cerebras, Mistral, etc.) - FREE FIRST
+        2. Vertex AI - Enterprise quota
+        3. Direct Gemini API - Fallback
 
         Args:
             prompt: User's message
@@ -229,10 +329,6 @@ class GeminiClient:
 
         Yields:
             Text chunks for UI rendering
-
-        Example:
-            async for chunk in client.stream("Explain Python decorators"):
-                print(chunk, end="", flush=True)
         """
         # Check circuit breaker first
         if not await self._circuit_breaker.can_execute():
@@ -240,16 +336,65 @@ class GeminiClient:
             yield f"⚡ Service temporarily unavailable. Retry in {retry_after:.0f}s"
             return
 
+        # Route 1: Use VerticeClient if available (unified multi-provider)
+        if self._vertice_client:
+            async for chunk in self._stream_via_client(prompt, system_prompt, context):
+                yield chunk
+            return
+
+        # Route 2: Direct Gemini API (fallback when VerticeClient unavailable)
+        async for chunk in self._stream_via_gemini(prompt, system_prompt, context, tools):
+            yield chunk
+
+    async def _stream_via_client(
+        self,
+        prompt: str,
+        system_prompt: str,
+        context: Optional[List[Dict[str, str]]],
+    ) -> AsyncIterator[str]:
+        """Stream via VerticeClient with automatic provider fallback."""
+        try:
+            # Build messages in OpenAI format
+            messages = []
+            if context:
+                messages.extend(context)
+            messages.append({"role": "user", "content": prompt})
+
+            # Stream via VerticeClient (handles all fallback logic)
+            async for chunk in self._vertice_client.stream_chat(
+                messages,
+                system_prompt=system_prompt,
+            ):
+                yield chunk
+
+            self._circuit_breaker.record_success()
+
+        except Exception as e:
+            self._circuit_breaker.record_failure(str(e))
+            error_msg = str(e)
+            if "429" in error_msg or "rate limit" in error_msg.lower():
+                yield "\n⚠️ Rate limit reached on all providers. Please wait."
+            elif "AllProvidersExhausted" in error_msg:
+                yield "\n⚠️ All providers exhausted. Check API keys."
+            else:
+                yield f"\n❌ Client error: {error_msg[:200]}"
+
+    async def _stream_via_gemini(
+        self,
+        prompt: str,
+        system_prompt: str,
+        context: Optional[List[Dict[str, str]]],
+        tools: Optional[List[Dict[str, Any]]],
+    ) -> AsyncIterator[str]:
+        """Stream via direct Gemini API (fallback)."""
         if not await self._ensure_initialized():
             yield "❌ Gemini not configured. Set GEMINI_API_KEY environment variable."
             return
 
         # Build tools for function calling
-        # Use passed tools if provided, otherwise use pre-configured
         if tools:
-            # Update tool schemas and rebuild
             self._tool_schemas = tools
-            self._gemini_tools = None  # Force rebuild
+            self._gemini_tools = None
         gemini_tools = self._build_gemini_tools() if self._tool_schemas else None
 
         if gemini_tools:
@@ -261,7 +406,6 @@ class GeminiClient:
             ):
                 yield chunk
 
-            # Success - record it
             self._circuit_breaker.record_success()
 
         except asyncio.TimeoutError:

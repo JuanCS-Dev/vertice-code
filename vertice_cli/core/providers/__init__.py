@@ -22,14 +22,26 @@ from .mistral import MistralProvider
 from .vertex_ai import VertexAIProvider
 from .azure_openai import AzureOpenAIProvider
 
-# Unified Router
-from .vertice_router import (
-    VerticeRouter,
-    TaskComplexity,
-    SpeedRequirement,
-    RoutingDecision,
-    get_router,
-)
+# Unified Client (NEW - Dec 2025)
+# Use vertice_core.clients.VerticeClient instead of vertice_router
+# vertice_router is deprecated, kept for backward compatibility
+
+# Legacy router (DEPRECATED - use VerticeClient)
+try:
+    from .vertice_router import (
+        VerticeRouter,
+        TaskComplexity,
+        SpeedRequirement,
+        RoutingDecision,
+        get_router,
+    )
+except ImportError:
+    # vertice_router may be removed in future
+    VerticeRouter = None
+    TaskComplexity = None
+    SpeedRequirement = None
+    RoutingDecision = None
+    get_router = None
 
 __all__ = [
     # Legacy providers
