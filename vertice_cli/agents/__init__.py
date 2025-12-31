@@ -35,17 +35,25 @@ from vertice_cli.agents.security import SecurityAgent
 from vertice_cli.agents.performance import PerformanceAgent
 from vertice_cli.agents.testing import TestingAgent
 from vertice_cli.agents.executor import NextGenExecutorAgent
-
-# Alias for backward compatibility with tests
-ExecutorAgent = NextGenExecutorAgent
 from vertice_cli.agents.documentation import DocumentationAgent
+from vertice_cli.agents.devops_agent import DevOpsAgent
+from vertice_cli.agents.justica_agent import JusticaIntegratedAgent
+from vertice_cli.agents.sofia_agent import SofiaIntegratedAgent
+from vertice_cli.agents.data_agent_production import DataAgent
+
+# Aliases for backward compatibility
+ExecutorAgent = NextGenExecutorAgent
+JusticaAgent = JusticaIntegratedAgent
+SofiaAgent = SofiaIntegratedAgent
 
 __all__ = [
+    # Base types
     "AgentCapability",
     "AgentRole",
     "AgentTask",
     "AgentResponse",
     "BaseAgent",
+    # CLI Agents (14)
     "ArchitectAgent",
     "ExplorerAgent",
     "PlannerAgent",
@@ -55,6 +63,12 @@ __all__ = [
     "PerformanceAgent",
     "TestingAgent",
     "NextGenExecutorAgent",
-    "ExecutorAgent",  # Alias for backward compatibility
+    "ExecutorAgent",  # Alias
     "DocumentationAgent",
+    "DevOpsAgent",
+    "JusticaIntegratedAgent",
+    "JusticaAgent",  # Alias
+    "SofiaIntegratedAgent",
+    "SofiaAgent",  # Alias
+    "DataAgent",
 ]

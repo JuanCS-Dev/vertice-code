@@ -26,7 +26,7 @@ class AutocompleteDropdown(VerticalScroll):
         layer: autocomplete;
         background: $surface;
         border: round $primary;
-        padding: 0;
+        padding: 0 1;
         max-height: 16;
         min-height: 1;
         width: 100%;
@@ -45,23 +45,24 @@ class AutocompleteDropdown(VerticalScroll):
     }
 
     AutocompleteDropdown .item.selected {
-        background: $secondary;
+        background: $accent;
+        color: $background;
     }
 
     AutocompleteDropdown .item-command {
-        color: #b84700;
+        color: $primary;
     }
 
     AutocompleteDropdown .item-tool {
-        color: #b84700;
+        color: $accent;
     }
 
     AutocompleteDropdown .item-file {
-        color: #8b4513;
+        color: $success;
     }
 
     AutocompleteDropdown .item-desc {
-        color: #6b5200;
+        color: $secondary;
     }
     """
 

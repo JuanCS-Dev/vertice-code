@@ -223,7 +223,9 @@ class ProviderManager:
             return self._get_maximus(), "maximus"
 
         if self._mode == "gemini":
-            return self.gemini, "gemini"
+            # Get actual provider name (may be router, vertex-ai, or gemini)
+            provider_name = self._get_gemini_provider_name()
+            return self.gemini, provider_name
 
         # Auto mode - detect complexity
         if self.config.enable_complexity_detection and message:
@@ -241,7 +243,19 @@ class ProviderManager:
                 except RuntimeError:
                     logger.warning("Prometheus not available, falling back to Gemini")
 
-        return self.gemini, "gemini"
+        # Get actual provider name (may be router, vertex-ai, or gemini)
+        provider_name = self._get_gemini_provider_name()
+        return self.gemini, provider_name
+
+    def _get_gemini_provider_name(self) -> str:
+        """Get the actual provider name from GeminiClient.
+
+        GeminiClient may use VerticeRouter internally which routes to
+        Groq, Cerebras, Mistral, etc.
+        """
+        if hasattr(self.gemini, 'get_current_provider_name'):
+            return self.gemini.get_current_provider_name()
+        return "gemini"
 
     def get_provider_status(self) -> Dict[str, Any]:
         """Get status of all providers.

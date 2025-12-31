@@ -29,11 +29,12 @@ class StreamFilter:
         # Matches: {"tool": ... or { "tool": ...
         self._json_start_pattern = re.compile(r'\{\s*"tool"')
 
-        # ENHANCED: Also detect common tool argument patterns
-        # These are JSON objects that Gemini sometimes outputs when describing tool calls
-        # Examples: {"query": "...", {"path": "...", {"command": "...
+        # SIMPLIFIED: Only filter EXPLICIT tool call markers
+        # Previously we filtered JSON with common argument names, but this was
+        # too aggressive and suppressed legitimate LLM responses about URLs, files, etc.
+        # Now we only filter explicit Gemini function call syntax.
         self._tool_arg_patterns = re.compile(
-            r'\{\s*"(query|path|command|file|url|pattern|search|prompt|message|data|content)"'
+            r'\{\s*"function_call"\s*:'  # Only filter actual function call JSON
         )
 
         # NEW: Pattern for [TOOL_CALL:name:{...}] markers

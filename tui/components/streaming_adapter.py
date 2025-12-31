@@ -1,7 +1,10 @@
 """
 Streaming Adapter - Bridge between vertice_tui and streaming components.
 
-Provides sync-compatible interface for ResponseView.append_chunk().
+Phase 9 Visual Refresh:
+- 60fps for code blocks (16.67ms frame budget)
+- 30fps for markdown (33.33ms frame budget)
+- Smooth cursor animation (50ms)
 
 Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 """
@@ -49,6 +52,7 @@ class StreamingResponseWidget(Static):
     - Renderização especializada por tipo de bloco
     - Cursor pulsante durante streaming
     - Fallback para plain text em caso de performance baixa
+    - 60fps code blocks, 30fps markdown
 
     Uso:
         # Em ResponseView.append_chunk():
@@ -68,7 +72,7 @@ class StreamingResponseWidget(Static):
     }
 
     StreamingResponseWidget.streaming {
-        border-left: solid $primary;
+        border-left: solid $accent;
         padding-left: 1;
     }
 
@@ -77,8 +81,13 @@ class StreamingResponseWidget(Static):
     }
     """
 
-    # Cursor animation frames
-    CURSOR_FRAMES = ["▋", "▌", "▍", "▎", "▏", " ", "▏", "▎", "▍", "▌"]
+    # Cursor animation frames (smoother animation)
+    CURSOR_FRAMES = ["▋", "▌", "▍", "▎", "▏", "▏", "▎", "▍", "▌", "▋"]
+
+    # Frame budgets (Phase 9: 60fps for code, 30fps for markdown)
+    CODE_FRAME_BUDGET_MS = 16.67  # 60fps
+    MARKDOWN_FRAME_BUDGET_MS = 33.33  # 30fps
+    CURSOR_ANIMATION_MS = 50  # 20fps cursor (smooth enough)
 
     # Reactive properties
     is_streaming = reactive(False)
@@ -203,21 +212,32 @@ class StreamingResponseWidget(Static):
         # Processa com block detector (incremental)
         self._block_detector.process_chunk(chunk)
 
-        # Throttling: only update if enough time has passed (60fps = 16.67ms)
+        # Adaptive frame budget: 60fps for code, 30fps for markdown
         current_time = time.time()
         if not hasattr(self, '_last_update_time'):
-            self._last_update_time = 0
+            self._last_update_time = 0.0
             self._pending_update = False
+            self._in_code_block = False
+
+        # Detect if we're inside a code block (``` markers)
+        if '```' in chunk:
+            self._in_code_block = not getattr(self, '_in_code_block', False)
+
+        # Select frame budget based on content type
+        frame_budget_ms = (
+            self.CODE_FRAME_BUDGET_MS if self._in_code_block
+            else self.MARKDOWN_FRAME_BUDGET_MS
+        )
+        frame_budget_s = frame_budget_ms / 1000.0
 
         time_since_last = current_time - self._last_update_time
 
-        # Update immediately if >16ms since last update, or chunk ends with newline
-        if time_since_last >= 0.016 or chunk.endswith('\n'):
+        # Update if frame budget exceeded or newline (flush)
+        if time_since_last >= frame_budget_s or chunk.endswith('\n'):
             self._update_display()
             self._last_update_time = current_time
             self._pending_update = False
         else:
-            # Mark that we have pending content
             self._pending_update = True
 
     def _update_display(self) -> None:
@@ -294,6 +314,7 @@ class StreamingResponseWidget(Static):
         Anima o cursor durante streaming.
 
         Also flushes any pending updates from throttling.
+        Phase 9: 50ms cursor animation (20fps - smooth enough)
         """
         while self.is_streaming and not self._is_finalizing:
             self._advance_cursor()  # Thread-safe
@@ -303,7 +324,7 @@ class StreamingResponseWidget(Static):
                 self._pending_update = False
 
             self._update_display()
-            await asyncio.sleep(0.08)  # 80ms per frame (~12.5fps for cursor)
+            await asyncio.sleep(self.CURSOR_ANIMATION_MS / 1000.0)  # 50ms
 
     async def finalize(self) -> None:
         """

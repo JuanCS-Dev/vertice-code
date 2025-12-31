@@ -54,19 +54,30 @@ class CommandPaletteBridge:
                 from vertice_cli.ui.command_palette import CommandPalette, Command
                 self._palette = CommandPalette()
 
-                # Register agent commands
+                # Register ALL 20 agent commands (14 CLI + 6 Core)
                 agent_commands = [
-                    ("plan", "Plan Task", "Create a plan using GOAP", "agent"),
-                    ("execute", "Execute Code", "Run code safely in sandbox", "agent"),
-                    ("architect", "Architecture", "Analyze architecture", "agent"),
-                    ("review", "Code Review", "Enterprise code review", "agent"),
-                    ("explore", "Explore", "Search and navigate codebase", "agent"),
-                    ("refactor", "Refactor", "Improve code structure", "agent"),
-                    ("test", "Test", "Generate and run tests", "agent"),
+                    # CLI Agents (14)
+                    ("planner", "Planner", "GOAP planning", "agent"),
+                    ("executor", "Executor", "Secure code execution", "agent"),
+                    ("architect", "Architect", "Architecture analysis", "agent"),
+                    ("reviewer", "Reviewer", "Enterprise code review", "agent"),
+                    ("explorer", "Explorer", "Codebase navigation", "agent"),
+                    ("refactorer", "Refactorer", "Code refactoring", "agent"),
+                    ("testing", "Testing", "Test generation", "agent"),
                     ("security", "Security", "OWASP security scan", "agent"),
-                    ("docs", "Documentation", "Generate documentation", "agent"),
-                    ("perf", "Performance", "Profile and optimize", "agent"),
-                    ("devops", "DevOps", "Infrastructure management", "agent"),
+                    ("documentation", "Documentation", "Docs generation", "agent"),
+                    ("performance", "Performance", "Profiling", "agent"),
+                    ("devops", "DevOps", "Infrastructure", "agent"),
+                    ("justica", "Justica", "Constitutional governance", "agent"),
+                    ("sofia", "Sofia", "Ethical counsel", "agent"),
+                    ("data", "Data", "Database analysis", "agent"),
+                    # Core Agents (6)
+                    ("orchestrator_core", "Orchestrator (Core)", "Multi-agent coordination", "agent"),
+                    ("coder_core", "Coder (Core)", "Darwin-Godel evolution", "agent"),
+                    ("reviewer_core", "Reviewer (Core)", "Deep-think review", "agent"),
+                    ("architect_core", "Architect (Core)", "Agentic RAG design", "agent"),
+                    ("researcher_core", "Researcher (Core)", "Three-loop learning", "agent"),
+                    ("devops_core", "DevOps (Core)", "Incident handler", "agent"),
                 ]
 
                 for cmd_id, label, desc, category in agent_commands:
@@ -314,7 +325,8 @@ class AutocompleteBridge:
 
             # Project (Claude Code parity)
             ("/init", "Initialize project"),
-            ("/model", "Select model"),
+            ("/model", "Select model/provider"),
+            ("/providers", "List LLM providers"),
             ("/doctor", "Check health"),
             ("/permissions", "Manage permissions"),
 
@@ -341,6 +353,11 @@ class AutocompleteBridge:
 
             # Data Agent
             ("/data", "Database analysis"),
+
+            # Core Agents (6) - Phase 3 Evolution
+            ("/orchestrator", "Multi-agent coordination (Core)"),
+            ("/coder", "Darwin-Godel code evolution (Core)"),
+            ("/researcher", "Three-loop learning (Core)"),
 
             # Advanced (Claude Code parity)
             ("/sandbox", "Enable sandbox"),
@@ -394,6 +411,22 @@ class AutocompleteBridge:
             ("/undo-stack", "View undo stack"),
             ("/secrets", "Scan for secrets"),
             ("/secrets-staged", "Scan staged files"),
+
+            # WAVE 7: Missing Commands (Audit Dec 2025)
+            ("/prometheus", "Direct Prometheus query"),
+            ("/task", "Launch subagent task"),
+            ("/subagents", "List running subagents"),
+            ("/ask", "Ask user question"),
+            ("/commands", "List custom commands"),
+            ("/command-create", "Create custom command"),
+            ("/command-delete", "Delete custom command"),
+            ("/a2a", "Agent-to-Agent protocol"),
+            ("/tribunal", "Toggle TRIBUNAL mode"),
+
+            # Core Agent Aliases (explicit slash access)
+            ("/reviewer-core", "Deep-think code review (Core)"),
+            ("/architect-core", "Agentic RAG design (Core)"),
+            ("/devops-core", "Incident handler (Core)"),
         ]
 
         for cmd, desc in slash_commands:

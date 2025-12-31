@@ -276,8 +276,10 @@ class HistoryManager(CompactionMixin):
                     "message_count": len(data.get("context", [])),
                     "file": str(session_file)
                 })
-            except Exception:
-                pass
+            except json.JSONDecodeError as e:
+                logger.warning(f"Corrupted session file {session_file}: {e}")
+            except Exception as e:
+                logger.error(f"Failed to load session {session_file}: {e}")
 
         return result
 

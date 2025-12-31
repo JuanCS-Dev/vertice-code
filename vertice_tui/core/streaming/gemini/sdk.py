@@ -120,7 +120,8 @@ class GeminiSDKStreamer(BaseStreamer):
                         items = items_list
                     else:
                         items = None
-                except Exception:
+                except Exception as e:
+                    logger.debug(f"Protobuf items extraction failed: {e}")
                     items = None
 
             if items:
@@ -131,7 +132,8 @@ class GeminiSDKStreamer(BaseStreamer):
                     ):
                         try:
                             result[key] = self._convert_protobuf_args(value)
-                        except Exception:
+                        except Exception as e:
+                            logger.debug(f"Nested protobuf conversion for {key} failed: {e}")
                             result[key] = str(value)
                     else:
                         # Convert to native Python type
@@ -150,7 +152,8 @@ class GeminiSDKStreamer(BaseStreamer):
             logger.debug(f"Protobuf conversion fallback: {e}")
             try:
                 result = {"_raw": str(args)}
-            except Exception:
+            except Exception as e2:
+                logger.debug(f"Final protobuf fallback failed: {e2}")
                 result = {}
 
         return result

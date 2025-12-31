@@ -27,6 +27,7 @@ class CommandRouter:
         self._claude_parity = None
         self._session = None
         self._operations = None
+        self._context = None
 
     @property
     def basic(self):
@@ -68,6 +69,14 @@ class CommandRouter:
             self._operations = OperationsHandler(self.app)
         return self._operations
 
+    @property
+    def context(self):
+        """Lazy load context commands handler."""
+        if self._context is None:
+            from tui.handlers.context_commands import ContextCommandHandler
+            self._context = ContextCommandHandler(self.app)
+        return self._context
+
     async def dispatch(
         self,
         cmd: str,
@@ -82,10 +91,15 @@ class CommandRouter:
         command = parts[0].lower()
         args = parts[1] if len(parts) > 1 else ""
 
+        # File context commands (Phase 10: Claude Code parity)
+        if command in ("/add", "/remove", "/files", "/context-files"):
+            await self.context.handle(command, args, view)
+            return True
+
         # Basic commands
         if command in ("/help", "/clear", "/quit", "/exit", "/run", "/read",
                        "/agents", "/status", "/tools", "/palette", "/history",
-                       "/context", "/context-clear"):
+                       "/context", "/context-clear", "/prometheus", "/providers"):
             await self.basic.handle(command, args, view)
             return True
 

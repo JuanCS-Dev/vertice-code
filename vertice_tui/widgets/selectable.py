@@ -54,8 +54,10 @@ class SelectableStatic(Static):
                 try:
                     pyperclip.copy(self.selected_text)
                     self.app.bell()  # Audio feedback
-                except Exception:
-                    pass
+                except Exception as e:
+                    # Clipboard access may fail in some environments
+                    import logging
+                    logging.warning(f"Clipboard copy failed: {e}")
 
     def on_double_click(self, event: events.Click) -> None:
         """Select word on double-click."""

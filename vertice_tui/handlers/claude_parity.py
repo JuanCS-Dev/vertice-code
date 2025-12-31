@@ -53,6 +53,7 @@ class ClaudeParityHandler:
         # Local handlers
         local_handlers = {
             "/compact": self._handle_compact,
+            "/context": self._handle_context,
             "/cost": self._handle_cost,
             "/tokens": self._handle_tokens,
             "/todos": self._handle_todos,
@@ -83,18 +84,173 @@ class ClaudeParityHandler:
             await self.plan_handler.handle(command, args, view)
 
     async def _handle_compact(self, args: str, view: "ResponseView") -> None:
-        focus = args if args else None
+        """Enhanced /compact command using SlidingWindowCompressor.
+
+        Supports strategies: fifo, priority, hierarchical, adaptive
+        Claude Code pattern: trigger at 64-75%, not 95%
+        """
+        from tui.core.context import get_sliding_window, WindowStrategy
+
+        # Parse strategy from args: /compact priority, /compact hierarchical
+        strategy_name = args.strip().lower() if args else "priority"
+        strategy_map = {
+            "fifo": WindowStrategy.FIFO,
+            "priority": WindowStrategy.PRIORITY,
+            "hierarchical": WindowStrategy.HIERARCHICAL,
+            "adaptive": WindowStrategy.ADAPTIVE,
+        }
+        strategy = strategy_map.get(strategy_name, WindowStrategy.PRIORITY)
+
         try:
-            result = self.bridge.compact_context(focus)
+            compressor = get_sliding_window()
+
+            # Claude Code pattern: trigger at 64-75%, not 95%
+            if compressor.utilization < 0.64:
+                view.add_system_message(
+                    f"## ℹ️ Context Status\n\n"
+                    f"Context at **{compressor.utilization*100:.0f}%** "
+                    f"(threshold: 64%). No compression needed.\n\n"
+                    f"- **Tokens:** {compressor.total_tokens:,} / {compressor.config.max_tokens:,}\n"
+                    f"- **Messages:** {compressor.message_count}"
+                )
+                return
+
+            result = compressor.compress(strategy=strategy, force=True)
+
+            # Update token dashboard if available
+            self._update_token_dashboard(compressor)
+
             view.add_system_message(
                 f"## 📦 Context Compacted\n\n"
-                f"- **Messages before:** {result.get('before', '?')}\n"
-                f"- **Messages after:** {result.get('after', '?')}\n"
-                f"- **Tokens saved:** ~{result.get('tokens_saved', '?')}\n"
-                f"{'- **Focus:** ' + focus if focus else ''}"
+                f"- **Strategy:** {result.strategy_used.value}\n"
+                f"- **Tokens before:** {result.tokens_before:,}\n"
+                f"- **Tokens after:** {result.tokens_after:,}\n"
+                f"- **Saved:** {result.tokens_saved:,} ({(1-result.compression_ratio)*100:.0f}%)\n"
+                f"- **Messages:** {result.messages_before} → {result.messages_after}\n"
+                f"- **Duration:** {result.duration_ms:.1f}ms"
             )
         except Exception as e:
             view.add_error(f"Compact failed: {e}")
+
+    def _update_token_dashboard(self, compressor) -> None:
+        """Update TokenDashboard widget with current stats."""
+        try:
+            from tui.widgets import TokenDashboard
+            dashboard = self.app.query_one("#token-dashboard", TokenDashboard)
+            dashboard.update_usage(
+                used=compressor.total_tokens,
+                limit=compressor.config.max_tokens
+            )
+            dashboard.update_compression(
+                ratio=1.0 / max(compressor.utilization, 0.01),
+                count=len(compressor.get_compression_history())
+            )
+        except Exception:
+            pass  # Dashboard not mounted yet
+
+    async def _handle_context(self, args: str, view: "ResponseView") -> None:
+        """Enhanced /context command with full breakdown.
+
+        Shows:
+        - Files in context
+        - Token usage breakdown
+        - Compression status
+        - Active reasoning chain (thought signatures)
+        """
+        from tui.core.context import (
+            get_sliding_window,
+            get_thought_manager,
+        )
+
+        try:
+            compressor = get_sliding_window()
+            thoughts = get_thought_manager()
+
+            sections = ["## 📋 Context Overview\n"]
+
+            # File context section
+            sections.append("### 📁 Files in Context")
+            file_entries = getattr(compressor, 'file_entries', [])
+            if file_entries:
+                for entry in file_entries[:10]:
+                    filepath = getattr(entry, 'filepath', str(entry))
+                    tokens = getattr(entry, 'tokens', 0)
+                    sections.append(f"- `{filepath}` ({tokens:,} tokens)")
+                if len(file_entries) > 10:
+                    sections.append(f"- ... and {len(file_entries) - 10} more")
+            else:
+                sections.append("*No files added. Use `/add <file>` to include files.*")
+
+            # Token breakdown section
+            sections.append("\n### 📊 Token Usage")
+            utilization_pct = compressor.utilization * 100
+            total_tokens = compressor.total_tokens
+            max_tokens = compressor.config.max_tokens
+
+            # Color based on usage
+            if utilization_pct >= 90:
+                status = "🔴 CRITICAL"
+            elif utilization_pct >= 75:
+                status = "🟠 WARNING"
+            elif utilization_pct >= 64:
+                status = "🟡 ELEVATED"
+            else:
+                status = "🟢 HEALTHY"
+
+            sections.append(f"- **Status:** {status}")
+            sections.append(f"- **Total:** {total_tokens:,} / {max_tokens:,} ({utilization_pct:.1f}%)")
+            sections.append(f"- **Messages:** {compressor.message_count}")
+
+            # Get breakdown if available
+            breakdown = getattr(compressor, 'get_breakdown', lambda: {})()
+            if breakdown:
+                sections.append(f"- **Messages tokens:** {breakdown.get('messages', 0):,}")
+                sections.append(f"- **Files tokens:** {breakdown.get('files', 0):,}")
+                sections.append(f"- **Summary tokens:** {breakdown.get('summary', 0):,}")
+                sections.append(f"- **System tokens:** {breakdown.get('system', 0):,}")
+
+            # Compression history
+            history = compressor.get_compression_history()
+            compressions = len(history)
+            if compressions > 0:
+                total_saved = sum(h.tokens_saved for h in history)
+                sections.append(f"- **Compressions:** {compressions}x ({total_saved:,} tokens saved)")
+            else:
+                sections.append("- **Compressions:** None yet")
+
+            # Auto-compact status
+            needs_compact = compressor.needs_compression()
+            sections.append(f"- **Needs compact:** {'⚠️ Yes' if needs_compact else '✓ No'}")
+
+            # Active reasoning section
+            sections.append("\n### 🧠 Active Reasoning")
+            active_sig = thoughts.get_active_signature() if thoughts else None
+            if active_sig:
+                sections.append(f"- **Level:** {active_sig.thinking_level.value.capitalize()}")
+                sections.append(f"- **Hypothesis:** {active_sig.hypothesis[:100]}{'...' if len(active_sig.hypothesis) > 100 else ''}")
+                sections.append(f"- **Steps:** {len(active_sig.key_observations)}")
+                if active_sig.key_observations:
+                    sections.append("- **Recent insights:**")
+                    for obs in active_sig.key_observations[-3:]:
+                        sections.append(f"  - {obs[:80]}{'...' if len(obs) > 80 else ''}")
+            else:
+                sections.append("*No active reasoning chain.*")
+
+            # Usage hints
+            sections.append("\n### 💡 Commands")
+            sections.append("- `/add <file>` - Add file to context")
+            sections.append("- `/remove <file>` - Remove from context")
+            sections.append("- `/compact` - Compress context")
+            sections.append("- `/compact priority` - Priority-based compression")
+            sections.append("- `/tokens` - Quick token count")
+
+            view.add_system_message("\n".join(sections))
+
+            # Update dashboard
+            self._update_token_dashboard(compressor)
+
+        except Exception as e:
+            view.add_error(f"Context info failed: {e}")
 
     async def _handle_cost(self, args: str, view: "ResponseView") -> None:
         try:

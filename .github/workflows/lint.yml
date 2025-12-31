@@ -23,13 +23,13 @@ jobs:
         pip install black flake8 mypy isort
     
     - name: Run black
-      run: black --check qwen_dev_cli/
-    
+      run: black --check vertice_cli/ vertice_tui/ vertice_core/
+
     - name: Run flake8
-      run: flake8 qwen_dev_cli/ --max-line-length=100
-    
+      run: flake8 vertice_cli/ vertice_tui/ vertice_core/ --max-line-length=100
+
     - name: Run mypy
-      run: mypy qwen_dev_cli/ --ignore-missing-imports
-    
+      run: mypy vertice_cli/ vertice_tui/ vertice_core/ --ignore-missing-imports
+
     - name: Run isort
-      run: isort --check-only qwen_dev_cli/
+      run: isort --check-only vertice_cli/ vertice_tui/ vertice_core/

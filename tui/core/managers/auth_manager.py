@@ -290,8 +290,8 @@ class AuthenticationManager(IAuthenticationManager):
                         del creds[key]
                         removed.append(f"{key} (global)")
                 creds_file.write_text(json.dumps(creds, indent=2))
-            except Exception:
-                pass
+            except Exception as e:
+                logger.error(f"Failed to remove global keys: {e}")
 
         return removed
 
@@ -317,8 +317,8 @@ class AuthenticationManager(IAuthenticationManager):
 
                 if len(lines) != len(original):
                     env_file.write_text("\n".join(lines) + "\n" if lines else "")
-            except Exception:
-                pass
+            except Exception as e:
+                logger.error(f"Failed to remove project keys: {e}")
 
         return removed
 
@@ -335,8 +335,8 @@ class AuthenticationManager(IAuthenticationManager):
         if creds_file.exists():
             try:
                 global_creds = json.loads(creds_file.read_text())
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(f"Failed to read global credentials: {e}")
 
         # Check project .env
         env_file = self._get_env_file()
@@ -347,8 +347,8 @@ class AuthenticationManager(IAuthenticationManager):
                     if "=" in line and not line.startswith("#"):
                         key, value = line.split("=", 1)
                         project_creds[key.strip()] = value.strip()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(f"Failed to read project .env: {e}")
 
         # Build status for each provider
         status = {}
@@ -384,5 +384,5 @@ class AuthenticationManager(IAuthenticationManager):
                 for key, value in creds.items():
                     if key not in os.environ:
                         os.environ[key] = value
-            except Exception:
-                pass
+            except Exception as e:
+                logger.error(f"Failed to load credentials: {e}")

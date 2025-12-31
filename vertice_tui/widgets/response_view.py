@@ -1,11 +1,15 @@
 """
-Response View Widget.
+Response View Widget - Phase 9 Visual Refresh.
 
 Smooth 60fps Response Viewport for streaming AI responses.
+Enhanced code blocks with headers, diffs, and Slate theme.
+
+Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 """
 
 from __future__ import annotations
 
+import time
 from typing import TYPE_CHECKING
 
 from textual.containers import VerticalScroll
@@ -16,6 +20,7 @@ from rich.syntax import Syntax
 from rich.panel import Panel
 from rich.markdown import Markdown
 from rich.text import Text
+from rich import box
 
 from vertice_tui.constants import BANNER
 from vertice_tui.widgets.selectable import SelectableStatic
@@ -43,7 +48,9 @@ class ResponseView(VerticalScroll):
         border: round $primary;
         background: $background;
         padding: 1 2;
-        scrollbar-size: 0 0;
+        scrollbar-size: 1 1;
+        scrollbar-background: $surface;
+        scrollbar-color: $secondary;
     }
 
     .user-message {
@@ -58,10 +65,16 @@ class ResponseView(VerticalScroll):
 
     .code-block {
         margin: 1 0;
+        background: $surface;
+    }
+
+    .diff-block {
+        margin: 1 0;
+        background: $surface;
     }
 
     .action {
-        color: $secondary;
+        color: $accent;
     }
 
     .success {
@@ -70,6 +83,10 @@ class ResponseView(VerticalScroll):
 
     .error {
         color: $error;
+    }
+
+    .warning {
+        color: $warning;
     }
 
     .system-message {
@@ -125,10 +142,10 @@ class ResponseView(VerticalScroll):
         self.scroll_end(animate=True)
 
     def start_thinking(self) -> None:
-        """Show thinking indicator with orange accent."""
+        """Show thinking indicator with accent color."""
         self.is_thinking = True
         self._thinking_widget = Static(
-            f"[bold {Colors.ACTION}]{Icons.THINKING}[/] [italic {Colors.MUTED}]Thinking...[/]",
+            f"[bold {Colors.ACCENT}]{Icons.THINKING}[/] [italic {Colors.MUTED}]Thinking...[/]",
             id="thinking-indicator"
         )
         self.mount(self._thinking_widget)
@@ -188,10 +205,9 @@ class ResponseView(VerticalScroll):
                 self._response_widget.append_chunk(chunk)
 
         # Throttled scroll (max 20fps = 50ms) to prevent layout thrashing
-        import time
         current_time = time.time()
         if not hasattr(self, '_last_scroll_time'):
-            self._last_scroll_time = 0
+            self._last_scroll_time = 0.0
 
         if current_time - self._last_scroll_time >= 0.05:
             self.scroll_end(animate=False)
@@ -201,35 +217,107 @@ class ResponseView(VerticalScroll):
         self,
         code: str,
         language: str = "text",
-        title: str | None = None
+        title: str | None = None,
+        file_path: str | None = None
     ) -> None:
-        """Add syntax-highlighted code block in a panel."""
+        """
+        Add syntax-highlighted code block with enhanced header.
+
+        Args:
+            code: Source code to display
+            language: Programming language for syntax highlighting
+            title: Optional custom title
+            file_path: Optional file path to show in header
+        """
         syntax = Syntax(
             code.strip(),
             language,
-            theme="dracula",
+            theme="one-dark",
             line_numbers=True,
             word_wrap=True,
-            background_color="#1e1e2e"
+            background_color=Colors.SURFACE
         )
 
-        panel_title = f"{Icons.FILE} {title}" if title else f"{Icons.FILE} {language.upper()}"
+        # Build header: icon + language + optional path
+        header_parts = [f"{Icons.CODE_FILE} {language.upper()}"]
+        if file_path:
+            header_parts.append(f"[{Colors.MUTED}]{file_path}[/]")
+        elif title:
+            header_parts.append(f"[{Colors.MUTED}]{title}[/]")
+
+        panel_title = " ".join(header_parts)
         panel = Panel(
             syntax,
-            title=f"[{Colors.PRIMARY}]{panel_title}[/]",
+            title=f"[bold {Colors.PRIMARY}]{panel_title}[/]",
             title_align="left",
-            border_style=Colors.PRIMARY
+            border_style=Colors.BORDER,
+            box=box.ROUNDED,
+            padding=(0, 1)
         )
 
         widget = SelectableStatic(panel, classes="code-block")
         self.mount(widget)
         self.scroll_end(animate=True)
 
+    def add_diff_block(
+        self,
+        diff_content: str,
+        title: str = "Diff",
+        file_path: str | None = None
+    ) -> None:
+        """
+        Add diff block with colored additions/deletions.
+
+        Args:
+            diff_content: Diff text with +/- prefixes
+            title: Block title
+            file_path: Optional file path to show
+        """
+        lines = diff_content.strip().split("\n")
+        result = Text()
+
+        for line in lines:
+            if line.startswith("+") and not line.startswith("+++"):
+                result.append(line + "\n", style=f"bold {Colors.SUCCESS}")
+            elif line.startswith("-") and not line.startswith("---"):
+                result.append(line + "\n", style=f"bold {Colors.ERROR}")
+            elif line.startswith("@@"):
+                result.append(line + "\n", style=f"bold {Colors.ACCENT}")
+            else:
+                result.append(line + "\n", style=Colors.MUTED)
+
+        # Header
+        header = f"{Icons.GIT} {title}"
+        if file_path:
+            header += f" [{Colors.MUTED}]{file_path}[/]"
+
+        panel = Panel(
+            result,
+            title=f"[bold {Colors.PRIMARY}]{header}[/]",
+            title_align="left",
+            border_style=Colors.BORDER,
+            box=box.ROUNDED,
+            padding=(0, 1)
+        )
+
+        widget = SelectableStatic(panel, classes="diff-block")
+        self.mount(widget)
+        self.scroll_end(animate=True)
+
     def add_action(self, action: str) -> None:
-        """Add action indicator with orange accent."""
+        """Add action indicator with accent color."""
         widget = SelectableStatic(
-            f"[bold {Colors.ACTION}]{Icons.EXECUTING}[/] [{Colors.MUTED}]{action}[/]",
+            f"[bold {Colors.ACCENT}]{Icons.EXECUTING}[/] [{Colors.MUTED}]{action}[/]",
             classes="action"
+        )
+        self.mount(widget)
+        self.scroll_end(animate=True)
+
+    def add_warning(self, message: str) -> None:
+        """Add warning message with triangle icon."""
+        widget = SelectableStatic(
+            f"[bold {Colors.WARNING}]{Icons.WARNING}[/] [{Colors.WARNING}]{message}[/]",
+            classes="warning"
         )
         self.mount(widget)
         self.scroll_end(animate=True)

@@ -30,9 +30,15 @@ from textual import on, events
 
 # Local imports
 from vertice_tui.constants import HELP_TEXT
-from vertice_tui.widgets import AutocompleteDropdown, ResponseView, StatusBar
+from vertice_tui.widgets import AutocompleteDropdown, ResponseView, StatusBar, TokenDashboard
 from vertice_tui.handlers import CommandRouter
-from vertice_tui.themes import THEME_LIGHT, THEME_DARK, ThemeManager
+from vertice_tui.themes import (
+    THEME_VERTICE_DARK,
+    THEME_VERTICE_LIGHT,
+    THEME_LIGHT,
+    THEME_DARK,
+    ThemeManager,
+)
 from vertice_tui.app_styles import APP_CSS, detect_language
 
 
@@ -44,8 +50,8 @@ class QwenApp(App):
     60fps rendering, security-first design, extensible core.
     """
 
-    TITLE = "JuanCS Dev-Code"
-    SUB_TITLE = "The Developer's Ally"
+    TITLE = "VERTICE"
+    SUB_TITLE = "Agent Agency"
     LAYERS = ["base", "autocomplete"]
     CSS = APP_CSS
 
@@ -54,6 +60,7 @@ class QwenApp(App):
         Binding("ctrl+l", "clear", "Clear", show=True),
         Binding("ctrl+p", "show_help", "Help", show=True),
         Binding("ctrl+t", "toggle_theme", "Theme", show=True),
+        Binding("ctrl+d", "toggle_dashboard", "Tokens", show=True),
         Binding("ctrl+m", "toggle_tribunal", "Tribunal", show=True),
         Binding("escape", "cancel", "Cancel", show=False),
         # Scroll bindings for ResponseView (PageUp/PageDown always work)
@@ -97,6 +104,9 @@ class QwenApp(App):
         """Compose the UI - Gemini CLI style."""
         yield Header(show_clock=True)
 
+        # Token Dashboard (collapsible, below header)
+        yield TokenDashboard(id="token-dashboard", classes="collapsed")
+
         with Container(id="main"):
             yield ResponseView(id="response")
             with Horizontal(id="input-area"):
@@ -113,12 +123,33 @@ class QwenApp(App):
 
     def on_mount(self) -> None:
         """Called when app is mounted - show banner and init bridge."""
+        self.register_theme(THEME_VERTICE_DARK)
+        self.register_theme(THEME_VERTICE_LIGHT)
         self.register_theme(THEME_LIGHT)
         self.register_theme(THEME_DARK)
         self.theme = ThemeManager.get_theme_preference()
 
         response = self.query_one("#response", ResponseView)
         response.add_banner()
+
+        # Initialize TokenDashboard with model limits
+        dashboard = self.query_one("#token-dashboard", TokenDashboard)
+        model_limits = {
+            "gpt-4": 128_000,
+            "gpt-4-turbo": 128_000,
+            "claude-3": 200_000,
+            "claude-3.5": 200_000,
+            "gemini-2": 1_000_000,
+            "gemini-3": 2_000_000,
+        }
+        # Default to 32k for unknown models
+        default_limit = 32_000
+        try:
+            current_model = getattr(self.bridge, "model_name", "unknown")
+            limit = model_limits.get(current_model, default_limit)
+            dashboard.update_usage(0, limit)
+        except Exception:
+            dashboard.update_usage(0, default_limit)
 
         status = self.query_one(StatusBar)
         try:
@@ -187,14 +218,27 @@ class QwenApp(App):
             for i in range(len(text) - 1, -1, -1)
         )
 
-        if not text.startswith("/") and not has_at_trigger and len(text) < 2:
-            autocomplete.hide()
-            return
-
-        try:
-            completions = self.bridge.autocomplete.get_completions(text, max_results=15)
-            autocomplete.show_completions(completions)
-        except Exception:
+        # Show autocomplete for / commands or @ files
+        if text.startswith("/") or has_at_trigger:
+            try:
+                completions = self.bridge.autocomplete.get_completions(text, max_results=15)
+                if completions:
+                    autocomplete.show_completions(completions)
+                else:
+                    autocomplete.hide()
+            except Exception:
+                autocomplete.hide()
+        elif len(text) >= 2:
+            # Regular text - need at least 2 chars
+            try:
+                completions = self.bridge.autocomplete.get_completions(text, max_results=15)
+                if completions:
+                    autocomplete.show_completions(completions)
+                else:
+                    autocomplete.hide()
+            except Exception:
+                autocomplete.hide()
+        else:
             autocomplete.hide()
 
     async def on_key(self, event: events.Key) -> None:
@@ -339,6 +383,14 @@ class QwenApp(App):
         theme_name = "Claude Light ☀️" if new_theme == "claude-light" else "Matrix Dark 🌙"
         response.add_system_message(f"Theme switched to **{theme_name}**")
 
+    def action_toggle_dashboard(self) -> None:
+        """Toggle TokenDashboard visibility (collapsed/expanded)."""
+        dashboard = self.query_one("#token-dashboard", TokenDashboard)
+        if dashboard.has_class("collapsed"):
+            dashboard.remove_class("collapsed")
+        else:
+            dashboard.add_class("collapsed")
+
     def action_toggle_tribunal(self) -> None:
         """Toggle TRIBUNAL mode - forces all requests through MAXIMUS."""
         status = self.query_one(StatusBar)
@@ -390,7 +442,7 @@ class QwenApp(App):
 def main() -> None:
     """Run the QWEN CLI application."""
     app = QwenApp()
-    app.run(mouse=False)
+    app.run(mouse=True)  # Enable mouse for scroll support
 
 
 if __name__ == "__main__":

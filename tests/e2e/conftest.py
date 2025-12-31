@@ -582,6 +582,140 @@ def mock_llm_with_responses():
 
 
 # ==============================================================================
+# SPRINT 5: CONTEXT OPTIMIZATION FIXTURES
+# ==============================================================================
+
+@pytest.fixture
+def context_manager():
+    """Create a fresh context manager for testing."""
+    from tui.core.context import SlidingWindowCompressor, WindowConfig
+
+    config = WindowConfig(
+        max_tokens=10000,
+        target_tokens=5000,
+        trigger_percent=0.64,
+    )
+    return SlidingWindowCompressor(config=config)
+
+
+@pytest.fixture
+def thought_manager():
+    """Create a fresh thought manager for testing."""
+    from tui.core.context import ThoughtSignatureManager
+    return ThoughtSignatureManager()
+
+
+@pytest.fixture
+def masker():
+    """Create a fresh masker for testing."""
+    from tui.core.context import ObservationMasker
+    return ObservationMasker()
+
+
+@pytest.fixture
+def sample_tool_outputs() -> Dict[str, str]:
+    """Sample tool outputs for masking tests."""
+    return {
+        "bash_ls": "\n".join([f"file{i}.py" for i in range(100)]),
+        "bash_error": (
+            "Error: Command not found\n"
+            "Stack trace:\n"
+            "  at main.py:10\n"
+            "  at utils.py:25\n"
+            "  at core.py:100"
+        ),
+        "read_file": "def foo():\n    pass\n" * 50,
+        "grep_result": "\n".join([
+            f"src/module{i}.py:10: match found"
+            for i in range(50)
+        ]),
+        "find_result": "\n".join([
+            f"./path/to/file{i}.py"
+            for i in range(200)
+        ]),
+    }
+
+
+@pytest.fixture
+def sample_conversation() -> List[Dict[str, Any]]:
+    """Sample conversation for testing."""
+    return [
+        {"role": "user", "content": "Hello, how are you?"},
+        {"role": "assistant", "content": "I'm doing well, thank you!"},
+        {"role": "user", "content": "Can you help me with Python?"},
+        {"role": "assistant", "content": "Of course! What do you need help with?"},
+        {"role": "user", "content": "Write a function to calculate factorial"},
+        {
+            "role": "assistant",
+            "content": "Here's a factorial function:\n\n```python\ndef factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n```"
+        },
+    ]
+
+
+class MockResponseView:
+    """Mock ResponseView for testing command handlers."""
+
+    def __init__(self):
+        self.messages: List[Dict[str, str]] = []
+        self.errors: List[str] = []
+
+    def add_system_message(self, content: str) -> None:
+        """Add a system message."""
+        self.messages.append({"type": "system", "content": content})
+
+    def add_user_message(self, content: str) -> None:
+        """Add a user message."""
+        self.messages.append({"type": "user", "content": content})
+
+    def add_error(self, content: str) -> None:
+        """Add an error message."""
+        self.errors.append(content)
+
+    def add_success(self, content: str) -> None:
+        """Add a success message."""
+        self.messages.append({"type": "success", "content": content})
+
+    def add_code_block(self, content: str, language: str = "text", title: str = "") -> None:
+        """Add a code block."""
+        self.messages.append({
+            "type": "code",
+            "content": content,
+            "language": language,
+            "title": title,
+        })
+
+    def get_last_message(self) -> str:
+        """Get the last message content."""
+        if self.messages:
+            return self.messages[-1].get("content", "")
+        return ""
+
+    def get_all_content(self) -> str:
+        """Get all message content concatenated."""
+        return "\n".join(m.get("content", "") for m in self.messages)
+
+
+@pytest.fixture
+def mock_view():
+    """Create a mock response view."""
+    return MockResponseView()
+
+
+def create_test_messages(count: int, tokens_each: int = 100) -> List[Dict[str, Any]]:
+    """Create test messages with specified token counts."""
+    messages = []
+    for i in range(count):
+        role = "user" if i % 2 == 0 else "assistant"
+        content = f"Message {i}: " + "word " * (tokens_each // 2)
+        messages.append({
+            "role": role,
+            "content": content,
+            "priority": 0.5 + (i / count) * 0.5,
+        })
+    return messages
+
+
+# ==============================================================================
 # REPORT GENERATION
 # ==============================================================================
 

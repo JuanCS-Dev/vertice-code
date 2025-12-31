@@ -232,11 +232,36 @@ class LLMClient:
         self._nebius_client = None
         self._gemini_client = None
         self._ollama_client = None
+        self._vertice_router = None  # Multi-provider router (Dec 2025)
 
-        # Provider priority for failover (Gemini first - most powerful)
-        # GEMINI FIRST ALWAYS - fastest and best quality
-        self.provider_priority = ["gemini", "nebius", "hf", "ollama"]
-        self.default_provider = "gemini"  # FORCE GEMINI, not auto
+        # Try VerticeRouter first (has Groq, Cerebras, etc - FREE FIRST)
+        self._init_vertice_router()
+
+        # Provider priority for failover
+        # If VerticeRouter available, use it; otherwise fallback to legacy
+        if self._vertice_router:
+            self.provider_priority = ["router"]  # Use router for all
+            self.default_provider = "router"
+            logger.info("✅ Using VerticeRouter (FREE FIRST: Groq, Cerebras, Mistral...)")
+        else:
+            self.provider_priority = ["gemini", "nebius", "hf", "ollama"]
+            self.default_provider = "gemini"
+            logger.info("Using legacy providers (Gemini first)")
+
+    def _init_vertice_router(self) -> None:
+        """Initialize VerticeRouter for multi-provider routing."""
+        try:
+            from .providers.vertice_router import get_router
+            self._vertice_router = get_router()
+            available = self._vertice_router.get_available_providers()
+            if available:
+                logger.info(f"VerticeRouter: {len(available)} providers ({', '.join(available[:3])}...)")
+            else:
+                self._vertice_router = None
+        except ImportError:
+            logger.debug("VerticeRouter not available")
+        except Exception as e:
+            logger.debug(f"VerticeRouter init failed: {e}")
 
     @property
     def hf_client(self):
@@ -440,7 +465,12 @@ class LLMClient:
                 chunks_received = 0
 
                 # Select provider stream method
-                if provider == "ollama":
+                if provider == "router":
+                    # Use VerticeRouter (FREE FIRST: Groq, Cerebras, etc)
+                    if not self._vertice_router:
+                        raise RuntimeError("VerticeRouter not initialized")
+                    stream_gen = self._stream_router(messages, max_tokens, temperature)
+                elif provider == "ollama":
                     if not self.ollama_client:
                         raise RuntimeError("Ollama not initialized")
                     stream_gen = self._stream_ollama(messages, max_tokens, temperature)
@@ -516,6 +546,29 @@ class LLMClient:
 
         logger.error(f"❌ All {self.max_retries + 1} stream attempts failed")
         raise last_error
+
+    async def _stream_router(
+        self,
+        messages: list,
+        max_tokens: int,
+        temperature: float
+    ) -> AsyncGenerator[str, None]:
+        """Stream from VerticeRouter (FREE FIRST: Groq, Cerebras, etc)."""
+        try:
+            from .providers.vertice_router import TaskComplexity, SpeedRequirement
+
+            async for chunk in self._vertice_router.stream_chat(
+                messages=messages,
+                complexity=TaskComplexity.MODERATE,
+                speed=SpeedRequirement.FAST,
+                max_tokens=max_tokens,
+                temperature=temperature,
+            ):
+                yield chunk
+
+        except Exception as e:
+            logger.error(f"VerticeRouter error: {type(e).__name__}: {e}", exc_info=True)
+            raise
 
     async def _stream_hf(
         self,

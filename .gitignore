@@ -133,8 +133,31 @@ logs/
 test_agency.py
 test_vertice_providers.py
 
-# Temporary markdown files (root level)
-HF_COMMUNITY_POSTS.md
-PROMETHEUS_FLIGHT_TEST.md
-PROTECT_API.md
-SETUP_API_KEY.md
+# Legacy egg-info directories
+juan_dev_code.egg-info/
+qwen_dev_cli.egg-info/
+
+# Stub files (should not exist)
+ai_agent_cloud_comparison.md
+comparison_table.md
+README.old.md
+
+# Caches (regeneratable)
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.hypothesis/
+
+# Temporary directories
+.trash/
+.qwen_backups/
+.qwen_atomic_backups/
+.streaming_fix_backups/
+
+# Archive (legacy code - preserved but not tracked)
+.archive/
+
+# IDE specific (additional)
+.cursor/
+.juancs/

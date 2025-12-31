@@ -126,7 +126,7 @@ class StreamingManager:
         self.agents = agents
         self.config = config or StreamingConfig()
         self._parallel_executor = ParallelToolExecutor(
-            tool_executor=self._execute_single_tool,
+            self._execute_single_tool,
             max_parallel=self.config.max_parallel_tools,
         )
 

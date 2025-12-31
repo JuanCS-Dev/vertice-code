@@ -1,7 +1,10 @@
 """
-App Styles - CSS definitions for QwenApp.
+App Styles - CSS for VERTICE Agent Agency TUI.
 
-Extracted from app.py (Dec 2025 Refactoring).
+Phase 9 Visual Refresh:
+- Input area floating with auto-resize
+- Focus states enhanced
+- Slate/Blue professional palette
 
 Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 """
@@ -11,15 +14,16 @@ from __future__ import annotations
 from typing import Dict
 
 # =============================================================================
-# PALETA DE CORES COESA - JuanCS Dev-Code Theme
+# PALETA DE CORES - VERTICE Slate/Blue Theme
 # =============================================================================
-# Primary: Cyan (#00d4aa) - Main accent, user prompts, panels
-# Secondary: Magenta (#ff79c6) - Highlights, agent indicators
-# Success: Green (#50fa7b) - Success messages, confirmations
-# Warning: Yellow (#f1fa8c) - Warnings, caution
-# Error: Red (#ff5555) - Errors, failures
-# Muted: Gray (#6272a4) - Dim text, hints
-# Surface: Dark (#1e1e2e) - Background
+# Primary: Blue (#3B82F6) - Main accent, actions
+# Accent: Cyan (#22D3EE) - Highlights, cursor
+# Secondary: Slate (#64748B) - Muted elements
+# Success: Green (#22C55E) - Confirmations
+# Warning: Amber (#F59E0B) - Caution
+# Error: Red (#EF4444) - Failures
+# Background: Slate-900 (#0F172A) - Soft black
+# Surface: Slate-800 (#1E293B) - Cards, panels
 # =============================================================================
 
 APP_CSS: str = """
@@ -31,10 +35,12 @@ Screen {
 Header {
     background: $surface;
     color: $foreground;
+    height: 1;
 }
 
 Footer {
     background: $surface;
+    height: 1;
 }
 
 #main {
@@ -43,18 +49,29 @@ Footer {
     layer: base;
 }
 
-/* Input area - uses theme colors */
+/* =============================================================================
+   INPUT AREA - Floating Design with Auto-resize
+   ============================================================================= */
+
 #input-area {
-    height: 3;
+    height: auto;
+    min-height: 3;
+    max-height: 10;
     border: round $primary;
     background: $surface;
     padding: 0 1;
+    margin: 0 1;
+    transition: border 150ms;
+}
+
+#input-area:focus-within {
+    border: double $accent;
 }
 
 #prompt-icon {
-    width: 3;
+    width: 2;
     padding: 1 0;
-    color: $primary;
+    color: $accent;
     text-style: bold;
 }
 
@@ -62,24 +79,40 @@ Footer {
     background: transparent;
     border: none;
     color: $foreground;
+    padding: 1 0;
 }
 
 #prompt:focus {
     border: none;
 }
 
-/* ResponseView styling */
+#prompt.-cursor-line {
+    background: transparent;
+}
+
+/* =============================================================================
+   RESPONSE VIEW - Clean minimal
+   ============================================================================= */
+
 ResponseView {
-    scrollbar-size: 0 0;
+    scrollbar-size: 1 1;
+    scrollbar-background: $surface;
+    scrollbar-color: $border;
+    scrollbar-color-hover: $primary;
+    scrollbar-color-active: $accent;
     background: $background;
     color: $foreground;
+    padding: 0 1;
 }
 
 VerticalScroll {
-    scrollbar-size: 0 0;
+    scrollbar-size: 1 1;
 }
 
-/* Autocomplete dropdown - uses theme colors */
+/* =============================================================================
+   AUTOCOMPLETE DROPDOWN
+   ============================================================================= */
+
 #autocomplete {
     layer: autocomplete;
     dock: bottom;
@@ -95,6 +128,146 @@ VerticalScroll {
 
 #autocomplete.visible {
     display: block;
+}
+
+#autocomplete:focus-within {
+    border: double $accent;
+}
+
+/* =============================================================================
+   CODE BLOCKS & SYNTAX
+   ============================================================================= */
+
+.code-block {
+    background: $surface;
+    border: round $border;
+    padding: 1;
+    margin: 1 0;
+}
+
+.code-header {
+    color: $secondary;
+    text-style: bold;
+    padding: 0 0 1 0;
+    border-bottom: solid $border;
+}
+
+.diff-add {
+    color: $success;
+    background: #22C55E20;
+}
+
+.diff-del {
+    color: $error;
+    background: #EF444420;
+}
+
+/* =============================================================================
+   STATUS INDICATORS
+   ============================================================================= */
+
+.thinking {
+    color: $accent;
+}
+
+.success {
+    color: $success;
+}
+
+.error {
+    color: $error;
+}
+
+.warning {
+    color: $warning;
+}
+
+.muted {
+    color: $secondary;
+}
+
+/* =============================================================================
+   PANELS & CONTAINERS
+   ============================================================================= */
+
+.panel {
+    background: $surface;
+    border: round $border;
+    padding: 1;
+}
+
+.panel:focus {
+    border: double $primary;
+}
+
+.elevated {
+    background: $panel-lighten-1;
+}
+
+/* =============================================================================
+   TOKEN DASHBOARD - Context Usage Visualization
+   ============================================================================= */
+
+#token-dashboard {
+    dock: top;
+    height: auto;
+    max-height: 12;
+    margin: 0 1;
+    padding: 0 1;
+    background: $surface;
+    border: round $border;
+    transition: height 200ms;
+}
+
+#token-dashboard.collapsed {
+    height: 3;
+    overflow: hidden;
+}
+
+#token-dashboard:focus {
+    border: double $primary;
+}
+
+/* Token Meter Progress Bar */
+TokenMeter {
+    height: 1;
+    margin: 0 1;
+}
+
+TokenMeter > .progress-bar {
+    color: $success;
+}
+
+TokenMeter > .progress-bar.warning {
+    color: $warning;
+}
+
+TokenMeter > .progress-bar.danger {
+    color: $error;
+}
+
+/* Breakdown Section */
+TokenBreakdownWidget {
+    height: auto;
+    padding: 0 1;
+}
+
+/* Compression Indicator */
+CompressionIndicator {
+    height: 1;
+    padding: 0 1;
+}
+
+/* Thinking Level Indicator */
+ThinkingLevelIndicator {
+    height: 1;
+    padding: 0 1;
+}
+
+/* Mini Token Meter (for StatusBar) */
+MiniTokenMeter {
+    width: auto;
+    min-width: 12;
 }
 """
 

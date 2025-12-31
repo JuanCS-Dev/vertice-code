@@ -144,7 +144,8 @@ class PullRequestManager(IPullRequestManager):
             if template.exists():
                 try:
                     return template.read_text()
-                except Exception:
+                except Exception as e:
+                    logger.debug(f"Failed to read template {template}: {e}")
                     continue
 
         return ""
@@ -160,7 +161,8 @@ class PullRequestManager(IPullRequestManager):
                 cwd=str(self._working_dir)
             )
             return result.stdout.strip()
-        except Exception:
+        except Exception as e:
+            logger.warning(f"Failed to get current branch: {e}")
             return "unknown"
 
     def _generate_default_body(self, title: str) -> str:
@@ -196,5 +198,6 @@ class PullRequestManager(IPullRequestManager):
                 timeout=10
             )
             return result.returncode == 0
-        except Exception:
+        except Exception as e:
+            logger.debug(f"GitHub auth check failed: {e}")
             return False

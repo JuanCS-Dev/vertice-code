@@ -27,7 +27,9 @@ try:
     if env_file.exists():
         load_dotenv(env_file)
 except ImportError:
-    pass
+    # python-dotenv not installed - env vars must be set externally
+    import logging
+    logging.debug("python-dotenv not installed, skipping .env load")
 
 # Core systems
 from vertice_tui.core.resilience import AsyncLock
@@ -195,8 +197,8 @@ class Bridge(ProtocolBridgeMixin):
                 tools=tool_schemas, context=context,
                 project_memory=project_memory, user_memory=user_memory
             )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Agentic system prompt failed, using fallback: {e}")
 
         # Fallback prompt
         tool_names = self.tools.list_tools()[:25]

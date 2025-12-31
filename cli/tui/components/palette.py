@@ -47,18 +47,20 @@ class CommandCategory(Enum):
     VIEW = "view"
     HELP = "help"
     SYSTEM = "system"
+    AGENTS = "agents"
 
 
-# Category icons and colors
+# Category icons and colors (Phase 9: Unicode minimalista)
 CATEGORY_CONFIG = {
-    CommandCategory.FILE: {"icon": "📄", "color": COLORS['accent_blue']},
-    CommandCategory.EDIT: {"icon": "✏️", "color": COLORS['accent_green']},
-    CommandCategory.SEARCH: {"icon": "🔍", "color": COLORS['accent_yellow']},
-    CommandCategory.GIT: {"icon": "🔀", "color": COLORS['accent_purple']},
-    CommandCategory.TOOLS: {"icon": "🔧", "color": COLORS['accent_blue']},
-    CommandCategory.VIEW: {"icon": "👁️", "color": COLORS['text_secondary']},
-    CommandCategory.HELP: {"icon": "❓", "color": COLORS['accent_yellow']},
-    CommandCategory.SYSTEM: {"icon": "⚙️", "color": COLORS['text_secondary']},
+    CommandCategory.FILE: {"icon": "▪", "color": COLORS['accent_blue']},
+    CommandCategory.EDIT: {"icon": "▸", "color": COLORS['accent_green']},
+    CommandCategory.SEARCH: {"icon": "○", "color": COLORS['accent_yellow']},
+    CommandCategory.GIT: {"icon": "⎇", "color": COLORS['accent_purple']},
+    CommandCategory.TOOLS: {"icon": "⚡", "color": COLORS['accent_blue']},
+    CommandCategory.VIEW: {"icon": "◎", "color": COLORS['text_secondary']},
+    CommandCategory.HELP: {"icon": "ℹ", "color": COLORS['accent_yellow']},
+    CommandCategory.SYSTEM: {"icon": "⊡", "color": COLORS['text_secondary']},
+    CommandCategory.AGENTS: {"icon": "◆", "color": "#22D3EE"},
 }
 
 
@@ -495,7 +497,9 @@ class CommandPalette:
 # =============================================================================
 
 DEFAULT_COMMANDS = [
-    # File commands
+    # =========================================================================
+    # FILE COMMANDS
+    # =========================================================================
     Command(
         id="file.open",
         title="Open File",
@@ -520,7 +524,9 @@ DEFAULT_COMMANDS = [
         keywords=["directory", "folder", "ls"],
     ),
 
-    # Search commands
+    # =========================================================================
+    # SEARCH COMMANDS
+    # =========================================================================
     Command(
         id="search.files",
         title="Search Files",
@@ -538,7 +544,9 @@ DEFAULT_COMMANDS = [
         keybinding="Ctrl+Shift+F",
     ),
 
-    # Git commands
+    # =========================================================================
+    # GIT COMMANDS
+    # =========================================================================
     Command(
         id="git.status",
         title="Git Status",
@@ -561,7 +569,9 @@ DEFAULT_COMMANDS = [
         keywords=["save", "checkpoint"],
     ),
 
-    # Tools
+    # =========================================================================
+    # TOOLS
+    # =========================================================================
     Command(
         id="tools.terminal",
         title="Open Terminal",
@@ -571,7 +581,9 @@ DEFAULT_COMMANDS = [
         keybinding="Ctrl+`",
     ),
 
-    # View
+    # =========================================================================
+    # VIEW
+    # =========================================================================
     Command(
         id="view.metrics",
         title="Show Metrics",
@@ -580,7 +592,9 @@ DEFAULT_COMMANDS = [
         keywords=["constitutional", "lei", "hri", "stats"],
     ),
 
-    # Help
+    # =========================================================================
+    # HELP
+    # =========================================================================
     Command(
         id="help.commands",
         title="Show All Commands",
@@ -588,6 +602,154 @@ DEFAULT_COMMANDS = [
         category=CommandCategory.HELP,
         keywords=["list", "palette"],
         keybinding="Ctrl+Shift+P",
+    ),
+
+    # =========================================================================
+    # AGENTS - CLI (14 agents)
+    # =========================================================================
+    Command(
+        id="agent.planner",
+        title="Planner Agent",
+        description="Goal-Oriented Action Planning (GOAP)",
+        category=CommandCategory.AGENTS,
+        keywords=["plan", "goap", "decomposition", "coordination"],
+    ),
+    Command(
+        id="agent.executor",
+        title="Executor Agent",
+        description="Secure code execution with sandbox",
+        category=CommandCategory.AGENTS,
+        keywords=["run", "bash", "python", "execute"],
+    ),
+    Command(
+        id="agent.architect",
+        title="Architect Agent",
+        description="Architecture analysis and feasibility",
+        category=CommandCategory.AGENTS,
+        keywords=["design", "system", "veto", "architecture"],
+    ),
+    Command(
+        id="agent.reviewer",
+        title="Reviewer Agent",
+        description="Enterprise code review",
+        category=CommandCategory.AGENTS,
+        keywords=["review", "pr", "suggestions", "quality"],
+    ),
+    Command(
+        id="agent.explorer",
+        title="Explorer Agent",
+        description="Codebase exploration and navigation",
+        category=CommandCategory.AGENTS,
+        keywords=["search", "navigate", "understand", "find"],
+    ),
+    Command(
+        id="agent.refactorer",
+        title="Refactorer Agent",
+        description="Code refactoring and improvement",
+        category=CommandCategory.AGENTS,
+        keywords=["refactor", "improve", "transform", "clean"],
+    ),
+    Command(
+        id="agent.testing",
+        title="Testing Agent",
+        description="Test generation and execution",
+        category=CommandCategory.AGENTS,
+        keywords=["test", "coverage", "pytest", "unittest"],
+    ),
+    Command(
+        id="agent.security",
+        title="Security Agent",
+        description="Security analysis (OWASP)",
+        category=CommandCategory.AGENTS,
+        keywords=["scan", "audit", "vulnerabilities", "owasp"],
+    ),
+    Command(
+        id="agent.documentation",
+        title="Documentation Agent",
+        description="Documentation generation",
+        category=CommandCategory.AGENTS,
+        keywords=["docs", "docstrings", "readme", "api"],
+    ),
+    Command(
+        id="agent.performance",
+        title="Performance Agent",
+        description="Performance profiling and optimization",
+        category=CommandCategory.AGENTS,
+        keywords=["profile", "optimize", "benchmark", "speed"],
+    ),
+    Command(
+        id="agent.devops",
+        title="DevOps Agent",
+        description="Infrastructure and deployment",
+        category=CommandCategory.AGENTS,
+        keywords=["docker", "kubernetes", "ci", "cd", "deploy"],
+    ),
+    Command(
+        id="agent.justica",
+        title="Justica Agent",
+        description="Constitutional governance",
+        category=CommandCategory.AGENTS,
+        keywords=["evaluate", "approve", "block", "governance"],
+    ),
+    Command(
+        id="agent.sofia",
+        title="Sofia Agent",
+        description="Ethical counsel and wisdom",
+        category=CommandCategory.AGENTS,
+        keywords=["counsel", "ethics", "reflection", "wisdom"],
+    ),
+    Command(
+        id="agent.data",
+        title="Data Agent",
+        description="Database optimization and analysis",
+        category=CommandCategory.AGENTS,
+        keywords=["database", "schema", "query", "migration", "sql"],
+    ),
+
+    # =========================================================================
+    # AGENTS - CORE (6 agents) - names must match registry (with _core suffix)
+    # =========================================================================
+    Command(
+        id="agent.orchestrator_core",
+        title="Orchestrator (Core)",
+        description="Multi-agent coordination with bounded autonomy",
+        category=CommandCategory.AGENTS,
+        keywords=["orchestration", "handoff", "autonomy", "multi"],
+    ),
+    Command(
+        id="agent.coder_core",
+        title="Coder (Core)",
+        description="Darwin-Gödel code evolution with auto-correction",
+        category=CommandCategory.AGENTS,
+        keywords=["code", "generation", "darwin", "evolution"],
+    ),
+    Command(
+        id="agent.reviewer_core",
+        title="Reviewer (Core)",
+        description="Deep-think code review with metacognition",
+        category=CommandCategory.AGENTS,
+        keywords=["deep", "review", "metacognition", "loops"],
+    ),
+    Command(
+        id="agent.architect_core",
+        title="Architect (Core)",
+        description="System design with agentic RAG",
+        category=CommandCategory.AGENTS,
+        keywords=["design", "rag", "patterns", "agentic"],
+    ),
+    Command(
+        id="agent.researcher_core",
+        title="Researcher (Core)",
+        description="Technical research with three-loop learning",
+        category=CommandCategory.AGENTS,
+        keywords=["research", "learning", "knowledge", "synthesis"],
+    ),
+    Command(
+        id="agent.devops_core",
+        title="DevOps (Core)",
+        description="Infrastructure with incident handler",
+        category=CommandCategory.AGENTS,
+        keywords=["incident", "handler", "infrastructure", "ops"],
     ),
 ]
 

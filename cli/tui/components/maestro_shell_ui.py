@@ -296,8 +296,9 @@ class MaestroShellUI:
             try:
                 self.live.stop()
             except Exception as e:
-                # Ignore errors during stop (Live might already be stopped)
-                pass
+                # Live might already be stopped - log for debugging
+                import logging
+                logging.debug(f"Live display stop warning: {e}")
             finally:
                 self.live = None
 
@@ -319,8 +320,9 @@ class MaestroShellUI:
         if self.live and self.live.is_started:
             try:
                 self.live.stop()
-            except Exception:
-                pass
+            except Exception as e:
+                import logging
+                logging.debug(f"Live pause warning: {e}")
 
     def resume(self):
         """
@@ -332,8 +334,9 @@ class MaestroShellUI:
                 try:
                     self.live.start()
                     self.refresh_display(force=True)
-                except Exception:
-                    pass
+                except Exception as e:
+                    import logging
+                    logging.warning(f"Live resume failed: {e}")
         else:
             try:
                 self.live = Live(
@@ -345,8 +348,9 @@ class MaestroShellUI:
                 )
                 self.live.start()
                 self.refresh_display(force=True)
-            except Exception:
-                pass
+            except Exception as e:
+                import logging
+                logging.warning(f"Live recreation failed: {e}")
 
     @property
     def is_paused(self) -> bool:

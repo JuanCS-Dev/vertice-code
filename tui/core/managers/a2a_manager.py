@@ -264,7 +264,8 @@ class A2AManager:
                 # Placeholder: actual discovery would fetch agent card
                 # via HTTP GET /.well-known/agent.json
                 pass
-            except Exception:
+            except Exception as e:
+                logger.debug(f"A2A discovery failed on port {port}: {e}")
                 continue
 
         # Return cached discoveries
