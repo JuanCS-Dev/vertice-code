@@ -56,7 +56,7 @@ class TestDevSquadCore:
         """Test workflow stops if architect vetoes."""
         dev_squad.architect.execute = AsyncMock(return_value=AgentResponse(
             success=True,
-            data={"approved": False, "reasoning": "Not feasible"},
+            data={"decision": "VETOED", "reasoning": "Not feasible"},
             reasoning="Vetoed"
         ))
 
@@ -71,7 +71,7 @@ class TestDevSquadCore:
         # Mock all agents to succeed
         dev_squad.architect.execute = AsyncMock(return_value=AgentResponse(
             success=True,
-            data={"approved": True, "architecture": {}},
+            data={"decision": "APPROVED", "architecture": {}},
             reasoning="Approved"
         ))
 
