@@ -16,7 +16,7 @@
 
 **Meta**: ~~Atingir **85%+ compliance** em todos os componentes.~~ **ATINGIDO** ✅
 
-**Total de Testes**: 421 (+ ~210 E2E planejados) | **Fases Completas**: 6/8
+**Total de Testes**: 421 (+ ~210 E2E planejados) | **Fases Completas**: 6/9
 
 ---
 
@@ -638,8 +638,9 @@ tests/performance/test_reconnect.py
 | 5. TUI Lightweight | 6-7 | 7 dias | MÉDIA | ✅ |
 | 6. Integração | 7-8 | 5 dias | ALTA | ✅ |
 | 7. Testes Compliance | 8 | 5 dias | CRÍTICA | 🔨 |
-| 8. Testes E2E | 9-10 | 12-16 dias | CRÍTICA | 📋 |
-| **TOTAL** | **10 semanas** | **~65 dias** | - | - |
+| 8. Testes E2E | 9-10 | TBD | CRÍTICA | 📋 |
+| 9. Visual Refresh | 11-12 | TBD | ALTA | 📋 |
+| **TOTAL** | **12 semanas** | **TBD** | - | - |
 
 ---
 
@@ -683,6 +684,7 @@ tests/performance/test_reconnect.py
 | Orchestration Workflows | 0% | 100% | 📋 |
 | Parallel Execution | 0% | 100% | 📋 |
 | Claude Code Parity | 0% | 100% | 📋 |
+| Visual Modernization | 0% | 100% | 📋 |
 
 ---
 
@@ -1107,6 +1109,7 @@ Coverage de 54-58% é aceitável porque:
 7. ~~**Fase 6: Integração Final** - Conectar agents/ Core ao TUI~~ ✅
 8. **Fase 7: Testes Compliance** - JSON Schema validation, stress tests
 9. **Fase 8: Testes End-to-End** - Tools, Agents, Orchestração, Parallelism
+10. **Fase 9: Visual Refresh** - UI moderna, paridade visual Claude/Gemini/Codex
 
 ---
 
@@ -1554,3 +1557,83 @@ test_context_preservation():
 - [ ] Parallelism sem race conditions
 - [ ] Paridade com Claude Code verificada
 - [ ] Stress tests passam sem degradação
+
+---
+
+## FASE 9: VISUAL REFRESH - UI MODERNA (Semana 11-12)
+
+**Objetivo**: Refatoração visual completa do TUI para paridade com interfaces modernas de AI coding assistants (Claude Code, Gemini Code Assist, OpenAI Codex).
+
+**Status**: 📋 PLANEJADO (pesquisa será feita quando chegar a fase)
+
+---
+
+### 9.1 Análise de Referências Visuais
+
+**Interfaces a estudar**:
+- Claude Code (Anthropic) - design minimalista, dark mode elegante
+- Gemini Code Assist (Google) - Material Design 3, animações fluidas
+- GitHub Copilot Chat - integração VS Code, panels modernos
+- Cursor AI - sidebar inteligente, inline suggestions
+- OpenAI Codex / ChatGPT Code Interpreter - cards, syntax highlighting
+
+**Elementos a analisar**:
+- Paleta de cores e temas
+- Tipografia e hierarquia visual
+- Animações e transições
+- Layout responsivo
+- Ícones e iconografia
+- Feedback visual (loading, success, error)
+- Code blocks e syntax highlighting
+- Markdown rendering
+
+---
+
+### 9.2 Componentes Visuais a Refatorar
+
+| Componente | Estado Atual | Objetivo |
+|------------|--------------|----------|
+| Banner/Header | ASCII art estático | Animado, branded |
+| Input area | Box simples | Floating, auto-resize |
+| Response view | Markdown básico | Rich rendering, code blocks |
+| Status bar | Texto simples | Badges, progress indicators |
+| Sidebar | Inexistente | File tree, agent status |
+| Themes | 3 temas básicos | Sistema de temas extensível |
+| Animations | Cursor piscando | Smooth transitions, skeleton loading |
+| Icons | Emoji/ASCII | SVG ou Nerd Fonts |
+
+---
+
+### 9.3 Tecnologias a Avaliar
+
+- **Textual 1.0+**: Novos widgets, CSS improvements
+- **Rich**: Advanced panels, progress bars
+- **Nerd Fonts**: Ícones consistentes
+- **Custom CSS**: Sistema de design tokens
+- **Animações**: 60fps smooth, não-blocking
+
+---
+
+### 9.4 Deliverables
+
+1. **Design System**: Cores, tipografia, espaçamentos, tokens
+2. **Component Library**: Widgets reutilizáveis
+3. **Theme Engine**: Sistema de temas dinâmico (light/dark/custom)
+4. **Animation Framework**: Transições e micro-interactions
+5. **Responsive Layout**: Adapta a diferentes tamanhos de terminal
+
+---
+
+### 9.5 Critérios de Sucesso
+
+- [ ] Visual moderno comparável a Claude Code / Gemini
+- [ ] Temas light e dark profissionais
+- [ ] Animações suaves a 60fps
+- [ ] Código syntax highlighted com temas
+- [ ] Markdown rendering rico (tables, code, links)
+- [ ] Feedback visual claro (loading, errors, success)
+- [ ] Acessibilidade (contraste, screen readers)
+
+**Estimativa**: A definir após pesquisa
+
+**Nota**: Esta fase será detalhada quando as fases anteriores estiverem completas. Pesquisa de referências visuais será feita no momento da implementação.
