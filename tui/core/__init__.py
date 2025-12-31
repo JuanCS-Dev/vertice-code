@@ -6,7 +6,7 @@ Minimal bridge connecting the beautiful TUI to the powerful agent system.
 
 Components:
 - GeminiClient: Streaming LLM via Gemini API (optimized Nov 2025)
-- AgentManager: Lazy loading of 13 agents
+- AgentManager: Lazy loading of 20 agents
 - GovernanceObserver: ELP alerts without blocking
 - ToolBridge: 47 tools via registry
 - CommandPaletteBridge: Fuzzy search commands

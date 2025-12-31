@@ -45,6 +45,7 @@ class Colors:
     # Agent-specific
     AGENT: str = "#22D3EE"          # Cyan-400
     ROUTING: str = "#3B82F6"        # Blue-500
+    ACTION: str = "#F59E0B"         # Amber-500 (action indicators)
 
 
 class Icons:
@@ -86,6 +87,7 @@ class Icons:
     TOOL: str = "⚡"                # Lightning
     PLAN: str = "▤"                 # Grid
     REVIEW: str = "◎"               # Target
+    ROUTING: str = "⇢"              # Right arrow for routing
 
     # Search
     SEARCH: str = "○"               # Circle

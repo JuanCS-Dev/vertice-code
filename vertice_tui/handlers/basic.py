@@ -107,14 +107,29 @@ class BasicCommandHandler:
         agents_list = "\n".join([
             f"- **{name}**: {info.description}"
             for name, info in self.bridge.agents.AGENT_REGISTRY.items()
-        ]) if hasattr(self.bridge.agents, 'AGENT_REGISTRY') else "13 agents available"
+        ]) if hasattr(self.bridge.agents, 'AGENT_REGISTRY') else "20 agents available"
         view.add_system_message(f"## 🤖 Available Agents\n\n{agents_list}")
 
     async def _handle_status(self, args: str, view: "ResponseView") -> None:
         """Handle /status command."""
+        # Get provider info dynamically
+        if self.bridge.is_connected:
+            provider_info = "✅ Connected"
+            if hasattr(self.bridge.llm, '_vertice_client') and self.bridge.llm._vertice_client:
+                current = self.bridge.llm._vertice_client.current_provider
+                providers = self.bridge.llm._vertice_client.get_available_providers()
+                if current:
+                    provider_info = f"✅ {current.capitalize()}"
+                elif providers:
+                    provider_info = f"✅ {len(providers)} providers available"
+            else:
+                provider_info = "✅ Gemini"
+        else:
+            provider_info = "❌ Not connected"
+
         status_msg = (
             f"## 📊 Status\n\n"
-            f"- **LLM:** {'✅ Gemini connected' if self.bridge.is_connected else '❌ Not connected'}\n"
+            f"- **LLM:** {provider_info}\n"
             f"- **Governance:** {self.bridge.governance.get_status_emoji()}\n"
             f"- **Agents:** {len(self.bridge.agents.available_agents)} available\n"
             f"- **Tools:** {self.bridge.tools.get_tool_count()} loaded\n"

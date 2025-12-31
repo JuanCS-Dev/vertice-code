@@ -402,6 +402,6 @@ class OutputFormatter:
     def format_governance_report(report: str) -> Text:
         """Format governance observation report."""
         text = Text()
-        text.append("🛡️ ", style="bold")
+        text.append(f"{Icons.SECURITY} ", style=f"bold {Colors.INFO}")
         text.append(report, style=Colors.MUTED)
         return text

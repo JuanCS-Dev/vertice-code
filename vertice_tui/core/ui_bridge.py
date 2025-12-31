@@ -117,13 +117,30 @@ class AutocompleteBridge:
 
     # Default ignore patterns for file scanning
     IGNORE_PATTERNS = {
-        '__pycache__', '.git', '.svn', '.hg', 'node_modules',
-        '.venv', 'venv', 'env', '.tox', '.mypy_cache',
+        # VCS
+        '.git', '.svn', '.hg',
+        # Python
+        '__pycache__', '.venv', 'venv', 'env', '.tox', '.mypy_cache',
         '.pytest_cache', '.coverage', 'htmlcov', 'dist', 'build',
-        '*.egg-info', '.eggs', '.idea', '.vscode', '*.pyc', '*.pyo',
+        '*.egg-info', '.eggs', '*.pyc', '*.pyo',
+        # Node
+        'node_modules',
+        # IDE
+        '.idea', '.vscode',
+        # OS
         '.DS_Store', 'Thumbs.db', '*.swp', '*.swo', '*~',
-        '.archive', '.backup', '.bak',
+        # Project-specific (VERTICE)
+        '.archive', '.backup', '.bak', 'prometheus_data',
+        'memory_data', 'cortex_data', '.vertice_cache',
+        'logs', '*.log', 'coverage_html', 'site-packages',
+        # Large binary/data
+        '*.bin', '*.dat', '*.db', '*.sqlite', '*.sqlite3',
+        '*.pkl', '*.pickle', '*.h5', '*.hdf5', '*.parquet',
     }
+
+    # Limits for file scanning (prevent TUI freeze)
+    MAX_FILES = 300  # Reduced from 2000
+    MAX_DEPTH = 4    # Reduced from 8
 
     # File type icons
     FILE_ICONS = {
@@ -148,13 +165,17 @@ class AutocompleteBridge:
         self._recent_files.insert(0, file_path)
         self._recent_files = self._recent_files[:50]  # Keep last 50
 
-    def _scan_files(self, root: Path = None, max_files: int = 2000) -> List[str]:
-        """Scan project files for @ completion."""
+    def _scan_files(self, root: Path = None, max_files: int = None) -> List[str]:
+        """Scan project files for @ completion.
+
+        Uses MAX_FILES and MAX_DEPTH limits to prevent TUI freeze.
+        """
         if self._file_cache_valid and self._file_cache:
             return self._file_cache
 
         import fnmatch
         root = root or Path.cwd()
+        max_files = max_files or self.MAX_FILES
         files = []
 
         def should_ignore(path: Path) -> bool:
@@ -165,7 +186,7 @@ class AutocompleteBridge:
             return False
 
         def scan_dir(dir_path: Path, depth: int = 0):
-            if depth > 8 or len(files) >= max_files:
+            if depth > self.MAX_DEPTH or len(files) >= max_files:
                 return
             try:
                 for entry in sorted(dir_path.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower())):

@@ -159,13 +159,37 @@ class QwenApp(App):
             status.governance_status = self.bridge.governance.get_status_emoji()
 
             if self.bridge.is_connected:
-                tool_msg = f" {status.tool_count} tools loaded." if status.tool_count > 0 else ""
+                # Get provider info dynamically
+                provider_name = "LLM"
+                if hasattr(self.bridge.llm, '_vertice_client') and self.bridge.llm._vertice_client:
+                    providers = self.bridge.llm._vertice_client.get_available_providers()
+                    current = self.bridge.llm._vertice_client.current_provider
+                    if current:
+                        provider_name = current.capitalize()
+                    elif providers:
+                        provider_name = f"{len(providers)} providers"
+                else:
+                    provider_name = "Gemini"
+
+                # Build concise status
+                parts = []
+                if status.tool_count > 0:
+                    parts.append(f"{status.tool_count} tools")
+                if status.agent_count > 0:
+                    parts.append(f"{status.agent_count} agents")
+
+                status_str = " | ".join(parts) if parts else ""
+                help_hint = "Type [bold cyan]/help[/bold cyan] for commands or just chat."
+
                 response.add_system_message(
-                    f"✅ **Gemini connected!**{tool_msg} Type `/help` for commands or just chat."
+                    f"✅ **{provider_name} connected!** {status_str}\n\n{help_hint}"
                 )
             else:
                 response.add_system_message(
-                    "⚠️ **No LLM configured.** Set `GEMINI_API_KEY` for full functionality.\n\n"
+                    "⚠️ **No LLM configured.** Set API keys for providers:\n"
+                    "- `GROQ_API_KEY` (free, fast)\n"
+                    "- `GEMINI_API_KEY` (Google)\n"
+                    "- `MISTRAL_API_KEY` (EU)\n\n"
                     "Type `/help` for available commands."
                 )
         except Exception as e:

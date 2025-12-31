@@ -80,7 +80,7 @@ class StatusBar(Horizontal):
     # Legacy compatibility
     llm_connected: reactive[bool] = reactive(False)
     governance_status: reactive[str] = reactive("")
-    agent_count: reactive[int] = reactive(13)
+    agent_count: reactive[int] = reactive(20)
     tool_count: reactive[int] = reactive(0)
     tribunal_mode: reactive[bool] = reactive(False)
 

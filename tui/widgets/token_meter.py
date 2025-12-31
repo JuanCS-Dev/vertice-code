@@ -107,7 +107,7 @@ class TokenMeter(Static):
         used_str = self._format_tokens(self.used)
         limit_str = self._format_tokens(self.limit)
 
-        return f"[{bar}] [{color}]{used_str}/{limit_str}[/{color}] ({percent:.0f}%)"
+        return f"\\[{bar}] [{color}]{used_str}/{limit_str}[/{color}] ({percent:.0f}%)"
 
     @staticmethod
     def _format_tokens(n: int) -> str:

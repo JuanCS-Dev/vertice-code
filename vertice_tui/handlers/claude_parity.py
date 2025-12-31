@@ -303,20 +303,73 @@ class ClaudeParityHandler:
 
     async def _handle_model(self, args: str, view: "ResponseView") -> None:
         if args:
+            provider_name = args.strip().lower()
             try:
+                # Try to switch provider via VerticeClient first
+                if hasattr(self.bridge.llm, '_vertice_client') and self.bridge.llm._vertice_client:
+                    client = self.bridge.llm._vertice_client
+                    available = client.get_available_providers()
+
+                    if provider_name in available:
+                        if client.set_preferred_provider(provider_name):
+                            new_order = client.get_priority_order()
+                            view.add_system_message(
+                                f"## ✅ Switched to {provider_name}\n\n"
+                                f"- **Active:** `{provider_name}`\n"
+                                f"- **Priority:** {' → '.join(new_order)}\n"
+                                f"- **Fallback:** Auto (if {provider_name} fails)"
+                            )
+                            return
+                        else:
+                            view.add_error(f"Failed to switch to `{provider_name}`")
+                            return
+                    # If not a provider, try as Gemini model name
+                    elif provider_name.startswith("gemini"):
+                        self.bridge.set_model(args)
+                        view.add_system_message(f"✅ Model changed to: **{args}**")
+                        return
+                    else:
+                        view.add_error(
+                            f"Provider `{provider_name}` not available.\n\n"
+                            f"**Available providers:** {', '.join(available)}\n\n"
+                            f"**Gemini models:** gemini-2.5-flash, gemini-2.0-flash, etc."
+                        )
+                        return
+
+                # Fallback: direct model change (Gemini only)
                 self.bridge.set_model(args)
                 view.add_system_message(f"✅ Model changed to: **{args}**")
             except Exception as e:
                 view.add_error(f"Failed to change model: {e}")
         else:
+            # Show current status
             current = self.bridge.get_current_model()
-            available = self.bridge.get_available_models()
-            view.add_system_message(
-                f"## 🤖 Model Selection\n\n"
-                f"**Current:** {current}\n\n"
-                f"**Available:**\n" +
-                "\n".join(f"- `{m}`" for m in available)
-            )
+            gemini_models = self.bridge.get_available_models()
+
+            # Get providers from VerticeClient if available
+            providers = []
+            current_provider = "gemini"
+            if hasattr(self.bridge.llm, '_vertice_client') and self.bridge.llm._vertice_client:
+                providers = self.bridge.llm._vertice_client.get_available_providers()
+                current_provider = self.bridge.llm._vertice_client.current_provider or "auto"
+
+            msg = f"## 🤖 Model Selection\n\n"
+            msg += f"**Current Model:** `{current}`\n"
+            msg += f"**Current Provider:** `{current_provider}`\n\n"
+
+            if providers:
+                msg += f"**Available Providers:**\n"
+                for p in providers:
+                    marker = "▸" if p == current_provider else "○"
+                    msg += f"  {marker} `{p}`\n"
+                msg += f"\n**Switch provider:** `/model groq`, `/model cerebras`, etc.\n"
+
+            msg += f"\n**Gemini Models:**\n"
+            for m in gemini_models:
+                marker = "▸" if m == current else "○"
+                msg += f"  {marker} `{m}`\n"
+
+            view.add_system_message(msg)
 
     async def _handle_init(self, args: str, view: "ResponseView") -> None:
         try:
