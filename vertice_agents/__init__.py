@@ -53,10 +53,27 @@ __version__ = "1.0.0"
 __author__ = "Juan Carlos de Souza"
 
 from .registry import AgentRegistry, get_agent, list_agents
+from .coordinator import (
+    AgencyCoordinator,
+    get_coordinator,
+    OrchestratorType,
+    TaskCategory,
+    CoordinationDecision,
+    CoordinationResult,
+)
 
 __all__ = [
+    # Registry
     "AgentRegistry",
     "get_agent",
     "list_agents",
+    # Coordinator
+    "AgencyCoordinator",
+    "get_coordinator",
+    "OrchestratorType",
+    "TaskCategory",
+    "CoordinationDecision",
+    "CoordinationResult",
+    # Meta
     "__version__",
 ]
