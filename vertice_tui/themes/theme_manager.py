@@ -12,8 +12,9 @@ Research sources:
 """
 
 from enum import Enum
+from functools import lru_cache
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 import json
 
 from textual.theme import Theme
@@ -206,13 +207,15 @@ class ThemeManager:
         return new_theme
 
     @classmethod
-    def get_available_themes(cls) -> list[Theme]:
-        """Return list of all available themes."""
-        return [THEME_LIGHT, THEME_DARK]
+    @lru_cache(maxsize=1)
+    def get_available_themes(cls) -> Tuple[Theme, ...]:
+        """Return tuple of all available themes (cached)."""
+        return (THEME_LIGHT, THEME_DARK)
 
     @classmethod
+    @lru_cache(maxsize=4)
     def get_theme_by_name(cls, name: str) -> Optional[Theme]:
-        """Get theme object by name."""
+        """Get theme object by name (cached)."""
         themes = {
             ThemeMode.LIGHT.value: THEME_LIGHT,
             ThemeMode.DARK.value: THEME_DARK,

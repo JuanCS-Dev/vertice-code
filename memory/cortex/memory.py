@@ -25,15 +25,15 @@ import json
 import sqlite3
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 import logging
 
 # Import MIRIX memory components
-from .core import CoreMemory, CoreBlockType
+from .core import CoreMemory
 from .procedural import ProceduralMemory, ProcedureType, Procedure
-from .resource import ResourceMemory, ResourceType, Resource
-from .vault import KnowledgeVault, VaultEntryType, SensitivityLevel
+from .resource import ResourceMemory
+from .vault import KnowledgeVault
 
 logger = logging.getLogger(__name__)
 

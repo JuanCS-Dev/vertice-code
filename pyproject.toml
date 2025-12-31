@@ -61,13 +61,12 @@ Repository = "https://github.com/JuanCS-Dev/juan-dev-code"
 Issues = "https://github.com/JuanCS-Dev/juan-dev-code/issues"
 
 [project.scripts]
-# Main CLI entry point
-vertice = "vertice_cli.main:cli_main"
-vtc = "vertice_cli.main:cli_main"
-vertice-code = "vertice_cli.main:cli_main"
+# TUI (default - main interface)
+vertice = "vertice_tui.app:main"
 
-# TUI (Textual-based)
-vertice-tui = "vertice_tui.app:main"
+# CLI entry points (alternative)
+vtc = "vertice_cli.main:cli_main"
+vertice-cli = "vertice_cli.main:cli_main"
 
 [tool.black]
 line-length = 100

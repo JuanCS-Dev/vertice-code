@@ -256,18 +256,142 @@ class ClaudeParityHandler:
             view.add_system_message(f"## 🪝 Hooks\n\nNot available: {e}")
 
     async def _handle_mcp(self, args: str, view: "ResponseView") -> None:
+        """Handle /mcp commands (Phase 6.2 - MCP integration)."""
+        parts = args.split(maxsplit=1) if args else []
+        subcommand = parts[0].lower() if parts else "status"
+        subargs = parts[1] if len(parts) > 1 else ""
+
         try:
-            mcp_status = self.bridge.get_mcp_status()
-            lines = ["## 🔌 MCP Servers\n"]
-            if mcp_status.get('servers'):
-                for server in mcp_status['servers']:
-                    status = "🟢" if server.get('connected') else "🔴"
-                    lines.append(f"{status} **{server.get('name')}**")
+            if subcommand == "status":
+                await self._mcp_status(view)
+            elif subcommand == "serve":
+                port = int(subargs) if subargs.isdigit() else 3000
+                await self._mcp_serve(port, view)
+            elif subcommand == "stop":
+                await self._mcp_stop(view)
+            elif subcommand == "connect":
+                await self._mcp_connect(subargs, view)
+            elif subcommand == "disconnect":
+                await self._mcp_disconnect(subargs, view)
+            elif subcommand == "tools":
+                await self._mcp_tools(view)
             else:
-                lines.append("No MCP servers configured.")
-            view.add_system_message("\n".join(lines))
+                await self._mcp_help(view)
         except Exception as e:
-            view.add_system_message(f"## 🔌 MCP Servers\n\nNot available: {e}")
+            view.add_error(f"MCP command failed: {e}")
+
+    async def _mcp_status(self, view: "ResponseView") -> None:
+        """Show MCP server and connection status."""
+        status = self.bridge.get_mcp_status()
+        server = status.get("server", {})
+        connections = status.get("connections", [])
+
+        lines = ["## 🔌 MCP Status\n"]
+
+        # Server status
+        if server.get("running"):
+            lines.append(f"**Server:** 🟢 Running on `{server.get('host')}:{server.get('port')}`")
+            lines.append(f"  - Transport: {server.get('transport', 'stdio')}")
+            lines.append(f"  - Tools exposed: {server.get('exposed_tools', 0)}")
+        else:
+            lines.append("**Server:** 🔴 Stopped")
+
+        # Connection status
+        if connections:
+            lines.append("\n**External Connections:**")
+            for conn in connections:
+                status_icon = "🟢" if conn.get("connected") else "🔴"
+                lines.append(f"  {status_icon} `{conn.get('name')}` - {conn.get('url')}")
+        else:
+            lines.append("\n**External Connections:** None")
+
+        lines.append(f"\n**Total tools:** {status.get('total_exposed_tools', 0)} exposed, {status.get('total_imported_tools', 0)} imported")
+        view.add_system_message("\n".join(lines))
+
+    async def _mcp_serve(self, port: int, view: "ResponseView") -> None:
+        """Start MCP server."""
+        result = await self.bridge.start_mcp_server(port)
+        if result.get("success"):
+            view.add_system_message(
+                f"## 🚀 MCP Server Started\n\n"
+                f"**Port:** {result.get('port')}\n"
+                f"**Host:** {result.get('host')}\n"
+                f"**Tools exposed:** {result.get('tools_exposed', 0)}"
+            )
+        else:
+            view.add_error(f"Failed to start MCP server: {result.get('error')}")
+
+    async def _mcp_stop(self, view: "ResponseView") -> None:
+        """Stop MCP server."""
+        result = await self.bridge.stop_mcp_server()
+        if result.get("success"):
+            view.add_system_message("## 🛑 MCP Server Stopped")
+        else:
+            view.add_error(f"Failed to stop MCP server: {result.get('error')}")
+
+    async def _mcp_connect(self, url: str, view: "ResponseView") -> None:
+        """Connect to external MCP server."""
+        if not url:
+            view.add_error("Usage: `/mcp connect <url>`")
+            return
+        result = await self.bridge.connect_mcp(url)
+        if result.get("success"):
+            view.add_system_message(
+                f"## 🔗 Connected to MCP\n\n"
+                f"**Name:** {result.get('name')}\n"
+                f"**URL:** {result.get('url')}\n"
+                f"**Tools:** {result.get('tools', 0)}"
+            )
+        else:
+            view.add_error(f"Failed to connect: {result.get('error')}")
+
+    async def _mcp_disconnect(self, name: str, view: "ResponseView") -> None:
+        """Disconnect from external MCP server."""
+        if not name:
+            view.add_error("Usage: `/mcp disconnect <name>`")
+            return
+        result = await self.bridge.disconnect_mcp(name)
+        if result.get("success"):
+            view.add_system_message(f"## 🔌 Disconnected from `{name}`")
+        else:
+            view.add_error(f"Failed to disconnect: {result.get('error')}")
+
+    async def _mcp_tools(self, view: "ResponseView") -> None:
+        """List available MCP tools."""
+        tools = self.bridge.list_mcp_tools()
+        lines = ["## 🔧 MCP Tools\n"]
+
+        exposed = tools.get("exposed", [])
+        if exposed:
+            lines.append(f"**Exposed ({len(exposed)}):**")
+            for tool in exposed[:20]:  # Limit display
+                lines.append(f"  - `{tool}`")
+            if len(exposed) > 20:
+                lines.append(f"  ... and {len(exposed) - 20} more")
+        else:
+            lines.append("**Exposed:** None (start server with `/mcp serve`)")
+
+        imported = tools.get("imported", {})
+        if imported:
+            lines.append("\n**Imported:**")
+            for source, source_tools in imported.items():
+                lines.append(f"  *{source}:*")
+                for tool in source_tools[:10]:
+                    lines.append(f"    - `{tool}`")
+
+        view.add_system_message("\n".join(lines))
+
+    async def _mcp_help(self, view: "ResponseView") -> None:
+        """Show MCP command help."""
+        view.add_system_message(
+            "## 🔌 MCP Commands\n\n"
+            "- `/mcp status` - Show server and connection status\n"
+            "- `/mcp serve [port]` - Start MCP server (default: 3000)\n"
+            "- `/mcp stop` - Stop MCP server\n"
+            "- `/mcp connect <url>` - Connect to external MCP server\n"
+            "- `/mcp disconnect <name>` - Disconnect from server\n"
+            "- `/mcp tools` - List available tools"
+        )
 
     async def _handle_router(self, args: str, view: "ResponseView") -> None:
         try:

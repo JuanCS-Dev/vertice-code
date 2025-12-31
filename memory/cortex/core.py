@@ -11,12 +11,11 @@ Reference: https://arxiv.org/abs/2507.07957
 
 from __future__ import annotations
 
-import json
 import sqlite3
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 

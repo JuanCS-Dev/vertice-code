@@ -272,9 +272,9 @@ class GeminiClient:
             self._circuit_breaker.record_failure(error_str)
             # Handle rate limiting gracefully
             if "429" in error_str or "quota" in error_str.lower():
-                yield f"\n⚠️ Rate limit reached. Please wait a moment and try again."
+                yield "\n⚠️ Rate limit reached. Please wait a moment and try again."
             elif "RepeatedComposite" in error_str or "serializable" in error_str.lower():
-                yield f"\n⚠️ Response parsing error. Retrying..."
+                yield "\n⚠️ Response parsing error. Retrying..."
             else:
                 yield f"\n❌ Error: {error_str[:200]}"
 

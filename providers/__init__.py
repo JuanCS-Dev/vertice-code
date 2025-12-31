@@ -1,4 +1,12 @@
-"""LLM provider integrations - Vertice Multi-Provider Architecture."""
+"""LLM provider integrations - Vertice Multi-Provider Architecture.
+
+Phase 8 Enhanced (2025 Best Practices):
+- Rate limit header parsing (Groq, Cerebras, OpenRouter)
+- Token usage tracking with cost calculation
+- Monthly budget tracking (Mistral 1B free tier)
+- OpenRouter :floor suffix for cost optimization
+- Prometheus-compatible metrics export
+"""
 
 from .nebius import NebiusProvider
 from .prometheus_provider import PrometheusProvider, PrometheusConfig
@@ -11,7 +19,20 @@ from .resilience import (
     ConnectionPoolConfig,
 )
 
-# Vertice Free Tier Providers
+# Phase 8: Enhanced Types & Base Class
+from .types import (
+    CostTier,
+    SpeedTier,
+    RateLimitInfo,
+    UsageInfo,
+    CostInfo,
+    ProviderPricing,
+    ProviderHealth,
+    OpenRouterProviderPrefs,
+)
+from .base import EnhancedProviderBase, ProviderStats
+
+# Vertice Free Tier Providers (Enhanced)
 from .gemini import GeminiProvider
 from .groq import GroqProvider
 from .cerebras import CerebrasProvider
@@ -44,7 +65,18 @@ __all__ = [
     "CircuitBreakerConfig",
     "RetryConfig",
     "ConnectionPoolConfig",
-    # Vertice Providers (Free Tier)
+    # Phase 8: Enhanced Types
+    "CostTier",
+    "SpeedTier",
+    "RateLimitInfo",
+    "UsageInfo",
+    "CostInfo",
+    "ProviderPricing",
+    "ProviderHealth",
+    "OpenRouterProviderPrefs",
+    "EnhancedProviderBase",
+    "ProviderStats",
+    # Vertice Providers (Free Tier - Enhanced)
     "GeminiProvider",
     "GroqProvider",
     "CerebrasProvider",

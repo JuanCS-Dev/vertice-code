@@ -1,13 +1,13 @@
 """
-QWEN CLI - The Minimal Masterpiece
-===================================
+Vertice TUI - Enterprise Multi-LLM Orchestration
+=================================================
 
 A beautiful, 60fps TUI for AI-powered development.
 
-From 93,683 lines → 736 lines. A 99.2% reduction.
+Soli Deo Gloria
 """
 
-__version__ = "11.0.0"
+__version__ = "1.0.0"
 __author__ = "JuanCS"
 
 from .app import QwenApp, main

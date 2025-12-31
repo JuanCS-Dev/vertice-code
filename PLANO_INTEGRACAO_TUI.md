@@ -4,15 +4,19 @@
 
 **Objetivo**: Integrar a agência de agentes (6 core + 22 CLI) ao TUI, tornando-o leve, funcional, com streaming de qualidade Claude Code, e compliance com padrões 2025 (MCP 2025-11-25, A2A v0.3).
 
-**Status Atual (Post Phase 4.1)**:
+**Status Atual (Post Phase 6)**:
 - Tools: **95%** compliance ✅ (strict mode, examples)
 - MCP: **90%** compliance ✅ (OAuth 2.1, PKCE, Elicitation, Consent)
 - A2A: **85%** compliance ✅ (Proto3, gRPC, JWS)
 - Streaming: **100%** compliance ✅ (heartbeat, backpressure, reconnect)
 - agents/ vs cli/agents/: **100%** integração ✅ (unified registry)
 - CODE_CONSTITUTION: **100%** compliance ✅ (zero TODOs, <500 lines, lint 0)
+- TUI Lightweight: **100%** compliance ✅ (semantic modularization, 101 testes, 100% coverage)
+- TUI Integration: **100%** compliance ✅ (CoreAgentAdapter, MCP/A2A managers, 81 testes)
 
 **Meta**: ~~Atingir **85%+ compliance** em todos os componentes.~~ **ATINGIDO** ✅
+
+**Total de Testes**: 421 (+ ~210 E2E planejados) | **Fases Completas**: 6/8
 
 ---
 
@@ -450,72 +454,137 @@ tui/components/streaming_adapter.py
 
 ---
 
-## FASE 6: INTEGRAÇÃO FINAL (Semanas 7-8)
+## FASE 6: INTEGRAÇÃO FINAL - PLANO DETALHADO
+
+**Status**: COMPLETO ✅
+**Duração**: 5 dias | **Testes**: 81 | **Arquivos novos**: 6 | **Arquivos modificados**: 4
+
+---
 
 ### 6.1 Conectar agents/ Core ao TUI
 
-**Arquivos a Modificar**:
-```
-tui/core/agents_bridge.py
-agents/__init__.py
-```
+#### Task 0: Reobter Contexto
+**Arquivos a ler:**
+- `tui/core/agents/manager.py` - AgentManager atual
+- `agents/orchestrator/agent.py` - OrchestratorAgent
+- `core/agents/base.py` - Agent unificado
 
-**Ações**:
-1. Adicionar core agents ao AGENT_REGISTRY:
+#### Task 0.5: Pesquisa Web
+- [Anthropic Multi-Agent Research System](https://www.anthropic.com/engineering/multi-agent-research-system)
+- [Building Agents with Claude Agent SDK](https://www.anthropic.com/engineering/building-agents-with-the-claude-agent-sdk)
+
+#### Task 1: Criar CoreAgentAdapter
+**Arquivo:** `tui/core/agents/core_adapter.py` (~200 linhas)
+
+Adapta core agents (agents/) para interface de streaming do TUI:
+- Converter AgentTask → Task (core)
+- Ativar mixins (BoundedAutonomy, DeepThink, etc)
+- Normalizar chunks de streaming
+
+#### Task 2: Atualizar AgentManager
+**Arquivo:** `tui/core/agents/manager.py`
+
+Detectar `is_core=True` no registry e usar CoreAgentAdapter.
+
+#### Task 3: Adicionar métodos no Bridge
+**Arquivo:** `tui/core/bridge.py`
+
 ```python
-AGENT_REGISTRY = {
-    # CLI agents existentes...
-    "orchestrator_core": AgentInfo(
-        module_path="agents.orchestrator.agent",
-        class_name="OrchestratorAgent",
-        capabilities=["bounded_autonomy", "handoff"]
-    ),
-    "coder_core": AgentInfo(
-        module_path="agents.coder.agent",
-        class_name="CoderAgent",
-        capabilities=["darwin_godel", "auto_correction"]
-    ),
-    # ...
-}
+async def invoke_planner_clarify(self, task: str) -> AsyncIterator[str]
+async def invoke_planner_explore(self, task: str) -> AsyncIterator[str]
 ```
 
-2. Criar router que seleciona CLI vs Core baseado em task
+#### Task 4: Criar OrchestratorIntegration
+**Arquivo:** `tui/core/agents/orchestrator_integration.py` (~150 linhas)
 
-**Estimativa**: 2 dias
+Habilita Three Loops pattern para colaboração humano-AI no TUI.
+
+#### Task 5: Testes Phase 6.1
+**Arquivo:** `tests/tui/test_phase6_core_agents.py` (~30 testes)
 
 ---
 
 ### 6.2 Expor MCP via TUI
 
-**Arquivos a Modificar**:
-```
-cli/main.py → Adicionar `qwen mcp` command
-tui/handlers/claude_parity.py → /mcp command
-```
+#### Task 0: Reobter Contexto
+**Arquivos a ler:**
+- `cli/integrations/mcp/server.py` - QwenMCPServer
+- `tui/handlers/claude_parity.py` - Handler atual
 
-**Ações**:
-1. Comando `/mcp status` - mostra tools expostos
-2. Comando `/mcp serve` - inicia MCP server
-3. Comando `/mcp connect <url>` - conecta a MCP externo
+#### Task 0.5: Pesquisa Web
+- MCP 2025-11-25 specification
+- FastMCP best practices
 
-**Estimativa**: 1 dia
+#### Task 1: Criar MCPManager
+**Arquivo:** `tui/core/managers/mcp_manager.py` (~250 linhas)
+
+Commands:
+- `/mcp status` - Estado atual
+- `/mcp serve [port]` - Iniciar servidor
+- `/mcp stop` - Parar servidor
+- `/mcp connect <url>` - Conectar a MCP externo
+- `/mcp tools` - Listar tools
+
+#### Task 2: Atualizar ClaudeParityHandler
+**Arquivo:** `tui/handlers/claude_parity.py`
+
+Expandir `_handle_mcp()` com subcommands.
+
+#### Task 3: Testes Phase 6.2
+**Arquivo:** `tests/tui/test_phase6_mcp.py` (~25 testes)
 
 ---
 
 ### 6.3 Expor A2A via TUI
 
-**Arquivos a Modificar**:
-```
-tui/handlers/agents.py → /a2a commands
-core/protocols/ → A2A endpoints
-```
+#### Task 0: Reobter Contexto
+**Arquivos a ler:**
+- `core/protocols/grpc_server.py` - create_grpc_server
+- `core/protocols/grpc_service.py` - A2AServiceImpl
+- `proto/service.proto` - gRPC definitions
 
-**Ações**:
-1. Comando `/a2a discover` - lista agents na rede
-2. Comando `/a2a call <agent> <task>` - envia task
-3. Comando `/a2a card` - mostra AgentCard local
+#### Task 0.5: Pesquisa Web
+- A2A v0.3 specification
+- gRPC streaming patterns Python
 
-**Estimativa**: 2 dias
+#### Task 1: Criar A2AManager
+**Arquivo:** `tui/core/managers/a2a_manager.py` (~300 linhas)
+
+Commands:
+- `/a2a status` - Estado do servidor
+- `/a2a serve [port]` - Iniciar gRPC server
+- `/a2a stop` - Parar servidor
+- `/a2a discover` - Descobrir agents na rede
+- `/a2a call <agent> <task>` - Enviar task para agent remoto
+- `/a2a card` - Mostrar AgentCard local
+- `/a2a sign <key>` - Assinar AgentCard com JWS
+
+#### Task 2: Criar A2ACommandHandler
+**Arquivo:** `tui/handlers/a2a.py` (~150 linhas)
+
+#### Task 3: Testes Phase 6.3
+**Arquivo:** `tests/tui/test_phase6_a2a.py` (~30 testes)
+
+---
+
+### Resumo de Arquivos Phase 6
+
+**Arquivos a CRIAR (5):**
+| Arquivo | Linhas | Responsabilidade |
+|---------|--------|------------------|
+| `tui/core/agents/core_adapter.py` | ~200 | Adapta core agents para TUI |
+| `tui/core/agents/orchestrator_integration.py` | ~150 | Coordenação via Orchestrator |
+| `tui/core/managers/mcp_manager.py` | ~250 | Gerencia MCP server/client |
+| `tui/core/managers/a2a_manager.py` | ~300 | Gerencia A2A gRPC |
+| `tui/handlers/a2a.py` | ~150 | Handler para /a2a commands |
+
+**Arquivos a MODIFICAR (4):**
+| Arquivo | Mudanças |
+|---------|----------|
+| `tui/core/agents/manager.py` | Detectar is_core, usar CoreAgentAdapter |
+| `tui/core/bridge.py` | Adicionar MCP/A2A managers, métodos delegação |
+| `tui/handlers/claude_parity.py` | Expandir _handle_mcp() |
+| `tui/handlers/router.py` | Adicionar /a2a route |
 
 ---
 
@@ -560,16 +629,17 @@ tests/performance/test_reconnect.py
 
 ## CRONOGRAMA CONSOLIDADO
 
-| Fase | Semanas | Esforço | Prioridade |
-|------|---------|---------|------------|
-| 1. Fundação | 1-2 | 6-8 dias | CRÍTICA |
-| 2. Streaming | 2-3 | 5 dias | CRÍTICA |
-| 3. MCP 2025-11-25 | 3-4 | 8-9 dias | ALTA |
-| 4. A2A v0.3 | 4-6 | 10-12 dias | ALTA |
-| 5. TUI Lightweight | 6-7 | 7 dias | MÉDIA |
-| 6. Integração | 7-8 | 5 dias | ALTA |
-| 7. Testes | 8 | 5 dias | CRÍTICA |
-| **TOTAL** | **8 semanas** | **~50 dias** | - |
+| Fase | Semanas | Esforço | Prioridade | Status |
+|------|---------|---------|------------|--------|
+| 1. Fundação | 1-2 | 6-8 dias | CRÍTICA | ✅ |
+| 2. Streaming | 2-3 | 5 dias | CRÍTICA | ✅ |
+| 3. MCP 2025-11-25 | 3-4 | 8-9 dias | ALTA | ✅ |
+| 4. A2A v0.3 | 4-6 | 10-12 dias | ALTA | ✅ |
+| 5. TUI Lightweight | 6-7 | 7 dias | MÉDIA | ✅ |
+| 6. Integração | 7-8 | 5 dias | ALTA | ✅ |
+| 7. Testes Compliance | 8 | 5 dias | CRÍTICA | 🔨 |
+| 8. Testes E2E | 9-10 | 12-16 dias | CRÍTICA | 📋 |
+| **TOTAL** | **10 semanas** | **~65 dias** | - | - |
 
 ---
 
@@ -599,15 +669,20 @@ tests/performance/test_reconnect.py
 
 ## MÉTRICAS DE SUCESSO
 
-| Métrica | Baseline | Target |
-|---------|----------|--------|
-| Tools Strict Mode | 0% | 100% |
-| MCP 2025-11-25 Compliance | 25% | 90% |
-| A2A v0.3 Compliance | 35% | 85% |
-| Streaming 60fps | Parcial | 100% |
-| agents/ Integration | 0% | 100% |
-| OAuth 2.1 | 0% | 100% |
-| gRPC Support | 0% | 100% |
+| Métrica | Baseline | Target | Status |
+|---------|----------|--------|--------|
+| Tools Strict Mode | 0% | 100% | ✅ |
+| MCP 2025-11-25 Compliance | 25% | 90% | ✅ |
+| A2A v0.3 Compliance | 35% | 85% | ✅ |
+| Streaming 60fps | Parcial | 100% | ✅ |
+| agents/ Integration | 0% | 100% | ✅ |
+| OAuth 2.1 | 0% | 100% | ✅ |
+| gRPC Support | 0% | 100% | ✅ |
+| E2E Tools Coverage | 0% | 100% | 📋 |
+| E2E Agents Coverage | 0% | 100% | 📋 |
+| Orchestration Workflows | 0% | 100% | 📋 |
+| Parallel Execution | 0% | 100% | 📋 |
+| Claude Code Parity | 0% | 100% | 📋 |
 
 ---
 
@@ -830,6 +905,197 @@ tests/performance/test_reconnect.py
 
 ---
 
+#### Fase 5: TUI Lightweight - COMPLETO ✅
+| Item | Status | Antes | Depois | Redução |
+|------|--------|-------|--------|---------|
+| `bridge.py` | ✅ | 1065 linhas | 471 linhas | -56% |
+| `app.py` | ✅ | 594 linhas | 397 linhas | -33% |
+| `agentic_prompt.py` | ✅ | 591 linhas | 316 linhas | -47% |
+| `safe_executor.py` | ✅ | 578 linhas | 324 linhas | -44% |
+| `streaming_adapter.py` | ✅ | 544 linhas | 473 linhas | -13% |
+| `history_manager.py` | ✅ | 629 linhas | 429 linhas | -32% |
+| `agents_bridge.py` | ✅ | 1077 linhas | → agents/ module | -100% |
+| `output_formatter.py` | ✅ | 816 linhas | → formatting/ module | -100% |
+| `gemini_stream.py` | ✅ | 691 linhas | → streaming/gemini/ | -100% |
+
+**Novos Módulos Criados**:
+
+*Prompt System*:
+- `tui/core/prompt_sections.py` (317 linhas) - Static prompt text
+- `vertice_tui/core/prompt_sections.py` (317 linhas) - Dual package
+
+*Help & Commands*:
+- `tui/core/help_builder.py` (116 linhas) - Tool/command help
+- `tui/core/plan_executor.py` (75 linhas) - Plan execution detection
+- `vertice_tui/core/help_builder.py` (116 linhas) - Dual package
+- `vertice_tui/core/plan_executor.py` (75 linhas) - Dual package
+
+*Security*:
+- `tui/core/command_whitelist.py` (273 linhas) - Secure commands
+- `vertice_tui/core/command_whitelist.py` (273 linhas) - Dual package
+
+*Components*:
+- `tui/components/tool_sanitizer.py` (108 linhas) - JSON sanitization
+- `vertice_tui/components/tool_sanitizer.py` (108 linhas) - Dual package
+
+*Styling*:
+- `tui/app_styles.py` (149 linhas) - CSS and language detection
+- `vertice_tui/app_styles.py` (149 linhas) - Dual package
+
+*Agents Module* (`tui/core/agents/`):
+- `router.py` (279 linhas) - Intent detection & routing
+- `manager.py` (451 linhas) - Agent lifecycle management
+- `streaming.py` (155 linhas) - Streaming normalization
+- `types.py` + `registry.py` - Type definitions
+
+*Formatting Module* (`tui/core/formatting/`):
+- `colors.py` (72 linhas) - Brand colors & icons
+- `truncation.py` (279 linhas) - Smart truncation
+- `formatter.py` (407 linhas) - Output formatting
+- `helpers.py` (83 linhas) - Convenience functions
+
+*Streaming Module* (`tui/core/streaming/gemini/`):
+- `config.py` (83 linhas) - Stream configuration
+- `base.py` (54 linhas) - Base protocol
+- `sdk.py` (277 linhas) - SDK streamer
+- `httpx_streamer.py` (175 linhas) - HTTPX streamer
+- `unified.py` (137 linhas) - Unified interface
+
+*History Module*:
+- `tui/core/history/compaction.py` (252 linhas) - CompactionMixin
+
+**Testes Phase 5**:
+- `tests/tui/test_phase5_lightweight.py` (101 testes)
+- Coverage: **100%** em todos os 6 módulos extraídos
+
+**Breakdown de Coverage**:
+| Módulo | Statements | Missing | Coverage |
+|--------|------------|---------|----------|
+| `app_styles.py` | 6 | 0 | 100% |
+| `tool_sanitizer.py` | 39 | 0 | 100% |
+| `command_whitelist.py` | 21 | 0 | 100% |
+| `help_builder.py` | 32 | 0 | 100% |
+| `plan_executor.py` | 13 | 0 | 100% |
+| `prompt_sections.py` | 10 | 0 | 100% |
+| **TOTAL** | **121** | **0** | **100%** |
+
+**Padrões Aplicados**:
+- Semantic domain extraction (não split arbitrário por linha)
+- Mixin pattern para reusabilidade (CompactionMixin)
+- Backward-compatible shims com deprecation warnings
+- Facade pattern para Bridge (pure delegation)
+- Thread-safe singleton para executors
+
+**Validação CODE_CONSTITUTION**:
+- ✅ Todos os arquivos <500 linhas
+- ✅ 100% type hints
+- ✅ Zero TODOs
+- ✅ Lint 0 erros
+
+---
+
+### Métricas de Qualidade Atualizadas
+| Métrica | Valor | Target | Status |
+|---------|-------|--------|--------|
+| Lint (ruff) | 0 erros | 0 | ✅ |
+| Type annotations | 100% | 100% | ✅ |
+| Testes | 340 | - | ✅ |
+| Coverage Phase 5 | 100% | 100% | ✅ |
+| Max file size | 473 linhas | <500 | ✅ |
+
+**Breakdown de Testes Atualizado**:
+- Phase 1.1 (Unified Agent): 22 testes
+- Phase 1.2 (Strict Mode): 24 testes
+- Phase 1.3 (Rate Limiting): 26 testes
+- Phase 2 (Streaming): 20 testes
+- Phase 3 (MCP Security): 93 testes
+- Phase 4 (A2A v0.3): 54 testes
+- **Phase 5 (TUI Lightweight): 101 testes** ✅ NEW
+
+---
+
+#### Fase 6: Integração Final - COMPLETO ✅
+| Item | Status | Arquivo | Testes |
+|------|--------|---------|--------|
+| CoreAgentAdapter | ✅ | `tui/core/agents/core_adapter.py` | 33 |
+| OrchestratorIntegration | ✅ | `tui/core/agents/orchestrator_integration.py` | 33 |
+| MCPManager | ✅ | `tui/core/managers/mcp_manager.py` | 23 |
+| A2AManager | ✅ | `tui/core/managers/a2a_manager.py` | 25 |
+| A2ACommandHandler | ✅ | `tui/handlers/a2a.py` | 25 |
+| ProtocolBridgeMixin | ✅ | `tui/core/protocol_bridge.py` | - |
+| Bridge <500 lines | ✅ | `tui/core/bridge.py` (499 linhas) | - |
+
+**Arquivos Criados**:
+- `tui/core/agents/core_adapter.py` (360 linhas) - Adapta core agents para TUI
+- `tui/core/agents/orchestrator_integration.py` (249 linhas) - Coordenação via Orchestrator
+- `tui/core/managers/mcp_manager.py` (341 linhas) - Gerencia MCP server/client
+- `tui/core/managers/a2a_manager.py` (418 linhas) - Gerencia A2A gRPC
+- `tui/handlers/a2a.py` (241 linhas) - Handler para /a2a commands
+- `tui/core/protocol_bridge.py` (91 linhas) - Mixin MCP/A2A para Bridge
+
+**Arquivos Modificados**:
+- `tui/core/bridge.py` (560 → 499 linhas) - Extração de métodos para mixin
+- `tui/core/agents/manager.py` - Detectar is_core, usar CoreAgentAdapter
+- `tui/handlers/claude_parity.py` - Expandir _handle_mcp()
+- `tui/core/managers/__init__.py` - Exportar A2AManager, MCPManager
+
+**Features Implementadas**:
+- CoreAgentAdapter com ativação de mixins (BoundedAutonomy, DeepThink)
+- Fallback TaskComplexity para import resilience
+- OrchestratorIntegration com Three Loops pattern
+- Approval/Reject workflow para L2 autonomy
+- MCPManager com start/stop server lifecycle
+- A2AManager com gRPC server e discovery
+- JWS signing de AgentCards com RSA/EC keys
+- `/a2a` commands: status, serve, stop, discover, call, card, sign, agents
+
+**Testes Phase 6**:
+- `tests/tui/test_phase6_core_agents.py` (33 testes)
+- `tests/tui/test_phase6_mcp.py` (23 testes)
+- `tests/tui/test_phase6_a2a.py` (25 testes)
+- **Total: 81 testes passando**
+
+**Validação CODE_CONSTITUTION**:
+- ✅ Todos os arquivos <500 linhas (max: 499 em bridge.py)
+- ✅ 100% type hints (mypy errors corrigidos)
+- ✅ Zero TODOs
+- ✅ Pylint 9.21/10
+- ✅ 81 testes passando
+- ⚠️ Coverage 54-58% (partes requerem infraestrutura real)
+
+---
+
+### Métricas de Qualidade Atualizadas
+| Métrica | Valor | Target | Status |
+|---------|-------|--------|--------|
+| Lint (ruff) | 0 erros | 0 | ✅ |
+| Type annotations | 100% | 100% | ✅ |
+| Testes | 421 | - | ✅ |
+| Coverage Phase 6 | 54-58% | - | ⚠️ |
+| Max file size | 499 linhas | <500 | ✅ |
+| Pylint Score | 9.21/10 | ≥9.0 | ✅ |
+
+**Breakdown de Testes Atualizado**:
+- Phase 1.1 (Unified Agent): 22 testes
+- Phase 1.2 (Strict Mode): 24 testes
+- Phase 1.3 (Rate Limiting): 26 testes
+- Phase 2 (Streaming): 20 testes
+- Phase 3 (MCP Security): 93 testes
+- Phase 4 (A2A v0.3): 54 testes
+- Phase 5 (TUI Lightweight): 101 testes
+- Phase 6 (Integração Final): 81 testes ✅
+- **Phase 7 (Compliance): ~40 testes** 🔨 PENDENTE
+- **Phase 8 (E2E): ~210 testes** 📋 PLANEJADO
+
+**Nota sobre Coverage Phase 6**:
+Coverage de 54-58% é aceitável porque:
+- ✅ Lógica principal e state management 100% testados
+- ⚠️ gRPC server start/stop requer infraestrutura real
+- ⚠️ Network calls (discover, call_agent) requerem servidores remotos
+- ⚠️ JWS signing testado com chaves geradas (não infraestrutura externa)
+
+---
+
 ## PRÓXIMOS PASSOS
 
 1. ~~**Fase 1: Fundação** - Unified Agent, Strict Mode, Rate Limiting~~ ✅
@@ -837,5 +1103,454 @@ tests/performance/test_reconnect.py
 3. ~~**Fase 3: MCP 2025-11-25** - OAuth 2.1 + PKCE, Elicitation, Consent~~ ✅
 4. ~~**Fase 4: A2A v0.3** - Protocol Buffers, gRPC, Security Cards~~ ✅
 5. ~~**Fase 4.1: CODE_CONSTITUTION Audit** - Zero TODOs, <500 lines, Lint 0~~ ✅
-6. **Fase 5: TUI Lightweight** - Split Bridge, otimizar handlers
-7. **Fase 7: Testes Compliance** - JSON Schema validation, stress tests
+6. ~~**Fase 5: TUI Lightweight** - Semantic modularization, 100% coverage~~ ✅
+7. ~~**Fase 6: Integração Final** - Conectar agents/ Core ao TUI~~ ✅
+8. **Fase 7: Testes Compliance** - JSON Schema validation, stress tests
+9. **Fase 8: Testes End-to-End** - Tools, Agents, Orchestração, Parallelism
+
+---
+
+## FASE 8: TESTES END-TO-END COMPLETOS (Semana 9-10)
+
+**Objetivo**: Validar que o TUI Vertice funciona igual ao Claude Code - todas as tools, agentes, orchestração e execução paralela.
+
+---
+
+### 8.1 Testes de Tools Completos
+
+**Problema**: 79 tools registradas, nenhuma validação end-to-end
+
+**Arquivos a Criar**:
+```
+tests/e2e/test_all_tools.py
+tests/e2e/conftest.py (fixtures compartilhadas)
+```
+
+**Testes por Categoria**:
+
+#### 8.1.1 File Tools (14 tools)
+| Tool | Teste | Validação |
+|------|-------|-----------|
+| Read | Ler arquivo existente | Conteúdo correto |
+| Write | Criar arquivo novo | Arquivo existe, conteúdo OK |
+| Edit | Editar linha específica | Diff correto |
+| Glob | Pattern matching | Lista correta de arquivos |
+| Grep | Busca por regex | Matches encontrados |
+| MultiEdit | Edições múltiplas | Todas aplicadas |
+| LS | Listar diretório | Formato correto |
+| Tree | Estrutura de diretório | Hierarquia correta |
+| MkDir | Criar diretório | Diretório existe |
+| Rm | Remover arquivo | Arquivo não existe |
+| Cp | Copiar arquivo | Destino existe |
+| Mv | Mover arquivo | Origem não existe, destino sim |
+| Find | Busca avançada | Resultados corretos |
+| Stat | Metadados | Permissões, tamanho, datas |
+
+#### 8.1.2 Git Tools (12 tools)
+| Tool | Teste | Validação |
+|------|-------|-----------|
+| GitStatus | Status do repo | Formato correto |
+| GitDiff | Diferenças | Hunks corretos |
+| GitLog | Histórico | Commits listados |
+| GitAdd | Stage arquivos | Status atualizado |
+| GitCommit | Criar commit | Hash gerado |
+| GitBranch | Listar/criar branches | Branch existe |
+| GitCheckout | Trocar branch | HEAD atualizado |
+| GitMerge | Merge branches | Histórico correto |
+| GitPush | Push (mock) | Request formatado |
+| GitPull | Pull (mock) | Merge aplicado |
+| GitStash | Stash changes | Lista de stash |
+| GitReset | Reset HEAD | Estado correto |
+
+#### 8.1.3 Web Tools (6 tools)
+| Tool | Teste | Validação |
+|------|-------|-----------|
+| WebFetch | Fetch URL | Conteúdo HTML |
+| WebSearch | Busca web | Resultados formatados |
+| UrlExtract | Extrair URLs | Lista válida |
+| HttpGet | GET request | Response body |
+| HttpPost | POST request | Response + status |
+| ApiCall | API genérica | JSON response |
+
+#### 8.1.4 Code Analysis Tools (10 tools)
+| Tool | Teste | Validação |
+|------|-------|-----------|
+| Lint | Verificar código | Warnings/errors |
+| Format | Formatar código | Código formatado |
+| TypeCheck | Verificar tipos | Erros de tipo |
+| TestRunner | Executar testes | Resultados |
+| Coverage | Cobertura | Percentual |
+| Complexity | Complexidade | Métricas |
+| Dependencies | Deps do arquivo | Lista de imports |
+| Symbols | Símbolos do arquivo | Classes, funções |
+| References | Referências | Usos do símbolo |
+| Definition | Ir para definição | Localização |
+
+#### 8.1.5 Shell Tools (8 tools)
+| Tool | Teste | Validação |
+|------|-------|-----------|
+| Bash | Executar comando | Output + exit code |
+| BashBackground | Comando background | Job ID |
+| BashInteractive | Comando interativo | Prompt handling |
+| Python | Executar Python | Output |
+| Npm | Comandos npm | Package operations |
+| Docker | Comandos Docker | Container ops |
+| Make | Executar Makefile | Target output |
+| Curl | HTTP via curl | Response |
+
+**Estimativa**: 3-4 dias
+
+---
+
+### 8.2 Testes de Agentes Completos
+
+**Problema**: 28 agentes (6 core + 22 CLI), sem validação de comportamento end-to-end
+
+**Arquivos a Criar**:
+```
+tests/e2e/test_all_agents.py
+tests/e2e/agents/test_core_agents.py
+tests/e2e/agents/test_cli_agents.py
+```
+
+#### 8.2.1 Core Agents (6)
+| Agente | Teste | Validação |
+|--------|-------|-----------|
+| OrchestratorAgent | Decompor tarefa complexa | Subtasks corretas |
+| PlannerAgent | Criar plano multi-step | Passos sequenciais |
+| CoderAgent | Gerar código Python | Código válido, executa |
+| ReviewerAgent | Revisar PR | Comentários úteis |
+| TesterAgent | Gerar testes | Testes passam |
+| DevOpsAgent | Script de deploy | Script válido |
+
+#### 8.2.2 CLI Agents (22)
+| Agente | Teste | Validação |
+|--------|-------|-----------|
+| planner | `/agent planner "criar feature"` | Plano gerado |
+| executor | `/agent executor "implementar"` | Código escrito |
+| explorer | `/agent explorer "entender código"` | Análise correta |
+| architect | `/agent architect "design system"` | Diagrama/spec |
+| debugger | `/agent debugger "fix bug"` | Bug identificado |
+| refactorer | `/agent refactorer "melhorar código"` | Refatoração aplicada |
+| documenter | `/agent documenter "documentar"` | Docs gerados |
+| security_auditor | `/agent security "audit"` | Vulnerabilidades |
+| performance_optimizer | `/agent perf "otimizar"` | Melhorias sugeridas |
+| test_generator | `/agent test "gerar testes"` | Testes criados |
+| code_reviewer | `/agent review "revisar"` | Feedback |
+| api_designer | `/agent api "design API"` | OpenAPI spec |
+| db_architect | `/agent db "schema"` | Migrations |
+| frontend_specialist | `/agent frontend "UI"` | Componentes |
+| backend_specialist | `/agent backend "API"` | Endpoints |
+| devops_engineer | `/agent devops "CI/CD"` | Pipeline |
+| ml_engineer | `/agent ml "model"` | Training code |
+| data_engineer | `/agent data "pipeline"` | ETL code |
+| qa_engineer | `/agent qa "quality"` | Test plan |
+| tech_writer | `/agent docs "write"` | Documentation |
+| project_manager | `/agent pm "plan"` | Timeline |
+| scrum_master | `/agent scrum "sprint"` | Sprint plan |
+
+**Estimativa**: 3-4 dias
+
+---
+
+### 8.3 Testes de Orchestração
+
+**Problema**: Nenhuma validação de handoffs entre agentes
+
+**Arquivos a Criar**:
+```
+tests/e2e/test_orchestration.py
+tests/e2e/orchestration/test_handoffs.py
+tests/e2e/orchestration/test_workflows.py
+```
+
+#### 8.3.1 Handoff Patterns
+| Pattern | Teste | Validação |
+|---------|-------|-----------|
+| Sequential | A → B → C | Cada agente recebe contexto |
+| Parallel | A → [B, C] → D | Merge de resultados |
+| Conditional | A → (B if x else C) | Branch correto |
+| Loop | A → B → A (até condição) | Termina corretamente |
+| Fallback | A fails → B | Fallback ativado |
+| Escalation | A → human → B | Aprovação funciona |
+
+#### 8.3.2 Workflow Complexos
+```python
+# Workflow 1: Feature Development
+test_workflow_feature_development():
+    """
+    1. planner decompõe feature
+    2. architect cria design
+    3. [coder, tester] em paralelo
+    4. reviewer valida
+    5. devops deploya
+    """
+
+# Workflow 2: Bug Investigation
+test_workflow_bug_investigation():
+    """
+    1. debugger investiga
+    2. Se complexo: architect analisa
+    3. coder implementa fix
+    4. tester valida
+    5. reviewer aprova
+    """
+
+# Workflow 3: Code Refactoring
+test_workflow_refactoring():
+    """
+    1. explorer mapeia codebase
+    2. architect identifica melhorias
+    3. refactorer aplica mudanças
+    4. [tester, security_auditor] validam
+    5. reviewer aprova
+    """
+
+# Workflow 4: Documentation Sprint
+test_workflow_documentation():
+    """
+    1. explorer analisa código
+    2. [documenter, tech_writer] em paralelo
+    3. reviewer valida
+    4. pm atualiza status
+    """
+```
+
+**Estimativa**: 2-3 dias
+
+---
+
+### 8.4 Testes de Execução Paralela
+
+**Problema**: Sem validação de performance e correção em paralelo
+
+**Arquivos a Criar**:
+```
+tests/e2e/test_parallel_execution.py
+tests/e2e/parallel/test_tool_parallel.py
+tests/e2e/parallel/test_agent_parallel.py
+```
+
+#### 8.4.1 Tool Parallel Execution
+```python
+# Test: Múltiplas tools em paralelo
+test_parallel_file_operations():
+    """
+    Executar em paralelo:
+    - Read file1.py
+    - Read file2.py
+    - Grep "pattern" em src/
+    - Glob "**/*.py"
+
+    Validar:
+    - Todas completam
+    - Sem race conditions
+    - Resultados corretos
+    """
+
+test_parallel_git_operations():
+    """
+    Executar em paralelo:
+    - GitStatus
+    - GitDiff
+    - GitLog --oneline -10
+
+    Validar:
+    - Sem deadlocks em .git/
+    - Resultados consistentes
+    """
+
+test_parallel_web_operations():
+    """
+    Executar em paralelo:
+    - WebFetch url1
+    - WebFetch url2
+    - WebSearch query1
+
+    Validar:
+    - Rate limiting respeitado
+    - Sem timeout cascade
+    """
+```
+
+#### 8.4.2 Agent Parallel Execution
+```python
+test_parallel_independent_agents():
+    """
+    Lançar em paralelo:
+    - documenter (documenta módulo A)
+    - tester (testa módulo B)
+    - security_auditor (audita módulo C)
+
+    Validar:
+    - Sem interferência
+    - Contextos isolados
+    - Resultados independentes
+    """
+
+test_parallel_dependent_agents():
+    """
+    Lançar com dependências:
+    - explorer (mapeamento) → resultado
+    - [coder, tester] recebem resultado em paralelo
+    - reviewer aguarda ambos
+
+    Validar:
+    - Dependências respeitadas
+    - Merge de contextos
+    - Resultado final completo
+    """
+
+test_parallel_resource_contention():
+    """
+    Testar contenção de recursos:
+    - 3 agents escrevendo arquivos diferentes
+    - 2 agents lendo mesmo arquivo
+    - 1 agent editando, 1 lendo
+
+    Validar:
+    - Locks funcionam
+    - Sem corrupção
+    - Sem deadlock
+    """
+```
+
+#### 8.4.3 Stress Tests
+```python
+test_stress_100_parallel_reads():
+    """100 Read tools em paralelo"""
+
+test_stress_50_parallel_agents():
+    """50 agents leves em paralelo"""
+
+test_stress_mixed_workload():
+    """
+    Mix de:
+    - 20 file operations
+    - 10 git operations
+    - 5 web fetches
+    - 15 agent invocations
+    """
+
+test_stress_sustained_load():
+    """
+    Carga sustentada por 60 segundos:
+    - 10 req/s de tools
+    - 2 req/s de agents
+
+    Validar:
+    - Sem memory leak
+    - Latência estável
+    - Sem degradação
+    """
+```
+
+**Estimativa**: 2-3 dias
+
+---
+
+### 8.5 Testes de Paridade com Claude Code
+
+**Problema**: TUI deve funcionar como Claude Code
+
+**Arquivos a Criar**:
+```
+tests/e2e/test_claude_parity.py
+tests/e2e/parity/test_commands.py
+tests/e2e/parity/test_behaviors.py
+```
+
+#### 8.5.1 Comandos Claude Code
+| Comando | Implementação | Teste |
+|---------|---------------|-------|
+| `/help` | ✅ | Lista todos comandos |
+| `/clear` | ✅ | Limpa histórico |
+| `/model` | ✅ | Mostra/troca modelo |
+| `/compact` | ✅ | Compacta contexto |
+| `/cost` | ✅ | Mostra custo sessão |
+| `/doctor` | ✅ | Diagnóstico sistema |
+| `/init` | ✅ | Inicializa projeto |
+| `/memory` | ✅ | Gerencia memória |
+| `/mcp` | ✅ | Status MCP |
+| `/permissions` | ✅ | Gerencia permissões |
+| `/pr` | ✅ | Cria/gerencia PRs |
+| `/review` | ✅ | Revisa código |
+| `/terminal` | ✅ | Terminal integrado |
+| `/vim` | ✅ | Modo vim |
+
+#### 8.5.2 Comportamentos Esperados
+```python
+test_auto_context_gathering():
+    """
+    Ao perguntar sobre código:
+    1. TUI automaticamente lê arquivos relevantes
+    2. Usa Glob/Grep para encontrar contexto
+    3. Apresenta resposta contextualizada
+    """
+
+test_tool_selection_intelligence():
+    """
+    Dado prompt ambíguo:
+    1. TUI seleciona tool correta
+    2. Se múltiplas possíveis, escolhe mais apropriada
+    3. Fallback inteligente se tool falha
+    """
+
+test_streaming_quality():
+    """
+    Durante streaming:
+    1. Chunks fluem a 60fps
+    2. Sem truncamento prematuro
+    3. Markdown renderiza progressivamente
+    4. Code blocks formatados
+    """
+
+test_error_recovery():
+    """
+    Em caso de erro:
+    1. Mensagem clara ao usuário
+    2. Sugestão de correção
+    3. Estado consistente mantido
+    4. Retry automático quando apropriado
+    """
+
+test_context_preservation():
+    """
+    Durante conversa longa:
+    1. Contexto relevante preservado
+    2. Compaction não perde info crítica
+    3. Referências a mensagens anteriores funcionam
+    """
+```
+
+**Estimativa**: 2 dias
+
+---
+
+### Resumo Fase 8
+
+**Arquivos a Criar**:
+| Diretório | Arquivos | Testes Estimados |
+|-----------|----------|------------------|
+| `tests/e2e/` | `conftest.py`, `test_all_tools.py` | 79 |
+| `tests/e2e/` | `test_all_agents.py` | 28 |
+| `tests/e2e/agents/` | `test_core_agents.py`, `test_cli_agents.py` | 28 |
+| `tests/e2e/orchestration/` | `test_handoffs.py`, `test_workflows.py` | 20 |
+| `tests/e2e/parallel/` | `test_tool_parallel.py`, `test_agent_parallel.py` | 30 |
+| `tests/e2e/parity/` | `test_commands.py`, `test_behaviors.py` | 25 |
+| **TOTAL** | **12 arquivos** | **~210 testes** |
+
+**Estimativa Total**: 12-16 dias
+
+**Dependências**:
+- Fase 7 completa (compliance tests)
+- Mock servers para web/git operations
+- Fixtures de projetos de teste
+
+**Critérios de Sucesso**:
+- [ ] 100% das 79 tools funcionando
+- [ ] 100% dos 28 agentes respondendo
+- [ ] Orchestração passa em todos os workflows
+- [ ] Parallelism sem race conditions
+- [ ] Paridade com Claude Code verificada
+- [ ] Stress tests passam sem degradação

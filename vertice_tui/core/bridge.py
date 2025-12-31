@@ -4,23 +4,11 @@ Bridge Module - Facade Pattern Integration
 
 Main integration bridge between TUI and agent system.
 
-Nov 2025 REFACTORING: Reduced from 5493 lines GOD CLASS to Facade pattern
-that coordinates all extracted modules:
+Dec 2025 REFACTORING: Reduced from 1065 lines to <500 by extracting:
+- help_builder.py: Tool listing and command help
+- plan_executor.py: Plan execution detection
 
-- governance.py: RiskLevel, GovernanceConfig, GovernanceObserver, ELP
-- llm_client.py: GeminiClient, ToolCallParser
-- agents_bridge.py: AgentInfo, AGENT_REGISTRY, AgentRouter, AgentManager
-- tools_bridge.py: ToolBridge, MinimalRegistry
-- ui_bridge.py: CommandPaletteBridge, MinimalCommandPalette, AutocompleteBridge
-- history_manager.py: HistoryManager
-- custom_commands.py: CustomCommandsManager
-- hooks_manager.py: HooksManager
-- plan_mode_manager.py: PlanModeManager
-
-Usage in app.py:
-    bridge = Bridge()
-    async for chunk in bridge.chat(message):
-        view.append_chunk(chunk)
+Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 """
 
 from __future__ import annotations
@@ -30,44 +18,10 @@ import threading
 from pathlib import Path
 from typing import Any, AsyncIterator, Dict, List, Optional, Tuple
 
-# CHAOS ORCHESTRATOR - Thread-safe primitives
-from vertice_tui.core.resilience import AsyncLock
-from vertice_tui.core.prometheus_client import PrometheusClient
-from vertice_tui.core.maximus_client import MaximusClient
-import re
-
-# Padrões para detectar tasks complexas que devem usar PROMETHEUS
-COMPLEX_TASK_PATTERNS = [
-    r'\b(create|build|implement|design|architect)\b.*\b(system|pipeline|framework|application)\b',
-    r'\b(analyze|debug|investigate|troubleshoot)\b.*\b(complex|multiple|entire)\b',
-    r'\b(refactor|optimize|improve)\b.*\b(codebase|architecture|performance)\b',
-    r'\b(multi.?step|step.?by.?step|sequentially|iteratively)\b',
-    r'\b(remember|recall|previous|earlier|context)\b',  # Memory-dependent
-    r'\b(simulate|predict|plan|strategy)\b',  # World model
-    r'\b(evolve|learn|adapt|improve over time)\b',  # Evolution
-]
-
-SIMPLE_TASK_PATTERNS = [
-    r'^(what|who|when|where|how|why)\s+\w+\??$',  # Simple questions
-    r'^\w+\s*\?$',  # Single word question
-    r'^(hi|hello|hey|thanks|ok|yes|no)\b',  # Greetings
-]
-
-# Padrões para tarefas que devem usar MAXIMUS (governance + memory backend)
-MAXIMUS_TASK_PATTERNS = [
-    r'\b(tribunal|governance|evaluate|judge)\b',  # Governance
-    r'\b(constitution|compliance|policy)\b',  # Constitutional
-    r'\b(remember long.?term|consolidate|vault)\b',  # Long-term memory
-    r'\b(generate tool|create tool|dynamic tool)\b',  # Tool factory
-    r'\b(VERITAS|SOPHIA|DIKE)\b',  # Tribunal judges
-]
-
 # Load .env file if exists
 try:
     from dotenv import load_dotenv
     load_dotenv()
-
-    # Also try to load from script directory
     script_dir = Path(__file__).parent.parent.parent
     env_file = script_dir / ".env"
     if env_file.exists():
@@ -75,130 +29,61 @@ try:
 except ImportError:
     pass
 
-# =============================================================================
-# IMPORTS FROM EXTRACTED MODULES
-# =============================================================================
+# Core systems
+from vertice_tui.core.resilience import AsyncLock
+from vertice_tui.core.prometheus_client import PrometheusClient
+from vertice_tui.core.maximus_client import MaximusClient
 
-# Governance - Risk assessment and ELP
-from .governance import (
-    RiskLevel,
-    GovernanceConfig,
-    GovernanceObserver,
-    ELP,
-)
-
-# LLM Client - Gemini streaming with function calling
-from .llm_client import (
-    GeminiClient,
-    ToolCallParser,
-)
-from .parsing.stream_filter import StreamFilter
-
-# Agents Bridge - Agent registry and routing
-from .agents_bridge import (
-    AgentInfo,
-    AGENT_REGISTRY,
-    AgentRouter,
-    AgentManager,
-)
-
-# Tools Bridge - 47 tools integration
-from .tools_bridge import (
-    ToolBridge,
-    MinimalRegistry,
-)
-
-# UI Bridge - Command palette and autocomplete
-from .ui_bridge import (
-    CommandPaletteBridge,
-    MinimalCommandPalette,
-    AutocompleteBridge,
-)
-
-# Output formatting - Centralized colors and icons
-from .output_formatter import (
-    tool_success_markup,
-    tool_error_markup,
-    agent_routing_markup,
-)
-
-# History Manager - Command and session history
+# Extracted modules
+from .governance import RiskLevel, GovernanceConfig, GovernanceObserver, ELP
+from .llm_client import GeminiClient, ToolCallParser
+from .agents_bridge import AgentInfo, AGENT_REGISTRY, AgentRouter, AgentManager
+from .tools_bridge import ToolBridge, MinimalRegistry
+from .ui_bridge import CommandPaletteBridge, MinimalCommandPalette, AutocompleteBridge
 from .history_manager import HistoryManager
+from .help_builder import build_tool_list, build_command_help, get_agent_commands
+from .plan_executor import is_plan_execution_request, prepare_plan_execution
+from .parallel_executor import ParallelExecutionResult, ParallelToolExecutor
+from .chat import ChatController, ChatConfig
+from .protocol_bridge import ProtocolBridgeMixin
 
-# Extracted Managers (SCALE & SUSTAIN Phase 1.1)
+# Managers
 from .managers import (
-    TodoManager,
-    StatusManager,
-    PullRequestManager,
-    MemoryManager,
-    ContextManager,
-    AuthenticationManager,
+    TodoManager, StatusManager, PullRequestManager, MemoryManager,
+    ContextManager, AuthenticationManager, StreamingManager,
+    StreamingConfig, ProviderManager, ProviderConfig, MCPManager,
+    A2AManager,
 )
 
-# Custom Commands - Slash command system (Claude Code parity)
+# Optional managers (graceful degradation)
 try:
     from .custom_commands import CustomCommandsManager
 except ImportError:
-    CustomCommandsManager = None
+    CustomCommandsManager = None  # type: ignore
 
-# Hooks Manager - Pre/post hooks (Claude Code parity)
 try:
     from .hooks_manager import HooksManager
 except ImportError:
-    HooksManager = None
+    HooksManager = None  # type: ignore
 
-# Plan Mode Manager - Plan mode state (Claude Code parity)
 try:
     from .plan_mode_manager import PlanModeManager
 except ImportError:
-    PlanModeManager = None
+    PlanModeManager = None  # type: ignore
 
 
-# Parallel Executor - extracted module (Nov 2025)
-from .parallel_executor import (
-    ParallelExecutionResult,
-    ParallelToolExecutor,
-)
+class Bridge(ProtocolBridgeMixin):
+    """Main integration bridge between TUI and agent system."""
 
-
-# =============================================================================
-# BRIDGE FACADE - Main Integration Point
-# =============================================================================
-
-class Bridge:
-    """
-    Main integration bridge between TUI and agent system.
-
-    Enhanced with:
-    - 47 tools via ToolBridge
-    - Command palette with fuzzy search
-    - Autocomplete with fuzzy matching
-    - History management with context
-
-    Usage in app.py:
-        bridge = Bridge()
-        async for chunk in bridge.chat(message):
-            view.append_chunk(chunk)
-    """
-
-    # Maximum iterations for agentic tool loop
     MAX_TOOL_ITERATIONS = 5
-
-    # Parallel execution configuration
-    MAX_PARALLEL_TOOLS = 5  # Max concurrent tool executions
-
-    # Thread locks for thread-safe operations
+    MAX_PARALLEL_TOOLS = 5
     _router_lock = threading.Lock()
-    _plan_mode_lock = threading.Lock()
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Bridge with all subsystems."""
-        # =====================================================================
-        # EXTRACTED MANAGERS (SCALE & SUSTAIN Phase 1.1)
-        # =====================================================================
-        # Initialize managers FIRST (they handle credentials, etc.)
+        # Auth first (loads credentials)
         self._auth_manager = AuthenticationManager()
-        self._auth_manager.load_credentials()  # Load before LLM init
+        self._auth_manager.load_credentials()
 
         # Core systems
         self.llm = GeminiClient()
@@ -209,7 +94,7 @@ class Bridge:
         self.autocomplete = AutocompleteBridge(self.tools)
         self.history = HistoryManager()
 
-        # Extracted managers with dependency injection
+        # Managers
         self._todo_manager = TodoManager()
         self._status_manager = StatusManager(
             llm_checker=lambda: self.llm.is_available,
@@ -223,185 +108,41 @@ class Bridge:
             context_setter=lambda ctx: setattr(self.history, 'context', ctx)
         )
 
-        # State (with thread-safe primitives)
+        # State
         self._tools_configured = False
         self._auto_route_enabled = True
         self._state_lock = AsyncLock("bridge_state")
 
-        # Optional managers (graceful degradation)
+        # Optional managers
         self._custom_commands_manager = CustomCommandsManager() if CustomCommandsManager else None
         self._hooks_manager = HooksManager() if HooksManager else None
         self._plan_mode_manager = PlanModeManager() if PlanModeManager else None
 
-        # Provider selection: auto, prometheus, maximus, or gemini
-        self._provider_mode = os.getenv("VERTICE_PROVIDER", "auto")  # DEFAULT: auto
-        self._prometheus_client: Optional[PrometheusClient] = None
-        self._maximus_client: Optional[MaximusClient] = None
-        self._task_complexity_cache: Dict[str, str] = {}
+        # Provider manager
+        self._provider_manager = ProviderManager(
+            gemini_client=self.llm,
+            prometheus_factory=lambda: PrometheusClient(),
+            maximus_factory=lambda: MaximusClient(),
+        )
 
-    def _detect_task_complexity(self, message: str) -> str:
-        """
-        Auto-detect task complexity to choose provider.
+        # MCP manager (Phase 6.2)
+        self._mcp_manager = MCPManager()
 
-        Returns:
-            'maximus' for governance/memory tasks
-            'prometheus' for complex tasks
-            'gemini' for simple ones
-        """
-        message_lower = message.lower()
+        # A2A manager (Phase 6.3)
+        self._a2a_manager = A2AManager()
 
-        # Check for MAXIMUS patterns first (governance, tribunal, memory)
-        for pattern in MAXIMUS_TASK_PATTERNS:
-            if re.search(pattern, message_lower, re.IGNORECASE):
-                return "maximus"
-
-        # Check for simple patterns
-        for pattern in SIMPLE_TASK_PATTERNS:
-            if re.search(pattern, message_lower):
-                return "gemini"
-
-        # Check for complex patterns
-        complexity_score = 0
-        for pattern in COMPLEX_TASK_PATTERNS:
-            if re.search(pattern, message_lower):
-                complexity_score += 1
-
-        # Length heuristic: long prompts usually need more processing
-        if len(message) > 500:
-            complexity_score += 1
-        if len(message) > 1000:
-            complexity_score += 1
-
-        # Code blocks indicate technical tasks
-        if '```' in message or 'def ' in message or 'class ' in message:
-            complexity_score += 1
-
-        # Threshold: 2+ indicators = complex
-        return "prometheus" if complexity_score >= 2 else "gemini"
-
-    def _get_client(self, message: str = ""):
-        """Get appropriate LLM client based on provider mode and task complexity."""
-        if self._provider_mode == "prometheus":
-            # Force PROMETHEUS
-            if self._prometheus_client is None:
-                self._prometheus_client = PrometheusClient()
-            return self._prometheus_client, "prometheus"
-
-        elif self._provider_mode == "maximus":
-            # Force MAXIMUS
-            if self._maximus_client is None:
-                self._maximus_client = MaximusClient()
-            return self._maximus_client, "maximus"
-
-        elif self._provider_mode == "gemini":
-            # Force Gemini
-            return self.llm, "gemini"
-
-        else:  # auto mode (DEFAULT)
-            detected = self._detect_task_complexity(message)
-            if detected == "maximus":
-                if self._maximus_client is None:
-                    self._maximus_client = MaximusClient()
-                return self._maximus_client, "maximus"
-            elif detected == "prometheus":
-                if self._prometheus_client is None:
-                    self._prometheus_client = PrometheusClient()
-                return self._prometheus_client, "prometheus"
-            else:
-                return self.llm, "gemini"
-
-    def _configure_llm_tools(self) -> None:
-        """Configure LLM with tool schemas for function calling."""
-        if self._tools_configured:
-            return
-
-        schemas = self.tools.get_schemas_for_llm()
-        if schemas:
-            self.llm.set_tools(schemas)
-            self._tools_configured = True
-
-    def _get_system_prompt(self) -> str:
-        """
-        Get system prompt optimized for agentic, symbiotic interaction.
-
-        Uses Claude Code-style agentic prompt for natural language understanding
-        and autonomous task execution.
-        """
-        # Try to use the new agentic prompt system
-        try:
-            from vertice_tui.core.agentic_prompt import (
-                build_agentic_system_prompt,
-                load_project_memory,
-                get_dynamic_context
-            )
-
-            # Get tool schemas
-            tool_schemas = self.tools.get_schemas_for_llm()
-
-            # Get dynamic context
-            context = get_dynamic_context()
-
-            # Load project memory (JUANCS.md)
-            project_memory = load_project_memory()
-
-            # Load user memory
-            user_memory = None
-            memory_result = self.read_memory(scope="project")
-            if memory_result.get("success"):
-                user_memory = memory_result.get("content")
-
-            # Build agentic prompt
-            return build_agentic_system_prompt(
-                tools=tool_schemas,
-                context=context,
-                project_memory=project_memory,
-                user_memory=user_memory
-            )
-
-        except Exception:
-            # Fallback to simple prompt if agentic fails
-            pass
-
-        # Fallback: Simple but effective prompt
-        tool_names = self.tools.list_tools()[:25]
-        tool_list = ", ".join(tool_names) if tool_names else "none loaded"
-
-        # Check for recent plan in context (from AgentManager)
-        plan_context = ""
-        last_plan = getattr(self.agents, '_last_plan', None)
-        if last_plan:
-            plan_context = f"""
-
-=== PREVIOUS PLAN TO EXECUTE ===
-{last_plan[:4000]}
-=== END OF PLAN ===
-
-CRITICAL: When user says "make it real", "do it", "build it", "create it", "go", "materializa", "faz", "cria os arquivos":
-1. IMMEDIATELY use write_file tool to create EACH file from the plan above
-2. First create directory: bash_command("mkdir -p neuro_api")
-3. Then write_file for EACH file with COMPLETE working code
-4. Do NOT just describe - actually CREATE the files using tools
-5. Do NOT try to run apt-get or install anything
-"""
-
-        return f"""You are PROMETHEUS, an AI coding assistant that EXECUTES code tasks.
-
-CRITICAL RULES:
-1. ACTIONS OVER EXPLANATIONS - USE TOOLS immediately, don't just talk
-2. When user confirms ("make it real", "do it", "yes", "go") = CREATE FILES using write_file
-3. NEVER joke or run silly commands like "apt-get install reality"
-4. EXECUTE the plan by writing actual files
-
-Available tools: {tool_list}
-
-TOOL USAGE:
-- Create file: write_file(path="filename.py", content="code here")
-- Create directory: bash_command(command="mkdir -p dirname")
-- Edit file: edit_file(path="filename.py", ...)
-- Read file: read_file(path="filename.py")
-{plan_context}
-Working directory: {os.getcwd()}
-"""
+        # Chat controller
+        self._chat_controller = ChatController(
+            tools=self.tools,
+            history=self.history,
+            governance=self.governance,
+            agents=self.agents,
+            agent_registry=AGENT_REGISTRY,
+            config=ChatConfig(
+                max_tool_iterations=self.MAX_TOOL_ITERATIONS,
+                max_parallel_tools=self.MAX_PARALLEL_TOOLS,
+            ),
+        )
 
     # =========================================================================
     # CORE PROPERTIES
@@ -416,447 +157,295 @@ Working directory: {os.getcwd()}
     def status_line(self) -> str:
         """Get status line for TUI."""
         llm_status = f"{ELP['approved']} Gemini" if self.is_connected else f"{ELP['error']} No LLM"
-        gov_status = self.governance.get_status_emoji()
-        agent_count = len(self.agents.available_agents)
-        tool_count = self.tools.get_tool_count()
-
-        return f"{llm_status} | {gov_status} | {ELP['agent']} {agent_count} agents | {ELP['tool']} {tool_count} tools"
+        return (f"{llm_status} | {self.governance.get_status_emoji()} | "
+                f"{ELP['agent']} {len(self.agents.available_agents)} agents | "
+                f"{ELP['tool']} {self.tools.get_tool_count()} tools")
 
     # =========================================================================
-    # CHAT - Main Entry Point
+    # CHAT
     # =========================================================================
 
-    def _is_plan_execution_request(self, message: str) -> bool:
-        """Check if user wants to execute the saved plan."""
-        import re
-        execute_patterns = [
-            r"^make\s+it\s+real",
-            r"^do\s+it\b",
-            r"^build\s+it\b",
-            r"^create\s+it\b",
-            r"^(go|let'?s\s+go|vamos|bora)\b",
-            r"^execute\s+(the\s+)?(plan|plano)",
-            r"^run\s+(the\s+)?(plan|plano)",
-            r"^implement",
-            r"^create\s+(the\s+)?files?",
-            r"^write\s+(the\s+)?files?",
-            r"^generate\s+(the\s+)?(code|files?)",
-            r"^materializ",
-            r"^(faz|cria)\s*(isso|os\s*arquivos)?",
-        ]
-        msg_lower = message.lower().strip()
-        return any(re.match(p, msg_lower, re.IGNORECASE) for p in execute_patterns)
+    def _get_client(self, message: str = "") -> Tuple[Any, str]:
+        """Get appropriate LLM client."""
+        return self._provider_manager.get_client(message)
+
+    def _configure_llm_tools(self) -> None:
+        """Configure LLM with tool schemas."""
+        if self._tools_configured:
+            return
+        schemas = self.tools.get_schemas_for_llm()
+        if schemas:
+            self.llm.set_tools(schemas)
+            self._tools_configured = True
+
+    def _get_system_prompt(self) -> str:
+        """Get system prompt for agentic interaction."""
+        try:
+            from vertice_tui.core.agentic_prompt import (
+                build_agentic_system_prompt, load_project_memory, get_dynamic_context
+            )
+            tool_schemas = self.tools.get_schemas_for_llm()
+            context = get_dynamic_context()
+            project_memory = load_project_memory()
+            user_memory = None
+            memory_result = self.read_memory(scope="project")
+            if memory_result.get("success"):
+                user_memory = memory_result.get("content")
+            return build_agentic_system_prompt(
+                tools=tool_schemas, context=context,
+                project_memory=project_memory, user_memory=user_memory
+            )
+        except Exception:
+            pass
+
+        # Fallback prompt
+        tool_names = self.tools.list_tools()[:25]
+        tool_list = ", ".join(tool_names) if tool_names else "none loaded"
+        return f"""You are PROMETHEUS, an AI coding assistant.
+Available tools: {tool_list}
+Working directory: {os.getcwd()}"""
 
     async def chat(self, message: str, auto_route: bool = True) -> AsyncIterator[str]:
-        """
-        Handle chat message with streaming response and agentic tool execution.
-
-        Enhanced with:
-        - Conversation context
-        - History tracking
-        - Agentic tool loop (detects and executes tool calls)
-        - **NEW**: Agent Router - auto-routes to specialized agents (Claude Code parity)
-
-        Args:
-            message: User message
-            auto_route: If True, automatically route to agents based on intent
-        """
-        # Check if user wants to execute a saved plan - BEFORE routing!
+        """Handle chat message with streaming response."""
+        # Check for plan execution
         last_plan = getattr(self.agents, '_last_plan', None)
-        executing_plan = False
-        if last_plan and self._is_plan_execution_request(message):
-            # Inject plan into message for LLM to execute
-            message = f"""Execute this plan by creating the files using write_file tool:
-
-{last_plan[:3000]}
-
-NOW CREATE ALL THE FILES using write_file tool. Start with mkdir for the directory, then write_file for each file."""
-            yield "🚀 *Executing saved plan...*\n\n"
-            executing_plan = True  # Skip routing - go straight to LLM with tools
-            # Clear the plan after execution attempt
+        message, skip_routing, preamble = prepare_plan_execution(message, last_plan)
+        if preamble:
+            yield preamble
             self.agents._last_plan = None
 
-        # Determine provider
+        self._configure_llm_tools()
         client, provider_name = self._get_client(message)
 
-        # Log provider selection for debugging
-        if self._provider_mode == "auto" and not executing_plan:
-            # Yield provider indicator for UI
-            yield f"[Using {provider_name.upper()}]\n"
+        self._chat_controller.config.auto_route_enabled = (
+            auto_route and self.is_auto_routing_enabled() and not skip_routing
+        )
 
-        # Configure LLM with tools on first chat
-        self._configure_llm_tools()
-
-        # Add to history
-        self.history.add_command(message)
-        self.history.add_context("user", message)
-
-        # Governance observation (never blocks)
-        gov_report = self.governance.observe("chat", message)
-        if self.governance.config.alerts and ("CRITICAL" in gov_report or "HIGH" in gov_report):
-            yield f"{gov_report}\n\n"
-
-        # =====================================================================
-        # AGENT ROUTER - Automatic Intent Detection (Claude Code Parity)
-        # Skip routing if we're executing a plan!
-        # =====================================================================
-        if auto_route and self.is_auto_routing_enabled() and not executing_plan:
-            routing = self.agents.router.route(message)
-            if routing:
-                agent_name, confidence = routing
-                agent_info = AGENT_REGISTRY.get(agent_name)
-
-                # Show routing decision (streaming-safe plain text)
-                yield f"{agent_routing_markup(agent_name, confidence)}\n"
-                if agent_info:
-                    yield f"   *{agent_info.description}*\n\n"
-
-                # Delegate to agent
-                async for chunk in self.invoke_agent(agent_name, message):
-                    yield chunk
-                return
-
-            # Check for ambiguous routing suggestion
-            suggestion = self.agents.router.get_routing_suggestion(message)
-            if suggestion:
-                yield f"{suggestion}\n\n"
-
-        # Get system prompt
         system_prompt = self._get_system_prompt()
-
-        # Agentic loop - process tool calls iteratively
-        current_message = message
-        full_response_parts = []
-
-        for iteration in range(self.MAX_TOOL_ITERATIONS):
-            # Stream from LLM with context
-            response_chunks = []
-            stream_filter = StreamFilter()
-
-            async for chunk in client.stream(
-                current_message,
-                system_prompt=system_prompt,
-                context=self.history.get_context(),
-                tools=self.tools.get_schemas_for_llm()
-            ):
-                response_chunks.append(chunk)
-
-                # Filter chunk to prevent raw JSON leakage
-                filtered_chunk = stream_filter.process_chunk(chunk)
-
-                # Don't yield tool call markers directly - process them
-                if filtered_chunk and not filtered_chunk.startswith("[TOOL_CALL:"):
-                    yield filtered_chunk
-
-            # Flush any remaining text in filter
-            remaining = stream_filter.flush()
-            if remaining and not remaining.startswith("[TOOL_CALL:"):
-                yield remaining
-
-            # Accumulate response
-            accumulated = "".join(response_chunks)
-
-            # Check for tool calls
-            tool_calls = ToolCallParser.extract(accumulated)
-
-            if not tool_calls:
-                # No tool calls - we're done
-                clean_response = ToolCallParser.remove(accumulated)
-                full_response_parts.append(clean_response)
-                break
-
-            # Execute tool calls with PARALLEL EXECUTION (Claude Code Parity)
-            # Detect dependencies and execute in waves
-            tool_results = []
-            exec_result = await self._execute_tools_parallel(tool_calls)
-
-            # Yield results in order for consistent UI
-            for call_id in sorted(exec_result.results.keys(), key=lambda x: int(x.split('_')[1])):
-                result = exec_result.results[call_id]
-                tool_name = result.get("tool_name", "unknown")
-
-                if result.get("success"):
-                    yield f"{tool_success_markup(tool_name)}\n"
-                    tool_results.append(f"Tool {tool_name} succeeded: {result.get('data', 'OK')}")
-                else:
-                    error = result.get("error", "Unknown error")
-                    yield f"{tool_error_markup(tool_name, error)}\n"
-                    tool_results.append(f"Tool {tool_name} failed: {error}")
-
-            # Show parallel execution stats if multiple tools
-            if len(tool_calls) > 1 and exec_result.parallelism_factor > 1.0:
-                yield f"\n⚡ *Parallel execution: {exec_result.wave_count} waves, {exec_result.parallelism_factor:.1f}x speedup ({exec_result.execution_time_ms:.0f}ms)*\n"
-
-            # Prepare next iteration message with tool results
-            clean_text = ToolCallParser.remove(accumulated)
-            full_response_parts.append(clean_text)
-
-            # Feed tool results back to LLM for continuation
-            current_message = "Tool execution results:\n" + "\n".join(tool_results) + "\n\nContinue or summarize."
-
-            yield "\n"  # Spacing between iterations
-
-        # Add full response to context
-        full_response = "\n".join(full_response_parts)
-        self.history.add_context("assistant", full_response)
+        async for chunk in self._chat_controller.chat(
+            client=client, message=message, system_prompt=system_prompt,
+            provider_name=provider_name if self._provider_manager.mode == "auto" else "",
+            skip_routing=skip_routing,
+        ):
+            yield chunk
 
     async def invoke_agent(
-        self,
-        agent_name: str,
-        task: str,
-        context: Optional[Dict[str, Any]] = None
+        self, agent_name: str, task: str, context: Optional[Dict[str, Any]] = None
     ) -> AsyncIterator[str]:
-        """
-        Invoke a specific agent with streaming response.
-
-        Enhanced with history tracking and plan capture.
-        """
-        # Add to history
+        """Invoke a specific agent with streaming response."""
         self.history.add_command(f"/{agent_name} {task}")
-
-        # Capture plan output if this is the planner
         plan_buffer = [] if agent_name == "planner" else None
 
-        # Governance observation (streaming-safe plain text)
         gov_report = self.governance.observe(f"agent:{agent_name}", task, agent_name)
         yield f"*{gov_report}*\n"
         yield f"🤖 Routing to **{agent_name.title()}Agent**...\n\n"
 
-        # Invoke agent and capture output
         async for chunk in self.agents.invoke_agent(agent_name, task, context):
-            # Capture plan chunks for later execution
             if plan_buffer is not None and chunk:
                 plan_buffer.append(chunk)
             yield chunk
 
-        # Save plan for later execution (e.g., "make it real", "create the files")
         if plan_buffer:
-            plan_text = "".join(plan_buffer)
-            self.agents._last_plan = plan_text
-            yield f"\n\n💾 **Plan saved!** Say `create the files` or `make it real` to execute.\n"
-
-    # =========================================================================
-    # PLANNER v6.1 METHODS (Multi-Plan, Clarification, Exploration)
-    # =========================================================================
+            self.agents._last_plan = "".join(plan_buffer)
+            yield "\n\n💾 **Plan saved!** Say `create the files` or `make it real` to execute.\n"
 
     async def invoke_planner_multi(
-        self,
-        task: str,
-        context: Optional[Dict[str, Any]] = None
+        self, task: str, context: Optional[Dict[str, Any]] = None
     ) -> AsyncIterator[str]:
-        """
-        Invoke planner with Multi-Plan Generation (v6.1).
-
-        Generates 3 alternative plans with risk/reward analysis.
-        """
+        """Invoke planner with Multi-Plan Generation."""
         self.history.add_command(f"/plan multi {task}")
-
-        gov_report = self.governance.observe("agent:planner:multi", task, "planner")
-        yield f"*{gov_report}*\n"
+        yield f"*{self.governance.observe('agent:planner:multi', task, 'planner')}*\n"
         yield "📋 **Multi-Plan Generation Mode** (v6.1)...\n\n"
-
         async for chunk in self.agents.invoke_planner_multi(task, context):
             yield chunk
 
     async def invoke_planner_clarify(
-        self,
-        task: str,
-        context: Optional[Dict[str, Any]] = None
+        self, task: str, context: Optional[Dict[str, Any]] = None
     ) -> AsyncIterator[str]:
-        """
-        Invoke planner with Clarification Mode (v6.1).
-
-        Asks clarifying questions before planning.
-        """
+        """Invoke planner with Clarification Mode."""
         self.history.add_command(f"/plan clarify {task}")
-
-        gov_report = self.governance.observe("agent:planner:clarify", task, "planner")
-        yield f"*{gov_report}*\n"
+        yield f"*{self.governance.observe('agent:planner:clarify', task, 'planner')}*\n"
         yield "❓ **Clarification Mode** (v6.1)...\n\n"
-
         async for chunk in self.agents.invoke_planner_clarify(task, context):
             yield chunk
 
     async def invoke_planner_explore(
-        self,
-        task: str,
-        context: Optional[Dict[str, Any]] = None
+        self, task: str, context: Optional[Dict[str, Any]] = None
     ) -> AsyncIterator[str]:
-        """
-        Invoke planner in Exploration Mode (v6.1).
-
-        Read-only analysis, no modifications.
-        """
+        """Invoke planner with Exploration Mode (read-only)."""
         self.history.add_command(f"/plan explore {task}")
-
-        gov_report = self.governance.observe("agent:planner:explore", task, "planner")
-        yield f"*{gov_report}*\n"
-        yield "🔍 **Exploration Mode** (Read-Only v6.1)...\n\n"
-
+        yield f"*{self.governance.observe('agent:planner:explore', task, 'planner')}*\n"
+        yield "🔍 **Exploration Mode** (v6.1 - read-only)...\n\n"
         async for chunk in self.agents.invoke_planner_explore(task, context):
             yield chunk
 
-    async def execute_tool(self, tool_name: str, **kwargs) -> Dict[str, Any]:
+    async def execute_tool(self, tool_name: str, **kwargs: Any) -> Dict[str, Any]:
         """Execute a tool by name."""
-        # Governance observation
         gov_report = self.governance.observe(f"tool:{tool_name}", str(kwargs))
-
-        # Execute tool
         result = await self.tools.execute_tool(tool_name, **kwargs)
         result["governance"] = gov_report
-
         return result
 
-    # =========================================================================
-    # PARALLEL TOOL EXECUTION (Claude Code Parity - Nov 2025)
-    # =========================================================================
-
     async def _execute_tools_parallel(
-        self,
-        tool_calls: List[Tuple[str, Dict[str, Any]]]
+        self, tool_calls: List[Tuple[str, Dict[str, Any]]]
     ) -> ParallelExecutionResult:
-        """
-        Execute tool calls with intelligent parallelization.
-
-        Uses ParallelToolExecutor (extracted module) for wave-based execution.
-        """
-        executor = ParallelToolExecutor(
-            self.tools.execute_tool,
-            max_parallel=self.MAX_PARALLEL_TOOLS
-        )
+        """Execute tool calls with intelligent parallelization."""
+        executor = ParallelToolExecutor(self.tools.execute_tool, max_parallel=self.MAX_PARALLEL_TOOLS)
         return await executor.execute(tool_calls)
 
     # =========================================================================
-    # AGENT COMMANDS
+    # COMMAND HELP (delegates to help_builder)
     # =========================================================================
 
     def get_agent_commands(self) -> Dict[str, str]:
         """Get mapping of slash commands to agents."""
-        return {
-            "/plan": "planner",
-            "/execute": "executor",
-            "/architect": "architect",
-            "/review": "reviewer",
-            "/explore": "explorer",
-            "/refactor": "refactorer",
-            "/test": "testing",
-            "/security": "security",
-            "/docs": "documentation",
-            "/perf": "performance",
-            "/devops": "devops",
-            # Governance & Counsel
-            "/justica": "justica",
-            "/sofia": "sofia",
-            # Data
-            "/data": "data",
-        }
+        return get_agent_commands()
 
     def get_command_help(self) -> str:
         """Get help text for agent commands."""
-        lines = ["## Agent Commands\n"]
-        for cmd, agent in self.get_agent_commands().items():
-            info = AGENT_REGISTRY.get(agent)
-            if info:
-                lines.append(f"| `{cmd}` | {info.description} |")
-        return "\n".join(lines)
+        return build_command_help(AGENT_REGISTRY)
 
     def get_tool_list(self) -> str:
         """Get formatted list of tools."""
-        tools = self.tools.list_tools()
-        if not tools:
-            return "No tools loaded."
-
-        # Group by category
-        categories = {
-            "File": ["read_file", "write_file", "edit_file", "list_directory", "delete_file",
-                    "move_file", "copy_file", "create_directory", "read_multiple_files", "insert_lines"],
-            "Terminal": ["cd", "ls", "pwd", "mkdir", "rm", "cp", "mv", "touch", "cat"],
-            "Execution": ["bash_command"],
-            "Search": ["search_files", "get_directory_tree"],
-            "Git": ["git_status", "git_diff"],
-            "Context": ["get_context", "save_session", "restore_backup"],
-            "Web": ["web_search", "search_documentation", "fetch_url", "download_file",
-                   "http_request", "package_search"],
-        }
-
-        lines = [f"## {ELP['tool']} Tools ({len(tools)} available)\n"]
-
-        for category, expected_tools in categories.items():
-            available = [t for t in expected_tools if t in tools]
-            if available:
-                lines.append(f"### {category}")
-                lines.append(", ".join(f"`{t}`" for t in available))
-                lines.append("")
-
-        # Any uncategorized tools
-        all_categorized = set()
-        for cat_tools in categories.values():
-            all_categorized.update(cat_tools)
-
-        uncategorized = [t for t in tools if t not in all_categorized]
-        if uncategorized:
-            lines.append("### Other")
-            lines.append(", ".join(f"`{t}`" for t in uncategorized))
-
-        return "\n".join(lines)
+        return build_tool_list(self.tools.list_tools())
 
     # =========================================================================
-    # CLAUDE CODE PARITY - Context Management
+    # DELEGATED METHODS (keeping API compatibility)
     # =========================================================================
 
-    # =========================================================================
-    # CONTEXT MANAGEMENT (delegates to ContextManager)
-    # =========================================================================
-
+    # Context management
     def compact_context(self, focus: Optional[str] = None) -> Dict[str, Any]:
-        """Compact conversation context, optionally focusing on specific topic."""
         return self._context_manager.compact_context(focus)
 
     def get_token_stats(self) -> Dict[str, Any]:
-        """Get token usage statistics."""
         return self._context_manager.get_token_stats()
 
-    # =========================================================================
-    # TODO MANAGEMENT (delegates to TodoManager)
-    # =========================================================================
-
+    # Todo management
     def get_todos(self) -> List[Dict[str, Any]]:
-        """Get current todo list (thread-safe copy)."""
         return self._todo_manager.get_todos()
 
     def add_todo(self, text: str) -> None:
-        """Add a todo item (thread-safe)."""
         self._todo_manager.add_todo(text)
 
     def update_todo(self, index: int, done: bool) -> bool:
-        """Update todo status (thread-safe). Returns True if updated."""
         return self._todo_manager.update_todo(index, done)
 
     def clear_todos(self) -> None:
-        """Clear all todos (thread-safe)."""
         self._todo_manager.clear_todos()
 
+    # Model management
     def set_model(self, model_name: str) -> None:
-        """Change the LLM model."""
         self.llm.model_name = model_name
 
     def get_current_model(self) -> str:
-        """Get current model name."""
         return getattr(self.llm, 'model_name', 'gemini-2.0-flash')
 
     def get_available_models(self) -> List[str]:
-        """Get list of available models."""
-        return [
-            "gemini-2.5-flash",
-            "gemini-2.5-pro",
-            "gemini-2.0-flash",
-            "gemini-1.5-pro",
-        ]
+        return ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash", "gemini-1.5-pro"]
 
+    # Session management
+    def resume_session(self, session_id: Optional[str] = None) -> Dict[str, Any]:
+        return self.history.load_session(session_id)
+
+    def save_session(self, session_id: Optional[str] = None) -> str:
+        return self.history.save_session(session_id)
+
+    def list_sessions(self, limit: int = 10) -> List[Dict[str, Any]]:
+        return self.history.list_sessions(limit)
+
+    def create_checkpoint(self, label: Optional[str] = None) -> Dict[str, Any]:
+        return self.history.create_checkpoint(label)
+
+    def get_checkpoints(self) -> List[Dict[str, Any]]:
+        return self.history.get_checkpoints()
+
+    def rewind_to(self, index: int) -> Dict[str, Any]:
+        return self.history.rewind_to_checkpoint(index)
+
+    # Status management
+    def check_health(self) -> Dict[str, Dict[str, Any]]:
+        return self._status_manager.check_health()
+
+    def get_permissions(self) -> Dict[str, bool]:
+        return self._status_manager.get_permissions()
+
+    def set_sandbox(self, enabled: bool) -> None:
+        self._status_manager.set_sandbox(enabled)
+
+    # Router control
+    def toggle_auto_routing(self) -> bool:
+        with self._router_lock:
+            self._auto_route_enabled = not self._auto_route_enabled
+            return self._auto_route_enabled
+
+    def is_auto_routing_enabled(self) -> bool:
+        with self._router_lock:
+            return self._auto_route_enabled
+
+    def get_router_status(self) -> Dict[str, Any]:
+        router = self.agents.router
+        return {
+            "enabled": self.is_auto_routing_enabled(),
+            "min_confidence": router.MIN_CONFIDENCE,
+            "agents_configured": len(router.INTENT_PATTERNS),
+        }
+
+    # Hooks (optional)
+    def get_hooks(self) -> Dict[str, Dict[str, Any]]:
+        return self._hooks_manager.get_hooks() if self._hooks_manager else {}
+
+    def set_hook(self, hook_name: str, commands: List[str]) -> bool:
+        return self._hooks_manager.set_hook(hook_name, commands) if self._hooks_manager else False
+
+    # Custom commands (optional)
+    def load_custom_commands(self) -> Dict[str, Dict[str, Any]]:
+        return self._custom_commands_manager.load_commands() if self._custom_commands_manager else {}
+
+    def get_custom_commands(self) -> Dict[str, Dict[str, Any]]:
+        return self._custom_commands_manager.get_commands() if self._custom_commands_manager else {}
+
+    def execute_custom_command(self, name: str, args: str = "") -> Optional[str]:
+        return self._custom_commands_manager.execute_command(name, args) if self._custom_commands_manager else None
+
+    # Plan mode (optional)
+    def enter_plan_mode(self, task: Optional[str] = None) -> Dict[str, Any]:
+        return self._plan_mode_manager.enter_plan_mode(task) if self._plan_mode_manager else {"success": False}
+
+    def exit_plan_mode(self, approved: bool = False) -> Dict[str, Any]:
+        return self._plan_mode_manager.exit_plan_mode(approved) if self._plan_mode_manager else {"success": False}
+
+    def is_plan_mode(self) -> bool:
+        return self._plan_mode_manager.is_plan_mode() if self._plan_mode_manager else False
+
+    # PR management
+    async def create_pull_request(
+        self, title: str, body: Optional[str] = None, base: str = "main", draft: bool = False
+    ) -> Dict[str, Any]:
+        return await self._pr_manager.create_pull_request(title, body, base, draft)
+
+    # Auth management
+    def login(self, provider: str = "gemini", api_key: Optional[str] = None, scope: str = "global") -> Dict[str, Any]:
+        return self._auth_manager.login(provider, api_key, scope)
+
+    def logout(self, provider: Optional[str] = None, scope: str = "all") -> Dict[str, Any]:
+        return self._auth_manager.logout(provider, scope)
+
+    def get_auth_status(self) -> Dict[str, Any]:
+        return self._auth_manager.get_auth_status()
+
+    # Memory management
+    def read_memory(self, scope: str = "project") -> Dict[str, Any]:
+        return self._memory_manager.read_memory(scope)
+
+    def write_memory(self, content: str, scope: str = "project", append: bool = False) -> Dict[str, Any]:
+        return self._memory_manager.write_memory(content, scope, append)
+
+    def remember(self, note: str, scope: str = "project") -> Dict[str, Any]:
+        return self._memory_manager.remember(note, scope)
+
+    # Project init
     def init_project(self) -> Dict[str, Any]:
-        """Initialize project with JUANCS.md file."""
         import datetime
-
         juancs_content = f"""# JUANCS.md - Project Context
 
 Generated: {datetime.datetime.now().isoformat()}
@@ -869,12 +458,6 @@ This file helps JuanCS Dev-Code understand your project context.
 
 ## Architecture
 <!-- Describe your architecture -->
-
-## Conventions
-<!-- Your coding conventions -->
-
-## Notes
-<!-- Additional context for the AI -->
 """
         juancs_path = Path.cwd() / "JUANCS.md"
         if not juancs_path.exists():
@@ -882,311 +465,9 @@ This file helps JuanCS Dev-Code understand your project context.
             return {"summary": "Created JUANCS.md - edit to add project context"}
         return {"summary": "JUANCS.md already exists"}
 
-    # =========================================================================
-    # SESSION MANAGEMENT (delegates to HistoryManager)
-    # =========================================================================
-
-    def resume_session(self, session_id: Optional[str] = None) -> Dict[str, Any]:
-        """Resume a previous session using HistoryManager."""
-        return self.history.load_session(session_id)
-
-    def save_session(self, session_id: Optional[str] = None) -> str:
-        """Save current session using HistoryManager."""
-        return self.history.save_session(session_id)
-
-    def list_sessions(self, limit: int = 10) -> List[Dict[str, Any]]:
-        """List available sessions."""
-        return self.history.list_sessions(limit)
-
-    def create_checkpoint(self, label: str = None) -> Dict[str, Any]:
-        """Create a checkpoint of current conversation state."""
-        return self.history.create_checkpoint(label)
-
-    def get_checkpoints(self) -> List[Dict[str, Any]]:
-        """Get available checkpoints for current session."""
-        return self.history.get_checkpoints()
-
-    def rewind_to(self, index: int) -> Dict[str, Any]:
-        """Rewind conversation to a specific checkpoint."""
-        return self.history.rewind_to_checkpoint(index)
-
-    def export_conversation(self, filepath: str = "conversation.md") -> str:
-        """Export conversation to file."""
-        lines = ["# Conversation Export\n"]
-        for msg in self.history.context:
-            role = msg.get("role", "unknown")
-            content = msg.get("content", "")
-            lines.append(f"## {role.title()}\n{content}\n")
-        Path(filepath).write_text("\n".join(lines))
-        return filepath
-
-    # =========================================================================
-    # STATUS MANAGEMENT (delegates to StatusManager)
-    # =========================================================================
-
-    def check_health(self) -> Dict[str, Dict[str, Any]]:
-        """Check system health."""
-        return self._status_manager.check_health()
-
-    def get_permissions(self) -> Dict[str, bool]:
-        """Get current permissions."""
-        return self._status_manager.get_permissions()
-
-    def set_sandbox(self, enabled: bool) -> None:
-        """Enable or disable sandbox mode."""
-        self._status_manager.set_sandbox(enabled)
-
-    # =========================================================================
-    # HOOKS SYSTEM (delegates to HooksManager)
-    # =========================================================================
-
-    def get_hooks(self) -> Dict[str, Dict[str, Any]]:
-        """Get configured hooks."""
-        if self._hooks_manager:
-            return self._hooks_manager.get_hooks()
-        return {}
-
-    def set_hook(self, hook_name: str, commands: List[str]) -> bool:
-        """Set commands for a specific hook."""
-        if self._hooks_manager:
-            return self._hooks_manager.set_hook(hook_name, commands)
-        return False
-
-    def enable_hook(self, hook_name: str, enabled: bool = True) -> bool:
-        """Enable or disable a hook."""
-        if self._hooks_manager:
-            return self._hooks_manager.enable_hook(hook_name, enabled)
-        return False
-
-    def add_hook_command(self, hook_name: str, command: str) -> bool:
-        """Add a command to a hook."""
-        if self._hooks_manager:
-            return self._hooks_manager.add_hook_command(hook_name, command)
-        return False
-
-    def remove_hook_command(self, hook_name: str, command: str) -> bool:
-        """Remove a command from a hook."""
-        if self._hooks_manager:
-            return self._hooks_manager.remove_hook_command(hook_name, command)
-        return False
-
-    async def execute_hook(self, hook_name: str, file_path: str) -> Dict[str, Any]:
-        """Execute a hook for a specific file."""
-        if self._hooks_manager:
-            return await self._hooks_manager.execute_hook(hook_name, file_path)
-        return {"success": False, "error": "Hooks system not available"}
-
-    def get_hook_stats(self) -> Dict[str, Any]:
-        """Get hook execution statistics."""
-        if self._hooks_manager:
-            return self._hooks_manager.get_stats()
-        return {"total_executions": 0, "no_manager": True}
-
-    def get_mcp_status(self) -> Dict[str, Any]:
-        """Get MCP server status."""
-        return {"servers": []}  # No MCP servers configured by default
-
-    # =========================================================================
-    # AGENT ROUTER CONTROL
-    # =========================================================================
-
-    def toggle_auto_routing(self) -> bool:
-        """Toggle automatic agent routing on/off (thread-safe)."""
-        with self._router_lock:
-            self._auto_route_enabled = not self._auto_route_enabled
-            return self._auto_route_enabled
-
-    def is_auto_routing_enabled(self) -> bool:
-        """Check if auto-routing is enabled (thread-safe read)."""
-        with self._router_lock:
-            return self._auto_route_enabled
-
-    def get_router_status(self) -> Dict[str, Any]:
-        """Get router status and statistics."""
-        router = self.agents.router
-        return {
-            "enabled": self.is_auto_routing_enabled(),
-            "min_confidence": router.MIN_CONFIDENCE,
-            "agents_configured": len(router.INTENT_PATTERNS),
-            "pattern_count": sum(len(p) for p in router.INTENT_PATTERNS.values()),
-            "available_agents": list(router.INTENT_PATTERNS.keys())
-        }
-
-    def test_routing(self, message: str) -> Dict[str, Any]:
-        """Test routing for a message without executing."""
-        router = self.agents.router
-
-        intents = router.detect_intent(message)
-        routing = router.route(message)
-        suggestion = router.get_routing_suggestion(message)
-
-        return {
-            "message": message,
-            "should_route": router.should_route(message),
-            "detected_intents": [
-                {"agent": a, "confidence": f"{c*100:.0f}%"}
-                for a, c in intents
-            ],
-            "selected_route": {
-                "agent": routing[0] if routing else None,
-                "confidence": f"{routing[1]*100:.0f}%" if routing else None
-            } if routing else None,
-            "suggestion": suggestion,
-            "would_auto_route": routing is not None and self.is_auto_routing_enabled()
-        }
-
-    def manually_route(self, message: str, agent_name: str) -> AsyncIterator[str]:
-        """Manually route a message to a specific agent."""
-        if agent_name not in AGENT_REGISTRY:
-            raise ValueError(f"Unknown agent: {agent_name}. Available: {list(AGENT_REGISTRY.keys())}")
-
-        return self.invoke_agent(agent_name, message)
-
-    # =========================================================================
-    # CUSTOM COMMANDS (delegates to CustomCommandsManager)
-    # =========================================================================
-
-    def load_custom_commands(self) -> Dict[str, Dict[str, Any]]:
-        """Load custom commands from .juancs/commands/ directory."""
-        if self._custom_commands_manager:
-            return self._custom_commands_manager.load_commands()
-        return {}
-
-    def get_custom_commands(self) -> Dict[str, Dict[str, Any]]:
-        """Get all loaded custom commands."""
-        if self._custom_commands_manager:
-            return self._custom_commands_manager.get_commands()
-        return {}
-
-    def get_custom_command(self, name: str) -> Optional[Dict[str, Any]]:
-        """Get a specific custom command by name."""
-        if self._custom_commands_manager:
-            return self._custom_commands_manager.get_command(name)
-        return None
-
-    def execute_custom_command(self, name: str, args: str = "") -> Optional[str]:
-        """Execute a custom command and return its expanded prompt."""
-        if self._custom_commands_manager:
-            return self._custom_commands_manager.execute_command(name, args)
-        return None
-
-    def create_custom_command(
-        self,
-        name: str,
-        prompt: str,
-        description: str = "",
-        scope: str = "project"
-    ) -> Dict[str, Any]:
-        """Create a new custom command."""
-        if self._custom_commands_manager:
-            return self._custom_commands_manager.create_command(name, prompt, description, scope)
-        return {"success": False, "error": "Custom commands system not available"}
-
-    def delete_custom_command(self, name: str) -> bool:
-        """Delete a custom command."""
-        if self._custom_commands_manager:
-            return self._custom_commands_manager.delete_command(name)
-        return False
-
-    def refresh_custom_commands(self) -> Dict[str, Dict[str, Any]]:
-        """Force reload of custom commands."""
-        if self._custom_commands_manager:
-            return self._custom_commands_manager.refresh()
-        return {}
-
-    # =========================================================================
-    # PLAN MODE (delegates to PlanModeManager)
-    # =========================================================================
-
-    def enter_plan_mode(self, task: str = None) -> Dict[str, Any]:
-        """Enter plan mode for careful task planning."""
-        if self._plan_mode_manager:
-            return self._plan_mode_manager.enter_plan_mode(task)
-        return {"success": False, "error": "Plan mode system not available"}
-
-    def exit_plan_mode(self, approved: bool = False) -> Dict[str, Any]:
-        """Exit plan mode."""
-        if self._plan_mode_manager:
-            return self._plan_mode_manager.exit_plan_mode(approved)
-        return {"success": False, "error": "Plan mode system not available"}
-
-    def is_plan_mode(self) -> bool:
-        """Check if currently in plan mode."""
-        if self._plan_mode_manager:
-            return self._plan_mode_manager.is_plan_mode()
-        return False
-
-    def get_plan_mode_state(self) -> Dict[str, Any]:
-        """Get current plan mode state."""
-        if self._plan_mode_manager:
-            return self._plan_mode_manager.get_plan_mode_state()
-        return {"active": False}
-
-    def add_plan_note(self, note: str, category: str = "exploration") -> bool:
-        """Add a note to the current plan."""
-        if self._plan_mode_manager:
-            return self._plan_mode_manager.add_plan_note(note, category)
-        return False
-
-    def check_plan_mode_restriction(self, operation: str) -> Tuple[bool, Optional[str]]:
-        """Check if an operation is allowed in plan mode."""
-        if self._plan_mode_manager:
-            return self._plan_mode_manager.check_plan_mode_restriction(operation)
-        return True, None
-
-    # =========================================================================
-    # PR CREATION (delegates to PullRequestManager)
-    # =========================================================================
-
-    async def create_pull_request(
-        self,
-        title: str,
-        body: str = None,
-        base: str = "main",
-        draft: bool = False
-    ) -> Dict[str, Any]:
-        """Create a GitHub pull request using gh CLI."""
-        return await self._pr_manager.create_pull_request(title, body, base, draft)
-
-    def get_pr_template(self) -> str:
-        """Get PR template if exists."""
-        return self._pr_manager.get_pr_template()
-
-    # =========================================================================
-    # API KEY MANAGEMENT (delegates to AuthenticationManager)
-    # =========================================================================
-
-    def login(self, provider: str = "gemini", api_key: str = None, scope: str = "global") -> Dict[str, Any]:
-        """Login/configure API key for a provider."""
-        return self._auth_manager.login(provider, api_key, scope)
-
-    def logout(self, provider: str = None, scope: str = "all") -> Dict[str, Any]:
-        """Logout/remove API key for a provider."""
-        return self._auth_manager.logout(provider, scope)
-
-    def get_auth_status(self) -> Dict[str, Any]:
-        """Get authentication status for all providers."""
-        return self._auth_manager.get_auth_status()
-
-    # =========================================================================
-    # MEMORY PERSISTENCE (delegates to MemoryManager)
-    # =========================================================================
-
-    def read_memory(self, scope: str = "project") -> Dict[str, Any]:
-        """Read memory/context from MEMORY.md file."""
-        return self._memory_manager.read_memory(scope)
-
-    def write_memory(self, content: str, scope: str = "project", append: bool = False) -> Dict[str, Any]:
-        """Write to MEMORY.md file."""
-        return self._memory_manager.write_memory(content, scope, append)
-
-    def remember(self, note: str, scope: str = "project") -> Dict[str, Any]:
-        """Add a note to memory (convenience method)."""
-        return self._memory_manager.remember(note, scope)
-
 
 # =============================================================================
-# SINGLETON PATTERN - For backwards compatibility
+# SINGLETON
 # =============================================================================
 
 _bridge_instance: Optional[Bridge] = None
@@ -1198,48 +479,21 @@ def get_bridge() -> Bridge:
     global _bridge_instance
     if _bridge_instance is None:
         with _bridge_lock:
-            # Double-check locking pattern
             if _bridge_instance is None:
                 _bridge_instance = Bridge()
     return _bridge_instance
 
 
 # =============================================================================
-# EXPORTS - Re-export all extracted module classes for backward compatibility
+# EXPORTS
 # =============================================================================
 
 __all__ = [
-    # Main facade
-    'Bridge',
-
-    # Governance
-    'RiskLevel',
-    'GovernanceConfig',
-    'GovernanceObserver',
-    'ELP',
-
-    # LLM
-    'GeminiClient',
-    'ToolCallParser',
-
-    # Agents
-    'AgentInfo',
-    'AGENT_REGISTRY',
-    'AgentRouter',
-    'AgentManager',
-
-    # Tools
-    'ToolBridge',
-    'MinimalRegistry',
-
-    # UI
-    'CommandPaletteBridge',
-    'MinimalCommandPalette',
-    'AutocompleteBridge',
-
-    # History
+    'Bridge', 'get_bridge',
+    'RiskLevel', 'GovernanceConfig', 'GovernanceObserver', 'ELP',
+    'GeminiClient', 'ToolCallParser',
+    'AgentInfo', 'AGENT_REGISTRY', 'AgentRouter', 'AgentManager',
+    'ToolBridge', 'MinimalRegistry',
+    'CommandPaletteBridge', 'MinimalCommandPalette', 'AutocompleteBridge',
     'HistoryManager',
-
-    # Singleton
-    'get_bridge',
 ]
