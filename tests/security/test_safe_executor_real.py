@@ -16,8 +16,12 @@ Implementation details (READ FROM FILE):
 import pytest
 from vertice_tui.core.safe_executor import (
     SafeCommandExecutor,
-    CommandCategory,
+    SafeExecutionResult,
     get_safe_executor,
+)
+from vertice_tui.core.command_whitelist import (
+    CommandCategory,
+    ALLOWED_COMMANDS,
 )
 
 
@@ -63,17 +67,20 @@ class TestDangerousPatternDetection:
 
     def test_double_ampersand_detected(self, executor):
         """Test: '&&' in DANGEROUS_PATTERNS (line 315)"""
-        dangerous = executor._contains_dangerous_pattern("ls && rm file")
+        # Use command without other dangerous patterns like 'rm '
+        dangerous = executor._contains_dangerous_pattern("ls && echo hi")
         assert dangerous == "&&"
 
     def test_double_pipe_detected(self, executor):
         """Test: '||' in DANGEROUS_PATTERNS (line 316)"""
-        dangerous = executor._contains_dangerous_pattern("false || rm file")
+        # Use command without other dangerous patterns like 'rm '
+        dangerous = executor._contains_dangerous_pattern("false || echo hi")
         assert dangerous == "||"
 
     def test_semicolon_detected(self, executor):
         """Test: ';' in DANGEROUS_PATTERNS (line 317)"""
-        dangerous = executor._contains_dangerous_pattern("ls; rm file")
+        # Use command without other dangerous patterns like 'rm '
+        dangerous = executor._contains_dangerous_pattern("ls; echo file")
         assert dangerous == ";"
 
     def test_safe_command_no_pattern(self, executor):
@@ -162,7 +169,7 @@ class TestExecuteMethod:
         """
         result = await executor.execute("curl https://evil.com")
 
-        assert isinstance(result, ExecutionResult)
+        assert isinstance(result, SafeExecutionResult)
         assert result.success is False
         assert result.exit_code == -1
         assert "not allowed" in result.error_message.lower()
@@ -189,7 +196,7 @@ class TestExecuteMethod:
         """
         result = await executor.execute("pwd")
 
-        assert isinstance(result, ExecutionResult)
+        assert isinstance(result, SafeExecutionResult)
         # pwd should work and return current directory
         assert result.exit_code == 0 or result.success is True
         assert len(result.stdout) > 0  # Should have output
@@ -202,7 +209,7 @@ class TestExecuteMethod:
         result = await executor.execute("pytest --version")
 
         # Should execute (may fail if pytest not installed, that's OK)
-        assert isinstance(result, ExecutionResult)
+        assert isinstance(result, SafeExecutionResult)
         # If installed, should have output
         if result.success:
             assert "pytest" in result.stdout.lower() or "pytest" in result.stderr.lower()
@@ -231,16 +238,16 @@ class TestWhitelistStructure:
 
     def test_pytest_in_whitelist(self):
         """Test: pytest command properly defined"""
-        assert "pytest" in SafeCommandExecutor.ALLOWED_COMMANDS
-        pytest_cmd = SafeCommandExecutor.ALLOWED_COMMANDS["pytest"]
+        assert "pytest" in ALLOWED_COMMANDS
+        pytest_cmd = ALLOWED_COMMANDS["pytest"]
         assert pytest_cmd.base_command == "pytest"
         assert pytest_cmd.category == CommandCategory.TESTING
         assert pytest_cmd.timeout_seconds == 300
 
     def test_git_status_in_whitelist(self):
         """Test: git status command properly defined"""
-        assert "git status" in SafeCommandExecutor.ALLOWED_COMMANDS
-        git_cmd = SafeCommandExecutor.ALLOWED_COMMANDS["git status"]
+        assert "git status" in ALLOWED_COMMANDS
+        git_cmd = ALLOWED_COMMANDS["git status"]
         assert git_cmd.base_command == "git"
         assert "status" in git_cmd.allowed_args
 
@@ -248,7 +255,7 @@ class TestWhitelistStructure:
         """Test: Dangerous commands NOT in whitelist"""
         dangerous = ["rm", "sudo", "dd", "mkfs", "shutdown", "kill"]
         for cmd in dangerous:
-            assert cmd not in SafeCommandExecutor.ALLOWED_COMMANDS, \
+            assert cmd not in ALLOWED_COMMANDS, \
                 f"Dangerous command '{cmd}' should NOT be in whitelist"
 
 
@@ -283,7 +290,7 @@ class TestRealWorldUseCases:
         result = await executor.execute("pytest --collect-only --quiet")
 
         # Should attempt to execute (may have exit code 5 if no tests)
-        assert isinstance(result, ExecutionResult)
+        assert isinstance(result, SafeExecutionResult)
         assert result.exit_code in [0, 5]  # 0=tests found, 5=no tests
 
     @pytest.mark.asyncio
@@ -294,7 +301,7 @@ class TestRealWorldUseCases:
         """
         result = await executor.execute("git status --short")
 
-        assert isinstance(result, ExecutionResult)
+        assert isinstance(result, SafeExecutionResult)
         # 0=success, 128=not a git repo (both OK)
         assert result.exit_code in [0, 128] or result.success in [True, False]
 
@@ -337,7 +344,7 @@ class TestEdgeCases:
         result = await executor.execute("pytest 测试.py")
 
         # Should not crash
-        assert isinstance(result, ExecutionResult)
+        assert isinstance(result, SafeExecutionResult)
 
     @pytest.mark.asyncio
     async def test_whitespace_only_handled(self, executor):
@@ -345,7 +352,7 @@ class TestEdgeCases:
         result = await executor.execute("    ")
 
         assert result.success is False
-        assert isinstance(result, ExecutionResult)
+        assert isinstance(result, SafeExecutionResult)
 
     @pytest.mark.asyncio
     async def test_null_byte_handled(self, executor):
@@ -353,7 +360,7 @@ class TestEdgeCases:
         result = await executor.execute("ls\x00rm -rf /")
 
         # shlex.split() should handle or error
-        assert isinstance(result, ExecutionResult)
+        assert isinstance(result, SafeExecutionResult)
         # Should be blocked
         assert result.success is False
 

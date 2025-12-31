@@ -113,14 +113,14 @@ class CommandValidator:
         cmd_lower = command.lower().strip()
         for blocked in cls.BLACKLIST:
             if blocked in cmd_lower:
-                logger.warning(f"WARNING: Blacklisted command detected: {blocked}")
-                return True, f"WARNING: Blacklisted command detected: {blocked}. Proceed with caution."
+                logger.warning(f"BLOCKED: Blacklisted command detected: {blocked}")
+                return False, f"BLOCKED: Blacklisted command '{blocked}' is not allowed"
 
         # 3. Check dangerous patterns (regex)
         for pattern in cls.DANGEROUS_PATTERNS:
             if re.search(pattern, command, re.IGNORECASE):
-                logger.warning(f"WARNING: Dangerous pattern detected: {pattern}")
-                return True, f"WARNING: Dangerous pattern detected: {pattern}. Proceed with caution."
+                logger.warning(f"BLOCKED: Dangerous pattern detected: {pattern}")
+                return False, f"BLOCKED: Dangerous pattern '{pattern}' is not allowed"
 
         # 4. Check for excessive piping (potential DoS)
         pipe_count = command.count('|')
@@ -439,12 +439,7 @@ class BashCommandToolHardened(ValidatedTool):
 
         is_valid, error_msg = self.validator.validate(command)
 
-        # Handle warnings (return True but with message)
-        if is_valid and error_msg and error_msg.startswith("WARNING"):
-            logger.warning(error_msg)
-            # In interactive mode, we proceed. In non-interactive, we might want to block or warn.
-            # For now, we proceed but log it.
-        elif not is_valid:
+        if not is_valid:
             logger.error(f"VALIDATION FAILED: {error_msg}")
             return ToolResult(
                 success=False,

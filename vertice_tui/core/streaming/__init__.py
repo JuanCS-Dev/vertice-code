@@ -17,7 +17,7 @@ Example:
 
 from __future__ import annotations
 
-from .gemini_stream import (
+from .gemini import (
     GEMINI_OUTPUT_RULES,
     GeminiStreamConfig,
     BaseStreamer,

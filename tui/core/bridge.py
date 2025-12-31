@@ -37,7 +37,7 @@ from vertice_tui.core.maximus_client import MaximusClient
 # Extracted modules
 from .governance import RiskLevel, GovernanceConfig, GovernanceObserver, ELP
 from .llm_client import GeminiClient, ToolCallParser
-from .agents_bridge import AgentInfo, AGENT_REGISTRY, AgentRouter, AgentManager
+from .agents import AgentInfo, AGENT_REGISTRY, AgentRouter, AgentManager
 from .tools_bridge import ToolBridge, MinimalRegistry
 from .ui_bridge import CommandPaletteBridge, MinimalCommandPalette, AutocompleteBridge
 from .history_manager import HistoryManager

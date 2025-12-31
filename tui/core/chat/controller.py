@@ -19,7 +19,7 @@ from typing import Any, AsyncIterator, Callable, Dict, List, Optional, Tuple
 
 from ..llm_client import ToolCallParser
 from ..parsing.stream_filter import StreamFilter
-from ..output_formatter import (
+from ..formatting import (
     tool_success_markup,
     tool_error_markup,
     agent_routing_markup,

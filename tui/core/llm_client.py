@@ -34,7 +34,7 @@ from vertice_tui.core.parsing.tool_call_parser import (
     KNOWN_TOOLS,
 )
 from vertice_tui.core.schema_adapter import SchemaAdapter
-from vertice_tui.core.streaming.gemini_stream import (
+from vertice_tui.core.streaming.gemini import (
     GeminiStreamConfig,
     GeminiStreamer,
 )

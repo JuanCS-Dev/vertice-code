@@ -20,8 +20,8 @@ import tempfile
 import os
 from pathlib import Path
 
-from vertice_cli.shell import InteractiveShell
-from vertice_cli.tools.exec_hardened import BashCommandTool
+from vertice_cli.shell_main import InteractiveShell
+from vertice_cli.tools.exec_hardened import BashCommandToolHardened as BashCommandTool
 
 
 @pytest.fixture(autouse=True)
@@ -179,7 +179,7 @@ class TestToolExecutionScientific:
             result = await tool.execute(path=temp_path)
 
             assert result.success
-            assert "test content" in result.data
+            assert "test content" in result.data["content"]
         finally:
             Path(temp_path).unlink()
 
@@ -270,7 +270,7 @@ class TestToolExecutionScientific:
             read_tool = shell.registry.tools["read_file"]
             result2 = await read_tool.execute(path=str(test_file))
             assert result2.success
-            assert "test" in result2.data
+            assert "test" in result2.data["content"]
 
     @pytest.mark.asyncio
     async def test_tool_with_invalid_params(self):

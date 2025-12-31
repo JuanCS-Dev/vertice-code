@@ -23,7 +23,7 @@ from typing import Any, AsyncIterator, Callable, Dict, List, Optional, Protocol,
 
 from ..llm_client import ToolCallParser
 from ..parsing.stream_filter import StreamFilter
-from ..output_formatter import tool_success_markup, tool_error_markup, agent_routing_markup
+from ..formatting import tool_success_markup, tool_error_markup, agent_routing_markup
 from ..parallel_executor import ParallelToolExecutor, ParallelExecutionResult
 
 logger = logging.getLogger(__name__)

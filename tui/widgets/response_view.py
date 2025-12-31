@@ -19,7 +19,7 @@ from rich.text import Text
 
 from vertice_tui.constants import BANNER
 from vertice_tui.widgets.selectable import SelectableStatic
-from vertice_tui.core.output_formatter import OutputFormatter, Colors, Icons
+from vertice_tui.core.formatting import OutputFormatter, Colors, Icons
 from vertice_tui.components.streaming_adapter import StreamingResponseWidget
 
 if TYPE_CHECKING:

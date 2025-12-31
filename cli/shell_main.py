@@ -160,10 +160,6 @@ class InteractiveShell:
         from .core.context_rich import RichContextBuilder
         self.rich_context = RichContextBuilder()
 
-        # P2: Rich context builder
-        from .core.context_rich import RichContextBuilder
-        self.rich_context = RichContextBuilder()
-
         # Session state management (AIR GAP #2)
         from .session import SessionManager
         self.session_manager = SessionManager()

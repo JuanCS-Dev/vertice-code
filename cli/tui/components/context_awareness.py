@@ -688,6 +688,108 @@ class ContextAwarenessEngine:
         # In real implementation, would scan workspace
         return []
 
+    # ========================================================================
+    # WEEK 4 DAY 1 CONSOLIDATION: Methods from ContextOptimizer
+    # ========================================================================
+
+    def add_item(
+        self,
+        item_id: str,
+        content: str,
+        content_type: ContentType,
+        token_count: int,
+        pinned: bool = False
+    ) -> bool:
+        """Add item with LRU tracking."""
+        if self.window.total_tokens + token_count > self.max_context_tokens:
+            if not pinned:
+                self.auto_optimize(tokens_needed=token_count)
+        if self.window.total_tokens + token_count > self.max_context_tokens:
+            return False
+        if item_id in self.items:
+            old_item = self.items[item_id]
+            self.window.total_tokens -= old_item.token_count
+        item = ContextItem(
+            id=item_id,
+            content=content,
+            content_type=content_type,
+            token_count=token_count,
+            timestamp=time.time(),
+            pinned=pinned
+        )
+        self.items[item_id] = item
+        self.window.total_tokens += token_count
+        return True
+
+    def auto_optimize(
+        self,
+        tokens_needed: int = 0,
+        target_usage: float = 0.7
+    ) -> OptimizationMetrics:
+        """Auto-optimize using LRU."""
+        start = time.time()
+        items_before = len(self.items)
+        tokens_before = self.window.total_tokens
+        target_tokens = int(self.max_context_tokens * target_usage) - tokens_needed
+        scored = [
+            (self.calculate_item_relevance(item), item)
+            for item in self.items.values()
+            if not item.pinned
+        ]
+        scored.sort(key=lambda x: x[0])
+        removed: List[str] = []
+        freed = 0
+        for _, item in scored:
+            if self.window.total_tokens <= target_tokens:
+                break
+            removed.append(item.id)
+            freed += item.token_count
+            self.window.total_tokens -= item.token_count
+        for rid in removed:
+            self.items.pop(rid, None)
+        self.optimizations_performed += 1
+        self.total_tokens_freed += freed
+        return OptimizationMetrics(
+            items_before=items_before,
+            items_after=len(self.items),
+            tokens_before=tokens_before,
+            tokens_after=self.window.total_tokens,
+            items_removed=len(removed),
+            tokens_freed=freed,
+            duration_ms=(time.time() - start) * 1000
+        )
+
+    def calculate_item_relevance(self, item: ContextItem) -> float:
+        """Calculate relevance for LRU."""
+        if item.pinned:
+            return 1.0
+        age = time.time() - item.last_accessed
+        recency = 1.0 / (1.0 + age / 300)
+        frequency = min(1.0, (item.access_count + 1) / 10)
+        return 0.7 * recency + 0.3 * frequency
+
+    def get_optimization_stats(self) -> Dict[str, Any]:
+        """Get stats."""
+        return {
+            'total_items': len(self.items),
+            'total_tokens': self.window.total_tokens,
+            'max_tokens': self.max_context_tokens,
+            'usage_percent': self.window.utilization * 100,
+            'pinned_items': sum(1 for i in self.items.values() if i.pinned),
+            'optimizations_performed': self.optimizations_performed,
+            'total_tokens_freed': self.total_tokens_freed
+        }
+
+    def get_optimization_recommendations(self) -> List[str]:
+        """Get recommendations."""
+        recs: List[str] = []
+        usage = self.window.utilization * 100
+        if usage >= 90:
+            recs.append("CRITICAL: Context >90% full")
+        elif usage >= 80:
+            recs.append("WARNING: Context >80% full")
+        return recs
+
 
 # Example usage
 if __name__ == "__main__":
@@ -707,61 +809,3 @@ if __name__ == "__main__":
     console.print("\n🤖 Suggested Files:")
     for suggestion in suggestions:
         console.print(f"  • {suggestion.path} (score: {suggestion.score:.2f})")
-
-    # ========================================================================
-    # WEEK 4 DAY 1 CONSOLIDATION: Methods from ContextOptimizer
-    # ========================================================================
-
-    def add_item(self, item_id: str, content: str, content_type, token_count: int, pinned: bool = False) -> bool:
-        """Add item with LRU tracking."""
-        if self.window.total_tokens + token_count > self.max_context_tokens:
-            if not pinned:
-                self.auto_optimize(tokens_needed=token_count)
-        if self.window.total_tokens + token_count > self.max_context_tokens:
-            return False
-        if item_id in self.items:
-            old_item = self.items[item_id]
-            self.window.total_tokens -= old_item.token_count
-        item = ContextItem(id=item_id, content=content, content_type=content_type, token_count=token_count, timestamp=time.time(), pinned=pinned)
-        self.items[item_id] = item
-        self.window.total_tokens += token_count
-        return True
-
-    def auto_optimize(self, tokens_needed: int = 0, target_usage: float = 0.7):
-        """Auto-optimize using LRU."""
-        start = time.time()
-        items_before = len(self.items)
-        tokens_before = self.window.total_tokens
-        target_tokens = int(self.max_context_tokens * target_usage) - tokens_needed
-        scored = [(self.calculate_item_relevance(item), item) for item in self.items.values() if not item.pinned]
-        scored.sort(key=lambda x: x[0])
-        removed, freed = [], 0
-        for _, item in scored:
-            if self.window.total_tokens <= target_tokens: break
-            removed.append(item.id)
-            freed += item.token_count
-            self.window.total_tokens -= item.token_count
-        for rid in removed: self.items.pop(rid, None)
-        self.optimizations_performed += 1
-        self.total_tokens_freed += freed
-        return OptimizationMetrics(items_before, len(self.items), tokens_before, self.window.total_tokens, len(removed), freed, (time.time() - start) * 1000)
-
-    def calculate_item_relevance(self, item) -> float:
-        """Calculate relevance for LRU."""
-        if item.pinned: return 1.0
-        age = time.time() - item.last_accessed
-        recency = 1.0 / (1.0 + age / 300)
-        frequency = min(1.0, (item.access_count + 1) / 10)
-        return 0.7 * recency + 0.3 * frequency
-
-    def get_optimization_stats(self) -> dict:
-        """Get stats."""
-        return {'total_items': len(self.items), 'total_tokens': self.window.total_tokens, 'max_tokens': self.max_context_tokens, 'usage_percent': self.window.utilization * 100, 'pinned_items': sum(1 for i in self.items.values() if i.pinned), 'optimizations_performed': self.optimizations_performed, 'total_tokens_freed': self.total_tokens_freed}
-
-    def get_optimization_recommendations(self) -> list:
-        """Get recommendations."""
-        recs = []
-        usage = self.window.utilization * 100
-        if usage >= 90: recs.append("CRITICAL: Context >90% full")
-        elif usage >= 80: recs.append("WARNING: Context >80% full")
-        return recs

@@ -29,7 +29,7 @@ from .bridge import (
     ToolCallParser,
     get_bridge,
 )
-from .output_formatter import OutputFormatter
+from .formatting import OutputFormatter
 from .maximus_client import MaximusClient, MaximusStreamConfig
 
 __all__ = [

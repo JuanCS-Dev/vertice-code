@@ -31,7 +31,7 @@ from vertice_cli.tui.components.streaming_markdown import (
 )
 
 # Import colors for brand consistency
-from vertice_tui.core.output_formatter import Colors
+from vertice_tui.core.formatting import Colors
 
 # Import tool sanitizer
 from .tool_sanitizer import sanitize_tool_call_json

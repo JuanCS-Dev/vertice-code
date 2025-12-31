@@ -95,6 +95,14 @@ class AgentCapability(str, Enum):
     NETWORK_ACCESS = "network_access"
     SYSTEM_CONFIG = "system_config"
 
+    # Agent-specific capabilities
+    DESIGN = "design"                 # Can create architecture/design plans
+    PLANNING = "planning"             # Can create execution plans
+    ANALYSIS = "analysis"             # Can analyze code/systems
+    REFACTORING = "refactoring"       # Can refactor code
+    TESTING = "testing"               # Can run/create tests
+    DOCUMENTATION = "documentation"   # Can create docs
+
     # Legacy capabilities (used by existing agents - backward compatible)
     READ_ONLY = "read_only"           # Can only read files
     FILE_EDIT = "file_edit"           # Can read and write files

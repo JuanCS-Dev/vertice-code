@@ -24,7 +24,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, AsyncIterator, Dict, List, Optional
 
-from .gemini_stream import GeminiStreamConfig, GeminiStreamer
+from .gemini import GeminiStreamConfig, GeminiStreamer
 
 logger = logging.getLogger(__name__)
 
