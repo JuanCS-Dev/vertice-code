@@ -45,12 +45,12 @@ class ResponseView(VerticalScroll):
     DEFAULT_CSS = """
     ResponseView {
         height: 1fr;
-        border: round $primary;
         background: $background;
         padding: 1 2;
         scrollbar-size: 1 1;
         scrollbar-background: $surface;
         scrollbar-color: $secondary;
+        scrollbar-color-hover: $primary;
     }
 
     .user-message {

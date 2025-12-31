@@ -87,15 +87,15 @@ class StatusBar(Horizontal):
     def compose(self) -> ComposeResult:
         """Compose premium status bar."""
         yield Static(self._format_mode(), id="mode", classes="mode")
-        yield Static(" | ", classes="separator")
+        yield Static("│", classes="separator")
         yield Static(self._format_model(), id="model", classes="model")
-        yield Static(" | ", classes="separator")
+        yield Static("│", classes="separator")
         yield Static(self._format_agent(), id="agent", classes="agent")
-        yield Static(" | ", classes="separator")
+        yield Static("│", classes="separator")
         yield MiniTokenMeter(id="mini-meter")
-        yield Static(" | ", classes="separator")
+        yield Static("│", classes="separator")
         yield Static(self._format_cost(), id="cost", classes="cost")
-        yield Static(" | ", classes="separator")
+        yield Static("│", classes="separator")
         yield Static(self._format_errors(), id="errors", classes="errors")
 
     def _format_mode(self) -> str:

@@ -1,27 +1,21 @@
 """
-VERTICE Agent Agency Banner - Phase 9 Visual Refresh.
+VERTICE Agent Agency Banner - Clean minimal design.
 
-Modern clean design with Slate/Blue palette (WCAG AAA).
+No frames, no boxes - pure typography.
+Slate/Blue palette (WCAG AAA).
 """
 
-# Modern clean banner with Slate/Blue theme colors
+# Clean banner without frame
 BANNER = """
-[bold #3B82F6]╔══════════════════════════════════════════════════════════╗[/bold #3B82F6]
-[bold #3B82F6]║[/bold #3B82F6]                                                          [bold #3B82F6]║[/bold #3B82F6]
-[bold #3B82F6]║[/bold #3B82F6]  [bold #22D3EE]██╗   ██╗███████╗██████╗ ████████╗██╗ ██████╗███████╗[/bold #22D3EE]  [bold #3B82F6]║[/bold #3B82F6]
-[bold #3B82F6]║[/bold #3B82F6]  [bold #22D3EE]██║   ██║██╔════╝██╔══██╗╚══██╔══╝██║██╔════╝██╔════╝[/bold #22D3EE]  [bold #3B82F6]║[/bold #3B82F6]
-[bold #3B82F6]║[/bold #3B82F6]  [bold #3B82F6]██║   ██║█████╗  ██████╔╝   ██║   ██║██║     █████╗  [/bold #3B82F6]  [bold #3B82F6]║[/bold #3B82F6]
-[bold #3B82F6]║[/bold #3B82F6]  [bold #60A5FA]╚██╗ ██╔╝██╔══╝  ██╔══██╗   ██║   ██║██║     ██╔══╝  [/bold #60A5FA]  [bold #3B82F6]║[/bold #3B82F6]
-[bold #3B82F6]║[/bold #3B82F6]  [bold #93C5FD] ╚████╔╝ ███████╗██║  ██║   ██║   ██║╚██████╗███████╗[/bold #93C5FD]  [bold #3B82F6]║[/bold #3B82F6]
-[bold #3B82F6]║[/bold #3B82F6]  [bold #93C5FD]  ╚═══╝  ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚═╝ ╚═════╝╚══════╝[/bold #93C5FD]  [bold #3B82F6]║[/bold #3B82F6]
-[bold #3B82F6]║[/bold #3B82F6]                                                          [bold #3B82F6]║[/bold #3B82F6]
-[bold #3B82F6]║[/bold #3B82F6]        [bold #F1F5F9]Agent Agency[/bold #F1F5F9] [dim #94A3B8]• Enterprise Multi-LLM v1.0[/dim #94A3B8]        [bold #3B82F6]║[/bold #3B82F6]
-[bold #3B82F6]║[/bold #3B82F6]                                                          [bold #3B82F6]║[/bold #3B82F6]
-[bold #3B82F6]╚══════════════════════════════════════════════════════════╝[/bold #3B82F6]
-[dim #64748B]                        by JuanCS-Dev[/dim #64748B]
+[bold #22D3EE]██╗   ██╗███████╗██████╗ ████████╗██╗ ██████╗███████╗[/bold #22D3EE]
+[bold #22D3EE]██║   ██║██╔════╝██╔══██╗╚══██╔══╝██║██╔════╝██╔════╝[/bold #22D3EE]
+[bold #3B82F6]██║   ██║█████╗  ██████╔╝   ██║   ██║██║     █████╗  [/bold #3B82F6]
+[bold #60A5FA]╚██╗ ██╔╝██╔══╝  ██╔══██╗   ██║   ██║██║     ██╔══╝  [/bold #60A5FA]
+[bold #93C5FD] ╚████╔╝ ███████╗██║  ██║   ██║   ██║╚██████╗███████╗[/bold #93C5FD]
+[bold #93C5FD]  ╚═══╝  ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚═╝ ╚═════╝╚══════╝[/bold #93C5FD]
+
+[bold #F1F5F9]Agent Agency[/bold #F1F5F9] [dim #64748B]• Enterprise Multi-LLM v1.0 • by JuanCS-Dev[/dim #64748B]
 """
 
 # Compact version for smaller terminals
-BANNER_COMPACT = """
-[bold #3B82F6]═══[/bold #3B82F6] [bold #22D3EE]VERTICE[/bold #22D3EE] [dim #94A3B8]Agent Agency v1.0[/dim #94A3B8] [bold #3B82F6]═══[/bold #3B82F6]
-"""
+BANNER_COMPACT = """[bold #22D3EE]VERTICE[/bold #22D3EE] [dim #64748B]Agent Agency v1.0[/dim #64748B]"""

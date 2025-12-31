@@ -211,21 +211,15 @@ VerticalScroll {
 #token-dashboard {
     dock: top;
     height: auto;
-    max-height: 12;
+    max-height: 8;
     margin: 0 1;
     padding: 0 1;
     background: $surface;
-    border: round $border;
-    transition: height 200ms;
 }
 
 #token-dashboard.collapsed {
-    height: 3;
+    height: 1;
     overflow: hidden;
-}
-
-#token-dashboard:focus {
-    border: double $primary;
 }
 
 /* Token Meter Progress Bar */

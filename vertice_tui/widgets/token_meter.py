@@ -317,14 +317,13 @@ class TokenDashboard(Vertical):
     TokenDashboard {
         height: auto;
         max-height: 10;
-        padding: 1;
+        padding: 0 1;
         background: $surface;
-        border: solid $border;
-        border-title-color: $accent;
     }
 
     TokenDashboard.collapsed {
-        height: 3;
+        height: 1;
+        overflow: hidden;
     }
 
     TokenDashboard .header {
