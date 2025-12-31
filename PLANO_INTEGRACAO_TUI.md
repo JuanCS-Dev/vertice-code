@@ -16,7 +16,7 @@
 
 **Meta**: ~~Atingir **85%+ compliance** em todos os componentes.~~ **ATINGIDO** ✅
 
-**Total de Testes**: 421 (+ ~210 E2E planejados) | **Fases Completas**: 6/9
+**Total de Testes**: 421 (+ ~210 E2E + ~65 UX planejados) | **Fases Completas**: 6/10
 
 ---
 
@@ -640,7 +640,8 @@ tests/performance/test_reconnect.py
 | 7. Testes Compliance | 8 | 5 dias | CRÍTICA | 🔨 |
 | 8. Testes E2E | 9-10 | TBD | CRÍTICA | 📋 |
 | 9. Visual Refresh | 11-12 | TBD | ALTA | 📋 |
-| **TOTAL** | **12 semanas** | **TBD** | - | - |
+| 10. UX Excellence | 13-14 | 5 dias | ALTA | 📋 |
+| **TOTAL** | **14 semanas** | **TBD** | - | - |
 
 ---
 
@@ -685,6 +686,11 @@ tests/performance/test_reconnect.py
 | Parallel Execution | 0% | 100% | 📋 |
 | Claude Code Parity | 0% | 100% | 📋 |
 | Visual Modernization | 0% | 100% | 📋 |
+| UX Excellence (InputEnhancer) | 0% | 100% | 📋 |
+| UX Excellence (ContextTracker) | 0% | 100% | 📋 |
+| UX Excellence (ErrorPresenter) | 0% | 100% | 📋 |
+| UX Excellence (Undo/Redo) | 0% | 100% | 📋 |
+| E2E Personas Tests | 0% | 100% | 📋 |
 
 ---
 
@@ -1110,6 +1116,7 @@ Coverage de 54-58% é aceitável porque:
 8. **Fase 7: Testes Compliance** - JSON Schema validation, stress tests
 9. **Fase 8: Testes End-to-End** - Tools, Agents, Orchestração, Parallelism
 10. **Fase 9: Visual Refresh** - UI moderna, paridade visual Claude/Gemini/Codex
+11. **Fase 10: UX Excellence** - Integrar InputEnhancer, ContextTracker, ErrorPresenter, Undo/Redo
 
 ---
 
@@ -1637,3 +1644,186 @@ test_context_preservation():
 **Estimativa**: A definir após pesquisa
 
 **Nota**: Esta fase será detalhada quando as fases anteriores estiverem completas. Pesquisa de referências visuais será feita no momento da implementação.
+
+---
+
+## FASE 10: UX EXCELLENCE & TEST INTEGRATION (Semana 13-14)
+
+**Objetivo**: Integrar features de UX existentes (InputEnhancer, ContextTracker, ErrorPresenter, UndoManager) ao pipeline do TUI e corrigir 34 testes falhando.
+
+**Descoberta**: Todas as features de UX avançado JÁ EXISTEM no codebase mas os testes E2E não estão conectados às implementações reais.
+
+**Status**: 📋 PLANEJADO
+
+---
+
+### 10.1 Implementações Existentes (Confirmadas)
+
+#### Vibe Coder / Beginner UX
+| Arquivo | Classe | Métodos Principais |
+|---------|--------|-------------------|
+| `vertice_cli/core/input_enhancer.py` | `InputEnhancer` | `enhance()`, `_detect_typos()`, `suggest_command_correction()`, `clean_stackoverflow_paste()` |
+| `vertice_cli/core/context_tracker.py` | `ContextTracker` | `resolve()`, `_resolve_demonstrative()`, `_resolve_anaphoric()`, `suggest_clarification()` |
+| `vertice_cli/core/error_presenter.py` | `ErrorPresenter` | `present()`, `_generate_simple_explanation()`, `format_for_terminal()` |
+
+#### Senior Developer Features
+| Arquivo | Classe | Métodos Principais |
+|---------|--------|-------------------|
+| `cli/core/undo_manager.py` | `UndoManager` | `undo()`, `redo()`, `record_file_edit()`, `batch_operations()` |
+| `cli/core/atomic_ops.py` | `AtomicFileOps` | `write_atomic()`, `edit_atomic()`, `rollback()`, `verify_checksum()` |
+| `vertice_cli/core/session_manager.py` | `SessionManager` | `start_session()`, `resume_session()`, `save()`, `check_for_crash_recovery()` |
+
+#### Security (Path Traversal)
+| Arquivo | Classe | Proteções |
+|---------|--------|-----------|
+| `vertice_cli/core/input_validator.py` | `InputValidator` | 24+ patterns, URL decode recursivo, symlink check, canonicalization |
+
+---
+
+### 10.2 Integrar InputEnhancer no TUI
+
+**Arquivo:** `tui/core/bridge.py`
+
+```python
+from vertice_cli.core.input_enhancer import InputEnhancer
+
+class Bridge:
+    def __init__(self):
+        self._input_enhancer = InputEnhancer()
+
+    def enhance_input(self, raw_input: str) -> EnhancedInput:
+        """Processa input do usuário com correção de typos e sugestões."""
+        return self._input_enhancer.enhance(raw_input)
+
+    def clean_code_paste(self, pasted_text: str) -> str:
+        """Limpa código colado do StackOverflow/Jupyter."""
+        return self._input_enhancer.clean_stackoverflow_paste(pasted_text)
+```
+
+**Testes:** `tests/tui/test_phase10_input_enhancer.py` (~15 testes)
+
+---
+
+### 10.3 Integrar ContextTracker no TUI
+
+**Arquivo:** `tui/core/bridge.py`
+
+```python
+from vertice_cli.core.context_tracker import ContextTracker
+
+class Bridge:
+    def __init__(self):
+        self._context_tracker = ContextTracker()
+
+    def resolve_reference(self, vague_input: str) -> ResolvedReference:
+        """Resolve referências vagas como 'this file', 'the other one'."""
+        return self._context_tracker.resolve(vague_input)
+
+    def record_file_access(self, file_path: str) -> None:
+        """Registra acesso a arquivo para contexto."""
+        self._context_tracker.record_file_access(file_path)
+```
+
+**Testes:** `tests/tui/test_phase10_context_tracker.py` (~15 testes)
+
+---
+
+### 10.4 Integrar ErrorPresenter no TUI
+
+**Arquivo:** `tui/core/bridge.py`
+
+```python
+from vertice_cli.core.error_presenter import ErrorPresenter, AudienceLevel
+
+class Bridge:
+    def __init__(self):
+        self._error_presenter = ErrorPresenter()
+        self._audience_level = AudienceLevel.INTERMEDIATE
+
+    def present_error(self, error: Exception) -> PresentedError:
+        """Formata erro para o nível do usuário."""
+        return self._error_presenter.present(error, self._audience_level)
+
+    def set_experience_level(self, level: str) -> None:
+        """Define nível de experiência do usuário."""
+        levels = {"beginner": AudienceLevel.BEGINNER, ...}
+        self._audience_level = levels.get(level, AudienceLevel.INTERMEDIATE)
+```
+
+**Testes:** `tests/tui/test_phase10_error_presenter.py` (~15 testes)
+
+---
+
+### 10.5 Integrar Undo/Transactions no TUI
+
+**Arquivo:** `tui/core/bridge.py`
+
+```python
+from cli.core.undo_manager import UndoManager
+from cli.core.atomic_ops import AtomicFileOps
+
+class Bridge:
+    def __init__(self):
+        self._undo_manager = UndoManager(max_history=100)
+        self._atomic_ops = AtomicFileOps()
+
+    def write_file_with_undo(self, path: str, content: str) -> bool:
+        """Escreve arquivo com suporte a undo."""
+        self._undo_manager.record_file_edit(path)
+        return self._atomic_ops.write_atomic(path, content)
+
+    def undo(self) -> UndoResult:
+        """Desfaz última operação."""
+        return self._undo_manager.undo()
+
+    def redo(self) -> UndoResult:
+        """Refaz operação desfeita."""
+        return self._undo_manager.redo()
+```
+
+**Novos Commands:** `/undo`, `/redo` em `tui/handlers/claude_parity.py`
+
+**Testes:** `tests/tui/test_phase10_undo_manager.py` (~20 testes)
+
+---
+
+### 10.6 Corrigir Testes E2E Existentes
+
+**Problema**: 34 testes falhando porque testam funcionalidades que existem mas não estão integradas.
+
+| Arquivo | Testes | Ação |
+|---------|--------|------|
+| `tests/e2e/personas/test_vibe_coder.py` | ~18 | Conectar a InputEnhancer real |
+| `tests/e2e/personas/test_senior_developer.py` | ~5 | Conectar a UndoManager/AtomicFileOps real |
+| `tests/e2e/adversarial/test_path_traversal.py` | ~6 | Conectar a InputValidator real |
+| `tests/e2e/scenarios/test_refactoring.py` | ~1 | Conectar a AtomicFileOps real |
+
+---
+
+### Resumo Fase 10
+
+**Arquivos a MODIFICAR (4):**
+| Arquivo | Mudanças |
+|---------|----------|
+| `tui/core/bridge.py` | Adicionar InputEnhancer, ContextTracker, ErrorPresenter, UndoManager |
+| `tui/handlers/claude_parity.py` | Adicionar /undo, /redo commands |
+| `tui/handlers/basic.py` | Integrar enhance_input, present_error |
+| `tui/handlers/operations.py` | Integrar resolve_reference |
+
+**Testes a CORRIGIR (4):** 34 testes existentes
+**Testes a CRIAR (4):** ~65 novos testes de integração
+
+**Estimativa**: 5 dias
+
+---
+
+### Critérios de Sucesso Fase 10
+
+- [ ] 0 testes falhando em test_vibe_coder.py
+- [ ] 0 testes falhando em test_senior_developer.py
+- [ ] 0 testes falhando em test_adversarial/
+- [ ] 65+ novos testes de integração passando
+- [ ] InputEnhancer integrado ao TUI
+- [ ] ContextTracker integrado ao TUI
+- [ ] ErrorPresenter integrado ao TUI
+- [ ] /undo e /redo funcionando
