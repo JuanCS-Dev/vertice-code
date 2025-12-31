@@ -13,10 +13,10 @@ backward compatibility. All functionality has been moved to:
 
 Migration:
     # Old:
-    from tui.core.output_formatter import OutputFormatter, Colors
+    from vertice_tui.core.output_formatter import OutputFormatter, Colors
 
     # New:
-    from tui.core.formatting import OutputFormatter, Colors
+    from vertice_tui.core.formatting import OutputFormatter, Colors
 """
 
 from __future__ import annotations

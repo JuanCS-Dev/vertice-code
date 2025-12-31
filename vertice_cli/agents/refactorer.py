@@ -568,20 +568,27 @@ Structured refactoring plan with dependencies and risk assessment.
             # Initialize session
             self.session = TransactionalSession()
 
-            # Phase 1: Context Analysis
-            target = task.context.get("target_file") or task.request
-            refactoring_type = task.context.get("refactoring_type", "auto")
+            # Phase 1: Check for pre-existing plan from PlannerAgent
+            existing_plan = task.context.get("plan")
 
-            # Phase 2: Blast Radius Analysis
-            blast_radius = await self._analyze_blast_radius(target)
+            if existing_plan and (existing_plan.get("sops") or existing_plan.get("stages")):
+                # Use plan from PlannerAgent (DevSquad workflow)
+                plan = self._convert_sops_to_refactoring_plan(existing_plan)
+            else:
+                # Fallback: generate own plan (standalone mode)
+                target = task.context.get("target_file") or task.request
+                refactoring_type = task.context.get("refactoring_type", "auto")
 
-            # Phase 3: Generate Refactoring Plan
-            plan = await self._generate_plan(
-                target=target,
-                refactoring_type=refactoring_type,
-                blast_radius=blast_radius,
-                context=task.context
-            )
+                # Phase 2: Blast Radius Analysis
+                blast_radius = await self._analyze_blast_radius(target)
+
+                # Phase 3: Generate Refactoring Plan
+                plan = await self._generate_plan(
+                    target=target,
+                    refactoring_type=refactoring_type,
+                    blast_radius=blast_radius,
+                    context=task.context
+                )
 
             # Phase 4: Execute Plan Transactionally
             result = await self._execute_plan(plan, dry_run=False)
@@ -602,6 +609,72 @@ Structured refactoring plan with dependencies and risk assessment.
                 error=str(e),
                 reasoning="Refactoring failed - all changes rolled back"
             )
+
+    def _convert_sops_to_refactoring_plan(
+        self,
+        execution_plan: Dict[str, Any]
+    ) -> RefactoringPlan:
+        """Convert ExecutionPlan from PlannerAgent to RefactoringPlan.
+
+        This bridges the gap between the high-level GOAP-based plan
+        from PlannerAgent and the file-level RefactoringPlan expected
+        by this agent.
+
+        Args:
+            execution_plan: Plan from PlannerAgent containing sops/stages
+
+        Returns:
+            RefactoringPlan compatible with _execute_plan()
+        """
+        sops = execution_plan.get("sops", [])
+        stages = execution_plan.get("stages", [])
+
+        # Extract actionable changes from SOPSteps
+        changes = []
+        for sop in sops:
+            role = sop.get("role", "")
+            if role in ["coder", "refactorer", "executor"]:
+                changes.append({
+                    "id": sop.get("id", f"sop-{len(changes)}"),
+                    "action": sop.get("action", ""),
+                    "file_path": sop.get("target_file", sop.get("file")),
+                    "description": sop.get("description", sop.get("action", "")),
+                    "dependencies": sop.get("dependencies", []),
+                    "original_sop": sop,  # Preserve original for context
+                })
+
+        # If no sops but stages exist, extract from stages
+        if not changes and stages:
+            for stage in stages:
+                for step in stage.get("steps", []):
+                    changes.append({
+                        "id": step.get("id", f"stage-step-{len(changes)}"),
+                        "action": step.get("action", ""),
+                        "file_path": step.get("target_file"),
+                        "description": step.get("description", ""),
+                        "dependencies": step.get("dependencies", []),
+                    })
+
+        # Build execution order respecting dependencies
+        execution_order = [c["id"] for c in changes]
+
+        # Collect all affected files
+        affected_files = list(set(
+            c["file_path"] for c in changes if c.get("file_path")
+        ))
+
+        return RefactoringPlan(
+            plan_id=execution_plan.get("plan_id", f"converted-{id(execution_plan)}"),
+            goal=execution_plan.get("goal", "Execute planned changes"),
+            changes=changes,
+            execution_order=execution_order,
+            affected_files=affected_files,
+            blast_radius=execution_plan.get("blast_radius", {}),
+            risk_level=execution_plan.get("risk_assessment", "MEDIUM"),
+            require_tests=execution_plan.get("require_tests", True),
+            require_approval=execution_plan.get("require_approval", False),
+            rollback_strategy=execution_plan.get("rollback_strategy", "incremental"),
+        )
 
     async def _analyze_blast_radius(self, target: str) -> Dict[str, List[str]]:
         """Analyze impact using Explorer agent"""

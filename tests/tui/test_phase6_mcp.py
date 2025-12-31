@@ -39,7 +39,7 @@ class TestMCPServerState:
     """Tests for MCPServerState dataclass."""
 
     def test_default_values(self) -> None:
-        from tui.core.managers.mcp_manager import MCPServerState
+        from vertice_tui.core.managers.mcp_manager import MCPServerState
 
         state = MCPServerState()
         assert state.running is False
@@ -50,7 +50,7 @@ class TestMCPServerState:
         assert state.error is None
 
     def test_custom_values(self) -> None:
-        from tui.core.managers.mcp_manager import MCPServerState
+        from vertice_tui.core.managers.mcp_manager import MCPServerState
 
         state = MCPServerState(running=True, port=8080, exposed_tools=10)
         assert state.running is True
@@ -62,7 +62,7 @@ class TestMCPClientConnection:
     """Tests for MCPClientConnection dataclass."""
 
     def test_default_values(self) -> None:
-        from tui.core.managers.mcp_manager import MCPClientConnection
+        from vertice_tui.core.managers.mcp_manager import MCPClientConnection
 
         conn = MCPClientConnection(url="http://localhost:3000", name="local")
         assert conn.url == "http://localhost:3000"
@@ -81,7 +81,7 @@ class TestMCPManager:
     """Tests for MCPManager."""
 
     def test_init(self) -> None:
-        from tui.core.managers.mcp_manager import MCPManager
+        from vertice_tui.core.managers.mcp_manager import MCPManager
 
         manager = MCPManager()
         assert manager._server is None
@@ -90,13 +90,13 @@ class TestMCPManager:
         assert manager._exposed_tools == []
 
     def test_is_running_default_false(self) -> None:
-        from tui.core.managers.mcp_manager import MCPManager
+        from vertice_tui.core.managers.mcp_manager import MCPManager
 
         manager = MCPManager()
         assert manager.is_running() is False
 
     def test_get_status_default(self) -> None:
-        from tui.core.managers.mcp_manager import MCPManager
+        from vertice_tui.core.managers.mcp_manager import MCPManager
 
         manager = MCPManager()
         status = manager.get_status()
@@ -109,7 +109,7 @@ class TestMCPManager:
 
     @pytest.mark.asyncio
     async def test_start_server_already_running(self) -> None:
-        from tui.core.managers.mcp_manager import MCPManager
+        from vertice_tui.core.managers.mcp_manager import MCPManager
 
         manager = MCPManager()
         manager._server_state.running = True
@@ -120,7 +120,7 @@ class TestMCPManager:
 
     @pytest.mark.asyncio
     async def test_stop_server_not_running(self) -> None:
-        from tui.core.managers.mcp_manager import MCPManager
+        from vertice_tui.core.managers.mcp_manager import MCPManager
 
         manager = MCPManager()
 
@@ -130,7 +130,7 @@ class TestMCPManager:
 
     @pytest.mark.asyncio
     async def test_connect_external(self) -> None:
-        from tui.core.managers.mcp_manager import MCPManager
+        from vertice_tui.core.managers.mcp_manager import MCPManager
 
         manager = MCPManager()
 
@@ -143,7 +143,7 @@ class TestMCPManager:
 
     @pytest.mark.asyncio
     async def test_connect_external_default_name(self) -> None:
-        from tui.core.managers.mcp_manager import MCPManager
+        from vertice_tui.core.managers.mcp_manager import MCPManager
 
         manager = MCPManager()
 
@@ -154,7 +154,7 @@ class TestMCPManager:
 
     @pytest.mark.asyncio
     async def test_connect_already_connected(self) -> None:
-        from tui.core.managers.mcp_manager import MCPManager, MCPClientConnection
+        from vertice_tui.core.managers.mcp_manager import MCPManager, MCPClientConnection
 
         manager = MCPManager()
         manager._connections["test"] = MCPClientConnection(
@@ -168,7 +168,7 @@ class TestMCPManager:
 
     @pytest.mark.asyncio
     async def test_disconnect(self) -> None:
-        from tui.core.managers.mcp_manager import MCPManager, MCPClientConnection
+        from vertice_tui.core.managers.mcp_manager import MCPManager, MCPClientConnection
 
         manager = MCPManager()
         manager._connections["test"] = MCPClientConnection(
@@ -184,7 +184,7 @@ class TestMCPManager:
 
     @pytest.mark.asyncio
     async def test_disconnect_not_found(self) -> None:
-        from tui.core.managers.mcp_manager import MCPManager
+        from vertice_tui.core.managers.mcp_manager import MCPManager
 
         manager = MCPManager()
 
@@ -194,7 +194,7 @@ class TestMCPManager:
         assert "no connection" in result["error"].lower()
 
     def test_list_tools_empty(self) -> None:
-        from tui.core.managers.mcp_manager import MCPManager
+        from vertice_tui.core.managers.mcp_manager import MCPManager
 
         manager = MCPManager()
         tools = manager.list_tools()
@@ -203,7 +203,7 @@ class TestMCPManager:
         assert tools["imported"] == {}
 
     def test_list_tools_with_data(self) -> None:
-        from tui.core.managers.mcp_manager import MCPManager
+        from vertice_tui.core.managers.mcp_manager import MCPManager
 
         manager = MCPManager()
         manager._exposed_tools = ["tool1", "tool2"]
@@ -215,7 +215,7 @@ class TestMCPManager:
         assert tools["imported"] == {"server1": ["tool3", "tool4"]}
 
     def test_get_exposed_tools(self) -> None:
-        from tui.core.managers.mcp_manager import MCPManager
+        from vertice_tui.core.managers.mcp_manager import MCPManager
 
         manager = MCPManager()
         manager._exposed_tools = ["tool1", "tool2"]
@@ -228,7 +228,7 @@ class TestMCPManager:
         assert len(manager._exposed_tools) == 2
 
     def test_get_connections(self) -> None:
-        from tui.core.managers.mcp_manager import MCPManager, MCPClientConnection
+        from vertice_tui.core.managers.mcp_manager import MCPManager, MCPClientConnection
 
         manager = MCPManager()
         manager._connections["active"] = MCPClientConnection(
@@ -244,7 +244,7 @@ class TestMCPManager:
         assert connections[0]["name"] == "active"
 
     def test_get_connection_found(self) -> None:
-        from tui.core.managers.mcp_manager import MCPManager, MCPClientConnection
+        from vertice_tui.core.managers.mcp_manager import MCPManager, MCPClientConnection
 
         manager = MCPManager()
         manager._connections["test"] = MCPClientConnection(
@@ -258,7 +258,7 @@ class TestMCPManager:
         assert result["url"] == "http://test"
 
     def test_get_connection_not_found(self) -> None:
-        from tui.core.managers.mcp_manager import MCPManager
+        from vertice_tui.core.managers.mcp_manager import MCPManager
 
         manager = MCPManager()
 
@@ -275,14 +275,14 @@ class TestMCPExports:
     """Tests for MCP module exports."""
 
     def test_mcp_manager_exported(self) -> None:
-        from tui.core.managers import MCPManager, MCPServerState, MCPClientConnection
+        from vertice_tui.core.managers import MCPManager, MCPServerState, MCPClientConnection
 
         assert MCPManager is not None
         assert MCPServerState is not None
         assert MCPClientConnection is not None
 
     def test_mcp_manager_from_main_package(self) -> None:
-        from tui.core.managers.mcp_manager import MCPManager
+        from vertice_tui.core.managers.mcp_manager import MCPManager
 
         manager = MCPManager()
         assert hasattr(manager, "start_server")
@@ -304,7 +304,7 @@ class TestMCPWithMockedDependencies:
     @pytest.mark.asyncio
     async def test_start_server_import_error(self) -> None:
         """Test graceful handling when MCP dependencies not available."""
-        from tui.core.managers.mcp_manager import MCPManager
+        from vertice_tui.core.managers.mcp_manager import MCPManager
 
         manager = MCPManager()
 
@@ -326,7 +326,7 @@ class TestMCPWithMockedDependencies:
 def test_phase6_2_summary() -> None:
     """Summary test ensuring all Phase 6.2 components exist."""
     # MCPManager
-    from tui.core.managers.mcp_manager import (
+    from vertice_tui.core.managers.mcp_manager import (
         MCPManager,
         MCPServerState,
         MCPClientConnection,

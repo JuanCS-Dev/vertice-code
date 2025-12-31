@@ -76,7 +76,7 @@ class TestCoreAgentContext:
     """Tests for CoreAgentContext dataclass."""
 
     def test_default_values(self) -> None:
-        from tui.core.agents.core_adapter import CoreAgentContext
+        from vertice_tui.core.agents.core_adapter import CoreAgentContext
 
         ctx = CoreAgentContext()
         assert ctx.autonomy_level == "L1"
@@ -88,7 +88,7 @@ class TestCoreAgentContext:
         assert ctx.extra_config == {}
 
     def test_custom_values(self) -> None:
-        from tui.core.agents.core_adapter import CoreAgentContext
+        from vertice_tui.core.agents.core_adapter import CoreAgentContext
 
         callback = MagicMock()
         ctx = CoreAgentContext(
@@ -110,7 +110,7 @@ class TestCoreAgentAdapter:
     """Tests for CoreAgentAdapter."""
 
     def test_init(self, mock_core_agent: MockCoreAgent) -> None:
-        from tui.core.agents.core_adapter import CoreAgentAdapter
+        from vertice_tui.core.agents.core_adapter import CoreAgentAdapter
 
         adapter = CoreAgentAdapter(mock_core_agent, "test_agent")
         assert adapter.agent_name == "test_agent"
@@ -118,13 +118,13 @@ class TestCoreAgentAdapter:
         assert adapter._mixin_activated is False
 
     def test_name_property(self, mock_core_agent: MockCoreAgent) -> None:
-        from tui.core.agents.core_adapter import CoreAgentAdapter
+        from vertice_tui.core.agents.core_adapter import CoreAgentAdapter
 
         adapter = CoreAgentAdapter(mock_core_agent, "test_agent")
         assert adapter.name == "test_agent"
 
     def test_activate_mixins(self, mock_core_agent: MockCoreAgent) -> None:
-        from tui.core.agents.core_adapter import CoreAgentAdapter, CoreAgentContext
+        from vertice_tui.core.agents.core_adapter import CoreAgentAdapter, CoreAgentContext
 
         adapter = CoreAgentAdapter(mock_core_agent, "test_agent")
         callback = MagicMock()
@@ -136,7 +136,7 @@ class TestCoreAgentAdapter:
         assert mock_core_agent._approval_callback is callback
 
     def test_activate_mixins_only_once(self, mock_core_agent: MockCoreAgent) -> None:
-        from tui.core.agents.core_adapter import CoreAgentAdapter, CoreAgentContext
+        from vertice_tui.core.agents.core_adapter import CoreAgentAdapter, CoreAgentContext
 
         adapter = CoreAgentAdapter(mock_core_agent, "test_agent")
         callback1 = MagicMock()
@@ -149,7 +149,7 @@ class TestCoreAgentAdapter:
         assert mock_core_agent._approval_callback is callback1
 
     def test_estimate_complexity_simple(self) -> None:
-        from tui.core.agents.core_adapter import CoreAgentAdapter
+        from vertice_tui.core.agents.core_adapter import CoreAgentAdapter
 
         adapter = CoreAgentAdapter(MagicMock(), "test")
 
@@ -159,7 +159,7 @@ class TestCoreAgentAdapter:
         assert result.name == "SIMPLE"
 
     def test_estimate_complexity_moderate(self) -> None:
-        from tui.core.agents.core_adapter import CoreAgentAdapter
+        from vertice_tui.core.agents.core_adapter import CoreAgentAdapter
 
         adapter = CoreAgentAdapter(MagicMock(), "test")
 
@@ -169,7 +169,7 @@ class TestCoreAgentAdapter:
         assert result.name == "MODERATE"
 
     def test_estimate_complexity_complex(self) -> None:
-        from tui.core.agents.core_adapter import CoreAgentAdapter
+        from vertice_tui.core.agents.core_adapter import CoreAgentAdapter
 
         adapter = CoreAgentAdapter(MagicMock(), "test")
 
@@ -181,7 +181,7 @@ class TestCoreAgentAdapter:
         assert result.name == "COMPLEX"
 
     def test_normalize_chunk_string(self, mock_core_agent: MockCoreAgent) -> None:
-        from tui.core.agents.core_adapter import CoreAgentAdapter
+        from vertice_tui.core.agents.core_adapter import CoreAgentAdapter
 
         adapter = CoreAgentAdapter(mock_core_agent, "test")
         assert adapter._normalize_chunk("hello") == "hello"
@@ -189,7 +189,7 @@ class TestCoreAgentAdapter:
     def test_normalize_chunk_object_with_text(
         self, mock_core_agent: MockCoreAgent
     ) -> None:
-        from tui.core.agents.core_adapter import CoreAgentAdapter
+        from vertice_tui.core.agents.core_adapter import CoreAgentAdapter
 
         adapter = CoreAgentAdapter(mock_core_agent, "test")
 
@@ -201,7 +201,7 @@ class TestCoreAgentAdapter:
     def test_normalize_chunk_dict_with_text(
         self, mock_core_agent: MockCoreAgent
     ) -> None:
-        from tui.core.agents.core_adapter import CoreAgentAdapter
+        from vertice_tui.core.agents.core_adapter import CoreAgentAdapter
 
         adapter = CoreAgentAdapter(mock_core_agent, "test")
         assert adapter._normalize_chunk({"text": "hello"}) == "hello"
@@ -209,14 +209,14 @@ class TestCoreAgentAdapter:
     def test_normalize_chunk_dict_with_content(
         self, mock_core_agent: MockCoreAgent
     ) -> None:
-        from tui.core.agents.core_adapter import CoreAgentAdapter
+        from vertice_tui.core.agents.core_adapter import CoreAgentAdapter
 
         adapter = CoreAgentAdapter(mock_core_agent, "test")
         assert adapter._normalize_chunk({"content": "hello"}) == "hello"
 
     @pytest.mark.asyncio
     async def test_execute_streaming(self, mock_core_agent: MockCoreAgent) -> None:
-        from tui.core.agents.core_adapter import CoreAgentAdapter
+        from vertice_tui.core.agents.core_adapter import CoreAgentAdapter
 
         adapter = CoreAgentAdapter(mock_core_agent, "test")
 
@@ -230,7 +230,7 @@ class TestCoreAgentAdapter:
 
     @pytest.mark.asyncio
     async def test_execute_sync(self, mock_core_agent: MockCoreAgent) -> None:
-        from tui.core.agents.core_adapter import CoreAgentAdapter
+        from vertice_tui.core.agents.core_adapter import CoreAgentAdapter
 
         adapter = CoreAgentAdapter(mock_core_agent, "test")
         result = await adapter.execute("Test task")
@@ -239,7 +239,7 @@ class TestCoreAgentAdapter:
         assert "Done" in result
 
     def test_check_autonomy_allowed(self, mock_core_agent: MockCoreAgent) -> None:
-        from tui.core.agents.core_adapter import CoreAgentAdapter
+        from vertice_tui.core.agents.core_adapter import CoreAgentAdapter
 
         adapter = CoreAgentAdapter(mock_core_agent, "test")
         allowed, approval = adapter.check_autonomy("safe operation")
@@ -248,7 +248,7 @@ class TestCoreAgentAdapter:
         assert approval is None
 
     def test_check_autonomy_denied(self, mock_core_agent: MockCoreAgent) -> None:
-        from tui.core.agents.core_adapter import CoreAgentAdapter
+        from vertice_tui.core.agents.core_adapter import CoreAgentAdapter
 
         adapter = CoreAgentAdapter(mock_core_agent, "test")
         allowed, approval = adapter.check_autonomy("dangerous operation")
@@ -257,7 +257,7 @@ class TestCoreAgentAdapter:
         assert approval is not None
 
     def test_get_status(self, mock_core_agent: MockCoreAgent) -> None:
-        from tui.core.agents.core_adapter import CoreAgentAdapter
+        from vertice_tui.core.agents.core_adapter import CoreAgentAdapter
 
         adapter = CoreAgentAdapter(mock_core_agent, "test_agent")
         status = adapter.get_status()
@@ -270,7 +270,7 @@ class TestCoreAgentAdapter:
     def test_get_pending_approvals_empty(
         self, mock_core_agent: MockCoreAgent
     ) -> None:
-        from tui.core.agents.core_adapter import CoreAgentAdapter
+        from vertice_tui.core.agents.core_adapter import CoreAgentAdapter
 
         adapter = CoreAgentAdapter(mock_core_agent, "test")
         assert adapter.get_pending_approvals() == []
@@ -285,7 +285,7 @@ class TestOrchestrationContext:
     """Tests for OrchestrationContext dataclass."""
 
     def test_default_values(self) -> None:
-        from tui.core.agents.orchestrator_integration import OrchestrationContext
+        from vertice_tui.core.agents.orchestrator_integration import OrchestrationContext
 
         ctx = OrchestrationContext()
         assert ctx.request_id == ""
@@ -321,7 +321,7 @@ class TestOrchestratorIntegration:
         return manager
 
     def test_init(self, mock_agent_manager: MagicMock) -> None:
-        from tui.core.agents.orchestrator_integration import OrchestratorIntegration
+        from vertice_tui.core.agents.orchestrator_integration import OrchestratorIntegration
 
         integration = OrchestratorIntegration(mock_agent_manager)
         assert integration.agent_manager is mock_agent_manager
@@ -332,7 +332,7 @@ class TestOrchestratorIntegration:
     async def test_execute_fallback_when_no_orchestrator(
         self, mock_agent_manager: MagicMock
     ) -> None:
-        from tui.core.agents.orchestrator_integration import OrchestratorIntegration
+        from vertice_tui.core.agents.orchestrator_integration import OrchestratorIntegration
 
         integration = OrchestratorIntegration(mock_agent_manager)
 
@@ -347,7 +347,7 @@ class TestOrchestratorIntegration:
     def test_set_autonomy_level_valid(
         self, mock_agent_manager: MagicMock
     ) -> None:
-        from tui.core.agents.orchestrator_integration import OrchestratorIntegration
+        from vertice_tui.core.agents.orchestrator_integration import OrchestratorIntegration
 
         integration = OrchestratorIntegration(mock_agent_manager)
 
@@ -360,7 +360,7 @@ class TestOrchestratorIntegration:
     def test_set_autonomy_level_invalid(
         self, mock_agent_manager: MagicMock
     ) -> None:
-        from tui.core.agents.orchestrator_integration import OrchestratorIntegration
+        from vertice_tui.core.agents.orchestrator_integration import OrchestratorIntegration
 
         integration = OrchestratorIntegration(mock_agent_manager)
         original = integration._context.autonomy_level
@@ -369,7 +369,7 @@ class TestOrchestratorIntegration:
         assert integration._context.autonomy_level == original
 
     def test_approve_pending(self, mock_agent_manager: MagicMock) -> None:
-        from tui.core.agents.orchestrator_integration import OrchestratorIntegration
+        from vertice_tui.core.agents.orchestrator_integration import OrchestratorIntegration
 
         integration = OrchestratorIntegration(mock_agent_manager)
         integration._approval_queue.append({
@@ -385,14 +385,14 @@ class TestOrchestratorIntegration:
         assert integration._approval_queue[0]["approved_by"] == "admin"
 
     def test_approve_not_found(self, mock_agent_manager: MagicMock) -> None:
-        from tui.core.agents.orchestrator_integration import OrchestratorIntegration
+        from vertice_tui.core.agents.orchestrator_integration import OrchestratorIntegration
 
         integration = OrchestratorIntegration(mock_agent_manager)
         result = integration.approve("nonexistent", "admin")
         assert result is False
 
     def test_reject_pending(self, mock_agent_manager: MagicMock) -> None:
-        from tui.core.agents.orchestrator_integration import OrchestratorIntegration
+        from vertice_tui.core.agents.orchestrator_integration import OrchestratorIntegration
 
         integration = OrchestratorIntegration(mock_agent_manager)
         integration._approval_queue.append({
@@ -407,7 +407,7 @@ class TestOrchestratorIntegration:
         assert integration._approval_queue[0]["status"] == "rejected"
 
     def test_get_pending_approvals(self, mock_agent_manager: MagicMock) -> None:
-        from tui.core.agents.orchestrator_integration import OrchestratorIntegration
+        from vertice_tui.core.agents.orchestrator_integration import OrchestratorIntegration
 
         integration = OrchestratorIntegration(mock_agent_manager)
         integration._approval_queue = [
@@ -421,7 +421,7 @@ class TestOrchestratorIntegration:
         assert all(a["status"] == "pending" for a in pending)
 
     def test_get_status(self, mock_agent_manager: MagicMock) -> None:
-        from tui.core.agents.orchestrator_integration import OrchestratorIntegration
+        from vertice_tui.core.agents.orchestrator_integration import OrchestratorIntegration
 
         integration = OrchestratorIntegration(mock_agent_manager)
         integration._approval_queue.append({"id": "a1", "status": "pending"})
@@ -434,7 +434,7 @@ class TestOrchestratorIntegration:
         assert status["executed_tasks"] == 1
 
     def test_clear_history(self, mock_agent_manager: MagicMock) -> None:
-        from tui.core.agents.orchestrator_integration import OrchestratorIntegration
+        from vertice_tui.core.agents.orchestrator_integration import OrchestratorIntegration
 
         integration = OrchestratorIntegration(mock_agent_manager)
         integration._context.history = ["a", "b", "c"]
@@ -457,7 +457,7 @@ class TestAgentManagerCoreIntegration:
     """Tests for AgentManager with is_core detection."""
 
     def test_core_agent_detection(self) -> None:
-        from tui.core.agents.registry import AGENT_REGISTRY
+        from vertice_tui.core.agents.registry import AGENT_REGISTRY
 
         core_agents = [
             name for name, info in AGENT_REGISTRY.items() if info.is_core
@@ -469,7 +469,7 @@ class TestAgentManagerCoreIntegration:
         assert len(core_agents) >= 6
 
     def test_cli_agent_not_core(self) -> None:
-        from tui.core.agents.registry import AGENT_REGISTRY
+        from vertice_tui.core.agents.registry import AGENT_REGISTRY
 
         cli_agents = ["planner", "executor", "explorer", "architect"]
         for name in cli_agents:
@@ -485,13 +485,13 @@ class TestAgentManagerCoreIntegration:
 def test_phase6_1_summary() -> None:
     """Summary test ensuring all Phase 6.1 components exist."""
     # CoreAgentAdapter
-    from tui.core.agents.core_adapter import CoreAgentAdapter, CoreAgentContext
+    from vertice_tui.core.agents.core_adapter import CoreAgentAdapter, CoreAgentContext
 
     assert CoreAgentAdapter is not None
     assert CoreAgentContext is not None
 
     # OrchestratorIntegration
-    from tui.core.agents.orchestrator_integration import (
+    from vertice_tui.core.agents.orchestrator_integration import (
         OrchestratorIntegration,
         OrchestrationContext,
     )
@@ -500,7 +500,7 @@ def test_phase6_1_summary() -> None:
     assert OrchestrationContext is not None
 
     # Exports from __init__
-    from tui.core.agents import (
+    from vertice_tui.core.agents import (
         CoreAgentAdapter as CA,
         CoreAgentContext as CC,
         OrchestratorIntegration as OI,

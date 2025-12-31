@@ -588,7 +588,7 @@ def mock_llm_with_responses():
 @pytest.fixture
 def context_manager():
     """Create a fresh context manager for testing."""
-    from tui.core.context import SlidingWindowCompressor, WindowConfig
+    from vertice_tui.core.context import SlidingWindowCompressor, WindowConfig
 
     config = WindowConfig(
         max_tokens=10000,
@@ -601,14 +601,14 @@ def context_manager():
 @pytest.fixture
 def thought_manager():
     """Create a fresh thought manager for testing."""
-    from tui.core.context import ThoughtSignatureManager
+    from vertice_tui.core.context import ThoughtSignatureManager
     return ThoughtSignatureManager()
 
 
 @pytest.fixture
 def masker():
     """Create a fresh masker for testing."""
-    from tui.core.context import ObservationMasker
+    from vertice_tui.core.context import ObservationMasker
     return ObservationMasker()
 
 

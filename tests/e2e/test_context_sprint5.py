@@ -33,7 +33,7 @@ class TestMaskingE2E:
 
     def test_masker_returns_masked_content(self, masker, sample_tool_outputs):
         """Verify masker returns MaskedContent object."""
-        from tui.core.context.masking import MaskedContent
+        from vertice_tui.core.context.masking import MaskedContent
         
         result = masker.mask_content(sample_tool_outputs["bash_ls"])
         assert isinstance(result, MaskedContent)
@@ -42,7 +42,7 @@ class TestMaskingE2E:
 
     def test_mask_tool_output_returns_structured_result(self, sample_tool_outputs):
         """Verify mask_tool_output returns ToolMaskingResult."""
-        from tui.core.context import mask_tool_output, ToolMaskingResult
+        from vertice_tui.core.context import mask_tool_output, ToolMaskingResult
         
         result = mask_tool_output(
             output=sample_tool_outputs["grep_result"],
@@ -57,7 +57,7 @@ class TestMaskingE2E:
 
     def test_controller_uses_masking(self):
         """Verify ChatController._execute_single_tool uses masking."""
-        from tui.core.chat.controller import ChatController
+        from vertice_tui.core.chat.controller import ChatController
         
         import inspect
         source = inspect.getsource(ChatController._execute_single_tool)
@@ -100,7 +100,7 @@ class TestCompressorE2E:
 
     def test_compressor_has_strategies(self):
         """Verify compression strategies exist."""
-        from tui.core.context import WindowStrategy
+        from vertice_tui.core.context import WindowStrategy
         
         assert hasattr(WindowStrategy, 'FIFO')
         assert hasattr(WindowStrategy, 'PRIORITY')
@@ -108,7 +108,7 @@ class TestCompressorE2E:
 
     def test_compressor_compress_method(self, context_manager):
         """Verify compress method exists and works."""
-        from tui.core.context import WindowStrategy
+        from vertice_tui.core.context import WindowStrategy
         
         # Add enough messages to trigger compression
         for i in range(100):
@@ -140,7 +140,7 @@ class TestSignaturesE2E:
 
     def test_thinking_levels_exist(self):
         """Verify thinking levels are defined."""
-        from tui.core.context import ThinkingLevel
+        from vertice_tui.core.context import ThinkingLevel
         
         assert hasattr(ThinkingLevel, 'MINIMAL')
         assert hasattr(ThinkingLevel, 'LOW')
@@ -149,13 +149,13 @@ class TestSignaturesE2E:
 
     def test_thinking_level_detection_in_controller(self):
         """Verify thinking level detection works in controller."""
-        from tui.core.chat.controller import ChatController
+        from vertice_tui.core.chat.controller import ChatController
         
         assert hasattr(ChatController, '_determine_thinking_level')
 
     def test_agentic_loop_references_signatures(self):
         """Verify agentic loop uses thought signatures."""
-        from tui.core.chat.controller import ChatController
+        from vertice_tui.core.chat.controller import ChatController
         import inspect
         
         source = inspect.getsource(ChatController._run_agentic_loop)
@@ -172,7 +172,7 @@ class TestCommandsE2E:
     @pytest.fixture
     def handler(self):
         """Create ClaudeParityHandler with mocks."""
-        from tui.handlers.claude_parity import ClaudeParityHandler
+        from vertice_tui.handlers.claude_parity import ClaudeParityHandler
         
         mock_app = MagicMock()
         mock_app.bridge = MagicMock()
@@ -215,14 +215,14 @@ class TestWidgetsE2E:
 
     def test_token_meter_exists(self):
         """Verify TokenMeter widget exists."""
-        from tui.widgets.token_meter import TokenMeter
+        from vertice_tui.widgets.token_meter import TokenMeter
         
         meter = TokenMeter()
         assert meter is not None
 
     def test_token_meter_renders(self):
         """Verify TokenMeter renders progress correctly."""
-        from tui.widgets.token_meter import TokenMeter
+        from vertice_tui.widgets.token_meter import TokenMeter
         
         meter = TokenMeter()
         meter.used = 16000
@@ -234,7 +234,7 @@ class TestWidgetsE2E:
 
     def test_mini_token_meter_format(self):
         """Verify MiniTokenMeter format is compact."""
-        from tui.widgets.token_meter import MiniTokenMeter
+        from vertice_tui.widgets.token_meter import MiniTokenMeter
         
         meter = MiniTokenMeter()
         meter.used = 8000
@@ -246,14 +246,14 @@ class TestWidgetsE2E:
 
     def test_compression_indicator_exists(self):
         """Verify CompressionIndicator exists."""
-        from tui.widgets.token_meter import CompressionIndicator
+        from vertice_tui.widgets.token_meter import CompressionIndicator
         
         indicator = CompressionIndicator()
         assert indicator is not None
 
     def test_thinking_level_indicator_levels(self):
         """Verify ThinkingLevelIndicator shows all levels."""
-        from tui.widgets.token_meter import ThinkingLevelIndicator
+        from vertice_tui.widgets.token_meter import ThinkingLevelIndicator
         
         indicator = ThinkingLevelIndicator()
         
@@ -264,14 +264,14 @@ class TestWidgetsE2E:
 
     def test_token_dashboard_exists(self):
         """Verify TokenDashboard widget exists."""
-        from tui.widgets.token_meter import TokenDashboard
+        from vertice_tui.widgets.token_meter import TokenDashboard
         
         dashboard = TokenDashboard()
         assert dashboard is not None
 
     def test_token_dashboard_updates(self):
         """Verify TokenDashboard updates correctly."""
-        from tui.widgets.token_meter import TokenDashboard
+        from vertice_tui.widgets.token_meter import TokenDashboard
         
         dashboard = TokenDashboard()
         dashboard.update_usage(8000, 32000)
@@ -282,7 +282,7 @@ class TestWidgetsE2E:
 
     def test_token_dashboard_breakdown(self):
         """Verify TokenDashboard breakdown updates."""
-        from tui.widgets.token_meter import TokenDashboard
+        from vertice_tui.widgets.token_meter import TokenDashboard
         
         dashboard = TokenDashboard()
         dashboard.update_breakdown(
@@ -305,7 +305,7 @@ class TestIntegrationE2E:
 
     def test_status_bar_uses_mini_meter(self):
         """Test StatusBar uses MiniTokenMeter."""
-        from tui.widgets.status_bar import StatusBar
+        from vertice_tui.widgets.status_bar import StatusBar
         
         import inspect
         source = inspect.getsource(StatusBar.compose)
@@ -313,7 +313,7 @@ class TestIntegrationE2E:
 
     def test_app_uses_dashboard(self):
         """Test app.py uses TokenDashboard."""
-        from tui.app import QwenApp
+        from vertice_tui.app import QwenApp
         
         import inspect
         source = inspect.getsource(QwenApp.compose)
@@ -321,13 +321,13 @@ class TestIntegrationE2E:
 
     def test_app_has_toggle_dashboard_action(self):
         """Test app has toggle dashboard action."""
-        from tui.app import QwenApp
+        from vertice_tui.app import QwenApp
         
         assert hasattr(QwenApp, 'action_toggle_dashboard')
 
     def test_controller_has_masking_integration(self):
         """Test controller integrates masking."""
-        from tui.core.chat.controller import ChatController
+        from vertice_tui.core.chat.controller import ChatController
         
         import inspect
         source = inspect.getsource(ChatController._execute_single_tool)
@@ -335,7 +335,7 @@ class TestIntegrationE2E:
 
     def test_handler_has_context_command(self):
         """Test handler has /context command."""
-        from tui.handlers.claude_parity import ClaudeParityHandler
+        from vertice_tui.handlers.claude_parity import ClaudeParityHandler
         
         import inspect
         source = inspect.getsource(ClaudeParityHandler.handle)
@@ -362,7 +362,7 @@ class TestPerformance:
 
     def test_widget_render_is_fast(self):
         """Test widget rendering is fast."""
-        from tui.widgets.token_meter import TokenMeter, MiniTokenMeter
+        from vertice_tui.widgets.token_meter import TokenMeter, MiniTokenMeter
         import time
         
         meter = TokenMeter()
@@ -378,7 +378,7 @@ class TestPerformance:
 
     def test_dashboard_stats_is_fast(self):
         """Test dashboard stats is fast."""
-        from tui.widgets.token_meter import TokenDashboard
+        from vertice_tui.widgets.token_meter import TokenDashboard
         import time
         
         dashboard = TokenDashboard()

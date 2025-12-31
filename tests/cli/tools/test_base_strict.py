@@ -16,7 +16,7 @@ from typing import Any
 
 import pytest
 
-from cli.tools.base import Tool, ToolResult, ToolCategory, ToolRegistry
+from vertice_cli.tools.base import Tool, ToolResult, ToolCategory, ToolRegistry
 
 
 # =============================================================================

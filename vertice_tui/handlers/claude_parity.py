@@ -89,7 +89,7 @@ class ClaudeParityHandler:
         Supports strategies: fifo, priority, hierarchical, adaptive
         Claude Code pattern: trigger at 64-75%, not 95%
         """
-        from tui.core.context import get_sliding_window, WindowStrategy
+        from vertice_tui.core.context import get_sliding_window, WindowStrategy
 
         # Parse strategy from args: /compact priority, /compact hierarchical
         strategy_name = args.strip().lower() if args else "priority"
@@ -135,7 +135,7 @@ class ClaudeParityHandler:
     def _update_token_dashboard(self, compressor) -> None:
         """Update TokenDashboard widget with current stats."""
         try:
-            from tui.widgets import TokenDashboard
+            from vertice_tui.widgets import TokenDashboard
             dashboard = self.app.query_one("#token-dashboard", TokenDashboard)
             dashboard.update_usage(
                 used=compressor.total_tokens,
@@ -157,7 +157,7 @@ class ClaudeParityHandler:
         - Compression status
         - Active reasoning chain (thought signatures)
         """
-        from tui.core.context import (
+        from vertice_tui.core.context import (
             get_sliding_window,
             get_thought_manager,
         )

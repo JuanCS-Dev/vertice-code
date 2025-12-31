@@ -14,10 +14,10 @@ backward compatibility. All functionality has been moved to:
 
 Migration:
     # Old:
-    from tui.core.streaming.gemini_stream import GeminiStreamer
+    from vertice_tui.core.streaming.gemini_stream import GeminiStreamer
 
     # New:
-    from tui.core.streaming.gemini import GeminiStreamer
+    from vertice_tui.core.streaming.gemini import GeminiStreamer
 """
 
 from __future__ import annotations

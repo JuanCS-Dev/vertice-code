@@ -17,7 +17,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from tui.core.streaming import (
+from vertice_tui.core.streaming import (
     GeminiStreamConfig,
     ProductionGeminiStreamer,
     StreamCheckpoint,

@@ -43,7 +43,7 @@ class TestAgentRouting:
             return AgentRouter()
         except ImportError:
             try:
-                from tui.core.agents import AgentRouter
+                from vertice_tui.core.agents import AgentRouter
                 return AgentRouter()
             except ImportError:
                 return None

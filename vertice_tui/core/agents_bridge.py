@@ -14,10 +14,10 @@ backward compatibility. All functionality has been moved to:
 
 Migration:
     # Old:
-    from tui.core.agents_bridge import AgentManager, AGENT_REGISTRY
+    from vertice_tui.core.agents_bridge import AgentManager, AGENT_REGISTRY
 
     # New:
-    from tui.core.agents import AgentManager, AGENT_REGISTRY
+    from vertice_tui.core.agents import AgentManager, AGENT_REGISTRY
 """
 
 from __future__ import annotations

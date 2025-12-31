@@ -7,7 +7,7 @@ Provides:
 - ProductionGeminiStreamer: Production-grade with heartbeat, backpressure, reconnect
 
 Example:
-    >>> from tui.core.streaming import ProductionGeminiStreamer, GeminiStreamConfig
+    >>> from vertice_tui.core.streaming import ProductionGeminiStreamer, GeminiStreamConfig
     >>> config = GeminiStreamConfig(api_key="...", model_name="gemini-2.0-flash")
     >>> streamer = ProductionGeminiStreamer(config)
     >>> await streamer.initialize()

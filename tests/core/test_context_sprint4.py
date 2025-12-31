@@ -25,7 +25,7 @@ class TestMaskingStrategy:
     """Test MaskingStrategy enum."""
 
     def test_strategies_exist(self):
-        from tui.core.context.masking import MaskingStrategy
+        from vertice_tui.core.context.masking import MaskingStrategy
 
         assert MaskingStrategy.PLACEHOLDER == "placeholder"
         assert MaskingStrategy.HASH_ONLY == "hash_only"
@@ -37,7 +37,7 @@ class TestContentType:
     """Test ContentType enum."""
 
     def test_content_types_exist(self):
-        from tui.core.context.masking import ContentType
+        from vertice_tui.core.context.masking import ContentType
 
         assert ContentType.TOOL_OUTPUT == "tool_output"
         assert ContentType.CODE_BLOCK == "code_block"
@@ -52,7 +52,7 @@ class TestMaskedContent:
     """Test MaskedContent dataclass."""
 
     def test_tokens_saved(self):
-        from tui.core.context.masking import MaskedContent, ContentType
+        from vertice_tui.core.context.masking import MaskedContent, ContentType
 
         result = MaskedContent(
             original_hash="abc123",
@@ -66,7 +66,7 @@ class TestMaskedContent:
         assert result.compression_ratio == 0.05
 
     def test_compression_ratio_zero_division(self):
-        from tui.core.context.masking import MaskedContent, ContentType
+        from vertice_tui.core.context.masking import MaskedContent, ContentType
 
         result = MaskedContent(
             original_hash="abc123",
@@ -83,7 +83,7 @@ class TestObservationMasker:
     """Test ObservationMasker class."""
 
     def test_initialization(self):
-        from tui.core.context.masking import ObservationMasker
+        from vertice_tui.core.context.masking import ObservationMasker
 
         masker = ObservationMasker()
         assert masker.min_tokens_to_mask == 50
@@ -91,14 +91,14 @@ class TestObservationMasker:
         assert len(masker.rules) > 0
 
     def test_should_mask_small_content(self):
-        from tui.core.context.masking import ObservationMasker
+        from vertice_tui.core.context.masking import ObservationMasker
 
         masker = ObservationMasker()
         # Small content should not be masked
         assert masker.should_mask("hello") is False
 
     def test_should_mask_large_content(self):
-        from tui.core.context.masking import ObservationMasker
+        from vertice_tui.core.context.masking import ObservationMasker
 
         masker = ObservationMasker()
         # Large log-like content should be masked
@@ -109,7 +109,7 @@ class TestObservationMasker:
         assert masker.should_mask(large_content) is True
 
     def test_mask_content_basic(self):
-        from tui.core.context.masking import ObservationMasker
+        from vertice_tui.core.context.masking import ObservationMasker
 
         masker = ObservationMasker()
         large_content = "x" * 1000  # Large generic content
@@ -121,7 +121,7 @@ class TestObservationMasker:
         assert len(result.masked_content) < len(large_content)
 
     def test_mask_stack_trace(self):
-        from tui.core.context.masking import ObservationMasker, ContentType
+        from vertice_tui.core.context.masking import ObservationMasker, ContentType
 
         masker = ObservationMasker()
         # Large stack trace that exceeds min_chars (200)
@@ -144,7 +144,7 @@ ValueError: Invalid format: expected JSON"""
         assert result.masked_tokens < result.original_tokens
 
     def test_mask_messages_keep_recent(self):
-        from tui.core.context.masking import ObservationMasker
+        from vertice_tui.core.context.masking import ObservationMasker
 
         masker = ObservationMasker()
         messages = [
@@ -161,7 +161,7 @@ ValueError: Invalid format: expected JSON"""
             assert msg.get("_masked") is not True
 
     def test_mask_messages_empty(self):
-        from tui.core.context.masking import ObservationMasker
+        from vertice_tui.core.context.masking import ObservationMasker
 
         masker = ObservationMasker()
         masked_msgs, result = masker.mask_messages([], keep_recent=5)
@@ -171,7 +171,7 @@ ValueError: Invalid format: expected JSON"""
         assert result.items_masked == 0
 
     def test_get_stats(self):
-        from tui.core.context.masking import ObservationMasker
+        from vertice_tui.core.context.masking import ObservationMasker
 
         masker = ObservationMasker()
         masker.mask_content("x" * 1000)
@@ -181,7 +181,7 @@ ValueError: Invalid format: expected JSON"""
         assert stats["total_masked"] >= 1
 
     def test_reset_stats(self):
-        from tui.core.context.masking import ObservationMasker
+        from vertice_tui.core.context.masking import ObservationMasker
 
         masker = ObservationMasker()
         masker.mask_content("x" * 1000)
@@ -195,7 +195,7 @@ class TestMaskingConvenienceFunctions:
     """Test convenience functions."""
 
     def test_mask_observation(self):
-        from tui.core.context.masking import mask_observation
+        from vertice_tui.core.context.masking import mask_observation
 
         result = mask_observation("small")
         assert result == "small"  # Not masked
@@ -209,7 +209,7 @@ class TestMaskingConvenienceFunctions:
         assert len(result) < len(large_content)  # Masked
 
     def test_mask_tool_output(self):
-        from tui.core.context.masking import mask_tool_output, ToolMaskingResult
+        from vertice_tui.core.context.masking import mask_tool_output, ToolMaskingResult
 
         result = mask_tool_output("small output", "grep")
         assert isinstance(result, ToolMaskingResult)
@@ -227,7 +227,7 @@ class TestWindowStrategy:
     """Test WindowStrategy enum."""
 
     def test_strategies_exist(self):
-        from tui.core.context.sliding_window import WindowStrategy
+        from vertice_tui.core.context.sliding_window import WindowStrategy
 
         assert WindowStrategy.FIFO == "fifo"
         assert WindowStrategy.PRIORITY == "priority"
@@ -239,7 +239,7 @@ class TestWindowConfig:
     """Test WindowConfig dataclass."""
 
     def test_default_values(self):
-        from tui.core.context.sliding_window import WindowConfig
+        from vertice_tui.core.context.sliding_window import WindowConfig
 
         config = WindowConfig()
         assert config.max_tokens == 32_000
@@ -252,7 +252,7 @@ class TestMessage:
     """Test Message dataclass."""
 
     def test_message_creation(self):
-        from tui.core.context.sliding_window import Message
+        from vertice_tui.core.context.sliding_window import Message
 
         msg = Message(role="user", content="Hello world")
 
@@ -261,7 +261,7 @@ class TestMessage:
         assert msg.content_hash is not None
 
     def test_message_to_dict(self):
-        from tui.core.context.sliding_window import Message
+        from vertice_tui.core.context.sliding_window import Message
 
         msg = Message(role="assistant", content="Response", priority=0.8)
         d = msg.to_dict()
@@ -275,14 +275,14 @@ class TestSlidingWindowCompressor:
     """Test SlidingWindowCompressor class."""
 
     def test_initialization(self):
-        from tui.core.context.sliding_window import SlidingWindowCompressor
+        from vertice_tui.core.context.sliding_window import SlidingWindowCompressor
 
         compressor = SlidingWindowCompressor()
         assert compressor.total_tokens == 0
         assert compressor.message_count == 0
 
     def test_add_message(self):
-        from tui.core.context.sliding_window import SlidingWindowCompressor
+        from vertice_tui.core.context.sliding_window import SlidingWindowCompressor
 
         compressor = SlidingWindowCompressor()
         result = compressor.add_message("user", "Hello")
@@ -292,7 +292,7 @@ class TestSlidingWindowCompressor:
         assert compressor.total_tokens > 0
 
     def test_utilization(self):
-        from tui.core.context.sliding_window import (
+        from vertice_tui.core.context.sliding_window import (
             SlidingWindowCompressor,
             WindowConfig,
         )
@@ -304,7 +304,7 @@ class TestSlidingWindowCompressor:
         assert 0 < compressor.utilization < 1.0
 
     def test_needs_compression(self):
-        from tui.core.context.sliding_window import (
+        from vertice_tui.core.context.sliding_window import (
             SlidingWindowCompressor,
             WindowConfig,
         )
@@ -316,7 +316,7 @@ class TestSlidingWindowCompressor:
         assert compressor.needs_compression() is True
 
     def test_compress_fifo(self):
-        from tui.core.context.sliding_window import (
+        from vertice_tui.core.context.sliding_window import (
             SlidingWindowCompressor,
             WindowConfig,
             WindowStrategy,
@@ -340,7 +340,7 @@ class TestSlidingWindowCompressor:
         assert result.messages_after < result.messages_before
 
     def test_compress_priority(self):
-        from tui.core.context.sliding_window import (
+        from vertice_tui.core.context.sliding_window import (
             SlidingWindowCompressor,
             WindowConfig,
             WindowStrategy,
@@ -364,7 +364,7 @@ class TestSlidingWindowCompressor:
         assert result.success is True
 
     def test_compress_hierarchical(self):
-        from tui.core.context.sliding_window import (
+        from vertice_tui.core.context.sliding_window import (
             SlidingWindowCompressor,
             WindowConfig,
             WindowStrategy,
@@ -386,7 +386,7 @@ class TestSlidingWindowCompressor:
         assert result.success is True
 
     def test_get_context_string(self):
-        from tui.core.context.sliding_window import SlidingWindowCompressor
+        from vertice_tui.core.context.sliding_window import SlidingWindowCompressor
 
         compressor = SlidingWindowCompressor()
         compressor.add_message("user", "Hello")
@@ -398,7 +398,7 @@ class TestSlidingWindowCompressor:
         assert "Hi there!" in context
 
     def test_clear(self):
-        from tui.core.context.sliding_window import SlidingWindowCompressor
+        from vertice_tui.core.context.sliding_window import SlidingWindowCompressor
 
         compressor = SlidingWindowCompressor()
         compressor.add_message("user", "Hello")
@@ -408,7 +408,7 @@ class TestSlidingWindowCompressor:
         assert compressor.total_tokens == 0
 
     def test_get_stats(self):
-        from tui.core.context.sliding_window import SlidingWindowCompressor
+        from vertice_tui.core.context.sliding_window import SlidingWindowCompressor
 
         compressor = SlidingWindowCompressor()
         compressor.add_message("user", "Hello")
@@ -419,7 +419,7 @@ class TestSlidingWindowCompressor:
         assert "utilization" in stats
 
     def test_singleton(self):
-        from tui.core.context.sliding_window import get_sliding_window
+        from vertice_tui.core.context.sliding_window import get_sliding_window
 
         w1 = get_sliding_window()
         w2 = get_sliding_window()
@@ -436,7 +436,7 @@ class TestThinkingLevel:
     """Test ThinkingLevel enum."""
 
     def test_levels_exist(self):
-        from tui.core.context.thought_signatures import ThinkingLevel
+        from vertice_tui.core.context.thought_signatures import ThinkingLevel
 
         assert ThinkingLevel.MINIMAL == "minimal"
         assert ThinkingLevel.LOW == "low"
@@ -448,7 +448,7 @@ class TestSignatureStatus:
     """Test SignatureStatus enum."""
 
     def test_statuses_exist(self):
-        from tui.core.context.thought_signatures import SignatureStatus
+        from vertice_tui.core.context.thought_signatures import SignatureStatus
 
         assert SignatureStatus.VALID == "valid"
         assert SignatureStatus.EXPIRED == "expired"
@@ -460,7 +460,7 @@ class TestThoughtSignature:
     """Test ThoughtSignature dataclass."""
 
     def test_creation(self):
-        from tui.core.context.thought_signatures import (
+        from vertice_tui.core.context.thought_signatures import (
             ThoughtSignature,
             ThinkingLevel,
         )
@@ -480,7 +480,7 @@ class TestThoughtSignature:
         assert sig.thinking_level == ThinkingLevel.HIGH
 
     def test_to_dict(self):
-        from tui.core.context.thought_signatures import (
+        from vertice_tui.core.context.thought_signatures import (
             ThoughtSignature,
             ThinkingLevel,
         )
@@ -501,7 +501,7 @@ class TestThoughtSignature:
         assert d["level"] == "medium"
 
     def test_encode_decode(self):
-        from tui.core.context.thought_signatures import (
+        from vertice_tui.core.context.thought_signatures import (
             ThoughtSignature,
             ThinkingLevel,
         )
@@ -524,7 +524,7 @@ class TestThoughtSignature:
         assert decoded.thinking_level == original.thinking_level
 
     def test_is_expired(self):
-        from tui.core.context.thought_signatures import (
+        from vertice_tui.core.context.thought_signatures import (
             ThoughtSignature,
             ThinkingLevel,
         )
@@ -560,13 +560,13 @@ class TestThoughtSignatureManager:
     """Test ThoughtSignatureManager class."""
 
     def test_initialization(self):
-        from tui.core.context.thought_signatures import ThoughtSignatureManager
+        from vertice_tui.core.context.thought_signatures import ThoughtSignatureManager
 
         manager = ThoughtSignatureManager()
         assert manager.get_thinking_level().value == "medium"
 
     def test_create_signature(self):
-        from tui.core.context.thought_signatures import (
+        from vertice_tui.core.context.thought_signatures import (
             ThoughtSignatureManager,
             ThinkingLevel,
         )
@@ -584,7 +584,7 @@ class TestThoughtSignatureManager:
         assert len(sig.key_insights) == 2
 
     def test_chain_building(self):
-        from tui.core.context.thought_signatures import ThoughtSignatureManager
+        from vertice_tui.core.context.thought_signatures import ThoughtSignatureManager
 
         manager = ThoughtSignatureManager()
 
@@ -605,7 +605,7 @@ class TestThoughtSignatureManager:
         assert context.chain_length == 2
 
     def test_validate_signature(self):
-        from tui.core.context.thought_signatures import (
+        from vertice_tui.core.context.thought_signatures import (
             ThoughtSignatureManager,
             SignatureStatus,
         )
@@ -622,7 +622,7 @@ class TestThoughtSignatureManager:
         assert validation.chain_position == 0
 
     def test_validate_expired_signature(self):
-        from tui.core.context.thought_signatures import (
+        from vertice_tui.core.context.thought_signatures import (
             ThoughtSignatureManager,
             ThoughtSignature,
             ThinkingLevel,
@@ -647,7 +647,7 @@ class TestThoughtSignatureManager:
         assert validation.status == SignatureStatus.EXPIRED
 
     def test_get_reasoning_context(self):
-        from tui.core.context.thought_signatures import ThoughtSignatureManager
+        from vertice_tui.core.context.thought_signatures import ThoughtSignatureManager
 
         manager = ThoughtSignatureManager()
 
@@ -663,7 +663,7 @@ class TestThoughtSignatureManager:
         assert context.chain_length == 1
 
     def test_clear_chain(self):
-        from tui.core.context.thought_signatures import ThoughtSignatureManager
+        from vertice_tui.core.context.thought_signatures import ThoughtSignatureManager
 
         manager = ThoughtSignatureManager()
         manager.create_signature(
@@ -677,7 +677,7 @@ class TestThoughtSignatureManager:
         assert manager.get_reasoning_context().chain_length == 0
 
     def test_set_thinking_level(self):
-        from tui.core.context.thought_signatures import (
+        from vertice_tui.core.context.thought_signatures import (
             ThoughtSignatureManager,
             ThinkingLevel,
         )
@@ -688,7 +688,7 @@ class TestThoughtSignatureManager:
         assert manager.get_thinking_level() == ThinkingLevel.HIGH
 
     def test_get_stats(self):
-        from tui.core.context.thought_signatures import ThoughtSignatureManager
+        from vertice_tui.core.context.thought_signatures import ThoughtSignatureManager
 
         manager = ThoughtSignatureManager()
         manager.create_signature(
@@ -703,7 +703,7 @@ class TestThoughtSignatureManager:
         assert stats["chain_length"] == 1
 
     def test_singleton(self):
-        from tui.core.context.thought_signatures import get_thought_manager
+        from vertice_tui.core.context.thought_signatures import get_thought_manager
 
         m1 = get_thought_manager()
         m2 = get_thought_manager()
@@ -715,7 +715,7 @@ class TestConvenienceFunction:
     """Test create_thought_signature convenience function."""
 
     def test_create_thought_signature(self):
-        from tui.core.context.thought_signatures import (
+        from vertice_tui.core.context.thought_signatures import (
             create_thought_signature,
             ThinkingLevel,
             ThoughtSignature,
@@ -745,7 +745,7 @@ class TestTokenBreakdown:
     """Test TokenBreakdown dataclass."""
 
     def test_creation(self):
-        from tui.widgets.token_meter import TokenBreakdown
+        from vertice_tui.widgets.token_meter import TokenBreakdown
 
         breakdown = TokenBreakdown(
             messages=4000,
@@ -758,7 +758,7 @@ class TestTokenBreakdown:
         assert breakdown.total == 8000
 
     def test_to_dict(self):
-        from tui.widgets.token_meter import TokenBreakdown
+        from vertice_tui.widgets.token_meter import TokenBreakdown
 
         breakdown = TokenBreakdown(messages=1000, files=500)
         d = breakdown.to_dict()
@@ -778,8 +778,8 @@ class TestContextIntegration:
 
     def test_masker_with_sliding_window(self):
         """Test ObservationMasker with SlidingWindowCompressor."""
-        from tui.core.context.masking import ObservationMasker
-        from tui.core.context.sliding_window import SlidingWindowCompressor
+        from vertice_tui.core.context.masking import ObservationMasker
+        from vertice_tui.core.context.sliding_window import SlidingWindowCompressor
 
         masker = ObservationMasker()
         compressor = SlidingWindowCompressor()
@@ -803,11 +803,11 @@ class TestContextIntegration:
 
     def test_thought_signatures_with_compression(self):
         """Test thought signatures preserved through compression."""
-        from tui.core.context.thought_signatures import (
+        from vertice_tui.core.context.thought_signatures import (
             ThoughtSignatureManager,
             ThinkingLevel,
         )
-        from tui.core.context.sliding_window import (
+        from vertice_tui.core.context.sliding_window import (
             SlidingWindowCompressor,
             WindowConfig,
         )
@@ -836,7 +836,7 @@ class TestContextIntegration:
 
     def test_full_context_pipeline(self):
         """Test complete context optimization pipeline."""
-        from tui.core.context import (
+        from vertice_tui.core.context import (
             ObservationMasker,
             SlidingWindowCompressor,
             ThoughtSignatureManager,
@@ -892,7 +892,7 @@ class TestModuleExports:
     """Test that all exports are available."""
 
     def test_masking_exports(self):
-        from tui.core.context import (
+        from vertice_tui.core.context import (
             MaskingStrategy,
             ContentType,
             MaskingRule,
@@ -908,7 +908,7 @@ class TestModuleExports:
         assert ObservationMasker is not None
 
     def test_sliding_window_exports(self):
-        from tui.core.context import (
+        from vertice_tui.core.context import (
             WindowStrategy,
             RetentionPolicy,
             WindowConfig,
@@ -923,7 +923,7 @@ class TestModuleExports:
         assert SlidingWindowCompressor is not None
 
     def test_thought_signatures_exports(self):
-        from tui.core.context import (
+        from vertice_tui.core.context import (
             SignatureStatus,
             ThinkingLevel,
             ThoughtSignature,

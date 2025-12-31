@@ -22,7 +22,7 @@ class TestA2AServerState:
     """Tests for A2AServerState dataclass."""
 
     def test_default_values(self) -> None:
-        from tui.core.managers.a2a_manager import A2AServerState
+        from vertice_tui.core.managers.a2a_manager import A2AServerState
 
         state = A2AServerState()
         assert state.running is False
@@ -34,7 +34,7 @@ class TestA2AServerState:
         assert state.error is None
 
     def test_custom_values(self) -> None:
-        from tui.core.managers.a2a_manager import A2AServerState
+        from vertice_tui.core.managers.a2a_manager import A2AServerState
 
         state = A2AServerState(running=True, port=50052, agent_card_name="test")
         assert state.running is True
@@ -46,7 +46,7 @@ class TestDiscoveredAgent:
     """Tests for DiscoveredAgent dataclass."""
 
     def test_default_values(self) -> None:
-        from tui.core.managers.a2a_manager import DiscoveredAgent
+        from vertice_tui.core.managers.a2a_manager import DiscoveredAgent
 
         agent = DiscoveredAgent(
             agent_id="agent-1",
@@ -72,7 +72,7 @@ class TestA2AManager:
     """Tests for A2AManager."""
 
     def test_init(self) -> None:
-        from tui.core.managers.a2a_manager import A2AManager
+        from vertice_tui.core.managers.a2a_manager import A2AManager
 
         manager = A2AManager()
         assert manager._server is None
@@ -82,13 +82,13 @@ class TestA2AManager:
         assert manager._task_counter == 0
 
     def test_is_running_default_false(self) -> None:
-        from tui.core.managers.a2a_manager import A2AManager
+        from vertice_tui.core.managers.a2a_manager import A2AManager
 
         manager = A2AManager()
         assert manager.is_running() is False
 
     def test_get_status_default(self) -> None:
-        from tui.core.managers.a2a_manager import A2AManager
+        from vertice_tui.core.managers.a2a_manager import A2AManager
 
         manager = A2AManager()
         status = manager.get_status()
@@ -100,7 +100,7 @@ class TestA2AManager:
 
     @pytest.mark.asyncio
     async def test_start_server_already_running(self) -> None:
-        from tui.core.managers.a2a_manager import A2AManager
+        from vertice_tui.core.managers.a2a_manager import A2AManager
 
         manager = A2AManager()
         manager._server_state.running = True
@@ -111,7 +111,7 @@ class TestA2AManager:
 
     @pytest.mark.asyncio
     async def test_stop_server_not_running(self) -> None:
-        from tui.core.managers.a2a_manager import A2AManager
+        from vertice_tui.core.managers.a2a_manager import A2AManager
 
         manager = A2AManager()
 
@@ -120,7 +120,7 @@ class TestA2AManager:
         assert "not running" in result["error"].lower()
 
     def test_add_discovered_agent(self) -> None:
-        from tui.core.managers.a2a_manager import A2AManager, DiscoveredAgent
+        from vertice_tui.core.managers.a2a_manager import A2AManager, DiscoveredAgent
 
         manager = A2AManager()
         agent = DiscoveredAgent(
@@ -136,14 +136,14 @@ class TestA2AManager:
         assert manager._discovered_agents["agent-1"].name == "Test"
 
     def test_get_discovered_agents_empty(self) -> None:
-        from tui.core.managers.a2a_manager import A2AManager
+        from vertice_tui.core.managers.a2a_manager import A2AManager
 
         manager = A2AManager()
         agents = manager.get_discovered_agents()
         assert agents == []
 
     def test_get_discovered_agents_with_data(self) -> None:
-        from tui.core.managers.a2a_manager import A2AManager, DiscoveredAgent
+        from vertice_tui.core.managers.a2a_manager import A2AManager, DiscoveredAgent
 
         manager = A2AManager()
         manager._discovered_agents["agent-1"] = DiscoveredAgent(
@@ -158,7 +158,7 @@ class TestA2AManager:
         assert agents[0]["agent_id"] == "agent-1"
 
     def test_get_agent_found(self) -> None:
-        from tui.core.managers.a2a_manager import A2AManager, DiscoveredAgent
+        from vertice_tui.core.managers.a2a_manager import A2AManager, DiscoveredAgent
 
         manager = A2AManager()
         agent = DiscoveredAgent(
@@ -174,14 +174,14 @@ class TestA2AManager:
         assert result.name == "Test"
 
     def test_get_agent_not_found(self) -> None:
-        from tui.core.managers.a2a_manager import A2AManager
+        from vertice_tui.core.managers.a2a_manager import A2AManager
 
         manager = A2AManager()
         result = manager.get_agent("nonexistent")
         assert result is None
 
     def test_clear_discoveries(self) -> None:
-        from tui.core.managers.a2a_manager import A2AManager, DiscoveredAgent
+        from vertice_tui.core.managers.a2a_manager import A2AManager, DiscoveredAgent
 
         manager = A2AManager()
         manager._discovered_agents["agent-1"] = DiscoveredAgent(
@@ -195,14 +195,14 @@ class TestA2AManager:
         assert manager._discovered_agents == {}
 
     def test_get_local_card_none(self) -> None:
-        from tui.core.managers.a2a_manager import A2AManager
+        from vertice_tui.core.managers.a2a_manager import A2AManager
 
         manager = A2AManager()
         assert manager.get_local_card() is None
 
     @pytest.mark.asyncio
     async def test_discover_agents_returns_cached(self) -> None:
-        from tui.core.managers.a2a_manager import A2AManager, DiscoveredAgent
+        from vertice_tui.core.managers.a2a_manager import A2AManager, DiscoveredAgent
 
         manager = A2AManager()
         manager._discovered_agents["agent-1"] = DiscoveredAgent(
@@ -217,7 +217,7 @@ class TestA2AManager:
 
     @pytest.mark.asyncio
     async def test_call_agent_not_found(self) -> None:
-        from tui.core.managers.a2a_manager import A2AManager
+        from vertice_tui.core.managers.a2a_manager import A2AManager
 
         manager = A2AManager()
 
@@ -230,7 +230,7 @@ class TestA2AManager:
 
     @pytest.mark.asyncio
     async def test_sign_card_no_card(self) -> None:
-        from tui.core.managers.a2a_manager import A2AManager
+        from vertice_tui.core.managers.a2a_manager import A2AManager
 
         manager = A2AManager()
 
@@ -244,7 +244,7 @@ class TestA2AManager:
         """Test sign_card with a real generated RSA key."""
         import tempfile
         import os
-        from tui.core.managers.a2a_manager import A2AManager
+        from vertice_tui.core.managers.a2a_manager import A2AManager
         from core.security.jws import KeyManager
         from core.protocols.agent_card import AgentCard
         from core.protocols.types import AgentCapabilities
@@ -292,7 +292,7 @@ class TestA2AManager:
     @pytest.mark.asyncio
     async def test_sign_card_file_not_found(self) -> None:
         """Test sign_card with non-existent key file."""
-        from tui.core.managers.a2a_manager import A2AManager
+        from vertice_tui.core.managers.a2a_manager import A2AManager
         from core.protocols.agent_card import AgentCard
         from core.protocols.types import AgentCapabilities
 
@@ -328,14 +328,14 @@ class TestA2AExports:
     """Tests for A2A module exports."""
 
     def test_a2a_manager_exported(self) -> None:
-        from tui.core.managers import A2AManager, A2AServerState, DiscoveredAgent
+        from vertice_tui.core.managers import A2AManager, A2AServerState, DiscoveredAgent
 
         assert A2AManager is not None
         assert A2AServerState is not None
         assert DiscoveredAgent is not None
 
     def test_a2a_manager_has_methods(self) -> None:
-        from tui.core.managers.a2a_manager import A2AManager
+        from vertice_tui.core.managers.a2a_manager import A2AManager
 
         manager = A2AManager()
         assert hasattr(manager, "start_server")
@@ -356,14 +356,14 @@ class TestA2ACommandHandler:
     """Tests for A2ACommandHandler."""
 
     def test_handler_init(self) -> None:
-        from tui.handlers.a2a import A2ACommandHandler
+        from vertice_tui.handlers.a2a import A2ACommandHandler
 
         mock_app = MagicMock()
         handler = A2ACommandHandler(mock_app)
         assert handler.app is mock_app
 
     def test_handler_has_handle_method(self) -> None:
-        from tui.handlers.a2a import A2ACommandHandler
+        from vertice_tui.handlers.a2a import A2ACommandHandler
 
         mock_app = MagicMock()
         handler = A2ACommandHandler(mock_app)
@@ -378,7 +378,7 @@ class TestA2ACommandHandler:
 def test_phase6_3_summary() -> None:
     """Summary test ensuring all Phase 6.3 components exist."""
     # A2AManager
-    from tui.core.managers.a2a_manager import (
+    from vertice_tui.core.managers.a2a_manager import (
         A2AManager,
         A2AServerState,
         DiscoveredAgent,
@@ -389,7 +389,7 @@ def test_phase6_3_summary() -> None:
     assert DiscoveredAgent is not None
 
     # A2ACommandHandler
-    from tui.handlers.a2a import A2ACommandHandler
+    from vertice_tui.handlers.a2a import A2ACommandHandler
 
     assert A2ACommandHandler is not None
 
