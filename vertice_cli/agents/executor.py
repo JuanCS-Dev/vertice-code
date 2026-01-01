@@ -341,11 +341,13 @@ class CodeExecutionEngine:
         """Execute command locally with subprocess"""
         start_time = time.time()
 
-        process = await asyncio.create_subprocess_shell(
-            command,
+        # SECURITY: Use create_subprocess_exec with shlex.split for safety
+        import shlex
+        args = shlex.split(command)
+        process = await asyncio.create_subprocess_exec(
+            *args,
             stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            shell=True
+            stderr=asyncio.subprocess.PIPE
         )
 
         try:

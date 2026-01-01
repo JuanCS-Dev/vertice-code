@@ -211,9 +211,12 @@ class PTYExecutor:
             old_settings = termios.tcgetattr(sys.stdin)
 
             # Start process with slave PTY
+            # SECURITY: Use shlex.split instead of shell=True
+            import shlex
+            args = shlex.split(self.command)
             self.process = subprocess.Popen(
-                self.command,
-                shell=True,
+                args,
+                shell=False,
                 stdin=self.slave_fd,
                 stdout=self.slave_fd,
                 stderr=self.slave_fd,

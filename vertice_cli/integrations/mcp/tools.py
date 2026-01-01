@@ -18,8 +18,8 @@ class MCPToolsAdapter:
     def register_all(self, mcp_server):
         """Register all CLI tools as MCP tools."""
         # NOTE: CLI tools use **kwargs which MCP doesn't support
-        # For now, we only register shell tools which have explicit signatures
-        # TODO: Generate proper wrappers with explicit args from tool schemas
+        # Only shell tools have explicit signatures and can be registered
+        # Other tools would require schema introspection to generate wrappers
 
         self._register_shell_tools(mcp_server)
         logger.info(f"Registered {len(self._mcp_tools)} MCP tools")

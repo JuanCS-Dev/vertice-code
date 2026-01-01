@@ -11,7 +11,10 @@ Based on pytest patterns from Anthropic's Claude Code.
 """
 import os
 import subprocess
+from pathlib import Path
 from unittest.mock import patch
+
+import pytest
 
 from vertice_tui.core.agentic_prompt import (
     build_agentic_system_prompt,
@@ -19,6 +22,37 @@ from vertice_tui.core.agentic_prompt import (
     get_dynamic_context,
     enhance_tool_result,
 )
+
+
+@pytest.fixture
+def temp_git_repo(tmp_path: Path) -> Path:
+    """Create a temporary git repository for testing."""
+    repo_dir = tmp_path / "test_repo"
+    repo_dir.mkdir()
+
+    # Initialize git repo
+    subprocess.run(["git", "init"], cwd=repo_dir, capture_output=True)
+    subprocess.run(
+        ["git", "config", "user.email", "test@test.com"],
+        cwd=repo_dir,
+        capture_output=True
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Test"],
+        cwd=repo_dir,
+        capture_output=True
+    )
+
+    # Create initial commit
+    (repo_dir / "README.md").write_text("# Test")
+    subprocess.run(["git", "add", "."], cwd=repo_dir, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "Initial commit"],
+        cwd=repo_dir,
+        capture_output=True
+    )
+
+    return repo_dir
 
 
 # =============================================================================

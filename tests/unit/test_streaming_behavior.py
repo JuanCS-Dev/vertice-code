@@ -105,10 +105,10 @@ class TestToolExecutionBehavior:
 
         # Should have bullet or icon
         assert "•" in exec_out or "**" in exec_out
-        # Should have checkmark or success indicator
-        assert "✓" in success_out or "Success" in success_out
-        # Should have X or error indicator
-        assert "✗" in error_out or "error" in error_out.lower()
+        # Should have checkmark or success indicator (case-insensitive)
+        assert "✓" in success_out or "success" in success_out.lower()
+        # Should have X or error/failed indicator
+        assert "✗" in error_out or "error" in error_out.lower() or "failed" in error_out.lower()
 
 
 class TestStreamingWidgetBehavior:

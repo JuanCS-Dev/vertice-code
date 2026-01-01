@@ -102,10 +102,8 @@ def setup_observability(
             console_exporter = ConsoleSpanExporter()
             provider.add_span_processor(BatchSpanProcessor(console_exporter))
 
-        # TODO: Add file exporter if needed
-        # if enable_file:
-        #     file_exporter = FileSpanExporter("traces.jsonl")
-        #     provider.add_span_processor(BatchSpanProcessor(file_exporter))
+        # File exporter available via FileSpanExporter if trace persistence needed
+        # Uncomment and configure path for production trace logging
 
         # Set global tracer provider
         trace.set_tracer_provider(provider)

@@ -389,7 +389,8 @@ class TestCodeExecutionEngine:
         """Test local execution failure."""
         engine = CodeExecutionEngine(timeout=5.0)
 
-        result = await engine.execute("exit 1")
+        # Use /bin/bash -c to run shell commands since shell=False
+        result = await engine.execute("/bin/bash -c 'exit 1'")
 
         assert result.success is False
         assert result.exit_code == 1
@@ -399,7 +400,8 @@ class TestCodeExecutionEngine:
         """Test stderr is captured."""
         engine = CodeExecutionEngine(timeout=5.0)
 
-        result = await engine.execute("echo error >&2")
+        # Use /bin/bash -c to run shell commands since shell=False
+        result = await engine.execute("/bin/bash -c 'echo error >&2'")
 
         assert "error" in result.stderr
 

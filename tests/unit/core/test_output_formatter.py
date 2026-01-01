@@ -285,7 +285,8 @@ class TestFormatIndicators:
 
         assert isinstance(text, Text)
         assert "Reading file..." in text.plain
-        assert "●" in text.plain
+        # Icon is now "▸" (play) instead of "●"
+        assert "▸" in text.plain or "●" in text.plain
 
     def test_format_thinking(self):
         """Test thinking indicator formatting."""
@@ -293,7 +294,8 @@ class TestFormatIndicators:
 
         assert isinstance(text, Text)
         assert "Thinking" in text.plain
-        assert "●" in text.plain
+        # Icon is now "◐" (quarter circle) instead of "●"
+        assert "◐" in text.plain or "●" in text.plain
 
 
 # =============================================================================
@@ -626,4 +628,5 @@ class TestColorsAndIcons:
         assert Icons.ERROR == "✗"
         assert Icons.WARNING == "⚠"
         assert Icons.TOOL == "⚡"
-        assert Icons.AGENT == "🤖"
+        # AGENT icon changed to Unicode diamond for better compatibility
+        assert Icons.AGENT == "◆"

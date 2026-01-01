@@ -297,7 +297,7 @@ class CodeChunker:
                 if arg.annotation:
                     try:
                         arg_str += f": {ast.unparse(arg.annotation)}"
-                    except:
+                    except (AttributeError, ValueError):
                         pass
                 args.append(arg_str)
 
@@ -305,7 +305,7 @@ class CodeChunker:
             if node.returns:
                 try:
                     returns = f" -> {ast.unparse(node.returns)}"
-                except:
+                except (AttributeError, ValueError):
                     pass
 
             signature = f"def {node.name}({', '.join(args)}){returns}"
@@ -363,7 +363,7 @@ class CodeChunker:
             for base in node.bases:
                 try:
                     bases.append(ast.unparse(base))
-                except:
+                except (AttributeError, ValueError):
                     bases.append("?")
 
             base_str = f"({', '.join(bases)})" if bases else ""

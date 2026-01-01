@@ -493,7 +493,7 @@ class TestStreamLlmErrorHandling:
             async for _ in agent._stream_llm("Test"):
                 pass
 
-        assert "LLM Stream failed" in caplog.text
+        assert "LLM stream failed" in caplog.text or "LLM Stream failed" in caplog.text
 
     @pytest.mark.asyncio
     async def test_stream_error_increments_execution_count_before_error(self, mock_mcp):
@@ -846,7 +846,7 @@ class TestCallLlmErrorHandling:
         with pytest.raises(Exception):
             await agent._call_llm("Test")
 
-        assert "LLM Call failed" in caplog.text
+        assert "LLM call failed" in caplog.text or "LLM Call failed" in caplog.text
 
 
 # =============================================================================

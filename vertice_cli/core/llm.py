@@ -22,6 +22,8 @@ os.environ.setdefault("GLOG_minloglevel", "3")
 warnings.filterwarnings("ignore", message=".*ALTS.*")
 
 from .config import config
+from .providers.resilience import CircuitBreaker, CircuitState
+from .resilience import RateLimiter
 
 logger = logging.getLogger(__name__)
 
@@ -379,3 +381,17 @@ def get_llm_client(
         )
 
     return _default_client
+
+
+# Create default singleton instance for convenient import
+llm_client: LLMClient = get_llm_client()
+
+__all__ = [
+    "LLMClient",
+    "RequestMetrics",
+    "get_llm_client",
+    "llm_client",
+    "CircuitBreaker",
+    "CircuitState",
+    "RateLimiter",
+]

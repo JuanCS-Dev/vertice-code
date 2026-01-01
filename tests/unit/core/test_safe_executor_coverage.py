@@ -732,27 +732,27 @@ class TestSingletonPatternComprehensive:
     # SINGLETON STATE PRESERVATION
     # =========================================================================
 
-    def test_singleton_preserves_allowed_commands(self) -> None:
-        """Singleton should preserve ALLOWED_COMMANDS across instances."""
+    def test_singleton_preserves_working_dir(self) -> None:
+        """Singleton should preserve working directory across instances."""
         executor1 = get_safe_executor()
-        commands1 = len(executor1.ALLOWED_COMMANDS)
+        working_dir1 = executor1._working_dir
 
         executor2 = get_safe_executor()
-        commands2 = len(executor2.ALLOWED_COMMANDS)
+        working_dir2 = executor2._working_dir
 
-        assert commands1 == commands2
-        assert executor1.ALLOWED_COMMANDS is executor2.ALLOWED_COMMANDS
+        assert working_dir1 == working_dir2
+        # Same instance means same working dir object
+        assert executor1 is executor2
 
-    def test_singleton_preserves_dangerous_patterns(self) -> None:
-        """Singleton should preserve DANGEROUS_PATTERNS."""
+    def test_singleton_identity_across_calls(self) -> None:
+        """Singleton should return identical instance every time."""
         executor1 = get_safe_executor()
-        patterns1 = len(executor1.DANGEROUS_PATTERNS)
-
         executor2 = get_safe_executor()
-        patterns2 = len(executor2.DANGEROUS_PATTERNS)
+        executor3 = get_safe_executor()
 
-        assert patterns1 == patterns2
-        assert executor1.DANGEROUS_PATTERNS is executor2.DANGEROUS_PATTERNS
+        assert executor1 is executor2
+        assert executor2 is executor3
+        assert id(executor1) == id(executor2) == id(executor3)
 
     # =========================================================================
     # SINGLETON WITH CONCURRENT CALLS

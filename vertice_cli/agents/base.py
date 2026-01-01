@@ -240,7 +240,11 @@ class BaseAgent(abc.ABC):
         if not self._can_use_tool(tool_name):
             msg = f"SECURITY VIOLATION: {self.role.value} attempted to use forbidden tool '{tool_name}'"
             self.logger.critical(msg)
-            raise CapabilityViolationError(msg)
+            raise CapabilityViolationError(
+                agent_id=self.role.value,
+                capability=tool_name,
+                message=msg
+            )
 
         try:
             self.logger.info(f"Executing {tool_name} with params: {parameters.keys()}")

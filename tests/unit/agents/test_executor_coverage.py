@@ -341,7 +341,8 @@ class TestCodeExecutionEngineErrorRecovery:
         """Test recovery from invalid bash syntax."""
         engine = CodeExecutionEngine(max_retries=1)
 
-        result = await engine.execute("echo test ||| invalid")
+        # Use bash -c to test shell syntax errors since shell=False
+        result = await engine.execute("/bin/bash -c 'echo test ||| invalid'")
 
         assert result.success is False
         assert result.exit_code != 0

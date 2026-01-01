@@ -176,7 +176,7 @@ class ExplorerAgent(BaseAgent):
                         "relevance": "HIGH" if file_count > 0 else "MEDIUM",
                         "reason": f"Diretório com {file_count} arquivos .py"
                     })
-                except:
+                except (PermissionError, OSError):
                     pass
 
         return results
@@ -209,7 +209,7 @@ class ExplorerAgent(BaseAgent):
                                 "relevance": "MEDIUM",
                                 "reason": f"Arquivo em {rel_path}/"
                             })
-                except:
+                except (PermissionError, OSError):
                     pass
 
         return results[:30]
@@ -241,7 +241,7 @@ class ExplorerAgent(BaseAgent):
                                     "relevance": "MEDIUM",
                                     "reason": f"Em diretório '{keyword}'"
                                 })
-                    except:
+                    except (PermissionError, OSError):
                         pass
 
                 elif path.is_file() and path.suffix in self.CODE_EXTENSIONS:
@@ -280,7 +280,7 @@ class ExplorerAgent(BaseAgent):
                                 "relevance": "MEDIUM",
                                 "reason": f"Contém '{keyword}'"
                             })
-                        except:
+                        except (ValueError, OSError):
                             pass
 
         except FileNotFoundError:
@@ -298,11 +298,11 @@ class ExplorerAgent(BaseAgent):
                                     "relevance": "MEDIUM",
                                     "reason": f"Contém '{keyword}'"
                                 })
-                            except:
+                            except (ValueError, OSError):
                                 pass
-            except:
+            except (subprocess.TimeoutExpired, OSError):
                 pass
-        except:
+        except (subprocess.TimeoutExpired, OSError):
             pass
 
         return results

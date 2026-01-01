@@ -11,14 +11,15 @@ This package provides a comprehensive planning system based on:
 Modules:
 - agent: The main PlannerAgent class
 - types: Domain types (Enums, Pydantic models)
+- models: Domain models (SOPStep, ExecutionPlan, etc.)
 - goap: GOAP planning with A* pathfinding
 - dependency: Dependency graph analysis
-- validation: Plan validation and monitoring
+- validation: Plan validation
+- monitoring: Execution monitoring
 
 Example:
     from vertice_cli.agents.planner import PlannerAgent
-    # or
-    from vertice_cli.agents.planner.types import ExecutionPlan, SOPStep
+    from vertice_cli.agents.planner import ExecutionPlan, SOPStep
     from vertice_cli.agents.planner.goap import GOAPPlanner, WorldState
 """
 
@@ -41,14 +42,11 @@ from .types import (
     MultiPlanResult,
 )
 
-# SOPStep, ExecutionStage, ExecutionPlan, ExecutionEvent, ExecutionMonitor
-# are in agent.py (complex, tightly coupled with PlannerAgent)
-from .agent import (
+# Re-export domain models
+from .models import (
     SOPStep,
     ExecutionStage,
     ExecutionPlan,
-    ExecutionEvent,
-    ExecutionMonitor,
 )
 
 # Re-export GOAP
@@ -62,15 +60,42 @@ from .goap import (
 # Re-export dependency analysis
 from .dependency import DependencyAnalyzer
 
-# Re-export validation (only PlanValidator - ExecutionEvent/Monitor are in agent.py)
+# Re-export validation
 from .validation import PlanValidator
+
+# Re-export monitoring
+from .monitoring import (
+    ExecutionEvent,
+    ExecutionMonitor,
+)
+
+# Re-export formatting utilities
+from .formatting import (
+    format_plan_as_markdown,
+    generate_confidence_summary,
+)
+
+# Re-export multi-planning utilities
+from .multi_planning import (
+    generate_multi_plan,
+    create_fallback_plan,
+    select_best_plan,
+    build_comparison_summary,
+)
 
 # Re-export PlannerAgent from agent module
 from .agent import PlannerAgent
 
+# Re-export from base for backwards compatibility
+from ..base import AgentTask, AgentResponse, AgentCapability
+
 __all__ = [
     # Main Agent
     "PlannerAgent",
+    # Base re-exports
+    "AgentTask",
+    "AgentResponse",
+    "AgentCapability",
     # Types - Enums
     "ExecutionStrategy",
     "AgentPriority",
@@ -86,6 +111,7 @@ __all__ = [
     "ClarificationResponse",
     "AlternativePlan",
     "MultiPlanResult",
+    # Domain Models
     "SOPStep",
     "ExecutionStage",
     "ExecutionPlan",
@@ -98,6 +124,15 @@ __all__ = [
     "DependencyAnalyzer",
     # Validation
     "PlanValidator",
+    # Monitoring
     "ExecutionEvent",
     "ExecutionMonitor",
+    # Formatting
+    "format_plan_as_markdown",
+    "generate_confidence_summary",
+    # Multi-Planning
+    "generate_multi_plan",
+    "create_fallback_plan",
+    "select_best_plan",
+    "build_comparison_summary",
 ]

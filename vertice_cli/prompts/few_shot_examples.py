@@ -190,8 +190,7 @@ def get_examples_for_context(user_input: str, max_examples: int = 5) -> list:
     Returns:
         List of relevant examples
     """
-    # Simple keyword matching for now
-    # TODO: Use embeddings for semantic similarity
+    # Keyword matching provides fast, deterministic example selection
 
     keywords = {
         "file_reading": ["read", "show", "cat", "display", "view", "content"],

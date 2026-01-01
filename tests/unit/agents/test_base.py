@@ -104,11 +104,11 @@ class TestTaskStatus:
     def test_all_statuses_defined(self):
         """Test all task statuses exist."""
         assert TaskStatus.PENDING
-        assert TaskStatus.THINKING
-        assert TaskStatus.ACTING
+        assert TaskStatus.IN_PROGRESS
         assert TaskStatus.COMPLETED
         assert TaskStatus.FAILED
         assert TaskStatus.BLOCKED
+        assert TaskStatus.CANCELLED
 
 
 # =============================================================================
@@ -454,17 +454,14 @@ class TestBaseAgent:
             await agent._call_llm("Test")
 
     @pytest.mark.asyncio
-    async def test_run_streaming_fallback(self, read_only_agent):
-        """Test run() method for non-streaming agent."""
-        task = AgentTask(request="Stream test")
+    async def test_execute_returns_response(self, read_only_agent):
+        """Test execute() method returns AgentResponse."""
+        task = AgentTask(request="Test execute")
 
-        results = []
-        async for update in read_only_agent.run(task):
-            results.append(update)
+        response = await read_only_agent.execute(task)
 
-        assert len(results) == 2
-        assert results[0]["type"] == "status"
-        assert results[1]["type"] == "result"
+        # BaseAgent.execute should return an AgentResponse
+        assert isinstance(response, AgentResponse)
 
     @pytest.mark.asyncio
     async def test_reason_method(self, read_only_agent, mock_llm):
@@ -778,7 +775,11 @@ class TestAdditionalCoverage:
 
     def test_capability_violation_error(self):
         """Test CapabilityViolationError exception."""
-        error = CapabilityViolationError("SECURITY VIOLATION: explorer cannot use bash_command")
+        error = CapabilityViolationError(
+            agent_id="explorer",
+            capability="bash_command",
+            message="SECURITY VIOLATION"
+        )
 
         assert "explorer" in str(error)
         assert "bash_command" in str(error)
@@ -787,17 +788,17 @@ class TestAdditionalCoverage:
         """Test TaskResult with all optional fields."""
         result = TaskResult(
             task_id="task-789",
-            status=TaskStatus.THINKING,
+            status=TaskStatus.IN_PROGRESS,  # THINKING doesn't exist, use IN_PROGRESS
             output={"partial": True},
             metadata={"progress": 50}
         )
 
-        assert result.status == TaskStatus.THINKING
+        assert result.status == TaskStatus.IN_PROGRESS
         assert result.metadata["progress"] == 50
 
     @pytest.mark.asyncio
     async def test_run_with_failed_execute(self):
-        """Test run() when execute fails."""
+        """Test execute() failure raises exception."""
         class FailingAgent(BaseAgent):
             async def execute(self, task: AgentTask) -> AgentResponse:
                 raise ValueError("Execution failed")
@@ -814,11 +815,10 @@ class TestAdditionalCoverage:
         )
 
         task = AgentTask(request="Fail task")
-        results = []
 
+        # Test that execute raises the error directly (no run() method)
         with pytest.raises(ValueError, match="Execution failed"):
-            async for update in agent.run(task):
-                results.append(update)
+            await agent.execute(task)
 
     def test_agent_response_data_with_nested(self):
         """Test AgentResponse with nested data."""

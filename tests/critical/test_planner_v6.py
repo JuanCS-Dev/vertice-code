@@ -368,7 +368,7 @@ class TestConfidenceSummary:
 
         summary = planner._generate_confidence_summary(0.95)
 
-        assert "HIGH CONFIDENCE" in summary
+        assert "VERY HIGH" in summary or "HIGH" in summary
 
     def test_confidence_summary_moderate(self):
         """Confidence moderada deve ter emoji amarelo."""

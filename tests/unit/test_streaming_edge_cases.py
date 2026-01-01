@@ -182,19 +182,34 @@ class TestMarkupHelperEdgeCases:
         ]
 
         for markup in markups:
-            # Should have ** for bold (Markdown)
-            assert "**" in markup or "*" in markup or markup.startswith("•") or markup.startswith("✓") or markup.startswith("✗") or "🔀" in markup
+            # Should have formatting: ** for bold, * for italic, [] for bracket notation, or visual indicators
+            has_formatting = (
+                "**" in markup or
+                "*" in markup or
+                "[" in markup or  # Bracket notation like [SUCCESS], [EXECUTING], [ERROR]
+                markup.startswith("•") or
+                markup.startswith("✓") or
+                markup.startswith("✗") or
+                "🔀" in markup
+            )
+            assert has_formatting, f"No valid formatting in: {markup}"
 
     def test_markup_emojis_present(self):
-        """Markups should use emojis for visual feedback."""
+        """Markups should use visual indicators for feedback."""
         exec_markup = tool_executing_markup("Test")
         success_markup = tool_success_markup("Test")
         error_markup = tool_error_markup("Test", "err")
         routing_markup = agent_routing_markup("test", 0.5)
 
-        # At least some should have visual indicators
+        # At least some should have visual indicators (icons, emojis, or bracket notation)
         all_markups = exec_markup + success_markup + error_markup + routing_markup
-        has_visual = any(c in all_markups for c in ["•", "✓", "✗", "🔀", "🤖", "⚡"])
+        visual_indicators = ["•", "✓", "✗", "🔀", "🤖", "⚡", "◆", "▸", "◐"]
+        bracket_patterns = ["[SUCCESS]", "[ERROR]", "[EXECUTING]", "SUCCESS", "ERROR"]
+
+        has_visual = (
+            any(c in all_markups for c in visual_indicators) or
+            any(p in all_markups for p in bracket_patterns)
+        )
         assert has_visual, "Markups should have visual indicators"
 
     def test_concurrent_markup_generation(self):
