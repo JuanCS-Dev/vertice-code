@@ -251,11 +251,10 @@ def chat(
 @app.command()
 def version():
     """Show version information."""
-    console.print("\n[bold]qwen-dev-cli[/bold] v0.1.0")
-    console.print("AI-Powered Code Assistant with MCP Integration")
+    console.print("\n[bold]vertice-code[/bold] v1.0.0")
+    console.print("Multi-LLM Agentic Framework with Constitutional AI")
     console.print("\n[dim]Powered by:[/dim]")
     console.print(f"  • Model: {config.hf_model}")
-    console.print(f"  • MCP: {'Enabled' if mcp_manager.enabled else 'Disabled'}")
     console.print()
 
 
@@ -278,10 +277,14 @@ def config_show():
 
     # MCP settings
     console.print("\n[bold blue]MCP Settings:[/bold blue]")
-    stats = mcp_manager.get_stats()
-    console.print(f"  Enabled: {stats['enabled']}")
-    console.print(f"  Root Dir: {stats['root_dir']}")
-    console.print(f"  Files in Context: {stats['files']}")
+    try:
+        from vertice_cli.core.mcp import create_mcp_client
+        mcp = create_mcp_client()
+        health = mcp.get_health_status()
+        console.print(f"  Healthy: {health['healthy']}")
+        console.print(f"  Tools Registered: {health['tools_registered']}")
+    except Exception as e:
+        console.print(f"  Status: Not configured ({e})")
 
     console.print()
 

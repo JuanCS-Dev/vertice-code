@@ -22,7 +22,8 @@ class TestSmellDetection:
 
     @pytest.fixture
     def agent(self):
-        return RefactorAgent(model=MagicMock())
+        # v8.0: RefactorAgent uses llm_client, not model
+        return RefactorAgent(llm_client=MagicMock())
 
     @pytest.mark.asyncio
     async def test_detect_long_method_basic(self, agent):
@@ -121,7 +122,7 @@ class TestComplexityAnalysis:
 
     @pytest.fixture
     def agent(self):
-        return RefactorAgent(model=MagicMock())
+        return RefactorAgent(llm_client=MagicMock())
 
     @pytest.mark.asyncio
     async def test_cyclomatic_complexity_simple(self, agent):
@@ -185,7 +186,7 @@ class TestMaintainabilityIndex:
 
     @pytest.fixture
     def agent(self):
-        return RefactorAgent(model=MagicMock())
+        return RefactorAgent(llm_client=MagicMock())
 
     @pytest.mark.asyncio
     async def test_maintainability_simple_code(self, agent):
@@ -228,7 +229,7 @@ class TestQualityScoring:
 
     @pytest.fixture
     def agent(self):
-        return RefactorAgent(model=MagicMock())
+        return RefactorAgent(llm_client=MagicMock())
 
     @pytest.mark.asyncio
     async def test_quality_score_perfect_code(self, agent):

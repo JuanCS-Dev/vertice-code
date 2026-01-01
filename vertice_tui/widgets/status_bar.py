@@ -166,10 +166,14 @@ class StatusBar(Horizontal):
         self._update_element("#agent", self._format_agent())
 
     def watch_token_used(self, value: int) -> None:
+        """Update both token display and mini meter when usage changes."""
         self._update_element("#tokens", self._format_tokens())
+        self._update_mini_meter()
 
     def watch_token_limit(self, value: int) -> None:
+        """Update both token display and mini meter when limit changes."""
         self._update_element("#tokens", self._format_tokens())
+        self._update_mini_meter()
 
     def watch_cost(self, value: float) -> None:
         self._update_element("#cost", self._format_cost())
@@ -182,14 +186,6 @@ class StatusBar(Horizontal):
 
     def watch_tribunal_mode(self, value: bool) -> None:
         self._update_element("#model", self._format_model())
-
-    def watch_token_used(self, value: int) -> None:
-        """Update mini token meter when token usage changes."""
-        self._update_mini_meter()
-
-    def watch_token_limit(self, value: int) -> None:
-        """Update mini token meter when limit changes."""
-        self._update_mini_meter()
 
     def _update_mini_meter(self) -> None:
         """Update the MiniTokenMeter widget."""

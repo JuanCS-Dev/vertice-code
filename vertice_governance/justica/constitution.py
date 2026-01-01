@@ -12,11 +12,15 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
+import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum, auto
-from typing import Any, Dict, FrozenSet, List, Optional, Set
+from typing import Any, Dict, FrozenSet, List, Optional, Set, Tuple
 from uuid import UUID, uuid4
+
+logger = logging.getLogger(__name__)
 
 
 class Severity(Enum):
@@ -532,6 +536,293 @@ class Constitution:
 ║ Hash: {self.integrity_hash[:32]}...                           ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
+
+
+# ════════════════════════════════════════════════════════════════════════════════
+# CONSTITUTIONAL ENFORCER (Anthropic Constitutional AI Pattern 2026)
+# ════════════════════════════════════════════════════════════════════════════════
+
+class EnforcementCategory(Enum):
+    """Categories of enforcement decisions."""
+    ALLOW = "allow"           # Action is permitted
+    DISALLOW = "disallow"     # Action is blocked
+    ESCALATE = "escalate"     # Action requires human review
+    MONITOR = "monitor"       # Action is allowed but monitored
+
+
+@dataclass
+class EnforcementResult:
+    """
+    Result of constitutional enforcement check.
+
+    Following Anthropic's Constitutional AI pattern:
+    - Clear decision with reasoning
+    - Reference to violated principle
+    - Severity classification
+    - Recommended action
+    """
+    allowed: bool
+    category: EnforcementCategory
+    principle_id: Optional[UUID] = None
+    principle_name: Optional[str] = None
+    severity: Severity = Severity.INFO
+    message: str = ""
+    matched_patterns: List[str] = field(default_factory=list)
+    matched_keywords: List[str] = field(default_factory=list)
+    requires_escalation: bool = False
+    recommended_action: str = ""
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "allowed": self.allowed,
+            "category": self.category.value,
+            "principle_id": str(self.principle_id) if self.principle_id else None,
+            "principle_name": self.principle_name,
+            "severity": self.severity.name,
+            "message": self.message,
+            "matched_patterns": self.matched_patterns,
+            "matched_keywords": self.matched_keywords,
+            "requires_escalation": self.requires_escalation,
+            "recommended_action": self.recommended_action,
+        }
+
+
+class ConstitutionalEnforcer:
+    """
+    Enforcer of constitutional principles.
+
+    Following Anthropic's Constitutional AI pattern (2022-2026):
+    - Self-supervision using explicit principles
+    - Tiered response based on severity
+    - Audit trail for all decisions
+    - Escalation for ambiguous cases
+
+    Usage:
+        constitution = Constitution()
+        enforcer = ConstitutionalEnforcer(constitution)
+
+        result = enforcer.enforce("User requested to bypass authentication")
+        if not result.allowed:
+            print(f"Blocked by {result.principle_name}: {result.message}")
+    """
+
+    def __init__(self, constitution: Constitution):
+        """
+        Initialize enforcer with a constitution.
+
+        Args:
+            constitution: The Constitution to enforce
+        """
+        self.constitution = constitution
+        self._enforcement_count = 0
+        self._blocks_count = 0
+        self._escalations_count = 0
+
+    def enforce(
+        self,
+        action: str,
+        context: Optional[Dict[str, Any]] = None,
+    ) -> EnforcementResult:
+        """
+        Enforce constitutional principles on an action.
+
+        This is the main enforcement method. It checks:
+        1. DISALLOW principles first (hard blocks)
+        2. ESCALATE principles (requires human review)
+        3. MONITOR principles (allowed but logged)
+        4. Default: ALLOW if no principle triggered
+
+        Args:
+            action: The action/text to evaluate
+            context: Optional context dictionary
+
+        Returns:
+            EnforcementResult with the decision
+        """
+        self._enforcement_count += 1
+        context = context or {}
+
+        # ═══════════════════════════════════════════════════════════════════
+        # Step 1: Check red flags (quick check)
+        # ═══════════════════════════════════════════════════════════════════
+        red_flags_found = self.constitution.check_red_flags(action)
+
+        # ═══════════════════════════════════════════════════════════════════
+        # Step 2: Check DISALLOW principles (highest priority)
+        # ═══════════════════════════════════════════════════════════════════
+        disallow_principles = self.constitution.get_principles_by_category("DISALLOW")
+        for principle in disallow_principles:
+            matched_patterns = principle.matches_pattern(action)
+            matched_keywords = principle.contains_keywords(action)
+
+            if matched_patterns or matched_keywords:
+                self._blocks_count += 1
+                logger.warning(
+                    f"Action blocked by principle '{principle.name}'. "
+                    f"Patterns: {matched_patterns}, Keywords: {matched_keywords}"
+                )
+                return EnforcementResult(
+                    allowed=False,
+                    category=EnforcementCategory.DISALLOW,
+                    principle_id=principle.id,
+                    principle_name=principle.name,
+                    severity=principle.severity,
+                    message=f"Blocked by constitutional principle: {principle.name}",
+                    matched_patterns=matched_patterns,
+                    matched_keywords=matched_keywords,
+                    requires_escalation=False,
+                    recommended_action="Block the action and log the attempt",
+                )
+
+        # ═══════════════════════════════════════════════════════════════════
+        # Step 3: Check ESCALATE principles
+        # ═══════════════════════════════════════════════════════════════════
+        escalate_principles = self.constitution.get_principles_by_category("ESCALATE")
+        for principle in escalate_principles:
+            matched_patterns = principle.matches_pattern(action)
+            matched_keywords = principle.contains_keywords(action)
+
+            if matched_patterns or matched_keywords:
+                self._escalations_count += 1
+                logger.info(
+                    f"Action requires escalation per principle '{principle.name}'. "
+                    f"Patterns: {matched_patterns}, Keywords: {matched_keywords}"
+                )
+                return EnforcementResult(
+                    allowed=False,
+                    category=EnforcementCategory.ESCALATE,
+                    principle_id=principle.id,
+                    principle_name=principle.name,
+                    severity=principle.severity,
+                    message=f"Requires human review: {principle.name}",
+                    matched_patterns=matched_patterns,
+                    matched_keywords=matched_keywords,
+                    requires_escalation=True,
+                    recommended_action="Pause and escalate to human reviewer",
+                )
+
+        # ═══════════════════════════════════════════════════════════════════
+        # Step 4: Check escalation triggers from context
+        # ═══════════════════════════════════════════════════════════════════
+        escalation_triggers = self.constitution.check_escalation_needed(context)
+        if escalation_triggers:
+            self._escalations_count += 1
+            return EnforcementResult(
+                allowed=False,
+                category=EnforcementCategory.ESCALATE,
+                principle_id=None,
+                principle_name="Escalation Trigger",
+                severity=Severity.HIGH,
+                message=f"Context triggered escalation: {', '.join(escalation_triggers[:3])}",
+                matched_patterns=[],
+                matched_keywords=[],
+                requires_escalation=True,
+                recommended_action="Review context with human supervisor",
+            )
+
+        # ═══════════════════════════════════════════════════════════════════
+        # Step 5: Check MONITOR principles (allowed but logged)
+        # ═══════════════════════════════════════════════════════════════════
+        monitor_principles = self.constitution.get_principles_by_category("MONITOR")
+        for principle in monitor_principles:
+            matched_patterns = principle.matches_pattern(action)
+            matched_keywords = principle.contains_keywords(action)
+
+            if matched_patterns or matched_keywords:
+                logger.debug(
+                    f"Action monitored per principle '{principle.name}'. "
+                    f"Patterns: {matched_patterns}"
+                )
+                # Continue checking other MONITOR principles but don't block
+
+        # ═══════════════════════════════════════════════════════════════════
+        # Step 6: Red flags found but no principle matched - escalate
+        # ═══════════════════════════════════════════════════════════════════
+        if red_flags_found and len(red_flags_found) >= 2:
+            # Multiple red flags suggest suspicious activity
+            self._escalations_count += 1
+            return EnforcementResult(
+                allowed=False,
+                category=EnforcementCategory.ESCALATE,
+                principle_id=None,
+                principle_name="Multiple Red Flags",
+                severity=Severity.MEDIUM,
+                message=f"Multiple red flags detected: {red_flags_found[:5]}",
+                matched_patterns=[],
+                matched_keywords=red_flags_found,
+                requires_escalation=True,
+                recommended_action="Review for potential policy violation",
+            )
+
+        # ═══════════════════════════════════════════════════════════════════
+        # Step 7: Default - ALLOW with optional monitoring
+        # ═══════════════════════════════════════════════════════════════════
+        category = (
+            EnforcementCategory.MONITOR if red_flags_found
+            else EnforcementCategory.ALLOW
+        )
+
+        return EnforcementResult(
+            allowed=True,
+            category=category,
+            principle_id=None,
+            principle_name=None,
+            severity=Severity.INFO,
+            message="Action permitted",
+            matched_patterns=[],
+            matched_keywords=red_flags_found if red_flags_found else [],
+            requires_escalation=False,
+            recommended_action="Proceed with action",
+        )
+
+    def enforce_batch(
+        self,
+        actions: List[str],
+        context: Optional[Dict[str, Any]] = None,
+    ) -> List[EnforcementResult]:
+        """
+        Enforce principles on multiple actions.
+
+        Useful for batch processing or pre-flight checks.
+        """
+        return [self.enforce(action, context) for action in actions]
+
+    def is_activity_safe(self, activity: str) -> Tuple[bool, Optional[str]]:
+        """
+        Quick check if an activity is safe.
+
+        Returns:
+            Tuple of (is_safe, reason_if_not_safe)
+        """
+        result = self.enforce(activity)
+        if result.allowed:
+            return True, None
+        return False, result.message
+
+    def get_metrics(self) -> Dict[str, Any]:
+        """Return enforcement metrics."""
+        return {
+            "total_enforcements": self._enforcement_count,
+            "total_blocks": self._blocks_count,
+            "total_escalations": self._escalations_count,
+            "block_rate": (
+                self._blocks_count / self._enforcement_count
+                if self._enforcement_count > 0 else 0.0
+            ),
+            "escalation_rate": (
+                self._escalations_count / self._enforcement_count
+                if self._enforcement_count > 0 else 0.0
+            ),
+        }
+
+    def __repr__(self) -> str:
+        metrics = self.get_metrics()
+        return (
+            f"ConstitutionalEnforcer("
+            f"enforcements={metrics['total_enforcements']}, "
+            f"blocks={metrics['total_blocks']}, "
+            f"escalations={metrics['total_escalations']})"
+        )
 
 
 # ════════════════════════════════════════════════════════════════════════════════

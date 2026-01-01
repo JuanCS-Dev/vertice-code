@@ -110,9 +110,19 @@ class VerticeRouter:
     4. FALLBACK CHAIN: Automatic failover on errors
     """
 
-    # Provider priorities (lower = higher priority for free tier)
-    # Enterprise providers have higher numbers (use when explicitly needed)
-    PROVIDER_PRIORITY = {
+    # Provider priorities (lower = higher priority)
+    # Mode: "enterprise" prioritizes Vertex AI, "free" prioritizes free tiers
+    PROVIDER_PRIORITY_ENTERPRISE = {
+        "vertex-ai": 1,    # Vertex AI Gemini 2.0 - PRIMARY (R$8000 credits!)
+        "azure-openai": 2, # Enterprise GPT-4 via Azure
+        "groq": 3,         # 14,400 req/day, ultra-fast fallback
+        "cerebras": 4,     # 1M tokens/day, fastest fallback
+        "mistral": 5,      # 1B tokens/month
+        "openrouter": 6,   # 200 req/day on free models
+        "gemini": 7,       # Legacy API (prefer vertex-ai)
+    }
+
+    PROVIDER_PRIORITY_FREE = {
         "groq": 1,         # 14,400 req/day, ultra-fast
         "cerebras": 2,     # 1M tokens/day, fastest
         "mistral": 3,      # 1B tokens/month
@@ -122,28 +132,42 @@ class VerticeRouter:
         "azure-openai": 7, # Enterprise GPT-4 via Azure
     }
 
-    # Task complexity to provider mapping
-    # Enterprise providers (vertex-ai, azure-openai) used for complex/critical tasks
+    # Default to enterprise mode (user has GCloud credits)
+    PROVIDER_PRIORITY = PROVIDER_PRIORITY_ENTERPRISE
+
+    # Task complexity to provider mapping (Enterprise mode - Vertex AI first)
     COMPLEXITY_ROUTING = {
-        TaskComplexity.SIMPLE: ["groq", "cerebras", "mistral"],
-        TaskComplexity.MODERATE: ["groq", "mistral", "vertex-ai"],
+        TaskComplexity.SIMPLE: ["vertex-ai", "groq", "cerebras"],
+        TaskComplexity.MODERATE: ["vertex-ai", "groq", "mistral"],
         TaskComplexity.COMPLEX: ["vertex-ai", "azure-openai", "openrouter"],
         TaskComplexity.CRITICAL: ["vertex-ai", "azure-openai"],  # Enterprise only
     }
 
-    # Speed requirement to provider mapping
+    # Speed requirement to provider mapping (Vertex AI is fast!)
     SPEED_ROUTING = {
-        SpeedRequirement.INSTANT: ["groq", "cerebras"],
-        SpeedRequirement.FAST: ["groq", "cerebras", "vertex-ai"],
-        SpeedRequirement.NORMAL: ["groq", "mistral", "vertex-ai", "openrouter"],
-        SpeedRequirement.RELAXED: ["mistral", "openrouter", "vertex-ai", "azure-openai"],
+        SpeedRequirement.INSTANT: ["vertex-ai", "groq", "cerebras"],
+        SpeedRequirement.FAST: ["vertex-ai", "groq", "cerebras"],
+        SpeedRequirement.NORMAL: ["vertex-ai", "groq", "mistral", "openrouter"],
+        SpeedRequirement.RELAXED: ["vertex-ai", "mistral", "openrouter", "azure-openai"],
     }
 
-    def __init__(self):
-        """Initialize the router."""
+    def __init__(self, enterprise_mode: bool = True):
+        """Initialize the router.
+
+        Args:
+            enterprise_mode: If True, prioritize Vertex AI (for users with GCloud credits).
+                           If False, prioritize free tier providers.
+        """
         self._providers: Dict[str, LLMProvider] = {}
         self._status: Dict[str, ProviderStatus] = {}
         self._initialized = False
+        self._enterprise_mode = enterprise_mode
+
+        # Set priority based on mode
+        if enterprise_mode:
+            self.PROVIDER_PRIORITY = self.PROVIDER_PRIORITY_ENTERPRISE
+        else:
+            self.PROVIDER_PRIORITY = self.PROVIDER_PRIORITY_FREE
 
     def _lazy_init(self):
         """Lazy initialize providers."""
@@ -169,7 +193,7 @@ class VerticeRouter:
             "mistral": (MistralProvider, {"model_name": "large"}),
             "gemini": (GeminiProvider, {}),  # Legacy - prefer vertex-ai
             # Enterprise Providers (Your Infrastructure)
-            "vertex-ai": (VertexAIProvider, {"model_name": "flash"}),  # Gemini 2.5 Flash
+            "vertex-ai": (VertexAIProvider, {"model_name": "pro"}),  # Gemini 3 Pro!
             "azure-openai": (AzureOpenAIProvider, {"deployment": "gpt4o-mini"}),
         }
 

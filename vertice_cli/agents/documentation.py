@@ -124,7 +124,7 @@ class DocumentationAgent(BaseAgent):
         r"password\s*=\s*['\"][\w-]+['\"]",
     ]
 
-    def __init__(self, llm_client: Any, mcp_client: Any):
+    def __init__(self, llm_client: Optional[Any] = None, mcp_client: Optional[Any] = None):
         """Initialize DocumentationAgent.
 
         Args:

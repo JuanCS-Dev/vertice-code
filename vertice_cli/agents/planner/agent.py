@@ -131,8 +131,8 @@ class PlannerAgent(BaseAgent):
 
     def __init__(
         self,
-        llm_client: Any,
-        mcp_client: Any,
+        llm_client: Optional[Any] = None,
+        mcp_client: Optional[Any] = None,
         plan_artifact_dir: Optional[str] = None,
         ask_clarifying_questions: bool = True,
     ):

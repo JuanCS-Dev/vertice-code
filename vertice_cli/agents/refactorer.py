@@ -517,7 +517,7 @@ class RefactorerAgent(BaseAgent):
     Enterprise Transactional Code Surgeon v8.0
     """
 
-    def __init__(self, llm_client: Any, mcp_client: Any, explorer_agent: Optional[Any] = None):
+    def __init__(self, llm_client: Optional[Any] = None, mcp_client: Optional[Any] = None, explorer_agent: Optional[Any] = None):
         super().__init__(
             role=AgentRole.REFACTORER,
             capabilities=[

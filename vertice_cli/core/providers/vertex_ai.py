@@ -4,10 +4,10 @@ Vertex AI Gemini Provider
 Usa ADC (Application Default Credentials) - sem necessidade de API key.
 Inferência via Vertex AI, não Google AI Studio.
 
-Modelos disponíveis:
-- gemini-2.5-flash (recomendado)
-- gemini-2.0-flash-exp
-- gemini-1.5-pro
+Modelos disponíveis (2026):
+- gemini-3-pro-preview (RECOMMENDED - reasoning-first, 1M context)
+- gemini-3-flash-preview (multimodal, agentic)
+- gemini-3-deep-think (coming soon)
 """
 
 from __future__ import annotations
@@ -32,16 +32,21 @@ class VertexAIProvider:
     """
 
     MODELS = {
-        "flash": "gemini-2.5-flash",
-        "flash-exp": "gemini-2.0-flash-exp",
-        "pro": "gemini-1.5-pro",
+        # Gemini 3 (2026) - RECOMMENDED
+        "pro": "gemini-3-pro-preview",            # Reasoning-first, 1M context, agentic
+        "flash": "gemini-3-flash-preview",        # Multimodal, complex understanding
+        "3-pro": "gemini-3-pro-preview",
+        "3-flash": "gemini-3-flash-preview",
+        # Legacy (still available)
+        "2.0-flash": "gemini-2.0-flash-exp",
+        "2.5-flash": "gemini-2.5-flash-preview",
     }
 
     def __init__(
         self,
         project: Optional[str] = None,
         location: str = "us-central1",
-        model_name: str = "flash",
+        model_name: str = "pro",  # Default to Gemini 3 Pro!
     ):
         """Initialize Vertex AI provider.
 
@@ -226,15 +231,18 @@ class VertexAIProvider:
 
     def get_model_info(self) -> Dict[str, str | bool | int]:
         """Get model information."""
+        # Gemini 3 has 1M context for all models
+        context_window = 1_000_000 if "3" in self.model_name else 128_000
         return {
             'provider': 'vertex-ai',
             'model': self.model_name,
             'project': self.project,
             'location': self.location,
             'available': self.is_available(),
-            'context_window': 1000000 if 'pro' in self.model_name else 128000,
+            'context_window': context_window,
             'supports_streaming': True,
-            'cost_tier': 'paid',  # But you have quota!
+            'supports_thinking': "3-pro" in self.model_name,  # Gemini 3 Pro has thinking
+            'cost_tier': 'enterprise',  # R$8000 credits!
             'speed_tier': 'ultra_fast',
         }
 

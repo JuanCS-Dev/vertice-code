@@ -155,8 +155,49 @@ class DocumentationAgent(RetrievalAgent):
         query: str,
         limit: int = 5,
     ) -> List[ResearchResult]:
-        """Search documentation sources."""
-        return []
+        """
+        Search documentation sources.
+
+        Searches local docs/ directory and README files.
+        """
+        import asyncio
+        from pathlib import Path
+
+        results: List[ResearchResult] = []
+        cwd = Path.cwd()
+
+        # Search in docs/ directory
+        docs_dir = cwd / "docs"
+        readme_files = list(cwd.glob("**/README*.md"))[:limit]
+        doc_files = list(docs_dir.glob("**/*.md"))[:limit] if docs_dir.exists() else []
+
+        all_files = (readme_files + doc_files)[:limit]
+
+        for doc_path in all_files:
+            try:
+                content = doc_path.read_text(encoding="utf-8", errors="ignore")
+                query_lower = query.lower()
+
+                # Simple relevance: check if query terms appear
+                if any(term in content.lower() for term in query_lower.split()):
+                    # Extract relevant snippet
+                    lines = content.split("\n")
+                    relevant_lines = [
+                        line for line in lines
+                        if any(term in line.lower() for term in query_lower.split())
+                    ][:5]
+
+                    results.append(ResearchResult(
+                        source=str(doc_path.relative_to(cwd)),
+                        title=doc_path.name,
+                        content="\n".join(relevant_lines) or content[:500],
+                        relevance_score=0.7,
+                        metadata={"type": "local_doc"},
+                    ))
+            except Exception:
+                continue
+
+        return results[:limit]
 
 
 class WebSearchAgent(RetrievalAgent):
@@ -175,8 +216,45 @@ class WebSearchAgent(RetrievalAgent):
         query: str,
         limit: int = 5,
     ) -> List[ResearchResult]:
-        """Search the web."""
-        return []
+        """
+        Search the web using httpx.
+
+        Uses DuckDuckGo HTML search as fallback.
+        """
+        import httpx
+
+        results: List[ResearchResult] = []
+
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                # DuckDuckGo HTML search (no API key needed)
+                url = "https://html.duckduckgo.com/html/"
+                response = await client.post(url, data={"q": query})
+
+                if response.status_code == 200:
+                    # Parse results (basic extraction)
+                    html = response.text
+                    # Extract result snippets (simplified)
+                    import re
+                    snippets = re.findall(
+                        r'<a class="result__a"[^>]*href="([^"]*)"[^>]*>([^<]*)</a>',
+                        html
+                    )
+
+                    for i, (href, title) in enumerate(snippets[:limit]):
+                        results.append(ResearchResult(
+                            source="duckduckgo",
+                            title=title.strip(),
+                            content=f"Web result for: {query}",
+                            url=href,
+                            relevance_score=0.8 - (i * 0.1),
+                            metadata={"type": "web_search"},
+                        ))
+        except Exception:
+            # Return empty if web search fails (offline, etc)
+            pass
+
+        return results[:limit]
 
 
 class CodebaseAgent(RetrievalAgent):
@@ -195,5 +273,56 @@ class CodebaseAgent(RetrievalAgent):
         query: str,
         limit: int = 5,
     ) -> List[ResearchResult]:
-        """Search the codebase."""
-        return []
+        """
+        Search the codebase using grep.
+
+        Searches Python files for query terms.
+        """
+        import subprocess
+        from pathlib import Path
+
+        results: List[ResearchResult] = []
+        cwd = Path.cwd()
+
+        try:
+            # Use grep to find matching files
+            proc = subprocess.run(
+                ["grep", "-r", "-l", "-i", query, ".", "--include=*.py"],
+                capture_output=True,
+                text=True,
+                timeout=10,
+                cwd=cwd,
+            )
+
+            files = [f for f in proc.stdout.strip().split("\n") if f][:limit]
+
+            for file_path in files:
+                try:
+                    full_path = cwd / file_path
+                    content = full_path.read_text(encoding="utf-8", errors="ignore")
+
+                    # Extract matching lines
+                    lines = content.split("\n")
+                    matching = [
+                        f"L{i+1}: {line.strip()}"
+                        for i, line in enumerate(lines)
+                        if query.lower() in line.lower()
+                    ][:5]
+
+                    results.append(ResearchResult(
+                        source=file_path,
+                        title=Path(file_path).name,
+                        content="\n".join(matching),
+                        relevance_score=0.9,
+                        metadata={"type": "codebase", "language": "python"},
+                    ))
+                except Exception:
+                    continue
+
+        except subprocess.TimeoutExpired:
+            pass
+        except FileNotFoundError:
+            # grep not available
+            pass
+
+        return results[:limit]

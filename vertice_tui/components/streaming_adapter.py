@@ -129,8 +129,9 @@ class StreamingResponseWidget(Static):
         # Render mode
         self._render_mode = RenderMode.MARKDOWN if enable_markdown else RenderMode.PLAIN_TEXT
 
-        # Flag para cleanup seguro
+        # Flag para cleanup seguro (with async lock for thread-safety)
         self._is_finalizing = False
+        self._finalize_lock = asyncio.Lock()
 
         # Deduplication: track last N lines to detect LLM repetitions
         self._last_lines: List[str] = []
@@ -330,32 +331,43 @@ class StreamingResponseWidget(Static):
         """
         Finaliza streaming e aplica formatação final.
 
+        Thread-safe: uses asyncio.Lock to prevent concurrent finalization.
         Deve ser chamado quando o streaming terminar.
         """
-        # Seta flag ANTES para evitar race conditions
-        self._is_finalizing = True
-        self.is_streaming = False
-        self.remove_class("streaming")
+        async with self._finalize_lock:
+            # Skip if already finalized
+            if self._is_finalizing:
+                return
 
-        # Cancela animação do cursor de forma segura
-        if self._cursor_task and not self._cursor_task.done():
-            self._cursor_task.cancel()
-            try:
-                await self._cursor_task
-            except asyncio.CancelledError:
-                pass
-            except Exception as e:
-                import logging
-                logging.warning(f"Error cancelling cursor task: {e}")
-            finally:
-                self._cursor_task = None
+            # Set flag BEFORE cleanup to prevent race conditions
+            self._is_finalizing = True
+            self.is_streaming = False
+            self.remove_class("streaming")
 
-        # Render final (sem cursor)
-        self._is_finalizing = False  # Permite render final
-        self._update_display()
+            # Cancel cursor animation safely with timeout
+            if self._cursor_task and not self._cursor_task.done():
+                self._cursor_task.cancel()
+                try:
+                    await asyncio.wait_for(
+                        asyncio.shield(self._cursor_task),
+                        timeout=1.0
+                    )
+                except (asyncio.CancelledError, asyncio.TimeoutError):
+                    pass
+                except Exception as e:
+                    import logging
+                    logging.warning(f"Error cancelling cursor task: {e}")
+                finally:
+                    self._cursor_task = None
 
-        # Emite evento
-        self.post_message(self.StreamCompleted(self._content, self._metrics))
+            # Final render (without cursor) - still inside lock
+            self._update_display()
+
+            # Emit completion event
+            self.post_message(self.StreamCompleted(self._content, self._metrics))
+
+            # Reset flag AFTER all cleanup is complete
+            self._is_finalizing = False
 
     def finalize_sync(self) -> None:
         """

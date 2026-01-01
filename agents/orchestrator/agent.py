@@ -94,6 +94,35 @@ class OrchestratorAgent(ResilienceMixin, CachingMixin, BoundedAutonomyMixin, Bas
         self._llm = None
         self._approval_callback = approval_callback
         self._notify_callback = notify_callback
+        self._agents_initialized = False
+
+    def _ensure_agents(self) -> None:
+        """
+        Lazy-initialize specialized agents.
+
+        Pattern: Anthropic Orchestrator-Worker (2026)
+        - Lead agent (this) coordinates
+        - Subagents execute specialized tasks
+        """
+        if self._agents_initialized:
+            return
+
+        # Import agents lazily to avoid circular imports
+        from agents.coder.agent import CoderAgent
+        from agents.reviewer.agent import ReviewerAgent
+        from agents.architect.agent import ArchitectAgent
+        from agents.researcher.agent import ResearcherAgent
+        from agents.devops.agent import DevOpsAgent
+
+        self.agents = {
+            AgentRole.CODER: CoderAgent(),
+            AgentRole.REVIEWER: ReviewerAgent(),
+            AgentRole.ARCHITECT: ArchitectAgent(),
+            AgentRole.RESEARCHER: ResearcherAgent(),
+            AgentRole.DEVOPS: DevOpsAgent(),
+        }
+        self._agents_initialized = True
+        logger.info(f"Orchestrator initialized {len(self.agents)} subagents")
 
     async def plan(self, user_request: str) -> List[Task]:
         """
@@ -176,6 +205,11 @@ class OrchestratorAgent(ResilienceMixin, CachingMixin, BoundedAutonomyMixin, Bas
         """
         Execute user request with full orchestration.
 
+        Pattern: Anthropic Orchestrator-Worker (2026)
+        - Lead agent decomposes and delegates
+        - Subagents execute with clear objectives
+        - Results aggregated back to user
+
         Args:
             user_request: The user's request.
             stream: Whether to stream output.
@@ -183,12 +217,14 @@ class OrchestratorAgent(ResilienceMixin, CachingMixin, BoundedAutonomyMixin, Bas
         Yields:
             Progress updates and results.
         """
+        self._ensure_agents()
         yield "[Orchestrator] Analyzing request...\n"
 
         tasks = await self.plan(user_request)
-        yield f"[Orchestrator] Created {len(tasks)} tasks\n"
+        yield f"[Orchestrator] Created {len(tasks)} task(s)\n"
 
         for task in tasks:
+            # Check bounded autonomy
             can_proceed, approval = await self.check_autonomy(task)
 
             if not can_proceed:
@@ -197,13 +233,53 @@ class OrchestratorAgent(ResilienceMixin, CachingMixin, BoundedAutonomyMixin, Bas
                     yield f"[Orchestrator] Approval ID: {approval.id}\n"
                 continue
 
+            # Route to appropriate agent
             agent_role = await self.route(task)
-            yield f"[Orchestrator] Routing to {agent_role.value}...\n"
+            agent = self.agents.get(agent_role)
 
-            task.status = "completed"
-            await self.notify_completion(task, "Task completed")
+            if agent is None:
+                yield f"[Orchestrator] No agent for role: {agent_role.value}\n"
+                task.status = "failed"
+                continue
 
-        yield "[Orchestrator] All tasks completed\n"
+            # Create handoff with context (Anthropic pattern)
+            handoff = await self.handoff(task, agent_role, user_request)
+            yield f"[Orchestrator] Handoff to {agent_role.value}...\n"
+
+            # EXECUTE THE AGENT
+            task.status = "in_progress"
+            try:
+                # Delegate based on agent type
+                if hasattr(agent, 'generate') and agent_role == AgentRole.CODER:
+                    from agents.coder.types import CodeGenerationRequest
+                    request = CodeGenerationRequest(
+                        description=task.description,
+                        language="python",
+                    )
+                    async for chunk in agent.generate(request, stream=stream):
+                        yield chunk
+                elif hasattr(agent, 'execute'):
+                    async for chunk in agent.execute(task.description, stream=stream):
+                        yield chunk
+                elif hasattr(agent, 'analyze'):
+                    async for chunk in agent.analyze(task.description, stream=stream):
+                        yield chunk
+                else:
+                    yield f"[{agent_role.value}] Processing: {task.description}\n"
+
+                task.status = "completed"
+                task.result = "Execution completed"
+                yield f"\n[Orchestrator] Task completed by {agent_role.value}\n"
+
+            except Exception as e:
+                task.status = "failed"
+                task.result = str(e)
+                logger.error(f"Agent {agent_role.value} failed: {e}")
+                yield f"\n[Orchestrator] Task failed: {e}\n"
+
+            await self.notify_completion(task, task.result or "")
+
+        yield "[Orchestrator] All tasks processed\n"
 
     async def _analyze_complexity(self, request: str) -> TaskComplexity:
         """Analyze request complexity for routing decisions."""
@@ -222,13 +298,15 @@ class OrchestratorAgent(ResilienceMixin, CachingMixin, BoundedAutonomyMixin, Bas
 
     def get_status(self) -> Dict:
         """Get orchestrator status."""
+        self._ensure_agents()
         return {
             "name": self.name,
             "role": self.role.value,
             "active_tasks": len([t for t in self.tasks.values() if t.status == "in_progress"]),
             "completed_tasks": len([t for t in self.tasks.values() if t.status == "completed"]),
+            "failed_tasks": len([t for t in self.tasks.values() if t.status == "failed"]),
             "handoffs": len(self.handoffs),
-            "agents_registered": len(self.agents),
+            "agents_registered": list(self.agents.keys()),
             "pending_approvals": len(self.pending_approvals),
         }
 

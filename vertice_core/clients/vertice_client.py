@@ -274,32 +274,18 @@ class VerticeClient:
         return provider
 
     def _init_provider(self, name: str) -> Optional[ProviderProtocol]:
-        """Initialize provider by name (lazy loading)."""
-        try:
-            if name == "groq":
-                from vertice_cli.core.providers.groq import GroqProvider
-                return GroqProvider()
-            elif name == "cerebras":
-                from vertice_cli.core.providers.cerebras import CerebrasProvider
-                return CerebrasProvider()
-            elif name == "mistral":
-                from vertice_cli.core.providers.mistral import MistralProvider
-                return MistralProvider()
-            elif name == "vertex-ai":
-                from vertice_cli.core.providers.vertex_ai import VertexAIProvider
-                return VertexAIProvider()
-            elif name == "azure":
-                from vertice_cli.core.providers.azure_openai import AzureOpenAIProvider
-                return AzureOpenAIProvider()
-            elif name == "openrouter":
-                from vertice_cli.core.providers.openrouter import OpenRouterProvider
-                return OpenRouterProvider()
-            else:
-                logger.warning(f"Unknown provider: {name}")
-                return None
-        except Exception as e:
-            logger.warning(f"Failed to init {name}: {e}")
-            return None
+        """
+        Initialize provider by name using the registry.
+
+        Uses Dependency Injection pattern to avoid circular imports.
+        Providers are registered by vertice_cli at startup.
+        """
+        from vertice_core.providers import registry
+
+        provider = registry.get(name)
+        if provider is None:
+            logger.warning(f"Provider not available: {name}")
+        return provider
 
     def _record_success(self, name: str) -> None:
         self._failures[name] = 0

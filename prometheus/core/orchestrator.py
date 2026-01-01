@@ -107,8 +107,10 @@ class PrometheusOrchestrator:
         # Execution history
         self.execution_history: List[ExecutionResult] = []
 
-        # State
+        # State with thread-safety (Semaphore prevents concurrent execution)
         self._is_executing = False
+        self._execution_lock = asyncio.Lock()
+        self._execution_semaphore = asyncio.Semaphore(1)  # Max 1 concurrent execution
 
     def _register_builtin_tools(self):
         """Register built-in tools."""
@@ -137,79 +139,87 @@ class PrometheusOrchestrator:
         """
         Execute a task with orchestration.
 
+        Thread-safe: Uses semaphore to prevent concurrent execution
+        and lock to protect state changes.
+
         Args:
             task: The task to execute
             stream: Whether to stream output
             fast_mode: Skip memory/reflection for speed (default: True)
         """
-        self._is_executing = True
-        start_time = datetime.now()
+        # Acquire semaphore to prevent concurrent execution
+        # Semaphore wraps entire execution to ensure no concurrent runs
+        async with self._execution_semaphore:
+            async with self._execution_lock:
+                self._is_executing = True
+            start_time = datetime.now()
 
-        try:
-            yield "🔥 **PROMETHEUS** executing...\n\n"
+            try:
+                yield "🔥 **PROMETHEUS** executing...\n\n"
 
-            # FAST MODE: Go directly to execution
-            if fast_mode:
-                execution_output = await self._execute_task_with_context(
-                    task,
-                    {},  # No memory context
-                    None,  # No plan
-                )
-                yield execution_output
+                # FAST MODE: Go directly to execution
+                if fast_mode:
+                    execution_output = await self._execute_task_with_context(
+                        task,
+                        {},  # No memory context
+                        None,  # No plan
+                    )
+                    yield execution_output
 
-                end_time = datetime.now()
-                execution_time = (end_time - start_time).total_seconds()
-                yield f"\n\n✅ Done in {execution_time:.1f}s\n"
-            else:
-                # FULL MODE: All the bells and whistles
-                yield "📚 Retrieving context...\n"
-                memory_context = self.memory.get_context_for_task(task)
+                    end_time = datetime.now()
+                    execution_time = (end_time - start_time).total_seconds()
+                    yield f"\n\n✅ Done in {execution_time:.1f}s\n"
+                else:
+                    # FULL MODE: All the bells and whistles
+                    yield "📚 Retrieving context...\n"
+                    memory_context = self.memory.get_context_for_task(task)
 
-                yield "🌍 Planning approach...\n"
-                plans = await self.world_model.find_best_plan(
-                    goal=task,
-                    available_actions=[
-                        ActionType.THINK,
-                        ActionType.READ_FILE,
-                        ActionType.WRITE_FILE,
-                        ActionType.EXECUTE_CODE,
-                        ActionType.USE_TOOL,
-                    ],
-                    max_steps=5,
-                    num_candidates=2,
-                )
+                    yield "🌍 Planning approach...\n"
+                    plans = await self.world_model.find_best_plan(
+                        goal=task,
+                        available_actions=[
+                            ActionType.THINK,
+                            ActionType.READ_FILE,
+                            ActionType.WRITE_FILE,
+                            ActionType.EXECUTE_CODE,
+                            ActionType.USE_TOOL,
+                        ],
+                        max_steps=5,
+                        num_candidates=2,
+                    )
 
-                yield "⚡ Executing...\n"
-                execution_output = await self._execute_task_with_context(
-                    task,
-                    memory_context,
-                    plans[0] if plans else None,
-                )
-                yield f"\n{execution_output}\n"
+                    yield "⚡ Executing...\n"
+                    execution_output = await self._execute_task_with_context(
+                        task,
+                        memory_context,
+                        plans[0] if plans else None,
+                    )
+                    yield f"\n{execution_output}\n"
 
-                yield "🪞 Reflecting...\n"
-                reflection_result = await self.reflection.critique_action(
-                    action=f"Task: {task[:100]}",
-                    result=execution_output[:500],
-                    context={},
-                )
+                    yield "🪞 Reflecting...\n"
+                    reflection_result = await self.reflection.critique_action(
+                        action=f"Task: {task[:100]}",
+                        result=execution_output[:500],
+                        context={},
+                    )
 
-                self.memory.remember_experience(
-                    experience=f"Task: {task[:200]}",
-                    outcome=f"Result: {execution_output[:200]}",
-                    context={"score": reflection_result.score},
-                    importance=reflection_result.score,
-                )
+                    self.memory.remember_experience(
+                        experience=f"Task: {task[:200]}",
+                        outcome=f"Result: {execution_output[:200]}",
+                        context={"score": reflection_result.score},
+                        importance=reflection_result.score,
+                    )
 
-                end_time = datetime.now()
-                execution_time = (end_time - start_time).total_seconds()
-                yield f"\n✅ Done in {execution_time:.1f}s (score: {reflection_result.score:.0%})\n"
+                    end_time = datetime.now()
+                    execution_time = (end_time - start_time).total_seconds()
+                    yield f"\n✅ Done in {execution_time:.1f}s (score: {reflection_result.score:.0%})\n"
 
-        except Exception as e:
-            yield f"\n❌ Error: {str(e)}\n"
-            raise
-        finally:
-            self._is_executing = False
+            except Exception as e:
+                yield f"\n❌ Error: {str(e)}\n"
+                raise
+            finally:
+                async with self._execution_lock:
+                    self._is_executing = False
 
     async def execute_simple(self, task: str) -> str:
         """

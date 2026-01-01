@@ -17,6 +17,7 @@ Performance comprovada: 78.4% precisão, 81.7% recall
 from __future__ import annotations
 
 import math
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from enum import Enum, auto
@@ -25,6 +26,68 @@ from collections import deque
 from uuid import UUID, uuid4
 
 from .constitution import Severity, ViolationType
+
+logger = logging.getLogger(__name__)
+
+
+# ════════════════════════════════════════════════════════════════════════════════
+# AUTHORIZATION CONTEXT (Anthropic Two-Party Authorization Pattern 2026)
+# ════════════════════════════════════════════════════════════════════════════════
+
+class AuthorizationLevel(Enum):
+    """
+    Authorization levels for governance operations.
+
+    Following Anthropic's ASL (AI Safety Levels) pattern:
+    - SYSTEM: Automated system operations
+    - OPERATOR: Human operator with standard permissions
+    - ADMIN: Human administrator with elevated permissions
+    - RSO: Responsible Scaling Officer (highest authority)
+    """
+    SYSTEM = 1      # Automated operations
+    OPERATOR = 2    # Human operator
+    ADMIN = 3       # Human administrator
+    RSO = 4         # Responsible Scaling Officer (Anthropic pattern)
+
+
+@dataclass
+class AuthorizationContext:
+    """
+    Authorization context for sensitive governance operations.
+
+    Following Anthropic's two-party authorization pattern:
+    - All sensitive operations require explicit authorization
+    - Audit trail for every authorization
+    - Minimum authorization level enforced
+
+    Attributes:
+        principal: Who is authorizing (user ID, system name)
+        level: Authorization level
+        reason: Why the operation is being authorized
+        ticket_id: Optional support ticket or incident ID
+        second_party: Optional second authorizer for two-party auth
+    """
+    principal: str
+    level: AuthorizationLevel
+    reason: str
+    ticket_id: Optional[str] = None
+    second_party: Optional[str] = None  # For two-party authorization
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+
+    def has_two_party_auth(self) -> bool:
+        """Check if this context has two-party authorization."""
+        return self.second_party is not None and self.second_party != self.principal
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "principal": self.principal,
+            "level": self.level.name,
+            "reason": self.reason,
+            "ticket_id": self.ticket_id,
+            "second_party": self.second_party,
+            "timestamp": self.timestamp.isoformat(),
+            "has_two_party_auth": self.has_two_party_auth(),
+        }
 
 
 class TrustLevel(Enum):
@@ -410,15 +473,122 @@ class TrustEngine:
 
         return trust_factor.is_suspended, trust_factor.suspension_reason
 
-    def lift_suspension(self, agent_id: str, reason: str = "Manual lift") -> bool:
+    # Minimum authorization level required for sensitive operations
+    LIFT_SUSPENSION_MIN_LEVEL = AuthorizationLevel.ADMIN
+    CRITICAL_SUSPENSION_MIN_LEVEL = AuthorizationLevel.RSO  # Requires RSO for critical
+
+    def lift_suspension(
+        self,
+        agent_id: str,
+        auth_context: AuthorizationContext,
+    ) -> bool:
         """
-        Remove suspensão de um agente manualmente.
-        
+        Remove suspensão de um agente com autorização obrigatória.
+
+        Following Anthropic's two-party authorization pattern (2026):
+        - Sensitive operations require explicit AuthorizationContext
+        - Minimum authorization level enforced
+        - Critical suspensions require RSO approval
+        - Full audit trail recorded
+
+        Args:
+            agent_id: ID do agente
+            auth_context: Authorization context with principal and level
+
         Returns:
-            True se suspensão foi removida, False se agente não estava suspenso
+            True se suspensão foi removida
+
+        Raises:
+            PermissionError: Se autorização insuficiente
+            ValueError: Se auth_context inválido
         """
+        # Validate auth_context
+        if auth_context is None:
+            raise ValueError(
+                "AuthorizationContext required. "
+                "lift_suspension() is a sensitive operation that requires explicit authorization."
+            )
+
         trust_factor = self.get_trust_factor(agent_id)
 
+        if trust_factor is None or not trust_factor.is_suspended:
+            return False
+
+        # Determine required authorization level
+        was_critical_suspension = (
+            trust_factor.suspension_reason and
+            "crítica" in trust_factor.suspension_reason.lower()
+        )
+
+        required_level = (
+            self.CRITICAL_SUSPENSION_MIN_LEVEL if was_critical_suspension
+            else self.LIFT_SUSPENSION_MIN_LEVEL
+        )
+
+        # Check authorization level
+        if auth_context.level.value < required_level.value:
+            logger.warning(
+                f"Authorization denied for lift_suspension on {agent_id}. "
+                f"Required: {required_level.name}, Got: {auth_context.level.name}, "
+                f"Principal: {auth_context.principal}"
+            )
+            raise PermissionError(
+                f"Insufficient authorization to lift suspension. "
+                f"Required: {required_level.name}, "
+                f"Got: {auth_context.level.name}. "
+                f"{'Two-party authorization recommended for critical suspensions.' if was_critical_suspension else ''}"
+            )
+
+        # Log the authorization BEFORE modifying state (audit trail)
+        logger.info(
+            f"Suspension lift authorized for {agent_id}. "
+            f"Principal: {auth_context.principal}, "
+            f"Level: {auth_context.level.name}, "
+            f"Reason: {auth_context.reason}, "
+            f"Ticket: {auth_context.ticket_id or 'N/A'}, "
+            f"Two-party: {auth_context.has_two_party_auth()}"
+        )
+
+        # Apply the change
+        trust_factor.is_suspended = False
+        old_reason = trust_factor.suspension_reason
+        trust_factor.suspension_reason = None
+        trust_factor.suspension_until = None
+
+        # Record event with full authorization context
+        event = TrustEvent(
+            event_type="suspension_lifted",
+            severity=Severity.INFO,
+            impact=0,
+            description=f"Suspensão removida por {auth_context.principal}: {auth_context.reason}",
+            context={
+                "authorization": auth_context.to_dict(),
+                "previous_suspension_reason": old_reason,
+                "was_critical": was_critical_suspension,
+            },
+        )
+        trust_factor.events.append(event)
+
+        return True
+
+    def lift_suspension_unsafe(self, agent_id: str, reason: str = "Manual lift") -> bool:
+        """
+        DEPRECATED: Remove suspensão sem autorização.
+
+        ⚠️ WARNING: This method bypasses authorization checks.
+        Use only for testing or migration. Will be removed in v4.0.
+
+        Use lift_suspension(agent_id, auth_context) instead.
+        """
+        import warnings
+        warnings.warn(
+            "lift_suspension_unsafe() is deprecated and will be removed in v4.0. "
+            "Use lift_suspension(agent_id, auth_context) with proper AuthorizationContext.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
+        trust_factor = self.get_trust_factor(agent_id)
         if trust_factor is None or not trust_factor.is_suspended:
             return False
 
@@ -428,12 +598,14 @@ class TrustEngine:
 
         event = TrustEvent(
             event_type="suspension_lifted",
-            severity=Severity.INFO,
+            severity=Severity.HIGH,  # Higher severity for unsafe operation
             impact=0,
-            description=f"Suspensão removida: {reason}",
+            description=f"[UNSAFE] Suspensão removida sem autorização: {reason}",
+            context={"unsafe_operation": True},
         )
         trust_factor.events.append(event)
 
+        logger.warning(f"[UNSAFE] Suspension lifted without authorization for {agent_id}")
         return True
 
     def apply_temporal_decay(self, agent_id: str) -> float:

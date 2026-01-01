@@ -19,10 +19,45 @@ Date: 2025-11-25
 from __future__ import annotations
 
 import asyncio
-from typing import Optional, List
+from typing import Optional, List, TypeVar, Coroutine, Any
 
 import typer
 from rich.console import Console
+
+T = TypeVar("T")
+
+
+def run_async(coro: Coroutine[Any, Any, T]) -> T:
+    """
+    Run async code safely, handling existing event loops.
+
+    This prevents "asyncio.run() cannot be called from a running event loop"
+    errors that occur when calling asyncio.run() from within an async context.
+
+    Args:
+        coro: The coroutine to run
+
+    Returns:
+        The result of the coroutine
+    """
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        # No running loop - safe to use asyncio.run()
+        return asyncio.run(coro)
+
+    # Already have a loop - use run_until_complete or create_task
+    if loop.is_running():
+        # We're in a running loop (e.g., called from TUI)
+        # Create a new loop in a new thread is one option,
+        # but simpler is to use nest_asyncio or return a task
+        import concurrent.futures
+        with concurrent.futures.ThreadPoolExecutor() as pool:
+            future = pool.submit(asyncio.run, coro)
+            return future.result()
+    else:
+        return loop.run_until_complete(coro)
+
 
 # Create CLI app
 app = typer.Typer(
@@ -85,13 +120,17 @@ def main(
         qwen -p "Fix tests" --max-turns 5 # Limited iterations
         qwen -p "List TODOs" -o json      # JSON output
     """
+    # Register providers with vertice_core (Dependency Injection)
+    from vertice_cli.core.providers.register import ensure_providers_registered
+    ensure_providers_registered()
+
     # If a subcommand is being invoked, skip default behavior
     if ctx.invoked_subcommand is not None:
         return
 
     # Headless mode
     if prompt:
-        asyncio.run(_run_headless(
+        run_async(_run_headless(
             prompt=prompt,
             output_format=output_format,
             max_turns=max_turns,
@@ -110,12 +149,13 @@ def _run_tui():
         launch_tui()
     except ImportError as e:
         console.print(f"[red]Error importing TUI:[/red] {e}")
-        console.print("[dim]Falling back to legacy shell...[/dim]")
+        console.print("[dim]Falling back to shell_main...[/dim]")
         try:
-            from vertice_cli.shell_fast import main as shell_main
-            asyncio.run(shell_main())
+            from vertice_cli.shell_main import main as shell_main
+            run_async(shell_main())
         except ImportError:
-            console.print("[red]No shell available. Install textual.[/red]")
+            console.print("[red]No shell available. Install textual:[/red]")
+            console.print("  pip install textual")
             raise typer.Exit(1)
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
@@ -195,7 +235,7 @@ def serve(
 
     try:
         from vertice_cli.cli_mcp import main as mcp_main
-        asyncio.run(mcp_main())
+        run_async(mcp_main())
     except ImportError as e:
         console.print("[red]Error:[/red] MCP dependencies not installed")
         console.print(f"[dim]Details: {e}[/dim]")
@@ -206,26 +246,13 @@ def serve(
 
 
 @app.command()
-def shell(
-    mode: str = typer.Option("fast", "--mode", "-m", help="Shell mode: fast, simple, main"),
-):
-    """Start legacy interactive shell."""
-    console.print(f"[bold cyan]🐚 Starting {mode} shell...[/bold cyan]")
+def shell():
+    """Start interactive shell."""
+    console.print("[bold cyan]🐚 Starting shell...[/bold cyan]")
 
     try:
-        if mode == "fast":
-            from vertice_cli.shell_fast import main as shell_main
-        elif mode == "simple":
-            from vertice_cli.shell_simple import main as shell_main
-        elif mode == "main":
-            from vertice_cli.shell_main import main as shell_main
-        else:
-            console.print(f"[red]Unknown shell mode:[/red] {mode}")
-            console.print("[dim]Available: fast, simple, main[/dim]")
-            raise typer.Exit(1)
-
-        asyncio.run(shell_main())
-
+        from vertice_cli.shell_main import main as shell_main
+        run_async(shell_main())
     except ImportError as e:
         console.print(f"[red]Error:[/red] Shell not available: {e}")
         raise typer.Exit(1)
@@ -244,7 +271,7 @@ def chat(
     json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
 ):
     """Send a single message (one-shot mode)."""
-    asyncio.run(_run_headless(
+    run_async(_run_headless(
         prompt=message,
         output_format="json" if json_output else "text",
     ))
