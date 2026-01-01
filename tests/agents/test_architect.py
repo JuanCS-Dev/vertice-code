@@ -75,8 +75,8 @@ class TestArchitectDecisions:
         assert response.success is True
         assert response.data["decision"] == "APPROVED"
         assert "feasible" in response.reasoning.lower()
-        assert response.metadata["decision"] == "APPROVED"
-        assert response.metadata["complexity"] == "MEDIUM"
+        # Architecture info is in response.data, not metadata
+        assert response.data["architecture"]["estimated_complexity"] == "MEDIUM"
 
     @pytest.mark.asyncio
     async def test_architect_vetoes_bad_request(self) -> None:

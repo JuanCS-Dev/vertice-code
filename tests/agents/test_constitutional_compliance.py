@@ -168,7 +168,8 @@ class TestConstitutionalP3CeticismoCritico:
         # Error should explain what went wrong
         assert "architect" in error_msg.lower()
         assert "write_file" in error_msg
-        assert "cannot use" in error_msg.lower()
+        # Error uses "lacks capability" or "forbidden" terminology
+        assert "lacks capability" in error_msg.lower() or "forbidden" in error_msg.lower()
 
     @pytest.mark.asyncio
     async def test_agent_does_not_silently_fail(self) -> None:
@@ -297,16 +298,19 @@ class TestConstitutionalP6EficienciaToken:
         # Counter allows detecting excessive retries
         assert isinstance(initial_count, int)
 
-    def test_agent_response_has_metadata_for_metrics(self) -> None:
-        """Test that responses support metadata for token tracking."""
+    def test_agent_response_has_metrics_for_token_tracking(self) -> None:
+        """Test that responses support metrics for token tracking."""
+        # Note: AgentResponse uses 'metrics' field (Dict[str, float])
+        # 'metadata' is a property alias for backward compatibility
         response = AgentResponse(
             success=True,
             reasoning="Test",
-            metadata={"tokens_used": 1234, "model": "gpt-4"},
+            metrics={"tokens_used": 1234.0, "latency_ms": 150.0},
         )
 
-        assert response.metadata["tokens_used"] == 1234
-        # Metadata enables token budget tracking
+        assert response.metrics["tokens_used"] == 1234.0
+        # metadata property returns same as metrics
+        assert response.metadata == response.metrics
 
 
 class TestCapabilityEnforcementSecurity:

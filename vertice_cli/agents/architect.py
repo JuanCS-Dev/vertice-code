@@ -168,16 +168,12 @@ class ArchitectAgent(BaseAgent):
                 )
 
             # Return successful analysis
+            # Note: data already contains decision and architecture info
+            # metrics field is for numeric values only
             return AgentResponse(
                 success=True,
                 data=decision_data,
                 reasoning=decision_data.get("reasoning", "Decision made"),
-                metadata={
-                    "decision": decision,
-                    "complexity": decision_data.get("architecture", {}).get(
-                        "estimated_complexity", "UNKNOWN"
-                    ),
-                },
             )
 
         except Exception as e:
