@@ -1,0 +1,75 @@
+name: Brutal E2E Validation
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 4 * * *'  # Run nightly at 4 AM
+  pull_request:
+    paths:
+      - 'vertice_tui/**'
+      - 'agents/**'
+      - 'core/**'
+      - 'tests/e2e_brutal/**'
+
+jobs:
+  brutal-e2e:
+    name: 🔥 Brutal E2E Validation (Vertex AI)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install google-cloud-aiplatform textual pytest-asyncio pytest-textual-snapshot
+
+      # 🔐 Google Vertex AI Authentication (Standard Pattern)
+      # Requires GCP_WORKLOAD_IDENTITY_PROVIDER and GCP_SERVICE_ACCOUNT secrets
+      - name: Authenticate to Google Cloud
+        id: 'auth'
+        if: env.GOOGLE_APPLICATION_CREDENTIALS == '' 
+        continue-on-error: true # Allow running without secrets (will skip real calls)
+        uses: 'google-github-actions/auth@v2'
+        with:
+          workload_identity_provider: '${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}'
+          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT }}'
+
+      - name: Setup Vertex AI Environment
+        if: steps.auth.outcome == 'success'
+        run: |
+          echo "GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}" >> $GITHUB_ENV
+          echo "VERTEX_AI_LOCATION=us-central1" >> $GITHUB_ENV
+
+      # 🛡️ Run Brutal Tests
+      - name: Execute Brutal E2E Tests
+        env:
+          TERM: xterm-256color
+          COLUMNS: 120
+          LINES: 40
+        run: |
+          # If no auth, we might skip or fail. For now, we attempt execution.
+          # The tests themselves should handle missing auth gracefully or fail if strictly required.
+          pytest tests/e2e_brutal/ \
+            -v \
+            -m "brutal_e2e" \
+            --html=e2e-report.html \
+            --self-contained-html
+      
+      - name: Upload E2E Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: brutal-e2e-report
+          path: e2e-report.html
