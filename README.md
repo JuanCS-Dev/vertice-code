@@ -1,18 +1,30 @@
 # VERTICE
 
-```
-██╗   ██╗███████╗██████╗ ████████╗██╗ ██████╗███████╗
-██║   ██║██╔════╝██╔══██╗╚══██╔══╝██║██╔════╝██╔════╝
-██║   ██║█████╗  ██████╔╝   ██║   ██║██║     █████╗
-╚██╗ ██╔╝██╔══╝  ██╔══██╗   ██║   ██║██║     ██╔══╝
- ╚████╔╝ ███████╗██║  ██║   ██║   ██║╚██████╗███████╗
-  ╚═══╝  ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚═╝ ╚═════╝╚══════╝
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Tests](https://img.shields.io/badge/tests-732%2B-green.svg)](tests/)
+[![Agents](https://img.shields.io/badge/agents-20-purple.svg)](agents/)
+[![Tools](https://img.shields.io/badge/tools-47-orange.svg)](vertice_cli/tools/)
 
-    Multi-LLM Agentic Framework with Constitutional AI
-```
+<p align="center">
+  <img src="docs/assets/tui-screanshot.png" alt="VERTICE TUI" width="700">
+</p>
 
-> **Enterprise-Grade AI Code Agency** | 20 Agents | 47 Tools | 7 LLM Providers | Constitutional Governance
->
+<p align="center">
+  <b>Multi-LLM Agentic Framework with Constitutional AI</b><br>
+  <i>Enterprise-Grade AI Code Agency • 20 Agents • 47 Tools • 7 LLM Providers</i>
+</p>
+
+<p align="center">
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#architecture">Architecture</a> •
+  <a href="#agents">Agents</a> •
+  <a href="#governance">Governance</a> •
+  <a href="https://buy.stripe.com/aFa6oJ1mY7KU1fW4LF33W01">Sponsor</a>
+</p>
+
+---
+
 > *December 2025 - Built with patterns from Anthropic, Google, OpenAI & Microsoft*
 
 ---
