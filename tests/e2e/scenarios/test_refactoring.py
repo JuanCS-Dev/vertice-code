@@ -526,7 +526,7 @@ def can_cancel(status: OrderStatus) -> bool:
         PaymentMethod = exec_globals['PaymentMethod']
         calculate_fee = exec_globals['calculate_processing_fee']
 
-        assert calculate_fee(100, PaymentMethod.CREDIT_CARD) == 2.9
+        assert calculate_fee(100, PaymentMethod.CREDIT_CARD) == pytest.approx(2.9)
         assert calculate_fee(100, PaymentMethod.BANK_TRANSFER) == 0
 
 
