@@ -24,6 +24,22 @@ from rich.console import Console
 _PromptSession = None
 _FileHistory = None
 _AutoSuggestFromHistory = None
+_CodeBlock = None
+_DiffViewer = None
+
+def _get_tui_components():
+    """Lazy load TUI components."""
+    global _CodeBlock, _DiffViewer
+    if _CodeBlock is None:
+        try:
+            from .tui.components.code import CodeBlock as CB
+            from .tui.components.diff import DiffViewer as DV
+            _CodeBlock, _DiffViewer = CB, DV
+        except ImportError:
+            # Fallback if TUI components not available
+            _CodeBlock = lambda *a, **k: type('FakeCodeBlock', (), {'render': lambda s: str(a[0]) if a else ''})()
+            _DiffViewer = lambda *a, **k: type('FakeDiffViewer', (), {'render': lambda s: ''})()
+    return _CodeBlock, _DiffViewer
 
 def _get_prompt_toolkit():
     """Lazy load prompt_toolkit components."""
@@ -40,6 +56,9 @@ if TYPE_CHECKING:
     from rich.panel import Panel
     from rich.syntax import Syntax
     from rich.table import Table
+    # TUI components (used conditionally)
+    from .tui.components.code import CodeBlock
+    from .tui.components.diff import DiffViewer
 
 # Core imports (lightweight, needed early)
 from .core.context import ContextBuilder
@@ -848,6 +867,7 @@ Response: I don't have a tool to check the current time, but I can help you with
                 if tool_name == "read_file":
                     # TUI: Enhanced code block with language badge
                     lang = result.metadata.get("language", "text")
+                    CodeBlock, _ = _get_tui_components()
                     code_block = CodeBlock(
                         str(result.data),
                         language=lang,
@@ -909,6 +929,7 @@ Response: I don't have a tool to check the current time, but I can help you with
                     if result.data:
                         # TUI: GitHub-style diff viewer
                         # Parse diff to extract old/new content (simplified for now)
+                        _, DiffViewer = _get_tui_components()
                         diff_viewer = DiffViewer("", result.data, "Working Copy", "Uncommitted")
                         self.console.print(Panel(
                             Syntax(result.data, "diff", theme="monokai"),
@@ -1375,6 +1396,9 @@ Response: I don't have a tool to check the current time, but I can help you with
         Gemini: Visual hierarchy + typography
         """
         import time
+
+        # Generate operation ID for dashboard tracking
+        op_id = f"llm_request_{int(time.time() * 1000)}"
 
         # Track user message in session (AIR GAP #2)
         self.session_state.add_message("user", user_input)
