@@ -15,7 +15,7 @@ Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 from __future__ import annotations
 
 import logging
-from typing import Any, AsyncIterator, Callable, Dict, List, Optional, Tuple
+from typing import Any, AsyncIterator, Dict, List, Optional, Tuple
 
 from ..llm_client import ToolCallParser
 from ..parsing.stream_filter import StreamFilter
@@ -28,13 +28,11 @@ from ..parallel_executor import ParallelExecutionResult, ParallelToolExecutor
 
 from .types import (
     ChatConfig,
-    ChatResult,
     LLMClientProtocol,
     ToolBridgeProtocol,
     HistoryProtocol,
     GovernanceProtocol,
     AgentManagerProtocol,
-    ToolExecutionResult,
 )
 
 logger = logging.getLogger(__name__)

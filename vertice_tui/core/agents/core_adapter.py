@@ -24,7 +24,7 @@ from enum import Enum
 from typing import Any, AsyncIterator, Callable, Dict, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from agents.orchestrator.types import Task, TaskComplexity, AutonomyLevel
+    pass
 
 
 # Fallback TaskComplexity for when import fails

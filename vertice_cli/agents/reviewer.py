@@ -14,11 +14,14 @@ Architecture inspired by: Qodo, CodeRabbit, GitHub Copilot Code Review
 
 import ast
 import json
+import logging
 import networkx as nx
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Set, Tuple
 from enum import Enum
 from pydantic import BaseModel, Field
+
+logger = logging.getLogger(__name__)
 
 from .base import (
     AgentCapability,

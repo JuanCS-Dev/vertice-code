@@ -20,12 +20,12 @@ Soli Deo Gloria
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from textual.app import ComposeResult
 from textual.containers import Vertical, Horizontal
 from textual.reactive import reactive
-from textual.widgets import Static, ProgressBar, Label
+from textual.widgets import Static
 
 
 @dataclass

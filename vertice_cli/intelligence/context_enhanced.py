@@ -3,8 +3,14 @@
 Boris Cherny: Rich context = better decisions. Aggregate everything.
 """
 
+import logging
+logger = logging.getLogger(__name__)
 import os
+import logging
+logger = logging.getLogger(__name__)
 import json
+import logging
+logger = logging.getLogger(__name__)
 import subprocess
 from dataclasses import dataclass, field
 from typing import Optional, Dict, List

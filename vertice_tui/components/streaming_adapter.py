@@ -12,7 +12,6 @@ Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 from __future__ import annotations
 
 import asyncio
-import re
 import threading
 from typing import Callable, List, Optional
 

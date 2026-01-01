@@ -7,7 +7,6 @@ European AI with generous FREE TIER
 """
 
 import os
-import asyncio
 from typing import Dict, List, Optional, AsyncGenerator
 import logging
 import httpx

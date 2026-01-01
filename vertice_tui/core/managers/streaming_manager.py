@@ -19,7 +19,7 @@ Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 from __future__ import annotations
 
 import logging
-from typing import Any, AsyncIterator, Callable, Dict, List, Optional, Protocol, Tuple
+from typing import Any, AsyncIterator, Dict, List, Optional, Protocol, Tuple
 
 from ..llm_client import ToolCallParser
 from ..parsing.stream_filter import StreamFilter

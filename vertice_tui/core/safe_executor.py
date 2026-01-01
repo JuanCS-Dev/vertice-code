@@ -22,7 +22,6 @@ from typing import Dict, List, Optional, Tuple
 
 from .command_whitelist import (
     AllowedCommand,
-    CommandCategory,
     ALLOWED_COMMANDS,
     DANGEROUS_PATTERNS,
 )

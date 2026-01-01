@@ -13,7 +13,11 @@ Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 
 from __future__ import annotations
 
+import logging
+logger = logging.getLogger(__name__)
 import os
+import logging
+logger = logging.getLogger(__name__)
 import threading
 from pathlib import Path
 from typing import Any, AsyncIterator, Dict, List, Optional, Tuple
@@ -44,7 +48,7 @@ from .tools_bridge import ToolBridge, MinimalRegistry
 from .ui_bridge import CommandPaletteBridge, MinimalCommandPalette, AutocompleteBridge
 from .history_manager import HistoryManager
 from .help_builder import build_tool_list, build_command_help, get_agent_commands
-from .plan_executor import is_plan_execution_request, prepare_plan_execution
+from .plan_executor import prepare_plan_execution
 from .parallel_executor import ParallelExecutionResult, ParallelToolExecutor
 from .chat import ChatController, ChatConfig
 from .protocol_bridge import ProtocolBridgeMixin
@@ -52,8 +56,7 @@ from .protocol_bridge import ProtocolBridgeMixin
 # Managers
 from .managers import (
     TodoManager, StatusManager, PullRequestManager, MemoryManager,
-    ContextManager, AuthenticationManager, StreamingManager,
-    StreamingConfig, ProviderManager, ProviderConfig, MCPManager,
+    ContextManager, AuthenticationManager, ProviderManager, MCPManager,
     A2AManager,
 )
 

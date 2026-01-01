@@ -7,7 +7,6 @@ Ultra-fast inference with Llama 3.3 70B - FREE TIER
 """
 
 import os
-import asyncio
 from typing import Dict, List, Optional, AsyncGenerator
 import logging
 import httpx

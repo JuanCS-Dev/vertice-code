@@ -12,7 +12,11 @@ Author: JuanCS Dev
 Date: 2025-11-26
 """
 
+import logging
+logger = logging.getLogger(__name__)
 import shutil
+import logging
+logger = logging.getLogger(__name__)
 import subprocess
 from pathlib import Path
 from typing import Any, Dict, Optional

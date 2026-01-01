@@ -5,7 +5,7 @@ Provides a class-based interface for building rich context information
 for LLM interactions.
 """
 
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from ..intelligence.context_enhanced import (
     build_rich_context,

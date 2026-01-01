@@ -8,7 +8,6 @@ Follows CODE_CONSTITUTION: <500 lines, 100% type hints, zero TODOs.
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import os
 import time

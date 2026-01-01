@@ -14,8 +14,14 @@ Features:
 Soli Deo Gloria 🙏
 """
 
+import logging
+logger = logging.getLogger(__name__)
 import asyncio
+import logging
+logger = logging.getLogger(__name__)
 import os
+import logging
+logger = logging.getLogger(__name__)
 import warnings
 
 # Silence ALL warnings (gRPC, absl, etc)
@@ -23,7 +29,11 @@ os.environ['GRPC_VERBOSITY'] = 'ERROR'
 os.environ['GLOG_minloglevel'] = '3'  # 3 = FATAL only
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 warnings.filterwarnings('ignore')
+import logging
+logger = logging.getLogger(__name__)
 import sys
+import logging
+logger = logging.getLogger(__name__)
 import io
 # Redirect stderr temporarily during imports to suppress gRPC warnings
 _original_stderr = sys.stderr
@@ -42,6 +52,8 @@ from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.syntax import Syntax
 from typing import Dict, Optional
+import logging
+logger = logging.getLogger(__name__)
 import time
 from pathlib import Path
 
