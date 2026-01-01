@@ -128,7 +128,7 @@ class StreamingResponseV2(Static):
         try:
             renderable = self._create_renderable()
             self.update(renderable)
-        except Exception as e:
+        except Exception:
             self._metrics.render_errors += 1
             self.update(Text(self._content))
 

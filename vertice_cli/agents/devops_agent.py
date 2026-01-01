@@ -426,6 +426,10 @@ Be precise and actionable.
 
         analysis = await self._call_llm(analysis_prompt)
 
+        # Log analysis for debugging
+        # TODO: Parse LLM response for structured incident data
+        logger.debug(f"Incident analysis: {analysis[:200] if analysis else 'empty'}...")
+
         # Parse analysis (simplified - real version would use structured output)
         # For demo, we'll create a sample incident
 

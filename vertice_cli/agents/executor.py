@@ -719,6 +719,7 @@ COMMAND:"""
 
         # Layer 1: Pattern-based detection
         category = self.security.classify_command(command)
+        logger.debug(f"Command category: {category}")
         violations = self.security.detect_malicious_patterns(command)
 
         if violations:

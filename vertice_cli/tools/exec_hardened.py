@@ -575,7 +575,7 @@ class BashCommandToolHardened(ValidatedTool):
                     }
                 )
 
-        except MemoryError as e:
+        except MemoryError:
             logger.error("MEMORY LIMIT: Command exceeded memory limit")
             return ToolResult(
                 success=False,

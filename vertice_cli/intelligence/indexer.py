@@ -154,7 +154,7 @@ class SemanticIndexer:
                 last_modified=path.stat().st_mtime
             )
 
-        except Exception as e:
+        except Exception:
             # Silently skip files that can't be parsed
             return None
 

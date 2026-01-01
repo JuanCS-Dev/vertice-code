@@ -329,7 +329,7 @@ class GeminiProvider:
                                 yield part.text
                     elif hasattr(chunk, 'text') and chunk.text:
                         yield chunk.text
-                except Exception as chunk_error:
+                except Exception:
                     # Some chunks might be pure metadata or function calls without text
                     continue
 

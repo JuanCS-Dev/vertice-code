@@ -1603,7 +1603,7 @@ Output ONLY the command, no explanation, no markdown."""
             command = self._extract_command(response)
             return command
 
-        except Exception as e:
+        except Exception:
             # Any LLM error: fallback gracefully
             self.console.print("[yellow]⚠️  LLM unavailable, using fallback[/yellow]")
             return self._fallback_suggest(user_request)

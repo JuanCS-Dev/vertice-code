@@ -236,7 +236,7 @@ class DocumentationAgent(BaseAgent):
             try:
                 module_doc = self._analyze_module(py_file)
                 modules.append(module_doc)
-            except Exception as e:
+            except Exception:
                 # Skip files with syntax errors
                 continue
 

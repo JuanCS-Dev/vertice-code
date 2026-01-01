@@ -295,7 +295,7 @@ class MaestroShellUI:
         if self.live:
             try:
                 self.live.stop()
-            except Exception as e:
+            except Exception:
                 # Ignore errors during stop (Live might already be stopped)
                 pass
             finally:

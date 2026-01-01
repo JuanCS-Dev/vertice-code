@@ -404,8 +404,9 @@ Be specific and actionable.
         else:
             analysis = await self._call_llm(prompt)
 
-        # Parse analysis (simplified - real version would be more robust)
-        # For production, you'd parse the LLM response more carefully
+        # Parse analysis - extract optimization recommendations
+        # TODO: Implement proper LLM response parsing
+        logger.debug(f"Query analysis: {analysis[:200] if analysis else 'empty'}...")
 
         optimization = QueryOptimization(
             query_hash=query_hash,
@@ -414,7 +415,7 @@ Be specific and actionable.
             cost_before=100.0,
             cost_after=30.0,
             improvement_percent=70.0,
-            rewritten_query=query,  # Would be rewritten based on analysis
+            rewritten_query=query,  # TODO: Use analysis to rewrite
             required_indexes=["users(email)", "orders(user_id, created_at)"],
             confidence_score=0.85,
         )
@@ -468,6 +469,10 @@ Be extremely conservative with risk assessment.
             analysis = result.get("response", "")
         else:
             analysis = await self._call_llm(prompt)
+
+        # Log LLM analysis for debugging
+        # TODO: Parse and incorporate LLM insights into risk assessment
+        logger.debug(f"Migration analysis: {analysis[:200] if analysis else 'empty'}...")
 
         # Analyze risk (heuristic-based + LLM insight)
         risk = IssueSeverity.LOW

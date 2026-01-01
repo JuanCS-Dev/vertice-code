@@ -326,7 +326,7 @@ class PerformanceAgent(BaseAgent):
                                 )
                             )
 
-            except Exception as e:
+            except Exception:
                 # Skip files with syntax errors
                 continue
 
