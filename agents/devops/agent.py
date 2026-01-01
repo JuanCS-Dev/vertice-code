@@ -246,10 +246,26 @@ Generate complete, production-ready configuration.
                 yield "[DevOps] BLOCKED: Dangerous command detected\n"
                 return
 
-        raise NotImplementedError(
-            "Command execution requires sandbox integration. "
-            "Use sandbox.execute() for safe command execution."
-        )
+        # Try to use sandbox for safe command execution
+        try:
+            from vertice_cli.integration.sandbox import get_sandbox
+            sandbox = get_sandbox()
+            if sandbox.is_available():
+                result = await sandbox.execute(command)
+                yield f"[DevOps] Output:\n{result.stdout}\n"
+                if result.stderr:
+                    yield f"[DevOps] Errors:\n{result.stderr}\n"
+                yield f"[DevOps] Exit code: {result.exit_code}\n"
+                return
+        except ImportError:
+            pass
+        except Exception as e:
+            yield f"[DevOps] Sandbox error: {e}\n"
+
+        # Fallback: simulation mode
+        yield "[DevOps] SIMULATION MODE (sandbox not available)\n"
+        yield f"[DevOps] Would execute: {command}\n"
+        yield "[DevOps] Enable Docker for real command execution\n"
 
     def get_status(self) -> Dict:
         """Get agent status."""

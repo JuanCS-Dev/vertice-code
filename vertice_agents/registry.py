@@ -19,6 +19,7 @@ Date: 2025-12-31
 from __future__ import annotations
 
 import logging
+import threading
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any, Dict, List, Optional, Type, Union
@@ -67,6 +68,7 @@ class AgentRegistry:
     """
 
     _instance: Optional["AgentRegistry"] = None
+    _lock = threading.Lock()
 
     def __init__(self) -> None:
         """Initialize the registry with known agents."""
@@ -75,10 +77,16 @@ class AgentRegistry:
 
     @classmethod
     def instance(cls) -> "AgentRegistry":
-        """Get the singleton registry instance."""
+        """Get the singleton registry instance (thread-safe).
+
+        Uses double-checked locking for performance.
+        """
         if cls._instance is None:
-            cls._instance = cls()
-            cls._instance._register_known_agents()
+            with cls._lock:
+                # Double-check inside lock
+                if cls._instance is None:
+                    cls._instance = cls()
+                    cls._instance._register_known_agents()
         return cls._instance
 
     def _register_known_agents(self) -> None:

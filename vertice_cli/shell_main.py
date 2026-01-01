@@ -1346,6 +1346,14 @@ Response: I don't have a tool to check the current time, but I can help you with
             self.file_watcher.stop()
             watcher_task.cancel()
 
+            # Cancel auto-index background task
+            if hasattr(self, '_auto_index_task') and self._auto_index_task:
+                self._auto_index_task.cancel()
+                try:
+                    await self._auto_index_task
+                except asyncio.CancelledError:
+                    logger.debug("Auto-index task cancelled successfully")
+
             # Stop LSP server if running
             if self._lsp_initialized:
                 try:

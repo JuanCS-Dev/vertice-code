@@ -52,24 +52,27 @@ class StreamCheckpoint:
     chunk_count: int = 0
     last_chunk_time: float = field(default_factory=time.time)
     context_snapshot: Optional[List[Dict[str, str]]] = None
+    _lock: asyncio.Lock = field(default_factory=asyncio.Lock)
 
-    def update(self, chunk: str) -> None:
-        """Update checkpoint with new chunk.
+    async def update(self, chunk: str) -> None:
+        """Update checkpoint with new chunk (thread-safe).
 
         Args:
             chunk: New text chunk to add
         """
-        self.accumulated_content += chunk
-        self.chunk_count += 1
-        self.last_chunk_time = time.time()
+        async with self._lock:
+            self.accumulated_content += chunk
+            self.chunk_count += 1
+            self.last_chunk_time = time.time()
 
-    def can_reconnect(self) -> bool:
-        """Check if we have enough context to reconnect.
+    async def can_reconnect(self) -> bool:
+        """Check if we have enough context to reconnect (thread-safe).
 
         Returns:
             True if checkpoint has enough data for reconnection
         """
-        return self.chunk_count > 0 and len(self.accumulated_content) > 0
+        async with self._lock:
+            return self.chunk_count > 0 and len(self.accumulated_content) > 0
 
 
 # =============================================================================
@@ -192,7 +195,7 @@ class ProductionGeminiStreamer:
                 self._last_activity_time = time.time()
                 await self._chunk_queue.put(chunk)
 
-                self._checkpoint.update(chunk)
+                await self._checkpoint.update(chunk)
                 if self._checkpoint.chunk_count % self.config.checkpoint_interval == 0:
                     self._checkpoint.context_snapshot = context
                     logger.debug(
@@ -273,7 +276,7 @@ class ProductionGeminiStreamer:
             )
             return None
 
-        if not self._checkpoint.can_reconnect():
+        if not await self._checkpoint.can_reconnect():
             logger.warning("No checkpoint available for reconnect")
             return None
 

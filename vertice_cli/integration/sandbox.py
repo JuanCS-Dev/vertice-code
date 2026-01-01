@@ -7,6 +7,7 @@ Complies with Constituicao Vertice v3.0 - Safety First (Artigo IV).
 
 import docker
 import logging
+import threading
 from typing import Dict, Any, Optional
 from pathlib import Path
 from dataclasses import dataclass
@@ -333,15 +334,22 @@ class SandboxExecutor:
             logger.warning(f"Failed to cleanup containers: {e}")
 
 
-# Global singleton instance
+# Global singleton instance with thread-safe initialization
 _sandbox_instance: Optional[SandboxExecutor] = None
+_sandbox_lock = threading.Lock()
 
 
 def get_sandbox() -> SandboxExecutor:
-    """Get global sandbox executor instance."""
+    """Get global sandbox executor instance (thread-safe).
+
+    Uses double-checked locking pattern for performance.
+    """
     global _sandbox_instance
 
     if _sandbox_instance is None:
-        _sandbox_instance = SandboxExecutor()
+        with _sandbox_lock:
+            # Double-check inside lock
+            if _sandbox_instance is None:
+                _sandbox_instance = SandboxExecutor()
 
     return _sandbox_instance

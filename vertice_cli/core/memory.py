@@ -18,6 +18,7 @@ Date: 2025-11-26
 from __future__ import annotations
 
 import logging
+import threading
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -516,13 +517,16 @@ class MemoryManager:
 # =============================================================================
 
 _memory_manager: Optional[MemoryManager] = None
+_memory_manager_lock = threading.Lock()
 
 
 def get_memory_manager(
     project_root: Optional[Path] = None,
     auto_load: bool = True,
 ) -> MemoryManager:
-    """Get or create the memory manager singleton.
+    """Get or create the memory manager singleton (thread-safe).
+
+    Uses double-checked locking for performance.
 
     Args:
         project_root: Project root directory
@@ -534,9 +538,12 @@ def get_memory_manager(
     global _memory_manager
 
     if _memory_manager is None:
-        _memory_manager = MemoryManager(project_root=project_root)
-        if auto_load:
-            _memory_manager.load()
+        with _memory_manager_lock:
+            # Double-check inside lock
+            if _memory_manager is None:
+                _memory_manager = MemoryManager(project_root=project_root)
+                if auto_load:
+                    _memory_manager.load()
 
     return _memory_manager
 
@@ -544,7 +551,8 @@ def get_memory_manager(
 def reset_memory_manager() -> None:
     """Reset the memory manager (for testing)."""
     global _memory_manager
-    _memory_manager = None
+    with _memory_manager_lock:
+        _memory_manager = None
 
 
 # =============================================================================
