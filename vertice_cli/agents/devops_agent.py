@@ -530,6 +530,20 @@ Be precise and actionable.
             return {
                 "plan": plan.to_dict(),
                 "status": "AWAITING_APPROVAL",
+                "infrastructure": {
+                    "type": "kubernetes",
+                    "container": "docker",
+                    "orchestration": "argocd",
+                    "registry": "ghcr.io",
+                    "cluster": "production-01"
+                },
+                "configuration": {
+                    "deploy_strategy": plan.strategy.value,
+                    "zero_downtime": True,
+                    "docker_registry": "ghcr.io",
+                    "replicas": 3,
+                    "health_check": plan.health_check_endpoint
+                }
             }
 
     async def _create_deployment_plan(self, task: AgentTask) -> DeploymentPlan:

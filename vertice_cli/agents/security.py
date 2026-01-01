@@ -140,7 +140,7 @@ class SecurityAgent(BaseAgent):
     def _compile_patterns(self) -> Dict[str, re.Pattern]:
         """Compile regex patterns for vulnerability and secret detection."""
         return {
-            # SQL Injection patterns
+            # SQL Injection patterns - comprehensive coverage
             "sql_inject": re.compile(
                 r'(execute|cursor\.execute|executemany)\s*\(\s*["\'].*?%s.*?["\']',
                 re.IGNORECASE,
@@ -151,6 +151,21 @@ class SecurityAgent(BaseAgent):
             ),
             "sql_fstring": re.compile(
                 r'(execute|cursor\.execute|executemany)\s*\(\s*f["\']',
+                re.IGNORECASE,
+            ),
+            # Detects f-string SQL queries even when assigned to variable first
+            "sql_fstring_var": re.compile(
+                r'(query|sql|stmt|statement)\s*=\s*f["\'].*?(SELECT|INSERT|UPDATE|DELETE|DROP)',
+                re.IGNORECASE,
+            ),
+            # Detects string concatenation in SQL
+            "sql_concat": re.compile(
+                r'(query|sql|stmt|statement)\s*=\s*["\'].*?(SELECT|INSERT|UPDATE|DELETE).*?["\']\s*\+',
+                re.IGNORECASE,
+            ),
+            # Detects variable interpolation in SQL strings
+            "sql_interpolation": re.compile(
+                r'(SELECT|INSERT|UPDATE|DELETE|DROP).*?\{.*?\}',
                 re.IGNORECASE,
             ),
             # Command Injection patterns
@@ -174,6 +189,28 @@ class SecurityAgent(BaseAgent):
             ),  # GitHub Personal Token
             "private_key": re.compile(
                 r'-----BEGIN\s+(RSA|OPENSSH|EC)\s+PRIVATE\s+KEY-----',
+                re.IGNORECASE,
+            ),
+            # Hardcoded secrets - common variable names
+            "hardcoded_password": re.compile(
+                r'(PASSWORD|PASSWD|PWD|DB_PASSWORD|DATABASE_PASSWORD|MYSQL_PASSWORD|'
+                r'ADMIN_PASSWORD|ROOT_PASSWORD|USER_PASSWORD)\s*=\s*["\'][^"\']{4,}["\']',
+                re.IGNORECASE,
+            ),
+            "hardcoded_secret": re.compile(
+                r'(SECRET|SECRET_KEY|API_SECRET|APP_SECRET|JWT_SECRET|'
+                r'AUTH_SECRET|ENCRYPTION_KEY|SIGNING_KEY)\s*=\s*["\'][^"\']{8,}["\']',
+                re.IGNORECASE,
+            ),
+            "hardcoded_token": re.compile(
+                r'(TOKEN|ACCESS_TOKEN|AUTH_TOKEN|BEARER_TOKEN|'
+                r'REFRESH_TOKEN|SESSION_TOKEN)\s*=\s*["\'][^"\']{16,}["\']',
+                re.IGNORECASE,
+            ),
+            # Generic secret patterns with sk- or similar prefixes
+            "generic_api_key": re.compile(
+                r'["\']?(sk-[a-zA-Z0-9]{20,}|pk-[a-zA-Z0-9]{20,}|'
+                r'sk_live_[a-zA-Z0-9]{20,}|sk_test_[a-zA-Z0-9]{20,})["\']?',
                 re.IGNORECASE,
             ),
             # Weak Crypto patterns
@@ -276,24 +313,49 @@ class SecurityAgent(BaseAgent):
     def _detect_sql_injection(
         self, file: Path, lines: List[str], content: str
     ) -> List[Vulnerability]:
-        """Detect SQL injection vulnerabilities."""
+        """Detect SQL injection vulnerabilities.
+
+        Now covers:
+        - Direct f-string in execute()
+        - F-string SQL assigned to variable then executed
+        - String concatenation in SQL queries
+        - Variable interpolation in SQL strings
+        """
         vulns = []
 
         for i, line in enumerate(lines, 1):
             # Check for string formatting in SQL (%, .format(), f-strings)
-            if (
-                self._patterns["sql_inject"].search(line)
-                or self._patterns["sql_format"].search(line)
-                or self._patterns["sql_fstring"].search(line)
-            ):
+            matched = False
+            description = ""
+
+            if self._patterns["sql_inject"].search(line):
+                matched = True
+                description = "SQL query uses %s formatting, vulnerable to injection"
+            elif self._patterns["sql_format"].search(line):
+                matched = True
+                description = "SQL query uses .format(), vulnerable to injection"
+            elif self._patterns["sql_fstring"].search(line):
+                matched = True
+                description = "SQL query uses f-string in execute(), vulnerable to injection"
+            elif self._patterns["sql_fstring_var"].search(line):
+                matched = True
+                description = "SQL query built with f-string, vulnerable to injection"
+            elif self._patterns["sql_concat"].search(line):
+                matched = True
+                description = "SQL query built with string concatenation, vulnerable to injection"
+            elif self._patterns["sql_interpolation"].search(line):
+                matched = True
+                description = "SQL query contains variable interpolation, vulnerable to injection"
+
+            if matched:
                 vulns.append(
                     Vulnerability(
                         type=VulnerabilityType.SQL_INJECTION,
-                        severity=SeverityLevel.HIGH,
+                        severity=SeverityLevel.CRITICAL,  # SQL injection is critical
                         file=str(file),
                         line=i,
                         code_snippet=line.strip(),
-                        description="SQL query uses string formatting, vulnerable to injection",
+                        description=description,
                         remediation="Use parameterized queries (e.g., cursor.execute(query, (param,)))",
                         cwe_id="CWE-89",
                     )
@@ -508,6 +570,61 @@ class SecurityAgent(BaseAgent):
                                 line=i,
                                 pattern="[PRIVATE KEY DETECTED]",
                                 confidence=1.0,
+                            )
+                        )
+
+                    # Hardcoded passwords
+                    match = self._patterns["hardcoded_password"].search(line)
+                    if match:
+                        secrets.append(
+                            Secret(
+                                type="hardcoded_password",
+                                file=str(file),
+                                line=i,
+                                pattern=f"{match.group(1)}=[REDACTED]",
+                                confidence=0.95,
+                            )
+                        )
+
+                    # Hardcoded secrets
+                    match = self._patterns["hardcoded_secret"].search(line)
+                    if match:
+                        secrets.append(
+                            Secret(
+                                type="hardcoded_secret",
+                                file=str(file),
+                                line=i,
+                                pattern=f"{match.group(1)}=[REDACTED]",
+                                confidence=0.95,
+                            )
+                        )
+
+                    # Hardcoded tokens
+                    match = self._patterns["hardcoded_token"].search(line)
+                    if match:
+                        secrets.append(
+                            Secret(
+                                type="hardcoded_token",
+                                file=str(file),
+                                line=i,
+                                pattern=f"{match.group(1)}=[REDACTED]",
+                                confidence=0.9,
+                            )
+                        )
+
+                    # Generic API keys (sk-, pk-, etc)
+                    match = self._patterns["generic_api_key"].search(line)
+                    if match:
+                        # Mask the key for security
+                        key = match.group(1)
+                        masked = key[:6] + "..." + key[-4:] if len(key) > 10 else "[REDACTED]"
+                        secrets.append(
+                            Secret(
+                                type="generic_api_key",
+                                file=str(file),
+                                line=i,
+                                pattern=masked,
+                                confidence=0.85,
                             )
                         )
 

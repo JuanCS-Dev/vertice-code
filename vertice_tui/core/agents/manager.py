@@ -38,6 +38,14 @@ class AgentManager:
         Args:
             llm_client: LLM client for fallback and agent creation
         """
+        # CRITICAL: Register providers before any agent is created
+        # This was missing and caused "Provider not available" errors
+        try:
+            from vertice_cli.core.providers.register import ensure_providers_registered
+            ensure_providers_registered()
+        except ImportError:
+            pass  # CLI providers not available (minimal install)
+
         # Lazy import to avoid circular dependency
         if llm_client is None:
             from ..llm_client import GeminiClient
@@ -48,6 +56,21 @@ class AgentManager:
         self._load_errors: Dict[str, str] = {}
         self.router = AgentRouter()
         self._last_plan: Optional[str] = None  # Store last plan for execution
+
+        # CRITICAL: Create MCP client for tools - was missing (passed None)
+        self._mcp_client: Optional[Any] = None
+        try:
+            from vertice_cli.core.mcp import create_mcp_client
+            # Attempt to create MCP client with error handling
+            self._mcp_client = create_mcp_client()
+            if self._mcp_client is None:
+                # Log warning if client is None (fallback mode)
+                print("⚠️ MCP Client creation returned None - capabilities will be limited.")
+        except ImportError:
+             print("⚠️ MCP module not found - running in standalone mode.")
+        except Exception as e:
+            print(f"❌ Failed to initialize MCP client: {e} - capabilities will be limited.")
+
 
     @property
     def available_agents(self) -> List[str]:
@@ -96,7 +119,8 @@ class AgentManager:
             if 'llm_client' in params:
                 init_kwargs['llm_client'] = self.llm_client
             if 'mcp_client' in params:
-                init_kwargs['mcp_client'] = None
+                # FIXED: Pass actual MCP client instead of None
+                init_kwargs['mcp_client'] = self._mcp_client
             if 'model' in params:
                 init_kwargs['model'] = self.llm_client
 
@@ -236,6 +260,65 @@ class AgentManager:
                     for rec in data['recommendations']:
                         yield f"- {rec}\n"
 
+            # ReviewerAgent / SecurityAgent results
+            elif isinstance(data, dict) and 'report' in data:
+                report = data['report']
+                yield f"## Code Review Report\n\n"
+                yield f"*{reasoning}*\n\n"
+
+                # SecurityAgent returns string report
+                if isinstance(report, str):
+                    yield report
+                    yield "\n"
+                    # Also show vulnerabilities if present
+                    if data.get('vulnerabilities'):
+                        yield "\n### Vulnerabilities Detail\n\n"
+                        for vuln in data['vulnerabilities'][:15]:
+                            severity = vuln.get('severity', 'MEDIUM')
+                            vuln_type = vuln.get('vulnerability_type', 'unknown')
+                            file_path = vuln.get('file', '')
+                            line = vuln.get('line', '')
+                            desc = vuln.get('description', 'No description')
+                            emoji = {"CRITICAL": "🔴", "HIGH": "🟠", "MEDIUM": "🟡", "LOW": "🟢"}.get(severity, "⚪")
+                            yield f"- {emoji} **[{severity}]** {vuln_type}: {desc}\n"
+                            if file_path:
+                                yield f"  📍 `{file_path}:{line}`\n"
+                # ReviewerAgent returns dict report
+                elif isinstance(report, dict):
+                    if report.get('quality_score') is not None:
+                        score = report['quality_score']
+                        emoji = "🟢" if score >= 80 else "🟡" if score >= 60 else "🔴"
+                        yield f"### {emoji} Quality Score: {score}/100\n\n"
+
+                    if report.get('risk_level'):
+                        yield f"**Risk Level:** {report['risk_level']}\n\n"
+
+                    issues = report.get('issues', [])
+                    if issues:
+                        yield f"### Issues Found ({len(issues)})\n\n"
+                        for i, issue in enumerate(issues[:20], 1):  # Limit to 20
+                            severity = issue.get('severity', 'MEDIUM')
+                            category = issue.get('category', 'general')
+                            message = issue.get('message', 'No description')
+                            file_path = issue.get('file', '')
+                            line = issue.get('line', '')
+                            location = f" at `{file_path}:{line}`" if file_path and line else ""
+                            severity_emoji = {"CRITICAL": "🔴", "HIGH": "🟠", "MEDIUM": "🟡", "LOW": "🟢", "INFO": "ℹ️"}.get(severity, "⚪")
+                            yield f"{i}. {severity_emoji} **[{severity}]** {message}{location}\n"
+                            if issue.get('suggestion'):
+                                yield f"   💡 *{issue['suggestion']}*\n"
+                    else:
+                        yield "✅ No issues found!\n"
+
+                    recommendations = report.get('recommendations', [])
+                    if recommendations:
+                        yield f"\n### Recommendations\n\n"
+                        for rec in recommendations[:10]:
+                            yield f"- {rec}\n"
+
+                    if report.get('estimated_fix_time'):
+                        yield f"\n⏱️ Estimated fix time: {report['estimated_fix_time']}\n"
+
             # ExplorerAgent results
             elif isinstance(data, dict) and 'relevant_files' in data:
                 if data.get('context_summary'):
@@ -269,6 +352,89 @@ class AgentManager:
                 if data.get('token_estimate'):
                     yield f"\n📊 *Token estimate: ~{data['token_estimate']} tokens*\n"
 
+            # DevOps deployment plans
+            elif isinstance(data, dict) and 'plan' in data:
+                yield f"## DevOps Deployment Plan\n\n"
+                yield f"*{reasoning}*\n\n"
+                plan = data['plan']
+                if isinstance(plan, dict):
+                    if plan.get('deployment_id'):
+                        yield f"**Deployment ID:** {plan['deployment_id']}\n"
+                    if plan.get('strategy'):
+                        yield f"**Strategy:** {plan['strategy']}\n"
+                    if plan.get('pre_checks'):
+                        yield "\n**Pre-Checks:**\n"
+                        for check in plan['pre_checks']:
+                            yield f"- {check}\n"
+                    if plan.get('deployment_steps'):
+                        yield "\n**Deployment Steps:**\n"
+                        for step in plan['deployment_steps']:
+                            yield f"- {step}\n"
+                    if plan.get('post_checks'):
+                        yield "\n**Post-Checks:**\n"
+                        for check in plan['post_checks']:
+                            yield f"- {check}\n"
+                else:
+                    yield str(plan)
+                if data.get('status'):
+                    yield f"\n**Status:** {data['status']}\n"
+                # Infrastructure details
+                if data.get('infrastructure'):
+                    yield "\n**Infrastructure:**\n"
+                    infra = data['infrastructure']
+                    for key, value in infra.items():
+                        yield f"- {key}: {value}\n"
+                # Configuration details
+                if data.get('configuration'):
+                    yield "\n**Configuration:**\n"
+                    config = data['configuration']
+                    for key, value in config.items():
+                        yield f"- {key}: {value}\n"
+
+            # DevOps LLM response
+            elif isinstance(data, dict) and 'response' in data:
+                yield data['response']
+
+            # Test cases (TestingAgent)
+            elif isinstance(data, dict) and 'test_cases' in data:
+                yield f"## Generated Test Cases\n\n"
+                for tc in data['test_cases'][:10]:
+                    yield f"### {tc.get('name', 'test')}\n"
+                    yield f"```python\n{tc.get('code', '')}\n```\n\n"
+                if data.get('total_assertions'):
+                    yield f"*Total assertions: {data['total_assertions']}*\n"
+
+            # Refactoring analysis (RefactorerAgent)
+            elif isinstance(data, dict) and 'analysis' in data:
+                yield f"## Refactoring Analysis\n\n"
+                yield f"*{reasoning}*\n\n"
+                analysis = data.get('analysis', '')
+                if analysis:
+                    yield analysis
+                    yield "\n"
+                suggestions = data.get('refactoring_suggestions', [])
+                if suggestions:
+                    yield "\n### Suggested Refactorings\n\n"
+                    for s in suggestions:
+                        yield f"- **{s.get('type', 'unknown')}**: {s.get('description', '')}\n"
+
+            # Documentation (DocumentationAgent)
+            elif isinstance(data, dict) and 'documentation' in data:
+                yield f"## Generated Documentation\n\n"
+                yield f"*{reasoning}*\n\n"
+                documentation = data.get('documentation', '')
+                if documentation:
+                    yield documentation
+                    yield "\n"
+                modules = data.get('modules', [])
+                if modules:
+                    yield f"\n### Modules Analyzed ({len(modules)})\n\n"
+                    for m in modules[:10]:
+                        name = m.get('name', 'unknown')
+                        classes = m.get('classes', 0)
+                        functions = m.get('functions', 0)
+                        yield f"- **{name}**: {classes} classes, {functions} functions\n"
+
             elif isinstance(data, dict) and 'formatted_markdown' in data:
                 yield data['formatted_markdown']
             elif isinstance(data, dict) and 'markdown' in data:
@@ -276,8 +442,30 @@ class AgentManager:
             elif isinstance(data, str):
                 yield data
             else:
-                if reasoning and reasoning != "None":
+                # Fallback: try to format any dict nicely
+                if isinstance(data, dict) and data:
+                    yield f"## Result\n\n"
+                    for key, value in data.items():
+                        if isinstance(value, list):
+                            yield f"**{key}:**\n"
+                            for item in value[:10]:
+                                yield f"- {item}\n"
+                        else:
+                            yield f"**{key}:** {value}\n"
+                elif reasoning and reasoning != "None":
                     yield f"{reasoning}\n"
+                
+                # FINAL FALLBACK: Check for common keys across all agents
+                if isinstance(data, dict):
+                    if 'infrastructure' in data and not any(k in str(data.get('infrastructure')) for k in ['Deployment Plan', 'DevOps']):
+                         yield "\n**Infrastructure details:**\n"
+                         for k, v in data['infrastructure'].items():
+                             yield f"- {k}: {v}\n"
+                    if 'configuration' in data:
+                         yield "\n**Configuration details:**\n"
+                         for k, v in data['configuration'].items():
+                             yield f"- {k}: {v}\n"
+
 
         elif hasattr(result, 'data'):
             data = result.data

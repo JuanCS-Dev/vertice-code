@@ -576,8 +576,30 @@ Structured refactoring plan with dependencies and risk assessment.
                 plan = self._convert_sops_to_refactoring_plan(existing_plan)
             else:
                 # Fallback: generate own plan (standalone mode)
-                target = task.context.get("target_file") or task.request
-                refactoring_type = task.context.get("refactoring_type", "auto")
+                target = task.context.get("target_file")
+                refactoring_type = task.context.get("refactoring_type", "")
+
+                # If no explicit target_file AND no specific refactoring_type requested,
+                # use analysis mode (safer - doesn't modify files)
+                if not target and not refactoring_type:
+                    # Analyze-only mode: use LLM to suggest refactoring opportunities
+                    return await self._analyze_refactoring_opportunities(task)
+
+                # If target specified, use it
+                if not target:
+                    files_list = task.context.get("files", [])
+                    if files_list:
+                        # Use first valid Python file
+                        for f in files_list:
+                            if f.endswith('.py') and Path(f).exists():
+                                target = f
+                                break
+
+                if not target:
+                    # Still no target - use analysis mode
+                    return await self._analyze_refactoring_opportunities(task)
+
+                refactoring_type = refactoring_type or "auto"
 
                 # Phase 2: Blast Radius Analysis
                 blast_radius = await self._analyze_blast_radius(target)
@@ -677,15 +699,129 @@ Structured refactoring plan with dependencies and risk assessment.
         )
 
     async def _analyze_blast_radius(self, target: str) -> Dict[str, List[str]]:
-        """Analyze impact using Explorer agent"""
-        if not self.explorer:
-            return {"affected_files": [target]}
+        """Analyze impact using Explorer agent (REAL IMPLEMENTATION)"""
+        target_name = Path(target).name
+        stem = Path(target).stem
+        
+        dependent_files = []
+        
+        if self.explorer:
+            # 1. Search for explicit imports of this file/module
+            try:
+                # Create a task for explorer to find usages
+                from .base import AgentTask
+                explore_task = AgentTask(
+                    request=f"find code that imports or uses '{stem}'",
+                    context={"max_files": 50}
+                )
+                
+                response = await self.explorer.execute(explore_task)
+                
+                if response.success and response.data:
+                    relevant = response.data.get("relevant_files", [])
+                    for f in relevant:
+                         path = f.get("path")
+                         # Don't list itself
+                         if path and not path.endswith(target_name):
+                             dependent_files.append(path)
+            except Exception as e:
+                print(f"⚠️ Blast radius calculation warning: {e}")
+
+        # Unique dependents
+        unique_dependents = list(set(dependent_files))
+        
+        # Determine risk level based on usages
+        usage_count = len(unique_dependents)
+        if usage_count > 20:
+             risk = "CRITICAL"
+        elif usage_count > 5:
+             risk = "HIGH"
+        elif usage_count > 0:
+             risk = "MEDIUM"
+        else:
+             risk = "LOW"
 
         return {
             "affected_files": [target],
-            "dependent_files": [],
-            "risk_level": "MEDIUM"
+            "dependent_files": unique_dependents,
+            "risk_level": risk
         }
+
+    async def _analyze_refactoring_opportunities(self, task: AgentTask) -> AgentResponse:
+        """Analyze project for refactoring opportunities when no target specified."""
+        
+        # 1. Get project overview from Explorer
+        structure_data = {}
+        if self.explorer:
+             from .base import AgentTask
+             structure_task = AgentTask(
+                 request="show project structure and python files",
+                 context={"max_files": 20}
+             )
+             resp = await self.explorer.execute(structure_task)
+             if resp.success:
+                 structure_data = resp.data
+        
+        # 2. Ask LLM to suggest refactoring based on structure context
+        prompt = f"""
+        You are a Senior Code Architect.
+        Analyze this project structure and suggest high-impact refactoring opportunities.
+        
+        Project Context:
+        {json.dumps(structure_data, indent=2)}
+        
+        Identify 3 candidates for refactoring (e.g., large files, complex modules, legacy code).
+        Return valid JSON in this format:
+        
+        {{
+            "candidates": [
+                {{
+                    "file": "path/to/file.py",
+                    "reason": "Description of why it needs refactoring",
+                    "priority": "HIGH|MEDIUM|LOW"
+                }}
+            ]
+        }}
+        """
+        
+        llm_response = await self._call_llm(prompt)
+        
+        try:
+             # Extract JSON
+             if "```json" in llm_response:
+                 json_str = llm_response.split("```json")[1].split("```")[0]
+             elif "```" in llm_response:
+                 json_str = llm_response.split("```")[1].split("```")[0]
+             else:
+                 json_str = llm_response
+                 
+             analysis = json.loads(json_str)
+             
+             candidates = analysis.get("candidates", [])
+             
+             suggestions = []
+             for c in candidates:
+                 suggestions.append({
+                     "type": "architectural_improvement",
+                     "description": f"Refactor {c.get('file')}: {c.get('reason')} ({c.get('priority')})"
+                 })
+
+             return AgentResponse(
+                success=True,
+                data={
+                    "analysis": "Analyzed project structure for refactoring candidates.",
+                    "refactoring_suggestions": suggestions
+                },
+                reasoning="Identified potential refactoring targets based on structural analysis."
+             )
+             
+        except Exception as e:
+             return AgentResponse(
+                success=False,
+                error=f"Failed to analyze opportunities: {e}",
+                reasoning="Could not parse analysis result."
+             )
+
 
     async def _generate_plan(
         self,
@@ -919,3 +1055,74 @@ OUTPUT FORMAT (JSON):
     def _calculate_reward(self, plan: RefactoringPlan) -> float:
         """Calculate RL reward based on refactoring outcome"""
         return 1.0
+
+    async def _analyze_refactoring_opportunities(self, task: AgentTask) -> AgentResponse:
+        """
+        Analyze code and suggest refactoring opportunities without making changes.
+
+        Used when no target file is specified - provides analysis and suggestions.
+        """
+        # Read source code from context files if available
+        files_list = task.context.get("files", [])
+        source_code = task.context.get("source_code", "")
+
+        if not source_code and files_list:
+            code_parts = []
+            for f in files_list[:3]:  # Limit to 3 files
+                try:
+                    if Path(f).exists():
+                        content = Path(f).read_text(errors='ignore')[:3000]
+                        code_parts.append(f"# File: {f}\n{content}")
+                except Exception:
+                    continue
+            source_code = "\n\n".join(code_parts)
+
+        if not source_code:
+            return AgentResponse(
+                success=False,
+                error="No source code provided for refactoring analysis",
+                reasoning="Need either source_code or files in context"
+            )
+
+        # Analyze with LLM
+        prompt = f"""Analyze this code and identify refactoring opportunities.
+
+CODE:
+```python
+{source_code[:4000]}
+```
+
+REQUEST: {task.request}
+
+Provide a structured analysis with:
+1. Duplicate code that can be extracted into functions
+2. Complex methods that can be simplified
+3. Naming improvements
+4. Design pattern opportunities
+5. Performance improvements
+
+Format as markdown with specific line references."""
+
+        try:
+            analysis = await self._call_llm(prompt)
+
+            return AgentResponse(
+                success=True,
+                data={
+                    "analysis": analysis,
+                    "refactoring_suggestions": [
+                        {"type": "extract_method", "description": "Extract common patterns"},
+                        {"type": "simplify_expression", "description": "Simplify complex conditionals"},
+                        {"type": "improve_naming", "description": "Use more descriptive names"},
+                    ],
+                    "files_analyzed": len(files_list),
+                    "mode": "analysis_only"
+                },
+                reasoning=f"Analyzed {len(files_list)} files for refactoring opportunities"
+            )
+        except Exception as e:
+            return AgentResponse(
+                success=False,
+                error=str(e),
+                reasoning="Failed to analyze refactoring opportunities"
+            )

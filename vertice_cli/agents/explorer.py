@@ -46,18 +46,70 @@ class ExplorerAgent(BaseAgent):
             query = task.request.lower()
             max_files = task.context.get("max_files", 25)
 
+            # Get project root from context files or cwd
+            files_list = task.context.get("files", [])
+            cwd = task.context.get("cwd", "")
+
+            if files_list and files_list[0]:
+                # Use parent of first file as project root
+                first_file = Path(files_list[0])
+                if first_file.exists():
+                    # Go up to find a reasonable project root (has .git or pyproject.toml)
+                    candidate = first_file.parent
+                    while candidate != candidate.parent:
+                        if (candidate / ".git").exists() or (candidate / "pyproject.toml").exists():
+                            self._project_root = candidate
+                            break
+                        candidate = candidate.parent
+                    else:
+                        self._project_root = first_file.parent
+                else:
+                    self._project_root = Path(cwd) if cwd else Path.cwd()
+            elif cwd:
+                self._project_root = Path(cwd)
+
             # Detectar tipo de busca
             search_type = self._detect_search_type(query)
 
             found_files: List[Dict[str, Any]] = []
 
+            # FIRST: Include files from context (always relevant)
+            if files_list:
+                for f in files_list:
+                    if Path(f).exists():
+                        found_files.append({
+                            "path": str(Path(f).relative_to(self._project_root) if f.startswith(str(self._project_root)) else f),
+                            "relevance": "HIGH",
+                            "reason": "Arquivo fornecido no contexto"
+                        })
+                        # Also analyze content for classes/functions
+                        try:
+                            content = Path(f).read_text(errors='ignore')
+                            # Extract class names
+                            import re
+                            classes = re.findall(r'class\s+(\w+)', content)
+                            functions = re.findall(r'def\s+(\w+)', content)
+                            if classes or functions:
+                                found_files.append({
+                                    "path": f,
+                                    "relevance": "HIGH",
+                                    "reason": f"Classes: {', '.join(classes[:5])}; Functions: {', '.join(functions[:10])}"
+                                })
+                        except Exception:
+                            pass
+
             if search_type == "structure":
                 # Usuário quer ver estrutura do projeto
-                found_files = self._get_project_structure()
+                found_files.extend(self._get_project_structure())
             elif search_type == "directory":
                 # Buscar diretório específico
                 dir_name = self._extract_dir_name(query)
-                found_files = self._search_directory(dir_name)
+                found_files.extend(self._search_directory(dir_name))
+            elif search_type == "deep_search":
+                # Deep search for imports/usages
+                keywords = self._extract_keywords(query)
+                for kw in keywords[:1]: # Focus on main keyword
+                     found_files.extend(self._deep_search_imports(kw))
             else:
                 # Busca por keywords
                 keywords = self._extract_keywords(query)
@@ -114,6 +166,8 @@ class ExplorerAgent(BaseAgent):
             return "structure"
         if any(w in query for w in dir_words):
             return "directory"
+        if "deep" in query or "import" in query or "usage" in query or "find" in query:
+             return "deep_search"
         return "keyword"
 
     def _extract_dir_name(self, query: str) -> str:
@@ -305,4 +359,38 @@ class ExplorerAgent(BaseAgent):
         except (subprocess.TimeoutExpired, OSError):
             pass
 
+        return results
+
+    def _deep_search_imports(self, keyword: str) -> List[Dict[str, Any]]:
+        """Deep search for imports and usages recursively."""
+        results = []
+        try:
+             # Use grep to find 'import ... keyword' or 'from ... keyword'
+             # Or usages like 'keyword('
+             cmd = ['grep', '-r', '-l', '-E', fr"import.*{keyword}|from.*{keyword}|{keyword}\(", str(self._project_root)]
+             
+             # Exclude dirs
+             exclude_args = []
+             for ex in self.EXCLUDE_DIRS:
+                exclude_args.extend(['--exclude-dir', ex])
+             
+             cmd.extend(exclude_args)
+             
+             output = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
+             
+             if output.stdout:
+                 for line in output.stdout.strip().split('\n')[:30]:
+                     if line:
+                         try:
+                             rel_path = str(Path(line).relative_to(self._project_root))
+                             results.append({
+                                 "path": rel_path,
+                                 "relevance": "HIGH",
+                                 "reason": f"Deep usage/import of '{keyword}'"
+                             })
+                         except Exception:
+                             pass
+        except Exception as e:
+            print(f"Deep search failed: {e}")
+            
         return results

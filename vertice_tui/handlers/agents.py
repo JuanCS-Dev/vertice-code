@@ -8,15 +8,25 @@ Handles: /plan, /execute, /architect, /review, /explore, /refactor,
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING
+import logging
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, List
 
 if TYPE_CHECKING:
     from vertice_tui.app import QwenApp
     from vertice_tui.widgets.response_view import ResponseView
 
+logger = logging.getLogger(__name__)
+
 
 class AgentCommandHandler:
     """Handler for agent invocation commands."""
+
+    # Agents that need file context from working directory
+    FILE_CONTEXT_AGENTS = {"reviewer", "refactorer", "security", "testing", "documentation", "performance"}
+
+    # File extensions to include in context
+    CODE_EXTENSIONS = {".py", ".js", ".ts", ".tsx", ".jsx", ".java", ".go", ".rs", ".cpp", ".c", ".h"}
 
     def __init__(self, app: "QwenApp"):
         self.app = app
@@ -24,6 +34,62 @@ class AgentCommandHandler:
     @property
     def bridge(self):
         return self.app.bridge
+
+    def _build_context(self, agent_name: str) -> Dict[str, Any]:
+        """
+        Build context for agent execution.
+
+        Detects files in current working directory for agents that need file context.
+        Fixes critical bug where ReviewerAgent couldn't find files.
+
+        Args:
+            agent_name: Name of the agent being invoked
+
+        Returns:
+            Context dict with 'files', 'cwd', and metadata
+        """
+        cwd = Path.cwd()
+        context: Dict[str, Any] = {
+            "cwd": str(cwd),
+            "files": [],
+            "project_name": cwd.name,
+        }
+
+        # Only scan files for agents that need file context
+        if agent_name not in self.FILE_CONTEXT_AGENTS:
+            logger.debug(f"Agent '{agent_name}' doesn't need file context")
+            return context
+
+        try:
+            # Find code files in current directory (non-recursive for performance)
+            files: List[str] = []
+
+            # First, check immediate directory
+            for ext in self.CODE_EXTENSIONS:
+                files.extend(str(f) for f in cwd.glob(f"*{ext}") if f.is_file())
+
+            # Then check src/ or lib/ if they exist (common patterns)
+            for subdir in ["src", "lib", "app", "core"]:
+                subpath = cwd / subdir
+                if subpath.exists():
+                    for ext in self.CODE_EXTENSIONS:
+                        files.extend(str(f) for f in subpath.glob(f"*{ext}") if f.is_file())
+
+            # Limit to avoid overwhelming the agent
+            MAX_FILES = 50
+            if len(files) > MAX_FILES:
+                logger.warning(f"Found {len(files)} files, limiting to {MAX_FILES}")
+                files = files[:MAX_FILES]
+
+            context["files"] = files
+            context["file_count"] = len(files)
+
+            logger.info(f"Built context for '{agent_name}': {len(files)} files in {cwd}")
+
+        except Exception as e:
+            logger.error(f"Failed to build file context: {e}")
+
+        return context
 
     async def handle(
         self,
@@ -116,15 +182,28 @@ class AgentCommandHandler:
         task: str,
         view: "ResponseView"
     ) -> None:
-        """Invoke a specific agent with streaming response."""
+        """
+        Invoke a specific agent with streaming response.
+
+        Automatically builds context with files from current working directory
+        for agents that need file context (reviewer, refactorer, etc).
+        """
         self.app.is_processing = True
         view.start_thinking()
 
         status = self.app.query_one("StatusBar")
         status.mode = f"🤖 {agent_name.upper()}"
 
+        # Build context with files from working directory
+        context = self._build_context(agent_name)
+
+        # Log context for debugging
+        if context.get("files"):
+            logger.debug(f"Invoking {agent_name} with {len(context['files'])} files from {context['cwd']}")
+            view.append_chunk(f"📁 Found **{len(context['files'])} files** in `{context['project_name']}`\n\n")
+
         try:
-            async for chunk in self.bridge.invoke_agent(agent_name, task):
+            async for chunk in self.bridge.invoke_agent(agent_name, task, context):
                 view.append_chunk(chunk)
                 await asyncio.sleep(0)
 

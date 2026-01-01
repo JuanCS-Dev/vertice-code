@@ -58,6 +58,7 @@ class TestType(str, Enum):
     FUNCTIONAL = "functional"
     EDGE_CASE = "edge_case"
     PROPERTY_BASED = "property_based"
+    TUI = "tui"
 
 
 @dataclass(frozen=True)
@@ -277,7 +278,9 @@ class TestingAgent(BaseAgent):
         """
         source_code = task.context.get("source_code", "")
         file_path = task.context.get("file_path", "")
+        files = task.context.get("files", [])
 
+        # Try multiple sources for code
         if not source_code and file_path:
             # Read file if path provided
             try:
@@ -290,6 +293,17 @@ class TestingAgent(BaseAgent):
                     reasoning=f"Failed to read file: {file_path}",
                     error=str(e),
                 )
+
+        # FIXED: Read from files list if no source_code yet
+        if not source_code and files:
+            code_parts = []
+            for f in files[:5]:  # Limit to 5 files
+                try:
+                    with open(f, 'r') as fp:
+                        code_parts.append(f"# File: {f}\n{fp.read()}")
+                except Exception:
+                    continue
+            source_code = "\n\n".join(code_parts)
 
         if not source_code:
             return AgentResponse(
@@ -378,7 +392,63 @@ class TestingAgent(BaseAgent):
         for cls in classes:
             test_cases.extend(self._generate_class_tests(cls))
 
+        # Generate integration tests for classes
+        for cls in classes:
+            test_cases.extend(self._generate_class_tests(cls))
+            
+        # [NEW] Generate TUI tests if Textual detected
+        if "textual" in source_code:
+             tui_apps = [cls for cls in classes if any(b.id == 'App' for b in cls.bases if isinstance(b, ast.Name))]
+             if tui_apps:
+                 self.log(f"Detected Textual Apps: {[a.name for a in tui_apps]}")
+                 for app in tui_apps:
+                     test_cases.extend(self._generate_tui_tests(app))
+
         return test_cases
+
+    def _generate_tui_tests(self, app_class: ast.ClassDef) -> List[TestCase]:
+        """Generate tests for Textual TUI apps."""
+        tests = []
+        app_name = app_class.name
+        
+        # 1. Basic App Load Test
+        tests.append(TestCase(
+            name=f"test_{app_name.lower()}_load",
+            code=f"""
+@pytest.mark.asyncio
+async def test_{app_name.lower()}_load():
+    \"\"\"Test that {app_name} loads without error.\"\"\"
+    app = {app_name}()
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        assert app.is_running
+""",
+            test_type=TestType.TUI,
+            target=app_name,
+            assertions=1,
+            complexity=2
+        ))
+        
+        # 2. Key Press Interaction Test
+        tests.append(TestCase(
+            name=f"test_{app_name.lower()}_q_quit",
+            code=f"""
+@pytest.mark.asyncio
+async def test_{app_name.lower()}_quit_command():
+    \"\"\"Test that pressing 'q' (common convention) keeps app running or behaves as expected.\"\"\"
+    app = {app_name}()
+    async with app.run_test() as pilot:
+        await pilot.press("q")
+        # Assert specific behavior here if known, otherwise generic check
+        assert app.return_code is None or app.return_code == 0
+""",
+            test_type=TestType.TUI,
+            target=app_name,
+            assertions=1,
+            complexity=3
+        ))
+        
+        return tests
 
     def _generate_function_tests(self, func: ast.FunctionDef) -> List[TestCase]:
         """Generate tests for a single function.

@@ -145,6 +145,8 @@ class CodeGraphAnalyzer(ast.NodeVisitor):
         # Data flow tracking
         self.variables: Dict[str, Set[int]] = {}  # var -> lines where used
         self.function_calls: List[Tuple[str, int]] = []
+        # Track calls per function: {caller_func_name: [(called_name, line), ...]}
+        self.calls_per_function: Dict[str, List[Tuple[str, int]]] = {}
 
     def analyze(self, tree: ast.AST) -> Tuple[List[ComplexityMetrics], List[CodeGraphNode], nx.DiGraph]:
         """Main entry point - now returns the graph!"""
@@ -153,22 +155,37 @@ class CodeGraphAnalyzer(ast.NodeVisitor):
         return self.metrics, self.nodes, self.graph
 
     def _build_dependency_edges(self):
-        """Build edges in the graph based on function calls"""
+        """Build edges in the graph based on function calls.
+
+        Fixed: Now correctly tracks which function made which call,
+        and excludes self-edges (recursive calls are not circular dependencies).
+        """
         # Map function names to their graph IDs
         func_map = {node.name: node.id for node in self.nodes}
 
-        # For each function call we tracked, create an edge
-        for caller_name in func_map:
+        # For each function, add edges for the calls IT made
+        for caller_name, calls in self.calls_per_function.items():
+            if caller_name not in func_map:
+                continue
+
             caller_id = func_map[caller_name]
-            # Find calls made by this function
-            for called_name, line in self.function_calls:
-                if called_name in func_map:
-                    called_id = func_map[called_name]
-                    self.graph.add_edge(caller_id, called_id, line=line)
 
             # Add node to graph if not already there
             if caller_id not in self.graph:
                 self.graph.add_node(caller_id)
+
+            # Add edges for calls made by this function
+            for called_name, line in calls:
+                if called_name in func_map:
+                    called_id = func_map[called_name]
+                    # Skip self-edges (recursive calls are NOT circular dependencies)
+                    if caller_id != called_id:
+                        self.graph.add_edge(caller_id, called_id, line=line)
+
+        # Also add any nodes not yet in the graph
+        for node in self.nodes:
+            if node.id not in self.graph:
+                self.graph.add_node(node.id)
 
     def visit_FunctionDef(self, node: ast.FunctionDef):
         self._enter_function(node)
@@ -261,10 +278,20 @@ class CodeGraphAnalyzer(ast.NodeVisitor):
 
     def visit_Call(self, node):
         """Track function calls for dependency graph"""
+        called_name = None
         if isinstance(node.func, ast.Name):
-            self.function_calls.append((node.func.id, node.lineno))
+            called_name = node.func.id
         elif isinstance(node.func, ast.Attribute):
-            self.function_calls.append((node.func.attr, node.lineno))
+            called_name = node.func.attr
+
+        if called_name:
+            self.function_calls.append((called_name, node.lineno))
+            # Track which function made this call
+            if self.current_function:
+                if self.current_function not in self.calls_per_function:
+                    self.calls_per_function[self.current_function] = []
+                self.calls_per_function[self.current_function].append((called_name, node.lineno))
+
         self.generic_visit(node)
 
 # ============================================================================

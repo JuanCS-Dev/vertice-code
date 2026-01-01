@@ -224,11 +224,40 @@
 
 ## CHANGELOG
 
+### 2026-01-01 (Sessão 7) - E2E AUDIT REAL! 🔬
+- 📊 **Testes E2E SEM MOCKS** executados contra projeto de teste real
+- 🔴 **BUGS ENCONTRADOS**:
+  - ReviewerAgent: FALSE POSITIVES (circular deps que não existem)
+  - SecurityAgent: Não detecta SQL injection e hardcoded secrets
+  - ExplorerAgent: LLM providers exhausted (infra issue)
+  - RefactorerAgent: Falha sem modo analyze-only
+- ✅ **FIXES APLICADOS**:
+  - `GeminiClient.generate()`: Aceita `**kwargs` (temperature fix)
+  - `AgentManager._format_agent_result()`: Handler para Security/Reviewer reports
+- 📄 Relatório completo: `docs/E2E_AGENT_AUDIT_REPORT.md`
+- 🔴 **PENDENTE**: Fix ReviewerAgent dependency algorithm, SecurityAgent patterns
+
+### 2026-01-01 (Sessão 6) - BUG CRÍTICO CORRIGIDO! 🚨
+- ✅ **BUG CRÍTICO**: ReviewerAgent "No files found to review"
+  - **Causa raiz**: Handler não passava context com files para bridge
+  - **Cadeia de falha**:
+    1. `handlers/agents.py::_invoke_agent()` → NÃO PASSAVA context
+    2. `bridge.invoke_agent(name, task, context=None)` → context vazio
+    3. `AgentTask(request=task, context={})` → files não populado
+    4. `ReviewerAgent._load_context()` → `task.context.get("files", [])` → `[]`
+  - **Fix aplicado**: `handlers/agents.py`
+    - Novo método `_build_context(agent_name)` detecta arquivos em `Path.cwd()`
+    - `_invoke_agent()` agora passa context para bridge
+    - Agentes FILE_CONTEXT_AGENTS: reviewer, refactorer, security, testing, docs, perf
+    - Suporte a .py, .js, .ts, .tsx, .jsx, .java, .go, .rs, .cpp, .c, .h
+    - Limite de 50 arquivos para performance
+  - **Impacto**: ReviewerAgent agora funciona dentro de qualquer diretório de projeto
+
 ### 2026-01-01 (Sessão 5) - SPRINTS 6-9 EM PROGRESSO
 - ✅ Sprint 6: Stub methods com debug logging
 - ✅ Sprint 7: Unused variables (F841) → logger.debug()
 - ✅ Sprint 8: 32 imports removidos, 8 loggers adicionados
-- 🔄 Sprint 9: Lazy loader para TUI, op_id bug fixado
+- ✅ Sprint 9: Lazy loader para TUI, op_id bug fixado
 - 📊 Commits: 61c9177, 161071b, 2407b55, 81442e0
 
 ### 2026-01-01 (Sessão 4) - SPRINT 5 COMPLETO! 🎉

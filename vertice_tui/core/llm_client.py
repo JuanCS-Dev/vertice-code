@@ -422,19 +422,25 @@ class GeminiClient:
             else:
                 yield f"\n❌ Error: {error_str[:200]}"
 
-    async def generate(self, prompt: str, system_prompt: str = "") -> str:
+    async def generate(
+        self,
+        prompt: str,
+        system_prompt: str = "",
+        **kwargs: Any,
+    ) -> str:
         """
         Generate complete response (non-streaming).
 
         Args:
             prompt: User's message
             system_prompt: System instructions
+            **kwargs: Additional parameters (temperature, etc) passed to stream()
 
         Returns:
             Complete response text
         """
         chunks = []
-        async for chunk in self.stream(prompt, system_prompt):
+        async for chunk in self.stream(prompt, system_prompt, **kwargs):
             chunks.append(chunk)
         return "".join(chunks)
 

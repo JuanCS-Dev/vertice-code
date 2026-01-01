@@ -149,6 +149,7 @@ class DocumentationAgent(BaseAgent):
                 - request: "generate_docs", "validate_docstrings", "create_readme"
                 - context: {
                     "target_path": str | Path,
+                    "files": List[str],  # Alternative to target_path
                     "format": DocFormat,
                     "style": DocstringStyle,
                     "output_path": Optional[str]
@@ -177,22 +178,33 @@ class DocumentationAgent(BaseAgent):
             >>> assert "modules" in response.data
         """
         try:
-            target_path = Path(task.context.get("target_path", "."))
+            # Get files from context - support both target_path and files list
+            files_list = task.context.get("files", [])
+            target_path_str = task.context.get("target_path", "")
+
+            # If we have a files list but no target_path, use the parent of first file
+            if files_list and not target_path_str:
+                first_file = Path(files_list[0])
+                if first_file.exists():
+                    target_path = first_file.parent
+                else:
+                    target_path = Path(".")
+            else:
+                target_path = Path(target_path_str) if target_path_str else Path(".")
+
             doc_format = task.context.get("format", DocFormat.MARKDOWN)
             style = task.context.get("style", DocstringStyle.GOOGLE)
             output_path = task.context.get("output_path")
 
-            if "generate_docs" in task.request.lower():
-                return await self._generate_docs(target_path, doc_format, style, output_path)
+            if "generate_docs" in task.request.lower() or "documentation" in task.request.lower() or "docstring" in task.request.lower():
+                return await self._generate_docs(target_path, doc_format, style, output_path, files_list)
             elif "validate" in task.request.lower():
                 return await self._validate_docstrings(target_path, style)
             elif "readme" in task.request.lower():
                 return await self._create_readme(target_path, output_path)
             else:
-                return AgentResponse(
-                    success=False,
-                    error=f"Unknown documentation task: {task.request}",
-                )
+                # Default: generate docs for the files
+                return await self._generate_docs(target_path, doc_format, style, output_path, files_list)
 
         except Exception as e:
             return AgentResponse(
@@ -207,6 +219,7 @@ class DocumentationAgent(BaseAgent):
         doc_format: DocFormat,
         style: DocstringStyle,
         output_path: Optional[str],
+        files_list: Optional[List[str]] = None,
     ) -> AgentResponse:
         """Generate documentation for target path.
 
@@ -215,6 +228,7 @@ class DocumentationAgent(BaseAgent):
             doc_format: Output format (Markdown, RST, etc.)
             style: Docstring style (Google, NumPy, Sphinx)
             output_path: Where to save generated docs
+            files_list: Explicit list of files to document (alternative to target_path)
 
         Returns:
             AgentResponse with generated documentation metadata
@@ -222,8 +236,10 @@ class DocumentationAgent(BaseAgent):
         modules: List[ModuleDoc] = []
         files_created: List[str] = []
 
-        # Find all Python files
-        if target_path.is_file():
+        # Find all Python files - prefer explicit list if provided
+        if files_list:
+            python_files = [Path(f) for f in files_list if f.endswith('.py') and Path(f).exists()]
+        elif target_path.is_file():
             python_files = [target_path]
         else:
             python_files = list(target_path.rglob("*.py"))
@@ -239,6 +255,24 @@ class DocumentationAgent(BaseAgent):
             except Exception:
                 # Skip files with syntax errors
                 continue
+
+        # FALLBACK: If no modules analyzed (e.g. syntax errors), read raw content
+        if not modules and python_files:
+             for py_file in python_files[:5]:
+                 try:
+                     content = py_file.read_text(encoding='utf-8', errors='ignore')
+                     # Create a dummy module doc
+                     modules.append(ModuleDoc(
+                         name=py_file.stem,
+                         classes=[],
+                         functions=[],
+                         imports=[],
+                         file_path=str(py_file),
+                         # Store raw content in docstring as last resort
+                         docstring=f"**Raw Content Preview**:\n\n```python\n{content[:2000]}\n```"
+                     ))
+                 except Exception:
+                     pass
 
         # Generate documentation files
         if output_path:
@@ -267,21 +301,31 @@ class DocumentationAgent(BaseAgent):
                 )
                 files_created.append(str(api_file))
 
+        # Generate documentation content for display (even if not writing to files)
+        doc_content_parts = []
+        for module_doc in modules[:5]:  # Limit to 5 modules for display
+            md_content = self._generate_markdown(module_doc, style)
+            doc_content_parts.append(md_content)
+
+        documentation = "\n\n---\n\n".join(doc_content_parts)
+
         return AgentResponse(
             success=True,
             data={
+                "documentation": documentation,  # Full text for display
                 "modules": [
                     {
                         "name": m.name,
                         "classes": len(m.classes),
                         "functions": len(m.functions),
+                        "docstring": m.docstring[:200] if m.docstring else None,
                     }
                     for m in modules
                 ],
                 "files_created": files_created,
                 "total_modules": len(modules),
             },
-            reasoning=f"Analyzed {len(modules)} modules, generated {len(files_created)} documentation files",
+            reasoning=f"Analyzed {len(modules)} modules, generated documentation for {len(doc_content_parts)} files",
         )
 
     async def _validate_docstrings(
@@ -560,7 +604,16 @@ class DocumentationAgent(BaseAgent):
         elif isinstance(node, ast.Subscript):
             return f"{self._get_name(node.value)}[{self._get_name(node.slice)}]"
         elif isinstance(node, ast.Constant):
-            return str(node.value)
+            return repr(node.value)
+        elif isinstance(node, (ast.List, ast.Tuple)):
+            elts = [self._get_name(e) for e in node.elts]
+            return f"[{', '.join(elts)}]"
+        elif isinstance(node, ast.Call):
+            func = self._get_name(node.func)
+            args = [self._get_name(a) for a in node.args]
+            return f"{func}({', '.join(args)})"
+        elif isinstance(node, ast.BinOp):
+            return f"{self._get_name(node.left)} | {self._get_name(node.right)}"
         else:
             return "Any"
 
@@ -615,7 +668,21 @@ class DocumentationAgent(BaseAgent):
                     lines.append(f"#### `{method.signature}`")
                     lines.append("")
                     if method.docstring:
+                        lines.append("**Docstring:**")
                         lines.extend([method.docstring, ""])
+                    # Add params and return info
+                    if method.parameters:
+                        lines.append("**Parameters:**")
+                        for param in method.parameters:
+                            # param is (name, type, description)
+                            desc = f" - {param[2]}" if len(param) > 2 and param[2] else ""
+                            lines.append(f"- `{param[0]}`: {param[1]}{desc}")
+                        lines.append("")
+                    if method.returns and method.returns[0]:
+                        lines.append(f"**Returns:** `{method.returns[0]}`")
+                        if method.returns[1]:
+                            lines.append(f"  {method.returns[1]}")
+                        lines.append("")
 
         # Standalone functions
         if module_doc.functions:
@@ -626,7 +693,21 @@ class DocumentationAgent(BaseAgent):
                 lines.append(f"### `{func.signature}`")
                 lines.append("")
                 if func.docstring:
+                    lines.append("**Docstring:**")
                     lines.extend([func.docstring, ""])
+                # Add params and return info
+                if func.parameters:
+                    lines.append("**Parameters:**")
+                    for param in func.parameters:
+                        # param is (name, type, description)
+                        desc = f" - {param[2]}" if len(param) > 2 and param[2] else ""
+                        lines.append(f"- `{param[0]}`: {param[1]}{desc}")
+                    lines.append("")
+                if func.returns and func.returns[0]:
+                    lines.append(f"**Returns:** `{func.returns[0]}`")
+                    if func.returns[1]:
+                        lines.append(f"  {func.returns[1]}")
+                    lines.append("")
 
         return "\n".join(lines)
 
