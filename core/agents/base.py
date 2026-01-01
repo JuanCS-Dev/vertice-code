@@ -126,17 +126,64 @@ class Agent:
         schemas = []
         for tool in self.tools:
             if hasattr(tool, "get_schema"):
-                # Tool class with schema method
-                if provider == "openai":
-                    schemas.append(tool.get_schema_openai())
-                elif provider == "gemini":
-                    schemas.append(tool.get_schema_gemini())
-                else:  # anthropic (default)
-                    schemas.append(tool.get_schema())
+                # Tool class with schema method - get base schema and transform
+                base_schema = tool.get_schema()
+                schemas.append(self._transform_schema(base_schema, provider))
             elif callable(tool):
                 # Function tool - generate schema from signature
                 schemas.append(self._schema_from_function(tool, provider))
         return schemas
+
+    def _transform_schema(
+        self, base_schema: Dict[str, Any], provider: str
+    ) -> Dict[str, Any]:
+        """Transform base schema to provider-specific format.
+
+        Args:
+            base_schema: Base schema from Tool.get_schema()
+            provider: Target provider (anthropic, openai, gemini)
+
+        Returns:
+            Provider-specific schema
+        """
+        name = base_schema.get("name", "")
+        description = base_schema.get("description", "")
+        # Handle both 'parameters' and 'input_schema' keys
+        params = base_schema.get("input_schema") or base_schema.get("parameters", {})
+
+        # Ensure proper object schema format
+        if not isinstance(params, dict):
+            params = {"type": "object", "properties": {}, "required": []}
+        elif "type" not in params:
+            # Wrap properties in object schema
+            params = {
+                "type": "object",
+                "properties": params,
+                "required": [k for k, v in params.items() if v.get("required", False)],
+            }
+
+        if provider == "openai":
+            return {
+                "type": "function",
+                "function": {
+                    "name": name,
+                    "description": description,
+                    "parameters": params,
+                },
+            }
+        elif provider == "gemini":
+            return {
+                "name": name,
+                "description": description,
+                "parameters": params,
+            }
+        else:  # anthropic (default)
+            return {
+                "name": name,
+                "description": description,
+                "input_schema": params,
+                "strict": True,
+            }
 
     def _schema_from_function(
         self, func: Callable[..., Any], provider: str

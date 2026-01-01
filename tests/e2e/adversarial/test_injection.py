@@ -66,9 +66,47 @@ def input_sanitizer():
 
         def sanitize_path(self, path: str, allowed_base: Path) -> Path:
             """Sanitize path to prevent traversal."""
-            # Resolve to absolute path
+            from urllib.parse import unquote
+
+            # Check for URI schemes first
+            if '://' in path or path.startswith('file:'):
+                raise ValueError(f"Dangerous pattern detected: URI scheme in path")
+
+            # URL decode (handles %2f, %252f, etc.)
+            decoded_path = path
+            for _ in range(3):  # Handle up to triple encoding
+                new_decoded = unquote(decoded_path)
+                if new_decoded == decoded_path:
+                    break
+                decoded_path = new_decoded
+
+            # Normalize backslashes to forward slashes for pattern checking
+            normalized = decoded_path.replace('\\', '/')
+
+            # Check for dangerous path components
+            dangerous_components = [
+                'etc/passwd', 'etc/shadow', '/dev/',
+                'proc/', 'sys/', '~/', '${', '$(', '`',
+                'windows/system', 'system32', 'config/sam',
+            ]
+            for pattern in dangerous_components:
+                if pattern in normalized.lower():
+                    raise ValueError(f"Dangerous pattern detected: {pattern}")
+
+            # Check for path traversal attempts at the start
+            # These are attempts to escape the base directory
+            if normalized.startswith('../') or normalized.startswith('..\\'):
+                raise ValueError(f"Path traversal detected: {path}")
+            if normalized.startswith('/'):
+                raise ValueError(f"Path traversal detected: absolute path not allowed")
+
+            # Check for double-dot variants that try to escape
+            # ....// or ....\\  means the user is trying something fishy
+            if '..../' in normalized or '....\\' in normalized:
+                raise ValueError(f"Dangerous pattern detected: obfuscated traversal")
+
+            # Resolve to absolute path and verify containment
             resolved = (allowed_base / path).resolve()
-            # Check if still under allowed base
             try:
                 resolved.relative_to(allowed_base.resolve())
             except ValueError:
