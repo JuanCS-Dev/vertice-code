@@ -300,8 +300,9 @@ class RAGContextEngine:
         return context
 
     async def _find_related_functions(self, files: List[str]) -> List[str]:
-        """Use semantic search to find related code"""
-        # Stub: In production, use embedding-based search
+        """Use semantic search to find related code."""
+        # TODO: Implement embedding-based semantic search
+        logger.debug("_find_related_functions: stub - semantic search not implemented")
         return []
 
     async def _load_team_standards(self) -> Dict[str, str]:
@@ -314,7 +315,9 @@ class RAGContextEngine:
         }
 
     async def _query_historical_issues(self, files: List[str]) -> List[str]:
-        """Find past issues in similar files"""
+        """Find past issues in similar files."""
+        # TODO: Implement historical issue tracking
+        logger.debug("_query_historical_issues: stub - history not implemented")
         return []
 
 # ============================================================================

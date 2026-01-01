@@ -477,8 +477,8 @@ class PerformanceAgent(BaseAgent):
         Note: This is a simplified version. In production, this would
         require more sophisticated profiling infrastructure.
         """
-        # For now, return empty list
-        # Real implementation would use cProfile or py-spy
+        # TODO: Implement cProfile or py-spy integration
+        logger.debug("_run_profiling: stub - profiling infrastructure not implemented")
         return []
 
     def _calculate_performance_score(self, bottlenecks: List[Bottleneck]) -> int:
