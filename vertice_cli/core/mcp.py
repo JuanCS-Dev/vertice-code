@@ -24,8 +24,8 @@ import warnings
 if TYPE_CHECKING:
     from vertice_cli.tools.base import ToolRegistry
 
-# FIX: Import from CLI's own resilience module (not TUI - avoids circular import)
-from vertice_cli.core.providers.resilience import (
+# SCALE & SUSTAIN Phase 2.1: Use canonical resilience module
+from core.resilience import (
     CircuitBreaker,
     CircuitBreakerConfig,
     CircuitState,

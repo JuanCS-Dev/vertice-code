@@ -1,15 +1,34 @@
 """
 Unified Circuit Breaker Types.
 
-SCALE & SUSTAIN Phase 1.3 - Type Consolidation.
+DEPRECATED: This module is deprecated. Use core.resilience or vertice_core.resilience instead.
 
-Consolidated from:
-- vertice_cli/core/llm.py:44 (simple dataclass)
-- vertice_tui/core/llm_client.py:33 (async with stats)
+Migration:
+    # Old (deprecated)
+    from vertice_core.types.circuit import CircuitBreaker, CircuitState
+
+    # New (canonical)
+    from core.resilience import CircuitBreaker, CircuitState
+    # or
+    from vertice_core.resilience import CircuitBreaker, CircuitState
+
+SCALE & SUSTAIN Phase 1.3 - Type Consolidation.
+SCALE & SUSTAIN Phase 2.1 - Deprecated in favor of core.resilience
 
 Author: JuanCS Dev
 Date: 2025-11-26
+Deprecated: 2026-01-02
 """
+
+import warnings
+
+warnings.warn(
+    "vertice_core.types.circuit is deprecated. "
+    "Use 'from core.resilience import CircuitBreaker' or "
+    "'from vertice_core.resilience import CircuitBreaker' instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 from enum import Enum
 from dataclasses import dataclass, field

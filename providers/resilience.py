@@ -1,6 +1,17 @@
 """
 MAXIMUS Resilience Patterns.
 
+DEPRECATED: This module is deprecated. Use core.resilience or vertice_core.resilience instead.
+
+Migration:
+    # Old (deprecated)
+    from providers.resilience import CircuitBreaker, CircuitBreakerConfig
+
+    # New (canonical)
+    from core.resilience import CircuitBreaker, CircuitBreakerConfig
+    # or
+    from vertice_core.resilience import CircuitBreaker, CircuitBreakerConfig
+
 Production-ready resilience for MAXIMUS provider with:
 - Tenacity retry with exponential backoff
 - Circuit breaker for fail-fast
@@ -12,9 +23,19 @@ Based on 2025 best practices:
 - HTTPX with HTTP/2 and connection pooling
 
 Follows CODE_CONSTITUTION: <500 lines, 100% type hints
+Deprecated: 2026-01-02
 """
 
 from __future__ import annotations
+
+import warnings
+
+warnings.warn(
+    "providers.resilience is deprecated. "
+    "Use 'from core.resilience import CircuitBreaker' instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 import time
 from dataclasses import dataclass

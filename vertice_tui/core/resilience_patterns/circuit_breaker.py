@@ -2,6 +2,17 @@
 Circuit Breaker Pattern - Resilience Engineering
 ================================================
 
+DEPRECATED: This module is deprecated. Use core.resilience or vertice_core.resilience instead.
+
+Migration:
+    # Old (deprecated)
+    from vertice_tui.core.resilience_patterns.circuit_breaker import CircuitBreaker
+
+    # New (canonical)
+    from core.resilience import CircuitBreaker
+    # or
+    from vertice_core.resilience import CircuitBreaker
+
 Extracted from llm_client.py as part of SCALE & SUSTAIN refactoring.
 
 Prevents cascading failures by stopping requests to failing services.
@@ -13,9 +24,19 @@ States:
 
 Author: JuanCS Dev
 Date: 2025-11-27
+Deprecated: 2026-01-02
 """
 
 from __future__ import annotations
+
+import warnings
+
+warnings.warn(
+    "vertice_tui.core.resilience_patterns.circuit_breaker is deprecated. "
+    "Use 'from core.resilience import CircuitBreaker' instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 import asyncio
 import logging
