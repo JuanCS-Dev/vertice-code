@@ -12,6 +12,8 @@ CHAOS ORCHESTRATOR - RESILIENCE ENGINEERING (Nov 2025):
     - Circuit Breaker pattern for fault tolerance
     - Timeout protection on tool calls
     - Graceful fallback for failures
+
+FIX: Use CLI's own resilience module to avoid circular imports with TUI.
 """
 
 import asyncio
@@ -22,8 +24,12 @@ import warnings
 if TYPE_CHECKING:
     from vertice_cli.tools.base import ToolRegistry
 
-# Import circuit breaker from llm_client
-from vertice_tui.core.llm_client import CircuitBreaker, CircuitBreakerConfig
+# FIX: Import from CLI's own resilience module (not TUI - avoids circular import)
+from vertice_cli.core.providers.resilience import (
+    CircuitBreaker,
+    CircuitBreakerConfig,
+    CircuitState,
+)
 
 
 def create_mcp_client(
@@ -116,13 +122,12 @@ class MCPClient:
             )
 
         # Circuit breaker for tool execution resilience
+        # FIX: Use CLI's CircuitBreaker API (not TUI's)
         self._circuit_breaker = CircuitBreaker(
-            name="mcp_tools",
             config=circuit_breaker_config or CircuitBreakerConfig(
                 failure_threshold=3,       # Open after 3 failures
-                success_threshold=2,       # Close after 2 successes
-                timeout=20.0,              # Try again after 20s
-                half_open_max_calls=2,     # 2 test calls in half-open
+                recovery_timeout=20.0,     # Try again after 20s
+                half_open_requests=2,      # 2 test calls in half-open
             )
         )
 
@@ -162,13 +167,13 @@ class MCPClient:
         """
         start_time = time.time()
 
-        # Check circuit breaker
-        if not await self._circuit_breaker.can_execute():
+        # Check circuit breaker (FIX: use CLI's is_open() method)
+        if self._circuit_breaker.is_open():
             duration = time.time() - start_time
             self._record_tool_call(tool_name, False, duration)
             return {
                 'error': "MCP tools temporarily unavailable (circuit breaker open)",
-                'retry_after': self._circuit_breaker.config.timeout,
+                'retry_after': self._circuit_breaker.config.recovery_timeout,
                 'fallback': True
             }
 
@@ -200,7 +205,7 @@ class MCPClient:
         except asyncio.TimeoutError:
             duration = time.time() - start_time
             self._record_tool_call(tool_name, False, duration)
-            self._circuit_breaker.record_failure(f"Tool '{tool_name}' timeout after {timeout}s")
+            self._circuit_breaker.record_failure()  # FIX: CLI's API takes no args
             return {
                 'error': f"Tool '{tool_name}' timed out after {timeout}s",
                 'timeout': True,
@@ -209,7 +214,7 @@ class MCPClient:
         except Exception as e:
             duration = time.time() - start_time
             self._record_tool_call(tool_name, False, duration)
-            self._circuit_breaker.record_failure(str(e))
+            self._circuit_breaker.record_failure()  # FIX: CLI's API takes no args
             raise Exception(f"Tool '{tool_name}' failed: {str(e)}") from e
 
         from vertice_cli.tools.base import ToolResult
@@ -258,7 +263,8 @@ class MCPClient:
 
     def get_health_status(self) -> Dict[str, Any]:
         """Get MCP client health status for observability."""
-        cb_status = self._circuit_breaker.get_status()
+        # FIX: Use CLI's get_stats() method instead of get_status()
+        cb_status = self._circuit_breaker.get_stats()
 
         # Calculate tool stats summary
         total_calls = sum(s['calls'] for s in self._tool_stats.values())
@@ -267,7 +273,7 @@ class MCPClient:
 
         return {
             'service': 'mcp_tools',
-            'healthy': self._circuit_breaker.is_closed,
+            'healthy': not self._circuit_breaker.is_open(),  # FIX: use is_open()
             'tools_registered': len(self.registry.tools),
             'circuit_breaker': cb_status,
             'stats': {
@@ -280,8 +286,10 @@ class MCPClient:
 
     def reset_circuit_breaker(self) -> None:
         """Manually reset circuit breaker (for recovery)."""
-        from vertice_tui.core.llm_client import CircuitState
-        self._circuit_breaker._transition_to(CircuitState.CLOSED)
+        # FIX: Use CLI's CircuitState and direct state reset
+        self._circuit_breaker._state = CircuitState.CLOSED
+        self._circuit_breaker._failure_count = 0
+        self._circuit_breaker._success_count = 0
 
 
 # Aliases for backward compatibility with tests

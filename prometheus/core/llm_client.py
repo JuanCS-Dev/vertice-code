@@ -47,7 +47,7 @@ class GeminiClient:
     BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
 
     MODELS = {
-        "flash": "gemini-2.0-flash-exp",
+        "flash": "gemini-2.0-flash",
         "thinking": "gemini-2.0-flash-thinking-exp-1219",
         "pro": "gemini-1.5-pro",
     }

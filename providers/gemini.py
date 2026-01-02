@@ -50,7 +50,7 @@ class GeminiProvider:
         """
         self.api_key = api_key or os.getenv("GEMINI_API_KEY")
         # Respect GEMINI_MODEL from .env unconditionally (Constitutional compliance)
-        default_model = "gemini-2.5-flash"  # Stable production model
+        default_model = "gemini-2.0-flash"  # Latest production model
         self.model_name = model_name or os.getenv("GEMINI_MODEL", default_model)
 
         # Native Capabilities

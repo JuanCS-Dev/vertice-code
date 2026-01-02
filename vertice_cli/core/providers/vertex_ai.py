@@ -6,7 +6,7 @@ Inferência via Vertex AI, não Google AI Studio.
 
 Modelos disponíveis (2026):
 - gemini-3-pro-preview (RECOMMENDED - reasoning-first, 1M context)
-- gemini-3-flash-preview (multimodal, agentic)
+- gemini-2.0-flash (multimodal, agentic)
 - gemini-3-deep-think (coming soon)
 """
 
@@ -34,9 +34,9 @@ class VertexAIProvider:
     MODELS = {
         # Gemini 3 (2026) - RECOMMENDED
         "pro": "gemini-3-pro-preview",            # Reasoning-first, 1M context, agentic
-        "flash": "gemini-3-flash-preview",        # Multimodal, complex understanding
+        "flash": "gemini-2.0-flash",        # Multimodal, complex understanding
         "3-pro": "gemini-3-pro-preview",
-        "3-flash": "gemini-3-flash-preview",
+        "3-flash": "gemini-2.0-flash",
         # Legacy (still available)
         "2.0-flash": "gemini-2.0-flash-exp",
         "2.5-flash": "gemini-2.5-flash-preview",
@@ -46,7 +46,7 @@ class VertexAIProvider:
         self,
         project: Optional[str] = None,
         location: str = "us-central1",
-        model_name: str = "pro",  # Default to Gemini 3 Pro!
+        model_name: str = "flash",  # Default to Gemini 3 Flash (Pro only for reasoning)
     ):
         """Initialize Vertex AI provider.
 

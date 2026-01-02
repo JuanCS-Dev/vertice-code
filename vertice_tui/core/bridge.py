@@ -346,7 +346,7 @@ Working directory: {os.getcwd()}"""
         return getattr(self.llm, 'model_name', 'gemini-2.0-flash')
 
     def get_available_models(self) -> List[str]:
-        return ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash", "gemini-1.5-pro"]
+        return ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-pro"]
 
     # Session management
     def resume_session(self, session_id: Optional[str] = None) -> Dict[str, Any]:
