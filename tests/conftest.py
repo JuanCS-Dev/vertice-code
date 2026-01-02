@@ -167,3 +167,54 @@ def temp_workspace(tmp_path):
     workspace = tmp_path / "workspace"
     workspace.mkdir()
     return workspace
+
+
+# =============================================================================
+# AZURE EMBEDDINGS FIXTURES (Sprint 0: Test Hygiene)
+# =============================================================================
+
+@pytest.fixture
+def mock_azure_env(monkeypatch):
+    """
+    Mock Azure environment to force local fallback.
+
+    Use this fixture in tests that should NOT call real Azure API.
+    """
+    monkeypatch.delenv("AZURE_OPENAI_KEY", raising=False)
+    monkeypatch.delenv("AZURE_OPENAI_ENDPOINT", raising=False)
+    monkeypatch.delenv("AZURE_OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("AZURE_OPENAI_DEPLOYMENT", raising=False)
+
+
+@pytest.fixture
+def mock_embeddings():
+    """
+    Mock embedding generation for tests that don't need real embeddings.
+
+    Returns a function that generates deterministic fake embeddings.
+    """
+    def _generate(text: str, dimensions: int = 64) -> List[float]:
+        """Generate deterministic fake embedding from text hash."""
+        import hashlib
+        hash_bytes = hashlib.sha256(text.encode()).digest()
+        embedding = []
+        for i in range(dimensions):
+            byte_val = hash_bytes[i % len(hash_bytes)]
+            embedding.append((byte_val / 255.0) * 2 - 1)  # Normalize to [-1, 1]
+        # Normalize to unit length
+        import math
+        norm = math.sqrt(sum(x*x for x in embedding))
+        return [x / norm for x in embedding]
+    return _generate
+
+
+def pytest_configure(config):
+    """Register custom markers."""
+    config.addinivalue_line(
+        "markers",
+        "azure_integration: mark test as requiring real Azure API (skip when unavailable)"
+    )
+    config.addinivalue_line(
+        "markers",
+        "slow: mark test as slow running"
+    )

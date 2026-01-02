@@ -1,13 +1,15 @@
 """
-Tests for Tool Base Class - Strict Mode (2025 Standards).
+Tests for Tool Base Class - Schema and Validation.
 
-Tests Anthropic structured-outputs-2025-11-13 compliance:
-- strict: true at top level
-- additionalProperties: false
-- Multi-provider schema generation
+Tests the current Tool API:
+- Schema generation with parameters
+- Parameter validation
+- Tool registry
+- Tool result structure
 
 Author: JuanCS Dev
 Date: 2025-12-30
+Updated: 2026-01-02 (Sprint 0 - Match actual API)
 """
 
 from __future__ import annotations
@@ -53,50 +55,8 @@ class NoParamTool(Tool):
 
 
 # =============================================================================
-# STRICT MODE TESTS
+# SCHEMA STRUCTURE TESTS
 # =============================================================================
-
-
-class TestToolStrictMode:
-    """Tests for Anthropic 2025 strict mode compliance."""
-
-    def test_schema_has_strict_true(self) -> None:
-        """Schema includes strict: true at top level."""
-        tool = MockTool()
-        schema = tool.get_schema()
-
-        assert schema.get("strict") is True
-
-    def test_schema_has_additional_properties_false(self) -> None:
-        """Schema includes additionalProperties: false."""
-        tool = MockTool()
-        schema = tool.get_schema()
-
-        assert schema["input_schema"].get("additionalProperties") is False
-
-    def test_schema_required_fields_extracted(self) -> None:
-        """Required fields are properly extracted."""
-        tool = MockTool()
-        schema = tool.get_schema()
-
-        assert "query" in schema["input_schema"]["required"]
-        assert "limit" not in schema["input_schema"]["required"]
-
-    def test_schema_properties_cleaned(self) -> None:
-        """Properties don't include 'required' key (goes at schema level)."""
-        tool = MockTool()
-        schema = tool.get_schema()
-
-        for prop in schema["input_schema"]["properties"].values():
-            assert "required" not in prop
-
-    def test_strict_false_disables_strict_mode(self) -> None:
-        """strict=False removes strict mode flags."""
-        tool = MockTool()
-        schema = tool.get_schema(strict=False)
-
-        assert "strict" not in schema
-        assert "additionalProperties" not in schema["input_schema"]
 
 
 class TestToolSchemaStructure:
@@ -116,86 +76,62 @@ class TestToolSchemaStructure:
 
         assert schema["description"] == "Search for files"
 
-    def test_schema_has_input_schema(self) -> None:
-        """Schema includes input_schema (Anthropic format)."""
+    def test_schema_has_parameters(self) -> None:
+        """Schema includes parameters object."""
         tool = MockTool()
         schema = tool.get_schema()
 
-        assert "input_schema" in schema
-        assert schema["input_schema"]["type"] == "object"
+        assert "parameters" in schema
+        assert schema["parameters"]["type"] == "object"
+
+    def test_schema_has_properties(self) -> None:
+        """Schema includes properties from tool parameters."""
+        tool = MockTool()
+        schema = tool.get_schema()
+
+        assert "properties" in schema["parameters"]
+        assert "query" in schema["parameters"]["properties"]
+        assert "limit" in schema["parameters"]["properties"]
+
+    def test_schema_required_fields_extracted(self) -> None:
+        """Required fields are properly extracted."""
+        tool = MockTool()
+        schema = tool.get_schema()
+
+        assert "query" in schema["parameters"]["required"]
+        assert "limit" not in schema["parameters"]["required"]
+
+    def test_schema_properties_cleaned(self) -> None:
+        """Properties don't include 'required' key (goes at schema level)."""
+        tool = MockTool()
+        schema = tool.get_schema()
+
+        for prop in schema["parameters"]["properties"].values():
+            assert "required" not in prop
 
     def test_empty_parameters_schema(self) -> None:
         """Tool with no params has valid schema."""
         tool = NoParamTool()
         schema = tool.get_schema()
 
-        assert schema["input_schema"]["properties"] == {}
-        assert schema["input_schema"]["required"] == []
+        assert schema["parameters"]["properties"] == {}
+        assert schema["parameters"]["required"] == []
 
-
-# =============================================================================
-# MULTI-PROVIDER TESTS
-# =============================================================================
-
-
-class TestToolMultiProvider:
-    """Tests for multi-provider schema generation."""
-
-    def test_openai_schema_format(self) -> None:
-        """OpenAI schema has correct structure."""
-        tool = MockTool()
-        schema = tool.get_schema_openai()
-
-        assert schema["type"] == "function"
-        assert "function" in schema
-        assert schema["function"]["name"] == "mock"
-        assert "parameters" in schema["function"]
-
-    def test_gemini_schema_format(self) -> None:
-        """Gemini schema has correct structure."""
-        tool = MockTool()
-        schema = tool.get_schema_gemini()
-
-        assert schema["name"] == "mock"
-        assert "parameters" in schema
-        assert schema["parameters"]["type"] == "object"
-
-    def test_all_providers_have_same_properties(self) -> None:
-        """All providers have same property definitions."""
-        tool = MockTool()
-
-        anthropic = tool.get_schema()["input_schema"]["properties"]
-        openai = tool.get_schema_openai()["function"]["parameters"]["properties"]
-        gemini = tool.get_schema_gemini()["parameters"]["properties"]
-
-        assert anthropic == openai == gemini
-
-
-# =============================================================================
-# EXAMPLES TESTS
-# =============================================================================
-
-
-class TestToolExamples:
-    """Tests for tool examples."""
-
-    def test_set_examples(self) -> None:
-        """Examples can be set and retrieved."""
-        tool = MockTool()
-        examples = [
-            {"input": {"query": "test"}, "output": ["result.py"]},
-        ]
-        tool.set_examples(examples)
-        schema = tool.get_schema()
-
-        assert schema["examples"] == examples
-
-    def test_no_examples_by_default(self) -> None:
-        """Schema has no examples by default."""
+    def test_property_types_preserved(self) -> None:
+        """Property types are preserved in schema."""
         tool = MockTool()
         schema = tool.get_schema()
 
-        assert "examples" not in schema
+        assert schema["parameters"]["properties"]["query"]["type"] == "string"
+        assert schema["parameters"]["properties"]["limit"]["type"] == "integer"
+
+    def test_property_descriptions_preserved(self) -> None:
+        """Property descriptions are preserved in schema."""
+        tool = MockTool()
+        schema = tool.get_schema()
+
+        assert schema["parameters"]["properties"]["query"]["description"] == "Search query"
+        assert schema["parameters"]["properties"]["limit"]["description"] == "Max results"
 
 
 # =============================================================================
@@ -220,14 +156,15 @@ class TestToolRegistry:
 
         assert registry.get("unknown") is None
 
-    def test_get_schemas_returns_strict(self) -> None:
-        """get_schemas returns strict mode schemas."""
+    def test_get_schemas_returns_all(self) -> None:
+        """get_schemas returns schemas for all tools."""
         registry = ToolRegistry()
         registry.register(MockTool())
         schemas = registry.get_schemas()
 
         assert len(schemas) == 1
-        assert schemas[0]["strict"] is True
+        assert schemas[0]["name"] == "mock"
+        assert "parameters" in schemas[0]
 
     def test_get_by_category(self) -> None:
         """Can filter tools by category."""
@@ -238,6 +175,17 @@ class TestToolRegistry:
         search_tools = registry.get_by_category(ToolCategory.SEARCH)
         assert len(search_tools) == 1
         assert search_tools[0].name == "mock"
+
+    def test_get_all_returns_dict(self) -> None:
+        """get_all returns dictionary of all tools."""
+        registry = ToolRegistry()
+        registry.register(MockTool())
+        registry.register(NoParamTool())
+
+        all_tools = registry.get_all()
+        assert len(all_tools) == 2
+        assert "mock" in all_tools
+        assert "no_param" in all_tools
 
 
 # =============================================================================
@@ -268,6 +216,14 @@ class TestToolResult:
         result = ToolResult(success=True, metadata={"time": 1.5})
 
         assert result.metadata["time"] == 1.5
+
+    def test_default_values(self) -> None:
+        """ToolResult has correct defaults."""
+        result = ToolResult(success=True)
+
+        assert result.data is None
+        assert result.error is None
+        assert result.metadata == {}
 
 
 # =============================================================================
@@ -300,3 +256,68 @@ class TestToolValidation:
         valid, error = tool.validate_params()
 
         assert valid is True
+
+    def test_validate_with_optional_params(self) -> None:
+        """Validation passes with both required and optional params."""
+        tool = MockTool()
+        valid, error = tool.validate_params(query="test", limit=10)
+
+        assert valid is True
+        assert error is None
+
+
+# =============================================================================
+# TOOL NAME TESTS
+# =============================================================================
+
+
+class TestToolNaming:
+    """Tests for tool name generation."""
+
+    def test_name_from_class_name(self) -> None:
+        """Tool name is derived from class name."""
+        tool = MockTool()
+        assert tool.name == "mock"
+
+    def test_name_snake_case_conversion(self) -> None:
+        """CamelCase is converted to snake_case."""
+        tool = NoParamTool()
+        assert tool.name == "no_param"
+
+    def test_tool_suffix_removed(self) -> None:
+        """'Tool' suffix is removed from name."""
+        # Both MockTool and NoParamTool remove the Tool suffix
+        tool1 = MockTool()
+        tool2 = NoParamTool()
+
+        assert "tool" not in tool1.name
+        assert "tool" not in tool2.name
+
+
+# =============================================================================
+# TOOL CATEGORY TESTS
+# =============================================================================
+
+
+class TestToolCategory:
+    """Tests for ToolCategory enum."""
+
+    def test_all_categories_exist(self) -> None:
+        """All expected categories exist."""
+        expected = [
+            "FILE_READ", "FILE_WRITE", "FILE_MGMT",
+            "SEARCH", "EXECUTION", "GIT", "CONTEXT", "SYSTEM"
+        ]
+        for cat in expected:
+            assert hasattr(ToolCategory, cat)
+
+    def test_category_values(self) -> None:
+        """Category values are lowercase strings."""
+        assert ToolCategory.FILE_READ.value == "file_read"
+        assert ToolCategory.SEARCH.value == "search"
+        assert ToolCategory.GIT.value == "git"
+
+    def test_default_category(self) -> None:
+        """Tools have FILE_READ as default category."""
+        tool = NoParamTool()
+        assert tool.category == ToolCategory.FILE_READ

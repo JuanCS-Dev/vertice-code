@@ -357,8 +357,9 @@ class TestSemanticEmbedder:
         assert embedder.config.dimensions == 3072
         assert embedder.config.model == "text-embedding-3-large"
 
-    def test_is_available(self, temp_dir):
+    def test_is_available(self, temp_dir, mock_azure_env):
         """Test availability check."""
+        # mock_azure_env removes Azure env vars to force is_available() = False
         config = EmbeddingConfig(
             cache_dir=str(temp_dir / "cache"),
             azure_endpoint="",
@@ -366,12 +367,13 @@ class TestSemanticEmbedder:
         )
         embedder = SemanticEmbedder(config)
 
-        # Without credentials, should not be available
+        # Without credentials (env vars removed), should not be available
         assert not embedder.is_available()
 
     @pytest.mark.asyncio
-    async def test_local_fallback(self, temp_dir):
+    async def test_local_fallback(self, temp_dir, mock_azure_env):
         """Test local fallback embedding."""
+        # mock_azure_env ensures we use local fallback, not Azure
         config = EmbeddingConfig(
             cache_dir=str(temp_dir / "cache"),
             azure_api_key="",  # Force fallback
@@ -388,8 +390,9 @@ class TestSemanticEmbedder:
         assert results[0].model == "local-hash"
 
     @pytest.mark.asyncio
-    async def test_embed_chunks(self, temp_dir, python_file):
+    async def test_embed_chunks(self, temp_dir, python_file, mock_azure_env):
         """Test embedding code chunks."""
+        # mock_azure_env ensures we use local fallback
         config = EmbeddingConfig(
             cache_dir=str(temp_dir / "cache"),
             use_local_fallback=True,
@@ -408,8 +411,9 @@ class TestSemanticEmbedder:
             assert len(result.embedding) == 64
 
     @pytest.mark.asyncio
-    async def test_cache_hit(self, temp_dir):
+    async def test_cache_hit(self, temp_dir, mock_azure_env):
         """Test cache is used on second call."""
+        # mock_azure_env ensures we use local fallback
         config = EmbeddingConfig(
             cache_dir=str(temp_dir / "cache"),
             use_local_fallback=True,
@@ -427,8 +431,9 @@ class TestSemanticEmbedder:
         assert results1[0].embedding == results2[0].embedding
 
     @pytest.mark.asyncio
-    async def test_embed_query(self, temp_dir):
+    async def test_embed_query(self, temp_dir, mock_azure_env):
         """Test query embedding."""
+        # mock_azure_env ensures we use local fallback
         config = EmbeddingConfig(
             cache_dir=str(temp_dir / "cache"),
             use_local_fallback=True,
@@ -664,8 +669,9 @@ class TestCodebaseIndexer:
         assert not indexer.is_indexing
 
     @pytest.mark.asyncio
-    async def test_index_codebase(self, sample_project):
+    async def test_index_codebase(self, sample_project, mock_azure_env):
         """Test full codebase indexing."""
+        # mock_azure_env ensures we use local fallback
         config = IndexerConfig(
             root_dir=str(sample_project),
             index_dir=str(sample_project / ".index"),
@@ -689,8 +695,9 @@ class TestCodebaseIndexer:
         assert progress.error_count == 0
 
     @pytest.mark.asyncio
-    async def test_incremental_index(self, sample_project):
+    async def test_incremental_index(self, sample_project, mock_azure_env):
         """Test incremental indexing only processes changed files."""
+        # mock_azure_env ensures we use local fallback
         config = IndexerConfig(
             root_dir=str(sample_project),
             index_dir=str(sample_project / ".index"),
@@ -717,8 +724,9 @@ class TestCodebaseIndexer:
         assert progress2.processed_files < first_count
 
     @pytest.mark.asyncio
-    async def test_search(self, sample_project, sample_python_code):
+    async def test_search(self, sample_project, sample_python_code, mock_azure_env):
         """Test searching indexed codebase."""
+        # mock_azure_env ensures we use local fallback
         config = IndexerConfig(
             root_dir=str(sample_project),
             index_dir=str(sample_project / ".index"),
@@ -746,8 +754,9 @@ class TestCodebaseIndexer:
         assert all(isinstance(r, SearchResult) for r in results)
 
     @pytest.mark.asyncio
-    async def test_index_single_file(self, sample_project):
+    async def test_index_single_file(self, sample_project, mock_azure_env):
         """Test indexing a single file."""
+        # mock_azure_env ensures we use local fallback
         config = IndexerConfig(
             root_dir=str(sample_project),
             index_dir=str(sample_project / ".index"),
@@ -770,8 +779,9 @@ class TestCodebaseIndexer:
         assert indexed > 0
 
     @pytest.mark.asyncio
-    async def test_delete_file(self, sample_project, sample_python_code):
+    async def test_delete_file(self, sample_project, sample_python_code, mock_azure_env):
         """Test removing a file from index."""
+        # mock_azure_env ensures we use local fallback
         config = IndexerConfig(
             root_dir=str(sample_project),
             index_dir=str(sample_project / ".index"),
@@ -799,8 +809,9 @@ class TestCodebaseIndexer:
         assert indexer._store.count() < initial_count
 
     @pytest.mark.asyncio
-    async def test_progress_callback(self, sample_project):
+    async def test_progress_callback(self, sample_project, mock_azure_env):
         """Test progress callback is called."""
+        # mock_azure_env ensures we use local fallback
         progress_updates = []
 
         def on_progress(progress: IndexingProgress):
@@ -831,8 +842,9 @@ class TestCodebaseIndexer:
         assert IndexerStatus.IDLE.value in statuses
 
     @pytest.mark.asyncio
-    async def test_get_stats(self, sample_project):
+    async def test_get_stats(self, sample_project, mock_azure_env):
         """Test statistics retrieval."""
+        # mock_azure_env ensures we use local fallback
         config = IndexerConfig(
             root_dir=str(sample_project),
             index_dir=str(sample_project / ".index"),
@@ -857,8 +869,9 @@ class TestCodebaseIndexer:
         assert stats["indexed_chunks"] > 0
 
     @pytest.mark.asyncio
-    async def test_clear(self, sample_project):
+    async def test_clear(self, sample_project, mock_azure_env):
         """Test clearing all indexed data."""
+        # mock_azure_env ensures we use local fallback
         config = IndexerConfig(
             root_dir=str(sample_project),
             index_dir=str(sample_project / ".index"),
@@ -890,8 +903,9 @@ class TestIntegration:
     """End-to-end integration tests."""
 
     @pytest.mark.asyncio
-    async def test_full_pipeline(self, temp_dir):
+    async def test_full_pipeline(self, temp_dir, mock_azure_env):
         """Test complete chunking -> embedding -> storage -> search pipeline."""
+        # mock_azure_env ensures we use local fallback
         # Create sample code
         code = '''
 def parse_config(path: str) -> dict:

@@ -10,7 +10,8 @@ runner = CliRunner()
 
 @pytest.fixture
 def mock_squad():
-    with patch("vertice_cli.cli.get_squad") as mock:
+    # Patch where get_squad is called (in cli_app), not where it's imported (in cli)
+    with patch("vertice_cli.cli_app.get_squad") as mock:
         squad_instance = MagicMock()
         # Mock execute_workflow to return a dummy result
         result = WorkflowResult(

@@ -10,7 +10,7 @@ from .intent_detector import IntentDetector
 
 # Re-export app and validate_output_path from cli_app module for backward compatibility
 # This avoids circular import issues from vertice_cli.cli.py vs vertice_cli/cli/ package conflict
-from vertice_cli.cli_app import app, validate_output_path
+from vertice_cli.cli_app import app, validate_output_path, get_squad
 
 
 def main():
@@ -25,5 +25,6 @@ __all__ = [
     "IntentDetector",
     "app",
     "validate_output_path",
+    "get_squad",
     "main",
 ]
