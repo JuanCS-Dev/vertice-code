@@ -585,6 +585,22 @@ The debt took months to accumulate. It will take weeks to properly eliminate.
 
 ---
 
+### Sprint 0.1: Test Hygiene Phase 2 - PENDING
+
+**Objective:** Fix 16 pre-existing test failures discovered during Sprint 1 validation
+
+| Task | Test File | Issue | Fix Strategy |
+|------|-----------|-------|--------------|
+| 0.1.1 | `test_shell_performance.py` (10 tests) | References non-existent `vertice_cli.shell.default_llm_client` | Update import path or add re-export |
+| 0.1.2 | `test_mcp_integration.py` (2 tests) | Missing `vertice_cli.security_hardening` module | Create stub module or update test |
+| 0.1.3 | `test_auto_indexing.py` (2 tests) | `module 'vertice_cli.shell' has no attribute 'os'` | Fix module reference |
+| 0.1.4 | `test_suggestions_real.py` (1 test) | Looking for old `shell.py` file path | Update to `shell_main.py` |
+| 0.1.5 | `test_squad_shell.py` (1 test) | Mock pattern incompatible with handler architecture | Update mock to capture handler console |
+
+**Priority:** Medium (non-blocking for development, but should be fixed before next release)
+
+---
+
 ### Sprint 1: shell_main.py Decomposition - COMPLETE (2026-01-02)
 
 **Objective:** Reduce shell_main.py from 1,876 lines to <300 lines per module
