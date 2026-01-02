@@ -30,6 +30,7 @@ from .refactor_handler import RefactorHandler
 from .git_handler import GitHandler
 from .file_ops_handler import FileOpsHandler
 from .tool_execution_handler import ToolExecutionHandler
+from .llm_processing_handler import LLMProcessingHandler
 from .input_handler import (
     InputHandler,
     InputType,
@@ -50,6 +51,7 @@ __all__ = [
     'GitHandler',
     'FileOpsHandler',
     'ToolExecutionHandler',
+    'LLMProcessingHandler',
     'InputHandler',
     'InputType',
     'ParsedInput',

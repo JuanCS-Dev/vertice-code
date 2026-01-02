@@ -595,15 +595,16 @@ The debt took months to accumulate. It will take weeks to properly eliminate.
 | 1.2 Git Handler | `vertice_cli/handlers/git_handler.py` (220 lines) | Extracted git operations: `/git status`, `/git diff`, `/git log`, `/git branch` + palette actions | -36 lines |
 | 1.3 FileOps Handler | `vertice_cli/handlers/file_ops_handler.py` (260 lines) | Extracted file operations: `/read`, `/write`, `/search`, `/tree` + palette actions | (included above) |
 | 1.4 ToolExecution Handler | `vertice_cli/handlers/tool_execution_handler.py` (495 lines) | Extracted tool execution lifecycle: `_process_tool_calls`, `_execute_tool_calls`, `_execute_with_recovery` | **-302 lines** |
+| 1.5 LLM Processing Handler | `vertice_cli/handlers/llm_processing_handler.py` (555 lines) | Extracted LLM processing: `_process_request_with_llm`, `_get_command_suggestion`, `_execute_command`, `_handle_error` | **-379 lines** |
 
 **Updated Files:**
 - `vertice_cli/handlers/dispatcher.py` - Registered new handlers and commands
-- `vertice_cli/handlers/__init__.py` - Exported `GitHandler`, `FileOpsHandler`, `ToolExecutionHandler`
-- `vertice_cli/shell_main.py` - Delegated tool execution to `ToolExecutionHandler`
+- `vertice_cli/handlers/__init__.py` - Exported `GitHandler`, `FileOpsHandler`, `ToolExecutionHandler`, `LLMProcessingHandler`
+- `vertice_cli/shell_main.py` - Delegated tool execution to `ToolExecutionHandler`, LLM processing to `LLMProcessingHandler`
 
-**Current shell_main.py:** 1,426 lines (target: <300) - **Total reduction: -450 lines from 1,876**
+**Current shell_main.py:** 1,047 lines (target: <300) - **Total reduction: -829 lines from 1,876 (44% reduction)**
 
-**Tests Validated:** 31 passed (test_shell_startup, test_shell_manual, test_shell_scientific)
+**Tests Validated:** 36 passed (test_shell_startup, test_shell_simple, test_shell_manual)
 
 ---
 
