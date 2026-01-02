@@ -594,13 +594,14 @@ The debt took months to accumulate. It will take weeks to properly eliminate.
 | 1.1 Output Renderers | `vertice_cli/shell/output/formatters.py`, `renderers.py` | Extracted Strategy pattern for tool result formatting | -113 lines |
 | 1.2 Git Handler | `vertice_cli/handlers/git_handler.py` (220 lines) | Extracted git operations: `/git status`, `/git diff`, `/git log`, `/git branch` + palette actions | -36 lines |
 | 1.3 FileOps Handler | `vertice_cli/handlers/file_ops_handler.py` (260 lines) | Extracted file operations: `/read`, `/write`, `/search`, `/tree` + palette actions | (included above) |
+| 1.4 ToolExecution Handler | `vertice_cli/handlers/tool_execution_handler.py` (495 lines) | Extracted tool execution lifecycle: `_process_tool_calls`, `_execute_tool_calls`, `_execute_with_recovery` | **-302 lines** |
 
 **Updated Files:**
 - `vertice_cli/handlers/dispatcher.py` - Registered new handlers and commands
-- `vertice_cli/handlers/__init__.py` - Exported `GitHandler`, `FileOpsHandler`
-- `vertice_cli/shell_main.py` - Removed `_palette_*` methods, delegated to handlers
+- `vertice_cli/handlers/__init__.py` - Exported `GitHandler`, `FileOpsHandler`, `ToolExecutionHandler`
+- `vertice_cli/shell_main.py` - Delegated tool execution to `ToolExecutionHandler`
 
-**Current shell_main.py:** 1,728 lines (target: <300)
+**Current shell_main.py:** 1,426 lines (target: <300) - **Total reduction: -450 lines from 1,876**
 
 **Tests Validated:** 31 passed (test_shell_startup, test_shell_manual, test_shell_scientific)
 

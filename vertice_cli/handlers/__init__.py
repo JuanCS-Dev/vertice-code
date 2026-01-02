@@ -29,6 +29,7 @@ from .index_handler import IndexHandler
 from .refactor_handler import RefactorHandler
 from .git_handler import GitHandler
 from .file_ops_handler import FileOpsHandler
+from .tool_execution_handler import ToolExecutionHandler
 from .input_handler import (
     InputHandler,
     InputType,
@@ -48,6 +49,7 @@ __all__ = [
     'RefactorHandler',
     'GitHandler',
     'FileOpsHandler',
+    'ToolExecutionHandler',
     'InputHandler',
     'InputType',
     'ParsedInput',

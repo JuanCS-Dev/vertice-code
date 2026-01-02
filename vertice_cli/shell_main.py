@@ -309,12 +309,14 @@ class InteractiveShell:
         # Replaces 120-line if/elif chain with Strategy pattern
         self._result_renderer = ResultRenderer(self.console)
 
-        # SCALE & SUSTAIN Phase 1.3: Semantic Handlers (Modularization)
+        # SCALE & SUSTAIN Phase 1.3-1.4: Semantic Handlers (Modularization)
         # Initialize AFTER registry is available (required dependency)
         from .handlers.git_handler import GitHandler
         from .handlers.file_ops_handler import FileOpsHandler
+        from .handlers.tool_execution_handler import ToolExecutionHandler
         self._git_handler = GitHandler(self)
         self._file_ops_handler = FileOpsHandler(self)
+        self._tool_executor = ToolExecutionHandler(self)
 
         # Register palette commands AFTER handlers are initialized
         self._register_palette_commands()
@@ -564,341 +566,37 @@ class InteractiveShell:
         )
         self.console.print(welcome)
 
+    # =========================================================================
+    # TOOL EXECUTION - DELEGATED TO ToolExecutionHandler (Phase 1.4)
+    # =========================================================================
+    # The following methods delegate to self._tool_executor for maintainability.
+    # See: vertice_cli/handlers/tool_execution_handler.py
+
     async def _execute_with_recovery(
-        self,
-        tool,
-        tool_name: str,
-        args: Dict[str, Any],
-        turn
+        self, tool, tool_name: str, args: Dict[str, Any], turn
     ):
-        """Execute tool with error recovery (refactored for SRP)."""
-        max_attempts = self.recovery_engine.max_attempts
-
-        for attempt in range(1, max_attempts + 1):
-            result, success = await self._attempt_tool_execution(
-                tool, tool_name, args, turn, attempt
-            )
-
-            if success:
-                if attempt > 1:
-                    self.console.print(f"[green]✓ Recovered on attempt {attempt}[/green]")
-                return result
-
-            # Try recovery if not last attempt
-            if attempt < max_attempts:
-                corrected_args = await self._handle_execution_failure(
-                    tool_name, args, result, turn, attempt, max_attempts
-                )
-                if corrected_args:
-                    args = corrected_args
-            else:
-                self.console.print(f"[red]✗ {tool_name} failed after {max_attempts} attempts[/red]")
-                return None
-
-        return None
-
-    async def _attempt_tool_execution(
-        self, tool, tool_name: str, args: Dict[str, Any], turn, attempt: int
-    ):
-        """Execute single tool attempt and track result."""
-        try:
-            result = await tool.execute(**args)
-
-            # Track tool call
-            self.context.track_tool_call(tool_name, args, result)
-
-            # Track in conversation
-            self.conversation.add_tool_result(
-                turn, tool_name, args, result,
-                success=result.success,
-                error=None if result.success else str(result.data)
-            )
-
-            return result, result.success
-
-        except Exception as e:
-            logger.error(f"Tool {tool_name} raised exception: {e}")
-
-            # Track exception
-            self.conversation.add_tool_result(
-                turn, tool_name, args, None,
-                success=False,
-                error=str(e)
-            )
-
-            # Create error result
-            from dataclasses import dataclass
-            @dataclass
-            class ErrorResult:
-                success: bool = False
-                data: str = str(e)
-
-            return ErrorResult(), False
-
-    async def _handle_execution_failure(
-        self, tool_name: str, args: Dict[str, Any], result, turn,
-        attempt: int, max_attempts: int
-    ):
-        """Handle tool execution failure and attempt recovery."""
-        error_msg = str(result.data) if result else "Unknown error"
-
-        self.console.print(
-            f"[yellow]Attempting recovery for {tool_name} (attempt {attempt}/{max_attempts})[/yellow]"
+        """Execute tool with error recovery. Delegated to ToolExecutionHandler."""
+        return await self._tool_executor.execute_with_recovery(
+            tool, tool_name, args, turn
         )
 
-        try:
-            # Build recovery context
-            recovery_ctx = create_recovery_context(
-                error=error_msg,
-                tool_name=tool_name,
-                args=args,
-                category=ErrorCategory.PARAMETER_ERROR
-            )
-
-            # Get diagnosis from LLM
-            diagnosis = await self.recovery_engine.diagnose_error(
-                recovery_ctx, self.conversation.get_recent_context(max_turns=3)
-            )
-
-            if diagnosis:
-                self.console.print(f"[dim]Diagnosis: {diagnosis}[/dim]")
-
-            # Attempt parameter correction
-            corrected = await self.recovery_engine.attempt_recovery(
-                recovery_ctx, self.registry
-            )
-
-            if corrected and 'args' in corrected:
-                self.console.print("[green]✓ Generated corrected parameters[/green]")
-                return corrected['args']
-            else:
-                self.console.print("[yellow]No correction found[/yellow]")
-                return None
-
-        except Exception as e:
-            logger.error(f"Recovery failed: {e}")
-            self.console.print(f"[red]Recovery error: {e}[/red]")
-            return None
-
     async def _process_tool_calls(self, user_input: str) -> str:
-        """Process user input and execute tools via LLM with conversation context (Phase 2.3)."""
-        # Phase 2.3: Start new conversation turn
-        turn = self.conversation.start_turn(user_input)
+        """
+        Process user input and execute tools via LLM.
 
-        try:
-            # Import professional prompts (Phase 1.1 complete!)
-
-            # Build prompt for LLM
-            tool_schemas = self.registry.get_schemas()
-
-            # Group tools by category for better understanding
-            tool_list = []
-            for schema in tool_schemas:
-                tool_list.append(f"- {schema['name']}: {schema['description']}")
-
-            system_prompt = f"""You are an AI code assistant with access to tools for file operations, git, search, and execution.
-
-Available tools ({len(tool_schemas)} total):
-{chr(10).join(tool_list)}
-
-Current context:
-- Working directory: {self.context.cwd}
-- Modified files: {list(self.context.modified_files) if self.context.modified_files else 'none'}
-- Read files: {list(self.context.read_files) if self.context.read_files else 'none'}
-- Conversation turns: {len(self.conversation.turns)}
-- Context usage: {self.conversation.context_window.get_usage_percentage():.0%}
-
-INSTRUCTIONS:
-1. Analyze the user's request (consider conversation history)
-2. If it requires tools, respond ONLY with a JSON array of tool calls
-3. If no tools needed, respond with helpful text
-
-Tool call format:
-[
-  {{"tool": "tool_name", "args": {{"param": "value"}}}}
-]
-
-Examples:
-User: "read api.py"
-Response: [{{"tool": "readfile", "args": {{"path": "api.py"}}}}]
-
-User: "show git status"
-Response: [{{"tool": "gitstatus", "args": {{}}}}]
-
-User: "search for TODO in python files"
-Response: [{{"tool": "searchfiles", "args": {{"pattern": "TODO", "file_pattern": "*.py"}}}}]
-
-User: "what time is it?"
-Response: I don't have a tool to check the current time, but I can help you with code-related tasks."""
-
-            # Phase 2.3: Include conversation context (Layer 3: Tool result feedback loop)
-            messages = [
-                {"role": "system", "content": system_prompt}
-            ]
-
-            # Add conversation history (last 3 turns for context)
-            context_messages = self.conversation.get_context_for_llm(include_last_n=3)
-            messages.extend(context_messages)
-
-            # Add current user input
-            messages.append({"role": "user", "content": user_input})
-
-            # Get LLM response
-            response = await self.llm.generate_async(
-                messages=messages,
-                temperature=0.1,
-                max_tokens=2000
-            )
-
-            # Parse response
-            response_text = response.get("content", "")
-            tokens_used = response.get("tokens_used", len(response_text) // 4)
-
-            # Phase 2.3: Add LLM response to turn
-            self.conversation.add_llm_response(turn, response_text, tokens_used=tokens_used)
-
-            # Try to parse as tool calls
-            try:
-                # Look for JSON array in response
-                if '[' in response_text and ']' in response_text:
-                    start = response_text.index('[')
-                    end = response_text.rindex(']') + 1
-                    json_str = response_text[start:end]
-                    tool_calls = json.loads(json_str)
-
-                    if isinstance(tool_calls, list) and tool_calls:
-                        # Phase 2.3: Add tool calls to turn
-                        self.conversation.add_tool_calls(turn, tool_calls)
-                        return await self._execute_tool_calls(tool_calls, turn)
-            except (json.JSONDecodeError, ValueError) as e:
-                logger.debug(f"Response is not tool calls JSON: {e}")
-
-            # If not tool calls, return as regular response
-            # Phase 2.3: Transition to IDLE (no tools to execute)
-            self.conversation.transition_state(ConversationState.IDLE, "text_response_only")
-            return response_text
-
-        except Exception as e:
-            # Phase 2.3: Mark error in turn
-            turn.error = str(e)
-            turn.error_category = "system"
-            self.conversation.transition_state(ConversationState.ERROR, f"exception: {type(e).__name__}")
-            return f"Error: {str(e)}"
+        SCALE & SUSTAIN Phase 1.4: Delegated to ToolExecutionHandler.
+        See: vertice_cli/handlers/tool_execution_handler.py
+        """
+        return await self._tool_executor.process_tool_calls(user_input)
 
     async def _execute_tool_calls(self, tool_calls: list[Dict[str, Any]], turn) -> str:
-        """Execute a sequence of tool calls with conversation tracking (Phase 2.3)."""
-        results = []
+        """
+        Execute a sequence of tool calls with conversation tracking.
 
-        # Week 2 Integration: Initialize workflow for tool execution
-        if len(tool_calls) > 1:
-            self.workflow_viz.start_workflow(f"Execute {len(tool_calls)} tools")
-
-        for i, call in enumerate(tool_calls):
-            tool_name = call.get("tool", "")
-            args = call.get("args", {})
-
-            # Week 2 Integration: Add workflow step for this tool
-            step_id = f"tool_{tool_name}_{i}"
-            dependencies = [f"tool_{tool_calls[i-1].get('tool', '')}_{i-1}"] if i > 0 else []
-            self.workflow_viz.add_step(
-                step_id,
-                f"Execute {tool_name}",
-                StepStatus.PENDING,
-                dependencies=dependencies
-            )
-
-            tool = self.registry.get(tool_name)
-            if not tool:
-                error_msg = f"Unknown tool: {tool_name}"
-                results.append(f"❌ {error_msg}")
-
-                # Week 2 Integration: Mark step as failed
-                self.workflow_viz.update_step_status(step_id, StepStatus.FAILED)
-
-                # Phase 2.3: Track tool failure
-                self.conversation.add_tool_result(
-                    turn, tool_name, args, None,
-                    success=False, error=error_msg
-                )
-                continue
-
-            # Week 2 Integration: Start executing step
-            self.workflow_viz.update_step_status(step_id, StepStatus.RUNNING)
-
-            # Week 2 Day 2: Add operation to dashboard
-            op_id = f"{tool_name}_{i}_{int(time.time() * 1000)}"
-            operation = Operation(
-                id=op_id,
-                type=tool_name,
-                description=f"{tool_name}({', '.join(f'{k}={v}' for k, v in list(args.items())[:2])})",
-                status=OperationStatus.RUNNING
-            )
-            self.dashboard.add_operation(operation)
-
-            # TUI: Show status badge for operation
-            args_str = ', '.join(f'{k}={v}' for k, v in args.items() if len(str(v)) < 50)
-            status = StatusBadge(f"{tool_name}({args_str})", StatusLevel.PROCESSING, show_icon=True)
-            self.console.print(status.render())
-
-            # Add session context for tools that need it
-            if tool_name in ['getcontext', 'savesession']:
-                args['session_context'] = self.context
-
-            # Week 2 Integration: Pass console and preview settings to file tools
-            if tool_name in ['write_file', 'edit_file']:
-                args['console'] = self.console
-                args['preview'] = getattr(self.context, 'preview_enabled', True)
-
-            # Week 3 Day 1: Pass indexer to search_files for semantic search
-            if tool_name == 'search_files' and self._indexer_initialized:
-                args['semantic'] = args.get('semantic', True)  # Enable semantic by default
-                args['indexer'] = self.indexer
-
-            # Execute tool with Phase 3.1: Error recovery loop
-            result = await self._execute_with_recovery(
-                tool, tool_name, args, turn
-            )
-
-            if not result:
-                # Recovery failed completely
-                results.append(f"❌ {tool_name} failed after recovery attempts")
-                # Week 2 Integration: Mark as failed
-                self.workflow_viz.update_step_status(step_id, StepStatus.FAILED)
-                # Week 2 Day 2: Update dashboard
-                self.dashboard.complete_operation(op_id, OperationStatus.ERROR)
-                continue
-
-            # Week 2 Integration: Mark step completion based on result
-            if result.success:
-                self.workflow_viz.update_step_status(step_id, StepStatus.COMPLETED)
-                # Week 2 Day 2: Update dashboard with success
-                self.dashboard.complete_operation(
-                    op_id,
-                    OperationStatus.SUCCESS,
-                    tokens_used=result.metadata.get('tokens', 0),
-                    cost=result.metadata.get('cost', 0.0)
-                )
-            else:
-                self.workflow_viz.update_step_status(step_id, StepStatus.FAILED)
-                # Week 2 Day 2: Update dashboard with error
-                self.dashboard.complete_operation(op_id, OperationStatus.ERROR)
-
-            # SCALE & SUSTAIN Phase 2: Delegated to ResultRenderer (Strategy pattern)
-            # Before: 125 lines of if/elif chain (CC=25+)
-            # After: Single delegation (CC=1)
-            summary = self._result_renderer.render(tool_name, result, args)
-            results.append(summary)
-
-        # Week 2 Integration: Complete workflow and show visualization
-        if len(tool_calls) > 1:
-            self.workflow_viz.complete_workflow()
-            # Show workflow visualization if any step failed
-            if any(step.status == StepStatus.FAILED for step in self.workflow_viz.current_workflow.steps):
-                viz = self.workflow_viz.render_workflow()
-                self.console.print("\n")
-                self.console.print(viz)
-
-        return "\n".join(results)
+        SCALE & SUSTAIN Phase 1.4: Delegated to ToolExecutionHandler.
+        See: vertice_cli/handlers/tool_execution_handler.py
+        """
+        return await self._tool_executor.execute_tool_calls(tool_calls, turn)
 
     async def _handle_system_command(self, cmd: str) -> tuple[bool, Optional[str]]:
         """
