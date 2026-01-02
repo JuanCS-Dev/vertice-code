@@ -76,6 +76,11 @@ class ImageReadTool(Tool):
                 "type": "number",
                 "description": "Maximum file size in MB to process (default: 10)",
                 "required": False
+            },
+            "return_content_block": {
+                "type": "boolean",
+                "description": "Return Anthropic-style content_block for multimodal LLM input (default: False)",
+                "required": False
             }
         }
 
@@ -84,6 +89,7 @@ class ImageReadTool(Tool):
         file_path = kwargs.get("file_path", "")
         include_base64 = kwargs.get("include_base64", False)
         max_size_mb = kwargs.get("max_size_mb", 10)
+        return_content_block = kwargs.get("return_content_block", False)
 
         if not file_path:
             return ToolResult(success=False, error="file_path is required")
@@ -137,20 +143,34 @@ class ImageReadTool(Tool):
                 base64_data=base64_data
             )
 
+            # Build result data
+            result_data = {
+                "path": image_info.path,
+                "format": image_info.format,
+                "dimensions": f"{width}x{height}",
+                "width": width,
+                "height": height,
+                "size_bytes": size_bytes,
+                "size_human": self._human_size(size_bytes),
+                "mime_type": mime_type,
+                "base64": base64_data[:100] + "..." if base64_data else None,
+                "base64_full": base64_data if include_base64 else None,
+            }
+
+            # Add Anthropic-style content_block for multimodal LLM input
+            if return_content_block and base64_data:
+                result_data["content_block"] = {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": mime_type,
+                        "data": base64_data
+                    }
+                }
+
             return ToolResult(
                 success=True,
-                data={
-                    "path": image_info.path,
-                    "format": image_info.format,
-                    "dimensions": f"{width}x{height}",
-                    "width": width,
-                    "height": height,
-                    "size_bytes": size_bytes,
-                    "size_human": self._human_size(size_bytes),
-                    "mime_type": mime_type,
-                    "base64": base64_data[:100] + "..." if base64_data else None,
-                    "base64_full": base64_data if include_base64 else None,
-                },
+                data=result_data,
                 metadata={
                     "format": image_info.format,
                     "has_base64": base64_data is not None

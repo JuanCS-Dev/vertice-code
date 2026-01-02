@@ -94,16 +94,18 @@ class ToolExecutionHandler:
         turn = self.conversation.start_turn(user_input)
 
         try:
-            # Build prompt and get LLM response
-            response_text, tokens_used = await self._get_llm_tool_response(
-                user_input, turn
-            )
+            # Build prompt and get LLM response (may include native tool_calls)
+            response = await self._get_llm_tool_response(user_input, turn)
+
+            # Extract text content for conversation tracking
+            response_text = response.get("content", "") if isinstance(response, dict) else str(response)
+            tokens_used = response.get("tokens_used", len(response_text) // 4) if isinstance(response, dict) else len(response_text) // 4
 
             # Add LLM response to turn
             self.conversation.add_llm_response(turn, response_text, tokens_used=tokens_used)
 
-            # Try to parse as tool calls
-            tool_calls = self._parse_tool_calls(response_text)
+            # Try to parse as tool calls (handles both native and text-based)
+            tool_calls = self._parse_tool_calls(response)
 
             if tool_calls:
                 # Add tool calls to turn and execute
@@ -377,25 +379,20 @@ class ToolExecutionHandler:
 
     async def _get_llm_tool_response(
         self, user_input: str, turn
-    ) -> tuple[str, int]:
+    ) -> Dict[str, Any]:
         """
         Get LLM response for tool call processing.
 
+        Uses native function calling when available (Vertex AI, Gemini).
+        Falls back to prompt-based tool calling for other providers.
+
         Returns:
-            Tuple of (response_text, tokens_used).
+            Dict with 'content', 'tokens_used', and optionally 'tool_calls'.
         """
         tool_schemas = self.registry.get_schemas()
 
-        # Build tool list for prompt
-        tool_list = [
-            f"- {schema['name']}: {schema['description']}"
-            for schema in tool_schemas
-        ]
-
+        # Build system prompt (simplified when using native function calling)
         system_prompt = f"""You are an AI code assistant with access to tools for file operations, git, search, and execution.
-
-Available tools ({len(tool_schemas)} total):
-{chr(10).join(tool_list)}
 
 Current context:
 - Working directory: {self.context.cwd}
@@ -405,27 +402,9 @@ Current context:
 - Context usage: {self.conversation.context_window.get_usage_percentage():.0%}
 
 INSTRUCTIONS:
-1. Analyze the user's request (consider conversation history)
-2. If it requires tools, respond ONLY with a JSON array of tool calls
-3. If no tools needed, respond with helpful text
-
-Tool call format:
-[
-  {{"tool": "tool_name", "args": {{"param": "value"}}}}
-]
-
-Examples:
-User: "read api.py"
-Response: [{{"tool": "readfile", "args": {{"path": "api.py"}}}}]
-
-User: "show git status"
-Response: [{{"tool": "gitstatus", "args": {{}}}}]
-
-User: "search for TODO in python files"
-Response: [{{"tool": "searchfiles", "args": {{"pattern": "TODO", "file_pattern": "*.py"}}}}]
-
-User: "what time is it?"
-Response: I don't have a tool to check the current time, but I can help you with code-related tasks."""
+1. Analyze the user's request carefully
+2. Use the available tools when needed to complete tasks
+3. For code-related requests, prefer using tools over generating code directly"""
 
         # Build messages with conversation context
         messages = [{"role": "system", "content": system_prompt}]
@@ -437,21 +416,90 @@ Response: I don't have a tool to check the current time, but I can help you with
         # Add current user input
         messages.append({"role": "user", "content": user_input})
 
-        # Get LLM response
+        # Try native function calling first (Vertex AI, Gemini)
+        try:
+            response = await self.llm.generate_async(
+                messages=messages,
+                tools=tool_schemas,  # Native function calling
+                tool_config="AUTO",
+                temperature=0.1,
+                max_tokens=2000
+            )
+
+            # If native tool_calls were returned, use them
+            if isinstance(response, dict) and response.get("tool_calls"):
+                logger.debug(f"Native function calling returned {len(response['tool_calls'])} tool calls")
+                return response
+
+        except Exception as e:
+            logger.debug(f"Native function calling not available: {e}")
+
+        # Fallback to prompt-based tool calling
+        tool_list = [
+            f"- {schema['name']}: {schema['description']}"
+            for schema in tool_schemas
+        ]
+
+        fallback_system_prompt = f"""{system_prompt}
+
+Available tools ({len(tool_schemas)} total):
+{chr(10).join(tool_list)}
+
+If you need to use tools, respond ONLY with a JSON array of tool calls:
+[{{"tool": "tool_name", "args": {{"param": "value"}}}}]
+
+If no tools needed, respond with helpful text."""
+
+        messages[0] = {"role": "system", "content": fallback_system_prompt}
+
         response = await self.llm.generate_async(
             messages=messages,
             temperature=0.1,
             max_tokens=2000
         )
 
-        response_text = response.get("content", "")
-        tokens_used = response.get("tokens_used", len(response_text) // 4)
+        return response
 
-        return response_text, tokens_used
-
-    def _parse_tool_calls(self, response_text: str) -> Optional[List[Dict[str, Any]]]:
+    def _parse_tool_calls(
+        self, response: Any
+    ) -> Optional[List[Dict[str, Any]]]:
         """
         Parse tool calls from LLM response.
+
+        Supports both:
+        - Native function calling (dict with 'tool_calls' key)
+        - Legacy text parsing (JSON array in text)
+
+        Args:
+            response: Either a dict (native) or string (legacy)
+
+        Returns:
+            List of tool call dicts or None if parsing fails.
+        """
+        # Native function calling response (from generate_async)
+        if isinstance(response, dict):
+            if "tool_calls" in response:
+                # Convert from native format to internal format
+                return [
+                    {"tool": call.get("name"), "args": call.get("arguments", call.get("args", {}))}
+                    for call in response["tool_calls"]
+                ]
+            # Also check content for text-based response
+            response_text = response.get("content", "")
+        else:
+            response_text = str(response)
+
+        # Legacy text parsing fallback
+        return self._parse_tool_calls_from_text(response_text)
+
+    def _parse_tool_calls_from_text(
+        self, response_text: str
+    ) -> Optional[List[Dict[str, Any]]]:
+        """
+        Parse tool calls from text response (legacy fallback).
+
+        Args:
+            response_text: Text potentially containing JSON tool calls
 
         Returns:
             List of tool call dicts or None if parsing fails.

@@ -340,6 +340,92 @@ class LLMClient:
             chunks.append(chunk)
         return "".join(chunks)
 
+    async def generate_async(
+        self,
+        messages: List[Dict[str, str]],
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+        tools: Optional[List[Dict[str, Any]]] = None,
+        tool_config: Optional[str] = "AUTO",
+        **kwargs: Any,
+    ) -> Dict[str, Any]:
+        """Generate response with native function calling support.
+
+        Args:
+            messages: Conversation messages [{role, content}, ...]
+            temperature: Sampling temperature
+            max_tokens: Max output tokens
+            tools: Tool schemas for native function calling
+            tool_config: Function calling mode (AUTO, ANY, NONE)
+            **kwargs: Additional provider-specific args
+
+        Returns:
+            Dict with 'content', 'tokens_used', and optionally 'tool_calls'
+        """
+        max_tokens = max_tokens or config.max_tokens
+        temperature = temperature or config.temperature
+        start_time = time.time()
+
+        chunks: List[str] = []
+        tool_calls: List[Dict[str, Any]] = []
+
+        # Use VerticeClient if available
+        if self._vertice_client:
+            try:
+                async for chunk in self._vertice_client.stream_chat(
+                    messages,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    tools=tools,
+                    tool_config=tool_config,
+                    **kwargs,
+                ):
+                    # Check if chunk is a tool call JSON
+                    if chunk.startswith('{"tool_call"'):
+                        try:
+                            import json
+                            call_data = json.loads(chunk)
+                            if "tool_call" in call_data:
+                                tool_calls.append(call_data["tool_call"])
+                        except json.JSONDecodeError:
+                            chunks.append(chunk)
+                    else:
+                        chunks.append(chunk)
+
+                content = "".join(chunks)
+                tokens_used = len(content) // 4
+
+                # Record success
+                if self.metrics:
+                    provider_name = self._vertice_client.current_provider or "unknown"
+                    latency = time.time() - start_time
+                    self.metrics.record_request(provider_name, True, latency, tokens_used)
+
+                result: Dict[str, Any] = {
+                    "content": content,
+                    "tokens_used": tokens_used,
+                }
+                if tool_calls:
+                    result["tool_calls"] = tool_calls
+
+                return result
+
+            except Exception as e:
+                logger.warning(f"VerticeClient failed: {e}")
+                if self.metrics:
+                    latency = time.time() - start_time
+                    self.metrics.record_request("vertice", False, latency)
+
+        # Legacy fallback (no native function calling)
+        async for chunk in self._stream_legacy(messages, max_tokens, temperature):
+            chunks.append(chunk)
+
+        content = "".join(chunks)
+        return {
+            "content": content,
+            "tokens_used": len(content) // 4,
+        }
+
 
 # Singleton instance
 _default_client: Optional[LLMClient] = None
