@@ -90,6 +90,22 @@ class AgentManagerProtocol(Protocol):
         ...
 
 
+class PlanApprovalCallback(Protocol):
+    """Protocol for plan approval callback."""
+
+    async def request_approval(self, plan_display: str) -> str:
+        """
+        Request user approval for a plan.
+
+        Args:
+            plan_display: Formatted plan to display
+
+        Returns:
+            User response: 'y', 'n', 'e' (yes/no/edit), or custom input
+        """
+        ...
+
+
 @dataclass
 class ChatConfig:
     """Configuration for chat behavior."""
@@ -100,6 +116,11 @@ class ChatConfig:
     show_parallel_stats: bool = True
     show_governance_alerts: bool = True
     auto_route_enabled: bool = True
+
+    # Plan Gating (Sprint 2.1)
+    plan_gating_enabled: bool = False
+    plan_gating_threshold: int = 2  # Show plan if >= N tasks
+    plan_gating_callback: Optional[PlanApprovalCallback] = None
 
 
 @dataclass

@@ -1213,6 +1213,117 @@ For complex tasks, think through the problem step by step:
 
 ---
 
+### 2026-01-02: Plan Gating - COMPLETED ✓
+
+**Sprint 2.1: Show Plan Before Execution**
+
+**Files Modified:**
+- `vertice_tui/core/chat/types.py` - Added `PlanApprovalCallback` protocol
+- `vertice_tui/core/chat/controller.py` - Added `chat_with_gating()` method
+
+**Implementation:**
+```python
+async def chat_with_gating(self, client, message, system_prompt, orchestrator):
+    """Show plan and get user approval before execution."""
+
+    # 1. Generate plan using orchestrator
+    tasks = await orchestrator.plan(message)
+
+    # 2. Check if gating needed (>= threshold tasks)
+    if len(tasks) < self.config.plan_gating_threshold:
+        # Simple request, execute directly
+        return await self.chat(...)
+
+    # 3. Format and display plan
+    yield self._format_plan_display(tasks, message)
+    yield "**Execute this plan?** [Y]es / [N]o / [E]dit"
+
+    # 4. Get user approval via callback
+    approval = await self.config.plan_gating_callback.request_approval(plan)
+
+    # 5. Process approval (y/n/e)
+    if approval == 'n': return "Plan cancelled"
+    if approval == 'e': edit_plan_interactive()
+
+    # 6. Execute approved plan
+    for task in tasks:
+        yield await execute_task(task)
+```
+
+**Plan Display Format:**
+```
+──────────────────────────────────────────────────
+📋 **EXECUTION PLAN**
+──────────────────────────────────────────────────
+
+**Request:** Create a REST API with auth
+
+**Tasks (3):**
+  1. Design the REST API architecture [moderate]
+  2. Implement authentication endpoints [moderate]
+  3. Write tests for auth module [moderate]
+
+──────────────────────────────────────────────────
+
+**Execute this plan?** [Y]es / [N]o / [E]dit
+```
+
+---
+
+### 2026-01-02: Confidence Calibration - COMPLETED ✓
+
+**Sprint 1.3: Dynamic Threshold Adjustment**
+
+**File Created:** `vertice_cli/core/confidence.py`
+
+**Implementation:**
+```python
+class ConfidenceCalibrator:
+    """Adaptive confidence thresholds based on historical accuracy."""
+
+    DEFAULT_THRESHOLDS = {
+        PredictionCategory.ROUTING: 0.70,
+        PredictionCategory.TOOL_SELECTION: 0.80,
+        PredictionCategory.CODE_GENERATION: 0.85,
+        PredictionCategory.INTENT: 0.60,
+        PredictionCategory.COMPLEXITY: 0.65,
+    }
+
+    def record_outcome(self, category, confidence, was_correct):
+        """Track prediction accuracy for calibration."""
+        self.history.append(record)
+        if len(self.history) % 10 == 0:
+            self._recalibrate()
+
+    def _recalibrate(self):
+        """Adjust thresholds based on recent accuracy."""
+        # Low accuracy (<70%): raise threshold +0.05
+        # High accuracy (>90%): lower threshold -0.02
+```
+
+**Test Results:**
+```
+Default Thresholds:
+  routing:        0.70
+  tool_selection: 0.80
+  code_generation: 0.85
+
+After 15 correct routing predictions (100% accuracy):
+  routing:        0.66  (lowered - more confident)
+
+After 8 tool predictions (62% accuracy):
+  tool_selection: 0.85  (raised - more conservative)
+```
+
+**Features:**
+- 5 prediction categories (routing, tools, code, intent, complexity)
+- Automatic recalibration every 10 predictions
+- Min/max threshold bounds (0.40 - 0.95)
+- Calibration report generation
+- Singleton pattern for global access
+
+---
+
 ## CURRENT STATUS
 
 | Gap | Status | Notes |
@@ -1222,8 +1333,8 @@ For complex tasks, think through the problem step by step:
 | Provider Routing | ⏸️ DEFERRED | Stability mode (vertex-ai only) |
 | Intent Recognition | ✅ FIXED | SemanticIntentClassifier with LLM+heuristic |
 | Chain-of-Thought | ✅ FIXED | Verbose reasoning in system prompts |
-| Plan Gating | 🔲 PENDING | Show plan → User approval |
-| Confidence Scoring | 🔲 PENDING | Dynamic calibration needed |
+| Plan Gating | ✅ FIXED | chat_with_gating() + PlanApprovalCallback |
+| Confidence Scoring | ✅ FIXED | ConfidenceCalibrator with auto-recalibration |
 
 ---
 

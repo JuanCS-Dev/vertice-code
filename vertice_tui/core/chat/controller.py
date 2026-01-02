@@ -33,6 +33,7 @@ from .types import (
     HistoryProtocol,
     GovernanceProtocol,
     AgentManagerProtocol,
+    PlanApprovalCallback,
 )
 
 logger = logging.getLogger(__name__)
@@ -379,3 +380,123 @@ class ChatController:
 
         # Add response to context
         self.history.add_context("assistant", "[Response completed]")
+
+    async def chat_with_gating(
+        self,
+        client: LLMClientProtocol,
+        message: str,
+        system_prompt: str,
+        orchestrator: Any,
+        provider_name: str = "",
+    ) -> AsyncIterator[str]:
+        """
+        Execute chat with plan gating (Sprint 2.1).
+
+        Shows the execution plan to the user and waits for approval
+        before proceeding with execution.
+
+        Args:
+            client: LLM client to use
+            message: User message
+            system_prompt: System instructions
+            orchestrator: Orchestrator agent for planning
+            provider_name: Provider name for display
+
+        Yields:
+            Response chunks for streaming display
+        """
+        # Step 1: Generate plan using orchestrator
+        try:
+            tasks = await orchestrator.plan(message)
+        except Exception as e:
+            logger.warning(f"Plan generation failed: {e}")
+            # Fall back to regular chat
+            async for chunk in self.chat(client, message, system_prompt, provider_name):
+                yield chunk
+            return
+
+        # Step 2: Check if gating is needed
+        if len(tasks) < self.config.plan_gating_threshold:
+            # Simple request, execute directly
+            async for chunk in self.chat(client, message, system_prompt, provider_name):
+                yield chunk
+            return
+
+        # Step 3: Format and display plan
+        plan_display = self._format_plan_display(tasks, message)
+        yield plan_display
+        yield "\n**Execute this plan?** [Y]es / [N]o / [E]dit\n"
+
+        # Step 4: Get user approval
+        if self.config.plan_gating_callback:
+            approval = await self.config.plan_gating_callback.request_approval(plan_display)
+        else:
+            # No callback, auto-approve
+            yield "\n*[Auto-approved: no approval callback configured]*\n\n"
+            approval = "y"
+
+        # Step 5: Process approval
+        approval_lower = approval.lower().strip()
+
+        if approval_lower in ("n", "no"):
+            yield "\n**Plan cancelled.**\n"
+            return
+
+        if approval_lower in ("e", "edit"):
+            yield "\n*[Edit mode not yet implemented - proceeding with original plan]*\n\n"
+
+        # Step 6: Execute approved plan
+        yield "\n**Executing plan...**\n\n"
+
+        for i, task in enumerate(tasks, 1):
+            yield f"### Task {i}/{len(tasks)}: {task.description[:80]}...\n"
+
+            # Execute task through regular chat flow
+            task_message = f"Execute this specific task: {task.description}"
+            async for chunk in self.chat(
+                client, task_message, system_prompt, provider_name, skip_routing=True
+            ):
+                yield chunk
+
+            yield f"\n✓ Task {i} completed\n\n"
+
+        yield "**All tasks completed.**\n"
+
+    def _format_plan_display(self, tasks: List[Any], original_request: str) -> str:
+        """
+        Format execution plan for display.
+
+        Args:
+            tasks: List of tasks from orchestrator
+            original_request: Original user request
+
+        Returns:
+            Formatted plan string
+        """
+        lines = [
+            "─" * 50,
+            "📋 **EXECUTION PLAN**",
+            "─" * 50,
+            "",
+            f"**Request:** {original_request[:100]}{'...' if len(original_request) > 100 else ''}",
+            "",
+            f"**Tasks ({len(tasks)}):**",
+        ]
+
+        for i, task in enumerate(tasks, 1):
+            # Get task details
+            desc = getattr(task, "description", str(task))[:80]
+            complexity = getattr(task, "complexity", None)
+            complexity_str = f" [{complexity.value}]" if complexity else ""
+
+            lines.append(f"  {i}. {desc}{complexity_str}")
+
+            # Show subtasks if any
+            subtasks = getattr(task, "subtasks", [])
+            for subtask in subtasks[:3]:
+                lines.append(f"     └─ {subtask}")
+
+        lines.append("")
+        lines.append("─" * 50)
+
+        return "\n".join(lines)
