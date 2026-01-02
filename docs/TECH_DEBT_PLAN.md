@@ -242,47 +242,49 @@ vertice_core/types/circuit.py                  # DeprecationWarning added
 
 ---
 
-### 2.2 Unify Exception Hierarchy
+### 2.2 Unify Exception Hierarchy ✅ COMPLETE
 
-**Current:** 4 scattered exception definitions
+**Status:** Completed 2026-01-02
 
-**Target:**
-```python
-# vertice_core/exceptions.py
-class VerticeError(Exception):
-    """Base exception for all Vertice errors."""
+**Analysis:**
+- 4 exception hierarchies identified across codebase
+- `vertice_cli/core/exceptions.py` already had comprehensive hierarchy (610 lines)
+- Multiple base classes: `QwenError`, `QwenCoreError`, `ResilienceError`, `VerticeClientError`
 
-class ValidationError(VerticeError):
-    """Invalid input or configuration."""
+**Approach:** Conservative consolidation via unified re-export module
 
-class NetworkError(VerticeError):
-    """Network communication failure."""
+**Created:** `vertice_core/exceptions.py`
+- Unified re-export point for all exception hierarchies
+- Brand consistency: `QwenError` aliased as `VerticeError`
+- Prefixed names to avoid shadowing builtins (e.g., `VerticeSyntaxError`)
+- Separate namespaces for different RateLimitError types
 
-class TimeoutError(VerticeError):
-    """Operation timed out."""
-
-class RateLimitError(NetworkError):
-    """API rate limit exceeded."""
-
-class CircuitOpenError(VerticeError):
-    """Circuit breaker is open."""
-
-class ToolError(VerticeError):
-    """Tool execution failure."""
-
-class AgentError(VerticeError):
-    """Agent execution failure."""
+**Exception Sources Consolidated:**
+```
+vertice_cli/core/exceptions.py    # CLI hierarchy (QwenError base, ~20 types)
+core/resilience/types.py          # Resilience hierarchy (ResilienceError base, 5 types)
+vertice_core/types/exceptions.py  # Domain hierarchy (QwenCoreError base, 4 types)
+vertice_core/clients/             # Client hierarchy (VerticeClientError base, 3 types)
 ```
 
-**Atomic Steps:**
+**Unified Import Point:**
+```python
+from vertice_core.exceptions import (
+    VerticeError,       # Base (alias for QwenError)
+    ValidationError,    # Input validation
+    NetworkError,       # Network failures
+    ToolError,          # Tool execution
+    AgentError,         # Agent failures (alias for QwenCoreError)
+    ResilienceError,    # Circuit breaker/retry
+    CircuitOpenError,   # Circuit breaker open
+)
+```
 
-1. Create `vertice_core/exceptions.py`
-2. Define canonical exception tree
-3. Update `vertice_cli/core/errors/__init__.py` to re-export
-4. Update `vertice_tui/core/errors/__init__.py` to re-export
-5. Grep and replace exception imports
-6. Run all tests
-7. Remove old exception files
+**Validation:**
+- [x] Single import point: `vertice_core.exceptions`
+- [x] All existing hierarchies preserved for backward compatibility
+- [x] Brand consistency with `VerticeError` alias
+- [x] Tests pass
 
 ---
 
