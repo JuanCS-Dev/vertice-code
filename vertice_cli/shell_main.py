@@ -309,19 +309,23 @@ class InteractiveShell:
         # Replaces 120-line if/elif chain with Strategy pattern
         self._result_renderer = ResultRenderer(self.console)
 
-        # SCALE & SUSTAIN Phase 1.3-1.5: Semantic Handlers (Modularization)
+        # SCALE & SUSTAIN Phase 1.3-1.7: Semantic Handlers (Modularization)
         # Initialize AFTER registry is available (required dependency)
         from .handlers.git_handler import GitHandler
         from .handlers.file_ops_handler import FileOpsHandler
         from .handlers.tool_execution_handler import ToolExecutionHandler
         from .handlers.llm_processing_handler import LLMProcessingHandler
+        from .handlers.palette_handler import PaletteHandler
+        from .handlers.ui_handler import UIHandler
         self._git_handler = GitHandler(self)
         self._file_ops_handler = FileOpsHandler(self)
         self._tool_executor = ToolExecutionHandler(self)
         self._llm_processor = LLMProcessingHandler(self)
+        self._palette_handler = PaletteHandler(self)
+        self._ui_handler = UIHandler(self)
 
         # Register palette commands AFTER handlers are initialized
-        self._register_palette_commands()
+        self._palette_handler.register_palette_commands()
 
         # Note: Semantic indexer moved earlier (before ContextSuggestionEngine)
 
@@ -430,143 +434,14 @@ class InteractiveShell:
 
         self.console.print(f"[dim]Loaded {len(tools)} tools[/dim]")
 
-    def _register_palette_commands(self):
-        """
-        Register commands in command palette (Ctrl+K).
-
-        SCALE & SUSTAIN Phase 1.3: Delegates to modular handlers for
-        maintainability and semantic clarity.
-        """
-        # File operations - delegated to FileOpsHandler
-        self.palette.add_command(Command(
-            id="file.read",
-            title="Read File",
-            description="Read and display file contents",
-            category=CommandCategory.FILE,
-            keywords=["open", "cat", "view", "show"],
-            keybinding=None,
-            action=lambda: self._file_ops_handler.palette_read_file()
-        ))
-
-        self.palette.add_command(Command(
-            id="file.write",
-            title="Write File",
-            description="Create or overwrite a file",
-            category=CommandCategory.FILE,
-            keywords=["create", "save", "new"],
-            action=lambda: self._file_ops_handler.palette_write_file()
-        ))
-
-        self.palette.add_command(Command(
-            id="file.edit",
-            title="Edit File",
-            description="Edit file with AI assistance",
-            category=CommandCategory.EDIT,
-            keywords=["modify", "change", "update", "fix"],
-            action=lambda: self._file_ops_handler.palette_edit_file()
-        ))
-
-        # Git operations - delegated to GitHandler
-        self.palette.add_command(Command(
-            id="git.status",
-            title="Git Status",
-            description="Show git repository status",
-            category=CommandCategory.GIT,
-            keywords=["git", "status", "changes", "diff"],
-            action=lambda: self._git_handler.palette_status()
-        ))
-
-        self.palette.add_command(Command(
-            id="git.diff",
-            title="Git Diff",
-            description="Show git diff",
-            category=CommandCategory.GIT,
-            keywords=["git", "diff", "changes"],
-            action=lambda: self._git_handler.palette_diff()
-        ))
-
-        # Search operations - delegated to FileOpsHandler
-        self.palette.add_command(Command(
-            id="search.files",
-            title="Search Files",
-            description="Search for text in files",
-            category=CommandCategory.SEARCH,
-            keywords=["find", "grep", "search", "locate"],
-            action=lambda: self._file_ops_handler.palette_search_files()
-        ))
-
-        # Help & System
-        self.palette.add_command(Command(
-            id="help.main",
-            title="Help",
-            description="Show main help",
-            category=CommandCategory.HELP,
-            keywords=["help", "docs", "guide"],
-            keybinding="?",
-            action=lambda: help_system.show_main_help()
-        ))
-
-        self.palette.add_command(Command(
-            id="system.clear",
-            title="Clear Screen",
-            description="Clear the terminal screen",
-            category=CommandCategory.SYSTEM,
-            keywords=["clear", "cls", "clean"],
-            action=lambda: os.system('clear')
-        ))
-
-        self.palette.add_command(Command(
-            id="tools.list",
-            title="List Available Tools",
-            description="Show all registered tools",
-            category=CommandCategory.TOOLS,
-            keywords=["tools", "list", "available"],
-            action=lambda: self._file_ops_handler.palette_list_tools()
-        ))
-
-        # DevSquad commands
-        self.palette.add_command(Command(
-            id="squad.run",
-            title="Run DevSquad Mission",
-            description="Execute a complex task with agent squad",
-            category=CommandCategory.TOOLS,
-            keywords=["squad", "mission", "agent", "devsquad"],
-            action=lambda: self._palette_run_squad()
-        ))
-
-        self.palette.add_command(Command(
-            id="workflow.list",
-            title="List Workflows",
-            description="Show available workflows",
-            category=CommandCategory.TOOLS,
-            keywords=["workflow", "list", "template"],
-            action=lambda: self._palette_list_workflows()
-        ))
+    # =========================================================================
+    # SCALE & SUSTAIN Phase 1.6: Palette - Delegated to PaletteHandler
+    # =========================================================================
+    # See: vertice_cli/handlers/palette_handler.py
 
     def _show_welcome(self):
-        """Show welcome message with TUI styling."""
-        from rich.text import Text
-
-        # Build styled welcome content
-        content = Text()
-        content.append("QWEN-DEV-CLI Interactive Shell ", style=PRESET_STYLES.EMPHASIS)
-        content.append("v1.0", style=PRESET_STYLES.SUCCESS)
-        content.append("\n\n")
-        content.append("🔧 Tools available: ", style=PRESET_STYLES.SECONDARY)
-        content.append(f"{len(self.registry.get_all())}\n", style=PRESET_STYLES.INFO)
-        content.append("📁 Working directory: ", style=PRESET_STYLES.SECONDARY)
-        content.append(f"{self.context.cwd}\n\n", style=PRESET_STYLES.PATH)
-        content.append("Type natural language commands or ", style=PRESET_STYLES.TERTIARY)
-        content.append("/help", style=PRESET_STYLES.COMMAND)
-        content.append(" for system commands", style=PRESET_STYLES.TERTIARY)
-
-        welcome = Panel(
-            content,
-            title="[bold]🚀 AI-Powered Code Shell[/bold]",
-            border_style=COLORS['accent_blue'],
-            padding=(1, 2)
-        )
-        self.console.print(welcome)
+        """SCALE & SUSTAIN Phase 1.7: Delegated to UIHandler."""
+        return self._ui_handler.show_welcome()
 
     # =========================================================================
     # TOOL EXECUTION - DELEGATED TO ToolExecutionHandler (Phase 1.4)
@@ -616,107 +491,33 @@ class InteractiveShell:
     # NOTE: The old _handle_system_command implementation (CC=112, 677 lines) has been
     # replaced with CommandDispatcher (CC=1). See vertice_cli/handlers/ for handlers.
 
+    # =========================================================================
+    # SCALE & SUSTAIN Phase 1.7: UI Operations - Delegated to UIHandler
+    # =========================================================================
+
     def _show_metrics(self) -> None:
-        """Show constitutional metrics."""
-        self.console.print("\n[bold cyan]📊 Constitutional Metrics[/bold cyan]\n")
-
-        metrics = generate_constitutional_report(
-            codebase_path="vertice_cli",
-            completeness=0.95,
-            precision=0.98,
-            recall=0.92
-        )
-
-        self.console.print(metrics.format_report())
+        """SCALE & SUSTAIN Phase 1.7: Delegated to UIHandler."""
+        return self._ui_handler.show_metrics()
 
     def _show_cache_stats(self) -> None:
-        """Show cache statistics."""
-        cache = get_cache()
-        stats = cache.stats
-
-        self.console.print("\n[bold cyan]💾 Cache Statistics[/bold cyan]\n")
-        self.console.print(f"Hits: {stats.hits}")
-        self.console.print(f"Misses: {stats.misses}")
-        self.console.print(f"Hit Rate: {stats.hit_rate:.1%}")
-        self.console.print(f"Memory Hits: {stats.memory_hits}")
-        self.console.print(f"Disk Hits: {stats.disk_hits}")
-
-        # File watcher stats
-        self.console.print("\n[bold cyan]📁 File Watcher[/bold cyan]\n")
-        self.console.print(f"Tracked Files: {self.file_watcher.tracked_files}")
-        self.console.print(f"Recent Events: {len(self.file_watcher.recent_events)}")
-        recent = self.recent_files.get_recent(5)
-        if recent:
-            self.console.print("\nRecent Files:")
-            for f in recent:
-                self.console.print(f"  • {f}")
+        """SCALE & SUSTAIN Phase 1.7: Delegated to UIHandler."""
+        return self._ui_handler.show_cache_stats()
 
     def _on_file_changed(self, event) -> None:
-        """Handle file change events."""
-        # Add to recent files tracker
-        self.recent_files.add(event.path)
-
-        # Invalidate cache if needed (files used in context)
-        if event.event_type in ['modified', 'deleted']:
-            # Cache invalidation deferred - would require cache key tracking
-            logger.debug(f"File {event.path} {event.event_type} - cache invalidation not yet implemented")
+        """SCALE & SUSTAIN Phase 1.7: Delegated to UIHandler."""
+        return self._ui_handler.on_file_changed(event)
 
     async def _handle_explain(self, command: str) -> None:
-        """Explain a command."""
-        if not command.strip():
-            self.console.print("[yellow]Usage: /explain <command>[/yellow]")
-            return
+        """SCALE & SUSTAIN Phase 1.7: Delegated to UIHandler."""
+        return await self._ui_handler.handle_explain(command)
 
-        # Build rich context
-        context = build_rich_context(
-            current_command=command,
-            command_history=self.context.history[-10:],
-            working_dir="."
-        )
+    # =========================================================================
+    # SCALE & SUSTAIN Phase 1.6: Palette Interactive - Delegated to PaletteHandler
+    # =========================================================================
 
-        # Get explanation
-        explanation = explain_command(command, context)
-
-        self.console.print(f"\n{explanation.format()}\n")
-
-    # Command Palette Helper Methods - EXTRACTED to handlers/
-    # Phase 1.3: Git operations -> GitHandler
-    # Phase 1.3: File operations -> FileOpsHandler
-    # See: vertice_cli/handlers/git_handler.py
-    # See: vertice_cli/handlers/file_ops_handler.py
-
-    async def _show_palette_interactive(self) -> Optional[Command]:
-        """Show interactive palette and return selected command."""
-        # Show search prompt
-        query = await self.enhanced_input.prompt_async("[cyan]Command Palette >[/cyan] ")
-
-        if not query or not query.strip():
-            return None
-
-        # Fuzzy search
-        results = self.palette.search(query, limit=10)
-
-        if not results:
-            self.console.print("[yellow]No commands found[/yellow]")
-            return None
-
-        # Display results
-        self.console.print("\n[cyan]Results:[/cyan]")
-        for i, cmd in enumerate(results, 1):
-            category_icon = CATEGORY_CONFIG.get(cmd.category, {}).get('icon', '📄')
-            self.console.print(f"  {i}. {category_icon} {cmd.title} - [dim]{cmd.description}[/dim]")
-
-        # Get selection
-        try:
-            selection = await self.enhanced_input.prompt_async("\nSelect (1-10) or Enter to cancel: ")
-            if selection and selection.isdigit():
-                idx = int(selection) - 1
-                if 0 <= idx < len(results):
-                    return results[idx]
-        except (ValueError, IndexError):
-            pass
-
-        return None
+    async def _show_palette_interactive(self):
+        """SCALE & SUSTAIN Phase 1.6: Delegated to PaletteHandler."""
+        return await self._palette_handler.show_palette_interactive()
 
     async def _auto_index_background(self) -> None:
         """
@@ -972,69 +773,16 @@ class InteractiveShell:
         return await self._llm_processor.handle_error(error, user_input)
 
     async def _palette_run_squad(self):
-        """Handle squad run from palette."""
-        self.console.print("[bold blue]🤖 DevSquad Mission[/bold blue]")
-        # Use input_session if available, or simple prompt
-        try:
-            request = await self.input_session.prompt_async("Mission Request: ")
-        except (AttributeError, EOFError, KeyboardInterrupt):
-            # Fallback if input_session not fully set up in tests or some modes
-            request = self.console.input("Mission Request: ")
-
-        if not request: return
-
-        try:
-            with self.console.status("[bold green]DevSquad Active...[/bold green]"):
-                result = await self.squad.execute_workflow(request)
-            self.console.print(self.squad.get_phase_summary(result))
-        except Exception as e:
-            self.console.print(f"[bold red]Error:[/bold red] {e}")
+        """SCALE & SUSTAIN Phase 1.6: Delegated to PaletteHandler."""
+        return await self._palette_handler.palette_run_squad()
 
     def _palette_list_workflows(self):
-        """Handle workflow list from palette."""
-        from .orchestration.workflows import WorkflowLibrary
-        from rich.table import Table
-
-        lib = WorkflowLibrary()
-        workflows = lib.list_workflows()
-
-        table = Table(title="Available Workflows")
-        table.add_column("ID", style="cyan")
-        table.add_column("Name", style="blue")
-        table.add_column("Description", style="white")
-
-        for w in workflows:
-            table.add_row(w.id, w.name, w.description)
-
-        self.console.print(table)
+        """SCALE & SUSTAIN Phase 1.6: Delegated to PaletteHandler."""
+        return self._palette_handler.palette_list_workflows()
 
     def _show_help(self):
-        """Show help message (Gemini: visual hierarchy)."""
-        help_text = """
-[bold cyan]Qwen CLI - AI-Powered Shell Assistant[/bold cyan]
-
-[bold]Commands:[/bold]
-  Just type what you want in natural language!
-  
-[bold]Examples:[/bold]
-  • "list large files"
-  • "find files modified today"
-  • "show processes using most memory"
-  
-[bold]System commands:[/bold]
-  • [cyan]help[/cyan]  - Show this help
-  • [cyan]quit[/cyan]  - Exit shell
-  • [cyan]/metrics[/cyan] - Show metrics
-  • [cyan]/explain <cmd>[/cyan] - Explain a command
-
-[bold]Safety:[/bold]
-  ✓ Safe commands auto-execute (ls, pwd)
-  ⚠️  Regular commands ask confirmation (cp, mv)
-  🚨 Dangerous commands double-confirm (rm, dd)
-
-[dim]Powered by Qwen + Constitutional AI[/dim]
-"""
-        self.console.print(help_text)
+        """SCALE & SUSTAIN Phase 1.7: Delegated to UIHandler."""
+        return self._ui_handler.show_help()
 
 
 async def main():

@@ -31,6 +31,8 @@ from .git_handler import GitHandler
 from .file_ops_handler import FileOpsHandler
 from .tool_execution_handler import ToolExecutionHandler
 from .llm_processing_handler import LLMProcessingHandler
+from .palette_handler import PaletteHandler
+from .ui_handler import UIHandler
 from .input_handler import (
     InputHandler,
     InputType,
@@ -52,6 +54,8 @@ __all__ = [
     'FileOpsHandler',
     'ToolExecutionHandler',
     'LLMProcessingHandler',
+    'PaletteHandler',
+    'UIHandler',
     'InputHandler',
     'InputType',
     'ParsedInput',
