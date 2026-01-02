@@ -81,6 +81,8 @@ class CommandDispatcher:
         from .workflow_handler import WorkflowHandler
         from .index_handler import IndexHandler
         from .refactor_handler import RefactorHandler
+        from .git_handler import GitHandler
+        from .file_ops_handler import FileOpsHandler
 
         # Create handler instances
         basic = BasicHandler(self.shell)
@@ -89,6 +91,8 @@ class CommandDispatcher:
         workflow = WorkflowHandler(self.shell)
         index = IndexHandler(self.shell)
         refactor = RefactorHandler(self.shell)
+        git = GitHandler(self.shell)
+        file_ops = FileOpsHandler(self.shell)
 
         # Register exact match handlers
         self._handlers = {
@@ -122,6 +126,15 @@ class CommandDispatcher:
 
             # LSP commands
             "/lsp": lsp.handle_lsp_start,
+
+            # Git commands (Phase 1.3)
+            "/git status": git.handle_status,
+            "/git diff": git.handle_diff,
+            "/git log": git.handle_log,
+            "/git branch": git.handle_branch,
+
+            # File operations (Phase 1.3)
+            "/tree": file_ops.handle_tree,
         }
 
         # Register prefix match handlers (order matters - longer prefixes first)
@@ -146,6 +159,16 @@ class CommandDispatcher:
             "/find ": index.handle_find,
             "/explain ": basic.handle_explain,
             "/suggest ": index.handle_suggest,
+
+            # Git prefix commands (Phase 1.3)
+            "/git diff ": git.handle_diff,
+            "/git log ": git.handle_log,
+
+            # File prefix commands (Phase 1.3)
+            "/read ": file_ops.handle_read,
+            "/write ": file_ops.handle_write,
+            "/search ": file_ops.handle_search,
+            "/tree ": file_ops.handle_tree,
         }
 
     async def dispatch(self, cmd: str) -> CommandResult:

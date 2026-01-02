@@ -234,9 +234,8 @@ class InteractiveShell:
         self.workflow_viz = WorkflowVisualizer(console=self.console)
         self.execution_timeline = ExecutionTimeline(console=self.console)
 
-        # Command Palette (Integration Sprint Week 1: Day 1)
+        # Command Palette - container initialized here, commands registered after registry
         self.palette = create_default_palette()
-        self._register_palette_commands()
 
         # Token Tracking (Integration Sprint Week 1: Day 1 - Task 1.2 - ACTIVATED)
         self.token_tracker = TokenTracker(
@@ -309,6 +308,16 @@ class InteractiveShell:
         # SCALE & SUSTAIN Phase 2: Modular Result Renderer
         # Replaces 120-line if/elif chain with Strategy pattern
         self._result_renderer = ResultRenderer(self.console)
+
+        # SCALE & SUSTAIN Phase 1.3: Semantic Handlers (Modularization)
+        # Initialize AFTER registry is available (required dependency)
+        from .handlers.git_handler import GitHandler
+        from .handlers.file_ops_handler import FileOpsHandler
+        self._git_handler = GitHandler(self)
+        self._file_ops_handler = FileOpsHandler(self)
+
+        # Register palette commands AFTER handlers are initialized
+        self._register_palette_commands()
 
         # Note: Semantic indexer moved earlier (before ContextSuggestionEngine)
 
@@ -418,8 +427,13 @@ class InteractiveShell:
         self.console.print(f"[dim]Loaded {len(tools)} tools[/dim]")
 
     def _register_palette_commands(self):
-        """Register commands in command palette (Ctrl+K)."""
-        # File operations
+        """
+        Register commands in command palette (Ctrl+K).
+
+        SCALE & SUSTAIN Phase 1.3: Delegates to modular handlers for
+        maintainability and semantic clarity.
+        """
+        # File operations - delegated to FileOpsHandler
         self.palette.add_command(Command(
             id="file.read",
             title="Read File",
@@ -427,7 +441,7 @@ class InteractiveShell:
             category=CommandCategory.FILE,
             keywords=["open", "cat", "view", "show"],
             keybinding=None,
-            action=lambda: self._palette_read_file()
+            action=lambda: self._file_ops_handler.palette_read_file()
         ))
 
         self.palette.add_command(Command(
@@ -436,7 +450,7 @@ class InteractiveShell:
             description="Create or overwrite a file",
             category=CommandCategory.FILE,
             keywords=["create", "save", "new"],
-            action=lambda: self._palette_write_file()
+            action=lambda: self._file_ops_handler.palette_write_file()
         ))
 
         self.palette.add_command(Command(
@@ -445,17 +459,17 @@ class InteractiveShell:
             description="Edit file with AI assistance",
             category=CommandCategory.EDIT,
             keywords=["modify", "change", "update", "fix"],
-            action=lambda: self._palette_edit_file()
+            action=lambda: self._file_ops_handler.palette_edit_file()
         ))
 
-        # Git operations
+        # Git operations - delegated to GitHandler
         self.palette.add_command(Command(
             id="git.status",
             title="Git Status",
             description="Show git repository status",
             category=CommandCategory.GIT,
             keywords=["git", "status", "changes", "diff"],
-            action=lambda: self._palette_git_status()
+            action=lambda: self._git_handler.palette_status()
         ))
 
         self.palette.add_command(Command(
@@ -464,17 +478,17 @@ class InteractiveShell:
             description="Show git diff",
             category=CommandCategory.GIT,
             keywords=["git", "diff", "changes"],
-            action=lambda: self._palette_git_diff()
+            action=lambda: self._git_handler.palette_diff()
         ))
 
-        # Search operations
+        # Search operations - delegated to FileOpsHandler
         self.palette.add_command(Command(
             id="search.files",
             title="Search Files",
             description="Search for text in files",
             category=CommandCategory.SEARCH,
             keywords=["find", "grep", "search", "locate"],
-            action=lambda: self._palette_search_files()
+            action=lambda: self._file_ops_handler.palette_search_files()
         ))
 
         # Help & System
@@ -503,7 +517,7 @@ class InteractiveShell:
             description="Show all registered tools",
             category=CommandCategory.TOOLS,
             keywords=["tools", "list", "available"],
-            action=lambda: self._palette_list_tools()
+            action=lambda: self._file_ops_handler.palette_list_tools()
         ))
 
         # DevSquad commands
@@ -965,60 +979,11 @@ Response: I don't have a tool to check the current time, but I can help you with
 
         self.console.print(f"\n{explanation.format()}\n")
 
-    # Command Palette Helper Methods (Integration Sprint Week 1)
-
-    async def _palette_read_file(self):
-        """Read file action from palette."""
-        file_path = await self.enhanced_input.prompt_async("File path: ")
-        if file_path:
-            await self._process_request_with_llm(f"read {file_path}", None)
-
-    async def _palette_write_file(self):
-        """Write file action from palette."""
-        file_path = await self.enhanced_input.prompt_async("File path: ")
-        if file_path:
-            content = await self.enhanced_input.prompt_async("Content: ")
-            if content:
-                await self._process_request_with_llm(f"write {file_path} with: {content}", None)
-
-    async def _palette_edit_file(self):
-        """Edit file action from palette."""
-        file_path = await self.enhanced_input.prompt_async("File path: ")
-        if file_path:
-            instruction = await self.enhanced_input.prompt_async("Edit instruction: ")
-            if instruction:
-                await self._process_request_with_llm(f"edit {file_path}: {instruction}", None)
-
-    async def _palette_git_status(self):
-        """Git status action from palette."""
-        tool = self.registry.get("git_status")
-        result = await tool.execute()
-        self.console.print(result.data.get("output", ""))
-
-    async def _palette_git_diff(self):
-        """Git diff action from palette."""
-        tool = self.registry.get("git_diff")
-        result = await tool.execute()
-        self.console.print(result.data.get("output", ""))
-
-    async def _palette_search_files(self):
-        """Search files action from palette."""
-        pattern = await self.enhanced_input.prompt_async("Search pattern: ")
-        if pattern:
-            await self._process_request_with_llm(f"search for {pattern}", None)
-
-    def _palette_list_tools(self):
-        """List tools action from palette."""
-        tools = self.registry.list_tools()
-        table = Table(title="Available Tools")
-        table.add_column("Tool", style="cyan")
-        table.add_column("Description", style="white")
-
-        for tool_name in tools:
-            tool = self.registry.get(tool_name)
-            table.add_row(tool_name, tool.description if hasattr(tool, 'description') else "")
-
-        self.console.print(table)
+    # Command Palette Helper Methods - EXTRACTED to handlers/
+    # Phase 1.3: Git operations -> GitHandler
+    # Phase 1.3: File operations -> FileOpsHandler
+    # See: vertice_cli/handlers/git_handler.py
+    # See: vertice_cli/handlers/file_ops_handler.py
 
     async def _show_palette_interactive(self) -> Optional[Command]:
         """Show interactive palette and return selected command."""
