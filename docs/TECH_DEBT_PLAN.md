@@ -358,41 +358,35 @@ reviewer.py               # 72 lines - Backward compat shim
 
 ---
 
-### 3.2 Flatten Deep Nesting (16 levels → 4 max)
+### 3.2 Flatten Deep Nesting (16 levels → 4 max) ✅ COMPLETE
 
-**Target:** `shell_main.py:977` and 487 other nested blocks
+**Status:** Completed 2026-01-02
 
-**Pattern: Guard Clauses + Extraction**
+**Analysis:**
+- Worst offender: `manager.py:_format_agent_result` with 16 AST nesting levels
+- Other files (tool_executor.py, shell_main.py, claude_parity.py) had **false positives**
+  from AST counting if-elif chains as nested, when they're actually flat pattern matching
 
-```python
-# Before (16 levels)
-if condition1:
-    for item in items:
-        if condition2:
-            for sub in subitems:
-                if condition3:
-                    # ... 10 more levels
+**Fix Applied:**
+- Created `vertice_tui/core/agents/formatters.py` using Strategy pattern
+- Extracted 11 specialized formatters (Architect, Reviewer, Explorer, DevOps, etc.)
+- Each formatter handles one agent type with max 3 levels of internal nesting
 
-# After (max 4 levels)
-def process_items(items: List[Item]) -> None:
-    for item in items:
-        if not should_process(item):
-            continue
-        handle_item(item)
-
-def handle_item(item: Item) -> None:
-    for sub in item.subitems:
-        if should_handle_sub(sub):
-            process_sub(sub)
+**Results:**
+```
+manager.py:     705 → 468 lines (-237 lines, -33%)
+formatters.py:  522 lines (NEW, Strategy pattern)
+Max nesting:    16 → 4 levels (target achieved)
 ```
 
-**Atomic Steps:**
+**Formatters Created:**
+- ArchitectFormatter, ReviewerFormatter, ExplorerFormatter
+- DevOpsFormatter, DevOpsResponseFormatter, TestingFormatter
+- RefactorerFormatter, DocumentationFormatter, MarkdownFormatter
+- StringFormatter, FallbackFormatter
 
-1. Run `radon cc -a -nc` to identify worst offenders
-2. Extract top 10 deeply nested functions
-3. Apply guard clause pattern (early returns)
-4. Create helper functions for nested logic
-5. Repeat until max nesting = 4
+**Note:** Other if-elif chains (tool dispatch, command handling) are flat pattern
+matching, not problematic nesting. Future improvement: convert to dispatch tables.
 
 ---
 
