@@ -12,10 +12,13 @@ Date: 2025-11-26
 
 import asyncio
 import json
+import logging
 import time
 import uuid
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional
+
+logger = logging.getLogger(__name__)
 
 from .interface import (
     IMessageQueue,
@@ -171,7 +174,8 @@ class RedisQueue(IMessageQueue):
                 self._processing[message.id] = message
                 messages.append(message)
 
-            except Exception:
+            except Exception as e:
+                logger.warning(f"Failed to consume from queue {self._queue_name}: {e}")
                 break
 
         return messages
@@ -430,7 +434,8 @@ class RedisBroker(IMessageBroker):
                     )
             except asyncio.CancelledError:
                 break
-            except Exception:
+            except Exception as e:
+                logger.warning(f"Subscription listener error: {e}")
                 await asyncio.sleep(0.1)
 
     async def _dispatch_message(self, channel: str, data: str) -> None:
@@ -446,8 +451,8 @@ class RedisBroker(IMessageBroker):
                     result = handler(msg)
                     if asyncio.iscoroutine(result):
                         await result
-                except Exception:
-                    pass  # Log in production
+                except Exception as e:
+                    logger.error(f"Handler failed for message on {channel}: {e}")
 
     async def close(self) -> None:
         """Close the broker."""

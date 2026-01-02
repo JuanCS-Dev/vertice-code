@@ -6,7 +6,10 @@ Provides blazing-fast semantic search and context awareness.
 
 import ast
 import json
+import logging
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 from typing import Dict, List, Set, Optional, Tuple
 from dataclasses import dataclass, field
 from collections import defaultdict
@@ -86,7 +89,8 @@ class SemanticIndexer:
         try:
             with open(path, 'rb') as f:
                 return hashlib.sha256(f.read()).hexdigest()[:16]
-        except Exception:
+        except (OSError, IOError) as e:
+            logger.debug(f"Could not compute hash for {path}: {e}")
             return ""
 
     def parse_file(self, path: Path) -> Optional[FileIndex]:
@@ -154,8 +158,11 @@ class SemanticIndexer:
                 last_modified=path.stat().st_mtime
             )
 
-        except Exception:
-            # Silently skip files that can't be parsed
+        except (SyntaxError, UnicodeDecodeError) as e:
+            logger.debug(f"Parse failed for {path}: {e}")
+            return None
+        except OSError as e:
+            logger.warning(f"Could not read file {path}: {e}")
             return None
 
     def index_codebase(self, force: bool = False) -> int:
@@ -256,7 +263,8 @@ class SemanticIndexer:
 
             return "\n".join(context)
 
-        except Exception:
+        except (OSError, UnicodeDecodeError) as e:
+            logger.debug(f"Could not get context for {file_path}:{line_number}: {e}")
             return None
 
     def get_dependencies(self, file_path: str) -> Set[str]:
@@ -373,8 +381,10 @@ class SemanticIndexer:
             with open(cache_file, 'w') as f:
                 json.dump(data, f, indent=2)
 
-        except Exception:
-            pass  # Silently fail cache save
+        except (OSError, IOError) as e:
+            logger.error(f"Failed to save index cache to {cache_file}: {e}")
+        except (TypeError, ValueError) as e:
+            logger.error(f"Failed to serialize index cache: {e}")
 
     def load_cache(self) -> bool:
         """Load index from cache."""
@@ -413,5 +423,9 @@ class SemanticIndexer:
 
             return True
 
-        except Exception:
+        except (OSError, IOError) as e:
+            logger.warning(f"Could not load index cache from {cache_file}: {e}")
+            return False
+        except (json.JSONDecodeError, KeyError, TypeError) as e:
+            logger.warning(f"Index cache is corrupted, will rebuild: {e}")
             return False

@@ -15,12 +15,15 @@ Phase 10: Refinement Sprint 1
 from __future__ import annotations
 
 import ast
+import hashlib
+import logging
 import re
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import List, Optional, Dict, Any
-import hashlib
+
+logger = logging.getLogger(__name__)
 
 
 class ChunkType(Enum):
@@ -159,7 +162,8 @@ class CodeChunker:
         # Read content
         try:
             content = path.read_text(encoding="utf-8", errors="replace")
-        except Exception:
+        except (OSError, IOError) as e:
+            logger.warning(f"Could not read file {path}: {e}")
             return []
 
         # Detect language

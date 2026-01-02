@@ -21,11 +21,14 @@ Philosophy (Boris Cherny):
 """
 
 import ast
+import logging
 import re
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+
+logger = logging.getLogger(__name__)
 
 from .base import (
     AgentCapability,
@@ -34,6 +37,20 @@ from .base import (
     AgentTask,
     BaseAgent,
 )
+
+# FIX E2E: Import grounding prompts for anti-hallucination
+try:
+    from vertice_cli.prompts.grounding import GROUNDING_INSTRUCTION, INLINE_CODE_PRIORITY
+except ImportError:
+    GROUNDING_INSTRUCTION = ""
+    INLINE_CODE_PRIORITY = ""
+
+# FIX E2E: Import temperature config
+try:
+    from vertice_cli.core.temperature_config import get_temperature
+except ImportError:
+    def get_temperature(agent_type: str, task_type: str = None) -> float:
+        return 0.4  # Documentation default
 
 
 class DocFormat(str, Enum):
@@ -134,22 +151,143 @@ class DocumentationAgent(BaseAgent):
         Raises:
             ValueError: If clients are None
         """
+        # FIX 1.4: Validate required clients
+        if llm_client is None:
+            raise ValueError("llm_client is required for DocumentationAgent")
+        if mcp_client is None:
+            raise ValueError("mcp_client is required for DocumentationAgent")
+
         super().__init__(
-            role=AgentRole.REVIEWER,  # Closest match (READ_ONLY)
+            role=AgentRole.DOCUMENTATION,  # FIX 1.2: Use correct role
             capabilities=[AgentCapability.READ_ONLY, AgentCapability.FILE_EDIT],
             llm_client=llm_client,
             mcp_client=mcp_client,
         )
 
+    def _extract_code_blocks(self, text: str) -> str:
+        """FIX E2E: Extract code from markdown code blocks or inline in user message.
+
+        Following Claude Code pattern: check inline content FIRST before using tools.
+
+        Args:
+            text: User message or context text that may contain code
+
+        Returns:
+            Extracted code as string, empty if no code found
+        """
+        if not text:
+            return ""
+
+        # Pattern 1: Fenced code blocks ```python\ncode\n``` or ```\ncode\n```
+        fenced_pattern = r'```(?:python|py)?\n(.*?)```'
+        fenced_matches = re.findall(fenced_pattern, text, re.DOTALL)
+
+        # Pattern 2: Generic fenced blocks without language
+        generic_pattern = r'```\n?(.*?)```'
+        generic_matches = re.findall(generic_pattern, text, re.DOTALL)
+
+        # Pattern 3: Indented code blocks (4 spaces or tab)
+        indented_pattern = r'(?:^|\n)((?:    |\t).+(?:\n(?:    |\t).+)*)'
+        indented_matches = re.findall(indented_pattern, text)
+
+        # Pattern 4: Detect Python code without markers (def, class, import at start)
+        inline_code_pattern = r'(?:^|\n)((?:def |class |import |from |async def |@).+(?:\n(?:    |\t).+)*)'
+        inline_matches = re.findall(inline_code_pattern, text)
+
+        # Combine all found code
+        all_code = []
+        all_code.extend(fenced_matches)
+        all_code.extend(generic_matches)
+        all_code.extend(indented_matches)
+        all_code.extend(inline_matches)
+
+        # Return combined unique code blocks
+        seen = set()
+        unique_code = []
+        for code in all_code:
+            code = code.strip()
+            if code and code not in seen:
+                seen.add(code)
+                unique_code.append(code)
+
+        return '\n\n'.join(unique_code)
+
+    async def _document_inline_code(self, code: str, style: DocstringStyle) -> AgentResponse:
+        """FIX E2E: Document inline code provided in user message.
+
+        This handles the case where user provides code directly in the prompt.
+
+        Args:
+            code: Inline code to document
+            style: Docstring style to use
+
+        Returns:
+            AgentResponse with generated documentation
+        """
+        try:
+            # Try to parse as Python AST
+            tree = ast.parse(code)
+
+            # Create a temporary module doc
+            module_doc = ModuleDoc(
+                name="inline_code",
+                docstring=None,
+                classes=[],
+                functions=[],
+                imports=[],
+                file_path="<inline>"
+            )
+
+            # Extract classes and functions
+            for node in tree.body:
+                if isinstance(node, ast.ClassDef):
+                    module_doc.classes.append(self._analyze_class(node))
+                elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    module_doc.functions.append(self._analyze_function(node))
+
+            # Generate documentation
+            documentation = self._generate_markdown(module_doc, style)
+
+            return AgentResponse(
+                success=True,
+                data={
+                    "documentation": documentation,
+                    "source": "inline_code",
+                    "classes": len(module_doc.classes),
+                    "functions": len(module_doc.functions),
+                    "code_analyzed": code[:500]  # Include quote for grounding
+                },
+                reasoning=f"Analyzed inline code: {len(module_doc.classes)} classes, {len(module_doc.functions)} functions"
+            )
+        except SyntaxError:
+            # Code has syntax errors, document as raw text
+            return AgentResponse(
+                success=True,
+                data={
+                    "documentation": f"# Code Documentation\n\n```python\n{code}\n```\n\n*Note: Code contains syntax errors, showing raw content.*",
+                    "source": "inline_code_raw",
+                    "code_analyzed": code[:500]
+                },
+                reasoning="Code contains syntax errors, documented as raw content"
+            )
+
     async def execute(self, task: AgentTask) -> AgentResponse:
         """Execute documentation generation task.
+
+        FIX E2E: Priority order for code sources (Claude Code pattern):
+            1. HIGHEST: Inline code in user_message
+            2. HIGH: files_list in context
+            3. MEDIUM: file_path in context
+            4. LOWEST: target_path for directory scan
 
         Args:
             task: Task containing:
                 - request: "generate_docs", "validate_docstrings", "create_readme"
                 - context: {
+                    "user_message": str,  # May contain inline code
                     "target_path": str | Path,
                     "files": List[str],  # Alternative to target_path
+                    "file_path": str,  # Single file
                     "format": DocFormat,
                     "style": DocstringStyle,
                     "output_path": Optional[str]
@@ -161,7 +299,8 @@ class DocumentationAgent(BaseAgent):
                 - data: {
                     "modules": List[ModuleDoc],
                     "files_created": List[str],
-                    "issues_found": List[str]
+                    "issues_found": List[str],
+                    "code_analyzed": str  # Quote of analyzed code for grounding
                   }
 
         Examples:
@@ -178,8 +317,35 @@ class DocumentationAgent(BaseAgent):
             >>> assert "modules" in response.data
         """
         try:
-            # Get files from context - support both target_path and files list
-            files_list = task.context.get("files", [])
+            # Get style early - used in all paths
+            style = task.context.get("style", DocstringStyle.GOOGLE)
+
+            # =================================================================
+            # FIX E2E: PRIORITY 1 - Check for inline code in user message
+            # Following Claude Code pattern: analyze inline content FIRST
+            # =================================================================
+            user_message = task.context.get("user_message", "")
+            inline_code = self._extract_code_blocks(user_message)
+
+            if inline_code:
+                # User provided code directly - document it!
+                return await self._document_inline_code(inline_code, style)
+
+            # =================================================================
+            # FIX E2E: PRIORITY 2 - Check files_list in context
+            # =================================================================
+            files_list = task.context.get("files_list", []) or task.context.get("files", [])
+
+            # =================================================================
+            # FIX E2E: PRIORITY 3 - Check file_path in context
+            # =================================================================
+            single_file_path = task.context.get("file_path", "")
+            if single_file_path and not files_list:
+                files_list = [single_file_path]
+
+            # =================================================================
+            # FIX E2E: PRIORITY 4 - Fall back to target_path for scan
+            # =================================================================
             target_path_str = task.context.get("target_path", "")
 
             # If we have a files list but no target_path, use the parent of first file
@@ -252,8 +418,8 @@ class DocumentationAgent(BaseAgent):
             try:
                 module_doc = self._analyze_module(py_file)
                 modules.append(module_doc)
-            except Exception:
-                # Skip files with syntax errors
+            except (SyntaxError, OSError) as e:
+                logger.debug(f"Skipping {py_file} due to error: {e}")
                 continue
 
         # FALLBACK: If no modules analyzed (e.g. syntax errors), read raw content
@@ -271,8 +437,8 @@ class DocumentationAgent(BaseAgent):
                          # Store raw content in docstring as last resort
                          docstring=f"**Raw Content Preview**:\n\n```python\n{content[:2000]}\n```"
                      ))
-                 except Exception:
-                     pass
+                 except OSError as e:
+                     logger.debug(f"Could not read {py_file} for fallback docs: {e}")
 
         # Generate documentation files
         if output_path:
@@ -399,7 +565,8 @@ class DocumentationAgent(BaseAgent):
                             "severity": "low",
                         })
 
-            except Exception:
+            except (SyntaxError, OSError) as e:
+                logger.debug(f"Could not analyze {py_file} for docstring issues: {e}")
                 continue
 
         return AgentResponse(
@@ -434,7 +601,8 @@ class DocumentationAgent(BaseAgent):
             if "__pycache__" not in str(py_file):
                 try:
                     modules.append(self._analyze_module(py_file))
-                except Exception:
+                except (SyntaxError, OSError) as e:
+                    logger.debug(f"Could not analyze {py_file} for README: {e}")
                     continue
 
         # Generate README content

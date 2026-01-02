@@ -10,9 +10,12 @@ Date: 2025-11-26
 """
 
 import asyncio
+import logging
 import time
 from dataclasses import dataclass, field
 from typing import Callable, Generic, Optional, TypeVar
+
+logger = logging.getLogger(__name__)
 
 T = TypeVar('T')
 
@@ -130,7 +133,8 @@ class ConnectionPool(Generic[T]):
                 loop = asyncio.get_event_loop()
                 conn = await loop.run_in_executor(None, self._factory)
             return conn
-        except Exception:
+        except Exception as e:
+            logger.warning(f"Failed to create connection: {e}")
             self._stats.total_errors += 1
             return None
 
@@ -142,7 +146,8 @@ class ConnectionPool(Generic[T]):
             else:
                 loop = asyncio.get_event_loop()
                 return await loop.run_in_executor(None, self._validator, conn)
-        except Exception:
+        except Exception as e:
+            logger.debug(f"Connection validation failed: {e}")
             return False
 
     async def _close_connection(self, conn: T) -> None:
@@ -153,8 +158,8 @@ class ConnectionPool(Generic[T]):
             else:
                 loop = asyncio.get_event_loop()
                 await loop.run_in_executor(None, self._closer, conn)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Error closing connection: {e}")
 
     async def acquire(self) -> 'PooledConnection[T]':
         """

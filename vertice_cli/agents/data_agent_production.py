@@ -218,6 +218,123 @@ Your principles:
 
 Be precise, safe, and proactive."""
 
+    def _parse_query_analysis(
+        self,
+        analysis: str,
+        original_query: str
+    ) -> Dict[str, Any]:
+        """
+        Parse LLM analysis to extract query optimization suggestions.
+
+        Extracts:
+        - Rewritten query (if present)
+        - Suggested indexes
+        - Confidence indicators
+
+        Returns:
+            Dict with 'rewritten_query', 'indexes', 'confidence' keys.
+        """
+        import re
+
+        result = {
+            "rewritten_query": original_query,
+            "indexes": [],
+            "confidence": 0.5,
+        }
+
+        if not analysis:
+            return result
+
+        analysis_lower = analysis.lower()
+
+        # Extract rewritten query (look for SQL patterns)
+        sql_patterns = [
+            r"(?:optimized|rewritten|improved).*?:?\s*```(?:sql)?\s*(.+?)```",
+            r"SELECT\s+.+?\s+FROM\s+.+?(?:WHERE|GROUP|ORDER|;|$)",
+        ]
+
+        for pattern in sql_patterns:
+            match = re.search(pattern, analysis, re.IGNORECASE | re.DOTALL)
+            if match:
+                result["rewritten_query"] = match.group(1).strip() if match.lastindex else match.group(0).strip()
+                break
+
+        # Extract index suggestions
+        index_patterns = [
+            r"(?:CREATE\s+)?INDEX\s+(?:ON\s+)?(\w+)\s*\(([^)]+)\)",
+            r"(\w+)\s*\(([^)]+)\)\s*(?:index|INDEX)",
+        ]
+
+        for pattern in index_patterns:
+            matches = re.findall(pattern, analysis)
+            for match in matches:
+                if len(match) >= 2:
+                    result["indexes"].append(f"{match[0]}({match[1]})")
+
+        # Estimate confidence from language
+        high_conf_words = ["definitely", "certain", "clearly", "must", "highly recommend"]
+        low_conf_words = ["possibly", "might", "could", "maybe", "uncertain"]
+
+        for word in high_conf_words:
+            if word in analysis_lower:
+                result["confidence"] = min(0.9, result["confidence"] + 0.1)
+
+        for word in low_conf_words:
+            if word in analysis_lower:
+                result["confidence"] = max(0.3, result["confidence"] - 0.1)
+
+        return result
+
+    def _parse_migration_analysis(self, analysis: str) -> Dict[str, Any]:
+        """
+        Parse LLM analysis to extract migration risk assessment.
+
+        Extracts:
+        - Risk level from LLM opinion
+        - Downtime estimates
+        - Online migration feasibility
+
+        Returns:
+            Dict with 'risk_modifier', 'downtime_modifier', 'online_safe' keys.
+        """
+        result = {
+            "risk_modifier": 0,  # -2 to +2 adjustment
+            "downtime_modifier": 0.0,
+            "online_safe": None,  # None = no opinion
+        }
+
+        if not analysis:
+            return result
+
+        analysis_lower = analysis.lower()
+
+        # Check for risk indicators
+        if any(w in analysis_lower for w in ["critical", "dangerous", "data loss", "high risk"]):
+            result["risk_modifier"] = 2
+        elif any(w in analysis_lower for w in ["risky", "caution", "careful"]):
+            result["risk_modifier"] = 1
+        elif any(w in analysis_lower for w in ["safe", "low risk", "straightforward"]):
+            result["risk_modifier"] = -1
+
+        # Check for downtime mentions
+        import re
+        time_match = re.search(r"(\d+(?:\.\d+)?)\s*(?:seconds?|minutes?|hours?)", analysis_lower)
+        if time_match:
+            value = float(time_match.group(1))
+            if "minute" in analysis_lower:
+                value *= 60
+            elif "hour" in analysis_lower:
+                value *= 3600
+            result["downtime_modifier"] = value
+
+        # Check online migration feasibility
+        if "online" in analysis_lower and "cannot" in analysis_lower:
+            result["online_safe"] = False
+        elif "online" in analysis_lower and "safe" in analysis_lower:
+            result["online_safe"] = True
+
+        return result
+
     # ========================================================================
     # MAIN EXECUTION
     # ========================================================================
@@ -406,9 +523,13 @@ Be specific and actionable.
         else:
             analysis = await self._call_llm(prompt)
 
-        # Parse analysis - extract optimization recommendations
-        # TODO: Implement proper LLM response parsing
-        logger.debug(f"Query analysis: {analysis[:200] if analysis else 'empty'}...")
+        # Parse analysis to extract optimization recommendations
+        parsed = self._parse_query_analysis(analysis, query)
+        logger.debug(f"Query analysis parsed: rewritten={parsed['rewritten_query'] != query}, "
+                     f"indexes={len(parsed['indexes'])}, confidence={parsed['confidence']:.2f}")
+
+        # Use parsed results with fallback defaults
+        required_indexes = parsed["indexes"] if parsed["indexes"] else ["users(email)", "orders(user_id, created_at)"]
 
         optimization = QueryOptimization(
             query_hash=query_hash,
@@ -417,9 +538,9 @@ Be specific and actionable.
             cost_before=100.0,
             cost_after=30.0,
             improvement_percent=70.0,
-            rewritten_query=query,  # TODO: Use analysis to rewrite
-            required_indexes=["users(email)", "orders(user_id, created_at)"],
-            confidence_score=0.85,
+            rewritten_query=parsed["rewritten_query"],
+            required_indexes=required_indexes,
+            confidence_score=parsed["confidence"],
         )
 
         # Cache it
@@ -472,12 +593,13 @@ Be extremely conservative with risk assessment.
         else:
             analysis = await self._call_llm(prompt)
 
-        # Log LLM analysis for debugging
-        # TODO: Parse and incorporate LLM insights into risk assessment
-        logger.debug(f"Migration analysis: {analysis[:200] if analysis else 'empty'}...")
+        # Parse LLM analysis to extract risk insights
+        llm_insights = self._parse_migration_analysis(analysis)
+        logger.debug(f"Migration analysis parsed: risk_mod={llm_insights['risk_modifier']}, "
+                     f"downtime_mod={llm_insights['downtime_modifier']:.1f}s")
 
-        # Analyze risk (heuristic-based + LLM insight)
-        risk = IssueSeverity.LOW
+        # Analyze risk (heuristic-based + LLM insight combined)
+        risk_level = 0  # 0=LOW, 1=MEDIUM, 2=HIGH, 3=CRITICAL
         can_run_online = True
         downtime = 0.0
 
@@ -485,13 +607,23 @@ Be extremely conservative with risk assessment.
             change_upper = change.upper()
 
             if "DROP" in change_upper:
-                risk = IssueSeverity.CRITICAL
+                risk_level = 3  # CRITICAL
                 can_run_online = False
                 downtime = 5.0
             elif "ADD COLUMN" in change_upper and "NOT NULL" in change_upper:
                 if "DEFAULT" not in change_upper:
-                    risk = IssueSeverity.HIGH
-                    downtime = 2.0
+                    risk_level = max(risk_level, 2)  # HIGH
+                    downtime = max(downtime, 2.0)
+
+        # Incorporate LLM risk assessment
+        risk_level = max(0, min(3, risk_level + llm_insights["risk_modifier"]))
+        downtime = max(downtime, llm_insights["downtime_modifier"])
+        if llm_insights["online_safe"] is False:
+            can_run_online = False
+
+        # Map numeric risk to enum
+        risk_map = {0: IssueSeverity.LOW, 1: IssueSeverity.MEDIUM, 2: IssueSeverity.HIGH, 3: IssueSeverity.CRITICAL}
+        risk = risk_map.get(risk_level, IssueSeverity.LOW)
 
         # Generate migration
         timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")

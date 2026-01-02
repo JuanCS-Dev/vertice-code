@@ -249,7 +249,20 @@ class ReviewerAgent(BaseAgent):
             )
 
     def _smart_truncate(self, content: str, limit: int = MAX_FILE_CHARS) -> str:
-        """Smart truncation preserving complete functions/classes."""
+        """
+        Smart truncation that preserves complete Python functions/classes.
+
+        Unlike naive truncation, this method attempts to cut at natural
+        code boundaries (function/class definitions) to maintain parseable
+        code in the truncated output.
+
+        Args:
+            content: Full source code content
+            limit: Maximum character limit (default: 8000)
+
+        Returns:
+            Truncated content with a note about truncation if applicable
+        """
         if len(content) <= limit:
             return content
 
@@ -276,7 +289,27 @@ class ReviewerAgent(BaseAgent):
         rag_context: RAGContext,
         static_issues: List[CodeIssue]
     ) -> str:
-        """Build comprehensive prompt for LLM analysis."""
+        """
+        Build comprehensive prompt for LLM deep semantic analysis.
+
+        Constructs a structured prompt that includes:
+        - Files content (smartly truncated)
+        - Static analysis metrics
+        - RAG context (team standards, historical issues)
+        - Analysis grounding instructions
+
+        The LLM is asked to find issues that static analysis missed,
+        particularly logic bugs, edge cases, and architecture problems.
+
+        Args:
+            files: Dict mapping filename to content
+            metrics: List of complexity metrics from static analysis
+            rag_context: Team standards and historical context
+            static_issues: Issues already found by static analysis
+
+        Returns:
+            Formatted prompt string for LLM analysis
+        """
         truncated_files = {
             k: self._smart_truncate(v, MAX_FILE_CHARS)
             for k, v in files.items()
@@ -322,7 +355,17 @@ Output JSON with:
 """
 
     async def _load_context(self, task: AgentTask) -> Dict[str, str]:
-        """Load file contents."""
+        """
+        Load file contents from various sources for review.
+
+        Priority order:
+        1. Inline code in user message (markdown code blocks)
+        2. Explicit files list in task context
+        3. Single file_path in task context
+
+        Returns:
+            Dict mapping filename (or "<inline>") to file content
+        """
         contents = {}
 
         # Priority 1: Inline code in user message
@@ -345,7 +388,8 @@ Output JSON with:
                 else:
                     with open(f, 'r', encoding='utf-8') as file:
                         contents[f] = file.read()
-            except Exception:
+            except (OSError, UnicodeDecodeError) as e:
+                logger.debug(f"Could not read file {f} for review: {e}")
                 continue
 
         # Priority 3: File path
@@ -359,13 +403,28 @@ Output JSON with:
                     else:
                         with open(file_path, 'r', encoding='utf-8') as file:
                             contents[file_path] = file.read()
-                except Exception:
-                    pass
+                except (OSError, UnicodeDecodeError) as e:
+                    logger.debug(f"Could not read file {file_path} for review: {e}")
 
         return contents
 
     def _extract_code_blocks(self, text: str) -> str:
-        """Extract code from markdown code blocks."""
+        """
+        Extract Python code from text using multiple detection strategies.
+
+        Extraction priority:
+        1. Fenced markdown code blocks (```python ... ```)
+        2. Lines starting with Python keywords (def, class, import, etc.)
+        3. Indented blocks containing Python keywords
+
+        Deduplicates extracted blocks to avoid reviewing the same code twice.
+
+        Args:
+            text: Raw text possibly containing code blocks
+
+        Returns:
+            Concatenated unique code blocks, or empty string if none found
+        """
         if not text:
             return ""
 
@@ -416,7 +475,19 @@ Output JSON with:
         return ""
 
     def _parse_llm_json(self, text: str) -> Dict[str, Any]:
-        """Robust JSON extraction."""
+        """
+        Extract JSON from LLM response with robust error handling.
+
+        Uses regex to find JSON objects in potentially mixed text output.
+        Returns a fallback dict on parse failure rather than raising.
+
+        Args:
+            text: Raw LLM response text
+
+        Returns:
+            Parsed JSON dict with 'summary' and 'additional_issues' keys,
+            or fallback dict on parse failure
+        """
         try:
             match = re.search(r'\{.*\}', text, re.DOTALL)
             if match:
@@ -431,7 +502,23 @@ Output JSON with:
         issues: List[CodeIssue],
         metrics: List[ComplexityMetrics]
     ) -> int:
-        """Calculate quality score 0-100."""
+        """
+        Calculate overall code quality score (0-100).
+
+        Scoring algorithm:
+        - Starts at 100
+        - Deducts based on issue severity × confidence:
+          CRITICAL: -30, HIGH: -15, MEDIUM: -7, LOW: -3, INFO: -1
+        - Penalizes high average complexity (cyclomatic > 10, cognitive > 15)
+        - Clamps to [0, 100] range
+
+        Args:
+            issues: List of found issues with severity and confidence
+            metrics: List of complexity metrics per function
+
+        Returns:
+            Integer quality score between 0 and 100
+        """
         score = 100
 
         severity_deductions = {
@@ -458,7 +545,22 @@ Output JSON with:
         return max(0, min(100, score))
 
     def _calculate_risk(self, issues: List[CodeIssue], score: int) -> str:
-        """Determine deployment risk level."""
+        """
+        Determine deployment risk level based on issues and score.
+
+        Risk levels:
+        - CRITICAL: Any critical issues OR score < 40
+        - HIGH: More than 2 high issues OR score < 60
+        - MEDIUM: Score < 80
+        - LOW: Score >= 80 with no critical/high issues
+
+        Args:
+            issues: List of found issues
+            score: Calculated quality score (0-100)
+
+        Returns:
+            Risk level string: "CRITICAL", "HIGH", "MEDIUM", or "LOW"
+        """
         critical_count = sum(1 for i in issues if i.severity == IssueSeverity.CRITICAL)
         high_count = sum(1 for i in issues if i.severity == IssueSeverity.HIGH)
 
@@ -477,7 +579,23 @@ Output JSON with:
         metrics: List[ComplexityMetrics],
         rag_context: RAGContext
     ) -> List[str]:
-        """Generate actionable recommendations."""
+        """
+        Generate actionable improvement recommendations.
+
+        Recommendation logic:
+        - Security issues → suggest security scanning tools
+        - Many complex functions → suggest refactoring priorities
+        - No test issues → remind about test coverage
+        - Team standards → apply team-specific rules (e.g., docstrings)
+
+        Args:
+            issues: List of found issues by category
+            metrics: Complexity metrics to identify refactoring candidates
+            rag_context: Team standards from RAG engine
+
+        Returns:
+            List of human-readable recommendation strings
+        """
         recs = []
 
         security_issues = [i for i in issues if i.category == IssueCategory.SECURITY]
@@ -497,7 +615,21 @@ Output JSON with:
         return recs
 
     def _estimate_fix_time(self, issues: List[CodeIssue]) -> str:
-        """Estimate time to fix issues."""
+        """
+        Estimate time required to fix all identified issues.
+
+        Uses a simple weighted model:
+        - CRITICAL: ~4 hours each
+        - HIGH: ~2 hours each
+        - MEDIUM: ~1 hour each
+        - LOW/INFO: ignored
+
+        Args:
+            issues: List of issues with severity levels
+
+        Returns:
+            Human-readable time estimate string (e.g., "1-4 hours", "2+ days")
+        """
         critical = sum(1 for i in issues if i.severity == IssueSeverity.CRITICAL)
         high = sum(1 for i in issues if i.severity == IssueSeverity.HIGH)
         medium = sum(1 for i in issues if i.severity == IssueSeverity.MEDIUM)

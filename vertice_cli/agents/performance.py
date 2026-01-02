@@ -192,8 +192,9 @@ class PerformanceAgent(BaseAgent):
         try:
             # Determine scan scope
             target_path = Path(task.context.get("root_dir", "."))
-            if "target_file" in task.metadata:
-                target_path = Path(task.metadata["target_file"])
+            # FIX 2.6: Use task.context instead of task.metadata
+            if "target_file" in task.context:
+                target_path = Path(task.context["target_file"])
 
             # Collect Python files
             python_files = self._collect_python_files(target_path)
@@ -206,8 +207,9 @@ class PerformanceAgent(BaseAgent):
             bottlenecks.extend(await self._detect_inefficiencies(python_files))
 
             # Run profiling if requested
+            # FIX 2.6: Use task.context instead of task.metadata
             profile_results: List[ProfileResult] = []
-            if task.metadata.get("run_profiling", False):
+            if task.context.get("run_profiling", False):
                 profile_results = await self._run_profiling(python_files)
 
             # Calculate performance score (0-100)
@@ -329,8 +331,8 @@ class PerformanceAgent(BaseAgent):
                                 )
                             )
 
-            except Exception:
-                # Skip files with syntax errors
+            except (SyntaxError, OSError) as e:
+                logger.debug(f"Skipping {file_path} in hotspot analysis: {e}")
                 continue
 
         return bottlenecks
@@ -364,7 +366,8 @@ class PerformanceAgent(BaseAgent):
                         )
                     )
 
-            except Exception:
+            except (OSError, UnicodeDecodeError) as e:
+                logger.debug(f"Skipping {file_path} in N+1 detection: {e}")
                 continue
 
         return bottlenecks
@@ -419,7 +422,8 @@ class PerformanceAgent(BaseAgent):
                                         )
                                     )
 
-            except Exception:
+            except (SyntaxError, OSError) as e:
+                logger.debug(f"Skipping {file_path} in memory analysis: {e}")
                 continue
 
         return bottlenecks
@@ -469,7 +473,8 @@ class PerformanceAgent(BaseAgent):
                         )
                     )
 
-            except Exception:
+            except (OSError, UnicodeDecodeError) as e:
+                logger.debug(f"Skipping {file_path} in inefficiency detection: {e}")
                 continue
 
         return bottlenecks
@@ -478,10 +483,17 @@ class PerformanceAgent(BaseAgent):
         """Run cProfile on Python files (if executable).
 
         Note: This is a simplified version. In production, this would
-        require more sophisticated profiling infrastructure.
+        require more sophisticated profiling infrastructure (cProfile, py-spy).
+
+        Current implementation returns empty results as profiling requires:
+        - Executable entry points in the codebase
+        - Process isolation for safe execution
+        - Integration with py-spy or cProfile for sampling
+
+        Returns:
+            Empty list (profiling not yet implemented).
         """
-        # TODO: Implement cProfile or py-spy integration
-        logger.debug("_run_profiling: stub - profiling infrastructure not implemented")
+        logger.debug("_run_profiling: returning empty - profiling infrastructure pending")
         return []
 
     def _calculate_performance_score(self, bottlenecks: List[Bottleneck]) -> int:

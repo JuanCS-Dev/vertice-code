@@ -49,6 +49,15 @@ from ..exceptions import (
     ResourceError,
     TokenLimitError,
     MemoryLimitError,
+    # Code execution errors
+    SyntaxError,
+    ImportError,
+    TypeError,
+    RuntimeError,
+    # File system errors
+    FileNotFoundError,
+    PermissionError,
+    FileAlreadyExistsError,
 )
 
 __all__ = [
@@ -83,4 +92,13 @@ __all__ = [
     "ResourceError",
     "TokenLimitError",
     "MemoryLimitError",
+    # Code execution errors
+    "SyntaxError",
+    "ImportError",
+    "TypeError",
+    "RuntimeError",
+    # File system errors
+    "FileNotFoundError",
+    "PermissionError",
+    "FileAlreadyExistsError",
 ]

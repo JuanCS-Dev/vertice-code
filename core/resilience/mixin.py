@@ -184,7 +184,8 @@ class ResilienceMixin:
             limiter = self._get_rate_limiter(provider)
             try:
                 await limiter.acquire(estimated_tokens=estimated_tokens)
-            except Exception:
+            except Exception as e:
+                logger.warning(f"Rate limit exceeded for provider {provider}: {e}")
                 self._resilience_stats["rate_limited"] += 1
                 raise
 
@@ -212,7 +213,8 @@ class ResilienceMixin:
 
             return result
 
-        except Exception:
+        except Exception as e:
+            logger.warning(f"Resilient call failed for provider {provider}: {e}")
             self._resilience_stats["failed_calls"] += 1
 
             # Check if circuit opened

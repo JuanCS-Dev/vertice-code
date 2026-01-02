@@ -253,6 +253,73 @@ CRITICAL RULES:
 
 Remember: You're the last line of defense. NEVER FAIL."""
 
+    def _parse_incident_analysis(self, analysis: str, request: str) -> Dict[str, Any]:
+        """
+        Parse LLM analysis to extract structured incident data.
+
+        Extracts:
+        - Root cause hypothesis from LLM response
+        - Affected services mentioned
+        - Severity indicators
+
+        Args:
+            analysis: LLM analysis text
+            request: Original incident request
+
+        Returns:
+            Dict with 'root_cause', 'affected_services', 'severity_hint' keys.
+        """
+        import re
+
+        result = {
+            "root_cause": "Analysis unavailable",
+            "affected_services": [],
+            "severity_hint": None,  # None means no override
+        }
+
+        if not analysis:
+            return result
+
+        analysis_lower = analysis.lower()
+
+        # Extract root cause (look for patterns like "root cause:" or "caused by")
+        cause_patterns = [
+            r"root cause[:\s]+([^.]+)",
+            r"caused by[:\s]+([^.]+)",
+            r"the issue is[:\s]+([^.]+)",
+            r"problem[:\s]+([^.]+)",
+        ]
+
+        for pattern in cause_patterns:
+            match = re.search(pattern, analysis, re.IGNORECASE)
+            if match:
+                result["root_cause"] = match.group(1).strip()[:200]
+                break
+
+        # Extract affected services (look for service names)
+        service_patterns = [
+            r"(\w+-service)",
+            r"(api|database|redis|cache|auth|payment|order|user)(?:\s+service)?",
+        ]
+
+        services = set()
+        for pattern in service_patterns:
+            matches = re.findall(pattern, analysis_lower)
+            for match in matches:
+                if len(match) > 2:  # Skip very short matches
+                    services.add(match)
+
+        if services:
+            result["affected_services"] = list(services)[:10]
+
+        # Check for severity hints in LLM response
+        if any(w in analysis_lower for w in ["critical", "p0", "outage", "down"]):
+            result["severity_hint"] = "P0"
+        elif any(w in analysis_lower for w in ["high", "p1", "degraded", "urgent"]):
+            result["severity_hint"] = "P1"
+
+        return result
+
     def _load_templates(self) -> Dict[str, Any]:
         """Load production-grade infrastructure templates"""
         return {
@@ -428,21 +495,27 @@ Be precise and actionable.
 
         analysis = await self._call_llm(analysis_prompt)
 
-        # Log analysis for debugging
-        # TODO: Parse LLM response for structured incident data
-        logger.debug(f"Incident analysis: {analysis[:200] if analysis else 'empty'}...")
-
-        # Parse analysis (simplified - real version would use structured output)
-        # For demo, we'll create a sample incident
+        # Parse LLM response for structured incident data
+        parsed = self._parse_incident_analysis(analysis, task.request)
+        logger.debug(f"Incident analysis parsed: root_cause={parsed['root_cause'][:50]}..., "
+                     f"services={len(parsed['affected_services'])}, severity_hint={parsed['severity_hint']}")
 
         incident_id = hashlib.md5(task.request.encode()).hexdigest()[:8]
 
-        # Detect severity from keywords
+        # Detect severity: combine keywords + LLM hint
         severity = IncidentSeverity.P3
-        if any(word in task.request.lower() for word in ["critical", "down", "p0", "outage"]):
+        if parsed["severity_hint"] == "P0" or any(
+            word in task.request.lower() for word in ["critical", "down", "p0", "outage"]
+        ):
             severity = IncidentSeverity.P0
-        elif any(word in task.request.lower() for word in ["high", "p1", "degraded"]):
+        elif parsed["severity_hint"] == "P1" or any(
+            word in task.request.lower() for word in ["high", "p1", "degraded"]
+        ):
             severity = IncidentSeverity.P1
+
+        # Use parsed services or fallback
+        affected_services = parsed["affected_services"] if parsed["affected_services"] else ["api-service", "database"]
+        root_cause = parsed["root_cause"] if parsed["root_cause"] != "Analysis unavailable" else "High memory usage causing OOM errors"
 
         # Determine if safe to auto-remediate
         can_auto_remediate = severity in [IncidentSeverity.P2, IncidentSeverity.P3]
@@ -451,8 +524,8 @@ Be precise and actionable.
             incident_id=incident_id,
             severity=severity,
             description=task.request,
-            affected_services=["api-service", "database"],  # Would be detected
-            root_cause="High memory usage causing OOM errors",
+            affected_services=affected_services,
+            root_cause=root_cause,
             recommended_actions=[RemediationAction.RESTART_POD, RemediationAction.ADJUST_RESOURCES],
             can_auto_remediate=can_auto_remediate,
             time_to_detect=0.0,  # Will be set by caller

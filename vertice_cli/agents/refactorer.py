@@ -28,11 +28,14 @@ References:
 import ast
 import hashlib
 import json
+import logging
 from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple, Any
 from enum import Enum
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 # LibCST for format-preserving AST transformations
 try:
@@ -522,7 +525,8 @@ class RefactorerAgent(BaseAgent):
             role=AgentRole.REFACTORER,
             capabilities=[
                 AgentCapability.FILE_EDIT,
-                AgentCapability.READ_ONLY
+                AgentCapability.READ_ONLY,
+                AgentCapability.BASH_EXEC  # FIX 1.3: Added for test execution
             ],
             llm_client=llm_client,
             mcp_client=mcp_client,
@@ -1073,7 +1077,8 @@ OUTPUT FORMAT (JSON):
                     if Path(f).exists():
                         content = Path(f).read_text(errors='ignore')[:3000]
                         code_parts.append(f"# File: {f}\n{content}")
-                except Exception:
+                except (OSError, UnicodeDecodeError) as e:
+                    logger.debug(f"Could not read file {f} for refactoring: {e}")
                     continue
             source_code = "\n\n".join(code_parts)
 

@@ -9,9 +9,12 @@ Author: JuanCS Dev
 Date: 2025-11-26
 """
 
+import logging
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, Optional
+
+logger = logging.getLogger(__name__)
 
 from .pool import ConnectionPool, PoolConfig, PoolStats
 
@@ -160,7 +163,8 @@ class ConnectionManager:
             try:
                 async with await pool.acquire() as conn:
                     results[name] = True
-            except Exception:
+            except Exception as e:
+                logger.debug(f"Health check failed for pool {name}: {e}")
                 results[name] = False
         return results
 

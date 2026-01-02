@@ -30,10 +30,13 @@ References:
 
 import ast
 import json
+import logging
 import re
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional
+
+logger = logging.getLogger(__name__)
 
 from .base import (
     AgentCapability,
@@ -42,6 +45,13 @@ from .base import (
     AgentTask,
     BaseAgent,
 )
+
+# FIX E2E: Import grounding prompts for anti-hallucination
+from vertice_cli.prompts.grounding import (
+    INLINE_CODE_PRIORITY,
+    get_analysis_grounding,
+)
+from vertice_cli.core.temperature_config import get_temperature
 
 
 class TestFramework(str, Enum):
@@ -218,8 +228,49 @@ class TestingAgent(BaseAgent):
         self.min_mutation_score: float = 80.0
         self.flaky_detection_runs: int = 5
 
-        # Execution tracking (from BaseAgent)
+        # Execution tracking
         self.execution_count: int = 0
+
+    def _extract_code_blocks(self, text: str) -> str:
+        """FIX E2E: Extract code from markdown code blocks or inline in user message.
+
+        Claude Code Pattern: Inline code has priority over file tools.
+
+        Args:
+            text: User message or prompt text
+
+        Returns:
+            Extracted code as string, empty if none found
+        """
+        if not text:
+            return ""
+
+        code_blocks = []
+
+        # Pattern 1: Fenced code blocks ```python\ncode\n``` or ```\ncode\n```
+        fenced_pattern = r'```(?:python|py)?\n(.*?)```'
+        matches = re.findall(fenced_pattern, text, re.DOTALL)
+        code_blocks.extend(matches)
+
+        # Pattern 2: Generic fenced blocks if no python-specific found
+        if not code_blocks:
+            generic_pattern = r'```\n?(.*?)```'
+            matches = re.findall(generic_pattern, text, re.DOTALL)
+            code_blocks.extend(matches)
+
+        # Pattern 3: Indented code blocks (4 spaces or tab)
+        if not code_blocks:
+            indented_pattern = r'(?:^|\n)((?:[ ]{4}|\t).*(?:\n(?:[ ]{4}|\t).*)*)'
+            matches = re.findall(indented_pattern, text, re.DOTALL)
+            code_blocks.extend(matches)
+
+        # Pattern 4: Look for function/class definitions directly
+        if not code_blocks:
+            # Check if the text itself looks like code
+            if re.search(r'^(def |class |async def |import |from )', text, re.MULTILINE):
+                code_blocks.append(text)
+
+        return '\n\n'.join(code_blocks).strip()
 
     async def execute(self, task: AgentTask) -> AgentResponse:
         """Execute testing analysis task.
@@ -269,23 +320,46 @@ class TestingAgent(BaseAgent):
 
     async def _handle_test_generation(self, task: AgentTask) -> AgentResponse:
         """Generate test suite for given code.
-        
+
+        FIX E2E: Implements Claude Code pattern - inline code has priority.
+
+        Priority Order (Claude Code 2026 Pattern):
+            1. Inline code in user_message (HIGHEST PRIORITY)
+            2. source_code in context
+            3. file_path in context
+            4. files list in context
+
         Args:
-            task: Task with source_code or file_path in context
-        
+            task: Task with source_code, file_path, or inline code in user_message
+
         Returns:
             AgentResponse with generated tests
         """
-        source_code = task.context.get("source_code", "")
-        file_path = task.context.get("file_path", "")
-        files = task.context.get("files", [])
+        source_code = ""
 
-        # Try multiple sources for code
+        # PRIORITY 1: Extract inline code from user message (Claude Code pattern)
+        user_message = task.context.get("user_message", "")
+        if not user_message:
+            # Also check 'prompt' and 'request' keys
+            user_message = task.context.get("prompt", task.context.get("request", ""))
+
+        inline_code = self._extract_code_blocks(user_message)
+        if inline_code:
+            source_code = inline_code
+            # FIX E2E: Using inline code from prompt
+
+        # PRIORITY 2: Check source_code in context
+        if not source_code:
+            source_code = task.context.get("source_code", "")
+            # Using source_code from context if available
+
+        # PRIORITY 3: Read from file_path
+        file_path = task.context.get("file_path", "")
         if not source_code and file_path:
-            # Read file if path provided
             try:
                 result = await self._execute_tool("read_file", {"path": file_path})
                 source_code = result.get("content", "")
+                # FIX E2E: Read code from file
             except Exception as e:
                 return AgentResponse(
                     success=False,
@@ -294,23 +368,28 @@ class TestingAgent(BaseAgent):
                     error=str(e),
                 )
 
-        # FIXED: Read from files list if no source_code yet
+        # PRIORITY 4: Read from files list
+        files = task.context.get("files", [])
         if not source_code and files:
             code_parts = []
             for f in files[:5]:  # Limit to 5 files
                 try:
                     with open(f, 'r') as fp:
                         code_parts.append(f"# File: {f}\n{fp.read()}")
-                except Exception:
+                except (OSError, UnicodeDecodeError) as e:
+                    logger.debug(f"Could not read file {f}: {e}")
                     continue
             source_code = "\n\n".join(code_parts)
+            # FIX E2E: Read code from files list
 
+        # Final check - if still no code, provide helpful error
         if not source_code:
             return AgentResponse(
                 success=False,
                 data={},
-                reasoning="No source code provided",
-                error="source_code or file_path required in task context",
+                reasoning="No source code found. Please provide code inline in your message, "
+                         "or specify source_code, file_path, or files in the task context.",
+                error="No source code provided. Tip: Include code in ```python``` blocks.",
             )
 
         # Generate tests
@@ -400,7 +479,7 @@ class TestingAgent(BaseAgent):
         if "textual" in source_code:
              tui_apps = [cls for cls in classes if any(b.id == 'App' for b in cls.bases if isinstance(b, ast.Name))]
              if tui_apps:
-                 self.log(f"Detected Textual Apps: {[a.name for a in tui_apps]}")
+                 # Detected Textual Apps
                  for app in tui_apps:
                      test_cases.extend(self._generate_tui_tests(app))
 
@@ -932,7 +1011,8 @@ async def test_{app_name.lower()}_quit_command():
                 mutation_score = mutation_response.data.get("mutation_testing", {}).get(
                     "mutation_score", 0
                 )
-            except Exception:
+            except Exception as e:
+                logger.warning(f"Mutation testing failed during quality analysis: {e}")
                 mutation_score = 0
 
             # Calculate component scores

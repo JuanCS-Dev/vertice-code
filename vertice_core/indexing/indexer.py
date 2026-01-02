@@ -154,7 +154,8 @@ class FileHashCache:
                 with open(self.cache_path, "r") as f:
                     data = json.load(f)
                     self._hashes = {k: tuple(v) for k, v in data.items()}
-            except Exception:
+            except (OSError, json.JSONDecodeError) as e:
+                logger.debug(f"Could not load hash cache: {e}")
                 self._hashes = {}
 
     def _save(self) -> None:
@@ -170,7 +171,8 @@ class FileHashCache:
         try:
             content = filepath.read_bytes()
             return hashlib.md5(content).hexdigest()
-        except Exception:
+        except (OSError, IOError) as e:
+            logger.debug(f"Could not compute hash for {filepath}: {e}")
             return ""
 
     def is_modified(self, filepath: str) -> bool:
@@ -181,7 +183,8 @@ class FileHashCache:
 
         try:
             mtime = path.stat().st_mtime
-        except Exception:
+        except OSError as e:
+            logger.debug(f"Could not stat file {filepath}: {e}")
             return True
 
         # Check if we have cached info
@@ -209,8 +212,8 @@ class FileHashCache:
             mtime = path.stat().st_mtime
             content_hash = self._compute_hash(path)
             self._hashes[filepath] = (content_hash, mtime)
-        except Exception:
-            pass
+        except OSError as e:
+            logger.debug(f"Could not update cache for {filepath}: {e}")
 
     def update_batch(self, filepaths: List[str]) -> None:
         """Update cache for multiple files."""
@@ -422,7 +425,8 @@ class CodebaseIndexer:
                 size_kb = path.stat().st_size / 1024
                 if size_kb > self.config.max_file_size_kb:
                     continue
-            except Exception:
+            except OSError as e:
+                logger.debug(f"Could not stat file {path}: {e}")
                 continue
 
             files.append(str_path)

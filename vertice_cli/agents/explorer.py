@@ -3,11 +3,18 @@ ExplorerAgent: The Context Navigator
 
 Busca REAL no filesystem usando ripgrep/glob.
 Retorna arquivos relevantes organizados por estrutura do projeto.
+
+FIX E2E: Now includes content snippets, not just paths.
+Following Claude Code pattern: provide actual content for grounding.
 """
 
+import logging
+import re
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
+
+logger = logging.getLogger(__name__)
 
 from vertice_cli.agents.base import (
     AgentCapability,
@@ -16,6 +23,19 @@ from vertice_cli.agents.base import (
     AgentResponse,
     BaseAgent,
 )
+
+# FIX E2E: Import grounding prompts for anti-hallucination
+try:
+    from vertice_cli.prompts.grounding import GROUNDING_INSTRUCTION
+except ImportError:
+    GROUNDING_INSTRUCTION = ""
+
+# FIX E2E: Import temperature config
+try:
+    from vertice_cli.core.temperature_config import get_temperature
+except ImportError:
+    def get_temperature(agent_type: str, task_type: str = None) -> float:
+        return 0.2  # Explorer default - low for accuracy
 
 
 class ExplorerAgent(BaseAgent):
@@ -95,8 +115,8 @@ class ExplorerAgent(BaseAgent):
                                     "relevance": "HIGH",
                                     "reason": f"Classes: {', '.join(classes[:5])}; Functions: {', '.join(functions[:10])}"
                                 })
-                        except Exception:
-                            pass
+                        except (OSError, UnicodeDecodeError) as e:
+                            logger.debug(f"Could not analyze content of {f}: {e}")
 
             if search_type == "structure":
                 # Usuário quer ver estrutura do projeto
@@ -106,10 +126,11 @@ class ExplorerAgent(BaseAgent):
                 dir_name = self._extract_dir_name(query)
                 found_files.extend(self._search_directory(dir_name))
             elif search_type == "deep_search":
-                # Deep search for imports/usages
+                # FIX E2E: Deep search using ALL keywords, not just first
+                # Previous bug: keywords[:1] ignored most search terms
                 keywords = self._extract_keywords(query)
-                for kw in keywords[:1]: # Focus on main keyword
-                     found_files.extend(self._deep_search_imports(kw))
+                for kw in keywords[:5]:  # Use up to 5 keywords for thorough search
+                    found_files.extend(self._deep_search_imports(kw))
             else:
                 # Busca por keywords
                 keywords = self._extract_keywords(query)
@@ -182,12 +203,16 @@ class ExplorerAgent(BaseAgent):
 
     def _extract_keywords(self, query: str) -> List[str]:
         """Extrai keywords relevantes da query."""
+        # FIX E2E: Expanded stopwords to avoid matching irrelevant paths
         stopwords = {
             'o', 'a', 'os', 'as', 'de', 'da', 'do', 'em', 'no', 'na', 'um', 'uma',
             'para', 'com', 'por', 'que', 'se', 'e', 'ou', 'onde', 'ficam', 'estão',
             'arquivos', 'files', 'where', 'are', 'my', 'the', 'is', 'meus', 'minha',
             'folder', 'pasta', 'diretório', 'directory', 'find', 'search', 'buscar',
-            'procurar', 'localizar', 'show', 'mostrar', 'listar', 'list'
+            'procurar', 'localizar', 'show', 'mostrar', 'listar', 'list',
+            # FIX E2E: Added common words that cause false positives
+            'ver', 'quero', 'trechos', 'relacionados', 'relevante', 'conteúdo',
+            'código', 'como', 'funciona', 'encontre', 'mostre', 'veja', 'code',
         }
 
         import re
@@ -304,13 +329,16 @@ class ExplorerAgent(BaseAgent):
                         "relevance": "HIGH",
                         "reason": f"Nome contém '{keyword}'"
                     })
-        except Exception:
-            pass
+        except (OSError, PermissionError) as e:
+            logger.warning(f"Search by name for '{keyword}' failed: {e}")
 
         return results
 
     def _search_content(self, keyword: str) -> List[Dict[str, Any]]:
-        """Busca keyword no conteúdo dos arquivos usando ripgrep."""
+        """Busca keyword no conteúdo dos arquivos usando ripgrep.
+
+        FIX E2E: Now includes content snippets, not just paths.
+        """
         results = []
 
         try:
@@ -327,12 +355,17 @@ class ExplorerAgent(BaseAgent):
                 for line in output.stdout.strip().split('\n')[:20]:
                     if line:
                         try:
-                            rel_path = str(Path(line).relative_to(self._project_root))
-                            # Não duplicar se já foi encontrado por nome
+                            file_path = Path(line)
+                            rel_path = str(file_path.relative_to(self._project_root))
+
+                            # FIX E2E: Include content snippet for grounding
+                            snippet = self._extract_snippet(file_path)
+
                             results.append({
                                 "path": rel_path,
                                 "relevance": "MEDIUM",
-                                "reason": f"Contém '{keyword}'"
+                                "reason": f"Contém '{keyword}'",
+                                "snippet": snippet  # FIX E2E: Add actual content
                             })
                         except (ValueError, OSError):
                             pass
@@ -346,11 +379,17 @@ class ExplorerAgent(BaseAgent):
                     for line in output.stdout.strip().split('\n')[:15]:
                         if line and not any(ex in line for ex in self.EXCLUDE_DIRS):
                             try:
-                                rel_path = str(Path(line).relative_to(self._project_root))
+                                file_path = Path(line)
+                                rel_path = str(file_path.relative_to(self._project_root))
+
+                                # FIX E2E: Include content snippet
+                                snippet = self._extract_snippet(file_path)
+
                                 results.append({
                                     "path": rel_path,
                                     "relevance": "MEDIUM",
-                                    "reason": f"Contém '{keyword}'"
+                                    "reason": f"Contém '{keyword}'",
+                                    "snippet": snippet
                                 })
                             except (ValueError, OSError):
                                 pass
@@ -365,32 +404,125 @@ class ExplorerAgent(BaseAgent):
         """Deep search for imports and usages recursively."""
         results = []
         try:
-             # Use grep to find 'import ... keyword' or 'from ... keyword'
-             # Or usages like 'keyword('
-             cmd = ['grep', '-r', '-l', '-E', fr"import.*{keyword}|from.*{keyword}|{keyword}\(", str(self._project_root)]
-             
-             # Exclude dirs
-             exclude_args = []
-             for ex in self.EXCLUDE_DIRS:
+            # Use grep to find 'import ... keyword' or 'from ... keyword'
+            # Or usages like 'keyword('
+            cmd = ['grep', '-r', '-l', '-E', fr"import.*{keyword}|from.*{keyword}|{keyword}\(", str(self._project_root)]
+
+            # Exclude dirs
+            exclude_args = []
+            for ex in self.EXCLUDE_DIRS:
                 exclude_args.extend(['--exclude-dir', ex])
-             
-             cmd.extend(exclude_args)
-             
-             output = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
-             
-             if output.stdout:
-                 for line in output.stdout.strip().split('\n')[:30]:
-                     if line:
-                         try:
-                             rel_path = str(Path(line).relative_to(self._project_root))
-                             results.append({
-                                 "path": rel_path,
-                                 "relevance": "HIGH",
-                                 "reason": f"Deep usage/import of '{keyword}'"
-                             })
-                         except Exception:
-                             pass
-        except Exception as e:
-            print(f"Deep search failed: {e}")
-            
+
+            cmd.extend(exclude_args)
+
+            output = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
+
+            if output.stdout:
+                for line in output.stdout.strip().split('\n')[:30]:
+                    if line:
+                        try:
+                            file_path = Path(line)
+                            rel_path = str(file_path.relative_to(self._project_root))
+
+                            # FIX E2E: Include content snippet for grounding
+                            snippet = self._extract_snippet(file_path)
+
+                            results.append({
+                                "path": rel_path,
+                                "relevance": "HIGH",
+                                "reason": f"Deep usage/import of '{keyword}'",
+                                "snippet": snippet  # FIX E2E: Add actual content
+                            })
+                        except (ValueError, OSError) as e:
+                            logger.debug(f"Failed to process file in deep search: {e}")
+        except (subprocess.TimeoutExpired, OSError) as e:
+            logger.warning(f"Deep search for '{keyword}' failed: {e}")
+
+        return results
+
+    def _extract_snippet(self, file_path: Path, limit: int = 500) -> str:
+        """FIX E2E: Extract meaningful snippet from file.
+
+        Following Claude Code pattern: provide actual content, not just paths.
+        This enables grounding - the LLM can cite real code.
+
+        Args:
+            file_path: Path to the file
+            limit: Maximum characters for snippet
+
+        Returns:
+            Code snippet (first class/function or N chars)
+        """
+        try:
+            if not file_path.exists():
+                return ""
+
+            content = file_path.read_text(encoding='utf-8', errors='ignore')
+
+            if len(content) <= limit:
+                return content
+
+            # Try to get first class or function (more meaningful than arbitrary cut)
+            class_match = re.search(
+                r'(class \w+.*?(?=\n\nclass |\n\ndef |\Z))',
+                content,
+                re.DOTALL
+            )
+            if class_match and len(class_match.group(1)) <= limit * 2:
+                return class_match.group(1)
+
+            func_match = re.search(
+                r'(def \w+.*?(?=\n\ndef |\n\nclass |\Z))',
+                content,
+                re.DOTALL
+            )
+            if func_match and len(func_match.group(1)) <= limit:
+                return func_match.group(1)
+
+            # Fallback to first N chars
+            return content[:limit] + '...'
+
+        except (OSError, UnicodeDecodeError) as e:
+            logger.debug(f"Snippet extraction failed for {file_path}: {e}")
+            return "[Snippet unavailable]"
+
+    def _search_with_content(self, keyword: str) -> List[Dict[str, Any]]:
+        """FIX E2E: Search files and include content snippets.
+
+        This is the improved search that provides grounding content.
+
+        Args:
+            keyword: Search keyword
+
+        Returns:
+            List of results with path, relevance, reason, AND snippet
+        """
+        results = []
+
+        try:
+            # First, find matching files
+            for path in self._project_root.rglob(f"*{keyword}*"):
+                if any(ex in str(path) for ex in self.EXCLUDE_DIRS):
+                    continue
+
+                if path.is_file() and path.suffix in self.CODE_EXTENSIONS:
+                    rel_path = str(path.relative_to(self._project_root))
+
+                    # Include content snippet
+                    snippet = self._extract_snippet(path)
+
+                    results.append({
+                        "path": rel_path,
+                        "relevance": "HIGH",
+                        "reason": f"Arquivo contém '{keyword}'",
+                        "snippet": snippet,
+                        "size": path.stat().st_size
+                    })
+
+                    if len(results) >= 20:
+                        break
+
+        except (OSError, PermissionError) as e:
+            logger.warning(f"Content search with snippets failed for '{keyword}': {e}")
+
         return results

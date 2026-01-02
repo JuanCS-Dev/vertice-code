@@ -11,9 +11,12 @@ Date: 2025-11-26
 
 import asyncio
 import fnmatch
+import logging
 import time
 import uuid
 from typing import Any, Callable, Dict, List, Optional
+
+logger = logging.getLogger(__name__)
 
 from .interface import (
     IMessageQueue,
@@ -278,9 +281,8 @@ class InMemoryBroker(IMessageBroker):
             result = handler(message)
             if asyncio.iscoroutine(result):
                 await result
-        except Exception:
-            # Log error in production
-            pass
+        except Exception as e:
+            logger.error(f"Handler failed for message {message.id}: {e}")
 
     async def _start_dispatcher(self) -> None:
         """Start the message dispatcher."""
@@ -303,7 +305,8 @@ class InMemoryBroker(IMessageBroker):
                             try:
                                 await self._invoke_handler(handler, message)
                                 await queue.ack(message.id)
-                            except Exception:
+                            except Exception as e:
+                                logger.warning(f"Message {message.id} nacked due to error: {e}")
                                 await queue.nack(message.id)
 
             await asyncio.sleep(0.1)  # Small delay between dispatch cycles

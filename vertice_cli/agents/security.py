@@ -19,12 +19,15 @@ Philosophy (Boris Cherny):
     "Security is not a feature. It's a non-negotiable."
 """
 
+import logging
 import re
 import subprocess
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+logger = logging.getLogger(__name__)
 
 from .base import (
     AgentCapability,
@@ -305,8 +308,9 @@ class SecurityAgent(BaseAgent):
                 # AST-based detection (eval/exec)
                 vulnerabilities.extend(self._detect_eval_usage(file, content))
 
-            except Exception:
-                continue  # Skip files with encoding issues
+            except (OSError, UnicodeDecodeError) as e:
+                logger.debug(f"Skipping {file} in vulnerability scan: {e}")
+                continue
 
         return vulnerabilities
 
@@ -628,7 +632,8 @@ class SecurityAgent(BaseAgent):
                             )
                         )
 
-            except Exception:
+            except (OSError, UnicodeDecodeError) as e:
+                logger.debug(f"Skipping {file} in secret scan: {e}")
                 continue
 
         return secrets
