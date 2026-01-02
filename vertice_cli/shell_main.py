@@ -164,6 +164,9 @@ logger = logging.getLogger(__name__)
 from .shell.context import SessionContext
 from .shell.safety import get_safety_level as _get_safety_level_fn
 
+# SCALE & SUSTAIN Phase 2: Modular output rendering
+from .shell.output import ResultRenderer
+
 
 class InteractiveShell:
     """Tool-based interactive shell (Claude Code-level) with multi-turn conversation."""
@@ -302,6 +305,10 @@ class InteractiveShell:
         # SCALE & SUSTAIN Phase 1.2: Command Dispatcher (CC Reduction)
         # Replaces massive if/elif chain (CC=112) with O(1) dictionary dispatch
         self._command_dispatcher = CommandDispatcher(self)
+
+        # SCALE & SUSTAIN Phase 2: Modular Result Renderer
+        # Replaces 120-line if/elif chain with Strategy pattern
+        self._result_renderer = ResultRenderer(self.console)
 
         # Note: Semantic indexer moved earlier (before ContextSuggestionEngine)
 
@@ -862,131 +869,11 @@ Response: I don't have a tool to check the current time, but I can help you with
                 # Week 2 Day 2: Update dashboard with error
                 self.dashboard.complete_operation(op_id, OperationStatus.ERROR)
 
-            # Format result
-            if result.success:
-                if tool_name == "read_file":
-                    # TUI: Enhanced code block with language badge
-                    lang = result.metadata.get("language", "text")
-                    CodeBlock, _ = _get_tui_components()
-                    code_block = CodeBlock(
-                        str(result.data),
-                        language=lang,
-                        show_line_numbers=True,
-                        show_language=True,
-                        copyable=True
-                    )
-                    self.console.print(code_block.render())
-                    results.append(f"✓ Read {result.metadata['path']} ({result.metadata['lines']} lines)")
-
-                elif tool_name in ["write_file", "edit_file"]:
-                    results.append(f"✓ {result.data}")
-                    if result.metadata.get("backup"):
-                        results.append(f"  Backup: {result.metadata['backup']}")
-
-                elif tool_name == "search_files":
-                    # Show search results as table
-                    if result.data:
-                        table = Table(title=f"Search Results: '{args['pattern']}'")
-                        table.add_column("File", style="cyan")
-                        table.add_column("Line", style="yellow", justify="right")
-                        table.add_column("Text", style="white")
-
-                        for match in result.data[:10]:  # Show first 10
-                            table.add_row(
-                                match["file"],
-                                str(match["line"]),
-                                match["text"][:80]
-                            )
-
-                        self.console.print(table)
-                        results.append(f"✓ Found {result.metadata['count']} matches")
-                    else:
-                        results.append("No matches found")
-
-                elif tool_name == "bash_command":
-                    data = result.data
-                    if data.get("stdout"):
-                        self.console.print("[dim]stdout:[/dim]")
-                        self.console.print(data["stdout"])
-                    if data.get("stderr"):
-                        self.console.print("[yellow]stderr:[/yellow]")
-                        self.console.print(data["stderr"])
-                    results.append(f"✓ Exit code: {data['exit_code']}")
-
-                elif tool_name == "git_status":
-                    data = result.data
-                    status_text = f"Branch: {data['branch']}\n"
-                    if data['modified']:
-                        status_text += f"Modified: {', '.join(data['modified'])}\n"
-                    if data['untracked']:
-                        status_text += f"Untracked: {', '.join(data['untracked'])}\n"
-                    if data['staged']:
-                        status_text += f"Staged: {', '.join(data['staged'])}\n"
-                    self.console.print(Panel(status_text, title="Git Status", border_style="green"))
-                    results.append("✓ Git status retrieved")
-
-                elif tool_name == "git_diff":
-                    if result.data:
-                        # TUI: GitHub-style diff viewer
-                        # Parse diff to extract old/new content (simplified for now)
-                        _, DiffViewer = _get_tui_components()
-                        diff_viewer = DiffViewer("", result.data, "Working Copy", "Uncommitted")
-                        self.console.print(Panel(
-                            Syntax(result.data, "diff", theme="monokai"),
-                            title="[bold]Git Diff[/bold]",
-                            border_style=COLORS['accent_blue']
-                        ))
-                        results.append("✓ Diff shown")
-                    else:
-                        results.append("No changes")
-
-                elif tool_name == "get_directory_tree":
-                    self.console.print(Panel(result.data, title="Directory Tree", border_style="blue"))
-                    results.append("✓ Tree shown")
-
-                elif tool_name == "list_directory":
-                    data = result.data
-                    self.console.print(f"[cyan]Directories ({len(data['directories'])}):[/cyan]")
-                    for d in data['directories'][:10]:
-                        self.console.print(f"  📁 {d['name']}")
-                    self.console.print(f"\n[cyan]Files ({len(data['files'])}):[/cyan]")
-                    for f in data['files'][:10]:
-                        self.console.print(f"  📄 {f['name']} ({f['size']} bytes)")
-                    results.append(f"✓ Listed {result.metadata['file_count']} files, {result.metadata['dir_count']} directories")
-
-                # Terminal commands
-                elif tool_name == "ls":
-                    items = result.data
-                    for item in items:
-                        icon = "📁" if item['type'] == 'dir' else "📄"
-                        name = f"[bold cyan]{item['name']}[/bold cyan]" if item['type'] == 'dir' else item['name']
-                        if result.metadata.get('long_format'):
-                            self.console.print(f"{icon} {name} ({item.get('size', 0)} bytes)")
-                        else:
-                            self.console.print(f"{icon} {name}")
-                    results.append(f"✓ {result.metadata['count']} items")
-
-                elif tool_name == "pwd":
-                    self.console.print(f"[bold green]{result.data}[/bold green]")
-                    results.append("✓ Current directory shown")
-
-                elif tool_name == "cd":
-                    self.console.print(f"[green]→ {result.metadata['new_cwd']}[/green]")
-                    results.append(f"✓ {result.data}")
-
-                elif tool_name == "cat":
-                    from rich.syntax import Syntax
-                    # Try to detect language from file extension
-                    path = result.metadata.get('path', '')
-                    lang = Path(path).suffix.lstrip('.') or 'text'
-                    syntax = Syntax(result.data, lang, theme="monokai", line_numbers=True)
-                    self.console.print(syntax)
-                    results.append(f"✓ Displayed {result.metadata['lines']} lines")
-
-                else:
-                    results.append(f"✓ {result.data}")
-            else:
-                results.append(f"❌ {result.error}")
+            # SCALE & SUSTAIN Phase 2: Delegated to ResultRenderer (Strategy pattern)
+            # Before: 125 lines of if/elif chain (CC=25+)
+            # After: Single delegation (CC=1)
+            summary = self._result_renderer.render(tool_name, result, args)
+            results.append(summary)
 
         # Week 2 Integration: Complete workflow and show visualization
         if len(tool_calls) > 1:
