@@ -1,16 +1,13 @@
 """
-Enhanced Circuit Breaker - Gradual recovery pattern.
+Enhanced Circuit Breaker - Gradual recovery pattern with registry.
 
-DEPRECATED: This module is deprecated. Use core.resilience or vertice_core.resilience instead.
+Provides EnhancedCircuitBreaker with:
+- Named circuit breaker registry
+- `call()` method API (vs context manager)
+- Gradual recovery with success threshold
 
-Migration:
-    # Old (deprecated)
-    from vertice_cli.core.errors.circuit_breaker import EnhancedCircuitBreaker
-
-    # New (canonical)
+For base CircuitBreaker class, use core.resilience:
     from core.resilience import CircuitBreaker
-    # or
-    from vertice_core.resilience import CircuitBreaker
 
 States:
 - CLOSED: Normal operation, requests pass through
@@ -19,26 +16,17 @@ States:
 
 Reference: HEROIC_IMPLEMENTATION_PLAN.md Sprint 3.2
 Follows CODE_CONSTITUTION: <500 lines, 100% type hints
-Deprecated: 2026-01-02
 """
 
 from __future__ import annotations
-
-import warnings
-
-warnings.warn(
-    "vertice_cli.core.errors.circuit_breaker is deprecated. "
-    "Use 'from core.resilience import CircuitBreaker' instead.",
-    DeprecationWarning,
-    stacklevel=2,
-)
 
 import asyncio
 import logging
 import time
 from typing import Any, Callable, Dict, Optional
 
-from .types import CircuitOpenError, CircuitState
+# Import base types from core.resilience
+from core.resilience import CircuitOpenError, CircuitState
 
 logger = logging.getLogger(__name__)
 

@@ -31,6 +31,10 @@ from .types import (
     RateLimitError,
     CircuitOpenError,
 )
+
+# Backward compatibility aliases
+CircuitBreakerOpen = CircuitOpenError  # Alias for backward compat
+CircuitBreakerStats = None  # Placeholder - use from vertice_tui.core.resilience_patterns
 from .retry import RetryHandler
 from .circuit_breaker import CircuitBreaker
 from .rate_limiter import RateLimiter, TokenBucket
@@ -58,6 +62,9 @@ __all__ = [
     "PermanentError",
     "RateLimitError",
     "CircuitOpenError",
+    # Backward compat aliases
+    "CircuitBreakerOpen",  # Alias for CircuitOpenError
+    "CircuitBreakerStats",  # Placeholder - use from TUI/vertice_core
     # Handlers
     "RetryHandler",
     "CircuitBreaker",

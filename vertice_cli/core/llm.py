@@ -21,8 +21,7 @@ os.environ.setdefault("GLOG_minloglevel", "3")
 warnings.filterwarnings("ignore", message=".*ALTS.*")
 
 from .config import config
-from .providers.resilience import CircuitBreaker, CircuitState
-from .resilience import RateLimiter
+from core.resilience import CircuitBreaker, CircuitState, RateLimiter
 
 logger = logging.getLogger(__name__)
 

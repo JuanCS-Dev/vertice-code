@@ -1,63 +1,39 @@
 """
-Unified Circuit Breaker Types.
+Circuit Breaker Types for vertice_core.
 
-DEPRECATED: This module is deprecated. Use core.resilience or vertice_core.resilience instead.
+Re-exports from core.resilience with domain-specific additions:
+- CircuitBreakerStats: Extended statistics
+- SimpleCircuitBreaker: Dataclass-based simple breaker for backward compat
 
-Migration:
-    # Old (deprecated)
-    from vertice_core.types.circuit import CircuitBreaker, CircuitState
-
-    # New (canonical)
+Usage:
+    # Preferred: direct from core
     from core.resilience import CircuitBreaker, CircuitState
-    # or
-    from vertice_core.resilience import CircuitBreaker, CircuitState
 
-SCALE & SUSTAIN Phase 1.3 - Type Consolidation.
-SCALE & SUSTAIN Phase 2.1 - Deprecated in favor of core.resilience
+    # Domain types (this module)
+    from vertice_core.types.circuit import CircuitBreakerStats, SimpleCircuitBreaker
 
 Author: JuanCS Dev
 Date: 2025-11-26
-Deprecated: 2026-01-02
 """
 
-import warnings
+from __future__ import annotations
 
-warnings.warn(
-    "vertice_core.types.circuit is deprecated. "
-    "Use 'from core.resilience import CircuitBreaker' or "
-    "'from vertice_core.resilience import CircuitBreaker' instead.",
-    DeprecationWarning,
-    stacklevel=2,
+import time
+from dataclasses import dataclass, field
+from typing import List, Optional, Tuple
+
+# Re-export base types from core.resilience
+from core.resilience import (
+    CircuitBreaker,
+    CircuitBreakerConfig,
+    CircuitOpenError,
+    CircuitState,
 )
 
-from enum import Enum
-from dataclasses import dataclass, field
-from typing import Optional, List, Tuple
-import asyncio
-import time
 
-
-class CircuitState(Enum):
-    """
-    Circuit breaker states.
-
-    CLOSED: Normal operation, requests pass through
-    OPEN: Service failing, requests rejected immediately
-    HALF_OPEN: Testing recovery, limited requests allowed
-    """
-    CLOSED = "closed"
-    OPEN = "open"
-    HALF_OPEN = "half_open"
-
-
-@dataclass
-class CircuitBreakerConfig:
-    """Configuration for circuit breaker behavior."""
-    failure_threshold: int = 5       # Failures before opening
-    success_threshold: int = 2       # Successes before closing from half-open
-    recovery_timeout: float = 30.0   # Seconds before trying half-open
-    half_open_max_calls: int = 3     # Max calls in half-open state
-
+# =============================================================================
+# VERTICE_CORE SPECIFIC TYPES
+# =============================================================================
 
 @dataclass
 class CircuitBreakerStats:
@@ -71,141 +47,12 @@ class CircuitBreakerStats:
     last_failure_reason: Optional[str] = None
 
 
-class CircuitBreaker:
-    """
-    Unified Circuit Breaker Pattern Implementation.
-
-    Prevents cascading failures by stopping requests to failing services.
-    Supports both sync and async usage patterns.
-
-    Usage (sync):
-        breaker = CircuitBreaker()
-        can_try, msg = breaker.can_attempt()
-        if can_try:
-            try:
-                result = external_call()
-                breaker.record_success()
-            except Exception:
-                breaker.record_failure()
-
-    Usage (async context manager):
-        async with breaker.call():
-            result = await external_service()
-    """
-
-    def __init__(
-        self,
-        name: str = "default",
-        config: Optional[CircuitBreakerConfig] = None
-    ):
-        self.name = name
-        self.config = config or CircuitBreakerConfig()
-        self._state = CircuitState.CLOSED
-        self._failure_count = 0
-        self._success_count = 0
-        self._last_failure_time: Optional[float] = None
-        self._half_open_calls = 0
-        self._lock = asyncio.Lock()
-        self.stats = CircuitBreakerStats()
-
-    @property
-    def state(self) -> CircuitState:
-        """Get current state, checking for timeout transition."""
-        if self._state == CircuitState.OPEN:
-            if self._last_failure_time:
-                elapsed = time.time() - self._last_failure_time
-                if elapsed >= self.config.recovery_timeout:
-                    return CircuitState.HALF_OPEN
-        return self._state
-
-    @property
-    def is_closed(self) -> bool:
-        return self.state == CircuitState.CLOSED
-
-    @property
-    def is_open(self) -> bool:
-        return self.state == CircuitState.OPEN
-
-    @property
-    def is_half_open(self) -> bool:
-        return self.state == CircuitState.HALF_OPEN
-
-    def can_attempt(self) -> Tuple[bool, str]:
-        """
-        Check if request can be attempted (sync API).
-
-        Returns:
-            Tuple of (can_proceed, reason_message)
-        """
-        current_state = self.state
-
-        if current_state == CircuitState.CLOSED:
-            return True, "Circuit closed"
-
-        if current_state == CircuitState.OPEN:
-            return False, "Circuit open (cooling down)"
-
-        # HALF_OPEN state
-        if self._half_open_calls < self.config.half_open_max_calls:
-            self._half_open_calls += 1
-            return True, f"Circuit half-open (test {self._half_open_calls}/{self.config.half_open_max_calls})"
-
-        return False, "Circuit half-open limit reached"
-
-    def record_success(self) -> None:
-        """Record successful call."""
-        self.stats.total_calls += 1
-        self.stats.successful_calls += 1
-        self._failure_count = 0
-
-        if self._state == CircuitState.HALF_OPEN:
-            self._success_count += 1
-            if self._success_count >= self.config.success_threshold:
-                self._transition_to(CircuitState.CLOSED)
-
-    def record_failure(self, reason: Optional[str] = None) -> None:
-        """Record failed call."""
-        self.stats.total_calls += 1
-        self.stats.failed_calls += 1
-        self._failure_count += 1
-        self._last_failure_time = time.time()
-        self.stats.last_failure_time = self._last_failure_time
-        self.stats.last_failure_reason = reason
-
-        if self._state == CircuitState.HALF_OPEN:
-            # Any failure in half-open immediately opens
-            self._transition_to(CircuitState.OPEN)
-        elif self._failure_count >= self.config.failure_threshold:
-            self._transition_to(CircuitState.OPEN)
-
-    def _transition_to(self, new_state: CircuitState) -> None:
-        """Internal state transition with logging."""
-        if self._state != new_state:
-            self.stats.state_changes.append((new_state.value, time.time()))
-            self._state = new_state
-
-            if new_state == CircuitState.HALF_OPEN:
-                self._half_open_calls = 0
-                self._success_count = 0
-            elif new_state == CircuitState.CLOSED:
-                self._failure_count = 0
-
-    def reset(self) -> None:
-        """Force reset to closed state."""
-        self._state = CircuitState.CLOSED
-        self._failure_count = 0
-        self._success_count = 0
-        self._half_open_calls = 0
-        self._last_failure_time = None
-
-
-# Backward compatibility alias (simple dataclass version)
 @dataclass
 class SimpleCircuitBreaker:
     """
-    Simple dataclass-based circuit breaker for backward compatibility.
+    Simple dataclass-based circuit breaker for lightweight use cases.
 
-    Deprecated: Use CircuitBreaker class for new code.
+    For full-featured circuit breaker, use CircuitBreaker from core.resilience.
     """
     failure_threshold: int = 5
     recovery_timeout: float = 60.0
@@ -247,9 +94,12 @@ class SimpleCircuitBreaker:
 
 
 __all__ = [
-    'CircuitState',
-    'CircuitBreakerConfig',
-    'CircuitBreakerStats',
+    # Re-exports from core.resilience
     'CircuitBreaker',
-    'SimpleCircuitBreaker',  # Backward compat
+    'CircuitBreakerConfig',
+    'CircuitOpenError',
+    'CircuitState',
+    # Domain-specific
+    'CircuitBreakerStats',
+    'SimpleCircuitBreaker',
 ]

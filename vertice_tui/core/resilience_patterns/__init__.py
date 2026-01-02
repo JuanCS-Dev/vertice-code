@@ -2,31 +2,23 @@
 Resilience Patterns Module - Fault Tolerance
 ============================================
 
-DEPRECATED: This module is deprecated. Use core.resilience or vertice_core.resilience instead.
+Re-exports from core.resilience with TUI-specific additions.
 
-Migration:
-    # Old (deprecated)
-    from vertice_tui.core.resilience_patterns import CircuitBreaker
+Usage:
+    # Preferred: direct from core
+    from core.resilience import CircuitBreaker, CircuitState
 
-    # New (canonical)
-    from core.resilience import CircuitBreaker
-    # or
-    from vertice_core.resilience import CircuitBreaker
+    # This module (re-exports + TUI additions)
+    from vertice_tui.core.resilience_patterns import CircuitBreaker, CircuitBreakerStats
 
 Contains:
-- CircuitBreaker: Prevents cascading failures (re-exported for backward compat)
+- CircuitBreaker: Prevents cascading failures (from core.resilience)
+- CircuitBreakerStats: Extended stats for TUI observability
 """
 
-import warnings
+from __future__ import annotations
 
-warnings.warn(
-    "vertice_tui.core.resilience_patterns is deprecated. "
-    "Use 'from core.resilience import CircuitBreaker' instead.",
-    DeprecationWarning,
-    stacklevel=2,
-)
-
-# Re-export from canonical location for backward compatibility
+# Re-export from canonical location
 from core.resilience import (
     CircuitBreaker,
     CircuitBreakerConfig,
@@ -34,7 +26,7 @@ from core.resilience import (
     CircuitState,
 )
 
-# Stats class from local (canonical doesn't have exact match)
+# TUI-specific addition
 from vertice_tui.core.resilience_patterns.circuit_breaker import (
     CircuitBreakerStats,
 )

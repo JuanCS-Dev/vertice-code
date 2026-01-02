@@ -29,8 +29,8 @@ from typing import Any, AsyncIterator, Dict, List, Optional, TYPE_CHECKING
 if TYPE_CHECKING:
     pass  # Future type hints if needed
 
-# Import from extracted modules
-from vertice_tui.core.resilience_patterns.circuit_breaker import (
+# Import from canonical resilience module
+from core.resilience import (
     CircuitBreaker,
     CircuitBreakerConfig,
     CircuitBreakerOpen,

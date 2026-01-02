@@ -1,21 +1,13 @@
 """
-MAXIMUS Resilience Patterns.
+MAXIMUS Provider Resilience Patterns.
 
-DEPRECATED: This module is deprecated. Use core.resilience or vertice_core.resilience instead.
+This module provides Maximus-specific resilience helpers built on top of core.resilience:
+- HTTPX async client with HTTP/2 and connection pooling
+- Tenacity retry decorators
+- Combined circuit breaker + retry utilities
 
-Migration:
-    # Old (deprecated)
-    from vertice_cli.core.providers.resilience import CircuitBreaker, RetryConfig
-
-    # New (canonical)
-    from core.resilience import CircuitBreaker, RetryConfig
-    # or
-    from vertice_core.resilience import CircuitBreaker, RetryConfig
-
-Production-ready resilience for MAXIMUS provider with:
-- Tenacity retry with exponential backoff
-- Circuit breaker for fail-fast
-- Connection pooling settings
+Base classes (CircuitBreaker, CircuitState, etc.) are re-exported from core.resilience
+for convenience. Maximus-specific additions are defined here.
 
 Based on 2025 best practices:
 - Tenacity for async retry logic
@@ -23,23 +15,11 @@ Based on 2025 best practices:
 - HTTPX with HTTP/2 and connection pooling
 
 Follows CODE_CONSTITUTION: <500 lines, 100% type hints
-Deprecated: 2026-01-02
 """
 
 from __future__ import annotations
 
-import warnings
-
-warnings.warn(
-    "vertice_cli.core.providers.resilience is deprecated. "
-    "Use 'from core.resilience import CircuitBreaker' instead.",
-    DeprecationWarning,
-    stacklevel=2,
-)
-
-import time
 from dataclasses import dataclass
-from enum import Enum
 from functools import wraps
 from typing import Any, Awaitable, Callable, Optional, TypeVar
 
@@ -51,45 +31,19 @@ from tenacity import (
     wait_exponential_jitter,
 )
 
-
-class CircuitState(Enum):
-    """Circuit breaker states."""
-
-    CLOSED = "closed"  # Normal operation
-    OPEN = "open"  # Failing, reject requests
-    HALF_OPEN = "half_open"  # Testing recovery
-
-
-@dataclass
-class CircuitBreakerConfig:
-    """Circuit breaker configuration.
-
-    Attributes:
-        failure_threshold: Failures before opening circuit
-        recovery_timeout: Seconds before attempting recovery
-        half_open_requests: Requests allowed in half-open state
-    """
-
-    failure_threshold: int = 5
-    recovery_timeout: float = 30.0
-    half_open_requests: int = 3
+# Re-export base classes from core.resilience for convenience
+from core.resilience import (
+    CircuitBreaker,
+    CircuitBreakerConfig,
+    CircuitState,
+    CircuitOpenError as CircuitBreakerOpen,  # Alias for backward compat
+    RetryConfig,
+)
 
 
-@dataclass
-class RetryConfig:
-    """Retry configuration with exponential backoff.
-
-    Attributes:
-        max_attempts: Maximum retry attempts
-        initial_wait: Initial wait time in seconds
-        max_wait: Maximum wait time in seconds
-        jitter: Add randomness to prevent thundering herd
-    """
-
-    max_attempts: int = 3
-    initial_wait: float = 1.0
-    max_wait: float = 10.0
-    jitter: float = 0.5
+# =============================================================================
+# MAXIMUS-SPECIFIC ADDITIONS
+# =============================================================================
 
 
 @dataclass
@@ -105,85 +59,6 @@ class ConnectionPoolConfig:
     max_connections: int = 100
     max_keepalive: int = 20
     keepalive_expiry: float = 5.0
-
-
-class CircuitBreaker:
-    """Circuit breaker for MAXIMUS provider.
-
-    Implements the circuit breaker pattern:
-    - CLOSED: Normal operation, track failures
-    - OPEN: Too many failures, reject requests immediately
-    - HALF_OPEN: Recovery test, allow limited requests
-
-    Example:
-        >>> breaker = CircuitBreaker()
-        >>> async with breaker.call():
-        ...     await client.post("/api/endpoint")
-    """
-
-    def __init__(self, config: Optional[CircuitBreakerConfig] = None) -> None:
-        """Initialize circuit breaker.
-
-        Args:
-            config: Circuit breaker configuration.
-        """
-        self.config = config or CircuitBreakerConfig()
-        self._state = CircuitState.CLOSED
-        self._failure_count = 0
-        self._success_count = 0
-        self._last_failure_time: Optional[float] = None
-
-    @property
-    def state(self) -> CircuitState:
-        """Get current circuit state, checking for recovery."""
-        if self._state == CircuitState.OPEN:
-            if self._should_attempt_recovery():
-                self._state = CircuitState.HALF_OPEN
-                self._success_count = 0
-        return self._state
-
-    def _should_attempt_recovery(self) -> bool:
-        """Check if enough time passed to attempt recovery."""
-        if self._last_failure_time is None:
-            return True
-        return (time.time() - self._last_failure_time) >= self.config.recovery_timeout
-
-    def record_success(self) -> None:
-        """Record a successful call."""
-        if self._state == CircuitState.HALF_OPEN:
-            self._success_count += 1
-            if self._success_count >= self.config.half_open_requests:
-                self._state = CircuitState.CLOSED
-                self._failure_count = 0
-        elif self._state == CircuitState.CLOSED:
-            self._failure_count = max(0, self._failure_count - 1)
-
-    def record_failure(self) -> None:
-        """Record a failed call."""
-        self._failure_count += 1
-        self._last_failure_time = time.time()
-
-        if self._state == CircuitState.HALF_OPEN:
-            self._state = CircuitState.OPEN
-        elif self._failure_count >= self.config.failure_threshold:
-            self._state = CircuitState.OPEN
-
-    def is_open(self) -> bool:
-        """Check if circuit is open (rejecting requests)."""
-        return self.state == CircuitState.OPEN
-
-    def get_stats(self) -> dict[str, Any]:
-        """Get circuit breaker statistics."""
-        return {
-            "state": self.state.value,
-            "failure_count": self._failure_count,
-            "success_count": self._success_count,
-            "last_failure": self._last_failure_time,
-        }
-
-
-class CircuitBreakerOpen(Exception):
-    """Raised when circuit breaker is open."""
 
 
 T = TypeVar("T")
