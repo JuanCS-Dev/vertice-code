@@ -288,31 +288,38 @@ from vertice_core.exceptions import (
 
 ---
 
-### 2.3 Fix Circular Imports (13 pairs)
+### 2.3 Fix Circular Imports ✅ ANALYZED
 
-**Pattern: Service Layer Extraction**
+**Status:** Analyzed 2026-01-02
 
-```
-Before:
-  A → B → C → A (circular)
+**Analysis Results:**
 
-After:
-  A → Service
-  B → Service
-  C → Service
-```
+| Cycle | Type | Impact | Action |
+|-------|------|--------|--------|
+| `vertice_core/exceptions → vertice_cli` | **Hard** | Breaks import | ✅ Fixed |
+| `vertice_tui ↔ vertice_cli` (31 imports) | Soft | Design smell | Future refactor |
+| `agents ↔ vertice_cli` (2 imports) | Soft | Design smell | Future refactor |
+| `core ↔ agents/providers` (3 imports) | Lazy | Correct pattern | No action |
 
-**Atomic Steps:**
+**Hard Cycle Fixed:**
+- `vertice_core/exceptions.py` was importing from `vertice_cli.core.exceptions`
+- Rewrote to define exceptions locally with no external dependencies
+- Architecture now correct: `vertice_core` → `vertice_cli` → `vertice_tui`
 
-1. Map all 13 circular pairs with `pydeps`
-2. Create `vertice_cli/services/` directory
-3. For each circular pair:
-   a. Identify shared interface
-   b. Extract to service module
-   c. Update imports
-   d. Verify cycle broken
-4. Run `python -c "import vertice_cli"` to verify
-5. Add CI check to prevent regressions
+**Soft Cycles (No Runtime Issues):**
+- Python resolves lazy imports at call time, not module load time
+- `core/agency.py` uses lazy imports inside `_lazy_init()` - correct pattern
+- `vertice_tui` imports tools/providers from `vertice_cli` - works but could be cleaner
+
+**Future Improvement (Phase 4+):**
+- Extract shared tools to `vertice_core/tools/`
+- Extract shared providers to `vertice_core/providers/`
+- This would eliminate soft cycles but requires larger refactoring
+
+**Validation:**
+- [x] All modules import successfully
+- [x] Import order doesn't matter
+- [x] No hard circular imports remain
 
 ---
 
