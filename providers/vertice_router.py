@@ -18,6 +18,10 @@ from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime, timedelta
 import logging
+from dotenv import load_dotenv
+
+# Load environment variables from .env
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
@@ -110,33 +114,33 @@ class VerticeRouter:
     4. FALLBACK CHAIN: Automatic failover on errors
     """
 
-    # Provider priorities (lower = higher priority for free tier)
-    # Enterprise providers have higher numbers (use when explicitly needed)
+    # Provider priorities (lower = higher priority)
+    # STABILITY MODE: vertex-ai only. Multi-provider routing planned for later.
     PROVIDER_PRIORITY = {
-        "groq": 1,         # 14,400 req/day, ultra-fast
-        "cerebras": 2,     # 1M tokens/day, fastest
-        "mistral": 3,      # 1B tokens/month
-        "openrouter": 4,   # 200 req/day on free models
-        "gemini": 5,       # Your existing quota (legacy API)
-        "vertex-ai": 6,    # Enterprise Gemini via Vertex AI
-        "azure-openai": 7, # Enterprise GPT-4 via Azure
+        "vertex-ai": 1,    # PRIMARY - Gemini via Vertex AI (stable)
+        # Future: enable after system stabilization
+        "groq": 10,
+        "cerebras": 11,
+        "mistral": 12,
+        "openrouter": 13,
+        "gemini": 14,
+        "azure-openai": 15,
     }
 
-    # Task complexity to provider mapping
-    # Enterprise providers (vertex-ai, azure-openai) used for complex/critical tasks
+    # STABILITY MODE: All complexity levels route to vertex-ai
     COMPLEXITY_ROUTING = {
-        TaskComplexity.SIMPLE: ["groq", "cerebras", "mistral"],
-        TaskComplexity.MODERATE: ["groq", "mistral", "vertex-ai"],
-        TaskComplexity.COMPLEX: ["vertex-ai", "azure-openai", "openrouter"],
-        TaskComplexity.CRITICAL: ["vertex-ai", "azure-openai"],  # Enterprise only
+        TaskComplexity.SIMPLE: ["vertex-ai"],
+        TaskComplexity.MODERATE: ["vertex-ai"],
+        TaskComplexity.COMPLEX: ["vertex-ai"],
+        TaskComplexity.CRITICAL: ["vertex-ai"],
     }
 
-    # Speed requirement to provider mapping
+    # STABILITY MODE: All speed requirements route to vertex-ai
     SPEED_ROUTING = {
-        SpeedRequirement.INSTANT: ["groq", "cerebras"],
-        SpeedRequirement.FAST: ["groq", "cerebras", "vertex-ai"],
-        SpeedRequirement.NORMAL: ["groq", "mistral", "vertex-ai", "openrouter"],
-        SpeedRequirement.RELAXED: ["mistral", "openrouter", "vertex-ai", "azure-openai"],
+        SpeedRequirement.INSTANT: ["vertex-ai"],
+        SpeedRequirement.FAST: ["vertex-ai"],
+        SpeedRequirement.NORMAL: ["vertex-ai"],
+        SpeedRequirement.RELAXED: ["vertex-ai"],
     }
 
     def __init__(self):
@@ -146,53 +150,85 @@ class VerticeRouter:
         self._initialized = False
 
     def _lazy_init(self):
-        """Lazy initialize providers."""
+        """Lazy initialize providers.
+
+        TEMPORARY FIX: Only initializes vertex-ai by default.
+        Other providers are initialized on-demand via /model command.
+        """
         if self._initialized:
             return
 
-        # Import providers - Free Tier
-        from .groq import GroqProvider
-        from .cerebras import CerebrasProvider
-        from .openrouter import OpenRouterProvider
-        from .mistral import MistralProvider
-        from .gemini import GeminiProvider
-        # Import providers - Enterprise (Your Infrastructure)
+        # TEMPORARY FIX: Only import and initialize vertex-ai
         from .vertex_ai import VertexAIProvider
-        from .azure_openai import AzureOpenAIProvider
 
-        # Initialize all providers
-        provider_classes = {
-            # Free Tier Providers
-            "groq": (GroqProvider, {"model_name": "llama-70b"}),
-            "cerebras": (CerebrasProvider, {"model_name": "llama-70b"}),
-            "openrouter": (OpenRouterProvider, {"model_name": "llama-70b"}),
-            "mistral": (MistralProvider, {"model_name": "large"}),
-            "gemini": (GeminiProvider, {}),  # Legacy - prefer vertex-ai
-            # Enterprise Providers (Your Infrastructure)
-            "vertex-ai": (VertexAIProvider, {"model_name": "flash"}),  # Gemini 2.5 Flash
-            "azure-openai": (AzureOpenAIProvider, {"deployment": "gpt4o-mini"}),
-        }
-
-        for name, (cls, kwargs) in provider_classes.items():
-            try:
-                provider = cls(**kwargs)
-                if provider.is_available():
-                    self._providers[name] = provider
-                    info = provider.get_model_info()
-                    daily_limit = info.get("requests_per_day", 10000)
-                    self._status[name] = ProviderStatus(
-                        name=name,
-                        available=True,
-                        daily_limit=daily_limit,
-                    )
-                    logger.info(f"✅ Provider {name} initialized")
-                else:
-                    logger.warning(f"⚠️ Provider {name} not available (missing API key)")
-            except Exception as e:
-                logger.error(f"❌ Failed to initialize {name}: {e}")
+        try:
+            provider = VertexAIProvider(model_name="flash")
+            if provider.is_available():
+                self._providers["vertex-ai"] = provider
+                info = provider.get_model_info()
+                self._status["vertex-ai"] = ProviderStatus(
+                    name="vertex-ai",
+                    available=True,
+                    daily_limit=info.get("requests_per_day", 10000),
+                )
+                logger.info(f"✅ Vertex AI initialized: {info.get('model')}")
+            else:
+                logger.error("❌ Vertex AI not available - check GOOGLE_CLOUD_PROJECT")
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize Vertex AI: {e}")
 
         self._initialized = True
-        logger.info(f"Vertice Router initialized with {len(self._providers)} providers")
+        logger.info(f"Vertice Router initialized (vertex-ai only mode)")
+
+    def _init_provider_on_demand(self, name: str) -> bool:
+        """Initialize a specific provider on demand (for /model command).
+
+        Args:
+            name: Provider name to initialize
+
+        Returns:
+            True if provider was initialized successfully
+        """
+        if name in self._providers:
+            return True  # Already initialized
+
+        provider_classes = {
+            "groq": (".groq", "GroqProvider", {"model_name": "llama-70b"}),
+            "cerebras": (".cerebras", "CerebrasProvider", {"model_name": "llama-70b"}),
+            "openrouter": (".openrouter", "OpenRouterProvider", {"model_name": "llama-70b"}),
+            "mistral": (".mistral", "MistralProvider", {"model_name": "large"}),
+            "gemini": (".gemini", "GeminiProvider", {}),
+            "azure-openai": (".azure_openai", "AzureOpenAIProvider", {"deployment": "gpt4o-mini"}),
+        }
+
+        if name not in provider_classes:
+            logger.warning(f"Unknown provider: {name}")
+            return False
+
+        module_name, class_name, kwargs = provider_classes[name]
+
+        try:
+            import importlib
+            module = importlib.import_module(module_name, package="providers")
+            cls = getattr(module, class_name)
+            provider = cls(**kwargs)
+
+            if provider.is_available():
+                self._providers[name] = provider
+                info = provider.get_model_info()
+                self._status[name] = ProviderStatus(
+                    name=name,
+                    available=True,
+                    daily_limit=info.get("requests_per_day", 10000),
+                )
+                logger.info(f"✅ Provider {name} initialized on-demand")
+                return True
+            else:
+                logger.warning(f"⚠️ Provider {name} not available (missing API key)")
+                return False
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize {name}: {e}")
+            return False
 
     def get_available_providers(self) -> List[str]:
         """Get list of available providers."""
@@ -225,8 +261,12 @@ class VerticeRouter:
         """
         self._lazy_init()
 
-        # If specific provider requested, use it
+        # If specific provider requested, use it (init on-demand if needed)
         if required_provider:
+            # Try to initialize on-demand if not already available
+            if required_provider not in self._providers:
+                self._init_provider_on_demand(required_provider)
+
             if required_provider in self._providers:
                 status = self._status.get(required_provider)
                 if status and status.can_use():
@@ -330,6 +370,7 @@ class VerticeRouter:
         system_prompt: Optional[str] = None,
         complexity: TaskComplexity = TaskComplexity.MODERATE,
         speed: SpeedRequirement = SpeedRequirement.NORMAL,
+        tools: Optional[List[Any]] = None,
         **kwargs
     ) -> AsyncGenerator[str, None]:
         """
@@ -340,6 +381,7 @@ class VerticeRouter:
             system_prompt: Optional system prompt
             complexity: Task complexity
             speed: Speed requirement
+            tools: Optional list of tools for function calling
             **kwargs: Additional arguments
 
         Yields:
@@ -354,6 +396,7 @@ class VerticeRouter:
             async for chunk in provider.stream_chat(
                 messages,
                 system_prompt=system_prompt,
+                tools=tools,
                 **kwargs
             ):
                 yield chunk
@@ -369,6 +412,7 @@ class VerticeRouter:
                     async for chunk in fallback.stream_chat(
                         messages,
                         system_prompt=system_prompt,
+                        tools=tools,
                         **kwargs
                     ):
                         yield chunk

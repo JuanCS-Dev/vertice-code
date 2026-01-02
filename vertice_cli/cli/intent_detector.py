@@ -1,18 +1,55 @@
 """
 Intent Detection - Detecta automaticamente qual agent usar.
 
-Baseado em keywords e padrões na mensagem do usuário.
+Upgraded to use SemanticIntentClassifier with LLM support.
+Falls back to heuristic patterns when LLM unavailable.
+
+Reference: HEROIC_IMPLEMENTATION_PLAN.md Sprint 1.1
 """
 
+import asyncio
 import re
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Any
+
+from vertice_cli.core.intent_classifier import (
+    SemanticIntentClassifier,
+    Intent,
+    IntentResult,
+    get_classifier,
+)
+
+
+# Map Intent enum to agent names
+INTENT_TO_AGENT = {
+    Intent.PLANNING: "planner",
+    Intent.CODING: None,  # Default chat, no specific agent
+    Intent.REVIEW: "reviewer",
+    Intent.DEBUG: None,  # Handled by default coder
+    Intent.REFACTOR: "refactorer",
+    Intent.TEST: "testing",
+    Intent.DOCS: "documentation",
+    Intent.EXPLORE: "explorer",
+    Intent.ARCHITECTURE: "architect",
+    Intent.PERFORMANCE: "performance",
+    Intent.SECURITY: "security",
+    Intent.GENERAL: None,
+}
 
 
 class IntentDetector:
-    """Detecta intenção do usuário para rotear para agent correto."""
+    """
+    Detecta intenção do usuário para rotear para agent correto.
 
-    def __init__(self):
-        # Keywords por agent
+    Now uses SemanticIntentClassifier for better accuracy.
+    """
+
+    def __init__(self, llm_client: Optional[Any] = None):
+        # Initialize semantic classifier
+        self._classifier = get_classifier(llm_client)
+        self._llm = llm_client
+        self._last_result: Optional[IntentResult] = None
+
+        # Legacy patterns kept for reference/fallback
         self.intent_patterns = {
             "planner": {
                 "keywords": [
@@ -135,48 +172,86 @@ class IntentDetector:
     def detect(self, message: str) -> Optional[str]:
         """
         Detecta qual agent deve ser usado baseado na mensagem.
-        
+
+        Uses SemanticIntentClassifier for better accuracy.
+
         Returns:
             Nome do agent ou None se não detectar nada específico.
         """
-        message_lower = message.lower()
+        # Use async classifier synchronously
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # If already in async context, use sync fallback
+                result = self._classify_sync(message)
+            else:
+                result = loop.run_until_complete(
+                    self._classifier.classify(message)
+                )
+        except RuntimeError:
+            # No event loop, create one
+            result = asyncio.run(self._classifier.classify(message))
 
-        # Score por agent
-        scores = {}
+        self._last_result = result
 
-        for agent, patterns in self.intent_patterns.items():
-            score = 0
+        # Map intent to agent name
+        agent = INTENT_TO_AGENT.get(result.intent)
 
-            # Check keywords
-            for keyword in patterns["keywords"]:
-                if keyword in message_lower:
-                    score += 2
+        # Only return agent if confidence is sufficient
+        if agent and result.confidence >= 0.4:
+            return agent
 
-            # Check regex patterns
-            for pattern in patterns["patterns"]:
-                if re.search(pattern, message_lower):
-                    score += 5  # Patterns valem mais
+        return None
 
-            if score > 0:
-                scores[agent] = score
+    def _classify_sync(self, message: str) -> IntentResult:
+        """Synchronous classification using heuristics only."""
+        return self._classifier._classify_heuristic(message)
 
-        # Retorna agent com maior score
-        if scores:
-            best_agent = max(scores, key=scores.get)
-            best_score = scores[best_agent]
+    async def detect_async(self, message: str) -> Optional[str]:
+        """
+        Async version of detect for use in async contexts.
 
-            # Apenas retorna se score for significativo
-            if best_score >= 3:
-                return best_agent
+        Returns:
+            Nome do agent ou None se não detectar nada específico.
+        """
+        result = await self._classifier.classify(message)
+        self._last_result = result
+
+        agent = INTENT_TO_AGENT.get(result.intent)
+
+        if agent and result.confidence >= 0.4:
+            return agent
 
         return None
 
     def should_use_agent(self, message: str) -> Tuple[bool, Optional[str]]:
         """
         Verifica se deve usar um agent e qual.
-        
+
         Returns:
             (should_use, agent_name)
         """
         agent = self.detect(message)
         return (agent is not None, agent)
+
+    async def should_use_agent_async(self, message: str) -> Tuple[bool, Optional[str]]:
+        """
+        Async version for use in async contexts.
+
+        Returns:
+            (should_use, agent_name)
+        """
+        agent = await self.detect_async(message)
+        return (agent is not None, agent)
+
+    def get_last_result(self) -> Optional[IntentResult]:
+        """Get the last classification result with full details."""
+        return self._last_result
+
+    def get_confidence(self) -> float:
+        """Get confidence of last classification."""
+        return self._last_result.confidence if self._last_result else 0.0
+
+    def get_reasoning(self) -> str:
+        """Get reasoning for last classification."""
+        return self._last_result.reasoning if self._last_result else ""

@@ -161,16 +161,34 @@ class HybridMeshMixin:
         return route
 
     def _classify_task(self, description: str) -> TaskCharacteristic:
-        """Classify task characteristic from description."""
+        """
+        Classify task characteristic from description.
+
+        Uses word boundary matching to avoid false positives
+        (e.g., "authentication" containing "then").
+        """
+        import re
         desc_lower = description.lower()
 
-        if any(kw in desc_lower for kw in ["parallel", "batch", "concurrent", "multiple"]):
+        def has_word(keywords: list) -> bool:
+            """Check if any keyword exists as a whole word."""
+            for kw in keywords:
+                # Use word boundaries for single words, exact match for phrases
+                if ' ' in kw:
+                    if kw in desc_lower:
+                        return True
+                else:
+                    if re.search(rf'\b{re.escape(kw)}\b', desc_lower):
+                        return True
+            return False
+
+        if has_word(["parallel", "batch", "concurrent", "multiple"]):
             return TaskCharacteristic.PARALLELIZABLE
-        if any(kw in desc_lower for kw in ["step by step", "sequential", "then", "after"]):
+        if has_word(["step by step", "sequential", "then ", " then", "after that"]):
             return TaskCharacteristic.SEQUENTIAL
-        if any(kw in desc_lower for kw in ["explore", "search", "find", "navigate", "discover"]):
+        if has_word(["explore", "search", "find", "navigate", "discover"]):
             return TaskCharacteristic.EXPLORATORY
-        if any(kw in desc_lower for kw in ["complex", "multi-step", "architecture", "design"]):
+        if has_word(["complex", "multi-step", "architecture", "design"]):
             return TaskCharacteristic.COMPLEX
 
         return TaskCharacteristic.PARALLELIZABLE
