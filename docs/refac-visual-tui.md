@@ -31,9 +31,19 @@ Elevar a TUI VERTICE ao nivel visual do Claude Code Web/CLI, integrando widgets 
 
 ---
 
+## Metodologia
+
+**IMPORTANTE:** Em cada fase, SEMPRE reobtener contexto antes de implementar:
+1. Buscar arquivos existentes relacionados (Grep/Glob)
+2. Ler implementacoes atuais
+3. Identificar gaps vs plano
+4. Implementar apenas o necessario
+
+---
+
 ## Plano de Implementacao - 5 Fases
 
-### FASE 1: Foundation (P0 - Critico)
+### FASE 1: Foundation (P0 - Critico) ✅ COMPLETA
 **Objetivo**: Infraestrutura basica para UX moderna
 
 #### 1.1 Modal System
@@ -110,13 +120,19 @@ Elevar a TUI VERTICE ao nivel visual do Claude Code Web/CLI, integrando widgets 
 ### FASE 3: Interactive Components (P1 - Importante)
 **Objetivo**: Interatividade avancada
 
-#### 3.1 Command Palette (Cmd+K)
-**Arquivo**: `vertice_tui/widgets/command_palette.py` (novo)
-- Fuzzy search
-- Categorias: Commands, Files, Agents, History
-- Recent commands section
-- Keyboard navigation
-- Action preview
+**REOBTENER CONTEXTO PRIMEIRO!**
+
+#### 3.1 Command Palette Integration
+**JA EXISTE:** `vertice_cli/tui/components/palette.py` (397 linhas completo!)
+- FuzzyMatcher com scoring
+- 20 agents (14 CLI + 6 Core)
+- Categories com icons
+- Recent commands
+
+**FALTA:** Integrar no `vertice_tui/app.py`:
+- Adicionar keybinding Ctrl+K (Ctrl+P ja e help)
+- Usar Textual Provider pattern ou ModalScreen
+- Conectar com CommandPaletteBridge
 
 #### 3.2 Search & Filter
 **Arquivo**: `vertice_tui/widgets/search_bar.py` (novo)

@@ -58,6 +58,8 @@ class QwenApp(App):
     BINDINGS: ClassVar[list[Binding]] = [
         Binding("ctrl+c", "quit", "Exit", show=True),
         Binding("ctrl+l", "clear", "Clear", show=True),
+        Binding("ctrl+k", "command_palette", "Commands", show=True),
+        Binding("ctrl+f", "search", "Search", show=True),
         Binding("ctrl+p", "show_help", "Help", show=True),
         Binding("ctrl+t", "toggle_theme", "Theme", show=True),
         Binding("ctrl+d", "toggle_dashboard", "Tokens", show=True),
@@ -436,6 +438,16 @@ class QwenApp(App):
 
         response = self.query_one("#response", ResponseView)
         response.add_system_message(mode_text)
+
+    def action_command_palette(self) -> None:
+        """Open command palette (Ctrl+K)."""
+        from vertice_tui.screens.command_palette import CommandPaletteScreen
+        self.push_screen(CommandPaletteScreen(self.bridge))
+
+    def action_search(self) -> None:
+        """Open search dialog (Ctrl+F)."""
+        from vertice_tui.screens.search import SearchScreen
+        self.push_screen(SearchScreen())
 
     # Scroll actions
     def action_scroll_up(self) -> None:

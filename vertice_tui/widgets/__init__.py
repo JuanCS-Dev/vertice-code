@@ -56,6 +56,17 @@ from vertice_tui.widgets.tool_call import (
     ToolCallWidget,
     ToolCallStack,
 )
+# Phase 11: Visual Upgrade - Enhanced Input
+from vertice_tui.widgets.input_area import InputArea
+# Phase 11: Visual Upgrade - Loading Animations
+from vertice_tui.widgets.loading import (
+    SkeletonLine,
+    SkeletonBlock,
+    SpinnerWidget,
+    LoadingCard,
+    ThinkingIndicator,
+    PulseIndicator,
+)
 
 __all__ = [
     "AutocompleteDropdown",
@@ -95,4 +106,13 @@ __all__ = [
     "ToolCallData",
     "ToolCallWidget",
     "ToolCallStack",
+    # Enhanced Input (Phase 11)
+    "InputArea",
+    # Loading Animations (Phase 11)
+    "SkeletonLine",
+    "SkeletonBlock",
+    "SpinnerWidget",
+    "LoadingCard",
+    "ThinkingIndicator",
+    "PulseIndicator",
 ]
