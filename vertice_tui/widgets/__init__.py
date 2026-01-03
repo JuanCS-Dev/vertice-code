@@ -91,6 +91,11 @@ from vertice_tui.widgets.token_sparkline import (
     CompactSparkline,
     MultiSparkline,
 )
+from vertice_tui.widgets.image_preview import (
+    ImagePreview,
+    ImageGallery,
+    check_image_support,
+)
 
 __all__ = [
     "AutocompleteDropdown",
@@ -153,4 +158,8 @@ __all__ = [
     "TokenSparkline",
     "CompactSparkline",
     "MultiSparkline",
+    # Image Preview (Phase 11)
+    "ImagePreview",
+    "ImageGallery",
+    "check_image_support",
 ]
