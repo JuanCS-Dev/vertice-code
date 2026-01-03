@@ -45,6 +45,7 @@ class IntentResult:
     method: str = "semantic"  # "semantic" or "heuristic"
 
     def to_dict(self) -> Dict[str, Any]:
+        """Convert intent result to dictionary for serialization."""
         return {
             "intent": self.intent.value,
             "confidence": self.confidence,

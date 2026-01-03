@@ -79,6 +79,7 @@ class SchemaIssue:
     estimated_impact: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
+        """Convert schema issue to dictionary for serialization."""
         return {
             "table": self.table,
             "severity": self.severity.value,
@@ -104,6 +105,7 @@ class QueryOptimization:
     confidence_score: float = 0.0
 
     def to_dict(self) -> Dict[str, Any]:
+        """Convert query optimization to dictionary for serialization."""
         return {
             "query_hash": self.query_hash,
             "optimization_type": self.optimization_type.value,
@@ -129,6 +131,7 @@ class MigrationPlan:
     requires_backup: bool = True
 
     def to_dict(self) -> Dict[str, Any]:
+        """Convert migration plan to dictionary for serialization."""
         return {
             "version_id": self.version_id,
             "description": self.description,
@@ -721,18 +724,23 @@ if __name__ == "__main__":
 
     # Mock LLM client
     class MockLLMClient:
+        """Mock LLM client for data agent demonstration."""
+
         async def generate(
             self, prompt: str, system_prompt: Optional[str] = None, **kwargs: Any
         ) -> str:
+            """Generate mock analysis response."""
             return "Analysis complete. Schema has 3 issues. Optimization possible."
 
         async def stream(
             self, prompt: str, system_prompt: Optional[str] = None, **kwargs: Any
         ) -> AsyncIterator[str]:
+            """Stream mock analysis tokens."""
             for word in "Streaming analysis results...".split():
                 yield word + " "
 
     async def demo() -> None:
+        """Demonstrate DataAgentProduction capabilities."""
         print("=" * 80)
         print("DATA AGENT PRODUCTION v1.0 - DEMO")
         print("=" * 80)

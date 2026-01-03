@@ -79,10 +79,12 @@ class ChainResult:
 
     @property
     def duration(self) -> float:
+        """Total duration of the chain execution in seconds."""
         return self.end_time - self.start_time
 
     @property
     def successful_ops(self) -> int:
+        """Count of operations that executed successfully without errors."""
         return sum(1 for op in self.operations if op.executed and not op.error)
 
 

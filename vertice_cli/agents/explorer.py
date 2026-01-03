@@ -37,6 +37,7 @@ try:
     from vertice_cli.core.temperature_config import get_temperature
 except ImportError:
     def get_temperature(agent_type: str, task_type: str = None) -> float:
+        """Get temperature for agent type (fallback if config module unavailable)."""
         return 0.2  # Explorer default - low for accuracy
 
 

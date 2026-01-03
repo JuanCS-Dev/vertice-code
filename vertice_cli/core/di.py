@@ -152,6 +152,7 @@ class Provider(Generic[T], ABC):
 
     @property
     def is_initialized(self) -> bool:
+        """Check if the provider has been initialized."""
         return self._state == ProviderState.INITIALIZED
 
 
