@@ -6,10 +6,11 @@ Code block que cresce durante streaming com:
 - Cache de tokens já parseados (incremental)
 - Cursor pulsante no final do código
 - Line numbers opcionais
-- Copy indicator
+- Copy to clipboard with feedback
 
 Autor: JuanCS Dev
 Data: 2025-11-25
+Updated: 2026-01-03 - Added copy functionality (Phase 11)
 """
 
 import asyncio
@@ -21,10 +22,18 @@ from textual.widgets import Static
 from textual.reactive import reactive
 from textual.message import Message
 from textual.app import ComposeResult
+from textual.binding import Binding
 
 from rich.text import Text
 from rich.panel import Panel
 from rich.style import Style
+
+# Clipboard support
+try:
+    import pyperclip
+    CLIPBOARD_AVAILABLE = True
+except ImportError:
+    CLIPBOARD_AVAILABLE = False
 
 try:
     from pygments import lex
@@ -297,8 +306,12 @@ class StreamingCodeBlock(Widget):
     - Cursor pulsante
     - Line numbers
     - Language badge
-    - Copy indicator
+    - Copy to clipboard (click header or Ctrl+C when focused)
     """
+
+    BINDINGS = [
+        Binding("c", "copy_code", "Copy code", show=False),
+    ]
 
     DEFAULT_CSS = """
     StreamingCodeBlock {
@@ -316,6 +329,21 @@ class StreamingCodeBlock(Widget):
         padding: 0 1;
     }
 
+    StreamingCodeBlock .code-header:hover {
+        background: #6272a4;
+    }
+
+    StreamingCodeBlock .copy-btn {
+        dock: right;
+        width: auto;
+        padding: 0 1;
+        color: #6272a4;
+    }
+
+    StreamingCodeBlock .copy-btn:hover {
+        color: #50fa7b;
+    }
+
     StreamingCodeBlock .code-content {
         padding: 1;
         overflow-x: auto;
@@ -323,6 +351,11 @@ class StreamingCodeBlock(Widget):
 
     StreamingCodeBlock.streaming .code-content {
         border-bottom: solid #ff79c6;
+    }
+
+    StreamingCodeBlock.copied .code-header {
+        background: #50fa7b;
+        color: #282a36;
     }
     """
 
@@ -349,11 +382,16 @@ class StreamingCodeBlock(Widget):
             self.line_count = line_count
             super().__init__()
 
+    # Collapse threshold (lines)
+    COLLAPSE_THRESHOLD = 50
+
     def __init__(
         self,
         language: str = "text",
         show_line_numbers: bool = True,
         show_header: bool = True,
+        filename: Optional[str] = None,
+        collapsible: bool = True,
         name: Optional[str] = None,
         id: Optional[str] = None,
         classes: Optional[str] = None,
@@ -365,6 +403,8 @@ class StreamingCodeBlock(Widget):
             language: Linguagem de programação
             show_line_numbers: Mostrar números de linha
             show_header: Mostrar header com linguagem
+            filename: Nome do arquivo (opcional)
+            collapsible: Permitir collapse para blocos grandes
             name: Nome do widget
             id: ID do widget
             classes: Classes CSS
@@ -374,6 +414,9 @@ class StreamingCodeBlock(Widget):
         self.language = language
         self.show_line_numbers = show_line_numbers
         self.show_header = show_header
+        self.filename = filename
+        self.collapsible = collapsible
+        self._collapsed = False
 
         # State
         self._code = ""
@@ -388,12 +431,99 @@ class StreamingCodeBlock(Widget):
     def compose(self) -> ComposeResult:
         """Compõe o widget."""
         if self.show_header:
-            lang_display = self.language.upper() if self.language else "CODE"
-            self._header = Static(f" {lang_display}", classes="code-header")
+            self._header = Static(self._format_header_text(), classes="code-header")
             yield self._header
 
         self._content = Static("", classes="code-content")
         yield self._content
+
+    def _format_header_text(self, line_count: int = 0) -> str:
+        """Format header text with language, filename, and hints."""
+        lang_display = self.language.upper() if self.language else "CODE"
+
+        parts = [f" {lang_display}"]
+
+        if self.filename:
+            parts.append(f"[dim]{self.filename}[/dim]")
+
+        if line_count > 0:
+            parts.append(f"{line_count} lines")
+
+        if line_count > self.COLLAPSE_THRESHOLD and self.collapsible:
+            if self._collapsed:
+                parts.append("[dim]▶ expand[/dim]")
+            else:
+                parts.append("[dim]▼ collapse[/dim]")
+        else:
+            parts.append("[dim]click to copy[/dim]")
+
+        return " │ ".join(parts)
+
+    def toggle_collapse(self) -> None:
+        """Toggle collapsed state for long code blocks."""
+        line_count = self._highlighter.state.total_lines
+        if line_count <= self.COLLAPSE_THRESHOLD or not self.collapsible:
+            return
+
+        self._collapsed = not self._collapsed
+        self._update_display()
+
+    def on_click(self, event) -> None:
+        """Handle click on header to copy or toggle collapse."""
+        if self._header and not self.is_streaming:
+            # Check if click is on header area (first row)
+            if event.y == 0:
+                line_count = self._highlighter.state.total_lines
+                if line_count > self.COLLAPSE_THRESHOLD and self.collapsible:
+                    self.toggle_collapse()
+                else:
+                    self.action_copy_code()
+
+    def action_copy_code(self) -> None:
+        """Copy code to clipboard."""
+        if not self._code:
+            return
+
+        copied = False
+        if CLIPBOARD_AVAILABLE:
+            try:
+                pyperclip.copy(self._code)
+                copied = True
+            except Exception:
+                pass
+
+        if not copied:
+            # Fallback: use Textual's copy_to_clipboard
+            try:
+                self.app.copy_to_clipboard(self._code)
+                copied = True
+            except Exception:
+                pass
+
+        if copied:
+            # Visual feedback
+            self.add_class("copied")
+            if self._header:
+                lang_display = self.language.upper() if self.language else "CODE"
+                self._header.update(f"✓ {lang_display} │ Copied!")
+
+            # Notify app if possible
+            try:
+                self.app.notify("Code copied to clipboard", title="Copied!", timeout=2)
+            except Exception:
+                pass
+
+            # Reset after delay
+            self.set_timer(1.5, self._reset_copy_state)
+
+    def _reset_copy_state(self) -> None:
+        """Reset copy visual feedback."""
+        self.remove_class("copied")
+        if self._header and self.show_header:
+            line_count = self._highlighter.state.total_lines + (
+                1 if self._highlighter.state.incomplete_line else 0
+            )
+            self._header.update(self._format_header_text(line_count))
 
     async def start_stream(self, language: Optional[str] = None) -> None:
         """
@@ -447,12 +577,27 @@ class StreamingCodeBlock(Widget):
         if self.is_streaming:
             cursor = self.CURSOR_FRAMES[self._cursor_index]
 
-        highlighted = self._highlighter.get_highlighted_text(
-            show_line_numbers=self.show_line_numbers,
-            cursor=cursor,
+        line_count = self._highlighter.state.total_lines + (
+            1 if self._highlighter.state.incomplete_line else 0
         )
 
-        self._content.update(highlighted)
+        # Handle collapsed state
+        if self._collapsed and line_count > self.COLLAPSE_THRESHOLD:
+            preview_lines = 5
+            preview = '\n'.join(self._code.split('\n')[:preview_lines])
+            from rich.text import Text
+            collapsed_text = Text(preview + f"\n... ({line_count - preview_lines} more lines)")
+            self._content.update(collapsed_text)
+        else:
+            highlighted = self._highlighter.get_highlighted_text(
+                show_line_numbers=self.show_line_numbers,
+                cursor=cursor,
+            )
+            self._content.update(highlighted)
+
+        # Update header with line count
+        if self._header and self.show_header and not self.is_streaming:
+            self._header.update(self._format_header_text(line_count))
 
     async def _animate_cursor(self) -> None:
         """Anima cursor durante streaming."""

@@ -5,9 +5,11 @@ Renderiza tabelas markdown ao vivo:
 - Renderiza após primeira row
 - Adapta largura dinamicamente
 - Integra com Rich.Table
+- Copy to clipboard support (Phase 11)
 
 Autor: JuanCS Dev
 Data: 2025-11-25
+Updated: 2026-01-03 - Added copy functionality (Phase 11)
 """
 
 import re
@@ -20,9 +22,18 @@ from textual.widgets import Static
 from textual.reactive import reactive
 from textual.message import Message
 from textual.app import ComposeResult
+from textual.binding import Binding
+from textual.containers import Vertical
 
 from rich.table import Table
 from rich import box
+
+# Clipboard support
+try:
+    import pyperclip
+    CLIPBOARD_AVAILABLE = True
+except ImportError:
+    CLIPBOARD_AVAILABLE = False
 
 
 class TableState(Enum):
@@ -269,7 +280,14 @@ class StreamingTableWidget(Widget):
     Widget de tabela com streaming.
 
     Renderiza tabelas markdown progressivamente durante streaming.
+    Features (Phase 11):
+    - Header with row/column count
+    - Copy to clipboard (click header or press 'c')
     """
+
+    BINDINGS = [
+        Binding("c", "copy_table", "Copy table", show=False),
+    ]
 
     DEFAULT_CSS = """
     StreamingTableWidget {
@@ -278,12 +296,28 @@ class StreamingTableWidget(Widget):
         min-height: 3;
     }
 
+    StreamingTableWidget .table-header {
+        background: #44475a;
+        color: #f8f8f2;
+        height: 1;
+        padding: 0 1;
+    }
+
+    StreamingTableWidget .table-header:hover {
+        background: #6272a4;
+    }
+
     StreamingTableWidget.streaming {
         border: solid #00d4aa;
     }
 
     StreamingTableWidget.complete {
         border: solid #50fa7b;
+    }
+
+    StreamingTableWidget.copied .table-header {
+        background: #50fa7b;
+        color: #282a36;
     }
     """
 
@@ -306,6 +340,7 @@ class StreamingTableWidget(Widget):
 
     def __init__(
         self,
+        show_header: bool = True,
         name: Optional[str] = None,
         id: Optional[str] = None,
         classes: Optional[str] = None,
@@ -313,13 +348,98 @@ class StreamingTableWidget(Widget):
         """Inicializa widget."""
         super().__init__(name=name, id=id, classes=classes)
 
+        self.show_header = show_header
         self._renderer = StreamingTableRenderer()
+        self._header: Optional[Static] = None
         self._content: Optional[Static] = None
 
     def compose(self) -> ComposeResult:
         """Compõe widget."""
+        if self.show_header:
+            self._header = Static(" TABLE │ [dim]click to copy[/dim]", classes="table-header")
+            yield self._header
         self._content = Static("")
         yield self._content
+
+    def _format_header(self) -> str:
+        """Format table header text."""
+        rows = len(self._renderer.state.rows)
+        cols = len(self._renderer.state.columns)
+        if rows > 0 and cols > 0:
+            return f" TABLE │ {rows} rows × {cols} cols │ [dim]click to copy[/dim]"
+        return " TABLE │ [dim]click to copy[/dim]"
+
+    def on_click(self, event) -> None:
+        """Handle click on header to copy."""
+        if self._header and not self.is_streaming:
+            if event.y == 0:
+                self.action_copy_table()
+
+    def action_copy_table(self) -> None:
+        """Copy table as markdown to clipboard."""
+        markdown = self._to_markdown()
+        if not markdown:
+            return
+
+        copied = False
+        if CLIPBOARD_AVAILABLE:
+            try:
+                pyperclip.copy(markdown)
+                copied = True
+            except Exception:
+                pass
+
+        if not copied:
+            try:
+                self.app.copy_to_clipboard(markdown)
+                copied = True
+            except Exception:
+                pass
+
+        if copied:
+            self.add_class("copied")
+            if self._header:
+                self._header.update("✓ TABLE │ Copied!")
+            try:
+                self.app.notify("Table copied to clipboard", title="Copied!", timeout=2)
+            except Exception:
+                pass
+            self.set_timer(1.5, self._reset_copy_state)
+
+    def _reset_copy_state(self) -> None:
+        """Reset copy visual feedback."""
+        self.remove_class("copied")
+        if self._header:
+            self._header.update(self._format_header())
+
+    def _to_markdown(self) -> str:
+        """Convert table to markdown format."""
+        state = self._renderer.state
+        if not state.columns:
+            return ""
+
+        lines = []
+
+        # Header row
+        headers = [col.header for col in state.columns]
+        lines.append("| " + " | ".join(headers) + " |")
+
+        # Separator
+        seps = []
+        for col in state.columns:
+            if col.alignment == "center":
+                seps.append(":---:")
+            elif col.alignment == "right":
+                seps.append("---:")
+            else:
+                seps.append("---")
+        lines.append("| " + " | ".join(seps) + " |")
+
+        # Data rows
+        for row in state.rows:
+            lines.append("| " + " | ".join(row.cells) + " |")
+
+        return "\n".join(lines)
 
     def start_stream(self) -> None:
         """Inicia streaming."""
@@ -359,6 +479,10 @@ class StreamingTableWidget(Widget):
         if table and self._content:
             self._content.update(table)
 
+        # Update header
+        if self._header:
+            self._header.update(self._format_header())
+
         self.post_message(self.TableComplete(
             len(self._renderer.state.rows),
             len(self._renderer.state.columns),
@@ -376,6 +500,9 @@ class StreamingTableWidget(Widget):
         if table and self._content:
             self._content.update(table)
             self.row_count = len(self._renderer.state.rows)
+            # Update header
+            if self._header:
+                self._header.update(self._format_header())
 
 
 def parse_markdown_table(markdown: str) -> Optional[Table]:

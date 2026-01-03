@@ -19,6 +19,9 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Optional, Tuple
 import json
+import os
+import platform
+import subprocess
 
 from textual.theme import Theme
 
@@ -301,3 +304,106 @@ class ThemeManager:
             ThemeMode.DARK.value: THEME_DARK,
         }
         return themes.get(name)
+
+    @classmethod
+    def detect_system_theme(cls) -> str:
+        """
+        Detect system dark/light mode preference.
+
+        Returns:
+            'vertice-dark' or 'vertice-light' based on system preference.
+
+        Platform detection:
+            - macOS: defaults read -g AppleInterfaceStyle
+            - Linux: GTK theme or COLORFGBG env var
+            - Windows: Registry AppsUseLightTheme
+        """
+        system = platform.system()
+
+        try:
+            if system == "Darwin":  # macOS
+                result = subprocess.run(
+                    ["defaults", "read", "-g", "AppleInterfaceStyle"],
+                    capture_output=True,
+                    text=True,
+                    timeout=1,
+                )
+                if result.returncode == 0 and "Dark" in result.stdout:
+                    return ThemeMode.VERTICE_DARK.value
+                return ThemeMode.VERTICE_LIGHT.value
+
+            elif system == "Linux":
+                # Check COLORFGBG (terminal hint)
+                colorfgbg = os.environ.get("COLORFGBG", "")
+                if colorfgbg:
+                    parts = colorfgbg.split(";")
+                    if len(parts) >= 2:
+                        bg = parts[-1]
+                        # Light backgrounds: 15 (white), 7 (silver)
+                        if bg in ("15", "7"):
+                            return ThemeMode.VERTICE_LIGHT.value
+
+                # Check GTK theme
+                gtk_theme = os.environ.get("GTK_THEME", "").lower()
+                if gtk_theme:
+                    if "dark" in gtk_theme:
+                        return ThemeMode.VERTICE_DARK.value
+                    return ThemeMode.VERTICE_LIGHT.value
+
+                # Check gsettings (GNOME)
+                try:
+                    result = subprocess.run(
+                        ["gsettings", "get", "org.gnome.desktop.interface", "color-scheme"],
+                        capture_output=True,
+                        text=True,
+                        timeout=1,
+                    )
+                    if "dark" in result.stdout.lower():
+                        return ThemeMode.VERTICE_DARK.value
+                    if "light" in result.stdout.lower():
+                        return ThemeMode.VERTICE_LIGHT.value
+                except Exception:
+                    pass
+
+            elif system == "Windows":
+                try:
+                    import winreg
+                    key = winreg.OpenKey(
+                        winreg.HKEY_CURRENT_USER,
+                        r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
+                    )
+                    value, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")
+                    winreg.CloseKey(key)
+                    if value == 0:
+                        return ThemeMode.VERTICE_DARK.value
+                    return ThemeMode.VERTICE_LIGHT.value
+                except Exception:
+                    pass
+
+        except Exception:
+            pass
+
+        # Default to dark
+        return ThemeMode.VERTICE_DARK.value
+
+    @classmethod
+    def get_auto_theme(cls) -> str:
+        """
+        Get theme based on saved preference or auto-detect.
+
+        Checks for "auto" preference to trigger system detection.
+
+        Returns:
+            Theme name string.
+        """
+        try:
+            if cls.CONFIG_FILE.exists():
+                config = json.loads(cls.CONFIG_FILE.read_text())
+                theme = config.get("theme", "auto")
+                if theme == "auto":
+                    return cls.detect_system_theme()
+                if theme in cls._THEME_MAP:
+                    return theme
+        except Exception:
+            pass
+        return cls.detect_system_theme()
