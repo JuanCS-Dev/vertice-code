@@ -89,7 +89,11 @@ from .enforcement import (
 
 # Monitoring
 from .monitor import (
-    JusticaMonitor
+    JusticaMonitor,
+    SuspicionLevel,
+    SuspicionScore,
+    MonitoringEvent,
+    AgentSession,
 )
 
 # Audit
@@ -101,7 +105,9 @@ from .audit import (
     ConsoleBackend,
     FileBackend,
     InMemoryBackend,
-    AuditLogger
+    AuditLogger,
+    create_test_logger,
+    create_default_logger,
 )
 
 # Main Agent
@@ -155,6 +161,10 @@ __all__ = [
 
     # Monitoring
     "JusticaMonitor",
+    "SuspicionLevel",
+    "SuspicionScore",
+    "MonitoringEvent",
+    "AgentSession",
 
     # Audit
     "AuditLevel",
@@ -165,6 +175,8 @@ __all__ = [
     "FileBackend",
     "InMemoryBackend",
     "AuditLogger",
+    "create_test_logger",
+    "create_default_logger",
 
     # Agent
     "JusticaState",
