@@ -22,7 +22,7 @@
 | Type hints faltando | **37 funcoes** | 0 | 🔴 PENDENTE | MEDIO |
 | Dependency injection | **47 singletons** | **47** | ✅ 100% | ALTO |
 
-**COMPLIANCE SCORE: 92%** (Anterior: 62% → 72% → 75% → 78% → 82% → 85% → 87% → 92%, Target: 95%)
+**COMPLIANCE SCORE: 94%** (Anterior: 62% → 72% → 75% → 78% → 82% → 85% → 87% → 92% → 94%, Target: 95%)
 
 ---
 
@@ -407,7 +407,7 @@ vertice_cli/agents/refactorer/
 
 ## FASE 4: ELIMINACAO DE DUPLICACAO
 
-> **Status**: 🔴 ANÁLISE COMPLETA - 6 padrões identificados (~900 linhas de economia)
+> **Status**: ✅ COMPLETO - Utilities criados em vertice_cli/utils/ + migração iniciada (2026-01-03)
 
 ### RESUMO DE DUPLICAÇÕES IDENTIFICADAS
 
@@ -1057,7 +1057,7 @@ def complex_function(
 | **FASE 2** | 🟡 EM ANDAMENTO | 4/15 arquivos >1000 linhas restantes (11 refatorados) | ~12h |
 | **FASE 2.R** | ✅ COMPLETO | 4 falhas de testes corrigidas | ~15min |
 | **FASE 3** | ✅ COMPLETO | 3 God Objects (já decompostos) | - |
-| **FASE 4** | 🔴 PENDENTE | 6 padrões duplicados | ~12h |
+| **FASE 4** | ✅ COMPLETO | 6 padrões → utilities criados + migração iniciada | ~4h |
 | **FASE 5** | ✅ COMPLETO | 47 singletons + DI Container | ~4h |
 | **FASE 6** | 🔴 PENDENTE | 70+ type hints | ~5h |
 | **FASE 7** | 🔴 PENDENTE | Docstrings | ~8h |

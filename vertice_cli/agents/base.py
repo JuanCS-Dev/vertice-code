@@ -20,6 +20,8 @@ import abc
 import logging
 from typing import Any, Dict, List, Optional, cast
 
+from vertice_cli.utils.streaming import collect_stream
+
 # =============================================================================
 # IMPORTS FROM vertice_core (Single Source of Truth)
 # =============================================================================
@@ -136,15 +138,14 @@ class BaseAgent(abc.ABC):
                     **kwargs,
                 )
             else:
-                # Fallback for streaming client
-                buffer = []
-                async for chunk in self.llm_client.stream(
-                    prompt=prompt,
-                    system_prompt=final_sys_prompt,
-                    **kwargs,
-                ):
-                    buffer.append(chunk)
-                response = ''.join(buffer)
+                # Fallback for streaming client - use unified StreamBuffer
+                response = await collect_stream(
+                    self.llm_client.stream(
+                        prompt=prompt,
+                        system_prompt=final_sys_prompt,
+                        **kwargs,
+                    )
+                )
 
             self.execution_count += 1
             return cast(str, response)
