@@ -19,7 +19,7 @@ Soli Deo Gloria
 
 from __future__ import annotations
 
-from .lsp_client import (
+from .lsp import (
     # Types
     DiagnosticSeverity,
     SymbolKind,
@@ -39,11 +39,13 @@ from .lsp_client import (
     LSPClient,
     get_lsp_client,
     close_lsp_client,
+    # Protocol
+    JsonRpcConnection,
     # Configs
     DEFAULT_LANGUAGE_SERVERS,
 )
 
-from .ast_editor import (
+from .ast import (
     NodeContext,
     CodeLocation,
     CodeMatch,
@@ -86,6 +88,7 @@ __all__ = [
     "LSPClient",
     "get_lsp_client",
     "close_lsp_client",
+    "JsonRpcConnection",
     "DEFAULT_LANGUAGE_SERVERS",
     # AST Editor
     "NodeContext",

@@ -126,23 +126,25 @@ except (SpecificException) as e:
 
 ### Prioridade CRITICA (>1000 linhas) - 15 arquivos VERIFICADOS
 
-| # | Arquivo | Linhas REAIS | Classes | Métodos | Dificuldade | Risco |
-|---|---------|--------------|---------|---------|-------------|-------|
-| 1 | `vertice_cli/agents/devops_agent.py` | **1,287** | 8 | 16 | MÉDIA | BAIXO |
-| 2 | `vertice_cli/core/workflow.py` | **1,214** | 14 | 44 | FÁCIL | BAIXO |
-| 3 | `vertice_cli/cli/repl_masterpiece.py` | **1,208** | 3 | 23 | DIFÍCIL | MÉDIO |
-| 4 | `vertice_core/code/lsp_client.py` | **1,171** | 15 | 22 | MÉDIA | BAIXO |
-| 5 | `vertice_cli/agents/documentation.py` | **1,156** | 6 | 18 | MÉDIA | BAIXO |
-| 6 | `vertice_cli/agents/testing.py` | **1,153** | 7 | 21 | ALTA | BAIXO |
-| 7 | `vertice_cli/agents/refactorer.py` | **1,133** | 10 | 32 | MÉDIA | BAIXO |
-| 8 | `vertice_governance/sofia/deliberation.py` | **1,113** | 7 | 27 | FÁCIL | BAIXO |
-| 9 | `vertice_cli/agents/planner/agent.py` | **1,077** | 1 | **38** | MÉDIA | BAIXO |
-| 10 | `vertice_cli/agents/sofia_agent.py` | **1,022** | 4 | 27 | MÉDIA | BAIXO |
-| 11 | `vertice_cli/tui/components/streaming_markdown.py` | **1,003** | 6 | 43 | FÁCIL | BAIXO |
-| 12 | `vertice_core/agents/orchestrator.py` | **923** | 8 | 25 | MÉDIA | MÉDIO |
-| 13 | `vertice_tui/core/agents/formatters.py` | **929** | 12 | 24 | FÁCIL | BAIXO |
-| 14 | `vertice_cli/core/recovery.py` | **920** | 7 | 18 | MÉDIA | BAIXO |
-| 15 | `vertice_core/code/ast_editor.py` | **890** | 7 | 18 | FÁCIL | BAIXO |
+| # | Arquivo | Linhas REAIS | Classes | Métodos | Dificuldade | Status |
+|---|---------|--------------|---------|---------|-------------|--------|
+| 1 | `vertice_cli/agents/devops_agent.py` | **1,287** | 8 | 16 | MÉDIA | ✅ Refatorado |
+| 2 | `vertice_cli/core/workflow.py` | **1,214** | 14 | 44 | FÁCIL | ✅ Refatorado |
+| 3 | `vertice_cli/cli/repl_masterpiece.py` | **1,208** | 3 | 23 | DIFÍCIL | ✅ Refatorado |
+| 4 | `vertice_core/code/lsp_client.py` | **1,171** | 15 | 22 | MÉDIA | ✅ Refatorado |
+| 5 | `vertice_cli/agents/documentation.py` | **1,156** | 6 | 18 | MÉDIA | 🔴 Pendente |
+| 6 | `vertice_cli/agents/testing.py` | **1,153** | 7 | 21 | ALTA | ✅ Refatorado |
+| 7 | `vertice_cli/agents/refactorer.py` | **1,133** | 10 | 32 | MÉDIA | 🔴 Pendente |
+| 8 | `vertice_governance/sofia/deliberation.py` | **1,113** | 7 | 27 | FÁCIL | ✅ Refatorado |
+| 9 | `vertice_cli/agents/planner/agent.py` | **1,077** | 1 | **38** | MÉDIA | 🔴 Pendente |
+| 10 | `vertice_cli/agents/sofia_agent.py` | **1,022** | 4 | 27 | MÉDIA | 🔴 Pendente |
+| 11 | `vertice_cli/tui/components/streaming_markdown.py` | **1,003** | 6 | 43 | FÁCIL | ✅ Refatorado |
+| 12 | `vertice_core/agents/orchestrator.py` | **923** | 8 | 25 | MÉDIA | ✅ Refatorado |
+| 13 | `vertice_tui/core/agents/formatters.py` | **929** | 12 | 24 | FÁCIL | ✅ Refatorado |
+| 14 | `vertice_cli/core/recovery.py` | **920** | 7 | 18 | MÉDIA | ✅ Refatorado |
+| 15 | `vertice_core/code/ast_editor.py` | **890** | 7 | 18 | FÁCIL | ✅ Refatorado |
+
+**Progresso Phase 2**: 11/15 arquivos refatorados (73.3%)
 
 ### Estratégias de Split DETALHADAS (baseadas em análise real)
 
@@ -1034,7 +1036,7 @@ def complex_function(
 
 | Metrica | Inicial | Atual | Target | Progresso |
 |---------|---------|-------|--------|-----------|
-| Arquivos >500 linhas | 72 | **62** | 0 | 🟡 13.9% |
+| Arquivos >500 linhas | 72 | **58** | 0 | 🟡 19.4% |
 | Arquivos >1000 linhas | 15 | **4** | 0 | 🟢 73.3% |
 | TODO/FIXME/HACK | 10 | **0** | 0 | ✅ 100% |
 | Error handling silencioso | 42 | **0** | 0 | ✅ 100% |
@@ -1275,6 +1277,60 @@ def complex_function(
 ---
 
 ## CHANGELOG
+
+### 2026-01-03 (Sessão 2.4) - PHASE 2.3: MODULAR DECOMPOSITION FINAL
+
+**Quatro refatorações completadas em uma sessão!**
+
+#### Arquivos refatorados:
+
+| Arquivo | Antes | Depois | Módulos | Max Linhas |
+|---------|-------|--------|---------|------------|
+| `formatters.py` | 929 | 771 | 9 | 117 |
+| `orchestrator.py` | 923 | 834 | 6 | 302 |
+| `recovery.py` | 920 | 892 | 6 | 415 |
+| `ast_editor.py` | 890 | 913 | 5 | 440 |
+
+#### Padrões aplicados:
+- **Strategy Pattern** (formatters - FORMATTERS registry)
+- **State Machine** (orchestrator - state handlers)
+- **Circuit Breaker + Retry** (recovery - DAY 7 patterns)
+- **Singleton** (ast - get_ast_editor)
+
+#### Arquivos criados:
+
+```
+vertice_tui/core/agents/formatters/
+├── __init__.py, protocol.py, helpers.py
+├── architect.py, reviewer.py, explorer.py
+├── devops.py, code_agents.py, fallback.py
+
+vertice_core/agents/orchestrator/
+├── __init__.py, types.py, models.py
+├── protocol.py, states.py, orchestrator.py
+
+vertice_cli/core/recovery/
+├── __init__.py, types.py, retry_policy.py
+├── circuit_breaker.py, engine.py, helpers.py
+
+vertice_core/code/ast/
+├── __init__.py, types.py, languages.py
+├── symbols.py, editor.py
+```
+
+#### Correções pós-refatoração:
+- `vertice_core/code/__init__.py`: Import `ast` em vez de `ast_editor`
+- `vertice_core/code/validator.py`: Import `ast` em vez de `ast_editor`
+
+#### Validação:
+- ✅ Todos os imports funcionam
+- ✅ Testes funcionais passam para todos os módulos
+- ✅ Backward compatible via `__init__.py` re-exports
+
+#### Commit: `aef653a`
+- 30 files changed, 3410 insertions(+), 3255 deletions(-)
+
+---
 
 ### 2026-01-02 (Sessão 2.3) - REFATORAÇÃO DELIBERATION.PY COMPLETA
 

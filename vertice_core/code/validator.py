@@ -43,7 +43,7 @@ from typing import (
     Union,
 )
 
-from .ast_editor import ASTEditor, get_ast_editor, TREE_SITTER_AVAILABLE
+from .ast import ASTEditor, get_ast_editor, TREE_SITTER_AVAILABLE
 from .lsp import (
     Diagnostic,
     DiagnosticSeverity,
