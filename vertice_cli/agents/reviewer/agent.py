@@ -13,8 +13,9 @@ Date: 2026-01-02
 import ast
 import json
 import logging
-import re
 from typing import Any, Dict, List
+
+from vertice_cli.utils import MarkdownExtractor
 
 import networkx as nx
 
@@ -409,13 +410,10 @@ Output JSON with:
         return contents
 
     def _extract_code_blocks(self, text: str) -> str:
-        """
-        Extract Python code from text using multiple detection strategies.
+        """Extract Python code from text using MarkdownExtractor.
 
-        Extraction priority:
-        1. Fenced markdown code blocks (```python ... ```)
-        2. Lines starting with Python keywords (def, class, import, etc.)
-        3. Indented blocks containing Python keywords
+        Uses unified MarkdownExtractor from vertice_cli.utils with
+        multi-strategy extraction (fenced, indented, inline patterns).
 
         Deduplicates extracted blocks to avoid reviewing the same code twice.
 
@@ -428,51 +426,16 @@ Output JSON with:
         if not text:
             return ""
 
-        # Priority 1: Fenced code blocks
-        fenced_pattern = r'```(?:python|py|python3)?\s*\n(.*?)```'
-        fenced_matches = re.findall(fenced_pattern, text, re.DOTALL)
+        extractor = MarkdownExtractor(deduplicate=True, min_lines=1)
 
-        if fenced_matches:
-            unique_code = []
-            seen = set()
-            for code in fenced_matches:
-                code = code.strip()
-                if code and code not in seen:
-                    seen.add(code)
-                    unique_code.append(code)
-            return '\n\n'.join(unique_code)
+        # Try Python-specific blocks first
+        blocks = extractor.extract_code_blocks(text, language="python")
 
-        # Priority 2: Python code at start of lines
-        inline_code_pattern = r'(?:^|\n)((?:def |class |import |from |async def |@\w+).+(?:\n(?:    |\t).+)*)'
-        inline_matches = re.findall(inline_code_pattern, text, re.DOTALL)
+        # If no python blocks, try all blocks
+        if not blocks:
+            blocks = extractor.extract_code_blocks(text)
 
-        if inline_matches:
-            unique_code = []
-            seen = set()
-            for code in inline_matches:
-                code = code.strip()
-                if code and code not in seen:
-                    seen.add(code)
-                    unique_code.append(code)
-            return '\n\n'.join(unique_code)
-
-        # Priority 3: Indented blocks
-        if any(kw in text for kw in ['def ', 'class ', 'return ', 'import ', 'if ', 'for ']):
-            indented_pattern = r'(?:^|\n)((?:    |\t).+(?:\n(?:    |\t).+)*)'
-            indented_matches = re.findall(indented_pattern, text)
-
-            if indented_matches:
-                unique_code = []
-                seen = set()
-                for code in indented_matches:
-                    code = code.strip()
-                    if code and code not in seen and len(code) > 20:
-                        seen.add(code)
-                        unique_code.append(code)
-                if unique_code:
-                    return '\n\n'.join(unique_code)
-
-        return ""
+        return '\n\n'.join(block.content for block in blocks)
 
     def _parse_llm_json(self, text: str) -> Dict[str, Any]:
         """

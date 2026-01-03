@@ -22,9 +22,10 @@ Philosophy (Boris Cherny):
 
 import ast
 import logging
-import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+from vertice_cli.utils import MarkdownExtractor
 
 from ..base import (
     AgentCapability,
@@ -104,6 +105,7 @@ class DocumentationAgent(BaseAgent):
         """Extract code from markdown code blocks or inline in user message.
 
         Following Claude Code pattern: check inline content FIRST before using tools.
+        Uses unified MarkdownExtractor from vertice_cli.utils.
 
         Args:
             text: User message or context text that may contain code
@@ -114,39 +116,10 @@ class DocumentationAgent(BaseAgent):
         if not text:
             return ""
 
-        # Pattern 1: Fenced code blocks
-        fenced_pattern = r'```(?:python|py)?\n(.*?)```'
-        fenced_matches = re.findall(fenced_pattern, text, re.DOTALL)
+        extractor = MarkdownExtractor(deduplicate=True)
+        blocks = extractor.extract_code_blocks(text)
 
-        # Pattern 2: Generic fenced blocks without language
-        generic_pattern = r'```\n?(.*?)```'
-        generic_matches = re.findall(generic_pattern, text, re.DOTALL)
-
-        # Pattern 3: Indented code blocks
-        indented_pattern = r'(?:^|\n)((?:    |\t).+(?:\n(?:    |\t).+)*)'
-        indented_matches = re.findall(indented_pattern, text)
-
-        # Pattern 4: Detect Python code without markers
-        inline_code_pattern = r'(?:^|\n)((?:def |class |import |from |async def |@).+(?:\n(?:    |\t).+)*)'
-        inline_matches = re.findall(inline_code_pattern, text)
-
-        # Combine all found code
-        all_code = []
-        all_code.extend(fenced_matches)
-        all_code.extend(generic_matches)
-        all_code.extend(indented_matches)
-        all_code.extend(inline_matches)
-
-        # Return combined unique code blocks
-        seen = set()
-        unique_code = []
-        for code in all_code:
-            code = code.strip()
-            if code and code not in seen:
-                seen.add(code)
-                unique_code.append(code)
-
-        return '\n\n'.join(unique_code)
+        return '\n\n'.join(block.content for block in blocks)
 
     async def _document_inline_code(
         self, code: str, style: DocstringStyle

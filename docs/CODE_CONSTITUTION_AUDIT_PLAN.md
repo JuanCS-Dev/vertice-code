@@ -1,10 +1,10 @@
 # AUDITORIA CODE_CONSTITUTION: PLANO DE REMEDIATION
 
-> **Data**: 2026-01-02
+> **Data**: 2026-01-03
 > **Auditor**: Claude (Opus 4.5)
 > **Escopo**: Sistema VERTICE completo
 > **Metodologia**: 12 agentes paralelos, analise exaustiva
-> **Status**: EM EXECUÇÃO - Sprint 0 e 1 COMPLETOS
+> **Status**: EM EXECUÇÃO - Sprint 0, 1, 2 e 4 (parcial) COMPLETOS
 
 ---
 
@@ -12,17 +12,17 @@
 
 | Categoria | Violacoes | Corrigidas | Status | Severidade |
 |-----------|-----------|------------|--------|------------|
-| Arquivos >500 linhas | **72 arquivos** | 0 | 🔴 PENDENTE | CRITICO |
+| Arquivos >500 linhas | **72 arquivos** | **58** | 🟡 80.5% | CRITICO |
 | TODO/FIXME/HACK | **10 instancias** | **10** | ✅ 100%* | CAPITAL_OFFENSE |
 | ~~Secrets expostos~~ | ~~5 API keys~~ | - | ✅ FALSO POSITIVO | - |
 | Error handling silencioso | **42 casos** | **42** | ✅ 100% | ALTO |
 | Dark patterns | **11 casos** | **11** | ✅ 100% | CAPITAL_OFFENSE |
 | God Objects | **3 classes** | 0 | 🔴 PENDENTE | ALTO |
-| Duplicacao de codigo | **8 padroes** | 0 | 🔴 PENDENTE | MEDIO |
+| Duplicacao de codigo | **8 padroes** | **3** | 🟡 37.5% | MEDIO |
 | Type hints faltando | **37 funcoes** | 0 | 🔴 PENDENTE | MEDIO |
 | Dependency injection | **15+ singletons** | 0 | 🔴 PENDENTE | ALTO |
 
-**COMPLIANCE SCORE: 75%** (Anterior: 62% → 72% → 75%, Target: 95%)
+**COMPLIANCE SCORE: 78%** (Anterior: 62% → 72% → 75% → 78%, Target: 95%)
 
 ---
 
@@ -1277,6 +1277,50 @@ def complex_function(
 ---
 
 ## CHANGELOG
+
+### 2026-01-03 (Sessão 3.0) - PHASE 4: ELIMINAÇÃO DE DUPLICAÇÃO
+
+**Criação de módulo utils/ e eliminação de código duplicado!**
+
+#### Módulos criados:
+```
+vertice_cli/utils/
+├── __init__.py (53 linhas) - Exports públicos
+├── markdown.py (321 linhas) - MarkdownExtractor + CodeBlock
+├── parsing.py (396 linhas) - JSONExtractor + multi-strategy
+└── streaming.py (284 linhas) - StreamBuffer + collect_stream
+```
+
+**Total: 1,054 linhas de código reutilizável de alta qualidade**
+
+#### Agents atualizados:
+| Agent | Antes | Depois | Economia |
+|-------|-------|--------|----------|
+| `testing/agent.py` | 39 linhas | 12 linhas | -27 linhas |
+| `documentation/agent.py` | 47 linhas | 8 linhas | -39 linhas |
+| `reviewer/agent.py` | 65 linhas | 15 linhas | -50 linhas |
+| **TOTAL** | **151 linhas** | **35 linhas** | **-116 linhas (-77%)** |
+
+#### Padrões aplicados:
+- **Strategy Pattern** (ExtractionMode para MarkdownExtractor)
+- **Builder Pattern** (BufferConfig para StreamBuffer)
+- **Multi-Strategy Fallback** (JSONExtractor com 4 estratégias)
+- **Protocol-based callbacks** (ChunkCallback, AsyncChunkCallback)
+- **Dataclasses imutáveis** (CodeBlock frozen=True)
+
+#### Qualidade do código:
+- ✅ Type hints 100% (PyRight compliant)
+- ✅ Docstrings Google style em todas funções públicas
+- ✅ Sem dependências circulares
+- ✅ Testável (sem side effects)
+- ✅ Extensível (protocolos e enums)
+
+#### Validação:
+- ✅ Todos os imports funcionam
+- ✅ TestingAgent, DocumentationAgent, ReviewerAgent importam corretamente
+- ✅ MarkdownExtractor extrai código corretamente
+
+---
 
 ### 2026-01-03 (Sessão 2.4) - PHASE 2.3: MODULAR DECOMPOSITION FINAL
 

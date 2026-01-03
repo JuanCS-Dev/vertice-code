@@ -23,8 +23,9 @@ Capabilities:
 """
 
 import logging
-import re
 from typing import Any, Dict, List, Optional
+
+from vertice_cli.utils import MarkdownExtractor
 
 from ..base import (
     AgentCapability,
@@ -156,6 +157,7 @@ class TestingAgent(BaseAgent):
         """Extract code from markdown code blocks or inline in user message.
 
         Claude Code Pattern: Inline code has priority over file tools.
+        Uses unified MarkdownExtractor from vertice_cli.utils.
 
         Args:
             text: User message or prompt text
@@ -166,31 +168,14 @@ class TestingAgent(BaseAgent):
         if not text:
             return ""
 
-        code_blocks = []
+        extractor = MarkdownExtractor(deduplicate=True)
+        blocks = extractor.extract_code_blocks(text, language="python")
 
-        # Pattern 1: Fenced code blocks ```python\ncode\n``` or ```\ncode\n```
-        fenced_pattern = r'```(?:python|py)?\n(.*?)```'
-        matches = re.findall(fenced_pattern, text, re.DOTALL)
-        code_blocks.extend(matches)
+        # If no python-specific blocks, try all blocks
+        if not blocks:
+            blocks = extractor.extract_code_blocks(text)
 
-        # Pattern 2: Generic fenced blocks if no python-specific found
-        if not code_blocks:
-            generic_pattern = r'```\n?(.*?)```'
-            matches = re.findall(generic_pattern, text, re.DOTALL)
-            code_blocks.extend(matches)
-
-        # Pattern 3: Indented code blocks (4 spaces or tab)
-        if not code_blocks:
-            indented_pattern = r'(?:^|\n)((?:[ ]{4}|\t).*(?:\n(?:[ ]{4}|\t).*)*)'
-            matches = re.findall(indented_pattern, text, re.DOTALL)
-            code_blocks.extend(matches)
-
-        # Pattern 4: Look for function/class definitions directly
-        if not code_blocks:
-            if re.search(r'^(def |class |async def |import |from )', text, re.MULTILINE):
-                code_blocks.append(text)
-
-        return '\n\n'.join(code_blocks).strip()
+        return '\n\n'.join(block.content for block in blocks)
 
     async def execute(self, task: AgentTask) -> AgentResponse:
         """Execute testing analysis task.
