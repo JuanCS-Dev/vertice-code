@@ -23,6 +23,7 @@ Capabilities:
 """
 
 import logging
+import re
 from typing import Any, Dict, List, Optional
 
 from vertice_cli.utils import MarkdownExtractor
