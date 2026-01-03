@@ -67,6 +67,30 @@ from vertice_tui.widgets.loading import (
     ThinkingIndicator,
     PulseIndicator,
 )
+# Phase 11: Visual Upgrade - Layout & Navigation
+from vertice_tui.widgets.sidebar import (
+    Sidebar,
+    FilteredDirectoryTree,
+)
+from vertice_tui.widgets.session_tabs import (
+    SessionTabs,
+    SessionPane,
+    SessionData,
+)
+from vertice_tui.widgets.split_view import (
+    SplitView,
+    SplitPane,
+    DualPane,
+)
+from vertice_tui.widgets.breadcrumb import (
+    Breadcrumb,
+    ContextBreadcrumb,
+)
+from vertice_tui.widgets.token_sparkline import (
+    TokenSparkline,
+    CompactSparkline,
+    MultiSparkline,
+)
 
 __all__ = [
     "AutocompleteDropdown",
@@ -115,4 +139,18 @@ __all__ = [
     "LoadingCard",
     "ThinkingIndicator",
     "PulseIndicator",
+    # Layout & Navigation (Phase 11)
+    "Sidebar",
+    "FilteredDirectoryTree",
+    "SessionTabs",
+    "SessionPane",
+    "SessionData",
+    "SplitView",
+    "SplitPane",
+    "DualPane",
+    "Breadcrumb",
+    "ContextBreadcrumb",
+    "TokenSparkline",
+    "CompactSparkline",
+    "MultiSparkline",
 ]
