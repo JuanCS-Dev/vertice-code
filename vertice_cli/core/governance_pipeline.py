@@ -37,7 +37,7 @@ from typing import Tuple, Optional, Dict, Any
 
 from vertice_cli.agents.base import AgentTask, AgentResponse, BaseAgent
 from vertice_cli.agents.justica_agent import JusticaIntegratedAgent
-from vertice_cli.agents.sofia_agent import SofiaIntegratedAgent
+from vertice_cli.agents.sofia import SofiaIntegratedAgent
 from vertice_cli.core.observability import get_tracer, trace_operation
 from vertice_cli.core.agent_identity import enforce_permission, AgentPermission
 

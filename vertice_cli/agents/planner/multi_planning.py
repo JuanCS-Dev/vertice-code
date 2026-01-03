@@ -313,9 +313,133 @@ def build_comparison_summary(plans: List[AlternativePlan]) -> str:
     return "\n".join(lines)
 
 
+async def execute_with_multi_plan(
+    agent: Any,
+    task: Any,
+    auto_select: bool = True,
+    preferred_strategy: Optional[PlanStrategy] = None
+) -> Any:
+    """
+    Execute planning with multi-plan generation.
+
+    This is the ultimate v6.1 entry point that:
+    1. Generates 3 alternative plans (Standard/Accelerator/Lateral)
+    2. Calculates probabilities for each
+    3. Recommends the best plan
+    4. Optionally executes the selected plan
+
+    Args:
+        agent: The PlannerAgent instance
+        task: The task to plan
+        auto_select: If True, automatically use recommended plan
+        preferred_strategy: Override recommendation with specific strategy
+
+    Returns:
+        AgentResponse with the plan
+    """
+    from ..base import AgentResponse
+
+    # Generate multi-plan
+    multi_result = await generate_multi_plan_for_task(agent, task)
+
+    # Select plan
+    if preferred_strategy:
+        selected = multi_result.get_plan(preferred_strategy)
+        if not selected:
+            selected = multi_result.get_recommended()
+    elif auto_select:
+        selected = multi_result.get_recommended()
+    else:
+        # Return multi-plan result for user selection
+        return AgentResponse(
+            success=True,
+            data={
+                "multi_plan": multi_result.model_dump(),
+                "requires_selection": True,
+                "markdown": multi_result.to_markdown()
+            },
+            reasoning=f"Generated {len(multi_result.plans)} alternative plans. "
+                      f"Recommended: {multi_result.recommended_plan.value.upper()}",
+            metadata={"mode": "multi_plan_selection"}
+        )
+
+    # Execute the selected plan
+    if selected:
+        plan_data = selected.plan
+        return AgentResponse(
+            success=True,
+            data={
+                "plan": plan_data,
+                "selected_strategy": selected.strategy.value,
+                "probabilities": selected.probabilities.to_display(),
+                "multi_plan_summary": multi_result.comparison_summary,
+                "sops": plan_data.get("sops", [])
+            },
+            reasoning=f"Executing {selected.strategy.value.upper()} plan: {selected.name}. "
+                      f"{multi_result.recommendation_reasoning}",
+            metadata={
+                "mode": "multi_plan_execution",
+                "strategy": selected.strategy.value,
+                "overall_score": selected.overall_score
+            }
+        )
+
+    return AgentResponse(
+        success=False,
+        error="No plan could be generated",
+        reasoning="All plan generation attempts failed."
+    )
+
+
+async def generate_multi_plan_for_task(
+    agent: Any,
+    task: Any,
+    strategies: Optional[List[PlanStrategy]] = None
+) -> MultiPlanResult:
+    """
+    Generate multiple alternative plans using Verbalized Sampling.
+
+    Delegates to generate_multi_plan with agent's methods as dependencies.
+
+    Args:
+        agent: The PlannerAgent instance
+        task: The task to plan
+        strategies: Optional list of strategies to use
+
+    Returns:
+        MultiPlanResult with all plans and recommendation
+    """
+    async def gather_context() -> Dict[str, Any]:
+        return await agent._gather_context(task)
+
+    return await generate_multi_plan(
+        task_request=task.request,
+        gather_context_fn=gather_context,
+        call_llm_fn=agent._call_llm,
+        parse_json_fn=lambda x: _parse_json_safe(x),
+        strategies=strategies,
+        logger=agent.logger,
+    )
+
+
+def _parse_json_safe(text: str) -> Dict[str, Any]:
+    """Safely parse JSON from text."""
+    try:
+        # Try to find JSON object in text
+        start = text.find("{")
+        end = text.rfind("}") + 1
+        if start != -1 and end > start:
+            return json.loads(text[start:end])
+    except Exception:
+        pass
+    return {}
+
+
 __all__ = [
     "generate_multi_plan",
     "create_fallback_plan",
     "select_best_plan",
     "build_comparison_summary",
+    "execute_with_multi_plan",
+    "generate_multi_plan_for_task",
 ]

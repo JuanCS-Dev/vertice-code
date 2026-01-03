@@ -57,6 +57,24 @@ class SOPStep(BaseModel):
     objective: str
     definition_of_done: str
 
+    # FIX 1.6: Additional fields for consumer compatibility
+    description: str = Field(
+        default="",
+        description="Human-readable description (alias for objective)",
+    )
+    target_file: Optional[str] = Field(
+        default=None,
+        description="Target file for file-based operations",
+    )
+    task: Optional[str] = Field(
+        default=None,
+        description="Task specification for downstream agents",
+    )
+    implementation: Optional[str] = Field(
+        default=None,
+        description="Implementation details or code snippet",
+    )
+
     # GOAP fields - for state machine tracking
     preconditions: Dict[str, Any] = Field(
         default_factory=dict,

@@ -29,16 +29,16 @@ from vertice_cli.agents.base import (
 from vertice_cli.agents.architect import ArchitectAgent
 from vertice_cli.agents.explorer import ExplorerAgent
 from vertice_cli.agents.planner import PlannerAgent
-from vertice_cli.agents.refactorer import RefactorerAgent
+from vertice_cli.agents.refactorer import RefactorerAgent, create_refactorer_agent
 from vertice_cli.agents.reviewer import ReviewerAgent
 from vertice_cli.agents.security import SecurityAgent
 from vertice_cli.agents.performance import PerformanceAgent
-from vertice_cli.agents.testing import TestingAgent
+from vertice_cli.agents.testing import TestingAgent, create_testing_agent
 from vertice_cli.agents.executor import NextGenExecutorAgent
-from vertice_cli.agents.documentation import DocumentationAgent
-from vertice_cli.agents.devops_agent import DevOpsAgent
+from vertice_cli.agents.documentation import DocumentationAgent, create_documentation_agent
+from vertice_cli.agents.devops import DevOpsAgent, create_devops_agent
 from vertice_cli.agents.justica_agent import JusticaIntegratedAgent
-from vertice_cli.agents.sofia_agent import SofiaIntegratedAgent
+from vertice_cli.agents.sofia import SofiaIntegratedAgent, create_sofia_agent
 from vertice_cli.agents.data_agent_production import DataAgent
 
 # Aliases for backward compatibility
@@ -58,17 +58,22 @@ __all__ = [
     "ExplorerAgent",
     "PlannerAgent",
     "RefactorerAgent",
+    "create_refactorer_agent",
     "ReviewerAgent",
     "SecurityAgent",
     "PerformanceAgent",
     "TestingAgent",
+    "create_testing_agent",
     "NextGenExecutorAgent",
     "ExecutorAgent",  # Alias
     "DocumentationAgent",
+    "create_documentation_agent",
     "DevOpsAgent",
+    "create_devops_agent",
     "JusticaIntegratedAgent",
     "JusticaAgent",  # Alias
     "SofiaIntegratedAgent",
     "SofiaAgent",  # Alias
+    "create_sofia_agent",
     "DataAgent",
 ]

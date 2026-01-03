@@ -430,7 +430,7 @@ class TestGovernanceIntegration:
         Wisdom: Ethical guidance system.
         """
         try:
-            from vertice_cli.agents.sofia_agent import SofiaAgent
+            from vertice_cli.agents.sofia import SofiaIntegratedAgent as SofiaAgent
 
             # Check Sofia has wisdom methods
             wisdom_methods = ['counsel', 'ask_question', 'reflect']

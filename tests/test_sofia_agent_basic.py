@@ -11,7 +11,7 @@ This test suite covers:
 """
 
 import pytest
-from vertice_cli.agents.sofia_agent import (
+from vertice_cli.agents.sofia import (
     SofiaIntegratedAgent,
     create_sofia_agent,
     CounselResponse,

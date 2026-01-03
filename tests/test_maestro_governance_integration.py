@@ -19,7 +19,7 @@ from unittest.mock import Mock, AsyncMock, patch
 from vertice_cli.maestro_governance import MaestroGovernance, render_sofia_counsel
 from vertice_cli.core.governance_pipeline import GovernancePipeline
 from vertice_cli.agents.justica_agent import JusticaIntegratedAgent
-from vertice_cli.agents.sofia_agent import SofiaIntegratedAgent
+from vertice_cli.agents.sofia import SofiaIntegratedAgent
 from vertice_cli.agents.base import AgentTask, AgentResponse
 
 

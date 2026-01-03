@@ -40,7 +40,7 @@ from dataclasses import dataclass
 from vertice_cli.maestro_governance import MaestroGovernance
 from vertice_cli.core.governance_pipeline import GovernancePipeline
 from vertice_cli.agents.justica_agent import JusticaIntegratedAgent
-from vertice_cli.agents.sofia_agent import SofiaIntegratedAgent
+from vertice_cli.agents.sofia import SofiaIntegratedAgent
 from vertice_cli.agents.base import AgentTask, AgentResponse, AgentRole
 
 

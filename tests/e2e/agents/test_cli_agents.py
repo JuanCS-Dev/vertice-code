@@ -279,7 +279,7 @@ class TestDevOpsAgent:
     def devops(self, mock_llm_client, mock_mcp_client):
         """Create devops agent with mocked dependencies."""
         try:
-            from vertice_cli.agents.devops_agent import DevOpsAgent
+            from vertice_cli.agents.devops import DevOpsAgent
             return DevOpsAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
         except ImportError:
             pytest.skip("DevOpsAgent not available")
@@ -317,7 +317,7 @@ class TestSofiaAgent:
     def sofia(self, mock_llm_client, mock_mcp_client):
         """Create sofia agent with mocked dependencies."""
         try:
-            from vertice_cli.agents.sofia_agent import SofiaIntegratedAgent
+            from vertice_cli.agents.sofia import SofiaIntegratedAgent
             return SofiaIntegratedAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
         except ImportError:
             pytest.skip("SofiaIntegratedAgent not available")
