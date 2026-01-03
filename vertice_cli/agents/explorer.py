@@ -14,6 +14,8 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from vertice_core.protocols import LLMClientProtocol, MCPClientProtocol
+
 logger = logging.getLogger(__name__)
 
 from vertice_cli.agents.base import (
@@ -50,7 +52,9 @@ class ExplorerAgent(BaseAgent):
 
     CODE_EXTENSIONS = {'.py', '.js', '.ts', '.tsx', '.jsx', '.md', '.yaml', '.yml', '.json', '.toml', '.css', '.html'}
 
-    def __init__(self, llm_client: Any, mcp_client: Any) -> None:
+    def __init__(
+        self, llm_client: LLMClientProtocol, mcp_client: MCPClientProtocol
+    ) -> None:
         super().__init__(
             role=AgentRole.EXPLORER,
             capabilities=[AgentCapability.READ_ONLY],

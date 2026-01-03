@@ -103,8 +103,8 @@ class ExecutionMetrics:
     avg_latency: float = 0.0
     last_updated: datetime = field(default_factory=datetime.now)
 
-    def update(self, success: bool, exec_time: float, tokens: int = 0):
-        """Update metrics after execution"""
+    def update(self, success: bool, exec_time: float, tokens: int = 0) -> None:
+        """Update metrics after execution."""
         self.execution_count += 1
         self.total_time += exec_time
         if success:

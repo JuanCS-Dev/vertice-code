@@ -349,15 +349,19 @@ if __name__ == "__main__":
 
     # Mock LLM client (simulates your real one)
     class MockLLMClient:
-        async def generate(self, prompt, system_prompt=None, **kwargs):
+        async def generate(
+            self, prompt: str, system_prompt: Optional[str] = None, **kwargs: Any
+        ) -> str:
             return f"Generated response to: {prompt[:50]}..."
 
-        async def stream(self, prompt, system_prompt=None, **kwargs):
+        async def stream(
+            self, prompt: str, system_prompt: Optional[str] = None, **kwargs: Any
+        ) -> AsyncIterator[str]:
             words = f"Streaming response to: {prompt[:50]}...".split()
             for word in words:
                 yield word + " "
 
-    async def demo():
+    async def demo() -> None:
         print("=" * 80)
         print("LLM CLIENT ADAPTER - DEMO")
         print("=" * 80)

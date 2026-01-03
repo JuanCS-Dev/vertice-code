@@ -721,14 +721,18 @@ if __name__ == "__main__":
 
     # Mock LLM client
     class MockLLMClient:
-        async def generate(self, prompt, system_prompt=None, **kwargs):
+        async def generate(
+            self, prompt: str, system_prompt: Optional[str] = None, **kwargs: Any
+        ) -> str:
             return "Analysis complete. Schema has 3 issues. Optimization possible."
 
-        async def stream(self, prompt, system_prompt=None, **kwargs):
+        async def stream(
+            self, prompt: str, system_prompt: Optional[str] = None, **kwargs: Any
+        ) -> AsyncIterator[str]:
             for word in "Streaming analysis results...".split():
                 yield word + " "
 
-    async def demo():
+    async def demo() -> None:
         print("=" * 80)
         print("DATA AGENT PRODUCTION v1.0 - DEMO")
         print("=" * 80)
