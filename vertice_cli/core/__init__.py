@@ -70,6 +70,23 @@ __all__ = [
     'MemoryEntry',
     'ProjectMemory',
     'get_memory_manager',
+
+    # Dependency Injection (Big 3 Patterns)
+    'Scope',
+    'Provider',
+    'ProviderConfig',
+    'Singleton',
+    'Factory',
+    'Transient',
+    'AsyncSingleton',
+    'Configuration',
+    'BaseContainer',
+    'VerticeContainer',
+    'Container',
+    'TestContainer',
+    'Provide',
+    'inject',
+    'with_container',
 ]
 
 
@@ -149,6 +166,17 @@ def __getattr__(name: str):
     # Memory System (Claude Code Parity)
     if name in ('MemoryManager', 'MemoryEntry', 'ProjectMemory', 'get_memory_manager'):
         from .memory import MemoryManager, MemoryEntry, ProjectMemory, get_memory_manager
+        return locals()[name]
+
+    # Dependency Injection (Big 3 Patterns)
+    if name in ('Scope', 'Provider', 'ProviderConfig', 'Singleton', 'Factory', 'Transient',
+                'AsyncSingleton', 'Configuration', 'BaseContainer', 'VerticeContainer',
+                'Container', 'TestContainer', 'Provide', 'inject', 'with_container'):
+        from .di import (
+            Scope, Provider, ProviderConfig, Singleton, Factory, Transient,
+            AsyncSingleton, Configuration, BaseContainer, VerticeContainer,
+            Container, TestContainer, Provide, inject, with_container
+        )
         return locals()[name]
 
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
