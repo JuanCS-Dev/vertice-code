@@ -38,6 +38,7 @@ dependencies = [
 
     # Resilience (audit fix: tenacity missing)
     "tenacity>=8.2.0",
+    "cryptography>=42.0.0", # SEC-004: Fernet encryption for vault
     "aiohttp>=3.9.0",
 
     # Graph Analysis

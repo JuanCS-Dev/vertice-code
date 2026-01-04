@@ -20,8 +20,12 @@ import uuid
 import hashlib
 import base64
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
+from cryptography.fernet import Fernet, InvalidToken
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
@@ -111,16 +115,29 @@ class KnowledgeVault:
     Based on MIRIX (arXiv:2507.07957) knowledge vault component.
     """
 
-    def __init__(self, db_path: Path, salt: Optional[str] = None):
+    def __init__(self, db_path: Path, password: Optional[str] = None):
         """
         Initialize knowledge vault.
 
         Args:
             db_path: Path to SQLite database file.
-            salt: Optional salt for obfuscation (default: uses machine ID).
+            password: Optional encryption key (derivation input).
+                      Defaults to VERTICE_VAULT_KEY env var.
         """
         self.db_path = db_path
-        self._salt = salt or self._get_machine_salt()
+
+        # SEC-004: Use strong key derivation with a deterministic salt.
+        salt = self._get_machine_salt().encode()
+        password = password or os.environ.get("VERTICE_VAULT_KEY", "default-dev-key")
+
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=480000,
+        )
+        key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
+        self._fernet = Fernet(key)
         self._init_db()
 
     def _get_machine_salt(self) -> str:
@@ -157,38 +174,38 @@ class KnowledgeVault:
                 "CREATE INDEX IF NOT EXISTS idx_vault_name ON vault(name)"
             )
 
-    def _obfuscate(self, value: str) -> str:
-        """
-        Obfuscate a value (NOT secure encryption).
+    def encrypt(self, value: str) -> str:
+        """Encrypt value with AES-128-CBC (Fernet)."""
+        return self._fernet.encrypt(value.encode()).decode()
 
-        This is basic obfuscation to prevent casual viewing.
-        For production security, use proper encryption.
+    def decrypt(self, token: str) -> str:
+        """Decrypt value, with fallback to legacy base64."""
+        try:
+            # Try new Fernet decryption first
+            return self._fernet.decrypt(token.encode()).decode()
+        except InvalidToken:
+            # Fallback for old base64-encoded data
+            logger.warning(
+                "Vault entry is using legacy obfuscation. "
+                "It will be auto-upgraded to new encryption on next save."
+            )
+            return self._deobfuscate_legacy(token)
 
-        Args:
-            value: Value to obfuscate.
+    def _deobfuscate_legacy(self, obfuscated: str) -> str:
+        """Deobfuscate a value using the old base64 method."""
+        try:
+            decoded = base64.b64decode(obfuscated.encode()).decode()
+            # Remove salt prefix from old format
+            if ":" in decoded:
+                return decoded.split(":", 1)[1]
+            return decoded
+        except Exception:
+            # If it fails, it's likely not base64. It might be an unencrypted value.
+            return obfuscated
 
-        Returns:
-            Obfuscated value.
-        """
-        combined = f"{self._salt}:{value}"
-        encoded = base64.b64encode(combined.encode()).decode()
-        return encoded
-
-    def _deobfuscate(self, obfuscated: str) -> str:
-        """
-        Deobfuscate a value.
-
-        Args:
-            obfuscated: Obfuscated value.
-
-        Returns:
-            Original value.
-        """
-        decoded = base64.b64decode(obfuscated.encode()).decode()
-        # Remove salt prefix
-        if ":" in decoded:
-            return decoded.split(":", 1)[1]
-        return decoded
+    # Keep old method names for backward compat
+    _obfuscate = encrypt
+    _deobfuscate = decrypt
 
     def store(
         self,
