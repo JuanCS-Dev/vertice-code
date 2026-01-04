@@ -13,6 +13,7 @@ Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime
 from typing import Callable, Coroutine, List, Optional, Any
 
@@ -32,6 +33,9 @@ from vertice_core.types.jules_types import (
     JulesSession,
     JulesSessionState,
 )
+
+# Logger
+logger = logging.getLogger(__name__)
 
 # Type aliases
 GetSessionFn = Callable[[], Coroutine[Any, Any, JulesSession]]
@@ -309,8 +313,8 @@ class JulesMonitorWidget(Widget):
             log = self.query_one("#log", RichLog)
             text = self._format_activity(activity)
             log.write(text)
-        except Exception:
-            pass  # Widget not mounted yet
+        except Exception as e:
+            logger.debug(f"Could not write to log, widget not ready: {e}")
 
     def _format_activity(self, activity: JulesActivity) -> Text:
         """Format activity for display (v1alpha types)."""
@@ -400,30 +404,30 @@ class JulesMonitorWidget(Widget):
         try:
             self.query_one("#state", Static).update(self._format_state())
             self.query_one("#compact", Static).update(self._format_compact_status())
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Failed to update session state display: {e}", exc_info=True)
 
     def watch_session_title(self, value: str) -> None:
         """Update title when it changes."""
         try:
             self.query_one("#title", Label).update(value)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Failed to update session title: {e}", exc_info=True)
 
     def watch_plan_pending(self, value: bool) -> None:
         """Enable/disable approve button."""
         try:
             self.query_one("#approve", Button).disabled = not value
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Failed to update approve button state: {e}", exc_info=True)
 
     def watch_last_update(self, value: str) -> None:
         """Update footer."""
         try:
             self.query_one("#footer", Static).update(f"Updated: {value}")
             self.query_one("#compact", Static).update(self._format_compact_status())
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Failed to update footer: {e}", exc_info=True)
 
     def watch_collapsed(self, value: bool) -> None:
         """Toggle collapsed state."""
