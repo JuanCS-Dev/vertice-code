@@ -1,0 +1,85 @@
+name: Security Report
+description: Report a security vulnerability
+title: "[SECURITY] "
+labels: ["security", "critical", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Important:** For critical vulnerabilities, consider responsible disclosure.
+        Email security concerns to: security@vertice.dev (if applicable)
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Vulnerability Type
+      description: What type of security issue is this?
+      options:
+        - Injection (SQL, Command, Code)
+        - Authentication/Authorization bypass
+        - Sensitive data exposure
+        - Insecure deserialization
+        - Cryptography weakness
+        - Dependency vulnerability
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this vulnerability?
+      options:
+        - Critical - Remote code execution, data breach
+        - High - Privilege escalation, significant data exposure
+        - Medium - Limited impact, requires specific conditions
+        - Low - Minimal impact, informational
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Vulnerability Description
+      description: Describe the security issue in detail.
+      placeholder: |
+        What is the vulnerability?
+        What is the potential impact?
+    validations:
+      required: true
+
+  - type: textarea
+    id: location
+    attributes:
+      label: Location
+      description: Where is the vulnerable code located?
+      placeholder: |
+        File: path/to/file.py
+        Line: 123
+        Function: vulnerable_function()
+    validations:
+      required: true
+
+  - type: textarea
+    id: poc
+    attributes:
+      label: Proof of Concept
+      description: Steps to reproduce or exploit (if safe to share)
+      render: python
+
+  - type: textarea
+    id: fix
+    attributes:
+      label: Suggested Fix
+      description: If you have a suggestion for how to fix this issue
+      render: python
+
+  - type: checkboxes
+    id: disclosure
+    attributes:
+      label: Responsible Disclosure
+      options:
+        - label: I have not publicly disclosed this vulnerability
+          required: true
+        - label: I will allow 90 days for a fix before any public disclosure

@@ -1,0 +1,108 @@
+name: Jules Task
+description: Task formatted for Jules AI to fix
+title: "[JULES] "
+labels: ["jules", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This template creates issues optimized for **Jules AI** automation.
+        Be specific and provide exact file locations.
+
+  - type: dropdown
+    id: task_type
+    attributes:
+      label: Task Type
+      description: What kind of task is this?
+      options:
+        - fix - Bug fix
+        - refactor - Code improvement
+        - test - Add/improve tests
+        - docs - Documentation
+        - security - Security fix
+        - performance - Performance improvement
+    validations:
+      required: true
+
+  - type: input
+    id: component
+    attributes:
+      label: Component
+      description: Which component is affected? (e.g., vertice_cli.core.resilience)
+      placeholder: "vertice_cli.agents.executor"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Description
+      description: What is the problem? Be specific.
+      placeholder: |
+        The function X in file Y has a bug where...
+    validations:
+      required: true
+
+  - type: textarea
+    id: files
+    attributes:
+      label: Files to Modify
+      description: List exact file paths and line numbers
+      placeholder: |
+        - `path/to/file.py:123` - Description of change
+        - `path/to/another.py:45-67` - Another change
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_code
+    attributes:
+      label: Current Code (Problematic)
+      description: Paste the current problematic code
+      render: python
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_code
+    attributes:
+      label: Expected Code (Fix)
+      description: Show how the code should look after the fix
+      render: python
+
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation Commands
+      description: Commands to verify the fix works
+      placeholder: |
+        ```bash
+        pytest tests/unit/test_x.py -v
+        python3 -c "from module import X; print('OK')"
+        ```
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - low
+        - medium
+        - high
+        - critical
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have verified the files exist at the specified paths
+          required: true
+        - label: I have included validation commands
+          required: true
+        - label: The task is atomic (one logical change)
+          required: true

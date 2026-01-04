@@ -1,0 +1,30 @@
+# CODEOWNERS - Vertice-Code
+# These owners will be automatically requested for review
+
+# Default owner for everything
+* @JuanCS-Dev
+
+# Core packages - require careful review
+/vertice_core/ @JuanCS-Dev
+/vertice_cli/core/ @JuanCS-Dev
+/vertice_tui/core/ @JuanCS-Dev
+
+# Agents - complex orchestration
+/agents/ @JuanCS-Dev
+/vertice_cli/agents/ @JuanCS-Dev
+/prometheus/ @JuanCS-Dev
+
+# Security-sensitive areas
+/vertice_governance/ @JuanCS-Dev
+/memory/cortex/vault.py @JuanCS-Dev
+**/resilience*.py @JuanCS-Dev
+
+# Infrastructure
+/.github/ @JuanCS-Dev
+/pyproject.toml @JuanCS-Dev
+/.jules/ @JuanCS-Dev
+/AGENTS.md @JuanCS-Dev
+
+# Documentation
+/docs/ @JuanCS-Dev
+*.md @JuanCS-Dev

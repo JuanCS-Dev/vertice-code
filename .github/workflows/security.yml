@@ -1,0 +1,112 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly on Monday 6AM UTC
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  bandit:
+    name: Bandit Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install Bandit
+      run: pip install bandit[toml]
+
+    - name: Run Bandit scan
+      run: |
+        bandit -r vertice_cli/ vertice_tui/ vertice_core/ \
+          -f json -o bandit-report.json \
+          --severity-level medium \
+          --confidence-level medium \
+          || true
+
+    - name: Upload Bandit report
+      uses: actions/upload-artifact@v4
+      with:
+        name: bandit-security-report
+        path: bandit-report.json
+
+    - name: Check for critical issues
+      run: |
+        if [ -f bandit-report.json ]; then
+          CRITICAL=$(python3 -c "import json; data=json.load(open('bandit-report.json')); print(len([r for r in data.get('results', []) if r.get('issue_severity') == 'HIGH']))")
+          echo "Critical issues found: $CRITICAL"
+          if [ "$CRITICAL" -gt 0 ]; then
+            echo "::error::Found $CRITICAL high-severity security issues"
+            python3 -c "import json; data=json.load(open('bandit-report.json')); [print(f\"  - {r['filename']}:{r['line_number']} - {r['issue_text']}\") for r in data.get('results', []) if r.get('issue_severity') == 'HIGH']"
+            exit 1
+          fi
+        fi
+
+  dependency-check:
+    name: Dependency Vulnerability Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install pip-audit
+      run: pip install pip-audit
+
+    - name: Check dependencies
+      run: |
+        pip install -e . || true
+        pip-audit --format json --output audit-report.json || true
+
+    - name: Upload audit report
+      uses: actions/upload-artifact@v4
+      with:
+        name: dependency-audit-report
+        path: audit-report.json
+
+  secrets-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Check for secrets
+      run: |
+        # Simple pattern-based check
+        echo "Scanning for potential secrets..."
+        FOUND=0
+
+        # API keys patterns
+        if grep -rE "(api[_-]?key|apikey)\s*[=:]\s*['\"][a-zA-Z0-9]{20,}['\"]" --include="*.py" vertice_cli/ vertice_tui/ vertice_core/ 2>/dev/null; then
+          echo "::warning::Potential API key found"
+          FOUND=1
+        fi
+
+        # Password patterns
+        if grep -rE "password\s*[=:]\s*['\"][^'\"]+['\"]" --include="*.py" vertice_cli/ vertice_tui/ vertice_core/ 2>/dev/null | grep -v "placeholder\|example\|test\|mock"; then
+          echo "::warning::Potential hardcoded password found"
+          FOUND=1
+        fi
+
+        if [ "$FOUND" -eq 0 ]; then
+          echo "✅ No obvious secrets detected"
+        fi
