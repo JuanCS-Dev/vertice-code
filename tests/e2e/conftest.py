@@ -716,6 +716,24 @@ def create_test_messages(count: int, tokens_each: int = 100) -> List[Dict[str, A
 
 
 # ==============================================================================
+# MEMORY CORTEX FIXTURE
+# ==============================================================================
+
+@pytest.fixture
+def cortex(tmp_path):
+    """Create a fresh MemoryCortex instance for testing."""
+    from memory.cortex import MemoryCortex
+    return MemoryCortex(base_path=tmp_path / "cortex", agent_id="test-agent")
+
+
+@pytest.fixture
+def benchmark():
+    """Create benchmark harness."""
+    from tests.benchmarks.utils import MIRIXBenchmark
+    return MIRIXBenchmark(num_queries=50)
+
+
+# ==============================================================================
 # REPORT GENERATION
 # ==============================================================================
 
