@@ -91,22 +91,22 @@ Footer {
 }
 
 /* =============================================================================
-   RESPONSE VIEW - Clean minimal
+   RESPONSE VIEW - Clean minimal with hidden scrollbar
    ============================================================================= */
 
 ResponseView {
-    scrollbar-size: 1 1;
-    scrollbar-background: $surface;
-    scrollbar-color: $border;
-    scrollbar-color-hover: $primary;
-    scrollbar-color-active: $accent;
+    scrollbar-size: 0 0;
     background: $background;
     color: $foreground;
     padding: 0 1;
 }
 
 VerticalScroll {
-    scrollbar-size: 1 1;
+    scrollbar-size: 0 0;
+}
+
+StreamingResponseWidget {
+    scrollbar-size: 0 0;
 }
 
 /* =============================================================================
@@ -262,6 +262,138 @@ ThinkingLevelIndicator {
 MiniTokenMeter {
     width: auto;
     min-width: 12;
+}
+
+/* =============================================================================
+   MARKDOWN STYLING - Beautiful Typography
+   Based on 2026 Textual best practices
+   Using theme-adaptive $variables for light/dark compatibility
+   ============================================================================= */
+
+/* Headings - Bold, theme-adaptive hierarchy */
+MarkdownH1 {
+    color: $text-primary;
+    text-style: bold;
+    padding: 1 0;
+    border-bottom: solid $border;
+    margin-bottom: 1;
+}
+
+MarkdownH2 {
+    color: $text-secondary;
+    text-style: bold;
+    padding: 1 0 0 0;
+    margin-top: 1;
+}
+
+MarkdownH3 {
+    color: $text;
+    text-style: bold;
+    margin-top: 1;
+}
+
+MarkdownH4, MarkdownH5, MarkdownH6 {
+    color: $text-muted;
+    text-style: bold;
+}
+
+/* Paragraphs */
+MarkdownParagraph {
+    margin: 0 0 1 0;
+    color: $text;
+}
+
+/* Lists - Clean bullet/numbered styling */
+MarkdownBulletList {
+    margin: 0 0 1 2;
+    padding-left: 2;
+    color: $text;
+}
+
+MarkdownOrderedList {
+    margin: 0 0 1 2;
+    padding-left: 2;
+    color: $text;
+}
+
+MarkdownListItem {
+    margin: 0;
+    padding: 0;
+}
+
+/* Code blocks - Beautiful panels */
+MarkdownFence {
+    background: $surface;
+    border: round $border;
+    margin: 1 0;
+    padding: 1;
+}
+
+/* Inline code */
+MarkdownCode {
+    background: $surface;
+    color: $text-accent;
+}
+
+/* Blockquotes - Styled with border */
+MarkdownBlockQuote {
+    border-left: thick $primary;
+    padding-left: 2;
+    margin: 1 0;
+    color: $text-muted;
+    text-style: italic;
+}
+
+/* Tables */
+MarkdownTable {
+    margin: 1 0;
+}
+
+MarkdownTH {
+    text-style: bold;
+    color: $text-primary;
+    padding: 0 1;
+}
+
+MarkdownTD {
+    padding: 0 1;
+    color: $text;
+}
+
+/* Horizontal rule */
+MarkdownHorizontalRule {
+    color: $border;
+    margin: 1 0;
+}
+
+/* Links */
+MarkdownLink {
+    color: $text-accent;
+    text-style: underline;
+}
+
+/* Bold and Italic in text */
+.bold {
+    text-style: bold;
+}
+
+.italic {
+    text-style: italic;
+}
+
+/* AI Response specific styling */
+.ai-response {
+    padding: 1 0;
+    margin: 0;
+    color: $text;
+}
+
+.ai-response MarkdownH1 {
+    color: $text-primary;
+}
+
+.ai-response MarkdownBulletList {
+    color: $text;
 }
 """
 

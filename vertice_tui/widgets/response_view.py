@@ -47,10 +47,7 @@ class ResponseView(VerticalScroll):
         height: 1fr;
         background: $background;
         padding: 1 2;
-        scrollbar-size: 1 1;
-        scrollbar-background: $surface;
-        scrollbar-color: $secondary;
-        scrollbar-color-hover: $primary;
+        scrollbar-size: 0 0;
     }
 
     .user-message {
