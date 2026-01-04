@@ -24,7 +24,6 @@ import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from .dispatcher import CommandResult
 
 if TYPE_CHECKING:
     from vertice_cli.shell_main import InteractiveShell

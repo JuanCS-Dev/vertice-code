@@ -6,7 +6,6 @@ Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 
 from __future__ import annotations
 
-import time
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional

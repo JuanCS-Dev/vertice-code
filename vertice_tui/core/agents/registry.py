@@ -129,6 +129,14 @@ AGENT_REGISTRY: Dict[str, AgentInfo] = {
         module_path="vertice_cli.agents.data_agent_production",
         class_name="DataAgent",
     ),
+    "jules": AgentInfo(
+        name="jules",
+        role="JULES",
+        description="Google Jules AI coding agent for complex tasks",
+        capabilities=["code_generation", "file_ops", "git_ops", "external_agent"],
+        module_path="vertice_cli.agents.jules_agent",
+        class_name="JulesAgent",
+    ),
     # =========================================================================
     # CORE AGENTS (from agents/ - Phase 3 Evolution)
     # =========================================================================

@@ -9,7 +9,7 @@ import logging
 from .base import ToolResult, ToolCategory
 from .validated import ValidatedTool
 from ..core.validation import Required, TypeCheck
-from .smart_match import smart_find, apply_replacement, MatchType, MatchResult
+from .smart_match import smart_find, apply_replacement, MatchType
 
 logger = logging.getLogger(__name__)
 
@@ -409,7 +409,7 @@ Example: [{"search": "def old_func():", "replace": "def new_func():"}]""",
             # Build result message
             result_msg = f"Applied {changes} edit(s) to {path}"
             if low_confidence_warnings:
-                result_msg += f"\n\nWarnings:\n" + "\n".join(low_confidence_warnings)
+                result_msg += "\n\nWarnings:\n" + "\n".join(low_confidence_warnings)
 
             result = ToolResult(
                 success=True,

@@ -222,10 +222,10 @@ class MistralProvider(EnhancedProviderBase):
             self._update_stats(UsageInfo(), self._calculate_cost(UsageInfo()), latency_ms, success=False)
             raise RuntimeError(f"Mistral API error {e.response.status_code}: {e.response.text[:200]}")
 
-        except Exception:
+        except (httpx.HTTPError, RuntimeError, OSError) as e:
             latency_ms = (time.perf_counter() - start_time) * 1000
             self._update_stats(UsageInfo(), self._calculate_cost(UsageInfo()), latency_ms, success=False)
-            raise
+            raise RuntimeError(f"Mistral request failed: {e}") from e
 
     async def stream_generate(
         self,
@@ -303,10 +303,10 @@ class MistralProvider(EnhancedProviderBase):
                 latency_ms = (time.perf_counter() - start_time) * 1000
                 self._update_stats(estimated_usage, self._calculate_cost(estimated_usage), latency_ms, success=True)
 
-        except Exception:
+        except (httpx.HTTPError, RuntimeError, OSError) as e:
             latency_ms = (time.perf_counter() - start_time) * 1000
             self._update_stats(UsageInfo(), self._calculate_cost(UsageInfo()), latency_ms, success=False)
-            raise
+            raise RuntimeError(f"Mistral streaming failed: {e}") from e
 
     def get_model_info(self) -> Dict[str, Any]:
         """Get model information with Mistral-specific details."""

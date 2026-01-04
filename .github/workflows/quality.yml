@@ -1,0 +1,101 @@
+name: Quality Gates
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install dependencies
+      run: |
+        pip install radon ruff
+
+    # File Size Check - Max 500 lines
+    - name: Check file sizes
+      run: |
+        echo "Checking file sizes (max 500 lines)..."
+        python scripts/check_file_size.py $(find vertice_cli vertice_tui vertice_core -name "*.py" -type f)
+
+    # Nesting Depth Check - Max 4 levels
+    - name: Check nesting depth
+      run: |
+        echo "Checking nesting depth (max 4 levels)..."
+        python scripts/check_nesting.py $(find vertice_cli vertice_tui vertice_core -name "*.py" -type f)
+
+    # Cyclomatic Complexity Check - Max D (10-15)
+    - name: Check cyclomatic complexity
+      run: |
+        echo "Checking cyclomatic complexity..."
+        radon cc vertice_cli/ vertice_tui/ vertice_core/ -a -nc --fail D
+
+    # Maintainability Index Check - Min A (20+)
+    - name: Check maintainability index
+      run: |
+        echo "Checking maintainability index..."
+        radon mi vertice_cli/ vertice_tui/ vertice_core/ -s
+
+    # Ruff linting
+    - name: Run Ruff linter
+      run: |
+        ruff check vertice_cli/ vertice_tui/ vertice_core/
+
+    # Bare Exception Handler Check (Tech Debt Prevention)
+    - name: Check for bare exception handlers
+      run: |
+        echo "Checking for bare 'except Exception:' handlers..."
+        COUNT=$(grep -rn "except Exception:" vertice_cli/ providers/ --include="*.py" | wc -l)
+        echo "Found $COUNT bare exception handlers"
+        if [ "$COUNT" -gt 30 ]; then
+          echo "::warning::Too many bare exception handlers ($COUNT). Target: <30"
+        fi
+
+    # SessionManager Duplication Check (Tech Debt Prevention)
+    - name: Check for SessionManager duplication
+      run: |
+        echo "Checking for SessionManager class duplications..."
+        DUPS=$(grep -rn "class SessionManager" vertice_cli/ --include="*.py" | grep -v "core/session_manager" | grep -v "DEPRECATED" | wc -l)
+        if [ "$DUPS" -gt 0 ]; then
+          echo "::error::Found $DUPS non-canonical SessionManager implementations"
+          grep -rn "class SessionManager" vertice_cli/ --include="*.py" | grep -v "core/session_manager" | grep -v "DEPRECATED"
+          exit 1
+        fi
+        echo "✅ No SessionManager duplication found"
+
+  coverage:
+    runs-on: ubuntu-latest
+    needs: quality
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install dependencies
+      run: |
+        pip install -e ".[dev]"
+        pip install pytest pytest-cov pytest-asyncio
+
+    - name: Run tests with coverage
+      run: |
+        pytest tests/ -v --cov=vertice_cli --cov=vertice_tui --cov=vertice_core --cov-report=xml --cov-fail-under=60
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./coverage.xml
+        fail_ci_if_error: false

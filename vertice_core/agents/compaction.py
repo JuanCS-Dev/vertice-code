@@ -21,7 +21,6 @@ Soli Deo Gloria
 
 from __future__ import annotations
 
-import hashlib
 import logging
 import re
 import time
@@ -34,8 +33,6 @@ from typing import (
     Dict,
     List,
     Optional,
-    Tuple,
-    TypeVar,
 )
 
 from .context import UnifiedContext
@@ -262,7 +259,7 @@ class ObservationMaskingStrategy(CompactionStrategy_ABC):
         if "error" in extracted:
             status = f"❌ Error: {extracted['error'][:100]}"
         elif "success" in extracted:
-            status = f"✓ Success"
+            status = "✓ Success"
             if extracted["success"] and extracted["success"] is not True:
                 status += f": {extracted['success'][:50]}"
         else:

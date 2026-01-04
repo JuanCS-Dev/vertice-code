@@ -16,7 +16,7 @@ Philosophy:
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Dict, Any, Callable
+from typing import TYPE_CHECKING, Dict, Any
 
 from vertice_cli.ui.command_palette import CommandCategory
 

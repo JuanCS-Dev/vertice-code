@@ -3,7 +3,6 @@
 import asyncio
 import os
 import time
-import json
 import logging
 from datetime import datetime
 from typing import Optional, Dict, Any, TYPE_CHECKING
@@ -60,22 +59,16 @@ def _get_prompt_toolkit():
 
 # Type hints only (no runtime cost)
 if TYPE_CHECKING:
-    from rich.panel import Panel
-    from rich.syntax import Syntax
-    from rich.table import Table
 
     # TUI components (used conditionally)
-    from .tui.components.code import CodeBlock
-    from .tui.components.diff import DiffViewer
+    pass
 
 # Core imports (lightweight, needed early)
 from .core.context import ContextBuilder
-from .core.conversation import ConversationManager, ConversationState
-from .core.recovery import ErrorRecoveryEngine, ErrorCategory, create_recovery_context
+from .core.conversation import ConversationManager
+from .core.recovery import ErrorRecoveryEngine
 
 # P1: Import error parser and danger detector
-from .core.error_parser import error_parser
-from .core.danger_detector import danger_detector
 
 # P2: Import enhanced help system
 from .core.help_system import help_system
@@ -132,35 +125,28 @@ from .tools.terminal import (
     TouchTool,
     CatTool,
 )
-from .intelligence.context_enhanced import build_rich_context
-from .intelligence.risk import assess_risk
 
 # TUI Components - Core only (others lazy loaded in methods)
-from .tui.components.status import StatusBadge, StatusLevel
-from .tui.theme import COLORS
-from .tui.styles import PRESET_STYLES, get_rich_theme
+from .tui.styles import get_rich_theme
 
 # Phase 2: Enhanced Input System (needed for __init__)
 from .tui.input_enhanced import EnhancedInputSession, InputContext
 from .tui.history import CommandHistory, HistoryEntry, SessionReplay
 
 # Phase 3: Visual Workflow (needed for __init__)
-from .tui.components.workflow_visualizer import WorkflowVisualizer, StepStatus
+from .tui.components.workflow_visualizer import WorkflowVisualizer
 from .tui.components.execution_timeline import ExecutionTimeline
 
 # Phase 4: Command Palette (needed for __init__)
 from .tui.components.palette import (
     create_default_palette,
-    Command,
-    CommandCategory,
-    CATEGORY_CONFIG,
 )
 
 # Phase 5: Animations (needed for __init__)
 from .tui.animations import Animator, AnimationConfig, StateTransition
 
 # Phase 6: Dashboard (needed for __init__)
-from .tui.components.dashboard import Dashboard, Operation, OperationStatus
+from .tui.components.dashboard import Dashboard
 
 # Phase 7: Token Tracking
 from .core.token_tracker import TokenTracker
@@ -189,7 +175,6 @@ logger = logging.getLogger(__name__)
 
 # Phase 2.2: Import from modular shell package
 from .shell.context import SessionContext
-from .shell.safety import get_safety_level as _get_safety_level_fn
 
 # SCALE & SUSTAIN Phase 2: Modular output rendering
 from .shell.output import ResultRenderer

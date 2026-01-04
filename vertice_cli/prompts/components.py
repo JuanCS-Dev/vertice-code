@@ -10,7 +10,7 @@ Date: 2026-01-01
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Optional
 
 

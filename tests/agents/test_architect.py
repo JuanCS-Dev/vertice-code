@@ -30,7 +30,7 @@ class TestArchitectAgentInitialization:
         assert architect.role.value == "architect"
         assert AgentCapability.READ_ONLY in architect.capabilities
         assert len(architect.capabilities) == 1  # Only READ_ONLY
-        assert "skeptical" in architect.system_prompt.lower()
+        assert "pragmatic" in architect.system_prompt.lower()  # FIX 1.5: Changed from skeptical to pragmatic
 
     def test_architect_has_no_write_capabilities(self) -> None:
         """Test that Architect cannot use write tools."""

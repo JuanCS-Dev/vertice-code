@@ -15,7 +15,6 @@ from textual.binding import Binding
 from textual.containers import Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Input, Static
-from textual.message import Message
 
 from rich.text import Text
 

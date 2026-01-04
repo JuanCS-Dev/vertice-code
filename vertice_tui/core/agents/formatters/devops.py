@@ -35,7 +35,7 @@ class DevOpsFormatter:
     @staticmethod
     async def format(data: Any, reasoning: str) -> AsyncIterator[str]:
         """Format deployment plan with strategy, checks, and infrastructure details."""
-        yield f"## DevOps Deployment Plan\n\n"
+        yield "## DevOps Deployment Plan\n\n"
         yield f"*{reasoning}*\n\n"
 
         plan = data["plan"]

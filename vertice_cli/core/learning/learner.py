@@ -13,9 +13,8 @@ Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 from __future__ import annotations
 
 import logging
-import re
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from .types import (
     CONFIDENCE_DELTAS,

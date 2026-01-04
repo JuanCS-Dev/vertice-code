@@ -22,7 +22,6 @@ Philosophy (Boris Cherny):
 from __future__ import annotations
 
 import logging
-import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -33,7 +32,7 @@ from ..base import (
     AgentTask,
     BaseAgent,
 )
-from .types import DependencyVulnerability, Secret, Vulnerability
+from .types import Vulnerability
 from .patterns import compile_security_patterns
 from .detectors import (
     detect_sql_injection,

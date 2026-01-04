@@ -17,7 +17,6 @@ from textual.widgets import Static
 from textual.widget import Widget
 from textual.message import Message
 
-from rich.text import Text
 
 
 class BreadcrumbItem(Static):

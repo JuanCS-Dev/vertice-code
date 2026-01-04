@@ -11,10 +11,14 @@ Supports:
 import os
 import json
 import asyncio
+import logging
+from collections import deque
 from dataclasses import dataclass, field
-from typing import AsyncIterator, Optional, List, Dict
+from typing import AsyncIterator, Optional, List, Dict, Deque
 from datetime import datetime
 import httpx
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -62,7 +66,7 @@ class GeminiClient:
         self.api_key = api_key or os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
         self.config = config or GenerationConfig()
         self._client: Optional[httpx.AsyncClient] = None
-        self.conversation_history: List[Message] = []
+        self.conversation_history: Deque[Message] = deque(maxlen=100)
 
         if not self.api_key:
             raise ValueError("GOOGLE_API_KEY or GEMINI_API_KEY environment variable required")

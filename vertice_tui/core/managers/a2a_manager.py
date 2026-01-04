@@ -335,8 +335,8 @@ class A2AManager:
                     # 1. Create A2AServiceStub
                     # 2. Call Execute with Task proto
                     # 3. Stream response chunks
-                    yield f"[A2A] Task sent. Waiting for response...\n"
-                    yield f"[A2A] Note: Full gRPC client not yet implemented.\n"
+                    yield "[A2A] Task sent. Waiting for response...\n"
+                    yield "[A2A] Note: Full gRPC client not yet implemented.\n"
                 finally:
                     self._server_state.active_tasks -= 1
 

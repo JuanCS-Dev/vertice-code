@@ -12,7 +12,7 @@ Source: NLU_OPTIMIZATION_PLAN.md Phase 9
 
 import re
 from dataclasses import dataclass
-from typing import Dict, Any, Optional, List
+from typing import List
 
 from .base import Tool, ToolCategory, ToolResult
 

@@ -146,7 +146,7 @@ class ComplexityAnalyzer:
         for pattern, weight in self.MULTI_TARGET_PATTERNS:
             if re.search(pattern, lower_request, re.IGNORECASE):
                 score += weight
-                reasons.append(f"multiplos alvos / multiple targets")
+                reasons.append("multiplos alvos / multiple targets")
                 break
 
         # Factor 6: Intent-based complexity

@@ -9,7 +9,7 @@ Philosophy:
     "Understand before you act."
 """
 
-from typing import Any, Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from ..base import AgentCapability, AgentResponse
 from .types import PlanningMode

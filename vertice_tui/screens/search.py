@@ -8,7 +8,7 @@ Phase 11: Visual Upgrade - Interactive Components.
 
 from __future__ import annotations
 
-from typing import Optional, List, Tuple
+from typing import List, Tuple
 
 from textual.app import ComposeResult
 from textual.binding import Binding

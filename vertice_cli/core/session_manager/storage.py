@@ -15,7 +15,7 @@ import tempfile
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from .types import SessionSnapshot, SessionInfo, SessionState
+from .types import SessionSnapshot, SessionInfo
 
 logger = logging.getLogger(__name__)
 

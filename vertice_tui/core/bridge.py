@@ -508,9 +508,8 @@ Working directory: {os.getcwd()}"""
 
     # Project init
     def init_project(self) -> Dict[str, Any]:
-        import datetime
 
-        vertice_content = f"""# VERTICE.md - Project Context
+        vertice_content = """# VERTICE.md - Project Context
 
 This file helps Vértice understand your project context.
 Define your project rules, core technologies, and coding standards here.

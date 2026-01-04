@@ -208,7 +208,7 @@ class AzureOpenAIProvider:
                         content = delta.get("content", "")
                         if content:
                             yield content
-                    except Exception:
+                    except json.JSONDecodeError:
                         continue
 
     async def stream_chat(

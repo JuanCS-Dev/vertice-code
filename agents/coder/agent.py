@@ -23,6 +23,7 @@ import ast
 import re
 import subprocess
 import tempfile
+import json
 from pathlib import Path
 from typing import Dict, List, AsyncIterator
 import logging
@@ -32,10 +33,12 @@ from .types import (
     EvaluationResult,
     GeneratedCode,
 )
+from providers.vertice_router import TaskComplexity
 from .darwin_godel import DarwinGodelMixin
 from agents.base import BaseAgent
 from core.resilience import ResilienceMixin
 from core.caching import CachingMixin
+from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
 
 logger = logging.getLogger(__name__)
 
@@ -77,11 +80,19 @@ Your code MUST be:
 - Secure (no vulnerabilities)
 - Efficient (no unnecessary complexity)
 
+CRITICAL INSTRUCTION:
+You have access to filesystem tools.
+WHEN ASKED TO CREATE CODE:
+1. DO NOT just print the code in markdown.
+2. YOU MUST USE the 'write_file' tool to save the code to disk.
+3. AFTER writing the file, you can verify it.
+
 NEVER:
 - Use placeholder implementations
 - Skip error handling
 - Hardcode secrets
 - Use deprecated APIs
+- Hallucinate successful execution (actually execute the tools!)
 
 ALWAYS:
 - Include type hints (Python) or types (TS)
@@ -108,7 +119,7 @@ ALWAYS:
         stream: bool = True
     ) -> AsyncIterator[str]:
         """
-        Generate code based on request.
+        Generate code based on request with autonomous tool use.
 
         Args:
             request: Code generation request.
@@ -118,6 +129,9 @@ ALWAYS:
             Generated code chunks.
         """
         llm = await self._get_llm()
+        
+        # Tools available to the Coder
+        tools = [WriteFileTool(), ReadFileTool()]
 
         prompt = f"""
 Language: {request.language}
@@ -128,23 +142,86 @@ Include Docs: {request.include_docs}
 Task: {request.description}
 
 Generate clean, production-ready code.
+You have access to tools to write files. USE THEM.
+If you need to create a file, use the 'write_file' tool.
 """
 
         messages = [
             {"role": "system", "content": self.SYSTEM_PROMPT},
             {"role": "user", "content": prompt},
         ]
+        
+        # DEBUG: Print the actual prompt being sent
+        print(f"\n[DEBUG CODER PROMPT] {prompt[:200]}...\n")
 
-        try:
+        # Action Loop
+        max_turns = 5
+        current_turn = 0
+        
+        while current_turn < max_turns:
+            current_turn += 1
+            full_response = ""
+            tool_calls = []
+
             async for chunk in llm.stream_chat(
                 messages,
-                complexity="simple",
+                complexity=TaskComplexity.COMPLEX,
                 max_tokens=4096,
+                tools=tools
             ):
+                # 1. Detect API Tool Calls (JSON)
+                try:
+                    if chunk.strip().startswith('{"tool_call":'):
+                        data = json.loads(chunk)
+                        tool_calls.append(data["tool_call"])
+                        continue
+                except (json.JSONDecodeError, KeyError, TypeError):
+                    pass
+                
+                full_response += chunk
                 yield chunk
-        except Exception as e:
-            logger.error(f"Code generation failed: {e}")
-            yield f"[Error] Code generation failed: {e}"
+
+            # 2. Fallback: Detect Simulated/Hallucinated Tool Calls in Text
+            # Pattern: ```python\nwrite_file('name', """content""")\n```
+            # We use a simple heuristic to catch common "Show, don't tell" failures
+            if not tool_calls:
+                import re
+                # Regex to find write_file calls in markdown blocks
+                # Matches: write_file("filename", """content""") or single quotes
+                pattern = r"write_file\s*\(\s*['\"]([^'\"]+)['\"]\s*,\s*(?:'''|\"\"\")(.*?)(?:'''|\"\"\")\s*\)"
+                matches = re.findall(pattern, full_response, re.DOTALL)
+                
+                for filename, content in matches:
+                    tool_calls.append({
+                        "name": "write_file",
+                        "arguments": {"path": filename, "content": content}
+                    })
+                    yield f"\n[System] Detected text-based tool call for {filename}...\n"
+
+            # If no tool calls, we are done
+            if not tool_calls:
+                break
+                
+            # Execute Tools
+            for call in tool_calls:
+                tool_name = call["name"]
+                args = call["arguments"]
+                
+                yield f"\n\n[Executing Tool: {tool_name}]...\n"
+                
+                # Find tool instance
+                tool_instance = next((t for t in tools if t.name == tool_name), None)
+                if tool_instance:
+                    result = await tool_instance._execute_validated(**args)
+                    output = result.data if result.success else f"Error: {result.error}"
+                    
+                    # Add result to history
+                    messages.append({"role": "assistant", "content": json.dumps(call)}) # Mocking the function call msg
+                    messages.append({"role": "user", "content": f"Tool Output [{tool_name}]: {output}"}) # Mocking the function response
+                    
+                    yield f"[Result: {str(output)[:100]}...]\n"
+                else:
+                    yield f"[Error: Tool {tool_name} not found]\n"
 
     async def refactor(
         self,
@@ -157,7 +234,7 @@ Generate clean, production-ready code.
 
         prompt = f"""
 Original Code ({language}):
-```{language}
+```{{language}}
 {code}
 ```
 
@@ -311,7 +388,7 @@ Continue naturally. Only output the completion, not the original code.
             if temp_path:
                 try:
                     Path(temp_path).unlink()
-                except Exception:
+                except (FileNotFoundError, PermissionError, OSError):
                     pass
 
     def _calculate_quality(
@@ -391,7 +468,7 @@ Continue naturally. Only output the completion, not the original code.
 
     def _extract_code_block(self, text: str, language: str) -> str:
         """Extract code from markdown code block."""
-        pattern = rf"```{language}?\n?(.*?)```"
+        pattern = rf"```{{language}}?\n?(.*?)""`"
         match = re.search(pattern, text, re.DOTALL)
         if match:
             return match.group(1).strip()
@@ -414,7 +491,7 @@ Issues:
 {issues_str}
 
 Original Code:
-```{language}
+```{{language}}
 {code}
 ```
 

@@ -8,8 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-import traceback
-from typing import TYPE_CHECKING, Any, AsyncIterator, Dict, List
+from typing import TYPE_CHECKING, AsyncIterator
 
 from vertice_core.agents.context import DecisionType, ExecutionResult
 from vertice_core.agents.router import AgentType, TaskComplexity

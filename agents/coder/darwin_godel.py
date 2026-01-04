@@ -331,7 +331,7 @@ class DarwinGodelMixin:
         finally:
             try:
                 Path(temp_path).unlink()
-            except Exception:
+            except (FileNotFoundError, PermissionError, OSError):
                 pass
 
     def get_evolution_stats(self) -> Dict[str, Any]:

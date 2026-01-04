@@ -111,6 +111,16 @@ class Agency:
                 "researcher": researcher,
                 "devops": devops,
             }
+            
+            # Load Stub Agents for Parity (Phase 6)
+            try:
+                from agents.stubs.base import create_stub_agents
+                stubs = create_stub_agents()
+                self._agents.update(stubs)
+                logger.info(f"Loaded {len(stubs)} specialized stub agents")
+            except ImportError as ie:
+                logger.warning(f"Stub agents not found: {ie}")
+                
             logger.info(f"Agents initialized: {list(self._agents.keys())}")
         except Exception as e:
             logger.warning(f"Agents init failed: {e}")

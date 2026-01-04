@@ -131,7 +131,7 @@ class KnowledgeVault:
             user = os.getenv("USER", os.getenv("USERNAME", "default"))
             home = str(Path.home())
             return hashlib.sha256(f"{user}:{home}".encode()).hexdigest()[:16]
-        except Exception:
+        except (OSError, RuntimeError):
             return "vertice-default-salt"
 
     def _init_db(self) -> None:

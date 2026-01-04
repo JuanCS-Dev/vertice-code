@@ -4,7 +4,7 @@ Orchestrator Types - State machine enums.
 Defines the states and transition types for the orchestration state machine.
 """
 
-from enum import Enum, auto
+from enum import Enum
 
 
 class OrchestratorState(str, Enum):

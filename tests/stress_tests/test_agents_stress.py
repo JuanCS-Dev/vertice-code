@@ -8,7 +8,7 @@ from vertice_tui.core.agents.manager import AgentManager
 from vertice_cli.agents.base import AgentTask
 from vertice_cli.agents.explorer import ExplorerAgent
 from vertice_cli.agents.refactorer import RefactorerAgent
-from vertice_cli.agents.devops_agent import DevOpsAgent
+from vertice_cli.agents.devops import DevOpsAgent
 from vertice_cli.agents.documentation import DocumentationAgent
 
 # MOCK LLM Client for Stress Testing to avoid API costs/latency

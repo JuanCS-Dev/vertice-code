@@ -12,7 +12,7 @@ import logging
 import re
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from vertice_core.protocols import LLMClientProtocol, MCPClientProtocol
 

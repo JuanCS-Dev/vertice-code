@@ -13,11 +13,15 @@ The Reflection Engine enables the agent to:
 4. Learn from the reflection process
 """
 
+import logging
+from collections import deque
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Deque
 from enum import Enum
 from datetime import datetime
 import json
+
+logger = logging.getLogger(__name__)
 import re
 
 
@@ -97,7 +101,7 @@ class ReflectionEngine:
     def __init__(self, llm_client, memory_system):
         self.llm = llm_client
         self.memory = memory_system
-        self.reflection_history: List[Reflection] = []
+        self.reflection_history: Deque[Reflection] = deque(maxlen=200)
         self._reflection_count = 0
 
     async def critique_action(

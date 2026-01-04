@@ -23,7 +23,6 @@ from textual.reactive import reactive
 from textual.message import Message
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.containers import Vertical
 
 from rich.table import Table
 from rich import box

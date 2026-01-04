@@ -8,11 +8,10 @@ from __future__ import annotations
 
 import json
 import time
-from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING
+from typing import Any, Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .unified import UnifiedContext
-    from .types import Decision, ErrorContext, FileContext, ThoughtSignature
 
 
 def generate_prompt_context(ctx: "UnifiedContext") -> str:

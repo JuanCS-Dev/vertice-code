@@ -9,7 +9,7 @@ Phase 11: Visual Upgrade - Polish & Delight.
 from __future__ import annotations
 
 from collections import deque
-from typing import Optional, Sequence, Callable
+from typing import Optional, Sequence
 
 from textual.app import ComposeResult
 from textual.containers import Horizontal

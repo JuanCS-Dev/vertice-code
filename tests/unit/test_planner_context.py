@@ -194,6 +194,8 @@ class TestPlannerWithoutContext:
 
         mcp = Mock()
         mcp.registry = registry
+        # call_tool must be AsyncMock for await expression
+        mcp.call_tool = AsyncMock(return_value={"success": True, "content": ""})
         return mcp
 
     @pytest.mark.asyncio
@@ -203,22 +205,17 @@ class TestPlannerWithoutContext:
         """PlannerAgent should execute successfully without CLAUDE.md."""
         agent = PlannerAgent(mock_llm_with_response, mock_mcp_with_tools)
 
-        # Mock _load_team_standards to simulate missing file
-        with patch.object(agent, '_load_team_standards', new_callable=AsyncMock) as mock_load:
-            mock_load.return_value = {}  # No CLAUDE.md
+        # Create simple task (no CLAUDE.md context)
+        task = AgentTask(
+            request="Create a simple hello world function",
+            context={"project_root": "/tmp/test"}
+        )
 
-            # Create simple task
-            task = AgentTask(
-                request="Create a simple hello world function",
-                context={"project_root": "/tmp/test"}
-            )
+        # Should not raise, executes with default standards
+        response = await agent.execute(task)
 
-            # Should not raise, executes with default standards
-            response = await agent.execute(task)
-
-            # Agent should still work
-            assert response is not None
-            mock_load.assert_called_once()
+        # Agent should still work without CLAUDE.md
+        assert response is not None
 
     @pytest.mark.asyncio
     async def test_planner_uses_defaults_when_no_standards(

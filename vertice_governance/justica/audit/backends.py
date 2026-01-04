@@ -91,7 +91,7 @@ class ConsoleBackend(AuditBackend):
 
             self.stream.write(line)
             return True
-        except Exception:
+        except (IOError, OSError, ValueError):
             return False
 
     def flush(self) -> None:
@@ -107,7 +107,7 @@ class ConsoleBackend(AuditBackend):
         # SECURITY FIX: Safe close with error handling
         try:
             self.flush()
-        except Exception:
+        except (IOError, OSError, ValueError):
             pass
 
 
@@ -172,7 +172,7 @@ class FileBackend(AuditBackend):
             self._rotate_if_needed()
             self._file.write(entry.to_json() + "\n")
             return True
-        except Exception:
+        except (IOError, OSError, ValueError):
             return False
 
     def flush(self) -> None:

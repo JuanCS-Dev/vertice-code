@@ -18,7 +18,7 @@ from typing import Optional, List, ClassVar
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical, VerticalScroll
-from textual.widgets import Static, DirectoryTree, Collapsible, Button
+from textual.widgets import Static, DirectoryTree, Collapsible
 from textual.reactive import reactive
 from textual.widget import Widget
 from textual.message import Message

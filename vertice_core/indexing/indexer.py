@@ -17,18 +17,14 @@ Soli Deo Gloria
 
 from __future__ import annotations
 
-import asyncio
 import hashlib
 import json
 import logging
-import os
-import sqlite3
 import time
-from contextlib import contextmanager
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from .chunker import CodeChunk, CodeChunker
 from .embedder import EmbeddingConfig, SemanticEmbedder, get_embedder

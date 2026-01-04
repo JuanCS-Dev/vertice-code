@@ -353,14 +353,14 @@ class JusticaAgent:
             for callback in self._on_violation_callbacks:
                 try:
                     callback(verdict)
-                except Exception:
+                except (TypeError, ValueError, RuntimeError):
                     pass
 
         if verdict.requires_human_review:
             for callback in self._on_escalation_callbacks:
                 try:
                     callback(verdict)
-                except Exception:
+                except (TypeError, ValueError, RuntimeError):
                     pass
 
     # Callback registration API

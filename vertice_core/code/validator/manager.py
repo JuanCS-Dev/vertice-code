@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 import time
-import hashlib
 import logging
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
-from .types import ValidationLevel, CheckType, Check, ValidationResult, EditValidation, FileBackup
+from typing import Any, Callable, Dict, List, Optional, Tuple
+from .types import ValidationLevel, CheckType, Check, ValidationResult, EditValidation
 from .checks import check_syntax, check_lsp, check_imports
 from .backup import BackupManager
 from ..ast import ASTEditor, get_ast_editor

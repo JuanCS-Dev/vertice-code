@@ -21,6 +21,17 @@ import json
 import re
 import random
 
+# FIX E2E: Import skill registry to prevent hallucination
+try:
+    from prometheus.core.skill_registry import validate_skills, is_valid_skill, VALID_SKILLS
+except ImportError:
+    # Fallback if skill_registry not available
+    VALID_SKILLS = set()
+    def validate_skills(skills: List[str]) -> List[str]:
+        return skills
+    def is_valid_skill(skill: str) -> bool:
+        return True
+
 
 class TaskDifficulty(Enum):
     """Task difficulty levels."""
@@ -293,12 +304,22 @@ Make the task specific and actionable, not vague."""
         executor_stats: Dict[str, Any],
         specific_skill: Optional[str] = None,
     ) -> List[str]:
-        """Select skills to target in the task."""
+        """Select skills to target in the task.
+
+        FIX E2E: Now validates all skills against the skill registry.
+        """
         if specific_skill:
-            return [specific_skill]
+            # FIX E2E: Validate the specific skill
+            if is_valid_skill(specific_skill):
+                return [specific_skill]
+            # If invalid, fall through to defaults
 
         weak_skills = executor_stats.get("skills_to_improve", [])
         mastered_skills = executor_stats.get("skills_mastered", [])
+
+        # FIX E2E: Validate skills from executor stats
+        weak_skills = validate_skills(weak_skills)
+        mastered_skills = validate_skills(mastered_skills)
 
         # Prioritize weak skills for practice
         target_skills = []
@@ -312,8 +333,9 @@ Make the task specific and actionable, not vague."""
             target_skills.append(random.choice(mastered_skills))
 
         if not target_skills:
-            # Default skills
-            target_skills = ["problem_solving", "code_generation"]
+            # FIX E2E: Use VALID default skills from registry
+            # These are canonical skills that exist in VALID_SKILLS
+            target_skills = ["python_basics", "python_functions"]
 
         return target_skills[:3]
 
@@ -332,7 +354,9 @@ Make the task specific and actionable, not vague."""
             self._adjust_distribution_down(task.difficulty)
 
         # Update skill discoveries
-        for skill in result.get("skills_demonstrated", []):
+        # FIX E2E: Validate skills before adding to discoveries
+        demonstrated_skills = validate_skills(result.get("skills_demonstrated", []))
+        for skill in demonstrated_skills:
             if skill not in self.discovered_skills:
                 self.discovered_skills[skill] = 0.5
             # Update mastery estimate

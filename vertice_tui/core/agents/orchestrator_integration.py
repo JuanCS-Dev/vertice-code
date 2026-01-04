@@ -119,7 +119,7 @@ class OrchestratorIntegration:
             return
 
         # Use orchestrator for coordinated execution
-        yield f"[Orchestrator] Analyzing request...\n"
+        yield "[Orchestrator] Analyzing request...\n"
 
         try:
             # Execute through CoreAgentAdapter's streaming interface
@@ -151,7 +151,7 @@ class OrchestratorIntegration:
             {"id": approval_id, "operation": operation, "details": details, "status": "pending"}
         )
 
-        yield f"\n**Approval Required** (L2)\n"
+        yield "\n**Approval Required** (L2)\n"
         yield f"Operation: {operation}\n"
         if details.get("reason"):
             yield f"Reason: {details['reason']}\n"

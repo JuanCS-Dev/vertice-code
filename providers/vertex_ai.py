@@ -32,23 +32,28 @@ class VertexAIProvider:
     """
 
     MODELS = {
-        "pro": "gemini-2.0-flash-exp",  # Fallback to 2.0 Flash as Pro is 404
-        "flash": "gemini-2.0-flash-exp",
-        "3-pro": "gemini-3-pro",  # Kept for future if available
-        "3-flash": "gemini-3-flash",
+        "flash": "gemini-2.5-flash",          # Current Stable Fast
+        "pro": "gemini-2.5-pro",              # Current Stable High-Intel
+        "flash-3": "gemini-3-flash-preview",  # Next-Gen Fast (Preview)
+        "pro-3": "gemini-3-pro-preview",      # Next-Gen Reasoning (Preview)
+        # Aliases
+        "gemini-2.5-flash": "gemini-2.5-flash",
+        "gemini-2.5-pro": "gemini-2.5-pro",
+        "gemini-3-flash": "gemini-3-flash-preview",
+        "gemini-3-pro": "gemini-3-pro-preview",
     }
 
     def __init__(
         self,
         project: Optional[str] = None,
         location: str = "us-central1",
-        model_name: str = "flash",  # Default to flash as it is the only one working
+        model_name: str = "pro",  # Default to 2.5-pro for best quality
     ):
         """Initialize Vertex AI provider.
 
         Args:
             project: GCP project ID (defaults to GOOGLE_CLOUD_PROJECT env var)
-            location: Vertex AI location (gemini-2.5-flash only in us-central1)
+            location: Vertex AI location
             model_name: Model alias or full name
         """
         self.project = project or os.getenv("GOOGLE_CLOUD_PROJECT")
@@ -74,16 +79,16 @@ class VertexAIProvider:
                     "google-cloud-aiplatform not installed. "
                     "Run: pip install google-cloud-aiplatform"
                 )
-            except Exception as e:
+            except (ImportError, RuntimeError, AttributeError) as e:
                 logger.error(f"Failed to initialize Vertex AI: {e}")
-                raise
+                raise RuntimeError(f"Vertex AI initialization failed: {e}") from e
 
     def is_available(self) -> bool:
         """Check if provider is available."""
         try:
             self._ensure_client()
             return self._model is not None
-        except Exception:
+        except (ImportError, RuntimeError, AttributeError):
             return False
 
     async def generate(

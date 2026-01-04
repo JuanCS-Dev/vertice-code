@@ -1,0 +1,71 @@
+# Pre-commit hooks for VERTICE project
+# Part of Prevention Guardrails - Series A Tech Debt Plan
+#
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # Standard pre-commit hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+      - id: check-merge-conflict
+      - id: detect-private-key
+
+  # Ruff - Fast Python linter
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.8
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  # Local custom hooks - Tech Debt Prevention
+  - repo: local
+    hooks:
+      - id: file-size-check
+        name: Check file size (<500 lines)
+        entry: python scripts/check_file_size.py
+        language: python
+        types: [python]
+        pass_filenames: true
+
+      - id: complexity-check
+        name: Check cyclomatic complexity (<10)
+        entry: radon cc -a -nc --fail D
+        language: python
+        types: [python]
+        additional_dependencies: [radon]
+
+      - id: nesting-check
+        name: Check nesting depth (<4)
+        entry: python scripts/check_nesting.py
+        language: python
+        types: [python]
+        pass_filenames: true
+
+      - id: bare-exception-check
+        name: Prevent bare exception handlers
+        entry: grep -nP "except\s+Exception\s*:" --include="*.py"
+        language: system
+        types: [python]
+        pass_filenames: false
+        args: [-r, vertice_cli/, providers/]
+
+      - id: sessionmanager-duplication-check
+        name: Prevent SessionManager duplication
+        entry: bash -c "! grep -rn 'class SessionManager' vertice_cli/ --include='*.py' | grep -v 'core/session_manager' | grep -v 'DEPRECATED'"
+        language: system
+        pass_filenames: false
+
+  # Type checking with mypy (optional, can be slow)
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: v1.7.1
+  #   hooks:
+  #     - id: mypy
+  #       additional_dependencies: [types-all]

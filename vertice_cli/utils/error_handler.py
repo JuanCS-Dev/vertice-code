@@ -45,10 +45,8 @@ from typing import (
     Callable,
     Generic,
     Optional,
-    Protocol,
     Type,
     TypeVar,
-    Union,
 )
 
 

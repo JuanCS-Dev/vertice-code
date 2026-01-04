@@ -11,10 +11,6 @@ Following CODE_CONSTITUTION.md:
 - Zero placeholders
 """
 
-import asyncio
-import uuid
-from datetime import datetime
-from pathlib import Path
 from typing import Any, AsyncIterator, Callable, Dict, List, Optional, Tuple
 
 # Base imports
@@ -33,18 +29,9 @@ from .dependency import DependencyAnalyzer
 from .models import SOPStep, ExecutionPlan, ExecutionStage
 
 # Formatting and utilities
-from .formatting import format_plan_as_markdown, generate_confidence_summary
-from .utils import robust_json_parse
-from .prompts import (
-    build_planning_prompt,
-    build_clarifying_questions_prompt,
-    build_exploration_prompt,
-    generate_basic_plan,
-)
 
 # Multi-planning and optimization
 from .multi_planning import (
-    generate_multi_plan,
     execute_with_multi_plan as _execute_with_multi_plan,
     generate_multi_plan_for_task as _generate_multi_plan_for_task,
 )

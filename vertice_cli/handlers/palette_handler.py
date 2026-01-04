@@ -203,7 +203,7 @@ class PaletteHandler:
         Returns:
             Selected Command or None if cancelled.
         """
-        from vertice_cli.tui.components.palette import Command, CATEGORY_CONFIG
+        from vertice_cli.tui.components.palette import CATEGORY_CONFIG
 
         # Show search prompt
         query = await self.enhanced_input.prompt_async("[cyan]Command Palette >[/cyan] ")

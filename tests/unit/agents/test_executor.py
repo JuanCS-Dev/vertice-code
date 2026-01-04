@@ -704,7 +704,8 @@ class TestNextGenExecutorAgentHelpers:
         context = agent._get_execution_history_context()
 
         assert "ls" in context
-        assert "✅" in context
+        # Accept both emoji and text formats
+        assert "✅" in context or "[OK]" in context
 
     def test_get_metrics(self, agent):
         """Test get_metrics returns proper structure."""

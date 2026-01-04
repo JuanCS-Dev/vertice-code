@@ -8,11 +8,9 @@ Reference: HEROIC_IMPLEMENTATION_PLAN.md Sprint 1.1
 """
 
 import asyncio
-import re
 from typing import Optional, Tuple, Any
 
 from vertice_cli.core.intent_classifier import (
-    SemanticIntentClassifier,
     Intent,
     IntentResult,
     get_classifier,

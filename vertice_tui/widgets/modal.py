@@ -10,11 +10,11 @@ Phase 11: Visual Upgrade Sprint 1.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Optional
 
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.containers import Grid, Vertical, Horizontal
+from textual.containers import Vertical, Horizontal
 from textual.screen import ModalScreen
 from textual.widgets import Button, Input, Label, Static, DirectoryTree
 

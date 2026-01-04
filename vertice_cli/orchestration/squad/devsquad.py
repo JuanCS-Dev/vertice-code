@@ -12,7 +12,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 from ...agents.architect import ArchitectAgent
-from ...agents.base import AgentTask, AgentResponse
+from ...agents.base import AgentTask
 from ...agents.explorer import ExplorerAgent
 from ...agents.planner import PlannerAgent
 from ...agents.refactorer import RefactorerAgent

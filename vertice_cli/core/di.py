@@ -51,8 +51,8 @@ import logging
 import os
 import threading
 from abc import ABC, abstractmethod
-from contextlib import asynccontextmanager, contextmanager
-from dataclasses import dataclass, field
+from contextlib import contextmanager
+from dataclasses import dataclass
 from enum import Enum
 from typing import (
     Any,
@@ -60,10 +60,8 @@ from typing import (
     Dict,
     Generic,
     Optional,
-    Protocol,
     Type,
     TypeVar,
-    Union,
     get_type_hints,
 )
 

@@ -10,7 +10,7 @@ import re
 from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
 
-from vertice_cli.core.intent_classifier import Intent, SemanticIntentClassifier
+from vertice_cli.core.intent_classifier import SemanticIntentClassifier
 
 
 @dataclass

@@ -35,13 +35,8 @@ from ..base import (
     AgentTask,
     BaseAgent,
 )
-from vertice_cli.prompts.grounding import (
-    INLINE_CODE_PRIORITY,
-    get_analysis_grounding,
-)
-from vertice_cli.core.temperature_config import get_temperature
 
-from .models import TestCase, TestFramework
+from .models import TestFramework
 from .generators import generate_test_suite
 from .analyzers import CoverageAnalyzer, MutationAnalyzer, FlakyDetector
 from .scoring import QualityScorer, score_to_grade

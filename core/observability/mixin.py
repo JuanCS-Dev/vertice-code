@@ -145,7 +145,7 @@ class ObservabilityMixin:
                 yield span
                 duration_ms = (time.perf_counter() - start_time) * 1000
                 self._metrics.record_tool_invocation(tool_name, success=True, duration_ms=duration_ms)
-            except Exception:
+            except BaseException:
                 duration_ms = (time.perf_counter() - start_time) * 1000
                 self._metrics.record_tool_invocation(tool_name, success=False, duration_ms=duration_ms)
                 raise

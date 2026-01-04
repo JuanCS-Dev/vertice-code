@@ -18,6 +18,8 @@ sovereignty:
     - test_generation
     - documentation_updates
     - dependency_updates_minor
+    - code_generation
+    - file_creation
 
   L1_CONSENSUS:   # Requires multi-agent agreement
     - architectural_changes

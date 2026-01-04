@@ -32,41 +32,45 @@ from vertice_tui.core.streaming import (
 class TestStreamCheckpoint:
     """Tests for StreamCheckpoint class."""
 
-    def test_checkpoint_initial_state(self) -> None:
+    @pytest.mark.asyncio
+    async def test_checkpoint_initial_state(self) -> None:
         """Checkpoint starts empty."""
         checkpoint = StreamCheckpoint()
 
         assert checkpoint.accumulated_content == ""
         assert checkpoint.chunk_count == 0
         assert checkpoint.context_snapshot is None
-        assert not checkpoint.can_reconnect()
+        assert not await checkpoint.can_reconnect()
 
-    def test_checkpoint_update_accumulates_content(self) -> None:
+    @pytest.mark.asyncio
+    async def test_checkpoint_update_accumulates_content(self) -> None:
         """Checkpoint accumulates chunks correctly."""
         checkpoint = StreamCheckpoint()
 
-        checkpoint.update("Hello ")
-        checkpoint.update("World!")
+        await checkpoint.update("Hello ")
+        await checkpoint.update("World!")
 
         assert checkpoint.accumulated_content == "Hello World!"
         assert checkpoint.chunk_count == 2
 
-    def test_checkpoint_can_reconnect_after_update(self) -> None:
+    @pytest.mark.asyncio
+    async def test_checkpoint_can_reconnect_after_update(self) -> None:
         """Checkpoint allows reconnect after receiving content."""
         checkpoint = StreamCheckpoint()
 
-        assert not checkpoint.can_reconnect()
+        assert not await checkpoint.can_reconnect()
 
-        checkpoint.update("Some content")
+        await checkpoint.update("Some content")
 
-        assert checkpoint.can_reconnect()
+        assert await checkpoint.can_reconnect()
 
-    def test_checkpoint_tracks_last_chunk_time(self) -> None:
+    @pytest.mark.asyncio
+    async def test_checkpoint_tracks_last_chunk_time(self) -> None:
         """Checkpoint updates last_chunk_time on each update."""
         checkpoint = StreamCheckpoint()
         initial_time = checkpoint.last_chunk_time
 
-        checkpoint.update("Test")
+        await checkpoint.update("Test")
 
         assert checkpoint.last_chunk_time >= initial_time
 
@@ -239,10 +243,10 @@ class TestProductionStreamerWithMocks:
         """Checkpoint is saved periodically during streaming."""
         streamer = ProductionGeminiStreamer(config)
 
-        # Simulate checkpoint updates
-        streamer._checkpoint.update("chunk1")
-        streamer._checkpoint.update("chunk2")
-        streamer._checkpoint.update("chunk3")
+        # Simulate checkpoint updates (async method)
+        await streamer._checkpoint.update("chunk1")
+        await streamer._checkpoint.update("chunk2")
+        await streamer._checkpoint.update("chunk3")
 
         assert streamer._checkpoint.chunk_count == 3
         assert streamer._checkpoint.accumulated_content == "chunk1chunk2chunk3"
@@ -320,7 +324,7 @@ class TestReconnectLogic:
     ) -> None:
         """Each reconnect attempt increments counter."""
         streamer = ProductionGeminiStreamer(config)
-        streamer._checkpoint.update("some content")
+        await streamer._checkpoint.update("some content")  # async method
         streamer._initialized = True
 
         # Mock base streamer
@@ -338,7 +342,7 @@ class TestReconnectLogic:
     ) -> None:
         """Reconnect delay increases exponentially."""
         streamer = ProductionGeminiStreamer(config)
-        streamer._checkpoint.update("some content")
+        await streamer._checkpoint.update("some content")  # async method
         streamer._initialized = True
 
         # Delay formula: base_delay * (2 ** (attempts - 1))

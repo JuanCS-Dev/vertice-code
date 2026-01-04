@@ -469,6 +469,22 @@ DEFAULT_COMMANDS = [
         CommandCategory.AGENTS,
         ["database", "schema", "sql"],
     ),
+    Command(
+        "agent.jules",
+        "Jules Agent",
+        "Google Jules AI coding",
+        CommandCategory.AGENTS,
+        ["google", "external", "async", "complex"],
+        "Ctrl+J",
+    ),
+    Command(
+        "jules.monitor",
+        "Jules Monitor",
+        "Monitor Jules session",
+        CommandCategory.AGENTS,
+        ["observe", "status", "track"],
+        "Ctrl+Shift+J",
+    ),
     # Core Agents (6) - names must match registry (with _core suffix)
     Command(
         "agent.orchestrator_core",

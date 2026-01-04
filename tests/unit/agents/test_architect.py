@@ -63,12 +63,14 @@ class TestArchitectSystemPrompt:
 
     def test_prompt_contains_personality(self):
         """Test prompt defines agent personality."""
-        assert "Skeptical" in ARCHITECT_SYSTEM_PROMPT or "skeptical" in ARCHITECT_SYSTEM_PROMPT
+        # Prompt now uses "Pragmatic" instead of "Skeptical" (FIX 1.5)
+        assert "Pragmatic" in ARCHITECT_SYSTEM_PROMPT or "pragmatic" in ARCHITECT_SYSTEM_PROMPT
         assert "production" in ARCHITECT_SYSTEM_PROMPT.lower()
 
-    def test_prompt_contains_boris_quote(self):
-        """Test prompt includes Boris Cherny philosophy."""
-        assert "Boris" in ARCHITECT_SYSTEM_PROMPT or "fail" in ARCHITECT_SYSTEM_PROMPT
+    def test_prompt_contains_philosophy(self):
+        """Test prompt includes clear philosophy."""
+        # Updated to check for the new philosophy section instead of Boris quote
+        assert "PHILOSOPHY" in ARCHITECT_SYSTEM_PROMPT or "guide" in ARCHITECT_SYSTEM_PROMPT.lower()
 
 
 # =============================================================================

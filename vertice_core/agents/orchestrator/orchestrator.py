@@ -216,7 +216,7 @@ class ActiveOrchestrator:
     async def _generate_summary(self) -> AsyncIterator[str]:
         """Generate execution summary."""
         yield "\n" + "=" * 40 + "\n"
-        yield f"📊 Execution Summary\n"
+        yield "📊 Execution Summary\n"
         yield "=" * 40 + "\n"
 
         state_emoji = {

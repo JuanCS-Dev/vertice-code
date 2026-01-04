@@ -34,7 +34,6 @@ from rich.markdown import Markdown
 from ..theme import COLORS
 from ..styles import PRESET_STYLES, StyleCombinations
 from ._enums import MessageRole
-from ._enums import MessageRole
 
 
 @dataclass

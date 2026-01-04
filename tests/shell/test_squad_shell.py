@@ -46,17 +46,23 @@ async def test_shell_workflow_list_command():
     # Mock MCPClient and DevSquad
     with patch("vertice_cli.shell_main.MCPClient"), patch("vertice_cli.shell_main.DevSquad"):
         shell = InteractiveShell()
-    shell.console = MagicMock()
+
+    # Create mock console and set on shell AND handlers that cached it
+    mock_console = MagicMock()
+    shell.console = mock_console
+    # Update palette handler console (it cached shell.console at init)
+    if hasattr(shell, '_palette_handler') and shell._palette_handler:
+        shell._palette_handler.console = mock_console
 
     # Test /workflow list
     await shell._handle_system_command("/workflow list")
 
-    # Verify output
-    shell.console.print.assert_called()
+    # Verify output - check mock was called
+    mock_console.print.assert_called()
     # Check if any call argument is a Table with correct title
     from rich.table import Table
     found = False
-    for args, _ in shell.console.print.call_args_list:
+    for args, _ in mock_console.print.call_args_list:
         if args and isinstance(args[0], Table):
             if "Available Workflows" in args[0].title:
                 found = True

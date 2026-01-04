@@ -5,7 +5,7 @@ Constitutional Audit: Routing Conflicts Test
 Testa edge cases e conflitos no routing do MAESTRO.
 """
 
-from scripts.maestro_v10_integrated import Orchestrator
+from scripts.maestro.orchestrator import Orchestrator
 
 class MockLLM:
     async def generate(self, *args, **kwargs):

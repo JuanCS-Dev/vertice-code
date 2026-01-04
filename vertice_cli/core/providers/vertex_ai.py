@@ -16,7 +16,7 @@ import base64
 import os
 import asyncio
 import json
-from typing import Any, Dict, List, Optional, AsyncGenerator, Union
+from typing import Any, Dict, List, Optional, AsyncGenerator
 import logging
 
 logger = logging.getLogger(__name__)
@@ -367,7 +367,7 @@ class VertexAIProvider:
         final_tools = all_tools if all_tools else None
 
         # Format messages as structured Content objects (SDK best practice)
-        from vertexai.generative_models import Content, Part
+        from vertexai.generative_models import Content
 
         contents = []
         for msg in messages:

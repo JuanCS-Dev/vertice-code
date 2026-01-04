@@ -10,7 +10,7 @@ Philosophy:
     "Ask the right questions before making assumptions."
 """
 
-from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING
 
 from .types import ClarifyingQuestion, ClarificationResponse
 from .prompts import build_clarifying_questions_prompt

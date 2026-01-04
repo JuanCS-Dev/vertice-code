@@ -14,12 +14,12 @@ class TestRealProjectIntegration:
     """Test with actual qwen-dev-cli codebase."""
 
     def test_suggest_for_shell_py(self):
-        """Test suggestions on shell.py (our main file)."""
+        """Test suggestions on shell_main.py (our main file)."""
         project_root = Path(__file__).parent.parent.parent
         engine = ContextSuggestionEngine(project_root=project_root)
 
-        shell_py = project_root / "vertice_cli" / "shell.py"
-        assert shell_py.exists(), "shell.py not found"
+        shell_py = project_root / "vertice_cli" / "shell_main.py"
+        assert shell_py.exists(), "shell_main.py not found"
 
         # Get recommendations
         recommendations = engine.suggest_related_files(shell_py, max_suggestions=10)
@@ -63,7 +63,7 @@ class TestRealProjectIntegration:
         engine = ContextSuggestionEngine(project_root=project_root)
 
         # Pick a file that might have issues
-        shell_py = project_root / "vertice_cli" / "shell.py"
+        shell_py = project_root / "vertice_cli" / "shell_main.py"
 
         suggestions = engine.suggest_edits(shell_py)
 
@@ -81,7 +81,7 @@ class TestRealProjectIntegration:
         project_root = Path(__file__).parent.parent.parent
         engine = ContextSuggestionEngine(project_root=project_root)
 
-        shell_py = project_root / "vertice_cli" / "shell.py"
+        shell_py = project_root / "vertice_cli" / "shell_main.py"
         context = engine.analyze_file_context(shell_py)
 
         # Validate context structure
@@ -90,13 +90,13 @@ class TestRealProjectIntegration:
         assert 'imports' in context, "Missing imports"
         assert 'definitions' in context, "Missing definitions"
 
-        # shell.py should have many imports
+        # shell_main.py should have many imports
         assert len(context['imports']) > 10, f"Too few imports: {len(context['imports'])}"
 
-        # shell.py should have class definitions
+        # shell_main.py should have class definitions
         assert len(context['definitions']) > 0, "No definitions found"
 
-        print(f"✓ Analyzed shell.py: {len(context['imports'])} imports, {len(context['definitions'])} definitions")
+        print(f"✓ Analyzed shell_main.py: {len(context['imports'])} imports, {len(context['definitions'])} definitions")
 
 
 class TestEdgeCases:

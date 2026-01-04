@@ -34,8 +34,6 @@ from tenacity import (
 # Re-export base classes from core.resilience for convenience
 from core.resilience import (
     CircuitBreaker,
-    CircuitBreakerConfig,
-    CircuitState,
     CircuitOpenError as CircuitBreakerOpen,  # Alias for backward compat
     RetryConfig,
 )

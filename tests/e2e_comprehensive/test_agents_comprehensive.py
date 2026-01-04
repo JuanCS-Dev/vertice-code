@@ -138,7 +138,7 @@ class TestOtherAgents:
     def test_devops_agent_exists(self):
         """Test devops agent can be imported."""
         try:
-            from vertice_cli.agents.devops_agent import DevOpsAgent
+            from vertice_cli.agents.devops import DevOpsAgent
             assert DevOpsAgent is not None
         except ImportError:
             pytest.skip("DevOpsAgent not found")

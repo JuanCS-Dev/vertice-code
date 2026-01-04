@@ -1,9 +1,16 @@
-"""Gemini API provider implementation."""
+"Gemini API provider implementation."
 
 import os
 import asyncio
 from typing import Dict, List, Optional, AsyncGenerator
 import logging
+
+# Try to import Google exceptions for precise catching
+try:
+    from google.api_core import exceptions as google_exceptions
+    GOOGLE_EXCEPTIONS = (google_exceptions.GoogleAPIError,)
+except ImportError:
+    GOOGLE_EXCEPTIONS = ()  # type: ignore
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +57,7 @@ class GeminiProvider:
         """
         self.api_key = api_key or os.getenv("GEMINI_API_KEY")
         # Respect GEMINI_MODEL from .env unconditionally (Constitutional compliance)
-        default_model = "gemini-2.0-flash"  # Latest production model
+        default_model = "gemini-2.5-pro"  # Best reasoning model
         self.model_name = model_name or os.getenv("GEMINI_MODEL", default_model)
 
         # Native Capabilities
@@ -117,7 +124,7 @@ class GeminiProvider:
                         print("   └── 🌍 Google Search: ENABLED")
 
                     logger.info(f"Gemini provider initialized with model: {self.model_name}")
-                except Exception as e:
+                except (RuntimeError, ValueError, *GOOGLE_EXCEPTIONS) as e:
                     logger.error(f"Failed to initialize Gemini: {e}")
                     self._client = None
         return self._client
@@ -165,7 +172,7 @@ class GeminiProvider:
 
             return response.text
 
-        except Exception as e:
+        except (RuntimeError, ValueError, asyncio.TimeoutError, *GOOGLE_EXCEPTIONS) as e:
             logger.error(f"Gemini generation failed: {e}")
             raise
 
@@ -222,7 +229,7 @@ class GeminiProvider:
                     # Small delay to allow other tasks
                     await asyncio.sleep(0)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, asyncio.TimeoutError, *GOOGLE_EXCEPTIONS) as e:
             logger.error(f"Gemini streaming failed: {e}")
             raise
 
@@ -329,14 +336,14 @@ class GeminiProvider:
                                 yield part.text
                     elif hasattr(chunk, 'text') and chunk.text:
                         yield chunk.text
-                except Exception as chunk_error:
+                except (AttributeError, ValueError, KeyError) as chunk_error:
                     # Some chunks might be pure metadata or function calls without text
                     continue
 
                 await asyncio.sleep(0)
 
 
-        except Exception as e:
+        except (RuntimeError, ValueError, asyncio.TimeoutError, *GOOGLE_EXCEPTIONS) as e:
             logger.error(f"Gemini streaming error: {e}")
             yield f"\n[System Error: {str(e)}]"
 
@@ -385,7 +392,6 @@ class GeminiProvider:
         try:
             # Use native count_tokens
             return self.client.count_tokens(text).total_tokens
-        except Exception as e:
+        except (AttributeError, ValueError, RuntimeError, *GOOGLE_EXCEPTIONS) as e:
             logger.warning(f"Native token count failed, falling back to estimation: {e}")
             return len(text) // 4
-

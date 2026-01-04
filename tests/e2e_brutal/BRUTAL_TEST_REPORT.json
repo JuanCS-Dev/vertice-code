@@ -1,7 +1,7 @@
 {
-  "total_issues": 111,
+  "total_issues": 112,
   "by_severity": {
-    "HIGH": 33,
+    "HIGH": 34,
     "MEDIUM": 43,
     "LOW": 28,
     "CRITICAL": 7
@@ -11,12 +11,13 @@
     "UX": 58,
     "SECURITY": 29,
     "LOGIC": 7,
-    "PERFORMANCE": 2
+    "PERFORMANCE": 2,
+    "CRASH": 1
   },
   "by_persona": {
     "INTEGRATION": 15,
     "SCRIPT_KID": 28,
-    "SENIOR": 9,
+    "SENIOR": 10,
     "STRESS_TEST": 6,
     "VIBE_CODER": 53
   },
@@ -36,7 +37,7 @@
       "actual_behavior": "Ad-hoc plan format, not validated",
       "affected_component": "agents/planner.py \u2192 agents/executor.py",
       "user_persona": "INTEGRATION",
-      "timestamp": "2026-01-01T08:05:25.312600",
+      "timestamp": "2026-01-03T08:36:07.901299",
       "traceback": null
     },
     {
@@ -54,7 +55,7 @@
       "actual_behavior": "Each agent has isolated context",
       "affected_component": "context propagation system",
       "user_persona": "INTEGRATION",
-      "timestamp": "2026-01-01T08:05:25.314052",
+      "timestamp": "2026-01-03T08:36:07.902424",
       "traceback": null
     },
     {
@@ -72,7 +73,7 @@
       "actual_behavior": "Manual intervention required",
       "affected_component": "review feedback loop",
       "user_persona": "INTEGRATION",
-      "timestamp": "2026-01-01T08:05:25.315179",
+      "timestamp": "2026-01-03T08:36:07.903543",
       "traceback": null
     },
     {
@@ -89,7 +90,7 @@
       "actual_behavior": "Method missing",
       "affected_component": "agents/architect.py",
       "user_persona": "INTEGRATION",
-      "timestamp": "2026-01-01T08:05:25.316490",
+      "timestamp": "2026-01-03T08:36:07.904686",
       "traceback": null
     },
     {
@@ -106,7 +107,7 @@
       "actual_behavior": "Method missing",
       "affected_component": "agents/architect.py",
       "user_persona": "INTEGRATION",
-      "timestamp": "2026-01-01T08:05:25.316496",
+      "timestamp": "2026-01-03T08:36:07.904691",
       "traceback": null
     },
     {
@@ -124,7 +125,7 @@
       "actual_behavior": "Allows out-of-order execution",
       "affected_component": "orchestration/squad.py",
       "user_persona": "INTEGRATION",
-      "timestamp": "2026-01-01T08:05:25.317626",
+      "timestamp": "2026-01-03T08:36:07.905963",
       "traceback": null
     },
     {
@@ -142,7 +143,7 @@
       "actual_behavior": "Must start from scratch",
       "affected_component": "orchestration/squad.py",
       "user_persona": "INTEGRATION",
-      "timestamp": "2026-01-01T08:05:25.318822",
+      "timestamp": "2026-01-03T08:36:07.907081",
       "traceback": null
     },
     {
@@ -159,23 +160,23 @@
       "actual_behavior": "Must actually try operation",
       "affected_component": "maestro_governance.py",
       "user_persona": "INTEGRATION",
-      "timestamp": "2026-01-01T08:05:26.846862",
+      "timestamp": "2026-01-03T08:36:09.379164",
       "traceback": null
     },
     {
       "id": "ISSUE-0009",
       "severity": "LOW",
       "category": "INTEGRATION",
-      "title": "SofiaAgent missing methods: ['counsel', 'reflect']",
+      "title": "SofiaAgent missing methods: ['counsel', 'ask_question', 'reflect']",
       "description": "Wisdom agent doesn't have expected interface",
       "reproduction_steps": [
-        "1. Check SofiaAgent for ['counsel', 'reflect']"
+        "1. Check SofiaAgent for ['counsel', 'ask_question', 'reflect']"
       ],
       "expected_behavior": "All wisdom methods present",
-      "actual_behavior": "Missing: ['counsel', 'reflect']",
+      "actual_behavior": "Missing: ['counsel', 'ask_question', 'reflect']",
       "affected_component": "agents/sofia_agent.py",
       "user_persona": "INTEGRATION",
-      "timestamp": "2026-01-01T08:05:26.848077",
+      "timestamp": "2026-01-03T08:36:09.380336",
       "traceback": null
     },
     {
@@ -193,7 +194,7 @@
       "actual_behavior": "No audit log method found",
       "affected_component": "maestro_governance.py",
       "user_persona": "INTEGRATION",
-      "timestamp": "2026-01-01T08:05:26.849218",
+      "timestamp": "2026-01-03T08:36:09.381504",
       "traceback": null
     },
     {
@@ -211,7 +212,7 @@
       "actual_behavior": "Manual multi-tool coordination",
       "affected_component": "tool orchestration",
       "user_persona": "INTEGRATION",
-      "timestamp": "2026-01-01T08:05:26.869720",
+      "timestamp": "2026-01-03T08:36:09.401983",
       "traceback": null
     },
     {
@@ -229,7 +230,7 @@
       "actual_behavior": "Three separate tool calls",
       "affected_component": "git workflow integration",
       "user_persona": "INTEGRATION",
-      "timestamp": "2026-01-01T08:05:26.880474",
+      "timestamp": "2026-01-03T08:36:09.410471",
       "traceback": null
     },
     {
@@ -247,7 +248,7 @@
       "actual_behavior": "Ad-hoc context handling",
       "affected_component": "session management",
       "user_persona": "INTEGRATION",
-      "timestamp": "2026-01-01T08:05:26.881772",
+      "timestamp": "2026-01-03T08:36:09.411801",
       "traceback": null
     },
     {
@@ -265,7 +266,7 @@
       "actual_behavior": "All state lost on crash",
       "affected_component": "session persistence",
       "user_persona": "INTEGRATION",
-      "timestamp": "2026-01-01T08:05:26.882889",
+      "timestamp": "2026-01-03T08:36:09.412984",
       "traceback": null
     },
     {
@@ -283,7 +284,7 @@
       "actual_behavior": "No history file",
       "affected_component": "shell_simple.py",
       "user_persona": "INTEGRATION",
-      "timestamp": "2026-01-01T08:05:26.884146",
+      "timestamp": "2026-01-03T08:36:09.414224",
       "traceback": null
     },
     {
@@ -301,7 +302,7 @@
       "actual_behavior": "No violation detected",
       "affected_component": "agents/executor.py:AdvancedSecurityValidator",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.894243",
+      "timestamp": "2026-01-03T08:36:09.423646",
       "traceback": null
     },
     {
@@ -318,7 +319,7 @@
       "actual_behavior": "No violation detected",
       "affected_component": "agents/executor.py:AdvancedSecurityValidator",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.904113",
+      "timestamp": "2026-01-03T08:36:09.432061",
       "traceback": null
     },
     {
@@ -335,7 +336,7 @@
       "actual_behavior": "No violation detected",
       "affected_component": "agents/executor.py:AdvancedSecurityValidator",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.904126",
+      "timestamp": "2026-01-03T08:36:09.432071",
       "traceback": null
     },
     {
@@ -352,7 +353,7 @@
       "actual_behavior": "No violation detected",
       "affected_component": "agents/executor.py:AdvancedSecurityValidator",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.904135",
+      "timestamp": "2026-01-03T08:36:09.432078",
       "traceback": null
     },
     {
@@ -369,7 +370,7 @@
       "actual_behavior": "No violation detected",
       "affected_component": "agents/executor.py:AdvancedSecurityValidator",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.904147",
+      "timestamp": "2026-01-03T08:36:09.432087",
       "traceback": null
     },
     {
@@ -386,7 +387,7 @@
       "actual_behavior": "No violation detected",
       "affected_component": "agents/executor.py:AdvancedSecurityValidator",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.905483",
+      "timestamp": "2026-01-03T08:36:09.433552",
       "traceback": null
     },
     {
@@ -403,7 +404,7 @@
       "actual_behavior": "No violation detected",
       "affected_component": "agents/executor.py:AdvancedSecurityValidator",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.906626",
+      "timestamp": "2026-01-03T08:36:09.434757",
       "traceback": null
     },
     {
@@ -420,7 +421,7 @@
       "actual_behavior": "Operation attempted with path: 'file.txt\\x00.jpg'",
       "affected_component": "tools/file_ops.py path validation",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.927892",
+      "timestamp": "2026-01-03T08:36:09.452664",
       "traceback": null
     },
     {
@@ -438,7 +439,7 @@
       "actual_behavior": "File contents returned via symlink",
       "affected_component": "tools/file_ops.py:ReadFileTool",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.937113",
+      "timestamp": "2026-01-03T08:36:09.461314",
       "traceback": null
     },
     {
@@ -456,7 +457,7 @@
       "actual_behavior": "Could hang indefinitely",
       "affected_component": "code execution engine",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.938595",
+      "timestamp": "2026-01-03T08:36:09.462673",
       "traceback": null
     },
     {
@@ -474,7 +475,7 @@
       "actual_behavior": "Could cause OOM kill",
       "affected_component": "resource limits",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.939935",
+      "timestamp": "2026-01-03T08:36:09.463857",
       "traceback": null
     },
     {
@@ -491,7 +492,7 @@
       "actual_behavior": "No violation detected",
       "affected_component": "agents/executor.py:AdvancedSecurityValidator",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.941196",
+      "timestamp": "2026-01-03T08:36:09.465038",
       "traceback": null
     },
     {
@@ -508,7 +509,7 @@
       "actual_behavior": "No violation detected",
       "affected_component": "agents/executor.py:AdvancedSecurityValidator",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.941206",
+      "timestamp": "2026-01-03T08:36:09.465047",
       "traceback": null
     },
     {
@@ -526,7 +527,7 @@
       "actual_behavior": "No limit on file size",
       "affected_component": "tools/file_ops.py:WriteFileTool",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.942361",
+      "timestamp": "2026-01-03T08:36:09.466207",
       "traceback": null
     },
     {
@@ -543,7 +544,7 @@
       "actual_behavior": "No violation detected",
       "affected_component": "agents/executor.py:AdvancedSecurityValidator",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.945291",
+      "timestamp": "2026-01-03T08:36:09.468572",
       "traceback": null
     },
     {
@@ -560,7 +561,7 @@
       "actual_behavior": "No violation detected",
       "affected_component": "agents/executor.py:AdvancedSecurityValidator",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.945303",
+      "timestamp": "2026-01-03T08:36:09.468581",
       "traceback": null
     },
     {
@@ -577,7 +578,7 @@
       "actual_behavior": "No violation detected",
       "affected_component": "agents/executor.py:AdvancedSecurityValidator",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.945311",
+      "timestamp": "2026-01-03T08:36:09.468589",
       "traceback": null
     },
     {
@@ -594,7 +595,7 @@
       "actual_behavior": "No violation detected",
       "affected_component": "agents/executor.py:AdvancedSecurityValidator",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.946478",
+      "timestamp": "2026-01-03T08:36:09.469727",
       "traceback": null
     },
     {
@@ -611,7 +612,7 @@
       "actual_behavior": "No violation detected",
       "affected_component": "agents/executor.py:AdvancedSecurityValidator",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.946488",
+      "timestamp": "2026-01-03T08:36:09.469736",
       "traceback": null
     },
     {
@@ -628,7 +629,7 @@
       "actual_behavior": "No violation detected",
       "affected_component": "agents/executor.py:AdvancedSecurityValidator",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.946496",
+      "timestamp": "2026-01-03T08:36:09.469744",
       "traceback": null
     },
     {
@@ -645,7 +646,7 @@
       "actual_behavior": "No violation detected",
       "affected_component": "agents/executor.py:AdvancedSecurityValidator",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.946503",
+      "timestamp": "2026-01-03T08:36:09.469750",
       "traceback": null
     },
     {
@@ -662,7 +663,7 @@
       "actual_behavior": "No violation detected",
       "affected_component": "agents/executor.py:AdvancedSecurityValidator",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.948863",
+      "timestamp": "2026-01-03T08:36:09.472026",
       "traceback": null
     },
     {
@@ -679,7 +680,7 @@
       "actual_behavior": "No violation detected",
       "affected_component": "agents/executor.py:AdvancedSecurityValidator",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.948872",
+      "timestamp": "2026-01-03T08:36:09.472035",
       "traceback": null
     },
     {
@@ -696,7 +697,7 @@
       "actual_behavior": "No violation detected",
       "affected_component": "agents/executor.py:AdvancedSecurityValidator",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.948881",
+      "timestamp": "2026-01-03T08:36:09.472043",
       "traceback": null
     },
     {
@@ -713,7 +714,7 @@
       "actual_behavior": "Unknown - needs testing",
       "affected_component": "LLM interaction layer",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.950050",
+      "timestamp": "2026-01-03T08:36:09.473165",
       "traceback": null
     },
     {
@@ -731,7 +732,7 @@
       "actual_behavior": "Unknown - needs testing",
       "affected_component": "file analysis / context building",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.951206",
+      "timestamp": "2026-01-03T08:36:09.474275",
       "traceback": null
     },
     {
@@ -749,7 +750,7 @@
       "actual_behavior": "Full Python access",
       "affected_component": "code execution system",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.952323",
+      "timestamp": "2026-01-03T08:36:09.475385",
       "traceback": null
     },
     {
@@ -766,7 +767,7 @@
       "actual_behavior": "No restriction",
       "affected_component": "security validator",
       "user_persona": "SCRIPT_KID",
-      "timestamp": "2026-01-01T08:05:26.953488",
+      "timestamp": "2026-01-03T08:36:09.476506",
       "traceback": null
     },
     {
@@ -784,7 +785,7 @@
       "actual_behavior": "Silently creates parent directories",
       "affected_component": "tools/file_ops.py:WriteFileTool",
       "user_persona": "SENIOR",
-      "timestamp": "2026-01-01T08:05:26.963972",
+      "timestamp": "2026-01-03T08:36:09.486101",
       "traceback": null
     },
     {
@@ -802,7 +803,7 @@
       "actual_behavior": "Content: initial",
       "affected_component": "tools/file_ops.py:WriteFileTool",
       "user_persona": "SENIOR",
-      "timestamp": "2026-01-01T08:05:26.988841",
+      "timestamp": "2026-01-03T08:36:09.511223",
       "traceback": null
     },
     {
@@ -819,7 +820,7 @@
       "actual_behavior": "Read succeeded, got 3 bytes",
       "affected_component": "tools/file_ops.py:ReadFileTool",
       "user_persona": "SENIOR",
-      "timestamp": "2026-01-01T08:05:26.999911",
+      "timestamp": "2026-01-03T08:36:09.520614",
       "traceback": null
     },
     {
@@ -837,7 +838,7 @@
       "actual_behavior": "Peak memory: 200MB",
       "affected_component": "tools/file_ops.py:ReadFileTool",
       "user_persona": "SENIOR",
-      "timestamp": "2026-01-01T08:05:27.206446",
+      "timestamp": "2026-01-03T08:36:09.704260",
       "traceback": null
     },
     {
@@ -854,7 +855,7 @@
       "actual_behavior": "Task created successfully with empty request",
       "affected_component": "agents/base.py:AgentTask",
       "user_persona": "SENIOR",
-      "timestamp": "2026-01-01T08:05:27.225885",
+      "timestamp": "2026-01-03T08:36:09.722396",
       "traceback": null
     },
     {
@@ -871,28 +872,45 @@
       "actual_behavior": "Task created with whitespace request",
       "affected_component": "agents/base.py:AgentTask",
       "user_persona": "SENIOR",
-      "timestamp": "2026-01-01T08:05:27.225905",
+      "timestamp": "2026-01-03T08:36:09.722414",
       "traceback": null
     },
     {
       "id": "ISSUE-0050",
+      "severity": "HIGH",
+      "category": "CRASH",
+      "title": "PlannerAgent fails to initialize",
+      "description": "Cannot create PlannerAgent: mcp_client is required for PlannerAgent",
+      "reproduction_steps": [
+        "1. Try to create PlannerAgent with mock LLM",
+        "2. Exception raised"
+      ],
+      "expected_behavior": "PlannerAgent initializes successfully",
+      "actual_behavior": "Exception: mcp_client is required for PlannerAgent",
+      "affected_component": "agents/planner.py:PlannerAgent",
+      "user_persona": "SENIOR",
+      "timestamp": "2026-01-03T08:36:09.724761",
+      "traceback": null
+    },
+    {
+      "id": "ISSUE-0051",
       "severity": "LOW",
       "category": "UX",
       "title": "Mixed language in error messages",
-      "description": "Found Portuguese in: ['main.py', 'maestro_governance.py', 'maestro.py', 'maestro_shell.py', 'shell_main.py']",
+      "description": "Found Portuguese in: ['main.py', 'maestro_governance.py', 'maestro.py', 'maestro_shell.py', 'integration/shell_bridge.py']",
       "reproduction_steps": [
         "1. Scan source files for error messages",
         "2. Check for mixed English/Portuguese"
       ],
       "expected_behavior": "Consistent language (all English or all Portuguese)",
-      "actual_behavior": "Mixed in 77 files",
+      "actual_behavior": "Mixed in 89 files",
       "affected_component": "Various",
       "user_persona": "SENIOR",
-      "timestamp": "2026-01-01T08:05:27.294099",
+      "timestamp": "2026-01-03T08:36:09.792191",
       "traceback": null
     },
     {
-      "id": "ISSUE-0051",
+      "id": "ISSUE-0052",
       "severity": "LOW",
       "category": "UX",
       "title": "CLI help missing sections",
@@ -905,11 +923,11 @@
       "actual_behavior": "Missing: ['usage', 'commands', 'options']",
       "affected_component": "cli.py",
       "user_persona": "SENIOR",
-      "timestamp": "2026-01-01T08:05:28.844176",
+      "timestamp": "2026-01-03T08:36:10.948113",
       "traceback": null
     },
     {
-      "id": "ISSUE-0052",
+      "id": "ISSUE-0053",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "CLI version command returns non-zero exit code",
@@ -922,11 +940,11 @@
       "actual_behavior": "Exit code 1",
       "affected_component": "cli.py",
       "user_persona": "SENIOR",
-      "timestamp": "2026-01-01T08:05:30.377687",
+      "timestamp": "2026-01-03T08:36:12.107201",
       "traceback": null
     },
     {
-      "id": "ISSUE-0053",
+      "id": "ISSUE-0054",
       "severity": "MEDIUM",
       "category": "INTEGRATION",
       "title": "No concurrent agent execution testing",
@@ -940,11 +958,11 @@
       "actual_behavior": "Not tested - needs implementation",
       "affected_component": "agent orchestration",
       "user_persona": "STRESS_TEST",
-      "timestamp": "2026-01-01T08:05:31.901788",
+      "timestamp": "2026-01-03T08:36:13.254900",
       "traceback": null
     },
     {
-      "id": "ISSUE-0054",
+      "id": "ISSUE-0055",
       "severity": "HIGH",
       "category": "LOGIC",
       "title": "No rollback for partial failures",
@@ -958,11 +976,11 @@
       "actual_behavior": "Partial state left",
       "affected_component": "multi-file operations",
       "user_persona": "STRESS_TEST",
-      "timestamp": "2026-01-01T08:05:32.288226",
+      "timestamp": "2026-01-03T08:36:13.618597",
       "traceback": null
     },
     {
-      "id": "ISSUE-0055",
+      "id": "ISSUE-0056",
       "severity": "MEDIUM",
       "category": "LOGIC",
       "title": "Timeout recovery not user-friendly",
@@ -976,11 +994,11 @@
       "actual_behavior": "Hard error with technical message",
       "affected_component": "core/llm.py",
       "user_persona": "STRESS_TEST",
-      "timestamp": "2026-01-01T08:05:32.289780",
+      "timestamp": "2026-01-03T08:36:13.619850",
       "traceback": null
     },
     {
-      "id": "ISSUE-0056",
+      "id": "ISSUE-0057",
       "severity": "HIGH",
       "category": "LOGIC",
       "title": "No handling for disk full scenario",
@@ -994,11 +1012,11 @@
       "actual_behavior": "Fails mid-operation",
       "affected_component": "tools/file_ops.py:WriteFileTool",
       "user_persona": "STRESS_TEST",
-      "timestamp": "2026-01-01T08:05:32.290953",
+      "timestamp": "2026-01-03T08:36:13.621000",
       "traceback": null
     },
     {
-      "id": "ISSUE-0057",
+      "id": "ISSUE-0058",
       "severity": "MEDIUM",
       "category": "LOGIC",
       "title": "No rate limit handling for LLM API",
@@ -1012,11 +1030,11 @@
       "actual_behavior": "Raw API error shown",
       "affected_component": "core/llm.py",
       "user_persona": "STRESS_TEST",
-      "timestamp": "2026-01-01T08:05:32.292240",
+      "timestamp": "2026-01-03T08:36:13.622298",
       "traceback": null
     },
     {
-      "id": "ISSUE-0058",
+      "id": "ISSUE-0059",
       "severity": "LOW",
       "category": "PERFORMANCE",
       "title": "No throttling for tool calls",
@@ -1029,11 +1047,11 @@
       "actual_behavior": "All attempted simultaneously",
       "affected_component": "tool execution system",
       "user_persona": "STRESS_TEST",
-      "timestamp": "2026-01-01T08:05:32.293609",
+      "timestamp": "2026-01-03T08:36:13.623452",
       "traceback": null
     },
     {
-      "id": "ISSUE-0059",
+      "id": "ISSUE-0060",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "No clarification system for vague request: 'make a file'",
@@ -1047,11 +1065,11 @@
       "actual_behavior": "No clarification mechanism found",
       "affected_component": "agents/base.py or shell",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.304105",
+      "timestamp": "2026-01-03T08:36:37.536910",
       "traceback": null
     },
     {
-      "id": "ISSUE-0060",
+      "id": "ISSUE-0061",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "No clarification system for vague request: 'create something'",
@@ -1065,11 +1083,11 @@
       "actual_behavior": "No clarification mechanism found",
       "affected_component": "agents/base.py or shell",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.304138",
+      "timestamp": "2026-01-03T08:36:37.536930",
       "traceback": null
     },
     {
-      "id": "ISSUE-0061",
+      "id": "ISSUE-0062",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "No clarification system for vague request: 'add a python thing'",
@@ -1083,11 +1101,11 @@
       "actual_behavior": "No clarification mechanism found",
       "affected_component": "agents/base.py or shell",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.304167",
+      "timestamp": "2026-01-03T08:36:37.536943",
       "traceback": null
     },
     {
-      "id": "ISSUE-0062",
+      "id": "ISSUE-0063",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "No clarification system for vague request: 'write some code'",
@@ -1101,11 +1119,11 @@
       "actual_behavior": "No clarification mechanism found",
       "affected_component": "agents/base.py or shell",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.304192",
+      "timestamp": "2026-01-03T08:36:37.536956",
       "traceback": null
     },
     {
-      "id": "ISSUE-0063",
+      "id": "ISSUE-0064",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "No clarification system for vague request: 'make it work'",
@@ -1119,11 +1137,11 @@
       "actual_behavior": "No clarification mechanism found",
       "affected_component": "agents/base.py or shell",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.304215",
+      "timestamp": "2026-01-03T08:36:37.536967",
       "traceback": null
     },
     {
-      "id": "ISSUE-0064",
+      "id": "ISSUE-0065",
       "severity": "LOW",
       "category": "UX",
       "title": "No typo correction for 'crate' \u2192 'create'",
@@ -1136,11 +1154,11 @@
       "actual_behavior": "Command fails or misinterprets",
       "affected_component": "shell input handling",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.315599",
+      "timestamp": "2026-01-03T08:36:37.547121",
       "traceback": null
     },
     {
-      "id": "ISSUE-0065",
+      "id": "ISSUE-0066",
       "severity": "LOW",
       "category": "UX",
       "title": "No typo correction for 'delte' \u2192 'delete'",
@@ -1153,11 +1171,11 @@
       "actual_behavior": "Command fails or misinterprets",
       "affected_component": "shell input handling",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.315606",
+      "timestamp": "2026-01-03T08:36:37.547127",
       "traceback": null
     },
     {
-      "id": "ISSUE-0066",
+      "id": "ISSUE-0067",
       "severity": "LOW",
       "category": "UX",
       "title": "No typo correction for 'remoev' \u2192 'remove'",
@@ -1170,11 +1188,11 @@
       "actual_behavior": "Command fails or misinterprets",
       "affected_component": "shell input handling",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.315609",
+      "timestamp": "2026-01-03T08:36:37.547130",
       "traceback": null
     },
     {
-      "id": "ISSUE-0067",
+      "id": "ISSUE-0068",
       "severity": "LOW",
       "category": "UX",
       "title": "No typo correction for 'rread' \u2192 'read'",
@@ -1187,11 +1205,11 @@
       "actual_behavior": "Command fails or misinterprets",
       "affected_component": "shell input handling",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.315611",
+      "timestamp": "2026-01-03T08:36:37.547133",
       "traceback": null
     },
     {
-      "id": "ISSUE-0068",
+      "id": "ISSUE-0069",
       "severity": "LOW",
       "category": "UX",
       "title": "No typo correction for 'wirte' \u2192 'write'",
@@ -1204,11 +1222,11 @@
       "actual_behavior": "Command fails or misinterprets",
       "affected_component": "shell input handling",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.315614",
+      "timestamp": "2026-01-03T08:36:37.547135",
       "traceback": null
     },
     {
-      "id": "ISSUE-0069",
+      "id": "ISSUE-0070",
       "severity": "LOW",
       "category": "UX",
       "title": "No typo correction for 'fiel' \u2192 'file'",
@@ -1221,11 +1239,11 @@
       "actual_behavior": "Command fails or misinterprets",
       "affected_component": "shell input handling",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.315619",
+      "timestamp": "2026-01-03T08:36:37.547138",
       "traceback": null
     },
     {
-      "id": "ISSUE-0070",
+      "id": "ISSUE-0071",
       "severity": "LOW",
       "category": "UX",
       "title": "No typo correction for 'direcotry' \u2192 'directory'",
@@ -1238,11 +1256,11 @@
       "actual_behavior": "Command fails or misinterprets",
       "affected_component": "shell input handling",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.315622",
+      "timestamp": "2026-01-03T08:36:37.547141",
       "traceback": null
     },
     {
-      "id": "ISSUE-0071",
+      "id": "ISSUE-0072",
       "severity": "LOW",
       "category": "UX",
       "title": "No guidance for incomplete command: 'git'",
@@ -1256,11 +1274,11 @@
       "actual_behavior": "Error or no response",
       "affected_component": "shell command handling",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.324944",
+      "timestamp": "2026-01-03T08:36:37.555786",
       "traceback": null
     },
     {
-      "id": "ISSUE-0072",
+      "id": "ISSUE-0073",
       "severity": "LOW",
       "category": "UX",
       "title": "No guidance for incomplete command: 'python'",
@@ -1274,11 +1292,11 @@
       "actual_behavior": "Error or no response",
       "affected_component": "shell command handling",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.324949",
+      "timestamp": "2026-01-03T08:36:37.555793",
       "traceback": null
     },
     {
-      "id": "ISSUE-0073",
+      "id": "ISSUE-0074",
       "severity": "LOW",
       "category": "UX",
       "title": "No guidance for incomplete command: 'create'",
@@ -1292,11 +1310,11 @@
       "actual_behavior": "Error or no response",
       "affected_component": "shell command handling",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.324952",
+      "timestamp": "2026-01-03T08:36:37.555797",
       "traceback": null
     },
     {
-      "id": "ISSUE-0074",
+      "id": "ISSUE-0075",
       "severity": "LOW",
       "category": "UX",
       "title": "No guidance for incomplete command: 'edit'",
@@ -1310,11 +1328,11 @@
       "actual_behavior": "Error or no response",
       "affected_component": "shell command handling",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.324954",
+      "timestamp": "2026-01-03T08:36:37.555801",
       "traceback": null
     },
     {
-      "id": "ISSUE-0075",
+      "id": "ISSUE-0076",
       "severity": "LOW",
       "category": "UX",
       "title": "No guidance for incomplete command: 'run'",
@@ -1328,11 +1346,11 @@
       "actual_behavior": "Error or no response",
       "affected_component": "shell command handling",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.324956",
+      "timestamp": "2026-01-03T08:36:37.555805",
       "traceback": null
     },
     {
-      "id": "ISSUE-0076",
+      "id": "ISSUE-0077",
       "severity": "LOW",
       "category": "UX",
       "title": "No guidance for incomplete command: 'test'",
@@ -1346,11 +1364,11 @@
       "actual_behavior": "Error or no response",
       "affected_component": "shell command handling",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.324958",
+      "timestamp": "2026-01-03T08:36:37.555809",
       "traceback": null
     },
     {
-      "id": "ISSUE-0077",
+      "id": "ISSUE-0078",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "Import errors don't suggest solutions",
@@ -1364,11 +1382,11 @@
       "actual_behavior": "Raw Python error only",
       "affected_component": "shell error handling",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.365011",
+      "timestamp": "2026-01-03T08:36:37.596487",
       "traceback": null
     },
     {
-      "id": "ISSUE-0078",
+      "id": "ISSUE-0079",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "No friendly explanation for syntax error",
@@ -1382,11 +1400,11 @@
       "actual_behavior": "Raw SyntaxError message",
       "affected_component": "shell error translation",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.417764",
+      "timestamp": "2026-01-03T08:36:37.646391",
       "traceback": null
     },
     {
-      "id": "ISSUE-0079",
+      "id": "ISSUE-0080",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "No friendly explanation for syntax error",
@@ -1400,11 +1418,11 @@
       "actual_behavior": "Raw SyntaxError message",
       "affected_component": "shell error translation",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.461059",
+      "timestamp": "2026-01-03T08:36:37.690563",
       "traceback": null
     },
     {
-      "id": "ISSUE-0080",
+      "id": "ISSUE-0081",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "No friendly explanation for syntax error",
@@ -1418,11 +1436,11 @@
       "actual_behavior": "Raw SyntaxError message",
       "affected_component": "shell error translation",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.502796",
+      "timestamp": "2026-01-03T08:36:37.740165",
       "traceback": null
     },
     {
-      "id": "ISSUE-0081",
+      "id": "ISSUE-0082",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "No friendly explanation for syntax error",
@@ -1436,11 +1454,11 @@
       "actual_behavior": "Raw SyntaxError message",
       "affected_component": "shell error translation",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.545821",
+      "timestamp": "2026-01-03T08:36:37.781582",
       "traceback": null
     },
     {
-      "id": "ISSUE-0082",
+      "id": "ISSUE-0083",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "Permission errors don't explain fix",
@@ -1454,11 +1472,11 @@
       "actual_behavior": "Raw PermissionError",
       "affected_component": "shell error handling",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.557798",
+      "timestamp": "2026-01-03T08:36:37.792444",
       "traceback": null
     },
     {
-      "id": "ISSUE-0083",
+      "id": "ISSUE-0084",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "Network errors don't suggest troubleshooting",
@@ -1471,11 +1489,11 @@
       "actual_behavior": "Raw connection error",
       "affected_component": "core/llm.py error handling",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.559138",
+      "timestamp": "2026-01-03T08:36:37.793811",
       "traceback": null
     },
     {
-      "id": "ISSUE-0084",
+      "id": "ISSUE-0085",
       "severity": "HIGH",
       "category": "UX",
       "title": "AI doesn't automatically read visible files for context",
@@ -1489,11 +1507,11 @@
       "actual_behavior": "AI asks what to make or creates something unrelated",
       "affected_component": "context awareness system",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.568087",
+      "timestamp": "2026-01-03T08:36:37.802698",
       "traceback": null
     },
     {
-      "id": "ISSUE-0085",
+      "id": "ISSUE-0086",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "No context for 'now the other one'",
@@ -1507,11 +1525,11 @@
       "actual_behavior": "AI asks 'which one?' or fails",
       "affected_component": "conversation context tracking",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.576769",
+      "timestamp": "2026-01-03T08:36:37.811356",
       "traceback": null
     },
     {
-      "id": "ISSUE-0086",
+      "id": "ISSUE-0087",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "No context for 'same but for the other file'",
@@ -1525,11 +1543,11 @@
       "actual_behavior": "AI asks 'which one?' or fails",
       "affected_component": "conversation context tracking",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.576775",
+      "timestamp": "2026-01-03T08:36:37.811361",
       "traceback": null
     },
     {
-      "id": "ISSUE-0087",
+      "id": "ISSUE-0088",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "No context for 'do that again'",
@@ -1543,11 +1561,11 @@
       "actual_behavior": "AI asks 'which one?' or fails",
       "affected_component": "conversation context tracking",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.576779",
+      "timestamp": "2026-01-03T08:36:37.811363",
       "traceback": null
     },
     {
-      "id": "ISSUE-0088",
+      "id": "ISSUE-0089",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "No context for 'the same thing'",
@@ -1561,11 +1579,11 @@
       "actual_behavior": "AI asks 'which one?' or fails",
       "affected_component": "conversation context tracking",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.576782",
+      "timestamp": "2026-01-03T08:36:37.811365",
       "traceback": null
     },
     {
-      "id": "ISSUE-0089",
+      "id": "ISSUE-0090",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "No context for 'now fix that'",
@@ -1579,11 +1597,11 @@
       "actual_behavior": "AI asks 'which one?' or fails",
       "affected_component": "conversation context tracking",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.576785",
+      "timestamp": "2026-01-03T08:36:37.811367",
       "traceback": null
     },
     {
-      "id": "ISSUE-0090",
+      "id": "ISSUE-0091",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "No context for 'this one too'",
@@ -1597,11 +1615,11 @@
       "actual_behavior": "AI asks 'which one?' or fails",
       "affected_component": "conversation context tracking",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.576788",
+      "timestamp": "2026-01-03T08:36:37.811369",
       "traceback": null
     },
     {
-      "id": "ISSUE-0091",
+      "id": "ISSUE-0092",
       "severity": "HIGH",
       "category": "UX",
       "title": "AI can't auto-detect file with bug",
@@ -1615,11 +1633,11 @@
       "actual_behavior": "AI asks 'which file?' or 'what bug?'",
       "affected_component": "intelligent file detection",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.587418",
+      "timestamp": "2026-01-03T08:36:37.819859",
       "traceback": null
     },
     {
-      "id": "ISSUE-0092",
+      "id": "ISSUE-0093",
       "severity": "LOW",
       "category": "UX",
       "title": "No special handling for repeated questions",
@@ -1633,11 +1651,11 @@
       "actual_behavior": "Same response each time",
       "affected_component": "conversation intelligence",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.589797",
+      "timestamp": "2026-01-03T08:36:37.821883",
       "traceback": null
     },
     {
-      "id": "ISSUE-0093",
+      "id": "ISSUE-0094",
       "severity": "LOW",
       "category": "UX",
       "title": "No frustration detection for: WHY WONT THIS WORK",
@@ -1650,11 +1668,11 @@
       "actual_behavior": "Standard response ignoring emotional context",
       "affected_component": "emotional intelligence",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.591385",
+      "timestamp": "2026-01-03T08:36:37.823584",
       "traceback": null
     },
     {
-      "id": "ISSUE-0094",
+      "id": "ISSUE-0095",
       "severity": "LOW",
       "category": "UX",
       "title": "No frustration detection for: THIS IS BROKEN",
@@ -1667,11 +1685,11 @@
       "actual_behavior": "Standard response ignoring emotional context",
       "affected_component": "emotional intelligence",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.591391",
+      "timestamp": "2026-01-03T08:36:37.823588",
       "traceback": null
     },
     {
-      "id": "ISSUE-0095",
+      "id": "ISSUE-0096",
       "severity": "LOW",
       "category": "UX",
       "title": "No frustration detection for: HELP!!!",
@@ -1684,11 +1702,11 @@
       "actual_behavior": "Standard response ignoring emotional context",
       "affected_component": "emotional intelligence",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.591394",
+      "timestamp": "2026-01-03T08:36:37.823590",
       "traceback": null
     },
     {
-      "id": "ISSUE-0096",
+      "id": "ISSUE-0097",
       "severity": "LOW",
       "category": "UX",
       "title": "No frustration detection for: I GIVE UP",
@@ -1701,11 +1719,11 @@
       "actual_behavior": "Standard response ignoring emotional context",
       "affected_component": "emotional intelligence",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.591396",
+      "timestamp": "2026-01-03T08:36:37.823592",
       "traceback": null
     },
     {
-      "id": "ISSUE-0097",
+      "id": "ISSUE-0098",
       "severity": "LOW",
       "category": "UX",
       "title": "No frustration detection for: nothing works",
@@ -1718,11 +1736,11 @@
       "actual_behavior": "Standard response ignoring emotional context",
       "affected_component": "emotional intelligence",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.591398",
+      "timestamp": "2026-01-03T08:36:37.823594",
       "traceback": null
     },
     {
-      "id": "ISSUE-0098",
+      "id": "ISSUE-0099",
       "severity": "LOW",
       "category": "UX",
       "title": "No frustration detection for: I've tried everythin",
@@ -1735,11 +1753,11 @@
       "actual_behavior": "Standard response ignoring emotional context",
       "affected_component": "emotional intelligence",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.591401",
+      "timestamp": "2026-01-03T08:36:37.823597",
       "traceback": null
     },
     {
-      "id": "ISSUE-0099",
+      "id": "ISSUE-0100",
       "severity": "HIGH",
       "category": "UX",
       "title": "No undo support for 'undo'",
@@ -1753,11 +1771,11 @@
       "actual_behavior": "System doesn't track actions for undo",
       "affected_component": "action history / undo system",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.601114",
+      "timestamp": "2026-01-03T08:36:37.833166",
       "traceback": null
     },
     {
-      "id": "ISSUE-0100",
+      "id": "ISSUE-0101",
       "severity": "HIGH",
       "category": "UX",
       "title": "No undo support for 'go back'",
@@ -1771,11 +1789,11 @@
       "actual_behavior": "System doesn't track actions for undo",
       "affected_component": "action history / undo system",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.601122",
+      "timestamp": "2026-01-03T08:36:37.833171",
       "traceback": null
     },
     {
-      "id": "ISSUE-0101",
+      "id": "ISSUE-0102",
       "severity": "HIGH",
       "category": "UX",
       "title": "No undo support for 'revert'",
@@ -1789,11 +1807,11 @@
       "actual_behavior": "System doesn't track actions for undo",
       "affected_component": "action history / undo system",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.601125",
+      "timestamp": "2026-01-03T08:36:37.833174",
       "traceback": null
     },
     {
-      "id": "ISSUE-0102",
+      "id": "ISSUE-0103",
       "severity": "HIGH",
       "category": "UX",
       "title": "No undo support for 'that was wrong'",
@@ -1807,11 +1825,11 @@
       "actual_behavior": "System doesn't track actions for undo",
       "affected_component": "action history / undo system",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.601127",
+      "timestamp": "2026-01-03T08:36:37.833176",
       "traceback": null
     },
     {
-      "id": "ISSUE-0103",
+      "id": "ISSUE-0104",
       "severity": "HIGH",
       "category": "UX",
       "title": "No undo support for 'bring it back'",
@@ -1825,11 +1843,11 @@
       "actual_behavior": "System doesn't track actions for undo",
       "affected_component": "action history / undo system",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.601129",
+      "timestamp": "2026-01-03T08:36:37.833178",
       "traceback": null
     },
     {
-      "id": "ISSUE-0104",
+      "id": "ISSUE-0105",
       "severity": "HIGH",
       "category": "UX",
       "title": "No undo support for 'restore'",
@@ -1843,11 +1861,11 @@
       "actual_behavior": "System doesn't track actions for undo",
       "affected_component": "action history / undo system",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.601131",
+      "timestamp": "2026-01-03T08:36:37.833180",
       "traceback": null
     },
     {
-      "id": "ISSUE-0105",
+      "id": "ISSUE-0106",
       "severity": "HIGH",
       "category": "UX",
       "title": "No undo support for 'oops'",
@@ -1861,11 +1879,11 @@
       "actual_behavior": "System doesn't track actions for undo",
       "affected_component": "action history / undo system",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.601133",
+      "timestamp": "2026-01-03T08:36:37.833182",
       "traceback": null
     },
     {
-      "id": "ISSUE-0106",
+      "id": "ISSUE-0107",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "Multiline paste not recognized as code",
@@ -1879,11 +1897,11 @@
       "actual_behavior": "Tries to run 'def hello():' as shell command",
       "affected_component": "shell input handling",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.610375",
+      "timestamp": "2026-01-03T08:36:37.842213",
       "traceback": null
     },
     {
-      "id": "ISSUE-0107",
+      "id": "ISSUE-0108",
       "severity": "LOW",
       "category": "UX",
       "title": "Can't clean StackOverflow-style paste",
@@ -1897,11 +1915,11 @@
       "actual_behavior": "Tries to execute '>>> import json'",
       "affected_component": "shell input cleaning",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.611693",
+      "timestamp": "2026-01-03T08:36:37.843537",
       "traceback": null
     },
     {
-      "id": "ISSUE-0108",
+      "id": "ISSUE-0109",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "Can't extract code from markdown paste",
@@ -1915,11 +1933,11 @@
       "actual_behavior": "Includes markdown markers in attempted execution",
       "affected_component": "shell markdown handling",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.612826",
+      "timestamp": "2026-01-03T08:36:37.844691",
       "traceback": null
     },
     {
-      "id": "ISSUE-0109",
+      "id": "ISSUE-0110",
       "severity": "MEDIUM",
       "category": "UX",
       "title": "No progress indication for long operations",
@@ -1933,11 +1951,11 @@
       "actual_behavior": "Blank screen during processing",
       "affected_component": "shell UI feedback",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.613960",
+      "timestamp": "2026-01-03T08:36:37.845834",
       "traceback": null
     },
     {
-      "id": "ISSUE-0110",
+      "id": "ISSUE-0111",
       "severity": "LOW",
       "category": "UX",
       "title": "No step-by-step explanation mode",
@@ -1951,11 +1969,11 @@
       "actual_behavior": "Silent execution, user just sees final result",
       "affected_component": "verbose/learning mode",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.615617",
+      "timestamp": "2026-01-03T08:36:37.846981",
       "traceback": null
     },
     {
-      "id": "ISSUE-0111",
+      "id": "ISSUE-0112",
       "severity": "LOW",
       "category": "UX",
       "title": "Success not clearly celebrated",
@@ -1969,7 +1987,7 @@
       "actual_behavior": "Minimal or no success indication",
       "affected_component": "shell success feedback",
       "user_persona": "VIBE_CODER",
-      "timestamp": "2026-01-01T08:05:32.617514",
+      "timestamp": "2026-01-03T08:36:37.848114",
       "traceback": null
     }
   ]

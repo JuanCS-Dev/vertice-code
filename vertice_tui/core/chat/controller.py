@@ -33,7 +33,6 @@ from .types import (
     HistoryProtocol,
     GovernanceProtocol,
     AgentManagerProtocol,
-    PlanApprovalCallback,
 )
 
 logger = logging.getLogger(__name__)

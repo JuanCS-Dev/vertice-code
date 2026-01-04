@@ -24,7 +24,7 @@ import os
 import re
 import shlex
 import time
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict
 
 if TYPE_CHECKING:
     from vertice_cli.shell_main import InteractiveShell

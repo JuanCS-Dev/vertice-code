@@ -28,7 +28,7 @@ class ReviewerFormatter:
     async def format(data: Any, reasoning: str) -> AsyncIterator[str]:
         """Format code review report, delegating to appropriate sub-formatter."""
         report = data["report"]
-        yield f"## Code Review Report\n\n"
+        yield "## Code Review Report\n\n"
         yield f"*{reasoning}*\n\n"
 
         if isinstance(report, str):
@@ -80,7 +80,7 @@ class ReviewerFormatter:
 
         recommendations = report.get("recommendations", [])
         if recommendations:
-            yield f"\n### Recommendations\n\n"
+            yield "\n### Recommendations\n\n"
             for rec in recommendations[:10]:
                 yield f"- {rec}\n"
 

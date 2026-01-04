@@ -255,7 +255,7 @@ class EnforcementEngine:
         for callback in self._on_action_callbacks:
             try:
                 callback(action)
-            except Exception:
+            except (TypeError, ValueError, RuntimeError):
                 pass
 
     def process_classification(

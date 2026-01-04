@@ -382,7 +382,7 @@ class AgencyCoordinator:
             else:
                 yield f"[Coordinator] Unknown orchestrator: {decision.orchestrator}\n"
 
-        except Exception as e:
+        except (AttributeError, RuntimeError, asyncio.CancelledError, ValueError, TypeError) as e:
             logger.error(f"Execution error: {e}")
             yield f"\n[Coordinator] Error: {e}\n"
 
@@ -447,7 +447,7 @@ class AgencyCoordinator:
         try:
             async for chunk in orch.execute(request):
                 yield chunk
-        except Exception as e:
+        except (AttributeError, RuntimeError, asyncio.CancelledError, ValueError, TypeError) as e:
             yield f"[State] Error: {e}\n"
 
     async def _execute_squad(
@@ -486,7 +486,7 @@ class AgencyCoordinator:
             if result.metadata.get("error"):
                 yield f"[Squad] Error: {result.metadata['error']}\n"
 
-        except Exception as e:
+        except (AttributeError, RuntimeError, asyncio.CancelledError, ValueError, TypeError) as e:
             yield f"[Squad] Error: {e}\n"
 
     # =========================================================================

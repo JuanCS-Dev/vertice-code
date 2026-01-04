@@ -14,10 +14,8 @@ References:
 from __future__ import annotations
 
 import difflib
-from typing import Optional, List
 
 from textual.app import ComposeResult
-from textual.containers import Vertical, Horizontal
 from textual.widgets import Static
 from textual.widget import Widget
 

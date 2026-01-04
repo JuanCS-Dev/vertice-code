@@ -8,7 +8,7 @@ Single responsibility: Render workflow state to Rich components.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
+from typing import TYPE_CHECKING, Dict, List, Optional, Set
 
 from rich.console import Group
 from rich.panel import Panel
@@ -19,7 +19,7 @@ from rich.tree import Tree
 from .types import StepStatus, WorkflowStep
 
 if TYPE_CHECKING:
-    from .visualizer import WorkflowVisualizer
+    pass
 
 
 def get_status_style(status: StepStatus) -> str:

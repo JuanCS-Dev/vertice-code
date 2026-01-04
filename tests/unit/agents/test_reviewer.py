@@ -1904,7 +1904,8 @@ class TestLoadContext:
     @pytest.mark.asyncio
     async def test_load_context_handles_exceptions(self, reviewer):
         """Test _load_context handles file read exceptions."""
-        reviewer._execute_tool = AsyncMock(side_effect=Exception("Tool error"))
+        # Use OSError since that's what _load_context catches
+        reviewer._execute_tool = AsyncMock(side_effect=OSError("File not found"))
 
         task = AgentTask(request="Review", context={"files": ["/nonexistent/file.py"]})
 

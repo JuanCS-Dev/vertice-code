@@ -362,18 +362,18 @@ class ClaudeParityHandler:
                 providers = self.bridge.llm._vertice_client.get_available_providers()
                 current_provider = self.bridge.llm._vertice_client.current_provider or "auto"
 
-            msg = f"## 🤖 Model Selection\n\n"
+            msg = "## 🤖 Model Selection\n\n"
             msg += f"**Current Model:** `{current}`\n"
             msg += f"**Current Provider:** `{current_provider}`\n\n"
 
             if providers:
-                msg += f"**Available Providers:**\n"
+                msg += "**Available Providers:**\n"
                 for p in providers:
                     marker = "▸" if p == current_provider else "○"
                     msg += f"  {marker} `{p}`\n"
-                msg += f"\n**Switch provider:** `/model groq`, `/model cerebras`, etc.\n"
+                msg += "\n**Switch provider:** `/model groq`, `/model cerebras`, etc.\n"
 
-            msg += f"\n**Gemini Models:**\n"
+            msg += "\n**Gemini Models:**\n"
             for m in gemini_models:
                 marker = "▸" if m == current else "○"
                 msg += f"  {marker} `{m}`\n"

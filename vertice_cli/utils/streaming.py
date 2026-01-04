@@ -32,8 +32,6 @@ import asyncio
 from dataclasses import dataclass, field
 from typing import (
     AsyncIterator,
-    Awaitable,
-    Callable,
     Iterator,
     Optional,
     Protocol,

@@ -249,10 +249,10 @@ class OpenRouterProvider(EnhancedProviderBase):
             self._update_stats(UsageInfo(), self._calculate_cost(UsageInfo()), latency_ms, success=False)
             raise RuntimeError(f"OpenRouter API error {e.response.status_code}: {e.response.text[:200]}")
 
-        except Exception:
+        except (httpx.HTTPError, RuntimeError, OSError) as e:
             latency_ms = (time.perf_counter() - start_time) * 1000
             self._update_stats(UsageInfo(), self._calculate_cost(UsageInfo()), latency_ms, success=False)
-            raise
+            raise RuntimeError(f"OpenRouter request failed: {e}") from e
 
     async def stream_generate(
         self,
@@ -325,10 +325,10 @@ class OpenRouterProvider(EnhancedProviderBase):
                 latency_ms = (time.perf_counter() - start_time) * 1000
                 self._update_stats(estimated_usage, self._calculate_cost(estimated_usage), latency_ms, success=True)
 
-        except Exception:
+        except (httpx.HTTPError, RuntimeError, OSError) as e:
             latency_ms = (time.perf_counter() - start_time) * 1000
             self._update_stats(UsageInfo(), self._calculate_cost(UsageInfo()), latency_ms, success=False)
-            raise
+            raise RuntimeError(f"OpenRouter streaming failed: {e}") from e
 
     async def list_models(self) -> List[Dict[str, Any]]:
         """List available models from OpenRouter."""

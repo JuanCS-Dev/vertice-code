@@ -20,6 +20,17 @@ import re
 
 from .curriculum_agent import EvolutionTask, TaskDifficulty, TaskDomain
 
+# FIX E2E: Import skill registry to prevent hallucination
+try:
+    from prometheus.core.skill_registry import validate_skills, is_valid_skill, VALID_SKILLS
+except ImportError:
+    # Fallback if skill_registry not available
+    VALID_SKILLS = set()
+    def validate_skills(skills: List[str]) -> List[str]:
+        return skills
+    def is_valid_skill(skill: str) -> bool:
+        return True
+
 
 @dataclass
 class ExecutionResult:
@@ -298,8 +309,8 @@ try:
                 try:
                     result = obj({repr(test_input)})
                     break
-                except:
-                    pass
+                except Exception:
+                    continue
 
     expected = {repr(expected)}
     passed = result == expected
@@ -354,31 +365,71 @@ IMPROVED SOLUTION:"""
         solution: str,
         task: EvolutionTask,
     ) -> List[str]:
-        """Identify skills demonstrated in the solution."""
+        """Identify skills demonstrated in the solution.
+
+        FIX E2E: Now validates skills against the skill registry to prevent
+        hallucination of non-existent skills.
+        """
         demonstrated = set()
         solution_lower = solution.lower()
 
-        # Skill detection patterns
+        # Skill detection patterns - MAPPED TO VALID SKILLS from registry
+        # Each pattern maps to a canonical skill name from VALID_SKILLS
         skill_patterns = {
-            "planning": ["step", "plan", "first", "then", "finally", "approach"],
-            "code_generation": ["def ", "class ", "import ", "function", "```python"],
-            "analysis": ["analyze", "evaluate", "compare", "examine", "observe"],
-            "problem_solving": ["solve", "solution", "approach", "method", "strategy"],
-            "debugging": ["fix", "bug", "error", "issue", "debug"],
-            "optimization": ["optimize", "improve", "efficient", "performance"],
-            "reasoning": ["because", "therefore", "thus", "hence", "conclude"],
-            "math": ["calculate", "compute", "formula", "equation", "="],
-            "tool_use": ["tool", "use", "execute", "run", "call"],
+            # Python skills
+            "python_basics": ["def ", "class ", "import ", "```python"],
+            "python_functions": ["def ", "lambda", "return "],
+            "python_classes": ["class ", "self.", "__init__"],
+            "python_decorators": ["@", "decorator"],
+            "python_comprehensions": ["[", "for", "in", "]"],
+
+            # Async skills
+            "async_programming": ["async ", "await ", "asyncio"],
+            "async_basics": ["async def", "await"],
+
+            # Testing skills
+            "testing": ["test", "assert", "pytest", "unittest"],
+            "unit_testing": ["test_", "assert", "assertEqual"],
+            "mocking": ["mock", "patch", "MagicMock"],
+
+            # Debugging skills
+            "debugging": ["debug", "breakpoint", "pdb"],
+            "error_handling": ["try:", "except", "raise"],
+            "logging": ["logging", "log.", "logger"],
+
+            # Architecture skills
+            "design_patterns": ["factory", "singleton", "observer", "pattern"],
+            "architecture": ["module", "component", "layer"],
+            "refactoring": ["refactor", "extract", "rename"],
+
+            # Performance skills
+            "optimization": ["optimize", "cache", "efficient"],
+            "caching": ["cache", "memoize", "@lru_cache"],
+            "profiling": ["profile", "timeit", "cProfile"],
+
+            # Data skills
+            "data_processing": ["pandas", "numpy", "data"],
+            "sql": ["SELECT", "INSERT", "sql", "query"],
+
+            # Documentation
+            "documentation": ["docstring", '"""', "'''"],
+            "code_comments": ["#", "comment"],
         }
 
         for skill, keywords in skill_patterns.items():
-            if any(kw in solution_lower for kw in keywords):
+            if any(kw in solution_lower or kw in solution for kw in keywords):
+                # FIX E2E: Only add if it's a valid skill
+                if is_valid_skill(skill):
+                    demonstrated.add(skill)
+
+        # Add expected skills from task - BUT VALIDATE THEM
+        for skill in task.expected_skills:
+            if is_valid_skill(skill):
                 demonstrated.add(skill)
 
-        # Add expected skills from task
-        demonstrated.update(task.expected_skills)
-
-        return list(demonstrated)
+        # FIX E2E: Final validation - only return valid skills
+        validated = validate_skills(list(demonstrated))
+        return validated
 
     async def _learn_from_result(self, result: ExecutionResult):
         """Learn from task execution result."""

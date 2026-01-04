@@ -502,7 +502,7 @@ Output only the corrected code:
                     if arg.annotation:
                         try:
                             param_type = ast.unparse(arg.annotation)
-                        except:
+                        except (ValueError, TypeError):
                             param_type = "Any"
                     params[param_name] = {
                         "type": param_type,
@@ -519,15 +519,15 @@ Output only the corrected code:
                         params[param_names[param_idx]]["required"] = False
                         try:
                             params[param_names[param_idx]]["default"] = ast.unparse(default)
-                        except:
-                            pass
+                        except (ValueError, TypeError):
+                            params[param_names[param_idx]]["default"] = "..."
 
                 # Parse return type
                 return_type = "Any"
                 if node.returns:
                     try:
                         return_type = ast.unparse(node.returns)
-                    except:
+                    except (ValueError, TypeError):
                         return_type = "Any"
 
                 # Parse docstring

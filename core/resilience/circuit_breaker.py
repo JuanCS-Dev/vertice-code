@@ -105,6 +105,50 @@ class CircuitBreaker:
         """Check if circuit is half-open (testing recovery)."""
         return self._state == CircuitState.HALF_OPEN
 
+    @property
+    def retry_after(self) -> float:
+        """Time in seconds until circuit can be retried."""
+        if self._state != CircuitState.OPEN:
+            return 0.0
+        
+        reset_time = self.get_reset_time()
+        if not reset_time:
+            return 0.0
+            
+        delta = (reset_time - datetime.utcnow()).total_seconds()
+        return max(0.0, delta)
+
+    async def can_execute(self) -> bool:
+        """Check if execution is allowed.
+        
+        This method updates the state (e.g. timeout check) but does NOT
+        count as a request execution itself. It is a gatekeeper.
+        """
+        await self._check_state()
+        
+        if self._state == CircuitState.OPEN:
+            return False
+            
+        if self._state == CircuitState.HALF_OPEN:
+            # Only allow if we can be the probe
+            return not self._half_open_pending
+            
+        return True
+
+    async def record_success(self) -> None:
+        """Public alias for _record_success."""
+        await self._record_success()
+
+    async def record_failure(self, error: Any = None) -> None:
+        """Public alias for _record_failure."""
+        # Convert string error messages to Exception if needed
+        if isinstance(error, str):
+            error = Exception(error)
+        elif error is None:
+            error = Exception("Unknown error")
+            
+        await self._record_failure(error)
+
     def _count_recent_failures(self) -> int:
         """Count failures within the time window.
 

@@ -10,7 +10,7 @@ Implements Claude pattern + Constitutional Layer 2:
 import logging
 from typing import Any, List
 
-from .models import ThoughtPath, WorkflowStep
+from .models import ThoughtPath
 
 logger = logging.getLogger(__name__)
 

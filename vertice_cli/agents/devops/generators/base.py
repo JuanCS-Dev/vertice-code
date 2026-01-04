@@ -7,7 +7,6 @@ All generators implement this protocol for consistent behavior.
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
-from ..models import DeploymentPlan
 
 
 class BaseGenerator(ABC):

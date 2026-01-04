@@ -188,7 +188,7 @@ class SofiaAgent:
         for callback in self._on_counsel_callbacks:
             try:
                 callback(counsel)
-            except Exception:
+            except (TypeError, ValueError, RuntimeError):
                 pass
 
         self.state = SofiaState.LISTENING

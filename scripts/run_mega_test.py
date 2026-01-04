@@ -220,11 +220,11 @@ def main():
         tools = tb.list_tools()
         am = AgentManager(GeminiClient())
         agents = am.available_agents
-    except Exception:
+    except (ImportError, AttributeError, RuntimeError):
         tools = []
         agents = []
 
-    report = f"""# 🎯 PROVA CABAL - JuanCS Dev-Code Test Report
+    report = f"""# 🎯 PROVA CABAL - Vértice Framework Test Report
 
 **Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 **Python:** {sys.version.split()[0]}

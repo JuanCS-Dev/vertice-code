@@ -26,9 +26,9 @@ from vertice_cli.core.session_manager import (
 )
 
 # Legacy types kept for compatibility
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Optional
 
 
 @dataclass

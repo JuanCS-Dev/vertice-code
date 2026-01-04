@@ -20,7 +20,7 @@ from uuid import uuid4
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical
-from textual.widgets import Static, TabbedContent, TabPane, ContentSwitcher
+from textual.widgets import Static, TabbedContent, TabPane
 from textual.reactive import reactive
 from textual.widget import Widget
 from textual.message import Message

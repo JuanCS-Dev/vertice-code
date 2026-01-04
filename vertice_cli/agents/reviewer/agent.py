@@ -31,7 +31,6 @@ from vertice_cli.prompts.grounding import (
     get_analysis_grounding,
     INLINE_CODE_PRIORITY,
 )
-from vertice_cli.core.temperature_config import get_temperature
 
 from .types import (
     CodeIssue,

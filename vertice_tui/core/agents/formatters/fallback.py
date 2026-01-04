@@ -69,7 +69,7 @@ class FallbackFormatter:
     async def format(data: Any, reasoning: str) -> AsyncIterator[str]:
         """Format arbitrary data structures generically."""
         if isinstance(data, dict) and data:
-            yield f"## Result\n\n"
+            yield "## Result\n\n"
             for key, value in data.items():
                 if isinstance(value, list):
                     yield f"**{key}:**\n"

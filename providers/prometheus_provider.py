@@ -170,7 +170,7 @@ class PrometheusProvider:
                         with open(path, 'r', encoding='utf-8', errors='ignore') as f:
                             content = f.read()
                             injections.append(f"\n[FILE_CONTENT: {path_str}]\n```\n{content}\n```\n")
-            except Exception:
+            except (OSError, PermissionError, UnicodeDecodeError):
                 pass  # Ignore errors, best effort
 
         if injections:

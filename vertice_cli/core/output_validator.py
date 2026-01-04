@@ -198,7 +198,7 @@ def validate_agent_output(raw_output: str, schema: Type[T], *, strict: bool = Tr
         errors = e.errors()
         error_messages = [f"  - {err['loc']}: {err['msg']}" for err in errors]
         raise SchemaValidationError(
-            f"Schema validation failed:\n" + "\n".join(error_messages), raw_output, errors
+            "Schema validation failed:\n" + "\n".join(error_messages), raw_output, errors
         )
 
 

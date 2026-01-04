@@ -19,10 +19,9 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import threading
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from vertice_cli.tools.base import Tool, ToolCategory, ToolResult
 

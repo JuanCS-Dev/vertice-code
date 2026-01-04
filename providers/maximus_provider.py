@@ -329,16 +329,16 @@ class MaximusProvider:
         try:
             execution_log = format_execution_log(prompt, response)
             await self.tribunal_evaluate(execution_log)
-        except Exception:  # pylint: disable=broad-exception-caught
-            pass  # Best effort
+        except (httpx.HTTPError, asyncio.CancelledError, asyncio.TimeoutError):
+            pass
 
     async def _store_interaction(self, prompt: str, response: str) -> None:
         """Store interaction in memory (background)."""
         try:
             content = format_interaction_for_memory(prompt, response)
             await self.memory_store(content=content, memory_type="episodic")
-        except Exception:  # pylint: disable=broad-exception-caught
-            pass  # Best effort
+        except (httpx.HTTPError, asyncio.CancelledError, asyncio.TimeoutError):
+            pass
 
     # =========================================================================
     # STATUS AND HEALTH

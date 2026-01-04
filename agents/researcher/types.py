@@ -194,7 +194,7 @@ class DocumentationAgent(RetrievalAgent):
                         relevance_score=0.7,
                         metadata={"type": "local_doc"},
                     ))
-            except Exception:
+            except (FileNotFoundError, PermissionError, IOError, UnicodeDecodeError):
                 continue
 
         return results[:limit]
@@ -250,8 +250,7 @@ class WebSearchAgent(RetrievalAgent):
                             relevance_score=0.8 - (i * 0.1),
                             metadata={"type": "web_search"},
                         ))
-        except Exception:
-            # Return empty if web search fails (offline, etc)
+        except (httpx.HTTPError, ConnectionError, TimeoutError):
             pass
 
         return results[:limit]
@@ -316,7 +315,7 @@ class CodebaseAgent(RetrievalAgent):
                         relevance_score=0.9,
                         metadata={"type": "codebase", "language": "python"},
                     ))
-                except Exception:
+                except (FileNotFoundError, PermissionError, IOError, UnicodeDecodeError):
                     continue
 
         except subprocess.TimeoutExpired:

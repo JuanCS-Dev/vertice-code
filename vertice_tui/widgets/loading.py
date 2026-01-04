@@ -12,7 +12,7 @@ from typing import Optional
 
 from textual.app import ComposeResult
 from textual.containers import Vertical, Horizontal
-from textual.widgets import Static, LoadingIndicator, ProgressBar
+from textual.widgets import Static, ProgressBar
 from textual.reactive import reactive
 from textual.widget import Widget
 

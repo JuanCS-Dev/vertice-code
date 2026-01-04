@@ -75,7 +75,7 @@ class AuditLogger:
             try:
                 if not backend.write(entry):
                     self.failed_writes += 1
-            except Exception:
+            except (IOError, OSError, ValueError, RuntimeError):
                 self.failed_writes += 1
 
     def add_backend(self, backend: AuditBackend) -> None:

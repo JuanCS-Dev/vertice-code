@@ -12,11 +12,15 @@ Secure Python code execution environment inspired by E2B (e2b.dev):
 import os
 import sys
 import asyncio
+import logging
 import tempfile
+from collections import deque
 from dataclasses import dataclass, field
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Deque
 from datetime import datetime
 import json
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -73,7 +77,7 @@ class SandboxExecutor:
 
     def __init__(self, config: Optional[SandboxConfig] = None):
         self.config = config or SandboxConfig()
-        self.execution_history: List[SandboxResult] = []
+        self.execution_history: Deque[SandboxResult] = deque(maxlen=100)
 
     async def execute(
         self,

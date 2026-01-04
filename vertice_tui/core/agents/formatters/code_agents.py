@@ -29,7 +29,7 @@ class TestingFormatter:
     @staticmethod
     async def format(data: Any, reasoning: str) -> AsyncIterator[str]:
         """Format test cases with Python code blocks (limited to 10)."""
-        yield f"## Generated Test Cases\n\n"
+        yield "## Generated Test Cases\n\n"
 
         for tc in data["test_cases"][:10]:
             yield f"### {tc.get('name', 'test')}\n"
@@ -61,7 +61,7 @@ class RefactorerFormatter:
     @staticmethod
     async def format(data: Any, reasoning: str) -> AsyncIterator[str]:
         """Format refactoring analysis with typed suggestions."""
-        yield f"## Refactoring Analysis\n\n"
+        yield "## Refactoring Analysis\n\n"
         yield f"*{reasoning}*\n\n"
 
         analysis = data.get("analysis", "")
@@ -99,7 +99,7 @@ class DocumentationFormatter:
     @staticmethod
     async def format(data: Any, reasoning: str) -> AsyncIterator[str]:
         """Format documentation with optional module analysis (limited to 10)."""
-        yield f"## Generated Documentation\n\n"
+        yield "## Generated Documentation\n\n"
         yield f"*{reasoning}*\n\n"
 
         documentation = data.get("documentation", "")

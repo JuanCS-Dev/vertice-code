@@ -7,13 +7,12 @@ Rich-based panels for context visualization.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict
 
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-from .types import ContextWindow, FileRelevance
+from .types import ContextWindow
 
 
 def render_context_panel(
