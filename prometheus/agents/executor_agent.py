@@ -16,7 +16,10 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Any, Tuple
 from datetime import datetime
 import json
+import logging
 import re
+
+logger = logging.getLogger(__name__)
 
 from .curriculum_agent import EvolutionTask, TaskDifficulty, TaskDomain
 
@@ -295,6 +298,9 @@ Evaluate each criterion and provide scores in JSON:
             test_input = test.get("input", "")
             expected = test.get("expected_output", test.get("expected", ""))
 
+            # NOTE: The inner try/except with continue is intentional - it's a
+            # heuristic that tries each callable until one accepts the input.
+            # Failed attempts are expected behavior, not errors to log.
             test_code = f"""
 {code}
 
@@ -302,7 +308,7 @@ Evaluate each criterion and provide scores in JSON:
 try:
     result = main({repr(test_input)}) if 'main' in dir() else None
     if result is None:
-        # Try to find the main function
+        # Try to find the main function (silent continue is intentional)
         import sys
         for name, obj in list(globals().items()):
             if callable(obj) and not name.startswith('_'):
@@ -310,7 +316,7 @@ try:
                     result = obj({repr(test_input)})
                     break
                 except Exception:
-                    continue
+                    continue  # Expected - try next callable
 
     expected = {repr(expected)}
     passed = result == expected
@@ -489,8 +495,8 @@ IMPROVED SOLUTION:"""
         if json_match:
             try:
                 return json.loads(json_match.group())
-            except json.JSONDecodeError:
-                pass
+            except json.JSONDecodeError as e:
+                logger.debug(f"Failed to parse JSON from LLM response: {e}")
         return {}
 
     def get_stats(self) -> Dict[str, Any]:
