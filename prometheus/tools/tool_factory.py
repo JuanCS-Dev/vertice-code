@@ -20,6 +20,32 @@ import re
 from datetime import datetime
 
 
+FORBIDDEN_NAMES = {'exec', 'eval', 'compile', 'open', '__import__', 'getattr', 'setattr', 'delattr'}
+FORBIDDEN_MODULES = {'os', 'sys', 'subprocess', 'shutil', 'pathlib'}
+
+def _validate_code_ast(code: str) -> None:
+    """Validate code safety using AST analysis."""
+    try:
+        tree = ast.parse(code)
+    except SyntaxError as e:
+        raise ValueError(f"Invalid Python syntax: {e}")
+
+    for node in ast.walk(tree):
+        # Block imports
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name.split('.')[0] in FORBIDDEN_MODULES:
+                    raise ValueError(f"Forbidden import: {alias.name}")
+        if isinstance(node, ast.ImportFrom):
+            if node.module and node.module.split('.')[0] in FORBIDDEN_MODULES:
+                raise ValueError(f"Forbidden import: {node.module}")
+
+        # Block dangerous calls
+        if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Name) and node.func.id in FORBIDDEN_NAMES:
+                raise ValueError(f"Forbidden function: {node.func.id}")
+
+
 @dataclass
 class ToolSpec:
     """Specification of a generated tool."""
@@ -408,6 +434,9 @@ Output only the corrected code:
             spec = self.generated_tools[name]
             spec.usage_count += 1
             spec.last_used = datetime.now()
+
+            # Validate code before execution
+            _validate_code_ast(spec.code)
 
             # Compile and return function
             exec_globals = {}
