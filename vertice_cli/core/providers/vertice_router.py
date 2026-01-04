@@ -11,6 +11,7 @@ Routes requests to the optimal LLM provider based on:
 
 from __future__ import annotations
 
+import asyncio
 from typing import Dict, List, Optional, AsyncGenerator, Protocol
 from dataclasses import dataclass, field
 from enum import Enum
@@ -210,9 +211,9 @@ class VerticeRouter:
                     logger.info(f"✅ Provider {name} initialized")
                 else:
                     logger.warning(f"⚠️ Provider {name} not available (missing API key)")
-            except Exception as e:
+            except (ImportError, AttributeError, RuntimeError, ValueError, ConnectionError, asyncio.TimeoutError) as e:
                 logger.error(f"❌ Failed to initialize {name}: {e}")
-
+                continue
         self._initialized = True
         logger.info(f"Vertice Router initialized with {len(self._providers)} providers")
 
@@ -329,7 +330,7 @@ class VerticeRouter:
             result = await provider.generate(messages, **kwargs)
             status.record_request()
             return result
-        except Exception as e:
+        except (RuntimeError, ValueError, ConnectionError, asyncio.TimeoutError) as e:
             status.record_error(str(e))
             logger.warning(f"Provider {decision.provider_name} failed: {e}")
 
@@ -340,7 +341,7 @@ class VerticeRouter:
                     result = await fallback.generate(messages, **kwargs)
                     self._status[fallback_name].record_request()
                     return result
-                except Exception as fe:
+                except (RuntimeError, ValueError, ConnectionError, asyncio.TimeoutError) as fe:
                     self._status[fallback_name].record_error(str(fe))
                     continue
 
@@ -380,7 +381,7 @@ class VerticeRouter:
             ):
                 yield chunk
             status.record_request()
-        except Exception as e:
+        except (RuntimeError, ValueError, ConnectionError, asyncio.TimeoutError) as e:
             status.record_error(str(e))
             logger.warning(f"Provider {decision.provider_name} failed: {e}")
 
@@ -396,7 +397,7 @@ class VerticeRouter:
                         yield chunk
                     self._status[fallback_name].record_request()
                     return
-                except Exception:
+                except (ConnectionError, asyncio.TimeoutError, RuntimeError, ValueError):
                     continue
 
             yield f"\n[Error: All providers failed - {e}]"

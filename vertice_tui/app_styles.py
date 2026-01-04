@@ -58,7 +58,7 @@ Footer {
     min-height: 3;
     max-height: 10;
     border: round $primary;
-    background: $surface;
+    background: $background;
     padding: 0 1;
     margin: 0 1;
     transition: border 150ms;

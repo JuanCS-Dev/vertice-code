@@ -12,10 +12,15 @@ Based on the Orchestrator-Worker pattern from Anthropic:
 https://www.anthropic.com/engineering/multi-agent-research-system
 """
 
+from collections import deque
 from dataclasses import dataclass, field
-from typing import AsyncIterator, List, Dict, Optional, Any
+from typing import AsyncIterator, List, Dict, Optional, Any, Deque
 from datetime import datetime
+import asyncio
+import logging
 import os
+
+logger = logging.getLogger(__name__)
 
 from .llm_client import GeminiClient
 from .world_model import WorldModel, ActionType, WorldState
@@ -104,8 +109,8 @@ class PrometheusOrchestrator:
         # Register builtin tools
         self._register_builtin_tools()
 
-        # Execution history
-        self.execution_history: List[ExecutionResult] = []
+        # Execution history (bounded to prevent memory leaks)
+        self.execution_history: Deque[ExecutionResult] = deque(maxlen=500)
 
         # State with thread-safety (Semaphore prevents concurrent execution)
         self._is_executing = False

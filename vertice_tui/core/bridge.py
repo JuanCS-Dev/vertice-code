@@ -136,6 +136,9 @@ class Bridge(ProtocolBridgeMixin):
         # A2A manager (Phase 6.3)
         self._a2a_manager = A2AManager()
 
+        # PROMETHEUS state (Phase 7: Meta-Agent Integration)
+        self._provider_mode: str = "auto"  # Synced with _provider_manager.mode
+
         # Chat controller
         self._chat_controller = ChatController(
             tools=self.tools,
@@ -165,6 +168,22 @@ class Bridge(ProtocolBridgeMixin):
         return (f"{llm_status} | {self.governance.get_status_emoji()} | "
                 f"{ELP['agent']} {len(self.agents.available_agents)} agents | "
                 f"{ELP['tool']} {self.tools.get_tool_count()} tools")
+
+    @property
+    def _prometheus_client(self):
+        """Get Prometheus client from provider manager (for backward compatibility)."""
+        return self._provider_manager._prometheus
+
+    @property
+    def prometheus_mode(self) -> bool:
+        """Check if PROMETHEUS mode is enabled."""
+        return self._provider_manager.mode == "prometheus"
+
+    @prometheus_mode.setter
+    def prometheus_mode(self, enabled: bool) -> None:
+        """Enable or disable PROMETHEUS mode."""
+        self._provider_manager.mode = "prometheus" if enabled else "auto"
+        self._provider_mode = self._provider_manager.mode
 
     # =========================================================================
     # CHAT
@@ -451,24 +470,16 @@ Working directory: {os.getcwd()}"""
     # Project init
     def init_project(self) -> Dict[str, Any]:
         import datetime
-        juancs_content = f"""# JUANCS.md - Project Context
+        vertice_content = f"""# VERTICE.md - Project Context
 
-Generated: {datetime.datetime.now().isoformat()}
-
-## Project Overview
-This file helps JuanCS Dev-Code understand your project context.
-
-## Key Files
-<!-- Add important files here -->
-
-## Architecture
-<!-- Describe your architecture -->
+This file helps Vértice understand your project context.
+Define your project rules, core technologies, and coding standards here.
 """
-        juancs_path = Path.cwd() / "JUANCS.md"
-        if not juancs_path.exists():
-            juancs_path.write_text(juancs_content)
-            return {"summary": "Created JUANCS.md - edit to add project context"}
-        return {"summary": "JUANCS.md already exists"}
+        vertice_path = Path.cwd() / "VERTICE.md"
+        if not vertice_path.exists():
+            vertice_path.write_text(vertice_content)
+            return {"summary": "Created VERTICE.md - edit to add project context"}
+        return {"summary": "VERTICE.md already exists"}
 
 
 # =============================================================================

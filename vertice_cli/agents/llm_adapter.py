@@ -11,6 +11,7 @@ Pattern: Adapter + Decorator
 Risk: ZERO (only adds, never breaks)
 """
 
+import asyncio
 import logging
 from typing import Any, Dict, Optional, AsyncIterator
 

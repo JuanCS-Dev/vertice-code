@@ -42,9 +42,9 @@ from vertice_tui.themes import (
 from vertice_tui.app_styles import APP_CSS, detect_language
 
 
-class QwenApp(App):
+class VerticeApp(App):
     """
-    JuanCS Dev-Code - The Minimal Masterpiece.
+    Vértice - Sovereign Intelligence & Tactical Execution.
 
     A beautiful, fast, minimal TUI for AI-powered development.
     60fps rendering, security-first design, extensible core.
@@ -54,16 +54,18 @@ class QwenApp(App):
     SUB_TITLE = "Agent Agency"
     LAYERS = ["base", "autocomplete"]
     CSS = APP_CSS
+    ALLOW_SELECT = True  # Enable mouse text selection (Shift+drag for native selection)
 
     BINDINGS: ClassVar[list[Binding]] = [
         Binding("ctrl+c", "quit", "Exit", show=True),
         Binding("ctrl+l", "clear", "Clear", show=True),
         Binding("ctrl+k", "command_palette", "Commands", show=True),
         Binding("ctrl+f", "search", "Search", show=True),
-        Binding("ctrl+p", "show_help", "Help", show=True),
+        Binding("ctrl+h", "show_help", "Help", show=True),
         Binding("ctrl+t", "toggle_theme", "Theme", show=True),
         Binding("ctrl+d", "toggle_dashboard", "Tokens", show=True),
         Binding("ctrl+m", "toggle_tribunal", "Tribunal", show=True),
+        Binding("ctrl+p", "toggle_prometheus", "Prometheus", show=True),
         Binding("escape", "cancel", "Cancel", show=False),
         # Scroll bindings for ResponseView (PageUp/PageDown always work)
         Binding("pageup", "scroll_up_page", "Page Up", show=False),
@@ -131,6 +133,13 @@ class QwenApp(App):
         self.register_theme(THEME_DARK)
         self.theme = ThemeManager.get_theme_preference()
 
+        # Restore PROMETHEUS mode preference
+        prometheus_enabled = ThemeManager.get_prometheus_preference()
+        if prometheus_enabled:
+            status = self.query_one(StatusBar)
+            status.prometheus_mode = True
+            self.bridge.prometheus_mode = True
+
         response = self.query_one("#response", ResponseView)
         response.add_banner()
 
@@ -150,7 +159,7 @@ class QwenApp(App):
             current_model = getattr(self.bridge, "model_name", "unknown")
             limit = model_limits.get(current_model, default_limit)
             dashboard.update_usage(0, limit)
-        except Exception:
+        except (AttributeError, KeyError):
             dashboard.update_usage(0, default_limit)
 
         status = self.query_one(StatusBar)
@@ -252,7 +261,7 @@ class QwenApp(App):
                     autocomplete.show_completions(completions)
                 else:
                     autocomplete.hide()
-            except Exception:
+            except (AttributeError, TypeError, ValueError):
                 autocomplete.hide()
         elif len(text) >= 2:
             # Regular text - need at least 2 chars
@@ -262,7 +271,7 @@ class QwenApp(App):
                     autocomplete.show_completions(completions)
                 else:
                     autocomplete.hide()
-            except Exception:
+            except (AttributeError, TypeError, ValueError):
                 autocomplete.hide()
         else:
             autocomplete.hide()
@@ -439,6 +448,34 @@ class QwenApp(App):
         response = self.query_one("#response", ResponseView)
         response.add_system_message(mode_text)
 
+    def action_toggle_prometheus(self) -> None:
+        """Toggle PROMETHEUS mode - self-evolving meta-agent."""
+        status = self.query_one(StatusBar)
+        status.prometheus_mode = not status.prometheus_mode
+
+        # Update bridge
+        self.bridge.prometheus_mode = status.prometheus_mode
+
+        # Persist preference
+        ThemeManager.save_prometheus_preference(status.prometheus_mode)
+
+        # User feedback
+        response = self.query_one("#response", ResponseView)
+        if status.prometheus_mode:
+            mode_text = (
+                "**🔥 PROMETHEUS MODE ENABLED**\n\n"
+                "Self-evolving meta-agent activated:\n"
+                "- 🌐 World Model simulation (SimuRA)\n"
+                "- 🧠 6-type memory system (MIRIX)\n"
+                "- 🔄 Self-reflection engine (Reflexion)\n"
+                "- 📈 Co-evolution learning (Agent0)\n\n"
+                "*Complex tasks will use enhanced reasoning.*"
+            )
+        else:
+            mode_text = "**PROMETHEUS MODE DISABLED**\n\nReturned to standard mode."
+
+        response.add_system_message(mode_text)
+
     def action_command_palette(self) -> None:
         """Open command palette (Ctrl+K)."""
         from vertice_tui.screens.command_palette import CommandPaletteScreen
@@ -476,9 +513,13 @@ class QwenApp(App):
 
 
 def main() -> None:
-    """Run the QWEN CLI application."""
-    app = QwenApp()
-    app.run(mouse=True)  # Enable mouse for scroll support
+    """Run the Vértice CLI application."""
+    app = VerticeApp()
+    app.run()
+
+
+# Backward compatibility alias
+QwenApp = VerticeApp
 
 
 if __name__ == "__main__":

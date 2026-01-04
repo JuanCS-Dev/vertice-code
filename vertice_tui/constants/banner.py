@@ -14,8 +14,8 @@ BANNER = """
 [bold #93C5FD] ╚████╔╝ ███████╗██║  ██║   ██║   ██║╚██████╗███████╗[/bold #93C5FD]
 [bold #93C5FD]  ╚═══╝  ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚═╝ ╚═════╝╚══════╝[/bold #93C5FD]
 
-[bold #F1F5F9]Agent Agency[/bold #F1F5F9] [dim #64748B]• Enterprise Multi-LLM v0.8 • by JuanCS-Dev[/dim #64748B]
+[bold #22D3EE]Agent Agency[/bold #22D3EE] [dim #94A3B8]• Sovereign Intelligence v0.9.0 • Tactical Execution[/dim #94A3B8]
 """
 
 # Compact version for smaller terminals
-BANNER_COMPACT = """[bold #22D3EE]VERTICE[/bold #22D3EE] [dim #64748B]Agent Agency v0.8[/dim #64748B]"""
+BANNER_COMPACT = """[bold #22D3EE]VERTICE[/bold #22D3EE] [dim #94A3B8]Sovereign Intelligence v0.9.0[/dim #94A3B8]"""
