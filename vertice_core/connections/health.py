@@ -83,8 +83,7 @@ class HealthCheck:
             else:
                 loop = asyncio.get_event_loop()
                 await asyncio.wait_for(
-                    loop.run_in_executor(None, self.checker),
-                    timeout=self.timeout
+                    loop.run_in_executor(None, self.checker), timeout=self.timeout
                 )
 
             latency_ms = (time.time() - start_time) * 1000
@@ -98,10 +97,7 @@ class HealthCheck:
                 status = HealthStatus.DEGRADED
 
             self._last_result = ServiceHealth(
-                name=self.name,
-                status=status,
-                latency_ms=latency_ms,
-                message="Check passed"
+                name=self.name, status=status, latency_ms=latency_ms, message="Check passed"
             )
 
         except asyncio.TimeoutError:
@@ -114,7 +110,7 @@ class HealthCheck:
                 name=self.name,
                 status=status,
                 latency_ms=self.timeout * 1000,
-                message=f"Check timed out after {self.timeout}s"
+                message=f"Check timed out after {self.timeout}s",
             )
 
         except Exception as e:
@@ -128,7 +124,7 @@ class HealthCheck:
                 name=self.name,
                 status=status,
                 latency_ms=latency_ms,
-                message=f"Check failed: {str(e)}"
+                message=f"Check failed: {str(e)}",
             )
 
         return self._last_result
@@ -183,9 +179,7 @@ class HealthMonitor:
         """Run a single health check."""
         if name not in self._checks:
             return ServiceHealth(
-                name=name,
-                status=HealthStatus.UNKNOWN,
-                message="Health check not registered"
+                name=name, status=HealthStatus.UNKNOWN, message="Health check not registered"
             )
 
         result = await self._checks[name].run()
@@ -194,10 +188,7 @@ class HealthMonitor:
 
     async def check_all(self) -> Dict[str, ServiceHealth]:
         """Run all health checks concurrently."""
-        tasks = [
-            self.check_one(name)
-            for name in self._checks
-        ]
+        tasks = [self.check_one(name) for name in self._checks]
         await asyncio.gather(*tasks)
         return self._results.copy()
 
@@ -245,11 +236,11 @@ class HealthMonitor:
         if name:
             if name in self._results:
                 return {name: self._results[name]}
-            return {name: ServiceHealth(
-                name=name,
-                status=HealthStatus.UNKNOWN,
-                message="No health data available"
-            )}
+            return {
+                name: ServiceHealth(
+                    name=name, status=HealthStatus.UNKNOWN, message="No health data available"
+                )
+            }
         return self._results.copy()
 
     @property
@@ -287,9 +278,9 @@ def get_health_monitor() -> HealthMonitor:
 
 
 __all__ = [
-    'HealthCheck',
-    'HealthStatus',
-    'ServiceHealth',
-    'HealthMonitor',
-    'get_health_monitor',
+    "HealthCheck",
+    "HealthStatus",
+    "ServiceHealth",
+    "HealthMonitor",
+    "get_health_monitor",
 ]

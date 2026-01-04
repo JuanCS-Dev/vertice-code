@@ -103,8 +103,7 @@ class ExecutionMonitor:
         """
         self.events.append(event)
         logger.debug(
-            f"[{event.timestamp}] {event.event_type}: "
-            f"{event.step_id} ({event.agent_role})"
+            f"[{event.timestamp}] {event.event_type}: " f"{event.step_id} ({event.agent_role})"
         )
 
     def get_metrics(self) -> Dict[str, Any]:

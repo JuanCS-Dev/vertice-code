@@ -20,180 +20,22 @@ Soli Deo Gloria
 
 from __future__ import annotations
 
-import hashlib
-import json
 import logging
 import time
 import uuid
-from dataclasses import dataclass, field
-from enum import Enum
-from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, TypeVar
+from typing import Any, Callable, Dict, List, Optional, Tuple
+
+from .types import (
+    ContextState,
+    Decision,
+    DecisionType,
+    ErrorContext,
+    ExecutionResult,
+    FileContext,
+    ThoughtSignature,
+)
 
 logger = logging.getLogger(__name__)
-
-
-class ContextState(str, Enum):
-    """State of the context."""
-
-    ACTIVE = "active"
-    COMPACTING = "compacting"
-    STALE = "stale"
-    PERSISTED = "persisted"
-
-
-class DecisionType(str, Enum):
-    """Types of decisions made during execution."""
-
-    ROUTING = "routing"  # Which agent to use
-    PLANNING = "planning"  # How to approach task
-    EXECUTION = "execution"  # What action to take
-    APPROVAL = "approval"  # Human approval
-    ROLLBACK = "rollback"  # Undo decision
-    HANDOFF = "handoff"  # Transfer to another agent
-
-
-@dataclass
-class Decision:
-    """
-    A decision made during execution.
-
-    Used for explainability and rollback.
-    """
-
-    decision_id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
-    timestamp: float = field(default_factory=time.time)
-    decision_type: DecisionType = DecisionType.EXECUTION
-    agent_id: str = ""
-    description: str = ""
-    reasoning: str = ""
-    alternatives_considered: List[str] = field(default_factory=list)
-    confidence: float = 1.0
-    outcome: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Serialize to dictionary."""
-        return {
-            "id": self.decision_id,
-            "type": self.decision_type.value,
-            "agent": self.agent_id,
-            "description": self.description,
-            "reasoning": self.reasoning[:200] if self.reasoning else "",
-            "confidence": self.confidence,
-            "outcome": self.outcome,
-        }
-
-
-@dataclass
-class ErrorContext:
-    """
-    Context about an error encountered during execution.
-
-    Used for self-correction and debugging.
-    """
-
-    error_id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
-    timestamp: float = field(default_factory=time.time)
-    error_type: str = ""
-    error_message: str = ""
-    agent_id: str = ""
-    step_id: Optional[str] = None
-    stack_trace: Optional[str] = None
-    recovery_attempted: bool = False
-    recovery_successful: bool = False
-    metadata: Dict[str, Any] = field(default_factory=dict)
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Serialize to dictionary."""
-        return {
-            "id": self.error_id,
-            "type": self.error_type,
-            "message": self.error_message[:200],
-            "agent": self.agent_id,
-            "step": self.step_id,
-            "recovered": self.recovery_successful,
-        }
-
-
-@dataclass
-class FileContext:
-    """
-    File added to context with metadata.
-
-    Tracks which files are relevant to current task.
-    """
-
-    filepath: str
-    content: str = ""
-    start_line: int = 1
-    end_line: int = 0
-    tokens: int = 0
-    relevance_score: float = 1.0
-    added_by: str = ""  # Agent or user
-    added_at: float = field(default_factory=time.time)
-    language: str = ""
-
-    def __post_init__(self):
-        """Calculate tokens if not provided."""
-        if self.tokens == 0 and self.content:
-            self.tokens = len(self.content) // 4
-        if self.end_line == 0 and self.content:
-            self.end_line = self.content.count("\n") + 1
-        if not self.language:
-            ext = Path(self.filepath).suffix
-            lang_map = {
-                ".py": "python", ".js": "javascript", ".ts": "typescript",
-                ".go": "go", ".rs": "rust", ".java": "java",
-            }
-            self.language = lang_map.get(ext, "text")
-
-
-@dataclass
-class ExecutionResult:
-    """Result of executing a step."""
-
-    step_id: str
-    success: bool
-    output: str = ""
-    error: Optional[str] = None
-    duration_ms: float = 0.0
-    files_modified: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-
-
-@dataclass
-class ThoughtSignature:
-    """
-    Thought signature for maintaining reasoning chain.
-
-    Inspired by Gemini 3's encrypted thought signatures.
-    """
-
-    signature_id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
-    timestamp: float = field(default_factory=time.time)
-    agent_id: str = ""
-    thought_hash: str = ""  # Hash of reasoning state
-    key_insights: List[str] = field(default_factory=list)
-    next_action: str = ""
-    confidence: float = 1.0
-
-    @classmethod
-    def from_reasoning(
-        cls,
-        agent_id: str,
-        reasoning: str,
-        insights: List[str],
-        next_action: str,
-    ) -> "ThoughtSignature":
-        """Create thought signature from reasoning."""
-        thought_hash = hashlib.sha256(reasoning.encode()).hexdigest()[:16]
-        return cls(
-            agent_id=agent_id,
-            thought_hash=thought_hash,
-            key_insights=insights[:5],  # Keep top 5 insights
-            next_action=next_action,
-        )
 
 
 class UnifiedContext:
@@ -372,11 +214,13 @@ class UnifiedContext:
 
     def add_message(self, role: str, content: str) -> None:
         """Add message to history."""
-        self._messages.append({
-            "role": role,
-            "content": content,
-            "timestamp": time.time(),
-        })
+        self._messages.append(
+            {
+                "role": role,
+                "content": content,
+                "timestamp": time.time(),
+            }
+        )
         self._token_usage += len(content) // 4
 
         # Check if compaction needed
@@ -539,7 +383,9 @@ class UnifiedContext:
 
             for msg in old_messages:
                 # Summarize role and key content
-                content = msg["content"][:100] + "..." if len(msg["content"]) > 100 else msg["content"]
+                content = (
+                    msg["content"][:100] + "..." if len(msg["content"]) > 100 else msg["content"]
+                )
                 summary_parts.append(f"[{msg['role']}]: {content}")
 
             self._summary = "\n".join(summary_parts[-20:])  # Keep last 20 summary entries
@@ -576,10 +422,7 @@ class UnifiedContext:
 
         self._token_usage = tokens
 
-    def compact(
-        self,
-        summarizer: Optional[Callable[[str], str]] = None
-    ) -> str:
+    def compact(self, summarizer: Optional[Callable[[str], str]] = None) -> str:
         """
         Manually trigger compaction with optional LLM summarizer.
 
@@ -600,113 +443,27 @@ class UnifiedContext:
         return self._summary
 
     # =========================================================================
-    # Serialization
+    # Serialization (delegated to serialization module)
     # =========================================================================
 
     def to_prompt_context(self) -> str:
-        """
-        Generate context string for LLM prompt.
+        """Generate context string for LLM prompt."""
+        from .serialization import generate_prompt_context
 
-        This is the main output used when calling LLMs.
-        """
-        parts = []
-
-        # User request
-        if self.user_request:
-            parts.append(f"## User Request\n{self.user_request}")
-
-        if self.user_intent:
-            parts.append(f"## Intent\n{self.user_intent}")
-
-        # Summary from compaction
-        if self._summary:
-            parts.append(f"## Previous Context (Summary)\n{self._summary}")
-
-        # Codebase awareness
-        if self.codebase_summary:
-            parts.append(f"## Codebase Context\n{self.codebase_summary}")
-
-        # Files in context
-        if self._files:
-            file_parts = ["## Files in Context"]
-            for filepath, file_ctx in self._files.items():
-                file_parts.append(f"\n### {filepath}")
-                file_parts.append(f"```{file_ctx.language}")
-                file_parts.append(file_ctx.content)
-                file_parts.append("```")
-            parts.append("\n".join(file_parts))
-
-        # Context variables (non-sensitive)
-        safe_vars = {k: v for k, v in self._variables.items()
-                     if not any(s in k.lower() for s in ["key", "secret", "token", "password"])}
-        if safe_vars:
-            parts.append(f"## Context Variables\n{json.dumps(safe_vars, indent=2)}")
-
-        # Recent decisions
-        if self._decisions:
-            recent = self._decisions[-5:]
-            decision_str = "\n".join(
-                f"- [{d.decision_type.value}] {d.description}" for d in recent
-            )
-            parts.append(f"## Recent Decisions\n{decision_str}")
-
-        # Thought chain
-        if self._thought_chain:
-            recent = self._thought_chain[-3:]
-            thought_str = "\n".join(
-                f"- {t.key_insights[0] if t.key_insights else 'N/A'} → {t.next_action}"
-                for t in recent
-            )
-            parts.append(f"## Reasoning Chain\n{thought_str}")
-
-        # Errors
-        if self._errors:
-            recent_errors = self._errors[-3:]
-            error_str = "\n".join(
-                f"- [{e.error_type}] {e.error_message[:100]}" for e in recent_errors
-            )
-            parts.append(f"## Recent Errors\n{error_str}")
-
-        return "\n\n".join(parts)
+        return generate_prompt_context(self)
 
     def to_dict(self) -> Dict[str, Any]:
         """Serialize entire context to dictionary."""
-        return {
-            "session_id": self.session_id,
-            "created_at": self.created_at,
-            "state": self.state.value,
-            "user_request": self.user_request,
-            "user_intent": self.user_intent,
-            "variables": self._variables,
-            "summary": self._summary,
-            "messages": self._messages,
-            "files": {fp: {"tokens": f.tokens, "lines": f"{f.start_line}-{f.end_line}"}
-                      for fp, f in self._files.items()},
-            "current_agent": self.current_agent,
-            "current_plan_id": self.current_plan_id,
-            "completed_steps": len(self.completed_steps),
-            "decisions": [d.to_dict() for d in self._decisions[-10:]],
-            "errors": [e.to_dict() for e in self._errors[-5:]],
-            "token_usage": self._token_usage,
-            "max_tokens": self.max_tokens,
-        }
+        from .serialization import context_to_dict
+
+        return context_to_dict(self)
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "UnifiedContext":
         """Deserialize from dictionary."""
-        ctx = cls(
-            user_request=data.get("user_request", ""),
-            max_tokens=data.get("max_tokens", cls.DEFAULT_MAX_TOKENS),
-            session_id=data.get("session_id"),
-        )
-        ctx.created_at = data.get("created_at", time.time())
-        ctx.user_intent = data.get("user_intent", "")
-        ctx._variables = data.get("variables", {})
-        ctx._summary = data.get("summary", "")
-        ctx._messages = data.get("messages", [])
-        ctx.current_agent = data.get("current_agent")
-        ctx.current_plan_id = data.get("current_plan_id")
-        return ctx
+        from .serialization import context_from_dict
+
+        return context_from_dict(cls, data)
 
     # =========================================================================
     # Utility Methods
@@ -745,41 +502,4 @@ class UnifiedContext:
         self.state = ContextState.ACTIVE
 
 
-# Singleton for current session
-_current_context: Optional[UnifiedContext] = None
-
-
-def get_context() -> UnifiedContext:
-    """Get or create the current unified context."""
-    global _current_context
-    if _current_context is None:
-        _current_context = UnifiedContext()
-    return _current_context
-
-
-def set_context(ctx: UnifiedContext) -> None:
-    """Set the current unified context."""
-    global _current_context
-    _current_context = ctx
-
-
-def new_context(user_request: str = "", **kwargs) -> UnifiedContext:
-    """Create and set a new unified context."""
-    global _current_context
-    _current_context = UnifiedContext(user_request=user_request, **kwargs)
-    return _current_context
-
-
-__all__ = [
-    "ContextState",
-    "DecisionType",
-    "Decision",
-    "ErrorContext",
-    "FileContext",
-    "ExecutionResult",
-    "ThoughtSignature",
-    "UnifiedContext",
-    "get_context",
-    "set_context",
-    "new_context",
-]
+__all__ = ["UnifiedContext"]

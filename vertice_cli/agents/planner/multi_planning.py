@@ -63,7 +63,7 @@ async def generate_multi_plan(
     strategies = strategies or [
         PlanStrategy.STANDARD,
         PlanStrategy.ACCELERATOR,
-        PlanStrategy.LATERAL
+        PlanStrategy.LATERAL,
     ]
 
     # Gather context once
@@ -102,7 +102,7 @@ async def generate_multi_plan(
         recommended_plan=recommended,
         recommendation_reasoning=reasoning,
         comparison_summary=comparison,
-        generation_time_ms=generation_time
+        generation_time_ms=generation_time,
     )
 
 
@@ -139,7 +139,7 @@ Focus on:
 - Novel use of tools or patterns
 - Potential shortcuts or innovations
 - "What if we approached this completely differently?"
-"""
+""",
     }
 
     prompt = f"""You are generating a {strategy.value.upper()} execution plan.
@@ -201,14 +201,11 @@ RESPOND WITH PURE JSON ONLY."""
         p_quality=float(data.get("p_quality", 0.7)),
         pros=data.get("pros", []),
         cons=data.get("cons", []),
-        best_for=data.get("best_for", "")
+        best_for=data.get("best_for", ""),
     )
 
 
-def create_fallback_plan(
-    task_request: str,
-    strategy: PlanStrategy
-) -> AlternativePlan:
+def create_fallback_plan(task_request: str, strategy: PlanStrategy) -> AlternativePlan:
     """Create a basic fallback plan when LLM generation fails."""
     return AlternativePlan(
         strategy=strategy,
@@ -222,7 +219,7 @@ def create_fallback_plan(
                     "action": "Analyze and plan",
                     "objective": "Understand requirements",
                     "definition_of_done": "Plan documented",
-                    "cost": 2.0
+                    "cost": 2.0,
                 },
                 {
                     "id": "step-2",
@@ -231,7 +228,7 @@ def create_fallback_plan(
                     "objective": "Write code",
                     "definition_of_done": "Code compiles",
                     "dependencies": ["step-1"],
-                    "cost": 5.0
+                    "cost": 5.0,
                 },
                 {
                     "id": "step-3",
@@ -240,8 +237,8 @@ def create_fallback_plan(
                     "objective": "Verify correctness",
                     "definition_of_done": "Tests pass",
                     "dependencies": ["step-2"],
-                    "cost": 3.0
-                }
+                    "cost": 3.0,
+                },
             ]
         },
         p_success=0.7,
@@ -250,7 +247,7 @@ def create_fallback_plan(
         p_quality=0.6,
         pros=["Simple and predictable", "Easy to follow"],
         cons=["May not be optimal", "No parallelization"],
-        best_for="When other approaches fail or for simple tasks"
+        best_for="When other approaches fail or for simple tasks",
     )
 
 
@@ -317,7 +314,7 @@ async def execute_with_multi_plan(
     agent: Any,
     task: Any,
     auto_select: bool = True,
-    preferred_strategy: Optional[PlanStrategy] = None
+    preferred_strategy: Optional[PlanStrategy] = None,
 ) -> Any:
     """
     Execute planning with multi-plan generation.
@@ -356,11 +353,11 @@ async def execute_with_multi_plan(
             data={
                 "multi_plan": multi_result.model_dump(),
                 "requires_selection": True,
-                "markdown": multi_result.to_markdown()
+                "markdown": multi_result.to_markdown(),
             },
             reasoning=f"Generated {len(multi_result.plans)} alternative plans. "
-                      f"Recommended: {multi_result.recommended_plan.value.upper()}",
-            metadata={"mode": "multi_plan_selection"}
+            f"Recommended: {multi_result.recommended_plan.value.upper()}",
+            metadata={"mode": "multi_plan_selection"},
         )
 
     # Execute the selected plan
@@ -373,28 +370,26 @@ async def execute_with_multi_plan(
                 "selected_strategy": selected.strategy.value,
                 "probabilities": selected.probabilities.to_display(),
                 "multi_plan_summary": multi_result.comparison_summary,
-                "sops": plan_data.get("sops", [])
+                "sops": plan_data.get("sops", []),
             },
             reasoning=f"Executing {selected.strategy.value.upper()} plan: {selected.name}. "
-                      f"{multi_result.recommendation_reasoning}",
+            f"{multi_result.recommendation_reasoning}",
             metadata={
                 "mode": "multi_plan_execution",
                 "strategy": selected.strategy.value,
-                "overall_score": selected.overall_score
-            }
+                "overall_score": selected.overall_score,
+            },
         )
 
     return AgentResponse(
         success=False,
         error="No plan could be generated",
-        reasoning="All plan generation attempts failed."
+        reasoning="All plan generation attempts failed.",
     )
 
 
 async def generate_multi_plan_for_task(
-    agent: Any,
-    task: Any,
-    strategies: Optional[List[PlanStrategy]] = None
+    agent: Any, task: Any, strategies: Optional[List[PlanStrategy]] = None
 ) -> MultiPlanResult:
     """
     Generate multiple alternative plans using Verbalized Sampling.
@@ -409,6 +404,7 @@ async def generate_multi_plan_for_task(
     Returns:
         MultiPlanResult with all plans and recommendation
     """
+
     async def gather_context() -> Dict[str, Any]:
         return await agent._gather_context(task)
 
@@ -430,7 +426,7 @@ def _parse_json_safe(text: str) -> Dict[str, Any]:
         end = text.rfind("}") + 1
         if start != -1 and end > start:
             return json.loads(text[start:end])
-    except Exception:
+    except (json.JSONDecodeError, ValueError, TypeError):
         pass
     return {}
 

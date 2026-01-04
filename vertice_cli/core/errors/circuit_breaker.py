@@ -116,8 +116,7 @@ class EnhancedCircuitBreaker:
                 self._success_count_in_half_open = 0
             else:
                 raise CircuitOpenError(
-                    f"Circuit {self.name} is open. "
-                    f"Wait {self._time_until_recovery():.0f}s"
+                    f"Circuit {self.name} is open. " f"Wait {self._time_until_recovery():.0f}s"
                 )
 
         try:
@@ -171,21 +170,16 @@ class EnhancedCircuitBreaker:
         self._last_failure_time = time.time()
 
         logger.warning(
-            f"[CircuitBreaker:{self.name}] Failure #{self._failures}: "
-            f"{type(error).__name__}"
+            f"[CircuitBreaker:{self.name}] Failure #{self._failures}: " f"{type(error).__name__}"
         )
 
         if self._state == CircuitState.HALF_OPEN:
-            logger.info(
-                f"[CircuitBreaker:{self.name}] Reopening circuit (failure in HALF_OPEN)"
-            )
+            logger.info(f"[CircuitBreaker:{self.name}] Reopening circuit (failure in HALF_OPEN)")
             self._state = CircuitState.OPEN
             self._success_count_in_half_open = 0
 
         elif self._failures >= self.failure_threshold:
-            logger.warning(
-                f"[CircuitBreaker:{self.name}] Opening circuit (threshold reached)"
-            )
+            logger.warning(f"[CircuitBreaker:{self.name}] Opening circuit (threshold reached)")
             self._state = CircuitState.OPEN
 
     def reset(self) -> None:
@@ -205,14 +199,10 @@ class EnhancedCircuitBreaker:
             "total_calls": self._total_calls,
             "total_failures": self._total_failures,
             "failure_rate": (
-                self._total_failures / self._total_calls
-                if self._total_calls > 0
-                else 0
+                self._total_failures / self._total_calls if self._total_calls > 0 else 0
             ),
             "time_until_recovery": (
-                self._time_until_recovery()
-                if self._state == CircuitState.OPEN
-                else 0
+                self._time_until_recovery() if self._state == CircuitState.OPEN else 0
             ),
         }
 

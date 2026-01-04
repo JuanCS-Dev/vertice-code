@@ -14,6 +14,7 @@ from typing import Any, Dict, List
 @dataclass
 class LanguageServerConfig:
     """Configuration for a language server."""
+
     language: str
     command: List[str]
     file_extensions: List[str]

@@ -227,9 +227,7 @@ Please diagnose the error and suggest a correction."""
         )
 
         if self.enable_learning:
-            self.common_errors[context.error] = (
-                self.common_errors.get(context.error, 0) + 1
-            )
+            self.common_errors[context.error] = self.common_errors.get(context.error, 0) + 1
 
         strategy = self.determine_strategy(context.error_category, context)
         context.recovery_strategy = strategy
@@ -349,9 +347,7 @@ Please diagnose the error and suggest a correction."""
             "timestamp": time.time(),
             "error": context.error,
             "category": context.error_category.value,
-            "strategy": (
-                context.recovery_strategy.value if context.recovery_strategy else None
-            ),
+            "strategy": (context.recovery_strategy.value if context.recovery_strategy else None),
             "diagnosis": context.diagnosis,
             "suggested_fix": context.suggested_fix,
             "attempts": result.attempts_used,
@@ -375,23 +371,17 @@ Please diagnose the error and suggest a correction."""
             stats["learning_disabled"] = True
         else:
             total_attempts = len(self.recovery_history)
-            successful_recoveries = sum(
-                1 for r in self.recovery_history if r["final_success"]
-            )
+            successful_recoveries = sum(1 for r in self.recovery_history if r["final_success"])
 
             stats.update(
                 {
                     "total_recovery_attempts": total_attempts,
                     "successful_recoveries": successful_recoveries,
                     "success_rate": (
-                        successful_recoveries / total_attempts
-                        if total_attempts > 0
-                        else 0.0
+                        successful_recoveries / total_attempts if total_attempts > 0 else 0.0
                     ),
                     "common_errors": dict(
-                        sorted(
-                            self.common_errors.items(), key=lambda x: x[1], reverse=True
-                        )[:10]
+                        sorted(self.common_errors.items(), key=lambda x: x[1], reverse=True)[:10]
                     ),
                     "learned_fixes": len(self.successful_fixes),
                 }

@@ -41,22 +41,22 @@ from .events import (
 
 __all__ = [
     # Interface
-    'IMessageQueue',
-    'IMessageBroker',
-    'Message',
-    'MessageStatus',
-    'QueueConfig',
+    "IMessageQueue",
+    "IMessageBroker",
+    "Message",
+    "MessageStatus",
+    "QueueConfig",
     # Memory
-    'InMemoryQueue',
-    'InMemoryBroker',
+    "InMemoryQueue",
+    "InMemoryBroker",
     # Redis
-    'RedisQueue',
-    'RedisBroker',
-    'RedisConfig',
-    'REDIS_AVAILABLE',
+    "RedisQueue",
+    "RedisBroker",
+    "RedisConfig",
+    "REDIS_AVAILABLE",
     # Events
-    'Event',
-    'EventBus',
-    'EventHandler',
-    'event_handler',
+    "Event",
+    "EventBus",
+    "EventHandler",
+    "event_handler",
 ]

@@ -43,9 +43,7 @@ class QualityScorer:
         self.mutation_analyzer = mutation_analyzer
 
     async def calculate_score(
-        self,
-        test_path: str = "tests/",
-        source_path: str = "."
+        self, test_path: str = "tests/", source_path: str = "."
     ) -> Dict[str, Any]:
         """Calculate comprehensive test quality score.
 
@@ -81,10 +79,7 @@ class QualityScorer:
         flaky_component = self.FLAKY_WEIGHT  # Assume no flaky tests
 
         total_score = int(
-            coverage_score
-            + mutation_component
-            + test_count_component
-            + flaky_component
+            coverage_score + mutation_component + test_count_component + flaky_component
         )
 
         return {

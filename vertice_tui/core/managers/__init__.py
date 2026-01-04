@@ -46,24 +46,24 @@ from .a2a_manager import A2AManager, A2AServerState, DiscoveredAgent
 
 __all__ = [
     # Original managers
-    'TodoManager',
-    'StatusManager',
-    'PullRequestManager',
-    'MemoryManager',
-    'ContextManager',
-    'AuthenticationManager',
+    "TodoManager",
+    "StatusManager",
+    "PullRequestManager",
+    "MemoryManager",
+    "ContextManager",
+    "AuthenticationManager",
     # Phase 5.1 managers
-    'StreamingManager',
-    'StreamingConfig',
-    'ProviderManager',
-    'ProviderConfig',
-    'TaskComplexity',
+    "StreamingManager",
+    "StreamingConfig",
+    "ProviderManager",
+    "ProviderConfig",
+    "TaskComplexity",
     # Phase 6.2: MCP
-    'MCPManager',
-    'MCPServerState',
-    'MCPClientConnection',
+    "MCPManager",
+    "MCPServerState",
+    "MCPClientConnection",
     # Phase 6.3: A2A
-    'A2AManager',
-    'A2AServerState',
-    'DiscoveredAgent',
+    "A2AManager",
+    "A2AServerState",
+    "DiscoveredAgent",
 ]

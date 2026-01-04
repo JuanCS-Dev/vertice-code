@@ -58,13 +58,13 @@ async def format_agent_result(result: Any) -> AsyncIterator[str]:
         Formatted markdown chunks
     """
     # Extract data and reasoning from result
-    if hasattr(result, 'data') and hasattr(result, 'reasoning'):
+    if hasattr(result, "data") and hasattr(result, "reasoning"):
         data = result.data
         reasoning = result.reasoning or ""
-    elif hasattr(result, 'data'):
+    elif hasattr(result, "data"):
         data = result.data
         reasoning = ""
-    elif hasattr(result, 'result'):
+    elif hasattr(result, "result"):
         yield str(result.result)
         return
     else:
@@ -84,25 +84,25 @@ async def format_agent_result(result: Any) -> AsyncIterator[str]:
 
 __all__ = [
     # Main entry point
-    'format_agent_result',
+    "format_agent_result",
     # Protocol
-    'ResultFormatter',
+    "ResultFormatter",
     # Helpers
-    'get_severity_emoji',
-    'format_list_items',
-    'yield_dict_items',
+    "get_severity_emoji",
+    "format_list_items",
+    "yield_dict_items",
     # Formatters
-    'ArchitectFormatter',
-    'ReviewerFormatter',
-    'ExplorerFormatter',
-    'DevOpsFormatter',
-    'DevOpsResponseFormatter',
-    'TestingFormatter',
-    'RefactorerFormatter',
-    'DocumentationFormatter',
-    'MarkdownFormatter',
-    'StringFormatter',
-    'FallbackFormatter',
+    "ArchitectFormatter",
+    "ReviewerFormatter",
+    "ExplorerFormatter",
+    "DevOpsFormatter",
+    "DevOpsResponseFormatter",
+    "TestingFormatter",
+    "RefactorerFormatter",
+    "DocumentationFormatter",
+    "MarkdownFormatter",
+    "StringFormatter",
+    "FallbackFormatter",
     # Registry
-    'FORMATTERS',
+    "FORMATTERS",
 ]

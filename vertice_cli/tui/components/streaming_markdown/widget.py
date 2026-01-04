@@ -92,10 +92,12 @@ class StreamingMarkdownWidget(Widget):
 
     class StreamStarted(Message):
         """Event: streaming started."""
+
         pass
 
     class StreamEnded(Message):
         """Event: streaming ended."""
+
         def __init__(self, content: str, metrics: PerformanceMetrics):
             self.content = content
             self.metrics = metrics
@@ -103,6 +105,7 @@ class StreamingMarkdownWidget(Widget):
 
     class BlockDetected(Message):
         """Event: new block type detected."""
+
         def __init__(self, block_type: BlockType, block_info: BlockInfo):
             self.block_type = block_type
             self.block_info = block_info
@@ -110,6 +113,7 @@ class StreamingMarkdownWidget(Widget):
 
     class FPSWarning(Message):
         """Event: low FPS detected."""
+
         def __init__(self, fps: float, action: str):
             self.fps = fps
             self.action = action
@@ -272,8 +276,7 @@ class StreamingMarkdownWidget(Widget):
         # Markdown mode with Widget Factory
         try:
             return self._create_block_based_renderable()
-        except Exception:
-            # Fallback to plain text on error
+        except (ValueError, TypeError, AttributeError):
             return self._create_plain_text_renderable()
 
     def _create_plain_text_renderable(self) -> Text:

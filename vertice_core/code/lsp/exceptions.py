@@ -22,9 +22,11 @@ class JsonRpcError(Exception):
 
 class LSPConnectionError(Exception):
     """LSP connection error."""
+
     pass
 
 
 class LSPTimeoutError(Exception):
     """LSP request timeout."""
+
     pass

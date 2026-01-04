@@ -44,11 +44,7 @@ class HealthChecker:
             ],
         )
 
-        avg_mttr = (
-            sum(self.mttr_seconds) / len(self.mttr_seconds)
-            if self.mttr_seconds
-            else 0
-        )
+        avg_mttr = sum(self.mttr_seconds) / len(self.mttr_seconds) if self.mttr_seconds else 0
 
         return {
             "health": health.to_dict(),

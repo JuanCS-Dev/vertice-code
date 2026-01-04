@@ -30,15 +30,15 @@ class ContextManager(IContextManager):
     # Default context window size
     MAX_CONTEXT_MESSAGES = 50
     MAX_CONTEXT_TOKENS = 32000  # Claude Code parity
-    COMPACT_THRESHOLD = 0.60    # Trigger at 60% utilization
+    COMPACT_THRESHOLD = 0.60  # Trigger at 60% utilization
     COMPACT_KEEP_FIRST = 2
     COMPACT_KEEP_LAST = 8
-    CHARS_PER_TOKEN = 4         # Rough estimation
+    CHARS_PER_TOKEN = 4  # Rough estimation
 
     def __init__(
         self,
         context_getter: Optional[Callable[[], List[Dict[str, Any]]]] = None,
-        context_setter: Optional[Callable[[List[Dict[str, Any]]], None]] = None
+        context_setter: Optional[Callable[[List[Dict[str, Any]]], None]] = None,
     ):
         """
         Initialize ContextManager.
@@ -129,13 +129,13 @@ class ContextManager(IContextManager):
                 "before_tokens": before_tokens,
                 "after_messages": before_count,
                 "after_tokens": before_tokens,
-                "tokens_saved": 0
+                "tokens_saved": 0,
             }
 
         # Split context
-        first_msgs = ctx[:self.COMPACT_KEEP_FIRST]
-        middle_msgs = ctx[self.COMPACT_KEEP_FIRST:-self.COMPACT_KEEP_LAST]
-        last_msgs = ctx[-self.COMPACT_KEEP_LAST:]
+        first_msgs = ctx[: self.COMPACT_KEEP_FIRST]
+        middle_msgs = ctx[self.COMPACT_KEEP_FIRST : -self.COMPACT_KEEP_LAST]
+        last_msgs = ctx[-self.COMPACT_KEEP_LAST :]
 
         # Generate summary of middle messages
         summary = self._generate_summary(middle_msgs, focus)
@@ -143,7 +143,7 @@ class ContextManager(IContextManager):
         # Create summary message
         summary_message = {
             "role": "system",
-            "content": f"[Context Summary - {len(middle_msgs)} messages compacted]\n{summary}"
+            "content": f"[Context Summary - {len(middle_msgs)} messages compacted]\n{summary}",
         }
 
         # Rebuild context
@@ -161,14 +161,10 @@ class ContextManager(IContextManager):
             "after_tokens": after_tokens,
             "tokens_saved": before_tokens - after_tokens,
             "messages_compacted": len(middle_msgs),
-            "focus": focus
+            "focus": focus,
         }
 
-    def _generate_summary(
-        self,
-        messages: List[Dict[str, Any]],
-        focus: Optional[str] = None
-    ) -> str:
+    def _generate_summary(self, messages: List[Dict[str, Any]], focus: Optional[str] = None) -> str:
         """
         Generate a summary of messages for compaction.
 
@@ -203,14 +199,20 @@ class ContextManager(IContextManager):
             tool_counts: Dict[str, int] = {}
             for msg in assistant_msgs:
                 content = str(msg.get("content", ""))
-                for tool in ["read_file", "write_file", "edit_file", "bash_command", "search_files", "git_status"]:
+                for tool in [
+                    "read_file",
+                    "write_file",
+                    "edit_file",
+                    "bash_command",
+                    "search_files",
+                    "git_status",
+                ]:
                     if tool in content.lower():
                         tool_counts[tool] = tool_counts.get(tool, 0) + 1
 
             if tool_counts:
                 tools_str = ", ".join(
-                    f"{k}({v}x)"
-                    for k, v in sorted(tool_counts.items(), key=lambda x: -x[1])[:5]
+                    f"{k}({v}x)" for k, v in sorted(tool_counts.items(), key=lambda x: -x[1])[:5]
                 )
                 summary_parts.append(f"Tools used: {tools_str}")
 
@@ -218,7 +220,11 @@ class ContextManager(IContextManager):
         if focus:
             summary_parts.append(f"Focus: {focus}")
 
-        return "\n".join(summary_parts) if summary_parts else "Previous conversation context (compacted)"
+        return (
+            "\n".join(summary_parts)
+            if summary_parts
+            else "Previous conversation context (compacted)"
+        )
 
     def _estimate_tokens(self, messages: List[Dict[str, Any]]) -> int:
         """Estimate token count for messages."""
@@ -248,7 +254,7 @@ class ContextManager(IContextManager):
         if len(ctx) > self.MAX_CONTEXT_MESSAGES:
             # Keep more context during auto-compact
             keep_last = min(20, len(ctx) - self.COMPACT_KEEP_FIRST)
-            ctx = ctx[:self.COMPACT_KEEP_FIRST] + ctx[-keep_last:]
+            ctx = ctx[: self.COMPACT_KEEP_FIRST] + ctx[-keep_last:]
             self._context = ctx
 
     def get_token_stats(self) -> Dict[str, Any]:
@@ -269,7 +275,7 @@ class ContextManager(IContextManager):
             "context_tokens": context_tokens,
             "context_messages": len(self._context),
             "max_tokens": 128000,
-            "cost": self._session_tokens * 0.000001  # Rough Gemini pricing
+            "cost": self._session_tokens * 0.000001,  # Rough Gemini pricing
         }
 
     def get_context_summary(self) -> Dict[str, Any]:
@@ -280,7 +286,7 @@ class ContextManager(IContextManager):
             "user_messages": sum(1 for m in ctx if m.get("role") == "user"),
             "assistant_messages": sum(1 for m in ctx if m.get("role") == "assistant"),
             "system_messages": sum(1 for m in ctx if m.get("role") == "system"),
-            "total_chars": sum(len(str(m.get("content", ""))) for m in ctx)
+            "total_chars": sum(len(str(m.get("content", ""))) for m in ctx),
         }
 
     def add_session_tokens(self, tokens: int) -> None:

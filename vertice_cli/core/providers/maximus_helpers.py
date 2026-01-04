@@ -79,8 +79,7 @@ def format_interaction_for_memory(prompt: str, response: str) -> str:
     truncated_response = response[:100] + "..." if len(response) > 100 else response
 
     return (
-        f"User asked: {truncated_prompt}\n"
-        f"I responded with guidance about: {truncated_response}"
+        f"User asked: {truncated_prompt}\n" f"I responded with guidance about: {truncated_response}"
     )
 
 

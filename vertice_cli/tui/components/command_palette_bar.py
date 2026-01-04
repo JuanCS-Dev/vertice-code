@@ -29,10 +29,10 @@ class CommandPaletteBar:
     def __init__(self):
         """Initialize command palette"""
         self.commands = [
-            ("🚀 Execute", COLORS['neon_green'], "/execute"),
-            ("🎯 Plan", COLORS['neon_purple'], "/plan"),
-            ("📊 Metrics", COLORS['neon_cyan'], "/metrics"),
-            ("❓ Help", COLORS['text_secondary'], "/help"),
+            ("🚀 Execute", COLORS["neon_green"], "/execute"),
+            ("🎯 Plan", COLORS["neon_purple"], "/plan"),
+            ("📊 Metrics", COLORS["neon_cyan"], "/metrics"),
+            ("❓ Help", COLORS["text_secondary"], "/help"),
         ]
         self.current_input = ""
 
@@ -83,10 +83,10 @@ class CommandPaletteBar:
 
         return Panel(
             content,
-            border_style=COLORS['border_muted'],
+            border_style=COLORS["border_muted"],
             box=ROUNDED,
             padding=(0, 2),
-            style=Style(bgcolor=COLORS['bg_elevated'])
+            style=Style(bgcolor=COLORS["bg_elevated"]),
         )
 
     def _build_input_hint(self) -> Text:
@@ -100,21 +100,21 @@ class CommandPaletteBar:
 
         if not self.current_input:
             # Default hint
-            hint.append("Type your request or use ", style=COLORS['text_secondary'])
+            hint.append("Type your request or use ", style=COLORS["text_secondary"])
             hint.append("/", style=f"bold {COLORS['accent_blue']}")
-            hint.append(" for commands", style=COLORS['text_secondary'])
+            hint.append(" for commands", style=COLORS["text_secondary"])
         elif self.current_input.startswith("/"):
             # Slash command hint
-            hint.append("Slash command mode ", style=COLORS['accent_blue'])
-            hint.append("• Press ", style=COLORS['text_secondary'])
+            hint.append("Slash command mode ", style=COLORS["accent_blue"])
+            hint.append("• Press ", style=COLORS["text_secondary"])
             hint.append("Tab", style=f"bold {COLORS['accent_blue']}")
-            hint.append(" for autocomplete", style=COLORS['text_secondary'])
+            hint.append(" for autocomplete", style=COLORS["text_secondary"])
         else:
             # Natural language hint
-            hint.append("Natural language request ", style=COLORS['accent_green'])
-            hint.append("• Press ", style=COLORS['text_secondary'])
+            hint.append("Natural language request ", style=COLORS["accent_green"])
+            hint.append("• Press ", style=COLORS["text_secondary"])
             hint.append("Enter", style=f"bold {COLORS['accent_green']}")
-            hint.append(" to execute", style=COLORS['text_secondary'])
+            hint.append(" to execute", style=COLORS["text_secondary"])
 
         return hint
 
@@ -159,20 +159,21 @@ class MinimalCommandBar:
         Returns:
             Rich Panel ready for rendering
         """
-        hint = Text(self.hint_text, style=COLORS['text_secondary'])
+        hint = Text(self.hint_text, style=COLORS["text_secondary"])
 
         return Panel(
             hint,
-            border_style=COLORS['border_muted'],
+            border_style=COLORS["border_muted"],
             box=ROUNDED,
             padding=(0, 2),
-            style=Style(bgcolor=COLORS['bg_elevated'])
+            style=Style(bgcolor=COLORS["bg_elevated"]),
         )
 
 
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
+
 
 def create_default_palette() -> CommandPaletteBar:
     """
@@ -193,10 +194,10 @@ def create_executor_palette() -> CommandPaletteBar:
     """
     palette = CommandPaletteBar()
     palette.commands = [
-        ("⚡ Execute", COLORS['neon_cyan'], "/execute"),
-        ("🛡️ Security", COLORS['neon_yellow'], "/security"),
-        ("📜 History", COLORS['text_secondary'], "/history"),
-        ("⚙️ Config", COLORS['text_secondary'], "/config"),
+        ("⚡ Execute", COLORS["neon_cyan"], "/execute"),
+        ("🛡️ Security", COLORS["neon_yellow"], "/security"),
+        ("📜 History", COLORS["text_secondary"], "/history"),
+        ("⚙️ Config", COLORS["text_secondary"], "/config"),
     ]
     return palette
 
@@ -210,9 +211,9 @@ def create_planner_palette() -> CommandPaletteBar:
     """
     palette = CommandPaletteBar()
     palette.commands = [
-        ("🎯 Plan", COLORS['neon_purple'], "/plan"),
-        ("🔍 Analyze", COLORS['neon_blue'], "/analyze"),
-        ("📊 Breakdown", COLORS['neon_cyan'], "/breakdown"),
-        ("❓ Help", COLORS['text_secondary'], "/help"),
+        ("🎯 Plan", COLORS["neon_purple"], "/plan"),
+        ("🔍 Analyze", COLORS["neon_blue"], "/analyze"),
+        ("📊 Breakdown", COLORS["neon_cyan"], "/breakdown"),
+        ("❓ Help", COLORS["text_secondary"], "/help"),
     ]
     return palette

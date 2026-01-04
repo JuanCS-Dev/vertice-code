@@ -12,8 +12,7 @@ class StreamingEngine:
         self.chunk_size = chunk_size
 
     async def stream_with_chunking(
-        self,
-        generator: AsyncGenerator[str, None]
+        self, generator: AsyncGenerator[str, None]
     ) -> AsyncGenerator[str, None]:
         """Stream com chunking inteligente."""
         buffer = ""

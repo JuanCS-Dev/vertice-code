@@ -19,15 +19,13 @@ from typing import Any, List, Union
 try:
     import aiofiles
     import aiofiles.os
+
     AIOFILES_AVAILABLE = True
 except ImportError:
     AIOFILES_AVAILABLE = False
 
 
-async def read_file(
-    path: Union[str, Path],
-    encoding: str = 'utf-8'
-) -> str:
+async def read_file(path: Union[str, Path], encoding: str = "utf-8") -> str:
     """
     Read file contents asynchronously.
 
@@ -41,22 +39,16 @@ async def read_file(
     path = Path(path)
 
     if AIOFILES_AVAILABLE:
-        async with aiofiles.open(path, 'r', encoding=encoding) as f:
+        async with aiofiles.open(path, "r", encoding=encoding) as f:
             return await f.read()
     else:
         # Fallback to thread pool
         loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(
-            None,
-            lambda: path.read_text(encoding=encoding)
-        )
+        return await loop.run_in_executor(None, lambda: path.read_text(encoding=encoding))
 
 
 async def write_file(
-    path: Union[str, Path],
-    content: str,
-    encoding: str = 'utf-8',
-    create_dirs: bool = True
+    path: Union[str, Path], content: str, encoding: str = "utf-8", create_dirs: bool = True
 ) -> None:
     """
     Write content to file asynchronously.
@@ -73,14 +65,11 @@ async def write_file(
         path.parent.mkdir(parents=True, exist_ok=True)
 
     if AIOFILES_AVAILABLE:
-        async with aiofiles.open(path, 'w', encoding=encoding) as f:
+        async with aiofiles.open(path, "w", encoding=encoding) as f:
             await f.write(content)
     else:
         loop = asyncio.get_event_loop()
-        await loop.run_in_executor(
-            None,
-            lambda: path.write_text(content, encoding=encoding)
-        )
+        await loop.run_in_executor(None, lambda: path.write_text(content, encoding=encoding))
 
 
 async def read_json(path: Union[str, Path]) -> Any:
@@ -97,11 +86,7 @@ async def read_json(path: Union[str, Path]) -> Any:
     return json.loads(content)
 
 
-async def write_json(
-    path: Union[str, Path],
-    data: Any,
-    indent: int = 2
-) -> None:
+async def write_json(path: Union[str, Path], data: Any, indent: int = 2) -> None:
     """
     Write data to JSON file asynchronously.
 
@@ -133,10 +118,7 @@ async def file_exists(path: Union[str, Path]) -> bool:
         return await loop.run_in_executor(None, path.exists)
 
 
-async def list_dir(
-    path: Union[str, Path],
-    pattern: str = '*'
-) -> List[Path]:
+async def list_dir(path: Union[str, Path], pattern: str = "*") -> List[Path]:
     """
     List directory contents asynchronously.
 
@@ -150,10 +132,7 @@ async def list_dir(
     path = Path(path)
     loop = asyncio.get_event_loop()
 
-    return await loop.run_in_executor(
-        None,
-        lambda: list(path.glob(pattern))
-    )
+    return await loop.run_in_executor(None, lambda: list(path.glob(pattern)))
 
 
 async def read_bytes(path: Union[str, Path]) -> bytes:
@@ -169,18 +148,14 @@ async def read_bytes(path: Union[str, Path]) -> bytes:
     path = Path(path)
 
     if AIOFILES_AVAILABLE:
-        async with aiofiles.open(path, 'rb') as f:
+        async with aiofiles.open(path, "rb") as f:
             return await f.read()
     else:
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(None, path.read_bytes)
 
 
-async def write_bytes(
-    path: Union[str, Path],
-    data: bytes,
-    create_dirs: bool = True
-) -> None:
+async def write_bytes(path: Union[str, Path], data: bytes, create_dirs: bool = True) -> None:
     """
     Write bytes to file asynchronously.
 
@@ -195,7 +170,7 @@ async def write_bytes(
         path.parent.mkdir(parents=True, exist_ok=True)
 
     if AIOFILES_AVAILABLE:
-        async with aiofiles.open(path, 'wb') as f:
+        async with aiofiles.open(path, "wb") as f:
             await f.write(data)
     else:
         loop = asyncio.get_event_loop()
@@ -203,7 +178,7 @@ async def write_bytes(
 
 
 # Sync wrappers for compatibility
-def read_file_sync(path: Union[str, Path], encoding: str = 'utf-8') -> str:
+def read_file_sync(path: Union[str, Path], encoding: str = "utf-8") -> str:
     """Sync wrapper for read_file."""
     return asyncio.run(read_file(path, encoding))
 
@@ -214,15 +189,15 @@ def write_file_sync(path: Union[str, Path], content: str) -> None:
 
 
 __all__ = [
-    'read_file',
-    'write_file',
-    'read_json',
-    'write_json',
-    'file_exists',
-    'list_dir',
-    'read_bytes',
-    'write_bytes',
-    'read_file_sync',
-    'write_file_sync',
-    'AIOFILES_AVAILABLE',
+    "read_file",
+    "write_file",
+    "read_json",
+    "write_json",
+    "file_exists",
+    "list_dir",
+    "read_bytes",
+    "write_bytes",
+    "read_file_sync",
+    "write_file_sync",
+    "AIOFILES_AVAILABLE",
 ]

@@ -33,9 +33,11 @@ from core.resilience import (
 # TUI-SPECIFIC ADDITIONS
 # =============================================================================
 
+
 @dataclass
 class CircuitBreakerStats:
     """Extended statistics for TUI observability."""
+
     total_calls: int = 0
     successful_calls: int = 0
     failed_calls: int = 0

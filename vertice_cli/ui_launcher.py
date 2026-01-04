@@ -28,8 +28,9 @@ def launch_tui() -> None:
 
     Lazy import to avoid circular dependency.
     """
-    from vertice_tui.app import QwenApp
-    app = QwenApp()
+    from vertice_tui.app import VerticeApp
+
+    app = VerticeApp()
     app.run()
 
 
@@ -43,6 +44,7 @@ def get_bridge() -> "Bridge":
         Bridge instance for CLI-TUI communication
     """
     from vertice_tui.core.bridge import get_bridge
+
     return get_bridge()
 
 
@@ -56,6 +58,7 @@ def get_agent_registry() -> dict:
         Dictionary of registered agents
     """
     from vertice_tui.core.bridge import AGENT_REGISTRY
+
     return AGENT_REGISTRY
 
 
@@ -77,8 +80,8 @@ async def chat_via_bridge(prompt: str) -> AsyncGenerator[Any, None]:
 
 
 __all__ = [
-    'launch_tui',
-    'get_bridge',
-    'get_agent_registry',
-    'chat_via_bridge',
+    "launch_tui",
+    "get_bridge",
+    "get_agent_registry",
+    "chat_via_bridge",
 ]

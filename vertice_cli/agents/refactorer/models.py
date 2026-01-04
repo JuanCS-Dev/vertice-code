@@ -28,6 +28,7 @@ class RefactoringType(str, Enum):
     - Martin Fowler's Refactoring catalog
     - Enterprise code modernization practices
     """
+
     EXTRACT_METHOD = "extract_method"
     INLINE_METHOD = "inline_method"
     RENAME_SYMBOL = "rename_symbol"
@@ -49,6 +50,7 @@ class ChangeStatus(str, Enum):
                          ↘ FAILED
                          ↘ ROLLED_BACK
     """
+
     PENDING = "pending"
     STAGED = "staged"
     VALIDATED = "validated"
@@ -78,6 +80,7 @@ class CodeChange:
         checkpoint_id: Associated checkpoint for rollback
         created_at: Timestamp of creation
     """
+
     id: str
     file_path: str
     refactoring_type: RefactoringType
@@ -105,6 +108,7 @@ class RefactoringPlan(BaseModel):
     - Risk assessment
     - Rollback strategy
     """
+
     plan_id: str
     goal: str
     changes: List[Dict[str, Any]] = Field(default_factory=list)
@@ -126,6 +130,7 @@ class ValidationResult(BaseModel):
     - Semantic validation
     - Reference validation
     """
+
     passed: bool
     checks: Dict[str, bool] = Field(default_factory=dict)
     errors: List[str] = Field(default_factory=list)
@@ -139,6 +144,7 @@ class RefactoringAction:
     Used by the RL policy to represent potential refactoring actions
     with their estimated rewards.
     """
+
     type: RefactoringType
     target: str
     parameters: Dict[str, Any]

@@ -42,6 +42,7 @@ MARKDOWN TABLES - CRITICAL:
 # CONFIGURATION
 # =============================================================================
 
+
 @dataclass
 class GeminiStreamConfig:
     """Configuration for Gemini streaming.
@@ -53,7 +54,8 @@ class GeminiStreamConfig:
     - max_reconnect_attempts: Maximum reconnection attempts
     - reconnect_base_delay: Base delay for exponential backoff
     """
-    model_name: str = "gemini-2.0-flash"
+
+    model_name: str = "gemini-2.5-pro"
     api_key: str = ""
     temperature: float = 1.0
     max_output_tokens: int = 8192

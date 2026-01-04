@@ -90,12 +90,14 @@ from vertice_governance.justica import (
 
 # --- Governance Metrics for UI/Monitoring ---
 
+
 class GovernanceMetrics(BaseModel):
     """
     Governance metrics exposed for UI and monitoring.
 
     Used by Maestro UI to display governance panels with Rich formatting.
     """
+
     agent_id: str
     trust_score: float = Field(ge=0.0, le=1.0, description="Current trust score (0.0 - 1.0)")
     trust_level: TrustLevel
@@ -122,6 +124,7 @@ class GovernanceMetrics(BaseModel):
 
 
 # --- Main Integrated Agent ---
+
 
 class JusticaIntegratedAgent(BaseAgent):
     """
@@ -261,6 +264,7 @@ Always provide clear reasoning for your decisions."""
             audit_backend = FileBackend(log_file="logs/justica_audit.jsonl")
         else:
             from vertice_governance.justica import InMemoryBackend
+
             audit_backend = InMemoryBackend()
 
         # AuditLogger expects a list of backends
@@ -284,7 +288,7 @@ Always provide clear reasoning for your decisions."""
         try:
             self.logger.info(
                 f"[{trace_id}] Governance evaluation started",
-                extra={"trace_id": trace_id, "agent": self.justica_config.agent_id}
+                extra={"trace_id": trace_id, "agent": self.justica_config.agent_id},
             )
 
             # Extract action details from task
@@ -312,7 +316,9 @@ Always provide clear reasoning for your decisions."""
                 metadata={
                     "trace_id": trace_id,
                     "agent_id": agent_id,
-                    "verdict": verdict.model_dump() if hasattr(verdict, 'model_dump') else str(verdict),
+                    "verdict": (
+                        verdict.model_dump() if hasattr(verdict, "model_dump") else str(verdict)
+                    ),
                 },
             )
 
@@ -320,13 +326,21 @@ Always provide clear reasoning for your decisions."""
             return AgentResponse(
                 success=verdict.approved,
                 data={
-                    "verdict": verdict.model_dump() if hasattr(verdict, 'model_dump') else {
-                        "approved": verdict.approved,
-                        "reasoning": verdict.reasoning,
-                        "severity": self._get_verdict_severity(verdict),
-                        "action_taken": self._get_verdict_action(verdict),
-                    },
-                    "metrics": self._metrics_cache.get(agent_id, {}).model_dump() if agent_id in self._metrics_cache else {},
+                    "verdict": (
+                        verdict.model_dump()
+                        if hasattr(verdict, "model_dump")
+                        else {
+                            "approved": verdict.approved,
+                            "reasoning": verdict.reasoning,
+                            "severity": self._get_verdict_severity(verdict),
+                            "action_taken": self._get_verdict_action(verdict),
+                        }
+                    ),
+                    "metrics": (
+                        self._metrics_cache.get(agent_id, {}).model_dump()
+                        if agent_id in self._metrics_cache
+                        else {}
+                    ),
                     "trace_id": trace_id,
                     "evaluation_time": datetime.utcnow().isoformat(),
                 },
@@ -511,7 +525,7 @@ Always provide clear reasoning for your decisions."""
     def _get_verdict_severity(self, verdict: JusticaVerdict) -> str:
         """Get severity from verdict with fallback."""
         # Check classification for severity
-        if verdict.classification and hasattr(verdict.classification, 'severity'):
+        if verdict.classification and hasattr(verdict.classification, "severity"):
             return verdict.classification.severity.name
         # Fallback based on approval
         return "INFO" if verdict.approved else "MEDIUM"
@@ -570,15 +584,17 @@ Always provide clear reasoning for your decisions."""
         # Add violation if blocked
         if not verdict.approved:
             violation_type = "UNKNOWN"
-            if verdict.classification and hasattr(verdict.classification, 'violation_type'):
+            if verdict.classification and hasattr(verdict.classification, "violation_type"):
                 violation_type = verdict.classification.violation_type.name
 
-            metrics.violations.append({
-                "timestamp": datetime.utcnow().isoformat(),
-                "type": violation_type,
-                "severity": self._get_verdict_severity(verdict),
-                "reasoning": verdict.reasoning,
-            })
+            metrics.violations.append(
+                {
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "type": violation_type,
+                    "severity": self._get_verdict_severity(verdict),
+                    "reasoning": verdict.reasoning,
+                }
+            )
 
         # Update last evaluation timestamp
         metrics.last_evaluation = datetime.utcnow()
@@ -690,15 +706,14 @@ Always provide clear reasoning for your decisions."""
                 self.justica_core.trust_engine.record_good_action(
                     agent_id=agent_id,
                     description="Trust reset by human review",
-                    context={"reset": True}
+                    context={"reset": True},
                 )
 
             # Lift suspension if suspended
             is_suspended, _ = self.justica_core.trust_engine.check_suspension(agent_id)
             if is_suspended:
                 self.justica_core.trust_engine.lift_suspension(
-                    agent_id=agent_id,
-                    reason="Trust reset by human review"
+                    agent_id=agent_id, reason="Trust reset by human review"
                 )
 
         # Clear metrics cache

@@ -51,26 +51,19 @@ class AutoCritique:
         lei = self._calculate_lei(result)
 
         # Determine if passed
-        passed = all([
-            completeness > 0.9,
-            validation,
-            efficiency > 0.7,
-            lei < self.lei_threshold
-        ])
+        passed = all([completeness > 0.9, validation, efficiency > 0.7, lei < self.lei_threshold])
 
         critique = Critique(
             passed=passed,
             completeness_score=completeness,
             validation_passed=validation,
             efficiency_score=efficiency,
-            lei=lei
+            lei=lei,
         )
 
         # Generate issues and suggestions
         if not passed:
-            critique.issues = self._identify_issues(
-                completeness, validation, efficiency, lei
-            )
+            critique.issues = self._identify_issues(completeness, validation, efficiency, lei)
             critique.suggestions = self._generate_suggestions(critique.issues)
 
         return critique
@@ -81,7 +74,7 @@ class AutoCritique:
             return 0.0
 
         # Check for success indicator
-        if hasattr(result, 'success'):
+        if hasattr(result, "success"):
             return 1.0 if result.success else 0.5
 
         return 0.8  # Assume mostly complete
@@ -92,10 +85,10 @@ class AutoCritique:
             return False
 
         # Check for error indicators
-        if hasattr(result, 'success'):
+        if hasattr(result, "success"):
             return bool(result.success)
 
-        if hasattr(result, 'error') and result.error:
+        if hasattr(result, "error") and result.error:
             return False
 
         return True
@@ -121,7 +114,7 @@ class AutoCritique:
         """
         # Extract code if available
         code = ""
-        if hasattr(result, 'data') and isinstance(result.data, str):
+        if hasattr(result, "data") and isinstance(result.data, str):
             code = result.data
         elif isinstance(result, str):
             code = result
@@ -131,19 +124,19 @@ class AutoCritique:
 
         # Lazy patterns
         lazy_patterns = [
-            'TODO',
-            'FIXME',
-            'HACK',
-            'XXX',
-            'NotImplementedError',
-            'pass  #',
-            '... #',
-            'raise NotImplementedError'
+            "TODO",
+            "FIXME",
+            "HACK",
+            "XXX",
+            "NotImplementedError",
+            "pass  #",
+            "... #",
+            "raise NotImplementedError",
         ]
 
         lazy_count = sum(1 for pattern in lazy_patterns if pattern in code)
 
-        lines = [line for line in code.split('\n') if line.strip()]
+        lines = [line for line in code.split("\n") if line.strip()]
         total_lines = len(lines)
 
         if total_lines == 0:
@@ -153,11 +146,7 @@ class AutoCritique:
         return lei
 
     def _identify_issues(
-        self,
-        completeness: float,
-        validation: bool,
-        efficiency: float,
-        lei: float
+        self, completeness: float, validation: bool, efficiency: float, lei: float
     ) -> List[str]:
         """Identify specific issues."""
         issues = []

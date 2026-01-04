@@ -32,20 +32,32 @@ try:
     )
     from opentelemetry.sdk.resources import Resource
     from opentelemetry.trace import Status, StatusCode
+
     OTEL_AVAILABLE = True
 except ImportError:
     OTEL_AVAILABLE = False
+
     # Fallback: no-op implementations
     class DummySpan:
-        def set_attribute(self, *args, **kwargs): pass
-        def set_status(self, *args, **kwargs): pass
-        def record_exception(self, *args, **kwargs): pass
-        def __enter__(self): return self
-        def __exit__(self, *args): pass
+        def set_attribute(self, *args, **kwargs):
+            pass
+
+        def set_status(self, *args, **kwargs):
+            pass
+
+        def record_exception(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
 
     class DummyTracer:
         def start_as_current_span(self, name, *args, **kwargs):
             return DummySpan()
+
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +68,7 @@ _tracer: Optional[Any] = None
 def setup_observability(
     service_name: str = "maestro-orchestrator",
     enable_console: bool = True,
-    enable_file: bool = True
+    enable_file: bool = True,
 ) -> None:
     """
     Setup OpenTelemetry observability for multi-agent system.
@@ -88,11 +100,13 @@ def setup_observability(
 
     try:
         # Create resource with service metadata
-        resource = Resource.create({
-            "service.name": service_name,
-            "service.version": "1.0.0",
-            "deployment.environment": "development"
-        })
+        resource = Resource.create(
+            {
+                "service.name": service_name,
+                "service.version": "1.0.0",
+                "deployment.environment": "development",
+            }
+        )
 
         # Create tracer provider
         provider = TracerProvider(resource=resource)
@@ -143,10 +157,7 @@ def get_tracer():
 
 
 @contextmanager
-def trace_operation(
-    operation_name: str,
-    attributes: Optional[Dict[str, Any]] = None
-):
+def trace_operation(operation_name: str, attributes: Optional[Dict[str, Any]] = None):
     """
     Context manager for tracing an operation.
 
@@ -193,14 +204,16 @@ def trace_agent_execution(agent_id: str, task_id: str):
         >>> async def execute_task():
         ...     # agent work
     """
+
     def decorator(func):
         async def wrapper(*args, **kwargs):
             with trace_operation(
-                f"agent.{agent_id}.execute",
-                {"agent_id": agent_id, "task_id": task_id}
+                f"agent.{agent_id}.execute", {"agent_id": agent_id, "task_id": task_id}
             ):
                 return await func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
@@ -221,10 +234,7 @@ class ObservabilityContext:
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
-        return {
-            "correlation_id": self.correlation_id,
-            **self.metadata
-        }
+        return {"correlation_id": self.correlation_id, **self.metadata}
 
 
 # Convenience function for getting status codes

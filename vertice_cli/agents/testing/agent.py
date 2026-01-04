@@ -122,35 +122,27 @@ class TestingAgent(BaseAgent):
         """Get or create coverage analyzer."""
         if self._coverage_analyzer is None:
             self._coverage_analyzer = CoverageAnalyzer(
-                self._execute_tool,
-                self.min_coverage_threshold
+                self._execute_tool, self.min_coverage_threshold
             )
         return self._coverage_analyzer
 
     def _get_mutation_analyzer(self) -> MutationAnalyzer:
         """Get or create mutation analyzer."""
         if self._mutation_analyzer is None:
-            self._mutation_analyzer = MutationAnalyzer(
-                self._execute_tool,
-                self.min_mutation_score
-            )
+            self._mutation_analyzer = MutationAnalyzer(self._execute_tool, self.min_mutation_score)
         return self._mutation_analyzer
 
     def _get_flaky_detector(self) -> FlakyDetector:
         """Get or create flaky detector."""
         if self._flaky_detector is None:
-            self._flaky_detector = FlakyDetector(
-                self._execute_tool,
-                self.flaky_detection_runs
-            )
+            self._flaky_detector = FlakyDetector(self._execute_tool, self.flaky_detection_runs)
         return self._flaky_detector
 
     def _get_quality_scorer(self) -> QualityScorer:
         """Get or create quality scorer."""
         if self._quality_scorer is None:
             self._quality_scorer = QualityScorer(
-                self._get_coverage_analyzer(),
-                self._get_mutation_analyzer()
+                self._get_coverage_analyzer(), self._get_mutation_analyzer()
             )
         return self._quality_scorer
 
@@ -176,7 +168,7 @@ class TestingAgent(BaseAgent):
         if not blocks:
             blocks = extractor.extract_code_blocks(text)
 
-        return '\n\n'.join(block.content for block in blocks)
+        return "\n\n".join(block.content for block in blocks)
 
     async def execute(self, task: AgentTask) -> AgentResponse:
         """Execute testing analysis task.
@@ -214,7 +206,7 @@ class TestingAgent(BaseAgent):
                     data={},
                     reasoning=f"Unknown action: {action}",
                     error="Supported actions: generate_tests, analyze_coverage, "
-                          "mutation_testing, detect_flaky, test_quality_score",
+                    "mutation_testing, detect_flaky, test_quality_score",
                 )
 
         except Exception as e:
@@ -275,7 +267,7 @@ class TestingAgent(BaseAgent):
             code_parts = []
             for f in files[:5]:  # Limit to 5 files
                 try:
-                    with open(f, 'r') as fp:
+                    with open(f, "r") as fp:
                         code_parts.append(f"# File: {f}\n{fp.read()}")
                 except (OSError, UnicodeDecodeError) as e:
                     logger.debug(f"Could not read file {f}: {e}")
@@ -288,7 +280,7 @@ class TestingAgent(BaseAgent):
                 success=False,
                 data={},
                 reasoning="No source code found. Please provide source_code inline, "
-                         "or specify source_code, file_path, or files in context.",
+                "or specify source_code, file_path, or files in context.",
                 error="source_code is required. Tip: Include code in ```python``` blocks.",
             )
 
@@ -298,9 +290,7 @@ class TestingAgent(BaseAgent):
         # Calculate metrics
         total_assertions = sum(tc.assertions for tc in test_cases)
         avg_complexity = (
-            sum(tc.complexity for tc in test_cases) / len(test_cases)
-            if test_cases
-            else 0
+            sum(tc.complexity for tc in test_cases) / len(test_cases) if test_cases else 0
         )
 
         return AgentResponse(
@@ -364,10 +354,11 @@ class TestingAgent(BaseAgent):
                         "missing_lines_count": len(coverage_data.missing_lines),
                     },
                     "quality_score": quality_score,
-                    "meets_threshold": coverage_data.coverage_percentage >= self.min_coverage_threshold,
+                    "meets_threshold": coverage_data.coverage_percentage
+                    >= self.min_coverage_threshold,
                 },
                 reasoning=f"Coverage: {coverage_data.coverage_percentage:.1f}% "
-                         f"(threshold: {self.min_coverage_threshold}%)",
+                f"(threshold: {self.min_coverage_threshold}%)",
                 metrics={
                     "coverage_percentage": coverage_data.coverage_percentage,
                     "branch_coverage": coverage_data.branch_coverage,
@@ -400,8 +391,9 @@ class TestingAgent(BaseAgent):
                 branches_total=totals.get("num_branches", 0),
                 branches_covered=totals.get("covered_branches", 0),
             )
-        except Exception:
+        except (json.JSONDecodeError, KeyError, TypeError, FileNotFoundError):
             from .models import CoverageReport
+
             return CoverageReport(
                 total_statements=0,
                 covered_statements=0,
@@ -434,9 +426,7 @@ class TestingAgent(BaseAgent):
             await self._execute_tool("bash_command", {"command": cmd})
 
             # Get results
-            result = await self._execute_tool(
-                "bash_command", {"command": "mutmut results"}
-            )
+            result = await self._execute_tool("bash_command", {"command": "mutmut results"})
 
             # Parse mutation results (can be mocked for tests)
             mutation_result = self._parse_mutation_results(result.get("output", ""))
@@ -458,7 +448,7 @@ class TestingAgent(BaseAgent):
                     "meets_threshold": mutation_result.mutation_score >= self.min_mutation_score,
                 },
                 reasoning=f"Mutation score: {mutation_result.mutation_score:.1f}% "
-                         f"(threshold: {self.min_mutation_score}%)",
+                f"(threshold: {self.min_mutation_score}%)",
                 metrics={
                     "mutation_score": mutation_result.mutation_score,
                     "killed_mutants": float(mutation_result.killed_mutants),
@@ -534,18 +524,14 @@ class TestingAgent(BaseAgent):
                 error=str(e),
             )
 
-    async def _detect_flaky_tests(
-        self, test_path: str, runs: int
-    ) -> List["FlakyTest"]:
+    async def _detect_flaky_tests(self, test_path: str, runs: int) -> List["FlakyTest"]:
         """Run tests multiple times to detect flakiness. Can be mocked for testing."""
         from .models import FlakyTest
 
         test_results: Dict[str, List[bool]] = {}
 
         for _ in range(runs):
-            result = await self._execute_tool(
-                "bash_command", {"command": f"pytest {test_path} -v"}
-            )
+            result = await self._execute_tool("bash_command", {"command": f"pytest {test_path} -v"})
 
             output = result.get("output", "")
             for line in output.split("\n"):
@@ -589,9 +575,7 @@ class TestingAgent(BaseAgent):
                 context={"action": "analyze_coverage", **task.context},
             )
             coverage_response = await self._handle_coverage_analysis(coverage_task)
-            coverage_pct = coverage_response.data.get("coverage", {}).get(
-                "coverage_percentage", 0
-            )
+            coverage_pct = coverage_response.data.get("coverage", {}).get("coverage_percentage", 0)
 
             # Get mutation score
             try:
@@ -614,10 +598,7 @@ class TestingAgent(BaseAgent):
             flaky_component = 15  # Assume no flaky tests
 
             total_score = int(
-                coverage_score
-                + mutation_component
-                + test_count_component
-                + flaky_component
+                coverage_score + mutation_component + test_count_component + flaky_component
             )
 
             return AgentResponse(
@@ -633,7 +614,7 @@ class TestingAgent(BaseAgent):
                     "grade": score_to_grade(total_score),
                 },
                 reasoning=f"Test quality score: {total_score}/100 "
-                         f"({score_to_grade(total_score)})",
+                f"({score_to_grade(total_score)})",
                 metrics={
                     "quality_score": float(total_score),
                     "coverage_score": coverage_score,

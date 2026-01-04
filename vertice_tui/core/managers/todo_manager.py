@@ -88,8 +88,4 @@ class TodoManager(ITodoManager):
         todos = self._todos.copy()
         pending = sum(1 for t in todos if not t.get("done", False))
         completed = sum(1 for t in todos if t.get("done", False))
-        return {
-            "total": len(todos),
-            "pending": pending,
-            "completed": completed
-        }
+        return {"total": len(todos), "pending": pending, "completed": completed}

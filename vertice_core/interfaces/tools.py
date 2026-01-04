@@ -20,6 +20,7 @@ from enum import Enum
 
 class ToolCategory(Enum):
     """Tool categories for organization."""
+
     FILE = "file"
     GIT = "git"
     SHELL = "shell"
@@ -41,28 +42,21 @@ class ToolResult:
         error: Error message if failed
         metadata: Additional info (timing, tokens, etc.)
     """
+
     success: bool
     data: Dict[str, Any] = field(default_factory=dict)
     error: Optional[str] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def ok(cls, data: Dict[str, Any] = None, **kwargs) -> 'ToolResult':
+    def ok(cls, data: Dict[str, Any] = None, **kwargs) -> "ToolResult":
         """Create successful result."""
-        return cls(
-            success=True,
-            data=data or {},
-            metadata=kwargs
-        )
+        return cls(success=True, data=data or {}, metadata=kwargs)
 
     @classmethod
-    def fail(cls, error: str, **kwargs) -> 'ToolResult':
+    def fail(cls, error: str, **kwargs) -> "ToolResult":
         """Create failed result."""
-        return cls(
-            success=False,
-            error=error,
-            metadata=kwargs
-        )
+        return cls(success=False, error=error, metadata=kwargs)
 
     def get(self, key: str, default: Any = None) -> Any:
         """Get value from data dict."""
@@ -72,6 +66,7 @@ class ToolResult:
 @dataclass
 class ToolSchema:
     """JSON Schema for tool parameters."""
+
     name: str
     description: str
     parameters: Dict[str, Any]
@@ -85,8 +80,8 @@ class ToolSchema:
             "parameters": {
                 "type": "object",
                 "properties": self.parameters,
-                "required": self.required
-            }
+                "required": self.required,
+            },
         }
 
 
@@ -170,11 +165,7 @@ class IToolExecutor(ABC):
     """
 
     @abstractmethod
-    async def execute(
-        self,
-        tool_name: str,
-        params: Dict[str, Any]
-    ) -> ToolResult:
+    async def execute(self, tool_name: str, params: Dict[str, Any]) -> ToolResult:
         """
         Execute a tool by name.
 
@@ -250,15 +241,16 @@ class IToolExecutor(ABC):
         Default implementation filters all tools.
         """
         return [
-            self.get(name) for name in self.get_available_tools()
+            self.get(name)
+            for name in self.get_available_tools()
             if self.get(name) and self.get(name).category == category
         ]
 
 
 __all__ = [
-    'ITool',
-    'IToolExecutor',
-    'ToolResult',
-    'ToolSchema',
-    'ToolCategory',
+    "ITool",
+    "IToolExecutor",
+    "ToolResult",
+    "ToolSchema",
+    "ToolCategory",
 ]

@@ -20,29 +20,29 @@ console = Console()
 async def handle_review(args: str, context: Dict[str, Any]) -> str:
     """
     Review current session changes and activity.
-    
+
     Usage:
         /review              Show session summary
         /review --diff       Show git diffs of modified files
         /review --stats      Show detailed statistics
         /review --export     Export report to file
-    
+
     Args:
         args: Command flags
         context: Execution context with session data
-    
+
     Returns:
         Formatted review output
     """
-    session = context.get('session')
+    session = context.get("session")
 
     if not session:
         return _format_error("No active session to review")
 
     # Parse flags
-    show_diff = '--diff' in args
-    show_stats = '--stats' in args
-    export = '--export' in args
+    show_diff = "--diff" in args
+    show_stats = "--stats" in args
+    export = "--export" in args
 
     # Build review output
     output_lines = []
@@ -71,7 +71,7 @@ async def handle_review(args: str, context: Dict[str, Any]) -> str:
         output_lines.append("")
 
     # Git status
-    git_status = _get_git_status(context.get('cwd', Path.cwd()))
+    git_status = _get_git_status(context.get("cwd", Path.cwd()))
     if git_status:
         output_lines.append(git_status)
         output_lines.append("")
@@ -175,36 +175,32 @@ def _get_git_status(cwd: Path) -> Optional[str]:
     """Get git status for current directory."""
     try:
         result = subprocess.run(
-            ['git', 'status', '--short'],
-            cwd=cwd,
-            capture_output=True,
-            text=True,
-            timeout=2
+            ["git", "status", "--short"], cwd=cwd, capture_output=True, text=True, timeout=2
         )
 
         if result.returncode == 0 and result.stdout.strip():
             lines = ["[bold]Git Status:[/bold]"]
 
-            for line in result.stdout.strip().split('\n')[:10]:
+            for line in result.stdout.strip().split("\n")[:10]:
                 status = line[:2]
                 file = line[3:]
 
-                if 'M' in status:
+                if "M" in status:
                     lines.append(f"  [yellow]M[/yellow] {file}")
-                elif 'A' in status:
+                elif "A" in status:
                     lines.append(f"  [green]A[/green] {file}")
-                elif 'D' in status:
+                elif "D" in status:
                     lines.append(f"  [red]D[/red] {file}")
-                elif '?' in status:
+                elif "?" in status:
                     lines.append(f"  [dim]?[/dim] {file}")
                 else:
                     lines.append(f"  {status} {file}")
 
-            if len(result.stdout.strip().split('\n')) > 10:
+            if len(result.stdout.strip().split("\n")) > 10:
                 lines.append("  [dim]... more files[/dim]")
 
             return "\n".join(lines)
-    except Exception:
+    except (subprocess.SubprocessError, OSError):
         pass
 
     return None
@@ -214,17 +210,14 @@ def _get_file_diff(filepath: str) -> Optional[str]:
     """Get git diff for a file."""
     try:
         result = subprocess.run(
-            ['git', 'diff', '--unified=0', filepath],
-            capture_output=True,
-            text=True,
-            timeout=2
+            ["git", "diff", "--unified=0", filepath], capture_output=True, text=True, timeout=2
         )
 
         if result.returncode == 0 and result.stdout.strip():
             # Return first few lines of diff
-            lines = result.stdout.strip().split('\n')[:5]
+            lines = result.stdout.strip().split("\n")[:5]
             return "\n    ".join(lines)
-    except Exception:
+    except (subprocess.SubprocessError, OSError):
         pass
 
     return None
@@ -234,20 +227,17 @@ def _calculate_loc_changes(files: set) -> Optional[Dict[str, int]]:
     """Calculate lines of code changes."""
     try:
         result = subprocess.run(
-            ['git', 'diff', '--numstat'] + list(files),
-            capture_output=True,
-            text=True,
-            timeout=2
+            ["git", "diff", "--numstat"] + list(files), capture_output=True, text=True, timeout=2
         )
 
         if result.returncode == 0:
             added = 0
             removed = 0
 
-            for line in result.stdout.strip().split('\n'):
+            for line in result.stdout.strip().split("\n"):
                 if not line:
                     continue
-                parts = line.split('\t')
+                parts = line.split("\t")
                 if len(parts) >= 2:
                     try:
                         added += int(parts[0])
@@ -255,12 +245,8 @@ def _calculate_loc_changes(files: set) -> Optional[Dict[str, int]]:
                     except ValueError:
                         pass
 
-            return {
-                'added': added,
-                'removed': removed,
-                'net': added - removed
-            }
-    except Exception:
+            return {"added": added, "removed": removed, "net": added - removed}
+    except (subprocess.SubprocessError, OSError):
         pass
 
     return None
@@ -271,7 +257,7 @@ def _analyze_file_types(files: set) -> Dict[str, int]:
     types = {}
 
     for file in files:
-        ext = Path(file).suffix or 'no extension'
+        ext = Path(file).suffix or "no extension"
         types[ext] = types.get(ext, 0) + 1
 
     return types
@@ -288,7 +274,8 @@ def _export_review(session, review_text: str) -> Path:
 
     # Strip ANSI codes for plain text export
     import re
-    plain_text = re.sub(r'\[.*?\]', '', review_text)
+
+    plain_text = re.sub(r"\[.*?\]", "", review_text)
 
     filepath.write_text(plain_text)
 
@@ -301,11 +288,13 @@ def _format_error(message: str) -> str:
 
 
 # Register command
-slash_registry.register(SlashCommand(
-    name="review",
-    description="Review session changes and activity",
-    usage="/review [--diff] [--stats] [--export]",
-    handler=handle_review,
-    aliases=["rv", "status"],
-    requires_session=True
-))
+slash_registry.register(
+    SlashCommand(
+        name="review",
+        description="Review session changes and activity",
+        usage="/review [--diff] [--stats] [--export]",
+        handler=handle_review,
+        aliases=["rv", "status"],
+        requires_session=True,
+    )
+)

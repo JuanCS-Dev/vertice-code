@@ -11,6 +11,7 @@ Date: 2025-11-28
 
 import re
 
+
 class StreamFilter:
     """
     Filters streaming text to remove raw JSON tool calls and internal markers.
@@ -38,8 +39,8 @@ class StreamFilter:
         )
 
         # NEW: Pattern for [TOOL_CALL:name:{...}] markers
-        self._tool_marker_pattern = re.compile(r'\[TOOL_CALL:\w+:\{.*?\}\]', re.DOTALL)
-        self._tool_marker_start = re.compile(r'\[TOOL_CALL:')
+        self._tool_marker_pattern = re.compile(r"\[TOOL_CALL:\w+:\{.*?\}\]", re.DOTALL)
+        self._tool_marker_start = re.compile(r"\[TOOL_CALL:")
 
     def process_chunk(self, chunk: str) -> str:
         """
@@ -55,19 +56,19 @@ class StreamFilter:
             return ""
 
         # FIRST: Filter out complete [TOOL_CALL:...] markers
-        chunk = self._tool_marker_pattern.sub('', chunk)
+        chunk = self._tool_marker_pattern.sub("", chunk)
 
         # If we are buffering a partial tool marker
         if self._in_tool_marker:
             self._buffer += chunk
             # Check if we have a complete marker now
-            if ']' in self._buffer:
+            if "]" in self._buffer:
                 # Remove the complete marker
-                cleaned = self._tool_marker_pattern.sub('', self._buffer)
+                cleaned = self._tool_marker_pattern.sub("", self._buffer)
                 # Check if there's still partial marker left
                 if self._tool_marker_start.search(cleaned):
                     # Still have partial marker, keep buffering
-                    idx = cleaned.rfind('[TOOL_CALL:')
+                    idx = cleaned.rfind("[TOOL_CALL:")
                     result = cleaned[:idx]
                     self._buffer = cleaned[idx:]
                     return result
@@ -78,9 +79,9 @@ class StreamFilter:
             return ""
 
         # Check for partial [TOOL_CALL: at the end of chunk
-        if '[TOOL_CALL:' in chunk:
-            idx = chunk.find('[TOOL_CALL:')
-            if ']' not in chunk[idx:]:
+        if "[TOOL_CALL:" in chunk:
+            idx = chunk.find("[TOOL_CALL:")
+            if "]" not in chunk[idx:]:
                 # Partial marker - buffer it
                 self._in_tool_marker = True
                 self._buffer = chunk[idx:]
@@ -93,24 +94,23 @@ class StreamFilter:
 
         # Check if this chunk starts a potential JSON block
         # We look for '{' which might be the start
-        if '{' in chunk:
+        if "{" in chunk:
             # Split text before and after the first '{'
-            pre_json, post_json = chunk.split('{', 1)
+            pre_json, post_json = chunk.split("{", 1)
 
             # Check if the '{' + post_json looks like it could be our JSON
             # We need enough context. If post_json is very short, we might need to buffer.
-            potential_start = '{' + post_json
+            potential_start = "{" + post_json
 
             # Buffer ONLY if it explicitly matches tool call patterns
             # Be conservative - only filter actual tool calls, not regular text with braces
-            if (
-                self._json_start_pattern.match(potential_start) or
-                self._tool_arg_patterns.match(potential_start)
+            if self._json_start_pattern.match(potential_start) or self._tool_arg_patterns.match(
+                potential_start
             ):
                 # Start buffering
                 self._in_potential_json = True
                 self._buffer = potential_start
-                self._brace_count = 1 + post_json.count('{') - post_json.count('}')
+                self._brace_count = 1 + post_json.count("{") - post_json.count("}")
 
                 # Return the text BEFORE the JSON
                 return pre_json
@@ -121,7 +121,7 @@ class StreamFilter:
     def _check_buffer(self) -> str:
         """
         Check the current buffer state.
-        
+
         Returns:
             Text to release (if invalid JSON), or empty string (if still buffering/valid JSON)
         """
@@ -129,13 +129,14 @@ class StreamFilter:
         # We need to be careful not to double count if we just added to buffer
         # Ideally we'd track incremental updates, but for now let's re-scan buffer
         # This is simple but O(N) on buffer size. Buffer shouldn't be huge.
-        self._brace_count = self._buffer.count('{') - self._buffer.count('}')
+        self._brace_count = self._buffer.count("{") - self._buffer.count("}")
 
         # If braces balanced (count == 0), we have a complete block
         if self._brace_count <= 0:
             # Check if it's actually a tool call JSON or tool argument JSON
-            if (self._json_start_pattern.match(self._buffer) or
-                self._tool_arg_patterns.match(self._buffer)):
+            if self._json_start_pattern.match(self._buffer) or self._tool_arg_patterns.match(
+                self._buffer
+            ):
                 # It IS a tool-related JSON. Suppress it.
                 # We might have trailing text after the closing brace
                 # Find the closing brace
@@ -166,13 +167,13 @@ class StreamFilter:
 
         # If buffer gets too large without confirming "tool" or tool args pattern, abort
         if len(self._buffer) > 50 and not (
-            self._json_start_pattern.search(self._buffer) or
-            self._tool_arg_patterns.search(self._buffer)
+            self._json_start_pattern.search(self._buffer)
+            or self._tool_arg_patterns.search(self._buffer)
         ):
-             content = self._buffer
-             self._buffer = ""
-             self._in_potential_json = False
-             return content
+            content = self._buffer
+            self._buffer = ""
+            self._in_potential_json = False
+            return content
 
         # Still buffering
         return ""

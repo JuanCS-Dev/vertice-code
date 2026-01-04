@@ -77,7 +77,7 @@ class GroqProvider:
         messages: List[Dict[str, str]],
         max_tokens: int = 4096,
         temperature: float = 0.7,
-        **kwargs
+        **kwargs,
     ) -> str:
         """Generate completion from messages.
 
@@ -121,7 +121,7 @@ class GroqProvider:
         messages: List[Dict[str, str]],
         max_tokens: int = 4096,
         temperature: float = 0.7,
-        **kwargs
+        **kwargs,
     ) -> AsyncGenerator[str, None]:
         """Stream generation from messages.
 
@@ -164,12 +164,13 @@ class GroqProvider:
                         break
                     try:
                         import json
+
                         data = json.loads(data_str)
                         delta = data.get("choices", [{}])[0].get("delta", {})
                         content = delta.get("content", "")
                         if content:
                             yield content
-                    except Exception:
+                    except json.JSONDecodeError:
                         continue
 
     async def stream_chat(
@@ -178,7 +179,7 @@ class GroqProvider:
         system_prompt: Optional[str] = None,
         max_tokens: int = 4096,
         temperature: float = 0.7,
-        **kwargs
+        **kwargs,
     ) -> AsyncGenerator[str, None]:
         """Stream chat with optional system prompt.
 
@@ -198,24 +199,21 @@ class GroqProvider:
         full_messages.extend(messages)
 
         async for chunk in self.stream_generate(
-            full_messages,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            **kwargs
+            full_messages, max_tokens=max_tokens, temperature=temperature, **kwargs
         ):
             yield chunk
 
     def get_model_info(self) -> Dict[str, str | bool | int]:
         """Get model information."""
         return {
-            'provider': 'groq',
-            'model': self.model_name,
-            'available': self.is_available(),
-            'context_window': 128000,  # Llama 3.3 70B context
-            'supports_streaming': True,
-            'cost_tier': 'free',
-            'speed_tier': 'ultra_fast',
-            'requests_per_day': self.RATE_LIMITS['requests_per_day'],
+            "provider": "groq",
+            "model": self.model_name,
+            "available": self.is_available(),
+            "context_window": 128000,  # Llama 3.3 70B context
+            "supports_streaming": True,
+            "cost_tier": "free",
+            "speed_tier": "ultra_fast",
+            "requests_per_day": self.RATE_LIMITS["requests_per_day"],
         }
 
     def count_tokens(self, text: str) -> int:

@@ -31,56 +31,57 @@ SUBAGENT_TYPES: Dict[str, Dict[str, Any]] = {
         "description": "Fast codebase exploration and search",
         "tools": ["glob", "grep", "read_file", "list_directory"],
         "prompt_prefix": "You are exploring a codebase. Be thorough but efficient.",
-        "read_only": True
+        "read_only": True,
     },
     "plan": {
         "description": "Task planning and breakdown",
         "tools": ["glob", "grep", "read_file", "todo_write"],
         "prompt_prefix": "You are planning a task. Break it down into actionable steps.",
-        "read_only": True
+        "read_only": True,
     },
     "general-purpose": {
         "description": "Complex multi-step autonomous tasks",
         "tools": "*",  # All tools
         "prompt_prefix": "You are handling a complex task autonomously.",
-        "read_only": False
+        "read_only": False,
     },
     "code-reviewer": {
         "description": "Review code for quality and best practices",
         "tools": ["read_file", "glob", "grep"],
         "prompt_prefix": "You are reviewing code. Focus on quality, security, and best practices.",
-        "read_only": True
+        "read_only": True,
     },
     "test-runner": {
         "description": "Execute and analyze test results",
         "tools": ["bash_command", "read_file", "glob"],
         "prompt_prefix": "You are running tests. Report results clearly.",
-        "read_only": True
+        "read_only": True,
     },
     "security": {
         "description": "Security analysis and vulnerability scanning",
         "tools": ["read_file", "glob", "grep", "bash_command"],
         "prompt_prefix": "You are analyzing code for security vulnerabilities. Follow OWASP guidelines.",
-        "read_only": True
+        "read_only": True,
     },
     "documentation": {
         "description": "Generate documentation from code",
         "tools": ["read_file", "glob", "write_file"],
         "prompt_prefix": "You are generating documentation. Be clear and comprehensive.",
-        "read_only": False
+        "read_only": False,
     },
     "refactor": {
         "description": "Code refactoring suggestions",
         "tools": ["read_file", "glob", "grep", "edit_file"],
         "prompt_prefix": "You are refactoring code. Maintain functionality while improving structure.",
-        "read_only": False
-    }
+        "read_only": False,
+    },
 }
 
 
 # =============================================================================
 # TASK TOOL
 # =============================================================================
+
 
 class TaskTool(Tool):
     """
@@ -119,28 +120,28 @@ class TaskTool(Tool):
             "prompt": {
                 "type": "string",
                 "description": "The task for the subagent to perform",
-                "required": True
+                "required": True,
             },
             "subagent_type": {
                 "type": "string",
                 "description": f"Agent type: {', '.join(SUBAGENT_TYPES.keys())}",
-                "required": True
+                "required": True,
             },
             "description": {
                 "type": "string",
                 "description": "Short (3-5 word) description of the task",
-                "required": False
+                "required": False,
             },
             "model": {
                 "type": "string",
                 "description": "Model to use: 'default', 'fast', 'smart' (default: inherit)",
-                "required": False
+                "required": False,
             },
             "resume": {
                 "type": "string",
                 "description": "Subagent ID to resume from previous execution",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     async def _execute_validated(self, **kwargs) -> ToolResult:
@@ -163,7 +164,7 @@ class TaskTool(Tool):
             available = ", ".join(SUBAGENT_TYPES.keys())
             return ToolResult(
                 success=False,
-                error=f"Unknown subagent_type: {subagent_type}. Available: {available}"
+                error=f"Unknown subagent_type: {subagent_type}. Available: {available}",
             )
 
         # Resume existing subagent if requested
@@ -187,7 +188,7 @@ class TaskTool(Tool):
             "prompts": [prompt],
             "results": [],
             "status": "created",
-            "created_at": datetime.datetime.now().isoformat()
+            "created_at": datetime.datetime.now().isoformat(),
         }
 
         TaskTool._subagents[subagent_id] = subagent
@@ -223,14 +224,14 @@ class TaskTool(Tool):
                     "type": subagent["type"],
                     "description": subagent["description"],
                     "result": result,
-                    "can_resume": True
+                    "can_resume": True,
                 },
                 metadata={
                     "prompts_count": len(subagent["prompts"]),
                     "model": subagent["model"],
                     "tools_available": config["tools"],
-                    "read_only": config.get("read_only", False)
-                }
+                    "read_only": config.get("read_only", False),
+                },
             )
 
         except Exception as e:
@@ -266,6 +267,7 @@ class TaskTool(Tool):
             # Try to get tools bridge
             try:
                 from vertice_tui.core.tools_bridge import ToolBridge
+
                 tools = ToolBridge()
                 all_schemas = tools.get_schemas_for_llm()
 
@@ -273,10 +275,7 @@ class TaskTool(Tool):
                 if allowed_tools == "*":
                     filtered_schemas = all_schemas
                 else:
-                    filtered_schemas = [
-                        s for s in all_schemas
-                        if s.get("name") in allowed_tools
-                    ]
+                    filtered_schemas = [s for s in all_schemas if s.get("name") in allowed_tools]
 
                 # Configure LLM with restricted tools
                 if filtered_schemas:
@@ -300,22 +299,22 @@ class TaskTool(Tool):
             tool_calls = ToolCallParser.extract(response_text)
 
             # Execute tool calls if any (limited to allowed tools)
-            if tool_calls and 'tools' in dir():
+            if tool_calls and "tools" in dir():
                 for tool_name, args in tool_calls[:10]:  # Limit tool calls
                     if allowed_tools == "*" or tool_name in allowed_tools:
                         try:
                             result = await tools.execute_tool(tool_name, **args)
-                            tool_calls_executed.append({
-                                "tool": tool_name,
-                                "success": result.get("success", False),
-                                "summary": str(result.get("data", ""))[:200]
-                            })
+                            tool_calls_executed.append(
+                                {
+                                    "tool": tool_name,
+                                    "success": result.get("success", False),
+                                    "summary": str(result.get("data", ""))[:200],
+                                }
+                            )
                         except Exception as e:
-                            tool_calls_executed.append({
-                                "tool": tool_name,
-                                "success": False,
-                                "error": str(e)[:100]
-                            })
+                            tool_calls_executed.append(
+                                {"tool": tool_name, "success": False, "error": str(e)[:100]}
+                            )
 
             # Clean response
             clean_response = ToolCallParser.remove(response_text)
@@ -325,7 +324,7 @@ class TaskTool(Tool):
                 "response": clean_response[:5000],  # Limit response size
                 "tool_calls": tool_calls_executed,
                 "tools_used": len(tool_calls_executed),
-                "status": "completed"
+                "status": "completed",
             }
 
         except ImportError as e:
@@ -339,7 +338,7 @@ class TaskTool(Tool):
                 "error": str(e)[:200],
                 "fallback": True,
                 "summary": f"Subagent execution failed: {str(e)[:100]}",
-                "status": "failed"
+                "status": "failed",
             }
 
     def _build_subagent_system_prompt(self, agent_type: str, allowed_tools: Any) -> str:
@@ -353,14 +352,12 @@ Focus on:
 - Understanding project structure
 - Reporting findings concisely
 Do NOT modify any files. Read-only exploration.""",
-
             "plan": """
 Focus on:
 - Breaking down tasks into actionable steps
 - Identifying dependencies between steps
 - Estimating complexity
 Create a clear, numbered plan.""",
-
             "code-reviewer": """
 Focus on:
 - Code quality and best practices
@@ -368,14 +365,12 @@ Focus on:
 - Security concerns
 - Performance considerations
 Provide specific, actionable feedback.""",
-
             "test-runner": """
 Focus on:
 - Running relevant test suites
 - Reporting pass/fail status
 - Identifying failing tests
 - Suggesting fixes for failures""",
-
             "security": """
 Focus on:
 - OWASP Top 10 vulnerabilities
@@ -383,14 +378,12 @@ Focus on:
 - Authentication/authorization flaws
 - Data exposure risks
 Prioritize findings by severity.""",
-
             "documentation": """
 Focus on:
 - Clear, comprehensive documentation
 - Code examples where helpful
 - API documentation if applicable
 Write in markdown format.""",
-
             "refactor": """
 Focus on:
 - Improving code structure
@@ -398,11 +391,10 @@ Focus on:
 - Enhancing readability
 - Maintaining functionality
 Explain each refactoring decision.""",
-
             "general-purpose": """
 Execute the task completely and autonomously.
 Use available tools as needed.
-Report results clearly."""
+Report results clearly.""",
         }
 
         tools_str = ", ".join(allowed_tools) if isinstance(allowed_tools, list) else "all"
@@ -418,7 +410,7 @@ Report results clearly."""
             "summary": f"Task queued for {agent_type}: {prompt[:200]}...",
             "hint": "LLM not available. Configure GEMINI_API_KEY to enable full subagent capabilities.",
             "status": "queued",
-            "fallback": True
+            "fallback": True,
         }
 
     @classmethod
@@ -431,7 +423,7 @@ Report results clearly."""
                 "description": s["description"],
                 "status": s["status"],
                 "prompts_count": len(s["prompts"]),
-                "created_at": s["created_at"]
+                "created_at": s["created_at"],
             }
             for s in cls._subagents.values()
         ]

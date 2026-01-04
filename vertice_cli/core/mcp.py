@@ -33,9 +33,8 @@ from core.resilience import (
 
 
 def create_mcp_client(
-    registry: Optional['ToolRegistry'] = None,
-    auto_setup: bool = True
-) -> 'MCPClient':
+    registry: Optional["ToolRegistry"] = None, auto_setup: bool = True
+) -> "MCPClient":
     """Create MCP client with optional auto-setup (RECOMMENDED).
 
     Args:
@@ -55,20 +54,18 @@ def create_mcp_client(
     if registry is None:
         if not auto_setup:
             raise ValueError(
-                "registry required when auto_setup=False. "
-                "Quick start: mcp = create_mcp_client()"
+                "registry required when auto_setup=False. " "Quick start: mcp = create_mcp_client()"
             )
 
         from vertice_cli.tools.registry_setup import setup_default_tools
+
         registry, mcp = setup_default_tools()
         return mcp
 
     from vertice_cli.tools.base import ToolRegistry
 
     if not isinstance(registry, ToolRegistry):
-        raise TypeError(
-            f"registry must be ToolRegistry, got {type(registry).__name__}"
-        )
+        raise TypeError(f"registry must be ToolRegistry, got {type(registry).__name__}")
 
     return MCPClient(registry)
 
@@ -85,21 +82,29 @@ class MCPClient:
     """
 
     # Timeout configuration
-    TOOL_TIMEOUT: float = 30.0          # Default tool timeout
+    TOOL_TIMEOUT: float = 30.0  # Default tool timeout
     DANGEROUS_TOOL_TIMEOUT: float = 60.0  # Timeout for long-running tools
 
     # Tools that may take longer
     LONG_RUNNING_TOOLS = {
-        'bash_command', 'git_status', 'git_diff', 'git_clone',
-        'web_search', 'fetch_url', 'http_request', 'download_file',
-        'search_files', 'get_directory_tree',
-        'prometheus_simulate', 'prometheus_execute'
+        "bash_command",
+        "git_status",
+        "git_diff",
+        "git_clone",
+        "web_search",
+        "fetch_url",
+        "http_request",
+        "download_file",
+        "search_files",
+        "get_directory_tree",
+        "prometheus_simulate",
+        "prometheus_execute",
     }
 
     def __init__(
         self,
-        registry: 'ToolRegistry',
-        circuit_breaker_config: Optional[CircuitBreakerConfig] = None
+        registry: "ToolRegistry",
+        circuit_breaker_config: Optional[CircuitBreakerConfig] = None,
     ):
         """Initialize MCP client with resilience features."""
         from vertice_cli.tools.base import ToolRegistry
@@ -118,17 +123,19 @@ class MCPClient:
                 "MCPClient created with empty registry. "
                 "Agents will fail. Use create_mcp_client() for auto-setup.",
                 UserWarning,
-                stacklevel=2
+                stacklevel=2,
             )
 
         # Circuit breaker for tool execution resilience
-        # FIX: Use CLI's CircuitBreaker API (not TUI's)
+        # FIX: Use core.resilience API with correct parameter names
         self._circuit_breaker = CircuitBreaker(
-            config=circuit_breaker_config or CircuitBreakerConfig(
-                failure_threshold=3,       # Open after 3 failures
-                recovery_timeout=20.0,     # Try again after 20s
-                half_open_requests=2,      # 2 test calls in half-open
-            )
+            name="mcp_tools",
+            config=circuit_breaker_config
+            or CircuitBreakerConfig(
+                failure_threshold=3,  # Open after 3 failures
+                timeout=20.0,  # Try again after 20s
+                success_threshold=2,  # 2 successes in half-open before closing
+            ),
         )
 
         # Per-tool failure tracking for observability
@@ -144,18 +151,18 @@ class MCPClient:
         """Record tool call statistics."""
         if tool_name not in self._tool_stats:
             self._tool_stats[tool_name] = {
-                'calls': 0,
-                'successes': 0,
-                'failures': 0,
-                'total_duration': 0.0,
+                "calls": 0,
+                "successes": 0,
+                "failures": 0,
+                "total_duration": 0.0,
             }
         stats = self._tool_stats[tool_name]
-        stats['calls'] += 1
-        stats['total_duration'] += duration
+        stats["calls"] += 1
+        stats["total_duration"] += duration
         if success:
-            stats['successes'] += 1
+            stats["successes"] += 1
         else:
-            stats['failures'] += 1
+            stats["failures"] += 1
 
     async def call_tool(self, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
         """Execute a tool by name with resilience features.
@@ -167,14 +174,14 @@ class MCPClient:
         """
         start_time = time.time()
 
-        # Check circuit breaker (FIX: use CLI's is_open() method)
-        if self._circuit_breaker.is_open():
+        # Check circuit breaker (is_open is a property, not method)
+        if self._circuit_breaker.is_open:
             duration = time.time() - start_time
             self._record_tool_call(tool_name, False, duration)
             return {
-                'error': "MCP tools temporarily unavailable (circuit breaker open)",
-                'retry_after': self._circuit_breaker.config.recovery_timeout,
-                'fallback': True
+                "error": "MCP tools temporarily unavailable (circuit breaker open)",
+                "retry_after": self._circuit_breaker.config.timeout,
+                "fallback": True,
             }
 
         tool = self.registry.get(tool_name)
@@ -193,28 +200,25 @@ class MCPClient:
         try:
             # Execute with timeout protection
             timeout = self._get_tool_timeout(tool_name)
-            result = await asyncio.wait_for(
-                tool._execute_validated(**arguments),
-                timeout=timeout
-            )
+            result = await asyncio.wait_for(tool._execute_validated(**arguments), timeout=timeout)
 
             duration = time.time() - start_time
             self._record_tool_call(tool_name, True, duration)
-            self._circuit_breaker.record_success()
+            await self._circuit_breaker._record_success()
 
-        except asyncio.TimeoutError:
+        except asyncio.TimeoutError as e:
             duration = time.time() - start_time
             self._record_tool_call(tool_name, False, duration)
-            self._circuit_breaker.record_failure()  # FIX: CLI's API takes no args
+            await self._circuit_breaker._record_failure(e)
             return {
-                'error': f"Tool '{tool_name}' timed out after {timeout}s",
-                'timeout': True,
-                'fallback': True
+                "error": f"Tool '{tool_name}' timed out after {timeout}s",
+                "timeout": True,
+                "fallback": True,
             }
         except Exception as e:
             duration = time.time() - start_time
             self._record_tool_call(tool_name, False, duration)
-            self._circuit_breaker.record_failure()  # FIX: CLI's API takes no args
+            await self._circuit_breaker._record_failure(e)
             raise Exception(f"Tool '{tool_name}' failed: {str(e)}") from e
 
         from vertice_cli.tools.base import ToolResult
@@ -224,15 +228,12 @@ class MCPClient:
                 raise Exception(result.error or f"Tool '{tool_name}' failed")
             return result.data if isinstance(result.data, dict) else {"output": result.data}
 
-        if hasattr(result, 'to_dict'):
+        if hasattr(result, "to_dict"):
             return result.to_dict()
-        return {'result': result}
+        return {"result": result}
 
     async def call_tool_with_fallback(
-        self,
-        tool_name: str,
-        arguments: Dict[str, Any],
-        fallback_fn: Optional[callable] = None
+        self, tool_name: str, arguments: Dict[str, Any], fallback_fn: Optional[callable] = None
     ) -> Dict[str, Any]:
         """Execute tool with optional fallback on failure.
 
@@ -252,14 +253,11 @@ class MCPClient:
                     return await fallback_fn(tool_name, arguments, e)
                 except Exception as fallback_error:
                     return {
-                        'error': str(e),
-                        'fallback_error': str(fallback_error),
-                        'fallback': True
+                        "error": str(e),
+                        "fallback_error": str(fallback_error),
+                        "fallback": True,
                     }
-            return {
-                'error': str(e),
-                'fallback': True
-            }
+            return {"error": str(e), "fallback": True}
 
     def get_health_status(self) -> Dict[str, Any]:
         """Get MCP client health status for observability."""
@@ -267,21 +265,21 @@ class MCPClient:
         cb_status = self._circuit_breaker.get_stats()
 
         # Calculate tool stats summary
-        total_calls = sum(s['calls'] for s in self._tool_stats.values())
-        total_failures = sum(s['failures'] for s in self._tool_stats.values())
+        total_calls = sum(s["calls"] for s in self._tool_stats.values())
+        total_failures = sum(s["failures"] for s in self._tool_stats.values())
         failure_rate = total_failures / total_calls if total_calls > 0 else 0.0
 
         return {
-            'service': 'mcp_tools',
-            'healthy': not self._circuit_breaker.is_open(),  # FIX: use is_open()
-            'tools_registered': len(self.registry.tools),
-            'circuit_breaker': cb_status,
-            'stats': {
-                'total_calls': total_calls,
-                'total_failures': total_failures,
-                'failure_rate': f"{failure_rate:.2%}",
-                'per_tool': self._tool_stats,
-            }
+            "service": "mcp_tools",
+            "healthy": not self._circuit_breaker.is_open,  # is_open is property
+            "tools_registered": len(self.registry.tools),
+            "circuit_breaker": cb_status,
+            "stats": {
+                "total_calls": total_calls,
+                "total_failures": total_failures,
+                "failure_rate": f"{failure_rate:.2%}",
+                "per_tool": self._tool_stats,
+            },
         }
 
     def reset_circuit_breaker(self) -> None:
@@ -296,4 +294,4 @@ class MCPClient:
 MCPManager = MCPClient  # Alias: MCPManager -> MCPClient
 mcp_manager = create_mcp_client  # Alias: mcp_manager -> create_mcp_client
 
-__all__ = ['MCPClient', 'create_mcp_client', 'MCPManager', 'mcp_manager']
+__all__ = ["MCPClient", "create_mcp_client", "MCPManager", "mcp_manager"]

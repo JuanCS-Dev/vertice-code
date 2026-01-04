@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 class ContextType(Enum):
     """Types of context items."""
+
     FILE = "file"
     DIRECTORY = "directory"
     COMMAND = "command"
@@ -48,15 +49,17 @@ class ContextType(Enum):
 
 class ReferenceType(Enum):
     """Types of natural language references."""
-    EXPLICIT = "explicit"       # "file.py"
+
+    EXPLICIT = "explicit"  # "file.py"
     DEMONSTRATIVE = "demonstrative"  # "this file", "that function"
-    ANAPHORIC = "anaphoric"     # "it", "the other one"
-    IMPLICIT = "implicit"       # "fix the bug" (which file?)
+    ANAPHORIC = "anaphoric"  # "it", "the other one"
+    IMPLICIT = "implicit"  # "fix the bug" (which file?)
 
 
 @dataclass
 class ContextItem:
     """An item in the context history."""
+
     type: ContextType
     value: str
     timestamp: float = field(default_factory=time.time)
@@ -72,6 +75,7 @@ class ContextItem:
 @dataclass
 class ResolvedReference:
     """A resolved reference with confidence."""
+
     value: str
     type: ContextType
     confidence: float  # 0.0 to 1.0
@@ -120,23 +124,23 @@ class ContextTracker:
 
     # Natural language patterns for reference detection
     DEMONSTRATIVE_PATTERNS = [
-        (r'\b(this|that)\s+(file|folder|directory|function|class|module)\b', 0),
-        (r'\b(the|this)\s+one\b', 0),
-        (r'\b(current|active)\s+(file|folder|directory)\b', 0),
+        (r"\b(this|that)\s+(file|folder|directory|function|class|module)\b", 0),
+        (r"\b(the|this)\s+one\b", 0),
+        (r"\b(current|active)\s+(file|folder|directory)\b", 0),
     ]
 
     ANAPHORIC_PATTERNS = [
-        (r'\bthe\s+other\s+(one|file|folder)\b', 1),  # Second most recent
-        (r'\bthe\s+(first|1st|original)\s+(one|file)\b', -1),  # First/oldest
-        (r'\bthe\s+(second|2nd)\s+(one|file)\b', 1),
-        (r'\bthe\s+(last|previous)\s+(one|file)\b', 0),  # Most recent
-        (r'\bit\b', 0),  # Most recent of matching type
+        (r"\bthe\s+other\s+(one|file|folder)\b", 1),  # Second most recent
+        (r"\bthe\s+(first|1st|original)\s+(one|file)\b", -1),  # First/oldest
+        (r"\bthe\s+(second|2nd)\s+(one|file)\b", 1),
+        (r"\bthe\s+(last|previous)\s+(one|file)\b", 0),  # Most recent
+        (r"\bit\b", 0),  # Most recent of matching type
     ]
 
     IMPLICIT_PATTERNS = [
-        (r'\b(fix|edit|update|change|modify)\s+(the\s+)?(bug|error|issue)\b', ContextType.FILE),
-        (r'\b(run|execute)\s+(the\s+)?(test|tests)\b', ContextType.FILE),
-        (r'\b(commit|push|pull)\b', ContextType.GIT_BRANCH),
+        (r"\b(fix|edit|update|change|modify)\s+(the\s+)?(bug|error|issue)\b", ContextType.FILE),
+        (r"\b(run|execute)\s+(the\s+)?(test|tests)\b", ContextType.FILE),
+        (r"\b(commit|push|pull)\b", ContextType.GIT_BRANCH),
     ]
 
     def __init__(
@@ -203,50 +207,21 @@ class ContextTracker:
         logger.debug(f"Recorded context: {type.value}={value}")
         return item
 
-    def record_file_access(
-        self,
-        path: str,
-        operation: str = "access",
-        **metadata
-    ) -> ContextItem:
+    def record_file_access(self, path: str, operation: str = "access", **metadata) -> ContextItem:
         """Record file access."""
         return self.record(
-            ContextType.FILE,
-            str(path),
-            metadata={"operation": operation, **metadata}
+            ContextType.FILE, str(path), metadata={"operation": operation, **metadata}
         )
 
-    def record_directory_access(
-        self,
-        path: str,
-        **metadata
-    ) -> ContextItem:
+    def record_directory_access(self, path: str, **metadata) -> ContextItem:
         """Record directory access."""
-        return self.record(
-            ContextType.DIRECTORY,
-            str(path),
-            metadata=metadata
-        )
+        return self.record(ContextType.DIRECTORY, str(path), metadata=metadata)
 
-    def record_command(
-        self,
-        command: str,
-        success: bool = True,
-        **metadata
-    ) -> ContextItem:
+    def record_command(self, command: str, success: bool = True, **metadata) -> ContextItem:
         """Record command execution."""
-        return self.record(
-            ContextType.COMMAND,
-            command,
-            metadata={"success": success, **metadata}
-        )
+        return self.record(ContextType.COMMAND, command, metadata={"success": success, **metadata})
 
-    def record_error(
-        self,
-        error: str,
-        file_path: Optional[str] = None,
-        **metadata
-    ) -> ContextItem:
+    def record_error(self, error: str, file_path: Optional[str] = None, **metadata) -> ContextItem:
         """Record an error."""
         meta = {"file_path": file_path, **metadata} if file_path else metadata
         return self.record(ContextType.ERROR, error, metadata=meta)
@@ -317,10 +292,7 @@ class ContextTracker:
         if text_lower in self._named:
             item = self._named[text_lower]
             return ResolvedReference(
-                value=item.value,
-                type=item.type,
-                confidence=1.0,
-                reason="Named reference"
+                value=item.value, type=item.type, confidence=1.0, reason="Named reference"
             )
 
         # Try demonstrative patterns ("this file", "that folder")
@@ -374,17 +346,14 @@ class ContextTracker:
                     value=item.value,
                     type=item.type,
                     confidence=0.9,
-                    reason=f"Demonstrative reference: '{match_text}'"
+                    reason=f"Demonstrative reference: '{match_text}'",
                 )
 
         # Fallback to any recent item
         if self._recent:
             item = self._recent[-1]
             return ResolvedReference(
-                value=item.value,
-                type=item.type,
-                confidence=0.7,
-                reason="Most recent item"
+                value=item.value, type=item.type, confidence=0.7, reason="Most recent item"
             )
 
         return None
@@ -409,7 +378,7 @@ class ContextTracker:
                     type=items[1].type,
                     confidence=0.85,
                     reason="The other one (second most recent)",
-                    alternatives=[items[0].value]
+                    alternatives=[items[0].value],
                 )
 
         # Handle "first", "original"
@@ -422,7 +391,7 @@ class ContextTracker:
                     value=oldest.value,
                     type=oldest.type,
                     confidence=0.8,
-                    reason="First/original reference"
+                    reason="First/original reference",
                 )
 
         # Default: most recent
@@ -432,7 +401,7 @@ class ContextTracker:
                 value=item.value,
                 type=item.type,
                 confidence=0.85,
-                reason=f"Anaphoric reference: '{match_text}'"
+                reason=f"Anaphoric reference: '{match_text}'",
             )
 
         return None
@@ -453,7 +422,7 @@ class ContextTracker:
                         value=file_path,
                         type=ContextType.FILE,
                         confidence=0.75,
-                        reason="Implicit reference from recent error"
+                        reason="Implicit reference from recent error",
                     )
 
         # Default to most recent of expected type
@@ -463,7 +432,7 @@ class ContextTracker:
                 value=item.value,
                 type=item.type,
                 confidence=0.6,
-                reason="Implicit reference to recent context"
+                reason="Implicit reference to recent context",
             )
 
         return None
@@ -473,8 +442,8 @@ class ContextTracker:
         # Common file patterns
         patterns = [
             r'["\']([^"\']+\.[a-zA-Z0-9]+)["\']',  # Quoted paths
-            r'\b(\S+\.[a-zA-Z0-9]{1,5})\b',  # File with extension
-            r'\b((?:[\w-]+/)+[\w.-]+)\b',  # Path with slashes
+            r"\b(\S+\.[a-zA-Z0-9]{1,5})\b",  # File with extension
+            r"\b((?:[\w-]+/)+[\w.-]+)\b",  # Path with slashes
         ]
 
         for pattern in patterns:
@@ -489,7 +458,7 @@ class ContextTracker:
                         value=str(full_path),
                         type=ContextType.FILE,
                         confidence=0.95,
-                        reason="Explicit file path found"
+                        reason="Explicit file path found",
                     )
 
                 # Check in recent files
@@ -499,7 +468,7 @@ class ContextTracker:
                             value=item.value,
                             type=ContextType.FILE,
                             confidence=0.8,
-                            reason="Matched recent file"
+                            reason="Matched recent file",
                         )
 
         return None
@@ -548,25 +517,25 @@ class ContextTracker:
 
     def record_intent(self, intent: str) -> None:
         """Record user's intent for tracking changes of mind."""
-        if not hasattr(self, '_intents'):
+        if not hasattr(self, "_intents"):
             self._intents = []
         self._intents.append(intent)
 
     def get_current_intent(self) -> str:
         """Get the current (most recent) intent."""
-        if hasattr(self, '_intents') and self._intents:
+        if hasattr(self, "_intents") and self._intents:
             return self._intents[-1]
         return ""
 
     def record_interaction(self, question: str, answer: str) -> None:
         """Record a Q&A interaction for context building."""
-        if not hasattr(self, '_interactions'):
+        if not hasattr(self, "_interactions"):
             self._interactions = []
         self._interactions.append((question, answer))
 
     def get_previous_topic(self) -> Optional[str]:
         """Get the topic from the previous interaction."""
-        if hasattr(self, '_interactions') and self._interactions:
+        if hasattr(self, "_interactions") and self._interactions:
             return self._interactions[-1][1]
         return None
 
@@ -585,6 +554,7 @@ def get_context_tracker() -> ContextTracker:
 
 # Convenience functions
 
+
 def record_file(path: str, operation: str = "access") -> ContextItem:
     """Record file access."""
     return get_context_tracker().record_file_access(path, operation)
@@ -596,7 +566,9 @@ def resolve_reference(text: str) -> Optional[ResolvedReference]:
 
 
 # Add resolve_reference as method to ContextTracker for test compatibility
-ContextTracker.resolve_reference = lambda self, text, expected_type=None: self.resolve(text, expected_type)
+ContextTracker.resolve_reference = lambda self, text, expected_type=None: self.resolve(
+    text, expected_type
+)
 
 
 def get_recent_files(limit: int = 5) -> List[str]:
@@ -607,13 +579,13 @@ def get_recent_files(limit: int = 5) -> List[str]:
 
 # Export all public symbols
 __all__ = [
-    'ContextType',
-    'ReferenceType',
-    'ContextItem',
-    'ResolvedReference',
-    'ContextTracker',
-    'get_context_tracker',
-    'record_file',
-    'resolve_reference',
-    'get_recent_files',
+    "ContextType",
+    "ReferenceType",
+    "ContextItem",
+    "ResolvedReference",
+    "ContextTracker",
+    "get_context_tracker",
+    "record_file",
+    "resolve_reference",
+    "get_recent_files",
 ]

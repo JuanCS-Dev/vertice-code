@@ -23,18 +23,20 @@ import threading
 
 class AuthScope(Flag):
     """Authorization scopes."""
+
     NONE = 0
-    READ = auto()           # Read files
-    WRITE = auto()          # Write files
-    EXECUTE = auto()        # Execute commands
-    NETWORK = auto()        # Network access
-    ADMIN = auto()          # Admin operations
+    READ = auto()  # Read files
+    WRITE = auto()  # Write files
+    EXECUTE = auto()  # Execute commands
+    NETWORK = auto()  # Network access
+    ADMIN = auto()  # Admin operations
     ALL = READ | WRITE | EXECUTE | NETWORK | ADMIN
 
 
 @dataclass
 class AuthToken:
     """Authentication token."""
+
     token_id: str
     name: str
     scopes: AuthScope
@@ -67,7 +69,7 @@ class AuthToken:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'AuthToken':
+    def from_dict(cls, data: Dict[str, Any]) -> "AuthToken":
         """Create from dictionary."""
         return cls(
             token_id=data["token_id"],
@@ -83,6 +85,7 @@ class AuthToken:
 @dataclass
 class AuthSession:
     """Authentication session."""
+
     session_id: str
     token_id: str
     created_at: float
@@ -122,11 +125,7 @@ class AuthenticationManager:
     # Token storage file
     TOKEN_FILE = ".vertice_tokens"
 
-    def __init__(
-        self,
-        storage_path: Optional[Path] = None,
-        secret_key: Optional[str] = None
-    ):
+    def __init__(self, storage_path: Optional[Path] = None, secret_key: Optional[str] = None):
         self._storage_path = storage_path or Path.home() / ".vertice"
         self._secret_key = secret_key or self._get_or_create_secret()
         self._tokens: Dict[str, AuthToken] = {}
@@ -152,11 +151,7 @@ class AuthenticationManager:
 
     def _hash_secret(self, secret: str) -> str:
         """Hash a secret using HMAC-SHA256."""
-        return hmac.new(
-            self._secret_key.encode(),
-            secret.encode(),
-            hashlib.sha256
-        ).hexdigest()
+        return hmac.new(self._secret_key.encode(), secret.encode(), hashlib.sha256).hexdigest()
 
     def _load_tokens(self) -> None:
         """Load tokens from storage."""
@@ -188,7 +183,7 @@ class AuthenticationManager:
             "secrets": self._token_secrets,
         }
 
-        with open(token_file, 'w') as f:
+        with open(token_file, "w") as f:
             json.dump(data, f, indent=2)
 
         # Secure permissions
@@ -199,7 +194,7 @@ class AuthenticationManager:
         name: str,
         scopes: AuthScope = AuthScope.READ,
         expires_in: Optional[int] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> tuple[AuthToken, str]:
         """
         Create a new authentication token.
@@ -235,11 +230,7 @@ class AuthenticationManager:
 
             return token, secret
 
-    def validate_token(
-        self,
-        token_id: str,
-        secret: Optional[str] = None
-    ) -> bool:
+    def validate_token(self, token_id: str, secret: Optional[str] = None) -> bool:
         """
         Validate a token.
 
@@ -261,21 +252,14 @@ class AuthenticationManager:
 
             if secret:
                 hashed = self._hash_secret(secret)
-                if not hmac.compare_digest(
-                    hashed,
-                    self._token_secrets.get(token_id, "")
-                ):
+                if not hmac.compare_digest(hashed, self._token_secrets.get(token_id, "")):
                     return False
 
             # Update last used
             token.last_used = time.time()
             return True
 
-    def authorize(
-        self,
-        token_id: str,
-        required_scope: AuthScope
-    ) -> bool:
+    def authorize(self, token_id: str, required_scope: AuthScope) -> bool:
         """
         Check if token is authorized for a scope.
 
@@ -315,11 +299,7 @@ class AuthenticationManager:
                 return True
             return False
 
-    def update_scopes(
-        self,
-        token_id: str,
-        scopes: AuthScope
-    ) -> bool:
+    def update_scopes(self, token_id: str, scopes: AuthScope) -> bool:
         """Update token scopes."""
         with self._lock:
             token = self._tokens.get(token_id)
@@ -334,7 +314,7 @@ class AuthenticationManager:
         token_id: str,
         expires_in: int = 3600,
         ip_address: Optional[str] = None,
-        user_agent: Optional[str] = None
+        user_agent: Optional[str] = None,
     ) -> Optional[AuthSession]:
         """Create an authentication session."""
         if not self.validate_token(token_id):
@@ -383,20 +363,14 @@ class AuthenticationManager:
 
         with self._lock:
             # Expired tokens
-            expired_tokens = [
-                tid for tid, t in self._tokens.items()
-                if t.is_expired
-            ]
+            expired_tokens = [tid for tid, t in self._tokens.items() if t.is_expired]
             for tid in expired_tokens:
                 del self._tokens[tid]
                 self._token_secrets.pop(tid, None)
                 cleaned += 1
 
             # Expired sessions
-            expired_sessions = [
-                sid for sid, s in self._sessions.items()
-                if now > s.expires_at
-            ]
+            expired_sessions = [sid for sid, s in self._sessions.items() if now > s.expires_at]
             for sid in expired_sessions:
                 del self._sessions[sid]
                 cleaned += 1
@@ -428,8 +402,8 @@ class AuthenticationManager:
 
 
 __all__ = [
-    'AuthenticationManager',
-    'AuthToken',
-    'AuthScope',
-    'AuthSession',
+    "AuthenticationManager",
+    "AuthToken",
+    "AuthScope",
+    "AuthSession",
 ]

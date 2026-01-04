@@ -21,7 +21,7 @@ def log_error(
     error: Exception,
     context: str = "",
     include_traceback: bool = True,
-    **extra: Any
+    **extra: Any,
 ) -> str:
     """
     Log an error with full context and optional traceback.
@@ -53,12 +53,7 @@ def log_error(
     return full_msg
 
 
-def log_warning(
-    logger: logging.Logger,
-    error: Exception,
-    context: str = "",
-    **extra: Any
-) -> str:
+def log_warning(logger: logging.Logger, error: Exception, context: str = "", **extra: Any) -> str:
     """
     Log a warning with error context (no traceback).
 
@@ -85,7 +80,7 @@ def log_retry(
     attempt: int,
     max_attempts: int,
     context: str = "",
-    **extra: Any
+    **extra: Any,
 ) -> str:
     """
     Log a retry attempt with context.
@@ -95,10 +90,7 @@ def log_retry(
     error_type = type(error).__name__
     error_msg = str(error)[:200]
 
-    full_msg = (
-        f"[RETRY {attempt}/{max_attempts}] {context}: "
-        f"{error_type}: {error_msg}"
-    )
+    full_msg = f"[RETRY {attempt}/{max_attempts}] {context}: " f"{error_type}: {error_msg}"
 
     # Use WARNING for first attempts, ERROR if near max
     if attempt >= max_attempts - 1:
@@ -109,11 +101,7 @@ def log_retry(
     return full_msg
 
 
-def format_error_for_user(
-    error: Exception,
-    context: str = "",
-    show_type: bool = True
-) -> str:
+def format_error_for_user(error: Exception, context: str = "", show_type: bool = True) -> str:
     """
     Format error for user display (no internal details).
 
@@ -153,9 +141,7 @@ def format_error_for_user(
 
 
 def create_error_result(
-    error: Exception,
-    context: str = "",
-    include_type: bool = True
+    error: Exception, context: str = "", include_type: bool = True
 ) -> Dict[str, Any]:
     """
     Create a standardized error result dictionary.
@@ -237,13 +223,7 @@ class ErrorContext:
         # Errors are automatically logged with context
     """
 
-    def __init__(
-        self,
-        logger: logging.Logger,
-        context: str,
-        reraise: bool = True,
-        **extra: Any
-    ):
+    def __init__(self, logger: logging.Logger, context: str, reraise: bool = True, **extra: Any):
         self.logger = logger
         self.context = context
         self.extra = extra
@@ -255,12 +235,7 @@ class ErrorContext:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_val is not None:
-            log_error(
-                self.logger,
-                exc_val,
-                self.context,
-                **self.extra
-            )
+            log_error(self.logger, exc_val, self.context, **self.extra)
             return not self.reraise  # Suppress if reraise=False
         return False
 

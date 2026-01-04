@@ -57,6 +57,7 @@ class SelectableStatic(Static):
                 except Exception as e:
                     # Clipboard access may fail in some environments
                     import logging
+
                     logging.warning(f"Clipboard copy failed: {e}")
 
     def on_double_click(self, event: events.Click) -> None:
@@ -73,7 +74,7 @@ class SelectableStatic(Static):
             return
 
         try:
-            if hasattr(self.renderable, 'plain'):
+            if hasattr(self.renderable, "plain"):
                 text = self.renderable.plain
             elif isinstance(self.renderable, str):
                 text = self.renderable
@@ -81,10 +82,12 @@ class SelectableStatic(Static):
                 text = str(self.renderable)
 
             # For simplicity, copy entire content if there's a selection
-            if abs(self.selection_end.y - self.selection_start.y) > 0 or \
-               abs(self.selection_end.x - self.selection_start.x) > 5:
+            if (
+                abs(self.selection_end.y - self.selection_start.y) > 0
+                or abs(self.selection_end.x - self.selection_start.x) > 5
+            ):
                 self.selected_text = text
             else:
                 self.selected_text = ""
-        except Exception:
+        except (AttributeError, TypeError):
             self.selected_text = ""

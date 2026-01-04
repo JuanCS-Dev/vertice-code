@@ -1,4 +1,5 @@
 """Web search tool using DuckDuckGo."""
+
 import logging
 from typing import Optional
 
@@ -18,21 +19,17 @@ class WebSearchTool(ValidatedTool):
         self.category = ToolCategory.SEARCH
         self.description = "Search the web for information using DuckDuckGo"
         self.parameters = {
-            "query": {
-                "type": "string",
-                "description": "Search query",
-                "required": True
-            },
+            "query": {"type": "string", "description": "Search query", "required": True},
             "max_results": {
                 "type": "integer",
                 "description": "Maximum number of results to return (default: 5, max: 20)",
-                "required": False
+                "required": False,
             },
             "time_range": {
                 "type": "string",
                 "description": "Time range filter: 'd' (day), 'w' (week), 'm' (month), 'y' (year), or None for all time",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     def get_validators(self):
@@ -40,19 +37,16 @@ class WebSearchTool(ValidatedTool):
         return {}
 
     async def _execute_validated(
-        self,
-        query: str,
-        max_results: int = 5,
-        time_range: Optional[str] = None
+        self, query: str, max_results: int = 5, time_range: Optional[str] = None
     ) -> ToolResult:
         """
         Search the web via DuckDuckGo.
-        
+
         Args:
             query: Search query string
             max_results: Number of results to return (1-20)
             time_range: Filter by time ('d', 'w', 'm', 'y', or None)
-        
+
         Returns:
             ToolResult with list of search results
         """
@@ -61,7 +55,7 @@ class WebSearchTool(ValidatedTool):
             max_results = max(1, min(max_results, 20))
 
             # Validate time_range
-            valid_time_ranges = ['d', 'w', 'm', 'y', None]
+            valid_time_ranges = ["d", "w", "m", "y", None]
             if time_range not in valid_time_ranges:
                 logger.warning(
                     f"Invalid time_range '{time_range}', using None. "
@@ -69,15 +63,13 @@ class WebSearchTool(ValidatedTool):
                 )
                 time_range = None
 
-            logger.info(f"Web search: query='{query}', max_results={max_results}, time_range={time_range}")
+            logger.info(
+                f"Web search: query='{query}', max_results={max_results}, time_range={time_range}"
+            )
 
             # Execute search
             with DDGS() as ddgs:
-                results_raw = ddgs.text(
-                    query=query,
-                    max_results=max_results,
-                    timelimit=time_range
-                )
+                results_raw = ddgs.text(query=query, max_results=max_results, timelimit=time_range)
 
             if not results_raw:
                 return ToolResult(
@@ -87,19 +79,21 @@ class WebSearchTool(ValidatedTool):
                         "query": query,
                         "count": 0,
                         "message": "No results found",
-                        "engine": "duckduckgo"
-                    }
+                        "engine": "duckduckgo",
+                    },
                 )
 
             # Parse and structure results
             results = []
             for item in results_raw:
-                results.append({
-                    "title": item.get("title", ""),
-                    "url": item.get("href", ""),
-                    "snippet": item.get("body", ""),
-                    "source": item.get("href", "").split("/")[2] if item.get("href") else ""
-                })
+                results.append(
+                    {
+                        "title": item.get("title", ""),
+                        "url": item.get("href", ""),
+                        "snippet": item.get("body", ""),
+                        "source": item.get("href", "").split("/")[2] if item.get("href") else "",
+                    }
+                )
 
             logger.info(f"Web search successful: {len(results)} results")
 
@@ -110,64 +104,56 @@ class WebSearchTool(ValidatedTool):
                     "query": query,
                     "count": len(results),
                     "engine": "duckduckgo",
-                    "time_range": time_range
-                }
+                    "time_range": time_range,
+                },
             )
 
         except Exception as e:
             logger.error(f"Web search failed: {e}", exc_info=True)
-            return ToolResult(
-                success=False,
-                error=f"Web search failed: {str(e)}"
-            )
+            return ToolResult(success=False, error=f"Web search failed: {str(e)}")
 
 
 class SearchDocumentationTool(ValidatedTool):
     """
     Specialized tool for searching technical documentation.
-    
+
     Uses site-specific search to target documentation sites directly.
     """
 
     def __init__(self):
         super().__init__()
         self.category = ToolCategory.SEARCH
-        self.description = "Search technical documentation sites (GitHub, Read the Docs, official docs)"
+        self.description = (
+            "Search technical documentation sites (GitHub, Read the Docs, official docs)"
+        )
         self.parameters = {
-            "query": {
-                "type": "string",
-                "description": "Search query",
-                "required": True
-            },
+            "query": {"type": "string", "description": "Search query", "required": True},
             "site": {
                 "type": "string",
                 "description": "Specific site to search (e.g., 'github.com', 'readthedocs.io', 'gradio.app')",
-                "required": False
+                "required": False,
             },
             "max_results": {
                 "type": "integer",
                 "description": "Maximum number of results",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     def get_validators(self):
         return {}
 
     async def _execute_validated(
-        self,
-        query: str,
-        site: Optional[str] = None,
-        max_results: int = 5
+        self, query: str, site: Optional[str] = None, max_results: int = 5
     ) -> ToolResult:
         """
         Search documentation with optional site filtering.
-        
+
         Args:
             query: Search query
             site: Optional site to restrict search to
             max_results: Number of results
-        
+
         Returns:
             ToolResult with documentation search results
         """
@@ -181,10 +167,7 @@ class SearchDocumentationTool(ValidatedTool):
 
             # Use WebSearchTool internally
             web_tool = WebSearchTool()
-            result = await web_tool.execute(
-                query=search_query,
-                max_results=max_results
-            )
+            result = await web_tool.execute(query=search_query, max_results=max_results)
 
             if not result.success:
                 return result
@@ -198,7 +181,4 @@ class SearchDocumentationTool(ValidatedTool):
 
         except Exception as e:
             logger.error(f"Documentation search failed: {e}", exc_info=True)
-            return ToolResult(
-                success=False,
-                error=f"Documentation search failed: {str(e)}"
-            )
+            return ToolResult(success=False, error=f"Documentation search failed: {str(e)}")

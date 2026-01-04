@@ -31,6 +31,7 @@ from .interface import (
 # Try to import redis
 try:
     import redis.asyncio as aioredis
+
     REDIS_AVAILABLE = True
 except ImportError:
     aioredis = None
@@ -95,7 +96,7 @@ class RedisQueue(IMessageQueue):
             socket_timeout=self._redis_config.socket_timeout,
             socket_connect_timeout=self._redis_config.socket_connect_timeout,
             max_connections=self._redis_config.max_connections,
-            decode_responses=True
+            decode_responses=True,
         )
 
     async def disconnect(self) -> None:
@@ -109,11 +110,7 @@ class RedisQueue(IMessageQueue):
         if self._redis is None:
             await self.connect()
 
-    async def publish(
-        self,
-        message: Message,
-        delay: float = 0.0
-    ) -> str:
+    async def publish(self, message: Message, delay: float = 0.0) -> str:
         """Publish a message to the queue."""
         await self._ensure_connected()
 
@@ -130,11 +127,7 @@ class RedisQueue(IMessageQueue):
 
         return message.id
 
-    async def consume(
-        self,
-        count: int = 1,
-        timeout: float = 0.0
-    ) -> List[Message]:
+    async def consume(self, count: int = 1, timeout: float = 0.0) -> List[Message]:
         """Consume messages from the queue."""
         await self._ensure_connected()
 
@@ -147,10 +140,7 @@ class RedisQueue(IMessageQueue):
             try:
                 if timeout > 0:
                     # Blocking pop with timeout
-                    result = await self._redis.blpop(
-                        self._queue_key,
-                        timeout=timeout
-                    )
+                    result = await self._redis.blpop(self._queue_key, timeout=timeout)
                     if result:
                         _, message_data = result
                     else:
@@ -167,8 +157,7 @@ class RedisQueue(IMessageQueue):
                 # Store in processing set with visibility timeout
                 visibility_timeout = time.time() + self._config.visibility_timeout
                 await self._redis.zadd(
-                    self._processing_key,
-                    {json.dumps(message.to_dict()): visibility_timeout}
+                    self._processing_key, {json.dumps(message.to_dict()): visibility_timeout}
                 )
 
                 self._processing[message.id] = message
@@ -185,18 +174,14 @@ class RedisQueue(IMessageQueue):
         now = time.time()
 
         # Get all messages with score <= now
-        ready_messages = await self._redis.zrangebyscore(
-            self._delayed_key,
-            '-inf',
-            now
-        )
+        ready_messages = await self._redis.zrangebyscore(self._delayed_key, "-inf", now)
 
         if ready_messages:
             # Move to main queue
             pipe = self._redis.pipeline()
             for msg in ready_messages:
                 pipe.rpush(self._queue_key, msg)
-            pipe.zremrangebyscore(self._delayed_key, '-inf', now)
+            pipe.zremrangebyscore(self._delayed_key, "-inf", now)
             await pipe.execute()
 
     async def ack(self, message_id: str) -> bool:
@@ -220,11 +205,7 @@ class RedisQueue(IMessageQueue):
 
         return True
 
-    async def nack(
-        self,
-        message_id: str,
-        requeue: bool = True
-    ) -> bool:
+    async def nack(self, message_id: str, requeue: bool = True) -> bool:
         """Negative acknowledge message."""
         await self._ensure_connected()
 
@@ -282,11 +263,7 @@ class RedisQueue(IMessageQueue):
         now = time.time()
 
         # Get stale messages
-        stale = await self._redis.zrangebyscore(
-            self._processing_key,
-            '-inf',
-            now
-        )
+        stale = await self._redis.zrangebyscore(self._processing_key, "-inf", now)
 
         if not stale:
             return 0
@@ -297,7 +274,7 @@ class RedisQueue(IMessageQueue):
             msg = Message.from_dict(json.loads(msg_data))
             msg.status = MessageStatus.PENDING
             pipe.rpush(self._queue_key, json.dumps(msg.to_dict()))
-        pipe.zremrangebyscore(self._processing_key, '-inf', now)
+        pipe.zremrangebyscore(self._processing_key, "-inf", now)
         await pipe.execute()
 
         return len(stale)
@@ -325,10 +302,7 @@ class RedisBroker(IMessageBroker):
             if not REDIS_AVAILABLE:
                 raise RuntimeError("redis package not installed")
 
-            self._redis = aioredis.from_url(
-                self._redis_config.url,
-                decode_responses=True
-            )
+            self._redis = aioredis.from_url(self._redis_config.url, decode_responses=True)
 
     async def create_queue(self, config: QueueConfig) -> IMessageQueue:
         """Create or get a queue."""
@@ -356,10 +330,7 @@ class RedisBroker(IMessageBroker):
         return list(self._queues.keys())
 
     async def subscribe(
-        self,
-        topic: str,
-        handler: Callable[[Message], Any],
-        queue_name: Optional[str] = None
+        self, topic: str, handler: Callable[[Message], Any], queue_name: Optional[str] = None
     ) -> str:
         """Subscribe to a topic using Redis pub/sub."""
         await self._ensure_connected()
@@ -394,19 +365,12 @@ class RedisBroker(IMessageBroker):
         return True
 
     async def publish(
-        self,
-        topic: str,
-        payload: Any,
-        headers: Optional[Dict[str, str]] = None
+        self, topic: str, payload: Any, headers: Optional[Dict[str, str]] = None
     ) -> str:
         """Publish to a topic."""
         await self._ensure_connected()
 
-        message = Message(
-            topic=topic,
-            payload=payload,
-            headers=headers or {}
-        )
+        message = Message(topic=topic, payload=payload, headers=headers or {})
 
         await self._redis.publish(topic, json.dumps(message.to_dict()))
         return message.id
@@ -424,14 +388,10 @@ class RedisBroker(IMessageBroker):
         while self._running and self._pubsub:
             try:
                 message = await self._pubsub.get_message(
-                    ignore_subscribe_messages=True,
-                    timeout=1.0
+                    ignore_subscribe_messages=True, timeout=1.0
                 )
-                if message and message['type'] == 'message':
-                    await self._dispatch_message(
-                        message['channel'],
-                        message['data']
-                    )
+                if message and message["type"] == "message":
+                    await self._dispatch_message(message["channel"], message["data"])
             except asyncio.CancelledError:
                 break
             except Exception as e:
@@ -479,8 +439,8 @@ class RedisBroker(IMessageBroker):
 
 
 __all__ = [
-    'RedisQueue',
-    'RedisBroker',
-    'RedisConfig',
-    'REDIS_AVAILABLE',
+    "RedisQueue",
+    "RedisBroker",
+    "RedisConfig",
+    "REDIS_AVAILABLE",
 ]

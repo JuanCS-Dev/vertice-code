@@ -44,7 +44,7 @@ class LLMProcessingHandler:
     5. Handle errors gracefully
     """
 
-    def __init__(self, shell: 'InteractiveShell'):
+    def __init__(self, shell: "InteractiveShell"):
         """
         Initialize with shell reference.
 
@@ -94,9 +94,7 @@ class LLMProcessingHandler:
 
         # P2: Build rich context (enhanced)
         context_dict = self.rich_context.build_rich_context(
-            include_git=True,
-            include_env=True,
-            include_recent=True
+            include_git=True, include_env=True, include_recent=True
         )
 
         # Old format for compatibility
@@ -104,7 +102,7 @@ class LLMProcessingHandler:
             current_command=user_input,
             command_history=self.context.history[-10:],
             recent_errors=[],
-            working_dir=os.getcwd()
+            working_dir=os.getcwd(),
         )
 
         # Show analyzing status
@@ -117,10 +115,12 @@ class LLMProcessingHandler:
             from vertice_cli.shell.streaming_integration import stream_llm_response
 
             # Build system prompt (fix - convert list items to strings)
-            recent_files_str = ', '.join([
-                str(f) if isinstance(f, dict) else f
-                for f in context_dict.get('recent_files', [])[:5]
-            ])
+            recent_files_str = ", ".join(
+                [
+                    str(f) if isinstance(f, dict) else f
+                    for f in context_dict.get("recent_files", [])[:5]
+                ]
+            )
 
             system_prompt = f"""You are an AI code assistant with access to the following context:
 
@@ -137,12 +137,14 @@ Provide clear, actionable suggestions."""
                 console=self.console,
                 workflow_viz=None,  # Disabled for now
                 context_engine=self.context_engine,
-                system_prompt=system_prompt
+                system_prompt=system_prompt,
             )
 
         except Exception as e:
             self.console.print(f"[red]❌ LLM failed: {e}[/red]")
-            self.console.print("[yellow]💡 Tip: Check your API key (GEMINI_API_KEY or HF_TOKEN)[/yellow]")
+            self.console.print(
+                "[yellow]💡 Tip: Check your API key (GEMINI_API_KEY or HF_TOKEN)[/yellow]"
+            )
             return
 
         elapsed = time.time() - start_time
@@ -174,7 +176,9 @@ Provide clear, actionable suggestions."""
             user_confirmation = input()
 
             # Validate confirmation
-            if not danger_detector.validate_confirmation(danger_warning, user_confirmation, suggestion):
+            if not danger_detector.validate_confirmation(
+                danger_warning, user_confirmation, suggestion
+            ):
                 self.console.print("[yellow]❌ Cancelled - confirmation failed[/yellow]")
                 return
 
@@ -194,15 +198,15 @@ Provide clear, actionable suggestions."""
             elif safety_level == 1:  # Needs confirmation
                 self.console.print("[yellow]⚠️  Requires confirmation[/yellow]")
                 confirm = input("Execute? [y/N] ").strip().lower()
-                if confirm not in ['y', 'yes']:
+                if confirm not in ["y", "yes"]:
                     self.console.print("[dim]Cancelled[/dim]")
                     return
             else:  # Safe
                 self.console.print("[green]✓ Safe command[/green]")
                 confirm = input("Execute? [Y/n] ").strip().lower()
                 if not confirm:  # Default yes for safe commands
-                    confirm = 'y'
-                if confirm not in ['y', 'yes']:
+                    confirm = "y"
+                if confirm not in ["y", "yes"]:
                     self.console.print("[dim]Cancelled[/dim]")
                     return
 
@@ -220,18 +224,20 @@ Provide clear, actionable suggestions."""
             result = await self.execute_command(suggestion)
 
             # Show result
-            if result.get('success'):
+            if result.get("success"):
                 self.state_transition.transition_to("success")
                 self.workflow_viz.update_step_status("execute", StepStatus.COMPLETED)
 
                 # Complete dashboard operation (Task 1.6)
-                self.dashboard.complete_operation(op_id, OperationStatus.SUCCESS, tokens_used=0, cost=0.0)
+                self.dashboard.complete_operation(
+                    op_id, OperationStatus.SUCCESS, tokens_used=0, cost=0.0
+                )
 
                 # Animated success message (Task 1.5)
                 text = Text("✓ Success", style="green bold")
                 self.console.print(text)
-                if result.get('output'):
-                    self.console.print(result['output'])
+                if result.get("output"):
+                    self.console.print(result["output"])
 
                 # Track assistant response in session (AIR GAP #2)
                 response = f"Executed: {suggestion}\nOutput: {result.get('output', '')[:200]}"
@@ -249,8 +255,8 @@ Provide clear, actionable suggestions."""
                 self.console.print(text)
 
                 # P1: Intelligent error parsing
-                if result.get('error'):
-                    error_text = result['error']
+                if result.get("error"):
+                    error_text = result["error"]
                     self.console.print(f"[red]{error_text}[/red]")
                     self.console.print()
 
@@ -272,12 +278,12 @@ Provide clear, actionable suggestions."""
                     if analysis.can_auto_fix and analysis.auto_fix_command:
                         self.console.print(f"[green]Auto-fix: {analysis.auto_fix_command}[/green]")
                         fix = input("Run auto-fix? [y/N] ").strip().lower()
-                        if fix == 'y':
+                        if fix == "y":
                             fix_result = await self.execute_command(analysis.auto_fix_command)
-                            if fix_result['success']:
+                            if fix_result["success"]:
                                 self.console.print("[green]✓ Auto-fix completed[/green]")
-                                if fix_result['output']:
-                                    self.console.print(fix_result['output'])
+                                if fix_result["output"]:
+                                    self.console.print(fix_result["output"])
 
         except Exception as e:
             self.console.print(f"[red]❌ Execution failed: {e}[/red]")
@@ -327,8 +333,7 @@ Output ONLY the command, no explanation, no markdown."""
             command = self.extract_command(response)
             return command
 
-        except Exception:
-            # Any LLM error: fallback gracefully
+        except (RuntimeError, ValueError, AttributeError, ConnectionError):
             self.console.print("[yellow]⚠️  LLM unavailable, using fallback[/yellow]")
             return self.fallback_suggest(user_request)
 
@@ -345,18 +350,22 @@ Output ONLY the command, no explanation, no markdown."""
         req_lower = user_request.lower()
 
         # Simple pattern matching
-        if 'large file' in req_lower or 'big file' in req_lower:
+        if "large file" in req_lower or "big file" in req_lower:
             return "find . -type f -size +100M"
-        elif 'process' in req_lower and 'memory' in req_lower:
+        elif "process" in req_lower and "memory" in req_lower:
             return "ps aux --sort=-%mem | head -10"
-        elif 'disk' in req_lower and ('space' in req_lower or 'usage' in req_lower):
+        elif "disk" in req_lower and ("space" in req_lower or "usage" in req_lower):
             return "df -h"
-        elif 'list' in req_lower and 'file' in req_lower:
+        elif "list" in req_lower and "file" in req_lower:
             return "ls -lah"
         else:
             # Truncate huge inputs to prevent memory issues
             max_display = 100
-            truncated = user_request[:max_display] + "..." if len(user_request) > max_display else user_request
+            truncated = (
+                user_request[:max_display] + "..."
+                if len(user_request) > max_display
+                else user_request
+            )
             return f"# Could not parse: {truncated}"
 
     def extract_command(self, llm_response: str) -> str:
@@ -374,17 +383,17 @@ Output ONLY the command, no explanation, no markdown."""
             return "# Could not extract command"
 
         # Remove markdown code blocks
-        code_block = re.search(r'```(?:bash|sh)?\s*\n?(.*?)\n?```', llm_response, re.DOTALL)
+        code_block = re.search(r"```(?:bash|sh)?\s*\n?(.*?)\n?```", llm_response, re.DOTALL)
         if code_block:
             return code_block.group(1).strip()
 
         # Remove common prefixes
-        lines = llm_response.strip().split('\n')
+        lines = llm_response.strip().split("\n")
         for line in lines:
             line = line.strip()
-            if line and not line.startswith('#'):
+            if line and not line.startswith("#"):
                 # Remove shell prompt prefix if present
-                if line.startswith('$'):
+                if line.startswith("$"):
                     line = line[1:].strip()
                 if line:  # Only return if there's content after stripping
                     return line
@@ -406,6 +415,7 @@ Output ONLY the command, no explanation, no markdown."""
             Safety level: 0=safe, 1=needs confirmation, 2=dangerous
         """
         from vertice_cli.shell.safety import get_safety_level as get_safety_level_fn
+
         return get_safety_level_fn(command)
 
     # =========================================================================
@@ -431,47 +441,41 @@ Output ONLY the command, no explanation, no markdown."""
         cmd_parts = command.strip().split()
         if cmd_parts:
             # Handle 'cd'
-            if cmd_parts[0] == 'cd':
+            if cmd_parts[0] == "cd":
                 return self._handle_cd(cmd_parts, command)
 
             # Handle 'export'
-            if cmd_parts[0] == 'export':
+            if cmd_parts[0] == "export":
                 return self._handle_export(command)
 
             # Handle 'unset'
-            if cmd_parts[0] == 'unset':
+            if cmd_parts[0] == "unset":
                 return self._handle_unset(cmd_parts)
 
         # PHASE 2: Execute with visual feedback
         bash = BashCommandTool()
 
         # Show execution status (streaming indicator)
-        with self.console.status(
-            f"[cyan]⚡ Executing:[/cyan] {command[:60]}...",
-            spinner="dots"
-        ):
+        with self.console.status(f"[cyan]⚡ Executing:[/cyan] {command[:60]}...", spinner="dots"):
             result = await bash.execute(
                 command=command,
                 interactive=True,
                 cwd=self.enhanced_input.context.cwd,
-                env=self.enhanced_input.context.env
+                env=self.enhanced_input.context.env,
             )
 
         if result.success:
             return {
-                'success': True,
-                'output': result.data['stdout'],
-                'error': result.data.get('stderr')
+                "success": True,
+                "output": result.data["stdout"],
+                "error": result.data.get("stderr"),
             }
         else:
-            return {
-                'success': False,
-                'error': result.error or 'Command failed'
-            }
+            return {"success": False, "error": result.error or "Command failed"}
 
     def _handle_cd(self, cmd_parts: list, command: str) -> Dict[str, Any]:
         """Handle cd command by updating context cwd."""
-        target_dir = cmd_parts[1] if len(cmd_parts) > 1 else os.path.expanduser('~')
+        target_dir = cmd_parts[1] if len(cmd_parts) > 1 else os.path.expanduser("~")
         try:
             # Expand user/vars using CONTEXT env
             for key, val in self.enhanced_input.context.env.items():
@@ -481,17 +485,19 @@ Output ONLY the command, no explanation, no markdown."""
 
             # Resolve relative paths against CONTEXT cwd
             if not os.path.isabs(target_dir):
-                target_dir = os.path.abspath(os.path.join(self.enhanced_input.context.cwd, target_dir))
+                target_dir = os.path.abspath(
+                    os.path.join(self.enhanced_input.context.cwd, target_dir)
+                )
 
             if os.path.isdir(target_dir):
                 # Update Context CWD (No os.chdir!)
                 self.enhanced_input.context.cwd = target_dir
                 self.console.print(f"[dim]📁 Changed directory to: {target_dir}[/dim]")
-                return {'success': True, 'output': '', 'error': None}
+                return {"success": True, "output": "", "error": None}
             else:
-                return {'success': False, 'error': f"cd: no such file or directory: {target_dir}"}
+                return {"success": False, "error": f"cd: no such file or directory: {target_dir}"}
         except Exception as e:
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
     def _handle_export(self, command: str) -> Dict[str, Any]:
         """Handle export command by updating context env."""
@@ -500,8 +506,8 @@ Output ONLY the command, no explanation, no markdown."""
             parts = shlex.split(command)
             if len(parts) > 1:
                 arg = parts[1]
-                if '=' in arg:
-                    key, val = arg.split('=', 1)
+                if "=" in arg:
+                    key, val = arg.split("=", 1)
 
                     # Expand variables using CONTEXT env
                     for env_key, env_val in self.enhanced_input.context.env.items():
@@ -510,19 +516,19 @@ Output ONLY the command, no explanation, no markdown."""
                     # Update Context Env (No os.environ!)
                     self.enhanced_input.context.env[key] = val
                     self.console.print(f"[dim]✓ Exported: {key}={val}[/dim]")
-                    return {'success': True, 'output': '', 'error': None}
-            return {'success': False, 'error': 'Invalid export syntax'}
+                    return {"success": True, "output": "", "error": None}
+            return {"success": False, "error": "Invalid export syntax"}
         except Exception as e:
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
     def _handle_unset(self, cmd_parts: list) -> Dict[str, Any]:
         """Handle unset command by removing from context env."""
         try:
             for key in cmd_parts[1:]:
                 self.enhanced_input.context.env.pop(key, None)
-            return {'success': True, 'output': '', 'error': None}
+            return {"success": True, "output": "", "error": None}
         except Exception as e:
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
     # =========================================================================
     # Error Handling Methods
@@ -546,7 +552,9 @@ Output ONLY the command, no explanation, no markdown."""
             self.console.print(f"[yellow]💡 Try: sudo {user_input}[/yellow]")
         elif isinstance(error, FileNotFoundError):
             self.console.print("[red]❌ File or command not found[/red]")
-            self.console.print("[yellow]💡 Check if the file exists or install the command[/yellow]")
+            self.console.print(
+                "[yellow]💡 Check if the file exists or install the command[/yellow]"
+            )
         elif isinstance(error, TimeoutError):
             self.console.print("[red]❌ Operation timed out[/red]")
             self.console.print("[yellow]💡 Check network connection or increase timeout[/yellow]")

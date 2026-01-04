@@ -15,6 +15,7 @@ from enum import Enum
 
 class RenderMode(Enum):
     """Rendering mode for streaming markdown."""
+
     MARKDOWN = "markdown"
     PLAIN_TEXT = "plain_text"
 
@@ -22,6 +23,7 @@ class RenderMode(Enum):
 @dataclass
 class PerformanceMetrics:
     """Performance metrics for streaming markdown rendering."""
+
     frames_rendered: int = 0
     total_render_time_ms: float = 0.0
     last_fps: float = 30.0

@@ -35,9 +35,9 @@ from rich.live import Live
 from rich import box
 
 
-
 class OperationStatus(Enum):
     """Status of an operation."""
+
     RUNNING = "running"
     SUCCESS = "success"
     ERROR = "error"
@@ -47,6 +47,7 @@ class OperationStatus(Enum):
 @dataclass
 class Operation:
     """Single operation record."""
+
     id: str
     type: str  # "llm", "file", "tool", "workflow"
     description: str
@@ -77,6 +78,7 @@ class Operation:
 @dataclass
 class SystemMetrics:
     """System resource metrics."""
+
     cpu_percent: float = 0.0
     memory_percent: float = 0.0
     memory_used_mb: float = 0.0
@@ -97,6 +99,7 @@ class SystemMetrics:
 @dataclass
 class SessionStats:
     """Statistics for current session."""
+
     total_operations: int = 0
     successful_operations: int = 0
     failed_operations: int = 0
@@ -127,6 +130,7 @@ class SessionStats:
 @dataclass
 class ContextWindowInfo:
     """Context window utilization info."""
+
     current_tokens: int = 0
     max_tokens: int = 128000  # Gemini 2.0 Flash default
     warning_threshold: float = 0.8  # 80% utilization warning
@@ -152,7 +156,7 @@ class ContextWindowInfo:
 class Dashboard:
     """
     Real-time status dashboard.
-    
+
     Layout:
     ┌─────────────────────────────────────────────────────┐
     │ QWEN-DEV-CLI Dashboard          [12:40:15 UTC]     │
@@ -168,7 +172,7 @@ class Dashboard:
     │ ✓ File analysis            0.8s    0.5K tok  $0.00 │
     │ ✗ Validation failed        1.1s    0.3K tok  $0.00 │
     └─────────────────────────────────────────────────────┘
-    
+
     Features:
     - Live system metrics (CPU, RAM)
     - Active operations list
@@ -184,7 +188,7 @@ class Dashboard:
     ):
         """
         Initialize dashboard.
-        
+
         Args:
             console: Rich console
             max_history: Max operations in history
@@ -204,7 +208,7 @@ class Dashboard:
     def add_operation(self, operation: Operation) -> None:
         """
         Add new operation to dashboard.
-        
+
         Args:
             operation: Operation to track
         """
@@ -220,7 +224,7 @@ class Dashboard:
     ) -> None:
         """
         Mark operation as complete.
-        
+
         Args:
             operation_id: Operation ID
             status: Final status
@@ -260,7 +264,7 @@ class Dashboard:
     def update_context_window(self, current_tokens: int, max_tokens: Optional[int] = None) -> None:
         """
         Update context window utilization.
-        
+
         Args:
             current_tokens: Current token count
             max_tokens: Max tokens (updates limit if provided)
@@ -272,7 +276,7 @@ class Dashboard:
     def render(self) -> Layout:
         """
         Render complete dashboard.
-        
+
         Returns:
             Rich Layout
         """
@@ -343,15 +347,21 @@ class Dashboard:
         table.add_column(justify="right")
 
         # CPU
-        cpu_color = "green" if metrics.cpu_percent < 50 else "yellow" if metrics.cpu_percent < 80 else "red"
+        cpu_color = (
+            "green" if metrics.cpu_percent < 50 else "yellow" if metrics.cpu_percent < 80 else "red"
+        )
         table.add_row("CPU:", f"[{cpu_color}]{metrics.cpu_percent:.0f}%[/{cpu_color}]")
 
         # Memory
-        mem_color = "green" if metrics.memory_percent < 50 else "yellow" if metrics.memory_percent < 80 else "red"
+        mem_color = (
+            "green"
+            if metrics.memory_percent < 50
+            else "yellow" if metrics.memory_percent < 80 else "red"
+        )
         table.add_row(
             "Memory:",
             f"[{mem_color}]{metrics.memory_percent:.0f}%[/{mem_color}] "
-            f"({metrics.memory_used_mb:.0f}/{metrics.memory_total_mb:.0f} MB)"
+            f"({metrics.memory_used_mb:.0f}/{metrics.memory_total_mb:.0f} MB)",
         )
 
         # Token rate (if available)
@@ -410,7 +420,7 @@ class Dashboard:
         table.add_row(
             "✓:",
             f"[green]{self.stats.successful_operations}[/green] "
-            f"({self.stats.success_rate:.0f}%)"
+            f"({self.stats.success_rate:.0f}%)",
         )
         table.add_row("✗:", f"[red]{self.stats.failed_operations}[/red]")
 
@@ -459,7 +469,7 @@ class Dashboard:
             table.add_column("Tokens", justify="right")
             table.add_column("Cost", justify="right")
 
-            for op in self.history[:self.max_history]:
+            for op in self.history[: self.max_history]:
                 # Status icon
                 if op.status == OperationStatus.SUCCESS:
                     status = Text("✓", style="bold green")
@@ -471,7 +481,9 @@ class Dashboard:
                     status = Text("?", style="yellow")
 
                 # Tokens
-                tokens_str = f"{op.tokens_used/1000:.1f}K" if op.tokens_used >= 1000 else str(op.tokens_used)
+                tokens_str = (
+                    f"{op.tokens_used/1000:.1f}K" if op.tokens_used >= 1000 else str(op.tokens_used)
+                )
 
                 # Cost
                 cost_str = f"${op.cost:.2f}" if op.cost >= 0.01 else f"${op.cost*1000:.1f}m"
@@ -508,7 +520,7 @@ class Dashboard:
     async def live_display(self, refresh_rate: float = 1.0) -> None:
         """
         Start live dashboard display.
-        
+
         Args:
             refresh_rate: Refresh interval in seconds
         """
@@ -539,10 +551,10 @@ class Dashboard:
 def create_dashboard(console: Optional[Console] = None) -> Dashboard:
     """
     Create dashboard instance.
-    
+
     Args:
         console: Rich console
-    
+
     Returns:
         Dashboard instance
     """

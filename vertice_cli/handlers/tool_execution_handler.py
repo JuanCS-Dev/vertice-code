@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ErrorResult:
     """Represents an error result from tool execution."""
+
     success: bool = False
     data: str = ""
     metadata: Dict[str, Any] = None
@@ -55,7 +56,7 @@ class ToolExecutionHandler:
     4. Update workflow visualization
     """
 
-    def __init__(self, shell: 'InteractiveShell'):
+    def __init__(self, shell: "InteractiveShell"):
         """
         Initialize with shell reference.
 
@@ -94,12 +95,70 @@ class ToolExecutionHandler:
         turn = self.conversation.start_turn(user_input)
 
         try:
+            # Phase 4: Request Amplification
+            # Amplify vague requests with context (Task 8.2: Context injection)
+            from vertice_cli.core.request_amplifier import RequestAmplifier
+
+            # Build context from shell state
+            amplifier_context = {
+                "cwd": self.context.cwd,
+                "recent_files": (
+                    list(self.context.read_files)[-5:] if self.context.read_files else []
+                ),
+                "modified_files": (
+                    list(self.context.modified_files) if self.context.modified_files else []
+                ),
+                "git_branch": getattr(self.context, "git_branch", None),
+            }
+
+            amplifier = RequestAmplifier(context=amplifier_context)
+            amplified_req = await amplifier.analyze(user_input)
+
+            # Task 8.4: Show clarifying questions for low confidence
+            if amplified_req.confidence < 0.6 and amplified_req.suggested_questions:
+                self.console.print("[yellow]Preciso de mais detalhes / Need more details:[/yellow]")
+                for q in amplified_req.suggested_questions[:2]:
+                    self.console.print(f"  • {q}")
+
+            # Use amplified request if confidence is high, otherwise use original
+            final_input = amplified_req.amplified if amplified_req.confidence > 0.5 else user_input
+
+            # Show amplification info if different from original
+            if amplified_req.amplified != user_input and amplified_req.confidence > 0.5:
+                self.console.print(f"[dim]Context: {amplified_req.amplified}[/dim]")
+
+            # Phase 9: Complexity Analysis - Auto-invoke think for complex tasks
+            from vertice_cli.core.complexity_analyzer import analyze_complexity
+            from vertice_cli.core.intent_classifier import Intent
+
+            # Map string intent to enum
+            intent_map = {i.value: i for i in Intent}
+            detected_intent = intent_map.get(amplified_req.detected_intent, Intent.GENERAL)
+
+            complexity = analyze_complexity(
+                user_input, intent=detected_intent, confidence=amplified_req.confidence
+            )
+
+            # Auto-invoke think for complex tasks
+            if complexity.needs_thinking:
+                self.console.print(
+                    f"[cyan]Pensando... / Thinking... (complexidade/complexity: {complexity.score:.0%})[/cyan]"
+                )
+                # Prepend think prompt to request
+                final_input = f"{complexity.suggested_think_prompt}\n\nAgora execute / Now execute: {final_input}"
+
             # Build prompt and get LLM response (may include native tool_calls)
-            response = await self._get_llm_tool_response(user_input, turn)
+            response = await self._get_llm_tool_response(final_input, turn)
 
             # Extract text content for conversation tracking
-            response_text = response.get("content", "") if isinstance(response, dict) else str(response)
-            tokens_used = response.get("tokens_used", len(response_text) // 4) if isinstance(response, dict) else len(response_text) // 4
+            response_text = (
+                response.get("content", "") if isinstance(response, dict) else str(response)
+            )
+            tokens_used = (
+                response.get("tokens_used", len(response_text) // 4)
+                if isinstance(response, dict)
+                else len(response_text) // 4
+            )
 
             # Add LLM response to turn
             self.conversation.add_llm_response(turn, response_text, tokens_used=tokens_used)
@@ -114,6 +173,7 @@ class ToolExecutionHandler:
 
             # If not tool calls, return as regular response
             from vertice_cli.core.conversation import ConversationState
+
             self.conversation.transition_state(ConversationState.IDLE, "text_response_only")
             return response_text
 
@@ -122,14 +182,13 @@ class ToolExecutionHandler:
             turn.error = str(e)
             turn.error_category = "system"
             from vertice_cli.core.conversation import ConversationState
+
             self.conversation.transition_state(
                 ConversationState.ERROR, f"exception: {type(e).__name__}"
             )
             return f"Error: {str(e)}"
 
-    async def execute_tool_calls(
-        self, tool_calls: List[Dict[str, Any]], turn
-    ) -> str:
+    async def execute_tool_calls(self, tool_calls: List[Dict[str, Any]], turn) -> str:
         """
         Execute a sequence of tool calls with conversation tracking.
 
@@ -158,10 +217,7 @@ class ToolExecutionHandler:
             step_id = f"tool_{tool_name}_{i}"
             dependencies = [f"tool_{tool_calls[i-1].get('tool', '')}_{i-1}"] if i > 0 else []
             self.workflow_viz.add_step(
-                step_id,
-                f"Execute {tool_name}",
-                StepStatus.PENDING,
-                dependencies=dependencies
+                step_id, f"Execute {tool_name}", StepStatus.PENDING, dependencies=dependencies
             )
 
             # Get tool from registry
@@ -171,8 +227,7 @@ class ToolExecutionHandler:
                 results.append(f"[red]x[/red] {error_msg}")
                 self.workflow_viz.update_step_status(step_id, StepStatus.FAILED)
                 self.conversation.add_tool_result(
-                    turn, tool_name, args, None,
-                    success=False, error=error_msg
+                    turn, tool_name, args, None, success=False, error=error_msg
                 )
                 continue
 
@@ -185,12 +240,12 @@ class ToolExecutionHandler:
                 id=op_id,
                 type=tool_name,
                 description=f"{tool_name}({', '.join(f'{k}={v}' for k, v in list(args.items())[:2])})",
-                status=OperationStatus.RUNNING
+                status=OperationStatus.RUNNING,
             )
             self.dashboard.add_operation(operation)
 
             # Show status badge
-            args_str = ', '.join(f'{k}={v}' for k, v in args.items() if len(str(v)) < 50)
+            args_str = ", ".join(f"{k}={v}" for k, v in args.items() if len(str(v)) < 50)
             status = StatusBadge(f"{tool_name}({args_str})", StatusLevel.PROCESSING, show_icon=True)
             self.console.print(status.render())
 
@@ -212,8 +267,10 @@ class ToolExecutionHandler:
                 self.dashboard.complete_operation(
                     op_id,
                     OperationStatus.SUCCESS,
-                    tokens_used=result.metadata.get('tokens', 0) if hasattr(result, 'metadata') else 0,
-                    cost=result.metadata.get('cost', 0.0) if hasattr(result, 'metadata') else 0.0
+                    tokens_used=(
+                        result.metadata.get("tokens", 0) if hasattr(result, "metadata") else 0
+                    ),
+                    cost=result.metadata.get("cost", 0.0) if hasattr(result, "metadata") else 0.0,
                 )
             else:
                 self.workflow_viz.update_step_status(step_id, StepStatus.FAILED)
@@ -226,24 +283,77 @@ class ToolExecutionHandler:
         # Complete workflow and show visualization if failures
         if len(tool_calls) > 1:
             self.workflow_viz.complete_workflow()
-            if any(step.status == StepStatus.FAILED
-                   for step in self.workflow_viz.current_workflow.steps):
+            if any(
+                step.status == StepStatus.FAILED
+                for step in self.workflow_viz.current_workflow.steps
+            ):
                 viz = self.workflow_viz.render_workflow()
                 self.console.print("\n")
                 self.console.print(viz)
 
         return "\n".join(results)
 
+    async def execute_with_self_correction(
+        self, tool_calls: List[Dict], max_corrections: int = 2, turn: Any = None
+    ) -> str:
+        """Execute tools with self-correction loop.
+
+        This method attempts to execute tool calls and, if failures occur,
+        automatically generates corrections and retries.
+        """
+        for attempt in range(max_corrections + 1):
+            # Execute current batch of tool calls
+            results = await self.execute_tool_calls(tool_calls, turn)
+
+            # Simple validation: check if results contain error indicators
+            # In a real implementation, this would be more sophisticated
+            has_errors = "[red]x[/red]" in results or "Error:" in results
+
+            if not has_errors:
+                return results
+
+            # If we have errors and retries left, attempt correction
+            if attempt < max_corrections:
+                self.console.print(
+                    f"[yellow]Attempting self-correction (attempt {attempt+1}/{max_corrections})...[/yellow]"
+                )
+
+                # Ask LLM for correction based on errors
+                correction_prompt = f"""
+Previous tool calls failed.
+Tool Calls: {json.dumps(tool_calls)}
+Results/Errors: {results}
+
+Please generate corrected tool calls to fix these errors.
+"""
+                try:
+                    # Get correction from LLM
+                    response = await self._get_llm_tool_response(correction_prompt, turn)
+                    new_tool_calls = self._parse_tool_calls(response)
+
+                    if new_tool_calls:
+                        self.console.print(
+                            f"[green]Generated {len(new_tool_calls)} corrected tool calls[/green]"
+                        )
+                        tool_calls = new_tool_calls
+                        continue
+                    else:
+                        self.console.print(
+                            "[yellow]Could not generate corrected tool calls[/yellow]"
+                        )
+                        break
+                except Exception as e:
+                    logger.error(f"Self-correction failed: {e}")
+                    break
+
+        return results
+
     # =========================================================================
     # Recovery Methods
     # =========================================================================
 
     async def execute_with_recovery(
-        self,
-        tool,
-        tool_name: str,
-        args: Dict[str, Any],
-        turn
+        self, tool, tool_name: str, args: Dict[str, Any], turn
     ) -> Optional[Any]:
         """
         Execute tool with error recovery loop.
@@ -277,9 +387,7 @@ class ToolExecutionHandler:
                 if corrected_args:
                     args = corrected_args
             else:
-                self.console.print(
-                    f"[red]x {tool_name} failed after {max_attempts} attempts[/red]"
-                )
+                self.console.print(f"[red]x {tool_name} failed after {max_attempts} attempts[/red]")
                 return None
 
         return None
@@ -301,9 +409,12 @@ class ToolExecutionHandler:
 
             # Track in conversation
             self.conversation.add_tool_result(
-                turn, tool_name, args, result,
+                turn,
+                tool_name,
+                args,
+                result,
                 success=result.success,
-                error=None if result.success else str(result.data)
+                error=None if result.success else str(result.data),
             )
 
             return result, result.success
@@ -313,16 +424,13 @@ class ToolExecutionHandler:
 
             # Track exception
             self.conversation.add_tool_result(
-                turn, tool_name, args, None,
-                success=False,
-                error=str(e)
+                turn, tool_name, args, None, success=False, error=str(e)
             )
 
             return ErrorResult(success=False, data=str(e)), False
 
     async def _handle_execution_failure(
-        self, tool_name: str, args: Dict[str, Any], result, turn,
-        attempt: int, max_attempts: int
+        self, tool_name: str, args: Dict[str, Any], result, turn, attempt: int, max_attempts: int
     ) -> Optional[Dict[str, Any]]:
         """
         Handle tool execution failure and attempt recovery.
@@ -345,7 +453,7 @@ class ToolExecutionHandler:
                 error=error_msg,
                 tool_name=tool_name,
                 args=args,
-                category=ErrorCategory.PARAMETER_ERROR
+                category=ErrorCategory.PARAMETER_ERROR,
             )
 
             # Get diagnosis from LLM
@@ -357,13 +465,11 @@ class ToolExecutionHandler:
                 self.console.print(f"[dim]Diagnosis: {diagnosis}[/dim]")
 
             # Attempt parameter correction
-            corrected = await self.recovery_engine.attempt_recovery(
-                recovery_ctx, self.registry
-            )
+            corrected = await self.recovery_engine.attempt_recovery(recovery_ctx, self.registry)
 
-            if corrected and 'args' in corrected:
+            if corrected and "args" in corrected:
                 self.console.print("[green]Generated corrected parameters[/green]")
-                return corrected['args']
+                return corrected["args"]
             else:
                 self.console.print("[yellow]No correction found[/yellow]")
                 return None
@@ -377,9 +483,7 @@ class ToolExecutionHandler:
     # Helper Methods
     # =========================================================================
 
-    async def _get_llm_tool_response(
-        self, user_input: str, turn
-    ) -> Dict[str, Any]:
+    async def _get_llm_tool_response(self, user_input: str, turn) -> Dict[str, Any]:
         """
         Get LLM response for tool call processing.
 
@@ -423,22 +527,21 @@ INSTRUCTIONS:
                 tools=tool_schemas,  # Native function calling
                 tool_config="AUTO",
                 temperature=0.1,
-                max_tokens=2000
+                max_tokens=2000,
             )
 
             # If native tool_calls were returned, use them
             if isinstance(response, dict) and response.get("tool_calls"):
-                logger.debug(f"Native function calling returned {len(response['tool_calls'])} tool calls")
+                logger.debug(
+                    f"Native function calling returned {len(response['tool_calls'])} tool calls"
+                )
                 return response
 
         except Exception as e:
             logger.debug(f"Native function calling not available: {e}")
 
         # Fallback to prompt-based tool calling
-        tool_list = [
-            f"- {schema['name']}: {schema['description']}"
-            for schema in tool_schemas
-        ]
+        tool_list = [f"- {schema['name']}: {schema['description']}" for schema in tool_schemas]
 
         fallback_system_prompt = f"""{system_prompt}
 
@@ -453,16 +556,12 @@ If no tools needed, respond with helpful text."""
         messages[0] = {"role": "system", "content": fallback_system_prompt}
 
         response = await self.llm.generate_async(
-            messages=messages,
-            temperature=0.1,
-            max_tokens=2000
+            messages=messages, temperature=0.1, max_tokens=2000
         )
 
         return response
 
-    def _parse_tool_calls(
-        self, response: Any
-    ) -> Optional[List[Dict[str, Any]]]:
+    def _parse_tool_calls(self, response: Any) -> Optional[List[Dict[str, Any]]]:
         """
         Parse tool calls from LLM response.
 
@@ -492,9 +591,7 @@ If no tools needed, respond with helpful text."""
         # Legacy text parsing fallback
         return self._parse_tool_calls_from_text(response_text)
 
-    def _parse_tool_calls_from_text(
-        self, response_text: str
-    ) -> Optional[List[Dict[str, Any]]]:
+    def _parse_tool_calls_from_text(self, response_text: str) -> Optional[List[Dict[str, Any]]]:
         """
         Parse tool calls from text response (legacy fallback).
 
@@ -505,9 +602,9 @@ If no tools needed, respond with helpful text."""
             List of tool call dicts or None if parsing fails.
         """
         try:
-            if '[' in response_text and ']' in response_text:
-                start = response_text.index('[')
-                end = response_text.rindex(']') + 1
+            if "[" in response_text and "]" in response_text:
+                start = response_text.index("[")
+                end = response_text.rindex("]") + 1
                 json_str = response_text[start:end]
                 tool_calls = json.loads(json_str)
 
@@ -518,26 +615,24 @@ If no tools needed, respond with helpful text."""
 
         return None
 
-    def _prepare_tool_args(
-        self, tool_name: str, args: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _prepare_tool_args(self, tool_name: str, args: Dict[str, Any]) -> Dict[str, Any]:
         """
         Prepare tool arguments with context injection.
 
         Some tools require additional context from the shell.
         """
         # Session context for context tools
-        if tool_name in ['getcontext', 'savesession']:
-            args['session_context'] = self.context
+        if tool_name in ["getcontext", "savesession"]:
+            args["session_context"] = self.context
 
         # Console and preview for file tools
-        if tool_name in ['write_file', 'edit_file']:
-            args['console'] = self.console
-            args['preview'] = getattr(self.context, 'preview_enabled', True)
+        if tool_name in ["write_file", "edit_file"]:
+            args["console"] = self.console
+            args["preview"] = getattr(self.context, "preview_enabled", True)
 
         # Semantic search configuration
-        if tool_name == 'search_files' and getattr(self.shell, '_indexer_initialized', False):
-            args['semantic'] = args.get('semantic', True)
-            args['indexer'] = self.shell.indexer
+        if tool_name == "search_files" and getattr(self.shell, "_indexer_initialized", False):
+            args["semantic"] = args.get("semantic", True)
+            args["indexer"] = self.shell.indexer
 
         return args

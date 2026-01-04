@@ -19,8 +19,16 @@ from .governance import ELP
 
 TOOL_CATEGORIES: Dict[str, List[str]] = {
     "File": [
-        "read_file", "write_file", "edit_file", "list_directory", "delete_file",
-        "move_file", "copy_file", "create_directory", "read_multiple_files", "insert_lines"
+        "read_file",
+        "write_file",
+        "edit_file",
+        "list_directory",
+        "delete_file",
+        "move_file",
+        "copy_file",
+        "create_directory",
+        "read_multiple_files",
+        "insert_lines",
     ],
     "Terminal": ["cd", "ls", "pwd", "mkdir", "rm", "cp", "mv", "touch", "cat"],
     "Execution": ["bash_command"],
@@ -28,8 +36,12 @@ TOOL_CATEGORIES: Dict[str, List[str]] = {
     "Git": ["git_status", "git_diff"],
     "Context": ["get_context", "save_session", "restore_backup"],
     "Web": [
-        "web_search", "search_documentation", "fetch_url", "download_file",
-        "http_request", "package_search"
+        "web_search",
+        "search_documentation",
+        "fetch_url",
+        "download_file",
+        "http_request",
+        "package_search",
     ],
 }
 

@@ -19,12 +19,12 @@ from .loader import ConfigLoader
 from .defaults import get_default_config
 
 __all__ = [
-    'QwenConfig',
-    'ProjectConfig',
-    'RulesConfig',
-    'SafetyConfig',
-    'HooksConfig',
-    'ContextConfig',
-    'ConfigLoader',
-    'get_default_config',
+    "QwenConfig",
+    "ProjectConfig",
+    "RulesConfig",
+    "SafetyConfig",
+    "HooksConfig",
+    "ContextConfig",
+    "ConfigLoader",
+    "get_default_config",
 ]

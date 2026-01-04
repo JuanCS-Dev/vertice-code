@@ -22,12 +22,13 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from typing import Any, Dict, Generic, Iterator, List, Optional, TypeVar
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 # =============================================================================
 # ASYNC-SAFE LOCK
 # =============================================================================
+
 
 class AsyncLock:
     """
@@ -75,6 +76,7 @@ class AsyncLock:
 # =============================================================================
 # THREAD-SAFE COLLECTIONS
 # =============================================================================
+
 
 class ThreadSafeList(Generic[T]):
     """
@@ -237,9 +239,11 @@ class ThreadSafeDict(Generic[T]):
 # RATE LIMITER
 # =============================================================================
 
+
 @dataclass
 class RateLimiterConfig:
     """Configuration for rate limiter."""
+
     requests_per_second: float = 10.0
     burst_size: int = 20
     retry_after_seconds: float = 1.0
@@ -263,8 +267,7 @@ class RateLimiter:
         now = time.time()
         elapsed = now - self._last_refill
         self._tokens = min(
-            self.config.burst_size,
-            self._tokens + elapsed * self.config.requests_per_second
+            self.config.burst_size, self._tokens + elapsed * self.config.requests_per_second
         )
         self._last_refill = now
 
@@ -302,6 +305,7 @@ class RateLimiter:
 # DEBOUNCER
 # =============================================================================
 
+
 class Debouncer:
     """
     Debouncer for UI updates and expensive operations.
@@ -334,9 +338,11 @@ class Debouncer:
 # RETRY HELPER
 # =============================================================================
 
+
 @dataclass
 class RetryConfig:
     """Configuration for retry behavior."""
+
     max_attempts: int = 3
     base_delay: float = 1.0
     max_delay: float = 30.0
@@ -364,6 +370,7 @@ async def retry_async(
         Last exception if all attempts fail
     """
     import random
+
     config = config or RetryConfig()
     last_error = None
 
@@ -378,10 +385,9 @@ async def retry_async(
 
             # Calculate delay with exponential backoff and jitter
             delay = min(
-                config.base_delay * (config.exponential_base ** (attempt - 1)),
-                config.max_delay
+                config.base_delay * (config.exponential_base ** (attempt - 1)), config.max_delay
             )
-            delay *= (1 + random.uniform(-config.jitter, config.jitter))
+            delay *= 1 + random.uniform(-config.jitter, config.jitter)
 
             if on_retry:
                 on_retry(attempt, e, delay)
@@ -396,12 +402,12 @@ async def retry_async(
 # =============================================================================
 
 __all__ = [
-    'AsyncLock',
-    'ThreadSafeList',
-    'ThreadSafeDict',
-    'RateLimiter',
-    'RateLimiterConfig',
-    'Debouncer',
-    'RetryConfig',
-    'retry_async',
+    "AsyncLock",
+    "ThreadSafeList",
+    "ThreadSafeDict",
+    "RateLimiter",
+    "RateLimiterConfig",
+    "Debouncer",
+    "RetryConfig",
+    "retry_async",
 ]

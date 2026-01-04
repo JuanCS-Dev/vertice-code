@@ -18,11 +18,7 @@ from typing import Any, Dict, List
 from .models import SOPStep
 
 
-def build_planning_prompt(
-    task_request: str,
-    context: Dict[str, Any],
-    agents: List[str]
-) -> str:
+def build_planning_prompt(task_request: str, context: Dict[str, Any], agents: List[str]) -> str:
     """Build comprehensive planning prompt for LLM."""
     return f"""
 Generate a detailed execution plan for this task:
@@ -63,10 +59,7 @@ RESPOND WITH PURE JSON ONLY.
 """
 
 
-def build_clarifying_questions_prompt(
-    task_request: str,
-    context: Dict[str, Any]
-) -> str:
+def build_clarifying_questions_prompt(task_request: str, context: Dict[str, Any]) -> str:
     """Build prompt for generating clarifying questions."""
     return f"""Analyze this task and generate 2-3 clarifying questions that would help create a better plan.
 
@@ -95,10 +88,7 @@ Focus on:
 Respond with ONLY the JSON, no explanation."""
 
 
-def build_exploration_prompt(
-    task_request: str,
-    context: Dict[str, Any]
-) -> str:
+def build_exploration_prompt(task_request: str, context: Dict[str, Any]) -> str:
     """Build prompt for exploration mode analysis."""
     return f"""Analyze this task in EXPLORATION mode (read-only).
 
@@ -131,7 +121,7 @@ def generate_basic_plan(agents: List[str]) -> List[SOPStep]:
             action="Analyze requirements and design solution",
             objective="Create technical plan",
             definition_of_done="Architecture documented",
-            cost=2.0
+            cost=2.0,
         ),
         SOPStep(
             id="step-2",
@@ -140,7 +130,7 @@ def generate_basic_plan(agents: List[str]) -> List[SOPStep]:
             objective="Write working code",
             definition_of_done="Code compiles and runs",
             dependencies=["step-1"],
-            cost=5.0
+            cost=5.0,
         ),
         SOPStep(
             id="step-3",
@@ -149,8 +139,8 @@ def generate_basic_plan(agents: List[str]) -> List[SOPStep]:
             objective="Verify correctness",
             definition_of_done="All tests pass",
             dependencies=["step-2"],
-            cost=3.0
-        )
+            cost=3.0,
+        ),
     ]
 
 

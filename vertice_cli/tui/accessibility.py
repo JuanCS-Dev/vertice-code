@@ -11,10 +11,11 @@ from .theme import COLORS
 @dataclass
 class ContrastRatio:
     """WCAG contrast ratio result"""
+
     ratio: float
     aa_normal: bool  # 4.5:1
-    aa_large: bool   # 3:1
-    aaa_normal: bool # 7:1
+    aa_large: bool  # 3:1
+    aaa_normal: bool  # 7:1
     aaa_large: bool  # 4.5:1
 
     @property
@@ -33,8 +34,8 @@ class ContrastRatio:
 
 def hex_to_rgb(hex_color: str) -> Tuple[int, int, int]:
     """Convert hex color to RGB tuple"""
-    hex_color = hex_color.lstrip('#')
-    return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+    hex_color = hex_color.lstrip("#")
+    return tuple(int(hex_color[i : i + 2], 16) for i in (0, 2, 4))
 
 
 def relative_luminance(rgb: Tuple[int, int, int]) -> float:
@@ -56,11 +57,11 @@ def relative_luminance(rgb: Tuple[int, int, int]) -> float:
 def calculate_contrast_ratio(fg: str, bg: str) -> ContrastRatio:
     """
     Calculate WCAG contrast ratio between two colors
-    
+
     Args:
         fg: Foreground color (hex)
         bg: Background color (hex)
-    
+
     Returns:
         ContrastRatio with compliance levels
     """
@@ -111,12 +112,12 @@ class AccessibilityValidator:
     ) -> str:
         """
         Get accessible color version that meets target contrast
-        
+
         Args:
             preferred: Preferred color
             background: Background color
             target_ratio: Minimum contrast ratio (default: AA normal)
-        
+
         Returns:
             Accessible color (may be adjusted from preferred)
         """
@@ -181,7 +182,6 @@ class KeyboardNavigation:
         "help": ["?", "h", "F1"],
         "search": ["Ctrl+F", "/"],
         "command_palette": ["Ctrl+K", "Cmd+K"],
-
         # Navigation
         "next": ["j", "Down", "Tab"],
         "previous": ["k", "Up", "Shift+Tab"],
@@ -189,14 +189,12 @@ class KeyboardNavigation:
         "last": ["G", "End"],
         "page_down": ["Ctrl+F", "PageDown", "Space"],
         "page_up": ["Ctrl+B", "PageUp", "Shift+Space"],
-
         # Actions
         "select": ["Enter", "Space"],
         "back": ["Esc", "Backspace"],
         "delete": ["d", "Delete"],
         "edit": ["e", "Enter"],
         "copy": ["y", "Ctrl+C"],
-
         # View
         "toggle_preview": ["p"],
         "toggle_tree": ["t"],
@@ -249,12 +247,14 @@ class AccessibilityManager:
     def _detect_high_contrast(self) -> bool:
         """Detect high contrast mode"""
         import os
-        return os.environ.get('HIGH_CONTRAST', '0') == '1'
+
+        return os.environ.get("HIGH_CONTRAST", "0") == "1"
 
     def _detect_reduced_motion(self) -> bool:
         """Detect reduced motion preference"""
         import os
-        return os.environ.get('REDUCE_MOTION', '0') == '1'
+
+        return os.environ.get("REDUCE_MOTION", "0") == "1"
 
     def calculate_contrast_ratio(self, fg: str, bg: str) -> float:
         """Calculate contrast ratio (returns float for compatibility)"""
@@ -269,8 +269,8 @@ class AccessibilityManager:
     def get_aria_label(self, element_type: str, **kwargs) -> str:
         """Generate ARIA label"""
         if element_type == "progress":
-            value = kwargs.get('value', 0)
-            max_val = kwargs.get('max', 100)
+            value = kwargs.get("value", 0)
+            max_val = kwargs.get("max", 100)
             return f"Progress: {value} of {max_val}"
         return element_type
 
@@ -288,11 +288,7 @@ class AccessibilityManager:
 
     def get_focus_style(self) -> dict:
         """Get focus indicator style"""
-        return {
-            "border": "double",
-            "border_color": "cyan",
-            "visibility": "visible"
-        }
+        return {"border": "double", "border_color": "cyan", "visibility": "visible"}
 
     def get_min_interactive_width(self) -> int:
         """Minimum width for interactive elements"""

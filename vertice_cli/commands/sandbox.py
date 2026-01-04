@@ -20,22 +20,22 @@ console = Console()
 async def handle_sandbox(args: str, context: Dict[str, Any]) -> str:
     """
     Execute command in isolated Docker sandbox.
-    
+
     Usage:
         /sandbox <command>
         /sb <command>
         /safe <command>
-    
+
     Examples:
         /sandbox npm install
         /sandbox pytest tests/
         /sb python test.py
         /safe rm -rf /tmp/test
-    
+
     Args:
         args: Command to execute
         context: Execution context (session, cwd, etc.)
-    
+
     Returns:
         Formatted output string
     """
@@ -46,10 +46,12 @@ async def handle_sandbox(args: str, context: Dict[str, Any]) -> str:
 
     # Check availability
     if not sandbox.is_available():
-        return _format_error("Docker sandbox not available. Install Docker and ensure daemon is running.")
+        return _format_error(
+            "Docker sandbox not available. Install Docker and ensure daemon is running."
+        )
 
     # Get current directory from context
-    cwd = context.get('cwd', Path.cwd())
+    cwd = context.get("cwd", Path.cwd())
     if isinstance(cwd, str):
         cwd = Path(cwd)
 
@@ -59,25 +61,22 @@ async def handle_sandbox(args: str, context: Dict[str, Any]) -> str:
     readonly = False  # Default to writable for most commands
 
     # Check for timeout flag
-    if '--timeout' in command:
-        parts = command.split('--timeout')
+    if "--timeout" in command:
+        parts = command.split("--timeout")
         try:
             timeout_part = parts[1].strip().split()[0]
             timeout = int(timeout_part)
-            command = parts[0].strip() + ' ' + ' '.join(parts[1].strip().split()[1:])
+            command = parts[0].strip() + " " + " ".join(parts[1].strip().split()[1:])
         except (IndexError, ValueError):
             pass
 
     # Check for readonly flag
-    if '--readonly' in command:
+    if "--readonly" in command:
         readonly = True
-        command = command.replace('--readonly', '').strip()
+        command = command.replace("--readonly", "").strip()
 
     # Safety validation before execution
-    tool_call = {
-        "tool": "bash_command",
-        "arguments": {"command": command}
-    }
+    tool_call = {"tool": "bash_command", "arguments": {"command": command}}
     is_safe, reason = safety_validator.is_safe(tool_call)
 
     if not is_safe:
@@ -86,16 +85,13 @@ async def handle_sandbox(args: str, context: Dict[str, Any]) -> str:
 
     console.print(f"\n[cyan]🔒 Executing in sandbox:[/cyan] {command}")
     console.print(f"[dim]Directory: {cwd}[/dim]")
-    console.print(f"[dim]Timeout: {timeout}s | Mode: {'readonly' if readonly else 'writable'}[/dim]\n")
+    console.print(
+        f"[dim]Timeout: {timeout}s | Mode: {'readonly' if readonly else 'writable'}[/dim]\n"
+    )
 
     try:
         # Execute in sandbox
-        result = sandbox.execute(
-            command=command,
-            cwd=cwd,
-            timeout=timeout,
-            readonly=readonly
-        )
+        result = sandbox.execute(command=command, cwd=cwd, timeout=timeout, readonly=readonly)
 
         return _format_result(result, command)
 
@@ -115,7 +111,9 @@ def _format_result(result: SandboxResult, command: str) -> str:
         status = f"[red]✗ Failed (exit {result.exit_code})[/red]"
 
     output_lines.append(f"\n{status}")
-    output_lines.append(f"[dim]Duration: {result.duration_ms:.0f}ms | Container: {result.container_id[:12]}[/dim]\n")
+    output_lines.append(
+        f"[dim]Duration: {result.duration_ms:.0f}ms | Container: {result.container_id[:12]}[/dim]\n"
+    )
 
     # Stdout
     if result.stdout.strip():
@@ -178,11 +176,13 @@ Requires Docker installed and daemon running.
 
 
 # Register command
-slash_registry.register(SlashCommand(
-    name="sandbox",
-    description="Execute command in isolated Docker sandbox",
-    usage="/sandbox <command> [--timeout N] [--readonly]",
-    handler=handle_sandbox,
-    aliases=["sb", "safe"],
-    requires_session=False
-))
+slash_registry.register(
+    SlashCommand(
+        name="sandbox",
+        description="Execute command in isolated Docker sandbox",
+        usage="/sandbox <command> [--timeout N] [--readonly]",
+        handler=handle_sandbox,
+        aliases=["sb", "safe"],
+        requires_session=False,
+    )
+)

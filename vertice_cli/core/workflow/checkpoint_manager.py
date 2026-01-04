@@ -28,23 +28,20 @@ class CheckpointManager:
     """
 
     def __init__(self, backup_dir: Optional[Path] = None):
-        self.backup_dir = backup_dir or Path.home() / ".qwen_checkpoints"
+        self.backup_dir = backup_dir or Path.home() / ".vertice_checkpoints"
         self.backup_dir.mkdir(exist_ok=True)
 
         self.checkpoints: Dict[str, Checkpoint] = {}
 
     def create_checkpoint(
-        self,
-        checkpoint_id: str,
-        context: Dict[str, Any],
-        completed_steps: List[str]
+        self, checkpoint_id: str, context: Dict[str, Any], completed_steps: List[str]
     ) -> Checkpoint:
         """Create checkpoint."""
         checkpoint = Checkpoint(
             checkpoint_id=checkpoint_id,
-            timestamp=__import__('time').time(),
+            timestamp=__import__("time").time(),
             context=copy.deepcopy(context),
-            completed_steps=completed_steps.copy()
+            completed_steps=completed_steps.copy(),
         )
 
         self.checkpoints[checkpoint_id] = checkpoint

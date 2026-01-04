@@ -42,8 +42,7 @@ def generate_test_suite(source_code: str) -> List[TestCase]:
 
     # Extract functions (including async)
     functions = [
-        node for node in ast.walk(tree)
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        node for node in ast.walk(tree) if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
     ]
 
     # Extract classes
@@ -61,11 +60,9 @@ def generate_test_suite(source_code: str) -> List[TestCase]:
     # Generate TUI tests if Textual detected
     if "textual" in source_code.lower():
         tui_apps = [
-            cls for cls in classes
-            if any(
-                isinstance(b, ast.Name) and b.id == 'App'
-                for b in cls.bases
-            )
+            cls
+            for cls in classes
+            if any(isinstance(b, ast.Name) and b.id == "App" for b in cls.bases)
         ]
         for app in tui_apps:
             test_cases.extend(generate_tui_tests(app))
@@ -73,9 +70,7 @@ def generate_test_suite(source_code: str) -> List[TestCase]:
     return test_cases
 
 
-def generate_function_tests(
-    func: Union[ast.FunctionDef, ast.AsyncFunctionDef]
-) -> List[TestCase]:
+def generate_function_tests(func: Union[ast.FunctionDef, ast.AsyncFunctionDef]) -> List[TestCase]:
     """Generate tests for a single function.
 
     Args:
@@ -147,9 +142,10 @@ def generate_tui_tests(app_class: ast.ClassDef) -> List[TestCase]:
     app_name = app_class.name
 
     # 1. Basic App Load Test
-    tests.append(TestCase(
-        name=f"test_{app_name.lower()}_load",
-        code=f'''
+    tests.append(
+        TestCase(
+            name=f"test_{app_name.lower()}_load",
+            code=f'''
 @pytest.mark.asyncio
 async def test_{app_name.lower()}_load():
     """Test that {app_name} loads without error."""
@@ -158,16 +154,18 @@ async def test_{app_name.lower()}_load():
         await pilot.pause()
         assert app.is_running
 ''',
-        test_type=TestType.TUI,
-        target=app_name,
-        assertions=1,
-        complexity=2
-    ))
+            test_type=TestType.TUI,
+            target=app_name,
+            assertions=1,
+            complexity=2,
+        )
+    )
 
     # 2. Key Press Interaction Test
-    tests.append(TestCase(
-        name=f"test_{app_name.lower()}_q_quit",
-        code=f'''
+    tests.append(
+        TestCase(
+            name=f"test_{app_name.lower()}_q_quit",
+            code=f'''
 @pytest.mark.asyncio
 async def test_{app_name.lower()}_quit_command():
     """Test that pressing 'q' behaves as expected."""
@@ -176,18 +174,17 @@ async def test_{app_name.lower()}_quit_command():
         await pilot.press("q")
         assert app.return_code is None or app.return_code == 0
 ''',
-        test_type=TestType.TUI,
-        target=app_name,
-        assertions=1,
-        complexity=3
-    ))
+            test_type=TestType.TUI,
+            target=app_name,
+            assertions=1,
+            complexity=3,
+        )
+    )
 
     return tests
 
 
-def _create_basic_test(
-    func_name: str, params: List[str], has_return: bool
-) -> TestCase:
+def _create_basic_test(func_name: str, params: List[str], has_return: bool) -> TestCase:
     """Create basic happy-path test.
 
     Args:
@@ -225,9 +222,7 @@ def _create_basic_test(
     )
 
 
-def _create_edge_case_tests(
-    func_name: str, params: List[str]
-) -> List[TestCase]:
+def _create_edge_case_tests(func_name: str, params: List[str]) -> List[TestCase]:
     """Create edge case tests.
 
     Args:
@@ -274,9 +269,7 @@ def _create_edge_case_tests(
     return tests
 
 
-def _has_return_statement(
-    func: Union[ast.FunctionDef, ast.AsyncFunctionDef]
-) -> bool:
+def _has_return_statement(func: Union[ast.FunctionDef, ast.AsyncFunctionDef]) -> bool:
     """Check if function has return statement.
 
     Args:

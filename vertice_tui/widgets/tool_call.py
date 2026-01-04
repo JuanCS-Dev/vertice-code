@@ -28,6 +28,7 @@ from textual.widget import Widget
 
 class ToolStatus(Enum):
     """Tool call status."""
+
     PENDING = ("pending", "○", "#64748B")  # Gray
     RUNNING = ("running", "◐", "#3B82F6")  # Blue (animated)
     SUCCESS = ("success", "✓", "#22C55E")  # Green
@@ -43,6 +44,7 @@ class ToolStatus(Enum):
 @dataclass
 class ToolCallData:
     """Data for a tool call."""
+
     name: str
     status: ToolStatus = ToolStatus.PENDING
     input_data: Optional[str] = None
@@ -223,7 +225,7 @@ class ToolCallWidget(Widget):
         self._update_classes()
         try:
             self.query_one("#header", Static).update(self._format_header())
-        except Exception:
+        except (AttributeError, ValueError):
             pass
 
 

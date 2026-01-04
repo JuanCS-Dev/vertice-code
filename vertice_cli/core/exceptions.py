@@ -1,5 +1,5 @@
 """
-Error hierarchy for qwen-dev-cli.
+Error hierarchy for Vértice.
 
 Following Boris Cherny's philosophy: explicit error types enable
 better error handling and recovery. Every error should:
@@ -27,9 +27,11 @@ from .types import ErrorCategory, FilePath
 # BASE EXCEPTION
 # ============================================================================
 
+
 @dataclass(frozen=True)
 class ErrorContext:
     """Immutable context for an error."""
+
     category: ErrorCategory
     file: Optional[FilePath] = None
     line: Optional[int] = None
@@ -39,9 +41,9 @@ class ErrorContext:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
-class QwenError(Exception):
-    """Base exception for all qwen-dev-cli errors.
-    
+class VerticeError(Exception):
+    """Base exception for all Vértice errors.
+
     All custom exceptions should inherit from this base class.
     Provides structured error information and recovery hints.
     """
@@ -85,32 +87,37 @@ class QwenError(Exception):
     def to_dict(self) -> Dict[str, Any]:
         """Serialize error to dictionary."""
         result: Dict[str, Any] = {
-            'type': self.__class__.__name__,
-            'message': self.message,
-            'recoverable': self.recoverable,
+            "type": self.__class__.__name__,
+            "message": self.message,
+            "recoverable": self.recoverable,
         }
 
         if self.context:
-            result['context'] = {
-                'category': self.context.category.value,
-                'file': str(self.context.file) if self.context.file else None,
-                'line': self.context.line,
-                'column': self.context.column,
-                'suggestions': list(self.context.suggestions),
-                'metadata': self.context.metadata,
+            result["context"] = {
+                "category": self.context.category.value,
+                "file": str(self.context.file) if self.context.file else None,
+                "line": self.context.line,
+                "column": self.context.column,
+                "suggestions": list(self.context.suggestions),
+                "metadata": self.context.metadata,
             }
 
         if self.cause:
-            result['cause'] = str(self.cause)
+            result["cause"] = str(self.cause)
 
         return result
+
+
+# Legacy alias
+QwenError = VerticeError
 
 
 # ============================================================================
 # CODE EXECUTION ERRORS
 # ============================================================================
 
-class SyntaxError(QwenError):
+
+class SyntaxError(VerticeError):
     """Syntax error in Python code."""
 
     def __init__(
@@ -136,7 +143,7 @@ class SyntaxError(QwenError):
         super().__init__(message, context, recoverable=True)
 
 
-class ImportError(QwenError):
+class ImportError(VerticeError):
     """Module import error."""
 
     def __init__(
@@ -150,7 +157,7 @@ class ImportError(QwenError):
             category=ErrorCategory.IMPORT,
             file=file,
             line=line,
-            metadata={'module': module_name},
+            metadata={"module": module_name},
             suggestions=(
                 f"Install module: `pip install {module_name}`",
                 "Check if module name is correct",
@@ -160,7 +167,7 @@ class ImportError(QwenError):
         super().__init__(message, context, recoverable=True)
 
 
-class TypeError(QwenError):
+class TypeError(VerticeError):
     """Type error in code execution."""
 
     def __init__(
@@ -176,8 +183,8 @@ class TypeError(QwenError):
             file=file,
             line=line,
             metadata={
-                'expected': expected_type,
-                'actual': actual_type,
+                "expected": expected_type,
+                "actual": actual_type,
             },
             suggestions=(
                 f"Expected {expected_type}, got {actual_type}",
@@ -188,7 +195,7 @@ class TypeError(QwenError):
         super().__init__(message, context, recoverable=True)
 
 
-class RuntimeError(QwenError):
+class RuntimeError(VerticeError):
     """Runtime error during execution."""
 
     def __init__(
@@ -210,7 +217,8 @@ class RuntimeError(QwenError):
 # FILE SYSTEM ERRORS
 # ============================================================================
 
-class FileNotFoundError(QwenError):
+
+class FileNotFoundError(VerticeError):
     """File or directory not found."""
 
     def __init__(self, path: FilePath):
@@ -226,14 +234,14 @@ class FileNotFoundError(QwenError):
         super().__init__(f"File not found: {path}", context, recoverable=False)
 
 
-class PermissionError(QwenError):
+class PermissionError(VerticeError):
     """Permission denied for file operation."""
 
     def __init__(self, path: FilePath, operation: str):
         context = ErrorContext(
             category=ErrorCategory.PERMISSION,
             file=path,
-            metadata={'operation': operation},
+            metadata={"operation": operation},
             suggestions=(
                 f"Check file permissions: `ls -la {path}`",
                 "Run with appropriate permissions",
@@ -247,7 +255,7 @@ class PermissionError(QwenError):
         )
 
 
-class FileAlreadyExistsError(QwenError):
+class FileAlreadyExistsError(VerticeError):
     """File already exists and cannot be overwritten."""
 
     def __init__(self, path: FilePath):
@@ -267,7 +275,8 @@ class FileAlreadyExistsError(QwenError):
 # NETWORK ERRORS
 # ============================================================================
 
-class NetworkError(QwenError):
+
+class NetworkError(VerticeError):
     """Network-related error."""
 
     def __init__(
@@ -279,9 +288,9 @@ class NetworkError(QwenError):
     ):
         metadata = {}
         if url:
-            metadata['url'] = url
+            metadata["url"] = url
         if status_code:
-            metadata['status_code'] = status_code
+            metadata["status_code"] = status_code
 
         context = ErrorContext(
             category=ErrorCategory.NETWORK,
@@ -296,7 +305,7 @@ class NetworkError(QwenError):
         super().__init__(message, context, recoverable=True, cause=cause)
 
 
-class TimeoutError(QwenError):
+class TimeoutError(VerticeError):
     """Operation timed out."""
 
     def __init__(
@@ -308,8 +317,8 @@ class TimeoutError(QwenError):
         context = ErrorContext(
             category=ErrorCategory.TIMEOUT,
             metadata={
-                'timeout': timeout_seconds,
-                'operation': operation,
+                "timeout": timeout_seconds,
+                "operation": operation,
             },
             suggestions=(
                 f"Increase timeout (current: {timeout_seconds}s)",
@@ -320,7 +329,7 @@ class TimeoutError(QwenError):
         super().__init__(message, context, recoverable=True)
 
 
-class RateLimitError(QwenError):
+class RateLimitError(VerticeError):
     """API rate limit exceeded."""
 
     def __init__(
@@ -333,16 +342,20 @@ class RateLimitError(QwenError):
             message += f". Retry after {retry_after} seconds"
 
         metadata: Dict[str, Any] = {
-            'provider': provider,
+            "provider": provider,
         }
         if retry_after is not None:
-            metadata['retry_after'] = retry_after
+            metadata["retry_after"] = retry_after
 
         context = ErrorContext(
             category=ErrorCategory.NETWORK,
             metadata=metadata,
             suggestions=(
-                f"Wait {retry_after} seconds before retrying" if retry_after else "Wait before retrying",
+                (
+                    f"Wait {retry_after} seconds before retrying"
+                    if retry_after
+                    else "Wait before retrying"
+                ),
                 "Reduce request rate",
                 "Implement exponential backoff",
             ),
@@ -354,7 +367,8 @@ class RateLimitError(QwenError):
 # RESOURCE ERRORS
 # ============================================================================
 
-class ResourceError(QwenError):
+
+class ResourceError(VerticeError):
     """Resource constraint error."""
 
     def __init__(
@@ -364,11 +378,11 @@ class ResourceError(QwenError):
         limit: Optional[Any] = None,
         current: Optional[Any] = None,
     ):
-        metadata = {'resource_type': resource_type}
+        metadata = {"resource_type": resource_type}
         if limit is not None:
-            metadata['limit'] = limit
+            metadata["limit"] = limit
         if current is not None:
-            metadata['current'] = current
+            metadata["current"] = current
 
         suggestions = [
             f"Reduce {resource_type} usage",
@@ -422,7 +436,8 @@ class MemoryLimitError(ResourceError):
 # VALIDATION ERRORS
 # ============================================================================
 
-class ValidationError(QwenError):
+
+class ValidationError(VerticeError):
     """Input validation error."""
 
     def __init__(
@@ -434,11 +449,11 @@ class ValidationError(QwenError):
     ):
         metadata = {}
         if field:
-            metadata['field'] = field
+            metadata["field"] = field
         if value is not None:
-            metadata['value'] = str(value)
+            metadata["value"] = str(value)
         if constraint:
-            metadata['constraint'] = constraint
+            metadata["constraint"] = constraint
 
         suggestions = ["Check input format and constraints"]
         if field:
@@ -458,7 +473,8 @@ class ValidationError(QwenError):
 # CONFIGURATION ERRORS
 # ============================================================================
 
-class ConfigurationError(QwenError):
+
+class ConfigurationError(VerticeError):
     """Configuration error."""
 
     def __init__(
@@ -469,7 +485,7 @@ class ConfigurationError(QwenError):
     ):
         metadata = {}
         if config_key:
-            metadata['config_key'] = config_key
+            metadata["config_key"] = config_key
 
         suggestions = [
             "Check configuration file syntax",
@@ -492,7 +508,8 @@ class ConfigurationError(QwenError):
 # LLM ERRORS
 # ============================================================================
 
-class LLMError(QwenError):
+
+class LLMError(VerticeError):
     """LLM-related error."""
 
     def __init__(
@@ -504,9 +521,9 @@ class LLMError(QwenError):
     ):
         metadata = {}
         if provider:
-            metadata['provider'] = provider
+            metadata["provider"] = provider
         if model:
-            metadata['model'] = model
+            metadata["model"] = model
 
         context = ErrorContext(
             category=ErrorCategory.NETWORK,
@@ -521,7 +538,7 @@ class LLMError(QwenError):
         super().__init__(message, context, recoverable=True, cause=cause)
 
 
-class LLMValidationError(QwenError):
+class LLMValidationError(VerticeError):
     """LLM backend not available."""
 
     def __init__(self, message: str):
@@ -542,7 +559,8 @@ class LLMValidationError(QwenError):
 # TOOL ERRORS
 # ============================================================================
 
-class ToolError(QwenError):
+
+class ToolError(VerticeError):
     """Tool execution error."""
 
     def __init__(
@@ -552,9 +570,9 @@ class ToolError(QwenError):
         arguments: Optional[Dict[str, Any]] = None,
         cause: Optional[Exception] = None,
     ):
-        metadata = {'tool': tool_name}
+        metadata = {"tool": tool_name}
         if arguments:
-            metadata['arguments'] = arguments
+            metadata["arguments"] = arguments
 
         context = ErrorContext(
             category=ErrorCategory.RUNTIME,
@@ -584,26 +602,33 @@ class ToolNotFoundError(ToolError):
 
 __all__ = [
     # Base
-    'QwenError', 'ErrorContext',
-
+    "VerticeError",
+    "QwenError",
+    "ErrorContext",
     # Code execution
-    'SyntaxError', 'ImportError', 'TypeError', 'RuntimeError',
-
+    "SyntaxError",
+    "ImportError",
+    "TypeError",
+    "RuntimeError",
     # File system
-    'FileNotFoundError', 'PermissionError', 'FileAlreadyExistsError',
-
+    "FileNotFoundError",
+    "PermissionError",
+    "FileAlreadyExistsError",
     # Network
-    'NetworkError', 'TimeoutError', 'RateLimitError',
-
+    "NetworkError",
+    "TimeoutError",
+    "RateLimitError",
     # Resources
-    'ResourceError', 'TokenLimitError', 'MemoryLimitError',
-
+    "ResourceError",
+    "TokenLimitError",
+    "MemoryLimitError",
     # Validation
-    'ValidationError', 'ConfigurationError',
-
+    "ValidationError",
+    "ConfigurationError",
     # LLM
-    'LLMError', 'LLMValidationError',
-
+    "LLMError",
+    "LLMValidationError",
     # Tools
-    'ToolError', 'ToolNotFoundError',
+    "ToolError",
+    "ToolNotFoundError",
 ]

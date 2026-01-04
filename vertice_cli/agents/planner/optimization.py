@@ -52,17 +52,10 @@ def build_stages(
             continue
 
         # Determine strategy
-        strategy = (
-            ExecutionStrategy.PARALLEL
-            if len(group) > 1
-            else ExecutionStrategy.SEQUENTIAL
-        )
+        strategy = ExecutionStrategy.PARALLEL if len(group) > 1 else ExecutionStrategy.SEQUENTIAL
 
         # Check if stage has checkpoint
-        has_checkpoint = any(
-            step.checkpoint is not None
-            for step in stage_steps
-        )
+        has_checkpoint = any(step.checkpoint is not None for step in stage_steps)
 
         stage = ExecutionStage(
             name=f"Stage {level_idx + 1}: {infer_stage_name(stage_steps)}",
@@ -73,7 +66,7 @@ def build_stages(
             required=all(
                 step.priority in [AgentPriority.CRITICAL, AgentPriority.HIGH]
                 for step in stage_steps
-            )
+            ),
         )
         stages.append(stage)
 
@@ -116,16 +109,9 @@ def assess_risk(sops: List[SOPStep]) -> str:
         return "LOW"
 
 
-def generate_rollback_strategy(
-    stages: List[ExecutionStage],
-    sops: List[SOPStep]
-) -> str:
+def generate_rollback_strategy(stages: List[ExecutionStage], sops: List[SOPStep]) -> str:
     """Generate comprehensive rollback strategy."""
-    checkpoints = [
-        stage.name
-        for stage in stages
-        if stage.checkpoint
-    ]
+    checkpoints = [stage.name for stage in stages if stage.checkpoint]
 
     if not checkpoints:
         return "Full rollback to initial state if any step fails."
@@ -135,7 +121,7 @@ def generate_rollback_strategy(
         f"- Checkpoints at: {', '.join(checkpoints)}",
         "- On failure: Restore to last successful checkpoint",
         "- Critical steps have automatic retry (max 3 attempts)",
-        "- All changes tracked for point-in-time recovery"
+        "- All changes tracked for point-in-time recovery",
     ]
 
     return "\n".join(strategy_parts)
@@ -143,17 +129,11 @@ def generate_rollback_strategy(
 
 def identify_checkpoints(stages: List[ExecutionStage]) -> List[str]:
     """Identify checkpoint stages."""
-    return [
-        stage.name
-        for stage in stages
-        if stage.checkpoint
-    ]
+    return [stage.name for stage in stages if stage.checkpoint]
 
 
 def estimate_duration(
-    sops: List[SOPStep],
-    parallel_groups: List[List[str]],
-    dependency_analyzer: "DependencyAnalyzer"
+    sops: List[SOPStep], parallel_groups: List[List[str]], dependency_analyzer: "DependencyAnalyzer"
 ) -> str:
     """
     Estimate total execution time accounting for parallelism.
@@ -181,9 +161,7 @@ def estimate_duration(
         return f"~{minutes // 60} hours"
 
 
-def calculate_max_parallel(
-    parallel_groups: List[List[str]]
-) -> int:
+def calculate_max_parallel(parallel_groups: List[List[str]]) -> int:
     """Calculate maximum parallel agents needed."""
     if not parallel_groups:
         return 1
@@ -192,9 +170,7 @@ def calculate_max_parallel(
 
 def generate_strategy_overview(stages: List[ExecutionStage]) -> str:
     """Generate high-level strategy description."""
-    parallel_stages = sum(
-        1 for s in stages if s.strategy == ExecutionStrategy.PARALLEL
-    )
+    parallel_stages = sum(1 for s in stages if s.strategy == ExecutionStrategy.PARALLEL)
     total_stages = len(stages)
 
     overview_parts = [
@@ -202,13 +178,9 @@ def generate_strategy_overview(stages: List[ExecutionStage]) -> str:
     ]
 
     if parallel_stages > 0:
-        overview_parts.append(
-            f"{parallel_stages} stages use parallel execution for efficiency."
-        )
+        overview_parts.append(f"{parallel_stages} stages use parallel execution for efficiency.")
 
-    overview_parts.append(
-        "Each stage has clear success criteria and rollback capability."
-    )
+    overview_parts.append("Each stage has clear success criteria and rollback capability.")
 
     return " ".join(overview_parts)
 

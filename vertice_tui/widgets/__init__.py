@@ -23,6 +23,7 @@ from vertice_tui.widgets.token_meter import (
     TokenDashboard,
     MiniTokenMeter,
 )
+
 # Phase 11: Visual Upgrade - Modal System
 from vertice_tui.widgets.modal import (
     ConfirmDialog,
@@ -34,6 +35,7 @@ from vertice_tui.widgets.modal import (
     alert,
     prompt,
 )
+
 # Phase 11: Visual Upgrade - Toast Helpers
 from vertice_tui.widgets.toast import (
     toast_success,
@@ -43,12 +45,14 @@ from vertice_tui.widgets.toast import (
     toast_copied,
     ToastMixin,
 )
+
 # Phase 11: Visual Upgrade - Diff View
 from vertice_tui.widgets.diff_view import (
     DiffView,
     InlineDiff,
     create_diff_text,
 )
+
 # Phase 11: Visual Upgrade - Tool Call Visualization
 from vertice_tui.widgets.tool_call import (
     ToolStatus,
@@ -56,8 +60,10 @@ from vertice_tui.widgets.tool_call import (
     ToolCallWidget,
     ToolCallStack,
 )
+
 # Phase 11: Visual Upgrade - Enhanced Input
 from vertice_tui.widgets.input_area import InputArea
+
 # Phase 11: Visual Upgrade - Loading Animations
 from vertice_tui.widgets.loading import (
     SkeletonLine,
@@ -67,6 +73,7 @@ from vertice_tui.widgets.loading import (
     ThinkingIndicator,
     PulseIndicator,
 )
+
 # Phase 11: Visual Upgrade - Layout & Navigation
 from vertice_tui.widgets.sidebar import (
     Sidebar,

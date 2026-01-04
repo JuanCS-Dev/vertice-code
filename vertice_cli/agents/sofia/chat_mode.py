@@ -54,7 +54,7 @@ class SofiaChatMode:
         response = await self.sofia.provide_counsel_async(
             query=query,
             session_id=self.session_id,
-            context={"mode": "chat", "turn": self.turn_count}
+            context={"mode": "chat", "turn": self.turn_count},
         )
         self.turn_count += 1
         return response
@@ -71,7 +71,7 @@ class SofiaChatMode:
         response = self.sofia.provide_counsel(
             query=query,
             session_id=self.session_id,
-            context={"mode": "chat", "turn": self.turn_count}
+            context={"mode": "chat", "turn": self.turn_count},
         )
         self.turn_count += 1
         return response
@@ -101,10 +101,7 @@ class SofiaChatMode:
         duration = (datetime.now(timezone.utc) - self.started_at).total_seconds()
 
         total_questions = sum(len(c.questions_asked) for c in history)
-        avg_confidence = (
-            sum(c.confidence for c in history) / len(history)
-            if history else 0.0
-        )
+        avg_confidence = sum(c.confidence for c in history) / len(history) if history else 0.0
 
         return {
             "session_id": self.session_id,
@@ -130,7 +127,7 @@ class SofiaChatMode:
             f"Started: {self.started_at.isoformat()}",
             f"Turns: {self.turn_count}",
             "=" * 70,
-            ""
+            "",
         ]
 
         for i, counsel in enumerate(history, 1):

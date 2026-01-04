@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 # ASK USER QUESTION TOOL
 # =============================================================================
 
+
 class AskUserQuestionTool(Tool):
     """
     Ask the user a question with predefined options.
@@ -71,7 +72,7 @@ class AskUserQuestionTool(Tool):
             "questions": {
                 "type": "array",
                 "description": "List of questions (1-4) with options",
-                "required": True
+                "required": True,
             }
         }
 
@@ -124,32 +125,30 @@ class AskUserQuestionTool(Tool):
             valid_options = []
             for j, opt in enumerate(options):
                 if isinstance(opt, dict) and opt.get("label"):
-                    valid_options.append({
-                        "label": str(opt.get("label", ""))[:50],
-                        "description": str(opt.get("description", ""))[:200]
-                    })
+                    valid_options.append(
+                        {
+                            "label": str(opt.get("label", ""))[:50],
+                            "description": str(opt.get("description", ""))[:200],
+                        }
+                    )
                 elif isinstance(opt, str):
-                    valid_options.append({
-                        "label": opt[:50],
-                        "description": ""
-                    })
+                    valid_options.append({"label": opt[:50], "description": ""})
 
             if len(valid_options) < 2:
                 errors.append(f"Question {i+1}: at least 2 valid options required")
                 continue
 
-            validated_questions.append({
-                "question": question_text[:500],
-                "header": str(header)[:12],
-                "options": valid_options,
-                "multiSelect": bool(multi_select)
-            })
+            validated_questions.append(
+                {
+                    "question": question_text[:500],
+                    "header": str(header)[:12],
+                    "options": valid_options,
+                    "multiSelect": bool(multi_select),
+                }
+            )
 
         if errors:
-            return ToolResult(
-                success=False,
-                error="; ".join(errors)
-            )
+            return ToolResult(success=False, error="; ".join(errors))
 
         if not validated_questions:
             return ToolResult(success=False, error="No valid questions provided")
@@ -162,7 +161,7 @@ class AskUserQuestionTool(Tool):
             "id": question_id,
             "questions": validated_questions,
             "status": "pending",
-            "created_at": datetime.datetime.now().isoformat()
+            "created_at": datetime.datetime.now().isoformat(),
         }
 
         return ToolResult(
@@ -171,18 +170,15 @@ class AskUserQuestionTool(Tool):
                 "question_id": question_id,
                 "questions": validated_questions,
                 "status": "pending",
-                "message": "Question(s) queued for user"
+                "message": "Question(s) queued for user",
             },
-            metadata={"count": len(validated_questions)}
+            metadata={"count": len(validated_questions)},
         )
 
     @classmethod
     def get_pending_questions(cls) -> List[Dict]:
         """Get all pending questions."""
-        return [
-            q for q in cls._pending_questions.values()
-            if q["status"] == "pending"
-        ]
+        return [q for q in cls._pending_questions.values() if q["status"] == "pending"]
 
     @classmethod
     def answer_question(cls, question_id: str, answers: Dict) -> bool:
@@ -204,6 +200,7 @@ class AskUserQuestionTool(Tool):
 # =============================================================================
 # SKILL TOOL
 # =============================================================================
+
 
 class SkillTool(Tool):
     """
@@ -232,7 +229,7 @@ class SkillTool(Tool):
             "skill": {
                 "type": "string",
                 "description": "The skill name (no arguments). E.g., 'pdf' or 'review-pr'",
-                "required": True
+                "required": True,
             }
         }
 
@@ -257,10 +254,7 @@ class SkillTool(Tool):
         if skill_name not in SkillTool._skills_cache:
             available = list(SkillTool._skills_cache.keys())[:10]
             hint = f" Available: {', '.join(available)}" if available else ""
-            return ToolResult(
-                success=False,
-                error=f"Skill '{skill_name}' not found.{hint}"
-            )
+            return ToolResult(success=False, error=f"Skill '{skill_name}' not found.{hint}")
 
         skill = SkillTool._skills_cache[skill_name]
 
@@ -271,12 +265,9 @@ class SkillTool(Tool):
                 "prompt": skill.get("content", ""),
                 "description": skill.get("description", ""),
                 "source": skill.get("source", ""),
-                "status": "loaded"
+                "status": "loaded",
             },
-            metadata={
-                "file": skill.get("file", ""),
-                "scope": skill.get("scope", "project")
-            }
+            metadata={"file": skill.get("file", ""), "scope": skill.get("scope", "project")},
         )
 
     def _refresh_skills_cache(self) -> None:
@@ -318,7 +309,7 @@ class SkillTool(Tool):
                             "description": description[:200],
                             "file": str(md_file),
                             "source": search_path.name,
-                            "scope": scope
+                            "scope": scope,
                         }
                         logger.debug(f"Loaded skill: {skill_name} from {md_file}")
 
@@ -337,7 +328,7 @@ class SkillTool(Tool):
             {
                 "name": name,
                 "description": skill.get("description", ""),
-                "scope": skill.get("scope", "project")
+                "scope": skill.get("scope", "project"),
             }
             for name, skill in cls._skills_cache.items()
         ]
@@ -352,6 +343,7 @@ class SkillTool(Tool):
 # =============================================================================
 # SLASH COMMAND TOOL
 # =============================================================================
+
 
 class SlashCommandTool(Tool):
     """
@@ -382,7 +374,7 @@ class SlashCommandTool(Tool):
             "command": {
                 "type": "string",
                 "description": "The slash command to execute, including arguments. E.g., '/review-pr 123'",
-                "required": True
+                "required": True,
             }
         }
 
@@ -409,10 +401,7 @@ class SlashCommandTool(Tool):
         if cmd_name not in SkillTool._skills_cache:
             available = list(SkillTool._skills_cache.keys())[:5]
             hint = f" Try: {', '.join(available)}" if available else ""
-            return ToolResult(
-                success=False,
-                error=f"Command '/{cmd_name}' not found.{hint}"
-            )
+            return ToolResult(success=False, error=f"Command '/{cmd_name}' not found.{hint}")
 
         skill = SkillTool._skills_cache[cmd_name]
         prompt = skill.get("content", "")
@@ -438,19 +427,20 @@ class SlashCommandTool(Tool):
                 "command": cmd_name,
                 "args": args,
                 "expanded_prompt": prompt,
-                "status": "expanded"
+                "status": "expanded",
             },
             metadata={
                 "file": skill.get("file", ""),
                 "has_args": bool(args),
-                "description": skill.get("description", "")
-            }
+                "description": skill.get("description", ""),
+            },
         )
 
 
 # =============================================================================
 # REGISTRY HELPER
 # =============================================================================
+
 
 def get_interaction_tools() -> List[Tool]:
     """Get all user interaction tools."""

@@ -23,10 +23,29 @@ class AgentCommandHandler:
     """Handler for agent invocation commands."""
 
     # Agents that need file context from working directory
-    FILE_CONTEXT_AGENTS = {"reviewer", "refactorer", "security", "testing", "documentation", "performance"}
+    FILE_CONTEXT_AGENTS = {
+        "reviewer",
+        "refactorer",
+        "security",
+        "testing",
+        "documentation",
+        "performance",
+    }
 
     # File extensions to include in context
-    CODE_EXTENSIONS = {".py", ".js", ".ts", ".tsx", ".jsx", ".java", ".go", ".rs", ".cpp", ".c", ".h"}
+    CODE_EXTENSIONS = {
+        ".py",
+        ".js",
+        ".ts",
+        ".tsx",
+        ".jsx",
+        ".java",
+        ".go",
+        ".rs",
+        ".cpp",
+        ".c",
+        ".h",
+    }
 
     def __init__(self, app: "QwenApp"):
         self.app = app
@@ -91,12 +110,7 @@ class AgentCommandHandler:
 
         return context
 
-    async def handle(
-        self,
-        command: str,
-        args: str,
-        view: "ResponseView"
-    ) -> None:
+    async def handle(self, command: str, args: str, view: "ResponseView") -> None:
         """Route to specific agent handler."""
         handlers = {
             "/plan": self._handle_plan,
@@ -176,12 +190,7 @@ class AgentCommandHandler:
     async def _handle_data(self, args: str, view: "ResponseView") -> None:
         await self._invoke_agent("data", args or "Database analysis", view)
 
-    async def _invoke_agent(
-        self,
-        agent_name: str,
-        task: str,
-        view: "ResponseView"
-    ) -> None:
+    async def _invoke_agent(self, agent_name: str, task: str, view: "ResponseView") -> None:
         """
         Invoke a specific agent with streaming response.
 
@@ -199,8 +208,12 @@ class AgentCommandHandler:
 
         # Log context for debugging
         if context.get("files"):
-            logger.debug(f"Invoking {agent_name} with {len(context['files'])} files from {context['cwd']}")
-            view.append_chunk(f"📁 Found **{len(context['files'])} files** in `{context['project_name']}`\n\n")
+            logger.debug(
+                f"Invoking {agent_name} with {len(context['files'])} files from {context['cwd']}"
+            )
+            view.append_chunk(
+                f"📁 Found **{len(context['files'])} files** in `{context['project_name']}`\n\n"
+            )
 
         try:
             async for chunk in self.bridge.invoke_agent(agent_name, task, context):
@@ -218,22 +231,13 @@ class AgentCommandHandler:
             status.mode = "READY"
             view.end_thinking()
 
-    async def _invoke_planner_v61(
-        self,
-        mode: str,
-        task: str,
-        view: "ResponseView"
-    ) -> None:
+    async def _invoke_planner_v61(self, mode: str, task: str, view: "ResponseView") -> None:
         """Invoke Planner v6.1 with specific mode."""
         self.app.is_processing = True
         view.start_thinking()
 
         status = self.app.query_one("StatusBar")
-        mode_labels = {
-            "multi": "MULTI-PLAN",
-            "clarify": "CLARIFY",
-            "explore": "EXPLORE"
-        }
+        mode_labels = {"multi": "MULTI-PLAN", "clarify": "CLARIFY", "explore": "EXPLORE"}
         status.mode = f"🎯 PLANNER:{mode_labels.get(mode, mode.upper())}"
 
         try:

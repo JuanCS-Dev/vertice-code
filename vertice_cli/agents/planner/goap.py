@@ -25,6 +25,7 @@ class WorldState:
     GOAP-inspired world state tracking.
     Represents the current state of the development environment.
     """
+
     facts: Dict[str, Any] = field(default_factory=dict)
     resources: Dict[str, int] = field(default_factory=dict)
 
@@ -47,15 +48,13 @@ class WorldState:
 
     def copy(self) -> WorldState:
         """Create a copy of this state."""
-        return WorldState(
-            facts=self.facts.copy(),
-            resources=self.resources.copy()
-        )
+        return WorldState(facts=self.facts.copy(), resources=self.resources.copy())
 
 
 @dataclass
 class GoalState:
     """Desired end state for GOAP planning."""
+
     name: str
     desired_facts: Dict[str, Any]
     priority: float = 1.0  # Weight for multi-goal scenarios
@@ -67,12 +66,13 @@ class Action:
     GOAP Action with preconditions and effects.
     Atomic unit of work for an agent.
     """
+
     id: str
     agent_role: str
     description: str
     preconditions: Dict[str, Any]  # Required world state
-    effects: Dict[str, Any]        # Changes to world state
-    cost: float = 1.0              # For path optimization
+    effects: Dict[str, Any]  # Changes to world state
+    cost: float = 1.0  # For path optimization
     duration_estimate: str = "5m"
 
     def can_execute(self, state: WorldState) -> bool:
@@ -114,10 +114,7 @@ class GOAPPlanner:
         self.actions = actions
 
     def plan(
-        self,
-        initial_state: WorldState,
-        goal: GoalState,
-        max_depth: int = 20
+        self, initial_state: WorldState, goal: GoalState, max_depth: int = 20
     ) -> Optional[List[Action]]:
         """
         Find optimal action sequence using A* algorithm.
@@ -168,10 +165,7 @@ class GOAPPlanner:
                 new_f_score = new_g_score + h_score
 
                 counter += 1
-                heapq.heappush(
-                    frontier,
-                    (new_f_score, counter, new_g_score, new_state, new_path)
-                )
+                heapq.heappush(frontier, (new_f_score, counter, new_g_score, new_state, new_path))
 
         return None  # No plan found
 

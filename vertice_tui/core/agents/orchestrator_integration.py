@@ -95,9 +95,7 @@ class OrchestratorIntegration:
         return None
 
     async def execute_orchestrated(
-        self,
-        request: str,
-        context: Optional[Dict[str, Any]] = None
+        self, request: str, context: Optional[Dict[str, Any]] = None
     ) -> AsyncIterator[str]:
         """
         Execute request through the orchestrator.
@@ -137,11 +135,7 @@ class OrchestratorIntegration:
             async for chunk in self.agent_manager.invoke("planner", request, context):
                 yield chunk
 
-    async def request_approval(
-        self,
-        operation: str,
-        details: Dict[str, Any]
-    ) -> AsyncIterator[str]:
+    async def request_approval(self, operation: str, details: Dict[str, Any]) -> AsyncIterator[str]:
         """
         Request human approval for L2 operations.
 
@@ -153,12 +147,9 @@ class OrchestratorIntegration:
             Approval request message
         """
         approval_id = f"approval-{len(self._approval_queue)}"
-        self._approval_queue.append({
-            "id": approval_id,
-            "operation": operation,
-            "details": details,
-            "status": "pending"
-        })
+        self._approval_queue.append(
+            {"id": approval_id, "operation": operation, "details": details, "status": "pending"}
+        )
 
         yield f"\n**Approval Required** (L2)\n"
         yield f"Operation: {operation}\n"

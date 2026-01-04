@@ -93,7 +93,7 @@ class VertexCacheManager:
                     vertexai=True,
                     project=self.project,
                     location=self.location,
-                    http_options=HttpOptions(api_version="v1")
+                    http_options=HttpOptions(api_version="v1"),
                 )
                 logger.info(f"Gen AI cache client initialized for {self.project}")
             except ImportError:
@@ -156,10 +156,7 @@ class VertexCacheManager:
             if system_instruction:
                 config.system_instruction = system_instruction
 
-            cache = self._client.caches.create(
-                model=self.model,
-                config=config
-            )
+            cache = self._client.caches.create(model=self.model, config=config)
 
             # Store cache reference
             self._caches[name] = cache
@@ -207,8 +204,7 @@ class VertexCacheManager:
             from google.genai.types import UpdateCachedContentConfig
 
             self._client.caches.update(
-                name=cache.name,
-                config=UpdateCachedContentConfig(ttl=f"{additional_seconds}s")
+                name=cache.name, config=UpdateCachedContentConfig(ttl=f"{additional_seconds}s")
             )
             logger.info(f"Cache TTL extended: {name} (+{additional_seconds}s)")
 
@@ -254,4 +250,3 @@ class VertexCacheManager:
             "project": self.project,
             "location": self.location,
         }
-

@@ -24,12 +24,7 @@ class OperationsHandler:
     def bridge(self):
         return self.app.bridge
 
-    async def handle(
-        self,
-        command: str,
-        args: str,
-        view: "ResponseView"
-    ) -> None:
+    async def handle(self, command: str, args: str, view: "ResponseView") -> None:
         """Route to specific handler method."""
         handlers = {
             "/pr": self._handle_pr,
@@ -196,7 +191,9 @@ class OperationsHandler:
                 lines = [f"## 💾 Backups ({result.get('total', 0)} total)\n"]
                 if backups:
                     for b in backups[:15]:
-                        lines.append(f"- `{b.get('timestamp')}` {b.get('original_name')} ({b.get('reason')})")
+                        lines.append(
+                            f"- `{b.get('timestamp')}` {b.get('original_name')} ({b.get('reason')})"
+                        )
                 else:
                     lines.append("*No backups yet*")
                 lines.append(f"\n**Backup dir:** `{result.get('backup_dir')}`")
@@ -216,20 +213,52 @@ class OperationsHandler:
 
     async def _handle_restore(self, args: str, view: "ResponseView") -> None:
         if not args:
-            view.add_error("Usage: `/restore <backup_path>` or `/restore <backup_path> <target_path>`")
+            view.add_error(
+                "Usage: `/restore <backup_path>` or `/restore <backup_path> <target_path>`"
+            )
+            return
+
+        parts = args.split(maxsplit=1)
+        backup_path = parts[0]
+        target_path = parts[1] if len(parts) > 1 else None
+
+        # Check for --force flag
+        if "--force" in args:
+            backup_path = backup_path.replace("--force", "").strip()
+            self._do_restore(backup_path, target_path, view)
+            return
+
+        # Show confirmation dialog
+        from vertice_tui.widgets.modal import ConfirmDialog
+
+        target_desc = target_path or "original location"
+
+        def on_confirm(confirmed: bool) -> None:
+            if confirmed:
+                self._do_restore(backup_path, target_path, view)
+
+        self.app.push_screen(
+            ConfirmDialog(
+                f"Restore from:\n  {backup_path}\n\nTo:\n  {target_desc}\n\nThis will overwrite existing content.",
+                title="Restore Backup?",
+                yes_label="Restore",
+                no_label="Cancel",
+                destructive=True,
+            ),
+            on_confirm,
+        )
+
+    def _do_restore(self, backup_path: str, target_path: str | None, view: "ResponseView") -> None:
+        """Execute restore operation."""
+        result = self.bridge.restore_backup(backup_path, target_path)
+        if result.get("success"):
+            view.add_system_message(
+                f"## ✅ Restored\n\n"
+                f"**From:** `{result.get('restored_from')}`\n"
+                f"**To:** `{result.get('restored_to')}`"
+            )
         else:
-            parts = args.split(maxsplit=1)
-            backup_path = parts[0]
-            target_path = parts[1] if len(parts) > 1 else None
-            result = self.bridge.restore_backup(backup_path, target_path)
-            if result.get("success"):
-                view.add_system_message(
-                    f"## ✅ Restored\n\n"
-                    f"**From:** `{result.get('restored_from')}`\n"
-                    f"**To:** `{result.get('restored_to')}`"
-                )
-            else:
-                view.add_error(result.get("error"))
+            view.add_error(result.get("error"))
 
     async def _handle_undo(self, args: str, view: "ResponseView") -> None:
         result = self.bridge.undo()

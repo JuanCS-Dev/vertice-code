@@ -24,9 +24,7 @@ if TYPE_CHECKING:
 
 
 async def stream_response(
-    repl: "MasterpieceREPL",
-    message: str,
-    system: Optional[str] = None
+    repl: "MasterpieceREPL", message: str, system: Optional[str] = None
 ) -> None:
     """
     Stream with MINIMAL OUTPUT (Nov 2025 style).
@@ -55,10 +53,7 @@ async def stream_response(
 
     try:
         async for chunk in repl.llm_client.stream_chat(
-            prompt=message,
-            context=system,
-            max_tokens=4000,
-            temperature=0.7
+            prompt=message, context=system, max_tokens=4000, temperature=0.7
         ):
             buffer.append(chunk)
             char_count += len(chunk)
@@ -74,7 +69,7 @@ async def stream_response(
                 repl.console.print(chunk, end="", style="white")
 
             # Count words
-            if ' ' in chunk or '\n' in chunk:
+            if " " in chunk or "\n" in chunk:
                 word_count += len(chunk.split())
 
                 # Update metrics
@@ -87,7 +82,7 @@ async def stream_response(
             sys.stdout.flush()
 
         # Store full response for /expand
-        full_response = ''.join(buffer)
+        full_response = "".join(buffer)
         repl.last_response = full_response
 
         # Enhanced stats (minimal style)

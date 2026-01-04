@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 # Try to import Levenshtein for fast distance calculation
 try:
     from Levenshtein import distance as levenshtein_distance
+
     HAS_LEVENSHTEIN = True
 except ImportError:
     HAS_LEVENSHTEIN = False
@@ -59,6 +60,7 @@ except ImportError:
 
 class InputType(Enum):
     """Types of input detected."""
+
     PLAIN_TEXT = "plain_text"
     CODE_BLOCK = "code_block"
     COMMAND = "command"
@@ -70,6 +72,7 @@ class InputType(Enum):
 @dataclass
 class CodeBlock:
     """An extracted code block."""
+
     language: str
     code: str
     original: str
@@ -78,6 +81,7 @@ class CodeBlock:
 @dataclass
 class CodeExtraction:
     """Result of code extraction."""
+
     clean_code: str
     code_blocks: List[CodeBlock] = field(default_factory=list)
     error_detected: bool = False
@@ -87,6 +91,7 @@ class CodeExtraction:
 @dataclass
 class EnhancedInput:
     """Result of input enhancement."""
+
     original: str
     cleaned: str
     input_type: InputType
@@ -158,8 +163,11 @@ class EnhancedInput:
         """Check if input contains contradictory requests."""
         text = self.original.lower()
         contradictions = [
-            ("delete", "keep"), ("remove", "save"), ("delete", "save"),
-            ("stop", "start"), ("cancel", "continue"),
+            ("delete", "keep"),
+            ("remove", "save"),
+            ("delete", "save"),
+            ("stop", "start"),
+            ("cancel", "continue"),
         ]
         for word1, word2 in contradictions:
             if word1 in text and word2 in text:
@@ -178,7 +186,9 @@ class EnhancedInput:
     def is_question(self) -> bool:
         """Check if input is a question."""
         text = self.original.strip()
-        return text.endswith("?") or text.lower().startswith(("what ", "how ", "why ", "when ", "where ", "can ", "does ", "is "))
+        return text.endswith("?") or text.lower().startswith(
+            ("what ", "how ", "why ", "when ", "where ", "can ", "does ", "is ")
+        )
 
     @property
     def wants_explanation(self) -> bool:
@@ -191,6 +201,7 @@ class EnhancedInput:
 @dataclass
 class TypoCorrection:
     """A suggested typo correction."""
+
     original: str
     suggestion: str
     distance: int
@@ -221,16 +232,56 @@ class InputEnhancer:
     # Common command vocabulary for typo correction
     COMMAND_VOCABULARY = {
         # File commands
-        "read", "write", "edit", "create", "delete", "rename", "move", "copy",
+        "read",
+        "write",
+        "edit",
+        "create",
+        "delete",
+        "rename",
+        "move",
+        "copy",
         # Git commands
-        "git", "commit", "push", "pull", "branch", "merge", "rebase", "checkout",
-        "status", "diff", "log", "stash", "clone", "fetch",
+        "git",
+        "commit",
+        "push",
+        "pull",
+        "branch",
+        "merge",
+        "rebase",
+        "checkout",
+        "status",
+        "diff",
+        "log",
+        "stash",
+        "clone",
+        "fetch",
         # Development commands
-        "test", "run", "build", "install", "deploy", "start", "stop", "restart",
+        "test",
+        "run",
+        "build",
+        "install",
+        "deploy",
+        "start",
+        "stop",
+        "restart",
         # Analysis commands
-        "search", "find", "grep", "list", "show", "view", "open", "close",
+        "search",
+        "find",
+        "grep",
+        "list",
+        "show",
+        "view",
+        "open",
+        "close",
         # Help commands
-        "help", "explain", "how", "what", "why", "fix", "debug", "analyze",
+        "help",
+        "explain",
+        "how",
+        "what",
+        "why",
+        "fix",
+        "debug",
+        "analyze",
     }
 
     # Common typos and their corrections
@@ -265,17 +316,14 @@ class InputEnhancer:
     }
 
     # Code block pattern
-    CODE_BLOCK_PATTERN = re.compile(
-        r'```(\w*)\n?(.*?)```',
-        re.DOTALL
-    )
+    CODE_BLOCK_PATTERN = re.compile(r"```(\w*)\n?(.*?)```", re.DOTALL)
 
     # REPL prompt patterns
     REPL_PATTERNS = [
-        (re.compile(r'^>>> (.*)$', re.MULTILINE), "python"),
-        (re.compile(r'^> (.*)$', re.MULTILINE), "shell"),
-        (re.compile(r'^\$ (.*)$', re.MULTILINE), "bash"),
-        (re.compile(r'^In \[\d+\]: (.*)$', re.MULTILINE), "ipython"),
+        (re.compile(r"^>>> (.*)$", re.MULTILINE), "python"),
+        (re.compile(r"^> (.*)$", re.MULTILINE), "shell"),
+        (re.compile(r"^\$ (.*)$", re.MULTILINE), "bash"),
+        (re.compile(r"^In \[\d+\]: (.*)$", re.MULTILINE), "ipython"),
     ]
 
     def __init__(
@@ -328,7 +376,7 @@ class InputEnhancer:
             metadata["detected_language"] = repl_lang
 
         # Detect multiline
-        if '\n' in cleaned.strip() and input_type == InputType.PLAIN_TEXT:
+        if "\n" in cleaned.strip() and input_type == InputType.PLAIN_TEXT:
             input_type = InputType.MULTILINE
 
         # Check for typos
@@ -354,10 +402,7 @@ class InputEnhancer:
             metadata=metadata,
         )
 
-    def _extract_code_blocks(
-        self,
-        text: str
-    ) -> Tuple[List[CodeBlock], str]:
+    def _extract_code_blocks(self, text: str) -> Tuple[List[CodeBlock], str]:
         """Extract markdown code blocks from text."""
         code_blocks = []
         remaining = text
@@ -366,11 +411,7 @@ class InputEnhancer:
             language = match.group(1) or "text"
             code = match.group(2).strip()
 
-            block = CodeBlock(
-                language=language,
-                code=code,
-                original=match.group(0)
-            )
+            block = CodeBlock(language=language, code=code, original=match.group(0))
             code_blocks.append(block)
 
             # Remove code block from remaining text
@@ -378,10 +419,7 @@ class InputEnhancer:
 
         return code_blocks, remaining.strip()
 
-    def _clean_repl_prompts(
-        self,
-        text: str
-    ) -> Tuple[str, Optional[str]]:
+    def _clean_repl_prompts(self, text: str) -> Tuple[str, Optional[str]]:
         """Remove REPL prompts from pasted code."""
         detected_language = None
 
@@ -395,19 +433,16 @@ class InputEnhancer:
                     lines.append(match.group(1))
 
                 # If most lines matched, return cleaned
-                total_lines = len([l for l in text.split('\n') if l.strip()])
+                total_lines = len([l for l in text.split("\n") if l.strip()])
                 if len(matches) >= total_lines * 0.5:
-                    return '\n'.join(lines), detected_language
+                    return "\n".join(lines), detected_language
 
         return text, detected_language
 
-    def _detect_typos(
-        self,
-        text: str
-    ) -> List[Tuple[str, str]]:
+    def _detect_typos(self, text: str) -> List[Tuple[str, str]]:
         """Detect potential typos and suggest corrections."""
         corrections = []
-        words = re.findall(r'\b[a-zA-Z]+\b', text.lower())
+        words = re.findall(r"\b[a-zA-Z]+\b", text.lower())
 
         for word in words:
             # Check common typos first (fast path)
@@ -443,7 +478,7 @@ class InputEnhancer:
     def _normalize_whitespace(self, text: str) -> str:
         """Normalize whitespace in text."""
         # Remove trailing whitespace from lines
-        lines = [line.rstrip() for line in text.split('\n')]
+        lines = [line.rstrip() for line in text.split("\n")]
 
         # Remove excessive blank lines
         normalized = []
@@ -455,30 +490,30 @@ class InputEnhancer:
             normalized.append(line)
             prev_blank = is_blank
 
-        return '\n'.join(normalized).strip()
+        return "\n".join(normalized).strip()
 
     def _check_paste_issues(self, text: str) -> List[str]:
         """Check for common paste issues."""
         warnings = []
 
         # Check for line number prefixes (from code editors)
-        if re.search(r'^\s*\d+[:\|]\s', text, re.MULTILINE):
+        if re.search(r"^\s*\d+[:\|]\s", text, re.MULTILINE):
             warnings.append("Text appears to contain line numbers. These may need to be removed.")
 
         # Check for tab/space mixing
-        has_tabs = '\t' in text
-        has_leading_spaces = re.search(r'^[ ]+\S', text, re.MULTILINE)
+        has_tabs = "\t" in text
+        has_leading_spaces = re.search(r"^[ ]+\S", text, re.MULTILINE)
         if has_tabs and has_leading_spaces:
             warnings.append("Text mixes tabs and spaces for indentation.")
 
         # Check for very long lines (possibly concatenated)
-        for line in text.split('\n'):
+        for line in text.split("\n"):
             if len(line) > 500:
                 warnings.append("Some lines are very long. Check if they should be split.")
                 break
 
         # Check for control characters
-        if re.search(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', text):
+        if re.search(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", text):
             warnings.append("Text contains control characters that may cause issues.")
 
         return warnings
@@ -516,7 +551,7 @@ class InputEnhancer:
                 original=command,
                 suggestion=best_match,
                 distance=best_distance,
-                confidence=confidence
+                confidence=confidence,
             )
 
         return None
@@ -534,7 +569,7 @@ class InputEnhancer:
             code_snippets.append(match.group(2).strip())
 
         # Extract inline code
-        inline_pattern = re.compile(r'`([^`]+)`')
+        inline_pattern = re.compile(r"`([^`]+)`")
         for match in inline_pattern.finditer(text):
             code_snippets.append(match.group(1))
 
@@ -569,17 +604,19 @@ class InputEnhancer:
         # Get code blocks
         code_blocks = []
         for match in self.CODE_BLOCK_PATTERN.finditer(text):
-            code_blocks.append(CodeBlock(
-                language=match.group(1) or "text",
-                code=match.group(2).strip(),
-                original=match.group(0)
-            ))
+            code_blocks.append(
+                CodeBlock(
+                    language=match.group(1) or "text",
+                    code=match.group(2).strip(),
+                    original=match.group(0),
+                )
+            )
 
         return CodeExtraction(
             clean_code=clean_code,
             code_blocks=code_blocks,
             error_detected=error_detected,
-            contains_error=error_detected
+            contains_error=error_detected,
         )
 
     def clean_stackoverflow_paste(self, text: str) -> str:
@@ -594,17 +631,17 @@ class InputEnhancer:
         cleaned = text
 
         # Remove line numbers (various formats)
-        cleaned = re.sub(r'^\s*\d+\s*[\|:]\s*', '', cleaned, flags=re.MULTILINE)
+        cleaned = re.sub(r"^\s*\d+\s*[\|:]\s*", "", cleaned, flags=re.MULTILINE)
 
         # Remove Python REPL prompts
-        cleaned = re.sub(r'^>>>\s*', '', cleaned, flags=re.MULTILINE)
-        cleaned = re.sub(r'^\.\.\.\s*', '', cleaned, flags=re.MULTILINE)
+        cleaned = re.sub(r"^>>>\s*", "", cleaned, flags=re.MULTILINE)
+        cleaned = re.sub(r"^\.\.\.\s*", "", cleaned, flags=re.MULTILINE)
 
         # Remove shell prompts
-        cleaned = re.sub(r'^\$\s*', '', cleaned, flags=re.MULTILINE)
+        cleaned = re.sub(r"^\$\s*", "", cleaned, flags=re.MULTILINE)
 
         # Remove "copy" button text sometimes included
-        cleaned = re.sub(r'^copy$', '', cleaned, flags=re.MULTILINE | re.IGNORECASE)
+        cleaned = re.sub(r"^copy$", "", cleaned, flags=re.MULTILINE | re.IGNORECASE)
 
         return self._normalize_whitespace(cleaned)
 
@@ -622,6 +659,7 @@ def get_input_enhancer() -> InputEnhancer:
 
 
 # Convenience functions
+
 
 def enhance_input(text: str) -> EnhancedInput:
     """Enhance input text."""
@@ -645,15 +683,15 @@ def suggest_correction(command: str, valid_commands: Set[str]) -> Optional[TypoC
 
 # Export all public symbols
 __all__ = [
-    'InputType',
-    'CodeBlock',
-    'CodeExtraction',
-    'EnhancedInput',
-    'TypoCorrection',
-    'InputEnhancer',
-    'get_input_enhancer',
-    'enhance_input',
-    'extract_code_blocks',
-    'clean_repl_paste',
-    'suggest_correction',
+    "InputType",
+    "CodeBlock",
+    "CodeExtraction",
+    "EnhancedInput",
+    "TypoCorrection",
+    "InputEnhancer",
+    "get_input_enhancer",
+    "enhance_input",
+    "extract_code_blocks",
+    "clean_repl_paste",
+    "suggest_correction",
 ]

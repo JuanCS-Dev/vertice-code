@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 # PLAN MODE STATE
 # =============================================================================
 
+
 @dataclass
 class PlanState:
     """Current state of plan mode."""
@@ -59,6 +60,7 @@ def reset_plan_state() -> None:
 # ENTER PLAN MODE TOOL
 # =============================================================================
 
+
 class EnterPlanModeTool(Tool):
     """Transition into planning mode for complex tasks.
 
@@ -89,13 +91,13 @@ class EnterPlanModeTool(Tool):
             "task_description": {
                 "type": "string",
                 "description": "Brief description of the task to plan",
-                "required": False
+                "required": False,
             },
             "plan_file": {
                 "type": "string",
                 "description": "Path for the plan file (default: .qwen/plans/current_plan.md)",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     async def _execute_validated(self, **kwargs) -> ToolResult:
@@ -108,8 +110,7 @@ class EnterPlanModeTool(Tool):
         # Check if already in plan mode
         if _plan_state.active:
             return ToolResult(
-                success=False,
-                error="Already in plan mode. Use exit_plan_mode to exit first."
+                success=False, error="Already in plan mode. Use exit_plan_mode to exit first."
             )
 
         # Create plan file directory
@@ -141,13 +142,10 @@ class EnterPlanModeTool(Tool):
                     "Use Glob/Grep/Read to explore the codebase",
                     "Write your plan to the plan file",
                     "Use AskUserQuestion to clarify decisions",
-                    "Call exit_plan_mode when ready for approval"
-                ]
+                    "Call exit_plan_mode when ready for approval",
+                ],
             },
-            metadata={
-                "mode": "planning",
-                "started_at": _plan_state.started_at.isoformat()
-            }
+            metadata={"mode": "planning", "started_at": _plan_state.started_at.isoformat()},
         )
 
     def _create_plan_template(self, task_description: str) -> str:
@@ -199,6 +197,7 @@ _Document any potential issues_
 # EXIT PLAN MODE TOOL
 # =============================================================================
 
+
 class ExitPlanModeTool(Tool):
     """Exit planning mode and submit plan for approval.
 
@@ -224,7 +223,7 @@ class ExitPlanModeTool(Tool):
             "summary": {
                 "type": "string",
                 "description": "Brief summary of the plan",
-                "required": False
+                "required": False,
             }
         }
 
@@ -237,8 +236,7 @@ class ExitPlanModeTool(Tool):
         # Check if in plan mode
         if not _plan_state.active:
             return ToolResult(
-                success=False,
-                error="Not currently in plan mode. Use enter_plan_mode first."
+                success=False, error="Not currently in plan mode. Use enter_plan_mode first."
             )
 
         # Read plan file content
@@ -250,7 +248,7 @@ class ExitPlanModeTool(Tool):
         if len(plan_content) < 100:
             return ToolResult(
                 success=False,
-                error="Plan file appears empty or too short. Please write your plan before exiting."
+                error="Plan file appears empty or too short. Please write your plan before exiting.",
             )
 
         # Store plan content
@@ -265,9 +263,11 @@ class ExitPlanModeTool(Tool):
                 "status": "plan_submitted",
                 "plan_file": str(_plan_state.plan_file),
                 "summary": summary or "Plan submitted for approval",
-                "plan_preview": plan_content[:500] + "..." if len(plan_content) > 500 else plan_content,
+                "plan_preview": (
+                    plan_content[:500] + "..." if len(plan_content) > 500 else plan_content
+                ),
                 "message": "Plan mode exited. Awaiting user approval.",
-                "approval_required": True
+                "approval_required": True,
             },
             metadata={
                 "mode": "awaiting_approval",
@@ -275,15 +275,17 @@ class ExitPlanModeTool(Tool):
                 "decisions_made": len(_plan_state.decisions_made),
                 "duration_seconds": (
                     (datetime.now() - _plan_state.started_at).total_seconds()
-                    if _plan_state.started_at else 0
-                )
-            }
+                    if _plan_state.started_at
+                    else 0
+                ),
+            },
         )
 
 
 # =============================================================================
 # PLAN MODE HELPERS
 # =============================================================================
+
 
 class AddPlanNoteTool(Tool):
     """Add a note to the current plan.
@@ -298,16 +300,12 @@ class AddPlanNoteTool(Tool):
         self.category = ToolCategory.CONTEXT
         self.description = "Add a note to the current plan"
         self.parameters = {
-            "note": {
-                "type": "string",
-                "description": "Note content to add",
-                "required": True
-            },
+            "note": {"type": "string", "description": "Note content to add", "required": True},
             "section": {
                 "type": "string",
                 "description": "Section to add note to (exploration, architecture, approach)",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     async def _execute_validated(self, **kwargs) -> ToolResult:
@@ -318,10 +316,7 @@ class AddPlanNoteTool(Tool):
         section = kwargs.get("section", "exploration")
 
         if not _plan_state.active:
-            return ToolResult(
-                success=False,
-                error="Not in plan mode. Use enter_plan_mode first."
-            )
+            return ToolResult(success=False, error="Not in plan mode. Use enter_plan_mode first.")
 
         if not note:
             return ToolResult(success=False, error="Note content is required")
@@ -349,9 +344,9 @@ class AddPlanNoteTool(Tool):
                 if line_end != -1:
                     timestamp = datetime.now().strftime("%H:%M")
                     new_content = (
-                        content[:line_end + 1] +
-                        f"\n- [{timestamp}] {note}\n" +
-                        content[line_end + 1:]
+                        content[: line_end + 1]
+                        + f"\n- [{timestamp}] {note}\n"
+                        + content[line_end + 1 :]
                     )
                     _plan_state.plan_file.write_text(new_content, encoding="utf-8")
 
@@ -360,8 +355,8 @@ class AddPlanNoteTool(Tool):
             data={
                 "note_added": note[:100],
                 "section": section,
-                "total_notes": len(_plan_state.exploration_notes)
-            }
+                "total_notes": len(_plan_state.exploration_notes),
+            },
         )
 
 
@@ -380,13 +375,7 @@ class GetPlanStatusTool(Tool):
         global _plan_state
 
         if not _plan_state.active and not _plan_state.plan_content:
-            return ToolResult(
-                success=True,
-                data={
-                    "active": False,
-                    "message": "Not in plan mode"
-                }
-            )
+            return ToolResult(success=True, data={"active": False, "message": "Not in plan mode"})
 
         plan_content = ""
         if _plan_state.plan_file and _plan_state.plan_file.exists():
@@ -398,20 +387,23 @@ class GetPlanStatusTool(Tool):
                 "active": _plan_state.active,
                 "plan_file": str(_plan_state.plan_file) if _plan_state.plan_file else None,
                 "task": _plan_state.task_description,
-                "started_at": _plan_state.started_at.isoformat() if _plan_state.started_at else None,
+                "started_at": (
+                    _plan_state.started_at.isoformat() if _plan_state.started_at else None
+                ),
                 "notes_count": len(_plan_state.exploration_notes),
                 "files_explored": len(_plan_state.files_explored),
                 "decisions_count": len(_plan_state.decisions_made),
                 "questions_pending": len(_plan_state.questions_pending),
                 "approved": _plan_state.approved,
-                "plan_preview": plan_content[:300] if plan_content else None
-            }
+                "plan_preview": plan_content[:300] if plan_content else None,
+            },
         )
 
 
 # =============================================================================
 # REGISTRY HELPER
 # =============================================================================
+
 
 def get_plan_mode_tools() -> List[Tool]:
     """Get all plan mode tools."""

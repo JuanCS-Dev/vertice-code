@@ -67,11 +67,7 @@ class RAGContextEngine:
     async def _load_team_standards(self) -> Dict[str, str]:
         """Load team-specific coding standards."""
         # Check for .reviewrc, copilot-instructions.md, etc.
-        return {
-            "max_complexity": "10",
-            "max_args": "5",
-            "require_docstrings": "true"
-        }
+        return {"max_complexity": "10", "max_args": "5", "require_docstrings": "true"}
 
     async def _query_historical_issues(self, files: List[str]) -> List[str]:
         """Find past issues in similar files.

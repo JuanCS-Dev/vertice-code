@@ -2,6 +2,7 @@
 Shell Executor - Processa comandos e executa ferramentas.
 Versão LIMPA sem code smells.
 """
+
 import json
 import re
 from typing import Dict, Any
@@ -42,10 +43,9 @@ For conversation, respond normally in text.
 
     def _build_system_prompt(self) -> str:
         """Constrói system prompt com lista de ferramentas."""
-        tools_list = "\n".join([
-            f"- {name}: {tool.description}"
-            for name, tool in self.registry.tools.items()
-        ])
+        tools_list = "\n".join(
+            [f"- {name}: {tool.description}" for name, tool in self.registry.tools.items()]
+        )
         return self.system_prompt.format(tools=tools_list)
 
     async def execute(self, user_input: str):
@@ -69,11 +69,14 @@ For conversation, respond normally in text.
         # --- STREAMING ---
         # Passamos o system prompt a cada turno para garantir obediência
         try:
-            async for chunk in self.llm.stream_chat(messages, system_prompt=self._build_system_prompt()):
+            async for chunk in self.llm.stream_chat(
+                messages, system_prompt=self._build_system_prompt()
+            ):
                 full_response += chunk
         except Exception as e:
             self.console.print(f"[red]LLM Error: {e}[/red]")
             import traceback
+
             traceback.print_exc()
             return
 

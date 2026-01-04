@@ -13,12 +13,15 @@ Date: 2025-11-26
 """
 
 import logging
+
 logger = logging.getLogger(__name__)
 import json
 import logging
+
 logger = logging.getLogger(__name__)
 import os
 import logging
+
 logger = logging.getLogger(__name__)
 import re
 from pathlib import Path
@@ -51,11 +54,7 @@ class AuthenticationManager(IAuthenticationManager):
     MAX_KEY_LENGTH = 500
     MIN_KEY_LENGTH = 10
 
-    def __init__(
-        self,
-        project_dir: Optional[Path] = None,
-        global_dir: Optional[Path] = None
-    ):
+    def __init__(self, project_dir: Optional[Path] = None, global_dir: Optional[Path] = None):
         """
         Initialize AuthenticationManager.
 
@@ -64,7 +63,7 @@ class AuthenticationManager(IAuthenticationManager):
             global_dir: Global config directory for credentials.json.
         """
         self._project_dir = project_dir or Path.cwd()
-        self._global_dir = global_dir or (Path.home() / ".config" / "juancs")
+        self._global_dir = global_dir or (Path.home() / ".config" / "vertice")
 
     def _get_credentials_file(self) -> Path:
         """Get global credentials file path."""
@@ -89,17 +88,17 @@ class AuthenticationManager(IAuthenticationManager):
             return False, f"API key too long (max {self.MAX_KEY_LENGTH} characters)"
 
         # Check for control characters (injection prevention)
-        sanitized = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', api_key)
+        sanitized = re.sub(r"[\x00-\x1f\x7f-\x9f]", "", api_key)
         if sanitized != api_key:
-            return False, "API key contains invalid characters (newlines, control chars not allowed)"
+            return (
+                False,
+                "API key contains invalid characters (newlines, control chars not allowed)",
+            )
 
         return True, None
 
     def login(
-        self,
-        provider: str = "gemini",
-        api_key: Optional[str] = None,
-        scope: str = "global"
+        self, provider: str = "gemini", api_key: Optional[str] = None, scope: str = "global"
     ) -> Dict[str, Any]:
         """
         Login/configure API key for a provider.
@@ -117,7 +116,7 @@ class AuthenticationManager(IAuthenticationManager):
         if provider_lower not in self.PROVIDERS:
             return {
                 "success": False,
-                "error": f"Unknown provider: {provider}. Valid: {', '.join(self.PROVIDERS.keys())}"
+                "error": f"Unknown provider: {provider}. Valid: {', '.join(self.PROVIDERS.keys())}",
             }
 
         env_var = self.PROVIDERS[provider_lower]
@@ -130,11 +129,11 @@ class AuthenticationManager(IAuthenticationManager):
                     "success": True,
                     "message": f"Already logged in to {provider} (key from environment)",
                     "provider": provider,
-                    "source": "environment"
+                    "source": "environment",
                 }
             return {
                 "success": False,
-                "error": f"No API key provided. Use: /login {provider} YOUR_API_KEY"
+                "error": f"No API key provided. Use: /login {provider} YOUR_API_KEY",
             }
 
         # Validate API key
@@ -150,17 +149,12 @@ class AuthenticationManager(IAuthenticationManager):
             else:
                 return {
                     "success": False,
-                    "error": f"Invalid scope: {scope}. Use 'global' or 'project'"
+                    "error": f"Invalid scope: {scope}. Use 'global' or 'project'",
                 }
         except Exception as e:
             return {"success": False, "error": f"Login failed: {e}"}
 
-    def _save_global_key(
-        self,
-        provider: str,
-        env_var: str,
-        api_key: str
-    ) -> Dict[str, Any]:
+    def _save_global_key(self, provider: str, env_var: str, api_key: str) -> Dict[str, Any]:
         """Save API key to global credentials file."""
         creds_file = self._get_credentials_file()
 
@@ -183,15 +177,10 @@ class AuthenticationManager(IAuthenticationManager):
             "message": f"Logged in to {provider} (global)",
             "provider": provider,
             "scope": "global",
-            "file": str(creds_file)
+            "file": str(creds_file),
         }
 
-    def _save_project_key(
-        self,
-        provider: str,
-        env_var: str,
-        api_key: str
-    ) -> Dict[str, Any]:
+    def _save_project_key(self, provider: str, env_var: str, api_key: str) -> Dict[str, Any]:
         """Save API key to project .env file."""
         env_file = self._get_env_file()
 
@@ -219,14 +208,10 @@ class AuthenticationManager(IAuthenticationManager):
             "message": f"Logged in to {provider} (project)",
             "provider": provider,
             "scope": "project",
-            "file": str(env_file)
+            "file": str(env_file),
         }
 
-    def logout(
-        self,
-        provider: Optional[str] = None,
-        scope: str = "all"
-    ) -> Dict[str, Any]:
+    def logout(self, provider: Optional[str] = None, scope: str = "all") -> Dict[str, Any]:
         """
         Logout/remove API key for a provider.
 
@@ -244,10 +229,7 @@ class AuthenticationManager(IAuthenticationManager):
             if provider:
                 provider_lower = provider.lower()
                 if provider_lower not in self.PROVIDERS:
-                    return {
-                        "success": False,
-                        "error": f"Unknown provider: {provider}"
-                    }
+                    return {"success": False, "error": f"Unknown provider: {provider}"}
                 keys_to_remove = [self.PROVIDERS[provider_lower]]
             else:
                 keys_to_remove = list(set(self.PROVIDERS.values()))
@@ -271,14 +253,10 @@ class AuthenticationManager(IAuthenticationManager):
                 return {
                     "success": True,
                     "message": f"Logged out: {', '.join(removed)}",
-                    "removed": removed
+                    "removed": removed,
                 }
             else:
-                return {
-                    "success": True,
-                    "message": "No credentials found to remove",
-                    "removed": []
-                }
+                return {"success": True, "message": "No credentials found to remove", "removed": []}
 
         except Exception as e:
             return {"success": False, "error": f"Logout failed: {e}"}
@@ -372,14 +350,10 @@ class AuthenticationManager(IAuthenticationManager):
             status[provider] = {
                 "logged_in": len(sources) > 0,
                 "sources": sources,
-                "env_var": env_var
+                "env_var": env_var,
             }
 
-        return {
-            "providers": status,
-            "global_file": str(creds_file),
-            "project_file": str(env_file)
-        }
+        return {"providers": status, "global_file": str(creds_file), "project_file": str(env_file)}
 
     def load_credentials(self) -> None:
         """Load credentials from global file into environment."""

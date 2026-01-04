@@ -36,7 +36,7 @@ class ParallelExecutionResult:
 
 class AsyncExecutor:
     """Parallel tool executor (Anthropic pattern).
-    
+
     Executes independent tools in parallel for 3-5x speedup.
     """
 
@@ -45,20 +45,19 @@ class AsyncExecutor:
         self._semaphore = asyncio.Semaphore(max_parallel)
 
     async def execute_parallel(
-        self,
-        tool_calls: List[ToolCall],
-        execute_fn
+        self, tool_calls: List[ToolCall], execute_fn
     ) -> ParallelExecutionResult:
         """Execute tools in parallel where possible.
-        
+
         Args:
             tool_calls: List of tool calls with dependencies
             execute_fn: Async function to execute single tool
-            
+
         Returns:
             ParallelExecutionResult with all results and timing
         """
         import time
+
         start = time.time()
 
         # Build dependency graph
@@ -69,9 +68,9 @@ class AsyncExecutor:
         while len(completed) < len(tool_calls):
             # Find tools ready to execute
             ready = [
-                call for call in tool_calls
-                if call.id not in completed
-                and call.depends_on.issubset(completed)
+                call
+                for call in tool_calls
+                if call.id not in completed and call.depends_on.issubset(completed)
             ]
 
             if not ready:
@@ -80,10 +79,7 @@ class AsyncExecutor:
                 break
 
             # Execute ready tools in parallel
-            tasks = [
-                self._execute_with_semaphore(call, execute_fn)
-                for call in ready
-            ]
+            tasks = [self._execute_with_semaphore(call, execute_fn) for call in ready]
 
             wave_results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -96,15 +92,12 @@ class AsyncExecutor:
 
         # Calculate parallelism factor
         total_time_sequential = sum(
-            r.get('execution_time', 0) for r in results.values()
-            if isinstance(r, dict)
+            r.get("execution_time", 0) for r in results.values() if isinstance(r, dict)
         )
         parallelism = total_time_sequential / execution_time if execution_time > 0 else 1.0
 
         return ParallelExecutionResult(
-            results=results,
-            execution_time_ms=execution_time,
-            parallelism_factor=parallelism
+            results=results, execution_time_ms=execution_time, parallelism_factor=parallelism
         )
 
     async def _execute_with_semaphore(self, call: ToolCall, execute_fn):
@@ -119,7 +112,7 @@ class AsyncExecutor:
 
 def detect_dependencies(tool_calls: List[Dict]) -> List[ToolCall]:
     """Detect dependencies between tool calls.
-    
+
     Simple heuristic:
     - read_file() doesn't depend on anything
     - write_file() depends on read_file() for same file
@@ -153,11 +146,6 @@ def detect_dependencies(tool_calls: List[Dict]) -> List[ToolCall]:
             if file_path:
                 file_operations[file_path] = call_id
 
-        calls.append(ToolCall(
-            id=call_id,
-            tool_name=tool_name,
-            args=args,
-            depends_on=depends_on
-        ))
+        calls.append(ToolCall(id=call_id, tool_name=tool_name, args=args, depends_on=depends_on))
 
     return calls

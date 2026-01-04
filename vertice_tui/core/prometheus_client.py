@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from vertice_cli.core.providers.prometheus_provider import PrometheusProvider, PrometheusConfig
+
     PROMETHEUS_AVAILABLE = True
 except ImportError as e:
     logger.warning(f"Prometheus provider not available: {e}")
@@ -25,6 +26,7 @@ except ImportError as e:
 @dataclass
 class PrometheusStreamConfig:
     """Streaming configuration."""
+
     temperature: float = 1.0
     max_output_tokens: int = 8192
     enable_world_model: bool = True
@@ -49,7 +51,7 @@ class PrometheusClient:
     def __init__(
         self,
         config: Optional[PrometheusStreamConfig] = None,
-        tools: Optional[List[Dict[str, Any]]] = None
+        tools: Optional[List[Dict[str, Any]]] = None,
     ):
         self.config = config or PrometheusStreamConfig()
         self._tools = tools or []
@@ -104,7 +106,7 @@ class PrometheusClient:
         prompt: str,
         system_prompt: Optional[str] = None,
         context: Optional[List[Dict[str, str]]] = None,
-        tools: Optional[List[Dict[str, Any]]] = None
+        tools: Optional[List[Dict[str, Any]]] = None,
     ) -> AsyncIterator[str]:
         """
         Stream response from PROMETHEUS.
@@ -132,7 +134,7 @@ class PrometheusClient:
                     prompt=prompt,
                     system_prompt=system_prompt,
                     context=context,
-                    tools=tools or self._tools
+                    tools=tools or self._tools,
                 ):
                     yield chunk
             else:

@@ -1,4 +1,5 @@
 """Full unrestricted web access tools for CLI."""
+
 import logging
 from pathlib import Path
 from typing import Optional, Dict
@@ -24,38 +25,36 @@ class PackageSearchTool(ValidatedTool):
             "package_name": {
                 "type": "string",
                 "description": "Name of the package to search for",
-                "required": True
+                "required": True,
             },
             "registry": {
                 "type": "string",
                 "description": "Package registry: 'pypi' or 'npm' (default: pypi)",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     def get_validators(self):
-        return {}
+        return {
+            "package_name": lambda v: v is not None and len(str(v).strip()) > 0,
+            "registry": lambda v: v is None or v in ("pypi", "npm"),
+        }
 
-    async def _execute_validated(
-        self,
-        package_name: str,
-        registry: str = "pypi"
-    ) -> ToolResult:
+    async def _execute_validated(self, package_name: str, registry: str = "pypi") -> ToolResult:
         """
         Search package registry for metadata.
-        
+
         Args:
             package_name: Package name
             registry: 'pypi' or 'npm'
-        
+
         Returns:
             ToolResult with package metadata
         """
         try:
             if registry not in ["pypi", "npm"]:
                 return ToolResult(
-                    success=False,
-                    error=f"Invalid registry '{registry}'. Must be 'pypi' or 'npm'"
+                    success=False, error=f"Invalid registry '{registry}'. Must be 'pypi' or 'npm'"
                 )
 
             logger.info(f"Searching {registry} for package: {package_name}")
@@ -72,8 +71,7 @@ class PackageSearchTool(ValidatedTool):
 
             if resp.status_code == 404:
                 return ToolResult(
-                    success=False,
-                    error=f"Package '{package_name}' not found in {registry}"
+                    success=False, error=f"Package '{package_name}' not found in {registry}"
                 )
 
             resp.raise_for_status()
@@ -91,19 +89,34 @@ class PackageSearchTool(ValidatedTool):
                     "requires_python": data["info"]["requires_python"],
                     "project_url": data["info"]["project_url"],
                     "package_url": f"https://pypi.org/project/{package_name}/",
-                    "dependencies": list(data.get("info", {}).get("requires_dist") or [])[:10]  # First 10
+                    "dependencies": list(data.get("info", {}).get("requires_dist") or [])[
+                        :10
+                    ],  # First 10
                 }
             else:  # npm
                 info = {
                     "name": data["name"],
                     "version": data.get("dist-tags", {}).get("latest", "unknown"),
                     "description": data.get("description", ""),
-                    "author": data.get("author", {}).get("name") if isinstance(data.get("author"), dict) else data.get("author"),
+                    "author": (
+                        data.get("author", {}).get("name")
+                        if isinstance(data.get("author"), dict)
+                        else data.get("author")
+                    ),
                     "license": data.get("license", "unknown"),
                     "homepage": data.get("homepage", ""),
-                    "repository": data.get("repository", {}).get("url") if isinstance(data.get("repository"), dict) else data.get("repository"),
+                    "repository": (
+                        data.get("repository", {}).get("url")
+                        if isinstance(data.get("repository"), dict)
+                        else data.get("repository")
+                    ),
                     "package_url": f"https://www.npmjs.com/package/{package_name}",
-                    "dependencies": list(data.get("versions", {}).get(data.get("dist-tags", {}).get("latest", ""), {}).get("dependencies", {}).keys())[:10]
+                    "dependencies": list(
+                        data.get("versions", {})
+                        .get(data.get("dist-tags", {}).get("latest", ""), {})
+                        .get("dependencies", {})
+                        .keys()
+                    )[:10],
                 }
 
             logger.info(f"Found {package_name} v{info['version']} in {registry}")
@@ -111,24 +124,15 @@ class PackageSearchTool(ValidatedTool):
             return ToolResult(
                 success=True,
                 data=info,
-                metadata={
-                    "registry": registry,
-                    "package_name": package_name
-                }
+                metadata={"registry": registry, "package_name": package_name},
             )
 
         except httpx.HTTPStatusError as e:
             logger.error(f"HTTP error: {e.response.status_code}")
-            return ToolResult(
-                success=False,
-                error=f"HTTP {e.response.status_code}: {str(e)}"
-            )
+            return ToolResult(success=False, error=f"HTTP {e.response.status_code}: {str(e)}")
         except Exception as e:
             logger.error(f"Package search failed: {e}", exc_info=True)
-            return ToolResult(
-                success=False,
-                error=f"Package search failed: {str(e)}"
-            )
+            return ToolResult(success=False, error=f"Package search failed: {str(e)}")
 
 
 class FetchURLTool(ValidatedTool):
@@ -140,40 +144,36 @@ class FetchURLTool(ValidatedTool):
         self.category = ToolCategory.SEARCH
         self.description = "Fetch content from any URL (supports HTML, JSON, plain text)"
         self.parameters = {
-            "url": {
-                "type": "string",
-                "description": "URL to fetch",
-                "required": True
-            },
+            "url": {"type": "string", "description": "URL to fetch", "required": True},
             "extract_text": {
                 "type": "boolean",
                 "description": "If HTML, extract clean text (removes tags)",
-                "required": False
+                "required": False,
             },
             "max_length": {
                 "type": "integer",
                 "description": "Maximum content length in characters (default: 50000)",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     def get_validators(self):
-        return {}
+        return {
+            "url": lambda v: v is not None and len(str(v).strip()) > 0,
+            "max_length": lambda v: v is None or (isinstance(v, int) and 0 < v <= 1000000),
+        }
 
     async def _execute_validated(
-        self,
-        url: str,
-        extract_text: bool = False,
-        max_length: int = 50000
+        self, url: str, extract_text: bool = False, max_length: int = 50000
     ) -> ToolResult:
         """
         Fetch URL content.
-        
+
         Args:
             url: URL to fetch
             extract_text: Extract plain text from HTML
             max_length: Max content length
-        
+
         Returns:
             ToolResult with content and metadata
         """
@@ -181,10 +181,7 @@ class FetchURLTool(ValidatedTool):
             # Validate URL
             parsed = urlparse(url)
             if not parsed.scheme or not parsed.netloc:
-                return ToolResult(
-                    success=False,
-                    error=f"Invalid URL: {url}"
-                )
+                return ToolResult(success=False, error=f"Invalid URL: {url}")
 
             logger.info(f"Fetching URL: {url}")
 
@@ -192,7 +189,7 @@ class FetchURLTool(ValidatedTool):
             async with httpx.AsyncClient(
                 timeout=30.0,
                 follow_redirects=True,
-                headers={"User-Agent": "Mozilla/5.0 (compatible; QwenDevCLI/1.0)"}
+                headers={"User-Agent": "Mozilla/5.0 (compatible; QwenDevCLI/1.0)"},
             ) as client:
                 resp = await client.get(url)
 
@@ -226,7 +223,7 @@ class FetchURLTool(ValidatedTool):
                     # Clean up whitespace
                     lines = (line.strip() for line in text.splitlines())
                     chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-                    content_str = '\n'.join(chunk for chunk in chunks if chunk)[:max_length]
+                    content_str = "\n".join(chunk for chunk in chunks if chunk)[:max_length]
                     data_type = "text"
                 else:
                     content_str = html[:max_length]
@@ -251,27 +248,19 @@ class FetchURLTool(ValidatedTool):
                     "data_type": data_type,
                     "truncated": was_truncated,
                     "full_length": len(resp.text),
-                    "status_code": resp.status_code
+                    "status_code": resp.status_code,
                 },
-                metadata={
-                    "url": url,
-                    "type": data_type,
-                    "size": len(content_str)
-                }
+                metadata={"url": url, "type": data_type, "size": len(content_str)},
             )
 
         except httpx.HTTPStatusError as e:
             logger.error(f"HTTP error: {e.response.status_code}")
             return ToolResult(
-                success=False,
-                error=f"HTTP {e.response.status_code}: Failed to fetch {url}"
+                success=False, error=f"HTTP {e.response.status_code}: Failed to fetch {url}"
             )
         except Exception as e:
             logger.error(f"URL fetch failed: {e}", exc_info=True)
-            return ToolResult(
-                success=False,
-                error=f"Failed to fetch URL: {str(e)}"
-            )
+            return ToolResult(success=False, error=f"Failed to fetch URL: {str(e)}")
 
 
 class DownloadFileTool(ValidatedTool):
@@ -282,33 +271,27 @@ class DownloadFileTool(ValidatedTool):
         self.category = ToolCategory.SEARCH
         self.description = "Download file from URL to local path"
         self.parameters = {
-            "url": {
-                "type": "string",
-                "description": "URL of file to download",
-                "required": True
-            },
+            "url": {"type": "string", "description": "URL of file to download", "required": True},
             "destination": {
                 "type": "string",
                 "description": "Local path to save file (optional, auto-generates if not provided)",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     def get_validators(self):
-        return {}
+        return {
+            "url": lambda v: v is not None and len(str(v).strip()) > 0,
+        }
 
-    async def _execute_validated(
-        self,
-        url: str,
-        destination: Optional[str] = None
-    ) -> ToolResult:
+    async def _execute_validated(self, url: str, destination: Optional[str] = None) -> ToolResult:
         """
         Download file from URL.
-        
+
         Args:
             url: URL to download from
             destination: Local path to save (auto-generated if None)
-        
+
         Returns:
             ToolResult with download info
         """
@@ -316,10 +299,7 @@ class DownloadFileTool(ValidatedTool):
             # Validate URL
             parsed = urlparse(url)
             if not parsed.scheme or not parsed.netloc:
-                return ToolResult(
-                    success=False,
-                    error=f"Invalid URL: {url}"
-                )
+                return ToolResult(success=False, error=f"Invalid URL: {url}")
 
             # Auto-generate destination if not provided
             if not destination:
@@ -335,10 +315,7 @@ class DownloadFileTool(ValidatedTool):
             logger.info(f"Downloading {url} to {dest_path}")
 
             # Download file
-            async with httpx.AsyncClient(
-                timeout=60.0,
-                follow_redirects=True
-            ) as client:
+            async with httpx.AsyncClient(timeout=60.0, follow_redirects=True) as client:
                 async with client.stream("GET", url) as resp:
                     resp.raise_for_status()
 
@@ -362,27 +339,19 @@ class DownloadFileTool(ValidatedTool):
                     "url": url,
                     "destination": str(dest_path),
                     "size": file_size,
-                    "size_mb": round(file_size / 1024 / 1024, 2)
+                    "size_mb": round(file_size / 1024 / 1024, 2),
                 },
-                metadata={
-                    "url": url,
-                    "path": str(dest_path),
-                    "size": file_size
-                }
+                metadata={"url": url, "path": str(dest_path), "size": file_size},
             )
 
         except httpx.HTTPStatusError as e:
             logger.error(f"HTTP error: {e.response.status_code}")
             return ToolResult(
-                success=False,
-                error=f"HTTP {e.response.status_code}: Failed to download {url}"
+                success=False, error=f"HTTP {e.response.status_code}: Failed to download {url}"
             )
         except Exception as e:
             logger.error(f"Download failed: {e}", exc_info=True)
-            return ToolResult(
-                success=False,
-                error=f"Download failed: {str(e)}"
-            )
+            return ToolResult(success=False, error=f"Download failed: {str(e)}")
 
 
 class HTTPRequestTool(ValidatedTool):
@@ -394,35 +363,35 @@ class HTTPRequestTool(ValidatedTool):
         self.category = ToolCategory.SEARCH
         self.description = "Make arbitrary HTTP request with custom method, headers, and body"
         self.parameters = {
-            "url": {
-                "type": "string",
-                "description": "URL to request",
-                "required": True
-            },
+            "url": {"type": "string", "description": "URL to request", "required": True},
             "method": {
                 "type": "string",
                 "description": "HTTP method (GET, POST, PUT, DELETE, PATCH, etc.)",
-                "required": False
+                "required": False,
             },
             "headers": {
                 "type": "object",
                 "description": "Request headers as dict",
-                "required": False
+                "required": False,
             },
             "body": {
                 "type": "string",
                 "description": "Request body (JSON string or plain text)",
-                "required": False
+                "required": False,
             },
             "params": {
                 "type": "object",
                 "description": "URL query parameters as dict",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     def get_validators(self):
-        return {}
+        return {
+            "url": lambda v: v is not None and len(str(v).strip()) > 0,
+            "method": lambda v: v is None
+            or str(v).upper() in ("GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"),
+        }
 
     async def _execute_validated(
         self,
@@ -430,18 +399,18 @@ class HTTPRequestTool(ValidatedTool):
         method: str = "GET",
         headers: Optional[Dict[str, str]] = None,
         body: Optional[str] = None,
-        params: Optional[Dict[str, str]] = None
+        params: Optional[Dict[str, str]] = None,
     ) -> ToolResult:
         """
         Make HTTP request.
-        
+
         Args:
             url: URL to request
             method: HTTP method
             headers: Custom headers
             body: Request body
             params: Query parameters
-        
+
         Returns:
             ToolResult with response data
         """
@@ -452,16 +421,13 @@ class HTTPRequestTool(ValidatedTool):
             if method not in valid_methods:
                 return ToolResult(
                     success=False,
-                    error=f"Invalid HTTP method: {method}. Must be one of {valid_methods}"
+                    error=f"Invalid HTTP method: {method}. Must be one of {valid_methods}",
                 )
 
             # Validate URL
             parsed = urlparse(url)
             if not parsed.scheme or not parsed.netloc:
-                return ToolResult(
-                    success=False,
-                    error=f"Invalid URL: {url}"
-                )
+                return ToolResult(success=False, error=f"Invalid URL: {url}")
 
             logger.info(f"HTTP {method} {url}")
 
@@ -470,7 +436,7 @@ class HTTPRequestTool(ValidatedTool):
                 "method": method,
                 "url": url,
                 "timeout": 30.0,
-                "follow_redirects": True
+                "follow_redirects": True,
             }
 
             if headers:
@@ -483,6 +449,7 @@ class HTTPRequestTool(ValidatedTool):
                 # Try to parse as JSON first
                 try:
                     import json
+
                     body_json = json.loads(body)
                     request_kwargs["json"] = body_json
                 except (json.JSONDecodeError, TypeError, ValueError):
@@ -515,24 +482,16 @@ class HTTPRequestTool(ValidatedTool):
                     "status_text": resp.reason_phrase,
                     "headers": dict(resp.headers),
                     "body": response_data,
-                    "content_type": content_type
+                    "content_type": content_type,
                 },
-                metadata={
-                    "url": url,
-                    "method": method,
-                    "status": resp.status_code
-                }
+                metadata={"url": url, "method": method, "status": resp.status_code},
             )
 
         except httpx.HTTPStatusError as e:
             logger.error(f"HTTP error: {e.response.status_code}")
             return ToolResult(
-                success=False,
-                error=f"HTTP {e.response.status_code}: {e.response.text[:200]}"
+                success=False, error=f"HTTP {e.response.status_code}: {e.response.text[:200]}"
             )
         except Exception as e:
             logger.error(f"HTTP request failed: {e}", exc_info=True)
-            return ToolResult(
-                success=False,
-                error=f"HTTP request failed: {str(e)}"
-            )
+            return ToolResult(success=False, error=f"HTTP request failed: {str(e)}")

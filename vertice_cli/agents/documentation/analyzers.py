@@ -96,9 +96,7 @@ def analyze_class(node: ast.ClassDef) -> ClassDoc:
     )
 
 
-def analyze_function(
-    node: Union[ast.FunctionDef, ast.AsyncFunctionDef]
-) -> FunctionDoc:
+def analyze_function(node: Union[ast.FunctionDef, ast.AsyncFunctionDef]) -> FunctionDoc:
     """Analyze function/method definition.
 
     Args:

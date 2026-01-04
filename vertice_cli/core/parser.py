@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 class ParseStrategy(Enum):
     """Parsing strategies in order of preference."""
+
     STRICT_JSON = "strict_json"
     MARKDOWN_JSON = "markdown_json"
     REGEX_EXTRACTION = "regex_extraction"
@@ -47,7 +48,7 @@ class ParseResult:
         text_response: Optional[str] = None,
         strategy: Optional[ParseStrategy] = None,
         error: Optional[str] = None,
-        raw_response: Optional[str] = None
+        raw_response: Optional[str] = None,
     ):
         self.success = success
         self.tool_calls = tool_calls or []
@@ -84,10 +85,10 @@ class ResponseParser:
         max_retries: int = 2,
         enable_logging: bool = True,
         log_dir: Optional[Path] = None,
-        sanitize_args: bool = True
+        sanitize_args: bool = True,
     ):
         """Initialize parser.
-        
+
         Args:
             strict_mode: If True, only accept perfect JSON. If False, attempt recovery.
             enable_retry: Enable retry with secondary LLM pass (Gemini strategy)
@@ -100,7 +101,7 @@ class ResponseParser:
         self.enable_retry = enable_retry
         self.max_retries = max_retries
         self.enable_logging = enable_logging
-        self.log_dir = log_dir or Path.home() / ".qwen_logs"
+        self.log_dir = log_dir or Path.home() / ".vertice" / "logs"
         self.sanitize_args = sanitize_args
 
         # Create log directory
@@ -115,7 +116,7 @@ class ResponseParser:
             ParseStrategy.PLAIN_TEXT: 0,
             "failures": 0,
             "retries": 0,
-            "security_blocks": 0
+            "security_blocks": 0,
         }
 
         # Retry callback for secondary LLM pass (can be sync or async)
@@ -124,20 +125,16 @@ class ResponseParser:
 
     def parse(self, response: str, attempt: int = 0) -> ParseResult:
         """Parse LLM response using multiple strategies with retry.
-        
+
         Args:
             response: Raw LLM response text
             attempt: Current retry attempt number
-            
+
         Returns:
             ParseResult with tool calls or text response
         """
         if not response or not response.strip():
-            return ParseResult(
-                success=False,
-                error="Empty response",
-                raw_response=response
-            )
+            return ParseResult(success=False, error="Empty response", raw_response=response)
 
         response = response.strip()
 
@@ -197,15 +194,15 @@ class ResponseParser:
             success=True,
             text_response=response,
             strategy=ParseStrategy.PLAIN_TEXT,
-            raw_response=response
+            raw_response=response,
         )
 
     def _try_strict_json(self, response: str) -> ParseResult:
         """Attempt strict JSON parsing.
-        
+
         Args:
             response: Raw response text
-            
+
         Returns:
             ParseResult with tool calls if successful
         """
@@ -220,7 +217,7 @@ class ResponseParser:
                 return ParseResult(
                     success=False,
                     error=f"Expected list or dict, got {type(data).__name__}",
-                    raw_response=response
+                    raw_response=response,
                 )
 
             # Validate tool call structure
@@ -230,15 +227,13 @@ class ResponseParser:
                     return ParseResult(
                         success=False,
                         error=f"Tool call must be dict, got {type(item).__name__}",
-                        raw_response=response
+                        raw_response=response,
                     )
 
                 # Validate required fields
                 if "tool" not in item:
                     return ParseResult(
-                        success=False,
-                        error="Tool call missing 'tool' field",
-                        raw_response=response
+                        success=False, error="Tool call missing 'tool' field", raw_response=response
                     )
 
                 # Normalize args field (support both "args" and "arguments")
@@ -251,9 +246,7 @@ class ResponseParser:
 
                 if not isinstance(item["args"], dict):
                     return ParseResult(
-                        success=False,
-                        error="'args' must be a dict",
-                        raw_response=response
+                        success=False, error="'args' must be a dict", raw_response=response
                     )
 
                 tool_calls.append(item)
@@ -262,36 +255,34 @@ class ResponseParser:
                 success=True,
                 tool_calls=tool_calls,
                 strategy=ParseStrategy.STRICT_JSON,
-                raw_response=response
+                raw_response=response,
             )
 
         except json.JSONDecodeError as e:
             return ParseResult(
-                success=False,
-                error=f"JSON decode error: {str(e)}",
-                raw_response=response
+                success=False, error=f"JSON decode error: {str(e)}", raw_response=response
             )
 
     def _try_markdown_json(self, response: str) -> ParseResult:
         """Extract JSON from markdown code blocks.
-        
+
         Handles responses like:
         ```json
         [{"tool": "readfile", "args": {"path": "main.py"}}]
         ```
-        
+
         Args:
             response: Raw response text
-            
+
         Returns:
             ParseResult with tool calls if successful
         """
         # Pattern: ```json ... ``` or ``` ... ```
         patterns = [
-            r'```json\s*\n(.*?)\n```',
-            r'```\s*\n(.*?)\n```',
-            r'```json\s*(.*?)```',
-            r'```(.*?)```'
+            r"```json\s*\n(.*?)\n```",
+            r"```\s*\n(.*?)\n```",
+            r"```json\s*(.*?)```",
+            r"```(.*?)```",
         ]
 
         for pattern in patterns:
@@ -305,22 +296,20 @@ class ResponseParser:
                     return result
 
         return ParseResult(
-            success=False,
-            error="No markdown JSON blocks found",
-            raw_response=response
+            success=False, error="No markdown JSON blocks found", raw_response=response
         )
 
     def _try_regex_extraction(self, response: str) -> ParseResult:
         """Extract tool calls using regex patterns.
-        
+
         Handles malformed JSON like:
         - Missing quotes
         - Single quotes instead of double
         - Trailing commas
-        
+
         Args:
             response: Raw response text
-            
+
         Returns:
             ParseResult with tool calls if successful
         """
@@ -338,54 +327,44 @@ class ResponseParser:
             try:
                 # Try to parse args as JSON
                 args = json.loads(args_str)
-                tool_calls.append({
-                    "tool": tool_name,
-                    "args": args
-                })
+                tool_calls.append({"tool": tool_name, "args": args})
             except json.JSONDecodeError:
                 # Try to extract key-value pairs manually
                 args = self._extract_args(args_str)
                 if args:
-                    tool_calls.append({
-                        "tool": tool_name,
-                        "args": args
-                    })
+                    tool_calls.append({"tool": tool_name, "args": args})
 
         if tool_calls:
             return ParseResult(
                 success=True,
                 tool_calls=tool_calls,
                 strategy=ParseStrategy.REGEX_EXTRACTION,
-                raw_response=response
+                raw_response=response,
             )
 
         return ParseResult(
-            success=False,
-            error="No tool calls found via regex",
-            raw_response=response
+            success=False, error="No tool calls found via regex", raw_response=response
         )
 
     def _try_partial_json(self, response: str) -> ParseResult:
         """Attempt to recover partial/truncated JSON.
-        
+
         Handles cases like:
         - Incomplete arrays: [{"tool": "read
         - Missing closing brackets
         - Truncated responses
-        
+
         Args:
             response: Raw response text
-            
+
         Returns:
             ParseResult with tool calls if successful
         """
         # Try to find start of JSON array
-        start_idx = response.find('[')
+        start_idx = response.find("[")
         if start_idx == -1:
             return ParseResult(
-                success=False,
-                error="No JSON array start found",
-                raw_response=response
+                success=False, error="No JSON array start found", raw_response=response
             )
 
         # Extract from array start
@@ -394,8 +373,8 @@ class ResponseParser:
         # Try to complete the JSON
         completion_attempts = [
             json_fragment,  # As-is
-            json_fragment + ']',  # Add closing bracket
-            json_fragment + '}]',  # Add closing object + bracket
+            json_fragment + "]",  # Add closing bracket
+            json_fragment + "}]",  # Add closing object + bracket
             json_fragment + '"}]}]',  # Add closing quote + object + bracket
         ]
 
@@ -408,17 +387,15 @@ class ResponseParser:
                 return result
 
         return ParseResult(
-            success=False,
-            error="Could not recover partial JSON",
-            raw_response=response
+            success=False, error="Could not recover partial JSON", raw_response=response
         )
 
     def _extract_args(self, args_str: str) -> Dict[str, Any]:
         """Extract arguments from malformed args string.
-        
+
         Args:
             args_str: String like '{"key": "value", "key2": "value2"}'
-            
+
         Returns:
             Dict of extracted args
         """
@@ -435,13 +412,15 @@ class ResponseParser:
 
         return args
 
-    def validate_tool_call(self, tool_call: Dict[str, Any], tool_schemas: List[Dict[str, Any]]) -> Tuple[bool, Optional[str]]:
+    def validate_tool_call(
+        self, tool_call: Dict[str, Any], tool_schemas: List[Dict[str, Any]]
+    ) -> Tuple[bool, Optional[str]]:
         """Validate tool call against tool schemas.
-        
+
         Args:
             tool_call: Parsed tool call dict
             tool_schemas: List of available tool schemas
-            
+
         Returns:
             Tuple of (is_valid, error_message)
         """
@@ -480,7 +459,7 @@ class ResponseParser:
                     "integer": "int",
                     "boolean": "bool",
                     "array": "list",
-                    "object": "dict"
+                    "object": "dict",
                 }
                 expected_python_type = type_map.get(expected_type, expected_type)
 
@@ -494,7 +473,7 @@ class ResponseParser:
 
     def get_statistics(self) -> Dict[str, int]:
         """Get parsing statistics.
-        
+
         Returns:
             Dict with strategy usage counts
         """
@@ -508,7 +487,7 @@ class ResponseParser:
             "plain_text": self.stats[ParseStrategy.PLAIN_TEXT],
             "failures": self.stats["failures"],
             "retries": self.stats.get("retries", 0),
-            "security_blocks": self.stats.get("security_blocks", 0)
+            "security_blocks": self.stats.get("security_blocks", 0),
         }
 
     def reset_statistics(self) -> None:
@@ -516,9 +495,11 @@ class ResponseParser:
         for key in self.stats:
             self.stats[key] = 0
 
-    def set_retry_callback(self, callback: Callable[[str, str], str], is_async: bool = False) -> None:
+    def set_retry_callback(
+        self, callback: Callable[[str, str], str], is_async: bool = False
+    ) -> None:
         """Set callback for secondary LLM pass during retry.
-        
+
         Args:
             callback: Function that takes (original_response, error) and returns fixed response
             is_async: Whether callback is async (default: False)
@@ -528,12 +509,12 @@ class ResponseParser:
 
     def _maybe_retry(self, response: str, failed_result: ParseResult, attempt: int) -> ParseResult:
         """Attempt retry with secondary LLM pass (Gemini strategy).
-        
+
         Args:
             response: Original response that failed to parse
             failed_result: Failed parse result
             attempt: Current attempt number
-            
+
         Returns:
             ParseResult from retry or original failed result
         """
@@ -563,16 +544,16 @@ class ResponseParser:
 
     def _sanitize_tool_calls(self, result: ParseResult) -> ParseResult:
         """Sanitize tool call arguments for security (Codex strategy).
-        
+
         Prevents:
         - Path traversal attacks (../, ~/)
         - Command injection (shell metacharacters)
         - Excessive string lengths
         - Suspicious patterns
-        
+
         Args:
             result: ParseResult with tool calls
-            
+
         Returns:
             Sanitized ParseResult
         """
@@ -593,13 +574,13 @@ class ResponseParser:
 
                 # Check for dangerous patterns
                 dangerous_patterns = [
-                    r'\.\./\.\.',  # Path traversal
-                    r'~/\.',        # Home directory traversal
-                    r';.*rm\s',     # Command chaining with rm
-                    r'\|.*rm\s',    # Pipe to rm
-                    r'&&.*rm\s',    # And operator with rm
-                    r'`.*`',        # Command substitution
-                    r'\$\(',        # Command substitution
+                    r"\.\./\.\.",  # Path traversal
+                    r"~/\.",  # Home directory traversal
+                    r";.*rm\s",  # Command chaining with rm
+                    r"\|.*rm\s",  # Pipe to rm
+                    r"&&.*rm\s",  # And operator with rm
+                    r"`.*`",  # Command substitution
+                    r"\$\(",  # Command substitution
                 ]
 
                 for pattern in dangerous_patterns:
@@ -620,10 +601,7 @@ class ResponseParser:
                 sanitized_args[key] = value
 
             if not blocked:
-                sanitized_calls.append({
-                    "tool": tool_call["tool"],
-                    "args": sanitized_args
-                })
+                sanitized_calls.append({"tool": tool_call["tool"], "args": sanitized_args})
 
         if len(sanitized_calls) < len(result.tool_calls):
             logger.warning(
@@ -635,7 +613,7 @@ class ResponseParser:
 
     def _log_response(self, response: str, attempt: int) -> None:
         """Log raw response for debugging (Codex best practice).
-        
+
         Args:
             response: Raw response text
             attempt: Attempt number
@@ -659,9 +637,5 @@ class ResponseParser:
 
 # Global parser instance
 parser = ResponseParser(
-    strict_mode=False,
-    enable_retry=True,
-    max_retries=2,
-    enable_logging=True,
-    sanitize_args=True
+    strict_mode=False, enable_retry=True, max_retries=2, enable_logging=True, sanitize_args=True
 )

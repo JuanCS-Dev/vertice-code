@@ -33,15 +33,15 @@ class OutputFormatter:
     """
 
     # Default styles - Using JuanCS brand colors
-    RESPONSE_BORDER: str = Colors.PRIMARY   # Orange for AI responses
-    SUCCESS_BORDER: str = Colors.SUCCESS    # Green (universal)
-    ERROR_BORDER: str = Colors.ERROR        # Red (universal)
-    WARNING_BORDER: str = Colors.WARNING    # Amber
-    INFO_BORDER: str = Colors.INFO          # Blue
+    RESPONSE_BORDER: str = Colors.PRIMARY  # Orange for AI responses
+    SUCCESS_BORDER: str = Colors.SUCCESS  # Green (universal)
+    ERROR_BORDER: str = Colors.ERROR  # Red (universal)
+    WARNING_BORDER: str = Colors.WARNING  # Amber
+    INFO_BORDER: str = Colors.INFO  # Blue
 
     # Max content length before truncation
-    MAX_CONTENT_LENGTH: int = 50000   # 50K chars
-    MAX_LINES: int = 500              # 500 lines
+    MAX_CONTENT_LENGTH: int = 50000  # 50K chars
+    MAX_LINES: int = 500  # 500 lines
 
     @staticmethod
     def format_response(
@@ -49,7 +49,7 @@ class OutputFormatter:
         title: str = "Response",
         border_style: str = None,
         expand: bool = True,
-        smart_truncate: bool = True
+        smart_truncate: bool = True,
     ) -> Panel:
         """
         Format LLM response in a styled Panel with smart truncation.
@@ -76,14 +76,14 @@ class OutputFormatter:
             # Legacy truncation (fallback)
             is_truncated = False
             if len(text) > OutputFormatter.MAX_CONTENT_LENGTH:
-                display_text = text[:OutputFormatter.MAX_CONTENT_LENGTH]
+                display_text = text[: OutputFormatter.MAX_CONTENT_LENGTH]
                 is_truncated = True
             else:
                 display_text = text
 
-            lines = display_text.split('\n')
+            lines = display_text.split("\n")
             if len(lines) > OutputFormatter.MAX_LINES:
-                display_text = '\n'.join(lines[:OutputFormatter.MAX_LINES])
+                display_text = "\n".join(lines[: OutputFormatter.MAX_LINES])
                 is_truncated = True
 
             truncation_info = ""
@@ -91,15 +91,13 @@ class OutputFormatter:
         # Parse as markdown for rich formatting
         try:
             content: Any = Markdown(display_text)
-        except Exception:
+        except (ValueError, TypeError):
             content = Text(display_text)
 
         # Build final content with truncation indicator
         if is_truncated and truncation_info:
             final_content: Any = Group(
-                content,
-                Text(""),  # Spacer
-                Text(truncation_info, style=Colors.DIM)
+                content, Text(""), Text(truncation_info, style=Colors.DIM)  # Spacer
             )
         else:
             final_content = content
@@ -110,19 +108,12 @@ class OutputFormatter:
             title_str += f" [{Colors.DIM}](truncated)[/{Colors.DIM}]"
 
         return Panel(
-            final_content,
-            title=title_str,
-            border_style=border_style,
-            padding=(1, 2),
-            expand=expand
+            final_content, title=title_str, border_style=border_style, padding=(1, 2), expand=expand
         )
 
     @staticmethod
     def format_tool_result(
-        tool_name: str,
-        success: bool,
-        data: Any = None,
-        error: Optional[str] = None
+        tool_name: str, success: bool, data: Any = None, error: Optional[str] = None
     ) -> Panel:
         """
         Format tool execution result with smart truncation.
@@ -151,14 +142,16 @@ class OutputFormatter:
 
         # Add truncation indicator if needed
         if truncated.is_truncated:
-            display_text += f"\n\n[{Colors.DIM}]{Icons.TRUNCATED} {truncated.expand_hint}[/{Colors.DIM}]"
+            display_text += (
+                f"\n\n[{Colors.DIM}]{Icons.TRUNCATED} {truncated.expand_hint}[/{Colors.DIM}]"
+            )
 
         return Panel(
             Text(display_text),
             title=f"[{style}]{icon} {tool_name}[/{style}]",
             border_style=style,
             padding=(0, 1),
-            expand=False
+            expand=False,
         )
 
     @staticmethod
@@ -167,7 +160,7 @@ class OutputFormatter:
         language: str = "python",
         title: Optional[str] = None,
         line_numbers: bool = True,
-        show_line_count: bool = True
+        show_line_count: bool = True,
     ) -> Panel:
         """
         Format code with syntax highlighting in a Panel.
@@ -197,7 +190,7 @@ class OutputFormatter:
             theme="dracula",
             line_numbers=line_numbers,
             word_wrap=True,
-            background_color="#1e1e2e"
+            background_color="#1e1e2e",
         )
 
         # Build title with line count
@@ -211,15 +204,12 @@ class OutputFormatter:
             syntax,
             title=f"[{Colors.PRIMARY}]{Icons.CODE} {display_title}[/{Colors.PRIMARY}]",
             border_style=Colors.PRIMARY,
-            padding=(0, 1)
+            padding=(0, 1),
         )
 
     @staticmethod
     def format_table(
-        headers: List[str],
-        rows: List[List[Any]],
-        title: str = None,
-        show_row_count: bool = True
+        headers: List[str], rows: List[List[Any]], title: str = None, show_row_count: bool = True
     ) -> Panel:
         """
         Format a table with smart truncation.
@@ -237,8 +227,8 @@ class OutputFormatter:
         total_cols = len(headers)
 
         # Smart truncation
-        trunc_headers, trunc_rows, is_truncated, truncation_info = (
-            TRUNCATOR.truncate_table_data(headers, rows)
+        trunc_headers, trunc_rows, is_truncated, truncation_info = TRUNCATOR.truncate_table_data(
+            headers, rows
         )
 
         # Build Rich Table
@@ -248,7 +238,7 @@ class OutputFormatter:
             row_styles=["", Colors.DIM],
             padding=(0, 1),
             collapse_padding=True,
-            show_lines=False
+            show_lines=False,
         )
 
         # Add columns with max width
@@ -257,7 +247,7 @@ class OutputFormatter:
                 header,
                 style=Colors.SECONDARY,
                 max_width=TRUNCATION_CONFIG.max_cell_width,
-                overflow="ellipsis"
+                overflow="ellipsis",
             )
 
         # Add rows
@@ -279,16 +269,18 @@ class OutputFormatter:
             table,
             title=f"[{Colors.PRIMARY}]{display_title}[/{Colors.PRIMARY}]",
             border_style=Colors.PRIMARY,
-            padding=(0, 1)
+            padding=(0, 1),
         )
 
     @staticmethod
     def format_error(message: str, title: str = "Error") -> Panel:
         """Format error message with smart truncation."""
         if len(message) > TRUNCATION_CONFIG.max_error_length:
-            display_msg = message[:TRUNCATION_CONFIG.max_error_length]
+            display_msg = message[: TRUNCATION_CONFIG.max_error_length]
             hidden = len(message) - TRUNCATION_CONFIG.max_error_length
-            display_msg += f"\n\n[{Colors.DIM}]{Icons.TRUNCATED} ... {hidden} more chars[/{Colors.DIM}]"
+            display_msg += (
+                f"\n\n[{Colors.DIM}]{Icons.TRUNCATED} ... {hidden} more chars[/{Colors.DIM}]"
+            )
         else:
             display_msg = message
 
@@ -296,7 +288,7 @@ class OutputFormatter:
             Text(display_msg, style=Colors.ERROR),
             title=f"[{Colors.ERROR}]{Icons.ERROR} {title}[/{Colors.ERROR}]",
             border_style=Colors.ERROR,
-            padding=(0, 1)
+            padding=(0, 1),
         )
 
     @staticmethod
@@ -306,7 +298,7 @@ class OutputFormatter:
             Text(message, style=Colors.SUCCESS),
             title=f"[{Colors.SUCCESS}]{Icons.SUCCESS} {title}[/{Colors.SUCCESS}]",
             border_style=Colors.SUCCESS,
-            padding=(0, 1)
+            padding=(0, 1),
         )
 
     @staticmethod
@@ -316,7 +308,7 @@ class OutputFormatter:
             Text(message, style=Colors.WARNING),
             title=f"[{Colors.WARNING}]{Icons.WARNING} {title}[/{Colors.WARNING}]",
             border_style=Colors.WARNING,
-            padding=(0, 1)
+            padding=(0, 1),
         )
 
     @staticmethod
@@ -326,7 +318,7 @@ class OutputFormatter:
             Text(message, style=Colors.INFO),
             title=f"[{Colors.INFO}]{Icons.INFO} {title}[/{Colors.INFO}]",
             border_style=Colors.INFO,
-            padding=(0, 1)
+            padding=(0, 1),
         )
 
     @staticmethod

@@ -8,6 +8,7 @@ from enum import Enum
 
 class ToolCategory(Enum):
     """Tool categories for organization."""
+
     FILE_READ = "file_read"
     FILE_WRITE = "file_write"
     FILE_MGMT = "file_mgmt"
@@ -21,6 +22,7 @@ class ToolCategory(Enum):
 @dataclass
 class ToolResult:
     """Result from tool execution."""
+
     success: bool
     data: Any = None
     error: Optional[str] = None
@@ -37,15 +39,15 @@ class ToolResult:
         return self.data
 
 
-
 class Tool(ABC):
     """Base class for all tools."""
 
     def __init__(self):
         # Convert CamelCase to snake_case for consistency
         import re
+
         class_name = self.__class__.__name__.replace("Tool", "")
-        self.name: str = re.sub(r'(?<!^)(?=[A-Z])', '_', class_name).lower()
+        self.name: str = re.sub(r"(?<!^)(?=[A-Z])", "_", class_name).lower()
         self.category: ToolCategory = ToolCategory.FILE_READ
         self.description: str = ""
         self.parameters: Dict[str, Any] = {}
@@ -53,10 +55,10 @@ class Tool(ABC):
     @abstractmethod
     async def _execute_validated(self, **kwargs) -> ToolResult:
         """Execute the tool with given parameters.
-        
+
         Args:
             **kwargs: Tool-specific parameters
-            
+
         Returns:
             ToolResult with execution outcome
         """
@@ -64,11 +66,11 @@ class Tool(ABC):
 
     def validate_params(self, **kwargs) -> tuple[bool, Optional[str]]:
         """Validate tool parameters.
-        
+
         Returns:
             (is_valid, error_message)
         """
-        required = [k for k, v in self.parameters.items() if v.get('required', False)]
+        required = [k for k, v in self.parameters.items() if v.get("required", False)]
         missing = [k for k in required if k not in kwargs]
 
         if missing:
@@ -78,14 +80,22 @@ class Tool(ABC):
 
     def get_schema(self) -> Dict[str, Any]:
         """Get tool schema for LLM tool use."""
+        # Clean up parameters for schema (remove 'required' from properties as it goes to top level)
+        properties = {}
+        for k, v in self.parameters.items():
+            prop = v.copy()
+            if "required" in prop:
+                del prop["required"]
+            properties[k] = prop
+
         return {
             "name": self.name,
             "description": self.description,
             "parameters": {
                 "type": "object",
-                "properties": self.parameters,
-                "required": [k for k, v in self.parameters.items() if v.get('required', False)]
-            }
+                "properties": properties,
+                "required": [k for k, v in self.parameters.items() if v.get("required", False)],
+            },
         }
 
 

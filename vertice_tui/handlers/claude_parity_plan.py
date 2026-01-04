@@ -25,12 +25,7 @@ class ClaudeParityPlanHandler:
     def bridge(self):
         return self.app.bridge
 
-    async def handle(
-        self,
-        command: str,
-        args: str,
-        view: "ResponseView"
-    ) -> None:
+    async def handle(self, command: str, args: str, view: "ResponseView") -> None:
         """Route to specific handler method."""
         handlers = {
             "/commands": self._handle_commands,
@@ -115,14 +110,43 @@ class ClaudeParityPlanHandler:
     async def _handle_command_delete(self, args: str, view: "ResponseView") -> None:
         if not args:
             view.add_error("Usage: `/command-delete <name>`")
-        else:
-            try:
-                if self.bridge.delete_custom_command(args):
-                    view.add_system_message(f"✅ Command `/{args}` deleted")
-                else:
-                    view.add_error(f"Command not found: {args}")
-            except Exception as e:
-                view.add_error(f"Delete failed: {e}")
+            return
+
+        command_name = args.strip()
+
+        # Check for --force flag
+        if "--force" in args:
+            command_name = command_name.replace("--force", "").strip()
+            self._do_command_delete(command_name, view)
+            return
+
+        # Show confirmation dialog
+        from vertice_tui.widgets.modal import ConfirmDialog
+
+        def on_confirm(confirmed: bool) -> None:
+            if confirmed:
+                self._do_command_delete(command_name, view)
+
+        self.app.push_screen(
+            ConfirmDialog(
+                f"Delete custom command '/{command_name}'?\n\nThis will remove the command file permanently.",
+                title="Delete Command?",
+                yes_label="Delete",
+                no_label="Cancel",
+                destructive=True,
+            ),
+            on_confirm,
+        )
+
+    def _do_command_delete(self, command_name: str, view: "ResponseView") -> None:
+        """Execute command deletion."""
+        try:
+            if self.bridge.delete_custom_command(command_name):
+                view.add_system_message(f"✅ Command `/{command_name}` deleted")
+            else:
+                view.add_error(f"Command not found: {command_name}")
+        except Exception as e:
+            view.add_error(f"Delete failed: {e}")
 
     async def _handle_plan_mode(self, args: str, view: "ResponseView") -> None:
         try:

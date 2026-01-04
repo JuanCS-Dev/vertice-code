@@ -19,17 +19,17 @@ from typing import List, Dict
 
 def build_enhanced_system_prompt(tool_schemas: List[Dict], context: Dict = None) -> str:
     """Build system prompt using PTCF framework and best practices.
-    
+
     PTCF Framework (Google AI):
         P = Persona (who you are, your role)
         T = Task (what you do, your objectives)
         C = Context (where you operate, available info)
         F = Format (how you respond, output structure)
-    
+
     Args:
         tool_schemas: Available tool schemas with descriptions
         context: Session context (cwd, files, git status, etc.)
-        
+
     Returns:
         Production-grade system prompt string
     """
@@ -38,15 +38,15 @@ def build_enhanced_system_prompt(tool_schemas: List[Dict], context: Dict = None)
     context_section = ""
     if context:
         context_section = "## [C] CURRENT CONTEXT\n\n"
-        if 'cwd' in context:
+        if "cwd" in context:
             context_section += f"- **Working Directory**: `{context['cwd']}`\n"
-        if 'modified_files' in context and context['modified_files']:
-            files = ', '.join(f"`{f}`" for f in list(context['modified_files'])[:5])
+        if "modified_files" in context and context["modified_files"]:
+            files = ", ".join(f"`{f}`" for f in list(context["modified_files"])[:5])
             context_section += f"- **Modified Files**: {files}\n"
-        if 'read_files' in context and context['read_files']:
-            files = ', '.join(f"`{f}`" for f in list(context['read_files'])[:5])
+        if "read_files" in context and context["read_files"]:
+            files = ", ".join(f"`{f}`" for f in list(context["read_files"])[:5])
             context_section += f"- **Recently Read**: {files}\n"
-        if 'git_branch' in context:
+        if "git_branch" in context:
             context_section += f"- **Git Branch**: `{context['git_branch']}`\n"
     else:
         context_section = "## [C] CURRENT CONTEXT\n\n- Context not available\n"
@@ -54,7 +54,7 @@ def build_enhanced_system_prompt(tool_schemas: List[Dict], context: Dict = None)
     # Group tools by category
     tools_by_category = {}
     for schema in tool_schemas:
-        category = schema.get('category', 'other')
+        category = schema.get("category", "other")
         if category not in tools_by_category:
             tools_by_category[category] = []
         tools_by_category[category].append(schema)
@@ -64,9 +64,9 @@ def build_enhanced_system_prompt(tool_schemas: List[Dict], context: Dict = None)
     for category in sorted(tools_by_category.keys()):
         tools_section += f"\n### {category.replace('_', ' ').title()}\n"
         for tool in tools_by_category[category]:
-            name = tool['name']
-            desc = tool['description']
-            params = tool['parameters'].get('required', [])
+            name = tool["name"]
+            desc = tool["description"]
+            params = tool["parameters"].get("required", [])
             param_str = f" ({', '.join(params)})" if params else ""
             tools_section += f"- **{name}**{param_str}: {desc}\n"
 
@@ -129,7 +129,47 @@ For complex tasks, think through the problem step by step:
 
 ---
 
+## THINK TOOL - Extended Reasoning
+
+For complex tasks, use the `think` tool BEFORE other tools:
+
+WHEN TO THINK:
+- Multi-step operations (3+ tools)
+- Ambiguous requests needing interpretation
+- Tasks with potential side effects
+- When unsure about parameters
+
+EXAMPLE:
+User: "organize my project files"
+
+Call think tool FIRST:
+{{"tool": "think", "args": {{"thought": "User wants to organize files. Options: 1) Move by type, 2) Create directories, 3) Rename. I'll first list files to understand state."}}}}
+
+THEN proceed with file operations.
+
+---
+
 {context_section}
+
+---
+
+## MULTILINGUAL SUPPORT
+
+Respond in the user's language:
+- Portuguese input -> Portuguese response
+- English input -> English response
+- Tool names always in English (API calls)
+
+EXAMPLES:
+- User: "mostra main.py" -> Portuguese response, use "readfile"
+- User: "show main.py" -> English response, use "readfile"
+
+Portuguese Command Patterns:
+- "mostra/mostre" -> read/show
+- "cria/crie" -> create
+- "edita/edite" -> edit
+- "busca/busque" -> search
+- "roda/rode" -> execute
 
 ---
 
@@ -306,10 +346,10 @@ Higher temperatures (0.7+) may cause:
 
 def build_fallback_simple_prompt(tool_schemas: List[Dict]) -> str:
     """Minimal fallback prompt for when advanced prompt fails.
-    
+
     Args:
         tool_schemas: Available tool schemas
-        
+
     Returns:
         Simple, reliable system prompt
     """

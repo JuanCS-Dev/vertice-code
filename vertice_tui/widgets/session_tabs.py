@@ -29,6 +29,7 @@ from textual.message import Message
 @dataclass
 class SessionData:
     """Data for a single chat session."""
+
     id: str = field(default_factory=lambda: str(uuid4())[:8])
     title: str = "New Chat"
     created_at: datetime = field(default_factory=datetime.now)
@@ -112,18 +113,21 @@ class SessionTabs(Widget):
 
     class SessionCreated(Message):
         """New session was created."""
+
         def __init__(self, session: SessionData) -> None:
             self.session = session
             super().__init__()
 
     class SessionClosed(Message):
         """Session was closed."""
+
         def __init__(self, session_id: str) -> None:
             self.session_id = session_id
             super().__init__()
 
     class SessionActivated(Message):
         """Session was activated."""
+
         def __init__(self, session: SessionData) -> None:
             self.session = session
             super().__init__()
@@ -191,7 +195,7 @@ class SessionTabs(Widget):
         if len(self._sessions) <= 1:
             try:
                 self.app.notify("Cannot close last session", severity="warning")
-            except Exception:
+            except (AttributeError, RuntimeError):
                 pass
             return False
 
@@ -199,7 +203,7 @@ class SessionTabs(Widget):
         if self._tabbed_content:
             try:
                 self._tabbed_content.remove_pane(f"session-{session_id}")
-            except Exception:
+            except (AttributeError, ValueError, KeyError):
                 pass
 
         # Remove from sessions
@@ -221,7 +225,7 @@ class SessionTabs(Widget):
             try:
                 tab = self._tabbed_content.get_tab(f"session-{session_id}")
                 tab.label = session.display_title
-            except Exception:
+            except (AttributeError, ValueError, KeyError):
                 pass
 
         return True
@@ -285,11 +289,13 @@ class SessionTabs(Widget):
     ) -> None:
         """Add message to session history."""
         if session_id in self._sessions:
-            self._sessions[session_id].messages.append({
-                "role": role,
-                "content": content,
-                "timestamp": datetime.now().isoformat(),
-            })
+            self._sessions[session_id].messages.append(
+                {
+                    "role": role,
+                    "content": content,
+                    "timestamp": datetime.now().isoformat(),
+                }
+            )
 
     def get_session_messages(self, session_id: str) -> List[Dict]:
         """Get messages for a session."""

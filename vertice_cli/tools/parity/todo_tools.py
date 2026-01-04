@@ -28,6 +28,7 @@ from vertice_cli.tools.base import Tool, ToolCategory, ToolResult
 
 logger = logging.getLogger(__name__)
 
+
 # P2.2: Session directory for persistence
 def _get_todo_persist_path() -> Path:
     """Get path for todo persistence file."""
@@ -41,6 +42,7 @@ def _get_todo_persist_path() -> Path:
 # SHARED TODO STATE (Thread-Safe Singleton)
 # =============================================================================
 
+
 class TodoState:
     """
     Thread-safe singleton for shared todo state with persistence.
@@ -49,10 +51,10 @@ class TodoState:
     Ensures TodoRead and TodoWrite share the same list.
     """
 
-    _instance: 'TodoState' = None
+    _instance: "TodoState" = None
     _lock = threading.RLock()
 
-    def __new__(cls) -> 'TodoState':
+    def __new__(cls) -> "TodoState":
         if cls._instance is None:
             with cls._lock:
                 if cls._instance is None:
@@ -115,7 +117,7 @@ class TodoState:
                 "version": 1,
             }
             # Atomic write pattern (from P0)
-            temp_path = path.with_suffix('.tmp')
+            temp_path = path.with_suffix(".tmp")
             temp_path.write_text(json.dumps(data, indent=2))
             temp_path.replace(path)
             logger.debug(f"Saved {len(self._todos)} todos to {path}")
@@ -149,6 +151,7 @@ _todo_state = TodoState()
 # TODOREAD TOOL
 # =============================================================================
 
+
 class TodoReadTool(Tool):
     """
     Read current todo list.
@@ -179,14 +182,15 @@ class TodoReadTool(Tool):
                 "count": len(todos),
                 "pending": counts["pending"],
                 "in_progress": counts["in_progress"],
-                "completed": counts["completed"]
-            }
+                "completed": counts["completed"],
+            },
         )
 
 
 # =============================================================================
 # TODOWRITE TOOL
 # =============================================================================
+
 
 class TodoWriteTool(Tool):
     """
@@ -223,13 +227,13 @@ class TodoWriteTool(Tool):
                         "content": {"type": "string"},
                         "status": {
                             "type": "string",
-                            "enum": ["pending", "in_progress", "completed"]
+                            "enum": ["pending", "in_progress", "completed"],
                         },
-                        "activeForm": {"type": "string"}
-                    }
+                        "activeForm": {"type": "string"},
+                    },
                 },
                 "description": "Updated todo list",
-                "required": True
+                "required": True,
             }
         }
 
@@ -269,17 +273,16 @@ class TodoWriteTool(Tool):
                 # Simple heuristic: add "ing" to verb
                 active_form = self._generate_active_form(content)
 
-            validated_todos.append({
-                "content": str(content)[:500],  # Limit length
-                "status": status,
-                "activeForm": str(active_form)[:500]
-            })
+            validated_todos.append(
+                {
+                    "content": str(content)[:500],  # Limit length
+                    "status": status,
+                    "activeForm": str(active_form)[:500],
+                }
+            )
 
         if errors:
-            return ToolResult(
-                success=False,
-                error=f"Validation errors: {'; '.join(errors)}"
-            )
+            return ToolResult(success=False, error=f"Validation errors: {'; '.join(errors)}")
 
         # Update shared state
         _todo_state.todos = validated_todos
@@ -287,14 +290,8 @@ class TodoWriteTool(Tool):
 
         return ToolResult(
             success=True,
-            data={
-                "updated": len(validated_todos),
-                "counts": counts
-            },
-            metadata={
-                "todos": validated_todos,
-                "total": len(validated_todos)
-            }
+            data={"updated": len(validated_todos), "counts": counts},
+            metadata={"todos": validated_todos, "total": len(validated_todos)},
         )
 
     def _generate_active_form(self, content: str) -> str:
@@ -347,6 +344,7 @@ class TodoWriteTool(Tool):
 # =============================================================================
 # REGISTRY HELPER
 # =============================================================================
+
 
 def get_todo_tools() -> List[Tool]:
     """Get all todo management tools."""

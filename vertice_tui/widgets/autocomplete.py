@@ -103,7 +103,9 @@ class AutocompleteDropdown(VerticalScroll):
                 text += f" [dim]{desc}[/dim]"
 
             # Set CSS class based on type
-            type_class = f"item-{item_type}" if item_type in ("command", "tool", "file") else "item-tool"
+            type_class = (
+                f"item-{item_type}" if item_type in ("command", "tool", "file") else "item-tool"
+            )
             classes = f"item {type_class}"
             if i == 0:
                 classes += " selected"

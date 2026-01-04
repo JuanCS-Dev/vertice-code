@@ -297,17 +297,17 @@ code here
 # =============================================================================
 
 TOOL_GUIDANCE: dict[str, str] = {
-    'read_file': "You now have the file contents. Proceed with your task.",
-    'readfile': "You now have the file contents. Proceed with your task.",
-    'write_file': "File written successfully. Verify if you need to run tests or commit.",
-    'writefile': "File written successfully. Verify if you need to run tests or commit.",
-    'bash': "Command executed. Check the output for errors or expected results.",
-    'execute_command': "Command executed. Check the output for errors or expected results.",
-    'grep': "Search complete. Review matches and read relevant files if needed.",
-    'search': "Search complete. Review matches and read relevant files if needed.",
-    'searchfiles': "Search complete. Review matches and read relevant files if needed.",
-    'git_status': "Git status retrieved. Proceed with add/commit if appropriate.",
-    'gitstatus': "Git status retrieved. Proceed with add/commit if appropriate.",
+    "read_file": "You now have the file contents. Proceed with your task.",
+    "readfile": "You now have the file contents. Proceed with your task.",
+    "write_file": "File written successfully. Verify if you need to run tests or commit.",
+    "writefile": "File written successfully. Verify if you need to run tests or commit.",
+    "bash": "Command executed. Check the output for errors or expected results.",
+    "execute_command": "Command executed. Check the output for errors or expected results.",
+    "grep": "Search complete. Review matches and read relevant files if needed.",
+    "search": "Search complete. Review matches and read relevant files if needed.",
+    "searchfiles": "Search complete. Review matches and read relevant files if needed.",
+    "git_status": "Git status retrieved. Proceed with add/commit if appropriate.",
+    "gitstatus": "Git status retrieved. Proceed with add/commit if appropriate.",
 }
 
 ERROR_GUIDANCE: str = """The tool failed. Analyze the error and:

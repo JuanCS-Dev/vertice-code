@@ -39,9 +39,9 @@ from .repl import MasterpieceREPL
 def start_masterpiece_repl() -> None:
     """Entry point for MasterpieceREPL."""
     # Suppress aiohttp cleanup warnings
-    warnings.filterwarnings('ignore', category=ResourceWarning)
-    warnings.filterwarnings('ignore', message='.*Unclosed.*')
-    warnings.filterwarnings('ignore', message='.*unclosed.*')
+    warnings.filterwarnings("ignore", category=ResourceWarning)
+    warnings.filterwarnings("ignore", message=".*Unclosed.*")
+    warnings.filterwarnings("ignore", message=".*unclosed.*")
 
     console = Console()
 
@@ -53,6 +53,7 @@ def start_masterpiece_repl() -> None:
     except Exception as e:
         console.print(f"\n[red]Fatal error: {e}[/red]\n")
         import traceback
+
         console.print(f"[dim]{traceback.format_exc()}[/dim]\n")
         sys.exit(1)
 

@@ -37,7 +37,7 @@ class ProcessResult:
             parts.append(self.stdout)
         if self.stderr:
             parts.append(self.stderr)
-        return '\n'.join(parts)
+        return "\n".join(parts)
 
 
 async def run_command(
@@ -46,7 +46,7 @@ async def run_command(
     env: Optional[Dict[str, str]] = None,
     timeout: Optional[float] = None,
     shell: bool = False,
-    capture_output: bool = True
+    capture_output: bool = True,
 ) -> ProcessResult:
     """
     Run a command asynchronously.
@@ -66,17 +66,17 @@ async def run_command(
         args = shlex.split(command)
     elif isinstance(command, list):
         args = command
-        command = ' '.join(command)
+        command = " ".join(command)
     else:
         args = command
 
     if shell:
         process = await asyncio.create_subprocess_shell(
-            command if isinstance(command, str) else ' '.join(args),
+            command if isinstance(command, str) else " ".join(args),
             stdout=asyncio.subprocess.PIPE if capture_output else None,
             stderr=asyncio.subprocess.PIPE if capture_output else None,
             cwd=cwd,
-            env=env
+            env=env,
         )
     else:
         process = await asyncio.create_subprocess_exec(
@@ -84,32 +84,29 @@ async def run_command(
             stdout=asyncio.subprocess.PIPE if capture_output else None,
             stderr=asyncio.subprocess.PIPE if capture_output else None,
             cwd=cwd,
-            env=env
+            env=env,
         )
 
     try:
-        stdout_bytes, stderr_bytes = await asyncio.wait_for(
-            process.communicate(),
-            timeout=timeout
-        )
+        stdout_bytes, stderr_bytes = await asyncio.wait_for(process.communicate(), timeout=timeout)
     except asyncio.TimeoutError:
         process.kill()
         await process.wait()
         return ProcessResult(
             returncode=-1,
-            stdout='',
-            stderr=f'Process timed out after {timeout} seconds',
-            command=command if isinstance(command, str) else ' '.join(args)
+            stdout="",
+            stderr=f"Process timed out after {timeout} seconds",
+            command=command if isinstance(command, str) else " ".join(args),
         )
 
-    stdout = stdout_bytes.decode('utf-8', errors='replace') if stdout_bytes else ''
-    stderr = stderr_bytes.decode('utf-8', errors='replace') if stderr_bytes else ''
+    stdout = stdout_bytes.decode("utf-8", errors="replace") if stdout_bytes else ""
+    stderr = stderr_bytes.decode("utf-8", errors="replace") if stderr_bytes else ""
 
     return ProcessResult(
         returncode=process.returncode or 0,
         stdout=stdout.strip(),
         stderr=stderr.strip(),
-        command=command if isinstance(command, str) else ' '.join(args)
+        command=command if isinstance(command, str) else " ".join(args),
     )
 
 
@@ -117,7 +114,7 @@ async def run_shell(
     script: str,
     cwd: Optional[str] = None,
     env: Optional[Dict[str, str]] = None,
-    timeout: Optional[float] = None
+    timeout: Optional[float] = None,
 ) -> ProcessResult:
     """
     Run a shell script asynchronously.
@@ -131,13 +128,7 @@ async def run_shell(
     Returns:
         ProcessResult with output and return code
     """
-    return await run_command(
-        script,
-        cwd=cwd,
-        env=env,
-        timeout=timeout,
-        shell=True
-    )
+    return await run_command(script, cwd=cwd, env=env, timeout=timeout, shell=True)
 
 
 async def run_many(
@@ -145,7 +136,7 @@ async def run_many(
     cwd: Optional[str] = None,
     env: Optional[Dict[str, str]] = None,
     timeout: Optional[float] = None,
-    fail_fast: bool = False
+    fail_fast: bool = False,
 ) -> List[ProcessResult]:
     """
     Run multiple commands concurrently.
@@ -169,16 +160,13 @@ async def run_many(
                 break
         return results
     else:
-        tasks = [
-            run_command(cmd, cwd=cwd, env=env, timeout=timeout)
-            for cmd in commands
-        ]
+        tasks = [run_command(cmd, cwd=cwd, env=env, timeout=timeout) for cmd in commands]
         return await asyncio.gather(*tasks)
 
 
 __all__ = [
-    'ProcessResult',
-    'run_command',
-    'run_shell',
-    'run_many',
+    "ProcessResult",
+    "run_command",
+    "run_shell",
+    "run_many",
 ]

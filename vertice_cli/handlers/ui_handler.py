@@ -39,7 +39,7 @@ class UIHandler:
     4. File change notifications
     """
 
-    def __init__(self, shell: 'InteractiveShell'):
+    def __init__(self, shell: "InteractiveShell"):
         """
         Initialize with shell reference.
 
@@ -66,7 +66,7 @@ class UIHandler:
 
         # Build styled welcome content
         content = Text()
-        content.append("QWEN-DEV-CLI Interactive Shell ", style=PRESET_STYLES.EMPHASIS)
+        content.append("VÉRTICE Interactive Shell ", style=PRESET_STYLES.EMPHASIS)
         content.append("v1.0", style=PRESET_STYLES.SUCCESS)
         content.append("\n\n")
         content.append("🔧 Tools available: ", style=PRESET_STYLES.SECONDARY)
@@ -80,15 +80,15 @@ class UIHandler:
         welcome = Panel(
             content,
             title="[bold]🚀 AI-Powered Code Shell[/bold]",
-            border_style=COLORS['accent_blue'],
-            padding=(1, 2)
+            border_style=COLORS["accent_blue"],
+            padding=(1, 2),
         )
         self.console.print(welcome)
 
     def show_help(self) -> None:
         """Show help message (Gemini: visual hierarchy)."""
         help_text = """
-[bold cyan]Qwen CLI - AI-Powered Shell Assistant[/bold cyan]
+[bold cyan]Vértice - Sovereign Intelligence & Tactical Execution[/bold cyan]
 
 [bold]Commands:[/bold]
   Just type what you want in natural language!
@@ -109,7 +109,7 @@ class UIHandler:
   ⚠️  Regular commands ask confirmation (cp, mv)
   🚨 Dangerous commands double-confirm (rm, dd)
 
-[dim]Powered by Qwen + Constitutional AI[/dim]
+[dim]Operando sob a CONSTITUIÇÃO VÉRTICE v3.0[/dim]
 """
         self.console.print(help_text)
 
@@ -124,10 +124,7 @@ class UIHandler:
         self.console.print("\n[bold cyan]📊 Constitutional Metrics[/bold cyan]\n")
 
         metrics = generate_constitutional_report(
-            codebase_path="vertice_cli",
-            completeness=0.95,
-            precision=0.98,
-            recall=0.92
+            codebase_path="vertice_cli", completeness=0.95, precision=0.98, recall=0.92
         )
 
         self.console.print(metrics.format_report())
@@ -176,9 +173,7 @@ class UIHandler:
 
         # Build rich context
         context = build_rich_context(
-            current_command=command,
-            command_history=self.context.history[-10:],
-            working_dir="."
+            current_command=command, command_history=self.context.history[-10:], working_dir="."
         )
 
         # Get explanation
@@ -201,6 +196,8 @@ class UIHandler:
         self.recent_files.add(event.path)
 
         # Invalidate cache if needed (files used in context)
-        if event.event_type in ['modified', 'deleted']:
+        if event.event_type in ["modified", "deleted"]:
             # Cache invalidation deferred - would require cache key tracking
-            logger.debug(f"File {event.path} {event.event_type} - cache invalidation not yet implemented")
+            logger.debug(
+                f"File {event.path} {event.event_type} - cache invalidation not yet implemented"
+            )

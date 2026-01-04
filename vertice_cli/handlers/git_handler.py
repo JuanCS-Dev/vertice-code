@@ -34,7 +34,7 @@ class GitHandler:
     Each method corresponds to a specific git action.
     """
 
-    def __init__(self, shell: 'InteractiveShell'):
+    def __init__(self, shell: "InteractiveShell"):
         """
         Initialize with shell reference.
 
@@ -73,11 +73,13 @@ class GitHandler:
         branch = result.data.get("branch", "unknown")
 
         # Format output with rich panel
-        self.console.print(Panel(
-            output or "[dim]Working tree clean[/dim]",
-            title=f"[bold cyan]Git Status[/bold cyan] ({branch})",
-            border_style="cyan"
-        ))
+        self.console.print(
+            Panel(
+                output or "[dim]Working tree clean[/dim]",
+                title=f"[bold cyan]Git Status[/bold cyan] ({branch})",
+                border_style="cyan",
+            )
+        )
 
         return CommandResult.ok()
 
@@ -118,11 +120,9 @@ class GitHandler:
 
         # Display with syntax highlighting
         syntax = Syntax(output, "diff", theme="monokai", line_numbers=True)
-        self.console.print(Panel(
-            syntax,
-            title="[bold blue]Git Diff[/bold blue]",
-            border_style="blue"
-        ))
+        self.console.print(
+            Panel(syntax, title="[bold blue]Git Diff[/bold blue]", border_style="blue")
+        )
 
         return CommandResult.ok()
 
@@ -146,20 +146,20 @@ class GitHandler:
         if not bash_tool:
             return CommandResult.error("[red]Bash tool not available[/red]")
 
-        result = await bash_tool.execute(
-            command=f"git log --oneline -n {count}"
-        )
+        result = await bash_tool.execute(command=f"git log --oneline -n {count}")
 
         if not result.success:
             return CommandResult.error(f"[red]Git error: {result.error}[/red]")
 
         output = result.data.get("output", "")
 
-        self.console.print(Panel(
-            output or "[dim]No commits found[/dim]",
-            title=f"[bold yellow]Git Log[/bold yellow] (last {count})",
-            border_style="yellow"
-        ))
+        self.console.print(
+            Panel(
+                output or "[dim]No commits found[/dim]",
+                title=f"[bold yellow]Git Log[/bold yellow] (last {count})",
+                border_style="yellow",
+            )
+        )
 
         return CommandResult.ok()
 
@@ -180,11 +180,13 @@ class GitHandler:
 
         output = result.data.get("output", "")
 
-        self.console.print(Panel(
-            output or "[dim]No branches found[/dim]",
-            title="[bold green]Git Branches[/bold green]",
-            border_style="green"
-        ))
+        self.console.print(
+            Panel(
+                output or "[dim]No branches found[/dim]",
+                title="[bold green]Git Branches[/bold green]",
+                border_style="green",
+            )
+        )
 
         return CommandResult.ok()
 

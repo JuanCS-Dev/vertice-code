@@ -17,11 +17,12 @@ from typing import Callable, Generic, Optional, TypeVar
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class PoolExhaustedError(Exception):
     """Raised when pool has no available connections."""
+
     pass
 
 
@@ -81,7 +82,7 @@ class ConnectionPool(Generic[T]):
         factory: Callable[[], T],
         validator: Optional[Callable[[T], bool]] = None,
         closer: Optional[Callable[[T], None]] = None,
-        config: Optional[PoolConfig] = None
+        config: Optional[PoolConfig] = None,
     ):
         """
         Initialize connection pool.
@@ -161,7 +162,7 @@ class ConnectionPool(Generic[T]):
         except Exception as e:
             logger.debug(f"Error closing connection: {e}")
 
-    async def acquire(self) -> 'PooledConnection[T]':
+    async def acquire(self) -> "PooledConnection[T]":
         """
         Acquire a connection from the pool.
 
@@ -212,8 +213,7 @@ class ConnectionPool(Generic[T]):
         # Wait for available connection
         try:
             conn, _ = await asyncio.wait_for(
-                self._available.get(),
-                timeout=self._config.acquire_timeout
+                self._available.get(), timeout=self._config.acquire_timeout
             )
             async with self._lock:
                 self._in_use.add(conn)
@@ -231,9 +231,7 @@ class ConnectionPool(Generic[T]):
         """Update average acquire time."""
         count = self._stats.total_acquires
         current_avg = self._stats.avg_acquire_time_ms
-        self._stats.avg_acquire_time_ms = (
-            (current_avg * (count - 1) + elapsed_ms) / count
-        )
+        self._stats.avg_acquire_time_ms = (current_avg * (count - 1) + elapsed_ms) / count
 
     async def release(self, conn: T) -> None:
         """Release a connection back to the pool."""
@@ -317,9 +315,9 @@ class PooledConnection(Generic[T]):
 
 
 __all__ = [
-    'ConnectionPool',
-    'PoolConfig',
-    'PoolStats',
-    'PoolExhaustedError',
-    'PooledConnection',
+    "ConnectionPool",
+    "PoolConfig",
+    "PoolStats",
+    "PoolExhaustedError",
+    "PooledConnection",
 ]

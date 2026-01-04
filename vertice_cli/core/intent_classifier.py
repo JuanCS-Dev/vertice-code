@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+import unicodedata
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Optional, Any
@@ -19,8 +20,28 @@ from typing import Dict, List, Optional, Any
 logger = logging.getLogger(__name__)
 
 
+def normalize_text(text: str) -> str:
+    """
+    Normalize text for accent-insensitive matching.
+
+    Phase 10.2: Uses Unicode NFD decomposition to remove accents.
+    Handles: á->a, é->e, ç->c, ã->a, etc.
+
+    Examples:
+        "código" -> "codigo"
+        "função" -> "funcao"
+        "não" -> "nao"
+    """
+    # NFD decomposes characters: é -> e + combining accent
+    nfd = unicodedata.normalize("NFD", text)
+    # Remove combining diacritical marks (category 'Mn')
+    without_accents = "".join(c for c in nfd if unicodedata.category(c) != "Mn")
+    return without_accents.lower()
+
+
 class Intent(str, Enum):
     """Available intent types."""
+
     PLANNING = "planning"
     CODING = "coding"
     REVIEW = "review"
@@ -38,6 +59,7 @@ class Intent(str, Enum):
 @dataclass
 class IntentResult:
     """Result of intent classification."""
+
     intent: Intent
     confidence: float
     reasoning: str
@@ -59,8 +81,8 @@ class IntentResult:
         """Parse LLM response into IntentResult."""
         try:
             # Extract JSON from response
-            start = response.find('{')
-            end = response.rfind('}') + 1
+            start = response.find("{")
+            end = response.rfind("}") + 1
             if start >= 0 and end > start:
                 data = json.loads(response[start:end])
 
@@ -119,49 +141,339 @@ class SemanticIntentClassifier:
     }
 
     # Heuristic fallback patterns (word-boundary safe)
+    # Phase 10.1: Added imperative PT forms (mostra, faz, busca, etc.)
     HEURISTIC_PATTERNS = {
         Intent.PLANNING: {
-            "keywords": ["plan", "plano", "strategy", "roadmap", "goals", "metas", "design"],
+            "keywords": [
+                # English
+                "plan",
+                "strategy",
+                "roadmap",
+                "goals",
+                "design",
+                "architect",
+                # Portuguese infinitive
+                "plano",
+                "metas",
+                "planejamento",
+                "estrategia",
+                # Portuguese imperative (tu/voce)
+                "planeja",
+                "planeja ai",
+                "faz um plano",
+                "monta um plano",
+                # Portuguese colloquial
+                "como fazer",
+                "como implementar",
+                "passo a passo",
+                "etapas",
+                "me ajuda a planejar",
+            ],
             "weight": 2,
         },
         Intent.CODING: {
-            "keywords": ["code", "implement", "create", "build", "write", "function", "class", "api"],
+            "keywords": [
+                # English
+                "code",
+                "implement",
+                "create",
+                "build",
+                "write",
+                "function",
+                "class",
+                "api",
+                # Portuguese infinitive
+                "codigo",
+                "implementar",
+                "criar",
+                "construir",
+                "escrever",
+                "funcao",
+                "classe",
+                # Portuguese imperative
+                "cria",
+                "faz",
+                "escreve",
+                "implementa",
+                "adiciona",
+                "bota",
+                "coloca",
+                "poe",
+                # Portuguese colloquial
+                "desenvolver",
+                "programar",
+                "fazer",
+                "adicionar",
+                "faz ai",
+                "cria ai",
+            ],
             "weight": 2,
         },
         Intent.REVIEW: {
-            "keywords": ["review", "revisar", "feedback", "analyze", "check", "avalie", "analise"],
+            "keywords": [
+                # English
+                "review",
+                "feedback",
+                "analyze",
+                "check",
+                "look at",
+                "examine",
+                # Portuguese infinitive
+                "revisar",
+                "analisar",
+                "verificar",
+                "checar",
+                # Portuguese imperative
+                "revisa",
+                "analisa",
+                "verifica",
+                "checa",
+                "olha",
+                "da uma olhada",
+                "avalia",
+                # Portuguese colloquial
+                "revisao",
+                "avalie",
+                "analise",
+                "ve ai",
+            ],
             "weight": 3,
         },
         Intent.DEBUG: {
-            "keywords": ["debug", "fix", "error", "bug", "issue", "problem", "broken", "crash"],
+            "keywords": [
+                # English
+                "debug",
+                "fix",
+                "error",
+                "bug",
+                "issue",
+                "problem",
+                "broken",
+                "crash",
+                "failing",
+                # Portuguese infinitive
+                "depurar",
+                "corrigir",
+                "consertar",
+                "arrumar",
+                "resolver",
+                # Portuguese imperative
+                "conserta",
+                "arruma",
+                "resolve",
+                "corrige",
+                "acha o erro",
+                "acha o bug",
+                # Portuguese colloquial
+                "erro",
+                "problema",
+                "falha",
+                "nao funciona",
+                "bugado",
+                "ta quebrado",
+                "deu pau",
+            ],
             "weight": 3,
         },
         Intent.REFACTOR: {
-            "keywords": ["refactor", "improve", "clean", "restructure", "rewrite", "simplify"],
+            "keywords": [
+                # English
+                "refactor",
+                "improve",
+                "clean",
+                "restructure",
+                "rewrite",
+                "simplify",
+                "reorganize",
+                # Portuguese infinitive
+                "refatorar",
+                "melhorar",
+                "limpar",
+                "reestruturar",
+                "reescrever",
+                "simplificar",
+                # Portuguese imperative
+                "refatora",
+                "melhora",
+                "limpa",
+                "reorganiza",
+                "simplifica",
+                "reestrutura",
+                # Portuguese colloquial
+                "deixa mais limpo",
+                "melhora isso",
+                "organiza melhor",
+            ],
             "weight": 3,
         },
         Intent.TEST: {
-            "keywords": ["test", "tests", "teste", "testes", "pytest", "unittest", "coverage", "spec"],
+            "keywords": [
+                # English
+                "test",
+                "tests",
+                "pytest",
+                "unittest",
+                "coverage",
+                "spec",
+                "testing",
+                # Portuguese infinitive
+                "teste",
+                "testes",
+                "testar",
+                "cobertura",
+                # Portuguese imperative
+                "testa",
+                "roda os testes",
+                "executa os testes",
+                "roda pytest",
+                # Portuguese colloquial
+                "faz um teste",
+                "cria um teste",
+                "teste unitario",
+            ],
             "weight": 3,
         },
         Intent.DOCS: {
-            "keywords": ["document", "documentation", "readme", "explain", "comment", "docstring"],
+            "keywords": [
+                # English
+                "document",
+                "documentation",
+                "readme",
+                "explain",
+                "comment",
+                "docstring",
+                # Portuguese infinitive
+                "documentar",
+                "documentacao",
+                "explicar",
+                "comentar",
+                # Portuguese imperative
+                "documenta",
+                "explica",
+                "comenta",
+                "escreve doc",
+                "faz a doc",
+                # Portuguese colloquial
+                "me explica",
+                "coloca comentario",
+                "documenta isso",
+            ],
             "weight": 2,
         },
         Intent.EXPLORE: {
-            "keywords": ["explore", "find", "search", "where", "show", "navigate", "locate"],
+            "keywords": [
+                # English
+                "explore",
+                "find",
+                "search",
+                "where",
+                "show",
+                "navigate",
+                "locate",
+                "list",
+                # Portuguese infinitive
+                "explorar",
+                "encontrar",
+                "buscar",
+                "mostrar",
+                "navegar",
+                "localizar",
+                # Portuguese imperative
+                "mostra",
+                "busca",
+                "encontra",
+                "acha",
+                "lista",
+                "procura",
+                "localiza",
+                # Portuguese colloquial
+                "onde",
+                "achar",
+                "onde esta",
+                "onde fica",
+                "me mostra",
+                "mostra ai",
+            ],
             "weight": 2,
         },
         Intent.ARCHITECTURE: {
-            "keywords": ["architecture", "arquitetura", "system design", "structure", "microservice"],
+            "keywords": [
+                # English
+                "architecture",
+                "system design",
+                "structure",
+                "microservice",
+                "component",
+                # Portuguese infinitive
+                "arquitetura",
+                "estrutura",
+                "componente",
+                # Portuguese imperative
+                "desenha",
+                "projeta",
+                "arquiteta",
+                # Portuguese colloquial
+                "design do sistema",
+                "estrutura do projeto",
+                "como ta organizado",
+            ],
             "weight": 3,
         },
         Intent.PERFORMANCE: {
-            "keywords": ["performance", "speed", "slow", "fast", "optimize", "profile", "latency"],
+            "keywords": [
+                # English
+                "performance",
+                "speed",
+                "slow",
+                "fast",
+                "optimize",
+                "profile",
+                "latency",
+                "memory",
+                # Portuguese infinitive
+                "velocidade",
+                "otimizar",
+                "latencia",
+                "desempenho",
+                "memoria",
+                # Portuguese imperative
+                "otimiza",
+                "acelera",
+                "melhora performance",
+                # Portuguese colloquial
+                "lento",
+                "rapido",
+                "ta lento",
+                "demora muito",
+                "ta devagar",
+            ],
             "weight": 3,
         },
         Intent.SECURITY: {
-            "keywords": ["security", "vulnerability", "injection", "xss", "csrf", "attack", "secure"],
+            "keywords": [
+                # English
+                "security",
+                "vulnerability",
+                "injection",
+                "xss",
+                "csrf",
+                "attack",
+                "secure",
+                "auth",
+                # Portuguese infinitive
+                "seguranca",
+                "vulnerabilidade",
+                "ataque",
+                # Portuguese imperative
+                "verifica seguranca",
+                "checa vulnerabilidade",
+                "protege",
+                # Portuguese colloquial
+                "seguro",
+                "inseguro",
+                "brecha",
+                "falha de seguranca",
+            ],
             "weight": 4,
         },
     }
@@ -239,21 +551,26 @@ Return ONLY valid JSON (no markdown, no explanation):
         Heuristic classification using keyword matching.
 
         Uses word boundaries to avoid false positives.
+        Phase 10.2: Now uses accent-normalized matching.
         """
-        text_lower = text.lower()
+        # Normalize text for accent-insensitive matching
+        text_normalized = normalize_text(text)
         scores: Dict[Intent, float] = {}
 
         for intent, config in self.HEURISTIC_PATTERNS.items():
             score = 0.0
             for keyword in config["keywords"]:
+                # Normalize keyword too
+                keyword_normalized = normalize_text(keyword)
+
                 # Word boundary matching
-                if ' ' in keyword:
+                if " " in keyword_normalized:
                     # Multi-word: exact phrase match
-                    if keyword in text_lower:
+                    if keyword_normalized in text_normalized:
                         score += config["weight"]
                 else:
                     # Single word: word boundary
-                    if re.search(rf'\b{re.escape(keyword)}\b', text_lower):
+                    if re.search(rf"\b{re.escape(keyword_normalized)}\b", text_normalized):
                         score += config["weight"]
 
             if score > 0:
@@ -280,9 +597,8 @@ Return ONLY valid JSON (no markdown, no explanation):
 
         # Get secondary intents
         secondary = [
-            intent for intent, score in sorted(
-                scores.items(), key=lambda x: x[1], reverse=True
-            )[1:3]
+            intent
+            for intent, score in sorted(scores.items(), key=lambda x: x[1], reverse=True)[1:3]
             if score >= best_score * 0.5
         ]
 

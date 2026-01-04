@@ -335,10 +335,10 @@ class SlidingWindowCompressor:
             return {"removed": [], "summary": ""}
 
         # Keep first N messages (system context)
-        first_messages = self._messages[:config.keep_first_messages]
+        first_messages = self._messages[: config.keep_first_messages]
 
         # Keep last N messages (recent)
-        last_messages = self._messages[-config.keep_recent_messages:]
+        last_messages = self._messages[-config.keep_recent_messages :]
 
         # Middle messages are candidates for removal
         start_idx = config.keep_first_messages
@@ -378,8 +378,8 @@ class SlidingWindowCompressor:
             return {"removed": [], "summary": ""}
 
         # Separate protected messages
-        first_messages = self._messages[:config.keep_first_messages]
-        last_messages = self._messages[-config.keep_recent_messages:]
+        first_messages = self._messages[: config.keep_first_messages]
+        last_messages = self._messages[-config.keep_recent_messages :]
 
         start_idx = config.keep_first_messages
         end_idx = len(self._messages) - config.keep_recent_messages
@@ -463,13 +463,15 @@ class SlidingWindowCompressor:
                 keep_chars = (msg.tokens * CHARS_PER_TOKEN) // 2
                 half = keep_chars // 2
                 truncated_content = f"{content[:half]}\n[...truncated...]\n{content[-half:]}"
-                truncated_medium.append(Message(
-                    role=msg.role,
-                    content=truncated_content,
-                    priority=msg.priority,
-                    timestamp=msg.timestamp,
-                    metadata={**msg.metadata, "_truncated": True},
-                ))
+                truncated_medium.append(
+                    Message(
+                        role=msg.role,
+                        content=truncated_content,
+                        priority=msg.priority,
+                        timestamp=msg.timestamp,
+                        metadata={**msg.metadata, "_truncated": True},
+                    )
+                )
             else:
                 truncated_medium.append(msg)
 
@@ -495,10 +497,7 @@ class SlidingWindowCompressor:
 
         if self._summarizer:
             # Use LLM summarizer
-            full_content = "\n".join(
-                f"[{m.role}]: {m.content[:200]}"
-                for m in messages
-            )
+            full_content = "\n".join(f"[{m.role}]: {m.content[:200]}" for m in messages)
             return self._summarizer(full_content)
 
         # Simple extractive summary

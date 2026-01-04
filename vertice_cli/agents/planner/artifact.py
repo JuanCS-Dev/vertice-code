@@ -20,9 +20,7 @@ if TYPE_CHECKING:
 
 
 async def generate_plan_artifact(
-    agent: "PlannerAgent",
-    plan_data: Dict[str, Any],
-    task: "AgentTask"
+    agent: "PlannerAgent", plan_data: Dict[str, Any], task: "AgentTask"
 ) -> Optional[str]:
     """
     Generate a plan.md file for user tracking.

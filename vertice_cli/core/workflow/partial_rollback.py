@@ -25,12 +25,7 @@ class PartialRollback:
         """Initialize partial rollback manager."""
         self.operations: List[Dict[str, Any]] = []
 
-    def add_operation(
-        self,
-        op_type: str,
-        data: Dict[str, Any],
-        reversible: bool = True
-    ) -> None:
+    def add_operation(self, op_type: str, data: Dict[str, Any], reversible: bool = True) -> None:
         """Add reversible operation to stack.
 
         Args:
@@ -38,12 +33,9 @@ class PartialRollback:
             data: Operation data needed for rollback
             reversible: Whether operation can be reversed
         """
-        self.operations.append({
-            'type': op_type,
-            'data': data,
-            'timestamp': time.time(),
-            'reversible': reversible
-        })
+        self.operations.append(
+            {"type": op_type, "data": data, "timestamp": time.time(), "reversible": reversible}
+        )
 
         logger.debug(f"Added operation to rollback stack: {op_type}")
 
@@ -62,7 +54,7 @@ class PartialRollback:
         for _ in range(min(n, len(self.operations))):
             op = self.operations.pop()
 
-            if not op['reversible']:
+            if not op["reversible"]:
                 logger.warning(f"Operation {op['type']} is not reversible")
                 failed += 1
                 continue
@@ -88,7 +80,7 @@ class PartialRollback:
         """
         count = 0
         for op in reversed(self.operations):
-            if op['timestamp'] <= target_timestamp:
+            if op["timestamp"] <= target_timestamp:
                 break
             count += 1
 
@@ -100,32 +92,30 @@ class PartialRollback:
         Args:
             op: Operation to rollback
         """
-        op_type = op['type']
-        data = op['data']
+        op_type = op["type"]
+        data = op["data"]
 
-        if op_type == 'file_write':
+        if op_type == "file_write":
             # Restore from backup
-            if 'backup_path' in data:
-                shutil.copy(data['backup_path'], data['file_path'])
+            if "backup_path" in data:
+                shutil.copy(data["backup_path"], data["file_path"])
                 logger.debug(f"Restored {data['file_path']} from backup")
 
-        elif op_type == 'file_delete':
+        elif op_type == "file_delete":
             # Restore deleted file
-            if 'backup_content' in data:
-                Path(data['file_path']).write_text(data['backup_content'])
+            if "backup_content" in data:
+                Path(data["file_path"]).write_text(data["backup_content"])
                 logger.debug(f"Restored deleted file {data['file_path']}")
 
-        elif op_type == 'file_edit':
+        elif op_type == "file_edit":
             # Restore previous content
-            if 'original_content' in data:
-                Path(data['file_path']).write_text(data['original_content'])
+            if "original_content" in data:
+                Path(data["file_path"]).write_text(data["original_content"])
                 logger.debug(f"Restored original content of {data['file_path']}")
 
-        elif op_type == 'command_execute':
+        elif op_type == "command_execute":
             # Most commands are irreversible
-            logger.warning(
-                f"Cannot rollback command execution: {data.get('command', 'unknown')}"
-            )
+            logger.warning(f"Cannot rollback command execution: {data.get('command', 'unknown')}")
 
         else:
             logger.warning(f"Unknown operation type: {op_type}")
@@ -149,10 +139,10 @@ class PartialRollback:
             Summary dictionary
         """
         return {
-            'total_operations': len(self.operations),
-            'reversible': sum(1 for op in self.operations if op['reversible']),
-            'irreversible': sum(1 for op in self.operations if not op['reversible']),
-            'types': list(set(op['type'] for op in self.operations)),
-            'oldest': self.operations[0]['timestamp'] if self.operations else None,
-            'newest': self.operations[-1]['timestamp'] if self.operations else None
+            "total_operations": len(self.operations),
+            "reversible": sum(1 for op in self.operations if op["reversible"]),
+            "irreversible": sum(1 for op in self.operations if not op["reversible"]),
+            "types": list(set(op["type"] for op in self.operations)),
+            "oldest": self.operations[0]["timestamp"] if self.operations else None,
+            "newest": self.operations[-1]["timestamp"] if self.operations else None,
         }

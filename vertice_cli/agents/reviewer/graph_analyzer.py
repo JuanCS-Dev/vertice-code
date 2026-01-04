@@ -53,8 +53,25 @@ class CodeGraphAnalyzer(ast.NodeVisitor):
         # Track calls per function: {caller_func_name: [(called_name, line), ...]}
         self.calls_per_function: Dict[str, List[Tuple[str, int]]] = {}
 
-    def analyze(self, tree: ast.AST) -> Tuple[List[ComplexityMetrics], List[CodeGraphNode], nx.DiGraph]:
-        """Main entry point - returns metrics, nodes, and dependency graph."""
+    def analyze(
+        self, tree: ast.AST
+    ) -> Tuple[List[ComplexityMetrics], List[CodeGraphNode], nx.DiGraph]:
+        """
+        Analyze an AST and return complexity metrics, nodes, and dependency graph.
+
+        This is the main entry point. It walks the AST, collects metrics for
+        each function, builds CodeGraphNode objects, and constructs a
+        dependency graph based on function calls.
+
+        Args:
+            tree: Parsed AST from ast.parse()
+
+        Returns:
+            Tuple of:
+            - List[ComplexityMetrics]: Per-function complexity data
+            - List[CodeGraphNode]: Graph nodes for each function/class
+            - nx.DiGraph: Dependency graph with call relationships
+        """
         self.visit(tree)
         self._build_dependency_edges()
         return self.metrics, self.nodes, self.graph
@@ -124,7 +141,7 @@ class CodeGraphAnalyzer(ast.NodeVisitor):
                 args_count=self.args,
                 returns_count=self.returns,
                 nesting_depth=self.nesting_level,
-                branch_count=self.branches
+                branch_count=self.branches,
             )
             self.metrics.append(metric)
 
@@ -137,7 +154,7 @@ class CodeGraphAnalyzer(ast.NodeVisitor):
                 line_start=self.line_start,
                 line_end=node.end_lineno or self.line_start,
                 complexity=self.complexity,
-                metadata={"cognitive": self.cognitive, "loc": self.loc}
+                metadata={"cognitive": self.cognitive, "loc": self.loc},
             )
             self.nodes.append(graph_node)
 

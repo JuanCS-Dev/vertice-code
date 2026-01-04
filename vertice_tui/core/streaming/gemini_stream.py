@@ -38,7 +38,7 @@ from .gemini import (
 warnings.warn(
     "tui.core.streaming.gemini_stream is deprecated. Use tui.core.streaming.gemini instead.",
     DeprecationWarning,
-    stacklevel=2
+    stacklevel=2,
 )
 
 __all__ = [

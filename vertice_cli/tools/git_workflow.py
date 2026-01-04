@@ -13,8 +13,6 @@ Refactored: Nov 2025 (841 -> 55 lines)
 Author: JuanCS Dev
 """
 
-
-
 # Re-export all tools from git submodules for backward compatibility
 from vertice_cli.tools.git import (
     # Safety

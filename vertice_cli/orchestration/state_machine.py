@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 
 class Phase(Enum):
     """DevSquad workflow phases."""
+
     INIT = "init"
     ARCHITECT = "architect"
     EXPLORER = "explorer"
@@ -44,6 +45,7 @@ class Phase(Enum):
 
 class TransitionResult(Enum):
     """Result of a state transition."""
+
     SUCCESS = "success"
     BLOCKED = "blocked"
     INVALID = "invalid"
@@ -53,6 +55,7 @@ class TransitionResult(Enum):
 @dataclass
 class PhaseCheckpoint:
     """Checkpoint of state at a phase."""
+
     phase: Phase
     timestamp: float
     context: Dict[str, Any]
@@ -63,6 +66,7 @@ class PhaseCheckpoint:
 @dataclass
 class PhaseResult:
     """Result of phase execution."""
+
     phase: Phase
     success: bool
     outputs: Dict[str, Any] = field(default_factory=dict)
@@ -74,6 +78,7 @@ class PhaseResult:
 @dataclass
 class StateTransition:
     """A state transition record."""
+
     from_phase: Phase
     to_phase: Phase
     timestamp: float
@@ -104,15 +109,35 @@ class DevSquadStateMachine:
 
     # Valid transitions (from_phase -> allowed_to_phases)
     VALID_TRANSITIONS: Dict[Phase, Set[Phase]] = {
-        Phase.INIT: {Phase.ARCHITECT, Phase.EXPLORER, Phase.PLANNER},  # Can start at different points
+        Phase.INIT: {
+            Phase.ARCHITECT,
+            Phase.EXPLORER,
+            Phase.PLANNER,
+        },  # Can start at different points
         Phase.ARCHITECT: {Phase.EXPLORER, Phase.PLANNER, Phase.FAILED, Phase.ROLLBACK},
         Phase.EXPLORER: {Phase.PLANNER, Phase.FAILED, Phase.ROLLBACK},
         Phase.PLANNER: {Phase.EXECUTOR, Phase.FAILED, Phase.ROLLBACK},
-        Phase.EXECUTOR: {Phase.REVIEWER, Phase.PLANNER, Phase.FAILED, Phase.ROLLBACK},  # Can go back to planner
-        Phase.REVIEWER: {Phase.COMPLETED, Phase.EXECUTOR, Phase.FAILED, Phase.ROLLBACK},  # Can send back to executor
+        Phase.EXECUTOR: {
+            Phase.REVIEWER,
+            Phase.PLANNER,
+            Phase.FAILED,
+            Phase.ROLLBACK,
+        },  # Can go back to planner
+        Phase.REVIEWER: {
+            Phase.COMPLETED,
+            Phase.EXECUTOR,
+            Phase.FAILED,
+            Phase.ROLLBACK,
+        },  # Can send back to executor
         Phase.COMPLETED: set(),  # Terminal state
         Phase.FAILED: {Phase.ROLLBACK, Phase.INIT},  # Can rollback or restart
-        Phase.ROLLBACK: {Phase.INIT, Phase.ARCHITECT, Phase.EXPLORER, Phase.PLANNER, Phase.EXECUTOR},
+        Phase.ROLLBACK: {
+            Phase.INIT,
+            Phase.ARCHITECT,
+            Phase.EXPLORER,
+            Phase.PLANNER,
+            Phase.EXECUTOR,
+        },
     }
 
     def __init__(self, workflow_id: Optional[str] = None):
@@ -123,6 +148,7 @@ class DevSquadStateMachine:
             workflow_id: Unique workflow identifier
         """
         import uuid
+
         self.workflow_id = workflow_id or str(uuid.uuid4())
         self.current_phase = Phase.INIT
         self.checkpoints: Dict[Phase, PhaseCheckpoint] = {}
@@ -158,7 +184,10 @@ class DevSquadStateMachine:
 
         valid_targets = self.VALID_TRANSITIONS.get(self.current_phase, set())
         if target_phase not in valid_targets:
-            return False, f"Invalid transition from {self.current_phase.value} to {target_phase.value}"
+            return (
+                False,
+                f"Invalid transition from {self.current_phase.value} to {target_phase.value}",
+            )
 
         return True, "Valid transition"
 
@@ -166,7 +195,7 @@ class DevSquadStateMachine:
         self,
         target_phase: Phase,
         context: Optional[Dict[str, Any]] = None,
-        reason: str = "Workflow progression"
+        reason: str = "Workflow progression",
     ) -> StateTransition:
         """
         Transition to a new phase.
@@ -186,7 +215,7 @@ class DevSquadStateMachine:
             to_phase=target_phase,
             timestamp=time.time(),
             reason=reason,
-            success=can_transition
+            success=can_transition,
         )
 
         if not can_transition:
@@ -218,9 +247,7 @@ class DevSquadStateMachine:
         return transition
 
     def complete_phase(
-        self,
-        outputs: Optional[Dict[str, Any]] = None,
-        context: Optional[Dict[str, Any]] = None
+        self, outputs: Optional[Dict[str, Any]] = None, context: Optional[Dict[str, Any]] = None
     ) -> PhaseResult:
         """
         Mark current phase as complete and save outputs.
@@ -245,16 +272,14 @@ class DevSquadStateMachine:
             success=True,
             outputs=outputs or {},
             duration=duration,
-            next_phase=next_phase
+            next_phase=next_phase,
         )
 
         logger.info(f"Phase {self.current_phase.value} completed in {duration:.2f}s")
         return result
 
     def fail_phase(
-        self,
-        errors: List[str],
-        context: Optional[Dict[str, Any]] = None
+        self, errors: List[str], context: Optional[Dict[str, Any]] = None
     ) -> PhaseResult:
         """
         Mark current phase as failed.
@@ -277,7 +302,7 @@ class DevSquadStateMachine:
             success=False,
             errors=errors,
             duration=duration,
-            next_phase=Phase.FAILED
+            next_phase=Phase.FAILED,
         )
 
         logger.error(f"Phase {self.current_phase.value} failed: {errors}")
@@ -333,10 +358,7 @@ class DevSquadStateMachine:
         }
 
     def _create_checkpoint(
-        self,
-        phase: Phase,
-        context: Dict[str, Any],
-        outputs: Dict[str, Any]
+        self, phase: Phase, context: Dict[str, Any], outputs: Dict[str, Any]
     ) -> PhaseCheckpoint:
         """Create and store a checkpoint."""
         checkpoint = PhaseCheckpoint(
@@ -351,8 +373,13 @@ class DevSquadStateMachine:
     def _get_default_next_phase(self) -> Optional[Phase]:
         """Get the default next phase in the workflow."""
         phase_order = [
-            Phase.INIT, Phase.ARCHITECT, Phase.EXPLORER,
-            Phase.PLANNER, Phase.EXECUTOR, Phase.REVIEWER, Phase.COMPLETED
+            Phase.INIT,
+            Phase.ARCHITECT,
+            Phase.EXPLORER,
+            Phase.PLANNER,
+            Phase.EXECUTOR,
+            Phase.REVIEWER,
+            Phase.COMPLETED,
         ]
         try:
             current_idx = phase_order.index(self.current_phase)
@@ -366,9 +393,9 @@ class DevSquadStateMachine:
     def is_running(self) -> bool:
         """Check if workflow is running."""
         return (
-            self.started_at is not None and
-            self.completed_at is None and
-            self.current_phase not in {Phase.COMPLETED, Phase.FAILED}
+            self.started_at is not None
+            and self.completed_at is None
+            and self.current_phase not in {Phase.COMPLETED, Phase.FAILED}
         )
 
     @property
@@ -402,7 +429,9 @@ def workflow_phase(sm: DevSquadStateMachine, phase: Phase, context: Optional[Dic
     try:
         yield phase_context
         # Complete phase on success
-        sm.complete_phase(outputs=phase_context.get("outputs"), context=phase_context.get("context"))
+        sm.complete_phase(
+            outputs=phase_context.get("outputs"), context=phase_context.get("context")
+        )
     except Exception as e:
         # Fail phase on error
         sm.fail_phase(errors=[str(e)], context=phase_context.get("context"))
@@ -411,11 +440,11 @@ def workflow_phase(sm: DevSquadStateMachine, phase: Phase, context: Optional[Dic
 
 # Export all public symbols
 __all__ = [
-    'Phase',
-    'TransitionResult',
-    'PhaseCheckpoint',
-    'PhaseResult',
-    'StateTransition',
-    'DevSquadStateMachine',
-    'workflow_phase',
+    "Phase",
+    "TransitionResult",
+    "PhaseCheckpoint",
+    "PhaseResult",
+    "StateTransition",
+    "DevSquadStateMachine",
+    "workflow_phase",
 ]

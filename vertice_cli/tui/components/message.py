@@ -41,13 +41,14 @@ from ._enums import MessageRole
 class Message:
     """
     Message data structure.
-    
+
     Attributes:
         content: Message text content
         role: Message role ('user', 'assistant', 'system')
         timestamp: Message timestamp
         metadata: Additional metadata (file attachments, etc.)
     """
+
     content: str
     role: str = "user"
     timestamp: Optional[datetime] = None
@@ -61,12 +62,12 @@ class Message:
 class MessageBox:
     """
     Enhanced message box with animations and styling.
-    
+
     Examples:
         # Simple message
         msg = MessageBox(Message("Hello!", role=MessageRole.USER))
         console.print(msg.render())
-        
+
         # With typing animation
         async for frame in msg.render_animated():
             console.clear()
@@ -84,7 +85,7 @@ class MessageBox:
     ):
         """
         Initialize message box.
-        
+
         Args:
             message: Message data
             console: Rich console instance
@@ -102,19 +103,19 @@ class MessageBox:
         if message.role == "user":
             self.styles = StyleCombinations.message_user()
             self.title_prefix = "You"
-            self.border_color = COLORS['accent_blue']
+            self.border_color = COLORS["accent_blue"]
         elif message.role == "assistant":
             self.styles = StyleCombinations.message_ai()
             self.title_prefix = "Assistant"
-            self.border_color = COLORS['accent_purple']
+            self.border_color = COLORS["accent_purple"]
         else:
             self.styles = {
-                'border': PRESET_STYLES.SECONDARY,
-                'text': PRESET_STYLES.PRIMARY,
-                'timestamp': PRESET_STYLES.TIMESTAMP,
+                "border": PRESET_STYLES.SECONDARY,
+                "text": PRESET_STYLES.PRIMARY,
+                "timestamp": PRESET_STYLES.TIMESTAMP,
             }
             self.title_prefix = "System"
-            self.border_color = COLORS['text_secondary']
+            self.border_color = COLORS["text_secondary"]
 
     def _format_timestamp(self) -> str:
         """Format timestamp for display."""
@@ -137,10 +138,10 @@ class MessageBox:
     def _process_content(self, content: str) -> RenderableType:
         """
         Process message content (markdown, code, plain text).
-        
+
         Args:
             content: Raw message content
-            
+
         Returns:
             Rich renderable object
         """
@@ -150,13 +151,13 @@ class MessageBox:
             return Markdown(content)
 
         # Plain text with proper wrapping
-        text = Text(content, style=self.styles['text'])
+        text = Text(content, style=self.styles["text"])
         return text
 
     def render(self) -> Panel:
         """
         Render complete message box.
-        
+
         Returns:
             Rich Panel object
         """
@@ -180,20 +181,20 @@ class MessageBox:
     ) -> AsyncIterator[Panel]:
         """
         Render message with smooth typing animation (Apple-style).
-        
+
         Args:
             wpm: Typing speed in words per minute (400 = ~33 chars/sec)
             clear_screen: Clear screen before each frame
             smooth: Use cubic ease-out for natural rhythm
-            
+
         Yields:
             Panel frames for animation
-            
+
         Example:
             async for frame in message_box.render_animated():
                 console.clear()
                 console.print(frame)
-        
+
         Note:
             Uses variable pacing for natural feel:
             - Slower at sentence start (thinking)
@@ -242,16 +243,16 @@ class MessageBox:
                 # Start slower (thinking)
                 progress = i / 10.0
                 eased = 1 - pow(1 - progress, 3)
-                delay *= (2 - eased)  # 2x slower → 1x
+                delay *= 2 - eased  # 2x slower → 1x
 
             # Pause longer at punctuation (natural breathing)
-            if char in '.!?':
+            if char in ".!?":
                 delay *= 5  # Long pause (sentence end)
-            elif char in ',;:':
+            elif char in ",;:":
                 delay *= 3  # Medium pause (clause)
-            elif char == '\n':
+            elif char == "\n":
                 delay *= 2  # Line break pause
-            elif char == '\n':
+            elif char == "\n":
                 delay *= 2
 
             await asyncio.sleep(delay)
@@ -264,7 +265,7 @@ class MessageBox:
 class MessageStream:
     """
     Manages a stream of messages with automatic scrolling.
-    
+
     Examples:
         stream = MessageStream(console)
         stream.add_message(Message("Hello!", role=MessageRole.USER))
@@ -280,7 +281,7 @@ class MessageStream:
     ):
         """
         Initialize message stream.
-        
+
         Args:
             console: Rich console instance
             max_messages: Maximum messages to keep in history
@@ -297,7 +298,7 @@ class MessageStream:
 
         # Trim old messages
         if len(self.messages) > self.max_messages:
-            self.messages = self.messages[-self.max_messages:]
+            self.messages = self.messages[-self.max_messages :]
 
     def clear(self) -> None:
         """Clear all messages."""
@@ -306,7 +307,7 @@ class MessageStream:
     def render(self, last_n: Optional[int] = None) -> None:
         """
         Render all messages in stream.
-        
+
         Args:
             last_n: Only render last N messages (None = all)
         """
@@ -320,7 +321,7 @@ class MessageStream:
     async def render_last_animated(self, wpm: int = 400):
         """
         Render last message with typing animation.
-        
+
         Args:
             wpm: Typing speed in words per minute
         """
@@ -333,7 +334,7 @@ class MessageStream:
         async for frame in box.render_animated(wpm=wpm, clear_screen=False):
             # Move cursor to message position
             # (In real implementation, would track position)
-            self.console.print(frame, end='\r')
+            self.console.print(frame, end="\r")
             await asyncio.sleep(0.03)
 
         self.console.print()  # Final newline
@@ -343,17 +344,18 @@ class MessageStream:
 # UTILITY FUNCTIONS
 # =============================================================================
 
+
 async def typing_effect(text: str, wpm: int = 400) -> AsyncIterator[str]:
     """
     Simple typing effect generator (character-by-character).
-    
+
     Args:
         text: Text to animate
         wpm: Words per minute (typing speed)
-        
+
     Yields:
         Characters one at a time
-        
+
     Example:
         async for char in typing_effect("Hello, world!", wpm=300):
             print(char, end='', flush=True)
@@ -367,11 +369,11 @@ async def typing_effect(text: str, wpm: int = 400) -> AsyncIterator[str]:
 
         # Variable delay
         delay = base_delay
-        if char in '.!?':
+        if char in ".!?":
             delay *= 4
-        elif char in ',;:':
+        elif char in ",;:":
             delay *= 2
-        elif char == '\n':
+        elif char == "\n":
             delay *= 2
 
         await asyncio.sleep(delay)

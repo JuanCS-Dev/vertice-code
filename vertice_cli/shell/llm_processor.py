@@ -234,10 +234,9 @@ Response: I don't have a tool to check the current time, but I can help you with
             Formatted prompt string
         """
         # Format recent files
-        recent_files_str = ", ".join([
-            str(f) if isinstance(f, dict) else f
-            for f in rich_context.get("recent_files", [])[:5]
-        ])
+        recent_files_str = ", ".join(
+            [str(f) if isinstance(f, dict) else f for f in rich_context.get("recent_files", [])[:5]]
+        )
 
         return f"""User request: {user_input}
 
@@ -332,8 +331,6 @@ class FallbackSuggester:
         # Truncate huge inputs
         max_display = 100
         truncated = (
-            user_request[:max_display] + "..."
-            if len(user_request) > max_display
-            else user_request
+            user_request[:max_display] + "..." if len(user_request) > max_display else user_request
         )
         return f"# Could not parse: {truncated}"

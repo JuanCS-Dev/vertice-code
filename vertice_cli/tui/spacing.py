@@ -22,36 +22,36 @@ from typing import Union
 
 SPACING = {
     # Base unit: 8px = 0.5rem
-    'xs': '0.5rem',      # 8px  - Tight spacing (inline elements)
-    'sm': '0.75rem',     # 12px - Small gaps (compact lists)
-    'md': '1rem',        # 16px - Default spacing (paragraphs)
-    'lg': '1.5rem',      # 24px - Section spacing
-    'xl': '2rem',        # 32px - Major section gaps
-    '2xl': '3rem',       # 48px - Large visual breaks
-    '3xl': '4rem',       # 64px - Hero spacing (rare)
-
+    "xs": "0.5rem",  # 8px  - Tight spacing (inline elements)
+    "sm": "0.75rem",  # 12px - Small gaps (compact lists)
+    "md": "1rem",  # 16px - Default spacing (paragraphs)
+    "lg": "1.5rem",  # 24px - Section spacing
+    "xl": "2rem",  # 32px - Major section gaps
+    "2xl": "3rem",  # 48px - Large visual breaks
+    "3xl": "4rem",  # 64px - Hero spacing (rare)
     # Special values
-    'none': '0',         # No spacing
-    'auto': 'auto',      # Automatic (for centering)
+    "none": "0",  # No spacing
+    "auto": "auto",  # Automatic (for centering)
 }
 
 
 # Pixel equivalents (for reference, assuming 16px base)
 SPACING_PX = {
-    'xs': 8,
-    'sm': 12,
-    'md': 16,
-    'lg': 24,
-    'xl': 32,
-    '2xl': 48,
-    '3xl': 64,
-    'none': 0,
+    "xs": 8,
+    "sm": 12,
+    "md": 16,
+    "lg": 24,
+    "xl": 32,
+    "2xl": 48,
+    "3xl": 64,
+    "none": 0,
 }
 
 
 # ============================================================================
 # MARGIN HELPERS
 # ============================================================================
+
 
 def margin(
     top: Union[str, None] = None,
@@ -64,7 +64,7 @@ def margin(
 ) -> str:
     """
     Generate margin CSS with spacing scale values.
-    
+
     Args:
         top: Top margin (e.g., 'md', 'lg')
         right: Right margin
@@ -73,17 +73,17 @@ def margin(
         all: Apply same margin to all sides
         x: Horizontal margin (left + right)
         y: Vertical margin (top + bottom)
-        
+
     Returns:
         CSS margin string
-        
+
     Examples:
         >>> margin(all='md')
         'margin: 1rem;'
-        
+
         >>> margin(y='lg', x='md')
         'margin: 1.5rem 1rem;'
-        
+
         >>> margin(top='xl', bottom='md')
         'margin: 2rem 0 1rem 0;'
     """
@@ -92,15 +92,15 @@ def margin(
         return f"margin: {value};"
 
     if x or y:
-        v_margin = SPACING.get(y, y) if y else '0'
-        h_margin = SPACING.get(x, x) if x else '0'
+        v_margin = SPACING.get(y, y) if y else "0"
+        h_margin = SPACING.get(x, x) if x else "0"
         return f"margin: {v_margin} {h_margin};"
 
     # Individual sides
-    t = SPACING.get(top, top) if top else '0'
-    r = SPACING.get(right, right) if right else '0'
-    b = SPACING.get(bottom, bottom) if bottom else '0'
-    l = SPACING.get(left, left) if left else '0'
+    t = SPACING.get(top, top) if top else "0"
+    r = SPACING.get(right, right) if right else "0"
+    b = SPACING.get(bottom, bottom) if bottom else "0"
+    l = SPACING.get(left, left) if left else "0"
 
     return f"margin: {t} {r} {b} {l};"
 
@@ -145,6 +145,7 @@ def margin_y(size: str) -> str:
 # PADDING HELPERS
 # ============================================================================
 
+
 def padding(
     top: Union[str, None] = None,
     right: Union[str, None] = None,
@@ -156,7 +157,7 @@ def padding(
 ) -> str:
     """
     Generate padding CSS with spacing scale values.
-    
+
     Args:
         top: Top padding (e.g., 'md', 'lg')
         right: Right padding
@@ -165,17 +166,17 @@ def padding(
         all: Apply same padding to all sides
         x: Horizontal padding (left + right)
         y: Vertical padding (top + bottom)
-        
+
     Returns:
         CSS padding string
-        
+
     Examples:
         >>> padding(all='md')
         'padding: 1rem;'
-        
+
         >>> padding(y='sm', x='lg')
         'padding: 0.75rem 1.5rem;'
-        
+
         >>> padding(top='xl', left='md')
         'padding: 2rem 0 0 1rem;'
     """
@@ -184,15 +185,15 @@ def padding(
         return f"padding: {value};"
 
     if x or y:
-        v_padding = SPACING.get(y, y) if y else '0'
-        h_padding = SPACING.get(x, x) if x else '0'
+        v_padding = SPACING.get(y, y) if y else "0"
+        h_padding = SPACING.get(x, x) if x else "0"
         return f"padding: {v_padding} {h_padding};"
 
     # Individual sides
-    t = SPACING.get(top, top) if top else '0'
-    r = SPACING.get(right, right) if right else '0'
-    b = SPACING.get(bottom, bottom) if bottom else '0'
-    l = SPACING.get(left, left) if left else '0'
+    t = SPACING.get(top, top) if top else "0"
+    r = SPACING.get(right, right) if right else "0"
+    b = SPACING.get(bottom, bottom) if bottom else "0"
+    l = SPACING.get(left, left) if left else "0"
 
     return f"padding: {t} {r} {b} {l};"
 
@@ -237,13 +238,14 @@ def padding_y(size: str) -> str:
 # GAP HELPERS (for flexbox/grid)
 # ============================================================================
 
+
 def gap(size: str) -> str:
     """
     Generate gap CSS for flex/grid layouts.
-    
+
     Args:
         size: Gap size from spacing scale
-        
+
     Returns:
         CSS gap string
     """
@@ -267,60 +269,62 @@ def gap_y(size: str) -> str:
 # SPACING PRESETS (Common patterns)
 # ============================================================================
 
+
 class SpacingPresets:
     """Pre-configured spacing patterns for common use cases."""
 
     # Compact (tight spacing)
     COMPACT = {
-        'padding': padding(y='xs', x='sm'),    # 8px 12px
-        'gap': gap('xs'),                       # 8px
-        'margin': margin(bottom='sm'),          # 12px
+        "padding": padding(y="xs", x="sm"),  # 8px 12px
+        "gap": gap("xs"),  # 8px
+        "margin": margin(bottom="sm"),  # 12px
     }
 
     # Default (comfortable spacing)
     DEFAULT = {
-        'padding': padding(y='sm', x='md'),    # 12px 16px
-        'gap': gap('sm'),                       # 12px
-        'margin': margin(bottom='md'),          # 16px
+        "padding": padding(y="sm", x="md"),  # 12px 16px
+        "gap": gap("sm"),  # 12px
+        "margin": margin(bottom="md"),  # 16px
     }
 
     # Relaxed (generous spacing)
     RELAXED = {
-        'padding': padding(y='md', x='lg'),    # 16px 24px
-        'gap': gap('md'),                       # 16px
-        'margin': margin(bottom='lg'),          # 24px
+        "padding": padding(y="md", x="lg"),  # 16px 24px
+        "gap": gap("md"),  # 16px
+        "margin": margin(bottom="lg"),  # 24px
     }
 
     # Section (major visual breaks)
     SECTION = {
-        'padding': padding(y='xl', x='lg'),    # 32px 24px
-        'gap': gap('lg'),                       # 24px
-        'margin': margin(y='xl'),               # 32px top+bottom
+        "padding": padding(y="xl", x="lg"),  # 32px 24px
+        "gap": gap("lg"),  # 24px
+        "margin": margin(y="xl"),  # 32px top+bottom
     }
 
     # Card/Panel
     CARD = {
-        'padding': padding(all='lg'),           # 24px all sides
-        'margin': margin(bottom='md'),          # 16px bottom
-        'gap': gap('md'),                       # 16px between elements
+        "padding": padding(all="lg"),  # 24px all sides
+        "margin": margin(bottom="md"),  # 16px bottom
+        "gap": gap("md"),  # 16px between elements
     }
 
     # Button
     BUTTON = {
-        'padding': padding(y='sm', x='lg'),    # 12px 24px
-        'margin': margin(right='sm'),           # 8px right (inline)
+        "padding": padding(y="sm", x="lg"),  # 12px 24px
+        "margin": margin(right="sm"),  # 8px right (inline)
     }
 
     # List item
     LIST_ITEM = {
-        'padding': padding(y='xs', x='md'),    # 8px 16px
-        'margin': margin(bottom='xs'),          # 8px bottom
+        "padding": padding(y="xs", x="md"),  # 8px 16px
+        "margin": margin(bottom="xs"),  # 8px bottom
     }
 
 
 # ============================================================================
 # VALIDATION
 # ============================================================================
+
 
 def validate_spacing():
     """Validate spacing system for consistency."""

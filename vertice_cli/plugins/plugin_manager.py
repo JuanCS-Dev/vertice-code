@@ -7,6 +7,7 @@ import importlib
 
 class Plugin(Protocol):
     """Plugin interface."""
+
     async def initialize(self) -> None: ...
     async def shutdown(self) -> None: ...
 
@@ -28,12 +29,11 @@ class PluginManager:
         try:
             loop = asyncio.get_event_loop()
             module = await loop.run_in_executor(
-                None,
-                lambda: importlib.import_module(f'vertice_cli.plugins.{name}_plugin')
+                None, lambda: importlib.import_module(f"vertice_cli.plugins.{name}_plugin")
             )
 
             # Instantiate plugin
-            if not hasattr(module, 'Plugin'):
+            if not hasattr(module, "Plugin"):
                 raise ValueError(f"Plugin module {name} does not define 'Plugin' class")
 
             plugin = module.Plugin()

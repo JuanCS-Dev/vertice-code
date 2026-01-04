@@ -21,7 +21,13 @@ from typing import Any, AsyncIterator, Callable, Dict, List, Optional, Tuple
 from ..base import AgentCapability, AgentResponse, AgentRole, AgentTask, BaseAgent
 
 # Types and GOAP
-from .types import ClarifyingQuestion, ClarificationResponse, PlanningMode, PlanStrategy, MultiPlanResult
+from .types import (
+    ClarifyingQuestion,
+    ClarificationResponse,
+    PlanningMode,
+    PlanStrategy,
+    MultiPlanResult,
+)
 from .goap import WorldState, GoalState, Action, GOAPPlanner
 from .dependency import DependencyAnalyzer
 from .models import SOPStep, ExecutionPlan, ExecutionStage
@@ -29,11 +35,29 @@ from .models import SOPStep, ExecutionPlan, ExecutionStage
 # Formatting and utilities
 from .formatting import format_plan_as_markdown, generate_confidence_summary
 from .utils import robust_json_parse
-from .prompts import build_planning_prompt, build_clarifying_questions_prompt, build_exploration_prompt, generate_basic_plan
+from .prompts import (
+    build_planning_prompt,
+    build_clarifying_questions_prompt,
+    build_exploration_prompt,
+    generate_basic_plan,
+)
 
 # Multi-planning and optimization
-from .multi_planning import generate_multi_plan, execute_with_multi_plan as _execute_with_multi_plan, generate_multi_plan_for_task as _generate_multi_plan_for_task
-from .optimization import build_stages, assess_risk, generate_rollback_strategy, identify_checkpoints, estimate_duration, calculate_max_parallel, generate_strategy_overview, generate_reasoning
+from .multi_planning import (
+    generate_multi_plan,
+    execute_with_multi_plan as _execute_with_multi_plan,
+    generate_multi_plan_for_task as _generate_multi_plan_for_task,
+)
+from .optimization import (
+    build_stages,
+    assess_risk,
+    generate_rollback_strategy,
+    identify_checkpoints,
+    estimate_duration,
+    calculate_max_parallel,
+    generate_strategy_overview,
+    generate_reasoning,
+)
 
 # Import streaming
 from .streaming import execute_streaming as _execute_streaming, run_streaming as _run_streaming
@@ -92,8 +116,8 @@ from .sops import (
 # ============================================================================
 
 
-
 # ============================================================================
+
 
 class PlannerAgent(BaseAgent):
     """
@@ -131,13 +155,10 @@ class PlannerAgent(BaseAgent):
 
         super().__init__(
             role=AgentRole.PLANNER,
-            capabilities=[
-                AgentCapability.DESIGN,
-                AgentCapability.READ_ONLY  # Narrow permissions!
-            ],
+            capabilities=[AgentCapability.DESIGN, AgentCapability.READ_ONLY],  # Narrow permissions!
             llm_client=llm_client,
             mcp_client=mcp_client,
-            system_prompt=self._build_system_prompt()
+            system_prompt=self._build_system_prompt(),
         )
 
         # Initialize analyzers
@@ -214,30 +235,20 @@ CRITICAL:
 
             # Phase 3: Generate action space from available agents
             available_agents = self._get_available_agents(task)
-            actions = self._generate_action_space(
-                task,
-                available_agents,
-                context
-            )
+            actions = self._generate_action_space(task, available_agents, context)
 
             # Phase 4: Run GOAP planner
             self.goap_planner = GOAPPlanner(actions)
 
             # Try GOAP first, fallback to LLM if needed
-            goap_plan = self.goap_planner.plan(
-                initial_state,
-                goal_state,
-                max_depth=20
-            )
+            goap_plan = self.goap_planner.plan(initial_state, goal_state, max_depth=20)
 
             if goap_plan:
                 # Convert GOAP actions to SOPs
                 sops = self._actions_to_sops(goap_plan)
             else:
                 # GOAP failed, use LLM planning
-                sops = await self._llm_planning_fallback(
-                    task, context, available_agents
-                )
+                sops = await self._llm_planning_fallback(task, context, available_agents)
 
             # Phase 5: Dependency analysis
             parallel_groups = self.dependency_analyzer.find_parallel_groups(sops)
@@ -249,7 +260,7 @@ CRITICAL:
                 return AgentResponse(
                     success=False,
                     error=f"Circular dependencies detected: {cycles}",
-                    reasoning="Plan has dependency cycles that would cause deadlock."
+                    reasoning="Plan has dependency cycles that would cause deadlock.",
                 )
 
             # Phase 6: Build stages from parallel groups
@@ -286,21 +297,19 @@ CRITICAL:
                     "goap_used": goap_plan is not None,
                     "stages_count": len(stages),
                     "total_steps": len(sops),
-                    "parallelism_factor": len(parallel_groups)
-                }
+                    "parallelism_factor": len(parallel_groups),
+                },
             )
 
             return AgentResponse(
-                success=True,
-                data={"plan": plan.model_dump()},
-                reasoning=generate_reasoning(plan)
+                success=True, data={"plan": plan.model_dump()}, reasoning=generate_reasoning(plan)
             )
 
         except Exception as e:
             return AgentResponse(
                 success=False,
                 error=str(e),
-                reasoning="Planning execution failed. See error for details."
+                reasoning="Planning execution failed. See error for details.",
             )
 
     # Context management - delegates to context module
@@ -322,14 +331,18 @@ CRITICAL:
     def _get_available_agents(self, task: AgentTask) -> List[str]:
         return _get_available_agents(task)
 
-    def _generate_action_space(self, task: AgentTask, agents: List[str], context: Dict) -> List[Action]:
+    def _generate_action_space(
+        self, task: AgentTask, agents: List[str], context: Dict
+    ) -> List[Action]:
         return _generate_action_space(task, agents, context)
 
     def _actions_to_sops(self, actions: List[Action]) -> List[SOPStep]:
         """Convert GOAP actions to SOP steps - delegates to sops module."""
         return _actions_to_sops(actions)
 
-    async def _llm_planning_fallback(self, task: AgentTask, context: Dict, agents: List[str]) -> List[SOPStep]:
+    async def _llm_planning_fallback(
+        self, task: AgentTask, context: Dict, agents: List[str]
+    ) -> List[SOPStep]:
         """Fallback to LLM planning - delegates to sops module."""
         return await _llm_planning_fallback(self, task, context, agents)
 
@@ -337,10 +350,7 @@ CRITICAL:
     # Utility methods moved to utils.py module (robust_json_parse)
     # Optimization methods moved to optimization.py module
 
-    async def execute_streaming(
-        self,
-        task: AgentTask
-    ) -> AsyncIterator[Dict[str, Any]]:
+    async def execute_streaming(self, task: AgentTask) -> AsyncIterator[Dict[str, Any]]:
         """Streaming execution - delegates to streaming module."""
         async for update in _execute_streaming(self, task):
             yield update
@@ -354,7 +364,9 @@ CRITICAL:
     # NEW v6.0: CLARIFYING QUESTIONS (delegates to clarification module)
     # =========================================================================
 
-    def set_question_callback(self, callback: Callable[[List[ClarifyingQuestion]], List[ClarificationResponse]]):
+    def set_question_callback(
+        self, callback: Callable[[List[ClarifyingQuestion]], List[ClarificationResponse]]
+    ):
         """Set callback for asking clarifying questions to user."""
         self._question_callback = callback
 
@@ -367,9 +379,7 @@ CRITICAL:
         return await _generate_clarifying_questions(self, task)
 
     async def execute_with_clarification(
-        self,
-        task: AgentTask,
-        responses: Optional[List[ClarificationResponse]] = None
+        self, task: AgentTask, responses: Optional[List[ClarificationResponse]] = None
     ) -> AgentResponse:
         """Execute with clarification - delegates to clarification module."""
         return await _execute_with_clarification(self, task, responses)
@@ -387,9 +397,7 @@ CRITICAL:
     # =========================================================================
 
     async def generate_multi_plan_for_task(
-        self,
-        task: AgentTask,
-        strategies: Optional[List[PlanStrategy]] = None
+        self, task: AgentTask, strategies: Optional[List[PlanStrategy]] = None
     ) -> MultiPlanResult:
         """Generate multiple alternative plans - delegates to multi_planning module."""
         return await _generate_multi_plan_for_task(self, task, strategies)
@@ -398,17 +406,18 @@ CRITICAL:
         self,
         task: AgentTask,
         auto_select: bool = True,
-        preferred_strategy: Optional[PlanStrategy] = None
+        preferred_strategy: Optional[PlanStrategy] = None,
     ) -> AgentResponse:
         """Execute with multi-plan - delegates to multi_planning module."""
         return await _execute_with_multi_plan(self, task, auto_select, preferred_strategy)
-
 
     # =========================================================================
     # BACKWARDS COMPATIBILITY WRAPPERS (delegate to compat module)
     # =========================================================================
 
-    def _calculate_step_confidence(self, step: "SOPStep", context: Dict[str, Any]) -> Tuple[float, str, List[str]]:
+    def _calculate_step_confidence(
+        self, step: "SOPStep", context: Dict[str, Any]
+    ) -> Tuple[float, str, List[str]]:
         return calculate_step_confidence_compat(step, context)
 
     def _generate_confidence_summary(self, score: float) -> str:
@@ -420,7 +429,9 @@ CRITICAL:
     def _create_fallback_plan(self, task: AgentTask, strategy: "PlanStrategy") -> "AlternativePlan":
         return create_fallback_plan_compat(task, strategy)
 
-    def _select_best_plan(self, plans: List["AlternativePlan"], task: AgentTask = None) -> Tuple["PlanStrategy", str]:
+    def _select_best_plan(
+        self, plans: List["AlternativePlan"], task: AgentTask = None
+    ) -> Tuple["PlanStrategy", str]:
         return select_best_plan_compat(plans, task)
 
     def _build_comparison_summary(self, plans: List["AlternativePlan"]) -> str:
@@ -444,7 +455,9 @@ CRITICAL:
     def _generate_strategy_overview(self, stages: List["ExecutionStage"]) -> str:
         return generate_strategy_overview_compat(stages)
 
-    def _estimate_duration(self, stages: List["ExecutionStage"], base_minutes_per_step: int = 5) -> str:
+    def _estimate_duration(
+        self, stages: List["ExecutionStage"], base_minutes_per_step: int = 5
+    ) -> str:
         return estimate_duration_compat(stages, base_minutes_per_step)
 
     def _identify_checkpoints(self, stages: List["ExecutionStage"]) -> List[str]:

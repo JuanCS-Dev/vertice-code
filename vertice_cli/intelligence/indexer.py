@@ -20,6 +20,7 @@ import re
 @dataclass
 class Symbol:
     """Represents a code symbol (class, function, variable)."""
+
     name: str
     type: str  # 'class', 'function', 'method', 'variable', 'import'
     file_path: str
@@ -33,6 +34,7 @@ class Symbol:
 @dataclass
 class FileIndex:
     """Index data for a single file."""
+
     path: str
     hash: str
     symbols: List[Symbol]
@@ -44,7 +46,7 @@ class FileIndex:
 class SemanticIndexer:
     """
     Cursor-style semantic codebase indexer.
-    
+
     Features:
     - Instant symbol lookup
     - Error → Source mapping
@@ -64,9 +66,20 @@ class SemanticIndexer:
 
         # Exclude patterns
         self.exclude_patterns = {
-            '__pycache__', '.git', '.venv', 'venv', 'node_modules',
-            '.pytest_cache', '.mypy_cache', '.tox', 'dist', 'build',
-            '*.pyc', '*.pyo', '*.so', '*.egg-info'
+            "__pycache__",
+            ".git",
+            ".venv",
+            "venv",
+            "node_modules",
+            ".pytest_cache",
+            ".mypy_cache",
+            ".tox",
+            "dist",
+            "build",
+            "*.pyc",
+            "*.pyo",
+            "*.so",
+            "*.egg-info",
         }
 
     def should_index(self, path: Path) -> bool:
@@ -74,7 +87,7 @@ class SemanticIndexer:
         # Check exclude patterns
         parts = path.parts
         for pattern in self.exclude_patterns:
-            if pattern.startswith('*.'):
+            if pattern.startswith("*."):
                 if path.suffix == pattern[1:]:
                     return False
             else:
@@ -82,12 +95,12 @@ class SemanticIndexer:
                     return False
 
         # Only Python files for now
-        return path.suffix == '.py'
+        return path.suffix == ".py"
 
     def compute_file_hash(self, path: Path) -> str:
         """Compute hash of file content."""
         try:
-            with open(path, 'rb') as f:
+            with open(path, "rb") as f:
                 return hashlib.sha256(f.read()).hexdigest()[:16]
         except (OSError, IOError) as e:
             logger.debug(f"Could not compute hash for {path}: {e}")
@@ -96,7 +109,7 @@ class SemanticIndexer:
     def parse_file(self, path: Path) -> Optional[FileIndex]:
         """Parse Python file and extract symbols."""
         try:
-            with open(path, 'r', encoding='utf-8') as f:
+            with open(path, "r", encoding="utf-8") as f:
                 content = f.read()
 
             tree = ast.parse(content, filename=str(path))
@@ -107,13 +120,15 @@ class SemanticIndexer:
             for node in ast.walk(tree):
                 # Classes
                 if isinstance(node, ast.ClassDef):
-                    symbols.append(Symbol(
-                        name=node.name,
-                        type='class',
-                        file_path=str(path.relative_to(self.root_path)),
-                        line_number=node.lineno,
-                        docstring=ast.get_docstring(node)
-                    ))
+                    symbols.append(
+                        Symbol(
+                            name=node.name,
+                            type="class",
+                            file_path=str(path.relative_to(self.root_path)),
+                            line_number=node.lineno,
+                            docstring=ast.get_docstring(node),
+                        )
+                    )
 
                 # Functions
                 elif isinstance(node, ast.FunctionDef):
@@ -129,15 +144,17 @@ class SemanticIndexer:
                     args = [arg.arg for arg in node.args.args]
                     signature = f"{node.name}({', '.join(args)})"
 
-                    symbols.append(Symbol(
-                        name=node.name,
-                        type='method' if parent else 'function',
-                        file_path=str(path.relative_to(self.root_path)),
-                        line_number=node.lineno,
-                        docstring=ast.get_docstring(node),
-                        signature=signature,
-                        parent=parent
-                    ))
+                    symbols.append(
+                        Symbol(
+                            name=node.name,
+                            type="method" if parent else "function",
+                            file_path=str(path.relative_to(self.root_path)),
+                            line_number=node.lineno,
+                            docstring=ast.get_docstring(node),
+                            signature=signature,
+                            parent=parent,
+                        )
+                    )
 
                 # Imports
                 elif isinstance(node, ast.Import):
@@ -155,7 +172,7 @@ class SemanticIndexer:
                 hash=file_hash,
                 symbols=symbols,
                 imports=imports,
-                last_modified=path.stat().st_mtime
+                last_modified=path.stat().st_mtime,
             )
 
         except (SyntaxError, UnicodeDecodeError) as e:
@@ -168,12 +185,12 @@ class SemanticIndexer:
     def index_codebase(self, force: bool = False) -> int:
         """
         Index entire codebase.
-        
+
         Returns number of files indexed.
         """
         indexed_count = 0
 
-        for path in self.root_path.rglob('*.py'):
+        for path in self.root_path.rglob("*.py"):
             if not self.should_index(path):
                 continue
 
@@ -219,7 +236,7 @@ class SemanticIndexer:
     def find_definition(self, error_trace: str) -> Optional[Tuple[str, int]]:
         """
         Map error trace to source location (Cursor magic).
-        
+
         Parses traceback and finds the exact file + line.
         """
         # Parse traceback format
@@ -244,13 +261,14 @@ class SemanticIndexer:
 
         return None
 
-    def get_file_context(self, file_path: str, line_number: int,
-                        context_lines: int = 10) -> Optional[str]:
+    def get_file_context(
+        self, file_path: str, line_number: int, context_lines: int = 10
+    ) -> Optional[str]:
         """Get code context around a line number."""
         full_path = self.root_path / file_path
 
         try:
-            with open(full_path, 'r') as f:
+            with open(full_path, "r") as f:
                 lines = f.readlines()
 
             start = max(0, line_number - context_lines - 1)
@@ -296,15 +314,15 @@ class SemanticIndexer:
     def _resolve_import(self, import_name: str) -> Optional[str]:
         """Resolve import to file path."""
         # Simple resolution: convert module.path to file/path.py
-        parts = import_name.split('.')
+        parts = import_name.split(".")
 
         # Try direct match
-        possible_path = '/'.join(parts) + '.py'
+        possible_path = "/".join(parts) + ".py"
         if possible_path in self.file_index:
             return possible_path
 
         # Try as package
-        possible_path = '/'.join(parts) + '/__init__.py'
+        possible_path = "/".join(parts) + "/__init__.py"
         if possible_path in self.file_index:
             return possible_path
 
@@ -343,10 +361,10 @@ class SemanticIndexer:
                 symbol_types[symbol.type] += 1
 
         return {
-            'files_indexed': len(self.file_index),
-            'total_symbols': total_symbols,
-            'symbol_types': dict(symbol_types),
-            'unique_symbols': len(self.symbol_index)
+            "files_indexed": len(self.file_index),
+            "total_symbols": total_symbols,
+            "symbol_types": dict(symbol_types),
+            "unique_symbols": len(self.symbol_index),
         }
 
     def _save_cache(self):
@@ -355,30 +373,30 @@ class SemanticIndexer:
 
         try:
             data = {
-                'file_index': {
+                "file_index": {
                     path: {
-                        'path': idx.path,
-                        'hash': idx.hash,
-                        'symbols': [
+                        "path": idx.path,
+                        "hash": idx.hash,
+                        "symbols": [
                             {
-                                'name': s.name,
-                                'type': s.type,
-                                'file_path': s.file_path,
-                                'line_number': s.line_number,
-                                'docstring': s.docstring,
-                                'signature': s.signature,
-                                'parent': s.parent
+                                "name": s.name,
+                                "type": s.type,
+                                "file_path": s.file_path,
+                                "line_number": s.line_number,
+                                "docstring": s.docstring,
+                                "signature": s.signature,
+                                "parent": s.parent,
                             }
                             for s in idx.symbols
                         ],
-                        'imports': idx.imports,
-                        'last_modified': idx.last_modified
+                        "imports": idx.imports,
+                        "last_modified": idx.last_modified,
                     }
                     for path, idx in self.file_index.items()
                 }
             }
 
-            with open(cache_file, 'w') as f:
+            with open(cache_file, "w") as f:
                 json.dump(data, f, indent=2)
 
         except (OSError, IOError) as e:
@@ -394,21 +412,19 @@ class SemanticIndexer:
             return False
 
         try:
-            with open(cache_file, 'r') as f:
+            with open(cache_file, "r") as f:
                 data = json.load(f)
 
             # Reconstruct indexes
-            for path, idx_data in data['file_index'].items():
-                symbols = [
-                    Symbol(**s) for s in idx_data['symbols']
-                ]
+            for path, idx_data in data["file_index"].items():
+                symbols = [Symbol(**s) for s in idx_data["symbols"]]
 
                 file_idx = FileIndex(
-                    path=idx_data['path'],
-                    hash=idx_data['hash'],
+                    path=idx_data["path"],
+                    hash=idx_data["hash"],
                     symbols=symbols,
-                    imports=idx_data['imports'],
-                    last_modified=idx_data['last_modified']
+                    imports=idx_data["imports"],
+                    last_modified=idx_data["last_modified"],
                 )
 
                 self.file_index[path] = file_idx

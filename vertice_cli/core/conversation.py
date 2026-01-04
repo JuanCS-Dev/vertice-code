@@ -27,17 +27,19 @@ logger = logging.getLogger(__name__)
 
 class ConversationState(Enum):
     """Conversation states (Constitutional Layer 3 requirement)."""
-    IDLE = "idle"               # Waiting for user input
-    THINKING = "thinking"       # LLM processing request
-    EXECUTING = "executing"     # Executing tool calls
-    WAITING = "waiting"         # Waiting for tool results
-    ERROR = "error"             # Error occurred, needs recovery
-    RECOVERING = "recovering"   # Attempting auto-recovery
+
+    IDLE = "idle"  # Waiting for user input
+    THINKING = "thinking"  # LLM processing request
+    EXECUTING = "executing"  # Executing tool calls
+    WAITING = "waiting"  # Waiting for tool results
+    ERROR = "error"  # Error occurred, needs recovery
+    RECOVERING = "recovering"  # Attempting auto-recovery
 
 
 @dataclass
 class ConversationTurn:
     """Single conversation turn with context."""
+
     turn_id: int
     timestamp: float
     state: ConversationState
@@ -85,16 +87,16 @@ class ConversationTurn:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'ConversationTurn':
+    def from_dict(cls, data: Dict[str, Any]) -> "ConversationTurn":
         """Create from dictionary."""
-        data['state'] = ConversationState(data['state'])
+        data["state"] = ConversationState(data["state"])
         return cls(**data)
 
 
 class ContextWindow:
     """
     Context window manager with sliding window and token counting.
-    
+
     Constitutional Layer 3 (State Management) requirement:
     - Compactar contexto quando >60% da janela
     - Sliding window (últimas N mensagens)
@@ -108,7 +110,7 @@ class ContextWindow:
         hard_limit: float = 0.8,  # 80% forces aggressive compaction
     ):
         """Initialize context window manager.
-        
+
         Args:
             max_tokens: Maximum tokens in context window
             soft_limit: Trigger compaction at this % (0.6 = 60%)
@@ -127,7 +129,7 @@ class ContextWindow:
     def estimate_tokens(self, text: str) -> int:
         """
         Estimate token count (rough approximation).
-        
+
         Rule of thumb: ~4 characters per token for English
         More accurate would use tiktoken, but this avoids dependency.
         """
@@ -142,7 +144,7 @@ class ContextWindow:
     def needs_compaction(self) -> Tuple[bool, str]:
         """
         Check if context needs compaction.
-        
+
         Returns:
             (needs_compaction, reason)
         """
@@ -156,20 +158,18 @@ class ContextWindow:
         return False, "ok"
 
     def compact(
-        self,
-        turns: List[ConversationTurn],
-        strategy: str = "sliding_window"
+        self, turns: List[ConversationTurn], strategy: str = "sliding_window"
     ) -> List[ConversationTurn]:
         """
         Compact conversation history.
-        
+
         Args:
             turns: Full conversation history
             strategy: Compaction strategy
                 - "sliding_window": Keep last N turns
                 - "summarize": Summarize old turns (requires LLM integration)
                 - "aggressive": Keep only last 2 turns + errors
-        
+
         Returns:
             Compacted turns list
         """
@@ -191,7 +191,7 @@ class ContextWindow:
 class ConversationManager:
     """
     Manages multi-turn conversations with state machine and context.
-    
+
     Constitutional compliance:
     - Layer 2 (Deliberation): Auto-critique + error correction
     - Layer 3 (State Management): Context compaction + sliding window
@@ -206,7 +206,7 @@ class ConversationManager:
         max_turns: int = 1000,  # BUG FIX #6: Prevent memory leak
     ):
         """Initialize conversation manager.
-        
+
         Args:
             session_id: Unique session identifier
             max_context_tokens: Maximum tokens in context window
@@ -250,10 +250,10 @@ class ConversationManager:
     def start_turn(self, user_input: str) -> ConversationTurn:
         """
         Start new conversation turn.
-        
+
         Args:
             user_input: User's input text
-        
+
         Returns:
             New ConversationTurn instance
         """
@@ -270,7 +270,10 @@ class ConversationManager:
             self._compact_context()  # Method decides strategy internally
 
         # EDGE CASE FIX #2: If single turn exceeds context, compact preemptively
-        if self.context_window.max_tokens > 0 and estimated_tokens > self.context_window.max_tokens * 0.5:
+        if (
+            self.context_window.max_tokens > 0
+            and estimated_tokens > self.context_window.max_tokens * 0.5
+        ):
             logger.warning(
                 f"Large input ({estimated_tokens} tokens > 50% of {self.context_window.max_tokens}), "
                 "preemptive compaction"
@@ -289,7 +292,7 @@ class ConversationManager:
         # BUG FIX #6: Enforce max_turns to prevent memory leak
         if len(self.turns) > self.max_turns:
             removed = len(self.turns) - self.max_turns
-            self.turns = self.turns[-self.max_turns:]
+            self.turns = self.turns[-self.max_turns :]
             logger.warning(f"Removed {removed} old turns (max_turns={self.max_turns})")
 
         # Check if context needs compaction
@@ -305,11 +308,11 @@ class ConversationManager:
         turn: ConversationTurn,
         response: str,
         reasoning: Optional[str] = None,
-        tokens_used: int = 0
+        tokens_used: int = 0,
     ):
         """
         Add LLM response to current turn.
-        
+
         Args:
             turn: Current conversation turn
             response: LLM response text
@@ -337,11 +340,11 @@ class ConversationManager:
         args: Dict[str, Any],
         result: Any,
         success: bool,
-        error: Optional[str] = None
+        error: Optional[str] = None,
     ):
         """
         Add tool execution result.
-        
+
         Args:
             turn: Current conversation turn
             tool_name: Tool that was executed
@@ -378,19 +381,16 @@ class ConversationManager:
             # If error, state is already ERROR
 
     async def add_turn(
-        self,
-        user_input: str,
-        assistant_response: str,
-        tool_calls: List[Dict[str, Any]] = None
+        self, user_input: str, assistant_response: str, tool_calls: List[Dict[str, Any]] = None
     ) -> ConversationTurn:
         """
         Helper method to add a complete turn (for testing/simple cases).
-        
+
         Args:
             user_input: User's input
             assistant_response: Assistant's response
             tool_calls: Optional tool calls
-            
+
         Returns:
             The created turn
         """
@@ -406,7 +406,7 @@ class ConversationManager:
     def _categorize_error(self, error: str) -> str:
         """
         Categorize error for recovery strategy.
-        
+
         Returns:
             Error category: syntax, permission, not_found, command_not_found, timeout, unknown
         """
@@ -428,12 +428,14 @@ class ConversationManager:
     def _attempt_recovery(self, turn: ConversationTurn):
         """
         Attempt automatic error recovery (Constitutional Layer 2 requirement).
-        
+
         Args:
             turn: Turn with error to recover from
         """
         turn.recovery_attempted = True
-        self.transition_state(ConversationState.RECOVERING, f"attempt_1/{self.max_recovery_attempts}")
+        self.transition_state(
+            ConversationState.RECOVERING, f"attempt_1/{self.max_recovery_attempts}"
+        )
 
         logger.info(
             f"Attempting auto-recovery for turn {turn.turn_id} "
@@ -447,7 +449,7 @@ class ConversationManager:
     def _compact_context(self):
         """
         Compact context window (Constitutional Layer 3 requirement).
-        
+
         Implements progressive disclosure:
         - Soft limit (60%): Sliding window (keep last 10 turns)
         - Hard limit (80%): Aggressive (keep last 2 + errors)
@@ -465,8 +467,8 @@ class ConversationManager:
 
         # Recalculate token count
         self.context_window.current_tokens = sum(
-            self.context_window.estimate_tokens(turn.user_input) +
-            self.context_window.estimate_tokens(turn.llm_response or "")
+            self.context_window.estimate_tokens(turn.user_input)
+            + self.context_window.estimate_tokens(turn.llm_response or "")
             for turn in self.turns
         )
 
@@ -478,12 +480,12 @@ class ConversationManager:
     def get_context_for_llm(self, include_last_n: int = 5) -> List[Dict[str, Any]]:
         """
         Get context for LLM (Constitutional Layer 3: Tool result feedback loop).
-        
+
         Returns last N turns formatted for LLM consumption.
-        
+
         Args:
             include_last_n: Number of recent turns to include
-        
+
         Returns:
             List of message dictionaries for LLM
         """
@@ -492,32 +494,25 @@ class ConversationManager:
 
         for turn in recent_turns:
             # User message
-            messages.append({
-                "role": "user",
-                "content": turn.user_input
-            })
+            messages.append({"role": "user", "content": turn.user_input})
 
             # Assistant response (if available)
             if turn.llm_response:
-                messages.append({
-                    "role": "assistant",
-                    "content": turn.llm_response
-                })
+                messages.append({"role": "assistant", "content": turn.llm_response})
 
             # Tool results (if available) - Constitutional Layer 2: feedback loop
             if turn.tool_results:
                 tool_summary = self._format_tool_results(turn.tool_results)
-                messages.append({
-                    "role": "system",
-                    "content": f"[Tool Results]\n{tool_summary}"
-                })
+                messages.append({"role": "system", "content": f"[Tool Results]\n{tool_summary}"})
 
             # Error feedback (if available) - Constitutional Layer 2: error correction
             if turn.error:
-                messages.append({
-                    "role": "system",
-                    "content": f"[Error Occurred]\nCategory: {turn.error_category}\nDetails: {turn.error}"
-                })
+                messages.append(
+                    {
+                        "role": "system",
+                        "content": f"[Error Occurred]\nCategory: {turn.error_category}\nDetails: {turn.error}",
+                    }
+                )
 
         return messages
 
@@ -538,7 +533,7 @@ class ConversationManager:
     def get_recovery_context(self, turn: ConversationTurn) -> Dict[str, Any]:
         """
         Get context for error recovery (Constitutional Layer 2 requirement).
-        
+
         Returns:
             Dictionary with recovery context
         """
@@ -547,14 +542,9 @@ class ConversationManager:
             "user_input": turn.user_input,
             "error": turn.error,
             "error_category": turn.error_category,
-            "failed_tool_calls": [
-                tc for tc in turn.tool_results if not tc["success"]
-            ],
+            "failed_tool_calls": [tc for tc in turn.tool_results if not tc["success"]],
             "previous_turns": [
-                {
-                    "user_input": t.user_input,
-                    "success": not bool(t.error)
-                }
+                {"user_input": t.user_input, "success": not bool(t.error)}
                 for t in self.turns[-3:-1]  # Last 2 turns before error
             ],
             "recovery_attempt": 1,
@@ -564,10 +554,10 @@ class ConversationManager:
     def save_session(self, path: Optional[Path] = None) -> Path:
         """
         Save conversation to disk for session continuity.
-        
+
         Args:
             path: Optional save path (defaults to ~/.qwen_sessions/)
-        
+
         Returns:
             Path where session was saved
         """
@@ -587,24 +577,24 @@ class ConversationManager:
             "max_tokens": self.context_window.max_tokens,
         }
 
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             json.dump(data, f, indent=2)
 
         logger.info(f"Saved conversation session to {path}")
         return path
 
     @classmethod
-    def restore_session(cls, path: Path) -> 'ConversationManager':
+    def restore_session(cls, path: Path) -> "ConversationManager":
         """
         Restore conversation from disk (session continuity).
-        
+
         Args:
             path: Path to saved session
-        
+
         Returns:
             Restored ConversationManager instance
         """
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             data = json.load(f)
 
         manager = cls(
@@ -628,8 +618,7 @@ class ConversationManager:
 
         total_tool_calls = sum(len(turn.tool_calls) for turn in self.turns)
         successful_tools = sum(
-            sum(1 for r in turn.tool_results if r["success"])
-            for turn in self.turns
+            sum(1 for r in turn.tool_results if r["success"]) for turn in self.turns
         )
         failed_tools = total_tool_calls - successful_tools
 

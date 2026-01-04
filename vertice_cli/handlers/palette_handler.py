@@ -37,7 +37,7 @@ class PaletteHandler:
     3. Squad and workflow palette actions
     """
 
-    def __init__(self, shell: 'InteractiveShell'):
+    def __init__(self, shell: "InteractiveShell"):
         """
         Initialize with shell reference.
 
@@ -65,116 +65,138 @@ class PaletteHandler:
         from vertice_cli.core.help_system import help_system
 
         # File operations - delegated to FileOpsHandler
-        self.palette.add_command(Command(
-            id="file.read",
-            title="Read File",
-            description="Read and display file contents",
-            category=CommandCategory.FILE,
-            keywords=["open", "cat", "view", "show"],
-            keybinding=None,
-            action=lambda: self.shell._file_ops_handler.palette_read_file()
-        ))
+        self.palette.add_command(
+            Command(
+                id="file.read",
+                title="Read File",
+                description="Read and display file contents",
+                category=CommandCategory.FILE,
+                keywords=["open", "cat", "view", "show"],
+                keybinding=None,
+                action=lambda: self.shell._file_ops_handler.palette_read_file(),
+            )
+        )
 
-        self.palette.add_command(Command(
-            id="file.write",
-            title="Write File",
-            description="Create or overwrite a file",
-            category=CommandCategory.FILE,
-            keywords=["create", "save", "new"],
-            action=lambda: self.shell._file_ops_handler.palette_write_file()
-        ))
+        self.palette.add_command(
+            Command(
+                id="file.write",
+                title="Write File",
+                description="Create or overwrite a file",
+                category=CommandCategory.FILE,
+                keywords=["create", "save", "new"],
+                action=lambda: self.shell._file_ops_handler.palette_write_file(),
+            )
+        )
 
-        self.palette.add_command(Command(
-            id="file.edit",
-            title="Edit File",
-            description="Edit file with AI assistance",
-            category=CommandCategory.EDIT,
-            keywords=["modify", "change", "update", "fix"],
-            action=lambda: self.shell._file_ops_handler.palette_edit_file()
-        ))
+        self.palette.add_command(
+            Command(
+                id="file.edit",
+                title="Edit File",
+                description="Edit file with AI assistance",
+                category=CommandCategory.EDIT,
+                keywords=["modify", "change", "update", "fix"],
+                action=lambda: self.shell._file_ops_handler.palette_edit_file(),
+            )
+        )
 
         # Git operations - delegated to GitHandler
-        self.palette.add_command(Command(
-            id="git.status",
-            title="Git Status",
-            description="Show git repository status",
-            category=CommandCategory.GIT,
-            keywords=["git", "status", "changes", "diff"],
-            action=lambda: self.shell._git_handler.palette_status()
-        ))
+        self.palette.add_command(
+            Command(
+                id="git.status",
+                title="Git Status",
+                description="Show git repository status",
+                category=CommandCategory.GIT,
+                keywords=["git", "status", "changes", "diff"],
+                action=lambda: self.shell._git_handler.palette_status(),
+            )
+        )
 
-        self.palette.add_command(Command(
-            id="git.diff",
-            title="Git Diff",
-            description="Show git diff",
-            category=CommandCategory.GIT,
-            keywords=["git", "diff", "changes"],
-            action=lambda: self.shell._git_handler.palette_diff()
-        ))
+        self.palette.add_command(
+            Command(
+                id="git.diff",
+                title="Git Diff",
+                description="Show git diff",
+                category=CommandCategory.GIT,
+                keywords=["git", "diff", "changes"],
+                action=lambda: self.shell._git_handler.palette_diff(),
+            )
+        )
 
         # Search operations - delegated to FileOpsHandler
-        self.palette.add_command(Command(
-            id="search.files",
-            title="Search Files",
-            description="Search for text in files",
-            category=CommandCategory.SEARCH,
-            keywords=["find", "grep", "search", "locate"],
-            action=lambda: self.shell._file_ops_handler.palette_search_files()
-        ))
+        self.palette.add_command(
+            Command(
+                id="search.files",
+                title="Search Files",
+                description="Search for text in files",
+                category=CommandCategory.SEARCH,
+                keywords=["find", "grep", "search", "locate"],
+                action=lambda: self.shell._file_ops_handler.palette_search_files(),
+            )
+        )
 
         # Help & System
-        self.palette.add_command(Command(
-            id="help.main",
-            title="Help",
-            description="Show main help",
-            category=CommandCategory.HELP,
-            keywords=["help", "docs", "guide"],
-            keybinding="?",
-            action=lambda: help_system.show_main_help()
-        ))
+        self.palette.add_command(
+            Command(
+                id="help.main",
+                title="Help",
+                description="Show main help",
+                category=CommandCategory.HELP,
+                keywords=["help", "docs", "guide"],
+                keybinding="?",
+                action=lambda: help_system.show_main_help(),
+            )
+        )
 
-        self.palette.add_command(Command(
-            id="system.clear",
-            title="Clear Screen",
-            description="Clear the terminal screen",
-            category=CommandCategory.SYSTEM,
-            keywords=["clear", "cls", "clean"],
-            action=lambda: os.system('clear')
-        ))
+        self.palette.add_command(
+            Command(
+                id="system.clear",
+                title="Clear Screen",
+                description="Clear the terminal screen",
+                category=CommandCategory.SYSTEM,
+                keywords=["clear", "cls", "clean"],
+                action=lambda: os.system("clear"),
+            )
+        )
 
-        self.palette.add_command(Command(
-            id="tools.list",
-            title="List Available Tools",
-            description="Show all registered tools",
-            category=CommandCategory.TOOLS,
-            keywords=["tools", "list", "available"],
-            action=lambda: self.shell._file_ops_handler.palette_list_tools()
-        ))
+        self.palette.add_command(
+            Command(
+                id="tools.list",
+                title="List Available Tools",
+                description="Show all registered tools",
+                category=CommandCategory.TOOLS,
+                keywords=["tools", "list", "available"],
+                action=lambda: self.shell._file_ops_handler.palette_list_tools(),
+            )
+        )
 
         # DevSquad commands
-        self.palette.add_command(Command(
-            id="squad.run",
-            title="Run DevSquad Mission",
-            description="Execute a complex task with agent squad",
-            category=CommandCategory.TOOLS,
-            keywords=["squad", "mission", "agent", "devsquad"],
-            action=lambda: self.palette_run_squad()
-        ))
+        self.palette.add_command(
+            Command(
+                id="squad.run",
+                title="Run DevSquad Mission",
+                description="Execute a complex task with agent squad",
+                category=CommandCategory.TOOLS,
+                keywords=["squad", "mission", "agent", "devsquad"],
+                action=lambda: self.palette_run_squad(),
+            )
+        )
 
-        self.palette.add_command(Command(
-            id="workflow.list",
-            title="List Workflows",
-            description="Show available workflows",
-            category=CommandCategory.TOOLS,
-            keywords=["workflow", "list", "template"],
-            action=lambda: self.palette_list_workflows()
-        ))
+        self.palette.add_command(
+            Command(
+                id="workflow.list",
+                title="List Workflows",
+                description="Show available workflows",
+                category=CommandCategory.TOOLS,
+                keywords=["workflow", "list", "template"],
+                action=lambda: self.palette_list_workflows(),
+            )
+        )
 
     # =========================================================================
     # Interactive Palette
     # =========================================================================
 
-    async def show_palette_interactive(self) -> Optional['Command']:
+    async def show_palette_interactive(self) -> Optional["Command"]:
         """
         Show interactive palette and return selected command.
 
@@ -199,12 +221,14 @@ class PaletteHandler:
         # Display results
         self.console.print("\n[cyan]Results:[/cyan]")
         for i, cmd in enumerate(results, 1):
-            category_icon = CATEGORY_CONFIG.get(cmd.category, {}).get('icon', '📄')
+            category_icon = CATEGORY_CONFIG.get(cmd.category, {}).get("icon", "📄")
             self.console.print(f"  {i}. {category_icon} {cmd.title} - [dim]{cmd.description}[/dim]")
 
         # Get selection
         try:
-            selection = await self.enhanced_input.prompt_async("\nSelect (1-10) or Enter to cancel: ")
+            selection = await self.enhanced_input.prompt_async(
+                "\nSelect (1-10) or Enter to cancel: "
+            )
             if selection and selection.isdigit():
                 idx = int(selection) - 1
                 if 0 <= idx < len(results):

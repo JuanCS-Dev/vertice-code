@@ -68,7 +68,7 @@ class RefactorerAgent(BaseAgent):
         self,
         llm_client: Optional[Any] = None,
         mcp_client: Optional[Any] = None,
-        explorer_agent: Optional[Any] = None
+        explorer_agent: Optional[Any] = None,
     ):
         """Initialize RefactorerAgent.
 
@@ -82,11 +82,11 @@ class RefactorerAgent(BaseAgent):
             capabilities=[
                 AgentCapability.FILE_EDIT,
                 AgentCapability.READ_ONLY,
-                AgentCapability.BASH_EXEC
+                AgentCapability.BASH_EXEC,
             ],
             llm_client=llm_client,
             mcp_client=mcp_client,
-            system_prompt=self._build_system_prompt()
+            system_prompt=self._build_system_prompt(),
         )
 
         self.transformer = ASTTransformer()
@@ -148,7 +148,7 @@ Structured refactoring plan with dependencies and risk assessment.
             return AgentResponse(
                 success=result["success"],
                 data=result,
-                reasoning=result.get("message", "Refactoring completed")
+                reasoning=result.get("message", "Refactoring completed"),
             )
 
         except Exception as e:
@@ -158,13 +158,10 @@ Structured refactoring plan with dependencies and risk assessment.
             return AgentResponse(
                 success=False,
                 error=str(e),
-                reasoning="Refactoring failed - all changes rolled back"
+                reasoning="Refactoring failed - all changes rolled back",
             )
 
-    async def _generate_standalone_plan(
-        self,
-        task: AgentTask
-    ) -> RefactoringPlan | AgentResponse:
+    async def _generate_standalone_plan(self, task: AgentTask) -> RefactoringPlan | AgentResponse:
         """Generate plan when no pre-existing plan is provided.
 
         Args:
@@ -184,7 +181,7 @@ Structured refactoring plan with dependencies and risk assessment.
         if not target:
             files_list = task.context.get("files", [])
             for f in files_list:
-                if f.endswith('.py') and Path(f).exists():
+                if f.endswith(".py") and Path(f).exists():
                     target = f
                     break
 
@@ -201,13 +198,10 @@ Structured refactoring plan with dependencies and risk assessment.
             target=target,
             refactoring_type=refactoring_type,
             blast_radius=blast_radius,
-            context=task.context
+            context=task.context,
         )
 
-    def _convert_sops_to_refactoring_plan(
-        self,
-        execution_plan: Dict[str, Any]
-    ) -> RefactoringPlan:
+    def _convert_sops_to_refactoring_plan(self, execution_plan: Dict[str, Any]) -> RefactoringPlan:
         """Convert ExecutionPlan from PlannerAgent to RefactoringPlan.
 
         Args:
@@ -223,30 +217,32 @@ Structured refactoring plan with dependencies and risk assessment.
         for sop in sops:
             role = sop.get("role", "")
             if role in ["coder", "refactorer", "executor"]:
-                changes.append({
-                    "id": sop.get("id", f"sop-{len(changes)}"),
-                    "action": sop.get("action", ""),
-                    "file_path": sop.get("target_file", sop.get("file")),
-                    "description": sop.get("description", sop.get("action", "")),
-                    "dependencies": sop.get("dependencies", []),
-                    "original_sop": sop,
-                })
+                changes.append(
+                    {
+                        "id": sop.get("id", f"sop-{len(changes)}"),
+                        "action": sop.get("action", ""),
+                        "file_path": sop.get("target_file", sop.get("file")),
+                        "description": sop.get("description", sop.get("action", "")),
+                        "dependencies": sop.get("dependencies", []),
+                        "original_sop": sop,
+                    }
+                )
 
         if not changes and stages:
             for stage in stages:
                 for step in stage.get("steps", []):
-                    changes.append({
-                        "id": step.get("id", f"stage-step-{len(changes)}"),
-                        "action": step.get("action", ""),
-                        "file_path": step.get("target_file"),
-                        "description": step.get("description", ""),
-                        "dependencies": step.get("dependencies", []),
-                    })
+                    changes.append(
+                        {
+                            "id": step.get("id", f"stage-step-{len(changes)}"),
+                            "action": step.get("action", ""),
+                            "file_path": step.get("target_file"),
+                            "description": step.get("description", ""),
+                            "dependencies": step.get("dependencies", []),
+                        }
+                    )
 
         execution_order = [c["id"] for c in changes]
-        affected_files = list(set(
-            c["file_path"] for c in changes if c.get("file_path")
-        ))
+        affected_files = list(set(c["file_path"] for c in changes if c.get("file_path")))
 
         return RefactoringPlan(
             plan_id=execution_plan.get("plan_id", f"converted-{id(execution_plan)}"),
@@ -277,8 +273,7 @@ Structured refactoring plan with dependencies and risk assessment.
         if self.explorer:
             try:
                 explore_task = AgentTask(
-                    request=f"find code that imports or uses '{stem}'",
-                    context={"max_files": 50}
+                    request=f"find code that imports or uses '{stem}'", context={"max_files": 50}
                 )
 
                 response = await self.explorer.execute(explore_task)
@@ -307,13 +302,10 @@ Structured refactoring plan with dependencies and risk assessment.
         return {
             "affected_files": [target],
             "dependent_files": unique_dependents,
-            "risk_level": risk
+            "risk_level": risk,
         }
 
-    async def _analyze_refactoring_opportunities(
-        self,
-        task: AgentTask
-    ) -> AgentResponse:
+    async def _analyze_refactoring_opportunities(self, task: AgentTask) -> AgentResponse:
         """Analyze code and suggest refactoring opportunities.
 
         Used when no target file is specified.
@@ -332,7 +324,7 @@ Structured refactoring plan with dependencies and risk assessment.
             for f in files_list[:3]:
                 try:
                     if Path(f).exists():
-                        content = Path(f).read_text(errors='ignore')[:3000]
+                        content = Path(f).read_text(errors="ignore")[:3000]
                         code_parts.append(f"# File: {f}\n{content}")
                 except (OSError, UnicodeDecodeError) as e:
                     logger.debug(f"Could not read file {f}: {e}")
@@ -343,7 +335,7 @@ Structured refactoring plan with dependencies and risk assessment.
             return AgentResponse(
                 success=False,
                 error="No source code provided for refactoring analysis",
-                reasoning="Need either source_code or files in context"
+                reasoning="Need either source_code or files in context",
             )
 
         prompt = f"""Analyze this code and identify refactoring opportunities.
@@ -373,19 +365,20 @@ Format as markdown with specific line references."""
                     "analysis": analysis,
                     "refactoring_suggestions": [
                         {"type": "extract_method", "description": "Extract common patterns"},
-                        {"type": "simplify_expression", "description": "Simplify complex conditionals"},
+                        {
+                            "type": "simplify_expression",
+                            "description": "Simplify complex conditionals",
+                        },
                         {"type": "improve_naming", "description": "Use more descriptive names"},
                     ],
                     "files_analyzed": len(files_list),
-                    "mode": "analysis_only"
+                    "mode": "analysis_only",
                 },
-                reasoning=f"Analyzed {len(files_list)} files for refactoring opportunities"
+                reasoning=f"Analyzed {len(files_list)} files for refactoring opportunities",
             )
         except Exception as e:
             return AgentResponse(
-                success=False,
-                error=str(e),
-                reasoning="Failed to analyze refactoring opportunities"
+                success=False, error=str(e), reasoning="Failed to analyze refactoring opportunities"
             )
 
     async def _generate_plan(
@@ -393,7 +386,7 @@ Format as markdown with specific line references."""
         target: str,
         refactoring_type: str,
         blast_radius: Dict[str, List[str]],
-        context: Dict[str, Any]
+        context: Dict[str, Any],
     ) -> RefactoringPlan:
         """Generate comprehensive refactoring plan.
 
@@ -425,7 +418,7 @@ Format as markdown with specific line references."""
             content=original_content,
             refactoring_type=refactoring_type,
             metrics=code_metrics,
-            blast_radius=blast_radius
+            blast_radius=blast_radius,
         )
 
         llm_response = await self._call_llm(prompt)
@@ -437,14 +430,10 @@ Format as markdown with specific line references."""
             changes=plan_data.get("changes", []),
             affected_files=blast_radius.get("affected_files", []),
             blast_radius=blast_radius,
-            risk_level=blast_radius.get("risk_level", "MEDIUM")
+            risk_level=blast_radius.get("risk_level", "MEDIUM"),
         )
 
-    async def _execute_plan(
-        self,
-        plan: RefactoringPlan,
-        dry_run: bool = False
-    ) -> Dict[str, Any]:
+    async def _execute_plan(self, plan: RefactoringPlan, dry_run: bool = False) -> Dict[str, Any]:
         """Execute refactoring plan transactionally.
 
         Args:
@@ -459,7 +448,7 @@ Format as markdown with specific line references."""
             "changes_applied": 0,
             "changes_failed": 0,
             "test_results": None,
-            "message": ""
+            "message": "",
         }
 
         try:
@@ -480,8 +469,7 @@ Format as markdown with specific line references."""
             self.session.create_checkpoint("pre-commit")
 
             commit_success, commit_msg = await self.session.commit(
-                dry_run=dry_run,
-                run_tests=plan.require_tests
+                dry_run=dry_run, run_tests=plan.require_tests
             )
 
             results["success"] = commit_success
@@ -508,16 +496,12 @@ Format as markdown with specific line references."""
                 change.original_content,
                 change.line_start,
                 change.line_end,
-                change.affected_symbols[0] if change.affected_symbols else "extracted_method"
+                change.affected_symbols[0] if change.affected_symbols else "extracted_method",
             )
 
         elif change.refactoring_type == RefactoringType.RENAME_SYMBOL:
             old_name, new_name = change.affected_symbols[:2]
-            return self.transformer.rename_symbol(
-                change.original_content,
-                old_name,
-                new_name
-            )
+            return self.transformer.rename_symbol(change.original_content, old_name, new_name)
 
         elif change.refactoring_type == RefactoringType.MODERNIZE_SYNTAX:
             return self.transformer.modernize_syntax(change.original_content)
@@ -531,7 +515,7 @@ Format as markdown with specific line references."""
         content: str,
         refactoring_type: str,
         metrics: Dict[str, Any],
-        blast_radius: Dict[str, List[str]]
+        blast_radius: Dict[str, List[str]],
     ) -> str:
         """Build LLM prompt for refactoring plan generation.
 
@@ -598,11 +582,7 @@ OUTPUT FORMAT (JSON):
         """
         try:
             tree = ast.parse(code)
-            return {
-                "loc": len(code.split('\n')),
-                "complexity": 5,
-                "coupling": 3
-            }
+            return {"loc": len(code.split("\n")), "complexity": 5, "coupling": 3}
         except Exception as e:
             logger.debug(f"Failed to extract metrics: {e}")
             return {}
@@ -620,7 +600,7 @@ OUTPUT FORMAT (JSON):
             RefactoringAction(
                 type=RefactoringType.EXTRACT_METHOD,
                 target="long_method",
-                parameters={"lines": (10, 50)}
+                parameters={"lines": (10, 50)},
             )
         ]
 
@@ -647,7 +627,7 @@ OUTPUT FORMAT (JSON):
             description=data.get("description", ""),
             line_start=data.get("line_start", 0),
             line_end=data.get("line_end", 0),
-            affected_symbols=data.get("affected_symbols", [])
+            affected_symbols=data.get("affected_symbols", []),
         )
 
     def _parse_refactoring_plan(self, llm_response: str) -> Dict[str, Any]:
@@ -670,9 +650,7 @@ OUTPUT FORMAT (JSON):
 
 
 def create_refactorer_agent(
-    llm_client: Any,
-    mcp_client: Any,
-    explorer_agent: Optional[Any] = None
+    llm_client: Any, mcp_client: Any, explorer_agent: Optional[Any] = None
 ) -> RefactorerAgent:
     """Factory function to create RefactorerAgent.
 
@@ -685,9 +663,7 @@ def create_refactorer_agent(
         Configured RefactorerAgent instance
     """
     return RefactorerAgent(
-        llm_client=llm_client,
-        mcp_client=mcp_client,
-        explorer_agent=explorer_agent
+        llm_client=llm_client, mcp_client=mcp_client, explorer_agent=explorer_agent
     )
 
 

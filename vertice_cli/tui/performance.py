@@ -88,9 +88,7 @@ class PerformanceMonitor:
 
         # Store metrics
         metrics = FrameMetrics(
-            frame_time=frame_time,
-            timestamp=time.time(),
-            budget_exceeded=budget_exceeded
+            frame_time=frame_time, timestamp=time.time(), budget_exceeded=budget_exceeded
         )
         self.frame_metrics.append(metrics)
 
@@ -145,7 +143,7 @@ class PerformanceMonitor:
                 "avg_frame_ms": 0.0,
                 "p95_frame_ms": 0.0,
                 "budget_violations": 0,
-                "total_frames": 0
+                "total_frames": 0,
             }
 
         current_fps = self.get_current_fps()
@@ -153,9 +151,7 @@ class PerformanceMonitor:
         p95_frame_ms = self.get_percentile_frame_time_ms(95)
         p99_frame_ms = self.get_percentile_frame_time_ms(99)
 
-        violation_rate = (
-            self.budget_violations / max(self.total_frames, 1) * 100
-        )
+        violation_rate = self.budget_violations / max(self.total_frames, 1) * 100
 
         return {
             "target_fps": self.target_fps,
@@ -167,7 +163,7 @@ class PerformanceMonitor:
             "budget_violations": self.budget_violations,
             "violation_rate_pct": violation_rate,
             "total_frames": self.total_frames,
-            "frames_measured": len(self.frame_times)
+            "frames_measured": len(self.frame_times),
         }
 
     def render_stats_panel(self) -> Panel:
@@ -185,26 +181,17 @@ class PerformanceMonitor:
         # FPS
         fps = stats["current_fps"]
         fps_color = "bright_green" if fps >= self.target_fps else "bright_red"
-        table.add_row(
-            "FPS:",
-            Text(f"{fps:.1f}", style=f"bold {fps_color}")
-        )
+        table.add_row("FPS:", Text(f"{fps:.1f}", style=f"bold {fps_color}"))
 
         # Frame times
         avg_ms = stats["avg_frame_ms"]
         p95_ms = stats["p95_frame_ms"]
 
         avg_color = "bright_green" if avg_ms <= stats["frame_budget_ms"] else "bright_yellow"
-        table.add_row(
-            "Avg Frame:",
-            Text(f"{avg_ms:.2f}ms", style=avg_color)
-        )
+        table.add_row("Avg Frame:", Text(f"{avg_ms:.2f}ms", style=avg_color))
 
         p95_color = "bright_green" if p95_ms <= stats["frame_budget_ms"] * 1.5 else "bright_red"
-        table.add_row(
-            "P95 Frame:",
-            Text(f"{p95_ms:.2f}ms", style=p95_color)
-        )
+        table.add_row("P95 Frame:", Text(f"{p95_ms:.2f}ms", style=p95_color))
 
         # Budget violations
         violations = stats["budget_violations"]
@@ -212,21 +199,17 @@ class PerformanceMonitor:
         violation_color = "bright_green" if violation_rate < 5 else "bright_yellow"
 
         table.add_row(
-            "Violations:",
-            Text(f"{violations} ({violation_rate:.1f}%)", style=violation_color)
+            "Violations:", Text(f"{violations} ({violation_rate:.1f}%)", style=violation_color)
         )
 
         # Total frames
-        table.add_row(
-            "Total Frames:",
-            Text(str(stats["total_frames"]), style="dim")
-        )
+        table.add_row("Total Frames:", Text(str(stats["total_frames"]), style="dim"))
 
         panel = Panel(
             table,
             title="[bold bright_yellow]⚡ Performance Monitor[/bold bright_yellow]",
             border_style="bright_yellow",
-            padding=(0, 1)
+            padding=(0, 1),
         )
 
         return panel

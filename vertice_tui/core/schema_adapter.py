@@ -14,6 +14,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class SchemaAdapter:
     """Adapts internal tool schemas to Gemini SDK requirements."""
 
@@ -21,10 +22,10 @@ class SchemaAdapter:
     def to_gemini_schema(internal_schema: Dict[str, Any]) -> Dict[str, Any]:
         """
         Transforms an internal tool schema into a Gemini-compatible schema dict.
-        
+
         Args:
             internal_schema: The raw schema from ToolBridge
-            
+
         Returns:
             A dictionary ready to be passed to FunctionDeclaration
         """
@@ -36,17 +37,13 @@ class SchemaAdapter:
         raw_params = internal_schema.get("parameters", {})
         clean_params = SchemaAdapter._clean_object_schema(raw_params)
 
-        return {
-            "name": name,
-            "description": description,
-            "parameters": clean_params
-        }
+        return {"name": name, "description": description, "parameters": clean_params}
 
     @staticmethod
     def _clean_object_schema(schema: Dict[str, Any]) -> Dict[str, Any]:
         """
         Recursively cleans a JSON schema object for Gemini compatibility.
-        
+
         Transformations:
         - Converts property-level 'required=True' to top-level 'required' list
         - Removes 'default' fields (not supported in protobuf)

@@ -44,6 +44,7 @@ class GeminiSDKStreamer(BaseStreamer):
 
         try:
             import google.generativeai as genai
+
             self._genai = genai
             genai.configure(api_key=self.config.api_key)
 
@@ -111,9 +112,9 @@ class GeminiSDKStreamer(BaseStreamer):
         try:
             # Try to iterate as a map
             items = None
-            if hasattr(args, 'items'):
+            if hasattr(args, "items"):
                 items = args.items()
-            elif hasattr(args, '__iter__') and not isinstance(args, (str, bytes)):
+            elif hasattr(args, "__iter__") and not isinstance(args, (str, bytes)):
                 try:
                     items_list = list(args)
                     if items_list and isinstance(items_list[0], tuple) and len(items_list[0]) == 2:
@@ -127,8 +128,9 @@ class GeminiSDKStreamer(BaseStreamer):
             if items:
                 for key, value in items:
                     # Recursively convert nested structures
-                    if hasattr(value, 'items') or (
-                        hasattr(value, '__iter__') and not isinstance(value, (str, bytes, int, float, bool))
+                    if hasattr(value, "items") or (
+                        hasattr(value, "__iter__")
+                        and not isinstance(value, (str, bytes, int, float, bool))
                     ):
                         try:
                             result[key] = self._convert_protobuf_args(value)
@@ -137,11 +139,11 @@ class GeminiSDKStreamer(BaseStreamer):
                             result[key] = str(value)
                     else:
                         # Convert to native Python type
-                        if hasattr(value, 'string_value'):
+                        if hasattr(value, "string_value"):
                             result[key] = value.string_value
-                        elif hasattr(value, 'number_value'):
+                        elif hasattr(value, "number_value"):
                             result[key] = value.number_value
-                        elif hasattr(value, 'bool_value'):
+                        elif hasattr(value, "bool_value"):
                             result[key] = value.bool_value
                         else:
                             result[key] = value
@@ -185,16 +187,14 @@ class GeminiSDKStreamer(BaseStreamer):
                 kwargs["tools"] = tools
                 try:
                     from google.generativeai.types import content_types
-                    kwargs["tool_config"] = content_types.to_tool_config({
-                        "function_calling_config": {"mode": "AUTO"}
-                    })
+
+                    kwargs["tool_config"] = content_types.to_tool_config(
+                        {"function_calling_config": {"mode": "AUTO"}}
+                    )
                     logger.debug(f"Tool config set to AUTO mode with {len(tools)} tools")
                 except Exception as e:
                     logger.warning(f"Could not set tool_config: {e}")
-            return model.generate_content(
-                contents if len(contents) > 1 else prompt,
-                **kwargs
-            )
+            return model.generate_content(contents if len(contents) > 1 else prompt, **kwargs)
 
         try:
             response = await loop.run_in_executor(None, _generate)
@@ -244,10 +244,7 @@ class GeminiSDKStreamer(BaseStreamer):
         if context:
             for msg in context:
                 role = "user" if msg.get("role") == "user" else "model"
-                contents.append({
-                    "role": role,
-                    "parts": [{"text": msg.get("content", "")}]
-                })
+                contents.append({"role": role, "parts": [{"text": msg.get("content", "")}]})
 
         # Add current prompt
         contents.append({"role": "user", "parts": [{"text": prompt}]})
@@ -258,11 +255,11 @@ class GeminiSDKStreamer(BaseStreamer):
         """Process a single response chunk. Deduplicated."""
         yielded = False
 
-        if hasattr(chunk, 'candidates') and chunk.candidates:
+        if hasattr(chunk, "candidates") and chunk.candidates:
             for candidate in chunk.candidates:
-                if hasattr(candidate, 'content') and candidate.content:
+                if hasattr(candidate, "content") and candidate.content:
                     for part in candidate.content.parts:
-                        if hasattr(part, 'function_call') and part.function_call:
+                        if hasattr(part, "function_call") and part.function_call:
                             fc = part.function_call
                             args = self._convert_protobuf_args(fc.args)
                             try:
@@ -271,10 +268,10 @@ class GeminiSDKStreamer(BaseStreamer):
                                 args_json = "{}"
                             yield f"[TOOL_CALL:{fc.name}:{args_json}]"
                             yielded = True
-                        elif hasattr(part, 'text') and part.text:
+                        elif hasattr(part, "text") and part.text:
                             yield part.text
                             yielded = True
 
         # Fallback ONLY if nothing yielded from candidates
-        if not yielded and hasattr(chunk, 'text') and chunk.text:
+        if not yielded and hasattr(chunk, "text") and chunk.text:
             yield chunk.text

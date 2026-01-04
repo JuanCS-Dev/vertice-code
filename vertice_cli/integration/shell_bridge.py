@@ -5,7 +5,7 @@ This is the CORE integration component that makes Phase 2.1 work.
 Inspired by best practices from:
 - Cursor AI: Semantic code understanding + RAG
 - Claude Code: Hook-based validation + persistent sessions
-- GitHub Codex: Tool calling + sandboxed execution  
+- GitHub Codex: Tool calling + sandboxed execution
 - Aider AI: Function calling + context mapping
 
 Architecture:
@@ -21,7 +21,9 @@ from ..core.parser import ResponseParser
 from ..core.llm import LLMClient
 from ..tools.base import ToolRegistry
 from .safety import SafetyValidator
-from .session import SessionManager, Session
+
+# Use canonical session manager (Task 1.6 tech debt elimination)
+from ..core.session_manager import SessionManager, SessionSnapshot, get_session_manager
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +31,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ToolExecutionResult:
     """Result of tool execution (distinct from command ExecutionResult)."""
+
     success: bool
     tool_name: str
     result: Any
@@ -40,9 +43,9 @@ class ToolExecutionResult:
 
 class ShellBridge:
     """Connects parser → validation → execution in a safe, efficient pipeline.
-    
+
     This is what makes our implementation production-grade like Cursor/Claude.
-    
+
     Features:
     - Multi-layer safety (Claude Code strategy)
     - Persistent sessions (Codex strategy)
@@ -59,7 +62,7 @@ class ShellBridge:
         session_manager: Optional[SessionManager] = None,
     ):
         """Initialize shell bridge.
-        
+
         Args:
             parser: Response parser (creates new if None)
             llm_client: LLM client (creates new if None)
@@ -70,15 +73,14 @@ class ShellBridge:
         from ..core.parser import parser as default_parser
         from ..core.llm import llm_client as default_llm
         from .safety import safety_validator as default_safety
-        from .session import session_manager as default_session
 
         self.parser = parser or default_parser
         self.llm = llm_client or default_llm
         self.registry = tool_registry or ToolRegistry()
         self.safety = safety_validator or default_safety
-        self.sessions = session_manager or default_session
+        self.sessions = session_manager or get_session_manager()
 
-        self.current_session: Optional[Session] = None
+        self.current_session: Optional[SessionSnapshot] = None
 
         # Register core tools (Copilot + Cursor + Claude pattern)
         self._register_core_tools()
@@ -87,36 +89,52 @@ class ShellBridge:
 
     def _register_core_tools(self):
         """Register core tools (always available).
-        
+
         Implements hybrid registry pattern:
         - Core tools (file, terminal, git) always loaded
         - Dynamic discovery based on project context
         - Lazy loading for heavy dependencies
-        
+
         Inspired by:
         - Copilot CLI: Static core + dynamic permissions
         - Cursor AI: Context-aware discovery
         - Claude Code: MCP-style on-demand execution
         """
         from ..tools.file_ops import (
-            ReadFileTool, WriteFileTool, EditFileTool,
-            ListDirectoryTool, DeleteFileTool
+            ReadFileTool,
+            WriteFileTool,
+            EditFileTool,
+            ListDirectoryTool,
+            DeleteFileTool,
         )
         from ..tools.file_mgmt import (
-            MoveFileTool, CopyFileTool, CreateDirectoryTool,
-            ReadMultipleFilesTool, InsertLinesTool
+            MoveFileTool,
+            CopyFileTool,
+            CreateDirectoryTool,
+            ReadMultipleFilesTool,
+            InsertLinesTool,
         )
         from ..tools.search import SearchFilesTool, GetDirectoryTreeTool
         from ..tools.web_search import WebSearchTool, SearchDocumentationTool
         from ..tools.web_access import (
-            PackageSearchTool, FetchURLTool, DownloadFileTool, HTTPRequestTool
+            PackageSearchTool,
+            FetchURLTool,
+            DownloadFileTool,
+            HTTPRequestTool,
         )
         from ..tools.exec_hardened import BashCommandTool
         from ..tools.git_ops import GitStatusTool, GitDiffTool
         from ..tools.context import GetContextTool, SaveSessionTool, RestoreBackupTool
         from ..tools.terminal import (
-            CdTool, LsTool, PwdTool, MkdirTool, RmTool,
-            CpTool, MvTool, TouchTool, CatTool
+            CdTool,
+            LsTool,
+            PwdTool,
+            MkdirTool,
+            RmTool,
+            CpTool,
+            MvTool,
+            TouchTool,
+            CatTool,
         )
 
         # File operations (9 tools)
@@ -173,9 +191,9 @@ class ShellBridge:
         context: Optional[Dict[str, Any]] = None,
     ) -> AsyncGenerator[str, None]:
         """Process user input through full pipeline.
-        
+
         This is the main entry point for Phase 2.1 integration.
-        
+
         Flow:
         1. Get/create session
         2. Build context (files, history, etc)
@@ -183,12 +201,12 @@ class ShellBridge:
         4. Parse response
         5. Validate & execute tools
         6. Return results
-        
+
         Args:
             user_input: User's natural language input
             session_id: Session ID (creates new if None)
             context: Additional context dictionary
-            
+
         Yields:
             Streaming response chunks
         """
@@ -210,9 +228,7 @@ class ShellBridge:
             # Stream from LLM
             full_response = ""
             async for chunk in self.llm.stream_chat(
-                prompt=user_input,
-                context=full_context,
-                provider="auto"
+                prompt=user_input, context=full_context, provider="auto"
             ):
                 full_response += chunk
                 yield chunk
@@ -229,10 +245,7 @@ class ShellBridge:
             if parse_result.tool_calls:
                 yield "\n\n🔧 Executing tools...\n"
 
-                results = await self._execute_tool_calls(
-                    parse_result.tool_calls,
-                    session
-                )
+                results = await self._execute_tool_calls(parse_result.tool_calls, session)
 
                 # Format and yield results
                 for result in results:
@@ -252,13 +265,13 @@ class ShellBridge:
         session_id: Optional[str] = None,
     ) -> List[ToolExecutionResult]:
         """Execute tool calls from LLM response.
-        
+
         This is the lower-level API for direct tool execution.
-        
+
         Args:
             llm_response: Raw LLM response text
             session_id: Session ID (uses active if None)
-            
+
         Returns:
             List of execution results
         """
@@ -287,14 +300,14 @@ class ShellBridge:
     async def _execute_tool_calls(
         self,
         tool_calls: List[Dict[str, Any]],
-        session: Session,
+        session: SessionSnapshot,
     ) -> List[ToolExecutionResult]:
         """Execute list of tool calls with safety validation.
-        
+
         Args:
             tool_calls: Parsed tool calls
             session: Current session
-            
+
         Returns:
             List of execution results
         """
@@ -312,7 +325,7 @@ class ShellBridge:
                     "args": tool_call.get("arguments", {}),
                 },
                 result=result.result,
-                success=result.success
+                success=result.success,
             )
 
         return results
@@ -320,20 +333,20 @@ class ShellBridge:
     async def _execute_single_tool(
         self,
         tool_call: Dict[str, Any],
-        session: Session,
+        session: SessionSnapshot,
     ) -> ToolExecutionResult:
         """Execute single tool with full safety pipeline.
-        
+
         Pipeline:
         1. Safety validation (Claude Code strategy)
         2. Tool execution
         3. Error handling
         4. Context tracking (Cursor strategy)
-        
+
         Args:
             tool_call: Tool call dictionary
             session: Current session
-            
+
         Returns:
             Execution result
         """
@@ -376,7 +389,7 @@ class ShellBridge:
             execution_time = (datetime.now() - start_time).total_seconds()
 
             # Check if tool execution actually succeeded
-            tool_success = result.success if hasattr(result, 'success') else True
+            tool_success = result.success if hasattr(result, "success") else True
 
             return ToolExecutionResult(
                 success=tool_success,
@@ -401,7 +414,7 @@ class ShellBridge:
         self,
         tool_name: str,
         arguments: Dict[str, Any],
-        session: Session,
+        session: SessionSnapshot,
     ):
         """Track file operations for context (Cursor strategy)."""
         path = arguments.get("path") or arguments.get("file")
@@ -418,15 +431,15 @@ class ShellBridge:
 
     async def _build_context(
         self,
-        session: Session,
+        session: SessionSnapshot,
         additional_context: Optional[Dict[str, Any]] = None,
     ) -> str:
         """Build rich context for LLM (Cursor RAG strategy).
-        
+
         Args:
             session: Current session
             additional_context: Additional context to include
-            
+
         Returns:
             Formatted context string
         """

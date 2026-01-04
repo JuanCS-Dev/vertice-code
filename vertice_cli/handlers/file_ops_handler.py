@@ -34,7 +34,7 @@ class FileOpsHandler:
     Supports both slash commands and palette actions.
     """
 
-    def __init__(self, shell: 'InteractiveShell'):
+    def __init__(self, shell: "InteractiveShell"):
         """
         Initialize with shell reference.
 
@@ -73,7 +73,7 @@ class FileOpsHandler:
         content = result.data.get("content", "")
 
         # Use shell's result renderer for consistent output
-        if hasattr(self.shell, '_result_renderer'):
+        if hasattr(self.shell, "_result_renderer"):
             self.shell._result_renderer.render("read_file", result, {"path": file_path})
         else:
             self.console.print(Panel(content, title=file_path))
@@ -92,9 +92,7 @@ class FileOpsHandler:
             return CommandResult.error("[red]Usage: /write <file_path>[/red]")
 
         # Prompt for content
-        content = await self.shell.enhanced_input.prompt_async(
-            f"Content for {file_path}: "
-        )
+        content = await self.shell.enhanced_input.prompt_async(f"Content for {file_path}: ")
 
         if not content:
             return CommandResult.error("[yellow]Write cancelled[/yellow]")
@@ -146,7 +144,7 @@ class FileOpsHandler:
             table.add_row(
                 match.get("file", ""),
                 str(match.get("line", "")),
-                match.get("text", "")[:80]  # Truncate long lines
+                match.get("text", "")[:80],  # Truncate long lines
             )
 
         self.console.print(table)
@@ -175,11 +173,13 @@ class FileOpsHandler:
 
         tree = result.data.get("tree", "")
 
-        self.console.print(Panel(
-            tree or "[dim]Empty directory[/dim]",
-            title=f"[bold cyan]Directory Tree[/bold cyan] ({path})",
-            border_style="cyan"
-        ))
+        self.console.print(
+            Panel(
+                tree or "[dim]Empty directory[/dim]",
+                title=f"[bold cyan]Directory Tree[/bold cyan] ({path})",
+                border_style="cyan",
+            )
+        )
 
         return CommandResult.ok()
 
@@ -219,13 +219,9 @@ class FileOpsHandler:
         """
         file_path = await self.shell.enhanced_input.prompt_async("File path: ")
         if file_path:
-            instruction = await self.shell.enhanced_input.prompt_async(
-                "Edit instruction: "
-            )
+            instruction = await self.shell.enhanced_input.prompt_async("Edit instruction: ")
             if instruction:
-                await self.shell._process_request_with_llm(
-                    f"edit {file_path}: {instruction}", None
-                )
+                await self.shell._process_request_with_llm(f"edit {file_path}: {instruction}", None)
 
     async def palette_search_files(self) -> None:
         """
@@ -252,9 +248,9 @@ class FileOpsHandler:
 
         for tool_name in sorted(tools):
             tool = self.registry.get(tool_name)
-            category = getattr(tool, 'category', None)
-            category_str = category.value if hasattr(category, 'value') else str(category or '')
-            description = getattr(tool, 'description', '')
+            category = getattr(tool, "category", None)
+            category_str = category.value if hasattr(category, "value") else str(category or "")
+            description = getattr(tool, "description", "")
             table.add_row(tool_name, category_str, description[:60])
 
         self.console.print(table)

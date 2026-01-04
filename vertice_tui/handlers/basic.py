@@ -27,12 +27,7 @@ class BasicCommandHandler:
     def bridge(self):
         return self.app.bridge
 
-    async def handle(
-        self,
-        command: str,
-        args: str,
-        view: "ResponseView"
-    ) -> None:
+    async def handle(self, command: str, args: str, view: "ResponseView") -> None:
         """Route to specific handler method."""
         handlers = {
             "/help": self._handle_help,
@@ -76,6 +71,31 @@ class BasicCommandHandler:
 
     async def _handle_clear(self, args: str, view: "ResponseView") -> None:
         """Handle /clear command."""
+        # Skip confirmation if --force flag
+        if args.strip() == "--force":
+            self._do_clear(view)
+            return
+
+        # Show confirmation dialog
+        from vertice_tui.widgets.modal import ConfirmDialog
+
+        def on_confirm(confirmed: bool) -> None:
+            if confirmed:
+                self._do_clear(view)
+
+        self.app.push_screen(
+            ConfirmDialog(
+                "This will clear all context and conversation history.\nThis cannot be undone.",
+                title="Clear Session?",
+                yes_label="Clear",
+                no_label="Cancel",
+                destructive=True,
+            ),
+            on_confirm,
+        )
+
+    def _do_clear(self, view: "ResponseView") -> None:
+        """Execute clear operation."""
         # Clear UI
         view.clear_all()
         view.add_banner()
@@ -104,10 +124,16 @@ class BasicCommandHandler:
 
     async def _handle_agents(self, args: str, view: "ResponseView") -> None:
         """Handle /agents command."""
-        agents_list = "\n".join([
-            f"- **{name}**: {info.description}"
-            for name, info in self.bridge.agents.AGENT_REGISTRY.items()
-        ]) if hasattr(self.bridge.agents, 'AGENT_REGISTRY') else "20 agents available"
+        agents_list = (
+            "\n".join(
+                [
+                    f"- **{name}**: {info.description}"
+                    for name, info in self.bridge.agents.AGENT_REGISTRY.items()
+                ]
+            )
+            if hasattr(self.bridge.agents, "AGENT_REGISTRY")
+            else "20 agents available"
+        )
         view.add_system_message(f"## 🤖 Available Agents\n\n{agents_list}")
 
     async def _handle_status(self, args: str, view: "ResponseView") -> None:
@@ -115,7 +141,7 @@ class BasicCommandHandler:
         # Get provider info dynamically
         if self.bridge.is_connected:
             provider_info = "✅ Connected"
-            if hasattr(self.bridge.llm, '_vertice_client') and self.bridge.llm._vertice_client:
+            if hasattr(self.bridge.llm, "_vertice_client") and self.bridge.llm._vertice_client:
                 current = self.bridge.llm._vertice_client.current_provider
                 providers = self.bridge.llm._vertice_client.get_available_providers()
                 if current:
@@ -148,7 +174,7 @@ class BasicCommandHandler:
             if results:
                 lines = ["## 🔍 Command Search Results\n"]
                 for r in results:
-                    kb = f" `{r.get('keybinding', '')}`" if r.get('keybinding') else ""
+                    kb = f" `{r.get('keybinding', '')}`" if r.get("keybinding") else ""
                     lines.append(f"- **{r['command']}**{kb}: {r['description']}")
                 view.add_system_message("\n".join(lines))
             else:
@@ -158,7 +184,7 @@ class BasicCommandHandler:
             results = self.bridge.palette.search("", max_results=15)
             lines = ["## ⚡ Command Palette\n", "Type `/palette <query>` to search.\n"]
             for r in results:
-                kb = f" `{r.get('keybinding', '')}`" if r.get('keybinding') else ""
+                kb = f" `{r.get('keybinding', '')}`" if r.get("keybinding") else ""
                 lines.append(f"- **{r['command']}**{kb}: {r['description']}")
             view.add_system_message("\n".join(lines))
 
@@ -184,7 +210,9 @@ class BasicCommandHandler:
             lines = [f"## 💬 Conversation Context ({len(context)} messages)\n"]
             for i, msg in enumerate(context[-10:], 1):
                 role = "👤 User" if msg["role"] == "user" else "🤖 Assistant"
-                content = msg["content"][:100] + "..." if len(msg["content"]) > 100 else msg["content"]
+                content = (
+                    msg["content"][:100] + "..." if len(msg["content"]) > 100 else msg["content"]
+                )
                 lines.append(f"**{role}:** {content}\n")
             view.add_system_message("\n".join(lines))
         else:
@@ -206,7 +234,9 @@ class BasicCommandHandler:
                 status = self.bridge._prometheus_client.get_health_status()
                 view.add_system_message(f"## 🔥 PROMETHEUS Status\n\n```json\n{status}\n```")
             else:
-                view.add_system_message("## 🔥 PROMETHEUS Status\n\nNot initialized (will lazy load on first complex task).")
+                view.add_system_message(
+                    "## 🔥 PROMETHEUS Status\n\nNot initialized (will lazy load on first complex task)."
+                )
 
         elif subcommand == "evolve":
             # Run evolution cycle
@@ -216,6 +246,7 @@ class BasicCommandHandler:
             # Ensure client exists
             if self.bridge._prometheus_client is None:
                 from vertice_tui.core.prometheus_client import PrometheusClient
+
                 self.bridge._prometheus_client = PrometheusClient()
 
             result = await self.bridge._prometheus_client.evolve(iterations)
@@ -225,29 +256,55 @@ class BasicCommandHandler:
             # Show memory status
             if self.bridge._prometheus_client and self.bridge._prometheus_client._provider:
                 memory_status = self.bridge._prometheus_client._provider.get_status()
-                view.add_system_message(f"## 🧠 Memory Status\n\n```json\n{memory_status.get('memory', {})}\n```")
+                view.add_system_message(
+                    f"## 🧠 Memory Status\n\n```json\n{memory_status.get('memory', {})}\n```"
+                )
             else:
                 view.add_system_message("PROMETHEUS not initialized")
 
         elif subcommand == "enable":
-            # Enable PROMETHEUS mode
-            self.bridge._provider_mode = "prometheus"
+            # Enable PROMETHEUS mode - sync with StatusBar
+            self.bridge.prometheus_mode = True
+            try:
+                from vertice_tui.widgets.status_bar import StatusBar
+                from vertice_tui.themes import ThemeManager
+
+                status = self.app.query_one(StatusBar)
+                status.prometheus_mode = True
+                ThemeManager.save_prometheus_preference(True)
+            except Exception as e:
+                import logging
+
+                logging.debug(f"StatusBar sync failed (non-critical): {e}")
             view.add_success("🔥 PROMETHEUS mode enabled. Self-evolution active.")
 
         elif subcommand == "disable":
-            # Disable PROMETHEUS mode
-            self.bridge._provider_mode = "gemini"
+            # Disable PROMETHEUS mode - sync with StatusBar
+            self.bridge.prometheus_mode = False
+            try:
+                from vertice_tui.widgets.status_bar import StatusBar
+                from vertice_tui.themes import ThemeManager
+
+                status = self.app.query_one(StatusBar)
+                status.prometheus_mode = False
+                ThemeManager.save_prometheus_preference(False)
+            except Exception as e:
+                import logging
+
+                logging.debug(f"StatusBar sync failed (non-critical): {e}")
             view.add_success("❄️ PROMETHEUS mode disabled. Using standard Gemini.")
 
         else:
-            view.add_system_message("""
+            view.add_system_message(
+                """
 ## 🔥 PROMETHEUS Commands
 - `/prometheus status`   - Show system status
 - `/prometheus evolve N` - Run N evolution iterations
 - `/prometheus memory`   - Show memory status
 - `/prometheus enable`   - Enable PROMETHEUS mode
 - `/prometheus disable`  - Disable PROMETHEUS mode
-""")
+"""
+            )
 
     async def _handle_providers(self, args: str, view: "ResponseView") -> None:
         """Handle /providers command - Show all available LLM providers."""
@@ -257,7 +314,11 @@ class BasicCommandHandler:
 
             lines = [
                 "## 🌐 LLM Providers\n",
-                "**Available providers:** " + ", ".join(providers) if providers else "No providers available",
+                (
+                    "**Available providers:** " + ", ".join(providers)
+                    if providers
+                    else "No providers available"
+                ),
                 "\n### Status Report\n",
                 f"```\n{status}\n```",
                 "\n### Provider Priority (FREE FIRST)\n",
@@ -296,7 +357,7 @@ class BasicCommandHandler:
             # Switch to specified provider
             provider_name = args.strip().lower()
             try:
-                if hasattr(self.bridge.llm, '_vertice_client') and self.bridge.llm._vertice_client:
+                if hasattr(self.bridge.llm, "_vertice_client") and self.bridge.llm._vertice_client:
                     client = self.bridge.llm._vertice_client
                     available = client.get_available_providers()
 

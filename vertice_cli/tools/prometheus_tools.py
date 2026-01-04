@@ -45,18 +45,18 @@ Use this for complex tasks that benefit from planning and learning.
             "task": {
                 "type": "string",
                 "description": "Task description to execute",
-                "required": True
+                "required": True,
             },
             "use_world_model": {
                 "type": "boolean",
                 "description": "Enable world model simulation (default: true)",
-                "required": False
+                "required": False,
             },
             "use_memory": {
                 "type": "boolean",
                 "description": "Enable memory retrieval (default: true)",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     def set_provider(self, provider):
@@ -64,10 +64,7 @@ Use this for complex tasks that benefit from planning and learning.
         self._provider = provider
 
     async def _execute_validated(
-        self,
-        task: str,
-        use_world_model: bool = True,
-        use_memory: bool = True
+        self, task: str, use_world_model: bool = True, use_memory: bool = True
     ) -> ToolResult:
         if not self._provider:
             return ToolResult(success=False, error="Prometheus provider not initialized")
@@ -92,16 +89,12 @@ class PrometheusMemoryQueryTool(ValidatedTool):
         self.category = ToolCategory.CONTEXT
         self.description = "Query PROMETHEUS 6-type persistent memory system (MIRIX)."
         self.parameters = {
-            "query": {
-                "type": "string",
-                "description": "Query string",
-                "required": True
-            },
+            "query": {"type": "string", "description": "Query string", "required": True},
             "memory_type": {
                 "type": "string",
                 "description": "Specific memory type (episodic, semantic, procedural, core, resource, vault) or 'all'",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     def set_provider(self, provider):
@@ -129,12 +122,14 @@ class PrometheusSimulateTool(ValidatedTool):
         super().__init__()
         self._provider = prometheus_provider
         self.category = ToolCategory.EXECUTION
-        self.description = "Simulate an action or plan using the World Model (SimuRA) without executing it."
+        self.description = (
+            "Simulate an action or plan using the World Model (SimuRA) without executing it."
+        )
         self.parameters = {
             "action_plan": {
                 "type": "string",
                 "description": "Action plan to simulate",
-                "required": True
+                "required": True,
             }
         }
 
@@ -148,13 +143,19 @@ class PrometheusSimulateTool(ValidatedTool):
         try:
             # We need to access the orchestrator's world model directly if possible
             await self._provider._ensure_initialized()
-            if self._provider._orchestrator and hasattr(self._provider._orchestrator, 'world_model'):
+            if self._provider._orchestrator and hasattr(
+                self._provider._orchestrator, "world_model"
+            ):
                 # Assuming world_model has a simulate method
-                if hasattr(self._provider._orchestrator.world_model, 'simulate'):
-                     simulation = await self._provider._orchestrator.world_model.simulate(action_plan)
-                     return ToolResult(success=True, data=simulation)
+                if hasattr(self._provider._orchestrator.world_model, "simulate"):
+                    simulation = await self._provider._orchestrator.world_model.simulate(
+                        action_plan
+                    )
+                    return ToolResult(success=True, data=simulation)
                 else:
-                     return ToolResult(success=False, error="World Model does not have simulate method")
+                    return ToolResult(
+                        success=False, error="World Model does not have simulate method"
+                    )
             return ToolResult(success=False, error="World Model not available")
         except Exception as e:
             return ToolResult(success=False, error=str(e))
@@ -172,7 +173,7 @@ class PrometheusEvolveTool(ValidatedTool):
             "iterations": {
                 "type": "integer",
                 "description": "Number of evolution iterations",
-                "required": False
+                "required": False,
             }
         }
 
@@ -202,13 +203,13 @@ class PrometheusReflectTool(ValidatedTool):
             "task_id": {
                 "type": "string",
                 "description": "ID of the task to reflect on (optional, reflects on last if empty)",
-                "required": False
+                "required": False,
             },
-             "outcome": {
+            "outcome": {
                 "type": "string",
                 "description": "Outcome of the task (success/failure details)",
-                "required": True
-            }
+                "required": True,
+            },
         }
 
     def set_provider(self, provider):
@@ -219,13 +220,15 @@ class PrometheusReflectTool(ValidatedTool):
             return ToolResult(success=False, error="Prometheus provider not initialized")
 
         try:
-             await self._provider._ensure_initialized()
-             if self._provider._orchestrator and hasattr(self._provider._orchestrator, 'reflection'):
-                 # Assuming reflection module has a reflect method
-                 if hasattr(self._provider._orchestrator.reflection, 'reflect'):
-                     reflection = await self._provider._orchestrator.reflection.reflect(outcome, task_id)
-                     return ToolResult(success=True, data=reflection)
-             return ToolResult(success=False, error="Reflection module not available")
+            await self._provider._ensure_initialized()
+            if self._provider._orchestrator and hasattr(self._provider._orchestrator, "reflection"):
+                # Assuming reflection module has a reflect method
+                if hasattr(self._provider._orchestrator.reflection, "reflect"):
+                    reflection = await self._provider._orchestrator.reflection.reflect(
+                        outcome, task_id
+                    )
+                    return ToolResult(success=True, data=reflection)
+            return ToolResult(success=False, error="Reflection module not available")
         except Exception as e:
             return ToolResult(success=False, error=str(e))
 
@@ -242,29 +245,33 @@ class PrometheusCreateToolTool(ValidatedTool):
             "tool_description": {
                 "type": "string",
                 "description": "Description of the tool to create",
-                "required": True
+                "required": True,
             },
             "language": {
                 "type": "string",
                 "description": "Language for the tool (python/bash)",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     def set_provider(self, provider):
         self._provider = provider
 
-    async def _execute_validated(self, tool_description: str, language: str = "python") -> ToolResult:
+    async def _execute_validated(
+        self, tool_description: str, language: str = "python"
+    ) -> ToolResult:
         if not self._provider:
             return ToolResult(success=False, error="Prometheus provider not initialized")
 
         try:
-             await self._provider._ensure_initialized()
-             # Assuming orchestrator has a tool_factory
-             if hasattr(self._provider._orchestrator, 'tool_factory'):
-                 new_tool = await self._provider._orchestrator.tool_factory.create_tool(tool_description, language)
-                 return ToolResult(success=True, data=new_tool)
-             return ToolResult(success=False, error="Tool Factory not available")
+            await self._provider._ensure_initialized()
+            # Assuming orchestrator has a tool_factory
+            if hasattr(self._provider._orchestrator, "tool_factory"):
+                new_tool = await self._provider._orchestrator.tool_factory.create_tool(
+                    tool_description, language
+                )
+                return ToolResult(success=True, data=new_tool)
+            return ToolResult(success=False, error="Tool Factory not available")
         except Exception as e:
             return ToolResult(success=False, error=str(e))
 
@@ -302,10 +309,10 @@ class PrometheusBenchmarkTool(ValidatedTool):
         self.category = ToolCategory.SYSTEM
         self.description = "Run PROMETHEUS benchmark suite to measure capabilities."
         self.parameters = {
-             "suite": {
+            "suite": {
                 "type": "string",
                 "description": "Benchmark suite to run (reasoning, coding, memory, all)",
-                "required": False
+                "required": False,
             }
         }
 
@@ -317,11 +324,11 @@ class PrometheusBenchmarkTool(ValidatedTool):
             return ToolResult(success=False, error="Prometheus provider not initialized")
 
         try:
-             await self._provider._ensure_initialized()
-             # Assuming orchestrator has a run_benchmark method
-             if hasattr(self._provider._orchestrator, 'run_benchmark'):
-                 results = await self._provider._orchestrator.run_benchmark(suite)
-                 return ToolResult(success=True, data=results)
-             return ToolResult(success=False, error="Benchmark capability not available")
+            await self._provider._ensure_initialized()
+            # Assuming orchestrator has a run_benchmark method
+            if hasattr(self._provider._orchestrator, "run_benchmark"):
+                results = await self._provider._orchestrator.run_benchmark(suite)
+                return ToolResult(success=True, data=results)
+            return ToolResult(success=False, error="Benchmark capability not available")
         except Exception as e:
             return ToolResult(success=False, error=str(e))

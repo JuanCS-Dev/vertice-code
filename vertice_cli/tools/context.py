@@ -30,7 +30,7 @@ class GetContextTool(ValidatedTool):
                     ["git", "rev-parse", "--abbrev-ref", "HEAD"],
                     capture_output=True,
                     text=True,
-                    timeout=2
+                    timeout=2,
                 )
                 git_branch = result.stdout.strip() if result.returncode == 0 else None
             except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
@@ -41,14 +41,10 @@ class GetContextTool(ValidatedTool):
                 "git_branch": git_branch,
                 "modified_files": list(session_context.modified_files) if session_context else [],
                 "read_files": list(session_context.read_files) if session_context else [],
-                "tool_calls": len(session_context.tool_calls) if session_context else 0
+                "tool_calls": len(session_context.tool_calls) if session_context else 0,
             }
 
-            return ToolResult(
-                success=True,
-                data=context,
-                metadata=context
-            )
+            return ToolResult(success=True, data=context, metadata=context)
         except Exception as e:
             return ToolResult(success=False, error=str(e))
 
@@ -61,23 +57,24 @@ class SaveSessionTool(ValidatedTool):
         self.category = ToolCategory.CONTEXT
         self.description = "Save conversation session to file"
         self.parameters = {
-            "path": {
-                "type": "string",
-                "description": "Output file path",
-                "required": True
-            },
+            "path": {"type": "string", "description": "Output file path", "required": True},
             "format": {
                 "type": "string",
                 "description": "Format: markdown or json",
-                "required": False
-            }
+                "required": False,
+            },
         }
+
     def get_validators(self):
         """Validate parameters."""
-        return {}
+        return {
+            "path": lambda v: v is not None and len(str(v).strip()) > 0,
+            "format": lambda v: v is None or v in ("markdown", "json"),
+        }
 
-
-    async def _execute_validated(self, path: str, format: str = "markdown", session_context=None) -> ToolResult:
+    async def _execute_validated(
+        self, path: str, format: str = "markdown", session_context=None
+    ) -> ToolResult:
         """Save session."""
         try:
             if not session_context:
@@ -92,7 +89,7 @@ class SaveSessionTool(ValidatedTool):
                     "cwd": session_context.cwd,
                     "modified_files": list(session_context.modified_files),
                     "read_files": list(session_context.read_files),
-                    "tool_calls": session_context.tool_calls
+                    "tool_calls": session_context.tool_calls,
                 }
                 file_path.write_text(json.dumps(data, indent=2))
             else:
@@ -126,7 +123,7 @@ class SaveSessionTool(ValidatedTool):
             return ToolResult(
                 success=True,
                 data=f"Session saved to {path}",
-                metadata={"path": str(file_path), "format": format}
+                metadata={"path": str(file_path), "format": format},
             )
         except Exception as e:
             return ToolResult(success=False, error=str(e))
@@ -140,21 +137,19 @@ class RestoreBackupTool(ValidatedTool):
         self.category = ToolCategory.CONTEXT
         self.description = "Restore file from backup"
         self.parameters = {
-            "file": {
-                "type": "string",
-                "description": "File to restore",
-                "required": True
-            },
+            "file": {"type": "string", "description": "File to restore", "required": True},
             "backup_id": {
                 "type": "string",
                 "description": "Specific backup ID (or latest)",
-                "required": False
-            }
+                "required": False,
+            },
         }
+
     def get_validators(self):
         """Validate parameters."""
-        return {}
-
+        return {
+            "file": lambda v: v is not None and len(str(v).strip()) > 0,
+        }
 
     async def _execute_validated(self, file: str, backup_id: Optional[str] = None) -> ToolResult:
         """Restore from backup."""
@@ -185,10 +180,7 @@ class RestoreBackupTool(ValidatedTool):
             return ToolResult(
                 success=True,
                 data=f"Restored {file} from {backup_path.name}",
-                metadata={
-                    "file": str(dest_path),
-                    "backup": str(backup_path)
-                }
+                metadata={"file": str(dest_path), "backup": str(backup_path)},
             )
         except Exception as e:
             return ToolResult(success=False, error=str(e))

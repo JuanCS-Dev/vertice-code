@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 
 class MessagePriority(Enum):
     """Priority levels for messages."""
+
     LOW = 0
     NORMAL = 1
     HIGH = 2
@@ -39,6 +40,7 @@ class MessagePriority(Enum):
 
 class MessageType(Enum):
     """Types of inter-agent messages."""
+
     REQUEST = "request"
     RESPONSE = "response"
     HANDOFF = "handoff"
@@ -49,6 +51,7 @@ class MessageType(Enum):
 
 class AgentRole(Enum):
     """Standard agent roles in the system."""
+
     PLANNER = "planner"
     EXECUTOR = "executor"
     REVIEWER = "reviewer"
@@ -63,6 +66,7 @@ class AgentRole(Enum):
 
 class TaskStatus(Enum):
     """Status of a task in execution."""
+
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     BLOCKED = "blocked"
@@ -83,15 +87,16 @@ class StreamingChunkType(Enum):
         yield StreamingChunk(type=StreamingChunkType.STATUS, data="Loading...")
         yield StreamingChunk(type=StreamingChunkType.RESULT, data=final_result)
     """
-    THINKING = "thinking"      # LLM tokens being generated (display as-is)
-    STATUS = "status"          # Status messages (display with newline)
-    COMMAND = "command"        # Command to execute (syntax highlight)
-    EXECUTING = "executing"    # Currently executing (show spinner)
-    RESULT = "result"          # Final result (format appropriately)
-    ERROR = "error"            # Error message (display in red)
-    VERDICT = "verdict"        # Governance verdict (JusticaAgent)
-    REASONING = "reasoning"    # Reasoning steps (collapse in UI)
-    METRICS = "metrics"        # Performance metrics (table format)
+
+    THINKING = "thinking"  # LLM tokens being generated (display as-is)
+    STATUS = "status"  # Status messages (display with newline)
+    COMMAND = "command"  # Command to execute (syntax highlight)
+    EXECUTING = "executing"  # Currently executing (show spinner)
+    RESULT = "result"  # Final result (format appropriately)
+    ERROR = "error"  # Error message (display in red)
+    VERDICT = "verdict"  # Governance verdict (JusticaAgent)
+    REASONING = "reasoning"  # Reasoning steps (collapse in UI)
+    METRICS = "metrics"  # Performance metrics (table format)
 
 
 @dataclass
@@ -113,6 +118,7 @@ class StreamingChunk:
     Note:
         The 'content' key is DEPRECATED. Use 'data' for all chunk payloads.
     """
+
     type: StreamingChunkType
     data: Any
     metadata: Dict[str, Any] = field(default_factory=dict)
@@ -122,7 +128,7 @@ class StreamingChunk:
         return {
             "type": self.type.value,
             "data": self.data,
-            **({"metadata": self.metadata} if self.metadata else {})
+            **({"metadata": self.metadata} if self.metadata else {}),
         }
 
     def __str__(self) -> str:
@@ -134,9 +140,9 @@ class StreamingChunk:
         elif self.type == StreamingChunkType.ERROR:
             return f"❌ {self.data}\n"
         elif self.type == StreamingChunkType.RESULT:
-            if hasattr(self.data, 'to_markdown'):
+            if hasattr(self.data, "to_markdown"):
                 return self.data.to_markdown()
-            elif hasattr(self.data, 'data'):
+            elif hasattr(self.data, "data"):
                 return str(self.data.data)
             return str(self.data)
         else:
@@ -146,6 +152,7 @@ class StreamingChunk:
 @dataclass
 class AgentIdentity:
     """Identity of an agent in the system."""
+
     agent_id: str
     role: AgentRole
     capabilities: Set[str] = field(default_factory=set)
@@ -159,6 +166,7 @@ class AgentIdentity:
 @dataclass
 class MessageEnvelope:
     """Standard message envelope for all agent communication."""
+
     message_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     timestamp: float = field(default_factory=time.time)
     message_type: MessageType = MessageType.REQUEST
@@ -182,6 +190,7 @@ class MessageEnvelope:
 @dataclass
 class ExecutionStep:
     """A single step in an execution plan."""
+
     step_id: str
     description: str
     action: str
@@ -199,6 +208,7 @@ class ExecutionPlan:
 
     This is the standard format for communicating work to be done.
     """
+
     plan_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     created_at: float = field(default_factory=time.time)
     created_by: Optional[AgentIdentity] = None
@@ -266,6 +276,7 @@ class ContextBundle:
 
     Contains all context needed for an agent to understand and continue work.
     """
+
     bundle_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     created_at: float = field(default_factory=time.time)
 
@@ -300,11 +311,13 @@ class ContextBundle:
 
     def add_error(self, error: str, context: Optional[Dict[str, Any]] = None) -> None:
         """Add an error to context."""
-        self.errors_encountered.append({
-            "error": error,
-            "timestamp": time.time(),
-            "context": context or {},
-        })
+        self.errors_encountered.append(
+            {
+                "error": error,
+                "timestamp": time.time(),
+                "context": context or {},
+            }
+        )
 
 
 @dataclass
@@ -314,6 +327,7 @@ class ReviewFeedback:
 
     Used to communicate corrections, suggestions, and approval status.
     """
+
     feedback_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     created_at: float = field(default_factory=time.time)
     reviewer: Optional[AgentIdentity] = None
@@ -354,6 +368,7 @@ class HandoffRequest:
 
     Used when one agent needs to delegate or transfer work.
     """
+
     handoff_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     created_at: float = field(default_factory=time.time)
 
@@ -431,11 +446,7 @@ class AgentProtocol:
         self.validator = ProtocolValidator()
 
     def create_plan(
-        self,
-        title: str,
-        goal: str,
-        steps: List[Dict[str, Any]],
-        **kwargs
+        self, title: str, goal: str, steps: List[Dict[str, Any]], **kwargs
     ) -> ExecutionPlan:
         """
         Create a validated execution plan.
@@ -460,11 +471,7 @@ class AgentProtocol:
             execution_steps.append(exec_step)
 
         plan = ExecutionPlan(
-            created_by=self.identity,
-            title=title,
-            goal=goal,
-            steps=execution_steps,
-            **kwargs
+            created_by=self.identity, title=title, goal=goal, steps=execution_steps, **kwargs
         )
 
         # Validate
@@ -475,10 +482,7 @@ class AgentProtocol:
         return plan
 
     def create_context_bundle(
-        self,
-        working_directory: str,
-        files: Optional[List[str]] = None,
-        **kwargs
+        self, working_directory: str, files: Optional[List[str]] = None, **kwargs
     ) -> ContextBundle:
         """
         Create a context bundle for handoff.
@@ -491,18 +495,12 @@ class AgentProtocol:
             ContextBundle ready for handoff
         """
         bundle = ContextBundle(
-            working_directory=working_directory,
-            relevant_files=files or [],
-            **kwargs
+            working_directory=working_directory, relevant_files=files or [], **kwargs
         )
 
         return bundle
 
-    def create_feedback(
-        self,
-        approved: bool,
-        **kwargs
-    ) -> ReviewFeedback:
+    def create_feedback(self, approved: bool, **kwargs) -> ReviewFeedback:
         """
         Create review feedback.
 
@@ -512,11 +510,7 @@ class AgentProtocol:
         Returns:
             ReviewFeedback ready to send
         """
-        return ReviewFeedback(
-            reviewer=self.identity,
-            approved=approved,
-            **kwargs
-        )
+        return ReviewFeedback(reviewer=self.identity, approved=approved, **kwargs)
 
     def create_handoff(
         self,
@@ -553,10 +547,7 @@ class AgentProtocol:
         return handoff
 
     def create_message(
-        self,
-        message_type: MessageType,
-        receiver: Optional[AgentIdentity] = None,
-        **kwargs
+        self, message_type: MessageType, receiver: Optional[AgentIdentity] = None, **kwargs
     ) -> MessageEnvelope:
         """
         Create a message envelope.
@@ -569,60 +560,52 @@ class AgentProtocol:
             MessageEnvelope ready to send
         """
         return MessageEnvelope(
-            message_type=message_type,
-            sender=self.identity,
-            receiver=receiver,
-            **kwargs
+            message_type=message_type, sender=self.identity, receiver=receiver, **kwargs
         )
 
 
 # Convenience factory functions
 
+
 def create_planner_identity(agent_id: str = "planner") -> AgentIdentity:
     """Create a planner agent identity."""
     return AgentIdentity(
-        agent_id=agent_id,
-        role=AgentRole.PLANNER,
-        capabilities={"plan", "analyze", "decompose"}
+        agent_id=agent_id, role=AgentRole.PLANNER, capabilities={"plan", "analyze", "decompose"}
     )
 
 
 def create_executor_identity(agent_id: str = "executor") -> AgentIdentity:
     """Create an executor agent identity."""
     return AgentIdentity(
-        agent_id=agent_id,
-        role=AgentRole.EXECUTOR,
-        capabilities={"execute", "file_ops", "command"}
+        agent_id=agent_id, role=AgentRole.EXECUTOR, capabilities={"execute", "file_ops", "command"}
     )
 
 
 def create_reviewer_identity(agent_id: str = "reviewer") -> AgentIdentity:
     """Create a reviewer agent identity."""
     return AgentIdentity(
-        agent_id=agent_id,
-        role=AgentRole.REVIEWER,
-        capabilities={"review", "validate", "quality"}
+        agent_id=agent_id, role=AgentRole.REVIEWER, capabilities={"review", "validate", "quality"}
     )
 
 
 # Export all public symbols
 __all__ = [
-    'MessagePriority',
-    'MessageType',
-    'AgentRole',
-    'TaskStatus',
-    'StreamingChunkType',
-    'StreamingChunk',
-    'AgentIdentity',
-    'MessageEnvelope',
-    'ExecutionStep',
-    'ExecutionPlan',
-    'ContextBundle',
-    'ReviewFeedback',
-    'HandoffRequest',
-    'ProtocolValidator',
-    'AgentProtocol',
-    'create_planner_identity',
-    'create_executor_identity',
-    'create_reviewer_identity',
+    "MessagePriority",
+    "MessageType",
+    "AgentRole",
+    "TaskStatus",
+    "StreamingChunkType",
+    "StreamingChunk",
+    "AgentIdentity",
+    "MessageEnvelope",
+    "ExecutionStep",
+    "ExecutionPlan",
+    "ContextBundle",
+    "ReviewFeedback",
+    "HandoffRequest",
+    "ProtocolValidator",
+    "AgentProtocol",
+    "create_planner_identity",
+    "create_executor_identity",
+    "create_reviewer_identity",
 ]

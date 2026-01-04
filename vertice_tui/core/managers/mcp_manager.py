@@ -96,9 +96,7 @@ class MCPManager:
             "server": asdict(self._server_state),
             "connections": [asdict(c) for c in self._connections.values()],
             "total_exposed_tools": len(self._exposed_tools),
-            "total_imported_tools": sum(
-                len(tools) for tools in self._imported_tools.values()
-            ),
+            "total_imported_tools": sum(len(tools) for tools in self._imported_tools.values()),
         }
 
     def is_running(self) -> bool:
@@ -139,6 +137,7 @@ class MCPManager:
             # Get default registry if not provided
             if tool_registry is None:
                 from vertice_cli.tools.registry_helper import get_default_registry
+
                 tool_registry = get_default_registry()
 
             # Configure and initialize
@@ -162,7 +161,9 @@ class MCPManager:
             self._exposed_tools = list(all_tools.keys())
             self._server_state.exposed_tools = len(self._exposed_tools)
 
-            logger.info(f"MCP server started on {host}:{port} with {len(self._exposed_tools)} tools")
+            logger.info(
+                f"MCP server started on {host}:{port} with {len(self._exposed_tools)} tools"
+            )
 
             return {
                 "success": True,
@@ -305,10 +306,7 @@ class MCPManager:
         """
         return {
             "exposed": self._exposed_tools.copy(),
-            "imported": {
-                name: tools.copy()
-                for name, tools in self._imported_tools.items()
-            },
+            "imported": {name: tools.copy() for name, tools in self._imported_tools.items()},
         }
 
     def get_exposed_tools(self) -> List[str]:
@@ -317,10 +315,7 @@ class MCPManager:
 
     def get_imported_tools(self) -> Dict[str, List[str]]:
         """Get tools imported from external servers."""
-        return {
-            name: tools.copy()
-            for name, tools in self._imported_tools.items()
-        }
+        return {name: tools.copy() for name, tools in self._imported_tools.items()}
 
     # =========================================================================
     # CONNECTION INFO
@@ -328,11 +323,7 @@ class MCPManager:
 
     def get_connections(self) -> List[Dict[str, Any]]:
         """Get list of active connections."""
-        return [
-            asdict(conn)
-            for conn in self._connections.values()
-            if conn.connected
-        ]
+        return [asdict(conn) for conn in self._connections.values() if conn.connected]
 
     def get_connection(self, name: str) -> Optional[Dict[str, Any]]:
         """Get info for a specific connection."""

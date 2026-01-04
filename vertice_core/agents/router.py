@@ -434,15 +434,12 @@ class SemanticRouter:
 
             # Max similarity across all examples
             max_sim = max(
-                self._cosine_similarity(request_embedding, emb)
-                for emb in route._embeddings
+                self._cosine_similarity(request_embedding, emb) for emb in route._embeddings
             )
 
             # Boost if keywords match
             text_lower = request.lower()
-            keyword_boost = sum(
-                0.05 for kw in route.keywords if kw in text_lower
-            )
+            keyword_boost = sum(0.05 for kw in route.keywords if kw in text_lower)
             final_score = min(max_sim + keyword_boost, 1.0)
 
             scores.append((route.name, final_score))
@@ -538,11 +535,7 @@ class SemanticRouter:
                 candidates = [name for name, _ in top_candidates]
 
                 # Ask LLM
-                result = await asyncio.to_thread(
-                    self._llm_classify_func,
-                    request,
-                    candidates
-                )
+                result = await asyncio.to_thread(self._llm_classify_func, request, candidates)
 
                 # Parse result
                 if result in self._route_map:
@@ -571,16 +564,30 @@ class SemanticRouter:
 
         # Complex indicators
         complex_indicators = [
-            "entire", "all files", "whole project", "system",
-            "refactor", "migrate", "redesign", "integrate",
-            "multiple", "all the", "comprehensive",
+            "entire",
+            "all files",
+            "whole project",
+            "system",
+            "refactor",
+            "migrate",
+            "redesign",
+            "integrate",
+            "multiple",
+            "all the",
+            "comprehensive",
         ]
         complex_count = sum(1 for ind in complex_indicators if ind in request_lower)
 
         # Simple indicators
         simple_indicators = [
-            "hello", "hi", "thanks", "what is", "explain",
-            "fix typo", "add comment", "rename",
+            "hello",
+            "hi",
+            "thanks",
+            "what is",
+            "explain",
+            "fix typo",
+            "add comment",
+            "rename",
         ]
         simple_count = sum(1 for ind in simple_indicators if ind in request_lower)
 

@@ -52,25 +52,25 @@ async def process_natural(repl: "MasterpieceREPL", message: str) -> None:
     msg_lower = message.lower()
 
     # File operations
-    if any(kw in msg_lower for kw in ['read', 'show', 'open', 'cat']):
-        match = re.search(r'[\w/.]+\.\w+', message)
+    if any(kw in msg_lower for kw in ["read", "show", "open", "cat"]):
+        match = re.search(r"[\w/.]+\.\w+", message)
         if match:
-            await process_tool(repl, '/read', match.group(0))
+            await process_tool(repl, "/read", match.group(0))
             return
 
     # Bash execution
-    if any(kw in msg_lower for kw in ['run', 'execute', 'bash']):
-        cmd = re.sub(r'^.*(run|execute|bash)\s+', '', message, flags=re.IGNORECASE)
-        await process_tool(repl, '/run', cmd)
+    if any(kw in msg_lower for kw in ["run", "execute", "bash"]):
+        cmd = re.sub(r"^.*(run|execute|bash)\s+", "", message, flags=re.IGNORECASE)
+        await process_tool(repl, "/run", cmd)
         return
 
     # Git operations
-    if 'git' in msg_lower:
-        if 'status' in msg_lower:
-            await process_tool(repl, '/git', 'status')
+    if "git" in msg_lower:
+        if "status" in msg_lower:
+            await process_tool(repl, "/git", "status")
             return
-        elif 'diff' in msg_lower:
-            await process_tool(repl, '/git', 'diff')
+        elif "diff" in msg_lower:
+            await process_tool(repl, "/git", "diff")
             return
 
     # FALLBACK: Old agent detection (kept for compatibility)

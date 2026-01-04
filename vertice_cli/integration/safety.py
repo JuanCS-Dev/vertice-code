@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class SafetyValidator:
     """Validates tool calls and shell commands for safety.
-    
+
     Implements multi-layer security:
     1. Dangerous pattern detection (Claude Code strategy)
     2. Permission whitelisting (Codex strategy)
@@ -61,7 +61,7 @@ class SafetyValidator:
         allowed_paths: Optional[List[str]] = None,
     ):
         """Initialize safety validator.
-        
+
         Args:
             enable_whitelist: Enable permission whitelist
             enable_blacklist: Enable dangerous pattern blacklist
@@ -80,19 +80,31 @@ class SafetyValidator:
 
         # Permission whitelist (can be extended by user)
         self.whitelisted_commands = {
-            "git status", "git log", "git diff", "git show",
-            "ls", "pwd", "cat", "grep", "find", "tree",
-            "echo", "printf", "wc", "head", "tail",
+            "git status",
+            "git log",
+            "git diff",
+            "git show",
+            "ls",
+            "pwd",
+            "cat",
+            "grep",
+            "find",
+            "tree",
+            "echo",
+            "printf",
+            "wc",
+            "head",
+            "tail",
         }
 
         logger.info(f"SafetyValidator initialized with {len(self.allowed_paths)} allowed paths")
 
     def is_safe(self, tool_call: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
         """Check if a tool call is safe to execute.
-        
+
         Args:
             tool_call: Tool call dictionary with 'tool', 'arguments'
-            
+
         Returns:
             Tuple of (is_safe, reason_if_unsafe)
         """
@@ -132,9 +144,7 @@ class SafetyValidator:
         return True, None
 
     def _check_blacklist(
-        self,
-        tool_name: str,
-        arguments: Dict[str, Any]
+        self, tool_name: str, arguments: Dict[str, Any]
     ) -> Tuple[bool, Optional[str]]:
         """Check against dangerous patterns."""
         patterns = self.DANGEROUS_OPERATIONS.get(tool_name, [])

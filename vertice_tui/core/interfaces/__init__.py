@@ -68,11 +68,7 @@ class IPullRequestManager(ABC):
 
     @abstractmethod
     async def create_pull_request(
-        self,
-        title: str,
-        body: Optional[str] = None,
-        base: str = "main",
-        draft: bool = False
+        self, title: str, body: Optional[str] = None, base: str = "main", draft: bool = False
     ) -> Dict[str, Any]:
         """Create a GitHub pull request."""
         pass
@@ -93,10 +89,7 @@ class IMemoryManager(ABC):
 
     @abstractmethod
     def write_memory(
-        self,
-        content: str,
-        scope: str = "project",
-        append: bool = False
+        self, content: str, scope: str = "project", append: bool = False
     ) -> Dict[str, Any]:
         """Write to MEMORY.md file."""
         pass
@@ -141,20 +134,13 @@ class IAuthenticationManager(ABC):
 
     @abstractmethod
     def login(
-        self,
-        provider: str = "gemini",
-        api_key: Optional[str] = None,
-        scope: str = "global"
+        self, provider: str = "gemini", api_key: Optional[str] = None, scope: str = "global"
     ) -> Dict[str, Any]:
         """Login/configure API key for a provider."""
         pass
 
     @abstractmethod
-    def logout(
-        self,
-        provider: Optional[str] = None,
-        scope: str = "all"
-    ) -> Dict[str, Any]:
+    def logout(self, provider: Optional[str] = None, scope: str = "all") -> Dict[str, Any]:
         """Logout/remove API key for a provider."""
         pass
 
@@ -166,10 +152,10 @@ class IAuthenticationManager(ABC):
 
 # Re-export all interfaces
 __all__ = [
-    'ITodoManager',
-    'IStatusManager',
-    'IPullRequestManager',
-    'IMemoryManager',
-    'IContextManager',
-    'IAuthenticationManager',
+    "ITodoManager",
+    "IStatusManager",
+    "IPullRequestManager",
+    "IMemoryManager",
+    "IContextManager",
+    "IAuthenticationManager",
 ]

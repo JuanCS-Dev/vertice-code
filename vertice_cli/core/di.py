@@ -452,24 +452,28 @@ class VerticeContainer(BaseContainer):
         """Get LLM client singleton."""
         # Lazy import to avoid circular dependencies
         from vertice_cli.core.llm import get_default_client
+
         return get_default_client()
 
     @classmethod
     def vertice_client(cls):
         """Get Vertice client singleton."""
         from vertice_core.clients.vertice_client import get_client
+
         return get_client()
 
     @classmethod
     def router(cls):
         """Get router singleton."""
         from vertice_cli.core.providers.vertice_router import get_router
+
         return get_router()
 
     @classmethod
     def semantic_router(cls):
         """Get semantic router singleton."""
         from vertice_core.agents.router import get_router
+
         return get_router()
 
     # ==========================================================================
@@ -480,18 +484,21 @@ class VerticeContainer(BaseContainer):
     def memory_manager(cls):
         """Get memory manager singleton."""
         from vertice_cli.core.memory import get_memory_manager
+
         return get_memory_manager()
 
     @classmethod
     def context_compactor(cls):
         """Get context compactor singleton."""
         from vertice_cli.core.context_compact import get_context_compactor
+
         return get_context_compactor()
 
     @classmethod
     def context_tracker(cls):
         """Get context tracker singleton."""
         from vertice_cli.core.context_tracker import get_default_tracker
+
         return get_default_tracker()
 
     # ==========================================================================
@@ -502,12 +509,14 @@ class VerticeContainer(BaseContainer):
     def session_manager(cls):
         """Get session manager singleton."""
         from vertice_cli.core.session_manager import get_default_manager
+
         return get_default_manager()
 
     @classmethod
     def undo_manager(cls):
         """Get undo manager singleton."""
         from vertice_cli.core.undo_manager import get_default_manager
+
         return get_default_manager()
 
     # ==========================================================================
@@ -518,12 +527,14 @@ class VerticeContainer(BaseContainer):
     def intent_classifier(cls):
         """Get intent classifier singleton."""
         from vertice_cli.core.intent_classifier import get_classifier
+
         return get_classifier()
 
     @classmethod
     def suggestion_engine(cls):
         """Get suggestion engine singleton."""
         from vertice_cli.intelligence.engine import get_engine
+
         return get_engine()
 
     # ==========================================================================
@@ -534,12 +545,14 @@ class VerticeContainer(BaseContainer):
     def rate_limiter(cls):
         """Get rate limiter singleton."""
         from vertice_cli.core.resilience import get_rate_limiter
+
         return get_rate_limiter()
 
     @classmethod
     def error_handler(cls):
         """Get error escalation handler singleton."""
         from vertice_cli.core.errors.escalation import get_default_handler
+
         return get_default_handler()
 
     # ==========================================================================
@@ -550,6 +563,7 @@ class VerticeContainer(BaseContainer):
     def audit_logger(cls):
         """Get audit logger singleton."""
         from vertice_cli.core.audit_logger import get_default_logger
+
         return get_default_logger()
 
     # ==========================================================================
@@ -560,12 +574,14 @@ class VerticeContainer(BaseContainer):
     def event_bus(cls):
         """Get event bus singleton."""
         from vertice_core.messaging.events import get_global_bus
+
         return get_global_bus()
 
     @classmethod
     def message_broker(cls):
         """Get message broker singleton."""
         from vertice_core.messaging.memory import get_global_broker
+
         return get_global_broker()
 
     # ==========================================================================
@@ -576,12 +592,14 @@ class VerticeContainer(BaseContainer):
     def agent_registry(cls):
         """Get agent registry singleton."""
         from vertice_agents.registry import AgentRegistry
+
         return AgentRegistry.instance()
 
     @classmethod
     def agency(cls):
         """Get agency singleton."""
         from core.agency import get_agency
+
         return get_agency()
 
 
@@ -611,6 +629,7 @@ class TestContainer(BaseContainer):
     def llm_client(cls):
         """Get mock LLM client."""
         from unittest.mock import MagicMock
+
         mock = MagicMock()
         mock.complete.return_value = "mock response"
         return mock
@@ -619,6 +638,7 @@ class TestContainer(BaseContainer):
     def router(cls):
         """Get mock router."""
         from unittest.mock import MagicMock
+
         return MagicMock()
 
 
@@ -630,6 +650,7 @@ def with_container(container_class: Type[BaseContainer]):
         ... def test_feature():
         ...     client = Container.llm_client()  # Uses TestContainer
     """
+
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> T:
@@ -641,7 +662,9 @@ def with_container(container_class: Type[BaseContainer]):
             finally:
                 if original:
                     globals()["Container"] = original
+
         return wrapper
+
     return decorator
 
 

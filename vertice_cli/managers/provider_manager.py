@@ -19,6 +19,7 @@ import threading
 
 class ProviderStatus(Enum):
     """Provider health status."""
+
     HEALTHY = auto()
     DEGRADED = auto()
     UNHEALTHY = auto()
@@ -27,6 +28,7 @@ class ProviderStatus(Enum):
 
 class ProviderType(Enum):
     """LLM provider types."""
+
     OLLAMA = "ollama"
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
@@ -41,6 +43,7 @@ class ProviderType(Enum):
 @dataclass
 class ProviderConfig:
     """Provider configuration."""
+
     name: str
     type: ProviderType
     base_url: str
@@ -52,12 +55,14 @@ class ProviderConfig:
     enabled: bool = True
     rate_limit: Optional[int] = None  # requests per minute
     metadata: Dict[str, Any] = field(default_factory=dict)
-    capabilities: Dict[str, bool] = field(default_factory=lambda: {
-        "native_code_execution": False,
-        "caching": False,
-        "grounding": False,
-        "system_instruction": True
-    })
+    capabilities: Dict[str, bool] = field(
+        default_factory=lambda: {
+            "native_code_execution": False,
+            "caching": False,
+            "grounding": False,
+            "system_instruction": True,
+        }
+    )
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
@@ -78,6 +83,7 @@ class ProviderConfig:
 @dataclass
 class ProviderHealth:
     """Provider health information."""
+
     status: ProviderStatus
     last_check: float
     latency_ms: Optional[float] = None
@@ -141,10 +147,7 @@ class ProviderManager:
         """Add a provider."""
         with self._lock:
             self._providers[config.name] = config
-            self._health[config.name] = ProviderHealth(
-                status=ProviderStatus.UNKNOWN,
-                last_check=0
-            )
+            self._health[config.name] = ProviderHealth(status=ProviderStatus.UNKNOWN, last_check=0)
             self._request_counts[config.name] = 0
             self._last_requests[config.name] = 0
 
@@ -160,9 +163,7 @@ class ProviderManager:
             return False
 
     def get_provider(
-        self,
-        name: Optional[str] = None,
-        strategy: str = "priority"
+        self, name: Optional[str] = None, strategy: str = "priority"
     ) -> Optional[ProviderConfig]:
         """
         Get a provider.
@@ -180,16 +181,14 @@ class ProviderManager:
 
             # Get available providers
             available = [
-                (n, c) for n, c in self._providers.items()
+                (n, c)
+                for n, c in self._providers.items()
                 if c.enabled and self._health[n].is_available()
             ]
 
             if not available:
                 # Fallback to any enabled provider
-                available = [
-                    (n, c) for n, c in self._providers.items()
-                    if c.enabled
-                ]
+                available = [(n, c) for n, c in self._providers.items() if c.enabled]
 
             if not available:
                 return None
@@ -211,9 +210,7 @@ class ProviderManager:
             return available[0][1]
 
     def list_providers(
-        self,
-        enabled_only: bool = True,
-        provider_type: Optional[ProviderType] = None
+        self, enabled_only: bool = True, provider_type: Optional[ProviderType] = None
     ) -> List[ProviderConfig]:
         """List all providers."""
         providers = list(self._providers.values())
@@ -235,7 +232,7 @@ class ProviderManager:
         name: str,
         status: ProviderStatus,
         latency_ms: Optional[float] = None,
-        error: Optional[str] = None
+        error: Optional[str] = None,
     ) -> None:
         """Update provider health status."""
         with self._lock:
@@ -253,12 +250,7 @@ class ProviderManager:
             elif status == ProviderStatus.UNHEALTHY:
                 health.consecutive_failures += 1
 
-    def record_request(
-        self,
-        name: str,
-        success: bool,
-        latency_ms: Optional[float] = None
-    ) -> None:
+    def record_request(self, name: str, success: bool, latency_ms: Optional[float] = None) -> None:
         """Record a request for statistics and health."""
         with self._lock:
             if name not in self._providers:
@@ -317,9 +309,7 @@ class ProviderManager:
         config = self._providers.get(name)
         if not config:
             return ProviderHealth(
-                status=ProviderStatus.UNKNOWN,
-                last_check=time.time(),
-                error="Provider not found"
+                status=ProviderStatus.UNKNOWN, last_check=time.time(), error="Provider not found"
             )
 
         start = time.time()
@@ -340,41 +330,26 @@ class ProviderManager:
                     latency = (time.time() - start) * 1000
 
                     if response.status == 200:
-                        self.update_health(
-                            name,
-                            ProviderStatus.HEALTHY,
-                            latency_ms=latency
-                        )
+                        self.update_health(name, ProviderStatus.HEALTHY, latency_ms=latency)
                     else:
                         self.update_health(
                             name,
                             ProviderStatus.DEGRADED,
                             latency_ms=latency,
-                            error=f"HTTP {response.status}"
+                            error=f"HTTP {response.status}",
                         )
 
         except asyncio.TimeoutError:
-            self.update_health(
-                name,
-                ProviderStatus.UNHEALTHY,
-                error="Health check timeout"
-            )
+            self.update_health(name, ProviderStatus.UNHEALTHY, error="Health check timeout")
 
         except Exception as e:
-            self.update_health(
-                name,
-                ProviderStatus.UNHEALTHY,
-                error=str(e)
-            )
+            self.update_health(name, ProviderStatus.UNHEALTHY, error=str(e))
 
         return self._health[name]
 
     async def health_check_all(self) -> Dict[str, ProviderHealth]:
         """Check health of all providers."""
-        tasks = [
-            self.health_check(name)
-            for name in self._providers
-        ]
+        tasks = [self.health_check(name) for name in self._providers]
 
         await asyncio.gather(*tasks, return_exceptions=True)
         return {name: self._health[name] for name in self._providers}
@@ -414,9 +389,9 @@ class ProviderManager:
 
 
 __all__ = [
-    'ProviderManager',
-    'ProviderConfig',
-    'ProviderStatus',
-    'ProviderType',
-    'ProviderHealth',
+    "ProviderManager",
+    "ProviderConfig",
+    "ProviderStatus",
+    "ProviderType",
+    "ProviderHealth",
 ]

@@ -121,22 +121,19 @@ def lazy_import_all(imports: dict[str, tuple[str, str]]) -> dict[str, Any]:
         })
         md = lazy['Markdown']("# Hello")
     """
-    return {
-        name: lazy_import(module, cls)
-        for name, (module, cls) in imports.items()
-    }
+    return {name: lazy_import(module, cls) for name, (module, cls) in imports.items()}
 
 
 # Pre-defined lazy imports for common heavy modules
 LAZY_RICH = {
-    'Markdown': lazy_import('rich.markdown', 'Markdown'),
-    'Panel': lazy_import('rich.panel', 'Panel'),
-    'Syntax': lazy_import('rich.syntax', 'Syntax'),
-    'Table': lazy_import('rich.table', 'Table'),
+    "Markdown": lazy_import("rich.markdown", "Markdown"),
+    "Panel": lazy_import("rich.panel", "Panel"),
+    "Syntax": lazy_import("rich.syntax", "Syntax"),
+    "Table": lazy_import("rich.table", "Table"),
 }
 
 LAZY_PROMPT_TOOLKIT = {
-    'PromptSession': lazy_import('prompt_toolkit', 'PromptSession'),
-    'FileHistory': lazy_import('prompt_toolkit.history', 'FileHistory'),
-    'AutoSuggestFromHistory': lazy_import('prompt_toolkit.auto_suggest', 'AutoSuggestFromHistory'),
+    "PromptSession": lazy_import("prompt_toolkit", "PromptSession"),
+    "FileHistory": lazy_import("prompt_toolkit.history", "FileHistory"),
+    "AutoSuggestFromHistory": lazy_import("prompt_toolkit.auto_suggest", "AutoSuggestFromHistory"),
 }

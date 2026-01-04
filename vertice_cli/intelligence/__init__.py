@@ -12,14 +12,14 @@ from .types import (
     SuggestionConfidence,
     Context,
     SuggestionPattern,
-    SuggestionResult
+    SuggestionResult,
 )
 
 __all__ = [
-    'Suggestion',
-    'SuggestionType',
-    'SuggestionConfidence',
-    'Context',
-    'SuggestionPattern',
-    'SuggestionResult'
+    "Suggestion",
+    "SuggestionType",
+    "SuggestionConfidence",
+    "Context",
+    "SuggestionPattern",
+    "SuggestionResult",
 ]

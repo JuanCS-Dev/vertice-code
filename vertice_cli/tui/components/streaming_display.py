@@ -17,11 +17,7 @@ class StreamingResponseDisplay:
     """Stream LLM responses with 30 FPS rendering and intelligent truncation."""
 
     def __init__(
-        self,
-        console: Console,
-        target_fps: int = 30,
-        max_lines: int = 20,
-        show_cursor: bool = True
+        self, console: Console, target_fps: int = 30, max_lines: int = 20, show_cursor: bool = True
     ):
         """Initialize StreamingResponseDisplay.
 
@@ -50,7 +46,7 @@ class StreamingResponseDisplay:
         self,
         token_iterator: AsyncIterator[str],
         role: str = "assistant",
-        style: str = "bright_magenta"
+        style: str = "bright_magenta",
     ):
         """Stream tokens with 30 FPS rendering.
 
@@ -119,7 +115,7 @@ class StreamingResponseDisplay:
             text,
             title="[bold bright_magenta]🤖 AI Response[/bold bright_magenta]",
             border_style="bright_magenta",
-            padding=(1, 2)
+            padding=(1, 2),
         )
 
         return panel
@@ -130,7 +126,7 @@ class StreamingResponseDisplay:
         Returns:
             Content string (possibly truncated)
         """
-        lines = self.full_content.split('\n')
+        lines = self.full_content.split("\n")
 
         # Check if truncation needed
         if len(lines) > self.max_lines:
@@ -140,7 +136,7 @@ class StreamingResponseDisplay:
             keep_start = self.max_lines - 5
             displayed_lines = lines[:keep_start] + ["", "...", ""] + lines[-5:]
 
-            return '\n'.join(displayed_lines)
+            return "\n".join(displayed_lines)
 
         self.is_truncated = False
         return self.full_content
@@ -149,7 +145,7 @@ class StreamingResponseDisplay:
         self,
         token_iterator: AsyncIterator[str],
         role: str = "assistant",
-        style: str = "bright_magenta"
+        style: str = "bright_magenta",
     ) -> str:
         """Stream with Live context manager (auto-refreshing).
 
@@ -170,7 +166,7 @@ class StreamingResponseDisplay:
             self._render_current_state(style),
             console=self.console,
             refresh_per_second=self.target_fps,
-            transient=False
+            transient=False,
         ) as live:
             async for token in token_iterator:
                 self.full_content += token
@@ -216,7 +212,7 @@ class TokenBatcher:
         # Flush if batch full or frame budget exceeded
         now = time.time()
         if len(self.buffer) >= self.batch_size or (now - self.last_flush) >= self.frame_budget:
-            batched = ''.join(self.buffer)
+            batched = "".join(self.buffer)
             self.buffer.clear()
             self.last_flush = now
             return batched
@@ -229,6 +225,6 @@ class TokenBatcher:
         Returns:
             Remaining batched string
         """
-        batched = ''.join(self.buffer)
+        batched = "".join(self.buffer)
         self.buffer.clear()
         return batched

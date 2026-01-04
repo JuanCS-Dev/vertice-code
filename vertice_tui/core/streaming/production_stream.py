@@ -186,9 +186,7 @@ class ProductionGeminiStreamer:
             tools: Available tools
         """
         try:
-            async for chunk in self._base_streamer.stream(
-                prompt, system_prompt, context, tools
-            ):
+            async for chunk in self._base_streamer.stream(prompt, system_prompt, context, tools):
                 if not self._stream_active:
                     break
 
@@ -225,8 +223,7 @@ class ProductionGeminiStreamer:
             try:
                 try:
                     chunk = await asyncio.wait_for(
-                        self._chunk_queue.get(),
-                        timeout=self.config.chunk_timeout
+                        self._chunk_queue.get(), timeout=self.config.chunk_timeout
                     )
                 except asyncio.TimeoutError:
                     if self._producer_exception:
@@ -271,9 +268,7 @@ class ProductionGeminiStreamer:
             New stream iterator or None if reconnect failed
         """
         if self._reconnect_attempts >= self.config.max_reconnect_attempts:
-            logger.warning(
-                f"Max reconnect attempts ({self.config.max_reconnect_attempts}) reached"
-            )
+            logger.warning(f"Max reconnect attempts ({self.config.max_reconnect_attempts}) reached")
             return None
 
         if not await self._checkpoint.can_reconnect():
@@ -300,9 +295,7 @@ class ProductionGeminiStreamer:
             await self.initialize()
 
         try:
-            return self._base_streamer.stream(
-                continuation_prompt, system_prompt, context, tools
-            )
+            return self._base_streamer.stream(continuation_prompt, system_prompt, context, tools)
         except Exception as e:
             logger.error(f"Reconnect failed: {e}")
             return None
@@ -341,9 +334,11 @@ class ProductionGeminiStreamer:
 
         try:
             self._heartbeat_task = asyncio.create_task(self._heartbeat_loop())
+            self._heartbeat_task.add_done_callback(self._handle_task_exception)
             self._producer_task = asyncio.create_task(
                 self._producer_loop(prompt, system_prompt, context, tools)
             )
+            self._producer_task.add_done_callback(self._handle_task_exception)
 
             async for chunk in self._consumer_loop():
                 yield chunk
@@ -352,9 +347,7 @@ class ProductionGeminiStreamer:
                 error = self._producer_exception
                 logger.warning(f"Stream error, attempting reconnect: {error}")
 
-                reconnect_stream = await self._try_reconnect(
-                    prompt, system_prompt, context, tools
-                )
+                reconnect_stream = await self._try_reconnect(prompt, system_prompt, context, tools)
                 if reconnect_stream:
                     async for chunk in reconnect_stream:
                         yield chunk
@@ -369,6 +362,21 @@ class ProductionGeminiStreamer:
         finally:
             await self._cleanup()
 
+    def _handle_task_exception(self, task: asyncio.Task) -> None:
+        """Handle exceptions from background tasks.
+
+        Args:
+            task: The completed task to check for exceptions
+        """
+        if task.cancelled():
+            return
+        try:
+            exc = task.exception()
+            if exc:
+                logger.error(f"Background task '{task.get_name()}' failed: {exc}", exc_info=exc)
+        except asyncio.InvalidStateError:
+            pass  # Task not done yet
+
     async def _cleanup(self) -> None:
         """Clean up resources after streaming."""
         self._stream_active = False
@@ -377,15 +385,17 @@ class ProductionGeminiStreamer:
             self._heartbeat_task.cancel()
             try:
                 await self._heartbeat_task
-            except asyncio.CancelledError:
-                pass
+            except (asyncio.CancelledError, Exception) as e:
+                if not isinstance(e, asyncio.CancelledError):
+                    logger.debug(f"Heartbeat cleanup exception: {e}")
 
         if self._producer_task and not self._producer_task.done():
             self._producer_task.cancel()
             try:
                 await self._producer_task
-            except asyncio.CancelledError:
-                pass
+            except (asyncio.CancelledError, Exception) as e:
+                if not isinstance(e, asyncio.CancelledError):
+                    logger.debug(f"Producer cleanup exception: {e}")
 
         self._chunk_queue = None
 

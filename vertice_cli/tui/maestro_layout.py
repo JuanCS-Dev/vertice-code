@@ -28,10 +28,10 @@ class LayoutState:
     def compute_hash(self) -> str:
         """Compute hash of current state."""
         state_str = (
-            str(self.header_data) +
-            str(self.conversation_data) +
-            str(self.status_data) +
-            self.input_data
+            str(self.header_data)
+            + str(self.conversation_data)
+            + str(self.status_data)
+            + self.input_data
         )
         return hashlib.md5(state_str.encode()).hexdigest()
 
@@ -67,7 +67,7 @@ class MaestroLayout:
             Layout(name="header", size=4),  # Title + session info
             Layout(name="conversation", ratio=1),  # Message stream
             Layout(name="status", size=10),  # Progress + routing
-            Layout(name="input", size=3)  # Prompt
+            Layout(name="input", size=3),  # Prompt
         )
 
     def update_header(
@@ -75,7 +75,7 @@ class MaestroLayout:
         title: str = "MAESTRO v10.0",
         session_id: str = "",
         agent: str = "",
-        timestamp: Optional[str] = None
+        timestamp: Optional[str] = None,
     ):
         """Update header panel.
 
@@ -91,7 +91,7 @@ class MaestroLayout:
             "title": title,
             "session_id": session_id,
             "agent": agent,
-            "timestamp": timestamp
+            "timestamp": timestamp,
         }
 
         # Check if changed
@@ -122,11 +122,7 @@ class MaestroLayout:
 
         table.add_row(left, center, right)
 
-        panel = Panel(
-            table,
-            border_style="bright_cyan",
-            padding=(0, 2)
-        )
+        panel = Panel(table, border_style="bright_cyan", padding=(0, 2))
 
         self.cached_panels["header"] = panel
         self.layout["header"].update(panel)
@@ -156,7 +152,7 @@ class MaestroLayout:
             content,
             title="[bold bright_blue]💬 Conversation[/bold bright_blue]",
             border_style="bright_blue",
-            padding=(1, 2)
+            padding=(1, 2),
         )
 
         self.cached_panels["conversation"] = panel
@@ -190,11 +186,7 @@ class MaestroLayout:
         # Render input
         text = Text(prompt, style="bright_green")
 
-        panel = Panel(
-            text,
-            border_style="bright_green",
-            padding=(0, 2)
-        )
+        panel = Panel(text, border_style="bright_green", padding=(0, 2))
 
         self.cached_panels["input"] = panel
         self.layout["input"].update(panel)
@@ -230,9 +222,7 @@ class MaestroLayout:
             Dict with performance metrics
         """
         cache_hit_rate = (
-            self.cache_hits / max(self.render_count, 1) * 100
-            if self.render_count > 0
-            else 0
+            self.cache_hits / max(self.render_count, 1) * 100 if self.render_count > 0 else 0
         )
 
         return {
@@ -241,7 +231,7 @@ class MaestroLayout:
             "cache_hit_rate": f"{cache_hit_rate:.1f}%",
             "last_render_ms": f"{self.last_render_time * 1000:.2f}ms",
             "target_fps": 30,
-            "frame_budget_ms": 33.33
+            "frame_budget_ms": 33.33,
         }
 
     def reset_stats(self):
@@ -258,7 +248,7 @@ class CyberpunkHeader:
     def render(
         title: str = "NEUROSHELL v10.0",
         subtitle: str = "NEURAL INTERFACE ACTIVE",
-        status: str = "ONLINE"
+        status: str = "ONLINE",
     ) -> Panel:
         """Render cyberpunk header.
 
@@ -291,8 +281,4 @@ class CyberpunkHeader:
         content.append(f"{status}", style=status_color)
         content.append("]", style="dim")
 
-        return Panel(
-            content,
-            border_style="bright_cyan",
-            padding=(0, 0)
-        )
+        return Panel(content, border_style="bright_cyan", padding=(0, 0))

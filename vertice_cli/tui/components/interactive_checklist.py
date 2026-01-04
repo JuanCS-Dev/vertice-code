@@ -30,6 +30,7 @@ from rich.text import Text
 
 class ChecklistItemStatus(Enum):
     """Status de um item do checklist."""
+
     UNCHECKED = "unchecked"
     CHECKED = "checked"
     IN_PROGRESS = "in_progress"
@@ -37,6 +38,7 @@ class ChecklistItemStatus(Enum):
 
 class AnimationState(Enum):
     """Estado da animação de strikethrough."""
+
     IDLE = "idle"
     ANIMATING_CHECK = "animating_check"
     ANIMATING_UNCHECK = "animating_uncheck"
@@ -46,6 +48,7 @@ class AnimationState(Enum):
 @dataclass
 class ChecklistItem:
     """Item de checklist."""
+
     text: str
     checked: bool = False
     animation_state: AnimationState = AnimationState.IDLE
@@ -172,14 +175,11 @@ class ChecklistParser:
     """Parser para checklists markdown durante streaming."""
 
     # Pattern para checklist item
-    CHECKLIST_PATTERN = re.compile(
-        r'^(\s*)[-*+]\s+\[([xX ])\]\s+(.+)$'
-    )
+    CHECKLIST_PATTERN = re.compile(r"^(\s*)[-*+]\s+\[([xX ])\]\s+(.+)$")
 
     # Pattern para prioridade no texto
     PRIORITY_PATTERN = re.compile(
-        r'\[?(BLOCKER|IMPORTANTE|SUGESTAO|HIGH|MEDIUM|LOW)\]?',
-        re.IGNORECASE
+        r"\[?(BLOCKER|IMPORTANTE|SUGESTAO|HIGH|MEDIUM|LOW)\]?", re.IGNORECASE
     )
 
     @classmethod
@@ -207,11 +207,11 @@ class ChecklistParser:
         if priority_match:
             priority = priority_match.group(1).upper()
             # Remove prioridade do texto
-            text = cls.PRIORITY_PATTERN.sub('', text).strip()
+            text = cls.PRIORITY_PATTERN.sub("", text).strip()
 
         return ChecklistItem(
             text=text,
-            checked=(check_char.lower() == 'x'),
+            checked=(check_char.lower() == "x"),
             indent_level=indent // 2,  # 2 espaços por nível
             priority=priority,
         )
@@ -228,7 +228,7 @@ class ChecklistParser:
             Lista de ChecklistItems
         """
         items = []
-        for line in markdown.split('\n'):
+        for line in markdown.split("\n"):
             item = cls.parse_line(line)
             if item:
                 items.append(item)
@@ -262,6 +262,7 @@ class ChecklistItemWidget(Widget):
 
     class ItemToggled(Message):
         """Item foi toggled."""
+
         def __init__(self, item: ChecklistItem, new_state: bool):
             self.item = item
             self.new_state = new_state
@@ -320,12 +321,11 @@ class ChecklistItemWidget(Widget):
         # Texto com animação
         if self.item.animation_state in (
             AnimationState.ANIMATING_CHECK,
-            AnimationState.ANIMATING_UNCHECK
+            AnimationState.ANIMATING_UNCHECK,
         ):
             # Durante animação
             text_rendered = StrikethroughAnimation.render_partial_strikethrough(
-                self.item.display_text,
-                self.item.animation_progress
+                self.item.display_text, self.item.animation_progress
             )
             result.append_text(text_rendered)
         elif self.item.checked:
@@ -346,8 +346,7 @@ class ChecklistItemWidget(Widget):
         """
         self.add_class("animating")
         self.item.animation_state = (
-            AnimationState.ANIMATING_CHECK if checking
-            else AnimationState.ANIMATING_UNCHECK
+            AnimationState.ANIMATING_CHECK if checking else AnimationState.ANIMATING_UNCHECK
         )
 
         def on_frame(text: str, progress: float) -> None:
@@ -379,9 +378,7 @@ class ChecklistItemWidget(Widget):
                     pass
 
             # Inicia nova animação
-            self._animation_task = asyncio.create_task(
-                self._animate_toggle(new_state)
-            )
+            self._animation_task = asyncio.create_task(self._animate_toggle(new_state))
             await self._animation_task
 
         # Atualiza estado
@@ -446,6 +443,7 @@ class InteractiveChecklist(Widget):
 
     class ChecklistUpdated(Message):
         """Checklist foi atualizado."""
+
         def __init__(self, total: int, checked: int):
             self.total = total
             self.checked = checked
@@ -453,6 +451,7 @@ class InteractiveChecklist(Widget):
 
     class AllItemsChecked(Message):
         """Todos os items foram marcados."""
+
         pass
 
     def __init__(
@@ -553,8 +552,8 @@ class InteractiveChecklist(Widget):
         self._buffer += chunk
 
         # Processa linhas completas
-        while '\n' in self._buffer:
-            line, self._buffer = self._buffer.split('\n', 1)
+        while "\n" in self._buffer:
+            line, self._buffer = self._buffer.split("\n", 1)
             self._process_line(line)
 
     def _process_line(self, line: str) -> None:
@@ -616,9 +615,7 @@ class InteractiveChecklist(Widget):
         items = ChecklistParser.parse_markdown(markdown)
         self.set_items(items)
 
-    def on_checklist_item_widget_item_toggled(
-        self, event: ChecklistItemWidget.ItemToggled
-    ) -> None:
+    def on_checklist_item_widget_item_toggled(self, event: ChecklistItemWidget.ItemToggled) -> None:
         """Handler quando item é toggled."""
         self._update_counts()
 

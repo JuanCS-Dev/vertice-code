@@ -40,30 +40,33 @@ logger = logging.getLogger(__name__)
 
 class ExecutionMode(Enum):
     """Execution modes with different security levels."""
-    STRICT = auto()      # Maximum security, minimal capabilities
-    STANDARD = auto()    # Balanced security and functionality
+
+    STRICT = auto()  # Maximum security, minimal capabilities
+    STANDARD = auto()  # Balanced security and functionality
     PRIVILEGED = auto()  # User-confirmed, elevated permissions
 
 
 class ResourceLimitType(Enum):
     """Resource limit types."""
-    CPU_TIME = "cpu_time"           # Seconds of CPU time
-    MEMORY = "memory"               # Bytes of memory
-    FILE_SIZE = "file_size"         # Max file size in bytes
-    OPEN_FILES = "open_files"       # Max open file descriptors
-    PROCESSES = "processes"         # Max child processes
-    WALL_TIME = "wall_time"         # Wall clock timeout
+
+    CPU_TIME = "cpu_time"  # Seconds of CPU time
+    MEMORY = "memory"  # Bytes of memory
+    FILE_SIZE = "file_size"  # Max file size in bytes
+    OPEN_FILES = "open_files"  # Max open file descriptors
+    PROCESSES = "processes"  # Max child processes
+    WALL_TIME = "wall_time"  # Wall clock timeout
 
 
 @dataclass
 class ResourceLimits:
     """Resource limits for command execution."""
-    cpu_time: int = 30              # 30 seconds CPU time
+
+    cpu_time: int = 30  # 30 seconds CPU time
     memory: int = 256 * 1024 * 1024  # 256MB
     file_size: int = 50 * 1024 * 1024  # 50MB
-    open_files: int = 256           # 256 file descriptors
-    processes: int = 10             # 10 child processes
-    wall_time: int = 60             # 60 seconds wall clock
+    open_files: int = 256  # 256 file descriptors
+    processes: int = 10  # 10 child processes
+    wall_time: int = 60  # 60 seconds wall clock
 
     @classmethod
     def minimal(cls) -> "ResourceLimits":
@@ -74,7 +77,7 @@ class ResourceLimits:
             file_size=1 * 1024 * 1024,
             open_files=32,
             processes=2,
-            wall_time=10
+            wall_time=10,
         )
 
     @classmethod
@@ -91,7 +94,7 @@ class ResourceLimits:
             file_size=500 * 1024 * 1024,
             open_files=1024,
             processes=100,
-            wall_time=600
+            wall_time=600,
         )
 
 
@@ -118,49 +121,131 @@ class SecureExecutor:
     """
 
     # Commands that are ALWAYS blocked (never allow these)
-    BLOCKED_COMMANDS = frozenset([
-        "rm", "rmdir", "dd", "mkfs", "fdisk", "parted",
-        "shutdown", "reboot", "halt", "poweroff",
-        "passwd", "chpasswd", "usermod", "useradd", "userdel",
-        "visudo", "su", "sudo",
-        "mount", "umount",
-        "iptables", "ip6tables", "nft",
-        "systemctl", "service", "init",
-    ])
+    BLOCKED_COMMANDS = frozenset(
+        [
+            "rm",
+            "rmdir",
+            "dd",
+            "mkfs",
+            "fdisk",
+            "parted",
+            "shutdown",
+            "reboot",
+            "halt",
+            "poweroff",
+            "passwd",
+            "chpasswd",
+            "usermod",
+            "useradd",
+            "userdel",
+            "visudo",
+            "su",
+            "sudo",
+            "mount",
+            "umount",
+            "iptables",
+            "ip6tables",
+            "nft",
+            "systemctl",
+            "service",
+            "init",
+        ]
+    )
 
     # Commands that require explicit user confirmation
-    DANGEROUS_COMMANDS = frozenset([
-        "chmod", "chown", "chgrp",
-        "mv", "cp",
-        "git", "npm", "pip", "yarn", "cargo",
-        "docker", "podman",
-        "curl", "wget",
-        "make", "cmake",
-    ])
+    DANGEROUS_COMMANDS = frozenset(
+        [
+            "chmod",
+            "chown",
+            "chgrp",
+            "mv",
+            "cp",
+            "git",
+            "npm",
+            "pip",
+            "yarn",
+            "cargo",
+            "docker",
+            "podman",
+            "curl",
+            "wget",
+            "make",
+            "cmake",
+        ]
+    )
 
     # Safe commands that can run without confirmation
-    SAFE_COMMANDS = frozenset([
-        "ls", "pwd", "cd", "cat", "head", "tail", "less", "more",
-        "grep", "find", "locate", "which", "whereis",
-        "echo", "printf", "date", "cal", "whoami", "hostname",
-        "wc", "sort", "uniq", "cut", "tr", "sed", "awk",
-        "file", "stat", "du", "df",
-        "tree", "exa", "bat", "fd", "rg",  # Modern alternatives
-        "python", "python3", "node", "ruby", "perl",  # Interpreters (with restrictions)
-    ])
+    SAFE_COMMANDS = frozenset(
+        [
+            "ls",
+            "pwd",
+            "cd",
+            "cat",
+            "head",
+            "tail",
+            "less",
+            "more",
+            "grep",
+            "find",
+            "locate",
+            "which",
+            "whereis",
+            "echo",
+            "printf",
+            "date",
+            "cal",
+            "whoami",
+            "hostname",
+            "wc",
+            "sort",
+            "uniq",
+            "cut",
+            "tr",
+            "sed",
+            "awk",
+            "file",
+            "stat",
+            "du",
+            "df",
+            "tree",
+            "exa",
+            "bat",
+            "fd",
+            "rg",  # Modern alternatives
+            "python",
+            "python3",
+            "node",
+            "ruby",
+            "perl",  # Interpreters (with restrictions)
+        ]
+    )
 
     # Environment variables to ALWAYS remove
-    BLOCKED_ENV_VARS = frozenset([
-        "LD_PRELOAD", "LD_LIBRARY_PATH", "LD_AUDIT",
-        "DYLD_INSERT_LIBRARIES", "DYLD_LIBRARY_PATH",
-        "PYTHONPATH", "RUBYLIB", "PERL5LIB", "NODE_PATH",
-        "PATH",  # We set our own safe PATH
-        "SHELL", "EDITOR", "VISUAL",
-        "SSH_AUTH_SOCK", "GPG_AGENT_INFO",
-        "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY",
-        "GITHUB_TOKEN", "GITLAB_TOKEN",
-        "DATABASE_URL", "DB_PASSWORD",
-    ])
+    BLOCKED_ENV_VARS = frozenset(
+        [
+            "LD_PRELOAD",
+            "LD_LIBRARY_PATH",
+            "LD_AUDIT",
+            "DYLD_INSERT_LIBRARIES",
+            "DYLD_LIBRARY_PATH",
+            "PYTHONPATH",
+            "RUBYLIB",
+            "PERL5LIB",
+            "NODE_PATH",
+            "PATH",  # We set our own safe PATH
+            "SHELL",
+            "EDITOR",
+            "VISUAL",
+            "SSH_AUTH_SOCK",
+            "GPG_AGENT_INFO",
+            "AWS_ACCESS_KEY_ID",
+            "AWS_SECRET_ACCESS_KEY",
+            "GITHUB_TOKEN",
+            "GITLAB_TOKEN",
+            "DATABASE_URL",
+            "DB_PASSWORD",
+        ]
+    )
 
     # Safe PATH with only essential directories
     SAFE_PATH = "/usr/local/bin:/usr/bin:/bin"
@@ -221,8 +306,7 @@ class SecureExecutor:
         """Create sanitized environment for subprocess."""
         if self.inherit_env:
             # Start with current environment, remove dangerous vars
-            env = {k: v for k, v in os.environ.items()
-                   if k not in self.BLOCKED_ENV_VARS}
+            env = {k: v for k, v in os.environ.items() if k not in self.BLOCKED_ENV_VARS}
         else:
             # Minimal safe environment
             env = {}
@@ -246,33 +330,24 @@ class SecureExecutor:
 
         try:
             # CPU time limit
-            resource.setrlimit(
-                resource.RLIMIT_CPU,
-                (self.limits.cpu_time, self.limits.cpu_time)
-            )
+            resource.setrlimit(resource.RLIMIT_CPU, (self.limits.cpu_time, self.limits.cpu_time))
 
             # Memory limit (virtual memory)
-            resource.setrlimit(
-                resource.RLIMIT_AS,
-                (self.limits.memory, self.limits.memory)
-            )
+            resource.setrlimit(resource.RLIMIT_AS, (self.limits.memory, self.limits.memory))
 
             # File size limit
             resource.setrlimit(
-                resource.RLIMIT_FSIZE,
-                (self.limits.file_size, self.limits.file_size)
+                resource.RLIMIT_FSIZE, (self.limits.file_size, self.limits.file_size)
             )
 
             # Open files limit
             resource.setrlimit(
-                resource.RLIMIT_NOFILE,
-                (self.limits.open_files, self.limits.open_files)
+                resource.RLIMIT_NOFILE, (self.limits.open_files, self.limits.open_files)
             )
 
             # Process limit
             resource.setrlimit(
-                resource.RLIMIT_NPROC,
-                (self.limits.processes, self.limits.processes)
+                resource.RLIMIT_NPROC, (self.limits.processes, self.limits.processes)
             )
 
         except (ValueError, resource.error) as e:
@@ -300,28 +375,21 @@ class SecureExecutor:
             ValidationResult with validation status
         """
         if not args:
-            return ValidationResult.failure(
-                errors=["Empty command"],
-                original_value=args
-            )
+            return ValidationResult.failure(errors=["Empty command"], original_value=args)
 
         # Validate each argument
         for i, arg in enumerate(args):
             result = self.validator.validate(arg, "argument")
             if not result.is_valid:
                 return ValidationResult.failure(
-                    errors=[f"Invalid argument {i}: {result.errors}"],
-                    original_value=args
+                    errors=[f"Invalid argument {i}: {result.errors}"], original_value=args
                 )
 
         # Check if command is allowed
         cmd_name = self._get_command_name(args)
         allowed, reason = self._is_command_allowed(cmd_name)
         if not allowed:
-            return ValidationResult.failure(
-                errors=[reason],
-                original_value=args
-            )
+            return ValidationResult.failure(errors=[reason], original_value=args)
 
         return ValidationResult.success(args)
 
@@ -356,12 +424,7 @@ class SecureExecutor:
             ExecutionResult with execution status and output
         """
         return self.execute_sync(
-            args=args,
-            cwd=cwd,
-            env=env,
-            timeout=timeout,
-            capture_output=capture_output,
-            stdin=stdin
+            args=args, cwd=cwd, env=env, timeout=timeout, capture_output=capture_output, stdin=stdin
         )
 
     async def execute_async(
@@ -391,20 +454,22 @@ class SecureExecutor:
             ExecutionResult with execution status and output
         """
         import time
+
         start_time = time.time()
 
         # Convert string to list if needed (but warn)
         if isinstance(args, str):
-            logger.warning("Command passed as string, splitting by whitespace. "
-                          "Prefer passing as list for security.")
+            logger.warning(
+                "Command passed as string, splitting by whitespace. "
+                "Prefer passing as list for security."
+            )
             args = args.split()
 
         # Validate command
         validation = self.validate_command(args)
         if not validation.is_valid:
             return ExecutionResult.failure(
-                error=f"Validation failed: {validation.errors}",
-                command=args
+                error=f"Validation failed: {validation.errors}", command=args
             )
 
         # Check for confirmation requirement
@@ -418,8 +483,7 @@ class SecureExecutor:
         work_dir = cwd or self.working_directory
         if not os.path.isdir(work_dir):
             return ExecutionResult.failure(
-                error=f"Working directory does not exist: {work_dir}",
-                command=args
+                error=f"Working directory does not exist: {work_dir}", command=args
             )
 
         # Prepare environment
@@ -450,7 +514,7 @@ class SecureExecutor:
             try:
                 stdout, stderr = await asyncio.wait_for(
                     process.communicate(input=stdin.encode() if stdin else None),
-                    timeout=exec_timeout
+                    timeout=exec_timeout,
                 )
 
                 execution_time = time.time() - start_time
@@ -458,8 +522,8 @@ class SecureExecutor:
                 return ExecutionResult(
                     success=process.returncode == 0,
                     exit_code=process.returncode or 0,
-                    stdout=stdout.decode('utf-8', errors='replace') if stdout else "",
-                    stderr=stderr.decode('utf-8', errors='replace') if stderr else "",
+                    stdout=stdout.decode("utf-8", errors="replace") if stdout else "",
+                    stderr=stderr.decode("utf-8", errors="replace") if stderr else "",
                     execution_time=execution_time,
                     command=args,
                     working_directory=work_dir,
@@ -484,23 +548,16 @@ class SecureExecutor:
                     execution_time=exec_timeout,
                     command=args,
                     working_directory=work_dir,
-                    error_message=f"Timeout after {exec_timeout}s"
+                    error_message=f"Timeout after {exec_timeout}s",
                 )
 
         except PermissionError as e:
-            return ExecutionResult.failure(
-                error=f"Permission denied: {e}",
-                command=args
-            )
+            return ExecutionResult.failure(error=f"Permission denied: {e}", command=args)
         except FileNotFoundError as e:
-            return ExecutionResult.failure(
-                error=f"Command not found: {e}",
-                command=args
-            )
+            return ExecutionResult.failure(error=f"Command not found: {e}", command=args)
         except Exception as e:
             return ExecutionResult.failure(
-                error=f"Execution error: {type(e).__name__}: {e}",
-                command=args
+                error=f"Execution error: {type(e).__name__}: {e}", command=args
             )
 
     def execute_sync(
@@ -519,6 +576,7 @@ class SecureExecutor:
             result = executor.execute_sync(["ls", "-la"])
         """
         import time
+
         start_time = time.time()
 
         # Convert string to list if needed
@@ -529,16 +587,14 @@ class SecureExecutor:
         validation = self.validate_command(args)
         if not validation.is_valid:
             return ExecutionResult.failure(
-                error=f"Validation failed: {validation.errors}",
-                command=args
+                error=f"Validation failed: {validation.errors}", command=args
             )
 
         # Prepare working directory
         work_dir = cwd or self.working_directory
         if not os.path.isdir(work_dir):
             return ExecutionResult.failure(
-                error=f"Working directory does not exist: {work_dir}",
-                command=args
+                error=f"Working directory does not exist: {work_dir}", command=args
             )
 
         # Prepare environment
@@ -586,20 +642,16 @@ class SecureExecutor:
                 execution_time=exec_timeout,
                 command=args,
                 working_directory=work_dir,
-                error_message=f"Timeout after {exec_timeout}s"
+                error_message=f"Timeout after {exec_timeout}s",
             )
         except Exception as e:
             return ExecutionResult.failure(
-                error=f"Execution error: {type(e).__name__}: {e}",
-                command=args
+                error=f"Execution error: {type(e).__name__}: {e}", command=args
             )
 
 
 @contextmanager
-def isolated_execution(
-    temp_dir: bool = True,
-    limits: Optional[ResourceLimits] = None
-):
+def isolated_execution(temp_dir: bool = True, limits: Optional[ResourceLimits] = None):
     """
     Context manager for isolated command execution.
 
@@ -627,10 +679,9 @@ def isolated_execution(
 
 # Convenience functions
 
+
 async def execute_safe(
-    args: List[str],
-    cwd: Optional[str] = None,
-    timeout: float = 30.0
+    args: List[str], cwd: Optional[str] = None, timeout: float = 30.0
 ) -> ExecutionResult:
     """Execute command with standard security settings (async)."""
     executor = SecureExecutor(mode=ExecutionMode.STANDARD)
@@ -638,9 +689,7 @@ async def execute_safe(
 
 
 def execute_safe_sync(
-    args: List[str],
-    cwd: Optional[str] = None,
-    timeout: float = 30.0
+    args: List[str], cwd: Optional[str] = None, timeout: float = 30.0
 ) -> ExecutionResult:
     """Execute command synchronously with standard security settings."""
     executor = SecureExecutor(mode=ExecutionMode.STANDARD)
@@ -649,12 +698,12 @@ def execute_safe_sync(
 
 # Export all public symbols
 __all__ = [
-    'ExecutionMode',
-    'ResourceLimitType',
-    'ResourceLimits',
-    'ExecutionResult',
-    'SecureExecutor',
-    'isolated_execution',
-    'execute_safe',
-    'execute_safe_sync',
+    "ExecutionMode",
+    "ResourceLimitType",
+    "ResourceLimits",
+    "ExecutionResult",
+    "SecureExecutor",
+    "isolated_execution",
+    "execute_safe",
+    "execute_safe_sync",
 ]

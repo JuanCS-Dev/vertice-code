@@ -14,7 +14,7 @@ Philosophy:
 - Token-aware (show size)
 - Elegant overflow (scroll indicators)
 
-"In all your ways acknowledge him, and he will make straight your paths." 
+"In all your ways acknowledge him, and he will make straight your paths."
 - Proverbs 3:6
 
 Created: 2025-11-18 21:44 UTC
@@ -36,6 +36,7 @@ from ..styles import PRESET_STYLES
 
 class PillType(Enum):
     """Context pill types (file types)."""
+
     PYTHON = "python"
     JAVASCRIPT = "javascript"
     TYPESCRIPT = "typescript"
@@ -50,47 +51,47 @@ class PillType(Enum):
 # Pill styling by type
 PILL_STYLES = {
     PillType.PYTHON: {
-        "color": COLORS['accent_blue'],
+        "color": COLORS["accent_blue"],
         "icon": "🐍",
         "bg": "#1e3a8a",  # Dark blue
     },
     PillType.JAVASCRIPT: {
-        "color": COLORS['accent_yellow'],
+        "color": COLORS["accent_yellow"],
         "icon": "📜",
         "bg": "#78350f",  # Dark yellow
     },
     PillType.TYPESCRIPT: {
-        "color": COLORS['accent_blue'],
+        "color": COLORS["accent_blue"],
         "icon": "🔷",
         "bg": "#164e63",  # Dark cyan
     },
     PillType.HTML: {
-        "color": COLORS['accent_red'],
+        "color": COLORS["accent_red"],
         "icon": "🌐",
         "bg": "#7f1d1d",  # Dark red
     },
     PillType.CSS: {
-        "color": COLORS['accent_purple'],
+        "color": COLORS["accent_purple"],
         "icon": "🎨",
         "bg": "#581c87",  # Dark purple
     },
     PillType.JSON: {
-        "color": COLORS['accent_green'],
+        "color": COLORS["accent_green"],
         "icon": "📦",
         "bg": "#14532d",  # Dark green
     },
     PillType.MARKDOWN: {
-        "color": COLORS['text_primary'],
+        "color": COLORS["text_primary"],
         "icon": "📝",
         "bg": "#374151",  # Dark gray
     },
     PillType.TEXT: {
-        "color": COLORS['text_secondary'],
+        "color": COLORS["text_secondary"],
         "icon": "📄",
         "bg": "#1f2937",  # Darker gray
     },
     PillType.OTHER: {
-        "color": COLORS['text_tertiary'],
+        "color": COLORS["text_tertiary"],
         "icon": "📁",
         "bg": "#111827",  # Almost black
     },
@@ -100,10 +101,10 @@ PILL_STYLES = {
 def detect_pill_type(path: Path) -> PillType:
     """
     Detect pill type from file extension.
-    
+
     Args:
         path: File path
-        
+
     Returns:
         PillType enum
     """
@@ -133,7 +134,7 @@ def detect_pill_type(path: Path) -> PillType:
 class ContextPill:
     """
     A pill representing a loaded file.
-    
+
     Attributes:
         id: Unique identifier
         path: File path
@@ -143,6 +144,7 @@ class ContextPill:
         closeable: Can be closed
         on_close: Callback when closed
     """
+
     id: str
     path: Path
     display_name: str
@@ -152,14 +154,14 @@ class ContextPill:
     on_close: Optional[Callable] = None
 
     @classmethod
-    def from_path(cls, path: str, token_count: Optional[int] = None) -> 'ContextPill':
+    def from_path(cls, path: str, token_count: Optional[int] = None) -> "ContextPill":
         """
         Create pill from file path.
-        
+
         Args:
             path: File path
             token_count: Token count (if known)
-            
+
         Returns:
             ContextPill instance
         """
@@ -175,11 +177,11 @@ class ContextPill:
     def render(self, selected: bool = False, show_close: bool = True) -> Text:
         """
         Render pill as Text.
-        
+
         Args:
             selected: Is pill selected (highlighted)
             show_close: Show close button (×)
-            
+
         Returns:
             Rich Text object
         """
@@ -188,7 +190,7 @@ class ContextPill:
         result = Text()
 
         # Icon
-        result.append(f"{style['icon']} ", style=style['color'])
+        result.append(f"{style['icon']} ", style=style["color"])
 
         # Display name
         name_style = PRESET_STYLES.EMPHASIS if selected else PRESET_STYLES.PRIMARY
@@ -208,7 +210,7 @@ class ContextPill:
     def close(self) -> bool:
         """
         Close pill (trigger callback).
-        
+
         Returns:
             True if closed successfully
         """
@@ -219,7 +221,7 @@ class ContextPill:
             try:
                 self.on_close(self)
                 return True
-            except Exception:
+            except (TypeError, ValueError, RuntimeError):
                 return False
 
         return True
@@ -228,14 +230,14 @@ class ContextPill:
 class PillContainer:
     """
     Container for managing multiple context pills.
-    
+
     Features:
     - Add/remove pills
     - Selection support
     - Overflow handling (scroll indicators)
     - Total token count
     - Batch operations
-    
+
     Examples:
         container = PillContainer()
         pill = ContextPill.from_path("src/main.py", token_count=150)
@@ -246,7 +248,7 @@ class PillContainer:
     def __init__(self, max_display: int = 10):
         """
         Initialize pill container.
-        
+
         Args:
             max_display: Maximum pills to display (overflow shows "...")
         """
@@ -257,7 +259,7 @@ class PillContainer:
     def add_pill(self, pill: ContextPill) -> None:
         """
         Add pill to container.
-        
+
         Args:
             pill: ContextPill to add
         """
@@ -270,10 +272,10 @@ class PillContainer:
     def remove_pill(self, pill_id: str) -> bool:
         """
         Remove pill by ID.
-        
+
         Args:
             pill_id: Pill identifier
-            
+
         Returns:
             True if removed
         """
@@ -306,10 +308,10 @@ class PillContainer:
     def select_pill(self, pill_id: str) -> bool:
         """
         Select pill by ID.
-        
+
         Args:
             pill_id: Pill identifier
-            
+
         Returns:
             True if selected
         """
@@ -359,7 +361,7 @@ class PillContainer:
     def get_total_tokens(self) -> int:
         """
         Get total token count across all pills.
-        
+
         Returns:
             Total tokens
         """
@@ -373,12 +375,12 @@ class PillContainer:
     ) -> Panel:
         """
         Render pill container.
-        
+
         Args:
             title: Panel title
             show_stats: Show statistics (count, tokens)
             show_overflow: Show overflow indicator
-            
+
         Returns:
             Rich Panel object
         """
@@ -391,7 +393,7 @@ class PillContainer:
             return Panel(
                 content,
                 title=title or "[bold]Context Files[/bold]",
-                border_style=COLORS['border_muted'],
+                border_style=COLORS["border_muted"],
                 padding=(1, 2),
             )
 
@@ -401,12 +403,12 @@ class PillContainer:
 
         # Display pills (with overflow handling)
         pills_list = list(self.pills.values())
-        display_pills = pills_list[:self.max_display]
+        display_pills = pills_list[: self.max_display]
         overflow_count = len(pills_list) - self.max_display
 
         # Add each pill
         for pill in display_pills:
-            selected = (pill.id == self.selected_id)
+            selected = pill.id == self.selected_id
             pill_text = pill.render(selected=selected)
 
             # Add selection indicator
@@ -428,8 +430,10 @@ class PillContainer:
         if show_stats:
             total_tokens = self.get_total_tokens()
             stats_text = Text()
-            stats_text.append(f"{len(self.pills)} file{'s' if len(self.pills) != 1 else ''}",
-                            style=PRESET_STYLES.INFO)
+            stats_text.append(
+                f"{len(self.pills)} file{'s' if len(self.pills) != 1 else ''}",
+                style=PRESET_STYLES.INFO,
+            )
             if total_tokens > 0:
                 stats_text.append(f" • {total_tokens:,} tokens", style=PRESET_STYLES.SECONDARY)
             subtitle = stats_text
@@ -438,7 +442,7 @@ class PillContainer:
             table,
             title=title or "[bold]📄 Context Files[/bold]",
             subtitle=subtitle,
-            border_style=COLORS['accent_green'],
+            border_style=COLORS["accent_green"],
             padding=(1, 2),
         )
 
@@ -447,6 +451,7 @@ class PillContainer:
 # CONVENIENCE FUNCTIONS
 # =============================================================================
 
+
 def create_pill_from_file(
     path: str,
     token_count: Optional[int] = None,
@@ -454,12 +459,12 @@ def create_pill_from_file(
 ) -> ContextPill:
     """
     Quick helper to create pill from file path.
-    
+
     Args:
         path: File path
         token_count: Token count (if known)
         on_close: Close callback
-        
+
     Returns:
         ContextPill instance
     """

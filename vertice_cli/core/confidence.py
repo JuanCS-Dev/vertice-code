@@ -20,16 +20,18 @@ logger = logging.getLogger(__name__)
 
 class PredictionCategory(str, Enum):
     """Categories of predictions that can be calibrated."""
-    ROUTING = "routing"           # Agent routing decisions
+
+    ROUTING = "routing"  # Agent routing decisions
     TOOL_SELECTION = "tool_selection"  # Which tool to use
     CODE_GENERATION = "code_generation"  # Code output quality
-    INTENT = "intent"             # Intent classification
-    COMPLEXITY = "complexity"     # Task complexity assessment
+    INTENT = "intent"  # Intent classification
+    COMPLEXITY = "complexity"  # Task complexity assessment
 
 
 @dataclass
 class CalibrationRecord:
     """Record of a prediction for calibration."""
+
     category: PredictionCategory
     confidence: float
     was_correct: bool
@@ -40,6 +42,7 @@ class CalibrationRecord:
 @dataclass
 class CalibrationStats:
     """Statistics for a category."""
+
     category: PredictionCategory
     total_predictions: int
     correct_predictions: int
@@ -150,7 +153,7 @@ class ConfidenceCalibrator:
 
     def _recalibrate(self) -> None:
         """Adjust thresholds based on recent accuracy."""
-        recent = self.history[-self.RECALIBRATION_WINDOW:]
+        recent = self.history[-self.RECALIBRATION_WINDOW :]
 
         for category in PredictionCategory:
             category_records = [r for r in recent if r.category == category]
@@ -207,14 +210,16 @@ class ConfidenceCalibrator:
             current = self.thresholds[cat]
             recommended = self._calculate_recommended_threshold(accuracy)
 
-            stats.append(CalibrationStats(
-                category=cat,
-                total_predictions=total,
-                correct_predictions=correct,
-                accuracy=accuracy,
-                current_threshold=current,
-                recommended_threshold=recommended,
-            ))
+            stats.append(
+                CalibrationStats(
+                    category=cat,
+                    total_predictions=total,
+                    correct_predictions=correct,
+                    accuracy=accuracy,
+                    current_threshold=current,
+                    recommended_threshold=recommended,
+                )
+            )
 
         return stats
 

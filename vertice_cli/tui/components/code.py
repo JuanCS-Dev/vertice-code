@@ -32,7 +32,7 @@ from ..styles import PRESET_STYLES
 class CodeBlock:
     """
     Enhanced code block with syntax highlighting.
-    
+
     Examples:
         code = CodeBlock(
             'def hello():\\n    print("Hello!")',
@@ -43,27 +43,27 @@ class CodeBlock:
 
     # Language icons/badges
     LANGUAGE_ICONS = {
-        'python': '🐍',
-        'javascript': '📜',
-        'typescript': '🔷',
-        'java': '☕',
-        'go': '🐹',
-        'rust': '🦀',
-        'cpp': '⚙️',
-        'c': '⚙️',
-        'ruby': '💎',
-        'php': '🐘',
-        'swift': '🦅',
-        'kotlin': '🅺',
-        'shell': '🐚',
-        'bash': '🐚',
-        'sql': '📊',
-        'html': '🌐',
-        'css': '🎨',
-        'json': '📦',
-        'yaml': '📄',
-        'markdown': '📝',
-        'xml': '📋',
+        "python": "🐍",
+        "javascript": "📜",
+        "typescript": "🔷",
+        "java": "☕",
+        "go": "🐹",
+        "rust": "🦀",
+        "cpp": "⚙️",
+        "c": "⚙️",
+        "ruby": "💎",
+        "php": "🐘",
+        "swift": "🦅",
+        "kotlin": "🅺",
+        "shell": "🐚",
+        "bash": "🐚",
+        "sql": "📊",
+        "html": "🌐",
+        "css": "🎨",
+        "json": "📦",
+        "yaml": "📄",
+        "markdown": "📝",
+        "xml": "📋",
     }
 
     def __init__(
@@ -80,7 +80,7 @@ class CodeBlock:
     ):
         """
         Initialize code block.
-        
+
         Args:
             code: Code content
             language: Programming language
@@ -104,14 +104,14 @@ class CodeBlock:
 
     def _get_language_display(self) -> str:
         """Get language display name with icon."""
-        icon = self.LANGUAGE_ICONS.get(self.language, '📄')
+        icon = self.LANGUAGE_ICONS.get(self.language, "📄")
         lang_name = self.language.upper() if len(self.language) <= 4 else self.language.capitalize()
         return f"{icon} {lang_name}"
 
     def _create_syntax(self) -> Syntax:
         """
         Create Rich Syntax object.
-        
+
         Returns:
             Rich Syntax object
         """
@@ -126,13 +126,13 @@ class CodeBlock:
             highlight_lines=self.highlight_lines,
             theme=pygments_theme,
             word_wrap=True,
-            background_color=COLORS['bg_secondary'],
+            background_color=COLORS["bg_secondary"],
         )
 
     def _create_header(self) -> Optional[Text]:
         """
         Create code block header with language and copy indicator.
-        
+
         Returns:
             Rich Text object or None
         """
@@ -162,7 +162,7 @@ class CodeBlock:
     def render(self) -> Panel:
         """
         Render code block as Panel.
-        
+
         Returns:
             Rich Panel object
         """
@@ -173,7 +173,7 @@ class CodeBlock:
             syntax,
             title=header if header else None,
             title_align="left",
-            border_style=COLORS['border_muted'],
+            border_style=COLORS["border_muted"],
             padding=(0, 1),
             expand=False,
             width=self.max_width,
@@ -182,7 +182,7 @@ class CodeBlock:
     def render_inline(self) -> Text:
         """
         Render as inline code (single line, no panel).
-        
+
         Returns:
             Rich Text object
         """
@@ -192,7 +192,7 @@ class CodeBlock:
 class InlineCode:
     """
     Inline code snippet (for use within text).
-    
+
     Examples:
         inline = InlineCode("print('hello')")
         text = Text("Use ") + inline.render() + Text(" to print")
@@ -201,7 +201,7 @@ class InlineCode:
     def __init__(self, code: str):
         """
         Initialize inline code.
-        
+
         Args:
             code: Code content
         """
@@ -210,7 +210,7 @@ class InlineCode:
     def render(self) -> Text:
         """
         Render inline code.
-        
+
         Returns:
             Rich Text object
         """
@@ -220,7 +220,7 @@ class InlineCode:
 class CodeSnippet:
     """
     Code snippet with context (file path, line range).
-    
+
     Examples:
         snippet = CodeSnippet(
             code="def hello():\\n    print('Hi')",
@@ -241,7 +241,7 @@ class CodeSnippet:
     ):
         """
         Initialize code snippet.
-        
+
         Args:
             code: Code content
             file_path: Source file path
@@ -252,7 +252,7 @@ class CodeSnippet:
         self.code = code
         self.file_path = file_path
         self.start_line = start_line
-        self.end_line = end_line or (start_line + code.count('\n'))
+        self.end_line = end_line or (start_line + code.count("\n"))
 
         # Auto-detect language from file path
         if language is None and file_path:
@@ -262,40 +262,40 @@ class CodeSnippet:
 
     def _detect_language(self, file_path: str) -> str:
         """Detect language from file extension."""
-        ext = Path(file_path).suffix.lstrip('.')
+        ext = Path(file_path).suffix.lstrip(".")
 
         # Map extensions to language names
         lang_map = {
-            'py': 'python',
-            'js': 'javascript',
-            'ts': 'typescript',
-            'tsx': 'typescript',
-            'jsx': 'javascript',
-            'java': 'java',
-            'go': 'go',
-            'rs': 'rust',
-            'cpp': 'cpp',
-            'cc': 'cpp',
-            'c': 'c',
-            'h': 'c',
-            'hpp': 'cpp',
-            'rb': 'ruby',
-            'php': 'php',
-            'swift': 'swift',
-            'kt': 'kotlin',
-            'sh': 'bash',
-            'bash': 'bash',
-            'sql': 'sql',
-            'html': 'html',
-            'css': 'css',
-            'json': 'json',
-            'yaml': 'yaml',
-            'yml': 'yaml',
-            'md': 'markdown',
-            'xml': 'xml',
+            "py": "python",
+            "js": "javascript",
+            "ts": "typescript",
+            "tsx": "typescript",
+            "jsx": "javascript",
+            "java": "java",
+            "go": "go",
+            "rs": "rust",
+            "cpp": "cpp",
+            "cc": "cpp",
+            "c": "c",
+            "h": "c",
+            "hpp": "cpp",
+            "rb": "ruby",
+            "php": "php",
+            "swift": "swift",
+            "kt": "kotlin",
+            "sh": "bash",
+            "bash": "bash",
+            "sql": "sql",
+            "html": "html",
+            "css": "css",
+            "json": "json",
+            "yaml": "yaml",
+            "yml": "yaml",
+            "md": "markdown",
+            "xml": "xml",
         }
 
-        return lang_map.get(ext, 'text')
+        return lang_map.get(ext, "text")
 
     def _create_title(self) -> Optional[Text]:
         """Create title with file path and line range."""
@@ -324,7 +324,7 @@ class CodeSnippet:
     def render(self) -> Panel:
         """
         Render code snippet.
-        
+
         Returns:
             Rich Panel object
         """
@@ -341,7 +341,7 @@ class CodeSnippet:
             code_block._create_syntax(),
             title=title if title else None,
             title_align="left",
-            border_style=COLORS['accent_blue'],
+            border_style=COLORS["accent_blue"],
             padding=(0, 1),
             expand=False,
         )
@@ -351,6 +351,7 @@ class CodeSnippet:
 # UTILITY FUNCTIONS
 # =============================================================================
 
+
 def create_code_block(
     code: str,
     language: str = "python",
@@ -358,12 +359,12 @@ def create_code_block(
 ) -> CodeBlock:
     """
     Quick helper to create code block.
-    
+
     Args:
         code: Code content
         language: Programming language
         **kwargs: Additional CodeBlock arguments
-        
+
     Returns:
         CodeBlock instance
     """
@@ -373,10 +374,10 @@ def create_code_block(
 def render_code_inline(code: str) -> Text:
     """
     Quick helper for inline code.
-    
+
     Args:
         code: Code content
-        
+
     Returns:
         Rich Text object
     """
@@ -386,23 +387,23 @@ def render_code_inline(code: str) -> Text:
 def detect_language_from_content(code: str) -> str:
     """
     Detect programming language from code content (heuristics).
-    
+
     Args:
         code: Code content
-        
+
     Returns:
         Detected language name
     """
     # Simple heuristics
-    if 'def ' in code or 'import ' in code or 'class ' in code:
-        return 'python'
-    elif 'function ' in code or 'const ' in code or 'let ' in code:
-        return 'javascript'
-    elif 'public class ' in code or 'public static void' in code:
-        return 'java'
-    elif 'fn ' in code or 'let mut' in code:
-        return 'rust'
-    elif 'func ' in code or 'package ' in code:
-        return 'go'
+    if "def " in code or "import " in code or "class " in code:
+        return "python"
+    elif "function " in code or "const " in code or "let " in code:
+        return "javascript"
+    elif "public class " in code or "public static void" in code:
+        return "java"
+    elif "fn " in code or "let mut" in code:
+        return "rust"
+    elif "func " in code or "package " in code:
+        return "go"
 
-    return 'text'
+    return "text"

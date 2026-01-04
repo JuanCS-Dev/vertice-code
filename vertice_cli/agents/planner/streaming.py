@@ -21,8 +21,7 @@ if TYPE_CHECKING:
 
 
 async def execute_streaming(
-    agent: "PlannerAgent",
-    task: AgentTask
+    agent: "PlannerAgent", task: AgentTask
 ) -> AsyncIterator[Dict[str, Any]]:
     """
     Streaming execution for PlannerAgent.
@@ -37,13 +36,13 @@ async def execute_streaming(
     Yields:
         Dict with format {"type": "status"|"thinking"|"result", "data": ...}
     """
-    trace_id = getattr(task, 'trace_id', str(uuid.uuid4()))
+    trace_id = getattr(task, "trace_id", str(uuid.uuid4()))
 
     try:
         # PHASE 1: Initial Status
         yield {"type": "status", "data": "📋 Loading project context..."}
 
-        cwd = task.context.get('cwd', '.') if task.context else '.'
+        cwd = task.context.get("cwd", ".") if task.context else "."
         await asyncio.sleep(0.05)
 
         # PHASE 2: Build Prompt
@@ -60,9 +59,11 @@ async def execute_streaming(
 
         async for token in agent.llm_client.stream(
             prompt=prompt,
-            system_prompt=agent._get_system_prompt() if hasattr(agent, '_get_system_prompt') else None,
+            system_prompt=(
+                agent._get_system_prompt() if hasattr(agent, "_get_system_prompt") else None
+            ),
             max_tokens=4096,
-            temperature=0.3
+            temperature=0.3,
         ):
             response_buffer.append(token)
             token_count += 1
@@ -70,7 +71,7 @@ async def execute_streaming(
             if token_count % 50 == 0:
                 yield {"type": "status", "data": f"🎯 Generating plan... ({token_count} tokens)"}
 
-        llm_response = ''.join(response_buffer)
+        llm_response = "".join(response_buffer)
 
         # PHASE 4: Process and Format
         yield {"type": "status", "data": "⚙️ Processing plan..."}
@@ -83,7 +84,7 @@ async def execute_streaming(
         formatted_markdown = format_plan_as_markdown(plan, task.request)
 
         # PHASE 6: Stream the formatted markdown LINE BY LINE
-        lines = formatted_markdown.split('\n')
+        lines = formatted_markdown.split("\n")
         for line in lines:
             yield {"type": "thinking", "data": line + "\n"}
             await asyncio.sleep(0.005)  # 5ms delay for smooth visual
@@ -99,8 +100,8 @@ async def execute_streaming(
                     "plan": plan,
                     "sops": plan.get("sops", []) if isinstance(plan, dict) else [],
                 },
-                reasoning=f"Generated plan with {len(plan.get('sops', []) if isinstance(plan, dict) else [])} steps"
-            )
+                reasoning=f"Generated plan with {len(plan.get('sops', []) if isinstance(plan, dict) else [])} steps",
+            ),
         }
 
     except Exception as e:
@@ -112,6 +113,7 @@ def _get_language_instruction(request: str) -> Optional[str]:
     """Get language-specific instruction for prompts."""
     try:
         from vertice_core import LanguageDetector
+
         return LanguageDetector.get_prompt_instruction(request)
     except ImportError:
         return None
@@ -157,10 +159,7 @@ Include 3-7 concrete steps. Each "action" must be plain text describing WHAT to 
 {f'IMPORTANT: {lang_instruction}' if lang_instruction else ''}"""
 
 
-async def run_streaming(
-    agent: "PlannerAgent",
-    task: AgentTask
-) -> AsyncIterator[Dict[str, Any]]:
+async def run_streaming(agent: "PlannerAgent", task: AgentTask) -> AsyncIterator[Dict[str, Any]]:
     """Alias for execute_streaming for backwards compatibility."""
     async for update in execute_streaming(agent, task):
         yield update

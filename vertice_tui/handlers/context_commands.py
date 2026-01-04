@@ -33,12 +33,7 @@ class ContextCommandHandler:
     def file_window(self):
         return get_file_context_window()
 
-    async def handle(
-        self,
-        command: str,
-        args: str,
-        view: "ResponseView"
-    ) -> None:
+    async def handle(self, command: str, args: str, view: "ResponseView") -> None:
         """Route to specific handler method."""
         handlers = {
             "/add": self._handle_add,
@@ -82,7 +77,7 @@ class ContextCommandHandler:
             filepath = file_spec
 
             # Check for line range syntax (file.py:10-50)
-            match = re.match(r'^(.+):(\d+)-(\d+)$', file_spec)
+            match = re.match(r"^(.+):(\d+)-(\d+)$", file_spec)
             if match:
                 filepath = match.group(1)
                 lines = (int(match.group(2)), int(match.group(3)))
@@ -91,7 +86,7 @@ class ContextCommandHandler:
             path = Path(filepath).expanduser()
 
             # Handle glob patterns
-            if '*' in filepath:
+            if "*" in filepath:
                 cwd = Path.cwd()
                 matched_files = list(cwd.glob(filepath))
                 if not matched_files:
@@ -108,7 +103,9 @@ class ContextCommandHandler:
                 # Single file
                 success, msg = self.file_window.add(str(path), lines=lines)
                 if success:
-                    added.append(path.name if lines is None else f"{path.name}:{lines[0]}-{lines[1]}")
+                    added.append(
+                        path.name if lines is None else f"{path.name}:{lines[0]}-{lines[1]}"
+                    )
                 else:
                     errors.append(msg)
 

@@ -56,29 +56,35 @@ class ProviderConfig:
     very_long_message_threshold: int = 1000
 
     # Pattern sets for complexity detection
-    simple_patterns: List[str] = field(default_factory=lambda: [
-        r"^(what|who|when|where|how|why)\s+\w+\??$",
-        r"^\w+\s*\?$",
-        r"^(hi|hello|hey|thanks|ok|yes|no)\b",
-    ])
+    simple_patterns: List[str] = field(
+        default_factory=lambda: [
+            r"^(what|who|when|where|how|why)\s+\w+\??$",
+            r"^\w+\s*\?$",
+            r"^(hi|hello|hey|thanks|ok|yes|no)\b",
+        ]
+    )
 
-    complex_patterns: List[str] = field(default_factory=lambda: [
-        r"\b(create|build|implement|design|architect)\b.*\b(system|pipeline|framework|application)\b",
-        r"\b(analyze|debug|investigate|troubleshoot)\b.*\b(complex|multiple|entire)\b",
-        r"\b(refactor|optimize|improve)\b.*\b(codebase|architecture|performance)\b",
-        r"\b(multi.?step|step.?by.?step|sequentially|iteratively)\b",
-        r"\b(remember|recall|previous|earlier|context)\b",
-        r"\b(simulate|predict|plan|strategy)\b",
-        r"\b(evolve|learn|adapt|improve over time)\b",
-    ])
+    complex_patterns: List[str] = field(
+        default_factory=lambda: [
+            r"\b(create|build|implement|design|architect)\b.*\b(system|pipeline|framework|application)\b",
+            r"\b(analyze|debug|investigate|troubleshoot)\b.*\b(complex|multiple|entire)\b",
+            r"\b(refactor|optimize|improve)\b.*\b(codebase|architecture|performance)\b",
+            r"\b(multi.?step|step.?by.?step|sequentially|iteratively)\b",
+            r"\b(remember|recall|previous|earlier|context)\b",
+            r"\b(simulate|predict|plan|strategy)\b",
+            r"\b(evolve|learn|adapt|improve over time)\b",
+        ]
+    )
 
-    governance_patterns: List[str] = field(default_factory=lambda: [
-        r"\b(tribunal|governance|evaluate|judge)\b",
-        r"\b(constitution|compliance|policy)\b",
-        r"\b(remember long.?term|consolidate|vault)\b",
-        r"\b(generate tool|create tool|dynamic tool)\b",
-        r"\b(VERITAS|SOPHIA|DIKE)\b",
-    ])
+    governance_patterns: List[str] = field(
+        default_factory=lambda: [
+            r"\b(tribunal|governance|evaluate|judge)\b",
+            r"\b(constitution|compliance|policy)\b",
+            r"\b(remember long.?term|consolidate|vault)\b",
+            r"\b(generate tool|create tool|dynamic tool)\b",
+            r"\b(VERITAS|SOPHIA|DIKE)\b",
+        ]
+    )
 
 
 class ProviderManager:
@@ -253,7 +259,7 @@ class ProviderManager:
         GeminiClient may use VerticeRouter internally which routes to
         Groq, Cerebras, Mistral, etc.
         """
-        if hasattr(self.gemini, 'get_current_provider_name'):
+        if hasattr(self.gemini, "get_current_provider_name"):
             return self.gemini.get_current_provider_name()
         return "gemini"
 
@@ -267,7 +273,9 @@ class ProviderManager:
             "mode": self._mode,
             "providers": {
                 "gemini": {
-                    "available": self.gemini.is_available if hasattr(self.gemini, "is_available") else True,
+                    "available": (
+                        self.gemini.is_available if hasattr(self.gemini, "is_available") else True
+                    ),
                     "active": self._mode in ("gemini", "auto"),
                 },
                 "prometheus": {

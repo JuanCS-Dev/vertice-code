@@ -231,10 +231,7 @@ class BaseHandler(ABC):
         separator = " | ".join("-" * len(str(h)) for h in headers)
 
         # Data rows
-        data_rows = "\n".join(
-            " | ".join(str(cell) for cell in row)
-            for row in rows
-        )
+        data_rows = "\n".join(" | ".join(str(cell) for cell in row) for row in rows)
 
         table = f"{header_row}\n{separator}\n{data_rows}"
         view.add_system_message(f"## {icon} {title}\n\n{table}")

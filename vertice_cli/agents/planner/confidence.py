@@ -18,8 +18,7 @@ from .models import SOPStep
 
 
 def calculate_step_confidence(
-    step: SOPStep,
-    context: Dict[str, Any]
+    step: SOPStep, context: Dict[str, Any]
 ) -> Tuple[float, str, List[str]]:
     """
     Calculate confidence score for a planning step.

@@ -17,15 +17,17 @@ from typing import Any, Dict, Optional, Union
 # Try to import httpx (preferred), fallback options
 try:
     import httpx
-    HTTP_CLIENT = 'httpx'
+
+    HTTP_CLIENT = "httpx"
 except ImportError:
     httpx = None
     try:
         import aiohttp
-        HTTP_CLIENT = 'aiohttp'
+
+        HTTP_CLIENT = "aiohttp"
     except ImportError:
         aiohttp = None
-        HTTP_CLIENT = 'requests'
+        HTTP_CLIENT = "requests"
 
 
 @dataclass
@@ -41,7 +43,7 @@ class HttpResponse:
     @property
     def text(self) -> str:
         """Response body as text."""
-        return self.content.decode('utf-8', errors='replace')
+        return self.content.decode("utf-8", errors="replace")
 
     @property
     def ok(self) -> bool:
@@ -51,6 +53,7 @@ class HttpResponse:
     def json(self) -> Any:
         """Parse response as JSON."""
         import json
+
         return json.loads(self.content)
 
     def raise_for_status(self) -> None:
@@ -59,7 +62,7 @@ class HttpResponse:
             raise HttpError(
                 f"HTTP {self.status_code} for {self.url}",
                 status_code=self.status_code,
-                response=self
+                response=self,
             )
 
 
@@ -70,7 +73,7 @@ class HttpError(Exception):
         self,
         message: str,
         status_code: Optional[int] = None,
-        response: Optional[HttpResponse] = None
+        response: Optional[HttpResponse] = None,
     ):
         super().__init__(message)
         self.status_code = status_code
@@ -88,13 +91,13 @@ class HttpClient:
             data = response.json()
     """
 
-    base_url: str = ''
+    base_url: str = ""
     headers: Dict[str, str] = field(default_factory=dict)
     timeout: float = 30.0
     max_connections: int = 100
     _client: Any = field(default=None, repr=False)
 
-    async def __aenter__(self) -> 'HttpClient':
+    async def __aenter__(self) -> "HttpClient":
         """Enter async context."""
         await self._init_client()
         return self
@@ -105,29 +108,29 @@ class HttpClient:
 
     async def _init_client(self) -> None:
         """Initialize the underlying HTTP client."""
-        if HTTP_CLIENT == 'httpx' and httpx:
+        if HTTP_CLIENT == "httpx" and httpx:
             self._client = httpx.AsyncClient(
                 base_url=self.base_url,
                 headers=self.headers,
                 timeout=self.timeout,
-                limits=httpx.Limits(max_connections=self.max_connections)
+                limits=httpx.Limits(max_connections=self.max_connections),
             )
-        elif HTTP_CLIENT == 'aiohttp' and aiohttp:
+        elif HTTP_CLIENT == "aiohttp" and aiohttp:
             connector = aiohttp.TCPConnector(limit=self.max_connections)
             timeout_obj = aiohttp.ClientTimeout(total=self.timeout)
             self._client = aiohttp.ClientSession(
                 base_url=self.base_url if self.base_url else None,
                 headers=self.headers,
                 connector=connector,
-                timeout=timeout_obj
+                timeout=timeout_obj,
             )
 
     async def close(self) -> None:
         """Close the client and release connections."""
         if self._client:
-            if HTTP_CLIENT == 'httpx':
+            if HTTP_CLIENT == "httpx":
                 await self._client.aclose()
-            elif HTTP_CLIENT == 'aiohttp':
+            elif HTTP_CLIENT == "aiohttp":
                 await self._client.close()
             self._client = None
 
@@ -139,7 +142,7 @@ class HttpClient:
         params: Optional[Dict[str, str]] = None,
         json: Optional[Any] = None,
         data: Optional[Union[bytes, str, Dict]] = None,
-        timeout: Optional[float] = None
+        timeout: Optional[float] = None,
     ) -> HttpResponse:
         """
         Make an HTTP request.
@@ -157,12 +160,13 @@ class HttpClient:
             HttpResponse object
         """
         import time
+
         start = time.monotonic()
 
         timeout = timeout or self.timeout
         merged_headers = {**self.headers, **(headers or {})}
 
-        if HTTP_CLIENT == 'httpx' and self._client:
+        if HTTP_CLIENT == "httpx" and self._client:
             response = await self._client.request(
                 method,
                 url,
@@ -170,7 +174,7 @@ class HttpClient:
                 params=params,
                 json=json,
                 data=data,
-                timeout=timeout
+                timeout=timeout,
             )
             elapsed_ms = (time.monotonic() - start) * 1000
             return HttpResponse(
@@ -178,18 +182,15 @@ class HttpClient:
                 headers=dict(response.headers),
                 content=response.content,
                 url=str(response.url),
-                elapsed_ms=elapsed_ms
+                elapsed_ms=elapsed_ms,
             )
 
-        elif HTTP_CLIENT == 'aiohttp' and self._client:
-            full_url = f"{self.base_url}{url}" if self.base_url and not url.startswith('http') else url
+        elif HTTP_CLIENT == "aiohttp" and self._client:
+            full_url = (
+                f"{self.base_url}{url}" if self.base_url and not url.startswith("http") else url
+            )
             async with self._client.request(
-                method,
-                full_url,
-                headers=merged_headers,
-                params=params,
-                json=json,
-                data=data
+                method, full_url, headers=merged_headers, params=params, json=json, data=data
             ) as response:
                 content = await response.read()
                 elapsed_ms = (time.monotonic() - start) * 1000
@@ -198,12 +199,13 @@ class HttpClient:
                     headers=dict(response.headers),
                     content=content,
                     url=str(response.url),
-                    elapsed_ms=elapsed_ms
+                    elapsed_ms=elapsed_ms,
                 )
 
         else:
             # Fallback to requests in thread pool
             import requests as req
+
             loop = asyncio.get_event_loop()
 
             def sync_request():
@@ -215,7 +217,7 @@ class HttpClient:
                     params=params,
                     json=json,
                     data=data,
-                    timeout=timeout
+                    timeout=timeout,
                 )
 
             response = await loop.run_in_executor(None, sync_request)
@@ -225,7 +227,7 @@ class HttpClient:
                 headers=dict(response.headers),
                 content=response.content,
                 url=response.url,
-                elapsed_ms=elapsed_ms
+                elapsed_ms=elapsed_ms,
             )
 
     async def get(
@@ -233,10 +235,10 @@ class HttpClient:
         url: str,
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, str]] = None,
-        timeout: Optional[float] = None
+        timeout: Optional[float] = None,
     ) -> HttpResponse:
         """Make GET request."""
-        return await self.request('GET', url, headers=headers, params=params, timeout=timeout)
+        return await self.request("GET", url, headers=headers, params=params, timeout=timeout)
 
     async def post(
         self,
@@ -244,10 +246,12 @@ class HttpClient:
         headers: Optional[Dict[str, str]] = None,
         json: Optional[Any] = None,
         data: Optional[Union[bytes, str, Dict]] = None,
-        timeout: Optional[float] = None
+        timeout: Optional[float] = None,
     ) -> HttpResponse:
         """Make POST request."""
-        return await self.request('POST', url, headers=headers, json=json, data=data, timeout=timeout)
+        return await self.request(
+            "POST", url, headers=headers, json=json, data=data, timeout=timeout
+        )
 
     async def put(
         self,
@@ -255,19 +259,18 @@ class HttpClient:
         headers: Optional[Dict[str, str]] = None,
         json: Optional[Any] = None,
         data: Optional[Union[bytes, str, Dict]] = None,
-        timeout: Optional[float] = None
+        timeout: Optional[float] = None,
     ) -> HttpResponse:
         """Make PUT request."""
-        return await self.request('PUT', url, headers=headers, json=json, data=data, timeout=timeout)
+        return await self.request(
+            "PUT", url, headers=headers, json=json, data=data, timeout=timeout
+        )
 
     async def delete(
-        self,
-        url: str,
-        headers: Optional[Dict[str, str]] = None,
-        timeout: Optional[float] = None
+        self, url: str, headers: Optional[Dict[str, str]] = None, timeout: Optional[float] = None
     ) -> HttpResponse:
         """Make DELETE request."""
-        return await self.request('DELETE', url, headers=headers, timeout=timeout)
+        return await self.request("DELETE", url, headers=headers, timeout=timeout)
 
     async def patch(
         self,
@@ -275,10 +278,12 @@ class HttpClient:
         headers: Optional[Dict[str, str]] = None,
         json: Optional[Any] = None,
         data: Optional[Union[bytes, str, Dict]] = None,
-        timeout: Optional[float] = None
+        timeout: Optional[float] = None,
     ) -> HttpResponse:
         """Make PATCH request."""
-        return await self.request('PATCH', url, headers=headers, json=json, data=data, timeout=timeout)
+        return await self.request(
+            "PATCH", url, headers=headers, json=json, data=data, timeout=timeout
+        )
 
 
 # Convenience functions for one-off requests
@@ -286,7 +291,7 @@ async def get(
     url: str,
     headers: Optional[Dict[str, str]] = None,
     params: Optional[Dict[str, str]] = None,
-    timeout: float = 30.0
+    timeout: float = 30.0,
 ) -> HttpResponse:
     """Make a GET request."""
     async with HttpClient(timeout=timeout) as client:
@@ -298,7 +303,7 @@ async def post(
     headers: Optional[Dict[str, str]] = None,
     json: Optional[Any] = None,
     data: Optional[Union[bytes, str, Dict]] = None,
-    timeout: float = 30.0
+    timeout: float = 30.0,
 ) -> HttpResponse:
     """Make a POST request."""
     async with HttpClient(timeout=timeout) as client:
@@ -306,10 +311,10 @@ async def post(
 
 
 __all__ = [
-    'HttpClient',
-    'HttpResponse',
-    'HttpError',
-    'get',
-    'post',
-    'HTTP_CLIENT',
+    "HttpClient",
+    "HttpResponse",
+    "HttpError",
+    "get",
+    "post",
+    "HTTP_CLIENT",
 ]

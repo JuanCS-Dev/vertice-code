@@ -13,9 +13,11 @@ Date: 2025-11-26
 """
 
 import logging
+
 logger = logging.getLogger(__name__)
 import shutil
 import logging
+
 logger = logging.getLogger(__name__)
 import subprocess
 from pathlib import Path
@@ -44,11 +46,7 @@ class PullRequestManager(IPullRequestManager):
         self._working_dir = working_dir or Path.cwd()
 
     async def create_pull_request(
-        self,
-        title: str,
-        body: Optional[str] = None,
-        base: str = "main",
-        draft: bool = False
+        self, title: str, body: Optional[str] = None, base: str = "main", draft: bool = False
     ) -> Dict[str, Any]:
         """
         Create a GitHub pull request using gh CLI.
@@ -66,7 +64,7 @@ class PullRequestManager(IPullRequestManager):
         if not shutil.which("gh"):
             return {
                 "success": False,
-                "error": "GitHub CLI (gh) not installed. Install with: brew install gh"
+                "error": "GitHub CLI (gh) not installed. Install with: brew install gh",
             }
 
         # Check if authenticated
@@ -76,12 +74,12 @@ class PullRequestManager(IPullRequestManager):
                 capture_output=True,
                 text=True,
                 timeout=10,
-                cwd=str(self._working_dir)
+                cwd=str(self._working_dir),
             )
             if auth_check.returncode != 0:
                 return {
                     "success": False,
-                    "error": "Not authenticated with GitHub. Run: gh auth login"
+                    "error": "Not authenticated with GitHub. Run: gh auth login",
                 }
         except subprocess.TimeoutExpired:
             return {"success": False, "error": "GitHub auth check timed out"}
@@ -103,11 +101,7 @@ class PullRequestManager(IPullRequestManager):
 
         try:
             result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=30,
-                cwd=str(self._working_dir)
+                cmd, capture_output=True, text=True, timeout=30, cwd=str(self._working_dir)
             )
 
             if result.returncode == 0:
@@ -118,13 +112,13 @@ class PullRequestManager(IPullRequestManager):
                     "branch": current_branch,
                     "base": base,
                     "draft": draft,
-                    "message": f"PR created: {pr_url}"
+                    "message": f"PR created: {pr_url}",
                 }
             else:
                 return {
                     "success": False,
                     "error": result.stderr.strip() or "PR creation failed",
-                    "stdout": result.stdout
+                    "stdout": result.stdout,
                 }
         except subprocess.TimeoutExpired:
             return {"success": False, "error": "PR creation timed out"}
@@ -162,7 +156,7 @@ class PullRequestManager(IPullRequestManager):
                 capture_output=True,
                 text=True,
                 timeout=5,
-                cwd=str(self._working_dir)
+                cwd=str(self._working_dir),
             )
             return result.stdout.strip()
         except Exception as e:
@@ -196,10 +190,7 @@ class PullRequestManager(IPullRequestManager):
 
         try:
             result = subprocess.run(
-                ["gh", "auth", "status"],
-                capture_output=True,
-                text=True,
-                timeout=10
+                ["gh", "auth", "status"], capture_output=True, text=True, timeout=10
             )
             return result.returncode == 0
         except Exception as e:

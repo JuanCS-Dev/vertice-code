@@ -6,121 +6,106 @@ FEW_SHOT_EXAMPLES = [
         "user": "show me the README",
         "assistant": '[{"tool": "readfile", "args": {"path": "README.md"}}]',
         "category": "file_reading",
-        "explanation": "Direct file read request"
+        "explanation": "Direct file read request",
     },
-
     # Example 2: File search
     {
         "user": "find all TODO comments in python files",
         "assistant": '[{"tool": "searchfiles", "args": {"pattern": "TODO", "path": ".", "file_pattern": "*.py"}}]',
         "category": "search",
-        "explanation": "Search with file type filter"
+        "explanation": "Search with file type filter",
     },
-
     # Example 3: File editing
     {
         "user": "replace 'old_name' with 'new_name' in config.py",
         "assistant": '[{"tool": "editfile", "args": {"path": "config.py", "edits": [{"search": "old_name", "replace": "new_name"}]}}]',
         "category": "file_writing",
-        "explanation": "Search and replace in file"
+        "explanation": "Search and replace in file",
     },
-
     # Example 4: Multi-step workflow
     {
         "user": "show git status and diff",
         "assistant": '[{"tool": "gitstatus", "args": {}}, {"tool": "gitdiff", "args": {}}]',
         "category": "git",
-        "explanation": "Sequential tool calls"
+        "explanation": "Sequential tool calls",
     },
-
     # Example 5: Directory operations
     {
         "user": "list files in the src directory",
         "assistant": '[{"tool": "ls", "args": {"path": "src"}}]',
         "category": "terminal",
-        "explanation": "Unix-like ls command"
+        "explanation": "Unix-like ls command",
     },
-
     # Example 6: File creation
     {
         "user": "create a new file called test.py with a hello world function",
         "assistant": '[{"tool": "writefile", "args": {"path": "test.py", "content": "def hello():\\n    print(\\"Hello, World!\\")\\n\\nif __name__ == \\"__main__\\":\\n    hello()\\n"}}]',
         "category": "file_writing",
-        "explanation": "Create file with content"
+        "explanation": "Create file with content",
     },
-
     # Example 7: Shell command for complex operations
     {
         "user": "find all files larger than 10MB",
         "assistant": '[{"tool": "bashcommand", "args": {"command": "find . -type f -size +10M -exec ls -lh {} \\\\;"}}]',
         "category": "execution",
-        "explanation": "Use shell when no specific tool exists"
+        "explanation": "Use shell when no specific tool exists",
     },
-
     # Example 8: Directory tree
     {
         "user": "show me the project structure",
         "assistant": '[{"tool": "getdirectorytree", "args": {"path": ".", "max_depth": 3}}]',
         "category": "search",
-        "explanation": "Directory tree visualization"
+        "explanation": "Directory tree visualization",
     },
-
     # Example 9: Safe file deletion
     {
         "user": "delete temp.log",
         "assistant": '[{"tool": "deletefile", "args": {"path": "temp.log"}}]',
         "category": "file_management",
-        "explanation": "Safe deletion (moves to .trash)"
+        "explanation": "Safe deletion (moves to .trash)",
     },
-
     # Example 10: Context query
     {
         "user": "what files have I been working on?",
         "assistant": '[{"tool": "getcontext", "args": {}}]',
         "category": "context",
-        "explanation": "Query session context"
+        "explanation": "Query session context",
     },
-
     # Example 11: Git workflow
     {
         "user": "stage all changes and show status",
         "assistant": '[{"tool": "bashcommand", "args": {"command": "git add -A"}}, {"tool": "gitstatus", "args": {}}]',
         "category": "git",
-        "explanation": "Combine shell and tools"
+        "explanation": "Combine shell and tools",
     },
-
     # Example 12: Multiple file reading
     {
         "user": "read main.py and utils.py",
         "assistant": '[{"tool": "readmultiplefiles", "args": {"paths": ["main.py", "utils.py"]}}]',
         "category": "file_reading",
-        "explanation": "Batch file reading"
+        "explanation": "Batch file reading",
     },
-
     # Example 13: Directory creation
     {
         "user": "create a folder called tests",
         "assistant": '[{"tool": "mkdir", "args": {"path": "tests"}}]',
         "category": "file_management",
-        "explanation": "Directory creation"
+        "explanation": "Directory creation",
     },
-
     # Example 14: Navigate + list
     {
         "user": "go to src and list files",
         "assistant": '[{"tool": "cd", "args": {"path": "src"}}, {"tool": "ls", "args": {}}]',
         "category": "terminal",
-        "explanation": "Navigation workflow"
+        "explanation": "Navigation workflow",
     },
-
     # Example 15: Conversational (no tool needed)
     {
         "user": "what does the rm command do?",
         "assistant": "The `rm` command removes (deletes) files or directories. In this CLI, we have a safe `rm` tool that moves files to `.trash/` instead of permanently deleting them. You can also use `deletefile` which does the same thing. Would you like to delete a specific file?",
         "category": "explanation",
-        "explanation": "Answer questions directly without tools"
+        "explanation": "Answer questions directly without tools",
     },
-
     # Example 16: Error recovery pattern
     {
         "user": "read config.yaml",
@@ -129,42 +114,109 @@ FEW_SHOT_EXAMPLES = [
         "explanation": "Initial attempt",
         "follow_up": {
             "error": "File 'config.yaml' not found",
-            "recovery": "I see that config.yaml doesn't exist. Let me search for similar files: [{'tool': 'bashcommand', 'args': {'command': 'find . -name \"config.*\" -o -name \"*.yaml\"'}}]"
-        }
+            "recovery": "I see that config.yaml doesn't exist. Let me search for similar files: [{'tool': 'bashcommand', 'args': {'command': 'find . -name \"config.*\" -o -name \"*.yaml\"'}}]",
+        },
     },
-
     # Example 17: Complex search and replace
     {
         "user": "in all python files, replace print statements with logging.info",
         "assistant": '[{"tool": "searchfiles", "args": {"pattern": "print\\\\(", "path": ".", "file_pattern": "*.py"}}]',
         "category": "search",
-        "explanation": "First find occurrences, then user can confirm replacement"
+        "explanation": "First find occurrences, then user can confirm replacement",
     },
-
     # Example 18: Git commit workflow
     {
         "user": "commit with message 'fix bug'",
         "assistant": '[{"tool": "bashcommand", "args": {"command": "git add -A && git commit -m \\"fix bug\\""}}]',
         "category": "git",
-        "explanation": "Combined git operations"
+        "explanation": "Combined git operations",
     },
-
     # Example 19: Copy and modify
     {
         "user": "copy main.py to backup.py",
         "assistant": '[{"tool": "cp", "args": {"source": "main.py", "destination": "backup.py"}}]',
         "category": "file_management",
-        "explanation": "File copy operation"
+        "explanation": "File copy operation",
     },
-
     # Example 20: Insert at specific line
     {
         "user": "add import logging at the top of utils.py",
         "assistant": '[{"tool": "insertlines", "args": {"path": "utils.py", "line": 1, "content": "import logging\\n"}}]',
         "category": "file_writing",
-        "explanation": "Insert at specific position"
+        "explanation": "Insert at specific position",
     },
 ]
+
+FEW_SHOT_EXAMPLES_PTBR = [
+    # File reading
+    {
+        "user": "mostra o README",
+        "assistant": '[{"tool": "readfile", "args": {"path": "README.md"}}]',
+        "category": "file_reading",
+    },
+    {
+        "user": "o que tem no config.py?",
+        "assistant": '[{"tool": "readfile", "args": {"path": "config.py"}}]',
+        "category": "file_reading",
+    },
+    # Search
+    {
+        "user": "encontre todos os TODO nos arquivos python",
+        "assistant": '[{"tool": "searchfiles", "args": {"pattern": "TODO", "file_pattern": "*.py"}}]',
+        "category": "search",
+    },
+    {
+        "user": "onde esta a funcao calculate_total?",
+        "assistant": '[{"tool": "grep", "args": {"pattern": "def calculate_total"}}]',
+        "category": "search",
+    },
+    # Git
+    {
+        "user": "qual o status do git?",
+        "assistant": '[{"tool": "gitstatus", "args": {}}]',
+        "category": "git",
+    },
+    {
+        "user": "commita as alteracoes com mensagem 'fix bug'",
+        "assistant": '[{"tool": "bashcommand", "args": {"command": "git add -A && git commit -m \\"fix bug\\""}}]',
+        "category": "git",
+    },
+    # File creation
+    {
+        "user": "crie um arquivo utils.py com hello world",
+        "assistant": '[{"tool": "writefile", "args": {"path": "utils.py", "content": "def hello():\\n    print(\\"Hello!\\")\\n"}}]',
+        "category": "file_writing",
+    },
+    # Questions (no tool)
+    {
+        "user": "como funciona o decorador @property?",
+        "assistant": "O decorador `@property` transforma um metodo em atributo somente-leitura...",
+        "category": "explanation",
+    },
+]
+
+
+def get_bilingual_examples(user_input: str, max_examples: int = 5) -> list:
+    """Get examples based on detected language."""
+    # Simple Portuguese detection
+    pt_indicators = [
+        "que",
+        "como",
+        "para",
+        "nao",
+        "isso",
+        "fazer",
+        "qual",
+        "mostra",
+        "crie",
+        "encontre",
+        "onde",
+    ]
+    is_portuguese = any(w in user_input.lower() for w in pt_indicators)
+
+    if is_portuguese:
+        return FEW_SHOT_EXAMPLES_PTBR[:max_examples]
+    return FEW_SHOT_EXAMPLES[:max_examples]
 
 
 # Examples grouped by category for context-aware selection
@@ -182,11 +234,11 @@ EXAMPLES_BY_CATEGORY = {
 
 def get_examples_for_context(user_input: str, max_examples: int = 5) -> list:
     """Get relevant few-shot examples based on user input.
-    
+
     Args:
         user_input: User's query/command
         max_examples: Maximum examples to return
-        
+
     Returns:
         List of relevant examples
     """
@@ -224,6 +276,7 @@ def get_examples_for_context(user_input: str, max_examples: int = 5) -> list:
     # If not enough, add random examples
     if len(selected) < max_examples:
         import random
+
         remaining = max_examples - len(selected)
         pool = [ex for ex in FEW_SHOT_EXAMPLES if ex not in selected]
         selected.extend(random.sample(pool, min(remaining, len(pool))))
@@ -233,10 +286,10 @@ def get_examples_for_context(user_input: str, max_examples: int = 5) -> list:
 
 def format_examples_for_prompt(examples: list) -> str:
     """Format few-shot examples for inclusion in prompt.
-    
+
     Args:
         examples: List of example dicts
-        
+
     Returns:
         Formatted string with examples
     """
@@ -245,7 +298,7 @@ def format_examples_for_prompt(examples: list) -> str:
         formatted.append(f"Example {i}:")
         formatted.append(f"User: {ex['user']}")
         formatted.append(f"Assistant: {ex['assistant']}")
-        if 'explanation' in ex:
+        if "explanation" in ex:
             formatted.append(f"// {ex['explanation']}")
         formatted.append("")
 
@@ -259,38 +312,38 @@ ERROR_RECOVERY_EXAMPLES = [
         "error": "FileNotFoundError: [Errno 2] No such file or directory: 'config.py'",
         "analysis": "The file doesn't exist in the current directory.",
         "recovery": "Let me search for similar files: find . -name 'config*' -o -name '*.py'",
-        "action": '[{"tool": "bashcommand", "args": {"command": "find . -name \\"config*\\""}}]'
+        "action": '[{"tool": "bashcommand", "args": {"command": "find . -name \\"config*\\""}}]',
     },
     {
         "scenario": "permission_denied",
         "error": "PermissionError: [Errno 13] Permission denied: '/etc/hosts'",
         "analysis": "This file requires elevated permissions.",
         "recovery": "You'll need sudo access. Would you like me to try with: sudo cat /etc/hosts",
-        "action": "Ask for confirmation before using sudo"
+        "action": "Ask for confirmation before using sudo",
     },
     {
         "scenario": "syntax_error",
         "error": "SyntaxError: invalid syntax in file.py line 15",
         "analysis": "There's a Python syntax error.",
         "recovery": "Let me read the file to see the problematic line",
-        "action": '[{"tool": "readfile", "args": {"path": "file.py"}}]'
+        "action": '[{"tool": "readfile", "args": {"path": "file.py"}}]',
     },
     {
         "scenario": "command_not_found",
         "error": "bash: ripgrep: command not found",
         "analysis": "The ripgrep tool is not installed.",
         "recovery": "Would you like to use grep instead, or install ripgrep?",
-        "action": "Suggest fallback: grep -r [pattern] ."
+        "action": "Suggest fallback: grep -r [pattern] .",
     },
 ]
 
 
 def get_error_recovery_example(error_msg: str) -> dict:
     """Get error recovery example based on error message.
-    
+
     Args:
         error_msg: Error message string
-        
+
     Returns:
         Relevant recovery example dict
     """
@@ -312,5 +365,5 @@ def get_error_recovery_example(error_msg: str) -> dict:
         "error": error_msg,
         "analysis": "An error occurred.",
         "recovery": "Let me try to understand and fix this issue.",
-        "action": "Analyze error and suggest alternative"
+        "action": "Analyze error and suggest alternative",
     }

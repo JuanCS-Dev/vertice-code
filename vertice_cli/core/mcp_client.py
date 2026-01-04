@@ -3,6 +3,7 @@
 All MCP functionality is now in vertice_cli.core.mcp
 This file exists for backward compatibility.
 """
+
 from vertice_cli.core.mcp import MCPClient, create_mcp_client, MCPManager, mcp_manager
 
-__all__ = ['MCPClient', 'create_mcp_client', 'MCPManager', 'mcp_manager']
+__all__ = ["MCPClient", "create_mcp_client", "MCPManager", "mcp_manager"]

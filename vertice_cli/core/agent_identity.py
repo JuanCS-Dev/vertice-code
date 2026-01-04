@@ -164,9 +164,8 @@ _AGENT_IDENTITIES_INTERNAL: Dict[str, AgentIdentity] = {
             AgentPermission.READ_AGENT_STATE,
         },
         description="Lead orchestrator agent - read and route only",
-        resource_boundaries={"scope": "orchestration"}
+        resource_boundaries={"scope": "orchestration"},
     ),
-
     # Justiça: Governance with evaluation permissions only
     "governance": AgentIdentity(
         agent_id="governance",
@@ -178,9 +177,8 @@ _AGENT_IDENTITIES_INTERNAL: Dict[str, AgentIdentity] = {
             AgentPermission.MANAGE_TRUST_SCORES,
         },
         description="Constitutional governance agent - evaluation and blocking",
-        resource_boundaries={"scope": "governance"}
+        resource_boundaries={"scope": "governance"},
     ),
-
     # Sofia: Counselor with counsel permissions only
     "counselor": AgentIdentity(
         agent_id="counselor",
@@ -191,9 +189,8 @@ _AGENT_IDENTITIES_INTERNAL: Dict[str, AgentIdentity] = {
             AgentPermission.ACCESS_ETHICAL_KNOWLEDGE,
         },
         description="Wise counselor agent - guidance and deliberation",
-        resource_boundaries={"scope": "counsel"}
+        resource_boundaries={"scope": "counsel"},
     ),
-
     # Executor: Command execution agent with bash/shell permissions
     "executor": AgentIdentity(
         agent_id="executor",
@@ -205,9 +202,8 @@ _AGENT_IDENTITIES_INTERNAL: Dict[str, AgentIdentity] = {
             AgentPermission.NETWORK_ACCESS,
         },
         description="Command execution agent - bash and shell operations",
-        resource_boundaries={"scope": "execution", "timeout": "30s", "max_retries": "3"}
+        resource_boundaries={"scope": "execution", "timeout": "30s", "max_retries": "3"},
     ),
-
     # Architect: Architecture and design agent
     "architect": AgentIdentity(
         agent_id="architect",
@@ -218,9 +214,8 @@ _AGENT_IDENTITIES_INTERNAL: Dict[str, AgentIdentity] = {
             AgentPermission.NETWORK_ACCESS,
         },
         description="Architecture agent - design and implementation",
-        resource_boundaries={"scope": "architecture", "max_file_size": "10MB"}
+        resource_boundaries={"scope": "architecture", "max_file_size": "10MB"},
     ),
-
     # Explorer: Read-only discovery agent
     "explorer": AgentIdentity(
         agent_id="explorer",
@@ -229,9 +224,8 @@ _AGENT_IDENTITIES_INTERNAL: Dict[str, AgentIdentity] = {
             AgentPermission.READ_FILES,
         },
         description="Codebase explorer - read-only access",
-        resource_boundaries={"scope": "read-only"}
+        resource_boundaries={"scope": "read-only"},
     ),
-
     # Reviewer: Code review agent
     "reviewer": AgentIdentity(
         agent_id="reviewer",
@@ -241,7 +235,7 @@ _AGENT_IDENTITIES_INTERNAL: Dict[str, AgentIdentity] = {
             AgentPermission.WRITE_FILES,  # For review comments
         },
         description="Code reviewer - read and comment",
-        resource_boundaries={"scope": "review"}
+        resource_boundaries={"scope": "review"},
     ),
 }
 

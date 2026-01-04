@@ -87,10 +87,9 @@ def with_retry(
     """
     cfg = config or RetryConfig()
 
-    def decorator(
-        func: Callable[..., Awaitable[T]]
-    ) -> Callable[..., Awaitable[T]]:
+    def decorator(func: Callable[..., Awaitable[T]]) -> Callable[..., Awaitable[T]]:
         """Decorator that wraps function with retry logic."""
+
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> T:
             """Execute function with exponential backoff retry."""
@@ -187,16 +186,17 @@ async def call_with_resilience(
                 max=cfg.max_wait,
                 jitter=cfg.jitter,
             ),
-            retry=retry_if_exception_type(
-                (httpx.TimeoutException, httpx.ConnectError)
-            ),
+            retry=retry_if_exception_type((httpx.TimeoutException, httpx.ConnectError)),
             reraise=True,
         ):
             with attempt:
                 result = await func()
                 breaker.record_success()
                 return result
-    except Exception:
+    except (httpx.HTTPError, RuntimeError, OSError, TimeoutError) as e:
         breaker.record_failure()
-        raise
+        raise e
+    except Exception as e:
+        breaker.record_failure()
+        raise e
     raise RuntimeError("Retry exhausted")

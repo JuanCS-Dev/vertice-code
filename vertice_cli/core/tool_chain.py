@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 class ChainStatus(Enum):
     """Status of tool chain execution."""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -44,16 +45,18 @@ class ChainStatus(Enum):
 
 class ToolDependency(Enum):
     """Types of dependencies between tools."""
+
     NONE = "none"
     SEQUENTIAL = "sequential"  # Must run after previous
-    FILE_READ = "file_read"    # Reads file created by previous
+    FILE_READ = "file_read"  # Reads file created by previous
     FILE_WRITE = "file_write"  # Writes to same file
-    STATE = "state"           # Depends on state from previous
+    STATE = "state"  # Depends on state from previous
 
 
 @dataclass
 class ToolOperation:
     """A single operation in a tool chain."""
+
     op_id: str
     tool_name: str
     parameters: Dict[str, Any]
@@ -69,6 +72,7 @@ class ToolOperation:
 @dataclass
 class ChainResult:
     """Result of tool chain execution."""
+
     chain_id: str
     status: ChainStatus
     operations: List[ToolOperation]
@@ -126,6 +130,7 @@ class AtomicToolChain:
             parallel_execution: Execute independent ops in parallel
         """
         import uuid
+
         self.chain_id = chain_id or str(uuid.uuid4())
         self.rollback_on_failure = rollback_on_failure
         self.parallel_execution = parallel_execution
@@ -189,10 +194,7 @@ class AtomicToolChain:
             ready = []
             for op_id in remaining:
                 op = op_map[op_id]
-                deps_satisfied = all(
-                    dep not in remaining
-                    for dep in op.dependencies
-                )
+                deps_satisfied = all(dep not in remaining for dep in op.dependencies)
                 if deps_satisfied:
                     ready.append(op)
 
@@ -233,7 +235,7 @@ class AtomicToolChain:
                     # Execute batch in parallel
                     results = await asyncio.gather(
                         *[self._execute_operation(op, tool_executor) for op in batch],
-                        return_exceptions=True
+                        return_exceptions=True,
                     )
 
                     # Check for failures
@@ -347,7 +349,7 @@ async def atomic_transaction(
         result = await chain.execute(tool_executor)
         if result.status == ChainStatus.FAILED:
             raise RuntimeError(f"Transaction failed: {result.error}")
-    except Exception:
+    except BaseException:
         if chain._status == ChainStatus.RUNNING:
             await chain._rollback()
         raise
@@ -355,10 +357,10 @@ async def atomic_transaction(
 
 # Export all public symbols
 __all__ = [
-    'ChainStatus',
-    'ToolDependency',
-    'ToolOperation',
-    'ChainResult',
-    'AtomicToolChain',
-    'atomic_transaction',
+    "ChainStatus",
+    "ToolDependency",
+    "ToolOperation",
+    "ChainResult",
+    "AtomicToolChain",
+    "atomic_transaction",
 ]

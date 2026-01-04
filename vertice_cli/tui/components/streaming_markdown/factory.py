@@ -92,6 +92,11 @@ class BlockWidgetFactory:
         """Render code fence with incremental syntax highlighting."""
         language = block.language or "text"
 
+        # 2026 FIX: If language is "markdown", render as actual markdown
+        # not as a code block (common LLM pattern)
+        if language.lower() in ("markdown", "md"):
+            return self._render_default(block)
+
         # Reuse highlighter if exists for same language
         if language not in self._highlighters:
             self._highlighters[language] = IncrementalSyntaxHighlighter(language)
@@ -106,7 +111,7 @@ class BlockWidgetFactory:
         return create_code_block_panel(
             code=block.content,
             language=language,
-            title=f"{language.upper()}" + ("" if block.is_complete else " ⏳")
+            title=f"{language.upper()}" + ("" if block.is_complete else " ⏳"),
         )
 
     def _render_table(self, block: "BlockInfo") -> RenderableType:
@@ -123,7 +128,7 @@ class BlockWidgetFactory:
         """Render generic block as markdown."""
         try:
             return RichMarkdown(block.content)
-        except Exception:
+        except (ValueError, TypeError):
             return Text(block.content)
 
     def reset(self) -> None:

@@ -8,12 +8,13 @@ logger = logging.getLogger(__name__)
 
 # REMOVED top-level import: import openai
 
+
 class NebiusProvider:
     """Nebius AI Studio provider (OpenAI-compatible)."""
 
     def __init__(self, api_key: Optional[str] = None):
         """Initialize Nebius provider.
-        
+
         Args:
             api_key: Nebius API key (defaults to NEBIUS_API_KEY env var)
         """
@@ -27,6 +28,7 @@ class NebiusProvider:
         if self._openai is None:
             try:
                 import openai
+
                 self._openai = openai
                 logger.info("Lazy loaded openai")
             except ImportError:
@@ -41,8 +43,7 @@ class NebiusProvider:
                 self._ensure_openai()
                 try:
                     self._client = self._openai.AsyncOpenAI(
-                        api_key=self.api_key,
-                        base_url="https://api.studio.nebius.ai/v1/"
+                        api_key=self.api_key, base_url="https://api.studio.nebius.ai/v1/"
                     )
                     logger.info(f"Nebius provider initialized with model: {self.model_name}")
                 except Exception as e:
@@ -59,15 +60,15 @@ class NebiusProvider:
         messages: List[Dict[str, str]],
         max_tokens: int = 2048,
         temperature: float = 0.6,
-        **kwargs
+        **kwargs,
     ) -> str:
         """Generate completion from messages.
-        
+
         Args:
             messages: List of message dicts with 'role' and 'content'
             max_tokens: Maximum tokens to generate
             temperature: Sampling temperature
-            
+
         Returns:
             Generated text
         """
@@ -80,7 +81,7 @@ class NebiusProvider:
                 messages=messages,
                 max_tokens=max_tokens,
                 temperature=temperature,
-                extra_body={"top_p": 0.9}
+                extra_body={"top_p": 0.9},
             )
 
             return response.choices[0].message.content
@@ -94,15 +95,15 @@ class NebiusProvider:
         messages: List[Dict[str, str]],
         max_tokens: int = 2048,
         temperature: float = 0.6,
-        **kwargs
+        **kwargs,
     ) -> AsyncGenerator[str, None]:
         """Stream generation from messages.
-        
+
         Args:
             messages: List of message dicts
             max_tokens: Maximum tokens to generate
             temperature: Sampling temperature
-            
+
         Yields:
             Generated text chunks
         """
@@ -116,7 +117,7 @@ class NebiusProvider:
                 max_tokens=max_tokens,
                 temperature=temperature,
                 stream=True,
-                extra_body={"top_p": 0.9}
+                extra_body={"top_p": 0.9},
             )
 
             async for chunk in stream:
@@ -132,11 +133,11 @@ class NebiusProvider:
         messages: List[Dict[str, str]],
         max_tokens: int = 2048,
         temperature: float = 0.6,
-        **kwargs
+        **kwargs,
     ) -> AsyncGenerator[str, None]:
         """
         Alias for stream_generate to maintain compatibility.
-        
+
         Some parts of the codebase call stream_chat() instead of stream_generate().
         This method delegates to stream_generate().
         """

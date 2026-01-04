@@ -9,10 +9,10 @@ from datetime import datetime
 @dataclass
 class HookContext:
     """Context information passed to hook executors.
-    
+
     Provides all necessary information for variable substitution
     in hook commands (e.g., {file}, {dir}, {project_name}).
-    
+
     Attributes:
         file_path: Full path to the file that triggered the hook
         event_name: Name of the event (post_write, post_edit, etc)
@@ -47,7 +47,7 @@ class HookContext:
     @property
     def file_extension(self) -> str:
         """File extension without dot (e.g., 'py')."""
-        return self.file_path.suffix.lstrip('.')
+        return self.file_path.suffix.lstrip(".")
 
     @property
     def dir(self) -> str:
@@ -64,10 +64,10 @@ class HookContext:
 
     def get_variables(self) -> Dict[str, str]:
         """Get all available variables for substitution.
-        
+
         Returns:
             Dictionary mapping variable names to their values.
-            
+
         Example:
             >>> ctx = HookContext(Path("src/utils/helper.py"), "post_write")
             >>> ctx.get_variables()
@@ -93,5 +93,5 @@ class HookContext:
             "cwd": str(self.cwd),
             "project_name": self.project_name,
             "event": self.event_name,
-            **self.metadata
+            **self.metadata,
         }

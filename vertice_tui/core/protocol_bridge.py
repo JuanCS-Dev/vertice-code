@@ -29,8 +29,8 @@ class ProtocolBridgeMixin:
 
     async def start_mcp_server(self, port: int = 3000) -> Dict[str, Any]:
         """Start the local MCP server."""
-        tools = getattr(self, 'tools', None)
-        registry = getattr(tools, 'registry', None) if tools else None
+        tools = getattr(self, "tools", None)
+        registry = getattr(tools, "registry", None) if tools else None
         return await self._mcp_manager.start_server(
             tool_registry=registry,
             port=port,

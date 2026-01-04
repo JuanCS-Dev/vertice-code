@@ -16,10 +16,8 @@ from typing import Any, AsyncIterator, Dict, List, Optional, Protocol
 
 logger = logging.getLogger(__name__)
 
-# Priority order: FREE FIRST, then Vertex AI (Gemini via GCP)
-DEFAULT_PRIORITY: List[str] = [
-    "groq", "cerebras", "mistral", "vertex-ai", "azure"
-]
+# Priority order: Vertex AI FIRST (Gemini 3 via GCP), then FREE tier
+DEFAULT_PRIORITY: List[str] = ["vertex-ai", "groq", "cerebras", "mistral", "azure"]
 DEFAULT_MAX_TOKENS: int = 8192
 DEFAULT_TEMPERATURE: float = 1.0
 CIRCUIT_BREAKER_THRESHOLD: int = 5

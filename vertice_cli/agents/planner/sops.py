@@ -39,8 +39,7 @@ def actions_to_sops(actions: List[Action]) -> List[SOPStep]:
         for prev_idx, prev_action in enumerate(actions[:idx]):
             # Check if previous action's effects satisfy our preconditions
             if any(
-                key in prev_action.effects and
-                prev_action.effects[key] == value
+                key in prev_action.effects and prev_action.effects[key] == value
                 for key, value in action.preconditions.items()
             ):
                 deps.append(f"step-{prev_idx}")
@@ -57,7 +56,7 @@ def actions_to_sops(actions: List[Action]) -> List[SOPStep]:
             dependencies=deps,
             context_isolation=True,
             max_tokens=4000,
-            correlation_id=f"action-{action.id}"
+            correlation_id=f"action-{action.id}",
         )
         sops.append(sop)
 
@@ -65,10 +64,7 @@ def actions_to_sops(actions: List[Action]) -> List[SOPStep]:
 
 
 async def llm_planning_fallback(
-    agent: "PlannerAgent",
-    task: "AgentTask",
-    context: Dict[str, Any],
-    agents: List[str]
+    agent: "PlannerAgent", task: "AgentTask", context: Dict[str, Any], agents: List[str]
 ) -> List[SOPStep]:
     """Fallback to LLM planning if GOAP fails.
 

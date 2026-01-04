@@ -45,7 +45,9 @@ logger = logging.getLogger(__name__)
 tracer = get_tracer()
 
 
-def _detect_circular_references(obj: Any, visited: Optional[set] = None, max_depth: int = 100) -> bool:
+def _detect_circular_references(
+    obj: Any, visited: Optional[set] = None, max_depth: int = 100
+) -> bool:
     """
     Detect circular references in nested objects.
 
@@ -116,7 +118,7 @@ class GovernancePipeline:
         enable_governance: bool = True,
         enable_counsel: bool = True,
         enable_observability: bool = True,
-        fail_safe: bool = True
+        fail_safe: bool = True,
     ):
         """
         Initialize governance pipeline.
@@ -140,13 +142,13 @@ class GovernancePipeline:
             raise ValueError("sofia cannot be None")
 
         # Type validation (duck typing - check for required methods)
-        if not hasattr(justica, 'evaluate_action') and not hasattr(justica, 'execute'):
+        if not hasattr(justica, "evaluate_action") and not hasattr(justica, "execute"):
             raise TypeError(
                 f"justica must have 'evaluate_action' or 'execute' method, "
                 f"got {type(justica).__name__}"
             )
 
-        if not hasattr(sofia, 'provide_counsel') and not hasattr(sofia, 'execute'):
+        if not hasattr(sofia, "provide_counsel") and not hasattr(sofia, "execute"):
             raise TypeError(
                 f"sofia must have 'provide_counsel' or 'execute' method, "
                 f"got {type(sofia).__name__}"
@@ -154,11 +156,15 @@ class GovernancePipeline:
 
         # Boolean validation
         if not isinstance(enable_governance, bool):
-            raise TypeError(f"enable_governance must be bool, got {type(enable_governance).__name__}")
+            raise TypeError(
+                f"enable_governance must be bool, got {type(enable_governance).__name__}"
+            )
         if not isinstance(enable_counsel, bool):
             raise TypeError(f"enable_counsel must be bool, got {type(enable_counsel).__name__}")
         if not isinstance(enable_observability, bool):
-            raise TypeError(f"enable_observability must be bool, got {type(enable_observability).__name__}")
+            raise TypeError(
+                f"enable_observability must be bool, got {type(enable_observability).__name__}"
+            )
         if not isinstance(fail_safe, bool):
             raise TypeError(f"fail_safe must be bool, got {type(fail_safe).__name__}")
 
@@ -176,10 +182,7 @@ class GovernancePipeline:
         logger.info(f"  - Fail-safe mode: {fail_safe}")
 
     async def pre_execution_check(
-        self,
-        task: AgentTask,
-        agent_id: str,
-        risk_level: str = "MEDIUM"
+        self, task: AgentTask, agent_id: str, risk_level: str = "MEDIUM"
     ) -> Tuple[bool, Optional[str], Dict[str, Any]]:
         """
         Execute governance checks BEFORE agent action.
@@ -233,17 +236,15 @@ class GovernancePipeline:
 
         # 🔒 CIRCULAR REFERENCE CHECK (AIR GAP #22-23, #48-49)
         if _detect_circular_references(task.context):
-            raise ValueError("Circular reference detected in task.context - potential infinite loop")
+            raise ValueError(
+                "Circular reference detected in task.context - potential infinite loop"
+            )
 
         correlation_id = str(uuid.uuid4())
 
         with trace_operation(
             "governance_pipeline.pre_execution_check",
-            {
-                "correlation_id": correlation_id,
-                "agent_id": agent_id,
-                "risk_level": risk_level
-            }
+            {"correlation_id": correlation_id, "agent_id": agent_id, "risk_level": risk_level},
         ) as span:
 
             traces = {
@@ -253,7 +254,7 @@ class GovernancePipeline:
                 "risk_level": risk_level,
                 "governance_check": None,
                 "counsel_check": None,
-                "parallel_execution": True
+                "parallel_execution": True,
             }
 
             try:
@@ -265,7 +266,9 @@ class GovernancePipeline:
                     tasks_to_run.append(self._run_governance_check(task, agent_id, correlation_id))
 
                 if self.enable_counsel:
-                    tasks_to_run.append(self._run_counsel_check(task, agent_id, risk_level, correlation_id))
+                    tasks_to_run.append(
+                        self._run_counsel_check(task, agent_id, risk_level, correlation_id)
+                    )
 
                 # Execute in parallel
                 if tasks_to_run:
@@ -276,7 +279,10 @@ class GovernancePipeline:
                         gov_result = results[0]
                         if isinstance(gov_result, Exception):
                             if self.fail_safe:
-                                traces["governance_check"] = {"error": str(gov_result), "blocked": True}
+                                traces["governance_check"] = {
+                                    "error": str(gov_result),
+                                    "blocked": True,
+                                }
                                 return False, f"Governance check failed: {str(gov_result)}", traces
                         else:
                             traces["governance_check"] = gov_result
@@ -310,10 +316,7 @@ class GovernancePipeline:
                 return True, None, traces
 
     async def _run_governance_check(
-        self,
-        task: AgentTask,
-        agent_id: str,
-        correlation_id: str
+        self, task: AgentTask, agent_id: str, correlation_id: str
     ) -> Dict[str, Any]:
         """
         Run Justiça governance check (isolated context).
@@ -321,8 +324,7 @@ class GovernancePipeline:
         This runs in PARALLEL with counsel check.
         """
         with trace_operation(
-            "governance.justica_check",
-            {"agent": "justica", "correlation_id": correlation_id}
+            "governance.justica_check", {"agent": "justica", "correlation_id": correlation_id}
         ) as span:
 
             # Enforce permission (IAM pattern)
@@ -334,7 +336,7 @@ class GovernancePipeline:
                     "agent": "justica",
                     "approved": False,
                     "reason": str(e),
-                    "timestamp": datetime.now(timezone.utc).isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
 
             # Evaluate action
@@ -342,10 +344,7 @@ class GovernancePipeline:
                 agent_id=agent_id,
                 action_type="agent_task",  # Fixed: was action_description (AIR GAP!)
                 content=task.request,
-                context={
-                    **task.context,
-                    "correlation_id": correlation_id
-                }
+                context={**task.context, "correlation_id": correlation_id},
             )
 
             result = {
@@ -353,7 +352,7 @@ class GovernancePipeline:
                 "approved": verdict.approved,  # Fixed: was verdict.success (AIR GAP!)
                 "reason": verdict.reasoning if not verdict.approved else None,
                 "trust_score": getattr(verdict, "trust_score", 0.0),
-                "timestamp": datetime.now(timezone.utc).isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
 
             if not verdict.approved:
@@ -362,11 +361,7 @@ class GovernancePipeline:
             return result
 
     async def _run_counsel_check(
-        self,
-        task: AgentTask,
-        agent_id: str,
-        risk_level: str,
-        correlation_id: str
+        self, task: AgentTask, agent_id: str, risk_level: str, correlation_id: str
     ) -> Dict[str, Any]:
         """
         Run Sofia counsel check (isolated context).
@@ -375,8 +370,7 @@ class GovernancePipeline:
         Only triggers for HIGH/CRITICAL risk or detected dilemmas.
         """
         with trace_operation(
-            "governance.sofia_check",
-            {"agent": "sofia", "correlation_id": correlation_id}
+            "governance.sofia_check", {"agent": "sofia", "correlation_id": correlation_id}
         ) as span:
 
             # Enforce permission (IAM pattern)
@@ -388,7 +382,7 @@ class GovernancePipeline:
                     "agent": "sofia",
                     "triggered": False,
                     "reason": str(e),
-                    "timestamp": datetime.now(timezone.utc).isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
 
             # Check if counsel should trigger
@@ -397,7 +391,7 @@ class GovernancePipeline:
             result = {
                 "agent": "sofia",
                 "triggered": False,
-                "timestamp": datetime.now(timezone.utc).isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
 
             # Only provide counsel for HIGH/CRITICAL risk OR detected dilemmas
@@ -406,10 +400,7 @@ class GovernancePipeline:
                     action_description=task.request,
                     risk_level=risk_level,
                     agent_id=agent_id,
-                    context={
-                        **task.context,
-                        "correlation_id": correlation_id
-                    }
+                    context={**task.context, "correlation_id": correlation_id},
                 )
 
                 result["triggered"] = True
@@ -424,18 +415,15 @@ class GovernancePipeline:
                 # ESCALATE if professional help required
                 if counsel.requires_professional:
                     logger.warning(f"[{correlation_id}] Professional referral required")
-                    span.add_event("escalation_required", {
-                        "correlation_id": correlation_id,
-                        "reason": "professional_referral"
-                    })
+                    span.add_event(
+                        "escalation_required",
+                        {"correlation_id": correlation_id, "reason": "professional_referral"},
+                    )
 
             return result
 
     async def execute_with_governance(
-        self,
-        agent: BaseAgent,
-        task: AgentTask,
-        risk_level: str = "MEDIUM"
+        self, agent: BaseAgent, task: AgentTask, risk_level: str = "MEDIUM"
     ) -> AgentResponse:
         """
         Execute agent with complete governance pipeline.
@@ -467,15 +455,13 @@ class GovernancePipeline:
             {
                 "correlation_id": correlation_id,
                 "agent_id": agent.role.value,
-                "risk_level": risk_level
-            }
+                "risk_level": risk_level,
+            },
         ) as span:
 
             # PHASE 1: Pre-execution checks (PARALLEL)
             approved, reason, traces = await self.pre_execution_check(
-                task=task,
-                agent_id=agent.role.value,
-                risk_level=risk_level
+                task=task, agent_id=agent.role.value, risk_level=risk_level
             )
 
             if not approved:
@@ -489,8 +475,8 @@ class GovernancePipeline:
                     data={
                         "governance_traces": traces,
                         "blocked_by": "governance_pipeline",
-                        "correlation_id": correlation_id
-                    }
+                        "correlation_id": correlation_id,
+                    },
                 )
 
             # PHASE 2: Execute agent (context isolated)
@@ -509,7 +495,7 @@ class GovernancePipeline:
                     self._update_metrics_async(
                         agent_id=agent.role.value,
                         success=response.success,
-                        correlation_id=correlation_id
+                        correlation_id=correlation_id,
                     )
                 )
 
@@ -523,17 +509,11 @@ class GovernancePipeline:
                     success=False,
                     reasoning=f"Agent execution failed: {str(e)}",
                     error=str(e),
-                    data={
-                        "correlation_id": correlation_id,
-                        "governance_traces": traces
-                    }
+                    data={"correlation_id": correlation_id, "governance_traces": traces},
                 )
 
     async def _update_metrics_async(
-        self,
-        agent_id: str,
-        success: bool,
-        correlation_id: str
+        self, agent_id: str, success: bool, correlation_id: str
     ) -> None:
         """
         Update metrics in background (non-blocking).

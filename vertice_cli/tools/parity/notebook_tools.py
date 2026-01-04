@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 # NOTEBOOK READ TOOL
 # =============================================================================
 
+
 class NotebookReadTool(Tool):
     """
     Read Jupyter notebook (.ipynb) files.
@@ -52,13 +53,13 @@ class NotebookReadTool(Tool):
             "file_path": {
                 "type": "string",
                 "description": "Path to the .ipynb file",
-                "required": True
+                "required": True,
             },
             "cell_type": {
                 "type": "string",
                 "description": "Filter by cell type: 'code', 'markdown', or 'all' (default)",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     async def _execute_validated(self, **kwargs) -> ToolResult:
@@ -88,7 +89,7 @@ class NotebookReadTool(Tool):
             if file_size > self.MAX_NOTEBOOK_SIZE:
                 return ToolResult(
                     success=False,
-                    error=f"Notebook too large ({file_size} bytes). Max: {self.MAX_NOTEBOOK_SIZE}"
+                    error=f"Notebook too large ({file_size} bytes). Max: {self.MAX_NOTEBOOK_SIZE}",
                 )
         except OSError as e:
             return ToolResult(success=False, error=f"Cannot access file: {e}")
@@ -155,8 +156,8 @@ class NotebookReadTool(Tool):
                     "file": str(path),
                     "filter": cell_filter,
                     "nbformat": f"{nbformat}.{nbformat_minor}",
-                    "file_size": file_size
-                }
+                    "file_size": file_size,
+                },
             )
 
         except json.JSONDecodeError as e:
@@ -183,35 +184,43 @@ class NotebookReadTool(Tool):
                 text = output.get("text", [])
                 if isinstance(text, list):
                     text = "".join(text)
-                parsed.append({
-                    "type": "stream",
-                    "name": output.get("name", "stdout"),
-                    "text": text[:5000]  # Limit text length
-                })
+                parsed.append(
+                    {
+                        "type": "stream",
+                        "name": output.get("name", "stdout"),
+                        "text": text[:5000],  # Limit text length
+                    }
+                )
 
             elif out_type == "execute_result":
                 data = output.get("data", {})
-                parsed.append({
-                    "type": "result",
-                    "text": str(data.get("text/plain", ""))[:2000],
-                    "html": data.get("text/html", "")[:1000] if data.get("text/html") else None
-                })
+                parsed.append(
+                    {
+                        "type": "result",
+                        "text": str(data.get("text/plain", ""))[:2000],
+                        "html": data.get("text/html", "")[:1000] if data.get("text/html") else None,
+                    }
+                )
 
             elif out_type == "error":
-                parsed.append({
-                    "type": "error",
-                    "ename": output.get("ename", "Error"),
-                    "evalue": output.get("evalue", "")[:500],
-                    "traceback": output.get("traceback", [])[:5]  # Limit traceback
-                })
+                parsed.append(
+                    {
+                        "type": "error",
+                        "ename": output.get("ename", "Error"),
+                        "evalue": output.get("evalue", "")[:500],
+                        "traceback": output.get("traceback", [])[:5],  # Limit traceback
+                    }
+                )
 
             elif out_type == "display_data":
                 data = output.get("data", {})
-                parsed.append({
-                    "type": "display",
-                    "has_image": "image/png" in data or "image/jpeg" in data,
-                    "text": str(data.get("text/plain", ""))[:1000]
-                })
+                parsed.append(
+                    {
+                        "type": "display",
+                        "has_image": "image/png" in data or "image/jpeg" in data,
+                        "text": str(data.get("text/plain", ""))[:1000],
+                    }
+                )
 
         return parsed
 
@@ -219,6 +228,7 @@ class NotebookReadTool(Tool):
 # =============================================================================
 # NOTEBOOK EDIT TOOL
 # =============================================================================
+
 
 class NotebookEditTool(Tool):
     """
@@ -255,28 +265,28 @@ class NotebookEditTool(Tool):
             "notebook_path": {
                 "type": "string",
                 "description": "Path to the .ipynb file",
-                "required": True
+                "required": True,
             },
             "cell_id": {
                 "type": "string",
                 "description": "ID or index of the cell to edit",
-                "required": False
+                "required": False,
             },
             "edit_mode": {
                 "type": "string",
                 "description": "Mode: 'replace', 'insert', or 'delete' (default: replace)",
-                "required": False
+                "required": False,
             },
             "cell_type": {
                 "type": "string",
                 "description": "Cell type: 'code' or 'markdown' (for insert)",
-                "required": False
+                "required": False,
             },
             "new_source": {
                 "type": "string",
                 "description": "New content for the cell",
-                "required": True
-            }
+                "required": True,
+            },
         }
 
     async def _execute_validated(self, **kwargs) -> ToolResult:
@@ -294,8 +304,7 @@ class NotebookEditTool(Tool):
         # Validate edit_mode
         if edit_mode not in ("replace", "insert", "delete"):
             return ToolResult(
-                success=False,
-                error=f"Invalid edit_mode: {edit_mode}. Use: replace, insert, delete"
+                success=False, error=f"Invalid edit_mode: {edit_mode}. Use: replace, insert, delete"
             )
 
         # Validate cell_type
@@ -341,14 +350,8 @@ class NotebookEditTool(Tool):
 
             return ToolResult(
                 success=True,
-                data={
-                    "action": result["action"],
-                    "total_cells": len(cells)
-                },
-                metadata={
-                    "file": str(path),
-                    "mode": edit_mode
-                }
+                data={"action": result["action"], "total_cells": len(cells)},
+                metadata={"file": str(path), "mode": edit_mode},
             )
 
         except json.JSONDecodeError as e:
@@ -385,7 +388,7 @@ class NotebookEditTool(Tool):
             "id": str(uuid.uuid4())[:8],
             "cell_type": cell_type,
             "metadata": {},
-            "source": source.split("\n") if source else []
+            "source": source.split("\n") if source else [],
         }
 
         if cell_type == "code":
@@ -404,11 +407,7 @@ class NotebookEditTool(Tool):
         return {"success": True, "action": f"Deleted cell {idx}"}
 
     def _insert_cell(
-        self,
-        cells: List[Dict],
-        cell_id: Optional[str],
-        cell_type: str,
-        source: str
+        self, cells: List[Dict], cell_id: Optional[str], cell_type: str, source: str
     ) -> Dict:
         """Insert a new cell after specified cell (or at beginning)."""
         new_cell = self._create_cell(cell_type, source)
@@ -424,11 +423,7 @@ class NotebookEditTool(Tool):
             return {"success": True, "action": f"Inserted new {cell_type} cell at beginning"}
 
     def _replace_cell(
-        self,
-        cells: List[Dict],
-        cell_id: Optional[str],
-        cell_type: Optional[str],
-        source: str
+        self, cells: List[Dict], cell_id: Optional[str], cell_type: Optional[str], source: str
     ) -> Dict:
         """Replace cell content."""
         if cell_id is None:
@@ -455,6 +450,7 @@ class NotebookEditTool(Tool):
 # =============================================================================
 # REGISTRY HELPER
 # =============================================================================
+
 
 def get_notebook_tools() -> List[Tool]:
     """Get all notebook operation tools."""

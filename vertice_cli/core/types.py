@@ -39,17 +39,19 @@ from enum import Enum
 # GENERIC TYPE VARIABLES
 # ============================================================================
 
-T = TypeVar('T')
-T_co = TypeVar('T_co', covariant=True)
-T_contra = TypeVar('T_contra', contravariant=True)
+T = TypeVar("T")
+T_co = TypeVar("T_co", covariant=True)
+T_contra = TypeVar("T_contra", contravariant=True)
 
 
 # ============================================================================
 # MESSAGE & CONVERSATION TYPES
 # ============================================================================
 
+
 class MessageRole(str, Enum):
     """Role of a message in a conversation."""
+
     SYSTEM = "system"
     USER = "user"
     ASSISTANT = "assistant"
@@ -58,15 +60,16 @@ class MessageRole(str, Enum):
 
 class Message(TypedDict, total=False):
     """Single message in a conversation.
-    
+
     Required fields:
         role: Who sent the message
         content: The message text
-    
+
     Optional fields:
         name: Name of the tool/function (for role="tool")
         tool_call_id: ID of the tool call this message responds to
     """
+
     role: MessageRole
     content: str
     name: str  # Optional
@@ -80,8 +83,10 @@ MessageList: TypeAlias = List[Message]
 # TOOL & FUNCTION TYPES
 # ============================================================================
 
+
 class ToolParameter(TypedDict, total=False):
     """Parameter definition for a tool."""
+
     type: str
     description: str
     enum: List[str]  # For enum types
@@ -90,6 +95,7 @@ class ToolParameter(TypedDict, total=False):
 
 class ToolDefinition(TypedDict):
     """Complete tool definition for LLM function calling."""
+
     name: str
     description: str
     parameters: Dict[str, ToolParameter]
@@ -97,6 +103,7 @@ class ToolDefinition(TypedDict):
 
 class ToolCall(TypedDict):
     """A tool invocation request from the LLM."""
+
     id: str
     tool: str
     arguments: Dict[str, Any]
@@ -104,6 +111,7 @@ class ToolCall(TypedDict):
 
 class ToolResult(TypedDict):
     """Result of a tool execution."""
+
     tool_call_id: str
     success: bool
     output: str
@@ -121,6 +129,7 @@ FileEncoding: TypeAlias = Literal["utf-8", "ascii", "latin-1"]
 
 class FileEdit(TypedDict):
     """Specification for a file edit operation."""
+
     path: FilePath
     old_text: str
     new_text: str
@@ -129,6 +138,7 @@ class FileEdit(TypedDict):
 
 class FileOperation(TypedDict):
     """A file system operation."""
+
     operation: Literal["read", "write", "edit", "delete", "move", "copy"]
     path: FilePath
     content: Optional[FileContent]
@@ -139,8 +149,10 @@ class FileOperation(TypedDict):
 # CONTEXT & STATE TYPES
 # ============================================================================
 
+
 class ContextEntry(TypedDict):
     """Single entry in the execution context."""
+
     key: str
     value: Any
     timestamp: datetime
@@ -149,6 +161,7 @@ class ContextEntry(TypedDict):
 
 class SessionState(TypedDict):
     """Complete session state for persistence."""
+
     session_id: str
     cwd: FilePath
     history: List[str]
@@ -165,8 +178,10 @@ class SessionState(TypedDict):
 # ERROR & RECOVERY TYPES
 # ============================================================================
 
+
 class ErrorCategory(str, Enum):
     """Category of error for recovery strategies."""
+
     SYNTAX = "syntax"
     IMPORT = "import"
     TYPE = "type"
@@ -180,6 +195,7 @@ class ErrorCategory(str, Enum):
 
 class ErrorInfo(TypedDict):
     """Structured error information."""
+
     category: ErrorCategory
     message: str
     traceback: Optional[str]
@@ -190,6 +206,7 @@ class ErrorInfo(TypedDict):
 
 class RecoveryStrategy(TypedDict):
     """Strategy for recovering from an error."""
+
     category: ErrorCategory
     max_attempts: int
     backoff_factor: float
@@ -201,8 +218,10 @@ class RecoveryStrategy(TypedDict):
 # LLM & GENERATION TYPES
 # ============================================================================
 
+
 class GenerationConfig(TypedDict, total=False):
     """Configuration for LLM generation."""
+
     max_tokens: int
     temperature: float
     top_p: float
@@ -214,6 +233,7 @@ class GenerationConfig(TypedDict, total=False):
 
 class TokenUsage(TypedDict):
     """Token usage statistics."""
+
     prompt_tokens: int
     completion_tokens: int
     total_tokens: int
@@ -222,6 +242,7 @@ class TokenUsage(TypedDict):
 
 class LLMResponse(TypedDict):
     """Complete LLM response with metadata."""
+
     content: str
     usage: TokenUsage
     model: str
@@ -233,8 +254,10 @@ class LLMResponse(TypedDict):
 # VALIDATION & CONSTRAINTS
 # ============================================================================
 
+
 class ValidationRule(TypedDict):
     """A validation rule for input."""
+
     field: str
     rule: Literal["required", "type", "range", "pattern", "custom"]
     constraint: Any
@@ -243,6 +266,7 @@ class ValidationRule(TypedDict):
 
 class ValidationResult(TypedDict):
     """Result of validation."""
+
     valid: bool
     errors: List[str]
     warnings: List[str]
@@ -251,6 +275,7 @@ class ValidationResult(TypedDict):
 # ============================================================================
 # PROTOCOLS (Structural Subtyping)
 # ============================================================================
+
 
 @runtime_checkable
 class Serializable(Protocol):
@@ -297,8 +322,10 @@ class Streamable(Protocol[T_co]):
 # WORKFLOW & ORCHESTRATION TYPES
 # ============================================================================
 
+
 class WorkflowStep(TypedDict):
     """Single step in a workflow."""
+
     id: str
     name: str
     tool: str
@@ -310,6 +337,7 @@ class WorkflowStep(TypedDict):
 
 class WorkflowDefinition(TypedDict):
     """Complete workflow definition."""
+
     id: str
     name: str
     description: str
@@ -319,6 +347,7 @@ class WorkflowDefinition(TypedDict):
 
 class WorkflowState(str, Enum):
     """State of a workflow execution."""
+
     PENDING = "pending"
     RUNNING = "running"
     SUCCESS = "success"
@@ -328,6 +357,7 @@ class WorkflowState(str, Enum):
 
 class WorkflowExecution(TypedDict):
     """State of a workflow execution."""
+
     workflow_id: str
     state: WorkflowState
     current_step: Optional[str]
@@ -342,8 +372,10 @@ class WorkflowExecution(TypedDict):
 # CONFIGURATION TYPES
 # ============================================================================
 
+
 class ProviderConfig(TypedDict, total=False):
     """Configuration for an LLM provider."""
+
     api_key: str
     base_url: str
     model: str
@@ -353,6 +385,7 @@ class ProviderConfig(TypedDict, total=False):
 
 class AppConfig(TypedDict, total=False):
     """Application configuration."""
+
     # LLM providers
     hf_token: str
     nebius_api_key: str
@@ -386,9 +419,11 @@ TokenCallback: TypeAlias = Callable[[int, int], None]  # (input_tokens, output_t
 # DATACLASSES (Immutable Data)
 # ============================================================================
 
+
 @dataclass(frozen=True)
 class CodeSpan:
     """A span of code with location information."""
+
     file: FilePath
     start_line: int
     end_line: int
@@ -398,6 +433,7 @@ class CodeSpan:
 @dataclass(frozen=True)
 class DiffHunk:
     """A single hunk in a diff."""
+
     old_start: int
     old_count: int
     new_start: int
@@ -409,15 +445,16 @@ class DiffHunk:
 # TYPE GUARDS (Runtime Type Checking)
 # ============================================================================
 
+
 def is_message(obj: Any) -> bool:
     """Check if object is a valid Message."""
     if not isinstance(obj, dict):
         return False
     return (
-        'role' in obj and
-        'content' in obj and
-        isinstance(obj['role'], str) and
-        isinstance(obj['content'], str)
+        "role" in obj
+        and "content" in obj
+        and isinstance(obj["role"], str)
+        and isinstance(obj["content"], str)
     )
 
 
@@ -439,29 +476,53 @@ def is_file_path(obj: Any) -> bool:
 
 __all__ = [
     # Type vars
-    'T', 'T_co', 'T_contra',
-
+    "T",
+    "T_co",
+    "T_contra",
     # Enums
-    'MessageRole', 'ErrorCategory', 'WorkflowState',
-
+    "MessageRole",
+    "ErrorCategory",
+    "WorkflowState",
     # Type aliases
-    'FilePath', 'FileContent', 'FileEncoding',
-    'MessageList', 'ProgressCallback', 'ErrorCallback', 'TokenCallback',
-
+    "FilePath",
+    "FileContent",
+    "FileEncoding",
+    "MessageList",
+    "ProgressCallback",
+    "ErrorCallback",
+    "TokenCallback",
     # TypedDicts
-    'Message', 'ToolParameter', 'ToolDefinition', 'ToolCall', 'ToolResult',
-    'FileEdit', 'FileOperation', 'ContextEntry', 'SessionState',
-    'ErrorInfo', 'RecoveryStrategy', 'GenerationConfig', 'TokenUsage',
-    'LLMResponse', 'ValidationRule', 'ValidationResult',
-    'WorkflowStep', 'WorkflowDefinition', 'WorkflowExecution',
-    'ProviderConfig', 'AppConfig',
-
+    "Message",
+    "ToolParameter",
+    "ToolDefinition",
+    "ToolCall",
+    "ToolResult",
+    "FileEdit",
+    "FileOperation",
+    "ContextEntry",
+    "SessionState",
+    "ErrorInfo",
+    "RecoveryStrategy",
+    "GenerationConfig",
+    "TokenUsage",
+    "LLMResponse",
+    "ValidationRule",
+    "ValidationResult",
+    "WorkflowStep",
+    "WorkflowDefinition",
+    "WorkflowExecution",
+    "ProviderConfig",
+    "AppConfig",
     # Protocols
-    'Serializable', 'Validatable', 'AsyncExecutable', 'Streamable',
-
+    "Serializable",
+    "Validatable",
+    "AsyncExecutable",
+    "Streamable",
     # Dataclasses
-    'CodeSpan', 'DiffHunk',
-
+    "CodeSpan",
+    "DiffHunk",
     # Type guards
-    'is_message', 'is_message_list', 'is_file_path',
+    "is_message",
+    "is_message_list",
+    "is_file_path",
 ]

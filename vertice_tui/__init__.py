@@ -10,6 +10,9 @@ Soli Deo Gloria
 __version__ = "1.0.0"
 __author__ = "JuanCS"
 
-from .app import QwenApp, main
+from .app import VerticeApp, main
 
-__all__ = ["QwenApp", "main", "__version__"]
+# Backward compatibility alias
+QwenApp = VerticeApp
+
+__all__ = ["VerticeApp", "QwenApp", "main", "__version__"]

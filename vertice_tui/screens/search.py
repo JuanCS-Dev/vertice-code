@@ -116,7 +116,7 @@ class SearchScreen(ModalScreen[None]):
                 self._current_match = 0
                 self._scroll_to_match()
 
-        except Exception:
+        except (AttributeError, ValueError):
             pass
 
         self._update_match_info()
@@ -124,26 +124,26 @@ class SearchScreen(ModalScreen[None]):
     def _get_widget_text(self, widget) -> str:
         """Extract text content from a widget."""
         # Try renderable first
-        if hasattr(widget, 'renderable'):
+        if hasattr(widget, "renderable"):
             renderable = widget.renderable
             if isinstance(renderable, Text):
                 return renderable.plain
-            elif hasattr(renderable, 'text'):
+            elif hasattr(renderable, "text"):
                 return str(renderable.text)
             elif isinstance(renderable, str):
                 return renderable
 
         # Try render() method
-        if hasattr(widget, 'render'):
+        if hasattr(widget, "render"):
             try:
                 rendered = widget.render()
                 if isinstance(rendered, Text):
                     return rendered.plain
-                elif hasattr(rendered, 'text'):
+                elif hasattr(rendered, "text"):
                     return str(rendered.text)
                 elif isinstance(rendered, str):
                     return rendered
-            except Exception:
+            except (AttributeError, TypeError, RuntimeError):
                 pass
 
         return ""
@@ -181,7 +181,7 @@ class SearchScreen(ModalScreen[None]):
                 target = response_view.children[widget_idx]
                 target.scroll_visible(animate=False)
 
-        except Exception:
+        except (AttributeError, ValueError, IndexError):
             pass
 
     def action_close(self) -> None:

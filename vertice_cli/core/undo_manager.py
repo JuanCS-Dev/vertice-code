@@ -36,11 +36,12 @@ from .atomic_ops import AtomicFileOps
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class OperationType(Enum):
     """Types of undoable operations."""
+
     FILE_CREATE = "file_create"
     FILE_EDIT = "file_edit"
     FILE_DELETE = "file_delete"
@@ -57,6 +58,7 @@ class OperationType(Enum):
 @dataclass
 class UndoableOperation:
     """A single undoable operation."""
+
     id: str
     op_type: OperationType
     description: str
@@ -117,6 +119,7 @@ class UndoableOperation:
 @dataclass
 class UndoResult:
     """Result of an undo/redo operation."""
+
     success: bool
     operation: UndoableOperation
     message: str
@@ -162,8 +165,8 @@ class UndoManager:
     """
 
     DEFAULT_MAX_SIZE = 100
-    SNAPSHOT_DIR = ".qwen_undo_snapshots"
-    STATE_FILE = ".qwen_undo_state.json"
+    SNAPSHOT_DIR = ".vertice_undo_snapshots"
+    STATE_FILE = ".vertice_undo_state.json"
 
     def __init__(
         self,
@@ -221,7 +224,7 @@ class UndoManager:
         """Load content from snapshot."""
         try:
             return Path(path).read_text()
-        except Exception:
+        except (FileNotFoundError, PermissionError, IOError):
             return None
 
     def _save_state(self) -> None:
@@ -252,12 +255,10 @@ class UndoManager:
         try:
             state = json.loads(state_path.read_text())
             self._undo_stack = [
-                UndoableOperation.from_dict(op)
-                for op in state.get("undo_stack", [])
+                UndoableOperation.from_dict(op) for op in state.get("undo_stack", [])
             ]
             self._redo_stack = [
-                UndoableOperation.from_dict(op)
-                for op in state.get("redo_stack", [])
+                UndoableOperation.from_dict(op) for op in state.get("redo_stack", [])
             ]
             self._operation_counter = state.get("counter", 0)
         except Exception as e:
@@ -278,7 +279,7 @@ class UndoManager:
             if removed.backup_path and os.path.exists(removed.backup_path):
                 try:
                     os.unlink(removed.backup_path)
-                except Exception:
+                except (OSError, PermissionError):
                     pass
 
         # Persist state
@@ -659,6 +660,7 @@ def get_undo_manager() -> UndoManager:
 
 # Convenience functions
 
+
 def undo() -> Optional[UndoResult]:
     """Undo the most recent operation."""
     return get_undo_manager().undo()
@@ -681,13 +683,13 @@ def can_redo() -> bool:
 
 # Export all public symbols
 __all__ = [
-    'OperationType',
-    'UndoableOperation',
-    'UndoResult',
-    'UndoManager',
-    'get_undo_manager',
-    'undo',
-    'redo',
-    'can_undo',
-    'can_redo',
+    "OperationType",
+    "UndoableOperation",
+    "UndoResult",
+    "UndoManager",
+    "get_undo_manager",
+    "undo",
+    "redo",
+    "can_undo",
+    "can_redo",
 ]

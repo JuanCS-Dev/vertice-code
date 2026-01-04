@@ -42,7 +42,7 @@ class ShellCore:
 
     async def output_chunk(self, chunk: str):
         """Output chunk - streaming mode."""
-        print(chunk, end='', flush=True)
+        print(chunk, end="", flush=True)
 
     async def output_line(self, line: str):
         """Output full line."""
@@ -50,18 +50,21 @@ class ShellCore:
 
     def _get_console(self):
         """Lazy load rich console."""
-        if not hasattr(self, '_console'):
+        if not hasattr(self, "_console"):
             from rich.console import Console
             from rich.theme import Theme
+
             # Premium theme
-            theme = Theme({
-                "info": "cyan",
-                "warning": "yellow",
-                "error": "bold red",
-                "success": "bold green",
-                "code": "bold white on #1e1e1e",
-                "panel.border": "blue",
-            })
+            theme = Theme(
+                {
+                    "info": "cyan",
+                    "warning": "yellow",
+                    "error": "bold red",
+                    "success": "bold green",
+                    "code": "bold white on #1e1e1e",
+                    "panel.border": "blue",
+                }
+            )
             self._console = Console(theme=theme)
         return self._console
 
@@ -69,6 +72,7 @@ class ShellCore:
         """Render markdown content using Rich."""
         try:
             from rich.markdown import Markdown
+
             console = self._get_console()
             console.print(Markdown(text))
         except ImportError:
@@ -78,6 +82,7 @@ class ShellCore:
         """Print a styled panel."""
         try:
             from rich.panel import Panel
+
             console = self._get_console()
             console.print(Panel(content, title=title, border_style=style))
         except ImportError:
@@ -87,6 +92,7 @@ class ShellCore:
         """Print syntax highlighted code."""
         try:
             from rich.syntax import Syntax
+
             console = self._get_console()
             syntax = Syntax(code, language, theme="monokai", line_numbers=True)
             console.print(syntax)

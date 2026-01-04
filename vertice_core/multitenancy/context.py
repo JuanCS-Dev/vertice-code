@@ -18,8 +18,9 @@ from .tenant import Tenant
 
 
 # Context variable for current tenant
-_current_tenant: contextvars.ContextVar[Optional['TenantContext']] = \
-    contextvars.ContextVar('current_tenant', default=None)
+_current_tenant: contextvars.ContextVar[Optional["TenantContext"]] = contextvars.ContextVar(
+    "current_tenant", default=None
+)
 
 
 @dataclass
@@ -102,10 +103,7 @@ def tenant_context(tenant: Tenant, **kwargs):
         tenant: Tenant for this context
         **kwargs: Additional context attributes
     """
-    context = TenantContext(
-        tenant=tenant,
-        **kwargs
-    )
+    context = TenantContext(tenant=tenant, **kwargs)
     token = set_current_tenant(context)
     try:
         yield context
@@ -175,12 +173,12 @@ class TenantAware:
 
 
 __all__ = [
-    'TenantContext',
-    'get_current_tenant',
-    'set_current_tenant',
-    'reset_tenant',
-    'tenant_context',
-    'require_tenant',
-    'require_active_tenant',
-    'TenantAware',
+    "TenantContext",
+    "get_current_tenant",
+    "set_current_tenant",
+    "reset_tenant",
+    "tenant_context",
+    "require_tenant",
+    "require_active_tenant",
+    "TenantAware",
 ]

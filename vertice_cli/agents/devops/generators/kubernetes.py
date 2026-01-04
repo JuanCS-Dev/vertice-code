@@ -56,9 +56,7 @@ class KubernetesGenerator(BaseGenerator):
         # Simplified - would parse request more carefully
         return "api-service"
 
-    def _build_deployment(
-        self, app_name: str, namespace: str, replicas: int
-    ) -> Dict[str, Any]:
+    def _build_deployment(self, app_name: str, namespace: str, replicas: int) -> Dict[str, Any]:
         """Build Deployment manifest."""
         return {
             "apiVersion": "apps/v1",
@@ -81,25 +79,27 @@ class KubernetesGenerator(BaseGenerator):
                 "template": {
                     "metadata": {"labels": {"app": app_name}},
                     "spec": {
-                        "containers": [{
-                            "name": app_name,
-                            "image": f"{app_name}:latest",
-                            "ports": [{"containerPort": 8000}],
-                            "resources": {
-                                "requests": {"memory": "128Mi", "cpu": "250m"},
-                                "limits": {"memory": "512Mi", "cpu": "500m"},
-                            },
-                            "livenessProbe": {
-                                "httpGet": {"path": "/health", "port": 8000},
-                                "initialDelaySeconds": 15,
-                                "periodSeconds": 20,
-                            },
-                            "readinessProbe": {
-                                "httpGet": {"path": "/ready", "port": 8000},
-                                "initialDelaySeconds": 5,
-                                "periodSeconds": 10,
-                            },
-                        }],
+                        "containers": [
+                            {
+                                "name": app_name,
+                                "image": f"{app_name}:latest",
+                                "ports": [{"containerPort": 8000}],
+                                "resources": {
+                                    "requests": {"memory": "128Mi", "cpu": "250m"},
+                                    "limits": {"memory": "512Mi", "cpu": "500m"},
+                                },
+                                "livenessProbe": {
+                                    "httpGet": {"path": "/health", "port": 8000},
+                                    "initialDelaySeconds": 15,
+                                    "periodSeconds": 20,
+                                },
+                                "readinessProbe": {
+                                    "httpGet": {"path": "/ready", "port": 8000},
+                                    "initialDelaySeconds": 5,
+                                    "periodSeconds": 10,
+                                },
+                            }
+                        ],
                     },
                 },
             },
@@ -121,9 +121,7 @@ class KubernetesGenerator(BaseGenerator):
             },
         }
 
-    def _build_argocd_application(
-        self, app_name: str, namespace: str
-    ) -> Dict[str, Any]:
+    def _build_argocd_application(self, app_name: str, namespace: str) -> Dict[str, Any]:
         """Build ArgoCD Application manifest."""
         return {
             "apiVersion": "argoproj.io/v1alpha1",

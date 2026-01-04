@@ -14,6 +14,7 @@ from typing import Any, Dict, List, Optional
 
 class FeedbackType(str, Enum):
     """Types of user feedback."""
+
     EXPLICIT_POSITIVE = "explicit_positive"
     EXPLICIT_NEGATIVE = "explicit_negative"
     IMPLICIT_ACCEPT = "implicit_accept"
@@ -24,6 +25,7 @@ class FeedbackType(str, Enum):
 
 class LearningCategory(str, Enum):
     """Categories of learned behaviors."""
+
     CODE_STYLE = "code_style"
     TOOL_PREFERENCE = "tool_preference"
     RESPONSE_FORMAT = "response_format"
@@ -36,6 +38,7 @@ class LearningCategory(str, Enum):
 @dataclass
 class LearningRecord:
     """Record of a learned behavior."""
+
     category: LearningCategory
     key: str
     value: Any
@@ -49,6 +52,7 @@ class LearningRecord:
 @dataclass
 class UserPreferences:
     """Aggregated user preferences."""
+
     code_style: Dict[str, Any] = field(default_factory=dict)
     tool_preferences: Dict[str, float] = field(default_factory=dict)
     response_format: Dict[str, Any] = field(default_factory=dict)

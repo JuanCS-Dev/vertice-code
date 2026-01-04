@@ -12,6 +12,7 @@ from enum import Enum
 
 class AgentStatus(Enum):
     """Agent execution status"""
+
     IDLE = "idle"
     THINKING = "thinking"
     EXECUTING = "executing"
@@ -21,6 +22,7 @@ class AgentStatus(Enum):
 
 class FileStatus(Enum):
     """File operation status"""
+
     ANALYZING = "analyzing"
     MODIFIED = "modified"
     SAVED = "saved"
@@ -42,6 +44,7 @@ class AgentState:
         spinner_frame: Current frame index for spinner animation
         error_message: Error message if status is ERROR
     """
+
     name: str
     icon: str
     status: AgentStatus = AgentStatus.IDLE
@@ -85,11 +88,12 @@ class FileOperation:
         lines_removed: Number of lines removed (for diffs)
         timestamp: Operation timestamp (for sorting)
     """
+
     path: str
     status: FileStatus
     lines_added: int = 0
     lines_removed: int = 0
-    timestamp: float = field(default_factory=lambda: __import__('time').time())
+    timestamp: float = field(default_factory=lambda: __import__("time").time())
 
     @property
     def has_diff(self) -> bool:
@@ -116,6 +120,7 @@ class MetricsData:
         execution_count: Total number of executions
         error_count: Total number of errors
     """
+
     success_rate: float = 100.0
     tokens_used: int = 0
     tokens_saved: float = 98.7  # MCP pattern default
@@ -124,12 +129,7 @@ class MetricsData:
     execution_count: int = 0
     error_count: int = 0
 
-    def update_from_execution(
-        self,
-        success: bool,
-        tokens: int,
-        latency: float
-    ):
+    def update_from_execution(self, success: bool, tokens: int, latency: float):
         """
         Update metrics from execution result.
 
@@ -143,9 +143,7 @@ class MetricsData:
             self.error_count += 1
 
         # Update success rate
-        self.success_rate = (
-            (self.execution_count - self.error_count) / self.execution_count * 100
-        )
+        self.success_rate = (self.execution_count - self.error_count) / self.execution_count * 100
 
         # Update tokens
         self.tokens_used += tokens
@@ -156,9 +154,7 @@ class MetricsData:
         else:
             # Exponential moving average
             alpha = 0.3
-            self.latency_ms = int(
-                alpha * (latency * 1000) + (1 - alpha) * self.latency_ms
-            )
+            self.latency_ms = int(alpha * (latency * 1000) + (1 - alpha) * self.latency_ms)
 
     def calculate_savings(self, cost_per_1k_tokens: float = 0.015) -> float:
         """
@@ -194,37 +190,38 @@ class StreamingEvent:
         agent_name: Name of agent that emitted the event
         timestamp: Event timestamp
     """
+
     type: str
     data: any
     agent_name: str = ""
-    timestamp: float = field(default_factory=lambda: __import__('time').time())
+    timestamp: float = field(default_factory=lambda: __import__("time").time())
 
     @classmethod
-    def thinking(cls, token: str, agent_name: str = "") -> 'StreamingEvent':
+    def thinking(cls, token: str, agent_name: str = "") -> "StreamingEvent":
         """Create thinking event (LLM token)"""
         return cls(type="thinking", data=token, agent_name=agent_name)
 
     @classmethod
-    def command(cls, command: str, agent_name: str = "") -> 'StreamingEvent':
+    def command(cls, command: str, agent_name: str = "") -> "StreamingEvent":
         """Create command event"""
         return cls(type="command", data=command, agent_name=agent_name)
 
     @classmethod
-    def status(cls, message: str, agent_name: str = "") -> 'StreamingEvent':
+    def status(cls, message: str, agent_name: str = "") -> "StreamingEvent":
         """Create status event"""
         return cls(type="status", data=message, agent_name=agent_name)
 
     @classmethod
-    def progress(cls, percent: float, agent_name: str = "") -> 'StreamingEvent':
+    def progress(cls, percent: float, agent_name: str = "") -> "StreamingEvent":
         """Create progress event"""
         return cls(type="progress", data={"percent": percent}, agent_name=agent_name)
 
     @classmethod
-    def result(cls, data: dict, agent_name: str = "") -> 'StreamingEvent':
+    def result(cls, data: dict, agent_name: str = "") -> "StreamingEvent":
         """Create result event"""
         return cls(type="result", data=data, agent_name=agent_name)
 
     @classmethod
-    def error(cls, message: str, agent_name: str = "") -> 'StreamingEvent':
+    def error(cls, message: str, agent_name: str = "") -> "StreamingEvent":
         """Create error event"""
         return cls(type="error", data={"message": message}, agent_name=agent_name)

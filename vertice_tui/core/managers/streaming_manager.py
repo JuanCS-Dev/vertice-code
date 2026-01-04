@@ -143,7 +143,7 @@ class StreamingManager:
             Tool execution result
         """
         try:
-            result = await self.tools.execute(tool_name, **arguments)
+            result = await self.tools.execute_tool(tool_name, **arguments)
             return {"success": True, "tool_name": tool_name, "data": result}
         except Exception as e:
             logger.error(f"Tool {tool_name} failed: {e}")
@@ -254,9 +254,7 @@ class StreamingManager:
 
             # Yield results in order for consistent UI
             tool_feedbacks: List[str] = []
-            for call_id in sorted(
-                exec_result.results.keys(), key=lambda x: int(x.split("_")[1])
-            ):
+            for call_id in sorted(exec_result.results.keys(), key=lambda x: int(x.split("_")[1])):
                 result = exec_result.results[call_id]
                 display, feedback = self._format_tool_result(result)
                 yield f"{display}\n"
@@ -334,7 +332,5 @@ class StreamingManager:
                     yield f"{suggestion}\n\n"
 
         # Fall through to regular streaming
-        async for chunk in self.stream_chat(
-            client, message, system_prompt, context, provider_name
-        ):
+        async for chunk in self.stream_chat(client, message, system_prompt, context, provider_name):
             yield chunk

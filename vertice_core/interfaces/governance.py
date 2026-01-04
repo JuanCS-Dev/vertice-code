@@ -19,12 +19,13 @@ from enum import Enum
 
 class RiskLevel(Enum):
     """Risk levels for actions."""
-    SAFE = 0           # No risk, auto-approve
-    LOW = 1            # Minor risk, soft confirmation
-    MEDIUM = 2         # Moderate risk, explicit confirmation
-    HIGH = 3           # High risk, strong confirmation
-    CRITICAL = 4       # Critical risk, requires typed confirmation
-    BLOCKED = 5        # Action is blocked
+
+    SAFE = 0  # No risk, auto-approve
+    LOW = 1  # Minor risk, soft confirmation
+    MEDIUM = 2  # Moderate risk, explicit confirmation
+    HIGH = 3  # High risk, strong confirmation
+    CRITICAL = 4  # Critical risk, requires typed confirmation
+    BLOCKED = 5  # Action is blocked
 
 
 @dataclass
@@ -40,6 +41,7 @@ class RiskAssessment:
         allow: Whether action should be allowed
         confirmation_required: Type of confirmation needed
     """
+
     level: RiskLevel
     score: float
     reasons: List[str] = field(default_factory=list)
@@ -49,24 +51,20 @@ class RiskAssessment:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def safe(cls) -> 'RiskAssessment':
+    def safe(cls) -> "RiskAssessment":
         """Create safe assessment."""
         return cls(level=RiskLevel.SAFE, score=0.0, allow=True)
 
     @classmethod
-    def blocked(cls, reasons: List[str]) -> 'RiskAssessment':
+    def blocked(cls, reasons: List[str]) -> "RiskAssessment":
         """Create blocked assessment."""
-        return cls(
-            level=RiskLevel.BLOCKED,
-            score=1.0,
-            reasons=reasons,
-            allow=False
-        )
+        return cls(level=RiskLevel.BLOCKED, score=1.0, reasons=reasons, allow=False)
 
 
 @dataclass
 class GovernancePolicy:
     """Governance policy definition."""
+
     name: str
     description: str
     rules: List[Dict[str, Any]] = field(default_factory=list)
@@ -113,11 +111,7 @@ class IGovernance(ABC):
         pass
 
     @abstractmethod
-    def get_confirmation_prompt(
-        self,
-        action: str,
-        assessment: RiskAssessment
-    ) -> str:
+    def get_confirmation_prompt(self, action: str, assessment: RiskAssessment) -> str:
         """
         Get confirmation prompt for action.
 
@@ -151,11 +145,7 @@ class IConstitutionalAI(ABC):
     """
 
     @abstractmethod
-    async def evaluate(
-        self,
-        action: str,
-        context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def evaluate(self, action: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """
         Evaluate action against constitutional principles.
 
@@ -175,9 +165,9 @@ class IConstitutionalAI(ABC):
 
 
 __all__ = [
-    'IGovernance',
-    'IConstitutionalAI',
-    'RiskAssessment',
-    'RiskLevel',
-    'GovernancePolicy',
+    "IGovernance",
+    "IConstitutionalAI",
+    "RiskAssessment",
+    "RiskLevel",
+    "GovernancePolicy",
 ]

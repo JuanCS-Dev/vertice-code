@@ -93,10 +93,7 @@ class DependencyGraph:
                 found_group = False
                 for group in groups:
                     # Can add to group if no dependencies within group
-                    if not any(
-                        dep_step.step_id in step.dependencies
-                        for dep_step in group
-                    ):
+                    if not any(dep_step.step_id in step.dependencies for dep_step in group):
                         group.append(step)
                         found_group = True
                         break

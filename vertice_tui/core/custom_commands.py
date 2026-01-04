@@ -42,11 +42,7 @@ class CustomCommandsManager:
         expanded = manager.execute_command("review", "main.py")
     """
 
-    def __init__(
-        self,
-        project_dir: Optional[Path] = None,
-        global_dir: Optional[Path] = None
-    ):
+    def __init__(self, project_dir: Optional[Path] = None, global_dir: Optional[Path] = None):
         """
         Initialize CustomCommandsManager.
 
@@ -103,7 +99,7 @@ class CustomCommandsManager:
         # Load from both project and global directories
         for scope, commands_dir in [
             ("project", self._get_project_commands_dir()),
-            ("global", self._get_global_commands_dir())
+            ("global", self._get_global_commands_dir()),
         ]:
             if not commands_dir.exists():
                 continue
@@ -124,7 +120,7 @@ class CustomCommandsManager:
                         "prompt": content,
                         "description": description or f"Custom command: {command_name}",
                         "path": str(md_file),
-                        "type": scope
+                        "type": scope,
                     }
 
                 except Exception as e:
@@ -216,17 +212,13 @@ class CustomCommandsManager:
         Only allows alphanumeric, hyphens, and underscores.
         Max length: 50 characters.
         """
-        sanitized = re.sub(r'[^a-zA-Z0-9_-]', '', name)
+        sanitized = re.sub(r"[^a-zA-Z0-9_-]", "", name)
         if not sanitized:
             sanitized = "unnamed_command"
         return sanitized[:50]
 
     def create_command(
-        self,
-        name: str,
-        prompt: str,
-        description: str = "",
-        scope: str = "project"
+        self, name: str, prompt: str, description: str = "", scope: str = "project"
     ) -> Dict[str, Any]:
         """
         Create a new custom command.
@@ -273,7 +265,7 @@ class CustomCommandsManager:
             "prompt": prompt,
             "description": description or f"Custom command: {safe_name}",
             "path": str(command_file),
-            "type": scope
+            "type": scope,
         }
 
         logger.info(f"Created command: {safe_name} ({scope})")
@@ -344,5 +336,5 @@ class CustomCommandsManager:
             "global_commands": global_count,
             "project_dir": str(self._get_project_commands_dir()),
             "global_dir": str(self._get_global_commands_dir()),
-            "loaded": self._loaded
+            "loaded": self._loaded,
         }

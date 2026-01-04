@@ -30,6 +30,7 @@ from rich.text import Text
 
 class TaskStatus(str, Enum):
     """Task status states."""
+
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
@@ -58,6 +59,7 @@ STATUS_COLORS = {
 @dataclass
 class Task:
     """A single task in the tracker."""
+
     content: str
     status: TaskStatus = TaskStatus.PENDING
     active_form: str = ""  # Present continuous form (e.g., "Implementing...")
@@ -290,9 +292,7 @@ class TodoTracker:
 
         if show_stats:
             stats = self.get_stats()
-            footer = (
-                f"✓ {stats['completed']}/{stats['total']} completed"
-            )
+            footer = f"✓ {stats['completed']}/{stats['total']} completed"
         else:
             footer = None
 

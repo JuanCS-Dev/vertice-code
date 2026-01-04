@@ -56,7 +56,7 @@ class HistoryManager(CompactionMixin):
         max_context: int = 50,
         max_context_tokens: int = 32000,
         history_file: Optional[Path] = None,
-        session_dir: Optional[Path] = None
+        session_dir: Optional[Path] = None,
     ) -> None:
         """
         Initialize HistoryManager.
@@ -79,7 +79,7 @@ class HistoryManager(CompactionMixin):
 
         # Configurable paths
         self._history_file = history_file or (Path.home() / ".vertice_tui_history")
-        self._session_dir = session_dir or (Path.home() / ".juancs" / "sessions")
+        self._session_dir = session_dir or (Path.home() / ".vertice" / "sessions")
 
         self._load_history()
 
@@ -92,14 +92,14 @@ class HistoryManager(CompactionMixin):
         try:
             if self._history_file.exists():
                 lines = self._history_file.read_text().strip().split("\n")
-                self.commands = lines[-self.max_commands:]
+                self.commands = lines[-self.max_commands :]
         except Exception as e:
             logger.debug(f"Failed to load history: {e}")
 
     def _save_history(self) -> None:
         """Save history to file."""
         try:
-            self._history_file.write_text("\n".join(self.commands[-self.max_commands:]))
+            self._history_file.write_text("\n".join(self.commands[-self.max_commands :]))
         except Exception as e:
             logger.debug(f"Failed to save history: {e}")
 
@@ -162,7 +162,7 @@ class HistoryManager(CompactionMixin):
         self.context.append({"role": role, "content": content})
         # Keep context within limits
         if len(self.context) > self.max_context:
-            self.context = self.context[-self.max_context:]
+            self.context = self.context[-self.max_context :]
 
     def get_context(self) -> List[Dict[str, str]]:
         """Get conversation context for LLM."""
@@ -198,7 +198,7 @@ class HistoryManager(CompactionMixin):
             "timestamp": datetime.now().isoformat(),
             "context": self.context,
             "commands": self.commands[-100:],  # Last 100 commands
-            "version": "1.0"
+            "version": "1.0",
         }
 
         session_file.write_text(json.dumps(session_data, indent=2, ensure_ascii=False))
@@ -228,9 +228,7 @@ class HistoryManager(CompactionMixin):
         else:
             # Get most recent session
             sessions = sorted(
-                self._session_dir.glob("*.json"),
-                key=lambda p: p.stat().st_mtime,
-                reverse=True
+                self._session_dir.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True
             )
             if not sessions:
                 raise ValueError("No sessions found")
@@ -244,7 +242,7 @@ class HistoryManager(CompactionMixin):
         return {
             "session_id": data.get("session_id"),
             "timestamp": data.get("timestamp"),
-            "message_count": len(self.context)
+            "message_count": len(self.context),
         }
 
     def list_sessions(self, limit: int = 10) -> List[Dict[str, Any]]:
@@ -261,21 +259,21 @@ class HistoryManager(CompactionMixin):
             return []
 
         sessions = sorted(
-            self._session_dir.glob("*.json"),
-            key=lambda p: p.stat().st_mtime,
-            reverse=True
+            self._session_dir.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True
         )
         result = []
 
         for session_file in sessions[:limit]:
             try:
                 data = json.loads(session_file.read_text())
-                result.append({
-                    "session_id": data.get("session_id", session_file.stem),
-                    "timestamp": data.get("timestamp"),
-                    "message_count": len(data.get("context", [])),
-                    "file": str(session_file)
-                })
+                result.append(
+                    {
+                        "session_id": data.get("session_id", session_file.stem),
+                        "timestamp": data.get("timestamp"),
+                        "message_count": len(data.get("context", [])),
+                        "file": str(session_file),
+                    }
+                )
             except json.JSONDecodeError as e:
                 logger.warning(f"Corrupted session file {session_file}: {e}")
             except Exception as e:
@@ -324,7 +322,7 @@ class HistoryManager(CompactionMixin):
             "label": label or f"Checkpoint {len(self._checkpoints) + 1}",
             "timestamp": datetime.now().isoformat(),
             "context": self.context.copy(),
-            "message_count": len(self.context)
+            "message_count": len(self.context),
         }
 
         self._checkpoints.append(checkpoint)
@@ -332,7 +330,7 @@ class HistoryManager(CompactionMixin):
         # AIR GAP FIX: Limit checkpoint count to prevent memory leak
         if len(self._checkpoints) > self.MAX_CHECKPOINTS:
             # Remove oldest checkpoints, keeping most recent
-            self._checkpoints = self._checkpoints[-self.MAX_CHECKPOINTS:]
+            self._checkpoints = self._checkpoints[-self.MAX_CHECKPOINTS :]
             # Re-index remaining checkpoints
             for i, cp in enumerate(self._checkpoints):
                 cp["index"] = i
@@ -341,7 +339,7 @@ class HistoryManager(CompactionMixin):
             "index": checkpoint["index"],
             "label": checkpoint["label"],
             "timestamp": checkpoint["timestamp"],
-            "message_count": checkpoint["message_count"]
+            "message_count": checkpoint["message_count"],
         }
 
     def get_checkpoints(self) -> List[Dict[str, Any]]:
@@ -356,7 +354,7 @@ class HistoryManager(CompactionMixin):
                 "index": cp["index"],
                 "label": cp["label"],
                 "timestamp": cp["timestamp"],
-                "message_count": cp["message_count"]
+                "message_count": cp["message_count"],
             }
             for cp in self._checkpoints
         ]
@@ -388,7 +386,7 @@ class HistoryManager(CompactionMixin):
         return {
             "success": True,
             "rewound_to": checkpoint["label"],
-            "message_count": len(self.context)
+            "message_count": len(self.context),
         }
 
     def clear_checkpoints(self) -> None:

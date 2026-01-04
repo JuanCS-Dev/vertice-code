@@ -18,6 +18,7 @@ from typing import Any, Dict, List
 
 class IncidentSeverity(str, Enum):
     """Incident severity levels."""
+
     P0 = "p0"  # Critical - immediate action
     P1 = "p1"  # High - action within 1 hour
     P2 = "p2"  # Medium - action within 24 hours
@@ -26,6 +27,7 @@ class IncidentSeverity(str, Enum):
 
 class RemediationAction(str, Enum):
     """Types of autonomous remediation actions."""
+
     RESTART_POD = "restart_pod"
     SCALE_DEPLOYMENT = "scale_deployment"
     ROLLBACK_DEPLOYMENT = "rollback_deployment"
@@ -37,6 +39,7 @@ class RemediationAction(str, Enum):
 
 class DeploymentStrategy(str, Enum):
     """Deployment strategies."""
+
     ROLLING_UPDATE = "rolling_update"
     BLUE_GREEN = "blue_green"
     CANARY = "canary"
@@ -46,6 +49,7 @@ class DeploymentStrategy(str, Enum):
 @dataclass
 class IncidentDetection:
     """Detected incident with autonomous response plan."""
+
     incident_id: str
     severity: IncidentSeverity
     description: str
@@ -73,6 +77,7 @@ class IncidentDetection:
 @dataclass
 class DeploymentPlan:
     """Deployment plan with safety guarantees."""
+
     deployment_id: str
     strategy: DeploymentStrategy
     pre_checks: List[str]
@@ -98,6 +103,7 @@ class DeploymentPlan:
 @dataclass
 class InfrastructureHealth:
     """Real-time infrastructure health assessment."""
+
     overall_score: float  # 0-100
     cluster_health: float
     application_health: float

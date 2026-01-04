@@ -20,6 +20,7 @@ from rich.text import Text
 @dataclass
 class AnimationConfig:
     """Configuration for animations"""
+
     duration: float = 0.3  # seconds
     easing: str = "ease-out"  # ease-in, ease-out, ease-in-out, linear
     fps: int = 60
@@ -93,7 +94,7 @@ class Animator:
     ) -> None:
         """
         Animate from start to end value
-        
+
         Args:
             start: Starting value
             end: Ending value
@@ -140,7 +141,7 @@ class StateTransition:
     ) -> None:
         """
         Transition from current state to new state
-        
+
         Args:
             new_state: Target state
             on_exit: Callback when leaving current state
@@ -194,7 +195,7 @@ class LoadingAnimation:
         else:
             pos = width - frame - 1
 
-        bar = bar[:pos] + "█" + bar[pos + 1:]
+        bar = bar[:pos] + "█" + bar[pos + 1 :]
         self.current_frame += 1
 
         return f"{text} [{bar}]"
@@ -224,10 +225,11 @@ spring_animator = Animator(AnimationConfig(duration=0.4, easing="spring"))
 
 # ===== UX POLISH SPRINT: ADVANCED ANIMATIONS =====
 
+
 class LoadingSpinner:
     """
     Modern loading spinners (UX Polish Sprint)
-    
+
     Styles:
     - dots: "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏" (braille, 10 frames)
     - line: "|/-\\" (classic, 4 frames)
@@ -248,7 +250,7 @@ class LoadingSpinner:
     def __init__(self, style: str = "dots", color: str = "cyan"):
         """
         Initialize spinner
-        
+
         Args:
             style: Spinner style (dots, line, arc, dots3, pulse, bounce)
             color: Rich color name
@@ -267,7 +269,7 @@ class LoadingSpinner:
     async def spin(self, console: Console, message: str = "Loading", duration: float = 2.0):
         """
         Animate spinner for duration
-        
+
         Args:
             console: Rich Console
             message: Message to show
@@ -295,7 +297,7 @@ class LoadingSpinner:
 class FadeEffect:
     """
     Fade in/out effects (UX Polish Sprint)
-    
+
     Uses opacity simulation with dim/bold styles
     """
 
@@ -303,7 +305,7 @@ class FadeEffect:
     def fade_in(text: str, progress: float, color: str = "white") -> Text:
         """
         Fade text in (0.0 → 1.0)
-        
+
         Args:
             text: Text to fade
             progress: 0.0 (invisible) to 1.0 (full)
@@ -327,7 +329,7 @@ class FadeEffect:
     def fade_out(text: str, progress: float, color: str = "white") -> Text:
         """
         Fade text out (1.0 → 0.0)
-        
+
         Args:
             text: Text to fade
             progress: 1.0 (full) to 0.0 (invisible)
@@ -337,10 +339,7 @@ class FadeEffect:
 
     @staticmethod
     async def fade_in_animated(
-        console: Console,
-        text: str,
-        duration: float = 0.5,
-        color: str = "white"
+        console: Console, text: str, duration: float = 0.5, color: str = "white"
     ):
         """Animate fade in effect"""
         from rich.live import Live
@@ -359,7 +358,7 @@ class FadeEffect:
 class MicroInteraction:
     """
     Subtle micro-interactions (UX Polish Sprint)
-    
+
     Examples:
     - Pulse: Scale effect (success, error)
     - Bounce: Attention grabber
@@ -370,7 +369,7 @@ class MicroInteraction:
     def pulse(text: str, scale: float = 1.2) -> str:
         """
         Pulse effect (grow slightly)
-        
+
         Args:
             text: Text to pulse
             scale: Scale factor (1.0 = normal, 1.2 = 20% bigger)
@@ -384,7 +383,7 @@ class MicroInteraction:
     async def bounce_text(console: Console, text: str, color: str = "cyan"):
         """
         Bounce animation (4 frames)
-        
+
         Args:
             console: Rich Console
             text: Text to bounce
@@ -409,7 +408,7 @@ class MicroInteraction:
     async def shake_text(console: Console, text: str, color: str = "red"):
         """
         Shake animation (error indication)
-        
+
         Args:
             console: Rich Console
             text: Text to shake
@@ -431,6 +430,7 @@ class MicroInteraction:
 
 
 # ===== CONVENIENCE FUNCTIONS =====
+
 
 async def show_loading(console: Console, message: str = "Processing", duration: float = 2.0):
     """Quick loading spinner"""

@@ -13,24 +13,50 @@ from typing import Set
 
 # Safety levels
 SAFE_COMMANDS: Set[str] = {
-    'ls', 'pwd', 'echo', 'cat', 'head', 'tail',
-    'grep', 'find', 'df', 'du', 'ps', 'top',
-    'date', 'whoami', 'hostname', 'uname',
-    'which', 'whereis', 'file', 'stat', 'wc',
+    "ls",
+    "pwd",
+    "echo",
+    "cat",
+    "head",
+    "tail",
+    "grep",
+    "find",
+    "df",
+    "du",
+    "ps",
+    "top",
+    "date",
+    "whoami",
+    "hostname",
+    "uname",
+    "which",
+    "whereis",
+    "file",
+    "stat",
+    "wc",
 }
 
 DANGEROUS_COMMANDS: Set[str] = {
-    'rm', 'rmdir', 'dd', 'mkfs', 'fdisk', 'format',
-    'shutdown', 'reboot', 'init',
-    'kill', 'pkill', 'killall',
+    "rm",
+    "rmdir",
+    "dd",
+    "mkfs",
+    "fdisk",
+    "format",
+    "shutdown",
+    "reboot",
+    "init",
+    "kill",
+    "pkill",
+    "killall",
 }
 
 # Dangerous patterns that should be detected anywhere in command
 DANGEROUS_PATTERNS: Set[str] = {
-    ':(){:|:&};:',  # Fork bomb
-    ':(){ :|:& };:',  # Fork bomb with spaces
-    '/dev/sda',  # Direct disk access
-    '/dev/null',  # Can be dangerous in redirects
+    ":(){:|:&};:",  # Fork bomb
+    ":(){ :|:& };:",  # Fork bomb with spaces
+    "/dev/sda",  # Direct disk access
+    "/dev/null",  # Can be dangerous in redirects
 }
 
 
@@ -58,7 +84,7 @@ def get_safety_level(command: str) -> int:
             return 2
 
     # Check for dangerous commands anywhere in the command string (handles chains)
-    tokens = re.split(r'[;&|]', command)
+    tokens = re.split(r"[;&|]", command)
 
     has_dangerous = False
     for token in tokens:

@@ -55,16 +55,8 @@ class MaestroShellUI:
 
         # Agent states (can be extended)
         self.agents: Dict[str, AgentState] = {
-            'executor': AgentState(
-                name="CODE EXECUTOR",
-                icon="⚡",
-                status=AgentStatus.IDLE
-            ),
-            'planner': AgentState(
-                name="PLANNER",
-                icon="🎯",
-                status=AgentStatus.IDLE
-            ),
+            "executor": AgentState(name="CODE EXECUTOR", icon="⚡", status=AgentStatus.IDLE),
+            "planner": AgentState(name="PLANNER", icon="🎯", status=AgentStatus.IDLE),
         }
 
         # File operations tracker
@@ -90,17 +82,17 @@ class MaestroShellUI:
         # Pause state (for approval dialogs)
         self._paused = False
 
-                # Throttle refresh to 30 FPS (33.3ms minimum interval)
+        # Throttle refresh to 30 FPS (33.3ms minimum interval)
         self._last_refresh = 0.0
         self._min_refresh_interval = 0.033  # 33ms = 30 FPS
 
     def _setup_layout(self):
         """Setup the 4-layer layout structure"""
         self.layout.split_column(
-            Layout(name="header", size=4),          # Title + live status
-            Layout(name="agents", ratio=1),         # Triple-panel streaming
-            Layout(name="command_bar", size=4),     # Command palette
-            Layout(name="metrics", size=3)          # Metrics dashboard
+            Layout(name="header", size=4),  # Title + live status
+            Layout(name="agents", ratio=1),  # Triple-panel streaming
+            Layout(name="command_bar", size=4),  # Command palette
+            Layout(name="metrics", size=3),  # Metrics dashboard
         )
 
     def _render_header(self) -> Panel:
@@ -124,40 +116,43 @@ class MaestroShellUI:
 
         # Center: Live indicator + stats
         center = Text()
-        center.append("[", style=COLORS['text_tertiary'])
+        center.append("[", style=COLORS["text_tertiary"])
         center.append("● LIVE", style=f"bold blink {COLORS['maestro_live']}")
-        center.append("]", style=COLORS['text_tertiary'])
+        center.append("]", style=COLORS["text_tertiary"])
 
         # Active agents count
         active_count = sum(
-            1 for agent in self.agents.values()
+            1
+            for agent in self.agents.values()
             if agent.status in [AgentStatus.EXECUTING, AgentStatus.THINKING]
         )
-        center.append(f" {len(self.agents)} agents", style=COLORS['text_secondary'])
+        center.append(f" {len(self.agents)} agents", style=COLORS["text_secondary"])
         if active_count > 0:
-            center.append(f" ({active_count} active)", style=COLORS['neon_cyan'])
+            center.append(f" ({active_count} active)", style=COLORS["neon_cyan"])
 
         # Token efficiency
         if self.metrics.tokens_saved > 0:
-            center.append(" | Efficiency: ", style=COLORS['text_secondary'])
-            center.append(f"{self.metrics.tokens_saved:.0f}%↓", style=f"bold {COLORS['neon_green']}")
+            center.append(" | Efficiency: ", style=COLORS["text_secondary"])
+            center.append(
+                f"{self.metrics.tokens_saved:.0f}%↓", style=f"bold {COLORS['neon_green']}"
+            )
 
         # Latency
         if self.metrics.latency_ms > 0:
-            center.append(" | ", style=COLORS['text_secondary'])
+            center.append(" | ", style=COLORS["text_secondary"])
             center.append(f"{self.metrics.latency_ms}ms", style=f"bold {COLORS['neon_cyan']}")
 
         # Right: Timestamp
-        right = Text(datetime.now().strftime("%H:%M:%S"), style=COLORS['text_tertiary'])
+        right = Text(datetime.now().strftime("%H:%M:%S"), style=COLORS["text_tertiary"])
 
         table.add_row(left, center, right)
 
         return Panel(
             table,
-            border_style=COLORS['neon_cyan'],
+            border_style=COLORS["neon_cyan"],
             box=ROUNDED,
             padding=(0, 2),
-            style=Style(bgcolor=COLORS['bg_deep'])
+            style=Style(bgcolor=COLORS["bg_deep"]),
         )
 
     def _render_agents_panel(self) -> Layout:
@@ -175,23 +170,15 @@ class MaestroShellUI:
         if len(active_agents) >= 2:
             # Triple panel: executor | planner | files
             agent_layout.split_row(
-                Layout(name="agent1"),
-                Layout(name="agent2"),
-                Layout(name="files")
+                Layout(name="agent1"), Layout(name="agent2"), Layout(name="files")
             )
 
             # Render executor
-            executor_panel = AgentStreamPanel(
-                self.agents['executor'],
-                COLORS['neon_cyan']
-            )
+            executor_panel = AgentStreamPanel(self.agents["executor"], COLORS["neon_cyan"])
             agent_layout["agent1"].update(executor_panel.render())
 
             # Render planner
-            planner_panel = AgentStreamPanel(
-                self.agents['planner'],
-                COLORS['neon_purple']
-            )
+            planner_panel = AgentStreamPanel(self.agents["planner"], COLORS["neon_purple"])
             agent_layout["agent2"].update(planner_panel.render())
 
             # Render files
@@ -199,22 +186,19 @@ class MaestroShellUI:
 
         else:
             # Dual panel: single agent | files
-            agent_layout.split_row(
-                Layout(name="agent1"),
-                Layout(name="files")
-            )
+            agent_layout.split_row(Layout(name="agent1"), Layout(name="files"))
 
             # Render first active agent
-            first_agent = active_agents[0] if active_agents else 'executor'
+            first_agent = active_agents[0] if active_agents else "executor"
             agent_state = self.agents[first_agent]
 
             # Choose color based on agent
-            if first_agent == 'executor':
-                color = COLORS['neon_cyan']
-            elif first_agent == 'planner':
-                color = COLORS['neon_purple']
+            if first_agent == "executor":
+                color = COLORS["neon_cyan"]
+            elif first_agent == "planner":
+                color = COLORS["neon_purple"]
             else:
-                color = COLORS['neon_blue']
+                color = COLORS["neon_blue"]
 
             panel = AgentStreamPanel(agent_state, color)
             agent_layout["agent1"].update(panel.render())
@@ -245,10 +229,10 @@ class MaestroShellUI:
 
         return Panel(
             content,
-            border_style=COLORS['border_muted'],
+            border_style=COLORS["border_muted"],
             box=ROUNDED,
             padding=(0, 2),
-            style=Style(bgcolor=COLORS['bg_deep'])
+            style=Style(bgcolor=COLORS["bg_deep"]),
         )
 
     def refresh_display(self, force: bool = False):
@@ -283,7 +267,7 @@ class MaestroShellUI:
             console=self.console,
             refresh_per_second=30,  # 30 FPS!
             screen=False,  # Stay in normal buffer (not alternate screen)
-            transient=False
+            transient=False,
         )
 
         self.live.start()
@@ -295,12 +279,10 @@ class MaestroShellUI:
         if self.live:
             try:
                 self.live.stop()
-            except Exception:
-                # Ignore errors during stop (Live might already be stopped)
+            except (RuntimeError, AttributeError):
                 pass
             finally:
                 self.live = None
-
 
     # ========================================================================
     # PATCH: PAUSE/RESUME METHODS (Fix for approval loop)
@@ -310,7 +292,7 @@ class MaestroShellUI:
     def pause(self):
         """
         Pause the live display for user input.
-        
+
         This is CRITICAL for approval dialogs - the Live display
         must be stopped before requesting console input, otherwise
         the screen will flicker/flash uncontrollably.
@@ -319,7 +301,7 @@ class MaestroShellUI:
         if self.live and self.live.is_started:
             try:
                 self.live.stop()
-            except Exception:
+            except (RuntimeError, AttributeError):
                 pass
 
     def resume(self):
@@ -332,7 +314,7 @@ class MaestroShellUI:
                 try:
                     self.live.start()
                     self.refresh_display(force=True)
-                except Exception:
+                except (RuntimeError, AttributeError):
                     pass
         else:
             try:
@@ -341,28 +323,23 @@ class MaestroShellUI:
                     console=self.console,
                     refresh_per_second=30,
                     screen=False,
-                    transient=False
+                    transient=False,
                 )
                 self.live.start()
                 self.refresh_display(force=True)
-            except Exception:
+            except (RuntimeError, AttributeError):
                 pass
 
     @property
     def is_paused(self) -> bool:
         """Check if display is paused."""
-        return getattr(self, '_paused', False)
+        return getattr(self, "_paused", False)
 
     # ========================================================================
     # HIGH-LEVEL API FOR AGENTS
     # ========================================================================
 
-    async def update_agent_stream(
-        self,
-        agent_name: str,
-        text: str,
-        advance_spinner: bool = True
-    ):
+    async def update_agent_stream(self, agent_name: str, text: str, advance_spinner: bool = True):
         """
         Update agent stream with new text.
 
@@ -392,11 +369,11 @@ class MaestroShellUI:
 
     async def update_executor_stream(self, text: str):
         """Shortcut: Update executor agent stream"""
-        await self.update_agent_stream('executor', text)
+        await self.update_agent_stream("executor", text)
 
     async def update_planner_stream(self, text: str):
         """Shortcut: Update planner agent stream"""
-        await self.update_agent_stream('planner', text)
+        await self.update_agent_stream("planner", text)
 
     def update_agent_progress(self, agent_name: str, progress: float):
         """
@@ -412,7 +389,7 @@ class MaestroShellUI:
 
     def update_executor_progress(self, progress: float):
         """Shortcut: Update executor progress"""
-        self.update_agent_progress('executor', progress)
+        self.update_agent_progress("executor", progress)
 
     def mark_agent_done(self, agent_name: str):
         """
@@ -451,13 +428,7 @@ class MaestroShellUI:
             self.agents[agent_name].status = AgentStatus.IDLE
             self.refresh_display()
 
-    def add_file_operation(
-        self,
-        path: str,
-        status: str,
-        added: int = 0,
-        removed: int = 0
-    ):
+    def add_file_operation(self, path: str, status: str, added: int = 0, removed: int = 0):
         """
         Add file operation to tracker.
 
@@ -510,16 +481,13 @@ class MaestroShellUI:
             display_name: Display name
             icon: Emoji icon
         """
-        self.agents[name] = AgentState(
-            name=display_name,
-            icon=icon,
-            status=AgentStatus.IDLE
-        )
+        self.agents[name] = AgentState(name=display_name, icon=icon, status=AgentStatus.IDLE)
 
 
 # ============================================================================
 # CONVENIENCE FUNCTIONS
 # ============================================================================
+
 
 def create_maestro_ui(console: Optional[Console] = None) -> MaestroShellUI:
     """

@@ -39,6 +39,7 @@ class Plugin(Protocol):
         name: Unique plugin identifier
         version: Plugin version string
     """
+
     name: str
     version: str
 
@@ -54,6 +55,6 @@ class Plugin(Protocol):
 from .plugin_manager import PluginManager
 
 __all__ = [
-    'Plugin',
-    'PluginManager',
+    "Plugin",
+    "PluginManager",
 ]

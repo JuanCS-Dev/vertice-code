@@ -12,7 +12,7 @@ from .schema import (
 
 def get_default_config() -> QwenConfig:
     """Get default configuration with sensible defaults.
-    
+
     Returns:
         QwenConfig with default values for all settings
     """
@@ -21,7 +21,7 @@ def get_default_config() -> QwenConfig:
             name="my-project",
             type="python",
             version="1.0.0",
-            description="Project managed by qwen-dev-cli"
+            description="Project managed by qwen-dev-cli",
         ),
         rules=RulesConfig(
             rules=[
@@ -34,7 +34,7 @@ def get_default_config() -> QwenConfig:
             style_guide="PEP 8",
             max_line_length=100,
             use_type_hints=True,
-            docstring_style="google"
+            docstring_style="google",
         ),
         safety=SafetyConfig(
             allowed_paths=["./"],
@@ -52,14 +52,9 @@ def get_default_config() -> QwenConfig:
                 "npm install",
             ],
             max_file_size_mb=10,
-            enable_sandbox=False
+            enable_sandbox=False,
         ),
-        hooks=HooksConfig(
-            post_write=[],
-            post_edit=[],
-            post_delete=[],
-            pre_commit=[]
-        ),
+        hooks=HooksConfig(post_write=[], post_edit=[], post_delete=[], pre_commit=[]),
         context=ContextConfig(
             max_tokens=32000,
             include_git=True,
@@ -75,11 +70,23 @@ def get_default_config() -> QwenConfig:
                 "**/.DS_Store",
             ],
             file_extensions=[
-                ".py", ".js", ".ts", ".jsx", ".tsx",
-                ".rs", ".go", ".java", ".cpp", ".c",
-                ".md", ".txt", ".yaml", ".yml", ".json",
-            ]
-        )
+                ".py",
+                ".js",
+                ".ts",
+                ".jsx",
+                ".tsx",
+                ".rs",
+                ".go",
+                ".java",
+                ".cpp",
+                ".c",
+                ".md",
+                ".txt",
+                ".yaml",
+                ".yml",
+                ".json",
+            ],
+        ),
     )
 
 
@@ -132,8 +139,12 @@ def get_javascript_config() -> QwenConfig:
         "eslint .",
     ]
     config.context.file_extensions = [
-        ".js", ".ts", ".jsx", ".tsx",
-        ".json", ".md",
+        ".js",
+        ".ts",
+        ".jsx",
+        ".tsx",
+        ".json",
+        ".md",
     ]
     return config
 
@@ -158,6 +169,8 @@ def get_rust_config() -> QwenConfig:
         "cargo clippy",
     ]
     config.context.file_extensions = [
-        ".rs", ".toml", ".md",
+        ".rs",
+        ".toml",
+        ".md",
     ]
     return config

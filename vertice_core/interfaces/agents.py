@@ -21,6 +21,7 @@ from vertice_core.types import AgentRole
 @dataclass
 class AgentRouteResult:
     """Result of routing a query to an agent."""
+
     agent_name: str
     agent_role: AgentRole
     confidence: float  # 0.0 to 1.0
@@ -31,6 +32,7 @@ class AgentRouteResult:
 @dataclass
 class AgentContext:
     """Context provided to agents."""
+
     session_id: str
     user_message: str
     history: List[Dict[str, Any]] = field(default_factory=list)
@@ -78,10 +80,7 @@ class IAgent(ABC):
         return []
 
     @abstractmethod
-    async def execute(
-        self,
-        context: AgentContext
-    ) -> AsyncIterator[Dict[str, Any]]:
+    async def execute(self, context: AgentContext) -> AsyncIterator[Dict[str, Any]]:
         """
         Execute agent task.
 
@@ -127,11 +126,7 @@ class IAgentRouter(ABC):
     """
 
     @abstractmethod
-    async def route(
-        self,
-        query: str,
-        context: Optional[Dict[str, Any]] = None
-    ) -> AgentRouteResult:
+    async def route(self, query: str, context: Optional[Dict[str, Any]] = None) -> AgentRouteResult:
         """
         Route query to appropriate agent.
 
@@ -174,9 +169,7 @@ class IAgentOrchestrator(ABC):
 
     @abstractmethod
     async def execute_workflow(
-        self,
-        request: str,
-        agents: Optional[List[str]] = None
+        self, request: str, agents: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """
         Execute a multi-agent workflow.
@@ -191,10 +184,7 @@ class IAgentOrchestrator(ABC):
         pass
 
     @abstractmethod
-    async def execute_parallel(
-        self,
-        tasks: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+    async def execute_parallel(self, tasks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
         Execute multiple agent tasks in parallel.
 
@@ -208,9 +198,9 @@ class IAgentOrchestrator(ABC):
 
 
 __all__ = [
-    'IAgent',
-    'IAgentRouter',
-    'IAgentOrchestrator',
-    'AgentRouteResult',
-    'AgentContext',
+    "IAgent",
+    "IAgentRouter",
+    "IAgentOrchestrator",
+    "AgentRouteResult",
+    "AgentContext",
 ]

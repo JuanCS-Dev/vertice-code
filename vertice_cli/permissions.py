@@ -32,9 +32,10 @@ logger = logging.getLogger(__name__)
 
 class PermissionLevel(Enum):
     """Permission decision levels (OWASP pattern)"""
-    ALLOW = "allow"      # Auto-approved (in allowlist)
-    DENY = "deny"        # Blocked (in blocklist or destructive)
-    ASK = "ask"          # Requires user approval
+
+    ALLOW = "allow"  # Auto-approved (in allowlist)
+    DENY = "deny"  # Blocked (in blocklist or destructive)
+    ASK = "ask"  # Requires user approval
 
 
 class PermissionManager:
@@ -104,7 +105,6 @@ class PermissionManager:
         return {
             "permissions": {
                 "version": "1.0",
-
                 # Allowlist: Safe read-only commands (OWASP: Least Privilege)
                 "allow": [
                     # Process management (read-only)
@@ -113,33 +113,28 @@ class PermissionManager:
                     "Bash(jobs)",
                     "Bash(bg)",
                     "Bash(fg)",
-
                     # Filesystem (read-only)
                     "Bash(ls *)",
                     "Bash(pwd)",
                     "Bash(find *)",
                     "Bash(tree *)",
-
                     # System info (read-only)
                     "Bash(whoami)",
                     "Bash(hostname)",
                     "Bash(date)",
                     "Bash(uptime)",
                     "Bash(uname *)",
-
                     # Git (read-only)
                     "Bash(git status)",
                     "Bash(git log *)",
                     "Bash(git diff *)",
                     "Bash(git show *)",
                     "Bash(git branch *)",
-
                     # Read files (non-sensitive)
                     "Read(**/*.md)",
                     "Read(**/*.txt)",
-                    "Read(**/*.{js,ts,py,java,go,rs})"
+                    "Read(**/*.{js,ts,py,java,go,rs})",
                 ],
-
                 # Blocklist: Destructive operations (OWASP: Defense-in-depth)
                 "deny": [
                     # System destruction
@@ -149,17 +144,14 @@ class PermissionManager:
                     "Bash(mkfs.*)",
                     "Bash(:(){ :|:& };:*)",  # Fork bomb
                     "Bash(chmod -R 777 *)",
-
                     # Network exfiltration
                     "Bash(curl *)",
                     "Bash(wget *)",
                     "Bash(nc *)",
                     "Bash(telnet *)",
-
                     # Pipe to shell
                     "Bash(*| sh)",
                     "Bash(*| bash)",
-
                     # Sensitive files
                     "Read(.env)",
                     "Read(.env.*)",
@@ -170,35 +162,28 @@ class PermissionManager:
                     "Read(**/*.key)",
                     "Read(~/.ssh/**)",
                     "Read(~/.aws/**)",
-
                     # Write to sensitive files
                     "Write(.env*)",
                     "Write(**/secrets/**)",
                     "Write(**/*.pem)",
                     "Write(~/.ssh/**)",
                     "Edit(.env*)",
-                    "Edit(**/secrets/**)"
+                    "Edit(**/secrets/**)",
                 ],
-
                 # Auto-approve settings
                 "autoApprove": {
                     "readOnlyCommands": True,
-                    "safeCommands": ["whoami", "pwd", "date", "hostname", "uname"]
-                }
+                    "safeCommands": ["whoami", "pwd", "date", "hostname", "uname"],
+                },
             },
-
             # Sandbox config (future feature)
-            "sandbox": {
-                "enabled": False,
-                "warnBeforeDisable": True
-            },
-
+            "sandbox": {"enabled": False, "warnBeforeDisable": True},
             # Audit logging (OWASP: Auditability)
             "logging": {
                 "auditFile": str(Path.home() / ".maestro" / "audit.log"),
                 "logAllDecisions": True,
-                "retentionDays": 90
-            }
+                "retentionDays": 90,
+            },
         }
 
     def _merge_configs(self, base: Dict, override: Dict) -> Dict:
@@ -363,15 +348,7 @@ class PermissionManager:
         Returns:
             True if path contains sensitive data
         """
-        sensitive_patterns = [
-            ".env",
-            "secrets/",
-            ".pem",
-            ".key",
-            ".ssh/",
-            ".aws/",
-            "credentials"
-        ]
+        sensitive_patterns = [".env", "secrets/", ".pem", ".key", ".ssh/", ".aws/", "credentials"]
 
         path_lower = path.lower()
         return any(pattern in path_lower for pattern in sensitive_patterns)
@@ -411,7 +388,7 @@ class PermissionManager:
         """
         self.local_config_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(self.local_config_path, 'w') as f:
+        with open(self.local_config_path, "w") as f:
             json.dump(self.config, f, indent=2)
 
         logger.info(f"Persisted config to: {self.local_config_path}")
@@ -431,12 +408,12 @@ class PermissionManager:
             "timestamp": datetime.datetime.now().isoformat(),
             "decision": decision,
             "command": command,
-            "reason": reason
+            "reason": reason,
         }
 
         try:
             audit_path = Path(self.config["logging"]["auditFile"])
-            with open(audit_path, 'a') as f:
+            with open(audit_path, "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
         except Exception as e:
             logger.warning(f"Failed to write audit log: {e}")
@@ -453,8 +430,17 @@ class PermissionManager:
             "auto_approve_enabled": self.config["permissions"]["autoApprove"]["readOnlyCommands"],
             "audit_enabled": self.config["logging"]["logAllDecisions"],
             "config_files": {
-                "user": {"path": str(self.user_config_path), "exists": self.user_config_path.exists()},
-                "project": {"path": str(self.project_config_path), "exists": self.project_config_path.exists()},
-                "local": {"path": str(self.local_config_path), "exists": self.local_config_path.exists()}
-            }
+                "user": {
+                    "path": str(self.user_config_path),
+                    "exists": self.user_config_path.exists(),
+                },
+                "project": {
+                    "path": str(self.project_config_path),
+                    "exists": self.project_config_path.exists(),
+                },
+                "local": {
+                    "path": str(self.local_config_path),
+                    "exists": self.local_config_path.exists(),
+                },
+            },
         }

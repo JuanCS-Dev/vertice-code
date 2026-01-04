@@ -8,19 +8,14 @@ import time
 import logging
 from typing import List, Optional
 
-from .types import (
-    Suggestion,
-    Context,
-    SuggestionPattern,
-    SuggestionResult
-)
+from .types import Suggestion, Context, SuggestionPattern, SuggestionResult
 
 logger = logging.getLogger(__name__)
 
 
 class SuggestionEngine:
     """Engine for generating intelligent suggestions.
-    
+
     Design: Registry pattern for extensibility + Strategy pattern for suggestions.
     Zero side effects - pure functions where possible.
     """
@@ -32,10 +27,10 @@ class SuggestionEngine:
 
     def register_pattern(self, pattern: SuggestionPattern) -> None:
         """Register a new suggestion pattern.
-        
+
         Args:
             pattern: Pattern to register
-            
+
         Note: Patterns are evaluated in order of priority (highest first)
         """
         # Insert maintaining priority order (binary search would be overkill for <100 patterns)
@@ -51,7 +46,7 @@ class SuggestionEngine:
 
     def unregister_pattern(self, name: str) -> bool:
         """Unregister a pattern by name.
-        
+
         Returns:
             True if pattern was found and removed
         """
@@ -63,20 +58,16 @@ class SuggestionEngine:
             logger.debug(f"Unregistered pattern '{name}'")
         return removed
 
-    def generate_suggestions(
-        self,
-        context: Context,
-        max_suggestions: int = 5
-    ) -> SuggestionResult:
+    def generate_suggestions(self, context: Context, max_suggestions: int = 5) -> SuggestionResult:
         """Generate suggestions for current context.
-        
+
         Args:
             context: Current context
             max_suggestions: Maximum number of suggestions to return
-            
+
         Returns:
             SuggestionResult with suggestions and metadata
-            
+
         Boris Cherny: Clear error handling, no silent failures
         """
         start_time = time.perf_counter()
@@ -86,10 +77,7 @@ class SuggestionEngine:
         if not self._enabled:
             logger.debug("Engine disabled, returning empty result")
             return SuggestionResult(
-                suggestions=[],
-                context=context,
-                generation_time_ms=0.0,
-                patterns_evaluated=0
+                suggestions=[], context=context, generation_time_ms=0.0, patterns_evaluated=0
             )
 
         for pattern in self._patterns:
@@ -115,7 +103,7 @@ class SuggestionEngine:
             suggestions=suggestions,
             context=context,
             generation_time_ms=generation_time,
-            patterns_evaluated=patterns_evaluated
+            patterns_evaluated=patterns_evaluated,
         )
 
     def enable(self) -> None:
@@ -145,7 +133,7 @@ _engine: Optional[SuggestionEngine] = None
 
 def get_engine() -> SuggestionEngine:
     """Get global suggestion engine (singleton pattern).
-    
+
     Boris Cherny: Singletons are acceptable for stateful services
     that truly need global access.
     """

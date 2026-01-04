@@ -1,4 +1,5 @@
 """MCP Server Configuration."""
+
 from dataclasses import dataclass
 from typing import Optional
 
@@ -20,6 +21,7 @@ class MCPConfig:
     def from_env(cls) -> "MCPConfig":
         """Load config from environment variables."""
         import os
+
         return cls(
             enabled=os.getenv("MCP_ENABLED", "false").lower() == "true",
             host=os.getenv("MCP_HOST", "localhost"),

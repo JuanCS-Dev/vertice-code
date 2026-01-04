@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 class HistoryHandler:
     """Handler for history and session commands."""
 
-    def __init__(self, shell: 'InteractiveShell'):
+    def __init__(self, shell: "InteractiveShell"):
         """Initialize with shell reference."""
         self.shell = shell
         self.console = shell.console
@@ -44,7 +44,7 @@ class HistoryHandler:
         for i, entry in enumerate(reversed(entries), 1):
             status = "✓ OK" if entry.success else "✗ FAIL"
             status_style = "green" if entry.success else "red"
-            time_str = entry.timestamp.split('T')[1][:8]
+            time_str = entry.timestamp.split("T")[1][:8]
             cmd_preview = entry.command[:60] + "..." if len(entry.command) > 60 else entry.command
 
             table.add_row(
@@ -52,7 +52,7 @@ class HistoryHandler:
                 time_str,
                 cmd_preview,
                 f"[{status_style}]{status}[/{status_style}]",
-                f"{entry.duration_ms}ms"
+                f"{entry.duration_ms}ms",
             )
 
         self.console.print(table)
@@ -68,10 +68,10 @@ class HistoryHandler:
         self.console.print(f"  Avg duration:   [yellow]{stats['avg_duration_ms']}ms[/yellow]")
         self.console.print(f"  Total tokens:   [cyan]{stats['total_tokens']:,}[/cyan]")
 
-        if stats['top_commands']:
+        if stats["top_commands"]:
             self.console.print("\n[bold]Top Commands:[/bold]")
-            for cmd_stat in stats['top_commands'][:5]:
-                cmd_preview = cmd_stat['command'][:50]
+            for cmd_stat in stats["top_commands"][:5]:
+                cmd_preview = cmd_stat["command"][:50]
                 self.console.print(f"  • {cmd_preview}: [bold]{cmd_stat['count']}[/bold] times")
 
         return CommandResult.ok()
@@ -91,13 +91,13 @@ class HistoryHandler:
         table.add_column("Files", style="green", width=8)
 
         for session in sessions:
-            start_time = session['start_time'].split('T')[0]
+            start_time = session["start_time"].split("T")[0]
             table.add_row(
-                session['session_id'][:20] + "...",
+                session["session_id"][:20] + "...",
                 start_time,
-                str(session['command_count']),
+                str(session["command_count"]),
                 f"{session['total_tokens']:,}",
-                str(len(session['files_modified']))
+                str(len(session["files_modified"])),
             )
 
         self.console.print(table)

@@ -29,31 +29,26 @@ def cmd_help(repl: "MasterpieceREPL", _: str) -> None:
     repl.console.print("\n[bold cyan]Commands[/bold cyan]")
 
     # Group by category
-    categories = {
-        'system': [],
-        'agent': []
-    }
+    categories = {"system": [], "agent": []}
 
     for cmd, meta in repl.commands.items():
-        cat = meta['category'].value
+        cat = meta["category"].value
         if cat in categories:
             categories[cat].append((cmd, meta))
 
     # Render compact
-    for cat_name, cat_key in [('System', 'system'), ('Agents', 'agent')]:
+    for cat_name, cat_key in [("System", "system"), ("Agents", "agent")]:
         if cat_key in categories and categories[cat_key]:
             repl.console.print(f"\n[dim]{cat_name}:[/dim]")
             items = sorted(categories[cat_key])
 
             for cmd, meta in items:
                 repl.console.print(
-                    f"  {meta['icon']} [cyan]{cmd:14}[/cyan] "
-                    f"[dim]{meta['description']}[/dim]"
+                    f"  {meta['icon']} [cyan]{cmd:14}[/cyan] " f"[dim]{meta['description']}[/dim]"
                 )
 
     repl.console.print(
-        "\n[dim]💡 Ctrl+P palette • Ctrl+O expand • Tab autocomplete • "
-        "Natural chat[/dim]\n"
+        "\n[dim]💡 Ctrl+P palette • Ctrl+O expand • Tab autocomplete • " "Natural chat[/dim]\n"
     )
 
 
@@ -96,7 +91,7 @@ def cmd_status(repl: "MasterpieceREPL", _: str) -> None:
 [dim]Shortcuts: Ctrl+P (palette) • Ctrl+O (expand) • Ctrl+D (dream) • Ctrl+L (clear)[/dim]
         """,
         border_style="cyan",
-        title="📊 Status"
+        title="📊 Status",
     )
     repl.console.print("\n")
     repl.console.print(panel)
@@ -121,7 +116,7 @@ def cmd_expand(repl: "MasterpieceREPL", _: str) -> None:
 
 def cmd_mode(repl: "MasterpieceREPL", args: str) -> None:
     """Change output mode."""
-    modes = ['auto', 'full', 'minimal', 'summary']
+    modes = ["auto", "full", "minimal", "summary"]
 
     if not args or args not in modes:
         repl.console.print(f"[yellow]Current mode: {repl.output_mode}[/yellow]")

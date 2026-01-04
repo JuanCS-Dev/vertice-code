@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ToolSuggestion:
     """A suggested tool with confidence score."""
+
     name: str
     description: str
     confidence: float
@@ -64,19 +65,74 @@ class ToolSearchTool(Tool):
     # Keyword mappings for heuristic matching
     CAPABILITY_KEYWORDS = {
         "file_read": {
-            "keywords": ["read", "view", "show", "display", "content", "cat", "head", "tail"],
+            "keywords": [
+                "read",
+                "view",
+                "show",
+                "display",
+                "content",
+                "cat",
+                "head",
+                "tail",
+                "ler",
+                "ver",
+                "mostrar",
+                "exibir",
+                "conteudo",
+                "abrir",
+            ],
             "tools": ["readfile", "read_file"],
         },
         "file_write": {
-            "keywords": ["write", "create", "save", "modify", "edit", "update", "change"],
+            "keywords": [
+                "write",
+                "create",
+                "save",
+                "modify",
+                "edit",
+                "update",
+                "change",
+                "escrever",
+                "criar",
+                "salvar",
+                "modificar",
+                "editar",
+                "alterar",
+            ],
             "tools": ["writefile", "write_file", "editfile", "edit_file"],
         },
         "file_search": {
-            "keywords": ["find", "search", "locate", "pattern", "glob", "match", "where"],
+            "keywords": [
+                "find",
+                "search",
+                "locate",
+                "pattern",
+                "glob",
+                "match",
+                "where",
+                "encontrar",
+                "buscar",
+                "localizar",
+                "padrao",
+                "onde",
+            ],
             "tools": ["glob", "searchfiles", "search_files", "findfiles"],
         },
         "code_search": {
-            "keywords": ["grep", "search", "find", "code", "function", "class", "definition"],
+            "keywords": [
+                "grep",
+                "search",
+                "find",
+                "code",
+                "function",
+                "class",
+                "definition",
+                "buscar",
+                "codigo",
+                "funcao",
+                "classe",
+                "definicao",
+            ],
             "tools": ["grep", "codesearch", "searchcode", "search_code"],
         },
         "git": {
@@ -84,23 +140,55 @@ class ToolSearchTool(Tool):
             "tools": ["gitstatus", "gitcommit", "gitdiff", "gitlog", "gitbranch"],
         },
         "shell": {
-            "keywords": ["run", "execute", "command", "shell", "bash", "terminal", "cmd"],
+            "keywords": [
+                "run",
+                "execute",
+                "command",
+                "shell",
+                "bash",
+                "terminal",
+                "cmd",
+                "rodar",
+                "executar",
+                "comando",
+            ],
             "tools": ["bash", "shell", "exec", "runcommand"],
         },
         "list": {
-            "keywords": ["list", "ls", "directory", "files", "folder", "contents"],
+            "keywords": [
+                "list",
+                "ls",
+                "directory",
+                "files",
+                "folder",
+                "contents",
+                "listar",
+                "diretorio",
+                "arquivos",
+                "pasta",
+                "conteudos",
+            ],
             "tools": ["listfiles", "list_files", "ls"],
         },
         "delete": {
-            "keywords": ["delete", "remove", "rm", "unlink", "erase"],
+            "keywords": [
+                "delete",
+                "remove",
+                "rm",
+                "unlink",
+                "erase",
+                "deletar",
+                "remover",
+                "apagar",
+            ],
             "tools": ["deletefile", "delete_file", "removefile"],
         },
         "move": {
-            "keywords": ["move", "rename", "mv", "relocate"],
+            "keywords": ["move", "rename", "mv", "relocate", "mover", "renomear"],
             "tools": ["movefile", "move_file", "renamefile"],
         },
         "copy": {
-            "keywords": ["copy", "cp", "duplicate", "clone"],
+            "keywords": ["copy", "cp", "duplicate", "clone", "copiar", "duplicar"],
             "tools": ["copyfile", "copy_file"],
         },
     }
@@ -196,14 +284,16 @@ class ToolSearchTool(Tool):
         suggestions = []
         for tool_name, score, reason in scored_tools[:top_k]:
             tool = all_tools[tool_name]
-            suggestions.append(ToolSuggestion(
-                name=tool_name,
-                description=tool.description,
-                confidence=score,
-                category=tool.category.value,
-                parameters=tool.parameters,
-                relevance_reason=reason,
-            ))
+            suggestions.append(
+                ToolSuggestion(
+                    name=tool_name,
+                    description=tool.description,
+                    confidence=score,
+                    category=tool.category.value,
+                    parameters=tool.parameters,
+                    relevance_reason=reason,
+                )
+            )
 
         return ToolResult(
             success=True,
@@ -238,8 +328,7 @@ class ToolSearchTool(Tool):
         # 1. Check capability keywords
         for capability, config in self.CAPABILITY_KEYWORDS.items():
             keyword_matches = sum(
-                1 for kw in config["keywords"]
-                if self._word_match(kw, query_lower)
+                1 for kw in config["keywords"] if self._word_match(kw, query_lower)
             )
             if keyword_matches > 0:
                 # Check if this tool matches the capability
@@ -283,9 +372,9 @@ class ToolSearchTool(Tool):
 
     def _word_match(self, word: str, text: str) -> bool:
         """Check if word appears as whole word in text."""
-        if ' ' in word:
+        if " " in word:
             return word in text
-        return bool(re.search(rf'\b{re.escape(word)}\b', text))
+        return bool(re.search(rf"\b{re.escape(word)}\b", text))
 
     def _infer_category(self, query: str) -> Optional[str]:
         """Infer tool category from query."""

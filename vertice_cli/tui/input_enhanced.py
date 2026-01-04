@@ -34,13 +34,13 @@ class MultiLineMode:
     """Handles multi-line input detection and processing."""
 
     CODE_BLOCK_PATTERNS = [
-        r'^```',  # Markdown code block
-        r'^def\s+\w+',  # Python function
-        r'^class\s+\w+',  # Python class
-        r'^if\s+.+:$',  # Python if statement
-        r'^for\s+.+:$',  # Python for loop
-        r'^while\s+.+:$',  # Python while loop
-        r'^try:$',  # Python try block
+        r"^```",  # Markdown code block
+        r"^def\s+\w+",  # Python function
+        r"^class\s+\w+",  # Python class
+        r"^if\s+.+:$",  # Python if statement
+        r"^for\s+.+:$",  # Python for loop
+        r"^while\s+.+:$",  # Python while loop
+        r"^try:$",  # Python try block
     ]
 
     @staticmethod
@@ -50,22 +50,22 @@ class MultiLineMode:
             return False
 
         # Code block detection
-        if text.strip().startswith('```'):
+        if text.strip().startswith("```"):
             # Check if code block is closed
-            return text.count('```') % 2 == 1
+            return text.count("```") % 2 == 1
 
         # Python-like syntax detection
-        if text.rstrip().endswith(':'):
+        if text.rstrip().endswith(":"):
             return True
 
         # Unclosed brackets/parentheses
-        open_count = text.count('(') + text.count('[') + text.count('{')
-        close_count = text.count(')') + text.count(']') + text.count('}')
+        open_count = text.count("(") + text.count("[") + text.count("{")
+        close_count = text.count(")") + text.count("]") + text.count("}")
         if open_count > close_count:
             return True
 
         # Explicit continuation (backslash at end)
-        if text.rstrip().endswith('\\'):
+        if text.rstrip().endswith("\\"):
             return True
 
         return False
@@ -73,17 +73,17 @@ class MultiLineMode:
     @staticmethod
     def detect_language(text: str) -> Optional[str]:
         """Detect programming language from code block."""
-        match = re.match(r'^```(\w+)', text.strip())
+        match = re.match(r"^```(\w+)", text.strip())
         if match:
             return match.group(1)
 
         # Heuristic detection
-        if re.search(r'\bdef\s+\w+|class\s+\w+|import\s+\w+', text):
-            return 'python'
-        if re.search(r'\bfunction\s+\w+|\bconst\s+\w+|\blet\s+\w+', text):
-            return 'javascript'
-        if re.search(r'\bpub\s+fn\s+\w+|\blet\s+mut\s+', text):
-            return 'rust'
+        if re.search(r"\bdef\s+\w+|class\s+\w+|import\s+\w+", text):
+            return "python"
+        if re.search(r"\bfunction\s+\w+|\bconst\s+\w+|\blet\s+\w+", text):
+            return "javascript"
+        if re.search(r"\bpub\s+fn\s+\w+|\blet\s+mut\s+", text):
+            return "rust"
 
         return None
 
@@ -94,13 +94,18 @@ class IntelligentCompleter(Completer):
     def __init__(self, context: InputContext):
         self.context = context
         # Use lambda to dynamically get current CWD from context (Thread Safety Fix)
-        self.path_completer = PathCompleter(
-            expanduser=True,
-            get_paths=lambda: [self.context.cwd]
-        )
+        self.path_completer = PathCompleter(expanduser=True, get_paths=lambda: [self.context.cwd])
         self.commands = [
-            '/help', '/exit', '/clear', '/history', '/context',
-            '/files', '/git', '/search', '/test', '/commit'
+            "/help",
+            "/exit",
+            "/clear",
+            "/history",
+            "/context",
+            "/files",
+            "/git",
+            "/search",
+            "/test",
+            "/commit",
         ]
 
     def get_completions(self, document: Document, complete_event: Any) -> Any:
@@ -109,17 +114,13 @@ class IntelligentCompleter(Completer):
         word = document.get_word_before_cursor()
 
         # Command completion
-        if text.startswith('/'):
+        if text.startswith("/"):
             for cmd in self.commands:
                 if cmd.startswith(text):
-                    yield Completion(
-                        cmd[len(text):],
-                        display=cmd,
-                        display_meta='Command'
-                    )
+                    yield Completion(cmd[len(text) :], display=cmd, display_meta="Command")
 
         # File path completion
-        elif '/' in word or word.startswith('~') or word.startswith('.'):
+        elif "/" in word or word.startswith("~") or word.startswith("."):
             for completion in self.path_completer.get_completions(document, complete_event):
                 yield completion
 
@@ -129,26 +130,22 @@ class IntelligentCompleter(Completer):
                 file_name = Path(file_path).name
                 if file_name.startswith(word):
                     yield Completion(
-                        file_name[len(word):],
+                        file_name[len(word) :],
                         display=file_name,
-                        display_meta=f'Recent: {Path(file_path).parent}'
+                        display_meta=f"Recent: {Path(file_path).parent}",
                     )
 
 
 class EnhancedInputSession:
     """Enhanced input session with rich features."""
 
-    def __init__(
-        self,
-        history_file: Optional[Path] = None,
-        context: Optional[InputContext] = None
-    ):
+    def __init__(self, history_file: Optional[Path] = None, context: Optional[InputContext] = None):
         self.context = context or InputContext(
             cwd=os.getcwd(),
             env=os.environ.copy(),  # Initialize with current env
             recent_files=[],
             command_history=[],
-            session_data={}
+            session_data={},
         )
 
         # Initialize key bindings
@@ -163,7 +160,7 @@ class EnhancedInputSession:
             key_bindings=self.kb,
             multiline=False,  # We handle multiline manually
             enable_history_search=True,
-            mouse_support=False  # DISABLED: Allow terminal copy/paste/select
+            mouse_support=False,  # DISABLED: Allow terminal copy/paste/select
         )
 
         self.multi_line_buffer: List[str] = []
@@ -182,7 +179,7 @@ class EnhancedInputSession:
         def _multiline(event: Any) -> None:
             """Force multiline mode (Alt+Enter)."""
             self.in_multiline = True
-            event.app.current_buffer.insert_text('\n')
+            event.app.current_buffer.insert_text("\n")
 
         @kb.add(Keys.ControlK)
         def _command_palette(event: Any) -> None:
@@ -195,10 +192,10 @@ class EnhancedInputSession:
     def _get_prompt_message(self) -> str | HTML:
         """Generate dynamic prompt message."""
         if self.in_multiline:
-            return HTML('<ansigreen>... </ansigreen>')
+            return HTML("<ansigreen>... </ansigreen>")
         else:
             cwd = Path(self.context.cwd).name
-            return HTML(f'<ansicyan><b>{cwd}</b></ansicyan> <ansigreen>❯</ansigreen> ')
+            return HTML(f"<ansicyan><b>{cwd}</b></ansicyan> <ansigreen>❯</ansigreen> ")
 
     async def prompt_async(self, message: Optional[str] = None) -> Optional[str]:
         """Async prompt with multi-line support."""
@@ -215,7 +212,7 @@ class EnhancedInputSession:
                 self.in_multiline = True
 
                 # Check if multi-line is complete
-                full_text = '\n'.join(self.multi_line_buffer)
+                full_text = "\n".join(self.multi_line_buffer)
                 if not MultiLineMode.should_continue(full_text):
                     self.in_multiline = False
                     result = full_text
@@ -245,17 +242,22 @@ class ClipboardIntegration:
         """Read from system clipboard."""
         try:
             import pyperclip
+
             return str(pyperclip.paste())
         except ImportError:
             # Fallback to xclip/pbpaste
             import subprocess
+
             try:
-                if os.name == 'posix':
-                    if os.uname().sysname == 'Darwin':
-                        result = subprocess.run(['pbpaste'], capture_output=True, text=True)
+                if os.name == "posix":
+                    if os.uname().sysname == "Darwin":
+                        result = subprocess.run(["pbpaste"], capture_output=True, text=True)
                     else:
-                        result = subprocess.run(['xclip', '-selection', 'clipboard', '-o'],
-                                               capture_output=True, text=True)
+                        result = subprocess.run(
+                            ["xclip", "-selection", "clipboard", "-o"],
+                            capture_output=True,
+                            text=True,
+                        )
                     return str(result.stdout) if result.stdout else None
             except FileNotFoundError:
                 pass
@@ -266,18 +268,21 @@ class ClipboardIntegration:
         """Write to system clipboard."""
         try:
             import pyperclip
+
             pyperclip.copy(text)
             return True
         except ImportError:
             # Fallback to xclip/pbcopy
             import subprocess
+
             try:
-                if os.name == 'posix':
-                    if os.uname().sysname == 'Darwin':
-                        subprocess.run(['pbcopy'], input=text.encode(), check=True)
+                if os.name == "posix":
+                    if os.uname().sysname == "Darwin":
+                        subprocess.run(["pbcopy"], input=text.encode(), check=True)
                     else:
-                        subprocess.run(['xclip', '-selection', 'clipboard'],
-                                      input=text.encode(), check=True)
+                        subprocess.run(
+                            ["xclip", "-selection", "clipboard"], input=text.encode(), check=True
+                        )
                     return True
             except (FileNotFoundError, subprocess.CalledProcessError):
                 pass
@@ -403,10 +408,10 @@ class EnhancedInput:
 
 # Export main interface
 __all__ = [
-    'EnhancedInputSession',
-    'EnhancedInput',
-    'InputContext',
-    'MultiLineMode',
-    'ClipboardIntegration',
-    'IntelligentCompleter'
+    "EnhancedInputSession",
+    "EnhancedInput",
+    "InputContext",
+    "MultiLineMode",
+    "ClipboardIntegration",
+    "IntelligentCompleter",
 ]

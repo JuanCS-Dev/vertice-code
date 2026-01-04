@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 
 class ThreatLevel(Enum):
     """Threat level classification."""
+
     SAFE = 0
     LOW = 1
     MEDIUM = 2
@@ -55,6 +56,7 @@ class ThreatLevel(Enum):
 
 class InjectionType(Enum):
     """Types of prompt injection attacks."""
+
     SYSTEM_OVERRIDE = "system_override"
     ROLE_CONFUSION = "role_confusion"
     DELIMITER_ESCAPE = "delimiter_escape"
@@ -67,6 +69,7 @@ class InjectionType(Enum):
 @dataclass
 class ShieldResult:
     """Result of prompt shield analysis."""
+
     is_safe: bool
     threat_level: ThreatLevel
     sanitized_content: str
@@ -107,10 +110,7 @@ class ShieldResult:
     def safe(cls, content: str) -> "ShieldResult":
         """Create a safe result."""
         return cls(
-            is_safe=True,
-            threat_level=ThreatLevel.SAFE,
-            sanitized_content=content,
-            confidence=1.0
+            is_safe=True, threat_level=ThreatLevel.SAFE, sanitized_content=content, confidence=1.0
         )
 
     @classmethod
@@ -120,7 +120,7 @@ class ShieldResult:
         level: ThreatLevel,
         threats: List[InjectionType],
         patterns: List[str],
-        confidence: float = 0.9
+        confidence: float = 0.9,
     ) -> "ShieldResult":
         """Create a threat result."""
         return cls(
@@ -130,7 +130,7 @@ class ShieldResult:
             detected_threats=threats,
             matched_patterns=patterns,
             confidence=confidence,
-            recommendations=cls._get_recommendations(threats)
+            recommendations=cls._get_recommendations(threats),
         )
 
     @staticmethod
@@ -139,12 +139,10 @@ class ShieldResult:
         # Remove known dangerous patterns
         sanitized = content
         # Remove system-like tags
-        sanitized = re.sub(r'<\|[^|]*\|>', '[REMOVED]', sanitized)
+        sanitized = re.sub(r"<\|[^|]*\|>", "[REMOVED]", sanitized)
         # Remove obvious override attempts
         sanitized = re.sub(
-            r'(?i)(ignore|disregard|forget)\s+(previous|all|above)',
-            '[FILTERED]',
-            sanitized
+            r"(?i)(ignore|disregard|forget)\s+(previous|all|above)", "[FILTERED]", sanitized
         )
         return sanitized
 
@@ -165,92 +163,163 @@ class ShieldResult:
 # Pattern format: (compiled_regex, description, threat_type, severity_weight)
 INJECTION_PATTERNS: List[Tuple[re.Pattern, str, InjectionType, float]] = [
     # System Override Attacks (HIGH severity)
-    (re.compile(r'(?i)ignore\s+(all\s+)?(previous\s+)?instructions?'),
-     "System override attempt", InjectionType.SYSTEM_OVERRIDE, 0.9),
-    (re.compile(r'(?i)ignore\s+(all|previous|above|system)\s+(instructions?|prompts?|rules?|constraints?)'),
-     "System override attempt", InjectionType.SYSTEM_OVERRIDE, 0.9),
-    (re.compile(r'(?i)disregard\s+(previous|all|system|your|the)'),
-     "Disregard instruction", InjectionType.SYSTEM_OVERRIDE, 0.9),
-    (re.compile(r'(?i)forget\s+(everything|all|your|previous)'),
-     "Memory wipe attempt", InjectionType.SYSTEM_OVERRIDE, 0.85),
-    (re.compile(r'(?i)(new|your\s+new)\s+(instruction|directive|rule|mode)s?\s*(are|is)?:?'),
-     "New instruction injection", InjectionType.SYSTEM_OVERRIDE, 0.8),
-    (re.compile(r'(?i)override\s+(mode|setting|instruction|behavior|safety)'),
-     "Override attempt", InjectionType.SYSTEM_OVERRIDE, 0.85),
-    (re.compile(r'(?i)SYSTEM:'),
-     "System tag injection", InjectionType.SYSTEM_OVERRIDE, 0.85),
-    (re.compile(r'(?i)\[\[ADMIN\]\]'),
-     "Admin tag injection", InjectionType.SYSTEM_OVERRIDE, 0.9),
-
+    (
+        re.compile(r"(?i)ignore\s+(all\s+)?(previous\s+)?instructions?"),
+        "System override attempt",
+        InjectionType.SYSTEM_OVERRIDE,
+        0.9,
+    ),
+    (
+        re.compile(
+            r"(?i)ignore\s+(all|previous|above|system)\s+(instructions?|prompts?|rules?|constraints?)"
+        ),
+        "System override attempt",
+        InjectionType.SYSTEM_OVERRIDE,
+        0.9,
+    ),
+    (
+        re.compile(r"(?i)disregard\s+(previous|all|system|your|the)"),
+        "Disregard instruction",
+        InjectionType.SYSTEM_OVERRIDE,
+        0.9,
+    ),
+    (
+        re.compile(r"(?i)forget\s+(everything|all|your|previous)"),
+        "Memory wipe attempt",
+        InjectionType.SYSTEM_OVERRIDE,
+        0.85,
+    ),
+    (
+        re.compile(r"(?i)(new|your\s+new)\s+(instruction|directive|rule|mode)s?\s*(are|is)?:?"),
+        "New instruction injection",
+        InjectionType.SYSTEM_OVERRIDE,
+        0.8,
+    ),
+    (
+        re.compile(r"(?i)override\s+(mode|setting|instruction|behavior|safety)"),
+        "Override attempt",
+        InjectionType.SYSTEM_OVERRIDE,
+        0.85,
+    ),
+    (re.compile(r"(?i)SYSTEM:"), "System tag injection", InjectionType.SYSTEM_OVERRIDE, 0.85),
+    (re.compile(r"(?i)\[\[ADMIN\]\]"), "Admin tag injection", InjectionType.SYSTEM_OVERRIDE, 0.9),
     # Role Confusion Attacks (HIGH severity)
-    (re.compile(r'(?i)you\s+are\s+now\s+(a\s+)?(different|new|another|DAN)'),
-     "Role reassignment", InjectionType.ROLE_CONFUSION, 0.9),
-    (re.compile(r'(?i)act\s+as\s+(a\s+)?(different|new|evil|malicious|if|GPT)'),
-     "Role confusion", InjectionType.ROLE_CONFUSION, 0.85),
-    (re.compile(r'(?i)pretend\s+(you\s+)?(have\s+no|are|to\s+be)'),
-     "Pretend instruction", InjectionType.ROLE_CONFUSION, 0.8),
-    (re.compile(r'(?i)from\s+now\s+on,?\s+(you|act|behave)'),
-     "Behavioral override", InjectionType.ROLE_CONFUSION, 0.8),
-    (re.compile(r'(?i)as\s+an?\s+AI\s+(without|with\s+no)'),
-     "AI without restrictions", InjectionType.ROLE_CONFUSION, 0.85),
-    (re.compile(r'(?i)roleplay\s+as'),
-     "Roleplay injection", InjectionType.ROLE_CONFUSION, 0.75),
-
+    (
+        re.compile(r"(?i)you\s+are\s+now\s+(a\s+)?(different|new|another|DAN)"),
+        "Role reassignment",
+        InjectionType.ROLE_CONFUSION,
+        0.9,
+    ),
+    (
+        re.compile(r"(?i)act\s+as\s+(a\s+)?(different|new|evil|malicious|if|GPT)"),
+        "Role confusion",
+        InjectionType.ROLE_CONFUSION,
+        0.85,
+    ),
+    (
+        re.compile(r"(?i)pretend\s+(you\s+)?(have\s+no|are|to\s+be)"),
+        "Pretend instruction",
+        InjectionType.ROLE_CONFUSION,
+        0.8,
+    ),
+    (
+        re.compile(r"(?i)from\s+now\s+on,?\s+(you|act|behave)"),
+        "Behavioral override",
+        InjectionType.ROLE_CONFUSION,
+        0.8,
+    ),
+    (
+        re.compile(r"(?i)as\s+an?\s+AI\s+(without|with\s+no)"),
+        "AI without restrictions",
+        InjectionType.ROLE_CONFUSION,
+        0.85,
+    ),
+    (re.compile(r"(?i)roleplay\s+as"), "Roleplay injection", InjectionType.ROLE_CONFUSION, 0.75),
     # Delimiter Escape Attacks (CRITICAL severity)
-    (re.compile(r'<\|im_start\|>'),
-     "ChatML delimiter", InjectionType.DELIMITER_ESCAPE, 0.95),
-    (re.compile(r'<\|im_end\|>'),
-     "ChatML end delimiter", InjectionType.DELIMITER_ESCAPE, 0.95),
-    (re.compile(r'<\|system\|>'),
-     "System tag injection", InjectionType.DELIMITER_ESCAPE, 0.95),
-    (re.compile(r'<\|user\|>'),
-     "User tag injection", InjectionType.DELIMITER_ESCAPE, 0.9),
-    (re.compile(r'<\|assistant\|>'),
-     "Assistant tag injection", InjectionType.DELIMITER_ESCAPE, 0.9),
-    (re.compile(r'```\s*system'),
-     "System code block", InjectionType.DELIMITER_ESCAPE, 0.8),
-    (re.compile(r'\[INST\]|\[/INST\]'),
-     "Llama delimiter", InjectionType.DELIMITER_ESCAPE, 0.9),
-    (re.compile(r'<<SYS>>|<</SYS>>'),
-     "Llama system tag", InjectionType.DELIMITER_ESCAPE, 0.9),
-
+    (re.compile(r"<\|im_start\|>"), "ChatML delimiter", InjectionType.DELIMITER_ESCAPE, 0.95),
+    (re.compile(r"<\|im_end\|>"), "ChatML end delimiter", InjectionType.DELIMITER_ESCAPE, 0.95),
+    (re.compile(r"<\|system\|>"), "System tag injection", InjectionType.DELIMITER_ESCAPE, 0.95),
+    (re.compile(r"<\|user\|>"), "User tag injection", InjectionType.DELIMITER_ESCAPE, 0.9),
+    (
+        re.compile(r"<\|assistant\|>"),
+        "Assistant tag injection",
+        InjectionType.DELIMITER_ESCAPE,
+        0.9,
+    ),
+    (re.compile(r"```\s*system"), "System code block", InjectionType.DELIMITER_ESCAPE, 0.8),
+    (re.compile(r"\[INST\]|\[/INST\]"), "Llama delimiter", InjectionType.DELIMITER_ESCAPE, 0.9),
+    (re.compile(r"<<SYS>>|<</SYS>>"), "Llama system tag", InjectionType.DELIMITER_ESCAPE, 0.9),
     # Instruction Leak Attempts (MEDIUM severity)
-    (re.compile(r'(?i)show\s+(me\s+)?(your|the)\s+(system\s+)?(prompt|instructions?)'),
-     "Instruction leak attempt", InjectionType.INSTRUCTION_LEAK, 0.75),
-    (re.compile(r'(?i)what\s+(are|is)\s+your\s+(instructions?|system\s+prompt|rules?)'),
-     "System probe", InjectionType.INSTRUCTION_LEAK, 0.75),
-    (re.compile(r'(?i)repeat\s+(your|the)\s+(instructions?|system\s+prompt)'),
-     "Repeat instruction", InjectionType.INSTRUCTION_LEAK, 0.8),
-    (re.compile(r'(?i)print\s+(your|the)\s+(initial|original|full)?\s*(prompt|instructions?|initialization)'),
-     "Print instruction", InjectionType.INSTRUCTION_LEAK, 0.8),
-
+    (
+        re.compile(r"(?i)show\s+(me\s+)?(your|the)\s+(system\s+)?(prompt|instructions?)"),
+        "Instruction leak attempt",
+        InjectionType.INSTRUCTION_LEAK,
+        0.75,
+    ),
+    (
+        re.compile(r"(?i)what\s+(are|is)\s+your\s+(instructions?|system\s+prompt|rules?)"),
+        "System probe",
+        InjectionType.INSTRUCTION_LEAK,
+        0.75,
+    ),
+    (
+        re.compile(r"(?i)repeat\s+(your|the)\s+(instructions?|system\s+prompt)"),
+        "Repeat instruction",
+        InjectionType.INSTRUCTION_LEAK,
+        0.8,
+    ),
+    (
+        re.compile(
+            r"(?i)print\s+(your|the)\s+(initial|original|full)?\s*(prompt|instructions?|initialization)"
+        ),
+        "Print instruction",
+        InjectionType.INSTRUCTION_LEAK,
+        0.8,
+    ),
     # Jailbreak Attempts (CRITICAL severity)
-    (re.compile(r'(?i)\bDAN\b'),
-     "DAN mode attempt", InjectionType.JAILBREAK, 0.95),
-    (re.compile(r'(?i)\bDo\s+Anything\s+Now\b'),
-     "DAN mode attempt", InjectionType.JAILBREAK, 0.95),
-    (re.compile(r'(?i)(enter|enable|activate)\s+developer\s+mode'),
-     "Developer mode", InjectionType.JAILBREAK, 0.9),
-    (re.compile(r'(?i)developer\s+mode'),
-     "Developer mode", InjectionType.JAILBREAK, 0.85),
-    (re.compile(r'(?i)evil\s+(mode|assistant|ai)'),
-     "Evil mode", InjectionType.JAILBREAK, 0.9),
-    (re.compile(r'(?i)bypass\s+(safety|filter|restriction|guard)'),
-     "Bypass safety", InjectionType.JAILBREAK, 0.85),
-    (re.compile(r'(?i)disable\s+(safety|filter|restriction|censorship)'),
-     "Disable safety", InjectionType.JAILBREAK, 0.85),
-    (re.compile(r'(?i)jailbreak'),
-     "Jailbreak keyword", InjectionType.JAILBREAK, 0.9),
-    (re.compile(r'(?i)BEGIN\s+JAILBREAK'),
-     "Jailbreak marker", InjectionType.JAILBREAK, 0.95),
-
+    (re.compile(r"(?i)\bDAN\b"), "DAN mode attempt", InjectionType.JAILBREAK, 0.95),
+    (re.compile(r"(?i)\bDo\s+Anything\s+Now\b"), "DAN mode attempt", InjectionType.JAILBREAK, 0.95),
+    (
+        re.compile(r"(?i)(enter|enable|activate)\s+developer\s+mode"),
+        "Developer mode",
+        InjectionType.JAILBREAK,
+        0.9,
+    ),
+    (re.compile(r"(?i)developer\s+mode"), "Developer mode", InjectionType.JAILBREAK, 0.85),
+    (re.compile(r"(?i)evil\s+(mode|assistant|ai)"), "Evil mode", InjectionType.JAILBREAK, 0.9),
+    (
+        re.compile(r"(?i)bypass\s+(safety|filter|restriction|guard)"),
+        "Bypass safety",
+        InjectionType.JAILBREAK,
+        0.85,
+    ),
+    (
+        re.compile(r"(?i)disable\s+(safety|filter|restriction|censorship)"),
+        "Disable safety",
+        InjectionType.JAILBREAK,
+        0.85,
+    ),
+    (re.compile(r"(?i)jailbreak"), "Jailbreak keyword", InjectionType.JAILBREAK, 0.9),
+    (re.compile(r"(?i)BEGIN\s+JAILBREAK"), "Jailbreak marker", InjectionType.JAILBREAK, 0.95),
     # Data Exfiltration Attempts (HIGH severity)
-    (re.compile(r'(?i)send\s+(this|the|all)\s+(to|via)\s+(email|http|url|webhook)'),
-     "Data exfil attempt", InjectionType.DATA_EXFILTRATION, 0.85),
-    (re.compile(r'(?i)post\s+to\s+(url|endpoint|api|webhook)'),
-     "Post data attempt", InjectionType.DATA_EXFILTRATION, 0.8),
-    (re.compile(r'(?i)upload\s+(this|the|all|data)\s+to'),
-     "Upload attempt", InjectionType.DATA_EXFILTRATION, 0.8),
+    (
+        re.compile(r"(?i)send\s+(this|the|all)\s+(to|via)\s+(email|http|url|webhook)"),
+        "Data exfil attempt",
+        InjectionType.DATA_EXFILTRATION,
+        0.85,
+    ),
+    (
+        re.compile(r"(?i)post\s+to\s+(url|endpoint|api|webhook)"),
+        "Post data attempt",
+        InjectionType.DATA_EXFILTRATION,
+        0.8,
+    ),
+    (
+        re.compile(r"(?i)upload\s+(this|the|all|data)\s+to"),
+        "Upload attempt",
+        InjectionType.DATA_EXFILTRATION,
+        0.8,
+    ),
 ]
 
 # Indirect injection markers (found in files/data)
@@ -288,10 +357,7 @@ class PromptShield:
     CACHE_SIZE = 1024
 
     def __init__(
-        self,
-        threshold: float = 0.7,
-        check_indirect: bool = True,
-        strict_mode: bool = False
+        self, threshold: float = 0.7, check_indirect: bool = True, strict_mode: bool = False
     ):
         """
         Initialize PromptShield.
@@ -337,8 +403,7 @@ class PromptShield:
                 max_severity = max(max_severity, 0.9)
                 if self.strict_mode:
                     return ShieldResult.threat(
-                        content, ThreatLevel.CRITICAL,
-                        detected_threats, matched_patterns, 0.95
+                        content, ThreatLevel.CRITICAL, detected_threats, matched_patterns, 0.95
                     )
 
         # Pattern matching
@@ -351,8 +416,7 @@ class PromptShield:
                 # Early exit on critical threats
                 if severity >= 0.95 or self.strict_mode:
                     return ShieldResult.threat(
-                        content, ThreatLevel.CRITICAL,
-                        detected_threats, matched_patterns, severity
+                        content, ThreatLevel.CRITICAL, detected_threats, matched_patterns, severity
                     )
 
         # Determine threat level based on severity
@@ -367,8 +431,7 @@ class PromptShield:
                 level = ThreatLevel.LOW
 
             return ShieldResult.threat(
-                content, level,
-                detected_threats, matched_patterns, max_severity
+                content, level, detected_threats, matched_patterns, max_severity
             )
 
         # Additional checks for indirect injection (always check for comment-based attacks)
@@ -391,10 +454,10 @@ class PromptShield:
 
         # Check for hidden instructions in various formats
         hidden_patterns = [
-            (r'<!--.*?(ignore|system|prompt|instruction).*?-->', "HTML comment injection"),
-            (r'/\*.*?(ignore|system|prompt|instruction).*?\*/', "Multi-line comment injection"),
-            (r'//.*?(ignore|system|prompt|instruction)', "Single-line comment injection"),
-            (r'#.*?(ignore|system|prompt|instruction)', "Hash comment injection"),
+            (r"<!--.*?(ignore|system|prompt|instruction).*?-->", "HTML comment injection"),
+            (r"/\*.*?(ignore|system|prompt|instruction).*?\*/", "Multi-line comment injection"),
+            (r"//.*?(ignore|system|prompt|instruction)", "Single-line comment injection"),
+            (r"#.*?(ignore|system|prompt|instruction)", "Hash comment injection"),
         ]
 
         for pattern, description in hidden_patterns:
@@ -403,10 +466,7 @@ class PromptShield:
                 patterns.append(description)
 
         if threats:
-            return ShieldResult.threat(
-                content, ThreatLevel.HIGH,
-                threats, patterns, 0.85
-            )
+            return ShieldResult.threat(content, ThreatLevel.HIGH, threats, patterns, 0.85)
 
         return ShieldResult.safe(content)
 
@@ -416,68 +476,76 @@ class PromptShield:
         import codecs
 
         dangerous_keywords = [
-            'ignore', 'previous', 'instruction', 'system', 'prompt',
-            'jailbreak', 'dan', 'override', 'bypass', 'disable'
+            "ignore",
+            "previous",
+            "instruction",
+            "system",
+            "prompt",
+            "jailbreak",
+            "dan",
+            "override",
+            "bypass",
+            "disable",
         ]
 
         # Check for hex escape sequences (e.g., \x69\x67\x6e\x6f\x72\x65 = "ignore")
-        hex_pattern = re.compile(r'(?:\\x[0-9a-fA-F]{2})+')
+        hex_pattern = re.compile(r"(?:\\x[0-9a-fA-F]{2})+")
         for match in hex_pattern.finditer(content):
             try:
                 # Decode hex escapes
                 hex_str = match.group()
-                decoded = bytes([int(h, 16) for h in re.findall(r'\\x([0-9a-fA-F]{2})', hex_str)]).decode('utf-8', errors='ignore')
+                decoded = bytes(
+                    [int(h, 16) for h in re.findall(r"\\x([0-9a-fA-F]{2})", hex_str)]
+                ).decode("utf-8", errors="ignore")
                 for keyword in dangerous_keywords:
                     if keyword.lower() in decoded.lower():
                         return ShieldResult.threat(
-                            content, ThreatLevel.MEDIUM,
+                            content,
+                            ThreatLevel.MEDIUM,
                             [InjectionType.INDIRECT_INJECTION],
                             [f"Hex encoded content contains '{keyword}'"],
-                            0.75
+                            0.75,
                         )
-            except Exception:
+            except (ValueError, UnicodeDecodeError):
                 pass
 
         # Check for ROT13 encoding (used to obfuscate text)
         try:
-            rot13_decoded = codecs.decode(content, 'rot_13')
+            rot13_decoded = codecs.decode(content, "rot_13")
             for keyword in dangerous_keywords:
                 if keyword.lower() in rot13_decoded.lower():
                     return ShieldResult.threat(
-                        content, ThreatLevel.MEDIUM,
+                        content,
+                        ThreatLevel.MEDIUM,
                         [InjectionType.INDIRECT_INJECTION],
                         [f"ROT13 encoded content contains '{keyword}'"],
-                        0.75
+                        0.75,
                     )
-        except Exception:
+        except (ValueError, LookupError):
             pass
 
         # Pattern to find potential base64 strings (at least 20 chars, looks like base64)
-        base64_pattern = re.compile(r'[A-Za-z0-9+/]{20,}={0,2}')
+        base64_pattern = re.compile(r"[A-Za-z0-9+/]{20,}={0,2}")
 
         for match in base64_pattern.finditer(content):
             try:
-                decoded = base64.b64decode(match.group()).decode('utf-8', errors='ignore')
+                decoded = base64.b64decode(match.group()).decode("utf-8", errors="ignore")
                 # Check if decoded content contains dangerous patterns
                 for keyword in dangerous_keywords:
                     if keyword.lower() in decoded.lower():
                         return ShieldResult.threat(
-                            content, ThreatLevel.MEDIUM,
+                            content,
+                            ThreatLevel.MEDIUM,
                             [InjectionType.INDIRECT_INJECTION],
                             [f"Base64 encoded content contains '{keyword}'"],
-                            0.75
+                            0.75,
                         )
-            except Exception:
-                pass  # Not valid base64 or not UTF-8
+            except (ValueError, UnicodeDecodeError):
+                pass
 
         return ShieldResult.safe(content)
 
-    def wrap_external_content(
-        self,
-        content: str,
-        source: str,
-        content_type: str = "text"
-    ) -> str:
+    def wrap_external_content(self, content: str, source: str, content_type: str = "text") -> str:
         """
         Wrap external content with safety delimiters.
 
@@ -503,7 +571,7 @@ class PromptShield:
             warning = ""
 
         # Create delimiter markers
-        start_marker = f"<external_content source=\"{source}\" type=\"{content_type}\">"
+        start_marker = f'<external_content source="{source}" type="{content_type}">'
         end_marker = "</external_content>"
 
         # Add data instruction
@@ -524,32 +592,23 @@ class PromptShield:
         sanitized = content
 
         # Remove system-like delimiters
-        sanitized = re.sub(r'<\|[^|]*\|>', '', sanitized)
+        sanitized = re.sub(r"<\|[^|]*\|>", "", sanitized)
 
         # Escape angle brackets that might form tags
-        sanitized = re.sub(r'<([^>]{1,20})>', r'&lt;\1&gt;', sanitized)
+        sanitized = re.sub(r"<([^>]{1,20})>", r"&lt;\1&gt;", sanitized)
 
         # Remove obvious override attempts
         sanitized = re.sub(
-            r'(?i)(ignore|disregard|forget)\s+(all|previous|above)',
-            '[REDACTED]',
-            sanitized
+            r"(?i)(ignore|disregard|forget)\s+(all|previous|above)", "[REDACTED]", sanitized
         )
 
         # Remove jailbreak keywords
-        sanitized = re.sub(
-            r'(?i)\b(dan\s+mode|jailbreak|evil\s+mode)\b',
-            '[REDACTED]',
-            sanitized
-        )
+        sanitized = re.sub(r"(?i)\b(dan\s+mode|jailbreak|evil\s+mode)\b", "[REDACTED]", sanitized)
 
         return sanitized
 
     def create_safe_context(
-        self,
-        system_prompt: str,
-        user_input: str,
-        external_data: Optional[Dict[str, str]] = None
+        self, system_prompt: str, user_input: str, external_data: Optional[Dict[str, str]] = None
     ) -> Dict[str, str]:
         """
         Create a safe context structure with properly isolated content.
@@ -586,6 +645,7 @@ class PromptShield:
 
 # Convenience functions
 
+
 def analyze_prompt(content: str) -> ShieldResult:
     """Quick analysis of prompt content."""
     return PromptShield().analyze(content)
@@ -608,12 +668,12 @@ def wrap_file_content(content: str, filename: str) -> str:
 
 # Export all public symbols
 __all__ = [
-    'ThreatLevel',
-    'InjectionType',
-    'ShieldResult',
-    'PromptShield',
-    'analyze_prompt',
-    'is_prompt_safe',
-    'sanitize_prompt',
-    'wrap_file_content',
+    "ThreatLevel",
+    "InjectionType",
+    "ShieldResult",
+    "PromptShield",
+    "analyze_prompt",
+    "is_prompt_safe",
+    "sanitize_prompt",
+    "wrap_file_content",
 ]

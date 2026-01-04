@@ -74,7 +74,7 @@ class CerebrasProvider:
         messages: List[Dict[str, str]],
         max_tokens: int = 4096,
         temperature: float = 0.7,
-        **kwargs
+        **kwargs,
     ) -> str:
         """Generate completion from messages."""
         if not self.is_available():
@@ -109,7 +109,7 @@ class CerebrasProvider:
         messages: List[Dict[str, str]],
         max_tokens: int = 4096,
         temperature: float = 0.7,
-        **kwargs
+        **kwargs,
     ) -> AsyncGenerator[str, None]:
         """Stream generation from messages."""
         if not self.is_available():
@@ -143,12 +143,13 @@ class CerebrasProvider:
                         break
                     try:
                         import json
+
                         data = json.loads(data_str)
                         delta = data.get("choices", [{}])[0].get("delta", {})
                         content = delta.get("content", "")
                         if content:
                             yield content
-                    except Exception:
+                    except json.JSONDecodeError:
                         continue
 
     async def stream_chat(
@@ -157,7 +158,7 @@ class CerebrasProvider:
         system_prompt: Optional[str] = None,
         max_tokens: int = 4096,
         temperature: float = 0.7,
-        **kwargs
+        **kwargs,
     ) -> AsyncGenerator[str, None]:
         """Stream chat with optional system prompt."""
         full_messages = []
@@ -166,24 +167,21 @@ class CerebrasProvider:
         full_messages.extend(messages)
 
         async for chunk in self.stream_generate(
-            full_messages,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            **kwargs
+            full_messages, max_tokens=max_tokens, temperature=temperature, **kwargs
         ):
             yield chunk
 
     def get_model_info(self) -> Dict[str, str | bool | int]:
         """Get model information."""
         return {
-            'provider': 'cerebras',
-            'model': self.model_name,
-            'available': self.is_available(),
-            'context_window': 128000,
-            'supports_streaming': True,
-            'cost_tier': 'free',
-            'speed_tier': 'fastest',
-            'tokens_per_day': self.RATE_LIMITS['tokens_per_day'],
+            "provider": "cerebras",
+            "model": self.model_name,
+            "available": self.is_available(),
+            "context_window": 128000,
+            "supports_streaming": True,
+            "cost_tier": "free",
+            "speed_tier": "fastest",
+            "tokens_per_day": self.RATE_LIMITS["tokens_per_day"],
         }
 
     def count_tokens(self, text: str) -> int:

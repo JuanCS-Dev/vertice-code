@@ -28,18 +28,34 @@ class FilteredDirectoryTree(DirectoryTree):
     """DirectoryTree that filters hidden files and common ignore patterns."""
 
     IGNORE_PATTERNS = {
-        ".git", ".svn", ".hg", "__pycache__", ".pytest_cache",
-        "node_modules", ".venv", "venv", ".env", ".idea", ".vscode",
-        ".mypy_cache", ".ruff_cache", "dist", "build", "*.egg-info",
+        ".git",
+        ".svn",
+        ".hg",
+        "__pycache__",
+        ".pytest_cache",
+        "node_modules",
+        ".venv",
+        "venv",
+        ".env",
+        ".idea",
+        ".vscode",
+        ".mypy_cache",
+        ".ruff_cache",
+        "dist",
+        "build",
+        "*.egg-info",
     }
 
     def filter_paths(self, paths: list[Path]) -> list[Path]:
         """Filter out hidden files and ignored directories."""
         return [
-            path for path in paths
+            path
+            for path in paths
             if not path.name.startswith(".")
             and path.name not in self.IGNORE_PATTERNS
-            and not any(path.name.endswith(p.replace("*", "")) for p in self.IGNORE_PATTERNS if "*" in p)
+            and not any(
+                path.name.endswith(p.replace("*", "")) for p in self.IGNORE_PATTERNS if "*" in p
+            )
         ]
 
 
@@ -157,12 +173,14 @@ class Sidebar(Widget):
 
     class FileSelected(Message):
         """File was selected in sidebar."""
+
         def __init__(self, path: Path) -> None:
             self.path = path
             super().__init__()
 
     class DirectorySelected(Message):
         """Directory was selected in sidebar."""
+
         def __init__(self, path: Path) -> None:
             self.path = path
             super().__init__()
@@ -254,7 +272,7 @@ class Sidebar(Widget):
             else:
                 for path in self._recent_files[:5]:
                     container.mount(RecentFileItem(path))
-        except Exception:
+        except (AttributeError, ValueError, RuntimeError):
             pass
 
     def _update_bookmarks(self) -> None:
@@ -268,7 +286,7 @@ class Sidebar(Widget):
             else:
                 for path in self._bookmarks:
                     container.mount(BookmarkItem(path))
-        except Exception:
+        except (AttributeError, ValueError, RuntimeError):
             pass
 
     def refresh_tree(self) -> None:
@@ -276,7 +294,7 @@ class Sidebar(Widget):
         try:
             tree = self.query_one("#dir-tree", FilteredDirectoryTree)
             tree.reload()
-        except Exception:
+        except (AttributeError, ValueError):
             pass
 
     def set_root(self, path: Path | str) -> None:
@@ -286,5 +304,5 @@ class Sidebar(Widget):
             tree = self.query_one("#dir-tree", FilteredDirectoryTree)
             tree.path = self._root
             tree.reload()
-        except Exception:
+        except (AttributeError, ValueError):
             pass

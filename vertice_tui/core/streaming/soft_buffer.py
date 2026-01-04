@@ -6,10 +6,11 @@ Accumulates partial chunks to prevent "janky" rendering of incomplete Markdown s
 
 import re
 
+
 class SoftBuffer:
     """
     Buffers streaming text until safe render boundaries.
-    
+
     Prevents flickering of:
     - Incomplete bold/italic markers (*, **)
     - Incomplete code block fences (`, ``)
@@ -20,12 +21,12 @@ class SoftBuffer:
     # Patterns that indicate we might be in the middle of a markdown token
     # Only match if the buffer ENDS with these characters
     UNSAFE_SUFFIXES = [
-        r"\*$",      # Ends with * (could be **)
-        r"\_$",      # Ends with _ (could be __)
-        r"\`$",      # Ends with ` (could be `` or ```)
-        r"\`\`$",    # Ends with `` (could be ```)
-        r"\#$",      # Ends with # (could be ##)
-        r"\\$"       # Ends with \ (escape)
+        r"\*$",  # Ends with * (could be **)
+        r"\_$",  # Ends with _ (could be __)
+        r"\`$",  # Ends with ` (could be `` or ```)
+        r"\`\`$",  # Ends with `` (could be ```)
+        r"\#$",  # Ends with # (could be ##)
+        r"\\$",  # Ends with \ (escape)
     ]
 
     def __init__(self):

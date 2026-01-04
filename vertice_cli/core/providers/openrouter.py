@@ -41,7 +41,9 @@ class OpenRouterProvider:
 
     # Models with free tier access
     FREE_MODELS = {
-        "llama-8b", "mistral-7b", "gemma-7b",
+        "llama-8b",
+        "mistral-7b",
+        "gemma-7b",
         "grok-2",  # Temporarily free (Dec 2025)
     }
 
@@ -99,7 +101,7 @@ class OpenRouterProvider:
         messages: List[Dict[str, str]],
         max_tokens: int = 4096,
         temperature: float = 0.7,
-        **kwargs
+        **kwargs,
     ) -> str:
         """Generate completion from messages."""
         if not self.is_available():
@@ -131,7 +133,7 @@ class OpenRouterProvider:
         messages: List[Dict[str, str]],
         max_tokens: int = 4096,
         temperature: float = 0.7,
-        **kwargs
+        **kwargs,
     ) -> AsyncGenerator[str, None]:
         """Stream generation from messages."""
         if not self.is_available():
@@ -162,12 +164,13 @@ class OpenRouterProvider:
                         break
                     try:
                         import json
+
                         data = json.loads(data_str)
                         delta = data.get("choices", [{}])[0].get("delta", {})
                         content = delta.get("content", "")
                         if content:
                             yield content
-                    except Exception:
+                    except json.JSONDecodeError:
                         continue
 
     async def stream_chat(
@@ -176,7 +179,7 @@ class OpenRouterProvider:
         system_prompt: Optional[str] = None,
         max_tokens: int = 4096,
         temperature: float = 0.7,
-        **kwargs
+        **kwargs,
     ) -> AsyncGenerator[str, None]:
         """Stream chat with optional system prompt."""
         full_messages = []
@@ -185,10 +188,7 @@ class OpenRouterProvider:
         full_messages.extend(messages)
 
         async for chunk in self.stream_generate(
-            full_messages,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            **kwargs
+            full_messages, max_tokens=max_tokens, temperature=temperature, **kwargs
         ):
             yield chunk
 
@@ -209,20 +209,17 @@ class OpenRouterProvider:
     def get_model_info(self) -> Dict[str, str | bool | int]:
         """Get model information."""
         # Determine if current model is free
-        model_key = next(
-            (k for k, v in self.MODELS.items() if v == self.model_name),
-            None
-        )
+        model_key = next((k for k, v in self.MODELS.items() if v == self.model_name), None)
         is_free = model_key in self.FREE_MODELS
 
         return {
-            'provider': 'openrouter',
-            'model': self.model_name,
-            'available': self.is_available(),
-            'context_window': 128000,
-            'supports_streaming': True,
-            'cost_tier': 'free' if is_free else 'paid',
-            'speed_tier': 'fast',
+            "provider": "openrouter",
+            "model": self.model_name,
+            "available": self.is_available(),
+            "context_window": 128000,
+            "supports_streaming": True,
+            "cost_tier": "free" if is_free else "paid",
+            "speed_tier": "fast",
         }
 
     def count_tokens(self, text: str) -> int:

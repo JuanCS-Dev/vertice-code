@@ -95,10 +95,10 @@ class FileOperationsPanel:
         return Panel(
             content,
             title=header,
-            border_style=COLORS['neon_blue'],
+            border_style=COLORS["neon_blue"],
             box=ROUNDED,
             padding=(1, 2),
-            style=Style(bgcolor=COLORS['bg_card'])
+            style=Style(bgcolor=COLORS["bg_card"]),
         )
 
     def _build_header(self) -> Text:
@@ -129,17 +129,11 @@ class FileOperationsPanel:
         Returns:
             Rich Tree object
         """
-        tree = Tree(
-            self.root_label,
-            style=COLORS['neon_blue'],
-            guide_style=COLORS['border_muted']
-        )
+        tree = Tree(self.root_label, style=COLORS["neon_blue"], guide_style=COLORS["border_muted"])
 
         # Get recent operations (sorted by timestamp)
         recent_ops = sorted(
-            self.operations[-max_display:],
-            key=lambda op: op.timestamp,
-            reverse=True
+            self.operations[-max_display:], key=lambda op: op.timestamp, reverse=True
         )
 
         for op in recent_ops:
@@ -148,7 +142,7 @@ class FileOperationsPanel:
 
         # Add placeholder if empty
         if not recent_ops:
-            empty_text = Text("No file operations yet", style=COLORS['text_tertiary'])
+            empty_text = Text("No file operations yet", style=COLORS["text_tertiary"])
             tree.add(empty_text)
 
         return tree
@@ -168,27 +162,27 @@ class FileOperationsPanel:
         # Status icon and color
         if op.status == FileStatus.MODIFIED:
             icon = "📝"
-            status_style = COLORS['neon_yellow']
+            status_style = COLORS["neon_yellow"]
             suffix = " (modified)"
         elif op.status == FileStatus.SAVED:
             icon = "✓"
-            status_style = COLORS['neon_green']
+            status_style = COLORS["neon_green"]
             suffix = " (saved)"
         elif op.status == FileStatus.CREATING:
             icon = "✨"
-            status_style = COLORS['neon_cyan']
+            status_style = COLORS["neon_cyan"]
             suffix = " (creating...)"
         elif op.status == FileStatus.ANALYZING:
             icon = "🔍"
-            status_style = COLORS['neon_purple']
+            status_style = COLORS["neon_purple"]
             suffix = " (analyzing...)"
         elif op.status == FileStatus.ERROR:
             icon = "✗"
-            status_style = COLORS['neon_red']
+            status_style = COLORS["neon_red"]
             suffix = " (error)"
         else:
             icon = "📄"
-            status_style = COLORS['text_secondary']
+            status_style = COLORS["text_secondary"]
             suffix = ""
 
         # Build node text
@@ -231,7 +225,7 @@ class FileOperationsPanel:
             added_bar = "█" * bar_length if bar_length > 0 else "▏"
 
             diff_text.append(f"+{total_added} lines ", style=f"bold {COLORS['diff_add_text']}")
-            diff_text.append(added_bar, style=COLORS['diff_add_text'])
+            diff_text.append(added_bar, style=COLORS["diff_add_text"])
             diff_text.append("\n")
 
         # Removed lines
@@ -241,7 +235,7 @@ class FileOperationsPanel:
             removed_bar = "█" * bar_length if bar_length > 0 else "▏"
 
             diff_text.append(f"-{total_removed} lines ", style=f"bold {COLORS['diff_remove_text']}")
-            diff_text.append(removed_bar, style=COLORS['diff_remove_text'])
+            diff_text.append(removed_bar, style=COLORS["diff_remove_text"])
 
         return diff_text
 
@@ -288,11 +282,9 @@ class FileOperationsPanel:
 # HELPER FUNCTIONS
 # ============================================================================
 
+
 def create_file_operation_from_event(
-    path: str,
-    event_type: str,
-    lines_added: int = 0,
-    lines_removed: int = 0
+    path: str, event_type: str, lines_added: int = 0, lines_removed: int = 0
 ) -> FileOperation:
     """
     Create FileOperation from event data.
@@ -320,8 +312,5 @@ def create_file_operation_from_event(
     status = status_map.get(event_type.lower(), FileStatus.ANALYZING)
 
     return FileOperation(
-        path=path,
-        status=status,
-        lines_added=lines_added,
-        lines_removed=lines_removed
+        path=path, status=status, lines_added=lines_added, lines_removed=lines_removed
     )

@@ -131,7 +131,7 @@ def generate_api_reference(modules: List[ModuleDoc]) -> str:
             lines.append("### Classes")
             lines.append("")
             for cls in module.classes:
-                desc = cls.docstring.split('.')[0] if cls.docstring else 'No description'
+                desc = cls.docstring.split(".")[0] if cls.docstring else "No description"
                 lines.append(f"- **{cls.name}**: {desc}")
             lines.append("")
 
@@ -140,16 +140,14 @@ def generate_api_reference(modules: List[ModuleDoc]) -> str:
             lines.append("### Functions")
             lines.append("")
             for func in module.functions:
-                desc = func.docstring.split('.')[0] if func.docstring else 'No description'
+                desc = func.docstring.split(".")[0] if func.docstring else "No description"
                 lines.append(f"- **{func.name}**: {desc}")
             lines.append("")
 
     return "\n".join(lines)
 
 
-def generate_readme_content(
-    project_path: Path, modules: List[ModuleDoc]
-) -> str:
+def generate_readme_content(project_path: Path, modules: List[ModuleDoc]) -> str:
     """Generate README.md content.
 
     Args:
@@ -177,12 +175,14 @@ def generate_readme_content(
     for module in modules[:20]:  # Limit to 20
         lines.append(f"├── {module.name}.py")
 
-    lines.extend([
-        "```",
-        "",
-        "## Modules",
-        "",
-    ])
+    lines.extend(
+        [
+            "```",
+            "",
+            "## Modules",
+            "",
+        ]
+    )
 
     for module in modules:
         lines.append(f"### {module.name}")
@@ -191,23 +191,25 @@ def generate_readme_content(
             lines.append(module.docstring.split("\n")[0])
             lines.append("")
 
-    lines.extend([
-        "## Installation",
-        "",
-        "```bash",
-        "pip install -r requirements.txt",
-        "```",
-        "",
-        "## Usage",
-        "",
-        "```python",
-        f"from {project_name} import ...",
-        "```",
-        "",
-        "## License",
-        "",
-        "MIT License",
-    ])
+    lines.extend(
+        [
+            "## Installation",
+            "",
+            "```bash",
+            "pip install -r requirements.txt",
+            "```",
+            "",
+            "## Usage",
+            "",
+            "```python",
+            f"from {project_name} import ...",
+            "```",
+            "",
+            "## License",
+            "",
+            "MIT License",
+        ]
+    )
 
     return "\n".join(lines)
 

@@ -5,10 +5,7 @@ Boris Cherny Implementation.
 """
 
 from typing import Dict
-from vertice_cli.tui.components.context_awareness import (
-    ContextAwarenessEngine,
-    OptimizationMetrics
-)
+from vertice_cli.tui.components.context_awareness import ContextAwarenessEngine, OptimizationMetrics
 
 
 class ConsolidatedContextManager:
@@ -24,13 +21,13 @@ class ConsolidatedContextManager:
     def get_optimization_stats(self) -> Dict:
         """Get stats (delegates to engine)."""
         return {
-            'total_items': len(self.engine.items),
-            'total_tokens': self.engine.window.total_tokens,
-            'max_tokens': self.engine.max_context_tokens,
-            'usage_percent': self.engine.window.utilization * 100,
-            'pinned_items': len(self.engine.window.user_pinned),
-            'optimizations_performed': self.engine.optimizations_performed,
-            'total_tokens_freed': self.engine.total_tokens_freed
+            "total_items": len(self.engine.items),
+            "total_tokens": self.engine.window.total_tokens,
+            "max_tokens": self.engine.max_context_tokens,
+            "usage_percent": self.engine.window.utilization * 100,
+            "pinned_items": len(self.engine.window.user_pinned),
+            "optimizations_performed": self.engine.optimizations_performed,
+            "total_tokens_freed": self.engine.total_tokens_freed,
         }
 
     def get_optimization_recommendations(self) -> list:
@@ -52,13 +49,13 @@ class ConsolidatedContextManager:
 
         # Convert to OptimizationMetrics format
         return OptimizationMetrics(
-            items_before=len(self.engine.items) + result.get('removed', 0),
+            items_before=len(self.engine.items) + result.get("removed", 0),
             items_after=len(self.engine.items),
-            tokens_before=self.engine.window.total_tokens + result.get('tokens_freed', 0),
+            tokens_before=self.engine.window.total_tokens + result.get("tokens_freed", 0),
             tokens_after=self.engine.window.total_tokens,
-            items_removed=result.get('removed', 0),
-            tokens_freed=result.get('tokens_freed', 0),
-            duration_ms=result.get('duration_ms', 0)
+            items_removed=result.get("removed", 0),
+            tokens_freed=result.get("tokens_freed", 0),
+            duration_ms=result.get("duration_ms", 0),
         )
 
     # Delegate rendering methods

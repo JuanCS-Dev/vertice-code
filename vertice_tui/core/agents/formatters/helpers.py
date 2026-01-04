@@ -18,13 +18,9 @@ def get_severity_emoji(severity: str) -> str:
     Returns:
         Emoji string representing the severity level
     """
-    return {
-        "CRITICAL": "🔴",
-        "HIGH": "🟠",
-        "MEDIUM": "🟡",
-        "LOW": "🟢",
-        "INFO": "ℹ️"
-    }.get(severity, "⚪")
+    return {"CRITICAL": "🔴", "HIGH": "🟠", "MEDIUM": "🟡", "LOW": "🟢", "INFO": "ℹ️"}.get(
+        severity, "⚪"
+    )
 
 
 def format_list_items(items: List[Any], prefix: str = "- ") -> str:
@@ -42,9 +38,7 @@ def format_list_items(items: List[Any], prefix: str = "- ") -> str:
 
 
 async def yield_dict_items(
-    data: Dict[str, Any],
-    keys: List[str],
-    headers: Optional[Dict[str, str]] = None
+    data: Dict[str, Any], keys: List[str], headers: Optional[Dict[str, str]] = None
 ) -> AsyncIterator[str]:
     """
     Async generator that yields formatted dictionary items as markdown.

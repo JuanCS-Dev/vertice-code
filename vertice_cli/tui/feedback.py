@@ -30,6 +30,7 @@ from .animations import Easing
 @dataclass
 class FeedbackConfig:
     """Configuration for visual feedback"""
+
     duration: float = 0.3
     intensity: float = 1.0
     sound: bool = False  # Future: terminal bell
@@ -42,11 +43,11 @@ class MicroInteraction:
     def button_press(text: str, pressed: bool = False) -> Text:
         """
         Button press effect
-        
+
         Args:
             text: Button label
             pressed: Whether button is pressed
-        
+
         Returns:
             Styled button text
         """
@@ -67,12 +68,12 @@ class MicroInteraction:
     ) -> Text:
         """
         Selection/focus highlight effect
-        
+
         Args:
             text: Item text
             selected: Whether item is selected
             focused: Whether item has focus
-        
+
         Returns:
             Styled text with highlight
         """
@@ -87,13 +88,13 @@ class MicroInteraction:
             return Text(f" › {text} ", style=f"bold {COLORS['text_primary']}")
         else:
             # Normal state
-            return Text(f"   {text} ", style=COLORS['text_secondary'])
+            return Text(f"   {text} ", style=COLORS["text_secondary"])
 
     @staticmethod
     def error_shake(console: Console, message: str, shakes: int = 3) -> None:
         """
         Shake animation for errors (like macOS login shake)
-        
+
         Args:
             console: Rich console
             message: Error message
@@ -101,7 +102,7 @@ class MicroInteraction:
         """
         panel = Panel(
             message,
-            border_style=COLORS['error'],
+            border_style=COLORS["error"],
             title="❌ Error",
         )
 
@@ -128,7 +129,7 @@ class MicroInteraction:
     ) -> None:
         """
         Pulse animation for success (like iOS success checkmark)
-        
+
         Args:
             console: Rich console
             message: Success message
@@ -144,7 +145,7 @@ class MicroInteraction:
 
                 panel = Panel(
                     message,
-                    border_style=COLORS['success'],
+                    border_style=COLORS["success"],
                     title="✅ Success",
                     padding=(padding, padding),
                 )
@@ -169,7 +170,7 @@ class LoadingState:
     ) -> None:
         """
         Show thinking/loading state
-        
+
         Args:
             operation: Operation being performed
             show_wisdom: Show Biblical verse
@@ -180,7 +181,9 @@ class LoadingState:
         verse_text = ""
         if show_wisdom:
             self.current_verse = get_random_verse(category="perseverance")
-            verse_text = f"\n\n💎 {self.current_verse['text']}\n   — {self.current_verse['reference']}"
+            verse_text = (
+                f"\n\n💎 {self.current_verse['text']}\n   — {self.current_verse['reference']}"
+            )
 
         # Create loading panel
         spinner = StatusBadge.loading(
@@ -190,11 +193,11 @@ class LoadingState:
 
         content = Text()
         content.append(spinner.render())
-        content.append(verse_text, style=COLORS['text_secondary'])
+        content.append(verse_text, style=COLORS["text_secondary"])
 
         panel = Panel(
             content,
-            border_style=COLORS['accent_purple'],
+            border_style=COLORS["accent_purple"],
             title="⏳ Please wait",
             padding=(1, 2),
         )
@@ -209,7 +212,7 @@ class LoadingState:
     ) -> None:
         """
         Show progress with percentage
-        
+
         Args:
             current: Current progress
             total: Total items
@@ -230,7 +233,7 @@ class LoadingState:
 
         panel = Panel(
             progress.render(),
-            border_style=COLORS['accent_blue'],
+            border_style=COLORS["accent_blue"],
             title=f"⚡ {operation}",
             padding=(1, 2),
         )
@@ -245,7 +248,7 @@ class StateTransition:
     def fade_in(console: Console, content: str, steps: int = 10) -> None:
         """
         Fade in content
-        
+
         Args:
             console: Rich console
             content: Content to fade in
@@ -280,7 +283,7 @@ class StateTransition:
     ) -> None:
         """
         Slide in content from direction
-        
+
         Args:
             console: Rich console
             content: Content to slide in
@@ -313,7 +316,7 @@ class StateTransition:
 class HapticFeedback:
     """
     Haptic-like feedback through visual cues
-    
+
     Since terminal can't provide true haptic feedback,
     we use rapid visual changes to create similar effect
     """

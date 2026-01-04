@@ -29,24 +29,29 @@ from pydantic import BaseModel, Field, model_validator
 # EXCEPTIONS
 # =============================================================================
 
+
 class QwenCoreError(Exception):
     """Base exception for all vertice_core errors."""
+
     pass
 
 
 class CapabilityViolationError(QwenCoreError):
     """Raised when an agent attempts an action beyond its capabilities."""
+
     pass
 
 
 class ValidationError(QwenCoreError):
     """Raised when input validation fails."""
+
     pass
 
 
 # =============================================================================
 # ENUMS
 # =============================================================================
+
 
 class AgentRole(str, Enum):
     """
@@ -72,6 +77,7 @@ class AgentRole(str, Enum):
         GOVERNANCE: Constitutional governance (Justiça framework)
         COUNSELOR: Wise counselor (Sofia framework)
     """
+
     # Core roles
     ARCHITECT = "architect"
     EXPLORER = "explorer"
@@ -102,6 +108,7 @@ class AgentCapability(str, Enum):
 
     Used to restrict what tools an agent can access.
     """
+
     READ_ONLY = "read_only"
     FILE_EDIT = "file_edit"
     BASH_EXEC = "bash_exec"
@@ -112,6 +119,7 @@ class AgentCapability(str, Enum):
 
 class TaskStatus(str, Enum):
     """Status of a task in the execution pipeline."""
+
     PENDING = "pending"
     THINKING = "thinking"
     ACTING = "acting"
@@ -123,6 +131,7 @@ class TaskStatus(str, Enum):
 # =============================================================================
 # PYDANTIC MODELS
 # =============================================================================
+
 
 class AgentTask(BaseModel):
     """
@@ -136,6 +145,7 @@ class AgentTask(BaseModel):
         metadata: Arbitrary metadata (limited to 10k keys)
         history: Previous interactions for context
     """
+
     model_config = {
         "strict": True,
         "validate_assignment": True,
@@ -149,22 +159,22 @@ class AgentTask(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict)
     history: List[Dict[str, Any]] = Field(default_factory=list)
 
-    @model_validator(mode='before')
+    @model_validator(mode="before")
     @classmethod
     def handle_deprecated_description(cls, values: Any) -> Any:
         """Migrate deprecated 'description' field to 'request'."""
-        if isinstance(values, dict) and 'description' in values:
+        if isinstance(values, dict) and "description" in values:
             warnings.warn(
                 "AgentTask field 'description' is deprecated. Use 'request' instead.",
                 DeprecationWarning,
-                stacklevel=3
+                stacklevel=3,
             )
-            if 'request' not in values:
-                values['request'] = values['description']
-            del values['description']
+            if "request" not in values:
+                values["request"] = values["description"]
+            del values["description"]
         return values
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def validate_size_limits(self) -> AgentTask:
         """Prevent resource exhaustion attacks."""
         # Context size limit: 10MB
@@ -201,6 +211,7 @@ class AgentResponse(BaseModel):
     Properties:
         metadata: Alias for metrics (backward compatibility)
     """
+
     model_config = {
         "strict": True,
         "validate_assignment": True,
@@ -226,6 +237,7 @@ class TaskResult(BaseModel):
 
     Used for compatibility with orchestration systems.
     """
+
     model_config = {
         "strict": True,
         "frozen": True,

@@ -124,8 +124,7 @@ DEFAULT_RULES: List[MaskingRule] = [
     MaskingRule(
         name="stack_trace",
         pattern=re.compile(
-            r"Traceback \(most recent call last\):.*?(?=\n\n|\Z)",
-            re.DOTALL | re.MULTILINE
+            r"Traceback \(most recent call last\):.*?(?=\n\n|\Z)", re.DOTALL | re.MULTILINE
         ),
         content_type=ContentType.STACK_TRACE,
         strategy=MaskingStrategy.SUMMARY_LINE,
@@ -146,10 +145,7 @@ DEFAULT_RULES: List[MaskingRule] = [
     # Log outputs (timestamps + messages)
     MaskingRule(
         name="log_output",
-        pattern=re.compile(
-            r"(\d{4}-\d{2}-\d{2}[\sT]\d{2}:\d{2}:\d{2}.*?\n){5,}",
-            re.MULTILINE
-        ),
+        pattern=re.compile(r"(\d{4}-\d{2}-\d{2}[\sT]\d{2}:\d{2}:\d{2}.*?\n){5,}", re.MULTILINE),
         content_type=ContentType.LOG_OUTPUT,
         strategy=MaskingStrategy.PLACEHOLDER,
         priority=70,
@@ -233,10 +229,7 @@ class ObservationMasker:
             preserve_errors: Keep error messages unmasked
             preserve_decisions: Keep decision-related content unmasked
         """
-        self.rules = sorted(
-            rules or DEFAULT_RULES,
-            key=lambda r: -r.priority
-        )
+        self.rules = sorted(rules or DEFAULT_RULES, key=lambda r: -r.priority)
         self.placeholder_template = placeholder_template
         self.min_tokens_to_mask = min_tokens_to_mask
         self.preserve_errors = preserve_errors
@@ -304,7 +297,7 @@ class ObservationMasker:
 
         # Update stats
         self._total_masked += 1
-        self._total_tokens_saved += (original_tokens - masked_tokens)
+        self._total_tokens_saved += original_tokens - masked_tokens
 
         return MaskedContent(
             original_hash=original_hash,
@@ -337,10 +330,7 @@ class ObservationMasker:
 
         if len(messages) <= keep_recent:
             # Nothing to mask
-            total_tokens = sum(
-                len(m.get("content", "")) // CHARS_PER_TOKEN
-                for m in messages
-            )
+            total_tokens = sum(len(m.get("content", "")) // CHARS_PER_TOKEN for m in messages)
             return messages, MaskingResult(
                 success=True,
                 original_tokens=total_tokens,
@@ -369,12 +359,14 @@ class ObservationMasker:
                 masked_contents.append(result)
                 masked_tokens += result.masked_tokens
 
-                masked_messages.append({
-                    **msg,
-                    "content": result.masked_content,
-                    "_masked": True,
-                    "_original_hash": result.original_hash,
-                })
+                masked_messages.append(
+                    {
+                        **msg,
+                        "content": result.masked_content,
+                        "_masked": True,
+                        "_original_hash": result.original_hash,
+                    }
+                )
             else:
                 # Keep as is
                 masked_tokens += len(content) // CHARS_PER_TOKEN
@@ -572,8 +564,7 @@ def mask_tool_output(
 
     # Check if this is an error (preserve if requested)
     is_error = any(
-        indicator in output.lower()
-        for indicator in ["error", "exception", "failed", "traceback"]
+        indicator in output.lower() for indicator in ["error", "exception", "failed", "traceback"]
     )
 
     masker = ObservationMasker(preserve_errors=preserve_errors)

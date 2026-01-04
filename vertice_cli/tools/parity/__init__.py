@@ -61,6 +61,7 @@ try:
         PrometheusMemoryQueryTool,
         PrometheusExecuteTool,
     )
+
     PROMETHEUS_AVAILABLE = True
 except ImportError:
     PROMETHEUS_AVAILABLE = False

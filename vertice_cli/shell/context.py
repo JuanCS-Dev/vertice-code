@@ -39,12 +39,7 @@ class SessionContext:
         # Week 2 Integration: Preview settings
         self.preview_enabled: bool = True
 
-    def track_tool_call(
-        self,
-        tool_name: str,
-        args: Dict[str, Any],
-        result: Any
-    ) -> None:
+    def track_tool_call(self, tool_name: str, args: Dict[str, Any], result: Any) -> None:
         """
         Track tool usage for session analytics.
 
@@ -53,12 +48,14 @@ class SessionContext:
             args: Arguments passed to the tool
             result: Tool execution result
         """
-        self.tool_calls.append({
-            "tool": tool_name,
-            "args": args,
-            "result": result,
-            "success": getattr(result, 'success', True)
-        })
+        self.tool_calls.append(
+            {
+                "tool": tool_name,
+                "args": args,
+                "result": result,
+                "success": getattr(result, "success", True),
+            }
+        )
 
         # Track file operations
         if tool_name in ("write_file", "edit_file"):

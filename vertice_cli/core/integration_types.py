@@ -5,7 +5,7 @@ Boris Cherny: "The type system is documentation that can't lie."
 
 This module defines the contracts between:
 - Shell ↔ Agents
-- Shell ↔ Tools  
+- Shell ↔ Tools
 - Shell ↔ Intelligence
 - Shell ↔ TUI
 
@@ -25,18 +25,19 @@ from uuid import uuid4
 # INTENT SYSTEM
 # ============================================================================
 
+
 class IntentType(str, Enum):
     """Categorized user intent (mapped to agents)."""
 
     # Agent-mapped intents
     ARCHITECTURE = "architecture"  # → ArchitectAgent
-    EXPLORATION = "exploration"    # → ExplorerAgent
-    PLANNING = "planning"          # → PlannerAgent
-    REFACTORING = "refactoring"    # → RefactorerAgent
-    REVIEW = "review"              # → ReviewerAgent
-    SECURITY = "security"          # → SecurityAgent
-    PERFORMANCE = "performance"    # → PerformanceAgent
-    TESTING = "testing"            # → TestingAgent
+    EXPLORATION = "exploration"  # → ExplorerAgent
+    PLANNING = "planning"  # → PlannerAgent
+    REFACTORING = "refactoring"  # → RefactorerAgent
+    REVIEW = "review"  # → ReviewerAgent
+    SECURITY = "security"  # → SecurityAgent
+    PERFORMANCE = "performance"  # → PerformanceAgent
+    TESTING = "testing"  # → TestingAgent
     DOCUMENTATION = "documentation"  # → DocumentationAgent
 
     # Direct actions (no agent)
@@ -69,6 +70,7 @@ class Intent:
 # AGENT INTEGRATION
 # ============================================================================
 
+
 class AgentResponse(TypedDict):
     """Standard agent response format."""
 
@@ -81,21 +83,17 @@ class AgentResponse(TypedDict):
 
 class AgentInvoker(Protocol):
     """Protocol for agent invocation.
-    
+
     Any class implementing this can be called by the integration layer.
     """
 
-    async def invoke(
-        self,
-        request: str,
-        context: Dict[str, Any]
-    ) -> AgentResponse:
+    async def invoke(self, request: str, context: Dict[str, Any]) -> AgentResponse:
         """Invoke agent with request and context.
-        
+
         Args:
             request: User's request string
             context: Rich context dictionary
-            
+
         Returns:
             AgentResponse with results
         """
@@ -105,6 +103,7 @@ class AgentInvoker(Protocol):
 # ============================================================================
 # TOOL INTEGRATION
 # ============================================================================
+
 
 class ToolCategory(str, Enum):
     """Tool categorization for organization."""
@@ -120,7 +119,7 @@ class ToolCategory(str, Enum):
 @dataclass(frozen=True)
 class ToolDefinition:
     """Gemini-compatible tool definition.
-    
+
     Maps our internal tools to Gemini function calling schema.
     """
 
@@ -133,11 +132,7 @@ class ToolDefinition:
 
     def to_gemini_schema(self) -> Dict[str, Any]:
         """Convert to Gemini function declaration format."""
-        return {
-            "name": self.name,
-            "description": self.description,
-            "parameters": self.parameters
-        }
+        return {"name": self.name, "description": self.description, "parameters": self.parameters}
 
 
 @dataclass
@@ -159,26 +154,24 @@ class ToolExecutionResult:
 # This provides compatibility with existing infrastructure while maintaining
 # our integration layer abstraction.
 
+
 def context_to_prompt_string(context: Any) -> str:
     """Format context as string for system prompt injection.
-    
+
     Args:
         context: RichContext from intelligence.context_enhanced
-        
+
     Returns:
         Formatted string for system prompt
     """
-    lines = [
-        "# Current Context",
-        ""
-    ]
+    lines = ["# Current Context", ""]
 
     # Working directory
-    if hasattr(context, 'working_directory'):
+    if hasattr(context, "working_directory"):
         lines.append(f"**Working Directory:** `{context.working_directory}`")
 
     # Git status
-    if hasattr(context, 'git_status') and context.git_status:
+    if hasattr(context, "git_status") and context.git_status:
         git = context.git_status
         lines.append("")
         lines.append("## Git Status")
@@ -195,7 +188,7 @@ def context_to_prompt_string(context: Any) -> str:
             lines.append(f"**Unstaged:** {len(git.unstaged_files)} files")
 
     # Workspace
-    if hasattr(context, 'workspace') and context.workspace:
+    if hasattr(context, "workspace") and context.workspace:
         ws = context.workspace
         lines.append("")
         lines.append("## Project Info")
@@ -208,7 +201,7 @@ def context_to_prompt_string(context: Any) -> str:
             lines.append(f"**Tests:** `{ws.test_command}`")
 
     # Recent files
-    if hasattr(context, 'recent_files') and context.recent_files:
+    if hasattr(context, "recent_files") and context.recent_files:
         lines.append("")
         lines.append("## Recent Files")
         for f in context.recent_files[:5]:
@@ -220,6 +213,7 @@ def context_to_prompt_string(context: Any) -> str:
 # ============================================================================
 # EVENT SYSTEM
 # ============================================================================
+
 
 class EventType(str, Enum):
     """Event types for pub/sub system."""
@@ -281,6 +275,7 @@ class EventBus(Protocol):
 # TUI INTEGRATION
 # ============================================================================
 
+
 @dataclass
 class ToastConfig:
     """Configuration for toast notification."""
@@ -305,20 +300,17 @@ class ProgressConfig:
 # INTEGRATION COORDINATOR
 # ============================================================================
 
+
 class IntegrationCoordinator(Protocol):
     """Central coordinator for all integrations.
-    
+
     This is the main interface that the shell interacts with.
     All component communication flows through here.
     """
 
-    async def process_message(
-        self,
-        message: str,
-        context: RichContext
-    ) -> str:
+    async def process_message(self, message: str, context: RichContext) -> str:
         """Process user message with full integration pipeline.
-        
+
         Flow:
         1. Detect intent
         2. Build/refresh context
@@ -340,10 +332,6 @@ class IntegrationCoordinator(Protocol):
         """Get all registered tools for function calling."""
         ...
 
-    async def execute_tool(
-        self,
-        tool_name: str,
-        parameters: Dict[str, Any]
-    ) -> ToolExecutionResult:
+    async def execute_tool(self, tool_name: str, parameters: Dict[str, Any]) -> ToolExecutionResult:
         """Execute a tool by name."""
         ...

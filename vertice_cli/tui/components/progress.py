@@ -43,6 +43,7 @@ from ..styles import PRESET_STYLES
 @dataclass
 class ProgressState:
     """Progress state data."""
+
     current: float
     total: float
     description: str = ""
@@ -78,13 +79,13 @@ class ProgressState:
 class ProgressBar:
     """
     Animated progress bar with easing and time estimates.
-    
+
     Examples:
         progress = ProgressBar(0, 100, "Processing files")
-        
+
         # Update with animation
         await progress.update_animated(50)
-        
+
         # Render current state
         console.print(progress.render())
     """
@@ -101,7 +102,7 @@ class ProgressBar:
     ):
         """
         Initialize progress bar.
-        
+
         Args:
             current: Current progress value
             total: Total target value
@@ -120,10 +121,10 @@ class ProgressBar:
     def _ease_out_cubic(self, t: float) -> float:
         """
         Cubic ease-out easing function.
-        
+
         Args:
             t: Progress (0.0 to 1.0)
-            
+
         Returns:
             Eased progress (0.0 to 1.0)
         """
@@ -132,12 +133,12 @@ class ProgressBar:
     def _interpolate(self, start: float, end: float, progress: float) -> float:
         """
         Interpolate between start and end with easing.
-        
+
         Args:
             start: Start value
             end: End value
             progress: Progress (0.0 to 1.0)
-            
+
         Returns:
             Interpolated value
         """
@@ -147,27 +148,27 @@ class ProgressBar:
     def _get_bar_color(self, percentage: float) -> str:
         """
         Get bar color based on progress (gradient effect).
-        
+
         Args:
             percentage: Progress percentage (0-100)
-            
+
         Returns:
             Color hex string
         """
         if percentage < 33:
-            return COLORS['accent_red']
+            return COLORS["accent_red"]
         elif percentage < 66:
-            return COLORS['accent_yellow']
+            return COLORS["accent_yellow"]
         else:
-            return COLORS['accent_green']
+            return COLORS["accent_green"]
 
     def _render_bar(self, percentage: float) -> Text:
         """
         Render progress bar visual.
-        
+
         Args:
             percentage: Progress percentage (0-100)
-            
+
         Returns:
             Rich Text object
         """
@@ -188,10 +189,10 @@ class ProgressBar:
     def _format_time(self, seconds: Optional[float]) -> str:
         """
         Format seconds as human-readable time.
-        
+
         Args:
             seconds: Time in seconds
-            
+
         Returns:
             Formatted string (e.g., "2.3s", "1m 30s")
         """
@@ -208,7 +209,7 @@ class ProgressBar:
     def render(self) -> Text:
         """
         Render complete progress bar.
-        
+
         Returns:
             Rich Text object
         """
@@ -253,12 +254,12 @@ class ProgressBar:
     ):
         """
         Update progress with smooth animation.
-        
+
         Args:
             new_value: New progress value
             duration: Animation duration in seconds
             fps: Frames per second
-            
+
         Example:
             await progress.update_animated(75, duration=0.5)
         """
@@ -283,12 +284,12 @@ class ProgressBar:
     ):
         """
         Animate progress to target with live rendering.
-        
+
         Args:
             target: Target progress value
             duration: Animation duration
             console: Rich console for rendering
-            
+
         Example:
             await progress.animate_to(100, duration=2.0, console=console)
         """
@@ -306,8 +307,8 @@ class ProgressBar:
             self.state.current = interpolated
 
             # Render current frame
-            console.print(self.render(), end='\r')
-            await asyncio.sleep(1/30)  # 30 FPS
+            console.print(self.render(), end="\r")
+            await asyncio.sleep(1 / 30)  # 30 FPS
 
         # Final frame
         self.state.current = target
@@ -317,12 +318,12 @@ class ProgressBar:
 class MultiProgressBar:
     """
     Manage multiple progress bars (for parallel tasks).
-    
+
     Examples:
         multi = MultiProgressBar()
         task1 = multi.add_task("Task 1", total=100)
         task2 = multi.add_task("Task 2", total=50)
-        
+
         await multi.update(task1, 50)
         await multi.update(task2, 25)
     """
@@ -330,7 +331,7 @@ class MultiProgressBar:
     def __init__(self, console: Optional[Console] = None):
         """
         Initialize multi-progress bar manager.
-        
+
         Args:
             console: Rich console instance
         """
@@ -346,12 +347,12 @@ class MultiProgressBar:
     ) -> int:
         """
         Add new progress bar.
-        
+
         Args:
             description: Task description
             total: Total progress value
             **kwargs: Additional ProgressBar arguments
-            
+
         Returns:
             Task ID
         """
@@ -371,7 +372,7 @@ class MultiProgressBar:
     ):
         """
         Update progress for task.
-        
+
         Args:
             task_id: Task ID
             value: New progress value
@@ -403,24 +404,25 @@ class MultiProgressBar:
 # RICH PROGRESS WRAPPER (for Rich's built-in Progress)
 # =============================================================================
 
+
 def create_rich_progress(
     console: Optional[Console] = None,
     transient: bool = False,
 ) -> Progress:
     """
     Create Rich Progress instance with our theme.
-    
+
     Args:
         console: Rich console
         transient: Progress disappears after completion
-        
+
     Returns:
         Rich Progress object
-        
+
     Example:
         progress = create_rich_progress()
         task = progress.add_task("Processing", total=100)
-        
+
         with progress:
             for i in range(100):
                 progress.update(task, advance=1)
@@ -430,9 +432,9 @@ def create_rich_progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
         BarColumn(
-            complete_style=COLORS['accent_green'],
-            finished_style=COLORS['accent_green'],
-            pulse_style=COLORS['accent_blue'],
+            complete_style=COLORS["accent_green"],
+            finished_style=COLORS["accent_green"],
+            pulse_style=COLORS["accent_blue"],
         ),
         TaskProgressColumn(),
         TimeElapsedColumn(),
@@ -446,6 +448,7 @@ def create_rich_progress(
 # UTILITY FUNCTIONS
 # =============================================================================
 
+
 async def show_progress(
     console: Console,
     total: int,
@@ -454,13 +457,13 @@ async def show_progress(
 ):
     """
     Show animated progress bar for demonstration.
-    
+
     Args:
         console: Rich console
         total: Total items
         description: Progress description
         duration: Total duration in seconds
-        
+
     Example:
         await show_progress(console, 100, "Loading files", 3.0)
     """
@@ -469,7 +472,7 @@ async def show_progress(
 
     for i in range(total + 1):
         await bar.update_animated(i, duration=delay)
-        console.print(bar.render(), end='\r')
+        console.print(bar.render(), end="\r")
         await asyncio.sleep(delay)
 
     console.print()
@@ -479,22 +482,21 @@ async def show_progress(
 # FACTORY FUNCTIONS
 # =============================================================================
 
+
 def create_progress_bar(
-    current: int = 0,
-    total: int = 100,
-    description: str = "Processing"
+    current: int = 0, total: int = 100, description: str = "Processing"
 ) -> ProgressBar:
     """
     Create a progress bar with default settings.
-    
+
     Args:
         current: Current progress value
         total: Total progress value
         description: Progress description
-        
+
     Returns:
         Configured ProgressBar instance
-        
+
     Example:
         bar = create_progress_bar(0, 100, "Loading files")
         bar.update(50)

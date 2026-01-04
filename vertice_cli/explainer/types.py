@@ -11,9 +11,9 @@ from typing import List, Optional
 class ExplanationLevel(Enum):
     """Detail level for explanations."""
 
-    CONCISE = "concise"        # Expert: One-line
-    BALANCED = "balanced"      # Intermediate: Brief with key points
-    DETAILED = "detailed"      # Beginner: Full breakdown
+    CONCISE = "concise"  # Expert: One-line
+    BALANCED = "balanced"  # Intermediate: Brief with key points
+    DETAILED = "detailed"  # Beginner: Full breakdown
 
 
 @dataclass(frozen=True)

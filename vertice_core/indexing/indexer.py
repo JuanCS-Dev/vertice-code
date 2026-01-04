@@ -58,14 +58,39 @@ class IndexerConfig:
     index_dir: str = ".vertice/index"
 
     # File patterns
-    extensions: List[str] = field(default_factory=lambda: [
-        ".py", ".js", ".ts", ".jsx", ".tsx", ".go", ".rs", ".java", ".c", ".cpp", ".h"
-    ])
-    exclude_patterns: List[str] = field(default_factory=lambda: [
-        "__pycache__", "node_modules", ".git", ".venv", "venv",
-        "dist", "build", ".egg-info", ".pytest_cache", ".mypy_cache",
-        ".vertice", ".cache", "*.pyc", "*.pyo"
-    ])
+    extensions: List[str] = field(
+        default_factory=lambda: [
+            ".py",
+            ".js",
+            ".ts",
+            ".jsx",
+            ".tsx",
+            ".go",
+            ".rs",
+            ".java",
+            ".c",
+            ".cpp",
+            ".h",
+        ]
+    )
+    exclude_patterns: List[str] = field(
+        default_factory=lambda: [
+            "__pycache__",
+            "node_modules",
+            ".git",
+            ".venv",
+            "venv",
+            "dist",
+            "build",
+            ".egg-info",
+            ".pytest_cache",
+            ".mypy_cache",
+            ".vertice",
+            ".cache",
+            "*.pyc",
+            "*.pyo",
+        ]
+    )
 
     # Processing
     batch_size: int = 50  # Files per batch
@@ -251,7 +276,7 @@ class CodebaseIndexer:
         config: Optional[IndexerConfig] = None,
         embedder: Optional[SemanticEmbedder] = None,
         store: Optional[VectorStore] = None,
-        on_progress: Optional[Callable[[IndexingProgress], None]] = None
+        on_progress: Optional[Callable[[IndexingProgress], None]] = None,
     ):
         """
         Initialize the indexer.
@@ -304,9 +329,7 @@ class CodebaseIndexer:
                 logger.warning(f"Progress callback error: {e}")
 
     async def index_codebase(
-        self,
-        full_reindex: bool = False,
-        paths: Optional[List[str]] = None
+        self, full_reindex: bool = False, paths: Optional[List[str]] = None
     ) -> IndexingProgress:
         """
         Index the codebase.
@@ -339,8 +362,7 @@ class CodebaseIndexer:
             if not full_reindex and self.config.check_modified:
                 files = [f for f in files if self._hash_cache.is_modified(f)]
                 self._update_progress(
-                    total_files=len(files),
-                    skipped_files=self._progress.total_files - len(files)
+                    total_files=len(files), skipped_files=self._progress.total_files - len(files)
                 )
 
             if not files:
@@ -356,7 +378,7 @@ class CodebaseIndexer:
                 if self._cancel_requested:
                     break
 
-                batch = files[i:i + batch_size]
+                batch = files[i : i + batch_size]
                 await self._process_batch(batch)
 
             # Update hash cache
@@ -371,8 +393,7 @@ class CodebaseIndexer:
         except Exception as e:
             logger.error(f"Indexing failed: {e}")
             self._update_progress(
-                status=IndexerStatus.ERROR,
-                errors=self._progress.errors + [str(e)]
+                status=IndexerStatus.ERROR, errors=self._progress.errors + [str(e)]
             )
             raise
 
@@ -456,14 +477,14 @@ class CodebaseIndexer:
 
                 self._update_progress(
                     processed_files=self._progress.processed_files + 1,
-                    total_chunks=self._progress.total_chunks + len(chunks)
+                    total_chunks=self._progress.total_chunks + len(chunks),
                 )
 
             except Exception as e:
                 logger.warning(f"Failed to chunk {filepath}: {e}")
                 self._update_progress(
                     error_count=self._progress.error_count + 1,
-                    errors=self._progress.errors + [f"{filepath}: {e}"]
+                    errors=self._progress.errors + [f"{filepath}: {e}"],
                 )
 
         if not all_chunks:
@@ -480,7 +501,7 @@ class CodebaseIndexer:
             logger.error(f"Embedding failed: {e}")
             self._update_progress(
                 error_count=self._progress.error_count + 1,
-                errors=self._progress.errors + [f"Embedding: {e}"]
+                errors=self._progress.errors + [f"Embedding: {e}"],
             )
             return
 
@@ -495,7 +516,7 @@ class CodebaseIndexer:
             logger.error(f"Storage failed: {e}")
             self._update_progress(
                 error_count=self._progress.error_count + 1,
-                errors=self._progress.errors + [f"Storage: {e}"]
+                errors=self._progress.errors + [f"Storage: {e}"],
             )
 
     async def search(
@@ -504,7 +525,7 @@ class CodebaseIndexer:
         top_k: int = 10,
         filepath_filter: Optional[str] = None,
         language_filter: Optional[str] = None,
-        min_score: float = 0.5
+        min_score: float = 0.5,
     ) -> List[SearchResult]:
         """
         Search the indexed codebase.
@@ -528,7 +549,7 @@ class CodebaseIndexer:
             top_k=top_k,
             filepath_filter=filepath_filter,
             language_filter=language_filter,
-            min_score=min_score
+            min_score=min_score,
         )
 
         return results
@@ -581,7 +602,7 @@ class CodebaseIndexer:
             "config": {
                 "root_dir": self.config.root_dir,
                 "extensions": self.config.extensions,
-            }
+            },
         }
 
     def clear(self) -> None:

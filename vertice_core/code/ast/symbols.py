@@ -16,9 +16,7 @@ if TYPE_CHECKING:
     from .editor import ASTEditor
 
 
-def get_symbols(
-    editor: "ASTEditor", content: str, language: str
-) -> List[CodeSymbol]:
+def get_symbols(editor: "ASTEditor", content: str, language: str) -> List[CodeSymbol]:
     """Extract all symbols (functions, classes, etc.) from code."""
     symbols: List[CodeSymbol] = []
     config = LANGUAGE_CONFIGS.get(language)
@@ -37,16 +35,12 @@ def get_symbols(
         node_type = node.type
 
         if node_type in config.function_node_types:
-            symbol = extract_function_symbol(
-                editor, node, content_bytes, language, parent_name
-            )
+            symbol = extract_function_symbol(editor, node, content_bytes, language, parent_name)
             if symbol:
                 symbols.append(symbol)
 
         elif node_type in config.class_node_types:
-            symbol = extract_class_symbol(
-                editor, node, content_bytes, language, parent_name
-            )
+            symbol = extract_class_symbol(editor, node, content_bytes, language, parent_name)
             if symbol:
                 symbols.append(symbol)
                 for child in node.children:

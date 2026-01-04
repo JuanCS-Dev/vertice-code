@@ -112,7 +112,7 @@ def _build_tool_section(tools: List[Dict[str, Any]]) -> str:
     # Group tools by category for better comprehension
     categories: Dict[str, List[Dict[str, Any]]] = {}
     for tool in tools:
-        cat = tool.get('category', 'general')
+        cat = tool.get("category", "general")
         if cat not in categories:
             categories[cat] = []
         categories[cat].append(tool)
@@ -120,15 +120,15 @@ def _build_tool_section(tools: List[Dict[str, Any]]) -> str:
     for cat, cat_tools in sorted(categories.items()):
         tool_section += f"### {cat.replace('_', ' ').title()}\n"
         for t in cat_tools:
-            name = t['name']
-            desc = t.get('description', '')
-            params = t.get('parameters', {})
-            required = params.get('required', [])
-            properties = params.get('properties', {})
+            name = t["name"]
+            desc = t.get("description", "")
+            params = t.get("parameters", {})
+            required = params.get("required", [])
+            properties = params.get("properties", {})
 
             param_info = []
             for p in required:
-                ptype = properties.get(p, {}).get('type', 'any')
+                ptype = properties.get(p, {}).get("type", "any")
                 param_info.append(f"{p}: {ptype}")
 
             param_str = f"({', '.join(param_info)})" if param_info else "()"
@@ -143,17 +143,17 @@ def _build_context_section(context: Optional[Dict[str, Any]]) -> str:
     context_section = "\n## Current Context\n\n"
 
     if context:
-        if context.get('cwd'):
+        if context.get("cwd"):
             context_section += f"Working Directory: `{context['cwd']}`\n"
-        if context.get('git_branch'):
+        if context.get("git_branch"):
             context_section += f"Git Branch: `{context['git_branch']}`\n"
-        if context.get('git_status'):
+        if context.get("git_status"):
             context_section += f"Git Status: {context['git_status']}\n"
-        if context.get('modified_files'):
-            files = list(context['modified_files'])[:10]
+        if context.get("modified_files"):
+            files = list(context["modified_files"])[:10]
             context_section += f"Modified Files: {', '.join(f'`{f}`' for f in files)}\n"
-        if context.get('recent_files'):
-            files = list(context['recent_files'])[:5]
+        if context.get("recent_files"):
+            files = list(context["recent_files"])[:5]
             context_section += f"Recent Files: {', '.join(f'`{f}`' for f in files)}\n"
     else:
         context_section += "No context available.\n"
@@ -161,10 +161,7 @@ def _build_context_section(context: Optional[Dict[str, Any]]) -> str:
     return context_section
 
 
-def _build_memory_section(
-    project_memory: Optional[str],
-    user_memory: Optional[str]
-) -> str:
+def _build_memory_section(project_memory: Optional[str], user_memory: Optional[str]) -> str:
     """Build the memory section."""
     memory_section = ""
 
@@ -194,30 +191,14 @@ Remember user preferences and apply them to your responses.
 
 
 def load_project_memory(project_path: str = ".") -> Optional[str]:
-    """
-    Load JUANCS.md project memory file.
-
-    Like CLAUDE.md, this file contains project-specific context:
-    - Architecture decisions
-    - Coding conventions
-    - Build/test commands
-    - Important warnings
-    - Team preferences
-
-    Args:
-        project_path: Root of the project
-
-    Returns:
-        Contents of JUANCS.md or None
-    """
-    memory_files = [
-        Path(project_path) / "JUANCS.md",
-        Path(project_path) / ".juancs" / "JUANCS.md",
-        Path(project_path) / "CLAUDE.md",  # Compatibility
-        Path(project_path) / ".claude" / "CLAUDE.md",
+    """Load VERTICE.md project memory file."""
+    search_paths = [
+        Path(project_path) / "VERTICE.md",
+        Path(project_path) / ".vertice" / "VERTICE.md",
+        Path(project_path) / "CLAUDE.md",
     ]
 
-    for memory_file in memory_files:
+    for memory_file in search_paths:
         if memory_file.exists():
             try:
                 return memory_file.read_text()
@@ -235,43 +216,39 @@ def get_dynamic_context() -> Dict[str, Any]:
         Context dictionary with cwd, git info, recent files, etc.
     """
     context: Dict[str, Any] = {
-        'cwd': os.getcwd(),
-        'modified_files': set(),
-        'recent_files': set(),
-        'git_branch': None,
-        'git_status': None,
+        "cwd": os.getcwd(),
+        "modified_files": set(),
+        "recent_files": set(),
+        "git_branch": None,
+        "git_status": None,
     }
 
     # Get git branch
     try:
         result = subprocess.run(
-            ['git', 'branch', '--show-current'],
-            capture_output=True, text=True, timeout=5
+            ["git", "branch", "--show-current"], capture_output=True, text=True, timeout=5
         )
         if result.returncode == 0:
-            context['git_branch'] = result.stdout.strip()
+            context["git_branch"] = result.stdout.strip()
     except (subprocess.SubprocessError, FileNotFoundError, OSError) as e:
         logger.debug(f"Failed to get git branch: {e}")
 
     # Get git status summary
     try:
         result = subprocess.run(
-            ['git', 'status', '--porcelain'],
-            capture_output=True, text=True, timeout=5
+            ["git", "status", "--porcelain"], capture_output=True, text=True, timeout=5
         )
         if result.returncode == 0:
-            lines = result.stdout.strip().split('\n')
+            lines = result.stdout.strip().split("\n")
             if lines and lines[0]:
                 modified = [
-                    line[3:] for line in lines
-                    if line.startswith(' M') or line.startswith('M ')
+                    line[3:] for line in lines if line.startswith(" M") or line.startswith("M ")
                 ]
                 added = [
-                    line[3:] for line in lines
-                    if line.startswith('A ') or line.startswith('??')
+                    line[3:] for line in lines if line.startswith("A ") or line.startswith("??")
                 ]
-                context['modified_files'] = set(modified[:10])
-                context['git_status'] = f"{len(modified)} modified, {len(added)} untracked"
+                context["modified_files"] = set(modified[:10])
+                context["git_status"] = f"{len(modified)} modified, {len(added)} untracked"
     except (subprocess.SubprocessError, FileNotFoundError, OSError) as e:
         logger.debug(f"Failed to get git status: {e}")
 

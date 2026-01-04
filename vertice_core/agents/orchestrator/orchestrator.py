@@ -61,12 +61,10 @@ class ActiveOrchestrator:
         self._iteration_count = 0
         self._start_time: Optional[float] = None
 
-        self._on_state_change: Optional[
-            Callable[[OrchestratorState, OrchestratorState], None]
-        ] = None
-        self._on_step_complete: Optional[
-            Callable[[ExecutionStep, ExecutionResult], None]
-        ] = None
+        self._on_state_change: Optional[Callable[[OrchestratorState, OrchestratorState], None]] = (
+            None
+        )
+        self._on_step_complete: Optional[Callable[[ExecutionStep, ExecutionResult], None]] = None
 
     def _transition_to(
         self,

@@ -68,34 +68,34 @@ class Message:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
-            'id': self.id,
-            'topic': self.topic,
-            'payload': self.payload,
-            'headers': self.headers,
-            'status': self.status.value,
-            'created_at': self.created_at,
-            'processed_at': self.processed_at,
-            'retry_count': self.retry_count,
-            'max_retries': self.max_retries,
-            'error': self.error,
+            "id": self.id,
+            "topic": self.topic,
+            "payload": self.payload,
+            "headers": self.headers,
+            "status": self.status.value,
+            "created_at": self.created_at,
+            "processed_at": self.processed_at,
+            "retry_count": self.retry_count,
+            "max_retries": self.max_retries,
+            "error": self.error,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Message':
+    def from_dict(cls, data: Dict[str, Any]) -> "Message":
         """Create from dictionary."""
         msg = cls(
-            id=data.get('id', str(uuid.uuid4())),
-            topic=data.get('topic', ''),
-            payload=data.get('payload'),
-            headers=data.get('headers', {}),
-            created_at=data.get('created_at', time.time()),
-            processed_at=data.get('processed_at'),
-            retry_count=data.get('retry_count', 0),
-            max_retries=data.get('max_retries', 3),
-            error=data.get('error'),
+            id=data.get("id", str(uuid.uuid4())),
+            topic=data.get("topic", ""),
+            payload=data.get("payload"),
+            headers=data.get("headers", {}),
+            created_at=data.get("created_at", time.time()),
+            processed_at=data.get("processed_at"),
+            retry_count=data.get("retry_count", 0),
+            max_retries=data.get("max_retries", 3),
+            error=data.get("error"),
         )
-        if 'status' in data:
-            msg.status = MessageStatus(data['status'])
+        if "status" in data:
+            msg.status = MessageStatus(data["status"])
         return msg
 
 
@@ -123,11 +123,7 @@ class IMessageQueue(ABC):
     """
 
     @abstractmethod
-    async def publish(
-        self,
-        message: Message,
-        delay: float = 0.0
-    ) -> str:
+    async def publish(self, message: Message, delay: float = 0.0) -> str:
         """
         Publish a message to the queue.
 
@@ -141,11 +137,7 @@ class IMessageQueue(ABC):
         pass
 
     @abstractmethod
-    async def consume(
-        self,
-        count: int = 1,
-        timeout: float = 0.0
-    ) -> List[Message]:
+    async def consume(self, count: int = 1, timeout: float = 0.0) -> List[Message]:
         """
         Consume messages from the queue.
 
@@ -172,11 +164,7 @@ class IMessageQueue(ABC):
         pass
 
     @abstractmethod
-    async def nack(
-        self,
-        message_id: str,
-        requeue: bool = True
-    ) -> bool:
+    async def nack(self, message_id: str, requeue: bool = True) -> bool:
         """
         Negative acknowledge message.
 
@@ -253,10 +241,7 @@ class IMessageBroker(ABC):
 
     @abstractmethod
     async def subscribe(
-        self,
-        topic: str,
-        handler: Callable[[Message], Any],
-        queue_name: Optional[str] = None
+        self, topic: str, handler: Callable[[Message], Any], queue_name: Optional[str] = None
     ) -> str:
         """
         Subscribe to a topic.
@@ -286,10 +271,7 @@ class IMessageBroker(ABC):
 
     @abstractmethod
     async def publish(
-        self,
-        topic: str,
-        payload: Any,
-        headers: Optional[Dict[str, str]] = None
+        self, topic: str, payload: Any, headers: Optional[Dict[str, str]] = None
     ) -> str:
         """
         Publish to a topic.
@@ -311,9 +293,9 @@ class IMessageBroker(ABC):
 
 
 __all__ = [
-    'IMessageQueue',
-    'IMessageBroker',
-    'Message',
-    'MessageStatus',
-    'QueueConfig',
+    "IMessageQueue",
+    "IMessageBroker",
+    "Message",
+    "MessageStatus",
+    "QueueConfig",
 ]

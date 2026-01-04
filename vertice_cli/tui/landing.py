@@ -30,6 +30,7 @@ NEON_MAGENTA = "#ff00ff"
 NEON_YELLOW = "#ffff00"
 DARK_BG = "#0a0a0a"
 
+
 class LandingScreen:
     """
     Premium landing screen for Neuroshell (2025 Edition).
@@ -67,20 +68,20 @@ class LandingScreen:
             subtitle=subtitle,
             subtitle_align="right",
             title="[bold white]SYSTEM INITIALIZED[/bold white]",
-            title_align="left"
+            title_align="left",
         )
 
     def _get_system_hud(self) -> Panel:
         """Render system vitals in a HUD style."""
         cpu = psutil.cpu_percent()
         mem = psutil.virtual_memory()
-        disk = psutil.disk_usage('/')
+        disk = psutil.disk_usage("/")
 
         # HUD Grid
         table = Table.grid(padding=(0, 2), expand=True)
         table.add_column(style=f"bold {NEON_GREEN}")
         table.add_column(justify="right", style="white")
-        table.add_column(style="dim white", width=10) # Bar column
+        table.add_column(style="dim white", width=10)  # Bar column
 
         # CPU
         cpu_bar = "█" * int(cpu / 10) + "░" * (10 - int(cpu / 10))
@@ -100,7 +101,7 @@ class LandingScreen:
             table,
             title=f"[bold {NEON_GREEN}]SYSTEM VITALS[/bold {NEON_GREEN}]",
             border_style=f"{NEON_GREEN}",
-            box=ROUNDED
+            box=ROUNDED,
         )
 
     def _get_quick_actions(self) -> Panel:
@@ -119,19 +120,20 @@ class LandingScreen:
 
         for key, desc in actions:
             table.add_row(f"{key}", f" {desc}")
-            table.add_row("", "") # Spacer
+            table.add_row("", "")  # Spacer
 
         return Panel(
             table,
             title=f"[bold {NEON_YELLOW}]QUICK ACTIONS[/bold {NEON_YELLOW}]",
             border_style=f"{NEON_YELLOW}",
-            box=ROUNDED
+            box=ROUNDED,
         )
 
     def _get_recent_sessions(self) -> Panel:
         """Render recent sessions list."""
         try:
             from ..session import SessionManager
+
             manager = SessionManager()
             sessions = manager.list_sessions(limit=3)
         except (ImportError, AttributeError, Exception):
@@ -145,9 +147,9 @@ class LandingScreen:
             table.add_column(justify="right", style="dim white")
 
             for s in sessions:
-                dt = datetime.fromisoformat(s['last_activity'])
+                dt = datetime.fromisoformat(s["last_activity"])
                 time_str = dt.strftime("%H:%M")
-                cwd_name = os.path.basename(s['cwd']) or "root"
+                cwd_name = os.path.basename(s["cwd"]) or "root"
 
                 table.add_row(f"⚡ {cwd_name}", time_str)
                 table.add_row(f"   [dim]{s['id'][:8]}...[/dim]", "")
@@ -158,7 +160,7 @@ class LandingScreen:
             content,
             title=f"[bold {NEON_MAGENTA}]RECENT LINKS[/bold {NEON_MAGENTA}]",
             border_style=f"{NEON_MAGENTA}",
-            box=ROUNDED
+            box=ROUNDED,
         )
 
     def _get_footer(self) -> Panel:
@@ -169,7 +171,7 @@ class LandingScreen:
             "TIP: Ctrl+D to disconnect safely",
             "STATUS: AI Model Connected",
             "STATUS: MCP Servers Online",
-            "TIP: Use natural language for complex tasks"
+            "TIP: Use natural language for complex tasks",
         ]
         tip = random.choice(tips)
 
@@ -177,7 +179,7 @@ class LandingScreen:
         return Panel(
             Align.center(Text(tip, style=f"italic {NEON_CYAN}")),
             box=SIMPLE,
-            border_style="dim white"
+            border_style="dim white",
         )
 
     def render(self) -> Layout:
@@ -188,18 +190,14 @@ class LandingScreen:
         layout.split_column(
             Layout(name="header", size=10),
             Layout(name="main", ratio=1),
-            Layout(name="footer", size=3)
+            Layout(name="footer", size=3),
         )
 
         # Header
         layout["header"].update(self._get_banner())
 
         # Main Grid: 3 Columns
-        layout["main"].split_row(
-            Layout(name="left"),
-            Layout(name="center"),
-            Layout(name="right")
-        )
+        layout["main"].split_row(Layout(name="left"), Layout(name="center"), Layout(name="right"))
 
         # Left: System Vitals
         layout["left"].update(self._get_system_hud())
@@ -215,8 +213,10 @@ class LandingScreen:
 
         return layout
 
+
 def create_landing_screen(console: Optional[Console] = None) -> LandingScreen:
     return LandingScreen(console)
+
 
 def show_landing_screen(console: Console, duration: float = 2.0):
     """Show landing screen for specified duration"""

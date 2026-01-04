@@ -64,15 +64,9 @@ class ExtractionResult:
 # Compiled regex patterns
 _PATTERNS = {
     # JSON code block: ```json ... ```
-    "json_block": re.compile(
-        r"```json\s*\n?(.*?)\n?```",
-        re.DOTALL | re.IGNORECASE
-    ),
+    "json_block": re.compile(r"```json\s*\n?(.*?)\n?```", re.DOTALL | re.IGNORECASE),
     # Generic code block that might contain JSON
-    "generic_block": re.compile(
-        r"```\s*\n?(\{.*?\}|\[.*?\])\n?```",
-        re.DOTALL
-    ),
+    "generic_block": re.compile(r"```\s*\n?(\{.*?\}|\[.*?\])\n?```", re.DOTALL),
     # Trailing comma before closing brace/bracket
     "trailing_comma": re.compile(r",\s*([}\]])"),
     # Single quotes that should be double quotes
@@ -359,12 +353,13 @@ class JSONExtractor:
             elif char == close_char:
                 depth -= 1
                 if depth == 0:
-                    return text[start:i + 1]
+                    return text[start : i + 1]
 
         return None
 
 
 # Convenience functions
+
 
 def extract_json(
     text: str,

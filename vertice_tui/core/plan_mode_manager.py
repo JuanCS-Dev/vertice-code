@@ -74,19 +74,19 @@ class PlanModeManager:
             "task": None,
             "exploration_log": [],
             "read_only": True,
-            "started_at": None
+            "started_at": None,
         }
 
     def _init_plan_mode(self) -> None:
         """Initialize plan mode state if not already done."""
-        if not hasattr(self, '_plan_mode') or self._plan_mode is None:
+        if not hasattr(self, "_plan_mode") or self._plan_mode is None:
             self._plan_mode = {
                 "active": False,
                 "plan_file": None,
                 "task": None,
                 "exploration_log": [],
                 "read_only": True,
-                "started_at": None
+                "started_at": None,
             }
 
     def enter_plan_mode(self, task: str = None) -> Dict[str, Any]:
@@ -119,11 +119,7 @@ class PlanModeManager:
             self._init_plan_mode()
 
             if self._plan_mode["active"]:
-                return {
-                    "success": False,
-                    "error": "Already in plan mode",
-                    "state": self._plan_mode
-                }
+                return {"success": False, "error": "Already in plan mode", "state": self._plan_mode}
 
             try:
                 # Create plan file
@@ -162,7 +158,7 @@ class PlanModeManager:
                     "task": task,
                     "exploration_log": [],
                     "read_only": True,
-                    "started_at": datetime.datetime.now().isoformat()
+                    "started_at": datetime.datetime.now().isoformat(),
                 }
 
                 logger.info(f"Entered plan mode for task: {task}")
@@ -172,15 +168,12 @@ class PlanModeManager:
                     "message": "Entered plan mode",
                     "plan_file": str(plan_file),
                     "task": task,
-                    "restrictions": "Write operations blocked until plan approved"
+                    "restrictions": "Write operations blocked until plan approved",
                 }
 
             except Exception as e:
                 logger.error(f"Failed to enter plan mode: {e}")
-                return {
-                    "success": False,
-                    "error": f"Failed to enter plan mode: {str(e)}"
-                }
+                return {"success": False, "error": f"Failed to enter plan mode: {str(e)}"}
 
     def exit_plan_mode(self, approved: bool = False) -> Dict[str, Any]:
         """
@@ -204,10 +197,7 @@ class PlanModeManager:
         self._init_plan_mode()
 
         if not self._plan_mode["active"]:
-            return {
-                "success": False,
-                "error": "Not in plan mode"
-            }
+            return {"success": False, "error": "Not in plan mode"}
 
         plan_file = self._plan_mode["plan_file"]
 
@@ -217,15 +207,13 @@ class PlanModeManager:
                 plan_path = Path(plan_file)
                 if plan_path.exists():
                     content = plan_path.read_text(encoding="utf-8")
-                    content = content.replace(
-                        "- [ ] Plan reviewed",
-                        "- [x] Plan reviewed"
-                    ).replace(
-                        "- [ ] Ready to implement",
-                        "- [x] Ready to implement"
-                    ).replace(
-                        "Status: IN PROGRESS",
-                        f"Status: APPROVED ({datetime.datetime.now().isoformat()})"
+                    content = (
+                        content.replace("- [ ] Plan reviewed", "- [x] Plan reviewed")
+                        .replace("- [ ] Ready to implement", "- [x] Ready to implement")
+                        .replace(
+                            "Status: IN PROGRESS",
+                            f"Status: APPROVED ({datetime.datetime.now().isoformat()})",
+                        )
                     )
                     plan_path.write_text(content, encoding="utf-8")
                     logger.info(f"Plan approved: {plan_file}")
@@ -237,7 +225,11 @@ class PlanModeManager:
             "approved": approved,
             "plan_file": plan_file,
             "exploration_count": len(self._plan_mode["exploration_log"]),
-            "message": "Plan approved - ready to implement" if approved else "Plan mode exited without approval"
+            "message": (
+                "Plan approved - ready to implement"
+                if approved
+                else "Plan mode exited without approval"
+            ),
         }
 
         # Reset state
@@ -247,7 +239,7 @@ class PlanModeManager:
             "task": None,
             "exploration_log": [],
             "read_only": True,
-            "started_at": None
+            "started_at": None,
         }
 
         logger.info(f"Exited plan mode (approved={approved})")
@@ -310,11 +302,9 @@ class PlanModeManager:
             return False
 
         # Add to in-memory log
-        self._plan_mode["exploration_log"].append({
-            "category": category,
-            "note": note,
-            "timestamp": datetime.datetime.now().isoformat()
-        })
+        self._plan_mode["exploration_log"].append(
+            {"category": category, "note": note, "timestamp": datetime.datetime.now().isoformat()}
+        )
 
         # Also append to plan file
         plan_file = self._plan_mode["plan_file"]
@@ -328,7 +318,7 @@ class PlanModeManager:
                     marker_map = {
                         "exploration": "## Exploration Notes",
                         "plan": "## Implementation Plan",
-                        "files": "## Files to Modify"
+                        "files": "## Files to Modify",
                     }
                     marker = marker_map.get(category, "## Exploration Notes")
 
@@ -406,7 +396,7 @@ class PlanModeManager:
             "active": self._plan_mode["active"],
             "duration": duration,
             "notes_count": len(self._plan_mode["exploration_log"]),
-            "plan_file": self._plan_mode["plan_file"]
+            "plan_file": self._plan_mode["plan_file"],
         }
 
     def get_exploration_log(self) -> List[Dict[str, Any]]:
@@ -436,6 +426,6 @@ class PlanModeManager:
                 "task": None,
                 "exploration_log": [],
                 "read_only": True,
-                "started_at": None
+                "started_at": None,
             }
             logger.warning("Plan mode forcibly cleared")

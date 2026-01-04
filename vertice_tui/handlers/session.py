@@ -27,12 +27,7 @@ class SessionCommandHandler:
     def bridge(self):
         return self.app.bridge
 
-    async def handle(
-        self,
-        command: str,
-        args: str,
-        view: "ResponseView"
-    ) -> None:
+    async def handle(self, command: str, args: str, view: "ResponseView") -> None:
         """Route to specific handler method."""
         handlers = {
             "/resume": self._handle_resume,
@@ -92,7 +87,9 @@ class SessionCommandHandler:
             if sessions:
                 lines = ["## 📚 Available Sessions\n"]
                 for s in sessions:
-                    lines.append(f"- `{s['session_id']}` ({s['message_count']} msgs) - {s.get('timestamp', '?')[:16]}")
+                    lines.append(
+                        f"- `{s['session_id']}` ({s['message_count']} msgs) - {s.get('timestamp', '?')[:16]}"
+                    )
                 lines.append("\nUse `/resume <session_id>` to restore.")
                 view.add_system_message("\n".join(lines))
             else:
@@ -157,7 +154,7 @@ class SessionCommandHandler:
             health = self.bridge.check_health()
             lines = ["## 🏥 Health Check\n"]
             for check, status in health.items():
-                icon = "✅" if status.get('ok') else "❌"
+                icon = "✅" if status.get("ok") else "❌"
                 lines.append(f"{icon} **{check}:** {status.get('message', 'OK')}")
             view.add_system_message("\n".join(lines))
         except Exception as e:
@@ -226,8 +223,7 @@ class SessionCommandHandler:
             removed = result.get("removed", [])
             if removed:
                 view.add_system_message(
-                    f"## 🔓 Logged Out\n\n"
-                    f"**Removed:** {', '.join(removed)}"
+                    f"## 🔓 Logged Out\n\n" f"**Removed:** {', '.join(removed)}"
                 )
             else:
                 view.add_system_message("No credentials found to remove.")
@@ -258,7 +254,9 @@ class SessionCommandHandler:
 
             if project_mem.get("exists"):
                 lines.append(f"### Project Memory (`{project_mem.get('file')}`)")
-                lines.append(f"*{project_mem.get('lines', 0)} lines, {project_mem.get('size', 0)} bytes*\n")
+                lines.append(
+                    f"*{project_mem.get('lines', 0)} lines, {project_mem.get('size', 0)} bytes*\n"
+                )
                 content = project_mem.get("content", "")[:500]
                 if content:
                     lines.append(f"```\n{content}\n```")
@@ -282,8 +280,7 @@ class SessionCommandHandler:
 
             if not mem_file.exists():
                 self.bridge.write_memory(
-                    "# Project Memory\n\nAdd persistent notes and context here.\n",
-                    scope="project"
+                    "# Project Memory\n\nAdd persistent notes and context here.\n", scope="project"
                 )
 
             try:
@@ -307,7 +304,12 @@ class SessionCommandHandler:
             category = "general"
             note = args
 
-            if ":" in args and args.split(":")[0].strip() in ["preferences", "patterns", "todos", "context"]:
+            if ":" in args and args.split(":")[0].strip() in [
+                "preferences",
+                "patterns",
+                "todos",
+                "context",
+            ]:
                 category, note = args.split(":", 1)
                 category = category.strip()
                 note = note.strip()

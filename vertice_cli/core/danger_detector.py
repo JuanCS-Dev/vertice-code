@@ -1,4 +1,5 @@
 """Minimal danger detector stub (consolidated from removed module)."""
+
 from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional
@@ -6,6 +7,7 @@ from typing import List, Optional
 
 class DangerLevel(Enum):
     """Danger level for commands."""
+
     SAFE = "safe"
     LOW = "low"
     MEDIUM = "medium"
@@ -16,6 +18,7 @@ class DangerLevel(Enum):
 @dataclass
 class DangerWarning:
     """Warning about dangerous operation."""
+
     level: DangerLevel
     message: str
     command: str
@@ -45,12 +48,14 @@ class DangerDetector:
 
         for pattern, level, message in self.DANGEROUS_PATTERNS:
             if pattern.lower() in cmd_lower:
-                warnings.append(DangerWarning(
-                    level=level,
-                    message=message,
-                    command=command,
-                    suggestion="Review this command carefully before executing"
-                ))
+                warnings.append(
+                    DangerWarning(
+                        level=level,
+                        message=message,
+                        command=command,
+                        suggestion="Review this command carefully before executing",
+                    )
+                )
 
         return warnings
 

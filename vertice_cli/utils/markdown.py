@@ -69,24 +69,14 @@ class CodeBlock:
 # Compiled regex patterns for performance
 _PATTERNS = {
     # Fenced with language: ```python\n...\n```
-    "fenced_lang": re.compile(
-        r"```(\w+)\s*\n(.*?)```",
-        re.DOTALL
-    ),
+    "fenced_lang": re.compile(r"```(\w+)\s*\n(.*?)```", re.DOTALL),
     # Fenced generic: ```\n...\n```
-    "fenced_generic": re.compile(
-        r"```\s*\n?(.*?)```",
-        re.DOTALL
-    ),
+    "fenced_generic": re.compile(r"```\s*\n?(.*?)```", re.DOTALL),
     # Indented blocks (4 spaces or tab at start of line)
-    "indented": re.compile(
-        r"(?:^|\n)((?:[ ]{4}|\t).*(?:\n(?:[ ]{4}|\t).*)*)",
-        re.MULTILINE
-    ),
+    "indented": re.compile(r"(?:^|\n)((?:[ ]{4}|\t).*(?:\n(?:[ ]{4}|\t).*)*)", re.MULTILINE),
     # Inline Python patterns (def, class, import, etc.)
     "inline_python": re.compile(
-        r"(?:^|\n)((?:def |class |import |from |async def |@).+(?:\n(?:    |\t).+)*)",
-        re.MULTILINE
+        r"(?:^|\n)((?:def |class |import |from |async def |@).+(?:\n(?:    |\t).+)*)", re.MULTILINE
     ),
 }
 
@@ -205,22 +195,26 @@ class MarkdownExtractor:
                 continue
 
             if content:
-                blocks.append(CodeBlock(
-                    content=content,
-                    language=lang,
-                    source="fenced",
-                ))
+                blocks.append(
+                    CodeBlock(
+                        content=content,
+                        language=lang,
+                        source="fenced",
+                    )
+                )
 
         # If no language filter, also try generic fences
         if not language:
             for match in _PATTERNS["fenced_generic"].finditer(text):
                 content = match.group(1).strip()
                 if content and not self._is_already_matched(content, blocks):
-                    blocks.append(CodeBlock(
-                        content=content,
-                        language="",
-                        source="fenced",
-                    ))
+                    blocks.append(
+                        CodeBlock(
+                            content=content,
+                            language="",
+                            source="fenced",
+                        )
+                    )
 
         return blocks
 
@@ -238,11 +232,13 @@ class MarkdownExtractor:
             )
 
             if dedented.strip():
-                blocks.append(CodeBlock(
-                    content=dedented.strip(),
-                    language="",
-                    source="indented",
-                ))
+                blocks.append(
+                    CodeBlock(
+                        content=dedented.strip(),
+                        language="",
+                        source="indented",
+                    )
+                )
 
         return blocks
 
@@ -253,11 +249,13 @@ class MarkdownExtractor:
         for match in _PATTERNS["inline_python"].finditer(text):
             content = match.group(1).strip()
             if content:
-                blocks.append(CodeBlock(
-                    content=content,
-                    language="python",
-                    source="inline",
-                ))
+                blocks.append(
+                    CodeBlock(
+                        content=content,
+                        language="python",
+                        source="inline",
+                    )
+                )
 
         return blocks
 
@@ -284,6 +282,7 @@ class MarkdownExtractor:
 
 
 # Convenience functions for simple use cases
+
 
 def extract_code_blocks(
     text: str,

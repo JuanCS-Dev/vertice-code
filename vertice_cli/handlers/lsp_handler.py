@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 class LSPHandler:
     """Handler for LSP-related commands."""
 
-    def __init__(self, shell: 'InteractiveShell'):
+    def __init__(self, shell: "InteractiveShell"):
         """Initialize with shell reference."""
         self.shell = shell
         self.console = shell.console
@@ -99,11 +99,13 @@ class LSPHandler:
             hover_info = await self.shell.lsp_client.hover(file_path, line, char)
 
             if hover_info:
-                self.console.print(Panel(
-                    hover_info.contents,
-                    title=f"Hover: {file_path}:{line}:{char}",
-                    border_style="cyan"
-                ))
+                self.console.print(
+                    Panel(
+                        hover_info.contents,
+                        title=f"Hover: {file_path}:{line}:{char}",
+                        border_style="cyan",
+                    )
+                )
             else:
                 self.console.print("[dim]No hover information available[/dim]")
 
@@ -183,10 +185,10 @@ class LSPHandler:
                 self.console.print(f"\n[bold]Diagnostics for {file_path}:[/bold]\n")
                 for diag in diagnostics:
                     severity_colors = {
-                        1: "red",      # Error
-                        2: "yellow",   # Warning
-                        3: "blue",     # Info
-                        4: "dim"       # Hint
+                        1: "red",  # Error
+                        2: "yellow",  # Warning
+                        3: "blue",  # Info
+                        4: "dim",  # Hint
                     }
                     color = severity_colors.get(diag.severity, "white")
 
@@ -220,14 +222,16 @@ class LSPHandler:
                 self.console.print(f"\n[bold]Code Completions ({len(completions)} items):[/bold]\n")
                 for item in completions[:20]:  # Show top 20
                     kind_emoji = {
-                        "Function": "🔧", "Method": "⚙️", "Variable": "📦",
-                        "Class": "📚", "Module": "📁", "Constant": "🔒"
+                        "Function": "🔧",
+                        "Method": "⚙️",
+                        "Variable": "📦",
+                        "Class": "📚",
+                        "Module": "📁",
+                        "Constant": "🔒",
                     }.get(item.kind_name, "•")
 
                     detail = f" - {item.detail}" if item.detail else ""
-                    self.console.print(
-                        f"  {kind_emoji} [cyan]{item.label}[/cyan]{detail}"
-                    )
+                    self.console.print(f"  {kind_emoji} [cyan]{item.label}[/cyan]{detail}")
                     if item.documentation:
                         doc_preview = item.documentation[:60]
                         self.console.print(f"     [dim]{doc_preview}[/dim]")

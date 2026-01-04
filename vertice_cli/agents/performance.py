@@ -152,30 +152,26 @@ class PerformanceAgent(BaseAgent):
         return {
             # N+1 Query pattern: DB query inside loop
             "query_in_loop": re.compile(
-                r'(for|while)\s+.*?:\s*.*?(\.get\(|\.filter\(|\.execute\(|\.query\()',
+                r"(for|while)\s+.*?:\s*.*?(\.get\(|\.filter\(|\.execute\(|\.query\()",
                 re.DOTALL | re.IGNORECASE,
             ),
             # String concatenation in loop
-            "string_concat": re.compile(
-                r'(for|while)\s+.*?:\s*.*?\+=.*?["\']', re.DOTALL
-            ),
+            "string_concat": re.compile(r'(for|while)\s+.*?:\s*.*?\+=.*?["\']', re.DOTALL),
             # Blocking I/O (sync operations)
             "blocking_io": re.compile(
-                r'(requests\.get|requests\.post|open\(|urlopen\()',
+                r"(requests\.get|requests\.post|open\(|urlopen\()",
                 re.IGNORECASE,
             ),
             # Global lookups in loops
-            "global_in_loop": re.compile(
-                r'(for|while)\s+.*?:\s*.*?global\s+', re.DOTALL
-            ),
+            "global_in_loop": re.compile(r"(for|while)\s+.*?:\s*.*?global\s+", re.DOTALL),
             # Uncompiled regex in loops
             "regex_in_loop": re.compile(
-                r'(for|while)\s+.*?:\s*.*?re\.(match|search|findall)',
+                r"(for|while)\s+.*?:\s*.*?re\.(match|search|findall)",
                 re.DOTALL,
             ),
             # List comprehension vs loop (positive pattern)
             "loop_vs_comprehension": re.compile(
-                r'for\s+\w+\s+in\s+.*?:\s*\w+\.append\(',
+                r"for\s+\w+\s+in\s+.*?:\s*\w+\.append\(",
                 re.DOTALL,
             ),
         }
@@ -216,9 +212,7 @@ class PerformanceAgent(BaseAgent):
             score = self._calculate_performance_score(bottlenecks)
 
             # Generate report
-            report = self._generate_report(
-                bottlenecks, profile_results, score, python_files
-            )
+            report = self._generate_report(bottlenecks, profile_results, score, python_files)
 
             return AgentResponse(
                 success=True,
@@ -306,9 +300,7 @@ class PerformanceAgent(BaseAgent):
 
                         if nested_level >= 2:
                             complexity = (
-                                ComplexityLevel.O_N2
-                                if nested_level == 2
-                                else ComplexityLevel.O_N3
+                                ComplexityLevel.O_N2 if nested_level == 2 else ComplexityLevel.O_N3
                             )
                             severity = "high" if nested_level == 2 else "critical"
 
@@ -321,9 +313,7 @@ class PerformanceAgent(BaseAgent):
                                     file=str(file_path),
                                     line=node.lineno,
                                     function=self._get_function_name(node, tree),
-                                    code_snippet=self._get_code_snippet(
-                                        source, node.lineno
-                                    ),
+                                    code_snippet=self._get_code_snippet(source, node.lineno),
                                     description=f"Nested loop detected ({complexity})",
                                     optimization="Consider using set operations, dict lookups, or vectorization",
                                     estimated_impact=f"{10 ** nested_level}x faster with optimization",
@@ -399,9 +389,7 @@ class PerformanceAgent(BaseAgent):
                                 and inner.func.attr == "append"
                             ):
                                 # Check if no break condition
-                                has_break = any(
-                                    isinstance(n, ast.Break) for n in ast.walk(node)
-                                )
+                                has_break = any(isinstance(n, ast.Break) for n in ast.walk(node))
 
                                 if not has_break:
                                     bottlenecks.append(
@@ -410,9 +398,7 @@ class PerformanceAgent(BaseAgent):
                                             severity="medium",
                                             file=str(file_path),
                                             line=node.lineno,
-                                            function=self._get_function_name(
-                                                node, tree
-                                            ),
+                                            function=self._get_function_name(node, tree),
                                             code_snippet=self._get_code_snippet(
                                                 source, node.lineno
                                             ),

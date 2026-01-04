@@ -22,8 +22,7 @@ if TYPE_CHECKING:
 
 
 async def generate_clarifying_questions(
-    agent: "PlannerAgent",
-    task: "AgentTask"
+    agent: "PlannerAgent", task: "AgentTask"
 ) -> List[ClarifyingQuestion]:
     """
     Generate 2-3 targeted clarifying questions based on the task.
@@ -46,12 +45,14 @@ async def generate_clarifying_questions(
         if data and "questions" in data:
             questions = []
             for q in data["questions"][:3]:  # Max 3 questions
-                questions.append(ClarifyingQuestion(
-                    question=q.get("question", ""),
-                    category=q.get("category", "general"),
-                    options=q.get("options", []),
-                    required=q.get("required", False)
-                ))
+                questions.append(
+                    ClarifyingQuestion(
+                        question=q.get("question", ""),
+                        category=q.get("category", "general"),
+                        options=q.get("options", []),
+                        required=q.get("required", False),
+                    )
+                )
             return questions
     except Exception as e:
         agent.logger.warning(f"Failed to generate clarifying questions: {e}")
@@ -67,21 +68,21 @@ def get_default_questions() -> List[ClarifyingQuestion]:
             question="What is the scope of this task? (e.g., single file, module, entire project)",
             category="scope",
             options=["Single file", "Module/directory", "Entire project"],
-            required=False
+            required=False,
         ),
         ClarifyingQuestion(
             question="Do you want tests written for the changes?",
             category="preferences",
             options=["Yes, with high coverage", "Basic tests only", "No tests needed"],
-            required=False
-        )
+            required=False,
+        ),
     ]
 
 
 async def execute_with_clarification(
     agent: "PlannerAgent",
     task: "AgentTask",
-    responses: Optional[List[ClarificationResponse]] = None
+    responses: Optional[List[ClarificationResponse]] = None,
 ) -> "AgentResponse":
     """
     Execute planning with optional clarifying questions.
@@ -120,9 +121,7 @@ async def execute_with_clarification(
     # Step 2: Enrich task context with clarification responses
     enriched_context = task.context.copy() if task.context else {}
     enriched_context["clarifications"] = {
-        r.question_id: r.answer
-        for r in clarification_responses
-        if not r.skipped
+        r.question_id: r.answer for r in clarification_responses if not r.skipped
     }
 
     enriched_task = AgentTask(
@@ -130,7 +129,7 @@ async def execute_with_clarification(
         request=task.request,
         context=enriched_context,
         session_id=task.session_id,
-        metadata=task.metadata
+        metadata=task.metadata,
     )
 
     # Step 3: Execute standard planning
@@ -156,6 +155,7 @@ async def execute_with_clarification(
 
             # Generate plan.md artifact
             from .artifact import generate_plan_artifact
+
             artifact_path = await generate_plan_artifact(agent, plan_data, task)
             if artifact_path:
                 plan_data["plan_artifact_path"] = artifact_path

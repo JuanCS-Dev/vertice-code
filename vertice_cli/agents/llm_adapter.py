@@ -19,20 +19,20 @@ from typing import Any, Dict, Optional, AsyncIterator
 class LLMClientAdapter:
     """
     Adapter that adds "thinking" capabilities to existing LLMClient.
-    
+
     This is the HONEST way to add features:
     1. Wraps existing client (no changes needed)
     2. Adds new methods that use existing methods internally
     3. Graceful degradation when features unavailable
     4. Zero breaking changes
-    
+
     Usage:
         original_client = LLMClient(...)
         enhanced_client = LLMClientAdapter(original_client)
-        
+
         # Old code still works
         response = await enhanced_client.generate(prompt)
-        
+
         # New code gets benefits
         result = await enhanced_client.generate_with_thinking(prompt, budget=5000)
     """
@@ -40,7 +40,7 @@ class LLMClientAdapter:
     def __init__(self, llm_client: Any):
         """
         Wrap existing LLMClient.
-        
+
         Args:
             llm_client: Your existing LLMClient instance
         """
@@ -48,9 +48,9 @@ class LLMClientAdapter:
         self.logger = logging.getLogger("llm_adapter")
 
         # Check what the client actually supports
-        self._has_generate = hasattr(llm_client, 'generate')
-        self._has_stream = hasattr(llm_client, 'stream')
-        self._has_stream_chat = hasattr(llm_client, 'stream_chat')
+        self._has_generate = hasattr(llm_client, "generate")
+        self._has_stream = hasattr(llm_client, "stream")
+        self._has_stream_chat = hasattr(llm_client, "stream_chat")
 
         self.logger.info(
             f"LLMClientAdapter initialized - "
@@ -126,18 +126,18 @@ class LLMClientAdapter:
     ) -> Dict[str, Any]:
         """
         Simulate "extended thinking" using existing generate().
-        
+
         This is HONEST implementation:
         - Uses two-phase prompting (think → respond)
         - Tracks approximate tokens
         - Returns structured result
         - No fancy features claimed - just good prompting
-        
+
         Args:
             prompt: The actual task/question
             system_prompt: System context
             thinking_budget: Max tokens for thinking phase
-            
+
         Returns:
             {
                 "thinking": "reasoning trace",
@@ -201,18 +201,18 @@ Now provide the final, concise answer to: {prompt}
     ) -> str:
         """
         Request structured JSON output using prompt engineering.
-        
+
         This is HONEST implementation:
         - Adds JSON schema to prompt
         - Requests valid JSON output
         - No guaranteed schema validation (that's Nov 2025 beta)
         - But works well in practice
-        
+
         Args:
             prompt: The actual task
             system_prompt: System context
             schema: Optional JSON schema hint
-            
+
         Returns:
             JSON string (hopefully valid)
         """
@@ -243,7 +243,7 @@ Your response must be parseable JSON.
     ) -> AsyncIterator[Dict[str, Any]]:
         """
         Stream thinking + response for real-time UI.
-        
+
         Yields events:
             {"type": "thinking", "content": "..."}
             {"type": "response", "content": "..."}
@@ -299,11 +299,11 @@ Now provide the final answer to: {prompt}
 
     def supports_native_thinking(self) -> bool:
         """Does the underlying client natively support thinking?"""
-        return hasattr(self._client, 'generate_with_thinking')
+        return hasattr(self._client, "generate_with_thinking")
 
     def supports_native_structured(self) -> bool:
         """Does the underlying client natively support structured outputs?"""
-        return hasattr(self._client, 'generate_structured')
+        return hasattr(self._client, "generate_structured")
 
     def get_capabilities(self) -> Dict[str, bool]:
         """Get adapter capabilities"""
@@ -322,19 +322,20 @@ Now provide the final answer to: {prompt}
 # CONVENIENCE WRAPPER
 # ============================================================================
 
+
 def wrap_llm_client(client: Any) -> LLMClientAdapter:
     """
     Convenience function to wrap an LLMClient.
-    
+
     Usage:
         from llm_adapter import wrap_llm_client
-        
+
         original = LLMClient(...)
         enhanced = wrap_llm_client(original)
-        
+
         # All old code works
         response = await enhanced.generate(prompt)
-        
+
         # New code gets features
         result = await enhanced.generate_with_thinking(prompt, budget=5000)
     """

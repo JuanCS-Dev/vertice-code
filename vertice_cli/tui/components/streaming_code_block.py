@@ -31,6 +31,7 @@ from rich.style import Style
 # Clipboard support
 try:
     import pyperclip
+
     CLIPBOARD_AVAILABLE = True
 except ImportError:
     CLIPBOARD_AVAILABLE = False
@@ -40,6 +41,7 @@ try:
     from pygments.lexers import get_lexer_by_name, guess_lexer
     from pygments.token import Token
     from pygments.util import ClassNotFound
+
     PYGMENTS_AVAILABLE = True
 except ImportError:
     PYGMENTS_AVAILABLE = False
@@ -101,6 +103,7 @@ TOKEN_STYLES = {
 @dataclass
 class CachedToken:
     """Token com informação de cache."""
+
     token_type: str
     value: str
     style: Style
@@ -110,6 +113,7 @@ class CachedToken:
 @dataclass
 class IncrementalState:
     """Estado do highlighting incremental."""
+
     cached_tokens: List[CachedToken] = field(default_factory=list)
     last_complete_line: int = 0
     incomplete_line: str = ""
@@ -178,7 +182,7 @@ class IncrementalSyntaxHighlighter:
         self.state.incomplete_line += chunk
 
         # Divide em linhas
-        lines = self.state.incomplete_line.split('\n')
+        lines = self.state.incomplete_line.split("\n")
 
         # Processa linhas completas (todas exceto última)
         for line in lines[:-1]:
@@ -193,8 +197,7 @@ class IncrementalSyntaxHighlighter:
         # Parseia linha incompleta (sem cachear)
         if self.state.incomplete_line:
             incomplete_tokens = self._tokenize_line(
-                self.state.incomplete_line,
-                self.state.total_lines + 1
+                self.state.incomplete_line, self.state.total_lines + 1
             )
             all_tokens.extend(incomplete_tokens)
 
@@ -213,30 +216,35 @@ class IncrementalSyntaxHighlighter:
 
         if PYGMENTS_AVAILABLE and self._lexer:
             try:
-                for token_type, value in lex(line + '\n', self._lexer):
-                    if value.strip() or value == '\n':
-                        tokens.append(CachedToken(
-                            token_type=str(token_type),
-                            value=value.rstrip('\n'),
-                            style=self._get_token_style(token_type),
-                            line_number=line_number,
-                        ))
-            except Exception:
-                # Fallback: texto simples
-                tokens.append(CachedToken(
+                for token_type, value in lex(line + "\n", self._lexer):
+                    if value.strip() or value == "\n":
+                        tokens.append(
+                            CachedToken(
+                                token_type=str(token_type),
+                                value=value.rstrip("\n"),
+                                style=self._get_token_style(token_type),
+                                line_number=line_number,
+                            )
+                        )
+            except (ValueError, TypeError):
+                tokens.append(
+                    CachedToken(
+                        token_type="text",
+                        value=line,
+                        style=TOKEN_STYLES["default"],
+                        line_number=line_number,
+                    )
+                )
+        else:
+            # Sem Pygments: texto simples
+            tokens.append(
+                CachedToken(
                     token_type="text",
                     value=line,
                     style=TOKEN_STYLES["default"],
                     line_number=line_number,
-                ))
-        else:
-            # Sem Pygments: texto simples
-            tokens.append(CachedToken(
-                token_type="text",
-                value=line,
-                style=TOKEN_STYLES["default"],
-                line_number=line_number,
-            ))
+                )
+            )
 
         return tokens
 
@@ -280,8 +288,7 @@ class IncrementalSyntaxHighlighter:
 
             # Tokeniza e adiciona
             incomplete_tokens = self._tokenize_line(
-                self.state.incomplete_line,
-                self.state.total_lines + 1
+                self.state.incomplete_line, self.state.total_lines + 1
             )
             for token in incomplete_tokens:
                 text.append(token.value, style=token.style)
@@ -370,12 +377,14 @@ class StreamingCodeBlock(Widget):
 
     class CodeStreamStarted(Message):
         """Streaming de código iniciado."""
+
         def __init__(self, language: str):
             self.language = language
             super().__init__()
 
     class CodeStreamEnded(Message):
         """Streaming de código finalizado."""
+
         def __init__(self, code: str, language: str, line_count: int):
             self.code = code
             self.language = language
@@ -489,7 +498,7 @@ class StreamingCodeBlock(Widget):
             try:
                 pyperclip.copy(self._code)
                 copied = True
-            except Exception:
+            except (OSError, RuntimeError):
                 pass
 
         if not copied:
@@ -497,7 +506,7 @@ class StreamingCodeBlock(Widget):
             try:
                 self.app.copy_to_clipboard(self._code)
                 copied = True
-            except Exception:
+            except (AttributeError, RuntimeError):
                 pass
 
         if copied:
@@ -510,7 +519,7 @@ class StreamingCodeBlock(Widget):
             # Notify app if possible
             try:
                 self.app.notify("Code copied to clipboard", title="Copied!", timeout=2)
-            except Exception:
+            except (AttributeError, RuntimeError):
                 pass
 
             # Reset after delay
@@ -584,8 +593,9 @@ class StreamingCodeBlock(Widget):
         # Handle collapsed state
         if self._collapsed and line_count > self.COLLAPSE_THRESHOLD:
             preview_lines = 5
-            preview = '\n'.join(self._code.split('\n')[:preview_lines])
+            preview = "\n".join(self._code.split("\n")[:preview_lines])
             from rich.text import Text
+
             collapsed_text = Text(preview + f"\n... ({line_count - preview_lines} more lines)")
             self._content.update(collapsed_text)
         else:
@@ -631,11 +641,13 @@ class StreamingCodeBlock(Widget):
             )
             self._header.update(f" {lang_display} | {line_count} lines")
 
-        self.post_message(self.CodeStreamEnded(
-            self._code,
-            self.language,
-            self._highlighter.state.total_lines,
-        ))
+        self.post_message(
+            self.CodeStreamEnded(
+                self._code,
+                self.language,
+                self._highlighter.state.total_lines,
+            )
+        )
 
     def set_code(self, code: str, language: Optional[str] = None) -> None:
         """

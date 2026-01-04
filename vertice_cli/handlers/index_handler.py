@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 class IndexHandler:
     """Handler for indexing and search commands."""
 
-    def __init__(self, shell: 'InteractiveShell'):
+    def __init__(self, shell: "InteractiveShell"):
         """Initialize with shell reference."""
         self.shell = shell
         self.console = shell.console
@@ -69,7 +69,7 @@ class IndexHandler:
                 f"[yellow]{symbol.file_path}:{symbol.line_number}[/yellow]"
             )
             if symbol.docstring:
-                doc_preview = symbol.docstring.split('\n')[0][:60]
+                doc_preview = symbol.docstring.split("\n")[0][:60]
                 self.console.print(f"    [dim]→ {doc_preview}...[/dim]")
 
         return CommandResult.ok()
@@ -87,21 +87,27 @@ class IndexHandler:
                 return CommandResult.error(f"[red]File not found: {file_path}[/red]")
 
             # Get file recommendations
-            recommendations = self.shell.suggestion_engine.suggest_related_files(file_path, max_suggestions=5)
+            recommendations = self.shell.suggestion_engine.suggest_related_files(
+                file_path, max_suggestions=5
+            )
 
             if recommendations:
                 self.console.print(f"\n[bold]💡 Related files for {file_path.name}:[/bold]\n")
 
                 for rec in recommendations:
-                    rel_path = rec.file_path.relative_to(Path.cwd()) if rec.file_path.is_relative_to(Path.cwd()) else rec.file_path
+                    rel_path = (
+                        rec.file_path.relative_to(Path.cwd())
+                        if rec.file_path.is_relative_to(Path.cwd())
+                        else rec.file_path
+                    )
                     score_bar = "█" * int(rec.relevance_score * 10)
 
                     type_emoji = {
-                        'import': '📦',
-                        'test': '🧪',
-                        'dependency': '🔗',
-                        'similar': '📄'
-                    }.get(rec.relationship_type, '📌')
+                        "import": "📦",
+                        "test": "🧪",
+                        "dependency": "🔗",
+                        "similar": "📄",
+                    }.get(rec.relationship_type, "📌")
 
                     self.console.print(
                         f"  {type_emoji} [cyan]{rel_path}[/cyan]\n"
@@ -118,12 +124,8 @@ class IndexHandler:
                 self.console.print("\n[bold]🔧 Code suggestions:[/bold]\n")
 
                 for sug in code_suggestions[:5]:  # Top 5
-                    impact_colors = {
-                        'high': 'red',
-                        'medium': 'yellow',
-                        'low': 'blue'
-                    }
-                    color = impact_colors.get(sug.impact, 'white')
+                    impact_colors = {"high": "red", "medium": "yellow", "low": "blue"}
+                    color = impact_colors.get(sug.impact, "white")
 
                     self.console.print(
                         f"  Line {sug.line_number}: [{color}]{sug.impact.upper()}[/{color}] {sug.suggestion}"

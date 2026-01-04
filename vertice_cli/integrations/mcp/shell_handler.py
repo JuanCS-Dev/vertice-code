@@ -1,4 +1,5 @@
 """Reverse shell handler for MCP - PTY-based interactive shell."""
+
 import asyncio
 import os
 import pty
@@ -69,31 +70,32 @@ class ShellSession:
                     data = os.read(self.master_fd, 4096)
                     if not data:
                         break
-                    output.append(data.decode('utf-8', errors='replace'))
+                    output.append(data.decode("utf-8", errors="replace"))
                 except OSError:
                     break
 
         except Exception as e:
             logger.error(f"Read error: {e}")
 
-        return ''.join(output)
+        return "".join(output)
 
     async def execute(self, command: str, timeout: float = 30.0) -> dict:
         """Execute command and return output."""
-        from ...security_hardening import CommandValidator
+        from ...tools.exec_hardened import CommandValidator
+
         if not CommandValidator.validate(command):
             return {
                 "success": False,
                 "error": f"Dangerous command blocked: {command}",
                 "session_id": self.session_id,
-                "command": command
+                "command": command,
             }
 
         if not self._running:
             await self.start()
 
         try:
-            await self.write(command + '\n')
+            await self.write(command + "\n")
             await asyncio.sleep(0.5)
 
             output = await self.read(timeout=1.0)
@@ -103,14 +105,14 @@ class ShellSession:
                 "output": output,
                 "session_id": self.session_id,
                 "command": command,
-                "cwd": self.cwd
+                "cwd": self.cwd,
             }
         except Exception as e:
             return {
                 "success": False,
                 "error": str(e),
                 "session_id": self.session_id,
-                "command": command
+                "command": command,
             }
 
     async def resize(self, rows: int, cols: int):

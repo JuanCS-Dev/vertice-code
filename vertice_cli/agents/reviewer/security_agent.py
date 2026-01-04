@@ -23,60 +23,60 @@ class SecurityAgent(ast.NodeVisitor):
     """
 
     DANGEROUS_CALLS = {
-        'eval': {
-            'severity': IssueSeverity.CRITICAL,
-            'message': 'Use of eval() is a critical security risk',
-            'explanation': 'eval() can execute arbitrary code and is a common attack vector',
-            'fix': 'Replace with ast.literal_eval() for literals or json.loads() for JSON'
+        "eval": {
+            "severity": IssueSeverity.CRITICAL,
+            "message": "Use of eval() is a critical security risk",
+            "explanation": "eval() can execute arbitrary code and is a common attack vector",
+            "fix": "Replace with ast.literal_eval() for literals or json.loads() for JSON",
         },
-        'exec': {
-            'severity': IssueSeverity.CRITICAL,
-            'message': 'Use of exec() is a critical security risk',
-            'explanation': 'exec() executes arbitrary Python code',
-            'fix': 'Refactor to avoid dynamic code execution'
+        "exec": {
+            "severity": IssueSeverity.CRITICAL,
+            "message": "Use of exec() is a critical security risk",
+            "explanation": "exec() executes arbitrary Python code",
+            "fix": "Refactor to avoid dynamic code execution",
         },
-        '__import__': {
-            'severity': IssueSeverity.HIGH,
-            'message': 'Dynamic import with __import__() can be dangerous',
-            'explanation': 'Can be used to import arbitrary modules',
-            'fix': 'Use standard import statements or importlib.import_module() with validation'
-        }
+        "__import__": {
+            "severity": IssueSeverity.HIGH,
+            "message": "Dynamic import with __import__() can be dangerous",
+            "explanation": "Can be used to import arbitrary modules",
+            "fix": "Use standard import statements or importlib.import_module() with validation",
+        },
     }
 
     DANGEROUS_METHODS = {
-        ('pickle', 'loads'): {
-            'severity': IssueSeverity.HIGH,
-            'message': 'pickle.loads() can execute arbitrary code',
-            'explanation': 'Unpickling untrusted data is dangerous',
-            'fix': 'Use JSON or other safe serialization formats'
+        ("pickle", "loads"): {
+            "severity": IssueSeverity.HIGH,
+            "message": "pickle.loads() can execute arbitrary code",
+            "explanation": "Unpickling untrusted data is dangerous",
+            "fix": "Use JSON or other safe serialization formats",
         },
-        ('subprocess', 'call'): {
-            'severity': IssueSeverity.HIGH,
-            'message': 'subprocess.call() without shell=False is risky',
-            'explanation': 'Can lead to command injection if user input is used',
-            'fix': 'Use subprocess.run() with explicit args list and shell=False'
+        ("subprocess", "call"): {
+            "severity": IssueSeverity.HIGH,
+            "message": "subprocess.call() without shell=False is risky",
+            "explanation": "Can lead to command injection if user input is used",
+            "fix": "Use subprocess.run() with explicit args list and shell=False",
         },
-        ('os', 'system'): {
-            'severity': IssueSeverity.CRITICAL,
-            'message': 'os.system() is vulnerable to command injection',
-            'explanation': 'Executes shell commands directly',
-            'fix': 'Use subprocess.run() with explicit args list'
+        ("os", "system"): {
+            "severity": IssueSeverity.CRITICAL,
+            "message": "os.system() is vulnerable to command injection",
+            "explanation": "Executes shell commands directly",
+            "fix": "Use subprocess.run() with explicit args list",
         },
-        ('hashlib', 'md5'): {
-            'severity': IssueSeverity.HIGH,
-            'message': 'MD5 is cryptographically broken, do not use for security',
-            'explanation': 'MD5 is vulnerable to collision attacks',
-            'fix': 'Use bcrypt, argon2, or scrypt for passwords; SHA-256+ for integrity'
+        ("hashlib", "md5"): {
+            "severity": IssueSeverity.HIGH,
+            "message": "MD5 is cryptographically broken, do not use for security",
+            "explanation": "MD5 is vulnerable to collision attacks",
+            "fix": "Use bcrypt, argon2, or scrypt for passwords; SHA-256+ for integrity",
         },
-        ('hashlib', 'sha1'): {
-            'severity': IssueSeverity.MEDIUM,
-            'message': 'SHA-1 is deprecated for security purposes',
-            'explanation': 'SHA-1 has known vulnerabilities',
-            'fix': 'Use SHA-256 or SHA-3 for cryptographic purposes'
+        ("hashlib", "sha1"): {
+            "severity": IssueSeverity.MEDIUM,
+            "message": "SHA-1 is deprecated for security purposes",
+            "explanation": "SHA-1 has known vulnerabilities",
+            "fix": "Use SHA-256 or SHA-3 for cryptographic purposes",
         },
     }
 
-    SQL_KEYWORDS = {'select', 'insert', 'update', 'delete', 'drop', 'execute', 'exec'}
+    SQL_KEYWORDS = {"select", "insert", "update", "delete", "drop", "execute", "exec"}
 
     def __init__(self, file_path: str):
         self.file_path = file_path
@@ -95,18 +95,20 @@ class SecurityAgent(ast.NodeVisitor):
             func_name = node.func.id
             if func_name in self.DANGEROUS_CALLS:
                 danger = self.DANGEROUS_CALLS[func_name]
-                self.issues.append(CodeIssue(
-                    file=self.file_path,
-                    line=node.lineno,
-                    end_line=node.end_lineno,
-                    severity=danger['severity'],
-                    category=IssueCategory.SECURITY,
-                    message=danger['message'],
-                    explanation=danger['explanation'],
-                    fix_suggestion=danger['fix'],
-                    auto_fixable=False,
-                    confidence=1.0
-                ))
+                self.issues.append(
+                    CodeIssue(
+                        file=self.file_path,
+                        line=node.lineno,
+                        end_line=node.end_lineno,
+                        severity=danger["severity"],
+                        category=IssueCategory.SECURITY,
+                        message=danger["message"],
+                        explanation=danger["explanation"],
+                        fix_suggestion=danger["fix"],
+                        auto_fixable=False,
+                        confidence=1.0,
+                    )
+                )
 
         # Case 2: Method calls on modules (pickle.loads, os.system, etc.)
         elif isinstance(node.func, ast.Attribute):
@@ -118,30 +120,32 @@ class SecurityAgent(ast.NodeVisitor):
                     danger = self.DANGEROUS_METHODS[module_method]
 
                     # Extra check for subprocess - warn only if shell=True
-                    if module_method[0] == 'subprocess':
+                    if module_method[0] == "subprocess":
                         has_shell_true = any(
-                            isinstance(kw, ast.keyword) and
-                            kw.arg == 'shell' and
-                            isinstance(kw.value, ast.Constant) and
-                            kw.value.value is True
+                            isinstance(kw, ast.keyword)
+                            and kw.arg == "shell"
+                            and isinstance(kw.value, ast.Constant)
+                            and kw.value.value is True
                             for kw in node.keywords
                         )
                         if not has_shell_true:
                             self.generic_visit(node)
                             return
 
-                    self.issues.append(CodeIssue(
-                        file=self.file_path,
-                        line=node.lineno,
-                        end_line=node.end_lineno,
-                        severity=danger['severity'],
-                        category=IssueCategory.SECURITY,
-                        message=danger['message'],
-                        explanation=danger['explanation'],
-                        fix_suggestion=danger['fix'],
-                        auto_fixable=False,
-                        confidence=0.95
-                    ))
+                    self.issues.append(
+                        CodeIssue(
+                            file=self.file_path,
+                            line=node.lineno,
+                            end_line=node.end_lineno,
+                            severity=danger["severity"],
+                            category=IssueCategory.SECURITY,
+                            message=danger["message"],
+                            explanation=danger["explanation"],
+                            fix_suggestion=danger["fix"],
+                            auto_fixable=False,
+                            confidence=0.95,
+                        )
+                    )
 
         self.generic_visit(node)
 
@@ -156,20 +160,22 @@ class SecurityAgent(ast.NodeVisitor):
             elif isinstance(value, ast.FormattedValue):
                 has_variable = True
 
-        full_string = ''.join(string_parts)
+        full_string = "".join(string_parts)
         if has_variable and any(kw in full_string for kw in self.SQL_KEYWORDS):
-            self.issues.append(CodeIssue(
-                file=self.file_path,
-                line=node.lineno,
-                end_line=getattr(node, 'end_lineno', node.lineno),
-                severity=IssueSeverity.CRITICAL,
-                category=IssueCategory.SECURITY,
-                message='Potential SQL injection via f-string interpolation',
-                explanation='F-strings with user input in SQL queries allow attackers to inject malicious SQL',
-                fix_suggestion='Use parameterized queries with placeholders (?, %s) instead of f-strings',
-                auto_fixable=False,
-                confidence=0.9
-            ))
+            self.issues.append(
+                CodeIssue(
+                    file=self.file_path,
+                    line=node.lineno,
+                    end_line=getattr(node, "end_lineno", node.lineno),
+                    severity=IssueSeverity.CRITICAL,
+                    category=IssueCategory.SECURITY,
+                    message="Potential SQL injection via f-string interpolation",
+                    explanation="F-strings with user input in SQL queries allow attackers to inject malicious SQL",
+                    fix_suggestion="Use parameterized queries with placeholders (?, %s) instead of f-strings",
+                    auto_fixable=False,
+                    confidence=0.9,
+                )
+            )
 
         self.generic_visit(node)
 
@@ -192,20 +198,22 @@ class SecurityAgent(ast.NodeVisitor):
             extract_strings(node.left)
             extract_strings(node.right)
 
-            full_string = ''.join(string_parts)
+            full_string = "".join(string_parts)
             if has_name and any(kw in full_string for kw in self.SQL_KEYWORDS):
-                self.issues.append(CodeIssue(
-                    file=self.file_path,
-                    line=node.lineno,
-                    end_line=getattr(node, 'end_lineno', node.lineno),
-                    severity=IssueSeverity.CRITICAL,
-                    category=IssueCategory.SECURITY,
-                    message='Potential SQL injection via string concatenation',
-                    explanation='Concatenating user input into SQL queries allows attackers to inject malicious SQL',
-                    fix_suggestion='Use parameterized queries with placeholders (?, %s) instead of concatenation',
-                    auto_fixable=False,
-                    confidence=0.85
-                ))
+                self.issues.append(
+                    CodeIssue(
+                        file=self.file_path,
+                        line=node.lineno,
+                        end_line=getattr(node, "end_lineno", node.lineno),
+                        severity=IssueSeverity.CRITICAL,
+                        category=IssueCategory.SECURITY,
+                        message="Potential SQL injection via string concatenation",
+                        explanation="Concatenating user input into SQL queries allows attackers to inject malicious SQL",
+                        fix_suggestion="Use parameterized queries with placeholders (?, %s) instead of concatenation",
+                        auto_fixable=False,
+                        confidence=0.85,
+                    )
+                )
 
         self.generic_visit(node)
 

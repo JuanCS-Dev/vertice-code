@@ -22,15 +22,15 @@ class SuggestionType(Enum):
 class SuggestionConfidence(Enum):
     """Confidence levels for suggestions."""
 
-    HIGH = "high"      # 80-100% confidence
+    HIGH = "high"  # 80-100% confidence
     MEDIUM = "medium"  # 50-79% confidence
-    LOW = "low"        # 20-49% confidence
+    LOW = "low"  # 20-49% confidence
 
 
 @dataclass(frozen=True)
 class Suggestion:
     """Immutable suggestion object.
-    
+
     Following functional programming principles: immutable data structures
     prevent a whole class of bugs.
     """
@@ -47,7 +47,7 @@ class Suggestion:
         icon = {
             SuggestionConfidence.HIGH: "🎯",
             SuggestionConfidence.MEDIUM: "💡",
-            SuggestionConfidence.LOW: "💭"
+            SuggestionConfidence.LOW: "💭",
         }[self.confidence]
 
         return f"{icon} {self.content}"
@@ -56,7 +56,7 @@ class Suggestion:
 @dataclass(frozen=True)
 class Context:
     """Context information for suggestion generation.
-    
+
     Immutable to prevent temporal coupling bugs.
     """
 
@@ -68,7 +68,7 @@ class Context:
     recent_files: List[str] = field(default_factory=list)
     environment: Dict[str, str] = field(default_factory=dict)
 
-    def with_command(self, command: str) -> 'Context':
+    def with_command(self, command: str) -> "Context":
         """Return new Context with updated command (immutable update)."""
         return Context(
             current_command=command,
@@ -77,7 +77,7 @@ class Context:
             working_directory=self.working_directory,
             git_branch=self.git_branch,
             recent_files=self.recent_files,
-            environment=self.environment
+            environment=self.environment,
         )
 
 
@@ -124,10 +124,7 @@ class SuggestionResult:
         confidence_order = {
             SuggestionConfidence.HIGH: 3,
             SuggestionConfidence.MEDIUM: 2,
-            SuggestionConfidence.LOW: 1
+            SuggestionConfidence.LOW: 1,
         }
 
-        return max(
-            self.suggestions,
-            key=lambda s: confidence_order[s.confidence]
-        )
+        return max(self.suggestions, key=lambda s: confidence_order[s.confidence])

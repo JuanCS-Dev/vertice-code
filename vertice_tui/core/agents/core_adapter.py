@@ -30,6 +30,7 @@ if TYPE_CHECKING:
 # Fallback TaskComplexity for when import fails
 class _FallbackTaskComplexity(str, Enum):
     """Fallback TaskComplexity when agents.orchestrator.types unavailable."""
+
     SIMPLE = "simple"
     MODERATE = "moderate"
     COMPLEX = "complex"
@@ -123,9 +124,9 @@ class CoreAgentAdapter:
             return
 
         # BoundedAutonomyMixin callbacks
-        if hasattr(self.core_agent, '_approval_callback'):
+        if hasattr(self.core_agent, "_approval_callback"):
             self.core_agent._approval_callback = context.approval_callback
-        if hasattr(self.core_agent, '_notify_callback'):
+        if hasattr(self.core_agent, "_notify_callback"):
             self.core_agent._notify_callback = context.notify_callback
 
         # Mark as activated
@@ -155,13 +156,11 @@ class CoreAgentAdapter:
             return TaskComplexity.SIMPLE
         elif word_count < 50:
             return TaskComplexity.MODERATE
-        elif any(kw in request.lower() for kw in [
-            "architecture", "design", "security", "production"
-        ]):
+        elif any(
+            kw in request.lower() for kw in ["architecture", "design", "security", "production"]
+        ):
             return TaskComplexity.COMPLEX
-        elif any(kw in request.lower() for kw in [
-            "deploy", "critical", "urgent"
-        ]):
+        elif any(kw in request.lower() for kw in ["deploy", "critical", "urgent"]):
             return TaskComplexity.CRITICAL
         else:
             return TaskComplexity.MODERATE
@@ -180,17 +179,17 @@ class CoreAgentAdapter:
         """
         if isinstance(chunk, str):
             return chunk
-        elif hasattr(chunk, 'text'):
+        elif hasattr(chunk, "text"):
             return str(chunk.text)
-        elif hasattr(chunk, 'content'):
+        elif hasattr(chunk, "content"):
             return str(chunk.content)
         elif isinstance(chunk, dict):
-            if 'text' in chunk:
-                return str(chunk['text'])
-            elif 'content' in chunk:
-                return str(chunk['content'])
-            elif 'message' in chunk:
-                return str(chunk['message'])
+            if "text" in chunk:
+                return str(chunk["text"])
+            elif "content" in chunk:
+                return str(chunk["content"])
+            elif "message" in chunk:
+                return str(chunk["message"])
         return str(chunk)
 
     async def execute_streaming(
@@ -220,11 +219,9 @@ class CoreAgentAdapter:
         self._activate_mixins(ctx)
 
         # Try streaming execute first
-        if hasattr(self.core_agent, 'execute'):
+        if hasattr(self.core_agent, "execute"):
             try:
-                async for chunk in self.core_agent.execute(
-                    task_request, stream=True
-                ):
+                async for chunk in self.core_agent.execute(task_request, stream=True):
                     yield self._normalize_chunk(chunk)
                 return
             except TypeError:
@@ -242,13 +239,13 @@ class CoreAgentAdapter:
             )
 
             # Some core agents have plan() method
-            if hasattr(self.core_agent, 'plan'):
+            if hasattr(self.core_agent, "plan"):
                 yield f"[{self.agent_name}] Planning task...\n"
                 tasks = await self.core_agent.plan(task_request)
                 yield f"[{self.agent_name}] Created {len(tasks)} subtasks\n"
 
             # Route if orchestrator
-            if hasattr(self.core_agent, 'route'):
+            if hasattr(self.core_agent, "route"):
                 agent_role = await self.core_agent.route(task)
                 yield f"[{self.agent_name}] Routing to {agent_role.value}...\n"
 
@@ -288,15 +285,12 @@ class CoreAgentAdapter:
         }
 
         # Get core agent status if available
-        if hasattr(self.core_agent, 'get_status'):
+        if hasattr(self.core_agent, "get_status"):
             status["core_status"] = self.core_agent.get_status()
 
         return status
 
-    def check_autonomy(
-        self,
-        operation: str
-    ) -> tuple[bool, Optional[Any]]:
+    def check_autonomy(self, operation: str) -> tuple[bool, Optional[Any]]:
         """
         Check autonomy level for an operation.
 
@@ -308,10 +302,8 @@ class CoreAgentAdapter:
         Returns:
             (can_proceed, approval_request) tuple
         """
-        if hasattr(self.core_agent, 'check_autonomy'):
-            result: tuple[bool, Optional[Any]] = self.core_agent.check_autonomy(
-                operation
-            )
+        if hasattr(self.core_agent, "check_autonomy"):
+            result: tuple[bool, Optional[Any]] = self.core_agent.check_autonomy(operation)
             return result
         return (True, None)  # Default: allow
 
@@ -326,7 +318,7 @@ class CoreAgentAdapter:
         Returns:
             True if approved successfully
         """
-        if hasattr(self.core_agent, 'approve'):
+        if hasattr(self.core_agent, "approve"):
             result: bool = self.core_agent.approve(approval_id, approved_by)
             return result
         return False
@@ -342,7 +334,7 @@ class CoreAgentAdapter:
         Returns:
             True if rejected successfully
         """
-        if hasattr(self.core_agent, 'reject'):
+        if hasattr(self.core_agent, "reject"):
             result: bool = self.core_agent.reject(approval_id, rejected_by)
             return result
         return False
@@ -354,7 +346,7 @@ class CoreAgentAdapter:
         Returns:
             List of ApprovalRequest objects
         """
-        if hasattr(self.core_agent, 'get_pending_approvals'):
+        if hasattr(self.core_agent, "get_pending_approvals"):
             result: List[Any] = self.core_agent.get_pending_approvals()
             return result
         return []

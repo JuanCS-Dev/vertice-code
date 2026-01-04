@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "vertice-code"
 version = "1.0.0"
-description = "Vertice-Code: Enterprise Multi-LLM Orchestration - Intelligent Routing, Free Tier Priority, Constitutional AI"
+description = "Vértice: Sovereign Intelligence & Tactical Execution - Enterprise Multi-LLM Orchestration"
 readme = "README.md"
 authors = [
     {name = "Juan Carlos de Souza", email = "juancs.dev@gmail.com"}
@@ -40,6 +40,9 @@ dependencies = [
     "tenacity>=8.2.0",
     "aiohttp>=3.9.0",
 
+    # Graph Analysis
+    "networkx>=3.0",
+
     # LLM Providers
     "google-cloud-aiplatform>=1.74.0",  # Vertex AI with Gemini 2.0
     "google-generativeai>=0.8.0",        # AI Studio fallback
@@ -52,6 +55,7 @@ dependencies = [
 dev = [
     "pytest>=7.0.0",
     "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.0.0",
     "black>=23.0.0",
     "mypy>=1.0.0",
     "ruff>=0.1.0",
@@ -66,13 +70,13 @@ providers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/JuanCS-Dev/juan-dev-code"
-Repository = "https://github.com/JuanCS-Dev/juan-dev-code"
-Issues = "https://github.com/JuanCS-Dev/juan-dev-code/issues"
+Homepage = "https://github.com/JuanCS-Dev/vertice-code"
+Repository = "https://github.com/JuanCS-Dev/vertice-code"
+Issues = "https://github.com/JuanCS-Dev/vertice-code/issues"
 
 [project.scripts]
 # TUI (default - main interface)
-vertice = "vertice_tui.app:main"
+vertice = "vertice_cli.main:cli_main"
 
 # CLI entry points (alternative)
 vtc = "vertice_cli.main:cli_main"

@@ -17,22 +17,24 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import Any, Dict, List, Optional, TypeVar, Generic
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class ConfigScope(Enum):
     """Configuration scope hierarchy."""
-    DEFAULT = auto()    # Built-in defaults
-    SYSTEM = auto()     # System-wide (/etc/vertice/)
-    USER = auto()       # User home (~/.config/vertice/)
-    PROJECT = auto()    # Project root (.vertice/)
-    ENVIRONMENT = auto() # Environment variables
-    RUNTIME = auto()    # Runtime overrides
+
+    DEFAULT = auto()  # Built-in defaults
+    SYSTEM = auto()  # System-wide (/etc/vertice/)
+    USER = auto()  # User home (~/.config/vertice/)
+    PROJECT = auto()  # Project root (.vertice/)
+    ENVIRONMENT = auto()  # Environment variables
+    RUNTIME = auto()  # Runtime overrides
 
 
 @dataclass
 class ConfigValue(Generic[T]):
     """Configuration value with metadata."""
+
     value: T
     scope: ConfigScope
     source: str  # File path or "environment" or "default"
@@ -68,22 +70,18 @@ class ConfigManager:
         "llm.temperature": 0.7,
         "llm.max_tokens": 4096,
         "llm.timeout": 120,
-
         # Tool settings
         "tools.timeout": 30,
         "tools.sandbox_enabled": True,
         "tools.max_output_size": 100000,
-
         # Session settings
         "session.auto_save": True,
         "session.history_limit": 100,
         "session.context_window": 8192,
-
         # Cache settings
         "cache.enabled": True,
         "cache.ttl": 3600,
         "cache.max_size_mb": 100,
-
         # UI settings
         "ui.theme": "dark",
         "ui.syntax_highlighting": True,
@@ -94,9 +92,7 @@ class ConfigManager:
     ENV_PREFIX = "VERTICE_"
 
     def __init__(self, project_path: Optional[Path] = None):
-        self._configs: Dict[ConfigScope, Dict[str, Any]] = {
-            scope: {} for scope in ConfigScope
-        }
+        self._configs: Dict[ConfigScope, Dict[str, Any]] = {scope: {} for scope in ConfigScope}
         self._configs[ConfigScope.DEFAULT] = self.DEFAULTS.copy()
         self._project_path: Optional[Path] = None
         self._loaded_files: List[str] = []
@@ -141,7 +137,7 @@ class ConfigManager:
         for key, value in os.environ.items():
             if key.startswith(self.ENV_PREFIX):
                 # VERTICE_LLM_MODEL -> llm.model
-                config_key = key[len(self.ENV_PREFIX):].lower().replace("_", ".")
+                config_key = key[len(self.ENV_PREFIX) :].lower().replace("_", ".")
                 env_config[config_key] = self._parse_env_value(value)
 
         self._configs[ConfigScope.ENVIRONMENT] = env_config
@@ -186,7 +182,7 @@ class ConfigManager:
         except (json.JSONDecodeError, IOError):
             return False
 
-    def _flatten_dict(self, d: Dict, parent_key: str = '') -> Dict[str, Any]:
+    def _flatten_dict(self, d: Dict, parent_key: str = "") -> Dict[str, Any]:
         """Flatten nested dictionary with dot notation."""
         items = []
         for k, v in d.items():
@@ -213,12 +209,7 @@ class ConfigManager:
 
         return False
 
-    def get(
-        self,
-        key: str,
-        default: Optional[T] = None,
-        type_: Optional[type] = None
-    ) -> T:
+    def get(self, key: str, default: Optional[T] = None, type_: Optional[type] = None) -> T:
         """
         Get configuration value.
 
@@ -253,19 +244,10 @@ class ConfigManager:
                 elif self._loaded_files:
                     source = self._loaded_files[-1]
 
-                return ConfigValue(
-                    value=self._configs[scope][key],
-                    scope=scope,
-                    source=source
-                )
+                return ConfigValue(value=self._configs[scope][key], scope=scope, source=source)
         return None
 
-    def set(
-        self,
-        key: str,
-        value: Any,
-        scope: ConfigScope = ConfigScope.RUNTIME
-    ) -> None:
+    def set(self, key: str, value: Any, scope: ConfigScope = ConfigScope.RUNTIME) -> None:
         """Set configuration value at runtime."""
         self._configs[scope][key] = value
 
@@ -278,7 +260,7 @@ class ConfigManager:
             for key, value in self._configs[scope].items():
                 if key.startswith(prefix_dot):
                     # Remove prefix
-                    short_key = key[len(prefix_dot):]
+                    short_key = key[len(prefix_dot) :]
                     result[short_key] = value
 
         return result
@@ -322,4 +304,4 @@ class ConfigManager:
         return self._project_path
 
 
-__all__ = ['ConfigManager', 'ConfigScope', 'ConfigValue']
+__all__ = ["ConfigManager", "ConfigScope", "ConfigValue"]

@@ -194,9 +194,19 @@ Always:
         content_lower = content.lower()
 
         ethical_keywords = [
-            "delete", "remove", "erase", "user data", "privacy",
-            "consent", "permission", "ethical", "moral", "right",
-            "wrong", "should i", "is it okay"
+            "delete",
+            "remove",
+            "erase",
+            "user data",
+            "privacy",
+            "consent",
+            "permission",
+            "ethical",
+            "moral",
+            "right",
+            "wrong",
+            "should i",
+            "is it okay",
         ]
 
         for keyword in ethical_keywords:
@@ -204,8 +214,15 @@ Always:
                 return True, f"Ethical concern detected: {keyword}"
 
         crisis_keywords = [
-            "suicide", "harm", "violence", "abuse", "emergency",
-            "suicidio", "violencia", "abuso", "emergencia"
+            "suicide",
+            "harm",
+            "violence",
+            "abuse",
+            "emergency",
+            "suicidio",
+            "violencia",
+            "abuso",
+            "emergencia",
         ]
 
         for keyword in crisis_keywords:
@@ -388,10 +405,7 @@ Respond helpfully in the same language the user used."""
 
     def export_metrics(self) -> Dict[str, Any]:
         """Export all metrics in serializable format."""
-        return {
-            agent_id: metrics.model_dump()
-            for agent_id, metrics in self._metrics_cache.items()
-        }
+        return {agent_id: metrics.model_dump() for agent_id, metrics in self._metrics_cache.items()}
 
     def get_sofia_state(self) -> str:
         """Get current Sofia state."""
@@ -406,7 +420,7 @@ Respond helpfully in the same language the user used."""
         action_description: str,
         risk_level: str,
         agent_id: str,
-        context: Optional[Dict[str, Any]] = None
+        context: Optional[Dict[str, Any]] = None,
     ) -> CounselResponse:
         """Provide counsel BEFORE executing a risky action."""
         query = (
@@ -423,7 +437,7 @@ Respond helpfully in the same language the user used."""
                 "risk_level": risk_level,
                 "action": action_description,
             },
-            agent_id=agent_id
+            agent_id=agent_id,
         )
 
     def __repr__(self) -> str:

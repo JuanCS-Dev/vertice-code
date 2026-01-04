@@ -12,10 +12,7 @@ from pathlib import Path
 from .llm import llm_client
 from .context import ContextBuilder
 from ..tools.base import ToolRegistry
-from ..tools.file_ops import (
-    ReadFileTool, WriteFileTool, EditFileTool,
-    ListDirectoryTool
-)
+from ..tools.file_ops import ReadFileTool, WriteFileTool, EditFileTool, ListDirectoryTool
 from ..tools.search import SearchFilesTool
 from ..tools.exec_hardened import BashCommandTool
 from ..tools.git_ops import GitStatusTool, GitDiffTool
@@ -47,17 +44,13 @@ class SingleShotExecutor:
         for tool in tools:
             self.registry.register(tool)
 
-    async def execute(
-        self,
-        message: str,
-        include_context: bool = True
-    ) -> Dict[str, Any]:
+    async def execute(self, message: str, include_context: bool = True) -> Dict[str, Any]:
         """Execute single message and return structured result.
-        
+
         Args:
             message: User's command/request
             include_context: Whether to include project context
-            
+
         Returns:
             Dictionary with execution result:
             {
@@ -81,12 +74,7 @@ class SingleShotExecutor:
 
             if not tool_calls:
                 # No tools needed, return LLM response directly
-                return {
-                    'success': True,
-                    'output': response,
-                    'actions_taken': [],
-                    'errors': []
-                }
+                return {"success": True, "output": response, "actions_taken": [], "errors": []}
 
             # Execute tools
             results = await self._execute_tool_calls(tool_calls)
@@ -96,40 +84,35 @@ class SingleShotExecutor:
 
         except Exception as e:
             return {
-                'success': False,
-                'output': "",
-                'actions_taken': [],
-                'errors': [f"Execution error: {str(e)}"]
+                "success": False,
+                "output": "",
+                "actions_taken": [],
+                "errors": [f"Execution error: {str(e)}"],
             }
 
     def _build_context(self) -> Dict[str, Any]:
         """Build project context for LLM."""
         return {
-            'cwd': os.getcwd(),
-            'project_structure': self._get_project_structure(),
+            "cwd": os.getcwd(),
+            "project_structure": self._get_project_structure(),
         }
 
     def _get_project_structure(self) -> str:
         """Get basic project structure."""
         try:
             cwd = Path.cwd()
-            files = list(cwd.glob('*'))
-            structure = '\n'.join(f"  - {f.name}" for f in files[:20])
+            files = list(cwd.glob("*"))
+            structure = "\n".join(f"  - {f.name}" for f in files[:20])
             return f"Current directory:\n{structure}"
-        except Exception:
+        except (OSError, PermissionError):
             return "Unable to read project structure"
 
-    async def _get_llm_response(
-        self,
-        message: str,
-        context: Dict[str, Any]
-    ) -> str:
+    async def _get_llm_response(self, message: str, context: Dict[str, Any]) -> str:
         """Get LLM response for user message."""
         # Build system prompt
         tool_schemas = self.registry.get_schemas()
-        tool_list = '\n'.join(
-            f"- {schema['name']}: {schema['description']}"
-            for schema in tool_schemas
+        tool_list = "\n".join(
+            f"- {schema['name']}: {schema['description']}" for schema in tool_schemas
         )
 
         system_prompt = f"""You are an AI code assistant with access to tools.
@@ -163,10 +146,7 @@ Response: Python is a high-level programming language...
 
         # LLMClient.generate() aceita prompt e system_prompt separados
         response = await self.llm.generate(
-            prompt=message,
-            system_prompt=system_prompt,
-            temperature=0.1,
-            max_tokens=2000
+            prompt=message, system_prompt=system_prompt, temperature=0.1, max_tokens=2000
         )
 
         return response
@@ -175,9 +155,9 @@ Response: Python is a high-level programming language...
         """Parse tool calls from LLM response."""
         try:
             # Look for JSON array in response
-            if '[' in response and ']' in response:
-                start = response.index('[')
-                end = response.rindex(']') + 1
+            if "[" in response and "]" in response:
+                start = response.index("[")
+                end = response.rindex("]") + 1
                 json_str = response[start:end]
                 tool_calls = json.loads(json_str)
 
@@ -188,10 +168,7 @@ Response: Python is a high-level programming language...
 
         return []
 
-    async def _execute_tool_calls(
-        self,
-        tool_calls: list
-    ) -> list:
+    async def _execute_tool_calls(self, tool_calls: list) -> list:
         """Execute sequence of tool calls."""
         results = []
 
@@ -202,43 +179,39 @@ Response: Python is a high-level programming language...
             tool = self.registry.get(tool_name)
 
             if not tool:
-                results.append({
-                    'success': False,
-                    'tool': tool_name,
-                    'error': f"Unknown tool: {tool_name}"
-                })
+                results.append(
+                    {"success": False, "tool": tool_name, "error": f"Unknown tool: {tool_name}"}
+                )
                 continue
 
             try:
                 result = await tool.execute(**args)
-                results.append({
-                    'success': result.success,
-                    'tool': tool_name,
-                    'output': str(result.data) if result.success else None,
-                    'error': result.error if not result.success else None
-                })
+                results.append(
+                    {
+                        "success": result.success,
+                        "tool": tool_name,
+                        "output": str(result.data) if result.success else None,
+                        "error": result.error if not result.success else None,
+                    }
+                )
             except Exception as e:
-                results.append({
-                    'success': False,
-                    'tool': tool_name,
-                    'error': str(e)
-                })
+                results.append({"success": False, "tool": tool_name, "error": str(e)})
 
         return results
 
     def _format_results(self, results: list) -> Dict[str, Any]:
         """Format tool execution results."""
-        all_success = all(r['success'] for r in results)
+        all_success = all(r["success"] for r in results)
 
         output_parts = []
         errors = []
         actions = []
 
         for result in results:
-            actions.append(result['tool'])
+            actions.append(result["tool"])
 
-            if result['success']:
-                if result.get('output'):
+            if result["success"]:
+                if result.get("output"):
                     output_parts.append(f"✓ {result['tool']}: {result['output']}")
                 else:
                     output_parts.append(f"✓ {result['tool']}: Success")
@@ -248,10 +221,10 @@ Response: Python is a high-level programming language...
                 errors.append(error_msg)
 
         return {
-            'success': all_success,
-            'output': '\n'.join(output_parts),
-            'actions_taken': actions,
-            'errors': errors
+            "success": all_success,
+            "output": "\n".join(output_parts),
+            "actions_taken": actions,
+            "errors": errors,
         }
 
 
@@ -267,18 +240,15 @@ def get_executor() -> SingleShotExecutor:
     return _executor
 
 
-async def execute_single_shot(
-    message: str,
-    include_context: bool = True
-) -> Dict[str, Any]:
+async def execute_single_shot(message: str, include_context: bool = True) -> Dict[str, Any]:
     """Execute single message in non-interactive mode.
-    
+
     This is the main entry point for non-interactive execution.
-    
+
     Args:
         message: User's command/request
         include_context: Whether to include project context
-        
+
     Returns:
         Execution result dictionary
     """

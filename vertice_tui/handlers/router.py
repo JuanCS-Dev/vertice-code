@@ -34,6 +34,7 @@ class CommandRouter:
         """Lazy load basic commands handler."""
         if self._basic is None:
             from vertice_tui.handlers.basic import BasicCommandHandler
+
             self._basic = BasicCommandHandler(self.app)
         return self._basic
 
@@ -42,6 +43,7 @@ class CommandRouter:
         """Lazy load agents handler."""
         if self._agents is None:
             from vertice_tui.handlers.agents import AgentCommandHandler
+
             self._agents = AgentCommandHandler(self.app)
         return self._agents
 
@@ -50,6 +52,7 @@ class CommandRouter:
         """Lazy load Claude parity handler."""
         if self._claude_parity is None:
             from vertice_tui.handlers.claude_parity import ClaudeParityHandler
+
             self._claude_parity = ClaudeParityHandler(self.app)
         return self._claude_parity
 
@@ -58,6 +61,7 @@ class CommandRouter:
         """Lazy load session handler."""
         if self._session is None:
             from vertice_tui.handlers.session import SessionCommandHandler
+
             self._session = SessionCommandHandler(self.app)
         return self._session
 
@@ -66,6 +70,7 @@ class CommandRouter:
         """Lazy load operations handler."""
         if self._operations is None:
             from vertice_tui.handlers.operations import OperationsHandler
+
             self._operations = OperationsHandler(self.app)
         return self._operations
 
@@ -74,14 +79,11 @@ class CommandRouter:
         """Lazy load context commands handler."""
         if self._context is None:
             from vertice_tui.handlers.context_commands import ContextCommandHandler
+
             self._context = ContextCommandHandler(self.app)
         return self._context
 
-    async def dispatch(
-        self,
-        cmd: str,
-        view: "ResponseView"
-    ) -> bool:
+    async def dispatch(self, cmd: str, view: "ResponseView") -> bool:
         """
         Dispatch a command to the appropriate handler.
 
@@ -97,40 +99,115 @@ class CommandRouter:
             return True
 
         # Basic commands
-        if command in ("/help", "/clear", "/quit", "/exit", "/run", "/read",
-                       "/agents", "/status", "/tools", "/palette", "/history",
-                       "/context", "/context-clear", "/prometheus", "/providers"):
+        if command in (
+            "/help",
+            "/clear",
+            "/quit",
+            "/exit",
+            "/run",
+            "/read",
+            "/agents",
+            "/status",
+            "/tools",
+            "/palette",
+            "/history",
+            "/context",
+            "/context-clear",
+            "/prometheus",
+            "/providers",
+        ):
             await self.basic.handle(command, args, view)
             return True
 
         # Agent commands
-        if command in ("/plan", "/execute", "/architect", "/review", "/explore",
-                       "/refactor", "/test", "/security", "/docs", "/perf",
-                       "/devops", "/justica", "/sofia", "/data"):
+        if command in (
+            "/plan",
+            "/execute",
+            "/architect",
+            "/review",
+            "/explore",
+            "/refactor",
+            "/test",
+            "/security",
+            "/docs",
+            "/perf",
+            "/devops",
+            "/justica",
+            "/sofia",
+            "/data",
+        ):
             await self.agents.handle(command, args, view)
             return True
 
         # Claude parity commands
-        if command in ("/compact", "/cost", "/tokens", "/todos", "/todo",
-                       "/model", "/init", "/hooks", "/mcp", "/router",
-                       "/router-status", "/route", "/bashes", "/bg", "/kill",
-                       "/notebook", "/task", "/subagents", "/ask", "/commands",
-                       "/command-create", "/command-delete", "/plan-mode",
-                       "/plan-status", "/plan-note", "/plan-exit", "/plan-approve"):
+        if command in (
+            "/compact",
+            "/cost",
+            "/tokens",
+            "/todos",
+            "/todo",
+            "/model",
+            "/init",
+            "/hooks",
+            "/mcp",
+            "/router",
+            "/router-status",
+            "/route",
+            "/bashes",
+            "/bg",
+            "/kill",
+            "/notebook",
+            "/task",
+            "/subagents",
+            "/ask",
+            "/commands",
+            "/command-create",
+            "/command-delete",
+            "/plan-mode",
+            "/plan-status",
+            "/plan-note",
+            "/plan-exit",
+            "/plan-approve",
+        ):
             await self.claude_parity.handle(command, args, view)
             return True
 
         # Session commands
-        if command in ("/resume", "/save", "/sessions", "/checkpoint", "/rewind",
-                       "/export", "/doctor", "/permissions", "/sandbox",
-                       "/login", "/logout", "/auth", "/memory", "/remember"):
+        if command in (
+            "/resume",
+            "/save",
+            "/sessions",
+            "/checkpoint",
+            "/rewind",
+            "/export",
+            "/doctor",
+            "/permissions",
+            "/sandbox",
+            "/login",
+            "/logout",
+            "/auth",
+            "/memory",
+            "/remember",
+        ):
             await self.session.handle(command, args, view)
             return True
 
         # Operations commands
-        if command in ("/pr", "/pr-draft", "/image", "/pdf", "/audit",
-                       "/diff", "/backup", "/restore", "/undo", "/redo",
-                       "/undo-stack", "/secrets", "/secrets-staged"):
+        if command in (
+            "/pr",
+            "/pr-draft",
+            "/image",
+            "/pdf",
+            "/audit",
+            "/diff",
+            "/backup",
+            "/restore",
+            "/undo",
+            "/redo",
+            "/undo-stack",
+            "/secrets",
+            "/secrets-staged",
+        ):
             await self.operations.handle(command, args, view)
             return True
 

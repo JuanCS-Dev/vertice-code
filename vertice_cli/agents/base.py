@@ -75,10 +75,11 @@ __all__ = [
 # BASE AGENT CLASS
 # =============================================================================
 
+
 class BaseAgent(abc.ABC):
     """
     Abstract Cybernetic Agent.
-    
+
     Enforces the 'Think before Act' protocol and manages tool safety.
     """
 
@@ -131,7 +132,7 @@ class BaseAgent(abc.ABC):
         final_sys_prompt = system_prompt or self.system_prompt
         try:
             # Handle both async generate() and async stream()
-            if hasattr(self.llm_client, 'generate'):
+            if hasattr(self.llm_client, "generate"):
                 response = await self.llm_client.generate(
                     prompt=prompt,
                     system_prompt=final_sys_prompt,
@@ -150,7 +151,9 @@ class BaseAgent(abc.ABC):
             self.execution_count += 1
             return cast(str, response)
         except Exception as e:
-            self.logger.error(f"LLM call failed (role={self.role.value}): {type(e).__name__}: {e}", exc_info=True)
+            self.logger.error(
+                f"LLM call failed (role={self.role.value}): {type(e).__name__}: {e}", exc_info=True
+            )
             raise
 
     async def _stream_llm(
@@ -167,14 +170,14 @@ class BaseAgent(abc.ABC):
         final_sys_prompt = system_prompt or self.system_prompt
         try:
             # Use stream_chat for real-time token delivery
-            if hasattr(self.llm_client, 'stream_chat'):
+            if hasattr(self.llm_client, "stream_chat"):
                 async for chunk in self.llm_client.stream_chat(
                     prompt=prompt,
                     context=final_sys_prompt,
                     **kwargs,
                 ):
                     yield chunk
-            elif hasattr(self.llm_client, 'stream'):
+            elif hasattr(self.llm_client, "stream"):
                 async for chunk in self.llm_client.stream(
                     prompt=prompt,
                     system_prompt=final_sys_prompt,
@@ -188,7 +191,10 @@ class BaseAgent(abc.ABC):
 
             self.execution_count += 1
         except Exception as e:
-            self.logger.error(f"LLM stream failed (role={self.role.value}): {type(e).__name__}: {e}", exc_info=True)
+            self.logger.error(
+                f"LLM stream failed (role={self.role.value}): {type(e).__name__}: {e}",
+                exc_info=True,
+            )
             raise
 
     def _can_use_tool(self, tool_name: str) -> bool:
@@ -242,9 +248,7 @@ class BaseAgent(abc.ABC):
             msg = f"SECURITY VIOLATION: {self.role.value} attempted to use forbidden tool '{tool_name}'"
             self.logger.critical(msg)
             raise CapabilityViolationError(
-                agent_id=self.role.value,
-                capability=tool_name,
-                message=msg
+                agent_id=self.role.value, capability=tool_name, message=msg
             )
 
         try:
@@ -258,8 +262,12 @@ class BaseAgent(abc.ABC):
             result = await self.mcp_client.call_tool(tool_name=tool_name, arguments=parameters)
             return cast(Dict[str, Any], result)
         except Exception as e:
-            self.logger.error(f"Tool '{tool_name}' execution failed (role={self.role.value}): {type(e).__name__}: {e}", exc_info=True)
+            self.logger.error(
+                f"Tool '{tool_name}' execution failed (role={self.role.value}): {type(e).__name__}: {e}",
+                exc_info=True,
+            )
             return {"success": False, "error": f"{type(e).__name__}: {str(e)}"}
+
 
 # Compatibility aliases for existing agents
 TaskContext = AgentTask  # Alias for old code

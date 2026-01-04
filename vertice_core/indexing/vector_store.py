@@ -117,18 +117,22 @@ class InMemoryVectorStore:
     def _init_db(self) -> None:
         """Initialize SQLite database."""
         with self._get_connection() as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS vectors (
                     chunk_id TEXT PRIMARY KEY,
                     embedding BLOB NOT NULL,
                     metadata TEXT NOT NULL,
                     updated_at REAL NOT NULL
                 )
-            """)
-            conn.execute("""
+            """
+            )
+            conn.execute(
+                """
                 CREATE INDEX IF NOT EXISTS idx_filepath
                 ON vectors(json_extract(metadata, '$.filepath'))
-            """)
+            """
+            )
 
     @contextmanager
     def _get_connection(self):
@@ -152,10 +156,7 @@ class InMemoryVectorStore:
         logger.info(f"Loaded {len(self._vectors)} vectors from disk")
 
     def add(
-        self,
-        chunk_ids: List[str],
-        embeddings: List[List[float]],
-        metadatas: List[Dict[str, Any]]
+        self, chunk_ids: List[str], embeddings: List[List[float]], metadatas: List[Dict[str, Any]]
     ) -> None:
         """Add vectors to store."""
         with self._get_connection() as conn:
@@ -168,14 +169,14 @@ class InMemoryVectorStore:
                     INSERT OR REPLACE INTO vectors (chunk_id, embedding, metadata, updated_at)
                     VALUES (?, ?, ?, ?)
                     """,
-                    (chunk_id, json.dumps(embedding), json.dumps(metadata), time.time())
+                    (chunk_id, json.dumps(embedding), json.dumps(metadata), time.time()),
                 )
 
     def search(
         self,
         query_embedding: List[float],
         top_k: int = 10,
-        filters: Optional[Dict[str, Any]] = None
+        filters: Optional[Dict[str, Any]] = None,
     ) -> List[Tuple[str, float, Dict[str, Any]]]:
         """Search for similar vectors."""
         if not self._vectors:
@@ -225,7 +226,8 @@ class InMemoryVectorStore:
     def delete_by_filepath(self, filepath: str) -> int:
         """Delete all vectors for a filepath."""
         to_delete = [
-            chunk_id for chunk_id, meta in self._metadata.items()
+            chunk_id
+            for chunk_id, meta in self._metadata.items()
             if meta.get("filepath") == filepath
         ]
         return self.delete(to_delete)
@@ -279,30 +281,21 @@ class ChromaVectorStore:
             is_persistent=True,
         )
 
-        self._client = chromadb.PersistentClient(
-            path=str(persist_path),
-            settings=settings
-        )
+        self._client = chromadb.PersistentClient(path=str(persist_path), settings=settings)
 
         # Get or create collection
-        distance_fn = {
-            "cosine": "cosine",
-            "l2": "l2",
-            "inner_product": "ip"
-        }.get(config.distance_metric, "cosine")
+        distance_fn = {"cosine": "cosine", "l2": "l2", "inner_product": "ip"}.get(
+            config.distance_metric, "cosine"
+        )
 
         self._collection = self._client.get_or_create_collection(
-            name=config.collection_name,
-            metadata={"hnsw:space": distance_fn}
+            name=config.collection_name, metadata={"hnsw:space": distance_fn}
         )
 
         logger.info(f"ChromaDB collection '{config.collection_name}' ready")
 
     def add(
-        self,
-        chunk_ids: List[str],
-        embeddings: List[List[float]],
-        metadatas: List[Dict[str, Any]]
+        self, chunk_ids: List[str], embeddings: List[List[float]], metadatas: List[Dict[str, Any]]
     ) -> None:
         """Add vectors to ChromaDB."""
         # Convert ChunkType enum to string for metadata
@@ -313,17 +306,13 @@ class ChromaVectorStore:
                 safe_meta["chunk_type"] = safe_meta["chunk_type"].value
             safe_metadatas.append(safe_meta)
 
-        self._collection.upsert(
-            ids=chunk_ids,
-            embeddings=embeddings,
-            metadatas=safe_metadatas
-        )
+        self._collection.upsert(ids=chunk_ids, embeddings=embeddings, metadatas=safe_metadatas)
 
     def search(
         self,
         query_embedding: List[float],
         top_k: int = 10,
-        filters: Optional[Dict[str, Any]] = None
+        filters: Optional[Dict[str, Any]] = None,
     ) -> List[Tuple[str, float, Dict[str, Any]]]:
         """Search ChromaDB for similar vectors."""
         # Build where clause
@@ -342,7 +331,7 @@ class ChromaVectorStore:
             query_embeddings=[query_embedding],
             n_results=top_k,
             where=where,
-            include=["metadatas", "distances"]
+            include=["metadatas", "distances"],
         )
 
         # Convert to standard format
@@ -370,10 +359,7 @@ class ChromaVectorStore:
     def delete_by_filepath(self, filepath: str) -> int:
         """Delete all vectors for a filepath."""
         # Query to find IDs with this filepath
-        results = self._collection.get(
-            where={"filepath": filepath},
-            include=[]
-        )
+        results = self._collection.get(where={"filepath": filepath}, include=[])
 
         if results["ids"]:
             self._collection.delete(ids=results["ids"])
@@ -389,8 +375,7 @@ class ChromaVectorStore:
         # Delete and recreate collection
         self._client.delete_collection(self.config.collection_name)
         self._collection = self._client.create_collection(
-            name=self.config.collection_name,
-            metadata={"hnsw:space": "cosine"}
+            name=self.config.collection_name, metadata={"hnsw:space": "cosine"}
         )
 
 
@@ -426,11 +411,7 @@ class VectorStore:
         """Get current backend type."""
         return self._backend_type
 
-    def add_chunks(
-        self,
-        chunks: List[CodeChunk],
-        embeddings: List[List[float]]
-    ) -> int:
+    def add_chunks(self, chunks: List[CodeChunk], embeddings: List[List[float]]) -> int:
         """
         Add code chunks with their embeddings to the store.
 
@@ -449,18 +430,20 @@ class VectorStore:
 
         for chunk in chunks:
             chunk_ids.append(chunk.chunk_id)
-            metadatas.append({
-                "filepath": chunk.filepath,
-                "name": chunk.name,
-                "chunk_type": chunk.chunk_type.value,
-                "language": chunk.language,
-                "start_line": chunk.start_line,
-                "end_line": chunk.end_line,
-                "tokens": chunk.tokens,
-                "content": chunk.content,  # Store content for retrieval
-                "docstring": chunk.docstring or "",
-                "parent": chunk.parent or "",
-            })
+            metadatas.append(
+                {
+                    "filepath": chunk.filepath,
+                    "name": chunk.name,
+                    "chunk_type": chunk.chunk_type.value,
+                    "language": chunk.language,
+                    "start_line": chunk.start_line,
+                    "end_line": chunk.end_line,
+                    "tokens": chunk.tokens,
+                    "content": chunk.content,  # Store content for retrieval
+                    "docstring": chunk.docstring or "",
+                    "parent": chunk.parent or "",
+                }
+            )
 
         self._backend.add(chunk_ids, embeddings, metadatas)
         return len(chunks)
@@ -472,7 +455,7 @@ class VectorStore:
         filepath_filter: Optional[str] = None,
         language_filter: Optional[str] = None,
         chunk_type_filter: Optional[str] = None,
-        min_score: Optional[float] = None
+        min_score: Optional[float] = None,
     ) -> List[SearchResult]:
         """
         Search for similar code chunks.
@@ -504,7 +487,7 @@ class VectorStore:
         raw_results = self._backend.search(
             query_embedding,
             top_k=top_k * 2,  # Get more to filter by score
-            filters=filters if filters else None
+            filters=filters if filters else None,
         )
 
         # Convert to SearchResult and filter by score
@@ -519,18 +502,20 @@ class VectorStore:
             except ValueError:
                 chunk_type = ChunkType.UNKNOWN
 
-            results.append(SearchResult(
-                chunk_id=chunk_id,
-                filepath=metadata.get("filepath", ""),
-                content=metadata.get("content", ""),
-                score=score,
-                chunk_type=chunk_type,
-                start_line=metadata.get("start_line", 0),
-                end_line=metadata.get("end_line", 0),
-                name=metadata.get("name", ""),
-                language=metadata.get("language", ""),
-                metadata=metadata,
-            ))
+            results.append(
+                SearchResult(
+                    chunk_id=chunk_id,
+                    filepath=metadata.get("filepath", ""),
+                    content=metadata.get("content", ""),
+                    score=score,
+                    chunk_type=chunk_type,
+                    start_line=metadata.get("start_line", 0),
+                    end_line=metadata.get("end_line", 0),
+                    name=metadata.get("name", ""),
+                    language=metadata.get("language", ""),
+                    metadata=metadata,
+                )
+            )
 
         return results[:top_k]
 

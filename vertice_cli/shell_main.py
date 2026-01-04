@@ -27,6 +27,7 @@ _AutoSuggestFromHistory = None
 _CodeBlock = None
 _DiffViewer = None
 
+
 def _get_tui_components():
     """Lazy load TUI components."""
     global _CodeBlock, _DiffViewer
@@ -34,12 +35,16 @@ def _get_tui_components():
         try:
             from .tui.components.code import CodeBlock as CB
             from .tui.components.diff import DiffViewer as DV
+
             _CodeBlock, _DiffViewer = CB, DV
         except ImportError:
             # Fallback if TUI components not available
-            _CodeBlock = lambda *a, **k: type('FakeCodeBlock', (), {'render': lambda s: str(a[0]) if a else ''})()
-            _DiffViewer = lambda *a, **k: type('FakeDiffViewer', (), {'render': lambda s: ''})()
+            _CodeBlock = lambda *a, **k: type(
+                "FakeCodeBlock", (), {"render": lambda s: str(a[0]) if a else ""}
+            )()
+            _DiffViewer = lambda *a, **k: type("FakeDiffViewer", (), {"render": lambda s: ""})()
     return _CodeBlock, _DiffViewer
+
 
 def _get_prompt_toolkit():
     """Lazy load prompt_toolkit components."""
@@ -48,14 +53,17 @@ def _get_prompt_toolkit():
         from prompt_toolkit import PromptSession as PS
         from prompt_toolkit.history import FileHistory as FH
         from prompt_toolkit.auto_suggest import AutoSuggestFromHistory as AS
+
         _PromptSession, _FileHistory, _AutoSuggestFromHistory = PS, FH, AS
     return _PromptSession, _FileHistory, _AutoSuggestFromHistory
+
 
 # Type hints only (no runtime cost)
 if TYPE_CHECKING:
     from rich.panel import Panel
     from rich.syntax import Syntax
     from rich.table import Table
+
     # TUI components (used conditionally)
     from .tui.components.code import CodeBlock
     from .tui.components.diff import DiffViewer
@@ -63,11 +71,7 @@ if TYPE_CHECKING:
 # Core imports (lightweight, needed early)
 from .core.context import ContextBuilder
 from .core.conversation import ConversationManager, ConversationState
-from .core.recovery import (
-    ErrorRecoveryEngine,
-    ErrorCategory,
-    create_recovery_context
-)
+from .core.recovery import ErrorRecoveryEngine, ErrorCategory, create_recovery_context
 
 # P1: Import error parser and danger detector
 from .core.error_parser import error_parser
@@ -82,12 +86,16 @@ from .core.file_watcher import FileWatcher, RecentFilesTracker
 
 # Lazy: SemanticIndexer (heavy, used lazily anyway)
 _SemanticIndexer = None
+
+
 def _get_semantic_indexer():
     global _SemanticIndexer
     if _SemanticIndexer is None:
         from .intelligence.indexer import SemanticIndexer
+
         _SemanticIndexer = SemanticIndexer
     return _SemanticIndexer
+
 
 try:
     from .core.llm import llm_client as default_llm_client
@@ -96,20 +104,33 @@ except ImportError:
 
 from .tools.base import ToolRegistry
 from .tools.file_ops import (
-    ReadFileTool, WriteFileTool, EditFileTool,
-    ListDirectoryTool, DeleteFileTool
+    ReadFileTool,
+    WriteFileTool,
+    EditFileTool,
+    ListDirectoryTool,
+    DeleteFileTool,
 )
 from .tools.file_mgmt import (
-    MoveFileTool, CopyFileTool, CreateDirectoryTool,
-    ReadMultipleFilesTool, InsertLinesTool
+    MoveFileTool,
+    CopyFileTool,
+    CreateDirectoryTool,
+    ReadMultipleFilesTool,
+    InsertLinesTool,
 )
 from .tools.search import SearchFilesTool, GetDirectoryTreeTool
 from .tools.exec_hardened import BashCommandTool
 from .tools.git_ops import GitStatusTool, GitDiffTool
 from .tools.context import GetContextTool, SaveSessionTool, RestoreBackupTool
 from .tools.terminal import (
-    CdTool, LsTool, PwdTool, MkdirTool, RmTool,
-    CpTool, MvTool, TouchTool, CatTool
+    CdTool,
+    LsTool,
+    PwdTool,
+    MkdirTool,
+    RmTool,
+    CpTool,
+    MvTool,
+    TouchTool,
+    CatTool,
 )
 from .intelligence.context_enhanced import build_rich_context
 from .intelligence.risk import assess_risk
@@ -129,8 +150,10 @@ from .tui.components.execution_timeline import ExecutionTimeline
 
 # Phase 4: Command Palette (needed for __init__)
 from .tui.components.palette import (
-    create_default_palette, Command, CommandCategory,
-    CATEGORY_CONFIG
+    create_default_palette,
+    Command,
+    CommandCategory,
+    CATEGORY_CONFIG,
 )
 
 # Phase 5: Animations (needed for __init__)
@@ -144,12 +167,16 @@ from .core.token_tracker import TokenTracker
 
 # Phase 8: LSP - Lazy loaded in property
 _LSPClient = None
+
+
 def _get_lsp_client():
     global _LSPClient
     if _LSPClient is None:
         from .intelligence.lsp_client import LSPClient
+
         _LSPClient = LSPClient
     return _LSPClient
+
 
 from .core.mcp_client import MCPClient
 from .orchestration.squad import DevSquad
@@ -180,10 +207,12 @@ class InteractiveShell:
 
         # P2: Rich context builder
         from .core.context_rich import RichContextBuilder
+
         self.rich_context = RichContextBuilder()
 
         # Session state management (AIR GAP #2)
         from .session import SessionManager
+
         self.session_manager = SessionManager()
 
         if session_state:
@@ -202,14 +231,12 @@ class InteractiveShell:
             session_id=session_id,
             max_context_tokens=4000,
             enable_auto_recovery=True,
-            max_recovery_attempts=2  # Constitutional P6
+            max_recovery_attempts=2,  # Constitutional P6
         )
 
         # Phase 3.1: Error recovery engine
         self.recovery_engine = ErrorRecoveryEngine(
-            llm_client=self.llm,
-            max_attempts=2,  # Constitutional P6
-            enable_learning=True
+            llm_client=self.llm, max_attempts=2, enable_learning=True  # Constitutional P6
         )
 
         # Setup enhanced input session (DAY 8: Phase 2)
@@ -219,11 +246,10 @@ class InteractiveShell:
             env=os.environ.copy(),
             recent_files=[],
             command_history=[],
-            session_data={}
+            session_data={},
         )
         self.enhanced_input = EnhancedInputSession(
-            history_file=history_file,
-            context=self.input_context
+            history_file=history_file, context=self.input_context
         )
 
         # Command history with analytics (DAY 8: Phase 2)
@@ -240,13 +266,13 @@ class InteractiveShell:
         # Token Tracking (Integration Sprint Week 1: Day 1 - Task 1.2 - ACTIVATED)
         self.token_tracker = TokenTracker(
             budget=1000000,  # 1M tokens budget
-            cost_per_1k=0.002  # Gemini Pro pricing ($0.002 per 1k tokens)
+            cost_per_1k=0.002,  # Gemini Pro pricing ($0.002 per 1k tokens)
         )
 
         from .tui.components.context_awareness import ContextAwarenessEngine
+
         self.context_engine = ContextAwarenessEngine(
-            max_context_tokens=100_000,  # 100k token window
-            console=self.console
+            max_context_tokens=100_000, console=self.console  # 100k token window
         )
 
         # Animations (Integration Sprint Week 1: Day 3 - Task 1.5)
@@ -270,6 +296,7 @@ class InteractiveShell:
 
         # Week 4 Day 1: Consolidated context manager (wraps ContextAwarenessEngine)
         from .core.context_manager_consolidated import ConsolidatedContextManager
+
         self.context_manager = ConsolidatedContextManager(max_tokens=100_000)
 
         # Week 4 Day 2: Refactoring engine - LAZY LOADED
@@ -294,7 +321,9 @@ class InteractiveShell:
         self.async_executor = AsyncExecutor(max_parallel=5)
 
         # Phase 4.4: File watcher for context tracking
-        self.file_watcher = FileWatcher(root_path=".", watch_extensions={'.py', '.js', '.ts', '.go', '.rs'})
+        self.file_watcher = FileWatcher(
+            root_path=".", watch_extensions={".py", ".js", ".ts", ".go", ".rs"}
+        )
         self.recent_files = RecentFilesTracker(maxsize=50)
 
         # Setup file watcher callback
@@ -317,6 +346,7 @@ class InteractiveShell:
         from .handlers.llm_processing_handler import LLMProcessingHandler
         from .handlers.palette_handler import PaletteHandler
         from .handlers.ui_handler import UIHandler
+
         self._git_handler = GitHandler(self)
         self._file_ops_handler = FileOpsHandler(self)
         self._tool_executor = ToolExecutionHandler(self)
@@ -355,9 +385,9 @@ class InteractiveShell:
         """Lazy-loaded context suggestion engine."""
         if self._suggestion_engine is None:
             from .intelligence.context_suggestions import ContextSuggestionEngine
+
             self._suggestion_engine = ContextSuggestionEngine(
-                project_root=Path.cwd(),
-                indexer=self.indexer  # This will trigger indexer lazy load
+                project_root=Path.cwd(), indexer=self.indexer  # This will trigger indexer lazy load
             )
             self.console.print("[dim]💡 Initialized suggestion engine[/dim]")
         return self._suggestion_engine
@@ -367,6 +397,7 @@ class InteractiveShell:
         """Lazy-loaded refactoring engine."""
         if self._refactoring_engine is None:
             from .refactoring.engine import RefactoringEngine
+
             self._refactoring_engine = RefactoringEngine(project_root=Path.cwd())
             self.console.print("[dim]🔨 Initialized refactoring engine[/dim]")
         return self._refactoring_engine
@@ -381,7 +412,6 @@ class InteractiveShell:
 
     # ========== END LAZY-LOADED PROPERTIES ==========
 
-
     def _register_tools(self):
         """Register all available tools."""
         tools = [
@@ -389,34 +419,27 @@ class InteractiveShell:
             ReadFileTool(),
             ReadMultipleFilesTool(),
             ListDirectoryTool(),
-
             # File writing (4 tools)
             WriteFileTool(),
             EditFileTool(),
             InsertLinesTool(),
             DeleteFileTool(),
-
             # File management (3 tools)
             MoveFileTool(),
             CopyFileTool(),
             CreateDirectoryTool(),
-
             # Search (2 tools)
             SearchFilesTool(),
             GetDirectoryTreeTool(),
-
             # Execution (1 tool)
             BashCommandTool(),
-
             # Git (2 tools)
             GitStatusTool(),
             GitDiffTool(),
-
             # Context (3 tools)
             GetContextTool(),
             SaveSessionTool(),
             RestoreBackupTool(),
-
             # Terminal commands (9 tools)
             CdTool(),
             LsTool(),
@@ -449,13 +472,9 @@ class InteractiveShell:
     # The following methods delegate to self._tool_executor for maintainability.
     # See: vertice_cli/handlers/tool_execution_handler.py
 
-    async def _execute_with_recovery(
-        self, tool, tool_name: str, args: Dict[str, Any], turn
-    ):
+    async def _execute_with_recovery(self, tool, tool_name: str, args: Dict[str, Any], turn):
         """Execute tool with error recovery. Delegated to ToolExecutionHandler."""
-        return await self._tool_executor.execute_with_recovery(
-            tool, tool_name, args, turn
-        )
+        return await self._tool_executor.execute_with_recovery(tool, tool_name, args, turn)
 
     async def _process_tool_calls(self, user_input: str) -> str:
         """
@@ -522,7 +541,7 @@ class InteractiveShell:
     async def _auto_index_background(self) -> None:
         """
         Week 3 Day 1: Background indexing task.
-        
+
         Automatically indexes codebase on startup without blocking.
         Shows progress indicator and updates cache incrementally.
         """
@@ -555,6 +574,7 @@ class InteractiveShell:
         except Exception as e:
             # Don't crash on indexing errors
             import logging
+
             logging.error(f"Background indexing failed: {e}")
 
     async def run(self):
@@ -563,10 +583,11 @@ class InteractiveShell:
 
         # Initialize suggestion engine
         from .intelligence.engine import SuggestionEngine
+
         suggestion_engine = SuggestionEngine()
         from .intelligence.patterns import register_builtin_patterns
-        register_builtin_patterns(suggestion_engine)
 
+        register_builtin_patterns(suggestion_engine)
 
         # Start background file watcher task
         async def file_watcher_loop():
@@ -613,26 +634,26 @@ class InteractiveShell:
                         continue
 
                     # Handle system commands (quit, help, etc)
-                    if user_input.strip().lower() in ['quit', 'exit', 'q']:
+                    if user_input.strip().lower() in ["quit", "exit", "q"]:
                         self.console.print("[cyan]👋 Goodbye![/cyan]")
                         break
-                    elif user_input.strip().lower() == 'help':
+                    elif user_input.strip().lower() == "help":
                         # P2: Enhanced help system
                         help_system.show_main_help()
                         continue
-                    elif user_input.strip().lower().startswith('help '):
+                    elif user_input.strip().lower().startswith("help "):
                         # P2: Topic-specific help
                         topic = user_input.strip()[5:].strip()
-                        if topic == 'examples':
+                        if topic == "examples":
                             help_system.show_examples()
                         else:
                             help_system.show_examples(topic)
                         continue
-                    elif user_input.strip().lower() == '/tutorial':
+                    elif user_input.strip().lower() == "/tutorial":
                         # P2: Interactive tutorial
                         help_system.show_tutorial()
                         continue
-                    elif user_input.strip().lower().startswith('/explain '):
+                    elif user_input.strip().lower().startswith("/explain "):
                         # P2: Command explanation
                         command = user_input.strip()[9:].strip()
                         explanation = help_system.explain_command(command)
@@ -658,8 +679,11 @@ class InteractiveShell:
                             self.console.print(token_panel)
 
                             # Warning if approaching limit
-                            usage_percent = (self.context_engine.window.total_tokens /
-                                           self.context_engine.max_context_tokens * 100)
+                            usage_percent = (
+                                self.context_engine.window.total_tokens
+                                / self.context_engine.max_context_tokens
+                                * 100
+                            )
 
                             if usage_percent >= 90:
                                 self.console.print(
@@ -688,7 +712,7 @@ class InteractiveShell:
                             tokens_used=0,  # Will be updated later
                             tool_calls=len(self.context.tool_calls),
                             files_modified=list(self.context.modified_files),
-                            session_id=self.session_state.session_id
+                            session_id=self.session_state.session_id,
                         )
                         self.cmd_history.add(history_entry)
 
@@ -696,7 +720,7 @@ class InteractiveShell:
                         self.enhanced_input.update_context(
                             cwd=str(Path.cwd()),
                             recent_files=list(self.recent_files.get_recent()),
-                            command_history=self.cmd_history.get_recent(limit=10)
+                            command_history=self.cmd_history.get_recent(limit=10),
                         )
 
                 except KeyboardInterrupt:
@@ -712,7 +736,9 @@ class InteractiveShell:
             # Auto-save session on exit (AIR GAP #2)
             try:
                 self.session_manager.save_session(self.session_state)
-                self.console.print(f"[dim]💾 Session auto-saved: {self.session_state.session_id}[/dim]")
+                self.console.print(
+                    f"[dim]💾 Session auto-saved: {self.session_state.session_id}[/dim]"
+                )
             except Exception as e:
                 logger.warning(f"Failed to auto-save session: {e}")
 
@@ -721,7 +747,7 @@ class InteractiveShell:
             watcher_task.cancel()
 
             # Cancel auto-index background task
-            if hasattr(self, '_auto_index_task') and self._auto_index_task:
+            if hasattr(self, "_auto_index_task") and self._auto_index_task:
                 self._auto_index_task.cancel()
                 try:
                     await self._auto_index_task

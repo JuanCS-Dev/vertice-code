@@ -21,11 +21,11 @@ from ..core.errors import ValidationError as ErrorValidationError
 class ValidatedTool(Tool, ABC):
     """
     Base class for tools with automatic input validation.
-    
+
     Subclasses should:
     1. Define validators in get_validators()
     2. Implement _execute_validated() instead of execute()
-    
+
     The base class will automatically validate inputs before
     calling _execute_validated().
     """
@@ -33,10 +33,10 @@ class ValidatedTool(Tool, ABC):
     def get_validators(self) -> Dict[str, Validator]:
         """
         Return validators for each parameter.
-        
+
         Returns:
             Dict mapping parameter name to Validator instance
-        
+
         Example:
             return {
                 'path': Required('path'),
@@ -48,7 +48,7 @@ class ValidatedTool(Tool, ABC):
     async def execute(self, **kwargs) -> ToolResult:
         """
         Execute tool with validation.
-        
+
         This wraps the actual execution with validation.
         Subclasses should implement _execute_validated() instead.
         """
@@ -62,9 +62,9 @@ class ValidatedTool(Tool, ABC):
                 success=False,
                 error=f"Validation failed:\n{error_msg}",
                 metadata={
-                    'validation_errors': validation_result.errors,
-                    'validation_warnings': validation_result.warnings
-                }
+                    "validation_errors": validation_result.errors,
+                    "validation_warnings": validation_result.warnings,
+                },
             )
 
         # Show warnings if any
@@ -79,20 +79,20 @@ class ValidatedTool(Tool, ABC):
             return ToolResult(
                 success=False,
                 error=str(e),
-                metadata={'error_type': 'validation', 'recoverable': e.recoverable}
+                metadata={"error_type": "validation", "recoverable": e.recoverable},
             )
         except Exception as e:
             return ToolResult(
                 success=False,
                 error=f"Execution failed: {e}",
-                metadata={'error_type': 'execution', 'exception': type(e).__name__}
+                metadata={"error_type": "execution", "exception": type(e).__name__},
             )
 
     @abstractmethod
     async def _execute_validated(self, **kwargs) -> ToolResult:
         """
         Execute tool logic after validation.
-        
+
         Subclasses must implement this method.
         All inputs are guaranteed to be valid when this is called.
         """
@@ -154,8 +154,8 @@ class ValidatedTool(Tool, ABC):
 
         for param_name, param_spec in self.parameters.items():
             value = inputs.get(param_name)
-            is_required = param_spec.get('required', False)
-            expected_type = param_spec.get('type', 'string')
+            is_required = param_spec.get("required", False)
+            expected_type = param_spec.get("type", "string")
 
             # Check required
             if is_required and value is None:
@@ -175,23 +175,21 @@ class ValidatedTool(Tool, ABC):
                 )
 
             # Enum validation (if specified)
-            if 'enum' in param_spec and value not in param_spec['enum']:
-                allowed = ', '.join(str(v) for v in param_spec['enum'])
-                errors.append(
-                    f"Parameter '{param_name}' must be one of [{allowed}], got '{value}'"
-                )
+            if "enum" in param_spec and value not in param_spec["enum"]:
+                allowed = ", ".join(str(v) for v in param_spec["enum"])
+                errors.append(f"Parameter '{param_name}' must be one of [{allowed}], got '{value}'")
 
         return errors
 
     def _check_type(self, value: Any, expected_type: str) -> bool:
         """Check if value matches expected JSON schema type."""
         type_map = {
-            'string': str,
-            'integer': int,
-            'number': (int, float),
-            'boolean': bool,
-            'array': list,
-            'object': dict,
+            "string": str,
+            "integer": int,
+            "number": (int, float),
+            "boolean": bool,
+            "array": list,
+            "object": dict,
         }
         expected = type_map.get(expected_type)
         if expected is None:
@@ -201,8 +199,7 @@ class ValidatedTool(Tool, ABC):
 
 # Helper function for quick validation
 def validate_tool_inputs(
-    inputs: Dict[str, Any],
-    validators: Dict[str, Validator]
+    inputs: Dict[str, Any], validators: Dict[str, Validator]
 ) -> ValidationResultImpl:
     """
     Validate tool inputs standalone (without ValidatedTool class).
@@ -244,6 +241,6 @@ def validate_tool_inputs(
 
 
 __all__ = [
-    'ValidatedTool',
-    'validate_tool_inputs',
+    "ValidatedTool",
+    "validate_tool_inputs",
 ]

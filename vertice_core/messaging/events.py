@@ -33,11 +33,11 @@ class Event:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
-            'id': self.id,
-            'type': self.event_type,
-            'timestamp': self.timestamp,
-            'source': self.source,
-            'data': self.data,
+            "id": self.id,
+            "type": self.event_type,
+            "timestamp": self.timestamp,
+            "source": self.source,
+            "data": self.data,
         }
 
     def __repr__(self) -> str:
@@ -48,7 +48,7 @@ class Event:
         )
 
 
-E = TypeVar('E', bound=Event)
+E = TypeVar("E", bound=Event)
 EventHandler = Callable[[E], Any]
 
 
@@ -74,8 +74,7 @@ class EventBus:
         self._max_history: int = 1000
 
     def on(
-        self,
-        event_type: Optional[Type[Event]] = None
+        self, event_type: Optional[Type[Event]] = None
     ) -> Callable[[EventHandler], EventHandler]:
         """
         Decorator to register an event handler.
@@ -86,6 +85,7 @@ class EventBus:
         Returns:
             Decorator function
         """
+
         def decorator(handler: EventHandler) -> EventHandler:
             if event_type is None:
                 self._wildcard_handlers.append(handler)
@@ -95,13 +95,10 @@ class EventBus:
                     self._handlers[type_name] = []
                 self._handlers[type_name].append(handler)
             return handler
+
         return decorator
 
-    def subscribe(
-        self,
-        event_type: Type[Event],
-        handler: EventHandler
-    ) -> str:
+    def subscribe(self, event_type: Type[Event], handler: EventHandler) -> str:
         """
         Subscribe to an event type.
 
@@ -118,11 +115,7 @@ class EventBus:
         self._handlers[type_name].append(handler)
         return f"{type_name}:{id(handler)}"
 
-    def unsubscribe(
-        self,
-        event_type: Type[Event],
-        handler: EventHandler
-    ) -> bool:
+    def unsubscribe(self, event_type: Type[Event], handler: EventHandler) -> bool:
         """
         Unsubscribe from an event type.
 
@@ -142,11 +135,7 @@ class EventBus:
                 pass
         return False
 
-    async def emit(
-        self,
-        event: Event,
-        wait: bool = True
-    ) -> List[Any]:
+    async def emit(self, event: Event, wait: bool = True) -> List[Any]:
         """
         Emit an event to all subscribers.
 
@@ -161,7 +150,7 @@ class EventBus:
         async with self._lock:
             self._event_history.append(event)
             if len(self._event_history) > self._max_history:
-                self._event_history = self._event_history[-self._max_history:]
+                self._event_history = self._event_history[-self._max_history :]
 
         # Get handlers for this event type
         type_name = event.event_type
@@ -183,11 +172,7 @@ class EventBus:
                 asyncio.create_task(task)
             return []
 
-    async def _invoke_handler(
-        self,
-        handler: EventHandler,
-        event: Event
-    ) -> Any:
+    async def _invoke_handler(self, handler: EventHandler, event: Event) -> Any:
         """Invoke a handler safely."""
         try:
             result = handler(event)
@@ -208,9 +193,7 @@ class EventBus:
         asyncio.create_task(self.emit(event, wait=False))
 
     def get_history(
-        self,
-        event_type: Optional[Type[Event]] = None,
-        limit: int = 100
+        self, event_type: Optional[Type[Event]] = None, limit: int = 100
     ) -> List[Event]:
         """
         Get recent event history.
@@ -243,9 +226,7 @@ class EventBus:
         return count
 
 
-def event_handler(
-    event_type: Type[Event]
-) -> Callable[[EventHandler], EventHandler]:
+def event_handler(event_type: Type[Event]) -> Callable[[EventHandler], EventHandler]:
     """
     Decorator to mark a function as an event handler.
 
@@ -256,9 +237,11 @@ def event_handler(
 
     Note: Must be registered with an EventBus to be active.
     """
+
     def decorator(func: EventHandler) -> EventHandler:
         func._event_type = event_type
         return func
+
     return decorator
 
 
@@ -266,30 +249,35 @@ def event_handler(
 @dataclass
 class SystemEvent(Event):
     """System-level event."""
+
     pass
 
 
 @dataclass
 class TaskStartedEvent(Event):
     """Task started event."""
+
     pass
 
 
 @dataclass
 class TaskCompletedEvent(Event):
     """Task completed event."""
+
     pass
 
 
 @dataclass
 class TaskFailedEvent(Event):
     """Task failed event."""
+
     pass
 
 
 @dataclass
 class AgentMessageEvent(Event):
     """Agent message event."""
+
     pass
 
 
@@ -306,14 +294,14 @@ def get_event_bus() -> EventBus:
 
 
 __all__ = [
-    'Event',
-    'EventBus',
-    'EventHandler',
-    'event_handler',
-    'SystemEvent',
-    'TaskStartedEvent',
-    'TaskCompletedEvent',
-    'TaskFailedEvent',
-    'AgentMessageEvent',
-    'get_event_bus',
+    "Event",
+    "EventBus",
+    "EventHandler",
+    "event_handler",
+    "SystemEvent",
+    "TaskStartedEvent",
+    "TaskCompletedEvent",
+    "TaskFailedEvent",
+    "AgentMessageEvent",
+    "get_event_bus",
 ]

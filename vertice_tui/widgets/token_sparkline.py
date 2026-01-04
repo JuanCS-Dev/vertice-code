@@ -115,13 +115,10 @@ class TokenSparkline(Widget):
                 current = data[-1]
                 peak = max(data)
                 avg = sum(data) / len(data)
-                stats.update(
-                    f"[bold]{current:.0f}%[/]\n"
-                    f"[dim]↑{peak:.0f}% ⌀{avg:.0f}%[/]"
-                )
+                stats.update(f"[bold]{current:.0f}%[/]\n" f"[dim]↑{peak:.0f}% ⌀{avg:.0f}%[/]")
             else:
                 stats.update("--")
-        except Exception:
+        except (AttributeError, ValueError):
             pass
 
     def clear(self) -> None:
@@ -223,8 +220,7 @@ class MultiSparkline(Widget):
         self._labels = list(labels) if labels else ["Series 1"]
         self._history_size = history_size
         self._data: dict[str, deque[float]] = {
-            label: deque(maxlen=history_size)
-            for label in self._labels
+            label: deque(maxlen=history_size) for label in self._labels
         }
 
     def compose(self) -> ComposeResult:
@@ -252,5 +248,5 @@ class MultiSparkline(Widget):
                 spark_id = f"spark-{label.lower().replace(' ', '-')}"
                 spark = self.query_one(f"#{spark_id}", Sparkline)
                 spark.data = list(data) if data else [0]
-            except Exception:
+            except (AttributeError, ValueError):
                 pass

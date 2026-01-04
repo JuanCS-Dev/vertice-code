@@ -33,7 +33,7 @@ def normalize_streaming_chunk(chunk: Any) -> str:
     """
     # Case 0: StreamingChunk dataclass (new standard - preferred)
     # Uses duck typing to avoid import
-    if hasattr(chunk, 'type') and hasattr(chunk, 'data') and hasattr(chunk, '__dataclass_fields__'):
+    if hasattr(chunk, "type") and hasattr(chunk, "data") and hasattr(chunk, "__dataclass_fields__"):
         return str(chunk)  # StreamingChunk has __str__ method
 
     # Case 1: Already a string
@@ -46,57 +46,62 @@ def normalize_streaming_chunk(chunk: Any) -> str:
 
     # Case 3: Dict - multiple protocols
     if isinstance(chunk, dict):
-        chunk_type = chunk.get('type', '')
+        chunk_type = chunk.get("type", "")
 
         # Protocol A: {"content": "..."} - LLMAdapter
-        if 'content' in chunk:
-            return str(chunk['content'])
+        if "content" in chunk:
+            return str(chunk["content"])
 
         # Protocol B: {"type": "...", "data": "..."} - Most agents
-        if 'data' in chunk:
-            data = chunk['data']
+        if "data" in chunk:
+            data = chunk["data"]
 
             # Skip certain types that are not for display
-            if chunk_type == 'error':
-                error_data = data if isinstance(data, dict) else {'error': str(data)}
+            if chunk_type == "error":
+                error_data = data if isinstance(data, dict) else {"error": str(data)}
                 return f"❌ Error: {error_data.get('error', data)}\n"
 
             # Status messages - display with formatting
-            if chunk_type == 'status':
+            if chunk_type == "status":
                 return f"{data}\n"
 
             # Thinking tokens - display raw for streaming effect
-            if chunk_type == 'thinking':
+            if chunk_type == "thinking":
                 return str(data)
 
             # Command - display with syntax highlighting marker
-            if chunk_type == 'command':
+            if chunk_type == "command":
                 return f"\n```bash\n{data}\n```\n"
 
             # Executing - show status
-            if chunk_type == 'executing':
+            if chunk_type == "executing":
                 return f"⚡ Executing: {data}\n"
 
             # Result - format appropriately (Claude Code style)
-            if chunk_type == 'result':
+            if chunk_type == "result":
                 return _format_result_data(data)
 
             # Other types with data - just return data as string
             return str(data)
 
         # Protocol C: {"type": "...", "text": "..."} - Legacy executor
-        if 'text' in chunk:
-            return str(chunk['text'])
+        if "text" in chunk:
+            return str(chunk["text"])
 
-        # Fallback: silent - don't dump raw dicts
-        return ""
+        # FIX 2.5: Log unknown format and provide fallback
+        import logging
+
+        logging.debug(
+            f"normalize_streaming_chunk: Unknown dict format with keys {list(chunk.keys())}"
+        )
+        return str(chunk.get("message", ""))  # Try 'message' key as last resort
 
     # Case 4: Has common attributes
-    if hasattr(chunk, 'data'):
+    if hasattr(chunk, "data"):
         return str(chunk.data)
-    if hasattr(chunk, 'content'):
+    if hasattr(chunk, "content"):
         return str(chunk.content)
-    if hasattr(chunk, 'to_markdown'):
+    if hasattr(chunk, "to_markdown"):
         return chunk.to_markdown()
 
     # Last resort: stringify
@@ -116,40 +121,40 @@ def _format_result_data(data: Any) -> str:
     result_data = data
 
     # If it's an AgentResponse, get the inner data
-    if hasattr(data, 'data'):
+    if hasattr(data, "data"):
         result_data = data.data
 
     # Now handle the result_data appropriately
     if isinstance(result_data, dict):
         # Priority 1: formatted_markdown (PlannerAgent style)
-        if 'formatted_markdown' in result_data:
-            return result_data['formatted_markdown']
+        if "formatted_markdown" in result_data:
+            return result_data["formatted_markdown"]
 
         # Priority 2: markdown field
-        if 'markdown' in result_data:
-            return result_data['markdown']
+        if "markdown" in result_data:
+            return result_data["markdown"]
 
         # Priority 3: response/result text
-        if 'response' in result_data:
-            return str(result_data['response'])
-        if 'result' in result_data:
-            return str(result_data['result'])
+        if "response" in result_data:
+            return str(result_data["response"])
+        if "result" in result_data:
+            return str(result_data["result"])
 
         # Priority 4: stdout for executor results
-        if 'stdout' in result_data:
+        if "stdout" in result_data:
             output_parts = []
-            if result_data.get('command'):
+            if result_data.get("command"):
                 output_parts.append(f"$ {result_data['command']}")
-            if result_data.get('stdout'):
-                output_parts.append(result_data['stdout'])
-            if result_data.get('stderr'):
+            if result_data.get("stdout"):
+                output_parts.append(result_data["stdout"])
+            if result_data.get("stderr"):
                 output_parts.append(f"stderr: {result_data['stderr']}")
-            return '\n'.join(output_parts) if output_parts else ""
+            return "\n".join(output_parts) if output_parts else ""
 
         # Priority 5: Don't dump raw dicts
         return ""
 
-    elif hasattr(result_data, 'to_markdown'):
+    elif hasattr(result_data, "to_markdown"):
         return result_data.to_markdown()
 
     return str(result_data) if result_data else ""

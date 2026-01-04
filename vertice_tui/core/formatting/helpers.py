@@ -19,17 +19,13 @@ from .formatter import OutputFormatter
 # CONVENIENCE FUNCTIONS
 # =============================================================================
 
+
 def response_panel(text: str, title: str = "Response") -> Panel:
     """Quick helper for response panels."""
     return OutputFormatter.format_response(text, title)
 
 
-def tool_panel(
-    name: str,
-    success: bool,
-    data: Any = None,
-    error: Optional[str] = None
-) -> Panel:
+def tool_panel(name: str, success: bool, data: Any = None, error: Optional[str] = None) -> Panel:
     """Quick helper for tool result panels."""
     return OutputFormatter.format_tool_result(name, success, data, error)
 

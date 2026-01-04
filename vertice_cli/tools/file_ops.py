@@ -2,20 +2,21 @@
 
 import shutil
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from datetime import datetime
 import logging
 
 from .base import ToolResult, ToolCategory
 from .validated import ValidatedTool
 from ..core.validation import Required, TypeCheck
+from .smart_match import smart_find, apply_replacement, MatchType, MatchResult
 
 logger = logging.getLogger(__name__)
 
 
 class ReadFileTool(ValidatedTool):
     """Read complete contents of a file.
-    
+
     Boris Cherny: Type-safe file reading with validation.
     """
 
@@ -27,56 +28,59 @@ class ReadFileTool(ValidatedTool):
             "path": {
                 "type": "string",
                 "description": "File path relative to current directory",
-                "required": True
+                "required": True,
             },
             "line_range": {
                 "type": "array",
                 "description": "Optional [start, end] line range to read",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     def get_validators(self) -> Dict[str, Any]:
         """Validate input parameters."""
         return {
-            'path': Required('path'),
-            'line_range': TypeCheck((list, tuple, type(None)), 'line_range')
+            "path": Required("path"),
+            "line_range": TypeCheck((list, tuple, type(None)), "line_range"),
         }
 
-    async def _execute_validated(self, path: str, line_range: Optional[tuple] = None, **kwargs) -> ToolResult:
+    async def _execute_validated(
+        self, path: str, line_range: Optional[tuple] = None, **kwargs
+    ) -> ToolResult:
         """Read file contents."""
         try:
             file_path = Path(path)
 
             if not file_path.exists():
-                return ToolResult(
-                    success=False,
-                    error=f"File not found: {path}"
-                )
+                return ToolResult(success=False, error=f"File not found: {path}")
 
             if not file_path.is_file():
-                return ToolResult(
-                    success=False,
-                    error=f"Path is not a file: {path}"
-                )
+                return ToolResult(success=False, error=f"Path is not a file: {path}")
 
             content = file_path.read_text()
-            lines = content.split('\n')
+            lines = content.split("\n")
 
             # Apply line range if specified
             if line_range and len(line_range) == 2:
                 start, end = line_range
-                lines = lines[start-1:end]  # 1-indexed
-                content = '\n'.join(lines)
+                lines = lines[start - 1 : end]  # 1-indexed
+                content = "\n".join(lines)
 
             # Detect language
-            suffix = file_path.suffix.lstrip('.')
+            suffix = file_path.suffix.lstrip(".")
             lang_map = {
-                'py': 'python', 'js': 'javascript', 'ts': 'typescript',
-                'java': 'java', 'cpp': 'cpp', 'c': 'c', 'go': 'go',
-                'rs': 'rust', 'rb': 'ruby', 'php': 'php'
+                "py": "python",
+                "js": "javascript",
+                "ts": "typescript",
+                "java": "java",
+                "cpp": "cpp",
+                "c": "c",
+                "go": "go",
+                "rs": "rust",
+                "rb": "ruby",
+                "php": "php",
             }
-            language = lang_map.get(suffix, suffix or 'text')
+            language = lang_map.get(suffix, suffix or "text")
 
             return ToolResult(
                 success=True,
@@ -85,8 +89,8 @@ class ReadFileTool(ValidatedTool):
                     "path": str(file_path),
                     "lines": len(lines),
                     "language": language,
-                    "size": file_path.stat().st_size
-                }
+                    "size": file_path.stat().st_size,
+                },
             )
         except Exception as e:
             return ToolResult(success=False, error=str(e))
@@ -102,28 +106,21 @@ class WriteFileTool(ValidatedTool):
         self.hook_executor = hook_executor
         self.config_loader = config_loader
         self.parameters = {
-            "path": {
-                "type": "string",
-                "description": "File path to create",
-                "required": True
-            },
-            "content": {
-                "type": "string",
-                "description": "File content",
-                "required": True
-            },
+            "path": {"type": "string", "description": "File path to create", "required": True},
+            "content": {"type": "string", "description": "File content", "required": True},
             "create_dirs": {
                 "type": "boolean",
                 "description": "Create parent directories if needed",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     def get_validators(self):
-        return {'path': Required('path'), 'content': Required('content')}
+        return {"path": Required("path"), "content": Required("content")}
 
-    async def _execute_validated(self, path: str, content: str, create_dirs: bool = True,
-                     preview: bool = True, console=None) -> ToolResult:
+    async def _execute_validated(
+        self, path: str, content: str, create_dirs: bool = True, preview: bool = True, console=None
+    ) -> ToolResult:
         """Create file with content."""
         try:
             file_path = Path(path)
@@ -139,19 +136,19 @@ class WriteFileTool(ValidatedTool):
                         original_content=original_content,
                         proposed_content=content,
                         file_path=str(file_path),
-                        console=console
+                        console=console,
                     )
 
                     if not accepted:
                         return ToolResult(
                             success=False,
                             data={"path": str(path), "message": "Overwrite cancelled by user"},
-                            error="Overwrite cancelled by user"
+                            error="Overwrite cancelled by user",
                         )
                 else:
                     return ToolResult(
                         success=False,
-                        error=f"File already exists: {path}. Use edit_file to modify."
+                        error=f"File already exists: {path}. Use edit_file to modify.",
                     )
 
             # Create parent directories if needed
@@ -166,8 +163,8 @@ class WriteFileTool(ValidatedTool):
                 metadata={
                     "path": str(file_path),
                     "size": len(content),
-                    "lines": len(content.split('\n'))
-                }
+                    "lines": len(content.split("\n")),
+                },
             )
 
             # Execute post_write hooks
@@ -199,7 +196,7 @@ class WriteFileTool(ValidatedTool):
                 file_path=file_path,
                 event_name=event_name,
                 cwd=Path.cwd(),
-                project_name=config.project.name if config.project else "unknown"
+                project_name=config.project.name if config.project else "unknown",
             )
 
             # Execute hooks
@@ -218,48 +215,59 @@ class WriteFileTool(ValidatedTool):
 
 
 class EditFileTool(ValidatedTool):
-    """Modify existing file using search/replace.
+    """Modify existing file using smart search/replace.
+
+    Features (2026-01-03):
+    - Layered matching: exact → whitespace-normalized → indentation-flexible → fuzzy
+    - Helpful error messages with closest matches
+    - Confidence scores for fuzzy matches
+    - Aider/Claude Code parity
 
     Boris Cherny: Type-safe editing with validation.
-    Claude Code parity: Supports replace_all for bulk replacements.
     """
 
     def __init__(self, hook_executor=None, config_loader=None):
         super().__init__()
         self.category = ToolCategory.FILE_WRITE
-        self.description = "Modify existing file using search/replace blocks"
+        self.description = "Modify existing file using smart search/replace with fuzzy matching"
         self.hook_executor = hook_executor
         self.config_loader = config_loader
         self.parameters = {
-            "path": {
-                "type": "string",
-                "description": "File path to edit",
-                "required": True
-            },
+            "path": {"type": "string", "description": "File path to edit", "required": True},
             "edits": {
                 "type": "array",
-                "description": "Array of {search, replace} edit operations",
-                "required": True
+                "description": """Array of {search, replace} edit operations.
+
+CRITICAL: The 'search' value should match text from the file.
+- Best practice: Use read_file first, then copy exact text
+- Smart matching handles minor whitespace/indentation differences
+- For major changes, consider using write_file to rewrite the file
+
+Example: [{"search": "def old_func():", "replace": "def new_func():"}]""",
+                "required": True,
             },
             "create_backup": {
                 "type": "boolean",
-                "description": "Create backup before editing",
-                "required": False
+                "description": "Create backup before editing (default: true)",
+                "required": False,
             },
             "replace_all": {
                 "type": "boolean",
-                "description": "Replace ALL occurrences instead of just first (Claude Code parity)",
+                "description": "Replace ALL occurrences instead of just first",
                 "required": False,
-                "default": False
-            }
+                "default": False,
+            },
+            "strict": {
+                "type": "boolean",
+                "description": "Only use exact/whitespace matching (no fuzzy). Safer but stricter.",
+                "required": False,
+                "default": False,
+            },
         }
 
     def get_validators(self) -> Dict[str, Any]:
         """Validate input parameters."""
-        return {
-            'path': Required('path'),
-            'edits': TypeCheck(list, 'edits')
-        }
+        return {"path": Required("path"), "edits": TypeCheck(list, "edits")}
 
     async def _execute_validated(
         self,
@@ -267,16 +275,25 @@ class EditFileTool(ValidatedTool):
         edits: list[dict],
         create_backup: bool = True,
         replace_all: bool = False,
+        strict: bool = False,
         preview: bool = True,
-        console=None
+        console=None,
     ) -> ToolResult:
-        """Edit file with search/replace operations.
+        """Edit file with smart search/replace operations.
+
+        Uses layered matching strategy:
+        1. Exact match
+        2. Whitespace-normalized match
+        3. Indentation-flexible match
+        4. Fuzzy line match (80%+ similarity)
+        5. Fuzzy block match (70%+ similarity)
 
         Args:
             path: File path to edit
             edits: List of {search, replace} operations
             create_backup: Whether to create backup before editing
             replace_all: If True, replace ALL occurrences (Claude Code parity)
+            strict: If True, only use exact/whitespace matching (no fuzzy)
             preview: Whether to show preview before applying
             console: Console for preview display
         """
@@ -284,10 +301,7 @@ class EditFileTool(ValidatedTool):
             file_path = Path(path)
 
             if not file_path.exists():
-                return ToolResult(
-                    success=False,
-                    error=f"File not found: {path}"
-                )
+                return ToolResult(success=False, error=f"File not found: {path}")
 
             # Read current content
             original_content = file_path.read_text()
@@ -302,26 +316,72 @@ class EditFileTool(ValidatedTool):
                 backup_path = backup_dir / f"{file_path.name}.{timestamp}.bak"
                 backup_path.write_text(original_content)
 
-            # Apply edits
+            # Apply edits with smart matching
             changes = 0
-            for edit in edits:
-                search = edit.get('search', '')
-                replace = edit.get('replace', '')
+            match_info: List[str] = []
+            low_confidence_warnings: List[str] = []
 
-                if search in modified_content:
-                    if replace_all:
-                        # Claude Code parity: Replace ALL occurrences
-                        occurrence_count = modified_content.count(search)
-                        modified_content = modified_content.replace(search, replace)
-                        changes += occurrence_count
-                    else:
-                        # Default: Replace only first occurrence
-                        modified_content = modified_content.replace(search, replace, 1)
-                        changes += 1
-                else:
+            for i, edit in enumerate(edits):
+                # Accept both 'search' and 'find' keys (LLM flexibility)
+                search = edit.get("search") or edit.get("find") or ""
+                replace = edit.get("replace", "")
+
+                if not search:
+                    # Empty search without content is an error
+                    if not replace:
+                        return ToolResult(
+                            success=False,
+                            error=f"Edit {i+1}: Both 'search' and 'replace' are empty",
+                            metadata={"edit_index": i, "successful_edits": changes},
+                        )
+                    # Empty search with content = append to end of file
+                    modified_content = modified_content + "\n" + replace
+                    changes += 1
+                    match_info.append(f"Edit {i+1}: Appended content to end of file")
+                    continue
+
+                # Use smart matching
+                match_result = smart_find(search, modified_content, strict=strict)
+
+                if not match_result.found:
+                    # Provide helpful error with suggestions
                     return ToolResult(
                         success=False,
-                        error=f"Search string not found: {search[:50]}..."
+                        error=match_result.suggestion,
+                        metadata={
+                            "edit_index": i,
+                            "search_preview": search[:100],
+                            "match_type": match_result.match_type.value,
+                            "successful_edits": changes,
+                        },
+                    )
+
+                # Check confidence for fuzzy matches
+                if match_result.confidence < 0.9:
+                    warning = (
+                        f"Edit {i+1}: {match_result.match_type.value} "
+                        f"({match_result.confidence:.0%} confidence)"
+                    )
+                    low_confidence_warnings.append(warning)
+                    logger.warning(f"Low confidence match: {warning}")
+
+                # Apply replacement
+                if replace_all and match_result.match_type == MatchType.EXACT:
+                    # For exact matches with replace_all, use standard replace
+                    occurrence_count = modified_content.count(match_result.matched_text)
+                    modified_content = modified_content.replace(match_result.matched_text, replace)
+                    changes += occurrence_count
+                    match_info.append(
+                        f"Edit {i+1}: Replaced {occurrence_count} occurrences "
+                        f"({match_result.match_type.value})"
+                    )
+                else:
+                    # Apply single replacement using match positions
+                    modified_content = apply_replacement(modified_content, match_result, replace)
+                    changes += 1
+                    match_info.append(
+                        f"Edit {i+1}: {match_result.match_type.value} "
+                        f"({match_result.confidence:.0%})"
                     )
 
             # Show preview if enabled (Integration Sprint Week 1: Task 1.3)
@@ -333,36 +393,48 @@ class EditFileTool(ValidatedTool):
                     original_content=original_content,
                     proposed_content=modified_content,
                     file_path=str(file_path),
-                    console=console
+                    console=console,
                 )
 
                 if not accepted:
                     return ToolResult(
                         success=False,
                         data={"path": str(path), "message": "Edit cancelled by user"},
-                        error="Edit cancelled by user"
+                        error="Edit cancelled by user",
                     )
 
             # Write modified content
             file_path.write_text(modified_content)
 
+            # Build result message
+            result_msg = f"Applied {changes} edit(s) to {path}"
+            if low_confidence_warnings:
+                result_msg += f"\n\nWarnings:\n" + "\n".join(low_confidence_warnings)
+
             result = ToolResult(
                 success=True,
-                data=f"Applied {changes} edits to {path}",
+                data=result_msg,
                 metadata={
                     "path": str(file_path),
                     "backup": str(backup_path) if backup_path else None,
                     "changes": changes,
-                    "lines_before": len(original_content.split('\n')),
-                    "lines_after": len(modified_content.split('\n'))
-                }
+                    "lines_before": len(original_content.split("\n")),
+                    "lines_after": len(modified_content.split("\n")),
+                    "match_details": match_info,
+                    "warnings": low_confidence_warnings,
+                },
             )
+
+            # Log match details for debugging
+            for info in match_info:
+                logger.debug(f"Smart match: {info}")
 
             # Execute post_edit hooks
             await self._execute_hooks("post_edit", file_path)
 
             return result
         except Exception as e:
+            logger.error(f"Edit failed: {e}")
             return ToolResult(success=False, error=str(e))
 
     async def _execute_hooks(self, event_name: str, file_path: Path):
@@ -387,7 +459,7 @@ class EditFileTool(ValidatedTool):
                 file_path=file_path,
                 event_name=event_name,
                 cwd=Path.cwd(),
-                project_name=config.project.name if config.project else "unknown"
+                project_name=config.project.name if config.project else "unknown",
             )
 
             # Execute hooks
@@ -413,42 +485,30 @@ class ListDirectoryTool(ValidatedTool):
         self.category = ToolCategory.FILE_READ
         self.description = "List files and directories"
         self.parameters = {
-            "path": {
-                "type": "string",
-                "description": "Directory path to list",
-                "required": False
-            },
-            "recursive": {
-                "type": "boolean",
-                "description": "List recursively",
-                "required": False
-            },
+            "path": {"type": "string", "description": "Directory path to list", "required": False},
+            "recursive": {"type": "boolean", "description": "List recursively", "required": False},
             "pattern": {
                 "type": "string",
                 "description": "Glob pattern to filter (e.g., '*.py')",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     def get_validators(self):
         return {}
 
-    async def _execute_validated(self, path: str = ".", recursive: bool = False, pattern: Optional[str] = None, **kwargs) -> ToolResult:
+    async def _execute_validated(
+        self, path: str = ".", recursive: bool = False, pattern: Optional[str] = None, **kwargs
+    ) -> ToolResult:
         """List directory contents."""
         try:
             dir_path = Path(path)
 
             if not dir_path.exists():
-                return ToolResult(
-                    success=False,
-                    error=f"Directory not found: {path}"
-                )
+                return ToolResult(success=False, error=f"Directory not found: {path}")
 
             if not dir_path.is_dir():
-                return ToolResult(
-                    success=False,
-                    error=f"Path is not a directory: {path}"
-                )
+                return ToolResult(success=False, error=f"Path is not a directory: {path}")
 
             # List files
             if pattern:
@@ -467,14 +527,14 @@ class ListDirectoryTool(ValidatedTool):
             dir_list = []
 
             for f in files:
-                if f.name.startswith('.'):
+                if f.name.startswith("."):
                     continue  # Skip hidden files
 
                 info = {
                     "name": f.name,
                     "path": str(f.relative_to(dir_path)),
                     "type": "directory" if f.is_dir() else "file",
-                    "size": f.stat().st_size if f.is_file() else 0
+                    "size": f.stat().st_size if f.is_file() else 0,
                 }
 
                 if f.is_dir():
@@ -484,15 +544,12 @@ class ListDirectoryTool(ValidatedTool):
 
             return ToolResult(
                 success=True,
-                data={
-                    "files": file_list,
-                    "directories": dir_list
-                },
+                data={"files": file_list, "directories": dir_list},
                 metadata={
                     "path": str(dir_path),
                     "file_count": len(file_list),
-                    "dir_count": len(dir_list)
-                }
+                    "dir_count": len(dir_list),
+                },
             )
         except Exception as e:
             return ToolResult(success=False, error=str(e))
@@ -506,20 +563,16 @@ class DeleteFileTool(ValidatedTool):
         self.category = ToolCategory.FILE_MGMT
         self.description = "Delete file (moves to .trash/ for safety)"
         self.parameters = {
-            "path": {
-                "type": "string",
-                "description": "File path to delete",
-                "required": True
-            },
+            "path": {"type": "string", "description": "File path to delete", "required": True},
             "permanent": {
                 "type": "boolean",
                 "description": "Permanently delete (skip trash)",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     def get_validators(self):
-        return {'path': Required('path')}
+        return {"path": Required("path")}
 
     async def _execute_validated(self, path: str, permanent: bool = False, **kwargs) -> ToolResult:
         """Delete file."""
@@ -527,10 +580,7 @@ class DeleteFileTool(ValidatedTool):
             file_path = Path(path)
 
             if not file_path.exists():
-                return ToolResult(
-                    success=False,
-                    error=f"File not found: {path}"
-                )
+                return ToolResult(success=False, error=f"File not found: {path}")
 
             if permanent:
                 # Permanent delete
@@ -542,7 +592,7 @@ class DeleteFileTool(ValidatedTool):
                 return ToolResult(
                     success=True,
                     data=f"Permanently deleted {path}",
-                    metadata={"path": str(file_path), "permanent": True}
+                    metadata={"path": str(file_path), "permanent": True},
                 )
             else:
                 # Move to trash
@@ -560,8 +610,8 @@ class DeleteFileTool(ValidatedTool):
                     metadata={
                         "path": str(file_path),
                         "trash_path": str(trash_path),
-                        "permanent": False
-                    }
+                        "permanent": False,
+                    },
                 )
         except Exception as e:
             return ToolResult(success=False, error=str(e))

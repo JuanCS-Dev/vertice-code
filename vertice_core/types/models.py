@@ -37,6 +37,7 @@ class AgentTask(BaseModel):
         metadata: Arbitrary metadata (limited to 10k keys)
         history: Previous interactions for context
     """
+
     model_config = {
         "strict": True,
         "validate_assignment": True,
@@ -50,23 +51,23 @@ class AgentTask(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict)
     history: List[Dict[str, Any]] = Field(default_factory=list)
 
-    @model_validator(mode='before')
+    @model_validator(mode="before")
     @classmethod
     def handle_deprecated_description(cls, values: Any) -> Any:
         """Migrate deprecated 'description' field to 'request'."""
-        if isinstance(values, dict) and 'description' in values:
+        if isinstance(values, dict) and "description" in values:
             warnings.warn(
                 "AgentTask field 'description' is deprecated. Use 'request' instead.",
                 DeprecationWarning,
-                stacklevel=3
+                stacklevel=3,
             )
-            if 'request' not in values:
-                values['request'] = values['description']
-            del values['description']
+            if "request" not in values:
+                values["request"] = values["description"]
+            del values["description"]
         return values
 
-    @model_validator(mode='after')
-    def validate_size_limits(self) -> 'AgentTask':
+    @model_validator(mode="after")
+    def validate_size_limits(self) -> "AgentTask":
         """Prevent resource exhaustion attacks."""
         # Context size limit: 10MB
         context_size = sys.getsizeof(str(self.context))
@@ -109,6 +110,7 @@ class AgentResponse(BaseModel):
     Properties:
         metadata: Alias for metrics (backward compatibility)
     """
+
     model_config = {
         "strict": True,
         "validate_assignment": True,
@@ -139,6 +141,7 @@ class TaskResult(BaseModel):
 
     Used for compatibility with orchestration systems.
     """
+
     model_config = {
         "strict": True,
         "frozen": True,
@@ -155,7 +158,7 @@ class TaskResult(BaseModel):
 
 
 __all__ = [
-    'AgentTask',
-    'AgentResponse',
-    'TaskResult',
+    "AgentTask",
+    "AgentResponse",
+    "TaskResult",
 ]

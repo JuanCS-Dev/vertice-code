@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 class ChunkType(Enum):
     """Type of code chunk."""
+
     FUNCTION = "function"
     METHOD = "method"
     CLASS = "class"
@@ -203,8 +204,16 @@ class CodeChunker:
         # Default excludes
         if exclude_patterns is None:
             exclude_patterns = [
-                "__pycache__", "node_modules", ".git", ".venv", "venv",
-                "dist", "build", ".egg-info", ".pytest_cache", ".mypy_cache"
+                "__pycache__",
+                "node_modules",
+                ".git",
+                ".venv",
+                "venv",
+                "dist",
+                "build",
+                ".egg-info",
+                ".pytest_cache",
+                ".mypy_cache",
             ]
 
         chunks = []
@@ -264,16 +273,18 @@ class CodeChunker:
 
         # If no chunks found, treat whole file as one chunk
         if not chunks:
-            chunks.append(CodeChunk(
-                chunk_id="",
-                filepath=filepath,
-                start_line=1,
-                end_line=len(lines),
-                content=content,
-                chunk_type=ChunkType.MODULE,
-                name=Path(filepath).stem,
-                language="python",
-            ))
+            chunks.append(
+                CodeChunk(
+                    chunk_id="",
+                    filepath=filepath,
+                    start_line=1,
+                    end_line=len(lines),
+                    content=content,
+                    chunk_type=ChunkType.MODULE,
+                    name=Path(filepath).stem,
+                    language="python",
+                )
+            )
 
         return chunks
 
@@ -329,7 +340,7 @@ class CodeChunker:
                 signature=signature,
                 language="python",
             )
-        except Exception:
+        except (AttributeError, ValueError, TypeError):
             return None
 
     def _extract_class_chunk(
@@ -349,7 +360,7 @@ class CodeChunker:
                     end = item.lineno - 1
                     break
                 else:
-                    end = getattr(item, 'end_lineno', item.lineno)
+                    end = getattr(item, "end_lineno", item.lineno)
 
             # Ensure we at least capture docstring
             docstring = ast.get_docstring(node)
@@ -385,7 +396,7 @@ class CodeChunker:
                 signature=signature,
                 language="python",
             )
-        except Exception:
+        except (AttributeError, ValueError, TypeError):
             return None
 
     def _chunk_generic(
@@ -412,11 +423,11 @@ class CodeChunker:
                 for match in re.finditer(pattern, content, re.MULTILINE):
                     start_pos = match.start()
                     # Find start line
-                    start_line = content[:start_pos].count('\n') + 1
+                    start_line = content[:start_pos].count("\n") + 1
 
                     # Find end (next blank line or pattern match)
                     end_pos = self._find_chunk_end(content, match.end(), language)
-                    end_line = content[:end_pos].count('\n') + 1
+                    end_line = content[:end_pos].count("\n") + 1
 
                     chunk_content = content[start_pos:end_pos]
                     name = match.group(1) if match.groups() else f"chunk_{start_line}"
@@ -445,31 +456,43 @@ class CodeChunker:
         """Get regex patterns for language."""
         patterns = {
             "javascript": [
-                (r'(?:async\s+)?function\s+(\w+)\s*\([^)]*\)\s*\{', ChunkType.FUNCTION),
-                (r'(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?\([^)]*\)\s*=>', ChunkType.FUNCTION),
-                (r'class\s+(\w+)(?:\s+extends\s+\w+)?\s*\{', ChunkType.CLASS),
+                (r"(?:async\s+)?function\s+(\w+)\s*\([^)]*\)\s*\{", ChunkType.FUNCTION),
+                (
+                    r"(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?\([^)]*\)\s*=>",
+                    ChunkType.FUNCTION,
+                ),
+                (r"class\s+(\w+)(?:\s+extends\s+\w+)?\s*\{", ChunkType.CLASS),
             ],
             "typescript": [
-                (r'(?:async\s+)?function\s+(\w+)\s*(?:<[^>]*>)?\s*\([^)]*\)', ChunkType.FUNCTION),
-                (r'(?:const|let|var)\s+(\w+)\s*(?::\s*[^=]+)?\s*=\s*(?:async\s+)?\([^)]*\)\s*=>', ChunkType.FUNCTION),
-                (r'class\s+(\w+)(?:<[^>]*>)?(?:\s+extends\s+\w+)?\s*\{', ChunkType.CLASS),
-                (r'interface\s+(\w+)(?:<[^>]*>)?\s*\{', ChunkType.CLASS),
+                (r"(?:async\s+)?function\s+(\w+)\s*(?:<[^>]*>)?\s*\([^)]*\)", ChunkType.FUNCTION),
+                (
+                    r"(?:const|let|var)\s+(\w+)\s*(?::\s*[^=]+)?\s*=\s*(?:async\s+)?\([^)]*\)\s*=>",
+                    ChunkType.FUNCTION,
+                ),
+                (r"class\s+(\w+)(?:<[^>]*>)?(?:\s+extends\s+\w+)?\s*\{", ChunkType.CLASS),
+                (r"interface\s+(\w+)(?:<[^>]*>)?\s*\{", ChunkType.CLASS),
             ],
             "go": [
-                (r'func\s+(?:\([^)]+\)\s+)?(\w+)\s*\([^)]*\)', ChunkType.FUNCTION),
-                (r'type\s+(\w+)\s+struct\s*\{', ChunkType.CLASS),
-                (r'type\s+(\w+)\s+interface\s*\{', ChunkType.CLASS),
+                (r"func\s+(?:\([^)]+\)\s+)?(\w+)\s*\([^)]*\)", ChunkType.FUNCTION),
+                (r"type\s+(\w+)\s+struct\s*\{", ChunkType.CLASS),
+                (r"type\s+(\w+)\s+interface\s*\{", ChunkType.CLASS),
             ],
             "rust": [
-                (r'(?:pub\s+)?(?:async\s+)?fn\s+(\w+)\s*(?:<[^>]*>)?\s*\([^)]*\)', ChunkType.FUNCTION),
-                (r'(?:pub\s+)?struct\s+(\w+)(?:<[^>]*>)?\s*\{', ChunkType.CLASS),
-                (r'(?:pub\s+)?enum\s+(\w+)(?:<[^>]*>)?\s*\{', ChunkType.CLASS),
-                (r'impl(?:<[^>]*>)?\s+(\w+)', ChunkType.CLASS),
+                (
+                    r"(?:pub\s+)?(?:async\s+)?fn\s+(\w+)\s*(?:<[^>]*>)?\s*\([^)]*\)",
+                    ChunkType.FUNCTION,
+                ),
+                (r"(?:pub\s+)?struct\s+(\w+)(?:<[^>]*>)?\s*\{", ChunkType.CLASS),
+                (r"(?:pub\s+)?enum\s+(\w+)(?:<[^>]*>)?\s*\{", ChunkType.CLASS),
+                (r"impl(?:<[^>]*>)?\s+(\w+)", ChunkType.CLASS),
             ],
             "java": [
-                (r'(?:public|private|protected)?\s*(?:static)?\s*(?:\w+\s+)?(\w+)\s*\([^)]*\)\s*(?:throws\s+\w+)?\s*\{', ChunkType.FUNCTION),
-                (r'(?:public|private|protected)?\s*class\s+(\w+)', ChunkType.CLASS),
-                (r'(?:public|private|protected)?\s*interface\s+(\w+)', ChunkType.CLASS),
+                (
+                    r"(?:public|private|protected)?\s*(?:static)?\s*(?:\w+\s+)?(\w+)\s*\([^)]*\)\s*(?:throws\s+\w+)?\s*\{",
+                    ChunkType.FUNCTION,
+                ),
+                (r"(?:public|private|protected)?\s*class\s+(\w+)", ChunkType.CLASS),
+                (r"(?:public|private|protected)?\s*interface\s+(\w+)", ChunkType.CLASS),
             ],
         }
         return patterns.get(language, [])
@@ -489,7 +512,7 @@ class CodeChunker:
                 char = content[i]
 
                 # Handle strings
-                if char in '"\'`' and (i == 0 or content[i-1] != '\\'):
+                if char in "\"'`" and (i == 0 or content[i - 1] != "\\"):
                     if not in_string:
                         in_string = True
                         string_char = char
@@ -497,9 +520,9 @@ class CodeChunker:
                         in_string = False
 
                 if not in_string:
-                    if char == '{':
+                    if char == "{":
                         depth += 1
-                    elif char == '}':
+                    elif char == "}":
                         depth -= 1
                         if depth <= 0:
                             return i + 1
@@ -507,7 +530,7 @@ class CodeChunker:
                 i += 1
 
         # Default: find next blank line or EOF
-        next_blank = content.find('\n\n', start)
+        next_blank = content.find("\n\n", start)
         if next_blank != -1:
             return next_blank
         return len(content)
@@ -526,7 +549,7 @@ class CodeChunker:
         lines_per_chunk = max(20, self.max_chunk_tokens // 10)
 
         for i in range(0, len(lines), lines_per_chunk):
-            chunk_lines = lines[i:i + lines_per_chunk]
+            chunk_lines = lines[i : i + lines_per_chunk]
             chunk_content = "".join(chunk_lines)
 
             chunk = CodeChunk(

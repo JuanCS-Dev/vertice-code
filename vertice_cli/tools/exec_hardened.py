@@ -39,10 +39,11 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ExecutionLimits:
     """Resource limits for command execution.
-    
+
     These are not suggestions. These are HARD LIMITS.
     If you hit them, your process dies. No negotiation.
     """
+
     timeout_seconds: int = 30
     max_output_bytes: int = 1024 * 1024  # 1MB
     max_memory_mb: int = 512
@@ -52,56 +53,66 @@ class ExecutionLimits:
 
 class CommandValidator:
     """Validates bash commands before execution.
-    
+
     Philosophy: Whitelist good, blacklist bad is for amateurs.
     We do BOTH. Defense in depth or go home.
     """
 
     # Commands that will NEVER be allowed. Period.
     BLACKLIST: Set[str] = {
-        'rm -rf /',
-        'rm -rf /*',
-        'rm -rf ~',
-        'rm -rf ~/*',
-        'chmod -R 777',
-        'chmod 777 /',
-        'dd if=/dev/zero',
-        'dd if=/dev/random',
-        'mkfs',
-        'mkfs.ext4',
-        ':(){ :|:& };:',  # Fork bomb
-        'curl | sh',
-        'wget | sh',
-        'curl | bash',
-        'wget | bash',
+        "rm -rf /",
+        "rm -rf /*",
+        "rm -rf ~",
+        "rm -rf ~/*",
+        "chmod -R 777",
+        "chmod 777 /",
+        "dd if=/dev/zero",
+        "dd if=/dev/random",
+        "mkfs",
+        "mkfs.ext4",
+        ":(){ :|:& };:",  # Fork bomb
+        "curl | sh",
+        "wget | sh",
+        "curl | bash",
+        "wget | bash",
     }
 
     # Dangerous patterns (regex)
     DANGEROUS_PATTERNS = [
-        r'rm\s+-rf\s+/',  # Any rm -rf on root
-        r'chmod\s+-R\s+777',  # Recursive 777
-        r'dd\s+if=/dev/(zero|random|urandom)',  # Disk destroyers
-        r'>\s*/dev/sd[a-z]',  # Writing to raw disk
-        r'mkfs\.',  # Filesystem creation
-        r':\(\)\{.*\|.*&\s*\}',  # Fork bombs
-        r'eval.*\$\(',  # Code injection via eval
-        r'\$\(.*curl',  # Remote code execution
-        r'\$\(.*wget',  # Remote code execution
-        r'(curl|wget).*\|\s*(sh|bash)',  # Piping curl/wget to shell
-        r'sudo\s+',  # No sudo ever
-        r'su\s+',  # No su either
+        r"rm\s+-rf\s+/",  # Any rm -rf on root
+        r"chmod\s+-R\s+777",  # Recursive 777
+        r"dd\s+if=/dev/(zero|random|urandom)",  # Disk destroyers
+        r">\s*/dev/sd[a-z]",  # Writing to raw disk
+        r"mkfs\.",  # Filesystem creation
+        r":\(\)\{.*\|.*&\s*\}",  # Fork bombs
+        r"eval.*\$\(",  # Code injection via eval
+        r"\$\(.*curl",  # Remote code execution
+        r"\$\(.*wget",  # Remote code execution
+        r"(curl|wget).*\|\s*(sh|bash)",  # Piping curl/wget to shell
+        r"sudo\s+",  # No sudo ever
+        r"su\s+",  # No su either
     ]
 
     # Suspicious characters that might indicate shell injection
     SHELL_INJECTION_CHARS = {
-        ';', '&&', '||', '|', '`', '$(',
-        '$()', '${', '>', '>>', '<', '<<',
+        ";",
+        "&&",
+        "||",
+        "|",
+        "`",
+        "$(",
+        "$()",
+        "${",
+        ">",
+        ">>",
+        "<",
+        "<<",
     }
 
     @classmethod
     def validate(cls, command: str) -> tuple[bool, Optional[str]]:
         """Validate command is safe to execute.
-        
+
         Returns:
             (is_valid, error_message)
         """
@@ -123,7 +134,7 @@ class CommandValidator:
                 return False, f"BLOCKED: Dangerous pattern '{pattern}' is not allowed"
 
         # 4. Check for excessive piping (potential DoS)
-        pipe_count = command.count('|')
+        pipe_count = command.count("|")
         if pipe_count > 10:
             logger.warning(f"SUSPICIOUS: Excessive piping ({pipe_count} pipes)")
             return False, f"Too many pipes: {pipe_count} (max 10)"
@@ -144,7 +155,7 @@ class CommandValidator:
     @classmethod
     def sanitize_path(cls, path: str) -> str:
         """Sanitize a file path.
-        
+
         Resolve symlinks, check for traversal, validate exists.
         """
         try:
@@ -165,10 +176,9 @@ class CommandValidator:
             raise ValueError(f"Invalid path: {path}")
 
 
-
 class PTYExecutor:
     """Executes commands in a PTY (Pseudo-Terminal).
-    
+
     This enables:
     1. Interactive applications (vim, htop, sudo)
     2. Real-time output streaming
@@ -176,7 +186,9 @@ class PTYExecutor:
     4. Color output preservation
     """
 
-    def __init__(self, command: str, cwd: Optional[str] = None, env: Optional[Dict[str, str]] = None):
+    def __init__(
+        self, command: str, cwd: Optional[str] = None, env: Optional[Dict[str, str]] = None
+    ):
         self.command = command
         self.cwd = cwd or os.getcwd()
         self.env = env or os.environ.copy()
@@ -189,7 +201,7 @@ class PTYExecutor:
         try:
             # struct winsize { unsigned short ws_row, ws_col, ws_xpixel, ws_ypixel; };
             if sys.stdin.isatty():
-                s = struct.pack('HHHH', 0, 0, 0, 0)
+                s = struct.pack("HHHH", 0, 0, 0, 0)
                 size = fcntl.ioctl(sys.stdin.fileno(), termios.TIOCGWINSZ, s)
 
                 # Set window size on master PTY
@@ -213,6 +225,7 @@ class PTYExecutor:
             # Start process with slave PTY
             # SECURITY: Use shlex.split instead of shell=True
             import shlex
+
             args = shlex.split(self.command)
             self.process = subprocess.Popen(
                 args,
@@ -222,7 +235,7 @@ class PTYExecutor:
                 stderr=self.slave_fd,
                 cwd=self.cwd,
                 env=self.env,
-                preexec_fn=os.setsid  # New session
+                preexec_fn=os.setsid,  # New session
             )
 
             # Close slave fd in parent
@@ -253,7 +266,7 @@ class PTYExecutor:
                             # Write to host stdout
                             os.write(sys.stdout.fileno(), data)
                             # Capture for result
-                            output_buffer.append(data.decode(errors='replace'))
+                            output_buffer.append(data.decode(errors="replace"))
                     except OSError:
                         break
 
@@ -284,9 +297,9 @@ class PTYExecutor:
                 data={
                     "stdout": "".join(output_buffer),
                     "stderr": "",  # Merged into stdout in PTY
-                    "exit_code": self.process.returncode
+                    "exit_code": self.process.returncode,
                 },
-                metadata={"pty": True}
+                metadata={"pty": True},
             )
 
         except Exception as e:
@@ -312,7 +325,7 @@ class PTYExecutor:
 
 class BashCommandToolHardened(ValidatedTool):
     """Hardened bash command execution.
-    
+
     This is not your grandmother's subprocess.run().
     This is PRODUCTION-GRADE command execution with:
     - Input validation (whitelist + blacklist)
@@ -320,7 +333,7 @@ class BashCommandToolHardened(ValidatedTool):
     - Security sandboxing (no sudo, no root)
     - Comprehensive logging
     - Graceful degradation
-    
+
     If this breaks, your command was probably malicious anyway.
     """
 
@@ -336,41 +349,41 @@ class BashCommandToolHardened(ValidatedTool):
             "command": {
                 "type": "string",
                 "description": "Shell command to execute (validated for safety)",
-                "required": True
+                "required": True,
             },
             "cwd": {
                 "type": "string",
                 "description": "Working directory (must exist)",
-                "required": False
+                "required": False,
             },
             "timeout": {
                 "type": "integer",
                 "description": f"Timeout in seconds (max {self.limits.timeout_seconds})",
-                "required": False
+                "required": False,
             },
             "env": {
                 "type": "object",
                 "description": "Environment variables (merged with current env)",
-                "required": False
+                "required": False,
             },
             "interactive": {
                 "type": "boolean",
                 "description": "Run in interactive PTY mode (for vim, sudo, etc.)",
                 "required": False,
-                "default": False
-            }
+                "default": False,
+            },
         }
 
         logger.info(f"BashCommandToolHardened initialized with limits: {self.limits}")
 
     def get_validators(self):
         """Validate parameters."""
-        return {'command': Required('command')}
+        return {"command": Required("command")}
 
     async def execute(self, **kwargs) -> ToolResult:
         """Execute with optional interactive mode."""
         # Extract interactive flag before validation (it's not in parameters dict)
-        interactive = kwargs.pop('interactive', False)
+        interactive = kwargs.pop("interactive", False)
 
         # Call parent execute which calls _execute_validated
         # We need to pass interactive back in somehow, or handle it here.
@@ -388,28 +401,23 @@ class BashCommandToolHardened(ValidatedTool):
 
     def _setup_resource_limits(self):
         """Set resource limits for child process.
-        
+
         This runs in the child process BEFORE exec.
         If it fails, the child dies. Good.
         """
         try:
             # CPU time limit (soft, hard)
             resource.setrlimit(
-                resource.RLIMIT_CPU,
-                (self.limits.timeout_seconds, self.limits.timeout_seconds + 5)
+                resource.RLIMIT_CPU, (self.limits.timeout_seconds, self.limits.timeout_seconds + 5)
             )
 
             # Memory limit (in bytes)
             max_memory = self.limits.max_memory_mb * 1024 * 1024
-            resource.setrlimit(
-                resource.RLIMIT_AS,
-                (max_memory, max_memory)
-            )
+            resource.setrlimit(resource.RLIMIT_AS, (max_memory, max_memory))
 
             # Max open files
             resource.setrlimit(
-                resource.RLIMIT_NOFILE,
-                (self.limits.max_open_files, self.limits.max_open_files)
+                resource.RLIMIT_NOFILE, (self.limits.max_open_files, self.limits.max_open_files)
             )
 
             # Core dumps disabled (security)
@@ -429,10 +437,10 @@ class BashCommandToolHardened(ValidatedTool):
         cwd: Optional[str] = None,
         timeout: Optional[int] = None,
         env: Optional[Dict[str, str]] = None,
-        interactive: bool = False
+        interactive: bool = False,
     ) -> ToolResult:
         """Execute bash command with full hardening.
-        
+
         This is where the magic happens. Or where your command dies trying.
         """
         start_time = asyncio.get_event_loop().time()
@@ -447,7 +455,7 @@ class BashCommandToolHardened(ValidatedTool):
             return ToolResult(
                 success=False,
                 error=f"Command validation failed: {error_msg}",
-                metadata={"validation_error": True}
+                metadata={"validation_error": True},
             )
 
         # 2. SANITIZE CWD
@@ -456,38 +464,29 @@ class BashCommandToolHardened(ValidatedTool):
                 cwd = self.validator.sanitize_path(cwd)
                 if not Path(cwd).exists():
                     return ToolResult(
-                        success=False,
-                        error=f"Working directory does not exist: {cwd}"
+                        success=False, error=f"Working directory does not exist: {cwd}"
                     )
                 if not Path(cwd).is_dir():
-                    return ToolResult(
-                        success=False,
-                        error=f"Not a directory: {cwd}"
-                    )
+                    return ToolResult(success=False, error=f"Not a directory: {cwd}")
             except Exception as e:
-                return ToolResult(
-                    success=False,
-                    error=f"Invalid working directory: {e}"
-                )
+                return ToolResult(success=False, error=f"Invalid working directory: {e}")
 
         # 3. SETUP TIMEOUT
-        actual_timeout = min(
-            timeout or self.limits.timeout_seconds,
-            self.limits.timeout_seconds
-        )
+        actual_timeout = min(timeout or self.limits.timeout_seconds, self.limits.timeout_seconds)
 
         # 4. SETUP ENVIRONMENT
         # Start with clean environment, add safe defaults, then user vars
         exec_env = os.environ.copy()
-        exec_env['BASH_ENV'] = ''  # No startup files
-        exec_env['ENV'] = ''
-        exec_env['PATH'] = '/usr/local/bin:/usr/bin:/bin'  # Restricted PATH
+        exec_env["BASH_ENV"] = ""  # No startup files
+        exec_env["ENV"] = ""
+        exec_env["PATH"] = "/usr/local/bin:/usr/bin:/bin"  # Restricted PATH
 
         if env:
             # Filter out dangerous env vars
             safe_env = {
-                k: v for k, v in env.items()
-                if k not in ['LD_PRELOAD', 'LD_LIBRARY_PATH', 'BASH_ENV']
+                k: v
+                for k, v in env.items()
+                if k not in ["LD_PRELOAD", "LD_LIBRARY_PATH", "BASH_ENV"]
             }
             exec_env.update(safe_env)
 
@@ -508,27 +507,28 @@ class BashCommandToolHardened(ValidatedTool):
                 cwd=cwd,
                 env=exec_env,
                 preexec_fn=self._setup_resource_limits,  # Apply limits in child
-                limit=self.limits.max_output_bytes  # Limit output buffer
+                limit=self.limits.max_output_bytes,  # Limit output buffer
             )
 
             try:
                 # Wait for completion with timeout
-                stdout, stderr = await asyncio.wait_for(
-                    proc.communicate(),
-                    timeout=actual_timeout
-                )
+                stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=actual_timeout)
 
                 # Decode output
-                stdout_str = stdout.decode('utf-8', errors='replace') if stdout else ""
-                stderr_str = stderr.decode('utf-8', errors='replace') if stderr else ""
+                stdout_str = stdout.decode("utf-8", errors="replace") if stdout else ""
+                stderr_str = stderr.decode("utf-8", errors="replace") if stderr else ""
 
                 # Truncate if too large
                 if len(stdout_str) > self.limits.max_output_bytes:
-                    stdout_str = stdout_str[:self.limits.max_output_bytes] + "\n\n[OUTPUT TRUNCATED]"
+                    stdout_str = (
+                        stdout_str[: self.limits.max_output_bytes] + "\n\n[OUTPUT TRUNCATED]"
+                    )
                     logger.warning(f"STDOUT truncated to {self.limits.max_output_bytes} bytes")
 
                 if len(stderr_str) > self.limits.max_output_bytes:
-                    stderr_str = stderr_str[:self.limits.max_output_bytes] + "\n\n[OUTPUT TRUNCATED]"
+                    stderr_str = (
+                        stderr_str[: self.limits.max_output_bytes] + "\n\n[OUTPUT TRUNCATED]"
+                    )
                     logger.warning(f"STDERR truncated to {self.limits.max_output_bytes} bytes")
 
                 elapsed = asyncio.get_event_loop().time() - start_time
@@ -545,7 +545,7 @@ class BashCommandToolHardened(ValidatedTool):
                         "stdout": stdout_str,
                         "stderr": stderr_str,
                         "exit_code": proc.returncode,
-                        "elapsed_seconds": round(elapsed, 3)
+                        "elapsed_seconds": round(elapsed, 3),
                     },
                     metadata={
                         "command": command[:200],  # Truncate in metadata
@@ -553,8 +553,8 @@ class BashCommandToolHardened(ValidatedTool):
                         "exit_code": proc.returncode,
                         "elapsed": elapsed,
                         "timeout": actual_timeout,
-                        "truncated": len(stdout_str) >= self.limits.max_output_bytes
-                    }
+                        "truncated": len(stdout_str) >= self.limits.max_output_bytes,
+                    },
                 )
 
             except asyncio.TimeoutError:
@@ -569,10 +569,7 @@ class BashCommandToolHardened(ValidatedTool):
                 return ToolResult(
                     success=False,
                     error=f"Command TIMEOUT after {actual_timeout}s",
-                    metadata={
-                        "timeout": True,
-                        "limit": actual_timeout
-                    }
+                    metadata={"timeout": True, "limit": actual_timeout},
                 )
 
         except MemoryError:
@@ -580,17 +577,13 @@ class BashCommandToolHardened(ValidatedTool):
             return ToolResult(
                 success=False,
                 error=f"Command exceeded memory limit ({self.limits.max_memory_mb}MB)",
-                metadata={"memory_error": True}
+                metadata={"memory_error": True},
             )
 
         except OSError as e:
             # OS-level errors (file not found, permission denied, etc)
             logger.error(f"OS ERROR: {e}")
-            return ToolResult(
-                success=False,
-                error=f"OS error: {e}",
-                metadata={"os_error": str(e)}
-            )
+            return ToolResult(success=False, error=f"OS error: {e}", metadata={"os_error": str(e)})
 
         except Exception as e:
             # Catch-all for unexpected errors
@@ -598,7 +591,7 @@ class BashCommandToolHardened(ValidatedTool):
             return ToolResult(
                 success=False,
                 error=f"Unexpected error: {type(e).__name__}: {e}",
-                metadata={"exception": str(e)}
+                metadata={"exception": str(e)},
             )
 
 

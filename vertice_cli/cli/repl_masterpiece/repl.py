@@ -28,10 +28,10 @@ from pathlib import Path
 from typing import Optional
 
 # Silence warnings during imports
-os.environ['GRPC_VERBOSITY'] = 'ERROR'
-os.environ['GLOG_minloglevel'] = '3'
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-warnings.filterwarnings('ignore')
+os.environ["GRPC_VERBOSITY"] = "ERROR"
+os.environ["GLOG_minloglevel"] = "3"
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+warnings.filterwarnings("ignore")
 
 # Redirect stderr temporarily during imports
 _original_stderr = sys.stderr
@@ -139,12 +139,7 @@ class MasterpieceREPL:
         self.coordinator = Coordinator(cwd=os.getcwd())
 
         # Register agents
-        register_agents(
-            self.coordinator,
-            self.llm_client,
-            self.console,
-            format_agent_output
-        )
+        register_agents(self.coordinator, self.llm_client, self.console, format_agent_output)
         self.console.print("[dim]✨ Integration coordinator initialized[/dim]")
 
         # TUI enhancements
@@ -153,7 +148,7 @@ class MasterpieceREPL:
             self.animator = Animator()
             self.token_metrics = TokenMetrics()
             self.minimal_output = MinimalOutput()
-        except Exception:
+        except (ImportError, TypeError, AttributeError):
             self.loading_animation = None
             self.animator = None
             self.token_metrics = None
@@ -180,15 +175,17 @@ class MasterpieceREPL:
 
     def _create_session(self) -> PromptSession:
         """Create session with clean, modern prompt."""
-        history_file = Path.home() / '.qwen-dev-history'
+        history_file = Path.home() / ".qwen-dev-history"
 
-        clean_style = Style.from_dict({
-            '': '#00d4aa',
-            'placeholder': '#666666 italic',
-        })
+        clean_style = Style.from_dict(
+            {
+                "": "#00d4aa",
+                "placeholder": "#666666 italic",
+            }
+        )
 
         return PromptSession(
-            message=[('class:prompt', '⚡ › ')],
+            message=[("class:prompt", "⚡ › ")],
             history=FileHistory(str(history_file)),
             auto_suggest=AutoSuggestFromHistory(),
             completer=SmartCompleter(self.commands),
@@ -219,6 +216,7 @@ class MasterpieceREPL:
         @bindings.add("c-s")
         def show_status(event):
             from .handlers import cmd_status
+
             cmd_status(self, "")
 
         @bindings.add("c-l")
@@ -228,6 +226,7 @@ class MasterpieceREPL:
         @bindings.add("c-o")
         def expand_response(event):
             from .handlers import cmd_expand
+
             cmd_expand(self, "")
 
         return bindings
@@ -238,8 +237,7 @@ class MasterpieceREPL:
 
         for cmd, meta in sorted(self.commands.items()):
             self.console.print(
-                f"  {meta['icon']} [cyan]{cmd:14}[/cyan] "
-                f"[dim]{meta['description']}[/dim]"
+                f"  {meta['icon']} [cyan]{cmd:14}[/cyan] " f"[dim]{meta['description']}[/dim]"
             )
 
         self.console.print("\n[dim]Tab autocomplete • /help details[/dim]\n")
@@ -250,8 +248,7 @@ class MasterpieceREPL:
 
         if not message.strip():
             self.console.print(
-                f"[yellow]⚠️  Please provide a message for the "
-                f"{agent_name} agent[/yellow]\n"
+                f"[yellow]⚠️  Please provide a message for the " f"{agent_name} agent[/yellow]\n"
             )
             return
 
@@ -265,14 +262,10 @@ class MasterpieceREPL:
         self.current_agent = agent_name
         icon = AGENT_ICONS.get(agent_name, "🤖")
 
-        self.console.print(
-            f"\n{icon} [bold cyan]{agent_name.capitalize()} Agent[/bold cyan]\n"
-        )
+        self.console.print(f"\n{icon} [bold cyan]{agent_name.capitalize()} Agent[/bold cyan]\n")
 
         # Stream response
-        await stream_response(
-            self, message, system=f"You are the {agent_name} agent."
-        )
+        await stream_response(self, message, system=f"You are the {agent_name} agent.")
 
         self.current_agent = None
 
@@ -292,25 +285,23 @@ class MasterpieceREPL:
         context_parts = [f"Project Path: {project_path}"]
 
         # README
-        for readme_name in ['README.md', 'readme.md', 'README']:
+        for readme_name in ["README.md", "readme.md", "README"]:
             readme_path = os.path.join(project_path, readme_name)
             if os.path.exists(readme_path):
                 try:
-                    with open(readme_path, 'r') as f:
+                    with open(readme_path, "r") as f:
                         context_parts.append(f"\n=== README ===\n{f.read()[:2000]}")
                         break
                 except (IOError, OSError):
                     pass
 
         # Config files
-        for config_file in ['pyproject.toml', 'package.json', 'setup.py']:
+        for config_file in ["pyproject.toml", "package.json", "setup.py"]:
             config_path = os.path.join(project_path, config_file)
             if os.path.exists(config_path):
                 try:
-                    with open(config_path, 'r') as f:
-                        context_parts.append(
-                            f"\n=== {config_file} ===\n{f.read()[:1000]}"
-                        )
+                    with open(config_path, "r") as f:
+                        context_parts.append(f"\n=== {config_file} ===\n{f.read()[:1000]}")
                         break
                 except (IOError, OSError):
                     pass
@@ -318,11 +309,9 @@ class MasterpieceREPL:
         # Structure
         try:
             import subprocess
+
             result = subprocess.run(
-                ['ls', '-la', project_path],
-                capture_output=True,
-                text=True,
-                timeout=2
+                ["ls", "-la", project_path], capture_output=True, text=True, timeout=2
             )
             if result.returncode == 0:
                 context_parts.append(f"\n=== Structure ===\n{result.stdout[:1000]}")
@@ -338,7 +327,7 @@ class MasterpieceREPL:
             SpinnerColumn(spinner_name="dots", style="cyan"),
             TextColumn(f"[bold cyan]✨ Loading {agent_name} agent..."),
             console=self.console,
-            transient=True
+            transient=True,
         ) as progress:
             progress.add_task("load", total=None)
 
@@ -349,10 +338,7 @@ class MasterpieceREPL:
             try:
                 return agent_class()
             except TypeError:
-                return agent_class(
-                    llm_client=self.llm_client,
-                    mcp_client=None
-                )
+                return agent_class(llm_client=self.llm_client, mcp_client=None)
 
     def _process_command(self, user_input: str) -> None:
         """Process with smart routing."""
@@ -366,32 +352,28 @@ class MasterpieceREPL:
         self.command_count += 1
 
         # Slash command
-        if user_input.startswith('/'):
+        if user_input.startswith("/"):
             parts = user_input.split(maxsplit=1)
             cmd = parts[0]
             args = parts[1] if len(parts) > 1 else ""
 
-            if cmd == '/':
+            if cmd == "/":
                 self._show_palette()
                 return
 
             if cmd in self.commands:
                 try:
-                    self.commands[cmd]['handler'](args)
+                    self.commands[cmd]["handler"](args)
                 except Exception as e:
                     self.console.print(f"\n[red]❌ Error: {e}[/red]")
-                    self.console.print(
-                        "[yellow]💡 Tip: Type /help for usage[/yellow]\n"
-                    )
+                    self.console.print("[yellow]💡 Tip: Type /help for usage[/yellow]\n")
 
-            elif cmd in ['/read', '/write', '/edit', '/run', '/git']:
+            elif cmd in ["/read", "/write", "/edit", "/run", "/git"]:
                 asyncio.run(process_tool(self, cmd, args))
 
             else:
                 self.console.print(f"\n[red]❌ Unknown command: {cmd}[/red]")
-                self.console.print(
-                    "[yellow]💡 Type /help to see available commands[/yellow]\n"
-                )
+                self.console.print("[yellow]💡 Type /help to see available commands[/yellow]\n")
 
         else:
             # Natural language
@@ -399,8 +381,8 @@ class MasterpieceREPL:
 
     def cleanup(self) -> None:
         """Cleanup resources."""
-        warnings.filterwarnings('ignore', message='.*Unclosed.*')
-        warnings.filterwarnings('ignore', message='.*unclosed.*')
+        warnings.filterwarnings("ignore", message=".*Unclosed.*")
+        warnings.filterwarnings("ignore", message=".*unclosed.*")
 
     def __del__(self):
         """Destructor."""
@@ -424,21 +406,18 @@ class MasterpieceREPL:
                 self._process_command(user_input)
 
             except KeyboardInterrupt:
-                self.console.print(
-                    "\n[dim]💡 Press Ctrl+C again or type /exit to quit[/dim]\n"
-                )
+                self.console.print("\n[dim]💡 Press Ctrl+C again or type /exit to quit[/dim]\n")
                 continue
 
             except EOFError:
                 from .handlers import cmd_exit
+
                 cmd_exit(self, "")
                 break
 
             except Exception as e:
                 self.console.print(f"\n[red]❌ Unexpected error: {e}[/red]")
-                self.console.print(
-                    "[yellow]💡 Please report this if it persists[/yellow]\n"
-                )
+                self.console.print("[yellow]💡 Please report this if it persists[/yellow]\n")
 
 
 __all__ = ["MasterpieceREPL"]

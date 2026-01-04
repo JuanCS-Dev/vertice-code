@@ -21,6 +21,7 @@ from typing import Any, Dict, List, Optional
 
 class RiskLevel(Enum):
     """Risk levels for governance assessment."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -30,6 +31,7 @@ class RiskLevel(Enum):
 @dataclass
 class GovernanceConfig:
     """Governance configuration - Observer mode by default."""
+
     mode: str = "observer"  # observer | enforcer | off
     block_on_violation: bool = False
     report_format: str = "elp"  # emoji language protocol
@@ -87,10 +89,20 @@ class GovernanceObserver:
     ]
 
     MEDIUM_RISK_KEYWORDS = [
-        "delete", "remove", "drop", "truncate",
-        "production", "deploy", "migrate",
-        "secret", "password", "token", "key",
-        "database", "db", "sql",
+        "delete",
+        "remove",
+        "drop",
+        "truncate",
+        "production",
+        "deploy",
+        "migrate",
+        "secret",
+        "password",
+        "token",
+        "key",
+        "database",
+        "db",
+        "sql",
     ]
 
     def __init__(self, config: Optional[GovernanceConfig] = None):
@@ -171,8 +183,8 @@ class GovernanceObserver:
 
 
 __all__ = [
-    'RiskLevel',
-    'GovernanceConfig',
-    'GovernanceObserver',
-    'ELP',
+    "RiskLevel",
+    "GovernanceConfig",
+    "GovernanceObserver",
+    "ELP",
 ]

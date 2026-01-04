@@ -14,13 +14,15 @@ Date: 2025-11-27
 
 from __future__ import annotations
 
+import ipaddress
 import logging
 import re
+import socket
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from vertice_cli.tools.base import Tool, ToolCategory, ToolResult
 from vertice_cli.tools._parity_utils import (
@@ -34,8 +36,155 @@ logger = logging.getLogger(__name__)
 
 
 # =============================================================================
+# SSRF PROTECTION (P0 Security Fix)
+# =============================================================================
+
+# RFC 1918 private ranges + loopback + link-local + metadata endpoints
+BLOCKED_IP_RANGES = [
+    ipaddress.ip_network("127.0.0.0/8"),  # Loopback
+    ipaddress.ip_network("10.0.0.0/8"),  # RFC 1918 Class A
+    ipaddress.ip_network("172.16.0.0/12"),  # RFC 1918 Class B
+    ipaddress.ip_network("192.168.0.0/16"),  # RFC 1918 Class C
+    ipaddress.ip_network("169.254.0.0/16"),  # Link-local (AWS metadata)
+    ipaddress.ip_network("::1/128"),  # IPv6 loopback
+    ipaddress.ip_network("fc00::/7"),  # IPv6 unique local
+    ipaddress.ip_network("fe80::/10"),  # IPv6 link-local
+]
+
+# Blocked hostnames that resolve to internal services
+BLOCKED_HOSTNAMES = {
+    "localhost",
+    "localhost.localdomain",
+    "metadata.google.internal",  # GCP metadata
+    "metadata",  # Generic cloud metadata
+    "169.254.169.254",  # AWS/GCP/Azure metadata IP
+    "fd00::",  # IPv6 internal
+}
+
+
+def is_ssrf_safe(url: str) -> Tuple[bool, Optional[str]]:
+    """
+    Check if URL is safe from SSRF attacks.
+
+    P0 Security Fix: Prevents access to:
+    - Internal networks (RFC 1918)
+    - Loopback addresses (127.x.x.x, ::1)
+    - Link-local addresses (169.254.x.x, fe80::)
+    - Cloud metadata endpoints
+
+    Args:
+        url: URL to validate
+
+    Returns:
+        Tuple of (is_safe, error_message)
+        is_safe=True if URL is safe to fetch
+        error_message explains why URL was blocked (if blocked)
+    """
+    try:
+        parsed = urllib.parse.urlparse(url)
+        hostname = parsed.hostname
+
+        if not hostname:
+            return False, "Invalid URL: no hostname"
+
+        # Check blocked hostnames (case-insensitive)
+        if hostname.lower() in BLOCKED_HOSTNAMES:
+            return False, f"SSRF blocked: hostname '{hostname}' is not allowed"
+
+        # Check if hostname is an IP address directly
+        try:
+            ip = ipaddress.ip_address(hostname)
+            for blocked_range in BLOCKED_IP_RANGES:
+                if ip in blocked_range:
+                    return False, f"SSRF blocked: IP {ip} is in private/internal range"
+            return True, None
+        except ValueError:
+            # Not an IP address, resolve hostname
+            pass
+
+        # Resolve hostname to IP(s) and check each
+        try:
+            # Get all IPs for this hostname
+            results = socket.getaddrinfo(
+                hostname, None, socket.AF_UNSPEC, socket.SOCK_STREAM  # Both IPv4 and IPv6
+            )
+
+            for family, _, _, _, sockaddr in results:
+                ip_str = sockaddr[0]
+                try:
+                    ip = ipaddress.ip_address(ip_str)
+                    for blocked_range in BLOCKED_IP_RANGES:
+                        if ip in blocked_range:
+                            return False, (
+                                f"SSRF blocked: hostname '{hostname}' resolves to "
+                                f"private/internal IP {ip}"
+                            )
+                except ValueError:
+                    continue
+
+        except socket.gaierror as e:
+            # DNS resolution failed - allow the request to fail naturally
+            # (could be a temporary DNS issue)
+            logger.debug(f"DNS resolution failed for {hostname}: {e}")
+
+        return True, None
+
+    except Exception as e:
+        logger.warning(f"SSRF check error for URL {url}: {e}")
+        # On error, block by default (fail secure)
+        return False, f"SSRF check failed: {e}"
+
+
+# =============================================================================
+# RATE LIMITING (P1 Security Fix)
+# =============================================================================
+
+
+class RateLimiter:
+    """
+    Simple token bucket rate limiter.
+
+    P1 FIX: Prevents abuse and protects against runaway requests.
+    """
+
+    def __init__(self, max_requests: int = 30, window_seconds: float = 60.0, name: str = "web"):
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        self.name = name
+        self._requests: List[float] = []
+
+    def is_allowed(self) -> Tuple[bool, Optional[str]]:
+        """Check if a request is allowed under rate limits."""
+        now = time.time()
+
+        # Remove old requests outside the window
+        self._requests = [t for t in self._requests if now - t < self.window_seconds]
+
+        if len(self._requests) >= self.max_requests:
+            wait_time = self._requests[0] + self.window_seconds - now
+            return False, (
+                f"Rate limit exceeded for {self.name}. "
+                f"Max {self.max_requests} requests per {self.window_seconds}s. "
+                f"Try again in {wait_time:.1f}s."
+            )
+
+        self._requests.append(now)
+        return True, None
+
+    def reset(self) -> None:
+        """Reset the rate limiter."""
+        self._requests.clear()
+
+
+# Global rate limiters for web tools
+_fetch_rate_limiter = RateLimiter(max_requests=30, window_seconds=60.0, name="web_fetch")
+_search_rate_limiter = RateLimiter(max_requests=10, window_seconds=60.0, name="web_search")
+
+
+# =============================================================================
 # WEB FETCH TOOL
 # =============================================================================
+
 
 class WebFetchTool(Tool):
     """
@@ -47,6 +196,8 @@ class WebFetchTool(Tool):
     - 15-minute cache with TTL
     - Content length limiting
     - Redirect detection
+    - SSRF protection (P0)
+    - Rate limiting (P1)
 
     Example:
         result = await fetch.execute(url="https://example.com", max_length=5000)
@@ -58,24 +209,21 @@ class WebFetchTool(Tool):
         self.category = ToolCategory.SEARCH
         self.description = "Fetch URL content and convert to readable text/markdown"
         self.parameters = {
-            "url": {
-                "type": "string",
-                "description": "URL to fetch content from",
-                "required": True
-            },
+            "url": {"type": "string", "description": "URL to fetch content from", "required": True},
             "prompt": {
                 "type": "string",
                 "description": "Optional prompt to process the content",
-                "required": False
+                "required": False,
             },
             "max_length": {
                 "type": "integer",
                 "description": "Maximum content length to return (default: 10000)",
-                "required": False
-            }
+                "required": False,
+            },
         }
         self._cache: Dict[str, Tuple[str, float]] = {}
         self._cache_ttl = DEFAULT_CACHE_TTL
+        self._rate_limiter = _fetch_rate_limiter
 
     async def _execute_validated(self, **kwargs) -> ToolResult:
         """Fetch and process URL content."""
@@ -89,6 +237,18 @@ class WebFetchTool(Tool):
 
         if not url.startswith(("http://", "https://")):
             return ToolResult(success=False, error="URL must start with http:// or https://")
+
+        # P0 SECURITY: SSRF Protection
+        is_safe, ssrf_error = is_ssrf_safe(url)
+        if not is_safe:
+            logger.warning(f"SSRF blocked request to {url}: {ssrf_error}")
+            return ToolResult(success=False, error=ssrf_error)
+
+        # P1 SECURITY: Rate Limiting
+        allowed, rate_error = self._rate_limiter.is_allowed()
+        if not allowed:
+            logger.warning(f"Rate limit hit for web_fetch: {rate_error}")
+            return ToolResult(success=False, error=rate_error)
 
         # Validate max_length
         if not isinstance(max_length, int) or max_length < 100:
@@ -112,18 +272,18 @@ class WebFetchTool(Tool):
                         metadata={
                             "url": url,
                             "cached": True,
-                            "cache_age": int(time.time() - cached_at)
-                        }
+                            "cache_age": int(time.time() - cached_at),
+                        },
                     )
 
             # Fetch URL
             req = urllib.request.Request(
                 url,
                 headers={
-                    'User-Agent': f'{DEFAULT_USER_AGENT} (CLI coding assistant)',
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                    'Accept-Language': 'en-US,en;q=0.5',
-                }
+                    "User-Agent": f"{DEFAULT_USER_AGENT} (CLI coding assistant)",
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                    "Accept-Language": "en-US,en;q=0.5",
+                },
             )
 
             with urllib.request.urlopen(req, timeout=30) as response:
@@ -139,20 +299,20 @@ class WebFetchTool(Tool):
                             "redirect_detected": True,
                             "original_url": url,
                             "redirect_url": final_url,
-                            "message": f"Redirected to different host. Fetch {final_url} to continue."
+                            "message": f"Redirected to different host. Fetch {final_url} to continue.",
                         },
-                        metadata={"redirect": True}
+                        metadata={"redirect": True},
                     )
 
                 # Check content length
-                content_length = response.headers.get('Content-Length')
+                content_length = response.headers.get("Content-Length")
                 if content_length and int(content_length) > MAX_FETCH_SIZE:
                     return ToolResult(
                         success=False,
-                        error=f"Content too large ({content_length} bytes). Max: {MAX_FETCH_SIZE}"
+                        error=f"Content too large ({content_length} bytes). Max: {MAX_FETCH_SIZE}",
                     )
 
-                html = response.read().decode('utf-8', errors='ignore')
+                html = response.read().decode("utf-8", errors="ignore")
 
             # Check actual size
             if len(html) > MAX_FETCH_SIZE:
@@ -177,8 +337,8 @@ class WebFetchTool(Tool):
                     "url": url,
                     "cached": False,
                     "original_length": len(content),
-                    "truncated": len(content) > max_length
-                }
+                    "truncated": len(content) > max_length,
+                },
             )
 
         except urllib.error.HTTPError as e:
@@ -204,6 +364,7 @@ class WebFetchTool(Tool):
 # WEB SEARCH TOOL
 # =============================================================================
 
+
 class WebSearchTool(Tool):
     """
     Search the web using DuckDuckGo (no API key required).
@@ -212,6 +373,7 @@ class WebSearchTool(Tool):
     - Returns search results with titles, URLs, and snippets
     - Includes formatted sources/citations section
     - Supports domain filtering (allowed/blocked)
+    - Rate limiting (P1)
 
     Example:
         result = await search.execute(
@@ -227,29 +389,26 @@ class WebSearchTool(Tool):
         self.category = ToolCategory.SEARCH
         self.description = "Search the web and return results with citations"
         self.parameters = {
-            "query": {
-                "type": "string",
-                "description": "Search query",
-                "required": True
-            },
+            "query": {"type": "string", "description": "Search query", "required": True},
             "num_results": {
                 "type": "integer",
                 "description": "Number of results to return (default: 5)",
-                "required": False
+                "required": False,
             },
             "allowed_domains": {
                 "type": "array",
                 "items": {"type": "string"},
                 "description": "Only include results from these domains",
-                "required": False
+                "required": False,
             },
             "blocked_domains": {
                 "type": "array",
                 "items": {"type": "string"},
                 "description": "Exclude results from these domains",
-                "required": False
-            }
+                "required": False,
+            },
         }
+        self._rate_limiter = _search_rate_limiter
 
     async def _execute_validated(self, **kwargs) -> ToolResult:
         """Execute web search with citations."""
@@ -264,6 +423,12 @@ class WebSearchTool(Tool):
 
         if len(query) < 2:
             return ToolResult(success=False, error="Query too short (min 2 characters)")
+
+        # P1 SECURITY: Rate Limiting
+        allowed, rate_error = self._rate_limiter.is_allowed()
+        if not allowed:
+            logger.warning(f"Rate limit hit for web_search: {rate_error}")
+            return ToolResult(success=False, error=rate_error)
 
         # Validate num_results
         if not isinstance(num_results, int) or num_results < 1:
@@ -281,15 +446,10 @@ class WebSearchTool(Tool):
             encoded_query = urllib.parse.quote(query)
             url = f"https://html.duckduckgo.com/html/?q={encoded_query}"
 
-            req = urllib.request.Request(
-                url,
-                headers={
-                    'User-Agent': DEFAULT_USER_AGENT
-                }
-            )
+            req = urllib.request.Request(url, headers={"User-Agent": DEFAULT_USER_AGENT})
 
             with urllib.request.urlopen(req, timeout=10) as response:
-                html = response.read().decode('utf-8', errors='ignore')
+                html = response.read().decode("utf-8", errors="ignore")
 
             # Parse results (get extra for filtering)
             results = self._parse_ddg_results(html, num_results * 2)
@@ -298,19 +458,21 @@ class WebSearchTool(Tool):
                 return ToolResult(
                     success=True,
                     data={"results": [], "sources": [], "sources_markdown": ""},
-                    metadata={"query": query, "num_results": 0, "no_results": True}
+                    metadata={"query": query, "num_results": 0, "no_results": True},
                 )
 
             # Apply domain filters
             if allowed_domains:
                 results = [
-                    r for r in results
+                    r
+                    for r in results
                     if any(domain.lower() in r["url"].lower() for domain in allowed_domains)
                 ]
 
             if blocked_domains:
                 results = [
-                    r for r in results
+                    r
+                    for r in results
                     if not any(domain.lower() in r["url"].lower() for domain in blocked_domains)
                 ]
 
@@ -331,8 +493,8 @@ class WebSearchTool(Tool):
                 metadata={
                     "query": query,
                     "num_results": len(results),
-                    "filtered": bool(allowed_domains or blocked_domains)
-                }
+                    "filtered": bool(allowed_domains or blocked_domains),
+                },
             )
 
         except urllib.error.HTTPError as e:
@@ -355,13 +517,13 @@ class WebSearchTool(Tool):
             re.compile(
                 r'<a[^>]+class="result__a"[^>]+href="([^"]+)"[^>]*>([^<]+)</a>.*?'
                 r'<a[^>]+class="result__snippet"[^>]*>([^<]+)</a>',
-                re.DOTALL
+                re.DOTALL,
             ),
             # Pattern 2: Alternative format
             re.compile(
                 r'<a[^>]+href="([^"]+)"[^>]+class="result__a"[^>]*>(.*?)</a>.*?'
                 r'class="result__snippet"[^>]*>(.*?)</(?:a|span)',
-                re.DOTALL
+                re.DOTALL,
             ),
         ]
 
@@ -375,24 +537,26 @@ class WebSearchTool(Tool):
                 snippet = HTMLConverter.decode_entities(match.group(3).strip())
 
                 # Clean up URL (DDG wraps URLs)
-                if '/l/?uddg=' in url:
-                    url_match = re.search(r'uddg=([^&]+)', url)
+                if "/l/?uddg=" in url:
+                    url_match = re.search(r"uddg=([^&]+)", url)
                     if url_match:
                         url = urllib.parse.unquote(url_match.group(1))
 
                 # Skip if URL is empty or not HTTP(S)
-                if not url or not url.startswith(('http://', 'https://')):
+                if not url or not url.startswith(("http://", "https://")):
                     continue
 
                 # Skip duplicates
                 if any(r["url"] == url for r in results):
                     continue
 
-                results.append({
-                    "title": title[:200] if title else "No title",
-                    "url": url,
-                    "snippet": snippet[:500] if snippet else ""
-                })
+                results.append(
+                    {
+                        "title": title[:200] if title else "No title",
+                        "url": url,
+                        "snippet": snippet[:500] if snippet else "",
+                    }
+                )
 
             if results:
                 break  # Use first successful pattern
@@ -403,12 +567,14 @@ class WebSearchTool(Tool):
         """Format results as citation sources."""
         sources = []
         for i, r in enumerate(results, 1):
-            sources.append({
-                "index": i,
-                "title": r["title"],
-                "url": r["url"],
-                "citation": f"[{i}] [{r['title']}]({r['url']})"
-            })
+            sources.append(
+                {
+                    "index": i,
+                    "title": r["title"],
+                    "url": r["url"],
+                    "citation": f"[{i}] [{r['title']}]({r['url']})",
+                }
+            )
         return sources
 
     def _format_sources_markdown(self, results: List[Dict[str, str]]) -> str:
@@ -430,6 +596,7 @@ class WebSearchTool(Tool):
 # REGISTRY HELPER
 # =============================================================================
 
+
 def get_web_tools() -> List[Tool]:
     """Get all web operation tools."""
     return [
@@ -442,4 +609,6 @@ __all__ = [
     "WebFetchTool",
     "WebSearchTool",
     "get_web_tools",
+    "is_ssrf_safe",  # P0 Security: Exported for use by other tools
+    "RateLimiter",  # P1 Security: Exported for use by other tools
 ]

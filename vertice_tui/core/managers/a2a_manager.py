@@ -157,6 +157,7 @@ class A2AManager:
             # Store as dataclass for local use
             from core.protocols.agent_card import AgentCard
             from core.protocols.types import AgentCapabilities
+
             self._local_agent_card = AgentCard(
                 agent_id=proto_card.agent_id,
                 name=proto_card.name,

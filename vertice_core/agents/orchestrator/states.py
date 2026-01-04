@@ -188,7 +188,7 @@ async def state_executing(orch: "ActiveOrchestrator") -> AsyncIterator[str]:
             if step.retry_count < step.max_retries:
                 step.status = "pending"
                 yield f"   🔄 Retrying ({step.retry_count}/{step.max_retries})\n"
-                await asyncio.sleep(orch.RETRY_BACKOFF_BASE ** step.retry_count)
+                await asyncio.sleep(orch.RETRY_BACKOFF_BASE**step.retry_count)
             else:
                 orch.current_plan.failed_steps += 1
 

@@ -11,7 +11,7 @@ class ContextBuilder:
 
     def __init__(self, max_files: Optional[int] = None, max_file_size_kb: Optional[int] = None):
         """Initialize context builder.
-        
+
         Args:
             max_files: Maximum number of files to include
             max_file_size_kb: Maximum file size in KB
@@ -24,10 +24,10 @@ class ContextBuilder:
 
     def read_file(self, file_path: str) -> tuple[bool, str, str]:
         """Read a single file.
-        
+
         Args:
             file_path: Path to file (relative or absolute)
-            
+
         Returns:
             Tuple of (success, content, error_message)
         """
@@ -44,10 +44,14 @@ class ContextBuilder:
             # Check file size
             size_kb = path.stat().st_size / 1024
             if size_kb > self.max_file_size_kb:
-                return False, "", f"File too large: {size_kb:.1f}KB (max: {self.max_file_size_kb}KB)"
+                return (
+                    False,
+                    "",
+                    f"File too large: {size_kb:.1f}KB (max: {self.max_file_size_kb}KB)",
+                )
 
             # Read file content
-            with open(path, 'r', encoding='utf-8') as f:
+            with open(path, "r", encoding="utf-8") as f:
                 content = f.read()
 
             return True, content, ""
@@ -61,10 +65,10 @@ class ContextBuilder:
 
     def add_file(self, file_path: str) -> tuple[bool, str]:
         """Add a file to context.
-        
+
         Args:
             file_path: Path to file
-            
+
         Returns:
             Tuple of (success, message)
         """
@@ -87,10 +91,10 @@ class ContextBuilder:
 
     def add_files(self, file_paths: List[str]) -> Dict[str, str]:
         """Add multiple files to context.
-        
+
         Args:
             file_paths: List of file paths
-            
+
         Returns:
             Dictionary of file_path -> result message
         """
@@ -108,7 +112,7 @@ class ContextBuilder:
 
     def get_context(self) -> str:
         """Get formatted context string.
-        
+
         Returns:
             Formatted context with all files
         """
@@ -129,23 +133,23 @@ class ContextBuilder:
 
     def build_context(self) -> Dict[str, str]:
         """Build context dictionary (alias for testing).
-        
+
         Returns:
             Dictionary with context information including cwd
         """
         return {
-            'cwd': os.getcwd(),
-            'working_dir': os.getcwd(),
-            'files': self.files,
-            'file_count': len(self.files)
+            "cwd": os.getcwd(),
+            "working_dir": os.getcwd(),
+            "files": self.files,
+            "file_count": len(self.files),
         }
 
     def inject_to_prompt(self, prompt: str) -> str:
         """Inject context into user prompt.
-        
+
         Args:
             prompt: User's original prompt
-            
+
         Returns:
             Prompt with context injected
         """
@@ -158,19 +162,19 @@ class ContextBuilder:
 
     def get_stats(self) -> Dict[str, any]:
         """Get context statistics.
-        
+
         Returns:
             Dictionary with stats
         """
         total_chars = sum(len(content) for content in self.files.values())
-        total_lines = sum(content.count('\n') + 1 for content in self.files.values())
+        total_lines = sum(content.count("\n") + 1 for content in self.files.values())
 
         return {
             "files": len(self.files),
             "max_files": self.max_files,
             "total_chars": total_chars,
             "total_lines": total_lines,
-            "approx_tokens": total_chars // 4
+            "approx_tokens": total_chars // 4,
         }
 
 

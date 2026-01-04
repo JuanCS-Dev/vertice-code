@@ -5,7 +5,7 @@ Boris Cherny: "Complexity is the enemy. Clarity is king."
 
 This coordinator is the SINGLE point of integration between:
 - Shell (user input)
-- Agents (specialized processors)  
+- Agents (specialized processors)
 - Tools (function execution)
 - Intelligence (context + intent)
 - TUI (visual feedback)
@@ -45,9 +45,10 @@ logger = logging.getLogger(__name__)
 # SIMPLE EVENT BUS IMPLEMENTATION
 # ============================================================================
 
+
 class SimpleEventBus:
     """Lightweight pub/sub event bus.
-    
+
     Boris Cherny: "Don't over-engineer. This is 50 lines and covers 99% of cases."
     """
 
@@ -75,39 +76,33 @@ class SimpleEventBus:
     def unsubscribe(self, event_type: EventType, handler: EventHandler) -> None:
         """Unsubscribe handler from event type."""
         if event_type in self._handlers:
-            self._handlers[event_type] = [
-                h for h in self._handlers[event_type] if h != handler
-            ]
+            self._handlers[event_type] = [h for h in self._handlers[event_type] if h != handler]
 
 
 # ============================================================================
 # INTEGRATION COORDINATOR
 # ============================================================================
 
+
 class Coordinator:
     """Central coordinator for all integrations.
-    
+
     Responsibilities:
     - Intent detection + routing
     - Context building + caching
     - Agent invocation
     - Tool registration + execution
     - Event publishing for TUI
-    
+
     NOT responsible for:
     - Shell/REPL logic (stays in repl_masterpiece.py)
     - Individual agent logic (stays in agents/*.py)
     - Tool implementation (stays in tools/*.py)
     """
 
-    def __init__(
-        self,
-        *,
-        cwd: Optional[str] = None,
-        event_bus: Optional[EventBus] = None
-    ) -> None:
+    def __init__(self, *, cwd: Optional[str] = None, event_bus: Optional[EventBus] = None) -> None:
         """Initialize coordinator.
-        
+
         Args:
             cwd: Working directory (default: current)
             event_bus: Event bus for pub/sub (default: create new)
@@ -128,32 +123,27 @@ class Coordinator:
         # Intent mapping (keywords → intent type)
         self._intent_keywords: Dict[IntentType, List[str]] = {
             IntentType.ARCHITECTURE: [
-                "design", "architecture", "structure", "pattern", "feasibility"
+                "design",
+                "architecture",
+                "structure",
+                "pattern",
+                "feasibility",
             ],
-            IntentType.EXPLORATION: [
-                "explore", "navigate", "find", "search", "where", "locate"
-            ],
-            IntentType.PLANNING: [
-                "plan", "strategy", "roadmap", "approach", "steps"
-            ],
-            IntentType.REFACTORING: [
-                "refactor", "improve", "clean", "optimize", "simplify"
-            ],
-            IntentType.REVIEW: [
-                "review", "analyze", "audit", "check", "assess"
-            ],
+            IntentType.EXPLORATION: ["explore", "navigate", "find", "search", "where", "locate"],
+            IntentType.PLANNING: ["plan", "strategy", "roadmap", "approach", "steps"],
+            IntentType.REFACTORING: ["refactor", "improve", "clean", "optimize", "simplify"],
+            IntentType.REVIEW: ["review", "analyze", "audit", "check", "assess"],
             IntentType.SECURITY: [
-                "security", "vulnerability", "vulnerabilities", "exploit", "secure", "unsafe"
+                "security",
+                "vulnerability",
+                "vulnerabilities",
+                "exploit",
+                "secure",
+                "unsafe",
             ],
-            IntentType.PERFORMANCE: [
-                "performance", "speed", "optimize", "benchmark", "profile"
-            ],
-            IntentType.TESTING: [
-                "test", "coverage", "unit", "integration", "e2e"
-            ],
-            IntentType.DOCUMENTATION: [
-                "document", "readme", "docs", "explain", "guide"
-            ],
+            IntentType.PERFORMANCE: ["performance", "speed", "optimize", "benchmark", "profile"],
+            IntentType.TESTING: ["test", "coverage", "unit", "integration", "e2e"],
+            IntentType.DOCUMENTATION: ["document", "readme", "docs", "explain", "guide"],
         }
 
         logger.info(f"Coordinator initialized (cwd: {self.cwd})")
@@ -162,13 +152,9 @@ class Coordinator:
     # AGENT REGISTRY
     # ========================================================================
 
-    def register_agent(
-        self,
-        intent_type: IntentType,
-        agent: AgentInvoker
-    ) -> None:
+    def register_agent(self, intent_type: IntentType, agent: AgentInvoker) -> None:
         """Register agent for specific intent type.
-        
+
         Args:
             intent_type: What intent this agent handles
             agent: Agent instance (must implement AgentInvoker protocol)
@@ -181,12 +167,10 @@ class Coordinator:
     # ========================================================================
 
     def register_tool(
-        self,
-        definition: ToolDefinition,
-        executor: Any  # Callable that executes the tool
+        self, definition: ToolDefinition, executor: Any  # Callable that executes the tool
     ) -> None:
         """Register tool for function calling.
-        
+
         Args:
             definition: Tool definition with schema
             executor: Callable that executes the tool
@@ -203,20 +187,16 @@ class Coordinator:
         """Get tools in Gemini function calling format."""
         return [tool.to_gemini_schema() for tool in self._tools.values()]
 
-    async def execute_tool(
-        self,
-        tool_name: str,
-        parameters: Dict[str, Any]
-    ) -> ToolExecutionResult:
+    async def execute_tool(self, tool_name: str, parameters: Dict[str, Any]) -> ToolExecutionResult:
         """Execute a tool by name.
-        
+
         Args:
             tool_name: Name of tool to execute
             parameters: Tool parameters
-            
+
         Returns:
             ToolExecutionResult with output
-            
+
         Raises:
             ValueError: If tool not found
         """
@@ -227,10 +207,9 @@ class Coordinator:
         executor = self._tool_executors[tool_name]
 
         # Publish start event
-        self.event_bus.publish(Event(
-            type=EventType.TOOL_STARTED,
-            data={"tool": tool_name, "parameters": parameters}
-        ))
+        self.event_bus.publish(
+            Event(type=EventType.TOOL_STARTED, data={"tool": tool_name, "parameters": parameters})
+        )
 
         start_time = time.perf_counter()
 
@@ -244,20 +223,16 @@ class Coordinator:
             execution_time = (time.perf_counter() - start_time) * 1000
 
             result = ToolExecutionResult(
-                success=True,
-                output=str(output),
-                execution_time_ms=execution_time
+                success=True, output=str(output), execution_time_ms=execution_time
             )
 
             # Publish success event
-            self.event_bus.publish(Event(
-                type=EventType.TOOL_COMPLETED,
-                data={
-                    "tool": tool_name,
-                    "success": True,
-                    "execution_time_ms": execution_time
-                }
-            ))
+            self.event_bus.publish(
+                Event(
+                    type=EventType.TOOL_COMPLETED,
+                    data={"tool": tool_name, "success": True, "execution_time_ms": execution_time},
+                )
+            )
 
             return result
 
@@ -267,21 +242,16 @@ class Coordinator:
             logger.error(f"Tool execution failed: {e}", exc_info=True)
 
             result = ToolExecutionResult(
-                success=False,
-                output="",
-                error=str(e),
-                execution_time_ms=execution_time
+                success=False, output="", error=str(e), execution_time_ms=execution_time
             )
 
             # Publish failure event
-            self.event_bus.publish(Event(
-                type=EventType.TOOL_FAILED,
-                data={
-                    "tool": tool_name,
-                    "error": str(e),
-                    "execution_time_ms": execution_time
-                }
-            ))
+            self.event_bus.publish(
+                Event(
+                    type=EventType.TOOL_FAILED,
+                    data={"tool": tool_name, "error": str(e), "execution_time_ms": execution_time},
+                )
+            )
 
             return result
 
@@ -291,7 +261,7 @@ class Coordinator:
 
     def get_context(self) -> Any:
         """Get current rich context (cached).
-        
+
         Returns cached context if fresh enough, otherwise rebuilds.
         Returns: RichContext from intelligence.context_enhanced
         """
@@ -308,7 +278,7 @@ class Coordinator:
 
     def refresh_context(self) -> Any:
         """Force rebuild of context (after cd, git ops, etc).
-        
+
         Returns: RichContext from intelligence.context_enhanced
         """
         from ..intelligence.context_enhanced import build_rich_context
@@ -323,10 +293,7 @@ class Coordinator:
         self._context_cache_time = time.time()
 
         # Publish event
-        self.event_bus.publish(Event(
-            type=EventType.CONTEXT_UPDATED,
-            data={"context": context}
-        ))
+        self.event_bus.publish(Event(type=EventType.CONTEXT_UPDATED, data={"context": context}))
 
         return context
 
@@ -336,14 +303,14 @@ class Coordinator:
 
     def detect_intent(self, message: str) -> Intent:
         """Detect user intent from message.
-        
+
         Simple keyword-based detection (can be enhanced later with ML).
-        
+
         Boris Cherny: "Simple and correct > complex and buggy"
-        
+
         Args:
             message: User's message
-            
+
         Returns:
             Intent with confidence score
         """
@@ -362,50 +329,35 @@ class Coordinator:
 
         if not scores:
             # No specific intent detected
-            return Intent(
-                type=IntentType.GENERAL,
-                confidence=1.0,
-                keywords=[]
-            )
+            return Intent(type=IntentType.GENERAL, confidence=1.0, keywords=[])
 
         # Get highest scoring intent
         best_intent = max(scores.items(), key=lambda x: x[1])
         intent_type, confidence = best_intent
 
         # Find matched keywords
-        matched_keywords = [
-            kw for kw in self._intent_keywords[intent_type]
-            if kw in message_lower
-        ]
+        matched_keywords = [kw for kw in self._intent_keywords[intent_type] if kw in message_lower]
 
-        return Intent(
-            type=intent_type,
-            confidence=confidence,
-            keywords=matched_keywords
-        )
+        return Intent(type=intent_type, confidence=confidence, keywords=matched_keywords)
 
     # ========================================================================
     # MESSAGE PROCESSING (MAIN ENTRY POINT)
     # ========================================================================
 
-    async def process_message(
-        self,
-        message: str,
-        context: Optional[RichContext] = None
-    ) -> str:
+    async def process_message(self, message: str, context: Optional[RichContext] = None) -> str:
         """Process user message through full integration pipeline.
-        
+
         Flow:
         1. Get/refresh context
         2. Detect intent
         3. Route to appropriate agent OR handle directly
         4. Publish events for TUI
         5. Return formatted response
-        
+
         Args:
             message: User's message
             context: Optional pre-built context (otherwise will build)
-            
+
         Returns:
             Formatted response string
         """
@@ -423,28 +375,25 @@ class Coordinator:
             agent = self._agents[intent.type]
 
             # Publish agent invocation event
-            self.event_bus.publish(Event(
-                type=EventType.AGENT_INVOKED,
-                data={
-                    "intent": intent.type.value,
-                    "agent": agent.__class__.__name__
-                }
-            ))
+            self.event_bus.publish(
+                Event(
+                    type=EventType.AGENT_INVOKED,
+                    data={"intent": intent.type.value, "agent": agent.__class__.__name__},
+                )
+            )
 
             try:
                 response = await agent.invoke(
-                    request=message,
-                    context=ctx.__dict__  # Convert to dict for compatibility
+                    request=message, context=ctx.__dict__  # Convert to dict for compatibility
                 )
 
                 # Publish completion event
-                self.event_bus.publish(Event(
-                    type=EventType.AGENT_COMPLETED,
-                    data={
-                        "intent": intent.type.value,
-                        "success": response["success"]
-                    }
-                ))
+                self.event_bus.publish(
+                    Event(
+                        type=EventType.AGENT_COMPLETED,
+                        data={"intent": intent.type.value, "success": response["success"]},
+                    )
+                )
 
                 return response["output"]
 
@@ -452,13 +401,12 @@ class Coordinator:
                 logger.error(f"Agent invocation failed: {e}", exc_info=True)
 
                 # Publish failure event
-                self.event_bus.publish(Event(
-                    type=EventType.AGENT_FAILED,
-                    data={
-                        "intent": intent.type.value,
-                        "error": str(e)
-                    }
-                ))
+                self.event_bus.publish(
+                    Event(
+                        type=EventType.AGENT_FAILED,
+                        data={"intent": intent.type.value, "error": str(e)},
+                    )
+                )
 
                 return f"❌ Agent execution failed: {e}"
 

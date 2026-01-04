@@ -28,6 +28,7 @@ from textual.theme import Theme
 
 class ThemeMode(Enum):
     """Available theme modes."""
+
     # New defaults (Phase 9)
     VERTICE_DARK = "vertice-dark"
     VERTICE_LIGHT = "vertice-light"
@@ -45,38 +46,44 @@ class ThemeMode(Enum):
 
 THEME_VERTICE_DARK = Theme(
     name="vertice-dark",
-    primary="#3B82F6",          # Blue-500 (clean, professional)
-    secondary="#64748B",        # Slate-500
-    accent="#22D3EE",           # Cyan-400 (highlights, cursor)
-    background="#0F172A",       # Slate-900 (soft black, not pure #000)
-    surface="#1E293B",          # Slate-800 (cards, panels)
-    foreground="#F1F5F9",       # Slate-100 (soft white)
-    success="#22C55E",          # Green-500
-    error="#EF4444",            # Red-500
-    warning="#F59E0B",          # Amber-500
+    primary="#3B82F6",  # Blue-500 (clean, professional)
+    secondary="#64748B",  # Slate-500
+    accent="#22D3EE",  # Cyan-400 (highlights, cursor)
+    background="#0F172A",  # Slate-900 (soft black, not pure #000)
+    surface="#1E293B",  # Slate-800 (cards, panels)
+    foreground="#F1F5F9",  # Slate-100 (soft white)
+    success="#22C55E",  # Green-500
+    error="#EF4444",  # Red-500
+    warning="#F59E0B",  # Amber-500
     dark=True,
     variables={
-        "text-muted": "#94A3B8",             # Slate-400
-        "text-disabled": "#64748B",          # Slate-500
-        "border": "#334155",                 # Slate-700
-        "border-hover": "#3B82F6",           # Blue-500
-        "input-cursor-foreground": "#22D3EE",  # Cyan-400
+        # Text colors - auto-contrast for dark theme
+        "text": "#F1F5F9",  # Slate-100 (main text)
+        "text-muted": "#94A3B8",  # Slate-400
+        "text-disabled": "#64748B",  # Slate-500
+        "text-primary": "#60A5FA",  # Blue-400 (bright for dark bg)
+        "text-secondary": "#22D3EE",  # Cyan-400
+        "text-accent": "#22D3EE",  # Cyan-400
+        # Borders and UI
+        "border": "#334155",  # Slate-700
+        "border-hover": "#3B82F6",  # Blue-500
+        "input-cursor-foreground": "#22D3EE",
         "input-cursor-background": "#22D3EE",
         "input-selection-background": "#3B82F633",
-        "scrollbar": "#334155",              # Slate-700
+        "scrollbar": "#334155",
         "scrollbar-hover": "#3B82F6",
         "footer-key-foreground": "#3B82F6",
         "footer-description-foreground": "#94A3B8",
         "button-foreground": "#FFFFFF",
         "button-background": "#3B82F6",
-        "panel": "#1E293B",                  # Slate-800
-        "panel-lighten-1": "#334155",        # Slate-700
-        "panel-darken-1": "#0F172A",         # Slate-900
+        "panel": "#1E293B",
+        "panel-lighten-1": "#334155",
+        "panel-darken-1": "#0F172A",
         "code-background": "#1E293B",
         "code-foreground": "#E2E8F0",
         "link": "#3B82F6",
-        "link-hover": "#60A5FA",             # Blue-400
-    }
+        "link-hover": "#60A5FA",
+    },
 )
 
 
@@ -88,21 +95,27 @@ THEME_VERTICE_DARK = Theme(
 
 THEME_VERTICE_LIGHT = Theme(
     name="vertice-light",
-    primary="#2563EB",          # Blue-600
-    secondary="#64748B",        # Slate-500
-    accent="#0891B2",           # Cyan-600
-    background="#FFFFFF",       # Pure white
-    surface="#F8FAFC",          # Slate-50
-    foreground="#0F172A",       # Slate-900
-    success="#16A34A",          # Green-600
-    error="#DC2626",            # Red-600
-    warning="#D97706",          # Amber-600
+    primary="#2563EB",  # Blue-600
+    secondary="#64748B",  # Slate-500
+    accent="#0891B2",  # Cyan-600
+    background="#FFFFFF",  # Pure white
+    surface="#F8FAFC",  # Slate-50
+    foreground="#0F172A",  # Slate-900
+    success="#16A34A",  # Green-600
+    error="#DC2626",  # Red-600
+    warning="#D97706",  # Amber-600
     dark=False,
     variables={
-        "text-muted": "#64748B",             # Slate-500
-        "text-disabled": "#94A3B8",          # Slate-400
-        "border": "#E2E8F0",                 # Slate-200
-        "border-hover": "#2563EB",           # Blue-600
+        # Text colors - high contrast for light theme
+        "text": "#1E293B",  # Slate-800 (main text)
+        "text-muted": "#64748B",  # Slate-500
+        "text-disabled": "#94A3B8",  # Slate-400
+        "text-primary": "#1D4ED8",  # Blue-700 (dark for light bg)
+        "text-secondary": "#0E7490",  # Cyan-700
+        "text-accent": "#0891B2",  # Cyan-600
+        # Borders and UI
+        "border": "#E2E8F0",  # Slate-200
+        "border-hover": "#2563EB",  # Blue-600
         "input-cursor-foreground": "#2563EB",
         "input-selection-background": "#2563EB33",
         "scrollbar": "#E2E8F0",
@@ -114,11 +127,11 @@ THEME_VERTICE_LIGHT = Theme(
         "panel": "#FFFFFF",
         "panel-lighten-1": "#FAFAFA",
         "panel-darken-1": "#F8FAFC",
-        "code-background": "#F1F5F9",        # Slate-100
-        "code-foreground": "#1E293B",        # Slate-800
+        "code-background": "#F1F5F9",
+        "code-foreground": "#1E293B",
         "link": "#2563EB",
-        "link-hover": "#1D4ED8",             # Blue-700
-    }
+        "link-hover": "#1D4ED8",
+    },
 )
 
 
@@ -157,7 +170,7 @@ THEME_LIGHT = Theme(
         "panel-darken-1": "#F5F5F4",
         "code-background": "#fff3e0",
         "code-foreground": "#cc4a0a",
-    }
+    },
 )
 
 
@@ -199,13 +212,14 @@ THEME_DARK = Theme(
         "panel-darken-1": "#000000",
         "link": "#00FF41",
         "link-hover": "#39FF14",
-    }
+    },
 )
 
 
 # =============================================================================
 # THEME MANAGER
 # =============================================================================
+
 
 class ThemeManager:
     """
@@ -255,6 +269,7 @@ class ThemeManager:
                     config = json.loads(cls.CONFIG_FILE.read_text())
                 except json.JSONDecodeError as e:
                     import logging
+
                     logging.warning(f"Corrupted theme config, using defaults: {e}")
             config["theme"] = theme_name
             cls.CONFIG_FILE.write_text(json.dumps(config, indent=2))
@@ -362,25 +377,26 @@ class ThemeManager:
                         return ThemeMode.VERTICE_DARK.value
                     if "light" in result.stdout.lower():
                         return ThemeMode.VERTICE_LIGHT.value
-                except Exception:
+                except (subprocess.SubprocessError, OSError, ValueError):
                     pass
 
             elif system == "Windows":
                 try:
                     import winreg
+
                     key = winreg.OpenKey(
                         winreg.HKEY_CURRENT_USER,
-                        r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
+                        r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize",
                     )
                     value, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")
                     winreg.CloseKey(key)
                     if value == 0:
                         return ThemeMode.VERTICE_DARK.value
                     return ThemeMode.VERTICE_LIGHT.value
-                except Exception:
+                except (OSError, ValueError, ImportError):
                     pass
 
-        except Exception:
+        except (subprocess.SubprocessError, OSError, ValueError):
             pass
 
         # Default to dark
@@ -404,6 +420,33 @@ class ThemeManager:
                     return cls.detect_system_theme()
                 if theme in cls._THEME_MAP:
                     return theme
-        except Exception:
+        except (json.JSONDecodeError, IOError, KeyError, TypeError):
             pass
         return cls.detect_system_theme()
+
+    @classmethod
+    def get_prometheus_preference(cls) -> bool:
+        """Load saved prometheus preference."""
+        try:
+            if cls.CONFIG_FILE.exists():
+                config = json.loads(cls.CONFIG_FILE.read_text())
+                return config.get("prometheus_mode", False)
+        except (json.JSONDecodeError, IOError):
+            pass
+        return False
+
+    @classmethod
+    def save_prometheus_preference(cls, enabled: bool) -> None:
+        """Save prometheus preference to config file."""
+        try:
+            cls.CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+            config = {}
+            if cls.CONFIG_FILE.exists():
+                try:
+                    config = json.loads(cls.CONFIG_FILE.read_text())
+                except json.JSONDecodeError:
+                    pass
+            config["prometheus_mode"] = enabled
+            cls.CONFIG_FILE.write_text(json.dumps(config, indent=2))
+        except IOError:
+            pass

@@ -4,12 +4,15 @@ Boris Cherny: Rich context = better decisions. Aggregate everything.
 """
 
 import logging
+
 logger = logging.getLogger(__name__)
 import os
 import logging
+
 logger = logging.getLogger(__name__)
 import json
 import logging
+
 logger = logging.getLogger(__name__)
 import subprocess
 from dataclasses import dataclass, field
@@ -71,7 +74,7 @@ class TerminalInfo:
 @dataclass(frozen=True)
 class RichContext(Context):
     """Enhanced context with multi-source information.
-    
+
     Combines patterns from:
     - Cursor: Multi-source context fusion
     - Claude: User expertise and preferences
@@ -93,10 +96,10 @@ class RichContext(Context):
 
 def detect_git_status(working_dir: str = ".") -> Optional[GitStatus]:
     """Detect git repository status.
-    
+
     Args:
         working_dir: Directory to check
-        
+
     Returns:
         GitStatus if in git repo, None otherwise
     """
@@ -107,7 +110,7 @@ def detect_git_status(working_dir: str = ".") -> Optional[GitStatus]:
             cwd=working_dir,
             capture_output=True,
             check=True,
-            timeout=2
+            timeout=2,
         )
 
         # Get branch
@@ -116,7 +119,7 @@ def detect_git_status(working_dir: str = ".") -> Optional[GitStatus]:
             cwd=working_dir,
             capture_output=True,
             text=True,
-            timeout=2
+            timeout=2,
         )
         branch = branch_result.stdout.strip() or None
 
@@ -126,7 +129,7 @@ def detect_git_status(working_dir: str = ".") -> Optional[GitStatus]:
             cwd=working_dir,
             capture_output=True,
             text=True,
-            timeout=2
+            timeout=2,
         )
 
         staged = []
@@ -140,20 +143,16 @@ def detect_git_status(working_dir: str = ".") -> Optional[GitStatus]:
             status = line[:2]
             filename = line[3:]
 
-            if status[0] in ['M', 'A', 'D', 'R', 'C']:
+            if status[0] in ["M", "A", "D", "R", "C"]:
                 staged.append(filename)
-            if status[1] in ['M', 'D']:
+            if status[1] in ["M", "D"]:
                 unstaged.append(filename)
-            if status == '??':
+            if status == "??":
                 untracked.append(filename)
 
         # Check for remote
         remote_result = subprocess.run(
-            ["git", "remote"],
-            cwd=working_dir,
-            capture_output=True,
-            text=True,
-            timeout=2
+            ["git", "remote"], cwd=working_dir, capture_output=True, text=True, timeout=2
         )
         has_remote = bool(remote_result.stdout.strip())
 
@@ -162,7 +161,7 @@ def detect_git_status(working_dir: str = ".") -> Optional[GitStatus]:
             staged_files=staged,
             unstaged_files=unstaged,
             untracked_files=untracked,
-            has_remote=has_remote
+            has_remote=has_remote,
         )
 
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
@@ -171,10 +170,10 @@ def detect_git_status(working_dir: str = ".") -> Optional[GitStatus]:
 
 def detect_workspace(working_dir: str = ".") -> WorkspaceInfo:
     """Detect workspace type and configuration.
-    
+
     Args:
         working_dir: Directory to analyze
-        
+
     Returns:
         WorkspaceInfo with detected information
     """
@@ -186,33 +185,33 @@ def detect_workspace(working_dir: str = ".") -> WorkspaceInfo:
         try:
             with open(package_json) as f:
                 pkg = json.load(f)
-                deps = pkg.get('dependencies', {})
-                dev_deps = pkg.get('devDependencies', {})
-                scripts = pkg.get('scripts', {})
+                deps = pkg.get("dependencies", {})
+                dev_deps = pkg.get("devDependencies", {})
+                scripts = pkg.get("scripts", {})
 
                 # Detect framework
                 framework = None
-                if 'react' in deps:
-                    framework = 'react'
-                elif 'vue' in deps:
-                    framework = 'vue'
-                elif 'next' in deps:
-                    framework = 'nextjs'
-                elif 'express' in deps:
-                    framework = 'express'
+                if "react" in deps:
+                    framework = "react"
+                elif "vue" in deps:
+                    framework = "vue"
+                elif "next" in deps:
+                    framework = "nextjs"
+                elif "express" in deps:
+                    framework = "express"
 
                 # Detect test setup
-                has_tests = 'test' in scripts or any(
-                    t in dev_deps for t in ['jest', 'vitest', 'mocha']
+                has_tests = "test" in scripts or any(
+                    t in dev_deps for t in ["jest", "vitest", "mocha"]
                 )
-                test_cmd = scripts.get('test', 'npm test') if has_tests else None
+                test_cmd = scripts.get("test", "npm test") if has_tests else None
 
                 info = WorkspaceInfo(
-                    language='javascript',
+                    language="javascript",
                     framework=framework,
                     dependencies=deps,
                     has_tests=has_tests,
-                    test_command=test_cmd
+                    test_command=test_cmd,
                 )
         except (json.JSONDecodeError, IOError) as e:
             logger.debug(f"Failed to parse package.json: {e}")
@@ -225,21 +224,21 @@ def detect_workspace(working_dir: str = ".") -> WorkspaceInfo:
                 reqs = f.read().lower()
 
                 framework = None
-                if 'django' in reqs:
-                    framework = 'django'
-                elif 'flask' in reqs:
-                    framework = 'flask'
-                elif 'fastapi' in reqs:
-                    framework = 'fastapi'
+                if "django" in reqs:
+                    framework = "django"
+                elif "flask" in reqs:
+                    framework = "flask"
+                elif "fastapi" in reqs:
+                    framework = "fastapi"
 
-                has_tests = 'pytest' in reqs or 'unittest' in reqs
-                test_cmd = 'pytest' if 'pytest' in reqs else 'python -m unittest'
+                has_tests = "pytest" in reqs or "unittest" in reqs
+                test_cmd = "pytest" if "pytest" in reqs else "python -m unittest"
 
                 info = WorkspaceInfo(
-                    language='python',
+                    language="python",
                     framework=framework,
                     has_tests=has_tests,
-                    test_command=test_cmd if has_tests else None
+                    test_command=test_cmd if has_tests else None,
                 )
         except IOError as e:
             logger.debug(f"Failed to read requirements.txt: {e}")
@@ -247,20 +246,12 @@ def detect_workspace(working_dir: str = ".") -> WorkspaceInfo:
     # Check for Cargo.toml (Rust)
     cargo_toml = os.path.join(working_dir, "Cargo.toml")
     if os.path.exists(cargo_toml):
-        info = WorkspaceInfo(
-            language='rust',
-            has_tests=True,
-            test_command='cargo test'
-        )
+        info = WorkspaceInfo(language="rust", has_tests=True, test_command="cargo test")
 
     # Check for go.mod (Go)
     go_mod = os.path.join(working_dir, "go.mod")
     if os.path.exists(go_mod):
-        info = WorkspaceInfo(
-            language='go',
-            has_tests=True,
-            test_command='go test ./...'
-        )
+        info = WorkspaceInfo(language="go", has_tests=True, test_command="go test ./...")
 
     return info
 
@@ -269,16 +260,16 @@ def build_rich_context(
     current_command: Optional[str] = None,
     command_history: Optional[List[str]] = None,
     recent_errors: Optional[List[str]] = None,
-    working_dir: str = "."
+    working_dir: str = ".",
 ) -> RichContext:
     """Build rich context from multiple sources.
-    
+
     Args:
         current_command: Current command being typed
         command_history: Recent command history
         recent_errors: Recent error messages
         working_dir: Working directory
-        
+
     Returns:
         RichContext with all available information
     """
@@ -293,8 +284,8 @@ def build_rich_context(
         working_directory=working_dir,
         git_branch=git_status.branch if git_status else None,
         recent_files=[],  # File tracking would require filesystem watcher
-        environment={},   # Env vars accessible via os.environ if needed
+        environment={},  # Env vars accessible via os.environ if needed
         git_status=git_status,
         workspace=workspace,
-        terminal=terminal
+        terminal=terminal,
     )

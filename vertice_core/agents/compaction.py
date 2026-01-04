@@ -86,11 +86,13 @@ class CompactionConfig:
 
     # Observation masking
     max_tool_output_chars: int = 500  # Truncate tool output
-    mask_patterns: List[str] = field(default_factory=lambda: [
-        r"^\s+",  # Leading whitespace
-        r"\n{3,}",  # Multiple newlines
-        r"```[\s\S]*?```",  # Code blocks (keep summary)
-    ])
+    mask_patterns: List[str] = field(
+        default_factory=lambda: [
+            r"^\s+",  # Leading whitespace
+            r"\n{3,}",  # Multiple newlines
+            r"```[\s\S]*?```",  # Code blocks (keep summary)
+        ]
+    )
 
 
 @dataclass
@@ -189,21 +191,25 @@ class ObservationMaskingStrategy(CompactionStrategy_ABC):
                     # Mask tool output
                     masked = self._mask_tool_output(content, config)
                     if masked:
-                        masked_messages.append({
-                            **msg,
-                            "content": masked,
-                            "_masked": True,
-                        })
+                        masked_messages.append(
+                            {
+                                **msg,
+                                "content": masked,
+                                "_masked": True,
+                            }
+                        )
                     else:
                         messages_removed += 1
                 elif len(content) > config.max_tool_output_chars * 2:
                     # Truncate very long messages
-                    truncated = content[:config.max_tool_output_chars] + "\n[...truncated...]"
-                    masked_messages.append({
-                        **msg,
-                        "content": truncated,
-                        "_truncated": True,
-                    })
+                    truncated = content[: config.max_tool_output_chars] + "\n[...truncated...]"
+                    masked_messages.append(
+                        {
+                            **msg,
+                            "content": truncated,
+                            "_truncated": True,
+                        }
+                    )
                 else:
                     masked_messages.append(msg)
 
@@ -449,7 +455,7 @@ Provide a concise summary (max 500 tokens):"""
             # Replace context with summary
             old_summary = context._summary
             context._summary = summary
-            context._messages = context._messages[-config.keep_recent_messages:]
+            context._messages = context._messages[-config.keep_recent_messages :]
 
             # Recalculate
             context._recalculate_tokens()
@@ -626,7 +632,8 @@ class ContextCompactor:
             "total_compactions": total_compactions,
             "total_tokens_saved": total_saved,
             "average_compression": (
-                sum(r.compression_ratio for r in self._compaction_history) / max(total_compactions, 1)
+                sum(r.compression_ratio for r in self._compaction_history)
+                / max(total_compactions, 1)
             ),
             "current_usage": f"{self.context._token_usage}/{self.context.max_tokens}",
             "current_percent": f"{self.context._token_usage / self.context.max_tokens * 100:.1f}%",

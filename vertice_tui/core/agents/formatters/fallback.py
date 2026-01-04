@@ -23,15 +23,15 @@ class MarkdownFormatter:
         """Check if data contains pre-formatted markdown content."""
         if not isinstance(data, dict):
             return False
-        return 'formatted_markdown' in data or 'markdown' in data
+        return "formatted_markdown" in data or "markdown" in data
 
     @staticmethod
     async def format(data: Any, reasoning: str) -> AsyncIterator[str]:
         """Pass through pre-formatted markdown content."""
-        if 'formatted_markdown' in data:
-            yield data['formatted_markdown']
-        elif 'markdown' in data:
-            yield data['markdown']
+        if "formatted_markdown" in data:
+            yield data["formatted_markdown"]
+        elif "markdown" in data:
+            yield data["markdown"]
 
 
 class StringFormatter:
@@ -78,18 +78,18 @@ class FallbackFormatter:
                 else:
                     yield f"**{key}:** {value}\n"
 
-            if 'infrastructure' in data:
-                infra = data['infrastructure']
+            if "infrastructure" in data:
+                infra = data["infrastructure"]
                 if isinstance(infra, dict) and not any(
-                    k in str(infra) for k in ['Deployment Plan', 'DevOps']
+                    k in str(infra) for k in ["Deployment Plan", "DevOps"]
                 ):
                     yield "\n**Infrastructure details:**\n"
                     for k, v in infra.items():
                         yield f"- {k}: {v}\n"
 
-            if 'configuration' in data:
+            if "configuration" in data:
                 yield "\n**Configuration details:**\n"
-                for k, v in data['configuration'].items():
+                for k, v in data["configuration"].items():
                     yield f"- {k}: {v}\n"
 
         elif reasoning and reasoning != "None":

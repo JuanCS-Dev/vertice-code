@@ -14,12 +14,12 @@ class LazyLoader:
     # Import map - módulos que podem ser lazy loaded
     # Maps component name to module path
     _LAZY_MODULES = {
-        'llm': 'vertice_cli.core.llm',  # Loads module, client accessed via property
-        'tools': 'vertice_cli.plugins.tools_plugin',
-        'tui': 'vertice_cli.plugins.tui_plugin',
-        'intelligence': 'vertice_cli.plugins.intelligence_plugin',
-        'devsquad': 'vertice_cli.plugins.devsquad_plugin',
-        'mcp': 'vertice_cli.core.mcp_client',
+        "llm": "vertice_cli.core.llm",  # Loads module, client accessed via property
+        "tools": "vertice_cli.plugins.tools_plugin",
+        "tui": "vertice_cli.plugins.tui_plugin",
+        "intelligence": "vertice_cli.plugins.intelligence_plugin",
+        "devsquad": "vertice_cli.plugins.devsquad_plugin",
+        "mcp": "vertice_cli.core.mcp_client",
     }
 
     async def load(self, component: str) -> Any:
@@ -37,10 +37,7 @@ class LazyLoader:
         # Run import in thread pool to avoid blocking the event loop
         # This is critical for responsiveness during background loading
         try:
-            module = await loop.run_in_executor(
-                None,
-                lambda: importlib.import_module(module_path)
-            )
+            module = await loop.run_in_executor(None, lambda: importlib.import_module(module_path))
 
             self._cache[component] = module
             return module

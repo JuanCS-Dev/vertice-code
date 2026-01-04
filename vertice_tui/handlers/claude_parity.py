@@ -32,6 +32,7 @@ class ClaudeParityHandler:
         """Lazy load tasks handler."""
         if self._tasks_handler is None:
             from vertice_tui.handlers.claude_parity_tasks import ClaudeParityTasksHandler
+
             self._tasks_handler = ClaudeParityTasksHandler(self.app)
         return self._tasks_handler
 
@@ -40,15 +41,11 @@ class ClaudeParityHandler:
         """Lazy load plan handler."""
         if self._plan_handler is None:
             from vertice_tui.handlers.claude_parity_plan import ClaudeParityPlanHandler
+
             self._plan_handler = ClaudeParityPlanHandler(self.app)
         return self._plan_handler
 
-    async def handle(
-        self,
-        command: str,
-        args: str,
-        view: "ResponseView"
-    ) -> None:
+    async def handle(self, command: str, args: str, view: "ResponseView") -> None:
         """Route to specific handler method."""
         # Local handlers
         local_handlers = {
@@ -72,8 +69,14 @@ class ClaudeParityHandler:
 
         # Plan-related commands (delegate to plan handler)
         plan_commands = {
-            "/commands", "/command-create", "/command-delete",
-            "/plan-mode", "/plan-status", "/plan-note", "/plan-exit", "/plan-approve"
+            "/commands",
+            "/command-create",
+            "/command-delete",
+            "/plan-mode",
+            "/plan-status",
+            "/plan-note",
+            "/plan-exit",
+            "/plan-approve",
         }
 
         if command in local_handlers:
@@ -136,17 +139,15 @@ class ClaudeParityHandler:
         """Update TokenDashboard widget with current stats."""
         try:
             from vertice_tui.widgets import TokenDashboard
+
             dashboard = self.app.query_one("#token-dashboard", TokenDashboard)
-            dashboard.update_usage(
-                used=compressor.total_tokens,
-                limit=compressor.config.max_tokens
-            )
+            dashboard.update_usage(used=compressor.total_tokens, limit=compressor.config.max_tokens)
             dashboard.update_compression(
                 ratio=1.0 / max(compressor.utilization, 0.01),
-                count=len(compressor.get_compression_history())
+                count=len(compressor.get_compression_history()),
             )
-        except Exception:
-            pass  # Dashboard not mounted yet
+        except (AttributeError, ValueError):
+            pass
 
     async def _handle_context(self, args: str, view: "ResponseView") -> None:
         """Enhanced /context command with full breakdown.
@@ -170,11 +171,11 @@ class ClaudeParityHandler:
 
             # File context section
             sections.append("### 📁 Files in Context")
-            file_entries = getattr(compressor, 'file_entries', [])
+            file_entries = getattr(compressor, "file_entries", [])
             if file_entries:
                 for entry in file_entries[:10]:
-                    filepath = getattr(entry, 'filepath', str(entry))
-                    tokens = getattr(entry, 'tokens', 0)
+                    filepath = getattr(entry, "filepath", str(entry))
+                    tokens = getattr(entry, "tokens", 0)
                     sections.append(f"- `{filepath}` ({tokens:,} tokens)")
                 if len(file_entries) > 10:
                     sections.append(f"- ... and {len(file_entries) - 10} more")
@@ -198,11 +199,13 @@ class ClaudeParityHandler:
                 status = "🟢 HEALTHY"
 
             sections.append(f"- **Status:** {status}")
-            sections.append(f"- **Total:** {total_tokens:,} / {max_tokens:,} ({utilization_pct:.1f}%)")
+            sections.append(
+                f"- **Total:** {total_tokens:,} / {max_tokens:,} ({utilization_pct:.1f}%)"
+            )
             sections.append(f"- **Messages:** {compressor.message_count}")
 
             # Get breakdown if available
-            breakdown = getattr(compressor, 'get_breakdown', lambda: {})()
+            breakdown = getattr(compressor, "get_breakdown", lambda: {})()
             if breakdown:
                 sections.append(f"- **Messages tokens:** {breakdown.get('messages', 0):,}")
                 sections.append(f"- **Files tokens:** {breakdown.get('files', 0):,}")
@@ -214,7 +217,9 @@ class ClaudeParityHandler:
             compressions = len(history)
             if compressions > 0:
                 total_saved = sum(h.tokens_saved for h in history)
-                sections.append(f"- **Compressions:** {compressions}x ({total_saved:,} tokens saved)")
+                sections.append(
+                    f"- **Compressions:** {compressions}x ({total_saved:,} tokens saved)"
+                )
             else:
                 sections.append("- **Compressions:** None yet")
 
@@ -227,7 +232,9 @@ class ClaudeParityHandler:
             active_sig = thoughts.get_active_signature() if thoughts else None
             if active_sig:
                 sections.append(f"- **Level:** {active_sig.thinking_level.value.capitalize()}")
-                sections.append(f"- **Hypothesis:** {active_sig.hypothesis[:100]}{'...' if len(active_sig.hypothesis) > 100 else ''}")
+                sections.append(
+                    f"- **Hypothesis:** {active_sig.hypothesis[:100]}{'...' if len(active_sig.hypothesis) > 100 else ''}"
+                )
                 sections.append(f"- **Steps:** {len(active_sig.key_observations)}")
                 if active_sig.key_observations:
                     sections.append("- **Recent insights:**")
@@ -283,11 +290,13 @@ class ClaudeParityHandler:
             if todos:
                 lines = ["## 📋 Todo List\n"]
                 for i, todo in enumerate(todos, 1):
-                    status_icon = "✅" if todo.get('done') else "⬜"
+                    status_icon = "✅" if todo.get("done") else "⬜"
                     lines.append(f"{status_icon} {i}. {todo.get('text', '?')}")
                 view.add_system_message("\n".join(lines))
             else:
-                view.add_system_message("## 📋 Todo List\n\nNo todos yet. Use `/todo <task>` to add one.")
+                view.add_system_message(
+                    "## 📋 Todo List\n\nNo todos yet. Use `/todo <task>` to add one."
+                )
         except Exception as e:
             view.add_system_message(f"## 📋 Todo List\n\nNot available: {e}")
 
@@ -306,7 +315,7 @@ class ClaudeParityHandler:
             provider_name = args.strip().lower()
             try:
                 # Try to switch provider via VerticeClient first
-                if hasattr(self.bridge.llm, '_vertice_client') and self.bridge.llm._vertice_client:
+                if hasattr(self.bridge.llm, "_vertice_client") and self.bridge.llm._vertice_client:
                     client = self.bridge.llm._vertice_client
                     available = client.get_available_providers()
 
@@ -349,7 +358,7 @@ class ClaudeParityHandler:
             # Get providers from VerticeClient if available
             providers = []
             current_provider = "gemini"
-            if hasattr(self.bridge.llm, '_vertice_client') and self.bridge.llm._vertice_client:
+            if hasattr(self.bridge.llm, "_vertice_client") and self.bridge.llm._vertice_client:
                 providers = self.bridge.llm._vertice_client.get_available_providers()
                 current_provider = self.bridge.llm._vertice_client.current_provider or "auto"
 
@@ -413,7 +422,9 @@ class ClaudeParityHandler:
                 hook_name = parts[1]
                 command_str = parts[2]
                 if self.bridge.remove_hook_command(hook_name, command_str):
-                    view.add_system_message(f"✅ Removed command from **{hook_name}**: `{command_str}`")
+                    view.add_system_message(
+                        f"✅ Removed command from **{hook_name}**: `{command_str}`"
+                    )
                 else:
                     view.add_error(f"Failed to remove command from hook: {hook_name}")
 
@@ -421,7 +432,9 @@ class ClaudeParityHandler:
                 hook_name = parts[1]
                 commands = [c.strip() for c in parts[2].split(",")]
                 if self.bridge.set_hook(hook_name, commands):
-                    view.add_system_message(f"✅ Hook **{hook_name}** configured with {len(commands)} command(s)")
+                    view.add_system_message(
+                        f"✅ Hook **{hook_name}** configured with {len(commands)} command(s)"
+                    )
                 else:
                     view.add_error(f"Failed to set hook: {hook_name}")
 
@@ -440,10 +453,10 @@ class ClaudeParityHandler:
                         "*Hooks run shell commands after file operations*\n",
                     ]
                     for hook_name, hook_info in hooks.items():
-                        status = "✅" if hook_info.get('enabled') else "⬜"
+                        status = "✅" if hook_info.get("enabled") else "⬜"
                         lines.append(f"\n### {status} {hook_name}")
                         lines.append(f"*{hook_info.get('description', '')}*")
-                        commands = hook_info.get('commands', [])
+                        commands = hook_info.get("commands", [])
                         if commands:
                             lines.append("**Commands:**")
                             for cmd in commands:
@@ -514,7 +527,9 @@ class ClaudeParityHandler:
         else:
             lines.append("\n**External Connections:** None")
 
-        lines.append(f"\n**Total tools:** {status.get('total_exposed_tools', 0)} exposed, {status.get('total_imported_tools', 0)} imported")
+        lines.append(
+            f"\n**Total tools:** {status.get('total_exposed_tools', 0)} exposed, {status.get('total_imported_tools', 0)} imported"
+        )
         view.add_system_message("\n".join(lines))
 
     async def _mcp_serve(self, port: int, view: "ResponseView") -> None:
@@ -625,7 +640,7 @@ class ClaudeParityHandler:
                 f"- **Patterns:** {status['pattern_count']}",
                 "\n**Available Agents:**",
             ]
-            for agent in status['available_agents']:
+            for agent in status["available_agents"]:
                 lines.append(f"  - `/{agent}`")
             view.add_system_message("\n".join(lines))
         except Exception as e:
@@ -639,22 +654,28 @@ class ClaudeParityHandler:
                 analysis = self.bridge.test_routing(args)
                 lines = [
                     "## 🎯 Routing Analysis\n",
-                    f"**Message:** `{analysis['message'][:50]}...`" if len(analysis['message']) > 50 else f"**Message:** `{analysis['message']}`",
+                    (
+                        f"**Message:** `{analysis['message'][:50]}...`"
+                        if len(analysis["message"]) > 50
+                        else f"**Message:** `{analysis['message']}`"
+                    ),
                     f"**Should Route:** {'Yes' if analysis['should_route'] else 'No'}",
                 ]
 
-                if analysis['detected_intents']:
+                if analysis["detected_intents"]:
                     lines.append("\n**Detected Intents:**")
-                    for intent in analysis['detected_intents'][:5]:
+                    for intent in analysis["detected_intents"][:5]:
                         lines.append(f"  - `{intent['agent']}`: {intent['confidence']}")
 
-                if analysis['selected_route']:
-                    route = analysis['selected_route']
-                    lines.append(f"\n**Would Route To:** `{route['agent']}` ({route['confidence']})")
+                if analysis["selected_route"]:
+                    route = analysis["selected_route"]
+                    lines.append(
+                        f"\n**Would Route To:** `{route['agent']}` ({route['confidence']})"
+                    )
                 else:
                     lines.append("\n**Would Route To:** None (general LLM chat)")
 
-                if analysis['suggestion']:
+                if analysis["suggestion"]:
                     lines.append(f"\n**Suggestion:**\n{analysis['suggestion']}")
 
                 view.add_system_message("\n".join(lines))

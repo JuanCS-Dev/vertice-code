@@ -35,9 +35,11 @@ from core.resilience import (
 # VERTICE_CORE SPECIFIC TYPES
 # =============================================================================
 
+
 @dataclass
 class CircuitBreakerStats:
     """Statistics for observability."""
+
     total_calls: int = 0
     successful_calls: int = 0
     failed_calls: int = 0
@@ -49,34 +51,31 @@ class CircuitBreakerStats:
     def to_dict(self) -> dict:
         """Serialize to dictionary."""
         return {
-            'total_calls': self.total_calls,
-            'successful_calls': self.successful_calls,
-            'failed_calls': self.failed_calls,
-            'rejected_calls': self.rejected_calls,
-            'state_changes': self.state_changes,
-            'last_failure_time': self.last_failure_time,
-            'last_failure_reason': self.last_failure_reason,
+            "total_calls": self.total_calls,
+            "successful_calls": self.successful_calls,
+            "failed_calls": self.failed_calls,
+            "rejected_calls": self.rejected_calls,
+            "state_changes": self.state_changes,
+            "last_failure_time": self.last_failure_time,
+            "last_failure_reason": self.last_failure_reason,
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'CircuitBreakerStats':
+    def from_dict(cls, data: dict) -> "CircuitBreakerStats":
         """Deserialize from dictionary."""
         return cls(
-            total_calls=data.get('total_calls', 0),
-            successful_calls=data.get('successful_calls', 0),
-            failed_calls=data.get('failed_calls', 0),
-            rejected_calls=data.get('rejected_calls', 0),
-            state_changes=data.get('state_changes', []),
-            last_failure_time=data.get('last_failure_time'),
-            last_failure_reason=data.get('last_failure_reason'),
+            total_calls=data.get("total_calls", 0),
+            successful_calls=data.get("successful_calls", 0),
+            failed_calls=data.get("failed_calls", 0),
+            rejected_calls=data.get("rejected_calls", 0),
+            state_changes=data.get("state_changes", []),
+            last_failure_time=data.get("last_failure_time"),
+            last_failure_reason=data.get("last_failure_reason"),
         )
 
     def __repr__(self) -> str:
         """Concise representation."""
-        success_rate = (
-            self.successful_calls / self.total_calls * 100
-            if self.total_calls > 0 else 0
-        )
+        success_rate = self.successful_calls / self.total_calls * 100 if self.total_calls > 0 else 0
         return f"CircuitBreakerStats(calls={self.total_calls}, success={success_rate:.1f}%)"
 
 
@@ -87,6 +86,7 @@ class SimpleCircuitBreaker:
 
     For full-featured circuit breaker, use CircuitBreaker from core.resilience.
     """
+
     failure_threshold: int = 5
     recovery_timeout: float = 60.0
     half_open_max_calls: int = 3
@@ -112,8 +112,10 @@ class SimpleCircuitBreaker:
             return True, "Circuit closed"
 
         if self.state == CircuitState.OPEN:
-            if self.last_failure_time and \
-               (time.time() - self.last_failure_time) >= self.recovery_timeout:
+            if (
+                self.last_failure_time
+                and (time.time() - self.last_failure_time) >= self.recovery_timeout
+            ):
                 self.state = CircuitState.HALF_OPEN
                 self.half_open_calls = 0
                 return True, "Circuit half-open"
@@ -128,27 +130,27 @@ class SimpleCircuitBreaker:
     def to_dict(self) -> dict:
         """Serialize to dictionary."""
         return {
-            'failure_threshold': self.failure_threshold,
-            'recovery_timeout': self.recovery_timeout,
-            'half_open_max_calls': self.half_open_max_calls,
-            'failures': self.failures,
-            'state': self.state.value,
-            'last_failure_time': self.last_failure_time,
-            'half_open_calls': self.half_open_calls,
+            "failure_threshold": self.failure_threshold,
+            "recovery_timeout": self.recovery_timeout,
+            "half_open_max_calls": self.half_open_max_calls,
+            "failures": self.failures,
+            "state": self.state.value,
+            "last_failure_time": self.last_failure_time,
+            "half_open_calls": self.half_open_calls,
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'SimpleCircuitBreaker':
+    def from_dict(cls, data: dict) -> "SimpleCircuitBreaker":
         """Deserialize from dictionary."""
-        state = data.get('state', 'closed')
+        state = data.get("state", "closed")
         return cls(
-            failure_threshold=data.get('failure_threshold', 5),
-            recovery_timeout=data.get('recovery_timeout', 60.0),
-            half_open_max_calls=data.get('half_open_max_calls', 3),
-            failures=data.get('failures', 0),
+            failure_threshold=data.get("failure_threshold", 5),
+            recovery_timeout=data.get("recovery_timeout", 60.0),
+            half_open_max_calls=data.get("half_open_max_calls", 3),
+            failures=data.get("failures", 0),
             state=CircuitState(state) if isinstance(state, str) else state,
-            last_failure_time=data.get('last_failure_time'),
-            half_open_calls=data.get('half_open_calls', 0),
+            last_failure_time=data.get("last_failure_time"),
+            half_open_calls=data.get("half_open_calls", 0),
         )
 
     def __repr__(self) -> str:
@@ -158,11 +160,11 @@ class SimpleCircuitBreaker:
 
 __all__ = [
     # Re-exports from core.resilience
-    'CircuitBreaker',
-    'CircuitBreakerConfig',
-    'CircuitOpenError',
-    'CircuitState',
+    "CircuitBreaker",
+    "CircuitBreakerConfig",
+    "CircuitOpenError",
+    "CircuitState",
     # Domain-specific
-    'CircuitBreakerStats',
-    'SimpleCircuitBreaker',
+    "CircuitBreakerStats",
+    "SimpleCircuitBreaker",
 ]

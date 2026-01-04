@@ -18,12 +18,13 @@ from typing import Any, Callable, Dict, Generic, Optional, TypeVar
 from collections import OrderedDict
 import threading
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 @dataclass
 class CacheEntry(Generic[T]):
     """Cache entry with metadata."""
+
     value: T
     created_at: float
     expires_at: Optional[float]
@@ -45,6 +46,7 @@ class CacheEntry(Generic[T]):
 @dataclass
 class CacheStats:
     """Cache statistics."""
+
     hits: int = 0
     misses: int = 0
     evictions: int = 0
@@ -105,7 +107,7 @@ class CacheManager:
         max_memory_mb: float = 50,
         max_disk_mb: float = 500,
         default_ttl: Optional[int] = 3600,
-        cache_dir: Optional[Path] = None
+        cache_dir: Optional[Path] = None,
     ):
         self._max_memory_bytes = int(max_memory_mb * 1024 * 1024)
         self._max_disk_bytes = int(max_disk_mb * 1024 * 1024)
@@ -139,10 +141,7 @@ class CacheManager:
             return len(str(value).encode())
 
     def get(
-        self,
-        key: str,
-        default: Optional[T] = None,
-        namespace: Optional[str] = None
+        self, key: str, default: Optional[T] = None, namespace: Optional[str] = None
     ) -> Optional[T]:
         """
         Get value from cache.
@@ -185,11 +184,7 @@ class CacheManager:
             return default
 
     def set(
-        self,
-        key: str,
-        value: T,
-        ttl: Optional[int] = None,
-        namespace: Optional[str] = None
+        self, key: str, value: T, ttl: Optional[int] = None, namespace: Optional[str] = None
     ) -> None:
         """
         Set value in cache.
@@ -206,21 +201,13 @@ class CacheManager:
         with self._lock:
             self._set_memory(full_key, value, actual_ttl)
 
-    def _set_memory(
-        self,
-        key: str,
-        value: Any,
-        ttl: Optional[int]
-    ) -> None:
+    def _set_memory(self, key: str, value: Any, ttl: Optional[int]) -> None:
         """Set value in memory cache."""
         size = self._estimate_size(value)
         now = time.time()
 
         entry = CacheEntry(
-            value=value,
-            created_at=now,
-            expires_at=now + ttl if ttl else None,
-            size_bytes=size
+            value=value, created_at=now, expires_at=now + ttl if ttl else None, size_bytes=size
         )
 
         # Evict if needed
@@ -296,7 +283,7 @@ class CacheManager:
                 "expires_at": entry.expires_at,
             }
 
-            with open(path, 'w') as f:
+            with open(path, "w") as f:
                 json.dump(data, f)
 
         except (TypeError, IOError):
@@ -343,7 +330,7 @@ class CacheManager:
         self,
         ttl: Optional[int] = None,
         namespace: Optional[str] = None,
-        key_func: Optional[Callable[..., str]] = None
+        key_func: Optional[Callable[..., str]] = None,
     ) -> Callable:
         """
         Decorator for caching function results.
@@ -358,6 +345,7 @@ class CacheManager:
             def fetch_data(url):
                 ...
         """
+
         def decorator(func: Callable) -> Callable:
             def wrapper(*args, **kwargs):
                 # Generate cache key
@@ -380,6 +368,7 @@ class CacheManager:
                 return result
 
             return wrapper
+
         return decorator
 
     @property
@@ -392,4 +381,4 @@ class CacheManager:
         return self._stats.to_dict()
 
 
-__all__ = ['CacheManager', 'CacheEntry', 'CacheStats']
+__all__ = ["CacheManager", "CacheEntry", "CacheStats"]

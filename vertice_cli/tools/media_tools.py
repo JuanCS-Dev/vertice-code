@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 # IMAGE READING
 # =============================================================================
 
+
 @dataclass
 class ImageInfo:
     """Information about an image file."""
@@ -65,23 +66,23 @@ class ImageReadTool(Tool):
             "file_path": {
                 "type": "string",
                 "description": "Path to the image file",
-                "required": True
+                "required": True,
             },
             "include_base64": {
                 "type": "boolean",
                 "description": "Include base64-encoded image data (default: False)",
-                "required": False
+                "required": False,
             },
             "max_size_mb": {
                 "type": "number",
                 "description": "Maximum file size in MB to process (default: 10)",
-                "required": False
+                "required": False,
             },
             "return_content_block": {
                 "type": "boolean",
                 "description": "Return Anthropic-style content_block for multimodal LLM input (default: False)",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     async def _execute_validated(self, **kwargs) -> ToolResult:
@@ -106,7 +107,7 @@ class ImageReadTool(Tool):
         if suffix not in self.SUPPORTED_FORMATS:
             return ToolResult(
                 success=False,
-                error=f"Unsupported format: {suffix}. Supported: {', '.join(self.SUPPORTED_FORMATS)}"
+                error=f"Unsupported format: {suffix}. Supported: {', '.join(self.SUPPORTED_FORMATS)}",
             )
 
         # Check file size
@@ -114,8 +115,7 @@ class ImageReadTool(Tool):
         size_mb = size_bytes / (1024 * 1024)
         if size_mb > max_size_mb:
             return ToolResult(
-                success=False,
-                error=f"File too large: {size_mb:.1f}MB > {max_size_mb}MB limit"
+                success=False, error=f"File too large: {size_mb:.1f}MB > {max_size_mb}MB limit"
             )
 
         try:
@@ -140,7 +140,7 @@ class ImageReadTool(Tool):
                 height=height,
                 size_bytes=size_bytes,
                 mime_type=mime_type,
-                base64_data=base64_data
+                base64_data=base64_data,
             )
 
             # Build result data
@@ -161,20 +161,13 @@ class ImageReadTool(Tool):
             if return_content_block and base64_data:
                 result_data["content_block"] = {
                     "type": "image",
-                    "source": {
-                        "type": "base64",
-                        "media_type": mime_type,
-                        "data": base64_data
-                    }
+                    "source": {"type": "base64", "media_type": mime_type, "data": base64_data},
                 }
 
             return ToolResult(
                 success=True,
                 data=result_data,
-                metadata={
-                    "format": image_info.format,
-                    "has_base64": base64_data is not None
-                }
+                metadata={"format": image_info.format, "has_base64": base64_data is not None},
             )
         except Exception as e:
             logger.error(f"Error reading image: {e}")
@@ -207,7 +200,7 @@ class ImageReadTool(Tool):
 
     def _png_dimensions(self, data: bytes) -> Tuple[int, int]:
         """Extract dimensions from PNG header."""
-        if data[:8] != b'\x89PNG\r\n\x1a\n':
+        if data[:8] != b"\x89PNG\r\n\x1a\n":
             return (0, 0)
         width = struct.unpack(">I", data[16:20])[0]
         height = struct.unpack(">I", data[20:24])[0]
@@ -217,27 +210,27 @@ class ImageReadTool(Tool):
         """Extract dimensions from JPEG."""
         f.seek(0)
         data = f.read(2)
-        if data != b'\xff\xd8':
+        if data != b"\xff\xd8":
             return (0, 0)
 
         while True:
             marker = f.read(2)
             if len(marker) < 2:
                 break
-            if marker[0] != 0xff:
+            if marker[0] != 0xFF:
                 break
 
             marker_type = marker[1]
 
             # SOF markers contain dimensions
-            if marker_type in (0xc0, 0xc1, 0xc2, 0xc3):
+            if marker_type in (0xC0, 0xC1, 0xC2, 0xC3):
                 f.read(3)  # Skip length and precision
                 height = struct.unpack(">H", f.read(2))[0]
                 width = struct.unpack(">H", f.read(2))[0]
                 return (width, height)
 
             # Skip other segments
-            if marker_type != 0xd8 and marker_type != 0xd9:
+            if marker_type != 0xD8 and marker_type != 0xD9:
                 length = struct.unpack(">H", f.read(2))[0]
                 f.seek(length - 2, 1)
 
@@ -245,7 +238,7 @@ class ImageReadTool(Tool):
 
     def _gif_dimensions(self, data: bytes) -> Tuple[int, int]:
         """Extract dimensions from GIF header."""
-        if data[:6] not in (b'GIF87a', b'GIF89a'):
+        if data[:6] not in (b"GIF87a", b"GIF89a"):
             return (0, 0)
         width = struct.unpack("<H", data[6:8])[0]
         height = struct.unpack("<H", data[8:10])[0]
@@ -253,28 +246,28 @@ class ImageReadTool(Tool):
 
     def _webp_dimensions(self, data: bytes) -> Tuple[int, int]:
         """Extract dimensions from WebP header."""
-        if data[:4] != b'RIFF' or data[8:12] != b'WEBP':
+        if data[:4] != b"RIFF" or data[8:12] != b"WEBP":
             return (0, 0)
 
         # VP8 format
-        if data[12:16] == b'VP8 ':
+        if data[12:16] == b"VP8 ":
             # Skip to dimensions
-            width = struct.unpack("<H", data[26:28])[0] & 0x3fff
-            height = struct.unpack("<H", data[28:30])[0] & 0x3fff
+            width = struct.unpack("<H", data[26:28])[0] & 0x3FFF
+            height = struct.unpack("<H", data[28:30])[0] & 0x3FFF
             return (width, height)
 
         # VP8L format
-        if data[12:16] == b'VP8L':
+        if data[12:16] == b"VP8L":
             bits = struct.unpack("<I", data[21:25])[0]
-            width = (bits & 0x3fff) + 1
-            height = ((bits >> 14) & 0x3fff) + 1
+            width = (bits & 0x3FFF) + 1
+            height = ((bits >> 14) & 0x3FFF) + 1
             return (width, height)
 
         return (0, 0)
 
     def _bmp_dimensions(self, data: bytes) -> Tuple[int, int]:
         """Extract dimensions from BMP header."""
-        if data[:2] != b'BM':
+        if data[:2] != b"BM":
             return (0, 0)
         width = struct.unpack("<I", data[18:22])[0]
         height = abs(struct.unpack("<i", data[22:26])[0])
@@ -302,7 +295,7 @@ class ImageReadTool(Tool):
 
     def _human_size(self, size_bytes: int) -> str:
         """Convert bytes to human-readable size."""
-        for unit in ['B', 'KB', 'MB', 'GB']:
+        for unit in ["B", "KB", "MB", "GB"]:
             if size_bytes < 1024:
                 return f"{size_bytes:.1f} {unit}"
             size_bytes /= 1024
@@ -312,6 +305,7 @@ class ImageReadTool(Tool):
 # =============================================================================
 # PDF READING
 # =============================================================================
+
 
 @dataclass
 class PDFInfo:
@@ -347,18 +341,18 @@ class PDFReadTool(Tool):
             "file_path": {
                 "type": "string",
                 "description": "Path to the PDF file",
-                "required": True
+                "required": True,
             },
             "pages": {
                 "type": "string",
                 "description": "Page range to extract (e.g., '1-5', 'all'). Default: 'all'",
-                "required": False
+                "required": False,
             },
             "max_chars": {
                 "type": "integer",
                 "description": "Maximum characters to extract (default: 50000)",
-                "required": False
-            }
+                "required": False,
+            },
         }
         self._has_pypdf = self._check_pypdf()
 
@@ -366,6 +360,7 @@ class PDFReadTool(Tool):
         """Check if pypdf is available."""
         try:
             import pypdf
+
             return True
         except ImportError:
             return False
@@ -447,10 +442,7 @@ class PDFReadTool(Tool):
                     "chars_extracted": chars_extracted,
                     "truncated": chars_extracted >= max_chars,
                 },
-                metadata={
-                    "parser": "pypdf",
-                    "total_pages": total_pages
-                }
+                metadata={"parser": "pypdf", "total_pages": total_pages},
             )
 
     async def _read_basic(
@@ -470,16 +462,16 @@ class PDFReadTool(Tool):
             text = content.decode("utf-8", errors="ignore")
 
         # Count pages (basic heuristic)
-        page_count = len(re.findall(rb'/Type\s*/Page[^s]', content))
+        page_count = len(re.findall(rb"/Type\s*/Page[^s]", content))
 
         # Extract text between stream markers (very basic)
         text_parts = []
-        stream_pattern = re.compile(r'stream\s*(.*?)\s*endstream', re.DOTALL)
+        stream_pattern = re.compile(r"stream\s*(.*?)\s*endstream", re.DOTALL)
 
         for match in stream_pattern.finditer(text):
             stream_content = match.group(1)
             # Try to extract readable text
-            readable = re.sub(r'[^\x20-\x7E\n]', '', stream_content)
+            readable = re.sub(r"[^\x20-\x7E\n]", "", stream_content)
             if len(readable) > 50:  # Only include meaningful content
                 text_parts.append(readable[:1000])
 
@@ -492,14 +484,12 @@ class PDFReadTool(Tool):
                 "pages": page_count or 1,
                 "size_bytes": size_bytes,
                 "size_human": self._human_size(size_bytes),
-                "text_content": extracted_text or "(Could not extract text. Install pypdf for better results)",
+                "text_content": extracted_text
+                or "(Could not extract text. Install pypdf for better results)",
                 "chars_extracted": len(extracted_text),
-                "warning": "Basic extraction. Install pypdf for better results: pip install pypdf"
+                "warning": "Basic extraction. Install pypdf for better results: pip install pypdf",
             },
-            metadata={
-                "parser": "basic",
-                "total_pages": page_count
-            }
+            metadata={"parser": "basic", "total_pages": page_count},
         )
 
     def _parse_page_range(self, spec: str, total: int) -> List[int]:
@@ -524,7 +514,7 @@ class PDFReadTool(Tool):
 
     def _human_size(self, size_bytes: int) -> str:
         """Convert bytes to human-readable size."""
-        for unit in ['B', 'KB', 'MB', 'GB']:
+        for unit in ["B", "KB", "MB", "GB"]:
             if size_bytes < 1024:
                 return f"{size_bytes:.1f} {unit}"
             size_bytes /= 1024
@@ -534,6 +524,7 @@ class PDFReadTool(Tool):
 # =============================================================================
 # SCREENSHOT TOOL
 # =============================================================================
+
 
 class ScreenshotReadTool(Tool):
     """Read screenshot files for analysis.
@@ -551,13 +542,13 @@ class ScreenshotReadTool(Tool):
             "file_path": {
                 "type": "string",
                 "description": "Path to the screenshot file",
-                "required": True
+                "required": True,
             },
             "include_base64": {
                 "type": "boolean",
                 "description": "Include base64-encoded data for LLM analysis",
-                "required": False
-            }
+                "required": False,
+            },
         }
         self._image_tool = ImageReadTool()
 
@@ -575,6 +566,7 @@ class ScreenshotReadTool(Tool):
 # =============================================================================
 # REGISTRY HELPER
 # =============================================================================
+
 
 def get_media_tools() -> List[Tool]:
     """Get all media tools."""

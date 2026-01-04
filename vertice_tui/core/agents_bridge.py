@@ -41,18 +41,18 @@ from core.agents import Agent, AgentConfig, Handoff
 warnings.warn(
     "tui.core.agents_bridge is deprecated. Use tui.core.agents instead.",
     DeprecationWarning,
-    stacklevel=2
+    stacklevel=2,
 )
 
 __all__ = [
-    'AgentInfo',
-    'AGENT_REGISTRY',
-    'AgentRouter',
-    'AgentManager',
+    "AgentInfo",
+    "AGENT_REGISTRY",
+    "AgentRouter",
+    "AgentManager",
     # Unified Agent integration
-    'Agent',
-    'AgentConfig',
-    'Handoff',
-    'get_unified_agents',
-    'get_core_agents',
+    "Agent",
+    "AgentConfig",
+    "Handoff",
+    "get_unified_agents",
+    "get_core_agents",
 ]

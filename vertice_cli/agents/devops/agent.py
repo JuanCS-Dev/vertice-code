@@ -77,9 +77,7 @@ class DevOpsAgent(BaseAgent):
             mcp_client=mcp_client,
             auto_remediate=auto_remediate,
         )
-        self.deployment_orchestrator = DeploymentOrchestrator(
-            policy_mode=policy_mode
-        )
+        self.deployment_orchestrator = DeploymentOrchestrator(policy_mode=policy_mode)
         self.health_checker = HealthChecker(
             incidents=self.incident_responder.incidents,
             mttr_seconds=self.incident_responder.mttr_seconds,

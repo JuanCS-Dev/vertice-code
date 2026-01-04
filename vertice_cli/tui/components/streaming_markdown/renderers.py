@@ -59,14 +59,15 @@ STATUS_BADGE_STYLES = {
     "⚠️": ("bold bright_yellow", "background: yellow"),
 }
 
-# Heading styles by level
+# Heading styles by level - Theme-adaptive color hierarchy
+# Using Rich semantic colors that work in both light and dark themes
 HEADING_STYLES = {
-    1: "bold underline bright_white",
-    2: "bold bright_white",
-    3: "bold white",
-    4: "bold dim white",
-    5: "dim white",
-    6: "dim italic white",
+    1: "bold bright_blue",  # Primary heading - bright for contrast
+    2: "bold bright_cyan",  # Accent heading - cyan stands out
+    3: "bold",  # Standard bold - uses theme foreground
+    4: "bold dim",  # Muted heading
+    5: "dim",  # More muted
+    6: "italic dim",  # Least prominent
 }
 
 
@@ -74,20 +75,35 @@ def render_heading(block: "BlockInfo") -> RenderableType:
     """
     Render heading with styled formatting.
 
+    Clean, modern style without showing # symbols.
+    Uses theme-adaptive colors for light/dark compatibility.
+
     Args:
         block: Block info with heading content
 
     Returns:
         Rich Text renderable
     """
-    level = block.metadata.get('level', 1)
-    text_content = block.metadata.get('text', block.content)
+    level = block.metadata.get("level", 1)
+    text_content = block.metadata.get("text", block.content)
 
-    style = HEADING_STYLES.get(level, "white")
+    style = HEADING_STYLES.get(level, "bold")
 
     text = Text()
-    text.append("#" * level + " ", style="dim cyan")
-    text.append(text_content, style=style)
+
+    # H1 gets a special treatment with underline effect
+    if level == 1:
+        text.append(text_content, style=style)
+        text.append("\n")
+        text.append("─" * min(len(text_content), 50), style="dim")  # Theme-adaptive
+    # H2 gets a subtle prefix
+    elif level == 2:
+        text.append("▸ ", style="dim")  # Theme-adaptive chevron
+        text.append(text_content, style=style)
+    else:
+        # H3+ just styled text
+        text.append(text_content, style=style)
+
     return text
 
 
@@ -108,7 +124,7 @@ def render_status_badge(block: "BlockInfo") -> RenderableType:
 
     for emoji, (style, _bg) in STATUS_BADGE_STYLES.items():
         if content.startswith(emoji):
-            status_text = content[len(emoji):].strip()
+            status_text = content[len(emoji) :].strip()
             text.append(f"{emoji} ", style="bold")
             text.append(status_text, style=style)
             return text
@@ -138,15 +154,15 @@ def render_diff(block: "BlockInfo") -> RenderableType:
             line_numbers=True,
             word_wrap=True,
         )
-    except Exception:
+    except (ValueError, TypeError):
         # Fallback: manual colorization
         text = Text()
-        for line in block.content.split('\n'):
-            if line.startswith('+'):
+        for line in block.content.split("\n"):
+            if line.startswith("+"):
                 text.append(line + "\n", style="green")
-            elif line.startswith('-'):
+            elif line.startswith("-"):
                 text.append(line + "\n", style="red")
-            elif line.startswith('@@'):
+            elif line.startswith("@@"):
                 text.append(line + "\n", style="cyan")
             else:
                 text.append(line + "\n", style="dim")
@@ -169,7 +185,7 @@ def render_tool_call(block: "BlockInfo") -> RenderableType:
     content = block.content.strip()
 
     # Gemini Native Format
-    if content.startswith('[TOOL_CALL:'):
+    if content.startswith("[TOOL_CALL:"):
         return _render_gemini_tool_call(content)
 
     # Claude Code Format
@@ -181,11 +197,11 @@ def _render_gemini_tool_call(content: str) -> RenderableType:
     try:
         # [TOOL_CALL:name:{...}]
         inner = content[11:]
-        if inner.endswith(']'):
+        if inner.endswith("]"):
             inner = inner[:-1]
 
-        if ':' in inner:
-            tool_name, args = inner.split(':', 1)
+        if ":" in inner:
+            tool_name, args = inner.split(":", 1)
         else:
             tool_name = inner
             args = "{}"
@@ -198,22 +214,22 @@ def _render_gemini_tool_call(content: str) -> RenderableType:
         result.append(" ", style="dim")
         result.append(args, style="italic #888888")
         return result
-    except Exception:
+    except (ValueError, IndexError, KeyError):
         return Text(content)
 
 
 def _render_claude_tool_call(content: str) -> RenderableType:
     """Render Claude Code style tool call."""
-    lines = content.split('\n')
+    lines = content.split("\n")
     if not lines:
         return Text(content)
 
     # Parse first line (tool call)
     first_line = lines[0].strip()
     # Remove ** bold markers if present
-    first_line = re.sub(r'\*\*', '', first_line)
+    first_line = re.sub(r"\*\*", "", first_line)
 
-    match = re.match(r'^[•●]\s*(\w+(?:\s+\w+)?)\s*(.*)', first_line)
+    match = re.match(r"^[•●]\s*(\w+(?:\s+\w+)?)\s*(.*)", first_line)
     if not match:
         return Text(content)
 
@@ -228,7 +244,7 @@ def _render_claude_tool_call(content: str) -> RenderableType:
     result.append(tool_name, style=f"bold {color}")
     if args:
         # Remove backticks for paths
-        args_clean = args.strip('`')
+        args_clean = args.strip("`")
         result.append(" ", style="dim")
         result.append(args_clean, style="italic #888888")
     result.append("\n")
@@ -242,7 +258,7 @@ def _render_claude_tool_call(content: str) -> RenderableType:
         _append_tool_output_line(result, line, stripped)
 
     # Remove trailing newline
-    if result.plain.endswith('\n'):
+    if result.plain.endswith("\n"):
         result = _apply_tool_styles(content, tool_name, icon, color)
 
     return result
@@ -251,16 +267,16 @@ def _render_claude_tool_call(content: str) -> RenderableType:
 def _append_tool_output_line(result: Text, line: str, stripped: str) -> None:
     """Append a tool output line with proper styling."""
     # Tool output line (└ resultado)
-    if stripped.startswith('└') or stripped.startswith('├'):
+    if stripped.startswith("└") or stripped.startswith("├"):
         output_text = stripped[1:].strip()
         result.append("  └ ", style="dim #666666")
 
         # Check for strikethrough (~~text~~)
-        if '~~' in output_text:
+        if "~~" in output_text:
             _append_strikethrough_text(result, output_text)
         # Check for checkbox
-        elif stripped.startswith('└ ☐') or stripped.startswith('└ □'):
-            checkbox_text = output_text.lstrip('☐□ ')
+        elif stripped.startswith("└ ☐") or stripped.startswith("└ □"):
+            checkbox_text = output_text.lstrip("☐□ ")
             result.append("☐ ", style="bold bright_yellow")
             result.append(checkbox_text, style="bright_white")
         else:
@@ -268,12 +284,12 @@ def _append_tool_output_line(result: Text, line: str, stripped: str) -> None:
         result.append("\n")
 
     # Indented continuation
-    elif line.startswith('  '):
+    elif line.startswith("  "):
         result.append("  ", style="")
-        if '~~' in stripped:
+        if "~~" in stripped:
             _append_strikethrough_text(result, stripped)
-        elif stripped.startswith('☐') or stripped.startswith('□'):
-            checkbox_text = stripped.lstrip('☐□ ')
+        elif stripped.startswith("☐") or stripped.startswith("□"):
+            checkbox_text = stripped.lstrip("☐□ ")
             result.append("☐ ", style="bold bright_yellow")
             result.append(checkbox_text, style="bright_white")
         else:
@@ -283,26 +299,24 @@ def _append_tool_output_line(result: Text, line: str, stripped: str) -> None:
 
 def _append_strikethrough_text(result: Text, text: str) -> None:
     """Append text with strikethrough portions styled."""
-    parts = re.split(r'(~~[^~]+~~)', text)
+    parts = re.split(r"(~~[^~]+~~)", text)
     for part in parts:
-        if part.startswith('~~') and part.endswith('~~'):
+        if part.startswith("~~") and part.endswith("~~"):
             result.append(part[2:-2], style="strike dim #888888")
         else:
             result.append(part, style="dim #aaaaaa")
 
 
-def _apply_tool_styles(
-    content: str, tool_name: str, icon: str, color: str
-) -> Text:
+def _apply_tool_styles(content: str, tool_name: str, icon: str, color: str) -> Text:
     """Apply consistent styling to tool output."""
-    lines = content.strip().split('\n')
+    lines = content.strip().split("\n")
     result = Text()
 
     # First line
-    first_line = re.sub(r'\*\*', '', lines[0].strip())
-    match = re.match(r'^[•●]\s*(\w+(?:\s+\w+)?)\s*(.*)', first_line)
+    first_line = re.sub(r"\*\*", "", lines[0].strip())
+    match = re.match(r"^[•●]\s*(\w+(?:\s+\w+)?)\s*(.*)", first_line)
     if match:
-        args = match.group(2).strip().strip('`')
+        args = match.group(2).strip().strip("`")
         result.append(f"{icon} ", style="bold")
         result.append(tool_name, style=f"bold {color}")
         if args:
@@ -316,23 +330,23 @@ def _apply_tool_styles(
             continue
         result.append("\n")
 
-        if stripped.startswith('└') or stripped.startswith('├'):
+        if stripped.startswith("└") or stripped.startswith("├"):
             output_text = stripped[1:].strip()
             result.append("  └ ", style="dim #666666")
-            if '~~' in output_text:
+            if "~~" in output_text:
                 _append_strikethrough_text(result, output_text)
-            elif output_text.startswith('☐') or output_text.startswith('□'):
-                checkbox_text = output_text.lstrip('☐□ ')
+            elif output_text.startswith("☐") or output_text.startswith("□"):
+                checkbox_text = output_text.lstrip("☐□ ")
                 result.append("☐ ", style="bold bright_yellow")
                 result.append(checkbox_text, style="bright_white")
             else:
                 result.append(output_text, style="dim #aaaaaa")
-        elif line.startswith('  '):
+        elif line.startswith("  "):
             result.append("  ", style="")
-            if '~~' in stripped:
+            if "~~" in stripped:
                 _append_strikethrough_text(result, stripped)
-            elif stripped.startswith('☐') or stripped.startswith('□'):
-                checkbox_text = stripped.lstrip('☐□ ')
+            elif stripped.startswith("☐") or stripped.startswith("□"):
+                checkbox_text = stripped.lstrip("☐□ ")
                 result.append("☐ ", style="bold bright_yellow")
                 result.append(checkbox_text, style="bright_white")
             else:

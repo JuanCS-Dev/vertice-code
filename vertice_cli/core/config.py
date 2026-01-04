@@ -11,6 +11,7 @@ def load_env():
     """Load environment variables from .env file."""
     try:
         from dotenv import load_dotenv
+
         env_file = Path(__file__).parent.parent.parent / ".env"
         if env_file.exists():
             load_dotenv(env_file)
@@ -22,8 +23,8 @@ def load_env():
             with open(env_file) as f:
                 for line in f:
                     line = line.strip()
-                    if line and not line.startswith('#') and '=' in line:
-                        key, value = line.split('=', 1)
+                    if line and not line.startswith("#") and "=" in line:
+                        key, value = line.split("=", 1)
                         os.environ[key.strip()] = value.strip()
 
 
@@ -66,7 +67,7 @@ class Config:
 
     def validate(self) -> tuple[bool, str]:
         """Validate configuration.
-        
+
         Returns:
             Tuple of (is_valid, error_message)
         """

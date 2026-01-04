@@ -33,11 +33,11 @@ class SmartCompleter(Completer):
         """
         self.commands = commands
         self.tools = {
-            '/read': {'icon': '📖', 'desc': 'Read file', 'example': '/read config.json'},
-            '/write': {'icon': '✍️', 'desc': 'Write file', 'example': '/write test.txt "hello"'},
-            '/edit': {'icon': '✏️', 'desc': 'Edit file', 'example': '/edit file.py'},
-            '/run': {'icon': '⚡', 'desc': 'Execute', 'example': '/run ls -la'},
-            '/git': {'icon': '🌿', 'desc': 'Git ops', 'example': '/git status'},
+            "/read": {"icon": "📖", "desc": "Read file", "example": "/read config.json"},
+            "/write": {"icon": "✍️", "desc": "Write file", "example": '/write test.txt "hello"'},
+            "/edit": {"icon": "✏️", "desc": "Edit file", "example": "/edit file.py"},
+            "/run": {"icon": "⚡", "desc": "Execute", "example": "/run ls -la"},
+            "/git": {"icon": "🌿", "desc": "Git ops", "example": "/git status"},
         }
 
     def _fuzzy_match(self, pattern: str, text: str) -> int:
@@ -68,7 +68,7 @@ class SmartCompleter(Completer):
 
         for i, char in enumerate(text):
             if pattern_idx < len(pattern) and char == pattern[pattern_idx]:
-                score += (100 - i)  # Earlier matches score higher
+                score += 100 - i  # Earlier matches score higher
                 pattern_idx += 1
 
         # All chars matched?
@@ -85,7 +85,7 @@ class SmartCompleter(Completer):
             return
 
         word = words[-1]
-        if not word.startswith('/'):
+        if not word.startswith("/"):
             return
 
         # Remove leading '/'
@@ -99,8 +99,8 @@ class SmartCompleter(Completer):
             score = self._fuzzy_match(query, cmd_key)
 
             if score > 0:
-                desc = cmd_meta.get('description') or cmd_meta.get('desc', '')
-                example = cmd_meta.get('example', '')
+                desc = cmd_meta.get("description") or cmd_meta.get("desc", "")
+                example = cmd_meta.get("example", "")
 
                 # Rich display with icon and description
                 display_text = f"{cmd_meta['icon']} {cmd_name:14} {desc}"
@@ -118,7 +118,7 @@ class SmartCompleter(Completer):
                 cmd_name,
                 start_position=-len(word),
                 display=display_text,
-                display_meta=HTML(f"<ansicyan>score: {score}</ansicyan>")
+                display_meta=HTML(f"<ansicyan>score: {score}</ansicyan>"),
             )
 
 

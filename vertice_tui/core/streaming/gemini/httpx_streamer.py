@@ -40,6 +40,7 @@ class GeminiHTTPXStreamer(BaseStreamer):
 
         try:
             import httpx
+
             self._client = httpx.AsyncClient(timeout=self.config.stream_timeout)
             self._initialized = True
             logger.info("GeminiHTTPXStreamer initialized")
@@ -87,14 +88,12 @@ class GeminiHTTPXStreamer(BaseStreamer):
                 "maxOutputTokens": self.config.max_output_tokens,
                 "topP": self.config.top_p,
                 "topK": self.config.top_k,
-            }
+            },
         }
 
         # Add native systemInstruction if provided
         if full_system_instruction:
-            payload["systemInstruction"] = {
-                "parts": [{"text": full_system_instruction}]
-            }
+            payload["systemInstruction"] = {"parts": [{"text": full_system_instruction}]}
 
         try:
             async with httpx.AsyncClient(timeout=self.config.stream_timeout) as client:
@@ -144,10 +143,7 @@ class GeminiHTTPXStreamer(BaseStreamer):
         if context:
             for msg in context:
                 role = "user" if msg.get("role") == "user" else "model"
-                contents.append({
-                    "role": role,
-                    "parts": [{"text": msg.get("content", "")}]
-                })
+                contents.append({"role": role, "parts": [{"text": msg.get("content", "")}]})
 
         contents.append({"role": "user", "parts": [{"text": prompt}]})
 
@@ -162,10 +158,7 @@ class GeminiHTTPXStreamer(BaseStreamer):
 
             if "candidates" in data:
                 text = (
-                    data["candidates"][0]
-                    .get("content", {})
-                    .get("parts", [{}])[0]
-                    .get("text", "")
+                    data["candidates"][0].get("content", {}).get("parts", [{}])[0].get("text", "")
                 )
                 return text if text else None
 

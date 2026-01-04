@@ -14,9 +14,11 @@ Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 from __future__ import annotations
 
 import logging
+
 logger = logging.getLogger(__name__)
 import os
 import logging
+
 logger = logging.getLogger(__name__)
 import threading
 from pathlib import Path
@@ -25,6 +27,7 @@ from typing import Any, AsyncIterator, Dict, List, Optional, Tuple
 # Load .env file if exists
 try:
     from dotenv import load_dotenv
+
     load_dotenv()
     script_dir = Path(__file__).parent.parent.parent
     env_file = script_dir / ".env"
@@ -33,6 +36,7 @@ try:
 except ImportError:
     # python-dotenv not installed - env vars must be set externally
     import logging
+
     logging.debug("python-dotenv not installed, skipping .env load")
 
 # Core systems
@@ -55,8 +59,14 @@ from .protocol_bridge import ProtocolBridgeMixin
 
 # Managers
 from .managers import (
-    TodoManager, StatusManager, PullRequestManager, MemoryManager,
-    ContextManager, AuthenticationManager, ProviderManager, MCPManager,
+    TodoManager,
+    StatusManager,
+    PullRequestManager,
+    MemoryManager,
+    ContextManager,
+    AuthenticationManager,
+    ProviderManager,
+    MCPManager,
     A2AManager,
 )
 
@@ -104,13 +114,13 @@ class Bridge(ProtocolBridgeMixin):
         self._status_manager = StatusManager(
             llm_checker=lambda: self.llm.is_available,
             tool_counter=lambda: self.tools.get_tool_count(),
-            agent_counter=lambda: len(self.agents.available_agents)
+            agent_counter=lambda: len(self.agents.available_agents),
         )
         self._pr_manager = PullRequestManager()
         self._memory_manager = MemoryManager()
         self._context_manager = ContextManager(
             context_getter=lambda: self.history.context,
-            context_setter=lambda ctx: setattr(self.history, 'context', ctx)
+            context_setter=lambda ctx: setattr(self.history, "context", ctx),
         )
 
         # State
@@ -165,9 +175,11 @@ class Bridge(ProtocolBridgeMixin):
     def status_line(self) -> str:
         """Get status line for TUI."""
         llm_status = f"{ELP['approved']} Gemini" if self.is_connected else f"{ELP['error']} No LLM"
-        return (f"{llm_status} | {self.governance.get_status_emoji()} | "
-                f"{ELP['agent']} {len(self.agents.available_agents)} agents | "
-                f"{ELP['tool']} {self.tools.get_tool_count()} tools")
+        return (
+            f"{llm_status} | {self.governance.get_status_emoji()} | "
+            f"{ELP['agent']} {len(self.agents.available_agents)} agents | "
+            f"{ELP['tool']} {self.tools.get_tool_count()} tools"
+        )
 
     @property
     def _prometheus_client(self):
@@ -206,8 +218,11 @@ class Bridge(ProtocolBridgeMixin):
         """Get system prompt for agentic interaction."""
         try:
             from vertice_tui.core.agentic_prompt import (
-                build_agentic_system_prompt, load_project_memory, get_dynamic_context
+                build_agentic_system_prompt,
+                load_project_memory,
+                get_dynamic_context,
             )
+
             tool_schemas = self.tools.get_schemas_for_llm()
             context = get_dynamic_context()
             project_memory = load_project_memory()
@@ -216,8 +231,10 @@ class Bridge(ProtocolBridgeMixin):
             if memory_result.get("success"):
                 user_memory = memory_result.get("content")
             return build_agentic_system_prompt(
-                tools=tool_schemas, context=context,
-                project_memory=project_memory, user_memory=user_memory
+                tools=tool_schemas,
+                context=context,
+                project_memory=project_memory,
+                user_memory=user_memory,
             )
         except Exception as e:
             logger.warning(f"Agentic system prompt failed, using fallback: {e}")
@@ -232,7 +249,7 @@ Working directory: {os.getcwd()}"""
     async def chat(self, message: str, auto_route: bool = True) -> AsyncIterator[str]:
         """Handle chat message with streaming response."""
         # Check for plan execution
-        last_plan = getattr(self.agents, '_last_plan', None)
+        last_plan = getattr(self.agents, "_last_plan", None)
         message, skip_routing, preamble = prepare_plan_execution(message, last_plan)
         if preamble:
             yield preamble
@@ -247,7 +264,9 @@ Working directory: {os.getcwd()}"""
 
         system_prompt = self._get_system_prompt()
         async for chunk in self._chat_controller.chat(
-            client=client, message=message, system_prompt=system_prompt,
+            client=client,
+            message=message,
+            system_prompt=system_prompt,
             provider_name=provider_name if self._provider_manager.mode == "auto" else "",
             skip_routing=skip_routing,
         ):
@@ -314,7 +333,9 @@ Working directory: {os.getcwd()}"""
         self, tool_calls: List[Tuple[str, Dict[str, Any]]]
     ) -> ParallelExecutionResult:
         """Execute tool calls with intelligent parallelization."""
-        executor = ParallelToolExecutor(self.tools.execute_tool, max_parallel=self.MAX_PARALLEL_TOOLS)
+        executor = ParallelToolExecutor(
+            self.tools.execute_tool, max_parallel=self.MAX_PARALLEL_TOOLS
+        )
         return await executor.execute(tool_calls)
 
     # =========================================================================
@@ -362,7 +383,7 @@ Working directory: {os.getcwd()}"""
         self.llm.model_name = model_name
 
     def get_current_model(self) -> str:
-        return getattr(self.llm, 'model_name', 'gemini-2.0-flash')
+        return getattr(self.llm, "model_name", "gemini-2.0-flash")
 
     def get_available_models(self) -> List[str]:
         return ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-pro"]
@@ -423,20 +444,34 @@ Working directory: {os.getcwd()}"""
 
     # Custom commands (optional)
     def load_custom_commands(self) -> Dict[str, Dict[str, Any]]:
-        return self._custom_commands_manager.load_commands() if self._custom_commands_manager else {}
+        return (
+            self._custom_commands_manager.load_commands() if self._custom_commands_manager else {}
+        )
 
     def get_custom_commands(self) -> Dict[str, Dict[str, Any]]:
         return self._custom_commands_manager.get_commands() if self._custom_commands_manager else {}
 
     def execute_custom_command(self, name: str, args: str = "") -> Optional[str]:
-        return self._custom_commands_manager.execute_command(name, args) if self._custom_commands_manager else None
+        return (
+            self._custom_commands_manager.execute_command(name, args)
+            if self._custom_commands_manager
+            else None
+        )
 
     # Plan mode (optional)
     def enter_plan_mode(self, task: Optional[str] = None) -> Dict[str, Any]:
-        return self._plan_mode_manager.enter_plan_mode(task) if self._plan_mode_manager else {"success": False}
+        return (
+            self._plan_mode_manager.enter_plan_mode(task)
+            if self._plan_mode_manager
+            else {"success": False}
+        )
 
     def exit_plan_mode(self, approved: bool = False) -> Dict[str, Any]:
-        return self._plan_mode_manager.exit_plan_mode(approved) if self._plan_mode_manager else {"success": False}
+        return (
+            self._plan_mode_manager.exit_plan_mode(approved)
+            if self._plan_mode_manager
+            else {"success": False}
+        )
 
     def is_plan_mode(self) -> bool:
         return self._plan_mode_manager.is_plan_mode() if self._plan_mode_manager else False
@@ -448,7 +483,9 @@ Working directory: {os.getcwd()}"""
         return await self._pr_manager.create_pull_request(title, body, base, draft)
 
     # Auth management
-    def login(self, provider: str = "gemini", api_key: Optional[str] = None, scope: str = "global") -> Dict[str, Any]:
+    def login(
+        self, provider: str = "gemini", api_key: Optional[str] = None, scope: str = "global"
+    ) -> Dict[str, Any]:
         return self._auth_manager.login(provider, api_key, scope)
 
     def logout(self, provider: Optional[str] = None, scope: str = "all") -> Dict[str, Any]:
@@ -461,7 +498,9 @@ Working directory: {os.getcwd()}"""
     def read_memory(self, scope: str = "project") -> Dict[str, Any]:
         return self._memory_manager.read_memory(scope)
 
-    def write_memory(self, content: str, scope: str = "project", append: bool = False) -> Dict[str, Any]:
+    def write_memory(
+        self, content: str, scope: str = "project", append: bool = False
+    ) -> Dict[str, Any]:
         return self._memory_manager.write_memory(content, scope, append)
 
     def remember(self, note: str, scope: str = "project") -> Dict[str, Any]:
@@ -470,6 +509,7 @@ Working directory: {os.getcwd()}"""
     # Project init
     def init_project(self) -> Dict[str, Any]:
         import datetime
+
         vertice_content = f"""# VERTICE.md - Project Context
 
 This file helps Vértice understand your project context.
@@ -505,11 +545,22 @@ def get_bridge() -> Bridge:
 # =============================================================================
 
 __all__ = [
-    'Bridge', 'get_bridge',
-    'RiskLevel', 'GovernanceConfig', 'GovernanceObserver', 'ELP',
-    'GeminiClient', 'ToolCallParser',
-    'AgentInfo', 'AGENT_REGISTRY', 'AgentRouter', 'AgentManager',
-    'ToolBridge', 'MinimalRegistry',
-    'CommandPaletteBridge', 'MinimalCommandPalette', 'AutocompleteBridge',
-    'HistoryManager',
+    "Bridge",
+    "get_bridge",
+    "RiskLevel",
+    "GovernanceConfig",
+    "GovernanceObserver",
+    "ELP",
+    "GeminiClient",
+    "ToolCallParser",
+    "AgentInfo",
+    "AGENT_REGISTRY",
+    "AgentRouter",
+    "AgentManager",
+    "ToolBridge",
+    "MinimalRegistry",
+    "CommandPaletteBridge",
+    "MinimalCommandPalette",
+    "AutocompleteBridge",
+    "HistoryManager",
 ]

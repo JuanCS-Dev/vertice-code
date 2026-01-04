@@ -74,11 +74,7 @@ class ConnectionManager:
         self._initialized = False
 
     def register(
-        self,
-        config: ConnectionConfig,
-        factory: Any,
-        validator: Any = None,
-        closer: Any = None
+        self, config: ConnectionConfig, factory: Any, validator: Any = None, closer: Any = None
     ) -> None:
         """
         Register a connection pool.
@@ -91,10 +87,7 @@ class ConnectionManager:
         """
         if config.enabled:
             pool = ConnectionPool(
-                factory=factory,
-                validator=validator,
-                closer=closer,
-                config=config.pool_config
+                factory=factory, validator=validator, closer=closer, config=config.pool_config
             )
             self._pools[config.name] = pool
             self._configs[config.name] = config
@@ -216,10 +209,10 @@ async def close_connections() -> None:
 
 
 __all__ = [
-    'ConnectionManager',
-    'ConnectionConfig',
-    'ConnectionType',
-    'get_connection_manager',
-    'initialize_connections',
-    'close_connections',
+    "ConnectionManager",
+    "ConnectionConfig",
+    "ConnectionType",
+    "get_connection_manager",
+    "initialize_connections",
+    "close_connections",
 ]

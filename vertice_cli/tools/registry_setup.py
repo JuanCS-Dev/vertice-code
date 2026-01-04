@@ -31,7 +31,8 @@ def setup_default_tools(
     include_search: bool = True,
     include_git: bool = True,
     include_prometheus: bool = True,
-    custom_tools: Optional[List] = None
+    include_think: bool = True,
+    custom_tools: Optional[List] = None,
 ) -> Tuple[ToolRegistry, MCPClient]:
     """Setup tool registry with default tools pre-registered.
 
@@ -41,6 +42,7 @@ def setup_default_tools(
     - Bash command execution
     - Code search and directory tree exploration
     - Git operations (status, diff)
+    - Think tool for complex reasoning
 
     Args:
         include_file_ops: Register file operation tools (read, write, edit, etc.)
@@ -53,6 +55,8 @@ def setup_default_tools(
                     Default: True
         include_prometheus: Register PROMETHEUS tools (execute, memory, etc.)
                            Default: True
+        include_think: Register Think tool for reasoning steps
+                      Default: True
         custom_tools: Additional custom tool instances to register
                      Default: None
 
@@ -91,16 +95,8 @@ def setup_default_tools(
     # File Operations Tools
     if include_file_ops:
         try:
-            from vertice_cli.tools.file_ops import (
-                ReadFileTool,
-                WriteFileTool,
-                EditFileTool
-            )
-            from vertice_cli.tools.file_mgmt import (
-                CreateDirectoryTool,
-                MoveFileTool,
-                CopyFileTool
-            )
+            from vertice_cli.tools.file_ops import ReadFileTool, WriteFileTool, EditFileTool
+            from vertice_cli.tools.file_mgmt import CreateDirectoryTool, MoveFileTool, CopyFileTool
 
             for tool_class in [
                 ReadFileTool,
@@ -108,7 +104,7 @@ def setup_default_tools(
                 EditFileTool,
                 CreateDirectoryTool,
                 MoveFileTool,
-                CopyFileTool
+                CopyFileTool,
             ]:
                 tool = tool_class()
                 registry.register(tool)
@@ -143,10 +139,7 @@ def setup_default_tools(
     # Search and Tree Tools
     if include_search:
         try:
-            from vertice_cli.tools.search import (
-                SearchFilesTool,
-                GetDirectoryTreeTool
-            )
+            from vertice_cli.tools.search import SearchFilesTool, GetDirectoryTreeTool
 
             for tool_class in [SearchFilesTool, GetDirectoryTreeTool]:
                 tool = tool_class()
@@ -158,17 +151,13 @@ def setup_default_tools(
         except ImportError as e:
             logger.error(f"Failed to import search tools: {e}")
             raise ImportError(
-                f"Search tools not available: {e}. "
-                f"Ensure vertice_cli is properly installed."
+                f"Search tools not available: {e}. " f"Ensure vertice_cli is properly installed."
             )
 
     # Git Operations Tools
     if include_git:
         try:
-            from vertice_cli.tools.git_ops import (
-                GitStatusTool,
-                GitDiffTool
-            )
+            from vertice_cli.tools.git_ops import GitStatusTool, GitDiffTool
 
             for tool_class in [GitStatusTool, GitDiffTool]:
                 tool = tool_class()
@@ -192,7 +181,7 @@ def setup_default_tools(
                 PrometheusReflectTool,
                 PrometheusCreateToolTool,
                 PrometheusGetStatusTool,
-                PrometheusBenchmarkTool
+                PrometheusBenchmarkTool,
             )
             from vertice_cli.core.providers.prometheus_provider import PrometheusProvider
 
@@ -207,7 +196,7 @@ def setup_default_tools(
                 PrometheusReflectTool(provider),
                 PrometheusCreateToolTool(provider),
                 PrometheusGetStatusTool(provider),
-                PrometheusBenchmarkTool(provider)
+                PrometheusBenchmarkTool(provider),
             ]
 
             for tool in tools:
@@ -219,19 +208,27 @@ def setup_default_tools(
         except ImportError as e:
             logger.warning(f"PROMETHEUS tools not available: {e}")
 
+    # Think Tool (Reasoning)
+    if include_think:
+        try:
+            from vertice_cli.tools.think_tool import ThinkTool
+
+            tool = ThinkTool()
+            registry.register(tool)
+            tools_registered += 1
+            logger.debug("Registered Think tool")
+        except ImportError as e:
+            logger.warning(f"Think tool not available: {e}")
 
     # Custom Tools
     if custom_tools:
         if not isinstance(custom_tools, list):
-            raise ValueError(
-                f"custom_tools must be a list, got {type(custom_tools).__name__}"
-            )
+            raise ValueError(f"custom_tools must be a list, got {type(custom_tools).__name__}")
 
         for tool in custom_tools:
-            if not hasattr(tool, 'name'):
+            if not hasattr(tool, "name"):
                 raise ValueError(
-                    f"Invalid custom tool: {tool}. "
-                    f"Tools must have a 'name' attribute."
+                    f"Invalid custom tool: {tool}. " f"Tools must have a 'name' attribute."
                 )
 
             registry.register(tool)
@@ -241,9 +238,7 @@ def setup_default_tools(
     # Create MCP client
     mcp = MCPClient(registry)
 
-    logger.info(
-        f"Tool registry setup complete: {tools_registered} tools registered"
-    )
+    logger.info(f"Tool registry setup complete: {tools_registered} tools registered")
 
     return registry, mcp
 
@@ -262,10 +257,7 @@ def setup_minimal_tools() -> Tuple[ToolRegistry, MCPClient]:
         >>> # Only read_file, write_file, edit_file available
     """
     return setup_default_tools(
-        include_file_ops=True,
-        include_bash=False,
-        include_search=False,
-        include_git=False
+        include_file_ops=True, include_bash=False, include_search=False, include_git=False
     )
 
 
@@ -284,9 +276,9 @@ def setup_readonly_tools() -> Tuple[ToolRegistry, MCPClient]:
     """
     return setup_default_tools(
         include_file_ops=False,  # Desabilita write/edit
-        include_bash=False,      # Bash pode modificar sistema
-        include_search=True,     # Search é read-only
-        include_git=True         # Git status/diff são read-only
+        include_bash=False,  # Bash pode modificar sistema
+        include_search=True,  # Search é read-only
+        include_git=True,  # Git status/diff são read-only
     )
 
 
@@ -314,8 +306,7 @@ def setup_custom_tools(tools: List) -> Tuple[ToolRegistry, MCPClient]:
     """
     if not tools:
         raise ValueError(
-            "tools list cannot be empty. "
-            "Use setup_minimal_tools() if you want minimal setup."
+            "tools list cannot be empty. " "Use setup_minimal_tools() if you want minimal setup."
         )
 
     return setup_default_tools(
@@ -323,14 +314,14 @@ def setup_custom_tools(tools: List) -> Tuple[ToolRegistry, MCPClient]:
         include_bash=False,
         include_search=False,
         include_git=False,
-        custom_tools=tools
+        custom_tools=tools,
     )
 
 
 # Convenience exports for common patterns
 __all__ = [
-    'setup_default_tools',
-    'setup_minimal_tools',
-    'setup_readonly_tools',
-    'setup_custom_tools',
+    "setup_default_tools",
+    "setup_minimal_tools",
+    "setup_readonly_tools",
+    "setup_custom_tools",
 ]

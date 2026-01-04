@@ -7,9 +7,9 @@ from .engine import ExplanationEngine, explain_command
 from .types import Explanation, ExplanationLevel, CommandBreakdown
 
 __all__ = [
-    'ExplanationEngine',
-    'explain_command',
-    'Explanation',
-    'ExplanationLevel',
-    'CommandBreakdown'
+    "ExplanationEngine",
+    "explain_command",
+    "Explanation",
+    "ExplanationLevel",
+    "CommandBreakdown",
 ]

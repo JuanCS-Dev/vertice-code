@@ -30,19 +30,23 @@ class SafetyConfig:
     """Safety and security settings."""
 
     allowed_paths: List[str] = field(default_factory=lambda: ["./"])
-    dangerous_commands: List[str] = field(default_factory=lambda: [
-        "rm -rf",
-        "chmod 777",
-        "dd if=",
-        "mkfs",
-        "> /dev/",
-    ])
-    require_approval: List[str] = field(default_factory=lambda: [
-        "git push",
-        "docker run",
-        "pip install",
-        "npm install",
-    ])
+    dangerous_commands: List[str] = field(
+        default_factory=lambda: [
+            "rm -rf",
+            "chmod 777",
+            "dd if=",
+            "mkfs",
+            "> /dev/",
+        ]
+    )
+    require_approval: List[str] = field(
+        default_factory=lambda: [
+            "git push",
+            "docker run",
+            "pip install",
+            "npm install",
+        ]
+    )
     max_file_size_mb: int = 10
     enable_sandbox: bool = False
 
@@ -71,20 +75,36 @@ class ContextConfig:
     include_git: bool = True
     include_tests: bool = True
     include_docs: bool = True
-    exclude_patterns: List[str] = field(default_factory=lambda: [
-        "**/__pycache__/**",
-        "**/node_modules/**",
-        "**/venv/**",
-        "**/.venv/**",
-        "**/.git/**",
-        "**/*.pyc",
-        "**/.DS_Store",
-    ])
-    file_extensions: List[str] = field(default_factory=lambda: [
-        ".py", ".js", ".ts", ".jsx", ".tsx",
-        ".rs", ".go", ".java", ".cpp", ".c",
-        ".md", ".txt", ".yaml", ".yml", ".json",
-    ])
+    exclude_patterns: List[str] = field(
+        default_factory=lambda: [
+            "**/__pycache__/**",
+            "**/node_modules/**",
+            "**/venv/**",
+            "**/.venv/**",
+            "**/.git/**",
+            "**/*.pyc",
+            "**/.DS_Store",
+        ]
+    )
+    file_extensions: List[str] = field(
+        default_factory=lambda: [
+            ".py",
+            ".js",
+            ".ts",
+            ".jsx",
+            ".tsx",
+            ".rs",
+            ".go",
+            ".java",
+            ".cpp",
+            ".c",
+            ".md",
+            ".txt",
+            ".yaml",
+            ".yml",
+            ".json",
+        ]
+    )
 
 
 @dataclass
@@ -100,20 +120,20 @@ class QwenConfig:
     def to_dict(self) -> Dict:
         """Convert config to dictionary."""
         return {
-            'project': self.project.__dict__,
-            'rules': self.rules.__dict__,
-            'safety': self.safety.__dict__,
-            'hooks': self.hooks.__dict__,
-            'context': self.context.__dict__,
+            "project": self.project.__dict__,
+            "rules": self.rules.__dict__,
+            "safety": self.safety.__dict__,
+            "hooks": self.hooks.__dict__,
+            "context": self.context.__dict__,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict) -> 'QwenConfig':
+    def from_dict(cls, data: Dict) -> "QwenConfig":
         """Create config from dictionary."""
         return cls(
-            project=ProjectConfig(**data.get('project', {})),
-            rules=RulesConfig(**data.get('rules', {})),
-            safety=SafetyConfig(**data.get('safety', {})),
-            hooks=HooksConfig(**data.get('hooks', {})),
-            context=ContextConfig(**data.get('context', {})),
+            project=ProjectConfig(**data.get("project", {})),
+            rules=RulesConfig(**data.get("rules", {})),
+            safety=SafetyConfig(**data.get("safety", {})),
+            hooks=HooksConfig(**data.get("hooks", {})),
+            context=ContextConfig(**data.get("context", {})),
         )

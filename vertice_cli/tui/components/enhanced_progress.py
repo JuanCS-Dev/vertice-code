@@ -44,6 +44,7 @@ from ..theme import COLORS
 
 class OperationType(Enum):
     """Types of operations for context-aware display."""
+
     LLM_GENERATION = "llm_gen"
     FILE_OPERATION = "file_op"
     TOOL_EXECUTION = "tool_exec"
@@ -55,6 +56,7 @@ class OperationType(Enum):
 @dataclass
 class TokenMetrics:
     """Token consumption tracking."""
+
     input_tokens: int = 0
     output_tokens: int = 0
     total_tokens: int = 0
@@ -72,6 +74,7 @@ class TokenMetrics:
 @dataclass
 class StageProgress:
     """Progress for a single stage in workflow."""
+
     name: str
     current: int = 0
     total: int = 100
@@ -98,6 +101,7 @@ class StageProgress:
 @dataclass
 class WorkflowProgress:
     """Multi-stage workflow progress tracking."""
+
     stages: List[StageProgress] = field(default_factory=list)
     current_stage_idx: int = 0
     tokens: TokenMetrics = field(default_factory=TokenMetrics)
@@ -138,14 +142,14 @@ class WorkflowProgress:
 class EnhancedProgressDisplay:
     """
     Enhanced progress display with multi-stage support.
-    
+
     Features:
     - Multi-stage workflow visualization
     - Token consumption tracking
     - Real-time cost estimation
     - Parallel task indicators
     - LLM thinking animations
-    
+
     Examples:
         display = EnhancedProgressDisplay()
         workflow = WorkflowProgress(
@@ -155,18 +159,18 @@ class EnhancedProgressDisplay:
                 StageProgress("Validation", total=50),
             ]
         )
-        
+
         async with display.live_update(workflow):
             for stage_idx in range(len(workflow.stages)):
                 workflow.current_stage_idx = stage_idx
                 stage = workflow.current_stage
                 stage.status = "running"
                 stage.start_time = time.time()
-                
+
                 for i in range(stage.total):
                     stage.current = i + 1
                     await asyncio.sleep(0.01)
-                
+
                 stage.status = "complete"
                 stage.end_time = time.time()
     """
@@ -174,7 +178,7 @@ class EnhancedProgressDisplay:
     def __init__(self, console: Optional[Console] = None):
         """
         Initialize enhanced progress display.
-        
+
         Args:
             console: Rich console (creates new if None)
         """
@@ -184,10 +188,10 @@ class EnhancedProgressDisplay:
     def render_workflow(self, workflow: WorkflowProgress) -> Group:
         """
         Render complete workflow progress.
-        
+
         Args:
             workflow: Workflow progress data
-        
+
         Returns:
             Rich Group renderable
         """
@@ -317,14 +321,14 @@ class EnhancedProgressDisplay:
     ) -> AsyncIterator[None]:
         """
         Context manager for live progress updates.
-        
+
         Args:
             workflow: Workflow to track
             refresh_rate: Update frequency in seconds
-        
+
         Yields:
             None (updates happen in background)
-        
+
         Example:
             async with display.live_update(workflow):
                 # Your work here
@@ -354,7 +358,7 @@ class EnhancedProgressDisplay:
 class ThinkingIndicator:
     """
     Animated 'thinking' indicator for LLM operations.
-    
+
     Shows what the LLM is doing (Claude 4.5 style):
     - "Analyzing codebase..."
     - "Generating solution..."
@@ -370,7 +374,7 @@ class ThinkingIndicator:
     ):
         """
         Initialize thinking indicator.
-        
+
         Args:
             message: Status message
             console: Rich console
@@ -382,10 +386,10 @@ class ThinkingIndicator:
     async def animate(self, duration: Optional[float] = None) -> AsyncIterator[str]:
         """
         Animate thinking indicator.
-        
+
         Args:
             duration: Duration in seconds (None = infinite)
-        
+
         Yields:
             Rendered frame
         """
@@ -412,10 +416,10 @@ class ThinkingIndicator:
 def create_simple_progress(description: str = "") -> Progress:
     """
     Create simple progress bar (for backward compatibility).
-    
+
     Args:
         description: Progress description
-    
+
     Returns:
         Rich Progress instance
     """

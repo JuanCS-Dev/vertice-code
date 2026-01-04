@@ -35,10 +35,7 @@ def get_unified_agents() -> Dict[str, "Agent"]:
     Returns:
         Dictionary mapping agent names to Agent instances
     """
-    return {
-        name: info.to_unified_agent()
-        for name, info in AGENT_REGISTRY.items()
-    }
+    return {name: info.to_unified_agent() for name, info in AGENT_REGISTRY.items()}
 
 
 def get_core_agents() -> Dict[str, AgentInfo]:
@@ -47,11 +44,7 @@ def get_core_agents() -> Dict[str, AgentInfo]:
     Returns:
         Dictionary of core agent info
     """
-    return {
-        name: info
-        for name, info in AGENT_REGISTRY.items()
-        if info.is_core
-    }
+    return {name: info for name, info in AGENT_REGISTRY.items() if info.is_core}
 
 
 __all__ = [

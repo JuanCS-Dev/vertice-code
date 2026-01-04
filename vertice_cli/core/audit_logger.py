@@ -36,6 +36,7 @@ logger = logging.getLogger(__name__)
 
 class AuditEventType(Enum):
     """Types of audit events."""
+
     # Governance events
     GOVERNANCE_CHECK = "governance_check"
     GOVERNANCE_BLOCK = "governance_block"
@@ -66,6 +67,7 @@ class AuditEventType(Enum):
 
 class AuditSeverity(Enum):
     """Severity levels for audit events."""
+
     DEBUG = 0
     INFO = 1
     WARNING = 2
@@ -76,6 +78,7 @@ class AuditSeverity(Enum):
 @dataclass
 class AuditEntry:
     """A single audit log entry."""
+
     event_id: str
     timestamp: float
     event_type: AuditEventType
@@ -177,7 +180,7 @@ class AuditLogger:
         blocked = audit.query(event_type=AuditEventType.GOVERNANCE_BLOCK)
     """
 
-    DEFAULT_LOG_DIR = ".qwen_audit_logs"
+    DEFAULT_LOG_DIR = ".vertice/audit"
     MAX_MEMORY_ENTRIES = 1000
 
     def __init__(
@@ -281,12 +284,7 @@ class AuditLogger:
             return entry
 
     def log_governance(
-        self,
-        action: str,
-        resource: str,
-        outcome: str,
-        blocked: bool = False,
-        **kwargs
+        self, action: str, resource: str, outcome: str, blocked: bool = False, **kwargs
     ) -> AuditEntry:
         """Log a governance decision."""
         event_type = AuditEventType.GOVERNANCE_BLOCK if blocked else AuditEventType.GOVERNANCE_ALLOW
@@ -298,35 +296,23 @@ class AuditLogger:
             resource=resource,
             outcome=outcome,
             severity=severity,
-            **kwargs
+            **kwargs,
         )
 
     def log_security(
-        self,
-        action: str,
-        resource: str,
-        violation: bool = False,
-        **kwargs
+        self, action: str, resource: str, violation: bool = False, **kwargs
     ) -> AuditEntry:
         """Log a security event."""
-        event_type = AuditEventType.SECURITY_VIOLATION if violation else AuditEventType.SECURITY_WARNING
+        event_type = (
+            AuditEventType.SECURITY_VIOLATION if violation else AuditEventType.SECURITY_WARNING
+        )
         severity = AuditSeverity.ERROR if violation else AuditSeverity.WARNING
 
         return self.log(
-            event_type=event_type,
-            action=action,
-            resource=resource,
-            severity=severity,
-            **kwargs
+            event_type=event_type, action=action, resource=resource, severity=severity, **kwargs
         )
 
-    def log_operation(
-        self,
-        action: str,
-        resource: str,
-        success: bool,
-        **kwargs
-    ) -> AuditEntry:
+    def log_operation(self, action: str, resource: str, success: bool, **kwargs) -> AuditEntry:
         """Log an operation event."""
         event_type = AuditEventType.OPERATION_COMPLETE if success else AuditEventType.OPERATION_FAIL
         severity = AuditSeverity.INFO if success else AuditSeverity.ERROR
@@ -337,7 +323,7 @@ class AuditLogger:
             resource=resource,
             outcome="success" if success else "failure",
             severity=severity,
-            **kwargs
+            **kwargs,
         )
 
     def log_agent(
@@ -345,15 +331,10 @@ class AuditLogger:
         agent_id: str,
         action: str,
         event_type: AuditEventType = AuditEventType.AGENT_START,
-        **kwargs
+        **kwargs,
     ) -> AuditEntry:
         """Log an agent event."""
-        return self.log(
-            event_type=event_type,
-            action=action,
-            agent_id=agent_id,
-            **kwargs
-        )
+        return self.log(event_type=event_type, action=action, agent_id=agent_id, **kwargs)
 
     @contextmanager
     def correlation_context(self, correlation_id: Optional[str] = None):
@@ -365,6 +346,7 @@ class AuditLogger:
                 audit.log(...)  # Will have correlation_id="task-123"
         """
         import uuid
+
         correlation_id = correlation_id or str(uuid.uuid4())
 
         self._correlation_stack.append(self._current_correlation or "")
@@ -471,6 +453,7 @@ class AuditLogger:
 
             elif format == "csv":
                 import csv
+
                 with open(output_path, "w", newline="") as f:
                     if self._entries:
                         writer = csv.DictWriter(f, fieldnames=self._entries[0].to_dict().keys())
@@ -499,6 +482,7 @@ def get_audit_logger() -> AuditLogger:
 
 # Convenience functions
 
+
 def audit_log(event_type: AuditEventType, action: str, **kwargs) -> AuditEntry:
     """Log an audit event."""
     return get_audit_logger().log(event_type, action, **kwargs)
@@ -516,12 +500,12 @@ def audit_security(action: str, resource: str, violation: bool = False, **kwargs
 
 # Export all public symbols
 __all__ = [
-    'AuditEventType',
-    'AuditSeverity',
-    'AuditEntry',
-    'AuditLogger',
-    'get_audit_logger',
-    'audit_log',
-    'audit_governance',
-    'audit_security',
+    "AuditEventType",
+    "AuditSeverity",
+    "AuditEntry",
+    "AuditLogger",
+    "get_audit_logger",
+    "audit_log",
+    "audit_governance",
+    "audit_security",
 ]

@@ -41,6 +41,7 @@ FilePath = Union[str, Path]
 
 class ErrorCategory(str, Enum):
     """Category of error for recovery strategies."""
+
     SYNTAX = "syntax"
     IMPORT = "import"
     TYPE = "type"
@@ -60,6 +61,7 @@ class ErrorCategory(str, Enum):
 @dataclass(frozen=True)
 class ErrorContext:
     """Immutable context for an error."""
+
     category: ErrorCategory = ErrorCategory.UNKNOWN
     file: Optional[FilePath] = None
     line: Optional[int] = None
@@ -72,6 +74,7 @@ class ErrorContext:
 # =============================================================================
 # BASE EXCEPTION
 # =============================================================================
+
 
 class VerticeError(Exception):
     """Base exception for all Vertice framework errors.
@@ -125,23 +128,23 @@ class VerticeError(Exception):
     def to_dict(self) -> Dict[str, Any]:
         """Serialize error to dictionary."""
         result: Dict[str, Any] = {
-            'type': self.__class__.__name__,
-            'message': self.message,
-            'recoverable': self.recoverable,
+            "type": self.__class__.__name__,
+            "message": self.message,
+            "recoverable": self.recoverable,
         }
 
         if self.context:
-            result['context'] = {
-                'category': self.context.category.value,
-                'file': str(self.context.file) if self.context.file else None,
-                'line': self.context.line,
-                'column': self.context.column,
-                'suggestions': list(self.context.suggestions),
-                'metadata': self.context.metadata,
+            result["context"] = {
+                "category": self.context.category.value,
+                "file": str(self.context.file) if self.context.file else None,
+                "line": self.context.line,
+                "column": self.context.column,
+                "suggestions": list(self.context.suggestions),
+                "metadata": self.context.metadata,
             }
 
         if self.cause:
-            result['cause'] = str(self.cause)
+            result["cause"] = str(self.cause)
 
         return result
 
@@ -149,6 +152,7 @@ class VerticeError(Exception):
 # =============================================================================
 # VALIDATION & CONFIGURATION
 # =============================================================================
+
 
 class ValidationError(VerticeError):
     """Input validation error."""
@@ -162,11 +166,11 @@ class ValidationError(VerticeError):
     ):
         metadata = {}
         if field:
-            metadata['field'] = field
+            metadata["field"] = field
         if value is not None:
-            metadata['value'] = str(value)
+            metadata["value"] = str(value)
         if constraint:
-            metadata['constraint'] = constraint
+            metadata["constraint"] = constraint
 
         suggestions: List[str] = ["Check input format and constraints"]
         if field:
@@ -193,7 +197,7 @@ class ConfigurationError(VerticeError):
     ):
         metadata = {}
         if config_key:
-            metadata['config_key'] = config_key
+            metadata["config_key"] = config_key
 
         suggestions = [
             "Check configuration file syntax",
@@ -215,6 +219,7 @@ class ConfigurationError(VerticeError):
 # NETWORK & RESILIENCE
 # =============================================================================
 
+
 class NetworkError(VerticeError):
     """Network-related error."""
 
@@ -227,9 +232,9 @@ class NetworkError(VerticeError):
     ):
         metadata = {}
         if url:
-            metadata['url'] = url
+            metadata["url"] = url
         if status_code:
-            metadata['status_code'] = status_code
+            metadata["status_code"] = status_code
 
         context = ErrorContext(
             category=ErrorCategory.NETWORK,
@@ -255,8 +260,8 @@ class TimeoutError(VerticeError):
         context = ErrorContext(
             category=ErrorCategory.TIMEOUT,
             metadata={
-                'timeout': timeout_seconds,
-                'operation': operation,
+                "timeout": timeout_seconds,
+                "operation": operation,
             },
             suggestions=(
                 f"Increase timeout (current: {timeout_seconds}s)",
@@ -303,8 +308,8 @@ class CircuitOpenError(VerticeError):
         context = ErrorContext(
             category=ErrorCategory.RESILIENCE,
             metadata={
-                'circuit': circuit_name,
-                'reset_time': reset_time,
+                "circuit": circuit_name,
+                "reset_time": reset_time,
             },
             suggestions=(
                 "Wait for circuit to reset",
@@ -320,6 +325,7 @@ class CircuitOpenError(VerticeError):
 # TOOL & AGENT
 # =============================================================================
 
+
 class ToolError(VerticeError):
     """Tool execution error."""
 
@@ -330,9 +336,9 @@ class ToolError(VerticeError):
         arguments: Optional[Dict[str, Any]] = None,
         cause: Optional[Exception] = None,
     ):
-        metadata = {'tool': tool_name}
+        metadata = {"tool": tool_name}
         if arguments:
-            metadata['arguments'] = arguments
+            metadata["arguments"] = arguments
 
         context = ErrorContext(
             category=ErrorCategory.TOOL,
@@ -366,7 +372,7 @@ class AgentError(VerticeError):
     ):
         metadata = {}
         if agent_id:
-            metadata['agent_id'] = agent_id
+            metadata["agent_id"] = agent_id
 
         context = ErrorContext(
             category=ErrorCategory.AGENT,
@@ -405,6 +411,7 @@ class AgentTimeoutError(AgentError):
 # RESOURCE
 # =============================================================================
 
+
 class ResourceError(VerticeError):
     """Resource constraint error."""
 
@@ -415,11 +422,11 @@ class ResourceError(VerticeError):
         limit: Optional[Any] = None,
         current: Optional[Any] = None,
     ):
-        metadata = {'resource_type': resource_type}
+        metadata = {"resource_type": resource_type}
         if limit is not None:
-            metadata['limit'] = limit
+            metadata["limit"] = limit
         if current is not None:
-            metadata['current'] = current
+            metadata["current"] = current
 
         suggestions = [f"Reduce {resource_type} usage"]
         if limit and current:
@@ -449,6 +456,7 @@ class TokenLimitError(ResourceError):
 # LLM
 # =============================================================================
 
+
 class LLMError(VerticeError):
     """LLM-related error."""
 
@@ -461,9 +469,9 @@ class LLMError(VerticeError):
     ):
         metadata = {}
         if provider:
-            metadata['provider'] = provider
+            metadata["provider"] = provider
         if model:
-            metadata['model'] = model
+            metadata["model"] = model
 
         context = ErrorContext(
             category=ErrorCategory.NETWORK,

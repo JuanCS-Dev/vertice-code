@@ -43,11 +43,7 @@ class InMemoryQueue(IMessageQueue):
         self._delayed_counter: int = 0  # Tiebreaker for heap ordering
         self._lock = asyncio.Lock()
 
-    async def publish(
-        self,
-        message: Message,
-        delay: float = 0.0
-    ) -> str:
+    async def publish(self, message: Message, delay: float = 0.0) -> str:
         """Publish a message to the queue."""
         message.max_retries = self._config.max_retries
 
@@ -64,11 +60,7 @@ class InMemoryQueue(IMessageQueue):
         except asyncio.QueueFull:
             raise Exception(f"Queue {self._config.name} is full")
 
-    async def consume(
-        self,
-        count: int = 1,
-        timeout: float = 0.0
-    ) -> List[Message]:
+    async def consume(self, count: int = 1, timeout: float = 0.0) -> List[Message]:
         """Consume messages from the queue."""
         # First, move any delayed messages that are now visible
         await self._process_delayed()
@@ -82,10 +74,7 @@ class InMemoryQueue(IMessageQueue):
                     remaining = deadline - time.time()
                     if remaining <= 0:
                         break
-                    message = await asyncio.wait_for(
-                        self._messages.get(),
-                        timeout=remaining
-                    )
+                    message = await asyncio.wait_for(self._messages.get(), timeout=remaining)
                 else:
                     message = self._messages.get_nowait()
 
@@ -121,11 +110,7 @@ class InMemoryQueue(IMessageQueue):
                 return True
             return False
 
-    async def nack(
-        self,
-        message_id: str,
-        requeue: bool = True
-    ) -> bool:
+    async def nack(self, message_id: str, requeue: bool = True) -> bool:
         """Negative acknowledge message."""
         async with self._lock:
             if message_id not in self._processing:
@@ -206,10 +191,7 @@ class InMemoryBroker(IMessageBroker):
         return list(self._queues.keys())
 
     async def subscribe(
-        self,
-        topic: str,
-        handler: Callable[[Message], Any],
-        queue_name: Optional[str] = None
+        self, topic: str, handler: Callable[[Message], Any], queue_name: Optional[str] = None
     ) -> str:
         """Subscribe to a topic."""
         subscription_id = str(uuid.uuid4())
@@ -236,17 +218,10 @@ class InMemoryBroker(IMessageBroker):
             return False
 
     async def publish(
-        self,
-        topic: str,
-        payload: Any,
-        headers: Optional[Dict[str, str]] = None
+        self, topic: str, payload: Any, headers: Optional[Dict[str, str]] = None
     ) -> str:
         """Publish to a topic."""
-        message = Message(
-            topic=topic,
-            payload=payload,
-            headers=headers or {}
-        )
+        message = Message(topic=topic, payload=payload, headers=headers or {})
 
         # Dispatch to matching subscribers
         async with self._lock:
@@ -270,14 +245,10 @@ class InMemoryBroker(IMessageBroker):
             return True
 
         # Convert MQTT-style wildcards to fnmatch patterns
-        fnmatch_pattern = pattern.replace('+', '*').replace('#', '**')
+        fnmatch_pattern = pattern.replace("+", "*").replace("#", "**")
         return fnmatch.fnmatch(topic, fnmatch_pattern)
 
-    async def _invoke_handler(
-        self,
-        handler: Callable[[Message], Any],
-        message: Message
-    ) -> None:
+    async def _invoke_handler(self, handler: Callable[[Message], Any], message: Message) -> None:
         """Invoke a message handler safely."""
         try:
             result = handler(message)
@@ -345,7 +316,7 @@ def get_message_broker() -> InMemoryBroker:
 
 
 __all__ = [
-    'InMemoryQueue',
-    'InMemoryBroker',
-    'get_message_broker',
+    "InMemoryQueue",
+    "InMemoryBroker",
+    "get_message_broker",
 ]

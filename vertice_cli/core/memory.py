@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 # MEMORY DATA STRUCTURES
 # =============================================================================
 
+
 @dataclass
 class MemoryEntry:
     """A single memory entry with metadata."""
@@ -97,6 +98,7 @@ class SessionMemory:
 # MEMORY MANAGER
 # =============================================================================
 
+
 class MemoryManager:
     """Manages persistent and session memory.
 
@@ -122,12 +124,12 @@ class MemoryManager:
 
     # Alternative names supported (includes CLAUDE.md for backwards compatibility)
     ALT_PROJECT_NAMES = [
-        "JUAN.md",           # Primary (Juan-Dev-Code)
-        ".juan/MEMORY.md",   # Hidden directory
-        ".vertice/MEMORY.md",   # Alternative
-        "CLAUDE.md",         # Backwards compatibility
-        ".claude/MEMORY.md", # Claude Code legacy
-        "MEMORY.md",         # Generic fallback
+        "JUAN.md",  # Primary (Juan-Dev-Code)
+        ".juan/MEMORY.md",  # Hidden directory
+        ".vertice/MEMORY.md",  # Alternative
+        "CLAUDE.md",  # Backwards compatibility
+        ".claude/MEMORY.md",  # Claude Code legacy
+        "MEMORY.md",  # Generic fallback
     ]
 
     def __init__(
@@ -145,12 +147,8 @@ class MemoryManager:
         self._user_config_dir = user_config_dir or Path.home() / ".config" / "vertice-cli"
 
         # Initialize memory stores
-        self._project_memory = ProjectMemory(
-            path=self._project_root / self.PROJECT_MEMORY_FILE
-        )
-        self._user_memory = UserMemory(
-            path=self._user_config_dir / self.USER_MEMORY_FILE
-        )
+        self._project_memory = ProjectMemory(path=self._project_root / self.PROJECT_MEMORY_FILE)
+        self._user_memory = UserMemory(path=self._user_config_dir / self.USER_MEMORY_FILE)
         self._session_memory = SessionMemory()
 
         self._loaded = False
@@ -171,9 +169,7 @@ class MemoryManager:
         self._loaded = project_loaded or user_loaded
 
         if self._loaded:
-            logger.info(
-                f"Memory loaded: project={project_loaded}, user={user_loaded}"
-            )
+            logger.info(f"Memory loaded: project={project_loaded}, user={user_loaded}")
         else:
             logger.debug("No memory files found")
 
@@ -290,7 +286,7 @@ class MemoryManager:
         preferences = {}
 
         # Match patterns like "- key: value" or "- **key**: value"
-        pattern = re.compile(r'^[-*]\s+\*?\*?([^:*]+)\*?\*?:\s*(.+)$', re.MULTILINE)
+        pattern = re.compile(r"^[-*]\s+\*?\*?([^:*]+)\*?\*?:\s*(.+)$", re.MULTILINE)
 
         for match in pattern.finditer(content):
             key = match.group(1).strip().lower().replace(" ", "_")
@@ -333,7 +329,7 @@ class MemoryManager:
             # Add raw content if there's room
             remaining = max_tokens - len("\n".join(parts).split())
             if remaining > 200:
-                raw = self._project_memory.raw_content[:remaining * 4]  # ~4 chars per token
+                raw = self._project_memory.raw_content[: remaining * 4]  # ~4 chars per token
                 parts.append(f"\n**Full Context:**\n{raw}")
 
         # User memory (lower priority)
@@ -559,6 +555,7 @@ def reset_memory_manager() -> None:
 # MEMORY TOOLS
 # =============================================================================
 
+
 class MemoryReadTool:
     """Tool to read project/user memory.
 
@@ -574,7 +571,7 @@ class MemoryReadTool:
             "source": {
                 "type": "string",
                 "description": "Memory source: 'project', 'user', or 'all' (default)",
-                "required": False
+                "required": False,
             }
         }
 
@@ -619,16 +616,12 @@ class MemoryWriteTool:
 
     def __init__(self):
         self.parameters = {
-            "content": {
-                "type": "string",
-                "description": "Content to write",
-                "required": True
-            },
+            "content": {"type": "string", "description": "Content to write", "required": True},
             "mode": {
                 "type": "string",
                 "description": "Write mode: 'replace' or 'append' (default)",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     async def execute(self, content: str, mode: str = "append") -> Dict[str, Any]:

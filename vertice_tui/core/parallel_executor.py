@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 # DATA CLASSES
 # =============================================================================
 
+
 @dataclass
 class ToolCallWithDeps:
     """
@@ -43,6 +44,7 @@ class ToolCallWithDeps:
         args: Arguments for the tool
         depends_on: Set of call IDs this call depends on
     """
+
     id: str
     tool_name: str
     args: Dict[str, Any]
@@ -60,6 +62,7 @@ class ParallelExecutionResult:
         parallelism_factor: >1.0 means parallel speedup achieved
         wave_count: Number of execution waves
     """
+
     results: Dict[str, Dict[str, Any]]
     execution_time_ms: float
     parallelism_factor: float
@@ -69,6 +72,7 @@ class ParallelExecutionResult:
 # =============================================================================
 # DEPENDENCY DETECTION
 # =============================================================================
+
 
 def detect_tool_dependencies(tool_calls: List[Tuple[str, Dict]]) -> List[ToolCallWithDeps]:
     """
@@ -98,40 +102,46 @@ def detect_tool_dependencies(tool_calls: List[Tuple[str, Dict]]) -> List[ToolCal
         # deps[2].depends_on == {"tool_0"}
     """
     calls = []
-    file_read_ops: Dict[str, str] = {}   # file_path -> call_id that read it
+    file_read_ops: Dict[str, str] = {}  # file_path -> call_id that read it
     file_write_ops: Dict[str, str] = {}  # file_path -> call_id that last wrote it
 
     # Tools that write to files
-    WRITE_TOOLS = frozenset({
-        "write_file",
-        "edit_file",
-        "delete_file",
-        "insert_lines",
-        "multi_edit",
-        "create_directory",
-        "move_file",
-        "copy_file",
-    })
+    WRITE_TOOLS = frozenset(
+        {
+            "write_file",
+            "edit_file",
+            "delete_file",
+            "insert_lines",
+            "multi_edit",
+            "create_directory",
+            "move_file",
+            "copy_file",
+        }
+    )
 
     # Tools that read files
-    READ_TOOLS = frozenset({
-        "read_file",
-        "read_multiple_files",
-        "cat",
-    })
+    READ_TOOLS = frozenset(
+        {
+            "read_file",
+            "read_multiple_files",
+            "cat",
+        }
+    )
 
     # Git tools (should be sequential)
-    GIT_TOOLS = frozenset({
-        "git_status",
-        "git_diff",
-        "git_commit",
-        "git_log",
-        "git_add",
-        "git_push",
-        "git_pull",
-        "git_checkout",
-        "git_branch",
-    })
+    GIT_TOOLS = frozenset(
+        {
+            "git_status",
+            "git_diff",
+            "git_commit",
+            "git_log",
+            "git_add",
+            "git_push",
+            "git_pull",
+            "git_checkout",
+            "git_branch",
+        }
+    )
 
     for i, (tool_name, args) in enumerate(tool_calls):
         call_id = f"tool_{i}"
@@ -178,12 +188,9 @@ def detect_tool_dependencies(tool_calls: List[Tuple[str, Dict]]) -> List[ToolCal
                 if prev_call.tool_name in GIT_TOOLS:
                     depends_on.add(prev_call.id)
 
-        calls.append(ToolCallWithDeps(
-            id=call_id,
-            tool_name=tool_name,
-            args=args,
-            depends_on=depends_on
-        ))
+        calls.append(
+            ToolCallWithDeps(id=call_id, tool_name=tool_name, args=args, depends_on=depends_on)
+        )
 
     return calls
 
@@ -230,8 +237,7 @@ class ParallelToolExecutor:
         self._max_parallel = max_parallel or self.MAX_PARALLEL_TOOLS
 
     async def execute(
-        self,
-        tool_calls: List[Tuple[str, Dict[str, Any]]]
+        self, tool_calls: List[Tuple[str, Dict[str, Any]]]
     ) -> ParallelExecutionResult:
         """
         Execute tool calls with intelligent parallelization.
@@ -247,13 +253,13 @@ class ParallelToolExecutor:
         # Single tool - no parallelization needed
         if len(tool_calls) == 1:
             tool_name, args = tool_calls[0]
-            result = await self._execute_fn(tool_name, **args)
+            result = await self._execute_fn(tool_name, args)
             result["tool_name"] = tool_name
             return ParallelExecutionResult(
                 results={"tool_0": result},
                 execution_time_ms=(time.time() - start_time) * 1000,
                 parallelism_factor=1.0,
-                wave_count=1
+                wave_count=1,
             )
 
         # Detect dependencies
@@ -268,9 +274,9 @@ class ParallelToolExecutor:
         while len(completed) < len(calls_with_deps):
             # Find tools ready to execute (all dependencies completed)
             ready = [
-                call for call in calls_with_deps
-                if call.id not in completed
-                and call.depends_on.issubset(completed)
+                call
+                for call in calls_with_deps
+                if call.id not in completed and call.depends_on.issubset(completed)
             ]
 
             if not ready:
@@ -301,7 +307,7 @@ class ParallelToolExecutor:
                             "success": False,
                             "error": str(item),
                             "tool_name": call.tool_name,
-                            "execution_time_ms": 0
+                            "execution_time_ms": 0,
                         }
                     else:
                         results[call.id] = item
@@ -310,9 +316,7 @@ class ParallelToolExecutor:
         # Calculate timing metrics
         total_time_ms = (time.time() - start_time) * 1000
         sequential_time = sum(
-            r.get("execution_time_ms", 0)
-            for r in results.values()
-            if isinstance(r, dict)
+            r.get("execution_time_ms", 0) for r in results.values() if isinstance(r, dict)
         )
         parallelism_factor = sequential_time / total_time_ms if total_time_ms > 0 else 1.0
 
@@ -320,28 +324,26 @@ class ParallelToolExecutor:
             results=results,
             execution_time_ms=total_time_ms,
             parallelism_factor=parallelism_factor,
-            wave_count=wave_count
+            wave_count=wave_count,
         )
 
     async def _execute_single(
-        self,
-        call: ToolCallWithDeps,
-        semaphore: asyncio.Semaphore
+        self, call: ToolCallWithDeps, semaphore: asyncio.Semaphore
     ) -> Dict[str, Any]:
         """Execute a single tool with semaphore control."""
         async with semaphore:
             tool_start = time.time()
             try:
-                result = await self._execute_fn(call.tool_name, **call.args)
+                result = await self._execute_fn(call.tool_name, call.args)
 
                 # Convert ToolResult to dict if needed
-                if hasattr(result, 'success') and hasattr(result, 'data'):
+                if hasattr(result, "success") and hasattr(result, "data"):
                     # It's a ToolResult object
                     result_dict = {
                         "success": result.success,
                         "data": result.data,
-                        "error": getattr(result, 'error', None),
-                        "metadata": getattr(result, 'metadata', {})
+                        "error": getattr(result, "error", None),
+                        "metadata": getattr(result, "metadata", {}),
                     }
                 elif isinstance(result, dict):
                     result_dict = result
@@ -357,8 +359,11 @@ class ParallelToolExecutor:
                     "success": False,
                     "error": str(e),
                     "tool_name": call.tool_name,
-                    "execution_time_ms": (time.time() - tool_start) * 1000
+                    "execution_time_ms": (time.time() - tool_start) * 1000,
                 }
+
+    # Alias for backward compatibility
+    execute_batch = execute
 
 
 # =============================================================================

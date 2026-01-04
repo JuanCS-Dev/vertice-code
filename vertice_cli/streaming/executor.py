@@ -1,5 +1,7 @@
 """Async command executor with zero UI blocking."""
+
 import logging
+
 logger = logging.getLogger(__name__)
 
 import asyncio
@@ -15,6 +17,7 @@ from .streams import StreamProcessor, StreamType, LineBufferedStreamReader
 @dataclass
 class StreamingExecutionResult:
     """Command execution result for streaming executor."""
+
     exit_code: int
     stdout: str
     stderr: str
@@ -35,10 +38,11 @@ class AsyncCommandExecutor:
         command: str,
         shell: bool = True,
         timeout: Optional[float] = None,
-        stream_callback: Optional[callable] = None
+        stream_callback: Optional[callable] = None,
     ) -> StreamingExecutionResult:
         """Execute command with real-time streaming."""
         import time
+
         start_time = time.time()
 
         processor = StreamProcessor()
@@ -52,7 +56,7 @@ class AsyncCommandExecutor:
                     stdout=asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.PIPE,
                     cwd=str(self.cwd),
-                    env={**os.environ, **self.env}
+                    env={**os.environ, **self.env},
                 )
             else:
                 cmd_args = shlex.split(command)
@@ -61,17 +65,13 @@ class AsyncCommandExecutor:
                     stdout=asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.PIPE,
                     cwd=str(self.cwd),
-                    env={**os.environ, **self.env}
+                    env={**os.environ, **self.env},
                 )
 
             self._active_processes.add(process)
 
-            stdout_reader = LineBufferedStreamReader(
-                process.stdout, processor, StreamType.STDOUT
-            )
-            stderr_reader = LineBufferedStreamReader(
-                process.stderr, processor, StreamType.STDERR
-            )
+            stdout_reader = LineBufferedStreamReader(process.stdout, processor, StreamType.STDOUT)
+            stderr_reader = LineBufferedStreamReader(process.stderr, processor, StreamType.STDERR)
 
             stdout_lines = []
             stderr_lines = []
@@ -108,25 +108,23 @@ class AsyncCommandExecutor:
 
             return StreamingExecutionResult(
                 exit_code=process.returncode,
-                stdout=''.join(stdout_lines),
-                stderr=''.join(stderr_lines),
+                stdout="".join(stdout_lines),
+                stderr="".join(stderr_lines),
                 duration=duration,
-                success=process.returncode == 0
+                success=process.returncode == 0,
             )
 
         except Exception as e:
             return StreamingExecutionResult(
                 exit_code=-1,
-                stdout='',
+                stdout="",
                 stderr=str(e),
                 duration=time.time() - start_time,
-                success=False
+                success=False,
             )
 
     async def execute_parallel(
-        self,
-        commands: list[str],
-        max_concurrent: int = 5
+        self, commands: list[str], max_concurrent: int = 5
     ) -> list[StreamingExecutionResult]:
         """Execute multiple commands in parallel."""
         semaphore = asyncio.Semaphore(max_concurrent)

@@ -33,9 +33,7 @@ class RLRefactoringPolicy:
         self.quality_metrics = ["complexity", "maintainability", "test_coverage"]
 
     def suggest_refactoring(
-        self,
-        code_state: Dict[str, Any],
-        available_actions: List[RefactoringAction]
+        self, code_state: Dict[str, Any], available_actions: List[RefactoringAction]
     ) -> RefactoringAction:
         """Suggest best refactoring action based on learned policy.
 
@@ -61,11 +59,7 @@ class RLRefactoringPolicy:
         """
         self.action_history.append((action, reward))
 
-    def _estimate_reward(
-        self,
-        action: RefactoringAction,
-        state: Dict[str, Any]
-    ) -> float:
+    def _estimate_reward(self, action: RefactoringAction, state: Dict[str, Any]) -> float:
         """Estimate reward for taking action in current state.
 
         Uses heuristics based on code quality research:
@@ -86,7 +80,7 @@ class RLRefactoringPolicy:
         if state.get("complexity", 0) > 15:
             if action.type in [
                 RefactoringType.EXTRACT_METHOD,
-                RefactoringType.DECOMPOSE_CONDITIONAL
+                RefactoringType.DECOMPOSE_CONDITIONAL,
             ]:
                 reward += 5.0
 

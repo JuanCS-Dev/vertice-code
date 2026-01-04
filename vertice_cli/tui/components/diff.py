@@ -33,6 +33,7 @@ from ..styles import PRESET_STYLES
 
 class DiffMode(Enum):
     """Diff display modes."""
+
     UNIFIED = "unified"
     SIDE_BY_SIDE = "side_by_side"
 
@@ -49,7 +50,7 @@ class DiffLine:
     ):
         """
         Initialize diff line.
-        
+
         Args:
             line_type: Line type ('+' = add, '-' = remove, ' ' = context)
             content: Line content
@@ -64,32 +65,32 @@ class DiffLine:
     @property
     def is_addition(self) -> bool:
         """Check if line is an addition."""
-        return self.line_type == '+'
+        return self.line_type == "+"
 
     @property
     def is_deletion(self) -> bool:
         """Check if line is a deletion."""
-        return self.line_type == '-'
+        return self.line_type == "-"
 
     @property
     def is_context(self) -> bool:
         """Check if line is context."""
-        return self.line_type == ' '
+        return self.line_type == " "
 
     @property
     def is_hunk_header(self) -> bool:
         """Check if line is hunk header."""
-        return self.line_type == '@@'
+        return self.line_type == "@@"
 
 
 class DiffViewer:
     """
     Diff viewer with multiple display modes.
-    
+
     Examples:
         diff = DiffViewer(old_content, new_content)
         console.print(diff.render())
-        
+
         # Side-by-side for wide terminals
         console.print(diff.render(mode=DiffMode.SIDE_BY_SIDE))
     """
@@ -104,7 +105,7 @@ class DiffViewer:
     ):
         """
         Initialize diff viewer.
-        
+
         Args:
             old_content: Old file content
             new_content: New file content
@@ -124,7 +125,7 @@ class DiffViewer:
     def _compute_diff(self) -> List[DiffLine]:
         """
         Compute diff between old and new content.
-        
+
         Returns:
             List of DiffLine objects
         """
@@ -138,7 +139,7 @@ class DiffViewer:
             fromfile=self.old_label,
             tofile=self.new_label,
             n=self.context_lines,
-            lineterm='',
+            lineterm="",
         )
 
         result = []
@@ -147,31 +148,31 @@ class DiffViewer:
 
         for line in diff:
             # Skip file headers
-            if line.startswith('---') or line.startswith('+++'):
+            if line.startswith("---") or line.startswith("+++"):
                 continue
 
             # Hunk header (@@)
-            if line.startswith('@@'):
-                result.append(DiffLine('@@', line))
+            if line.startswith("@@"):
+                result.append(DiffLine("@@", line))
                 # Parse line numbers from hunk header
                 # Example: @@ -10,5 +12,6 @@
-                parts = line.split('@@')[1].strip().split()
+                parts = line.split("@@")[1].strip().split()
                 if len(parts) >= 2:
-                    old_part = parts[0].lstrip('-').split(',')
-                    new_part = parts[1].lstrip('+').split(',')
+                    old_part = parts[0].lstrip("-").split(",")
+                    new_part = parts[1].lstrip("+").split(",")
                     old_line_no = int(old_part[0])
                     new_line_no = int(new_part[0])
                 continue
 
             # Determine line type and update line numbers
-            if line.startswith('+'):
-                result.append(DiffLine('+', line[1:], None, new_line_no))
+            if line.startswith("+"):
+                result.append(DiffLine("+", line[1:], None, new_line_no))
                 new_line_no += 1
-            elif line.startswith('-'):
-                result.append(DiffLine('-', line[1:], old_line_no, None))
+            elif line.startswith("-"):
+                result.append(DiffLine("-", line[1:], old_line_no, None))
                 old_line_no += 1
-            elif line.startswith(' '):
-                result.append(DiffLine(' ', line[1:], old_line_no, new_line_no))
+            elif line.startswith(" "):
+                result.append(DiffLine(" ", line[1:], old_line_no, new_line_no))
                 old_line_no += 1
                 new_line_no += 1
 
@@ -180,7 +181,7 @@ class DiffViewer:
     def _render_unified(self) -> Text:
         """
         Render unified diff format.
-        
+
         Returns:
             Rich Text object
         """
@@ -189,39 +190,39 @@ class DiffViewer:
         for diff_line in self.diff_lines:
             if diff_line.is_hunk_header:
                 # Hunk header (cyan)
-                result.append(diff_line.content + '\n', style=PRESET_STYLES.INFO)
+                result.append(diff_line.content + "\n", style=PRESET_STYLES.INFO)
 
             elif diff_line.is_addition:
                 # Addition (green background)
                 line_no = f"{diff_line.new_line_no:4d}" if diff_line.new_line_no else "    "
                 result.append(f"+{line_no} │ ", style=PRESET_STYLES.DIFF_ADD)
-                result.append(diff_line.content + '\n', style=PRESET_STYLES.DIFF_ADD)
+                result.append(diff_line.content + "\n", style=PRESET_STYLES.DIFF_ADD)
 
             elif diff_line.is_deletion:
                 # Deletion (red background)
                 line_no = f"{diff_line.old_line_no:4d}" if diff_line.old_line_no else "    "
                 result.append(f"-{line_no} │ ", style=PRESET_STYLES.DIFF_REMOVE)
-                result.append(diff_line.content + '\n', style=PRESET_STYLES.DIFF_REMOVE)
+                result.append(diff_line.content + "\n", style=PRESET_STYLES.DIFF_REMOVE)
 
             elif diff_line.is_context:
                 # Context (normal)
                 line_no = f"{diff_line.old_line_no:4d}" if diff_line.old_line_no else "    "
                 result.append(f" {line_no} │ ", style=PRESET_STYLES.DIFF_CONTEXT)
-                result.append(diff_line.content + '\n', style=PRESET_STYLES.TERTIARY)
+                result.append(diff_line.content + "\n", style=PRESET_STYLES.TERTIARY)
 
         return result
 
     def _render_side_by_side(self) -> Table:
         """
         Render side-by-side diff format.
-        
+
         Returns:
             Rich Table object
         """
         table = Table(
             show_header=True,
             header_style=PRESET_STYLES.TABLE_HEADER,
-            border_style=COLORS['border_muted'],
+            border_style=COLORS["border_muted"],
             expand=False,
         )
 
@@ -264,7 +265,10 @@ class DiffViewer:
                 line_text = f" {diff_line.old_line_no:4d} │ {diff_line.content}"
                 table.add_row(
                     Text(line_text, style=PRESET_STYLES.TERTIARY),
-                    Text(f" {diff_line.new_line_no:4d} │ {diff_line.content}", style=PRESET_STYLES.TERTIARY),
+                    Text(
+                        f" {diff_line.new_line_no:4d} │ {diff_line.content}",
+                        style=PRESET_STYLES.TERTIARY,
+                    ),
                 )
 
         # Flush remaining lines
@@ -298,11 +302,11 @@ class DiffViewer:
     ) -> Panel:
         """
         Render diff with specified mode.
-        
+
         Args:
             mode: Display mode (unified or side-by-side)
             title: Panel title
-            
+
         Returns:
             Rich Panel object
         """
@@ -319,7 +323,7 @@ class DiffViewer:
             content,
             title=title,
             title_align="left",
-            border_style=COLORS['accent_blue'],
+            border_style=COLORS["accent_blue"],
             padding=(0, 1),
             expand=False,
         )
@@ -327,7 +331,7 @@ class DiffViewer:
     def get_stats(self) -> dict:
         """
         Get diff statistics.
-        
+
         Returns:
             Dictionary with additions, deletions, changes
         """
@@ -335,15 +339,16 @@ class DiffViewer:
         deletions = sum(1 for line in self.diff_lines if line.is_deletion)
 
         return {
-            'additions': additions,
-            'deletions': deletions,
-            'changes': additions + deletions,
+            "additions": additions,
+            "deletions": deletions,
+            "changes": additions + deletions,
         }
 
 
 # =============================================================================
 # QUICK DIFF FUNCTIONS
 # =============================================================================
+
 
 def show_diff(
     console: Console,
@@ -355,7 +360,7 @@ def show_diff(
 ):
     """
     Quick helper to show diff.
-    
+
     Args:
         console: Rich console
         old_content: Old content
@@ -375,19 +380,19 @@ def create_file_diff(
 ) -> DiffViewer:
     """
     Create diff viewer from file paths.
-    
+
     Args:
         old_path: Path to old file
         new_path: Path to new file
         context_lines: Context lines
-        
+
     Returns:
         DiffViewer instance
     """
-    with open(old_path, 'r') as f:
+    with open(old_path, "r") as f:
         old_content = f.read()
 
-    with open(new_path, 'r') as f:
+    with open(new_path, "r") as f:
         new_content = f.read()
 
     return DiffViewer(
@@ -406,7 +411,7 @@ def compare_strings(
 ) -> None:
     """
     Quick comparison of two strings.
-    
+
     Args:
         old: Old string
         new: New string

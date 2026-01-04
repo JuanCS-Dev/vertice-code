@@ -1,5 +1,7 @@
 """Real-time stream processing (Producer-Consumer pattern)."""
+
 import logging
+
 logger = logging.getLogger(__name__)
 
 import asyncio
@@ -10,6 +12,7 @@ from typing import AsyncIterator, Optional, Callable
 
 class StreamType(Enum):
     """Stream types."""
+
     STDOUT = "stdout"
     STDERR = "stderr"
     SYSTEM = "system"
@@ -18,6 +21,7 @@ class StreamType(Enum):
 @dataclass
 class OutputChunk:
     """Single output chunk from stream."""
+
     content: str
     stream_type: StreamType
     timestamp: float
@@ -27,7 +31,7 @@ class OutputChunk:
 class StreamProcessor:
     """
     Real-time stream processor with zero-buffering.
-    
+
     Implements Cursor-style streaming: line-by-line emission as produced.
     """
 
@@ -46,10 +50,7 @@ class StreamProcessor:
         import time
 
         chunk = OutputChunk(
-            content=content,
-            stream_type=stream_type,
-            timestamp=time.time(),
-            sequence=self._sequence
+            content=content, stream_type=stream_type, timestamp=time.time(), sequence=self._sequence
         )
         self._sequence += 1
 
@@ -85,11 +86,13 @@ class StreamProcessor:
 class LineBufferedStreamReader:
     """
     Line-buffered async reader for subprocess pipes.
-    
+
     Yields complete lines immediately (Claude Code pattern).
     """
 
-    def __init__(self, stream: asyncio.StreamReader, processor: StreamProcessor, stream_type: StreamType):
+    def __init__(
+        self, stream: asyncio.StreamReader, processor: StreamProcessor, stream_type: StreamType
+    ):
         self.stream = stream
         self.processor = processor
         self.stream_type = stream_type
@@ -105,12 +108,12 @@ class LineBufferedStreamReader:
                         await self.processor.feed(self._buffer, self.stream_type)
                     break
 
-                text = chunk.decode('utf-8', errors='replace')
+                text = chunk.decode("utf-8", errors="replace")
                 self._buffer += text
 
-                while '\n' in self._buffer:
-                    line, self._buffer = self._buffer.split('\n', 1)
-                    await self.processor.feed(line + '\n', self.stream_type)
+                while "\n" in self._buffer:
+                    line, self._buffer = self._buffer.split("\n", 1)
+                    await self.processor.feed(line + "\n", self.stream_type)
 
         except asyncio.CancelledError:
             raise

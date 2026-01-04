@@ -1,5 +1,7 @@
 """Context-aware autocomplete component."""
+
 import logging
+
 logger = logging.getLogger(__name__)
 
 from typing import List, Dict, Any, Optional
@@ -12,6 +14,7 @@ from prompt_toolkit.document import Document
 
 class CompletionType(Enum):
     """Types of completions."""
+
     COMMAND = "command"
     FILE = "file"
     TOOL = "tool"
@@ -23,6 +26,7 @@ class CompletionType(Enum):
 @dataclass
 class CompletionItem:
     """Single completion item."""
+
     text: str
     display: str
     type: CompletionType
@@ -38,7 +42,7 @@ class CompletionItem:
 class ContextAwareCompleter(Completer):
     """
     Context-aware autocomplete with semantic understanding.
-    
+
     Features:
     - File path completion with fuzzy matching
     - Tool name completion with descriptions
@@ -51,7 +55,7 @@ class ContextAwareCompleter(Completer):
         self,
         tools_registry: Optional[Any] = None,
         indexer: Optional[Any] = None,
-        recent_tracker: Optional[Any] = None
+        recent_tracker: Optional[Any] = None,
     ):
         self.tools_registry = tools_registry
         self.indexer = indexer
@@ -82,7 +86,7 @@ class ContextAwareCompleter(Completer):
                 text=item.text,
                 start_position=-len(word),
                 display=item.display,
-                display_meta=item.description or ""
+                display_meta=item.description or "",
             )
 
     def _get_tool_completions(self, prefix: str) -> List[CompletionItem]:
@@ -99,14 +103,16 @@ class ContextAwareCompleter(Completer):
                 if tool_name.startswith(prefix.lower()):
                     score = self._calculate_prefix_score(prefix, tool_name)
 
-                    completions.append(CompletionItem(
-                        text=tool_name,
-                        display=f"🔧 {tool_name}",
-                        type=CompletionType.TOOL,
-                        description=getattr(tool, 'description', None),
-                        score=score + 10.0,  # Boost tool completions
-                        metadata={"tool": tool_name}
-                    ))
+                    completions.append(
+                        CompletionItem(
+                            text=tool_name,
+                            display=f"🔧 {tool_name}",
+                            type=CompletionType.TOOL,
+                            description=getattr(tool, "description", None),
+                            score=score + 10.0,  # Boost tool completions
+                            metadata={"tool": tool_name},
+                        )
+                    )
         except Exception as e:
             logger.debug(f"Failed to get tool completions: {e}")
 
@@ -121,18 +127,20 @@ class ContextAwareCompleter(Completer):
         recent_files = self.recent_tracker.get_recent_files(limit=50)
 
         for file_path in recent_files:
-            file_name = file_path.split('/')[-1]
+            file_name = file_path.split("/")[-1]
             if prefix.lower() in file_name.lower():
                 score = self._calculate_fuzzy_score(prefix, file_name)
 
-                completions.append(CompletionItem(
-                    text=file_path,
-                    display=f"📄 {file_name}",
-                    type=CompletionType.FILE,
-                    description=file_path,
-                    score=score + 5.0,  # Moderate boost
-                    metadata={"path": file_path}
-                ))
+                completions.append(
+                    CompletionItem(
+                        text=file_path,
+                        display=f"📄 {file_name}",
+                        type=CompletionType.FILE,
+                        description=file_path,
+                        score=score + 5.0,  # Moderate boost
+                        metadata={"path": file_path},
+                    )
+                )
 
         return completions
 
@@ -152,20 +160,22 @@ class ContextAwareCompleter(Completer):
         try:
             results = self.indexer.search_symbols(prefix, limit=10)
             for result in results:
-                score = result.get('score', 0.0)
-                symbol_name = result.get('symbol', '')
-                symbol_type = result.get('type', 'unknown')
+                score = result.get("score", 0.0)
+                symbol_name = result.get("symbol", "")
+                symbol_type = result.get("type", "unknown")
 
                 icon = self._get_symbol_icon(symbol_type)
 
-                completions.append(CompletionItem(
-                    text=symbol_name,
-                    display=f"{icon} {symbol_name}",
-                    type=CompletionType.VARIABLE,
-                    description=f"{symbol_type} in {result.get('file', '')}",
-                    score=score,
-                    metadata=result
-                ))
+                completions.append(
+                    CompletionItem(
+                        text=symbol_name,
+                        display=f"{icon} {symbol_name}",
+                        type=CompletionType.VARIABLE,
+                        description=f"{symbol_type} in {result.get('file', '')}",
+                        score=score,
+                        metadata=result,
+                    )
+                )
         except Exception as e:
             logger.debug(f"Failed to get semantic completions: {e}")
 
@@ -221,32 +231,28 @@ class ContextAwareCompleter(Completer):
     def _get_symbol_icon(self, symbol_type: str) -> str:
         """Get icon for symbol type."""
         icons = {
-            'function': '⚡',
-            'class': '📦',
-            'method': '🔹',
-            'variable': '📌',
-            'constant': '🔒',
-            'module': '📚',
-            'unknown': '❓'
+            "function": "⚡",
+            "class": "📦",
+            "method": "🔹",
+            "variable": "📌",
+            "constant": "🔒",
+            "module": "📚",
+            "unknown": "❓",
         }
-        return icons.get(symbol_type.lower(), '❓')
+        return icons.get(symbol_type.lower(), "❓")
 
 
 class SmartAutoSuggest:
     """
     Smart auto-suggest based on context and history.
-    
+
     Provides inline suggestions as you type, similar to:
     - Fish shell
     - GitHub Copilot
     - Cursor AI
     """
 
-    def __init__(
-        self,
-        history: Optional[Any] = None,
-        indexer: Optional[Any] = None
-    ):
+    def __init__(self, history: Optional[Any] = None, indexer: Optional[Any] = None):
         self.history = history
         self.indexer = indexer
         self._suggestion_cache: Dict[str, str] = {}
@@ -283,7 +289,7 @@ class SmartAutoSuggest:
         # Find most recent command that starts with text
         for item in reversed(list(self.history.load_history_strings())):
             if item.startswith(text) and len(item) > len(text):
-                return item[len(text):]
+                return item[len(text) :]
 
         return None
 
@@ -300,11 +306,9 @@ class SmartAutoSuggest:
 def create_completer(
     tools_registry: Optional[Any] = None,
     indexer: Optional[Any] = None,
-    recent_tracker: Optional[Any] = None
+    recent_tracker: Optional[Any] = None,
 ) -> ContextAwareCompleter:
     """Create configured autocompleter."""
     return ContextAwareCompleter(
-        tools_registry=tools_registry,
-        indexer=indexer,
-        recent_tracker=recent_tracker
+        tools_registry=tools_registry, indexer=indexer, recent_tracker=recent_tracker
     )

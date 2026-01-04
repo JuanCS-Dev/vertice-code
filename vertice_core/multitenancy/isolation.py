@@ -46,11 +46,7 @@ class TenantIsolation:
     _tenant_resources: Dict[str, Dict[str, Any]] = field(default_factory=dict)
     _access_policies: Dict[str, Callable[[TenantContext, str], bool]] = field(default_factory=dict)
 
-    def register_resource(
-        self,
-        resource_type: str,
-        scope: ResourceScope
-    ) -> None:
+    def register_resource(self, resource_type: str, scope: ResourceScope) -> None:
         """
         Register a resource type with its scope.
 
@@ -69,7 +65,7 @@ class TenantIsolation:
         resource_type: str,
         resource_id: str,
         tenant: Optional[Tenant] = None,
-        user_id: Optional[str] = None
+        user_id: Optional[str] = None,
     ) -> str:
         """
         Get the scoped key for a resource.
@@ -113,7 +109,7 @@ class TenantIsolation:
         resource_id: str,
         value: Any,
         tenant: Optional[Tenant] = None,
-        user_id: Optional[str] = None
+        user_id: Optional[str] = None,
     ) -> str:
         """
         Store a resource with proper scoping.
@@ -141,7 +137,7 @@ class TenantIsolation:
         resource_type: str,
         resource_id: str,
         tenant: Optional[Tenant] = None,
-        user_id: Optional[str] = None
+        user_id: Optional[str] = None,
     ) -> Optional[Any]:
         """
         Get a resource with proper scoping.
@@ -165,7 +161,7 @@ class TenantIsolation:
         resource_type: str,
         resource_id: str,
         tenant: Optional[Tenant] = None,
-        user_id: Optional[str] = None
+        user_id: Optional[str] = None,
     ) -> bool:
         """
         Delete a resource.
@@ -187,11 +183,7 @@ class TenantIsolation:
                 return True
         return False
 
-    def list_resources(
-        self,
-        resource_type: str,
-        tenant: Optional[Tenant] = None
-    ) -> List[str]:
+    def list_resources(self, resource_type: str, tenant: Optional[Tenant] = None) -> List[str]:
         """
         List all resources of a type for a tenant.
 
@@ -222,9 +214,7 @@ class TenantIsolation:
         return 0
 
     def register_access_policy(
-        self,
-        resource_type: str,
-        policy: Callable[[TenantContext, str], bool]
+        self, resource_type: str, policy: Callable[[TenantContext, str], bool]
     ) -> None:
         """
         Register an access policy for a resource type.
@@ -236,10 +226,7 @@ class TenantIsolation:
         self._access_policies[resource_type] = policy
 
     def check_access(
-        self,
-        resource_type: str,
-        resource_id: str,
-        context: Optional[TenantContext] = None
+        self, resource_type: str, resource_id: str, context: Optional[TenantContext] = None
     ) -> bool:
         """
         Check if current context has access to a resource.
@@ -277,9 +264,7 @@ def require_access(resource_type: str, resource_id: str) -> None:
     """
     isolation = get_tenant_isolation()
     if not isolation.check_access(resource_type, resource_id):
-        raise PermissionError(
-            f"Access denied to {resource_type}:{resource_id}"
-        )
+        raise PermissionError(f"Access denied to {resource_type}:{resource_id}")
 
 
 # Global isolation instance
@@ -295,9 +280,9 @@ def get_tenant_isolation() -> TenantIsolation:
 
 
 __all__ = [
-    'TenantIsolation',
-    'IsolationLevel',
-    'ResourceScope',
-    'require_access',
-    'get_tenant_isolation',
+    "TenantIsolation",
+    "IsolationLevel",
+    "ResourceScope",
+    "require_access",
+    "get_tenant_isolation",
 ]

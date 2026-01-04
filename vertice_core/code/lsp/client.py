@@ -103,9 +103,7 @@ class LSPClient:
             raise ValueError(f"No configuration for language: {language}")
 
         if not config.is_installed():
-            raise LSPConnectionError(
-                f"Language server not installed: {config.command[0]}"
-            )
+            raise LSPConnectionError(f"Language server not installed: {config.command[0]}")
 
         # Start server process
         process = await asyncio.create_subprocess_exec(
@@ -176,9 +174,7 @@ class LSPClient:
                     },
                 },
                 "initializationOptions": config.initialization_options,
-                "workspaceFolders": [
-                    {"uri": self.workspace_uri, "name": self.workspace_root.name}
-                ],
+                "workspaceFolders": [{"uri": self.workspace_uri, "name": self.workspace_root.name}],
             },
         )
 
@@ -196,9 +192,7 @@ class LSPClient:
     async def _handle_diagnostics(self, params: Dict[str, Any]) -> None:
         """Handle diagnostics notification."""
         uri = params.get("uri", "")
-        diagnostics = [
-            Diagnostic.from_dict(d) for d in params.get("diagnostics", [])
-        ]
+        diagnostics = [Diagnostic.from_dict(d) for d in params.get("diagnostics", [])]
         self._document_diagnostics[uri] = diagnostics
 
     async def _ensure_document_open(
@@ -493,10 +487,7 @@ class LSPClient:
 
     def get_available_languages(self) -> List[str]:
         """Get list of languages with installed servers."""
-        return [
-            lang for lang, config in self.configs.items()
-            if config.is_installed()
-        ]
+        return [lang for lang, config in self.configs.items() if config.is_installed()]
 
     def get_stats(self) -> Dict[str, Any]:
         """Get client statistics."""

@@ -18,17 +18,19 @@ from typing import Any, Dict, List, Optional
 
 class InputType(Enum):
     """Type of user input."""
-    COMMAND = "command"          # /help, /exit, etc.
-    QUERY = "query"              # Natural language query
-    CODE = "code"                # Code block
-    FILE_PATH = "file_path"      # File path reference
-    URL = "url"                  # URL reference
-    EMPTY = "empty"              # Empty input
+
+    COMMAND = "command"  # /help, /exit, etc.
+    QUERY = "query"  # Natural language query
+    CODE = "code"  # Code block
+    FILE_PATH = "file_path"  # File path reference
+    URL = "url"  # URL reference
+    EMPTY = "empty"  # Empty input
     CONTINUATION = "continuation"  # Multi-line continuation
 
 
 class ValidationStatus(Enum):
     """Input validation status."""
+
     VALID = "valid"
     INVALID = "invalid"
     WARNING = "warning"
@@ -59,12 +61,12 @@ class ParsedInput:
     @property
     def has_file_references(self) -> bool:
         """Check if input contains file references."""
-        return bool(self.metadata.get('file_references', []))
+        return bool(self.metadata.get("file_references", []))
 
     @property
     def has_urls(self) -> bool:
         """Check if input contains URLs."""
-        return bool(self.metadata.get('urls', []))
+        return bool(self.metadata.get("urls", []))
 
 
 @dataclass
@@ -103,41 +105,57 @@ class InputHandler:
     """
 
     # Command pattern: starts with /
-    COMMAND_PATTERN = re.compile(r'^/(\w+)(?:\s+(.*))?$', re.DOTALL)
+    COMMAND_PATTERN = re.compile(r"^/(\w+)(?:\s+(.*))?$", re.DOTALL)
 
     # File path patterns
-    FILE_PATH_PATTERN = re.compile(r'(?:^|\s)([./~][\w./\-_]+(?:\.\w+)?)')
+    FILE_PATH_PATTERN = re.compile(r"(?:^|\s)([./~][\w./\-_]+(?:\.\w+)?)")
 
     # URL pattern
     URL_PATTERN = re.compile(r'https?://[^\s<>"{}|\\^`\[\]]+')
 
     # Code block pattern (markdown)
-    CODE_BLOCK_PATTERN = re.compile(r'```(\w*)\n(.*?)```', re.DOTALL)
+    CODE_BLOCK_PATTERN = re.compile(r"```(\w*)\n(.*?)```", re.DOTALL)
 
     # Dangerous command patterns (for validation)
     DANGEROUS_PATTERNS = [
-        re.compile(r'\brm\s+-rf\s+[/~]', re.IGNORECASE),
-        re.compile(r'\bsudo\s+rm\b', re.IGNORECASE),
-        re.compile(r'\b:(){ :|:& };:', re.IGNORECASE),  # Fork bomb
-        re.compile(r'\bdd\s+if=.*of=/dev/', re.IGNORECASE),
-        re.compile(r'\bmkfs\b', re.IGNORECASE),
-        re.compile(r'\bchmod\s+-R\s+777\s+/', re.IGNORECASE),
+        re.compile(r"\brm\s+-rf\s+[/~]", re.IGNORECASE),
+        re.compile(r"\bsudo\s+rm\b", re.IGNORECASE),
+        re.compile(r"\b:(){ :|:& };:", re.IGNORECASE),  # Fork bomb
+        re.compile(r"\bdd\s+if=.*of=/dev/", re.IGNORECASE),
+        re.compile(r"\bmkfs\b", re.IGNORECASE),
+        re.compile(r"\bchmod\s+-R\s+777\s+/", re.IGNORECASE),
     ]
 
     # Known commands
     KNOWN_COMMANDS = {
-        'help', 'exit', 'quit', 'clear', 'model', 'context',
-        'history', 'stats', 'config', 'tools', 'agents',
-        'lsp', 'index', 'find', 'suggest', 'refactor',
-        'workflow', 'squad', 'compact', 'session', 'sessions',
-        'memory', 'forget', 'remember', 'recall',
+        "help",
+        "exit",
+        "quit",
+        "clear",
+        "model",
+        "context",
+        "history",
+        "stats",
+        "config",
+        "tools",
+        "agents",
+        "lsp",
+        "index",
+        "find",
+        "suggest",
+        "refactor",
+        "workflow",
+        "squad",
+        "compact",
+        "session",
+        "sessions",
+        "memory",
+        "forget",
+        "remember",
+        "recall",
     }
 
-    def __init__(
-        self,
-        max_input_length: int = 100000,
-        allow_dangerous: bool = False
-    ):
+    def __init__(self, max_input_length: int = 100000, allow_dangerous: bool = False):
         """
         Initialize input handler.
 
@@ -160,11 +178,7 @@ class InputHandler:
         """
         # Handle empty input
         if not raw or not raw.strip():
-            return ParsedInput(
-                raw=raw,
-                input_type=InputType.EMPTY,
-                content=""
-            )
+            return ParsedInput(raw=raw, input_type=InputType.EMPTY, content="")
 
         stripped = raw.strip()
 
@@ -178,7 +192,7 @@ class InputHandler:
                 input_type=InputType.COMMAND,
                 command=command,
                 args=args.strip(),
-                content=stripped
+                content=stripped,
             )
 
         # Check for code blocks
@@ -189,11 +203,10 @@ class InputHandler:
                 input_type=InputType.CODE,
                 content=stripped,
                 metadata={
-                    'code_blocks': [
-                        {'language': lang or 'text', 'code': code}
-                        for lang, code in code_blocks
+                    "code_blocks": [
+                        {"language": lang or "text", "code": code} for lang, code in code_blocks
                     ]
-                }
+                },
             )
 
         # Extract file references
@@ -215,9 +228,9 @@ class InputHandler:
             input_type=input_type,
             content=stripped,
             metadata={
-                'file_references': file_refs,
-                'urls': urls,
-            }
+                "file_references": file_refs,
+                "urls": urls,
+            },
         )
 
     def validate_input(self, parsed: ParsedInput) -> ValidationResult:
@@ -237,7 +250,7 @@ class InputHandler:
         if len(parsed.raw) > self.max_input_length:
             return ValidationResult(
                 status=ValidationStatus.INVALID,
-                message=f"Input too long ({len(parsed.raw)} > {self.max_input_length})"
+                message=f"Input too long ({len(parsed.raw)} > {self.max_input_length})",
             )
 
         # Validate commands
@@ -256,15 +269,17 @@ class InputHandler:
                     return ValidationResult(
                         status=ValidationStatus.NEEDS_CONFIRMATION,
                         message="Potentially dangerous command detected",
-                        warnings=["This command may cause data loss or system damage"]
+                        warnings=["This command may cause data loss or system damage"],
                     )
 
         # Check file references exist (optional)
         if parsed.has_file_references:
             import os
+
             missing = [
-                f for f in parsed.metadata.get('file_references', [])
-                if not os.path.exists(f) and not f.startswith('~')
+                f
+                for f in parsed.metadata.get("file_references", [])
+                if not os.path.exists(f) and not f.startswith("~")
             ]
             if missing:
                 warnings.append(f"Referenced files not found: {', '.join(missing[:3])}")
@@ -275,13 +290,10 @@ class InputHandler:
                 status=ValidationStatus.WARNING,
                 message="Input valid with warnings",
                 warnings=warnings,
-                suggestions=suggestions
+                suggestions=suggestions,
             )
 
-        return ValidationResult(
-            status=ValidationStatus.VALID,
-            message="Input valid"
-        )
+        return ValidationResult(status=ValidationStatus.VALID, message="Input valid")
 
     def preprocess_input(self, parsed: ParsedInput) -> str:
         """
@@ -298,19 +310,21 @@ class InputHandler:
         # Expand home directory in file paths
         if parsed.has_file_references:
             import os
-            for file_ref in parsed.metadata.get('file_references', []):
-                if file_ref.startswith('~'):
+
+            for file_ref in parsed.metadata.get("file_references", []):
+                if file_ref.startswith("~"):
                     expanded = os.path.expanduser(file_ref)
                     content = content.replace(file_ref, expanded)
 
         # Normalize whitespace
-        content = ' '.join(content.split())
+        content = " ".join(content.split())
 
         return content
 
     def _find_similar_commands(self, command: str, max_results: int = 3) -> List[str]:
         """Find similar known commands."""
         from difflib import get_close_matches
+
         return get_close_matches(command, self.KNOWN_COMMANDS, n=max_results, cutoff=0.6)
 
     def extract_context_hints(self, parsed: ParsedInput) -> Dict[str, Any]:
@@ -326,25 +340,25 @@ class InputHandler:
             Dictionary of context hints
         """
         hints = {
-            'files': parsed.metadata.get('file_references', []),
-            'urls': parsed.metadata.get('urls', []),
-            'code_blocks': parsed.metadata.get('code_blocks', []),
-            'mentions': [],
+            "files": parsed.metadata.get("file_references", []),
+            "urls": parsed.metadata.get("urls", []),
+            "code_blocks": parsed.metadata.get("code_blocks", []),
+            "mentions": [],
         }
 
         # Extract function/class mentions
         content = parsed.content
 
         # Function pattern: function_name() or def function_name
-        func_pattern = re.compile(r'(?:def\s+)?(\w+)\s*\(')
-        hints['mentions'].extend(func_pattern.findall(content))
+        func_pattern = re.compile(r"(?:def\s+)?(\w+)\s*\(")
+        hints["mentions"].extend(func_pattern.findall(content))
 
         # Class pattern: class ClassName or ClassName.
-        class_pattern = re.compile(r'(?:class\s+)?([A-Z]\w+)(?:\.|:|\s|$)')
-        hints['mentions'].extend(class_pattern.findall(content))
+        class_pattern = re.compile(r"(?:class\s+)?([A-Z]\w+)(?:\.|:|\s|$)")
+        hints["mentions"].extend(class_pattern.findall(content))
 
         # Deduplicate
-        hints['mentions'] = list(set(hints['mentions']))
+        hints["mentions"] = list(set(hints["mentions"]))
 
         return hints
 
@@ -372,12 +386,12 @@ def validate_input(parsed: ParsedInput) -> ValidationResult:
 
 
 __all__ = [
-    'InputHandler',
-    'InputType',
-    'ParsedInput',
-    'ValidationResult',
-    'ValidationStatus',
-    'get_input_handler',
-    'parse_input',
-    'validate_input',
+    "InputHandler",
+    "InputType",
+    "ParsedInput",
+    "ValidationResult",
+    "ValidationStatus",
+    "get_input_handler",
+    "parse_input",
+    "validate_input",
 ]

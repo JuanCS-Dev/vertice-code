@@ -57,8 +57,7 @@ class GeminiStreamer:
         try:
             # Apply timeout to initialization
             if await asyncio.wait_for(
-                self._sdk_streamer.initialize(),
-                timeout=self.config.init_timeout
+                self._sdk_streamer.initialize(), timeout=self.config.init_timeout
             ):
                 self._active_streamer = self._sdk_streamer
                 logger.info("Using SDK streamer")
@@ -71,8 +70,7 @@ class GeminiStreamer:
         # Try HTTPX fallback
         try:
             if await asyncio.wait_for(
-                self._httpx_streamer.initialize(),
-                timeout=self.config.init_timeout
+                self._httpx_streamer.initialize(), timeout=self.config.init_timeout
             ):
                 self._active_streamer = self._httpx_streamer
                 logger.info("Using HTTPX streamer (fallback)")
@@ -118,16 +116,12 @@ class GeminiStreamer:
         last_chunk_time = time.time()
 
         try:
-            async for chunk in self._active_streamer.stream(
-                prompt, system_prompt, context, tools
-            ):
+            async for chunk in self._active_streamer.stream(prompt, system_prompt, context, tools):
                 current_time = time.time()
 
                 # Check for chunk timeout (stall detection)
                 if current_time - last_chunk_time > self.config.chunk_timeout:
-                    raise asyncio.TimeoutError(
-                        f"No response for {self.config.chunk_timeout}s"
-                    )
+                    raise asyncio.TimeoutError(f"No response for {self.config.chunk_timeout}s")
 
                 last_chunk_time = current_time
                 yield chunk

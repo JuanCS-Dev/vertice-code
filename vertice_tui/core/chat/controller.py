@@ -98,7 +98,7 @@ class ChatController:
         from ..context import mask_tool_output
 
         try:
-            raw_result = await self.tools.execute(tool_name, **arguments)
+            raw_result = await self.tools.execute_tool(tool_name, **arguments)
 
             # Apply observation masking (research-backed: zero cost, equal quality)
             masked = mask_tool_output(
@@ -139,9 +139,7 @@ class ChatController:
 
         return display, feedback
 
-    async def _try_agent_routing(
-        self, message: str
-    ) -> Optional[Tuple[str, float, Any]]:
+    async def _try_agent_routing(self, message: str) -> Optional[Tuple[str, float, Any]]:
         """Try to route message to an agent.
 
         Returns:
@@ -171,16 +169,30 @@ class ChatController:
 
         # High complexity keywords
         keywords_high = [
-            "architect", "design", "refactor", "complex", "system",
-            "rewrite", "optimize", "infrastructure", "migration"
+            "architect",
+            "design",
+            "refactor",
+            "complex",
+            "system",
+            "rewrite",
+            "optimize",
+            "infrastructure",
+            "migration",
         ]
         if any(k in msg_lower for k in keywords_high):
             return "high"
 
         # Low complexity keywords
         keywords_low = [
-            "fix", "typo", "simple", "quick", "rename", "update",
-            "change", "small", "minor"
+            "fix",
+            "typo",
+            "simple",
+            "quick",
+            "rename",
+            "update",
+            "change",
+            "small",
+            "minor",
         ]
         if any(k in msg_lower for k in keywords_low):
             return "low"
@@ -268,10 +280,7 @@ class ChatController:
 
             # Yield results
             tool_feedbacks: List[str] = []
-            for call_id in sorted(
-                exec_result.results.keys(),
-                key=lambda x: int(x.split("_")[1])
-            ):
+            for call_id in sorted(exec_result.results.keys(), key=lambda x: int(x.split("_")[1])):
                 result = exec_result.results[call_id]
                 display, feedback = self._format_tool_result(result)
                 yield f"{display}\n"

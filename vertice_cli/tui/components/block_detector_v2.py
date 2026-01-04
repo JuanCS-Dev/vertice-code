@@ -14,10 +14,7 @@ from __future__ import annotations
 import re
 from typing import List, Optional
 
-from .block_renderers import (
-    BlockType, BlockInfo, BlockRendererRegistry,
-    detect_block_type
-)
+from .block_renderers import BlockType, BlockInfo, BlockRendererRegistry, detect_block_type
 
 
 class BlockDetectorV2:
@@ -33,7 +30,7 @@ class BlockDetectorV2:
     """
 
     # Pattern para fechar code fence
-    CODE_FENCE_CLOSE = re.compile(r'^(`{3,}|~{3,})\s*$')
+    CODE_FENCE_CLOSE = re.compile(r"^(`{3,}|~{3,})\s*$")
 
     def __init__(self):
         self.blocks: List[BlockInfo] = []
@@ -65,8 +62,8 @@ class BlockDetectorV2:
         self._buffer += chunk
 
         # Processa linha por linha
-        while '\n' in self._buffer:
-            line, self._buffer = self._buffer.split('\n', 1)
+        while "\n" in self._buffer:
+            line, self._buffer = self._buffer.split("\n", 1)
             self._process_line(line)
 
         # Processa última linha incompleta (optimistic)
@@ -136,7 +133,7 @@ class BlockDetectorV2:
         """Inicia um novo bloco."""
         # Caso especial: code fence
         if block_type == BlockType.CODE_FENCE:
-            match = re.match(r'^(`{3,}|~{3,})(\w*)\s*$', line.strip())
+            match = re.match(r"^(`{3,}|~{3,})(\w*)\s*$", line.strip())
             if match:
                 self.in_code_fence = True
                 self.code_fence_marker = match.group(1)[:3]
@@ -154,7 +151,7 @@ class BlockDetectorV2:
         # Extrai metadata via registry
         metadata = {}
         renderer_cls = BlockRendererRegistry._renderers.get(block_type)
-        if renderer_cls and hasattr(renderer_cls, 'extract_metadata'):
+        if renderer_cls and hasattr(renderer_cls, "extract_metadata"):
             metadata = renderer_cls.extract_metadata(line)
 
         self.current_block = BlockInfo(
@@ -196,7 +193,7 @@ class BlockDetectorV2:
             self.current_block.end_line = self.line_number
 
             # Remove trailing newline do content
-            self.current_block.content = self.current_block.content.rstrip('\n')
+            self.current_block.content = self.current_block.content.rstrip("\n")
 
             self.blocks.append(self.current_block)
             self.current_block = None
@@ -226,6 +223,6 @@ BlockDetector = BlockDetectorV2
 
 
 __all__ = [
-    'BlockDetectorV2',
-    'BlockDetector',  # Alias
+    "BlockDetectorV2",
+    "BlockDetector",  # Alias
 ]

@@ -141,9 +141,7 @@ class StreamBuffer:
         self._stats.total_chars += len(chunk)
 
         if self.config.count_tokens:
-            self._stats.estimated_tokens = int(
-                self._stats.total_chars / self.config.token_ratio
-            )
+            self._stats.estimated_tokens = int(self._stats.total_chars / self.config.token_ratio)
 
         # Notify callback
         if self.on_chunk is not None:
@@ -277,6 +275,7 @@ def create_tee_callback(
         >>> combined = create_tee_callback(print, logger.info)
         >>> buffer = StreamBuffer(on_chunk=combined)
     """
+
     def tee_callback(chunk: str) -> None:
         for callback in callbacks:
             callback(chunk)

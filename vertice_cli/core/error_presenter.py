@@ -31,13 +31,15 @@ logger = logging.getLogger(__name__)
 
 class AudienceLevel(Enum):
     """Target audience for error messages."""
-    BEGINNER = "beginner"      # Simple, friendly, step-by-step
+
+    BEGINNER = "beginner"  # Simple, friendly, step-by-step
     INTERMEDIATE = "intermediate"  # Some technical detail
-    DEVELOPER = "developer"    # Full technical detail
+    DEVELOPER = "developer"  # Full technical detail
 
 
 class ErrorCategory(Enum):
     """Categories of errors."""
+
     FILE_NOT_FOUND = "file_not_found"
     PERMISSION_DENIED = "permission_denied"
     SYNTAX_ERROR = "syntax_error"
@@ -54,6 +56,7 @@ class ErrorCategory(Enum):
 @dataclass
 class ErrorExplanation:
     """Structured error explanation."""
+
     category: ErrorCategory
     title: str
     simple_explanation: str
@@ -67,6 +70,7 @@ class ErrorExplanation:
 @dataclass
 class PresentedError:
     """A formatted error ready for display."""
+
     title: str
     message: str
     suggestions: List[str]
@@ -102,7 +106,6 @@ ERROR_PATTERNS: Dict[str, ErrorExplanation] = {
         ],
         example_fix="# To check what files exist:\nls -la\n\n# To create parent folders:\nmkdir -p path/to/folder",
     ),
-
     r"Permission denied|PermissionError|EACCES": ErrorExplanation(
         category=ErrorCategory.PERMISSION_DENIED,
         title="Permission Denied",
@@ -116,7 +119,6 @@ ERROR_PATTERNS: Dict[str, ErrorExplanation] = {
         ],
         example_fix="# To see permissions:\nls -la filename\n\n# To make a file readable:\nchmod +r filename\n\n# To make executable:\nchmod +x script.sh",
     ),
-
     # Python errors
     r"SyntaxError|invalid syntax": ErrorExplanation(
         category=ErrorCategory.SYNTAX_ERROR,
@@ -131,7 +133,6 @@ ERROR_PATTERNS: Dict[str, ErrorExplanation] = {
         ],
         example_fix='# Common fixes:\n# Missing colon:\nif x == 1:  # <- colon needed\n    print("yes")\n\n# Unbalanced brackets:\nmy_list = [1, 2, 3]  # <- all brackets matched',
     ),
-
     r"ModuleNotFoundError|ImportError|No module named": ErrorExplanation(
         category=ErrorCategory.IMPORT_ERROR,
         title="Missing Package",
@@ -145,7 +146,6 @@ ERROR_PATTERNS: Dict[str, ErrorExplanation] = {
         ],
         example_fix="# To install a package:\npip install package_name\n\n# To install from requirements:\npip install -r requirements.txt\n\n# To check installed packages:\npip list",
     ),
-
     # Network errors
     r"ConnectionError|ConnectionRefused|Connection refused|ECONNREFUSED": ErrorExplanation(
         category=ErrorCategory.NETWORK_ERROR,
@@ -160,7 +160,6 @@ ERROR_PATTERNS: Dict[str, ErrorExplanation] = {
         ],
         example_fix="# To test connectivity:\nping google.com\n\n# To check if a port is open:\nnc -zv localhost 8080",
     ),
-
     r"TimeoutError|timed out|ETIMEDOUT": ErrorExplanation(
         category=ErrorCategory.TIMEOUT,
         title="Operation Timed Out",
@@ -173,7 +172,6 @@ ERROR_PATTERNS: Dict[str, ErrorExplanation] = {
             "Consider increasing the timeout if possible",
         ],
     ),
-
     # Memory errors
     r"MemoryError|killed|OOM|Out of memory": ErrorExplanation(
         category=ErrorCategory.MEMORY_ERROR,
@@ -187,7 +185,6 @@ ERROR_PATTERNS: Dict[str, ErrorExplanation] = {
             "The dataset might be too large for your system",
         ],
     ),
-
     # Git errors
     r"not a git repository|fatal: not a git repo": ErrorExplanation(
         category=ErrorCategory.GIT_ERROR,
@@ -201,7 +198,6 @@ ERROR_PATTERNS: Dict[str, ErrorExplanation] = {
         ],
         example_fix="# To initialize a new repo:\ngit init\n\n# To clone an existing repo:\ngit clone https://github.com/user/repo.git",
     ),
-
     r"CONFLICT|Merge conflict": ErrorExplanation(
         category=ErrorCategory.GIT_ERROR,
         title="Merge Conflict",
@@ -352,10 +348,11 @@ class ErrorPresenter:
 
             # Add location info from error if available
             if isinstance(error, Exception):
-                if hasattr(error, 'filename') and hasattr(error, 'lineno'):
+                if hasattr(error, "filename") and hasattr(error, "lineno"):
                     result.location = f"{error.filename}:{error.lineno}"
-                elif hasattr(error, '__traceback__') and error.__traceback__:
+                elif hasattr(error, "__traceback__") and error.__traceback__:
                     import traceback as tb_module
+
                     frames = tb_module.extract_tb(error.__traceback__)
                     if frames:
                         last_frame = frames[-1]
@@ -364,9 +361,10 @@ class ErrorPresenter:
                 # Add full traceback if requested or in developer mode
                 if include_traceback or self.audience == AudienceLevel.DEVELOPER:
                     import traceback as tb_module
-                    result.traceback = "".join(tb_module.format_exception(
-                        type(error), error, error.__traceback__
-                    ))
+
+                    result.traceback = "".join(
+                        tb_module.format_exception(type(error), error, error.__traceback__)
+                    )
 
             return result
         finally:
@@ -397,9 +395,9 @@ class ErrorPresenter:
         # Technical details for developers
         technical_details = None
         if self.show_technical and isinstance(error, Exception):
-            technical_details = "".join(traceback.format_exception(
-                type(error), error, error.__traceback__
-            ))
+            technical_details = "".join(
+                traceback.format_exception(type(error), error, error.__traceback__)
+            )
 
         # Suggestions
         suggestions = explanation.suggestions if self.show_suggestions else []
@@ -460,9 +458,9 @@ class ErrorPresenter:
         # Technical details
         technical_details = None
         if self.show_technical and isinstance(error, Exception):
-            technical_details = "".join(traceback.format_exception(
-                type(error), error, error.__traceback__
-            ))
+            technical_details = "".join(
+                traceback.format_exception(type(error), error, error.__traceback__)
+            )
 
         steps = [f"Step {i+1}: {s}" for i, s in enumerate(suggestions[:4])]
 
@@ -560,15 +558,17 @@ class ErrorPresenter:
         # Example fix
         if presented.example_fix:
             lines.append("\n\033[1;36mExample Fix:\033[0m" if use_color else "\nExample Fix:")
-            for line in presented.example_fix.split('\n'):
+            for line in presented.example_fix.split("\n"):
                 lines.append(f"  {line}")
 
         # Technical details (collapsed for non-developers)
         if presented.technical_details and self.audience == AudienceLevel.DEVELOPER:
-            lines.append("\n\033[1;35mTechnical Details:\033[0m" if use_color else "\nTechnical Details:")
+            lines.append(
+                "\n\033[1;35mTechnical Details:\033[0m" if use_color else "\nTechnical Details:"
+            )
             lines.append("```")
             # Limit traceback length
-            tb_lines = presented.technical_details.split('\n')
+            tb_lines = presented.technical_details.split("\n")
             if len(tb_lines) > 20:
                 lines.extend(tb_lines[:10])
                 lines.append("  ... (truncated) ...")
@@ -622,6 +622,7 @@ class ErrorPresenter:
 
 # Convenience functions
 
+
 def present_error(
     error: Union[Exception, str],
     audience: AudienceLevel = AudienceLevel.INTERMEDIATE,
@@ -655,13 +656,13 @@ def format_error_terminal(error: Union[Exception, str], **kwargs) -> str:
 
 # Export all public symbols
 __all__ = [
-    'AudienceLevel',
-    'ErrorCategory',
-    'ErrorExplanation',
-    'PresentedError',
-    'ErrorPresenter',
-    'present_error',
-    'explain_error',
-    'get_error_suggestions',
-    'format_error_terminal',
+    "AudienceLevel",
+    "ErrorCategory",
+    "ErrorExplanation",
+    "PresentedError",
+    "ErrorPresenter",
+    "present_error",
+    "explain_error",
+    "get_error_suggestions",
+    "format_error_terminal",
 ]

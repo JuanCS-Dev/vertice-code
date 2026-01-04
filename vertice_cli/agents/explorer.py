@@ -36,6 +36,7 @@ except ImportError:
 try:
     from vertice_cli.core.temperature_config import get_temperature
 except ImportError:
+
     def get_temperature(agent_type: str, task_type: str = None) -> float:
         """Get temperature for agent type (fallback if config module unavailable)."""
         return 0.2  # Explorer default - low for accuracy
@@ -45,17 +46,44 @@ class ExplorerAgent(BaseAgent):
     """Explorer Agent - Busca real no filesystem."""
 
     EXCLUDE_DIRS = {
-        '__pycache__', '.git', 'node_modules', '.venv', 'venv', 'env',
-        '.mypy_cache', '.pytest_cache', '.tox', 'dist', 'build', '.eggs',
-        '.cache', '.idea', '.vscode', 'htmlcov', '.coverage', '.qwen',
-        'egg-info', 'site-packages'
+        "__pycache__",
+        ".git",
+        "node_modules",
+        ".venv",
+        "venv",
+        "env",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".tox",
+        "dist",
+        "build",
+        ".eggs",
+        ".cache",
+        ".idea",
+        ".vscode",
+        "htmlcov",
+        ".coverage",
+        ".qwen",
+        "egg-info",
+        "site-packages",
     }
 
-    CODE_EXTENSIONS = {'.py', '.js', '.ts', '.tsx', '.jsx', '.md', '.yaml', '.yml', '.json', '.toml', '.css', '.html'}
+    CODE_EXTENSIONS = {
+        ".py",
+        ".js",
+        ".ts",
+        ".tsx",
+        ".jsx",
+        ".md",
+        ".yaml",
+        ".yml",
+        ".json",
+        ".toml",
+        ".css",
+        ".html",
+    }
 
-    def __init__(
-        self, llm_client: LLMClientProtocol, mcp_client: MCPClientProtocol
-    ) -> None:
+    def __init__(self, llm_client: LLMClientProtocol, mcp_client: MCPClientProtocol) -> None:
         super().__init__(
             role=AgentRole.EXPLORER,
             capabilities=[AgentCapability.READ_ONLY],
@@ -102,24 +130,33 @@ class ExplorerAgent(BaseAgent):
             if files_list:
                 for f in files_list:
                     if Path(f).exists():
-                        found_files.append({
-                            "path": str(Path(f).relative_to(self._project_root) if f.startswith(str(self._project_root)) else f),
-                            "relevance": "HIGH",
-                            "reason": "Arquivo fornecido no contexto"
-                        })
+                        found_files.append(
+                            {
+                                "path": str(
+                                    Path(f).relative_to(self._project_root)
+                                    if f.startswith(str(self._project_root))
+                                    else f
+                                ),
+                                "relevance": "HIGH",
+                                "reason": "Arquivo fornecido no contexto",
+                            }
+                        )
                         # Also analyze content for classes/functions
                         try:
-                            content = Path(f).read_text(errors='ignore')
+                            content = Path(f).read_text(errors="ignore")
                             # Extract class names
                             import re
-                            classes = re.findall(r'class\s+(\w+)', content)
-                            functions = re.findall(r'def\s+(\w+)', content)
+
+                            classes = re.findall(r"class\s+(\w+)", content)
+                            functions = re.findall(r"def\s+(\w+)", content)
                             if classes or functions:
-                                found_files.append({
-                                    "path": f,
-                                    "relevance": "HIGH",
-                                    "reason": f"Classes: {', '.join(classes[:5])}; Functions: {', '.join(functions[:10])}"
-                                })
+                                found_files.append(
+                                    {
+                                        "path": f,
+                                        "relevance": "HIGH",
+                                        "reason": f"Classes: {', '.join(classes[:5])}; Functions: {', '.join(functions[:10])}",
+                                    }
+                                )
                         except (OSError, UnicodeDecodeError) as e:
                             logger.debug(f"Could not analyze content of {f}: {e}")
 
@@ -185,21 +222,42 @@ class ExplorerAgent(BaseAgent):
 
     def _detect_search_type(self, query: str) -> str:
         """Detecta o tipo de busca que o usuário quer."""
-        structure_words = {'estrutura', 'structure', 'projeto', 'project', 'pastas', 'folders', 'organização'}
-        dir_words = {'diretório', 'directory', 'pasta', 'folder', 'dir'}
+        structure_words = {
+            "estrutura",
+            "structure",
+            "projeto",
+            "project",
+            "pastas",
+            "folders",
+            "organização",
+        }
+        dir_words = {"diretório", "directory", "pasta", "folder", "dir"}
 
         if any(w in query for w in structure_words):
             return "structure"
         if any(w in query for w in dir_words):
             return "directory"
         if "deep" in query or "import" in query or "usage" in query or "find" in query:
-             return "deep_search"
+            return "deep_search"
         return "keyword"
 
     def _extract_dir_name(self, query: str) -> str:
         """Extrai nome de diretório da query."""
         # Palavras comuns a ignorar
-        ignore = {'diretório', 'directory', 'pasta', 'folder', 'dir', 'onde', 'where', 'está', 'is', 'the', 'o', 'a'}
+        ignore = {
+            "diretório",
+            "directory",
+            "pasta",
+            "folder",
+            "dir",
+            "onde",
+            "where",
+            "está",
+            "is",
+            "the",
+            "o",
+            "a",
+        }
         words = query.split()
         for w in words:
             if w.lower() not in ignore and len(w) > 2:
@@ -210,18 +268,69 @@ class ExplorerAgent(BaseAgent):
         """Extrai keywords relevantes da query."""
         # FIX E2E: Expanded stopwords to avoid matching irrelevant paths
         stopwords = {
-            'o', 'a', 'os', 'as', 'de', 'da', 'do', 'em', 'no', 'na', 'um', 'uma',
-            'para', 'com', 'por', 'que', 'se', 'e', 'ou', 'onde', 'ficam', 'estão',
-            'arquivos', 'files', 'where', 'are', 'my', 'the', 'is', 'meus', 'minha',
-            'folder', 'pasta', 'diretório', 'directory', 'find', 'search', 'buscar',
-            'procurar', 'localizar', 'show', 'mostrar', 'listar', 'list',
+            "o",
+            "a",
+            "os",
+            "as",
+            "de",
+            "da",
+            "do",
+            "em",
+            "no",
+            "na",
+            "um",
+            "uma",
+            "para",
+            "com",
+            "por",
+            "que",
+            "se",
+            "e",
+            "ou",
+            "onde",
+            "ficam",
+            "estão",
+            "arquivos",
+            "files",
+            "where",
+            "are",
+            "my",
+            "the",
+            "is",
+            "meus",
+            "minha",
+            "folder",
+            "pasta",
+            "diretório",
+            "directory",
+            "find",
+            "search",
+            "buscar",
+            "procurar",
+            "localizar",
+            "show",
+            "mostrar",
+            "listar",
+            "list",
             # FIX E2E: Added common words that cause false positives
-            'ver', 'quero', 'trechos', 'relacionados', 'relevante', 'conteúdo',
-            'código', 'como', 'funciona', 'encontre', 'mostre', 'veja', 'code',
+            "ver",
+            "quero",
+            "trechos",
+            "relacionados",
+            "relevante",
+            "conteúdo",
+            "código",
+            "como",
+            "funciona",
+            "encontre",
+            "mostre",
+            "veja",
+            "code",
         }
 
         import re
-        words = re.findall(r'\b[a-zA-Z_][a-zA-Z0-9_]*\b', query.lower())
+
+        words = re.findall(r"\b[a-zA-Z_][a-zA-Z0-9_]*\b", query.lower())
         keywords = [w for w in words if w not in stopwords and len(w) > 2]
 
         # Manter ordem mas sem duplicatas
@@ -238,28 +347,39 @@ class ExplorerAgent(BaseAgent):
         results = []
 
         # Arquivos raiz importantes
-        root_files = ['README.md', 'pyproject.toml', 'setup.py', 'requirements.txt',
-                      'Makefile', 'docker-compose.yml', '.env.example']
+        root_files = [
+            "README.md",
+            "pyproject.toml",
+            "setup.py",
+            "requirements.txt",
+            "Makefile",
+            "docker-compose.yml",
+            ".env.example",
+        ]
         for f in root_files:
             path = self._project_root / f
             if path.exists():
-                results.append({
-                    "path": f,
-                    "relevance": "HIGH",
-                    "reason": "Arquivo raiz do projeto"
-                })
+                results.append(
+                    {"path": f, "relevance": "HIGH", "reason": "Arquivo raiz do projeto"}
+                )
 
         # Diretórios principais (1 nível)
         for path in sorted(self._project_root.iterdir()):
-            if path.is_dir() and path.name not in self.EXCLUDE_DIRS and not path.name.startswith('.'):
+            if (
+                path.is_dir()
+                and path.name not in self.EXCLUDE_DIRS
+                and not path.name.startswith(".")
+            ):
                 # Contar arquivos no diretório
                 try:
-                    file_count = sum(1 for _ in path.glob('*.py'))
-                    results.append({
-                        "path": f"{path.name}/",
-                        "relevance": "HIGH" if file_count > 0 else "MEDIUM",
-                        "reason": f"Diretório com {file_count} arquivos .py"
-                    })
+                    file_count = sum(1 for _ in path.glob("*.py"))
+                    results.append(
+                        {
+                            "path": f"{path.name}/",
+                            "relevance": "HIGH" if file_count > 0 else "MEDIUM",
+                            "reason": f"Diretório com {file_count} arquivos .py",
+                        }
+                    )
                 except (PermissionError, OSError):
                     pass
 
@@ -278,21 +398,25 @@ class ExplorerAgent(BaseAgent):
                 rel_path = str(path.relative_to(self._project_root))
 
                 # Adicionar o diretório
-                results.append({
-                    "path": f"{rel_path}/",
-                    "relevance": "HIGH",
-                    "reason": f"Diretório matching '{dir_name}'"
-                })
+                results.append(
+                    {
+                        "path": f"{rel_path}/",
+                        "relevance": "HIGH",
+                        "reason": f"Diretório matching '{dir_name}'",
+                    }
+                )
 
                 # Listar arquivos dentro
                 try:
                     for f in sorted(path.iterdir())[:15]:
                         if f.is_file() and f.suffix in self.CODE_EXTENSIONS:
-                            results.append({
-                                "path": str(f.relative_to(self._project_root)),
-                                "relevance": "MEDIUM",
-                                "reason": f"Arquivo em {rel_path}/"
-                            })
+                            results.append(
+                                {
+                                    "path": str(f.relative_to(self._project_root)),
+                                    "relevance": "MEDIUM",
+                                    "reason": f"Arquivo em {rel_path}/",
+                                }
+                            )
                 except (PermissionError, OSError):
                     pass
 
@@ -311,29 +435,35 @@ class ExplorerAgent(BaseAgent):
                 rel_path = str(path.relative_to(self._project_root))
 
                 if path.is_dir():
-                    results.append({
-                        "path": f"{rel_path}/",
-                        "relevance": "HIGH",
-                        "reason": f"Diretório contém '{keyword}'"
-                    })
+                    results.append(
+                        {
+                            "path": f"{rel_path}/",
+                            "relevance": "HIGH",
+                            "reason": f"Diretório contém '{keyword}'",
+                        }
+                    )
                     # Listar alguns arquivos do diretório
                     try:
                         for f in list(path.iterdir())[:5]:
                             if f.is_file() and f.suffix in self.CODE_EXTENSIONS:
-                                results.append({
-                                    "path": str(f.relative_to(self._project_root)),
-                                    "relevance": "MEDIUM",
-                                    "reason": f"Em diretório '{keyword}'"
-                                })
+                                results.append(
+                                    {
+                                        "path": str(f.relative_to(self._project_root)),
+                                        "relevance": "MEDIUM",
+                                        "reason": f"Em diretório '{keyword}'",
+                                    }
+                                )
                     except (PermissionError, OSError):
                         pass
 
                 elif path.is_file() and path.suffix in self.CODE_EXTENSIONS:
-                    results.append({
-                        "path": rel_path,
-                        "relevance": "HIGH",
-                        "reason": f"Nome contém '{keyword}'"
-                    })
+                    results.append(
+                        {
+                            "path": rel_path,
+                            "relevance": "HIGH",
+                            "reason": f"Nome contém '{keyword}'",
+                        }
+                    )
         except (OSError, PermissionError) as e:
             logger.warning(f"Search by name for '{keyword}' failed: {e}")
 
@@ -350,14 +480,18 @@ class ExplorerAgent(BaseAgent):
             # Construir comando ripgrep
             exclude_args = []
             for ex in self.EXCLUDE_DIRS:
-                exclude_args.extend(['-g', f'!{ex}/**'])
+                exclude_args.extend(["-g", f"!{ex}/**"])
 
-            cmd = ['rg', '-l', '-i', '--max-count=1'] + exclude_args + [keyword, str(self._project_root)]
+            cmd = (
+                ["rg", "-l", "-i", "--max-count=1"]
+                + exclude_args
+                + [keyword, str(self._project_root)]
+            )
 
             output = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
 
             if output.stdout:
-                for line in output.stdout.strip().split('\n')[:20]:
+                for line in output.stdout.strip().split("\n")[:20]:
                     if line:
                         try:
                             file_path = Path(line)
@@ -366,22 +500,24 @@ class ExplorerAgent(BaseAgent):
                             # FIX E2E: Include content snippet for grounding
                             snippet = self._extract_snippet(file_path)
 
-                            results.append({
-                                "path": rel_path,
-                                "relevance": "MEDIUM",
-                                "reason": f"Contém '{keyword}'",
-                                "snippet": snippet  # FIX E2E: Add actual content
-                            })
+                            results.append(
+                                {
+                                    "path": rel_path,
+                                    "relevance": "MEDIUM",
+                                    "reason": f"Contém '{keyword}'",
+                                    "snippet": snippet,  # FIX E2E: Add actual content
+                                }
+                            )
                         except (ValueError, OSError):
                             pass
 
         except FileNotFoundError:
             # ripgrep não instalado, usar grep
             try:
-                cmd = ['grep', '-rl', '-i', '--include=*.py', keyword, str(self._project_root)]
+                cmd = ["grep", "-rl", "-i", "--include=*.py", keyword, str(self._project_root)]
                 output = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
                 if output.stdout:
-                    for line in output.stdout.strip().split('\n')[:15]:
+                    for line in output.stdout.strip().split("\n")[:15]:
                         if line and not any(ex in line for ex in self.EXCLUDE_DIRS):
                             try:
                                 file_path = Path(line)
@@ -390,12 +526,14 @@ class ExplorerAgent(BaseAgent):
                                 # FIX E2E: Include content snippet
                                 snippet = self._extract_snippet(file_path)
 
-                                results.append({
-                                    "path": rel_path,
-                                    "relevance": "MEDIUM",
-                                    "reason": f"Contém '{keyword}'",
-                                    "snippet": snippet
-                                })
+                                results.append(
+                                    {
+                                        "path": rel_path,
+                                        "relevance": "MEDIUM",
+                                        "reason": f"Contém '{keyword}'",
+                                        "snippet": snippet,
+                                    }
+                                )
                             except (ValueError, OSError):
                                 pass
             except (subprocess.TimeoutExpired, OSError):
@@ -411,19 +549,26 @@ class ExplorerAgent(BaseAgent):
         try:
             # Use grep to find 'import ... keyword' or 'from ... keyword'
             # Or usages like 'keyword('
-            cmd = ['grep', '-r', '-l', '-E', fr"import.*{keyword}|from.*{keyword}|{keyword}\(", str(self._project_root)]
+            cmd = [
+                "grep",
+                "-r",
+                "-l",
+                "-E",
+                rf"import.*{keyword}|from.*{keyword}|{keyword}\(",
+                str(self._project_root),
+            ]
 
             # Exclude dirs
             exclude_args = []
             for ex in self.EXCLUDE_DIRS:
-                exclude_args.extend(['--exclude-dir', ex])
+                exclude_args.extend(["--exclude-dir", ex])
 
             cmd.extend(exclude_args)
 
             output = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
 
             if output.stdout:
-                for line in output.stdout.strip().split('\n')[:30]:
+                for line in output.stdout.strip().split("\n")[:30]:
                     if line:
                         try:
                             file_path = Path(line)
@@ -432,12 +577,14 @@ class ExplorerAgent(BaseAgent):
                             # FIX E2E: Include content snippet for grounding
                             snippet = self._extract_snippet(file_path)
 
-                            results.append({
-                                "path": rel_path,
-                                "relevance": "HIGH",
-                                "reason": f"Deep usage/import of '{keyword}'",
-                                "snippet": snippet  # FIX E2E: Add actual content
-                            })
+                            results.append(
+                                {
+                                    "path": rel_path,
+                                    "relevance": "HIGH",
+                                    "reason": f"Deep usage/import of '{keyword}'",
+                                    "snippet": snippet,  # FIX E2E: Add actual content
+                                }
+                            )
                         except (ValueError, OSError) as e:
                             logger.debug(f"Failed to process file in deep search: {e}")
         except (subprocess.TimeoutExpired, OSError) as e:
@@ -462,30 +609,22 @@ class ExplorerAgent(BaseAgent):
             if not file_path.exists():
                 return ""
 
-            content = file_path.read_text(encoding='utf-8', errors='ignore')
+            content = file_path.read_text(encoding="utf-8", errors="ignore")
 
             if len(content) <= limit:
                 return content
 
             # Try to get first class or function (more meaningful than arbitrary cut)
-            class_match = re.search(
-                r'(class \w+.*?(?=\n\nclass |\n\ndef |\Z))',
-                content,
-                re.DOTALL
-            )
+            class_match = re.search(r"(class \w+.*?(?=\n\nclass |\n\ndef |\Z))", content, re.DOTALL)
             if class_match and len(class_match.group(1)) <= limit * 2:
                 return class_match.group(1)
 
-            func_match = re.search(
-                r'(def \w+.*?(?=\n\ndef |\n\nclass |\Z))',
-                content,
-                re.DOTALL
-            )
+            func_match = re.search(r"(def \w+.*?(?=\n\ndef |\n\nclass |\Z))", content, re.DOTALL)
             if func_match and len(func_match.group(1)) <= limit:
                 return func_match.group(1)
 
             # Fallback to first N chars
-            return content[:limit] + '...'
+            return content[:limit] + "..."
 
         except (OSError, UnicodeDecodeError) as e:
             logger.debug(f"Snippet extraction failed for {file_path}: {e}")
@@ -516,13 +655,15 @@ class ExplorerAgent(BaseAgent):
                     # Include content snippet
                     snippet = self._extract_snippet(path)
 
-                    results.append({
-                        "path": rel_path,
-                        "relevance": "HIGH",
-                        "reason": f"Arquivo contém '{keyword}'",
-                        "snippet": snippet,
-                        "size": path.stat().st_size
-                    })
+                    results.append(
+                        {
+                            "path": rel_path,
+                            "relevance": "HIGH",
+                            "reason": f"Arquivo contém '{keyword}'",
+                            "snippet": snippet,
+                            "size": path.stat().st_size,
+                        }
+                    )
 
                     if len(results) >= 20:
                         break

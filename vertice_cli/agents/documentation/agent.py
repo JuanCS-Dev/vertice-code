@@ -52,8 +52,10 @@ except ImportError:
 try:
     from vertice_cli.core.temperature_config import get_temperature
 except ImportError:
+
     def get_temperature(agent_type: str, task_type: str = None) -> float:
         return 0.4  # Documentation default
+
 
 logger = logging.getLogger(__name__)
 
@@ -74,9 +76,7 @@ class DocumentationAgent(BaseAgent):
         capabilities: READ_ONLY + FILE_EDIT
     """
 
-    def __init__(
-        self, llm_client: Optional[Any] = None, mcp_client: Optional[Any] = None
-    ):
+    def __init__(self, llm_client: Optional[Any] = None, mcp_client: Optional[Any] = None):
         """Initialize DocumentationAgent.
 
         Args:
@@ -119,11 +119,9 @@ class DocumentationAgent(BaseAgent):
         extractor = MarkdownExtractor(deduplicate=True)
         blocks = extractor.extract_code_blocks(text)
 
-        return '\n\n'.join(block.content for block in blocks)
+        return "\n\n".join(block.content for block in blocks)
 
-    async def _document_inline_code(
-        self, code: str, style: DocstringStyle
-    ) -> AgentResponse:
+    async def _document_inline_code(self, code: str, style: DocstringStyle) -> AgentResponse:
         """Document inline code provided in user message.
 
         Args:
@@ -142,7 +140,7 @@ class DocumentationAgent(BaseAgent):
                 classes=[],
                 functions=[],
                 imports=[],
-                file_path="<inline>"
+                file_path="<inline>",
             )
 
             for node in tree.body:
@@ -160,21 +158,21 @@ class DocumentationAgent(BaseAgent):
                     "source": "inline_code",
                     "classes": len(module_doc.classes),
                     "functions": len(module_doc.functions),
-                    "code_analyzed": code[:500]
+                    "code_analyzed": code[:500],
                 },
                 reasoning=f"Analyzed inline code: {len(module_doc.classes)} classes, "
-                         f"{len(module_doc.functions)} functions"
+                f"{len(module_doc.functions)} functions",
             )
         except SyntaxError:
             return AgentResponse(
                 success=True,
                 data={
                     "documentation": f"# Code Documentation\n\n```python\n{code}\n```\n\n"
-                                    "*Note: Code contains syntax errors, showing raw content.*",
+                    "*Note: Code contains syntax errors, showing raw content.*",
                     "source": "inline_code_raw",
-                    "code_analyzed": code[:500]
+                    "code_analyzed": code[:500],
                 },
-                reasoning="Code contains syntax errors, documented as raw content"
+                reasoning="Code contains syntax errors, documented as raw content",
             )
 
     async def execute(self, task: AgentTask) -> AgentResponse:
@@ -225,13 +223,17 @@ class DocumentationAgent(BaseAgent):
             # Route to appropriate handler
             request_lower = task.request.lower()
             if any(kw in request_lower for kw in ["generate_docs", "documentation", "docstring"]):
-                return await self._generate_docs(target_path, doc_format, style, output_path, files_list)
+                return await self._generate_docs(
+                    target_path, doc_format, style, output_path, files_list
+                )
             elif "validate" in request_lower:
                 return await self._validate_docstrings(target_path, style)
             elif "readme" in request_lower:
                 return await self._create_readme(target_path, output_path)
             else:
-                return await self._generate_docs(target_path, doc_format, style, output_path, files_list)
+                return await self._generate_docs(
+                    target_path, doc_format, style, output_path, files_list
+                )
 
         except Exception as e:
             return AgentResponse(
@@ -254,7 +256,7 @@ class DocumentationAgent(BaseAgent):
 
         # Find all Python files
         if files_list:
-            python_files = [Path(f) for f in files_list if f.endswith('.py') and Path(f).exists()]
+            python_files = [Path(f) for f in files_list if f.endswith(".py") and Path(f).exists()]
         elif target_path.is_file():
             python_files = [target_path]
         else:
@@ -276,15 +278,17 @@ class DocumentationAgent(BaseAgent):
         if not modules and python_files:
             for py_file in python_files[:5]:
                 try:
-                    content = py_file.read_text(encoding='utf-8', errors='ignore')
-                    modules.append(ModuleDoc(
-                        name=py_file.stem,
-                        classes=[],
-                        functions=[],
-                        imports=[],
-                        file_path=str(py_file),
-                        docstring=f"**Raw Content Preview**:\n\n```python\n{content[:2000]}\n```"
-                    ))
+                    content = py_file.read_text(encoding="utf-8", errors="ignore")
+                    modules.append(
+                        ModuleDoc(
+                            name=py_file.stem,
+                            classes=[],
+                            functions=[],
+                            imports=[],
+                            file_path=str(py_file),
+                            docstring=f"**Raw Content Preview**:\n\n```python\n{content[:2000]}\n```",
+                        )
+                    )
                 except OSError as e:
                     logger.debug(f"Could not read {py_file}: {e}")
 
@@ -339,9 +343,7 @@ class DocumentationAgent(BaseAgent):
             reasoning=f"Analyzed {len(modules)} modules, generated documentation",
         )
 
-    async def _validate_docstrings(
-        self, target_path: Path, style: DocstringStyle
-    ) -> AgentResponse:
+    async def _validate_docstrings(self, target_path: Path, style: DocstringStyle) -> AgentResponse:
         """Validate existing docstrings against style guide."""
         result = validate_docstrings(target_path, style)
 
@@ -351,9 +353,7 @@ class DocumentationAgent(BaseAgent):
             reasoning=f"Found {result['total_issues']} docstring issues",
         )
 
-    async def _create_readme(
-        self, target_path: Path, output_path: Optional[str]
-    ) -> AgentResponse:
+    async def _create_readme(self, target_path: Path, output_path: Optional[str]) -> AgentResponse:
         """Generate README.md for project/module."""
         modules = []
         python_files = list(target_path.rglob("*.py"))
@@ -381,7 +381,9 @@ class DocumentationAgent(BaseAgent):
         )
 
     # Sync API delegation methods
-    def generate_documentation(self, code: str, doc_type: str = "function", style: str = "google") -> Dict[str, Any]:
+    def generate_documentation(
+        self, code: str, doc_type: str = "function", style: str = "google"
+    ) -> Dict[str, Any]:
         """Generate documentation for code snippet (SYNC wrapper)."""
         return self._sync_api.generate_documentation(code, doc_type, style)
 

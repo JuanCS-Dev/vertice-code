@@ -36,10 +36,7 @@ class GitRollback:
         try:
             # Check if in git repo
             result = subprocess.run(
-                ["git", "rev-parse", "--git-dir"],
-                capture_output=True,
-                text=True,
-                timeout=5
+                ["git", "rev-parse", "--git-dir"], capture_output=True, text=True, timeout=5
             )
 
             if result.returncode != 0:
@@ -48,10 +45,7 @@ class GitRollback:
 
             # Check if there are changes
             result = subprocess.run(
-                ["git", "status", "--porcelain"],
-                capture_output=True,
-                text=True,
-                timeout=5
+                ["git", "status", "--porcelain"], capture_output=True, text=True, timeout=5
             )
 
             if not result.stdout.strip():
@@ -59,19 +53,12 @@ class GitRollback:
                 return None
 
             # Stage all changes
-            subprocess.run(
-                ["git", "add", "-A"],
-                capture_output=True,
-                timeout=10
-            )
+            subprocess.run(["git", "add", "-A"], capture_output=True, timeout=10)
 
             # Commit with checkpoint tag
             commit_msg = f"[VERTICE-CHECKPOINT] {message}"
             result = subprocess.run(
-                ["git", "commit", "-m", commit_msg],
-                capture_output=True,
-                text=True,
-                timeout=10
+                ["git", "commit", "-m", commit_msg], capture_output=True, text=True, timeout=10
             )
 
             if result.returncode != 0:
@@ -80,10 +67,7 @@ class GitRollback:
 
             # Get commit SHA
             result = subprocess.run(
-                ["git", "rev-parse", "HEAD"],
-                capture_output=True,
-                text=True,
-                timeout=5
+                ["git", "rev-parse", "HEAD"], capture_output=True, text=True, timeout=5
             )
 
             sha = result.stdout.strip()
@@ -111,7 +95,7 @@ class GitRollback:
                 ["git", "reset", "--hard", checkpoint_sha],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=10,
             )
 
             if result.returncode != 0:

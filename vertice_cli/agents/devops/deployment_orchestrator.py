@@ -120,9 +120,7 @@ class DeploymentOrchestrator:
         await asyncio.sleep(1)
 
         # Update success rate (exponential moving average)
-        self.deployment_success_rate = (
-            self.deployment_success_rate * 0.99 + 1.0 * 0.01
-        )
+        self.deployment_success_rate = self.deployment_success_rate * 0.99 + 1.0 * 0.01
 
         return {
             "deployment_id": plan.deployment_id,

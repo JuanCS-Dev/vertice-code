@@ -105,6 +105,7 @@ class Breadcrumb(Widget):
 
     class ItemClicked(Message):
         """Breadcrumb item was clicked."""
+
         def __init__(self, path: str) -> None:
             self.path = path
             super().__init__()
@@ -132,23 +133,18 @@ class Breadcrumb(Widget):
         if isinstance(path, Path):
             # Convert Path to parts
             self._path_items = [
-                (part, str(Path(*path.parts[:i+1])))
+                (part, str(Path(*path.parts[: i + 1])))
                 for i, part in enumerate(path.parts)
                 if part != "/"
             ]
         elif isinstance(path, list):
             # List of labels
-            self._path_items = [
-                (label, "/".join(path[:i+1]))
-                for i, label in enumerate(path)
-            ]
+            self._path_items = [(label, "/".join(path[: i + 1])) for i, label in enumerate(path)]
         else:
             # String path
             parts = path.strip("/").split("/")
             self._path_items = [
-                (part, "/".join(parts[:i+1]))
-                for i, part in enumerate(parts)
-                if part
+                (part, "/".join(parts[: i + 1])) for i, part in enumerate(parts) if part
             ]
 
         self._render_breadcrumb()
@@ -176,7 +172,7 @@ class Breadcrumb(Widget):
                 # Show first, ellipsis, last N-1
                 truncated = [items[0]]
                 truncated.append(("...", ""))
-                truncated.extend(items[-(self._max_items - 2):])
+                truncated.extend(items[-(self._max_items - 2) :])
                 items = truncated
 
             # Add items with separators
@@ -186,17 +182,19 @@ class Breadcrumb(Widget):
                 if label == "...":
                     container.mount(BreadcrumbItem("...", is_separator=True))
                 else:
-                    container.mount(BreadcrumbItem(
-                        label,
-                        path=path,
-                        is_current=is_current,
-                    ))
+                    container.mount(
+                        BreadcrumbItem(
+                            label,
+                            path=path,
+                            is_current=is_current,
+                        )
+                    )
 
                 # Add separator except after last item
                 if i < len(items) - 1 and label != "...":
                     container.mount(BreadcrumbItem("", is_separator=True))
 
-        except Exception:
+        except (AttributeError, ValueError, RuntimeError):
             pass
 
     def push(self, label: str, path: Optional[str] = None) -> None:
@@ -228,7 +226,7 @@ class Breadcrumb(Widget):
         # Find the path and truncate to that point
         for i, (_, item_path) in enumerate(self._path_items):
             if item_path == path:
-                self._path_items = self._path_items[:i+1]
+                self._path_items = self._path_items[: i + 1]
                 self._render_breadcrumb()
                 break
 
@@ -279,7 +277,9 @@ class ContextBreadcrumb(Breadcrumb):
             items.append((self._tool, path))
 
         if self._action:
-            path = f"{self._mode}/{self._agent or 'default'}/{self._tool or 'default'}/{self._action}"
+            path = (
+                f"{self._mode}/{self._agent or 'default'}/{self._tool or 'default'}/{self._action}"
+            )
             items.append((self._action, path))
 
         self.set_items(items)

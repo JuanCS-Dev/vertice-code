@@ -32,6 +32,7 @@ import logging
 # Try to import filelock
 try:
     from filelock import FileLock, Timeout as LockTimeout
+
     HAS_FILELOCK = True
 except ImportError:
     HAS_FILELOCK = False
@@ -40,16 +41,18 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar('T')
-F = TypeVar('F', bound=Callable[..., Any])
+T = TypeVar("T")
+F = TypeVar("F", bound=Callable[..., Any])
 
 
 # =============================================================================
 # CONCURRENCY MANAGER
 # =============================================================================
 
+
 class LockType(Enum):
     """Types of locks."""
+
     READ = "read"
     WRITE = "write"
     EXCLUSIVE = "exclusive"
@@ -58,6 +61,7 @@ class LockType(Enum):
 @dataclass
 class LockInfo:
     """Information about an acquired lock."""
+
     resource: str
     lock_type: LockType
     acquired_at: float
@@ -144,7 +148,7 @@ class ConcurrencyManager:
         try:
             await asyncio.wait_for(
                 loop.run_in_executor(None, lambda: self._get_lock(resource).acquire()),
-                timeout=timeout or self.default_timeout
+                timeout=timeout or self.default_timeout,
             )
         except asyncio.TimeoutError:
             raise TimeoutError(f"Could not acquire lock for {resource}")
@@ -182,9 +186,11 @@ class ConcurrencyManager:
 # RESOURCE LIMITS
 # =============================================================================
 
+
 @dataclass
 class ResourceConfig:
     """Resource limit configuration."""
+
     max_memory_mb: int = 256
     max_file_size_mb: int = 50
     max_files_per_operation: int = 1000
@@ -196,6 +202,7 @@ class ResourceConfig:
 @dataclass
 class ResourceUsage:
     """Current resource usage."""
+
     memory_mb: float = 0.0
     disk_available_mb: float = 0.0
     open_files: int = 0
@@ -238,7 +245,7 @@ class ResourceLimits:
         try:
             disk = psutil.disk_usage(os.getcwd())
             disk_available_mb = disk.free / (1024 * 1024)
-        except Exception:
+        except (OSError, FileNotFoundError):
             disk_available_mb = 0
 
         return ResourceUsage(
@@ -253,8 +260,8 @@ class ResourceLimits:
         try:
             usage = self.get_usage()
             return (usage.memory_mb + size_mb) <= self.config.max_memory_mb
-        except Exception:
-            return True  # Allow if we can't check
+        except (OSError, AttributeError):
+            return True
 
     def check_file_size(self, size_bytes: int) -> bool:
         """Check if file size is within limits."""
@@ -270,6 +277,7 @@ class ResourceLimits:
         """
         try:
             import psutil
+
             disk = psutil.disk_usage(os.path.dirname(os.path.abspath(path)))
             available_mb = disk.free / (1024 * 1024)
 
@@ -298,7 +306,9 @@ class ResourceLimits:
         usage = self.get_usage()
 
         if usage.memory_mb > self.config.max_memory_mb:
-            violations.append(f"Memory limit exceeded: {usage.memory_mb:.1f}MB > {self.config.max_memory_mb}MB")
+            violations.append(
+                f"Memory limit exceeded: {usage.memory_mb:.1f}MB > {self.config.max_memory_mb}MB"
+            )
 
         if usage.disk_available_mb < self.config.min_disk_space_mb:
             violations.append(f"Low disk space: {usage.disk_available_mb:.1f}MB")
@@ -309,6 +319,7 @@ class ResourceLimits:
 # =============================================================================
 # ENCODING SAFETY
 # =============================================================================
+
 
 class EncodingSafety:
     """
@@ -331,15 +342,15 @@ class EncodingSafety:
     DANGEROUS_FILENAME_CHARS = set('<>:"/\\|?*\x00')
 
     # Unicode normalization forms
-    NORMALIZATION_FORMS = ['NFC', 'NFD', 'NFKC', 'NFKD']
+    NORMALIZATION_FORMS = ["NFC", "NFD", "NFKC", "NFKD"]
 
     def __init__(
         self,
-        default_encoding: str = 'utf-8',
+        default_encoding: str = "utf-8",
         fallback_encodings: Optional[List[str]] = None,
     ):
         self.default_encoding = default_encoding
-        self.fallback_encodings = fallback_encodings or ['latin-1', 'cp1252', 'iso-8859-1']
+        self.fallback_encodings = fallback_encodings or ["latin-1", "cp1252", "iso-8859-1"]
 
     def read_file_safe(self, path: str) -> Tuple[str, str]:
         """
@@ -352,11 +363,11 @@ class EncodingSafety:
 
         for encoding in encodings:
             try:
-                with open(path, 'r', encoding=encoding) as f:
+                with open(path, "r", encoding=encoding) as f:
                     content = f.read()
 
                 # Handle BOM
-                if content.startswith('\ufeff'):
+                if content.startswith("\ufeff"):
                     content = content[1:]
 
                 return content, encoding
@@ -365,10 +376,10 @@ class EncodingSafety:
                 continue
 
         # Last resort: read as binary and decode with errors='replace'
-        with open(path, 'rb') as f:
+        with open(path, "rb") as f:
             raw = f.read()
 
-        return raw.decode('utf-8', errors='replace'), 'utf-8-replace'
+        return raw.decode("utf-8", errors="replace"), "utf-8-replace"
 
     def write_file_safe(
         self,
@@ -381,54 +392,64 @@ class EncodingSafety:
 
         try:
             # Normalize unicode
-            content = unicodedata.normalize('NFC', content)
+            content = unicodedata.normalize("NFC", content)
 
-            with open(path, 'w', encoding=encoding) as f:
+            with open(path, "w", encoding=encoding) as f:
                 f.write(content)
 
             return True
 
         except UnicodeEncodeError:
             # Try with replacement
-            content_safe = content.encode(encoding, errors='replace').decode(encoding)
-            with open(path, 'w', encoding=encoding) as f:
+            content_safe = content.encode(encoding, errors="replace").decode(encoding)
+            with open(path, "w", encoding=encoding) as f:
                 f.write(content_safe)
             return True
 
     def sanitize_filename(self, filename: str) -> str:
         """Sanitize filename for safe filesystem use."""
         # Normalize unicode
-        sanitized = unicodedata.normalize('NFC', filename)
+        sanitized = unicodedata.normalize("NFC", filename)
 
         # Remove dangerous characters
-        sanitized = ''.join(c if c not in self.DANGEROUS_FILENAME_CHARS else '_' for c in sanitized)
+        sanitized = "".join(c if c not in self.DANGEROUS_FILENAME_CHARS else "_" for c in sanitized)
 
         # Remove control characters
-        sanitized = ''.join(c for c in sanitized if unicodedata.category(c) != 'Cc')
+        sanitized = "".join(c for c in sanitized if unicodedata.category(c) != "Cc")
 
         # Limit length
-        if len(sanitized.encode('utf-8')) > 255:
+        if len(sanitized.encode("utf-8")) > 255:
             # Truncate by bytes
-            sanitized = sanitized.encode('utf-8')[:250].decode('utf-8', errors='ignore')
+            sanitized = sanitized.encode("utf-8")[:250].decode("utf-8", errors="ignore")
 
-        return sanitized or 'unnamed'
+        return sanitized or "unnamed"
 
     def is_safe_string(self, text: str) -> Tuple[bool, List[str]]:
         """Check if string is safe (no dangerous unicode)."""
         issues = []
 
         # Check for null bytes
-        if '\x00' in text:
+        if "\x00" in text:
             issues.append("Contains null bytes")
 
         # Check for direction override characters
-        bidi_chars = {'\u202a', '\u202b', '\u202c', '\u202d', '\u202e', '\u2066', '\u2067', '\u2068', '\u2069'}
+        bidi_chars = {
+            "\u202a",
+            "\u202b",
+            "\u202c",
+            "\u202d",
+            "\u202e",
+            "\u2066",
+            "\u2067",
+            "\u2068",
+            "\u2069",
+        }
         found_bidi = bidi_chars & set(text)
         if found_bidi:
             issues.append(f"Contains bidirectional override: {found_bidi}")
 
         # Check for zero-width characters
-        zwc = {'\u200b', '\u200c', '\u200d', '\ufeff'}
+        zwc = {"\u200b", "\u200c", "\u200d", "\ufeff"}
         found_zwc = zwc & set(text)
         if found_zwc:
             issues.append(f"Contains zero-width characters: {len(found_zwc)}")
@@ -440,8 +461,10 @@ class EncodingSafety:
 # RATE LIMITER
 # =============================================================================
 
+
 class RateLimitAlgorithm(Enum):
     """Rate limiting algorithms."""
+
     TOKEN_BUCKET = "token_bucket"
     SLIDING_WINDOW = "sliding_window"
     FIXED_WINDOW = "fixed_window"
@@ -450,6 +473,7 @@ class RateLimitAlgorithm(Enum):
 @dataclass
 class RateLimitConfig:
     """Rate limit configuration."""
+
     requests_per_second: float = 10.0
     burst_size: int = 20
     retry_after: float = 1.0
@@ -494,8 +518,7 @@ class RateLimiter:
         now = time.time()
         elapsed = now - self._last_update
         self._tokens = min(
-            self.config.burst_size,
-            self._tokens + elapsed * self.config.requests_per_second
+            self.config.burst_size, self._tokens + elapsed * self.config.requests_per_second
         )
         self._last_update = now
 
@@ -542,7 +565,7 @@ class RateLimiter:
         if self._failure_count >= self.config.max_retries:
             self._circuit_open = True
             self._circuit_open_until = time.time() + (
-                self.config.retry_after * (self.config.backoff_factor ** self._failure_count)
+                self.config.retry_after * (self.config.backoff_factor**self._failure_count)
             )
 
     def record_success(self) -> None:
@@ -553,6 +576,7 @@ class RateLimiter:
     def rate_limited(self, func: F) -> F:
         """Decorator for rate-limited functions."""
         if asyncio.iscoroutinefunction(func):
+
             @wraps(func)
             async def async_wrapper(*args, **kwargs):
                 await self.wait_for_token()
@@ -560,11 +584,13 @@ class RateLimiter:
                     result = await func(*args, **kwargs)
                     self.record_success()
                     return result
-                except Exception:
+                except BaseException:
                     self.record_failure()
                     raise
+
             return async_wrapper
         else:
+
             @wraps(func)
             def sync_wrapper(*args, **kwargs):
                 wait = self.wait_time()
@@ -576,9 +602,10 @@ class RateLimiter:
                     result = func(*args, **kwargs)
                     self.record_success()
                     return result
-                except Exception:
+                except BaseException:
                     self.record_failure()
                     raise
+
             return sync_wrapper
 
 
@@ -628,24 +655,21 @@ def get_rate_limiter() -> RateLimiter:
 # Export all public symbols
 __all__ = [
     # Concurrency
-    'LockType',
-    'LockInfo',
-    'ConcurrencyManager',
-    'get_concurrency_manager',
-
+    "LockType",
+    "LockInfo",
+    "ConcurrencyManager",
+    "get_concurrency_manager",
     # Resources
-    'ResourceConfig',
-    'ResourceUsage',
-    'ResourceLimits',
-    'get_resource_limits',
-
+    "ResourceConfig",
+    "ResourceUsage",
+    "ResourceLimits",
+    "get_resource_limits",
     # Encoding
-    'EncodingSafety',
-    'get_encoding_safety',
-
+    "EncodingSafety",
+    "get_encoding_safety",
     # Rate Limiting
-    'RateLimitAlgorithm',
-    'RateLimitConfig',
-    'RateLimiter',
-    'get_rate_limiter',
+    "RateLimitAlgorithm",
+    "RateLimitConfig",
+    "RateLimiter",
+    "get_rate_limiter",
 ]

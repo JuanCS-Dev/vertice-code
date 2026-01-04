@@ -435,9 +435,7 @@ class FilePickerDialog(ModalScreen[Optional[Path]]):
                 yield Button("Select", variant="primary", id="select")
                 yield Button("Cancel", variant="default", id="cancel")
 
-    def on_directory_tree_file_selected(
-        self, event: DirectoryTree.FileSelected
-    ) -> None:
+    def on_directory_tree_file_selected(self, event: DirectoryTree.FileSelected) -> None:
         self._selected_path = event.path
         self.query_one("#selected", Static).update(str(event.path))
 
@@ -540,9 +538,7 @@ async def confirm(
         if await confirm(self.app, "Delete this file?", destructive=True):
             self.delete_file()
     """
-    return await app.push_screen_wait(
-        ConfirmDialog(message, title, destructive=destructive)
-    )
+    return await app.push_screen_wait(ConfirmDialog(message, title, destructive=destructive))
 
 
 async def alert(
@@ -574,9 +570,7 @@ async def prompt(
         if name:
             self.greet(name)
     """
-    return await app.push_screen_wait(
-        InputDialog(message, title, default_value=default)
-    )
+    return await app.push_screen_wait(InputDialog(message, title, default_value=default))
 
 
 __all__ = [

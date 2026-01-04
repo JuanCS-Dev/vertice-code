@@ -40,6 +40,7 @@ from ..wisdom import get_random_verse
 
 class CommandCategory(Enum):
     """Command categories."""
+
     FILE = "file"
     EDIT = "edit"
     SEARCH = "search"
@@ -53,14 +54,14 @@ class CommandCategory(Enum):
 
 # Category icons and colors (Phase 9: Unicode minimalista)
 CATEGORY_CONFIG = {
-    CommandCategory.FILE: {"icon": "▪", "color": COLORS['accent_blue']},
-    CommandCategory.EDIT: {"icon": "▸", "color": COLORS['accent_green']},
-    CommandCategory.SEARCH: {"icon": "○", "color": COLORS['accent_yellow']},
-    CommandCategory.GIT: {"icon": "⎇", "color": COLORS['accent_purple']},
-    CommandCategory.TOOLS: {"icon": "⚡", "color": COLORS['accent_blue']},
-    CommandCategory.VIEW: {"icon": "◎", "color": COLORS['text_secondary']},
-    CommandCategory.HELP: {"icon": "ℹ", "color": COLORS['accent_yellow']},
-    CommandCategory.SYSTEM: {"icon": "⊡", "color": COLORS['text_secondary']},
+    CommandCategory.FILE: {"icon": "▪", "color": COLORS["accent_blue"]},
+    CommandCategory.EDIT: {"icon": "▸", "color": COLORS["accent_green"]},
+    CommandCategory.SEARCH: {"icon": "○", "color": COLORS["accent_yellow"]},
+    CommandCategory.GIT: {"icon": "⎇", "color": COLORS["accent_purple"]},
+    CommandCategory.TOOLS: {"icon": "⚡", "color": COLORS["accent_blue"]},
+    CommandCategory.VIEW: {"icon": "◎", "color": COLORS["text_secondary"]},
+    CommandCategory.HELP: {"icon": "ℹ", "color": COLORS["accent_yellow"]},
+    CommandCategory.SYSTEM: {"icon": "⊡", "color": COLORS["text_secondary"]},
     CommandCategory.AGENTS: {"icon": "◆", "color": "#22D3EE"},
 }
 
@@ -68,6 +69,7 @@ CATEGORY_CONFIG = {
 @dataclass
 class Command:
     """Command definition for palette."""
+
     id: str
     title: str
     description: str
@@ -94,7 +96,7 @@ class Command:
         """Get formatted title with category icon."""
         config = CATEGORY_CONFIG[self.category]
         text = Text()
-        text.append(f"{config['icon']} ", style=config['color'])
+        text.append(f"{config['icon']} ", style=config["color"])
         text.append(self.title, style=PRESET_STYLES.EMPHASIS)
 
         if self.keybinding:
@@ -144,15 +146,11 @@ class FuzzyMatcher:
 
         consecutive_count = 0
         for i in range(1, len(matches)):
-            if matches[i] == matches[i-1] + 1:
+            if matches[i] == matches[i - 1] + 1:
                 consecutive_count += 1
         consecutive_score = consecutive_count / max(len(matches) - 1, 1)
 
-        final_score = (
-            base_score * 0.4 +
-            position_score * 0.3 +
-            consecutive_score * 0.3
-        )
+        final_score = base_score * 0.4 + position_score * 0.3 + consecutive_score * 0.3
 
         return min(final_score, 1.0)
 
@@ -240,7 +238,7 @@ class CommandPalette:
             try:
                 cmd.action()
                 return True
-            except Exception:
+            except (TypeError, ValueError, RuntimeError):
                 return False
 
         return True
@@ -264,7 +262,7 @@ class CommandPalette:
                 Align.center(content),
                 title="[bold]Command Palette[/bold]",
                 subtitle=f"[dim]{query}[/dim]" if query else None,
-                border_style=COLORS['border_muted'],
+                border_style=COLORS["border_muted"],
                 padding=(1, 2),
             )
 
@@ -292,14 +290,14 @@ class CommandPalette:
         query_text.append("Search: ", style=PRESET_STYLES.SECONDARY)
         query_text.append(
             query or "(type to search)",
-            style=PRESET_STYLES.EMPHASIS if query else PRESET_STYLES.DIM
+            style=PRESET_STYLES.EMPHASIS if query else PRESET_STYLES.DIM,
         )
 
         return Panel(
             table,
             title="[bold]⌘ Command Palette[/bold]",
             subtitle=query_text,
-            border_style=COLORS['accent_blue'],
+            border_style=COLORS["accent_blue"],
             padding=(1, 2),
         )
 
@@ -310,82 +308,210 @@ class CommandPalette:
 
 DEFAULT_COMMANDS = [
     # File
-    Command("file.open", "Open File", "Open a file", CommandCategory.FILE,
-            ["read", "load"], "Ctrl+O"),
-    Command("file.save", "Save File", "Save current file", CommandCategory.FILE,
-            ["write"], "Ctrl+S"),
-    Command("file.tree", "File Tree", "Display directory tree", CommandCategory.FILE,
-            ["directory", "folder"]),
-
+    Command(
+        "file.open", "Open File", "Open a file", CommandCategory.FILE, ["read", "load"], "Ctrl+O"
+    ),
+    Command(
+        "file.save", "Save File", "Save current file", CommandCategory.FILE, ["write"], "Ctrl+S"
+    ),
+    Command(
+        "file.tree",
+        "File Tree",
+        "Display directory tree",
+        CommandCategory.FILE,
+        ["directory", "folder"],
+    ),
     # Search
-    Command("search.files", "Search Files", "Search by name", CommandCategory.SEARCH,
-            ["find", "locate"], "Ctrl+P"),
-    Command("search.content", "Search Content", "Search in files", CommandCategory.SEARCH,
-            ["grep", "text"], "Ctrl+Shift+F"),
-
+    Command(
+        "search.files",
+        "Search Files",
+        "Search by name",
+        CommandCategory.SEARCH,
+        ["find", "locate"],
+        "Ctrl+P",
+    ),
+    Command(
+        "search.content",
+        "Search Content",
+        "Search in files",
+        CommandCategory.SEARCH,
+        ["grep", "text"],
+        "Ctrl+Shift+F",
+    ),
     # Git
-    Command("git.status", "Git Status", "Repository status", CommandCategory.GIT,
-            ["vcs", "version"]),
-    Command("git.diff", "Git Diff", "Show changes", CommandCategory.GIT,
-            ["changes"]),
-    Command("git.commit", "Git Commit", "Commit staged", CommandCategory.GIT,
-            ["save"]),
-
+    Command(
+        "git.status", "Git Status", "Repository status", CommandCategory.GIT, ["vcs", "version"]
+    ),
+    Command("git.diff", "Git Diff", "Show changes", CommandCategory.GIT, ["changes"]),
+    Command("git.commit", "Git Commit", "Commit staged", CommandCategory.GIT, ["save"]),
     # Tools
-    Command("tools.terminal", "Terminal", "Open terminal", CommandCategory.TOOLS,
-            ["shell", "bash"], "Ctrl+`"),
-
+    Command(
+        "tools.terminal",
+        "Terminal",
+        "Open terminal",
+        CommandCategory.TOOLS,
+        ["shell", "bash"],
+        "Ctrl+`",
+    ),
     # View
-    Command("view.metrics", "Metrics", "LEI, HRI, CPI metrics", CommandCategory.VIEW,
-            ["constitutional", "stats"]),
-
+    Command(
+        "view.metrics",
+        "Metrics",
+        "LEI, HRI, CPI metrics",
+        CommandCategory.VIEW,
+        ["constitutional", "stats"],
+    ),
     # Help
-    Command("help.commands", "All Commands", "List commands", CommandCategory.HELP,
-            ["list", "palette"], "Ctrl+Shift+P"),
-
+    Command(
+        "help.commands",
+        "All Commands",
+        "List commands",
+        CommandCategory.HELP,
+        ["list", "palette"],
+        "Ctrl+Shift+P",
+    ),
     # CLI Agents (14)
-    Command("agent.planner", "Planner Agent", "GOAP planning", CommandCategory.AGENTS,
-            ["plan", "goap", "decomposition"]),
-    Command("agent.executor", "Executor Agent", "Secure execution", CommandCategory.AGENTS,
-            ["run", "bash", "python"]),
-    Command("agent.architect", "Architect Agent", "Architecture analysis", CommandCategory.AGENTS,
-            ["design", "system", "veto"]),
-    Command("agent.reviewer", "Reviewer Agent", "Code review", CommandCategory.AGENTS,
-            ["review", "pr", "quality"]),
-    Command("agent.explorer", "Explorer Agent", "Codebase exploration", CommandCategory.AGENTS,
-            ["search", "navigate", "find"]),
-    Command("agent.refactorer", "Refactorer Agent", "Code refactoring", CommandCategory.AGENTS,
-            ["refactor", "improve", "clean"]),
-    Command("agent.testing", "Testing Agent", "Test generation", CommandCategory.AGENTS,
-            ["test", "coverage", "pytest"]),
-    Command("agent.security", "Security Agent", "OWASP analysis", CommandCategory.AGENTS,
-            ["scan", "audit", "vulnerabilities"]),
-    Command("agent.documentation", "Documentation Agent", "Docs generation", CommandCategory.AGENTS,
-            ["docs", "docstrings", "readme"]),
-    Command("agent.performance", "Performance Agent", "Profiling", CommandCategory.AGENTS,
-            ["profile", "optimize", "benchmark"]),
-    Command("agent.devops", "DevOps Agent", "Infrastructure", CommandCategory.AGENTS,
-            ["docker", "kubernetes", "deploy"]),
-    Command("agent.justica", "Justica Agent", "Governance", CommandCategory.AGENTS,
-            ["evaluate", "approve", "block"]),
-    Command("agent.sofia", "Sofia Agent", "Ethical counsel", CommandCategory.AGENTS,
-            ["counsel", "ethics", "wisdom"]),
-    Command("agent.data", "Data Agent", "Database analysis", CommandCategory.AGENTS,
-            ["database", "schema", "sql"]),
-
+    Command(
+        "agent.planner",
+        "Planner Agent",
+        "GOAP planning",
+        CommandCategory.AGENTS,
+        ["plan", "goap", "decomposition"],
+    ),
+    Command(
+        "agent.executor",
+        "Executor Agent",
+        "Secure execution",
+        CommandCategory.AGENTS,
+        ["run", "bash", "python"],
+    ),
+    Command(
+        "agent.architect",
+        "Architect Agent",
+        "Architecture analysis",
+        CommandCategory.AGENTS,
+        ["design", "system", "veto"],
+    ),
+    Command(
+        "agent.reviewer",
+        "Reviewer Agent",
+        "Code review",
+        CommandCategory.AGENTS,
+        ["review", "pr", "quality"],
+    ),
+    Command(
+        "agent.explorer",
+        "Explorer Agent",
+        "Codebase exploration",
+        CommandCategory.AGENTS,
+        ["search", "navigate", "find"],
+    ),
+    Command(
+        "agent.refactorer",
+        "Refactorer Agent",
+        "Code refactoring",
+        CommandCategory.AGENTS,
+        ["refactor", "improve", "clean"],
+    ),
+    Command(
+        "agent.testing",
+        "Testing Agent",
+        "Test generation",
+        CommandCategory.AGENTS,
+        ["test", "coverage", "pytest"],
+    ),
+    Command(
+        "agent.security",
+        "Security Agent",
+        "OWASP analysis",
+        CommandCategory.AGENTS,
+        ["scan", "audit", "vulnerabilities"],
+    ),
+    Command(
+        "agent.documentation",
+        "Documentation Agent",
+        "Docs generation",
+        CommandCategory.AGENTS,
+        ["docs", "docstrings", "readme"],
+    ),
+    Command(
+        "agent.performance",
+        "Performance Agent",
+        "Profiling",
+        CommandCategory.AGENTS,
+        ["profile", "optimize", "benchmark"],
+    ),
+    Command(
+        "agent.devops",
+        "DevOps Agent",
+        "Infrastructure",
+        CommandCategory.AGENTS,
+        ["docker", "kubernetes", "deploy"],
+    ),
+    Command(
+        "agent.justica",
+        "Justica Agent",
+        "Governance",
+        CommandCategory.AGENTS,
+        ["evaluate", "approve", "block"],
+    ),
+    Command(
+        "agent.sofia",
+        "Sofia Agent",
+        "Ethical counsel",
+        CommandCategory.AGENTS,
+        ["counsel", "ethics", "wisdom"],
+    ),
+    Command(
+        "agent.data",
+        "Data Agent",
+        "Database analysis",
+        CommandCategory.AGENTS,
+        ["database", "schema", "sql"],
+    ),
     # Core Agents (6) - names must match registry (with _core suffix)
-    Command("agent.orchestrator_core", "Orchestrator (Core)", "Multi-agent coordination",
-            CommandCategory.AGENTS, ["orchestration", "handoff", "autonomy"]),
-    Command("agent.coder_core", "Coder (Core)", "Darwin-Godel evolution",
-            CommandCategory.AGENTS, ["code", "generation", "darwin"]),
-    Command("agent.reviewer_core", "Reviewer (Core)", "Deep-think review",
-            CommandCategory.AGENTS, ["deep", "metacognition"]),
-    Command("agent.architect_core", "Architect (Core)", "Agentic RAG design",
-            CommandCategory.AGENTS, ["rag", "patterns"]),
-    Command("agent.researcher_core", "Researcher (Core)", "Three-loop learning",
-            CommandCategory.AGENTS, ["research", "knowledge", "synthesis"]),
-    Command("agent.devops_core", "DevOps (Core)", "Incident handler",
-            CommandCategory.AGENTS, ["incident", "infrastructure"]),
+    Command(
+        "agent.orchestrator_core",
+        "Orchestrator (Core)",
+        "Multi-agent coordination",
+        CommandCategory.AGENTS,
+        ["orchestration", "handoff", "autonomy"],
+    ),
+    Command(
+        "agent.coder_core",
+        "Coder (Core)",
+        "Darwin-Godel evolution",
+        CommandCategory.AGENTS,
+        ["code", "generation", "darwin"],
+    ),
+    Command(
+        "agent.reviewer_core",
+        "Reviewer (Core)",
+        "Deep-think review",
+        CommandCategory.AGENTS,
+        ["deep", "metacognition"],
+    ),
+    Command(
+        "agent.architect_core",
+        "Architect (Core)",
+        "Agentic RAG design",
+        CommandCategory.AGENTS,
+        ["rag", "patterns"],
+    ),
+    Command(
+        "agent.researcher_core",
+        "Researcher (Core)",
+        "Three-loop learning",
+        CommandCategory.AGENTS,
+        ["research", "knowledge", "synthesis"],
+    ),
+    Command(
+        "agent.devops_core",
+        "DevOps (Core)",
+        "Incident handler",
+        CommandCategory.AGENTS,
+        ["incident", "infrastructure"],
+    ),
 ]
 
 

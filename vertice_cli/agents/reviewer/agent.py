@@ -13,6 +13,7 @@ Date: 2026-01-02
 import ast
 import json
 import logging
+import re
 from typing import Any, Dict, List
 
 from vertice_cli.utils import MarkdownExtractor
@@ -68,7 +69,7 @@ class ReviewerAgent(BaseAgent):
             capabilities=[AgentCapability.READ_ONLY, AgentCapability.BASH_EXEC],
             llm_client=llm_client,
             mcp_client=mcp_client,
-            system_prompt=self._build_system_prompt()
+            system_prompt=self._build_system_prompt(),
         )
 
         # Initialize components
@@ -104,15 +105,12 @@ class ReviewerAgent(BaseAgent):
             files_map = await self._load_context(task)
             if not files_map:
                 return AgentResponse(
-                    success=False,
-                    reasoning="No files found to review.",
-                    error="No files provided"
+                    success=False, reasoning="No files found to review.", error="No files provided"
                 )
 
             # Phase 2: Build RAG context
             rag_context = await self.rag_engine.build_context(
-                list(files_map.keys()),
-                task.context.get("description", "")
+                list(files_map.keys()), task.context.get("description", "")
             )
 
             # Phase 3: Static Analysis (Code Graphs)
@@ -122,7 +120,7 @@ class ReviewerAgent(BaseAgent):
             all_issues = []
 
             for fname, content in files_map.items():
-                if not fname.endswith('.py') and fname != "<inline>":
+                if not fname.endswith(".py") and fname != "<inline>":
                     continue
 
                 try:
@@ -136,40 +134,48 @@ class ReviewerAgent(BaseAgent):
                     # Immediate heuristic checks
                     for m in metrics:
                         if m.cyclomatic > 15:
-                            all_issues.append(CodeIssue(
-                                file=fname, line=1,
-                                severity=IssueSeverity.HIGH,
-                                category=IssueCategory.COMPLEXITY,
-                                message=f"Function '{m.function_name}' exceeds complexity limit (CC={m.cyclomatic})",
-                                explanation="High cyclomatic complexity indicates too many decision points",
-                                fix_suggestion="Refactor into smaller functions with single responsibilities",
-                                confidence=1.0
-                            ))
+                            all_issues.append(
+                                CodeIssue(
+                                    file=fname,
+                                    line=1,
+                                    severity=IssueSeverity.HIGH,
+                                    category=IssueCategory.COMPLEXITY,
+                                    message=f"Function '{m.function_name}' exceeds complexity limit (CC={m.cyclomatic})",
+                                    explanation="High cyclomatic complexity indicates too many decision points",
+                                    fix_suggestion="Refactor into smaller functions with single responsibilities",
+                                    confidence=1.0,
+                                )
+                            )
                         if m.cognitive > 20:
-                            all_issues.append(CodeIssue(
-                                file=fname, line=1,
-                                severity=IssueSeverity.MEDIUM,
-                                category=IssueCategory.MAINTAINABILITY,
-                                message=f"Function '{m.function_name}' has very high cognitive complexity ({m.cognitive})",
-                                explanation="Code is difficult for humans to understand",
-                                fix_suggestion="Simplify control flow and reduce nesting",
-                                confidence=0.95
-                            ))
+                            all_issues.append(
+                                CodeIssue(
+                                    file=fname,
+                                    line=1,
+                                    severity=IssueSeverity.MEDIUM,
+                                    category=IssueCategory.MAINTAINABILITY,
+                                    message=f"Function '{m.function_name}' has very high cognitive complexity ({m.cognitive})",
+                                    explanation="Code is difficult for humans to understand",
+                                    fix_suggestion="Simplify control flow and reduce nesting",
+                                    confidence=0.95,
+                                )
+                            )
 
                 except SyntaxError as e:
-                    all_issues.append(CodeIssue(
-                        file=fname,
-                        line=e.lineno or 0,
-                        severity=IssueSeverity.CRITICAL,
-                        category=IssueCategory.LOGIC,
-                        message=f"Syntax Error: {e.msg}",
-                        explanation="Code cannot be parsed",
-                        confidence=1.0
-                    ))
+                    all_issues.append(
+                        CodeIssue(
+                            file=fname,
+                            line=e.lineno or 0,
+                            severity=IssueSeverity.CRITICAL,
+                            category=IssueCategory.LOGIC,
+                            message=f"Syntax Error: {e.msg}",
+                            explanation="Code cannot be parsed",
+                            confidence=1.0,
+                        )
+                    )
 
             # Phase 4: Run specialized agents
             for fname, content in files_map.items():
-                if not fname.endswith('.py') and fname != "<inline>":
+                if not fname.endswith(".py") and fname != "<inline>":
                     continue
 
                 try:
@@ -198,9 +204,7 @@ class ReviewerAgent(BaseAgent):
             all_issues.extend(graph_issues)
 
             # Phase 5: LLM Deep Analysis
-            llm_prompt = self._build_llm_prompt(
-                files_map, all_metrics, rag_context, all_issues
-            )
+            llm_prompt = self._build_llm_prompt(files_map, all_metrics, rag_context, all_issues)
 
             try:
                 llm_response = await self._call_llm(llm_prompt, temperature=0.2)
@@ -218,9 +222,7 @@ class ReviewerAgent(BaseAgent):
             risk_level = self._calculate_risk(all_issues, score)
 
             # Phase 7: Generate recommendations
-            recommendations = self._generate_recommendations(
-                all_issues, all_metrics, rag_context
-            )
+            recommendations = self._generate_recommendations(all_issues, all_metrics, rag_context)
 
             # Phase 8: Build final report
             report = ReviewReport(
@@ -233,20 +235,18 @@ class ReviewerAgent(BaseAgent):
                 summary=llm_data.get("summary", "Automated review completed."),
                 recommendations=recommendations,
                 estimated_fix_time=self._estimate_fix_time(all_issues),
-                requires_human_review=risk_level in ["HIGH", "CRITICAL"] or score < 60
+                requires_human_review=risk_level in ["HIGH", "CRITICAL"] or score < 60,
             )
 
             return AgentResponse(
                 success=True,
                 data={"report": report.model_dump()},
-                reasoning=f"Analyzed {len(all_metrics)} functions. Found {len(all_issues)} issues. Score: {score}/100"
+                reasoning=f"Analyzed {len(all_metrics)} functions. Found {len(all_issues)} issues. Score: {score}/100",
             )
 
         except Exception as e:
             return AgentResponse(
-                success=False,
-                error=str(e),
-                reasoning=f"Review process failed: {str(e)}"
+                success=False, error=str(e), reasoning=f"Review process failed: {str(e)}"
             )
 
     def _smart_truncate(self, content: str, limit: int = MAX_FILE_CHARS) -> str:
@@ -269,26 +269,26 @@ class ReviewerAgent(BaseAgent):
 
         truncated = content[:limit]
 
-        last_def = truncated.rfind('\n\ndef ')
+        last_def = truncated.rfind("\n\ndef ")
         if last_def > limit // 2:
-            return truncated[:last_def] + '\n# ... [truncated, full file has more content]'
+            return truncated[:last_def] + "\n# ... [truncated, full file has more content]"
 
-        last_class = truncated.rfind('\n\nclass ')
+        last_class = truncated.rfind("\n\nclass ")
         if last_class > limit // 2:
-            return truncated[:last_class] + '\n# ... [truncated, full file has more content]'
+            return truncated[:last_class] + "\n# ... [truncated, full file has more content]"
 
-        last_newline = truncated.rfind('\n')
+        last_newline = truncated.rfind("\n")
         if last_newline > 0:
-            return truncated[:last_newline] + '\n# ... [truncated, full file has more content]'
+            return truncated[:last_newline] + "\n# ... [truncated, full file has more content]"
 
-        return truncated + '\n# ... [truncated]'
+        return truncated + "\n# ... [truncated]"
 
     def _build_llm_prompt(
         self,
         files: Dict[str, str],
         metrics: List[ComplexityMetrics],
         rag_context: RAGContext,
-        static_issues: List[CodeIssue]
+        static_issues: List[CodeIssue],
     ) -> str:
         """
         Build comprehensive prompt for LLM deep semantic analysis.
@@ -311,10 +311,7 @@ class ReviewerAgent(BaseAgent):
         Returns:
             Formatted prompt string for LLM analysis
         """
-        truncated_files = {
-            k: self._smart_truncate(v, MAX_FILE_CHARS)
-            for k, v in files.items()
-        }
+        truncated_files = {k: self._smart_truncate(v, MAX_FILE_CHARS) for k, v in files.items()}
 
         grounding = get_analysis_grounding()
 
@@ -387,7 +384,7 @@ Output JSON with:
                 if res.get("success"):
                     contents[f] = res.get("content", "")
                 else:
-                    with open(f, 'r', encoding='utf-8') as file:
+                    with open(f, "r", encoding="utf-8") as file:
                         contents[f] = file.read()
             except (OSError, UnicodeDecodeError) as e:
                 logger.debug(f"Could not read file {f} for review: {e}")
@@ -402,7 +399,7 @@ Output JSON with:
                     if res.get("success"):
                         contents[file_path] = res.get("content", "")
                     else:
-                        with open(file_path, 'r', encoding='utf-8') as file:
+                        with open(file_path, "r", encoding="utf-8") as file:
                             contents[file_path] = file.read()
                 except (OSError, UnicodeDecodeError) as e:
                     logger.debug(f"Could not read file {file_path} for review: {e}")
@@ -435,7 +432,7 @@ Output JSON with:
         if not blocks:
             blocks = extractor.extract_code_blocks(text)
 
-        return '\n\n'.join(block.content for block in blocks)
+        return "\n\n".join(block.content for block in blocks)
 
     def _parse_llm_json(self, text: str) -> Dict[str, Any]:
         """
@@ -452,7 +449,7 @@ Output JSON with:
             or fallback dict on parse failure
         """
         try:
-            match = re.search(r'\{.*\}', text, re.DOTALL)
+            match = re.search(r"\{.*\}", text, re.DOTALL)
             if match:
                 return json.loads(match.group(0))
             return {"summary": "LLM response parsing failed", "additional_issues": []}
@@ -460,11 +457,7 @@ Output JSON with:
             logger.warning(f"Failed to parse LLM JSON response: {e}")
             return {"summary": "LLM response invalid JSON", "additional_issues": []}
 
-    def _calculate_score(
-        self,
-        issues: List[CodeIssue],
-        metrics: List[ComplexityMetrics]
-    ) -> int:
+    def _calculate_score(self, issues: List[CodeIssue], metrics: List[ComplexityMetrics]) -> int:
         """
         Calculate overall code quality score (0-100).
 
@@ -489,7 +482,7 @@ Output JSON with:
             IssueSeverity.HIGH: 15,
             IssueSeverity.MEDIUM: 7,
             IssueSeverity.LOW: 3,
-            IssueSeverity.INFO: 1
+            IssueSeverity.INFO: 1,
         }
 
         for issue in issues:
@@ -537,10 +530,7 @@ Output JSON with:
             return "LOW"
 
     def _generate_recommendations(
-        self,
-        issues: List[CodeIssue],
-        metrics: List[ComplexityMetrics],
-        rag_context: RAGContext
+        self, issues: List[CodeIssue], metrics: List[ComplexityMetrics], rag_context: RAGContext
     ) -> List[str]:
         """
         Generate actionable improvement recommendations.

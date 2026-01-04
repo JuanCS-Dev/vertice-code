@@ -28,15 +28,14 @@ from textual.message import Message
 from rich.text import Text
 from rich.console import RenderableType, Group
 
-from .block_renderers import (
-    render_block, list_renderers
-)
+from .block_renderers import render_block, list_renderers
 from .block_detector_v2 import BlockDetectorV2
 
 
 @dataclass
 class StreamingMetrics:
     """Métricas de performance do streaming."""
+
     chunks_processed: int = 0
     blocks_detected: int = 0
     render_errors: int = 0
@@ -79,6 +78,7 @@ class StreamingResponseV2(Static):
 
     class StreamCompleted(Message):
         """Emitido quando streaming termina."""
+
         def __init__(self, content: str, metrics: StreamingMetrics):
             self.content = content
             self.metrics = metrics
@@ -128,7 +128,7 @@ class StreamingResponseV2(Static):
         try:
             renderable = self._create_renderable()
             self.update(renderable)
-        except Exception:
+        except (ValueError, TypeError, AttributeError):
             self._metrics.render_errors += 1
             self.update(Text(self._content))
 
@@ -159,7 +159,7 @@ class StreamingResponseV2(Static):
             try:
                 rendered = render_block(block)
                 renderables.append(rendered)
-            except Exception:
+            except (ValueError, TypeError, AttributeError):
                 renderables.append(Text(block.content))
 
         # Cursor no final
@@ -255,6 +255,6 @@ class StreamingResponseV2(Static):
 
 
 __all__ = [
-    'StreamingResponseV2',
-    'StreamingMetrics',
+    "StreamingResponseV2",
+    "StreamingMetrics",
 ]

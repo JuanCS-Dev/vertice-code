@@ -61,6 +61,7 @@ class LanguageDetector:
         if cls._detector is None:
             try:
                 from fast_langdetect import detect
+
                 cls._detector = detect
             except ImportError:
                 cls._detector = None
@@ -91,7 +92,7 @@ class LanguageDetector:
             if isinstance(result, list) and result:
                 return result[0].get("lang", "en")
             return "en"
-        except Exception:
+        except (RuntimeError, ValueError, TypeError):
             return "en"
 
     @classmethod

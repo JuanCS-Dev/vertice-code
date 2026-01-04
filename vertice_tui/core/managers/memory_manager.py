@@ -29,11 +29,7 @@ class MemoryManager(IMemoryManager):
     - Note appending with timestamps
     """
 
-    def __init__(
-        self,
-        project_dir: Optional[Path] = None,
-        global_dir: Optional[Path] = None
-    ):
+    def __init__(self, project_dir: Optional[Path] = None, global_dir: Optional[Path] = None):
         """
         Initialize MemoryManager.
 
@@ -42,7 +38,7 @@ class MemoryManager(IMemoryManager):
             global_dir: Global config directory. Defaults to ~/.config/juancs.
         """
         self._project_dir = project_dir or Path.cwd()
-        self._global_dir = global_dir or (Path.home() / ".config" / "juancs")
+        self._global_dir = global_dir or (Path.home() / ".config" / "vertice")
 
     def _get_memory_file(self, scope: str = "project") -> Path:
         """
@@ -78,7 +74,7 @@ class MemoryManager(IMemoryManager):
                 "content": "",
                 "exists": False,
                 "file": str(memory_file),
-                "scope": scope
+                "scope": scope,
             }
 
         try:
@@ -89,20 +85,13 @@ class MemoryManager(IMemoryManager):
                 "exists": True,
                 "file": str(memory_file),
                 "scope": scope,
-                "size": len(content)
+                "size": len(content),
             }
         except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "file": str(memory_file)
-            }
+            return {"success": False, "error": str(e), "file": str(memory_file)}
 
     def write_memory(
-        self,
-        content: str,
-        scope: str = "project",
-        append: bool = False
+        self, content: str, scope: str = "project", append: bool = False
     ) -> Dict[str, Any]:
         """
         Write to MEMORY.md file.
@@ -128,13 +117,10 @@ class MemoryManager(IMemoryManager):
                 "success": True,
                 "message": f"Memory {'appended to' if append else 'written to'} {memory_file}",
                 "file": str(memory_file),
-                "scope": scope
+                "scope": scope,
             }
         except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            return {"success": False, "error": str(e)}
 
     def remember(self, note: str, scope: str = "project") -> Dict[str, Any]:
         """
@@ -166,16 +152,9 @@ class MemoryManager(IMemoryManager):
         try:
             if memory_file.exists():
                 memory_file.unlink()
-            return {
-                "success": True,
-                "message": f"Memory cleared: {memory_file}",
-                "scope": scope
-            }
+            return {"success": True, "message": f"Memory cleared: {memory_file}", "scope": scope}
         except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            return {"success": False, "error": str(e)}
 
     def get_memory_stats(self, scope: str = "project") -> Dict[str, Any]:
         """
@@ -190,11 +169,7 @@ class MemoryManager(IMemoryManager):
         memory_file = self._get_memory_file(scope)
 
         if not memory_file.exists():
-            return {
-                "exists": False,
-                "scope": scope,
-                "file": str(memory_file)
-            }
+            return {"exists": False, "scope": scope, "file": str(memory_file)}
 
         try:
             content = memory_file.read_text()
@@ -207,11 +182,7 @@ class MemoryManager(IMemoryManager):
                 "file": str(memory_file),
                 "size": len(content),
                 "lines": len(lines),
-                "notes": notes
+                "notes": notes,
             }
         except Exception as e:
-            return {
-                "exists": True,
-                "error": str(e),
-                "scope": scope
-            }
+            return {"exists": True, "error": str(e), "scope": scope}

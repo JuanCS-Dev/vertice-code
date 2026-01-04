@@ -45,6 +45,7 @@ class AgentRole(str, Enum):
         COUNSELOR/SOFIA: Wise counselor (Sofia framework)
         MAESTRO: Orchestration coordinator
     """
+
     # Core roles
     ARCHITECT = "architect"
     EXPLORER = "explorer"
@@ -75,10 +76,11 @@ class AgentRole(str, Enum):
 
 class AgentPriority(str, Enum):
     """Priority levels for agent tasks."""
+
     CRITICAL = "critical"  # Must complete for success
-    HIGH = "high"          # Important but can continue
-    MEDIUM = "medium"      # Nice to have
-    LOW = "low"            # Optional enhancement
+    HIGH = "high"  # Important but can continue
+    MEDIUM = "medium"  # Nice to have
+    LOW = "low"  # Optional enhancement
 
 
 class AgentCapability(str, Enum):
@@ -87,6 +89,7 @@ class AgentCapability(str, Enum):
 
     Used to restrict what tools an agent can access.
     """
+
     # Core capabilities (new naming)
     READ_FILES = "read_files"
     WRITE_FILES = "write_files"
@@ -96,19 +99,19 @@ class AgentCapability(str, Enum):
     SYSTEM_CONFIG = "system_config"
 
     # Agent-specific capabilities
-    DESIGN = "design"                 # Can create architecture/design plans
-    PLANNING = "planning"             # Can create execution plans
-    ANALYSIS = "analysis"             # Can analyze code/systems
-    REFACTORING = "refactoring"       # Can refactor code
-    TESTING = "testing"               # Can run/create tests
-    DOCUMENTATION = "documentation"   # Can create docs
+    DESIGN = "design"  # Can create architecture/design plans
+    PLANNING = "planning"  # Can create execution plans
+    ANALYSIS = "analysis"  # Can analyze code/systems
+    REFACTORING = "refactoring"  # Can refactor code
+    TESTING = "testing"  # Can run/create tests
+    DOCUMENTATION = "documentation"  # Can create docs
 
     # Legacy capabilities (used by existing agents - backward compatible)
-    READ_ONLY = "read_only"           # Can only read files
-    FILE_EDIT = "file_edit"           # Can read and write files
-    BASH_EXEC = "bash_exec"           # Can execute bash commands
-    DATABASE = "database"             # Can access database
-    GIT_OPS = "git_ops"               # Can perform git operations
+    READ_ONLY = "read_only"  # Can only read files
+    FILE_EDIT = "file_edit"  # Can read and write files
+    BASH_EXEC = "bash_exec"  # Can execute bash commands
+    DATABASE = "database"  # Can access database
+    GIT_OPS = "git_ops"  # Can perform git operations
 
     # Special capabilities
     ALL = "all"  # Full access (use with caution)
@@ -125,6 +128,7 @@ class AgentIdentity:
     - Capability-based access control
     - Message routing between agents
     """
+
     agent_id: str
     role: AgentRole
     name: Optional[str] = None
@@ -156,6 +160,7 @@ class AgentIdentity:
 
 class TaskStatus(str, Enum):
     """Status of a task in execution."""
+
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     BLOCKED = "blocked"
@@ -168,21 +173,23 @@ class PlanningMode(str, Enum):
     """
     Planning modes inspired by Claude Code Plan Mode.
     """
+
     EXPLORATION = "exploration"  # Read-only exploration
-    PLANNING = "planning"        # Generate plan
-    EXECUTION = "execution"      # Execute plan
+    PLANNING = "planning"  # Generate plan
+    EXECUTION = "execution"  # Execute plan
 
 
 class ConfidenceLevel(str, Enum):
     """Confidence levels for plan steps."""
-    CERTAIN = "certain"          # 0.9-1.0
-    CONFIDENT = "confident"      # 0.7-0.9
-    MODERATE = "moderate"        # 0.5-0.7
-    LOW = "low"                  # 0.3-0.5
+
+    CERTAIN = "certain"  # 0.9-1.0
+    CONFIDENT = "confident"  # 0.7-0.9
+    MODERATE = "moderate"  # 0.5-0.7
+    LOW = "low"  # 0.3-0.5
     SPECULATIVE = "speculative"  # 0.0-0.3
 
     @classmethod
-    def from_score(cls, score: float) -> 'ConfidenceLevel':
+    def from_score(cls, score: float) -> "ConfidenceLevel":
         """Get level from numeric score."""
         if score >= 0.9:
             return cls.CERTAIN
@@ -196,11 +203,11 @@ class ConfidenceLevel(str, Enum):
 
 
 __all__ = [
-    'AgentRole',
-    'AgentPriority',
-    'AgentCapability',
-    'AgentIdentity',
-    'TaskStatus',
-    'PlanningMode',
-    'ConfidenceLevel',
+    "AgentRole",
+    "AgentPriority",
+    "AgentCapability",
+    "AgentIdentity",
+    "TaskStatus",
+    "PlanningMode",
+    "ConfidenceLevel",
 ]

@@ -52,6 +52,7 @@ class CommandPaletteBridge:
         if self._palette is None:
             try:
                 from vertice_cli.ui.command_palette import CommandPalette, Command
+
                 self._palette = CommandPalette()
 
                 # Register ALL 20 agent commands (14 CLI + 6 Core)
@@ -72,7 +73,12 @@ class CommandPaletteBridge:
                     ("sofia", "Sofia", "Ethical counsel", "agent"),
                     ("data", "Data", "Database analysis", "agent"),
                     # Core Agents (6)
-                    ("orchestrator_core", "Orchestrator (Core)", "Multi-agent coordination", "agent"),
+                    (
+                        "orchestrator_core",
+                        "Orchestrator (Core)",
+                        "Multi-agent coordination",
+                        "agent",
+                    ),
                     ("coder_core", "Coder (Core)", "Darwin-Godel evolution", "agent"),
                     ("reviewer_core", "Reviewer (Core)", "Deep-think review", "agent"),
                     ("architect_core", "Architect (Core)", "Agentic RAG design", "agent"),
@@ -81,13 +87,15 @@ class CommandPaletteBridge:
                 ]
 
                 for cmd_id, label, desc, category in agent_commands:
-                    self._palette.register_command(Command(
-                        id=f"agent.{cmd_id}",
-                        label=label,
-                        description=desc,
-                        category=category,
-                        keybinding=f"/{cmd_id}"
-                    ))
+                    self._palette.register_command(
+                        Command(
+                            id=f"agent.{cmd_id}",
+                            label=label,
+                            description=desc,
+                            category=category,
+                            keybinding=f"/{cmd_id}",
+                        )
+                    )
 
             except ImportError:
                 # Minimal fallback
@@ -118,39 +126,87 @@ class AutocompleteBridge:
     # Default ignore patterns for file scanning
     IGNORE_PATTERNS = {
         # VCS
-        '.git', '.svn', '.hg',
+        ".git",
+        ".svn",
+        ".hg",
         # Python
-        '__pycache__', '.venv', 'venv', 'env', '.tox', '.mypy_cache',
-        '.pytest_cache', '.coverage', 'htmlcov', 'dist', 'build',
-        '*.egg-info', '.eggs', '*.pyc', '*.pyo',
+        "__pycache__",
+        ".venv",
+        "venv",
+        "env",
+        ".tox",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".coverage",
+        "htmlcov",
+        "dist",
+        "build",
+        "*.egg-info",
+        ".eggs",
+        "*.pyc",
+        "*.pyo",
         # Node
-        'node_modules',
+        "node_modules",
         # IDE
-        '.idea', '.vscode',
+        ".idea",
+        ".vscode",
         # OS
-        '.DS_Store', 'Thumbs.db', '*.swp', '*.swo', '*~',
+        ".DS_Store",
+        "Thumbs.db",
+        "*.swp",
+        "*.swo",
+        "*~",
         # Project-specific (VERTICE)
-        '.archive', '.backup', '.bak', 'prometheus_data',
-        'memory_data', 'cortex_data', '.vertice_cache',
-        'logs', '*.log', 'coverage_html', 'site-packages',
+        ".archive",
+        ".backup",
+        ".bak",
+        "prometheus_data",
+        "memory_data",
+        "cortex_data",
+        ".vertice_cache",
+        "logs",
+        "*.log",
+        "coverage_html",
+        "site-packages",
         # Large binary/data
-        '*.bin', '*.dat', '*.db', '*.sqlite', '*.sqlite3',
-        '*.pkl', '*.pickle', '*.h5', '*.hdf5', '*.parquet',
+        "*.bin",
+        "*.dat",
+        "*.db",
+        "*.sqlite",
+        "*.sqlite3",
+        "*.pkl",
+        "*.pickle",
+        "*.h5",
+        "*.hdf5",
+        "*.parquet",
     }
 
     # Limits for file scanning (prevent TUI freeze)
     MAX_FILES = 300  # Reduced from 2000
-    MAX_DEPTH = 4    # Reduced from 8
+    MAX_DEPTH = 4  # Reduced from 8
 
     # File type icons
     FILE_ICONS = {
-        '.py': '🐍', '.js': '📜', '.ts': '💠', '.jsx': '📜', '.tsx': '💠',
-        '.rs': '🦀', '.go': '🔵', '.md': '📝', '.json': '📋',
-        '.yaml': '⚙️', '.yml': '⚙️', '.toml': '⚙️', '.html': '🌐',
-        '.css': '🎨', '.sql': '🗃️', '.sh': '💻', '.bash': '💻',
+        ".py": "🐍",
+        ".js": "📜",
+        ".ts": "💠",
+        ".jsx": "📜",
+        ".tsx": "💠",
+        ".rs": "🦀",
+        ".go": "🔵",
+        ".md": "📝",
+        ".json": "📋",
+        ".yaml": "⚙️",
+        ".yml": "⚙️",
+        ".toml": "⚙️",
+        ".html": "🌐",
+        ".css": "🎨",
+        ".sql": "🗃️",
+        ".sh": "💻",
+        ".bash": "💻",
     }
 
-    def __init__(self, tool_bridge: Optional['ToolBridge'] = None):
+    def __init__(self, tool_bridge: Optional["ToolBridge"] = None):
         self.tool_bridge = tool_bridge
         self._completer = None
         self._suggestion_cache: Dict[str, str] = {}
@@ -174,6 +230,7 @@ class AutocompleteBridge:
             return self._file_cache
 
         import fnmatch
+
         root = root or Path.cwd()
         max_files = max_files or self.MAX_FILES
         files = []
@@ -189,7 +246,9 @@ class AutocompleteBridge:
             if depth > self.MAX_DEPTH or len(files) >= max_files:
                 return
             try:
-                for entry in sorted(dir_path.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower())):
+                for entry in sorted(
+                    dir_path.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower())
+                ):
                     if len(files) >= max_files:
                         break
                     if should_ignore(entry):
@@ -213,7 +272,7 @@ class AutocompleteBridge:
     def _get_file_icon(self, filename: str) -> str:
         """Get icon for file based on extension."""
         suffix = Path(filename).suffix.lower()
-        return self.FILE_ICONS.get(suffix, '📄')
+        return self.FILE_ICONS.get(suffix, "📄")
 
     def _get_file_completions(self, query: str, max_results: int = 15) -> List[Dict]:
         """Get file completions for @ query."""
@@ -268,13 +327,15 @@ class AutocompleteBridge:
             icon = self._get_file_icon(filename)
             is_recent = file_path in self._recent_files
 
-            completions.append({
-                "text": f"@{file_path}",
-                "display": f"{icon} {'★ ' if is_recent else ''}{filename}",
-                "description": parent if parent != '.' else '',
-                "type": "file",
-                "score": score,
-            })
+            completions.append(
+                {
+                    "text": f"@{file_path}",
+                    "display": f"{icon} {'★ ' if is_recent else ''}{filename}",
+                    "description": parent if parent != "." else "",
+                    "type": "file",
+                    "score": score,
+                }
+            )
 
         return completions
 
@@ -286,13 +347,13 @@ class AutocompleteBridge:
         # Check for @ file picker trigger
         at_pos = None
         for i in range(len(text) - 1, -1, -1):
-            if text[i] == '@' and (i == 0 or text[i-1].isspace()):
+            if text[i] == "@" and (i == 0 or text[i - 1].isspace()):
                 at_pos = i
                 break
 
         if at_pos is not None:
             # @ file picker mode
-            query = text[at_pos + 1:]
+            query = text[at_pos + 1 :]
             return self._get_file_completions(query, max_results)
 
         completions = []
@@ -303,12 +364,14 @@ class AutocompleteBridge:
             for tool_name in self.tool_bridge.list_tools():
                 score = self._fuzzy_score(text_lower, tool_name)
                 if score > 0:
-                    completions.append({
-                        "text": tool_name,
-                        "display": f"🔧 {tool_name}",
-                        "type": "tool",
-                        "score": score + 10,  # Boost tools
-                    })
+                    completions.append(
+                        {
+                            "text": tool_name,
+                            "display": f"🔧 {tool_name}",
+                            "type": "tool",
+                            "score": score + 10,  # Boost tools
+                        }
+                    )
 
         # Command completions - Claude Code parity (37+ commands)
         slash_commands = [
@@ -317,25 +380,21 @@ class AutocompleteBridge:
             ("/clear", "Clear screen"),
             ("/quit", "Exit"),
             ("/exit", "Exit"),
-
             # Execution
             ("/run", "Execute bash"),
             ("/read", "Read file"),
-
             # Discovery
             ("/agents", "List agents"),
             ("/status", "Show status"),
             ("/tools", "List tools"),
             ("/palette", "Command palette"),
             ("/history", "Command history"),
-
             # Context Management (Claude Code parity)
             ("/context", "Show context"),
             ("/context-clear", "Clear context"),
             ("/compact", "Compact context"),
             ("/cost", "Token usage stats"),
             ("/tokens", "Token usage"),
-
             # Session Management (Claude Code parity)
             ("/save", "Save session"),
             ("/resume", "Resume session"),
@@ -343,18 +402,15 @@ class AutocompleteBridge:
             ("/checkpoint", "Create checkpoint"),
             ("/rewind", "Rewind to checkpoint"),
             ("/export", "Export conversation"),
-
             # Project (Claude Code parity)
             ("/init", "Initialize project"),
             ("/model", "Select model/provider"),
             ("/providers", "List LLM providers"),
             ("/doctor", "Check health"),
             ("/permissions", "Manage permissions"),
-
             # Todo Management (Claude Code parity)
             ("/todos", "List todos"),
             ("/todo", "Add todo"),
-
             # Agent Commands
             ("/plan", "Plan task"),
             ("/execute", "Execute code"),
@@ -367,61 +423,48 @@ class AutocompleteBridge:
             ("/docs", "Generate docs"),
             ("/perf", "Performance"),
             ("/devops", "DevOps"),
-
             # Governance & Counsel Agents
             ("/justica", "Constitutional governance"),
             ("/sofia", "Ethical counsel"),
-
             # Data Agent
             ("/data", "Database analysis"),
-
             # Core Agents (6) - Phase 3 Evolution
             ("/orchestrator", "Multi-agent coordination (Core)"),
             ("/coder", "Darwin-Godel code evolution (Core)"),
             ("/researcher", "Three-loop learning (Core)"),
-
             # Advanced (Claude Code parity)
             ("/sandbox", "Enable sandbox"),
             ("/hooks", "Manage hooks"),
             ("/mcp", "MCP servers"),
-
             # Agent Router (NEW)
             ("/router", "Toggle auto-routing"),
             ("/router-status", "Show routing config"),
             ("/route", "Manually route message"),
-
             # Background Tasks (Claude Code /bashes parity)
             ("/bashes", "List background tasks"),
             ("/bg", "Start background task"),
             ("/kill", "Kill background task"),
-
             # Notebook Tools (Claude Code parity)
             ("/notebook", "Read notebook file"),
-
             # Plan Mode (Claude Code parity - WAVE 4)
             ("/plan-mode", "Enter plan mode"),
             ("/plan-status", "Plan mode status"),
             ("/plan-note", "Add plan note"),
             ("/plan-exit", "Exit plan mode"),
             ("/plan-approve", "Approve plan"),
-
             # PR Creation (Claude Code parity - WAVE 4)
             ("/pr", "Create pull request"),
             ("/pr-draft", "Create draft PR"),
-
             # Auth Management (Claude Code parity - WAVE 5)
             ("/login", "Login to provider"),
             ("/logout", "Logout from provider"),
             ("/auth", "Show auth status"),
-
             # Memory (Claude Code parity - WAVE 5)
             ("/memory", "View/manage memory"),
             ("/remember", "Add note to memory"),
-
             # Image/PDF Reading (Claude Code parity - WAVE 5)
             ("/image", "Read image file"),
             ("/pdf", "Read PDF file"),
-
             # WAVE 6: Beyond Claude Code Parity
             ("/audit", "View audit log"),
             ("/diff", "Diff preview"),
@@ -432,7 +475,6 @@ class AutocompleteBridge:
             ("/undo-stack", "View undo stack"),
             ("/secrets", "Scan for secrets"),
             ("/secrets-staged", "Scan staged files"),
-
             # WAVE 7: Missing Commands (Audit Dec 2025)
             ("/prometheus", "Direct Prometheus query"),
             ("/task", "Launch subagent task"),
@@ -443,7 +485,6 @@ class AutocompleteBridge:
             ("/command-delete", "Delete custom command"),
             ("/a2a", "Agent-to-Agent protocol"),
             ("/tribunal", "Toggle TRIBUNAL mode"),
-
             # Core Agent Aliases (explicit slash access)
             ("/reviewer-core", "Deep-think code review (Core)"),
             ("/architect-core", "Agentic RAG design (Core)"),
@@ -453,13 +494,15 @@ class AutocompleteBridge:
         for cmd, desc in slash_commands:
             score = self._fuzzy_score(text_lower, cmd)
             if score > 0:
-                completions.append({
-                    "text": cmd,
-                    "display": f"⚡ {cmd}",
-                    "description": desc,
-                    "type": "command",
-                    "score": score + 20,  # Boost commands
-                })
+                completions.append(
+                    {
+                        "text": cmd,
+                        "display": f"⚡ {cmd}",
+                        "description": desc,
+                        "type": "command",
+                        "score": score + 20,  # Boost commands
+                    }
+                )
 
         # Sort by score
         completions.sort(key=lambda x: x["score"], reverse=True)
@@ -506,7 +549,7 @@ class AutocompleteBridge:
         if completions and completions[0]["score"] > 50:
             suggestion = completions[0]["text"]
             if suggestion.startswith(text):
-                result = suggestion[len(text):]
+                result = suggestion[len(text) :]
                 self._suggestion_cache[text] = result
                 return result
 
@@ -514,7 +557,7 @@ class AutocompleteBridge:
 
 
 __all__ = [
-    'CommandPaletteBridge',
-    'MinimalCommandPalette',
-    'AutocompleteBridge',
+    "CommandPaletteBridge",
+    "MinimalCommandPalette",
+    "AutocompleteBridge",
 ]

@@ -26,12 +26,7 @@ class A2ACommandHandler:
         """Access Bridge through app."""
         return self.app.bridge
 
-    async def handle(
-        self,
-        command: str,
-        args: str,
-        view: "ResponseView"
-    ) -> None:
+    async def handle(self, command: str, args: str, view: "ResponseView") -> None:
         """
         Handle /a2a commands.
 
@@ -214,8 +209,7 @@ class A2ACommandHandler:
 
         if not agents:
             view.add_system_message(
-                "## 🤖 Discovered Agents\n\n"
-                "No agents discovered. Run `/a2a discover` first."
+                "## 🤖 Discovered Agents\n\n" "No agents discovered. Run `/a2a discover` first."
             )
             return
 

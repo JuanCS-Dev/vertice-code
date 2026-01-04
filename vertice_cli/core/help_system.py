@@ -1,4 +1,5 @@
 """Minimal help system stub (consolidated from removed module)."""
+
 from typing import List, Optional
 
 

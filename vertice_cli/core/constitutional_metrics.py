@@ -13,7 +13,7 @@ from typing import Dict, List
 @dataclass(frozen=True)
 class ConstitutionalMetrics:
     """Immutable metrics snapshot.
-    
+
     All metrics defined by Constituicao Vertice v3.0.
     """
 
@@ -32,11 +32,7 @@ class ConstitutionalMetrics:
     @property
     def is_compliant(self) -> bool:
         """Check if all metrics meet constitutional targets."""
-        return (
-            self.lei < 1.0 and
-            self.hri < 0.1 and
-            self.cpi > 0.9
-        )
+        return self.lei < 1.0 and self.hri < 0.1 and self.cpi > 0.9
 
     @property
     def compliance_score(self) -> float:
@@ -70,28 +66,32 @@ class ConstitutionalMetrics:
         for pattern, count in self.lei_details.items():
             lines.append(f"  • {pattern}: {count}")
 
-        lines.extend([
-            "",
-            "=" * 60,
-            "HRI - Hallucination Rate Index",
-            "=" * 60,
-            f"Score: {self.hri:.2f} (target: < 0.1) {'✅' if self.hri < 0.1 else '❌'}",
-            "",
-            "Error Categories:",
-        ])
+        lines.extend(
+            [
+                "",
+                "=" * 60,
+                "HRI - Hallucination Rate Index",
+                "=" * 60,
+                f"Score: {self.hri:.2f} (target: < 0.1) {'✅' if self.hri < 0.1 else '❌'}",
+                "",
+                "Error Categories:",
+            ]
+        )
 
         for category, count in self.hri_details.items():
             lines.append(f"  • {category}: {count}")
 
-        lines.extend([
-            "",
-            "=" * 60,
-            "CPI - Completeness-Precision Index",
-            "=" * 60,
-            f"Score: {self.cpi:.2f} (target: > 0.9) {'✅' if self.cpi > 0.9 else '❌'}",
-            "",
-            "Components:",
-        ])
+        lines.extend(
+            [
+                "",
+                "=" * 60,
+                "CPI - Completeness-Precision Index",
+                "=" * 60,
+                f"Score: {self.cpi:.2f} (target: > 0.9) {'✅' if self.cpi > 0.9 else '❌'}",
+                "",
+                "Components:",
+            ]
+        )
 
         for component, value in self.cpi_details.items():
             lines.append(f"  • {component}: {value:.2f}")
@@ -103,14 +103,14 @@ class ConstitutionalMetrics:
 
 def calculate_lei(codebase_path: str = "vertice_cli") -> tuple[float, Dict[str, int]]:
     """Calculate Lazy Execution Index.
-    
+
     LEI = (TODO + FIXME + pass + NotImplemented) / total_loc * 1000
-    
+
     Target: < 1.0 per 1000 LOC
-    
+
     Args:
         codebase_path: Path to analyze
-        
+
     Returns:
         (LEI score, details dict)
     """
@@ -129,41 +129,41 @@ def calculate_lei(codebase_path: str = "vertice_cli") -> tuple[float, Dict[str, 
     for root, dirs, files in os.walk(codebase_path):
         # Skip specific subdirectories (tests, prompts with examples, cache)
         path_parts = root.split(os.sep)
-        skip_dirs = {'tests', 'test', '__pycache__', 'prompts', 'examples'}
+        skip_dirs = {"tests", "test", "__pycache__", "prompts", "examples"}
         if any(part in skip_dirs for part in path_parts):
             continue
 
         for file in files:
-            if not file.endswith('.py'):
+            if not file.endswith(".py"):
                 continue
 
             filepath = os.path.join(root, file)
 
             try:
-                with open(filepath, 'r', encoding='utf-8') as f:
+                with open(filepath, "r", encoding="utf-8") as f:
                     lines = f.readlines()
                     total_loc += len(lines)
 
                     for line in lines:
                         # Only count patterns in comments (not in strings/code)
                         stripped = line.strip()
-                        if stripped.startswith('#'):
-                            if 'TODO' in line:
+                        if stripped.startswith("#"):
+                            if "TODO" in line:
                                 lazy_patterns["TODO"] += 1
-                            if 'FIXME' in line:
+                            if "FIXME" in line:
                                 lazy_patterns["FIXME"] += 1
-                            if 'XXX' in line:
+                            if "XXX" in line:
                                 lazy_patterns["XXX"] += 1
-                            if 'HACK' in line:
+                            if "HACK" in line:
                                 lazy_patterns["HACK"] += 1
 
                         # Count pass statements (excluding docstrings)
                         stripped = line.strip()
-                        if stripped == 'pass':
+                        if stripped == "pass":
                             lazy_patterns["pass_statements"] += 1
 
                         # Count NotImplemented (only bare raises, not in strings/detection)
-                        if 'raise NotImplementedError' in line and '(' not in line:
+                        if "raise NotImplementedError" in line and "(" not in line:
                             lazy_patterns["NotImplemented"] += 1
 
             except (IOError, UnicodeDecodeError):
@@ -175,18 +175,16 @@ def calculate_lei(codebase_path: str = "vertice_cli") -> tuple[float, Dict[str, 
     return lei, lazy_patterns
 
 
-def calculate_hri(
-    error_log: List[Dict[str, str]] = None
-) -> tuple[float, Dict[str, int]]:
+def calculate_hri(error_log: List[Dict[str, str]] = None) -> tuple[float, Dict[str, int]]:
     """Calculate Hallucination Rate Index.
-    
+
     HRI = (API_errors + Logic_errors) / total_executions
-    
+
     Target: < 0.1 (10% error rate)
-    
+
     Args:
         error_log: List of error events
-        
+
     Returns:
         (HRI score, details dict)
     """
@@ -222,21 +220,19 @@ def calculate_hri(
 
 
 def calculate_cpi(
-    completeness: float = 1.0,
-    precision: float = 1.0,
-    recall: float = 1.0
+    completeness: float = 1.0, precision: float = 1.0, recall: float = 1.0
 ) -> tuple[float, Dict[str, float]]:
     """Calculate Completeness-Precision Index.
-    
+
     CPI = (Completeness * 0.4) + (Precision * 0.3) + (Recall * 0.3)
-    
+
     Target: > 0.9
-    
+
     Args:
         completeness: Task completion rate (0.0-1.0)
         precision: Accuracy rate (0.0-1.0)
         recall: Coverage rate (0.0-1.0)
-        
+
     Returns:
         (CPI score, details dict)
     """
@@ -256,17 +252,17 @@ def generate_constitutional_report(
     error_log: List[Dict[str, str]] = None,
     completeness: float = 1.0,
     precision: float = 1.0,
-    recall: float = 1.0
+    recall: float = 1.0,
 ) -> ConstitutionalMetrics:
     """Generate complete constitutional metrics report.
-    
+
     Args:
         codebase_path: Path to analyze
         error_log: List of error events
         completeness: Task completion rate
         precision: Accuracy rate
         recall: Coverage rate
-        
+
     Returns:
         ConstitutionalMetrics object
     """
@@ -280,5 +276,5 @@ def generate_constitutional_report(
         hri=hri,
         hri_details=hri_details,
         cpi=cpi,
-        cpi_details=cpi_details
+        cpi_details=cpi_details,
     )

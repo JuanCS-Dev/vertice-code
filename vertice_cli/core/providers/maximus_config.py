@@ -73,9 +73,7 @@ class MaximusConfig:
     """
 
     # Connection settings
-    base_url: str = field(
-        default_factory=lambda: os.getenv("MAXIMUS_URL", "http://localhost:8100")
-    )
+    base_url: str = field(default_factory=lambda: os.getenv("MAXIMUS_URL", "http://localhost:8100"))
     mcp_url: str = field(
         default_factory=lambda: os.getenv("MAXIMUS_MCP_URL", "http://localhost:8100/mcp")
     )

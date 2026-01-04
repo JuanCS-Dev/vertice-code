@@ -23,11 +23,7 @@ logger = logging.getLogger(__name__)
 class CoverageAnalyzer:
     """Analyzes test coverage using pytest-cov."""
 
-    def __init__(
-        self,
-        execute_tool: Callable[..., Any],
-        min_coverage_threshold: float = 90.0
-    ):
+    def __init__(self, execute_tool: Callable[..., Any], min_coverage_threshold: float = 90.0):
         """Initialize coverage analyzer.
 
         Args:
@@ -37,11 +33,7 @@ class CoverageAnalyzer:
         self._execute_tool = execute_tool
         self.min_coverage_threshold = min_coverage_threshold
 
-    async def analyze(
-        self,
-        test_path: str = "tests/",
-        source_path: str = "."
-    ) -> Dict[str, Any]:
+    async def analyze(self, test_path: str = "tests/", source_path: str = ".") -> Dict[str, Any]:
         """Analyze test coverage.
 
         Args:
@@ -93,7 +85,7 @@ class CoverageAnalyzer:
                 branches_total=totals.get("num_branches", 0),
                 branches_covered=totals.get("covered_branches", 0),
             )
-        except Exception:
+        except (json.JSONDecodeError, KeyError, TypeError, FileNotFoundError):
             return CoverageReport(
                 total_statements=0,
                 covered_statements=0,
@@ -126,11 +118,7 @@ class CoverageAnalyzer:
 class MutationAnalyzer:
     """Runs mutation testing using mutmut."""
 
-    def __init__(
-        self,
-        execute_tool: Callable[..., Any],
-        min_mutation_score: float = 80.0
-    ):
+    def __init__(self, execute_tool: Callable[..., Any], min_mutation_score: float = 80.0):
         """Initialize mutation analyzer.
 
         Args:
@@ -154,9 +142,7 @@ class MutationAnalyzer:
         await self._execute_tool("bash_command", {"command": cmd})
 
         # Get results
-        result = await self._execute_tool(
-            "bash_command", {"command": "mutmut results"}
-        )
+        result = await self._execute_tool("bash_command", {"command": "mutmut results"})
 
         # Parse mutation results
         mutation_result = self._parse_mutation_results(result.get("output", ""))
@@ -201,11 +187,7 @@ class MutationAnalyzer:
 class FlakyDetector:
     """Detects flaky tests through multiple runs."""
 
-    def __init__(
-        self,
-        execute_tool: Callable[..., Any],
-        default_runs: int = 5
-    ):
+    def __init__(self, execute_tool: Callable[..., Any], default_runs: int = 5):
         """Initialize flaky detector.
 
         Args:
@@ -215,11 +197,7 @@ class FlakyDetector:
         self._execute_tool = execute_tool
         self.default_runs = default_runs
 
-    async def detect(
-        self,
-        test_path: str = "tests/",
-        runs: int | None = None
-    ) -> Dict[str, Any]:
+    async def detect(self, test_path: str = "tests/", runs: int | None = None) -> Dict[str, Any]:
         """Detect flaky tests by running multiple times.
 
         Args:
@@ -246,9 +224,7 @@ class FlakyDetector:
             "flaky_count": len(flaky_tests),
         }
 
-    async def _detect_flaky_tests(
-        self, test_path: str, runs: int
-    ) -> List[FlakyTest]:
+    async def _detect_flaky_tests(self, test_path: str, runs: int) -> List[FlakyTest]:
         """Run tests multiple times to detect flakiness.
 
         Args:
@@ -261,9 +237,7 @@ class FlakyDetector:
         test_results: Dict[str, List[bool]] = {}
 
         for _ in range(runs):
-            result = await self._execute_tool(
-                "bash_command", {"command": f"pytest {test_path} -v"}
-            )
+            result = await self._execute_tool("bash_command", {"command": f"pytest {test_path} -v"})
 
             # Parse test results
             output = result.get("output", "")

@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 class WorkflowHandler:
     """Handler for workflow and squad commands."""
 
-    def __init__(self, shell: 'InteractiveShell'):
+    def __init__(self, shell: "InteractiveShell"):
         """Initialize with shell reference."""
         self.shell = shell
         self.console = shell.console
@@ -44,6 +44,7 @@ class WorkflowHandler:
         workflow_name = cmd[14:].strip()  # Remove "/workflow run "
 
         from ..orchestration.workflows import WorkflowLibrary
+
         lib = WorkflowLibrary()
         workflow = lib.get_workflow(workflow_name)
 
@@ -64,7 +65,9 @@ class WorkflowHandler:
             for step in workflow.steps:
                 request += f"- {step.name}: {step.description}\n"
 
-            with self.console.status(f"[bold green]Running Workflow {workflow_name}...[/bold green]"):
+            with self.console.status(
+                f"[bold green]Running Workflow {workflow_name}...[/bold green]"
+            ):
                 result = await self.shell.squad.execute_workflow(request)
             self.console.print(self.shell.squad.get_phase_summary(result))
         except Exception as e:

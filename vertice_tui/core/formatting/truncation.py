@@ -19,23 +19,23 @@ class TruncationConfig:
     """Configuration for smart truncation behavior."""
 
     # Content limits (increased from original 5000)
-    max_chars: int = 50000           # 50K chars before truncation
-    max_lines: int = 500             # Max lines before truncation
-    preview_lines: int = 30          # Lines shown when truncated
-    preview_chars: int = 3000        # Chars shown when truncated
+    max_chars: int = 50000  # 50K chars before truncation
+    max_lines: int = 500  # Max lines before truncation
+    preview_lines: int = 30  # Lines shown when truncated
+    preview_chars: int = 3000  # Chars shown when truncated
 
     # Table limits
-    max_table_rows: int = 50         # Max rows visible
-    max_table_cols: int = 10         # Max columns visible
-    max_cell_width: int = 50         # Max chars per cell
+    max_table_rows: int = 50  # Max rows visible
+    max_table_cols: int = 10  # Max columns visible
+    max_cell_width: int = 50  # Max chars per cell
 
     # Code block limits
-    max_code_lines: int = 40         # Code lines before collapse
-    code_preview_lines: int = 20     # Lines shown in preview
+    max_code_lines: int = 40  # Code lines before collapse
+    code_preview_lines: int = 20  # Lines shown in preview
 
     # Tool output limits
-    max_tool_output: int = 2000      # Tool result chars
-    max_error_length: int = 500      # Error message chars
+    max_tool_output: int = 2000  # Tool result chars
+    max_error_length: int = 500  # Error message chars
 
 
 # Global config instance
@@ -83,10 +83,7 @@ class SmartTruncator:
         self.config = config or TRUNCATION_CONFIG
 
     def truncate_text(
-        self,
-        text: str,
-        max_lines: int = None,
-        max_chars: int = None
+        self, text: str, max_lines: int = None, max_chars: int = None
     ) -> TruncatedContent:
         """
         Truncate text intelligently, preserving paragraph boundaries.
@@ -102,7 +99,7 @@ class SmartTruncator:
         max_lines = max_lines or self.config.preview_lines
         max_chars = max_chars or self.config.preview_chars
 
-        lines = text.split('\n')
+        lines = text.split("\n")
         full_length = len(text)
 
         # Check if truncation needed
@@ -112,23 +109,23 @@ class SmartTruncator:
                 is_truncated=False,
                 full_length=full_length,
                 preview_length=full_length,
-                content_type="text"
+                content_type="text",
             )
 
         # Truncate by lines first, then by chars
         preview_lines = lines[:max_lines]
-        preview = '\n'.join(preview_lines)
+        preview = "\n".join(preview_lines)
 
         if len(preview) > max_chars:
             preview = preview[:max_chars]
             # Try to break at paragraph/sentence boundary
-            last_para = preview.rfind('\n\n')
-            last_sentence = max(preview.rfind('. '), preview.rfind('.\n'))
+            last_para = preview.rfind("\n\n")
+            last_sentence = max(preview.rfind(". "), preview.rfind(".\n"))
 
             if last_para > max_chars * 0.6:
                 preview = preview[:last_para]
             elif last_sentence > max_chars * 0.6:
-                preview = preview[:last_sentence + 1]
+                preview = preview[: last_sentence + 1]
 
         return TruncatedContent(
             content=preview,
@@ -136,7 +133,7 @@ class SmartTruncator:
             full_length=full_length,
             preview_length=len(preview),
             content_type="text",
-            expand_hint="Use /expand to see full response"
+            expand_hint="Use /expand to see full response",
         )
 
     def truncate_code(self, code: str, language: str = "text") -> TruncatedContent:
@@ -150,7 +147,7 @@ class SmartTruncator:
         Returns:
             TruncatedContent with preview
         """
-        lines = code.split('\n')
+        lines = code.split("\n")
         full_lines = len(lines)
 
         if full_lines <= self.config.code_preview_lines:
@@ -159,20 +156,20 @@ class SmartTruncator:
                 is_truncated=False,
                 full_length=full_lines,
                 preview_length=full_lines,
-                content_type="code"
+                content_type="code",
             )
 
         # Take preview lines
-        preview_lines = lines[:self.config.code_preview_lines]
+        preview_lines = lines[: self.config.code_preview_lines]
 
         # Try to end at a logical boundary (empty line, closing brace)
         for i in range(len(preview_lines) - 1, max(10, len(preview_lines) - 10), -1):
             line = preview_lines[i].strip()
-            if line == '' or line in ['}', ']', ')', 'end', 'fi', 'done']:
-                preview_lines = preview_lines[:i + 1]
+            if line == "" or line in ["}", "]", ")", "end", "fi", "done"]:
+                preview_lines = preview_lines[: i + 1]
                 break
 
-        preview = '\n'.join(preview_lines)
+        preview = "\n".join(preview_lines)
         hidden_lines = full_lines - len(preview_lines)
 
         return TruncatedContent(
@@ -181,15 +178,11 @@ class SmartTruncator:
             full_length=full_lines,
             preview_length=len(preview_lines),
             content_type="code",
-            expand_hint=f"# ... {hidden_lines} more lines"
+            expand_hint=f"# ... {hidden_lines} more lines",
         )
 
     def truncate_table_data(
-        self,
-        headers: List[str],
-        rows: List[List[str]],
-        max_rows: int = None,
-        max_cols: int = None
+        self, headers: List[str], rows: List[List[str]], max_rows: int = None, max_cols: int = None
     ) -> Tuple[List[str], List[List[str]], bool, str]:
         """
         Truncate table data for display.
@@ -227,7 +220,7 @@ class SmartTruncator:
         max_width = self.config.max_cell_width
         for i, row in enumerate(result_rows):
             result_rows[i] = [
-                (str(cell)[:max_width - 3] + "..." if len(str(cell)) > max_width else str(cell))
+                (str(cell)[: max_width - 3] + "..." if len(str(cell)) > max_width else str(cell))
                 for cell in row
             ]
 
@@ -256,12 +249,12 @@ class SmartTruncator:
                 is_truncated=False,
                 full_length=full_length,
                 preview_length=full_length,
-                content_type="tool_output"
+                content_type="tool_output",
             )
 
         # For tool output, try to end at a line boundary
         preview = output[:max_chars]
-        last_newline = preview.rfind('\n')
+        last_newline = preview.rfind("\n")
         if last_newline > max_chars * 0.7:
             preview = preview[:last_newline]
 
@@ -271,7 +264,7 @@ class SmartTruncator:
             full_length=full_length,
             preview_length=len(preview),
             content_type="tool_output",
-            expand_hint=f"... {full_length - len(preview)} more chars"
+            expand_hint=f"... {full_length - len(preview)} more chars",
         )
 
 

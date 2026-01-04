@@ -26,7 +26,7 @@ class Workflow(ABC):
 
 class GitWorkflow(Workflow):
     """Git workflow state machine.
-    
+
     States:
     - IDLE → git add → STAGED → git commit → COMMITTED → git push → PUSHED
     """
@@ -46,51 +46,54 @@ class GitWorkflow(Workflow):
 
         # State: Just did "git add"
         if "git add" in last_cmd and git.staged_files:
-            suggestions.append(Suggestion(
-                type=SuggestionType.NEXT_STEP,
-                content="git commit -m ''",
-                confidence=SuggestionConfidence.HIGH,
-                reasoning="Files staged, ready to commit",
-                metadata={'workflow': 'git', 'state': 'staged'}
-            ))
+            suggestions.append(
+                Suggestion(
+                    type=SuggestionType.NEXT_STEP,
+                    content="git commit -m ''",
+                    confidence=SuggestionConfidence.HIGH,
+                    reasoning="Files staged, ready to commit",
+                    metadata={"workflow": "git", "state": "staged"},
+                )
+            )
 
         # State: Just did "git commit"
         elif "git commit" in last_cmd and git.has_remote:
             branch = git.branch or "main"
-            suggestions.append(Suggestion(
-                type=SuggestionType.NEXT_STEP,
-                content=f"git push origin {branch}",
-                confidence=SuggestionConfidence.HIGH,
-                reasoning="Commit created, ready to push to remote",
-                metadata={'workflow': 'git', 'state': 'committed'}
-            ))
+            suggestions.append(
+                Suggestion(
+                    type=SuggestionType.NEXT_STEP,
+                    content=f"git push origin {branch}",
+                    confidence=SuggestionConfidence.HIGH,
+                    reasoning="Commit created, ready to push to remote",
+                    metadata={"workflow": "git", "state": "committed"},
+                )
+            )
 
         # State: Unstaged changes exist
         elif git.unstaged_files or git.untracked_files:
-            suggestions.append(Suggestion(
-                type=SuggestionType.NEXT_STEP,
-                content="git add .",
-                confidence=SuggestionConfidence.MEDIUM,
-                reasoning=f"{len(git.unstaged_files + git.untracked_files)} files modified",
-                metadata={'workflow': 'git', 'state': 'modified'}
-            ))
+            suggestions.append(
+                Suggestion(
+                    type=SuggestionType.NEXT_STEP,
+                    content="git add .",
+                    confidence=SuggestionConfidence.MEDIUM,
+                    reasoning=f"{len(git.unstaged_files + git.untracked_files)} files modified",
+                    metadata={"workflow": "git", "state": "modified"},
+                )
+            )
 
         return suggestions
 
 
 class NpmWorkflow(Workflow):
     """NPM workflow state machine.
-    
+
     States:
     - npm install → INSTALLED → npm run dev / npm test
     """
 
     def is_active(self, context: RichContext) -> bool:
         """Active if in Node.js project."""
-        return (
-            context.workspace is not None and
-            context.workspace.language == 'javascript'
-        )
+        return context.workspace is not None and context.workspace.language == "javascript"
 
     def suggest_next(self, context: RichContext) -> List[Suggestion]:
         """Suggest next npm actions."""
@@ -100,39 +103,44 @@ class NpmWorkflow(Workflow):
         # State: Just installed dependencies
         if "npm install" in last_cmd or "yarn add" in last_cmd:
             # Suggest starting dev server
-            suggestions.append(Suggestion(
-                type=SuggestionType.NEXT_STEP,
-                content="npm run dev",
-                confidence=SuggestionConfidence.HIGH,
-                reasoning="Dependencies installed, start development server",
-                metadata={'workflow': 'npm', 'state': 'installed'}
-            ))
+            suggestions.append(
+                Suggestion(
+                    type=SuggestionType.NEXT_STEP,
+                    content="npm run dev",
+                    confidence=SuggestionConfidence.HIGH,
+                    reasoning="Dependencies installed, start development server",
+                    metadata={"workflow": "npm", "state": "installed"},
+                )
+            )
 
             # Or running tests
             if context.workspace and context.workspace.has_tests:
-                suggestions.append(Suggestion(
-                    type=SuggestionType.NEXT_STEP,
-                    content=context.workspace.test_command,
-                    confidence=SuggestionConfidence.MEDIUM,
-                    reasoning="Run tests after dependency changes",
-                    metadata={'workflow': 'npm', 'state': 'installed'}
-                ))
+                suggestions.append(
+                    Suggestion(
+                        type=SuggestionType.NEXT_STEP,
+                        content=context.workspace.test_command,
+                        confidence=SuggestionConfidence.MEDIUM,
+                        reasoning="Run tests after dependency changes",
+                        metadata={"workflow": "npm", "state": "installed"},
+                    )
+                )
 
         # State: Code files were modified
         elif context.recent_files:
             code_files = [
-                f for f in context.recent_files
-                if f.endswith(('.js', '.ts', '.jsx', '.tsx'))
+                f for f in context.recent_files if f.endswith((".js", ".ts", ".jsx", ".tsx"))
             ]
 
             if code_files and context.workspace and context.workspace.has_tests:
-                suggestions.append(Suggestion(
-                    type=SuggestionType.NEXT_STEP,
-                    content=context.workspace.test_command,
-                    confidence=SuggestionConfidence.MEDIUM,
-                    reasoning=f"{len(code_files)} code files modified",
-                    metadata={'workflow': 'npm', 'state': 'modified'}
-                ))
+                suggestions.append(
+                    Suggestion(
+                        type=SuggestionType.NEXT_STEP,
+                        content=context.workspace.test_command,
+                        confidence=SuggestionConfidence.MEDIUM,
+                        reasoning=f"{len(code_files)} code files modified",
+                        metadata={"workflow": "npm", "state": "modified"},
+                    )
+                )
 
         return suggestions
 
@@ -142,10 +150,7 @@ class PythonWorkflow(Workflow):
 
     def is_active(self, context: RichContext) -> bool:
         """Active if in Python project."""
-        return (
-            context.workspace is not None and
-            context.workspace.language == 'python'
-        )
+        return context.workspace is not None and context.workspace.language == "python"
 
     def suggest_next(self, context: RichContext) -> List[Suggestion]:
         """Suggest next Python actions."""
@@ -155,26 +160,30 @@ class PythonWorkflow(Workflow):
         # State: Just installed dependencies
         if "pip install" in last_cmd:
             if context.workspace and context.workspace.has_tests:
-                suggestions.append(Suggestion(
-                    type=SuggestionType.NEXT_STEP,
-                    content=context.workspace.test_command,
-                    confidence=SuggestionConfidence.MEDIUM,
-                    reasoning="Dependencies installed, run tests",
-                    metadata={'workflow': 'python', 'state': 'installed'}
-                ))
+                suggestions.append(
+                    Suggestion(
+                        type=SuggestionType.NEXT_STEP,
+                        content=context.workspace.test_command,
+                        confidence=SuggestionConfidence.MEDIUM,
+                        reasoning="Dependencies installed, run tests",
+                        metadata={"workflow": "python", "state": "installed"},
+                    )
+                )
 
         # State: Python files modified
         elif context.recent_files:
-            py_files = [f for f in context.recent_files if f.endswith('.py')]
+            py_files = [f for f in context.recent_files if f.endswith(".py")]
 
             if py_files and context.workspace and context.workspace.has_tests:
-                suggestions.append(Suggestion(
-                    type=SuggestionType.NEXT_STEP,
-                    content=context.workspace.test_command,
-                    confidence=SuggestionConfidence.MEDIUM,
-                    reasoning=f"{len(py_files)} Python files modified",
-                    metadata={'workflow': 'python', 'state': 'modified'}
-                ))
+                suggestions.append(
+                    Suggestion(
+                        type=SuggestionType.NEXT_STEP,
+                        content=context.workspace.test_command,
+                        confidence=SuggestionConfidence.MEDIUM,
+                        reasoning=f"{len(py_files)} Python files modified",
+                        metadata={"workflow": "python", "state": "modified"},
+                    )
+                )
 
         return suggestions
 
@@ -185,6 +194,7 @@ class DockerWorkflow(Workflow):
     def is_active(self, context: RichContext) -> bool:
         """Active if Dockerfile exists."""
         import os
+
         return os.path.exists(os.path.join(context.working_directory, "Dockerfile"))
 
     def suggest_next(self, context: RichContext) -> List[Suggestion]:
@@ -194,30 +204,34 @@ class DockerWorkflow(Workflow):
 
         # State: Just built image
         if "docker build" in last_cmd:
-            suggestions.append(Suggestion(
-                type=SuggestionType.NEXT_STEP,
-                content="docker run <image>",
-                confidence=SuggestionConfidence.HIGH,
-                reasoning="Image built, ready to run container",
-                metadata={'workflow': 'docker', 'state': 'built'}
-            ))
+            suggestions.append(
+                Suggestion(
+                    type=SuggestionType.NEXT_STEP,
+                    content="docker run <image>",
+                    confidence=SuggestionConfidence.HIGH,
+                    reasoning="Image built, ready to run container",
+                    metadata={"workflow": "docker", "state": "built"},
+                )
+            )
 
         # State: Dockerfile modified
         elif "Dockerfile" in str(context.recent_files):
-            suggestions.append(Suggestion(
-                type=SuggestionType.NEXT_STEP,
-                content="docker build -t <tag> .",
-                confidence=SuggestionConfidence.MEDIUM,
-                reasoning="Dockerfile modified, rebuild image",
-                metadata={'workflow': 'docker', 'state': 'modified'}
-            ))
+            suggestions.append(
+                Suggestion(
+                    type=SuggestionType.NEXT_STEP,
+                    content="docker build -t <tag> .",
+                    confidence=SuggestionConfidence.MEDIUM,
+                    reasoning="Dockerfile modified, rebuild image",
+                    metadata={"workflow": "docker", "state": "modified"},
+                )
+            )
 
         return suggestions
 
 
 class WorkflowOrchestrator:
     """Orchestrates multiple workflows.
-    
+
     Boris Cherny: Composition over inheritance. Each workflow is independent.
     """
 
@@ -230,16 +244,14 @@ class WorkflowOrchestrator:
         ]
 
     def get_workflow_suggestions(
-        self,
-        context: RichContext,
-        max_per_workflow: int = 2
+        self, context: RichContext, max_per_workflow: int = 2
     ) -> List[Suggestion]:
         """Get suggestions from all active workflows.
-        
+
         Args:
             context: Rich context
             max_per_workflow: Max suggestions per workflow
-            
+
         Returns:
             List of suggestions from all workflows
         """

@@ -1,4 +1,5 @@
 """MCP Tools - Auto-expose CLI tools as MCP tools."""
+
 import logging
 from typing import Optional
 from vertice_cli.tools.base import ToolRegistry
@@ -32,18 +33,10 @@ class MCPToolsAdapter:
             """Auto-generated MCP tool wrapper."""
             try:
                 result = await tool_fn(**kwargs)
-                return {
-                    "success": True,
-                    "tool": tool_name,
-                    "result": result
-                }
+                return {"success": True, "tool": tool_name, "result": result}
             except Exception as e:
                 logger.error(f"Tool {tool_name} error: {e}")
-                return {
-                    "success": False,
-                    "tool": tool_name,
-                    "error": str(e)
-                }
+                return {"success": False, "tool": tool_name, "error": str(e)}
 
         self._mcp_tools[tool_name] = mcp_tool_wrapper
 
@@ -59,7 +52,7 @@ class MCPToolsAdapter:
                     "success": True,
                     "session_id": session_id,
                     "cwd": session.cwd,
-                    "message": "Shell session created. Use execute_shell to run commands."
+                    "message": "Shell session created. Use execute_shell to run commands.",
                 }
             except Exception as e:
                 logger.error(f"Failed to create shell: {e}")
@@ -67,9 +60,7 @@ class MCPToolsAdapter:
 
         @mcp_server.tool(name="execute_shell")
         async def execute_shell(
-            command: str,
-            session_id: str = "default",
-            timeout: float = 30.0
+            command: str, session_id: str = "default", timeout: float = 30.0
         ) -> dict:
             """Execute command in shell session."""
             try:
@@ -78,10 +69,7 @@ class MCPToolsAdapter:
                     session = await self.shell_manager.create_session(session_id)
 
                 result = await session.execute(command, timeout)
-                return {
-                    "success": True,
-                    **result
-                }
+                return {"success": True, **result}
             except Exception as e:
                 logger.error(f"Shell execution error: {e}")
                 return {"success": False, "error": str(e)}
@@ -94,7 +82,7 @@ class MCPToolsAdapter:
                 return {
                     "success": True,
                     "session_id": session_id,
-                    "message": "Shell session closed"
+                    "message": "Shell session closed",
                 }
             except Exception as e:
                 return {"success": False, "error": str(e)}
@@ -106,15 +94,13 @@ class MCPToolsAdapter:
                 {"session_id": sid, "cwd": s.cwd, "pid": s.pid}
                 for sid, s in self.shell_manager.sessions.items()
             ]
-            return {
-                "success": True,
-                "sessions": sessions,
-                "count": len(sessions)
-            }
+            return {"success": True, "sessions": sessions, "count": len(sessions)}
 
-        self._mcp_tools.update({
-            "create_shell": create_shell,
-            "execute_shell": execute_shell,
-            "close_shell": close_shell,
-            "list_shell_sessions": list_shell_sessions
-        })
+        self._mcp_tools.update(
+            {
+                "create_shell": create_shell,
+                "execute_shell": execute_shell,
+                "close_shell": close_shell,
+                "list_shell_sessions": list_shell_sessions,
+            }
+        )

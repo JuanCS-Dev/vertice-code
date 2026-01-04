@@ -30,6 +30,7 @@ class BlockType(Enum):
         - Claude Code Web style (TOOL_CALL, DIFF_BLOCK, etc.)
         - Extensions (MERMAID_DIAGRAM, etc.)
     """
+
     # Core markdown blocks
     UNKNOWN = "unknown"
     PARAGRAPH = "paragraph"
@@ -57,6 +58,7 @@ class BlockType(Enum):
 @dataclass
 class BlockInfo:
     """Information about a detected block."""
+
     block_type: BlockType
     start_line: int
     end_line: Optional[int] = None
@@ -74,6 +76,7 @@ class BlockInfo:
 @dataclass
 class BlockRenderConfig:
     """Configuration for block rendering."""
+
     show_line_numbers: bool = True
     show_language_badge: bool = True
     max_height: Optional[int] = None
@@ -82,7 +85,7 @@ class BlockRenderConfig:
 
 
 __all__ = [
-    'BlockType',
-    'BlockInfo',
-    'BlockRenderConfig',
+    "BlockType",
+    "BlockInfo",
+    "BlockRenderConfig",
 ]

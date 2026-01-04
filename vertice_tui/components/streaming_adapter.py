@@ -93,17 +93,13 @@ class StreamingResponseWidget(Static):
 
     class StreamCompleted(Message):
         """Emitido quando streaming termina."""
+
         def __init__(self, content: str, metrics: PerformanceMetrics):
             self.content = content
             self.metrics = metrics
             super().__init__()
 
-    def __init__(
-        self,
-        *args,
-        enable_markdown: bool = True,
-        **kwargs
-    ):
+    def __init__(self, *args, enable_markdown: bool = True, **kwargs):
         """
         Inicializa StreamingResponseWidget.
 
@@ -163,11 +159,11 @@ class StreamingResponseWidget(Static):
         # BLINDAGEM 1: Sanitizar Rich markup que o LLM gerou erroneamente
         # =================================================================
         chunk = re.sub(
-            r'\[/?(?:bold|italic|dim|underline|strike|blink|reverse|#[0-9a-fA-F]{6}|'
-            r'red|green|blue|yellow|magenta|cyan|white|black|'
-            r'bright_\w+|rgb\([^)]+\)|on\s+\w+)[^\]]*\]',
-            '',
-            chunk
+            r"\[/?(?:bold|italic|dim|underline|strike|blink|reverse|#[0-9a-fA-F]{6}|"
+            r"red|green|blue|yellow|magenta|cyan|white|black|"
+            r"bright_\w+|rgb\([^)]+\)|on\s+\w+)[^\]]*\]",
+            "",
+            chunk,
         )
 
         # =================================================================
@@ -176,10 +172,52 @@ class StreamingResponseWidget(Static):
         # =================================================================
         chunk = sanitize_tool_call_json(chunk)
 
+        # =================================================================
+        # BLINDAGEM 3: Fix malformed code fences from Gemini
+        # Based on 2026 research: Gemini CLI has known markdown bugs (P1)
+        # Patterns:
+        #   - ```markdown → render as actual markdown, not code
+        #   - ```html<html> → ```html\n<html>  (language + content on same line)
+        #   - ```lang```lang → ```lang  (duplicated fence marker)
+        # =================================================================
+        # Fix: Remove ```markdown wrapper (LLM outputs markdown as code block)
+        # This allows the content to be rendered as actual formatted markdown
+        chunk = re.sub(r"^```markdown\s*\n?", "", chunk)
+        chunk = re.sub(r"\n?```\s*$", "", chunk)  # Closing fence at end
+
+        # Fix: ```lang```lang duplication (e.g., ```html```html)
+        chunk = re.sub(r"```(\w+)```\1", r"```\1", chunk)
+
+        # Fix: ```lang<content> on same line → split to newline
+        # Match: ```html<html> (HTML/XML tags immediately after language)
+        # Simplified pattern to avoid false positives with identifiers
+        chunk = re.sub(r"```(\w+)(<[^>\n]+>)", r"```\1\n\2", chunk)
+
+        # Fix: ```lang{ or ```lang[ (JSON/object literals after language)
+        chunk = re.sub(r"```(\w+)([\{\[])", r"```\1\n\2", chunk)
+
+        # =================================================================
+        # BLINDAGEM 4: Inline deduplication (same-line repetition)
+        # Based on 2026 research: LLMs can repeat content within same line
+        # Patterns:
+        #   - </body></body> → </body>  (HTML tag duplication)
+        #   - </div></div> → </div>
+        #   - word word → word  (immediate word repetition at boundaries)
+        # =================================================================
+        # Fix: Duplicated HTML closing tags
+        chunk = re.sub(r"(</\w+>)\1+", r"\1", chunk)
+
+        # Fix: Duplicated HTML opening tags (less common but possible)
+        chunk = re.sub(r"(<\w+[^>]*>)\1+", r"\1", chunk)
+
+        # Fix: Immediate word/token duplication (word word → word)
+        # Only at word boundaries to avoid false positives
+        chunk = re.sub(r"\b(\w{3,})\s+\1\b", r"\1", chunk)
+
         # DEDUPLICATION: Remove LLM-generated duplicate lines
         # Split chunk into lines and filter duplicates
-        if '\n' in chunk:
-            lines = chunk.split('\n')
+        if "\n" in chunk:
+            lines = chunk.split("\n")
             filtered_lines = []
 
             for line in lines:
@@ -205,7 +243,7 @@ class StreamingResponseWidget(Static):
                     if len(self._last_lines) > self._max_line_history:
                         self._last_lines.pop(0)
 
-            chunk = '\n'.join(filtered_lines)
+            chunk = "\n".join(filtered_lines)
 
         self._content += chunk
 
@@ -214,26 +252,25 @@ class StreamingResponseWidget(Static):
 
         # Adaptive frame budget: 60fps for code, 30fps for markdown
         current_time = time.time()
-        if not hasattr(self, '_last_update_time'):
+        if not hasattr(self, "_last_update_time"):
             self._last_update_time = 0.0
             self._pending_update = False
             self._in_code_block = False
 
         # Detect if we're inside a code block (``` markers)
-        if '```' in chunk:
-            self._in_code_block = not getattr(self, '_in_code_block', False)
+        if "```" in chunk:
+            self._in_code_block = not getattr(self, "_in_code_block", False)
 
         # Select frame budget based on content type
         frame_budget_ms = (
-            self.CODE_FRAME_BUDGET_MS if self._in_code_block
-            else self.MARKDOWN_FRAME_BUDGET_MS
+            self.CODE_FRAME_BUDGET_MS if self._in_code_block else self.MARKDOWN_FRAME_BUDGET_MS
         )
         frame_budget_s = frame_budget_ms / 1000.0
 
         time_since_last = current_time - self._last_update_time
 
         # Update if frame budget exceeded or newline (flush)
-        if time_since_last >= frame_budget_s or chunk.endswith('\n'):
+        if time_since_last >= frame_budget_s or chunk.endswith("\n"):
             self._update_display()
             self._last_update_time = current_time
             self._pending_update = False
@@ -253,6 +290,7 @@ class StreamingResponseWidget(Static):
             except Exception as e:
                 # Log para debugging (não silencia mais)
                 import logging
+
                 logging.warning(f"StreamingResponseWidget render error: {e}")
                 renderable = self._render_plain_text()
 
@@ -292,6 +330,7 @@ class StreamingResponseWidget(Static):
                 return RichMarkdown(content)
             except Exception as e:
                 import logging
+
                 logging.warning(f"RichMarkdown error: {e}")
                 return Text(content)
 
@@ -304,7 +343,9 @@ class StreamingResponseWidget(Static):
         # Cursor no final (thread-safe) - Orange brand color
         if self.is_streaming and not self._is_finalizing:
             cursor_text = Text()
-            cursor_text.append(self.CURSOR_FRAMES[self._get_cursor_index()], style=f"bold {Colors.PRIMARY}")
+            cursor_text.append(
+                self.CURSOR_FRAMES[self._get_cursor_index()], style=f"bold {Colors.PRIMARY}"
+            )
             renderables.append(cursor_text)
 
         return Group(*renderables) if renderables else Text("")
@@ -320,7 +361,7 @@ class StreamingResponseWidget(Static):
             self._advance_cursor()  # Thread-safe
 
             # Flush pending updates if any (from throttling)
-            if getattr(self, '_pending_update', False):
+            if getattr(self, "_pending_update", False):
                 self._pending_update = False
 
             self._update_display()
@@ -347,14 +388,12 @@ class StreamingResponseWidget(Static):
             if self._cursor_task and not self._cursor_task.done():
                 self._cursor_task.cancel()
                 try:
-                    await asyncio.wait_for(
-                        asyncio.shield(self._cursor_task),
-                        timeout=1.0
-                    )
+                    await asyncio.wait_for(asyncio.shield(self._cursor_task), timeout=1.0)
                 except (asyncio.CancelledError, asyncio.TimeoutError):
                     pass
                 except Exception as e:
                     import logging
+
                     logging.warning(f"Error cancelling cursor task: {e}")
                 finally:
                     self._cursor_task = None
@@ -372,18 +411,22 @@ class StreamingResponseWidget(Static):
         """
         Versão sync de finalize() para uso em contextos síncronos.
 
-        Usa call_later para executar a versão async.
+        Uses call_later to execute async finalization.
+        FIX 2.2: Delegate entirely to async version to avoid race conditions.
         """
-        # Seta flags imediatamente para evitar race conditions
-        self._is_finalizing = True
-        self.is_streaming = False
-        self.remove_class("streaming")
+        # FIX 2.2: Don't set flags here - let the async version handle it
+        # with proper locking to avoid race conditions
+        self.call_later(self._finalize_async_safe)
 
-        # Agenda finalização async
-        self.call_later(self._finalize_async)
+    async def _finalize_async_safe(self) -> None:
+        """
+        FIX 2.2: Thread-safe async finalization with proper locking.
+        Delegates to finalize() which already uses the lock.
+        """
+        await self.finalize()
 
     async def _finalize_async(self) -> None:
-        """Helper async para finalize_sync."""
+        """Helper async para finalize_sync (legacy, use _finalize_async_safe)."""
         if self._cursor_task and not self._cursor_task.done():
             self._cursor_task.cancel()
             try:
@@ -392,6 +435,7 @@ class StreamingResponseWidget(Static):
                 pass
             except Exception as e:
                 import logging
+
                 logging.warning(f"Error cancelling cursor task: {e}")
             finally:
                 self._cursor_task = None

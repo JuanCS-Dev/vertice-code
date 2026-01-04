@@ -58,7 +58,9 @@ class AzureOpenAIProvider:
         self.api_key = api_key or os.getenv("AZURE_OPENAI_KEY")
         self.endpoint = endpoint or os.getenv("AZURE_OPENAI_ENDPOINT", self.DEFAULT_ENDPOINT)
         self.deployment = self.MODELS.get(deployment, deployment)
-        self.api_version = api_version or os.getenv("AZURE_OPENAI_API_VERSION", self.DEFAULT_API_VERSION)
+        self.api_version = api_version or os.getenv(
+            "AZURE_OPENAI_API_VERSION", self.DEFAULT_API_VERSION
+        )
         self._client: Optional[httpx.AsyncClient] = None
 
     async def _ensure_client(self) -> httpx.AsyncClient:
@@ -92,7 +94,7 @@ class AzureOpenAIProvider:
         temperature: float = 0.7,
         response_format: str = "text",
         retry_count: int = 3,
-        **kwargs
+        **kwargs,
     ) -> str:
         """Generate completion from messages with retry logic.
 
@@ -143,8 +145,10 @@ class AzureOpenAIProvider:
                 # Retryable errors
                 if response.status_code in [429, 500, 502, 503]:
                     retry_after = response.headers.get("Retry-After")
-                    wait_time = int(retry_after) if retry_after else (2 ** attempt)
-                    logger.warning(f"Azure OpenAI {response.status_code}, retrying in {wait_time}s...")
+                    wait_time = int(retry_after) if retry_after else (2**attempt)
+                    logger.warning(
+                        f"Azure OpenAI {response.status_code}, retrying in {wait_time}s..."
+                    )
                     await asyncio.sleep(wait_time)
                     continue
 
@@ -155,10 +159,10 @@ class AzureOpenAIProvider:
 
             except httpx.TimeoutException:
                 last_error = "Azure OpenAI timeout"
-                await asyncio.sleep(2 ** attempt)
+                await asyncio.sleep(2**attempt)
             except Exception as e:
                 last_error = str(e)
-                await asyncio.sleep(2 ** attempt)
+                await asyncio.sleep(2**attempt)
 
         raise RuntimeError(f"Azure OpenAI failed after {retry_count} attempts: {last_error}")
 
@@ -167,7 +171,7 @@ class AzureOpenAIProvider:
         messages: List[Dict[str, str]],
         max_tokens: int = 4096,
         temperature: float = 0.7,
-        **kwargs
+        **kwargs,
     ) -> AsyncGenerator[str, None]:
         """Stream generation from messages."""
         if not self.is_available():
@@ -203,12 +207,13 @@ class AzureOpenAIProvider:
                         break
                     try:
                         import json
+
                         data = json.loads(data_str)
                         delta = data.get("choices", [{}])[0].get("delta", {})
                         content = delta.get("content", "")
                         if content:
                             yield content
-                    except Exception:
+                    except json.JSONDecodeError:
                         continue
 
     async def stream_chat(
@@ -217,7 +222,7 @@ class AzureOpenAIProvider:
         system_prompt: Optional[str] = None,
         max_tokens: int = 4096,
         temperature: float = 0.7,
-        **kwargs
+        **kwargs,
     ) -> AsyncGenerator[str, None]:
         """Stream chat with optional system prompt."""
         full_messages = []
@@ -226,24 +231,21 @@ class AzureOpenAIProvider:
         full_messages.extend(messages)
 
         async for chunk in self.stream_generate(
-            full_messages,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            **kwargs
+            full_messages, max_tokens=max_tokens, temperature=temperature, **kwargs
         ):
             yield chunk
 
     def get_model_info(self) -> Dict[str, str | bool | int]:
         """Get model information."""
         return {
-            'provider': 'azure-openai',
-            'model': self.deployment,
-            'endpoint': self.endpoint,
-            'available': self.is_available(),
-            'context_window': 128000,
-            'supports_streaming': True,
-            'cost_tier': 'paid',
-            'speed_tier': 'medium',
+            "provider": "azure-openai",
+            "model": self.deployment,
+            "endpoint": self.endpoint,
+            "available": self.is_available(),
+            "context_window": 128000,
+            "supports_streaming": True,
+            "cost_tier": "paid",
+            "speed_tier": "medium",
         }
 
     def count_tokens(self, text: str) -> int:

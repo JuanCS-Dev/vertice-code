@@ -19,17 +19,19 @@ import threading
 
 class ToolCategory(Enum):
     """Tool categories."""
-    FILE_SYSTEM = auto()   # read, write, glob, etc.
-    CODE = auto()          # edit, search, refactor
-    SHELL = auto()         # bash, exec
-    NETWORK = auto()       # http, fetch
-    AGENT = auto()         # task, sub-agents
-    UTILITY = auto()       # misc helpers
+
+    FILE_SYSTEM = auto()  # read, write, glob, etc.
+    CODE = auto()  # edit, search, refactor
+    SHELL = auto()  # bash, exec
+    NETWORK = auto()  # http, fetch
+    AGENT = auto()  # task, sub-agents
+    UTILITY = auto()  # misc helpers
 
 
 @dataclass
 class ToolRegistration:
     """Tool registration metadata."""
+
     name: str
     description: str
     handler: Callable
@@ -52,6 +54,7 @@ class ToolRegistration:
 @dataclass
 class ToolExecutionContext:
     """Context for tool execution."""
+
     session_id: Optional[str] = None
     user_id: Optional[str] = None
     working_directory: Optional[str] = None
@@ -68,6 +71,7 @@ class ToolExecutionContext:
 @dataclass
 class ToolResult:
     """Result of tool execution."""
+
     tool_name: str
     success: bool
     output: Any
@@ -135,7 +139,7 @@ class ToolManager:
         parameters: Optional[Dict[str, Any]] = None,
         requires_approval: bool = False,
         timeout: int = 30,
-        aliases: Optional[List[str]] = None
+        aliases: Optional[List[str]] = None,
     ) -> Callable:
         """
         Decorator to register a tool handler.
@@ -154,6 +158,7 @@ class ToolManager:
             async def execute_bash(command: str) -> str:
                 ...
         """
+
         def decorator(handler: Callable) -> Callable:
             registration = ToolRegistration(
                 name=name,
@@ -182,6 +187,7 @@ class ToolManager:
                 }
 
             return handler
+
         return decorator
 
     def register_tool(self, registration: ToolRegistration) -> None:
@@ -206,9 +212,7 @@ class ToolManager:
         return self._tools.get(actual_name)
 
     def list_tools(
-        self,
-        category: Optional[ToolCategory] = None,
-        enabled_only: bool = True
+        self, category: Optional[ToolCategory] = None, enabled_only: bool = True
     ) -> List[ToolRegistration]:
         """List registered tools."""
         tools = list(self._tools.values())
@@ -221,10 +225,7 @@ class ToolManager:
 
         return tools
 
-    def get_tool_schemas(
-        self,
-        category: Optional[ToolCategory] = None
-    ) -> List[Dict[str, Any]]:
+    def get_tool_schemas(self, category: Optional[ToolCategory] = None) -> List[Dict[str, Any]]:
         """Get tool schemas for LLM."""
         tools = self.list_tools(category=category, enabled_only=True)
         return [t.to_schema() for t in tools]
@@ -233,7 +234,7 @@ class ToolManager:
         self,
         tool_name: str,
         parameters: Dict[str, Any],
-        context: Optional[ToolExecutionContext] = None
+        context: Optional[ToolExecutionContext] = None,
     ) -> ToolResult:
         """
         Execute a tool.
@@ -286,16 +287,12 @@ class ToolManager:
             handler = tool.handler
 
             if asyncio.iscoroutinefunction(handler):
-                result = await asyncio.wait_for(
-                    handler(**parameters),
-                    timeout=timeout
-                )
+                result = await asyncio.wait_for(handler(**parameters), timeout=timeout)
             else:
                 # Run sync handler in thread pool
                 loop = asyncio.get_event_loop()
                 result = await asyncio.wait_for(
-                    loop.run_in_executor(None, lambda: handler(**parameters)),
-                    timeout=timeout
+                    loop.run_in_executor(None, lambda: handler(**parameters)), timeout=timeout
                 )
 
             execution_time = time.time() - start_time
@@ -393,9 +390,9 @@ class ToolManager:
 
 
 __all__ = [
-    'ToolManager',
-    'ToolRegistration',
-    'ToolExecutionContext',
-    'ToolResult',
-    'ToolCategory',
+    "ToolManager",
+    "ToolRegistration",
+    "ToolExecutionContext",
+    "ToolResult",
+    "ToolCategory",
 ]

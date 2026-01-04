@@ -143,7 +143,7 @@ class ResponseView(VerticalScroll):
         self.is_thinking = True
         self._thinking_widget = Static(
             f"[bold {Colors.ACCENT}]{Icons.THINKING}[/] [italic {Colors.MUTED}]Thinking...[/]",
-            id="thinking-indicator"
+            id="thinking-indicator",
         )
         self.mount(self._thinking_widget)
         self.scroll_end(animate=True)
@@ -157,13 +157,13 @@ class ResponseView(VerticalScroll):
 
         # Wrap completed response in Panel
         if self.current_response and self._response_widget:
-            if self._use_streaming_markdown and isinstance(self._response_widget, StreamingResponseWidget):
+            if self._use_streaming_markdown and isinstance(
+                self._response_widget, StreamingResponseWidget
+            ):
                 self._response_widget.finalize_sync()
             else:
                 formatted_panel = OutputFormatter.format_response(
-                    self.current_response,
-                    title="Response",
-                    border_style=Colors.PRIMARY
+                    self.current_response, title="Response", border_style=Colors.PRIMARY
                 )
                 self._response_widget.update(formatted_panel)
 
@@ -176,7 +176,9 @@ class ResponseView(VerticalScroll):
         self.current_response += chunk
 
         if self._response_widget:
-            if self._use_streaming_markdown and isinstance(self._response_widget, StreamingResponseWidget):
+            if self._use_streaming_markdown and isinstance(
+                self._response_widget, StreamingResponseWidget
+            ):
                 self._response_widget.append_chunk(chunk)
             else:
                 self._response_widget.update(self.current_response)
@@ -188,22 +190,22 @@ class ResponseView(VerticalScroll):
 
             if self._use_streaming_markdown:
                 self._response_widget = StreamingResponseWidget(
-                    classes="ai-response",
-                    enable_markdown=True
+                    classes="ai-response", enable_markdown=True
                 )
             else:
                 self._response_widget = SelectableStatic(
-                    self.current_response,
-                    classes="ai-response"
+                    self.current_response, classes="ai-response"
                 )
             self.mount(self._response_widget)
 
-            if self._use_streaming_markdown and isinstance(self._response_widget, StreamingResponseWidget):
+            if self._use_streaming_markdown and isinstance(
+                self._response_widget, StreamingResponseWidget
+            ):
                 self._response_widget.append_chunk(chunk)
 
         # Throttled scroll (max 20fps = 50ms) to prevent layout thrashing
         current_time = time.time()
-        if not hasattr(self, '_last_scroll_time'):
+        if not hasattr(self, "_last_scroll_time"):
             self._last_scroll_time = 0.0
 
         if current_time - self._last_scroll_time >= 0.05:
@@ -215,7 +217,7 @@ class ResponseView(VerticalScroll):
         code: str,
         language: str = "text",
         title: str | None = None,
-        file_path: str | None = None
+        file_path: str | None = None,
     ) -> None:
         """
         Add syntax-highlighted code block with enhanced header.
@@ -232,7 +234,7 @@ class ResponseView(VerticalScroll):
             theme="one-dark",
             line_numbers=True,
             word_wrap=True,
-            background_color=Colors.SURFACE
+            background_color=Colors.SURFACE,
         )
 
         # Build header: icon + language + optional path
@@ -249,7 +251,7 @@ class ResponseView(VerticalScroll):
             title_align="left",
             border_style=Colors.BORDER,
             box=box.ROUNDED,
-            padding=(0, 1)
+            padding=(0, 1),
         )
 
         widget = SelectableStatic(panel, classes="code-block")
@@ -257,10 +259,7 @@ class ResponseView(VerticalScroll):
         self.scroll_end(animate=True)
 
     def add_diff_block(
-        self,
-        diff_content: str,
-        title: str = "Diff",
-        file_path: str | None = None
+        self, diff_content: str, title: str = "Diff", file_path: str | None = None
     ) -> None:
         """
         Add diff block with colored additions/deletions.
@@ -294,7 +293,7 @@ class ResponseView(VerticalScroll):
             title_align="left",
             border_style=Colors.BORDER,
             box=box.ROUNDED,
-            padding=(0, 1)
+            padding=(0, 1),
         )
 
         widget = SelectableStatic(panel, classes="diff-block")
@@ -305,7 +304,7 @@ class ResponseView(VerticalScroll):
         """Add action indicator with accent color."""
         widget = SelectableStatic(
             f"[bold {Colors.ACCENT}]{Icons.EXECUTING}[/] [{Colors.MUTED}]{action}[/]",
-            classes="action"
+            classes="action",
         )
         self.mount(widget)
         self.scroll_end(animate=True)
@@ -314,7 +313,7 @@ class ResponseView(VerticalScroll):
         """Add warning message with triangle icon."""
         widget = SelectableStatic(
             f"[bold {Colors.WARNING}]{Icons.WARNING}[/] [{Colors.WARNING}]{message}[/]",
-            classes="warning"
+            classes="warning",
         )
         self.mount(widget)
         self.scroll_end(animate=True)
@@ -323,7 +322,7 @@ class ResponseView(VerticalScroll):
         """Add success message with checkmark."""
         widget = SelectableStatic(
             f"[bold {Colors.SUCCESS}]{Icons.SUCCESS}[/] [{Colors.SUCCESS}]{message}[/]",
-            classes="success"
+            classes="success",
         )
         self.mount(widget)
         self.scroll_end(animate=True)
@@ -331,18 +330,13 @@ class ResponseView(VerticalScroll):
     def add_error(self, message: str) -> None:
         """Add error message with X."""
         widget = SelectableStatic(
-            f"[bold {Colors.ERROR}]{Icons.ERROR}[/] [{Colors.ERROR}]{message}[/]",
-            classes="error"
+            f"[bold {Colors.ERROR}]{Icons.ERROR}[/] [{Colors.ERROR}]{message}[/]", classes="error"
         )
         self.mount(widget)
         self.scroll_end(animate=True)
 
     def add_tool_result(
-        self,
-        tool_name: str,
-        success: bool,
-        data: str | None = None,
-        error: str | None = None
+        self, tool_name: str, success: bool, data: str | None = None, error: str | None = None
     ) -> None:
         """Add tool execution result with Panel formatting."""
         panel = OutputFormatter.format_tool_result(tool_name, success, data, error)

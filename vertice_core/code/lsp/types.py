@@ -20,6 +20,7 @@ from typing import Any, Dict, List, Optional
 
 class DiagnosticSeverity(int, Enum):
     """LSP Diagnostic severity levels."""
+
     ERROR = 1
     WARNING = 2
     INFORMATION = 3
@@ -28,6 +29,7 @@ class DiagnosticSeverity(int, Enum):
 
 class SymbolKind(int, Enum):
     """LSP Symbol kinds."""
+
     FILE = 1
     MODULE = 2
     NAMESPACE = 3
@@ -59,6 +61,7 @@ class SymbolKind(int, Enum):
 @dataclass
 class Position:
     """LSP Position (0-indexed)."""
+
     line: int
     character: int
 
@@ -73,6 +76,7 @@ class Position:
 @dataclass
 class Range:
     """LSP Range."""
+
     start: Position
     end: Position
 
@@ -90,6 +94,7 @@ class Range:
 @dataclass
 class Location:
     """LSP Location."""
+
     uri: str
     range: Range
 
@@ -121,6 +126,7 @@ class Location:
 @dataclass
 class Diagnostic:
     """LSP Diagnostic."""
+
     range: Range
     message: str
     severity: DiagnosticSeverity = DiagnosticSeverity.ERROR
@@ -149,6 +155,7 @@ class Diagnostic:
 @dataclass
 class DocumentSymbol:
     """LSP Document Symbol."""
+
     name: str
     kind: SymbolKind
     range: Range
@@ -163,9 +170,7 @@ class DocumentSymbol:
             name=data["name"],
             kind=SymbolKind(data.get("kind", 1)),
             range=Range.from_dict(data["range"]),
-            selection_range=Range.from_dict(
-                data.get("selectionRange", data["range"])
-            ),
+            selection_range=Range.from_dict(data.get("selectionRange", data["range"])),
             detail=data.get("detail"),
             children=children,
         )
@@ -174,6 +179,7 @@ class DocumentSymbol:
 @dataclass
 class HoverInfo:
     """LSP Hover information."""
+
     contents: str
     range: Optional[Range] = None
 
@@ -184,8 +190,7 @@ class HoverInfo:
             contents = contents.get("value", str(contents))
         elif isinstance(contents, list):
             contents = "\n".join(
-                c.get("value", str(c)) if isinstance(c, dict) else str(c)
-                for c in contents
+                c.get("value", str(c)) if isinstance(c, dict) else str(c) for c in contents
             )
 
         range_data = data.get("range")
@@ -198,6 +203,7 @@ class HoverInfo:
 @dataclass
 class CompletionItem:
     """LSP Completion item."""
+
     label: str
     kind: Optional[int] = None
     detail: Optional[str] = None

@@ -35,7 +35,7 @@ class AgentManager:
             print(chunk, end='')
     """
 
-    def __init__(self, llm_client: Optional['GeminiClient'] = None) -> None:
+    def __init__(self, llm_client: Optional["GeminiClient"] = None) -> None:
         """Initialize agent manager.
 
         Args:
@@ -45,6 +45,7 @@ class AgentManager:
         # This was missing and caused "Provider not available" errors
         try:
             from vertice_cli.core.providers.register import ensure_providers_registered
+
             ensure_providers_registered()
         except ImportError:
             pass  # CLI providers not available (minimal install)
@@ -52,6 +53,7 @@ class AgentManager:
         # Lazy import to avoid circular dependency
         if llm_client is None:
             from ..llm_client import GeminiClient
+
             llm_client = GeminiClient()
 
         self.llm_client = llm_client
@@ -66,21 +68,24 @@ class AgentManager:
         self._mcp_client: Optional[Any] = None
         try:
             from vertice_cli.core.mcp import create_mcp_client
+
             # Attempt to create MCP client with error handling
             self._mcp_client = create_mcp_client()
             if self._mcp_client is None:
                 # FIX 3.3: Use logger instead of print
                 import logging
+
                 logging.warning("MCP Client creation returned None - capabilities will be limited.")
         except ImportError:
             # FIX 3.3: Use logger instead of print
             import logging
+
             logging.warning("MCP module not found - running in standalone mode.")
         except Exception as e:
             # FIX 3.3: Use logger instead of print
             import logging
-            logging.error(f"Failed to initialize MCP client: {e} - capabilities will be limited.")
 
+            logging.error(f"Failed to initialize MCP client: {e} - capabilities will be limited.")
 
     @property
     def available_agents(self) -> List[str]:
@@ -97,18 +102,18 @@ class AgentManager:
         async with self._lock:
             for name, agent in list(self._agents.items()):
                 # Call agent cleanup if available
-                if hasattr(agent, 'cleanup'):
+                if hasattr(agent, "cleanup"):
                     try:
                         if asyncio.iscoroutinefunction(agent.cleanup):
                             await agent.cleanup()
                         else:
                             agent.cleanup()
-                    except Exception:
-                        pass  # Ignore cleanup errors
+                    except (AttributeError, RuntimeError):
+                        pass
                 # Clear references
-                if hasattr(agent, 'llm_client'):
+                if hasattr(agent, "llm_client"):
                     agent.llm_client = None
-                if hasattr(agent, 'mcp_client'):
+                if hasattr(agent, "mcp_client"):
                     agent.mcp_client = None
             self._agents.clear()
             self._load_errors.clear()
@@ -153,6 +158,7 @@ class AgentManager:
             try:
                 # Dynamic import
                 import importlib
+
                 module = importlib.import_module(info.module_path)
                 agent_class = getattr(module, info.class_name)
 
@@ -161,19 +167,20 @@ class AgentManager:
                 params = sig.parameters
 
                 init_kwargs: Dict[str, Any] = {}
-                if 'llm_client' in params:
-                    init_kwargs['llm_client'] = self.llm_client
-                if 'mcp_client' in params:
+                if "llm_client" in params:
+                    init_kwargs["llm_client"] = self.llm_client
+                if "mcp_client" in params:
                     # FIXED: Pass actual MCP client instead of None
-                    init_kwargs['mcp_client'] = self._mcp_client
-                if 'model' in params:
-                    init_kwargs['model'] = self.llm_client
+                    init_kwargs["mcp_client"] = self._mcp_client
+                if "model" in params:
+                    init_kwargs["model"] = self.llm_client
 
                 agent = agent_class(**init_kwargs)
 
                 # Wrap core agents with CoreAgentAdapter for mixin activation
                 if info.is_core:
                     from .core_adapter import CoreAgentAdapter
+
                     adapter = CoreAgentAdapter(agent, info.name)
                     self._agents[name] = adapter
                     return adapter
@@ -189,10 +196,7 @@ class AgentManager:
                 return None
 
     async def invoke(
-        self,
-        name: str,
-        task: str,
-        context: Optional[Dict[str, Any]] = None
+        self, name: str, task: str, context: Optional[Dict[str, Any]] = None
     ) -> AsyncIterator[str]:
         """
         Invoke an agent and stream response.
@@ -225,21 +229,27 @@ class AgentManager:
 
         # Create AgentTask
         from vertice_core import AgentTask
+
         agent_task = AgentTask(request=task, context=context or {})
 
         # Track plan output for later execution
         plan_chunks: Optional[List[str]] = [] if name == "planner" else None
 
         # Try streaming interface first
-        if hasattr(agent, 'execute_streaming'):
+        if hasattr(agent, "execute_streaming"):
             try:
                 sig = inspect.signature(agent.execute_streaming)
                 # FIX 3.5: Exclude 'self' and handle *args/**kwargs properly
-                param_count = len([p for p in sig.parameters.values()
-                                   if p.name != 'self'
-                                   and p.default == inspect.Parameter.empty
-                                   and p.kind not in (inspect.Parameter.VAR_POSITIONAL,
-                                                      inspect.Parameter.VAR_KEYWORD)])
+                param_count = len(
+                    [
+                        p
+                        for p in sig.parameters.values()
+                        if p.name != "self"
+                        and p.default == inspect.Parameter.empty
+                        and p.kind
+                        not in (inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD)
+                    ]
+                )
 
                 if param_count == 1:  # AgentTask only
                     async for chunk in agent.execute_streaming(agent_task):
@@ -264,7 +274,7 @@ class AgentManager:
                 yield f"⚠️ Streaming failed: {e}\n"
 
         # Fallback to sync execute
-        if hasattr(agent, 'execute'):
+        if hasattr(agent, "execute"):
             try:
                 result = await agent.execute(agent_task)
                 async for chunk in self._format_agent_result(result):
@@ -306,9 +316,7 @@ class AgentManager:
     # =========================================================================
 
     async def invoke_planner_multi(
-        self,
-        task: str,
-        context: Optional[Dict[str, Any]] = None
+        self, task: str, context: Optional[Dict[str, Any]] = None
     ) -> AsyncIterator[str]:
         """
         Invoke planner with Multi-Plan Generation (v6.1).
@@ -324,7 +332,7 @@ class AgentManager:
             yield "❌ Planner agent not available"
             return
 
-        if not hasattr(agent, 'generate_multi_plan'):
+        if not hasattr(agent, "generate_multi_plan"):
             yield "⚠️ Planner doesn't support multi-plan (requires v6.1+)\n"
             async for chunk in self.invoke("planner", task, context):
                 yield chunk
@@ -332,6 +340,7 @@ class AgentManager:
 
         try:
             from vertice_core import AgentTask
+
             agent_task = AgentTask(request=task, context=context or {})
 
             yield "🎯 **Generating 3 Alternative Plans...**\n\n"
@@ -343,9 +352,7 @@ class AgentManager:
             yield f"❌ Multi-plan generation failed: {e}"
 
     async def invoke_planner_clarify(
-        self,
-        task: str,
-        context: Optional[Dict[str, Any]] = None
+        self, task: str, context: Optional[Dict[str, Any]] = None
     ) -> AsyncIterator[str]:
         """
         Invoke planner with Clarification Mode (v6.1).
@@ -358,7 +365,7 @@ class AgentManager:
             yield "❌ Planner agent not available"
             return
 
-        if not hasattr(agent, 'generate_clarifying_questions'):
+        if not hasattr(agent, "generate_clarifying_questions"):
             yield "⚠️ Planner doesn't support clarification (requires v6.1+)\n"
             async for chunk in self.invoke("planner", task, context):
                 yield chunk
@@ -366,6 +373,7 @@ class AgentManager:
 
         try:
             from vertice_core import AgentTask
+
             agent_task = AgentTask(request=task, context=context or {})
 
             yield "🤔 **Analyzing your request...**\n\n"
@@ -390,9 +398,7 @@ class AgentManager:
             yield f"❌ Clarification failed: {e}"
 
     async def invoke_planner_explore(
-        self,
-        task: str,
-        context: Optional[Dict[str, Any]] = None
+        self, task: str, context: Optional[Dict[str, Any]] = None
     ) -> AsyncIterator[str]:
         """
         Invoke planner in Exploration Mode (v6.1).
@@ -405,7 +411,7 @@ class AgentManager:
             yield "❌ Planner agent not available"
             return
 
-        if not hasattr(agent, 'explore'):
+        if not hasattr(agent, "explore"):
             yield "⚠️ Planner doesn't support exploration (requires v6.1+)\n"
             async for chunk in self.invoke("planner", task, context):
                 yield chunk
@@ -413,6 +419,7 @@ class AgentManager:
 
         try:
             from vertice_core import AgentTask
+
             agent_task = AgentTask(request=task, context=context or {})
 
             yield "🔍 **Exploration Mode (Read-Only)**\n\n"
@@ -421,26 +428,26 @@ class AgentManager:
             result = await agent.explore(agent_task)
 
             if result.success:
-                exploration = result.data.get('exploration', {})
+                exploration = result.data.get("exploration", {})
 
-                if 'files_analyzed' in exploration:
+                if "files_analyzed" in exploration:
                     yield f"**📁 Files Analyzed:** {exploration['files_analyzed']}\n\n"
 
-                if 'key_findings' in exploration:
+                if "key_findings" in exploration:
                     yield "**🔑 Key Findings:**\n"
-                    for finding in exploration['key_findings']:
+                    for finding in exploration["key_findings"]:
                         yield f"- {finding}\n"
                     yield "\n"
 
-                if 'dependencies' in exploration:
+                if "dependencies" in exploration:
                     yield "**🔗 Dependencies:**\n"
-                    for dep in exploration['dependencies'][:10]:
+                    for dep in exploration["dependencies"][:10]:
                         yield f"- {dep}\n"
                     yield "\n"
 
-                if 'recommendations' in exploration:
+                if "recommendations" in exploration:
                     yield "**💡 Recommendations:**\n"
-                    for rec in exploration['recommendations']:
+                    for rec in exploration["recommendations"]:
                         yield f"- {rec}\n"
                     yield "\n"
 

@@ -122,9 +122,7 @@ class ErrorEscalationHandler:
                 context.history.append(f"Failed: {level.value} - {str(e)[:50]}")
                 continue
 
-        raise UnrecoverableError(
-            f"All recovery strategies failed for {context.operation}: {error}"
-        )
+        raise UnrecoverableError(f"All recovery strategies failed for {context.operation}: {error}")
 
     async def _execute_level(
         self,
@@ -173,9 +171,7 @@ class ErrorEscalationHandler:
         except Exception as e:
             return await self.handle_error(e, context, operation)
 
-    async def _safe_call(
-        self, func: Callable, context: ExecutionContext
-    ) -> Any:
+    async def _safe_call(self, func: Callable, context: ExecutionContext) -> Any:
         """Safely call function (sync or async)."""
         context.attempt += 1
         result = func(context)
@@ -192,7 +188,7 @@ class ErrorEscalationHandler:
         if context.attempt >= context.max_retries:
             raise Exception(f"Max retries ({context.max_retries}) exceeded")
 
-        wait_time = min(2 ** context.attempt, 30)
+        wait_time = min(2**context.attempt, 30)
         logger.debug(f"[Retry] Waiting {wait_time}s before attempt {context.attempt + 1}")
         await asyncio.sleep(wait_time)
 
@@ -288,7 +284,7 @@ class ErrorEscalationHandler:
             try:
                 result = await self._safe_call(execute_fn, subtask_ctx)
                 results.append(result)
-            except Exception:
+            except (RuntimeError, ValueError, TypeError):
                 results.append(None)
 
         success_count = sum(1 for r in results if r is not None)
@@ -320,13 +316,15 @@ class ErrorEscalationHandler:
 
     def _record_recovery(self, context: ExecutionContext, recovery: Recovery) -> None:
         """Record recovery for statistics."""
-        self._recovery_history.append({
-            "operation": context.operation,
-            "strategy": recovery.strategy_used.value,
-            "attempts": recovery.attempts,
-            "timestamp": datetime.now().isoformat(),
-            "success": recovery.success,
-        })
+        self._recovery_history.append(
+            {
+                "operation": context.operation,
+                "strategy": recovery.strategy_used.value,
+                "attempts": recovery.attempts,
+                "timestamp": datetime.now().isoformat(),
+                "success": recovery.success,
+            }
+        )
 
     def get_stats(self) -> Dict[str, Any]:
         """Get recovery statistics."""

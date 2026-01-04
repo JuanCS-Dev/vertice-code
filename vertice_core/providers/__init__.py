@@ -174,10 +174,7 @@ class ProviderRegistry:
     def __repr__(self) -> str:
         registered = list(self._factories.keys())
         instantiated = list(self._instances.keys())
-        return (
-            f"ProviderRegistry(registered={registered}, "
-            f"instantiated={instantiated})"
-        )
+        return f"ProviderRegistry(registered={registered}, " f"instantiated={instantiated})"
 
 
 # Global singleton registry

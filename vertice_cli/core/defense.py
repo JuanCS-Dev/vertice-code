@@ -21,6 +21,7 @@ from dataclasses import dataclass
 @dataclass
 class InjectionDetection:
     """Result of prompt injection detection."""
+
     is_malicious: bool
     confidence: float  # 0.0-1.0
     patterns_found: List[str]
@@ -31,7 +32,7 @@ class InjectionDetection:
 class PromptInjectionDefender:
     """
     Detect and prevent prompt injection attacks.
-    
+
     Constitutional Article VI requirement:
     "Defesa Contra Prompt Injection"
     """
@@ -43,33 +44,27 @@ class PromptInjectionDefender:
         (r"ignore.*instructions.*delete", 0.95),  # High confidence for combined pattern
         (r"disregard\s+(previous|all|system)", 0.9),
         (r"forget\s+(everything|all|your)", 0.8),
-
         # Role confusion attacks
         (r"you\s+are\s+now\s+a\s+different", 0.85),
         (r"act\s+as\s+(a\s+)?(different|new)\s+(ai|assistant|system)", 0.85),
         (r"pretend\s+(you|to)\s+(are|be)", 0.7),
-
         # Instruction manipulation
         (r"new\s+(instruction|directive|rule):", 0.8),
         (r"override\s+(mode|setting|instruction)", 0.9),
         (r"system\s+message:", 0.8),
         (r"admin\s+(command|mode|override)", 0.9),
-
         # Prompt leaking attempts
         (r"show\s+(me\s+)?(your|the)\s+(prompt|system\s+message|instructions)", 0.8),
         (r"what\s+(are|is)\s+your\s+(instructions|system\s+prompt)", 0.8),
         (r"repeat\s+(your|the)\s+instructions", 0.8),
-
         # Delimiter attacks
         (r"```[\s\S]*system", 0.7),
         (r"<\|im_start\|>system", 0.9),
         (r"<\|system\|>", 0.9),
-
         # Jailbreak attempts
         (r"dan\s+mode", 0.9),  # Do Anything Now
         (r"developer\s+mode", 0.85),
         (r"evil\s+(mode|assistant)", 0.9),
-
         # Code injection in prompts
         (r"eval\(", 0.8),
         (r"exec\(", 0.8),
@@ -88,7 +83,7 @@ class PromptInjectionDefender:
     def detect(self, user_input: str) -> InjectionDetection:
         """
         Detect prompt injection attempts.
-        
+
         Returns InjectionDetection with:
         - is_malicious: True if high-confidence injection detected
         - confidence: 0.0-1.0 confidence score
@@ -115,24 +110,27 @@ class PromptInjectionDefender:
 
         # Sanitize input
         from ..security_hardening import PromptSanitiser
+
         sanitized = PromptSanitiser.sanitise(user_input)
 
         reason = None
         if is_malicious:
-            reason = f"High confidence ({max_confidence:.2f}) injection detected: {patterns_found[:3]}"
+            reason = (
+                f"High confidence ({max_confidence:.2f}) injection detected: {patterns_found[:3]}"
+            )
 
         return InjectionDetection(
             is_malicious=is_malicious,
             confidence=max_confidence,
             patterns_found=patterns_found,
             sanitized_input=sanitized,
-            reason=reason
+            reason=reason,
         )
 
     def _sanitize(self, text: str) -> str:
         """
         Sanitize input by removing/escaping dangerous patterns.
-        
+
         This is a conservative approach - we don't modify the input heavily,
         just escape obvious attempts.
         """
@@ -149,7 +147,7 @@ class PromptInjectionDefender:
             r"(ignore|disregard|forget)\s+(previous|all|above)\s+(instructions|prompts)",
             "[FILTERED]",
             sanitized,
-            flags=re.IGNORECASE
+            flags=re.IGNORECASE,
         )
 
         return sanitized
@@ -158,10 +156,10 @@ class PromptInjectionDefender:
 class AutoCritic:
     """
     Auto-critique mechanism for tool call validation.
-    
+
     Constitutional Article VII requirement:
     "Protocolo de Auto-Crítica Obrigatória"
-    
+
     Validates tool calls before execution and reviews results after.
     """
 
@@ -169,13 +167,11 @@ class AutoCritic:
         self.error_patterns = []
 
     def pre_execution_critique(
-        self,
-        tool_calls: List[Dict],
-        context: Dict
+        self, tool_calls: List[Dict], context: Dict
     ) -> Tuple[bool, List[str]]:
         """
         Critique tool calls BEFORE execution.
-        
+
         Returns:
             (should_execute, warnings)
         """
@@ -214,14 +210,10 @@ class AutoCritic:
 
         return should_execute, warnings
 
-    def post_execution_critique(
-        self,
-        tool_calls: List[Dict],
-        results: List[Dict]
-    ) -> List[str]:
+    def post_execution_critique(self, tool_calls: List[Dict], results: List[Dict]) -> List[str]:
         """
         Critique tool execution results AFTER execution.
-        
+
         Identifies potential issues:
         - Failed operations
         - Incomplete implementations
@@ -238,11 +230,7 @@ class AutoCritic:
                 issues.append(f"Tool '{name}' failed: {error}")
 
                 # Track error patterns
-                self.error_patterns.append({
-                    "tool": name,
-                    "error": error,
-                    "args": tc.get("args")
-                })
+                self.error_patterns.append({"tool": name, "error": error, "args": tc.get("args")})
 
             # Check for lazy execution indicators
             if "TODO" in str(result) or "NotImplemented" in str(result):
@@ -258,7 +246,7 @@ class AutoCritic:
     def suggest_improvements(self) -> List[str]:
         """
         Suggest improvements based on error patterns.
-        
+
         This implements basic learning from failures.
         """
         if not self.error_patterns:
@@ -294,10 +282,10 @@ class AutoCritic:
 class ContextCompactor:
     """
     Smart context compaction for Layer 3 (State Management).
-    
+
     Constitutional Article VIII requirement:
     "Compactação Ativa de Contexto"
-    
+
     Reduces context window usage while preserving critical information.
     """
 
@@ -307,20 +295,16 @@ class ContextCompactor:
     def estimate_tokens(self, text: str) -> int:
         """
         Estimate token count.
-        
+
         Rough estimate: 1 token ≈ 4 characters for English text.
         This is conservative (actual is closer to 3-3.5 for GPT models).
         """
         return len(text) // 4
 
-    def compact(
-        self,
-        messages: List[Dict],
-        preserve_system: bool = True
-    ) -> List[Dict]:
+    def compact(self, messages: List[Dict], preserve_system: bool = True) -> List[Dict]:
         """
         Compact message history to fit within max_tokens.
-        
+
         Strategy:
         1. Always preserve system message (if preserve_system=True)
         2. Always preserve last user message
@@ -351,7 +335,7 @@ class ContextCompactor:
 
         if last_user_idx is not None:
             last_user = messages[last_user_idx]
-            messages = messages[:last_user_idx] + messages[last_user_idx + 1:]
+            messages = messages[:last_user_idx] + messages[last_user_idx + 1 :]
         else:
             last_user = None
 
@@ -362,10 +346,9 @@ class ContextCompactor:
         # Summarize old messages
         if old_messages:
             summary = self._summarize_messages(old_messages)
-            compacted.append({
-                "role": "system",
-                "content": f"[Previous conversation summary: {summary}]"
-            })
+            compacted.append(
+                {"role": "system", "content": f"[Previous conversation summary: {summary}]"}
+            )
 
         # Add recent messages
         compacted.extend(recent_messages)
@@ -402,6 +385,7 @@ class ContextCompactor:
 @dataclass
 class DefenseResult:
     """Result of defense validation."""
+
     is_safe: bool
     confidence: float
     reason: Optional[str] = None
@@ -419,7 +403,7 @@ class PromptDefense:
     def validate_input(self, user_input: str) -> DefenseResult:
         """
         Validate user input for safety.
-        
+
         Returns:
             DefenseResult with is_safe, confidence, and reason
         """
@@ -428,5 +412,5 @@ class PromptDefense:
         return DefenseResult(
             is_safe=not detection.is_malicious,
             confidence=detection.confidence,
-            reason=detection.reason
+            reason=detection.reason,
         )

@@ -51,7 +51,7 @@ from .formatting import (
 warnings.warn(
     "tui.core.output_formatter is deprecated. Use tui.core.formatting instead.",
     DeprecationWarning,
-    stacklevel=2
+    stacklevel=2,
 )
 
 __all__ = [

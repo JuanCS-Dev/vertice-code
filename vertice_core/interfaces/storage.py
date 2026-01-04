@@ -16,12 +16,13 @@ from dataclasses import dataclass, field
 from typing import Dict, Any, List, Optional, TypeVar, Generic
 from datetime import datetime
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 @dataclass
 class ICacheStats:
     """Cache statistics."""
+
     hits: int = 0
     misses: int = 0
     size: int = 0
@@ -38,6 +39,7 @@ class ICacheStats:
 @dataclass
 class CacheEntry(Generic[T]):
     """Cache entry with metadata."""
+
     key: str
     value: T
     created_at: datetime = field(default_factory=datetime.utcnow)
@@ -79,12 +81,7 @@ class IStorage(ABC):
         pass
 
     @abstractmethod
-    async def set(
-        self,
-        key: str,
-        value: Any,
-        ttl: Optional[int] = None
-    ) -> None:
+    async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
         """
         Set value for key.
 
@@ -125,11 +122,7 @@ class IStorage(ABC):
         """Get multiple values."""
         return {k: await self.get(k) for k in keys}
 
-    async def set_many(
-        self,
-        items: Dict[str, Any],
-        ttl: Optional[int] = None
-    ) -> None:
+    async def set_many(self, items: Dict[str, Any], ttl: Optional[int] = None) -> None:
         """Set multiple values."""
         for k, v in items.items():
             await self.set(k, v, ttl)
@@ -170,12 +163,7 @@ class ICache(ABC):
         pass
 
     @abstractmethod
-    def set(
-        self,
-        key: str,
-        value: Any,
-        ttl: Optional[int] = None
-    ) -> None:
+    def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
         """
         Set cache value.
 
@@ -207,12 +195,7 @@ class ICache(ABC):
         """Get cache statistics."""
         pass
 
-    def get_or_set(
-        self,
-        key: str,
-        factory,
-        ttl: Optional[int] = None
-    ) -> Any:
+    def get_or_set(self, key: str, factory, ttl: Optional[int] = None) -> Any:
         """
         Get value or compute and cache it.
 
@@ -233,8 +216,8 @@ class ICache(ABC):
 
 
 __all__ = [
-    'IStorage',
-    'ICache',
-    'ICacheStats',
-    'CacheEntry',
+    "IStorage",
+    "ICache",
+    "ICacheStats",
+    "CacheEntry",
 ]

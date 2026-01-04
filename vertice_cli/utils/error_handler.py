@@ -414,9 +414,7 @@ async def retry_with_backoff(
     for attempt in range(1, policy.max_attempts + 1):
         # Check circuit breaker
         if circuit_breaker and not circuit_breaker.allow_request():
-            raise CircuitOpenError(
-                f"Circuit breaker open for {context or 'operation'}"
-            )
+            raise CircuitOpenError(f"Circuit breaker open for {context or 'operation'}")
 
         try:
             result = await coro_factory()
@@ -462,9 +460,7 @@ async def retry_with_backoff(
                     elapsed_ms=elapsed,
                     category=category,
                 )
-                logger.warning(
-                    f"Retrying after {delay:.2f}s: {ctx.format(e)}"
-                )
+                logger.warning(f"Retrying after {delay:.2f}s: {ctx.format(e)}")
 
             await asyncio.sleep(delay)
 
@@ -523,6 +519,7 @@ def retry_sync_with_backoff(
 
 class CircuitOpenError(Exception):
     """Raised when circuit breaker is open."""
+
     pass
 
 
@@ -541,8 +538,10 @@ def with_retry(
         ... async def call_api():
         ...     return await client.request()
     """
+
     def decorator(func: Callable) -> Callable:
         if asyncio.iscoroutinefunction(func):
+
             @functools.wraps(func)
             async def async_wrapper(*args, **kwargs):
                 return await retry_with_backoff(
@@ -552,8 +551,10 @@ def with_retry(
                     logger=logger or logging.getLogger(func.__module__),
                     context=context or func.__name__,
                 )
+
             return async_wrapper
         else:
+
             @functools.wraps(func)
             def sync_wrapper(*args, **kwargs):
                 return retry_sync_with_backoff(
@@ -563,7 +564,9 @@ def with_retry(
                     logger=logger or logging.getLogger(func.__module__),
                     context=context or func.__name__,
                 )
+
             return sync_wrapper
+
     return decorator
 
 
@@ -575,9 +578,7 @@ class ErrorAggregator:
     processing even if some items fail.
     """
 
-    _errors: list[tuple[str, Exception, ErrorCategory]] = field(
-        default_factory=list, repr=False
-    )
+    _errors: list[tuple[str, Exception, ErrorCategory]] = field(default_factory=list, repr=False)
     _logger: Optional[logging.Logger] = field(default=None, repr=False)
 
     def __init__(self, logger: Optional[logging.Logger] = None):
@@ -626,16 +627,14 @@ class ErrorAggregator:
                 }
                 for ctx, err, cat in self._errors
             ],
-            "by_category": {
-                cat.value: len(errs)
-                for cat, errs in self.errors_by_category.items()
-            },
+            "by_category": {cat.value: len(errs) for cat, errs in self.errors_by_category.items()},
         }
 
     def raise_if_errors(self, message: str = "Multiple errors occurred") -> None:
         """Raise if any errors were collected."""
         if self._errors:
             import json
+
             raise RuntimeError(f"{message}\n{json.dumps(self.to_dict(), indent=2)}")
 
     def clear(self) -> None:

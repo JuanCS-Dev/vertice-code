@@ -23,6 +23,7 @@ from pathlib import Path
 @dataclass
 class FileContext:
     """Contexto de um arquivo manipulado"""
+
     path: str
     content: Optional[str] = None
     last_operation: str = "read"  # read, write, edit
@@ -32,6 +33,7 @@ class FileContext:
 @dataclass
 class CommandContext:
     """Contexto de um comando executado"""
+
     command: str
     tool: str
     result: Dict
@@ -57,22 +59,16 @@ class ShellContext:
 
     def remember_file(self, path: str, content: Optional[str] = None, operation: str = "read"):
         """Remember file that was just accessed"""
-        file_ctx = FileContext(
-            path=path,
-            content=content,
-            last_operation=operation
-        )
+        file_ctx = FileContext(path=path, content=content, last_operation=operation)
         self.last_file = file_ctx
         self.file_history.append(file_ctx)
 
     def remember_command(self, command: str, tool: str, result: Dict):
         """Remember command that was executed"""
         import datetime
+
         cmd_ctx = CommandContext(
-            command=command,
-            tool=tool,
-            result=result,
-            timestamp=datetime.datetime.now().isoformat()
+            command=command, tool=tool, result=result, timestamp=datetime.datetime.now().isoformat()
         )
         self.command_history.append(cmd_ctx)
 
@@ -103,7 +99,7 @@ class ShellContext:
         for ref in references:
             # Use word boundaries to avoid replacing parts of words
             # Example: "Edit" won't match "it", but "edit it" will
-            pattern = re.compile(r'\b' + re.escape(ref) + r'\b', re.IGNORECASE)
+            pattern = re.compile(r"\b" + re.escape(ref) + r"\b", re.IGNORECASE)
             result = pattern.sub(self.last_file.path, result)
 
         return result

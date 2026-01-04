@@ -1,4 +1,5 @@
 """Minimal error parser stub (consolidated from removed module)."""
+
 from dataclasses import dataclass
 from typing import List, Optional
 
@@ -6,6 +7,7 @@ from typing import List, Optional
 @dataclass
 class ErrorAnalysis:
     """Analysis result for an error."""
+
     error_type: str = "unknown"
     user_friendly: str = "An error occurred"
     suggestions: List[str] = None
@@ -37,15 +39,15 @@ class ErrorParser:
             suggestions = ["Check file permissions", "Run with appropriate privileges"]
         elif "SyntaxError" in error_text:
             user_friendly = "Syntax error in code"
-            suggestions = ["Check the line mentioned in the error", "Look for missing brackets or quotes"]
+            suggestions = [
+                "Check the line mentioned in the error",
+                "Look for missing brackets or quotes",
+            ]
 
         if suggestion:
             suggestions.insert(0, suggestion)
 
-        return ErrorAnalysis(
-            user_friendly=user_friendly,
-            suggestions=suggestions[:5]
-        )
+        return ErrorAnalysis(user_friendly=user_friendly, suggestions=suggestions[:5])
 
 
 # Singleton instance

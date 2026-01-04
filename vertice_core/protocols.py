@@ -31,6 +31,7 @@ from vertice_core.types import AgentTask, AgentResponse, AgentCapability, AgentR
 # LLM CLIENT PROTOCOL
 # =============================================================================
 
+
 @runtime_checkable
 class LLMClientProtocol(Protocol):
     """
@@ -92,6 +93,7 @@ class LLMClientWithChatProtocol(LLMClientProtocol, Protocol):
 # MCP CLIENT PROTOCOL
 # =============================================================================
 
+
 @runtime_checkable
 class MCPClientProtocol(Protocol):
     """
@@ -123,6 +125,7 @@ class MCPClientProtocol(Protocol):
 # =============================================================================
 # AGENT PROTOCOL
 # =============================================================================
+
 
 @runtime_checkable
 class AgentProtocol(Protocol):
@@ -186,6 +189,7 @@ class StreamingAgentProtocol(AgentProtocol, Protocol):
 # TOOL PROTOCOL
 # =============================================================================
 
+
 @runtime_checkable
 class ToolProtocol(Protocol):
     """
@@ -239,6 +243,7 @@ class ToolWithSchemaProtocol(ToolProtocol, Protocol):
 # GOVERNANCE PROTOCOL
 # =============================================================================
 
+
 @runtime_checkable
 class GovernanceProtocol(Protocol):
     """
@@ -269,6 +274,7 @@ class GovernanceProtocol(Protocol):
 # =============================================================================
 # SESSION PROTOCOL
 # =============================================================================
+
 
 @runtime_checkable
 class SessionProtocol(Protocol):

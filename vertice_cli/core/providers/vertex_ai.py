@@ -35,8 +35,8 @@ class VertexAIProvider:
 
     MODELS = {
         # Gemini 3 (2026) - RECOMMENDED
-        "pro": "gemini-3-pro-preview",            # Reasoning-first, 1M context, agentic
-        "flash": "gemini-2.0-flash",        # Multimodal, complex understanding
+        "pro": "gemini-3-pro-preview",  # Reasoning-first, 1M context, agentic
+        "flash": "gemini-2.0-flash",  # Multimodal, complex understanding
         "3-pro": "gemini-3-pro-preview",
         "3-flash": "gemini-2.0-flash",
         # Legacy (still available)
@@ -83,16 +83,16 @@ class VertexAIProvider:
                     "google-cloud-aiplatform not installed. "
                     "Run: pip install google-cloud-aiplatform"
                 )
-            except Exception as e:
+            except (ImportError, RuntimeError, AttributeError) as e:
                 logger.error(f"Failed to initialize Vertex AI: {e}")
-                raise
+                raise RuntimeError(f"Vertex AI initialization failed: {e}") from e
 
     def is_available(self) -> bool:
         """Check if provider is available."""
         try:
             self._ensure_client()
             return self._model is not None
-        except Exception:
+        except (ImportError, RuntimeError, AttributeError):
             return False
 
     def set_grounding(self, enabled: bool = True) -> None:
@@ -184,7 +184,7 @@ class VertexAIProvider:
         messages: List[Dict[str, str]],
         max_tokens: int = 8192,
         temperature: float = 0.7,
-        **kwargs
+        **kwargs,
     ) -> str:
         """Generate completion from messages."""
         self._ensure_client()
@@ -213,10 +213,8 @@ class VertexAIProvider:
             # Create model with system instruction if provided
             if system_prompt:
                 from vertexai.generative_models import GenerativeModel
-                model = GenerativeModel(
-                    self.model_name,
-                    system_instruction=system_prompt
-                )
+
+                model = GenerativeModel(self.model_name, system_instruction=system_prompt)
             else:
                 model = self._model
 
@@ -231,7 +229,7 @@ class VertexAIProvider:
         messages: List[Dict[str, str]],
         max_tokens: int = 8192,
         temperature: float = 0.7,
-        **kwargs
+        **kwargs,
     ) -> AsyncGenerator[str, None]:
         """Stream generation from messages."""
         self._ensure_client()
@@ -254,10 +252,7 @@ class VertexAIProvider:
             )
 
             if system_prompt:
-                model = GenerativeModel(
-                    self.model_name,
-                    system_instruction=system_prompt
-                )
+                model = GenerativeModel(self.model_name, system_instruction=system_prompt)
             else:
                 model = self._model
 
@@ -276,7 +271,7 @@ class VertexAIProvider:
             chunk = await loop.run_in_executor(None, _get_next, iterator)
             if chunk is None:
                 break
-            if hasattr(chunk, 'text') and chunk.text:
+            if hasattr(chunk, "text") and chunk.text:
                 yield chunk.text
             await asyncio.sleep(0)
 
@@ -298,13 +293,13 @@ class VertexAIProvider:
             declarations = []
             for tool in tools:
                 # Handle both internal Tool objects and raw dictionaries
-                schema = tool.get_schema() if hasattr(tool, 'get_schema') else tool
+                schema = tool.get_schema() if hasattr(tool, "get_schema") else tool
 
                 declarations.append(
                     FunctionDeclaration(
-                        name=schema['name'],
-                        description=schema['description'],
-                        parameters=schema['parameters']
+                        name=schema["name"],
+                        description=schema["description"],
+                        parameters=schema["parameters"],
                     )
                 )
 
@@ -323,7 +318,7 @@ class VertexAIProvider:
         tool_config: Optional[str] = "AUTO",
         enable_grounding: Optional[bool] = None,
         cached_content: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ) -> AsyncGenerator[str, None]:
         """Stream chat with optional system prompt and native function calling.
 
@@ -421,7 +416,7 @@ class VertexAIProvider:
                     self.model_name,
                     system_instruction=system_prompt,
                     tools=final_tools,  # Combined: function tools + grounding tool
-                    tool_config=vertex_tool_config
+                    tool_config=vertex_tool_config,
                 )
 
             return model.generate_content(contents, generation_config=config, stream=True)
@@ -441,15 +436,15 @@ class VertexAIProvider:
                 break
 
             # Handle Function Calls (native response)
-            if hasattr(chunk, 'candidates') and chunk.candidates:
+            if hasattr(chunk, "candidates") and chunk.candidates:
                 for candidate in chunk.candidates:
-                    if hasattr(candidate, 'content') and candidate.content:
+                    if hasattr(candidate, "content") and candidate.content:
                         for part in candidate.content.parts:
-                            if hasattr(part, 'function_call') and part.function_call:
+                            if hasattr(part, "function_call") and part.function_call:
                                 call_data = {
                                     "tool_call": {
                                         "name": part.function_call.name,
-                                        "arguments": dict(part.function_call.args)
+                                        "arguments": dict(part.function_call.args),
                                     }
                                 }
                                 yield json.dumps(call_data)
@@ -457,7 +452,7 @@ class VertexAIProvider:
 
             # Handle Text (Safely)
             try:
-                if hasattr(chunk, 'text') and chunk.text:
+                if hasattr(chunk, "text") and chunk.text:
                     yield chunk.text
             except ValueError:
                 # Vertex AI raises ValueError if no text is present (e.g. only function call)
@@ -486,16 +481,16 @@ class VertexAIProvider:
         # Gemini 3 has 1M context for all models
         context_window = 1_000_000 if "3" in self.model_name else 128_000
         return {
-            'provider': 'vertex-ai',
-            'model': self.model_name,
-            'project': self.project,
-            'location': self.location,
-            'available': self.is_available(),
-            'context_window': context_window,
-            'supports_streaming': True,
-            'supports_thinking': "3-pro" in self.model_name,  # Gemini 3 Pro has thinking
-            'cost_tier': 'enterprise',  # R$8000 credits!
-            'speed_tier': 'ultra_fast',
+            "provider": "vertex-ai",
+            "model": self.model_name,
+            "project": self.project,
+            "location": self.location,
+            "available": self.is_available(),
+            "context_window": context_window,
+            "supports_streaming": True,
+            "supports_thinking": "3-pro" in self.model_name,  # Gemini 3 Pro has thinking
+            "cost_tier": "enterprise",  # R$8000 credits!
+            "speed_tier": "ultra_fast",
         }
 
     def count_tokens(self, text: str) -> int:

@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 # CONTEXT ENTRY TYPES
 # =============================================================================
 
+
 @dataclass
 class ContextEntry:
     """A single context entry with metadata."""
@@ -77,6 +78,7 @@ class CompactedContext:
 # =============================================================================
 # CONTEXT COMPACTOR
 # =============================================================================
+
 
 class ContextCompactor:
     """Automatic context compaction manager.
@@ -364,10 +366,7 @@ class ContextCompactor:
                 entries_to_keep.discard(idx)
                 current_tokens -= entry.token_count
 
-        self._entries = [
-            entry for i, entry in enumerate(self._entries)
-            if i in entries_to_keep
-        ]
+        self._entries = [entry for i, entry in enumerate(self._entries) if i in entries_to_keep]
 
     # =========================================================================
     # CONTEXT RETRIEVAL
@@ -478,6 +477,7 @@ def reset_context_compactor() -> None:
 # CONTEXT AUTO-COMPACT TOOL
 # =============================================================================
 
+
 class ContextCompactTool:
     """Tool to manually trigger context compaction.
 
@@ -493,7 +493,7 @@ class ContextCompactTool:
             "target_ratio": {
                 "type": "number",
                 "description": "Target utilization ratio after compaction (default: 0.5)",
-                "required": False
+                "required": False,
             }
         }
 

@@ -140,9 +140,7 @@ class ListDirectoryFormatter(ToolFormatter):
     def format(self, result: ToolResult, args: Dict[str, Any]) -> FormattedResult:
         file_count = result.metadata.get("file_count", 0)
         dir_count = result.metadata.get("dir_count", 0)
-        return FormattedResult(
-            summary=f"Listed {file_count} files, {dir_count} directories"
-        )
+        return FormattedResult(summary=f"Listed {file_count} files, {dir_count} directories")
 
 
 class DirectoryTreeFormatter(ToolFormatter):

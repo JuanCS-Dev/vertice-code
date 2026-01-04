@@ -123,7 +123,9 @@ class LLMClient:
             self._vertice_client = get_client()
             available = self._vertice_client.get_available_providers()
             if available:
-                logger.info(f"VerticeClient: {len(available)} providers ({', '.join(available[:3])}...)")
+                logger.info(
+                    f"VerticeClient: {len(available)} providers ({', '.join(available[:3])}...)"
+                )
             else:
                 logger.debug("No providers configured in VerticeClient")
         except ImportError:
@@ -180,10 +182,12 @@ class LLMClient:
         # Build messages
         messages: List[Dict[str, str]] = []
         if context:
-            messages.append({
-                "role": "system",
-                "content": f"You are a helpful coding assistant. Context:\n\n{context}",
-            })
+            messages.append(
+                {
+                    "role": "system",
+                    "content": f"You are a helpful coding assistant. Context:\n\n{context}",
+                }
+            )
         messages.append({"role": "user", "content": prompt})
 
         # Use VerticeClient if available
@@ -254,6 +258,7 @@ class LLMClient:
             if api_key:
                 try:
                     from .providers.gemini import GeminiProvider
+
                     self._gemini_client = GeminiProvider(api_key=api_key)
                 except Exception as e:
                     logger.warning(f"Gemini init failed: {e}")
@@ -266,6 +271,7 @@ class LLMClient:
             if api_key:
                 try:
                     from .providers.nebius import NebiusProvider
+
                     self._nebius_client = NebiusProvider(api_key=api_key)
                 except Exception as e:
                     logger.warning(f"Nebius init failed: {e}")
@@ -334,9 +340,7 @@ class LLMClient:
             Complete response text
         """
         chunks = []
-        async for chunk in self.stream_chat(
-            prompt, context, max_tokens, temperature
-        ):
+        async for chunk in self.stream_chat(prompt, context, max_tokens, temperature):
             chunks.append(chunk)
         return "".join(chunks)
 
@@ -384,6 +388,7 @@ class LLMClient:
                     if chunk.startswith('{"tool_call"'):
                         try:
                             import json
+
                             call_data = json.loads(chunk)
                             if "tool_call" in call_data:
                                 tool_calls.append(call_data["tool_call"])

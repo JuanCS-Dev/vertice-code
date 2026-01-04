@@ -1,4 +1,5 @@
 """MCP Server CLI entry point."""
+
 import sys
 import asyncio
 import logging
@@ -9,8 +10,7 @@ from vertice_cli.tools.registry_helper import get_default_registry
 def main():
     """Run MCP server from command line."""
     logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
 
     config = MCPConfig.from_env()

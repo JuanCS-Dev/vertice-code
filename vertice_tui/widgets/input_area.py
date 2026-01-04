@@ -21,6 +21,7 @@ from textual.message import Message
 # Try to import TextArea with syntax highlighting
 try:
     from textual.widgets import TextArea
+
     TEXTAREA_AVAILABLE = True
 except ImportError:
     TEXTAREA_AVAILABLE = False
@@ -102,12 +103,14 @@ class InputArea(Widget):
 
     class Submitted(Message):
         """Emitted when user submits input."""
+
         def __init__(self, value: str) -> None:
             self.value = value
             super().__init__()
 
     class Cancelled(Message):
         """Emitted when user cancels."""
+
         pass
 
     def __init__(
@@ -144,6 +147,7 @@ class InputArea(Widget):
         else:
             # Fallback to simple input
             from textual.widgets import Input
+
             yield Input(placeholder=self._placeholder, id="fallback-input")
 
     def on_mount(self) -> None:
@@ -158,6 +162,7 @@ class InputArea(Widget):
             return self._text_area.text
         try:
             from textual.widgets import Input
+
             return self.query_one("#fallback-input", Input).value
         except (AttributeError, ValueError):
             return ""
@@ -170,6 +175,7 @@ class InputArea(Widget):
         else:
             try:
                 from textual.widgets import Input
+
                 self.query_one("#fallback-input", Input).value = new_value
             except (AttributeError, ValueError):
                 pass
@@ -181,6 +187,7 @@ class InputArea(Widget):
         else:
             try:
                 from textual.widgets import Input
+
                 self.query_one("#fallback-input", Input).focus()
             except (AttributeError, ValueError):
                 pass

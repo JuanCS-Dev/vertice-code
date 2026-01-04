@@ -31,32 +31,72 @@ logger = logging.getLogger(__name__)
 
 KNOWN_TOOLS: Set[str] = {
     # File operations
-    'write_file', 'read_file', 'edit_file', 'delete_file',
-    'list_directory', 'create_directory', 'move_file', 'copy_file',
-    'insert_lines', 'read_multiple_files',
+    "write_file",
+    "read_file",
+    "edit_file",
+    "delete_file",
+    "list_directory",
+    "create_directory",
+    "move_file",
+    "copy_file",
+    "insert_lines",
+    "read_multiple_files",
     # Search
-    'search_files', 'get_directory_tree', 'glob', 'grep',
+    "search_files",
+    "get_directory_tree",
+    "glob",
+    "grep",
     # Execution
-    'bash_command', 'bash', 'background_task',
+    "bash_command",
+    "bash",
+    "background_task",
     # Git
-    'git_status', 'git_diff', 'git_commit', 'git_log',
+    "git_status",
+    "git_diff",
+    "git_commit",
+    "git_log",
     # Web
-    'web_search', 'fetch_url', 'web_fetch', 'http_request', 'download_file',
+    "web_search",
+    "fetch_url",
+    "web_fetch",
+    "http_request",
+    "download_file",
     # Context
-    'restore_backup', 'save_session', 'get_context',
-    'search_documentation', 'package_search',
+    "restore_backup",
+    "save_session",
+    "get_context",
+    "search_documentation",
+    "package_search",
     # Terminal
-    'cd', 'ls', 'pwd', 'mkdir', 'rm', 'cp', 'mv', 'touch', 'cat',
+    "cd",
+    "ls",
+    "pwd",
+    "mkdir",
+    "rm",
+    "cp",
+    "mv",
+    "touch",
+    "cat",
     # Claude Code parity
-    'task', 'todo_write', 'todo_read', 'ask_user_question',
-    'notebook_edit', 'notebook_read', 'enter_plan_mode', 'exit_plan_mode',
-    'image_read', 'pdf_read', 'screenshot_read',
+    "task",
+    "todo_write",
+    "todo_read",
+    "ask_user_question",
+    "notebook_edit",
+    "notebook_read",
+    "enter_plan_mode",
+    "exit_plan_mode",
+    "image_read",
+    "pdf_read",
+    "screenshot_read",
     # Background execution
-    'bash_output', 'kill_shell',
+    "bash_output",
+    "kill_shell",
     # Skills
-    'skill', 'slash_command',
+    "skill",
+    "slash_command",
     # Multi-edit
-    'multi_edit',
+    "multi_edit",
 }
 
 
@@ -65,47 +105,45 @@ KNOWN_TOOLS: Set[str] = {
 # =============================================================================
 
 # Pattern for explicit tool call markers (internal format)
-MARKER_PATTERN = re.compile(r'\[TOOL_CALL:(\w+):(\{.*?\})\]', re.DOTALL)
+MARKER_PATTERN = re.compile(r"\[TOOL_CALL:(\w+):(\{.*?\})\]", re.DOTALL)
 
 # Pattern for Anthropic-style tool_use JSON blocks
 ANTHROPIC_PATTERN = re.compile(
-    r'"type"\s*:\s*"tool_use"[^}]*"name"\s*:\s*"(\w+)"[^}]*"input"\s*:\s*(\{[^}]+\})',
-    re.DOTALL
+    r'"type"\s*:\s*"tool_use"[^}]*"name"\s*:\s*"(\w+)"[^}]*"input"\s*:\s*(\{[^}]+\})', re.DOTALL
 )
 
 # Pattern for JSON function call blocks (common LLM output)
 JSON_FUNC_PATTERN = re.compile(
     r'\{\s*"name"\s*:\s*"(\w+)"\s*,\s*"(?:arguments|params|parameters)"\s*:\s*(\{[^}]+\})\s*\}',
-    re.DOTALL
+    re.DOTALL,
 )
 
 # Pattern for Gemini native function_call in JSON response
 GEMINI_FC_PATTERN = re.compile(
-    r'"functionCall"\s*:\s*\{\s*"name"\s*:\s*"(\w+)"\s*,\s*"args"\s*:\s*(\{[^}]+\})',
-    re.DOTALL
+    r'"functionCall"\s*:\s*\{\s*"name"\s*:\s*"(\w+)"\s*,\s*"args"\s*:\s*(\{[^}]+\})', re.DOTALL
 )
 
 # Pattern for Python-style function calls in code blocks
 # Matches: write_file(path='test.txt', content='Hello')
 FUNC_PATTERN = re.compile(
-    r'(\w+)\s*\(\s*'  # function_name(
-    r'((?:[^()]*(?:\([^()]*\))?)*)'  # args (handles nested parens)
-    r'\s*\)',
-    re.DOTALL
+    r"(\w+)\s*\(\s*"  # function_name(
+    r"((?:[^()]*(?:\([^()]*\))?)*)"  # args (handles nested parens)
+    r"\s*\)",
+    re.DOTALL,
 )
 
 # Pattern for legacy JSON format ({"tool": "name", "args": {...}})
 # This is the format we just removed from the prompt, but we keep support
 # in case the model hallucinates it or for backward compatibility.
 LEGACY_JSON_PATTERN = re.compile(
-    r'\{\s*"tool"\s*:\s*"(\w+)"\s*,\s*"args"\s*:\s*(\{[^}]+\})\s*\}',
-    re.DOTALL
+    r'\{\s*"tool"\s*:\s*"(\w+)"\s*,\s*"args"\s*:\s*(\{[^}]+\})\s*\}', re.DOTALL
 )
 
 
 # =============================================================================
 # TOOL CALL PARSER
 # =============================================================================
+
 
 class ToolCallParser:
     """
@@ -144,6 +182,45 @@ class ToolCallParser:
     KNOWN_TOOLS = KNOWN_TOOLS
 
     @staticmethod
+    def _extract_protobuf_value(value: Any) -> Any:
+        """
+        Extract Python value from protobuf Value type.
+
+        Handles Gemini SDK's google.protobuf.struct_pb2.Value types.
+
+        Args:
+            value: Protobuf Value object
+
+        Returns:
+            Python native value (str, int, float, bool, list, dict, or None)
+        """
+        # Check for each possible value kind in protobuf Value
+        if hasattr(value, "string_value") and value.HasField("string_value"):
+            return value.string_value
+        if hasattr(value, "number_value") and value.HasField("number_value"):
+            return value.number_value
+        if hasattr(value, "bool_value") and value.HasField("bool_value"):
+            return value.bool_value
+        if hasattr(value, "null_value") and value.HasField("null_value"):
+            return None
+        if hasattr(value, "list_value") and value.HasField("list_value"):
+            return [ToolCallParser._extract_protobuf_value(v) for v in value.list_value.values]
+        if hasattr(value, "struct_value") and value.HasField("struct_value"):
+            return {
+                k: ToolCallParser._extract_protobuf_value(v)
+                for k, v in value.struct_value.fields.items()
+            }
+        # Fallback: try direct attribute access (older SDK versions)
+        for attr in ("string_value", "number_value", "bool_value"):
+            if hasattr(value, attr):
+                try:
+                    return getattr(value, attr)
+                except (AttributeError, TypeError):
+                    pass
+        # Last resort: return as-is
+        return value
+
+    @staticmethod
     def _parse_python_args(args_str: str) -> Dict[str, Any]:
         """
         Parse Python-style keyword arguments.
@@ -161,9 +238,10 @@ class ToolCallParser:
         # Use ast to safely parse
         try:
             import ast
+
             # Wrap in function call to parse
             fake_call = f"f({args_str})"
-            tree = ast.parse(fake_call, mode='eval')
+            tree = ast.parse(fake_call, mode="eval")
             call = tree.body
 
             for keyword in call.keywords:
@@ -180,7 +258,7 @@ class ToolCallParser:
                     args[key] = value.n
                 elif isinstance(value, (ast.List, ast.Dict)):
                     args[key] = ast.literal_eval(ast.unparse(value))
-        except Exception as e:
+        except (SyntaxError, ValueError, AttributeError) as e:
             # Fallback: regex-based parsing
             logger.debug(f"AST parsing failed, using regex fallback: {e}")
             # Match key='value' or key="value" or key=value
@@ -268,8 +346,8 @@ class ToolCallParser:
                     continue
 
         # 5. Check for Python-style function calls (in code blocks)
-        code_blocks = re.findall(r'```(?:\w+)?\n?(.*?)```', text, re.DOTALL)
-        search_text = '\n'.join(code_blocks) if code_blocks else text
+        code_blocks = re.findall(r"```(?:\w+)?\n?(.*?)```", text, re.DOTALL)
+        search_text = "\n".join(code_blocks) if code_blocks else text
 
         for match in FUNC_PATTERN.finditer(search_text):
             func_name = match.group(1)
@@ -317,37 +395,93 @@ class ToolCallParser:
             return results
 
         # Handle candidates in response
-        candidates = getattr(response, 'candidates', None)
+        candidates = getattr(response, "candidates", None)
         if not candidates:
             return results
 
         for candidate in candidates:
-            content = getattr(candidate, 'content', None)
+            content = getattr(candidate, "content", None)
             if not content:
                 continue
 
-            parts = getattr(content, 'parts', [])
+            parts = getattr(content, "parts", [])
             for part in parts:
                 # Check for function_call attribute (Gemini SDK format)
-                fc = getattr(part, 'function_call', None)
+                fc = getattr(part, "function_call", None)
                 if fc:
-                    name = getattr(fc, 'name', None)
+                    name = getattr(fc, "name", None)
                     if name:
                         # Convert args (protobuf Struct) to dict
-                        args_obj = getattr(fc, 'args', {})
+                        # P0 FIX: Robust protobuf conversion with multiple fallbacks
+                        args_obj = getattr(fc, "args", {})
                         args: Dict[str, Any] = {}
 
-                        if hasattr(args_obj, 'items'):
-                            args = dict(args_obj)
-                        elif isinstance(args_obj, dict):
+                        if isinstance(args_obj, dict):
                             args = args_obj
-                        else:
-                            # Try to convert protobuf Struct
+                        elif hasattr(args_obj, "items"):
+                            # Direct dict-like access
+                            args = dict(args_obj)
+                        elif args_obj is not None:
+                            # Try multiple protobuf conversion strategies
+                            conversion_succeeded = False
+
+                            # Strategy 1: google.protobuf MessageToDict
                             try:
                                 from google.protobuf.json_format import MessageToDict
-                                args = MessageToDict(args_obj)
-                            except Exception as e:
-                                logger.debug(f"Failed to convert protobuf args: {e}")
+
+                                args = MessageToDict(args_obj, preserving_proto_field_name=True)
+                                conversion_succeeded = True
+                            except (ImportError, TypeError, ValueError, AttributeError):
+                                pass
+
+                            # Strategy 2: Direct field access (Gemini SDK specific)
+                            if not conversion_succeeded:
+                                try:
+                                    # Gemini SDK Struct has .fields attribute
+                                    if hasattr(args_obj, "fields"):
+                                        args = {
+                                            k: self._extract_protobuf_value(v)
+                                            for k, v in args_obj.fields.items()
+                                        }
+                                        conversion_succeeded = True
+                                except (AttributeError, TypeError):
+                                    pass
+
+                            # Strategy 3: __dict__ access
+                            if not conversion_succeeded:
+                                try:
+                                    if hasattr(args_obj, "__dict__"):
+                                        args = {
+                                            k: v
+                                            for k, v in args_obj.__dict__.items()
+                                            if not k.startswith("_")
+                                        }
+                                        conversion_succeeded = True
+                                except (AttributeError, TypeError):
+                                    pass
+
+                            # Strategy 4: JSON serialization roundtrip
+                            if not conversion_succeeded:
+                                try:
+                                    import json
+
+                                    if hasattr(args_obj, "SerializeToString"):
+                                        # Try to serialize and parse
+                                        from google.protobuf.json_format import MessageToJson
+
+                                        json_str = MessageToJson(args_obj)
+                                        args = json.loads(json_str)
+                                        conversion_succeeded = True
+                                except (ImportError, TypeError, ValueError, AttributeError):
+                                    pass
+
+                            # CRITICAL: Log warning if all strategies failed
+                            if not conversion_succeeded:
+                                logger.warning(
+                                    f"All protobuf conversion strategies failed for tool '{name}'. "
+                                    f"Args type: {type(args_obj).__name__}. "
+                                    "Tool call will execute with empty arguments."
+                                )
                                 args = {}
 
                         # Check if known tool (case-insensitive)
@@ -367,18 +501,18 @@ class ToolCallParser:
         Returns:
             Cleaned text without markers
         """
-        text = MARKER_PATTERN.sub('', text)
+        text = MARKER_PATTERN.sub("", text)
 
         # Remove legacy JSON patterns
-        text = LEGACY_JSON_PATTERN.sub('', text)
+        text = LEGACY_JSON_PATTERN.sub("", text)
 
         # Also remove code blocks containing only tool calls
-        lines = text.split('\n')
+        lines = text.split("\n")
         clean_lines: List[str] = []
         in_tool_block = False
 
         for line in lines:
-            if line.strip().startswith('```'):
+            if line.strip().startswith("```"):
                 in_tool_block = not in_tool_block
                 continue
             if in_tool_block:
@@ -387,7 +521,7 @@ class ToolCallParser:
                     continue
             clean_lines.append(line)
 
-        return '\n'.join(clean_lines).strip()
+        return "\n".join(clean_lines).strip()
 
     @staticmethod
     def format_marker(name: str, args: Dict[str, Any]) -> str:

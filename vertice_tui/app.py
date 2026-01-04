@@ -94,6 +94,7 @@ class VerticeApp(App):
         """Lazy load the integration bridge."""
         if self._bridge is None:
             from vertice_tui.core.bridge import get_bridge
+
             self._bridge = get_bridge()
         return self._bridge
 
@@ -115,11 +116,9 @@ class VerticeApp(App):
             yield ResponseView(id="response")
             with Horizontal(id="input-area"):
                 from textual.widgets import Static
+
                 yield Static("❯", id="prompt-icon")
-                yield Input(
-                    placeholder="Type your command or ask anything...",
-                    id="prompt"
-                )
+                yield Input(placeholder="Type your command or ask anything...", id="prompt")
 
         yield AutocompleteDropdown(id="autocomplete")
         yield StatusBar()
@@ -172,7 +171,7 @@ class VerticeApp(App):
             if self.bridge.is_connected:
                 # Get provider info dynamically
                 provider_name = "LLM"
-                if hasattr(self.bridge.llm, '_vertice_client') and self.bridge.llm._vertice_client:
+                if hasattr(self.bridge.llm, "_vertice_client") and self.bridge.llm._vertice_client:
                     providers = self.bridge.llm._vertice_client.get_available_providers()
                     current = self.bridge.llm._vertice_client.current_provider
                     if current:
@@ -249,7 +248,7 @@ class VerticeApp(App):
 
         # Check for @ file picker trigger
         has_at_trigger = any(
-            text[i] == '@' and (i == 0 or text[i-1].isspace())
+            text[i] == "@" and (i == 0 or text[i - 1].isspace())
             for i in range(len(text) - 1, -1, -1)
         )
 
@@ -479,11 +478,13 @@ class VerticeApp(App):
     def action_command_palette(self) -> None:
         """Open command palette (Ctrl+K)."""
         from vertice_tui.screens.command_palette import CommandPaletteScreen
+
         self.push_screen(CommandPaletteScreen(self.bridge))
 
     def action_search(self) -> None:
         """Open search dialog (Ctrl+F)."""
         from vertice_tui.screens.search import SearchScreen
+
         self.push_screen(SearchScreen())
 
     # Scroll actions

@@ -24,15 +24,15 @@ class ExplorerFormatter:
     @staticmethod
     def can_format(data: Any) -> bool:
         """Check if data contains file exploration results ('relevant_files' key)."""
-        return isinstance(data, dict) and 'relevant_files' in data
+        return isinstance(data, dict) and "relevant_files" in data
 
     @staticmethod
     async def format(data: Any, reasoning: str) -> AsyncIterator[str]:
         """Format file exploration with summaries, files, dependencies, and token counts."""
-        if data.get('context_summary'):
+        if data.get("context_summary"):
             yield f"{data['context_summary']}\n\n"
 
-        relevant_files = data.get('relevant_files', [])
+        relevant_files = data.get("relevant_files", [])
         if relevant_files:
             yield "**Relevant Files:**\n"
             async for chunk in ExplorerFormatter._format_files(relevant_files):
@@ -40,7 +40,7 @@ class ExplorerFormatter:
         else:
             yield "⚠️ No relevant files found for this query.\n"
 
-        deps = data.get('dependencies', [])
+        deps = data.get("dependencies", [])
         if deps:
             yield "\n**Dependencies:**\n"
             for d in deps:
@@ -49,7 +49,7 @@ class ExplorerFormatter:
                 else:
                     yield f"- {d}\n"
 
-        if data.get('token_estimate'):
+        if data.get("token_estimate"):
             yield f"\n📊 *Token estimate: ~{data['token_estimate']} tokens*\n"
 
     @staticmethod
@@ -57,15 +57,15 @@ class ExplorerFormatter:
         """Format file list with relevance badges and optional code snippets."""
         for f in files:
             if isinstance(f, dict):
-                path = f.get('path', 'unknown')
-                relevance = f.get('relevance', '')
-                reason = f.get('reason', '')
+                path = f.get("path", "unknown")
+                relevance = f.get("relevance", "")
+                reason = f.get("reason", "")
 
                 relevance_badge = f" [{relevance}]" if relevance else ""
                 reason_text = f" - {reason}" if reason else ""
                 yield f"- `{path}`{relevance_badge}{reason_text}\n"
 
-                snippet = f.get('snippet', '')
+                snippet = f.get("snippet", "")
                 if snippet:
                     preview = snippet[:200].strip()
                     if len(snippet) > 200:

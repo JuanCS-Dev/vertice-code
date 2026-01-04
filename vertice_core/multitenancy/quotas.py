@@ -28,7 +28,7 @@ class QuotaExceededError(Exception):
         quota_name: str,
         limit: int,
         current: int,
-        reset_at: Optional[float] = None
+        reset_at: Optional[float] = None,
     ):
         super().__init__(message)
         self.quota_name = quota_name
@@ -128,7 +128,7 @@ class QuotaBucket:
             used=self.count,
             remaining=max(0, self.limit - self.count),
             period_start=self.window_start,
-            period_end=self.window_start + self.period
+            period_end=self.window_start + self.period,
         )
 
 
@@ -159,12 +159,7 @@ class QuotaManager:
             self._tenant_quotas[tenant_id] = {}
         return self._tenant_quotas[tenant_id]
 
-    def _get_limit(
-        self,
-        config: TenantConfig,
-        quota_name: str,
-        period: str
-    ) -> int:
+    def _get_limit(self, config: TenantConfig, quota_name: str, period: str) -> int:
         """Get limit from tenant config."""
         limits = {
             ("requests", "minute"): config.requests_per_minute,
@@ -186,10 +181,7 @@ class QuotaManager:
         return periods.get(period, 60)
 
     async def check_quota(
-        self,
-        tenant: Optional[Tenant] = None,
-        quota_name: str = "requests",
-        period: str = "minute"
+        self, tenant: Optional[Tenant] = None, quota_name: str = "requests", period: str = "minute"
     ) -> bool:
         """
         Check if tenant is within quota.
@@ -224,7 +216,7 @@ class QuotaManager:
         tenant: Optional[Tenant] = None,
         quota_name: str = "requests",
         period: str = "minute",
-        amount: int = 1
+        amount: int = 1,
     ) -> bool:
         """
         Increment quota usage.
@@ -256,10 +248,7 @@ class QuotaManager:
             return buckets[key].increment(amount)
 
     async def require_quota(
-        self,
-        tenant: Optional[Tenant] = None,
-        quota_name: str = "requests",
-        period: str = "minute"
+        self, tenant: Optional[Tenant] = None, quota_name: str = "requests", period: str = "minute"
     ) -> None:
         """
         Require quota to be available, raising if exceeded.
@@ -279,14 +268,11 @@ class QuotaManager:
                 quota_name=f"{quota_name}/{period}",
                 limit=usage.limit,
                 current=usage.used,
-                reset_at=usage.period_end
+                reset_at=usage.period_end,
             )
 
     async def get_usage(
-        self,
-        tenant: Optional[Tenant] = None,
-        quota_name: str = "requests",
-        period: str = "minute"
+        self, tenant: Optional[Tenant] = None, quota_name: str = "requests", period: str = "minute"
     ) -> QuotaUsage:
         """
         Get current quota usage.
@@ -303,7 +289,7 @@ class QuotaManager:
                     used=0,
                     remaining=0,
                     period_start=time.time(),
-                    period_end=time.time()
+                    period_end=time.time(),
                 )
             tenant = ctx.tenant
 
@@ -320,10 +306,7 @@ class QuotaManager:
             usage.quota_name = f"{quota_name}/{period}"
             return usage
 
-    async def get_all_usage(
-        self,
-        tenant: Optional[Tenant] = None
-    ) -> List[QuotaUsage]:
+    async def get_all_usage(self, tenant: Optional[Tenant] = None) -> List[QuotaUsage]:
         """
         Get all quota usage for a tenant.
 
@@ -365,10 +348,10 @@ def get_quota_manager() -> QuotaManager:
 
 
 __all__ = [
-    'QuotaManager',
-    'Quota',
-    'QuotaUsage',
-    'QuotaExceededError',
-    'QuotaPeriod',
-    'get_quota_manager',
+    "QuotaManager",
+    "Quota",
+    "QuotaUsage",
+    "QuotaExceededError",
+    "QuotaPeriod",
+    "get_quota_manager",
 ]

@@ -26,11 +26,11 @@ class MinimalOutput:
     def truncate_text(text: str, max_lines: int = 15, max_chars: int = 120) -> tuple[str, bool]:
         """
         Smart truncation that preserves meaning.
-        
+
         Returns:
             (truncated_text, was_truncated)
         """
-        lines = text.split('\n')
+        lines = text.split("\n")
         truncated = False
 
         # Truncate lines
@@ -47,7 +47,7 @@ class MinimalOutput:
             else:
                 processed_lines.append(line)
 
-        return '\n'.join(processed_lines), truncated
+        return "\n".join(processed_lines), truncated
 
     @staticmethod
     def smart_summarize(text: str, target_lines: int = 10) -> str:
@@ -59,7 +59,7 @@ class MinimalOutput:
         - Lists (-, *, 1.)
         - Key paragraphs
         """
-        lines = text.split('\n')
+        lines = text.split("\n")
 
         if len(lines) <= target_lines:
             return text
@@ -72,15 +72,15 @@ class MinimalOutput:
             stripped = line.strip()
 
             # Headers (high priority)
-            if stripped.startswith('#'):
+            if stripped.startswith("#"):
                 score += 10
 
             # Code blocks
-            if '```' in stripped:
+            if "```" in stripped:
                 score += 8
 
             # Lists
-            if re.match(r'^[\-\*\d]+\.?\s', stripped):
+            if re.match(r"^[\-\*\d]+\.?\s", stripped):
                 score += 5
 
             # Short lines (likely important)
@@ -88,7 +88,7 @@ class MinimalOutput:
                 score += 3
 
             # Contains keywords
-            if any(kw in stripped.lower() for kw in ['error', 'warning', 'important', 'note']):
+            if any(kw in stripped.lower() for kw in ["error", "warning", "important", "note"]):
                 score += 7
 
             if score > 0:
@@ -111,20 +111,20 @@ class MinimalOutput:
         if selected_indices[-1] < len(lines) - 1:
             result.append("...")
 
-        return '\n'.join(result)
+        return "\n".join(result)
 
     @staticmethod
     def render_response(text: str, mode: str = "auto") -> None:
         """
         Render response with intelligent truncation.
-        
+
         Modes:
         - auto: Smart decision based on length
         - full: Show everything
         - minimal: Aggressive truncation
         - summary: Intelligent summarization
         """
-        lines = text.split('\n')
+        lines = text.split("\n")
         line_count = len(lines)
         char_count = len(text)
         word_count = len(text.split())
@@ -178,9 +178,7 @@ class MinimalOutput:
         # Render in columns
         if cols > 1:
             columns = Columns(
-                [Text(f"  • {item}", style="dim") for item in items],
-                equal=True,
-                expand=False
+                [Text(f"  • {item}", style="dim") for item in items], equal=True, expand=False
             )
             console.print(columns)
         else:
@@ -196,11 +194,11 @@ class MinimalOutput:
         """
         from rich.syntax import Syntax
 
-        lines = code.split('\n')
+        lines = code.split("\n")
 
         if len(lines) > max_lines:
             # Show first N-2 lines + separator + last line
-            truncated_code = '\n'.join(lines[:max_lines-2] + ['# ... truncated ...', lines[-1]])
+            truncated_code = "\n".join(lines[: max_lines - 2] + ["# ... truncated ...", lines[-1]])
             syntax = Syntax(truncated_code, language, theme="monokai", line_numbers=False)
             console.print(Panel(syntax, border_style="dim", title=f"[dim]{language}[/dim]"))
             console.print(f"[dim]({len(lines)} lines total)[/dim]\n")
@@ -210,21 +208,13 @@ class MinimalOutput:
 
     @staticmethod
     def render_stats(
-        words: int,
-        chars: int,
-        duration: float,
-        wps: int,
-        cost: Optional[str] = None
+        words: int, chars: int, duration: float, wps: int, cost: Optional[str] = None
     ) -> None:
         """
         Minimal stats line (2025 style).
         """
         # Build compact stats
-        parts = [
-            f"{words}w",
-            f"{duration:.1f}s",
-            f"{wps}wps"
-        ]
+        parts = [f"{words}w", f"{duration:.1f}s", f"{wps}wps"]
 
         if cost:
             parts.append(cost)
@@ -247,7 +237,7 @@ class StreamingMinimal:
     def add_chunk(self, chunk: str) -> None:
         """Add chunk and decide if should show."""
         self.buffer.append(chunk)
-        self.line_count += chunk.count('\n')
+        self.line_count += chunk.count("\n")
 
         # Auto-truncate after threshold
         if self.line_count > self.max_visible_lines and not self.should_truncate:
@@ -256,15 +246,15 @@ class StreamingMinimal:
 
     def get_display_buffer(self) -> str:
         """Get what should be displayed."""
-        full_text = ''.join(self.buffer)
+        full_text = "".join(self.buffer)
 
         if not self.should_truncate:
             return full_text
 
         # Show first N lines only during streaming
-        lines = full_text.split('\n')
-        return '\n'.join(lines[:self.max_visible_lines])
+        lines = full_text.split("\n")
+        return "\n".join(lines[: self.max_visible_lines])
 
     def finalize(self) -> str:
         """Return full buffer at end."""
-        return ''.join(self.buffer)
+        return "".join(self.buffer)

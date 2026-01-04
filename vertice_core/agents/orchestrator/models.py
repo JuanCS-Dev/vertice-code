@@ -93,10 +93,7 @@ class ExecutionPlan:
 
     def has_failed(self) -> bool:
         """Check if any step failed without recovery."""
-        return any(
-            s.status == "failed" and s.retry_count >= s.max_retries
-            for s in self.steps
-        )
+        return any(s.status == "failed" and s.retry_count >= s.max_retries for s in self.steps)
 
 
 @dataclass

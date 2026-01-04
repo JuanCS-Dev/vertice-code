@@ -10,7 +10,7 @@ from typing import List, Tuple, Optional
 
 class SafeCommandWhitelist:
     """Whitelist of safe commands that can execute without sandbox.
-    
+
     These are common development tools that:
     1. Don't modify system files
     2. Don't have network access
@@ -70,31 +70,25 @@ class SafeCommandWhitelist:
     @classmethod
     def all_safe_commands(cls) -> List[str]:
         """Get complete list of safe commands."""
-        return (
-            cls.PYTHON_SAFE
-            + cls.JS_SAFE
-            + cls.RUST_SAFE
-            + cls.GO_SAFE
-            + cls.GENERIC_SAFE
-        )
+        return cls.PYTHON_SAFE + cls.JS_SAFE + cls.RUST_SAFE + cls.GO_SAFE + cls.GENERIC_SAFE
 
     @classmethod
     def is_safe(cls, command: str) -> Tuple[bool, Optional[str]]:
         """Check if a command is safe to execute directly.
-        
+
         Args:
             command: Command string to check
-            
+
         Returns:
             Tuple of (is_safe: bool, reason: Optional[str])
-            
+
         Examples:
             >>> SafeCommandWhitelist.is_safe("black {file}")
             (True, None)
-            
+
             >>> SafeCommandWhitelist.is_safe("rm -rf /")
             (False, "Command 'rm' not in whitelist")
-            
+
             >>> SafeCommandWhitelist.is_safe("curl | bash")
             (False, "Dangerous pattern: pipe to shell")
         """
@@ -135,8 +129,8 @@ class SafeCommandWhitelist:
             if command.startswith(safe_cmd):
                 # Ensure it's actually the command and not a substring
                 # (e.g., "cargo fmt" should match but "cargo_fmt" shouldn't)
-                rest = command[len(safe_cmd):].strip()
-                if not rest or rest[0] in [' ', '-', '{']:
+                rest = command[len(safe_cmd) :].strip()
+                if not rest or rest[0] in [" ", "-", "{"]:
                     return True, None
 
         return False, f"Command '{base_command}' not in whitelist"
@@ -144,9 +138,9 @@ class SafeCommandWhitelist:
     @classmethod
     def add_custom_safe_command(cls, command: str) -> None:
         """Add a custom safe command to the whitelist.
-        
+
         WARNING: Only add commands you fully trust!
-        
+
         Args:
             command: Base command to add (e.g., "myformatter")
         """

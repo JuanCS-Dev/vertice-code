@@ -34,6 +34,7 @@ class ExecutionResult:
         error_message: Human-readable error description
         block_reason: Reason for blocking (if blocked)
     """
+
     success: bool
     exit_code: int
     stdout: str
@@ -51,9 +52,12 @@ class ExecutionResult:
     def blocked(self) -> bool:
         """Check if execution was blocked by security policy."""
         return self.block_reason is not None or (
-            not self.success and
-            self.error_message is not None and
-            any(kw in self.error_message.lower() for kw in ["blocked", "validation failed", "not allowed", "permission"])
+            not self.success
+            and self.error_message is not None
+            and any(
+                kw in self.error_message.lower()
+                for kw in ["blocked", "validation failed", "not allowed", "permission"]
+            )
         )
 
     @classmethod
@@ -65,7 +69,7 @@ class ExecutionResult:
             stdout="",
             stderr=error,
             command=command or [],
-            error_message=error
+            error_message=error,
         )
 
     @classmethod
@@ -74,7 +78,7 @@ class ExecutionResult:
         stdout: str = "",
         stderr: str = "",
         command: Optional[List[str]] = None,
-        execution_time: float = 0.0
+        execution_time: float = 0.0,
     ) -> "ExecutionResult":
         """Create a successful execution result."""
         return cls(
@@ -83,7 +87,7 @@ class ExecutionResult:
             stdout=stdout,
             stderr=stderr,
             command=command or [],
-            execution_time=execution_time
+            execution_time=execution_time,
         )
 
     @property
@@ -99,4 +103,4 @@ class ExecutionResult:
         return self.error_message or (self.stderr if not self.success else None)
 
 
-__all__ = ['ExecutionResult']
+__all__ = ["ExecutionResult"]

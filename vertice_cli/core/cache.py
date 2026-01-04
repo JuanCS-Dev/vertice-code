@@ -74,24 +74,23 @@ class DiskCache:
     def _init_db(self):
         """Initialize SQLite database."""
         conn = sqlite3.connect(str(self.db_path))
-        conn.execute("""
+        conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS cache (
                 key TEXT PRIMARY KEY,
                 value TEXT NOT NULL,
                 timestamp REAL NOT NULL,
                 ttl REAL NOT NULL
             )
-        """)
+        """
+        )
         conn.commit()
         conn.close()
 
     def get(self, key: str) -> Optional[Any]:
         """Get value if not expired."""
         conn = sqlite3.connect(str(self.db_path))
-        cursor = conn.execute(
-            "SELECT value, timestamp, ttl FROM cache WHERE key = ?",
-            (key,)
-        )
+        cursor = conn.execute("SELECT value, timestamp, ttl FROM cache WHERE key = ?", (key,))
         row = cursor.fetchone()
         conn.close()
 
@@ -110,7 +109,7 @@ class DiskCache:
         conn = sqlite3.connect(str(self.db_path))
         conn.execute(
             "INSERT OR REPLACE INTO cache (key, value, timestamp, ttl) VALUES (?, ?, ?, ?)",
-            (key, json.dumps(value), time.time(), ttl)
+            (key, json.dumps(value), time.time(), ttl),
         )
         conn.commit()
         conn.close()
@@ -125,27 +124,20 @@ class DiskCache:
     def clear_expired(self):
         """Remove expired entries."""
         conn = sqlite3.connect(str(self.db_path))
-        conn.execute(
-            "DELETE FROM cache WHERE (? - timestamp) > ttl",
-            (time.time(),)
-        )
+        conn.execute("DELETE FROM cache WHERE (? - timestamp) > ttl", (time.time(),))
         conn.commit()
         conn.close()
 
 
 class PerformanceCache:
     """3-tier cache system (Cursor pattern).
-    
+
     L1: Memory (100ms)
     L2: Disk (500ms)
     L3: Miss (full execution)
     """
 
-    def __init__(
-        self,
-        memory_size: int = 1000,
-        disk_path: str = "~/.qwen-dev-cli/cache.db"
-    ):
+    def __init__(self, memory_size: int = 1000, disk_path: str = "~/.qwen-dev-cli/cache.db"):
         self._memory = LRUCache(memory_size)
         self._disk = DiskCache(disk_path)
         self._stats = CacheStats()
@@ -194,7 +186,7 @@ class PerformanceCache:
 
 def cache_key(*args, **kwargs) -> str:
     """Generate cache key from arguments.
-    
+
     Uses SHA256 hash of JSON-serialized args.
     """
     data = json.dumps({"args": args, "kwargs": kwargs}, sort_keys=True)

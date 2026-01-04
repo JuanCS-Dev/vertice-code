@@ -205,7 +205,7 @@ class TokenBreakdownWidget(Vertical):
                 self.query_one(f"#{prefix}-value", Static).update(
                     f"{self._format_tokens(tokens)} ({ratio*100:.0f}%)"
                 )
-            except Exception:
+            except (AttributeError, ValueError):
                 pass
 
     @staticmethod
@@ -402,7 +402,7 @@ class TokenDashboard(Vertical):
             meter.used = used
             if limit is not None:
                 meter.limit = limit
-        except Exception:
+        except (AttributeError, ValueError):
             pass
 
     def update_breakdown(
@@ -425,7 +425,7 @@ class TokenDashboard(Vertical):
         try:
             widget = self.query_one("#breakdown", TokenBreakdownWidget)
             widget.breakdown = self._breakdown
-        except Exception:
+        except (AttributeError, ValueError):
             pass
 
     def update_compression(
@@ -442,7 +442,7 @@ class TokenDashboard(Vertical):
             indicator.compression_ratio = ratio
             indicator.is_compacting = is_compacting
             indicator.compressions_count = count
-        except Exception:
+        except (AttributeError, ValueError):
             pass
 
     def update_thinking_level(self, level: str) -> None:
@@ -452,7 +452,7 @@ class TokenDashboard(Vertical):
         try:
             indicator = self.query_one("#thinking", ThinkingLevelIndicator)
             indicator.level = level
-        except Exception:
+        except (AttributeError, ValueError):
             pass
 
     def toggle_collapsed(self) -> None:
@@ -469,8 +469,7 @@ class TokenDashboard(Vertical):
             "used_tokens": self.used_tokens,
             "max_tokens": self.max_tokens,
             "utilization": (
-                f"{self.used_tokens / self.max_tokens * 100:.1f}%"
-                if self.max_tokens > 0 else "N/A"
+                f"{self.used_tokens / self.max_tokens * 100:.1f}%" if self.max_tokens > 0 else "N/A"
             ),
             "breakdown": self._breakdown.to_dict(),
             "compression_ratio": self._compression_ratio,

@@ -1,5 +1,7 @@
 """Reactive TUI renderer with zero UI blocking."""
+
 import logging
+
 logger = logging.getLogger(__name__)
 
 import asyncio
@@ -17,6 +19,7 @@ from rich.layout import Layout
 
 class RenderEventType(Enum):
     """Render event types."""
+
     OUTPUT = "output"
     PROGRESS = "progress"
     COMPLETE = "complete"
@@ -28,6 +31,7 @@ class RenderEventType(Enum):
 @dataclass
 class RenderEvent:
     """UI render event."""
+
     event_type: RenderEventType
     content: str
     metadata: dict
@@ -76,10 +80,7 @@ class ReactiveRenderer:
         try:
             while self._running:
                 try:
-                    event = await asyncio.wait_for(
-                        self._event_queue.get(),
-                        timeout=0.1
-                    )
+                    event = await asyncio.wait_for(self._event_queue.get(), timeout=0.1)
                 except asyncio.TimeoutError:
                     continue
 
@@ -91,7 +92,7 @@ class ReactiveRenderer:
     async def _render_event(self, event: RenderEvent) -> None:
         """Render single event."""
         if event.event_type == RenderEventType.OUTPUT:
-            self.console.print(event.content, end='')
+            self.console.print(event.content, end="")
             self._output_buffer.append(event.content)
 
         elif event.event_type == RenderEventType.COMPLETE:
@@ -102,29 +103,25 @@ class ReactiveRenderer:
 
         elif event.event_type == RenderEventType.SPINNER:
             # Enhanced spinner rendering
-            task_id = event.metadata.get('task_id')
-            message = event.metadata.get('message', 'Processing...')
-            self.console.print(f"[cyan]⠋[/cyan] {message}", end='\r')
+            task_id = event.metadata.get("task_id")
+            message = event.metadata.get("message", "Processing...")
+            self.console.print(f"[cyan]⠋[/cyan] {message}", end="\r")
 
         elif event.event_type == RenderEventType.PROGRESS_BAR:
             # Progress bar updates
-            task_id = event.metadata.get('task_id')
-            completed = event.metadata.get('completed', 0)
-            total = event.metadata.get('total', 100)
-            description = event.metadata.get('description', 'Progress')
+            task_id = event.metadata.get("task_id")
+            completed = event.metadata.get("completed", 0)
+            total = event.metadata.get("total", 100)
+            description = event.metadata.get("description", "Progress")
 
             if not self._progress:
                 self._init_progress()
 
             if task_id not in self._active_tasks:
-                self._active_tasks[task_id] = self._progress.add_task(
-                    description, total=total
-                )
+                self._active_tasks[task_id] = self._progress.add_task(description, total=total)
 
             self._progress.update(
-                self._active_tasks[task_id],
-                completed=completed,
-                description=description
+                self._active_tasks[task_id], completed=completed, description=description
             )
 
     def _init_progress(self) -> None:
@@ -134,7 +131,7 @@ class ReactiveRenderer:
             TextColumn("[progress.description]{task.description}"),
             BarColumn(),
             TaskProgressColumn(),
-            console=self.console
+            console=self.console,
         )
         self._live = Live(self._progress, console=self.console, refresh_per_second=10)
         self._live.start()
@@ -157,9 +154,7 @@ class ConcurrentRenderer:
         """Add new process to rendering."""
         async with self._lock:
             self._panels[process_id] = Panel(
-                "",
-                title=f"[bold blue]{title}[/bold blue]",
-                border_style="blue"
+                "", title=f"[bold blue]{title}[/bold blue]", border_style="blue"
             )
             self._update_layout()
 
@@ -168,9 +163,7 @@ class ConcurrentRenderer:
         async with self._lock:
             if process_id in self._panels:
                 self._panels[process_id] = Panel(
-                    content,
-                    title=self._panels[process_id].title,
-                    border_style="blue"
+                    content, title=self._panels[process_id].title, border_style="blue"
                 )
                 self._update_layout()
 
@@ -184,7 +177,7 @@ class ConcurrentRenderer:
                 self._panels[process_id] = Panel(
                     self._panels[process_id].renderable,
                     title=f"{title} [{style}]{symbol}[/{style}]",
-                    border_style=style
+                    border_style=style,
                 )
                 self._update_layout()
 

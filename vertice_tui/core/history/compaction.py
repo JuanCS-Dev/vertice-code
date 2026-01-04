@@ -46,13 +46,12 @@ class CompactionMixin:
             Token estimation with utilization metrics
         """
         # Requires self.context from HistoryManager
-        context: List[Dict[str, str]] = getattr(self, 'context', [])
+        context: List[Dict[str, str]] = getattr(self, "context", [])
 
         total_chars = sum(len(msg.get("content", "")) for msg in context)
         estimated_tokens = total_chars // self.CHARS_PER_TOKEN
         utilization = (
-            estimated_tokens / self.max_context_tokens
-            if self.max_context_tokens > 0 else 0
+            estimated_tokens / self.max_context_tokens if self.max_context_tokens > 0 else 0
         )
 
         return {
@@ -61,7 +60,7 @@ class CompactionMixin:
             "max_tokens": self.max_context_tokens,
             "utilization_percent": round(utilization * 100, 1),
             "needs_compaction": utilization > self.COMPACTION_THRESHOLD,
-            "messages_count": len(context)
+            "messages_count": len(context),
         }
 
     def needs_compaction(self) -> bool:
@@ -73,7 +72,7 @@ class CompactionMixin:
         self,
         focus: Optional[str] = None,
         preserve_recent: int = 5,
-        summary_fn: Optional[Callable[[List[Dict[str, str]], Optional[str]], str]] = None
+        summary_fn: Optional[Callable[[List[Dict[str, str]], Optional[str]], str]] = None,
     ) -> Dict[str, Any]:
         """
         Compact conversation context by summarizing older messages.
@@ -91,7 +90,7 @@ class CompactionMixin:
         Returns:
             Compaction result with before/after stats
         """
-        context: List[Dict[str, str]] = getattr(self, 'context', [])
+        context: List[Dict[str, str]] = getattr(self, "context", [])
         before_stats = self.estimate_tokens()
 
         if len(context) <= preserve_recent:
@@ -99,7 +98,7 @@ class CompactionMixin:
                 "success": False,
                 "reason": "Not enough context to compact",
                 "before": before_stats,
-                "after": before_stats
+                "after": before_stats,
             }
 
         # Split context
@@ -115,11 +114,11 @@ class CompactionMixin:
         # Create compacted context
         summary_message = {
             "role": "system",
-            "content": f"[Context Summary - {len(old_messages)} messages compacted]\n{summary}"
+            "content": f"[Context Summary - {len(old_messages)} messages compacted]\n{summary}",
         }
 
         # Update context
-        setattr(self, 'context', [summary_message] + recent_messages)
+        setattr(self, "context", [summary_message] + recent_messages)
         self._compaction_count += 1
 
         after_stats = self.estimate_tokens()
@@ -132,13 +131,11 @@ class CompactionMixin:
             "messages_preserved": len(recent_messages),
             "tokens_saved": before_stats["estimated_tokens"] - after_stats["estimated_tokens"],
             "focus": focus,
-            "compaction_number": self._compaction_count
+            "compaction_number": self._compaction_count,
         }
 
     def _generate_simple_summary(
-        self,
-        messages: List[Dict[str, str]],
-        focus: Optional[str] = None
+        self, messages: List[Dict[str, str]], focus: Optional[str] = None
     ) -> str:
         """
         Generate a simple rule-based summary of messages.
@@ -172,27 +169,32 @@ class CompactionMixin:
             tool_mentions: Dict[str, int] = {}
             for msg in assistant_msgs:
                 content = msg.get("content", "")
-                for tool in ["read_file", "write_file", "edit_file", "bash_command", "search_files"]:
+                for tool in [
+                    "read_file",
+                    "write_file",
+                    "edit_file",
+                    "bash_command",
+                    "search_files",
+                ]:
                     if tool in content.lower():
                         tool_mentions[tool] = tool_mentions.get(tool, 0) + 1
 
             if tool_mentions:
                 tools_used = ", ".join(
-                    f"{k}({v}x)"
-                    for k, v in sorted(tool_mentions.items(), key=lambda x: -x[1])[:5]
+                    f"{k}({v}x)" for k, v in sorted(tool_mentions.items(), key=lambda x: -x[1])[:5]
                 )
                 summary_parts.append(f"Tools used: {tools_used}")
 
         if focus:
             summary_parts.append(f"Focus topic: {focus}")
 
-        return "\n".join(summary_parts) if summary_parts else "Previous conversation context (details compacted)"
+        return (
+            "\n".join(summary_parts)
+            if summary_parts
+            else "Previous conversation context (details compacted)"
+        )
 
-    def replace_with_summary(
-        self,
-        summary: str,
-        preserve_recent: int = 5
-    ) -> Dict[str, Any]:
+    def replace_with_summary(self, summary: str, preserve_recent: int = 5) -> Dict[str, Any]:
         """
         Replace older context with a custom summary.
 
@@ -205,24 +207,21 @@ class CompactionMixin:
         Returns:
             Result dictionary
         """
-        context: List[Dict[str, str]] = getattr(self, 'context', [])
+        context: List[Dict[str, str]] = getattr(self, "context", [])
         before_stats = self.estimate_tokens()
 
         if len(context) <= preserve_recent:
-            return {
-                "success": False,
-                "reason": "Not enough context to compact"
-            }
+            return {"success": False, "reason": "Not enough context to compact"}
 
         recent_messages = context[-preserve_recent:]
         old_count = len(context) - preserve_recent
 
         summary_message = {
             "role": "system",
-            "content": f"[Context Summary - {old_count} messages compacted]\n{summary}"
+            "content": f"[Context Summary - {old_count} messages compacted]\n{summary}",
         }
 
-        setattr(self, 'context', [summary_message] + recent_messages)
+        setattr(self, "context", [summary_message] + recent_messages)
         self._compaction_count += 1
 
         after_stats = self.estimate_tokens()
@@ -232,13 +231,10 @@ class CompactionMixin:
             "messages_compacted": old_count,
             "tokens_before": before_stats["estimated_tokens"],
             "tokens_after": after_stats["estimated_tokens"],
-            "tokens_saved": before_stats["estimated_tokens"] - after_stats["estimated_tokens"]
+            "tokens_saved": before_stats["estimated_tokens"] - after_stats["estimated_tokens"],
         }
 
-    def auto_compact_if_needed(
-        self,
-        preserve_recent: int = 5
-    ) -> Optional[Dict[str, Any]]:
+    def auto_compact_if_needed(self, preserve_recent: int = 5) -> Optional[Dict[str, Any]]:
         """
         Automatically compact context if utilization exceeds threshold.
 

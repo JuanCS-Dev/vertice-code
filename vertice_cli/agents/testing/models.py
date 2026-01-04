@@ -15,6 +15,7 @@ from typing import List
 
 class TestFramework(str, Enum):
     """Supported test frameworks."""
+
     PYTEST = "pytest"
     UNITTEST = "unittest"
     DOCTEST = "doctest"
@@ -22,6 +23,7 @@ class TestFramework(str, Enum):
 
 class TestType(str, Enum):
     """Types of tests that can be generated."""
+
     UNIT = "unit"
     INTEGRATION = "integration"
     FUNCTIONAL = "functional"
@@ -42,6 +44,7 @@ class TestCase:
         assertions: Number of assertions in test
         complexity: Estimated complexity (1-10)
     """
+
     name: str
     code: str
     test_type: TestType
@@ -71,6 +74,7 @@ class CoverageReport:
         branches_total: Total conditional branches
         branches_covered: Branches executed
     """
+
     total_statements: int
     covered_statements: int
     coverage_percentage: float
@@ -96,6 +100,7 @@ class MutationResult:
         survived_mutants: Mutations that passed tests
         timeout_mutants: Mutations that caused timeout
     """
+
     total_mutants: int
     killed_mutants: int
     survived_mutants: int
@@ -120,6 +125,7 @@ class FlakyTest:
         error_messages: Unique error messages seen
         suspected_cause: Most likely cause of flakiness
     """
+
     name: str
     file_path: str
     failure_rate: float

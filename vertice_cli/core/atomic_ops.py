@@ -40,6 +40,7 @@ import logging
 # Try to import filelock, graceful degradation if not available
 try:
     from filelock import FileLock, Timeout as LockTimeout
+
     HAS_FILELOCK = True
 except ImportError:
     HAS_FILELOCK = False
@@ -51,6 +52,7 @@ logger = logging.getLogger(__name__)
 
 class AtomicOpType(Enum):
     """Types of atomic operations."""
+
     WRITE = auto()
     EDIT = auto()
     DELETE = auto()
@@ -61,6 +63,7 @@ class AtomicOpType(Enum):
 @dataclass
 class OperationCheckpoint:
     """Checkpoint for rollback capability."""
+
     operation_id: str
     op_type: AtomicOpType
     target_path: str
@@ -101,6 +104,7 @@ class OperationCheckpoint:
 @dataclass
 class AtomicResult:
     """Result of an atomic operation."""
+
     success: bool
     path: str
     checksum: Optional[str] = None
@@ -134,7 +138,7 @@ class AtomicFileOps:
     """
 
     # Default backup directory
-    BACKUP_DIR = ".qwen_atomic_backups"
+    BACKUP_DIR = ".vertice_atomic_backups"
 
     # Lock timeout in seconds
     LOCK_TIMEOUT = 30
@@ -170,7 +174,7 @@ class AtomicFileOps:
     def _compute_checksum(self, content: Union[str, bytes]) -> str:
         """Compute SHA256 checksum of content."""
         if isinstance(content, str):
-            content = content.encode('utf-8')
+            content = content.encode("utf-8")
         return hashlib.sha256(content).hexdigest()
 
     def _get_lock_path(self, path: Path) -> Path:
@@ -195,7 +199,7 @@ class AtomicFileOps:
         finally:
             try:
                 lock.release()
-            except Exception:
+            except (OSError, RuntimeError):
                 pass
 
     def _ensure_backup_dir(self) -> Path:
@@ -244,7 +248,7 @@ class AtomicFileOps:
         self,
         path: Union[str, Path],
         content: Union[str, bytes],
-        encoding: str = 'utf-8',
+        encoding: str = "utf-8",
         create_dirs: bool = True,
         create_backup: bool = True,
     ) -> AtomicResult:
@@ -270,8 +274,7 @@ class AtomicFileOps:
             path.parent.mkdir(parents=True, exist_ok=True)
         elif not path.parent.exists():
             return AtomicResult.failure(
-                str(path),
-                f"Parent directory does not exist: {path.parent}"
+                str(path), f"Parent directory does not exist: {path.parent}"
             )
 
         # Create checkpoint
@@ -304,9 +307,7 @@ class AtomicFileOps:
 
                 # Create temp file in same directory (important for atomic rename)
                 fd, temp_path = tempfile.mkstemp(
-                    dir=str(path.parent),
-                    prefix=f".{path.name}.",
-                    suffix=".tmp"
+                    dir=str(path.parent), prefix=f".{path.name}.", suffix=".tmp"
                 )
 
                 checkpoint.temp_path = temp_path
@@ -357,7 +358,7 @@ class AtomicFileOps:
         self,
         path: Union[str, Path],
         edit_func: Callable[[str], str],
-        encoding: str = 'utf-8',
+        encoding: str = "utf-8",
         create_backup: bool = True,
     ) -> AtomicResult:
         """
@@ -387,10 +388,11 @@ class AtomicFileOps:
 
                 # Write atomically
                 return self.write_atomic(
-                    path, modified,
+                    path,
+                    modified,
                     encoding=encoding,
                     create_dirs=False,
-                    create_backup=create_backup
+                    create_backup=create_backup,
                 )
 
         except Exception as e:
@@ -573,16 +575,10 @@ class AtomicFileOps:
                         shutil.move(str(target), source)
                         return AtomicResult(success=True, path=source)
 
-            return AtomicResult.failure(
-                str(target),
-                "Could not rollback: no backup available"
-            )
+            return AtomicResult.failure(str(target), "Could not rollback: no backup available")
 
         except Exception as e:
-            return AtomicResult.failure(
-                checkpoint.target_path,
-                f"Rollback failed: {e}"
-            )
+            return AtomicResult.failure(checkpoint.target_path, f"Rollback failed: {e}")
 
     def verify_checksum(self, path: Union[str, Path], expected: str) -> bool:
         """Verify file checksum matches expected."""
@@ -625,49 +621,37 @@ class AtomicFileOps:
 
 # Convenience functions
 
-def write_file_atomic(
-    path: Union[str, Path],
-    content: Union[str, bytes],
-    **kwargs
-) -> AtomicResult:
+
+def write_file_atomic(path: Union[str, Path], content: Union[str, bytes], **kwargs) -> AtomicResult:
     """Write file atomically."""
     return AtomicFileOps().write_atomic(path, content, **kwargs)
 
 
 def edit_file_atomic(
-    path: Union[str, Path],
-    edit_func: Callable[[str], str],
-    **kwargs
+    path: Union[str, Path], edit_func: Callable[[str], str], **kwargs
 ) -> AtomicResult:
     """Edit file atomically."""
     return AtomicFileOps().edit_atomic(path, edit_func, **kwargs)
 
 
-def delete_file_atomic(
-    path: Union[str, Path],
-    **kwargs
-) -> AtomicResult:
+def delete_file_atomic(path: Union[str, Path], **kwargs) -> AtomicResult:
     """Delete file atomically with backup."""
     return AtomicFileOps().delete_atomic(path, **kwargs)
 
 
-def move_file_atomic(
-    source: Union[str, Path],
-    dest: Union[str, Path],
-    **kwargs
-) -> AtomicResult:
+def move_file_atomic(source: Union[str, Path], dest: Union[str, Path], **kwargs) -> AtomicResult:
     """Move file atomically."""
     return AtomicFileOps().move_atomic(source, dest, **kwargs)
 
 
 # Export all public symbols
 __all__ = [
-    'AtomicOpType',
-    'OperationCheckpoint',
-    'AtomicResult',
-    'AtomicFileOps',
-    'write_file_atomic',
-    'edit_file_atomic',
-    'delete_file_atomic',
-    'move_file_atomic',
+    "AtomicOpType",
+    "OperationCheckpoint",
+    "AtomicResult",
+    "AtomicFileOps",
+    "write_file_atomic",
+    "edit_file_atomic",
+    "delete_file_atomic",
+    "move_file_atomic",
 ]

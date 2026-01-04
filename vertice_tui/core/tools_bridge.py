@@ -53,19 +53,31 @@ class ToolBridge:
             # File Operations (12 tools)
             try:
                 from vertice_cli.tools.file_ops import (
-                    ReadFileTool, WriteFileTool, EditFileTool,
-                    ListDirectoryTool, DeleteFileTool
+                    ReadFileTool,
+                    WriteFileTool,
+                    EditFileTool,
+                    ListDirectoryTool,
+                    DeleteFileTool,
                 )
                 from vertice_cli.tools.file_mgmt import (
-                    MoveFileTool, CopyFileTool, CreateDirectoryTool,
-                    ReadMultipleFilesTool, InsertLinesTool
+                    MoveFileTool,
+                    CopyFileTool,
+                    CreateDirectoryTool,
+                    ReadMultipleFilesTool,
+                    InsertLinesTool,
                 )
 
                 for tool_cls in [
-                    ReadFileTool, WriteFileTool, EditFileTool,
-                    ListDirectoryTool, DeleteFileTool,
-                    MoveFileTool, CopyFileTool, CreateDirectoryTool,
-                    ReadMultipleFilesTool, InsertLinesTool
+                    ReadFileTool,
+                    WriteFileTool,
+                    EditFileTool,
+                    ListDirectoryTool,
+                    DeleteFileTool,
+                    MoveFileTool,
+                    CopyFileTool,
+                    CreateDirectoryTool,
+                    ReadMultipleFilesTool,
+                    InsertLinesTool,
                 ]:
                     try:
                         registry.register(tool_cls())
@@ -77,13 +89,27 @@ class ToolBridge:
             # Terminal (9 tools)
             try:
                 from vertice_cli.tools.terminal import (
-                    CdTool, LsTool, PwdTool, MkdirTool, RmTool,
-                    CpTool, MvTool, TouchTool, CatTool
+                    CdTool,
+                    LsTool,
+                    PwdTool,
+                    MkdirTool,
+                    RmTool,
+                    CpTool,
+                    MvTool,
+                    TouchTool,
+                    CatTool,
                 )
 
                 for tool_cls in [
-                    CdTool, LsTool, PwdTool, MkdirTool, RmTool,
-                    CpTool, MvTool, TouchTool, CatTool
+                    CdTool,
+                    LsTool,
+                    PwdTool,
+                    MkdirTool,
+                    RmTool,
+                    CpTool,
+                    MvTool,
+                    TouchTool,
+                    CatTool,
                 ]:
                     try:
                         registry.register(tool_cls())
@@ -95,6 +121,7 @@ class ToolBridge:
             # Execution (2 tools)
             try:
                 from vertice_cli.tools.exec_hardened import BashCommandTool
+
                 registry.register(BashCommandTool())
             except ImportError as e:
                 self._load_errors.append(f"exec import: {e}")
@@ -102,6 +129,7 @@ class ToolBridge:
             # Search (2 tools)
             try:
                 from vertice_cli.tools.search import SearchFilesTool, GetDirectoryTreeTool
+
                 registry.register(SearchFilesTool())
                 registry.register(GetDirectoryTreeTool())
             except ImportError as e:
@@ -110,6 +138,7 @@ class ToolBridge:
             # Git (2 tools)
             try:
                 from vertice_cli.tools.git_ops import GitStatusTool, GitDiffTool
+
                 registry.register(GitStatusTool())
                 registry.register(GitDiffTool())
             except ImportError as e:
@@ -118,8 +147,11 @@ class ToolBridge:
             # Context (3 tools)
             try:
                 from vertice_cli.tools.context import (
-                    GetContextTool, SaveSessionTool, RestoreBackupTool
+                    GetContextTool,
+                    SaveSessionTool,
+                    RestoreBackupTool,
                 )
+
                 registry.register(GetContextTool())
                 registry.register(SaveSessionTool())
                 registry.register(RestoreBackupTool())
@@ -130,12 +162,19 @@ class ToolBridge:
             try:
                 from vertice_cli.tools.web_search import WebSearchTool, SearchDocumentationTool
                 from vertice_cli.tools.web_access import (
-                    FetchURLTool, DownloadFileTool, HTTPRequestTool, PackageSearchTool
+                    FetchURLTool,
+                    DownloadFileTool,
+                    HTTPRequestTool,
+                    PackageSearchTool,
                 )
 
                 for tool_cls in [
-                    WebSearchTool, SearchDocumentationTool,
-                    FetchURLTool, DownloadFileTool, HTTPRequestTool, PackageSearchTool
+                    WebSearchTool,
+                    SearchDocumentationTool,
+                    FetchURLTool,
+                    DownloadFileTool,
+                    HTTPRequestTool,
+                    PackageSearchTool,
                 ]:
                     try:
                         registry.register(tool_cls())
@@ -186,7 +225,7 @@ class ToolBridge:
                 "success": result.success,
                 "data": result.data,
                 "error": result.error,
-                "metadata": result.metadata
+                "metadata": result.metadata,
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -213,6 +252,6 @@ class MinimalRegistry:
 
 
 __all__ = [
-    'ToolBridge',
-    'MinimalRegistry',
+    "ToolBridge",
+    "MinimalRegistry",
 ]

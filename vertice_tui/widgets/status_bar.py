@@ -83,6 +83,7 @@ class StatusBar(Horizontal):
     agent_count: reactive[int] = reactive(20)
     tool_count: reactive[int] = reactive(0)
     tribunal_mode: reactive[bool] = reactive(False)
+    prometheus_mode: reactive[bool] = reactive(False)
 
     def compose(self) -> ComposeResult:
         """Compose premium status bar."""
@@ -110,9 +111,11 @@ class StatusBar(Horizontal):
         return f"{icon} {self.mode}"
 
     def _format_model(self) -> str:
-        """Format model name."""
+        """Format model name with mode indicators."""
+        if self.prometheus_mode:
+            return "[bold #FF6B00]PROMETHEUS[/bold #FF6B00]"  # Orange/Fire
         if self.tribunal_mode:
-            return "[bold #EF4444]TRIBUNAL[/bold #EF4444]"
+            return "[bold #EF4444]TRIBUNAL[/bold #EF4444]"  # Red
         if not self.llm_connected:
             return "[dim]No Model[/dim]"
         return f"[bold]{self.model_name}[/bold]"
@@ -187,13 +190,17 @@ class StatusBar(Horizontal):
     def watch_tribunal_mode(self, value: bool) -> None:
         self._update_element("#model", self._format_model())
 
+    def watch_prometheus_mode(self, value: bool) -> None:
+        """Update display when PROMETHEUS mode changes."""
+        self._update_element("#model", self._format_model())
+
     def _update_mini_meter(self) -> None:
         """Update the MiniTokenMeter widget."""
         try:
             meter = self.query_one("#mini-meter", MiniTokenMeter)
             meter.used = self.token_used
             meter.limit = self.token_limit
-        except Exception:
+        except (AttributeError, ValueError):
             pass
 
     def update_tokens(self, used: int, limit: int) -> None:
@@ -215,4 +222,5 @@ class StatusBar(Horizontal):
         except Exception as e:
             # UI element may not exist yet during initialization
             import logging
+
             logging.debug(f"StatusBar element {element_id} update failed: {e}")

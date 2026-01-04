@@ -31,14 +31,17 @@ logger = logging.getLogger(__name__)
 # EXCEPTIONS
 # =============================================================================
 
+
 class GitSafetyError(Exception):
     """Raised when a git operation violates safety protocols."""
+
     pass
 
 
 # =============================================================================
 # CONFIGURATION
 # =============================================================================
+
 
 @dataclass
 class GitSafetyConfig:
@@ -58,36 +61,42 @@ class GitSafetyConfig:
     """
 
     # Protected branches (no force push)
-    protected_branches: List[str] = field(default_factory=lambda: [
-        "main",
-        "master",
-        "develop",
-        "production",
-        "release",
-    ])
+    protected_branches: List[str] = field(
+        default_factory=lambda: [
+            "main",
+            "master",
+            "develop",
+            "production",
+            "release",
+        ]
+    )
 
     # Dangerous flags to block
-    dangerous_flags: List[str] = field(default_factory=lambda: [
-        "--force",
-        "-f",
-        "--hard",
-        "--no-verify",
-        "--no-gpg-sign",
-        "-i",  # Interactive (not supported in automated context)
-    ])
+    dangerous_flags: List[str] = field(
+        default_factory=lambda: [
+            "--force",
+            "-f",
+            "--hard",
+            "--no-verify",
+            "--no-gpg-sign",
+            "-i",  # Interactive (not supported in automated context)
+        ]
+    )
 
     # Dangerous commands to block
-    dangerous_commands: List[str] = field(default_factory=lambda: [
-        "config",           # Never modify git config
-        "push --force",
-        "push -f",
-        "reset --hard",
-        "clean -fd",
-        "checkout -f",
-        "rebase -i",        # Interactive rebase not supported
-        "filter-branch",    # History rewriting
-        "gc --prune",       # Aggressive garbage collection
-    ])
+    dangerous_commands: List[str] = field(
+        default_factory=lambda: [
+            "config",  # Never modify git config
+            "push --force",
+            "push -f",
+            "reset --hard",
+            "clean -fd",
+            "checkout -f",
+            "rebase -i",  # Interactive rebase not supported
+            "filter-branch",  # History rewriting
+            "gc --prune",  # Aggressive garbage collection
+        ]
+    )
 
     # Maximum commit message size (DoS prevention)
     max_commit_message: int = 1_000_000  # 1MB
@@ -124,6 +133,7 @@ def set_safety_config(config: GitSafetyConfig) -> None:
 # =============================================================================
 # VALIDATION
 # =============================================================================
+
 
 def validate_git_command(command: str) -> Tuple[bool, str]:
     """

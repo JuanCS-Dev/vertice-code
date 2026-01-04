@@ -31,12 +31,7 @@ class WorkflowEngine:
     - Constitutional: LEI tracking + validation
     """
 
-    def __init__(
-        self,
-        llm_client: Any,
-        recovery_engine: Any,
-        tool_registry: Any
-    ) -> None:
+    def __init__(self, llm_client: Any, recovery_engine: Any, tool_registry: Any) -> None:
         self.llm = llm_client
         self.recovery = recovery_engine
         self.tools = tool_registry
@@ -48,9 +43,7 @@ class WorkflowEngine:
         self.checkpoints: CheckpointManager = CheckpointManager()
 
     async def execute_workflow(
-        self,
-        user_goal: str,
-        initial_context: Optional[Dict[str, Any]] = None
+        self, user_goal: str, initial_context: Optional[Dict[str, Any]] = None
     ) -> WorkflowResult:
         """
         Execute multi-step workflow.
@@ -69,11 +62,7 @@ class WorkflowEngine:
 
         # 1. Tree-of-Thought planning (Constitutional Layer 2)
         available_tools = list(self.tools.get_all().keys())
-        paths = await self.tree_of_thought.generate_paths(
-            user_goal,
-            available_tools,
-            max_paths=3
-        )
+        paths = await self.tree_of_thought.generate_paths(user_goal, available_tools, max_paths=3)
 
         best_path = self.tree_of_thought.select_best_path(paths)
         logger.info(f"Selected path: {best_path.description} (score: {best_path.total_score:.2f})")
@@ -87,9 +76,7 @@ class WorkflowEngine:
         except ValueError as e:
             logger.error(f"Dependency error: {e}")
             return WorkflowResult(
-                success=False,
-                completed_steps=[],
-                total_time=time.time() - start_time
+                success=False, completed_steps=[], total_time=time.time() - start_time
             )
 
         # 3. Create transaction
@@ -100,9 +87,7 @@ class WorkflowEngine:
         critiques: List[Critique] = []
 
         for i, step in enumerate(execution_order):
-            result = await self._execute_step(
-                step, i, transaction, context, completed, critiques
-            )
+            result = await self._execute_step(step, i, transaction, context, completed, critiques)
             if result is not None:
                 # Early return on failure
                 result.total_time = time.time() - start_time
@@ -119,7 +104,7 @@ class WorkflowEngine:
             completed_steps=completed,
             total_time=total_time,
             critiques=critiques,
-            final_context=context
+            final_context=context,
         )
 
     async def _execute_step(
@@ -129,7 +114,7 @@ class WorkflowEngine:
         transaction: Transaction,
         context: Dict[str, Any],
         completed: List,
-        critiques: List[Critique]
+        critiques: List[Critique],
     ) -> Optional[WorkflowResult]:
         """Execute single workflow step.
 
@@ -140,9 +125,7 @@ class WorkflowEngine:
         if step.is_risky:
             checkpoint_id = f"{transaction.transaction_id}_step_{index}"
             self.checkpoints.create_checkpoint(
-                checkpoint_id,
-                context,
-                [s.step_id for s in completed]
+                checkpoint_id, context, [s.step_id for s in completed]
             )
 
         # Execute step
@@ -157,10 +140,7 @@ class WorkflowEngine:
             await transaction.rollback(self.checkpoints)
 
             return WorkflowResult(
-                success=False,
-                completed_steps=completed,
-                failed_step=step,
-                total_time=0
+                success=False, completed_steps=completed, failed_step=step, total_time=0
             )
 
         try:
@@ -179,7 +159,7 @@ class WorkflowEngine:
                     completed_steps=completed,
                     failed_step=step,
                     total_time=0,
-                    critiques=critiques
+                    critiques=critiques,
                 )
 
             # Auto-critique (Constitutional Layer 2)
@@ -199,7 +179,7 @@ class WorkflowEngine:
                     completed_steps=completed,
                     failed_step=step,
                     total_time=0,
-                    critiques=critiques
+                    critiques=critiques,
                 )
 
             # Success
@@ -221,7 +201,7 @@ class WorkflowEngine:
                 completed_steps=completed,
                 failed_step=step,
                 total_time=0,
-                critiques=critiques
+                critiques=critiques,
             )
 
         return None  # Success, continue

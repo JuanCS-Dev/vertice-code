@@ -106,8 +106,7 @@ class SecretsManager:
         value = self.get(key, required=False)
         if value is None:
             raise ValueError(
-                error_message
-                or f"Secret '{key}' is required but not set. Check your .env file."
+                error_message or f"Secret '{key}' is required but not set. Check your .env file."
             )
         return value
 

@@ -54,9 +54,7 @@ class ResultRenderer:
         formatted = self.formatter.format(tool_name, result, args)
 
         # Dispatch to tool-specific renderer
-        renderer_method = getattr(
-            self, f"_render_{tool_name.lower()}", self._render_default
-        )
+        renderer_method = getattr(self, f"_render_{tool_name.lower()}", self._render_default)
         renderer_method(formatted, result, args)
 
         # Return summary with status icon

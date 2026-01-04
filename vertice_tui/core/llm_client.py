@@ -54,6 +54,7 @@ logger = logging.getLogger(__name__)
 # GEMINI CLIENT
 # =============================================================================
 
+
 class GeminiClient:
     """
     Optimized Gemini API client with streaming support.
@@ -104,12 +105,8 @@ class GeminiClient:
             When GOOGLE_CLOUD_PROJECT is set, uses Vertex AI (enterprise quota).
             Falls back to direct Gemini API only when Vertex AI unavailable.
         """
-        self.api_key = (
-            api_key
-            or os.getenv("GEMINI_API_KEY")
-            or os.getenv("GOOGLE_API_KEY")
-        )
-        self.model_name = model or os.getenv("GEMINI_MODEL") or "gemini-2.0-flash"
+        self.api_key = api_key or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+        self.model_name = model or os.getenv("GEMINI_MODEL") or "gemini-2.5-pro"
         self.temperature = temperature
         self.max_output_tokens = max_output_tokens
 
@@ -139,12 +136,12 @@ class GeminiClient:
         # Circuit Breaker for resilience
         self._circuit_breaker = CircuitBreaker(
             name="gemini_api",
-            config=circuit_breaker_config or CircuitBreakerConfig(
+            config=circuit_breaker_config
+            or CircuitBreakerConfig(
                 failure_threshold=5,
                 success_threshold=2,
                 timeout=30.0,
-                half_open_max_calls=3,
-            )
+            ),
         )
 
     def _init_multi_provider(self) -> None:
@@ -255,7 +252,7 @@ class GeminiClient:
                         FunctionDeclaration(
                             name=gemini_schema["name"],
                             description=gemini_schema["description"],
-                            parameters=gemini_schema["parameters"]
+                            parameters=gemini_schema["parameters"],
                         )
                     )
                 except Exception as e:
@@ -275,6 +272,7 @@ class GeminiClient:
             return None
         except Exception as e:
             import traceback
+
             traceback.print_exc()
             logger.error(f"Failed to build Gemini tools: {e}")
             return None
@@ -290,18 +288,15 @@ class GeminiClient:
 
         try:
             self._streamer = GeminiStreamer(self._stream_config)
-            result = await asyncio.wait_for(
-                self._streamer.initialize(),
-                timeout=self.INIT_TIMEOUT
-            )
+            result = await asyncio.wait_for(self._streamer.initialize(), timeout=self.INIT_TIMEOUT)
             self._initialized = result
             return result
 
         except asyncio.TimeoutError:
-            self._circuit_breaker.record_failure("Initialization timeout")
+            await self._circuit_breaker.record_failure("Initialization timeout")
             return False
         except Exception as e:
-            self._circuit_breaker.record_failure(f"Init error: {str(e)}")
+            await self._circuit_breaker.record_failure(f"Init error: {str(e)}")
             return False
 
     async def stream(
@@ -367,10 +362,10 @@ class GeminiClient:
             ):
                 yield chunk
 
-            self._circuit_breaker.record_success()
+            await self._circuit_breaker.record_success()
 
         except Exception as e:
-            self._circuit_breaker.record_failure(str(e))
+            await self._circuit_breaker.record_failure(str(e))
             error_msg = str(e)
             if "429" in error_msg or "rate limit" in error_msg.lower():
                 yield "\n⚠️ Rate limit reached on all providers. Please wait."
@@ -401,19 +396,17 @@ class GeminiClient:
             logger.info(f"Function calling enabled with {len(self._tool_schemas)} tools")
 
         try:
-            async for chunk in self._streamer.stream(
-                prompt, system_prompt, context, gemini_tools
-            ):
+            async for chunk in self._streamer.stream(prompt, system_prompt, context, gemini_tools):
                 yield chunk
 
-            self._circuit_breaker.record_success()
+            await self._circuit_breaker.record_success()
 
         except asyncio.TimeoutError:
-            self._circuit_breaker.record_failure("Stream timeout")
+            await self._circuit_breaker.record_failure("Stream timeout")
             yield f"\n⚠️ Request timed out after {self.STREAM_TIMEOUT}s"
         except Exception as e:
             error_str = str(e)
-            self._circuit_breaker.record_failure(error_str)
+            await self._circuit_breaker.record_failure(error_str)
             # Handle rate limiting gracefully
             if "429" in error_str or "quota" in error_str.lower():
                 yield "\n⚠️ Rate limit reached. Please wait a moment and try again."
@@ -475,7 +468,7 @@ class GeminiClient:
                 "chunk_timeout": self.CHUNK_TIMEOUT,
                 "temperature": self.temperature,
                 "max_output_tokens": self.max_output_tokens,
-            }
+            },
         }
 
     def reset_circuit_breaker(self) -> None:
@@ -489,16 +482,16 @@ class GeminiClient:
 
 __all__ = [
     # Main client
-    'GeminiClient',
+    "GeminiClient",
     # Parsing (re-exported from parsing module)
-    'ToolCallParser',
-    'KNOWN_TOOLS',
+    "ToolCallParser",
+    "KNOWN_TOOLS",
     # Circuit Breaker (re-exported from resilience module)
-    'CircuitBreaker',
-    'CircuitBreakerConfig',
-    'CircuitBreakerOpen',
-    'CircuitBreakerStats',
-    'CircuitState',
+    "CircuitBreaker",
+    "CircuitBreakerConfig",
+    "CircuitBreakerOpen",
+    "CircuitBreakerStats",
+    "CircuitState",
     # Streaming config (re-exported from streaming module)
-    'GeminiStreamConfig',
+    "GeminiStreamConfig",
 ]

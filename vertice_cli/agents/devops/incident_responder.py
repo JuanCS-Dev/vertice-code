@@ -142,9 +142,7 @@ Be precise and actionable.
             predicted_impact="Users experiencing 500 errors on checkout",
         )
 
-    def _detect_severity(
-        self, request: str, parsed: Dict[str, Any]
-    ) -> IncidentSeverity:
+    def _detect_severity(self, request: str, parsed: Dict[str, Any]) -> IncidentSeverity:
         """Detect incident severity."""
         request_lower = request.lower()
 
@@ -161,9 +159,7 @@ Be precise and actionable.
 
         return IncidentSeverity.P3
 
-    def _parse_incident_analysis(
-        self, analysis: str, request: str
-    ) -> Dict[str, Any]:
+    def _parse_incident_analysis(self, analysis: str, request: str) -> Dict[str, Any]:
         """Parse LLM analysis to extract structured data."""
         result = {
             "root_cause": "Analysis unavailable",
@@ -213,9 +209,7 @@ Be precise and actionable.
 
         return result
 
-    async def _execute_remediation(
-        self, incident: IncidentDetection
-    ) -> Dict[str, Any]:
+    async def _execute_remediation(self, incident: IncidentDetection) -> Dict[str, Any]:
         """Execute autonomous remediation with safety checks."""
         results = []
 
@@ -240,12 +234,14 @@ Be precise and actionable.
                 results.append({"success": True, "action": action.value})
 
         # Track remediation
-        self.remediation_history.append({
-            "incident_id": incident.incident_id,
-            "actions": [a.value for a in incident.recommended_actions],
-            "results": results,
-            "timestamp": datetime.utcnow().isoformat(),
-        })
+        self.remediation_history.append(
+            {
+                "incident_id": incident.incident_id,
+                "actions": [a.value for a in incident.recommended_actions],
+                "results": results,
+                "timestamp": datetime.utcnow().isoformat(),
+            }
+        )
 
         return {
             "actions_executed": len(results),

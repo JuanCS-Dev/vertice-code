@@ -22,33 +22,34 @@ if TYPE_CHECKING:
 @dataclass
 class CommandResult:
     """Result of command execution."""
+
     should_exit: bool = False
     message: Optional[str] = None
     success: bool = True
 
     @classmethod
-    def exit(cls) -> 'CommandResult':
+    def exit(cls) -> "CommandResult":
         """Create exit result."""
         return cls(should_exit=True)
 
     @classmethod
-    def ok(cls, message: Optional[str] = None) -> 'CommandResult':
+    def ok(cls, message: Optional[str] = None) -> "CommandResult":
         """Create success result."""
         return cls(message=message)
 
     @classmethod
-    def error(cls, message: str) -> 'CommandResult':
+    def error(cls, message: str) -> "CommandResult":
         """Create error result."""
         return cls(message=message, success=False)
 
     @classmethod
-    def unknown(cls, cmd: str) -> 'CommandResult':
+    def unknown(cls, cmd: str) -> "CommandResult":
         """Create unknown command result."""
         return cls(message=f"Unknown command: {cmd}", success=False)
 
 
 # Type alias for command handler
-CommandHandler = Callable[['InteractiveShell', str], Coroutine[Any, Any, CommandResult]]
+CommandHandler = Callable[["InteractiveShell", str], Coroutine[Any, Any, CommandResult]]
 
 
 class CommandDispatcher:
@@ -59,7 +60,7 @@ class CommandDispatcher:
     with dictionary-based dispatch.
     """
 
-    def __init__(self, shell: 'InteractiveShell'):
+    def __init__(self, shell: "InteractiveShell"):
         """
         Initialize dispatcher with shell reference.
 
@@ -111,28 +112,22 @@ class CommandDispatcher:
             "/nopreview": basic.handle_preview_off,
             "/dash": basic.handle_dashboard,
             "/dashboard": basic.handle_dashboard,
-
             # History commands
             "/history": history.handle_history,
             "/stats": history.handle_stats,
             "/sessions": history.handle_sessions,
-
             # Workflow commands
             "/workflow": workflow.handle_workflow_status,
             "/workflow list": workflow.handle_workflow_list,
-
             # Index commands
             "/index": index.handle_index,
-
             # LSP commands
             "/lsp": lsp.handle_lsp_start,
-
             # Git commands (Phase 1.3)
             "/git status": git.handle_status,
             "/git diff": git.handle_diff,
             "/git log": git.handle_log,
             "/git branch": git.handle_branch,
-
             # File operations (Phase 1.3)
             "/tree": file_ops.handle_tree,
         }
@@ -146,24 +141,19 @@ class CommandDispatcher:
             "/lsp goto ": lsp.handle_goto,
             "/lsp refs ": lsp.handle_refs,
             "/lsp diag ": lsp.handle_diag,
-
             # Refactor commands
             "/refactor rename ": refactor.handle_rename,
             "/refactor imports ": refactor.handle_imports,
-
             # Workflow commands
             "/workflow run ": workflow.handle_workflow_run,
-
             # Other commands
             "/squad ": workflow.handle_squad,
             "/find ": index.handle_find,
             "/explain ": basic.handle_explain,
             "/suggest ": index.handle_suggest,
-
             # Git prefix commands (Phase 1.3)
             "/git diff ": git.handle_diff,
             "/git log ": git.handle_log,
-
             # File prefix commands (Phase 1.3)
             "/read ": file_ops.handle_read,
             "/write ": file_ops.handle_write,
@@ -190,9 +180,7 @@ class CommandDispatcher:
 
         # Try prefix match (check longer prefixes first)
         for prefix, handler in sorted(
-            self._prefix_handlers.items(),
-            key=lambda x: len(x[0]),
-            reverse=True
+            self._prefix_handlers.items(), key=lambda x: len(x[0]), reverse=True
         ):
             if cmd.startswith(prefix):
                 return await handler(cmd)
@@ -222,6 +210,4 @@ class CommandDispatcher:
 
     def get_all_commands(self) -> list[str]:
         """Get list of all registered commands."""
-        return list(self._handlers.keys()) + [
-            f"{p}..." for p in self._prefix_handlers.keys()
-        ]
+        return list(self._handlers.keys()) + [f"{p}..." for p in self._prefix_handlers.keys()]

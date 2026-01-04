@@ -9,6 +9,7 @@ import json
 @dataclass
 class TokenUsage:
     """Single token usage record."""
+
     timestamp: datetime
     input_tokens: int
     output_tokens: int
@@ -23,7 +24,7 @@ class TokenTracker:
     def __init__(self, budget: int = 1000000, cost_per_1k: float = 0.002):
         """
         Initialize tracker.
-        
+
         Args:
             budget: Maximum tokens allowed
             cost_per_1k: Cost per 1000 tokens (default: Gemini Pro pricing)
@@ -48,7 +49,7 @@ class TokenTracker:
             output_tokens=output_tokens,
             total_tokens=total,
             cost_estimate=cost,
-            context=context
+            context=context,
         )
 
         self.history.append(usage)
@@ -66,7 +67,7 @@ class TokenTracker:
             "budget_remaining": self.budget - total,
             "budget_used_percent": (total / self.budget * 100) if self.budget > 0 else 0,
             "total_cost": sum(u.cost_estimate for u in self.history),
-            "requests": len(self.history)
+            "requests": len(self.history),
         }
 
     def is_over_budget(self) -> bool:
@@ -92,7 +93,7 @@ class TokenTracker:
                 "output": u.output_tokens,
                 "total": u.total_tokens,
                 "cost": u.cost_estimate,
-                "context": u.context
+                "context": u.context,
             }
             for u in self.history[-20:]  # Last 20 requests
         ]

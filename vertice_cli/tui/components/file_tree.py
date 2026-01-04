@@ -40,6 +40,7 @@ from ..theme import COLORS
 
 class FileType(Enum):
     """File type classification."""
+
     DIRECTORY = "directory"
     PYTHON = "python"
     JAVASCRIPT = "javascript"
@@ -57,6 +58,7 @@ class FileType(Enum):
 
 class GitStatus(Enum):
     """Git file status."""
+
     UNTRACKED = "untracked"
     MODIFIED = "modified"
     ADDED = "added"
@@ -68,11 +70,12 @@ class GitStatus(Enum):
 @dataclass
 class FileNode:
     """Represents a file or directory in the tree."""
+
     name: str
     path: Path
     type: FileType
     is_dir: bool
-    children: List['FileNode'] = field(default_factory=list)
+    children: List["FileNode"] = field(default_factory=list)
     expanded: bool = False
     git_status: Optional[GitStatus] = None
     size: Optional[int] = None
@@ -92,7 +95,7 @@ class FileNode:
         if self.is_dir:
             self.expanded = not self.expanded
 
-    def add_child(self, node: 'FileNode') -> None:
+    def add_child(self, node: "FileNode") -> None:
         """Add child node."""
         if self.is_dir:
             self.children.append(node)
@@ -115,7 +118,7 @@ class FileNode:
             FileType.IMAGE: "🖼️",
             FileType.TEXT: "📄",
             FileType.BINARY: "📦",
-            FileType.UNKNOWN: "❓"
+            FileType.UNKNOWN: "❓",
         }
 
         return icons.get(self.type, "📄")
@@ -130,7 +133,7 @@ class FileNode:
             GitStatus.MODIFIED: "M",
             GitStatus.ADDED: "A",
             GitStatus.DELETED: "D",
-            GitStatus.RENAMED: "R"
+            GitStatus.RENAMED: "R",
         }
 
         return indicators.get(self.git_status, "")
@@ -144,26 +147,26 @@ def detect_file_type(path: Path) -> FileType:
     suffix = path.suffix.lower()
 
     type_map = {
-        '.py': FileType.PYTHON,
-        '.js': FileType.JAVASCRIPT,
-        '.jsx': FileType.JAVASCRIPT,
-        '.ts': FileType.TYPESCRIPT,
-        '.tsx': FileType.TYPESCRIPT,
-        '.html': FileType.HTML,
-        '.htm': FileType.HTML,
-        '.css': FileType.CSS,
-        '.scss': FileType.CSS,
-        '.json': FileType.JSON,
-        '.yaml': FileType.YAML,
-        '.yml': FileType.YAML,
-        '.md': FileType.MARKDOWN,
-        '.png': FileType.IMAGE,
-        '.jpg': FileType.IMAGE,
-        '.jpeg': FileType.IMAGE,
-        '.gif': FileType.IMAGE,
-        '.svg': FileType.IMAGE,
-        '.txt': FileType.TEXT,
-        '.log': FileType.TEXT
+        ".py": FileType.PYTHON,
+        ".js": FileType.JAVASCRIPT,
+        ".jsx": FileType.JAVASCRIPT,
+        ".ts": FileType.TYPESCRIPT,
+        ".tsx": FileType.TYPESCRIPT,
+        ".html": FileType.HTML,
+        ".htm": FileType.HTML,
+        ".css": FileType.CSS,
+        ".scss": FileType.CSS,
+        ".json": FileType.JSON,
+        ".yaml": FileType.YAML,
+        ".yml": FileType.YAML,
+        ".md": FileType.MARKDOWN,
+        ".png": FileType.IMAGE,
+        ".jpg": FileType.IMAGE,
+        ".jpeg": FileType.IMAGE,
+        ".gif": FileType.IMAGE,
+        ".svg": FileType.IMAGE,
+        ".txt": FileType.TEXT,
+        ".log": FileType.TEXT,
     }
 
     return type_map.get(suffix, FileType.UNKNOWN)
@@ -172,7 +175,7 @@ def detect_file_type(path: Path) -> FileType:
 class FileTree:
     """
     Interactive collapsible file tree.
-    
+
     Features:
     - Expand/collapse directories
     - Git status indicators
@@ -188,7 +191,7 @@ class FileTree:
         console: Console,
         max_depth: int = 5,
         show_hidden: bool = False,
-        git_aware: bool = True
+        git_aware: bool = True,
     ):
         self.root_path = root_path
         self.console = console
@@ -203,8 +206,16 @@ class FileTree:
 
         # Filters
         self.ignore_patterns = {
-            '__pycache__', '.git', '.venv', 'venv', 'node_modules',
-            '.pytest_cache', '.mypy_cache', 'dist', 'build', '.eggs'
+            "__pycache__",
+            ".git",
+            ".venv",
+            "venv",
+            "node_modules",
+            ".pytest_cache",
+            ".mypy_cache",
+            "dist",
+            "build",
+            ".eggs",
         }
 
     def build_tree(self) -> FileNode:
@@ -227,7 +238,7 @@ class FileTree:
             type=file_type,
             is_dir=is_dir,
             depth=depth,
-            expanded=str(path) in self.expanded_paths
+            expanded=str(path) in self.expanded_paths,
         )
 
         # Build children for directories
@@ -235,7 +246,7 @@ class FileTree:
             try:
                 for child_path in sorted(path.iterdir()):
                     # Skip hidden files
-                    if not self.show_hidden and child_path.name.startswith('.'):
+                    if not self.show_hidden and child_path.name.startswith("."):
                         continue
 
                     # Skip ignored patterns
@@ -275,9 +286,9 @@ class FileTree:
             tree,
             title=f"📁 {self.root_path.name}",
             title_align="left",
-            border_style=COLORS['primary'],
+            border_style=COLORS["primary"],
             box=box.ROUNDED,
-            padding=(1, 1)
+            padding=(1, 1),
         )
 
         return panel
@@ -304,10 +315,10 @@ class FileTree:
 
         # Icon
         icon = node.get_icon()
-        label.append(f"{icon} ", style=COLORS['secondary'])
+        label.append(f"{icon} ", style=COLORS["secondary"])
 
         # Name
-        name_style = f"bold {COLORS['primary']}" if node.is_dir else COLORS['secondary']
+        name_style = f"bold {COLORS['primary']}" if node.is_dir else COLORS["secondary"]
         if node == self.selected_node:
             name_style = f"bold {COLORS['accent']}"
 
@@ -329,18 +340,18 @@ class FileTree:
     def _get_git_color(self, status: Optional[GitStatus]) -> str:
         """Get color for git status."""
         colors = {
-            GitStatus.UNTRACKED: COLORS['info'],
-            GitStatus.MODIFIED: COLORS['warning'],
-            GitStatus.ADDED: COLORS['success'],
-            GitStatus.DELETED: COLORS['error'],
-            GitStatus.RENAMED: COLORS['accent']
+            GitStatus.UNTRACKED: COLORS["info"],
+            GitStatus.MODIFIED: COLORS["warning"],
+            GitStatus.ADDED: COLORS["success"],
+            GitStatus.DELETED: COLORS["error"],
+            GitStatus.RENAMED: COLORS["accent"],
         }
-        return colors.get(status, COLORS['muted'])
+        return colors.get(status, COLORS["muted"])
 
     def _format_size(self, size_bytes: int) -> str:
         """Format file size."""
         size: float = float(size_bytes)
-        for unit in ['B', 'KB', 'MB', 'GB']:
+        for unit in ["B", "KB", "MB", "GB"]:
             if size < 1024.0:
                 return f"{size:.1f}{unit}"
             size /= 1024.0
@@ -372,15 +383,9 @@ class FileTree:
 
 
 def create_file_tree(
-    root_path: str,
-    console: Console,
-    max_depth: int = 3,
-    show_hidden: bool = False
+    root_path: str, console: Console, max_depth: int = 3, show_hidden: bool = False
 ) -> FileTree:
     """Create configured file tree."""
     return FileTree(
-        root_path=Path(root_path),
-        console=console,
-        max_depth=max_depth,
-        show_hidden=show_hidden
+        root_path=Path(root_path), console=console, max_depth=max_depth, show_hidden=show_hidden
     )

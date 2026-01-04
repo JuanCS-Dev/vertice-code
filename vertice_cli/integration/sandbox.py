@@ -37,14 +37,14 @@ class SandboxResult:
 class SandboxExecutor:
     """
     Execute commands in isolated Docker containers.
-    
+
     Security Features:
     - Isolated filesystem (no host access by default)
     - Resource limits (CPU, memory)
     - Network isolation (optional)
     - Timeout enforcement
     - Auto-cleanup
-    
+
     Constitutional Compliance:
     - LEI = 0.0 (no learning from sandbox execution)
     - FPC = 100% (explicit permission required)
@@ -57,11 +57,11 @@ class SandboxExecutor:
         memory_limit: str = "512m",
         cpu_quota: int = 50000,  # 50% of one core
         network_disabled: bool = False,
-        auto_pull: bool = True
+        auto_pull: bool = True,
     ):
         """
         Initialize sandbox executor.
-        
+
         Args:
             image: Docker image to use
             memory_limit: Memory limit (e.g., "512m", "1g")
@@ -113,11 +113,11 @@ class SandboxExecutor:
         timeout: int = 30,
         readonly: bool = True,
         env: Optional[Dict[str, str]] = None,
-        working_dir: str = "/workspace"
+        working_dir: str = "/workspace",
     ) -> SandboxResult:
         """
         Execute command in sandbox.
-        
+
         Args:
             command: Command to execute
             cwd: Host directory to mount (if any)
@@ -125,10 +125,10 @@ class SandboxExecutor:
             readonly: Mount directory as readonly
             env: Environment variables
             working_dir: Working directory inside container
-        
+
         Returns:
             SandboxResult with execution details
-        
+
         Raises:
             RuntimeError: If Docker is not available
             docker.errors.ContainerError: If execution fails
@@ -147,28 +147,25 @@ class SandboxExecutor:
             volumes = {}
             if cwd:
                 mode = "ro" if readonly else "rw"
-                volumes[str(cwd.absolute())] = {
-                    'bind': working_dir,
-                    'mode': mode
-                }
+                volumes[str(cwd.absolute())] = {"bind": working_dir, "mode": mode}
 
             # Prepare environment
             environment = env or {}
 
             # Container configuration
             container_config = {
-                'image': self.image,
-                'command': ['sh', '-c', command],
-                'working_dir': working_dir,
-                'volumes': volumes,
-                'environment': environment,
-                'detach': True,
-                'auto_remove': False,  # Manual cleanup for better control
-                'mem_limit': self.memory_limit,
-                'cpu_quota': self.cpu_quota,
-                'network_disabled': self.network_disabled,
-                'stdin_open': False,
-                'tty': False,
+                "image": self.image,
+                "command": ["sh", "-c", command],
+                "working_dir": working_dir,
+                "volumes": volumes,
+                "environment": environment,
+                "detach": True,
+                "auto_remove": False,  # Manual cleanup for better control
+                "mem_limit": self.memory_limit,
+                "cpu_quota": self.cpu_quota,
+                "network_disabled": self.network_disabled,
+                "stdin_open": False,
+                "tty": False,
             }
 
             logger.debug(f"Starting container with command: {command}")
@@ -177,19 +174,21 @@ class SandboxExecutor:
             # Wait for completion with timeout
             try:
                 result = container.wait(timeout=timeout)
-                exit_code = result['StatusCode']
+                exit_code = result["StatusCode"]
             except Exception as e:
                 logger.warning(f"Container timeout or error: {e}")
                 container.stop(timeout=1)
                 exit_code = -1
 
             # Get logs
-            stdout = container.logs(stdout=True, stderr=False).decode('utf-8', errors='replace')
-            stderr = container.logs(stdout=False, stderr=True).decode('utf-8', errors='replace')
+            stdout = container.logs(stdout=True, stderr=False).decode("utf-8", errors="replace")
+            stderr = container.logs(stdout=False, stderr=True).decode("utf-8", errors="replace")
 
             duration_ms = (datetime.now() - start_time).total_seconds() * 1000
 
-            logger.debug(f"Container execution completed: exit_code={exit_code}, duration={duration_ms}ms")
+            logger.debug(
+                f"Container execution completed: exit_code={exit_code}, duration={duration_ms}ms"
+            )
 
             return SandboxResult(
                 exit_code=exit_code,
@@ -197,7 +196,7 @@ class SandboxExecutor:
                 stderr=stderr,
                 duration_ms=duration_ms,
                 container_id=container.id,
-                success=(exit_code == 0)
+                success=(exit_code == 0),
             )
 
         except docker.errors.ContainerError as e:
@@ -210,7 +209,7 @@ class SandboxExecutor:
                 stderr=str(e),
                 duration_ms=duration_ms,
                 container_id=e.container.id if e.container else "unknown",
-                success=False
+                success=False,
             )
 
         except docker.errors.APIError as e:
@@ -223,7 +222,7 @@ class SandboxExecutor:
                 stderr=f"Docker API Error: {e}",
                 duration_ms=duration_ms,
                 container_id="unknown",
-                success=False
+                success=False,
             )
 
         finally:
@@ -240,19 +239,19 @@ class SandboxExecutor:
         command: str,
         files: Dict[str, str],
         timeout: int = 30,
-        env: Optional[Dict[str, str]] = None
+        env: Optional[Dict[str, str]] = None,
     ) -> SandboxResult:
         """
         Execute command with temporary files.
-        
+
         Creates temporary directory, writes files, executes command, and cleans up.
-        
+
         Args:
             command: Command to execute
             files: Dict mapping filenames to content
             timeout: Timeout in seconds
             env: Environment variables
-        
+
         Returns:
             SandboxResult with execution details
         """
@@ -271,45 +270,39 @@ class SandboxExecutor:
                 cwd=tmppath,
                 timeout=timeout,
                 readonly=False,  # Need write access for execution
-                env=env
+                env=env,
             )
 
     def test_availability(self) -> Dict[str, Any]:
         """
         Test sandbox availability and capabilities.
-        
+
         Returns:
             Dict with availability status and details
         """
         if not self.is_available():
-            return {
-                'available': False,
-                'reason': 'Docker client not initialized'
-            }
+            return {"available": False, "reason": "Docker client not initialized"}
 
         try:
             # Test with simple command
             result = self.execute("echo 'Sandbox test'", timeout=5)
 
             return {
-                'available': True,
-                'image': self.image,
-                'memory_limit': self.memory_limit,
-                'cpu_quota': self.cpu_quota,
-                'network_disabled': self.network_disabled,
-                'test_result': result.success,
-                'test_output': result.stdout.strip()
+                "available": True,
+                "image": self.image,
+                "memory_limit": self.memory_limit,
+                "cpu_quota": self.cpu_quota,
+                "network_disabled": self.network_disabled,
+                "test_result": result.success,
+                "test_output": result.stdout.strip(),
             }
         except Exception as e:
-            return {
-                'available': False,
-                'reason': f'Test execution failed: {e}'
-            }
+            return {"available": False, "reason": f"Test execution failed: {e}"}
 
     def cleanup_old_containers(self, older_than_hours: int = 24):
         """
         Cleanup old containers from previous executions.
-        
+
         Args:
             older_than_hours: Remove containers older than this many hours
         """
@@ -324,7 +317,7 @@ class SandboxExecutor:
                 # Check if it's our container (by image)
                 if container.image.tags and self.image in container.image.tags:
                     # Remove if stopped
-                    if container.status != 'running':
+                    if container.status != "running":
                         container.remove(force=True)
                         removed += 1
 

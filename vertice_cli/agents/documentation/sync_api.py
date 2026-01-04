@@ -25,10 +25,7 @@ class DocumentationSyncAPI:
         self.llm_client = llm_client
 
     def generate_documentation(
-        self,
-        code: str,
-        doc_type: str = "function",
-        style: str = "google"
+        self, code: str, doc_type: str = "function", style: str = "google"
     ) -> Dict[str, Any]:
         """Generate documentation for code snippet (SYNC wrapper).
 
@@ -44,11 +41,7 @@ class DocumentationSyncAPI:
                 - error: Optional[str]
         """
         if not code or not code.strip():
-            return {
-                "success": False,
-                "error": "Empty code provided",
-                "documentation": ""
-            }
+            return {"success": False, "error": "Empty code provided", "documentation": ""}
 
         try:
             prompt = f"""Generate {style}-style documentation for this {doc_type}:
@@ -60,29 +53,14 @@ class DocumentationSyncAPI:
 Return ONLY the documentation text, no explanations."""
 
             response = self._run_async(
-                self.llm_client.generate(
-                    prompt=prompt,
-                    max_tokens=2000,
-                    temperature=0.3
-                )
+                self.llm_client.generate(prompt=prompt, max_tokens=2000, temperature=0.3)
             )
 
-            return {
-                "success": True,
-                "documentation": response.strip()
-            }
+            return {"success": True, "documentation": response.strip()}
         except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "documentation": ""
-            }
+            return {"success": False, "error": str(e), "documentation": ""}
 
-    def generate_api_docs(
-        self,
-        code: str,
-        api_type: str = "rest"
-    ) -> Dict[str, Any]:
+    def generate_api_docs(self, code: str, api_type: str = "rest") -> Dict[str, Any]:
         """Generate API documentation (SYNC wrapper).
 
         Args:
@@ -102,28 +80,14 @@ Return ONLY the documentation text, no explanations."""
 Include: endpoints, methods, parameters, responses, examples."""
 
             response = self._run_async(
-                self.llm_client.generate(
-                    prompt=prompt,
-                    max_tokens=3000,
-                    temperature=0.2
-                )
+                self.llm_client.generate(prompt=prompt, max_tokens=3000, temperature=0.2)
             )
 
-            return {
-                "success": True,
-                "documentation": response.strip()
-            }
+            return {"success": True, "documentation": response.strip()}
         except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "documentation": ""
-            }
+            return {"success": False, "error": str(e), "documentation": ""}
 
-    def generate_readme(
-        self,
-        project_info: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def generate_readme(self, project_info: Dict[str, Any]) -> Dict[str, Any]:
         """Generate README for project (SYNC wrapper).
 
         Args:
@@ -153,23 +117,12 @@ Include: endpoints, methods, parameters, responses, examples."""
 Include: Installation, Usage, Contributing, License sections."""
 
             response = self._run_async(
-                self.llm_client.generate(
-                    prompt=prompt,
-                    max_tokens=4000,
-                    temperature=0.4
-                )
+                self.llm_client.generate(prompt=prompt, max_tokens=4000, temperature=0.4)
             )
 
-            return {
-                "success": True,
-                "documentation": response.strip()
-            }
+            return {"success": True, "documentation": response.strip()}
         except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "documentation": ""
-            }
+            return {"success": False, "error": str(e), "documentation": ""}
 
     def _run_async(self, coro):
         """Run async coroutine synchronously.

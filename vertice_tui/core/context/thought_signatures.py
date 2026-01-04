@@ -236,9 +236,7 @@ class ThoughtSignatureManager:
         # Generate chain hash (links to previous)
         if self._chain:
             prev_sig = self._chain[-1]
-            chain_hash = self._hash_content(
-                f"{prev_sig.signature_id}:{prev_sig.thought_hash}"
-            )
+            chain_hash = self._hash_content(f"{prev_sig.signature_id}:{prev_sig.thought_hash}")
         else:
             chain_hash = self._hash_content("genesis")
 
@@ -262,7 +260,7 @@ class ThoughtSignatureManager:
 
         # Prune old signatures
         if len(self._chain) > self._max_chain_length:
-            self._chain = self._chain[-self._max_chain_length:]
+            self._chain = self._chain[-self._max_chain_length :]
 
         return signature
 
@@ -340,13 +338,16 @@ class ThoughtSignatureManager:
             return validation, None
 
         except Exception as e:
-            return SignatureValidation(
-                status=SignatureStatus.INVALID,
-                signature=None,
-                chain_position=-1,
-                is_continuous=False,
-                error=str(e),
-            ), None
+            return (
+                SignatureValidation(
+                    status=SignatureStatus.INVALID,
+                    signature=None,
+                    chain_position=-1,
+                    is_continuous=False,
+                    error=str(e),
+                ),
+                None,
+            )
 
     def get_reasoning_context(self) -> ReasoningContext:
         """
@@ -419,12 +420,12 @@ class ThoughtSignatureManager:
                 if not sig.is_expired(self._signature_ttl):
                     self._chain.append(sig)
                     restored += 1
-            except Exception:
+            except (ValueError, KeyError, TypeError):
                 continue
 
         # Prune if needed
         if len(self._chain) > self._max_chain_length:
-            self._chain = self._chain[-self._max_chain_length:]
+            self._chain = self._chain[-self._max_chain_length :]
 
         return restored
 
@@ -444,11 +445,7 @@ class ThoughtSignatureManager:
 
     def _hash_content(self, content: str) -> str:
         """Generate HMAC hash of content."""
-        h = hmac.new(
-            self._secret_key.encode(),
-            content.encode(),
-            hashlib.sha256
-        )
+        h = hmac.new(self._secret_key.encode(), content.encode(), hashlib.sha256)
         return h.hexdigest()[:16]
 
     def _generate_id(self) -> str:
@@ -482,12 +479,8 @@ class ThoughtSignatureManager:
             "max_chain_length": self._max_chain_length,
             "current_level": self._current_level.value,
             "signature_ttl": self._signature_ttl,
-            "oldest_age": (
-                self._chain[0].age_seconds if self._chain else 0
-            ),
-            "newest_age": (
-                self._chain[-1].age_seconds if self._chain else 0
-            ),
+            "oldest_age": (self._chain[0].age_seconds if self._chain else 0),
+            "newest_age": (self._chain[-1].age_seconds if self._chain else 0),
         }
 
 

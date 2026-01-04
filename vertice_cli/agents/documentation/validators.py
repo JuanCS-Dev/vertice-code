@@ -39,9 +39,7 @@ SECRET_PATTERNS = [
 ]
 
 
-def validate_docstrings(
-    target_path: Path, style: DocstringStyle
-) -> Dict[str, Any]:
+def validate_docstrings(target_path: Path, style: DocstringStyle) -> Dict[str, Any]:
     """Validate existing docstrings against style guide.
 
     Args:
@@ -57,11 +55,7 @@ def validate_docstrings(
     issues: List[Dict[str, Any]] = []
 
     # Find all Python files
-    python_files = (
-        [target_path]
-        if target_path.is_file()
-        else list(target_path.rglob("*.py"))
-    )
+    python_files = [target_path] if target_path.is_file() else list(target_path.rglob("*.py"))
 
     for py_file in python_files:
         if "__pycache__" in str(py_file):
@@ -72,46 +66,54 @@ def validate_docstrings(
 
             # Check module docstring
             if not module_doc.docstring:
-                issues.append({
-                    "file": str(py_file),
-                    "line": 1,
-                    "type": "missing_module_docstring",
-                    "severity": "medium",
-                })
+                issues.append(
+                    {
+                        "file": str(py_file),
+                        "line": 1,
+                        "type": "missing_module_docstring",
+                        "severity": "medium",
+                    }
+                )
 
             # Check classes
             for cls in module_doc.classes:
                 if not cls.docstring:
-                    issues.append({
-                        "file": str(py_file),
-                        "line": cls.line_number,
-                        "type": "missing_class_docstring",
-                        "class": cls.name,
-                        "severity": "medium",
-                    })
+                    issues.append(
+                        {
+                            "file": str(py_file),
+                            "line": cls.line_number,
+                            "type": "missing_class_docstring",
+                            "class": cls.name,
+                            "severity": "medium",
+                        }
+                    )
 
                 # Check methods
                 for method in cls.methods:
                     if not method.docstring and not method.name.startswith("_"):
-                        issues.append({
-                            "file": str(py_file),
-                            "line": method.line_number,
-                            "type": "missing_method_docstring",
-                            "class": cls.name,
-                            "method": method.name,
-                            "severity": "low",
-                        })
+                        issues.append(
+                            {
+                                "file": str(py_file),
+                                "line": method.line_number,
+                                "type": "missing_method_docstring",
+                                "class": cls.name,
+                                "method": method.name,
+                                "severity": "low",
+                            }
+                        )
 
             # Check standalone functions
             for func in module_doc.functions:
                 if not func.docstring and not func.name.startswith("_"):
-                    issues.append({
-                        "file": str(py_file),
-                        "line": func.line_number,
-                        "type": "missing_function_docstring",
-                        "function": func.name,
-                        "severity": "low",
-                    })
+                    issues.append(
+                        {
+                            "file": str(py_file),
+                            "line": func.line_number,
+                            "type": "missing_function_docstring",
+                            "function": func.name,
+                            "severity": "low",
+                        }
+                    )
 
         except (SyntaxError, OSError) as e:
             logger.debug(f"Could not analyze {py_file} for docstring issues: {e}")

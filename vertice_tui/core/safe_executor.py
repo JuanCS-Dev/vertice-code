@@ -42,6 +42,7 @@ class SafeExecutionResult:
         command: The command that was executed (string form)
         error_message: Human-readable error if failed
     """
+
     success: bool
     exit_code: int
     stdout: str
@@ -109,9 +110,7 @@ class SafeCommandExecutor:
             return "", []
 
     def _find_matching_allowed_command(
-        self,
-        base_cmd: str,
-        args: List[str]
+        self, base_cmd: str, args: List[str]
     ) -> Optional[AllowedCommand]:
         """
         Find matching allowed command definition.
@@ -171,10 +170,7 @@ class SafeCommandExecutor:
         Returns:
             List of allowed command descriptions
         """
-        return [
-            f"{cmd.name}: {cmd.description}"
-            for cmd in ALLOWED_COMMANDS.values()
-        ]
+        return [f"{cmd.name}: {cmd.description}" for cmd in ALLOWED_COMMANDS.values()]
 
     def get_allowed_commands_by_category(self) -> Dict[str, List[str]]:
         """
@@ -211,7 +207,7 @@ class SafeCommandExecutor:
                 stdout="",
                 stderr="",
                 command=command,
-                error_message=f"Command not allowed: {reason}"
+                error_message=f"Command not allowed: {reason}",
             )
 
         # Parse command for execution
@@ -226,7 +222,7 @@ class SafeCommandExecutor:
                 stdout="",
                 stderr="",
                 command=command,
-                error_message="Internal error: command validation inconsistency"
+                error_message="Internal error: command validation inconsistency",
             )
 
         try:
@@ -240,14 +236,13 @@ class SafeCommandExecutor:
                 *cmd_array,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
-                cwd=str(self._working_dir)
+                cwd=str(self._working_dir),
             )
 
             # Wait with timeout
             try:
                 stdout, stderr = await asyncio.wait_for(
-                    proc.communicate(),
-                    timeout=allowed.timeout_seconds
+                    proc.communicate(), timeout=allowed.timeout_seconds
                 )
             except asyncio.TimeoutError:
                 proc.kill()
@@ -258,7 +253,7 @@ class SafeCommandExecutor:
                     stdout="",
                     stderr="",
                     command=command,
-                    error_message=f"Command timed out after {allowed.timeout_seconds}s"
+                    error_message=f"Command timed out after {allowed.timeout_seconds}s",
                 )
 
             stdout_str = stdout.decode("utf-8", errors="replace") if stdout else ""
@@ -270,7 +265,7 @@ class SafeCommandExecutor:
                 stdout=stdout_str,
                 stderr=stderr_str,
                 command=command,
-                error_message="" if proc.returncode == 0 else f"Exit code: {proc.returncode}"
+                error_message="" if proc.returncode == 0 else f"Exit code: {proc.returncode}",
             )
 
         except FileNotFoundError:
@@ -280,7 +275,7 @@ class SafeCommandExecutor:
                 stdout="",
                 stderr="",
                 command=command,
-                error_message=f"Command not found: {base_cmd}"
+                error_message=f"Command not found: {base_cmd}",
             )
         except PermissionError:
             return SafeExecutionResult(
@@ -289,7 +284,7 @@ class SafeCommandExecutor:
                 stdout="",
                 stderr="",
                 command=command,
-                error_message=f"Permission denied: {base_cmd}"
+                error_message=f"Permission denied: {base_cmd}",
             )
         except Exception as e:
             logger.exception(f"Unexpected error executing command: {command}")
@@ -299,7 +294,7 @@ class SafeCommandExecutor:
                 stdout="",
                 stderr="",
                 command=command,
-                error_message=f"Execution error: {type(e).__name__}: {e}"
+                error_message=f"Execution error: {type(e).__name__}: {e}",
             )
 
 

@@ -125,12 +125,13 @@ class CommandPaletteScreen(ModalScreen[Optional[str]]):
 
     def _update_results(self, query: str) -> None:
         """Update search results."""
-        if self.bridge and hasattr(self.bridge, 'palette'):
+        if self.bridge and hasattr(self.bridge, "palette"):
             self._results = self.bridge.palette.search(query, max_results=10)
         else:
             # Fallback: use CLI palette directly
             try:
                 from vertice_cli.tui.components.palette import create_default_palette
+
                 palette = create_default_palette()
                 commands = palette.search(query, limit=10)
                 self._results = [
@@ -210,10 +211,10 @@ class CommandPaletteScreen(ModalScreen[Optional[str]]):
         command_id = selected.get("id")
 
         # Execute via bridge if available
-        if self.bridge and hasattr(self.bridge, 'palette'):
+        if self.bridge and hasattr(self.bridge, "palette"):
             try:
                 self.bridge.palette.execute(command_id)
-            except Exception:
+            except (AttributeError, ValueError, KeyError):
                 pass
 
         self.dismiss(command_id)

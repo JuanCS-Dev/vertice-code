@@ -36,7 +36,7 @@ from .tool_executor import ToolExecutor, ExecutionAttempt
 
 def __getattr__(name: str):
     """
-    Lazy import for InteractiveShell to avoid circular import.
+    Lazy import for InteractiveShell and default_llm_client to avoid circular import.
 
     shell/__init__.py imports shell_main.InteractiveShell
     shell_main.py imports shell.context.SessionContext
@@ -45,7 +45,12 @@ def __getattr__(name: str):
     """
     if name == "InteractiveShell":
         from vertice_cli.shell_main import InteractiveShell
+
         return InteractiveShell
+    if name == "default_llm_client":
+        from vertice_cli.shell_main import default_llm_client
+
+        return default_llm_client
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
@@ -57,6 +62,8 @@ __all__ = [
     # Tool execution
     "ToolExecutor",
     "ExecutionAttempt",
+    # LLM client (for testing)
+    "default_llm_client",
     # Safety
     "get_safety_level",
     "is_safe",

@@ -20,6 +20,7 @@ from enum import Enum
 
 class LLMProvider(Enum):
     """Supported LLM providers."""
+
     GEMINI = "gemini"
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
@@ -31,6 +32,7 @@ class LLMProvider(Enum):
 @dataclass
 class ILLMConfig:
     """Configuration for LLM clients."""
+
     provider: LLMProvider
     model: str
     api_key: Optional[str] = None
@@ -45,6 +47,7 @@ class ILLMConfig:
 @dataclass
 class LLMResponse:
     """Response from LLM."""
+
     content: str
     model: str
     provider: str
@@ -61,6 +64,7 @@ class LLMResponse:
 @dataclass
 class ChatMessage:
     """Chat message for conversation context."""
+
     role: str  # user, assistant, system
     content: str
     metadata: Dict[str, Any] = field(default_factory=dict)
@@ -104,11 +108,7 @@ class ILLMClient(ABC):
         pass
 
     @abstractmethod
-    async def complete(
-        self,
-        prompt: str,
-        **kwargs
-    ) -> LLMResponse:
+    async def complete(self, prompt: str, **kwargs) -> LLMResponse:
         """
         Get completion (non-streaming).
 
@@ -122,11 +122,7 @@ class ILLMClient(ABC):
         pass
 
     @abstractmethod
-    async def generate(
-        self,
-        prompt: str,
-        **kwargs
-    ) -> str:
+    async def generate(self, prompt: str, **kwargs) -> str:
         """
         Generate text (simple interface).
 
@@ -187,9 +183,9 @@ class ILLMClient(ABC):
 
 
 __all__ = [
-    'ILLMClient',
-    'ILLMConfig',
-    'LLMResponse',
-    'LLMProvider',
-    'ChatMessage',
+    "ILLMClient",
+    "ILLMConfig",
+    "LLMResponse",
+    "LLMProvider",
+    "ChatMessage",
 ]

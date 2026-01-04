@@ -31,6 +31,7 @@ from rich import box
 # Clipboard support
 try:
     import pyperclip
+
     CLIPBOARD_AVAILABLE = True
 except ImportError:
     CLIPBOARD_AVAILABLE = False
@@ -38,6 +39,7 @@ except ImportError:
 
 class TableState(Enum):
     """Estado da tabela durante parsing."""
+
     WAITING_HEADER = 1
     WAITING_SEPARATOR = 2
     READY_FOR_ROWS = 3
@@ -47,6 +49,7 @@ class TableState(Enum):
 @dataclass
 class TableColumn:
     """Definição de uma coluna."""
+
     header: str
     alignment: str = "left"  # left, center, right
     min_width: int = 3
@@ -66,6 +69,7 @@ class TableColumn:
 @dataclass
 class TableRow:
     """Uma linha da tabela."""
+
     cells: List[str]
     is_header: bool = False
 
@@ -73,6 +77,7 @@ class TableRow:
 @dataclass
 class StreamingTableState:
     """Estado completo da tabela."""
+
     columns: List[TableColumn] = field(default_factory=list)
     rows: List[TableRow] = field(default_factory=list)
     state: TableState = TableState.WAITING_HEADER
@@ -91,9 +96,9 @@ class StreamingTableRenderer:
     """
 
     # Patterns
-    TABLE_ROW_PATTERN = re.compile(r'^\s*\|(.+)\|\s*$')
-    SEPARATOR_PATTERN = re.compile(r'^\s*\|[\s\-:|]+\|\s*$')
-    ALIGNMENT_PATTERN = re.compile(r'^(:)?-+(:)?$')
+    TABLE_ROW_PATTERN = re.compile(r"^\s*\|(.+)\|\s*$")
+    SEPARATOR_PATTERN = re.compile(r"^\s*\|[\s\-:|]+\|\s*$")
+    ALIGNMENT_PATTERN = re.compile(r"^(:)?-+(:)?$")
 
     def __init__(self):
         """Inicializa renderer."""
@@ -116,8 +121,8 @@ class StreamingTableRenderer:
         self.state.buffer += chunk
 
         # Processa linha por linha
-        while '\n' in self.state.buffer:
-            line, self.state.buffer = self.state.buffer.split('\n', 1)
+        while "\n" in self.state.buffer:
+            line, self.state.buffer = self.state.buffer.split("\n", 1)
             result = self._process_line(line)
             if result:
                 return result
@@ -205,10 +210,12 @@ class StreamingTableRenderer:
         if self.state.header_row:
             for i, header in enumerate(self.state.header_row.cells):
                 alignment = alignments[i] if i < len(alignments) else "left"
-                self.state.columns.append(TableColumn(
-                    header=header.strip(),
-                    alignment=alignment,
-                ))
+                self.state.columns.append(
+                    TableColumn(
+                        header=header.strip(),
+                        alignment=alignment,
+                    )
+                )
 
         self.state.state = TableState.READY_FOR_ROWS
         return None
@@ -222,7 +229,7 @@ class StreamingTableRenderer:
         # Ajusta número de células para match com colunas
         while len(cells) < len(self.state.columns):
             cells.append("")
-        cells = cells[:len(self.state.columns)]
+        cells = cells[: len(self.state.columns)]
 
         self.state.rows.append(TableRow(cells=[c.strip() for c in cells]))
         return self._build_table()
@@ -234,7 +241,7 @@ class StreamingTableRenderer:
             return []
 
         content = match.group(1)
-        cells = content.split('|')
+        cells = content.split("|")
         return [cell.strip() for cell in cells]
 
     def _build_table(self) -> Optional[Table]:
@@ -326,6 +333,7 @@ class StreamingTableWidget(Widget):
 
     class TableUpdated(Message):
         """Tabela foi atualizada."""
+
         def __init__(self, row_count: int, column_count: int):
             self.row_count = row_count
             self.column_count = column_count
@@ -333,6 +341,7 @@ class StreamingTableWidget(Widget):
 
     class TableComplete(Message):
         """Tabela está completa."""
+
         def __init__(self, row_count: int, column_count: int):
             self.row_count = row_count
             self.column_count = column_count
@@ -386,14 +395,14 @@ class StreamingTableWidget(Widget):
             try:
                 pyperclip.copy(markdown)
                 copied = True
-            except Exception:
+            except (OSError, RuntimeError):
                 pass
 
         if not copied:
             try:
                 self.app.copy_to_clipboard(markdown)
                 copied = True
-            except Exception:
+            except (AttributeError, RuntimeError):
                 pass
 
         if copied:
@@ -402,7 +411,7 @@ class StreamingTableWidget(Widget):
                 self._header.update("✓ TABLE │ Copied!")
             try:
                 self.app.notify("Table copied to clipboard", title="Copied!", timeout=2)
-            except Exception:
+            except (AttributeError, RuntimeError):
                 pass
             self.set_timer(1.5, self._reset_copy_state)
 
@@ -463,10 +472,12 @@ class StreamingTableWidget(Widget):
         if table and self._content:
             self._content.update(table)
             self.row_count = len(self._renderer.state.rows)
-            self.post_message(self.TableUpdated(
-                self.row_count,
-                len(self._renderer.state.columns),
-            ))
+            self.post_message(
+                self.TableUpdated(
+                    self.row_count,
+                    len(self._renderer.state.columns),
+                )
+            )
 
     def end_stream(self) -> None:
         """Finaliza streaming."""
@@ -483,10 +494,12 @@ class StreamingTableWidget(Widget):
         if self._header:
             self._header.update(self._format_header())
 
-        self.post_message(self.TableComplete(
-            len(self._renderer.state.rows),
-            len(self._renderer.state.columns),
-        ))
+        self.post_message(
+            self.TableComplete(
+                len(self._renderer.state.rows),
+                len(self._renderer.state.columns),
+            )
+        )
 
     def set_markdown_table(self, markdown: str) -> None:
         """

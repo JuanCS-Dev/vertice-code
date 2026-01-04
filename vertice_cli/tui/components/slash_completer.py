@@ -19,15 +19,12 @@ class SlashCommandCompleter(Completer):
             ("/c", "Clear screen (short)"),
             ("/help", "Show help"),
             ("/h", "Show help (short)"),
-
             # Agent commands
             ("/agents", "List available agents"),
             ("/commands", "Fuzzy search commands"),
-
             # Permission management
             ("/permissions", "Show permission configuration"),
             ("/metrics", "Show execution metrics"),
-
             # Future commands (commented for visibility)
             # ("/history", "Show command history"),
             # ("/save", "Save session"),
@@ -40,17 +37,14 @@ class SlashCommandCompleter(Completer):
         word = document.get_word_before_cursor()
 
         # Only complete if starts with /
-        if not text.startswith('/'):
+        if not text.startswith("/"):
             return
 
         # Get all matching commands
         for cmd, description in self.slash_commands:
             if cmd.startswith(text.lower()):
                 yield Completion(
-                    text=cmd,
-                    start_position=-len(text),
-                    display=cmd,
-                    display_meta=description
+                    text=cmd, start_position=-len(text), display=cmd, display_meta=description
                 )
 
 
@@ -71,7 +65,7 @@ class CombinedCompleter(Completer):
         text = document.text_before_cursor
 
         # If starts with /, use slash completer
-        if text.startswith('/'):
+        if text.startswith("/"):
             yield from self.slash_completer.get_completions(document, complete_event)
         # Otherwise use tool completer if available
         elif self.tool_completer:

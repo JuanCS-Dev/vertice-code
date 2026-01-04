@@ -103,7 +103,8 @@ class EmbeddingCache:
     def _init_db(self) -> None:
         """Initialize SQLite database."""
         with self._get_connection() as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS embeddings (
                     content_hash TEXT PRIMARY KEY,
                     embedding BLOB NOT NULL,
@@ -111,10 +112,13 @@ class EmbeddingCache:
                     dimensions INTEGER NOT NULL,
                     created_at REAL NOT NULL
                 )
-            """)
-            conn.execute("""
+            """
+            )
+            conn.execute(
+                """
                 CREATE INDEX IF NOT EXISTS idx_model ON embeddings(model)
-            """)
+            """
+            )
 
     @contextmanager
     def _get_connection(self):
@@ -136,38 +140,27 @@ class EmbeddingCache:
         content_hash = self._content_hash(content, model)
         with self._get_connection() as conn:
             cursor = conn.execute(
-                "SELECT embedding FROM embeddings WHERE content_hash = ?",
-                (content_hash,)
+                "SELECT embedding FROM embeddings WHERE content_hash = ?", (content_hash,)
             )
             row = cursor.fetchone()
             if row:
                 return json.loads(row[0])
         return None
 
-    def get_batch(
-        self,
-        contents: List[str],
-        model: str
-    ) -> Dict[str, Optional[List[float]]]:
+    def get_batch(self, contents: List[str], model: str) -> Dict[str, Optional[List[float]]]:
         """Get multiple cached embeddings."""
         results = {}
         with self._get_connection() as conn:
             for content in contents:
                 content_hash = self._content_hash(content, model)
                 cursor = conn.execute(
-                    "SELECT embedding FROM embeddings WHERE content_hash = ?",
-                    (content_hash,)
+                    "SELECT embedding FROM embeddings WHERE content_hash = ?", (content_hash,)
                 )
                 row = cursor.fetchone()
                 results[content] = json.loads(row[0]) if row else None
         return results
 
-    def put(
-        self,
-        content: str,
-        embedding: List[float],
-        model: str
-    ) -> None:
+    def put(self, content: str, embedding: List[float], model: str) -> None:
         """Store embedding in cache."""
         content_hash = self._content_hash(content, model)
         with self._get_connection() as conn:
@@ -177,20 +170,10 @@ class EmbeddingCache:
                 (content_hash, embedding, model, dimensions, created_at)
                 VALUES (?, ?, ?, ?, ?)
                 """,
-                (
-                    content_hash,
-                    json.dumps(embedding),
-                    model,
-                    len(embedding),
-                    time.time()
-                )
+                (content_hash, json.dumps(embedding), model, len(embedding), time.time()),
             )
 
-    def put_batch(
-        self,
-        items: List[Tuple[str, List[float]]],
-        model: str
-    ) -> None:
+    def put_batch(self, items: List[Tuple[str, List[float]]], model: str) -> None:
         """Store multiple embeddings."""
         with self._get_connection() as conn:
             for content, embedding in items:
@@ -201,13 +184,7 @@ class EmbeddingCache:
                     (content_hash, embedding, model, dimensions, created_at)
                     VALUES (?, ?, ?, ?, ?)
                     """,
-                    (
-                        content_hash,
-                        json.dumps(embedding),
-                        model,
-                        len(embedding),
-                        time.time()
-                    )
+                    (content_hash, json.dumps(embedding), model, len(embedding), time.time()),
                 )
 
     def get_stats(self) -> Dict[str, Any]:
@@ -232,10 +209,7 @@ class EmbeddingCache:
         """Clear cache, optionally for specific model."""
         with self._get_connection() as conn:
             if model:
-                cursor = conn.execute(
-                    "DELETE FROM embeddings WHERE model = ?",
-                    (model,)
-                )
+                cursor = conn.execute("DELETE FROM embeddings WHERE model = ?", (model,))
             else:
                 cursor = conn.execute("DELETE FROM embeddings")
             return cursor.rowcount
@@ -263,8 +237,7 @@ class SemanticEmbedder:
         # Load from environment if not provided
         if not self.config.azure_endpoint:
             self.config.azure_endpoint = os.getenv(
-                "AZURE_OPENAI_ENDPOINT",
-                "https://eastus2.api.cognitive.microsoft.com/"
+                "AZURE_OPENAI_ENDPOINT", "https://eastus2.api.cognitive.microsoft.com/"
             )
         if not self.config.azure_api_key:
             self.config.azure_api_key = os.getenv("AZURE_OPENAI_KEY", "")
@@ -325,9 +298,7 @@ class SemanticEmbedder:
         return results[0]
 
     async def embed_texts(
-        self,
-        texts: List[str],
-        show_progress: bool = False
+        self, texts: List[str], show_progress: bool = False
     ) -> List[EmbeddingResult]:
         """
         Embed multiple texts with batching and caching.
@@ -382,7 +353,7 @@ class SemanticEmbedder:
         self,
         to_embed: List[Tuple[int, str]],
         results: Dict[int, EmbeddingResult],
-        show_progress: bool
+        show_progress: bool,
     ) -> None:
         """Embed texts via Azure OpenAI API."""
         client = await self._ensure_client()
@@ -390,10 +361,7 @@ class SemanticEmbedder:
 
         # Split into batches
         batch_size = self.config.batch_size
-        batches = [
-            to_embed[i:i + batch_size]
-            for i in range(0, len(to_embed), batch_size)
-        ]
+        batches = [to_embed[i : i + batch_size] for i in range(0, len(to_embed), batch_size)]
 
         if show_progress:
             logger.info(f"Embedding {len(to_embed)} texts in {len(batches)} batches")
@@ -453,21 +421,21 @@ class SemanticEmbedder:
                     elif response.status_code == 429:
                         # Rate limit - get retry-after header
                         retry_after = response.headers.get("Retry-After")
-                        wait_time = int(retry_after) if retry_after else (
-                            self.config.retry_base_delay * (2 ** attempt)
+                        wait_time = (
+                            int(retry_after)
+                            if retry_after
+                            else (self.config.retry_base_delay * (2**attempt))
                         )
                         logger.warning(f"Rate limit hit, waiting {wait_time}s...")
                         await asyncio.sleep(wait_time)
 
                     else:
                         error_text = response.text[:200]
-                        raise RuntimeError(
-                            f"Azure API error {response.status_code}: {error_text}"
-                        )
+                        raise RuntimeError(f"Azure API error {response.status_code}: {error_text}")
 
                 except httpx.TimeoutException:
                     if attempt < self.config.max_retries - 1:
-                        wait_time = self.config.retry_base_delay * (2 ** attempt)
+                        wait_time = self.config.retry_base_delay * (2**attempt)
                         logger.warning(f"Timeout, retrying in {wait_time}s...")
                         await asyncio.sleep(wait_time)
                     else:
@@ -477,9 +445,7 @@ class SemanticEmbedder:
                 logger.info(f"Batch {batch_idx + 1}/{len(batches)} complete")
 
     def _embed_local(
-        self,
-        to_embed: List[Tuple[int, str]],
-        results: Dict[int, EmbeddingResult]
+        self, to_embed: List[Tuple[int, str]], results: Dict[int, EmbeddingResult]
     ) -> None:
         """
         Local fallback embedding using hash-based pseudo-embeddings.
@@ -522,9 +488,7 @@ class SemanticEmbedder:
         self._stats["total_embedded"] += len(to_embed)
 
     async def embed_chunks(
-        self,
-        chunks: List[CodeChunk],
-        show_progress: bool = False
+        self, chunks: List[CodeChunk], show_progress: bool = False
     ) -> List[EmbeddingResult]:
         """
         Embed code chunks using their embedding text.

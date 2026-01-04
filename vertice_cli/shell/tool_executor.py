@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ExecutionAttempt:
     """Result of a single tool execution attempt."""
+
     success: bool
     result: Any
     attempt_number: int
@@ -73,9 +74,7 @@ class ToolExecutor:
             Tool result or None if all attempts failed
         """
         for attempt in range(1, self.max_attempts + 1):
-            result, success = await self._attempt_execution(
-                tool, tool_name, args, turn, attempt
-            )
+            result, success = await self._attempt_execution(tool, tool_name, args, turn, attempt)
 
             if success:
                 if attempt > 1:
@@ -84,9 +83,7 @@ class ToolExecutor:
 
             # Try recovery if not last attempt
             if attempt < self.max_attempts:
-                corrected_args = await self._handle_failure(
-                    tool_name, args, result, turn, attempt
-                )
+                corrected_args = await self._handle_failure(tool_name, args, result, turn, attempt)
                 if corrected_args:
                     args = corrected_args
             else:
@@ -179,9 +176,7 @@ class ToolExecutor:
                 self.console.print(f"[dim]Diagnosis: {diagnosis}[/dim]")
 
             # Attempt parameter correction
-            corrected = await self.recovery_engine.attempt_recovery(
-                recovery_ctx, self.registry
-            )
+            corrected = await self.recovery_engine.attempt_recovery(recovery_ctx, self.registry)
 
             if corrected and "args" in corrected:
                 self.console.print("[green]✓ Generated corrected parameters[/green]")

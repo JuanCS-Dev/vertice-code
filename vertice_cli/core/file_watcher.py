@@ -27,18 +27,14 @@ class FileEvent:
 
 class FileWatcher:
     """File system watcher with incremental updates (Claude pattern).
-    
+
     Uses polling for simplicity (watchdog adds dependency).
     Updates every 1s, only processes changed files.
     """
 
-    def __init__(
-        self,
-        root_path: str = ".",
-        watch_extensions: Set[str] = None
-    ):
+    def __init__(self, root_path: str = ".", watch_extensions: Set[str] = None):
         self.root_path = Path(root_path)
-        self._watch_extensions = watch_extensions or {'.py', '.js', '.ts', '.go', '.rs'}
+        self._watch_extensions = watch_extensions or {".py", ".js", ".ts", ".go", ".rs"}
         self._file_hashes: Dict[str, str] = {}
         self._recent_events: deque = deque(maxlen=100)
         self._callbacks: list[Callable] = []
@@ -75,20 +71,16 @@ class FileWatcher:
         for file_path in current_files - tracked_files:
             event = FileEvent(
                 path=file_path,
-                event_type='created',
+                event_type="created",
                 timestamp=time.time(),
-                file_hash=self._hash_file(file_path)
+                file_hash=self._hash_file(file_path),
             )
             self._handle_event(event)
             self._file_hashes[file_path] = event.file_hash
 
         # Detect deleted files
         for file_path in tracked_files - current_files:
-            event = FileEvent(
-                path=file_path,
-                event_type='deleted',
-                timestamp=time.time()
-            )
+            event = FileEvent(path=file_path, event_type="deleted", timestamp=time.time())
             self._handle_event(event)
             del self._file_hashes[file_path]
 
@@ -97,10 +89,7 @@ class FileWatcher:
             new_hash = self._hash_file(file_path)
             if new_hash != self._file_hashes[file_path]:
                 event = FileEvent(
-                    path=file_path,
-                    event_type='modified',
-                    timestamp=time.time(),
-                    file_hash=new_hash
+                    path=file_path, event_type="modified", timestamp=time.time(), file_hash=new_hash
                 )
                 self._handle_event(event)
                 self._file_hashes[file_path] = new_hash
@@ -109,7 +98,11 @@ class FileWatcher:
         """Get all files to watch."""
         for root, dirs, files in os.walk(self.root_path):
             # Skip hidden dirs and common excludes
-            dirs[:] = [d for d in dirs if not d.startswith('.') and d not in ['node_modules', '__pycache__', 'venv']]
+            dirs[:] = [
+                d
+                for d in dirs
+                if not d.startswith(".") and d not in ["node_modules", "__pycache__", "venv"]
+            ]
 
             for file in files:
                 file_path = Path(root) / file
@@ -119,7 +112,7 @@ class FileWatcher:
     def _hash_file(self, file_path: str) -> str:
         """Fast file hash (first 8KB only for speed)."""
         try:
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 # Only hash first 8KB for speed
                 content = f.read(8192)
                 return hashlib.md5(content).hexdigest()
@@ -149,7 +142,7 @@ class FileWatcher:
 
 class RecentFilesTracker:
     """Track recently modified files (Cursor pattern).
-    
+
     LRU cache of recent files with recency scoring.
     """
 

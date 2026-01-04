@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 # GIT HELPER
 # =============================================================================
 
+
 async def run_git_command(*args: str, timeout: int = 30) -> ToolResult:
     """
     Run a git command safely.
@@ -41,16 +42,11 @@ async def run_git_command(*args: str, timeout: int = 30) -> ToolResult:
         ToolResult with stdout/stderr
     """
     try:
-        result = subprocess.run(
-            ["git", *args],
-            capture_output=True,
-            text=True,
-            timeout=timeout
-        )
+        result = subprocess.run(["git", *args], capture_output=True, text=True, timeout=timeout)
         return ToolResult(
             success=result.returncode == 0,
             data=result.stdout,
-            error=result.stderr if result.returncode != 0 else None
+            error=result.stderr if result.returncode != 0 else None,
         )
     except subprocess.TimeoutExpired:
         return ToolResult(success=False, error=f"Git command timed out after {timeout}s")
@@ -64,6 +60,7 @@ async def run_git_command(*args: str, timeout: int = 30) -> ToolResult:
 # =============================================================================
 # GIT STATUS ENHANCED
 # =============================================================================
+
 
 class GitStatusEnhancedTool(Tool):
     """
@@ -89,7 +86,7 @@ class GitStatusEnhancedTool(Tool):
             "include_diff_stats": {
                 "type": "boolean",
                 "description": "Include diff statistics (default: False)",
-                "required": False
+                "required": False,
             }
         }
 
@@ -141,12 +138,12 @@ class GitStatusEnhancedTool(Tool):
                     "deleted": parsed["deleted"],
                     "renamed": parsed["renamed"],
                     "diff_stats": diff_stats,
-                    "summary": self._format_summary(parsed, ahead, behind)
+                    "summary": self._format_summary(parsed, ahead, behind),
                 },
                 metadata={
                     "file_count": sum(len(v) for v in parsed.values()),
-                    "branch": current_branch
-                }
+                    "branch": current_branch,
+                },
             )
 
         except Exception as e:
@@ -218,6 +215,7 @@ class GitStatusEnhancedTool(Tool):
 # GIT LOG TOOL
 # =============================================================================
 
+
 class GitLogTool(Tool):
     """
     Get git commit history.
@@ -237,18 +235,18 @@ class GitLogTool(Tool):
             "count": {
                 "type": "integer",
                 "description": "Number of commits to show (default: 10, max: 100)",
-                "required": False
+                "required": False,
             },
             "oneline": {
                 "type": "boolean",
                 "description": "One line per commit (default: True)",
-                "required": False
+                "required": False,
             },
             "branch": {
                 "type": "string",
                 "description": "Branch to show history for (default: current)",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     async def _execute_validated(self, **kwargs) -> ToolResult:
@@ -285,24 +283,25 @@ class GitLogTool(Tool):
 
                 if oneline:
                     parts = line.split(" ", 1)
-                    commits.append({
-                        "hash": parts[0],
-                        "message": parts[1] if len(parts) > 1 else ""
-                    })
+                    commits.append(
+                        {"hash": parts[0], "message": parts[1] if len(parts) > 1 else ""}
+                    )
                 else:
                     parts = line.split("|")
                     if len(parts) >= 4:
-                        commits.append({
-                            "hash": parts[0][:7],
-                            "author": parts[1],
-                            "date": parts[2],
-                            "message": parts[3]
-                        })
+                        commits.append(
+                            {
+                                "hash": parts[0][:7],
+                                "author": parts[1],
+                                "date": parts[2],
+                                "message": parts[3],
+                            }
+                        )
 
             return ToolResult(
                 success=True,
                 data={"commits": commits},
-                metadata={"count": len(commits), "branch": branch or "HEAD"}
+                metadata={"count": len(commits), "branch": branch or "HEAD"},
             )
 
         except Exception as e:
@@ -313,6 +312,7 @@ class GitLogTool(Tool):
 # =============================================================================
 # GIT DIFF ENHANCED
 # =============================================================================
+
 
 class GitDiffEnhancedTool(Tool):
     """
@@ -333,18 +333,14 @@ class GitDiffEnhancedTool(Tool):
             "target": {
                 "type": "string",
                 "description": "Target to diff against (e.g., 'HEAD~1', 'main', 'staged')",
-                "required": False
+                "required": False,
             },
             "stat_only": {
                 "type": "boolean",
                 "description": "Show only statistics (default: False)",
-                "required": False
+                "required": False,
             },
-            "file": {
-                "type": "string",
-                "description": "Specific file to diff",
-                "required": False
-            }
+            "file": {"type": "string", "description": "Specific file to diff", "required": False},
         }
 
     async def _execute_validated(self, **kwargs) -> ToolResult:
@@ -411,7 +407,7 @@ class GitDiffEnhancedTool(Tool):
                     "target": target or "working tree",
                     "original_size": original_size,
                     "truncated_at": MAX_DIFF_SIZE if is_truncated else None,
-                }
+                },
             )
 
         except Exception as e:
@@ -422,8 +418,8 @@ class GitDiffEnhancedTool(Tool):
         """Parse diff --stat output."""
         # Last line format: "X files changed, Y insertions(+), Z deletions(-)"
         match = re.search(
-            r'(\d+) files? changed(?:, (\d+) insertions?\(\+\))?(?:, (\d+) deletions?\(-\))?',
-            output
+            r"(\d+) files? changed(?:, (\d+) insertions?\(\+\))?(?:, (\d+) deletions?\(-\))?",
+            output,
         )
 
         if match:
@@ -439,6 +435,7 @@ class GitDiffEnhancedTool(Tool):
 # =============================================================================
 # REGISTRY HELPER
 # =============================================================================
+
 
 def get_git_inspect_tools() -> List[Tool]:
     """Get all read-only git tools."""

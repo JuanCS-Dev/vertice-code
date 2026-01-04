@@ -60,7 +60,7 @@ class TenantConfig:
     monthly_request_quota: int = 10000
 
     @classmethod
-    def for_tier(cls, tier: TenantTier) -> 'TenantConfig':
+    def for_tier(cls, tier: TenantTier) -> "TenantConfig":
         """Get default config for a tier."""
         configs = {
             TenantTier.FREE: cls(
@@ -131,7 +131,7 @@ class Tenant:
 
     def __post_init__(self):
         if not self.slug:
-            self.slug = self.name.lower().replace(' ', '-')
+            self.slug = self.name.lower().replace(" ", "-")
 
     @property
     def is_active(self) -> bool:
@@ -162,31 +162,31 @@ class Tenant:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
-            'id': self.id,
-            'name': self.name,
-            'slug': self.slug,
-            'status': self.status.value,
-            'tier': self.tier.value,
-            'metadata': self.metadata,
-            'created_at': self.created_at,
-            'updated_at': self.updated_at,
+            "id": self.id,
+            "name": self.name,
+            "slug": self.slug,
+            "status": self.status.value,
+            "tier": self.tier.value,
+            "metadata": self.metadata,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Tenant':
+    def from_dict(cls, data: Dict[str, Any]) -> "Tenant":
         """Create from dictionary."""
         tenant = cls(
-            id=data.get('id', str(uuid.uuid4())),
-            name=data.get('name', ''),
-            slug=data.get('slug', ''),
-            metadata=data.get('metadata', {}),
-            created_at=data.get('created_at', time.time()),
-            updated_at=data.get('updated_at', time.time()),
+            id=data.get("id", str(uuid.uuid4())),
+            name=data.get("name", ""),
+            slug=data.get("slug", ""),
+            metadata=data.get("metadata", {}),
+            created_at=data.get("created_at", time.time()),
+            updated_at=data.get("updated_at", time.time()),
         )
-        if 'status' in data:
-            tenant.status = TenantStatus(data['status'])
-        if 'tier' in data:
-            tenant.tier = TenantTier(data['tier'])
+        if "status" in data:
+            tenant.status = TenantStatus(data["status"])
+        if "tier" in data:
+            tenant.tier = TenantTier(data["tier"])
             tenant.config = TenantConfig.for_tier(tenant.tier)
         return tenant
 
@@ -248,10 +248,10 @@ def get_tenant_registry() -> TenantRegistry:
 
 
 __all__ = [
-    'Tenant',
-    'TenantConfig',
-    'TenantStatus',
-    'TenantTier',
-    'TenantRegistry',
-    'get_tenant_registry',
+    "Tenant",
+    "TenantConfig",
+    "TenantStatus",
+    "TenantTier",
+    "TenantRegistry",
+    "get_tenant_registry",
 ]

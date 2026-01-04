@@ -218,7 +218,7 @@ class LoadingCard(Widget):
         self._message = message
         try:
             self.query_one("#loading-text", Static).update(message)
-        except Exception:
+        except (AttributeError, ValueError):
             pass
 
     def set_progress(self, value: float) -> None:
@@ -227,7 +227,7 @@ class LoadingCard(Widget):
         try:
             bar = self.query_one("#progress-bar", ProgressBar)
             bar.update(progress=value)
-        except Exception:
+        except (AttributeError, ValueError):
             pass
 
 

@@ -34,8 +34,8 @@ class DependencyAnalyzer:
         graph = {}
         for step in steps:
             # Handle both .id and .step_number patterns
-            step_id = getattr(step, 'id', None) or str(getattr(step, 'step_number', id(step)))
-            deps = getattr(step, 'dependencies', [])
+            step_id = getattr(step, "id", None) or str(getattr(step, "step_number", id(step)))
+            deps = getattr(step, "dependencies", [])
             # Convert int dependencies to strings if needed
             graph[step_id] = [str(d) for d in deps] if deps else []
         return graph
@@ -69,8 +69,7 @@ class DependencyAnalyzer:
         while len(processed) < len(step_ids):
             # Current level: nodes with no remaining dependencies
             current_level = [
-                sid for sid in step_ids
-                if sid not in processed and in_degree[sid] == 0
+                sid for sid in step_ids if sid not in processed and in_degree[sid] == 0
             ]
 
             if not current_level:
@@ -107,10 +106,10 @@ class DependencyAnalyzer:
         # Build step map with costs
         step_map = {}
         for step in steps:
-            step_id = getattr(step, 'id', None) or str(getattr(step, 'step_number', id(step)))
-            cost = getattr(step, 'cost', 1.0)
+            step_id = getattr(step, "id", None) or str(getattr(step, "step_number", id(step)))
+            cost = getattr(step, "cost", 1.0)
             deps = graph.get(step_id, [])
-            step_map[step_id] = {'cost': cost, 'deps': deps}
+            step_map[step_id] = {"cost": cost, "deps": deps}
 
         # Calculate longest path using dynamic programming
         memo: Dict[str, Tuple[float, List[str]]] = {}
@@ -123,8 +122,8 @@ class DependencyAnalyzer:
                 return (0.0, [])
 
             step_info = step_map[step_id]
-            deps = step_info['deps']
-            cost = step_info['cost']
+            deps = step_info["deps"]
+            cost = step_info["cost"]
 
             if not deps:
                 result = (cost, [step_id])
@@ -189,7 +188,7 @@ class DependencyAnalyzer:
             rec_stack.remove(node)
 
         for step in steps:
-            step_id = getattr(step, 'id', None) or str(getattr(step, 'step_number', id(step)))
+            step_id = getattr(step, "id", None) or str(getattr(step, "step_number", id(step)))
             if step_id not in visited:
                 dfs(step_id, [])
 
@@ -217,10 +216,10 @@ class DependencyAnalyzer:
         critical_path = DependencyAnalyzer.find_critical_path(steps)
 
         return {
-            'valid': len(cycles) == 0,
-            'cycles': cycles,
-            'parallel_groups': parallel_groups,
-            'critical_path': critical_path,
-            'total_levels': len(parallel_groups),
-            'max_parallelism': max(len(g) for g in parallel_groups) if parallel_groups else 0,
+            "valid": len(cycles) == 0,
+            "cycles": cycles,
+            "parallel_groups": parallel_groups,
+            "critical_path": critical_path,
+            "total_levels": len(parallel_groups),
+            "max_parallelism": max(len(g) for g in parallel_groups) if parallel_groups else 0,
         }

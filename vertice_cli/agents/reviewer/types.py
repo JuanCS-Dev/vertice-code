@@ -22,12 +22,13 @@ from pydantic import BaseModel, Field
 # ENUMS
 # ============================================================================
 
+
 class IssueSeverity(str, Enum):
-    CRITICAL = "CRITICAL"    # Security, data loss, crashes
-    HIGH = "HIGH"            # Logic bugs, performance issues
-    MEDIUM = "MEDIUM"        # Code smell, maintainability
-    LOW = "LOW"              # Style, minor improvements
-    INFO = "INFO"            # Suggestions, best practices
+    CRITICAL = "CRITICAL"  # Security, data loss, crashes
+    HIGH = "HIGH"  # Logic bugs, performance issues
+    MEDIUM = "MEDIUM"  # Code smell, maintainability
+    LOW = "LOW"  # Style, minor improvements
+    INFO = "INFO"  # Suggestions, best practices
 
 
 class IssueCategory(str, Enum):
@@ -46,9 +47,11 @@ class IssueCategory(str, Enum):
 # GRAPH NODES
 # ============================================================================
 
+
 @dataclass
 class CodeGraphNode:
     """Represents a node in the code graph (function, class, module)."""
+
     id: str
     type: str  # function, class, method, module
     name: str
@@ -65,11 +68,13 @@ class CodeGraphNode:
 # METRICS
 # ============================================================================
 
+
 class ComplexityMetrics(BaseModel):
     """Enhanced complexity metrics."""
+
     function_name: str
     cyclomatic: int  # McCabe
-    cognitive: int   # How hard to understand
+    cognitive: int  # How hard to understand
     halstead_difficulty: float = 0.0
     loc: int
     args_count: int
@@ -82,8 +87,10 @@ class ComplexityMetrics(BaseModel):
 # ISSUES & REPORTS
 # ============================================================================
 
+
 class CodeIssue(BaseModel):
     """Enhanced issue reporting."""
+
     file: str
     line: int
     end_line: Optional[int] = None
@@ -99,6 +106,7 @@ class CodeIssue(BaseModel):
 
 class RAGContext(BaseModel):
     """Context retrieved from codebase."""
+
     related_functions: List[str] = Field(default_factory=list)
     similar_patterns: List[str] = Field(default_factory=list)
     team_standards: Dict[str, str] = Field(default_factory=dict)
@@ -107,6 +115,7 @@ class RAGContext(BaseModel):
 
 class ReviewReport(BaseModel):
     """Comprehensive review report."""
+
     approved: bool
     score: int  # 0-100
     risk_level: str  # LOW, MEDIUM, HIGH, CRITICAL

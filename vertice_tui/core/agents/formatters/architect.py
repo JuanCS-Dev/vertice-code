@@ -27,25 +27,25 @@ class ArchitectFormatter:
     @staticmethod
     def can_format(data: Any) -> bool:
         """Check if data contains architecture decision ('decision' key)."""
-        return isinstance(data, dict) and 'decision' in data
+        return isinstance(data, dict) and "decision" in data
 
     @staticmethod
     async def format(data: Any, reasoning: str) -> AsyncIterator[str]:
         """Format architecture decision with approach, risks, and recommendations."""
-        decision = data.get('decision', 'UNKNOWN')
+        decision = data.get("decision", "UNKNOWN")
         emoji = "✅" if decision == "APPROVED" else "❌"
         yield f"{emoji} **{decision}**\n\n"
         yield f"*{reasoning}*\n"
 
-        arch = data.get('architecture', {})
-        if arch.get('approach'):
+        arch = data.get("architecture", {})
+        if arch.get("approach"):
             yield f"\n**Approach:** {arch['approach']}\n"
-        if arch.get('risks'):
+        if arch.get("risks"):
             yield f"\n**Risks:** {', '.join(arch['risks'])}\n"
-        if arch.get('estimated_complexity'):
+        if arch.get("estimated_complexity"):
             yield f"\n**Complexity:** {arch['estimated_complexity']}\n"
 
-        recommendations = data.get('recommendations', [])
+        recommendations = data.get("recommendations", [])
         if recommendations:
             yield "\n**Recommendations:**\n"
             for rec in recommendations:

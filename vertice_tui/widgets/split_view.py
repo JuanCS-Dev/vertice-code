@@ -72,11 +72,13 @@ class SplitHandle(Static):
 
     def on_mouse_move(self, event) -> None:
         if self._dragging:
-            self.post_message(SplitView.HandleDragged(
-                delta_x=event.delta_x,
-                delta_y=event.delta_y,
-                orientation=self._orientation,
-            ))
+            self.post_message(
+                SplitView.HandleDragged(
+                    delta_x=event.delta_x,
+                    delta_y=event.delta_y,
+                    orientation=self._orientation,
+                )
+            )
 
 
 class SplitPane(Container):
@@ -144,6 +146,7 @@ class SplitView(Widget):
 
     class HandleDragged(Message):
         """Handle was dragged."""
+
         def __init__(self, delta_x: int, delta_y: int, orientation: str) -> None:
             self.delta_x = delta_x
             self.delta_y = delta_y
@@ -152,6 +155,7 @@ class SplitView(Widget):
 
     class SplitChanged(Message):
         """Split ratio changed."""
+
         def __init__(self, ratio: float) -> None:
             self.ratio = ratio
             super().__init__()
@@ -230,7 +234,7 @@ class SplitView(Widget):
 
                 top.styles.height = f"{top_pct}%"
                 bottom.styles.height = f"{bottom_pct}%"
-        except Exception:
+        except (AttributeError, ValueError):
             pass
 
     def action_toggle_orientation(self) -> None:
@@ -249,7 +253,7 @@ class SplitView(Widget):
             pane = self.query_one(f"#{pane_id}", SplitPane)
             pane.remove_children()
             pane.mount(widget)
-        except Exception:
+        except (AttributeError, ValueError, RuntimeError):
             pass
 
     def set_right_content(self, widget: Widget) -> None:
@@ -259,7 +263,7 @@ class SplitView(Widget):
             pane = self.query_one(f"#{pane_id}", SplitPane)
             pane.remove_children()
             pane.mount(widget)
-        except Exception:
+        except (AttributeError, ValueError, RuntimeError):
             pass
 
 

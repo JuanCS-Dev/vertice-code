@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 # LibCST for format-preserving AST transformations
 try:
     import libcst as cst
+
     HAS_LIBCST = True
 except ImportError:
     HAS_LIBCST = False
@@ -92,11 +93,7 @@ class TransactionalSession:
         if file_path not in self.original_state:
             self.original_state[file_path] = content
 
-    def stage_change(
-        self,
-        change: CodeChange,
-        validate: bool = True
-    ) -> ValidationResult:
+    def stage_change(self, change: CodeChange, validate: bool = True) -> ValidationResult:
         """Stage a change with validation.
 
         Args:
@@ -124,9 +121,7 @@ class TransactionalSession:
                 validation.checks["semantics"] = semantic_valid
                 if not semantic_valid:
                     validation.passed = False
-                    validation.warnings.append(
-                        f"Semantic issue detected in {change.file_path}"
-                    )
+                    validation.warnings.append(f"Semantic issue detected in {change.file_path}")
 
             # 3. Reference validation (check if rename breaks refs)
             if change.refactoring_type == RefactoringType.RENAME_SYMBOL:
@@ -158,17 +153,13 @@ class TransactionalSession:
             "id": checkpoint_id,
             "timestamp": datetime.now().isoformat(),
             "committed_changes": self.committed_changes.copy(),
-            "staged_changes": list(self.staged_changes.keys())
+            "staged_changes": list(self.staged_changes.keys()),
         }
 
         self.checkpoints.append(checkpoint)
         return checkpoint_id
 
-    async def commit(
-        self,
-        dry_run: bool = False,
-        run_tests: bool = True
-    ) -> Tuple[bool, str]:
+    async def commit(self, dry_run: bool = False, run_tests: bool = True) -> Tuple[bool, str]:
         """Commit all staged changes atomically.
 
         Args:
@@ -212,17 +203,13 @@ class TransactionalSession:
             to_checkpoint: Optional checkpoint ID to rollback to
         """
         if to_checkpoint:
-            checkpoint = next(
-                (cp for cp in self.checkpoints if cp["id"] == to_checkpoint),
-                None
-            )
+            checkpoint = next((cp for cp in self.checkpoints if cp["id"] == to_checkpoint), None)
             if not checkpoint:
                 raise ValueError(f"Checkpoint {to_checkpoint} not found")
 
             # Identify changes to rollback
             changes_to_rollback = [
-                cid for cid in self.committed_changes
-                if cid not in checkpoint["committed_changes"]
+                cid for cid in self.committed_changes if cid not in checkpoint["committed_changes"]
             ]
 
             for change_id in changes_to_rollback:

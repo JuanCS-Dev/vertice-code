@@ -14,6 +14,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 class EscalationLevel(str, Enum):
     """Escalation levels in order of severity."""
+
     RETRY = "retry"
     ADJUST = "adjust"
     FALLBACK = "fallback"
@@ -23,6 +24,7 @@ class EscalationLevel(str, Enum):
 
 class CircuitState(str, Enum):
     """Circuit breaker states."""
+
     CLOSED = "closed"
     OPEN = "open"
     HALF_OPEN = "half_open"
@@ -31,6 +33,7 @@ class CircuitState(str, Enum):
 @dataclass
 class ExecutionContext:
     """Context for error recovery."""
+
     operation: str
     args: Dict[str, Any] = field(default_factory=dict)
     attempt: int = 0
@@ -44,6 +47,7 @@ class ExecutionContext:
 @dataclass
 class Recovery:
     """Result of a recovery attempt."""
+
     success: bool
     result: Any = None
     strategy_used: EscalationLevel = EscalationLevel.RETRY
@@ -53,11 +57,13 @@ class Recovery:
 
 class UnrecoverableError(Exception):
     """Error that cannot be recovered from."""
+
     pass
 
 
 class CircuitOpenError(Exception):
     """Raised when attempting to call through an open circuit."""
+
     pass
 
 

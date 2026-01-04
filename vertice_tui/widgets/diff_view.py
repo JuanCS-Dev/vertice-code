@@ -147,25 +147,25 @@ class DiffView(Widget):
 
         for line in diff:
             line_num += 1
-            line_stripped = line.rstrip('\n')
+            line_stripped = line.rstrip("\n")
 
             # Line number prefix
             result.append(f"{line_num:4d} ", style=STYLE_LINE_NUM)
 
-            if line.startswith('+++') or line.startswith('---'):
+            if line.startswith("+++") or line.startswith("---"):
                 result.append(line_stripped, style=STYLE_HEADER)
-            elif line.startswith('@@'):
+            elif line.startswith("@@"):
                 result.append(line_stripped, style=STYLE_HUNK)
-            elif line.startswith('+'):
+            elif line.startswith("+"):
                 result.append(line_stripped, style=STYLE_ADDITION)
                 self._additions += 1
-            elif line.startswith('-'):
+            elif line.startswith("-"):
                 result.append(line_stripped, style=STYLE_DELETION)
                 self._deletions += 1
             else:
                 result.append(line_stripped, style=STYLE_CONTEXT)
 
-            result.append('\n')
+            result.append("\n")
 
         if not result.plain:
             return Text("No differences", style=STYLE_CONTEXT)
@@ -178,7 +178,7 @@ class DiffView(Widget):
             self.query_one(".diff-header", Static).update(self._format_header())
             self.query_one(".diff-content", Static).update(self._render_diff())
             self.query_one(".diff-stats", Static).update(self._format_stats())
-        except Exception:
+        except (AttributeError, ValueError):
             pass
         super().refresh(*args, **kwargs)
 
@@ -229,14 +229,14 @@ class InlineDiff(Static):
         matcher = difflib.SequenceMatcher(None, self.old_text, self.new_text)
 
         for tag, i1, i2, j1, j2 in matcher.get_opcodes():
-            if tag == 'equal':
+            if tag == "equal":
                 result.append(self.old_text[i1:i2], style=STYLE_CONTEXT)
-            elif tag == 'replace':
+            elif tag == "replace":
                 result.append(self.old_text[i1:i2], style=STYLE_DELETION)
                 result.append(self.new_text[j1:j2], style=STYLE_ADDITION)
-            elif tag == 'delete':
+            elif tag == "delete":
                 result.append(self.old_text[i1:i2], style=STYLE_DELETION)
-            elif tag == 'insert':
+            elif tag == "insert":
                 result.append(self.new_text[j1:j2], style=STYLE_ADDITION)
 
         return result

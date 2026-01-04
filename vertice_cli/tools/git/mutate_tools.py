@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 # GIT COMMIT TOOL
 # =============================================================================
 
+
 class GitCommitTool(Tool):
     """
     Create git commits with Claude Code conventions.
@@ -74,23 +75,23 @@ Co-Authored-By: Juan-Dev-Code <noreply@juancs.dev>"""
             "message": {
                 "type": "string",
                 "description": "Commit message (without signature)",
-                "required": True
+                "required": True,
             },
             "files": {
                 "type": "array",
                 "description": "Files to stage (default: all modified)",
-                "required": False
+                "required": False,
             },
             "amend": {
                 "type": "boolean",
                 "description": "Amend previous commit (requires explicit permission)",
-                "required": False
+                "required": False,
             },
             "add_signature": {
                 "type": "boolean",
                 "description": "Add Juan-Dev-Code signature (default: True)",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     async def _execute_validated(self, **kwargs) -> ToolResult:
@@ -130,8 +131,7 @@ Co-Authored-By: Juan-Dev-Code <noreply@juancs.dev>"""
                 author_check = await self._check_authorship()
                 if not author_check["safe_to_amend"]:
                     return ToolResult(
-                        success=False,
-                        error=f"Cannot amend: {author_check['reason']}"
+                        success=False, error=f"Cannot amend: {author_check['reason']}"
                     )
 
             # Stage files
@@ -142,10 +142,7 @@ Co-Authored-By: Juan-Dev-Code <noreply@juancs.dev>"""
             # Check if there are staged changes
             diff_result = await run_git_command("diff", "--cached", "--quiet")
             if diff_result.success:
-                return ToolResult(
-                    success=False,
-                    error="No changes staged for commit"
-                )
+                return ToolResult(success=False, error="No changes staged for commit")
 
             # Build commit message
             full_message = self._build_commit_message(message, add_signature)
@@ -159,7 +156,7 @@ Co-Authored-By: Juan-Dev-Code <noreply@juancs.dev>"""
                     return ToolResult(
                         success=False,
                         error="Pre-commit hook modified files. Review changes and retry.",
-                        data={"hook_triggered": True}
+                        data={"hook_triggered": True},
                     )
                 return ToolResult(success=False, error=commit_result.error)
 
@@ -174,9 +171,9 @@ Co-Authored-By: Juan-Dev-Code <noreply@juancs.dev>"""
                     "message": message[:100],
                     "amended": amend,
                     "files_committed": len(files) if files else "all staged",
-                    "heredoc_used": True
+                    "heredoc_used": True,
                 },
-                metadata={"hash": commit_hash}
+                metadata={"hash": commit_hash},
             )
 
         except Exception as e:
@@ -194,8 +191,7 @@ Co-Authored-By: Juan-Dev-Code <noreply@juancs.dev>"""
                 stage_result = await run_git_command("add", file)
                 if not stage_result.success:
                     return ToolResult(
-                        success=False,
-                        error=f"Failed to stage {file}: {stage_result.error}"
+                        success=False, error=f"Failed to stage {file}: {stage_result.error}"
                     )
         else:
             # Stage all modified files
@@ -228,13 +224,13 @@ Co-Authored-By: Juan-Dev-Code <noreply@juancs.dev>"""
                 input=message,  # Pass message via stdin (HEREDOC equivalent)
                 capture_output=True,
                 text=True,
-                timeout=60
+                timeout=60,
             )
 
             return ToolResult(
                 success=result.returncode == 0,
                 data=result.stdout,
-                error=result.stderr if result.returncode != 0 else None
+                error=result.stderr if result.returncode != 0 else None,
             )
 
         except subprocess.TimeoutExpired:
@@ -263,7 +259,7 @@ Co-Authored-By: Juan-Dev-Code <noreply@juancs.dev>"""
         return {
             "safe_to_amend": True,
             "reason": f"Unpushed commit by {author}",
-            "warning": "Amending another developer's commit"
+            "warning": "Amending another developer's commit",
         }
 
     def _build_commit_message(self, message: str, add_signature: bool) -> str:
@@ -277,6 +273,7 @@ Co-Authored-By: Juan-Dev-Code <noreply@juancs.dev>"""
 # =============================================================================
 # PR CREATE TOOL
 # =============================================================================
+
 
 class GitPRCreateTool(Tool):
     """
@@ -302,26 +299,18 @@ class GitPRCreateTool(Tool):
         self.category = ToolCategory.GIT
         self.description = "Create a GitHub Pull Request"
         self.parameters = {
-            "title": {
-                "type": "string",
-                "description": "PR title",
-                "required": True
-            },
+            "title": {"type": "string", "description": "PR title", "required": True},
             "body": {
                 "type": "string",
                 "description": "PR description (markdown)",
-                "required": False
+                "required": False,
             },
             "base": {
                 "type": "string",
                 "description": "Base branch (default: main)",
-                "required": False
+                "required": False,
             },
-            "draft": {
-                "type": "boolean",
-                "description": "Create as draft PR",
-                "required": False
-            }
+            "draft": {"type": "boolean", "description": "Create as draft PR", "required": False},
         }
 
     async def _execute_validated(self, **kwargs) -> ToolResult:
@@ -348,21 +337,22 @@ class GitPRCreateTool(Tool):
 
             # Use subprocess with stdin for body (HEREDOC equivalent)
             args = [
-                "gh", "pr", "create",
-                "--title", title,
-                "--body-file", "-",  # Read body from stdin
-                "--base", base,
+                "gh",
+                "pr",
+                "create",
+                "--title",
+                title,
+                "--body-file",
+                "-",  # Read body from stdin
+                "--base",
+                base,
             ]
 
             if draft:
                 args.append("--draft")
 
             result = subprocess.run(
-                args,
-                input=full_body,
-                capture_output=True,
-                text=True,
-                timeout=60
+                args, input=full_body, capture_output=True, text=True, timeout=60
             )
 
             if result.returncode != 0:
@@ -379,7 +369,7 @@ class GitPRCreateTool(Tool):
                     "base": base,
                     "draft": draft,
                 },
-                metadata={"created": True}
+                metadata={"created": True},
             )
 
         except subprocess.TimeoutExpired:
@@ -391,27 +381,15 @@ class GitPRCreateTool(Tool):
     async def _check_gh_cli(self) -> ToolResult:
         """Check if gh CLI is available and authenticated."""
         try:
-            result = subprocess.run(
-                ["gh", "--version"],
-                capture_output=True,
-                timeout=10
-            )
+            result = subprocess.run(["gh", "--version"], capture_output=True, timeout=10)
             if result.returncode != 0:
-                return ToolResult(
-                    success=False,
-                    error="GitHub CLI (gh) not working properly"
-                )
+                return ToolResult(success=False, error="GitHub CLI (gh) not working properly")
 
             # Check auth status
-            auth_result = subprocess.run(
-                ["gh", "auth", "status"],
-                capture_output=True,
-                timeout=10
-            )
+            auth_result = subprocess.run(["gh", "auth", "status"], capture_output=True, timeout=10)
             if auth_result.returncode != 0:
                 return ToolResult(
-                    success=False,
-                    error="GitHub CLI not authenticated. Run: gh auth login"
+                    success=False, error="GitHub CLI not authenticated. Run: gh auth login"
                 )
 
             return ToolResult(success=True, data="gh CLI ready")
@@ -419,7 +397,7 @@ class GitPRCreateTool(Tool):
         except FileNotFoundError:
             return ToolResult(
                 success=False,
-                error="GitHub CLI (gh) not found. Install from: https://cli.github.com"
+                error="GitHub CLI (gh) not found. Install from: https://cli.github.com",
             )
         except Exception as e:
             return ToolResult(success=False, error=str(e))
@@ -435,6 +413,7 @@ class GitPRCreateTool(Tool):
 # =============================================================================
 # REGISTRY HELPER
 # =============================================================================
+
 
 def get_git_mutate_tools() -> List[Tool]:
     """Get all write git tools."""

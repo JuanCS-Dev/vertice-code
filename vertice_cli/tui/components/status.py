@@ -30,6 +30,7 @@ from ..styles import StyleCombinations
 
 class StatusLevel(Enum):
     """Status severity levels."""
+
     SUCCESS = "success"
     ERROR = "error"
     WARNING = "warning"
@@ -41,11 +42,11 @@ class StatusLevel(Enum):
 class StatusBadge:
     """
     Status badge with icon and text.
-    
+
     Examples:
         badge = StatusBadge("Operation complete", StatusLevel.SUCCESS)
         console.print(badge.render())
-        
+
         # Animated
         async for frame in badge.render_animated():
             console.print(frame, end='\r')
@@ -70,7 +71,7 @@ class StatusBadge:
     ):
         """
         Initialize status badge.
-        
+
         Args:
             text: Badge text
             level: Status level
@@ -88,7 +89,7 @@ class StatusBadge:
     def render(self) -> Text:
         """
         Render status badge.
-        
+
         Returns:
             Rich Text object
         """
@@ -110,11 +111,11 @@ class StatusBadge:
     ) -> AsyncIterator[Text]:
         """
         Render badge with pulse animation.
-        
+
         Args:
             duration: Animation duration in seconds
             fps: Frames per second
-            
+
         Yields:
             Text frames for animation
         """
@@ -147,6 +148,7 @@ class StatusBadge:
 
 class SpinnerStyle(Enum):
     """Spinner animation styles."""
+
     DOTS = "dots"
     PULSE = "pulse"
     BOUNCE = "bounce"
@@ -157,10 +159,10 @@ class SpinnerStyle(Enum):
 class Spinner:
     """
     Animated spinner for loading/processing states.
-    
+
     Examples:
         spinner = Spinner("Loading...", style=SpinnerStyle.DOTS)
-        
+
         # Render frames
         async for frame in spinner.spin():
             console.print(frame, end='\r')
@@ -168,11 +170,11 @@ class Spinner:
 
     # Spinner frame sequences
     FRAMES = {
-        SpinnerStyle.DOTS: ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'],
-        SpinnerStyle.PULSE: ['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'],
-        SpinnerStyle.BOUNCE: ['▖', '▘', '▝', '▗'],
-        SpinnerStyle.LINE: ['|', '/', '─', '\\'],
-        SpinnerStyle.DOTS_PULSE: ['⠁', '⠂', '⠄', '⡀', '⢀', '⠠', '⠐', '⠈'],
+        SpinnerStyle.DOTS: ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"],
+        SpinnerStyle.PULSE: ["⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"],
+        SpinnerStyle.BOUNCE: ["▖", "▘", "▝", "▗"],
+        SpinnerStyle.LINE: ["|", "/", "─", "\\"],
+        SpinnerStyle.DOTS_PULSE: ["⠁", "⠂", "⠄", "⡀", "⢀", "⠠", "⠐", "⠈"],
     }
 
     def __init__(
@@ -183,7 +185,7 @@ class Spinner:
     ):
         """
         Initialize spinner.
-        
+
         Args:
             text: Spinner text
             style: Animation style
@@ -191,16 +193,16 @@ class Spinner:
         """
         self.text = text
         self.style = style
-        self.color = color or COLORS['accent_blue']
+        self.color = color or COLORS["accent_blue"]
         self.frames = self.FRAMES[style]
 
     def render(self, frame_index: int = 0) -> Text:
         """
         Render single spinner frame.
-        
+
         Args:
             frame_index: Frame index (cycles through frames)
-            
+
         Returns:
             Rich Text object
         """
@@ -215,14 +217,14 @@ class Spinner:
     ) -> AsyncIterator[Text]:
         """
         Animated spinner generator.
-        
+
         Args:
             duration: Duration in seconds (None = infinite)
             fps: Frames per second
-            
+
         Yields:
             Text frames for animation
-            
+
         Example:
             async for frame in spinner.spin(duration=5.0):
                 console.print(frame, end='\r')
@@ -248,12 +250,12 @@ class Spinner:
 class StatusIndicator:
     """
     Combined status indicator with icon, text, and optional spinner.
-    
+
     Examples:
         # Static status
         status = StatusIndicator("Analyzing code", StatusLevel.INFO)
         console.print(status.render())
-        
+
         # With spinner
         status = StatusIndicator(
             "Processing...",
@@ -273,7 +275,7 @@ class StatusIndicator:
     ):
         """
         Initialize status indicator.
-        
+
         Args:
             text: Status text
             level: Status level
@@ -298,19 +300,19 @@ class StatusIndicator:
     def _get_color_for_level(self, level: StatusLevel) -> str:
         """Get color for status level."""
         color_map = {
-            StatusLevel.SUCCESS: COLORS['accent_green'],
-            StatusLevel.ERROR: COLORS['accent_red'],
-            StatusLevel.WARNING: COLORS['accent_yellow'],
-            StatusLevel.INFO: COLORS['accent_blue'],
-            StatusLevel.PROCESSING: COLORS['accent_purple'],
-            StatusLevel.DEBUG: COLORS['text_tertiary'],
+            StatusLevel.SUCCESS: COLORS["accent_green"],
+            StatusLevel.ERROR: COLORS["accent_red"],
+            StatusLevel.WARNING: COLORS["accent_yellow"],
+            StatusLevel.INFO: COLORS["accent_blue"],
+            StatusLevel.PROCESSING: COLORS["accent_purple"],
+            StatusLevel.DEBUG: COLORS["text_tertiary"],
         }
-        return color_map.get(level, COLORS['text_primary'])
+        return color_map.get(level, COLORS["text_primary"])
 
     def render(self) -> Text:
         """
         Render status indicator (static frame).
-        
+
         Returns:
             Rich Text object
         """
@@ -326,11 +328,11 @@ class StatusIndicator:
     ) -> AsyncIterator[Text]:
         """
         Render animated status indicator.
-        
+
         Args:
             duration: Animation duration (None = infinite)
             fps: Frames per second
-            
+
         Yields:
             Text frames for animation
         """
@@ -345,6 +347,7 @@ class StatusIndicator:
 # =============================================================================
 # UTILITY FUNCTIONS
 # =============================================================================
+
 
 def create_success_badge(text: str) -> StatusBadge:
     """Create success badge."""
@@ -379,21 +382,21 @@ async def show_spinner_for(
 ):
     """
     Show spinner for a duration then clear.
-    
+
     Args:
         console: Rich console
         text: Spinner text
         duration: Duration in seconds
         style: Spinner style
-        
+
     Example:
         await show_spinner_for(console, "Loading...", 3.0)
     """
     spinner = Spinner(text, style)
 
     async for frame in spinner.spin(duration=duration, fps=12):
-        console.print(frame, end='\r')
-        await asyncio.sleep(1/12)
+        console.print(frame, end="\r")
+        await asyncio.sleep(1 / 12)
 
     # Clear line
-    console.print(" " * (len(text) + 5), end='\r')
+    console.print(" " * (len(text) + 5), end="\r")

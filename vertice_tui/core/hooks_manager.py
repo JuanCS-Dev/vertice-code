@@ -52,7 +52,7 @@ class HooksManager:
         Args:
             config_dir: Directory for config file. Defaults to ~/.juancs
         """
-        self._config_dir = config_dir or (Path.home() / ".juancs")
+        self._config_dir = config_dir or (Path.home() / ".vertice")
         self._config_path = self._config_dir / "hooks.json"
         self._hooks_executor = None
         self._hooks_config: Dict[str, Dict[str, Any]] = {}
@@ -65,11 +65,7 @@ class HooksManager:
 
         # Set defaults
         self._hooks_config = {
-            hook_name: {
-                "enabled": False,
-                "description": description,
-                "commands": []
-            }
+            hook_name: {"enabled": False, "description": description, "commands": []}
             for hook_name, description in self.HOOK_TYPES.items()
         }
 
@@ -235,6 +231,7 @@ class HooksManager:
         if self._hooks_executor is None:
             try:
                 from vertice_cli.hooks import HookExecutor
+
                 self._hooks_executor = HookExecutor(timeout_seconds=30)
             except ImportError:
                 return {"success": False, "error": "Hooks system not available"}
@@ -249,7 +246,7 @@ class HooksManager:
             "post_write": HookEvent.POST_WRITE,
             "post_edit": HookEvent.POST_EDIT,
             "post_delete": HookEvent.POST_DELETE,
-            "pre_commit": HookEvent.PRE_COMMIT
+            "pre_commit": HookEvent.PRE_COMMIT,
         }
 
         event = event_map.get(hook_name)
@@ -257,15 +254,9 @@ class HooksManager:
             return {"success": False, "error": f"Invalid hook event: {hook_name}"}
 
         # Create context and execute
-        context = HookContext(
-            file_path=Path(file_path),
-            event_name=hook_name,
-            cwd=Path.cwd()
-        )
+        context = HookContext(file_path=Path(file_path), event_name=hook_name, cwd=Path.cwd())
 
-        results = await self._hooks_executor.execute_hooks(
-            event, context, hook["commands"]
-        )
+        results = await self._hooks_executor.execute_hooks(event, context, hook["commands"])
 
         return {
             "success": all(r.success for r in results),
@@ -276,10 +267,10 @@ class HooksManager:
                     "stdout": r.stdout,
                     "stderr": r.stderr,
                     "error": r.error,
-                    "execution_time_ms": r.execution_time_ms
+                    "execution_time_ms": r.execution_time_ms,
                 }
                 for r in results
-            ]
+            ],
         }
 
     def get_stats(self) -> Dict[str, Any]:

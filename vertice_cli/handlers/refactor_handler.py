@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 class RefactorHandler:
     """Handler for refactoring commands."""
 
-    def __init__(self, shell: 'InteractiveShell'):
+    def __init__(self, shell: "InteractiveShell"):
         """Initialize with shell reference."""
         self.shell = shell
         self.console = shell.console
@@ -31,7 +31,9 @@ class RefactorHandler:
         args = cmd[17:].strip().split()  # Remove "/refactor rename "
 
         if len(args) < 3:
-            return CommandResult.error("[red]Usage: /refactor rename <file> <old_name> <new_name>[/red]")
+            return CommandResult.error(
+                "[red]Usage: /refactor rename <file> <old_name> <new_name>[/red]"
+            )
 
         file_path = Path(args[0])
         old_name = args[1]

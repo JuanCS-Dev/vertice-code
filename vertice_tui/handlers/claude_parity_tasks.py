@@ -25,12 +25,7 @@ class ClaudeParityTasksHandler:
     def bridge(self):
         return self.app.bridge
 
-    async def handle(
-        self,
-        command: str,
-        args: str,
-        view: "ResponseView"
-    ) -> None:
+    async def handle(self, command: str, args: str, view: "ResponseView") -> None:
         """Route to specific handler method."""
         handlers = {
             "/bashes": self._handle_bashes,
@@ -58,11 +53,17 @@ class ClaudeParityTasksHandler:
                 if tasks:
                     lines = ["## 🔄 Background Tasks\n"]
                     for t in tasks:
-                        status_icon = "🟢" if t["status"] == "running" else "✅" if t["status"] == "completed" else "❌"
+                        status_icon = (
+                            "🟢"
+                            if t["status"] == "running"
+                            else "✅" if t["status"] == "completed" else "❌"
+                        )
                         lines.append(f"{status_icon} `{t['id']}` - {t['command']} ({t['status']})")
                     view.add_system_message("\n".join(lines))
                 else:
-                    view.add_system_message("## 🔄 Background Tasks\n\nNo background tasks running.")
+                    view.add_system_message(
+                        "## 🔄 Background Tasks\n\nNo background tasks running."
+                    )
             else:
                 view.add_error(f"Failed: {result.error}")
         except Exception as e:
@@ -178,9 +179,7 @@ class ClaudeParityTasksHandler:
 
                 tool = TaskTool()
                 result = await tool._execute_validated(
-                    prompt=prompt,
-                    subagent_type=subagent_type,
-                    description=f"Task: {prompt[:30]}"
+                    prompt=prompt, subagent_type=subagent_type, description=f"Task: {prompt[:30]}"
                 )
 
                 if result.success:
@@ -207,7 +206,11 @@ class ClaudeParityTasksHandler:
             if subagents:
                 lines = ["## 🤖 Running Subagents\n"]
                 for s in subagents:
-                    status_icon = "🟢" if s["status"] == "running" else "✅" if s["status"] == "completed" else "❌"
+                    status_icon = (
+                        "🟢"
+                        if s["status"] == "running"
+                        else "✅" if s["status"] == "completed" else "❌"
+                    )
                     lines.append(
                         f"{status_icon} `{s['id']}` - **{s['type']}** ({s['status']})\n"
                         f"   {s['description']} | {s['prompts_count']} prompt(s)"
@@ -235,6 +238,7 @@ class ClaudeParityTasksHandler:
         else:
             try:
                 from vertice_cli.tools.claude_parity_tools import AskUserQuestionTool
+
                 pending = AskUserQuestionTool.get_pending_questions()
                 if pending:
                     lines = ["## ❓ Pending Questions\n"]

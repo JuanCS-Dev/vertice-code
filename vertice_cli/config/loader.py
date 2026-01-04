@@ -28,7 +28,7 @@ class ConfigLoader:
 
     def __init__(self, cwd: Optional[Path] = None):
         """Initialize config loader.
-        
+
         Args:
             cwd: Current working directory (default: Path.cwd())
         """
@@ -39,7 +39,7 @@ class ConfigLoader:
 
     def _find_config_file(self) -> Optional[Path]:
         """Find first existing config file in CONFIG_FILENAMES.
-        
+
         Returns:
             Path to config file or None if not found
         """
@@ -55,7 +55,7 @@ class ConfigLoader:
 
         if config_file:
             try:
-                with open(config_file, 'r') as f:
+                with open(config_file, "r") as f:
                     data = yaml.safe_load(f)
 
                 if data:
@@ -94,7 +94,7 @@ class ConfigLoader:
 
     def save(self, path: Optional[Path] = None) -> None:
         """Save current configuration to YAML file.
-        
+
         Args:
             path: Path to save config (default: .qwenrc in cwd)
         """
@@ -104,7 +104,7 @@ class ConfigLoader:
         data = self.config.to_dict()
 
         try:
-            with open(path, 'w') as f:
+            with open(path, "w") as f:
                 yaml.dump(data, f, default_flow_style=False, sort_keys=False)
             console.print(f"[green]✓ Config saved to:[/green] {path}")
         except Exception as e:
@@ -117,10 +117,10 @@ class ConfigLoader:
 
     def get_hooks(self, event: str) -> list:
         """Get hooks for specific event.
-        
+
         Args:
             event: Hook event name (post_write, post_edit, post_delete, pre_commit)
-            
+
         Returns:
             List of hook commands
         """
@@ -128,10 +128,10 @@ class ConfigLoader:
 
     def is_path_allowed(self, path: Path) -> bool:
         """Check if path is in allowed paths.
-        
+
         Args:
             path: Path to check
-            
+
         Returns:
             True if path is allowed
         """
@@ -150,14 +150,15 @@ class ConfigLoader:
 
     def is_command_dangerous(self, command: str) -> bool:
         """Check if command contains dangerous patterns.
-        
+
         Args:
             command: Command string to check
-            
+
         Returns:
             True if command is dangerous
         """
         from ..security_hardening import normalise_command
+
         norm_cmd = normalise_command(command)
         for pattern in self.config.safety.dangerous_commands:
             if pattern in norm_cmd:
@@ -166,10 +167,10 @@ class ConfigLoader:
 
     def requires_approval(self, command: str) -> bool:
         """Check if command requires user approval.
-        
+
         Args:
             command: Command string to check
-            
+
         Returns:
             True if approval required
         """
@@ -180,14 +181,11 @@ class ConfigLoader:
 
     def get_context_patterns(self) -> tuple:
         """Get context include/exclude patterns.
-        
+
         Returns:
             Tuple of (include_extensions, exclude_patterns)
         """
-        return (
-            self.config.context.file_extensions,
-            self.config.context.exclude_patterns
-        )
+        return (self.config.context.file_extensions, self.config.context.exclude_patterns)
 
     def reload(self) -> None:
         """Reload configuration from file."""

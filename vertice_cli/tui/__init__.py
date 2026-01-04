@@ -45,18 +45,15 @@ __all__ = [
     "COLORS",
     "ColorHelpers",
     "ThemeVariant",
-
     # Typography
     "FONTS",
     "SIZES",
     "WEIGHTS",
     "LineHeights",
-
     # Spacing
     "SPACING",
     "margin",
     "padding",
-
     # Styles
     "create_style",
     "PRESET_STYLES",

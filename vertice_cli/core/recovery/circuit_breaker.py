@@ -80,9 +80,7 @@ class RecoveryCircuitBreaker:
         if self.state == self.STATE_CLOSED:
             if self.failure_count >= self.failure_threshold:
                 self.state = self.STATE_OPEN
-                logger.warning(
-                    f"Circuit breaker: OPEN ({self.failure_count} consecutive failures)"
-                )
+                logger.warning(f"Circuit breaker: OPEN ({self.failure_count} consecutive failures)")
 
         elif self.state == self.STATE_HALF_OPEN:
             self.state = self.STATE_OPEN
@@ -106,9 +104,7 @@ class RecoveryCircuitBreaker:
             if elapsed >= self.timeout:
                 self.state = self.STATE_HALF_OPEN
                 self.success_count = 0
-                logger.info(
-                    f"Circuit breaker: HALF_OPEN (testing after {elapsed:.1f}s)"
-                )
+                logger.info(f"Circuit breaker: HALF_OPEN (testing after {elapsed:.1f}s)")
                 return True, "Circuit half-open (testing recovery)"
             else:
                 remaining = self.timeout - elapsed

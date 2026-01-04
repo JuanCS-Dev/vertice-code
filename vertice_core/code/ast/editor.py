@@ -138,9 +138,7 @@ class ASTEditor:
         while current:
             if current.type in config.string_node_types:
                 parent = current.parent
-                if parent and parent.type in (
-                    config.function_node_types | config.class_node_types
-                ):
+                if parent and parent.type in (config.function_node_types | config.class_node_types):
                     for child in parent.children:
                         if child.type == "expression_statement":
                             expr = child.children[0] if child.children else None
@@ -200,9 +198,7 @@ class ASTEditor:
 
                 if node.child_count == 0 or node_text == search:
                     location = self._node_to_location(node)
-                    line_text = (
-                        lines[location.line - 1] if location.line <= len(lines) else ""
-                    )
+                    line_text = lines[location.line - 1] if location.line <= len(lines) else ""
 
                     matches.append(
                         CodeMatch(
@@ -266,9 +262,7 @@ class ASTEditor:
 
         return matches
 
-    def _detect_context_heuristic(
-        self, line: str, column: int, language: str
-    ) -> NodeContext:
+    def _detect_context_heuristic(self, line: str, column: int, language: str) -> NodeContext:
         """Detect context using heuristics (fallback)."""
         prefix = line[: column - 1]
 
@@ -304,9 +298,7 @@ class ASTEditor:
         if old_text == new_text:
             return EditResult(success=True, content=content, changes_made=0)
 
-        matches = self.find_in_code(
-            content, old_text, language, include_strings, include_comments
-        )
+        matches = self.find_in_code(content, old_text, language, include_strings, include_comments)
 
         if not matches:
             return EditResult(success=True, content=content, changes_made=0)
@@ -367,9 +359,7 @@ class ASTEditor:
     # Public API - Validation
     # =========================================================================
 
-    def is_valid_syntax(
-        self, content: str, language: str
-    ) -> Tuple[bool, Optional[str]]:
+    def is_valid_syntax(self, content: str, language: str) -> Tuple[bool, Optional[str]]:
         """Check if content has valid syntax."""
         tree = self._parse(content, language)
 

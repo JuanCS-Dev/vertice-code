@@ -47,8 +47,7 @@ def is_plan_execution_request(message: str) -> bool:
 
 
 def prepare_plan_execution(
-    message: str,
-    last_plan: Optional[str]
+    message: str, last_plan: Optional[str]
 ) -> Tuple[str, bool, Optional[str]]:
     """
     Prepare message for plan execution if applicable.

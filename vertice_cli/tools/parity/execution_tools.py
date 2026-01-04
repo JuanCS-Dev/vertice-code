@@ -36,6 +36,7 @@ _task_tracker = TaskTracker()
 # BACKGROUND TASK TOOL
 # =============================================================================
 
+
 class BackgroundTaskTool(Tool):
     """
     Run shell commands in the background.
@@ -70,18 +71,18 @@ class BackgroundTaskTool(Tool):
             "action": {
                 "type": "string",
                 "description": "Action: 'start', 'status', 'output', 'kill', 'list'",
-                "required": True
+                "required": True,
             },
             "command": {
                 "type": "string",
                 "description": "Shell command to run (for 'start' action)",
-                "required": False
+                "required": False,
             },
             "task_id": {
                 "type": "string",
                 "description": "Task ID (for 'status', 'output', 'kill' actions)",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     async def _execute_validated(self, **kwargs) -> ToolResult:
@@ -106,7 +107,7 @@ class BackgroundTaskTool(Tool):
         else:
             return ToolResult(
                 success=False,
-                error=f"Unknown action: {action}. Valid: start, list, status, output, kill"
+                error=f"Unknown action: {action}. Valid: start, list, status, output, kill",
             )
 
     async def _start_task(self, command: str) -> ToolResult:
@@ -117,19 +118,16 @@ class BackgroundTaskTool(Tool):
         # Security: Check for dangerous patterns
         for pattern in self.BLOCKED_PATTERNS:
             if re.search(pattern, command, re.IGNORECASE):
-                return ToolResult(
-                    success=False,
-                    error="Command blocked by security filter"
-                )
+                return ToolResult(success=False, error="Command blocked by security filter")
 
         # Try to use input validator if available
         try:
             from vertice_cli.core.input_validator import validate_command
+
             validation = validate_command(command, allow_shell=False)
             if not validation.is_valid:
                 return ToolResult(
-                    success=False,
-                    error=f"Command blocked: {', '.join(validation.errors)}"
+                    success=False, error=f"Command blocked: {', '.join(validation.errors)}"
                 )
         except ImportError:
             logger.debug("Input validator not available, using basic checks")
@@ -146,18 +144,14 @@ class BackgroundTaskTool(Tool):
                 shell=False,  # SECURITY: Never use shell=True
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True
+                text=True,
             )
 
             # Create task entry
             task_id = _task_tracker.create_task(command, process, "running")
 
             # Start output collector thread
-            collector = threading.Thread(
-                target=self._collect_output,
-                args=(task_id,),
-                daemon=True
-            )
+            collector = threading.Thread(target=self._collect_output, args=(task_id,), daemon=True)
             collector.start()
 
             return ToolResult(
@@ -166,9 +160,9 @@ class BackgroundTaskTool(Tool):
                     "task_id": task_id,
                     "command": command[:100],
                     "status": "started",
-                    "pid": process.pid
+                    "pid": process.pid,
                 },
-                metadata={"action": "start"}
+                metadata={"action": "start"},
             )
 
         except FileNotFoundError:
@@ -222,7 +216,7 @@ class BackgroundTaskTool(Tool):
                     _task_tracker.update_status(
                         task["id"],
                         "completed" if proc.returncode == 0 else "failed",
-                        proc.returncode
+                        proc.returncode,
                     )
 
         # Get fresh list after status updates
@@ -233,7 +227,7 @@ class BackgroundTaskTool(Tool):
                 "id": t["id"],
                 "command": t["command"][:50],
                 "status": t["status"],
-                "start_time": t.get("started_at")
+                "start_time": t.get("started_at"),
             }
             for t in tasks
         ]
@@ -241,7 +235,7 @@ class BackgroundTaskTool(Tool):
         return ToolResult(
             success=True,
             data={"tasks": tasks_info, "count": len(tasks_info)},
-            metadata={"action": "list"}
+            metadata={"action": "list"},
         )
 
     def _get_status(self, task_id: str) -> ToolResult:
@@ -257,9 +251,7 @@ class BackgroundTaskTool(Tool):
         proc = task.get("process")
         if proc and task["status"] == "running" and proc.poll() is not None:
             _task_tracker.update_status(
-                task["id"],
-                "completed" if proc.returncode == 0 else "failed",
-                proc.returncode
+                task["id"], "completed" if proc.returncode == 0 else "failed", proc.returncode
             )
             task = _task_tracker.get_task(task["id"])
 
@@ -271,9 +263,9 @@ class BackgroundTaskTool(Tool):
                 "status": task["status"],
                 "return_code": task.get("return_code"),
                 "started_at": task.get("started_at"),
-                "completed_at": task.get("completed_at")
+                "completed_at": task.get("completed_at"),
             },
-            metadata={"action": "status"}
+            metadata={"action": "status"},
         )
 
     def _get_output(self, task_id: str) -> ToolResult:
@@ -290,9 +282,9 @@ class BackgroundTaskTool(Tool):
             data={
                 "stdout": "\n".join(task.get("stdout", [])),
                 "stderr": "\n".join(task.get("stderr", [])),
-                "status": task["status"]
+                "status": task["status"],
             },
-            metadata={"action": "output", "task_id": task["id"]}
+            metadata={"action": "output", "task_id": task["id"]},
         )
 
     def _kill_task(self, task_id: str) -> ToolResult:
@@ -315,13 +307,14 @@ class BackgroundTaskTool(Tool):
         return ToolResult(
             success=True,
             data={"task_id": task["id"], "status": "killed"},
-            metadata={"action": "kill"}
+            metadata={"action": "kill"},
         )
 
 
 # =============================================================================
 # BASH OUTPUT TOOL
 # =============================================================================
+
 
 class BashOutputTool(Tool):
     """
@@ -348,13 +341,13 @@ class BashOutputTool(Tool):
             "bash_id": {
                 "type": "string",
                 "description": "The ID of the background shell to retrieve output from",
-                "required": True
+                "required": True,
             },
             "filter": {
                 "type": "string",
                 "description": "Optional regex to filter output lines",
-                "required": False
-            }
+                "required": False,
+            },
         }
         # Track read positions per shell
         self._read_positions: Dict[str, int] = {}
@@ -372,7 +365,7 @@ class BashOutputTool(Tool):
         if not task:
             return ToolResult(
                 success=False,
-                error=f"Shell not found: {bash_id}. Use background_task(action='list') to see shells."
+                error=f"Shell not found: {bash_id}. Use background_task(action='list') to see shells.",
             )
 
         # Normalize task_id
@@ -382,9 +375,7 @@ class BashOutputTool(Tool):
         proc = task.get("process")
         if proc and task["status"] == "running" and proc.poll() is not None:
             _task_tracker.update_status(
-                task_id,
-                "completed" if proc.returncode == 0 else "failed",
-                proc.returncode
+                task_id, "completed" if proc.returncode == 0 else "failed", proc.returncode
             )
             task = _task_tracker.get_task(task_id)
 
@@ -418,19 +409,20 @@ class BashOutputTool(Tool):
                 "output": "\n".join(new_output),
                 "lines_returned": len(new_output),
                 "is_complete": task["status"] in ("completed", "failed", "killed"),
-                "return_code": task.get("return_code")
+                "return_code": task.get("return_code"),
             },
             metadata={
                 "command": task.get("command", "")[:50],
                 "filtered": bool(filter_pattern),
-                "total_lines": len(all_output)
-            }
+                "total_lines": len(all_output),
+            },
         )
 
 
 # =============================================================================
 # KILL SHELL TOOL
 # =============================================================================
+
 
 class KillShellTool(Tool):
     """
@@ -451,7 +443,7 @@ class KillShellTool(Tool):
             "shell_id": {
                 "type": "string",
                 "description": "The ID of the background shell to kill",
-                "required": True
+                "required": True,
             }
         }
 
@@ -467,7 +459,7 @@ class KillShellTool(Tool):
         if not task:
             return ToolResult(
                 success=False,
-                error=f"Shell not found: {shell_id}. Use background_task(action='list') to see shells."
+                error=f"Shell not found: {shell_id}. Use background_task(action='list') to see shells.",
             )
 
         task_id = task["id"]
@@ -479,9 +471,9 @@ class KillShellTool(Tool):
                 data={
                     "shell_id": task_id,
                     "status": task["status"],
-                    "message": f"Shell already {task['status']}"
+                    "message": f"Shell already {task['status']}",
                 },
-                metadata={"already_terminated": True}
+                metadata={"already_terminated": True},
             )
 
         # Kill the process
@@ -506,24 +498,22 @@ class KillShellTool(Tool):
                     data={
                         "shell_id": task_id,
                         "status": "killed",
-                        "message": "Shell terminated successfully"
+                        "message": "Shell terminated successfully",
                     },
-                    metadata={"command": task.get("command", "")[:50]}
+                    metadata={"command": task.get("command", "")[:50]},
                 )
 
             except Exception as e:
                 logger.error(f"Failed to kill shell {task_id}: {e}")
                 return ToolResult(success=False, error=f"Failed to kill shell: {e}")
 
-        return ToolResult(
-            success=False,
-            error="No process associated with shell"
-        )
+        return ToolResult(success=False, error="No process associated with shell")
 
 
 # =============================================================================
 # REGISTRY HELPER
 # =============================================================================
+
 
 def get_execution_tools() -> List[Tool]:
     """Get all execution/background tools."""

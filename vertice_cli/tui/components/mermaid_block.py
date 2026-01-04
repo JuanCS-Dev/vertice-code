@@ -32,6 +32,7 @@ from rich import box
 
 class DiagramType(Enum):
     """Mermaid diagram types."""
+
     FLOWCHART = auto()
     SEQUENCE = auto()
     CLASS = auto()
@@ -44,6 +45,7 @@ class DiagramType(Enum):
 @dataclass
 class FlowNode:
     """Node in a flowchart."""
+
     id: str
     label: str
     shape: str = "rect"  # rect, rounded, diamond, circle
@@ -52,6 +54,7 @@ class FlowNode:
 @dataclass
 class FlowEdge:
     """Edge in a flowchart."""
+
     from_node: str
     to_node: str
     label: str = ""
@@ -63,28 +66,28 @@ class MermaidParser:
 
     # Pattern to detect diagram type
     TYPE_PATTERNS = {
-        DiagramType.FLOWCHART: re.compile(r'^(flowchart|graph)\s+(TD|TB|LR|RL|BT)', re.MULTILINE),
-        DiagramType.SEQUENCE: re.compile(r'^sequenceDiagram', re.MULTILINE),
-        DiagramType.CLASS: re.compile(r'^classDiagram', re.MULTILINE),
-        DiagramType.STATE: re.compile(r'^stateDiagram', re.MULTILINE),
-        DiagramType.PIE: re.compile(r'^pie', re.MULTILINE),
-        DiagramType.GANTT: re.compile(r'^gantt', re.MULTILINE),
+        DiagramType.FLOWCHART: re.compile(r"^(flowchart|graph)\s+(TD|TB|LR|RL|BT)", re.MULTILINE),
+        DiagramType.SEQUENCE: re.compile(r"^sequenceDiagram", re.MULTILINE),
+        DiagramType.CLASS: re.compile(r"^classDiagram", re.MULTILINE),
+        DiagramType.STATE: re.compile(r"^stateDiagram", re.MULTILINE),
+        DiagramType.PIE: re.compile(r"^pie", re.MULTILINE),
+        DiagramType.GANTT: re.compile(r"^gantt", re.MULTILINE),
     }
 
     # Flowchart node shapes
     NODE_PATTERNS = [
-        (r'\[([^\]]+)\]', 'rect'),      # [label]
-        (r'\(([^\)]+)\)', 'rounded'),    # (label)
-        (r'\{([^\}]+)\}', 'diamond'),    # {label}
-        (r'\(\(([^\)]+)\)\)', 'circle'), # ((label))
+        (r"\[([^\]]+)\]", "rect"),  # [label]
+        (r"\(([^\)]+)\)", "rounded"),  # (label)
+        (r"\{([^\}]+)\}", "diamond"),  # {label}
+        (r"\(\(([^\)]+)\)\)", "circle"),  # ((label))
     ]
 
     # Edge patterns
     EDGE_PATTERN = re.compile(
-        r'(\w+)\s*'                    # from node
-        r'(-->|---|-\.->|==>)'         # edge type
-        r'\s*(\|[^|]+\|)?\s*'          # optional label
-        r'(\w+)'                       # to node
+        r"(\w+)\s*"  # from node
+        r"(-->|---|-\.->|==>)"  # edge type
+        r"\s*(\|[^|]+\|)?\s*"  # optional label
+        r"(\w+)"  # to node
     )
 
     @classmethod
@@ -102,17 +105,17 @@ class MermaidParser:
         edges: List[FlowEdge] = []
         direction = "TD"
 
-        lines = diagram.strip().split('\n')
+        lines = diagram.strip().split("\n")
 
         # Get direction from first line
         first_line = lines[0].strip()
-        match = re.search(r'(TD|TB|LR|RL|BT)', first_line)
+        match = re.search(r"(TD|TB|LR|RL|BT)", first_line)
         if match:
             direction = match.group(1)
 
         for line in lines[1:]:
             line = line.strip()
-            if not line or line.startswith('%%'):
+            if not line or line.startswith("%%"):
                 continue
 
             # Parse edges
@@ -120,7 +123,7 @@ class MermaidParser:
             if edge_match:
                 from_id = edge_match.group(1)
                 edge_style = edge_match.group(2)
-                label = (edge_match.group(3) or '').strip('|')
+                label = (edge_match.group(3) or "").strip("|")
                 to_id = edge_match.group(4)
 
                 edges.append(FlowEdge(from_id, to_id, label, edge_style))
@@ -133,7 +136,7 @@ class MermaidParser:
 
             # Parse node definitions
             for pattern, shape in cls.NODE_PATTERNS:
-                node_match = re.search(r'^(\w+)' + pattern, line)
+                node_match = re.search(r"^(\w+)" + pattern, line)
                 if node_match:
                     node_id = node_match.group(1)
                     label = node_match.group(2)
@@ -253,21 +256,21 @@ class MermaidAsciiRenderer:
         participants = []
         messages = []
 
-        for line in diagram.strip().split('\n')[1:]:
+        for line in diagram.strip().split("\n")[1:]:
             line = line.strip()
-            if not line or line.startswith('%%'):
+            if not line or line.startswith("%%"):
                 continue
 
             # participant
-            if line.startswith('participant'):
-                name = line.replace('participant', '').strip()
+            if line.startswith("participant"):
+                name = line.replace("participant", "").strip()
                 participants.append(name)
 
             # message arrow
-            match = re.search(r'(\w+)\s*(->>|-->>|->|-->)\s*(\w+)\s*:\s*(.+)', line)
+            match = re.search(r"(\w+)\s*(->>|-->>|->|-->)\s*(\w+)\s*:\s*(.+)", line)
             if match:
                 from_p, arrow, to_p, msg = match.groups()
-                messages.append((from_p, to_p, msg, '--' in arrow))
+                messages.append((from_p, to_p, msg, "--" in arrow))
 
         # Draw participants
         if participants:
@@ -287,10 +290,10 @@ class MermaidAsciiRenderer:
         lines = ["[Class Diagram]", ""]
 
         classes = []
-        for line in diagram.strip().split('\n')[1:]:
+        for line in diagram.strip().split("\n")[1:]:
             line = line.strip()
-            if line.startswith('class '):
-                class_name = line.replace('class ', '').split('{')[0].strip()
+            if line.startswith("class "):
+                class_name = line.replace("class ", "").split("{")[0].strip()
                 classes.append(class_name)
 
         for class_name in classes:
@@ -309,11 +312,11 @@ class MermaidAsciiRenderer:
         title = ""
         slices = []
 
-        for line in diagram.strip().split('\n')[1:]:
+        for line in diagram.strip().split("\n")[1:]:
             line = line.strip()
-            if line.startswith('title'):
-                title = line.replace('title', '').strip()
-            elif ':' in line:
+            if line.startswith("title"):
+                title = line.replace("title", "").strip()
+            elif ":" in line:
                 match = re.search(r'"([^"]+)"\s*:\s*(\d+)', line)
                 if match:
                     slices.append((match.group(1), int(match.group(2))))
@@ -339,24 +342,24 @@ class MermaidAsciiRenderer:
         states = []
         transitions = []
 
-        for line in diagram.strip().split('\n')[1:]:
+        for line in diagram.strip().split("\n")[1:]:
             line = line.strip()
-            if not line or line.startswith('%%'):
+            if not line or line.startswith("%%"):
                 continue
 
-            match = re.search(r'(\w+|\[\*\])\s*-->\s*(\w+|\[\*\])\s*:?\s*(.*)', line)
+            match = re.search(r"(\w+|\[\*\])\s*-->\s*(\w+|\[\*\])\s*:?\s*(.*)", line)
             if match:
                 from_s, to_s, label = match.groups()
                 transitions.append((from_s, to_s, label.strip()))
 
-                if from_s not in states and from_s != '[*]':
+                if from_s not in states and from_s != "[*]":
                     states.append(from_s)
-                if to_s not in states and to_s != '[*]':
+                if to_s not in states and to_s != "[*]":
                     states.append(to_s)
 
         for from_s, to_s, label in transitions:
-            from_display = "●" if from_s == '[*]' else f"({from_s})"
-            to_display = "●" if to_s == '[*]' else f"({to_s})"
+            from_display = "●" if from_s == "[*]" else f"({from_s})"
+            to_display = "●" if to_s == "[*]" else f"({to_s})"
             if label:
                 lines.append(f"  {from_display} ──{label}──→ {to_display}")
             else:
@@ -368,7 +371,7 @@ class MermaidAsciiRenderer:
     def _render_fallback(cls, diagram: str) -> str:
         """Fallback for unsupported diagrams."""
         lines = ["[Mermaid Diagram]", ""]
-        for line in diagram.strip().split('\n'):
+        for line in diagram.strip().split("\n"):
             lines.append(f"  {line}")
         return "\n".join(lines)
 

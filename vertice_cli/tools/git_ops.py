@@ -18,7 +18,7 @@ class GitStatusTool(ValidatedTool):
             "path": {
                 "type": "string",
                 "description": "Repository path (default: current directory)",
-                "required": False
+                "required": False,
             }
         }
 
@@ -34,7 +34,7 @@ class GitStatusTool(ValidatedTool):
                 ["git", "-C", path, "rev-parse", "--abbrev-ref", "HEAD"],
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
             )
             branch = result.stdout.strip() if result.returncode == 0 else "unknown"
 
@@ -43,16 +43,13 @@ class GitStatusTool(ValidatedTool):
                 ["git", "-C", path, "status", "--porcelain"],
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
             )
 
             if result.returncode != 0:
-                return ToolResult(
-                    success=False,
-                    error="Not a git repository or git not available"
-                )
+                return ToolResult(success=False, error="Not a git repository or git not available")
 
-            lines = result.stdout.split('\n') if result.stdout else []
+            lines = result.stdout.split("\n") if result.stdout else []
 
             modified = []
             untracked = []
@@ -66,11 +63,11 @@ class GitStatusTool(ValidatedTool):
                 status = line[:2]
                 filename = line[3:].strip()  # Strip whitespace
 
-                if status[0] in ['M', 'A', 'D', 'R']:
+                if status[0] in ["M", "A", "D", "R"]:
                     staged.append(filename)
-                if status[1] == 'M':
+                if status[1] == "M":
                     modified.append(filename)
-                if status == '??':
+                if status == "??":
                     untracked.append(filename)
 
             return ToolResult(
@@ -79,12 +76,12 @@ class GitStatusTool(ValidatedTool):
                     "branch": branch,
                     "modified": modified,
                     "untracked": untracked,
-                    "staged": staged
+                    "staged": staged,
                 },
                 metadata={
                     "branch": branch,
-                    "total_changes": len(modified) + len(untracked) + len(staged)
-                }
+                    "total_changes": len(modified) + len(untracked) + len(staged),
+                },
             )
 
         except Exception as e:
@@ -102,25 +99,23 @@ class GitDiffTool(ValidatedTool):
             "path": {
                 "type": "string",
                 "description": "Repository path (default: current directory)",
-                "required": False
+                "required": False,
             },
-            "file": {
-                "type": "string",
-                "description": "Specific file to diff",
-                "required": False
-            },
+            "file": {"type": "string", "description": "Specific file to diff", "required": False},
             "staged": {
                 "type": "boolean",
                 "description": "Show staged changes only",
-                "required": False
-            }
+                "required": False,
+            },
         }
+
     def get_validators(self):
         """Validate parameters."""
         return {}
 
-
-    async def _execute_validated(self, path: str = ".", file: Optional[str] = None, staged: bool = False) -> ToolResult:
+    async def _execute_validated(
+        self, path: str = ".", file: Optional[str] = None, staged: bool = False
+    ) -> ToolResult:
         """Get git diff."""
         try:
             cmd = ["git", "-C", path, "diff"]
@@ -131,18 +126,10 @@ class GitDiffTool(ValidatedTool):
             if file:
                 cmd.append(file)
 
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
 
             if result.returncode != 0:
-                return ToolResult(
-                    success=False,
-                    error=result.stderr or "Git diff failed"
-                )
+                return ToolResult(success=False, error=result.stderr or "Git diff failed")
 
             return ToolResult(
                 success=True,
@@ -150,8 +137,8 @@ class GitDiffTool(ValidatedTool):
                 metadata={
                     "file": file or "all",
                     "staged": staged,
-                    "has_changes": bool(result.stdout.strip())
-                }
+                    "has_changes": bool(result.stdout.strip()),
+                },
             )
 
         except Exception as e:

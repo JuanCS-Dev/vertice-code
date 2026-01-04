@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 class BasicHandler:
     """Handler for basic system commands."""
 
-    def __init__(self, shell: 'InteractiveShell'):
+    def __init__(self, shell: "InteractiveShell"):
         """Initialize with shell reference."""
         self.shell = shell
         self.console = shell.console
@@ -139,14 +139,19 @@ Context Optimizer:
         metrics = self.shell.context_manager.auto_optimize(target_usage=0.7)
 
         self.console.print(f"[green]✓ Optimization complete in {metrics.duration_ms:.1f}ms[/green]")
-        self.console.print(f"  Items: {metrics.items_before} → {metrics.items_after} ({metrics.items_removed} removed)")
-        self.console.print(f"  Tokens: {metrics.tokens_before:,} → {metrics.tokens_after:,} ({metrics.tokens_freed:,} freed)")
+        self.console.print(
+            f"  Items: {metrics.items_before} → {metrics.items_after} ({metrics.items_removed} removed)"
+        )
+        self.console.print(
+            f"  Tokens: {metrics.tokens_before:,} → {metrics.tokens_after:,} ({metrics.tokens_freed:,} freed)"
+        )
 
         return CommandResult.ok()
 
     async def handle_metrics(self, cmd: str) -> CommandResult:
         """Handle /metrics command."""
         from ..core.constitution import generate_constitutional_report
+
         report = generate_constitutional_report(self.shell.context.history)
         self.console.print(report)
         return CommandResult.ok()
@@ -154,13 +159,18 @@ Context Optimizer:
     async def handle_cache(self, cmd: str) -> CommandResult:
         """Handle /cache command."""
         from ..core.cache import get_cache
+
         cache = get_cache()
         stats = cache.get_stats()
-        self.console.print(f"\n📊 Cache Stats:\n  Hits: {stats['hits']}\n  Misses: {stats['misses']}\n  Size: {stats['size']}")
+        self.console.print(
+            f"\n📊 Cache Stats:\n  Hits: {stats['hits']}\n  Misses: {stats['misses']}\n  Size: {stats['size']}"
+        )
 
         if self.shell.file_watcher:
             wstats = self.shell.file_watcher.get_stats()
-            self.console.print(f"\n📁 File Watcher:\n  Tracked: {wstats['tracked_count']}\n  Events: {wstats['event_count']}")
+            self.console.print(
+                f"\n📁 File Watcher:\n  Tracked: {wstats['tracked_count']}\n  Events: {wstats['event_count']}"
+            )
 
         return CommandResult.ok()
 
@@ -184,12 +194,14 @@ Context Optimizer:
                     f"{snapshot.input_tokens:,}",
                     f"{snapshot.output_tokens:,}",
                     f"{snapshot.total_tokens:,}",
-                    f"${snapshot.cost_estimate_usd:.4f}"
+                    f"${snapshot.cost_estimate_usd:.4f}",
                 )
 
             self.console.print(history_table)
         else:
-            self.console.print("\n[dim]No token usage history yet. Start a conversation to track tokens.[/dim]")
+            self.console.print(
+                "\n[dim]No token usage history yet. Start a conversation to track tokens.[/dim]"
+            )
 
         return CommandResult.ok()
 
@@ -201,7 +213,9 @@ Context Optimizer:
     async def handle_preview_off(self, cmd: str) -> CommandResult:
         """Handle /nopreview command."""
         self.shell.context.preview_enabled = False
-        return CommandResult.ok("[yellow]⚠ Preview disabled. Files will be written directly.[/yellow]")
+        return CommandResult.ok(
+            "[yellow]⚠ Preview disabled. Files will be written directly.[/yellow]"
+        )
 
     async def handle_dashboard(self, cmd: str) -> CommandResult:
         """Handle /dash and /dashboard commands."""

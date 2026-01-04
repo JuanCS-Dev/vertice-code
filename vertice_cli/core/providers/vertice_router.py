@@ -23,23 +23,26 @@ logger = logging.getLogger(__name__)
 
 class TaskComplexity(str, Enum):
     """Task complexity levels for routing decisions."""
-    SIMPLE = "simple"          # Formatting, simple chat
-    MODERATE = "moderate"      # Code generation, analysis
-    COMPLEX = "complex"        # Architecture, deep reasoning
-    CRITICAL = "critical"      # Security audit, production code
+
+    SIMPLE = "simple"  # Formatting, simple chat
+    MODERATE = "moderate"  # Code generation, analysis
+    COMPLEX = "complex"  # Architecture, deep reasoning
+    CRITICAL = "critical"  # Security audit, production code
 
 
 class SpeedRequirement(str, Enum):
     """Speed requirements for routing."""
-    INSTANT = "instant"        # < 1s first token
-    FAST = "fast"             # < 3s first token
-    NORMAL = "normal"         # < 10s first token
-    RELAXED = "relaxed"       # Any speed acceptable
+
+    INSTANT = "instant"  # < 1s first token
+    FAST = "fast"  # < 3s first token
+    NORMAL = "normal"  # < 10s first token
+    RELAXED = "relaxed"  # Any speed acceptable
 
 
 @dataclass
 class ProviderStatus:
     """Track provider availability and rate limits."""
+
     name: str
     available: bool = True
     requests_today: int = 0
@@ -80,6 +83,7 @@ class ProviderStatus:
 @dataclass
 class RoutingDecision:
     """Result of a routing decision."""
+
     provider_name: str
     model_name: str
     reasoning: str
@@ -93,7 +97,9 @@ class LLMProvider(Protocol):
 
     def is_available(self) -> bool: ...
     async def generate(self, messages: List[Dict], **kwargs) -> str: ...
-    async def stream_generate(self, messages: List[Dict], **kwargs) -> AsyncGenerator[str, None]: ...
+    async def stream_generate(
+        self, messages: List[Dict], **kwargs
+    ) -> AsyncGenerator[str, None]: ...
     async def stream_chat(self, messages: List[Dict], **kwargs) -> AsyncGenerator[str, None]: ...
     def get_model_info(self) -> Dict: ...
 
@@ -112,23 +118,23 @@ class VerticeRouter:
     # Provider priorities (lower = higher priority)
     # Mode: "enterprise" prioritizes Vertex AI, "free" prioritizes free tiers
     PROVIDER_PRIORITY_ENTERPRISE = {
-        "vertex-ai": 1,    # Vertex AI Gemini 2.0 - PRIMARY (R$8000 credits!)
-        "azure-openai": 2, # Enterprise GPT-4 via Azure
-        "groq": 3,         # 14,400 req/day, ultra-fast fallback
-        "cerebras": 4,     # 1M tokens/day, fastest fallback
-        "mistral": 5,      # 1B tokens/month
-        "openrouter": 6,   # 200 req/day on free models
-        "gemini": 7,       # Legacy API (prefer vertex-ai)
+        "vertex-ai": 1,  # Vertex AI Gemini 2.0 - PRIMARY (R$8000 credits!)
+        "azure-openai": 2,  # Enterprise GPT-4 via Azure
+        "groq": 3,  # 14,400 req/day, ultra-fast fallback
+        "cerebras": 4,  # 1M tokens/day, fastest fallback
+        "mistral": 5,  # 1B tokens/month
+        "openrouter": 6,  # 200 req/day on free models
+        "gemini": 7,  # Legacy API (prefer vertex-ai)
     }
 
     PROVIDER_PRIORITY_FREE = {
-        "groq": 1,         # 14,400 req/day, ultra-fast
-        "cerebras": 2,     # 1M tokens/day, fastest
-        "mistral": 3,      # 1B tokens/month
-        "openrouter": 4,   # 200 req/day on free models
-        "gemini": 5,       # Your existing quota (legacy API)
-        "vertex-ai": 6,    # Enterprise Gemini via Vertex AI
-        "azure-openai": 7, # Enterprise GPT-4 via Azure
+        "groq": 1,  # 14,400 req/day, ultra-fast
+        "cerebras": 2,  # 1M tokens/day, fastest
+        "mistral": 3,  # 1B tokens/month
+        "openrouter": 4,  # 200 req/day on free models
+        "gemini": 5,  # Your existing quota (legacy API)
+        "vertex-ai": 6,  # Enterprise Gemini via Vertex AI
+        "azure-openai": 7,  # Enterprise GPT-4 via Azure
     }
 
     # Default to enterprise mode (user has GCloud credits)
@@ -179,6 +185,7 @@ class VerticeRouter:
         from .openrouter import OpenRouterProvider
         from .mistral import MistralProvider
         from .gemini import GeminiProvider
+
         # Import providers - Enterprise (Your Infrastructure)
         from .vertex_ai import VertexAIProvider
         from .azure_openai import AzureOpenAIProvider
@@ -211,7 +218,14 @@ class VerticeRouter:
                     logger.info(f"✅ Provider {name} initialized")
                 else:
                     logger.warning(f"⚠️ Provider {name} not available (missing API key)")
-            except (ImportError, AttributeError, RuntimeError, ValueError, ConnectionError, asyncio.TimeoutError) as e:
+            except (
+                ImportError,
+                AttributeError,
+                RuntimeError,
+                ValueError,
+                ConnectionError,
+                asyncio.TimeoutError,
+            ) as e:
                 logger.error(f"❌ Failed to initialize {name}: {e}")
                 continue
         self._initialized = True
@@ -220,10 +234,7 @@ class VerticeRouter:
     def get_available_providers(self) -> List[str]:
         """Get list of available providers."""
         self._lazy_init()
-        return [
-            name for name, status in self._status.items()
-            if status.can_use()
-        ]
+        return [name for name, status in self._status.items() if status.can_use()]
 
     def route(
         self,
@@ -268,7 +279,8 @@ class VerticeRouter:
 
         # Filter by availability
         available_candidates = [
-            p for p in candidates
+            p
+            for p in candidates
             if p in self._providers and self._status.get(p, ProviderStatus(name=p)).can_use()
         ]
 
@@ -306,7 +318,7 @@ class VerticeRouter:
         messages: List[Dict[str, str]],
         complexity: TaskComplexity = TaskComplexity.MODERATE,
         speed: SpeedRequirement = SpeedRequirement.NORMAL,
-        **kwargs
+        **kwargs,
     ) -> str:
         """
         Generate completion with automatic routing and fallback.
@@ -353,7 +365,7 @@ class VerticeRouter:
         system_prompt: Optional[str] = None,
         complexity: TaskComplexity = TaskComplexity.MODERATE,
         speed: SpeedRequirement = SpeedRequirement.NORMAL,
-        **kwargs
+        **kwargs,
     ) -> AsyncGenerator[str, None]:
         """
         Stream chat with automatic routing and fallback.
@@ -375,9 +387,7 @@ class VerticeRouter:
 
         try:
             async for chunk in provider.stream_chat(
-                messages,
-                system_prompt=system_prompt,
-                **kwargs
+                messages, system_prompt=system_prompt, **kwargs
             ):
                 yield chunk
             status.record_request()
@@ -390,9 +400,7 @@ class VerticeRouter:
                 try:
                     fallback = self._providers[fallback_name]
                     async for chunk in fallback.stream_chat(
-                        messages,
-                        system_prompt=system_prompt,
-                        **kwargs
+                        messages, system_prompt=system_prompt, **kwargs
                     ):
                         yield chunk
                     self._status[fallback_name].record_request()

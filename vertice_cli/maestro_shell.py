@@ -28,6 +28,7 @@ from enum import Enum
 
 # Silence the noise FIRST
 import os
+
 os.environ["GRPC_VERBOSITY"] = "ERROR"
 os.environ["GLOG_minloglevel"] = "3"
 
@@ -59,19 +60,19 @@ console = Console()
 
 # Structured logging (file-only, no terminal pollution)
 logging.basicConfig(
-    filename='maestro.log',
+    filename="maestro.log",
     level=logging.INFO,
-    format='%(asctime)s | %(levelname)s | %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    format="%(asctime)s | %(levelname)s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
 
 # Main app (Typer instance)
 app = AsyncTyper(
     name="maestro",
-    help="🎯 Maestro - AI-Powered Development CLI v7.0",
+    help="🎯 Vértice Maestro - Sovereign Intelligence CLI",
     add_completion=True,
-    rich_markup_mode="rich"
+    rich_markup_mode="rich",
 )
 
 # Sub-apps for modularity
@@ -85,8 +86,10 @@ app.add_typer(config_app, name="config")
 # GLOBAL STATE (Minimalist Context)
 # ============================================================================
 
+
 class GlobalState:
     """Minimal global state - keep it light"""
+
     def __init__(self):
         self.agents = {}
         self.context = {}
@@ -94,18 +97,22 @@ class GlobalState:
         self.llm_client = None
         self.mcp_client = None
 
+
 state = GlobalState()
 
 # ============================================================================
 # OUTPUT FORMATTERS (Beautiful, Fast, Informative)
 # ============================================================================
 
+
 class OutputFormat(str, Enum):
     """Output format options"""
+
     table = "table"
     json = "json"
     markdown = "markdown"
     plain = "plain"
+
 
 def render_plan(data: dict, format: OutputFormat = OutputFormat.table):
     """Render execution plan beautifully"""
@@ -114,7 +121,7 @@ def render_plan(data: dict, format: OutputFormat = OutputFormat.table):
             title="📋 Execution Plan",
             show_header=True,
             header_style="bold cyan",
-            border_style="blue"
+            border_style="blue",
         )
         table.add_column("#", style="dim", width=4)
         table.add_column("Stage", style="cyan")
@@ -125,23 +132,21 @@ def render_plan(data: dict, format: OutputFormat = OutputFormat.table):
             steps_list = stage.get("steps", [])
             if isinstance(steps_list, list):
                 if steps_list and isinstance(steps_list[0], dict):
-                    steps = "\n".join(f"• {s.get('action', s.get('objective', 'Unknown'))}" for s in steps_list)
+                    steps = "\n".join(
+                        f"• {s.get('action', s.get('objective', 'Unknown'))}" for s in steps_list
+                    )
                 else:
                     steps = "\n".join(f"• {s}" for s in steps_list)
             else:
                 steps = str(steps_list)
 
-            table.add_row(
-                str(idx),
-                stage.get("name", "Unknown"),
-                steps,
-                "✓ Ready"
-            )
+            table.add_row(str(idx), stage.get("name", "Unknown"), steps, "✓ Ready")
 
         console.print(table)
 
     elif format == OutputFormat.json:
         import json
+
         console.print_json(json.dumps(data, indent=2))
 
     elif format == OutputFormat.markdown:
@@ -159,10 +164,12 @@ def render_plan(data: dict, format: OutputFormat = OutputFormat.table):
     else:  # plain
         console.print(data)
 
+
 def render_code(code: str, language: str = "python"):
     """Render code with syntax highlighting"""
     syntax = Syntax(code, language, theme="monokai", line_numbers=True)
     console.print(Panel(syntax, title=f"📝 {language.upper()}", border_style="green"))
+
 
 def render_error(error: str, details: Optional[str] = None):
     """Render errors beautifully"""
@@ -171,6 +178,7 @@ def render_error(error: str, details: Optional[str] = None):
         console.print(f"[dim]{details}[/dim]")
     logger.error(f"{error} | {details}")
 
+
 def render_success(message: str, duration: Optional[float] = None):
     """Render success message"""
     if duration:
@@ -178,25 +186,24 @@ def render_success(message: str, duration: Optional[float] = None):
     else:
         console.print(f"\n[bold green]✅ {message}[/bold green]")
 
+
 # ============================================================================
 # ASYNC AGENT EXECUTION (Fast, Non-Blocking, Beautiful)
 # ============================================================================
 
+
 async def execute_agent_task(
-    agent_name: str,
-    prompt: str,
-    context: dict = None,
-    stream: bool = True
+    agent_name: str, prompt: str, context: dict = None, stream: bool = True
 ) -> dict:
     """
     Execute agent task with beautiful streaming output.
-    
+
     Args:
         agent_name: Name of agent (planner, reviewer, explorer)
         prompt: User prompt/request
         context: Additional context
         stream: Enable streaming output
-    
+
     Returns:
         dict: Agent response data
     """
@@ -210,7 +217,7 @@ async def execute_agent_task(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
             console=console,
-            transient=True
+            transient=True,
         ) as progress:
             task_desc = progress.add_task(f"Analyzing: {prompt[:40]}...", total=None)
 
@@ -219,10 +226,7 @@ async def execute_agent_task(
             if not agent:
                 raise ValueError(f"Agent '{agent_name}' not initialized")
 
-            agent_task = AgentTask(
-                request=prompt,
-                context=context or {}
-            )
+            agent_task = AgentTask(request=prompt, context=context or {})
 
             response: AgentResponse = await agent.execute(agent_task)
             progress.update(task_desc, completed=True)
@@ -239,9 +243,11 @@ async def execute_agent_task(
         render_error(f"{agent_name} failed", str(e))
         raise
 
+
 # ============================================================================
 # INITIALIZATION (Lazy Loading - Fast Startup)
 # ============================================================================
+
 
 async def ensure_initialized():
     """Lazy initialization - only when needed"""
@@ -256,9 +262,9 @@ async def ensure_initialized():
         state.mcp_client = MCPClient()
 
         # Initialize agents (lazy)
-        state.agents['planner'] = PlannerAgent(state.llm_client, state.mcp_client)
-        state.agents['reviewer'] = ReviewerAgent(state.llm_client, state.mcp_client)
-        state.agents['explorer'] = ExplorerAgent(state.llm_client, state.mcp_client)
+        state.agents["planner"] = PlannerAgent(state.llm_client, state.mcp_client)
+        state.agents["reviewer"] = ReviewerAgent(state.llm_client, state.mcp_client)
+        state.agents["explorer"] = ExplorerAgent(state.llm_client, state.mcp_client)
 
         state.initialized = True
         console.print("[green]✓[/green] [dim]Ready[/dim]\n")
@@ -267,19 +273,25 @@ async def ensure_initialized():
         render_error("Initialization failed", str(e))
         raise
 
+
 # ============================================================================
 # COMMANDS: AGENT OPERATIONS
 # ============================================================================
 
+
 @agent_app.async_command("plan")
 async def agent_plan(
     goal: Annotated[str, typer.Argument(help="What do you want to accomplish?")],
-    output: Annotated[OutputFormat, typer.Option("--output", "-o", help="Output format")] = OutputFormat.table,
-    context_file: Annotated[Optional[Path], typer.Option("--context", "-c", help="Context file")] = None,
+    output: Annotated[
+        OutputFormat, typer.Option("--output", "-o", help="Output format")
+    ] = OutputFormat.table,
+    context_file: Annotated[
+        Optional[Path], typer.Option("--context", "-c", help="Context file")
+    ] = None,
 ):
     """
     🎯 Generate execution plan using the Planner agent.
-    
+
     Example:
         maestro agent plan "Implement user authentication with JWT"
         maestro agent plan "Refactor database layer" --output json
@@ -290,11 +302,13 @@ async def agent_plan(
     if context_file and context_file.exists():
         # Load context from file
         import json
+
         with open(context_file) as f:
             context = json.load(f)
 
     result = await execute_agent_task("planner", goal, context)
     render_plan(result, output)
+
 
 @agent_app.async_command("review")
 async def agent_review(
@@ -304,7 +318,7 @@ async def agent_review(
 ):
     """
     🔍 Review code using the Reviewer agent.
-    
+
     Example:
         maestro agent review src/auth.py
         maestro agent review . --deep
@@ -317,9 +331,13 @@ async def agent_review(
         raise typer.Exit(1)
 
     context = {
-        "files": [str(target_path)] if target_path.is_file() else [str(f) for f in target_path.rglob("*.py")],
+        "files": (
+            [str(target_path)]
+            if target_path.is_file()
+            else [str(f) for f in target_path.rglob("*.py")]
+        ),
         "deep_mode": deep,
-        "auto_fix": fix
+        "auto_fix": fix,
     }
 
     result = await execute_agent_task("reviewer", f"Review {target}", context)
@@ -338,28 +356,31 @@ async def agent_review(
                 issue.get("severity", "UNKNOWN"),
                 issue.get("file", ""),
                 str(issue.get("line", "")),
-                issue.get("message", "")[:60]
+                issue.get("message", "")[:60],
             )
 
         console.print(table)
         console.print(f"\n[dim]Score: {report.get('score', 0)}/100[/dim]")
         console.print(f"[dim]Approved: {report.get('approved', False)}[/dim]")
 
+
 @agent_app.async_command("explore")
 async def agent_explore(
-    operation: Annotated[str, typer.Argument(help="Operation: map, blast-radius, search, insights")],
+    operation: Annotated[
+        str, typer.Argument(help="Operation: map, blast-radius, search, insights")
+    ],
     target: Annotated[Optional[str], typer.Argument(help="Target entity/file")] = None,
     root: Annotated[Path, typer.Option("--root", "-r", help="Repository root")] = Path("."),
 ):
     """
     🗺️  Explore codebase using the Explorer agent.
-    
+
     Operations:
         map          - Build repository knowledge graph
         blast-radius - Analyze impact of changes
         search       - Semantic code search
         insights     - Generate architectural insights
-    
+
     Example:
         maestro agent explore map
         maestro agent explore blast-radius "authenticate_user"
@@ -367,10 +388,7 @@ async def agent_explore(
     """
     await ensure_initialized()
 
-    context = {
-        "operation": operation,
-        "root_dir": str(root)
-    }
+    context = {"operation": operation, "root_dir": str(root)}
 
     if target:
         context["target"] = target
@@ -380,38 +398,44 @@ async def agent_explore(
 
     # Render based on operation
     if operation == "map":
-        console.print(Panel(
-            f"""[bold]Repository Map[/bold]
+        console.print(
+            Panel(
+                f"""[bold]Repository Map[/bold]
             
 📊 Total Entities: {result.get('total_entities', 0)}
 📁 Files: {result.get('files_analyzed', 0)}
 🔥 Hotspots: {len(result.get('hotspots', []))}
 💀 Dead Code: {result.get('dead_code', 0)} entities""",
-            border_style="cyan"
-        ))
+                border_style="cyan",
+            )
+        )
 
-        if result.get('hotspots'):
+        if result.get("hotspots"):
             console.print("\n[bold yellow]🔥 Hotspots (High Coupling):[/bold yellow]")
-            for hotspot in result['hotspots'][:5]:
+            for hotspot in result["hotspots"][:5]:
                 console.print(f"  • {hotspot}")
 
     elif operation == "blast-radius":
-        console.print(Panel(
-            f"""[bold]Blast Radius Analysis[/bold]
+        console.print(
+            Panel(
+                f"""[bold]Blast Radius Analysis[/bold]
             
 🎯 Target: {target}
 ⚠️  Risk Level: {result.get('risk_level', 'UNKNOWN')}
 📦 Impacted Files: {len(result.get('impacted_files', []))}
 🔗 Dependencies: {len(result.get('transitive_dependencies', []))}""",
-            border_style="red" if result.get('risk_level') == 'HIGH' else "yellow"
-        ))
+                border_style="red" if result.get("risk_level") == "HIGH" else "yellow",
+            )
+        )
 
     else:
         console.print(result)
 
+
 # ============================================================================
 # COMMANDS: CONFIGURATION
 # ============================================================================
+
 
 @config_app.command("show")
 def config_show():
@@ -425,7 +449,7 @@ def config_show():
         "agents_initialized": str(state.initialized),
         "python_version": sys.version.split()[0],
         "context_size": len(state.context),
-        "available_agents": ", ".join(state.agents.keys()) if state.agents else "None"
+        "available_agents": ", ".join(state.agents.keys()) if state.agents else "None",
     }
 
     for key, value in config.items():
@@ -433,9 +457,10 @@ def config_show():
 
     console.print(table)
 
+
 @config_app.command("reset")
 def config_reset(
-    force: Annotated[bool, typer.Option("--force", "-f", help="Skip confirmation")] = False
+    force: Annotated[bool, typer.Option("--force", "-f", help="Skip confirmation")] = False,
 ):
     """🔄 Reset configuration to defaults"""
     if not force:
@@ -448,66 +473,78 @@ def config_reset(
     state.initialized = False
     render_success("Configuration reset")
 
+
 # ============================================================================
 # ROOT COMMANDS (Top-level convenience)
 # ============================================================================
 
+
 @app.command()
 def version():
     """📦 Show version information"""
-    console.print(Panel.fit(
-        "[bold cyan]Maestro Shell v7.0[/bold cyan]\n"
-        "[dim]The Ultimate AI-Powered CLI (2025)[/dim]\n\n"
-        "Built with:\n"
-        "  • Typer (CLI framework)\n"
-        "  • Rich (Terminal UI)\n"
-        "  • async-typer (Async support)",
-        border_style="cyan"
-    ))
+    console.print(
+        Panel.fit(
+            "[bold cyan]Maestro Shell v7.0[/bold cyan]\n"
+            "[dim]The Ultimate AI-Powered CLI (2025)[/dim]\n\n"
+            "Built with:\n"
+            "  • Typer (CLI framework)\n"
+            "  • Rich (Terminal UI)\n"
+            "  • async-typer (Async support)",
+            border_style="cyan",
+        )
+    )
+
 
 @app.command()
 def info():
     """ℹ️  System information"""
-    console.print(Panel(
-        f"""[bold]System Information[/bold]
+    console.print(
+        Panel(
+            f"""[bold]System Information[/bold]
 
 🐍 Python: {sys.version.split()[0]}
 📁 Working Directory: {Path.cwd()}
 📝 Log File: maestro.log
 🤖 Agents: {len(state.agents)} initialized
 💾 Context Size: {len(state.context)} items""",
-        border_style="blue"
-    ))
+            border_style="blue",
+        )
+    )
+
 
 # ============================================================================
 # STARTUP HOOK (Welcome Message)
 # ============================================================================
 
+
 @app.callback(invoke_without_command=True)
 def main(
     ctx: typer.Context,
-    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Verbose mode")] = False
+    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Verbose mode")] = False,
 ):
     """
     🎯 Maestro - AI-Powered Development CLI v7.0
-    
+
     The supersonic, reliable, minimal shell for AI-assisted development.
     """
     if ctx.invoked_subcommand is None:
         # Show welcome if no command
-        console.print(Panel.fit(
-            "[bold cyan]🎯 Maestro Shell v7.0[/bold cyan]\n\n"
-            "Quick Start:\n"
-            "  [cyan]maestro agent plan[/cyan] \"your goal\"\n"
-            "  [cyan]maestro agent review[/cyan] src/\n"
-            "  [cyan]maestro agent explore[/cyan] map\n\n"
-            "Type [cyan]maestro --help[/cyan] for all commands",
-            border_style="cyan"
-        ))
+        console.print(
+            Panel.fit(
+                "[bold cyan]🎯 Maestro Shell v7.0[/bold cyan]\n\n"
+                "Quick Start:\n"
+                '  [cyan]maestro agent plan[/cyan] "your goal"\n'
+                "  [cyan]maestro agent review[/cyan] src/\n"
+                "  [cyan]maestro agent explore[/cyan] map\n\n"
+                "Type [cyan]maestro --help[/cyan] for all commands",
+                border_style="cyan",
+            )
+        )
 
     if verbose:
         logging.getLogger().setLevel(logging.DEBUG)
         console.print("[dim]Verbose mode enabled[/dim]")
+
 
 # ============================================================================
 # ENTRY POINT

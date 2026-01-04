@@ -34,9 +34,9 @@ from rich.table import Table
 from rich import box
 
 
-
 class CalloutType(Enum):
     """Callout box types."""
+
     INFO = "info"
     WARNING = "warning"
     ERROR = "error"
@@ -48,7 +48,7 @@ class CalloutType(Enum):
 class EnhancedMarkdown:
     """
     Enhanced markdown renderer with 2025 features.
-    
+
     Supports:
     - Standard Markdown (CommonMark)
     - Syntax-highlighted code blocks
@@ -57,13 +57,13 @@ class EnhancedMarkdown:
     - Mermaid diagrams (ASCII rendering)
     - LaTeX math (ASCII rendering)
     - Collapsible sections
-    
+
     Examples:
         renderer = EnhancedMarkdown()
-        
+
         # Render markdown
         renderer.render("# Hello\\n\\nThis is **bold**.")
-        
+
         # With code block
         md = '''
         ```python
@@ -72,7 +72,7 @@ class EnhancedMarkdown:
         ```
         '''
         renderer.render(md)
-        
+
         # With callout
         md = '''
         > [!WARNING]
@@ -83,32 +83,21 @@ class EnhancedMarkdown:
 
     # Callout patterns
     CALLOUT_PATTERN = re.compile(
-        r'^> \[!(INFO|WARNING|ERROR|SUCCESS|TIP|NOTE)\]\s*\n((?:> .*\n?)*)',
-        re.MULTILINE
+        r"^> \[!(INFO|WARNING|ERROR|SUCCESS|TIP|NOTE)\]\s*\n((?:> .*\n?)*)", re.MULTILINE
     )
 
     # Diff block pattern
-    DIFF_PATTERN = re.compile(
-        r'```diff\n(.*?)\n```',
-        re.DOTALL
-    )
+    DIFF_PATTERN = re.compile(r"```diff\n(.*?)\n```", re.DOTALL)
 
     # Mermaid diagram pattern
-    MERMAID_PATTERN = re.compile(
-        r'```mermaid\n(.*?)\n```',
-        re.DOTALL
-    )
+    MERMAID_PATTERN = re.compile(r"```mermaid\n(.*?)\n```", re.DOTALL)
 
     # LaTeX math pattern
-    MATH_PATTERN = re.compile(
-        r'\$\$(.*?)\$\$',
-        re.DOTALL
-    )
+    MATH_PATTERN = re.compile(r"\$\$(.*?)\$\$", re.DOTALL)
 
     # Collapsible section pattern
     COLLAPSIBLE_PATTERN = re.compile(
-        r'<details>\s*<summary>(.*?)</summary>\s*(.*?)</details>',
-        re.DOTALL
+        r"<details>\s*<summary>(.*?)</summary>\s*(.*?)</details>", re.DOTALL
     )
 
     def __init__(
@@ -119,7 +108,7 @@ class EnhancedMarkdown:
     ):
         """
         Initialize enhanced markdown renderer.
-        
+
         Args:
             console: Rich console
             show_line_numbers: Show line numbers in code blocks
@@ -132,7 +121,7 @@ class EnhancedMarkdown:
     def render(self, markdown: str, title: Optional[str] = None) -> None:
         """
         Render markdown to console.
-        
+
         Args:
             markdown: Markdown content
             title: Optional panel title
@@ -155,10 +144,10 @@ class EnhancedMarkdown:
     def _preprocess(self, markdown: str) -> str:
         """
         Pre-process markdown for enhanced features.
-        
+
         Args:
             markdown: Raw markdown
-        
+
         Returns:
             Processed markdown
         """
@@ -182,24 +171,24 @@ class EnhancedMarkdown:
     def _process_callouts(self, markdown: str) -> str:
         """
         Process callout boxes.
-        
+
         Syntax:
             > [!INFO]
             > This is an info callout.
-        
+
         Args:
             markdown: Markdown content
-        
+
         Returns:
             Processed markdown
         """
+
         def replace_callout(match: Match[str]) -> str:
             callout_type = match.group(1).lower()
             content = match.group(2)
 
             # Remove leading "> " from each line
-            lines = [line[2:] if line.startswith("> ") else line
-                     for line in content.split("\n")]
+            lines = [line[2:] if line.startswith("> ") else line for line in content.split("\n")]
             content = "\n".join(lines).strip()
 
             # Render callout panel
@@ -222,13 +211,14 @@ class EnhancedMarkdown:
     def _process_diff_blocks(self, markdown: str) -> str:
         """
         Process diff code blocks with +/- indicators.
-        
+
         Args:
             markdown: Markdown content
-        
+
         Returns:
             Processed markdown
         """
+
         def replace_diff(match: Match[str]) -> str:
             diff_content = match.group(1)
 
@@ -251,13 +241,14 @@ class EnhancedMarkdown:
     def _process_mermaid(self, markdown: str) -> str:
         """
         Process Mermaid diagrams (ASCII fallback).
-        
+
         Args:
             markdown: Markdown content
-        
+
         Returns:
             Processed markdown
         """
+
         def replace_mermaid(match: Match[str]) -> str:
             diagram = match.group(1)
 
@@ -272,10 +263,10 @@ class EnhancedMarkdown:
     def _mermaid_to_ascii(self, diagram: str) -> str:
         """
         Convert Mermaid to ASCII (basic implementation).
-        
+
         Args:
             diagram: Mermaid diagram code
-        
+
         Returns:
             ASCII representation
         """
@@ -300,13 +291,14 @@ class EnhancedMarkdown:
     def _process_math(self, markdown: str) -> str:
         """
         Process LaTeX math (ASCII fallback).
-        
+
         Args:
             markdown: Markdown content
-        
+
         Returns:
             Processed markdown
         """
+
         def replace_math(match: Match[str]) -> str:
             math = match.group(1).strip()
 
@@ -319,31 +311,31 @@ class EnhancedMarkdown:
     def _latex_to_ascii(self, latex: str) -> str:
         """
         Convert LaTeX to ASCII (basic implementation).
-        
+
         Args:
             latex: LaTeX math code
-        
+
         Returns:
             ASCII representation
         """
         # Basic replacements
         replacements = {
-            r'\frac': '/',
-            r'\times': '×',
-            r'\div': '÷',
-            r'\sum': 'Σ',
-            r'\prod': 'Π',
-            r'\int': '∫',
-            r'\sqrt': '√',
-            r'\alpha': 'α',
-            r'\beta': 'β',
-            r'\gamma': 'γ',
-            r'\delta': 'δ',
-            r'\pi': 'π',
-            r'\infty': '∞',
-            r'\leq': '≤',
-            r'\geq': '≥',
-            r'\neq': '≠',
+            r"\frac": "/",
+            r"\times": "×",
+            r"\div": "÷",
+            r"\sum": "Σ",
+            r"\prod": "Π",
+            r"\int": "∫",
+            r"\sqrt": "√",
+            r"\alpha": "α",
+            r"\beta": "β",
+            r"\gamma": "γ",
+            r"\delta": "δ",
+            r"\pi": "π",
+            r"\infty": "∞",
+            r"\leq": "≤",
+            r"\geq": "≥",
+            r"\neq": "≠",
         }
 
         result = latex
@@ -351,20 +343,21 @@ class EnhancedMarkdown:
             result = result.replace(tex, ascii_char)
 
         # Remove braces
-        result = result.replace('{', '').replace('}', '')
+        result = result.replace("{", "").replace("}", "")
 
         return result
 
     def _process_collapsible(self, markdown: str) -> str:
         """
         Process collapsible sections.
-        
+
         Args:
             markdown: Markdown content
-        
+
         Returns:
             Processed markdown
         """
+
         def replace_collapsible(match: Match[str]) -> str:
             summary = match.group(1).strip()
             content = match.group(2).strip()
@@ -379,7 +372,7 @@ class EnhancedMarkdown:
 class CodeBlock:
     """
     Enhanced code block renderer.
-    
+
     Features:
     - Syntax highlighting (50+ languages)
     - Line numbers
@@ -398,7 +391,7 @@ class CodeBlock:
     ):
         """
         Initialize code block.
-        
+
         Args:
             code: Code content
             language: Programming language
@@ -415,7 +408,7 @@ class CodeBlock:
     def render(self, console: Optional[Console] = None) -> None:
         """
         Render code block.
-        
+
         Args:
             console: Rich console
         """
@@ -446,7 +439,7 @@ class CodeBlock:
 class DiffViewer:
     """
     Side-by-side diff viewer (ASCII).
-    
+
     Shows before/after comparison.
     """
 
@@ -458,7 +451,7 @@ class DiffViewer:
     ):
         """
         Initialize diff viewer.
-        
+
         Args:
             before: Original code
             after: Modified code
@@ -471,7 +464,7 @@ class DiffViewer:
     def render(self, console: Optional[Console] = None) -> None:
         """
         Render diff comparison.
-        
+
         Args:
             console: Rich console
         """
@@ -516,7 +509,7 @@ def render_markdown(
 ) -> None:
     """
     Render markdown (convenience function).
-    
+
     Args:
         markdown: Markdown content
         title: Optional title
@@ -533,7 +526,7 @@ def render_code(
 ) -> None:
     """
     Render code block (convenience function).
-    
+
     Args:
         code: Code content
         language: Programming language
@@ -551,7 +544,7 @@ def render_diff(
 ) -> None:
     """
     Render diff comparison (convenience function).
-    
+
     Args:
         before: Original code
         after: Modified code

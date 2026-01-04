@@ -38,15 +38,15 @@ async def process_tool(repl: "MasterpieceREPL", tool: str, args: str) -> None:
         args: Tool arguments
     """
     try:
-        if tool == '/read':
+        if tool == "/read":
             await _handle_read(repl, args)
-        elif tool == '/write':
+        elif tool == "/write":
             await _handle_write(repl, args)
-        elif tool == '/edit':
+        elif tool == "/edit":
             await _handle_edit(repl, args)
-        elif tool == '/run':
+        elif tool == "/run":
             await _handle_run(repl, args)
-        elif tool == '/git':
+        elif tool == "/git":
             await _handle_git(repl, args)
 
     except Exception as e:
@@ -62,18 +62,23 @@ async def _handle_read(repl: "MasterpieceREPL", args: str) -> None:
 
     repl.console.print(f"[dim]📖 Reading {args}...[/dim]")
     result = await repl.file_read.execute(path=args)
-    content = str(result.content) if hasattr(result, 'content') else str(result)
+    content = str(result.content) if hasattr(result, "content") else str(result)
 
     # Detect language for syntax highlighting
-    ext = Path(args).suffix.lstrip('.')
+    ext = Path(args).suffix.lstrip(".")
     lang_map = {
-        'py': 'python', 'js': 'javascript', 'ts': 'typescript',
-        'json': 'json', 'yaml': 'yaml', 'yml': 'yaml',
-        'md': 'markdown', 'sh': 'bash'
+        "py": "python",
+        "js": "javascript",
+        "ts": "typescript",
+        "json": "json",
+        "yaml": "yaml",
+        "yml": "yaml",
+        "md": "markdown",
+        "sh": "bash",
     }
-    language = lang_map.get(ext, 'text')
+    language = lang_map.get(ext, "text")
 
-    if language != 'text':
+    if language != "text":
         syntax = Syntax(content, language, theme="monokai", line_numbers=True)
         repl.console.print(Panel(syntax, title=f"📖 {args}", border_style="green"))
     else:
@@ -109,14 +114,12 @@ async def _handle_run(repl: "MasterpieceREPL", args: str) -> None:
 
     repl.console.print(f"[dim]⚡ Running: {args}[/dim]")
     result = await repl.bash_tool.execute(command=args)
-    output = result.output if hasattr(result, 'output') else str(result)
+    output = result.output if hasattr(result, "output") else str(result)
 
-    repl.console.print(Panel(
-        output if output else "[dim]No output[/dim]",
-        title="⚡ Output",
-        border_style="green"
-    ))
-    duration = result.duration if hasattr(result, 'duration') else '?'
+    repl.console.print(
+        Panel(output if output else "[dim]No output[/dim]", title="⚡ Output", border_style="green")
+    )
+    duration = result.duration if hasattr(result, "duration") else "?"
     repl.console.print(f"[dim]✓ Completed in {duration}s[/dim]\n")
 
 
@@ -126,10 +129,10 @@ async def _handle_git(repl: "MasterpieceREPL", args: str) -> None:
         repl.console.print("[yellow]Usage: /git status | diff[/yellow]\n")
         return
 
-    if 'status' in args:
+    if "status" in args:
         repl.console.print("[dim]🌿 Git status...[/dim]")
         result = await repl.git_status.execute()
-    elif 'diff' in args:
+    elif "diff" in args:
         repl.console.print("[dim]🌿 Git diff...[/dim]")
         result = await repl.git_diff.execute()
     else:

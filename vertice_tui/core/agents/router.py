@@ -149,8 +149,8 @@ class AgentRouter:
     # Keywords that indicate NOT to route (general chat or direct tool use)
     NO_ROUTE_PATTERNS: List[str] = [
         r"^(oi|ol[aá]|hi|hello|hey|e\s*a[ií])\b",  # Greetings
-        r"^(obrigad[oa]|thanks?|valeu|vlw)\b",      # Thanks
-        r"^(ok|certo|entend[io]|got\s*it)\b",      # Acknowledgments
+        r"^(obrigad[oa]|thanks?|valeu|vlw)\b",  # Thanks
+        r"^(ok|certo|entend[io]|got\s*it)\b",  # Acknowledgments
         # File creation/save commands
         r"\b(salv[ae]|save|cri[ae]|create|escrev[ae]|write)\s*(o[s]?\s*)?(arquivo|file)",
         r"\b(grav[ae]|persist|gravar)\s*(no\s*)?(disco|disk)",
@@ -192,15 +192,12 @@ class AgentRouter:
     def __init__(self) -> None:
         """Initialize router with compiled patterns."""
         self._compiled_patterns: Dict[str, List[Tuple[re.Pattern[str], float]]] = {}
-        self._no_route_patterns = [
-            re.compile(p, re.IGNORECASE) for p in self.NO_ROUTE_PATTERNS
-        ]
+        self._no_route_patterns = [re.compile(p, re.IGNORECASE) for p in self.NO_ROUTE_PATTERNS]
 
         # Pre-compile all patterns
         for agent, patterns in self.INTENT_PATTERNS.items():
             self._compiled_patterns[agent] = [
-                (re.compile(pattern, re.IGNORECASE), weight)
-                for pattern, weight in patterns
+                (re.compile(pattern, re.IGNORECASE), weight) for pattern, weight in patterns
             ]
 
     def should_route(self, message: str) -> bool:
@@ -271,9 +268,9 @@ class AgentRouter:
         if len(high_conf) > 1:
             suggestions = [f"- `/{a}` ({int(c*100)}%)" for a, c in high_conf[:3]]
             return (
-                "🤔 Multiple agents could help:\n" +
-                "\n".join(suggestions) +
-                "\n\nType one of the commands or ask naturally."
+                "🤔 Multiple agents could help:\n"
+                + "\n".join(suggestions)
+                + "\n\nType one of the commands or ask naturally."
             )
 
         return None

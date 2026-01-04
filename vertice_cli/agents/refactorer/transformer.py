@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 # LibCST for format-preserving AST transformations
 try:
     import libcst as cst
+
     HAS_LIBCST = True
 except ImportError:
     HAS_LIBCST = False
@@ -44,11 +45,7 @@ class ASTTransformer:
         self.use_libcst = use_libcst and HAS_LIBCST
 
     def extract_method(
-        self,
-        source_code: str,
-        start_line: int,
-        end_line: int,
-        new_method_name: str
+        self, source_code: str, start_line: int, end_line: int, new_method_name: str
     ) -> str:
         """Extract lines into a new method.
 
@@ -64,20 +61,12 @@ class ASTTransformer:
             Transformed source code
         """
         if self.use_libcst:
-            return self._extract_method_libcst(
-                source_code, start_line, end_line, new_method_name
-            )
+            return self._extract_method_libcst(source_code, start_line, end_line, new_method_name)
         else:
-            return self._extract_method_ast(
-                source_code, start_line, end_line, new_method_name
-            )
+            return self._extract_method_ast(source_code, start_line, end_line, new_method_name)
 
     def rename_symbol(
-        self,
-        source_code: str,
-        old_name: str,
-        new_name: str,
-        scope: Optional[str] = None
+        self, source_code: str, old_name: str, new_name: str, scope: Optional[str] = None
     ) -> str:
         """Rename symbol (function, variable, class).
 
@@ -97,11 +86,7 @@ class ASTTransformer:
         else:
             return self._rename_symbol_ast(source_code, old_name, new_name)
 
-    def inline_method(
-        self,
-        source_code: str,
-        method_name: str
-    ) -> str:
+    def inline_method(self, source_code: str, method_name: str) -> str:
         """Inline a method (replace calls with method body).
 
         Args:
@@ -114,11 +99,7 @@ class ASTTransformer:
         # TODO: Implement method inlining
         return source_code
 
-    def modernize_syntax(
-        self,
-        source_code: str,
-        target_version: str = "3.12"
-    ) -> str:
+    def modernize_syntax(self, source_code: str, target_version: str = "3.12") -> str:
         """Modernize Python syntax.
 
         Examples:
@@ -136,13 +117,7 @@ class ASTTransformer:
         # TODO: Implement syntax modernization
         return source_code
 
-    def _extract_method_libcst(
-        self,
-        code: str,
-        start: int,
-        end: int,
-        name: str
-    ) -> str:
+    def _extract_method_libcst(self, code: str, start: int, end: int, name: str) -> str:
         """Extract method using LibCST (format-preserving).
 
         Args:
@@ -161,13 +136,7 @@ class ASTTransformer:
         # TODO: Implement proper method extraction
         return module.code
 
-    def _rename_symbol_libcst(
-        self,
-        code: str,
-        old: str,
-        new: str,
-        scope: Optional[str]
-    ) -> str:
+    def _rename_symbol_libcst(self, code: str, old: str, new: str, scope: Optional[str]) -> str:
         """Rename using LibCST.
 
         Args:
@@ -187,11 +156,7 @@ class ASTTransformer:
         class RenameTransformer(cst.CSTTransformer):
             """CST transformer for renaming symbols."""
 
-            def leave_Name(
-                self,
-                original_node: Any,
-                updated_node: Any
-            ) -> Any:
+            def leave_Name(self, original_node: Any, updated_node: Any) -> Any:
                 if original_node.value == old:
                     return updated_node.with_changes(value=new)
                 return updated_node
@@ -199,13 +164,7 @@ class ASTTransformer:
         transformed = module.visit(RenameTransformer())
         return transformed.code
 
-    def _extract_method_ast(
-        self,
-        code: str,
-        start: int,
-        end: int,
-        name: str
-    ) -> str:
+    def _extract_method_ast(self, code: str, start: int, end: int, name: str) -> str:
         """Fallback AST-based extraction (doesn't preserve format).
 
         Args:
@@ -217,25 +176,18 @@ class ASTTransformer:
         Returns:
             Transformed code
         """
-        lines = code.split('\n')
-        extracted_lines = lines[start-1:end]
+        lines = code.split("\n")
+        extracted_lines = lines[start - 1 : end]
 
         # Create new method
-        new_method = f"def {name}():\n" + '\n'.join(
-            f"    {line}" for line in extracted_lines
-        )
+        new_method = f"def {name}():\n" + "\n".join(f"    {line}" for line in extracted_lines)
 
         # Replace in original
-        lines[start-1:end] = [f"    {name}()"]
+        lines[start - 1 : end] = [f"    {name}()"]
 
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
-    def _rename_symbol_ast(
-        self,
-        code: str,
-        old: str,
-        new: str
-    ) -> str:
+    def _rename_symbol_ast(self, code: str, old: str, new: str) -> str:
         """Fallback AST-based rename.
 
         Simple string replacement - not scope-aware.

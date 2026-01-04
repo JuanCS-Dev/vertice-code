@@ -68,7 +68,7 @@ class AgentStreamPanel:
             border_style=self.color,
             box=ROUNDED,
             padding=(1, 2),
-            style=Style(bgcolor=COLORS['bg_card'])
+            style=Style(bgcolor=COLORS["bg_card"]),
         )
 
     def _build_header(self) -> Text:
@@ -87,9 +87,7 @@ class AgentStreamPanel:
         # Status indicator
         if self.state.status == AgentStatus.EXECUTING:
             # Animated spinner
-            spinner = self.SPINNER_FRAMES[
-                self.state.spinner_frame % len(self.SPINNER_FRAMES)
-            ]
+            spinner = self.SPINNER_FRAMES[self.state.spinner_frame % len(self.SPINNER_FRAMES)]
             header.append(f" {spinner}", style=self.color)
 
         elif self.state.status == AgentStatus.THINKING:
@@ -103,11 +101,7 @@ class AgentStreamPanel:
 
         return header
 
-    def _build_content(
-        self,
-        show_cursor: bool,
-        max_display_lines: int
-    ) -> Text:
+    def _build_content(self, show_cursor: bool, max_display_lines: int) -> Text:
         """
         Build content area with streaming text.
 
@@ -130,11 +124,7 @@ class AgentStreamPanel:
         # Display content
         for line in display_lines:
             # Use primary text color for executor, keep neon for others
-            text_color = (
-                COLORS['text_primary']
-                if self.color == COLORS['neon_cyan']
-                else self.color
-            )
+            text_color = COLORS["text_primary"] if self.color == COLORS["neon_cyan"] else self.color
             content.append(line + "\n", style=text_color)
 
         # Add animated cursor if executing
@@ -151,13 +141,13 @@ class AgentStreamPanel:
         # Add completion indicator
         if self.state.status == AgentStatus.DONE:
             content.append("\n\n✓ ", style=f"bold {COLORS['neon_green']}")
-            content.append("Complete", style=COLORS['neon_green'])
+            content.append("Complete", style=COLORS["neon_green"])
 
         # Add error message if present
         if self.state.status == AgentStatus.ERROR and self.state.error_message:
             content.append("\n\n✗ ", style=f"bold {COLORS['neon_red']}")
             content.append("Error: ", style=f"bold {COLORS['neon_red']}")
-            content.append(self.state.error_message, style=COLORS['neon_red'])
+            content.append(self.state.error_message, style=COLORS["neon_red"])
 
         return content
 
@@ -188,6 +178,7 @@ class AgentStreamPanel:
 # HELPER FUNCTIONS
 # ============================================================================
 
+
 def create_executor_panel(state: AgentState) -> AgentStreamPanel:
     """
     Create executor agent panel with cyan neon styling.
@@ -198,7 +189,7 @@ def create_executor_panel(state: AgentState) -> AgentStreamPanel:
     Returns:
         Configured AgentStreamPanel
     """
-    return AgentStreamPanel(state, COLORS['neon_cyan'])
+    return AgentStreamPanel(state, COLORS["neon_cyan"])
 
 
 def create_planner_panel(state: AgentState) -> AgentStreamPanel:
@@ -211,7 +202,7 @@ def create_planner_panel(state: AgentState) -> AgentStreamPanel:
     Returns:
         Configured AgentStreamPanel
     """
-    return AgentStreamPanel(state, COLORS['neon_purple'])
+    return AgentStreamPanel(state, COLORS["neon_purple"])
 
 
 def create_reviewer_panel(state: AgentState) -> AgentStreamPanel:
@@ -224,7 +215,7 @@ def create_reviewer_panel(state: AgentState) -> AgentStreamPanel:
     Returns:
         Configured AgentStreamPanel
     """
-    return AgentStreamPanel(state, COLORS['neon_green'])
+    return AgentStreamPanel(state, COLORS["neon_green"])
 
 
 def create_refactorer_panel(state: AgentState) -> AgentStreamPanel:
@@ -237,7 +228,7 @@ def create_refactorer_panel(state: AgentState) -> AgentStreamPanel:
     Returns:
         Configured AgentStreamPanel
     """
-    return AgentStreamPanel(state, COLORS['neon_yellow'])
+    return AgentStreamPanel(state, COLORS["neon_yellow"])
 
 
 def create_explorer_panel(state: AgentState) -> AgentStreamPanel:
@@ -250,4 +241,4 @@ def create_explorer_panel(state: AgentState) -> AgentStreamPanel:
     Returns:
         Configured AgentStreamPanel
     """
-    return AgentStreamPanel(state, COLORS['neon_blue'])
+    return AgentStreamPanel(state, COLORS["neon_blue"])

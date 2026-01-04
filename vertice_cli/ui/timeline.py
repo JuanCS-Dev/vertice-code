@@ -9,6 +9,7 @@ from enum import Enum
 
 class EventType(Enum):
     """Types of recordable events."""
+
     USER_INPUT = "user_input"
     ASSISTANT_RESPONSE = "assistant_response"
     TOOL_CALL = "tool_call"
@@ -21,6 +22,7 @@ class EventType(Enum):
 @dataclass
 class TimelineEvent:
     """Single event in timeline."""
+
     timestamp: datetime
     event_type: EventType
     description: str
@@ -38,18 +40,22 @@ class Timeline:
         self.is_playing: bool = False
         self.playback_speed: float = 1.0
 
-    def record(self, event_type: EventType, description: str, data: Dict = None, duration_ms: float = None):
+    def record(
+        self, event_type: EventType, description: str, data: Dict = None, duration_ms: float = None
+    ):
         """Record new event."""
         event = TimelineEvent(
             timestamp=datetime.now(),
             event_type=event_type,
             description=description,
             data=data or {},
-            duration_ms=duration_ms
+            duration_ms=duration_ms,
         )
         self.events.append(event)
 
-    def get_events(self, event_type: Optional[EventType] = None, since: Optional[datetime] = None) -> List[TimelineEvent]:
+    def get_events(
+        self, event_type: Optional[EventType] = None, since: Optional[datetime] = None
+    ) -> List[TimelineEvent]:
         """Get filtered events."""
         filtered = self.events
 
@@ -94,7 +100,7 @@ class Timeline:
                 "total_events": len(self.events),
                 "start_time": self.events[0].timestamp.isoformat() if self.events else None,
                 "end_time": self.events[-1].timestamp.isoformat() if self.events else None,
-                "export_time": datetime.now().isoformat()
+                "export_time": datetime.now().isoformat(),
             },
             "events": [
                 {
@@ -102,16 +108,16 @@ class Timeline:
                     "type": e.event_type.value,
                     "description": e.description,
                     "data": e.data,
-                    "duration_ms": e.duration_ms
+                    "duration_ms": e.duration_ms,
                 }
                 for e in self.events
-            ]
+            ],
         }
 
         json_str = json.dumps(data, indent=2)
 
         if filepath:
-            with open(filepath, 'w') as f:
+            with open(filepath, "w") as f:
                 f.write(json_str)
 
         return json_str
@@ -127,7 +133,7 @@ class Timeline:
                 event_type=EventType(event_dict["type"]),
                 description=event_dict["description"],
                 data=event_dict.get("data", {}),
-                duration_ms=event_dict.get("duration_ms")
+                duration_ms=event_dict.get("duration_ms"),
             )
             self.events.append(event)
 
@@ -153,5 +159,5 @@ class Timeline:
             "session_duration_seconds": duration,
             "total_processing_time_ms": total_duration,
             "start_time": self.events[0].timestamp.isoformat(),
-            "end_time": self.events[-1].timestamp.isoformat()
+            "end_time": self.events[-1].timestamp.isoformat(),
         }

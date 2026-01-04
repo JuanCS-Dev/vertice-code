@@ -25,6 +25,7 @@ from textual.message import Message
 # Try to import textual-image
 try:
     from textual_image.widget import Image as TextualImage
+
     TEXTUAL_IMAGE_AVAILABLE = True
 except ImportError:
     TEXTUAL_IMAGE_AVAILABLE = False
@@ -71,12 +72,14 @@ class ImagePreview(Widget):
 
     class ImageLoaded(Message):
         """Image was loaded successfully."""
+
         def __init__(self, path: str) -> None:
             self.path = path
             super().__init__()
 
     class ImageError(Message):
         """Failed to load image."""
+
         def __init__(self, error: str) -> None:
             self.error = error
             super().__init__()
@@ -113,9 +116,8 @@ class ImagePreview(Widget):
                 yield Static(f"[Error: {e}]", classes="image-fallback")
         else:
             yield Static(
-                "[textual-image not installed]\n"
-                "pip install textual-image[textual]",
-                classes="image-fallback"
+                "[textual-image not installed]\n" "pip install textual-image[textual]",
+                classes="image-fallback",
             )
 
     def on_mount(self) -> None:
@@ -165,7 +167,7 @@ class ImageGallery(Widget):
         try:
             container = self.query_one("Vertical")
             container.mount(ImagePreview(path))
-        except Exception:
+        except (AttributeError, ValueError, RuntimeError):
             pass
 
     def clear(self) -> None:
@@ -174,7 +176,7 @@ class ImageGallery(Widget):
         try:
             container = self.query_one("Vertical")
             container.remove_children()
-        except Exception:
+        except (AttributeError, ValueError, RuntimeError):
             pass
 
 
@@ -188,10 +190,11 @@ def check_image_support() -> dict:
     if TEXTUAL_IMAGE_AVAILABLE:
         try:
             from textual_image import renderable
+
             # Check available protocols
             result["protocols"] = ["unicode"]  # Always available
             # TGP and Sixel detection would need terminal query
-        except Exception:
+        except (ImportError, AttributeError):
             pass
 
     return result

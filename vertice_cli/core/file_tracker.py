@@ -59,10 +59,7 @@ class FileOperationTracker:
         path_str = str(path)
 
         # Store operation
-        self.operations[path_str] = {
-            "status": "analyzing",
-            "timestamp": time.time()
-        }
+        self.operations[path_str] = {"status": "analyzing", "timestamp": time.time()}
 
         # Emit event
         if self.callback:
@@ -71,12 +68,7 @@ class FileOperationTracker:
         # Small delay for visual feedback
         await asyncio.sleep(0.05)
 
-    async def track_write(
-        self,
-        path: str | Path,
-        lines_added: int = 0,
-        lines_removed: int = 0
-    ):
+    async def track_write(self, path: str | Path, lines_added: int = 0, lines_removed: int = 0):
         """
         Track file write operation.
 
@@ -95,7 +87,7 @@ class FileOperationTracker:
             "status": "modified",
             "lines_added": lines_added,
             "lines_removed": lines_removed,
-            "timestamp": time.time()
+            "timestamp": time.time(),
         }
 
         # Emit event
@@ -122,7 +114,7 @@ class FileOperationTracker:
             "status": "saved",
             "lines_added": lines_added,
             "lines_removed": lines_removed,
-            "timestamp": time.time()
+            "timestamp": time.time(),
         }
 
         # Emit event
@@ -145,10 +137,7 @@ class FileOperationTracker:
         path_str = str(path)
 
         # Store operation
-        self.operations[path_str] = {
-            "status": "creating",
-            "timestamp": time.time()
-        }
+        self.operations[path_str] = {"status": "creating", "timestamp": time.time()}
 
         # Emit event
         if self.callback:
@@ -168,11 +157,7 @@ class FileOperationTracker:
         path_str = str(path)
 
         # Store operation
-        self.operations[path_str] = {
-            "status": "error",
-            "error": error,
-            "timestamp": time.time()
-        }
+        self.operations[path_str] = {"status": "error", "error": error, "timestamp": time.time()}
 
         # Emit event
         if self.callback:
@@ -204,12 +189,7 @@ class FileOperationTracker:
 
         return (lines_added, lines_removed)
 
-    async def track_edit(
-        self,
-        path: str | Path,
-        old_content: str,
-        new_content: str
-    ):
+    async def track_edit(self, path: str | Path, old_content: str, new_content: str):
         """
         Track file edit with automatic diff calculation.
 
@@ -279,6 +259,7 @@ def set_global_callback(callback: Callable):
 # CONTEXT MANAGER FOR AUTOMATIC TRACKING
 # ============================================================================
 
+
 class TrackedFileOperation:
     """
     Context manager for automatic file operation tracking.
@@ -288,12 +269,7 @@ class TrackedFileOperation:
             content = read_file("src/agent.py")
     """
 
-    def __init__(
-        self,
-        tracker: FileOperationTracker,
-        path: str | Path,
-        operation: str
-    ):
+    def __init__(self, tracker: FileOperationTracker, path: str | Path, operation: str):
         """
         Initialize tracked operation.
 
@@ -340,8 +316,5 @@ class TrackedFileOperation:
         self.old_content = old_content
 
         # Calculate and cache diff
-        lines_added, lines_removed = self.tracker.calculate_diff(
-            old_content,
-            new_content
-        )
+        lines_added, lines_removed = self.tracker.calculate_diff(old_content, new_content)
         self.tracker.diff_cache[str(self.path)] = (lines_added, lines_removed)

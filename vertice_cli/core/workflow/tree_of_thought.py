@@ -29,10 +29,7 @@ class TreeOfThought:
         self.llm = llm_client
 
     async def generate_paths(
-        self,
-        user_goal: str,
-        available_tools: List[str],
-        max_paths: int = 3
+        self, user_goal: str, available_tools: List[str], max_paths: int = 3
     ) -> List[ThoughtPath]:
         """
         Generate multiple solution paths.
@@ -56,10 +53,10 @@ class TreeOfThought:
             response = await self.llm.generate_async(
                 messages=[
                     {"role": "system", "content": self._get_planning_system_prompt()},
-                    {"role": "user", "content": prompt}
+                    {"role": "user", "content": prompt},
                 ],
                 temperature=0.7,  # Higher for creativity
-                max_tokens=1000
+                max_tokens=1000,
             )
 
             # Parse LLM response into paths
@@ -117,14 +114,16 @@ Generate 3 distinct paths."""
         path_sections = llm_response.split("PATH ")
 
         for i, section in enumerate(path_sections[1:], 1):  # Skip first split
-            lines = section.strip().split('\n')
+            lines = section.strip().split("\n")
             if not lines:
                 continue
 
             path = ThoughtPath(
                 path_id=f"path_{i}",
-                description=lines[0].split(':', 1)[-1].strip() if ':' in lines[0] else f"Approach {i}",
-                steps=[]
+                description=(
+                    lines[0].split(":", 1)[-1].strip() if ":" in lines[0] else f"Approach {i}"
+                ),
+                steps=[],
             )
 
             # Extract steps (simplified)
@@ -142,7 +141,7 @@ Generate 3 distinct paths."""
             completeness_score=0.7,
             validation_score=0.7,
             efficiency_score=0.7,
-            total_score=0.7
+            total_score=0.7,
         )
 
     def score_paths(self, paths: List[ThoughtPath]) -> List[ThoughtPath]:
@@ -176,10 +175,7 @@ Generate 3 distinct paths."""
             return 0.5  # No steps defined yet
 
         # Check if steps have all required info
-        complete_steps = sum(
-            1 for step in path.steps
-            if step.tool_name and step.args is not None
-        )
+        complete_steps = sum(1 for step in path.steps if step.tool_name and step.args is not None)
 
         return complete_steps / len(path.steps) if path.steps else 0.5
 
@@ -187,7 +183,7 @@ Generate 3 distinct paths."""
         """Score path validation capability."""
         # Paths with test/verify steps score higher
         has_validation = any(
-            'test' in step.tool_name.lower() or 'verify' in step.tool_name.lower()
+            "test" in step.tool_name.lower() or "verify" in step.tool_name.lower()
             for step in path.steps
         )
 

@@ -124,11 +124,7 @@ class StreamingMarkdownPanel(ScrollableContainer):
         self, event: StreamingMarkdownWidget.BlockDetected
     ) -> None:
         """Handler: block detected."""
-        if (
-            self._status_bar
-            and self._markdown_widget
-            and self._markdown_widget.is_streaming
-        ):
+        if self._status_bar and self._markdown_widget and self._markdown_widget.is_streaming:
             icon = self.BLOCK_ICONS.get(event.block_type, " Block")
             self._status_bar.update(f" Streaming... {icon}")
 

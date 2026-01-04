@@ -29,64 +29,59 @@ CAMADA 4 - OUTPUT SHIELD:
 # Lazy imports for performance
 __all__ = [
     # Input Fortress (Camada 1)
-    'InputValidator',
-    'ValidationResult',
-    'validate_command',
-    'validate_file_path',
-    'PromptShield',
-    'ShieldResult',
-    'InputEnhancer',
-    'EnhancedInput',
-
+    "InputValidator",
+    "ValidationResult",
+    "validate_command",
+    "validate_file_path",
+    "PromptShield",
+    "ShieldResult",
+    "InputEnhancer",
+    "EnhancedInput",
     # Governance Gate (Camada 2)
-    'AuditLogger',
-    'AuditEventType',
-    'audit_log',
-    'audit_governance',
-
+    "AuditLogger",
+    "AuditEventType",
+    "audit_log",
+    "audit_governance",
     # Execution Sandbox (Camada 3)
-    'SecureExecutor',
-    'ExecutionResult',
-    'PythonSandbox',
-    'AtomicFileOps',
-    'AtomicResult',
-    'UndoManager',
-    'AtomicToolChain',
-    'ConcurrencyManager',
-    'ResourceLimits',
-    'RateLimiter',
-    'EncodingSafety',
-
+    "SecureExecutor",
+    "ExecutionResult",
+    "PythonSandbox",
+    "AtomicFileOps",
+    "AtomicResult",
+    "UndoManager",
+    "AtomicToolChain",
+    "ConcurrencyManager",
+    "ResourceLimits",
+    "RateLimiter",
+    "EncodingSafety",
     # Output Shield (Camada 4)
-    'ErrorPresenter',
-    'PresentedError',
-    'SessionManager',
-    'SessionSnapshot',
-    'ContextTracker',
-    'ResolvedReference',
-
+    "ErrorPresenter",
+    "PresentedError",
+    "SessionManager",
+    "SessionSnapshot",
+    "ContextTracker",
+    "ResolvedReference",
     # Memory System (Claude Code Parity)
-    'MemoryManager',
-    'MemoryEntry',
-    'ProjectMemory',
-    'get_memory_manager',
-
+    "MemoryManager",
+    "MemoryEntry",
+    "ProjectMemory",
+    "get_memory_manager",
     # Dependency Injection (Big 3 Patterns)
-    'Scope',
-    'Provider',
-    'ProviderConfig',
-    'Singleton',
-    'Factory',
-    'Transient',
-    'AsyncSingleton',
-    'Configuration',
-    'BaseContainer',
-    'VerticeContainer',
-    'Container',
-    'TestContainer',
-    'Provide',
-    'inject',
-    'with_container',
+    "Scope",
+    "Provider",
+    "ProviderConfig",
+    "Singleton",
+    "Factory",
+    "Transient",
+    "AsyncSingleton",
+    "Configuration",
+    "BaseContainer",
+    "VerticeContainer",
+    "Container",
+    "TestContainer",
+    "Provide",
+    "inject",
+    "with_container",
 ]
 
 
@@ -94,89 +89,136 @@ def __getattr__(name: str):
     """Lazy loading of modules for faster startup."""
 
     # Input Validator
-    if name in ('InputValidator', 'ValidationResult', 'validate_command', 'validate_file_path'):
-        from .input_validator import InputValidator, ValidationResult, validate_command, validate_file_path
+    if name in ("InputValidator", "ValidationResult", "validate_command", "validate_file_path"):
+        from .input_validator import (
+            InputValidator,
+            ValidationResult,
+            validate_command,
+            validate_file_path,
+        )
+
         return locals()[name]
 
     # Prompt Shield
-    if name in ('PromptShield', 'ShieldResult'):
+    if name in ("PromptShield", "ShieldResult"):
         from .prompt_shield import PromptShield, ShieldResult
+
         return locals()[name]
 
     # Input Enhancer
-    if name in ('InputEnhancer', 'EnhancedInput'):
+    if name in ("InputEnhancer", "EnhancedInput"):
         from .input_enhancer import InputEnhancer, EnhancedInput
+
         return locals()[name]
 
     # Audit Logger
-    if name in ('AuditLogger', 'AuditEventType', 'audit_log', 'audit_governance'):
+    if name in ("AuditLogger", "AuditEventType", "audit_log", "audit_governance"):
         from .audit_logger import AuditLogger, AuditEventType, audit_log, audit_governance
+
         return locals()[name]
 
     # Execution Result (canonical)
-    if name == 'ExecutionResult':
+    if name == "ExecutionResult":
         from .execution import ExecutionResult
+
         return ExecutionResult
 
     # Secure Executor
-    if name == 'SecureExecutor':
+    if name == "SecureExecutor":
         from .sandbox import SecureExecutor
+
         return SecureExecutor
 
     # Python Sandbox
-    if name in ('PythonSandbox',):
+    if name in ("PythonSandbox",):
         from .python_sandbox import PythonSandbox
+
         return locals()[name]
 
     # Atomic Operations
-    if name in ('AtomicFileOps', 'AtomicResult'):
+    if name in ("AtomicFileOps", "AtomicResult"):
         from .atomic_ops import AtomicFileOps, AtomicResult
+
         return locals()[name]
 
     # Undo Manager
-    if name in ('UndoManager',):
+    if name in ("UndoManager",):
         from .undo_manager import UndoManager
+
         return locals()[name]
 
     # Tool Chain
-    if name in ('AtomicToolChain',):
+    if name in ("AtomicToolChain",):
         from .tool_chain import AtomicToolChain
+
         return locals()[name]
 
     # Resilience
-    if name in ('ConcurrencyManager', 'ResourceLimits', 'RateLimiter', 'EncodingSafety'):
+    if name in ("ConcurrencyManager", "ResourceLimits", "RateLimiter", "EncodingSafety"):
         from .resilience import ConcurrencyManager, ResourceLimits, RateLimiter, EncodingSafety
+
         return locals()[name]
 
     # Error Presenter
-    if name in ('ErrorPresenter', 'PresentedError'):
+    if name in ("ErrorPresenter", "PresentedError"):
         from .error_presenter import ErrorPresenter, PresentedError
+
         return locals()[name]
 
     # Session Manager
-    if name in ('SessionManager', 'SessionSnapshot'):
+    if name in ("SessionManager", "SessionSnapshot"):
         from .session_manager import SessionManager, SessionSnapshot
+
         return locals()[name]
 
     # Context Tracker
-    if name in ('ContextTracker', 'ResolvedReference'):
+    if name in ("ContextTracker", "ResolvedReference"):
         from .context_tracker import ContextTracker, ResolvedReference
+
         return locals()[name]
 
     # Memory System (Claude Code Parity)
-    if name in ('MemoryManager', 'MemoryEntry', 'ProjectMemory', 'get_memory_manager'):
+    if name in ("MemoryManager", "MemoryEntry", "ProjectMemory", "get_memory_manager"):
         from .memory import MemoryManager, MemoryEntry, ProjectMemory, get_memory_manager
+
         return locals()[name]
 
     # Dependency Injection (Big 3 Patterns)
-    if name in ('Scope', 'Provider', 'ProviderConfig', 'Singleton', 'Factory', 'Transient',
-                'AsyncSingleton', 'Configuration', 'BaseContainer', 'VerticeContainer',
-                'Container', 'TestContainer', 'Provide', 'inject', 'with_container'):
+    if name in (
+        "Scope",
+        "Provider",
+        "ProviderConfig",
+        "Singleton",
+        "Factory",
+        "Transient",
+        "AsyncSingleton",
+        "Configuration",
+        "BaseContainer",
+        "VerticeContainer",
+        "Container",
+        "TestContainer",
+        "Provide",
+        "inject",
+        "with_container",
+    ):
         from .di import (
-            Scope, Provider, ProviderConfig, Singleton, Factory, Transient,
-            AsyncSingleton, Configuration, BaseContainer, VerticeContainer,
-            Container, TestContainer, Provide, inject, with_container
+            Scope,
+            Provider,
+            ProviderConfig,
+            Singleton,
+            Factory,
+            Transient,
+            AsyncSingleton,
+            Configuration,
+            BaseContainer,
+            VerticeContainer,
+            Container,
+            TestContainer,
+            Provide,
+            inject,
+            with_container,
         )
+
         return locals()[name]
 
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

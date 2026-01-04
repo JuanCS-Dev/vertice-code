@@ -29,6 +29,7 @@ from vertice_cli.tui.wisdom import wisdom_system
 
 class ToastType(Enum):
     """Toast notification types with semantic meaning"""
+
     SUCCESS = "success"
     WARNING = "warning"
     ERROR = "error"
@@ -39,6 +40,7 @@ class ToastType(Enum):
 @dataclass
 class Toast:
     """Single toast notification"""
+
     id: str
     type: ToastType
     title: str
@@ -75,26 +77,26 @@ TOAST_ICONS = {
 }
 
 TOAST_COLORS = {
-    ToastType.SUCCESS: COLORS['accent_green'],
-    ToastType.WARNING: COLORS['accent_yellow'],
-    ToastType.ERROR: COLORS['accent_red'],
-    ToastType.INFO: COLORS['accent_blue'],
-    ToastType.WISDOM: COLORS['accent_purple'],
+    ToastType.SUCCESS: COLORS["accent_green"],
+    ToastType.WARNING: COLORS["accent_yellow"],
+    ToastType.ERROR: COLORS["accent_red"],
+    ToastType.INFO: COLORS["accent_blue"],
+    ToastType.WISDOM: COLORS["accent_purple"],
 }
 
 TOAST_BG_COLORS = {
     ToastType.SUCCESS: "#064e3b",  # Dark green
     ToastType.WARNING: "#78350f",  # Dark yellow
-    ToastType.ERROR: "#7f1d1d",    # Dark red
-    ToastType.INFO: "#1e3a8a",     # Dark blue
-    ToastType.WISDOM: "#4c1d95",   # Dark purple
+    ToastType.ERROR: "#7f1d1d",  # Dark red
+    ToastType.INFO: "#1e3a8a",  # Dark blue
+    ToastType.WISDOM: "#4c1d95",  # Dark purple
 }
 
 
 class ToastManager:
     """
     Manages toast notifications lifecycle
-    
+
     Features:
     - Queue management (max 5 visible)
     - Priority system (error > warning > info)
@@ -113,18 +115,18 @@ class ToastManager:
         title: str,
         message: str,
         duration: float = 5.0,
-        on_dismiss: Optional[Callable[[], None]] = None
+        on_dismiss: Optional[Callable[[], None]] = None,
     ) -> str:
         """
         Add a new toast notification
-        
+
         Args:
             type: Toast type (success, warning, error, info, wisdom)
             title: Toast title (short, bold)
             message: Toast message (detail)
             duration: Auto-dismiss time in seconds (0 = persistent)
             on_dismiss: Callback when dismissed
-            
+
         Returns:
             Toast ID
         """
@@ -138,11 +140,17 @@ class ToastManager:
             message=message,
             duration=duration,
             created_at=datetime.now(),
-            on_dismiss=on_dismiss
+            on_dismiss=on_dismiss,
         )
 
         # Priority insertion (errors first, then warnings, then others)
-        priority_order = [ToastType.ERROR, ToastType.WARNING, ToastType.WISDOM, ToastType.INFO, ToastType.SUCCESS]
+        priority_order = [
+            ToastType.ERROR,
+            ToastType.WARNING,
+            ToastType.WISDOM,
+            ToastType.INFO,
+            ToastType.SUCCESS,
+        ]
         insert_index = 0
 
         for i, existing_toast in enumerate(self.toasts):
@@ -173,7 +181,7 @@ class ToastManager:
     def dismiss_toast(self, toast_id: str) -> bool:
         """
         Dismiss a toast by ID
-        
+
         Returns:
             True if dismissed, False if not found
         """
@@ -188,7 +196,7 @@ class ToastManager:
     def clear_expired(self) -> List[str]:
         """
         Remove expired toasts
-        
+
         Returns:
             List of dismissed toast IDs
         """
@@ -218,7 +226,7 @@ class ToastManager:
 class ToastWidget(Static):
     """
     Single toast widget (Textual component)
-    
+
     Gemini-inspired design:
     - Clean panel with rounded corners
     - Icon + title + message
@@ -246,7 +254,7 @@ class ToastWidget(Static):
         content.append("\n")
 
         # Message (normal weight)
-        content.append(self.toast.message, style=COLORS['text_secondary'])
+        content.append(self.toast.message, style=COLORS["text_secondary"])
 
         # Create panel with colored border
         panel = Panel(
@@ -268,7 +276,7 @@ class ToastWidget(Static):
 class ToastContainer(VerticalScroll):
     """
     Container for multiple toasts (stacked)
-    
+
     Position: top-right corner of screen
     Max height: 50% of screen
     Auto-scroll to newest
@@ -303,22 +311,12 @@ def create_toast_manager() -> ToastManager:
     return ToastManager(max_toasts=5)
 
 
-def show_success(
-    manager: ToastManager,
-    title: str,
-    message: str,
-    duration: float = 5.0
-) -> str:
+def show_success(manager: ToastManager, title: str, message: str, duration: float = 5.0) -> str:
     """Show a success toast"""
     return manager.add_toast(ToastType.SUCCESS, title, message, duration)
 
 
-def show_warning(
-    manager: ToastManager,
-    title: str,
-    message: str,
-    duration: float = 7.0
-) -> str:
+def show_warning(manager: ToastManager, title: str, message: str, duration: float = 7.0) -> str:
     """Show a warning toast"""
     return manager.add_toast(ToastType.WARNING, title, message, duration)
 
@@ -327,35 +325,28 @@ def show_error(
     manager: ToastManager,
     title: str,
     message: str,
-    duration: float = 0  # Errors persist until dismissed
+    duration: float = 0,  # Errors persist until dismissed
 ) -> str:
     """Show an error toast (persistent)"""
     return manager.add_toast(ToastType.ERROR, title, message, duration)
 
 
-def show_info(
-    manager: ToastManager,
-    title: str,
-    message: str,
-    duration: float = 4.0
-) -> str:
+def show_info(manager: ToastManager, title: str, message: str, duration: float = 4.0) -> str:
     """Show an info toast"""
     return manager.add_toast(ToastType.INFO, title, message, duration)
 
 
 def show_wisdom(
-    manager: ToastManager,
-    category: str = "construction",
-    duration: float = 8.0
+    manager: ToastManager, category: str = "construction", duration: float = 8.0
 ) -> str:
     """
     Show a biblical wisdom toast
-    
+
     Args:
         manager: Toast manager
         category: Wisdom category (construction, purpose, persistence, etc.)
         duration: Display time
-        
+
     Returns:
         Toast ID
     """
@@ -365,7 +356,7 @@ def show_wisdom(
         ToastType.WISDOM,
         title="Biblical Wisdom",
         message=f"{verse.text} — {verse.reference}",
-        duration=duration
+        duration=duration,
     )
 
 
@@ -376,10 +367,7 @@ def example_usage() -> None:
 
     # Success toast
     show_success(
-        manager,
-        title="File Saved",
-        message="config.py has been saved successfully.",
-        duration=3.0
+        manager, title="File Saved", message="config.py has been saved successfully.", duration=3.0
     )
 
     # Warning toast
@@ -387,7 +375,7 @@ def example_usage() -> None:
         manager,
         title="Large Context",
         message="File context exceeds 10,000 tokens. Consider reducing.",
-        duration=5.0
+        duration=5.0,
     )
 
     # Error toast (persistent)
@@ -395,7 +383,7 @@ def example_usage() -> None:
         manager,
         title="Syntax Error",
         message="Invalid Python syntax on line 42: unexpected indent",
-        duration=0  # Persistent
+        duration=0,  # Persistent
     )
 
     # Info toast
@@ -403,15 +391,11 @@ def example_usage() -> None:
         manager,
         title="Model Switched",
         message="Now using Qwen2.5-Coder-32B-Instruct",
-        duration=3.0
+        duration=3.0,
     )
 
     # Wisdom toast
-    show_wisdom(
-        manager,
-        category="construction",
-        duration=8.0
-    )
+    show_wisdom(manager, category="construction", duration=8.0)
 
 
 if __name__ == "__main__":

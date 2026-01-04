@@ -134,9 +134,7 @@ class MaximusProvider:
             """Execute HTTP request and return JSON response."""
             if self._client is None:
                 return {"error": "Client not initialized"}
-            response = await self._client.request(
-                method, path, json=json, params=params
-            )
+            response = await self._client.request(method, path, json=json, params=params)
             response.raise_for_status()
             return cast(Dict[str, Any], response.json())
 
@@ -239,13 +237,9 @@ class MaximusProvider:
         payload = {"name": name, "description": description, "examples": examples}
         return await self._request("POST", "/v1/tools/generate", json=payload)
 
-    async def factory_execute(
-        self, tool_name: str, params: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def factory_execute(self, tool_name: str, params: Dict[str, Any]) -> Dict[str, Any]:
         """Execute a generated tool with resilience."""
-        return await self._request(
-            "POST", f"/v1/tools/{tool_name}/execute", json=params
-        )
+        return await self._request("POST", f"/v1/tools/{tool_name}/execute", json=params)
 
     async def factory_list(self) -> List[Dict[str, Any]]:
         """List available generated tools with resilience."""
@@ -329,16 +323,16 @@ class MaximusProvider:
         try:
             execution_log = format_execution_log(prompt, response)
             await self.tribunal_evaluate(execution_log)
-        except Exception:  # pylint: disable=broad-exception-caught
-            pass  # Best effort
+        except (RuntimeError, ValueError, AttributeError):
+            pass
 
     async def _store_interaction(self, prompt: str, response: str) -> None:
         """Store interaction in memory (background)."""
         try:
             content = format_interaction_for_memory(prompt, response)
             await self.memory_store(content=content, memory_type="episodic")
-        except Exception:  # pylint: disable=broad-exception-caught
-            pass  # Best effort
+        except (RuntimeError, ValueError, AttributeError):
+            pass
 
     # =========================================================================
     # STATUS AND HEALTH

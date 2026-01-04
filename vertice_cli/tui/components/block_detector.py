@@ -16,6 +16,7 @@ import re
 
 class BlockType(Enum):
     """Tipos de blocos markdown suportados."""
+
     UNKNOWN = "unknown"
     PARAGRAPH = "paragraph"
     CODE_FENCE = "code_fence"
@@ -35,6 +36,7 @@ class BlockType(Enum):
 @dataclass
 class BlockInfo:
     """Informação sobre um bloco detectado."""
+
     block_type: BlockType
     start_line: int
     end_line: Optional[int] = None
@@ -56,46 +58,49 @@ class BlockDetector:
 
     # Patterns para detecção de início de bloco
     # NOTA: Padrões devem ser flexíveis para aceitar variações do LLM
+    # 2026 FIX: Gemini can output malformed code fences (known P1 bug)
     PATTERNS = {
-        BlockType.CODE_FENCE: re.compile(r'^(`{3,}|~{3,})(\w*)\s*$'),
-        BlockType.TABLE: re.compile(r'^\|.*\|'),
-        BlockType.CHECKLIST: re.compile(r'^[-*+]\s+\[[ xX]\]'),
-        BlockType.HEADING: re.compile(r'^(#{1,6})\s+(.*)'),
-        BlockType.BLOCKQUOTE: re.compile(r'^>\s*'),
-        BlockType.HORIZONTAL_RULE: re.compile(r'^([-*_]){3,}\s*$'),
+        # More flexible code fence pattern - allows trailing content
+        # Handles: ```python, ```python<code>, ```lang```lang
+        BlockType.CODE_FENCE: re.compile(r"^(`{3,}|~{3,})(\w*)"),
+        BlockType.TABLE: re.compile(r"^\|.*\|"),
+        BlockType.CHECKLIST: re.compile(r"^[-*+]\s+\[[ xX]\]"),
+        BlockType.HEADING: re.compile(r"^(#{1,6})\s+(.*)"),
+        BlockType.BLOCKQUOTE: re.compile(r"^>\s*"),
+        BlockType.HORIZONTAL_RULE: re.compile(r"^([-*_]){3,}\s*$"),
         # Claude Code Web style patterns - flexível para aceitar **bold** ou não
         BlockType.TOOL_CALL: re.compile(
-            r'(?:^[•●]\s*\**\s*'  # Claude style: Bullet + optional bold markers
-            r'(?:Read|Write|Bash|Update Todos|Edit|Glob|Grep|Task|WebFetch|WebSearch|TodoWrite|AskUserQuestion)'
-            r'\**\s*'
-            r'(?:\s|`|/|$))'
-            r'|'  # OR
-            r'(?:^\[TOOL_CALL:)',  # Gemini Native style
-            re.IGNORECASE
+            r"(?:^[•●]\s*\**\s*"  # Claude style: Bullet + optional bold markers
+            r"(?:Read|Write|Bash|Update Todos|Edit|Glob|Grep|Task|WebFetch|WebSearch|TodoWrite|AskUserQuestion)"
+            r"\**\s*"
+            r"(?:\s|`|/|$))"
+            r"|"  # OR
+            r"(?:^\[TOOL_CALL:)",  # Gemini Native style
+            re.IGNORECASE,
         ),
         # Status badges - aceita emoji seguido de texto
-        BlockType.STATUS_BADGE: re.compile(r'^[🔴🟡🟢⚪🟠✅❌⚠️]\s*.+'),
+        BlockType.STATUS_BADGE: re.compile(r"^[🔴🟡🟢⚪🟠✅❌⚠️]\s*.+"),
         # Diff block detection (unified diff format)
-        BlockType.DIFF_BLOCK: re.compile(r'^(diff --git|@@\s*-\d+.*\+\d+.*@@|[+-]{3}\s+[ab]/)'),
+        BlockType.DIFF_BLOCK: re.compile(r"^(diff --git|@@\s*-\d+.*\+\d+.*@@|[+-]{3}\s+[ab]/)"),
     }
 
     # Additional patterns (not in BlockType enum)
     EXTRA_PATTERNS = {
-        'TABLE_SEPARATOR': re.compile(r'^\|[\s\-:|]+\|'),
-        'LIST_BULLET': re.compile(r'^[-*+]\s+(?!\[[ xX]\])'),
-        'LIST_NUMBERED': re.compile(r'^\d+\.\s+'),
+        "TABLE_SEPARATOR": re.compile(r"^\|[\s\-:|]+\|"),
+        "LIST_BULLET": re.compile(r"^[-*+]\s+(?!\[[ xX]\])"),
+        "LIST_NUMBERED": re.compile(r"^\d+\.\s+"),
         # Tool output patterns (└ resultado)
-        'TOOL_OUTPUT': re.compile(r'^[└├│┌┐┗┃]\s*'),
-        'DIFF_LINE': re.compile(r'^[+-]\s'),
-        'SHOW_MORE': re.compile(r'^Show full diff \(\d+ more lines\)'),
+        "TOOL_OUTPUT": re.compile(r"^[└├│┌┐┗┃]\s*"),
+        "DIFF_LINE": re.compile(r"^[+-]\s"),
+        "SHOW_MORE": re.compile(r"^Show full diff \(\d+ more lines\)"),
         # Strikethrough items (~~completed~~)
-        'STRIKETHROUGH': re.compile(r'~~.+~~'),
+        "STRIKETHROUGH": re.compile(r"~~.+~~"),
         # Checkbox items (☐ or □ or [ ])
-        'CHECKBOX_EMPTY': re.compile(r'^[☐□]\s+'),
+        "CHECKBOX_EMPTY": re.compile(r"^[☐□]\s+"),
     }
 
     # Pattern para fechar code fence
-    CODE_FENCE_CLOSE = re.compile(r'^(`{3,}|~{3,})\s*$')
+    CODE_FENCE_CLOSE = re.compile(r"^(`{3,}|~{3,})\s*$")
 
     def __init__(self):
         self.blocks: List[BlockInfo] = []
@@ -114,6 +119,68 @@ class BlockDetector:
         self.code_fence_marker = ""
         self._buffer = ""
 
+    def _guess_language_from_content(self, first_token: str, content: str) -> Optional[str]:
+        """
+        2026 FIX: Guess programming language from code content.
+
+        Based on research: Gemini sometimes outputs malformed code fences
+        where the language is missing or merged with content.
+
+        Args:
+            first_token: First word/token of the content
+            content: Full trailing content after fence
+
+        Returns:
+            Detected language or None
+        """
+        # HTML detection
+        if content.startswith("<") or first_token.startswith("<"):
+            if "<html" in content.lower() or "<!doctype" in content.lower():
+                return "html"
+            if "<svg" in content.lower():
+                return "svg"
+            return "html"  # Generic XML/HTML
+
+        # Python detection
+        if first_token in ("def", "class", "import", "from", "async", "await"):
+            return "python"
+        if content.startswith("#!/usr/bin/env python") or content.startswith("#!/usr/bin/python"):
+            return "python"
+
+        # JavaScript/TypeScript detection
+        if first_token in ("function", "const", "let", "var", "export", "import"):
+            return "javascript"
+        if "interface " in content or ": string" in content or ": number" in content:
+            return "typescript"
+
+        # Shell/Bash detection
+        if first_token in ("#!/bin/bash", "#!/bin/sh", "echo", "export", "source"):
+            return "bash"
+        if content.startswith("#!"):
+            return "bash"
+
+        # JSON detection
+        if content.startswith("{") or content.startswith("["):
+            return "json"
+
+        # SQL detection
+        if first_token.upper() in (
+            "SELECT",
+            "INSERT",
+            "UPDATE",
+            "DELETE",
+            "CREATE",
+            "DROP",
+            "ALTER",
+        ):
+            return "sql"
+
+        # CSS detection
+        if first_token.endswith("{") or re.match(r"^[\.\#\w\-]+\s*\{", content):
+            return "css"
+
+        return None
+
     def process_chunk(self, chunk: str) -> List[BlockInfo]:
         """
         Processa um chunk de texto e retorna blocos atualizados.
@@ -127,8 +194,8 @@ class BlockDetector:
         self._buffer += chunk
 
         # Processa linha por linha
-        while '\n' in self._buffer:
-            line, self._buffer = self._buffer.split('\n', 1)
+        while "\n" in self._buffer:
+            line, self._buffer = self._buffer.split("\n", 1)
             self._process_line(line)
 
         # Processa última linha incompleta (optimistic)
@@ -152,7 +219,7 @@ class BlockDetector:
         # Linha vazia
         if not line.strip():
             self._finalize_current_block()
-            self._partial_base = ''
+            self._partial_base = ""
             return
 
         # Detecta tipo de bloco
@@ -163,7 +230,7 @@ class BlockDetector:
             # IMPORTANTE: Se bloco atual tinha partial, substituir pelo conteúdo completo
             # não extender (pois o partial já tem o texto)
             if self.current_block:
-                confirmed = getattr(self.current_block, '_confirmed_content', '')
+                confirmed = getattr(self.current_block, "_confirmed_content", "")
                 self.current_block.content = confirmed + line + "\n"
                 self.current_block._confirmed_content = self.current_block.content
         else:
@@ -184,7 +251,7 @@ class BlockDetector:
         if self.in_code_fence:
             if self.current_block:
                 # Content = confirmed + partial (não acumula partial)
-                confirmed = getattr(self.current_block, '_confirmed_content', '')
+                confirmed = getattr(self.current_block, "_confirmed_content", "")
                 self.current_block.content = confirmed + partial
             return
 
@@ -193,7 +260,7 @@ class BlockDetector:
         if self._should_continue_block(block_type, partial):
             if self.current_block:
                 # Content = confirmed + partial (substitui, não acumula)
-                confirmed = getattr(self.current_block, '_confirmed_content', '')
+                confirmed = getattr(self.current_block, "_confirmed_content", "")
                 self.current_block.content = confirmed + partial
         else:
             # Inicia novo bloco com partial
@@ -241,11 +308,11 @@ class BlockDetector:
             return BlockType.BLOCKQUOTE
 
         # List bullet (using EXTRA_PATTERNS)
-        if self.EXTRA_PATTERNS['LIST_BULLET'].match(stripped):
+        if self.EXTRA_PATTERNS["LIST_BULLET"].match(stripped):
             return BlockType.LIST
 
         # List numbered (using EXTRA_PATTERNS)
-        if self.EXTRA_PATTERNS['LIST_NUMBERED'].match(stripped):
+        if self.EXTRA_PATTERNS["LIST_NUMBERED"].match(stripped):
             return BlockType.LIST
 
         return BlockType.PARAGRAPH
@@ -261,16 +328,16 @@ class BlockDetector:
         # TOOL_CALL continua com linhas de output (└ resultado) ou indentadas
         if current_type == BlockType.TOOL_CALL:
             # Linhas que fazem parte do output de uma tool
-            if self.EXTRA_PATTERNS['TOOL_OUTPUT'].match(stripped):
+            if self.EXTRA_PATTERNS["TOOL_OUTPUT"].match(stripped):
                 return True
             # Linhas indentadas com espaços (continuação)
-            if line.startswith('  ') and not line.strip().startswith('•'):
+            if line.startswith("  ") and not line.strip().startswith("•"):
                 return True
             # Strikethrough items (~~completed~~) são parte de Update Todos
-            if self.EXTRA_PATTERNS['STRIKETHROUGH'].search(stripped):
+            if self.EXTRA_PATTERNS["STRIKETHROUGH"].search(stripped):
                 return True
             # Checkbox items
-            if self.EXTRA_PATTERNS['CHECKBOX_EMPTY'].match(stripped):
+            if self.EXTRA_PATTERNS["CHECKBOX_EMPTY"].match(stripped):
                 return True
 
         # Table continua com mais rows
@@ -296,10 +363,14 @@ class BlockDetector:
         # Diff block continua com linhas +/- ou contexto (espaço no início)
         if current_type == BlockType.DIFF_BLOCK:
             # Linhas que fazem parte de um diff (não stripped - espaço inicial importa!)
-            if (line.startswith('+') or line.startswith('-') or
-                line.startswith('@@') or line.startswith('diff ') or
-                line.startswith(' ') or  # Linha de contexto em diffs
-                new_type == BlockType.DIFF_BLOCK):
+            if (
+                line.startswith("+")
+                or line.startswith("-")
+                or line.startswith("@@")
+                or line.startswith("diff ")
+                or line.startswith(" ")  # Linha de contexto em diffs
+                or new_type == BlockType.DIFF_BLOCK
+            ):
                 return True
 
         return False
@@ -314,6 +385,18 @@ class BlockDetector:
                 self.code_fence_marker = match.group(1)[:3]  # ``` ou ~~~
                 language = match.group(2) or None
 
+                # 2026 FIX: If language is empty but there's trailing content,
+                # try to extract it or detect from first line of code
+                if not language:
+                    # Check if there's content after the fence marker
+                    stripped = line.strip()
+                    fence_end = len(match.group(0))
+                    trailing = stripped[fence_end:].strip()
+                    if trailing:
+                        # Try to detect language from first token
+                        first_token = trailing.split()[0] if trailing.split() else ""
+                        language = self._guess_language_from_content(first_token, trailing)
+
                 self.current_block = BlockInfo(
                     block_type=BlockType.CODE_FENCE,
                     start_line=self.line_number,
@@ -321,7 +404,7 @@ class BlockDetector:
                     content="",  # Não inclui a fence marker
                     is_complete=False,
                 )
-                self.current_block._confirmed_content = ''
+                self.current_block._confirmed_content = ""
                 return
 
         # Extrai metadata para heading
@@ -329,8 +412,8 @@ class BlockDetector:
         if block_type == BlockType.HEADING:
             match = self.PATTERNS[BlockType.HEADING].match(line.strip())
             if match:
-                metadata['level'] = len(match.group(1))
-                metadata['text'] = match.group(2)
+                metadata["level"] = len(match.group(1))
+                metadata["text"] = match.group(2)
 
         self.current_block = BlockInfo(
             block_type=block_type,
@@ -341,7 +424,7 @@ class BlockDetector:
         )
         # Inicializa confirmed_content
         if is_partial:
-            self.current_block._confirmed_content = ''  # Partial não é confirmado
+            self.current_block._confirmed_content = ""  # Partial não é confirmado
         else:
             self.current_block._confirmed_content = self.current_block.content
 
@@ -379,7 +462,7 @@ class BlockDetector:
             self.current_block.end_line = self.line_number
 
             # Remove trailing newline do content
-            self.current_block.content = self.current_block.content.rstrip('\n')
+            self.current_block.content = self.current_block.content.rstrip("\n")
 
             self.blocks.append(self.current_block)
             self.current_block = None
@@ -412,11 +495,11 @@ class OptimisticInlineParser:
     """
 
     # Padrões inline
-    BOLD = re.compile(r'\*\*(.+?)(\*\*|$)')
-    ITALIC = re.compile(r'\*([^*]+?)(\*|$)')
-    CODE = re.compile(r'`([^`]+?)(`|$)')
-    STRIKETHROUGH = re.compile(r'~~(.+?)(~~|$)')
-    LINK = re.compile(r'\[([^\]]+)\]\(([^)]*)\)?')
+    BOLD = re.compile(r"\*\*(.+?)(\*\*|$)")
+    ITALIC = re.compile(r"\*([^*]+?)(\*|$)")
+    CODE = re.compile(r"`([^`]+?)(`|$)")
+    STRIKETHROUGH = re.compile(r"~~(.+?)(~~|$)")
+    LINK = re.compile(r"\[([^\]]+)\]\(([^)]*)\)?")
 
     @classmethod
     def detect_incomplete(cls, text: str) -> List[Tuple[str, int, int]]:
@@ -429,24 +512,22 @@ class OptimisticInlineParser:
         results = []
 
         # Bold incompleto: **texto sem fechamento
-        if '**' in text:
-            idx = text.rfind('**')
-            remaining = text[idx+2:]
-            if '**' not in remaining and remaining.strip():
-                results.append(('bold_incomplete', idx, len(text)))
+        if "**" in text:
+            idx = text.rfind("**")
+            remaining = text[idx + 2 :]
+            if "**" not in remaining and remaining.strip():
+                results.append(("bold_incomplete", idx, len(text)))
 
         # Code incompleto: `code sem fechamento
-        backticks = [i for i, c in enumerate(text) if c == '`']
+        backticks = [i for i, c in enumerate(text) if c == "`"]
         if len(backticks) % 2 == 1:
-            results.append(('code_incomplete', backticks[-1], len(text)))
+            results.append(("code_incomplete", backticks[-1], len(text)))
 
         # Strikethrough incompleto
-        if '~~' in text:
-            idx = text.rfind('~~')
-            remaining = text[idx+2:]
-            if '~~' not in remaining and remaining.strip():
-                results.append(('strike_incomplete', idx, len(text)))
+        if "~~" in text:
+            idx = text.rfind("~~")
+            remaining = text[idx + 2 :]
+            if "~~" not in remaining and remaining.strip():
+                results.append(("strike_incomplete", idx, len(text)))
 
         return results
-
-

@@ -13,30 +13,30 @@ class AgentRoutingDisplay:
 
     # Agent emojis for visual impact
     AGENT_EMOJIS = {
-        'executor': '💻',
-        'planner': '⚡',
-        'reviewer': '🔍',
-        'refactorer': '🔧',
-        'explorer': '🗺️',
-        'architect': '🏗️',
-        'security': '🛡️',
-        'performance': '⚡',
-        'testing': '🧪',
-        'documentation': '📚'
+        "executor": "💻",
+        "planner": "⚡",
+        "reviewer": "🔍",
+        "refactorer": "🔧",
+        "explorer": "🗺️",
+        "architect": "🏗️",
+        "security": "🛡️",
+        "performance": "⚡",
+        "testing": "🧪",
+        "documentation": "📚",
     }
 
     # Agent colors (cyberpunk theme)
     AGENT_COLORS = {
-        'executor': 'bright_white',
-        'planner': 'bright_yellow',
-        'reviewer': 'bright_cyan',
-        'refactorer': 'bright_magenta',
-        'explorer': 'bright_green',
-        'architect': 'bright_blue',
-        'security': 'bright_red',
-        'performance': 'yellow',
-        'testing': 'green',
-        'documentation': 'cyan'
+        "executor": "bright_white",
+        "planner": "bright_yellow",
+        "reviewer": "bright_cyan",
+        "refactorer": "bright_magenta",
+        "explorer": "bright_green",
+        "architect": "bright_blue",
+        "security": "bright_red",
+        "performance": "yellow",
+        "testing": "green",
+        "documentation": "cyan",
     }
 
     def __init__(self):
@@ -48,7 +48,7 @@ class AgentRoutingDisplay:
         agent_name: str,
         confidence: float = 1.0,
         eta: str = "calculating...",
-        metadata: dict = None
+        metadata: dict = None,
     ) -> Panel:
         """Render agent routing panel.
 
@@ -64,8 +64,8 @@ class AgentRoutingDisplay:
         metadata = metadata or {}
 
         # Get agent styling
-        emoji = self.AGENT_EMOJIS.get(agent_name, '🤖')
-        color = self.AGENT_COLORS.get(agent_name, 'white')
+        emoji = self.AGENT_EMOJIS.get(agent_name, "🤖")
+        color = self.AGENT_COLORS.get(agent_name, "white")
 
         # Create table for structured display
         table = Table.grid(padding=(0, 2))
@@ -94,7 +94,7 @@ class AgentRoutingDisplay:
             table,
             title="[bold cyan]⚡ AGENT ROUTING ⚡[/bold cyan]",
             border_style="bright_cyan",
-            padding=(0, 1)
+            padding=(0, 1),
         )
 
         return panel
@@ -135,7 +135,7 @@ class AgentRoutingDisplay:
         Returns:
             Text with compact routing info
         """
-        emoji = self.AGENT_EMOJIS.get(agent_name, '🤖')
-        color = self.AGENT_COLORS.get(agent_name, 'white')
+        emoji = self.AGENT_EMOJIS.get(agent_name, "🤖")
+        color = self.AGENT_COLORS.get(agent_name, "white")
 
         return Text(f"{emoji} [{color}]{agent_name}[/{color}]", style="dim")

@@ -192,10 +192,7 @@ class ContextLearner:
 
     def record_tool_usage(self, tool_name: str, success: bool) -> None:
         """Record tool usage for preference learning."""
-        feedback_type = (
-            FeedbackType.IMPLICIT_ACCEPT if success
-            else FeedbackType.IMPLICIT_REJECT
-        )
+        feedback_type = FeedbackType.IMPLICIT_ACCEPT if success else FeedbackType.IMPLICIT_REJECT
         self.record_feedback(
             category=LearningCategory.TOOL_PREFERENCE,
             key=tool_name,
@@ -211,8 +208,7 @@ class ContextLearner:
     ) -> None:
         """Record agent routing decision."""
         feedback_type = (
-            FeedbackType.IMPLICIT_ACCEPT if was_correct
-            else FeedbackType.IMPLICIT_REJECT
+            FeedbackType.IMPLICIT_ACCEPT if was_correct else FeedbackType.IMPLICIT_REJECT
         )
         self.record_feedback(
             category=LearningCategory.AGENT_ROUTING,

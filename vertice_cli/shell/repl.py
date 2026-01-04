@@ -18,15 +18,18 @@ if env_path.exists():
     print(f"✓ Loaded .env from {env_path}")
 
 # Tema estilo Cyberpunk/Dark
-style = Style.from_dict({
-    'prompt': 'ansicyan bold',
-    'input': '#00ff00',
-})
+style = Style.from_dict(
+    {
+        "prompt": "ansicyan bold",
+        "input": "#00ff00",
+    }
+)
+
 
 class ShellREPL:
     def __init__(self):
         self.console = Console()
-        self.session = PromptSession(history=FileHistory('.qwen_history'))
+        self.session = PromptSession(history=FileHistory(".qwen_history"))
 
         # Inicializa componentes
         try:
@@ -40,16 +43,15 @@ class ShellREPL:
     async def start(self):
         """Loop principal do Shell."""
         self.console.clear()
-        self.console.print(Markdown("# 🚀 QWEN-DEV-CLI v2.0 (Reborn)"))
-        self.console.print("[dim]Architecture: Modular | LLM: Gemini-Flash Fixed | Mode: Pragmatic[/dim]\n")
+        self.console.print(Markdown("# 🚀 VÉRTICE SHELL v2.0 (Reborn)"))
+        self.console.print(
+            "[dim]Architecture: Modular | Mode: Pragmatic | Operando sob a CONSTITUIÇÃO v3.0[/dim]\n"
+        )
 
         while True:
             try:
                 # Input assíncrono que não bloqueia o event loop principal
-                user_input = await self.session.prompt_async(
-                    "╭─(dev) ❯ ",
-                    style=style
-                )
+                user_input = await self.session.prompt_async("╭─(dev) ❯ ", style=style)
 
                 if not user_input.strip():
                     continue
@@ -73,12 +75,14 @@ class ShellREPL:
             except Exception as e:
                 self.console.print(f"[bold red]Runtime Error:[/bold red] {e}")
 
+
 def main():
     repl = ShellREPL()
     try:
         asyncio.run(repl.start())
     except KeyboardInterrupt:
         pass
+
 
 if __name__ == "__main__":
     main()

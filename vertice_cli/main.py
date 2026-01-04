@@ -1,19 +1,15 @@
 """
-JuanCS Dev-Code - Unified Entry Point
-======================================
+Vértice - Unified Entry Point
+==============================
 
 Single command with multiple modes:
-    qwen                    # Interactive TUI (default)
-    qwen chat "message"     # One-shot message
-    qwen -p "prompt"        # Headless mode (CI/CD)
-    qwen ui                 # Gradio web UI
-    qwen serve              # MCP server mode
-    qwen shell              # Legacy shell mode
+    vertice                 # Interactive TUI (default - 30 FPS)
+    vertice chat "message"  # One-shot message
+    vertice -p "prompt"     # Headless mode (CI/CD)
+    vertice serve           # MCP server mode
+    vertice shell           # Legacy shell mode
 
-Philosophy: One command to rule them all.
-
-Author: JuanCS
-Date: 2025-11-25
+Philosophy: Sovereign Intelligence & Tactical Execution.
 """
 
 from __future__ import annotations
@@ -52,6 +48,7 @@ def run_async(coro: Coroutine[Any, Any, T]) -> T:
         # Create a new loop in a new thread is one option,
         # but simpler is to use nest_asyncio or return a task
         import concurrent.futures
+
         with concurrent.futures.ThreadPoolExecutor() as pool:
             future = pool.submit(asyncio.run, coro)
             return future.result()
@@ -61,8 +58,8 @@ def run_async(coro: Coroutine[Any, Any, T]) -> T:
 
 # Create CLI app
 app = typer.Typer(
-    name="qwen",
-    help="JuanCS Dev-Code - AI-Powered Development Assistant",
+    name="vertice",
+    help="Vértice - Enterprise Multi-LLM Orchestration & Agentic Intelligence",
     add_completion=True,
     invoke_without_command=True,  # Allow running without subcommand
 )
@@ -73,13 +70,14 @@ console = Console()
 def version_callback(value: bool):
     """Show version and exit."""
     if value:
-        console.print("[bold cyan]JuanCS Dev-Code[/bold cyan] v0.0.2")
-        console.print("[dim]AI-Powered Development Assistant[/dim]")
+        console.print("[bold cyan]Vértice[/bold cyan] v1.0.0")
+        console.print("[dim]Enterprise Multi-LLM Orchestration & Agentic Intelligence[/dim]")
+        console.print("[dim]Operando sob a CONSTITUIÇÃO VÉRTICE v3.0[/dim]")
         console.print("\n[bold]Available Modes:[/bold]")
-        console.print("  qwen          → Interactive TUI")
-        console.print("  qwen -p       → Headless mode")
-        console.print("  qwen ui       → Web UI")
-        console.print("  qwen serve    → MCP Server")
+        console.print("  vertice          → Interactive TUI (Executor Tático)")
+        console.print("  vertice -p       → Headless mode (CI/CD / Automation)")
+        console.print("  vertice chat     → One-shot interaction")
+        console.print("  vertice serve    → MCP Server Mode")
         raise typer.Exit()
 
 
@@ -87,41 +85,43 @@ def version_callback(value: bool):
 def main(
     ctx: typer.Context,
     prompt: Optional[str] = typer.Option(
-        None, "-p", "--prompt",
-        help="Run in headless mode with given prompt"
+        None, "-p", "--prompt", help="Run in headless mode with given prompt"
     ),
     output_format: str = typer.Option(
-        "text", "--output-format", "-o",
-        help="Output format: text, json, stream-json"
+        "text", "--output-format", "-o", help="Output format: text, json, stream-json"
     ),
     max_turns: int = typer.Option(
-        10, "--max-turns",
-        help="Maximum tool execution turns in headless mode"
+        10, "--max-turns", help="Maximum tool execution turns in headless mode"
     ),
     allowed_tools: Optional[List[str]] = typer.Option(
-        None, "--allow-tool",
-        help="Restrict to specific tools (can repeat)"
+        None, "--allow-tool", help="Restrict to specific tools (can repeat)"
     ),
     version: bool = typer.Option(
-        None, "--version", "-V",
-        callback=version_callback, is_eager=True,
-        help="Show version and exit"
+        None,
+        "--version",
+        "-V",
+        callback=version_callback,
+        is_eager=True,
+        help="Show version and exit",
     ),
 ):
     """
-    JuanCS Dev-Code - AI-Powered Development Assistant.
+    Vértice - Enterprise Multi-LLM Orchestration.
 
-    Run without arguments to start the interactive TUI.
+    Operacional como Executor Tático sob a Constituição Vértice v3.0.
+
+    Run without arguments to start the interactive TUI (30 FPS optimized).
     Use -p for headless mode (CI/CD, scripts, automation).
 
     Examples:
-        qwen                              # Interactive TUI
-        qwen -p "Create a hello.py"       # Headless one-shot
-        qwen -p "Fix tests" --max-turns 5 # Limited iterations
-        qwen -p "List TODOs" -o json      # JSON output
+        vertice                           # Start TUI (Default)
+        vertice -p "Check security"       # Headless one-shot
+        vertice chat "Explain this code"  # Simple one-shot
+        vertice status                    # Check system integrity
     """
     # Register providers with vertice_core (Dependency Injection)
     from vertice_cli.core.providers.register import ensure_providers_registered
+
     ensure_providers_registered()
 
     # If a subcommand is being invoked, skip default behavior
@@ -130,12 +130,14 @@ def main(
 
     # Headless mode
     if prompt:
-        run_async(_run_headless(
-            prompt=prompt,
-            output_format=output_format,
-            max_turns=max_turns,
-            allowed_tools=allowed_tools,
-        ))
+        run_async(
+            _run_headless(
+                prompt=prompt,
+                output_format=output_format,
+                max_turns=max_turns,
+                allowed_tools=allowed_tools,
+            )
+        )
         return
 
     # Default: Interactive TUI
@@ -146,12 +148,14 @@ def _run_tui():
     """Run the interactive Textual TUI."""
     try:
         from vertice_cli.ui_launcher import launch_tui
+
         launch_tui()
     except ImportError as e:
         console.print(f"[red]Error importing TUI:[/red] {e}")
         console.print("[dim]Falling back to shell_main...[/dim]")
         try:
             from vertice_cli.shell_main import main as shell_main
+
             run_async(shell_main())
         except ImportError:
             console.print("[red]No shell available. Install textual:[/red]")
@@ -235,6 +239,7 @@ def serve(
 
     try:
         from vertice_cli.cli_mcp import main as mcp_main
+
         run_async(mcp_main())
     except ImportError as e:
         console.print("[red]Error:[/red] MCP dependencies not installed")
@@ -252,6 +257,7 @@ def shell():
 
     try:
         from vertice_cli.shell_main import main as shell_main
+
         run_async(shell_main())
     except ImportError as e:
         console.print(f"[red]Error:[/red] Shell not available: {e}")
@@ -271,10 +277,12 @@ def chat(
     json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
 ):
     """Send a single message (one-shot mode)."""
-    run_async(_run_headless(
-        prompt=message,
-        output_format="json" if json_output else "text",
-    ))
+    run_async(
+        _run_headless(
+            prompt=message,
+            output_format="json" if json_output else "text",
+        )
+    )
 
 
 @app.command()
@@ -285,7 +293,7 @@ def status():
 
         bridge = get_bridge()
 
-        console.print("\n[bold cyan]JuanCS Dev-Code Status[/bold cyan]\n")
+        console.print("\n[bold cyan]Vértice System Status[/bold cyan]\n")
 
         # LLM Status
         if bridge.is_connected:
@@ -325,7 +333,7 @@ def agents():
 
         AGENT_REGISTRY = get_agent_registry()
 
-        table = Table(title="Available Agents")
+        table = Table(title="Vértice Agent Registry")
         table.add_column("Name", style="cyan")
         table.add_column("Role", style="magenta")
         table.add_column("Description", style="white")

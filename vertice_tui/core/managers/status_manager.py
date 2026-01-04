@@ -31,7 +31,7 @@ class StatusManager(IStatusManager):
         self,
         llm_checker: Optional[Callable[[], bool]] = None,
         tool_counter: Optional[Callable[[], int]] = None,
-        agent_counter: Optional[Callable[[], int]] = None
+        agent_counter: Optional[Callable[[], int]] = None,
     ):
         """
         Initialize StatusManager.
@@ -60,45 +60,27 @@ class StatusManager(IStatusManager):
             is_connected = self._llm_checker()
             health["LLM"] = {
                 "ok": is_connected,
-                "message": "Connected" if is_connected else "Not connected"
+                "message": "Connected" if is_connected else "Not connected",
             }
         else:
-            health["LLM"] = {
-                "ok": False,
-                "message": "LLM checker not configured"
-            }
+            health["LLM"] = {"ok": False, "message": "LLM checker not configured"}
 
         # Check tools
         if self._tool_counter:
             tool_count = self._tool_counter()
-            health["Tools"] = {
-                "ok": tool_count > 0,
-                "message": f"{tool_count} tools loaded"
-            }
+            health["Tools"] = {"ok": tool_count > 0, "message": f"{tool_count} tools loaded"}
         else:
-            health["Tools"] = {
-                "ok": False,
-                "message": "Tool counter not configured"
-            }
+            health["Tools"] = {"ok": False, "message": "Tool counter not configured"}
 
         # Check agents
         if self._agent_counter:
             agent_count = self._agent_counter()
-            health["Agents"] = {
-                "ok": agent_count > 0,
-                "message": f"{agent_count} agents available"
-            }
+            health["Agents"] = {"ok": agent_count > 0, "message": f"{agent_count} agents available"}
         else:
-            health["Agents"] = {
-                "ok": False,
-                "message": "Agent counter not configured"
-            }
+            health["Agents"] = {"ok": False, "message": "Agent counter not configured"}
 
         # Check sandbox status
-        health["Sandbox"] = {
-            "ok": True,
-            "message": "Enabled" if self._sandbox else "Disabled"
-        }
+        health["Sandbox"] = {"ok": True, "message": "Enabled" if self._sandbox else "Disabled"}
 
         return health
 
@@ -114,7 +96,7 @@ class StatusManager(IStatusManager):
             "write_files": not self._sandbox,
             "execute_commands": not self._sandbox,
             "network_access": True,
-            "sandbox_mode": self._sandbox
+            "sandbox_mode": self._sandbox,
         }
 
     def set_sandbox(self, enabled: bool) -> None:
@@ -143,5 +125,5 @@ class StatusManager(IStatusManager):
             "healthy": all_ok,
             "components": len(health),
             "failed": [name for name, status in health.items() if not status.get("ok", False)],
-            "sandbox": self._sandbox
+            "sandbox": self._sandbox,
         }

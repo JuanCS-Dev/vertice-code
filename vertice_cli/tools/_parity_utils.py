@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_USER_AGENT = "JuanCS-DevCode/1.0"
 DEFAULT_CACHE_TTL = 900  # 15 minutes
-SKILL_CACHE_TTL = 60.0   # 1 minute
+SKILL_CACHE_TTL = 60.0  # 1 minute
 
 # Maximum sizes for DoS prevention
 MAX_FETCH_SIZE = 10_000_000  # 10MB
@@ -48,6 +48,7 @@ COMMAND_SEARCH_PATHS = [
 # TASK TRACKER - Thread-safe state management
 # =============================================================================
 
+
 class TaskTracker:
     """
     Thread-safe task state management for background processes.
@@ -61,10 +62,10 @@ class TaskTracker:
         tracker.cleanup_old_tasks(max_age=3600)
     """
 
-    _instance: Optional['TaskTracker'] = None
+    _instance: Optional["TaskTracker"] = None
     _lock = threading.RLock()
 
-    def __new__(cls) -> 'TaskTracker':
+    def __new__(cls) -> "TaskTracker":
         """Singleton pattern for shared state."""
         if cls._instance is None:
             with cls._lock:
@@ -74,12 +75,7 @@ class TaskTracker:
                     cls._instance._counter = 0
         return cls._instance
 
-    def create_task(
-        self,
-        command: str,
-        process: Any = None,
-        status: str = "running"
-    ) -> str:
+    def create_task(self, command: str, process: Any = None, status: str = "running") -> str:
         """
         Create a new task entry.
 
@@ -155,12 +151,7 @@ class TaskTracker:
                 tasks = [t for t in tasks if t.get("status") == status]
             return tasks
 
-    def update_status(
-        self,
-        task_id: str,
-        status: str,
-        return_code: Optional[int] = None
-    ) -> bool:
+    def update_status(self, task_id: str, status: str, return_code: Optional[int] = None) -> bool:
         """
         Update task status.
 
@@ -184,10 +175,7 @@ class TaskTracker:
             return True
 
     def append_output(
-        self,
-        task_id: str,
-        stdout: Optional[str] = None,
-        stderr: Optional[str] = None
+        self, task_id: str, stdout: Optional[str] = None, stderr: Optional[str] = None
     ) -> bool:
         """
         Append output to task.
@@ -223,7 +211,8 @@ class TaskTracker:
         with self._lock:
             now = time.time()
             old_ids = [
-                task_id for task_id, task in self._tasks.items()
+                task_id
+                for task_id, task in self._tasks.items()
                 if (now - task.get("started_at", now)) > max_age
                 and task.get("status") in ("completed", "failed", "killed")
             ]
@@ -243,6 +232,7 @@ class TaskTracker:
 # =============================================================================
 # HTML CONVERTER
 # =============================================================================
+
 
 class HTMLConverter:
     """
@@ -298,21 +288,23 @@ class HTMLConverter:
             Plain text
         """
         # Remove scripts and styles
-        text = re.sub(r'<script[^>]*>.*?</script>', '', html_content, flags=re.DOTALL | re.IGNORECASE)
-        text = re.sub(r'<style[^>]*>.*?</style>', '', text, flags=re.DOTALL | re.IGNORECASE)
+        text = re.sub(
+            r"<script[^>]*>.*?</script>", "", html_content, flags=re.DOTALL | re.IGNORECASE
+        )
+        text = re.sub(r"<style[^>]*>.*?</style>", "", text, flags=re.DOTALL | re.IGNORECASE)
 
         # Replace block elements with newlines
-        text = re.sub(r'<(?:br|p|div|h\d|li|tr)[^>]*>', '\n', text, flags=re.IGNORECASE)
+        text = re.sub(r"<(?:br|p|div|h\d|li|tr)[^>]*>", "\n", text, flags=re.IGNORECASE)
 
         # Remove all remaining tags
-        text = re.sub(r'<[^>]+>', '', text)
+        text = re.sub(r"<[^>]+>", "", text)
 
         # Decode entities
         text = cls.decode_entities(text)
 
         # Normalize whitespace
-        text = re.sub(r'\s+', ' ', text)
-        text = re.sub(r'\n\s*\n', '\n\n', text)
+        text = re.sub(r"\s+", " ", text)
+        text = re.sub(r"\n\s*\n", "\n\n", text)
         text = text.strip()
 
         if max_length and len(text) > max_length:
@@ -333,51 +325,60 @@ class HTMLConverter:
             Markdown-formatted text
         """
         # Remove scripts and styles
-        text = re.sub(r'<script[^>]*>.*?</script>', '', html_content, flags=re.DOTALL | re.IGNORECASE)
-        text = re.sub(r'<style[^>]*>.*?</style>', '', text, flags=re.DOTALL | re.IGNORECASE)
+        text = re.sub(
+            r"<script[^>]*>.*?</script>", "", html_content, flags=re.DOTALL | re.IGNORECASE
+        )
+        text = re.sub(r"<style[^>]*>.*?</style>", "", text, flags=re.DOTALL | re.IGNORECASE)
 
         # Convert headers
         for i in range(1, 7):
             text = re.sub(
-                rf'<h{i}[^>]*>(.*?)</h{i}>',
+                rf"<h{i}[^>]*>(.*?)</h{i}>",
                 rf'\n{"#" * i} \1\n',
                 text,
-                flags=re.DOTALL | re.IGNORECASE
+                flags=re.DOTALL | re.IGNORECASE,
             )
 
         # Convert links
         text = re.sub(
             r'<a[^>]+href=["\']([^"\']+)["\'][^>]*>(.*?)</a>',
-            r'[\2](\1)',
+            r"[\2](\1)",
             text,
-            flags=re.DOTALL | re.IGNORECASE
+            flags=re.DOTALL | re.IGNORECASE,
         )
 
         # Convert bold/strong
-        text = re.sub(r'<(?:b|strong)[^>]*>(.*?)</(?:b|strong)>', r'**\1**', text, flags=re.DOTALL | re.IGNORECASE)
+        text = re.sub(
+            r"<(?:b|strong)[^>]*>(.*?)</(?:b|strong)>",
+            r"**\1**",
+            text,
+            flags=re.DOTALL | re.IGNORECASE,
+        )
 
         # Convert italic/em
-        text = re.sub(r'<(?:i|em)[^>]*>(.*?)</(?:i|em)>', r'*\1*', text, flags=re.DOTALL | re.IGNORECASE)
+        text = re.sub(
+            r"<(?:i|em)[^>]*>(.*?)</(?:i|em)>", r"*\1*", text, flags=re.DOTALL | re.IGNORECASE
+        )
 
         # Convert code
-        text = re.sub(r'<code[^>]*>(.*?)</code>', r'`\1`', text, flags=re.DOTALL | re.IGNORECASE)
+        text = re.sub(r"<code[^>]*>(.*?)</code>", r"`\1`", text, flags=re.DOTALL | re.IGNORECASE)
 
         # Convert list items
-        text = re.sub(r'<li[^>]*>(.*?)</li>', r'\n- \1', text, flags=re.DOTALL | re.IGNORECASE)
+        text = re.sub(r"<li[^>]*>(.*?)</li>", r"\n- \1", text, flags=re.DOTALL | re.IGNORECASE)
 
         # Convert paragraphs and breaks
-        text = re.sub(r'<p[^>]*>(.*?)</p>', r'\n\1\n', text, flags=re.DOTALL | re.IGNORECASE)
-        text = re.sub(r'<br\s*/?>', '\n', text, flags=re.IGNORECASE)
+        text = re.sub(r"<p[^>]*>(.*?)</p>", r"\n\1\n", text, flags=re.DOTALL | re.IGNORECASE)
+        text = re.sub(r"<br\s*/?>", "\n", text, flags=re.IGNORECASE)
 
         # Remove remaining tags
-        text = re.sub(r'<[^>]+>', '', text)
+        text = re.sub(r"<[^>]+>", "", text)
 
         # Decode entities
         text = cls.decode_entities(text)
 
         # Normalize whitespace
-        text = re.sub(r' +', ' ', text)
-        text = re.sub(r'\n{3,}', '\n\n', text)
+        text = re.sub(r" +", " ", text)
+        text = re.sub(r"\n{3,}", "\n\n", text)
         text = text.strip()
 
         if max_length and len(text) > max_length:

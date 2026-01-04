@@ -30,12 +30,12 @@ from .whitelist import SafeCommandWhitelist
 from .executor import HookExecutor, HookResult
 
 __all__ = [
-    'HookEvent',
-    'HookPriority',
-    'HookContext',
-    'SafeCommandWhitelist',
-    'HookExecutor',
-    'HookResult',
+    "HookEvent",
+    "HookPriority",
+    "HookContext",
+    "SafeCommandWhitelist",
+    "HookExecutor",
+    "HookResult",
 ]
 
-__version__ = '1.0.0'
+__version__ = "1.0.0"

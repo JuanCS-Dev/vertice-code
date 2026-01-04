@@ -1,5 +1,7 @@
 """Search and navigation tools."""
+
 import logging
+
 logger = logging.getLogger(__name__)
 
 import subprocess
@@ -21,45 +23,51 @@ class SearchFilesTool(ValidatedTool):
             "pattern": {
                 "type": "string",
                 "description": "Text pattern to search for",
-                "required": True
+                "required": True,
             },
-            "path": {
-                "type": "string",
-                "description": "Directory to search in",
-                "required": False
-            },
+            "path": {"type": "string", "description": "Directory to search in", "required": False},
             "file_pattern": {
                 "type": "string",
                 "description": "File pattern to include (e.g., '*.py')",
-                "required": False
+                "required": False,
             },
             "max_results": {
                 "type": "integer",
                 "description": "Maximum number of results",
-                "required": False
+                "required": False,
             },
             "semantic": {
                 "type": "boolean",
                 "description": "Use semantic search (code symbols) instead of text search",
-                "required": False
+                "required": False,
             },
             "ignore_case": {
                 "type": "boolean",
                 "description": "Case insensitive search",
-                "required": False
-            }
+                "required": False,
+            },
         }
+
     def get_validators(self):
         """Validate parameters."""
-        return {}
+        return {
+            "pattern": lambda v: v is not None and len(str(v).strip()) > 0,
+            "max_results": lambda v: v is None or (isinstance(v, int) and 0 < v <= 1000),
+        }
 
-
-    async def _execute_validated(self, pattern: str, path: str = ".", file_pattern: Optional[str] = None,
-                                 max_results: int = 50, semantic: bool = False, indexer=None,
-                                 ignore_case: bool = False) -> ToolResult:
+    async def _execute_validated(
+        self,
+        pattern: str,
+        path: str = ".",
+        file_pattern: Optional[str] = None,
+        max_results: int = 50,
+        semantic: bool = False,
+        indexer=None,
+        ignore_case: bool = False,
+    ) -> ToolResult:
         """
         Search for pattern in files.
-        
+
         Week 3 Day 1: Added semantic search mode using indexer.
         When semantic=True, searches code symbols instead of text.
         """
@@ -81,35 +89,28 @@ class SearchFilesTool(ValidatedTool):
             cmd.extend([pattern, path])
 
             try:
-                result = subprocess.run(
-                    cmd,
-                    capture_output=True,
-                    text=True,
-                    timeout=10
-                )
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
 
                 if result.returncode == 0:
-                    lines = result.stdout.strip().split('\n')[:max_results]
+                    lines = result.stdout.strip().split("\n")[:max_results]
 
                     results = []
                     for line in lines:
-                        if ':' in line:
-                            parts = line.split(':', 2)
+                        if ":" in line:
+                            parts = line.split(":", 2)
                             if len(parts) >= 3:
-                                results.append({
-                                    "file": parts[0],
-                                    "line": int(parts[1]),
-                                    "text": parts[2].strip()
-                                })
+                                results.append(
+                                    {
+                                        "file": parts[0],
+                                        "line": int(parts[1]),
+                                        "text": parts[2].strip(),
+                                    }
+                                )
 
                     return ToolResult(
                         success=True,
                         data={"matches": results, "count": len(results)},
-                        metadata={
-                            "pattern": pattern,
-                            "count": len(results),
-                            "tool": "ripgrep"
-                        }
+                        metadata={"pattern": pattern, "count": len(results), "tool": "ripgrep"},
                     )
             except FileNotFoundError:
                 # Ripgrep not installed, fall back to grep
@@ -123,34 +124,23 @@ class SearchFilesTool(ValidatedTool):
             if file_pattern:
                 cmd.extend(["--include", file_pattern])
 
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
 
-            lines = result.stdout.strip().split('\n')[:max_results]
+            lines = result.stdout.strip().split("\n")[:max_results]
 
             results = []
             for line in lines:
-                if ':' in line:
-                    parts = line.split(':', 2)
+                if ":" in line:
+                    parts = line.split(":", 2)
                     if len(parts) >= 3:
-                        results.append({
-                            "file": parts[0],
-                            "line": int(parts[1]),
-                            "text": parts[2].strip()
-                        })
+                        results.append(
+                            {"file": parts[0], "line": int(parts[1]), "text": parts[2].strip()}
+                        )
 
             return ToolResult(
                 success=True,
                 data={"matches": results, "count": len(results)},
-                metadata={
-                    "pattern": pattern,
-                    "count": len(results),
-                    "tool": "grep"
-                }
+                metadata={"pattern": pattern, "count": len(results), "tool": "grep"},
             )
 
         except Exception as e:
@@ -159,15 +149,15 @@ class SearchFilesTool(ValidatedTool):
     async def _semantic_search(self, query: str, indexer, max_results: int) -> ToolResult:
         """
         Week 3 Day 1: Semantic search using indexer.
-        
+
         Searches code symbols (classes, functions, methods) instead of text.
         Much faster and more accurate for code navigation.
-        
+
         Args:
             query: Symbol name to search for
             indexer: SemanticIndexer instance
             max_results: Maximum number of results
-        
+
         Returns:
             ToolResult with symbol matches
         """
@@ -179,33 +169,27 @@ class SearchFilesTool(ValidatedTool):
                 return ToolResult(
                     success=True,
                     data={"matches": [], "count": 0},
-                    metadata={
-                        "pattern": query,
-                        "count": 0,
-                        "tool": "semantic_indexer"
-                    }
+                    metadata={"pattern": query, "count": 0, "tool": "semantic_indexer"},
                 )
 
             # Convert Symbol objects to dict format
             results = []
             for symbol in symbols:
-                results.append({
-                    "file": symbol.file_path,
-                    "line": symbol.line_number,
-                    "name": symbol.name,
-                    "type": symbol.type,
-                    "signature": symbol.signature or "",
-                    "docstring": (symbol.docstring or "")[:100]  # First 100 chars
-                })
+                results.append(
+                    {
+                        "file": symbol.file_path,
+                        "line": symbol.line_number,
+                        "name": symbol.name,
+                        "type": symbol.type,
+                        "signature": symbol.signature or "",
+                        "docstring": (symbol.docstring or "")[:100],  # First 100 chars
+                    }
+                )
 
             return ToolResult(
                 success=True,
                 data={"matches": results, "count": len(results)},
-                metadata={
-                    "pattern": query,
-                    "count": len(results),
-                    "tool": "semantic_indexer"
-                }
+                metadata={"pattern": query, "count": len(results), "tool": "semantic_indexer"},
             )
 
         except Exception as e:
@@ -222,21 +206,19 @@ class GetDirectoryTreeTool(ValidatedTool):
         self.category = ToolCategory.SEARCH
         self.description = "Get hierarchical file tree structure"
         self.parameters = {
-            "path": {
-                "type": "string",
-                "description": "Directory path",
-                "required": False
-            },
+            "path": {"type": "string", "description": "Directory path", "required": False},
             "max_depth": {
                 "type": "integer",
                 "description": "Maximum depth to traverse",
-                "required": False
-            }
+                "required": False,
+            },
         }
+
     def get_validators(self):
         """Validate parameters."""
-        return {}
-
+        return {
+            "max_depth": lambda v: v is None or (isinstance(v, int) and 0 < v <= 10),
+        }
 
     async def _execute_validated(self, path: str = ".", max_depth: int = 3) -> ToolResult:
         """Get directory tree."""
@@ -244,10 +226,7 @@ class GetDirectoryTreeTool(ValidatedTool):
             dir_path = Path(path)
 
             if not dir_path.is_dir():
-                return ToolResult(
-                    success=False,
-                    error=f"Not a directory: {path}"
-                )
+                return ToolResult(success=False, error=f"Not a directory: {path}")
 
             def build_tree(dir_path: Path, prefix: str = "", depth: int = 0) -> list[str]:
                 """Recursively build tree structure."""
@@ -259,15 +238,21 @@ class GetDirectoryTreeTool(ValidatedTool):
                     items = sorted(dir_path.iterdir(), key=lambda x: (not x.is_dir(), x.name))
 
                     # Skip hidden and common ignored directories
-                    items = [x for x in items if not x.name.startswith('.')
-                            and x.name not in ['__pycache__', 'node_modules', 'venv']]
+                    items = [
+                        x
+                        for x in items
+                        if not x.name.startswith(".")
+                        and x.name not in ["__pycache__", "node_modules", "venv"]
+                    ]
 
                     for i, item in enumerate(items):
                         is_last = i == len(items) - 1
                         current_prefix = "└── " if is_last else "├── "
                         next_prefix = "    " if is_last else "│   "
 
-                        lines.append(f"{prefix}{current_prefix}{item.name}{'/' if item.is_dir() else ''}")
+                        lines.append(
+                            f"{prefix}{current_prefix}{item.name}{'/' if item.is_dir() else ''}"
+                        )
 
                         if item.is_dir():
                             lines.extend(build_tree(item, prefix + next_prefix, depth + 1))
@@ -278,15 +263,12 @@ class GetDirectoryTreeTool(ValidatedTool):
 
             tree_lines = [f"{dir_path.name}/"]
             tree_lines.extend(build_tree(dir_path))
-            tree_str = '\n'.join(tree_lines)
+            tree_str = "\n".join(tree_lines)
 
             return ToolResult(
                 success=True,
                 data=tree_str,
-                metadata={
-                    "path": str(dir_path),
-                    "max_depth": max_depth
-                }
+                metadata={"path": str(dir_path), "max_depth": max_depth},
             )
         except Exception as e:
             return ToolResult(success=False, error=str(e))

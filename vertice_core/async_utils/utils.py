@@ -21,7 +21,7 @@ from typing import (
     Union,
 )
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 def run_sync(coro: Awaitable[T]) -> T:
@@ -44,15 +44,14 @@ def run_sync(coro: Awaitable[T]) -> T:
 
     # Already in async context, need to run in a new thread
     import concurrent.futures
+
     with concurrent.futures.ThreadPoolExecutor() as pool:
         future = pool.submit(asyncio.run, coro)
         return future.result()
 
 
 async def gather_with_limit(
-    coros: Sequence[Awaitable[T]],
-    limit: int = 10,
-    return_exceptions: bool = False
+    coros: Sequence[Awaitable[T]], limit: int = 10, return_exceptions: bool = False
 ) -> List[Union[T, Exception]]:
     """
     Run coroutines concurrently with a concurrency limit.
@@ -77,10 +76,7 @@ async def gather_with_limit(
                     return (index, e)
                 raise
 
-    tasks = [
-        asyncio.create_task(limited_coro(i, coro))
-        for i, coro in enumerate(coros)
-    ]
+    tasks = [asyncio.create_task(limited_coro(i, coro)) for i, coro in enumerate(coros)]
 
     results = await asyncio.gather(*tasks, return_exceptions=return_exceptions)
 
@@ -89,11 +85,7 @@ async def gather_with_limit(
     return [r[1] if isinstance(r, tuple) else r for r in sorted_results]
 
 
-async def timeout(
-    coro: Awaitable[T],
-    seconds: float,
-    default: Optional[T] = None
-) -> Optional[T]:
+async def timeout(coro: Awaitable[T], seconds: float, default: Optional[T] = None) -> Optional[T]:
     """
     Run a coroutine with a timeout.
 
@@ -120,9 +112,7 @@ class TimeoutError(Exception):
 
 
 async def timeout_or_raise(
-    coro: Awaitable[T],
-    seconds: float,
-    message: str = "Operation timed out"
+    coro: Awaitable[T], seconds: float, message: str = "Operation timed out"
 ) -> T:
     """
     Run a coroutine with a timeout, raising on timeout.
@@ -148,7 +138,7 @@ def retry(
     max_attempts: int = 3,
     delay: float = 1.0,
     backoff: float = 2.0,
-    exceptions: tuple = (Exception,)
+    exceptions: tuple = (Exception,),
 ) -> Callable[[Callable[..., Awaitable[T]]], Callable[..., Awaitable[T]]]:
     """
     Decorator to retry an async function on failure.
@@ -162,6 +152,7 @@ def retry(
     Returns:
         Decorated function
     """
+
     def decorator(func: Callable[..., Awaitable[T]]) -> Callable[..., Awaitable[T]]:
         @functools.wraps(func)
         async def wrapper(*args, **kwargs) -> T:
@@ -180,6 +171,7 @@ def retry(
             raise last_exception
 
         return wrapper
+
     return decorator
 
 
@@ -188,7 +180,7 @@ async def retry_async(
     max_attempts: int = 3,
     delay: float = 1.0,
     backoff: float = 2.0,
-    exceptions: tuple = (Exception,)
+    exceptions: tuple = (Exception,),
 ) -> T:
     """
     Retry a coroutine factory on failure.
@@ -225,10 +217,7 @@ async def retry_async(
     raise last_exception
 
 
-async def first_completed(
-    coros: Sequence[Awaitable[T]],
-    cancel_pending: bool = True
-) -> T:
+async def first_completed(coros: Sequence[Awaitable[T]], cancel_pending: bool = True) -> T:
     """
     Return result of first completed coroutine.
 
@@ -241,10 +230,7 @@ async def first_completed(
     """
     tasks = [asyncio.create_task(coro) for coro in coros]
 
-    done, pending = await asyncio.wait(
-        tasks,
-        return_when=asyncio.FIRST_COMPLETED
-    )
+    done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
 
     if cancel_pending:
         for task in pending:
@@ -259,10 +245,7 @@ async def first_completed(
         return task.result()
 
 
-async def debounce(
-    coro: Awaitable[T],
-    wait: float
-) -> T:
+async def debounce(coro: Awaitable[T], wait: float) -> T:
     """
     Debounce a coroutine execution.
 
@@ -290,7 +273,7 @@ class AsyncLock:
     def __init__(self):
         self._lock = asyncio.Lock()
 
-    async def acquire(self, timeout: Optional[float] = None) -> 'AsyncLockContext':
+    async def acquire(self, timeout: Optional[float] = None) -> "AsyncLockContext":
         """Acquire lock with optional timeout."""
         return AsyncLockContext(self._lock, timeout)
 
@@ -324,14 +307,14 @@ class AsyncLockContext:
 
 
 __all__ = [
-    'run_sync',
-    'gather_with_limit',
-    'timeout',
-    'timeout_or_raise',
-    'TimeoutError',
-    'retry',
-    'retry_async',
-    'first_completed',
-    'debounce',
-    'AsyncLock',
+    "run_sync",
+    "gather_with_limit",
+    "timeout",
+    "timeout_or_raise",
+    "TimeoutError",
+    "retry",
+    "retry_async",
+    "first_completed",
+    "debounce",
+    "AsyncLock",
 ]

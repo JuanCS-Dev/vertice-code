@@ -21,10 +21,7 @@ if TYPE_CHECKING:
     from .agent import PlannerAgent
 
 
-async def explore(
-    agent: "PlannerAgent",
-    task: "AgentTask"
-) -> AgentResponse:
+async def explore(agent: "PlannerAgent", task: "AgentTask") -> AgentResponse:
     """
     Execute in exploration mode - read-only analysis.
 
@@ -60,10 +57,10 @@ async def explore(
             data={
                 "mode": "exploration",
                 "analysis": analysis or {"raw": response},
-                "context": context
+                "context": context,
             },
             reasoning="Exploration complete. Ready for planning phase.",
-            metadata={"mode": PlanningMode.EXPLORATION.value}
+            metadata={"mode": PlanningMode.EXPLORATION.value},
         )
 
     finally:

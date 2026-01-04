@@ -13,7 +13,7 @@ class OllamaProvider:
 
     def __init__(self, base_url: Optional[str] = None, model: Optional[str] = None):
         """Initialize Ollama provider.
-        
+
         Args:
             base_url: Ollama API base URL (defaults to http://localhost:11434)
             model: Model name (defaults to qwen2.5-coder:latest)
@@ -33,14 +33,18 @@ class OllamaProvider:
         """Check if Ollama is running and model is available."""
         try:
             session = await self._get_session()
-            async with session.get(f"{self.base_url}/api/tags", timeout=aiohttp.ClientTimeout(total=2)) as resp:
+            async with session.get(
+                f"{self.base_url}/api/tags", timeout=aiohttp.ClientTimeout(total=2)
+            ) as resp:
                 if resp.status == 200:
                     data = await resp.json()
                     models = [m.get("name", "") for m in data.get("models", [])]
                     # Check if our model exists
                     model_available = any(self.model_name in m for m in models)
                     if not model_available:
-                        logger.warning(f"Model {self.model_name} not found. Available: {models[:5]}")
+                        logger.warning(
+                            f"Model {self.model_name} not found. Available: {models[:5]}"
+                        )
                     return model_available
                 return False
         except Exception as e:
@@ -52,15 +56,15 @@ class OllamaProvider:
         messages: List[Dict[str, str]],
         max_tokens: int = 2048,
         temperature: float = 0.7,
-        **kwargs
+        **kwargs,
     ) -> str:
         """Generate completion from messages.
-        
+
         Args:
             messages: List of message dicts with 'role' and 'content'
             max_tokens: Maximum tokens to generate
             temperature: Sampling temperature
-            
+
         Returns:
             Generated text
         """
@@ -78,13 +82,11 @@ class OllamaProvider:
                 "options": {
                     "num_predict": max_tokens,
                     "temperature": temperature,
-                }
+                },
             }
 
             async with session.post(
-                f"{self.base_url}/api/chat",
-                json=payload,
-                timeout=aiohttp.ClientTimeout(total=120)
+                f"{self.base_url}/api/chat", json=payload, timeout=aiohttp.ClientTimeout(total=120)
             ) as resp:
                 if resp.status != 200:
                     error_text = await resp.text()
@@ -102,15 +104,15 @@ class OllamaProvider:
         messages: List[Dict[str, str]],
         max_tokens: int = 2048,
         temperature: float = 0.7,
-        **kwargs
+        **kwargs,
     ) -> AsyncGenerator[str, None]:
         """Stream generation from messages.
-        
+
         Args:
             messages: List of message dicts
             max_tokens: Maximum tokens to generate
             temperature: Sampling temperature
-            
+
         Yields:
             Generated text chunks
         """
@@ -127,13 +129,11 @@ class OllamaProvider:
                 "options": {
                     "num_predict": max_tokens,
                     "temperature": temperature,
-                }
+                },
             }
 
             async with session.post(
-                f"{self.base_url}/api/chat",
-                json=payload,
-                timeout=aiohttp.ClientTimeout(total=300)
+                f"{self.base_url}/api/chat", json=payload, timeout=aiohttp.ClientTimeout(total=300)
             ) as resp:
                 if resp.status != 200:
                     error_text = await resp.text()
@@ -143,6 +143,7 @@ class OllamaProvider:
                 async for line in resp.content:
                     if line:
                         import json
+
                         try:
                             chunk = json.loads(line)
                             content = chunk.get("message", {}).get("content", "")
@@ -160,7 +161,7 @@ class OllamaProvider:
         messages: List[Dict[str, str]],
         max_tokens: int = 2048,
         temperature: float = 0.7,
-        **kwargs
+        **kwargs,
     ) -> AsyncGenerator[str, None]:
         """
         Alias for stream_generate to maintain compatibility.
@@ -171,10 +172,10 @@ class OllamaProvider:
     def get_model_info(self) -> Dict[str, str | bool | int]:
         """Get model information."""
         return {
-            'provider': 'ollama',
-            'model': self.model_name,
-            'base_url': self.base_url,
-            'supports_streaming': True
+            "provider": "ollama",
+            "model": self.model_name,
+            "base_url": self.base_url,
+            "supports_streaming": True,
         }
 
     async def close(self):

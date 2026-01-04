@@ -18,27 +18,30 @@ from vertice_cli.tools.registry_helper import get_default_registry
 from vertice_cli.orchestration.squad import DevSquad
 
 app = typer.Typer(
-    name="qwen-dev",
-    help="AI-Powered Code Assistant with MCP Integration",
-    add_completion=False
+    name="vertice-cli",
+    help="Vértice - Sovereign Intelligence & Tactical Execution",
+    add_completion=False,
 )
+
 
 def get_squad() -> DevSquad:
     """Initialize DevSquad with default components."""
     registry = get_default_registry()
     mcp_client = MCPClient(registry)
     return DevSquad(llm_client, mcp_client)
+
+
 console = Console()
 
 
 def validate_output_path(path_str: str) -> Path:
     """Validate output path is safe and allowed.
-    
+
     Security checks:
     1. Must be relative or within current directory tree
     2. Cannot overwrite critical system files (checked BEFORE parent dir check)
     3. Parent directory must exist
-    
+
     Raises:
         ValueError: If path is unsafe or forbidden
         FileNotFoundError: If parent directory doesn't exist
@@ -57,7 +60,7 @@ def validate_output_path(path_str: str) -> Path:
         )
 
     # Check 2: Forbidden paths/files (check BEFORE parent existence)
-    forbidden_patterns = ['.git', '.env', '.ssh', 'id_rsa', 'id_ed25519', 'authorized_keys']
+    forbidden_patterns = [".git", ".env", ".ssh", "id_rsa", "id_ed25519", "authorized_keys"]
     path_parts = path.parts
 
     for pattern in forbidden_patterns:
@@ -170,13 +173,15 @@ def generate(
 
 @app.command()
 def chat(
-    message: Optional[str] = typer.Option(None, "--message", help="Single message (non-interactive)"),
+    message: Optional[str] = typer.Option(
+        None, "--message", help="Single message (non-interactive)"
+    ),
     no_context: bool = typer.Option(False, "--no-context", help="Disable project context"),
     output_file: Optional[str] = typer.Option(None, "--output", help="Save output to file"),
     json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
 ):
     """Start interactive chat or execute single message.
-    
+
     Examples:
         qwen chat                                        # Interactive mode
         qwen chat --message "list all Python files"      # Single command
@@ -192,20 +197,17 @@ def chat(
             console.print(f"[dim]Executing:[/dim] {message}\n")
 
         # Execute
-        result = asyncio.run(execute_single_shot(
-            message,
-            include_context=not no_context
-        ))
+        result = asyncio.run(execute_single_shot(message, include_context=not no_context))
 
         # Format output
         if json_output:
             output = json.dumps(result, indent=2)
         else:
-            output = result['output']
+            output = result["output"]
 
-            if not result['success'] and result['errors']:
-                output += '\n\n[red]Errors:[/red]\n'
-                output += '\n'.join(f"  - {err}" for err in result['errors'])
+            if not result["success"] and result["errors"]:
+                output += "\n\n[red]Errors:[/red]\n"
+                output += "\n".join(f"  - {err}" for err in result["errors"])
 
         # FIX #1 & #3: Save to file with proper error handling and path validation
         if output_file:
@@ -228,10 +230,11 @@ def chat(
                 console.print(output)
             else:
                 from rich.markdown import Markdown
+
                 console.print(Markdown(output))
 
         # Exit with appropriate code
-        raise typer.Exit(0 if result['success'] else 1)
+        raise typer.Exit(0 if result["success"] else 1)
 
     else:
         # Interactive mode - launch shell
@@ -240,6 +243,7 @@ def chat(
 
         try:
             from .shell import main as shell_main
+
             asyncio.run(shell_main())
         except KeyboardInterrupt:
             console.print("\n\n[yellow]Goodbye! 👋[/yellow]\n")
@@ -279,6 +283,7 @@ def config_show():
     console.print("\n[bold blue]MCP Settings:[/bold blue]")
     try:
         from vertice_cli.core.mcp import create_mcp_client
+
         mcp = create_mcp_client()
         health = mcp.get_health_status()
         console.print(f"  Healthy: {health['healthy']}")
@@ -307,15 +312,12 @@ def shell():
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")
         import traceback
+
         traceback.print_exc()
 
 
 # Session management commands
-sessions_app = typer.Typer(
-    name="sessions",
-    help="Manage saved sessions",
-    add_completion=False
-)
+sessions_app = typer.Typer(name="sessions", help="Manage saved sessions", add_completion=False)
 app.add_typer(sessions_app, name="sessions")
 
 
@@ -323,12 +325,16 @@ app.add_typer(sessions_app, name="sessions")
 def list_sessions(
     limit: int = typer.Option(10, "--limit", help="Number of sessions to show"),
     all_sessions: bool = typer.Option(False, "--all", "-a", help="Show all sessions"),
-    cwd_filter: Optional[str] = typer.Option(None, "--cwd", help="Filter by working directory (substring)"),
-    min_messages: Optional[int] = typer.Option(None, "--min-messages", help="Minimum number of messages"),
+    cwd_filter: Optional[str] = typer.Option(
+        None, "--cwd", help="Filter by working directory (substring)"
+    ),
+    min_messages: Optional[int] = typer.Option(
+        None, "--min-messages", help="Minimum number of messages"
+    ),
     sort_by: str = typer.Option("activity", "--sort", help="Sort by: activity, messages, files"),
 ):
     """List all saved sessions with filtering and sorting.
-    
+
     Examples:
         qwen sessions list                          # Show 10 most recent
         qwen sessions list --all                    # Show all sessions
@@ -349,22 +355,22 @@ def list_sessions(
 
     # Apply filters (AIR GAP #3)
     if cwd_filter:
-        sessions = [s for s in sessions if cwd_filter.lower() in s['cwd'].lower()]
+        sessions = [s for s in sessions if cwd_filter.lower() in s["cwd"].lower()]
         if not sessions:
             console.print(f"[yellow]No sessions found matching cwd: {cwd_filter}[/yellow]")
             return
 
     if min_messages is not None:
-        sessions = [s for s in sessions if s['messages'] >= min_messages]
+        sessions = [s for s in sessions if s["messages"] >= min_messages]
         if not sessions:
             console.print(f"[yellow]No sessions found with {min_messages}+ messages[/yellow]")
             return
 
     # Apply sorting (AIR GAP #3)
     if sort_by == "messages":
-        sessions = sorted(sessions, key=lambda s: s['messages'], reverse=True)
+        sessions = sorted(sessions, key=lambda s: s["messages"], reverse=True)
     elif sort_by == "files":
-        sessions = sorted(sessions, key=lambda s: s['files_read'], reverse=True)
+        sessions = sorted(sessions, key=lambda s: s["files_read"], reverse=True)
     # Default: already sorted by activity (most recent first)
 
     # Apply limit
@@ -386,7 +392,7 @@ def list_sessions(
     table.add_column("Last Activity", style="magenta")
 
     for session in sessions:
-        last_activity = datetime.fromisoformat(session['last_activity'])
+        last_activity = datetime.fromisoformat(session["last_activity"])
         age = datetime.now() - last_activity
 
         if age.days > 0:
@@ -397,18 +403,20 @@ def list_sessions(
             age_str = f"{age.seconds // 60}m ago"
 
         table.add_row(
-            session['id'],
-            session['cwd'],
-            str(session['messages']),
-            str(session['files_read']),
-            age_str
+            session["id"],
+            session["cwd"],
+            str(session["messages"]),
+            str(session["files_read"]),
+            age_str,
         )
 
     console.print(table)
 
     # Show helpful hints
     if not all_sessions and total_matching > limit:
-        console.print(f"\n[dim]Showing {len(sessions)} of {total_matching} matching sessions. Use --all to see all.[/dim]")
+        console.print(
+            f"\n[dim]Showing {len(sessions)} of {total_matching} matching sessions. Use --all to see all.[/dim]"
+        )
 
     if cwd_filter or min_messages:
         filters = []
@@ -545,7 +553,9 @@ def resume(
 
     console.print(f"[cyan]Resuming session {state.session_id}...[/cyan]")
     console.print(f"[dim]Working directory: {state.cwd}[/dim]")
-    console.print(f"[dim]Messages: {len(state.conversation)}, Files: {len(state.files_read)}[/dim]\n")
+    console.print(
+        f"[dim]Messages: {len(state.conversation)}, Files: {len(state.files_read)}[/dim]\n"
+    )
 
     # Start shell with restored state
     try:
@@ -556,22 +566,21 @@ def resume(
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")
         import traceback
+
         traceback.print_exc()
 
 
-
 # Squad management commands
-squad_app = typer.Typer(
-    name="squad",
-    help="Manage DevSquad agents",
-    add_completion=False
-)
+squad_app = typer.Typer(name="squad", help="Manage DevSquad agents", add_completion=False)
 app.add_typer(squad_app, name="squad")
+
 
 @squad_app.command("run")
 def squad_run(request: str):
     """Start a DevSquad mission."""
-    console.print(Panel(f"[bold blue]🚀 Starting DevSquad Mission[/bold blue]\n[white]{request}[/white]"))
+    console.print(
+        Panel(f"[bold blue]🚀 Starting DevSquad Mission[/bold blue]\n[white]{request}[/white]")
+    )
 
     try:
         squad = get_squad()
@@ -586,6 +595,7 @@ def squad_run(request: str):
     except Exception as e:
         console.print(f"[bold red]Error:[/bold red] {e}")
         raise typer.Exit(1)
+
 
 @squad_app.command("status")
 def squad_status():
@@ -614,12 +624,9 @@ def squad_status():
 
 
 # Workflow management commands
-workflow_app = typer.Typer(
-    name="workflow",
-    help="Manage and run workflows",
-    add_completion=False
-)
+workflow_app = typer.Typer(name="workflow", help="Manage and run workflows", add_completion=False)
 app.add_typer(workflow_app, name="workflow")
+
 
 @workflow_app.command("list")
 def list_workflows():
@@ -641,6 +648,7 @@ def list_workflows():
 
     console.print(table)
 
+
 @workflow_app.command("run")
 def workflow_run(name: str):
     """Execute a predefined workflow."""
@@ -656,10 +664,12 @@ def workflow_run(name: str):
         console.print("Run [bold]qwen-dev workflow list[/bold] to see available workflows.")
         raise typer.Exit(1)
 
-    console.print(Panel(
-        f"[bold blue]Starting Workflow: {workflow.name}[/bold blue]\n"
-        f"[dim]{workflow.description}[/dim]"
-    ))
+    console.print(
+        Panel(
+            f"[bold blue]Starting Workflow: {workflow.name}[/bold blue]\n"
+            f"[dim]{workflow.description}[/dim]"
+        )
+    )
 
     # Prompt for parameters
     params = {}

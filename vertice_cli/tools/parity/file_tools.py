@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 # GLOB TOOL
 # =============================================================================
 
+
 class GlobTool(Tool):
     """
     Fast file pattern matching tool using glob patterns.
@@ -50,18 +51,18 @@ class GlobTool(Tool):
             "pattern": {
                 "type": "string",
                 "description": "Glob pattern to match files (e.g., '**/*.py', 'src/**/*.ts')",
-                "required": True
+                "required": True,
             },
             "path": {
                 "type": "string",
                 "description": "Directory to search in (default: current directory)",
-                "required": False
+                "required": False,
             },
             "max_results": {
                 "type": "integer",
                 "description": "Maximum number of results to return (default: 100)",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     async def _execute_validated(self, **kwargs) -> ToolResult:
@@ -113,8 +114,8 @@ class GlobTool(Tool):
                     "path": str(root),
                     "total_matches": len(matches),
                     "returned": len(result_paths),
-                    "truncated": len(matches) > max_results
-                }
+                    "truncated": len(matches) > max_results,
+                },
             )
 
         except PermissionError:
@@ -127,6 +128,7 @@ class GlobTool(Tool):
 # =============================================================================
 # LS TOOL
 # =============================================================================
+
 
 class LSTool(Tool):
     """
@@ -148,19 +150,19 @@ class LSTool(Tool):
             "path": {
                 "type": "string",
                 "description": "Directory path to list (default: current directory)",
-                "required": False
+                "required": False,
             },
             "all": {
                 "type": "boolean",
                 "description": "Include hidden files (starting with .)",
-                "required": False
+                "required": False,
             },
             "ignore": {
                 "type": "array",
                 "items": {"type": "string"},
                 "description": "Patterns to ignore (e.g., ['node_modules', '__pycache__'])",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     async def _execute_validated(self, **kwargs) -> ToolResult:
@@ -185,8 +187,7 @@ class LSTool(Tool):
             entries = []
             try:
                 dir_contents = sorted(
-                    dir_path.iterdir(),
-                    key=lambda p: (not p.is_dir(), p.name.lower())
+                    dir_path.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower())
                 )
             except PermissionError:
                 return ToolResult(success=False, error=f"Permission denied reading: {path}")
@@ -195,7 +196,7 @@ class LSTool(Tool):
                 name = entry.name
 
                 # Skip hidden files unless requested
-                if not show_all and name.startswith('.'):
+                if not show_all and name.startswith("."):
                     continue
 
                 # Skip ignored patterns
@@ -204,29 +205,24 @@ class LSTool(Tool):
 
                 try:
                     stat = entry.stat()
-                    entries.append({
-                        "name": name,
-                        "type": "directory" if entry.is_dir() else "file",
-                        "size": stat.st_size if entry.is_file() else None,
-                        "modified": stat.st_mtime,
-                    })
+                    entries.append(
+                        {
+                            "name": name,
+                            "type": "directory" if entry.is_dir() else "file",
+                            "size": stat.st_size if entry.is_file() else None,
+                            "modified": stat.st_mtime,
+                        }
+                    )
                 except OSError as e:
                     logger.debug(f"Cannot stat {entry}: {e}")
-                    entries.append({
-                        "name": name,
-                        "type": "unknown",
-                        "size": None,
-                        "modified": None
-                    })
+                    entries.append(
+                        {"name": name, "type": "unknown", "size": None, "modified": None}
+                    )
 
             return ToolResult(
                 success=True,
                 data=entries,
-                metadata={
-                    "path": str(dir_path),
-                    "count": len(entries),
-                    "show_hidden": show_all
-                }
+                metadata={"path": str(dir_path), "count": len(entries), "show_hidden": show_all},
             )
 
         except PermissionError:
@@ -239,6 +235,7 @@ class LSTool(Tool):
 # =============================================================================
 # MULTI-EDIT TOOL
 # =============================================================================
+
 
 class MultiEditTool(Tool):
     """
@@ -271,7 +268,7 @@ class MultiEditTool(Tool):
             "file_path": {
                 "type": "string",
                 "description": "Absolute path to the file to edit",
-                "required": True
+                "required": True,
             },
             "edits": {
                 "type": "array",
@@ -279,17 +276,17 @@ class MultiEditTool(Tool):
                     "type": "object",
                     "properties": {
                         "old_string": {"type": "string"},
-                        "new_string": {"type": "string"}
-                    }
+                        "new_string": {"type": "string"},
+                    },
                 },
                 "description": "List of {old_string, new_string} edits to apply",
-                "required": True
+                "required": True,
             },
             "create_backup": {
                 "type": "boolean",
                 "description": "Create backup before editing (default: true)",
-                "required": False
-            }
+                "required": False,
+            },
         }
 
     async def _execute_validated(self, **kwargs) -> ToolResult:
@@ -322,12 +319,12 @@ class MultiEditTool(Tool):
             if file_size > self.MAX_FILE_SIZE:
                 return ToolResult(
                     success=False,
-                    error=f"File too large ({file_size} bytes). Max: {self.MAX_FILE_SIZE}"
+                    error=f"File too large ({file_size} bytes). Max: {self.MAX_FILE_SIZE}",
                 )
 
             # Read original content
             try:
-                original_content = path.read_text(encoding='utf-8')
+                original_content = path.read_text(encoding="utf-8")
             except UnicodeDecodeError:
                 return ToolResult(success=False, error="File is not valid UTF-8 text")
 
@@ -345,10 +342,7 @@ class MultiEditTool(Tool):
                     validation_errors.append(f"Edit {i+1}: old_string not found in file")
 
             if validation_errors:
-                return ToolResult(
-                    success=False,
-                    error="; ".join(validation_errors)
-                )
+                return ToolResult(success=False, error="; ".join(validation_errors))
 
             # Phase 2: Apply all edits
             applied = []
@@ -362,43 +356,45 @@ class MultiEditTool(Tool):
                     if count > 1:
                         return ToolResult(
                             success=False,
-                            error=f"Edit {i+1}: old_string appears {count} times (ambiguous)"
+                            error=f"Edit {i+1}: old_string appears {count} times (ambiguous)",
                         )
 
                     content = content.replace(old_string, new_string, 1)
-                    applied.append({
-                        "index": i,
-                        "type": "replace",
-                        "old_len": len(old_string),
-                        "new_len": len(new_string)
-                    })
+                    applied.append(
+                        {
+                            "index": i,
+                            "type": "replace",
+                            "old_len": len(old_string),
+                            "new_len": len(new_string),
+                        }
+                    )
 
             # Create backup if requested
             backup_path = None
             if create_backup:
-                backup_path = path.with_suffix(path.suffix + '.bak')
+                backup_path = path.with_suffix(path.suffix + ".bak")
                 try:
-                    backup_path.write_text(original_content, encoding='utf-8')
+                    backup_path.write_text(original_content, encoding="utf-8")
                 except OSError as e:
                     logger.warning(f"Could not create backup: {e}")
                     backup_path = None
 
             # Write new content
-            path.write_text(content, encoding='utf-8')
+            path.write_text(content, encoding="utf-8")
 
             return ToolResult(
                 success=True,
                 data={
                     "file": str(path),
                     "edits_applied": len(applied),
-                    "backup": str(backup_path) if backup_path else None
+                    "backup": str(backup_path) if backup_path else None,
                 },
                 metadata={
                     "original_size": len(original_content),
                     "new_size": len(content),
                     "edits": applied,
-                    "size_delta": len(content) - len(original_content)
-                }
+                    "size_delta": len(content) - len(original_content),
+                },
             )
 
         except PermissionError:
@@ -411,6 +407,7 @@ class MultiEditTool(Tool):
 # =============================================================================
 # REGISTRY HELPER
 # =============================================================================
+
 
 def get_file_tools() -> List[Tool]:
     """Get all file operation tools."""
