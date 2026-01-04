@@ -385,16 +385,33 @@ class GitDiffEnhancedTool(Tool):
                 if stat_result.success:
                     stats = self._parse_diff_stats(stat_result.data)
 
+            # P2.1 FIX: Add truncation indicator per web 2026 best practices
+            # Source: Agenta - "Output validators check final response"
+            MAX_DIFF_SIZE = 10000
+            diff_content = result.data if not stat_only else None
+            is_truncated = False
+            original_size = None
+
+            if diff_content and len(diff_content) > MAX_DIFF_SIZE:
+                is_truncated = True
+                original_size = len(diff_content)
+                diff_content = diff_content[:MAX_DIFF_SIZE]
+
             return ToolResult(
                 success=True,
                 data={
-                    "diff": result.data[:10000] if not stat_only else None,
+                    "diff": diff_content,
+                    "is_truncated": is_truncated,
                     "stats": result.data if stat_only else None,
                     "files_changed": stats.get("files", 0),
                     "insertions": stats.get("insertions", 0),
                     "deletions": stats.get("deletions", 0),
                 },
-                metadata={"target": target or "working tree"}
+                metadata={
+                    "target": target or "working tree",
+                    "original_size": original_size,
+                    "truncated_at": MAX_DIFF_SIZE if is_truncated else None,
+                }
             )
 
         except Exception as e:

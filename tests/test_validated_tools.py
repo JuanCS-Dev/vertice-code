@@ -138,7 +138,7 @@ class TestValidateToolInputs:
             validators
         )
 
-        assert result.valid is True
+        assert result.is_valid is True
         assert len(result.errors) == 0
 
     def test_invalid_inputs(self):
@@ -153,7 +153,7 @@ class TestValidateToolInputs:
             validators
         )
 
-        assert result.valid is False
+        assert result.is_valid is False
         assert len(result.errors) >= 2
 
     def test_empty_validators(self):
@@ -163,7 +163,7 @@ class TestValidateToolInputs:
             {}
         )
 
-        assert result.valid is True
+        assert result.is_valid is True
         assert len(result.errors) == 0
 
 

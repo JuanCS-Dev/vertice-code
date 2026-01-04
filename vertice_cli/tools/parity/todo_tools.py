@@ -8,19 +8,33 @@ Contains:
 - TodoReadTool: Get current todo list
 - TodoWriteTool: Manage todo list (add, update, complete)
 
+P2.2 FIX: Added persistence to session directory.
+Source: Agenta - "Structured outputs enforce consistent data formats"
+
 Author: JuanCS Dev
 Date: 2025-11-27
 """
 
 from __future__ import annotations
 
+import json
 import logging
+import os
 import threading
-from typing import Any, Dict, List
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from vertice_cli.tools.base import Tool, ToolCategory, ToolResult
 
 logger = logging.getLogger(__name__)
+
+# P2.2: Session directory for persistence
+def _get_todo_persist_path() -> Path:
+    """Get path for todo persistence file."""
+    # Use .vertice directory in current working directory
+    vertice_dir = Path.cwd() / ".vertice"
+    vertice_dir.mkdir(parents=True, exist_ok=True)
+    return vertice_dir / "todos.json"
 
 
 # =============================================================================
@@ -29,8 +43,9 @@ logger = logging.getLogger(__name__)
 
 class TodoState:
     """
-    Thread-safe singleton for shared todo state.
+    Thread-safe singleton for shared todo state with persistence.
 
+    P2.2 FIX: Now persists to .vertice/todos.json on every update.
     Ensures TodoRead and TodoWrite share the same list.
     """
 
@@ -43,28 +58,40 @@ class TodoState:
                 if cls._instance is None:
                     cls._instance = super().__new__(cls)
                     cls._instance._todos: List[Dict[str, Any]] = []
+                    cls._instance._loaded = False
         return cls._instance
+
+    def _ensure_loaded(self) -> None:
+        """Load from disk on first access (lazy loading)."""
+        if not self._loaded:
+            self._load()
+            self._loaded = True
 
     @property
     def todos(self) -> List[Dict[str, Any]]:
         """Get the current todo list (copy for safety)."""
         with self._lock:
+            self._ensure_loaded()
             return list(self._todos)
 
     @todos.setter
     def todos(self, value: List[Dict[str, Any]]) -> None:
-        """Set the todo list."""
+        """Set the todo list and persist to disk."""
         with self._lock:
             self._todos = list(value) if value else []
+            self._loaded = True
+            self._save()
 
     def count(self) -> int:
         """Get todo count."""
         with self._lock:
+            self._ensure_loaded()
             return len(self._todos)
 
     def count_by_status(self) -> Dict[str, int]:
         """Get counts by status."""
         with self._lock:
+            self._ensure_loaded()
             counts = {"pending": 0, "in_progress": 0, "completed": 0}
             for todo in self._todos:
                 status = todo.get("status", "pending")
@@ -73,9 +100,45 @@ class TodoState:
             return counts
 
     def clear(self) -> None:
-        """Clear all todos (for testing)."""
+        """Clear all todos and persist."""
         with self._lock:
             self._todos.clear()
+            self._save()
+
+    # P2.2: Persistence methods
+    def _save(self) -> bool:
+        """Save todos to disk."""
+        try:
+            path = _get_todo_persist_path()
+            data = {
+                "todos": self._todos,
+                "version": 1,
+            }
+            # Atomic write pattern (from P0)
+            temp_path = path.with_suffix('.tmp')
+            temp_path.write_text(json.dumps(data, indent=2))
+            temp_path.replace(path)
+            logger.debug(f"Saved {len(self._todos)} todos to {path}")
+            return True
+        except (OSError, IOError, TypeError) as e:
+            logger.warning(f"Failed to save todos: {e}")
+            return False
+
+    def _load(self) -> bool:
+        """Load todos from disk."""
+        try:
+            path = _get_todo_persist_path()
+            if not path.exists():
+                logger.debug("No todos file found, starting fresh")
+                return False
+
+            data = json.loads(path.read_text())
+            self._todos = data.get("todos", [])
+            logger.debug(f"Loaded {len(self._todos)} todos from {path}")
+            return True
+        except (OSError, IOError, json.JSONDecodeError) as e:
+            logger.warning(f"Failed to load todos: {e}")
+            return False
 
 
 # Global state instance

@@ -54,18 +54,34 @@ from vertice_cli.tools.parity.task_tool import (
     TaskTool,
 )
 
+# P2.4 FIX: Import prometheus tools for memory capability
+# Source: Google Developers - "Advanced agentic patterns: memory for robust agents"
+try:
+    from vertice_cli.tools.prometheus_tools import (
+        PrometheusMemoryQueryTool,
+        PrometheusExecuteTool,
+    )
+    PROMETHEUS_AVAILABLE = True
+except ImportError:
+    PROMETHEUS_AVAILABLE = False
+
 from vertice_cli.tools.base import Tool
 from typing import List
 
 
-def get_claude_parity_tools() -> List[Tool]:
+def get_claude_parity_tools(prometheus_provider=None) -> List[Tool]:
     """
     Get all Claude Code parity tools.
+
+    P2.4 FIX: Now includes memory tools when prometheus_provider is available.
+
+    Args:
+        prometheus_provider: Optional PROMETHEUS provider for memory tools
 
     Returns:
         List of all parity tools for registration
     """
-    return [
+    tools = [
         *get_file_tools(),
         *get_web_tools(),
         *get_notebook_tools(),
@@ -73,6 +89,28 @@ def get_claude_parity_tools() -> List[Tool]:
         *get_execution_tools(),
         *get_interaction_tools(),
         TaskTool(),
+    ]
+
+    # P2.4: Add memory tools if prometheus is available
+    if PROMETHEUS_AVAILABLE and prometheus_provider is not None:
+        memory_tool = PrometheusMemoryQueryTool(prometheus_provider)
+        execute_tool = PrometheusExecuteTool(prometheus_provider)
+        tools.extend([memory_tool, execute_tool])
+
+    return tools
+
+
+def get_memory_tools(prometheus_provider=None) -> List[Tool]:
+    """
+    P2.4: Get memory-specific tools.
+
+    Returns empty list if prometheus not available or provider not set.
+    """
+    if not PROMETHEUS_AVAILABLE or prometheus_provider is None:
+        return []
+
+    return [
+        PrometheusMemoryQueryTool(prometheus_provider),
     ]
 
 
@@ -102,6 +140,8 @@ __all__ = [
     "TaskTool",
     # Registry
     "get_claude_parity_tools",
+    "get_memory_tools",  # P2.4: Memory tools getter
+    "PROMETHEUS_AVAILABLE",  # P2.4: Check if prometheus is available
     # Module getters
     "get_file_tools",
     "get_web_tools",
