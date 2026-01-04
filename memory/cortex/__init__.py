@@ -12,6 +12,7 @@ Implements the MIRIX memory system (arXiv:2507.07957):
 Plus:
 - Working Memory - Ephemeral task context
 - Active Retrieval - Automatic context injection
+- Contribution Ledger - Agent economy tracking
 
 Stack:
 - SQLite: Structured data (zero setup, file-based)
@@ -20,20 +21,24 @@ Stack:
 Reference: https://arxiv.org/abs/2507.07957
 """
 
-from .memory import (
-    MemoryCortex,
-    WorkingMemory,
-    EpisodicMemory,
-    SemanticMemory,
-    Memory,
-    Contribution,
-    get_cortex,
-    LANCEDB_AVAILABLE,
-)
+# Main cortex facade
+from .cortex import MemoryCortex, get_cortex
+
+# Data types
+from .types import Memory, Contribution
+
+# Memory subsystems
+from .working import WorkingMemory
+from .episodic import EpisodicMemory
+from .semantic import SemanticMemory, LANCEDB_AVAILABLE
 from .core import CoreMemory, CoreBlockType, CoreBlock
 from .procedural import ProceduralMemory, ProcedureType, Procedure
 from .resource import ResourceMemory, ResourceType, Resource
 from .vault import KnowledgeVault, VaultEntryType, SensitivityLevel, VaultEntry
+
+# Managers
+from .economy import ContributionLedger
+from .retrieval import ActiveRetrieval
 
 __all__ = [
     # Main cortex
@@ -66,4 +71,7 @@ __all__ = [
     "VaultEntryType",
     "SensitivityLevel",
     "VaultEntry",
+    # Managers (new)
+    "ContributionLedger",
+    "ActiveRetrieval",
 ]
