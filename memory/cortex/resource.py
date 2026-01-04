@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import asyncio
 import uuid
 import logging
 from datetime import datetime
@@ -19,6 +20,8 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
+from .timing import timing_decorator
+from .connection_pool import ConnectionPool
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +96,7 @@ class ResourceMemory:
     Based on MIRIX (arXiv:2507.07957) resource memory component.
     """
 
-    def __init__(self, db_path: Path):
+    def __init__(self, db_path: Path, pool: ConnectionPool):
         """
         Initialize resource memory.
 
@@ -101,11 +104,12 @@ class ResourceMemory:
             db_path: Path to SQLite database file.
         """
         self.db_path = db_path
+        self.pool = pool
         self._init_db()
 
     def _init_db(self) -> None:
         """Initialize database schema."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self.pool.get_conn(self.db_path) as conn:
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS resources (
                     id TEXT PRIMARY KEY,
@@ -160,7 +164,7 @@ class ResourceMemory:
         """
         resource_id = str(uuid.uuid4())
 
-        with sqlite3.connect(self.db_path) as conn:
+        with self.pool.get_conn(self.db_path) as conn:
             conn.execute(
                 """INSERT INTO resources
                    (id, title, summary, resource_type, content, path,
@@ -198,7 +202,7 @@ class ResourceMemory:
         Returns:
             Resource if found, None otherwise.
         """
-        with sqlite3.connect(self.db_path) as conn:
+        with self.pool.get_conn(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             row = conn.execute(
                 "SELECT * FROM resources WHERE id = ?",
@@ -217,7 +221,8 @@ class ResourceMemory:
                 return self._row_to_resource(row)
             return None
 
-    def search(
+    @timing_decorator
+    async def search(
         self,
         query: str,
         resource_type: Optional[ResourceType] = None,
@@ -234,37 +239,42 @@ class ResourceMemory:
         Returns:
             List of matching resources.
         """
-        with sqlite3.connect(self.db_path) as conn:
-            conn.row_factory = sqlite3.Row
+        loop = asyncio.get_event_loop()
 
-            # Get IDs from FTS
-            fts_rows = conn.execute(
-                """SELECT id FROM resources_fts
-                   WHERE resources_fts MATCH ?
-                   ORDER BY rank
-                   LIMIT ?""",
-                (query, limit * 2)  # Get extra for filtering
-            ).fetchall()
+        def db_read():
+            with self.pool.get_conn(self.db_path) as conn:
+                conn.row_factory = sqlite3.Row
 
-            if not fts_rows:
-                # Fallback to LIKE search
-                return self._fallback_search(conn, query, resource_type, limit)
+                # Get IDs from FTS
+                fts_rows = conn.execute(
+                    """SELECT id FROM resources_fts
+                       WHERE resources_fts MATCH ?
+                       ORDER BY rank
+                       LIMIT ?""",
+                    (query, limit * 2)  # Get extra for filtering
+                ).fetchall()
 
-            ids = [row["id"] for row in fts_rows]
-            placeholders = ",".join("?" * len(ids))
+                if not fts_rows:
+                    # Fallback to LIKE search
+                    return self._fallback_search(conn, query, resource_type, limit)
 
-            sql = f"SELECT * FROM resources WHERE id IN ({placeholders})"
-            params: List[Any] = list(ids)
+                ids = [row["id"] for row in fts_rows]
+                placeholders = ",".join("?" * len(ids))
 
-            if resource_type:
-                sql += " AND resource_type = ?"
-                params.append(resource_type.value)
+                sql = f"SELECT * FROM resources WHERE id IN ({placeholders})"
+                params: List[Any] = list(ids)
 
-            sql += " LIMIT ?"
-            params.append(limit)
+                if resource_type:
+                    sql += " AND resource_type = ?"
+                    params.append(resource_type.value)
 
-            rows = conn.execute(sql, params).fetchall()
-            return [self._row_to_resource(row) for row in rows]
+                sql += " LIMIT ?"
+                params.append(limit)
+
+                rows = conn.execute(sql, params).fetchall()
+                return [self._row_to_resource(row) for row in rows]
+
+        return await loop.run_in_executor(None, db_read)
 
     def _fallback_search(
         self,
@@ -308,7 +318,7 @@ class ResourceMemory:
         Returns:
             List of resources of given type.
         """
-        with sqlite3.connect(self.db_path) as conn:
+        with self.pool.get_conn(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             rows = conn.execute(
                 """SELECT * FROM resources
@@ -330,7 +340,7 @@ class ResourceMemory:
         Returns:
             List of recently accessed resources.
         """
-        with sqlite3.connect(self.db_path) as conn:
+        with self.pool.get_conn(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             rows = conn.execute(
                 """SELECT * FROM resources

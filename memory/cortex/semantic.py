@@ -10,9 +10,12 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
+import asyncio
 import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from .timing import timing_decorator
+from async_lru import alru_cache
 
 logger = logging.getLogger(__name__)
 
@@ -104,51 +107,57 @@ class SemanticMemory:
 
         return entry_id
 
-    def search(
+    @alru_cache(maxsize=128)
+    @timing_decorator
+    async def search(
         self,
         query: str,
         embedding: Optional[List[float]] = None,
         limit: int = 10,
     ) -> List[Dict[str, Any]]:
         """Search semantic memory."""
-        if self._lance_db and embedding:
-            # Vector similarity search
-            try:
-                table = self._lance_db.open_table("knowledge")
-                results = table.search(embedding).limit(limit).to_list()
-                return [
-                    {
-                        "id": r["id"],
-                        "content": r["content"],
-                        "category": r["category"],
-                        "metadata": json.loads(r["metadata"]),
-                        "score": r.get("_distance", 0),
-                    }
-                    for r in results
-                ]
-            except Exception as e:
-                logger.warning(f"LanceDB search failed: {e}")
+        loop = asyncio.get_event_loop()
 
-        # Fallback to FTS
-        if self._fallback_db:
-            with sqlite3.connect(self._fallback_db) as conn:
-                conn.row_factory = sqlite3.Row
-                rows = conn.execute(
-                    "SELECT * FROM semantic_fts WHERE content MATCH ? LIMIT ?",
-                    (query, limit),
-                ).fetchall()
+        def db_read():
+            if self._lance_db and embedding:
+                # Vector similarity search
+                try:
+                    table = self._lance_db.open_table("knowledge")
+                    results = table.search(embedding).limit(limit).to_list()
+                    return [
+                        {
+                            "id": r["id"],
+                            "content": r["content"],
+                            "category": r["category"],
+                            "metadata": json.loads(r["metadata"]),
+                            "score": r.get("_distance", 0),
+                        }
+                        for r in results
+                    ]
+                except Exception as e:
+                    logger.warning(f"LanceDB search failed: {e}")
 
-                return [
-                    {
-                        "id": row["id"],
-                        "content": row["content"],
-                        "category": row["category"],
-                        "metadata": json.loads(row["metadata"]),
-                    }
-                    for row in rows
-                ]
+            # Fallback to FTS
+            if self._fallback_db:
+                with sqlite3.connect(self._fallback_db) as conn:
+                    conn.row_factory = sqlite3.Row
+                    rows = conn.execute(
+                        "SELECT * FROM semantic_fts WHERE content MATCH ? LIMIT ?",
+                        (query, limit),
+                    ).fetchall()
 
-        return []
+                    return [
+                        {
+                            "id": row["id"],
+                            "content": row["content"],
+                            "category": row["category"],
+                            "metadata": json.loads(row["metadata"]),
+                        }
+                        for row in rows
+                    ]
+            return []
+
+        return await loop.run_in_executor(None, db_read)
 
     def get_by_category(self, category: str, limit: int = 50) -> List[Dict[str, Any]]:
         """Get entries by category."""

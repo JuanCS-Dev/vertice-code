@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import asyncio
 import uuid
 import logging
 from datetime import datetime
@@ -19,6 +20,8 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
+from .timing import timing_decorator
+from .connection_pool import ConnectionPool
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +97,7 @@ class ProceduralMemory:
     Based on MIRIX (arXiv:2507.07957) procedural memory component.
     """
 
-    def __init__(self, db_path: Path):
+    def __init__(self, db_path: Path, pool: ConnectionPool):
         """
         Initialize procedural memory.
 
@@ -102,11 +105,12 @@ class ProceduralMemory:
             db_path: Path to SQLite database file.
         """
         self.db_path = db_path
+        self.pool = pool
         self._init_db()
 
     def _init_db(self) -> None:
         """Initialize database schema."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self.pool.get_conn(self.db_path) as conn:
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS procedures (
                     id TEXT PRIMARY KEY,
@@ -151,7 +155,7 @@ class ProceduralMemory:
         """
         procedure_id = str(uuid.uuid4())
 
-        with sqlite3.connect(self.db_path) as conn:
+        with self.pool.get_conn(self.db_path) as conn:
             conn.execute(
                 """INSERT INTO procedures
                    (id, entry_type, description, steps, agent_id, metadata, created_at)
@@ -180,7 +184,7 @@ class ProceduralMemory:
         Returns:
             Procedure if found, None otherwise.
         """
-        with sqlite3.connect(self.db_path) as conn:
+        with self.pool.get_conn(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             row = conn.execute(
                 "SELECT * FROM procedures WHERE id = ?",
@@ -191,7 +195,8 @@ class ProceduralMemory:
                 return self._row_to_procedure(row)
             return None
 
-    def search(
+    @timing_decorator
+    async def search(
         self,
         query: str,
         entry_type: Optional[ProcedureType] = None,
@@ -225,20 +230,25 @@ class ProceduralMemory:
 
         where_clause = " AND ".join(conditions)
 
-        with sqlite3.connect(self.db_path) as conn:
-            conn.row_factory = sqlite3.Row
-            rows = conn.execute(
-                f"""SELECT * FROM procedures
-                    WHERE {where_clause}
-                    ORDER BY (success_count * 1.0 /
-                             NULLIF(success_count + failure_count, 0)) DESC,
-                             created_at DESC
-                    LIMIT ?""",
-                (*params, limit)
-            ).fetchall()
+        loop = asyncio.get_event_loop()
 
-            procedures = [self._row_to_procedure(row) for row in rows]
-            return [p for p in procedures if p.success_rate >= min_success_rate]
+        def db_read():
+            with self.pool.get_conn(self.db_path) as conn:
+                conn.row_factory = sqlite3.Row
+                rows = conn.execute(
+                    f"""SELECT * FROM procedures
+                        WHERE {where_clause}
+                        ORDER BY (success_count * 1.0 /
+                                 NULLIF(success_count + failure_count, 0)) DESC,
+                                 created_at DESC
+                        LIMIT ?""",
+                    (*params, limit)
+                ).fetchall()
+
+                procedures = [self._row_to_procedure(row) for row in rows]
+                return [p for p in procedures if p.success_rate >= min_success_rate]
+
+        return await loop.run_in_executor(None, db_read)
 
     def record_outcome(
         self,
@@ -254,7 +264,7 @@ class ProceduralMemory:
         """
         column = "success_count" if success else "failure_count"
 
-        with sqlite3.connect(self.db_path) as conn:
+        with self.pool.get_conn(self.db_path) as conn:
             conn.execute(
                 f"""UPDATE procedures
                     SET {column} = {column} + 1,
@@ -267,7 +277,7 @@ class ProceduralMemory:
             f"Recorded {'success' if success else 'failure'} for {procedure_id}"
         )
 
-    def get_best_for_task(
+    async def get_best_for_task(
         self,
         task_description: str,
         entry_type: Optional[ProcedureType] = None,
@@ -291,7 +301,7 @@ class ProceduralMemory:
         all_matches: Dict[str, Procedure] = {}
         for term in terms[:5]:  # Limit to first 5 terms
             if len(term) > 3:  # Skip short words
-                matches = self.search(term, entry_type=entry_type, limit=5)
+                matches = await self.search(term, entry_type=entry_type, limit=5)
                 for proc in matches:
                     if proc.id not in all_matches:
                         all_matches[proc.id] = proc

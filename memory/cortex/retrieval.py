@@ -6,14 +6,15 @@ for automatic context injection into LLM prompts.
 """
 
 from __future__ import annotations
-
-from typing import Any, Dict, List, Protocol
+import asyncio
+from typing import Any, Coroutine, Dict, List, Protocol
+from .timing import timing_decorator
 
 
 class MemorySubsystem(Protocol):
     """Protocol for memory subsystems that support search."""
 
-    def search(self, query: str, limit: int = 5) -> List[Any]: ...
+    def search(self, query: str, limit: int = 5) -> Coroutine[Any, Any, List[Any]]: ...
 
 
 class CoreMemoryProtocol(Protocol):
@@ -46,7 +47,8 @@ class ActiveRetrieval:
         self.procedural = procedural
         self.resource = resource
 
-    def retrieve(
+    @timing_decorator
+    async def retrieve(
         self,
         query: str,
         limit_per_type: int = 5,
@@ -61,38 +63,31 @@ class ActiveRetrieval:
         Returns:
             Dictionary with tagged results from each memory type.
         """
-        results: Dict[str, List[Dict[str, Any]]] = {}
+        tasks = {
+            "episodic": self.episodic.search(query=query, limit=limit_per_type),
+            "semantic": self.semantic.search(query=query, limit=limit_per_type),
+            "procedural": self.procedural.search(query=query, limit=limit_per_type),
+            "resource": self.resource.search(query=query, limit=limit_per_type),
+        }
 
-        # Core memory (always include)
+        search_results = await asyncio.gather(*tasks.values())
+
+        results: Dict[str, List[Dict[str, Any]]] = {}
         results["core"] = [self.core.get_persona()]
 
-        # Episodic memory
-        episodic_results = self.episodic.search(query=query, limit=limit_per_type)
-        if episodic_results:
-            results["episodic"] = episodic_results
-
-        # Semantic memory
-        semantic_results = self.semantic.search(query=query, limit=limit_per_type)
-        if semantic_results:
-            results["semantic"] = semantic_results
-
-        # Procedural memory
-        proc_results = self.procedural.search(query=query, limit=limit_per_type)
-        if proc_results:
-            results["procedural"] = [
-                p.to_dict() if hasattr(p, "to_dict") else p for p in proc_results
-            ]
-
-        # Resource memory
-        resource_results = self.resource.search(query=query, limit=limit_per_type)
-        if resource_results:
-            results["resource"] = [
-                r.to_dict() if hasattr(r, "to_dict") else r for r in resource_results
-            ]
+        # Process results
+        for (memory_type, search_result) in zip(tasks.keys(), search_results):
+            if search_result:
+                if memory_type == "procedural" or memory_type == "resource":
+                     results[memory_type] = [
+                        p.to_dict() if hasattr(p, "to_dict") else p for p in search_result
+                    ]
+                else:
+                    results[memory_type] = search_result
 
         return results
 
-    def to_context_prompt(self, query: str) -> str:
+    async def to_context_prompt(self, query: str) -> str:
         """
         Generate context string for LLM prompt injection.
 
@@ -105,7 +100,7 @@ class ActiveRetrieval:
         Returns:
             Formatted context string with XML tags.
         """
-        retrieved = self.retrieve(query)
+        retrieved = await self.retrieve(query)
         parts = ["<memory_context>"]
 
         # Core memory
