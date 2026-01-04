@@ -167,6 +167,58 @@ jules-help() {
     echo "  jules-status                - List active sessions"
     echo "  jules-repos                 - List connected repos"
     echo "  jules-pull <id>             - Pull and apply session result"
+    echo ""
+    echo -e "${BLUE}Pre-Release:${NC}"
+    echo "  jules-validate              - Run full validation (local)"
+    echo "  jules-validate-quick        - Run quick validation (local)"
+    echo "  jules-prerelease            - Jules task: full validation + fixes"
+    echo "  jules-autofix               - Jules task: auto-fix only"
+}
+
+# =============================================================================
+# PRE-RELEASE VALIDATION
+# =============================================================================
+
+# Run full pre-release validation (LOCAL)
+jules-validate() {
+    echo -e "${GREEN}=== Pre-Release Validation ===${NC}"
+    python scripts/pre_release_validation.py "$@"
+}
+
+# Run quick validation (LOCAL)
+jules-validate-quick() {
+    echo -e "${GREEN}=== Quick Validation ===${NC}"
+    python scripts/pre_release_validation.py --quick "$@"
+}
+
+# Jules task: Full pre-release validation
+jules-prerelease() {
+    echo -e "${GREEN}=== Jules Pre-Release Validation Task ===${NC}"
+    jules new --repo JuanCS-Dev/vertice-code "PRE-RELEASE VALIDATION: Run python scripts/pre_release_validation.py --fix. For each category of issues found:
+
+1. SYNTAX errors: Fix all syntax errors immediately
+2. IMPORT errors: Fix missing imports, circular imports
+3. BLACK formatting: Run black on all failing files
+4. RUFF linting: Run ruff --fix, then manually fix remaining
+5. TYPE HINTS: Add return type hints to public functions (warning only)
+6. DOCSTRINGS: Add docstrings to public APIs (info only)
+7. SECURITY: Review and fix any security warnings
+8. TESTS: Fix failing tests, do NOT delete tests
+
+IMPORTANT RULES:
+- Never skip a category, process ALL issues
+- Document issues you cannot fix in PRE_RELEASE_REPORT.md
+- Create atomic commits per category: fix(syntax), fix(imports), style(black), etc.
+- Run validation again after each fix category
+- Final PR must show validation passing or document remaining issues
+
+Expected output: PRE_RELEASE_REPORT.md updated with all fixes documented."
+}
+
+# Jules task: Fix only auto-fixable issues
+jules-autofix() {
+    echo -e "${GREEN}=== Jules Auto-Fix Task ===${NC}"
+    jules new --repo JuanCS-Dev/vertice-code "AUTO-FIX: Run python scripts/pre_release_validation.py --fix to auto-fix formatting and linting issues. Commit changes with: style: auto-fix formatting and linting issues. Run validation again to confirm fixes. Do NOT manually fix anything, only auto-fixes."
 }
 
 echo -e "${GREEN}Jules workflows loaded! Run 'jules-help' for commands.${NC}"
