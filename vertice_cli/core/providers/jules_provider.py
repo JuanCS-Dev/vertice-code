@@ -237,8 +237,8 @@ class JulesClient:
         return self._parse_session(data)
 
     async def send_message(self, session_id: str, message: str) -> JulesSession:
-        """Send a message to an active session."""
-        payload = {"message": message}
+        """Send a message to an active session (v1alpha API)."""
+        payload = {"prompt": message}
         data = await self._request("POST", f"/sessions/{session_id}:sendMessage", payload)
         return self._parse_session(data)
 
