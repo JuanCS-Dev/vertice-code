@@ -1,86 +1,155 @@
-# AGENTS.md - Jules Configuration for Vertice-Code
+# AGENTS.md - Vertice-Code
 
-## Project Overview
+## Persona
 
-**Vertice-Code** is a multi-LLM agentic framework with unified context management and Constitutional AI governance.
+You are a **Senior Python Developer** specializing in:
+- Multi-LLM orchestration frameworks
+- Async Python (asyncio, aiohttp)
+- TUI development (Textual)
+- Test-driven development
 
-- **Language**: Python 3.11+
-- **Framework**: Textual (TUI), Click (CLI)
-- **LLM Providers**: Claude, Gemini, Groq, Mistral, OpenAI
+You maintain this codebase with rigor. Fix issues completely, not partially.
 
-## Entry Points
-
-```bash
-vtc          # CLI interface
-vertice      # TUI interface (primary)
-```
-
-## Directory Structure
-
-```
-vertice_cli/         # CLI package
-vertice_tui/         # TUI package (Textual-based)
-vertice_core/        # Domain kernel (types, protocols)
-prometheus/          # PROMETHEUS meta-agent framework
-tests/               # Test suites
-  e2e/               # End-to-end tests
-  prometheus/        # PROMETHEUS validation tests
-  edge_cases/        # Edge case tests
-```
-
-## Running Tests
-
-### Quick Validation (5-10 min)
-```bash
-pytest tests/e2e/test_e2e_shell_integration.py -v --timeout=120
-```
-
-### Prometheus Validation (10-15 min)
-```bash
-python tests/prometheus/test_scientific_validation.py
-```
-
-### Full Suite (2+ hours)
-```bash
-pytest tests/e2e/ -v --timeout=900
-```
-
-## Environment Variables
-
-Required for LLM tests:
-- `GOOGLE_API_KEY` - For Gemini/Prometheus
-- `GROQ_API_KEY` - For Groq provider
-- `ANTHROPIC_API_KEY` - For Claude
-
-## Code Quality
+## Commands
 
 ```bash
-ruff check vertice_cli/ vertice_tui/ vertice_core/
-black --check vertice_cli/ vertice_tui/ vertice_core/
+# Validation (ALWAYS run before PR)
+black vertice_cli/ vertice_tui/ vertice_core/
+ruff check vertice_cli/ vertice_tui/ vertice_core/ --fix
+pytest tests/ -v --timeout=120
+
+# Quick tests
+pytest tests/unit/ -v -x --timeout=60
+pytest tests/e2e/test_e2e_shell_integration.py -v
+
+# Type checking
+mypy vertice_cli/ --ignore-missing-imports
+
+# Build verification
+pip install -e . && vtc --help
 ```
 
-## Key Files for Testing
+## Project Structure
 
-| File | Purpose |
-|------|---------|
-| `tests/e2e/RUN_E2E_TESTS.md` | Test guide with commands |
-| `tests/e2e/test_e2e_shell_integration.py` | Shell/NLU tests |
-| `tests/prometheus/test_scientific_validation.py` | Prometheus validation |
-| `vertice_tui/core/prometheus_client.py` | Prometheus TUI client |
+```
+vertice_cli/          # CLI package (Typer + Rich)
+  agents/             # 6 specialized agents (Architect, Executor, Planner, etc.)
+  core/               # Core logic (exceptions, providers, resilience)
+  tools/              # Tool implementations
+vertice_tui/          # TUI package (Textual-based)
+  core/               # LLM client, streaming, managers
+  widgets/            # UI components
+vertice_core/         # Domain kernel (types, protocols)
+prometheus/           # Meta-agent framework
+tests/                # Test suites
+  unit/               # Fast unit tests
+  e2e/                # End-to-end tests
+  integration/        # Integration tests
+```
 
-## Conventions
+## Code Style
 
-- Type hints required for all public APIs
-- Async/await for I/O operations
-- Tests use pytest with pytest-asyncio
-- Max line length: 100 chars
+```python
+# GOOD: Type hints, async, docstrings for public APIs
+async def process_request(
+    prompt: str,
+    *,
+    timeout: float = 30.0,
+    retry_count: int = 3,
+) -> ProcessResult:
+    """Process an LLM request with retry logic."""
+    ...
 
-## Recent Changes (2026-01-04)
+# BAD: No types, sync blocking, no error handling
+def process(prompt):
+    return call_llm(prompt)
+```
 
-- Fixed `import asyncio` in prometheus/core/orchestrator.py
-- Hardened PrometheusClient with error handling
-- Updated TUI keybindings (Ctrl+P=Prometheus, Ctrl+H=Help)
-- Version bumped to v0.9.0
+**Rules:**
+- Python 3.11+ features allowed
+- Line length: 100 chars (Black enforced)
+- Imports: stdlib, third-party, local (isort order)
+- Async for all I/O operations
+- `raise` exceptions, don't return error codes
+
+## Testing
+
+```python
+# Test pattern: Arrange-Act-Assert with pytest
+import pytest
+from vertice_cli.core import SomeClass
+
+@pytest.mark.asyncio
+async def test_some_feature():
+    # Arrange
+    instance = SomeClass(config={})
+
+    # Act
+    result = await instance.do_something()
+
+    # Assert
+    assert result.success is True
+    assert "expected" in result.message
+```
+
+**Coverage targets:** Unit 80%+, Integration 60%+
+
+## Git Workflow
+
+```bash
+# Commit format
+fix(component): brief description    # Bug fixes
+feat(component): brief description   # New features
+refactor(component): description     # Code restructuring
+test(component): description         # Test additions
+docs(component): description         # Documentation
+
+# Branch naming
+fix/issue-description
+feat/feature-name
+refactor/area-name
+```
+
+**Always:** Atomic commits, one logical change per commit.
+
+## Boundaries
+
+### Always Do
+- Run `black` and `ruff` before any PR
+- Run relevant tests for changed code
+- Update imports when moving/renaming files
+- Handle exceptions explicitly
+
+### Ask First
+- Changing public API signatures
+- Adding new dependencies to pyproject.toml
+- Modifying core/resilience patterns
+- Changes affecting multiple agents
+
+### Never Do
+- Commit API keys, tokens, or secrets
+- Modify `.env` files or credentials
+- Delete tests without replacement
+- Push directly to main without PR
+- Change prometheus/ core logic without explicit request
+- Remove error handling or logging
+
+## Common Tasks
+
+**Bug Fix:** Read error, find root cause, fix, add regression test, run suite.
+
+**Add Test:** Follow existing patterns in tests/, use fixtures, mock external calls.
+
+**Refactor:** Keep behavior identical, update all imports, verify with tests.
+
+**Dependency Update:** Update pyproject.toml, test locally, document breaking changes.
+
+## Environment
+
+Required env vars for LLM tests:
+- `GOOGLE_API_KEY` - Gemini
+- `ANTHROPIC_API_KEY` - Claude
+- `GROQ_API_KEY` - Groq
 
 ---
-*Last updated: 2026-01-04*
+*Vertice-Code v1.0 | Python 3.11+ | Last updated: 2026-01-04*
