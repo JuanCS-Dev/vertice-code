@@ -13,6 +13,8 @@ Total: 10 tests
 """
 
 import pytest
+import asyncio
+from prometheus.sandbox.executor import SandboxExecutor
 
 
 # ==============================================================================
@@ -205,7 +207,8 @@ data = json.dumps({"key": "value"})
 class TestTypeErrorFixes:
     """Tests for identifying and fixing type errors."""
 
-    def test_identifies_type_mismatch(self, buggy_project):
+    @pytest.mark.asyncio
+    async def test_identifies_type_mismatch(self, buggy_project):
         """Identifies type mismatch in function call."""
         file_path = buggy_project / "src" / "type_error.py"
         content = file_path.read_text()
@@ -224,7 +227,9 @@ result = add_numbers(5, 3)  # Fixed: both are ints now
         file_path.write_text(fixed_content)
 
         # Verify fix works at runtime
-        exec(compile(fixed_content, file_path, 'exec'))
+        sandbox = SandboxExecutor()
+        result = await sandbox.execute(fixed_content)
+        assert result.success, f"Sandbox execution failed: {result.stderr}"
 
     def test_adds_type_hints_for_clarity(self, buggy_project):
         """Adds type hints to prevent future type errors."""
@@ -263,7 +268,8 @@ def find_value(data: Dict[str, int], key: str) -> Optional[int]:
 class TestLogicBugFixes:
     """Tests for identifying and fixing logic bugs."""
 
-    def test_fixes_divide_by_zero_bug(self, buggy_project):
+    @pytest.mark.asyncio
+    async def test_fixes_divide_by_zero_bug(self, buggy_project):
         """Fixes divide by zero in average calculation."""
         file_path = buggy_project / "src" / "logic_bug.py"
 
@@ -292,19 +298,21 @@ def find_max(numbers):
         file_path.write_text(fixed_content)
 
         # Verify fixes
-        exec_globals = {}
-        exec(compile(fixed_content, file_path, 'exec'), exec_globals)
+        test_code = fixed_content + """
+# Test edge cases
+assert calculate_average([]) == 0
+assert calculate_average([1, 2, 3]) == 2
+assert find_max([]) is None
+assert find_max([-5, -3, -1]) == -1
+print("Assertions passed")
+"""
+        sandbox = SandboxExecutor()
+        result = await sandbox.execute(test_code)
+        assert result.success, f"Sandbox execution failed: {result.stderr}"
+        assert "Assertions passed" in result.stdout
 
-        calculate_average = exec_globals['calculate_average']
-        find_max = exec_globals['find_max']
-
-        # Test edge cases
-        assert calculate_average([]) == 0
-        assert calculate_average([1, 2, 3]) == 2
-        assert find_max([]) is None
-        assert find_max([-5, -3, -1]) == -1
-
-    def test_fixes_off_by_one_error(self, buggy_project):
+    @pytest.mark.asyncio
+    async def test_fixes_off_by_one_error(self, buggy_project):
         """Fixes off-by-one error in loop."""
         file_path = buggy_project / "src" / "off_by_one.py"
 
@@ -333,13 +341,17 @@ def get_last_n_items(items, n):
         file_path.write_text(fixed_content)
 
         # Verify fix
-        exec_globals = {}
-        exec(compile(fixed_content, file_path, 'exec'), exec_globals)
-
-        get_last_n = exec_globals['get_last_n_items']
-        assert get_last_n([1, 2, 3, 4, 5], 2) == [4, 5]
-        assert get_last_n([1, 2, 3], 0) == []
-        assert get_last_n([1, 2], 5) == [1, 2]
+        test_code = fixed_content + """
+get_last_n = get_last_n_items
+assert get_last_n([1, 2, 3, 4, 5], 2) == [4, 5]
+assert get_last_n([1, 2, 3], 0) == []
+assert get_last_n([1, 2], 5) == [1, 2]
+print("Assertions passed")
+"""
+        sandbox = SandboxExecutor()
+        result = await sandbox.execute(test_code)
+        assert result.success, f"Sandbox execution failed: {result.stderr}"
+        assert "Assertions passed" in result.stdout
 
 
 # ==============================================================================
@@ -350,7 +362,8 @@ def get_last_n_items(items, n):
 class TestRuntimeErrorFixes:
     """Tests for identifying and fixing runtime errors."""
 
-    def test_fixes_zero_division_error(self, buggy_project):
+    @pytest.mark.asyncio
+    async def test_fixes_zero_division_error(self, buggy_project):
         """Fixes division by zero error."""
         file_path = buggy_project / "src" / "runtime_error.py"
 
@@ -374,29 +387,36 @@ def get_key(d, key, default=None):
         file_path.write_text(fixed_content)
 
         # Verify fixes
-        exec_globals = {}
-        exec(compile(fixed_content, file_path, 'exec'), exec_globals)
+        test_code = fixed_content + '''
+# Test error handling
+try:
+    divide(10, 0)
+    print("ValueError not raised for divide")
+except ValueError:
+    print("ValueError correctly raised for divide")
 
-        divide = exec_globals['divide']
-        access_list = exec_globals['access_list']
-        get_key = exec_globals['get_key']
+assert access_list([], 0) is None
+assert access_list([1, 2, 3], 10) is None
+assert access_list([1, 2, 3], 1) == 2
 
-        # Test error handling
-        with pytest.raises(ValueError):
-            divide(10, 0)
+assert get_key({}, "missing") is None
+assert get_key({"a": 1}, "a") == 1
+print("Assertions passed")
+'''
+        sandbox = SandboxExecutor()
+        result = await sandbox.execute(test_code)
 
-        assert access_list([], 0) is None
-        assert access_list([1, 2, 3], 10) is None
-        assert access_list([1, 2, 3], 1) == 2
+        assert result.success, f"Sandbox execution failed: {result.stderr}"
+        assert "Assertions passed" in result.stdout
+        assert "ValueError correctly raised for divide" in result.stdout
+        assert "ValueError not raised for divide" not in result.stdout
 
-        assert get_key({}, "missing") is None
-        assert get_key({"a": 1}, "a") == 1
-
-    def test_adds_error_handling(self, buggy_project):
+    @pytest.mark.asyncio
+    async def test_adds_error_handling(self, buggy_project):
         """Adds proper error handling to functions."""
         file_path = buggy_project / "src" / "error_handling.py"
 
-        file_path.write_text('''"""Module with proper error handling."""
+        file_content = '''"""Module with proper error handling."""
 import logging
 
 logger = logging.getLogger(__name__)
@@ -420,20 +440,22 @@ def safe_parse_json(json_string):
         return {"success": True, "data": json.loads(json_string)}
     except json.JSONDecodeError as e:
         return {"success": False, "error": f"Invalid JSON: {e}"}
-''')
+'''
+        file_path.write_text(file_content)
 
         # Verify error handling
-        exec_globals = {}
-        exec(compile(file_path.read_text(), file_path, 'exec'), exec_globals)
+        test_code = file_content + """
+assert safe_divide(10, 0)["success"] is False
+assert safe_divide(10, 2)["result"] == 5
 
-        safe_divide = exec_globals['safe_divide']
-        safe_parse_json = exec_globals['safe_parse_json']
-
-        assert safe_divide(10, 0)["success"] is False
-        assert safe_divide(10, 2)["result"] == 5
-
-        assert safe_parse_json("invalid")["success"] is False
-        assert safe_parse_json('{"key": "value"}')["success"] is True
+assert safe_parse_json("invalid")["success"] is False
+assert safe_parse_json('{"key": "value"}')["success"] is True
+print("Assertions passed")
+"""
+        sandbox = SandboxExecutor()
+        result = await sandbox.execute(test_code)
+        assert result.success, f"Sandbox execution failed: {result.stderr}"
+        assert "Assertions passed" in result.stdout
 
 
 # ==============================================================================
