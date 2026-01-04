@@ -246,12 +246,14 @@ class ResourceMemory:
                 conn.row_factory = sqlite3.Row
 
                 # Get IDs from FTS
+                # Sanitize the query for FTS5 by wrapping it in quotes
+                sanitized_query = f'"{query.replace("\"", "\"\"")}"'
                 fts_rows = conn.execute(
                     """SELECT id FROM resources_fts
                        WHERE resources_fts MATCH ?
                        ORDER BY rank
                        LIMIT ?""",
-                    (query, limit * 2)  # Get extra for filtering
+                    (sanitized_query, limit * 2)  # Get extra for filtering
                 ).fetchall()
 
                 if not fts_rows:
