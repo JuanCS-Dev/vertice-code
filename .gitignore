@@ -161,3 +161,7 @@ htmlcov/
 # IDE specific (additional)
 .cursor/
 .juancs/
+.qwen/
+.qwen/
+tests/e2e_textual/E2E_REPORT.json
+tests/e2e_textual/E2E_REPORT.md

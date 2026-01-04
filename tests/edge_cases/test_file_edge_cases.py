@@ -104,7 +104,6 @@ class TestFileLocking:
 class TestSymlinkHandling:
     """Test symlink handling edge cases."""
 
-    @pytest.mark.skipif(os.name == 'nt', reason="Symlinks require admin on Windows")
     def test_symlink_resolution(self):
         """Resolve symlinks to actual file."""
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -124,7 +123,6 @@ class TestSymlinkHandling:
             resolved = link.resolve()
             assert resolved == real_file.resolve()
 
-    @pytest.mark.skipif(os.name == 'nt', reason="Symlinks require admin on Windows")
     def test_broken_symlink_detection(self):
         """Detect and handle broken symlinks."""
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -137,7 +135,6 @@ class TestSymlinkHandling:
             assert link.is_symlink()
             assert not link.exists()  # Broken symlink
 
-    @pytest.mark.skipif(os.name == 'nt', reason="Symlinks require admin on Windows")
     def test_symlink_loop_detection(self):
         """Detect symlink loops."""
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -207,7 +204,6 @@ class TestFilePathEdgeCases:
 class TestFilePermissions:
     """Test file permission edge cases."""
 
-    @pytest.mark.skipif(os.name == 'nt', reason="Unix permissions only")
     def test_read_only_file(self):
         """Handle read-only file write attempt."""
         with tempfile.NamedTemporaryFile(delete=False) as f:
@@ -231,7 +227,6 @@ class TestFilePermissions:
             os.chmod(temp_path, 0o644)
             os.unlink(temp_path)
 
-    @pytest.mark.skipif(os.name == 'nt', reason="Unix permissions only")
     def test_no_read_permission(self):
         """Handle file with no read permission."""
         with tempfile.NamedTemporaryFile(delete=False) as f:
