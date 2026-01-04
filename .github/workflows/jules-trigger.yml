@@ -1,0 +1,52 @@
+name: Jules Auto-Fix
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  jules-work:
+    # Only trigger when 'jules' label is added
+    if: github.event.label.name == 'jules'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract issue info
+        id: issue
+        run: |
+          echo "title=${{ github.event.issue.title }}" >> $GITHUB_OUTPUT
+          echo "number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "${{ github.event.issue.body }}" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Invoke Jules
+        uses: google-labs-code/jules-invoke@v1
+        with:
+          jules_api_key: ${{ secrets.JULES_API_KEY }}
+          prompt: |
+            Fix the following GitHub issue for the Vertice-Code repository.
+
+            ## Issue #${{ steps.issue.outputs.number }}
+            **Title:** ${{ steps.issue.outputs.title }}
+
+            **Description:**
+            ${{ steps.issue.outputs.body }}
+
+            ## Instructions
+            1. Read AGENTS.md for coding standards
+            2. Implement the fix as described
+            3. Run validation commands from the issue
+            4. Create a PR that fixes #${{ steps.issue.outputs.number }}
+
+            ## Quality Requirements
+            - Run: black vertice_cli/ vertice_tui/ vertice_core/
+            - Run: ruff check --fix
+            - Run: pytest tests/unit/ -v -x --timeout=60
+            - Commit format: fix(component): description
