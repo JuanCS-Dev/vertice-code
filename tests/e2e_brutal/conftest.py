@@ -17,6 +17,7 @@ import asyncio
 import os
 import sys
 import json
+import subprocess
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Any, Optional
@@ -467,9 +468,9 @@ class ShellSimulator:
             elif command.startswith(("ls", "cat", "grep", "find", "git")):
                 # Execute shell command
                 import subprocess
+                import shlex
                 proc = subprocess.run(
-                    command,
-                    shell=True,
+                    shlex.split(command),
                     capture_output=True,
                     text=True,
                     timeout=30,

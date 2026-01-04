@@ -28,6 +28,7 @@ pytestmark = pytest.mark.skip(
 )
 import asyncio
 import os
+import subprocess
 from pathlib import Path
 from unittest.mock import patch
 
@@ -95,7 +96,9 @@ test = ["pytest>=8.0"]
     (workspace / "README.md").write_text("# Senior Project\n\nProfessional quality code.\n")
 
     # Initialize git
-    os.system(f"cd {workspace} && git init -q && git add . && git commit -m 'Initial commit' -q 2>/dev/null")
+    subprocess.run(["git", "init", "-q"], cwd=workspace, check=True, stderr=subprocess.DEVNULL)
+    subprocess.run(["git", "add", "."], cwd=workspace, check=True, stderr=subprocess.DEVNULL)
+    subprocess.run(["git", "commit", "-m", "Initial commit", "-q"], cwd=workspace, check=True, stderr=subprocess.DEVNULL)
 
     return workspace
 

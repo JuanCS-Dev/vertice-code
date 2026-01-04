@@ -17,7 +17,6 @@ Author: Vertice Team
 Date: 2026-01-02
 """
 
-import os
 import logging
 from typing import TYPE_CHECKING, Optional
 
@@ -154,7 +153,7 @@ class PaletteHandler:
                 description="Clear the terminal screen",
                 category=CommandCategory.SYSTEM,
                 keywords=["clear", "cls", "clean"],
-                action=lambda: os.system("clear"),
+                action=self.console.clear,
             )
         )
 

@@ -18,6 +18,7 @@ import pytest
 import asyncio
 import os
 import json
+import subprocess
 import time
 from pathlib import Path
 from dataclasses import dataclass, field
@@ -430,7 +431,9 @@ test = ["pytest>=8.0"]
     (workspace / "README.md").write_text("# E2E Test Project\n")
 
     # Initialize git
-    os.system(f"cd {workspace} && git init -q && git add . && git commit -m 'Initial' -q 2>/dev/null")
+    subprocess.run(["git", "init", "-q"], cwd=workspace, check=True, stderr=subprocess.DEVNULL)
+    subprocess.run(["git", "add", "."], cwd=workspace, check=True, stderr=subprocess.DEVNULL)
+    subprocess.run(["git", "commit", "-m", "Initial", "-q"], cwd=workspace, check=True, stderr=subprocess.DEVNULL)
 
     old_cwd = os.getcwd()
     os.chdir(workspace)

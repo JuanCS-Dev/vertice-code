@@ -20,6 +20,7 @@ import resource
 import signal
 import sys
 import fcntl
+import shlex
 import termios
 import struct
 import pty
@@ -372,6 +373,12 @@ class BashCommandToolHardened(ValidatedTool):
                 "required": False,
                 "default": False,
             },
+            "use_shell": {
+                "type": "boolean",
+                "description": "Use shell=True for execution (requires stricter validation)",
+                "required": False,
+                "default": False,
+            },
         }
 
         logger.info(f"BashCommandToolHardened initialized with limits: {self.limits}")
@@ -382,22 +389,9 @@ class BashCommandToolHardened(ValidatedTool):
 
     async def execute(self, **kwargs) -> ToolResult:
         """Execute with optional interactive mode."""
-        # Extract interactive flag before validation (it's not in parameters dict)
-        interactive = kwargs.pop("interactive", False)
-
-        # Call parent execute which calls _execute_validated
-        # We need to pass interactive back in somehow, or handle it here.
-        # Better: Add 'interactive' to parameters so it passes validation.
-
-        # Actually, let's just add it to parameters in __init__ (already done)
-        # The issue is ValidatedTool.execute signature in base class might be strict?
-        # No, base.Tool.execute is abstract. ValidatedTool.execute takes **kwargs.
-        # Wait, the error was "takes 1 positional argument but 2 were given".
-        # This means it was called as tool.execute("cmd", interactive=True)
-        # instead of tool.execute(command="cmd", interactive=True).
-
-        # Let's fix the CALLER in test_shell_state.py first.
-        return await super().execute(interactive=interactive, **kwargs)
+        interactive = kwargs.get("interactive", False)
+        use_shell = kwargs.get("use_shell", False)
+        return await super().execute(interactive=interactive, use_shell=use_shell, **kwargs)
 
     def _setup_resource_limits(self):
         """Set resource limits for child process.
@@ -438,6 +432,7 @@ class BashCommandToolHardened(ValidatedTool):
         timeout: Optional[int] = None,
         env: Optional[Dict[str, str]] = None,
         interactive: bool = False,
+        use_shell: bool = False,
     ) -> ToolResult:
         """Execute bash command with full hardening.
 
@@ -500,10 +495,18 @@ class BashCommandToolHardened(ValidatedTool):
         try:
             logger.info(f"EXECUTING: {command} (timeout={actual_timeout}s, cwd={cwd or 'CWD'})")
 
-            proc = await asyncio.create_subprocess_shell(
-                command,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
+            if use_shell:
+                proc = await asyncio.create_subprocess_shell(
+                    command,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+            )
+            else:
+                args = shlex.split(command)
+                proc = await asyncio.create_subprocess_exec(
+                    *args,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
                 cwd=cwd,
                 env=exec_env,
                 preexec_fn=self._setup_resource_limits,  # Apply limits in child

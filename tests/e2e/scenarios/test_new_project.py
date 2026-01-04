@@ -14,6 +14,7 @@ Total: 10 tests
 
 import pytest
 import os
+import subprocess
 
 
 # ==============================================================================
@@ -379,7 +380,7 @@ indent_style = tab
         project_dir.mkdir()
 
         # Initialize git
-        os.system(f"cd {project_dir} && git init -q")
+        subprocess.run(["git", "init", "-q"], cwd=project_dir, check=True)
 
         assert (project_dir / ".git").is_dir()
 

@@ -18,12 +18,11 @@ class TestShellEdgeCases:
         assert '0' in result.stdout and '2' in result.stdout
 
     def test_command_with_pipes(self):
-        result = subprocess.run(
-            'echo "hello world" | wc -w',
-            shell=True, capture_output=True, text=True, timeout=5
-        )
-        assert result.returncode == 0
-        assert '2' in result.stdout
+        p1 = subprocess.Popen(['echo', 'hello world'], stdout=subprocess.PIPE)
+        p2 = subprocess.Popen(['wc', '-w'], stdin=p1.stdout, stdout=subprocess.PIPE, text=True)
+        p1.stdout.close()
+        output = p2.communicate()[0]
+        assert '2' in output
 
     def test_large_output_streaming(self):
         result = subprocess.run(

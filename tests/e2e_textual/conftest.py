@@ -5,6 +5,7 @@ import tempfile
 import shutil
 import os
 import json
+import subprocess
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Any, Optional
@@ -96,7 +97,7 @@ def temp_project():
     tmpdir = tempfile.mkdtemp(prefix="vertice_e2e_")
 
     # Initialize as git repo
-    os.system(f"cd {tmpdir} && git init -q")
+    subprocess.run(["git", "init", "-q"], cwd=tmpdir, check=True)
 
     yield Path(tmpdir)
 
@@ -194,7 +195,8 @@ A sample project for E2E testing.
 ''')
 
     # Commit initial state
-    os.system(f"cd {temp_project} && git add -A && git commit -q -m 'Initial commit'")
+    subprocess.run(["git", "add", "-A"], cwd=temp_project, check=True)
+    subprocess.run(["git", "commit", "-q", "-m", "Initial commit"], cwd=temp_project, check=True)
 
     return temp_project
 

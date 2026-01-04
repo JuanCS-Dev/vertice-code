@@ -36,7 +36,7 @@ class AsyncCommandExecutor:
     async def execute(
         self,
         command: str,
-        shell: bool = True,
+        shell: bool = False,
         timeout: Optional[float] = None,
         stream_callback: Optional[callable] = None,
     ) -> StreamingExecutionResult:
