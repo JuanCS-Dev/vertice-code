@@ -4,11 +4,11 @@ Tests for async process operations.
 SCALE & SUSTAIN Phase 3.1 validation.
 """
 
+import os
 import pytest
 
 from vertice_core.async_utils import (
     run_command,
-    run_shell,
     run_many,
     ProcessResult,
 )
@@ -99,37 +99,12 @@ class TestRunCommand:
         assert "timed out" in result.stderr.lower()
 
     @pytest.mark.asyncio
-    async def test_run_command_with_env(self):
-        """Test running command with custom environment."""
-        import os
-        env = {**os.environ, "TEST_VAR": "test_value"}
-        result = await run_command("echo $TEST_VAR", shell=True, env=env)
-
-        assert result.success is True
-        assert "test_value" in result.stdout
-
-
-class TestRunShell:
-    """Test run_shell function."""
-
-    @pytest.mark.asyncio
-    async def test_run_shell_script(self):
-        """Test running a shell script."""
-        script = "echo 'line1' && echo 'line2'"
-        result = await run_shell(script)
-
-        assert result.success is True
-        assert "line1" in result.stdout
-        assert "line2" in result.stdout
-
-    @pytest.mark.asyncio
-    async def test_run_shell_with_pipes(self):
-        """Test shell script with pipes."""
-        script = "echo 'hello world' | tr 'a-z' 'A-Z'"
-        result = await run_shell(script)
-
-        assert result.success is True
-        assert "HELLO WORLD" in result.stdout
+    async def test_run_command_with_env_var(self):
+        """Test running command with a custom environment variable."""
+        env = {**os.environ, "MY_TEST_VAR": "my_test_value"}
+        result = await run_command(["bash", "-c", "echo $MY_TEST_VAR"], env=env)
+        assert result.success
+        assert result.stdout.strip() == "my_test_value"
 
 
 class TestRunMany:

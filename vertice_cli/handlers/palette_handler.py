@@ -154,7 +154,7 @@ class PaletteHandler:
                 description="Clear the terminal screen",
                 category=CommandCategory.SYSTEM,
                 keywords=["clear", "cls", "clean"],
-                action=lambda: os.system("clear"),
+                action=lambda: self.console.clear(),
             )
         )
 

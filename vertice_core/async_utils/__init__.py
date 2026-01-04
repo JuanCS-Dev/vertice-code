@@ -27,7 +27,6 @@ from .files import (
 
 from .process import (
     run_command,
-    run_shell,
     run_many,
     ProcessResult,
 )
@@ -67,7 +66,6 @@ __all__ = [
     "AIOFILES_AVAILABLE",
     # Process
     "run_command",
-    "run_shell",
     "run_many",
     "ProcessResult",
     # HTTP

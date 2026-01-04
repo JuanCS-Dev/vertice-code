@@ -41,7 +41,7 @@ async def test_file_ops():
         read_tool = ReadFileTool()
         result = await read_tool.execute(path=str(test_file))
         assert result.success
-        assert "Hello World" in result.data
+        assert "Hello World" in result.data['content']
         assert result.metadata['lines'] == 2
         print("    ✓ read_file works")
 

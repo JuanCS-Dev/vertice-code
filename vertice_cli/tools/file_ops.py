@@ -5,11 +5,13 @@ from pathlib import Path
 from typing import Optional, Dict, Any, List
 from datetime import datetime
 import logging
+import shlex
 
 from .base import ToolResult, ToolCategory
 from .validated import ValidatedTool
 from ..core.validation import Required, TypeCheck
 from .smart_match import smart_find, apply_replacement, MatchType
+from vertice_core.async_utils.process import run_command
 
 logger = logging.getLogger(__name__)
 
@@ -99,11 +101,10 @@ class ReadFileTool(ValidatedTool):
 class WriteFileTool(ValidatedTool):
     """Create new file with content."""
 
-    def __init__(self, hook_executor=None, config_loader=None):
+    def __init__(self, config_loader=None):
         super().__init__()
         self.category = ToolCategory.FILE_WRITE
         self.description = "Create new file with content (fails if file exists)"
-        self.hook_executor = hook_executor
         self.config_loader = config_loader
         self.parameters = {
             "path": {"type": "string", "description": "File path to create", "required": True},
@@ -175,43 +176,41 @@ class WriteFileTool(ValidatedTool):
             return ToolResult(success=False, error=str(e))
 
     async def _execute_hooks(self, event_name: str, file_path: Path):
-        """Execute hooks for this event."""
-        if not self.hook_executor or not self.config_loader:
+        """Execute hooks for this event safely."""
+        if not self.config_loader:
             return
 
         try:
-            from vertice_cli.hooks import HookEvent, HookContext
-
-            # Get hooks from config
             config = self.config_loader.config
             if not config or not config.hooks:
                 return
 
             hooks_to_run = getattr(config.hooks, event_name, [])
-            if not hooks_to_run:
-                return
+            for hook_command in hooks_to_run:
+                try:
+                    # Substitute placeholders like {file_path}
+                    formatted_command = hook_command.format(
+                        file_path=shlex.quote(str(file_path))
+                    )
 
-            # Create context
-            context = HookContext(
-                file_path=file_path,
-                event_name=event_name,
-                cwd=Path.cwd(),
-                project_name=config.project.name if config.project else "unknown",
-            )
+                    logger.info(f"Executing {event_name} hook: {formatted_command}")
+                    result = await run_command(formatted_command)
 
-            # Execute hooks
-            event = HookEvent(event_name)
-            results = await self.hook_executor.execute_hooks(event, context, hooks_to_run)
+                    if result.success:
+                        logger.debug(f"Hook '{formatted_command}' succeeded.")
+                        if result.stdout:
+                            logger.debug(f"Hook stdout:\n{result.stdout}")
+                    else:
+                        logger.warning(
+                            f"Hook '{formatted_command}' failed with exit code {result.returncode}."
+                        )
+                        if result.stderr:
+                            logger.warning(f"Hook stderr:\n{result.stderr}")
 
-            # Log results
-            for result in results:
-                if result.success:
-                    logger.debug(f"Hook succeeded: {result.command}")
-                else:
-                    logger.warning(f"Hook failed: {result.command} - {result.error}")
-
+                except Exception as e:
+                    logger.error(f"Error executing hook command '{hook_command}': {e}")
         except Exception as e:
-            logger.error(f"Error executing hooks: {e}")
+            logger.error(f"Failed to process hooks for {event_name}: {e}")
 
 
 class EditFileTool(ValidatedTool):
@@ -226,11 +225,10 @@ class EditFileTool(ValidatedTool):
     Boris Cherny: Type-safe editing with validation.
     """
 
-    def __init__(self, hook_executor=None, config_loader=None):
+    def __init__(self, config_loader=None):
         super().__init__()
         self.category = ToolCategory.FILE_WRITE
         self.description = "Modify existing file using smart search/replace with fuzzy matching"
-        self.hook_executor = hook_executor
         self.config_loader = config_loader
         self.parameters = {
             "path": {"type": "string", "description": "File path to edit", "required": True},
@@ -438,43 +436,41 @@ Example: [{"search": "def old_func():", "replace": "def new_func():"}]""",
             return ToolResult(success=False, error=str(e))
 
     async def _execute_hooks(self, event_name: str, file_path: Path):
-        """Execute hooks for this event."""
-        if not self.hook_executor or not self.config_loader:
+        """Execute hooks for this event safely."""
+        if not self.config_loader:
             return
 
         try:
-            from vertice_cli.hooks import HookEvent, HookContext
-
-            # Get hooks from config
             config = self.config_loader.config
             if not config or not config.hooks:
                 return
 
             hooks_to_run = getattr(config.hooks, event_name, [])
-            if not hooks_to_run:
-                return
+            for hook_command in hooks_to_run:
+                try:
+                    # Substitute placeholders like {file_path}
+                    formatted_command = hook_command.format(
+                        file_path=shlex.quote(str(file_path))
+                    )
 
-            # Create context
-            context = HookContext(
-                file_path=file_path,
-                event_name=event_name,
-                cwd=Path.cwd(),
-                project_name=config.project.name if config.project else "unknown",
-            )
+                    logger.info(f"Executing {event_name} hook: {formatted_command}")
+                    result = await run_command(formatted_command)
 
-            # Execute hooks
-            event = HookEvent(event_name)
-            results = await self.hook_executor.execute_hooks(event, context, hooks_to_run)
+                    if result.success:
+                        logger.debug(f"Hook '{formatted_command}' succeeded.")
+                        if result.stdout:
+                            logger.debug(f"Hook stdout:\n{result.stdout}")
+                    else:
+                        logger.warning(
+                            f"Hook '{formatted_command}' failed with exit code {result.returncode}."
+                        )
+                        if result.stderr:
+                            logger.warning(f"Hook stderr:\n{result.stderr}")
 
-            # Log results
-            for result in results:
-                if result.success:
-                    logger.debug(f"Hook succeeded: {result.command}")
-                else:
-                    logger.warning(f"Hook failed: {result.command} - {result.error}")
-
+                except Exception as e:
+                    logger.error(f"Error executing hook command '{hook_command}': {e}")
         except Exception as e:
-            logger.error(f"Error executing hooks: {e}")
+            logger.error(f"Failed to process hooks for {event_name}: {e}")
 
 
 class ListDirectoryTool(ValidatedTool):
