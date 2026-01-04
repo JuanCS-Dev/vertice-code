@@ -142,7 +142,8 @@ class SemanticMemory:
                 with sqlite3.connect(self._fallback_db) as conn:
                     conn.row_factory = sqlite3.Row
                     # Sanitize the query for FTS5
-                    sanitized_query = f'"{query.replace("\"", "\"\"")}"'
+                    escaped = query.replace('"', '""')
+                    sanitized_query = f'"{escaped}"'
                     rows = conn.execute(
                         "SELECT * FROM semantic_fts WHERE content MATCH ? LIMIT ?",
                         (sanitized_query, limit),

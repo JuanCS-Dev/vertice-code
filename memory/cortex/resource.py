@@ -247,7 +247,8 @@ class ResourceMemory:
 
                 # Get IDs from FTS
                 # Sanitize the query for FTS5 by wrapping it in quotes
-                sanitized_query = f'"{query.replace("\"", "\"\"")}"'
+                escaped = query.replace('"', '""')
+                sanitized_query = f'"{escaped}"'
                 fts_rows = conn.execute(
                     """SELECT id FROM resources_fts
                        WHERE resources_fts MATCH ?
