@@ -19,6 +19,7 @@ Reference: https://arxiv.org/abs/2507.07957
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -29,6 +30,7 @@ from .episodic import EpisodicMemory
 from .procedural import ProceduralMemory, Procedure, ProcedureType
 from .resource import ResourceMemory
 from .retrieval import ActiveRetrieval
+from .connection_pool import get_connection_pool
 from .semantic import SemanticMemory
 from .vault import KnowledgeVault
 from .working import WorkingMemory
@@ -57,27 +59,80 @@ class MemoryCortex:
         self.base_path = Path(base_path)
         self.base_path.mkdir(parents=True, exist_ok=True)
         self.agent_id = agent_id
+        self._pool = get_connection_pool()
 
-        # Initialize MIRIX 6-type memory subsystems
-        self.working = WorkingMemory()
-        self.core = CoreMemory(self.base_path / "core.db", agent_id)
-        self.episodic = EpisodicMemory(self.base_path / "episodic.db")
-        self.semantic = SemanticMemory(self.base_path / "semantic")
-        self.procedural = ProceduralMemory(self.base_path / "procedural.db")
-        self.resource = ResourceMemory(self.base_path / "resource.db")
-        self.vault = KnowledgeVault(self.base_path / "vault.db")
+        # Lazy-loaded properties
+        self._working: Optional[WorkingMemory] = None
+        self._core: Optional[CoreMemory] = None
+        self._episodic: Optional[EpisodicMemory] = None
+        self._semantic: Optional[SemanticMemory] = None
+        self._procedural: Optional[ProceduralMemory] = None
+        self._resource: Optional[ResourceMemory] = None
+        self._vault: Optional[KnowledgeVault] = None
+        self._economy: Optional[ContributionLedger] = None
+        self._retrieval: Optional[ActiveRetrieval] = None
 
-        # Composed managers
-        self._economy = ContributionLedger(self.base_path / "ledger.db")
-        self._retrieval = ActiveRetrieval(
-            core=self.core,
-            episodic=self.episodic,
-            semantic=self.semantic,
-            procedural=self.procedural,
-            resource=self.resource,
-        )
+        logger.info(f"Memory Cortex (MIRIX 6-type) lazy-initialized at {self.base_path}")
 
-        logger.info(f"Memory Cortex (MIRIX 6-type) initialized at {self.base_path}")
+    @property
+    def working(self) -> WorkingMemory:
+        if self._working is None:
+            self._working = WorkingMemory()
+        return self._working
+
+    @property
+    def core(self) -> CoreMemory:
+        if self._core is None:
+            self._core = CoreMemory(self.base_path / "core.db", self.agent_id)
+        return self._core
+
+    @property
+    def episodic(self) -> EpisodicMemory:
+        if self._episodic is None:
+            self._episodic = EpisodicMemory(self.base_path / "episodic.db", self._pool)
+        return self._episodic
+
+    @property
+    def semantic(self) -> SemanticMemory:
+        if self._semantic is None:
+            self._semantic = SemanticMemory(self.base_path / "semantic")
+        return self._semantic
+
+    @property
+    def procedural(self) -> ProceduralMemory:
+        if self._procedural is None:
+            self._procedural = ProceduralMemory(self.base_path / "procedural.db", self._pool)
+        return self._procedural
+
+    @property
+    def resource(self) -> ResourceMemory:
+        if self._resource is None:
+            self._resource = ResourceMemory(self.base_path / "resource.db", self._pool)
+        return self._resource
+
+    @property
+    def vault(self) -> KnowledgeVault:
+        if self._vault is None:
+            self._vault = KnowledgeVault(self.base_path / "vault.db")
+        return self._vault
+
+    @property
+    def economy(self) -> ContributionLedger:
+        if self._economy is None:
+            self._economy = ContributionLedger(self.base_path / "ledger.db")
+        return self._economy
+
+    @property
+    def retrieval(self) -> ActiveRetrieval:
+        if self._retrieval is None:
+            self._retrieval = ActiveRetrieval(
+                core=self.core,
+                episodic=self.episodic,
+                semantic=self.semantic,
+                procedural=self.procedural,
+                resource=self.resource,
+            )
+        return self._retrieval
 
     # === Economy delegation ===
 
@@ -90,27 +145,27 @@ class MemoryCortex:
         metadata: Optional[Dict[str, Any]] = None,
     ) -> str:
         """Record an agent contribution."""
-        return self._economy.record_contribution(
+        return self.economy.record_contribution(
             agent_id, contribution_type, value, task_id, metadata
         )
 
     def get_agent_reputation(self, agent_id: str) -> Dict[str, Any]:
         """Get an agent's reputation score."""
-        return self._economy.get_agent_reputation(agent_id)
+        return self.economy.get_agent_reputation(agent_id)
 
     # === Active Retrieval delegation ===
 
-    def active_retrieve(
+    async def active_retrieve(
         self,
         query: str,
         limit_per_type: int = 5,
     ) -> Dict[str, List[Dict[str, Any]]]:
         """MIRIX Active Retrieval - Automatic context injection."""
-        return self._retrieval.retrieve(query, limit_per_type)
+        return await self.retrieval.retrieve(query, limit_per_type)
 
-    def to_context_prompt(self, query: str) -> str:
+    async def to_context_prompt(self, query: str) -> str:
         """Generate context string for LLM prompt injection."""
-        return self._retrieval.to_context_prompt(query)
+        return await self.retrieval.to_context_prompt(query)
 
     # === Convenience methods ===
 
@@ -144,7 +199,7 @@ class MemoryCortex:
         else:
             raise ValueError(f"Unknown memory type: {memory_type}")
 
-    def recall(
+    async def recall(
         self,
         query: str,
         memory_types: Optional[List[str]] = None,
@@ -155,20 +210,26 @@ class MemoryCortex:
         results: List[Dict[str, Any]] = []
         memory_types = memory_types or ["episodic", "semantic"]
 
+        tasks = []
+        sources = []
+
         if "episodic" in memory_types:
-            episodic_results = self.episodic.search(query=query, limit=limit)
-            for r in episodic_results:
-                r["source"] = "episodic"
-                results.append(r)
+            tasks.append(self.episodic.search(query=query, limit=limit))
+            sources.append("episodic")
 
         if "semantic" in memory_types:
-            semantic_results = self.semantic.search(
+            tasks.append(self.semantic.search(
                 query=query,
                 embedding=kwargs.get("embedding"),
                 limit=limit,
-            )
-            for r in semantic_results:
-                r["source"] = "semantic"
+            ))
+            sources.append("semantic")
+
+        search_results = await asyncio.gather(*tasks)
+
+        for source, search_result in zip(sources, search_results):
+            for r in search_result:
+                r["source"] = source
                 results.append(r)
 
         return results[:limit]
@@ -187,9 +248,9 @@ class MemoryCortex:
             agent_id=agent_id or self.agent_id,
         )
 
-    def get_best_procedure(self, task: str) -> Optional[Procedure]:
+    async def get_best_procedure(self, task: str) -> Optional[Procedure]:
         """Get the best procedure for a task."""
-        return self.procedural.get_best_for_task(task)
+        return await self.procedural.get_best_for_task(task)
 
     def get_status(self) -> Dict[str, Any]:
         """Get memory cortex status."""

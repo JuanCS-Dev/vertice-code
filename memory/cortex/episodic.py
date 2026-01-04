@@ -8,11 +8,14 @@ Uses SQLite with indexes for efficient retrieval.
 from __future__ import annotations
 
 import json
+import asyncio
 import sqlite3
 import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from .timing import timing_decorator
+from .connection_pool import ConnectionPool
 
 
 class EpisodicMemory:
@@ -23,13 +26,14 @@ class EpisodicMemory:
     for later retrieval and learning.
     """
 
-    def __init__(self, db_path: Path) -> None:
+    def __init__(self, db_path: Path, pool: ConnectionPool) -> None:
         self.db_path = db_path
+        self.pool = pool
         self._init_db()
 
     def _init_db(self) -> None:
         """Initialize SQLite database."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self.pool.get_conn(self.db_path) as conn:
             conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS episodes (
@@ -58,7 +62,7 @@ class EpisodicMemory:
         """Record an episode."""
         episode_id = str(uuid.uuid4())
 
-        with sqlite3.connect(self.db_path) as conn:
+        with self.pool.get_conn(self.db_path) as conn:
             conn.execute(
                 """INSERT INTO episodes
                    (id, session_id, agent_id, event_type, content, metadata, timestamp)
@@ -78,7 +82,7 @@ class EpisodicMemory:
 
     def get_session(self, session_id: str) -> List[Dict[str, Any]]:
         """Get all episodes from a session."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self.pool.get_conn(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             rows = conn.execute(
                 "SELECT * FROM episodes WHERE session_id = ? ORDER BY timestamp",
@@ -89,7 +93,7 @@ class EpisodicMemory:
 
     def get_recent(self, limit: int = 20) -> List[Dict[str, Any]]:
         """Get most recent episodes."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self.pool.get_conn(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             rows = conn.execute(
                 "SELECT * FROM episodes ORDER BY timestamp DESC LIMIT ?",
@@ -98,7 +102,8 @@ class EpisodicMemory:
 
             return [dict(row) for row in rows]
 
-    def search(
+    @timing_decorator
+    async def search(
         self,
         query: Optional[str] = None,
         agent_id: Optional[str] = None,
@@ -121,18 +126,22 @@ class EpisodicMemory:
 
         where_clause = " AND ".join(conditions) if conditions else "1=1"
 
-        with sqlite3.connect(self.db_path) as conn:
-            conn.row_factory = sqlite3.Row
-            rows = conn.execute(
-                f"SELECT * FROM episodes WHERE {where_clause} ORDER BY timestamp DESC LIMIT ?",
-                (*params, limit),
-            ).fetchall()
+        loop = asyncio.get_event_loop()
 
-            return [dict(row) for row in rows]
+        def db_read():
+            with self.pool.get_conn(self.db_path) as conn:
+                conn.row_factory = sqlite3.Row
+                rows = conn.execute(
+                    f"SELECT * FROM episodes WHERE {where_clause} ORDER BY timestamp DESC LIMIT ?",
+                    (*params, limit),
+                ).fetchall()
+                return [dict(row) for row in rows]
+
+        return await loop.run_in_executor(None, db_read)
 
     def delete_session(self, session_id: str) -> int:
         """Delete all episodes from a session. Returns count deleted."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self.pool.get_conn(self.db_path) as conn:
             cursor = conn.execute(
                 "DELETE FROM episodes WHERE session_id = ?",
                 (session_id,),
@@ -141,6 +150,6 @@ class EpisodicMemory:
 
     def count(self) -> int:
         """Get total episode count."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self.pool.get_conn(self.db_path) as conn:
             result = conn.execute("SELECT COUNT(*) FROM episodes").fetchone()
             return result[0] if result else 0
