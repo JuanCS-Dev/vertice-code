@@ -40,6 +40,13 @@ class Event:
             'data': self.data,
         }
 
+    def __repr__(self) -> str:
+        """Concise representation for debugging."""
+        return (
+            f"{self.__class__.__name__}(id={self.id[:8]}..., "
+            f"source={self.source!r}, keys={list(self.data.keys())[:3]})"
+        )
+
 
 E = TypeVar('E', bound=Event)
 EventHandler = Callable[[E], Any]

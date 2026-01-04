@@ -46,6 +46,39 @@ class CircuitBreakerStats:
     last_failure_time: Optional[float] = None
     last_failure_reason: Optional[str] = None
 
+    def to_dict(self) -> dict:
+        """Serialize to dictionary."""
+        return {
+            'total_calls': self.total_calls,
+            'successful_calls': self.successful_calls,
+            'failed_calls': self.failed_calls,
+            'rejected_calls': self.rejected_calls,
+            'state_changes': self.state_changes,
+            'last_failure_time': self.last_failure_time,
+            'last_failure_reason': self.last_failure_reason,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> 'CircuitBreakerStats':
+        """Deserialize from dictionary."""
+        return cls(
+            total_calls=data.get('total_calls', 0),
+            successful_calls=data.get('successful_calls', 0),
+            failed_calls=data.get('failed_calls', 0),
+            rejected_calls=data.get('rejected_calls', 0),
+            state_changes=data.get('state_changes', []),
+            last_failure_time=data.get('last_failure_time'),
+            last_failure_reason=data.get('last_failure_reason'),
+        )
+
+    def __repr__(self) -> str:
+        """Concise representation."""
+        success_rate = (
+            self.successful_calls / self.total_calls * 100
+            if self.total_calls > 0 else 0
+        )
+        return f"CircuitBreakerStats(calls={self.total_calls}, success={success_rate:.1f}%)"
+
 
 @dataclass
 class SimpleCircuitBreaker:
@@ -91,6 +124,36 @@ class SimpleCircuitBreaker:
             return True, f"Half-open test {self.half_open_calls}"
 
         return False, "Half-open limit"
+
+    def to_dict(self) -> dict:
+        """Serialize to dictionary."""
+        return {
+            'failure_threshold': self.failure_threshold,
+            'recovery_timeout': self.recovery_timeout,
+            'half_open_max_calls': self.half_open_max_calls,
+            'failures': self.failures,
+            'state': self.state.value,
+            'last_failure_time': self.last_failure_time,
+            'half_open_calls': self.half_open_calls,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> 'SimpleCircuitBreaker':
+        """Deserialize from dictionary."""
+        state = data.get('state', 'closed')
+        return cls(
+            failure_threshold=data.get('failure_threshold', 5),
+            recovery_timeout=data.get('recovery_timeout', 60.0),
+            half_open_max_calls=data.get('half_open_max_calls', 3),
+            failures=data.get('failures', 0),
+            state=CircuitState(state) if isinstance(state, str) else state,
+            last_failure_time=data.get('last_failure_time'),
+            half_open_calls=data.get('half_open_calls', 0),
+        )
+
+    def __repr__(self) -> str:
+        """Concise representation."""
+        return f"SimpleCircuitBreaker(state={self.state.value}, failures={self.failures}/{self.failure_threshold})"
 
 
 __all__ = [

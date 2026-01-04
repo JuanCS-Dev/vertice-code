@@ -86,6 +86,13 @@ class AgentTask(BaseModel):
 
         return self
 
+    def __repr__(self) -> str:
+        """Concise representation for debugging."""
+        return (
+            f"AgentTask(id={self.task_id[:8]}..., "
+            f"request={self.request[:30]!r}{'...' if len(self.request) > 30 else ''})"
+        )
+
 
 class AgentResponse(BaseModel):
     """
@@ -120,6 +127,11 @@ class AgentResponse(BaseModel):
         """Alias for metrics (backward compatibility)."""
         return self.metrics
 
+    def __repr__(self) -> str:
+        """Concise representation for debugging."""
+        status = "OK" if self.success else f"ERR: {self.error or 'unknown'}"
+        return f"AgentResponse(success={self.success}, status={status!r})"
+
 
 class TaskResult(BaseModel):
     """
@@ -136,6 +148,10 @@ class TaskResult(BaseModel):
     status: TaskStatus
     output: Dict[str, Any] = Field(default_factory=dict)
     metadata: Dict[str, Any] = Field(default_factory=dict)
+
+    def __repr__(self) -> str:
+        """Concise representation for debugging."""
+        return f"TaskResult(id={self.task_id[:8]}..., status={self.status.value!r})"
 
 
 __all__ = [

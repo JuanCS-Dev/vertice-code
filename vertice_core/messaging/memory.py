@@ -11,10 +11,11 @@ Date: 2025-11-26
 
 import asyncio
 import fnmatch
+import heapq
 import logging
 import time
 import uuid
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,8 @@ class InMemoryQueue(IMessageQueue):
         self._config = config
         self._messages: asyncio.Queue[Message] = asyncio.Queue(maxsize=config.max_size)
         self._processing: Dict[str, Message] = {}
-        self._delayed: List[tuple[float, Message]] = []
+        self._delayed: List[Tuple[float, int, Message]] = []  # (visible_at, counter, message) heap
+        self._delayed_counter: int = 0  # Tiebreaker for heap ordering
         self._lock = asyncio.Lock()
 
     async def publish(
@@ -52,8 +54,8 @@ class InMemoryQueue(IMessageQueue):
         if delay > 0:
             async with self._lock:
                 visible_at = time.time() + delay
-                self._delayed.append((visible_at, message))
-                self._delayed.sort(key=lambda x: x[0])
+                self._delayed_counter += 1
+                heapq.heappush(self._delayed, (visible_at, self._delayed_counter, message))
             return message.id
 
         try:
@@ -102,12 +104,12 @@ class InMemoryQueue(IMessageQueue):
         async with self._lock:
             now = time.time()
             while self._delayed and self._delayed[0][0] <= now:
-                _, message = self._delayed.pop(0)
+                visible_at, counter, message = heapq.heappop(self._delayed)
                 try:
                     self._messages.put_nowait(message)
                 except asyncio.QueueFull:
                     # Put back in delayed queue
-                    self._delayed.insert(0, (now, message))
+                    heapq.heappush(self._delayed, (visible_at, counter, message))
                     break
 
     async def ack(self, message_id: str) -> bool:

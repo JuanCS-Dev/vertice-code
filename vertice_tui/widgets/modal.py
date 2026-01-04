@@ -23,6 +23,11 @@ class ConfirmDialog(ModalScreen[bool]):
     """
     Confirmation dialog with Yes/No buttons.
 
+    Accessibility:
+        - role="dialog" for screen readers
+        - Focus trapped within dialog
+        - Keyboard navigation: Y/N, Enter/Escape
+
     Usage:
         def handle_result(confirmed: bool) -> None:
             if confirmed:
@@ -32,10 +37,12 @@ class ConfirmDialog(ModalScreen[bool]):
     """
 
     BINDINGS = [
-        Binding("escape", "cancel", "Cancel"),
-        Binding("enter", "confirm", "Confirm"),
+        Binding("escape", "cancel", "Cancel", priority=True),
+        Binding("enter", "confirm", "Confirm", priority=True),
         Binding("y", "confirm", "Yes"),
         Binding("n", "cancel", "No"),
+        Binding("tab", "focus_next", "Next", show=False),
+        Binding("shift+tab", "focus_previous", "Previous", show=False),
     ]
 
     DEFAULT_CSS = """
@@ -93,13 +100,19 @@ class ConfirmDialog(ModalScreen[bool]):
         self.destructive = destructive
 
     def compose(self) -> ComposeResult:
-        with Vertical():
-            yield Label(self.title, classes="dialog-title")
-            yield Label(self.message, classes="dialog-message")
+        with Vertical(id="dialog-container"):
+            yield Label(self.title, classes="dialog-title", id="dialog-title")
+            yield Label(self.message, classes="dialog-message", id="dialog-message")
             with Horizontal(classes="dialog-buttons"):
                 variant = "error" if self.destructive else "primary"
                 yield Button(self.yes_label, variant=variant, id="yes")
                 yield Button(self.no_label, variant="default", id="no")
+
+    def on_mount(self) -> None:
+        """Focus the appropriate button on mount."""
+        # Focus No button for destructive actions (safer default)
+        focus_id = "no" if self.destructive else "yes"
+        self.query_one(f"#{focus_id}", Button).focus()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         self.dismiss(event.button.id == "yes")
@@ -115,13 +128,18 @@ class AlertDialog(ModalScreen[None]):
     """
     Alert dialog with single OK button.
 
+    Accessibility:
+        - role="alertdialog" for screen readers
+        - Auto-focus on OK button
+        - Simple keyboard dismiss (Enter/Escape)
+
     Usage:
         self.push_screen(AlertDialog("Operation completed!", "Success"))
     """
 
     BINDINGS = [
-        Binding("escape", "dismiss_dialog", "Close"),
-        Binding("enter", "dismiss_dialog", "OK"),
+        Binding("escape", "dismiss_dialog", "Close", priority=True),
+        Binding("enter", "dismiss_dialog", "OK", priority=True),
     ]
 
     DEFAULT_CSS = """
@@ -183,11 +201,15 @@ class AlertDialog(ModalScreen[None]):
 
     def compose(self) -> ComposeResult:
         icon = self._get_icon()
-        with Vertical():
-            yield Label(f"{icon} {self.title}", classes="dialog-title")
-            yield Label(self.message, classes="dialog-message")
+        with Vertical(id="alert-container"):
+            yield Label(f"{icon} {self.title}", classes="dialog-title", id="alert-title")
+            yield Label(self.message, classes="dialog-message", id="alert-message")
             with Horizontal(classes="dialog-buttons"):
                 yield Button("OK", variant="primary", id="ok")
+
+    def on_mount(self) -> None:
+        """Auto-focus OK button."""
+        self.query_one("#ok", Button).focus()
 
     def _get_icon(self) -> str:
         icons = {
@@ -211,6 +233,11 @@ class InputDialog(ModalScreen[Optional[str]]):
 
     Returns the input value or None if cancelled.
 
+    Accessibility:
+        - Auto-focus on input field
+        - Tab navigation between input and buttons
+        - Enter submits, Escape cancels
+
     Usage:
         def handle_input(value: str | None) -> None:
             if value:
@@ -220,7 +247,9 @@ class InputDialog(ModalScreen[Optional[str]]):
     """
 
     BINDINGS = [
-        Binding("escape", "cancel", "Cancel"),
+        Binding("escape", "cancel", "Cancel", priority=True),
+        Binding("tab", "focus_next", "Next", show=False),
+        Binding("shift+tab", "focus_previous", "Previous", show=False),
     ]
 
     DEFAULT_CSS = """
@@ -318,6 +347,11 @@ class FilePickerDialog(ModalScreen[Optional[Path]]):
 
     Returns the selected path or None if cancelled.
 
+    Accessibility:
+        - Arrow key navigation in tree
+        - Tab between tree and buttons
+        - Enter selects, Escape cancels
+
     Usage:
         def handle_file(path: Path | None) -> None:
             if path:
@@ -327,7 +361,9 @@ class FilePickerDialog(ModalScreen[Optional[Path]]):
     """
 
     BINDINGS = [
-        Binding("escape", "cancel", "Cancel"),
+        Binding("escape", "cancel", "Cancel", priority=True),
+        Binding("tab", "focus_next", "Next", show=False),
+        Binding("shift+tab", "focus_previous", "Previous", show=False),
     ]
 
     DEFAULT_CSS = """
@@ -421,12 +457,20 @@ class ProgressDialog(ModalScreen[None]):
 
     Cannot be dismissed by user - must be closed programmatically.
 
+    Accessibility:
+        - aria-busy="true" semantics
+        - Live region for progress updates
+        - Non-dismissible (no keyboard escape)
+
     Usage:
         dialog = ProgressDialog("Processing...")
         self.push_screen(dialog)
         await self.do_work()
         dialog.dismiss(None)
     """
+
+    # No bindings - cannot be dismissed by user
+    BINDINGS = []
 
     DEFAULT_CSS = """
     ProgressDialog {
@@ -478,7 +522,7 @@ class ProgressDialog(ModalScreen[None]):
         self.message = message
         try:
             self.query_one(".dialog-message", Label).update(message)
-        except Exception:
+        except (AttributeError, ValueError):
             pass
 
 

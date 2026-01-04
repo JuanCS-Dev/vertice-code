@@ -41,6 +41,9 @@ class InputArea(Widget):
     BINDINGS: ClassVar[list[Binding]] = [
         Binding("ctrl+enter", "submit", "Submit", show=False),
         Binding("escape", "cancel", "Cancel", show=False),
+        Binding("ctrl+a", "select_all", "Select All", show=False),
+        Binding("ctrl+u", "clear_line", "Clear Line", show=False),
+        Binding("ctrl+k", "kill_to_end", "Kill to End", show=False),
     ]
 
     DEFAULT_CSS = """
@@ -156,7 +159,7 @@ class InputArea(Widget):
         try:
             from textual.widgets import Input
             return self.query_one("#fallback-input", Input).value
-        except Exception:
+        except (AttributeError, ValueError):
             return ""
 
     @value.setter
@@ -168,7 +171,7 @@ class InputArea(Widget):
             try:
                 from textual.widgets import Input
                 self.query_one("#fallback-input", Input).value = new_value
-            except Exception:
+            except (AttributeError, ValueError):
                 pass
 
     def focus(self) -> None:
@@ -179,7 +182,7 @@ class InputArea(Widget):
             try:
                 from textual.widgets import Input
                 self.query_one("#fallback-input", Input).focus()
-            except Exception:
+            except (AttributeError, ValueError):
                 pass
 
     def clear(self) -> None:
@@ -199,7 +202,7 @@ class InputArea(Widget):
             if self._text_area and detected != "text":
                 try:
                     self._text_area.language = detected
-                except Exception:
+                except (AttributeError, ValueError):
                     pass
 
         self._update_status()
@@ -250,7 +253,7 @@ class InputArea(Widget):
                 parts.append(f"{lines} lines")
 
                 status.update(" │ ".join(parts))
-        except Exception:
+        except (AttributeError, ValueError):
             pass
 
     def action_submit(self) -> None:
@@ -261,3 +264,30 @@ class InputArea(Widget):
     def action_cancel(self) -> None:
         """Cancel input."""
         self.post_message(self.Cancelled())
+
+    def action_select_all(self) -> None:
+        """Select all text."""
+        if self._text_area:
+            self._text_area.select_all()
+
+    def action_clear_line(self) -> None:
+        """Clear current line (Ctrl+U)."""
+        if self._text_area:
+            # Get current cursor position
+            row, col = self._text_area.cursor_location
+            lines = self._text_area.text.split("\n")
+            if row < len(lines):
+                # Clear from start of line to cursor
+                lines[row] = lines[row][col:]
+                self._text_area.text = "\n".join(lines)
+                self._text_area.cursor_location = (row, 0)
+
+    def action_kill_to_end(self) -> None:
+        """Kill text to end of line (Ctrl+K)."""
+        if self._text_area:
+            row, col = self._text_area.cursor_location
+            lines = self._text_area.text.split("\n")
+            if row < len(lines):
+                # Kill from cursor to end of line
+                lines[row] = lines[row][:col]
+                self._text_area.text = "\n".join(lines)

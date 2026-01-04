@@ -146,6 +146,13 @@ class AgentIdentity:
         """Check if agent has specific capability enum."""
         return self.can_handle(cap.value)
 
+    def __repr__(self) -> str:
+        """Detailed representation for debugging."""
+        return (
+            f"AgentIdentity(id={self.agent_id!r}, role={self.role.value!r}, "
+            f"name={self.name!r}, caps={len(self.capabilities)})"
+        )
+
 
 class TaskStatus(str, Enum):
     """Status of a task in execution."""
