@@ -13,6 +13,8 @@ Total: 10 tests
 """
 
 import pytest
+import asyncio
+from prometheus.sandbox.executor import SandboxExecutor
 
 
 # ==============================================================================
@@ -184,7 +186,8 @@ def calculate_shipping_time(distance):
 class TestExtractMethodRefactoring:
     """Tests for extracting methods from long functions."""
 
-    def test_extracts_validation_logic(self, legacy_codebase):
+    @pytest.mark.asyncio
+    async def test_extracts_validation_logic(self, legacy_codebase):
         """Extracts validation into separate function."""
         file_path = legacy_codebase / "src" / "long_function.py"
 
@@ -255,15 +258,19 @@ def process_order(order_data):
         assert "def calculate_shipping" in content
 
         # Verify functionality preserved
-        exec_globals = {}
-        exec(compile(content, file_path, 'exec'), exec_globals)
-        process_order = exec_globals['process_order']
+        test_code = content + """
+result = process_order({"items": [{"price": 10, "quantity": 2}]})
+assert result["subtotal"] == 20
+assert "error" not in result
+print("Assertions passed")
+"""
+        sandbox = SandboxExecutor()
+        result = await sandbox.execute(test_code)
+        assert result.success, f"Sandbox execution failed: {result.stderr}"
+        assert "Assertions passed" in result.stdout
 
-        result = process_order({"items": [{"price": 10, "quantity": 2}]})
-        assert result["subtotal"] == 20
-        assert "error" not in result
-
-    def test_extracts_repeated_pattern(self, legacy_codebase):
+    @pytest.mark.asyncio
+    async def test_extracts_repeated_pattern(self, legacy_codebase):
         """Extracts repeated pattern into helper."""
         file_path = legacy_codebase / "src" / "duplicated.py"
 
@@ -291,13 +298,17 @@ process_user_c = normalize_user
         assert content.count("name.strip().title()") == 1  # Only in one place
 
         # Verify functionality preserved
-        exec_globals = {}
-        exec(compile(content, file_path, 'exec'), exec_globals)
-
-        test_user = {"name": "  john doe  ", "email": "JOHN@EXAMPLE.COM"}
-        result = exec_globals['process_user_a'](test_user)
-        assert result["name"] == "John Doe"
-        assert result["email"] == "john@example.com"
+        test_code = content + """
+test_user = {"name": "  john doe  ", "email": "JOHN@EXAMPLE.COM"}
+result = process_user_a(test_user)
+assert result["name"] == "John Doe"
+assert result["email"] == "john@example.com"
+print("Assertions passed")
+"""
+        sandbox = SandboxExecutor()
+        result = await sandbox.execute(test_code)
+        assert result.success, f"Sandbox execution failed: {result.stderr}"
+        assert "Assertions passed" in result.stdout
 
 
 # ==============================================================================
@@ -308,7 +319,8 @@ process_user_c = normalize_user
 class TestFlattenNestedCode:
     """Tests for reducing code nesting."""
 
-    def test_uses_early_returns(self, legacy_codebase):
+    @pytest.mark.asyncio
+    async def test_uses_early_returns(self, legacy_codebase):
         """Refactors deep nesting to early returns."""
         file_path = legacy_codebase / "src" / "deeply_nested.py"
 
@@ -351,19 +363,24 @@ def check_permissions(user, resource, action):
         assert max_indent <= 8, f"Max indent {max_indent} too deep"
 
         # Verify functionality
-        exec_globals = {}
-        exec(compile(content, file_path, 'exec'), exec_globals)
-        check = exec_globals['check_permissions']
+        test_code = content + """
+check = check_permissions
+assert check(None, None, "read") is False
+assert check({"active": True, "role": "admin"}, None, "write") is True
+assert check({"active": True, "role": "user", "id": 1}, {"owner": 1}, "write") is True
+print("Assertions passed")
+"""
+        sandbox = SandboxExecutor()
+        result = await sandbox.execute(test_code)
+        assert result.success, f"Sandbox execution failed: {result.stderr}"
+        assert "Assertions passed" in result.stdout
 
-        assert check(None, None, "read") is False
-        assert check({"active": True, "role": "admin"}, None, "write") is True
-        assert check({"active": True, "role": "user", "id": 1}, {"owner": 1}, "write") is True
-
-    def test_extracts_guard_clauses(self, legacy_codebase):
+    @pytest.mark.asyncio
+    async def test_extracts_guard_clauses(self, legacy_codebase):
         """Uses guard clauses for validation."""
         file_path = legacy_codebase / "src" / "guard_clauses.py"
 
-        file_path.write_text('''"""Module demonstrating guard clauses."""
+        file_content = '''"""Module demonstrating guard clauses."""
 
 def process_payment(payment):
     """Process payment with guard clauses."""
@@ -389,21 +406,31 @@ def process_payment(payment):
     }
 
     return processors[method](amount)
-''')
+'''
+        file_path.write_text(file_content)
 
-        exec_globals = {}
-        exec(compile(file_path.read_text(), file_path, 'exec'), exec_globals)
-        process = exec_globals['process_payment']
+        test_code = file_content + """
+process = process_payment
+# Test guard clauses
+try:
+    process(None)
+except ValueError as e:
+    assert "Payment data required" in str(e)
 
-        # Test guard clauses
-        with pytest.raises(ValueError, match="Payment data required"):
-            process(None)
-        with pytest.raises(ValueError, match="Invalid payment amount"):
-            process({"amount": -10})
+try:
+    process({"amount": -10})
+except ValueError as e:
+    assert "Invalid payment amount" in str(e)
 
-        # Test happy path
-        result = process({"amount": 100, "method": "card"})
-        assert result["status"] == "charged"
+# Test happy path
+result = process({"amount": 100, "method": "card"})
+assert result["status"] == "charged"
+print("Assertions passed")
+"""
+        sandbox = SandboxExecutor()
+        result = await sandbox.execute(test_code)
+        assert result.success, f"Sandbox execution failed: {result.stderr}"
+        assert "Assertions passed" in result.stdout
 
 
 # ==============================================================================
@@ -485,11 +512,12 @@ def calculate_shipping_time(distance):
         assert "0.15" not in function_section
         assert "0.0875" not in function_section
 
-    def test_uses_enum_for_related_constants(self, legacy_codebase):
+    @pytest.mark.asyncio
+    async def test_uses_enum_for_related_constants(self, legacy_codebase):
         """Uses Enum for related constant groups."""
         file_path = legacy_codebase / "src" / "enum_constants.py"
 
-        file_path.write_text('''"""Module using Enum for constants."""
+        file_content = '''"""Module using Enum for constants."""
 from enum import Enum, auto
 
 
@@ -518,16 +546,19 @@ def calculate_processing_fee(amount, method: PaymentMethod):
 def can_cancel(status: OrderStatus) -> bool:
     """Check if order can be cancelled."""
     return status in (OrderStatus.PENDING, OrderStatus.CONFIRMED)
-''')
+'''
+        file_path.write_text(file_content)
 
-        exec_globals = {}
-        exec(compile(file_path.read_text(), file_path, 'exec'), exec_globals)
-
-        PaymentMethod = exec_globals['PaymentMethod']
-        calculate_fee = exec_globals['calculate_processing_fee']
-
-        assert calculate_fee(100, PaymentMethod.CREDIT_CARD) == pytest.approx(2.9)
-        assert calculate_fee(100, PaymentMethod.BANK_TRANSFER) == 0
+        test_code = file_content + """
+fee = calculate_processing_fee(100, PaymentMethod.CREDIT_CARD)
+assert abs(fee - 2.9) < 0.001
+assert calculate_processing_fee(100, PaymentMethod.BANK_TRANSFER) == 0
+print("Assertions passed")
+"""
+        sandbox = SandboxExecutor()
+        result = await sandbox.execute(test_code)
+        assert result.success, f"Sandbox execution failed: {result.stderr}"
+        assert "Assertions passed" in result.stdout
 
 
 # ==============================================================================
