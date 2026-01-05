@@ -36,7 +36,7 @@ from core.resilience import (
 # =============================================================================
 
 
-@dataclass
+@dataclass(frozen=True)
 class CircuitBreakerStats:
     """Statistics for observability."""
 
