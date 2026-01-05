@@ -96,8 +96,10 @@ class ASTTransformer:
         Returns:
             Transformed source code
         """
-        # TODO: Implement method inlining
-        return source_code
+        raise NotImplementedError(
+            "inline_method not yet implemented. "
+            "Contributions welcome: https://github.com/JuanCS/Vertice-Code/issues"
+        )
 
     def modernize_syntax(self, source_code: str, target_version: str = "3.12") -> str:
         """Modernize Python syntax.
@@ -114,8 +116,10 @@ class ASTTransformer:
         Returns:
             Modernized source code
         """
-        # TODO: Implement syntax modernization
-        return source_code
+        raise NotImplementedError(
+            "modernize_syntax not yet implemented. "
+            "Contributions welcome: https://github.com/JuanCS/Vertice-Code/issues"
+        )
 
     def _extract_method_libcst(self, code: str, start: int, end: int, name: str) -> str:
         """Extract method using LibCST (format-preserving).
@@ -129,12 +133,10 @@ class ASTTransformer:
         Returns:
             Transformed code
         """
-        if not HAS_LIBCST:
-            raise ImportError("libcst not installed")
-
-        module = cst.parse_module(code)
-        # TODO: Implement proper method extraction
-        return module.code
+        raise NotImplementedError(
+            "_extract_method_libcst not yet implemented. "
+            "Contributions welcome: https://github.com/JuanCS/Vertice-Code/issues"
+        )
 
     def _rename_symbol_libcst(self, code: str, old: str, new: str, scope: Optional[str]) -> str:
         """Rename using LibCST.
