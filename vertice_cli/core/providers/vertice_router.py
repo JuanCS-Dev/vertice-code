@@ -18,6 +18,8 @@ from enum import Enum
 from datetime import datetime, timedelta
 import logging
 
+from vertice_cli.core.types import ModelInfo
+
 logger = logging.getLogger(__name__)
 
 
@@ -101,7 +103,7 @@ class LLMProvider(Protocol):
         self, messages: List[Dict], **kwargs
     ) -> AsyncGenerator[str, None]: ...
     async def stream_chat(self, messages: List[Dict], **kwargs) -> AsyncGenerator[str, None]: ...
-    def get_model_info(self) -> Dict: ...
+    def get_model_info(self) -> ModelInfo: ...
 
 
 class VerticeRouter:
@@ -265,7 +267,12 @@ class VerticeRouter:
                 status = self._status.get(required_provider)
                 if status and status.can_use():
                     model_info = self._providers[required_provider].get_model_info()
-                    model_name = model_info.get("model", "default_model")
+                    try:
+                        model_name = model_info["model"]
+                    except KeyError:
+                        raise ValueError(
+                            f"Provider '{required_provider}' returned invalid model info: missing 'model' key."
+                        )
                     decision = RoutingDecision(
                         provider_name=required_provider,
                         model_name=model_name,
@@ -308,7 +315,12 @@ class VerticeRouter:
         fallbacks = available_candidates[1:3] if len(available_candidates) > 1 else []
 
         model_info = self._providers[selected].get_model_info()
-        model_name = model_info.get("model", "default_model")
+        try:
+            model_name = model_info["model"]
+        except KeyError:
+            raise ValueError(
+                f"Provider '{selected}' returned invalid model info: missing 'model' key."
+            )
 
         decision = RoutingDecision(
             provider_name=selected,

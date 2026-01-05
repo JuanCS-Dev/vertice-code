@@ -21,6 +21,7 @@ from typing import (
     Dict,
     List,
     Literal,
+    NotRequired,
     Optional,
     Protocol,
     TypeAlias,
@@ -225,6 +226,17 @@ class RecoveryStrategy(TypedDict):
 # ============================================================================
 # LLM & GENERATION TYPES
 # ============================================================================
+
+
+class ModelInfo(TypedDict):
+    """Information about an LLM model."""
+
+    model: str
+    provider: str
+    cost_tier: NotRequired[str]
+    speed_tier: NotRequired[str]
+    supports_streaming: NotRequired[bool]
+    requests_per_day: NotRequired[int]
 
 
 class GenerationConfig(TypedDict, total=False):
@@ -500,6 +512,7 @@ __all__ = [
     "ErrorCallback",
     "TokenCallback",
     # TypedDicts
+    "ModelInfo",
     "Message",
     "ToolParameter",
     "ToolDefinition",

@@ -17,6 +17,7 @@ from typing import Any, AsyncIterator, Dict, List, Optional
 
 import aiohttp
 
+from vertice_cli.core.types import ModelInfo
 from vertice_core.types.jules_types import (
     JulesActivity,
     JulesActivityType,
@@ -89,15 +90,15 @@ class JulesProvider(EnhancedProviderBase):
         async for activity in self.client.stream_activities(session.session_id):
             yield activity.message
 
-    def get_model_info(self) -> Dict[str, Any]:
+    def get_model_info(self) -> ModelInfo:
         """Get model information for Jules."""
-        return {
-            "model": self.model_name,
-            "provider": self.PROVIDER_NAME,
-            "cost_tier": self.COST_TIER,
-            "speed_tier": self.SPEED_TIER,
-            "supports_streaming": True,
-        }
+        return ModelInfo(
+            model=self.model_name,
+            provider=self.PROVIDER_NAME,
+            cost_tier=self.COST_TIER.value,
+            speed_tier=self.SPEED_TIER.value,
+            supports_streaming=True,
+        )
 
 
 class JulesClientError(Exception):
