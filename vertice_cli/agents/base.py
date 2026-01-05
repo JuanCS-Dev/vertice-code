@@ -206,6 +206,7 @@ class BaseAgent(abc.ABC):
         tool_map = {
             "read_file": AgentCapability.READ_ONLY,
             "list_files": AgentCapability.READ_ONLY,
+            "list_directory": AgentCapability.READ_ONLY,  # Alias
             "grep_search": AgentCapability.READ_ONLY,
             "ast_parse": AgentCapability.READ_ONLY,
             "find_files": AgentCapability.READ_ONLY,
