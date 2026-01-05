@@ -10,9 +10,12 @@ Date: 2025-11-26
 """
 
 import asyncio
+import logging
 import shlex
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Union
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -62,6 +65,7 @@ async def run_command(
     Returns:
         ProcessResult with output and return code
     """
+    start_time = asyncio.get_event_loop().time()
     if isinstance(command, str) and not shell:
         args = shlex.split(command)
     elif isinstance(command, list):
@@ -69,7 +73,7 @@ async def run_command(
         command = " ".join(command)
     else:
         args = command
-
+    logger.info("Running command: %s", command)
     if shell:
         process = await asyncio.create_subprocess_shell(
             command if isinstance(command, str) else " ".join(args),
@@ -92,6 +96,8 @@ async def run_command(
     except asyncio.TimeoutError:
         process.kill()
         await process.wait()
+        duration = asyncio.get_event_loop().time() - start_time
+        logger.warning("Command '%s' timed out after %.2f seconds.", command, duration)
         return ProcessResult(
             returncode=-1,
             stdout="",
@@ -101,13 +107,23 @@ async def run_command(
 
     stdout = stdout_bytes.decode("utf-8", errors="replace") if stdout_bytes else ""
     stderr = stderr_bytes.decode("utf-8", errors="replace") if stderr_bytes else ""
-
-    return ProcessResult(
+    duration = asyncio.get_event_loop().time() - start_time
+    result = ProcessResult(
         returncode=process.returncode or 0,
         stdout=stdout.strip(),
         stderr=stderr.strip(),
         command=command if isinstance(command, str) else " ".join(args),
     )
+    logger.info(
+        "Command '%s' finished in %.2f seconds with exit code %d.",
+        result.command,
+        duration,
+        result.returncode,
+    )
+    logger.debug("Command stdout:\n%s", result.stdout)
+    if result.stderr:
+        logger.debug("Command stderr:\n%s", result.stderr)
+    return result
 
 
 async def run_shell(
