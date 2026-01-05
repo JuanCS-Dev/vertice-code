@@ -14,12 +14,8 @@ Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 
 from __future__ import annotations
 
-import asyncio
-from datetime import datetime
-from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
-import httpx
 import pytest
 
 from providers import (

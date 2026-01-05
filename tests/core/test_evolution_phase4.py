@@ -9,8 +9,7 @@ References:
 """
 
 import pytest
-from datetime import datetime
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch
 
 from core.evolution.types import (
     MutationType,
@@ -1703,7 +1702,6 @@ class TestEvolutionMixinEdgeCases:
         """Test evolve when no mutation is proposed (lines 144-145)."""
         from core.evolution.mixin import EvolutionMixin
         from core.evolution.operators import BaseMutator
-        from core.evolution.types import MutationProposal
 
         class NullMutator(BaseMutator):
             def propose(self, variant):
@@ -1739,7 +1737,7 @@ class TestEvolutionTypesEdgeCases:
 
     def test_agent_variant_from_dict_with_kappa(self):
         """Test AgentVariant.from_dict with kappa_metrics (line 234)."""
-        from core.evolution.types import AgentVariant, KappaMetrics
+        from core.evolution.types import AgentVariant
         data = {
             "id": "test123",
             "parent_id": None,
@@ -2003,7 +2001,6 @@ class TestEvolutionMixinTargetReached:
     async def test_evolve_until_target_logs_when_reached(self):
         """Test evolve_until_target stops when target reached."""
         from core.evolution.mixin import EvolutionMixin
-        from core.evolution.types import EvolutionConfig
 
         class TestAgent(EvolutionMixin):
             def __init__(self):
@@ -2233,9 +2230,9 @@ class TestEvolutionMixinImprovedPath:
         from core.evolution.mixin import EvolutionMixin
         from core.evolution.types import (
             EvolutionConfig, AgentVariant, EvolutionStatus,
-            EvolutionResult, VerificationResult
+            EvolutionResult
         )
-        from unittest.mock import AsyncMock, MagicMock, patch
+        from unittest.mock import AsyncMock, patch
 
         class TestEvolvingAgent(EvolutionMixin):
             pass
@@ -2385,10 +2382,9 @@ class TestToolMutatorEmptySynergyScores:
 
     def test_propose_add_tool_empty_synergy_dict(self):
         """Test propose add tool when synergy_scores is forced empty."""
-        from unittest.mock import patch, MagicMock
+        from unittest.mock import patch
         from core.evolution.operators import ToolMutator
         from core.evolution.types import AgentVariant
-        import random
 
         # Create a dict subclass that reports empty even when not
         class EmptyLookingDict(dict):
@@ -2444,7 +2440,6 @@ class TestToolMutatorEmptySynergyScores:
         from unittest.mock import patch
         from core.evolution.operators import ToolMutator
         from core.evolution.types import AgentVariant
-        import random
 
         mutator = ToolMutator()
 
@@ -2469,10 +2464,8 @@ class TestToolMutatorEdgeCasesForce:
 
     def test_force_line_188_via_patch(self):
         """Try to force line 188 via patching loop behavior."""
-        from unittest.mock import patch, MagicMock
         from core.evolution.operators import ToolMutator
-        from core.evolution.types import AgentVariant, MutationProposal, GVUPhase, MutationType
-        import random
+        from core.evolution.types import AgentVariant
 
         mutator = ToolMutator()
 

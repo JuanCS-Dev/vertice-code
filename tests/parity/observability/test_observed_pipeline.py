@@ -14,16 +14,12 @@ import pytest
 import asyncio
 import os
 import sys
-import time
 from pathlib import Path
-from typing import Dict, Any, List
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from tests.parity.observability.pipeline_observer import (
-    PipelineObserver,
     PipelineStage,
-    PipelineTrace,
     get_observer,
     reset_observer,
 )
@@ -160,7 +156,7 @@ class TestObservedPromptProcessing:
 
         if intent_obs:
             intent_data = intent_obs.output_data
-            print(f"\n[INTENT ANALYSIS]")
+            print("\n[INTENT ANALYSIS]")
             print(f"  Classified as: {intent_data.get('intent')}")
             print(f"  Confidence: {intent_data.get('confidence', 0):.1%}")
 
@@ -177,7 +173,7 @@ class TestObservedPromptProcessing:
 
         if task_obs:
             task_data = task_obs.output_data
-            print(f"\n[TASK DECOMPOSITION ANALYSIS]")
+            print("\n[TASK DECOMPOSITION ANALYSIS]")
             print(f"  Tasks generated: {task_data.get('task_count', 0)}")
 
             # THIS IS THE BUG: Should be more than 1 for complex request
@@ -219,7 +215,7 @@ class TestObservedPromptProcessing:
         # CRITICAL: Check task decomposition
         tasks_generated = result["trace"].tasks_generated
 
-        print(f"\n[CRITICAL ANALYSIS: TASK DECOMPOSITION]")
+        print("\n[CRITICAL ANALYSIS: TASK DECOMPOSITION]")
         print(f"  Tasks found: {len(tasks_generated)}")
 
         if len(tasks_generated) == 0:
@@ -237,7 +233,7 @@ class TestObservedPromptProcessing:
         components = ["registration", "login", "password", "session"]
         components_found = [c for c in components if c in output_lower]
 
-        print(f"\n[COMPONENT COVERAGE]")
+        print("\n[COMPONENT COVERAGE]")
         print(f"  Components mentioned: {len(components_found)}/{len(components)}")
         for c in components:
             status = "✓" if c in components_found else "✗"
@@ -272,7 +268,7 @@ class TestObservedPromptProcessing:
         # Analyze tool usage
         tools_called = result["trace"].tools_called
 
-        print(f"\n[TOOL EXECUTION ANALYSIS]")
+        print("\n[TOOL EXECUTION ANALYSIS]")
         print(f"  Tools called: {len(tools_called)}")
 
         for tool in tools_called:
@@ -313,7 +309,7 @@ class TestObservedPromptProcessing:
         # Analyze thinking steps
         thinking_steps = result["trace"].thinking_steps
 
-        print(f"\n[THINKING PROCESS ANALYSIS]")
+        print("\n[THINKING PROCESS ANALYSIS]")
         print(f"  Thinking steps recorded: {len(thinking_steps)}")
 
         if thinking_steps:
@@ -333,7 +329,7 @@ class TestObservedPromptProcessing:
         ]
         markers_found = [m for m in reasoning_markers if m in output_lower]
 
-        print(f"\n[REASONING QUALITY]")
+        print("\n[REASONING QUALITY]")
         print(f"  Reasoning markers found: {len(markers_found)}")
         for m in markers_found[:5]:
             print(f"    ✓ '{m}'")
@@ -435,7 +431,7 @@ class TestObservedFailurePoints:
                 print(f"  Got: {actual}")
                 print(f"  {status} Match: {match}")
             else:
-                print(f"  ✗ No agent selection observed")
+                print("  ✗ No agent selection observed")
 
 
 class TestObservedQualityValidation:

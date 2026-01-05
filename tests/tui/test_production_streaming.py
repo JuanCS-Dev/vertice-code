@@ -12,8 +12,8 @@ Date: 2025-12-30
 from __future__ import annotations
 
 import asyncio
-from typing import AsyncIterator, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from typing import List
+from unittest.mock import AsyncMock, patch
 
 import pytest
 

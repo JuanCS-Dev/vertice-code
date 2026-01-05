@@ -18,7 +18,6 @@ Usage:
     pytest tests/e2e/test_e2e_real_llm.py -k "portuguese" -v
 """
 
-import asyncio
 import json
 import os
 import shutil

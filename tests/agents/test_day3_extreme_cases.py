@@ -8,10 +8,8 @@ Updated for v8.0 API:
 - Proper async/await patterns
 """
 import pytest
-import json
 import string
 import random
-from pathlib import Path
 from unittest.mock import MagicMock, AsyncMock
 
 from vertice_cli.agents.planner import PlannerAgent

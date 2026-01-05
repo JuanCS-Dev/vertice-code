@@ -14,7 +14,6 @@ Soli Deo Gloria
 
 import time
 import pytest
-from unittest.mock import Mock, patch
 
 # =============================================================================
 # OBSERVATION MASKER TESTS
@@ -894,14 +893,7 @@ class TestModuleExports:
     def test_masking_exports(self):
         from vertice_tui.core.context import (
             MaskingStrategy,
-            ContentType,
-            MaskingRule,
-            MaskedContent,
-            MaskingResult,
             ObservationMasker,
-            mask_observation,
-            mask_tool_output,
-            DEFAULT_RULES,
         )
 
         assert MaskingStrategy is not None
@@ -910,13 +902,7 @@ class TestModuleExports:
     def test_sliding_window_exports(self):
         from vertice_tui.core.context import (
             WindowStrategy,
-            RetentionPolicy,
-            WindowConfig,
-            WindowSlice,
-            CompressionResult,
-            Message,
             SlidingWindowCompressor,
-            get_sliding_window,
         )
 
         assert WindowStrategy is not None
@@ -924,14 +910,8 @@ class TestModuleExports:
 
     def test_thought_signatures_exports(self):
         from vertice_tui.core.context import (
-            SignatureStatus,
             ThinkingLevel,
-            ThoughtSignature,
-            SignatureValidation,
-            ReasoningContext,
             ThoughtSignatureManager,
-            get_thought_manager,
-            create_thought_signature,
         )
 
         assert ThinkingLevel is not None

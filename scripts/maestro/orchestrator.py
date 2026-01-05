@@ -1,6 +1,6 @@
 """Orchestrator - The Brain of Maestro."""
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict
 
 from vertice_cli.core.llm import LLMClient
 from vertice_cli.core.mcp_client import MCPClient

@@ -5,10 +5,6 @@ Tests REAL tool imports and structure.
 NO MOCKS - tests actual tool classes.
 """
 
-import pytest
-import tempfile
-import os
-from pathlib import Path
 
 
 # =============================================================================

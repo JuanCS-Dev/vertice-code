@@ -21,8 +21,7 @@ Following Anthropic's principle: "Resist the urge to over-engineer"
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-from pathlib import Path
+from unittest.mock import AsyncMock, MagicMock
 
 
 @pytest.fixture

@@ -13,7 +13,6 @@ Total: 10 tests
 """
 
 import pytest
-import asyncio
 from prometheus.sandbox.executor import SandboxExecutor
 
 

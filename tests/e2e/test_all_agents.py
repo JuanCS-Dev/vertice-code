@@ -12,7 +12,7 @@ Agents:
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 
 class TestOrchestratorAgentE2E:
@@ -322,7 +322,7 @@ class TestAgentInteractions:
     async def test_orchestrator_to_coder_flow(self):
         """Test full flow from orchestrator to coder."""
         from agents import OrchestratorAgent
-        from agents.orchestrator.types import Task, TaskComplexity, AgentRole
+        from agents.orchestrator.types import AgentRole
 
         orchestrator = OrchestratorAgent()
 
@@ -347,7 +347,7 @@ class TestAgentInteractions:
     async def test_orchestrator_to_reviewer_flow(self):
         """Test flow from orchestrator to reviewer."""
         from agents import OrchestratorAgent
-        from agents.orchestrator.types import Task, TaskComplexity, AgentRole
+        from agents.orchestrator.types import AgentRole
 
         orchestrator = OrchestratorAgent()
 

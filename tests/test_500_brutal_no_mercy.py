@@ -371,7 +371,7 @@ class TestExtremeValues:
             try:
                 risk = gov.detect_risk_level(prompt, "executor")
                 assert risk in ["LOW", "MEDIUM", "HIGH", "CRITICAL"], f"Failed: {desc}"
-            except Exception as e:
+            except Exception:
                 # Algumas podem crashar - isso é um air gap
                 pass
 

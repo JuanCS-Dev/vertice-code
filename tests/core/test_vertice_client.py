@@ -12,14 +12,13 @@ Follows CODE_CONSTITUTION: comprehensive tests for all public methods.
 from __future__ import annotations
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 from typing import AsyncIterator, Dict, List
 
 from vertice_core.clients.vertice_client import (
     VerticeClient,
     VerticeClientConfig,
     AllProvidersExhaustedError,
-    RateLimitError,
     DEFAULT_PRIORITY,
 )
 

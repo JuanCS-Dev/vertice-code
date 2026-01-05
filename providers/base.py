@@ -19,10 +19,9 @@ Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 from __future__ import annotations
 
 import logging
-import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict, List, Optional, AsyncGenerator, Any, Tuple
 
 import httpx
@@ -303,30 +302,30 @@ class EnhancedProviderBase(ABC):
         m = self.model_name.replace("/", "_").replace("-", "_")
 
         lines = [
-            f'# HELP provider_requests_total Total requests to provider',
-            f'# TYPE provider_requests_total counter',
+            '# HELP provider_requests_total Total requests to provider',
+            '# TYPE provider_requests_total counter',
             f'provider_requests_total{{provider="{p}",model="{m}"}} {self._stats.total_requests}',
-            f'',
-            f'# HELP provider_success_rate Success rate (0-1)',
-            f'# TYPE provider_success_rate gauge',
+            '',
+            '# HELP provider_success_rate Success rate (0-1)',
+            '# TYPE provider_success_rate gauge',
             f'provider_success_rate{{provider="{p}",model="{m}"}} {self._stats.success_rate:.4f}',
-            f'',
-            f'# HELP provider_tokens_total Total tokens used',
-            f'# TYPE provider_tokens_total counter',
+            '',
+            '# HELP provider_tokens_total Total tokens used',
+            '# TYPE provider_tokens_total counter',
             f'provider_tokens_total{{provider="{p}",model="{m}",type="input"}} {self._stats.total_input_tokens}',
             f'provider_tokens_total{{provider="{p}",model="{m}",type="output"}} {self._stats.total_output_tokens}',
             f'provider_tokens_total{{provider="{p}",model="{m}",type="cached"}} {self._stats.total_cached_tokens}',
-            f'',
-            f'# HELP provider_cost_usd_total Total cost in USD',
-            f'# TYPE provider_cost_usd_total counter',
+            '',
+            '# HELP provider_cost_usd_total Total cost in USD',
+            '# TYPE provider_cost_usd_total counter',
             f'provider_cost_usd_total{{provider="{p}",model="{m}"}} {self._stats.total_cost_usd:.6f}',
-            f'',
-            f'# HELP provider_latency_ms Average latency in milliseconds',
-            f'# TYPE provider_latency_ms gauge',
+            '',
+            '# HELP provider_latency_ms Average latency in milliseconds',
+            '# TYPE provider_latency_ms gauge',
             f'provider_latency_ms{{provider="{p}",model="{m}"}} {self._stats.avg_latency_ms:.2f}',
-            f'',
-            f'# HELP provider_rate_limit_remaining Remaining rate limit',
-            f'# TYPE provider_rate_limit_remaining gauge',
+            '',
+            '# HELP provider_rate_limit_remaining Remaining rate limit',
+            '# TYPE provider_rate_limit_remaining gauge',
             f'provider_rate_limit_remaining{{provider="{p}",type="requests"}} {self._rate_limit.requests_remaining}',
             f'provider_rate_limit_remaining{{provider="{p}",type="tokens"}} {self._rate_limit.tokens_remaining}',
         ]

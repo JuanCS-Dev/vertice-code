@@ -19,14 +19,13 @@ Requirements:
     - Sufficient API credits
 """
 
-import asyncio
 import json
 import os
 import shutil
 import tempfile
 import time
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, List
 from dataclasses import dataclass, field
 
 import pytest

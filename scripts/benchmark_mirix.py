@@ -63,7 +63,7 @@ async def amain():
         if seq_stats.get('p99_ms', 0) > 0 and conc_stats.get('p99_ms') is not None:
             improvement = ((seq_stats['p99_ms'] - conc_stats['p99_ms']) / seq_stats['p99_ms']) * 100
             report["improvement_p99_percent"] = improvement
-            print(f"\n[IMPROVEMENT]")
+            print("\n[IMPROVEMENT]")
             print(f"  p99 improved by: {improvement:.1f}%")
 
         print("\n" + "="*70)

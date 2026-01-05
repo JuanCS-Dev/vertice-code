@@ -24,7 +24,6 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from typing import Dict, Any, List, Optional
 
 import pytest
 
@@ -199,7 +198,7 @@ class TestComplexityAnalyzer:
 
     def test_complex_requests_high_complexity(self):
         """Test that complex requests trigger thinking."""
-        from vertice_cli.core.complexity_analyzer import analyze_complexity, ComplexityAnalyzer
+        from vertice_cli.core.complexity_analyzer import ComplexityAnalyzer
         from vertice_cli.core.intent_classifier import Intent
 
         # Adjust threshold for testing
@@ -425,7 +424,7 @@ class TestErrorMessages:
 
     def test_error_messages_bilingual(self):
         """Test that error messages are bilingual."""
-        from vertice_cli.core.error_messages import get_error_message, ERROR_MESSAGES
+        from vertice_cli.core.error_messages import ERROR_MESSAGES
 
         # Check that messages have both languages
         for key, messages in ERROR_MESSAGES.items():

@@ -1,12 +1,8 @@
 
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-from typing import AsyncIterator, List, Dict, Any
+from unittest.mock import AsyncMock
 
-from vertice_tui.core.chat.controller import ChatController
-from vertice_tui.core.llm_client import GeminiClient
-from memory.cortex import get_cortex, MemoryCortex
 
 
 class TestDataFlowE2E:

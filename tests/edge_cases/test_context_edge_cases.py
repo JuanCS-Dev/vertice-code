@@ -4,8 +4,6 @@ Context Window Edge Case Tests.
 Tests for edge cases in context window management.
 """
 
-import pytest
-from unittest.mock import MagicMock
 
 
 class TestContextAtLimit:

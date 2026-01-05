@@ -2,7 +2,6 @@
 import boto3
 import json
 import os
-import sys
 
 def invoke_claude_bedrock():
     print("--- Testing Claude on AWS Bedrock ---")
@@ -32,7 +31,7 @@ def invoke_claude_bedrock():
             ]
         })
         
-        print(f"Invoking...")
+        print("Invoking...")
         response = bedrock.invoke_model(
             body=body,
             modelId=model_id,
@@ -48,7 +47,7 @@ def invoke_claude_bedrock():
             if content["type"] == "text":
                 text += content["text"]
                 
-        print(f"✅ SUCCESS!")
+        print("✅ SUCCESS!")
         print(f"Response: {text}")
         return True
 

@@ -1,6 +1,5 @@
 
 import os
-import sys
 import logging
 import traceback
 
@@ -17,7 +16,7 @@ def debug_vertex_connection():
     env_location = os.getenv("VERTEX_AI_LOCATION")
     location = "us-central1"
     
-    print(f"1. ENV VARS:")
+    print("1. ENV VARS:")
     print(f"   - GOOGLE_CLOUD_PROJECT: {project_id}")
     print(f"   - VERTEX_AI_LOCATION (Raw): {env_location}")
     print(f"   - LOCATION (Forced): {location}")

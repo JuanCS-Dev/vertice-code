@@ -70,7 +70,7 @@ def input_sanitizer():
 
             # Check for URI schemes first
             if '://' in path or path.startswith('file:'):
-                raise ValueError(f"Dangerous pattern detected: URI scheme in path")
+                raise ValueError("Dangerous pattern detected: URI scheme in path")
 
             # URL decode (handles %2f, %252f, etc.)
             decoded_path = path
@@ -98,12 +98,12 @@ def input_sanitizer():
             if normalized.startswith('../') or normalized.startswith('..\\'):
                 raise ValueError(f"Path traversal detected: {path}")
             if normalized.startswith('/'):
-                raise ValueError(f"Path traversal detected: absolute path not allowed")
+                raise ValueError("Path traversal detected: absolute path not allowed")
 
             # Check for double-dot variants that try to escape
             # ....// or ....\\  means the user is trying something fishy
             if '..../' in normalized or '....\\' in normalized:
-                raise ValueError(f"Dangerous pattern detected: obfuscated traversal")
+                raise ValueError("Dangerous pattern detected: obfuscated traversal")
 
             # Resolve to absolute path and verify containment
             resolved = (allowed_base / path).resolve()

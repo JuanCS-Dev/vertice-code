@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -26,7 +26,6 @@ from core.resilience import (
     RateLimitConfig,
     TokenBucket,
     FallbackHandler,
-    FallbackConfig,
     ResilienceMixin,
     ErrorCategory,
     TransientError,

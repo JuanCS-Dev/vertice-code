@@ -27,11 +27,9 @@ SEM MOCKS. EXECUCAO REAL. OBSERVABILIDADE TOTAL.
 """
 import asyncio
 import sys
-import os
-from pathlib import Path
 from datetime import datetime
-from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional, Tuple
+from dataclasses import dataclass
+from typing import List, Dict, Optional, Tuple
 from enum import Enum
 import traceback
 
@@ -373,13 +371,13 @@ class TestesE2ECompletos:
         print(f"{'='*70}")
 
         # 1. MOSTRAR PROMPT
-        print(f"\n📥 PROMPT ENVIADO:")
+        print("\n📥 PROMPT ENVIADO:")
         print(f"   {config['prompt'][:200]}{'...' if len(config['prompt']) > 200 else ''}")
         print(f"\n🎯 O QUE PEDIMOS: {config['pede']}")
         print(f"📋 CRITERIOS ESPERADOS: {config['criterios']}")
 
         # 2. INVOCAR AGENTE (REAL)
-        print(f"\n⏳ Invocando agente via AgentManager...")
+        print("\n⏳ Invocando agente via AgentManager...")
         output, chunks, tempo = await self.invocar_agente_observavel(agente, config["prompt"])
 
         # 3. MOSTRAR OUTPUT
@@ -403,7 +401,7 @@ class TestesE2ECompletos:
         )
 
         # 5. MOSTRAR ANALISE
-        print(f"\n📊 ANALISE:")
+        print("\n📊 ANALISE:")
         print(f"   O que foi pedido: {obs.o_que_foi_pedido}")
         print(f"   O que foi entregue: {obs.o_que_foi_entregue}")
         print(f"   Criterios atendidos: {obs.criterios_atendidos}")
@@ -462,7 +460,7 @@ class TestesE2ECompletos:
         sucesso = excelente + bom
         taxa = (sucesso / total * 100) if total > 0 else 0
 
-        print(f"\n📊 RESUMO FINAL:")
+        print("\n📊 RESUMO FINAL:")
         print(f"   🏆 EXCELENTE: {excelente:>3}")
         print(f"   ✅ BOM:       {bom:>3}")
         print(f"   ⚠️  PARCIAL:   {contagem[Veredicto.PARCIAL]:>3}")

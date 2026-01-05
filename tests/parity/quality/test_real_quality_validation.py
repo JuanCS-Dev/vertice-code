@@ -21,7 +21,7 @@ import time
 import re
 import ast
 from pathlib import Path
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List
 from dataclasses import dataclass
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
@@ -697,7 +697,7 @@ class TestComprehensiveQuality:
             request, "code", expected
         )
 
-        print(f"\n[QUALITY] COMPREHENSIVE TEST")
+        print("\n[QUALITY] COMPREHENSIVE TEST")
         if result['quality_score']:
             for key, value in result['quality_score'].to_dict().items():
                 print(f"  {key}: {value:.1%}")
@@ -725,7 +725,7 @@ class TestComprehensiveQuality:
             request, "code", expected
         )
 
-        print(f"\n[QUALITY] Error handling test")
+        print("\n[QUALITY] Error handling test")
         if result['quality_score']:
             print(f"  Correctness: {result['quality_score'].correctness:.1%}")
 

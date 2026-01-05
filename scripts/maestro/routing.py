@@ -5,7 +5,6 @@ Phase 10.3: Expanded Portuguese keyword coverage for all agents.
 """
 
 import unicodedata
-from typing import Optional, List
 
 
 def normalize_text(text: str) -> str:

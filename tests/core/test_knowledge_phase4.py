@@ -11,7 +11,7 @@ References:
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from pathlib import Path
 import tempfile
 
@@ -2008,7 +2008,7 @@ class TestRetrieverSelfRAG:
         from core.knowledge.embedder import HybridEmbedder
         from core.knowledge.graph import KnowledgeGraph
         from core.knowledge.types import (
-            RetrievalQuery, RetrievalStrategy, KnowledgeConfig, DocumentChunk
+            RetrievalQuery, KnowledgeConfig, DocumentChunk
         )
 
         config = KnowledgeConfig(
@@ -2049,7 +2049,6 @@ class TestRetrieverUnknownStrategy:
 
     def test_unknown_strategy_fallback(self):
         """Test that unknown strategy falls back to hybrid (line 121)."""
-        from unittest.mock import patch, MagicMock
         from core.knowledge.retriever import GraphRetriever
         from core.knowledge.embedder import HybridEmbedder
         from core.knowledge.types import RetrievalQuery, KnowledgeConfig, DocumentChunk
@@ -2078,7 +2077,6 @@ class TestRetrieverMultiHopWithMocking:
 
     def test_multi_hop_processes_neighbor_chunks(self):
         """Test _multi_hop_retrieve processes neighbor chunks correctly."""
-        from unittest.mock import patch, MagicMock
         from core.knowledge.retriever import GraphRetriever
         from core.knowledge.embedder import HybridEmbedder
         from core.knowledge.graph import KnowledgeGraph
@@ -2132,7 +2130,6 @@ class TestRetrieverMultiHopWithMocking:
 
     def test_multi_hop_full_path_coverage(self):
         """Test multi-hop with full path to lines 281-297."""
-        from unittest.mock import patch
         from core.knowledge.retriever import GraphRetriever
         from core.knowledge.embedder import HybridEmbedder
         from core.knowledge.graph import KnowledgeGraph

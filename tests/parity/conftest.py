@@ -3,10 +3,8 @@ Pytest fixtures for parity test suite.
 """
 
 import asyncio
-import json
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 # -----------------------------------------------------------------------------
@@ -392,7 +390,7 @@ class MockRouter:
                     if cb:
                         cb.record_success()
                     return result
-            except Exception as e:
+            except Exception:
                 if cb:
                     cb.record_failure()
                 continue

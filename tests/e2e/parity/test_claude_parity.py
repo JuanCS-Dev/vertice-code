@@ -14,7 +14,7 @@ Commands tested (Part 3 - Plan Mode):
 """
 
 import pytest
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import MagicMock, AsyncMock
 
 
 class TestClaudeParityHandler:

@@ -22,7 +22,7 @@ import logging
 import threading
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Type
 
 logger = logging.getLogger(__name__)
 

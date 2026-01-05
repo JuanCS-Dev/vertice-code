@@ -14,7 +14,7 @@ import sys
 import os
 from pathlib import Path
 from datetime import datetime
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
 from enum import Enum
 
@@ -183,7 +183,7 @@ class TesteE2EReal:
         elif veredicto == Veredicto.RUIM:
             justificativa = f"Encontrou apenas {len(encontrado)}/{len(esperado)} critérios. Precisa de correções."
         else:
-            justificativa = f"Falha total. Nenhum critério atendido ou output vazio/erro."
+            justificativa = "Falha total. Nenhum critério atendido ou output vazio/erro."
 
         # Criar resumo do output
         if len(output) > 500:
@@ -479,7 +479,7 @@ class TesteE2EReal:
             linhas.append(f"💬 JUSTIFICATIVA: {r.justificativa}")
 
             # O que foi esperado vs encontrado
-            linhas.append(f"\n📊 ANÁLISE DE CRITÉRIOS:")
+            linhas.append("\n📊 ANÁLISE DE CRITÉRIOS:")
             linhas.append(f"   Esperado: {r.esperado}")
             linhas.append(f"   Encontrado: {r.encontrado}")
             if r.nao_encontrado:
@@ -487,24 +487,24 @@ class TesteE2EReal:
 
             # Pontos positivos
             if r.pontos_positivos:
-                linhas.append(f"\n✨ PONTOS POSITIVOS:")
+                linhas.append("\n✨ PONTOS POSITIVOS:")
                 for p in r.pontos_positivos:
                     linhas.append(f"   • {p}")
 
             # Pontos negativos
             if r.pontos_negativos:
-                linhas.append(f"\n⚠️  PONTOS NEGATIVOS:")
+                linhas.append("\n⚠️  PONTOS NEGATIVOS:")
                 for p in r.pontos_negativos:
                     linhas.append(f"   • {p}")
 
             # Sugestões
             if r.sugestoes_melhoria:
-                linhas.append(f"\n💡 SUGESTÕES DE MELHORIA:")
+                linhas.append("\n💡 SUGESTÕES DE MELHORIA:")
                 for s in r.sugestoes_melhoria:
                     linhas.append(f"   • {s}")
 
             # Output resumido
-            linhas.append(f"\n📄 OUTPUT (resumo):")
+            linhas.append("\n📄 OUTPUT (resumo):")
             linhas.append("   " + "-" * 60)
             for linha in r.output_resumo.split("\n")[:15]:
                 linhas.append(f"   {linha}")

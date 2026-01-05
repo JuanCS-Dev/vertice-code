@@ -117,8 +117,7 @@ class JulesAgent(BaseAgent):
 
         return AgentResponse(
             success=(
-                final_session is not None
-                and final_session.state == JulesSessionState.COMPLETED
+                final_session is not None and final_session.state == JulesSessionState.COMPLETED
             ),
             data={
                 "output": "".join(chunks),
@@ -196,9 +195,7 @@ class JulesAgent(BaseAgent):
                         approved = await self._handle_plan_approval(session)
 
                         if approved:
-                            session = await self.jules_client.approve_plan(
-                                session.session_id
-                            )
+                            session = await self.jules_client.approve_plan(session.session_id)
                             self._active_session = session
                             yield StreamingChunk(
                                 type=StreamingChunkType.STATUS,
@@ -307,9 +304,7 @@ class JulesAgent(BaseAgent):
             logger.warning("No active session to send message to")
             return None
 
-        session = await self.jules_client.send_message(
-            self._active_session.session_id, message
-        )
+        session = await self.jules_client.send_message(self._active_session.session_id, message)
         self._active_session = session
         return session
 
@@ -320,9 +315,7 @@ class JulesAgent(BaseAgent):
             return None
 
         if self._active_session.state != JulesSessionState.AWAITING_PLAN_APPROVAL:
-            logger.warning(
-                f"Session not awaiting approval (state: {self._active_session.state})"
-            )
+            logger.warning(f"Session not awaiting approval (state: {self._active_session.state})")
             return None
 
         session = await self.jules_client.approve_plan(self._active_session.session_id)

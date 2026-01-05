@@ -1,7 +1,6 @@
 import pytest
 import asyncio
 from pathlib import Path
-from typing import List, Dict, Any
 from unittest.mock import MagicMock, AsyncMock
 
 from vertice_tui.core.agents.manager import AgentManager

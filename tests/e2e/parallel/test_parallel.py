@@ -13,7 +13,6 @@ import pytest
 import asyncio
 import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, AsyncMock
 
 
 class TestParallelToolExecution:

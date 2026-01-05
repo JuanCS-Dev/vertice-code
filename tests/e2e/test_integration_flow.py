@@ -4,8 +4,6 @@ from unittest.mock import AsyncMock, MagicMock
 
 # Mocked components
 from vertice_tui.core.chat.controller import ChatController
-from vertice_tui.core.llm_client import GeminiClient
-from memory.cortex import MemoryCortex
 from vertice_tui.core.tools_bridge import ToolBridge
 
 @pytest.mark.asyncio

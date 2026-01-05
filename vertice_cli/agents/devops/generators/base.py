@@ -8,7 +8,6 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict
 
 
-
 class BaseGenerator(ABC):
     """Abstract base class for infrastructure generators."""
 

@@ -11,12 +11,10 @@ Phase 10: Sprint 3 - Code Intelligence
 Soli Deo Gloria
 """
 
-import asyncio
 import os
 import tempfile
 import pytest
 from pathlib import Path
-from typing import List
 
 # Import all Sprint 3 components
 from vertice_core.code import (
@@ -31,25 +29,19 @@ from vertice_core.code import (
     HoverInfo,
     CompletionItem,
     LanguageServerConfig,
-    LSPClient,
     DEFAULT_LANGUAGE_SERVERS,
     # AST Editor
     NodeContext,
     CodeLocation,
     CodeMatch,
-    CodeSymbol,
-    EditResult,
     ASTEditor,
     get_ast_editor,
     LANGUAGE_CONFIGS,
-    TREE_SITTER_AVAILABLE,
-    # Validator
     ValidationLevel,
     CheckType,
     Check,
     ValidationResult,
     EditValidation,
-    FileBackup,
     CodeValidator,
 )
 

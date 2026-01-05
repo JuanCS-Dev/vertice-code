@@ -7,14 +7,12 @@ detailed diagnostics on WHERE and WHY the system fails.
 This is NOT a mock - this observes REAL execution.
 """
 
-import asyncio
 import time
 import json
 import traceback
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Callable, AsyncIterator
+from typing import Any, Dict, List, Optional, Callable
 from enum import Enum
-from datetime import datetime
 from pathlib import Path
 import sys
 

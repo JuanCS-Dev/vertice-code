@@ -13,11 +13,9 @@ Targets:
 from __future__ import annotations
 
 import json
-import tempfile
-import asyncio
 from pathlib import Path
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -454,7 +452,6 @@ class TestDarwinGodelFullCoverage:
     def test_get_evolution_stats(self, tmp_path):
         """Test get_evolution_stats returns correct stats."""
         from agents.coder.darwin_godel import DarwinGodelMixin
-        from agents.coder.types import EvolutionResult
 
         class TestAgent(DarwinGodelMixin):
             SYSTEM_PROMPT = "Test"
@@ -2791,7 +2788,6 @@ class TestAdditionalCoverage:
     async def test_deep_think_no_validated_findings(self):
         """Test deep_think_review when no findings pass validation."""
         from agents.reviewer.deep_think import DeepThinkMixin
-        from agents.reviewer.types import ReviewSeverity
 
         class TestAgent(DeepThinkMixin):
             SECURITY_CHECKS = []
@@ -3254,7 +3250,7 @@ class TestAdditionalCoverage:
     async def test_execute_remediation_not_found(self):
         """Test execute_remediation with invalid remediation_id (line 343)."""
         from agents.devops.incident_handler import IncidentHandlerMixin
-        from agents.devops.types import Alert, Incident, IncidentSeverity, IncidentStatus
+        from agents.devops.types import Incident, IncidentSeverity, IncidentStatus
 
         class TestAgent(IncidentHandlerMixin):
             pass
@@ -3347,7 +3343,6 @@ class TestAdditionalCoverage:
 
     def test_run_test_code_cleanup_exception(self, tmp_path, monkeypatch):
         """Test _run_test_code handles cleanup exception (lines 334-335)."""
-        from pathlib import Path
         from agents.coder.darwin_godel import DarwinGodelMixin
 
         class TestAgent(DarwinGodelMixin):

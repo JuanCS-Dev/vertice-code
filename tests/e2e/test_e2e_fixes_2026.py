@@ -12,8 +12,6 @@ Date: 2026-01-01
 """
 
 import pytest
-import asyncio
-from typing import Dict, Any
 from unittest.mock import AsyncMock, MagicMock
 
 # Import agents
@@ -21,7 +19,7 @@ from vertice_cli.agents.testing import TestingAgent
 from vertice_cli.agents.reviewer import ReviewerAgent
 from vertice_cli.agents.documentation import DocumentationAgent
 from vertice_cli.agents.explorer import ExplorerAgent
-from vertice_cli.agents.base import AgentTask, AgentResponse
+from vertice_cli.agents.base import AgentTask
 
 
 # =============================================================================
@@ -159,7 +157,7 @@ Make sure to test edge cases too."""
         assert any(term in result_str for term in ["test", "assert", "calculate_sum"]), \
             f"FIX FAILED: Response doesn't contain tests. Got: {response.data}"
 
-        print(f"✓ Testing Agent processed inline code correctly")
+        print("✓ Testing Agent processed inline code correctly")
         print(f"  Reasoning: {response.reasoning}")
 
     @pytest.mark.asyncio
@@ -264,7 +262,7 @@ class MyClass:
         assert any(term in result_str for term in ["review", "issue", "code", "function"]), \
             f"FIX FAILED: No meaningful review. Got: {response.data}"
 
-        print(f"✓ Reviewer handled large code correctly")
+        print("✓ Reviewer handled large code correctly")
         print(f"  Reasoning: {response.reasoning}")
 
     @pytest.mark.asyncio
@@ -339,7 +337,7 @@ def fibonacci(n):
             assert "inline" in source.lower() or response.data.get("documentation"), \
                 "FIX FAILED: Should indicate inline code was used"
 
-        print(f"✓ Documentation Agent processed inline code")
+        print("✓ Documentation Agent processed inline code")
         print(f"  Reasoning: {response.reasoning}")
 
 
@@ -391,7 +389,7 @@ class TestExplorerAgentE2E:
             print(f"  Example snippet from {example['path']}:")
             print(f"    {example['snippet'][:100]}...")
 
-        print(f"✓ Explorer returned results")
+        print("✓ Explorer returned results")
         print(f"  Summary: {response.data.get('context_summary', 'N/A')}")
 
     @pytest.mark.asyncio
@@ -423,7 +421,7 @@ class TestExplorerAgentE2E:
         # que se usasse só a primeira
         assert len(relevant_files) >= 1, "Deep search should find files"
 
-        print(f"✓ Deep search executed")
+        print("✓ Deep search executed")
 
 
 # =============================================================================
@@ -442,7 +440,6 @@ class TestSkillRegistryE2E:
         """
         from prometheus.core.skill_registry import (
             validate_skills,
-            is_valid_skill,
             VALID_SKILLS,
             suggest_similar_skill
         )
@@ -469,13 +466,13 @@ class TestSkillRegistryE2E:
         assert suggestion is not None, "Should suggest similar skill"
         assert "python" in suggestion, f"Suggestion should contain 'python': {suggestion}"
 
-        print(f"✓ Skill Registry validates correctly")
+        print("✓ Skill Registry validates correctly")
         print(f"  Total valid skills: {len(VALID_SKILLS)}")
         print(f"  Suggestion for 'python': {suggestion}")
 
     def test_skill_normalization(self):
         """Test skill name normalization."""
-        from prometheus.core.skill_registry import normalize_skill, is_valid_skill
+        from prometheus.core.skill_registry import normalize_skill
 
         # Test aliases
         assert normalize_skill("python") == "python_basics"
@@ -486,7 +483,7 @@ class TestSkillRegistryE2E:
         assert normalize_skill("Python-Basics") == "python_basics"
         assert normalize_skill("ASYNC PROGRAMMING") == "async_programming"
 
-        print(f"✓ Skill normalization works correctly")
+        print("✓ Skill normalization works correctly")
 
 
 # =============================================================================
@@ -504,7 +501,7 @@ class TestTemperatureConfigE2E:
         - Generation tasks: 0.3-0.5 (creative)
         - Exploration tasks: 0.2-0.3 (balanced)
         """
-        from vertice_cli.core.temperature_config import get_temperature, TEMPERATURE_CONFIG
+        from vertice_cli.core.temperature_config import get_temperature
 
         # Analysis tasks should be low (deterministic)
         assert get_temperature("reviewer") <= 0.2, "Reviewer should be deterministic"
@@ -517,7 +514,7 @@ class TestTemperatureConfigE2E:
         # Exploration tasks should be balanced
         assert 0.1 <= get_temperature("explorer") <= 0.3, "Explorer should be balanced"
 
-        print(f"✓ Temperature config follows best practices")
+        print("✓ Temperature config follows best practices")
         print(f"  Reviewer: {get_temperature('reviewer')}")
         print(f"  Coder: {get_temperature('coder')}")
         print(f"  Explorer: {get_temperature('explorer')}")
@@ -554,7 +551,7 @@ class TestOutputValidatorE2E:
         text4 = '{"outer": {"inner": "value"}}'
         assert is_valid_json(text4)
 
-        print(f"✓ JSON extraction handles all formats")
+        print("✓ JSON extraction handles all formats")
 
     def test_validates_against_schema(self):
         """Test schema validation works."""
@@ -575,7 +572,7 @@ class TestOutputValidatorE2E:
         assert result.decision == ReviewDecision.APPROVED
         assert result.success == True
 
-        print(f"✓ Schema validation works")
+        print("✓ Schema validation works")
 
 
 # =============================================================================
@@ -606,7 +603,7 @@ class TestGroundingPromptsE2E:
         assert "inline" in INLINE_CODE_PRIORITY.lower(), \
                "Missing inline code instruction"
 
-        print(f"✓ Grounding prompts are properly defined")
+        print("✓ Grounding prompts are properly defined")
         print(f"  GROUNDING_INSTRUCTION length: {len(GROUNDING_INSTRUCTION)}")
         print(f"  INLINE_CODE_PRIORITY length: {len(INLINE_CODE_PRIORITY)}")
 

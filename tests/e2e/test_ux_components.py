@@ -10,7 +10,6 @@ These tests validate the components work correctly before integration.
 """
 
 import pytest
-from unittest.mock import MagicMock, patch
 
 
 # =============================================================================
@@ -102,7 +101,6 @@ Line 3"""
         """Test command input detection."""
         result = enhancer.enhance("/help")
 
-        from vertice_cli.core.input_enhancer import InputType
         # Commands should be detected
         assert result is not None
 

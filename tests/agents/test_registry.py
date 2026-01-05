@@ -10,9 +10,8 @@ Date: 2025-12-31
 
 from __future__ import annotations
 
-import pytest
 
-from vertice_agents import AgentRegistry, get_agent, list_agents
+from vertice_agents import AgentRegistry, list_agents
 from vertice_agents.registry import AgentSource, AgentInfo
 
 

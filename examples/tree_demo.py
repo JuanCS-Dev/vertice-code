@@ -79,7 +79,7 @@ def main():
         else:
             print(f"{COLORS['dim']}Not a git repository{COLORS['reset']}")
 
-    except Exception as e:
+    except Exception:
         print(f"{COLORS['dim']}Git not available{COLORS['reset']}")
 
     # Demo 4: Filter patterns

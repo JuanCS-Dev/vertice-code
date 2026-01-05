@@ -204,7 +204,7 @@ class TestPathTraversal:
                         component="tools/file_ops.py:ReadFileTool",
                         persona="SCRIPT_KID"
                     )
-            except Exception as e:
+            except Exception:
                 # Exception is good - means it was caught
                 pass
 

@@ -9,8 +9,7 @@ Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 from __future__ import annotations
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-from typing import Any, Dict, List, Optional
+from unittest.mock import MagicMock, patch
 
 
 # =============================================================================

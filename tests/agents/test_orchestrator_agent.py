@@ -6,14 +6,12 @@ Tests the Anthropic Orchestrator-Worker pattern implementation.
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from agents.orchestrator.agent import OrchestratorAgent
 from agents.orchestrator.types import (
     AgentRole,
     Task,
     TaskComplexity,
-    AutonomyLevel,
 )
 
 

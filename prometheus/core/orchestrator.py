@@ -246,7 +246,6 @@ class PrometheusOrchestrator:
         plan: Optional[Any] = None,
     ) -> str:
         """Execute the main task with all context."""
-        import re
 
         # Check if task contains a plan with code blocks - DIRECT EXTRACTION MODE
         has_code_blocks = "```" in task

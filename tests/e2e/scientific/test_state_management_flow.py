@@ -15,8 +15,8 @@ import pytest
 import asyncio
 import time
 from enum import Enum, auto
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, field
+from typing import Dict, List, Any
+from dataclasses import dataclass
 
 
 # =============================================================================

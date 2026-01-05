@@ -11,7 +11,6 @@ Routes requests to the optimal LLM provider based on:
 
 from __future__ import annotations
 
-import os
 import asyncio
 from typing import Dict, List, Optional, AsyncGenerator, Protocol, Any
 from dataclasses import dataclass, field
@@ -178,7 +177,7 @@ class VerticeRouter:
             logger.error(f"❌ Failed to initialize Vertex AI: {e}")
 
         self._initialized = True
-        logger.info(f"Vertice Router initialized (vertex-ai only mode)")
+        logger.info("Vertice Router initialized (vertex-ai only mode)")
 
     def _init_provider_on_demand(self, name: str) -> bool:
         """Initialize a specific provider on demand (for /model command).

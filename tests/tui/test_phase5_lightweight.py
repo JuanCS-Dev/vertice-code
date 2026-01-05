@@ -16,7 +16,6 @@ Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 from __future__ import annotations
 
 import pytest
-from typing import Any, Dict, List
 
 
 # =============================================================================

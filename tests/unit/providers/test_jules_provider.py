@@ -10,7 +10,6 @@ Tests API client functionality including:
 
 from __future__ import annotations
 
-import asyncio
 from datetime import datetime
 from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -22,7 +21,6 @@ from vertice_cli.core.providers.jules_provider import (
     JulesClientError,
     JulesAuthError,
     JulesRateLimitError,
-    JulesSessionError,
     get_jules_client,
 )
 from vertice_core.types.jules_types import (

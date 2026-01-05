@@ -1,7 +1,5 @@
 
 import pytest
-import asyncio
-from textual.app import App
 from vertice_tui.app import QwenApp
 from vertice_tui.widgets.response_view import ResponseView
 from textual.widgets import Input

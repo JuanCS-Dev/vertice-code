@@ -36,7 +36,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 
 # =============================================================================
@@ -943,8 +943,8 @@ def generate_report(report: ValidationReport) -> str:
         "",
         "## Summary",
         "",
-        f"| Metric | Value |",
-        f"|--------|-------|",
+        "| Metric | Value |",
+        "|--------|-------|",
         f"| Total Checks | {len(report.results)} |",
         f"| Passed | {report.passed_checks} |",
         f"| Failed | {report.failed_checks} |",

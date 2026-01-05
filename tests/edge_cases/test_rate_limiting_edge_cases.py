@@ -6,8 +6,7 @@ Tests for edge cases in rate limiting and API error handling.
 
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 class TestRetryAfterHeader:

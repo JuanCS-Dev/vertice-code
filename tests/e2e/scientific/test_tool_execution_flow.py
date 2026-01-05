@@ -15,9 +15,7 @@ Tests cover:
 import pytest
 import asyncio
 import tempfile
-import os
 from pathlib import Path
-from unittest.mock import MagicMock, AsyncMock, patch
 
 
 # =============================================================================

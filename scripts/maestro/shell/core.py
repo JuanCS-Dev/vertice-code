@@ -1,6 +1,5 @@
 "Core Shell definition."
 import time
-import asyncio
 from typing import Optional
 from pathlib import Path
 from rich.console import Console

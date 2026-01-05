@@ -15,8 +15,7 @@ Soli Deo Gloria
 """
 
 import pytest
-from typing import Dict, Any, List
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import MagicMock, patch
 
 
 # =============================================================================
@@ -362,7 +361,7 @@ class TestPerformance:
 
     def test_widget_render_is_fast(self):
         """Test widget rendering is fast."""
-        from vertice_tui.widgets.token_meter import TokenMeter, MiniTokenMeter
+        from vertice_tui.widgets.token_meter import TokenMeter
         import time
         
         meter = TokenMeter()

@@ -17,7 +17,7 @@ import os
 import sys
 import time
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, List
 from dataclasses import dataclass
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
@@ -442,7 +442,7 @@ class TestPerformanceBenchmarks:
 
         result = await stress_tester.run_concurrent(messages, max_concurrent=2)
 
-        print(f"\n[LATENCY] Distribution:")
+        print("\n[LATENCY] Distribution:")
         print(f"  Average: {result.avg_latency_ms:.0f}ms")
         print(f"  P95: {result.p95_latency_ms:.0f}ms")
         print(f"  P99: {result.p99_latency_ms:.0f}ms")

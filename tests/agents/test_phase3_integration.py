@@ -2515,7 +2515,7 @@ class TestMetacognitionMixinFullCoverage:
 
     def test_should_continue_abort(self):
         """Cover line 108: should_continue with ABORT outcome using mock."""
-        from unittest.mock import patch, MagicMock
+        from unittest.mock import patch
         from core.metacognition import MetaCognitiveMixin, ReflectionOutcome, ReflectionResult, ReflectionLevel
 
         class TestAgent(MetaCognitiveMixin):
@@ -2649,7 +2649,7 @@ class TestProtocolsMixinFullCoverage:
     @pytest.mark.asyncio
     async def test_process_task_with_exception(self):
         """Cover lines 184-190: process_task exception handling in BASE class."""
-        from unittest.mock import patch, MagicMock, PropertyMock
+        from unittest.mock import patch
         from core.protocols import A2AProtocolMixin, TaskStatus, MessageRole
 
         class TestAgent(A2AProtocolMixin):

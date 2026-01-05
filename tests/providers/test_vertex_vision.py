@@ -16,9 +16,8 @@ References:
 from __future__ import annotations
 
 import base64
-import json
-from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from typing import Any, Dict, List
+from unittest.mock import MagicMock, patch
 
 import pytest
 

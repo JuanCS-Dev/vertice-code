@@ -15,19 +15,13 @@ Soli Deo Gloria
 
 import asyncio
 import pytest
-import time
-from typing import Any, AsyncIterator, Dict, List
 
 # Import all Sprint 2 components
 from vertice_core.agents import (
     # Context
     ContextState,
     DecisionType,
-    Decision,
-    ErrorContext,
-    FileContext,
     ExecutionResult,
-    ThoughtSignature,
     UnifiedContext,
     get_context,
     set_context,
@@ -41,29 +35,16 @@ from vertice_core.agents import (
     DEFAULT_ROUTES,
     # Orchestrator
     OrchestratorState,
-    HandoffType,
-    StateTransition,
     ExecutionStep,
     ExecutionPlan,
-    Handoff,
     ActiveOrchestrator,
-    orchestrate,
-    # Handoff
     HandoffStatus,
     HandoffReason,
-    AgentCapability,
-    HandoffRequest,
-    HandoffResult,
-    EscalationChain,
     HandoffManager,
     handoff,
-    DEFAULT_CAPABILITIES,
-    # Compaction
     CompactionStrategy,
     CompactionConfig,
-    CompactionResult,
     ContextCompactor,
-    auto_compact,
 )
 
 

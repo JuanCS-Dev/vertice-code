@@ -12,14 +12,13 @@ Source: NLU_OPTIMIZATION_PLAN.md Phase 11
 """
 
 import pytest
-import asyncio
 
 from vertice_cli.core.intent_classifier import (
     SemanticIntentClassifier,
     Intent,
     normalize_text,
 )
-from vertice_cli.core.request_amplifier import RequestAmplifier, AmplifiedRequest
+from vertice_cli.core.request_amplifier import RequestAmplifier
 from vertice_cli.core.complexity_analyzer import ComplexityAnalyzer, analyze_complexity
 from scripts.maestro.routing import route_to_agent
 

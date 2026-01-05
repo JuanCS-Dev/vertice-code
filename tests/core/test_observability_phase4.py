@@ -10,8 +10,7 @@ References:
 
 import pytest
 import time
-from datetime import datetime
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch, MagicMock
 
 from core.observability.types import (
     SpanKind,
@@ -1317,7 +1316,6 @@ class TestEdgeCases:
     def test_span_exporter_export_interval(self, tmp_path):
         """Test export flush based on time interval."""
         from core.observability.exporter import SpanExporter
-        import time
 
         exporter = SpanExporter(export_path=tmp_path / "spans.json")
         exporter._config.export_interval_seconds = 0  # Force immediate flush
@@ -1483,7 +1481,6 @@ class TestSpanExporterOTLPResponse:
         """Test OTLP export handles non-200 response."""
         from core.observability.exporter import SpanExporter
         from core.observability.types import ObservabilityConfig
-        from unittest.mock import patch, MagicMock
 
         config = ObservabilityConfig(otlp_endpoint="http://localhost:4318")
         exporter = SpanExporter(config=config)
@@ -1503,7 +1500,6 @@ class TestSpanExporterOTLPResponse:
         """Test OTLP export succeeds with 200 response."""
         from core.observability.exporter import SpanExporter
         from core.observability.types import ObservabilityConfig
-        from unittest.mock import patch, MagicMock
 
         config = ObservabilityConfig(otlp_endpoint="http://localhost:4318")
         exporter = SpanExporter(config=config)

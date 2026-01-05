@@ -246,9 +246,7 @@ class JulesMonitorWidget(Widget):
             "CANCELLED": ("red", "state-failed", "Cancelled"),
         }
 
-        color, cls, label = state_config.get(
-            self.session_state, ("white", "", self.session_state)
-        )
+        color, cls, label = state_config.get(self.session_state, ("white", "", self.session_state))
 
         icon = {
             "QUEUED": "",
