@@ -147,7 +147,7 @@
 - **Solução**:
   - `lift_suspension(agent_id, auth_context)` requer `AuthorizationContext`
   - Verifica nível de autorização (ADMIN required)
-  - `lift_suspension_unsafe()` deprecated com DeprecationWarning
+  - `lift_suspension_unsafe()` removido completamente. Apenas `lift_suspension()` com `AuthorizationContext` é permitido.
   - Audit trail registrado para todas operações
 - **Data**: 2026-01-01 (sessão anterior)
 

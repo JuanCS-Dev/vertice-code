@@ -344,39 +344,6 @@ class TrustEngine:
 
         return True
 
-    def lift_suspension_unsafe(self, agent_id: str, reason: str = "Manual lift") -> bool:
-        """
-        DEPRECATED: Remove suspensao sem autorizacao.
-
-        WARNING: This method bypasses authorization checks.
-        Use lift_suspension(agent_id, auth_context) instead.
-        """
-        warnings.warn(
-            "lift_suspension_unsafe() is deprecated. Use lift_suspension() with AuthorizationContext.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-        trust_factor = self.get_trust_factor(agent_id)
-        if trust_factor is None or not trust_factor.is_suspended:
-            return False
-
-        trust_factor.is_suspended = False
-        trust_factor.suspension_reason = None
-        trust_factor.suspension_until = None
-
-        event = TrustEvent(
-            event_type="suspension_lifted",
-            severity=Severity.HIGH,
-            impact=0,
-            description=f"[UNSAFE] Suspensao removida sem autorizacao: {reason}",
-            context={"unsafe_operation": True},
-        )
-        trust_factor.events.append(event)
-
-        logger.warning(f"[UNSAFE] Suspension lifted without authorization for {agent_id}")
-        return True
-
     def apply_temporal_decay(self, agent_id: str) -> float:
         """
         Aplica decaimento temporal as violacoes antigas.
