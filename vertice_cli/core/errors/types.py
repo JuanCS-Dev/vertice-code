@@ -55,13 +55,43 @@ class Recovery:
 
 
 class UnrecoverableError(Exception):
-    """Error that cannot be recovered from."""
+    """
+    Raised when an operation fails with a non-transient error.
+
+    This exception signals that further retry attempts for the same operation
+    are futile, as the underlying cause is not expected to resolve on its own
+    (e.g., invalid API key, malformed request, authentication failure).
+
+    When to raise:
+      - After exhausting all retry and fallback strategies.
+      - When a validation error makes the request permanently invalid.
+
+    How to handle:
+      - Log the error for debugging.
+      - Terminate the current workflow gracefully.
+      - Escalate to a human for manual intervention.
+    """
 
     pass
 
 
 class CircuitOpenError(Exception):
-    """Raised when attempting to call through an open circuit."""
+    """
+    Raised when an operation is blocked by an open circuit breaker.
+
+    This indicates that the associated service has been deemed unavailable due
+    to a high rate of recent failures. The circuit breaker is intentionally
+    preventing new requests to allow the downstream service time to recover.
+
+    When to raise:
+      - By a circuit breaker implementation before executing a guarded call.
+
+    How to handle:
+      - Immediately route the request to a fallback provider, if available.
+      - If no fallback exists, fail fast and inform the user.
+      - Do not retry the same operation against the same provider until the
+        circuit transitions to half-open or closed.
+    """
 
     pass
 
