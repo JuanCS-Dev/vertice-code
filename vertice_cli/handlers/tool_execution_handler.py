@@ -176,7 +176,8 @@ class ToolExecutionHandler:
             self.conversation.transition_state(ConversationState.IDLE, "text_response_only")
             return response_text
 
-        except Exception as e:
+        except (ValueError, TypeError, AttributeError) as e:
+            logger.error("Error processing tool calls", exc_info=True)
             # Mark error in turn
             turn.error = str(e)
             turn.error_category = "system"
@@ -185,7 +186,7 @@ class ToolExecutionHandler:
             self.conversation.transition_state(
                 ConversationState.ERROR, f"exception: {type(e).__name__}"
             )
-            return f"Error: {str(e)}"
+            return f"Error processing tool request: {e}"
 
     async def execute_tool_calls(self, tool_calls: List[Dict[str, Any]], turn) -> str:
         """
@@ -341,8 +342,9 @@ Please generate corrected tool calls to fix these errors.
                             "[yellow]Could not generate corrected tool calls[/yellow]"
                         )
                         break
-                except Exception as e:
-                    logger.error(f"Self-correction failed: {e}")
+                except (ValueError, json.JSONDecodeError) as e:
+                    logger.error("Self-correction LLM call failed", exc_info=True)
+                    self.console.print(f"[red]Self-correction failed: {e}[/red]")
                     break
 
         return results
@@ -418,8 +420,14 @@ Please generate corrected tool calls to fix these errors.
 
             return result, result.success
 
+        except (TypeError, ValueError, AttributeError) as e:
+            logger.error(f"Tool {tool_name} raised a validation or type error", exc_info=True)
+            self.conversation.add_tool_result(
+                turn, tool_name, args, None, success=False, error=str(e)
+            )
+            return ErrorResult(success=False, data=str(e)), False
         except Exception as e:
-            logger.error(f"Tool {tool_name} raised exception: {e}")
+            logger.error(f"Tool {tool_name} raised an unexpected exception", exc_info=True)
 
             # Track exception
             self.conversation.add_tool_result(
@@ -473,8 +481,8 @@ Please generate corrected tool calls to fix these errors.
                 self.console.print("[yellow]No correction found[/yellow]")
                 return None
 
-        except Exception as e:
-            logger.error(f"Recovery failed: {e}")
+        except (ValueError, TypeError) as e:
+            logger.error("Recovery engine failed", exc_info=True)
             self.console.print(f"[red]Recovery error: {e}[/red]")
             return None
 
@@ -536,8 +544,8 @@ INSTRUCTIONS:
                 )
                 return response
 
-        except Exception as e:
-            logger.debug(f"Native function calling not available: {e}")
+        except (RuntimeError, ValueError) as e:
+            logger.debug(f"Native function calling not available: {e}", exc_info=True)
 
         # Fallback to prompt-based tool calling
         tool_list = [f"- {schema['name']}: {schema['description']}" for schema in tool_schemas]

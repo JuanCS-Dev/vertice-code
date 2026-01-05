@@ -161,3 +161,10 @@ htmlcov/
 # IDE specific (additional)
 .cursor/
 .juancs/
+
+# Ignore local tool index
+.qwen/
+
+# Ignore test reports
+tests/e2e_textual/*.json
+tests/e2e_textual/*.md
