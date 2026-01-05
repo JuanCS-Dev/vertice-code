@@ -140,10 +140,11 @@ Provide clear, actionable suggestions."""
                 system_prompt=system_prompt,
             )
 
-        except Exception as e:
+        except (RuntimeError, ValueError) as e:
+            logger.error("LLM stream failed", exc_info=True)
             self.console.print(f"[red]❌ LLM failed: {e}[/red]")
             self.console.print(
-                "[yellow]💡 Tip: Check your API key (GEMINI_API_KEY or HF_TOKEN)[/yellow]"
+                "[yellow]💡 Tip: Check your API key and network connection.[/yellow]"
             )
             return
 
@@ -285,8 +286,15 @@ Provide clear, actionable suggestions."""
                                 if fix_result["output"]:
                                     self.console.print(fix_result["output"])
 
-        except Exception as e:
+        except (IOError, OSError, ValueError) as e:
+            logger.error(f"Command execution failed for '{suggestion}'", exc_info=True)
             self.console.print(f"[red]❌ Execution failed: {e}[/red]")
+        except Exception as e:
+            # Catch any other unexpected errors and log with stack trace
+            logger.error(
+                f"An unexpected error occurred during execution of '{suggestion}'", exc_info=True
+            )
+            self.console.print(f"[red]❌ An unexpected error occurred: {e}[/red]")
 
         # Add to history
         self.context.history.append(user_input)
@@ -496,7 +504,8 @@ Output ONLY the command, no explanation, no markdown."""
                 return {"success": True, "output": "", "error": None}
             else:
                 return {"success": False, "error": f"cd: no such file or directory: {target_dir}"}
-        except Exception as e:
+        except OSError as e:
+            logger.warning(f"Error handling 'cd {target_dir}': {e}", exc_info=True)
             return {"success": False, "error": str(e)}
 
     def _handle_export(self, command: str) -> Dict[str, Any]:
@@ -518,17 +527,22 @@ Output ONLY the command, no explanation, no markdown."""
                     self.console.print(f"[dim]✓ Exported: {key}={val}[/dim]")
                     return {"success": True, "output": "", "error": None}
             return {"success": False, "error": "Invalid export syntax"}
-        except Exception as e:
+        except (ValueError, IndexError) as e:
+            logger.warning(f"Error handling export '{command}': {e}", exc_info=True)
             return {"success": False, "error": str(e)}
 
     def _handle_unset(self, cmd_parts: list) -> Dict[str, Any]:
         """Handle unset command by removing from context env."""
         try:
+            if len(cmd_parts) < 2:
+                return {"success": False, "error": "unset: not enough arguments"}
             for key in cmd_parts[1:]:
                 self.enhanced_input.context.env.pop(key, None)
             return {"success": True, "output": "", "error": None}
-        except Exception as e:
-            return {"success": False, "error": str(e)}
+        except KeyError as e:
+            # This should not happen with pop(key, None), but as a safeguard
+            logger.warning(f"Error handling unset '{' '.join(cmd_parts)}': {e}", exc_info=True)
+            return {"success": False, "error": f"Failed to unset variable: {e}"}
 
     # =========================================================================
     # Error Handling Methods

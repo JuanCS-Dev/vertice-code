@@ -97,16 +97,17 @@ def save_session(
 
             return True
 
-        except Exception:
+        except (IOError, OSError, ValueError) as e:
             # Clean up temp file on failure
+            logger.debug(f"Cleaning up temp file {temp_path} after I/O error: {e}")
             try:
                 os.unlink(temp_path)
-            except OSError:
-                pass
+            except OSError as unlink_e:
+                logger.error(f"Failed to clean up temp file {temp_path}: {unlink_e}")
             raise
 
-    except (OSError, IOError, ValueError, TypeError) as e:
-        logger.error(f"Failed to save session: {e}")
+    except (OSError, IOError, ValueError, TypeError):
+        logger.error(f"Failed to save session snapshot to {path}", exc_info=True)
         return False
 
 
@@ -155,8 +156,8 @@ def load_session(path: Path) -> Optional[SessionSnapshot]:
 
         return SessionSnapshot.from_dict(data)
 
-    except Exception as e:
-        logger.error(f"Failed to load session: {e}")
+    except (IOError, OSError, json.JSONDecodeError, TypeError):
+        logger.error(f"Failed to load session snapshot from {path}", exc_info=True)
         return None
 
 
