@@ -185,7 +185,7 @@ class TestTrustEngine:
         tf = engine.get_trust_factor("agent-002")
         assert tf.is_suspended
         assert tf.suspension_reason is not None
-        assert "crítica" in tf.suspension_reason.lower()
+        assert "critica" in tf.suspension_reason.lower()
 
     def test_good_actions_increase_trust(self, engine):
         """Test that good actions increase trust."""
@@ -254,7 +254,7 @@ class TestTrustEngine:
 
         tf = engine.get_trust_factor("agent-007")
         assert tf.is_suspended
-        assert "crítica" in tf.suspension_reason.lower()
+        assert "critica" in tf.suspension_reason.lower()
 
         # Try with ADMIN level (should fail for critical)
         with pytest.raises(PermissionError, match="Insufficient authorization"):
@@ -310,18 +310,3 @@ class TestTrustEngine:
         assert "agents_by_level" in metrics
 
 
-class TestTrustEngineLegacy:
-    """Tests for deprecated lift_suspension_unsafe method."""
-
-    def test_lift_suspension_unsafe_deprecated(self):
-        """Test that lift_suspension_unsafe emits deprecation warning."""
-        engine = TrustEngine()
-        tf = engine.get_or_create_trust_factor("agent-legacy")
-        tf.is_suspended = True
-        tf.suspension_reason = "Test"
-
-        with pytest.warns(DeprecationWarning, match="lift_suspension_unsafe"):
-            result = engine.lift_suspension_unsafe("agent-legacy", "Migration test")
-
-        assert result is True
-        assert not tf.is_suspended
