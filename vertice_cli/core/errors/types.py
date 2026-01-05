@@ -54,6 +54,12 @@ class Recovery:
     message: str = ""
 
 
+class AuthenticationError(Exception):
+    """Raised when authentication fails."""
+
+    pass
+
+
 class UnrecoverableError(Exception):
     """
     Raised when an operation fails with a non-transient error.

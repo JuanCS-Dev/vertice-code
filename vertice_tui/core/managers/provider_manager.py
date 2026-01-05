@@ -133,11 +133,14 @@ class ProviderManager:
 
     @mode.setter
     def mode(self, value: str) -> None:
-        """Set provider mode."""
-        valid_modes = {"auto", "gemini", "prometheus", "maximus"}
-        if value not in valid_modes:
-            raise ValueError(f"Invalid mode: {value}. Must be one of {valid_modes}")
+        """Set provider mode.
+
+        Now supports dynamic providers (groq, cerebras) via GeminiClient/VerticeRouter.
+        """
         self._mode = value
+        # If mode is a specific provider, tell the GeminiClient to switch
+        if value not in {"auto", "prometheus", "maximus"} and hasattr(self.gemini, "set_provider"):
+             self.gemini.set_provider(value)
 
     def detect_complexity(self, message: str) -> TaskComplexity:
         """Detect task complexity from message content.
@@ -228,10 +231,12 @@ class ProviderManager:
         if self._mode == "maximus":
             return self._get_maximus(), "maximus"
 
-        if self._mode == "gemini":
-            # Get actual provider name (may be router, vertex-ai, or gemini)
-            provider_name = self._get_gemini_provider_name()
-            return self.gemini, provider_name
+        # If mode is not one of the special agents, use GeminiClient (which wraps VerticeClient)
+        # We don't check for "gemini" specifically anymore, as any other mode (groq, cerebras)
+        # relies on GeminiClient/VerticeClient to handle the routing.
+        if self._mode != "auto":
+             provider_name = self._get_gemini_provider_name()
+             return self.gemini, provider_name
 
         # Auto mode - detect complexity
         if self.config.enable_complexity_detection and message:
@@ -269,15 +274,9 @@ class ProviderManager:
         Returns:
             Dict with provider availability and current mode
         """
-        return {
+        status = {
             "mode": self._mode,
             "providers": {
-                "gemini": {
-                    "available": (
-                        self.gemini.is_available if hasattr(self.gemini, "is_available") else True
-                    ),
-                    "active": self._mode in ("gemini", "auto"),
-                },
                 "prometheus": {
                     "available": self._prometheus_factory is not None,
                     "initialized": self._prometheus is not None,
@@ -291,6 +290,26 @@ class ProviderManager:
             },
             "complexity_cache_size": len(self._complexity_cache),
         }
+
+        # Add dynamic providers from GeminiClient/VerticeClient
+        if hasattr(self.gemini, "get_available_providers"):
+            available = self.gemini.get_available_providers()
+            current = getattr(self.gemini, "get_current_provider_name", lambda: "gemini")()
+
+            for p in available:
+                status["providers"][p] = {
+                    "available": True,
+                    "active": current == p
+                }
+
+            # Ensure "gemini" is always listed if available
+            if "gemini" not in status["providers"] and getattr(self.gemini, "is_available", True):
+                 status["providers"]["gemini"] = {
+                    "available": True,
+                    "active": current == "gemini"
+                 }
+
+        return status
 
     def clear_complexity_cache(self) -> None:
         """Clear the complexity detection cache."""
