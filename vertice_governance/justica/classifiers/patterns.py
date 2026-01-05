@@ -27,6 +27,7 @@ JAILBREAK_PATTERNS: List[str] = [
     r"(?:system|admin).*override",
     r"reveal.*(?:system|hidden).*prompt",
     r"show.*(?:instructions|rules)",
+    r"ignore.*your.*instructions",
 ]
 
 # Padroes de injecao de codigo
@@ -51,6 +52,10 @@ EXFILTRATION_PATTERNS: List[str] = [
     r"nc\s+-[elvp]",  # netcat
     r"base64.*(?:encode|decode)",
     r"POST.*http",
+    r"print.*content",
+    r"cat\s+/etc/passwd",
+    r"read.*file.*",
+    r"find.*file.*/"
 ]
 
 # =============================================================================
