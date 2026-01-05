@@ -3,7 +3,6 @@ Unit tests for the KnowledgeVault.
 """
 
 import pytest
-from pathlib import Path
 from memory.cortex.vault import KnowledgeVault, VaultEntryType, SensitivityLevel
 
 @pytest.fixture

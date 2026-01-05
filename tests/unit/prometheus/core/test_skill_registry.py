@@ -2,7 +2,6 @@
 Unit tests for the skill_registry module.
 """
 
-import pytest
 from prometheus.core.skill_registry import (
     normalize_skill,
     is_valid_skill,

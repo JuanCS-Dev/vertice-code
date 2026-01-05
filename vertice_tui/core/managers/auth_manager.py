@@ -12,22 +12,19 @@ Author: JuanCS Dev
 Date: 2025-11-26
 """
 
-import logging
-
-logger = logging.getLogger(__name__)
 import json
 import logging
-
-logger = logging.getLogger(__name__)
 import os
-import logging
-
-logger = logging.getLogger(__name__)
 import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from providers.gemini import GeminiProvider
+from providers.groq import GroqProvider
+from vertice_cli.core.errors.types import AuthenticationError
 from vertice_tui.core.interfaces import IAuthenticationManager
+
+logger = logging.getLogger(__name__)
 
 
 class AuthenticationManager(IAuthenticationManager):
@@ -53,6 +50,12 @@ class AuthenticationManager(IAuthenticationManager):
     # Security limits
     MAX_KEY_LENGTH = 500
     MIN_KEY_LENGTH = 10
+    KEY_PATTERNS = {
+        "openai": r"^sk-[a-zA-Z0-9]{48}$",
+        "anthropic": r"^sk-ant-api[a-zA-Z0-9-]{93}$",
+        "google": r"^AIza[a-zA-Z0-9_-]{35}$",
+        "groq": r"^gsk_[a-zA-Z0-9]{52}$",
+    }
 
     def __init__(self, project_dir: Optional[Path] = None, global_dir: Optional[Path] = None):
         """
@@ -74,28 +77,46 @@ class AuthenticationManager(IAuthenticationManager):
         """Get project .env file path."""
         return self._project_dir / ".env"
 
-    def _validate_api_key(self, api_key: str) -> tuple[bool, Optional[str]]:
-        """
-        Validate API key format.
+    def validate_api_key(self, key: str, provider: str = None) -> tuple[bool, str]:
+        """Validate API key format and optionally test connectivity.
 
         Returns:
-            Tuple of (is_valid, error_message).
+            (is_valid, error_message)
         """
-        if len(api_key) < self.MIN_KEY_LENGTH:
-            return False, "API key too short. Please provide a valid key."
+        if " " in key:
+            return False, "Key contains whitespace (reject, don't strip)"
 
-        if len(api_key) > self.MAX_KEY_LENGTH:
-            return False, f"API key too long (max {self.MAX_KEY_LENGTH} characters)"
+        if not key or len(key) < 20:
+            return False, "Key too short (minimum 20 characters)"
 
-        # Check for control characters (injection prevention)
-        sanitized = re.sub(r"[\x00-\x1f\x7f-\x9f]", "", api_key)
-        if sanitized != api_key:
-            return (
-                False,
-                "API key contains invalid characters (newlines, control chars not allowed)",
-            )
+        # Control character check
+        if any(ord(c) < 32 for c in key):
+            return False, "Key contains control characters (reject, don't strip)"
 
-        return True, None
+        # Provider-specific validation
+        if provider and provider in self.KEY_PATTERNS:
+            if not re.match(self.KEY_PATTERNS[provider], key):
+                return False, f"Key doesn't match {provider} format"
+
+        return True, ""
+
+    async def test_api_key(self, key: str, provider: str) -> bool:
+        """Test key works via minimal API call before storage."""
+        try:
+            # Minimal API call to verify key works
+            client = get_client(provider, key)
+            # Placeholder for list_models, as it's not on the base class
+            if hasattr(client, "list_models"):
+                await client.list_models()  # Lightweight call
+            else:
+                # Fallback for providers without list_models
+                await client.generate(messages=[{"role": "user", "content": "test"}])
+            return True
+        except AuthenticationError:
+            return False
+        except Exception:
+            # Catch other exceptions during client initialization or API call
+            return False
 
     def login(
         self, provider: str = "gemini", api_key: Optional[str] = None, scope: str = "global"
@@ -137,7 +158,7 @@ class AuthenticationManager(IAuthenticationManager):
             }
 
         # Validate API key
-        is_valid, error = self._validate_api_key(api_key)
+        is_valid, error = self.validate_api_key(api_key, provider=provider_lower)
         if not is_valid:
             return {"success": False, "error": error}
 
@@ -366,3 +387,18 @@ class AuthenticationManager(IAuthenticationManager):
                         os.environ[key] = value
             except Exception as e:
                 logger.error(f"Failed to load credentials: {e}")
+
+
+def get_client(provider: str, api_key: str):
+    """Get a client for the given provider."""
+    if provider == "gemini" or provider == "google":
+        return GeminiProvider(api_key=api_key)
+    elif provider == "groq":
+        return GroqProvider(api_key=api_key)
+    # TODO: Add Anthropic and OpenAI once their providers are located
+    # elif provider == "anthropic":
+    #     return AnthropicProvider(api_key=api_key)
+    # elif provider == "openai":
+    #     return OpenAIProvider(api_key=api_key)
+    else:
+        raise ValueError(f"Unknown provider: {provider}")
