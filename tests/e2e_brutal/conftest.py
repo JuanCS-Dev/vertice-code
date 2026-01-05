@@ -465,11 +465,12 @@ class ShellSimulator:
                 result["exit"] = True
 
             elif command.startswith(("ls", "cat", "grep", "find", "git")):
-                # Execute shell command
+                # Execute shell command (SEC-003: use shlex.split instead of shell=True)
                 import subprocess
+                import shlex
                 proc = subprocess.run(
-                    command,
-                    shell=True,
+                    shlex.split(command),
+                    shell=False,
                     capture_output=True,
                     text=True,
                     timeout=30,

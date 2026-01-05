@@ -119,6 +119,10 @@ async def run_shell(
     """
     Run a shell script asynchronously.
 
+    SECURITY: Uses explicit sh -c instead of shell=True to avoid
+    Python shell injection. For simple commands, prefer run_command()
+    with a list of arguments.
+
     Args:
         script: Shell script to execute
         cwd: Working directory
@@ -128,7 +132,15 @@ async def run_shell(
     Returns:
         ProcessResult with output and return code
     """
-    return await run_command(script, cwd=cwd, env=env, timeout=timeout, shell=True)
+    # SEC-003: Use explicit shell invocation instead of shell=True
+    # This is safer as we control which shell is used
+    return await run_command(
+        ["sh", "-c", script],
+        cwd=cwd,
+        env=env,
+        timeout=timeout,
+        shell=False
+    )
 
 
 async def run_many(

@@ -103,7 +103,8 @@ class TestRunCommand:
         """Test running command with custom environment."""
         import os
         env = {**os.environ, "TEST_VAR": "test_value"}
-        result = await run_command("echo $TEST_VAR", shell=True, env=env)
+        # SEC-003: Use run_shell instead of shell=True
+        result = await run_shell("echo $TEST_VAR", env=env)
 
         assert result.success is True
         assert "test_value" in result.stdout

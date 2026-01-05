@@ -18,9 +18,10 @@ class TestShellEdgeCases:
         assert '0' in result.stdout and '2' in result.stdout
 
     def test_command_with_pipes(self):
+        # SEC-003: Use explicit sh -c instead of shell=True
         result = subprocess.run(
-            'echo "hello world" | wc -w',
-            shell=True, capture_output=True, text=True, timeout=5
+            ['sh', '-c', 'echo "hello world" | wc -w'],
+            shell=False, capture_output=True, text=True, timeout=5
         )
         assert result.returncode == 0
         assert '2' in result.stdout
