@@ -66,6 +66,7 @@ class VerticeApp(App):
         Binding("ctrl+d", "toggle_dashboard", "Tokens", show=True),
         Binding("ctrl+m", "toggle_tribunal", "Tribunal", show=True),
         Binding("ctrl+p", "toggle_prometheus", "Prometheus", show=True),
+        Binding("ctrl+r", "registry", "Registry", show=True),
         Binding("escape", "cancel", "Cancel", show=False),
         # Scroll bindings for ResponseView (PageUp/PageDown always work)
         Binding("pageup", "scroll_up_page", "Page Up", show=False),
@@ -486,6 +487,12 @@ class VerticeApp(App):
         from vertice_tui.screens.search import SearchScreen
 
         self.push_screen(SearchScreen())
+
+    def action_registry(self) -> None:
+        """Open registry screen (Ctrl+R)."""
+        from vertice_tui.screens.registry_screen import RegistryScreen
+
+        self.push_screen(RegistryScreen(self.bridge))
 
     # Scroll actions
     def action_scroll_up(self) -> None:

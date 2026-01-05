@@ -35,7 +35,9 @@ from tenacity import (
 from core.resilience import (
     CircuitBreaker,
     CircuitOpenError as CircuitBreakerOpen,  # Alias for backward compat
+    CircuitBreakerConfig,  # noqa: F401
     RetryConfig,
+    CircuitState,  # noqa: F401
 )
 
 

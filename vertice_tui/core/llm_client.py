@@ -221,6 +221,22 @@ class GeminiClient:
             return "gemini"
         return "none"
 
+    def set_provider(self, name: str) -> bool:
+        """Set the preferred provider.
+
+        Args:
+            name: Provider name to prioritize
+
+        Returns:
+            True if provider was set, False otherwise
+        """
+        if self._vertice_client:
+            success = self._vertice_client.set_preferred_provider(name)
+            if success:
+                logger.info(f"Switched provider to: {name}")
+            return success
+        return False
+
     def set_tools(self, schemas: List[Dict[str, Any]]) -> None:
         """
         Configure tools for function calling.
@@ -439,7 +455,9 @@ class GeminiClient:
 
     @property
     def is_available(self) -> bool:
-        """Check if Gemini is configured."""
+        """Check if any provider is configured."""
+        if self._vertice_client:
+            return bool(self._vertice_client.get_available_providers())
         return bool(self.api_key)
 
     @property
