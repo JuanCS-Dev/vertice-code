@@ -1,9 +1,40 @@
 """User prompt templates for building context-rich prompts."""
 
-from typing import List, Dict, Any
+from typing import Any, Dict, List, Optional, TypedDict
+
+try:
+    from vertice_cli.core.types import Message, ToolDefinition
+except ImportError:
+    # Fallback for environments where the full package isn't installed
+    ToolDefinition = Dict[str, Any]
+    Message = Dict[str, Any]
 
 
-def format_tool_schemas(tool_schemas: List[Dict]) -> str:
+class PromptContext(TypedDict, total=False):
+    """Context for building a prompt."""
+
+    cwd: str
+    recent_files: List[str]
+    modified_files: List[str]
+    last_command: str
+    git_branch: str
+
+
+class FewShotExample(TypedDict):
+    """A few-shot example for the prompt."""
+
+    user: str
+    assistant: str
+
+
+class ErrorContext(TypedDict, total=False):
+    """Error context for a recovery prompt."""
+
+    error: str
+    previous_action: str
+
+
+def format_tool_schemas(tool_schemas: List[ToolDefinition]) -> str:
     """Format tool schemas in a concise, readable way.
 
     Args:
@@ -45,7 +76,7 @@ def format_tool_schemas(tool_schemas: List[Dict]) -> str:
     return "\n".join(formatted)
 
 
-def format_context(context: Dict[str, Any]) -> str:
+def format_context(context: PromptContext) -> str:
     """Format session context for prompt.
 
     Args:
@@ -76,7 +107,7 @@ def format_context(context: Dict[str, Any]) -> str:
     return "\n".join(parts) if parts else "No context available"
 
 
-def format_conversation_history(history: List[Dict], max_turns: int = 5) -> str:
+def format_conversation_history(history: List[Message], max_turns: int = 5) -> str:
     """Format conversation history for context.
 
     Args:
@@ -114,7 +145,7 @@ def format_conversation_history(history: List[Dict], max_turns: int = 5) -> str:
     return "\n".join(formatted)
 
 
-def format_error_context(error: str, previous_action: str = None) -> str:
+def format_error_context(error: str, previous_action: Optional[str] = None) -> str:
     """Format error context for recovery prompts.
 
     Args:
@@ -139,11 +170,11 @@ def format_error_context(error: str, previous_action: str = None) -> str:
 
 def build_user_prompt(
     user_input: str,
-    tool_schemas: List[Dict] = None,
-    context: Dict = None,
-    conversation_history: List[Dict] = None,
-    few_shot_examples: List[Dict] = None,
-    error_context: Dict = None,
+    tool_schemas: Optional[List[ToolDefinition]] = None,
+    context: Optional[PromptContext] = None,
+    conversation_history: Optional[List[Message]] = None,
+    few_shot_examples: Optional[List[FewShotExample]] = None,
+    error_context: Optional[ErrorContext] = None,
 ) -> str:
     """Build complete user prompt with all context.
 
@@ -274,7 +305,7 @@ Tools: {', '.join(tool_names)}
 Respond with JSON tool call or text:"""
 
 
-def build_chain_of_thought_prompt(user_input: str, context: Dict = None) -> str:
+def build_chain_of_thought_prompt(user_input: str, context: Optional[PromptContext] = None) -> str:
     """Build prompt that encourages chain-of-thought reasoning.
 
     Args:

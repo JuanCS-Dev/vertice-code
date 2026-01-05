@@ -45,6 +45,14 @@ T_contra = TypeVar("T_contra", contravariant=True)
 
 
 # ============================================================================
+# JSON & SERIALIZATION TYPES
+# ============================================================================
+
+JSONValue = Union[str, int, float, bool, None, List["JSONValue"], "JSONDict"]
+JSONDict: TypeAlias = Dict[str, JSONValue]
+
+
+# ============================================================================
 # MESSAGE & CONVERSATION TYPES
 # ============================================================================
 
@@ -106,7 +114,7 @@ class ToolCall(TypedDict):
 
     id: str
     tool: str
-    arguments: Dict[str, Any]
+    arguments: JSONDict
 
 
 class ToolResult(TypedDict):
@@ -166,7 +174,7 @@ class SessionState(TypedDict):
     cwd: FilePath
     history: List[str]
     conversation: MessageList
-    context: Dict[str, Any]
+    context: JSONDict
     files_read: List[FilePath]
     files_modified: List[FilePath]
     tool_calls_count: int
@@ -281,12 +289,12 @@ class ValidationResult(TypedDict):
 class Serializable(Protocol):
     """Protocol for objects that can be serialized."""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> JSONDict:
         """Convert to dictionary representation."""
         ...
 
     @classmethod
-    def from_dict(cls: type[T], data: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], data: JSONDict) -> T:
         """Create instance from dictionary."""
         ...
 
@@ -329,7 +337,7 @@ class WorkflowStep(TypedDict):
     id: str
     name: str
     tool: str
-    arguments: Dict[str, Any]
+    arguments: JSONDict
     depends_on: List[str]
     timeout_seconds: float
     retry_policy: Optional[RecoveryStrategy]

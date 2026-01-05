@@ -13,7 +13,22 @@ import os
 import time
 import warnings
 from dataclasses import dataclass, field
-from typing import Any, AsyncGenerator, Dict, List, Optional
+from typing import Any, AsyncGenerator, Dict, List, Optional, TypedDict
+
+try:
+    from vertice_cli.core.types import (
+        JSONDict,
+        TokenCallback,
+        ToolCall,
+        ToolDefinition,
+    )
+except ImportError:
+    # Define fallbacks for environments where types are not available
+    TokenCallback = Any
+    ToolDefinition = Dict[str, Any]
+    ToolCall = Dict[str, Any]
+    JSONDict = Dict[str, Any]
+
 
 # Silence gRPC/glog warnings
 os.environ.setdefault("GRPC_VERBOSITY", "ERROR")
@@ -24,6 +39,25 @@ from .config import config
 from core.resilience import CircuitBreaker, CircuitState, RateLimiter
 
 logger = logging.getLogger(__name__)
+
+
+class MetricsSummary(TypedDict):
+    """Summary of LLM request metrics."""
+
+    total_requests: int
+    success_rate: str
+    avg_latency_ms: str
+    total_tokens: int
+    providers: Dict[str, Dict[str, int]]
+    vertice_status: Optional[JSONDict]
+
+
+class GenerationResult(TypedDict, total=False):
+    """Result of a generation call."""
+
+    content: str
+    tokens_used: int
+    tool_calls: List[ToolCall]
 
 
 @dataclass
@@ -63,7 +97,7 @@ class RequestMetrics:
             self.provider_stats[provider]["fail"] += 1
         self.provider_stats[provider]["tokens"] += tokens
 
-    def get_summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> MetricsSummary:
         """Get metrics summary."""
         success_rate = 0.0
         if self.total_requests > 0:
@@ -90,7 +124,7 @@ class LLMClient:
         max_retries: int = 3,
         timeout: float = 30.0,
         enable_telemetry: bool = True,
-        token_callback: Optional[Any] = None,
+        token_callback: Optional[TokenCallback] = None,
     ) -> None:
         """Initialize LLM client.
 
@@ -299,7 +333,7 @@ class LLMClient:
 
         return status
 
-    def get_metrics(self) -> Dict[str, Any]:
+    def get_metrics(self) -> Union[MetricsSummary, Dict[str, bool]]:
         """Get request metrics summary.
 
         Returns:
@@ -349,10 +383,10 @@ class LLMClient:
         messages: List[Dict[str, str]],
         temperature: Optional[float] = None,
         max_tokens: Optional[int] = None,
-        tools: Optional[List[Dict[str, Any]]] = None,
+        tools: Optional[List[ToolDefinition]] = None,
         tool_config: Optional[str] = "AUTO",
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> GenerationResult:
         """Generate response with native function calling support.
 
         Args:
