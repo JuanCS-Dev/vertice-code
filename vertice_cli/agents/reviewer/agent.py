@@ -14,7 +14,7 @@ import ast
 import json
 import logging
 import re
-from typing import Any, Dict, List
+from typing import Any, Dict, List, TypedDict
 
 from vertice_cli.utils import MarkdownExtractor
 
@@ -53,6 +53,28 @@ logger = logging.getLogger(__name__)
 
 # Smart truncation limit
 MAX_FILE_CHARS = 8000
+
+
+class LLMResponse(TypedDict, total=False):
+    """LLM response for code review."""
+
+    additional_issues: List[Dict[str, Any]]
+    summary: str
+
+
+class ReviewReportDict(TypedDict):
+    """Dictionary representation of a review report."""
+
+    approved: bool
+    score: int
+    risk_level: str
+    metrics: List[ComplexityMetrics]
+    issues: List[CodeIssue]
+    rag_context: RAGContext
+    summary: str
+    recommendations: List[str]
+    estimated_fix_time: str
+    requires_human_review: bool
 
 
 class ReviewerAgent(BaseAgent):
@@ -113,10 +135,10 @@ class ReviewerAgent(BaseAgent):
             )
 
             # Phase 3: Static Analysis (Code Graphs)
-            all_metrics = []
-            all_nodes = []
-            all_graphs = []
-            all_issues = []
+            all_metrics: List[ComplexityMetrics] = []
+            all_nodes: List[Any] = []
+            all_graphs: List[nx.DiGraph] = []
+            all_issues: List[CodeIssue] = []
 
             for fname, content in files_map.items():
                 if not fname.endswith(".py") and fname != "<inline>":
@@ -204,6 +226,7 @@ class ReviewerAgent(BaseAgent):
 
             # Phase 5: LLM Deep Analysis
             llm_prompt = self._build_llm_prompt(files_map, all_metrics, rag_context, all_issues)
+            llm_data: LLMResponse
 
             try:
                 llm_response = await self._call_llm(llm_prompt, temperature=0.2)
@@ -237,9 +260,11 @@ class ReviewerAgent(BaseAgent):
                 requires_human_review=risk_level in ["HIGH", "CRITICAL"] or score < 60,
             )
 
+            report_dict: ReviewReportDict = report.model_dump()  # type: ignore
+
             return AgentResponse(
                 success=True,
-                data={"report": report.model_dump()},
+                data={"report": report_dict},
                 reasoning=f"Analyzed {len(all_metrics)} functions. Found {len(all_issues)} issues. Score: {score}/100",
             )
 
@@ -363,7 +388,7 @@ Output JSON with:
         Returns:
             Dict mapping filename (or "<inline>") to file content
         """
-        contents = {}
+        contents: Dict[str, str] = {}
 
         # Priority 1: Inline code in user message
         user_message = task.context.get("user_message", "")
@@ -433,7 +458,7 @@ Output JSON with:
 
         return "\n\n".join(block.content for block in blocks)
 
-    def _parse_llm_json(self, text: str) -> Dict[str, Any]:
+    def _parse_llm_json(self, text: str) -> LLMResponse:
         """
         Extract JSON from LLM response with robust error handling.
 

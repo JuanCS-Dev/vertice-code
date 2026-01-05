@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import datetime
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional, TypedDict, Union
 
 from vertice_cli.tools.base import Tool, ToolCategory, ToolResult
 
@@ -23,10 +23,24 @@ logger = logging.getLogger(__name__)
 
 
 # =============================================================================
+# TYPE DEFINITIONS
+# =============================================================================
+
+
+class SubagentConfig(TypedDict):
+    """Configuration for a subagent."""
+
+    description: str
+    tools: Union[List[str], Literal["*"]]
+    prompt_prefix: str
+    read_only: bool
+
+
+# =============================================================================
 # SUBAGENT CONFIGURATION
 # =============================================================================
 
-SUBAGENT_TYPES: Dict[str, Dict[str, Any]] = {
+SUBAGENT_TYPES: Dict[str, SubagentConfig] = {
     "explore": {
         "description": "Fast codebase exploration and search",
         "tools": ["glob", "grep", "read_file", "list_directory"],
@@ -83,6 +97,21 @@ SUBAGENT_TYPES: Dict[str, Dict[str, Any]] = {
 # =============================================================================
 
 
+class SubagentState(TypedDict):
+    """State of a running subagent."""
+
+    id: str
+    type: str
+    description: str
+    model: str
+    config: SubagentConfig
+    prompts: List[str]
+    results: List[Dict[str, Any]]  # LLM results can be complex
+    status: Literal["created", "running", "completed", "failed"]
+    created_at: str
+    error: Optional[str]
+
+
 class TaskTool(Tool):
     """
     Launch specialized subagents for complex, multi-step tasks.
@@ -108,7 +137,7 @@ class TaskTool(Tool):
     """
 
     # Track running subagents (class-level)
-    _subagents: Dict[str, Dict[str, Any]] = {}
+    _subagents: Dict[str, SubagentState] = {}
     _subagent_counter: int = 0
 
     def __init__(self):
@@ -196,7 +225,7 @@ class TaskTool(Tool):
 
         return await self._run_subagent(subagent, prompt)
 
-    async def _run_subagent(self, subagent: Dict, prompt: str) -> ToolResult:
+    async def _run_subagent(self, subagent: SubagentState, prompt: str) -> ToolResult:
         """
         Run the subagent with isolated context and restricted tools.
 
@@ -240,7 +269,7 @@ class TaskTool(Tool):
             logger.error(f"Subagent {subagent['id']} failed: {e}")
             return ToolResult(success=False, error=str(e))
 
-    async def _execute_with_llm(self, subagent: Dict, prompt: str) -> Dict:
+    async def _execute_with_llm(self, subagent: SubagentState, prompt: str) -> Dict[str, Any]:
         """
         Execute subagent task using real LLM with restricted tools.
 
@@ -402,7 +431,7 @@ Report results clearly.""",
 
         return base + type_prompts.get(agent_type, type_prompts["general-purpose"]) + tools_note
 
-    def _fallback_execution(self, subagent: Dict, prompt: str) -> Dict:
+    def _fallback_execution(self, subagent: SubagentState, prompt: str) -> Dict[str, Any]:
         """Fallback when LLM is not available."""
         agent_type = subagent["type"]
         return {

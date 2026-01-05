@@ -24,8 +24,14 @@ import logging
 import fnmatch
 import datetime
 from enum import Enum
-from typing import Tuple, Dict, Any
+from typing import Tuple, Dict, Any, List, TypedDict
 from pathlib import Path
+
+try:
+    from vertice_cli.core.types import JSONDict
+except ImportError:
+    JSONDict = Dict[str, Any]
+
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +42,45 @@ class PermissionLevel(Enum):
     ALLOW = "allow"  # Auto-approved (in allowlist)
     DENY = "deny"  # Blocked (in blocklist or destructive)
     ASK = "ask"  # Requires user approval
+
+
+class AutoApproveConfig(TypedDict):
+    """Configuration for auto-approvals."""
+
+    readOnlyCommands: bool
+    safeCommands: List[str]
+
+
+class PermissionRules(TypedDict):
+    """Permission rules."""
+
+    version: str
+    allow: List[str]
+    deny: List[str]
+    autoApprove: AutoApproveConfig
+
+
+class SandboxConfig(TypedDict):
+    """Sandbox configuration."""
+
+    enabled: bool
+    warnBeforeDisable: bool
+
+
+class LoggingConfig(TypedDict):
+    """Logging configuration."""
+
+    auditFile: str
+    logAllDecisions: bool
+    retentionDays: int
+
+
+class Config(TypedDict):
+    """Root configuration object."""
+
+    permissions: PermissionRules
+    sandbox: SandboxConfig
+    logging: LoggingConfig
 
 
 class PermissionManager:
@@ -70,12 +115,12 @@ class PermissionManager:
         self.local_config_path = Path.cwd() / ".maestro" / "settings.local.json"
 
         # Load merged config
-        self.config = self._load_config()
+        self.config: Config = self._load_config()
 
         # Initialize audit log
         self._init_audit_log()
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> Config:
         """Load merged config from hierarchy (User < Project < Local).
 
         Claude Code pattern: Local overrides Project overrides User.
@@ -96,7 +141,7 @@ class PermissionManager:
 
         return config
 
-    def _get_default_config(self) -> Dict[str, Any]:
+    def _get_default_config(self) -> Config:
         """Get secure defaults (OWASP: Deny by default, explicit allow).
 
         Returns:
@@ -217,7 +262,7 @@ class PermissionManager:
                 audit_path.touch()
                 logger.info(f"Created audit log: {audit_path}")
 
-    def check_permission(self, tool: str, args: Dict[str, Any]) -> Tuple[PermissionLevel, str]:
+    def check_permission(self, tool: str, args: JSONDict) -> Tuple[PermissionLevel, str]:
         """Check permission for tool execution.
 
         OWASP Pattern: Defense-in-depth
@@ -258,13 +303,13 @@ class PermissionManager:
             if tool == "Read":
                 # Check not in sensitive paths
                 path = args.get("path", args.get("file_path", ""))
-                if not self._is_sensitive_path(path):
+                if isinstance(path, str) and not self._is_sensitive_path(path):
                     self._audit_log("ALLOW", command_str, "Auto-approved: safe read-only")
                     return PermissionLevel.ALLOW, "Auto-approved: safe read operation"
 
             elif tool == "Bash":
                 command = args.get("command", "")
-                if self._is_read_only_bash_command(command):
+                if isinstance(command, str) and self._is_read_only_bash_command(command):
                     self._audit_log("ALLOW", command_str, "Auto-approved: read-only bash")
                     return PermissionLevel.ALLOW, "Auto-approved: read-only bash command"
 
@@ -272,7 +317,7 @@ class PermissionManager:
         self._audit_log("ASK", command_str, "Not in allow/deny list - requires approval")
         return PermissionLevel.ASK, "Requires user approval"
 
-    def _format_command(self, tool: str, args: Dict[str, Any]) -> str:
+    def _format_command(self, tool: str, args: JSONDict) -> str:
         """Format tool call as string (Claude Code compatible format).
 
         Examples:

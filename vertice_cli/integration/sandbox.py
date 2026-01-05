@@ -8,7 +8,7 @@ Complies with Constituicao Vertice v3.0 - Safety First (Artigo IV).
 import docker
 import logging
 import threading
-from typing import Dict, Any, Optional
+from typing import Dict, Optional, TypedDict
 from pathlib import Path
 from dataclasses import dataclass
 from datetime import datetime
@@ -32,6 +32,19 @@ class SandboxResult:
     def output(self) -> str:
         """Combined output."""
         return self.stdout + self.stderr
+
+
+class SandboxAvailability(TypedDict, total=False):
+    """Availability status of the sandbox."""
+
+    available: bool
+    reason: str
+    image: str
+    memory_limit: str
+    cpu_quota: int
+    network_disabled: bool
+    test_result: bool
+    test_output: str
 
 
 class SandboxExecutor:
@@ -273,7 +286,7 @@ class SandboxExecutor:
                 env=env,
             )
 
-    def test_availability(self) -> Dict[str, Any]:
+    def test_availability(self) -> SandboxAvailability:
         """
         Test sandbox availability and capabilities.
 

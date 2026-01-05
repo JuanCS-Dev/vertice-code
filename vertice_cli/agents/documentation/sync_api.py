@@ -10,7 +10,24 @@ Note: These wrap async LLM calls with asyncio.run_until_complete().
 """
 
 import asyncio
-from typing import Any, Dict
+from typing import Any, List, Optional, TypedDict
+
+
+class GenerationResult(TypedDict):
+    """Result of a documentation generation call."""
+
+    success: bool
+    documentation: str
+    error: Optional[str]
+
+
+class ProjectInfo(TypedDict, total=False):
+    """Information about a project for README generation."""
+
+    name: str
+    description: str
+    tech_stack: List[str]
+    features: List[str]
 
 
 class DocumentationSyncAPI:
@@ -26,7 +43,7 @@ class DocumentationSyncAPI:
 
     def generate_documentation(
         self, code: str, doc_type: str = "function", style: str = "google"
-    ) -> Dict[str, Any]:
+    ) -> GenerationResult:
         """Generate documentation for code snippet (SYNC wrapper).
 
         Args:
@@ -41,7 +58,11 @@ class DocumentationSyncAPI:
                 - error: Optional[str]
         """
         if not code or not code.strip():
-            return {"success": False, "error": "Empty code provided", "documentation": ""}
+            return {
+                "success": False,
+                "error": "Empty code provided",
+                "documentation": "",
+            }
 
         try:
             prompt = f"""Generate {style}-style documentation for this {doc_type}:
@@ -56,11 +77,15 @@ Return ONLY the documentation text, no explanations."""
                 self.llm_client.generate(prompt=prompt, max_tokens=2000, temperature=0.3)
             )
 
-            return {"success": True, "documentation": response.strip()}
+            return {
+                "success": True,
+                "documentation": response.strip(),
+                "error": None,
+            }
         except Exception as e:
             return {"success": False, "error": str(e), "documentation": ""}
 
-    def generate_api_docs(self, code: str, api_type: str = "rest") -> Dict[str, Any]:
+    def generate_api_docs(self, code: str, api_type: str = "rest") -> GenerationResult:
         """Generate API documentation (SYNC wrapper).
 
         Args:
@@ -83,11 +108,15 @@ Include: endpoints, methods, parameters, responses, examples."""
                 self.llm_client.generate(prompt=prompt, max_tokens=3000, temperature=0.2)
             )
 
-            return {"success": True, "documentation": response.strip()}
+            return {
+                "success": True,
+                "documentation": response.strip(),
+                "error": None,
+            }
         except Exception as e:
             return {"success": False, "error": str(e), "documentation": ""}
 
-    def generate_readme(self, project_info: Dict[str, Any]) -> Dict[str, Any]:
+    def generate_readme(self, project_info: ProjectInfo) -> GenerationResult:
         """Generate README for project (SYNC wrapper).
 
         Args:
@@ -120,11 +149,15 @@ Include: Installation, Usage, Contributing, License sections."""
                 self.llm_client.generate(prompt=prompt, max_tokens=4000, temperature=0.4)
             )
 
-            return {"success": True, "documentation": response.strip()}
+            return {
+                "success": True,
+                "documentation": response.strip(),
+                "error": None,
+            }
         except Exception as e:
             return {"success": False, "error": str(e), "documentation": ""}
 
-    def _run_async(self, coro):
+    def _run_async(self, coro: Any) -> Any:
         """Run async coroutine synchronously.
 
         Args:

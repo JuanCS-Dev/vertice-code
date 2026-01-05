@@ -24,10 +24,15 @@ Architecture:
 """
 
 import logging
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List, TypedDict
 
 from rich.console import Console
 from rich.panel import Panel
+
+try:
+    from vertice_cli.core.types import JSONDict
+except ImportError:
+    JSONDict = Dict[str, Any]
 
 from vertice_cli.core.llm import LLMClient
 from vertice_cli.core.mcp_client import MCPClient
@@ -39,6 +44,41 @@ from vertice_cli.core.observability import setup_observability, trace_operation
 
 logger = logging.getLogger(__name__)
 console = Console()
+
+
+class CounselResult(TypedDict, total=False):
+    """Result of a counsel request to Sofia."""
+
+    success: bool
+    counsel: str
+    counsel_type: str
+    confidence: float
+    requires_professional: bool
+    sources: List[str]
+    error: str
+
+
+class GovernanceStatus(TypedDict):
+    """Status of the governance components."""
+
+    initialized: bool
+    governance_enabled: bool
+    counsel_enabled: bool
+    observability_enabled: bool
+    justica_available: bool
+    sofia_available: bool
+    pipeline_available: bool
+    auto_risk_detection: bool
+
+
+class SofiaResponse(TypedDict):
+    """Response from Sofia agent."""
+
+    counsel: str
+    counsel_type: str
+    confidence: float
+    requires_professional: bool
+    sources: List[str]
 
 
 class MaestroGovernance:
@@ -364,9 +404,7 @@ class MaestroGovernance:
 
         return response
 
-    async def ask_sofia(
-        self, question: str, context: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+    async def ask_sofia(self, question: str, context: Optional[JSONDict] = None) -> CounselResult:
         """
         Ask Sofia for ethical counsel (direct access).
 
@@ -399,21 +437,23 @@ class MaestroGovernance:
             await self.initialize()
 
         if not self.sofia:
-            return {"error": "Sofia not available", "message": "Counsel service is disabled"}
+            return {"error": "Sofia not available", "counsel": "Counsel service is disabled"}
 
         console.print("\n[bold magenta]🕊️  Consulting Sofia (Wise Counselor)...[/bold magenta]\n")
 
         try:
             # Use chat mode for interactive counsel
-            response = await self.sofia.chat_mode(user_input=question, context=context or {})
+            response: SofiaResponse = await self.sofia.chat_mode(
+                user_input=question, context=context or {}
+            )
 
             return {
                 "success": True,
-                "counsel": response.counsel,
-                "counsel_type": response.counsel_type,
-                "confidence": response.confidence,
-                "requires_professional": response.requires_professional,
-                "sources": response.sources,
+                "counsel": response["counsel"],
+                "counsel_type": response["counsel_type"],
+                "confidence": response["confidence"],
+                "requires_professional": response["requires_professional"],
+                "sources": response["sources"],
             }
 
         except Exception as e:
@@ -453,7 +493,7 @@ class MaestroGovernance:
             )
         )
 
-    def get_governance_status(self) -> Dict[str, Any]:
+    def get_governance_status(self) -> GovernanceStatus:
         """
         Get current governance status.
 
@@ -474,7 +514,7 @@ class MaestroGovernance:
         }
 
 
-def render_sofia_counsel(counsel_data: Dict[str, Any]):
+def render_sofia_counsel(counsel_data: CounselResult):
     """
     Render Sofia's counsel beautifully.
 
@@ -486,7 +526,7 @@ def render_sofia_counsel(counsel_data: Dict[str, Any]):
         return
 
     # Create counsel panel
-    counsel_text = counsel_data["counsel"]
+    counsel_text = counsel_data.get("counsel", "No counsel provided.")
     counsel_type = counsel_data.get("counsel_type", "general")
     confidence = counsel_data.get("confidence", 0.0)
     requires_prof = counsel_data.get("requires_professional", False)

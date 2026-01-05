@@ -19,10 +19,16 @@ Designed for high reliability (95%+ parse success) even with malformed LLM respo
 import json
 import re
 import logging
-from typing import List, Dict, Any, Optional, Tuple, Callable
+from typing import List, Dict, Any, Optional, Tuple, Callable, TypedDict
 from enum import Enum
 from pathlib import Path
 from datetime import datetime
+
+try:
+    from vertice_cli.core.types import JSONDict, ToolDefinition
+except ImportError:
+    JSONDict = Dict[str, Any]
+    ToolDefinition = Dict[str, Any]
 
 
 logger = logging.getLogger(__name__)
@@ -38,13 +44,34 @@ class ParseStrategy(Enum):
     PLAIN_TEXT = "plain_text"
 
 
+class ToolCall(TypedDict):
+    """A tool invocation request."""
+
+    tool: str
+    args: JSONDict
+
+
+class ParserStats(TypedDict):
+    """Statistics for the parser."""
+
+    total: int
+    strict_json: int
+    markdown_json: int
+    regex_extraction: int
+    partial_json: int
+    plain_text: int
+    failures: int
+    retries: int
+    security_blocks: int
+
+
 class ParseResult:
     """Result of parsing attempt with metadata."""
 
     def __init__(
         self,
         success: bool,
-        tool_calls: Optional[List[Dict[str, Any]]] = None,
+        tool_calls: Optional[List[ToolCall]] = None,
         text_response: Optional[str] = None,
         strategy: Optional[ParseStrategy] = None,
         error: Optional[str] = None,
@@ -108,7 +135,7 @@ class ResponseParser:
         if self.enable_logging:
             self.log_dir.mkdir(parents=True, exist_ok=True)
 
-        self.stats = {
+        self.stats: Dict[Any, int] = {
             ParseStrategy.STRICT_JSON: 0,
             ParseStrategy.MARKDOWN_JSON: 0,
             ParseStrategy.REGEX_EXTRACTION: 0,
@@ -221,7 +248,7 @@ class ResponseParser:
                 )
 
             # Validate tool call structure
-            tool_calls = []
+            tool_calls: List[ToolCall] = []
             for item in data:
                 if not isinstance(item, dict):
                     return ParseResult(
@@ -249,7 +276,7 @@ class ResponseParser:
                         success=False, error="'args' must be a dict", raw_response=response
                     )
 
-                tool_calls.append(item)
+                tool_calls.append({"tool": item["tool"], "args": item["args"]})
 
             return ParseResult(
                 success=True,
@@ -318,7 +345,7 @@ class ResponseParser:
         pattern = r'\{\s*["\']?tool["\']?\s*:\s*["\'](\w+)["\']\s*,\s*["\']?args["\']?\s*:\s*(\{[^}]*\})\s*\}'
 
         matches = re.finditer(pattern, response)
-        tool_calls = []
+        tool_calls: List[ToolCall] = []
 
         for match in matches:
             tool_name = match.group(1)
@@ -390,7 +417,7 @@ class ResponseParser:
             success=False, error="Could not recover partial JSON", raw_response=response
         )
 
-    def _extract_args(self, args_str: str) -> Dict[str, Any]:
+    def _extract_args(self, args_str: str) -> JSONDict:
         """Extract arguments from malformed args string.
 
         Args:
@@ -399,7 +426,7 @@ class ResponseParser:
         Returns:
             Dict of extracted args
         """
-        args = {}
+        args: JSONDict = {}
 
         # Pattern: "key": "value" or 'key': 'value'
         pattern = r'["\']?(\w+)["\']?\s*:\s*["\']([^"\']*)["\']'
@@ -413,7 +440,7 @@ class ResponseParser:
         return args
 
     def validate_tool_call(
-        self, tool_call: Dict[str, Any], tool_schemas: List[Dict[str, Any]]
+        self, tool_call: ToolCall, tool_schemas: List[ToolDefinition]
     ) -> Tuple[bool, Optional[str]]:
         """Validate tool call against tool schemas.
 
@@ -428,7 +455,7 @@ class ResponseParser:
         args = tool_call.get("args", {})
 
         # Find tool schema
-        tool_schema = None
+        tool_schema: Optional[ToolDefinition] = None
         for schema in tool_schemas:
             if schema["name"] == tool_name:
                 tool_schema = schema
@@ -471,7 +498,7 @@ class ResponseParser:
 
         return True, None
 
-    def get_statistics(self) -> Dict[str, int]:
+    def get_statistics(self) -> ParserStats:
         """Get parsing statistics.
 
         Returns:
@@ -560,10 +587,10 @@ class ResponseParser:
         if not result.tool_calls:
             return result
 
-        sanitized_calls = []
+        sanitized_calls: List[ToolCall] = []
         for tool_call in result.tool_calls:
             args = tool_call.get("args", {})
-            sanitized_args = {}
+            sanitized_args: JSONDict = {}
             blocked = False
 
             for key, value in args.items():
