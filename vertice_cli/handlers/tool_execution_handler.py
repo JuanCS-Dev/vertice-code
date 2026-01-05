@@ -90,6 +90,7 @@ class ToolExecutionHandler:
         Returns:
             String result of tool execution or LLM response.
         """
+        logger.info("Starting tool call processing for user input.")
         # Start new conversation turn
         turn = self.conversation.start_turn(user_input)
 
@@ -121,6 +122,11 @@ class ToolExecutionHandler:
 
             # Use amplified request if confidence is high, otherwise use original
             final_input = amplified_req.amplified if amplified_req.confidence > 0.5 else user_input
+            logger.debug(
+                "Amplified request (confidence: %.2f): '%s'",
+                amplified_req.confidence,
+                final_input,
+            )
 
             # Show amplification info if different from original
             if amplified_req.amplified != user_input and amplified_req.confidence > 0.5:
@@ -137,6 +143,7 @@ class ToolExecutionHandler:
             complexity = analyze_complexity(
                 user_input, intent=detected_intent, confidence=amplified_req.confidence
             )
+            logger.debug("Complexity analysis score: %.2f", complexity.score)
 
             # Auto-invoke think for complex tasks
             if complexity.needs_thinking:
@@ -166,18 +173,20 @@ class ToolExecutionHandler:
             tool_calls = self._parse_tool_calls(response)
 
             if tool_calls:
+                logger.info("Found %d tool calls. Proceeding with execution.", len(tool_calls))
                 # Add tool calls to turn and execute
                 self.conversation.add_tool_calls(turn, tool_calls)
                 return await self.execute_tool_calls(tool_calls, turn)
 
             # If not tool calls, return as regular response
+            logger.info("No tool calls found in LLM response.")
             from vertice_cli.core.conversation import ConversationState
 
             self.conversation.transition_state(ConversationState.IDLE, "text_response_only")
             return response_text
 
         except (ValueError, TypeError, AttributeError) as e:
-            logger.error("Error processing tool calls", exc_info=True)
+            logger.error("Error processing tool calls for input: '%s'", user_input, exc_info=True)
             # Mark error in turn
             turn.error = str(e)
             turn.error_category = "system"
@@ -204,6 +213,7 @@ class ToolExecutionHandler:
         from vertice_cli.tui.components.status import StatusBadge, StatusLevel
 
         results = []
+        logger.info("Executing batch of %d tool calls.", len(tool_calls))
 
         # Start workflow for multiple tools
         if len(tool_calls) > 1:
@@ -212,6 +222,7 @@ class ToolExecutionHandler:
         for i, call in enumerate(tool_calls):
             tool_name = call.get("tool", "")
             args = call.get("args", {})
+            logger.debug("Executing tool '%s' with args: %s", tool_name, args)
 
             # Add workflow step
             step_id = f"tool_{tool_name}_{i}"
@@ -256,6 +267,7 @@ class ToolExecutionHandler:
             result = await self.execute_with_recovery(tool, tool_name, args, turn)
 
             if not result:
+                logger.warning("Tool '%s' failed permanently after recovery attempts.", tool_name)
                 results.append(f"[red]x[/red] {tool_name} failed after recovery attempts")
                 self.workflow_viz.update_step_status(step_id, StepStatus.FAILED)
                 self.dashboard.complete_operation(op_id, OperationStatus.ERROR)
@@ -263,6 +275,7 @@ class ToolExecutionHandler:
 
             # Update workflow and dashboard based on result
             if result.success:
+                logger.info("Tool '%s' executed successfully.", tool_name)
                 self.workflow_viz.update_step_status(step_id, StepStatus.COMPLETED)
                 self.dashboard.complete_operation(
                     op_id,
@@ -273,6 +286,7 @@ class ToolExecutionHandler:
                     cost=result.metadata.get("cost", 0.0) if hasattr(result, "metadata") else 0.0,
                 )
             else:
+                logger.warning("Tool '%s' execution failed.", tool_name)
                 self.workflow_viz.update_step_status(step_id, StepStatus.FAILED)
                 self.dashboard.complete_operation(op_id, OperationStatus.ERROR)
 
@@ -369,6 +383,7 @@ Please generate corrected tool calls to fix these errors.
             Tool result or None if all recovery attempts fail.
         """
         max_attempts = self.recovery_engine.max_attempts
+        logger.info("Executing tool '%s' with up to %d recovery attempts.", tool_name, max_attempts)
 
         for attempt in range(1, max_attempts + 1):
             result, success = await self._attempt_tool_execution(
@@ -377,6 +392,9 @@ Please generate corrected tool calls to fix these errors.
 
             if success:
                 if attempt > 1:
+                    logger.info(
+                        "Successfully recovered tool '%s' on attempt %d.", tool_name, attempt
+                    )
                     self.console.print(f"[green]Recovered on attempt {attempt}[/green]")
                 return result
 
@@ -388,6 +406,11 @@ Please generate corrected tool calls to fix these errors.
                 if corrected_args:
                     args = corrected_args
             else:
+                logger.error(
+                    "Tool '%s' failed after %d attempts. No more retries.",
+                    tool_name,
+                    max_attempts,
+                )
                 self.console.print(f"[red]x {tool_name} failed after {max_attempts} attempts[/red]")
                 return None
 
@@ -402,6 +425,7 @@ Please generate corrected tool calls to fix these errors.
         Returns:
             Tuple of (result, success_bool).
         """
+        logger.debug("Attempt %d: Executing '%s' with args: %s", attempt, tool_name, args)
         try:
             result = await tool.execute(**args)
 
@@ -421,13 +445,23 @@ Please generate corrected tool calls to fix these errors.
             return result, result.success
 
         except (TypeError, ValueError, AttributeError) as e:
-            logger.error(f"Tool {tool_name} raised a validation or type error", exc_info=True)
+            logger.warning(
+                "Tool '%s' raised a validation or type error on attempt %d",
+                tool_name,
+                attempt,
+                exc_info=True,
+            )
             self.conversation.add_tool_result(
                 turn, tool_name, args, None, success=False, error=str(e)
             )
             return ErrorResult(success=False, data=str(e)), False
         except Exception as e:
-            logger.error(f"Tool {tool_name} raised an unexpected exception", exc_info=True)
+            logger.error(
+                "Tool '%s' raised an unexpected exception on attempt %d",
+                tool_name,
+                attempt,
+                exc_info=True,
+            )
 
             # Track exception
             self.conversation.add_tool_result(
@@ -448,7 +482,12 @@ Please generate corrected tool calls to fix these errors.
         from vertice_cli.core.recovery import ErrorCategory, create_recovery_context
 
         error_msg = str(result.data) if result else "Unknown error"
-
+        logger.info(
+            "Handling execution failure for '%s' (attempt %d/%d).",
+            tool_name,
+            attempt,
+            max_attempts,
+        )
         self.console.print(
             f"[yellow]Attempting recovery for {tool_name} "
             f"(attempt {attempt}/{max_attempts})[/yellow]"
@@ -467,6 +506,7 @@ Please generate corrected tool calls to fix these errors.
             diagnosis = await self.recovery_engine.diagnose_error(
                 recovery_ctx, self.conversation.get_recent_context(max_turns=3)
             )
+            logger.debug("Recovery diagnosis: %s", diagnosis)
 
             if diagnosis:
                 self.console.print(f"[dim]Diagnosis: {diagnosis}[/dim]")
@@ -475,9 +515,11 @@ Please generate corrected tool calls to fix these errors.
             corrected = await self.recovery_engine.attempt_recovery(recovery_ctx, self.registry)
 
             if corrected and "args" in corrected:
+                logger.info("Recovery generated corrected parameters for '%s'.", tool_name)
                 self.console.print("[green]Generated corrected parameters[/green]")
                 return corrected["args"]
             else:
+                logger.warning("Recovery failed to find a correction for '%s'.", tool_name)
                 self.console.print("[yellow]No correction found[/yellow]")
                 return None
 
@@ -540,12 +582,12 @@ INSTRUCTIONS:
             # If native tool_calls were returned, use them
             if isinstance(response, dict) and response.get("tool_calls"):
                 logger.debug(
-                    f"Native function calling returned {len(response['tool_calls'])} tool calls"
+                    "Native function calling returned %d tool calls", len(response["tool_calls"])
                 )
                 return response
 
         except (RuntimeError, ValueError) as e:
-            logger.debug(f"Native function calling not available: {e}", exc_info=True)
+            logger.debug("Native function calling not available: %s", e, exc_info=True)
 
         # Fallback to prompt-based tool calling
         tool_list = [f"- {schema['name']}: {schema['description']}" for schema in tool_schemas]
@@ -618,7 +660,7 @@ If no tools needed, respond with helpful text."""
                 if isinstance(tool_calls, list) and tool_calls:
                     return tool_calls
         except (json.JSONDecodeError, ValueError) as e:
-            logger.debug(f"Response is not tool calls JSON: {e}")
+            logger.debug("Response is not tool calls JSON: %s", e)
 
         return None
 

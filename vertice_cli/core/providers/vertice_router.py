@@ -215,9 +215,9 @@ class VerticeRouter:
                         available=True,
                         daily_limit=daily_limit,
                     )
-                    logger.info(f"✅ Provider {name} initialized")
+                    logger.debug("Provider '%s' initialized successfully.", name)
                 else:
-                    logger.warning(f"⚠️ Provider {name} not available (missing API key)")
+                    logger.warning("Provider '%s' not available (missing API key or config).", name)
             except (
                 ImportError,
                 AttributeError,
@@ -266,11 +266,17 @@ class VerticeRouter:
                 if status and status.can_use():
                     model_info = self._providers[required_provider].get_model_info()
                     model_name = model_info.get("model", "default_model")
-                    return RoutingDecision(
+                    decision = RoutingDecision(
                         provider_name=required_provider,
                         model_name=model_name,
                         reasoning=f"Explicitly requested provider: {required_provider}",
                     )
+                    logger.info(
+                        "Routing decision: %s (Reason: %s)",
+                        decision.provider_name,
+                        decision.reasoning,
+                    )
+                    return decision
 
         # Get candidate providers based on complexity and speed
         complexity_providers = set(self.COMPLEXITY_ROUTING.get(complexity, []))
@@ -304,14 +310,21 @@ class VerticeRouter:
         model_info = self._providers[selected].get_model_info()
         model_name = model_info.get("model", "default_model")
 
-        return RoutingDecision(
+        decision = RoutingDecision(
             provider_name=selected,
             model_name=model_name,
-            reasoning=f"Selected {selected} for {complexity.value} task with {speed.value} speed requirement",
+            reasoning=f"Selected '{selected}' for {complexity.value} task with {speed.value} speed requirement",
             fallback_providers=fallbacks,
             estimated_cost=0.0 if selected in ["groq", "cerebras", "mistral"] else 0.01,
             estimated_speed="ultra_fast" if selected in ["groq", "cerebras"] else "fast",
         )
+        logger.info(
+            "Routing decision: %s (Reason: %s, Fallbacks: %s)",
+            decision.provider_name,
+            decision.reasoning,
+            decision.fallback_providers,
+        )
+        return decision
 
     def get_provider(self, name: str) -> Optional[LLMProvider]:
         """Get a specific provider instance."""
@@ -344,24 +357,35 @@ class VerticeRouter:
         status = self._status[decision.provider_name]
 
         try:
+            logger.info("Attempting to generate with primary provider: %s", decision.provider_name)
             result = await provider.generate(messages, **kwargs)
             status.record_request()
             return result
         except (RuntimeError, ValueError, ConnectionError, asyncio.TimeoutError) as e:
             status.record_error(str(e))
-            logger.warning(f"Provider {decision.provider_name} failed: {e}")
+            logger.warning(
+                "Primary provider '%s' failed with error: %s. Attempting fallbacks.",
+                decision.provider_name,
+                e,
+                exc_info=True,
+            )
 
             # Try fallbacks
             for fallback_name in decision.fallback_providers:
                 try:
+                    logger.info("Attempting fallback generation with: %s", fallback_name)
                     fallback = self._providers[fallback_name]
                     result = await fallback.generate(messages, **kwargs)
                     self._status[fallback_name].record_request()
                     return result
                 except (RuntimeError, ValueError, ConnectionError, asyncio.TimeoutError) as fe:
                     self._status[fallback_name].record_error(str(fe))
+                    logger.warning(
+                        "Fallback provider '%s' also failed.", fallback_name, exc_info=True
+                    )
                     continue
 
+            logger.error("All available providers failed for the generation task.")
             raise RuntimeError(f"All providers failed. Last error: {e}")
 
     async def stream_chat(
@@ -391,6 +415,7 @@ class VerticeRouter:
         status = self._status[decision.provider_name]
 
         try:
+            logger.info("Attempting to stream with primary provider: %s", decision.provider_name)
             async for chunk in provider.stream_chat(
                 messages, system_prompt=system_prompt, **kwargs
             ):
@@ -398,11 +423,17 @@ class VerticeRouter:
             status.record_request()
         except (RuntimeError, ValueError, ConnectionError, asyncio.TimeoutError) as e:
             status.record_error(str(e))
-            logger.warning(f"Provider {decision.provider_name} failed: {e}")
+            logger.warning(
+                "Primary streaming provider '%s' failed: %s. Attempting fallbacks.",
+                decision.provider_name,
+                e,
+                exc_info=True,
+            )
 
             # Try fallbacks
             for fallback_name in decision.fallback_providers:
                 try:
+                    logger.info("Attempting fallback streaming with: %s", fallback_name)
                     fallback = self._providers[fallback_name]
                     async for chunk in fallback.stream_chat(
                         messages, system_prompt=system_prompt, **kwargs
@@ -411,8 +442,13 @@ class VerticeRouter:
                     self._status[fallback_name].record_request()
                     return
                 except (ConnectionError, asyncio.TimeoutError, RuntimeError, ValueError):
+                    logger.warning(
+                        "Fallback streaming provider '%s' also failed.",
+                        fallback_name,
+                        exc_info=True,
+                    )
                     continue
-
+            logger.error("All available providers failed for the streaming task.")
             yield f"\n[Error: All providers failed - {e}]"
 
     def get_status_report(self) -> str:
