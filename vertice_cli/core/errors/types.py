@@ -75,6 +75,27 @@ class UnrecoverableError(Exception):
     pass
 
 
+class ToolExecutionError(Exception):
+    """
+    Raised when one or more tools fail during parallel execution.
+
+    This exception aggregates multiple underlying errors into a single report,
+    providing a comprehensive summary of all failures. It is specifically used
+    in contexts where tools are run concurrently, and `return_exceptions=True`
+    might otherwise hide individual errors.
+
+    When to raise:
+      - When `asyncio.gather` collects multiple exceptions from tool executions.
+
+    How to handle:
+      - Log the full error message, which contains details for each failed tool.
+      - Use the aggregated information to inform recovery or rollback strategies.
+      - Present a consolidated error report to the user.
+    """
+
+    pass
+
+
 class CircuitOpenError(Exception):
     """
     Raised when an operation is blocked by an open circuit breaker.

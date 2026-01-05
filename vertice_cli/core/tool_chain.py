@@ -28,6 +28,7 @@ from contextlib import asynccontextmanager
 import logging
 
 from .atomic_ops import AtomicFileOps
+from .errors.types import ToolExecutionError
 from .undo_manager import UndoManager
 
 logger = logging.getLogger(__name__)
@@ -239,10 +240,21 @@ class AtomicToolChain:
                     )
 
                     # Check for failures
+                    failed_ops = []
                     for op, result in zip(batch, results):
                         if isinstance(result, Exception):
                             op.error = str(result)
-                            raise result
+                            failed_ops.append(op)
+
+                    if failed_ops:
+                        error_messages = [
+                            f"  - {op.op_id} ({op.tool_name}): {op.error}" for op in failed_ops
+                        ]
+                        error_summary = (
+                            "Multiple tools failed in parallel execution:\n"
+                            + "\n".join(error_messages)
+                        )
+                        raise ToolExecutionError(error_summary)
                 else:
                     # Execute sequentially
                     for op in batch:
