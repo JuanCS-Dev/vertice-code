@@ -27,8 +27,77 @@ from vertice_core.types.jules_types import (
     JulesSessionState,
     JulesSource,
 )
+from providers.base import EnhancedProviderBase
+from providers.types import CostTier, SpeedTier
+from typing import AsyncGenerator
+
 
 logger = logging.getLogger(__name__)
+
+
+class JulesProvider(EnhancedProviderBase):
+    """
+    Jules AI Provider.
+    """
+
+    PROVIDER_NAME = "jules"
+    BASE_URL = "https://jules.googleapis.com/v1alpha"
+    COST_TIER = CostTier.FREE
+    SPEED_TIER = SpeedTier.RELAXED
+
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        model_name: str = "jules-v1",
+        timeout: float = 300.0,
+        max_retries: int = 2,
+    ):
+        """Initialize Jules provider."""
+        super().__init__(
+            api_key=api_key or os.getenv("JULES_API_KEY"),
+            model_name=model_name,
+            timeout=timeout,
+            max_retries=max_retries,
+        )
+        self.client = JulesClient(JulesConfig(api_key=self.api_key, timeout=self.timeout))
+
+    def is_available(self) -> bool:
+        """Check if the provider is available."""
+        return self.client.is_available
+
+    async def generate(
+        self,
+        messages: List[Dict[str, str]],
+        **kwargs: Any,
+    ) -> str:
+        """Generate a response from a Jules session."""
+        prompt = messages[-1]["content"]
+        session = await self.client.create_session(prompt=prompt)
+        # This is a simplified interaction; a real one would stream activities
+        # and wait for a completion state.
+        # For now, we'll just return a message indicating the session was created.
+        return f"Jules session created: {session.session_id}"
+
+    async def stream_chat(
+        self,
+        messages: List[Dict[str, str]],
+        **kwargs: Any,
+    ) -> AsyncGenerator[str, None]:
+        """Stream responses from a Jules session."""
+        prompt = messages[-1]["content"]
+        session = await self.client.create_session(prompt=prompt)
+        async for activity in self.client.stream_activities(session.session_id):
+            yield activity.message
+
+    def get_model_info(self) -> Dict[str, Any]:
+        """Get model information for Jules."""
+        return {
+            "model": self.model_name,
+            "provider": self.PROVIDER_NAME,
+            "cost_tier": self.COST_TIER,
+            "speed_tier": self.SPEED_TIER,
+            "supports_streaming": True,
+        }
 
 
 class JulesClientError(Exception):

@@ -264,9 +264,11 @@ class VerticeRouter:
             if required_provider in self._providers:
                 status = self._status.get(required_provider)
                 if status and status.can_use():
+                    model_info = self._providers[required_provider].get_model_info()
+                    model_name = model_info.get("model", "default_model")
                     return RoutingDecision(
                         provider_name=required_provider,
-                        model_name=self._providers[required_provider].get_model_info()["model"],
+                        model_name=model_name,
                         reasoning=f"Explicitly requested provider: {required_provider}",
                     )
 
@@ -299,9 +301,12 @@ class VerticeRouter:
         selected = available_candidates[0]
         fallbacks = available_candidates[1:3] if len(available_candidates) > 1 else []
 
+        model_info = self._providers[selected].get_model_info()
+        model_name = model_info.get("model", "default_model")
+
         return RoutingDecision(
             provider_name=selected,
-            model_name=self._providers[selected].get_model_info()["model"],
+            model_name=model_name,
             reasoning=f"Selected {selected} for {complexity.value} task with {speed.value} speed requirement",
             fallback_providers=fallbacks,
             estimated_cost=0.0 if selected in ["groq", "cerebras", "mistral"] else 0.01,
