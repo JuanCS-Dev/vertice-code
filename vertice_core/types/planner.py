@@ -42,7 +42,7 @@ class DependencyType(str, Enum):
     RESOURCE = "resource"  # Shared resource lock
 
 
-@dataclass
+@dataclass(frozen=True)
 class StepConfidence:
     """Confidence rating for a planning step."""
 
@@ -64,7 +64,7 @@ class StepConfidence:
         return "speculative"
 
 
-@dataclass
+@dataclass(frozen=True)
 class Checkpoint:
     """Execution checkpoint for rollback/validation."""
 

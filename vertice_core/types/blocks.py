@@ -55,7 +55,7 @@ class BlockType(Enum):
     ALERT_BLOCK = "alert_block"
 
 
-@dataclass
+@dataclass(frozen=True)
 class BlockInfo:
     """Information about a detected block."""
 
@@ -70,10 +70,10 @@ class BlockInfo:
     def __post_init__(self):
         """Ensure end_line is set."""
         if self.end_line is None:
-            self.end_line = self.start_line
+            object.__setattr__(self, "end_line", self.start_line)
 
 
-@dataclass
+@dataclass(frozen=True)
 class BlockRenderConfig:
     """Configuration for block rendering."""
 
