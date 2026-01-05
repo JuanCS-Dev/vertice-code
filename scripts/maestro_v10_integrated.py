@@ -11,7 +11,7 @@ warnings.warn(
     stacklevel=2
 )
 
-from scripts.maestro import main, Orchestrator, Shell
+from scripts.maestro import main
 
 if __name__ == "__main__":
     main()

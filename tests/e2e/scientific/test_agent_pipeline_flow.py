@@ -16,10 +16,9 @@ Tests cover:
 import pytest
 import asyncio
 import time
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Any
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from unittest.mock import MagicMock, AsyncMock, patch
 
 
 # =============================================================================

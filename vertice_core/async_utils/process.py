@@ -134,13 +134,7 @@ async def run_shell(
     """
     # SEC-003: Use explicit shell invocation instead of shell=True
     # This is safer as we control which shell is used
-    return await run_command(
-        ["sh", "-c", script],
-        cwd=cwd,
-        env=env,
-        timeout=timeout,
-        shell=False
-    )
+    return await run_command(["sh", "-c", script], cwd=cwd, env=env, timeout=timeout, shell=False)
 
 
 async def run_many(

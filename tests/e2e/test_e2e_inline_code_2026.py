@@ -17,11 +17,9 @@ Baseado em: Claude Code 2026 + Gemini CLI 2026 patterns
 """
 import asyncio
 import sys
-import os
-from pathlib import Path
 from datetime import datetime
-from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional
+from dataclasses import dataclass
+from typing import List, Dict, Any
 from enum import Enum
 
 VERTICE_PATH = "/media/juan/DATA/Vertice-Code"
@@ -508,7 +506,7 @@ Skills rejeitadas (alucinadas):
         ruins = sum(1 for r in self.resultados if r.veredicto == Veredicto.RUIM)
         falhas = sum(1 for r in self.resultados if r.veredicto == Veredicto.FALHA_TOTAL)
 
-        print(f"\nRESUMO:")
+        print("\nRESUMO:")
         print(f"  Total de testes: {total}")
         print(f"  EXCELENTE: {excelentes}")
         print(f"  BOM: {bons}")

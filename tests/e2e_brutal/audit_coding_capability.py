@@ -4,7 +4,6 @@ import asyncio
 from pathlib import Path
 from core.agency import get_agency
 from memory.cortex import get_cortex
-from vertice_cli.tools.file_ops import ReadFileTool, WriteFileTool
 # Tools are used internally by the agency, we don't need to import them here for the test execution
 # unless we are manually invoking them, which we are not. We are invoking agency.execute()
 

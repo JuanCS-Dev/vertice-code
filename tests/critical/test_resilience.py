@@ -74,7 +74,7 @@ class TestGracefulDegradation:
                 # OK - timeout funcionou
                 task.cancel()
                 pass
-            except Exception as e:
+            except Exception:
                 # Outros erros também são aceitáveis se tratados
                 pass
 

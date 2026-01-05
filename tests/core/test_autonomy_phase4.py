@@ -11,7 +11,6 @@ References:
 
 import pytest
 from datetime import datetime
-from unittest.mock import Mock, patch, MagicMock
 
 from core.autonomy.types import (
     AutonomyLevel,
@@ -1584,7 +1583,6 @@ class TestEscalationCancelFuture:
     @pytest.mark.asyncio
     async def test_timeout_with_active_future(self):
         """Test timeout sets future result to None (line 266)."""
-        import asyncio
         from core.autonomy.escalation import EscalationManager
         manager = EscalationManager()
         decision = AutonomyDecision(action="test", risk_level=0.5)

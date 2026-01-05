@@ -18,7 +18,6 @@ from textual.widget import Widget
 from textual.message import Message
 
 
-
 class BreadcrumbItem(Static):
     """Single breadcrumb item."""
 

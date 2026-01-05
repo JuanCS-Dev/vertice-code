@@ -10,7 +10,7 @@ import sys
 import os
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, Any, List
 
 VERTICE_PATH = "/media/juan/DATA/Vertice-Code"
 sys.path.insert(0, VERTICE_PATH)

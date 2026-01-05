@@ -18,7 +18,7 @@ v2.1 Changes:
 
 import abc
 import logging
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional
 
 from vertice_cli.utils.streaming import collect_stream
 
@@ -149,7 +149,10 @@ class BaseAgent(abc.ABC):
                 )
 
             self.execution_count += 1
-            return cast(str, response)
+            if isinstance(response, str):
+                return response
+            self.logger.warning(f"LLM call returned non-string response: {type(response)}")
+            return str(response)
         except Exception as e:
             self.logger.error(
                 f"LLM call failed (role={self.role.value}): {type(e).__name__}: {e}", exc_info=True
@@ -260,7 +263,10 @@ class BaseAgent(abc.ABC):
                 return {"success": False, "error": "MCP client not initialized"}
 
             result = await self.mcp_client.call_tool(tool_name=tool_name, arguments=parameters)
-            return cast(Dict[str, Any], result)
+            if isinstance(result, dict):
+                return result
+            self.logger.warning(f"Tool call returned non-dict response: {type(result)}")
+            return {"success": False, "error": f"Tool returned non-dict response: {type(result)}"}
         except Exception as e:
             self.logger.error(
                 f"Tool '{tool_name}' execution failed (role={self.role.value}): {type(e).__name__}: {e}",

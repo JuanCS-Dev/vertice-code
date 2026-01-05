@@ -7,10 +7,9 @@ It patches key components to capture observations at each stage.
 NO MOCKS - This observes actual system behavior.
 """
 
-import asyncio
 import functools
 import time
-from typing import Any, Dict, List, Optional, Callable, AsyncIterator
+from typing import Any, Dict, Optional
 from pathlib import Path
 import sys
 

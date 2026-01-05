@@ -16,7 +16,7 @@ Note: Prometheus tools require LLM access, so most tests use mocks.
 """
 
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock
 from typing import Any
 
 

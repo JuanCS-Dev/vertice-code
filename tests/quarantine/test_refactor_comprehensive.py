@@ -13,7 +13,6 @@ import pytest
 from unittest.mock import MagicMock
 
 from vertice_cli.agents.refactor import RefactorAgent
-from vertice_cli.agents.base import AgentTask
 
 
 # Skip reason for all tests in this module

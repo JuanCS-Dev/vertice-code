@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
 
 from ..constitution import Severity
-from ..classifiers import ClassificationReport, ClassificationResult
+from ..classifiers import ClassificationReport
 from ..enforcement import EnforcementAction, EnforcementMode
 from ..monitor import SuspicionScore
 from ..trust import TrustFactor

@@ -16,7 +16,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import pytest
 
 from vertice_cli.tools.base import Tool, ToolResult, ToolCategory, ToolRegistry
 

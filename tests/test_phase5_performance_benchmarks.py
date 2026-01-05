@@ -389,7 +389,7 @@ async def test_stress_high_concurrency(mock_governance, mock_agent):
             await mock_governance.execute_with_governance(mock_agent, task, risk_level="LOW")
             latency_ms = (time.time() - op_start) * 1000
             tracker.record_latency(latency_ms)
-        except Exception as e:
+        except Exception:
             tracker.record_error()
 
     tracker.start()

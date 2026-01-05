@@ -14,12 +14,8 @@ Soli Deo Gloria
 
 from __future__ import annotations
 
-import asyncio
-import json
 import tempfile
 from pathlib import Path
-from typing import List
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -30,7 +26,6 @@ from vertice_core.indexing import (
     CodeChunker,
     EmbeddingCache,
     EmbeddingConfig,
-    EmbeddingResult,
     SemanticEmbedder,
     VectorStore,
     VectorStoreConfig,
@@ -39,7 +34,6 @@ from vertice_core.indexing import (
     IndexerStatus,
     IndexingProgress,
     CodebaseIndexer,
-    CHROMADB_AVAILABLE,
 )
 
 

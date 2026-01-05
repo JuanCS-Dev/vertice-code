@@ -138,7 +138,11 @@ class MaximusProvider:
                 method, path, json=json, params=params
             )
             response.raise_for_status()
-            return cast(Dict[str, Any], response.json())
+            json_response = response.json()
+            if isinstance(json_response, dict):
+                return json_response
+            # Log or handle unexpected non-dict response
+            return {"error": f"Unexpected non-dict response: {type(json_response)}"}
 
         try:
             return await call_with_resilience(

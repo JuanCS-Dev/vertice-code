@@ -222,7 +222,7 @@ class TestSeniorProgrammer:
             result = await gov.execute_with_governance(Mock(), task)
             # ISSUE #8: Should fail gracefully with clear error
 
-        except ConnectionError as e:
+        except ConnectionError:
             # Good - error propagated
             pass
         except Exception as e:
@@ -437,7 +437,7 @@ class TestVibeCoder:
             if status["initialized"]:
                 pytest.fail("ISSUE #20: Reports initialized without await!")
 
-        except Exception as e:
+        except Exception:
             pass  # Expected some error
 
     @pytest.mark.asyncio

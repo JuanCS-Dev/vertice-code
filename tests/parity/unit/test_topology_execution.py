@@ -7,7 +7,7 @@ during execution, not just calculated and ignored.
 
 import pytest
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock
 from dataclasses import dataclass
 from typing import List, Dict, Any
 import sys

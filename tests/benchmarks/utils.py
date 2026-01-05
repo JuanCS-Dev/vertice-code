@@ -1,7 +1,7 @@
 import asyncio
 import statistics
 import time
-from typing import List, Dict, Any
+from typing import List, Dict
 
 from memory.cortex import MemoryCortex
 

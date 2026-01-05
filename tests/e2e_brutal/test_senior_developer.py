@@ -98,7 +98,7 @@ class TestSeniorFileOperations:
                 path=str(test_file),
                 content=large_content
             ))
-        except Exception as e:
+        except Exception:
             # Check if original content is preserved
             if test_file.exists():
                 current = test_file.read_text()

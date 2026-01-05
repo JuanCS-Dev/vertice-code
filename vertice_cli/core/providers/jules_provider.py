@@ -252,9 +252,7 @@ class JulesClient:
         page_size: int = 50,
     ) -> List[JulesActivity]:
         """Get session activities."""
-        data = await self._request(
-            "GET", f"/sessions/{session_id}/activities?pageSize={page_size}"
-        )
+        data = await self._request("GET", f"/sessions/{session_id}/activities?pageSize={page_size}")
         return [self._parse_activity(a) for a in data.get("activities", [])]
 
     async def stream_activities(
@@ -425,7 +423,11 @@ class JulesClient:
             steps = plan.get("steps", [])
             if steps:
                 first_step = steps[0].get("title", "Plan generated")
-                message = f"Plan: {first_step[:100]}..." if len(first_step) > 100 else f"Plan: {first_step}"
+                message = (
+                    f"Plan: {first_step[:100]}..."
+                    if len(first_step) > 100
+                    else f"Plan: {first_step}"
+                )
             else:
                 message = "Plan generated"
             return JulesActivityType.PLAN_GENERATED, message, plan_data
@@ -433,7 +435,11 @@ class JulesClient:
         # planApproved: { planId: string }
         if "planApproved" in data:
             plan_id = data["planApproved"].get("planId", "")
-            return JulesActivityType.PLAN_APPROVED, f"Plan approved: {plan_id}" if plan_id else "Plan approved", data.get("planApproved", {})
+            return (
+                JulesActivityType.PLAN_APPROVED,
+                f"Plan approved: {plan_id}" if plan_id else "Plan approved",
+                data.get("planApproved", {}),
+            )
 
         # progressUpdated: { title, description }
         if "progressUpdated" in data:
@@ -445,7 +451,11 @@ class JulesClient:
 
         # sessionCompleted: {}
         if "sessionCompleted" in data:
-            return JulesActivityType.SESSION_COMPLETED, "Session completed", data.get("sessionCompleted", {})
+            return (
+                JulesActivityType.SESSION_COMPLETED,
+                "Session completed",
+                data.get("sessionCompleted", {}),
+            )
 
         # sessionFailed: { reason: string }
         if "sessionFailed" in data:

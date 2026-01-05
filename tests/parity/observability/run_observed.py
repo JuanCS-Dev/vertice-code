@@ -16,7 +16,6 @@ import asyncio
 import argparse
 import sys
 import os
-import time
 from pathlib import Path
 from typing import List, Dict
 
@@ -24,8 +23,6 @@ from typing import List, Dict
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from tests.parity.observability.pipeline_observer import (
-    PipelineObserver,
-    PipelineStage,
     get_observer,
     reset_observer,
 )
@@ -188,7 +185,7 @@ class ObservedRunner:
                     stage_times[obs.stage.value].append(obs.duration_ms)
 
         if all_times:
-            print(f"\nTiming:")
+            print("\nTiming:")
             print(f"  Average: {sum(all_times)/len(all_times):.0f}ms")
             print(f"  Min: {min(all_times):.0f}ms")
             print(f"  Max: {max(all_times):.0f}ms")

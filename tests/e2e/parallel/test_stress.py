@@ -17,7 +17,6 @@ import tempfile
 import time
 import gc
 from pathlib import Path
-from unittest.mock import MagicMock, AsyncMock
 
 
 # =============================================================================
@@ -334,7 +333,7 @@ class TestMemoryStability:
         for i in range(10):
             # Each command generates ~100KB of output
             tasks.append(tool.execute(
-                command=f"python3 -c \"print('x' * 1000 * 100)\""
+                command="python3 -c \"print('x' * 1000 * 100)\""
             ))
 
         results = await asyncio.gather(*tasks)

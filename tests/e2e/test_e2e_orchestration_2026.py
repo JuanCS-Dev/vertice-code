@@ -14,10 +14,8 @@ SEM MOCKS. EXECUCAO REAL. ANALISE CRITICA.
 """
 import asyncio
 import sys
-import os
-from pathlib import Path
 from datetime import datetime
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Dict, Any, Optional, Tuple
 from enum import Enum
 import traceback
@@ -539,7 +537,7 @@ class TestesE2EOrquestracao:
         excelente_bom = contagem[Veredicto.EXCELENTE] + contagem[Veredicto.BOM]
         taxa_sucesso = (excelente_bom / total * 100) if total > 0 else 0
 
-        print(f"\nRESUMO:")
+        print("\nRESUMO:")
         print(f"  Total de testes: {total}")
         for v in Veredicto:
             emoji = {"EXCELENTE": "🏆", "BOM": "✓", "PARCIAL": "⚠️", "RUIM": "✗", "FALHA_TOTAL": "💀"}.get(v.value, "")

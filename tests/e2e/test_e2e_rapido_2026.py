@@ -9,7 +9,7 @@ Gera tabela de resultados no final.
 import asyncio
 import sys
 from datetime import datetime
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 
 sys.path.insert(0, "/media/juan/DATA/Vertice-Code")
 

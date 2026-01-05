@@ -9,10 +9,8 @@ Date: 2025-12-30
 
 from __future__ import annotations
 
-import asyncio
 import uuid
-from typing import AsyncIterator
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -52,7 +50,6 @@ from core.protocols.proto.agent_card_pb2 import (
 from core.security.jws import (
     JWSAlgorithm,
     JWSHeader,
-    JWSSignature,
     KeyPair,
     KeyManager,
     JWSSigner,

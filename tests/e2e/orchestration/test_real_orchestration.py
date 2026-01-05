@@ -15,10 +15,8 @@ Requirements:
 """
 
 import pytest
-import asyncio
 import time
 import os
-from typing import Dict, List, Any
 from unittest.mock import AsyncMock
 
 
@@ -411,7 +409,6 @@ class TestCompleteWorkflow:
     async def test_feature_development_workflow(self):
         """Test complete feature development workflow."""
         from agents import OrchestratorAgent
-        from agents.orchestrator.types import Task, TaskComplexity, AgentRole
 
         orchestrator = OrchestratorAgent(
             approval_callback=AsyncMock(return_value=True),

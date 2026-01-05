@@ -823,7 +823,7 @@ class ChaosOrchestrator:
         critical_paths = self.analyzer.get_critical_paths()
         lines.append("CRITICAL PATHS (Single Points of Failure):")
         for path in critical_paths:
-            lines.append(f"  -> " + " -> ".join(path))
+            lines.append("  -> " + " -> ".join(path))
         lines.append("")
 
         # Component analysis

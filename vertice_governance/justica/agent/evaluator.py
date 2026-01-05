@@ -6,7 +6,7 @@ Contains the verdict determination logic for the JUSTICA agent.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 from ..classifiers import ClassificationReport, ClassificationResult
 from ..monitor import SuspicionScore

@@ -21,7 +21,6 @@ from vertice_core.types import AgentTask
 from vertice_core.types.jules_types import (
     JulesActivity,
     JulesActivityType,
-    JulesConfig,
     JulesPlan,
     JulesSession,
     JulesSessionState,

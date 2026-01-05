@@ -9,7 +9,7 @@ import os
 import sys
 import logging
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict
 from dotenv import load_dotenv
 
 # Add project root to path

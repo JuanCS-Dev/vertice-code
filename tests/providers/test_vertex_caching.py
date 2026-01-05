@@ -16,10 +16,8 @@ References:
 from __future__ import annotations
 
 import importlib.util
-import json
-from datetime import timedelta
-from typing import Any, Dict, List, Optional, Type
-from unittest.mock import AsyncMock, MagicMock, patch, PropertyMock
+from typing import Dict, List, Type
+from unittest.mock import MagicMock, patch
 
 import pytest
 

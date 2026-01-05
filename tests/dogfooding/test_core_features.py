@@ -3,7 +3,9 @@
 Dogfooding test - Final working version.
 Boris Cherny - Week 4 Day 4
 """
-import sys, asyncio, tempfile
+import sys
+import asyncio
+import tempfile
 from pathlib import Path
 
 async def test_lsp_features():

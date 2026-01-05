@@ -15,7 +15,6 @@ from __future__ import annotations
 import asyncio
 import pytest
 import time
-from typing import List
 
 from tests.chaos.chaos_orchestrator import (
     BlastRadiusAnalyzer,

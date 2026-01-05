@@ -21,15 +21,12 @@ from vertice_cli.orchestration.squad import (
     DevSquad,
     WorkflowPhase,
     WorkflowStatus,
-    WorkflowResult,
     PhaseResult,
 )
 from vertice_cli.orchestration.state_machine import (
-    DevSquadStateMachine,
     Phase,
-    PhaseCheckpoint,
 )
-from vertice_cli.agents.base import AgentResponse, AgentTask
+from vertice_cli.agents.base import AgentResponse
 
 
 # =============================================================================

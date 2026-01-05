@@ -11,7 +11,7 @@ Validates:
 
 import pytest
 import json
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 from vertice_cli.agents.refactorer import (
     RefactorerAgent,

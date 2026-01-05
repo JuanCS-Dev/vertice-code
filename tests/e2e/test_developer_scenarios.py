@@ -1,7 +1,5 @@
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock
-from vertice_tui.core.chat.controller import ChatController
 
 @pytest.mark.asyncio
 async def test_debugging_scenario(cortex):

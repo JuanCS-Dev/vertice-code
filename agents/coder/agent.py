@@ -468,7 +468,7 @@ Continue naturally. Only output the completion, not the original code.
 
     def _extract_code_block(self, text: str, language: str) -> str:
         """Extract code from markdown code block."""
-        pattern = rf"```{{language}}?\n?(.*?)""`"
+        pattern = r"```{language}?\n?(.*?)""`"
         match = re.search(pattern, text, re.DOTALL)
         if match:
             return match.group(1).strip()

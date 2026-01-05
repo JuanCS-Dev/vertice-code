@@ -2,7 +2,7 @@
 import sqlite3
 import queue
 from contextlib import contextmanager
-from typing import Dict, Any
+from typing import Dict
 from pathlib import Path
 
 class ConnectionPool:

@@ -6,7 +6,6 @@ Tests for edge cases in agent execution and failure handling.
 
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 from dataclasses import dataclass
 from typing import Optional
 

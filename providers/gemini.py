@@ -336,7 +336,7 @@ class GeminiProvider:
                                 yield part.text
                     elif hasattr(chunk, 'text') and chunk.text:
                         yield chunk.text
-                except (AttributeError, ValueError, KeyError) as chunk_error:
+                except (AttributeError, ValueError, KeyError):
                     # Some chunks might be pure metadata or function calls without text
                     continue
 

@@ -160,7 +160,6 @@ class DocumentationAgent(RetrievalAgent):
 
         Searches local docs/ directory and README files.
         """
-        import asyncio
         from pathlib import Path
 
         results: List[ResearchResult] = []

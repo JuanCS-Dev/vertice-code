@@ -11,7 +11,6 @@ These tests validate that agents can:
 """
 
 import pytest
-import asyncio
 import os
 import sys
 import time
