@@ -22,9 +22,11 @@ __codename__ = "PROMETHEUS"
 
 from .core.orchestrator import PrometheusOrchestrator
 from .core.llm_client import GeminiClient
+from .agent import PrometheusIntegratedAgent
 
 __all__ = [
     "PrometheusOrchestrator",
+    "PrometheusIntegratedAgent",
     "GeminiClient",
     "__version__",
     "__codename__",

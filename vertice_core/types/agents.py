@@ -44,6 +44,9 @@ class AgentRole(str, Enum):
         GOVERNANCE/JUSTICA: Constitutional governance (Justiça framework)
         COUNSELOR/SOFIA: Wise counselor (Sofia framework)
         MAESTRO: Orchestration coordinator
+
+    Meta-Orchestration Roles:
+        PROMETHEUS: Self-evolving meta-agent (L4 autonomy)
     """
 
     # Core roles
@@ -69,6 +72,9 @@ class AgentRole(str, Enum):
     COUNSELOR = "counselor"
     SOFIA = "sofia"  # Alias for counselor
     MAESTRO = "maestro"
+
+    # Meta-orchestration roles (L4 autonomy)
+    PROMETHEUS = "prometheus"
 
     # Legacy aliases (deprecated)
     REFACTOR = "refactor"  # Use REFACTORER instead

@@ -29,14 +29,16 @@ logger = logging.getLogger(__name__)
 
 class AgentSource(Enum):
     """Source of the agent."""
-    CORE = auto()      # agents/ directory
-    CLI = auto()       # vertice_cli/agents/ directory
+
+    CORE = auto()  # agents/ directory
+    CLI = auto()  # vertice_cli/agents/ directory
     GOVERNANCE = auto()  # vertice_governance/
 
 
 @dataclass
 class AgentInfo:
     """Information about a registered agent."""
+
     name: str
     source: AgentSource
     module_path: str
@@ -238,8 +240,21 @@ class AgentRegistry:
             ),
         ]
 
+        # =================================================================
+        # META-ORCHESTRATION AGENTS (prometheus/)
+        # =================================================================
+        meta_agents = [
+            AgentInfo(
+                name="prometheus",
+                source=AgentSource.CLI,  # Registered as CLI for now
+                module_path="prometheus.agent",
+                class_name="PrometheusIntegratedAgent",
+                description="Self-evolving meta-agent with world model and 6-type memory (L4 autonomy)",
+            ),
+        ]
+
         # Register all agents
-        for agent in core_agents + cli_agents + governance_agents:
+        for agent in core_agents + cli_agents + governance_agents + meta_agents:
             self._agents[agent.name] = agent
 
         self._initialized = True
@@ -267,6 +282,7 @@ class AgentRegistry:
         # Lazy import
         try:
             import importlib
+
             module = importlib.import_module(info.module_path)
             info._class = getattr(module, info.class_name)
             return info._class
@@ -308,10 +324,7 @@ class AgentRegistry:
             logger.error(f"Failed to create agent {name}: {e}")
             return None
 
-    def list_agents(
-        self,
-        source: Optional[AgentSource] = None
-    ) -> List[tuple[str, AgentInfo]]:
+    def list_agents(self, source: Optional[AgentSource] = None) -> List[tuple[str, AgentInfo]]:
         """
         List registered agents.
 
@@ -323,11 +336,7 @@ class AgentRegistry:
         """
         if source is None:
             return list(self._agents.items())
-        return [
-            (name, info)
-            for name, info in self._agents.items()
-            if info.source == source
-        ]
+        return [(name, info) for name, info in self._agents.items() if info.source == source]
 
     def has_agent(self, name: str) -> bool:
         """Check if an agent is registered."""
@@ -341,6 +350,7 @@ class AgentRegistry:
 # =============================================================================
 # CONVENIENCE FUNCTIONS
 # =============================================================================
+
 
 def get_agent(name: str, **kwargs: Any) -> Optional[Any]:
     """

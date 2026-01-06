@@ -33,18 +33,20 @@ from vertice_cli.agents.refactorer import RefactorerAgent, create_refactorer_age
 from vertice_cli.agents.reviewer import ReviewerAgent
 from vertice_cli.agents.security import SecurityAgent
 from vertice_cli.agents.performance import PerformanceAgent
-from vertice_cli.agents.testing import TestingAgent, create_testing_agent
+from vertice_cli.agents.testing import TestRunnerAgent, create_testing_agent
 from vertice_cli.agents.executor import NextGenExecutorAgent
 from vertice_cli.agents.documentation import DocumentationAgent, create_documentation_agent
 from vertice_cli.agents.devops import DevOpsAgent, create_devops_agent
 from vertice_cli.agents.justica_agent import JusticaIntegratedAgent
 from vertice_cli.agents.sofia import SofiaIntegratedAgent, create_sofia_agent
 from vertice_cli.agents.data_agent_production import DataAgent
+from prometheus.agent import PrometheusIntegratedAgent
 
 # Aliases for backward compatibility
 ExecutorAgent = NextGenExecutorAgent
 JusticaAgent = JusticaIntegratedAgent
 SofiaAgent = SofiaIntegratedAgent
+PrometheusAgent = PrometheusIntegratedAgent  # Alias for convenience
 
 __all__ = [
     # Base types
@@ -62,7 +64,7 @@ __all__ = [
     "ReviewerAgent",
     "SecurityAgent",
     "PerformanceAgent",
-    "TestingAgent",
+    "TestRunnerAgent",
     "create_testing_agent",
     "NextGenExecutorAgent",
     "ExecutorAgent",  # Alias
@@ -76,4 +78,7 @@ __all__ = [
     "SofiaAgent",  # Alias
     "create_sofia_agent",
     "DataAgent",
+    # Meta-Orchestration Agents (1)
+    "PrometheusIntegratedAgent",
+    "PrometheusAgent",  # Alias
 ]
