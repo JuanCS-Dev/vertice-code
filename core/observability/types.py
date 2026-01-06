@@ -264,8 +264,11 @@ class ObservabilityConfig:
     export_interval_seconds: int = 60
     batch_size: int = 100
 
-    # Sampling
-    sample_rate: float = 1.0  # 1.0 = 100% sampling
+    # Sampling (P1-5 - Optimized for production scale)
+    sampling_enabled: bool = True
+    head_sample_rate: float = 0.1  # 10% head-based sampling (production)
+    tail_sample_errors: bool = True  # Always sample errors (100%)
+    sample_rate: float = 1.0  # Legacy: 1.0 = 100% sampling (dev/test)
 
     # Feature flags
     trace_llm_content: bool = False  # Privacy: don't trace prompts by default

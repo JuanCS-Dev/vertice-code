@@ -211,6 +211,9 @@ class PrometheusOrchestrator(ObservabilityMixin):
                     # Auto-save after every execution
                     await persistence.save_state(self.agent_name, self.export_state())
 
+                    # WAL health monitoring and auto-checkpoint (P0-2)
+                    await persistence.auto_checkpoint_if_needed()
+
     async def _execute_task_with_context(self, task: str, context: Dict, plan: Any) -> str:
         """Call LLM with gathered context and plan."""
         prompt = f"TASK: {task}\nCONTEXT: {context}\nTOOLS: {self.tools.list_tools()[:10]}"

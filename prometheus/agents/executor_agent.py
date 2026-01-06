@@ -15,26 +15,15 @@ The Executor Agent is responsible for:
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Any, Tuple
 from datetime import datetime
-import json
 import logging
-import re
 
 logger = logging.getLogger(__name__)
 
 from .curriculum_agent import EvolutionTask, TaskDifficulty, TaskDomain
-
-# FIX E2E: Import skill registry to prevent hallucination
-try:
-    from prometheus.core.skill_registry import validate_skills, is_valid_skill, VALID_SKILLS
-except ImportError:
-    # Fallback if skill_registry not available
-    VALID_SKILLS = set()
-
-    def validate_skills(skills: List[str]) -> List[str]:
-        return skills
-
-    def is_valid_skill(skill: str) -> bool:
-        return True
+from .skills import SkillDetector, SkillProfile
+from .utils.parsers import JSONResponseParser
+from .testing import TestRunner
+from .prompts import ExecutorPrompts
 
 
 @dataclass
@@ -63,31 +52,6 @@ class ExecutionResult:
         }
 
 
-@dataclass
-class SkillProfile:
-    """Profile of a learned skill."""
-
-    name: str
-    proficiency: float  # 0-1
-    practice_count: int = 0
-    last_practiced: Optional[datetime] = None
-    success_history: List[bool] = field(default_factory=list)
-
-    def update(self, success: bool):
-        """Update skill based on practice result."""
-        self.practice_count += 1
-        self.last_practiced = datetime.now()
-        self.success_history.append(success)
-
-        # Keep last 20 results
-        if len(self.success_history) > 20:
-            self.success_history = self.success_history[-20:]
-
-        # Update proficiency with exponential moving average
-        alpha = 0.2 if self.practice_count > 5 else 0.5
-        self.proficiency = (1 - alpha) * self.proficiency + alpha * (1.0 if success else 0.0)
-
-
 class ExecutorAgent:
     """
     Learns to solve tasks through practice.
@@ -109,6 +73,13 @@ class ExecutorAgent:
         self.reflection = reflection_engine
         self.sandbox = sandbox_executor
 
+        # Initialize helper modules
+        self.skill_detector = SkillDetector()
+        self.test_runner = TestRunner(sandbox_executor)
+        self.json_parser = JSONResponseParser()
+        self.prompts = ExecutorPrompts()
+
+        # State
         self.skills: Dict[str, SkillProfile] = {}
         self.execution_history: List[ExecutionResult] = []
 
@@ -136,10 +107,10 @@ class ExecutorAgent:
         # Get relevant context from memory
         context = self.memory.get_context_for_task(task.description)
 
-        # Add hints if requested and available
+        # Format hints if requested and available
         hints_section = ""
         if use_hints and task.hints:
-            hints_section = "\nHINTS:\n" + "\n".join(f"- {h}" for h in task.hints)
+            hints_section = self.prompts.format_hints(task.hints)
 
         # Plan and execute
         solution = await self._generate_solution(task, context, hints_section)
@@ -160,7 +131,9 @@ class ExecutorAgent:
         time_taken = (end_time - start_time).total_seconds()
 
         # Identify skills demonstrated
-        skills_demonstrated = self._identify_skills(solution, task)
+        skills_demonstrated = self.skill_detector.identify_skills(
+            solution, task.expected_skills
+        )
 
         # Create result
         result = ExecutionResult(
@@ -191,48 +164,23 @@ class ExecutorAgent:
         hints_section: str = "",
     ) -> str:
         """Generate a solution for the task."""
-        # Format relevant experiences
-        experiences_section = ""
-        if context.get("relevant_experiences"):
-            exp_list = [
-                f"- {e.get('content', '')[:100]}" for e in context["relevant_experiences"][:3]
-            ]
-            experiences_section = "\nRELEVANT EXPERIENCES:\n" + "\n".join(exp_list)
-
-        # Format relevant procedures
-        procedures_section = ""
-        if context.get("relevant_procedures"):
-            proc_list = [
-                f"- {p.get('skill', '')}: {p.get('steps', [])[:2]}"
-                for p in context["relevant_procedures"][:3]
-            ]
-            procedures_section = "\nRELEVANT PROCEDURES:\n" + "\n".join(proc_list)
-
-        # Available tools
-        tools_list = self.tools.list_tools()
-        tools_section = "\nAVAILABLE TOOLS:\n" + "\n".join(
-            f"- {t['name']}: {t.get('description', 'No description')[:50]}" for t in tools_list[:10]
+        # Format context sections using prompts module
+        experiences_section = self.prompts.format_experiences(
+            context.get("relevant_experiences", [])
         )
+        procedures_section = self.prompts.format_procedures(
+            context.get("relevant_procedures", [])
+        )
+        tools_section = self.prompts.format_tools(self.tools.list_tools())
 
-        prompt = f"""Solve this task step by step.
-
-TASK: {task.description}
-DIFFICULTY: {task.difficulty.name}
-DOMAIN: {task.domain.value}
-
-SUCCESS CRITERIA:
-{chr(10).join(f'- {c}' for c in task.success_criteria)}
-
-{experiences_section}
-{procedures_section}
-{tools_section}
-{hints_section}
-
-Think through the problem carefully and provide a complete solution.
-If this is a coding task, provide working code.
-If this is a reasoning task, show your reasoning step by step.
-
-SOLUTION:"""
+        # Generate prompt
+        prompt = self.prompts.solution_generation(
+            task,
+            experiences_section=experiences_section,
+            procedures_section=procedures_section,
+            tools_section=tools_section,
+            hints_section=hints_section,
+        )
 
         return await self.llm.generate(prompt)
 
@@ -246,102 +194,20 @@ SOLUTION:"""
 
         # If there are test cases, run them
         if task.test_cases and task.domain == TaskDomain.CODE:
-            test_score, test_errors = await self._run_test_cases(task, solution)
+            test_score, test_errors = await self.test_runner.run_test_cases(task, solution)
             errors.extend(test_errors)
             if test_score is not None:
                 return test_score, errors
 
         # LLM-based evaluation
-        prompt = f"""Evaluate this solution against the success criteria.
-
-TASK: {task.description}
-
-SUCCESS CRITERIA:
-{chr(10).join(f'- {c}' for c in task.success_criteria)}
-
-SOLUTION:
-{solution}
-
-Evaluate each criterion and provide scores in JSON:
-{{
-    "criterion_scores": {{"criterion": 0.8, ...}},
-    "overall_score": 0.0-1.0,
-    "errors": ["error 1", "error 2"],
-    "what_worked": ["thing that worked"],
-    "what_failed": ["thing that failed"]
-}}"""
-
+        prompt = self.prompts.solution_evaluation(task, solution)
         response = await self.llm.generate(prompt)
-        data = self._parse_json_response(response)
+        data = self.json_parser.parse(response)
 
         errors.extend(data.get("errors", []))
         errors.extend(data.get("what_failed", []))
 
         return data.get("overall_score", 0.5), errors
-
-    async def _run_test_cases(
-        self,
-        task: EvolutionTask,
-        solution: str,
-    ) -> Tuple[Optional[float], List[str]]:
-        """Run test cases for code solutions."""
-        if not task.test_cases:
-            return None, []
-
-        # Extract code from solution
-        code = self._extract_code(solution)
-        if not code:
-            return 0.0, ["No code found in solution"]
-
-        passed = 0
-        errors = []
-
-        for i, test in enumerate(task.test_cases):
-            test_input = test.get("input", "")
-            expected = test.get("expected_output", test.get("expected", ""))
-
-            # NOTE: The inner try/except with continue is intentional - it's a
-            # heuristic that tries each callable until one accepts the input.
-            # Failed attempts are expected behavior, not errors to log.
-            test_code = f"""
-{code}
-
-# Test case {i + 1}
-try:
-    result = main({repr(test_input)}) if 'main' in dir() else None
-    if result is None:
-        # Try to find the main function (silent continue is intentional)
-        import sys
-        for name, obj in list(globals().items()):
-            if callable(obj) and not name.startswith('_'):
-                try:
-                    result = obj({repr(test_input)})
-                    break
-                except Exception:
-                    continue  # Expected - try next callable
-
-    expected = {repr(expected)}
-    passed = result == expected
-    print(f"RESULT: {{result}}")
-    print(f"EXPECTED: {{expected}}")
-    print(f"PASSED: {{passed}}")
-except Exception as e:
-    print(f"ERROR: {{e}}")
-    print("PASSED: False")
-"""
-
-            result = await self.sandbox.execute(test_code, timeout=10)
-
-            if result.success and "PASSED: True" in result.stdout:
-                passed += 1
-            else:
-                error_msg = f"Test {i+1} failed"
-                if result.stderr:
-                    error_msg += f": {result.stderr[:100]}"
-                errors.append(error_msg)
-
-        score = passed / len(task.test_cases) if task.test_cases else 0
-        return score, errors
 
     async def _improve_solution(
         self,
@@ -351,86 +217,8 @@ except Exception as e:
         context: dict,
     ) -> str:
         """Improve a failed solution."""
-        prompt = f"""Your previous solution had errors. Fix them.
-
-TASK: {task.description}
-
-PREVIOUS SOLUTION:
-{current_solution}
-
-ERRORS:
-{chr(10).join(f'- {e}' for e in errors)}
-
-Analyze what went wrong and provide a corrected solution.
-Focus on fixing the specific errors mentioned.
-
-IMPROVED SOLUTION:"""
-
+        prompt = self.prompts.solution_improvement(task, current_solution, errors)
         return await self.llm.generate(prompt)
-
-    def _identify_skills(
-        self,
-        solution: str,
-        task: EvolutionTask,
-    ) -> List[str]:
-        """Identify skills demonstrated in the solution.
-
-        FIX E2E: Now validates skills against the skill registry to prevent
-        hallucination of non-existent skills.
-        """
-        demonstrated = set()
-        solution_lower = solution.lower()
-
-        # Skill detection patterns - MAPPED TO VALID SKILLS from registry
-        # Each pattern maps to a canonical skill name from VALID_SKILLS
-        skill_patterns = {
-            # Python skills
-            "python_basics": ["def ", "class ", "import ", "```python"],
-            "python_functions": ["def ", "lambda", "return "],
-            "python_classes": ["class ", "self.", "__init__"],
-            "python_decorators": ["@", "decorator"],
-            "python_comprehensions": ["[", "for", "in", "]"],
-            # Async skills
-            "async_programming": ["async ", "await ", "asyncio"],
-            "async_basics": ["async def", "await"],
-            # Testing skills
-            "testing": ["test", "assert", "pytest", "unittest"],
-            "unit_testing": ["test_", "assert", "assertEqual"],
-            "mocking": ["mock", "patch", "MagicMock"],
-            # Debugging skills
-            "debugging": ["debug", "breakpoint", "pdb"],
-            "error_handling": ["try:", "except", "raise"],
-            "logging": ["logging", "log.", "logger"],
-            # Architecture skills
-            "design_patterns": ["factory", "singleton", "observer", "pattern"],
-            "architecture": ["module", "component", "layer"],
-            "refactoring": ["refactor", "extract", "rename"],
-            # Performance skills
-            "optimization": ["optimize", "cache", "efficient"],
-            "caching": ["cache", "memoize", "@lru_cache"],
-            "profiling": ["profile", "timeit", "cProfile"],
-            # Data skills
-            "data_processing": ["pandas", "numpy", "data"],
-            "sql": ["SELECT", "INSERT", "sql", "query"],
-            # Documentation
-            "documentation": ["docstring", '"""', "'''"],
-            "code_comments": ["#", "comment"],
-        }
-
-        for skill, keywords in skill_patterns.items():
-            if any(kw in solution_lower or kw in solution for kw in keywords):
-                # FIX E2E: Only add if it's a valid skill
-                if is_valid_skill(skill):
-                    demonstrated.add(skill)
-
-        # Add expected skills from task - BUT VALIDATE THEM
-        for skill in task.expected_skills:
-            if is_valid_skill(skill):
-                demonstrated.add(skill)
-
-        # FIX E2E: Final validation - only return valid skills
-        validated = validate_skills(list(demonstrated))
-        return validated
 
     async def _learn_from_result(self, result: ExecutionResult):
         """Learn from task execution result."""
@@ -469,30 +257,6 @@ IMPROVED SOLUTION:"""
                     skill_name=f"avoid_error_{result.task.domain.value}",
                     steps=reflection_result.lessons_learned,
                 )
-
-    def _extract_code(self, text: str) -> str:
-        """Extract code from solution text."""
-        # Try to find code block
-        code_match = re.search(r"```(?:python)?\n(.*?)```", text, re.DOTALL)
-        if code_match:
-            return code_match.group(1).strip()
-
-        # Look for function definitions
-        func_match = re.search(r"(def \w+.*?)(?=\n\n|\Z)", text, re.DOTALL)
-        if func_match:
-            return func_match.group(1).strip()
-
-        return text
-
-    def _parse_json_response(self, text: str) -> dict:
-        """Parse JSON from LLM response."""
-        json_match = re.search(r"\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}", text, re.DOTALL)
-        if json_match:
-            try:
-                return json.loads(json_match.group())
-            except json.JSONDecodeError as e:
-                logger.debug(f"Failed to parse JSON from LLM response: {e}")
-        return {}
 
     def get_stats(self) -> Dict[str, Any]:
         """Get executor statistics."""

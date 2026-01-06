@@ -12,6 +12,7 @@ References:
 from __future__ import annotations
 
 import logging
+import random
 from contextlib import contextmanager
 from typing import Any, Dict, Generator, List, Optional
 
@@ -54,6 +55,40 @@ class AgentTracer:
         self._llm_spans: List[LLMSpan] = []
         self._tool_spans: List[ToolSpan] = []
         self._current_context: Optional[TraceContext] = None
+        self._sampling_stats = {"sampled": 0, "dropped": 0}
+
+    def _should_sample(self, is_error: bool = False) -> bool:
+        """
+        Decide whether to sample this trace (P1-5).
+
+        Implements head-based + tail-based sampling:
+        - Head-based: Sample X% of all traces (configurable)
+        - Tail-based: Always sample errors (100%)
+
+        Args:
+            is_error: Whether this is an error trace
+
+        Returns:
+            True if trace should be sampled
+
+        Reference:
+            https://www.groundcover.com/opentelemetry/opentelemetry-metrics
+        """
+        if not self._config.sampling_enabled:
+            return True  # Sampling disabled - sample everything
+
+        # Tail-based: Always sample errors
+        if is_error and self._config.tail_sample_errors:
+            self._sampling_stats["sampled"] += 1
+            return True
+
+        # Head-based: Sample based on rate
+        if random.random() < self._config.head_sample_rate:
+            self._sampling_stats["sampled"] += 1
+            return True
+
+        self._sampling_stats["dropped"] += 1
+        return False
 
     @contextmanager
     def start_agent_span(
@@ -118,7 +153,13 @@ class AgentTracer:
         finally:
             # Cleanup
             del self._active_spans[span.span_id]
-            self._completed_spans.append(span)
+
+            # Sampling decision (P1-5)
+            is_error = span.status_code == "ERROR"
+            if self._should_sample(is_error=is_error):
+                self._completed_spans.append(span)
+            # If not sampled, span is dropped (not stored)
+
             self._current_context = old_context
 
             logger.debug(
@@ -254,6 +295,12 @@ class AgentTracer:
 
         error_count = sum(1 for s in self._completed_spans if s.status_code == "ERROR")
 
+        # Calculate sampling metrics
+        total_traces = self._sampling_stats["sampled"] + self._sampling_stats["dropped"]
+        sample_rate_actual = (
+            self._sampling_stats["sampled"] / total_traces if total_traces > 0 else 0.0
+        )
+
         return {
             "total_agent_spans": total_agent_spans,
             "total_llm_spans": total_llm_spans,
@@ -264,6 +311,12 @@ class AgentTracer:
             "error_count": error_count,
             "error_rate": error_count / total_agent_spans if total_agent_spans else 0.0,
             "active_spans": len(self._active_spans),  # Number of currently active spans
+            # Sampling metrics (P1-5)
+            "sampling_enabled": self._config.sampling_enabled,
+            "traces_sampled": self._sampling_stats["sampled"],
+            "traces_dropped": self._sampling_stats["dropped"],
+            "sample_rate_actual": sample_rate_actual,
+            "sample_rate_configured": self._config.head_sample_rate,
         }
 
     def export_spans(self) -> List[Dict[str, Any]]:
