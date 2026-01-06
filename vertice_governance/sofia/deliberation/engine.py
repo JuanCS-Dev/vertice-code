@@ -187,6 +187,54 @@ class DeliberationEngine:
         """Retorna histórico de deliberações."""
         return self._deliberation_history
 
+    def format_deliberation_output(self, result: DeliberationResult) -> str:
+        """
+        Formata o resultado da deliberação em uma string legível.
+
+        Args:
+            result: Resultado da deliberação
+
+        Returns:
+            String formatada com insights e recomendação
+        """
+        output = []
+        
+        # Cabeçalho
+        output.append("🤔 DELIBERAÇÃO PROFUNDA (SISTEMA 2)\n")
+        output.append("Esta questão é complexa e merece uma análise cuidadosa.\n")
+
+        # 1. Recomendação Principal
+        output.append(f"**Recomendação**: {result.recommendation}\n")
+
+        # 2. Insights Chave
+        if result.key_insights:
+            output.append("**Insights Chave**:")
+            for insight in result.key_insights:
+                output.append(f"• {insight}")
+            output.append("")
+
+        # 3. Tensões de Valores
+        if result.values_in_tension:
+            output.append("**Tensões de Valores**:")
+            for v1, v2 in result.values_in_tension:
+                output.append(f"• {v1} vs {v2}")
+            output.append("")
+
+        # 4. Perspectivas Consideradas
+        if result.perspectives_considered:
+            output.append("**Perspectivas Consideradas**:")
+            for p in result.perspectives_considered[:3]:
+                output.append(f"• {p.name}: {p.viewpoint[:100]}...")
+            output.append("")
+
+        # 5. Incertezas e Limitações
+        if result.uncertainty_areas:
+            output.append("\n**Incertezas Identificadas**:")
+            for uncertainty in result.uncertainty_areas[:2]:
+                output.append(f"• {uncertainty}")
+
+        return "\n".join(output)
+
     def __repr__(self) -> str:
         return (
             f"DeliberationEngine("

@@ -1,4 +1,5 @@
-"""
+"
+
 Vertice Coder Agent
 
 Fast code generation specialist with Darwin Gödel self-improvement.
@@ -15,7 +16,7 @@ Fallback: Cerebras, Vertex AI
 Reference:
 - Darwin Gödel Machine (arXiv:2505.22954, Sakana AI)
 - https://sakana.ai/dgm/
-"""
+"
 
 from __future__ import annotations
 
@@ -162,6 +163,7 @@ If you need to create a file, use the 'write_file' tool.
             current_turn += 1
             full_response = ""
             tool_calls = []
+            json_buffer = ""
 
             async for chunk in llm.stream_chat(
                 messages,
@@ -169,27 +171,32 @@ If you need to create a file, use the 'write_file' tool.
                 max_tokens=4096,
                 tools=tools
             ):
-                # 1. Detect API Tool Calls (JSON)
-                try:
-                    if chunk.strip().startswith('{"tool_call":'):
-                        data = json.loads(chunk)
-                        tool_calls.append(data["tool_call"])
-                        continue
-                except (json.JSONDecodeError, KeyError, TypeError):
-                    pass
+                # Detect API Tool Calls (JSON)
+                if '"tool_call":' in chunk:
+                    json_buffer += chunk
+                    try:
+                        start = json_buffer.find('{"tool_call":')
+                        if start != -1:
+                            data = json.loads(json_buffer[start:])
+                            tool_calls.append(data["tool_call"])
+                            json_buffer = ""
+                            continue
+                    except (json.JSONDecodeError, KeyError, TypeError):
+                        pass
                 
                 full_response += chunk
                 yield chunk
 
-            # 2. Fallback: Detect Simulated/Hallucinated Tool Calls in Text
-            # Pattern: ```python\nwrite_file('name', """content""")\n```
-            # We use a simple heuristic to catch common "Show, don't tell" failures
+            # Fallback: Detect Simulated Tool Calls
             if not tool_calls:
-                import re
-                # Regex to find write_file calls in markdown blocks
-                # Matches: write_file("filename", """content""") or single quotes
-                pattern = r"write_file\s*\(\s*['\"]([^'\"]+)['\"]\s*,\s*(?:'''|\"\"\")(.*?)(?:'''|\"\"\")\s*\)"
+                # Matches: write_file("filename", """content""")
+                pattern = r"write_file\s*\(\s*['"]([^'"]+)['"]\s*,\s*(?:'''|""")(.*?)(?:'''|""")\s*\)"
                 matches = re.findall(pattern, full_response, re.DOTALL)
+                
+                # Matches: write_file("filename", "content")
+                if not matches:
+                    pattern_simple = r"write_file\s*\(\s*['"]([^'"]+)['"]\s*,\s*['"](.*?)['"]\s*\)"
+                    matches = re.findall(pattern_simple, full_response, re.DOTALL)
                 
                 for filename, content in matches:
                     tool_calls.append({
@@ -203,25 +210,33 @@ If you need to create a file, use the 'write_file' tool.
                 break
                 
             # Execute Tools
+            messages.append({"role": "assistant", "content": full_response})
+            
             for call in tool_calls:
                 tool_name = call["name"]
                 args = call["arguments"]
                 
-                yield f"\n\n[Executing Tool: {tool_name}]...\n"
+                yield f"\n\n[Executing Tool: {tool_name} with args {list(args.keys())}]...\n"
                 
-                # Find tool instance
                 tool_instance = next((t for t in tools if t.name == tool_name), None)
                 if tool_instance:
-                    result = await tool_instance._execute_validated(**args)
-                    output = result.data if result.success else f"Error: {result.error}"
-                    
-                    # Add result to history
-                    messages.append({"role": "assistant", "content": json.dumps(call)}) # Mocking the function call msg
-                    messages.append({"role": "user", "content": f"Tool Output [{tool_name}]: {output}"}) # Mocking the function response
-                    
-                    yield f"[Result: {str(output)[:100]}...]\n"
+                    try:
+                        result = await tool_instance._execute_validated(**args)
+                        output = result.data if result.success else f"Error: {result.error}"
+                        
+                        # Add result to history for next turn
+                        messages.append({
+                            "role": "user", 
+                            "content": f"Tool Result [{tool_name}]: {output}"
+                        })
+                        
+                        yield f"[Result: {str(output)[:200]}...]\n"
+                    except Exception as e:
+                        yield f"[Error: {e}]\n"
+                        messages.append({"role": "user", "content": f"Error executing {tool_name}: {e}"})
                 else:
                     yield f"[Error: Tool {tool_name} not found]\n"
+                    messages.append({"role": "user", "content": f"Tool {tool_name} not found"})
 
     async def refactor(
         self,
@@ -468,7 +483,7 @@ Continue naturally. Only output the completion, not the original code.
 
     def _extract_code_block(self, text: str, language: str) -> str:
         """Extract code from markdown code block."""
-        pattern = r"```{language}?\n?(.*?)""`"
+        pattern = r"```{{language}}?\n?(.*?)""`"
         match = re.search(pattern, text, re.DOTALL)
         if match:
             return match.group(1).strip()

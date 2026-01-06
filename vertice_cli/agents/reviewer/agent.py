@@ -14,7 +14,7 @@ import ast
 import json
 import logging
 import re
-from typing import Any, Dict, List, TypedDict
+from typing import Any, Dict, List, Optional, TypedDict
 
 from vertice_cli.utils import MarkdownExtractor
 
@@ -48,6 +48,15 @@ from .sub_agents import (
     PerformanceAgent,
     TestCoverageAgent,
 )
+
+# SOFIA Integration for ethical code review
+try:
+    from vertice_governance.sofia import SofiaAgent
+
+    SOFIA_AVAILABLE = True
+except ImportError:
+    SofiaAgent = None  # type: ignore
+    SOFIA_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -100,15 +109,26 @@ class ReviewerAgent(BaseAgent):
         self.test_agent = TestCoverageAgent()
         self.graph_agent = CodeGraphAnalysisAgent()
 
+        # Initialize SOFIA for ethical code analysis (Constituição Vértice v3.0)
+        self.sofia_agent = None
+        if SOFIA_AVAILABLE and SofiaAgent is not None:
+            try:
+                self.sofia_agent = SofiaAgent()
+                logger.info("SOFIA integrated for ethical code review")
+            except Exception as e:
+                logger.warning(f"Failed to initialize SOFIA: {e}")
+
     def _build_system_prompt(self) -> str:
-        return """
-        You are ReviewerAgent v5.0 - Enterprise-Grade Code Review System.
+        sofia_status = " + SOFIA (Ethical Analysis)" if self.sofia_agent else ""
+        return f"""
+        You are ReviewerAgent v5.0 - Enterprise-Grade Code Review System{sofia_status}.
 
         You have access to:
         1. Static Analysis (AST, Complexity, Code Graphs)
         2. RAG-based Codebase Context
         3. Specialized Sub-Agents (Security, Performance, Testing)
         4. Team Standards & Historical Data
+        {"5. SOFIA - Ethical Code Analysis (Virtues, Discernment, Deliberation)" if self.sofia_agent else ""}
 
         Your role:
         - Provide actionable, context-aware feedback
@@ -116,9 +136,48 @@ class ReviewerAgent(BaseAgent):
         - Suggest fixes that align with team standards
         - Identify patterns across the codebase
         - Balance thoroughness with pragmatism
+        {"- Consider ethical implications and virtue alignment" if self.sofia_agent else ""}
 
         Output: Structured ReviewReport JSON
         """
+
+    def _analyze_with_sofia(self, code_content: str, file_path: str) -> Optional[Dict[str, Any]]:
+        """Analyze code with SOFIA for ethical considerations."""
+        if not self.sofia_agent:
+            return None
+
+        try:
+            # Create a focused prompt for code ethics analysis
+            ethics_prompt = f"""
+            Analyze this code for ethical implications and virtue alignment:
+
+            File: {file_path}
+            Code:
+            {code_content[:2000]}  # Limit for analysis
+
+            Consider:
+            1. Privacy and data protection
+            2. User autonomy and consent
+            3. Fairness and bias potential
+            4. Transparency and explainability
+            5. Societal impact
+            6. Alignment with Christian virtues (if applicable)
+            """
+
+            # Use SOFIA to analyze
+            counsel = self.sofia_agent.respond(ethics_prompt)
+
+            return {
+                "sofia_counsel": counsel.response
+                if hasattr(counsel, "response") and counsel.response
+                else None,
+                "thinking_mode": getattr(counsel, "thinking_mode", None),
+                "counsel_type": getattr(counsel, "counsel_type", None),
+                "session_id": getattr(counsel, "session_id", None),
+            }
+        except Exception as e:
+            logger.warning(f"SOFIA analysis failed: {e}")
+            return None
 
     async def execute(self, task: AgentTask) -> AgentResponse:
         try:
@@ -204,6 +263,41 @@ class ReviewerAgent(BaseAgent):
                     self.security_agent.file_path = fname
                     sec_issues = await self.security_agent.analyze(content, tree)
                     all_issues.extend(sec_issues)
+
+                    # Linting Tools Analysis (CODE_CONSTITUTION compliance)
+                    lint_issues = await self._run_linting_tools(fname, content)
+                    all_issues.extend(lint_issues)
+
+                    # SOFIA Ethical Analysis (Constituição Vértice v3.0)
+                    sofia_analysis = self._analyze_with_sofia(content, fname)
+                    if sofia_analysis and sofia_analysis.get("sofia_counsel"):
+                        counsel_text = sofia_analysis["sofia_counsel"]
+                        # Add ethical insights as issues if they contain concerns
+                        if any(
+                            word in counsel_text.lower()
+                            for word in [
+                                "concern",
+                                "ethical",
+                                "privacy",
+                                "bias",
+                                "fairness",
+                                "virtue",
+                                "moral",
+                            ]
+                        ):
+                            all_issues.append(
+                                CodeIssue(
+                                    file=fname,
+                                    line=1,
+                                    severity=IssueSeverity.MEDIUM,
+                                    category=IssueCategory.SECURITY,
+                                    message="SOFIA ethical analysis detected potential concerns",
+                                    explanation=f"SOFIA counsel: {counsel_text[:200]}...",
+                                    fix_suggestion="Review ethical implications and consider SOFIA recommendations for virtue alignment",
+                                    confidence=0.8,
+                                )
+                            )
+
                 except Exception as e:
                     logger.debug(f"Security analysis failed for {fname}: {e}")
 
@@ -272,6 +366,88 @@ class ReviewerAgent(BaseAgent):
             return AgentResponse(
                 success=False, error=str(e), reasoning=f"Review process failed: {str(e)}"
             )
+
+    async def _run_linting_tools(self, file_path: str, content: str) -> List[CodeIssue]:
+        """Run linting tools (ruff, mypy, pylint) and convert results to CodeIssue objects."""
+        issues = []
+
+        try:
+            # Run ruff for fast linting and formatting checks
+            ruff_result = await self._execute_tool(
+                "bash_command",
+                {
+                    "command": f"cd /media/juan/DATA/Vertice-Code && python -m ruff check {file_path} --output-format json",
+                    "timeout": 30,
+                },
+            )
+
+            if ruff_result.get("success"):
+                import json
+
+                try:
+                    ruff_output = json.loads(ruff_result.get("data", "[]"))
+                    for violation in ruff_output:
+                        issues.append(
+                            CodeIssue(
+                                file=file_path,
+                                line=violation.get("location", {}).get("row", 1),
+                                severity=IssueSeverity.MEDIUM
+                                if violation.get("code", "").startswith("E")
+                                else IssueSeverity.LOW,
+                                category=IssueCategory.MAINTAINABILITY,
+                                message=f"Ruff: {violation.get('message', 'Unknown issue')}",
+                                explanation=f"Rule: {violation.get('code', 'unknown')}",
+                                fix_suggestion=violation.get("fix", {}).get(
+                                    "message", "Fix code style issue"
+                                ),
+                                confidence=0.9,
+                            )
+                        )
+                except json.JSONDecodeError:
+                    pass  # ruff output not valid JSON
+
+        except Exception as e:
+            logger.debug(f"Ruff analysis failed for {file_path}: {e}")
+
+        try:
+            # Run mypy for type checking
+            mypy_result = await self._execute_tool(
+                "bash_command",
+                {
+                    "command": f"cd /media/juan/DATA/Vertice-Code && python -m mypy {file_path} --ignore-missing-imports --no-error-summary",
+                    "timeout": 60,
+                },
+            )
+
+            if not mypy_result.get("success") and mypy_result.get("error"):
+                # Parse mypy error output
+                error_output = mypy_result.get("error", "")
+                for line in error_output.split("\n"):
+                    if ":" in line and file_path in line:
+                        try:
+                            parts = line.split(":")
+                            if len(parts) >= 3:
+                                line_num = int(parts[1])
+                                message = ":".join(parts[2:]).strip()
+                                issues.append(
+                                    CodeIssue(
+                                        file=file_path,
+                                        line=line_num,
+                                        severity=IssueSeverity.HIGH,
+                                        category=IssueCategory.MAINTAINABILITY,
+                                        message=f"MyPy: {message}",
+                                        explanation="Type checking error detected by MyPy",
+                                        fix_suggestion="Fix type annotations or type-related issues",
+                                        confidence=0.95,
+                                    )
+                                )
+                        except (ValueError, IndexError):
+                            continue
+
+        except Exception as e:
+            logger.debug(f"MyPy analysis failed for {file_path}: {e}")
+
+        return issues
 
     def _smart_truncate(self, content: str, limit: int = MAX_FILE_CHARS) -> str:
         """

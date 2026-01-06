@@ -17,7 +17,7 @@ from .types import DeliberationTrigger
 TRIGGER_KEYWORDS: Dict[DeliberationTrigger, List[str]] = {
     DeliberationTrigger.ETHICAL_DILEMMA: [
         "certo", "errado", "ético", "moral", "devo", "deveria",
-        "consciência", "culpa", "justo", "injusto",
+        "consciência", "culpa", "justo", "injusto", "privacidade",
     ],
     DeliberationTrigger.VALUES_CONFLICT: [
         "dilema", "conflito", "escolher entre", "ou... ou",
@@ -26,6 +26,7 @@ TRIGGER_KEYWORDS: Dict[DeliberationTrigger, List[str]] = {
     DeliberationTrigger.HIGH_STAKES: [
         "importante", "crucial", "decisivo", "determinante",
         "mudança de vida", "carreira", "casamento", "família",
+        "vigilância",
     ],
     DeliberationTrigger.IRREVERSIBLE: [
         "irreversível", "sem volta", "definitivo", "permanente",

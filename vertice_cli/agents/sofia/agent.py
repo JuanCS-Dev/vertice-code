@@ -223,6 +223,9 @@ Always:
             "violencia",
             "abuso",
             "emergencia",
+            "suicídio",
+            "violência",
+            "emergência",
         ]
 
         for keyword in crisis_keywords:
@@ -234,6 +237,10 @@ Always:
     def get_metrics(self, agent_id: str) -> Optional[CounselMetrics]:
         """Get counsel metrics for an agent."""
         return self._metrics_cache.get(agent_id)
+
+    def get_virtue_distribution(self) -> Dict[str, float]:
+        """Get the current balance/distribution of virtues."""
+        return self.sofia_core.virtue_engine.get_virtue_balance()
 
     def get_session_history(self, session_id: str) -> List[SofiaCounsel]:
         """Get all counsel in a session."""
@@ -430,6 +437,31 @@ Respond helpfully in the same language the user used."""
         )
 
         return await self.provide_counsel_async(
+            query=query,
+            context={
+                **(context or {}),
+                "mode": "pre_execution",
+                "risk_level": risk_level,
+                "action": action_description,
+            },
+            agent_id=agent_id,
+        )
+
+    def pre_execution_counsel_sync(
+        self,
+        action_description: str,
+        risk_level: str,
+        agent_id: str,
+        context: Optional[Dict[str, Any]] = None,
+    ) -> CounselResponse:
+        """Provide counsel BEFORE executing a risky action (Sync version)."""
+        query = (
+            f"I am about to execute a {risk_level} risk action: "
+            f"{action_description}. "
+            f"What should I carefully consider before proceeding?"
+        )
+
+        return self.provide_counsel(
             query=query,
             context={
                 **(context or {}),
