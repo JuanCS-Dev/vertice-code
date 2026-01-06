@@ -116,6 +116,15 @@ class OrchestratorAgent(
             AgentRole.DEVOPS: DevOpsAgent(),
         }
 
+        # Lazy load Prometheus Meta-Agent (L4 Autonomy)
+        try:
+            from vertice_agents.registry import get_agent
+            prometheus = get_agent("prometheus")
+            if prometheus:
+                self.agents[AgentRole.PROMETHEUS] = prometheus
+        except ImportError:
+            logger.warning("Could not load Prometheus agent")
+
         # Register all agents as workers in the mesh
         for role, agent in self.agents.items():
             self.register_worker(
@@ -258,7 +267,34 @@ class OrchestratorAgent(
         stream: bool,
     ) -> AsyncIterator[str]:
         """Delegate task execution to specialized agent."""
-        if hasattr(agent, "generate") and agent_role == AgentRole.CODER:
+        if agent_role == AgentRole.PROMETHEUS:
+            # Adapt Core Task -> CLI AgentTask
+            # This bridges the gap between Core and CLI agent protocols
+            from vertice_cli.agents.base import AgentTask
+            
+            agent_task = AgentTask(
+                task_id=task.id,
+                request=task.description,
+                metadata={
+                    "complexity": task.complexity.value,
+                    "fast_mode": True  # Default to fast mode for integration
+                }
+            )
+            response = await agent.execute(agent_task)
+            
+            # Extract result from AgentResponse (response.data["result"])
+            task_result = response.data.get("result")
+            if task_result and hasattr(task_result, "output"):
+                output_data = task_result.output
+                # Output might be a dict (TaskResult definition) or string (if coerced)
+                if isinstance(output_data, dict):
+                    yield output_data.get("output") or str(output_data)
+                else:
+                    yield str(output_data)
+            else:
+                yield "Prometheus task executed (no output available)"
+
+        elif hasattr(agent, "generate") and agent_role == AgentRole.CODER:
             from agents.coder.types import CodeGenerationRequest
 
             request = CodeGenerationRequest(

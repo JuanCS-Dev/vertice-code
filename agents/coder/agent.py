@@ -1,5 +1,4 @@
-"
-
+"""
 Vertice Coder Agent
 
 Fast code generation specialist with Darwin Gödel self-improvement.
@@ -16,7 +15,7 @@ Fallback: Cerebras, Vertex AI
 Reference:
 - Darwin Gödel Machine (arXiv:2505.22954, Sakana AI)
 - https://sakana.ai/dgm/
-"
+"""
 
 from __future__ import annotations
 
@@ -190,12 +189,13 @@ If you need to create a file, use the 'write_file' tool.
             # Fallback: Detect Simulated Tool Calls
             if not tool_calls:
                 # Matches: write_file("filename", """content""")
-                pattern = r"write_file\s*\(\s*['"]([^'"]+)['"]\s*,\s*(?:'''|""")(.*?)(?:'''|""")\s*\)"
+                # Simplified regex to avoid syntax errors
+                pattern = r'write_file\s*\(\s*["\']([^"\']+)["\']\s*,\s*(?:"""|\'\'\')((?:.|[\r\n])*?)(?:"""|\'\'\')\s*\)'
                 matches = re.findall(pattern, full_response, re.DOTALL)
                 
                 # Matches: write_file("filename", "content")
                 if not matches:
-                    pattern_simple = r"write_file\s*\(\s*['"]([^'"]+)['"]\s*,\s*['"](.*?)['"]\s*\)"
+                    pattern_simple = r'write_file\s*\(\s*["\']([^"\']+)["\']\s*,\s*["\']([^"\']*)["\']\s*\)'
                     matches = re.findall(pattern_simple, full_response, re.DOTALL)
                 
                 for filename, content in matches:

@@ -48,6 +48,7 @@ class AgentRole(str, Enum):
     ARCHITECT = "architect"
     RESEARCHER = "researcher"
     DEVOPS = "devops"
+    PROMETHEUS = "prometheus"
 
 
 @dataclass

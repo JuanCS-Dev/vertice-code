@@ -194,8 +194,11 @@ class PrometheusIntegratedAgent(BaseAgent):
             logger.info(f"Task completed successfully (length={len(full_output)})")
 
             return AgentResponse(
-                task_id=task.task_id,
-                result=result,
+                success=True,
+                data={
+                    "task_id": task.task_id,
+                    "result": result,
+                },
                 reasoning=(
                     "Executed via Prometheus meta-orchestrator with "
                     f"{'fast mode (no memory/reflection)' if fast_mode else 'full pipeline (memory + reflection)'}"
@@ -219,8 +222,12 @@ class PrometheusIntegratedAgent(BaseAgent):
             )
 
             return AgentResponse(
-                task_id=task.task_id,
-                result=result,
+                success=False,
+                data={
+                    "task_id": task.task_id,
+                    "result": result,
+                },
+                error=f"{type(e).__name__}: {str(e)}",
                 reasoning=f"Failed during Prometheus orchestration: {type(e).__name__}",
             )
 

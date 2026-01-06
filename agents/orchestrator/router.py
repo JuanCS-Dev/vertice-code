@@ -31,6 +31,10 @@ class TaskRouter:
         "refactor": AgentRole.CODER,
         "security": AgentRole.REVIEWER,
         "documentation": AgentRole.RESEARCHER,
+        "plan": AgentRole.PROMETHEUS,
+        "complex": AgentRole.PROMETHEUS,
+        "evolve": AgentRole.PROMETHEUS,
+        "simulate": AgentRole.PROMETHEUS,
     }
 
     # Complexity -> recommended model mapping
@@ -52,6 +56,10 @@ class TaskRouter:
         Returns:
             AgentRole for the task.
         """
+        # Complexity-based routing (L4 Autonomy elevation)
+        if task.complexity in (TaskComplexity.COMPLEX, TaskComplexity.CRITICAL):
+            return AgentRole.PROMETHEUS
+
         description_lower = task.description.lower()
 
         for keyword, agent in self.ROUTING_TABLE.items():
