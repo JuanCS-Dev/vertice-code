@@ -9,6 +9,7 @@ from vertice_cli.tools.registry_helper import get_default_registry
 from vertice_cli.integrations.mcp.config import MCPConfig
 from vertice_cli.integrations.mcp.shell_handler import ShellManager
 from vertice_cli.integrations.mcp.tools import MCPToolsAdapter
+from prometheus.integrations.mcp_adapter import PrometheusMCPAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -23,14 +24,29 @@ class QwenMCPServer:
         self.tools_adapter: Optional[MCPToolsAdapter] = None
         self._running = False
 
-    def initialize(self, registry: ToolRegistry):
+    def initialize(self, registry: ToolRegistry, prometheus_provider=None):
         """Initialize server with tool registry."""
         self.tools_adapter = MCPToolsAdapter(registry, self.shell_manager)
+
+        # Initialize Prometheus adapter if provider available
+        if prometheus_provider:
+            self.tools_adapter.prometheus_adapter = PrometheusMCPAdapter(
+                prometheus_provider, self.shell_manager
+            )
+
         self.tools_adapter.register_all(self.mcp)
 
-        logger.info(
-            f"MCP Server initialized with {len(registry.get_all())} CLI tools (shell tools registered)"
-        )
+        total_tools = len(registry.get_all())
+        if self.tools_adapter.prometheus_adapter:
+            prometheus_tools = len(self.tools_adapter.prometheus_adapter.list_registered_tools())
+            total_tools += prometheus_tools
+            logger.info(
+                f"MCP Server initialized with {len(registry.get_all())} CLI tools + {prometheus_tools} Prometheus tools"
+            )
+        else:
+            logger.info(
+                f"MCP Server initialized with {total_tools} CLI tools (shell tools registered)"
+            )
 
     async def start(self):
         """Start MCP server."""

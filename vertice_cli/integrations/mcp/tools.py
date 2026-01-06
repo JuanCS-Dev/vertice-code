@@ -4,6 +4,7 @@ import logging
 from typing import Optional
 from vertice_cli.tools.base import ToolRegistry
 from vertice_cli.integrations.mcp.shell_handler import ShellManager
+from prometheus.integrations.mcp_adapter import PrometheusMCPAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +15,7 @@ class MCPToolsAdapter:
     def __init__(self, registry: ToolRegistry, shell_manager: ShellManager):
         self.registry = registry
         self.shell_manager = shell_manager
+        self.prometheus_adapter: Optional[PrometheusMCPAdapter] = None
         self._mcp_tools = {}
 
     def register_all(self, mcp_server):
@@ -23,7 +25,15 @@ class MCPToolsAdapter:
         # Other tools would require schema introspection to generate wrappers
 
         self._register_shell_tools(mcp_server)
+        self._register_prometheus_tools(mcp_server)
         logger.info(f"Registered {len(self._mcp_tools)} MCP tools")
+
+    def _register_prometheus_tools(self, mcp_server):
+        """Register Prometheus tools via MCP adapter."""
+        if self.prometheus_adapter:
+            self.prometheus_adapter.register_all(mcp_server)
+            prometheus_tools = self.prometheus_adapter.list_registered_tools()
+            self._mcp_tools.update({tool: None for tool in prometheus_tools})
 
     def _register_tool(self, mcp_server, tool_name: str, tool_fn):
         """Register single CLI tool as MCP tool."""
