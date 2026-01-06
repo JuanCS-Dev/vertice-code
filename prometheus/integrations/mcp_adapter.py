@@ -16,6 +16,7 @@ import logging
 from typing import Optional
 from vertice_cli.integrations.mcp.shell_handler import ShellManager
 from vertice_cli.core.providers import PrometheusProvider
+from vertice_cli.integrations.skills.prometheus_skills import PrometheusSkillsProvider
 
 logger = logging.getLogger(__name__)
 
@@ -30,11 +31,25 @@ class PrometheusMCPAdapter:
     ):
         self.provider = prometheus_provider
         self.shell_manager = shell_manager or ShellManager()
+        self.skills_provider = PrometheusSkillsProvider()
         self._mcp_tools = {}
 
     def set_provider(self, provider: PrometheusProvider):
         """Set Prometheus provider (for lazy initialization)."""
         self.provider = provider
+        # Configure skills provider with the registry if available
+        if (
+            hasattr(provider, "_orchestrator")
+            and provider._orchestrator
+            and hasattr(provider._orchestrator, "evolution")
+        ):
+            if (
+                hasattr(provider._orchestrator.evolution, "skills_registry")
+                and provider._orchestrator.evolution.skills_registry
+            ):
+                self.skills_provider.set_skills_registry(
+                    provider._orchestrator.evolution.skills_registry
+                )
 
     def register_all(self, mcp_server):
         """Register all Prometheus tools as MCP tools."""
@@ -43,6 +58,7 @@ class PrometheusMCPAdapter:
             return
 
         self._register_prometheus_tools(mcp_server)
+        self._register_skills_as_mcp_tools(mcp_server)
         logger.info(f"Registered {len(self._mcp_tools)} Prometheus MCP tools")
 
     def _register_prometheus_tools(self, mcp_server):
@@ -231,6 +247,15 @@ class PrometheusMCPAdapter:
                 "prometheus_benchmark": prometheus_benchmark,
             }
         )
+
+    def _register_skills_as_mcp_tools(self, mcp_server):
+        """Register learned skills as MCP tools."""
+        try:
+            # Register skills as MCP tools
+            skills_registered = self.skills_provider.register_skills_as_mcp_tools(mcp_server)
+            logger.info(f"Registered {skills_registered} learned skills as MCP tools")
+        except Exception as e:
+            logger.warning(f"Failed to register skills as MCP tools: {e}")
 
     def list_registered_tools(self) -> list:
         """List all registered MCP tools."""

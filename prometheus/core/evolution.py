@@ -15,6 +15,7 @@ The co-evolution loop enables the agent to:
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Any, AsyncIterator
 import asyncio
+import logging
 
 from ..agents.curriculum_agent import (
     CurriculumAgent,
@@ -24,10 +25,13 @@ from ..agents.curriculum_agent import (
 )
 from ..agents.executor_agent import ExecutorAgent, ExecutionResult
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class EvolutionStats:
     """Overall evolution statistics."""
+
     total_iterations: int = 0
     total_tasks: int = 0
     tasks_solved: int = 0
@@ -54,6 +58,7 @@ class EvolutionStats:
 @dataclass
 class EvolutionIteration:
     """A single iteration of evolution."""
+
     iteration: int
     task: EvolutionTask
     result: ExecutionResult
@@ -74,33 +79,42 @@ class EvolutionIteration:
 
 class CoEvolutionLoop:
     """
-    Co-Evolution Loop Coordinator.
+    Co-Evolution Loop - Agent0-inspired Self-Improvement.
 
-    Manages the interplay between Curriculum Agent and Executor Agent
-    for continuous self-improvement.
+    Reference: Agent0 (arXiv:2511.16043)
+    - Curriculum Agent vs Executor Agent co-evolution
+    - +18% math reasoning, +24% general reasoning
+    - Zero external data needed
     """
 
     def __init__(
-        self,
-        llm_client,
-        tool_factory,
-        memory_system,
-        reflection_engine,
-        sandbox_executor,
+        self, llm_client, tool_factory, memory_system, reflection_engine, sandbox_executor
     ):
         self.llm = llm_client
-        self.curriculum = CurriculumAgent(llm_client)
+        self.tools = tool_factory
+        self.memory = memory_system
+        self.reflection = reflection_engine
+        self.sandbox = sandbox_executor
+
+        self.skills_registry = None
+        self.curriculum = CurriculumAgent(memory_system)
         self.executor = ExecutorAgent(
-            llm_client,
-            tool_factory,
-            memory_system,
-            reflection_engine,
-            sandbox_executor,
+            llm_client, tool_factory, memory_system, reflection_engine, sandbox_executor
         )
 
         self.evolution_history: List[EvolutionIteration] = []
         self.stats = EvolutionStats()
         self._is_evolving = False
+
+    def set_skills_registry(self, skills_registry):
+        """Set the skills registry for auto-registration of learned skills."""
+        from ..skills.registry import PrometheusSkillsRegistry
+
+        if isinstance(skills_registry, PrometheusSkillsRegistry):
+            self.skills_registry = skills_registry
+            logger.info("Skills registry configured for auto-registration of learned skills")
+        else:
+            logger.warning("Invalid skills registry type provided")
 
     async def evolve(
         self,
@@ -144,19 +158,21 @@ class CoEvolutionLoop:
                 result = await self.executor.attempt_task(task)
 
                 # Curriculum updates based on result
-                self.curriculum.update_curriculum(task, {
-                    "success": result.success,
-                    "score": result.score,
-                    "skills_demonstrated": result.skills_demonstrated,
-                })
+                self.curriculum.update_curriculum(
+                    task,
+                    {
+                        "success": result.success,
+                        "score": result.score,
+                        "skills_demonstrated": result.skills_demonstrated,
+                    },
+                )
 
                 # Get updated stats
                 stats_after = self.executor.get_stats()
 
                 # Calculate improvement
-                improvement = (
-                    stats_after.get("success_rate", 0) -
-                    stats_before.get("success_rate", 0)
+                improvement = stats_after.get("success_rate", 0) - stats_before.get(
+                    "success_rate", 0
                 )
 
                 # Store iteration
@@ -210,11 +226,14 @@ class CoEvolutionLoop:
 
             result = await self.executor.attempt_task(task)
 
-            self.curriculum.update_curriculum(task, {
-                "success": result.success,
-                "score": result.score,
-                "skills_demonstrated": result.skills_demonstrated,
-            })
+            self.curriculum.update_curriculum(
+                task,
+                {
+                    "success": result.success,
+                    "score": result.score,
+                    "skills_demonstrated": result.skills_demonstrated,
+                },
+            )
 
             self._update_stats(result, self.executor.get_stats())
 
@@ -286,15 +305,11 @@ class CoEvolutionLoop:
             }
 
         # Overall metrics
-        all_results = [
-            r for level in results["by_difficulty"].values()
-            for r in [level]
-        ]
         results["overall"] = {
             "weighted_success_rate": sum(
-                r["success_rate"] * (i + 1)
-                for i, r in enumerate(results["by_difficulty"].values())
-            ) / sum(range(1, len(TaskDifficulty) + 1)),
+                r["success_rate"] * (i + 1) for i, r in enumerate(results["by_difficulty"].values())
+            )
+            / sum(range(1, len(TaskDifficulty) + 1)),
             "skills_count": len(results["skills_tested"]),
         }
         results["skills_tested"] = list(results["skills_tested"])
@@ -334,15 +349,10 @@ class CoEvolutionLoop:
         if result.success:
             self.stats.tasks_solved += 1
 
-        self.stats.success_rate = (
-            self.stats.tasks_solved / self.stats.total_tasks
-        )
+        self.stats.success_rate = self.stats.tasks_solved / self.stats.total_tasks
 
         # Update difficulty tracking
-        difficulties = [
-            it.task.difficulty.value
-            for it in self.evolution_history[-20:]
-        ]
+        difficulties = [it.task.difficulty.value for it in self.evolution_history[-20:]]
         if difficulties:
             self.stats.avg_difficulty = sum(difficulties) / len(difficulties)
 
@@ -356,8 +366,30 @@ class CoEvolutionLoop:
         # Update skills
         self.stats.skills_mastered = executor_stats.get("skills_mastered", [])
 
+        # Auto-register learned skills
+        if self.skills_registry:
+            try:
+                # Schedule auto-registration (will be handled asynchronously by the registry)
+                asyncio.create_task(self._auto_register_skills(executor_stats))
+            except Exception as e:
+                logger.warning(f"Failed to schedule skill auto-registration: {e}")
+
         # Track improvement curve
         self.stats.improvement_curve.append(self.stats.success_rate)
+
+    async def _auto_register_skills(self, executor_stats: Dict[str, Any]):
+        """Auto-register skills from evolution results."""
+        if not self.skills_registry:
+            return
+
+        try:
+            registered_count = await self.skills_registry.auto_register_from_evolution(
+                executor_stats
+            )
+            if registered_count > 0:
+                logger.info(f"Auto-registered {registered_count} new skills from evolution cycle")
+        except Exception as e:
+            logger.warning(f"Failed to auto-register skills: {e}")
 
     def get_evolution_summary(self) -> Dict[str, Any]:
         """Get comprehensive evolution summary."""
@@ -365,9 +397,7 @@ class CoEvolutionLoop:
             "stats": self.stats.to_dict(),
             "curriculum": self.curriculum.get_stats(),
             "executor": self.executor.get_stats(),
-            "recent_iterations": [
-                it.to_dict() for it in self.evolution_history[-10:]
-            ],
+            "recent_iterations": [it.to_dict() for it in self.evolution_history[-10:]],
             "improvement_analysis": self._analyze_improvement(),
         }
 
@@ -382,7 +412,7 @@ class CoEvolutionLoop:
         window = 5
         if len(curve) >= window * 2:
             recent_avg = sum(curve[-window:]) / window
-            older_avg = sum(curve[-window*2:-window]) / window
+            older_avg = sum(curve[-window * 2 : -window]) / window
 
             if recent_avg > older_avg + 0.1:
                 trend = "improving"
@@ -407,27 +437,19 @@ class CoEvolutionLoop:
 
         # Based on success rate
         if stats["success_rate"] < 0.3:
-            recommendations.append(
-                "Consider practicing more EASY tasks to build foundations"
-            )
+            recommendations.append("Consider practicing more EASY tasks to build foundations")
         elif stats["success_rate"] > 0.8:
-            recommendations.append(
-                "Ready to tackle harder challenges - increase difficulty"
-            )
+            recommendations.append("Ready to tackle harder challenges - increase difficulty")
 
         # Based on skills
         weak_skills = stats.get("skills_to_improve", [])
         if weak_skills:
-            recommendations.append(
-                f"Focus on improving: {', '.join(weak_skills[:3])}"
-            )
+            recommendations.append(f"Focus on improving: {', '.join(weak_skills[:3])}")
 
         # Based on curriculum
         curriculum_stats = self.curriculum.get_stats()
         if curriculum_stats["solve_rate"] < 0.4:
-            recommendations.append(
-                "Task difficulty may be too high - curriculum will auto-adjust"
-            )
+            recommendations.append("Task difficulty may be too high - curriculum will auto-adjust")
 
         return recommendations
 
