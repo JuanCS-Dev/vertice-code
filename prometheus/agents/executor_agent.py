@@ -29,8 +29,10 @@ try:
 except ImportError:
     # Fallback if skill_registry not available
     VALID_SKILLS = set()
+
     def validate_skills(skills: List[str]) -> List[str]:
         return skills
+
     def is_valid_skill(skill: str) -> bool:
         return True
 
@@ -38,6 +40,7 @@ except ImportError:
 @dataclass
 class ExecutionResult:
     """Result of executing a task."""
+
     task: EvolutionTask
     solution: str
     success: bool
@@ -63,6 +66,7 @@ class ExecutionResult:
 @dataclass
 class SkillProfile:
     """Profile of a learned skill."""
+
     name: str
     proficiency: float  # 0-1
     practice_count: int = 0
@@ -191,8 +195,7 @@ class ExecutorAgent:
         experiences_section = ""
         if context.get("relevant_experiences"):
             exp_list = [
-                f"- {e.get('content', '')[:100]}"
-                for e in context["relevant_experiences"][:3]
+                f"- {e.get('content', '')[:100]}" for e in context["relevant_experiences"][:3]
             ]
             experiences_section = "\nRELEVANT EXPERIENCES:\n" + "\n".join(exp_list)
 
@@ -208,8 +211,7 @@ class ExecutorAgent:
         # Available tools
         tools_list = self.tools.list_tools()
         tools_section = "\nAVAILABLE TOOLS:\n" + "\n".join(
-            f"- {t['name']}: {t.get('description', 'No description')[:50]}"
-            for t in tools_list[:10]
+            f"- {t['name']}: {t.get('description', 'No description')[:50]}" for t in tools_list[:10]
         )
 
         prompt = f"""Solve this task step by step.
@@ -388,35 +390,28 @@ IMPROVED SOLUTION:"""
             "python_classes": ["class ", "self.", "__init__"],
             "python_decorators": ["@", "decorator"],
             "python_comprehensions": ["[", "for", "in", "]"],
-
             # Async skills
             "async_programming": ["async ", "await ", "asyncio"],
             "async_basics": ["async def", "await"],
-
             # Testing skills
             "testing": ["test", "assert", "pytest", "unittest"],
             "unit_testing": ["test_", "assert", "assertEqual"],
             "mocking": ["mock", "patch", "MagicMock"],
-
             # Debugging skills
             "debugging": ["debug", "breakpoint", "pdb"],
             "error_handling": ["try:", "except", "raise"],
             "logging": ["logging", "log.", "logger"],
-
             # Architecture skills
             "design_patterns": ["factory", "singleton", "observer", "pattern"],
             "architecture": ["module", "component", "layer"],
             "refactoring": ["refactor", "extract", "rename"],
-
             # Performance skills
             "optimization": ["optimize", "cache", "efficient"],
             "caching": ["cache", "memoize", "@lru_cache"],
             "profiling": ["profile", "timeit", "cProfile"],
-
             # Data skills
             "data_processing": ["pandas", "numpy", "data"],
             "sql": ["SELECT", "INSERT", "sql", "query"],
-
             # Documentation
             "documentation": ["docstring", '"""', "'''"],
             "code_comments": ["#", "comment"],
@@ -478,12 +473,12 @@ IMPROVED SOLUTION:"""
     def _extract_code(self, text: str) -> str:
         """Extract code from solution text."""
         # Try to find code block
-        code_match = re.search(r'```(?:python)?\n(.*?)```', text, re.DOTALL)
+        code_match = re.search(r"```(?:python)?\n(.*?)```", text, re.DOTALL)
         if code_match:
             return code_match.group(1).strip()
 
         # Look for function definitions
-        func_match = re.search(r'(def \w+.*?)(?=\n\n|\Z)', text, re.DOTALL)
+        func_match = re.search(r"(def \w+.*?)(?=\n\n|\Z)", text, re.DOTALL)
         if func_match:
             return func_match.group(1).strip()
 
@@ -491,7 +486,7 @@ IMPROVED SOLUTION:"""
 
     def _parse_json_response(self, text: str) -> dict:
         """Parse JSON from LLM response."""
-        json_match = re.search(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', text, re.DOTALL)
+        json_match = re.search(r"\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}", text, re.DOTALL)
         if json_match:
             try:
                 return json.loads(json_match.group())
@@ -530,14 +525,8 @@ IMPROVED SOLUTION:"""
                     current_frontier = d
 
         # Categorize skills
-        mastered = [
-            s for s, p in self.skills.items()
-            if p.proficiency > 0.8
-        ]
-        to_improve = [
-            s for s, p in self.skills.items()
-            if 0.3 < p.proficiency < 0.7
-        ]
+        mastered = [s for s, p in self.skills.items() if p.proficiency > 0.8]
+        to_improve = [s for s, p in self.skills.items() if 0.3 < p.proficiency < 0.7]
 
         return {
             "total_attempts": self._total_attempts,
@@ -549,10 +538,7 @@ IMPROVED SOLUTION:"""
             "skills_to_improve": to_improve,
             "skill_count": len(self.skills),
             "by_difficulty": {
-                d: {
-                    "rate": data["successes"] / data["attempts"],
-                    "attempts": data["attempts"]
-                }
+                d: {"rate": data["successes"] / data["attempts"], "attempts": data["attempts"]}
                 for d, data in by_difficulty.items()
             },
         }
@@ -563,8 +549,11 @@ IMPROVED SOLUTION:"""
             skill: {
                 "proficiency": round(profile.proficiency, 3),
                 "practice_count": profile.practice_count,
-                "last_practiced": profile.last_practiced.isoformat() if profile.last_practiced else None,
-                "recent_success_rate": sum(profile.success_history[-10:]) / max(len(profile.success_history[-10:]), 1),
+                "last_practiced": (
+                    profile.last_practiced.isoformat() if profile.last_practiced else None
+                ),
+                "recent_success_rate": sum(profile.success_history[-10:])
+                / max(len(profile.success_history[-10:]), 1),
             }
             for skill, profile in self.skills.items()
         }
@@ -576,3 +565,9 @@ IMPROVED SOLUTION:"""
             "skills": self.get_skill_report(),
             "history_size": len(self.execution_history),
         }
+
+    def import_state(self, state: dict) -> None:
+        """Import executor state (stats and skills are read-only, so this is a no-op)."""
+        # Note: execution_history and stats are runtime-generated
+        # and don't need restoration from persistence
+        pass

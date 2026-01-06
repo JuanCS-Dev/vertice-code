@@ -107,10 +107,13 @@ class AgentTracer:
             span.end(status_code="OK")
         except Exception as e:
             span.end(status_code="ERROR", message=str(e))
-            span.add_event("exception", {
-                "exception.type": type(e).__name__,
-                "exception.message": str(e),
-            })
+            span.add_event(
+                "exception",
+                {
+                    "exception.type": type(e).__name__,
+                    "exception.message": str(e),
+                },
+            )
             raise
         finally:
             # Cleanup
@@ -239,11 +242,13 @@ class AgentTracer:
 
         avg_agent_duration = (
             sum(s.duration_ms for s in self._completed_spans) / total_agent_spans
-            if total_agent_spans else 0.0
+            if total_agent_spans
+            else 0.0
         )
         avg_llm_duration = (
             sum(s.duration_ms for s in self._llm_spans) / total_llm_spans
-            if total_llm_spans else 0.0
+            if total_llm_spans
+            else 0.0
         )
         total_tokens = sum(s.gen_ai_usage_total_tokens for s in self._llm_spans)
 
@@ -258,6 +263,7 @@ class AgentTracer:
             "total_tokens_used": total_tokens,
             "error_count": error_count,
             "error_rate": error_count / total_agent_spans if total_agent_spans else 0.0,
+            "active_spans": len(self._active_spans),  # Number of currently active spans
         }
 
     def export_spans(self) -> List[Dict[str, Any]]:
@@ -271,16 +277,18 @@ class AgentTracer:
             spans.append(span.to_dict())
 
         for span in self._tool_spans:
-            spans.append({
-                "spanId": span.span_id,
-                "parentSpanId": span.parent_span_id,
-                "name": f"tool.{span.tool_name}",
-                "kind": SpanKind.TOOL.value,
-                "attributes": {
-                    "tool.name": span.tool_name,
-                },
-                "status": {"code": span.status_code},
-            })
+            spans.append(
+                {
+                    "spanId": span.span_id,
+                    "parentSpanId": span.parent_span_id,
+                    "name": f"tool.{span.tool_name}",
+                    "kind": SpanKind.TOOL.value,
+                    "attributes": {
+                        "tool.name": span.tool_name,
+                    },
+                    "status": {"code": span.status_code},
+                }
+            )
 
         return spans
 
