@@ -19,9 +19,10 @@ from datetime import datetime
 import asyncio
 import logging
 import os
+import uuid
 
-logger = logging.getLogger(__name__)
-
+from vertice_core.messaging.events import EventBus, get_event_bus
+from .events import PrometheusTaskReceived, PrometheusTaskCompleted, PrometheusTaskFailed
 from .llm_client import GeminiClient
 from .world_model import WorldModel, ActionType, WorldState
 from .reflection import ReflectionEngine
@@ -30,10 +31,13 @@ from ..memory.memory_system import MemorySystem
 from ..tools.tool_factory import ToolFactory
 from ..sandbox.executor import SandboxExecutor
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class ExecutionContext:
     """Context for task execution."""
+
     task: str
     memory_context: Dict[str, Any]
     world_state: WorldState
@@ -45,6 +49,7 @@ class ExecutionContext:
 @dataclass
 class ExecutionResult:
     """Result of orchestrated execution."""
+
     task: str
     output: str
     success: bool
@@ -87,11 +92,13 @@ class PrometheusOrchestrator:
         self,
         llm_client: Optional[Any] = None,  # GeminiClient or PrometheusLLMAdapter
         agent_name: str = "Prometheus",
+        event_bus: Optional[EventBus] = None,
     ):
         # Core LLM client (supports both GeminiClient and PrometheusLLMAdapter)
         # Duck typing: both have generate(), generate_stream(), generate_with_thinking()
         self.llm = llm_client or GeminiClient()
         self.agent_name = agent_name
+        self.event_bus = event_bus or get_event_bus()
 
         # Initialize all subsystems
         self.memory = MemorySystem(agent_name=agent_name)
@@ -159,6 +166,19 @@ class PrometheusOrchestrator:
             async with self._execution_lock:
                 self._is_executing = True
             start_time = datetime.now()
+            task_id = str(uuid.uuid4())
+
+            # Emit start event
+            self.event_bus.emit_sync(
+                PrometheusTaskReceived(
+                    id=str(uuid.uuid4()),
+                    data={
+                        "task_id": task_id,
+                        "request": task,
+                        "complexity": "simple" if fast_mode else "complex",
+                    },
+                )
+            )
 
             try:
                 yield "🔥 **PROMETHEUS** executing...\n\n"
@@ -174,6 +194,20 @@ class PrometheusOrchestrator:
 
                     end_time = datetime.now()
                     execution_time = (end_time - start_time).total_seconds()
+
+                    # Emit completion event
+                    self.event_bus.emit_sync(
+                        PrometheusTaskCompleted(
+                            id=str(uuid.uuid4()),
+                            data={
+                                "task_id": task_id,
+                                "result": execution_output[:500],
+                                "total_steps": 1,
+                                "total_duration_ms": execution_time * 1000,
+                            },
+                        )
+                    )
+
                     yield f"\n\n✅ Done in {execution_time:.1f}s\n"
                 else:
                     # FULL MODE: All the bells and whistles
@@ -218,9 +252,35 @@ class PrometheusOrchestrator:
 
                     end_time = datetime.now()
                     execution_time = (end_time - start_time).total_seconds()
+
+                    # Emit completion event
+                    self.event_bus.emit_sync(
+                        PrometheusTaskCompleted(
+                            id=str(uuid.uuid4()),
+                            data={
+                                "task_id": task_id,
+                                "result": execution_output[:500],
+                                "total_steps": len(plans) if plans else 0,
+                                "total_duration_ms": execution_time * 1000,
+                            },
+                        )
+                    )
+
                     yield f"\n✅ Done in {execution_time:.1f}s (score: {reflection_result.score:.0%})\n"
 
             except Exception as e:
+                # Emit failure event
+                self.event_bus.emit_sync(
+                    PrometheusTaskFailed(
+                        id=str(uuid.uuid4()),
+                        data={
+                            "task_id": task_id,
+                            "error": str(e),
+                            "error_type": type(e).__name__,
+                            "failed_at_step": -1,
+                        },
+                    )
+                )
                 yield f"\n❌ Error: {str(e)}\n"
                 raise
             finally:
@@ -250,7 +310,9 @@ class PrometheusOrchestrator:
 
         # Check if task contains a plan with code blocks - DIRECT EXTRACTION MODE
         has_code_blocks = "```" in task
-        has_file_refs = any(x in task for x in [".py", "requirements", "Dockerfile", ".yaml", ".json", ".toml"])
+        has_file_refs = any(
+            x in task for x in [".py", "requirements", "Dockerfile", ".yaml", ".json", ".toml"]
+        )
 
         if has_code_blocks and has_file_refs:
             # OPTIMIZED: Direct extraction and file creation - no LLM call needed!
@@ -262,8 +324,7 @@ class PrometheusOrchestrator:
 
         tools_list = self.tools.list_tools()
         tools_section = "\n".join(
-            f"- {t['name']}: {t.get('description', 'No description')[:60]}"
-            for t in tools_list[:15]
+            f"- {t['name']}: {t.get('description', 'No description')[:60]}" for t in tools_list[:15]
         )
 
         prompt = f"""You are PROMETHEUS. Execute this task using tools.
@@ -294,8 +355,8 @@ Use [TOOL:name:args] format. Example: [TOOL:write_file:path=x.py,content=code]""
 
         # Step 1: Find project directory (e.g., neuro_api, my_project)
         dir_patterns = [
-            r'mkdir\s+(\w+)',
-            r'cd\s+(\w+)',
+            r"mkdir\s+(\w+)",
+            r"cd\s+(\w+)",
             r'directory[:\s]+[`\'"]*(\w+)[`\'"]*',
             r'project[:\s]+[`\'"]*(\w+)[`\'"]*',
             r'called\s+[`\'"]*(\w+)[`\'"]*',
@@ -305,7 +366,7 @@ Use [TOOL:name:args] format. Example: [TOOL:write_file:path=x.py,content=code]""
             match = re.search(pattern, task, re.IGNORECASE)
             if match:
                 candidate = match.group(1)
-                if candidate not in ['python', 'pip', 'source', 'venv', 'app']:
+                if candidate not in ["python", "pip", "source", "venv", "app"]:
                     project_dir = candidate
                     break
 
@@ -320,7 +381,7 @@ Use [TOOL:name:args] format. Example: [TOOL:write_file:path=x.py,content=code]""
             # `filename.py`: ```python
             r'[`\'"]+([a-zA-Z_][\w/\-\.]*\.(?:py|txt|md|yaml|yml|json|toml|dockerfile|cfg|ini))[`\'"]*[:\s]*\n*```[\w]*\n(.*?)```',
             # **filename.py** or filename.py:
-            r'\*?\*?([a-zA-Z_][\w/\-\.]*\.(?:py|txt|md|yaml|yml|json|toml|dockerfile|cfg|ini))\*?\*?[:\s]*\n*```[\w]*\n(.*?)```',
+            r"\*?\*?([a-zA-Z_][\w/\-\.]*\.(?:py|txt|md|yaml|yml|json|toml|dockerfile|cfg|ini))\*?\*?[:\s]*\n*```[\w]*\n(.*?)```",
             # Create filename.py or File: filename.py
             r'(?:Create|File|create|file)[:\s]+[`\'"]*([a-zA-Z_][\w/\-\.]*\.(?:py|txt|md|yaml|yml|json|toml))[`\'"]*[:\s]*\n*```[\w]*\n(.*?)```',
         ]
@@ -328,7 +389,7 @@ Use [TOOL:name:args] format. Example: [TOOL:write_file:path=x.py,content=code]""
         created_files = set()
         for pattern in file_patterns:
             for match in re.finditer(pattern, task, re.DOTALL | re.IGNORECASE):
-                filename = match.group(1).strip('`\'"* ')
+                filename = match.group(1).strip("`'\"* ")
                 content = match.group(2).strip()
 
                 if not content or len(content) < 5:
@@ -339,7 +400,7 @@ Use [TOOL:name:args] format. Example: [TOOL:write_file:path=x.py,content=code]""
                 # Determine full path
                 if project_dir and not filename.startswith(project_dir):
                     # Check if it's a nested file like utils/ml_utils.py
-                    if '/' in filename:
+                    if "/" in filename:
                         full_path = os.path.join(project_dir, filename)
                     else:
                         full_path = os.path.join(project_dir, filename)
@@ -353,7 +414,7 @@ Use [TOOL:name:args] format. Example: [TOOL:write_file:path=x.py,content=code]""
 
                 # Write file
                 try:
-                    with open(full_path, 'w', encoding='utf-8') as f:
+                    with open(full_path, "w", encoding="utf-8") as f:
                         f.write(content)
                     results.append(f"✅ Created: {full_path} ({len(content)} bytes)")
                     created_files.add(filename)
@@ -362,9 +423,9 @@ Use [TOOL:name:args] format. Example: [TOOL:write_file:path=x.py,content=code]""
 
         # Step 3: Also check for requirements.txt or Dockerfile specifically
         special_files = {
-            'requirements.txt': r'requirements\.txt[`\'":\s]*\n*```[^\n]*\n(.*?)```',
-            'Dockerfile': r'Dockerfile[`\'":\s]*\n*```[^\n]*\n(.*?)```',
-            '.env': r'\.env[`\'":\s]*\n*```[^\n]*\n(.*?)```',
+            "requirements.txt": r'requirements\.txt[`\'":\s]*\n*```[^\n]*\n(.*?)```',
+            "Dockerfile": r'Dockerfile[`\'":\s]*\n*```[^\n]*\n(.*?)```',
+            ".env": r'\.env[`\'":\s]*\n*```[^\n]*\n(.*?)```',
         }
 
         for filename, pattern in special_files.items():
@@ -376,7 +437,7 @@ Use [TOOL:name:args] format. Example: [TOOL:write_file:path=x.py,content=code]""
                 if content and len(content) > 3:
                     full_path = os.path.join(project_dir, filename) if project_dir else filename
                     try:
-                        with open(full_path, 'w', encoding='utf-8') as f:
+                        with open(full_path, "w", encoding="utf-8") as f:
                             f.write(content)
                         results.append(f"✅ Created: {full_path}")
                         created_files.add(filename)
@@ -395,14 +456,14 @@ Use [TOOL:name:args] format. Example: [TOOL:write_file:path=x.py,content=code]""
         executed_results = []
 
         # Pattern 1: [TOOL:tool_name:args]
-        tool_pattern = r'\[TOOL:(\w+):([^\]]+)\]'
+        tool_pattern = r"\[TOOL:(\w+):([^\]]+)\]"
         for match in re.finditer(tool_pattern, response):
             tool_name = match.group(1)
             args_str = match.group(2)
             args = {}
-            for pair in args_str.split(','):
-                if '=' in pair:
-                    key, value = pair.split('=', 1)
+            for pair in args_str.split(","):
+                if "=" in pair:
+                    key, value = pair.split("=", 1)
                     args[key.strip()] = value.strip()
             result = await self._execute_tool(tool_name, args)
             executed_results.append(f"✅ {tool_name}: {result[:100]}")
@@ -474,8 +535,7 @@ Use [TOOL:name:args] format. Example: [TOOL:write_file:path=x.py,content=code]""
 
         if context.get("relevant_experiences"):
             exp_text = "\n".join(
-                f"  - {e.get('content', '')[:80]}"
-                for e in context["relevant_experiences"][:3]
+                f"  - {e.get('content', '')[:80]}" for e in context["relevant_experiences"][:3]
             )
             sections.append(f"Past Experiences:\n{exp_text}")
 
@@ -497,7 +557,7 @@ Use [TOOL:name:args] format. Example: [TOOL:write_file:path=x.py,content=code]""
 
     def _format_plan(self, plan: Any) -> str:
         """Format plan for prompt."""
-        if not plan or not hasattr(plan, 'actions_taken'):
+        if not plan or not hasattr(plan, "actions_taken"):
             return ""
 
         steps = []
@@ -536,7 +596,7 @@ RECOMMENDED APPROACH:
     async def _tool_read_file(self, path: str) -> str:
         """Read file contents."""
         try:
-            with open(path, 'r', encoding='utf-8') as f:
+            with open(path, "r", encoding="utf-8") as f:
                 content = f.read()
             return content[:10000]  # Limit size
         except FileNotFoundError:
@@ -548,8 +608,8 @@ RECOMMENDED APPROACH:
         """Write content to file."""
         try:
             # Ensure directory exists
-            os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
-            with open(path, 'w', encoding='utf-8') as f:
+            os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+            with open(path, "w", encoding="utf-8") as f:
                 f.write(content)
             return f"Successfully wrote to {path}"
         except Exception as e:
@@ -558,6 +618,7 @@ RECOMMENDED APPROACH:
     async def _tool_list_files(self, directory: str = ".", pattern: str = "*") -> str:
         """List files in directory."""
         import glob
+
         try:
             files = glob.glob(os.path.join(directory, pattern))
             return "\n".join(files[:50])
@@ -575,6 +636,7 @@ RECOMMENDED APPROACH:
         """Search for code patterns."""
         # Simple grep-like search
         import subprocess
+
         try:
             result = subprocess.run(
                 ["grep", "-r", "-n", query, path],
@@ -613,10 +675,7 @@ Be specific and actionable."""
         """Recall from memory."""
         results = self.memory.search_knowledge(query, top_k=5)
         if results:
-            return "\n".join(
-                f"- {r['topic']}: {r['content']}"
-                for r in results
-            )
+            return "\n".join(f"- {r['topic']}: {r['content']}" for r in results)
         return "Nothing relevant found in memory"
 
     # =========================================================================
@@ -635,7 +694,11 @@ Be specific and actionable."""
         """
         from ..agents.curriculum_agent import TaskDomain
 
-        domain_enum = TaskDomain[domain.upper()] if domain.upper() in TaskDomain.__members__ else TaskDomain.GENERAL
+        domain_enum = (
+            TaskDomain[domain.upper()]
+            if domain.upper() in TaskDomain.__members__
+            else TaskDomain.GENERAL
+        )
 
         async for progress in self.evolution.evolve(
             num_iterations=iterations,
@@ -663,7 +726,9 @@ Be specific and actionable."""
             "tools": self.tools.get_stats(),
             "world_model": self.world_model.get_stats(),
             "reflection": self.reflection.get_learning_summary(),
-            "evolution": self.evolution.get_evolution_summary() if self.evolution.evolution_history else {},
+            "evolution": (
+                self.evolution.get_evolution_summary() if self.evolution.evolution_history else {}
+            ),
             "execution_history": len(self.execution_history),
         }
 
@@ -671,7 +736,11 @@ Be specific and actionable."""
         """Get comprehensive learning report."""
         return {
             "memory_stats": self.memory.get_stats(),
-            "skills_report": self.evolution.executor.get_skill_report() if hasattr(self.evolution, 'executor') else {},
+            "skills_report": (
+                self.evolution.executor.get_skill_report()
+                if hasattr(self.evolution, "executor")
+                else {}
+            ),
             "reflection_summary": self.reflection.get_learning_summary(),
             "improvement_suggestions": self.reflection.get_improvement_suggestions(),
             "evolution_recommendations": self.evolution.get_recommendations(),

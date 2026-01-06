@@ -1,7 +1,7 @@
 # PLANO DE INTEGRAÇÃO: Prometheus Meta-Agent com Vertice
-**Status:** Fase 1 e 6 Completas ✅
+**Status:** Fase 1, 2 e 6 Completas ✅
 **Data:** 2026-01-06
-**Versão:** 2.4 (Fase 6 Completa - LLM Client Unificado)
+**Versão:** 2.5 (Fase 2 Completa - Event Bus)
 **Autor:** JuanCS Dev & Claude Opus 4.5
 
 ---
@@ -212,12 +212,34 @@ $ pytest tests/unit/agents/ -v
 
 ---
 
-### **FASE 2-5: Event Bus, Meta-Orchestrator, Persistence, Observability**
-*(Detalhes mantidos do plano original v2.0 - a serem expandidos quando executadas)*
+### **FASE 2: Event Bus Integration** ✅ **CONCLUÍDA** (2026-01-06)
+**Objetivo:** Permitir comunicação assíncrona e não-bloqueante via Event Bus, preparando o terreno para "Event Loop Bypass" e observabilidade.
 
-**NOTA CRÍTICA**: Antes de implementar Fases 2-5, executar **FASE 6** (refatoração LLM client) para evitar débito técnico.
+**Status:** ✅ **100% COMPLETA**
+
+**Tarefas Executadas:**
+1. ✅ Criado `prometheus/core/events.py` com definições de eventos (TaskReceived, StepExecuted, etc.)
+2. ✅ Modificado `prometheus/core/orchestrator.py` para emitir eventos durante execução
+3. ✅ Modificado `prometheus/agent.py` para injetar `EventBus` global (Dependency Injection)
+4. ✅ Criado testes de integração `tests/prometheus/test_events.py`
+
+**Critério de Sucesso:**
+- ✅ PrometheusOrchestrator emite eventos (Start, Complete, Fail)
+- ✅ Eventos seguem protocolo `vertice_core.messaging.events`
+- ✅ Testes de emissão passando (Fast Mode e Failures)
+- ✅ **Backward Compatible**: `execute()` ainda retorna generator string para TUI
+
+**Arquivos Modificados:**
+- ✅ NOVO: `prometheus/core/events.py`
+- ✅ MODIFICAR: `prometheus/core/orchestrator.py`
+- ✅ MODIFICAR: `prometheus/agent.py`
+- ✅ NOVO: `tests/prometheus/test_events.py`
+
+**Resultado:** ✅ **FASE 2 CONCLUÍDA - Event Bus Ativo**
 
 ---
+
+### **FASE 3: Meta-Orchestrator Elevation (L4 Autonomy)**
 
 ### **FASE 6: Unified LLM Client Refactoring** ✅ **COMPLETA** (2026-01-06)
 **Objetivo:** Substituir `GeminiClient` hardcoded por client unificado do Vertice, garantindo manutenibilidade e escalabilidade.
@@ -674,6 +696,16 @@ await agent.use_skill("prometheus:debug_performance_issue", {
 ---
 
 **Soli Deo Gloria** 🙏
+
+**VERSÃO 2.5 - Fase 2 Implementada** 🚀
+**Atualizado:** 2026-01-06 11:30
+**Mudanças v2.5:**
+- ✅ **FASE 2 CONCLUÍDA**: Event Bus Integration
+- ✅ Criado sistema de eventos (`prometheus/core/events.py`)
+- ✅ Integrado emissão de eventos no Orchestrator
+- ✅ Injeção de dependência do EventBus no Agent
+- ✅ Testes de verificação criados e passando
+- 🚀 **Pronto para Fase 3 (Meta-Orchestrator)**
 
 **VERSÃO 2.4 - Fase 1 Implementada** 💙
 **Atualizado:** 2026-01-06 11:00

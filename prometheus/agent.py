@@ -32,6 +32,7 @@ from .core.orchestrator import PrometheusOrchestrator
 from .core.llm_client import GeminiClient
 from .core.llm_adapter import PrometheusLLMAdapter
 from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+from vertice_core.messaging.events import get_event_bus
 
 logger = logging.getLogger(__name__)
 
@@ -133,6 +134,7 @@ class PrometheusIntegratedAgent(BaseAgent):
         self.orchestrator = PrometheusOrchestrator(
             llm_client=llm_to_use,
             agent_name=agent_name,
+            event_bus=get_event_bus(),
         )
 
         logger.info(
