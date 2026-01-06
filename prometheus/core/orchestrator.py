@@ -27,6 +27,7 @@ from .llm_client import GeminiClient
 from .world_model import WorldModel, ActionType, WorldState
 from .reflection import ReflectionEngine
 from .evolution import CoEvolutionLoop
+from .persistence import persistence
 from ..memory.memory_system import MemorySystem
 from ..tools.tool_factory import ToolFactory
 from ..sandbox.executor import SandboxExecutor
@@ -124,6 +125,22 @@ class PrometheusOrchestrator:
         self._is_executing = False
         self._execution_lock = asyncio.Lock()
         self._execution_semaphore = asyncio.Semaphore(1)  # Max 1 concurrent execution
+        self._persistence_initialized = False
+
+    async def _ensure_persistence(self):
+        """Ensure persistence layer is initialized and state is loaded."""
+        if self._persistence_initialized:
+            return
+
+        await persistence.initialize()
+        
+        # Try to load previous state
+        saved_state = await persistence.load_state(self.agent_name)
+        if saved_state:
+            logger.info(f"Restoring state for {self.agent_name}")
+            self.import_state(saved_state)
+            
+        self._persistence_initialized = True
 
     def _register_builtin_tools(self):
         """Register built-in tools."""
@@ -163,6 +180,8 @@ class PrometheusOrchestrator:
         # Acquire semaphore to prevent concurrent execution
         # Semaphore wraps entire execution to ensure no concurrent runs
         async with self._execution_semaphore:
+            await self._ensure_persistence()
+            
             async with self._execution_lock:
                 self._is_executing = True
             start_time = datetime.now()
@@ -286,6 +305,13 @@ class PrometheusOrchestrator:
             finally:
                 async with self._execution_lock:
                     self._is_executing = False
+                
+                # Auto-save state
+                try:
+                    state = self.export_state()
+                    await persistence.save_state(self.agent_name, state)
+                except Exception as e:
+                    logger.error(f"Failed to auto-save state: {e}")
 
     async def execute_simple(self, task: str) -> str:
         """
@@ -523,6 +549,15 @@ Use [TOOL:name:args] format. Example: [TOOL:write_file:path=x.py,content=code]""
                 code = args.get("code", "")
                 return await self._tool_execute_python(code)
 
+            elif tool_name == "remember":
+                key = args.get("key", "")
+                value = args.get("value", "")
+                return await self._tool_remember(key, value)
+
+            elif tool_name == "recall":
+                query = args.get("query", "")
+                return await self._tool_recall(query)
+
             else:
                 return f"Unknown tool: {tool_name}"
 
@@ -668,14 +703,52 @@ Be specific and actionable."""
 
     async def _tool_remember(self, key: str, value: str) -> str:
         """Store something in memory."""
+        # Store in MIRIX (in-memory)
         self.memory.learn_fact(key, value, source="tool_remember")
-        return f"Remembered: {key}"
+        
+        # Persist to disk
+        try:
+            await persistence.store_memory(
+                memory_id=str(uuid.uuid4()),
+                type="semantic",
+                content=f"{key}: {value}",
+                metadata={"source": "tool_remember", "key": key},
+                importance=0.8
+            )
+            return f"Remembered and persisted: {key}"
+        except Exception as e:
+            return f"Remembered in session, but persistence failed: {e}"
 
     async def _tool_recall(self, query: str) -> str:
-        """Recall from memory."""
-        results = self.memory.search_knowledge(query, top_k=5)
+        """Recall from memory (both session and persistent)."""
+        # Session memory
+        session_results = self.memory.search_knowledge(query, top_k=3)
+
+        # Persistent memory
+        try:
+            # Simple retrieval for now - real implementation would use vector search
+            # Here we just fetch recent semantic memories as a fallback
+            persistent_results = await persistence.retrieve_memories(type="semantic", limit=5)
+            # Basic filtering
+            persistent_matches = [
+                m for m in persistent_results if query.lower() in m["content"].lower()
+            ]
+        except Exception as e:
+            logger.warning(f"Persistence recall failed: {e}")
+            persistent_matches = []
+
+        results = []
+        if session_results:
+            results.append("Session Memory:")
+            results.extend([f"- {r['topic']}: {r['content']}" for r in session_results])
+
+        if persistent_matches:
+            results.append("\nLong-term Memory:")
+            results.extend([f"- {r['content']}" for r in persistent_matches])
+
         if results:
-            return "\n".join(f"- {r['topic']}: {r['content']}" for r in results)
+            return "\n".join(results)
+
         return "Nothing relevant found in memory"
 
     # =========================================================================
@@ -748,13 +821,14 @@ Be specific and actionable."""
 
     def export_state(self) -> Dict[str, Any]:
         """Export complete orchestrator state for persistence."""
+        history_list = list(self.execution_history)
         return {
             "agent_name": self.agent_name,
             "memory": self.memory.export_state(),
             "tools": self.tools.export_tools(),
             "evolution": self.evolution.export_state(),
             "reflections": self.reflection.export_reflections(),
-            "execution_history": [r.to_dict() for r in self.execution_history[-100:]],
+            "execution_history": [r.to_dict() for r in history_list[-100:]],
         }
 
     def import_state(self, state: Dict[str, Any]):

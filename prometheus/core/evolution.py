@@ -447,6 +447,31 @@ class CoEvolutionLoop:
             "history_size": len(self.evolution_history),
         }
 
+    def import_state(self, state: Dict[str, Any]):
+        """Import evolution state."""
+        from ..agents.curriculum_agent import TaskDifficulty
+
+        if "stats" in state:
+            s = state["stats"]
+            self.stats.total_iterations = s.get("total_iterations", 0)
+            self.stats.total_tasks = s.get("total_tasks", 0)
+            self.stats.tasks_solved = s.get("tasks_solved", 0)
+            self.stats.success_rate = s.get("success_rate", 0.0)
+            self.stats.avg_difficulty = s.get("avg_difficulty", 2.0)
+            self.stats.skills_mastered = s.get("skills_mastered", [])
+            frontier_name = s.get("current_frontier", "EASY")
+            if isinstance(frontier_name, str):
+                self.stats.current_frontier = TaskDifficulty[frontier_name]
+            else:
+                self.stats.current_frontier = frontier_name
+            self.stats.improvement_curve = s.get("improvement_curve", [])
+
+        if "curriculum" in state:
+            self.curriculum.import_curriculum(state["curriculum"])
+
+        if "executor" in state:
+            self.executor.import_state(state["executor"])
+
     @property
     def is_evolving(self) -> bool:
         """Check if evolution is currently running."""
