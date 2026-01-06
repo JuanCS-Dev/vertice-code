@@ -5,9 +5,10 @@ Usa ADC (Application Default Credentials) - sem necessidade de API key.
 Inferência via Vertex AI, não Google AI Studio.
 
 Modelos disponíveis (2026):
-- gemini-3-pro-preview (RECOMMENDED - reasoning-first, 1M context)
-- gemini-2.0-flash (multimodal, agentic)
-- gemini-3-deep-think (coming soon)
+- gemini-2.5-pro (DEFAULT - best quality for code, 128K context)
+- gemini-2.5-flash (fast + quality balance)
+- gemini-3-pro-preview (FUTURE - reasoning-first, 1M context, thinking_level)
+- gemini-3-flash-preview (FUTURE - ultra-fast, 1M context, multimodal)
 """
 
 from __future__ import annotations
@@ -34,21 +35,25 @@ class VertexAIProvider:
     """
 
     MODELS = {
-        # Gemini 3 (2026) - RECOMMENDED
-        "pro": "gemini-3-pro-preview",  # Reasoning-first, 1M context, agentic
-        "flash": "gemini-2.0-flash",  # Multimodal, complex understanding
-        "3-pro": "gemini-3-pro-preview",
-        "3-flash": "gemini-2.0-flash",
-        # Legacy (still available)
+        # Gemini 2.5 (CURRENT - Best for code quality)
+        "flash": "gemini-2.5-flash",  # Fast + quality balance
+        "pro": "gemini-2.5-pro",  # DEFAULT: Best quality (code-first)
+        "gemini-2.5-flash": "gemini-2.5-flash",
+        "gemini-2.5-pro": "gemini-2.5-pro",
+        # Gemini 3 (FUTURE - Preview models, not yet available)
+        "flash-3": "gemini-3-flash-preview",  # Next-Gen Fast
+        "pro-3": "gemini-3-pro-preview",  # Next-Gen Reasoning
+        "gemini-3-flash": "gemini-3-flash-preview",
+        "gemini-3-pro": "gemini-3-pro-preview",
+        # Legacy (deprecated)
         "2.0-flash": "gemini-2.0-flash-exp",
-        "2.5-flash": "gemini-2.5-flash-preview",
     }
 
     def __init__(
         self,
         project: Optional[str] = None,
         location: str = "us-central1",
-        model_name: str = "flash",  # Default to Gemini 3 Flash (Pro only for reasoning)
+        model_name: str = "pro",  # Default to Gemini 2.5 Pro (best quality for code)
         enable_grounding: bool = False,  # Google Search grounding
     ):
         """Initialize Vertex AI provider.

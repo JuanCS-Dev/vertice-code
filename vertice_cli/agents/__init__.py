@@ -40,13 +40,12 @@ from vertice_cli.agents.devops import DevOpsAgent, create_devops_agent
 from vertice_cli.agents.justica_agent import JusticaIntegratedAgent
 from vertice_cli.agents.sofia import SofiaIntegratedAgent, create_sofia_agent
 from vertice_cli.agents.data_agent_production import DataAgent
-from prometheus.agent import PrometheusIntegratedAgent
 
 # Aliases for backward compatibility
 ExecutorAgent = NextGenExecutorAgent
 JusticaAgent = JusticaIntegratedAgent
 SofiaAgent = SofiaIntegratedAgent
-PrometheusAgent = PrometheusIntegratedAgent  # Alias for convenience
+# Note: PrometheusAgent available via vertice_agents.registry.get("prometheus")
 
 __all__ = [
     # Base types
@@ -78,7 +77,5 @@ __all__ = [
     "SofiaAgent",  # Alias
     "create_sofia_agent",
     "DataAgent",
-    # Meta-Orchestration Agents (1)
-    "PrometheusIntegratedAgent",
-    "PrometheusAgent",  # Alias
+    # Note: PrometheusAgent available via vertice_agents.registry.get("prometheus")
 ]

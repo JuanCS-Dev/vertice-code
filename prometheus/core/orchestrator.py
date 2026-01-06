@@ -85,10 +85,11 @@ class PrometheusOrchestrator:
 
     def __init__(
         self,
-        llm_client: Optional[GeminiClient] = None,
+        llm_client: Optional[Any] = None,  # GeminiClient or PrometheusLLMAdapter
         agent_name: str = "Prometheus",
     ):
-        # Core LLM client
+        # Core LLM client (supports both GeminiClient and PrometheusLLMAdapter)
+        # Duck typing: both have generate(), generate_stream(), generate_with_thinking()
         self.llm = llm_client or GeminiClient()
         self.agent_name = agent_name
 

@@ -15,6 +15,7 @@ Date: 2026-01-06
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any, Optional, List
 
 from vertice_cli.agents.base import (
@@ -29,6 +30,8 @@ from vertice_cli.agents.base import (
 
 from .core.orchestrator import PrometheusOrchestrator
 from .core.llm_client import GeminiClient
+from .core.llm_adapter import PrometheusLLMAdapter
+from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
 logger = logging.getLogger(__name__)
 
@@ -53,8 +56,8 @@ class PrometheusIntegratedAgent(BaseAgent):
                             → [Memory, WorldModel, Reflection, Evolution, Tools]
 
     Note:
-        Currently uses GeminiClient hardcoded. Will be refactored to use
-        unified ProviderManager in Phase 6 (Unified LLM Client Refactoring).
+        Uses unified Vertex AI provider via PrometheusLLMAdapter (Phase 6).
+        Feature flag USE_UNIFIED_LLM_CLIENT controls migration (default: true).
     """
 
     def __init__(
@@ -72,7 +75,7 @@ class PrometheusIntegratedAgent(BaseAgent):
         Args:
             role: Agent role (defaults to PROMETHEUS)
             capabilities: Agent capabilities (L4 autonomy = high privileges)
-            llm_client: LLM client (currently ignored, uses GeminiClient)
+            llm_client: LLM client (optional, uses Vertex AI adapter by default)
             mcp_client: MCP client for tool execution
             system_prompt: System prompt (optional override)
             agent_name: Agent name for memory/logging
@@ -102,14 +105,33 @@ class PrometheusIntegratedAgent(BaseAgent):
             system_prompt=system_prompt,
         )
 
-        # NOTE: For Phase 1, we use GeminiClient directly
-        # Phase 6 will refactor to use llm_client (ProviderManager) via adapter
-        self.gemini_client = GeminiClient()
+        # Phase 6: Unified LLM Client via Vertex AI
+        # Feature flag for gradual migration (default: enabled)
+        use_unified = os.getenv("USE_UNIFIED_LLM_CLIENT", "true").lower() == "true"
+
+        if use_unified:
+            # Use Vertex AI provider via adapter (RECOMMENDED)
+            logger.info("Using unified Vertex AI provider via PrometheusLLMAdapter")
+            vertex_provider = VertexAIProvider(
+                model_name="pro",  # gemini-2.5-pro (best quality for code)
+            )
+            llm_adapter = PrometheusLLMAdapter(
+                vertex_provider=vertex_provider,
+                enable_thinking=True,
+            )
+            llm_to_use = llm_adapter
+        else:
+            # Fallback to legacy GeminiClient (backward compatibility)
+            logger.warning(
+                "Using legacy GeminiClient (set USE_UNIFIED_LLM_CLIENT=true for Vertex AI)"
+            )
+            llm_to_use = GeminiClient()
+
         self.agent_name = agent_name
 
         # Initialize Prometheus Orchestrator (core engine)
         self.orchestrator = PrometheusOrchestrator(
-            llm_client=self.gemini_client,
+            llm_client=llm_to_use,
             agent_name=agent_name,
         )
 
