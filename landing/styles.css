@@ -668,6 +668,108 @@ body {
     font-size: 0.9375rem;
 }
 
+/* === PROMETHEUS HIGHLIGHT === */
+.prometheus-highlight {
+    margin-bottom: 48px;
+}
+
+.prometheus-title {
+    font-size: 1.75rem;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.prometheus-title svg {
+    fill: var(--accent);
+    filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.4));
+}
+
+.prometheus-card {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
+    border: 2px solid var(--accent);
+    border-radius: 16px;
+    padding: 32px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(6, 182, 212, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.prometheus-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, transparent 70%);
+    animation: prometheus-pulse 8s ease-in-out infinite;
+}
+
+@keyframes prometheus-pulse {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+    50% { transform: translate(-20px, -20px) scale(1.1); opacity: 0.6; }
+}
+
+.prometheus-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    position: relative;
+    z-index: 1;
+}
+
+.prometheus-icon {
+    font-size: 5rem;
+    line-height: 1;
+    filter: drop-shadow(0 4px 16px rgba(255, 149, 0, 0.5));
+    animation: prometheus-flame 3s ease-in-out infinite;
+}
+
+@keyframes prometheus-flame {
+    0%, 100% { transform: scale(1) translateY(0); filter: drop-shadow(0 4px 16px rgba(255, 149, 0, 0.5)); }
+    50% { transform: scale(1.05) translateY(-4px); filter: drop-shadow(0 8px 24px rgba(255, 149, 0, 0.7)); }
+}
+
+.prometheus-info {
+    flex: 1;
+}
+
+.prometheus-info h4 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 12px;
+    text-shadow: 0 2px 8px rgba(6, 182, 212, 0.3);
+}
+
+.prometheus-info p {
+    font-size: 1.0625rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+.prometheus-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.prom-badge {
+    background: rgba(6, 182, 212, 0.2);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
 /* === ARCHITECTURE DIAGRAM === */
 .architecture-diagram {
     background: var(--glass-bg);
@@ -1475,24 +1577,86 @@ body {
     .footer-links {
         grid-template-columns: 1fr;
     }
+
+    /* Prometheus mobile adjustments */
+    .prometheus-title {
+        font-size: 1.375rem;
+    }
+
+    .prometheus-card {
+        padding: 24px;
+    }
+
+    .prometheus-content {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+
+    .prometheus-icon {
+        font-size: 4rem;
+    }
+
+    .prometheus-info h4 {
+        font-size: 1.375rem;
+    }
+
+    .prometheus-info p {
+        font-size: 0.9375rem;
+    }
+
+    .prometheus-features {
+        justify-content: center;
+    }
+
+    .prom-badge {
+        font-size: 0.8125rem;
+        padding: 6px 12px;
+    }
+
+    /* Better touch targets */
+    .btn, .btn-nav-cta {
+        min-height: 44px;
+        padding: 12px 24px;
+    }
+
+    .tab-btn {
+        min-height: 44px;
+        padding: 10px 16px;
+    }
+
+    .agent-card, .feature-card {
+        min-height: 120px;
+    }
 }
 
 @media (max-width: 480px) {
     .hero-title {
         font-size: 2rem;
+        line-height: 1.2;
+    }
+
+    .section-title {
+        font-size: 1.75rem;
     }
 
     .hero-stats {
         grid-template-columns: 1fr;
+        gap: 16px;
     }
 
     .stat-number {
         font-size: 2rem;
     }
 
+    .stat-label {
+        font-size: 0.875rem;
+    }
+
     .btn {
         width: 100%;
         justify-content: center;
+        font-size: 0.9375rem;
     }
 
     .agents-grid {
@@ -1505,6 +1669,56 @@ body {
 
     .cta-buttons {
         flex-direction: column;
+        gap: 12px;
+    }
+
+    /* Prometheus extra small screens */
+    .prometheus-title {
+        font-size: 1.25rem;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .prometheus-card {
+        padding: 20px;
+    }
+
+    .prometheus-icon {
+        font-size: 3.5rem;
+    }
+
+    .prometheus-info h4 {
+        font-size: 1.125rem;
+    }
+
+    .prometheus-info p {
+        font-size: 0.875rem;
+    }
+
+    .prom-badge {
+        font-size: 0.75rem;
+        padding: 4px 10px;
+    }
+
+    /* Architecture diagram mobile */
+    .architecture-diagram {
+        padding: 20px;
+    }
+
+    .architecture-diagram text {
+        font-size: 10px;
+    }
+
+    /* API Demo mobile */
+    .demo-tabs {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .tab-btn {
+        flex: 1 1 calc(33.333% - 6px);
+        min-width: 80px;
+        font-size: 0.8125rem;
     }
 }
 

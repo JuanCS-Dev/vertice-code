@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertice MCP Server - Model Context Protocol Live</title>
+    <meta name="description" content="Vertice MCP Server - Production-ready Model Context Protocol endpoint with 85+ tools and multi-LLM integration.">
+    <link rel="stylesheet" href="mcp-styles.css">
+</head>
+<body>
+    <!-- Background Effects -->
+    <div class="background-effects">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="nav-brand">
+                    <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+                        <circle cx="32" cy="32" r="28" stroke="url(#logo-gradient)" stroke-width="3"/>
+                        <circle cx="32" cy="32" r="18" stroke="url(#logo-gradient)" stroke-width="2"/>
+                        <circle cx="32" cy="32" r="8" fill="url(#logo-gradient)"/>
+                        <defs>
+                            <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#3b82f6"/>
+                                <stop offset="100%" stop-color="#06b6d4"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div>
+                        <h1>Vertice MCP</h1>
+                        <p>Model Context Protocol</p>
+                    </div>
+                </div>
+                <div class="nav-status">
+                    <span class="status-badge status-live">
+                        <span class="status-dot"></span>
+                        Live
+                    </span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 0L10 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6z"/>
+                    </svg>
+                    Production Ready
+                </div>
+                <h1 class="hero-title">
+                    Model Context Protocol
+                    <span class="gradient-text">Server Live</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Connect your AI assistants to 85+ tactical tools with secure, scalable MCP integration.
+                    <br>Powered by Vertice-Code multi-agent framework.
+                </p>
+
+                <!-- Quick Stats -->
+                <div class="quick-stats">
+                    <div class="stat">
+                        <div class="stat-icon">🚀</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="uptime">Loading...</span>
+                            <span class="stat-label">Uptime</span>
+                        </div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-icon">⚡</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="latency">--ms</span>
+                            <span class="stat-label">Avg Latency</span>
+                        </div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-icon">🛠️</div>
+                        <div class="stat-info">
+                            <span class="stat-value">85+</span>
+                            <span class="stat-label">Tools</span>
+                        </div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-icon">🤖</div>
+                        <div class="stat-info">
+                            <span class="stat-value">5</span>
+                            <span class="stat-label">LLM Providers</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Endpoints Section -->
+    <section class="section endpoints-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">API <span class="gradient-text">Endpoints</span></h2>
+                <p class="section-subtitle">JSON-RPC 2.0 compliant with real-time health monitoring</p>
+            </div>
+
+            <div class="endpoints-grid">
+                <!-- MCP Endpoint -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <div class="endpoint-method post">POST</div>
+                        <code class="endpoint-path">/mcp</code>
+                    </div>
+                    <p class="endpoint-description">
+                        Main MCP JSON-RPC endpoint for tool calls, agent orchestration, and context management.
+                    </p>
+                    <div class="endpoint-features">
+                        <span class="feature-tag">JSON-RPC 2.0</span>
+                        <span class="feature-tag">Tool Calls</span>
+                        <span class="feature-tag">Multi-LLM</span>
+                        <span class="feature-tag">Rate Limited</span>
+                    </div>
+                    <button class="btn btn-primary btn-test" onclick="testMCPEndpoint()">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="5 3 15 8 5 13 5 3"/>
+                        </svg>
+                        Test Endpoint
+                    </button>
+                </div>
+
+                <!-- Health Endpoint -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <div class="endpoint-method get">GET</div>
+                        <code class="endpoint-path">/health</code>
+                    </div>
+                    <p class="endpoint-description">
+                        Health check endpoint for monitoring server status, database connections, and uptime.
+                    </p>
+                    <div class="endpoint-features">
+                        <span class="feature-tag">Status Check</span>
+                        <span class="feature-tag">No Auth</span>
+                        <span class="feature-tag">Fast Response</span>
+                    </div>
+                    <button class="btn btn-secondary btn-test" onclick="testHealthEndpoint()">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="5 3 15 8 5 13 5 3"/>
+                        </svg>
+                        Check Health
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Playground -->
+    <section class="section section-dark playground-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Interactive <span class="gradient-text">Playground</span></h2>
+                <p class="section-subtitle">Test the MCP server in real-time with live examples</p>
+            </div>
+
+            <div class="playground-container">
+                <!-- Request Builder -->
+                <div class="playground-panel">
+                    <h3 class="panel-title">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M2 5l8-3 8 3v6c0 5-8 7-8 7s-8-2-8-7V5z"/>
+                        </svg>
+                        Request Builder
+                    </h3>
+
+                    <div class="form-group">
+                        <label for="method-select">Method</label>
+                        <select id="method-select" class="form-control">
+                            <option value="tools/list">tools/list - List all available tools</option>
+                            <option value="tools/call">tools/call - Execute a tool</option>
+                            <option value="ping">ping - Server ping test</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="request-json">Request JSON</label>
+                        <textarea id="request-json" class="form-control code-editor" rows="10">{
+  "jsonrpc": "2.0",
+  "method": "tools/list",
+  "id": "playground-test-1"
+}</textarea>
+                    </div>
+
+                    <div class="playground-actions">
+                        <button class="btn btn-primary btn-large" onclick="executeRequest()">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 3 19 10 5 17 5 3"/>
+                            </svg>
+                            Execute Request
+                        </button>
+                        <button class="btn btn-secondary" onclick="clearPlayground()">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 6h14M8 6V4a2 2 0 012-2h0a2 2 0 012 2v2m3 0v10a2 2 0 01-2 2H7a2 2 0 01-2-2V6h10z"/>
+                            </svg>
+                            Clear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Response Viewer -->
+                <div class="playground-panel">
+                    <h3 class="panel-title">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M4 4h12v12H4z"/>
+                            <path d="M7 7h6M7 10h6M7 13h4" stroke="white" stroke-width="1.5"/>
+                        </svg>
+                        Response
+                    </h3>
+
+                    <div id="response-container" class="response-viewer">
+                        <div class="response-placeholder">
+                            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="8" y="8" width="48" height="48" rx="4"/>
+                                <path d="M16 24h32M16 32h32M16 40h20"/>
+                            </svg>
+                            <p>Execute a request to see the response here</p>
+                        </div>
+                    </div>
+
+                    <div class="response-meta" id="response-meta" style="display: none;">
+                        <div class="meta-item">
+                            <span class="meta-label">Status:</span>
+                            <span class="meta-value" id="response-status">--</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Time:</span>
+                            <span class="meta-value" id="response-time">--ms</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Size:</span>
+                            <span class="meta-value" id="response-size">-- bytes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tools Showcase -->
+    <section class="section tools-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title"><span class="gradient-text">85+ Tools</span> Available</h2>
+                <p class="section-subtitle">Complete toolkit for file operations, git, bash, web APIs, testing, and more</p>
+            </div>
+
+            <div class="tools-grid">
+                <div class="tool-card">
+                    <div class="tool-icon">📁</div>
+                    <h4>File Operations</h4>
+                    <p>Read, Write, Edit, Delete, Search, Glob, Grep, Tree</p>
+                    <span class="tool-count">13 tools</span>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-icon">🔧</div>
+                    <h4>Git Workflow</h4>
+                    <p>Status, Diff, Commit, PR, Safety Checks, Blame</p>
+                    <span class="tool-count">7 tools</span>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-icon">💻</div>
+                    <h4>Bash Execution</h4>
+                    <p>Shell commands, background tasks, sandboxed runs</p>
+                    <span class="tool-count">12 tools</span>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-icon">🌐</div>
+                    <h4>Web APIs</h4>
+                    <p>HTTP requests, WebFetch, WebSearch, REST calls</p>
+                    <span class="tool-count">6 tools</span>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-icon">🧪</div>
+                    <h4>Testing Suite</h4>
+                    <p>Pytest runner, coverage, unit/integration tests</p>
+                    <span class="tool-count">8 tools</span>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-icon">🔒</div>
+                    <h4>Security & Audit</h4>
+                    <p>Bandit, safety checks, vulnerability scanning</p>
+                    <span class="tool-count">5 tools</span>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-icon">🎨</div>
+                    <h4>Code Quality</h4>
+                    <p>Linting, formatting, type checking, refactoring</p>
+                    <span class="tool-count">9 tools</span>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-icon">📊</div>
+                    <h4>Documentation</h4>
+                    <p>Auto-docs, README gen, API reference, diagrams</p>
+                    <span class="tool-count">6 tools</span>
+                </div>
+            </div>
+
+            <div class="tools-cta">
+                <a href="https://github.com/JuanCS-Dev/vertice-code" target="_blank" class="btn btn-primary btn-large">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 0C4.477 0 0 4.477 0 10c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0110 4.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C17.137 18.163 20 14.418 20 10c0-5.523-4.477-10-10-10z"/>
+                    </svg>
+                    View Full Documentation
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Integration Examples -->
+    <section class="section section-dark integration-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Integration <span class="gradient-text">Examples</span></h2>
+                <p class="section-subtitle">Connect your apps in Python, JavaScript, or cURL</p>
+            </div>
+
+            <div class="integration-tabs">
+                <button class="tab-btn active" data-tab="python">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 0C4.477 0 0 4.477 0 10s4.477 10 10 10 10-4.477 10-10S15.523 0 10 0zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"/>
+                    </svg>
+                    Python
+                </button>
+                <button class="tab-btn" data-tab="javascript">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M0 0h20v20H0V0zm10.5 14.5c0 1.5-1 2-2 2s-2-.5-2-2V10h1.5v4.5c0 .5.2.7.5.7s.5-.2.5-.7V10H10.5v4.5zm5 0c0 1.5-1 2-2 2s-2-.5-2-2V10h1.5v4.5c0 .5.2.7.5.7s.5-.2.5-.7V10H15.5v4.5z"/>
+                    </svg>
+                    JavaScript
+                </button>
+                <button class="tab-btn" data-tab="curl">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <rect x="3" y="4" width="14" height="12" rx="1"/>
+                        <path d="M7 8h6M7 11h4" stroke="white" stroke-width="1"/>
+                    </svg>
+                    cURL
+                </button>
+            </div>
+
+            <div class="code-examples">
+                <div class="code-example active" data-content="python">
+                    <pre><code>import requests
+
+# MCP Server endpoint
+MCP_URL = "https://vertice-mcp-server-452089804714.us-central1.run.app/mcp"
+
+# List available tools
+response = requests.post(MCP_URL, json={
+    "jsonrpc": "2.0",
+    "method": "tools/list",
+    "id": "python-client-1"
+})
+
+tools = response.json()
+print(f"Available tools: {len(tools['result'])}")
+
+# Call a specific tool
+response = requests.post(MCP_URL, json={
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+        "name": "read_file",
+        "arguments": {"path": "/path/to/file.txt"}
+    },
+    "id": "python-client-2"
+})
+
+result = response.json()
+print(result['result'])</code></pre>
+                </div>
+
+                <div class="code-example" data-content="javascript">
+                    <pre><code>// MCP Server endpoint
+const MCP_URL = "https://vertice-mcp-server-452089804714.us-central1.run.app/mcp";
+
+// List available tools
+const listTools = async () => {
+    const response = await fetch(MCP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'tools/list',
+            id: 'js-client-1'
+        })
+    });
+
+    const data = await response.json();
+    console.log(`Available tools: ${data.result.length}`);
+    return data.result;
+};
+
+// Call a specific tool
+const callTool = async (toolName, args) => {
+    const response = await fetch(MCP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: { name: toolName, arguments: args },
+            id: 'js-client-2'
+        })
+    });
+
+    const result = await response.json();
+    return result.result;
+};</code></pre>
+                </div>
+
+                <div class="code-example" data-content="curl">
+                    <pre><code># List available tools
+curl -X POST https://vertice-mcp-server-452089804714.us-central1.run.app/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/list",
+    "id": "curl-client-1"
+  }'
+
+# Call a specific tool
+curl -X POST https://vertice-mcp-server-452089804714.us-central1.run.app/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "read_file",
+      "arguments": {"path": "/path/to/file.txt"}
+    },
+    "id": "curl-client-2"
+  }'
+
+# Health check
+curl https://vertice-mcp-server-452089804714.us-central1.run.app/health</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3>Vertice MCP Server</h3>
+                    <p>Powered by Vertice-Code Multi-Agent Framework</p>
+                    <div class="footer-badges">
+                        <span class="badge">MCP 1.0</span>
+                        <span class="badge">JSON-RPC 2.0</span>
+                        <span class="badge">Cloud Run</span>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <div>
+                        <h4>Resources</h4>
+                        <a href="https://github.com/JuanCS-Dev/vertice-code" target="_blank">Documentation</a>
+                        <a href="https://github.com/JuanCS-Dev/vertice-code/blob/main/README.md" target="_blank">Getting Started</a>
+                        <a href="https://modelcontextprotocol.io" target="_blank">MCP Spec</a>
+                    </div>
+                    <div>
+                        <h4>Endpoints</h4>
+                        <a href="https://vertice-mcp-server-452089804714.us-central1.run.app/mcp" target="_blank">/mcp</a>
+                        <a href="https://vertice-mcp-server-452089804714.us-central1.run.app/health" target="_blank">/health</a>
+                    </div>
+                    <div>
+                        <h4>Community</h4>
+                        <a href="https://github.com/JuanCS-Dev/vertice-code/issues" target="_blank">Issues</a>
+                        <a href="https://github.com/JuanCS-Dev/vertice-code/discussions" target="_blank">Discussions</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Vertice-Code. Open Source under MIT License.</p>
+                <p class="footer-tagline">Soli Deo Gloria ❤️</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="mcp-script.js"></script>
+</body>
+</html>

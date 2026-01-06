@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "landing",
+    "public": ".",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -8,26 +8,13 @@
     ],
     "rewrites": [
       {
-        "source": "/mcp",
-        "destination": "/mcp.html"
-      },
-      {
         "source": "**",
-        "destination": "/index.html"
+        "destination": "/mcp.html"
       }
     ],
     "headers": [
       {
         "source": "**/*.@(js|css)",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "max-age=31536000"
-          }
-        ]
-      },
-      {
-        "source": "**/*.@(png|jpg|jpeg|gif|svg|webp|ico)",
         "headers": [
           {
             "key": "Cache-Control",
