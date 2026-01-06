@@ -1,7 +1,7 @@
 # PLANO DE INTEGRAÇÃO: Prometheus Meta-Agent com Vertice
-**Status:** CONCLUÍDO (Fases 1-8) ✅
+**Status:** PLANEJADO (Fases 9-10) 📋
 **Data:** 2026-01-06
-**Versão:** 5.0 (SKILLS EXPOSURE COMPLETE)
+**Versão:** 6.0 (DISTRIBUTED & STANDALONE PLANNED)
 **Autor:** JuanCS Dev & Claude Opus 4.5
 
 ---
@@ -628,9 +628,343 @@ result = await provider.invoke_skill("debug_performance_issue", context)
 
 ---
 
-#### Fases Adicionais
-- **Fase 9:** Distributed Evolution (múltiplas instâncias compartilham skills)
-- **Fase 10:** Full MCP Server Standalone (Prometheus como serviço independente)
+#### **FASE 9: Distributed Evolution (Skills Sharing)** (3-4 dias) - **PLANEJADO**
+**Objetivo:** Implementar compartilhamento distribuído de skills entre múltiplas instâncias do Prometheus
+
+**Contexto**: Atualmente cada instância do Prometheus aprende skills isoladamente. Esta fase cria um ecossistema onde instâncias compartilham conhecimento aprendido, acelerando a evolução coletiva.
+
+**Arquitetura Distribuída**:
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  Prometheus-1   │    │  Prometheus-2   │    │  Prometheus-3   │
+│                 │    │                 │    │                 │
+│ Skills Registry │◄──►│ Skills Registry │◄──►│ Skills Registry │
+│ Evolution Loop  │    │ Evolution Loop  │    │ Evolution Loop  │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         ▲                       ▲                       ▲
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 ▼
+                    ┌─────────────────────┐
+                    │   Skills Hub        │
+                    │   (Discovery)       │
+                    │ - Peer Registry     │
+                    │ - Skills Broadcast  │
+                    │ - Consensus Protocol│
+                    └─────────────────────┘
+```
+
+**Tarefas:**
+1. **Skills Discovery Service**:
+   ```python
+   class SkillsDiscoveryService:
+       async def register_instance(self, instance_id: str, skills: List[LearnedSkill])
+       async def discover_peers(self) -> List[str]
+       async def broadcast_skill(self, skill: LearnedSkill)
+       async def request_skill(self, skill_name: str, peer_id: str) -> LearnedSkill
+   ```
+
+2. **Distributed Skills Registry**:
+   ```python
+   class DistributedSkillsRegistry(PrometheusSkillsRegistry):
+       def __init__(self, discovery_service: SkillsDiscoveryService):
+           super().__init__()
+           self.discovery = discovery_service
+           self.peer_skills_cache: Dict[str, List[LearnedSkill]] = {}
+
+       async def sync_with_peers(self):
+           """Synchronize skills with all known peers"""
+           peers = await self.discovery.discover_peers()
+           for peer_id in peers:
+               peer_skills = await self.discovery.get_peer_skills(peer_id)
+               await self.merge_peer_skills(peer_id, peer_skills)
+
+       async def share_top_skills(self, top_k: int = 10):
+           """Share most successful skills with peers"""
+           top_skills = await self.list_skills(sort_by="success_rate")[:top_k]
+           for skill in top_skills:
+               await self.discovery.broadcast_skill(skill)
+   ```
+
+3. **Peer-to-Peer Communication**:
+   ```python
+   class SkillsPeerProtocol:
+       async def handle_skill_request(self, skill_name: str) -> LearnedSkill:
+           """Handle incoming skill requests from peers"""
+           skill = await self.registry.get_skill(skill_name)
+           if skill and skill.success_rate > 0.8:  # Only share high-quality skills
+               return skill
+           return None
+
+       async def handle_skill_broadcast(self, skill: LearnedSkill):
+           """Handle skill broadcasts from peers"""
+           if skill.success_rate > 0.9:  # Only accept very successful skills
+               await self.registry.register_distributed_skill(skill)
+   ```
+
+4. **Consensus & Conflict Resolution**:
+   ```python
+   class SkillsConsensusManager:
+       def resolve_skill_conflict(self, local_skill: LearnedSkill, peer_skill: LearnedSkill) -> LearnedSkill:
+           """Resolve conflicts when same skill exists with different implementations"""
+           # Prefer higher success rate
+           if peer_skill.success_rate > local_skill.success_rate:
+               return peer_skill
+           # Prefer more recent learning
+           elif peer_skill.learned_at > local_skill.learned_at:
+               return peer_skill
+           else:
+               return local_skill
+   ```
+
+**Benefícios Esperados**:
+- 🎯 **Aceleração da Evolução**: Instâncias aprendem coletivamente
+- 🎯 **Robustez**: Skills são validadas por múltiplas instâncias
+- 🎯 **Especialização**: Instâncias podem se especializar em domínios
+- 🎯 **Recuperação**: Skills perdidas podem ser recuperadas de peers
+
+**Critério de Sucesso**:
+- ✅ Múltiplas instâncias sincronizam skills automaticamente
+- ✅ Skills são validadas por consenso peer-to-peer
+- ✅ Taxa de sucesso coletivo > taxa individual isolada
+- ✅ Sistema tolerante a falhas de peers
+
+**Arquivos:**
+- NOVO: `prometheus/distributed/skills_discovery.py`
+- NOVO: `prometheus/distributed/peer_protocol.py`
+- MODIFICAR: `prometheus/skills/registry.py` (add distributed features)
+- NOVO: `prometheus/distributed/consensus.py`
+- NOVO: `tests/prometheus/test_distributed_skills.py`
+
+---
+
+#### **FASE 10: Full MCP Server Standalone** (4-5 dias) - **PLANEJADO**
+**Objetivo:** Transformar o Prometheus em um servidor MCP independente e completo
+
+**Contexto**: Atualmente o Prometheus é integrado no Vertice. Esta fase cria um servidor MCP standalone que pode ser usado por qualquer cliente MCP, tornando o Prometheus um serviço independente.
+
+**Arquitetura Standalone**:
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    MCP SERVER STANDALONE                    │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │                 Prometheus Core                     │   │
+│  │  ┌─────────────┬─────────────┬─────────────────┐   │   │
+│  │  │ Orchestrator│   Memory    │   Evolution     │   │   │
+│  │  │             │   System    │   Loop          │   │   │
+│  │  └─────────────┴─────────────┴─────────────────┘   │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │               MCP INTERFACE LAYER                   │   │
+│  │  ┌─────────────┬─────────────┬─────────────────┐   │   │
+│  │  │  Resources  │   Tools     │    Prompts      │   │   │
+│  │  │             │             │                 │   │   │
+│  │  │ - Memories  │ - Execute   │ - Task Prompts  │   │   │
+│  │  │ - Skills    │ - Simulate  │ - Evolution     │   │   │
+│  │  │ - State     │ - Evolve    │ - Reflection    │   │   │
+│  │  │             │ - Skills    │                 │   │   │
+│  │  └─────────────┴─────────────┴─────────────────┘   │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+               ┌─────────────────────────────┐
+               │        MCP CLIENTS          │
+               │  ┌─────────────┬─────────┐  │
+               │  │ Claude Code │ VS Code │  │
+               │  │ ChatGPT     │ Custom  │  │
+               │  │             │ Clients │  │
+               │  └─────────────┴─────────┘  │
+               └─────────────────────────────┘
+```
+
+**Tarefas:**
+1. **MCP Server Core**:
+   ```python
+   class PrometheusMCPServer:
+       """Standalone MCP server exposing Prometheus capabilities"""
+
+       def __init__(self, config: PrometheusConfig):
+           self.prometheus = PrometheusOrchestrator(config)
+           self.resources = MCPResources(self.prometheus)
+           self.tools = MCPTools(self.prometheus)
+           self.prompts = MCPPrompts(self.prometheus)
+
+       async def serve(self, host: str = "0.0.0.0", port: int = 3000):
+           """Start MCP server on specified host/port"""
+           server = await asyncio.start_server(
+               self.handle_mcp_connection,
+               host, port
+           )
+           logger.info(f"Prometheus MCP Server running on {host}:{port}")
+           await server.serve_forever()
+   ```
+
+2. **MCP Resources Implementation**:
+   ```python
+   class MCPResources:
+       """MCP Resources: Memories, Skills, State"""
+
+       async def list_resources(self) -> List[Resource]:
+           """List all available resources"""
+           return [
+               Resource(uri="prometheus://memories/episodic", name="Episodic Memories"),
+               Resource(uri="prometheus://memories/semantic", name="Semantic Memories"),
+               Resource(uri="prometheus://memories/procedural", name="Procedural Skills"),
+               Resource(uri="prometheus://state/current", name="Current State"),
+               Resource(uri="prometheus://evolution/stats", name="Evolution Stats"),
+           ]
+
+       async def read_resource(self, uri: str) -> str:
+           """Read resource content"""
+           if uri.startswith("prometheus://memories/"):
+               return await self._read_memory_resource(uri)
+           elif uri.startswith("prometheus://state/"):
+               return await self._read_state_resource(uri)
+           elif uri.startswith("prometheus://evolution/"):
+               return await self._read_evolution_resource(uri)
+   ```
+
+3. **MCP Tools Implementation**:
+   ```python
+   class MCPTools:
+       """MCP Tools: All Prometheus capabilities as tools"""
+
+       async def list_tools(self) -> List[Tool]:
+           """List all available tools"""
+           return [
+               Tool(
+                   name="prometheus_execute",
+                   description="Execute task via self-evolving meta-agent",
+                   inputSchema={
+                       "type": "object",
+                       "properties": {
+                           "task": {"type": "string", "description": "Task description"},
+                           "use_memory": {"type": "boolean", "default": True},
+                           "use_world_model": {"type": "boolean", "default": True}
+                       }
+                   }
+               ),
+               # ... all other tools
+           ]
+
+       async def call_tool(self, name: str, arguments: Dict[str, Any]) -> Any:
+           """Execute tool with arguments"""
+           if name == "prometheus_execute":
+               return await self.prometheus.execute(**arguments)
+           elif name == "prometheus_memory_query":
+               return await self.prometheus.memory.find_procedures(arguments["query"])
+           # ... handle all tools
+   ```
+
+4. **MCP Prompts Implementation**:
+   ```python
+   class MCPPrompts:
+       """MCP Prompts: Reusable prompt templates"""
+
+       async def list_prompts(self) -> List[Prompt]:
+           """List available prompts"""
+           return [
+               Prompt(
+                   name="task_execution",
+                   description="Execute complex task with full Prometheus capabilities",
+                   arguments=[
+                       PromptArgument(name="task_description", description="What to accomplish")
+                   ]
+               ),
+               Prompt(
+                   name="skill_learning",
+                   description="Learn new skill through evolution",
+                   arguments=[
+                       PromptArgument(name="skill_description", description="Skill to learn")
+                   ]
+               )
+           ]
+
+       async def get_prompt(self, name: str, arguments: Dict[str, Any]) -> str:
+           """Get formatted prompt"""
+           if name == "task_execution":
+               return self._format_task_prompt(arguments["task_description"])
+           elif name == "skill_learning":
+               return self._format_skill_prompt(arguments["skill_description"])
+   ```
+
+5. **Server Lifecycle Management**:
+   ```python
+   class PrometheusMCPServerManager:
+       """Manage MCP server lifecycle"""
+
+       @staticmethod
+       async def start_server(config_path: str, host: str = "0.0.0.0", port: int = 3000):
+           """Start Prometheus as MCP server"""
+           config = PrometheusConfig.from_file(config_path)
+           server = PrometheusMCPServer(config)
+
+           # Setup signal handlers
+           def signal_handler(signum, frame):
+               logger.info("Shutting down Prometheus MCP Server...")
+               # Graceful shutdown logic
+
+           signal.signal(signal.SIGINT, signal_handler)
+           signal.signal(signal.SIGTERM, signal_handler)
+
+           await server.serve(host, port)
+
+       @staticmethod
+       def create_systemd_service(port: int = 3000) -> str:
+           """Generate systemd service file"""
+           return f"""
+[Unit]
+Description=Prometheus MCP Server
+After=network.target
+
+[Service]
+Type=simple
+User=prometheus
+ExecStart=/usr/local/bin/prometheus-mcp-server --port {port}
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+"""
+   ```
+
+**Benefícios Esperados**:
+- 🎯 **Interoperabilidade Universal**: Qualquer cliente MCP pode usar o Prometheus
+- 🎯 **Deploy Independente**: Prometheus como serviço isolado
+- 🎯 **Escalabilidade**: Múltiplas instâncias do servidor
+- 🎯 **Integração Enterprise**: Fácil integração em pipelines existentes
+
+**Critério de Sucesso**:
+- ✅ Servidor MCP responde corretamente a todas as operações padrão
+- ✅ Todas as capabilities do Prometheus expostas via MCP
+- ✅ Compatível com Claude Code, VS Code, e outros clientes MCP
+- ✅ Performance adequada para uso em produção
+- ✅ Configuração e deploy simplificados
+
+**Arquivos:**
+- NOVO: `prometheus/mcp_server/server.py` (servidor MCP principal)
+- NOVO: `prometheus/mcp_server/resources.py` (implementação de resources)
+- NOVO: `prometheus/mcp_server/tools.py` (implementação de tools)
+- NOVO: `prometheus/mcp_server/prompts.py` (implementação de prompts)
+- NOVO: `bin/prometheus-mcp-server` (script de inicialização)
+- NOVO: `prometheus/mcp_server/config.py` (configuração standalone)
+- NOVO: `tests/integration/test_mcp_standalone.py`
+
+**Deployment Options**:
+- Docker container: `docker run -p 3000:3000 prometheus/mcp-server`
+- Systemd service: `/etc/systemd/system/prometheus-mcp.service`
+- Kubernetes: Deployment com ConfigMap e Secrets
+- Cloud: AWS ECS, Google Cloud Run, etc.
+
+---
+
+#### Fases Adicionais (Post-MVP)
+- **Fase 11:** Multi-Modal Evolution (integração com visão/áudio)
+- **Fase 12:** Constitutional AI Integration (JUSTICA/SOFIA nativo)
+- **Fase 13:** Quantum-Ready Architecture (preparação para quantum computing)
 
 ---
 
@@ -711,6 +1045,17 @@ result = await provider.invoke_skill("debug_performance_issue", context)
 - Corrigida contagem de agentes: 18 agentes (6 Core + 10 CLI + 2 Governance), não 20
 - Corrigida localização de AgentRole: `vertice_core/types/agents.py` (não `vertice_core/types.py`)
 - Adicionada atenção crítica sobre preservar Gemini 2.5 Pro Thinking ao migrar para ProviderManager (Gap G6 + Risco R5)
+
+**VERSÃO 6.0 - Fases 9-10 Planejadas (Distributed & Standalone)** 🌐
+**Atualizado:** 2026-01-06 19:00
+**Mudanças v6.0:**
+- 📋 **FASE 9 PLANEJADA**: Distributed Evolution (Skills sharing across instances)
+- 📋 **FASE 10 PLANEJADA**: Full MCP Server Standalone (Prometheus as independent service)
+- 🔬 Pesquisa completa em Anthropic/Google/OpenAI docs sobre sistemas distribuídos MCP
+- 🏗️ Arquiteturas detalhadas para peer-to-peer skills sharing
+- 🚀 Plano de implementação para servidor MCP standalone
+- 📊 Benefícios quantificados e critérios de sucesso definidos
+- 🌐 **PRÓXIMO: ECOSSISTEMA DISTRIBUÍDO E SERVIÇO INDEPENDENTE!**
 
 **VERSÃO 5.0 - Fase 8 Skills Exposure Concluída** 🎯
 **Atualizado:** 2026-01-06 18:30
