@@ -333,7 +333,7 @@ class Or(Validator):
         return ValidationResultImpl.failure(all_errors)
 
 
-class Optional(Validator):
+class OptionalValidator(Validator):
     """Make a validator optional (None is valid)."""
 
     def __init__(self, validator: Validator):

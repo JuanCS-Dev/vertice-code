@@ -26,6 +26,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from .context_rich import RichContext
 from .integration_types import (
     AgentInvoker,
     Event,
@@ -167,7 +168,9 @@ class Coordinator:
     # ========================================================================
 
     def register_tool(
-        self, definition: ToolDefinition, executor: Any  # Callable that executes the tool
+        self,
+        definition: ToolDefinition,
+        executor: Any,  # Callable that executes the tool
     ) -> None:
         """Register tool for function calling.
 
@@ -203,7 +206,6 @@ class Coordinator:
         if tool_name not in self._tool_executors:
             raise ValueError(f"Tool not found: {tool_name}")
 
-        definition = self._tools[tool_name]
         executor = self._tool_executors[tool_name]
 
         # Publish start event
@@ -384,7 +386,8 @@ class Coordinator:
 
             try:
                 response = await agent.invoke(
-                    request=message, context=ctx.__dict__  # Convert to dict for compatibility
+                    request=message,
+                    context=ctx.__dict__,  # Convert to dict for compatibility
                 )
 
                 # Publish completion event

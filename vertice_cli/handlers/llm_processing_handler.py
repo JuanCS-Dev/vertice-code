@@ -81,7 +81,6 @@ class LLMProcessingHandler:
             suggestion_engine: The suggestion engine instance (legacy).
         """
         from rich.text import Text
-        from vertice_cli.core.ai_patterns import build_rich_context
         from vertice_cli.shell.safety import assess_risk, danger_detector, error_parser
         from vertice_cli.tui.components.workflow_visualizer import StepStatus
         from vertice_cli.tui.components.dashboard import OperationStatus
@@ -95,14 +94,6 @@ class LLMProcessingHandler:
         # P2: Build rich context (enhanced)
         context_dict = self.rich_context.build_rich_context(
             include_git=True, include_env=True, include_recent=True
-        )
-
-        # Old format for compatibility
-        rich_ctx = build_rich_context(
-            current_command=user_input,
-            command_history=self.context.history[-10:],
-            recent_errors=[],
-            working_dir=os.getcwd(),
         )
 
         # Show analyzing status
@@ -126,7 +117,7 @@ class LLMProcessingHandler:
 
 Project: {os.getcwd()}
 Recent files: {recent_files_str}
-Git status: {context_dict.get('git_status', 'N/A')}
+Git status: {context_dict.get("git_status", "N/A")}
 
 Provide clear, actionable suggestions."""
 

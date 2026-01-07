@@ -134,7 +134,7 @@ class FlakyTest:
 
 
 __all__ = [
-    "TestFramework",
+    "TestingFramework",
     "TestType",
     "TestCase",
     "CoverageReport",

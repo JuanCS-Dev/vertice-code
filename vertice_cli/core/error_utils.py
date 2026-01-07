@@ -90,7 +90,7 @@ def log_retry(
     error_type = type(error).__name__
     error_msg = str(error)[:200]
 
-    full_msg = f"[RETRY {attempt}/{max_attempts}] {context}: " f"{error_type}: {error_msg}"
+    full_msg = f"[RETRY {attempt}/{max_attempts}] {context}: {error_type}: {error_msg}"
 
     # Use WARNING for first attempts, ERROR if near max
     if attempt >= max_attempts - 1:
@@ -149,7 +149,6 @@ def create_error_result(
     Use for returning errors from tools/agents.
     """
     error_type = type(error).__name__
-    error_msg = str(error)
 
     result = {
         "success": False,

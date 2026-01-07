@@ -13,7 +13,7 @@ import os
 import time
 import warnings
 from dataclasses import dataclass, field
-from typing import Any, AsyncGenerator, Dict, List, Optional, TypedDict
+from typing import Any, AsyncGenerator, Dict, List, Optional, TypedDict, Union
 
 try:
     from vertice_cli.core.types import (
@@ -33,10 +33,10 @@ except ImportError:
 # Silence gRPC/glog warnings
 os.environ.setdefault("GRPC_VERBOSITY", "ERROR")
 os.environ.setdefault("GLOG_minloglevel", "3")
-warnings.filterwarnings("ignore", message=".*ALTS.*")
-
 from .config import config
 from core.resilience import CircuitBreaker, CircuitState, RateLimiter
+
+warnings.filterwarnings("ignore", message=".*ALTS.*")
 
 logger = logging.getLogger(__name__)
 

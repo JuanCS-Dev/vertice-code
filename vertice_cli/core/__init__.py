@@ -90,7 +90,7 @@ def __getattr__(name: str):
 
     # Input Validator
     if name in ("InputValidator", "ValidationResult", "validate_command", "validate_file_path"):
-        from .input_validator import (
+        from .input_validator import (  # noqa: F401
             InputValidator,
             ValidationResult,
             validate_command,
@@ -101,19 +101,19 @@ def __getattr__(name: str):
 
     # Prompt Shield
     if name in ("PromptShield", "ShieldResult"):
-        from .prompt_shield import PromptShield, ShieldResult
+        from .prompt_shield import PromptShield, ShieldResult  # noqa: F401
 
         return locals()[name]
 
     # Input Enhancer
     if name in ("InputEnhancer", "EnhancedInput"):
-        from .input_enhancer import InputEnhancer, EnhancedInput
+        from .input_enhancer import InputEnhancer, EnhancedInput  # noqa: F401
 
         return locals()[name]
 
     # Audit Logger
     if name in ("AuditLogger", "AuditEventType", "audit_log", "audit_governance"):
-        from .audit_logger import AuditLogger, AuditEventType, audit_log, audit_governance
+        from .audit_logger import AuditLogger, AuditEventType, audit_log, audit_governance  # noqa: F401
 
         return locals()[name]
 
@@ -131,55 +131,55 @@ def __getattr__(name: str):
 
     # Python Sandbox
     if name in ("PythonSandbox",):
-        from .python_sandbox import PythonSandbox
+        from .python_sandbox import PythonSandbox  # noqa: F401
 
         return locals()[name]
 
     # Atomic Operations
     if name in ("AtomicFileOps", "AtomicResult"):
-        from .atomic_ops import AtomicFileOps, AtomicResult
+        from .atomic_ops import AtomicFileOps, AtomicResult  # noqa: F401
 
         return locals()[name]
 
     # Undo Manager
     if name in ("UndoManager",):
-        from .undo_manager import UndoManager
+        from .undo_manager import UndoManager  # noqa: F401
 
         return locals()[name]
 
     # Tool Chain
     if name in ("AtomicToolChain",):
-        from .tool_chain import AtomicToolChain
+        from .tool_chain import AtomicToolChain  # noqa: F401
 
         return locals()[name]
 
     # Resilience
     if name in ("ConcurrencyManager", "ResourceLimits", "RateLimiter", "EncodingSafety"):
-        from .resilience import ConcurrencyManager, ResourceLimits, RateLimiter, EncodingSafety
+        from .resilience import ConcurrencyManager, ResourceLimits, RateLimiter, EncodingSafety  # noqa: F401
 
         return locals()[name]
 
     # Error Presenter
     if name in ("ErrorPresenter", "PresentedError"):
-        from .error_presenter import ErrorPresenter, PresentedError
+        from .error_presenter import ErrorPresenter, PresentedError  # noqa: F401
 
         return locals()[name]
 
     # Session Manager
     if name in ("SessionManager", "SessionSnapshot"):
-        from .session_manager import SessionManager, SessionSnapshot
+        from .session_manager import SessionManager, SessionSnapshot  # noqa: F401
 
         return locals()[name]
 
     # Context Tracker
     if name in ("ContextTracker", "ResolvedReference"):
-        from .context_tracker import ContextTracker, ResolvedReference
+        from .context_tracker import ContextTracker, ResolvedReference  # noqa: F401
 
         return locals()[name]
 
     # Memory System (Claude Code Parity)
     if name in ("MemoryManager", "MemoryEntry", "ProjectMemory", "get_memory_manager"):
-        from .memory import MemoryManager, MemoryEntry, ProjectMemory, get_memory_manager
+        from .memory import MemoryManager, MemoryEntry, ProjectMemory, get_memory_manager  # noqa: F401
 
         return locals()[name]
 
@@ -201,7 +201,7 @@ def __getattr__(name: str):
         "inject",
         "with_container",
     ):
-        from .di import (
+        from .di import (  # noqa: F401
             Scope,
             Provider,
             ProviderConfig,

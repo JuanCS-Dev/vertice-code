@@ -36,7 +36,7 @@ from ..base import (
     BaseAgent,
 )
 
-from .models import TestingFramework
+from .models import TestingFramework, CoverageReport, MutationResult, FlakyTest
 from .generators import generate_test_suite
 from .analyzers import CoverageAnalyzer, MutationAnalyzer, FlakyDetector
 from .scoring import QualityScorer, score_to_grade
@@ -387,9 +387,9 @@ class TestRunnerAgent(BaseAgent):
                 branches_covered=totals.get("covered_branches", 0),
             )
         except (json.JSONDecodeError, KeyError, TypeError, FileNotFoundError):
-            from .models import TestCoverageReport
+            from .models import CoverageReport
 
-            return TestCoverageReport(
+            return CoverageReport(
                 total_statements=0,
                 covered_statements=0,
                 coverage_percentage=0.0,
@@ -398,7 +398,7 @@ class TestRunnerAgent(BaseAgent):
                 branches_covered=0,
             )
 
-    def _calculate_coverage_score(self, coverage: "TestCoverageReport") -> int:
+    def _calculate_coverage_score(self, coverage: "CoverageReport") -> int:
         """Calculate quality score from coverage metrics. Can be mocked for testing."""
         base_score = coverage.coverage_percentage * 0.7
         branch_bonus = coverage.branch_coverage * 0.3
@@ -466,7 +466,7 @@ class TestRunnerAgent(BaseAgent):
         timeout = len(re.findall(r"TIMEOUT", output))
         total = killed + survived + timeout
 
-        return TestMutationResult(
+        return MutationResult(
             total_mutants=total,
             killed_mutants=killed,
             survived_mutants=survived,
@@ -536,12 +536,12 @@ class TestRunnerAgent(BaseAgent):
                         test_results[test_name].append("PASSED" in line)
 
         # Identify flaky tests
-        flaky_tests: List[TestFlakyTest] = []
+        flaky_tests: List[FlakyTest] = []
         for test_name, results in test_results.items():
             if len(set(results)) > 1:
                 failure_rate = (results.count(False) / len(results)) * 100
                 flaky_tests.append(
-                    TestFlakyTest(
+                    FlakyTest(
                         name=test_name,
                         file_path=test_path,
                         failure_rate=failure_rate,

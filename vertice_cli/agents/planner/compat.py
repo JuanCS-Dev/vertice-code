@@ -48,7 +48,7 @@ def create_fallback_plan_compat(task: "AgentTask", strategy: "PlanStrategy") -> 
 
 
 def select_best_plan_compat(
-    plans: List["AlternativePlan"], task: "AgentTask" = None
+    plans: List["AlternativePlan"], task: Optional["AgentTask"] = None
 ) -> Tuple["PlanStrategy", str]:
     """Backwards compatibility wrapper for select_best_plan."""
     from .multi_planning import select_best_plan

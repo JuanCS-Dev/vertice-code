@@ -29,6 +29,8 @@ import tempfile
 from typing import Dict, List, Optional, Tuple, Union
 from dataclasses import dataclass
 from enum import Enum, auto
+
+from vertice_cli.core.execution import ExecutionResult
 from contextlib import contextmanager
 import logging
 
@@ -96,10 +98,6 @@ class ResourceLimits:
             processes=100,
             wall_time=600,
         )
-
-
-# ExecutionResult imported from canonical source
-from vertice_cli.core.execution import ExecutionResult
 
 
 class SecureExecutor:

@@ -316,7 +316,6 @@ def inject(func: Callable[..., T]) -> Callable[..., T]:
     @functools.wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> T:
         # Get defaults from function
-        defaults = func.__defaults__ or ()
         kwdefaults = func.__kwdefaults__ or {}
 
         # Inject dependencies

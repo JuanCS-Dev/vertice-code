@@ -327,7 +327,6 @@ class ErrorPresenter:
             PresentedError ready for display
         """
         context = context or {}
-        error_str = str(error)
         explanation = self.get_explanation(error)
 
         # Temporarily override audience if mode specified
@@ -406,7 +405,7 @@ class ErrorPresenter:
         example_fix = explanation.example_fix if self.show_examples else None
 
         # Build steps from suggestions
-        steps = [f"Step {i+1}: {s}" for i, s in enumerate(suggestions[:4])]
+        steps = [f"Step {i + 1}: {s}" for i, s in enumerate(suggestions[:4])]
 
         # Generate simple explanation for beginners
         simple_explanation = self._generate_simple_explanation(error, explanation)
@@ -462,7 +461,7 @@ class ErrorPresenter:
                 traceback.format_exception(type(error), error, error.__traceback__)
             )
 
-        steps = [f"Step {i+1}: {s}" for i, s in enumerate(suggestions[:4])]
+        steps = [f"Step {i + 1}: {s}" for i, s in enumerate(suggestions[:4])]
 
         return PresentedError(
             title="Error Occurred",
@@ -588,7 +587,6 @@ class ErrorPresenter:
         try:
             from rich.panel import Panel
             from rich.text import Text
-            from rich.syntax import Syntax
             from rich import box
 
             content = Text()

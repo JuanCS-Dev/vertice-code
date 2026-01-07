@@ -20,6 +20,8 @@ from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Protocol, TypedDict
 from uuid import uuid4
 
+from .context_rich import RichContext
+
 
 # ============================================================================
 # INTENT SYSTEM

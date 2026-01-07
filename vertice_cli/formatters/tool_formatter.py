@@ -99,7 +99,7 @@ def format_file_content(result: Any, options: Dict[str, Any]) -> FormattedResult
 
     if show_line_numbers:
         width = len(str(len(lines)))
-        numbered_lines = [f"{i+1:>{width}}│ {line}" for i, line in enumerate(lines)]
+        numbered_lines = [f"{i + 1:>{width}}│ {line}" for i, line in enumerate(lines)]
         content = "\n".join(numbered_lines)
     else:
         content = "\n".join(lines)
@@ -164,7 +164,6 @@ def format_glob_result(result: Any, options: Dict[str, Any]) -> FormattedResult:
 def format_grep_result(result: Any, options: Dict[str, Any]) -> FormattedResult:
     """Format grep/search result."""
     max_matches = options.get("max_matches", 100)
-    show_context = options.get("show_context", True)
 
     if isinstance(result, dict):
         matches = result.get("matches", [])

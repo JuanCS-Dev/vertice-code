@@ -24,6 +24,7 @@ from .types import (
     PlanStrategy,
     MultiPlanResult,
 )
+from . import AlternativePlan
 from .goap import WorldState, GoalState, Action, GOAPPlanner
 from .dependency import DependencyAnalyzer
 from .models import SOPStep, ExecutionPlan, ExecutionStage
@@ -417,7 +418,7 @@ CRITICAL:
         return create_fallback_plan_compat(task, strategy)
 
     def _select_best_plan(
-        self, plans: List["AlternativePlan"], task: AgentTask = None
+        self, plans: List["AlternativePlan"], task: Optional[AgentTask] = None
     ) -> Tuple["PlanStrategy", str]:
         return select_best_plan_compat(plans, task)
 
