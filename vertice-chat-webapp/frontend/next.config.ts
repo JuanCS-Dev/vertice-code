@@ -1,4 +1,10 @@
 import type { NextConfig } from 'next';
+import { BundleAnalyzerPlugin } from '@next/bundle-analyzer';
+
+// Bundle analyzer configuration
+const withBundleAnalyzer = BundleAnalyzerPlugin({
+  enabled: process.env.ANALYZE === 'true',
+});
 
 const nextConfig: NextConfig = {
   // Enable experimental features
@@ -6,6 +12,19 @@ const nextConfig: NextConfig = {
     // Partial Prerendering (PPR) - hybrid static/dynamic
     // Reference: https://nextjs.org/docs/app/building-your-application/rendering/partial-prerendering
     cacheComponents: true,
+
+    // Bundle optimization
+    optimizePackageImports: ['@radix-ui/react-icons', 'date-fns'],
+  },
+
+  // Optimize imports for better tree shaking
+  modularizeImports: {
+    'lucide-react': {
+      transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
+    },
+    'lodash': {
+      transform: 'lodash/{{member}}',
+    },
   },
 
   // Turbopack configuration
@@ -57,6 +76,46 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
   },
+
+  // Webpack configuration for bundle optimization
+  webpack: (config, { isServer }) => {
+    // Optimize bundle size and splitting
+    if (!isServer) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            // Vendor chunk - third-party libraries
+            vendor: {
+              name: 'vendor',
+              test: /node_modules/,
+              priority: 20,
+              reuseExistingChunk: true,
+            },
+            // UI components chunk
+            ui: {
+              name: 'ui',
+              test: /[\\/]components[\\/]ui[\\/]/,
+              priority: 15,
+              reuseExistingChunk: true,
+            },
+            // Common chunk - shared between pages
+            common: {
+              minChunks: 2,
+              priority: 10,
+              reuseExistingChunk: true,
+              enforce: true,
+            },
+          },
+        },
+      };
+    }
+
+    return config;
+  },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);

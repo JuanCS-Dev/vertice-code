@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from '@clerk/nextjs';
+import { PageTransition } from '@/components/layout/page-transition';
+import { WebVitalsMonitor } from '@/components/metrics/web-vitals';
+import { AccessibilityChecker } from '@/components/accessibility/accessibility-checker';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,7 +32,9 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          {children}
+          <PageTransition>{children}</PageTransition>
+          <WebVitalsMonitor />
+          <AccessibilityChecker />
         </body>
       </html>
     </ClerkProvider>
