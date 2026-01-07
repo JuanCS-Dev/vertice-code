@@ -1,17 +1,21 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useChatStore } from '@/lib/stores/chat-store';
 import { ChatSidebar } from '@/components/chat/chat-sidebar';
 import { ChatMessages } from '@/components/chat/chat-messages';
 import { ChatInput } from '@/components/chat/chat-input';
 import { ChatSettings } from '@/components/chat/chat-settings';
+import { ArtifactsPanel } from '@/components/artifacts/artifacts-panel';
 import { Button } from '@/components/ui/button';
-import { Settings, MessageSquare } from 'lucide-react';
+import { Settings, MessageSquare, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+type ViewMode = 'chat' | 'artifacts';
 
 export default function ChatPage() {
   const { currentSessionId, createSession } = useChatStore();
+  const [viewMode, setViewMode] = useState<ViewMode>('chat');
 
   // Create initial session if none exists
   useEffect(() => {
@@ -25,17 +29,45 @@ export default function ChatPage() {
       {/* Sidebar */}
       <ChatSidebar />
 
-      {/* Main Chat Area */}
+      {/* Main Content Area */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5" />
-            <h1 className="text-lg font-semibold">Vertice Chat</h1>
+            {viewMode === 'chat' ? (
+              <MessageSquare className="h-5 w-5" />
+            ) : (
+              <FileText className="h-5 w-5" />
+            )}
+            <h1 className="text-lg font-semibold">
+              {viewMode === 'chat' ? 'Vertice Chat' : 'Artifacts'}
+            </h1>
           </div>
 
           <div className="flex items-center gap-2">
-            <ChatSettings />
+            {/* View Mode Toggle */}
+            <div className="flex rounded-md border">
+              <Button
+                variant={viewMode === 'chat' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('chat')}
+                className="rounded-r-none"
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Chat
+              </Button>
+              <Button
+                variant={viewMode === 'artifacts' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('artifacts')}
+                className="rounded-l-none border-l"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Artifacts
+              </Button>
+            </div>
+
+            {viewMode === 'chat' && <ChatSettings />}
             <Button variant="outline" size="sm">
               <Settings className="h-4 w-4 mr-2" />
               Settings
@@ -43,14 +75,26 @@ export default function ChatPage() {
           </div>
         </div>
 
-        {/* Messages Area */}
+        {/* Content Area */}
         <div className="flex-1 overflow-hidden">
-          <ChatMessages />
-        </div>
+          {viewMode === 'chat' ? (
+            <>
+              {/* Chat Messages */}
+              <div className="flex-1 overflow-hidden">
+                <ChatMessages />
+              </div>
 
-        {/* Input Area */}
-        <div className="border-t border-border p-4">
-          <ChatInput />
+              {/* Chat Input */}
+              <div className="border-t border-border p-4">
+                <ChatInput />
+              </div>
+            </>
+          ) : (
+            /* Artifacts Panel */
+            <div className="h-full p-4">
+              <ArtifactsPanel />
+            </div>
+          )}
         </div>
       </div>
     </div>
