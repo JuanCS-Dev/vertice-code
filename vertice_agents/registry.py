@@ -194,7 +194,7 @@ class AgentRegistry:
                 name="tester",
                 source=AgentSource.CLI,
                 module_path="vertice_cli.agents.testing",
-                class_name="TestingAgent",
+                class_name="TestRunnerAgent",
                 description="Test generation and execution",
             ),
             AgentInfo(

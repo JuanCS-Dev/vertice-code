@@ -4,7 +4,7 @@ Slash commands for qwen-dev-cli.
 Slash commands provide quick access to common operations.
 """
 
-from typing import Dict, Any, Callable, Optional, List
+from typing import Dict, Callable, Optional, List
 from dataclasses import dataclass
 
 

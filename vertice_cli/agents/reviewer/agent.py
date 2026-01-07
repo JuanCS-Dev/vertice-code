@@ -168,9 +168,9 @@ class ReviewerAgent(BaseAgent):
             counsel = self.sofia_agent.respond(ethics_prompt)
 
             return {
-                "sofia_counsel": counsel.response
-                if hasattr(counsel, "response") and counsel.response
-                else None,
+                "sofia_counsel": (
+                    counsel.response if hasattr(counsel, "response") and counsel.response else None
+                ),
                 "thinking_mode": getattr(counsel, "thinking_mode", None),
                 "counsel_type": getattr(counsel, "counsel_type", None),
                 "session_id": getattr(counsel, "session_id", None),
@@ -391,9 +391,11 @@ class ReviewerAgent(BaseAgent):
                             CodeIssue(
                                 file=file_path,
                                 line=violation.get("location", {}).get("row", 1),
-                                severity=IssueSeverity.MEDIUM
-                                if violation.get("code", "").startswith("E")
-                                else IssueSeverity.LOW,
+                                severity=(
+                                    IssueSeverity.MEDIUM
+                                    if violation.get("code", "").startswith("E")
+                                    else IssueSeverity.LOW
+                                ),
                                 category=IssueCategory.MAINTAINABILITY,
                                 message=f"Ruff: {violation.get('message', 'Unknown issue')}",
                                 explanation=f"Rule: {violation.get('code', 'unknown')}",

@@ -1,5 +1,5 @@
 """
-Extended Scientific Test Suite for TestingAgent - 121+ Additional Tests
+Extended Scientific Test Suite for TestRunnerAgent - 121+ Additional Tests
 
 This suite adds 121 scientific tests with REAL code validation (no mocks).
 Tests actual behavior, edge cases, performance, and constitutional compliance.
@@ -21,7 +21,7 @@ import pytest
 from unittest.mock import MagicMock
 
 from vertice_cli.agents.testing import (
-    TestingAgent,
+    TestRunnerAgent,
 )
 from vertice_cli.agents.base import AgentTask
 
@@ -35,7 +35,7 @@ class TestRealCodeAnalysis:
 
     @pytest.fixture
     def agent(self):
-        return TestingAgent(model=MagicMock())
+        return TestRunnerAgent(model=MagicMock())
 
     @pytest.mark.asyncio
     async def test_analyze_real_function_simple(self, agent):
@@ -626,7 +626,7 @@ class TestASTParsingEdgeCases:
 
     @pytest.fixture
     def agent(self):
-        return TestingAgent(model=MagicMock())
+        return TestRunnerAgent(model=MagicMock())
 
     @pytest.mark.asyncio
     async def test_parse_empty_file(self, agent):

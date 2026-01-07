@@ -9,7 +9,7 @@ from typing import Any, AsyncIterator
 
 class TestingFormatter:
     """
-    Format TestingAgent generated test case outputs.
+    Format TestRunnerAgent generated test case outputs.
 
     Expected data structure:
         {

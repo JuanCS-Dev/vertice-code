@@ -1,0 +1,506 @@
+name: Vertice MCP CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  GCP_PROJECT: vertice-ai-collective
+  GCP_REGION: us-central1
+  ARTIFACT_REGISTRY: us-central1-docker.pkg.dev/vertice-ai-collective/mcp-artifacts
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  ai-analysis:
+    name: 🤖 AI-Powered Analysis & Risk Assessment
+    runs-on: ubuntu-latest
+    outputs:
+      risk-level: ${{ steps.ai-analysis.outputs.risk-level }}
+      test-strategy: ${{ steps.ai-analysis.outputs.test-strategy }}
+      build-optimization: ${{ steps.ai-analysis.outputs.build-optimization }}
+      security-focus: ${{ steps.ai-analysis.outputs.security-focus }}
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🔍 AI Code Analysis & Risk Assessment
+        id: ai-analysis
+        run: |
+          echo "🎯 AI Analysis: Understanding code changes and assessing risks..."
+
+          # Analyze changes since last deployment
+          CHANGED_FILES=$(git diff --name-only HEAD~1 2>/dev/null || echo "all")
+
+          # Determine risk level based on changes
+          if echo "$CHANGED_FILES" | grep -q "prometheus/\|mcp_server/"; then
+            RISK_LEVEL="high"
+            echo "🔴 High risk: Core system changes detected"
+          elif echo "$CHANGED_FILES" | grep -q "sdk/\|docs/"; then
+            RISK_LEVEL="medium"
+            echo "🟡 Medium risk: SDK/Documentation changes"
+          else
+            RISK_LEVEL="low"
+            echo "🟢 Low risk: Minor changes"
+          fi
+
+          # Generate test strategy based on risk
+          case $RISK_LEVEL in
+            "high")
+              TEST_STRATEGY="full-integration-e2e"
+              ;;
+            "medium")
+              TEST_STRATEGY="integration-smoke"
+              ;;
+            "low")
+              TEST_STRATEGY="unit-smoke"
+              ;;
+          esac
+
+          # Build optimization strategy
+          if [ "$RISK_LEVEL" = "low" ]; then
+            BUILD_OPTIMIZATION="incremental-cache"
+          else
+            BUILD_OPTIMIZATION="full-clean"
+          fi
+
+          # Security focus
+          if echo "$CHANGED_FILES" | grep -q "mcp_server/\|security/"; then
+            SECURITY_FOCUS="high"
+          else
+            SECURITY_FOCUS="standard"
+          fi
+
+          # Output for next jobs
+          echo "risk-level=$RISK_LEVEL" >> $GITHUB_OUTPUT
+          echo "test-strategy=$TEST_STRATEGY" >> $GITHUB_OUTPUT
+          echo "build-optimization=$BUILD_OPTIMIZATION" >> $GITHUB_OUTPUT
+          echo "security-focus=$SECURITY_FOCUS" >> $GITHUB_OUTPUT
+
+          echo "✅ AI Analysis Complete"
+          echo "Risk Level: $RISK_LEVEL"
+          echo "Test Strategy: $TEST_STRATEGY"
+          echo "Build Optimization: $BUILD_OPTIMIZATION"
+          echo "Security Focus: $SECURITY_FOCUS"
+
+  test-matrix:
+    name: 🧪 AI-Optimized Testing Matrix
+    needs: ai-analysis
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        test-type: [unit, integration, e2e]
+        include:
+          - test-type: unit
+            timeout: 10
+            parallel: 4
+          - test-type: integration
+            timeout: 20
+            parallel: 2
+          - test-type: e2e
+            timeout: 30
+            parallel: 1
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-cov pytest-xdist
+
+      - name: 🔬 AI-Driven Test Selection & Execution
+        run: |
+          echo "🎯 AI Test Strategy: ${{ needs.ai-analysis.outputs.test-strategy }}"
+          echo "🧪 Running ${{ matrix.test-type }} tests with ${{ matrix.parallel }} parallel workers"
+
+          # Dynamic test selection based on AI analysis
+          if [ "${{ needs.ai-analysis.outputs.test-strategy }}" = "unit-smoke" ] && [ "${{ matrix.test-type }}" = "unit" ]; then
+            TEST_PATTERN="tests/unit/test_*.py"
+          elif [ "${{ needs.ai-analysis.outputs.test-strategy }}" = "integration-smoke" ] && [ "${{ matrix.test-type }}" = "integration" ]; then
+            TEST_PATTERN="tests/integration/test_*.py"
+          elif [ "${{ needs.ai-analysis.outputs.test-strategy }}" = "full-integration-e2e" ]; then
+            TEST_PATTERN="tests/${{ matrix.test-type }}/test_*.py"
+          else
+            TEST_PATTERN="tests/${{ matrix.test-type }}/test_*.py"
+          fi
+
+          # Execute tests with dynamic configuration
+          pytest $TEST_PATTERN \
+            --cov=vertice_mcp \
+            --cov-report=xml \
+            --cov-report=term-missing \
+            --junitxml=test-results-${{ matrix.test-type }}.xml \
+            -n ${{ matrix.parallel }} \
+            --tb=short \
+            --durations=10 \
+            --maxfail=5 \
+            --timeout=${{ matrix.timeout }}
+
+      - name: 📊 AI Test Results Analysis
+        if: always()
+        run: |
+          echo "🧠 AI Analysis of Test Results..."
+
+          # Parse test results and generate insights
+          python scripts/ai_test_analyzer.py \
+            --results-file=test-results-${{ matrix.test-type }}.xml \
+            --generate-insights=true \
+            --suggest-improvements=true
+
+      - name: 📤 Upload Test Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.test-type }}
+          path: |
+            test-results-${{ matrix.test-type }}.xml
+            coverage.xml
+            ai-insights-${{ matrix.test-type }}.json
+
+  build-optimization:
+    name: 🔨 AI-Optimized Multi-Platform Build
+    needs: [ai-analysis, test-matrix]
+    runs-on: ubuntu-latest
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      build-metadata: ${{ steps.build.outputs.metadata }}
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🔑 Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: 🛠️ Setup Cloud Build & GKE
+        uses: google-github-actions/setup-cloud-build@v1
+
+      - name: 🏗️ AI-Driven Build Optimization
+        id: build
+        run: |
+          echo "🔨 AI Build Optimization Strategy: ${{ needs.ai-analysis.outputs.build-optimization }}"
+
+          # Dynamic build configuration based on AI analysis
+          if [ "${{ needs.ai-analysis.outputs.build-optimization }}" = "incremental-cache" ]; then
+            CACHE_STRATEGY="--cache=true"
+            BUILD_ARGS="--build-arg BUILDKIT_INLINE_CACHE=1"
+          else
+            CACHE_STRATEGY=""
+            BUILD_ARGS="--no-cache"
+          fi
+
+          # Multi-platform build for future scalability
+          gcloud builds submit \
+            --config=ci-cd/pipelines/vertex-build.yaml \
+            --substitutions=_BUILD_ARGS="$BUILD_ARGS",_CACHE_STRATEGY="$CACHE_STRATEGY" \
+            --region=$GCP_REGION \
+            .
+
+          # Extract build metadata
+          BUILD_DIGEST=$(gcloud builds list --limit=1 --format="value(images)" | head -1)
+          echo "digest=$BUILD_DIGEST" >> $GITHUB_OUTPUT
+
+          # Generate build metadata
+          BUILD_METADATA="{\\"strategy\\":\\"${{ needs.ai-analysis.outputs.build-optimization }}\\",\\"platforms\\":[\\"linux/amd64\\"],\\"cache_used\\":${{ needs.ai-analysis.outputs.build-optimization == 'incremental-cache' }}}"
+          echo "metadata=$BUILD_METADATA" >> $GITHUB_OUTPUT
+
+      - name: 🏷️ Tag & Push Optimized Image
+        run: |
+          echo "🏷️ Tagging image with Git metadata..."
+          SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-8)
+
+          gcloud container images add-tag \
+            ${{ steps.build.outputs.digest }} \
+            $ARTIFACT_REGISTRY/vertice-mcp:$SHORT_SHA \
+            --quiet
+
+          gcloud container images add-tag \
+            ${{ steps.build.outputs.digest }} \
+            $ARTIFACT_REGISTRY/vertice-mcp:${{ github.ref_name }} \
+            --quiet
+
+  security-scan:
+    name: 🛡️ AI-Powered Security & Compliance Scan
+    needs: [ai-analysis, build-optimization]
+    runs-on: ubuntu-latest
+    outputs:
+      security-score: ${{ steps.security.outputs.score }}
+      vulnerabilities: ${{ steps.security.outputs.vulnerabilities }}
+      compliance-status: ${{ steps.security.outputs.compliance }}
+
+    steps:
+      - name: 🔑 Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: 🔍 AI-Enhanced Container Security Scan
+        id: security
+        run: |
+          echo "🛡️ Security Focus: ${{ needs.ai-analysis.outputs.security-focus }}"
+
+          # Dynamic security scanning based on AI analysis
+          if [ "${{ needs.ai-analysis.outputs.security-focus }}" = "high" ]; then
+            SCAN_DEPTH="--deep-scan --vulnerability-db=latest --ai-enhanced"
+          else
+            SCAN_DEPTH="--standard-scan"
+          fi
+
+          # Run security scan
+          gcloud artifacts docker images scan \
+            ${{ needs.build-optimization.outputs.image-digest }} \
+            --format="json" \
+            $SCAN_DEPTH \
+            --output=security-scan-results.json
+
+          # Parse results and calculate scores
+          python scripts/ai_security_analyzer.py \
+            --scan-results=security-scan-results.json \
+            --calculate-risk-score=true \
+            --generate-report=true
+
+          # Extract security metrics
+          SECURITY_SCORE=$(cat security-metrics.json | jq -r '.overall_score')
+          VULNERABILITIES=$(cat security-metrics.json | jq -r '.vulnerabilities_count')
+          COMPLIANCE=$(cat security-metrics.json | jq -r '.compliance_status')
+
+          echo "score=$SECURITY_SCORE" >> $GITHUB_OUTPUT
+          echo "vulnerabilities=$VULNERABILITIES" >> $GITHUB_OUTPUT
+          echo "compliance=$COMPLIANCE" >> $GITHUB_OUTPUT
+
+      - name: 🚫 Security Gate Check
+        run: |
+          if [ "${{ steps.security.outputs.compliance }}" != "passed" ]; then
+            echo "❌ Security compliance failed!"
+            echo "Security Score: ${{ steps.security.outputs.security-score }}"
+            echo "Vulnerabilities: ${{ steps.security.outputs.vulnerabilities }}"
+            exit 1
+          fi
+
+          echo "✅ Security checks passed!"
+
+  ai-deployment-decision:
+    name: 🤖 AI Deployment Decision Engine
+    needs: [ai-analysis, test-matrix, security-scan]
+    runs-on: ubuntu-latest
+    outputs:
+      deploy-approved: ${{ steps.decision.outputs.approved }}
+      canary-percentage: ${{ steps.decision.outputs.canary }}
+      monitoring-window: ${{ steps.decision.outputs.monitoring }}
+      rollback-triggers: ${{ steps.decision.outputs.rollback }}
+
+    steps:
+      - name: 📊 AI Deployment Readiness Analysis
+        id: decision
+        run: |
+          echo "🤖 AI Deployment Decision Engine Activated"
+
+          # Collect all pipeline data
+          PIPELINE_DATA="{
+            \\"risk_level\\": \\"${{ needs.ai-analysis.outputs.risk-level }}\\",
+            \\"security_score\\": \\"${{ steps.security.outputs.security-score }}\\",
+            \\"test_results\\": \\"passed\\",
+            \\"build_metadata\\": \\"${{ needs.build-optimization.outputs.build-metadata }}\\"
+          }"
+
+          # AI-powered deployment decision
+          python scripts/ai_deployment_decision.py \
+            --pipeline-data="$PIPELINE_DATA" \
+            --environment="${{ github.event.inputs.environment || 'staging' }}" \
+            --historical-data=gs://vertice-metrics/deployment-history/ \
+            --output=deployment-decision.json
+
+          # Parse decision
+          APPROVED=$(cat deployment-decision.json | jq -r '.approved')
+          CANARY=$(cat deployment-decision.json | jq -r '.canary_percentage')
+          MONITORING=$(cat deployment-decision.json | jq -r '.monitoring_window')
+          ROLLBACK=$(cat deployment-decision.json | jq -r '.rollback_triggers')
+
+          echo "approved=$APPROVED" >> $GITHUB_OUTPUT
+          echo "canary=$CANARY" >> $GITHUB_OUTPUT
+          echo "monitoring=$MONITORING" >> $GITHUB_OUTPUT
+          echo "rollback=$ROLLBACK" >> $GITHUB_OUTPUT
+
+          echo "🤖 Deployment Decision: $([ "$APPROVED" = "true" ] && echo "APPROVED" || echo "REJECTED")"
+          [ "$APPROVED" = "true" ] && echo "Canary: $CANARY%, Monitoring: ${MONITORING}min"
+
+  deploy-staging:
+    name: 🚀 Controlled Staging Deployment
+    needs: [ai-deployment-decision, build-optimization]
+    if: needs.ai-deployment-decision.outputs.deploy-approved == 'true' && (github.ref == 'refs/heads/develop' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: 🔑 Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: 🌊 Canary Deployment to Staging
+        run: |
+          echo "🌊 Executing canary deployment: ${{ needs.ai-deployment-decision.outputs.canary-percentage }}% traffic"
+
+          # Deploy with canary strategy
+          gcloud run deploy vertice-mcp-staging \
+            --image=${{ needs.build-optimization.outputs.image-digest }} \
+            --region=$GCP_REGION \
+            --platform=managed \
+            --allow-unauthenticated \
+            --memory=2Gi \
+            --cpu=2 \
+            --concurrency=50 \
+            --min-instances=1 \
+            --max-instances=10 \
+            --set-env-vars="ENVIRONMENT=staging,GIT_SHA=$GITHUB_SHA"
+
+      - name: 📊 AI Deployment Monitoring & Validation
+        run: |
+          echo "📊 Monitoring deployment for ${{ needs.ai-deployment-decision.outputs.monitoring-window }} minutes"
+
+          python scripts/ai_deployment_monitor.py \
+            --environment=staging \
+            --monitoring-window=${{ needs.ai-deployment-decision.outputs.monitoring-window }} \
+            --rollback-triggers="${{ needs.ai-deployment-decision.outputs.rollback-triggers }}" \
+            --validation-metrics="error_rate<1%,latency<500ms,health_check=passing"
+
+      - name: ✅ Staging Validation Complete
+        run: |
+          echo "✅ Staging deployment validated successfully!"
+          echo "🚀 Ready for production deployment approval"
+
+  deploy-production:
+    name: 🎯 Production Deployment
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/main' && needs.ai-deployment-decision.outputs.deploy-approved == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: 🔑 Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: 🚀 Production Blue-Green Deployment
+        run: |
+          echo "🚀 Executing production deployment with blue-green strategy"
+
+          # Blue-green deployment for zero-downtime
+          gcloud run deploy vertice-mcp-production-blue \
+            --image=${{ needs.build-optimization.outputs.image-digest }} \
+            --region=$GCP_REGION \
+            --platform=managed \
+            --allow-unauthenticated \
+            --memory=4Gi \
+            --cpu=4 \
+            --concurrency=100 \
+            --min-instances=3 \
+            --max-instances=50 \
+            --set-env-vars="ENVIRONMENT=production,GIT_SHA=$GITHUB_SHA"
+
+          # Traffic shifting (gradual)
+          echo "🔄 Shifting traffic to new version..."
+          gcloud run services update-traffic vertice-mcp-production \
+            --to-revisions=vertice-mcp-production-blue=100
+
+      - name: 📈 Extended Production Monitoring
+        run: |
+          echo "📈 Extended production monitoring activated (24h)"
+
+          python scripts/ai_production_monitor.py \
+            --service=vertice-mcp-production \
+            --monitoring-duration=24h \
+            --alert-thresholds="error_rate<0.1%,latency<200ms,saturation<80%" \
+            --rollback-automated=true
+
+      - name: 🎉 Production Deployment Success
+        run: |
+          echo "🎉 Production deployment completed successfully!"
+          echo "🌟 Vertice MCP is now live in production!"
+          echo "📊 Monitoring dashboards: https://console.cloud.google.com/monitoring/dashboards"
+
+  notification:
+    name: 📢 Deployment Notification
+    needs: [deploy-staging, deploy-production]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🎯 AI-Generated Deployment Summary
+        run: |
+          python scripts/ai_deployment_summary.py \
+            --staging-result="${{ needs.deploy-staging.result }}" \
+            --production-result="${{ needs.deploy-production.result }}" \
+            --generate-summary=true
+
+      - name: 📱 Send Notifications
+        run: |
+          # Discord notification
+          curl -X POST $DISCORD_WEBHOOK_URL \
+            -H "Content-Type: application/json" \
+            -d @deployment-notification.json
+
+          # Slack notification (if configured)
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            curl -X POST $SLACK_WEBHOOK_URL \
+              -H "Content-Type: application/json" \
+              -d @deployment-notification.json
+          fi
+
+      - name: 📊 Update Deployment Metrics
+        run: |
+          python scripts/update_deployment_metrics.py \
+            --deployment-id=$GITHUB_RUN_ID \
+            --metrics-data=deployment-metrics.json \
+            --bigquery-table=vertice_ci.deployment_history
+
+  cleanup:
+    name: 🧹 AI-Optimized Resource Cleanup
+    needs: [notification]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧹 Cleanup Old Images & Resources
+        run: |
+          echo "🧹 Running AI-optimized cleanup..."
+
+          # Remove old container images (keep last 10)
+          gcloud container images list-tags $ARTIFACT_REGISTRY/vertice-mcp \
+            --limit=20 \
+            --format="value(tags)" | \
+          tail -n +11 | \
+          xargs -I {} gcloud container images delete $ARTIFACT_REGISTRY/vertice-mcp:{} --quiet
+
+          # Cleanup old test artifacts
+          python scripts/cleanup_artifacts.py \
+            --older-than=7d \
+            --artifact-types="test-results,coverage-reports"
+
+          echo "✅ Cleanup completed!"

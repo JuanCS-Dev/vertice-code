@@ -135,6 +135,7 @@ class PrometheusIntegratedAgent(BaseAgent):
             llm_client=llm_to_use,
             agent_name=agent_name,
             event_bus=get_event_bus(),
+            mcp_client=mcp_client,
         )
 
         logger.info(

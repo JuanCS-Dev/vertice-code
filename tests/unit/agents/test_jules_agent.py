@@ -18,6 +18,7 @@ import pytest
 from vertice_cli.agents.jules_agent import JulesAgent
 from vertice_cli.agents.protocol import StreamingChunk, StreamingChunkType
 from vertice_core.types import AgentTask
+from vertice_cli.core.providers.vertice_router import SpeedRequirement
 from vertice_core.types.jules_types import (
     JulesActivity,
     JulesActivityType,
@@ -101,9 +102,7 @@ class TestJulesAgentInit:
 
     def test_default_init(self) -> None:
         """Agent initializes with default client."""
-        with patch(
-            "vertice_cli.agents.jules_agent.get_jules_client"
-        ) as mock_get_client:
+        with patch("vertice_cli.agents.jules_agent.get_jules_client") as mock_get_client:
             mock_client = MagicMock()
             mock_client.is_available = True
             mock_get_client.return_value = mock_client

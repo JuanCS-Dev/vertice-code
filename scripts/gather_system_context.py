@@ -26,7 +26,7 @@ from vertice_cli.agents.executor import NextGenExecutorAgent, ExecutionMode, Sec
 from vertice_cli.agents.architect import ArchitectAgent
 from vertice_cli.agents.security import SecurityAgent
 from vertice_cli.agents.performance import PerformanceAgent
-from vertice_cli.agents.testing import TestingAgent
+from vertice_cli.agents.testing import TestRunnerAgent
 from vertice_cli.agents.documentation import DocumentationAgent
 from vertice_cli.agents.data_agent_production import create_data_agent
 from vertice_cli.agents.devops import create_devops_agent
@@ -80,7 +80,7 @@ async def main():
         'Architect': ArchitectAgent(llm, mcp),
         'Security': SecurityAgent(llm, mcp),
         'Performance': PerformanceAgent(llm, mcp),
-        'Testing': TestingAgent(llm, mcp),
+        'Testing': TestRunnerAgent(llm, mcp),
         'Documentation': DocumentationAgent(llm, mcp),
         'Data': create_data_agent(llm, mcp),
         'DevOps': create_devops_agent(llm, mcp)

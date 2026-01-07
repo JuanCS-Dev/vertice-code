@@ -44,7 +44,7 @@ class JulesProvider(EnhancedProviderBase):
     PROVIDER_NAME = "jules"
     BASE_URL = "https://jules.googleapis.com/v1alpha"
     COST_TIER = CostTier.FREE
-    SPEED_TIER = SpeedTier.RELAXED
+    SPEED_TIER = SpeedTier.SLOW
 
     def __init__(
         self,

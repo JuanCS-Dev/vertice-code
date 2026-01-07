@@ -131,7 +131,7 @@ class TestCase(BaseModel):
 
 
 class TestOutput(AgentOutputBase):
-    """Output schema for TestingAgent.
+    """Output schema for TestRunnerAgent.
 
     Example:
         {

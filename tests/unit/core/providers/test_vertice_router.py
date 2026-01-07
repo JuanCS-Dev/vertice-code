@@ -7,7 +7,6 @@ Note: These tests use isolated validation logic to avoid import chain issues
 with the full provider module graph.
 """
 
-from unittest.mock import Mock
 import pytest
 from typing import TypedDict, NotRequired
 

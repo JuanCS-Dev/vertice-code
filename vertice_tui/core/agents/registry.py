@@ -71,7 +71,7 @@ AGENT_REGISTRY: Dict[str, AgentInfo] = {
         description="Test generation and execution",
         capabilities=["generate_tests", "run_tests", "coverage"],
         module_path="vertice_cli.agents.testing",
-        class_name="TestingAgent",
+        class_name="TestRunnerAgent",
     ),
     "security": AgentInfo(
         name="security",

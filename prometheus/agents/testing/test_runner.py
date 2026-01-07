@@ -6,7 +6,7 @@ Executes test cases in sandbox and evaluates results.
 
 from typing import List, Optional, Tuple
 
-from ..curriculum_agent import EvolutionTask, TaskDomain
+from ..curriculum_agent import EvolutionTask
 from ..utils.parsers import CodeExtractor, TestCodeGenerator
 
 

@@ -1,487 +1,245 @@
-# Plano de Implementação: Landing Unificada Vertice-Code
+# Plan Refactoring: Vertice-Code Unified Landing Page (2026 Edition)
 
-**Data:** 2026-01-06
-**Status:** Em Planejamento
-**Objetivo:** Criar uma landing page minimalista e profissional inspirada nas Big 3 (Anthropic, OpenAI, Google)
+**Status:** IN PROGRESS
+**Date:** 2026-01-06
+**Objective:** Refactor `@docs/LANDING_UNIFICADA_PLAN.md` to align with 2026 "Intelligent Minimalism" trends and the Claude Code Web aesthetic.
 
----
+## 1. Design Philosophy Update: "Intelligent Minimalism" (2026 Trend)
 
-## 🔍 Problema Identificado
+The 2026 web design landscape, influenced by AI leaders (OpenAI, Perplexity, Anthropic), has shifted from "simple minimalism" to "intelligent minimalism".
 
-### Situação Atual:
-Temos **2 landing pages separadas**:
+**Key Characteristics for Vertice-Code:**
+*   **Hyper-Functional Whitespace:** Whitespace isn't just empty; it guides cognitive flow.
+*   **Adaptive Dark Mode:** The interface shouldn't just be "dark"; it should use deep, rich grays (e.g., `#0a0e1a` to `#161b2e`) rather than pure black to reduce eye strain and feel "premium".
+*   **Typography-First Hierarchy:** Bold, purposeful headings (Sans-Serif) paired with highly legible Monospace for code/technical data.
+*   **Micro-Interactions:** Subtle feedback on every interaction (hover, click, focus) to indicate "liveness".
+*   **"Glassmorphism 2.0":** Very subtle, high-performance blurs used *only* for depth layering (e.g., the console overlay), not as decoration.
 
-1. **vertice-maximus.com** (vertice-maximus-2)
-   - Vitrine do projeto Vertice-Code
-   - Apresentação conceitual
-   - Para recrutamento/marketing
-   - **Problema:** Muita informação, confuso
+## 2. Refactored HTML Structure (Single-Page App Feel)
 
-2. **clinica-genesis-os-e689e.web.app**
-   - Acesso técnico ao MCP Server
-   - Playground/API testing
-   - Para desenvolvedores usando o produto
-   - **Problema:** Separado da experiência principal
-
-### Por que ficou esquisito:
-- ✗ Mesmas informações em dois lugares
-- ✗ Confusão sobre qual usar quando
-- ✗ Duplicação de conteúdo
-- ✗ Experiência fragmentada
-- ✗ Muita informação visual (sobrecarga)
-
----
-
-## 🎯 Solução: Opção A - Unificação
-
-**Conceito:** Uma só landing em `vertice-maximus.com` que serve como **hub principal**
-
-**Seção "Console/Playground"** integrada na própria landing:
-- Login/API Keys dentro da experiência
-- Playground logo após o hero
-- Tudo em uma jornada contínua
-
-**Referências:**
-- [Anthropic Claude](https://www.anthropic.com) - Single-column, text-first, produto integrado
-- [OpenAI Landing Design](https://www.saasframe.io/examples/openai-landing-page) - Minimalista, CTAs estratégicos
-- [Best Landing Pages 2026](https://swipepages.com/blog/landing-page-examples/) - Padrões modernos
-
----
-
-## 📐 Design System Minimalista
-
-### Inspiração: Big 3 Principles
-
-**Anthropic (claude.com):**
-- Dark background: `#131314`
-- Cream text: `#faf9f0`
-- Orange accent: `#d97757`
-- Single-column scrolling
-- Typography-first (bold headlines)
-- Lottie animations on scroll
-- Generous whitespace
-
-**OpenAI:**
-- Blues and whites palette
-- Bold typography
-- Minimalist layout
-- Real product interfaces
-- Strategic CTAs
-- Trust and professionalism
-
-**Google AI:**
-- Clean, structured
-- Whitespace breathing room
-- Product-focused
-- Functional animations
-- Accessibility-first
-
-### Aplicação Vertice-Code:
-
-**Paleta de Cores:**
-```css
---bg-dark: #0a0e1a;          /* Background principal */
---text-primary: #ffffff;      /* Texto principal */
---text-muted: rgba(255,255,255,0.6); /* Texto secundário */
---accent: #06b6d4;            /* Cyan - destaque */
---accent-hover: #0891b2;      /* Hover state */
---glass-bg: rgba(20,25,40,0.4); /* Glassmorphism sutil */
-```
-
-**Typography:**
-```css
---font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui;
---font-mono: 'JetBrains Mono', 'Courier New', monospace;
-
-/* Hierarchy */
-H1: 3.5rem / 700 (Hero)
-H2: 2rem / 700 (Sections)
-H3: 1.25rem / 600 (Cards)
-Body: 1rem / 400
-```
-
-**Spacing:**
-```css
---space-xs: 8px;
---space-sm: 16px;
---space-md: 32px;
---space-lg: 64px;
---space-xl: 128px;
-```
-
----
-
-## 🏗️ Estrutura da Landing Unificada
-
-### Layout: Single-Column Scrolling
-
-```
-┌────────────────────────────────────┐
-│ NAVBAR (fixed)                     │
-│ - Logo + Vertice-Code              │
-│ - Docs | API | Console | GitHub    │
-└────────────────────────────────────┘
-
-┌────────────────────────────────────┐
-│ HERO                               │
-│ - Bold headline (mission)          │
-│ - Supporting text (1-2 lines)      │
-│ - 2 CTAs: [Try Console] [Docs →]  │
-│ - Stats bar: 20 Agents | 85 Tools │
-└────────────────────────────────────┘
-
-┌────────────────────────────────────┐
-│ CONSOLE (Integrated Playground)    │
-│ - Request Builder (left)           │
-│ - Response Viewer (right)          │
-│ - Live testing MCP endpoints       │
-│ - Quick examples (tabs)            │
-└────────────────────────────────────┘
-
-┌────────────────────────────────────┐
-│ FEATURES (3 cards)                 │
-│ 1. Multi-LLM Routing               │
-│ 2. 85+ Tactical Tools              │
-│ 3. Constitutional AI               │
-└────────────────────────────────────┘
-
-┌────────────────────────────────────┐
-│ QUICK START (Code Example)         │
-│ - Tabs: Python | JavaScript | cURL│
-│ - Copy button                      │
-└────────────────────────────────────┘
-
-┌────────────────────────────────────┐
-│ FOOTER (Minimal)                   │
-│ - GitHub | Docs | MCP Spec         │
-│ - © 2026 | Soli Deo Gloria         │
-└────────────────────────────────────┘
-```
-
----
-
-## ⚙️ Funcionalidades Essenciais
-
-### 1. Hero Section
-**Objetivo:** Comunicar valor em 3 segundos
+The structure will be flattened further to resemble a web app more than a marketing site.
 
 ```html
-<h1>AI Agents. Built Right.</h1>
-<p>Multi-LLM orchestration with 85+ tactical tools and constitutional governance.</p>
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertice-Code | Sovereign AI Agency</title>
+    <!-- Preconnect to fonts -->
+    <!-- Meta tags for SEO/Social -->
+</head>
+<body class="bg-primary text-primary antialiased selection:bg-accent selection:text-white">
 
-[Try Console] [Read Docs →]
+    <!-- 1. Fixed Minimal Navbar (Glass) -->
+    <nav class="fixed top-0 w-full z-50 border-b border-white/5 bg-primary/80 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 bg-accent rounded-sm"></div> <!-- Minimal Logo Placeholder -->
+                <span class="font-bold text-lg tracking-tight">Vertice-Code</span>
+            </div>
+            <div class="hidden md:flex gap-8 text-sm font-medium text-muted">
+                <a href="#console" class="hover:text-white transition-colors">Console</a>
+                <a href="#agents" class="hover:text-white transition-colors">Agents</a>
+                <a href="#tools" class="hover:text-white transition-colors">Tools</a>
+                <a href="/docs" class="hover:text-white transition-colors">Docs</a>
+            </div>
+            <div class="flex gap-4">
+                <a href="https://github.com/juan-cs-dev/vertice-code" target="_blank" class="text-muted hover:text-white transition-colors">
+                    <svg>...</svg> <!-- GitHub Icon -->
+                </a>
+            </div>
+        </div>
+    </nav>
 
-Stats: 20 Agents • 85+ Tools • 5 LLM Providers • <50ms Latency
+    <main class="relative pt-32 pb-20">
+        
+        <!-- 2. Hero Section (Centered, Typography-Led) -->
+        <section class="max-w-4xl mx-auto px-6 text-center mb-24">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-accent mb-8">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                v2.0.0 Stable
+            </div>
+            <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-tight">
+                The Sovereign <br />
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50">Tactical Executor.</span>
+            </h1>
+            <p class="text-xl text-muted max-w-2xl mx-auto mb-10 leading-relaxed">
+                A unified multi-agent agency with constitutional governance. 
+                Orchestrating 20 agents and 85+ tools with millisecond latency.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <button onclick="scrollToConsole()" class="px-8 py-4 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition-all transform hover:scale-105">
+                    Launch Console
+                </button>
+                <a href="/docs" class="px-8 py-4 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-all font-medium">
+                    Read Documentation
+                </a>
+            </div>
+        </section>
+
+        <!-- 3. Integrated Live Console (The "Hero" Product Demo) -->
+        <section id="console" class="max-w-6xl mx-auto px-6 mb-32">
+            <div class="rounded-xl border border-white/10 bg-[#0f1219] shadow-2xl overflow-hidden relative group">
+                <!-- Mac-like Window Header -->
+                <div class="h-10 bg-white/5 border-b border-white/5 flex items-center px-4 gap-2">
+                    <div class="flex gap-1.5">
+                        <div class="w-3 h-3 rounded-full bg-red-500/20"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500/20"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500/20"></div>
+                    </div>
+                    <div class="ml-4 flex gap-4 text-xs font-mono text-muted">
+                        <span class="text-accent border-b border-accent cursor-pointer">request.json</span>
+                        <span class="hover:text-white cursor-pointer transition-colors">headers</span>
+                    </div>
+                    <div class="ml-auto flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                        <span class="text-xs font-mono text-muted">Connected: Vertice-MCP</span>
+                    </div>
+                </div>
+
+                <!-- Console Body (Split View) -->
+                <div class="grid md:grid-cols-2 min-h-[500px] font-mono text-sm">
+                    <!-- Left: Request Builder -->
+                    <div class="p-6 border-r border-white/5 relative">
+                        <div class="mb-4 flex justify-between items-center">
+                            <span class="text-muted text-xs uppercase tracking-wider">Payload</span>
+                            <select id="method-select" class="bg-transparent text-xs text-accent border-none focus:ring-0 cursor-pointer">
+                                <option value="list">tools/list</option>
+                                <option value="call">tools/call</option>
+                                <option value="ping">ping</option>
+                            </select>
+                        </div>
+                        <textarea id="request-editor" class="w-full h-[350px] bg-transparent text-white/90 resize-none outline-none font-mono" spellcheck="false">{
+  "jsonrpc": "2.0",
+  "method": "tools/list",
+  "id": 1
+}</textarea>
+                        <button id="execute-btn" class="absolute bottom-6 right-6 px-4 py-2 bg-accent text-white rounded hover:bg-accent-hover transition-colors shadow-lg flex items-center gap-2">
+                            <span>Execute</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- Right: Response Viewer -->
+                    <div class="p-6 bg-[#0a0c10] relative">
+                         <div class="mb-4 flex justify-between items-center">
+                            <span class="text-muted text-xs uppercase tracking-wider">Response</span>
+                            <span id="timing-badge" class="hidden text-xs text-green-400 bg-green-400/10 px-2 py-0.5 rounded">45ms</span>
+                        </div>
+                        <pre id="response-viewer" class="text-green-400/90 overflow-auto h-[400px] scrollbar-hide">// Waiting for request...</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. "Bento Grid" Features (Replacing Cards) -->
+        <section id="features" class="max-w-6xl mx-auto px-6 mb-32">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Large Card -->
+                <div class="md:col-span-2 p-8 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
+                    <div class="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center mb-6 text-accent">
+                        <svg>...</svg> <!-- Network Icon -->
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Multi-LLM Routing</h3>
+                    <p class="text-muted leading-relaxed max-w-lg">
+                        Intelligent traffic direction between Claude 3.5 Sonnet, Gemini 1.5 Pro, and Groq. 
+                        Optimizes for cost, speed, and capability per-token.
+                    </p>
+                </div>
+                
+                <!-- Tall Card -->
+                <div class="md:row-span-2 p-8 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 pointer-events-none"></div>
+                    <h3 class="text-2xl font-bold mb-3 relative z-10">Constitutional<br>Governance</h3>
+                    <div class="mt-8 space-y-4 font-mono text-xs text-muted relative z-10">
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                            JUSTIÇA Protocol Active
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                            SOFIA Oversight: L3
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medium Card -->
+                <div class="p-8 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
+                    <h3 class="text-xl font-bold mb-2">85+ Tactical Tools</h3>
+                    <p class="text-sm text-muted">Native integration with Git, Filesystem, Docker, and Web Search.</p>
+                </div>
+
+                 <!-- Medium Card -->
+                 <div class="p-8 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
+                    <h3 class="text-xl font-bold mb-2">MCP Native</h3>
+                    <p class="text-sm text-muted">Full compliance with Model Context Protocol specification.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 5. Minimal Footer -->
+        <footer class="max-w-6xl mx-auto px-6 pt-12 pb-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-sm text-muted">
+            <div>
+                © 2026 Vertice-Code. <span class="opacity-50">Soli Deo Gloria.</span>
+            </div>
+            <div class="flex gap-6 mt-4 md:mt-0">
+                <a href="#" class="hover:text-white transition-colors">Privacy</a>
+                <a href="#" class="hover:text-white transition-colors">Terms</a>
+                <a href="#" class="hover:text-white transition-colors">Status</a>
+            </div>
+        </footer>
+
+    </main>
+    
+    <!-- Scripts -->
+    <script src="landing/script-v2.js"></script>
+</body>
+</html>
 ```
 
-### 2. Console Integrado
-**Objetivo:** Permitir teste imediato sem sair da página
+## 3. Style Guide (CSS Variables)
 
-**Features:**
-- Request Builder
-  - Method selector (tools/list, tools/call, ping)
-  - JSON editor com syntax highlighting
-  - Templates pre-populados
+To achieve the "Anthropic/OpenAI" look:
 
-- Response Viewer
-  - JSON pretty-print
-  - Status code + timing
-  - Error handling visual
-
-- Tabs de exemplos rápidos:
-  - Python
-  - JavaScript
-  - cURL
-
-**Estado:**
-- Sem login: Mostra exemplos read-only
-- Com API key: Permite requests reais
-
-### 3. Features (3 cards ONLY)
-**Princípio:** Menos é mais
-
-**Card 1: Multi-LLM Routing**
-```
-Icon: 🔀
-Title: Multi-LLM Routing
-Text: Claude, Gemini, GPT-4, Groq, Mistral - unified interface
-```
-
-**Card 2: 85+ Tools**
-```
-Icon: 🛠️
-Title: Tactical Toolbelt
-Text: File ops, Git, Bash, Web APIs, Testing, Security
-```
-
-**Card 3: Constitutional AI**
-```
-Icon: ⚖️
-Title: Constitutional Governance
-Text: JUSTIÇA + SOFIA - built-in ethical constraints
-```
-
-### 4. Quick Start
-**Objetivo:** Copy-paste onboarding
-
-```python
-import requests
-
-response = requests.post(
-    "https://vertice-mcp-server.run.app/mcp",
-    json={
-        "jsonrpc": "2.0",
-        "method": "tools/list",
-        "id": "quickstart-1"
-    }
-)
-
-print(response.json())
-```
-
----
-
-## 📋 Plano de Implementação
-
-### Fase 1: Estrutura Base (HTML) ✅
-**Arquivo:** `landing/index-v2.html`
-
-- [ ] Navbar fixed com navegação mínima
-- [ ] Hero section com headline bold
-- [ ] Stats bar inline
-- [ ] Console section (estrutura)
-- [ ] Features grid (3 cards)
-- [ ] Quick Start section
-- [ ] Footer minimalista
-
-**Estimativa:** 200-300 linhas HTML
-
----
-
-### Fase 2: Estilização Minimalista (CSS) ✅
-**Arquivo:** `landing/styles-v2.css`
-
-**Princípios:**
-- Mobile-first
-- Whitespace generoso (space-lg entre seções)
-- Typography hierarchy clara
-- Transitions sutis (200ms ease)
-- Sem gradientes excessivos
-- Glassmorphism SUTIL (apenas console)
-
-**Componentes:**
 ```css
-/* Navbar */
-- Background: rgba(10,14,26,0.8) backdrop-blur
-- Height: 64px
-- Border-bottom: 1px rgba(255,255,255,0.1)
-
-/* Hero */
-- Padding: 128px 0 64px
-- Max-width: 800px center
-- Text-align: center
-
-/* Console */
-- Grid: 1fr 1fr (request | response)
-- Background: glass-bg
-- Border: 1px accent
-- Border-radius: 12px
-
-/* Cards */
-- Grid: repeat(3, 1fr)
-- Background: transparent
-- Border: 1px rgba(255,255,255,0.1)
-- Hover: border-color accent
-
-/* Code blocks */
-- Background: rgba(0,0,0,0.4)
-- Font: JetBrains Mono
-- Padding: 24px
+:root {
+    /* Backgrounds */
+    --bg-primary: #0a0e1a;  /* Deep Navy/Black */
+    --bg-secondary: #0f1219; /* Slightly lighter for cards */
+    
+    /* Text */
+    --text-primary: #ffffff;
+    --text-muted: #94a3b8;  /* Slate 400 */
+    
+    /* Accent */
+    --accent: #06b6d4;      /* Cyan 500 */
+    --accent-hover: #0891b2; /* Cyan 600 */
+    
+    /* Borders */
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    
+    /* Typography */
+    --font-sans: 'Inter', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+}
 ```
 
-**Estimativa:** 400-500 linhas CSS
+## 4. Interaction Logic (JavaScript)
 
----
+The console needs to feel **real**.
 
-### Fase 3: Interatividade (JavaScript) ✅
-**Arquivo:** `landing/script-v2.js`
+1.  **Mock Network Delay:** Use `setTimeout` with random 50-150ms delay to simulate real network latency.
+2.  **Typing Effect:** Stream the JSON response character-by-character (fast) to mimic LLM/Server streaming.
+3.  **Dynamic Status:** Change the badge from "Connecting..." to "200 OK" (Green) or "500 Error" (Red).
 
-**Funcionalidades:**
-1. Console Request Builder
-   - Template switcher
-   - JSON validator
-   - Execute request (fetch)
+**Quick Start Tabs Logic:**
+- Simple class toggling (`hidden` vs `block`) for code snippets.
+- "Copy to Clipboard" with a visual "Copied!" tooltip feedback.
 
-2. Response Viewer
-   - JSON pretty-print
-   - Timing display
-   - Status code coloring
+## 5. Next Steps
 
-3. Quick Start Tabs
-   - Tab switching
-   - Copy to clipboard
-
-4. Smooth scroll
-   - Anchor links
-   - Offset for fixed navbar
-
-**Estimativa:** 300-400 linhas JS
-
----
-
-### Fase 4: Integração & Deploy 🚀
-
-**Ações:**
-1. Substituir `landing/index.html` atual
-2. Manter backup como `landing/index-old.html`
-3. Atualizar `firebase.json` (se necessário)
-4. Deploy para `vertice-maximus-2`
-5. Testar em:
-   - Desktop (Chrome, Firefox, Safari)
-   - Tablet (iPad)
-   - Mobile (iPhone, Android)
-
----
-
-## 🎨 Componentes Visuais
-
-### Navbar
-```
-Logo [Vertice-Code]    Docs | API | Console | GitHub
-```
-
-### Hero
-```
-    AI Agents. Built Right.
-
-Multi-LLM orchestration with 85+ tactical tools
-         and constitutional governance.
-
-    [Try Console]  [Read Docs →]
-
-20 Agents • 85+ Tools • 5 LLM Providers • <50ms
-```
-
-### Console
-```
-┌─────────────────┬─────────────────┐
-│ Request         │ Response        │
-│                 │                 │
-│ Method: [v]     │ Status: 200 OK  │
-│                 │ Time: 45ms      │
-│ {               │                 │
-│   "jsonrpc":... │ {               │
-│ }               │   "result": ... │
-│                 │ }               │
-│                 │                 │
-│ [Execute]       │                 │
-└─────────────────┴─────────────────┘
-```
-
-### Features
-```
-┌─────────┐ ┌─────────┐ ┌─────────┐
-│   🔀    │ │   🛠️    │ │   ⚖️    │
-│ Multi-  │ │ 85+     │ │ Consti- │
-│ LLM     │ │ Tools   │ │ tutional│
-└─────────┘ └─────────┘ └─────────┘
-```
-
----
-
-## 📊 Métricas de Sucesso
-
-**Antes (atual):**
-- 2 sites separados
-- ~2000 linhas total HTML
-- Experiência fragmentada
-- Bounce rate alto (estimado)
-
-**Depois (meta):**
-- 1 site unificado
-- ~800 linhas total (60% redução)
-- Experiência fluida
-- Engagement no console integrado
-- Tempo na página aumentado
-
----
-
-## 🚀 Próximos Passos
-
-1. ✅ **Documentar plano** (este arquivo)
-2. ⏳ **Criar protótipo HTML/CSS**
-3. ⏳ **Implementar JavaScript interativo**
-4. ⏳ **Testar responsividade**
-5. ⏳ **Deploy em staging**
-6. ⏳ **Validar com usuário**
-7. ⏳ **Deploy produção**
-
----
-
-## 📝 Notas de Design
-
-### O que MANTER:
-- ✅ Glassmorphism (sutil)
-- ✅ Cyan accent (#06b6d4)
-- ✅ Dark theme
-- ✅ Console integrado (ótima ideia)
-
-### O que REMOVER:
-- ✗ Gradient orbs (muito visual)
-- ✗ Múltiplas seções repetitivas
-- ✗ Ícones excessivos
-- ✗ Agent cards individuais (simplificar)
-- ✗ Architecture diagram SVG complexo
-- ✗ Múltiplos CTAs confusos
-
-### O que SIMPLIFICAR:
-- Tools Showcase: 8 categorias → 3 features principais
-- Agent Fleet: 20 cards → 1 stat line
-- Footer: 4 colunas → 2 colunas essenciais
-
----
-
-## 🎯 Filosofia de Design
-
-> **"Perfection is achieved not when there is nothing more to add,**
-> **but when there is nothing left to take away."**
-> — Antoine de Saint-Exupéry
-
-**Aplicado:**
-- Cada elemento deve ter um **propósito claro**
-- Se duvidar, **remova**
-- Whitespace é **conteúdo**
-- Typography **é design**
-- Console integrado **é o diferencial**
-
----
-
-## 📚 Referências
-
-**Design Inspiration:**
-- [Anthropic Claude](https://www.anthropic.com) - Text-first, mission-driven
-- [OpenAI API](https://openai.com) - Clean, professional
-- [Vercel](https://vercel.com) - Minimal, developer-focused
-- [Linear](https://linear.app) - Typography hierarchy
-- [Resend](https://resend.com) - Console integration
-
-**Technical Resources:**
-- [Model Context Protocol Spec](https://modelcontextprotocol.io)
-- [MCP Registry](https://registry.modelcontextprotocol.io)
-- [Anthropic MCP Guide](https://www.anthropic.com/news/model-context-protocol)
-
-**Best Practices:**
-- [40 Best Landing Pages 2026](https://swipepages.com/blog/landing-page-examples/)
-- [Claude Frontend Design Skills](https://claude.com/blog/improving-frontend-design-through-skills)
-- [SaaSFrame Design Examples](https://www.saasframe.io)
-
----
-
-**Criado com:** Claude Sonnet 4.5
-**Data:** 2026-01-06
-**Versão:** 1.0
-**Status:** Aguardando aprovação para implementação
-
----
-
-*Soli Deo Gloria ❤️*
+1.  **Execute:** Write `landing/index-v2.html` with the structure above.
+2.  **Style:** Write `landing/styles-v2.css` (using Tailwind CDN for prototyping or raw CSS with variables).
+3.  **Script:** Write `landing/script-v2.js` implementing the console logic.
+4.  **Verify:** Open in browser and check responsiveness.

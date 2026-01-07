@@ -1,7 +1,7 @@
 """
 Testing Prompts - System Prompts for LLM-based Test Generation.
 
-Contains the system prompt that defines the TestingAgent's personality
+Contains the system prompt that defines the TestRunnerAgent's personality
 and capabilities when interacting with the LLM.
 """
 

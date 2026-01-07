@@ -14,10 +14,6 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict, List
 
-from vertice_core.protocols import LLMClientProtocol, MCPClientProtocol
-
-logger = logging.getLogger(__name__)
-
 from vertice_cli.agents.base import (
     AgentCapability,
     AgentRole,
@@ -25,6 +21,9 @@ from vertice_cli.agents.base import (
     AgentResponse,
     BaseAgent,
 )
+from vertice_core.protocols import LLMClientProtocol, MCPClientProtocol
+
+logger = logging.getLogger(__name__)
 
 # FIX E2E: Import grounding prompts for anti-hallucination
 try:

@@ -37,50 +37,50 @@ warnings.filterwarnings("ignore")
 _original_stderr = sys.stderr
 sys.stderr = io.StringIO()
 
-from prompt_toolkit import PromptSession
-from prompt_toolkit.key_binding import KeyBindings
-from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
-from prompt_toolkit.history import FileHistory
-from prompt_toolkit.patch_stdout import patch_stdout
-from prompt_toolkit.styles import Style
-from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn
+from prompt_toolkit import PromptSession  # noqa: E402
+from prompt_toolkit.key_binding import KeyBindings  # noqa: E402
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory  # noqa: E402
+from prompt_toolkit.history import FileHistory  # noqa: E402
+from prompt_toolkit.patch_stdout import patch_stdout  # noqa: E402
+from prompt_toolkit.styles import Style  # noqa: E402
+from rich.console import Console  # noqa: E402
+from rich.progress import Progress, SpinnerColumn, TextColumn  # noqa: E402
 
 # Restore stderr
 sys.stderr = _original_stderr
 
 # Core imports
-from ..shell_context import ShellContext
-from ..intent_detector import IntentDetector
-from vertice_cli.core.llm import LLMClient
-from vertice_cli.core.integration_coordinator import Coordinator
-from vertice_cli.core.logging_setup import setup_logging
+from ..shell_context import ShellContext  # noqa: E402
+from ..intent_detector import IntentDetector  # noqa: E402
+from vertice_cli.core.llm import LLMClient  # noqa: E402
+from vertice_cli.core.integration_coordinator import Coordinator  # noqa: E402
+from vertice_cli.core.logging_setup import setup_logging  # noqa: E402
 
 # Tools
-from vertice_cli.tools.exec import BashCommandTool
-from vertice_cli.tools.file_ops import ReadFileTool, WriteFileTool, EditFileTool
-from vertice_cli.tools.git_ops import GitStatusTool, GitDiffTool
+from vertice_cli.tools.exec import BashCommandTool  # noqa: E402
+from vertice_cli.tools.file_ops import ReadFileTool, WriteFileTool, EditFileTool  # noqa: E402
+from vertice_cli.tools.git_ops import GitStatusTool, GitDiffTool  # noqa: E402
 
 # Agents
-from vertice_cli.agents.architect import ArchitectAgent
-from vertice_cli.agents.documentation import DocumentationAgent
-from vertice_cli.agents.explorer import ExplorerAgent
-from vertice_cli.agents.planner import PlannerAgent
-from vertice_cli.agents.refactorer import RefactorerAgent
-from vertice_cli.agents.reviewer import ReviewerAgent
-from vertice_cli.agents.testing import TestingAgent
-from vertice_cli.agents.performance import PerformanceAgent
-from vertice_cli.agents.security import SecurityAgent
+from vertice_cli.agents.architect import ArchitectAgent  # noqa: E402
+from vertice_cli.agents.documentation import DocumentationAgent  # noqa: E402
+from vertice_cli.agents.explorer import ExplorerAgent  # noqa: E402
+from vertice_cli.agents.planner import PlannerAgent  # noqa: E402
+from vertice_cli.agents.refactorer import RefactorerAgent  # noqa: E402
+from vertice_cli.agents.reviewer import ReviewerAgent  # noqa: E402
+from vertice_cli.agents.testing import TestRunnerAgent  # noqa: E402
+from vertice_cli.agents.performance import PerformanceAgent  # noqa: E402
+from vertice_cli.agents.security import SecurityAgent  # noqa: E402
 
 # TUI Components
-from vertice_cli.tui.animations import LoadingAnimation, Animator
-from vertice_cli.tui.components.enhanced_progress import TokenMetrics
-from vertice_cli.tui.minimal_output import MinimalOutput
+from vertice_cli.tui.animations import LoadingAnimation, Animator  # noqa: E402
+from vertice_cli.tui.components.enhanced_progress import TokenMetrics  # noqa: E402
+from vertice_cli.tui.minimal_output import MinimalOutput  # noqa: E402
 
 # Local modules
-from .completer import SmartCompleter
-from .commands import create_commands, AGENT_ICONS
-from .agent_adapter import format_agent_output, register_agents
+from .completer import SmartCompleter  # noqa: E402
+from .commands import create_commands, AGENT_ICONS  # noqa: E402
+from .agent_adapter import format_agent_output, register_agents  # noqa: E402
 
 logger = logging.getLogger(__name__)
 setup_logging()
@@ -102,8 +102,8 @@ class MasterpieceREPL:
         "architect": ArchitectAgent,
         "refactor": RefactorerAgent,
         "refactorer": RefactorerAgent,
-        "test": TestingAgent,
-        "testing": TestingAgent,
+        "test": TestRunnerAgent,
+        "testing": TestRunnerAgent,
         "review": ReviewerAgent,
         "reviewer": ReviewerAgent,
         "docs": DocumentationAgent,
@@ -236,7 +236,7 @@ class MasterpieceREPL:
 
         for cmd, meta in sorted(self.commands.items()):
             self.console.print(
-                f"  {meta['icon']} [cyan]{cmd:14}[/cyan] " f"[dim]{meta['description']}[/dim]"
+                f"  {meta['icon']} [cyan]{cmd:14}[/cyan] [dim]{meta['description']}[/dim]"
             )
 
         self.console.print("\n[dim]Tab autocomplete • /help details[/dim]\n")
@@ -247,7 +247,7 @@ class MasterpieceREPL:
 
         if not message.strip():
             self.console.print(
-                f"[yellow]⚠️  Please provide a message for the " f"{agent_name} agent[/yellow]\n"
+                f"[yellow]⚠️  Please provide a message for the {agent_name} agent[/yellow]\n"
             )
             return
 

@@ -1,7 +1,7 @@
 """
-Comprehensive Test Suite for TestingAgent (100+ tests)
+Comprehensive Test Suite for TestRunnerAgent (100+ tests)
 
-This test suite validates the TestingAgent's ability to:
+This test suite validates the TestRunnerAgent's ability to:
 - Generate comprehensive unit tests
 - Analyze code coverage accurately
 - Run mutation testing
@@ -27,7 +27,7 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock
 
 from vertice_cli.agents.testing import (
-    TestingAgent,
+    TestRunnerAgent,
     TestCase,
     TestType,
     TestFramework,
@@ -50,8 +50,8 @@ class TestTestGeneration:
 
     @pytest.fixture
     def agent(self):
-        """Create TestingAgent instance."""
-        return TestingAgent(model=MagicMock())
+        """Create TestRunnerAgent instance."""
+        return TestRunnerAgent(model=MagicMock())
 
     @pytest.mark.asyncio
     async def test_generate_tests_for_simple_function(self, agent):
@@ -424,8 +424,8 @@ class TestCoverageAnalysis:
 
     @pytest.fixture
     def agent(self):
-        """Create TestingAgent instance."""
-        return TestingAgent(model=MagicMock())
+        """Create TestRunnerAgent instance."""
+        return TestRunnerAgent(model=MagicMock())
 
     @pytest.mark.asyncio
     async def test_analyze_coverage_runs_pytest_cov(self, agent):
@@ -714,8 +714,8 @@ class TestMutationTesting:
 
     @pytest.fixture
     def agent(self):
-        """Create TestingAgent instance."""
-        return TestingAgent(model=MagicMock())
+        """Create TestRunnerAgent instance."""
+        return TestRunnerAgent(model=MagicMock())
 
     @pytest.mark.asyncio
     async def test_mutation_testing_runs_mutmut(self, agent):
@@ -885,8 +885,8 @@ class TestFlakyDetection:
 
     @pytest.fixture
     def agent(self):
-        """Create TestingAgent instance."""
-        return TestingAgent(model=MagicMock())
+        """Create TestRunnerAgent instance."""
+        return TestRunnerAgent(model=MagicMock())
 
     @pytest.mark.asyncio
     async def test_flaky_detection_runs_multiple_times(self, agent):
@@ -1036,8 +1036,8 @@ class TestQualityScoring:
 
     @pytest.fixture
     def agent(self):
-        """Create TestingAgent instance."""
-        return TestingAgent(model=MagicMock())
+        """Create TestRunnerAgent instance."""
+        return TestRunnerAgent(model=MagicMock())
 
     @pytest.mark.asyncio
     async def test_quality_score_aggregates_metrics(self, agent):
@@ -1210,8 +1210,8 @@ class TestEdgeCases:
 
     @pytest.fixture
     def agent(self):
-        """Create TestingAgent instance."""
-        return TestingAgent(model=MagicMock())
+        """Create TestRunnerAgent instance."""
+        return TestRunnerAgent(model=MagicMock())
 
     @pytest.mark.asyncio
     async def test_handles_empty_source_code(self, agent):
@@ -1475,8 +1475,8 @@ class TestIntegration:
 
     @pytest.fixture
     def agent(self):
-        """Create TestingAgent instance."""
-        return TestingAgent(model=MagicMock())
+        """Create TestRunnerAgent instance."""
+        return TestRunnerAgent(model=MagicMock())
 
     @pytest.mark.asyncio
     async def test_full_workflow_generate_and_score(self, agent):
@@ -1685,7 +1685,7 @@ def aggregate_data(df: pd.DataFrame) -> dict:
     @pytest.mark.asyncio
     async def test_agent_name_is_set(self, agent):
         """Should have correct agent name."""
-        assert agent.name == "TestingAgent"
+        assert agent.name == "TestRunnerAgent"
 
 
 # ============================================================================

@@ -140,7 +140,7 @@ class ProviderManager:
         self._mode = value
         # If mode is a specific provider, tell the GeminiClient to switch
         if value not in {"auto", "prometheus", "maximus"} and hasattr(self.gemini, "set_provider"):
-             self.gemini.set_provider(value)
+            self.gemini.set_provider(value)
 
     def detect_complexity(self, message: str) -> TaskComplexity:
         """Detect task complexity from message content.
@@ -235,8 +235,8 @@ class ProviderManager:
         # We don't check for "gemini" specifically anymore, as any other mode (groq, cerebras)
         # relies on GeminiClient/VerticeClient to handle the routing.
         if self._mode != "auto":
-             provider_name = self._get_gemini_provider_name()
-             return self.gemini, provider_name
+            provider_name = self._get_gemini_provider_name()
+            return self.gemini, provider_name
 
         # Auto mode - detect complexity
         if self.config.enable_complexity_detection and message:
@@ -297,17 +297,11 @@ class ProviderManager:
             current = getattr(self.gemini, "get_current_provider_name", lambda: "gemini")()
 
             for p in available:
-                status["providers"][p] = {
-                    "available": True,
-                    "active": current == p
-                }
+                status["providers"][p] = {"available": True, "active": current == p}
 
             # Ensure "gemini" is always listed if available
             if "gemini" not in status["providers"] and getattr(self.gemini, "is_available", True):
-                 status["providers"]["gemini"] = {
-                    "available": True,
-                    "active": current == "gemini"
-                 }
+                status["providers"]["gemini"] = {"available": True, "active": current == "gemini"}
 
         return status
 

@@ -2,6 +2,7 @@
 Execution Sandbox based on Python resource limits.
 Provides a safer environment for agent-executed code.
 """
+
 import asyncio
 import logging
 import resource
@@ -40,9 +41,7 @@ class SandboxExecution:
         try:
             # CPU Time
             # Soft limit sends SIGXCPU, Hard limit sends SIGKILL
-            resource.setrlimit(
-                resource.RLIMIT_CPU, (self.cpu_time_limit, self.cpu_time_limit + 5)
-            )
+            resource.setrlimit(resource.RLIMIT_CPU, (self.cpu_time_limit, self.cpu_time_limit + 5))
 
             # Memory (AS - Address Space)
             # Warning: extensive imports (like pytorch/tensorflow) can hit this easily
@@ -52,12 +51,13 @@ class SandboxExecution:
             # File size (fsize) - prevent disk filling
             file_bytes = self.max_file_size_mb * 1024 * 1024
             resource.setrlimit(resource.RLIMIT_FSIZE, (file_bytes, file_bytes))
-            
+
             # Restore signals just in case
             import signal
+
             signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
-        except ValueError as e:
+        except ValueError:
             # Limits might be too high for system, ignore but log
             # We can't log here easily as it's a preexec_fn in child
             pass
@@ -74,7 +74,7 @@ class SandboxExecution:
             args = shlex.split(command)
         else:
             args = command
-            
+
         # Inherit current env but add overrides
         current_env = os.environ.copy()
         if env:

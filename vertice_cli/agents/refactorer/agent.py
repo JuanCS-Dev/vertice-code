@@ -543,8 +543,8 @@ CODE METRICS:
 {json.dumps(metrics, indent=2)}
 
 BLAST RADIUS:
-Affected Files: {', '.join(blast_radius.get('affected_files', []))}
-Risk Level: {blast_radius.get('risk_level', 'UNKNOWN')}
+Affected Files: {", ".join(blast_radius.get("affected_files", []))}
+Risk Level: {blast_radius.get("risk_level", "UNKNOWN")}
 
 TASK:
 Generate a detailed refactoring plan that:
@@ -581,7 +581,7 @@ OUTPUT FORMAT (JSON):
             Dictionary with code metrics
         """
         try:
-            tree = ast.parse(code)
+            ast.parse(code)  # Validate syntax
             return {"loc": len(code.split("\n")), "complexity": 5, "coupling": 3}
         except Exception as e:
             logger.debug(f"Failed to extract metrics: {e}")

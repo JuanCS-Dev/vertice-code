@@ -14,10 +14,10 @@ Architecture:
     - analyzers.py: Coverage, mutation, flaky detection
     - scoring.py: Quality scoring system
     - prompts.py: LLM system prompts
-    - agent.py: TestingAgent orchestrator
+    - agent.py: TestRunnerAgent orchestrator
 
 Usage:
-    from vertice_cli.agents.testing import TestingAgent, create_testing_agent
+    from vertice_cli.agents.testing import TestRunnerAgent, create_testing_agent
 
     agent = create_testing_agent(llm_client, mcp_client)
     response = await agent.execute(task)
@@ -28,12 +28,7 @@ Philosophy (Boris Cherny):
 
 # Models
 from .models import (
-    TestFramework,
-    TestType,
-    TestCase,
-    CoverageReport,
-    MutationResult,
-    FlakyTest,
+    TestingFramework,
 )
 
 # Generators
@@ -62,18 +57,18 @@ from .prompts import TESTING_SYSTEM_PROMPT
 
 # Agent
 from .agent import (
-    TestingAgent,
+    TestRunnerAgent,
     create_testing_agent,
 )
 
 __all__ = [
     # Models
-    "TestFramework",
+    "TestingFramework",
     "TestType",
     "TestCase",
-    "CoverageReport",
-    "MutationResult",
-    "FlakyTest",
+    "TestCoverageReport",
+    "TestMutationResult",
+    "TestFlakyTest",
     # Generators
     "generate_test_suite",
     "generate_function_tests",
@@ -89,6 +84,6 @@ __all__ = [
     # Prompts
     "TESTING_SYSTEM_PROMPT",
     # Agent
-    "TestingAgent",
+    "TestRunnerAgent",
     "create_testing_agent",
 ]

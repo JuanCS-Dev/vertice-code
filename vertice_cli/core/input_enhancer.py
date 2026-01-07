@@ -433,7 +433,7 @@ class InputEnhancer:
                     lines.append(match.group(1))
 
                 # If most lines matched, return cleaned
-                total_lines = len([l for l in text.split("\n") if l.strip()])
+                total_lines = len([line for line in text.split("\n") if line.strip()])
                 if len(matches) >= total_lines * 0.5:
                     return "\n".join(lines), detected_language
 

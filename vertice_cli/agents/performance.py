@@ -28,8 +28,6 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-logger = logging.getLogger(__name__)
-
 from .base import (
     AgentCapability,
     AgentResponse,
@@ -37,6 +35,8 @@ from .base import (
     AgentTask,
     BaseAgent,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class BottleneckType(str, Enum):
@@ -316,7 +316,7 @@ class PerformanceAgent(BaseAgent):
                                     code_snippet=self._get_code_snippet(source, node.lineno),
                                     description=f"Nested loop detected ({complexity})",
                                     optimization="Consider using set operations, dict lookups, or vectorization",
-                                    estimated_impact=f"{10 ** nested_level}x faster with optimization",
+                                    estimated_impact=f"{10**nested_level}x faster with optimization",
                                     complexity=complexity,
                                 )
                             )
@@ -335,7 +335,6 @@ class PerformanceAgent(BaseAgent):
             try:
                 with open(file_path, "r", encoding="utf-8") as f:
                     content = f.read()
-                    lines = content.split("\n")
 
                 # Pattern match for queries in loops
                 match = self._patterns["query_in_loop"].search(content)

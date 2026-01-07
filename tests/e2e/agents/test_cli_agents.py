@@ -9,7 +9,7 @@ Tests for all CLI agents:
 - ReviewerAgent: RAG, code graph, linters
 - RefactorerAgent: AST, transactions, rollback
 - SecurityAgent: Vuln scan, OWASP, secrets
-- TestingAgent: Unit, coverage, mutation
+- TestRunnerAgent: Unit, coverage, mutation
 - PerformanceAgent: Big-O, N+1, profiling
 - DocumentationAgent: AST docs, multi-format
 - DataAgent: Schema, query optimization
@@ -193,17 +193,17 @@ class TestSecurityAgent:
         assert hasattr(security, 'execute') or hasattr(security, 'scan')
 
 
-class TestTestingAgent:
-    """Tests for TestingAgent."""
+class TestTestRunnerAgent:
+    """Tests for TestRunnerAgent."""
 
     @pytest.fixture
     def testing(self, mock_llm_client, mock_mcp_client):
         """Create testing agent with mocked dependencies."""
         try:
-            from vertice_cli.agents.testing import TestingAgent
-            return TestingAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
+            from vertice_cli.agents.testing import TestRunnerAgent
+            return TestRunnerAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
         except ImportError:
-            pytest.skip("TestingAgent not available")
+            pytest.skip("TestRunnerAgent not available")
 
     def test_testing_initialization(self, testing):
         """Test testing agent initializes correctly."""

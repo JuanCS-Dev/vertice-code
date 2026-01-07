@@ -3,7 +3,6 @@
 import ast
 import logging
 from pathlib import Path
-from typing import Dict, Any, List
 
 from vertice_cli.tools.base import Tool, ToolCategory, ToolResult
 
@@ -47,12 +46,16 @@ class AuditDocsTool(Tool):
                     node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
                 ):
                     # Skip private members (starting with _)
-                    if hasattr(node, "name") and node.name.startswith("_") and node.name != "__init__":
+                    if (
+                        hasattr(node, "name")
+                        and node.name.startswith("_")
+                        and node.name != "__init__"
+                    ):
                         continue
-                    
+
                     # Skip __init__ if class has docstring? No, Google style requires both often.
                     # But let's skip __init__ if it's standard.
-                    
+
                     total += 1
                     docstring = ast.get_docstring(node)
                     if not docstring:
@@ -61,9 +64,13 @@ class AuditDocsTool(Tool):
                         missing.append(f"{name} (line {line})")
                     else:
                         # Basic Style Check (Google Style)
-                        if "Args:" not in docstring and "Returns:" not in docstring and len(docstring.split('\n')) > 1:
-                             # Weak check, just a warning maybe?
-                             pass
+                        if (
+                            "Args:" not in docstring
+                            and "Returns:" not in docstring
+                            and len(docstring.split("\n")) > 1
+                        ):
+                            # Weak check, just a warning maybe?
+                            pass
 
             coverage = ((total - len(missing)) / total * 100) if total > 0 else 100
             success = coverage >= min_coverage

@@ -146,7 +146,6 @@ class CodeGraphAnalysisAgent:
                         )
 
         # 3. Detect high coupling (God functions)
-        node_map = {node.id: node for node in nodes}
         for node_id in graph.nodes:
             out_degree = graph.out_degree(node_id)
             in_degree = graph.in_degree(node_id)
@@ -170,7 +169,6 @@ class CodeGraphAnalysisAgent:
             # High fan-in = too many things depend on it
             if in_degree > 15:
                 func_name = node_id.split("::")[-1]
-                node = node_map.get(node_id)
                 issues.append(
                     CodeIssue(
                         file="",

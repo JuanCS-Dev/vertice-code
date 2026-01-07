@@ -15,7 +15,7 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock
 
 # Import agents
-from vertice_cli.agents.testing import TestingAgent
+from vertice_cli.agents.testing import TestRunnerAgent
 from vertice_cli.agents.reviewer import ReviewerAgent
 from vertice_cli.agents.documentation import DocumentationAgent
 from vertice_cli.agents.explorer import ExplorerAgent
@@ -108,7 +108,7 @@ def mock_mcp_client():
 # TEST: Testing Agent - Inline Code Priority
 # =============================================================================
 
-class TestTestingAgentE2E:
+class TestTestRunnerAgentE2E:
     """E2E tests for Testing Agent inline code fix."""
 
     @pytest.mark.asyncio
@@ -119,7 +119,7 @@ class TestTestingAgentE2E:
         Before fix: "No source code provided" error
         After fix: Should generate tests for the inline code
         """
-        agent = TestingAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
+        agent = TestRunnerAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
 
         # Prompt natural com código inline - EXATAMENTE como usuário faria
         task = AgentTask(
@@ -163,7 +163,7 @@ Make sure to test edge cases too."""
     @pytest.mark.asyncio
     async def test_empty_context_handled_gracefully(self, mock_llm_client, mock_mcp_client):
         """Test that empty context is handled without crash."""
-        agent = TestingAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
+        agent = TestRunnerAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
 
         task = AgentTask(
             request="Generate tests",

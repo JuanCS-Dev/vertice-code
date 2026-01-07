@@ -339,7 +339,7 @@ class TestPrometheusSkillsProvider:
 
         result = await skills_provider.invoke_skill("prometheus:test_skill")
 
-        skills_registry.invoke_skill.assert_called_once_with("test_skill", None)
+        skills_registry.invoke_skill.assert_called_once_with("test_skill", {})
 
     @pytest.mark.asyncio
     async def test_search_skills(self, skills_provider, skills_registry):

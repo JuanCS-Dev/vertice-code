@@ -1,7 +1,6 @@
 """Pytest execution tool for TDD loop."""
 
 import logging
-from typing import Any, Dict
 
 from vertice_cli.tools.base import Tool, ToolCategory, ToolResult
 from vertice_cli.core.execution.sandbox import SandboxExecution
@@ -37,10 +36,10 @@ class RunPytestTool(Tool):
 
         # Use Sandbox to prevent infinite loops or memory bombs
         sandbox = SandboxExecution(
-            cpu_time_limit=60,   # 60s timeout for tests
-            memory_limit_mb=2048 # 2GB RAM limit (pytest overhead)
+            cpu_time_limit=60,  # 60s timeout for tests
+            memory_limit_mb=2048,  # 2GB RAM limit (pytest overhead)
         )
-        
+
         logger.info(f"Running tests in sandbox: {' '.join(cmd)}")
 
         result = await sandbox.run(cmd)
@@ -65,8 +64,5 @@ class RunPytestTool(Tool):
             success=success,
             data=output,
             error=error_msg,
-            metadata={
-                "returncode": result.returncode,
-                "timed_out": result.timed_out
-            },
+            metadata={"returncode": result.returncode, "timed_out": result.timed_out},
         )

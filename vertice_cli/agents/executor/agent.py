@@ -201,7 +201,7 @@ class NextGenExecutorAgent(BaseAgent):
             # Clean markdown artifacts
             if command.startswith("```"):
                 lines = command.split("\n")
-                command = "\n".join([l for l in lines if not l.startswith("```")])
+                command = "\n".join([line for line in lines if not line.startswith("```")])
                 command = command.strip()
 
             yield {"type": "command", "data": command}
@@ -374,9 +374,7 @@ COMMAND:"""
                 f"Command executed successfully. Output: {output_lines} lines, "
                 f"took {result.execution_time:.2f}s"
             )
-        return (
-            f"Command failed with exit code {result.exit_code}. " f"Error: {result.stderr[:100]}..."
-        )
+        return f"Command failed with exit code {result.exit_code}. Error: {result.stderr[:100]}..."
 
     async def _reflect_on_execution(self, result: CommandResult, task: AgentTask) -> List[str]:
         """Reflection pattern: Learn from execution and suggest improvements."""

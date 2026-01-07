@@ -1,7 +1,6 @@
 """Security scanning tool using Bandit."""
 
 import logging
-from typing import Any, Dict
 
 from vertice_cli.tools.base import Tool, ToolCategory, ToolResult
 from vertice_cli.core.execution.sandbox import SandboxExecution

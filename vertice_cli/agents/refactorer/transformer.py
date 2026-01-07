@@ -179,10 +179,6 @@ class ASTTransformer:
             Transformed code
         """
         lines = code.split("\n")
-        extracted_lines = lines[start - 1 : end]
-
-        # Create new method
-        new_method = f"def {name}():\n" + "\n".join(f"    {line}" for line in extracted_lines)
 
         # Replace in original
         lines[start - 1 : end] = [f"    {name}()"]

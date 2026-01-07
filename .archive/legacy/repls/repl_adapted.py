@@ -52,7 +52,7 @@ from qwen_dev_cli.agents.explorer import ExplorerAgent
 from qwen_dev_cli.agents.planner import PlannerAgent
 from qwen_dev_cli.agents.refactorer import RefactorerAgent
 from qwen_dev_cli.agents.reviewer import ReviewerAgent
-from qwen_dev_cli.agents.testing import TestingAgent
+from qwen_dev_cli.agents.testing import TestRunnerAgent
 
 console = Console()
 
@@ -315,7 +315,7 @@ class EnhancedREPL:
         agent_map = {
             "architect": ArchitectAgent,
             "refactorer": RefactorerAgent,
-            "testing": TestingAgent,
+            "testing": TestRunnerAgent,
             "reviewer": ReviewerAgent,
             "documentation": DocumentationAgent,
             "explorer": ExplorerAgent,

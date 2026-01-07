@@ -13,7 +13,6 @@ Reference:
 """
 
 import logging
-from typing import Any, Dict
 
 from vertice_core.messaging.events import Event
 from .persistence import persistence

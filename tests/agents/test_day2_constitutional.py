@@ -14,7 +14,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from vertice_cli.agents.testing import TestingAgent
+from vertice_cli.agents.testing import TestRunnerAgent
 from vertice_cli.agents.refactor import RefactorAgent
 from vertice_cli.agents.base import AgentTask, AgentRole, AgentCapability
 
@@ -28,8 +28,8 @@ class TestConstitutionalCompliance:
 
     @pytest.mark.asyncio
     async def test_article2_zero_placeholders_testing(self):
-        """Art. II: Zero placeholders in TestingAgent."""
-        agent = TestingAgent(model=MagicMock())
+        """Art. II: Zero placeholders in TestRunnerAgent."""
+        agent = TestRunnerAgent(model=MagicMock())
 
         # Check source code
         source_file = Path("vertice_cli/agents/testing.py")
@@ -52,8 +52,8 @@ class TestConstitutionalCompliance:
 
     @pytest.mark.asyncio
     async def test_p1_completeness_testing(self):
-        """P1 (Completude Obrigatória): TestingAgent is complete."""
-        agent = TestingAgent(model=MagicMock())
+        """P1 (Completude Obrigatória): TestRunnerAgent is complete."""
+        agent = TestRunnerAgent(model=MagicMock())
 
         # All methods must be implemented
         assert hasattr(agent, "execute")
@@ -76,8 +76,8 @@ class TestConstitutionalCompliance:
 
     @pytest.mark.asyncio
     async def test_p2_validation_testing(self):
-        """P2 (Validação Preventiva): TestingAgent validates inputs."""
-        agent = TestingAgent(model=MagicMock())
+        """P2 (Validação Preventiva): TestRunnerAgent validates inputs."""
+        agent = TestRunnerAgent(model=MagicMock())
 
         # Empty source should be rejected
         task = AgentTask(
@@ -103,8 +103,8 @@ class TestConstitutionalCompliance:
 
     @pytest.mark.asyncio
     async def test_p3_skepticism_testing(self):
-        """P3 (Ceticismo Crítico): TestingAgent doesn't trust input."""
-        agent = TestingAgent(model=MagicMock())
+        """P3 (Ceticismo Crítico): TestRunnerAgent doesn't trust input."""
+        agent = TestRunnerAgent(model=MagicMock())
 
         # Invalid Python should be handled
         task = AgentTask(
@@ -118,8 +118,8 @@ class TestConstitutionalCompliance:
 
     @pytest.mark.asyncio
     async def test_p4_traceability_testing(self):
-        """P4 (Rastreabilidade): TestingAgent tracks execution."""
-        agent = TestingAgent(model=MagicMock())
+        """P4 (Rastreabilidade): TestRunnerAgent tracks execution."""
+        agent = TestRunnerAgent(model=MagicMock())
 
         initial_count = agent.execution_count
 
@@ -134,8 +134,8 @@ class TestConstitutionalCompliance:
 
     @pytest.mark.asyncio
     async def test_p5_systemic_awareness_testing(self):
-        """P5 (Consciência Sistêmica): TestingAgent integrates with base."""
-        agent = TestingAgent(model=MagicMock())
+        """P5 (Consciência Sistêmica): TestRunnerAgent integrates with base."""
+        agent = TestRunnerAgent(model=MagicMock())
 
         # Should inherit from BaseAgent
         assert agent.role == AgentRole.TESTING
@@ -143,8 +143,8 @@ class TestConstitutionalCompliance:
 
     @pytest.mark.asyncio
     async def test_p6_token_efficiency_testing(self):
-        """P6 (Eficiência de Token): TestingAgent is concise."""
-        agent = TestingAgent(model=MagicMock())
+        """P6 (Eficiência de Token): TestRunnerAgent is concise."""
+        agent = TestRunnerAgent(model=MagicMock())
 
         task = AgentTask(
             request="Generate tests",
@@ -160,7 +160,7 @@ class TestConstitutionalCompliance:
     @pytest.mark.asyncio
     async def test_article7_tree_of_thoughts(self):
         """Art. VII: Agent uses deliberation."""
-        agent = TestingAgent(model=MagicMock())
+        agent = TestRunnerAgent(model=MagicMock())
 
         # Complex scenario should trigger analysis
         code = "\n".join([f"def func{i}(): pass" for i in range(10)])
@@ -179,7 +179,7 @@ class TestConstitutionalCompliance:
     @pytest.mark.asyncio
     async def test_article9_error_handling(self):
         """Art. IX: Robust error handling."""
-        agent = TestingAgent(model=MagicMock())
+        agent = TestRunnerAgent(model=MagicMock())
 
         # Invalid action should be handled
         task = AgentTask(
@@ -194,8 +194,8 @@ class TestConstitutionalCompliance:
 
     @pytest.mark.asyncio
     async def test_article10_metrics_testing(self):
-        """Art. X: TestingAgent provides metrics."""
-        agent = TestingAgent(model=MagicMock())
+        """Art. X: TestRunnerAgent provides metrics."""
+        agent = TestRunnerAgent(model=MagicMock())
 
         task = AgentTask(
             request="Generate tests",
@@ -222,7 +222,7 @@ class TestConstitutionalCompliance:
     async def test_lei_lazy_execution_index(self):
         """LEI (Lazy Execution Index) < 1.0."""
         # All functions should be fully implemented
-        agent = TestingAgent(model=MagicMock())
+        agent = TestRunnerAgent(model=MagicMock())
 
         # Check that agent methods don't just pass/return None
         assert agent.test_framework is not None
@@ -240,7 +240,7 @@ class TestRealWorldEndToEnd:
     @pytest.mark.asyncio
     async def test_e2e_flask_route_testing(self):
         """E2E: Generate tests for Flask route."""
-        agent = TestingAgent(model=MagicMock())
+        agent = TestRunnerAgent(model=MagicMock())
 
         code = """
 from flask import Flask, request, jsonify
@@ -265,7 +265,7 @@ def get_users():
     @pytest.mark.asyncio
     async def test_e2e_django_model_testing(self):
         """E2E: Generate tests for Django model."""
-        agent = TestingAgent(model=MagicMock())
+        agent = TestRunnerAgent(model=MagicMock())
 
         code = """
 from django.db import models
@@ -323,7 +323,7 @@ def process(x, y, z):
     @pytest.mark.asyncio
     async def test_e2e_integration_test_then_refactor(self):
         """E2E: Test generation → Refactor analysis pipeline."""
-        test_agent = TestingAgent(model=MagicMock())
+        test_agent = TestRunnerAgent(model=MagicMock())
         refactor_agent = RefactorAgent(llm_client=MagicMock(), mcp_client=MagicMock())
 
         code = """
@@ -358,7 +358,7 @@ def calculate_discount(price, customer_type):
     @pytest.mark.asyncio
     async def test_e2e_sqlalchemy_repository_pattern(self):
         """E2E: Test SQLAlchemy repository pattern."""
-        agent = TestingAgent(model=MagicMock())
+        agent = TestRunnerAgent(model=MagicMock())
 
         code = """
 from sqlalchemy.orm import Session
@@ -392,12 +392,12 @@ class UserRepository:
 
 def test_day2_final_validation():
     """Final validation: All agents working."""
-    test_agent = TestingAgent(model=MagicMock())
+    test_agent = TestRunnerAgent(model=MagicMock())
     refactor_agent = RefactorAgent(llm_client=MagicMock(), mcp_client=MagicMock())
 
     assert test_agent.role == AgentRole.TESTING
     assert refactor_agent.role == AgentRole.REFACTORER
 
     print("\n✅ Day 2 Constitutional Compliance: PASSED")
-    print("✅ TestingAgent: Production Ready")
+    print("✅ TestRunnerAgent: Production Ready")
     print("✅ RefactorAgent: Production Ready")

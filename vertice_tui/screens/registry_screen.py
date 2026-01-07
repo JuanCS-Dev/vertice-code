@@ -91,7 +91,9 @@ class RegistryScreen(Screen):
                         with Vertical(classes="list-container"):
                             yield DataTable(id="agent-table", cursor_type="row")
                         with Vertical(classes="detail-container"):
-                            yield Static("Select an agent to view details", id="agent-detail-header")
+                            yield Static(
+                                "Select an agent to view details", id="agent-detail-header"
+                            )
                             yield Markdown(id="agent-detail-body")
 
                 # --- TOOLS TAB ---

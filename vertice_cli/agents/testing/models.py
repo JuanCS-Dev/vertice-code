@@ -13,7 +13,7 @@ from enum import Enum
 from typing import List
 
 
-class TestFramework(str, Enum):
+class TestingFramework(str, Enum):
     """Supported test frameworks."""
 
     PYTEST = "pytest"

@@ -464,8 +464,23 @@ Make the task specific and actionable, not vague."""
         return {
             "tasks": [t.to_dict() for t in self.task_history],
             "stats": self.get_stats(),
-            "distribution": {
-                d.name: w for d, w in self.difficulty_distribution.items()
-            },
+            "distribution": {d.name: w for d, w in self.difficulty_distribution.items()},
             "discovered_skills": self.discovered_skills,
         }
+
+    def import_curriculum(self, state: dict) -> None:
+        """Import curriculum state."""
+        if "distribution" in state:
+            for name, weight in state["distribution"].items():
+                if name in TaskDifficulty.__members__:
+                    self.difficulty_distribution[TaskDifficulty[name]] = weight
+
+        if "discovered_skills" in state:
+            self.discovered_skills.update(state["discovered_skills"])
+
+        if "stats" in state:
+            s = state["stats"]
+            if "frontier" in s and s["frontier"] in TaskDifficulty.__members__:
+                self.stats.frontier_difficulty = TaskDifficulty[s["frontier"]]
+            self.stats.total_tasks = s.get("total_tasks", 0)
+            self.stats.avg_solve_rate = s.get("solve_rate", 0.0)

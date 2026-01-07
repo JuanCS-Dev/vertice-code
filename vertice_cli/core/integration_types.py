@@ -37,7 +37,7 @@ class IntentType(str, Enum):
     REVIEW = "review"  # → ReviewerAgent
     SECURITY = "security"  # → SecurityAgent
     PERFORMANCE = "performance"  # → PerformanceAgent
-    TESTING = "testing"  # → TestingAgent
+    TESTING = "testing"  # → TestRunnerAgent
     DOCUMENTATION = "documentation"  # → DocumentationAgent
 
     # Direct actions (no agent)

@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vertice-Code | AI Agents Built Right</title>
-    <meta name="description" content="Multi-LLM orchestration with 85+ tactical tools and constitutional governance. MCP-compatible AI agent framework.">
+    <title>Vertice-Code | AI Agents. Built Right.</title>
+    <meta name="description" content="Multi-LLM orchestration with 85+ tactical tools and constitutional governance.">
     <link rel="stylesheet" href="styles-v2.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
 </head>
 <body>
     <!-- Navbar -->
@@ -27,158 +29,200 @@
         </div>
     </nav>
 
-    <!-- Hero -->
+    <!-- Hero Section -->
     <section class="hero">
         <div class="container">
-            <h1>AI Agents. Built Right.</h1>
+            <div class="hero-badge">
+                <span class="badge-dot"></span>
+                Phase 2 Complete • MCP Server Live
+            </div>
+
+            <h1 class="hero-title">
+                AI Agents. Built Right.
+            </h1>
+
             <p class="hero-subtitle">
                 Multi-LLM orchestration with 85+ tactical tools and constitutional governance.
-                <br>Production-ready MCP server for AI assistants.
             </p>
-            <div class="hero-actions">
-                <a href="#console" class="btn btn-primary">Try Console</a>
-                <a href="https://github.com/JuanCS-Dev/vertice-code" class="btn btn-secondary" target="_blank">Read Docs →</a>
+
+            <div class="hero-stats">
+                20 Agents • 85+ Tools • 5 LLM Providers • &lt;50ms Latency
             </div>
-            <div class="stats">
-                <span>20 Agents</span>
-                <span>85+ Tools</span>
-                <span>5 LLM Providers</span>
-                <span>&lt;50ms Latency</span>
+
+            <div class="hero-buttons">
+                <a href="#console" class="btn btn-primary">Try Console</a>
+                <a href="https://github.com/anomalyco/vertice-code" class="btn btn-secondary">Read Docs →</a>
             </div>
         </div>
     </section>
 
-    <!-- Console (Integrated Playground) -->
-    <section id="console" class="console-section">
+    <!-- Console Section -->
+    <section id="console" class="console">
         <div class="container">
-            <h2>Interactive Console</h2>
-            <p class="section-subtitle">Test the MCP server in real-time</p>
+            <div class="section-header">
+                <h2>Test the MCP Server</h2>
+                <p>Execute requests against our live Model Context Protocol server</p>
+            </div>
 
-            <div class="console">
+            <div class="console-grid">
+                <!-- Request Builder -->
                 <div class="console-panel">
                     <div class="panel-header">
-                        <h3>Request</h3>
-                        <select id="method-select" class="method-select">
-                            <option value="tools/list">tools/list</option>
-                            <option value="tools/call">tools/call</option>
-                            <option value="ping">ping</option>
-                        </select>
+                        <h3>Request Builder</h3>
                     </div>
-                    <textarea id="request-input" class="code-input" rows="12">{
-  "jsonrpc": "2.0",
-  "method": "tools/list",
-  "id": "console-1"
-}</textarea>
-                    <button class="btn btn-primary btn-execute" onclick="executeRequest()">Execute Request</button>
+                    <div class="panel-content">
+                        <div class="form-group">
+                            <label>Method</label>
+                            <select id="method-select" class="form-control">
+                                <option value="tools/list">tools/list</option>
+                                <option value="tools/call">tools/call</option>
+                                <option value="ping">ping</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Parameters (JSON)</label>
+                            <textarea id="params-editor" class="form-control" rows="8" placeholder='{
+  "tool": "example_tool"
+}'></textarea>
+                        </div>
+
+                        <button id="execute-btn" class="btn btn-primary btn-block">
+                            Execute Request
+                        </button>
+                    </div>
                 </div>
 
+                <!-- Response Viewer -->
                 <div class="console-panel">
                     <div class="panel-header">
                         <h3>Response</h3>
-                        <div class="response-meta" id="response-meta" style="display: none;">
-                            <span id="response-status">--</span>
-                            <span id="response-time">--ms</span>
+                        <div class="response-meta">
+                            <span id="status-badge" class="status-badge">Ready</span>
+                            <span id="timing-badge" class="timing-badge">--ms</span>
                         </div>
                     </div>
-                    <div id="response-output" class="code-output">
-                        <div class="placeholder">
-                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="6" y="6" width="36" height="36" rx="3"/>
-                                <path d="M14 18h20M14 24h20M14 30h12"/>
-                            </svg>
-                            <p>Execute a request to see response</p>
-                        </div>
+                    <div class="panel-content">
+                        <pre id="response-viewer" class="response-viewer">
+                            <code>Click "Execute Request" to test the MCP server...</code>
+                        </pre>
                     </div>
+                </div>
+            </div>
+
+            <!-- Quick Examples -->
+            <div class="examples-section">
+                <h3>Quick Examples</h3>
+                <div class="example-buttons">
+                    <button class="example-btn" data-method="tools/list" data-params="{}">
+                        List Tools
+                    </button>
+                    <button class="example-btn" data-method="ping" data-params="{}">
+                        Ping Server
+                    </button>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Features -->
-    <section id="features" class="features-section">
+    <!-- Features Section -->
+    <section id="features" class="features">
         <div class="container">
-            <h2>Built for Production</h2>
+            <div class="section-header">
+                <h2>Core Features</h2>
+                <p>Built for enterprise-grade AI orchestration</p>
+            </div>
+
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">🔀</div>
                     <h3>Multi-LLM Routing</h3>
-                    <p>Claude, Gemini, GPT-4, Groq, Mistral. One unified interface for all major LLM providers.</p>
+                    <p>Claude, Gemini, GPT-4, Groq, Mistral - unified interface with intelligent routing.</p>
                 </div>
 
                 <div class="feature-card">
                     <div class="feature-icon">🛠️</div>
                     <h3>85+ Tactical Tools</h3>
-                    <p>File operations, Git workflow, Bash execution, Web APIs, testing suite, security audits.</p>
+                    <p>File ops, Git, Bash, Web APIs, Testing, Security - complete toolkit for AI agents.</p>
                 </div>
 
                 <div class="feature-card">
                     <div class="feature-icon">⚖️</div>
                     <h3>Constitutional AI</h3>
-                    <p>Built-in ethical constraints with JUSTIÇA principles and SOFIA governance framework.</p>
+                    <p>JUSTIÇA + SOFIA - built-in ethical constraints and governance framework.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Quick Start -->
-    <section class="quickstart-section">
+    <!-- Quick Start Section -->
+    <section class="quick-start">
         <div class="container">
-            <h2>Quick Start</h2>
-            <div class="code-tabs">
-                <button class="tab-btn active" data-tab="python">Python</button>
-                <button class="tab-btn" data-tab="javascript">JavaScript</button>
-                <button class="tab-btn" data-tab="curl">cURL</button>
+            <div class="section-header">
+                <h2>Quick Start</h2>
+                <p>Get started with Vertice-Code in minutes</p>
             </div>
 
-            <div class="code-examples">
-                <div class="code-example active" data-content="python">
-                    <pre><code>import requests
-
-# MCP Server endpoint
-response = requests.post(
-    "https://vertice-mcp-server-452089804714.us-central1.run.app/mcp",
-    json={
-        "jsonrpc": "2.0",
-        "method": "tools/list",
-        "id": "quickstart-1"
-    }
-)
-
-print(response.json())</code></pre>
-                    <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+            <div class="code-tabs">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="python">Python</button>
+                    <button class="tab-btn" data-tab="javascript">JavaScript</button>
+                    <button class="tab-btn" data-tab="curl">cURL</button>
                 </div>
 
-                <div class="code-example" data-content="javascript">
-                    <pre><code>// MCP Server endpoint
-const response = await fetch(
-    "https://vertice-mcp-server-452089804714.us-central1.run.app/mcp",
-    {
+                <div class="tab-content">
+                    <div id="python-tab" class="code-block active">
+                        <pre><code>import requests
+
+# MCP Server endpoint
+MCP_URL = "https://vertice-mcp-server-452089804714.us-central1.run.app/mcp"
+
+# List available tools
+response = requests.post(MCP_URL, json={
+    "jsonrpc": "2.0",
+    "method": "tools/list",
+    "id": "quickstart-1"
+})
+
+tools = response.json()
+print(f"Available tools: {len(tools.get('result', []))}")</code></pre>
+                    </div>
+
+                    <div id="javascript-tab" class="code-block">
+                        <pre><code>// MCP Server endpoint
+const MCP_URL = "https://vertice-mcp-server-452089804714.us-central1.run.app/mcp";
+
+// List available tools
+async function listTools() {
+    const response = await fetch(MCP_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             jsonrpc: '2.0',
             method: 'tools/list',
-            id: 'quickstart-1'
+            id: 'quickstart-js-1'
         })
-    }
-);
+    });
 
-const data = await response.json();
-console.log(data);</code></pre>
-                    <button class="btn-copy" onclick="copyCode(this)">Copy</button>
-                </div>
+    const data = await response.json();
+    console.log('Available tools:', data.result?.length || 0);
+}</code></pre>
+                    </div>
 
-                <div class="code-example" data-content="curl">
-                    <pre><code>curl -X POST \
-  https://vertice-mcp-server-452089804714.us-central1.run.app/mcp \
+                    <div id="curl-tab" class="code-block">
+                        <pre><code>curl -X POST https://vertice-mcp-server-452089804714.us-central1.run.app/mcp \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
     "method": "tools/list",
-    "id": "quickstart-1"
+    "id": "quickstart-curl-1"
   }'</code></pre>
-                    <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+                    </div>
                 </div>
+
+                <button class="copy-btn" onclick="copyCode()">
+                    Copy Code
+                </button>
             </div>
         </div>
     </section>
@@ -188,19 +232,14 @@ console.log(data);</code></pre>
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <strong>Vertice-Code</strong>
-                    <p>Multi-agent AI framework with MCP compatibility</p>
+                    <h3>Vertice-Code</h3>
+                    <p>Soli Deo Gloria | 2026</p>
                 </div>
                 <div class="footer-links">
-                    <a href="https://github.com/JuanCS-Dev/vertice-code" target="_blank">GitHub</a>
-                    <a href="https://github.com/JuanCS-Dev/vertice-code/blob/main/README.md" target="_blank">Documentation</a>
+                    <a href="https://github.com/anomalyco/vertice-code" target="_blank">GitHub</a>
+                    <a href="#console">Console</a>
                     <a href="https://modelcontextprotocol.io" target="_blank">MCP Spec</a>
-                    <a href="https://vertice-mcp-server-452089804714.us-central1.run.app/health" target="_blank">Server Status</a>
                 </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 Vertice-Code. Open Source.</p>
-                <p>Soli Deo Gloria</p>
             </div>
         </div>
     </footer>

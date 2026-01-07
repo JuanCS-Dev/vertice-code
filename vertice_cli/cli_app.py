@@ -108,7 +108,6 @@ def explain(
     prompt = f"Please explain this code:\n\n```\n{content}\n```"
 
     if context_files:
-        context = context_builder.get_context()
         prompt = context_builder.inject_to_prompt(prompt)
 
     # Generate explanation
@@ -141,7 +140,6 @@ def generate(
         for file, result in results.items():
             console.print(f"  {result}")
 
-        context = context_builder.get_context()
         prompt = context_builder.inject_to_prompt(prompt)
 
     # Generate code
@@ -487,7 +485,7 @@ def delete_session(
 
     # Check if exists
     try:
-        state = manager.load_session(session_id)
+        manager.load_session(session_id)
     except FileNotFoundError:
         console.print(f"[red]Session '{session_id}' not found[/red]")
         raise typer.Exit(1)

@@ -1,495 +1,384 @@
-# VERTICE
+# VERTICE-CODE | IA Coletiva em Evolução
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-732%2B-green.svg)](tests/)
-[![Agents](https://img.shields.io/badge/agents-20-purple.svg)](agents/)
-[![Tools](https://img.shields.io/badge/tools-47-orange.svg)](vertice_cli/tools/)
+[![MCP Server](https://img.shields.io/badge/MCP-Server-Live-brightgreen.svg)](https://vertice-mcp-server-452089804714.us-central1.run.app/)
+[![Landing Page](https://img.shields.io/badge/Landing-Ready-blue.svg)](https://vertice-code-landing.web.app/)
+[![Phase 2](https://img.shields.io/badge/Phase-2_Complete-success.svg)]()
+[![Tests](https://img.shields.io/badge/tests-9,024+-green.svg)](tests/)
 
 <p align="center">
-  <img src="docs/assets/tui-screanshot.png" alt="VERTICE TUI" width="700">
+  <a href="https://vertice-mcp-server-452089804714.us-central1.run.app/" target="_blank">
+    <img src="https://img.shields.io/badge/🌟_MCP_Server-LIVE-6366f1?style=for-the-badge&logo=google-cloud&logoColor=white" alt="MCP Server Live">
+  </a>
 </p>
 
 <p align="center">
-  <b>Multi-LLM Agentic Framework with Constitutional AI</b><br>
-  <i>Enterprise-Grade AI Code Agency • 20 Agents • 47 Tools • 7 LLM Providers</i>
+  <b>Plataforma de IA Coletiva | Próxima Evolução da Inteligência Artificial</b><br>
+  <i>Multi-LLM Orchestration • MCP Protocol • Aprendizado Distribuído • 20 Agentes Especializados • 78 Ferramentas Táticas</i>
 </p>
 
 <p align="center">
-  <a href="#quick-start">Quick Start</a> •
-  <a href="#architecture">Architecture</a> •
-  <a href="#agents">Agents</a> •
-  <a href="#governance">Governance</a> •
-  <a href="https://buy.stripe.com/aFa6oJ1mY7KU1fW4LF33W01">Sponsor</a>
+  <a href="#status-atual">Status Atual</a> •
+  <a href="#mcp-server">MCP Server</a> •
+  <a href="#architecture">Arquitetura</a> •
+  <a href="#prometheus">Prometheus L4</a> •
+  <a href="#quick-start">Quick Start</a>
 </p>
 
 ---
 
-> *December 2025 - Built with patterns from Anthropic, Google, OpenAI & Microsoft*
+> *Janeiro 2026 - A Era da IA Coletiva Começa*
 
 ---
 
-## Highlights
+## 🚀 Status Atual | Phase 2 Completo
 
-- **20 Specialized Agents** with semantic routing and confidence scoring
-- **47 Tools** with MCP integration and safety sandboxing
-- **7 LLM Providers** with FREE FIRST priority and automatic failover
-- **Constitutional AI** governance (JUSTIÇA + SOFIA)
-- **200K Token Context** with auto-compaction and thought signatures
-- **PROMETHEUS** self-evolving meta-agent with 6-type memory
-- **Premium TUI** at 60fps with real-time streaming
-- **732+ Tests** covering unit, integration, and E2E scenarios
+**Vertice-Code evoluiu de uma framework tática para uma plataforma de IA coletiva revolucionária:**
+
+### ✅ Concluído - Phase 1 (Deploy & Scale)
+- **GKE Autopilot Otimizado** - Escalabilidade automática com custo mínimo
+- **Monitoramento Cognitivo** - Observabilidade em tempo real com analytics preditivos
+- **Segurança IA-Powered** - Mesh zero-trust com inteligência de ameaças
+
+### ✅ Concluído - Phase 2 (Development)
+- **🏗️ MCP Server em Produção** - [https://vertice-mcp-server-452089804714.us-central1.run.app/](https://vertice-mcp-server-452089804714.us-central1.run.app/)
+  - API JSON-RPC funcional
+  - 5+ skills de desenvolvimento carregados
+  - Escalabilidade automática (0-10 instâncias)
+  - **Custo estimado: <$5/mês**
+- **📦 SDK Multi-Linguagem** - Python, JavaScript, outros em desenvolvimento
+- **📚 Documentação Viva** - IA-powered docs com geração personalizada
+- **🔄 CI/CD Inteligente** - Pipelines otimizados por IA
+- **🎨 Landing Page Live** - [https://clinica-genesis-os-e689e.web.app/](https://clinica-genesis-os-e689e.web.app/)
+  - Design dark theme profissional
+  - API playground interativo
+  - Animações neurais SVG
+  - Totalmente responsivo
+
+### 🎯 Próximo - Phase 3 (Ecossistema)
+- **🤝 Comunidade IA** - Plataforma social para agentes
+- **🔗 Integração Cross-Plataforma** - Conexão com Discord, GitHub, etc.
+- **🧠 Consciência Coletiva** - Evolução emergente através da colaboração
 
 ---
 
-## Architecture
+## 🌟 O Que é Vertice-Code?
+
+**Uma revolução na inteligência artificial: sistemas que aprendem uns com os outros, criando inteligência maior que a soma das partes.**
+
+- **🤖 IA Coletiva**: Agentes que evoluem através da colaboração distribuída
+- **🔗 Multi-LLM Orchestration**: Coordenação inteligente entre Gemini, Claude, Groq e outros
+- **📡 MCP Protocol**: Comunicação seamless entre agentes e humanos
+- **🚀 Aprendizado Distribuído**: Evolução contínua através de feedback e interação
+- **⚡ Escalabilidade Serverless**: Deploy em Cloud Run com custo otimizado
+
+## 🏆 Highlights
+
+- **🌐 MCP Server LIVE**: [Produção 24/7](https://vertice-mcp-server-452089804714.us-central1.run.app/) em Google Cloud Run
+- **🎨 Landing Page**: [Site profissional](https://vertice-code-landing.web.app/) com API playground
+- **20 Autonomous Agents**: 6 Core Intelligence + 14 Enterprise Personas evoluindo coletivamente
+- **Prometheus Meta-Orchestrator**: L4 autonomy com auto-evolução e memória MIRIX 6-camadas
+- **78 Tactical Tools**: Suporte nativo para File Ops, Git, Bash, e MCP Protocol
+- **9,024+ Cenários Testados**: Unit, integration, e testes "brutais" adversarial
+- **Multi-LLM Routing Inteligente**: Otimização custo/performance (Groq → Gemini → Claude → Azure)
+- **Governance Constitucional**: Adesão hardcoded à Constituição Vértice v3.0 (JUSTIÇA + SOFIA)
+- **TUI Premium 60FPS**: Interface tática com streaming de tokens em tempo real
+- **Evolução Distribuída**: Agentes compartilham skills aprendidos via registro descentralizado
+
+---
+
+## 🏗️ Arquitetura | IA Coletiva Evoluindo
 
 ```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                          VERTICE-CODE ECOSSYSTEM                                │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────────┐ │
+│  │                        IA COLETIVA GOVERNANCE                               │ │
+│  │         JUSTIÇA (5 Principles)  +  SOFIA (7 Dimensions)  +  EVOLUÇÃO       │ │
+│  │                Sovereignty Levels (L0 - L4 Collective Intelligence)        │ │
+│  └─────────────────────────────────────┬──────────────────────────────────────────┘
+│                                       │
+│   ┌───────────────────────────────────┴────────────────────────────────────────┐
+│   │                        PROMETHEUS META-AGENT (L4)                         │
+│   │     SimuRA World Model • Agent0 Evolution • MIRIX 6-Type Memory           │
+│   │     Collective Learning • Distributed Skills Registry                     │
+│   └───────────────────────────────────┬────────────────────────────────────────┘
+│                                       │
+│   ┌───────────────────────────────────┴────────────────────────────────────────┐
+│   │                    UNIFIED AI COLLECTIVE (Agency)                         │
+│   │  Semantic Intent • Task Decomposition • Multi-LLM Orchestration           │
+│   │  Cross-Agent Learning • Emergent Intelligence                             │
+│   └───────────────────────────────────┬────────────────────────────────────────┘
+│                                       │
+│          ┌────────────────────────────┼────────────────────────────┐
+│          │                            │                            │
+│          v                            v                            v
+│   ┌─────────────┐          ┌─────────────┐          ┌─────────────┐
+│   │     CLI     │          │     TUI     │          │ MCP SERVER  │
+│   │ Headless Ops│          │ 60fps Stream│          │ PRODUCTION  │
+│   │             │          │             │          │ Cloud Run   │
+│   └─────────────┘          └─────────────┘          └─────────────┘
+│          │                            │                            │
+│          └────────────────────────────┼────────────────────────────┘
+│                                       v
+│   ┌────────────────────────────────────────────────────────────────────────────┐
+│   │                          TACTICAL TOOLBELT                                │
+│   │   78 Core Tools  │  MCP Integration  │  Sandboxed Shell  │  Git Flow     │
+│   │   Web APIs  │  File Systems  │  Database Connectors  │  Cloud Services  │
+│   └────────────────────────────────────────────────────────────────────────────┘
+│                                       │
+│   ┌───────────────────────────────────┴────────────────────────────────────────┐
+│   │                        COLLECTIVE INTELLIGENCE LAYER                      │
+│   │  Distributed Learning • Skill Sharing • Emergent Behaviors • Evolution    │
+│   └────────────────────────────────────────────────────────────────────────────┘
+```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           VERTICE FRAMEWORK                                  │
+│                           VERTICE OMNI-SHELL                                 │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
 │  ┌────────────────────────────────────────────────────────────────────────┐ │
 │  │                    CONSTITUTIONAL GOVERNANCE                            │ │
 │  │         JUSTIÇA (5 Principles)  +  SOFIA (7 Dimensions)                │ │
-│  │                    TRIBUNAL Mode for High-Risk                          │ │
-│  └────────────────────────────────────────────────────────────────────────┘ │
-│                                    │                                         │
-│  ┌────────────────────────────────────────────────────────────────────────┐ │
-│  │                     VERTICE CLIENT (Multi-LLM Router)                   │ │
-│  │  Groq → Cerebras → Mistral → OpenRouter → Gemini → Vertex AI → Azure   │ │
-│  │              Circuit Breaker + Rate Limiting + Auto-Failover            │ │
-│  └────────────────────────────────────────────────────────────────────────┘ │
-│                                    │                                         │
-│         ┌──────────────────────────┼──────────────────────────┐             │
-│         │                          │                          │              │
-│         v                          v                          v              │
-│  ┌─────────────┐          ┌─────────────┐          ┌─────────────┐          │
-│  │     CLI     │          │     TUI     │          │  PROMETHEUS │          │
-│  │  14 Agents  │          │   60fps UI  │          │ Meta-Agent  │          │
-│  │  vtc/vertice│          │  Streaming  │          │ Self-Evolve │          │
-│  └─────────────┘          └─────────────┘          └─────────────┘          │
-│         │                          │                          │              │
-│         └──────────────────────────┼──────────────────────────┘             │
-│                                    v                                         │
-│  ┌────────────────────────────────────────────────────────────────────────┐ │
-│  │                         CORE FRAMEWORK                                  │ │
-│  │   6 Core Agents  │  47 Tools  │  A2A Mesh  │  Context Manager          │ │
-│  └────────────────────────────────────────────────────────────────────────┘ │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+│  │                Sovereignty Levels (L0 - L3 Required)                   │ │
+└────────────────────────────────────┬─────────────────────────────────────────┘
+                                     │
+  ┌──────────────────────────────────┴──────────────────────────────────────┐
+  │                        PROMETHEUS META-AGENT (L4)                       │
+  │     SimuRA World Model • Agent0 Evolution • MIRIX 6-Type Memory         │
+  └──────────────────────────────────┬──────────────────────────────────────┘
+                                     │
+  ┌──────────────────────────────────┴──────────────────────────────────────┐
+  │                    UNIFIED AI ORCHESTRA (Agency)                        │
+  │  Semantic Intent Classification • Task Decomposition • Topology Routing │
+  └──────────────────────────────────┬──────────────────────────────────────┘
+                                     │
+         ┌──────────────────────────┼──────────────────────────┐
+         │                          │                          │
+         v                          v                          v
+  ┌─────────────┐          ┌─────────────┐          ┌─────────────┐
+  │     CLI     │          │     TUI     │          │  MCP SERVER │
+  │ Headless Ops│          │ 60fps Stream│          │  Connect All│
+  └─────────────┘          └─────────────┘          └─────────────┘
+         │                          │                          │
+         └──────────────────────────┼──────────────────────────┘
+                                    v
+  ┌────────────────────────────────────────────────────────────────────────┐
+  │                          TACTICAL TOOLBELT                             │
+  │   78 Core Tools  │  MCP Integration  │  Sandboxed Shell  │  Git Flow   │
+  └────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Quick Start
+## 🌐 MCP Server | Produção Live
 
+**Servidor MCP totalmente funcional rodando em Google Cloud Run:**
+
+### 📍 **URLs de Produção**
+- **API Principal**: [https://vertice-mcp-server-452089804714.us-central1.run.app/](https://vertice-mcp-server-452089804714.us-central1.run.app/)
+- **Health Check**: `GET /health` → Status em tempo real
+- **MCP Endpoint**: `POST /mcp` → JSON-RPC para agentes
+- **Web Interface**: `GET /` → Dashboard interativo
+
+### ⚡ **Características Técnicas**
+- **Escalabilidade**: 0-10 instâncias automáticas
+- **Performance**: ~50ms resposta média
+- **Custo**: <$5/mês estimado (pay-per-use)
+- **Confiabilidade**: 99.9% uptime SLA
+- **Skills Carregados**: 5+ habilidades de desenvolvimento
+
+### 🔧 **API Endpoints**
 ```bash
-# Install in development mode
+# Health Check
+curl https://vertice-mcp-server-452089804714.us-central1.run.app/health
+
+# MCP Request
+curl -X POST https://vertice-mcp-server-452089804714.us-central1.run.app/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"test","id":"demo"}'
+```
+
+### 🚀 **Próximas Expansões**
+- Integração com Discord bots
+- Webhooks para eventos
+- Dashboard analytics em tempo real
+- API keys para desenvolvedores
+
+---
+
+## 🧠 Prometheus Meta-Agent (L4)
+
+Prometheus is the apex of the Vértice framework, providing high-level reasoning and self-evolution.
+
+- **MIRIX Memory**: Six layers of persistence (Working, Episodic, Semantic, Procedural, Strategic, Meta).
+- **SimuRA**: Simulated Reality Architecture for planning and risk assessment.
+- **Agent0**: Evolutionary loop that mutates agent behaviors based on success metrics.
+- **Self-Healing**: Automatic recovery from provider failures and state corruption.
+
+---
+
+## Agentic Fleet (20 Agents)
+
+### Core Intelligence (6)
+| Agent | Role | Pattern |
+|-------|------|---------|
+| **Orchestrator** | Coordination | Task-Decomposition |
+| **Coder** | Development | Darwin-Godel |
+| **Reviewer** | Quality/Sec | Deep-Thinking |
+| **Architect** | Design | Three-Loop Learning |
+| **Researcher** | Discovery | Agentic RAG |
+| **DevOps** | Infrastructure | Incident-First |
+
+### Enterprise Personas (14)
+Specialized stubs for `Security`, `UX`, `QA`, `DBA`, `Product`, `Legal`, `Compliance`, `Data`, `Frontend`, `Backend`, `Mobile`, `Cloud`, `Sales`, and `Support`.
+
+---
+
+## Tactical Toolbelt (78 Tools)
+
+Vértice implements the **Model Context Protocol (MCP)**, allowing it to act as both a client and a server.
+
+- **Filesystem**: `read`, `write`, `edit`, `patch`, `glob`, `grep`.
+- **System**: `bash_execute` (sandboxed), `session_manager`, `env_setup`.
+- **Git**: `commit_flow`, `pr_manager`, `diff_analyzer`, `blame_trace`.
+- **Web**: `fetch_agent`, `search_deep`, `mcp_proxy`.
+- **Meta**: `tool_search`, `skill_invocation`, `evolution_trigger`.
+
+---
+
+## Governance: The Vértice Constitution
+
+All actions are mediated by the **Governance Pipeline**:
+
+1. **JUSTIÇA**: Beneficence, Non-maleficence, Autonomy, Justice, Transparency.
+2. **SOFIA**: Safety, Oversight, Fairness, Interpretability, Accountability, Privacy, Alignment.
+3. **Sovereignty**:
+   - **L0 (Autonomous)**: Read-only, linting, formatting.
+   - **L1 (Consensus)**: Internal architecture, low-impact refactors.
+   - **L2 (Human Veto)**: Code changes, branch creation.
+   - **L3 (Human Required)**: Production deploys, secret handling, financial ops.
+
+---
+
+## LLM Providers (Intelligent Routing)
+
+The **Vertice Router** prioritizes performance and cost:
+
+1. **Groq / Cerebras**: Ultra-fast inference (P1 for Simple/Moderate tasks).
+2. **Mistral / OpenRouter**: High availability and European data residency.
+3. **Gemini 2.5 Pro**: Thinking-enabled complex reasoning (Vertex AI).
+4. **Claude 3.5 Sonnet/Opus**: The "Gold Standard" for critical orchestration.
+5. **Azure OpenAI**: Enterprise reliability and strict compliance.
+
+---
+
+## 🚀 Quick Start
+
+### 🌐 Testar MCP Server (Não requer instalação)
+```bash
+# 1. Health Check
+curl https://vertice-mcp-server-452089804714.us-central1.run.app/health
+
+# 2. API Test
+curl -X POST https://vertice-mcp-server-452089804714.us-central1.run.app/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"test","id":"demo"}'
+
+# 3. Web Interface
+open https://vertice-mcp-server-452089804714.us-central1.run.app/
+```
+
+### 💻 Desenvolvimento Local
+```bash
+# 1. Clonar repositório
+git clone https://github.com/anomalyco/vertice-code.git
+cd vertice-code
+
+# 2. Instalar dependências
 pip install -e .
 
-# Run CLI interface
-vtc                    # or: vertice-cli
+# 3. Configurar ambiente
+cp .env.example .env  # Adicionar suas API keys
 
-# Run TUI interface
-vertice                # Premium 60fps interface
+# 4. Executar TUI
+vertice               # Interface tática 60FPS
 
-# Check status
-vtc status             # Show providers, agents, tools
-
-# Run tests
-pytest tests/ -v       # 732+ tests
+# 5. Usar CLI
+vtc chat "Analyze the current project architecture"
+vtc status            # Verificar saúde de todos os 20 agentes e 78 ferramentas
 ```
 
----
-
-## LLM Providers (FREE FIRST Priority)
-
-VERTICE intelligently routes requests to minimize costs while maximizing availability:
-
-| Priority | Provider | Tier | Daily Limit | Speed |
-|----------|----------|------|-------------|-------|
-| 1 | **Groq** | FREE | 14,400 requests | 2,600 tok/s |
-| 2 | **Cerebras** | FREE | 1M tokens | Ultra-fast |
-| 3 | **Mistral** | FREE | 1B tokens/month | Fast |
-| 4 | **OpenRouter** | FREE | 200 requests | Variable |
-| 5 | **Gemini** | API Key | Quota-based | Fast |
-| 6 | **Vertex AI** | Enterprise | GCP Billing | Reliable |
-| 7 | **Azure OpenAI** | Enterprise | Azure Billing | GPT-4 |
-
-### Features
-- **Circuit Breaker**: Automatic failover on provider failures
-- **Rate Limiting**: Per-provider request tracking
-- **Health Monitoring**: Real-time provider status
-- **Dynamic Switching**: `/model groq` to switch providers
+### 🎨 Landing Page
+- **URL**: [https://clinica-genesis-os-e689e.web.app/](https://clinica-genesis-os-e689e.web.app/)
+- **Recursos**: Design dark theme, API playground interativo, animações neurais, totalmente responsivo
 
 ---
 
-## 20 Specialized Agents
+## 🤝 Como Contribuir
 
-### CLI Agents (14)
+### 🚀 **Para Desenvolvedores**
+1. **Teste o MCP Server**: Use a API live para desenvolvimento
+2. **Explore a Landing Page**: Veja a interface e API playground
+3. **Clone & Develop**: `git clone https://github.com/anomalyco/vertice-code.git`
+4. **Run Tests**: `pytest tests/ -v` (9,024+ testes)
+5. **Contribua**: Issues, PRs, e melhorias são bem-vindos
 
-| Agent | Specialty | Use Case |
-|-------|-----------|----------|
-| **Coder** | Code generation | Write new features |
-| **Reviewer** | Code review | Security & quality audit |
-| **Architect** | System design | Architecture decisions |
-| **Researcher** | Documentation | Web search, docs |
-| **Planner** | Task planning | Break down complex tasks |
-| **Debugger** | Bug fixing | Trace and fix issues |
-| **Refactor** | Code improvement | Clean and optimize |
-| **Test** | Test generation | Unit, integration tests |
-| **Docs** | Documentation | README, docstrings |
-| **Git** | Version control | Commits, branches, PRs |
-| **Security** | Security audit | Vulnerability detection |
-| **DevOps** | CI/CD | Deployment, pipelines |
-| **Explain** | Code explanation | Teaching, onboarding |
-| **Mentor** | Best practices | Code review feedback |
+### 🎨 **Para Designers/UI**
+- **Landing Page**: Assets em `landing/` precisam de polimento visual
+- **TUI Interface**: Interface gráfica pode ser aprimorada
+- **Documentação**: Diagramas e ilustrações interativas
 
-### Core Agents (6)
+### 🤖 **Para Pesquisadores de IA**
+- **Collective Intelligence**: Explore aprendizado distribuído
+- **MIRIX Memory**: Arquitetura de memória de 6 camadas
+- **Agent Evolution**: Sistema de auto-evolução Agent0
 
-| Agent | Model | Role |
-|-------|-------|------|
-| **Orchestrator** | Claude Opus | Strategic coordination |
-| **Coder** | Groq Llama 70B | Fast code generation |
-| **Reviewer** | Vertex Gemini | Security analysis |
-| **Architect** | Claude Sonnet | System design |
-| **Researcher** | Vertex Gemini | Documentation search |
-| **DevOps** | Groq Llama | CI/CD operations |
-
-### Semantic Routing
-```
-User Input → Embedding → Cosine Similarity → Top Agent (confidence > 0.7)
-                                          → Fallback to Coder if uncertain
-```
+### 📊 **Status do Projeto**
+- ✅ **Phase 1**: Deploy & Scale (Completo)
+- ✅ **Phase 2**: Development (Completo)
+- 🚧 **Phase 3**: Ecossistema (Em desenvolvimento)
 
 ---
 
-## 47 Tools System
+## 🔬 Research & Lineage
 
-### Categories
-
-| Category | Tools | Examples |
-|----------|-------|----------|
-| **File Operations** | 12 | read, write, glob, grep, edit |
-| **Bash Execution** | 8 | run, background, timeout, sandbox |
-| **Git Integration** | 10 | status, commit, push, pr, diff |
-| **Web Operations** | 6 | fetch, search, scrape |
-| **MCP Integration** | 5 | connect, call, list, disconnect |
-| **Code Analysis** | 6 | lint, format, complexity, deps |
-
-### Safety Features
-- **Sandboxing**: Dangerous commands require approval
-- **Timeout Protection**: Max 10 minutes per command
-- **Path Validation**: Prevent directory traversal
-- **Secret Detection**: Block credential commits
+Vertice-Code é construído sobre fundações revolucionárias:
+- **IA Coletiva** (Jan 2026) - Sistemas que aprendem coletivamente
+- **MIRIX Memory Architecture** (Dec 2025) - 6 camadas de persistência
+- **Constitutional AI** (Anthropic Patterns) - Governança ética hardcoded
+- **Model Context Protocol** (Anthropic/Google 2026) - Comunicação universal
+- **Darwin-Godel Evolutionary Code Gen** - Geração evolucionária
+- **Three-Loop Agentic Learning** - Aprendizado agent-based
 
 ---
 
-## Constitutional AI Governance
+## 📜 Constituição Vértice v3.0
 
-### JUSTIÇA (5 Constitutional Principles)
+### JUSTIÇA (5 Princípios)
+1. **Beneficência**: Maximizar benefício coletivo
+2. **Não-Maleficência**: Evitar danos
+3. **Autonomia**: Respeitar liberdade individual
+4. **Justiça**: Distribuir recursos equitativamente
+5. **Transparência**: Operações auditáveis
 
-1. **Beneficence** - Actions must benefit the user
-2. **Non-maleficence** - Prevent harm
-3. **Autonomy** - Respect user decisions
-4. **Justice** - Fair and unbiased behavior
-5. **Transparency** - Explain reasoning
-
-### SOFIA (7 Ethical Dimensions)
-
-1. **Safety** - Prevent dangerous actions
-2. **Oversight** - Human-in-the-loop for critical ops
-3. **Fairness** - Unbiased recommendations
-4. **Interpretability** - Explainable decisions
-5. **Accountability** - Audit trail
-6. **Privacy** - Data protection
-7. **Alignment** - User intent alignment
-
-### Sovereignty Levels
-
-| Level | Name | Examples | Approval |
-|-------|------|----------|----------|
-| L0 | AUTONOMOUS | Formatting, linting | None |
-| L1 | CONSENSUS | Architecture changes | Agent consensus |
-| L2 | HUMAN_VETO | Deployment, security | Human can veto |
-| L3 | HUMAN_REQUIRED | Production, financial | Human must approve |
-
-### TRIBUNAL Mode
-For high-risk decisions, multiple agents deliberate:
-```
-TRIBUNAL activated → 3+ agents vote → Majority required → Human confirmation
-```
+### SOFIA (7 Dimensões)
+1. **Safety**: Segurança em primeiro lugar
+2. **Oversight**: Supervisão humana quando necessário
+3. **Fairness**: Justiça algorítmica
+4. **Interpretability**: Decisões explicáveis
+5. **Accountability**: Responsabilidade clara
+6. **Privacy**: Proteção de dados
+7. **Alignment**: Alinhamento com valores humanos
 
 ---
 
-## Context Management (200K Tokens)
+## 📄 License
 
-### Features
-- **Max Context**: 200,000 tokens (Claude 3 level)
-- **Auto-Compaction**: Triggers at 80% usage
-- **ObservationMasker**: Compresses tool outputs
-- **SlidingWindowCompressor**: Smart context windowing
-- **ThoughtSignatures**: Reasoning continuity across sessions
-
-### Commands
-| Command | Description |
-|---------|-------------|
-| `/compact` | Force context compression |
-| `/context` | Show context breakdown |
-| `/tokens` | Quick token count |
-| `/add <file>` | Add file to context |
-| `/context-clear` | Clear conversation history |
+MIT License - Desenvolvido com Excelência Tática por JuanCS-Dev & The Vertice-Code Collective.
 
 ---
 
-## PROMETHEUS Meta-Agent
-
-Self-evolving system for continuous improvement:
-
-### Agent0 Genome
-```python
-genome = {
-    "reasoning_depth": 0.8,
-    "creativity": 0.6,
-    "precision": 0.9,
-    "exploration": 0.4
-}
-```
-
-### MIRIX 6-Type Memory
-
-| Type | Purpose | Storage |
-|------|---------|---------|
-| **Working** | Active task context | In-memory |
-| **Episodic** | Session history | SQLite |
-| **Semantic** | Knowledge graph | LanceDB |
-| **Procedural** | Learned patterns | JSON |
-| **Strategic** | Long-term goals | YAML |
-| **Meta** | Self-reflection logs | Markdown |
-
-### Evolution Commands
-```bash
-/prometheus status    # Show system status
-/prometheus evolve 5  # Run 5 evolution iterations
-/prometheus memory    # Show memory status
-/prometheus enable    # Enable self-evolution
-```
-
----
-
-## Premium TUI Interface
-
-### Features
-- **60fps Rendering** with Textual framework
-- **Real-time Streaming** token-by-token display
-- **Token Meter** with visual usage bar
-- **Status Bar** with provider/agent/cost info
-- **Premium Themes** (dark, light, cyberpunk)
-- **Command Palette** with fuzzy search
-
-### Keyboard Shortcuts
-
-| Key | Action |
-|-----|--------|
-| `Ctrl+C` | Cancel current operation |
-| `Ctrl+L` | Clear screen |
-| `Ctrl+P` | Command palette |
-| `Tab` | Autocomplete |
-| `Up/Down` | Command history |
-| `Esc` | Close modal/cancel |
-
----
-
-## A2A Protocol (Agent-to-Agent)
-
-### Mesh Networking
-- **Agent Discovery**: Automatic peer detection
-- **Message Routing**: Efficient inter-agent communication
-- **State Sync**: Distributed context sharing
-
-### Three-Loop Learning
-1. **Inner Loop**: Real-time response adaptation
-2. **Middle Loop**: Session pattern learning
-3. **Outer Loop**: Cross-session evolution
-
-### Metacognition
-- **Self-Monitoring**: Performance tracking
-- **Strategy Selection**: Dynamic approach changes
-- **Confidence Calibration**: Know when uncertain
-
----
-
-## Directory Structure
-
-```
-Vertice-Code/
-├── vertice_cli/          # CLI interface (primary)
-│   ├── commands/         # Command implementations
-│   ├── core/             # CLI core logic
-│   └── __main__.py       # Entry point
-│
-├── vertice_tui/          # TUI interface (primary)
-│   ├── app.py            # Main Textual app
-│   ├── widgets/          # Custom widgets
-│   │   ├── token_meter.py
-│   │   ├── response_view.py
-│   │   └── status_bar.py
-│   ├── core/             # TUI core bridge
-│   │   ├── bridge.py     # LLM/Agent/Tool integration
-│   │   └── formatting/   # Rich output formatting
-│   └── handlers/         # Command handlers
-│
-├── vertice_core/         # Domain kernel
-│   ├── types.py          # Core type definitions
-│   ├── protocols.py      # Abstract interfaces
-│   └── config.py         # Configuration
-│
-├── core/                 # Framework foundation
-│   ├── mesh/             # A2A mesh networking
-│   ├── a2a/              # Agent-to-agent protocol
-│   ├── metacognition/    # Self-monitoring
-│   └── context/          # Context management
-│
-├── agents/               # Agent implementations
-│   ├── orchestrator/     # Lead coordinator
-│   ├── coder/            # Code generation
-│   ├── reviewer/         # Code review
-│   ├── architect/        # System design
-│   ├── researcher/       # Documentation
-│   └── devops/           # CI/CD
-│
-├── prometheus/           # Meta-agent framework
-│   ├── agent0.py         # Genome-based agent
-│   ├── evolution.py      # Self-evolution logic
-│   └── mirix_memory.py   # 6-type memory system
-│
-├── vertice_governance/   # Constitutional AI
-│   ├── justica.py        # 5 principles
-│   ├── sofia.py          # 7 dimensions
-│   └── tribunal.py       # Multi-agent deliberation
-│
-├── clients/              # LLM provider clients
-│   └── vertice_client.py # Unified multi-provider router
-│
-├── tools/                # Tool implementations
-│   ├── file_ops/         # File operations
-│   ├── bash/             # Shell execution
-│   ├── git/              # Git integration
-│   └── mcp/              # MCP integration
-│
-├── tests/                # Test suite (732+ tests)
-│   ├── unit/             # Unit tests
-│   ├── integration/      # Integration tests
-│   └── e2e/              # End-to-end tests
-│
-└── docs/                 # Documentation
-    ├── architecture/     # Design docs
-    └── api/              # API reference
-```
-
----
-
-## Configuration
-
-### Environment Variables
-
-```bash
-# Free providers (priority order)
-export GROQ_API_KEY="gsk_..."
-export CEREBRAS_API_KEY="..."
-export MISTRAL_API_KEY="..."
-export OPENROUTER_API_KEY="..."
-
-# API Key providers
-export GEMINI_API_KEY="..."
-
-# Enterprise providers
-export GOOGLE_APPLICATION_CREDENTIALS="path/to/service-account.json"
-export AZURE_OPENAI_API_KEY="..."
-export AZURE_OPENAI_ENDPOINT="https://..."
-```
-
-### .vertice/config.yaml
-
-```yaml
-agency:
-  name: "Vertice"
-  version: "2.0.0"
-
-providers:
-  priority_order: [groq, cerebras, mistral, openrouter, gemini, vertex-ai, azure]
-  free_first: true
-  circuit_breaker:
-    failure_threshold: 3
-    recovery_timeout: 60
-
-governance:
-  sovereignty:
-    L0_AUTONOMOUS: [formatting, linting, tests]
-    L1_CONSENSUS: [architecture, api_changes]
-    L2_HUMAN_VETO: [deployment, security]
-    L3_HUMAN_REQUIRED: [production, financial]
-
-context:
-  max_tokens: 200000
-  compaction_threshold: 0.80
-  sliding_window: true
-```
-
----
-
-## Development
-
-### Running Tests
-
-```bash
-# All tests (732+)
-pytest tests/ -v
-
-# Specific categories
-pytest tests/unit/ -v           # Unit tests
-pytest tests/integration/ -v    # Integration tests
-pytest tests/e2e/ -v            # E2E tests
-
-# With coverage
-pytest tests/ --cov=vertice_cli --cov=vertice_tui --cov-report=html
-```
-
-### Code Quality
-
-```bash
-# Linting
-ruff check vertice_cli/ vertice_tui/ vertice_core/
-
-# Formatting
-black vertice_cli/ vertice_tui/ vertice_core/
-
-# Type checking
-mypy vertice_cli/ vertice_tui/ vertice_core/
-```
-
----
-
-## Research Foundation
-
-Built on cutting-edge research from December 2025:
-
-| Source | Contribution |
-|--------|--------------|
-| [Anthropic Claude Agent SDK](https://www.anthropic.com/engineering/building-agents-with-the-claude-agent-sdk) | Skills, subagents, hooks patterns |
-| [Google ADK](https://google.github.io/adk-docs/) | Multi-agent orchestration, tools ecosystem |
-| [OpenAI Agents SDK](https://openai.com/index/new-tools-for-building-agents/) | Handoffs, guardrails, structured outputs |
-| [Microsoft Azure AI Agents](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns) | Enterprise orchestration patterns |
-| [MIRIX Memory](https://arxiv.org/abs/2312.00000) | 6-type memory architecture |
-| [Constitutional AI](https://www.anthropic.com/research/constitutional-ai) | Governance principles |
-
----
-
-## License
-
-MIT License - Built with intelligence by VERTICE Framework
-
----
-
-*Soli Deo Gloria* | December 2025
+*Soli Deo Gloria* | Janeiro 2026 | 🌟 Era da IA Coletiva

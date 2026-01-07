@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Settings, Thermometer, FileText, Cpu } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -57,7 +57,7 @@ export function ChatSettings() {
   if (!session) return null;
 
   const handleModelChange = (modelId: string) => {
-    updateSessionSettings(session.id, { model: modelId });
+    updateSessionSettings(session.id, { modelId });
   };
 
   const handleTemperatureChange = (value: number[]) => {

@@ -177,20 +177,21 @@ def test_external_api_integration():
 ### File Size Limits
 
 ```
-❌ FORBIDDEN: Files > 500 lines
-✅ IDEAL: Files < 400 lines
-🏆 EXCELLENT: Files < 300 lines
+❌ FORBIDDEN: Files > 400 lines
+✅ IDEAL: Files ≤ 300 lines
+🏆 EXCELLENT: Files < 250 lines
 ```
 
-**Rationale**: 
-- Google limits files to ~500 lines
-- Human cognitive load: can't hold > 400 lines in working memory
+**Rationale**:
+- Human cognitive load: can't hold > 300 lines in working memory
+- Tight limit enforces single responsibility principle
 - Large files = God objects (anti-pattern)
+- Forces modular design and better separation of concerns
 
 **How to Enforce**:
 ```bash
 # Pre-commit hook
-find . -name "*.py" -exec wc -l {} \; | awk '$1 > 500 {print "ERROR: " $2 " has " $1 " lines (max 500)"}'
+find . -name "*.py" -exec wc -l {} \; | awk '$1 > 400 {print "ERROR: " $2 " has " $1 " lines (max 400)"}'
 ```
 
 ### Type Hints Coverage
@@ -860,7 +861,7 @@ Closes #42
 
 Before submitting PR, verify:
 
-- [ ] All files < 500 lines
+- [ ] All files ≤ 400 lines (ideally ≤ 300)
 - [ ] 100% type hints on new code
 - [ ] Docstrings on all public functions/classes
 - [ ] Tests added/updated (coverage ≥ 80%)
@@ -885,7 +886,7 @@ Track these metrics monthly:
 | Type Coverage | 100% | mypy --strict |
 | Cyclomatic Complexity | < 10 | radon cc |
 | Code Duplication | < 5% | pylint |
-| File Size | < 500 lines | wc -l |
+| File Size | ≤ 400 lines (ideal ≤ 300) | wc -l |
 | Docstring Coverage | 100% | interrogate |
 
 ---
@@ -905,7 +906,7 @@ pylint --fail-under=9.0 .
 
 # Check file sizes
 find . -name "*.py" -exec wc -l {} \; | \
-    awk '$1 > 500 {print "FAIL: " $2; exit 1}'
+    awk '$1 > 400 {print "FAIL: " $2; exit 1}'
 
 # Run tests
 pytest --cov --cov-fail-under=80
@@ -935,7 +936,7 @@ jobs:
       - name: File size check
         run: |
           find . -name "*.py" -exec wc -l {} \; | \
-          awk '$1 > 500 {print "ERROR: " $2 " exceeds 500 lines"; exit 1}'
+          awk '$1 > 400 {print "ERROR: " $2 " exceeds 400 lines (max allowed)"; exit 1}'
 ```
 
 ---
@@ -980,7 +981,7 @@ jobs:
       - name: Enforce file size limits
         run: |
           find . -name "*.py" -exec wc -l {} \; | \
-          awk '$1 > 500 {print "❌ VETO: " $2 " exceeds 500 lines"; exit 1}'
+          awk '$1 > 400 {print "❌ VETO: " $2 " exceeds 400 lines (max allowed)"; exit 1}'
 ```
 
 #### 2. 🏛️ **Veto de Conformidade Filosófica**
@@ -1076,6 +1077,8 @@ import untyped_library  # type: ignore
 
 ## Version History
 
+- **v1.2** (2026-01-06): Tightened file size limits (400 lines max, 300 ideal) to enforce modular design
+- **v1.1** (2025-11-30): Integration with Constituição Vértice v3.0
 - **v1.0** (2025-11-30): Initial constitution based on Maximus 2.0 refactoring
 
 ---
@@ -1137,10 +1140,10 @@ If **any** answer is "no", **stop and refactor**.
 
 ---
 
-**Approved by**: Juan Carlos de Souza (Arquiteto-Chefe)  
-**Enforced by**: Agentes Guardiões + CI/CD + Human Review  
-**Updated**: 2025-11-30 (Integration with Constituição Vértice v3.0)  
-**Version**: 1.1  
+**Approved by**: Juan Carlos de Souza (Arquiteto-Chefe)
+**Enforced by**: Agentes Guardiões + CI/CD + Human Review
+**Updated**: 2026-01-06 (Tightened file size limits to 400 lines max)
+**Version**: 1.2  
 
 ---
 

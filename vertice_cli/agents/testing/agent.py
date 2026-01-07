@@ -1,5 +1,5 @@
 """
-TestingAgent - The QA Engineer: Intelligent Test Generation and Quality Analysis.
+TestRunnerAgent - The QA Engineer: Intelligent Test Generation and Quality Analysis.
 
 This agent generates comprehensive test suites, analyzes coverage, performs mutation
 testing, and detects flaky tests. It operates with READ_ONLY + BASH_EXEC capabilities.
@@ -36,7 +36,7 @@ from ..base import (
     BaseAgent,
 )
 
-from .models import TestFramework
+from .models import TestingFramework
 from .generators import generate_test_suite
 from .analyzers import CoverageAnalyzer, MutationAnalyzer, FlakyDetector
 from .scoring import QualityScorer, score_to_grade
@@ -45,7 +45,7 @@ from .prompts import TESTING_SYSTEM_PROMPT
 logger = logging.getLogger(__name__)
 
 
-class TestingAgent(BaseAgent):
+class TestRunnerAgent(BaseAgent):
     """
     The QA Engineer - Intelligent test generation and quality analysis.
 
@@ -68,7 +68,7 @@ class TestingAgent(BaseAgent):
         model: Any = None,
         config: Optional[Dict[str, Any]] = None,
     ) -> None:
-        """Initialize TestingAgent with type-safe configuration.
+        """Initialize TestRunnerAgent with type-safe configuration.
 
         Args:
             llm_client: LLM provider client (for docstring generation)
@@ -94,12 +94,12 @@ class TestingAgent(BaseAgent):
                 AgentCapability.READ_ONLY,
                 AgentCapability.BASH_EXEC,
             ]
-            self.name = "TestingAgent"
+            self.name = "TestRunnerAgent"
             self.llm_client = model
             self.config = config or {}
 
         # Configuration
-        self.test_framework: TestFramework = TestFramework.PYTEST
+        self.test_framework: TestingFramework = TestingFramework.PYTEST
         self.min_coverage_threshold: float = 90.0
         self.min_mutation_score: float = 80.0
         self.flaky_detection_runs: int = 5
@@ -208,7 +208,7 @@ class TestingAgent(BaseAgent):
             return AgentResponse(
                 success=False,
                 data={},
-                reasoning=f"TestingAgent execution failed: {str(e)}",
+                reasoning=f"TestRunnerAgent execution failed: {str(e)}",
                 error=str(e),
             )
 
@@ -387,9 +387,9 @@ class TestingAgent(BaseAgent):
                 branches_covered=totals.get("covered_branches", 0),
             )
         except (json.JSONDecodeError, KeyError, TypeError, FileNotFoundError):
-            from .models import CoverageReport
+            from .models import TestCoverageReport
 
-            return CoverageReport(
+            return TestCoverageReport(
                 total_statements=0,
                 covered_statements=0,
                 coverage_percentage=0.0,
@@ -398,7 +398,7 @@ class TestingAgent(BaseAgent):
                 branches_covered=0,
             )
 
-    def _calculate_coverage_score(self, coverage: "CoverageReport") -> int:
+    def _calculate_coverage_score(self, coverage: "TestCoverageReport") -> int:
         """Calculate quality score from coverage metrics. Can be mocked for testing."""
         base_score = coverage.coverage_percentage * 0.7
         branch_bonus = coverage.branch_coverage * 0.3
@@ -460,14 +460,13 @@ class TestingAgent(BaseAgent):
 
     def _parse_mutation_results(self, output: str) -> "MutationResult":
         """Parse mutmut results output. Can be mocked for testing."""
-        from .models import MutationResult
 
         killed = len(re.findall(r"KILLED", output))
         survived = len(re.findall(r"SURVIVED", output))
         timeout = len(re.findall(r"TIMEOUT", output))
         total = killed + survived + timeout
 
-        return MutationResult(
+        return TestMutationResult(
             total_mutants=total,
             killed_mutants=killed,
             survived_mutants=survived,
@@ -521,7 +520,6 @@ class TestingAgent(BaseAgent):
 
     async def _detect_flaky_tests(self, test_path: str, runs: int) -> List["FlakyTest"]:
         """Run tests multiple times to detect flakiness. Can be mocked for testing."""
-        from .models import FlakyTest
 
         test_results: Dict[str, List[bool]] = {}
 
@@ -538,12 +536,12 @@ class TestingAgent(BaseAgent):
                         test_results[test_name].append("PASSED" in line)
 
         # Identify flaky tests
-        flaky_tests: List[FlakyTest] = []
+        flaky_tests: List[TestFlakyTest] = []
         for test_name, results in test_results.items():
             if len(set(results)) > 1:
                 failure_rate = (results.count(False) / len(results)) * 100
                 flaky_tests.append(
-                    FlakyTest(
+                    TestFlakyTest(
                         name=test_name,
                         file_path=test_path,
                         failure_rate=failure_rate,
@@ -608,8 +606,7 @@ class TestingAgent(BaseAgent):
                     },
                     "grade": score_to_grade(total_score),
                 },
-                reasoning=f"Test quality score: {total_score}/100 "
-                f"({score_to_grade(total_score)})",
+                reasoning=f"Test quality score: {total_score}/100 ({score_to_grade(total_score)})",
                 metrics={
                     "quality_score": float(total_score),
                     "coverage_score": coverage_score,
@@ -629,8 +626,8 @@ def create_testing_agent(
     llm_client: Any = None,
     mcp_client: Any = None,
     config: Optional[Dict[str, Any]] = None,
-) -> TestingAgent:
-    """Factory function to create TestingAgent.
+) -> TestRunnerAgent:
+    """Factory function to create TestRunnerAgent.
 
     Args:
         llm_client: LLM provider client
@@ -638,9 +635,9 @@ def create_testing_agent(
         config: Optional configuration
 
     Returns:
-        Configured TestingAgent instance
+        Configured TestRunnerAgent instance
     """
-    return TestingAgent(
+    return TestRunnerAgent(
         llm_client=llm_client,
         mcp_client=mcp_client,
         config=config,
@@ -648,7 +645,7 @@ def create_testing_agent(
 
 
 __all__ = [
-    "TestingAgent",
+    "TestRunnerAgent",
     "create_testing_agent",
     "TESTING_SYSTEM_PROMPT",
 ]

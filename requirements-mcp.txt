@@ -1,0 +1,6 @@
+# Prometheus MCP Server Dependencies
+# Requirements for running the standalone MCP server
+
+aiohttp>=3.9.0
+aiohttp-cors>=0.7.0
+httpx>=0.25.0

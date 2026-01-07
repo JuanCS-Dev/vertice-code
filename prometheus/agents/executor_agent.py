@@ -13,7 +13,7 @@ The Executor Agent is responsible for:
 """
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Any, Tuple
+from typing import List, Dict, Any, Tuple
 from datetime import datetime
 import logging
 
