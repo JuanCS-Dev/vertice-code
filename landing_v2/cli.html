@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertice CLI & TUI | Command Line Interface</title>
+    <meta name="description" content="Terminal-first AI development. Natural language commands, real-time agent monitoring, and full control from your shell.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        void: '#050505',
+                        primary: '#0a0e1a',
+                        secondary: '#0f1219',
+                        accent: '#06b6d4',
+                        muted: '#94a3b8'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles-v2.css">
+</head>
+<body class="bg-void text-white antialiased selection:bg-accent selection:text-white overflow-x-hidden">
+
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-50 bg-glass transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="/index-v2.html" class="flex items-center gap-3 group cursor-pointer">
+                <div class="w-8 h-8 bg-gradient-to-br from-accent to-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-accent/20 group-hover:shadow-accent/40 transition-all duration-300">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <span class="font-bold text-lg tracking-tight group-hover:text-accent transition-colors">Vertice-Code</span>
+            </a>
+
+            <div class="hidden md:flex gap-8 text-sm font-medium">
+                <a href="/index-v2.html#products" class="text-gray-400 hover:text-white transition-colors">Products</a>
+                <a href="/cli.html" class="text-white relative group">
+                    CLI
+                    <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-accent"></span>
+                </a>
+                <a href="/index-v2.html#features" class="text-gray-400 hover:text-white transition-colors">Features</a>
+                <a href="https://github.com/JuanCS-Dev/vertice-code" target="_blank" class="text-gray-400 hover:text-white transition-colors">GitHub</a>
+            </div>
+
+            <div class="flex gap-4">
+                <a href="https://app.vertice-maximus.com" target="_blank" class="text-xs font-mono bg-accent/10 hover:bg-accent/20 border border-accent/30 text-accent px-4 py-1.5 rounded transition-colors">
+                    Launch App
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative pt-32 pb-20">
+
+        <!-- Hero Section -->
+        <section class="max-w-4xl mx-auto px-6 text-center mb-24 relative z-10">
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent/20 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-xs font-mono text-accent mb-8">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Command Line Interface
+            </div>
+
+            <h1 class="text-4xl md:text-6xl font-bold tracking-tight mb-6 leading-[1.1]">
+                Built for the<br />
+                <span class="text-gradient">Terminal.</span>
+            </h1>
+
+            <p class="text-lg text-gray-300 max-w-2xl mx-auto mb-12 leading-relaxed">
+                Natural language commands. Real-time agent monitoring. Full control from your shell.<br/>
+                For developers who live in the terminal.
+            </p>
+
+            <!-- Installation -->
+            <div class="bg-black/40 border border-white/10 rounded-lg p-6 max-w-xl mx-auto mb-8">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs text-gray-500 font-mono">INSTALLATION</span>
+                    <button class="text-xs text-accent hover:text-accent/80 transition-colors" onclick="navigator.clipboard.writeText('pip install vertice-code')">
+                        Copy
+                    </button>
+                </div>
+                <div class="font-mono text-sm text-gray-200 flex items-center gap-3">
+                    <span class="text-accent">$</span>
+                    <code>pip install vertice-code</code>
+                </div>
+            </div>
+
+            <p class="text-sm text-gray-500">
+                Python 3.10+ required. Works on macOS, Linux, and Windows (WSL).
+            </p>
+        </section>
+
+        <!-- CLI Commands -->
+        <section class="max-w-5xl mx-auto px-6 mb-24">
+            <h2 class="text-2xl font-bold mb-3 text-center">Core Commands</h2>
+            <p class="text-center text-gray-400 mb-12 max-w-xl mx-auto text-sm">
+                Interact with agents using natural language. Simple, intuitive, powerful.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <!-- Chat -->
+                <div class="bg-white/3 border border-white/10 rounded-lg p-6 hover:bg-white/5 transition-all">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center text-accent">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-white">vertice chat</h3>
+                    </div>
+                    <p class="text-sm text-gray-400 mb-4">Start an interactive conversation with agents.</p>
+                    <div class="bg-black/40 p-3 rounded font-mono text-xs text-gray-300">
+                        <span class="text-accent">$</span> vertice chat "explain this code"
+                    </div>
+                </div>
+
+                <!-- Run -->
+                <div class="bg-white/3 border border-white/10 rounded-lg p-6 hover:bg-white/5 transition-all">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 bg-green-500/10 rounded-lg flex items-center justify-center text-green-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-white">vertice run</h3>
+                    </div>
+                    <p class="text-sm text-gray-400 mb-4">Execute a task with agent orchestration.</p>
+                    <div class="bg-black/40 p-3 rounded font-mono text-xs text-gray-300">
+                        <span class="text-accent">$</span> vertice run --task "refactor tests"
+                    </div>
+                </div>
+
+                <!-- Maestro (TUI) -->
+                <div class="bg-white/3 border border-white/10 rounded-lg p-6 hover:bg-white/5 transition-all">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 bg-purple-500/10 rounded-lg flex items-center justify-center text-purple-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-white">vertice --mode omni</h3>
+                    </div>
+                    <p class="text-sm text-gray-400 mb-4">Launch the Terminal UI for real-time monitoring.</p>
+                    <div class="bg-black/40 p-3 rounded font-mono text-xs text-gray-300">
+                        <span class="text-accent">$</span> vertice --mode omni
+                    </div>
+                </div>
+
+                <!-- Config -->
+                <div class="bg-white/3 border border-white/10 rounded-lg p-6 hover:bg-white/5 transition-all">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center text-blue-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-white">vertice config</h3>
+                    </div>
+                    <p class="text-sm text-gray-400 mb-4">Configure API keys and preferences.</p>
+                    <div class="bg-black/40 p-3 rounded font-mono text-xs text-gray-300">
+                        <span class="text-accent">$</span> vertice config set ANTHROPIC_API_KEY
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- TUI Screenshot -->
+        <section id="tui" class="max-w-6xl mx-auto px-6 mb-24">
+            <div class="bento-card">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold mb-2">Terminal UI (TUI)</h2>
+                        <p class="text-sm text-gray-400">Real-time agent orchestration monitoring</p>
+                    </div>
+                    <div class="px-3 py-1 bg-purple-500/20 rounded-full text-xs font-mono text-purple-400 border border-purple-500/30">
+                        INTERACTIVE
+                    </div>
+                </div>
+
+                <!-- TUI Screenshot Placeholder -->
+                <div class="rounded-lg overflow-hidden border border-white/10 shadow-2xl bg-black/50 mb-6">
+                    <img src="assets/vertice-code-cli.png" alt="Vertice TUI Interface" class="w-full h-auto object-cover opacity-90 hover:opacity-100 transition-opacity">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-black/20 p-4 rounded-lg border border-white/5">
+                        <div class="flex items-center gap-2 mb-2">
+                            <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            <span class="font-mono text-sm text-white">Agent Monitor</span>
+                        </div>
+                        <p class="text-xs text-gray-500">Watch agents spawn, collaborate, and complete tasks in real-time.</p>
+                    </div>
+                    <div class="bg-black/20 p-4 rounded-lg border border-white/5">
+                        <div class="flex items-center gap-2 mb-2">
+                            <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                            <span class="font-mono text-sm text-white">Tool Inspection</span>
+                        </div>
+                        <p class="text-xs text-gray-500">Inspect every tool call, parameter, and result in the execution flow.</p>
+                    </div>
+                    <div class="bg-black/20 p-4 rounded-lg border border-white/5">
+                        <div class="flex items-center gap-2 mb-2">
+                            <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span class="font-mono text-sm text-white">Cost Tracking</span>
+                        </div>
+                        <p class="text-xs text-gray-500">Live token usage and cost estimation per conversation.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Use Cases -->
+        <section class="max-w-5xl mx-auto px-6 mb-32">
+            <h2 class="text-2xl font-bold mb-3 text-center">Use Cases</h2>
+            <p class="text-center text-gray-400 mb-12 max-w-xl mx-auto text-sm">
+                From quick queries to complex workflows, Vertice CLI adapts to your needs.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- Code Review -->
+                <div class="bento-card">
+                    <h3 class="text-lg font-bold mb-2">Code Review</h3>
+                    <p class="text-sm text-gray-400 mb-4">Get instant feedback on your changes</p>
+                    <div class="bg-black/40 p-4 rounded-lg font-mono text-xs space-y-2">
+                        <div><span class="text-accent">$</span> <span class="text-gray-300">vertice chat "review my last commit"</span></div>
+                        <div class="text-gray-500">→ Analyzing commit 7f3a2b9...</div>
+                        <div class="text-gray-500">→ Found 3 potential issues</div>
+                        <div class="text-gray-500">→ Generated report</div>
+                    </div>
+                </div>
+
+                <!-- Refactoring -->
+                <div class="bento-card">
+                    <h3 class="text-lg font-bold mb-2">Automated Refactoring</h3>
+                    <p class="text-sm text-gray-400 mb-4">Multi-agent collaboration for large changes</p>
+                    <div class="bg-black/40 p-4 rounded-lg font-mono text-xs space-y-2">
+                        <div><span class="text-accent">$</span> <span class="text-gray-300">vertice run --task "extract utils"</span></div>
+                        <div class="text-gray-500">→ Orchestrator planning...</div>
+                        <div class="text-gray-500">→ Coder implementing changes...</div>
+                        <div class="text-gray-500">→ Reviewer checking quality...</div>
+                    </div>
+                </div>
+
+                <!-- Documentation -->
+                <div class="bento-card">
+                    <h3 class="text-lg font-bold mb-2">Documentation</h3>
+                    <p class="text-sm text-gray-400 mb-4">Generate docs from your codebase</p>
+                    <div class="bg-black/40 p-4 rounded-lg font-mono text-xs space-y-2">
+                        <div><span class="text-accent">$</span> <span class="text-gray-300">vertice chat "document public API"</span></div>
+                        <div class="text-gray-500">→ Scanning 24 files...</div>
+                        <div class="text-gray-500">→ Generating API.md...</div>
+                        <div class="text-gray-500">✓ Complete</div>
+                    </div>
+                </div>
+
+                <!-- Debugging -->
+                <div class="bento-card">
+                    <h3 class="text-lg font-bold mb-2">Debugging</h3>
+                    <p class="text-sm text-gray-400 mb-4">AI-powered error analysis</p>
+                    <div class="bg-black/40 p-4 rounded-lg font-mono text-xs space-y-2">
+                        <div><span class="text-accent">$</span> <span class="text-gray-300">vertice chat "why is test_auth failing?"</span></div>
+                        <div class="text-gray-500">→ Reading test output...</div>
+                        <div class="text-gray-500">→ Analyzing stack trace...</div>
+                        <div class="text-gray-500">→ Suggesting fix...</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="max-w-3xl mx-auto px-6 mb-24 text-center">
+            <div class="bento-card">
+                <h2 class="text-2xl font-bold mb-4">Ready to Start?</h2>
+                <p class="text-gray-400 mb-8">Install Vertice CLI and bring AI agents to your terminal.</p>
+
+                <div class="bg-black/40 border border-white/10 rounded-lg p-6 mb-6 max-w-md mx-auto">
+                    <div class="font-mono text-sm text-gray-200 flex items-center gap-3 justify-center">
+                        <span class="text-accent">$</span>
+                        <code>pip install vertice-code</code>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="https://github.com/JuanCS-Dev/vertice-code" target="_blank" class="px-6 py-3 bg-white/5 border border-white/20 rounded-lg hover:bg-white/10 transition-all font-medium text-white backdrop-blur-sm flex items-center gap-2 justify-center">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                        View on GitHub
+                    </a>
+                    <a href="https://app.vertice-maximus.com" target="_blank" class="px-6 py-3 bg-accent text-white font-medium rounded-lg hover:bg-accent/90 transition-all flex items-center gap-2 justify-center">
+                        Try Web App Instead
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="max-w-6xl mx-auto px-6 pt-12 pb-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
+            <div class="flex items-center gap-2 mb-4 md:mb-0">
+                <div class="w-4 h-4 bg-accent rounded-sm"></div>
+                <span>© 2026 Vertice-Code. <span class="opacity-50">Soli Deo Gloria.</span></span>
+            </div>
+            <div class="flex gap-8">
+                <a href="/index-v2.html" class="hover:text-white transition-colors">Home</a>
+                <a href="https://github.com/JuanCS-Dev/vertice-code" class="hover:text-white transition-colors">GitHub</a>
+                <a href="https://app.vertice-maximus.com" class="hover:text-white transition-colors">Web App</a>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- Scripts -->
+    <script src="script-v2.js"></script>
+</body>
+</html>

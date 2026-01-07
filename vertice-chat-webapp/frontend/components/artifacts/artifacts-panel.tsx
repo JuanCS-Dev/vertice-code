@@ -5,6 +5,8 @@ import { useArtifactsStore, useActiveArtifact } from '@/lib/stores/artifacts-sto
 import { ArtifactTree } from './artifact-tree';
 import { ArtifactEditor } from './artifact-editor';
 import { ArtifactToolbar } from './artifact-toolbar';
+import { SandpackClient, useDebouncedSync } from './preview/sandpack-client';
+import { Terminal } from './cloud/terminal'; // PROJECT VIVID Phase 3
 import { Button } from '@/components/ui/button';
 import { Plus, File, Folder, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -20,11 +22,34 @@ export function ArtifactsPanel() {
     createArtifact,
     loadArtifactFromFile,
     artifacts,
-    rootArtifactIds
+    rootArtifactIds,
+    previewMode // PROJECT VIVID
   } = useArtifactsStore();
 
   const activeArtifact = useActiveArtifact();
   const [showTree, setShowTree] = useState(true);
+  const [showTerminal, setShowTerminal] = useState(false); // PROJECT VIVID Phase 3
+
+  // PROJECT VIVID - Debounced content for Sandpack sync
+  const debouncedContent = useDebouncedSync(activeArtifact?.content || '', 500);
+
+  // Determine if current file can be previewed
+  const canPreview = activeArtifact && activeArtifact.language && [
+    'jsx', 'tsx', 'javascript', 'typescript', 'html', 'react'
+  ].includes(activeArtifact.language);
+
+  // PROJECT VIVID Phase 3 - Keyboard shortcut for terminal (Ctrl+`)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === '`') {
+        e.preventDefault();
+        setShowTerminal(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Handle file upload
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,13 +154,64 @@ export function ArtifactsPanel() {
         )}
       </div>
 
-      {/* Main Content Area */}
+      {/* Main Content Area - PROJECT VIVID Enhanced */}
       <div className="flex-1 flex flex-col">
         {activeArtifact ? (
           <>
-            <ArtifactToolbar />
-            <div className="flex-1 overflow-hidden">
-              <ArtifactEditor />
+            <ArtifactToolbar
+              showTerminal={showTerminal}
+              onToggleTerminal={() => setShowTerminal(!showTerminal)}
+            />
+
+            {/* Content Area with Preview Support + Terminal */}
+            <div className="flex-1 flex flex-col overflow-hidden">
+              {/* Editor & Preview Area */}
+              <div className={cn(
+                "flex overflow-hidden transition-all duration-200",
+                showTerminal ? 'flex-1' : 'h-full'
+              )}>
+                {/* Monaco Editor */}
+                {(previewMode === 'editor' || previewMode === 'split') && (
+                  <div className={cn(
+                    "overflow-hidden transition-all duration-200",
+                    previewMode === 'split' ? 'w-1/2 border-r' : 'w-full'
+                  )}>
+                    <ArtifactEditor />
+                  </div>
+                )}
+
+                {/* Sandpack Preview */}
+                {canPreview && (previewMode === 'preview' || previewMode === 'split') && (
+                  <div className={cn(
+                    "overflow-hidden bg-[#050505] transition-all duration-200",
+                    previewMode === 'split' ? 'w-1/2' : 'w-full'
+                  )}>
+                    <div className="h-full p-4">
+                      <div className="h-full border border-gray-800 rounded-lg overflow-hidden">
+                        <SandpackClient
+                          files={{
+                            [`/App.${activeArtifact.language}`]: debouncedContent
+                          }}
+                          template={activeArtifact.language === 'tsx' ? 'react-ts' : 'react'}
+                          showEditor={false}
+                          showPreview={true}
+                          autorun={true}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Terminal Panel - PROJECT VIVID Phase 3 */}
+              {showTerminal && (
+                <div className="h-80 border-t border-gray-800">
+                  <Terminal
+                    onCommand={(cmd) => console.log('Command:', cmd)}
+                    autoConnect={true}
+                  />
+                </div>
+              )}
             </div>
           </>
         ) : (

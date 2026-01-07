@@ -7,7 +7,7 @@ Enables responding in the same language as the user's prompt.
 This module is pure domain logic with no UI dependencies.
 """
 
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Any
 
 # Language name mapping (ISO 639-1 to full names)
 LANGUAGE_NAMES = {
@@ -56,7 +56,7 @@ class LanguageDetector:
     _detector = None
 
     @classmethod
-    def _get_detector(cls):
+    def _get_detector(cls) -> Any:
         """Lazy load the detector to avoid startup cost."""
         if cls._detector is None:
             try:

@@ -17,13 +17,13 @@ from typing import List, Dict, Any, Tuple
 from datetime import datetime
 import logging
 
-logger = logging.getLogger(__name__)
+from prometheus.agents.curriculum_agent import EvolutionTask, TaskDifficulty, TaskDomain
+from prometheus.agents.skills import SkillDetector, SkillProfile
+from prometheus.agents.utils.parsers import JSONResponseParser
+from prometheus.agents.testing import TestRunner
+from prometheus.agents.prompts import ExecutorPrompts
 
-from .curriculum_agent import EvolutionTask, TaskDifficulty, TaskDomain
-from .skills import SkillDetector, SkillProfile
-from .utils.parsers import JSONResponseParser
-from .testing import TestRunner
-from .prompts import ExecutorPrompts
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -131,9 +131,7 @@ class ExecutorAgent:
         time_taken = (end_time - start_time).total_seconds()
 
         # Identify skills demonstrated
-        skills_demonstrated = self.skill_detector.identify_skills(
-            solution, task.expected_skills
-        )
+        skills_demonstrated = self.skill_detector.identify_skills(solution, task.expected_skills)
 
         # Create result
         result = ExecutionResult(
@@ -168,9 +166,7 @@ class ExecutorAgent:
         experiences_section = self.prompts.format_experiences(
             context.get("relevant_experiences", [])
         )
-        procedures_section = self.prompts.format_procedures(
-            context.get("relevant_procedures", [])
-        )
+        procedures_section = self.prompts.format_procedures(context.get("relevant_procedures", []))
         tools_section = self.prompts.format_tools(self.tools.list_tools())
 
         # Generate prompt

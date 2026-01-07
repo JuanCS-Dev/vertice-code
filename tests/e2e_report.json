@@ -1,0 +1,68 @@
+{
+  "summary": {
+    "total_tests": 14,
+    "passed": 14,
+    "failed": 0,
+    "skipped": 0,
+    "success_rate": 100.0,
+    "overall_status": "PASS"
+  },
+  "results": {
+    "CLI_import": {
+      "status": "PASS",
+      "duration": 0.1
+    },
+    "TUI_import": {
+      "status": "PASS",
+      "duration": 0.1
+    },
+    "Core_import": {
+      "status": "PASS",
+      "duration": 0.1
+    },
+    "Prometheus_import": {
+      "status": "PASS",
+      "duration": 0.1
+    },
+    "dependency_validation": {
+      "status": "PASS",
+      "output": "\ud83d\udd0d Running dependency validation...\n\nRunning Import validation...\n\u2713 vertice_cli imports successfully\n\u2713 Loaded .env from /media/juan/DATA/Vertice-Code/.env\n\u2713 vertice_tui imports successfully\n\u2713 vertice_core imports successfully\n\u2713 prometheus imports successfully\nRunning Requirements validation...\n\u2713 requirements.txt validation passed\nRunning Circular import check...\nRunning Pyproject validation...\n\u2713 pyproject.toml validation passed\n\n==================================================\nVALIDATION RESULTS\n==================================================\n\u2705 All checks passed!\n"
+    },
+    "backend_startup": {
+      "status": "PASS",
+      "response_time": 0.008815
+    },
+    "mcp_connection": {
+      "status": "PASS",
+      "response_time": 0.391312
+    },
+    "cli_integration": {
+      "status": "PASS",
+      "output_length": 2545
+    },
+    "web_integration": {
+      "status": "PASS"
+    },
+    "mcp_integration": {
+      "status": "PASS",
+      "message": "MCP integration available via backend"
+    },
+    "workflow_terminal": {
+      "status": "PASS"
+    },
+    "complete_workflows": {
+      "status": "PASS",
+      "workflows_tested": 11
+    },
+    "performance_imports": {
+      "status": "PASS",
+      "import_time": 3.814697265625e-06
+    },
+    "performance_api": {
+      "status": "PASS",
+      "response_time": 0.005942821502685547
+    }
+  },
+  "errors": [],
+  "timestamp": 1767811872.8559675
+}

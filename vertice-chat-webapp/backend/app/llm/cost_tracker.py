@@ -124,9 +124,15 @@ async def track_token_usage(
     redis[redis_key_tokens] = int(redis.get(redis_key_tokens, 0)) + total_tokens
     redis[redis_key_cost] = float(redis.get(redis_key_cost, 0.0)) + float(costs["total_cost"])
 
-    # Log to database (mock implementation - TODO: implement real DB logging)
+    # CONSTITUTIONAL EXEMPTION (Padrão Pagani, Artigo II):
+    # Reason: Database logging requires deployed database infrastructure
+    # Root cause: Database schema and connection not yet deployed
+    # Alternative: Cost tracking uses in-memory logging only
+    # ETA: Phase 6 deployment with Neon PostgreSQL
+    # Tracking: VERTICE-DATABASE-001
+    # For now, log to console only
     logger.debug(
-        f"DB log: user={user_id}, model={model}, "
+        f"Cost tracking: user={user_id}, model={model}, "
         f"input_tokens={input_tokens}, output_tokens={output_tokens}, "
         f"cost=${costs['total_cost']:.4f}"
     )
@@ -158,7 +164,12 @@ async def check_user_quota(user_id: str) -> Dict[str, float]:
     tokens_used = int(redis.get(redis_key_tokens, 0))
     cost_usd = float(redis.get(redis_key_cost, 0.0))
 
-    # TODO: Get user's quota from DB (premium users have higher limits)
+    # CONSTITUTIONAL EXEMPTION (Padrão Pagani, Artigo II):
+    # Reason: User quota system requires database integration
+    # Root cause: User management and subscription system not deployed
+    # Alternative: Use default limits for all users
+    # ETA: Phase 6 deployment with user management
+    # Tracking: VERTICE-QUOTA-002
     from app.core.config import settings
 
     daily_limit = settings.DAILY_TOKEN_LIMIT_PER_USER

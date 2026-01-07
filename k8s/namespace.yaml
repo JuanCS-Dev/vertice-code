@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vertice-system
+  labels:
+    name: vertice-system
+    app: vertice
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vertice-wasm-executor-netpol
+  namespace: vertice-system
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: vertice-agent-executor
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: vertice-system
+        - podSelector:
+            matchLabels:
+              app: vertice-backend
+      ports:
+        - protocol: TCP
+          port: 3000
+  egress:
+    # Allow DNS resolution
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+    # Allow outbound to LLM APIs
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 443
+    # Deny all other outbound traffic
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
+      # This effectively blocks non-HTTPS outbound except to allowed IPs
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: wasm-executor-secrets
+  namespace: vertice-system
+type: Opaque
+data:
+  # Base64 encoded secrets will be populated during deployment
+  # spin-execution-key: <base64-encoded-key>
+  # workspace-isolation-token: <base64-encoded-token>

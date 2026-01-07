@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vertice-Code | Sovereign AI Agency</title>
-    <meta name="description" content="Unified multi-agent agency with constitutional governance. Orchestrating 20 agents and 85+ tools.">
+    <title>Vertice Code | AI Development Platform</title>
+    <meta name="description" content="CLI, TUI, and Web App for AI-powered development. 20+ agents, 85+ tools, MCP server integration.">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -52,12 +52,12 @@
             </div>
             
             <div class="hidden md:flex gap-8 text-sm font-medium text-secondary-foreground/80">
-                <a href="#console" class="text-gray-400 hover:text-white transition-colors relative group">
-                    Console
+                <a href="#products" class="text-gray-400 hover:text-white transition-colors relative group">
+                    Products
                     <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent transition-all group-hover:w-full"></span>
                 </a>
-                <a href="#integration" class="text-gray-400 hover:text-white transition-colors relative group">
-                    Integration
+                <a href="/cli.html" class="text-gray-400 hover:text-white transition-colors relative group">
+                    CLI
                     <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent transition-all group-hover:w-full"></span>
                 </a>
                 <a href="#features" class="text-gray-400 hover:text-white transition-colors relative group">
@@ -68,8 +68,8 @@
             </div>
 
             <div class="flex gap-4">
-                <a href="/docs" class="text-xs font-mono bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded transition-colors">
-                    v2.0.0
+                <a href="https://app.vertice-maximus.com" target="_blank" class="text-xs font-mono bg-accent/10 hover:bg-accent/20 border border-accent/30 text-accent px-4 py-1.5 rounded transition-colors">
+                    Launch App
                 </a>
             </div>
         </div>
@@ -87,147 +87,133 @@
                 System Status: OMNI-ROOT ACTIVE
             </div>
             
-            <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-[1.1]">
-                The Sovereign <br />
-                <span class="text-gradient">Tactical Executor.</span>
+            <h1 class="text-4xl md:text-6xl font-bold tracking-tight mb-6 leading-[1.1]">
+                AI Development Platform<br />
+                <span class="text-gradient">CLI · TUI · Web App</span>
             </h1>
-            
-            <p class="text-xl text-muted max-w-2xl mx-auto mb-12 leading-relaxed font-light">
-                The Neuroshell for Sovereign Intelligence. <br class="hidden md:block"/>
-                Direct neural link to <span class="text-white font-medium">20+ agents</span> and <span class="text-white font-medium">85+ tools</span>.
+
+            <p class="text-lg text-gray-300 max-w-2xl mx-auto mb-12 leading-relaxed">
+                20+ specialized agents. 85+ integrated tools. Model Context Protocol server.<br class="hidden md:block"/>
+                Choose your interface: command line, terminal UI, or browser.
             </p>
-            
+
             <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <button onclick="scrollToConsole()" class="group relative px-8 py-4 bg-white text-black font-bold rounded-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl shadow-white/10 overflow-hidden">
-                    <span class="relative z-10 flex items-center gap-2">
-                        Launch Console 
-                        <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                    </span>
-                </button>
-                <a href="https://github.com/JuanCS-Dev/vertice-code" target="_blank" class="px-8 py-4 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-all font-medium text-gray-300 hover:text-white backdrop-blur-sm">
-                    View Source
+                <a href="/cli.html" class="group px-6 py-3 bg-white/5 border border-white/20 rounded-lg hover:bg-white/10 transition-all font-medium text-white backdrop-blur-sm flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    View CLI
+                </a>
+                <a href="https://app.vertice-maximus.com" target="_blank" class="group px-6 py-3 bg-accent text-white font-medium rounded-lg hover:bg-accent/90 transition-all flex items-center gap-2">
+                    Launch Web App
+                    <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                 </a>
             </div>
-        </section>
 
-        <!-- 3. Integrated Live Console -->
-        <section id="console" class="max-w-6xl mx-auto px-6 mb-24 delay-100">
-            <div class="console-window relative group">
-                <!-- Header -->
-                <div class="console-header flex items-center px-4 gap-4 select-none">
-                    <div class="traffic-lights">
-                        <div class="traffic-light close"></div>
-                        <div class="traffic-light minimize"></div>
-                        <div class="traffic-light maximize"></div>
-                    </div>
-                    <div class="flex gap-4 text-xs font-mono text-gray-500">
-                        <span class="text-accent border-b border-accent cursor-pointer px-2">request.json</span>
-                        <span class="hover:text-white cursor-pointer transition-colors px-2">headers</span>
-                        <span class="hover:text-white cursor-pointer transition-colors px-2">auth</span>
-                    </div>
-                    <div class="ml-auto flex items-center gap-2 transition-opacity duration-300">
-                        <span id="status-indicator" class="w-2 h-2 rounded-full bg-green-500"></span>
-                        <span id="status-text" class="text-xs font-mono text-gray-400">Connected: Vertice-MCP (Cloud Run)</span>
-                    </div>
-                </div>
-
-                <!-- Body -->
-                <div class="console-body">
-                    <!-- Left: Editor -->
-                    <div class="editor-pane">
-                        <div class="mb-4 flex justify-between items-center">
-                            <span class="text-gray-500 text-xs font-bold uppercase tracking-wider">Payload</span>
-                            <div class="relative">
-                                <select id="method-select" class="appearance-none bg-white/5 border border-white/10 rounded px-3 py-1 text-xs text-accent cursor-pointer hover:bg-white/10 transition-colors focus:outline-none focus:border-accent">
-                                    <option value="list">tools/list</option>
-                                    <option value="call">tools/call</option>
-                                    <option value="ping">system/ping</option>
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
-                                    <svg class="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                                </div>
-                            </div>
-                        </div>
-                        <textarea id="request-editor" class="code-textarea" spellcheck="false">{
-  "jsonrpc": "2.0",
-  "method": "tools/list",
-  "id": 1
-}</textarea>
-                        <button id="execute-btn" class="execute-btn">
-                            <span>Execute</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                        </button>
-                    </div>
-
-                    <!-- Right: Viewer -->
-                    <div class="viewer-pane">
-                         <div class="mb-4 flex justify-between items-center">
-                            <span class="text-gray-500 text-xs font-bold uppercase tracking-wider">Response</span>
-                            <span id="timing-badge" class="hidden text-xs font-mono text-green-400 bg-green-400/10 px-2 py-0.5 rounded border border-green-400/20">45ms</span>
-                        </div>
-                        <pre id="response-viewer" class="response-pre scrollbar-hide">// Waiting for request...</pre>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Quick Start Snippet -->
-            <div class="mt-8 flex justify-center delay-200">
-                <div class="bg-white/5 border border-white/10 rounded-full px-6 py-2 text-sm font-mono text-gray-400 flex items-center gap-3">
-                    <span class="text-accent">$</span>
-                    <span>pip install vertice-code</span>
-                    <button class="ml-2 hover:text-white transition-colors" title="Copy">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                    </button>
-                </div>
+            <div class="mt-12 inline-flex items-center gap-3 px-6 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-gray-400">
+                <span class="font-mono text-accent">$</span>
+                <code class="text-gray-300">pip install vertice-code</code>
             </div>
         </section>
 
-        <!-- 4. New Integration Section (MCP & CLI) -->
-        <section id="integration" class="max-w-6xl mx-auto px-6 mb-32 delay-200">
-            <h2 class="text-3xl font-bold mb-12 text-center">Seamless Integration</h2>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                
-                <!-- 4.1 CLI Showcase -->
-                <div class="bento-card group flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center text-accent">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            </div>
-                            <h3 class="text-xl font-bold text-white">Vertice CLI</h3>
-                        </div>
-                        <p class="text-gray-400 mb-8 leading-relaxed">
-                            Command the entire agency from your terminal. <br>
-                            Includes TUI for real-time monitoring of agent swarms.
-                        </p>
-                        <!-- CLI Image -->
-                        <div class="rounded-lg overflow-hidden border border-white/10 shadow-2xl mb-6 bg-black/50">
-                            <img src="assets/vertice-code-cli.png" alt="Vertice CLI Interface" class="w-full h-auto object-cover opacity-90 hover:opacity-100 transition-opacity">
-                        </div>
-                    </div>
-                    <div class="mt-4 bg-black/40 p-4 rounded-lg font-mono text-xs text-gray-300 border border-white/5">
-                        <span class="text-accent">juan@vertice:~$</span> vertice --mode omni
-                    </div>
-                </div>
+        <!-- 3. Products Overview -->
+        <section id="products" class="max-w-6xl mx-auto px-6 mb-32 delay-100">
+            <h2 class="text-2xl font-bold mb-3 text-center">Choose Your Interface</h2>
+            <p class="text-center text-gray-400 mb-12 max-w-2xl mx-auto">
+                Same powerful agent orchestration. Three ways to work.
+            </p>
 
-                <!-- 4.2 MCP Integration -->
-                <div class="bento-card group flex flex-col">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center text-purple-400">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-white">MCP Server</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                <!-- CLI -->
+                <div class="bento-card group">
+                    <div class="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center mb-6 text-accent">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     </div>
-                    <p class="text-gray-400 mb-6">
-                        Connect Claude Desktop or any MCP client directly to our hosted intelligence.
-                        <span class="block mt-2 text-xs text-gray-500">Deployed on Google Cloud Run (us-central1)</span>
+                    <h3 class="text-xl font-bold mb-3 text-white">CLI</h3>
+                    <p class="text-sm text-gray-400 mb-6 leading-relaxed">
+                        Command-line interface for terminal workflows. Natural language commands, direct agent access.
                     </p>
+                    <div class="bg-black/40 p-3 rounded-lg font-mono text-xs text-gray-300 mb-6">
+                        <span class="text-accent">$</span> vertice chat "optimize my code"
+                    </div>
+                    <a href="/cli.html" class="inline-flex items-center gap-2 text-sm text-accent hover:text-accent/80 transition-colors">
+                        Learn more
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                    </a>
+                </div>
 
-                    <!-- Config Code Block -->
-                    <div class="relative bg-[#0d1117] rounded-lg border border-white/10 p-4 font-mono text-xs overflow-x-auto flex-1">
-                        <div class="absolute top-3 right-3 text-[10px] text-gray-500">claude_desktop_config.json</div>
-                        <pre class="text-gray-300 whitespace-pre"><span class="text-gray-500">{</span>
+                <!-- TUI -->
+                <div class="bento-card group">
+                    <div class="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center mb-6 text-purple-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-white">TUI</h3>
+                    <p class="text-sm text-gray-400 mb-6 leading-relaxed">
+                        Terminal UI for real-time monitoring. Watch agents collaborate, inspect tool calls, debug flows.
+                    </p>
+                    <div class="bg-black/40 p-3 rounded-lg font-mono text-xs text-gray-300 mb-6">
+                        <span class="text-accent">$</span> vertice --mode omni
+                    </div>
+                    <a href="/cli.html#tui" class="inline-flex items-center gap-2 text-sm text-accent hover:text-accent/80 transition-colors">
+                        Learn more
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                    </a>
+                </div>
+
+                <!-- Web App -->
+                <div class="bento-card group relative overflow-hidden">
+                    <div class="absolute top-3 right-3 px-2 py-1 bg-accent/20 rounded text-[10px] font-mono text-accent border border-accent/30">
+                        NEW
+                    </div>
+                    <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6 text-blue-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-white">Web App</h3>
+                    <p class="text-sm text-gray-400 mb-6 leading-relaxed">
+                        Full-featured browser interface. Chat, code editor, artifacts, voice, GitHub integration, cloud terminal.
+                    </p>
+                    <div class="space-y-2 mb-6">
+                        <div class="flex items-center gap-2 text-xs text-gray-500">
+                            <svg class="w-3 h-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            Monaco Code Editor
+                        </div>
+                        <div class="flex items-center gap-2 text-xs text-gray-500">
+                            <svg class="w-3 h-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            Voice Chat (OpenAI + Gemini)
+                        </div>
+                        <div class="flex items-center gap-2 text-xs text-gray-500">
+                            <svg class="w-3 h-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            Cloud Terminal
+                        </div>
+                    </div>
+                    <a href="https://app.vertice-maximus.com" target="_blank" class="inline-flex items-center gap-2 text-sm text-accent hover:text-accent/80 transition-colors">
+                        Launch App
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 4. MCP Integration -->
+        <section class="max-w-4xl mx-auto px-6 mb-32 delay-200">
+            <div class="bento-card">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center text-purple-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white">Model Context Protocol Server</h3>
+                        <p class="text-xs text-gray-500">Hosted on Google Cloud Run (us-central1)</p>
+                    </div>
+                </div>
+                <p class="text-gray-400 mb-6 text-sm">
+                    Connect Claude Desktop or any MCP-compatible client to access all Vertice agents and tools remotely.
+                </p>
+
+                <!-- Config Code Block -->
+                <div class="relative bg-[#0d1117] rounded-lg border border-white/10 p-4 font-mono text-xs overflow-x-auto">
+                    <div class="absolute top-3 right-3 text-[10px] text-gray-500">claude_desktop_config.json</div>
+                    <pre class="text-gray-300 whitespace-pre"><span class="text-gray-500">{</span>
   <span class="text-purple-400">"mcpServers"</span>: <span class="text-gray-500">{</span>
     <span class="text-purple-400">"vertice-cloud"</span>: <span class="text-gray-500">{</span>
       <span class="text-purple-400">"command"</span>: <span class="text-green-400">"npx"</span>,
@@ -235,83 +221,59 @@
         <span class="text-green-400">"-y"</span>,
         <span class="text-green-400">"@vertice/mcp-client"</span>,
         <span class="text-green-400">"--endpoint"</span>,
-        <span class="text-green-400">"https://vertice-mcp-server-452089804714.us-central1.run.app/sse"</span>
+        <span class="text-green-400">"https://vertice-mcp-server.run.app/sse"</span>
       <span class="text-gray-500">]</span>
     <span class="text-gray-500">}</span>
   <span class="text-gray-500">}</span>
 <span class="text-gray-500">}</span></pre>
-                    </div>
-                    
-                    <button class="mt-6 w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2">
-                        <span>Get API Key</span>
-                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                    </button>
                 </div>
             </div>
         </section>
 
-        <!-- 5. Features (Bento Grid) -->
-        <section id="features" class="max-w-6xl mx-auto px-6 mb-32 delay-300">
-            <h2 class="text-3xl font-bold mb-12 text-center">Core Capabilities</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                
-                <!-- Card 1: Routing (Span 2) -->
-                <div class="bento-card md:col-span-2 group">
-                    <div class="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center mb-6 text-accent group-hover:scale-110 transition-transform duration-300">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+        <!-- 5. Features -->
+        <section id="features" class="max-w-5xl mx-auto px-6 mb-32 delay-300">
+            <h2 class="text-2xl font-bold mb-3 text-center">Core Capabilities</h2>
+            <p class="text-center text-gray-400 mb-12 max-w-xl mx-auto text-sm">
+                Enterprise-grade agent orchestration with intelligent routing and comprehensive tooling.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- Multi-LLM Routing -->
+                <div class="bento-card group">
+                    <div class="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center mb-4 text-accent">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
                     </div>
-                    <h3 class="text-2xl font-bold mb-3 text-white">Multi-LLM Routing</h3>
-                    <p class="text-gray-400 leading-relaxed max-w-lg">
-                        Intelligent traffic direction between Claude 3.5 Sonnet, Gemini 1.5 Pro, and Groq. 
-                        Optimizes for <span class="text-white">cost</span>, <span class="text-white">speed</span>, and <span class="text-white">capability</span> per-token.
-                    </p>
-                </div>
-                
-                <!-- Card 2: Governance (Tall) -->
-                <div class="bento-card md:row-span-2 relative overflow-hidden group">
-                    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-accent/5 pointer-events-none"></div>
-                    
-                    <div class="relative z-10 h-full flex flex-col">
-                        <div class="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center mb-6 text-accent group-hover:scale-110 transition-transform duration-300">
-                           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-3 text-white">Constitutional<br>Governance</h3>
-                        <p class="text-gray-400 text-sm mb-8">Hardcoded ethical constraints built into the core loop.</p>
-                        
-                        <div class="mt-auto space-y-3 font-mono text-xs text-gray-500 bg-black/20 p-4 rounded-lg border border-white/5">
-                            <div class="flex items-center gap-2">
-                                <span class="status-dot"></span>
-                                JUSTIÇA Protocol Active
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="status-dot" style="animation-delay: 0.5s"></span>
-                                SOFIA Oversight: L3
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="status-dot" style="animation-delay: 1s"></span>
-                                User Privacy: Enforced
-                            </div>
-                        </div>
-                    </div>
+                    <h3 class="text-lg font-bold mb-2 text-white">Multi-LLM Routing</h3>
+                    <p class="text-sm text-gray-400">Intelligent routing between Claude, Gemini, OpenAI, and Groq based on task complexity and cost optimization.</p>
                 </div>
 
-                <!-- Card 3: Tools -->
+                <!-- Agent Swarm -->
+                <div class="bento-card group">
+                    <div class="w-10 h-10 bg-green-500/10 rounded-lg flex items-center justify-center mb-4 text-green-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2 text-white">20+ Specialized Agents</h3>
+                    <p class="text-sm text-gray-400">Orchestrator, coder, reviewer, researcher, planner, and more. Each optimized for specific tasks.</p>
+                </div>
+
+                <!-- Tools -->
                 <div class="bento-card group">
                     <div class="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center mb-4 text-blue-400">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
                     </div>
-                    <h3 class="text-xl font-bold mb-2 text-white">85+ Tactical Tools</h3>
-                    <p class="text-sm text-gray-400">Native integration with Git, Filesystem, Docker, and Web Search.</p>
+                    <h3 class="text-lg font-bold mb-2 text-white">85+ Integrated Tools</h3>
+                    <p class="text-sm text-gray-400">Git operations, file system, Docker, web search, code execution, database queries, and more.</p>
                 </div>
 
-                 <!-- Card 4: Agent Swarm -->
-                 <div class="bento-card group">
-                    <div class="w-10 h-10 bg-green-500/10 rounded-lg flex items-center justify-center mb-4 text-green-400">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                <!-- Constitutional AI -->
+                <div class="bento-card group">
+                    <div class="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center mb-4 text-purple-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                     </div>
-                    <h3 class="text-xl font-bold mb-2 text-white">Swarm Intelligence</h3>
-                    <p class="text-sm text-gray-400">20+ specialized agents collaborating in real-time.</p>
+                    <h3 class="text-lg font-bold mb-2 text-white">Constitutional Governance</h3>
+                    <p class="text-sm text-gray-400">Built-in ethical constraints, privacy enforcement, and audit logging for enterprise compliance.</p>
                 </div>
+
             </div>
         </section>
         

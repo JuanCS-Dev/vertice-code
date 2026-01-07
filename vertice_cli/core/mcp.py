@@ -25,11 +25,9 @@ if TYPE_CHECKING:
     from vertice_cli.tools.base import ToolRegistry
 
 # SCALE & SUSTAIN Phase 2.1: Use canonical resilience module
-from core.resilience import (
-    CircuitBreaker,
-    CircuitBreakerConfig,
-    CircuitState,
-)
+from vertice_cli.utils.error_handler import CircuitBreaker
+from vertice_cli.core.providers.resilience import CircuitBreakerConfig
+from vertice_cli.core.errors.types import CircuitState
 
 
 def create_mcp_client(
@@ -54,7 +52,7 @@ def create_mcp_client(
     if registry is None:
         if not auto_setup:
             raise ValueError(
-                "registry required when auto_setup=False. " "Quick start: mcp = create_mcp_client()"
+                "registry required when auto_setup=False. Quick start: mcp = create_mcp_client()"
             )
 
         from vertice_cli.tools.registry_setup import setup_default_tools

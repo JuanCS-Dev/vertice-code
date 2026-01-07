@@ -11,16 +11,37 @@ import {
   Replace,
   Undo,
   Redo,
-  Settings
+  Settings,
+  Eye,
+  Code2,
+  Columns2,
+  Terminal as TerminalIcon
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { EjectToCloud } from './cloud/eject-to-cloud'; // PROJECT VIVID Phase 3
+import { useState } from 'react';
 
-export function ArtifactToolbar() {
+export type PreviewMode = 'editor' | 'preview' | 'split';
+
+export interface ArtifactToolbarProps {
+  showTerminal?: boolean;
+  onToggleTerminal?: () => void;
+}
+
+export function ArtifactToolbar({
+  showTerminal = false,
+  onToggleTerminal
+}: ArtifactToolbarProps = {}) {
   const activeArtifact = useActiveArtifact();
-  const { saveArtifact, exportArtifact } = useArtifactsStore();
+  const { saveArtifact, exportArtifact, setPreviewMode, previewMode, artifacts } = useArtifactsStore();
   const { toast } = useToast();
 
   if (!activeArtifact) return null;
+
+  // Determine if preview is available for this file type
+  const canPreview = activeArtifact.language && [
+    'jsx', 'tsx', 'javascript', 'typescript', 'html', 'react'
+  ].includes(activeArtifact.language);
 
   const handleSave = async () => {
     try {
@@ -63,7 +84,7 @@ export function ArtifactToolbar() {
   };
 
   const handleSearch = () => {
-    // TODO: Implement search functionality
+    // Search functionality will be implemented in Phase 9
     toast({
       title: "Em breve",
       description: "Funcionalidade de busca será implementada.",
@@ -71,7 +92,7 @@ export function ArtifactToolbar() {
   };
 
   const handleReplace = () => {
-    // TODO: Implement replace functionality
+    // Replace functionality will be implemented in Phase 9
     toast({
       title: "Em breve",
       description: "Funcionalidade de substituição será implementada.",
@@ -160,8 +181,88 @@ export function ArtifactToolbar() {
 
       <Separator orientation="vertical" className="h-6" />
 
-      {/* Settings */}
-      <div className="flex items-center gap-1 ml-auto">
+      {/* Preview Mode Toggle - PROJECT VIVID */}
+      {canPreview && (
+        <>
+          <div className="flex items-center gap-1">
+            <Button
+              variant={previewMode === 'editor' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setPreviewMode('editor')}
+              className="h-8 px-2"
+              title="Editor Only (Ctrl+1)"
+            >
+              <Code2 className="h-4 w-4 mr-1" />
+              Editor
+            </Button>
+
+            <Button
+              variant={previewMode === 'split' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setPreviewMode('split')}
+              className="h-8 px-2"
+              title="Split View (Ctrl+2)"
+            >
+              <Columns2 className="h-4 w-4 mr-1" />
+              Split
+            </Button>
+
+            <Button
+              variant={previewMode === 'preview' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setPreviewMode('preview')}
+              className="h-8 px-2"
+              title="Preview Only (Ctrl+3)"
+            >
+              <Eye className="h-4 w-4 mr-1" />
+              Preview
+            </Button>
+          </div>
+
+          <Separator orientation="vertical" className="h-6" />
+        </>
+      )}
+
+      {/* Cloud Actions - PROJECT VIVID Phase 3 */}
+      <div className="flex items-center gap-2 ml-auto">
+        {/* Eject to Cloud */}
+        <EjectToCloud
+          files={Object.fromEntries(
+            Object.values(artifacts)
+              .filter(a => a.type === 'file')
+              .map(a => [a.name, a.content || ''])
+          )}
+          projectName={activeArtifact.name.split('.')[0]}
+          onEject={(success) => {
+            toast({
+              title: success ? 'Ejected!' : 'Failed',
+              description: success
+                ? 'Files synced to cloud successfully'
+                : 'Failed to sync files to cloud',
+              variant: success ? 'default' : 'destructive'
+            });
+          }}
+        />
+
+        <Separator orientation="vertical" className="h-6" />
+
+        {/* Terminal Toggle */}
+        {onToggleTerminal && (
+          <Button
+            variant={showTerminal ? 'default' : 'ghost'}
+            size="sm"
+            onClick={onToggleTerminal}
+            className="h-8 px-2"
+            title="Toggle Terminal (Ctrl+`)"
+          >
+            <TerminalIcon className="h-4 w-4 mr-1" />
+            Terminal
+          </Button>
+        )}
+
+        <Separator orientation="vertical" className="h-6" />
+
+        {/* Settings */}
         <Button
           variant="ghost"
           size="sm"

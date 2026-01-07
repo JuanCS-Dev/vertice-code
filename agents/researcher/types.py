@@ -7,30 +7,36 @@ Includes Agentic RAG types.
 
 from __future__ import annotations
 
+import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 from enum import Enum
 
+logger = logging.getLogger(__name__)
+
 
 class QueryComplexity(str, Enum):
     """Query complexity levels for adaptive retrieval."""
-    SIMPLE = "simple"       # Direct answer, no retrieval needed
-    MODERATE = "moderate"   # Single-step retrieval
-    COMPLEX = "complex"     # Multi-hop reasoning required
+
+    SIMPLE = "simple"  # Direct answer, no retrieval needed
+    MODERATE = "moderate"  # Single-step retrieval
+    COMPLEX = "complex"  # Multi-hop reasoning required
 
 
 class RetrievalStrategy(str, Enum):
     """Retrieval strategies based on complexity."""
-    DIRECT_ANSWER = "direct"           # No retrieval, use knowledge
-    SINGLE_RETRIEVAL = "single"        # One retrieval pass
-    MULTI_HOP = "multi_hop"            # Iterative retrieval
-    CORRECTIVE = "corrective"          # Retrieve + verify + correct
+
+    DIRECT_ANSWER = "direct"  # No retrieval, use knowledge
+    SINGLE_RETRIEVAL = "single"  # One retrieval pass
+    MULTI_HOP = "multi_hop"  # Iterative retrieval
+    CORRECTIVE = "corrective"  # Retrieve + verify + correct
 
 
 @dataclass
 class ResearchResult:
     """A single research finding."""
+
     source: str
     title: str
     content: str
@@ -42,6 +48,7 @@ class ResearchResult:
 @dataclass
 class ResearchReport:
     """Complete research report."""
+
     query: str
     summary: str
     findings: List[ResearchResult]
@@ -53,6 +60,7 @@ class ResearchReport:
 # AGENTIC RAG TYPES
 # =============================================================================
 
+
 @dataclass
 class RetrievalPlan:
     """
@@ -61,6 +69,7 @@ class RetrievalPlan:
     Based on Agentic RAG planning pattern: decompose query
     into retrievable sub-questions.
     """
+
     original_query: str
     sub_queries: List[str]
     sources_to_check: List[str]
@@ -71,6 +80,7 @@ class RetrievalPlan:
 @dataclass
 class RetrievalStep:
     """A single step in the retrieval process."""
+
     query: str
     source: str
     results: List[ResearchResult]
@@ -85,6 +95,7 @@ class SufficiencyEvaluation:
 
     Core Agentic RAG pattern: decide when to stop retrieving.
     """
+
     sufficient: bool
     confidence: float
     missing_aspects: List[str]
@@ -94,6 +105,7 @@ class SufficiencyEvaluation:
 @dataclass
 class AgenticRAGResult:
     """Complete result from Agentic RAG process."""
+
     query: str
     complexity: QueryComplexity
     strategy_used: RetrievalStrategy
@@ -108,6 +120,7 @@ class AgenticRAGResult:
 # =============================================================================
 # RETRIEVAL AGENTS
 # =============================================================================
+
 
 class RetrievalAgent(ABC):
     """
@@ -182,17 +195,20 @@ class DocumentationAgent(RetrievalAgent):
                     # Extract relevant snippet
                     lines = content.split("\n")
                     relevant_lines = [
-                        line for line in lines
+                        line
+                        for line in lines
                         if any(term in line.lower() for term in query_lower.split())
                     ][:5]
 
-                    results.append(ResearchResult(
-                        source=str(doc_path.relative_to(cwd)),
-                        title=doc_path.name,
-                        content="\n".join(relevant_lines) or content[:500],
-                        relevance_score=0.7,
-                        metadata={"type": "local_doc"},
-                    ))
+                    results.append(
+                        ResearchResult(
+                            source=str(doc_path.relative_to(cwd)),
+                            title=doc_path.name,
+                            content="\n".join(relevant_lines) or content[:500],
+                            relevance_score=0.7,
+                            metadata={"type": "local_doc"},
+                        )
+                    )
             except (FileNotFoundError, PermissionError, IOError, UnicodeDecodeError):
                 continue
 
@@ -200,7 +216,7 @@ class DocumentationAgent(RetrievalAgent):
 
 
 class WebSearchAgent(RetrievalAgent):
-    """Agent specialized for web search."""
+    """Agent specialized for web search using robust WebSearchTool."""
 
     @property
     def name(self) -> str:
@@ -216,41 +232,49 @@ class WebSearchAgent(RetrievalAgent):
         limit: int = 5,
     ) -> List[ResearchResult]:
         """
-        Search the web using httpx.
+        Search the web using the robust WebSearchTool.
 
-        Uses DuckDuckGo HTML search as fallback.
+        This uses the proper WebSearchTool instead of manual HTML scraping.
         """
-        import httpx
+        from vertice_cli.tools.web_search import WebSearchTool
 
         results: List[ResearchResult] = []
 
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                # DuckDuckGo HTML search (no API key needed)
-                url = "https://html.duckduckgo.com/html/"
-                response = await client.post(url, data={"q": query})
+            # Use the robust WebSearchTool
+            web_search_tool = WebSearchTool()
 
-                if response.status_code == 200:
-                    # Parse results (basic extraction)
-                    html = response.text
-                    # Extract result snippets (simplified)
-                    import re
-                    snippets = re.findall(
-                        r'<a class="result__a"[^>]*href="([^"]*)"[^>]*>([^<]*)</a>',
-                        html
+            # Execute search with proper parameters
+            search_result = await web_search_tool._execute_validated(
+                query=query,
+                max_results=limit,
+                time_range=None,  # Can be made configurable later
+            )
+
+            if search_result.success and search_result.data:
+                # Convert WebSearchTool results to ResearchResult format
+                for item in search_result.data:
+                    research_result = ResearchResult(
+                        source=item.get("source", "web"),
+                        title=item.get("title", "Untitled"),
+                        content=item.get("snippet", ""),
+                        url=item.get("url"),
+                        relevance_score=0.8,  # Default relevance, can be improved
+                        metadata={
+                            "search_engine": "duckduckgo",
+                            "query": query,
+                            "tool_used": "WebSearchTool",
+                        },
                     )
+                    results.append(research_result)
 
-                    for i, (href, title) in enumerate(snippets[:limit]):
-                        results.append(ResearchResult(
-                            source="duckduckgo",
-                            title=title.strip(),
-                            content=f"Web result for: {query}",
-                            url=href,
-                            relevance_score=0.8 - (i * 0.1),
-                            metadata={"type": "web_search"},
-                        ))
-        except (httpx.HTTPError, ConnectionError, TimeoutError):
-            pass
+            else:
+                # Handle search failure gracefully
+                logger.warning(f"Web search failed: {search_result.error}")
+
+        except Exception as e:
+            logger.error(f"WebSearchAgent error: {e}")
+            # Return empty results instead of crashing
 
         return results[:limit]
 
@@ -302,18 +326,20 @@ class CodebaseAgent(RetrievalAgent):
                     # Extract matching lines
                     lines = content.split("\n")
                     matching = [
-                        f"L{i+1}: {line.strip()}"
+                        f"L{i + 1}: {line.strip()}"
                         for i, line in enumerate(lines)
                         if query.lower() in line.lower()
                     ][:5]
 
-                    results.append(ResearchResult(
-                        source=file_path,
-                        title=Path(file_path).name,
-                        content="\n".join(matching),
-                        relevance_score=0.9,
-                        metadata={"type": "codebase", "language": "python"},
-                    ))
+                    results.append(
+                        ResearchResult(
+                            source=file_path,
+                            title=Path(file_path).name,
+                            content="\n".join(matching),
+                            relevance_score=0.9,
+                            metadata={"type": "codebase", "language": "python"},
+                        )
+                    )
                 except (FileNotFoundError, PermissionError, IOError, UnicodeDecodeError):
                     continue
 

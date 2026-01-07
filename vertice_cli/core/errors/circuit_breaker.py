@@ -25,8 +25,8 @@ import logging
 import time
 from typing import Any, Callable, Dict, Optional
 
-# Import base types from core.resilience
-from core.resilience import CircuitOpenError, CircuitState
+# Import base types
+from vertice_cli.core.errors.types import CircuitState, CircuitOpenError
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +116,7 @@ class EnhancedCircuitBreaker:
                 self._success_count_in_half_open = 0
             else:
                 raise CircuitOpenError(
-                    f"Circuit {self.name} is open. " f"Wait {self._time_until_recovery():.0f}s"
+                    f"Circuit {self.name} is open. Wait {self._time_until_recovery():.0f}s"
                 )
 
         try:
@@ -170,7 +170,7 @@ class EnhancedCircuitBreaker:
         self._last_failure_time = time.time()
 
         logger.warning(
-            f"[CircuitBreaker:{self.name}] Failure #{self._failures}: " f"{type(error).__name__}"
+            f"[CircuitBreaker:{self.name}] Failure #{self._failures}: {type(error).__name__}"
         )
 
         if self._state == CircuitState.HALF_OPEN:

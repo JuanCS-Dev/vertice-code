@@ -23,6 +23,7 @@ from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from vertice_cli.shell_main import InteractiveShell
+    from vertice_cli.tui.components.palette import Command
 
 logger = logging.getLogger(__name__)
 

@@ -38,10 +38,20 @@ def _get_tui_components():
             _CodeBlock, _DiffViewer = CB, DV
         except ImportError:
             # Fallback if TUI components not available
-            _CodeBlock = lambda *a, **k: type(
-                "FakeCodeBlock", (), {"render": lambda s: str(a[0]) if a else ""}
-            )()
-            _DiffViewer = lambda *a, **k: type("FakeDiffViewer", (), {"render": lambda s: ""})()
+            def _create_fake_code_block(*a, **k):
+                def render(s):
+                    return str(a[0]) if a else ""
+
+                return type("FakeCodeBlock", (), {"render": render})()
+
+            def _create_fake_diff_viewer(*a, **k):
+                def render(s):
+                    return ""
+
+                return type("FakeDiffViewer", (), {"render": render})()
+
+            _CodeBlock = _create_fake_code_block
+            _DiffViewer = _create_fake_diff_viewer
     return _CodeBlock, _DiffViewer
 
 
@@ -59,23 +69,22 @@ def _get_prompt_toolkit():
 
 # Type hints only (no runtime cost)
 if TYPE_CHECKING:
-
     # TUI components (used conditionally)
     pass
 
 # Core imports (lightweight, needed early)
-from .core.context import ContextBuilder
-from .core.conversation import ConversationManager
-from .core.recovery import ErrorRecoveryEngine
+from .core.context import ContextBuilder  # noqa: E402
+from .core.conversation import ConversationManager  # noqa: E402
+from .core.recovery import ErrorRecoveryEngine  # noqa: E402
 
 # P1: Import error parser and danger detector
 
 # P2: Import enhanced help system
-from .core.help_system import help_system
+from .core.help_system import help_system  # noqa: E402
 
 # Import LLM client (using existing implementation)
-from .core.async_executor import AsyncExecutor
-from .core.file_watcher import FileWatcher, RecentFilesTracker
+from .core.async_executor import AsyncExecutor  # noqa: E402
+from .core.file_watcher import FileWatcher, RecentFilesTracker  # noqa: E402
 
 # Lazy: SemanticIndexer (heavy, used lazily anyway)
 _SemanticIndexer = None
@@ -221,7 +230,9 @@ class InteractiveShell:
 
         # Phase 3.1: Error recovery engine
         self.recovery_engine = ErrorRecoveryEngine(
-            llm_client=self.llm, max_attempts=2, enable_learning=True  # Constitutional P6
+            llm_client=self.llm,
+            max_attempts=2,
+            enable_learning=True,  # Constitutional P6
         )
 
         # Setup enhanced input session (DAY 8: Phase 2)
@@ -257,7 +268,8 @@ class InteractiveShell:
         from .tui.components.context_awareness import ContextAwarenessEngine
 
         self.context_engine = ContextAwarenessEngine(
-            max_context_tokens=100_000, console=self.console  # 100k token window
+            max_context_tokens=100_000,
+            console=self.console,  # 100k token window
         )
 
         # Animations (Integration Sprint Week 1: Day 3 - Task 1.5)
@@ -372,7 +384,8 @@ class InteractiveShell:
             from .intelligence.context_suggestions import ContextSuggestionEngine
 
             self._suggestion_engine = ContextSuggestionEngine(
-                project_root=Path.cwd(), indexer=self.indexer  # This will trigger indexer lazy load
+                project_root=Path.cwd(),
+                indexer=self.indexer,  # This will trigger indexer lazy load
             )
             self.console.print("[dim]💡 Initialized suggestion engine[/dim]")
         return self._suggestion_engine

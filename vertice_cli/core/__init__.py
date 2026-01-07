@@ -113,7 +113,12 @@ def __getattr__(name: str):
 
     # Audit Logger
     if name in ("AuditLogger", "AuditEventType", "audit_log", "audit_governance"):
-        from .audit_logger import AuditLogger, AuditEventType, audit_log, audit_governance  # noqa: F401
+        from .audit_logger import (
+            AuditLogger,  # noqa: F401
+            AuditEventType,  # noqa: F401
+            audit_log,  # noqa: F401
+            audit_governance,  # noqa: F401
+        )
 
         return locals()[name]
 
@@ -155,7 +160,12 @@ def __getattr__(name: str):
 
     # Resilience
     if name in ("ConcurrencyManager", "ResourceLimits", "RateLimiter", "EncodingSafety"):
-        from .resilience import ConcurrencyManager, ResourceLimits, RateLimiter, EncodingSafety  # noqa: F401
+        from .resilience import (
+            ConcurrencyManager,  # noqa: F401
+            ResourceLimits,  # noqa: F401
+            RateLimiter,  # noqa: F401
+            EncodingSafety,  # noqa: F401
+        )
 
         return locals()[name]
 
@@ -179,7 +189,12 @@ def __getattr__(name: str):
 
     # Memory System (Claude Code Parity)
     if name in ("MemoryManager", "MemoryEntry", "ProjectMemory", "get_memory_manager"):
-        from .memory import MemoryManager, MemoryEntry, ProjectMemory, get_memory_manager  # noqa: F401
+        from .memory import (
+            MemoryManager,  # noqa: F401
+            MemoryEntry,  # noqa: F401
+            ProjectMemory,  # noqa: F401
+            get_memory_manager,  # noqa: F401
+        )
 
         return locals()[name]
 

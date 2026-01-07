@@ -22,13 +22,101 @@ import time
 from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
 
-# Re-export base types from core.resilience
-from core.resilience import (
-    CircuitBreaker,
-    CircuitBreakerConfig,
-    CircuitOpenError,
-    CircuitState,
-)
+# Basic circuit breaker types implemented directly in vertice_core
+# to avoid dependency on vertice_cli (architectural constraint)
+
+from enum import Enum
+
+
+class CircuitState(str, Enum):
+    """Circuit breaker states."""
+
+    CLOSED = "closed"
+    OPEN = "open"
+    HALF_OPEN = "half_open"
+
+
+class CircuitOpenError(Exception):
+    """Raised when circuit breaker is open."""
+
+    pass
+
+
+@dataclass
+class CircuitBreakerConfig:
+    """Configuration for circuit breaker."""
+
+    failure_threshold: int = 5
+    recovery_timeout: float = 60.0
+    half_open_max_calls: int = 3
+    name: str = "default"
+
+
+class CircuitBreaker:
+    """Basic circuit breaker implementation."""
+
+    def __init__(self, config: CircuitBreakerConfig):
+        self.config = config
+        self.failures = 0
+        self.state = CircuitState.CLOSED
+        self.last_failure_time: Optional[float] = None
+        self.half_open_calls = 0
+
+    def record_success(self) -> None:
+        """Record a successful call."""
+        pass
+        self.failures = 0
+        if self.state == CircuitState.HALF_OPEN:
+            self.state = CircuitState.CLOSED
+
+    def record_failure(self) -> None:
+        """Record a failed call."""
+        pass
+        import time
+
+        self.failures += 1
+        self.last_failure_time = time.time()
+        if self.failures >= self.config.failure_threshold:
+            self.state = CircuitState.OPEN
+
+    def can_attempt(self) -> bool:
+        """Check if call can be attempted."""
+        import time
+
+        if self.state == CircuitState.CLOSED:
+            return True
+
+        if self.state == CircuitState.OPEN:
+            if (
+                self.last_failure_time
+                and (time.time() - self.last_failure_time) >= self.config.recovery_timeout
+            ):
+                self.state = CircuitState.HALF_OPEN
+                self.half_open_calls = 0
+                return True
+            return False
+
+        if self.half_open_calls < self.config.half_open_max_calls:
+            self.half_open_calls += 1
+            return True
+
+        return False
+
+    def __call__(self, func):
+        """Decorator to apply circuit breaker to function."""
+
+        def wrapper(*args, **kwargs):
+            if not self.can_attempt():
+                raise CircuitOpenError("Circuit breaker is open")
+            try:
+                result = func(*args, **kwargs)
+                self.record_success()
+                return result
+            except Exception as e:
+                self.record_failure()
+                raise e
+
+        return wrapper
 
 
 # =============================================================================

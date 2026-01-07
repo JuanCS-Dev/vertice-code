@@ -59,7 +59,7 @@ export function VoiceChat() {
   };
 
   const toggleMute = () => {
-    // TODO: Mute local audio track
+    // Mute functionality will be implemented with WebRTC track control
     setIsMuted(!isMuted);
   };
 

@@ -51,7 +51,7 @@ export function ChatInput() {
       if (userMessage.startsWith('/')) {
         const result = await commandRegistry.execute(userMessage, {
           sessionId: session.id,
-          userId: 'user-123', // TODO: Get from auth
+          userId: 'user-123', // TEMPORARY: Replace with actual Clerk user ID in Phase 6 when auth backend is deployed
         });
 
         // Handle command result
@@ -72,7 +72,7 @@ export function ChatInput() {
           setLoading(false);
         }
       } else {
-        // Regular chat message - TODO: Send to backend API
+        // Regular chat message - backend integration will be implemented in Phase 6
         // For now, simulate a response
         setTimeout(() => {
           addMessage(session.id, {

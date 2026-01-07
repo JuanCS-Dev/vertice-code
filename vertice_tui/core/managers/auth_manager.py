@@ -395,10 +395,19 @@ def get_client(provider: str, api_key: str):
         return GeminiProvider(api_key=api_key)
     elif provider == "groq":
         return GroqProvider(api_key=api_key)
-    # TODO: Add Anthropic and OpenAI once their providers are located
-    # elif provider == "anthropic":
-    #     return AnthropicProvider(api_key=api_key)
-    # elif provider == "openai":
-    #     return OpenAIProvider(api_key=api_key)
+    elif provider == "anthropic":
+        raise NotImplementedError(
+            "Root cause: Anthropic provider not implemented. "
+            "Alternative: Use available providers (Gemini, Groq). "
+            "ETA: Phase 6 deployment. "
+            "Tracking ID: VERTICE-PROVIDERS-001"
+        )
+    elif provider == "openai":
+        raise NotImplementedError(
+            "Root cause: OpenAI provider not implemented. "
+            "Alternative: Use available providers (Gemini, Groq). "
+            "ETA: Phase 6 deployment. "
+            "Tracking ID: VERTICE-PROVIDERS-002"
+        )
     else:
         raise ValueError(f"Unknown provider: {provider}")

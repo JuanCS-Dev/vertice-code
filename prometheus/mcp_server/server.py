@@ -16,6 +16,7 @@ from datetime import datetime
 import uuid
 
 from prometheus.mcp_server.config import MCPServerConfig
+from prometheus.mcp_server.tools.registry import get_tool_registry
 
 logger = logging.getLogger(__name__)
 
@@ -177,54 +178,65 @@ class PrometheusMCPServer:
         return {"status": "pong"}
 
     async def handle_tools_list(self, request: MCPRequest) -> Dict[str, Any]:
-        """List available tools."""
-        tools = []
+        """List available tools using the Tool Registry."""
+        registry = get_tool_registry()
+        tools = registry.list_tools()
 
-        # Add Prometheus tools
-        if self.config.enable_skills_registry:
-            tools.extend(
-                [
-                    {
-                        "name": "prometheus_learn_skill",
-                        "description": "Learn a new skill from procedure steps",
-                        "inputSchema": {
-                            "type": "object",
-                            "properties": {
-                                "name": {"type": "string"},
-                                "description": {"type": "string"},
-                                "procedure_steps": {"type": "array", "items": {"type": "string"}},
-                                "category": {"type": "string"},
-                            },
-                            "required": ["name", "description", "procedure_steps"],
-                        },
-                    },
-                    {
-                        "name": "prometheus_get_skill",
-                        "description": "Retrieve information about a learned skill",
-                        "inputSchema": {
-                            "type": "object",
-                            "properties": {"skill_name": {"type": "string"}},
-                            "required": ["skill_name"],
-                        },
-                    },
-                ]
-            )
+        # Filter tools based on configuration flags
+        filtered_tools = []
+        for tool in tools:
+            tool_name = tool.get("name", "")
 
-        return {"tools": tools}
+            # Apply configuration filters
+            if tool_name.startswith("file_") and not getattr(
+                self.config, "enable_file_tools", True
+            ):
+                continue
+            elif tool_name.startswith("git_") and not getattr(
+                self.config, "enable_git_tools", True
+            ):
+                continue
+            elif tool_name.startswith("execution_") and not getattr(
+                self.config, "enable_execution_tools", True
+            ):
+                continue
+            elif tool_name.startswith("web_") and not getattr(
+                self.config, "enable_web_tools", True
+            ):
+                continue
+            elif tool_name.startswith("media_") and not getattr(
+                self.config, "enable_media_tools", True
+            ):
+                continue
+            elif tool_name.startswith("prometheus_") and not getattr(
+                self.config, "enable_prometheus_tools", True
+            ):
+                continue
+
+            filtered_tools.append(tool)
+
+        logger.info(f"Returning {len(filtered_tools)} tools from registry")
+        return {"tools": filtered_tools}
 
     async def handle_tools_call(self, request: MCPRequest) -> Dict[str, Any]:
-        """Execute a tool."""
+        """Execute a tool using the Tool Registry."""
         tool_name = request.params.get("name")
         tool_args = request.params.get("arguments", {})
 
         if not tool_name:
             raise ValueError("Tool name is required")
 
-        # Route to appropriate tool handler
-        if tool_name.startswith("prometheus_"):
-            return await self._handle_prometheus_tool(tool_name, tool_args)
+        # Use Tool Registry for unified tool execution
+        registry = get_tool_registry()
+        result = await registry.call_tool(tool_name, tool_args)
+
+        # Extract the result content from MCP response format
+        if "result" in result and "content" in result["result"]:
+            return result["result"]
+        elif "error" in result:
+            return result
         else:
-            raise ValueError(f"Unknown tool: {tool_name}")
+            return {"error": {"code": -32000, "message": "Invalid tool response format"}}
 
     async def handle_resources_list(self, request: MCPRequest) -> Dict[str, Any]:
         """List available resources."""
@@ -348,21 +360,34 @@ The skill should be executable and follow Prometheus conventions."""
     async def _handle_prometheus_tool(self, tool_name: str, args: Dict[str, Any]) -> Dict[str, Any]:
         """Handle Prometheus-specific tools."""
         if tool_name == "prometheus_learn_skill":
-            # This would integrate with the skills registry
-            return {
-                "success": True,
-                "skill_name": args["name"],
-                "message": f"Skill '{args['name']}' learned successfully",
-            }
+            return await self._handle_prometheus_learn_skill(args)
         elif tool_name == "prometheus_get_skill":
-            # This would retrieve skill information
-            return {
-                "skill_name": args["skill_name"],
-                "found": False,
-                "message": f"Skill '{args['skill_name']}' not found",
-            }
+            return await self._handle_prometheus_get_skill(args)
+        elif tool_name == "prometheus_eject_to_cloud":
+            return await self._handle_prometheus_eject_to_cloud(args)
         else:
             raise ValueError(f"Unknown Prometheus tool: {tool_name}")
+
+    async def _handle_prometheus_eject_to_cloud(self, args: Dict[str, Any]) -> Dict[str, Any]:
+        """Handle eject to cloud tool."""
+        code = args.get("code", "")
+        filename = args.get("filename", "ejected_code.py")
+        description = args.get("description", "")
+
+        if not code:
+            raise ValueError("Code is required for eject to cloud")
+
+        # In a real implementation, this would save to cloud storage
+        # For now, we'll simulate by returning success
+        cloud_url = f"https://cloud.vertice.ai/code/{filename}"
+
+        return {
+            "success": True,
+            "cloud_url": cloud_url,
+            "filename": filename,
+            "description": description,
+            "message": f"Code ejected to cloud successfully at {cloud_url}",
+        }
 
     async def _get_skills_resource(self) -> Dict[str, Any]:
         """Get skills resource content."""

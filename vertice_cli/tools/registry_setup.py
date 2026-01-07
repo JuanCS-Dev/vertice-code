@@ -132,8 +132,7 @@ def setup_default_tools(
         except ImportError as e:
             logger.error(f"Failed to import bash tool: {e}")
             raise ImportError(
-                f"Bash command tool not available: {e}. "
-                f"Ensure vertice_cli is properly installed."
+                f"Bash command tool not available: {e}. Ensure vertice_cli is properly installed."
             )
 
     # Search and Tree Tools
@@ -151,7 +150,7 @@ def setup_default_tools(
         except ImportError as e:
             logger.error(f"Failed to import search tools: {e}")
             raise ImportError(
-                f"Search tools not available: {e}. " f"Ensure vertice_cli is properly installed."
+                f"Search tools not available: {e}. Ensure vertice_cli is properly installed."
             )
 
     # Git Operations Tools
@@ -228,7 +227,7 @@ def setup_default_tools(
         for tool in custom_tools:
             if not hasattr(tool, "name"):
                 raise ValueError(
-                    f"Invalid custom tool: {tool}. " f"Tools must have a 'name' attribute."
+                    f"Invalid custom tool: {tool}. Tools must have a 'name' attribute."
                 )
 
             registry.register(tool)
@@ -306,7 +305,7 @@ def setup_custom_tools(tools: List) -> Tuple[ToolRegistry, MCPClient]:
     """
     if not tools:
         raise ValueError(
-            "tools list cannot be empty. " "Use setup_minimal_tools() if you want minimal setup."
+            "tools list cannot be empty. Use setup_minimal_tools() if you want minimal setup."
         )
 
     return setup_default_tools(
@@ -318,10 +317,20 @@ def setup_custom_tools(tools: List) -> Tuple[ToolRegistry, MCPClient]:
     )
 
 
+def create_full_registry(*args, **kwargs) -> ToolRegistry:
+    """Legacy alias for setup_default_tools registry only.
+
+    Deprecated: Use setup_default_tools() instead.
+    """
+    registry, _ = setup_default_tools(*args, **kwargs)
+    return registry
+
+
 # Convenience exports for common patterns
 __all__ = [
     "setup_default_tools",
     "setup_minimal_tools",
     "setup_readonly_tools",
     "setup_custom_tools",
+    "create_full_registry",
 ]

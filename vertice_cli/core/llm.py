@@ -34,7 +34,9 @@ except ImportError:
 os.environ.setdefault("GRPC_VERBOSITY", "ERROR")
 os.environ.setdefault("GLOG_minloglevel", "3")
 from .config import config
-from core.resilience import CircuitBreaker, CircuitState, RateLimiter
+from vertice_cli.utils.error_handler import CircuitBreaker
+from vertice_cli.core.errors.types import CircuitState
+from vertice_cli.core.resilience import RateLimiter
 
 warnings.filterwarnings("ignore", message=".*ALTS.*")
 

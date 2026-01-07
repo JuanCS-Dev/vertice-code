@@ -16,7 +16,7 @@ warnings.warn(
 )
 
 # Re-export everything from package for backward compatibility
-from vertice_cli.maestro import (
+from vertice_cli.maestro import (  # noqa: E402
     GlobalState,
     OutputFormat,
     app,
@@ -27,8 +27,8 @@ from vertice_cli.maestro import (
 )
 
 # Legacy exports
-from vertice_cli.maestro.bootstrap import ensure_initialized
-from vertice_cli.maestro.formatters import (
+from vertice_cli.maestro.bootstrap import ensure_initialized  # noqa: E402
+from vertice_cli.maestro.formatters import (  # noqa: E402
     render_code,
     render_error,
     render_plan,

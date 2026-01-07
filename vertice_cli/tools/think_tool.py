@@ -96,6 +96,10 @@ class ThinkTool(Tool):
             }
         }
 
+    async def execute(self, thought: str) -> ToolResult:
+        """Legacy execute method for compatibility."""
+        return await self._execute_validated(thought)
+
     async def _execute_validated(self, thought: str) -> ToolResult:
         """
         Process and structure the thought.

@@ -37,6 +37,21 @@ class MCPServerConfig:
     enable_memory_system: bool = True
     enable_distributed_features: bool = False
 
+    # Tool feature flags (for MCP Universal Gateway)
+    enable_file_tools: bool = True
+    enable_git_tools: bool = True
+    enable_web_tools: bool = True
+    enable_media_tools: bool = True
+    enable_prometheus_tools: bool = True
+    enable_execution_tools: bool = True  # Security-sensitive
+    enable_notebook_tools: bool = True
+    enable_context_tools: bool = True
+    enable_advanced_tools: bool = False  # Plan mode tools (complex)
+
+    # Tool execution limits
+    max_tools_per_request: int = 5
+    tool_execution_timeout: int = 30  # seconds
+
     # Distributed settings (if enabled)
     discovery_endpoints: List[str] = field(default_factory=list)
     peer_sync_interval: int = 300  # seconds

@@ -1,0 +1,335 @@
+name: AI Evaluation & Deploy Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      evaluation_threshold:
+        description: 'Quality threshold override (0.0-1.0)'
+        required: false
+        default: '0.95'
+        type: string
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.11'
+  EVALUATION_THRESHOLD: ${{ github.event.inputs.evaluation_threshold || '0.95' }}
+
+jobs:
+  # =============================================================================
+  # QUALITY ASSURANCE
+  # =============================================================================
+
+  code-quality:
+    name: Code Quality & Security
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Run security scan
+        run: |
+          pip install safety
+          safety check --full-report
+
+      - name: Lint with Ruff
+        run: |
+          ruff check vertice_cli/ vertice_tui/ vertice_core/ --fix
+          ruff check vertice_cli/ vertice_tui/ vertice_core/
+
+      - name: Format with Black
+        run: |
+          black vertice_cli/ vertice_tui/ vertice_core/ --check
+
+      - name: Type check with mypy
+        run: |
+          mypy vertice_cli/core/ --ignore-missing-imports --no-error-summary
+
+  # =============================================================================
+  # AI MODEL EVALUATION
+  # =============================================================================
+
+  ai-evaluation:
+    name: AI Model Quality Evaluation
+    runs-on: ubuntu-latest
+    needs: code-quality
+    strategy:
+      matrix:
+        model: [ 'gpt-4', 'claude-3', 'gemini-pro' ]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache Node.js dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install promptfoo
+        run: npm install -g promptfoo
+
+      - name: Install Python evaluation dependencies
+        run: |
+          pip install deepeval langsmith openai anthropic google-generativeai
+
+      - name: Run promptfoo evaluation
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        run: |
+          promptfoo eval \
+            --config .github/evals/promptfoo-config.yaml \
+            --output results/${{ matrix.model }}/promptfoo-results.json \
+            --model ${{ matrix.model }}
+
+      - name: Run DeepEval quality assessment
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python scripts/evaluation/deepeval_runner.py \
+            --model ${{ matrix.model }} \
+            --output results/${{ matrix.model }}/deepeval-results.json
+
+      - name: Calculate quality metrics
+        run: |
+          python scripts/evaluation/calculate_metrics.py \
+            --promptfoo-results results/${{ matrix.model }}/promptfoo-results.json \
+            --deepeval-results results/${{ matrix.model }}/deepeval-results.json \
+            --output results/${{ matrix.model }}/quality-metrics.json
+
+      - name: Check quality threshold
+        run: |
+          python scripts/evaluation/check_threshold.py \
+            --metrics results/${{ matrix.model }}/quality-metrics.json \
+            --threshold ${{ env.EVALUATION_THRESHOLD }}
+
+      - name: Upload evaluation artifacts
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: evaluation-results-${{ matrix.model }}
+          path: results/${{ matrix.model }}/
+
+  # =============================================================================
+  # INTEGRATION TESTING
+  # =============================================================================
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: ai-evaluation
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run database migrations
+        run: |
+          python -c "
+          from vertice_cli.core.database import init_database
+          import asyncio
+          asyncio.run(init_database())
+          "
+
+      - name: Run integration tests
+        run: pytest tests/integration/ -v --tb=short
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+
+  # =============================================================================
+  # END-TO-END TESTING
+  # =============================================================================
+
+  e2e-tests:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    needs: integration-tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Cache frontend dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+
+      - name: Run E2E tests
+        run: npx playwright test
+        env:
+          BASE_URL: http://localhost:3000
+
+  # =============================================================================
+  # PERFORMANCE TESTING
+  # =============================================================================
+
+  performance-tests:
+    name: Performance & Load Testing
+    runs-on: ubuntu-latest
+    needs: e2e-tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Locust
+        run: pip install locust
+
+      - name: Run performance tests
+        run: |
+          locust --headless \
+            --users 100 \
+            --spawn-rate 10 \
+            --run-time 2m \
+            --host http://localhost:3000 \
+            --locustfile tests/performance/locustfile.py
+
+  # =============================================================================
+  # DEPLOYMENT
+  # =============================================================================
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [ai-evaluation, integration-tests, e2e-tests, performance-tests]
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy to staging
+        run: |
+          # Build and deploy application
+          ./scripts/deploy.sh staging
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [ai-evaluation, integration-tests, e2e-tests, performance-tests]
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy to production
+        run: |
+          # Build and deploy application
+          ./scripts/deploy.sh production
+
+      - name: Post-deployment monitoring
+        run: |
+          # Wait for deployment to stabilize
+          sleep 300
+
+          # Run production smoke tests
+          python scripts/deployment/smoke_test.py
+
+  # =============================================================================
+  # POST-DEPLOYMENT MONITORING
+  # =============================================================================
+
+  monitoring-setup:
+    name: Production Monitoring Setup
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up monitoring
+        run: |
+          # Configure LangSmith monitoring
+          python scripts/monitoring/setup_langsmith.py
+
+          # Configure error tracking
+          python scripts/monitoring/setup_sentry.py
+
+          # Set up performance monitoring
+          python scripts/monitoring/setup_datadog.py
+
+      - name: Validate monitoring
+        run: |
+          python scripts/monitoring/validate_setup.py

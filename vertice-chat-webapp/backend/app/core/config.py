@@ -15,6 +15,7 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=True,
+        extra="ignore",
     )
 
     # Application
@@ -69,6 +70,23 @@ class Settings(BaseSettings):
     # Clerk Authentication
     CLERK_SECRET_KEY: Optional[str] = None
     CLERK_PUBLISHABLE_KEY: Optional[str] = None
+
+    # Stripe Billing
+    STRIPE_SECRET_KEY: Optional[str] = None
+    STRIPE_PUBLISHABLE_KEY: Optional[str] = None
+    STRIPE_WEBHOOK_SECRET: Optional[str] = None
+
+    # Billing Plans (Stripe Price IDs)
+    STRIPE_PRICE_FREEMIUM: str = "price_freemium_monthly"
+    STRIPE_PRICE_PRO: str = "price_pro_monthly"
+    STRIPE_PRICE_ENTERPRISE: str = "price_enterprise_monthly"
+
+    # Usage Metering
+    USAGE_REPORT_INTERVAL_MINUTES: int = 15
+    USAGE_BATCH_SIZE: int = 100
+
+    # Frontend URL for Stripe redirects
+    FRONTEND_URL: str = "http://localhost:3000"
 
 
 @lru_cache()

@@ -124,37 +124,6 @@ class LSPClient:
 
     async def _initialize(self, config: LSPServerConfig) -> None:
         """Send initialize request."""
-        request = {
-            "jsonrpc": "2.0",
-            "id": self._next_id(),
-            "method": "initialize",
-            "params": {
-                "processId": None,
-                "rootUri": self.root_uri,
-                "capabilities": {
-                    "textDocument": {
-                        "hover": {"contentFormat": ["markdown", "plaintext"]},
-                        "definition": {"linkSupport": True},
-                        "references": {},
-                        "completion": {
-                            "completionItem": {
-                                "snippetSupport": True,
-                                "documentationFormat": ["markdown", "plaintext"],
-                            }
-                        },
-                        "signatureHelp": {
-                            "signatureInformation": {
-                                "documentationFormat": ["markdown", "plaintext"],
-                                "parameterInformation": {"labelOffsetSupport": True},
-                            }
-                        },
-                        "publishDiagnostics": {},
-                    }
-                },
-                "initializationOptions": config.initialization_options or {},
-            },
-        }
-
         logger.debug(f"LSP initialized ({config.language.value})")
 
     async def stop(self) -> None:
@@ -305,7 +274,7 @@ class LSPClient:
             return
 
         try:
-            content = file_path.read_text()
+            file_path.read_text()
             logger.debug(f"File opened: {file_path}")
         except Exception as e:
             logger.error(f"Failed to open file in LSP: {e}")

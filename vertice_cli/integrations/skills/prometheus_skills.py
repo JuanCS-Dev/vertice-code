@@ -269,7 +269,6 @@ class PrometheusSkillsProvider:
 
             for skill_info in skills:
                 skill_name = skill_info["name"]
-                skill_description = skill_info["description"]
 
                 # Create MCP tool for this skill
                 mcp_tool = self.create_mcp_skill_tool(skill_name.replace("prometheus:", ""))

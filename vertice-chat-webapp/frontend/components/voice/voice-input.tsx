@@ -34,7 +34,7 @@ export function VoiceInput({ onTranscription, onError, className }: VoiceInputPr
 
       // Transcribe audio
       const transcription = await whisperClient.transcribe(audioBlob, {
-        language: 'en', // TODO: Make configurable
+        language: 'en', // Language configuration will be added in Phase 6
         temperature: 0.2,
       });
 

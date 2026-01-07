@@ -7,6 +7,9 @@ const withBundleAnalyzer = BundleAnalyzerPlugin({
 });
 
 const nextConfig: NextConfig = {
+  // Output standalone for Docker
+  output: 'standalone',
+
   // Enable experimental features
   experimental: {
     // Partial Prerendering (PPR) - hybrid static/dynamic

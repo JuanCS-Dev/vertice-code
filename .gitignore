@@ -19,21 +19,62 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
-# Virtual Environment
-venv/
+# Virtual environments
+.env
+.venv
 env/
+venv/
 ENV/
 env.bak/
 venv.bak/
 
-# IDEs
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Node.js (for frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.bak
 *~
+
+# Vertice-specific
+.vertice/embeddings/
+.vertice/index/
+.qwen/
+.qwen_backups/
+.firebaserc
+assets/videos/
+test_screenshots/
+
+# Development artifacts
+*_backup.py
+*_old.py
+*_temp.py
+*_test.py
+example_*.py
+demo_*.py
 .DS_Store
 
 # Testing

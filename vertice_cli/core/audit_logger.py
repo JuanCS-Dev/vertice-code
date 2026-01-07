@@ -64,6 +64,14 @@ class AuditEventType(Enum):
     USER_APPROVAL = "user_approval"
     USER_REJECTION = "user_rejection"
 
+    # AI Safety & ISO 42001 events
+    AI_INTERACTION_START = "ai_interaction_start"
+    AI_INTERACTION_COMPLETE = "ai_interaction_complete"
+    AI_SAFETY_VIOLATION = "ai_safety_violation"
+    AI_CONTENT_FILTER = "ai_content_filter"
+    AI_BIAS_DETECTED = "ai_bias_detected"
+    AI_MODEL_SWITCH = "ai_model_switch"
+
 
 class AuditSeverity(Enum):
     """Severity levels for audit events."""
@@ -95,6 +103,17 @@ class AuditEntry:
     resource: str = ""
     outcome: str = ""
     details: Dict[str, Any] = field(default_factory=dict)
+
+    # AI Safety specific fields (ISO 42001)
+    ai_interaction: bool = False
+    input_prompt: Optional[str] = None
+    output_generated: Optional[str] = None
+    model_used: Optional[str] = None
+    latency_ms: Optional[int] = None
+    token_count: Optional[int] = None
+    cost_cents: Optional[float] = None
+    safety_flags: Dict[str, Any] = field(default_factory=dict)
+    bias_score: Optional[float] = None
 
     # Integrity
     previous_hash: Optional[str] = None

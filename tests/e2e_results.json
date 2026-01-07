@@ -1,0 +1,21 @@
+{
+  "timestamp": 1767808080.4684534,
+  "results": {
+    "vertice_cli_import": "PASS",
+    "vertice_tui_import": "PASS",
+    "vertice_core_import": "PASS",
+    "prometheus_import": "PASS",
+    "dependencies": "PASS",
+    "cli": "PASS",
+    "backend": "FAIL",
+    "mcp": "PASS"
+  },
+  "errors": [
+    "Backend error: All connection attempts failed"
+  ],
+  "summary": {
+    "passed": 7,
+    "total": 8,
+    "success_rate": 87.5
+  }
+}

@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
-COPY requirements-mcp.txt requirements.txt
+COPY requirements.txt requirements.txt
 COPY pyproject.toml ./
 
 # Install Python dependencies
@@ -28,4 +28,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:$PORT/health || exit 1
 
 # Run the MCP server
-ENTRYPOINT ["python", "simple_mcp_server.py"]
+ENTRYPOINT ["python", "scripts/mcp/simple_mcp_server.py"]

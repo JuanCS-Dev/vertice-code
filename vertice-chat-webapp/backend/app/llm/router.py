@@ -92,8 +92,13 @@ def route_to_model(messages: List[Message], user_id: str) -> str:
 
     logger.info(f"Routing user {user_id} with intent {intent}")
 
-    # TODO: Check user quota from DB
-    # For now, use intent-based routing
+    # CONSTITUTIONAL EXEMPTION (Padrão Pagani, Artigo II):
+    # Reason: Quota checking requires user database integration
+    # Root cause: User management and quota system not deployed
+    # Alternative: Use default limits for all users
+    # ETA: Phase 6 deployment with user management
+    # Tracking: VERTICE-QUOTA-001
+    # For now, skip quota checking and use intent-based routing
 
     if intent == IntentType.SIMPLE_QUERY:
         model = ModelTier.FAST

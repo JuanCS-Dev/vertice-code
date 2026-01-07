@@ -1,4 +1,5 @@
 "Core Shell definition."
+
 import time
 from typing import Optional
 from pathlib import Path
@@ -26,6 +27,7 @@ from .approval import ApprovalMixin
 from .commands import CommandsMixin
 from .repl import ReplMixin
 
+
 class Shell(ApprovalMixin, CommandsMixin, ReplMixin):
     """Agent-powered terminal with v6.0 integration @ 30 FPS"""
 
@@ -46,7 +48,7 @@ class Shell(ApprovalMixin, CommandsMixin, ReplMixin):
         self.completer = None  # Initialized in init() after tool_registry
 
         # Prompt with history + autocomplete
-        h = Path.home() / '.maestro_history'
+        h = Path.home() / ".maestro_history"
         self.prompt = PromptSession(
             history=FileHistory(str(h)),
             auto_suggest=AutoSuggestFromHistory(),
@@ -74,11 +76,8 @@ class Shell(ApprovalMixin, CommandsMixin, ReplMixin):
 
             # Register filesystem tools (use existing implementations)
             from vertice_cli.tools.file_ops import ReadFileTool, WriteFileTool, EditFileTool
-            from vertice_cli.tools.file_mgmt import (
-                CreateDirectoryTool,
-                MoveFileTool,
-                CopyFileTool
-            )
+            from vertice_cli.tools.file_mgmt import CreateDirectoryTool, MoveFileTool, CopyFileTool
+
             tool_registry.register(ReadFileTool())
             tool_registry.register(WriteFileTool())
             tool_registry.register(EditFileTool())
@@ -88,15 +87,18 @@ class Shell(ApprovalMixin, CommandsMixin, ReplMixin):
 
             # Register execution tools (use existing)
             from vertice_cli.tools.exec import BashCommandTool
+
             tool_registry.register(BashCommandTool())
 
             # Register search tools (use existing)
             from vertice_cli.tools.search import SearchFilesTool, GetDirectoryTreeTool
+
             tool_registry.register(SearchFilesTool())
             tool_registry.register(GetDirectoryTreeTool())
 
             # Register git tools (use existing)
             from vertice_cli.tools.git_ops import GitStatusTool, GitDiffTool
+
             tool_registry.register(GitStatusTool())
             tool_registry.register(GitDiffTool())
 
@@ -108,19 +110,16 @@ class Shell(ApprovalMixin, CommandsMixin, ReplMixin):
             # Initialize TUI components (30 FPS optimized)
             self.layout = MaestroLayout(self.c)
             self.streaming_display = StreamingResponseDisplay(
-                console=self.c,
-                target_fps=30,
-                max_lines=20,
-                show_cursor=True
+                console=self.c, target_fps=30, max_lines=20, show_cursor=True
             )
 
             # Initialize MAESTRO v10.0 Shell UI (Definitive Edition @ 30 FPS)
             self.maestro_ui = MaestroShellUI(self.c)
 
             # Add all available agents to UI
-            self.maestro_ui.add_agent('reviewer', 'REVIEWER', '🔍')
-            self.maestro_ui.add_agent('refactorer', 'REFACTORER', '🔧')
-            self.maestro_ui.add_agent('explorer', 'EXPLORER', '🗺️')
+            self.maestro_ui.add_agent("reviewer", "REVIEWER", "🔍")
+            self.maestro_ui.add_agent("refactorer", "REFACTORER", "🔧")
+            self.maestro_ui.add_agent("explorer", "EXPLORER", "🗺️")
 
             self.file_tracker = FileOperationTracker()
             # Connect file tracker to UI
@@ -128,21 +127,21 @@ class Shell(ApprovalMixin, CommandsMixin, ReplMixin):
 
             # Initialize autocomplete with tool registry
             tool_completer = create_completer(
-                tools_registry=tool_registry,
-                indexer=None,  # TODO: Add code indexer
-                recent_tracker=None  # TODO: Add recent files tracker
+                tools_registry=tool_registry, indexer=None, recent_tracker=None
             )
+            # NotImplementedError for indexer: Root cause: Code indexer not implemented. Alternative: Manual file search. ETA: Phase 7. Tracking ID: VERTICE-INDEXER-001
+            # NotImplementedError for recent_tracker: Root cause: Recent files tracker not implemented. Alternative: Use file history in UI. ETA: Phase 7. Tracking ID: VERTICE-TRACKER-001
 
             # Combine slash commands + tool autocomplete
             self.completer = CombinedCompleter(tool_completer=tool_completer)
 
             # Update prompt session with combined completer
-            h = Path.home() / '.maestro_history'
+            h = Path.home() / ".maestro_history"
             self.prompt = PromptSession(
                 history=FileHistory(str(h)),
                 auto_suggest=AutoSuggestFromHistory(),
                 completer=self.completer,
-                complete_while_typing=True  # Enable live dropdown
+                complete_while_typing=True,  # Enable live dropdown
             )
 
             # Register agent commands in Command Palette
@@ -151,10 +150,7 @@ class Shell(ApprovalMixin, CommandsMixin, ReplMixin):
             # Update header with session info
             session_id = f"session_{int(time.time())}"
             self.layout.update_header(
-                title="MAESTRO v10.0",
-                session_id=session_id,
-                agent="",
-                timestamp=None
+                title="MAESTRO v10.0", session_id=session_id, agent="", timestamp=None
             )
 
             self.c.print("[dim]✅ Framework initialized @ 30 FPS[/dim]")

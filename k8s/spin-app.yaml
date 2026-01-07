@@ -1,0 +1,37 @@
+apiVersion: core.spinoperator.dev/v1alpha1
+kind: SpinApp
+metadata:
+  name: vertice-agent-executor
+  namespace: vertice-system
+  labels:
+    app: vertice-agent-executor
+    component: wasm-executor
+spec:
+  image: "ghcr.io/fermyon/spin:latest"
+  replicas: 3
+  runtimeConfig:
+    - name: python-agent
+      runtime: wagi
+      resourceLimits:
+        cpu: "500m"
+        memory: "512Mi"
+      environment:
+        SPIN_MEMORY_LIMIT: "128MB"
+        SPIN_CPU_LIMIT: "0.5"
+        SPIN_EXECUTION_TIMEOUT: "30s"
+  configMaps:
+    - name: spin-config
+      mountPath: /app
+  secrets:
+    - name: wasm-executor-secrets
+      mountPath: /secrets
+  network:
+    allowedOutboundHosts:
+      - "https://api.openai.com"
+      - "https://googleapis.com"
+      - "https://api.anthropic.com"
+  scaling:
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
