@@ -8,8 +8,8 @@ and execution across all interfaces (CLI, TUI, Web App).
 """
 
 import logging
-from typing import Dict, List, Any, Optional, Type
-from .base import BaseTool, ToolDefinition, ToolResult
+from typing import Dict, List, Any, Optional
+from .base import BaseTool
 from .validated import ValidatedTool
 
 logger = logging.getLogger(__name__)

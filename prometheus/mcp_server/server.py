@@ -18,6 +18,14 @@ import uuid
 from prometheus.mcp_server.config import MCPServerConfig
 from prometheus.mcp_server.tools.registry import get_tool_registry
 
+# Import tools to register them
+from prometheus.mcp_server.tools import (
+    file_tools,
+    search_tools,
+    execution_tools,
+    system_tools,
+)  # noqa: F401
+
 logger = logging.getLogger(__name__)
 
 

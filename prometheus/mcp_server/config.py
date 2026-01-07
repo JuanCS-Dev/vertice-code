@@ -52,6 +52,13 @@ class MCPServerConfig:
     max_tools_per_request: int = 5
     tool_execution_timeout: int = 30  # seconds
 
+    # Execution security (for bash_command and execution tools)
+    execution_timeout_seconds: int = 30
+    max_output_bytes: int = 1024 * 1024  # 1MB
+    max_memory_mb: int = 512
+    restricted_path: str = "/usr/local/bin:/usr/bin:/bin"  # Allowed PATH
+    enable_pty_execution: bool = False  # Interactive mode (security risk)
+
     # Distributed settings (if enabled)
     discovery_endpoints: List[str] = field(default_factory=list)
     peer_sync_interval: int = 300  # seconds

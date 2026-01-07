@@ -13,7 +13,7 @@ import json
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 from enum import Enum
 
 logger = logging.getLogger(__name__)
@@ -51,9 +51,11 @@ class ToolResult:
                 "content": [
                     {
                         "type": "text",
-                        "text": json.dumps(self.data, indent=2)
-                        if isinstance(self.data, (dict, list))
-                        else str(self.data),
+                        "text": (
+                            json.dumps(self.data, indent=2)
+                            if isinstance(self.data, (dict, list))
+                            else str(self.data)
+                        ),
                     }
                 ]
             }
