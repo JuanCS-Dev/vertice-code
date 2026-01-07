@@ -28,10 +28,12 @@ alembic==1.13.3            # Database migrations
 redis==5.1.1               # Redis client
 hiredis==2.3.2             # Redis parser (C extension for speed)
 
-# Security
+# Security & Authentication
 python-jose[cryptography]==3.3.0  # JWT tokens
 passlib[bcrypt]==1.7.4     # Password hashing
 python-multipart==0.0.12   # File upload support
+PyJWT==2.8.0               # JWT token handling
+cryptography==42.0.0       # Cryptographic operations
 
 # Observability
 opentelemetry-api==1.27.0

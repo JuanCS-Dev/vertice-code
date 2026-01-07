@@ -66,6 +66,10 @@ class Settings(BaseSettings):
     # Rate Limiting
     RATE_LIMIT_REQUESTS_PER_MINUTE: int = 60
 
+    # Clerk Authentication
+    CLERK_SECRET_KEY: Optional[str] = None
+    CLERK_PUBLISHABLE_KEY: Optional[str] = None
+
 
 @lru_cache()
 def get_settings() -> Settings:
