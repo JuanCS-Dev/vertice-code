@@ -7,11 +7,12 @@ import { ChatMessages } from '@/components/chat/chat-messages';
 import { ChatInput } from '@/components/chat/chat-input';
 import { ChatSettings } from '@/components/chat/chat-settings';
 import { ArtifactsPanel } from '@/components/artifacts/artifacts-panel';
+import { RepoBrowser } from '@/components/github/repo-browser';
 import { Button } from '@/components/ui/button';
-import { Settings, MessageSquare, FileText } from 'lucide-react';
+import { Settings, MessageSquare, FileText, Github } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-type ViewMode = 'chat' | 'artifacts';
+type ViewMode = 'chat' | 'artifacts' | 'github';
 
 export default function ChatPage() {
   const { currentSessionId, createSession } = useChatStore();
@@ -39,9 +40,19 @@ export default function ChatPage() {
             ) : (
               <FileText className="h-5 w-5" />
             )}
-            <h1 className="text-lg font-semibold">
-              {viewMode === 'chat' ? 'Vertice Chat' : 'Artifacts'}
-            </h1>
+            <div className="flex items-center gap-2">
+              {viewMode === 'chat' ? (
+                <MessageSquare className="h-5 w-5" />
+              ) : viewMode === 'artifacts' ? (
+                <FileText className="h-5 w-5" />
+              ) : (
+                <Github className="h-5 w-5" />
+              )}
+              <h1 className="text-lg font-semibold">
+                {viewMode === 'chat' ? 'Vertice Chat' :
+                 viewMode === 'artifacts' ? 'Artifacts' : 'GitHub Explorer'}
+              </h1>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -60,10 +71,19 @@ export default function ChatPage() {
                 variant={viewMode === 'artifacts' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('artifacts')}
-                className="rounded-l-none border-l"
+                className="rounded-none border-l border-r"
               >
                 <FileText className="h-4 w-4 mr-2" />
                 Artifacts
+              </Button>
+              <Button
+                variant={viewMode === 'github' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('github')}
+                className="rounded-l-none"
+              >
+                <Github className="h-4 w-4 mr-2" />
+                GitHub
               </Button>
             </div>
 
@@ -89,10 +109,15 @@ export default function ChatPage() {
                 <ChatInput />
               </div>
             </>
-          ) : (
+          ) : viewMode === 'artifacts' ? (
             /* Artifacts Panel */
             <div className="h-full p-4">
               <ArtifactsPanel />
+            </div>
+          ) : (
+            /* GitHub Browser */
+            <div className="h-full">
+              <RepoBrowser />
             </div>
           )}
         </div>
