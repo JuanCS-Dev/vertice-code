@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* 
+     * VERTICE DESIGN SYSTEM - VOID THEME
+     * Base: Deep Space (#030304) -> Surface (#0A0E17) -> Highlight (#151B2B)
+     * Accent: Electric Cyan (#06B6D4)
+     */
+    
+    /* Backgrounds */
+    --background: 240 10% 2%;      /* #050505 - Void */
+    --foreground: 210 40% 98%;     /* #F8FAFC - Starlight */
+
+    /* Surface Levels (Elevation) */
+    --card: 222 47% 6%;            /* #080C14 - Deep Surface */
+    --card-foreground: 210 40% 98%;
+    
+    --popover: 222 47% 8%;         /* #0B101B - Floating Surface */
+    --popover-foreground: 210 40% 98%;
+
+    /* Brand Colors */
+    --primary: 189 94% 43%;        /* #06B6D4 - Electric Cyan */
+    --primary-foreground: 222 47% 11%;
+
+    --secondary: 217 33% 12%;      /* #141B29 - Muted Blue */
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 12%;
+    --muted-foreground: 215 20% 65%; /* #94A3B8 - Slate 400 */
+
+    --accent: 189 94% 43%;
+    --accent-foreground: 222 47% 11%;
+
+    /* Semantic States */
+    --destructive: 0 84% 60%;      /* #EF4444 - Red 500 */
+    --destructive-foreground: 210 40% 98%;
+    
+    --success: 142 71% 45%;        /* #10B981 - Emerald 500 */
+    --warning: 38 92% 50%;         /* #F59E0B - Amber 500 */
+    --info: 217 91% 60%;           /* #3B82F6 - Blue 500 */
+
+    /* UI Elements */
+    --border: 217 33% 12%;         /* Subtle borders */
+    --input: 217 33% 12%;
+    --ring: 189 94% 43%;           /* Focus ring color */
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    height: 100%;
+    overflow: hidden; /* App-like feel, no body scroll */
+  }
+
+  /* IDE-like Typography */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans tracking-tight;
+  }
+
+  code, pre, kbd {
+    @apply font-mono;
+  }
+}
+
+/* Custom Scrollbars (IDE Style) */
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/20 rounded-full transition-colors;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/40;
+  }
+}
+
+/* Animations */
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Code Editor Overrides (Monaco) */
+.monaco-editor .margin {
+  @apply bg-transparent !important;
+}
+
+/* Glassmorphism Utilities */
+.bg-glass {
+  @apply bg-background/80 backdrop-blur-md border-b border-white/5;
+}
+
+/* Panel Resizer Handle */
+.resizer-handle {
+  @apply w-1 bg-border hover:bg-primary/50 transition-colors cursor-col-resize active:bg-primary z-50;
+}
