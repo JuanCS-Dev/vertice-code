@@ -146,9 +146,17 @@ class SafeCommandExecutor:
         Returns:
             Tuple of (is_allowed, reason)
         """
-        # Check for dangerous patterns first
+        # Enhanced security checks
+        security_issues = self._comprehensive_security_check(command)
+        if security_issues:
+            # Log security attempt
+            logger.warning(f"Security violation in command: {security_issues}")
+            return False, f"Security violation: {security_issues[0]}"
+
+        # Check for dangerous patterns
         dangerous = self._contains_dangerous_pattern(command)
         if dangerous:
+            logger.warning(f"Dangerous pattern detected: {dangerous}")
             return False, f"Contains dangerous pattern: '{dangerous}'"
 
         # Parse command
@@ -162,6 +170,76 @@ class SafeCommandExecutor:
             return False, f"Command '{base_cmd}' is not in the whitelist"
 
         return True, f"Allowed: {allowed.description}"
+
+    def _comprehensive_security_check(self, command: str) -> List[str]:
+        """
+        Perform comprehensive security validation on command.
+
+        Returns:
+            List of security violations (empty if safe)
+        """
+        violations = []
+
+        # Check for shell metacharacters that could enable injection
+        shell_meta = [
+            "|",
+            "&",
+            ";",
+            "`",
+            "$",
+            "(",
+            ")",
+            "<",
+            ">",
+            "[",
+            "]",
+            "{",
+            "}",
+            "\\",
+            "\n",
+            "\r",
+        ]
+        for meta in shell_meta:
+            if meta in command:
+                # Allow some safe uses (like file paths with spaces, but be strict)
+                if meta in ["(", ")"] and ("git" in command or "pytest" in command):
+                    continue  # Allow parentheses in test commands
+                violations.append(f"Shell metacharacter '{meta}' not allowed")
+
+        # Check for command chaining
+        if "&&" in command or "||" in command:
+            violations.append("Command chaining not allowed")
+
+        # Check for redirection
+        if ">" in command or "<" in command or ">>" in command:
+            violations.append("I/O redirection not allowed")
+
+        # Check for environment variable expansion
+        if "$" in command and not command.startswith(("git ", "python ", "pytest ")):
+            violations.append("Environment variable expansion not allowed")
+
+        # Check for glob patterns that could be dangerous
+        dangerous_globs = ["**", "/*", "~"]
+        for glob in dangerous_globs:
+            if glob in command:
+                violations.append(f"Dangerous glob pattern '{glob}' not allowed")
+
+        # Check command length
+        if len(command) > 1000:
+            violations.append("Command too long")
+
+        # Check for encoded/escaped characters
+        if "\\x" in command.lower() or "\\u" in command.lower():
+            violations.append("Encoded characters not allowed")
+
+        # Check for suspicious keywords
+        suspicious_keywords = ["rm", "del", "format", "fdisk", "mkfs", "dd", "wget", "curl"]
+        command_lower = command.lower()
+        for keyword in suspicious_keywords:
+            if keyword in command_lower and keyword not in ALLOWED_COMMANDS:
+                violations.append(f"Suspicious command '{keyword}' not in whitelist")
+
+        return violations
 
     def get_allowed_commands(self) -> List[str]:
         """
