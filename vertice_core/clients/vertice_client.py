@@ -148,6 +148,19 @@ class VerticeClient:
             tried.append(name)
             try:
                 self._current_provider = name
+
+                # Validate tools support
+                tools = kwargs.get("tools")
+                if tools and hasattr(provider, "stream_chat"):
+                    # Check if provider signature accepts tools
+                    import inspect
+
+                    sig = inspect.signature(provider.stream_chat)
+                    if "tools" not in sig.parameters:
+                        logger.warning(
+                            f"Provider {name} ignoring {len(tools)} tools (not supported)"
+                        )
+
                 async for chunk in provider.stream_chat(
                     full_messages, max_tokens=max_tokens, temperature=temperature, **kwargs
                 ):

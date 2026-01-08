@@ -8,6 +8,7 @@ import logging
 # Try to import Google exceptions for precise catching
 try:
     from google.api_core import exceptions as google_exceptions
+
     GOOGLE_EXCEPTIONS = (google_exceptions.GoogleAPIError,)
 except ImportError:
     GOOGLE_EXCEPTIONS = ()  # type: ignore
@@ -35,6 +36,7 @@ MARKDOWN TABLES - CRITICAL:
 - Keep cell content short (under 30 chars)
 """
 
+
 class GeminiProvider:
     """Google Gemini API provider."""
 
@@ -44,10 +46,10 @@ class GeminiProvider:
         model_name: str = None,
         enable_code_execution: bool = False,
         enable_search: bool = False,
-        enable_caching: bool = True
+        enable_caching: bool = True,
     ):
         """Initialize Gemini provider.
-        
+
         Args:
             api_key: Gemini API key (defaults to GEMINI_API_KEY env var)
             model_name: Model name override
@@ -77,6 +79,7 @@ class GeminiProvider:
                 # Suppress gRPC warnings during import
                 import sys
                 import io
+
                 _original_stderr = sys.stderr
                 sys.stderr = io.StringIO()
 
@@ -112,8 +115,7 @@ class GeminiProvider:
 
                     # Initialize Model with Tools
                     self._client = self._genai.GenerativeModel(
-                        self.model_name,
-                        tools=tools if tools else None
+                        self.model_name, tools=tools if tools else None
                     )
 
                     # FORCE visible confirmation
@@ -138,15 +140,15 @@ class GeminiProvider:
         messages: List[Dict[str, str]],
         max_tokens: int = 2048,
         temperature: float = 0.7,
-        **kwargs
+        **kwargs,
     ) -> str:
         """Generate completion from messages.
-        
+
         Args:
             messages: List of message dicts with 'role' and 'content'
             max_tokens: Maximum tokens to generate
             temperature: Sampling temperature
-            
+
         Returns:
             Generated text
         """
@@ -164,10 +166,10 @@ class GeminiProvider:
                 lambda: self.client.generate_content(
                     prompt,
                     generation_config={
-                        'max_output_tokens': max_tokens,
-                        'temperature': temperature,
-                    }
-                )
+                        "max_output_tokens": max_tokens,
+                        "temperature": temperature,
+                    },
+                ),
             )
 
             return response.text
@@ -181,15 +183,15 @@ class GeminiProvider:
         messages: List[Dict[str, str]],
         max_tokens: int = 2048,
         temperature: float = 0.7,
-        **kwargs
+        **kwargs,
     ) -> AsyncGenerator[str, None]:
         """Stream generation from messages.
-        
+
         Args:
             messages: List of message dicts
             max_tokens: Maximum tokens to generate
             temperature: Sampling temperature
-            
+
         Yields:
             Generated text chunks
         """
@@ -203,16 +205,17 @@ class GeminiProvider:
             def _stream():
                 import sys
                 import io
+
                 _original_stderr = sys.stderr
                 sys.stderr = io.StringIO()
                 try:
                     result = self.client.generate_content(
                         prompt,
                         generation_config={
-                            'max_output_tokens': max_tokens,
-                            'temperature': temperature,
+                            "max_output_tokens": max_tokens,
+                            "temperature": temperature,
                         },
-                        stream=True
+                        stream=True,
                     )
                     return result
                 finally:
@@ -239,7 +242,8 @@ class GeminiProvider:
         system_prompt: Optional[str] = None,
         max_tokens: int = 8192,
         temperature: float = 0.7,
-        **kwargs
+        tools: Optional[List[Any]] = None,
+        **kwargs,
     ) -> AsyncGenerator[str, None]:
         """
         Native Streaming with System Instruction and Tools.
@@ -255,6 +259,14 @@ class GeminiProvider:
             if self.enable_search:
                 tools.append("google_search_retrieval")
 
+            # 2. Add custom tools if provided
+            if tools:
+                # Convert custom tools to Gemini format if needed
+                # For now, log that custom tools are not fully supported
+                logger.warning(
+                    f"Gemini provider received {len(tools)} custom tools but only supports builtin tools"
+                )
+
             # 2. Initialize Model (with System Instruction)
             # We create a specific instance for this chat to support dynamic system prompt
             # This is lightweight and ensures we use the native system_instruction
@@ -265,13 +277,13 @@ class GeminiProvider:
             # CRITICAL: Temperature MUST be 1.0 for Gemini 2.5+ to prevent looping
             safe_temperature = 1.0
             if temperature != 1.0:
-                 # We silently enforce 1.0 for stability as per DeepMind docs
-                 safe_temperature = 1.0
+                # We silently enforce 1.0 for stability as per DeepMind docs
+                safe_temperature = 1.0
 
             model = self._genai.GenerativeModel(
                 self.model_name,
                 tools=tools if tools else None,
-                system_instruction=full_system_prompt
+                system_instruction=full_system_prompt,
             )
 
             # 3. Prepare History
@@ -292,10 +304,10 @@ class GeminiProvider:
                 return chat.send_message(
                     last_user_msg,
                     generation_config={
-                        'max_output_tokens': max_tokens,
-                        'temperature': safe_temperature,
+                        "max_output_tokens": max_tokens,
+                        "temperature": safe_temperature,
                     },
-                    stream=True
+                    stream=True,
                 )
 
             loop = asyncio.get_event_loop()
@@ -324,17 +336,17 @@ class GeminiProvider:
 
                 try:
                     # Handle Code Execution Parts
-                    if hasattr(chunk, 'parts'):
+                    if hasattr(chunk, "parts"):
                         for part in chunk.parts:
-                            if hasattr(part, 'executable_code'):
+                            if hasattr(part, "executable_code"):
                                 # Notify user about code execution (optional, or yield a marker)
                                 pass
-                            if hasattr(part, 'code_execution_result'):
+                            if hasattr(part, "code_execution_result"):
                                 # Notify user about result
                                 pass
-                            if hasattr(part, 'text') and part.text:
+                            if hasattr(part, "text") and part.text:
                                 yield part.text
-                    elif hasattr(chunk, 'text') and chunk.text:
+                    elif hasattr(chunk, "text") and chunk.text:
                         yield chunk.text
                 except (AttributeError, ValueError, KeyError):
                     # Some chunks might be pure metadata or function calls without text
@@ -342,27 +354,26 @@ class GeminiProvider:
 
                 await asyncio.sleep(0)
 
-
         except (RuntimeError, ValueError, asyncio.TimeoutError, *GOOGLE_EXCEPTIONS) as e:
             logger.error(f"Gemini streaming error: {e}")
             yield f"\n[System Error: {str(e)}]"
 
     def _format_messages(self, messages: List[Dict[str, str]]) -> str:
         """Format messages for Gemini.
-        
+
         Gemini uses a simpler prompt format than chat APIs.
         We concatenate messages with role prefixes.
         """
         formatted = []
         for msg in messages:
-            role = msg.get('role', 'user')
-            content = msg.get('content', '')
+            role = msg.get("role", "user")
+            content = msg.get("content", "")
 
-            if role == 'system':
+            if role == "system":
                 formatted.append(f"System: {content}")
-            elif role == 'user':
+            elif role == "user":
                 formatted.append(f"User: {content}")
-            elif role == 'assistant':
+            elif role == "assistant":
                 formatted.append(f"Assistant: {content}")
 
         return "\n\n".join(formatted)
@@ -370,19 +381,19 @@ class GeminiProvider:
     def get_model_info(self) -> Dict[str, str | bool | int]:
         """Get model information."""
         return {
-            'provider': 'gemini',
-            'model': self.model_name,
-            'available': self.is_available(),
-            'context_window': 32768,  # Gemini Pro context
-            'supports_streaming': True
+            "provider": "gemini",
+            "model": self.model_name,
+            "available": self.is_available(),
+            "context_window": 32768,  # Gemini Pro context
+            "supports_streaming": True,
         }
 
     def count_tokens(self, text: str) -> int:
         """Count tokens using native API.
-        
+
         Args:
             text: Text to count tokens for
-            
+
         Returns:
             Exact token count from Gemini API
         """

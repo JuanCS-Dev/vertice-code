@@ -191,6 +191,7 @@ class LLMClient:
         temperature: Optional[float] = None,
         provider: Optional[str] = None,
         enable_failover: bool = True,
+        tools: Optional[List[ToolDefinition]] = None,
     ) -> AsyncGenerator[str, None]:
         """Stream chat completion with automatic failover.
 
@@ -233,6 +234,7 @@ class LLMClient:
                     messages,
                     max_tokens=max_tokens,
                     temperature=temperature,
+                    tools=tools,
                 ):
                     yield chunk
 
