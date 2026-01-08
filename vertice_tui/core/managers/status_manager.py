@@ -48,41 +48,197 @@ class StatusManager(IStatusManager):
 
     def check_health(self) -> Dict[str, Dict[str, Any]]:
         """
-        Check system health for all components.
+        Comprehensive system health check with detailed metrics.
 
         Returns:
-            Dictionary with health status for each component.
+            Dictionary with detailed health status for each component.
         """
-        health = {}
+        import time
+        import psutil
+        import os
 
-        # Check LLM
+        health = {}
+        start_time = time.time()
+
+        # System-level metrics
+        health["System"] = self._check_system_health()
+
+        # Check LLM with detailed metrics
         if self._llm_checker:
+            llm_start = time.time()
             is_connected = self._llm_checker()
+            llm_check_time = time.time() - llm_start
+
             health["LLM"] = {
                 "ok": is_connected,
+                "status": "healthy" if is_connected else "unhealthy",
                 "message": "Connected" if is_connected else "Not connected",
+                "response_time_ms": round(llm_check_time * 1000, 2),
+                "last_check": time.time(),
             }
         else:
-            health["LLM"] = {"ok": False, "message": "LLM checker not configured"}
+            health["LLM"] = {
+                "ok": False,
+                "status": "unhealthy",
+                "message": "LLM checker not configured",
+                "severity": "critical",
+            }
 
-        # Check tools
+        # Check tools with detailed metrics
         if self._tool_counter:
             tool_count = self._tool_counter()
-            health["Tools"] = {"ok": tool_count > 0, "message": f"{tool_count} tools loaded"}
+            health["Tools"] = {
+                "ok": tool_count > 0,
+                "status": "healthy" if tool_count > 0 else "degraded",
+                "message": f"{tool_count} tools loaded",
+                "count": tool_count,
+                "threshold": {"min": 1, "recommended": 10},
+                "severity": "warning" if tool_count < 5 else "info",
+            }
         else:
-            health["Tools"] = {"ok": False, "message": "Tool counter not configured"}
+            health["Tools"] = {
+                "ok": False,
+                "status": "unhealthy",
+                "message": "Tool counter not configured",
+                "severity": "critical",
+            }
 
-        # Check agents
+        # Check agents with detailed metrics
         if self._agent_counter:
             agent_count = self._agent_counter()
-            health["Agents"] = {"ok": agent_count > 0, "message": f"{agent_count} agents available"}
+            health["Agents"] = {
+                "ok": agent_count > 0,
+                "status": "healthy"
+                if agent_count >= 3
+                else "degraded"
+                if agent_count > 0
+                else "unhealthy",
+                "message": f"{agent_count} agents available",
+                "count": agent_count,
+                "threshold": {"min": 1, "recommended": 5},
+                "severity": "warning" if agent_count < 3 else "info",
+            }
         else:
-            health["Agents"] = {"ok": False, "message": "Agent counter not configured"}
+            health["Agents"] = {
+                "ok": False,
+                "status": "unhealthy",
+                "message": "Agent counter not configured",
+                "severity": "critical",
+            }
 
         # Check sandbox status
-        health["Sandbox"] = {"ok": True, "message": "Enabled" if self._sandbox else "Disabled"}
+        health["Sandbox"] = {
+            "ok": True,
+            "status": "healthy",
+            "message": "Enabled" if self._sandbox else "Disabled",
+            "enabled": self._sandbox,
+            "severity": "info",
+        }
+
+        # Overall health assessment
+        total_time = time.time() - start_time
+        critical_issues = sum(
+            1
+            for component in health.values()
+            if isinstance(component, dict) and component.get("severity") == "critical"
+        )
+        warning_issues = sum(
+            1
+            for component in health.values()
+            if isinstance(component, dict) and component.get("severity") == "warning"
+        )
+
+        overall_status = "healthy"
+        if critical_issues > 0:
+            overall_status = "critical"
+        elif warning_issues > 0:
+            overall_status = "warning"
+
+        health["Overall"] = {
+            "ok": critical_issues == 0,
+            "status": overall_status,
+            "message": f"System {overall_status}: {critical_issues} critical, {warning_issues} warnings",
+            "check_duration_ms": round(total_time * 1000, 2),
+            "timestamp": time.time(),
+            "critical_issues": critical_issues,
+            "warning_issues": warning_issues,
+            "total_components": len(health) - 2,  # Exclude System and Overall
+        }
 
         return health
+
+    def _check_system_health(self) -> Dict[str, Any]:
+        """Check system-level health metrics."""
+        try:
+            import psutil
+            import os
+
+            # Memory usage
+            memory = psutil.virtual_memory()
+            memory_usage_percent = memory.percent
+            memory_usage_gb = round(memory.used / (1024**3), 2)
+
+            # CPU usage
+            cpu_percent = psutil.cpu_percent(interval=0.1)
+
+            # Disk usage
+            disk = psutil.disk_usage("/")
+            disk_usage_percent = disk.percent
+
+            # Process info
+            process = psutil.Process(os.getpid())
+            process_memory_mb = round(process.memory_info().rss / (1024**2), 2)
+            process_cpu_percent = process.cpu_percent(interval=0.1)
+
+            # Determine status based on thresholds
+            status = "healthy"
+            severity = "info"
+
+            if memory_usage_percent > 90 or cpu_percent > 95 or disk_usage_percent > 95:
+                status = "critical"
+                severity = "critical"
+            elif memory_usage_percent > 80 or cpu_percent > 80 or disk_usage_percent > 85:
+                status = "warning"
+                severity = "warning"
+
+            return {
+                "ok": status != "critical",
+                "status": status,
+                "severity": severity,
+                "memory": {
+                    "usage_percent": memory_usage_percent,
+                    "usage_gb": memory_usage_gb,
+                    "available_gb": round(memory.available / (1024**3), 2),
+                },
+                "cpu": {"usage_percent": cpu_percent},
+                "disk": {"usage_percent": disk_usage_percent},
+                "process": {
+                    "memory_mb": process_memory_mb,
+                    "cpu_percent": process_cpu_percent,
+                    "pid": os.getpid(),
+                },
+            }
+
+        except ImportError:
+            return {
+                "ok": True,
+                "status": "degraded",
+                "severity": "warning",
+                "message": "psutil not available - limited system metrics",
+                "memory": {"usage_percent": "unknown"},
+                "cpu": {"usage_percent": "unknown"},
+                "disk": {"usage_percent": "unknown"},
+                "process": {"memory_mb": "unknown", "cpu_percent": "unknown"},
+            }
+
+        except Exception as e:
+            return {
+                "ok": False,
+                "status": "error",
+                "severity": "warning",
+                "message": f"System health check failed: {e}",
+                "error": str(e),
+            }
 
     def get_permissions(self) -> Dict[str, bool]:
         """
