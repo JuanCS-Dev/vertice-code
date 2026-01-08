@@ -8,7 +8,7 @@ from typing import Dict, Any, Optional
 from pydantic import BaseModel
 import logging
 
-from app.core.auth import ClerkUser, get_current_user
+from app.core.auth import FirebaseUser, get_current_user
 from app.core.stripe_service import get_stripe_service
 from app.core.usage_metering import get_usage_metering_service
 
@@ -33,7 +33,7 @@ class UsageReportRequest(BaseModel):
 async def create_subscription(
     request: CreateSubscriptionRequest,
     background_tasks: BackgroundTasks,
-    user: ClerkUser = Depends(get_current_user),
+    user: FirebaseUser = Depends(get_current_user),
 ):
     """
     Create a new subscription for the user's workspace.
@@ -71,7 +71,7 @@ async def create_subscription(
 
 
 @router.get("/subscriptions")
-async def get_subscription_status(user: ClerkUser = Depends(get_current_user)):
+async def get_subscription_status(user: FirebaseUser = Depends(get_current_user)):
     """
     Get current subscription status for the user's workspace.
     """
@@ -93,7 +93,7 @@ async def get_subscription_status(user: ClerkUser = Depends(get_current_user)):
 
 
 @router.post("/usage")
-async def report_usage(request: UsageReportRequest, user: ClerkUser = Depends(get_current_user)):
+async def report_usage(request: UsageReportRequest, user: FirebaseUser = Depends(get_current_user)):
     """
     Report usage for billing purposes.
 
@@ -130,7 +130,7 @@ async def report_usage(request: UsageReportRequest, user: ClerkUser = Depends(ge
 async def get_usage_summary(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
-    user: ClerkUser = Depends(get_current_user),
+    user: FirebaseUser = Depends(get_current_user),
 ):
     """
     Get usage summary for the current billing period.
@@ -159,7 +159,7 @@ async def get_usage_summary(
 
 
 @router.get("/limits")
-async def check_usage_limits(user: ClerkUser = Depends(get_current_user)):
+async def check_usage_limits(user: FirebaseUser = Depends(get_current_user)):
     """
     Check if workspace is approaching or exceeding usage limits.
     """
@@ -177,7 +177,7 @@ async def check_usage_limits(user: ClerkUser = Depends(get_current_user)):
 
 
 @router.get("/portal")
-async def get_customer_portal_url(user: ClerkUser = Depends(get_current_user)):
+async def get_customer_portal_url(user: FirebaseUser = Depends(get_current_user)):
     """
     Get Stripe Customer Portal URL for self-service billing management.
 
@@ -204,7 +204,7 @@ async def get_customer_portal_url(user: ClerkUser = Depends(get_current_user)):
 
 @router.get("/preview")
 async def get_invoice_preview(
-    upcoming_usage: Optional[Dict[str, float]] = None, user: ClerkUser = Depends(get_current_user)
+    upcoming_usage: Optional[Dict[str, float]] = None, user: FirebaseUser = Depends(get_current_user)
 ):
     """
     Generate invoice preview for next billing cycle.

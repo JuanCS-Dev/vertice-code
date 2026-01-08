@@ -1,22 +1,9 @@
 """
 🧠 Vertice Core - AI Domain Kernel
+🕐 Temporal Consciousness Core
 
-This package contains the core domain types and protocols that define
-the contract between all other packages. Dependencies flow INWARD:
-
-    vertice_tui ─────┐
-                  │
-    qwen_agents ──┼──> vertice_core
-                  │
-    qwen_tools ───┘
-
-RULES:
-1. vertice_core imports NOTHING from vertice_tui, vertice_cli, or qwen_agents
-2. All types here are immutable value objects or protocols
-3. No side effects, no I/O, no state
-4. 100% type coverage required
-
-Author: Boris Cherny (Anthropic Claude Code Team Pattern)
+Core types, protocols, and domain logic for AI-powered development tools.
+Temporal Awareness: MICROSECOND PRECISION
 """
 
 from vertice_core.types import (

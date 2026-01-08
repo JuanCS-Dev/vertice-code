@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, Depends, Header
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 
-from app.core.auth import ClerkUser, get_current_user, authenticate_request
+from app.core.auth import FirebaseUser, get_current_user, authenticate_request
 from app.core.agent_auth import get_agent_key_service
 
 router = APIRouter()
@@ -53,7 +53,7 @@ async def create_agent_key(
     if not auth_result or auth_result["type"] != "human":
         raise HTTPException(status_code=401, detail="Authentication required")
 
-    user: ClerkUser = auth_result["user"]
+    user: FirebaseUser = auth_result["user"]
 
     # For now, use user_id as workspace_id (in production, this would be more complex)
     workspace_id = user.user_id
@@ -92,7 +92,7 @@ async def list_agent_keys(
 
     # Determine workspace based on auth type
     if auth_result["type"] == "human":
-        user: ClerkUser = auth_result["user"]
+        user: FirebaseUser = auth_result["user"]
         workspace_id = user.user_id
     elif auth_result["type"] == "agent":
         agent = auth_result["agent"]
@@ -132,7 +132,7 @@ async def rotate_agent_key(
     if not auth_result or auth_result["type"] != "human":
         raise HTTPException(status_code=401, detail="Authentication required")
 
-    user: ClerkUser = auth_result["user"]
+    user: FirebaseUser = auth_result["user"]
     workspace_id = user.user_id
 
     # Rotate the key
@@ -166,7 +166,7 @@ async def revoke_agent_key(
     if not auth_result or auth_result["type"] != "human":
         raise HTTPException(status_code=401, detail="Authentication required")
 
-    user: ClerkUser = auth_result["user"]
+    user: FirebaseUser = auth_result["user"]
     workspace_id = user.user_id
 
     # Revoke the key

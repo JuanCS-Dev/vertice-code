@@ -121,7 +121,12 @@ class UIHandler:
         """Show constitutional metrics."""
         from vertice_cli.core.metrics import generate_constitutional_report
 
-        self.console.print("\n[bold cyan]🛡️ AI Constitutional Metrics[/bold cyan]\n")
+        from vertice_cli.core import get_temporal_context
+
+        temporal = get_temporal_context()
+        self.console.print(
+            f"\n[bold cyan]🛡️ AI Constitutional Metrics ({temporal['date']})[/bold cyan]\n"
+        )
 
         metrics = generate_constitutional_report(
             codebase_path="vertice_cli", completeness=0.95, precision=0.98, recall=0.92
@@ -144,7 +149,12 @@ class UIHandler:
         self.console.print(f"Disk Hits: {stats.disk_hits}")
 
         # File watcher stats
-        self.console.print("\n[bold cyan]👁️ AI File Watcher[/bold cyan]\n")
+        from vertice_cli.core import get_temporal_context
+
+        temporal = get_temporal_context()
+        self.console.print(
+            f"\n[bold cyan]👁️ AI File Watcher ({temporal['time'][:8]} UTC)[/bold cyan]\n"
+        )
         self.console.print(f"Tracked Files: {self.file_watcher.tracked_files}")
         self.console.print(f"Recent Events: {len(self.file_watcher.recent_events)}")
         recent = self.recent_files.get_recent(5)

@@ -62,7 +62,12 @@ class HistoryHandler:
         """Handle /stats command."""
         stats = self.shell.cmd_history.get_statistics(days=7)
 
-        self.console.print("\n[bold cyan]📊 AI Command Statistics (Last 7 Days)[/bold cyan]\n")
+        from vertice_cli.core import get_temporal_context
+
+        temporal = get_temporal_context()
+        self.console.print(
+            f"\n[bold cyan]📊 AI Command Statistics (as of {temporal['weekday_name']}, {temporal['month_name']} {temporal['day']}, {temporal['year']})[/bold cyan]\n"
+        )
         self.console.print(f"  Total commands: [bold]{stats['total_commands']}[/bold]")
         self.console.print(f"  Success rate:   [bold green]{stats['success_rate']}%[/bold green]")
         self.console.print(f"  Avg duration:   [yellow]{stats['avg_duration_ms']}ms[/yellow]")

@@ -17,7 +17,7 @@ import asyncio
 import uuid
 
 from app.integrations.mcp_client import get_mcp_client, CircuitBreakerOpenException
-from app.core.auth import ClerkUser, get_current_user
+from app.core.auth import FirebaseUser, get_current_user
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ class AgentExecutionRequest:
 @router.websocket("/execute")
 async def execute_agent_websocket(
     websocket: WebSocket,
-    # current_user: ClerkUser = Depends(get_current_user)  # TODO: Enable when auth is ready
+    # current_user: FirebaseUser = Depends(get_current_user)  # TODO: Enable when auth is ready
 ):
     """
     Execute agent via WebSocket with real-time streaming.
@@ -264,7 +264,7 @@ async def execute_agent_websocket(
 @router.post("/execute")
 async def execute_agent_http(
     request: Dict[str, Any],
-    # current_user: ClerkUser = Depends(get_current_user)  # TODO: Enable when auth is ready
+    # current_user: FirebaseUser = Depends(get_current_user)  # TODO: Enable when auth is ready
 ):
     """
     Execute agent via HTTP (synchronous).

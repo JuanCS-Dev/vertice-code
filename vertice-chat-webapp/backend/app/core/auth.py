@@ -111,7 +111,7 @@ async def authenticate_request(
     Unified authentication function that handles both human users and agents
 
     Returns:
-        - For humans: {"type": "human", "user": ClerkUser}
+        - For humans: {"type": "human", "user": FirebaseUser}
         - For agents: {"type": "agent", "agent": AgentIdentity}
         - For unauthenticated: None
     """
