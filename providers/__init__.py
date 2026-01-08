@@ -41,6 +41,7 @@ from .mistral import MistralProvider
 
 # Enterprise Providers (Your Infrastructure)
 from .vertex_ai import VertexAIProvider
+from .anthropic_vertex import AnthropicVertexProvider
 from .azure_openai import AzureOpenAIProvider
 
 # Unified Router
@@ -84,6 +85,7 @@ __all__ = [
     "MistralProvider",
     # Enterprise Providers (Your Infrastructure)
     "VertexAIProvider",
+    "AnthropicVertexProvider",
     "AzureOpenAIProvider",
     # Unified Router
     "VerticeRouter",

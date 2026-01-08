@@ -3,6 +3,8 @@
  *
  * Welcome new users and guide them through initial setup
  */
+'use client';
+
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
@@ -34,7 +36,7 @@ export default function OnboardingPage() {
         {/* Welcome Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-foreground mb-4">
-            Welcome to Vertice, {user.firstName}!
+            Welcome to Vertice, {user?.firstName || 'Developer'}!
           </h1>
           <p className="text-xl text-muted-foreground">
             Your AI-powered coding companion is ready. Let's get you started.

@@ -3,12 +3,10 @@ Production Monitoring Service - LangSmith/Phoenix Integration
 Real-time AI performance monitoring and observability
 """
 
-import asyncio
 import logging
 import time
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
-import json
 
 logger = logging.getLogger(__name__)
 

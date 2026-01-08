@@ -24,7 +24,7 @@ import { cn } from '@/lib/utils';
 // Enable Partial Prerendering for optimal performance
 // Static parts (sidebar, header) render at build time
 // Dynamic parts (messages, input) stream at runtime
-export const experimental_ppr = true;
+// export const experimental_ppr = true; // Disabled due to cacheComponents conflict
 
 type ViewMode = 'chat' | 'artifacts' | 'github' | 'voice';
 

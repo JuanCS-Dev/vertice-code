@@ -126,7 +126,7 @@ class BaseTool(ABC):
         """Execute the tool with given parameters."""
         pass
 
-    def validate_and_execute(self, params: Dict[str, Any]) -> ToolResult:
+    async def validate_and_execute(self, params: Dict[str, Any]) -> ToolResult:
         """Validate parameters and execute tool."""
         # Validate parameters
         validation_errors = self.definition.validate_params(params)
@@ -137,7 +137,7 @@ class BaseTool(ABC):
 
         # Execute tool
         try:
-            return self.execute(**params)
+            return await self.execute(**params)
         except Exception as e:
             logger.error(f"Tool execution failed: {e}", exc_info=True)
             return ToolResult(success=False, error=f"Tool execution failed: {str(e)}")

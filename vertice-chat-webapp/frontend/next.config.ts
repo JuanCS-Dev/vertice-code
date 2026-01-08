@@ -1,8 +1,8 @@
 import type { NextConfig } from 'next';
-import { BundleAnalyzerPlugin } from '@next/bundle-analyzer';
+import withBundleAnalyzer from '@next/bundle-analyzer';
 
 // Bundle analyzer configuration
-const withBundleAnalyzer = BundleAnalyzerPlugin({
+const bundleAnalyzer = withBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
@@ -12,10 +12,6 @@ const nextConfig: NextConfig = {
 
   // Enable experimental features
   experimental: {
-    // Partial Prerendering (PPR) - hybrid static/dynamic
-    // Reference: https://nextjs.org/docs/app/building-your-application/rendering/partial-prerendering
-    cacheComponents: true,
-
     // Bundle optimization
     optimizePackageImports: ['@radix-ui/react-icons', 'date-fns'],
   },
@@ -30,7 +26,7 @@ const nextConfig: NextConfig = {
     },
   },
 
-  // Turbopack configuration
+  // Turbopack configuration (empty to avoid webpack conflicts)
   turbopack: {},
 
   // Image optimization
@@ -121,4 +117,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withBundleAnalyzer(nextConfig);
+export default bundleAnalyzer(nextConfig);

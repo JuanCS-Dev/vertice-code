@@ -116,7 +116,8 @@ class VerticeRouter:
     # Provider priorities (lower = higher priority)
     # STABILITY MODE: vertex-ai only. Multi-provider routing planned for later.
     PROVIDER_PRIORITY = {
-        "vertex-ai": 1,    # PRIMARY - Gemini via Vertex AI (stable)
+        "anthropic-vertex": 1, # PREMIUM - Claude via Vertex AI
+        "vertex-ai": 2,        # PRIMARY - Gemini via Vertex AI (stable)
         # Future: enable after system stabilization
         "groq": 10,
         "cerebras": 11,
@@ -128,18 +129,18 @@ class VerticeRouter:
 
     # STABILITY MODE: All complexity levels route to vertex-ai
     COMPLEXITY_ROUTING = {
-        TaskComplexity.SIMPLE: ["vertex-ai"],
-        TaskComplexity.MODERATE: ["vertex-ai"],
-        TaskComplexity.COMPLEX: ["vertex-ai"],
-        TaskComplexity.CRITICAL: ["vertex-ai"],
+        TaskComplexity.SIMPLE: ["anthropic-vertex", "vertex-ai"],
+        TaskComplexity.MODERATE: ["anthropic-vertex", "vertex-ai"],
+        TaskComplexity.COMPLEX: ["anthropic-vertex", "vertex-ai"],
+        TaskComplexity.CRITICAL: ["anthropic-vertex", "vertex-ai"],
     }
 
     # STABILITY MODE: All speed requirements route to vertex-ai
     SPEED_ROUTING = {
-        SpeedRequirement.INSTANT: ["vertex-ai"],
-        SpeedRequirement.FAST: ["vertex-ai"],
-        SpeedRequirement.NORMAL: ["vertex-ai"],
-        SpeedRequirement.RELAXED: ["vertex-ai"],
+        SpeedRequirement.INSTANT: ["anthropic-vertex", "vertex-ai"],
+        SpeedRequirement.FAST: ["anthropic-vertex", "vertex-ai"],
+        SpeedRequirement.NORMAL: ["anthropic-vertex", "vertex-ai"],
+        SpeedRequirement.RELAXED: ["anthropic-vertex", "vertex-ai"],
     }
 
     def __init__(self):
@@ -157,9 +158,25 @@ class VerticeRouter:
         if self._initialized:
             return
 
-        # TEMPORARY FIX: Only import and initialize vertex-ai
+        # TEMPORARY FIX: Only import and initialize vertex-ai and anthropic-vertex
         from .vertex_ai import VertexAIProvider
+        from .anthropic_vertex import AnthropicVertexProvider
 
+        # 1. Try Anthropic Vertex (Claude)
+        try:
+            anthropic = AnthropicVertexProvider(model_name="sonnet-4.5")
+            if anthropic.is_available():
+                self._providers["anthropic-vertex"] = anthropic
+                info = anthropic.get_model_info()
+                self._status["anthropic-vertex"] = ProviderStatus(
+                    name="anthropic-vertex",
+                    available=True,
+                )
+                logger.info(f"✅ Anthropic Vertex initialized: {info.get('model')}")
+        except Exception as e:
+            logger.debug(f"Anthropic Vertex not available: {e}")
+
+        # 2. Try Vertex AI (Gemini)
         try:
             provider = VertexAIProvider(model_name="flash")
             if provider.is_available():
@@ -192,6 +209,7 @@ class VerticeRouter:
             return True  # Already initialized
 
         provider_classes = {
+            "anthropic-vertex": (".anthropic_vertex", "AnthropicVertexProvider", {"model_name": "sonnet-4.5"}),
             "groq": (".groq", "GroqProvider", {"model_name": "llama-70b"}),
             "cerebras": (".cerebras", "CerebrasProvider", {"model_name": "llama-70b"}),
             "openrouter": (".openrouter", "OpenRouterProvider", {"model_name": "llama-70b"}),

@@ -64,8 +64,6 @@ export function ChatInput() {
             role: 'assistant',
             content: result.content,
             metadata: {
-              commandResult: true,
-              resultType: result.type,
               ...result.metadata,
             },
           });

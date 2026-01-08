@@ -351,6 +351,81 @@ class ResponseView(VerticalScroll):
         self.mount(widget)
         self.scroll_end(animate=True)
 
+    def add_markdown_response(self, text: str, title: str = "Response") -> None:
+        """Add markdown response with syntax highlighting for code blocks."""
+        self._render_markdown_with_syntax(text, title)
+
+    def _render_markdown_with_syntax(self, text: str, title: str) -> None:
+        """Render markdown text with proper syntax highlighting for code blocks."""
+        import re
+        from rich.markdown import Markdown
+        from rich.text import Text
+        from rich.panel import Panel
+        from rich.console import Group
+        from rich.box import ROUNDED
+
+        # Split text into markdown and code blocks
+        parts = []
+        last_end = 0
+
+        # Find all code blocks
+        code_block_pattern = r"```(\w+)?\n(.*?)\n```"
+        for match in re.finditer(code_block_pattern, text, re.DOTALL):
+            # Add text before code block
+            if match.start() > last_end:
+                markdown_text = text[last_end : match.start()]
+                if markdown_text.strip():
+                    parts.append(("markdown", markdown_text))
+
+            # Add code block
+            language = match.group(1) or "text"
+            code = match.group(2)
+            parts.append(("code", (language, code)))
+
+            last_end = match.end()
+
+        # Add remaining text
+        if last_end < len(text):
+            remaining_text = text[last_end:]
+            if remaining_text.strip():
+                parts.append(("markdown", remaining_text))
+
+        # If no code blocks found, render as regular markdown
+        if not any(part[0] == "code" for part in parts):
+            panel = OutputFormatter.format_response(text, title)
+            widget = SelectableStatic(panel, classes="ai-response")
+            self.mount(widget)
+            self.scroll_end(animate=True)
+            return
+
+        # Render parts
+        rendered_parts = []
+        for part_type, content in parts:
+            if part_type == "markdown":
+                try:
+                    rendered_parts.append(Markdown(content))
+                except (ValueError, TypeError):
+                    rendered_parts.append(Text(content))
+            elif part_type == "code":
+                language, code = content
+                self.add_code_block(code, language)
+
+        # Create panel with all parts
+        if rendered_parts:
+            content = Group(*rendered_parts)
+            panel = Panel(
+                content,
+                title=f"[bold {Colors.PRIMARY}]{title}[/]",
+                title_align="left",
+                border_style=Colors.BORDER,
+                box=ROUNDED,
+                padding=(1, 2),
+            )
+            widget = SelectableStatic(panel, classes="ai-response")
+            self.mount(widget)
+
+        self.scroll_end(animate=True)
+
     def clear_all(self) -> None:
         """Clear all content."""
         self.current_response = ""

@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./vertice-chat-webapp/backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - DATABASE_URL=postgresql+asyncpg://user:password@db:5432/vertice_db
+      - REDIS_URL=redis://redis:6379
+      - MCP_SERVER_URL=http://mcp-server:3000
+    depends_on:
+      - db
+      - redis
+      - mcp-server
+    networks:
+      - vertice-network
+
+  frontend:
+    build:
+      context: ./vertice-chat-webapp/frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:8000
+        - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_Y2xlcmsuZXhhbXBsZS5jb20k
+    ports:
+      - "3000:8080"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - CLERK_SECRET_KEY=sk_test_mock_secret_key_for_local_dev
+    depends_on:
+      - backend
+    networks:
+      - vertice-network
+
+  mcp-server:
+    build:
+      context: .
+      dockerfile: prometheus/Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      - MCP_HOST=0.0.0.0
+      - MCP_PORT=3000
+      - MCP_LOG_LEVEL=DEBUG
+    networks:
+      - vertice-network
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=vertice_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - vertice-network
+
+  redis:
+    image: redis:7-alpine
+    networks:
+      - vertice-network
+
+networks:
+  vertice-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

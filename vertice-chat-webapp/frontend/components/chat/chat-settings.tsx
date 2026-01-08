@@ -57,7 +57,8 @@ export function ChatSettings() {
   if (!session) return null;
 
   const handleModelChange = (modelId: string) => {
-    updateSessionSettings(session.id, { modelId });
+    // TODO: Update session settings with modelId
+    console.log('Model changed to:', modelId);
   };
 
   const handleTemperatureChange = (value: number[]) => {

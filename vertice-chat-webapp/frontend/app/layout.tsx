@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ClerkProvider } from '@clerk/nextjs';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import { AuthProvider } from '@/context/AuthContext';
+
+const inter = Inter({ subsets: ['latin'] });
+
 import { PageTransition } from '@/components/layout/page-transition';
 import { WebVitalsMonitor } from '@/components/metrics/web-vitals';
 import { AccessibilityChecker } from '@/components/accessibility/accessibility-checker';
@@ -27,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <AuthProvider>
       <html lang="en">
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
@@ -37,6 +42,6 @@ export default function RootLayout({
           <AccessibilityChecker />
         </body>
       </html>
-    </ClerkProvider>
+    </AuthProvider>
   );
 }

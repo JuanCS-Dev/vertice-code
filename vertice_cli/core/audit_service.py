@@ -3,15 +3,13 @@ AI Audit Service - ISO 42001 Compliance
 Comprehensive logging of AI interactions for safety and compliance
 """
 
-import asyncio
 import logging
 import time
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 from dataclasses import dataclass
-from datetime import datetime
 
 from .database import get_db_session
-from .guardrails import get_ai_safety_guardrails, SafetyResult, SafetyViolation
+from .guardrails import get_ai_safety_guardrails, SafetyResult
 
 logger = logging.getLogger(__name__)
 

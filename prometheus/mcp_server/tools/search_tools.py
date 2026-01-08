@@ -346,3 +346,9 @@ search_tools = [
         execute_func=list_directory,
     ),
 ]
+
+# Register all tools with the global registry
+from .registry import register_tool
+
+for tool in search_tools:
+    register_tool(tool)

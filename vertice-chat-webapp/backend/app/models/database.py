@@ -76,12 +76,12 @@ class Workspace(Base):
 
 
 class User(Base):
-    """User model with Clerk integration"""
+    """User model with Google Identity integration"""
 
     __tablename__ = "users"
 
     id: Mapped[uuid.UUID] = Column(SQLUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    clerk_id: Mapped[str] = Column(String(255), nullable=False, unique=True)
+    auth_id: Mapped[str] = Column(String(255), nullable=False, unique=True)
 
     # Profile
     email: Mapped[str] = Column(String(255), nullable=False)
@@ -316,7 +316,7 @@ class AuditLog(Base):
 
 # Indexes for performance
 Index("idx_workspaces_slug", Workspace.slug)
-Index("idx_users_clerk_id", User.clerk_id)
+Index("idx_users_auth_id", User.auth_id)
 Index("idx_users_workspace_id", User.workspace_id)
 Index("idx_agents_workspace_id", Agent.workspace_id)
 Index("idx_agents_api_key_hash", Agent.api_key_hash)
@@ -371,7 +371,7 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    clerk_id: str = Field(..., max_length=255)
+    auth_id: str = Field(..., max_length=255)
     workspace_id: Optional[uuid.UUID] = None
 
 
@@ -387,7 +387,7 @@ class UserUpdate(BaseModel):
 
 class User(UserBase):
     id: uuid.UUID
-    clerk_id: str
+    auth_id: str
     workspace_id: Optional[uuid.UUID]
     role: str
     preferences: Dict[str, Any]

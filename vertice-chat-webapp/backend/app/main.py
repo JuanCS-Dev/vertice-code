@@ -25,6 +25,12 @@ try:
 except ImportError as e:
     print(f"Warning: Terminal API not available: {e}")
     terminal = None
+
+try:
+    from app.api.v1 import executor
+except ImportError as e:
+    print(f"Warning: Executor API not available: {e}")
+    executor = None
 from app.core.exceptions import AppException
 
 # Setup logging
@@ -263,6 +269,9 @@ app.include_router(billing.router, prefix="/api/v1/billing", tags=["billing"])
 
 if terminal:
     app.include_router(terminal.router, prefix="/api/v1/terminal", tags=["terminal"])
+
+if executor:
+    app.include_router(executor.router, prefix="/api/v1/agents", tags=["agents"])
 
 
 # Health check endpoint

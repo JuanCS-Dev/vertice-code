@@ -46,6 +46,8 @@ class MCPServerConfig:
     enable_execution_tools: bool = True  # Security-sensitive
     enable_notebook_tools: bool = True
     enable_context_tools: bool = True
+    enable_search_tools: bool = True
+    enable_system_tools: bool = True
     enable_advanced_tools: bool = False  # Plan mode tools (complex)
 
     # Tool execution limits
@@ -58,6 +60,15 @@ class MCPServerConfig:
     max_memory_mb: int = 512
     restricted_path: str = "/usr/local/bin:/usr/bin:/bin"  # Allowed PATH
     enable_pty_execution: bool = False  # Interactive mode (security risk)
+
+    # Git security (for git tools)
+    git_protected_branches: List[str] = field(
+        default_factory=lambda: ["main", "master", "develop", "production", "release"]
+    )
+    git_dangerous_flags: List[str] = field(
+        default_factory=lambda: ["--force", "-f", "--hard", "--no-verify", "--no-gpg-sign", "-i"]
+    )
+    git_max_commit_message: int = 1_000_000  # 1MB
 
     # Distributed settings (if enabled)
     discovery_endpoints: List[str] = field(default_factory=list)

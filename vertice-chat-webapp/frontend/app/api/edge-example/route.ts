@@ -13,7 +13,7 @@
  */
 
 // Opt into Edge Runtime
-export const runtime = 'edge';
+// export const runtime = 'edge'; // Disabled due to cacheComponents conflict
 
 export async function POST(request: Request) {
   try {

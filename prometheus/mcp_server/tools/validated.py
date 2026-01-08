@@ -7,8 +7,10 @@ validation against JSON schemas, ensuring type safety and constraint
 enforcement for all MCP tools.
 """
 
+from __future__ import annotations
+
 import logging
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Callable, Awaitable
 from .base import BaseTool, ToolResult, ToolDefinition
 
 logger = logging.getLogger(__name__)
@@ -75,18 +77,7 @@ class ValidatedTool(BaseTool):
 
         # Execute tool if validation passes
         try:
-            result = await self.execute(**params)  # Add await here
-            logger.info(f"Tool executed successfully: {self._definition.name}")
-            return result
-
-        except Exception as e:
-            error_msg = f"Tool execution failed: {str(e)}"
-            logger.error(f"{error_msg} (tool: {self._definition.name})", exc_info=True)
-            return ToolResult(success=False, error=error_msg, metadata={"exception": str(e)})
-
-        # Execute tool if validation passes
-        try:
-            result = self.execute(**params)
+            result = await self.execute(**params)
             logger.info(f"Tool executed successfully: {self._definition.name}")
             return result
 
@@ -118,7 +109,7 @@ def create_validated_tool(
     category: str,
     parameters: Dict[str, Any],
     required_params: List[str],
-    execute_func: callable,
+    execute_func: Callable[..., Awaitable[ToolResult]],
 ) -> ValidatedTool:
     """
     Create a validated tool from components.

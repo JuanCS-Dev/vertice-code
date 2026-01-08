@@ -9,11 +9,10 @@ Strategy:
 - Voice/Audio → GPT-4o Realtime or Gemini Live
 
 Cost comparison (per 1M tokens):
-- Haiku:  $0.25 input / $1.25 output
-- Sonnet: $3 input / $15 output
-- Opus:   $15 input / $75 output
+- Flash:  $0.075 input / $0.30 output
+- Pro:    $1.25 input / $5.00 output
 
-Reference: https://www.anthropic.com/pricing
+Reference: https://ai.google.dev/pricing
 """
 
 from typing import List, Literal
@@ -35,9 +34,9 @@ logger = logging.getLogger(__name__)
 class ModelTier(str, Enum):
     """Model tiers by capability and cost"""
 
-    FAST = "claude-3-5-haiku-20241022"  # Fastest, cheapest
-    BALANCED = "claude-sonnet-4-5-20250901"  # Best balance
-    POWERFUL = "claude-opus-4-5-20251101"  # Most capable
+    FAST = "gemini-1.5-flash"  # Fastest, cheapest
+    BALANCED = "gemini-1.5-pro"  # Best balance
+    POWERFUL = "gemini-1.5-pro"  # Most capable (Gemini 1.5 Pro is currently top tier)
 
 
 class IntentType(str, Enum):

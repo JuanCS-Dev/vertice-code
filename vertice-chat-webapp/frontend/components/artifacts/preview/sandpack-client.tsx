@@ -141,10 +141,10 @@ function SandpackErrorListener({
 
   useEffect(() => {
     const unsubscribe = listen((message) => {
-      if (message.type === 'error') {
+      if (message.type === 'action' && message.action === 'show-error') {
         const parsedError = parseSandpackError(
-          message.message || 'Unknown error',
-          message.stack
+          (message as any).message || 'Unknown error',
+          (message as any).stack
         );
 
         onError?.({
@@ -266,13 +266,7 @@ export function SandpackClient({
         theme={VERTICE_VOID_THEME}
         options={{
           autorun,
-          autoReload: true,
-          showTabs: showEditor,
-          showLineNumbers: true,
-          showInlineErrors: true,
-          wrapContent: true,
-          editorHeight: showEditor ? 400 : 0,
-          editorWidthPercentage: 50
+          autoReload: true
         }}
       >
         {/* Error Listener (PROJECT VIVID Phase 2.2) */}

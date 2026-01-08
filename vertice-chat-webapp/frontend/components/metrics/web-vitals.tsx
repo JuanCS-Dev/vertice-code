@@ -19,7 +19,7 @@ declare global {
 export function WebVitalsMonitor() {
   useEffect(() => {
     // Dynamic import to avoid SSR issues
-    import('web-vitals').then(({ onCLS, onFID, onLCP, onFCP, onTTFB }) => {
+    import('web-vitals').then(({ onCLS, onLCP, onFCP, onTTFB }) => {
       const sendToAnalytics = (metric: any) => {
         // Send to Vercel Analytics if available
         if (window.va) {
@@ -47,7 +47,7 @@ export function WebVitalsMonitor() {
 
       // Monitor all Core Web Vitals
       onCLS(sendToAnalytics);      // Cumulative Layout Shift
-      onFID(sendToAnalytics);      // First Input Delay
+      // onFID removed in web-vitals v5.x
       onLCP(sendToAnalytics);      // Largest Contentful Paint
       onFCP(sendToAnalytics);      // First Contentful Paint
       onTTFB(sendToAnalytics);     // Time to First Byte

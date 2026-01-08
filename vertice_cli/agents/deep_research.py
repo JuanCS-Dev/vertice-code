@@ -6,16 +6,14 @@ This module provides deep research capabilities through iterative information ga
 integrated with Vertice-Code's existing agent architecture and tools.
 """
 
-import asyncio
 import logging
 import time
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime
-import json
 
 # Using simple class instead of BaseAgent for compatibility
-from vertice_cli.core.guardrails import get_ai_safety_guardrails, SafetyResult
+from vertice_cli.core.guardrails import get_ai_safety_guardrails
 from vertice_cli.tools.web_search import WebSearchTool
 
 logger = logging.getLogger(__name__)

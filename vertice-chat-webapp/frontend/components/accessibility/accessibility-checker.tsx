@@ -33,17 +33,17 @@ export function AccessibilityChecker() {
         1000, // Check every 1 second
         {
           // Axe configuration
-          rules: {
+          rules: [
             // Enable specific rules
-            'color-contrast': { enabled: true },
-            'heading-order': { enabled: true },
-            'image-alt': { enabled: true },
-            'link-name': { enabled: true },
-            'button-name': { enabled: true },
-            'aria-roles': { enabled: true },
-            'aria-valid-attr': { enabled: true },
-            'tabindex': { enabled: true },
-          },
+            { id: 'color-contrast', enabled: true },
+            { id: 'heading-order', enabled: true },
+            { id: 'image-alt', enabled: true },
+            { id: 'link-name', enabled: true },
+            { id: 'button-name', enabled: true },
+            { id: 'aria-roles', enabled: true },
+            { id: 'aria-valid-attr', enabled: true },
+            { id: 'tabindex', enabled: true },
+          ],
           // Disable noisy rules in development
           disableOtherRules: false,
         },

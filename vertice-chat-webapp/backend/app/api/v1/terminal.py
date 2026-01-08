@@ -8,45 +8,27 @@ import json
 import logging
 import uuid
 import asyncio
+import os
+
+from app.integrations.mcp_client import get_mcp_client, MCPClient, CircuitBreakerOpenException
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-
-# Mock MCP server for terminal endpoint
-class MockMCPServer:
-    """Mock MCP server for testing and development."""
-
-    async def handle_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
-        """Handle MCP request with mock response."""
-        method = request.get("method", "")
-        request_id = request.get("id", "mock")
-
-        if method == "tools/list":
-            # Return mock tools list
-            return {
-                "jsonrpc": "2.0",
-                "result": {
-                    "tools": [
-                        {"name": "execute_shell", "description": "Execute shell commands"},
-                        {"name": "read_file", "description": "Read file contents"},
-                        {"name": "write_file", "description": "Write to files"},
-                    ]
-                },
-                "id": request_id,
-            }
-        else:
-            # Generic mock response
-            return {
-                "jsonrpc": "2.0",
-                "result": {"output": "Mock MCP server response", "status": "success"},
-                "id": request_id,
-            }
+# Global MCP client instance
+mcp_client: MCPClient
 
 
-# Global MCP server instance
-mcp_server = MockMCPServer()
+async def get_terminal_mcp_client() -> MCPClient:
+    """Get MCP client for terminal operations."""
+    global mcp_client
+    if mcp_client is None:
+        # Get MCP server URL from environment or use default
+        mcp_server_url = os.getenv("MCP_SERVER_URL", "http://localhost:3000")
+        mcp_client = MCPClient(base_url=mcp_server_url)
+        await mcp_client.start()
+    return mcp_client
 
 
 @router.websocket("/")
@@ -97,16 +79,32 @@ async def terminal_websocket(websocket: WebSocket):
                         "id": f"terminal-{id(message)}",
                     }
 
-                # Handle MCP request
+                # Handle MCP request via HTTP client
                 try:
-                    response = await mcp_server.handle_request(mcp_request)
-                    response_data = response  # Already a dict from mock server
+                    client = await get_terminal_mcp_client()
+                    response_data = await client.call_mcp_method(
+                        mcp_request["method"], mcp_request.get("params", {})
+                    )
 
                     # Send response back to client
                     if "result" in response_data:
-                        await websocket.send_json(
-                            {"type": "output", "data": response_data["result"].get("output", "")}
-                        )
+                        # Extract tool result content
+                        result = response_data["result"]
+                        if isinstance(result, dict) and "content" in result:
+                            # MCP tool response format
+                            content = result["content"]
+                            if isinstance(content, list) and content:
+                                text_content = (
+                                    content[0].get("text", "")
+                                    if isinstance(content[0], dict)
+                                    else str(content[0])
+                                )
+                                await websocket.send_json({"type": "output", "data": text_content})
+                            else:
+                                await websocket.send_json({"type": "output", "data": str(result)})
+                        else:
+                            # Other MCP responses
+                            await websocket.send_json({"type": "output", "data": str(result)})
                     elif "error" in response_data:
                         await websocket.send_json(
                             {
@@ -115,6 +113,14 @@ async def terminal_websocket(websocket: WebSocket):
                             }
                         )
 
+                except CircuitBreakerOpenException as e:
+                    logger.warning(f"Circuit breaker open: {e}")
+                    await websocket.send_json(
+                        {
+                            "type": "error",
+                            "data": "MCP server temporarily unavailable. Please try again later.",
+                        }
+                    )
                 except Exception as e:
                     logger.error(f"Error executing command via MCP: {e}")
                     await websocket.send_json(

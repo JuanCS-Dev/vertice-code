@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional
 from rich.panel import Panel
 from rich.markdown import Markdown
 from rich.syntax import Syntax
+import re
 from rich.text import Text
 from rich.table import Table
 from rich.console import Group
@@ -42,6 +43,25 @@ class OutputFormatter:
     # Max content length before truncation
     MAX_CONTENT_LENGTH: int = 50000  # 50K chars
     MAX_LINES: int = 500  # 500 lines
+
+    @staticmethod
+    def _process_code_blocks(text: str) -> str:
+        """
+        Process code blocks in markdown text to enable syntax highlighting.
+        Since Rich Markdown doesn't automatically syntax highlight code blocks,
+        we need to replace them with placeholders that will be handled separately.
+        """
+        # Pattern to match code blocks: ```language\ncode\n```
+        code_block_pattern = r"```(\w+)?\n(.*?)\n```"
+
+        def replace_code_block(match):
+            language = match.group(1) or "text"
+            code = match.group(2)
+            # For now, just return the original block
+            # We'll enhance this to actually inject syntax highlighting
+            return f"```{language}\n{code}\n```"
+
+        return re.sub(code_block_pattern, replace_code_block, text, flags=re.DOTALL)
 
     @staticmethod
     def format_response(
@@ -88,16 +108,21 @@ class OutputFormatter:
 
             truncation_info = ""
 
+        # Process code blocks with syntax highlighting
+        processed_text = OutputFormatter._process_code_blocks(display_text)
+
         # Parse as markdown for rich formatting
         try:
-            content: Any = Markdown(display_text)
+            content: Any = Markdown(processed_text)
         except (ValueError, TypeError):
             content = Text(display_text)
 
         # Build final content with truncation indicator
         if is_truncated and truncation_info:
             final_content: Any = Group(
-                content, Text(""), Text(truncation_info, style=Colors.DIM)  # Spacer
+                content,
+                Text(""),
+                Text(truncation_info, style=Colors.DIM),  # Spacer
             )
         else:
             final_content = content
@@ -379,7 +404,7 @@ class OutputFormatter:
         text.append(f"{Icons.ROUTING} ", style=f"bold {Colors.ROUTING}")
         text.append("Auto-routing to ", style=Colors.MUTED)
         text.append(f"{agent_name.title()}Agent", style=f"bold {Colors.AGENT}")
-        text.append(f" (confidence: {int(confidence*100)}%)", style=Colors.DIM)
+        text.append(f" (confidence: {int(confidence * 100)}%)", style=Colors.DIM)
         return text
 
     @staticmethod

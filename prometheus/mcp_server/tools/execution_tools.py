@@ -506,3 +506,9 @@ execution_tools = [
         execute_func=kill_shell,
     ),
 ]
+
+# Register all tools with the global registry
+from .registry import register_tool
+
+for tool in execution_tools:
+    register_tool(tool)

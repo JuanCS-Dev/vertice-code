@@ -40,10 +40,10 @@ CREATE TABLE workspaces (
     deletion_reason TEXT
 );
 
--- Users (Clerk integration)
+-- Users (Google Identity integration)
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    clerk_id VARCHAR(255) UNIQUE NOT NULL,
+    auth_id VARCHAR(255) UNIQUE NOT NULL,
 
     -- Profile
     email VARCHAR(255) NOT NULL,
@@ -295,7 +295,7 @@ CREATE TABLE gdpr_requests (
 
 -- Performance indexes
 CREATE INDEX CONCURRENTLY idx_workspaces_slug ON workspaces(slug);
-CREATE INDEX CONCURRENTLY idx_users_clerk_id ON users(clerk_id);
+CREATE INDEX CONCURRENTLY idx_users_auth_id ON users(auth_id);
 CREATE INDEX CONCURRENTLY idx_users_workspace_id ON users(workspace_id);
 CREATE INDEX CONCURRENTLY idx_agents_workspace_id ON agents(workspace_id);
 CREATE INDEX CONCURRENTLY idx_agents_api_key_hash ON agents(api_key_hash);
@@ -305,7 +305,7 @@ CREATE INDEX CONCURRENTLY idx_audit_workspace_created ON audit_log(workspace_id,
 
 -- Unique constraints
 ALTER TABLE workspaces ADD CONSTRAINT workspaces_slug_unique UNIQUE (slug);
-ALTER TABLE users ADD CONSTRAINT users_clerk_id_unique UNIQUE (clerk_id);
+ALTER TABLE users ADD CONSTRAINT users_auth_id_unique UNIQUE (auth_id);
 ALTER TABLE agents ADD CONSTRAINT agents_api_key_hash_unique UNIQUE (api_key_hash);
 
 -- =============================================================================

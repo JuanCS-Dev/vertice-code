@@ -115,3 +115,9 @@ system_tools = [
         execute_func=think_tool,
     ),
 ]
+
+# Register all tools with the global registry
+from .registry import register_tool
+
+for tool in system_tools:
+    register_tool(tool)
