@@ -93,27 +93,27 @@ export default function Home() {
               transition={{ duration: 0.5 }}
               className="lg:w-1/2 text-center lg:text-left"
             >
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-cyan-400 mb-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-xs font-medium text-cyan-400 mb-6">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
                 </span>
-                v2.0 Public Beta is Live
+                Sovereign Mode Activated — Jan 2026
               </div>
               
-              <h1 className="text-5xl lg:text-7xl font-bold leading-tight mb-6 tracking-tight">
-                The <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">OS</span> for <br/>
-                AI Engineers
+              <h1 className="text-5xl lg:text-8xl font-bold leading-tight mb-6 tracking-tight">
+                The <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">Sovereign OS</span> <br/>
+                for AI Engineers
               </h1>
               
               <p className="text-xl text-zinc-400 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-                Stop coding alone. Vertice Code orchestrates autonomous squads of agents to build, test, and deploy your software in a secure WebAssembly sandbox.
+                Orchestrate autonomous agent squads with <b>Noesis Strategic Consciousness</b> and <b>Daimon Passive Insights</b>. Build at the speed of thought.
               </p>
               
               <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
                 <Link href="/sign-up" className="w-full sm:w-auto">
-                  <Button size="lg" className="w-full sm:w-auto h-12 px-8 bg-white text-black hover:bg-zinc-200 font-bold text-base">
-                    <Command className="w-4 h-4 mr-2" /> Launch Terminal
+                  <Button size="lg" variant="neon" className="w-full sm:w-auto h-14 px-10 font-bold text-lg">
+                    <Command className="w-5 h-5 mr-2" /> Launch Sovereign Terminal
                   </Button>
                 </Link>
                 <Button variant="outline" size="lg" className="w-full sm:w-auto h-12 px-8 border-white/20 hover:bg-white/5 hover:text-white hover:border-white/40">
@@ -161,21 +161,21 @@ export default function Home() {
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-cyan-500/5 rounded-full blur-[100px] pointer-events-none"></div>
                   
                   <div className="flex">
-                    <div className="text-zinc-700 mr-4 select-none text-right w-8">
-                      1<br/>2<br/>3<br/>4<br/>5<br/>6<br/>7<br/>8<br/>9<br/>10<br/>11
+                    <div className="text-zinc-700 mr-4 select-none text-right w-8 border-r border-white/5 pr-4">
+                      1<br/>2<br/>3<br/>4<br/>5<br/>6<br/>7<br/>8<br/>9<br/>10<br/>11<br/>12<br/>13
                     </div>
                     <div>
-                      <span className="text-purple-400">import</span> <span className="text-white">vertice</span> <span className="text-purple-400">as</span> <span className="text-white">vt</span>
+                      <span className="text-purple-400">from</span> <span className="text-white">vertice.core</span> <span className="text-purple-400">import</span> <span className="text-white">SovereignOrchestrator</span>
                       <br/><br/>
-                      <span className="text-zinc-500"># Define an autonomous squad</span><br/>
-                      <span className="text-blue-400">squad</span> = vt.<span className="text-yellow-300">create_squad</span>([<br/>
-                      &nbsp;&nbsp;vt.Agent(role=<span className="text-green-400">"Architect"</span>),<br/>
-                      &nbsp;&nbsp;vt.Agent(role=<span className="text-green-400">"Engineer"</span>, language=<span className="text-green-400">"rust"</span>),<br/>
-                      &nbsp;&nbsp;vt.Agent(role=<span className="text-green-400">"QA"</span>)<br/>
-                      ])<br/><br/>
-                      <span className="text-zinc-500"># Execute mission in parallel</span><br/>
-                      <span className="text-purple-400">await</span> squad.<span className="text-yellow-300">execute</span>(<br/>
-                      &nbsp;&nbsp;<span className="text-green-400">"Refactor the billing module for high concurrency"</span><br/>
+                      <span className="text-zinc-500"># Initializing Claude 4.5 Opus Backbone</span><br/>
+                      <span className="text-blue-400">brain</span> = <span className="text-white">SovereignOrchestrator</span>(<br/>
+                      &nbsp;&nbsp;model=<span className="text-green-400">"claude-4.5-opus"</span>,<br/>
+                      &nbsp;&nbsp;consciousness=<span className="text-green-400">"noesis"</span>,<br/>
+                      &nbsp;&nbsp;insights=<span className="text-green-400">"daimon"</span><br/>
+                      )<br/><br/>
+                      <span className="text-zinc-500"># Execute mission with 90% Prompt Caching</span><br/>
+                      <span className="text-purple-400">await</span> brain.<span className="text-yellow-300">solve</span>(<br/>
+                      &nbsp;&nbsp;<span className="text-green-400">"Build a distributed trading engine in Rust"</span><br/>
                       )<br/>
                       <span className="text-cyan-400 animate-pulse">_</span>
                     </div>
@@ -183,9 +183,15 @@ export default function Home() {
                 </div>
                 
                 {/* Floating "AI Processing" Badge */}
-                <div className="absolute bottom-6 right-6 bg-[#1a1a1a]/90 backdrop-blur border border-cyan-500/30 rounded-lg p-3 flex items-center gap-3 shadow-lg">
-                  <div className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></div>
-                  <div className="text-xs text-cyan-200">Architect Agent Planning...</div>
+                <div className="absolute bottom-6 right-6 bg-black/80 backdrop-blur-xl border border-cyan-500/50 rounded-xl p-4 flex items-center gap-4 shadow-2xl shadow-cyan-500/20">
+                  <div className="relative">
+                    <div className="w-3 h-3 bg-cyan-500 rounded-full animate-pulse"></div>
+                    <div className="absolute inset-0 bg-cyan-500 rounded-full animate-ping opacity-25"></div>
+                  </div>
+                  <div className="flex flex-col">
+                    <div className="text-[10px] uppercase tracking-widest text-cyan-500 font-bold">Noesis Active</div>
+                    <div className="text-xs text-white">Opus 4.5 reasoning: 98%</div>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -203,19 +209,19 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-8">
             <FeatureCard 
-              icon={<Bot className="w-8 h-8 text-cyan-400" />}
-              title="Multi-Agent Squads"
-              description="Don't just chat with one bot. Spin up a specialized team (Architect, Dev, QA) that shares context and solves complex problems."
+              icon={<Cpu className="w-8 h-8 text-purple-400" />}
+              title="Noesis Consciousness"
+              description="Strategic monitor that detects critical moments and activates the ethical tribunal for high-impact architectural decisions."
             />
             <FeatureCard 
-              icon={<Cpu className="w-8 h-8 text-purple-400" />}
-              title="Wasm Sandboxing"
-              description="Execute untrusted AI-generated code securely in milliseconds using our specialized WebAssembly runtime."
+              icon={<Bot className="w-8 h-8 text-cyan-400" />}
+              title="Daimon Insights"
+              description="Silent observation via 7 telemetry collectors. The system learns your patterns and improves your code while you sleep."
             />
             <FeatureCard 
               icon={<Layers className="w-8 h-8 text-blue-400" />}
-              title="Memory Vault"
-              description="Persistent, vector-based memory that learns from your codebase and adapts to your team's coding style."
+              title="Sovereign Routing"
+              description="Automatic escalation between Claude 4.5 Sonnet and Opus. 90% cost reduction via native Prompt Caching."
             />
             <FeatureCard 
               icon={<Code2 className="w-8 h-8 text-green-400" />}
@@ -229,8 +235,8 @@ export default function Home() {
             />
             <FeatureCard 
               icon={<Globe className="w-8 h-8 text-yellow-400" />}
-              title="Merchant of Record"
-              description="Monetize your agents. Built-in Stripe integration allows you to sell your specialized agents to other devs."
+              title="Wasm Sandbox"
+              description="Execute AI code in secure, isolated environments with hardware-level performance and zero-day protection."
             />
           </div>
         </div>

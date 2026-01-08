@@ -83,20 +83,23 @@ export function ArtifactsPanel() {
   const hasArtifacts = Object.keys(artifacts).length > 0;
 
   return (
-    <div className="flex h-full bg-background border rounded-lg overflow-hidden">
+    <div className="flex h-full bg-[#050505] border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
       {/* Left Sidebar - Artifact Tree */}
       <div className={cn(
-        "border-r bg-muted/10 transition-all duration-200",
+        "border-r border-white/5 bg-zinc-950/50 backdrop-blur-md transition-all duration-300",
         showTree ? "w-80" : "w-0 overflow-hidden"
       )}>
-        <div className="p-4 border-b">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold">Artifacts</h3>
+        <div className="p-6 border-b border-white/5">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></div>
+              <h3 className="font-bold text-xs uppercase tracking-[0.2em] text-zinc-400">Project Nodes</h3>
+            </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowTree(!showTree)}
-              className="text-muted-foreground"
+              className="h-8 w-8 p-0 hover:bg-white/5 text-zinc-500"
             >
               {showTree ? '◁' : '▷'}
             </Button>

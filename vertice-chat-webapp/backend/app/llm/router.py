@@ -32,11 +32,13 @@ logger = logging.getLogger(__name__)
 
 
 class ModelTier(str, Enum):
-    """Model tiers by capability and cost"""
+    """Model tiers by capability and cost (2026 Sovereign Mode)"""
 
-    FAST = "gemini-1.5-flash"  # Fastest, cheapest
-    BALANCED = "gemini-1.5-pro"  # Best balance
-    POWERFUL = "gemini-1.5-pro"  # Most capable (Gemini 1.5 Pro is currently top tier)
+    FAST = "claude-3-5-haiku-20241022"
+    BALANCED = "claude-sonnet-4-5-20250901"
+    POWERFUL = "claude-opus-4-5-20251101"
+    # Legacy fallback
+    GEMINI_FAST = "gemini-1.5-flash"
 
 
 class IntentType(str, Enum):

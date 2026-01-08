@@ -141,7 +141,7 @@ export function ChatInput() {
   };
 
   return (
-    <div className="relative space-y-2">
+    <div className="relative space-y-4">
       {/* Voice Input */}
       {showVoiceInput && (
         <VoiceInput
@@ -151,52 +151,53 @@ export function ChatInput() {
         />
       )}
 
-      <form onSubmit={handleSubmit} className="flex gap-2">
+      <form onSubmit={handleSubmit} className="flex gap-3 items-end bg-zinc-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-2 transition-all duration-300 focus-within:border-cyan-500/50 focus-within:shadow-[0_0_20px_rgba(6,182,212,0.1)]">
         <div className="flex-1 relative">
           <Textarea
             ref={textareaRef}
             value={message}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder="Digite sua mensagem... (/ para comandos, Shift+Enter para nova linha)"
-            className="min-h-[44px] max-h-[200px] resize-none pr-20"
+            placeholder="Execute sovereign commands or brainstorm with Opus 4.5... (/ for tools)"
+            className="min-h-[44px] max-h-[300px] bg-transparent border-none focus-visible:ring-0 resize-none py-3 px-4 text-zinc-200 placeholder:text-zinc-600"
             disabled={isSubmitting}
           />
 
           {message.length > 0 && (
-            <div className="absolute bottom-2 right-2 text-xs text-muted-foreground">
-              {message.length}
+            <div className="absolute bottom-2 right-2 text-[10px] font-mono text-zinc-700 tracking-tighter">
+              {message.length} CHARS
             </div>
           )}
         </div>
 
-        <div className="flex gap-1">
+        <div className="flex gap-2 pb-1.5 pr-1.5">
           {/* Voice Input Button */}
           <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             size="icon"
             onClick={() => setShowVoiceInput(!showVoiceInput)}
             disabled={isSubmitting}
-            className="flex-shrink-0"
+            className={cn(
+              "h-9 w-9 rounded-xl hover:bg-white/5 transition-colors",
+              showVoiceInput && "text-red-500 bg-red-500/10"
+            )}
           >
-            <Mic className={cn(
-              "h-4 w-4",
-              showVoiceInput && "text-red-500"
-            )} />
+            <Mic className="h-4 w-4" />
           </Button>
 
           <Button
             type="submit"
+            variant="neon"
             size="icon"
             disabled={!message.trim() || isSubmitting || !session}
             className={cn(
-              "flex-shrink-0",
-              isSubmitting && "animate-pulse"
+              "h-9 w-9 rounded-xl transition-all duration-300",
+              isSubmitting && "animate-pulse scale-95"
             )}
           >
             {isSubmitting ? (
-              <Square className="h-4 w-4" />
+              <Square className="h-4 w-4 fill-current" />
             ) : (
               <Send className="h-4 w-4" />
             )}

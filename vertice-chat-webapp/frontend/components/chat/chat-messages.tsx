@@ -51,9 +51,14 @@ export function ChatMessages() {
             ))}
 
             {isLoading && (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span className="text-sm">Pensando...</span>
+              <div className="flex flex-col gap-2 p-4 rounded-xl bg-cyan-500/5 border border-cyan-500/20 max-w-[200px]">
+                <div className="flex items-center gap-2 text-cyan-400">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-xs font-bold tracking-widest uppercase">Noesis Active</span>
+                </div>
+                <div className="text-[10px] text-zinc-500 font-mono animate-pulse">
+                  Opus 4.5 synthesizing...
+                </div>
               </div>
             )}
           </>

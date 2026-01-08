@@ -78,16 +78,16 @@ export const MessageBubble = memo(function MessageBubble({
 
         {/* Message Bubble */}
         <div className={cn(
-          "rounded-lg px-4 py-3 shadow-sm",
+          "rounded-2xl px-5 py-4 shadow-xl transition-all duration-300",
           isUser
-            ? "bg-primary text-primary-foreground ml-auto"
+            ? "bg-gradient-to-br from-cyan-600 to-blue-700 text-white ml-auto"
             : isSystem
-              ? "bg-muted border border-border"
-              : "bg-card border border-border"
+              ? "bg-zinc-900/50 border border-zinc-800 backdrop-blur-md"
+              : "bg-[#0f0f0f]/80 border border-white/10 backdrop-blur-xl hover:border-cyan-500/30 group-hover:shadow-[0_0_20px_rgba(6,182,212,0.05)]"
         )}>
-          <div className="prose prose-sm max-w-none dark:prose-invert">
+          <div className="prose prose-sm max-w-none dark:prose-invert prose-pre:bg-zinc-950 prose-pre:border prose-pre:border-white/5">
             {isUser ? (
-              <div className="whitespace-pre-wrap">{message.content}</div>
+              <div className="whitespace-pre-wrap font-medium">{message.content}</div>
             ) : (
               <MarkdownRenderer content={message.content} />
             )}
@@ -95,23 +95,23 @@ export const MessageBubble = memo(function MessageBubble({
         </div>
 
         {/* Message Footer */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between text-[10px] uppercase tracking-widest font-bold text-zinc-500">
+          <div className="flex items-center gap-4">
             {message.metadata?.executionTime && (
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1 text-cyan-500/70">
                 <Zap className="h-3 w-3" />
                 {(message.metadata.executionTime * 1000).toFixed(0)}ms
               </span>
             )}
             {message.metadata?.tokens && (
-              <span>
-                {message.metadata.tokens.toLocaleString()} tokens
+              <span className="border-l border-white/10 pl-4">
+                {message.metadata.tokens.toLocaleString()} TOKENS
               </span>
             )}
-            {message.metadata?.cost && (
-              <span>
-                ${message.metadata.cost.toFixed(4)}
-              </span>
+            {message.metadata?.effort && (
+              <Badge variant="outline" className="text-[8px] px-1 py-0 border-purple-500/30 text-purple-400">
+                EFFORT: {message.metadata.effort}
+              </Badge>
             )}
           </div>
 
