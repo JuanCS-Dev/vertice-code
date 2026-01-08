@@ -67,9 +67,9 @@ class Settings(BaseSettings):
     # Rate Limiting
     RATE_LIMIT_REQUESTS_PER_MINUTE: int = 60
 
-    # Clerk Authentication
-    CLERK_SECRET_KEY: Optional[str] = None
-    CLERK_PUBLISHABLE_KEY: Optional[str] = None
+    # Google Identity (Firebase Auth)
+    FIREBASE_PROJECT_ID: Optional[str] = "vertice-ai"
+    GOOGLE_CLOUD_PROJECT: Optional[str] = None
 
     # Stripe Billing
     STRIPE_SECRET_KEY: Optional[str] = None
