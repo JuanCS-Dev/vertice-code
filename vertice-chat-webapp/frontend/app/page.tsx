@@ -13,7 +13,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -33,18 +33,18 @@ import {
 } from 'lucide-react';
 
 export default function Home() {
-  const { user, isLoaded } = useUser();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    if (isLoaded && user) {
+    if (!loading && user) {
       router.push('/chat');
     }
-  }, [user, isLoaded, router]);
+  }, [user, loading, router]);
 
-  if (!mounted || !isLoaded) return null;
+  if (!mounted || loading) return null;
 
   if (user) return null; // Will redirect
 

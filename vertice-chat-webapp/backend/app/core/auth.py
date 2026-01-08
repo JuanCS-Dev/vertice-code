@@ -23,9 +23,6 @@ class FirebaseUser(BaseModel):
     name: Optional[str] = None
     image_url: Optional[str] = None
 
-# Alias for backward compatibility during migration
-ClerkUser = FirebaseUser
-
 class FirebaseAuth:
     """Firebase authentication handler"""
 
@@ -78,9 +75,6 @@ def get_firebase_auth() -> FirebaseAuth:
         _firebase_auth = FirebaseAuth()
     return _firebase_auth
 
-# Alias for backward compatibility
-get_clerk_auth = get_firebase_auth
-
 async def get_current_user(token: str) -> Optional[FirebaseUser]:
     """
     Dependency function for FastAPI routes
@@ -101,13 +95,6 @@ async def authenticate_agent(api_key: str) -> Optional[AgentIdentity]:
     """
     if not api_key:
         return None
-
-    # Hash the provided key for lookup
-    key_hash = hash_api_key(api_key)
-
-    # Use the agent key service
-    service = get_agent_key_service()
-    return await service.get_agent_by_key_hash(key_hash)
 
     # Hash the provided key for lookup
     key_hash = hash_api_key(api_key)

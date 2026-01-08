@@ -113,7 +113,7 @@ firebase deploy --only hosting
 {
   "next": "16.1.1",
   "react": "19.2.3",
-  "@clerk/nextjs": "^6.36.5",
+  "firebase": "^11.1.0",
   "@monaco-editor/react": "^4.7.0",
   "@xterm/xterm": "^6.0.0",
   "@tanstack/react-query": "^5.90.16",
@@ -130,26 +130,18 @@ firebase deploy --only hosting
 - Health check `/api/health`
 - Optimized for Cloud Run
 
-### Variáveis de Ambiente Necessárias
+### Variáveis de Ambiente Necessárias (Firebase)
 ```bash
-# Clerk Authentication
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-CLERK_SECRET_KEY=sk_test_...
+# Firebase Config (Client Side)
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSy...
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=vertice-project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=vertice-project
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=vertice-project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
+NEXT_PUBLIC_FIREBASE_APP_ID=1:...
 
 # Backend API
 NEXT_PUBLIC_API_URL=https://vertice-backend-xxx.run.app
-
-# MCP Server (opcional, se frontend chamar diretamente)
-NEXT_PUBLIC_MCP_URL=https://vertice-mcp-xxx.run.app
-
-# Sentry (Observability)
-SENTRY_DSN=https://...@sentry.io/...
-NEXT_PUBLIC_SENTRY_DSN=https://...@sentry.io/...
-
-# Next.js
-NODE_ENV=production
-NEXT_TELEMETRY_DISABLED=1
-PORT=8080
 ```
 
 ### Build e Deploy

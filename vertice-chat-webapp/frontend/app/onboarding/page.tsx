@@ -7,22 +7,22 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, Code, Github, Mic, MessageSquare } from 'lucide-react';
 
 export default function OnboardingPage() {
-  const { user, isLoaded } = useUser();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (isLoaded && !user) {
+    if (!loading && !user) {
       router.push('/sign-in');
     }
-  }, [user, isLoaded, router]);
+  }, [user, loading, router]);
 
-  if (!isLoaded || !user) {
+  if (loading || !user) {
     return <div>Loading...</div>;
   }
 
@@ -36,7 +36,7 @@ export default function OnboardingPage() {
         {/* Welcome Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-foreground mb-4">
-            Welcome to Vertice, {user?.firstName || 'Developer'}!
+            Welcome to Vertice, {user?.displayName?.split(' ')[0] || 'Developer'}!
           </h1>
           <p className="text-xl text-muted-foreground">
             Your AI-powered coding companion is ready. Let's get you started.

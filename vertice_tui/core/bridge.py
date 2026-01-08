@@ -115,25 +115,37 @@ class Bridge(ProtocolBridgeMixin):
         initialization_errors = []
         partial_initialization = False
 
-        logger.info("Bridge initialization: Starting phased initialization")
+        # Import structured logging and error tracking
+        from .logging import get_bridge_logger, create_operation_context
+        from .error_tracking import track_error
+
+        bridge_logger = get_bridge_logger()
+
+        bridge_logger.info("Bridge initialization: Starting phased initialization")
 
         # Phase 1: Critical components (fail fast)
-        try:
-            logger.info("Bridge initialization: Phase 1 - Critical components")
-            self._auth_manager = AuthenticationManager()
-            self._auth_manager.load_credentials()
-            logger.debug("✓ Authentication manager initialized")
+        with create_operation_context("critical_init", "bridge", {"phase": 1}):
+            try:
+                bridge_logger.info("Bridge initialization: Phase 1 - Critical components")
+                self._auth_manager = AuthenticationManager()
+                self._auth_manager.load_credentials()
+                bridge_logger.debug("✓ Authentication manager initialized")
 
-            self.llm = GeminiClient()
-            if not self.llm.is_available:
-                logger.warning("LLM client initialized but not connected - limited functionality")
-            logger.debug("✓ LLM client initialized")
+                self.llm = GeminiClient()
+                if not self.llm.is_available:
+                    bridge_logger.warning(
+                        "LLM client initialized but not connected - limited functionality"
+                    )
+                bridge_logger.debug("✓ LLM client initialized")
 
-        except Exception as e:
-            error_msg = f"Critical component initialization failed: {e}"
-            logger.critical(error_msg)
-            initialization_errors.append(("critical", error_msg))
-            raise RuntimeError("Cannot continue without critical components") from e
+            except Exception as e:
+                error_event = track_error(
+                    "bridge", "critical_init", e, {"phase": 1, "component": "critical"}
+                )
+                error_msg = f"Critical component initialization failed: {e}"
+                bridge_logger.critical(error_msg, extra={"error_event": error_event.correlation_id})
+                initialization_errors.append(("critical", error_msg))
+                raise RuntimeError("Cannot continue without critical components") from e
 
         # Phase 2: Important components (graceful degradation)
         logger.info("Bridge initialization: Phase 2 - Important components")
