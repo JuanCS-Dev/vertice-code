@@ -193,15 +193,6 @@ class AzureOpenAIProvider:
             body["tools"] = self._convert_tools(tools)
             body["tool_choice"] = "auto"  # Enable function calling
 
-    def _convert_tools(self, tools: List[Any]) -> List[Dict[str, Any]]:
-        """Convert internal tools to OpenAI format."""
-        openai_tools = []
-        for tool in tools:
-            # Handle both internal Tool objects and raw dictionaries
-            schema = tool.get_schema() if hasattr(tool, "get_schema") else tool
-            openai_tools.append({"type": "function", "function": schema})
-        return openai_tools
-
         async with client.stream(
             "POST",
             url,
@@ -250,6 +241,15 @@ class AzureOpenAIProvider:
             full_messages, max_tokens=max_tokens, temperature=temperature, **kwargs
         ):
             yield chunk
+
+    def _convert_tools(self, tools: List[Any]) -> List[Dict[str, Any]]:
+        """Convert internal tools to OpenAI format."""
+        openai_tools = []
+        for tool in tools:
+            # Handle both internal Tool objects and raw dictionaries
+            schema = tool.get_schema() if hasattr(tool, "get_schema") else tool
+            openai_tools.append({"type": "function", "function": schema})
+        return openai_tools
 
     def get_model_info(self) -> Dict[str, str | bool | int]:
         """Get model information."""

@@ -81,11 +81,14 @@ class LLMClientWithChatProtocol(LLMClientProtocol, Protocol):
 
     async def stream_chat(
         self,
-        prompt: str,
-        context: Optional[str] = None,
+        messages: List[Dict[str, str]],
+        system_prompt: Optional[str] = None,
+        max_tokens: int = 8192,
+        temperature: float = 0.7,
+        tools: Optional[List[Any]] = None,
         **kwargs: Any,
     ) -> AsyncIterator[str]:
-        """Stream chat response with context."""
+        """Stream chat with messages and optional parameters."""
         ...
 
 

@@ -271,7 +271,11 @@ class VerticeClient:
         return [{"role": "system", "content": system_prompt}, *messages]
 
     def _can_use(self, name: str) -> bool:
-        return self._failures.get(name, 0) < self.config.circuit_breaker_threshold
+        # Check circuit breaker
+        if self._failures.get(name, 0) >= self.config.circuit_breaker_threshold:
+            return False
+        # Check API key availability
+        return self._has_api_key(name)
 
     def _has_api_key(self, name: str) -> bool:
         env_var = ENV_MAP.get(name)
