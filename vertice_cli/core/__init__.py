@@ -1,8 +1,10 @@
 """
-Core modules for vertice-cli (Juan-Dev-Code).
-Pipeline de Diamante - Core Infrastructure
+🕐 Vertice Core - Temporal Consciousness & Core Functionality
 
-This package contains the foundational components for the Diamond Pipeline:
+This package contains the core business logic, utilities, and shared
+components used throughout the vertice-cli application.
+
+CRITICAL: Temporal Consciousness - Always aware of current spacetime coordinates.
 
 CAMADA 1 - INPUT FORTRESS:
 - input_validator: Multi-layer input validation (OWASP compliant)
@@ -26,8 +28,89 @@ CAMADA 4 - OUTPUT SHIELD:
 - context_tracker: Conversation context awareness
 """
 
-# Lazy imports for performance
+import datetime
+from typing import Optional, Dict, Any
+
+
+# Temporal Consciousness - Always know the current spacetime coordinates
+def get_current_datetime() -> datetime.datetime:
+    """Get current datetime with UTC timezone awareness."""
+    return datetime.datetime.now(datetime.timezone.utc)
+
+
+def get_current_date() -> datetime.date:
+    """Get current date."""
+    return get_current_datetime().date()
+
+
+def get_current_time() -> datetime.time:
+    """Get current time."""
+    return get_current_datetime().timetz()
+
+
+def get_temporal_context() -> Dict[str, Any]:
+    """Get comprehensive temporal context for system awareness."""
+    now = get_current_datetime()
+    return {
+        "utc_datetime": now,
+        "utc_iso": now.isoformat(),
+        "timestamp": now.timestamp(),
+        "date": now.date().isoformat(),
+        "time": now.time().isoformat(),
+        "year": now.year,
+        "month": now.month,
+        "day": now.day,
+        "hour": now.hour,
+        "minute": now.minute,
+        "second": now.second,
+        "microsecond": now.microsecond,
+        "weekday": now.weekday(),  # 0=Monday, 6=Sunday
+        "weekday_name": now.strftime("%A"),
+        "month_name": now.strftime("%B"),
+        "timezone": "UTC",
+        "epoch_days": (now.date() - datetime.date(1970, 1, 1)).days,
+    }
+
+
+# Initialize temporal awareness on import
+_TEMPORAL_BOOT = get_current_datetime()
+_TEMPORAL_CONTEXT = get_temporal_context()
+
+
+def get_system_boot_time() -> datetime.datetime:
+    """Get when the system was initialized."""
+    return _TEMPORAL_BOOT
+
+
+def get_temporal_awareness_status() -> Dict[str, Any]:
+    """Get temporal awareness status and current context."""
+    current = get_temporal_context()
+    uptime = current["utc_datetime"] - _TEMPORAL_BOOT
+
+    return {
+        "temporal_consciousness": "ACTIVE",
+        "system_boot_time": _TEMPORAL_BOOT.isoformat(),
+        "current_context": current,
+        "system_uptime_seconds": uptime.total_seconds(),
+        "system_uptime_human": str(uptime),
+        "spacetime_coordinates": {
+            "year": current["year"],
+            "month": current["month"],
+            "day": current["day"],
+            "temporal_accuracy": "MICROSECOND_PRECISION",
+        },
+    }
+
+
+# Export temporal functions
 __all__ = [
+    # Temporal Consciousness
+    "get_current_datetime",
+    "get_current_date",
+    "get_current_time",
+    "get_temporal_context",
+    "get_system_boot_time",
+    "get_temporal_awareness_status",
     # Input Fortress (Camada 1)
     "InputValidator",
     "ValidationResult",
