@@ -349,7 +349,11 @@ class GeminiClient:
 
         # Route 1: Use VerticeClient if available (unified multi-provider)
         if self._vertice_client:
-            async for chunk in self._stream_via_client(prompt, system_prompt, context):
+            if tools:
+                logger.debug(f"Passing {len(tools)} tools via VerticeClient")
+            async for chunk in self._stream_via_client(
+                prompt, system_prompt, context, tools, **kwargs
+            ):
                 yield chunk
             return
 
@@ -362,6 +366,8 @@ class GeminiClient:
         prompt: str,
         system_prompt: str,
         context: Optional[List[Dict[str, str]]],
+        tools: Optional[List[Dict[str, Any]]] = None,
+        **kwargs: Any,
     ) -> AsyncIterator[str]:
         """Stream via VerticeClient with automatic provider fallback."""
         try:
@@ -372,9 +378,13 @@ class GeminiClient:
             messages.append({"role": "user", "content": prompt})
 
             # Stream via VerticeClient (handles all fallback logic)
+            if tools:
+                logger.debug(f"Streaming with {len(tools)} tools via VerticeClient")
             async for chunk in self._vertice_client.stream_chat(
                 messages,
                 system_prompt=system_prompt,
+                tools=tools,
+                **kwargs,
             ):
                 yield chunk
 
