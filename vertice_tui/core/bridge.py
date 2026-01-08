@@ -96,18 +96,22 @@ class Bridge(ProtocolBridgeMixin):
 
     def __init__(self) -> None:
         """Initialize Bridge with all subsystems."""
-        # Auth first (loads credentials)
-        self._auth_manager = AuthenticationManager()
-        self._auth_manager.load_credentials()
+        try:
+            # Auth first (loads credentials)
+            self._auth_manager = AuthenticationManager()
+            self._auth_manager.load_credentials()
 
-        # Core systems
-        self.llm = GeminiClient()
-        self.governance = GovernanceObserver()
-        self.agents = AgentManager(self.llm)
-        self.tools = ToolBridge()
-        self.palette = CommandPaletteBridge()
-        self.autocomplete = AutocompleteBridge(self.tools)
-        self.history = HistoryManager()
+            # Core systems - with error handling
+            self.llm = GeminiClient()
+            self.governance = GovernanceObserver()
+            self.agents = AgentManager(self.llm)
+            self.tools = ToolBridge()
+            self.palette = CommandPaletteBridge()
+            self.autocomplete = AutocompleteBridge(self.tools)
+            self.history = HistoryManager()
+        except Exception as e:
+            logger.critical(f"Bridge initialization failed: {e}")
+            raise RuntimeError(f"System initialization failed: {e}")
 
         # Managers
         self._todo_manager = TodoManager()
@@ -170,6 +174,27 @@ class Bridge(ProtocolBridgeMixin):
     def is_connected(self) -> bool:
         """Check if LLM is available."""
         return self.llm.is_available
+
+    def _verify_initialization(self) -> bool:
+        """Verify that all critical components were initialized successfully."""
+        critical_components = [
+            ("llm", self.llm),
+            ("governance", self.governance),
+            ("agents", self.agents),
+            ("tools", self.tools),
+            ("auth_manager", self._auth_manager),
+        ]
+
+        for name, component in critical_components:
+            if component is None:
+                logger.error(f"Critical component {name} is None")
+                return False
+
+        # Verify LLM connectivity
+        if not self.is_connected:
+            logger.warning("LLM is not connected - system may have limited functionality")
+
+        return True
 
     @property
     def status_line(self) -> str:
@@ -508,7 +533,6 @@ Working directory: {os.getcwd()}"""
 
     # Project init
     def init_project(self) -> Dict[str, Any]:
-
         vertice_content = """# VERTICE.md - Project Context
 
 This file helps Vértice understand your project context.
@@ -536,6 +560,18 @@ def get_bridge() -> Bridge:
         with _bridge_lock:
             if _bridge_instance is None:
                 _bridge_instance = Bridge()
+
+    # Verify bridge health after creation
+    if _bridge_instance:
+        try:
+            # Quick health check
+            health = _bridge_instance.check_health()
+            critical_failures = [k for k, v in health.items() if not v.get("ok", False)]
+            if critical_failures:
+                logger.warning(f"Bridge health check failed for: {critical_failures}")
+        except Exception as e:
+            logger.error(f"Bridge health check failed: {e}")
+
     return _bridge_instance
 
 
