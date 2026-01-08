@@ -157,6 +157,17 @@ class SessionManager:
         logger.info(f"Started new session: {session_id}")
         return self._current_session
 
+    def create_session(
+        self,
+        working_directory: Optional[str] = None,
+        context: Optional[Dict[str, Any]] = None,
+        **kwargs: Any,
+    ) -> SessionSnapshot:
+        """Alias for start_session for backward compatibility."""
+        # Handle 'cwd' as an alias for 'working_directory'
+        wd = working_directory or kwargs.get("cwd")
+        return self.start_session(working_directory=wd, context=context)
+
     def resume_session(self, session_id: str) -> Optional[SessionSnapshot]:
         """Resume an existing session."""
         path = self._get_session_path(session_id)
@@ -334,6 +345,16 @@ class SessionManager:
         self._last_save = time.time()
 
         return True
+
+    def save_session(self, snapshot: SessionSnapshot) -> bool:
+        """Alias for saving a specific snapshot (compatibility)."""
+        path = self._get_session_path(snapshot.session_id)
+        return save_session(
+            snapshot,
+            path,
+            self.enable_compression,
+            self.COMPRESSION_THRESHOLD,
+        )
 
     def end_session(self) -> None:
         """End the current session gracefully."""

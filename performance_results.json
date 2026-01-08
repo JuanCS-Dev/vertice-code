@@ -1,12 +1,13 @@
 {
   "import_times": {
-    "vertice_cli": 0.00011515617370605469,
-    "vertice_tui": 1.1783008575439453,
-    "vertice_core": 1.430511474609375e-06,
+    "vertice_cli": 0.0002465248107910156,
+    "vertice_tui": 1.2175590991973877,
+    "vertice_core": 1.6689300537109375e-06,
     "prometheus": 1.1920928955078125e-06
   },
-  "total_import_time": 1.1784186363220215,
+  "total_import_time": 1.217808485031128,
   "recommendations": [
-    "Use lazy loading for heavy components"
+    "Use lazy loading for heavy components",
+    "Implement caching for expensive operations"
   ]
 }

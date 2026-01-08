@@ -169,6 +169,19 @@ class LLMClient:
         except Exception as e:
             logger.debug(f"VerticeClient init failed: {e}")
 
+    def get_available_providers(self) -> List[str]:
+        """Get list of available providers.
+
+        Delegates to VerticeClient if available, otherwise returns
+        legacy priority list.
+        """
+        if self._vertice_client:
+            try:
+                return self._vertice_client.get_available_providers()
+            except Exception:
+                pass
+        return self.provider_priority
+
     @property
     def default_provider(self) -> str:
         """Get current default provider."""

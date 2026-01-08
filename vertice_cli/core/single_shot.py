@@ -11,11 +11,7 @@ from pathlib import Path
 
 from .llm import llm_client
 from .context import ContextBuilder
-from ..tools.base import ToolRegistry
-from ..tools.file_ops import ReadFileTool, WriteFileTool, EditFileTool, ListDirectoryTool
-from ..tools.search import SearchFilesTool
-from ..tools.exec_hardened import BashCommandTool
-from ..tools.git_ops import GitStatusTool, GitDiffTool
+from ..core.tool_registry import ToolRegistry
 
 
 class SingleShotExecutor:
@@ -121,7 +117,7 @@ Available tools:
 {tool_list}
 
 Current context:
-- Working directory: {context.get('cwd', 'unknown')}
+- Working directory: {context.get("cwd", "unknown")}
 
 INSTRUCTIONS:
 1. Analyze the user's request

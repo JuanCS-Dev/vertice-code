@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Force "dark" variant to trigger on .dark class */
+@variant dark (&:where(.dark, .dark *));
+
 /* CSS Variables for theming */
 :root {
   --background: 0 0% 100%;

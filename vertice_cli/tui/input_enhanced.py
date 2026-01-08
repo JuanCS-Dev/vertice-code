@@ -187,6 +187,18 @@ class EnhancedInputSession:
             # Exit prompt with special signal to trigger palette
             event.app.exit(result="__PALETTE__")
 
+        @kb.add(Keys.ControlN)
+        def _activate_noesis(event: Any) -> None:
+            """Activate Noesis mode (Ctrl+N) - Consciousness for strategic moments."""
+            # Exit prompt with special signal to trigger Noesis activation
+            event.app.exit(result="__NOESIS__")
+
+        @kb.add(Keys.ControlT)
+        def _activate_distributed_noesis(event: Any) -> None:
+            """Activate Distributed Consciousness (Ctrl+T) - Networked collective intelligence."""
+            # Exit prompt with special signal to trigger distributed Noesis activation
+            event.app.exit(result="__DISTRIBUTED_NOESIS__")
+
         return kb
 
     def _get_prompt_message(self) -> str | HTML:

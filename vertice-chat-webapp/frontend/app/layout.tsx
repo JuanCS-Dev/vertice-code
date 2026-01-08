@@ -33,9 +33,9 @@ export default function RootLayout({
 }>) {
   return (
     <AuthProvider>
-      <html lang="en">
+      <html lang="en" className="dark" style={{ colorScheme: 'dark' }}>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-900 text-white`}
         >
           <PageTransition>{children}</PageTransition>
           <WebVitalsMonitor />

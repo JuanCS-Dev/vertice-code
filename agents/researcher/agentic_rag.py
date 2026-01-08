@@ -59,6 +59,71 @@ class AgenticRAGMixin:
             "code": CodebaseAgent(),
         }
 
+    async def _generate_answer_llm(
+        self,
+        query: str,
+        results: List[ResearchResult],
+    ) -> str:
+        """Generate final answer from retrieved results using LLM (Claude 4.5 optimized)."""
+        if not results:
+            return f"Unable to find information about: {query}"
+
+        # Import router and complexity
+        from providers.vertice_router import get_router, TaskComplexity
+        router = get_router()
+
+        # Format context for Claude 4.5 Prompt Caching
+        # Placing large context at the beginning of the prompt
+        context_parts = []
+        for i, res in enumerate(results):
+            context_parts.append(f"Source {i+1} ({res.title}):\n{res.content or 'No content'}\n")
+        
+        context_str = "\n---\n".join(context_parts)
+
+        system_prompt = "You are an expert researcher. Synthesize the following search results into a clear, concise, and accurate answer."
+        
+        user_prompt = f"""CONTEXT FOR RESEARCH:
+{context_str}
+
+USER QUERY: {query}
+
+Synthesize the context above to answer the query. 
+Use markdown. Cite sources by their source number [1], [2], etc.
+If the context doesn't contain the answer, say so.
+"""
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ]
+
+        try:
+            # Use TaskComplexity.COMPLEX to route to Claude 4.5
+            answer = await router.generate(
+                messages, 
+                complexity=TaskComplexity.COMPLEX,
+                max_tokens=4096
+            )
+            return answer
+        except Exception as e:
+            logger.error(f"LLM Synthesis failed: {e}. Falling back to basic synthesis.")
+            return self._generate_answer_basic(query, results)
+
+    def _generate_answer_basic(
+        self,
+        query: str,
+        results: List[ResearchResult],
+    ) -> str:
+        """Fallback basic answer generation."""
+        answer_parts = [f"Research findings for: {query}\n"]
+        for i, result in enumerate(results[:5], 1):
+            answer_parts.append(f"\n{i}. {result.title}")
+            if result.content:
+                answer_parts.append(f"   {result.content[:200]}...")
+            if result.url:
+                answer_parts.append(f"   Source: {result.url}")
+        return "\n".join(answer_parts)
+
     async def agentic_research(
         self,
         query: str,
@@ -67,15 +132,8 @@ class AgenticRAGMixin:
     ) -> AgenticRAGResult:
         """
         Perform Agentic RAG research.
-
-        Args:
-            query: Research query.
-            max_iterations: Max retrieval iterations.
-            confidence_threshold: Minimum confidence to stop.
-
-        Returns:
-            AgenticRAGResult with answer and trace.
         """
+        # ... (rest of the method remains similar until answer generation)
         if not hasattr(self, "_retrieval_agents"):
             self._init_retrieval_agents()
 
@@ -149,7 +207,8 @@ class AgenticRAGMixin:
                 sub_queries = [self._refine_query(query, evaluation.missing_aspects)]
                 reasoning_trace.append(f"[Refine] New query: {sub_queries[0]}")
 
-        answer = self._generate_answer(query, all_results)
+        # Use the new LLM-based synthesis (Claude 4.5 optimized)
+        answer = await self._generate_answer_llm(query, all_results)
         sources = list(set(r.url for r in all_results if r.url))
 
         return AgenticRAGResult(
@@ -163,8 +222,6 @@ class AgenticRAGMixin:
             reasoning_trace=reasoning_trace,
             iterations=iteration,
         )
-
-    def _classify_complexity(self, query: str) -> QueryComplexity:
         """Classify query complexity for adaptive retrieval."""
         query_lower = query.lower()
 

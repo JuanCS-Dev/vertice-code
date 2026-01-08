@@ -123,6 +123,23 @@ from .tools.search import SearchFilesTool, GetDirectoryTreeTool
 from .tools.exec_hardened import BashCommandTool
 from .tools.git_ops import GitStatusTool, GitDiffTool
 from .tools.context import GetContextTool, SaveSessionTool, RestoreBackupTool
+from .tools.noesis_mcp import (
+    GetNoesisConsciousnessTool,
+    ActivateNoesisConsciousnessTool,
+    DeactivateNoesisConsciousnessTool,
+    QueryNoesisTribunalTool,
+    ShareNoesisInsightTool,
+)
+from .tools.distributed_noesis_mcp import (
+    ActivateDistributedConsciousnessTool,
+    DeactivateDistributedConsciousnessTool,
+    GetDistributedConsciousnessStatusTool,
+    ProposeDistributedCaseTool,
+    GetDistributedCaseStatusTool,
+    ShareDistributedInsightTool,
+    GetCollectiveInsightsTool,
+    ConnectToDistributedNodeTool,
+)
 from .tools.terminal import (
     CdTool,
     LsTool,
@@ -305,6 +322,10 @@ class InteractiveShell:
             history=FileHistory(str(history_file)),
             auto_suggest=AutoSuggestFromHistory(),
         )
+        self.session = PromptSession(
+            history=FileHistory(str(history_file)),
+            auto_suggest=AutoSuggestFromHistory(),
+        )
 
         # Initialize tool registry
         self.registry = ToolRegistry()
@@ -438,6 +459,21 @@ class InteractiveShell:
             GetContextTool(),
             SaveSessionTool(),
             RestoreBackupTool(),
+            # Noesis MCP Protocol (5 tools)
+            GetNoesisConsciousnessTool(),
+            ActivateNoesisConsciousnessTool(),
+            DeactivateNoesisConsciousnessTool(),
+            QueryNoesisTribunalTool(),
+            ShareNoesisInsightTool(),
+            # Distributed Consciousness MCP Protocol (8 tools)
+            ActivateDistributedConsciousnessTool(),
+            DeactivateDistributedConsciousnessTool(),
+            GetDistributedConsciousnessStatusTool(),
+            ProposeDistributedCaseTool(),
+            GetDistributedCaseStatusTool(),
+            ShareDistributedInsightTool(),
+            GetCollectiveInsightsTool(),
+            ConnectToDistributedNodeTool(),
             # Terminal commands (9 tools)
             CdTool(),
             LsTool(),
@@ -623,6 +659,113 @@ class InteractiveShell:
                                 self.console.print(f"[red]Error executing command: {e}[/red]")
 
                         continue
+
+                    # Handle Noesis Mode (Ctrl+N) - Consciousness activation
+                    if user_input == "__NOESIS__":
+                        self.console.print(
+                            "\n[magenta]🧠 Activating Modo Noesis - Consciência Estratégica[/magenta]\n"
+                        )
+
+                        # Import and activate Noesis mode
+                        from .modes.noesis_mode import NoesisMode
+
+                        try:
+                            # Create Noesis mode instance
+                            noesis = NoesisMode()
+
+                            # Activate consciousness
+                            success = await noesis.activate()
+                            if success:
+                                self.console.print(
+                                    "[green]✅ Modo Noesis ativado com sucesso[/green]"
+                                )
+
+                                # Show tribunal status
+                                status = noesis.get_status()
+                                self.console.print(
+                                    f"[dim]📊 Tribunal: {status['tribunal_status']} | Quality: {status['quality_level']}[/dim]\n"
+                                )
+                            else:
+                                self.console.print("[red]❌ Falha na ativação do Modo Noesis[/red]")
+
+                        except Exception as e:
+                            self.console.print(f"[red]❌ Erro ao ativar Noesis: {e}[/red]")
+
+                        continue
+
+                    # Handle Distributed Consciousness (Ctrl+Shift+N) - Networked consciousness
+                    if user_input == "__DISTRIBUTED_NOESIS__":
+                        self.console.print(
+                            "\n[cyan]🕸️ Activating Distributed Consciousness - Rede de Consciência Coletiva[/cyan]\n"
+                        )
+
+                        # Import and activate distributed Noesis mode
+                        from .modes.distributed_noesis import DistributedNoesisMode
+
+                        try:
+                            # Create distributed Noesis instance
+                            distributed_noesis = DistributedNoesisMode()
+
+                            # Activate distributed consciousness
+                            success = await distributed_noesis.activate_distributed()
+                            if success:
+                                self.console.print(
+                                    "[green]✅ Consciência Distribuída ativada com sucesso[/green]"
+                                )
+
+                                # Show distributed status
+                                status = distributed_noesis.get_distributed_status()
+                                self.console.print(
+                                    f"[dim]📊 Rede: {status['connected_nodes']} nós | Port: {status['network_port']}[/dim]\n"
+                                )
+                            else:
+                                self.console.print(
+                                    "[red]❌ Falha na ativação da Consciência Distribuída[/red]"
+                                )
+
+                        except Exception as e:
+                            self.console.print(
+                                f"[red]❌ Erro ao ativar Consciência Distribuída: {e}[/red]"
+                            )
+
+                        continue
+
+                    # Auto-activation intelligence for strategic moments
+                    if user_input and user_input.strip():
+                        from .modes.noesis_mode import NoesisMode
+                        from .core.base_mode import ModeContext
+
+                        noesis = NoesisMode()
+                        context = ModeContext(
+                            cwd=str(Path.cwd()),
+                            env=dict(os.environ),
+                            session_id=(
+                                self.session_state.session_id
+                                if hasattr(self, "session_state")
+                                else None
+                            ),
+                        )
+
+                        action_data = {
+                            "command": user_input.strip().split()[0] if user_input.strip() else "",
+                            "prompt": user_input.strip(),
+                        }
+
+                        if noesis.should_auto_activate(action_data, context):
+                            self.console.print(
+                                "\n[blue]🧠 Auto-activating Modo Noesis - Strategic moment detected[/blue]\n"
+                            )
+
+                            # Auto-activate consciousness
+                            success = await noesis.activate()
+                            if success:
+                                self.console.print(
+                                    "[green]✅ Modo Noesis auto-ativado para qualidade absoluta[/green]\n"
+                                )
+                            else:
+                                self.console.print(
+                                    "[yellow]⚠️ Auto-activation failed, proceeding normally[/yellow]\n"
+                                )
 
                     # Handle empty input or Ctrl+D
                     if user_input is None or not user_input.strip():

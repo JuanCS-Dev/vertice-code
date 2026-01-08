@@ -244,6 +244,7 @@ Provide clear, actionable suggestions."""
 
                 # Animated error message (Task 1.5)
                 text = Text("❌ AI Execution Failed", style="red bold")
+                success = False
                 self.console.print(text)
 
                 # P1: Intelligent error parsing
@@ -280,12 +281,22 @@ Provide clear, actionable suggestions."""
         except (IOError, OSError, ValueError) as e:
             logger.error(f"Command execution failed for '{suggestion}'", exc_info=True)
             self.console.print(f"[red]💥 AI Execution failed: {e}[/red]")
+            success = False
         except Exception as e:
             # Catch any other unexpected errors and log with stack trace
             logger.error(
                 f"An unexpected error occurred during execution of '{suggestion}'", exc_info=True
             )
             self.console.print(f"[red]🚨 AI System error: {e}[/red]")
+            success = False
+        finally:
+            duration = time.time() - start_time
+            await insights_collector.observe_command(
+                command=user_input,
+                duration=duration,
+                success=success,
+                context={"handler": "llm_processing"},
+            )
 
         # Add to history
         self.context.history.append(user_input)
@@ -559,6 +570,7 @@ Output ONLY the command, no explanation, no markdown."""
         if isinstance(error, PermissionError):
             self.console.print("[red]🔒 Permission denied[/red]")
             self.console.print(f"[yellow]💡 AI Suggestion: Try: sudo {user_input}[/yellow]")
+            success = False
         elif isinstance(error, FileNotFoundError):
             self.console.print("[red]❌ File or command not found[/red]")
             self.console.print(

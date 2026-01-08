@@ -51,6 +51,12 @@ class BasicHandler:
   /dash       - Show AI operations dashboard 📊
   /preview    - Enable AI file preview (default) 👁️
   /nopreview  - Disable AI file preview ⚡
+  /noesis-on  - Activate Noesis mode (consciousness) 🧠
+  /noesis-off - Deactivate Noesis mode 🔄
+  /noesis-status - Check Noesis mode status ⚖️
+
+  [bold]Keyboard Shortcuts:[/bold] ⌨️
+  Ctrl+N      - Toggle Noesis mode on/off 🧠
 
 [bold]History & Analytics:[/bold] 🆕
   /history    - Show command history
@@ -233,4 +239,40 @@ Context Optimizer:
 
         explanation = explain_command(command)
         self.console.print(f"\n🤖 AI: {explanation}")
+
+    async def handle_noesis_on(self, args: str) -> None:
+        """Ativa Modo Noesis."""
+        from vertice_cli.tools.plan_mode import EnterNoesisModeTool
+
+        tool = EnterNoesisModeTool()
+        result = await tool.execute()
+
+        if result.success:
+            self.console.print(f"\n{result.message}")
+        else:
+            self.console.print(f"\n❌ Erro: {result.error}")
+
+    async def handle_noesis_off(self, args: str) -> None:
+        """Desativa Modo Noesis."""
+        from vertice_cli.tools.plan_mode import ExitNoesisModeTool
+
+        tool = ExitNoesisModeTool()
+        result = await tool.execute()
+
+        if result.success:
+            self.console.print(f"\n{result.message}")
+        else:
+            self.console.print(f"\n❌ Erro: {result.error}")
+
+    async def handle_noesis_status(self, args: str) -> None:
+        """Verifica status do Modo Noesis."""
+        from vertice_cli.tools.plan_mode import GetNoesisStatusTool
+
+        tool = GetNoesisStatusTool()
+        result = await tool.execute()
+
+        if result.success:
+            self.console.print(f"\n{result.message}")
+        else:
+            self.console.print(f"\n❌ Erro: {result.error}")
         return CommandResult.ok()

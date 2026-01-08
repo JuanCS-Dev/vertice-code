@@ -12,6 +12,7 @@ Routes requests to the optimal LLM provider based on:
 from __future__ import annotations
 
 import asyncio
+import os
 from typing import Dict, List, Optional, AsyncGenerator, Protocol, Any
 from dataclasses import dataclass, field
 from enum import Enum
@@ -27,23 +28,26 @@ logger = logging.getLogger(__name__)
 
 class TaskComplexity(str, Enum):
     """Task complexity levels for routing decisions."""
-    SIMPLE = "simple"          # Formatting, simple chat
-    MODERATE = "moderate"      # Code generation, analysis
-    COMPLEX = "complex"        # Architecture, deep reasoning
-    CRITICAL = "critical"      # Security audit, production code
+
+    SIMPLE = "simple"  # Formatting, simple chat
+    MODERATE = "moderate"  # Code generation, analysis
+    COMPLEX = "complex"  # Architecture, deep reasoning
+    CRITICAL = "critical"  # Security audit, production code
 
 
 class SpeedRequirement(str, Enum):
     """Speed requirements for routing."""
-    INSTANT = "instant"        # < 1s first token
-    FAST = "fast"             # < 3s first token
-    NORMAL = "normal"         # < 10s first token
-    RELAXED = "relaxed"       # Any speed acceptable
+
+    INSTANT = "instant"  # < 1s first token
+    FAST = "fast"  # < 3s first token
+    NORMAL = "normal"  # < 10s first token
+    RELAXED = "relaxed"  # Any speed acceptable
 
 
 @dataclass
 class ProviderStatus:
     """Track provider availability and rate limits."""
+
     name: str
     available: bool = True
     requests_today: int = 0
@@ -84,6 +88,7 @@ class ProviderStatus:
 @dataclass
 class RoutingDecision:
     """Result of a routing decision."""
+
     provider_name: str
     model_name: str
     reasoning: str
@@ -97,7 +102,9 @@ class LLMProvider(Protocol):
 
     def is_available(self) -> bool: ...
     async def generate(self, messages: List[Dict], **kwargs) -> str: ...
-    async def stream_generate(self, messages: List[Dict], **kwargs) -> AsyncGenerator[str, None]: ...
+    async def stream_generate(
+        self, messages: List[Dict], **kwargs
+    ) -> AsyncGenerator[str, None]: ...
     async def stream_chat(self, messages: List[Dict], **kwargs) -> AsyncGenerator[str, None]: ...
     def get_model_info(self) -> Dict: ...
 
@@ -113,32 +120,29 @@ class VerticeRouter:
     4. FALLBACK CHAIN: Automatic failover on errors
     """
 
-    # Provider priorities (lower = higher priority)
-    # STABILITY MODE: vertex-ai only. Multi-provider routing planned for later.
+    # PROVIDER PRIORITIES (Lower = Higher Priority)
+    # Claude 4.5 is the supreme primary powerhouse for 2026.
     PROVIDER_PRIORITY = {
-        "anthropic-vertex": 1, # PREMIUM - Claude via Vertex AI
-        "vertex-ai": 2,        # PRIMARY - Gemini via Vertex AI (stable)
-        # Future: enable after system stabilization
+        "anthropic-vertex": 1,  # PRIMARY - Claude 4.5 (Optimized & Powerful)
+        "vertex-ai": 2,         # SECONDARY - Gemini (Stable Tooling)
         "groq": 10,
         "cerebras": 11,
         "mistral": 12,
-        "openrouter": 13,
-        "gemini": 14,
-        "azure-openai": 15,
     }
 
-    # STABILITY MODE: All complexity levels route to vertex-ai
+    # COMPLEXITY ROUTING (2026 Standards)
+    # All levels now prefer Anthropic Vertex as the first option.
     COMPLEXITY_ROUTING = {
-        TaskComplexity.SIMPLE: ["anthropic-vertex", "vertex-ai"],
-        TaskComplexity.MODERATE: ["anthropic-vertex", "vertex-ai"],
+        TaskComplexity.SIMPLE: ["anthropic-vertex", "vertex-ai", "groq"],
+        TaskComplexity.MODERATE: ["anthropic-vertex", "vertex-ai", "groq"],
         TaskComplexity.COMPLEX: ["anthropic-vertex", "vertex-ai"],
         TaskComplexity.CRITICAL: ["anthropic-vertex", "vertex-ai"],
     }
 
-    # STABILITY MODE: All speed requirements route to vertex-ai
+    # SPEED ROUTING
     SPEED_ROUTING = {
-        SpeedRequirement.INSTANT: ["anthropic-vertex", "vertex-ai"],
-        SpeedRequirement.FAST: ["anthropic-vertex", "vertex-ai"],
+        SpeedRequirement.INSTANT: ["groq", "cerebras", "anthropic-vertex"],
+        SpeedRequirement.FAST: ["anthropic-vertex", "vertex-ai", "groq"],
         SpeedRequirement.NORMAL: ["anthropic-vertex", "vertex-ai"],
         SpeedRequirement.RELAXED: ["anthropic-vertex", "vertex-ai"],
     }
@@ -150,109 +154,48 @@ class VerticeRouter:
         self._initialized = False
 
     def _lazy_init(self):
-        """Lazy initialize providers.
-
-        TEMPORARY FIX: Only initializes vertex-ai by default.
-        Other providers are initialized on-demand via /model command.
-        """
+        """Initialize providers on first use."""
         if self._initialized:
             return
 
-        # TEMPORARY FIX: Only import and initialize vertex-ai and anthropic-vertex
-        from .vertex_ai import VertexAIProvider
-        from .anthropic_vertex import AnthropicVertexProvider
-
-        # 1. Try Anthropic Vertex (Claude)
-        try:
-            anthropic = AnthropicVertexProvider(model_name="sonnet-4.5")
-            if anthropic.is_available():
-                self._providers["anthropic-vertex"] = anthropic
-                info = anthropic.get_model_info()
-                self._status["anthropic-vertex"] = ProviderStatus(
-                    name="anthropic-vertex",
-                    available=True,
-                )
-                logger.info(f"✅ Anthropic Vertex initialized: {info.get('model')}")
-        except Exception as e:
-            logger.debug(f"Anthropic Vertex not available: {e}")
-
-        # 2. Try Vertex AI (Gemini)
-        try:
-            provider = VertexAIProvider(model_name="flash")
-            if provider.is_available():
-                self._providers["vertex-ai"] = provider
-                info = provider.get_model_info()
-                self._status["vertex-ai"] = ProviderStatus(
-                    name="vertex-ai",
-                    available=True,
-                    daily_limit=info.get("requests_per_day", 10000),
-                )
-                logger.info(f"✅ Vertex AI initialized: {info.get('model')}")
-            else:
-                logger.error("❌ Vertex AI not available - check GOOGLE_CLOUD_PROJECT")
-        except (RuntimeError, ValueError, ImportError, AttributeError) as e:
-            logger.error(f"❌ Failed to initialize Vertex AI: {e}")
-
+        # Initialize providers
+        self._init_providers()
         self._initialized = True
-        logger.info("Vertice Router initialized (vertex-ai only mode)")
 
-    def _init_provider_on_demand(self, name: str) -> bool:
-        """Initialize a specific provider on demand (for /model command).
+    def _init_providers(self):
+        """Initialize all configured providers."""
+        # Import here to avoid circular imports
+        from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
-        Args:
-            name: Provider name to initialize
+        # Anthropic Vertex (Claude 4.5)
+        if os.getenv("ANTHROPIC_API_KEY"):
+            try:
+                from vertice_cli.core.providers.anthropic_vertex import AnthropicVertexProvider
 
-        Returns:
-            True if provider was initialized successfully
-        """
-        if name in self._providers:
-            return True  # Already initialized
+                self._providers["anthropic-vertex"] = AnthropicVertexProvider()
+                self._status["anthropic-vertex"] = ProviderStatus(name="anthropic-vertex")
+            except Exception as e:
+                logger.warning(f"Failed to initialize anthropic-vertex: {e}")
 
-        provider_classes = {
-            "anthropic-vertex": (".anthropic_vertex", "AnthropicVertexProvider", {"model_name": "sonnet-4.5"}),
-            "groq": (".groq", "GroqProvider", {"model_name": "llama-70b"}),
-            "cerebras": (".cerebras", "CerebrasProvider", {"model_name": "llama-70b"}),
-            "openrouter": (".openrouter", "OpenRouterProvider", {"model_name": "llama-70b"}),
-            "mistral": (".mistral", "MistralProvider", {"model_name": "large"}),
-            "gemini": (".gemini", "GeminiProvider", {}),
-            "azure-openai": (".azure_openai", "AzureOpenAIProvider", {"deployment": "gpt4o-mini"}),
-        }
-
-        if name not in provider_classes:
-            logger.warning(f"Unknown provider: {name}")
-            return False
-
-        module_name, class_name, kwargs = provider_classes[name]
-
+        # Vertex AI (Gemini)
         try:
-            import importlib
-            module = importlib.import_module(module_name, package="providers")
-            cls = getattr(module, class_name)
-            provider = cls(**kwargs)
+            self._providers["vertex-ai"] = VertexAIProvider()
+            self._status["vertex-ai"] = ProviderStatus(name="vertex-ai")
+        except Exception as e:
+            logger.warning(f"Failed to initialize vertex-ai: {e}")
 
-            if provider.is_available():
-                self._providers[name] = provider
-                info = provider.get_model_info()
-                self._status[name] = ProviderStatus(
-                    name=name,
-                    available=True,
-                    daily_limit=info.get("requests_per_day", 10000),
-                )
-                logger.info(f"✅ Provider {name} initialized on-demand")
-                return True
-            else:
-                logger.warning(f"⚠️ Provider {name} not available (missing API key)")
-                return False
-        except (ImportError, AttributeError, RuntimeError, ValueError) as e:
-            logger.error(f"❌ Failed to initialize {name}: {e}")
-            return False
+    def _init_provider_on_demand(self, provider_name: str):
+        """Initialize a provider on demand."""
+        # For now, just call _init_providers (they're all initialized at once)
+        self._init_providers()
 
     def get_available_providers(self) -> List[str]:
         """Get list of available providers."""
         self._lazy_init()
         return [
-            name for name, status in self._status.items()
-            if status.can_use()
+            name
+            for name, status in self._status.items()
+            if status.can_use() and name in self._providers
         ]
 
     def route(
@@ -263,23 +206,29 @@ class VerticeRouter:
         prefer_free: bool = True,
         required_provider: Optional[str] = None,
     ) -> RoutingDecision:
-        """
-        Route a request to the optimal provider.
-
-        Args:
-            task_description: Description of the task (for keyword analysis)
-            complexity: Task complexity level
-            speed: Speed requirement
-            prefer_free: Whether to prefer free tier providers
-            required_provider: Force a specific provider
-
-        Returns:
-            RoutingDecision with provider selection
-        """
+        """Route a request to the optimal provider."""
         self._lazy_init()
 
-        # If specific provider requested, use it (init on-demand if needed)
-        if required_provider:
+        # Analyze task description for RAG or Tooling keywords
+        is_rag = any(
+            kw in task_description.lower()
+            for kw in ["rag", "context", "search", "document", "knowledge"]
+        )
+        is_tooling = any(
+            kw in task_description.lower() for kw in ["tool", "function", "api", "execute", "run"]
+        )
+
+        # Force Anthropic for RAG in 2026 due to Prompt Caching efficiency
+        if is_rag and not required_provider:
+            required_provider = "anthropic-vertex"
+
+        # Force Gemini for Tooling (if user preferred and Gemini 3 works)
+        # Note: Gemini 3 is often preferred for latency in tools, but user reported issues.
+        # We stick to stable vertex-ai (Gemini 2.5) for now.
+        if is_tooling and not required_provider:
+            required_provider = "vertex-ai"
+
+            # If specific provider requested, use it
             # Try to initialize on-demand if not already available
             if required_provider not in self._providers:
                 self._init_provider_on_demand(required_provider)
@@ -302,7 +251,8 @@ class VerticeRouter:
 
         # Filter by availability
         available_candidates = [
-            p for p in candidates
+            p
+            for p in candidates
             if p in self._providers and self._status.get(p, ProviderStatus(name=p)).can_use()
         ]
 
@@ -321,10 +271,20 @@ class VerticeRouter:
         selected = available_candidates[0]
         fallbacks = available_candidates[1:3] if len(available_candidates) > 1 else []
 
+        # Model Selection Strategy (2026 Optimized)
+        model_name = self._providers[selected].get_model_info()["model"]
+        
+        if selected == "anthropic-vertex":
+            # Sonnet 4.5 for Light tasks, Opus 4.5 for Heavy tasks
+            if complexity in [TaskComplexity.SIMPLE, TaskComplexity.MODERATE]:
+                model_name = "claude-sonnet-4-5@20250929" # Sonnet
+            else:
+                model_name = "claude-opus-4-5@20251101"   # Opus
+
         return RoutingDecision(
             provider_name=selected,
-            model_name=self._providers[selected].get_model_info()["model"],
-            reasoning=f"Selected {selected} for {complexity.value} task with {speed.value} speed requirement",
+            model_name=model_name,
+            reasoning=f"Selected {selected} ({model_name}) for {complexity.value} task with {speed.value} speed requirement",
             fallback_providers=fallbacks,
             estimated_cost=0.0 if selected in ["groq", "cerebras", "mistral"] else 0.01,
             estimated_speed="ultra_fast" if selected in ["groq", "cerebras"] else "fast",
@@ -340,7 +300,7 @@ class VerticeRouter:
         messages: List[Dict[str, str]],
         complexity: TaskComplexity = TaskComplexity.MODERATE,
         speed: SpeedRequirement = SpeedRequirement.NORMAL,
-        **kwargs
+        **kwargs,
     ) -> str:
         """
         Generate completion with automatic routing and fallback.
@@ -361,7 +321,8 @@ class VerticeRouter:
         status = self._status[decision.provider_name]
 
         try:
-            result = await provider.generate(messages, **kwargs)
+            # Pass the specifically selected model
+            result = await provider.generate(messages, model=decision.model_name, **kwargs)
             status.record_request()
             return result
         except (RuntimeError, ValueError, ConnectionError, asyncio.TimeoutError) as e:
@@ -388,7 +349,7 @@ class VerticeRouter:
         complexity: TaskComplexity = TaskComplexity.MODERATE,
         speed: SpeedRequirement = SpeedRequirement.NORMAL,
         tools: Optional[List[Any]] = None,
-        **kwargs
+        **kwargs,
     ) -> AsyncGenerator[str, None]:
         """
         Stream chat with automatic routing and fallback.
@@ -414,10 +375,13 @@ class VerticeRouter:
                 messages,
                 system_prompt=system_prompt,
                 tools=tools,
+                model=decision.model_name,
                 **kwargs
             ):
                 yield chunk
             status.record_request()
+
+        
         except (RuntimeError, ValueError, ConnectionError, asyncio.TimeoutError) as e:
             status.record_error(str(e))
             logger.warning(f"Provider {decision.provider_name} failed: {e}")
@@ -427,15 +391,17 @@ class VerticeRouter:
                 try:
                     fallback = self._providers[fallback_name]
                     async for chunk in fallback.stream_chat(
-                        messages,
-                        system_prompt=system_prompt,
-                        tools=tools,
-                        **kwargs
+                        messages, system_prompt=system_prompt, tools=tools, **kwargs
                     ):
                         yield chunk
                     self._status[fallback_name].record_request()
                     return
-                except (ConnectionError, asyncio.TimeoutError, RuntimeError, ValueError) as fallback_error:
+                except (
+                    ConnectionError,
+                    asyncio.TimeoutError,
+                    RuntimeError,
+                    ValueError,
+                ) as fallback_error:
                     self._status[fallback_name].record_error(str(fallback_error))
                     continue
 

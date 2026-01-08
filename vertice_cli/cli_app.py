@@ -236,7 +236,17 @@ def chat(
 
     else:
         # Interactive mode - launch shell
+        from vertice_cli.core import insights_collector
+
         console.print("\n[bold blue]🚀 Starting AI-Powered Interactive Shell...[/bold blue]\n")
+
+        # Initialize insights collection
+        await insights_collector.observe_command(
+            command="shell_start",
+            duration=0.0,
+            success=True,
+            context={"event": "shell_initialization"},
+        )
         console.print("[dim]Type 'quit' or press Ctrl+D to exit[/dim]\n")
 
         try:
@@ -499,7 +509,7 @@ def delete_session(
 
     # Delete
     manager.delete_session(session_id)
-        console.print(f"[green]🗑️ Session {session_id} deleted[/green]")
+    console.print(f"[green]🗑️ Session {session_id} deleted[/green]")
 
 
 @sessions_app.command("cleanup")

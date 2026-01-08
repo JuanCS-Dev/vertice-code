@@ -178,7 +178,7 @@ __all__ = [
 from .types import *
 from .exceptions import *
 from .config import *
-from .logging import *
+from .logging_setup import *
 from .validation import *
 from .providers import *
 from .governance_pipeline import *
@@ -186,7 +186,8 @@ from .observability import *
 from .input_enhancer import *
 from .intent_classifier import *
 from .complexity_analyzer import *
-from .single_shot import *
+
+# from .single_shot import *  # FIXME: Circular import
 from .request_amplifier import *
 from .defense import *
 from .prompt_shield import *
@@ -198,5 +199,6 @@ from .error_presenter import *
 from .guardrails import *
 from .integration_types import *
 from .integration_coordinator import *
-from .maestro_governance import *
+
+# from .maestro_governance import *  # FIXME: Module not found
 from .error_utils import *

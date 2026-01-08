@@ -20,11 +20,20 @@ from .types import SessionSnapshot, SessionInfo
 logger = logging.getLogger(__name__)
 
 
+def _json_serialize_handler(obj: Any) -> Any:
+    """Handle non-serializable objects for JSON dumps."""
+    if isinstance(obj, (Path, os.PathLike)):
+        return str(obj)
+    if isinstance(obj, set):
+        return list(obj)
+    raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
+
+
 def compute_checksum(data: Dict[str, Any]) -> str:
     """Compute checksum for data integrity verification."""
     # Exclude checksum field itself
     data_copy = {k: v for k, v in data.items() if k != "checksum"}
-    content = json.dumps(data_copy, sort_keys=True)
+    content = json.dumps(data_copy, sort_keys=True, default=_json_serialize_handler)
     return hashlib.sha256(content.encode()).hexdigest()[:16]
 
 
@@ -42,24 +51,12 @@ def save_session(
 ) -> bool:
     """
     Save session snapshot to file with ATOMIC WRITE.
-
-    P0 FIX: Uses write-to-temp-then-rename pattern to prevent
-    corrupted files on crash or power loss.
-
-    Args:
-        snapshot: Session snapshot to save.
-        path: Base path for the file.
-        enable_compression: Whether to enable gzip compression.
-        compression_threshold: Compress if content exceeds this size.
-
-    Returns:
-        True if save was successful.
     """
     try:
         data = snapshot.to_dict()
         data["checksum"] = compute_checksum(data)
 
-        content = json.dumps(data, indent=2)
+        content = json.dumps(data, indent=2, default=_json_serialize_handler)
 
         # Determine final path with correct extension
         if enable_compression and len(content) > compression_threshold:
@@ -209,7 +206,7 @@ def update_index(
                     except (OSError, PermissionError):
                         pass
 
-    index_path.write_text(json.dumps(index, indent=2))
+    index_path.write_text(json.dumps(index, indent=2, default=_json_serialize_handler))
 
 
 def load_index(session_dir: Path, index_file: str) -> Dict[str, Dict[str, Any]]:

@@ -128,10 +128,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
             profiles_sample_rate=0.1,
         )
 
-    # Initialize Redis connection pool
-    from app.core.cache import init_redis_pool
+    # Initialize Cache (Firestore)
+    from app.core.cache import init_cache_pool
 
-    await init_redis_pool()
+    await init_cache_pool()
 
     # Initialize DB connection pool
     from app.core.database import init_db_pool
@@ -143,11 +143,11 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # Shutdown
     logger.info("Shutting down...")
-    from app.core.cache import close_redis_pool
-    from app.core.database import close_db_pool
+    from app.core.cache import close_cache_pool
+    # from app.core.database import close_db_pool
 
-    await close_redis_pool()
-    await close_db_pool()
+    await close_cache_pool()
+    # await close_db_pool()
 
 
 # Create FastAPI app

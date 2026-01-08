@@ -75,8 +75,10 @@ from .plan_mode import (
     AddPlanNoteTool,
     GetPlanStatusTool,
     get_plan_mode_tools,
-    get_plan_state,
-    reset_plan_state,
+    EnterNoesisModeTool,
+    ExitNoesisModeTool,
+    GetNoesisStatusTool,
+    get_noesis_mode_tools,
 )
 
 # Media tools (Sprint 3)
@@ -173,6 +175,14 @@ def get_all_tools():
         ExitPlanModeTool(),
         AddPlanNoteTool(),
         GetPlanStatusTool(),
+        # Noesis mode
+        EnterNoesisModeTool(),
+        ExitNoesisModeTool(),
+        GetNoesisStatusTool(),
+        # Noesis mode
+        EnterNoesisModeTool(),
+        ExitNoesisModeTool(),
+        GetNoesisStatusTool(),
         # Media
         ImageReadTool(),
         PDFReadTool(),
@@ -232,6 +242,16 @@ __all__ = [
     "AddPlanNoteTool",
     "GetPlanStatusTool",
     "get_plan_mode_tools",
+    # Noesis mode
+    "EnterNoesisModeTool",
+    "ExitNoesisModeTool",
+    "GetNoesisStatusTool",
+    "get_noesis_mode_tools",
+    # Noesis mode
+    "EnterNoesisModeTool",
+    "ExitNoesisModeTool",
+    "GetNoesisStatusTool",
+    "get_noesis_mode_tools",
     "get_plan_state",
     "reset_plan_state",
     # Media tools (Sprint 3)

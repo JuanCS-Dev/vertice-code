@@ -53,11 +53,11 @@ class VertexAIProvider:
 
         Args:
             project: GCP project ID (defaults to GOOGLE_CLOUD_PROJECT env var)
-            location: Vertex AI location
+            location: Vertex AI location (defaults to us-central1, but 'global' is an option in 2026)
             model_name: Model alias or full name
         """
         self.project = project or os.getenv("GOOGLE_CLOUD_PROJECT")
-        self.location = location
+        self.location = os.getenv("VERTEX_AI_LOCATION", location)
         self.model_name = self.MODELS.get(model_name, model_name)
         self._client = None
         self._model = None
@@ -69,6 +69,8 @@ class VertexAIProvider:
                 import vertexai
                 from vertexai.generative_models import GenerativeModel
 
+                # In 2026, we prefer 'global' if supported for cost optimization,
+                # but 'us-central1' is still the most stable for features.
                 vertexai.init(project=self.project, location=self.location)
                 self._model = GenerativeModel(self.model_name)
                 self._client = True  # Flag to indicate initialization
@@ -90,6 +92,16 @@ class VertexAIProvider:
             return self._model is not None
         except (ImportError, RuntimeError, AttributeError):
             return False
+
+    def count_tokens(self, text: str) -> int:
+        """Count tokens using the official Vertex AI SDK."""
+        self._ensure_client()
+        try:
+            response = self._model.count_tokens(text)
+            return response.total_tokens
+        except Exception as e:
+            logger.warning(f"Failed to count tokens via SDK: {e}. Falling back to heuristic.")
+            return len(text) // 4
 
     async def generate(
         self,
@@ -353,13 +365,9 @@ class VertexAIProvider:
             'project': self.project,
             'location': self.location,
             'available': self.is_available(),
-            'context_window': 1000000 if 'pro' in self.model_name else 128000,
+            'context_window': 2000000 if 'pro' in self.model_name else 1000000, # 2026 Context Windows
             'supports_streaming': True,
-            'cost_tier': 'paid',  # But you have quota!
+            'supports_context_caching': True,
+            'cost_tier': 'optimized',
             'speed_tier': 'ultra_fast',
         }
-
-    def count_tokens(self, text: str) -> int:
-        """Estimate token count."""
-        # Gemini tokenizer is roughly 4 chars per token
-        return len(text) // 4

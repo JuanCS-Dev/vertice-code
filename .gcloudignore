@@ -1,0 +1,219 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+# lib/ -> Overridden below
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Node.js (for frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.bak
+*~
+
+# Vertice-specific
+.vertice/embeddings/
+.vertice/index/
+.qwen/
+.qwen_backups/
+.firebaserc
+assets/videos/
+test_screenshots/
+
+# Development artifacts
+*_backup.py
+*_old.py
+*_temp.py
+*_test.py
+example_*.py
+demo_*.py
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# Environment Variables (SENSITIVE - NEVER COMMIT)
+.env
+.env.*
+!.env.example
+.env.local
+.env.backup
+*.log
+*.key
+*.pem
+*.p12
+credentials.json
+secrets/
+.secrets/
+
+# Temporary files
+*.tmp
+*.bak
+*.backup
+*_backup*
+*.swp
+*.swo
+temp/
+tmp/
+
+# Project specific
+.qwen_backups/
+.streaming_fix_backups/
+.backup/
+test_results.log
+.qwen_history
+*.BROKEN_BACKUP*
+*_backup_*
+
+# Archive (legacy code - not tracked)
+.archive/
+
+# Personal/local development notes
+.juancs/
+
+# Plan files (temporary)
+.qwen/plans/
+
+# Test artifacts and logs
+test_*.log
+*.coverage*
+htmlcov/
+.pytest_cache/
+
+# IDE and OS
+.DS_Store
+.vscode/
+.idea/
+*.sublime-*
+
+# Hypothesis test cache
+.hypothesis/
+
+# Project Specific Ignored Directories
+.qwen_atomic_backups/
+.qwen_backups/
+.claude/
+.cursor/
+.trash/
+test_data/
+test_screenshots/
+uploads/
+
+# Large/Binary Files
+*.tar.gz
+*.log
+maestro.log
+streaming-fix-package.tar.gz
+
+# Scripts are now in scripts/ directory and should be tracked
+logs/
+
+# Temporary HuggingFace scripts
+.fallback_patch_design.py
+.list_spaces.py
+.make_private.py
+.make_public.py
+.quota_patch_design.py
+.temp_download_space.py
+.upload_*.py
+
+# Temporary test files
+test_agency.py
+test_vertice_providers.py
+
+# Legacy egg-info directories
+juan_dev_code.egg-info/
+qwen_dev_cli.egg-info/
+
+# Stub files (should not exist)
+ai_agent_cloud_comparison.md
+comparison_table.md
+README.old.md
+
+# Caches (regeneratable)
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.hypothesis/
+
+# Temporary directories
+.trash/
+.qwen_backups/
+.qwen_atomic_backups/
+.streaming_fix_backups/
+
+# Archive (legacy code - preserved but not tracked)
+.archive/
+
+# IDE specific (additional)
+.cursor/
+.juancs/
+
+# Ignore local tool index
+.qwen/
+
+# Ignore test reports
+tests/e2e_textual/*.json
+tests/e2e_textual/*.md
+
+
+# ==============================================================================
+# VERTICE CUSTOM OVERRIDES FOR CLOUD BUILD
+# ==============================================================================
+# We must allow 'lib/' inside the frontend path, which is ignored by the 'lib/' rule above
+!vertice-chat-webapp/frontend/lib/
+!vertice-chat-webapp/frontend/lib/**/*

@@ -95,18 +95,20 @@ def setup_default_tools(
     # File Operations Tools
     if include_file_ops:
         try:
+            # Import tools dynamically to avoid circular imports
             from vertice_cli.tools.file_ops import ReadFileTool, WriteFileTool, EditFileTool
             from vertice_cli.tools.file_mgmt import CreateDirectoryTool, MoveFileTool, CopyFileTool
 
-            for tool_class in [
-                ReadFileTool,
-                WriteFileTool,
-                EditFileTool,
-                CreateDirectoryTool,
-                MoveFileTool,
-                CopyFileTool,
-            ]:
-                tool = tool_class()
+            file_tools = [
+                ReadFileTool(),
+                WriteFileTool(),
+                EditFileTool(),
+                CreateDirectoryTool(),
+                MoveFileTool(),
+                CopyFileTool(),
+            ]
+
+            for tool in file_tools:
                 registry.register(tool)
                 tools_registered += 1
 
@@ -114,10 +116,8 @@ def setup_default_tools(
 
         except ImportError as e:
             logger.error(f"Failed to import file operation tools: {e}")
-            raise ImportError(
-                f"File operation tools not available: {e}. "
-                f"Ensure vertice_cli is properly installed."
-            )
+            # Don't raise - allow partial setup
+            logger.warning("Continuing without file operation tools")
 
     # Bash Execution Tool
     if include_bash:
