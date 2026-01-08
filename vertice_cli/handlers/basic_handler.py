@@ -47,10 +47,10 @@ class BasicHandler:
   /metrics    - Show constitutional metrics
   /cache      - Show cache statistics
   /tokens     - Show token usage & budget 💰
-  /workflow   - Show workflow visualization 🔄
-  /dash       - Show operations dashboard 📊
-  /preview    - Enable file preview (default) 👁️
-  /nopreview  - Disable file preview ⚡
+  /workflow   - Show AI workflow visualization 🔄
+  /dash       - Show AI operations dashboard 📊
+  /preview    - Enable AI file preview (default) 👁️
+  /nopreview  - Disable AI file preview ⚡
 
 [bold]History & Analytics:[/bold] 🆕
   /history    - Show command history
@@ -117,10 +117,10 @@ Read files: {len(self.shell.context.read_files)}
 Tool calls: {len(self.shell.context.tool_calls)}
 
 Context Optimizer:
-  Items: {stats['total_items']}
-  Tokens: {stats['total_tokens']:,} / {stats['max_tokens']:,}
-  Usage: {stats['usage_percent']:.1f}%
-  Optimizations: {stats['optimizations_performed']}
+  Items: {stats["total_items"]}
+  Tokens: {stats["total_tokens"]:,} / {stats["max_tokens"]:,}
+  Usage: {stats["usage_percent"]:.1f}%
+  Optimizations: {stats["optimizations_performed"]}
 """
         self.console.print(Panel(context_text, title="Session Context", border_style="blue"))
 
@@ -135,7 +135,7 @@ Context Optimizer:
 
     async def handle_context_optimize(self, cmd: str) -> CommandResult:
         """Handle /context optimize command."""
-        self.console.print("[cyan]🔧 Optimizing context...[/cyan]")
+        self.console.print("[cyan]🧠 AI Optimizing context...[/cyan]")
         metrics = self.shell.context_manager.auto_optimize(target_usage=0.7)
 
         self.console.print(f"[green]✓ Optimization complete in {metrics.duration_ms:.1f}ms[/green]")
@@ -163,13 +163,13 @@ Context Optimizer:
         cache = get_cache()
         stats = cache.get_stats()
         self.console.print(
-            f"\n📊 Cache Stats:\n  Hits: {stats['hits']}\n  Misses: {stats['misses']}\n  Size: {stats['size']}"
+            f"\n📊 AI Cache Stats:\n  Hits: {stats['hits']}\n  Misses: {stats['misses']}\n  Size: {stats['size']}"
         )
 
         if self.shell.file_watcher:
             wstats = self.shell.file_watcher.get_stats()
             self.console.print(
-                f"\n📁 File Watcher:\n  Tracked: {wstats['tracked_count']}\n  Events: {wstats['event_count']}"
+                f"\n👁️ AI File Watcher:\n  Tracked: {wstats['tracked_count']}\n  Events: {wstats['event_count']}"
             )
 
         return CommandResult.ok()
@@ -232,5 +232,5 @@ Context Optimizer:
             return CommandResult.error("[red]Usage: /explain <command>[/red]")
 
         explanation = explain_command(command)
-        self.console.print(f"\n💡 {explanation}")
+        self.console.print(f"\n🤖 AI: {explanation}")
         return CommandResult.ok()

@@ -54,8 +54,6 @@ class StatusManager(IStatusManager):
             Dictionary with detailed health status for each component.
         """
         import time
-        import psutil
-        import os
 
         health = {}
         start_time = time.time()
@@ -108,11 +106,11 @@ class StatusManager(IStatusManager):
             agent_count = self._agent_counter()
             health["Agents"] = {
                 "ok": agent_count > 0,
-                "status": "healthy"
-                if agent_count >= 3
-                else "degraded"
-                if agent_count > 0
-                else "unhealthy",
+                "status": (
+                    "healthy"
+                    if agent_count >= 3
+                    else "degraded" if agent_count > 0 else "unhealthy"
+                ),
                 "message": f"{agent_count} agents available",
                 "count": agent_count,
                 "threshold": {"min": 1, "recommended": 5},

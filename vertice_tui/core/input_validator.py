@@ -7,7 +7,7 @@ for all input interfaces to prevent injection attacks and data corruption.
 
 import re
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, List, Optional
 from dataclasses import dataclass
 from urllib.parse import urlparse
 import html

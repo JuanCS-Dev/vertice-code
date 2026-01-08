@@ -343,7 +343,7 @@ class AgentManager:
 
             agent_task = AgentTask(request=task, context=context or {})
 
-            yield "🎯 **Generating 3 Alternative Plans...**\n\n"
+            yield "🎯 **AI Generating 3 Alternative Plans...**\n\n"
 
             result = await agent.generate_multi_plan(agent_task)
             yield result.to_markdown()
@@ -388,7 +388,7 @@ class AgentManager:
                         for opt in q.options:
                             yield f"   - {opt}\n"
                     yield "\n"
-                yield "\n💡 *Answer these questions, then run `/plan` again with the context.*\n"
+                yield "\n🤖 *AI Suggestion: Answer these questions, then run `/plan` again with the context.*\n"
             else:
                 yield "✅ No clarification needed. Proceeding with planning...\n\n"
                 async for chunk in self.invoke("planner", task, context):

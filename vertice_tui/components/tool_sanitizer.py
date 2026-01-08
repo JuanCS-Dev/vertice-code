@@ -54,7 +54,7 @@ def _format_tool_call(tool_name: str, args: Dict[str, Any]) -> str:
 
     elif tool_name == "write_file":
         path = args.get("path", args.get("file_path", ""))
-        return f"📝 **Escrevendo arquivo:** `{path}`"
+        return f"📝 **AI Escrevendo arquivo:** `{path}`"
 
     elif tool_name == "read_file":
         path = args.get("path", args.get("file_path", ""))
@@ -62,11 +62,11 @@ def _format_tool_call(tool_name: str, args: Dict[str, Any]) -> str:
 
     elif tool_name == "edit_file":
         path = args.get("path", args.get("file_path", ""))
-        return f"✏️ **Editando arquivo:** `{path}`"
+        return f"✏️ **AI Editando arquivo:** `{path}`"
 
     elif tool_name in ("web_search", "search"):
         query = args.get("query", args.get("q", ""))
-        return f"🔍 **Pesquisando:** `{query}`"
+        return f"🔍 **AI Pesquisando:** `{query}`"
 
     elif tool_name in ("web_fetch", "fetch_url"):
         url = args.get("url", "")
@@ -74,7 +74,7 @@ def _format_tool_call(tool_name: str, args: Dict[str, Any]) -> str:
 
     # Fallback: show tool call cleanly
     args_str = ", ".join(f"{k}={repr(v)}" for k, v in args.items())
-    return f"🔧 **{tool_name}**({args_str})"
+    return f"🔧 **AI {tool_name}**({args_str})"
 
 
 def sanitize_tool_call_json(chunk: str) -> str:

@@ -1,6 +1,5 @@
 """
-Vertice TUI - Enterprise Multi-LLM Orchestration
-=================================================
+🎨 Vertice TUI - AI-Powered Text User Interface
 
 A beautiful, 60fps TUI for AI-powered development.
 

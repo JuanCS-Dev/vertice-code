@@ -230,9 +230,9 @@ class Bridge(ProtocolBridgeMixin):
         try:
             self._context_manager = ContextManager(
                 context_getter=lambda: self.history.context if self.history else {},
-                context_setter=lambda ctx: setattr(self.history, "context", ctx)
-                if self.history
-                else None,
+                context_setter=lambda ctx: (
+                    setattr(self.history, "context", ctx) if self.history else None
+                ),
             )
             logger.debug("✓ Context manager initialized")
         except Exception as e:
@@ -311,9 +311,9 @@ class Bridge(ProtocolBridgeMixin):
         self._context_manager = self._safe_init(
             lambda: ContextManager(
                 context_getter=lambda: self.history.context if self.history else {},
-                context_setter=lambda ctx: setattr(self.history, "context", ctx)
-                if self.history
-                else None,
+                context_setter=lambda ctx: (
+                    setattr(self.history, "context", ctx) if self.history else None
+                ),
             ),
             "Context manager",
             partial_initialization,
@@ -350,9 +350,9 @@ class Bridge(ProtocolBridgeMixin):
         try:
             self._context_manager = ContextManager(
                 context_getter=lambda: self.history.context if self.history else {},
-                context_setter=lambda ctx: setattr(self.history, "context", ctx)
-                if self.history
-                else None,
+                context_setter=lambda ctx: (
+                    setattr(self.history, "context", ctx) if self.history else None
+                ),
             )
             logger.debug("✓ Context manager initialized")
         except Exception as e:

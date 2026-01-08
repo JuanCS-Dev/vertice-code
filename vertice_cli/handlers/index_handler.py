@@ -29,7 +29,7 @@ class IndexHandler:
 
     async def handle_index(self, cmd: str) -> CommandResult:
         """Handle /index command."""
-        self.console.print("[cyan]🔍 Indexing codebase...[/cyan]")
+        self.console.print("[cyan]🔍 AI Indexing codebase...[/cyan]")
         start = time.time()
         count = self.shell.indexer.index_codebase(force=True)
         elapsed = time.time() - start

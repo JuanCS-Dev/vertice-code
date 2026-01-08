@@ -245,7 +245,7 @@ class PaletteHandler:
 
     async def palette_run_squad(self) -> None:
         """Handle squad run from palette."""
-        self.console.print("[bold blue]🤖 DevSquad Mission[/bold blue]")
+        self.console.print("[bold blue]🎯 DevSquad AI Mission Control[/bold blue]")
 
         # Use input_session if available, or simple prompt
         try:

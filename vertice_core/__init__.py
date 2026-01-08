@@ -1,5 +1,5 @@
 """
-vertice_core: The Domain Kernel.
+🧠 Vertice Core - AI Domain Kernel
 
 This package contains the core domain types and protocols that define
 the contract between all other packages. Dependencies flow INWARD:

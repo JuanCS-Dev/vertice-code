@@ -21,7 +21,7 @@ class ShellCore:
 
         print(f"\n{cyan}🚀 NEUROSHELL v2.0{reset} - {green}ULTRA FAST MODE{reset}")
         print(f"{dim}📁 {self.cwd}{reset}")
-        print(f"{dim}Type 'help' for commands{reset}\n")
+        print(f"{yellow}⚡ Ready for AI-powered development!{reset}\n")
 
     async def get_input(self) -> str:
         """Get user input with lazy session loading."""

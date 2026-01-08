@@ -79,7 +79,7 @@ class UIHandler:
 
         welcome = Panel(
             content,
-            title="[bold]🚀 AI-Powered Code Shell[/bold]",
+            title="[bold]🚀 Vertice AI-Powered Code Shell[/bold]",
             border_style=COLORS["accent_blue"],
             padding=(1, 2),
         )
@@ -106,7 +106,7 @@ class UIHandler:
 
 [bold]Safety:[/bold]
   ✓ Safe commands auto-execute (ls, pwd)
-  ⚠️  Regular commands ask confirmation (cp, mv)
+  ⚠️  AI-Safe commands ask confirmation (cp, mv)
   🚨 Dangerous commands double-confirm (rm, dd)
 
 [dim]Operando sob a CONSTITUIÇÃO VÉRTICE v3.0[/dim]
@@ -121,7 +121,7 @@ class UIHandler:
         """Show constitutional metrics."""
         from vertice_cli.core.metrics import generate_constitutional_report
 
-        self.console.print("\n[bold cyan]📊 Constitutional Metrics[/bold cyan]\n")
+        self.console.print("\n[bold cyan]🛡️ AI Constitutional Metrics[/bold cyan]\n")
 
         metrics = generate_constitutional_report(
             codebase_path="vertice_cli", completeness=0.95, precision=0.98, recall=0.92
@@ -144,7 +144,7 @@ class UIHandler:
         self.console.print(f"Disk Hits: {stats.disk_hits}")
 
         # File watcher stats
-        self.console.print("\n[bold cyan]📁 File Watcher[/bold cyan]\n")
+        self.console.print("\n[bold cyan]👁️ AI File Watcher[/bold cyan]\n")
         self.console.print(f"Tracked Files: {self.file_watcher.tracked_files}")
         self.console.print(f"Recent Events: {len(self.file_watcher.recent_events)}")
         recent = self.recent_files.get_recent(5)

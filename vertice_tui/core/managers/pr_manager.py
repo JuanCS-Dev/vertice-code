@@ -176,7 +176,7 @@ class PullRequestManager(IPullRequestManager):
 - [ ] Manual testing done
 
 ---
-🤖 Generated with [JuanCS Dev-Code](https://github.com/juancs/dev-code)
+    🤖 AI-Generated with [JuanCS Dev-Code](https://github.com/juancs/dev-code)
 """
 
     def is_gh_available(self) -> bool:

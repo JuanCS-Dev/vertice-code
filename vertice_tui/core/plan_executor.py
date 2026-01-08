@@ -69,6 +69,6 @@ def prepare_plan_execution(
 
 NOW CREATE ALL THE FILES using write_file tool. Start with mkdir for the directory, then write_file for each file."""
 
-    preamble = "🚀 *Executing saved plan...*\n\n"
+    preamble = "🚀 *AI Executing saved plan...*\n\n"
 
     return modified_message, True, preamble

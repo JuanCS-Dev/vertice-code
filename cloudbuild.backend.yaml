@@ -1,0 +1,14 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/protovolt-studio/vertice/backend:latest'
+      - '-f'
+      - 'vertice-chat-webapp/backend/Dockerfile'
+      - 'vertice-chat-webapp/backend'
+
+images:
+  - 'us-central1-docker.pkg.dev/protovolt-studio/vertice/backend:latest'
+
+timeout: 1200s

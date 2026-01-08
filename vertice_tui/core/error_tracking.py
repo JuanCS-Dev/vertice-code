@@ -10,7 +10,7 @@ import threading
 import hashlib
 from typing import Dict, List, Any, Optional, Callable
 from dataclasses import dataclass, field
-from collections import defaultdict, Counter
+from collections import Counter
 import logging
 
 
@@ -343,9 +343,11 @@ class ErrorTracker:
 
             return {
                 "total_errors": total_errors,
-                "time_range_hours": (time.time() - min(e.timestamp for e in self.errors)) / 3600
-                if self.errors
-                else 0,
+                "time_range_hours": (
+                    (time.time() - min(e.timestamp for e in self.errors)) / 3600
+                    if self.errors
+                    else 0
+                ),
                 "most_common_error_types": most_common,
                 "pattern_stats": pattern_stats,
                 "patterns": [

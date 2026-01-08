@@ -128,7 +128,7 @@ class ActiveOrchestrator:
 
         await self.router.initialize()
 
-        yield f"🎯 Processing: {request[:100]}...\n"
+        yield f"🎯 AI Processing: {request[:100]}...\n"
 
         try:
             while not self._is_terminal_state():
@@ -216,7 +216,7 @@ class ActiveOrchestrator:
     async def _generate_summary(self) -> AsyncIterator[str]:
         """Generate execution summary."""
         yield "\n" + "=" * 40 + "\n"
-        yield "📊 Execution Summary\n"
+        yield "📊 AI Execution Summary\n"
         yield "=" * 40 + "\n"
 
         state_emoji = {

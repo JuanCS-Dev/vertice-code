@@ -8,7 +8,7 @@ and performance optimization for API calls.
 import asyncio
 import time
 import logging
-from typing import Dict, Any, Optional, Callable
+from typing import Dict, Any, Optional
 from dataclasses import dataclass, field
 import aiohttp
 from aiohttp import ClientTimeout, ClientError
@@ -241,9 +241,11 @@ class HTTPConnectionPool:
                 )
                 * 100,
                 "average_response_time": round(self._stats.average_response_time, 3),
-                "active_connections": getattr(self._session.connector, "_conns", {}).get("total", 0)
-                if self._session
-                else 0,
+                "active_connections": (
+                    getattr(self._session.connector, "_conns", {}).get("total", 0)
+                    if self._session
+                    else 0
+                ),
                 "circuit_breakers": {
                     host: {
                         "failures": data["failures"],

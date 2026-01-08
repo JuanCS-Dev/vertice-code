@@ -82,7 +82,7 @@ class WorkflowHandler:
         if not request:
             return CommandResult.error("[red]Usage: /squad <mission description>[/red]")
 
-        self.console.print(f"\n[bold blue]🤖 DevSquad Mission:[/bold blue] {request}\n")
+        self.console.print(f"\n[bold blue]🎯 DevSquad AI Mission:[/bold blue] {request}\n")
 
         try:
             with self.console.status("[bold green]DevSquad Active...[/bold green]"):

@@ -88,7 +88,7 @@ def explain(
     model: Optional[str] = typer.Option(None, "--model", help="LLM model to use"),
 ):
     """Explain code from a file."""
-    console.print(f"\n[bold blue]🔍 Explaining:[/bold blue] {file_path}\n")
+    console.print(f"\n[bold blue]🔍 AI Analysis - Explaining:[/bold blue] {file_path}\n")
 
     # Read main file
     success, content, error = context_builder.read_file(file_path)
@@ -236,7 +236,7 @@ def chat(
 
     else:
         # Interactive mode - launch shell
-        console.print("\n[bold blue]🚀 Starting interactive shell...[/bold blue]\n")
+        console.print("\n[bold blue]🚀 Starting AI-Powered Interactive Shell...[/bold blue]\n")
         console.print("[dim]Type 'quit' or press Ctrl+D to exit[/dim]\n")
 
         try:
@@ -499,7 +499,7 @@ def delete_session(
 
     # Delete
     manager.delete_session(session_id)
-    console.print(f"[green]✅ Session {session_id} deleted[/green]")
+        console.print(f"[green]🗑️ Session {session_id} deleted[/green]")
 
 
 @sessions_app.command("cleanup")
@@ -577,7 +577,7 @@ app.add_typer(squad_app, name="squad")
 def squad_run(request: str):
     """Start a DevSquad mission."""
     console.print(
-        Panel(f"[bold blue]🚀 Starting DevSquad Mission[/bold blue]\n[white]{request}[/white]")
+        Panel(f"[bold blue]🤖 Starting DevSquad AI Mission[/bold blue]\n[white]{request}[/white]")
     )
 
     try:

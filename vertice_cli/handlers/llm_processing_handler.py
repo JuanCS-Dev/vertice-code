@@ -135,7 +135,7 @@ Provide clear, actionable suggestions."""
             logger.error("LLM stream failed", exc_info=True)
             self.console.print(f"[red]❌ LLM failed: {e}[/red]")
             self.console.print(
-                "[yellow]💡 Tip: Check your API key and network connection.[/yellow]"
+                "[yellow]💡 AI Tip: Check your API key and network connection.[/yellow]"
             )
             return
 
@@ -146,7 +146,7 @@ Provide clear, actionable suggestions."""
         self.console.print()
         self.console.print(f"[dim]You:[/dim] {user_input}")
         self.console.print()
-        self.console.print("[bold]💡 Suggested action:[/bold]")
+        self.console.print("[bold]🤖 AI Suggested action:[/bold]")
         self.console.print(f"   [cyan]{suggestion}[/cyan]")
         self.console.print()
 
@@ -243,7 +243,7 @@ Provide clear, actionable suggestions."""
                 self.dashboard.complete_operation(op_id, OperationStatus.ERROR)
 
                 # Animated error message (Task 1.5)
-                text = Text("❌ Failed", style="red bold")
+                text = Text("❌ AI Execution Failed", style="red bold")
                 self.console.print(text)
 
                 # P1: Intelligent error parsing
@@ -256,7 +256,7 @@ Provide clear, actionable suggestions."""
                     analysis = error_parser.parse(error_text, suggestion)
 
                     # Show user-friendly message
-                    self.console.print(f"[yellow]💡 {analysis.user_friendly}[/yellow]")
+                    self.console.print(f"[yellow]🤖 AI: {analysis.user_friendly}[/yellow]")
                     self.console.print()
 
                     # Show suggestions
@@ -279,13 +279,13 @@ Provide clear, actionable suggestions."""
 
         except (IOError, OSError, ValueError) as e:
             logger.error(f"Command execution failed for '{suggestion}'", exc_info=True)
-            self.console.print(f"[red]❌ Execution failed: {e}[/red]")
+            self.console.print(f"[red]💥 AI Execution failed: {e}[/red]")
         except Exception as e:
             # Catch any other unexpected errors and log with stack trace
             logger.error(
                 f"An unexpected error occurred during execution of '{suggestion}'", exc_info=True
             )
-            self.console.print(f"[red]❌ An unexpected error occurred: {e}[/red]")
+            self.console.print(f"[red]🚨 AI System error: {e}[/red]")
 
         # Add to history
         self.context.history.append(user_input)
@@ -333,7 +333,7 @@ Output ONLY the command, no explanation, no markdown."""
             return command
 
         except (RuntimeError, ValueError, AttributeError, ConnectionError):
-            self.console.print("[yellow]⚠️  LLM unavailable, using fallback[/yellow]")
+            self.console.print("[yellow]🔄 AI Fallback: LLM unavailable, using backup[/yellow]")
             return self.fallback_suggest(user_request)
 
     def fallback_suggest(self, user_request: str) -> str:
@@ -455,7 +455,9 @@ Output ONLY the command, no explanation, no markdown."""
         bash = BashCommandTool()
 
         # Show execution status (streaming indicator)
-        with self.console.status(f"[cyan]⚡ Executing:[/cyan] {command[:60]}...", spinner="dots"):
+        with self.console.status(
+            f"[cyan]⚡ AI Executing:[/cyan] {command[:60]}...", spinner="dots"
+        ):
             result = await bash.execute(
                 command=command,
                 interactive=True,
@@ -491,7 +493,9 @@ Output ONLY the command, no explanation, no markdown."""
             if os.path.isdir(target_dir):
                 # Update Context CWD (No os.chdir!)
                 self.enhanced_input.context.cwd = target_dir
-                self.console.print(f"[dim]📁 Changed directory to: {target_dir}[/dim]")
+                self.console.print(
+                    f"[dim]📁 AI Navigation: Changed directory to: {target_dir}[/dim]"
+                )
                 return {"success": True, "output": "", "error": None}
             else:
                 return {"success": False, "error": f"cd: no such file or directory: {target_dir}"}
@@ -553,16 +557,18 @@ Output ONLY the command, no explanation, no markdown."""
 
         # Specific handlers
         if isinstance(error, PermissionError):
-            self.console.print("[red]❌ Permission denied[/red]")
-            self.console.print(f"[yellow]💡 Try: sudo {user_input}[/yellow]")
+            self.console.print("[red]🔒 Permission denied[/red]")
+            self.console.print(f"[yellow]💡 AI Suggestion: Try: sudo {user_input}[/yellow]")
         elif isinstance(error, FileNotFoundError):
             self.console.print("[red]❌ File or command not found[/red]")
             self.console.print(
                 "[yellow]💡 Check if the file exists or install the command[/yellow]"
             )
         elif isinstance(error, TimeoutError):
-            self.console.print("[red]❌ Operation timed out[/red]")
-            self.console.print("[yellow]💡 Check network connection or increase timeout[/yellow]")
+            self.console.print("[red]⏰ Operation timed out[/red]")
+            self.console.print(
+                "[yellow]💡 AI Diagnosis: Check network or increase timeout[/yellow]"
+            )
         else:
             # Generic fallback
             self.console.print(f"[red]❌ Error: {error_type}[/red]")
