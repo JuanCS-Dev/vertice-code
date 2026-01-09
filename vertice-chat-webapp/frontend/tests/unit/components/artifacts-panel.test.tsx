@@ -1,8 +1,9 @@
 /**
  * @jest-environment jsdom
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import '@testing-library/jest-dom';
 import { ArtifactsPanel } from '@/components/artifacts/artifacts-panel';
 import { useArtifactsStore } from '@/lib/stores/artifacts-store';
 

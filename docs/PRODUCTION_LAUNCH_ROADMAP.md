@@ -37,21 +37,37 @@
 
     ```tsx
     // src/components/auth/SignIn.tsx
-    import { SignIn } from "@clerk/clerk-react";
-    import React from "react";
+    import { signInWithEmailAndPassword, signInWithPasskey } from '@/lib/auth';
+    import React, { useState } from "react";
 
     /**
      * Componente de Login principal.
      * Força o uso de Passkeys/Passwordless conforme Diretriz de Segurança 2026.
      */
     export default function SignInPage(): React.JSX.Element {
+      const [email, setEmail] = useState('');
+      const [password, setPassword] = useState('');
+
+      const handleEmailSignIn = async () => {
+        try {
+          await signInWithEmailAndPassword(email, password);
+        } catch (error) {
+          console.error('Sign in failed:', error);
+        }
+      };
+
+      const handlePasskeySignIn = async () => {
+        try {
+          await signInWithPasskey();
+        } catch (error) {
+          console.error('Passkey sign in failed:', error);
+        }
+      };
+
       return (
         <div className="auth-wrapper">
-          <SignIn 
-            path="/sign-in"
-            routing="path"
-            signUpUrl="/sign-up"
-            appearance={{
+          <button onClick={handlePasskeySignIn}>Sign in with Passkey</button>
+          <form onSubmit={handleEmailSignIn}>
               elements: {
                 footerAction: { display: "none" } // Remove opção de senha (Legacy)
               }

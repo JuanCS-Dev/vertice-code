@@ -10,8 +10,8 @@ test.describe('Chat Flow', () => {
   test.beforeEach(async ({ page }) => {
     // Mock authentication for testing
     await page.addInitScript(() => {
-      // Mock Clerk authentication
-      window.localStorage.setItem('clerk-token', 'mock-token');
+      // Mock Firebase authentication
+      window.localStorage.setItem('firebase-auth-token', 'mock-token');
     });
 
     await page.goto('http://localhost:3000/chat');
@@ -114,7 +114,7 @@ test.describe('Chat Flow', () => {
 test.describe('GitHub Integration', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
-      window.localStorage.setItem('clerk-token', 'mock-token');
+      window.localStorage.setItem('firebase-auth-token', 'mock-token');
     });
 
     await page.goto('http://localhost:3000/chat');

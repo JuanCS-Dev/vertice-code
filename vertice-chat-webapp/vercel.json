@@ -8,12 +8,14 @@
 
   "env": {
     "NEXT_PUBLIC_API_URL": "https://api.vertice.ai",
-    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY": "@clerk-publishable-key"
+    "NEXT_PUBLIC_FIREBASE_API_KEY": "@firebase-api-key",
+    "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN": "@firebase-auth-domain",
+    "NEXT_PUBLIC_FIREBASE_PROJECT_ID": "@firebase-project-id"
   },
 
   "build": {
     "env": {
-      "CLERK_SECRET_KEY": "@clerk-secret-key"
+      "FIREBASE_SERVICE_ACCOUNT_KEY": "@firebase-service-account-key"
     }
   },
 

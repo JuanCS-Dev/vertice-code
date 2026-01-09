@@ -471,31 +471,33 @@ Clerk → Passkeys (FIDO2) → Zod → Redis Rate Limiter → CORS
 
 **Features Implementadas**:
 
-1. **Clerk Integration**:
+1. **Firebase Auth Integration**:
 ```typescript
 // frontend/app/layout.tsx
-import { ClerkProvider } from '@clerk/nextjs';
+import { AuthProvider } from '@/components/auth/auth-provider';
 
 export default function RootLayout({ children }) {
   return (
-    <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_KEY}>
+    <AuthProvider>
       <html lang="en">
         <body>{children}</body>
       </html>
-    </ClerkProvider>
+    </AuthProvider>
   );
 }
 ```
 
 2. **Passkeys Support** (FIDO2):
 ```typescript
-import { useSignIn } from '@clerk/nextjs';
+import { signInWithPasskey } from '@/lib/auth';
 
 export function PasskeyAuth() {
-  const { signIn } = useSignIn();
-
   const handlePasskeyAuth = async () => {
-    await signIn?.authenticateWithPasskey();
+    try {
+      await signInWithPasskey();
+    } catch (error) {
+      console.error('Passkey auth failed:', error);
+    }
   };
 
   return <button onClick={handlePasskeyAuth}>Sign in with Passkey</button>;
@@ -505,16 +507,18 @@ export function PasskeyAuth() {
 3. **Backend JWT Validation**:
 ```python
 from fastapi import Depends, HTTPException
-from clerk_backend_api import Clerk
+import firebase_admin
+from firebase_admin import auth
 
-clerk = Clerk(bearer_auth=os.getenv("CLERK_SECRET_KEY"))
+# Initialize Firebase Admin
+firebase_admin.initialize_app()
 
 async def get_current_user(authorization: str = Header(...)) -> User:
     token = authorization.replace("Bearer ", "")
 
     try:
-        jwt_data = clerk.verify_token(token)
-        return User(id=jwt_data["sub"], email=jwt_data["email"])
+        decoded_token = auth.verify_id_token(token)
+        return User(id=decoded_token["uid"], email=decoded_token["email"])
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid token")
 ```
@@ -558,8 +562,8 @@ export function validateMessage(data: unknown) {
 **Checklist**: 10 itens de validação
 
 **Referências Oficiais**:
-- https://clerk.com/docs/quickstarts/nextjs
-- https://clerk.com/docs/authentication/passkeys
+- https://firebase.google.com/docs/auth/web/start
+- https://firebase.google.com/docs/auth/web/passkeys
 - https://docs.pydantic.dev/latest/concepts/validators/
 
 ---
@@ -1304,8 +1308,8 @@ Jaeger                ┘
 21. https://tailwindcss.com/docs
 
 ### Authentication
-22. https://clerk.com/docs/quickstarts/nextjs
-23. https://clerk.com/docs/authentication/passkeys
+22. https://firebase.google.com/docs/auth/web/start
+23. https://firebase.google.com/docs/auth/web/passkeys
 24. https://webauthn.guide/
 
 ### Testing

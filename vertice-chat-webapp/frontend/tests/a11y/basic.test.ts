@@ -57,8 +57,8 @@ test.describe('Accessibility Compliance', () => {
   test('chat page accessibility', async ({ page }) => {
     // Mock authentication for chat page access
     await page.addInitScript(() => {
-      // Mock Clerk authentication
-      window.localStorage.setItem('clerk-token', 'mock-token');
+      // Mock Firebase authentication
+      window.localStorage.setItem('firebase-auth-token', 'mock-token');
     });
 
     await page.goto('http://localhost:3000/chat');

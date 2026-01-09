@@ -1,0 +1,22 @@
+{
+  "summary": {
+    "total_tests": 1,
+    "passed": 0,
+    "failed": 1,
+    "success_rate": 0.0
+  },
+  "results": {
+    "phase1_backend": [],
+    "phase1_frontend": [],
+    "phase2_generative_ui": [],
+    "phase2_artifacts": [],
+    "phase3_github_sync": [
+      {
+        "test": "webhook_signature",
+        "success": false,
+        "details": "Webhook API not available"
+      }
+    ]
+  },
+  "timestamp": "2026-01-09T15:05:00Z"
+}

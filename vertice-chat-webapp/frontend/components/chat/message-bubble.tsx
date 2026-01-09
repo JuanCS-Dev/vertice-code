@@ -108,9 +108,9 @@ export const MessageBubble = memo(function MessageBubble({
                 {message.metadata.tokens.toLocaleString()} TOKENS
               </span>
             )}
-            {message.metadata?.effort && (
+            {(message.metadata as any)?.effort && (
               <Badge variant="outline" className="text-[8px] px-1 py-0 border-purple-500/30 text-purple-400">
-                EFFORT: {message.metadata.effort}
+                EFFORT: {(message.metadata as any).effort}
               </Badge>
             )}
           </div>

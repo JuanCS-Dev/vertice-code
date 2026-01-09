@@ -200,7 +200,7 @@ class GDPRComplianceManager:
 
         Args:
             request_type: "access", "rectification", "erasure", "portability"
-            data_subject_id: User identifier (email or clerk_id)
+            data_subject_id: User identifier (email or firebase_uid)
             workspace_id: Optional workspace scope
         """
         result = {

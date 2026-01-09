@@ -4039,40 +4039,89 @@ Voice Input:
 ### **4.1 Authentication with Clerk**
 
 **References:**
-- Clerk Next.js: https://clerk.com/docs/quickstarts/nextjs
-- Passkeys (FIDO2): https://clerk.com/docs/authentication/passkeys
-- Enterprise SSO: https://clerk.com/docs/authentication/enterprise-connections
+- Firebase Auth Next.js: https://firebase.google.com/docs/auth/web/start
+- Firebase App Hosting: https://firebase.google.com/docs/app-hosting
+- Google Cloud Run: https://cloud.google.com/run/docs
+- Passkeys (FIDO2): https://firebase.google.com/docs/auth/web/passkeys
 
-#### **4.1.1 Clerk Setup**
+#### **4.1.1 Firebase Auth Setup**
 
 **Install dependencies:**
 ```bash
 cd frontend
-pnpm add @clerk/nextjs
+pnpm add firebase
+cd ../backend
+pip install firebase-admin
+```
+
+**Firebase Project Setup:**
+```bash
+# Create Firebase project
+firebase projects:create vertice-chat-webapp --project vertice-chat-webapp
+
+# Enable Authentication
+firebase auth:import users.json --project vertice-chat-webapp
+
+# Enable Firestore (for user data storage)
+firebase firestore:databases:create --project vertice-chat-webapp
+
+# Generate service account key for backend
+firebase projects:addfirebase vertice-chat-webapp
 ```
 
 **frontend/.env.local:**
 ```env
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxx
-CLERK_SECRET_KEY=sk_test_xxx
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=vertice-chat-webapp.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=vertice-chat-webapp
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=vertice-chat-webapp.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 
 # After sign-in/sign-up redirects
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/onboarding
+NEXT_PUBLIC_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_AFTER_SIGN_IN_URL=/
+NEXT_PUBLIC_AFTER_SIGN_UP_URL=/onboarding
+```
+
+**frontend/lib/firebase.ts:**
+```typescript
+/**
+ * Firebase Configuration
+ *
+ * Initialize Firebase App and Auth
+ */
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
+
+const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+
+export default app;
 ```
 
 **frontend/app/layout.tsx:**
 ```typescript
 /**
- * Root Layout with Clerk Provider
+ * Root Layout with Firebase Auth Provider
  *
  * Wraps entire app with authentication context
  */
-import { ClerkProvider } from '@clerk/nextjs';
 import type { Metadata } from 'next';
 import './globals.css';
+import { AuthProvider } from '@/components/auth/auth-provider';
 
 export const metadata: Metadata = {
   title: 'Vertice Chat',
@@ -4085,11 +4134,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body>{children}</body>
-      </html>
-    </ClerkProvider>
+    <html lang="en">
+      <body>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
+    </html>
   );
 }
 ```
@@ -4097,26 +4148,40 @@ export default function RootLayout({
 **frontend/middleware.ts:**
 ```typescript
 /**
- * Clerk Middleware for Route Protection
+ * Firebase Auth Middleware for Route Protection
  *
- * Automatically protects routes and handles auth redirects
- *
- * Reference: https://clerk.com/docs/references/nextjs/clerk-middleware
+ * Protects routes using Firebase Auth tokens
  */
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { verifyIdToken } from '@/lib/auth-server';
 
-const isPublicRoute = createRouteMatcher([
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/api/webhooks(.*)',
-  '/',
-]);
+const publicRoutes = ['/sign-in', '/sign-up', '/api/webhooks', '/'];
 
-export default clerkMiddleware((auth, request) => {
-  if (!isPublicRoute(request)) {
-    auth().protect();
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Skip middleware for public routes
+  if (publicRoutes.some(route => pathname.startsWith(route))) {
+    return NextResponse.next();
   }
-});
+
+  // Check for auth token
+  const token = request.cookies.get('firebase-auth-token')?.value;
+
+  if (!token) {
+    return NextResponse.redirect(new URL('/sign-in', request.url));
+  }
+
+  try {
+    // Verify token with Firebase Admin
+    await verifyIdToken(token);
+    return NextResponse.next();
+  } catch (error) {
+    console.error('Auth verification failed:', error);
+    return NextResponse.redirect(new URL('/sign-in', request.url));
+  }
+}
 
 export const config = {
   matcher: [
@@ -4134,61 +4199,41 @@ export const config = {
 ```python
 """
 Authentication Utilities
-Validates Clerk JWT tokens
+Validates Firebase Auth JWT tokens
 
-Reference: https://clerk.com/docs/backend-requests/handling/manual-jwt
+Reference: https://firebase.google.com/docs/auth/admin/verify-id-tokens
 """
 from fastapi import HTTPException, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jose import jwt, JWTError
-import httpx
+import firebase_admin
+from firebase_admin import auth, credentials
 import logging
-from functools import lru_cache
 from typing import Dict, Optional
 
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
+# Initialize Firebase Admin SDK
+cred = credentials.Certificate(settings.FIREBASE_SERVICE_ACCOUNT_KEY_PATH)
+firebase_admin.initialize_app(cred)
+
 security = HTTPBearer()
 
-@lru_cache()
-def get_clerk_jwks() -> Dict:
+async def verify_firebase_token(token: str) -> Dict:
     """
-    Fetch Clerk's JWKS (JSON Web Key Set) for token verification
-
-    Cached to avoid repeated network calls
-    """
-    response = httpx.get(
-        f"https://{settings.CLERK_DOMAIN}/.well-known/jwks.json"
-    )
-    response.raise_for_status()
-    return response.json()
-
-async def verify_clerk_token(token: str) -> Dict:
-    """
-    Verify Clerk JWT token
+    Verify Firebase Auth JWT token
 
     Returns decoded token payload with user info
     """
     try:
-        # Get JWKS
-        jwks = get_clerk_jwks()
+        # Verify token
+        decoded_token = auth.verify_id_token(token)
 
-        # Decode and verify token
-        # Clerk uses RS256 algorithm
-        payload = jwt.decode(
-            token,
-            jwks,
-            algorithms=["RS256"],
-            audience=settings.CLERK_AUDIENCE,
-            issuer=f"https://{settings.CLERK_DOMAIN}",
-        )
+        return decoded_token
 
-        return payload
-
-    except JWTError as e:
-        logger.error(f"JWT verification failed: {e}")
+    except Exception as e:
+        logger.error(f"Firebase token verification failed: {e}")
         raise HTTPException(
             status_code=401,
             detail="Invalid authentication token"
@@ -4203,16 +4248,16 @@ async def get_current_user(
     Usage:
         @router.get("/protected")
         async def protected_route(user: dict = Depends(get_current_user)):
-            return {"user_id": user["sub"]}
+            return {"user_id": user["uid"]}
     """
     token = credentials.credentials
-    payload = await verify_clerk_token(token)
+    payload = await verify_firebase_token(token)
 
     return {
-        "id": payload["sub"],
+        "id": payload["uid"],
         "email": payload.get("email"),
         "name": payload.get("name"),
-        "metadata": payload.get("public_metadata", {}),
+        "email_verified": payload.get("email_verified", False),
     }
 
 async def get_current_user_optional(
@@ -4240,23 +4285,22 @@ async def get_current_user_optional(
  * Enables passwordless authentication via FIDO2/WebAuthn
  *
  * References:
- * - Clerk Passkeys: https://clerk.com/docs/authentication/passkeys
+ * - Firebase Passkeys: https://firebase.google.com/docs/auth/web/passkeys
  * - WebAuthn: https://webauthn.guide/
  */
 'use client';
 
-import { useUser } from '@clerk/nextjs';
+import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Key, Check, X } from 'lucide-react';
 import { useState } from 'react';
+import { createUserWithPasskey, signInWithPasskey } from '@/lib/auth';
 
 export function PasskeySetup() {
-  const { user } = useUser();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [hasPasskey, setHasPasskey] = useState(
-    user?.passkeys && user.passkeys.length > 0
-  );
+  const [hasPasskey, setHasPasskey] = useState(false); // Check from user metadata
 
   const handleCreatePasskey = async () => {
     if (!user) return;
@@ -4264,8 +4308,8 @@ export function PasskeySetup() {
     setIsLoading(true);
 
     try {
-      // Create passkey via Clerk
-      await user.createPasskey();
+      // Create passkey via Firebase Auth
+      await createUserWithPasskey(user.email!);
       setHasPasskey(true);
 
       // Show success message

@@ -615,7 +615,7 @@ wscat -c ws://localhost:8000/api/v1/terminal
 # 4. Test agent execution
 curl -X POST http://localhost:8000/api/v1/agents/execute \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <clerk_jwt>" \
+   -H "Authorization: Bearer <firebase_jwt>" \
   -d '{
     "task": "Read and summarize README.md",
     "agent": "architect"

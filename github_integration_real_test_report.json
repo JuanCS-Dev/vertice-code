@@ -1,0 +1,52 @@
+{
+  "total_tests": 9,
+  "passed": 6,
+  "failed": 3,
+  "details": [
+    {
+      "test": "GitHub CLI Auth",
+      "status": "\u2705",
+      "details": "Authenticated as keyring"
+    },
+    {
+      "test": "Repository Creation",
+      "status": "\u2705",
+      "details": "Repo vertice-code-test-2026 ready"
+    },
+    {
+      "test": "Repository Info",
+      "status": "\u2705",
+      "details": "Repo info retrieved"
+    },
+    {
+      "test": "Git Operations",
+      "status": "\u274c",
+      "details": "Git operations failed"
+    },
+    {
+      "test": "Webhook Payload Validation",
+      "status": "\u274c",
+      "details": "Validation failed: name 'get_settings' is not defined"
+    },
+    {
+      "test": "GitHub Agent Creation",
+      "status": "\u2705",
+      "details": "Agent instantiated"
+    },
+    {
+      "test": "Push Analysis",
+      "status": "\u2705",
+      "details": "Analysis complete: 0 findings"
+    },
+    {
+      "test": "PR Review",
+      "status": "\u2705",
+      "details": "Review complete: Approved"
+    },
+    {
+      "test": "Test Cleanup",
+      "status": "\u274c",
+      "details": "Cleanup failed: HTTP 403: Must have admin rights to Repository. (https://api.github.com/repos/JuanCS-Dev/vertice-code-test-2026)\nThis API operation needs the \"delete_repo\" scope. To request it, run:  gh auth refresh -h github.com -s delete_repo"
+    }
+  ]
+}
