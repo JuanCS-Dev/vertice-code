@@ -59,6 +59,32 @@ class BaseTool(ABC):
             return False, f"Missing required parameters: {', '.join(missing)}"
         return True, None
 
+    def get_schema(self) -> Dict[str, Any]:
+        """Get valid JSON Schema for the tool."""
+        properties = {}
+        required_fields = []
+
+        for name, param in self.parameters.items():
+            # Create a clean copy of the parameter definition
+            # Remove 'required' from the property definition itself
+            # as it belongs in the 'required' list at the object level
+            clean_param = param.copy()
+            if clean_param.pop("required", False):
+                required_fields.append(name)
+
+            # Recurse for nested objects if needed (simple version for now)
+            properties[name] = clean_param
+
+        return {
+            "name": self.name,
+            "description": self.description,
+            "parameters": {
+                "type": "object",
+                "properties": properties,
+                "required": required_fields,
+            },
+        }
+
 
 # =============================================================================
 # FILE TOOLS - Completely rewritten
@@ -418,13 +444,7 @@ class CleanToolRegistry:
         """Get tool schemas for API."""
         schemas = []
         for tool in self.tools.values():
-            schemas.append(
-                {
-                    "name": tool.name,
-                    "description": tool.description,
-                    "parameters": tool.parameters,
-                }
-            )
+            schemas.append(tool.get_schema())
         return schemas
 
     def __len__(self) -> int:

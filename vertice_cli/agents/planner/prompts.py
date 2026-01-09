@@ -19,44 +19,52 @@ from .models import SOPStep
 
 
 def build_planning_prompt(task_request: str, context: Dict[str, Any], agents: List[str]) -> str:
-    """Build comprehensive planning prompt for LLM."""
-    return f"""
-Generate a detailed execution plan for this task:
+    """Build Claude-optimized planning prompt with structured reasoning."""
+    return f"""You are Claude, an expert project planner. Create a detailed, executable plan for this software development task.
 
-TASK: {task_request}
+TASK REQUEST: {task_request}
 
-CONTEXT:
+CURRENT CONTEXT:
 {json.dumps(context, indent=2)}
 
-AVAILABLE AGENTS: {', '.join(agents)}
+AVAILABLE SPECIALIZED AGENTS: {", ".join(agents)}
 
-REQUIREMENTS:
-1. Break into atomic steps (one agent, one action)
-2. Each step must have clear "definition_of_done"
-3. Specify dependencies between steps
-4. Mark which steps can run in parallel
-5. Add checkpoints for critical transitions
-6. Include rollback strategy
+PLANNING METHODOLOGY:
+Think step-by-step through the complete solution:
 
-OUTPUT SCHEMA:
+1. UNDERSTAND: What exactly needs to be accomplished?
+2. BREAK DOWN: Divide into atomic, verifiable steps
+3. SEQUENCE: Order steps with proper dependencies
+4. PARALLELIZE: Identify steps that can run simultaneously
+5. VALIDATE: Add checkpoints for critical transitions
+6. RECOVER: Plan rollback strategies for failures
+
+PLANNING PRINCIPLES:
+- Each step = One agent + One clear action
+- Every step needs measurable success criteria
+- Dependencies must be explicit and minimal
+- Parallel execution maximizes efficiency
+- Checkpoints prevent cascading failures
+- Rollback ensures safe failure recovery
+
+EXECUTION PLAN SCHEMA:
 {{
   "sops": [
     {{
       "id": "step-1",
-      "role": "agent_name",
-      "action": "What to do",
-      "objective": "Why",
-      "definition_of_done": "Success criteria",
-      "dependencies": [],
+      "role": "architect|executor|tester|etc",
+      "action": "Precise action description",
+      "objective": "Why this step matters",
+      "definition_of_done": "Concrete success criteria",
+      "dependencies": ["step-id"],
       "cost": 1.0,
-      "priority": "high",
-      "checkpoint": "validation"
+      "priority": "low|medium|high",
+      "checkpoint": "validation|testing|deployment"
     }}
   ]
 }}
 
-RESPOND WITH PURE JSON ONLY.
-"""
+OUTPUT: Return ONLY the JSON object, no additional text or explanation."""
 
 
 def build_clarifying_questions_prompt(task_request: str, context: Dict[str, Any]) -> str:

@@ -264,32 +264,124 @@ class NextGenExecutorAgent(BaseAgent):
             yield {"type": "error", "data": {"error": str(e), "trace_id": trace_id}}
 
     async def _generate_command(self, request: str, context: Dict[str, Any]) -> str:
-        """Generate bash command from natural language request."""
+        """Generate bash command with Evaluator-Optimizer Loop for quality improvement."""
         examples = self._get_few_shot_examples()
         history_context = self._get_execution_history_context()
 
-        prompt = f"""You are an expert bash command generator. Convert the user's request into a SINGLE, safe bash command.
+        max_iterations = 3  # Limit iterations to prevent infinite loops
+        best_command = ""
+        best_score = 0
 
-IMPORTANT RULES:
-1. Return ONLY the bash command, no explanation
-2. No markdown formatting (no ```)
-3. Use full command syntax with proper flags
-4. Prefer simple, direct commands
-5. Consider security and safety
+        for iteration in range(max_iterations):
+            prompt = self._build_generation_prompt(
+                request, examples, history_context, iteration, best_command
+            )
 
-FEW-SHOT EXAMPLES:
+            response = await self._call_llm(prompt=prompt, temperature=0.0, max_tokens=150)
+            candidate_command = response.strip()
+
+            # Evaluate command quality
+            evaluation = await self._evaluate_command_quality(candidate_command, request)
+
+            if evaluation["score"] >= 8:  # Good enough
+                return candidate_command
+
+            if evaluation["score"] > best_score:
+                best_score = evaluation["score"]
+                best_command = candidate_command
+
+            # If not the last iteration, prepare feedback for next attempt
+            if iteration < max_iterations - 1:
+                logger.debug(
+                    f"Command iteration {iteration + 1} score: {evaluation['score']}, improving..."
+                )
+
+        # Return best command found
+        return best_command
+
+    def _build_generation_prompt(
+        self,
+        request: str,
+        examples: str,
+        history_context: str,
+        iteration: int,
+        previous_command: str = "",
+    ) -> str:
+        """Build optimized generation prompt with feedback from previous attempts."""
+        base_prompt = """You are Claude, an expert at converting natural language requests into precise bash commands.
+
+Your task: Transform the user's request into exactly ONE safe, correct bash command.
+
+CRITICAL REQUIREMENTS:
+- Output ONLY the command itself - no explanations, no markdown, no extra text
+- Use proper bash syntax with appropriate flags
+- Choose the most direct and safe approach
+- Consider current working directory context
+- Prefer standard Unix tools
+
+COMMAND GENERATION PROCESS:
+1. Parse the intent from the natural language
+2. Select the appropriate bash command and flags
+3. Ensure safety (no destructive operations without clear intent)
+4. Output the final command
+
+EXAMPLES OF SUCCESSFUL CONVERSIONS:
 {examples}
 
-EXECUTION HISTORY (learn from past):
+LEARN FROM EXECUTION HISTORY:
 {history_context}
 
-CURRENT REQUEST: {request}
+NOW CONVERT THIS REQUEST TO A BASH COMMAND:
 
-Generate the bash command now:"""
+REQUEST: {request}"""
 
-        response = await self._call_llm(prompt=prompt, temperature=0.0, max_tokens=150)
+        if iteration > 0 and previous_command:
+            base_prompt += """
 
-        return response.strip()
+PREVIOUS ATTEMPT (consider feedback for improvement):
+{previous_command}
+
+IMPROVE based on safety, accuracy, and efficiency concerns."""
+
+        return base_prompt.format(
+            examples=examples,
+            history_context=history_context,
+            request=request,
+            previous_command=previous_command,
+        )
+
+    async def _evaluate_command_quality(self, command: str, request: str) -> Dict[str, Any]:
+        """Evaluate command quality using Claude as evaluator."""
+        eval_prompt = f"""You are a bash command evaluator. Rate this command for the given task on a scale of 1-10.
+
+TASK: {request}
+COMMAND: {command}
+
+EVALUATION CRITERIA:
+- Safety: Command is not destructive or dangerous
+- Correctness: Command actually solves the task
+- Efficiency: Uses appropriate tools and flags
+- Completeness: Addresses all aspects of the request
+
+Return ONLY JSON in this format:
+{{
+    "score": 7,
+    "issues": ["brief issue description"],
+    "strengths": ["what's good about it"]
+}}
+
+SCORE: """
+
+        try:
+            response = await self._call_llm(prompt=eval_prompt, temperature=0.0, max_tokens=200)
+            # Simple JSON extraction (could be improved)
+            import json
+
+            result = json.loads(response.strip())
+            return result
+        except Exception as e:
+            logger.warning(f"Command evaluation failed: {e}, assuming score 5")
+            return {"score": 5, "issues": ["evaluation failed"], "strengths": []}
 
     async def _stream_command_generation(
         self, request: str, context: Dict[str, Any]

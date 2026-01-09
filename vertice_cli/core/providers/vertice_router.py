@@ -12,7 +12,7 @@ Routes requests to the optimal LLM provider based on:
 from __future__ import annotations
 
 import asyncio
-from typing import Dict, List, Optional, AsyncGenerator, Protocol
+from typing import Dict, List, Optional, AsyncGenerator, Protocol, Any
 from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime, timedelta
@@ -120,13 +120,14 @@ class VerticeRouter:
     # Provider priorities (lower = higher priority)
     # Mode: "enterprise" prioritizes Vertex AI, "free" prioritizes free tiers
     PROVIDER_PRIORITY_ENTERPRISE = {
-        "vertex-ai": 1,  # Vertex AI Gemini 2.0 - PRIMARY (R$8000 credits!)
-        "azure-openai": 2,  # Enterprise GPT-4 via Azure
-        "groq": 3,  # 14,400 req/day, ultra-fast fallback
-        "cerebras": 4,  # 1M tokens/day, fastest fallback
-        "mistral": 5,  # 1B tokens/month
-        "openrouter": 6,  # 200 req/day on free models
-        "gemini": 7,  # Legacy API (prefer vertex-ai)
+        "anthropic-vertex": 1,  # Claude 3.5 Sonnet v2 - PRIMARY (Best code model)
+        "vertex-ai": 2,  # Vertex AI Gemini 2.0 - Secondary
+        "azure-openai": 3,  # Enterprise GPT-4 via Azure
+        "groq": 4,  # 14,400 req/day, ultra-fast fallback
+        "cerebras": 5,  # 1M tokens/day, fastest fallback
+        "mistral": 6,  # 1B tokens/month
+        "openrouter": 7,  # 200 req/day on free models
+        "gemini": 8,  # Legacy API
     }
 
     PROVIDER_PRIORITY_FREE = {
@@ -135,8 +136,9 @@ class VerticeRouter:
         "mistral": 3,  # 1B tokens/month
         "openrouter": 4,  # 200 req/day on free models
         "gemini": 5,  # Your existing quota (legacy API)
-        "vertex-ai": 6,  # Enterprise Gemini via Vertex AI
-        "azure-openai": 7,  # Enterprise GPT-4 via Azure
+        "anthropic-vertex": 6,  # Enterprise Claude
+        "vertex-ai": 7,  # Enterprise Gemini via Vertex AI
+        "azure-openai": 8,  # Enterprise GPT-4 via Azure
     }
 
     # Default to enterprise mode (user has GCloud credits)
@@ -144,10 +146,10 @@ class VerticeRouter:
 
     # Task complexity to provider mapping (Enterprise mode - Vertex AI first)
     COMPLEXITY_ROUTING = {
-        TaskComplexity.SIMPLE: ["vertex-ai", "groq", "cerebras"],
-        TaskComplexity.MODERATE: ["vertex-ai", "groq", "mistral"],
-        TaskComplexity.COMPLEX: ["vertex-ai", "azure-openai", "openrouter"],
-        TaskComplexity.CRITICAL: ["vertex-ai", "azure-openai"],  # Enterprise only
+        TaskComplexity.SIMPLE: ["anthropic-vertex", "vertex-ai", "groq"],
+        TaskComplexity.MODERATE: ["anthropic-vertex", "vertex-ai", "mistral"],
+        TaskComplexity.COMPLEX: ["anthropic-vertex", "azure-openai", "vertex-ai"],
+        TaskComplexity.CRITICAL: ["anthropic-vertex", "azure-openai"],  # Enterprise only
     }
 
     # Speed requirement to provider mapping (Vertex AI is fast!)
@@ -190,6 +192,7 @@ class VerticeRouter:
 
         # Import providers - Enterprise (Your Infrastructure)
         from .vertex_ai import VertexAIProvider
+        from .anthropic_vertex import AnthropicVertexProvider
         from .azure_openai import AzureOpenAIProvider
 
         # Initialize all providers
@@ -201,6 +204,7 @@ class VerticeRouter:
             "mistral": (MistralProvider, {"model_name": "large"}),
             "gemini": (GeminiProvider, {}),  # Legacy - prefer vertex-ai
             # Enterprise Providers (Your Infrastructure)
+            "anthropic-vertex": (AnthropicVertexProvider, {"model_name": "sonnet-4.5"}),
             "vertex-ai": (VertexAIProvider, {"model_name": "pro"}),  # Gemini 3 Pro!
             "azure-openai": (AzureOpenAIProvider, {"deployment": "gpt4o-mini"}),
         }
@@ -208,7 +212,8 @@ class VerticeRouter:
         for name, (cls, kwargs) in provider_classes.items():
             try:
                 provider = cls(**kwargs)
-                if provider.is_available():
+                # Special handling for anthropic-vertex - try even if is_available() fails
+                if name == "anthropic-vertex" or provider.is_available():
                     self._providers[name] = provider
                     info = provider.get_model_info()
                     daily_limit = info.get("requests_per_day", 10000)
@@ -237,6 +242,92 @@ class VerticeRouter:
         """Get list of available providers."""
         self._lazy_init()
         return [name for name, status in self._status.items() if status.can_use()]
+
+    async def route_with_claude_analysis(
+        self,
+        task_description: str = "",
+        complexity: Optional[TaskComplexity] = None,
+        speed: Optional[SpeedRequirement] = None,
+        prefer_free: bool = True,
+    ) -> RoutingDecision:
+        """Route using Claude analysis for intelligent decision making."""
+        # First analyze the task with Claude
+        if not complexity or not speed:
+            analysis = await self._analyze_task_with_claude(task_description)
+            complexity = complexity or TaskComplexity(analysis.get("complexity", "moderate"))
+            speed = speed or SpeedRequirement(analysis.get("speed", "normal"))
+
+        return self.route(task_description, complexity, speed, prefer_free)
+
+    async def _analyze_task_with_claude(self, task_description: str) -> Dict[str, Any]:
+        """Use Claude to analyze task complexity and requirements."""
+        # Get the best available LLM (prefer Claude)
+        llm_client = None
+        for provider_name in ["anthropic-vertex", "vertex-ai", "groq"]:
+            if provider_name in self._providers:
+                llm_client = self._providers[provider_name]
+                break
+
+        if not llm_client:
+            # Fallback to defaults
+            return {
+                "complexity": TaskComplexity.MODERATE,
+                "speed": SpeedRequirement.NORMAL,
+                "skills_needed": ["general"],
+                "estimated_time": "medium",
+            }
+
+        analysis_prompt = f"""Analyze this software development task and classify its requirements:
+
+TASK: {task_description}
+
+Provide analysis in JSON format:
+{{
+    "complexity": "simple|moderate|complex|critical",
+    "speed": "instant|fast|normal|relaxed",
+    "skills_needed": ["skill1", "skill2"],
+    "estimated_time": "short|medium|long",
+    "recommended_provider": "anthropic-vertex|vertex-ai|groq|etc",
+    "reasoning": "brief explanation"
+}}
+
+Focus on:
+- TECHNICAL COMPLEXITY: algorithm design, architecture decisions, multiple technologies
+- TIME SENSITIVITY: user waiting, background processing, iterative development
+- EXPERTISE REQUIRED: specialized knowledge, debugging, optimization
+
+Respond with ONLY the JSON object."""
+
+        try:
+            response = await llm_client.generate(
+                messages=[{"role": "user", "content": analysis_prompt}],
+                max_tokens=300,
+                temperature=0.0,
+            )
+
+            # Simple JSON extraction
+            import json
+            import re
+
+            # Extract JSON from response
+            json_match = re.search(r"\{.*\}", response, re.DOTALL)
+            if json_match:
+                analysis = json.loads(json_match.group())
+                return analysis
+            else:
+                print(f"Failed to parse Claude analysis: {response}")
+
+        except Exception as e:
+            print(f"Claude analysis failed: {e}")
+
+        # Fallback
+        return {
+            "complexity": TaskComplexity.MODERATE,
+            "speed": SpeedRequirement.NORMAL,
+            "skills_needed": ["general"],
+            "estimated_time": "medium",
+            "reasoning": "fallback due to analysis failure",
+        }
 
     def route(
         self,
