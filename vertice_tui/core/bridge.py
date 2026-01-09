@@ -433,10 +433,14 @@ class Bridge(ProtocolBridgeMixin):
     def status_line(self) -> str:
         """Get status line for TUI."""
         llm_status = f"{ELP['approved']} Gemini" if self.is_connected else f"{ELP['error']} No LLM"
+        
+        tool_count = self.tools.get_tool_count() if self.tools else 0
+        agent_count = len(self.agents.available_agents) if self.agents else 0
+        
         return (
-            f"{llm_status} | {self.governance.get_status_emoji()} | "
-            f"{ELP['agent']} {len(self.agents.available_agents)} agents | "
-            f"{ELP['tool']} {self.tools.get_tool_count()} tools"
+            f"{llm_status} | {self.governance.get_status_emoji() if self.governance else '??'} | "
+            f"{ELP['agent']} {agent_count} agents | "
+            f"{ELP['tool']} {tool_count} tools"
         )
 
     @property
@@ -467,6 +471,11 @@ class Bridge(ProtocolBridgeMixin):
         """Configure LLM with tool schemas."""
         if self._tools_configured:
             return
+            
+        if not self.tools:
+            logger.warning("Cannot configure LLM tools: Tool bridge not initialized")
+            return
+            
         schemas = self.tools.get_schemas_for_llm()
         if schemas:
             self.llm.set_tools(schemas)
@@ -481,7 +490,7 @@ class Bridge(ProtocolBridgeMixin):
                 get_dynamic_context,
             )
 
-            tool_schemas = self.tools.get_schemas_for_llm()
+            tool_schemas = self.tools.get_schemas_for_llm() if self.tools else []
             context = get_dynamic_context()
             project_memory = load_project_memory()
             user_memory = None
@@ -498,7 +507,7 @@ class Bridge(ProtocolBridgeMixin):
             logger.warning(f"Agentic system prompt failed, using fallback: {e}")
 
         # Fallback prompt
-        tool_names = self.tools.list_tools()[:25]
+        tool_names = self.tools.list_tools()[:25] if self.tools else []
         tool_list = ", ".join(tool_names) if tool_names else "none loaded"
         return f"""You are PROMETHEUS, an AI coding assistant.
 Available tools: {tool_list}
@@ -582,7 +591,14 @@ Working directory: {os.getcwd()}"""
 
     async def execute_tool(self, tool_name: str, **kwargs: Any) -> Dict[str, Any]:
         """Execute a tool by name."""
-        gov_report = self.governance.observe(f"tool:{tool_name}", str(kwargs))
+        if not self.tools:
+            raise RuntimeError("Tool bridge not initialized")
+        
+        if self.governance:
+            gov_report = self.governance.observe(f"tool:{tool_name}", str(kwargs))
+        else:
+            gov_report = "Governance not active"
+            
         result = await self.tools.execute_tool(tool_name, **kwargs)
         result["governance"] = gov_report
         return result
@@ -610,6 +626,8 @@ Working directory: {os.getcwd()}"""
 
     def get_tool_list(self) -> str:
         """Get formatted list of tools."""
+        if not self.tools:
+            return "No tools loaded (Bridge not fully initialized)"
         return build_tool_list(self.tools.list_tools())
 
     # =========================================================================

@@ -165,9 +165,9 @@ class VerticeApp(App):
         status = self.query_one(StatusBar)
         try:
             status.llm_connected = self.bridge.is_connected
-            status.agent_count = len(self.bridge.agents.available_agents)
-            status.tool_count = self.bridge.tools.get_tool_count()
-            status.governance_status = self.bridge.governance.get_status_emoji()
+            status.agent_count = len(self.bridge.agents.available_agents) if self.bridge.agents else 0
+            status.tool_count = self.bridge.tools.get_tool_count() if self.bridge.tools else 0
+            status.governance_status = self.bridge.governance.get_status_emoji() if self.bridge.governance else "??"
 
             if self.bridge.is_connected:
                 # Get provider info dynamically
