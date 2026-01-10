@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     // Call FastAPI Backend
     const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-    const response = await fetch(`${backendUrl}/api/v1/chat/`, {
+    const response = await fetch(`${backendUrl}/api/v1/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

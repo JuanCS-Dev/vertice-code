@@ -4,7 +4,7 @@ Vercel AI SDK Compatible Chat Endpoint (VERTEX AI REAL)
 DEBUG: Loading vertice-chat-webapp/backend/app/api/v1/chat.py - REVISION 2026-01-10-REAL-AI
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Header
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
@@ -14,17 +14,24 @@ import logging
 import os
 import vertexai
 from vertexai.generative_models import GenerativeModel, Content, Part, SafetySetting
+import firebase_admin
+from firebase_admin import auth, credentials
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 print("DEBUG: Loading REAL VERTEX AI chat.py")
 
+# Initialize Firebase Admin SDK for authentication
+if not firebase_admin._apps:
+    cred = credentials.ApplicationDefault()
+    firebase_admin.initialize_app(cred)
+
 
 class ChatRequest(BaseModel):
     messages: List[Any]
     stream: bool = True
-    model: str = "gemini-1.5-pro"
+    model: str = "gemini-2.5-pro"
 
 
 def convert_messages(messages):
@@ -78,5 +85,18 @@ async def stream_generator(request: ChatRequest):
 
 
 @router.post("/")
-async def chat_endpoint(request: ChatRequest):
+async def chat_endpoint(request: ChatRequest, authorization: Optional[str] = Header(None)):
+    # Validate Firebase Auth token
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authentication required")
+
+    token = authorization.replace("Bearer ", "")
+    try:
+        decoded_token = auth.verify_id_token(token)
+        user_id = decoded_token["uid"]
+        logger.info(f"Authenticated request from user {user_id}")
+    except Exception as e:
+        logger.error(f"Token validation failed: {e}")
+        raise HTTPException(status_code=401, detail="Invalid authentication token")
+
     return StreamingResponse(stream_generator(request), media_type="text/plain")

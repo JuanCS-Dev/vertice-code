@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "vertice-ai"
-  }
+  },
+  "targets": {
+    "vertice-ai": {
+      "hosting": {
+        "us-central1": [
+          "vertice-ai"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
