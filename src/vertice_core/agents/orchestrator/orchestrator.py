@@ -45,10 +45,17 @@ class ActiveOrchestrator:
         context: UnifiedContext,
         router: Optional[SemanticRouter] = None,
         agents: Optional[Dict[AgentType, AgentProtocol]] = None,
+        timeout: Optional[float] = None,
+        max_iterations: Optional[int] = None,
     ):
+        if context is None:
+            raise AttributeError("Context cannot be None")
+
         self.context = context
         self.router = router or SemanticRouter()
         self.agents = agents or {}
+        self.timeout = timeout or self.DEFAULT_TIMEOUT
+        self.max_iterations = max_iterations or self.MAX_ITERATIONS
 
         self.state = OrchestratorState.IDLE
         self._state_history: List[StateTransition] = []
@@ -103,11 +110,11 @@ class ActiveOrchestrator:
         if self._start_time is None:
             return False
         elapsed = time.time() - self._start_time
-        return elapsed > self.DEFAULT_TIMEOUT
+        return elapsed > self.timeout
 
     def _check_iteration_limit(self) -> bool:
         """Check if iteration limit reached."""
-        return self._iteration_count >= self.MAX_ITERATIONS
+        return self._iteration_count >= self.max_iterations
 
     async def execute(
         self,
@@ -191,7 +198,7 @@ class ActiveOrchestrator:
     def request_handoff(
         self,
         to_agent: AgentType,
-        reason: str,
+        reason: str = "",
         context_updates: Optional[Dict[str, Any]] = None,
         handoff_type: HandoffType = HandoffType.SEQUENTIAL,
     ) -> Handoff:
@@ -274,6 +281,7 @@ class ActiveOrchestrator:
     def cancel(self) -> None:
         """Cancel execution."""
         self._cancelled = True
+        self._transition_to(OrchestratorState.CANCELLED)
 
     def pause(self) -> None:
         """Pause execution (awaiting approval)."""
