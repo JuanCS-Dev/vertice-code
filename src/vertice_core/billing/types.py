@@ -25,6 +25,16 @@ class PricingTier(str, Enum):
     ENTERPRISE_ELITE = "enterprise_elite"  # Strategic accounts
 
 
+class PricingModel(str, Enum):
+    """Pricing models for 2026 enterprise SaaS."""
+
+    USAGE_BASED = "usage_based"  # Traditional usage-based
+    VALUE_BASED = "value_based"  # ROI-driven pricing
+    OUTCOME_BASED = "outcome_based"  # Success/outcome metrics
+    HYBRID = "hybrid"  # Mix of models
+    ENTERPRISE_CUSTOM = "enterprise_custom"  # Fully negotiated
+
+
 class BillingCycle(str, Enum):
     """Billing cycle options."""
 
@@ -46,7 +56,7 @@ class UsageType(str, Enum):
 
 @dataclass
 class PricingPlan:
-    """Enterprise pricing plan with usage tiers."""
+    """Enterprise pricing plan with usage tiers and value-based features."""
 
     # Required fields (no defaults)
     tier: PricingTier
@@ -60,6 +70,16 @@ class PricingPlan:
 
     # Optional fields (with defaults)
     billing_cycle: BillingCycle = BillingCycle.MONTHLY
+    pricing_model: PricingModel = PricingModel.USAGE_BASED
+
+    # Value-Based Pricing Features (2026)
+    roi_guarantee: Optional[float] = None  # ROI percentage guarantee
+    outcome_metrics: List[str] = field(default_factory=list)  # Success metrics tracked
+    value_multipliers: Dict[str, float] = field(default_factory=dict)  # Value-based adjustments
+
+    # Enterprise features
+    custom_sla: bool = False
+    priority_support: bool = False
 
     # Overage pricing per unit
     overage_ai_tokens_per_1k: float = 0.02  # $0.02 per 1K tokens
@@ -101,6 +121,47 @@ class PricingPlan:
             overage_cost += (excess_calls / 1000) * self.overage_api_calls_per_1k
 
         return base_cost + overage_cost
+
+    def calculate_value_based_cost(
+        self, usage: Dict[UsageType, int], outcomes: Dict[str, Any]
+    ) -> float:
+        """
+        Calculate cost based on value delivered and outcomes achieved (2026 model).
+
+        Args:
+            usage: Standard usage metrics
+            outcomes: Business outcomes achieved (ROI, efficiency gains, etc.)
+
+        Returns:
+            Value-adjusted monthly cost
+        """
+        base_cost = self.calculate_monthly_cost(usage)
+
+        if self.pricing_model == PricingModel.VALUE_BASED:
+            # Apply value multipliers based on outcomes
+            value_multiplier = 1.0
+
+            for outcome_key, outcome_value in outcomes.items():
+                if outcome_key in self.value_multipliers:
+                    multiplier = self.value_multipliers[outcome_key]
+
+                    # Apply outcome-based adjustments
+                    if outcome_key == "roi_achieved" and outcome_value > 100:
+                        # Higher ROI = willingness to pay more
+                        value_multiplier *= min(1.5, 1.0 + (outcome_value - 100) * 0.005)
+                    elif outcome_key == "efficiency_gain" and outcome_value > 20:
+                        # Significant efficiency gains justify premium
+                        value_multiplier *= min(1.3, 1.0 + (outcome_value - 20) * 0.01)
+
+            base_cost *= value_multiplier
+
+        return base_cost
+
+    def get_roi_calculator_url(self) -> Optional[str]:
+        """Get URL for ROI calculator (2026 enterprise requirement)."""
+        if self.roi_guarantee:
+            return f"/roi-calculator/{self.tier.value}"
+        return None
 
 
 @dataclass

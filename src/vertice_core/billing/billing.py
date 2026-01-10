@@ -7,6 +7,7 @@ billing automation for enterprise customers.
 
 import asyncio
 import logging
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
@@ -148,20 +149,31 @@ class BillingEngine:
     - Billing cycle management
     """
 
-    def __init__(self, stripe_secret_key: str, tax_rates: Optional[Dict[str, TaxInfo]] = None):
+    def __init__(
+        self,
+        stripe_secret_key: str,
+        tax_rates: Optional[Dict[str, TaxInfo]] = None,
+        ai_optimization_enabled: bool = True,  # 2026 AI-powered billing
+    ):
         """
-        Initialize billing engine.
+        Initialize billing engine with AI-powered optimization (2026).
 
         Args:
             stripe_secret_key: Stripe secret key for API calls
             tax_rates: Tax rates by country/state
+            ai_optimization_enabled: Enable AI-powered billing optimization
         """
         self.stripe_secret_key = stripe_secret_key
         self.tax_rates = tax_rates or self._get_default_tax_rates()
+        self.ai_optimization_enabled = ai_optimization_enabled
 
         # In-memory storage (production would use database)
         self.invoices: Dict[str, Invoice] = {}
         self.billing_periods: Dict[str, List[BillingPeriod]] = {}
+
+        # AI-powered features (2026)
+        self.payment_retry_patterns: Dict[str, Dict] = {}
+        self.customer_risk_profiles: Dict[str, Dict] = {}
 
     async def create_invoice(
         self,
@@ -332,6 +344,144 @@ class BillingEngine:
             logger.error(f"Payment processing failed for invoice {invoice_id}: {e}")
             return False
 
+    async def optimize_payment_retry_strategy(
+        self, tenant_id: str, failed_payment_history: List[Dict]
+    ) -> Dict[str, Any]:
+        """
+        AI-powered payment retry optimization (2026 trend).
+
+        Analyzes payment failure patterns and optimizes retry strategy.
+
+        Args:
+            tenant_id: Tenant identifier
+            failed_payment_history: History of failed payment attempts
+
+        Returns:
+            Optimized retry strategy
+        """
+        if not self.ai_optimization_enabled:
+            return self._default_retry_strategy()
+
+        # Analyze failure patterns
+        failure_reasons = [f.get("reason", "unknown") for f in failed_payment_history]
+
+        # Simple AI analysis (in production, use ML models)
+        card_declines = failure_reasons.count("card_declined")
+        insufficient_funds = failure_reasons.count("insufficient_funds")
+        expired_cards = failure_reasons.count("card_expired")
+
+        # Calculate optimal retry strategy
+        if card_declines > len(failure_reasons) * 0.5:
+            # High card decline rate - focus on card updates
+            strategy = {
+                "recommendation": "card_update_campaign",
+                "retry_delays": [24, 72, 168],  # 1d, 3d, 1w
+                "max_attempts": 3,
+                "ai_insight": "High card decline rate suggests expired/invalid cards",
+            }
+        elif insufficient_funds > len(failure_reasons) * 0.3:
+            # Insufficient funds - longer delays
+            strategy = {
+                "recommendation": "extended_retry",
+                "retry_delays": [72, 168, 336],  # 3d, 1w, 2w
+                "max_attempts": 3,
+                "ai_insight": "Insufficient funds pattern - allow more time between retries",
+            }
+        else:
+            # General failures - standard approach
+            strategy = {
+                "recommendation": "standard_retry",
+                "retry_delays": [24, 72, 168],
+                "max_attempts": 3,
+                "ai_insight": "Mixed failure reasons - use standard retry pattern",
+            }
+
+        # Store learned patterns for future optimization
+        self.payment_retry_patterns[tenant_id] = {
+            "last_updated": time.time(),
+            "failure_analysis": {
+                "card_declines": card_declines,
+                "insufficient_funds": insufficient_funds,
+                "expired_cards": expired_cards,
+                "total_failures": len(failed_payment_history),
+            },
+            "optimal_strategy": strategy,
+        }
+
+        return strategy
+
+    async def predictive_dunning_management(
+        self, tenant_id: str, overdue_invoices: List[Invoice]
+    ) -> Dict[str, Any]:
+        """
+        AI-powered predictive dunning management (2026 enterprise trend).
+
+        Predicts payment likelihood and optimizes dunning strategy.
+
+        Args:
+            tenant_id: Tenant identifier
+            overdue_invoices: List of overdue invoices
+
+        Returns:
+            Optimized dunning strategy
+        """
+        if not overdue_invoices:
+            return {"action": "no_action", "reason": "no_overdue_invoices"}
+
+        # Calculate risk score based on overdue history
+        total_overdue = sum(inv.total_amount for inv in overdue_invoices)
+        days_overdue = max(
+            (time.time() - inv.due_date.timestamp()) / 86400 for inv in overdue_invoices
+        )
+
+        # Simple risk scoring (production would use ML)
+        risk_score = min(100, (total_overdue / 1000) * 10 + (days_overdue / 30) * 20)
+
+        if risk_score > 70:
+            # High risk - immediate action
+            strategy = {
+                "action": "immediate_collection",
+                "priority": "urgent",
+                "communication": "executive_outreach",
+                "ai_insight": f"High risk score ({risk_score:.1f}) - immediate attention required",
+            }
+        elif risk_score > 40:
+            # Medium risk - escalated dunning
+            strategy = {
+                "action": "escalated_dunning",
+                "priority": "high",
+                "communication": "multi_channel_campaign",
+                "ai_insight": f"Medium risk score ({risk_score:.1f}) - escalated engagement needed",
+            }
+        else:
+            # Low risk - standard dunning
+            strategy = {
+                "action": "standard_dunning",
+                "priority": "normal",
+                "communication": "email_sequence",
+                "ai_insight": f"Low risk score ({risk_score:.1f}) - standard collection process",
+            }
+
+        # Update risk profile
+        self.customer_risk_profiles[tenant_id] = {
+            "last_updated": time.time(),
+            "risk_score": risk_score,
+            "total_overdue": total_overdue,
+            "avg_days_overdue": days_overdue,
+            "recommended_strategy": strategy,
+        }
+
+        return strategy
+
+    def _default_retry_strategy(self) -> Dict[str, Any]:
+        """Default payment retry strategy when AI is disabled."""
+        return {
+            "recommendation": "standard_retry",
+            "retry_delays": [24, 72, 168],  # 1d, 3d, 1w
+            "max_attempts": 3,
+            "ai_insight": "AI optimization disabled - using standard retry pattern",
+        }
+
     def get_invoice(self, invoice_id: str) -> Optional[Invoice]:
         """Get invoice by ID."""
         return self.invoices.get(invoice_id)
@@ -351,33 +501,76 @@ class BillingEngine:
         return None
 
     def _get_default_tax_rates(self) -> Dict[str, TaxInfo]:
-        """Get default tax rates for major countries."""
+        """Get comprehensive tax rates for 50+ countries (2026 Global Compliance)."""
         return {
-            "US": TaxInfo(
-                country_code="US",
-                tax_rate=0.0,  # Sales tax varies by state, handled separately
-                tax_type="Sales Tax",
-            ),
-            "GB": TaxInfo(
-                country_code="GB",
-                tax_rate=20.0,  # UK VAT
-                tax_type="VAT",
-            ),
-            "DE": TaxInfo(
-                country_code="DE",
-                tax_rate=19.0,  # German VAT
-                tax_type="VAT",
-            ),
-            "FR": TaxInfo(
-                country_code="FR",
-                tax_rate=20.0,  # French VAT
-                tax_type="VAT",
-            ),
-            "BR": TaxInfo(
-                country_code="BR",
-                tax_rate=0.0,  # Tax included in pricing for Brazil
-                tax_type="Tax Included",
-            ),
+            # North America
+            "US": TaxInfo(country_code="US", tax_rate=0.0, tax_type="Sales Tax"),
+            "CA": TaxInfo(country_code="CA", tax_rate=5.0, tax_type="GST"),
+            "MX": TaxInfo(country_code="MX", tax_rate=16.0, tax_type="IVA"),
+            # European Union (VAT rates as of 2026)
+            "GB": TaxInfo(country_code="GB", tax_rate=20.0, tax_type="VAT"),
+            "DE": TaxInfo(country_code="DE", tax_rate=19.0, tax_type="VAT"),
+            "FR": TaxInfo(country_code="FR", tax_rate=20.0, tax_type="VAT"),
+            "IT": TaxInfo(country_code="IT", tax_rate=22.0, tax_type="VAT"),
+            "ES": TaxInfo(country_code="ES", tax_rate=21.0, tax_type="VAT"),
+            "NL": TaxInfo(country_code="NL", tax_rate=21.0, tax_type="VAT"),
+            "BE": TaxInfo(country_code="BE", tax_rate=21.0, tax_type="VAT"),
+            "AT": TaxInfo(country_code="AT", tax_rate=20.0, tax_type="VAT"),
+            "SE": TaxInfo(country_code="SE", tax_rate=25.0, tax_type="VAT"),
+            "DK": TaxInfo(country_code="DK", tax_rate=25.0, tax_type="VAT"),
+            "FI": TaxInfo(country_code="FI", tax_rate=24.0, tax_type="VAT"),
+            "PT": TaxInfo(country_code="PT", tax_rate=23.0, tax_type="VAT"),
+            "IE": TaxInfo(country_code="IE", tax_rate=23.0, tax_type="VAT"),
+            "LU": TaxInfo(country_code="LU", tax_rate=17.0, tax_type="VAT"),
+            "MT": TaxInfo(country_code="MT", tax_rate=18.0, tax_type="VAT"),
+            "CY": TaxInfo(country_code="CY", tax_rate=19.0, tax_type="VAT"),
+            "EE": TaxInfo(country_code="EE", tax_rate=20.0, tax_type="VAT"),
+            "LV": TaxInfo(country_code="LV", tax_rate=21.0, tax_type="VAT"),
+            "LT": TaxInfo(country_code="LT", tax_rate=21.0, tax_type="VAT"),
+            "SK": TaxInfo(country_code="SK", tax_rate=20.0, tax_type="VAT"),
+            "SI": TaxInfo(country_code="SI", tax_rate=22.0, tax_type="VAT"),
+            "HR": TaxInfo(country_code="HR", tax_rate=25.0, tax_type="VAT"),
+            "PL": TaxInfo(country_code="PL", tax_rate=23.0, tax_type="VAT"),
+            "HU": TaxInfo(country_code="HU", tax_rate=27.0, tax_type="VAT"),
+            "CZ": TaxInfo(country_code="CZ", tax_rate=21.0, tax_type="VAT"),
+            "RO": TaxInfo(country_code="RO", tax_rate=19.0, tax_type="VAT"),
+            "BG": TaxInfo(country_code="BG", tax_rate=20.0, tax_type="VAT"),
+            "GR": TaxInfo(country_code="GR", tax_rate=24.0, tax_type="VAT"),
+            # Asia Pacific
+            "AU": TaxInfo(country_code="AU", tax_rate=10.0, tax_type="GST"),
+            "NZ": TaxInfo(country_code="NZ", tax_rate=15.0, tax_type="GST"),
+            "JP": TaxInfo(country_code="JP", tax_rate=10.0, tax_type="VAT"),
+            "KR": TaxInfo(country_code="KR", tax_rate=10.0, tax_type="VAT"),
+            "SG": TaxInfo(country_code="SG", tax_rate=9.0, tax_type="GST"),
+            "HK": TaxInfo(country_code="HK", tax_rate=0.0, tax_type="No Tax"),
+            "IN": TaxInfo(country_code="IN", tax_rate=18.0, tax_type="GST"),
+            "CN": TaxInfo(country_code="CN", tax_rate=13.0, tax_type="VAT"),
+            "TW": TaxInfo(country_code="TW", tax_rate=5.0, tax_type="VAT"),
+            "TH": TaxInfo(country_code="TH", tax_rate=7.0, tax_type="VAT"),
+            "MY": TaxInfo(country_code="MY", tax_rate=10.0, tax_type="GST"),
+            "PH": TaxInfo(country_code="PH", tax_rate=12.0, tax_type="VAT"),
+            "ID": TaxInfo(country_code="ID", tax_rate=11.0, tax_type="VAT"),
+            # Latin America
+            "BR": TaxInfo(country_code="BR", tax_rate=0.0, tax_type="Tax Included"),
+            "AR": TaxInfo(country_code="AR", tax_rate=21.0, tax_type="IVA"),
+            "CL": TaxInfo(country_code="CL", tax_rate=19.0, tax_type="IVA"),
+            "CO": TaxInfo(country_code="CO", tax_rate=19.0, tax_type="IVA"),
+            "PE": TaxInfo(country_code="PE", tax_rate=18.0, tax_type="IGV"),
+            "UY": TaxInfo(country_code="UY", tax_rate=22.0, tax_type="IVA"),
+            "PY": TaxInfo(country_code="PY", tax_rate=10.0, tax_type="IVA"),
+            # Middle East & Africa
+            "AE": TaxInfo(country_code="AE", tax_rate=5.0, tax_type="VAT"),
+            "SA": TaxInfo(country_code="SA", tax_rate=15.0, tax_type="VAT"),
+            "ZA": TaxInfo(country_code="ZA", tax_rate=15.0, tax_type="VAT"),
+            "EG": TaxInfo(country_code="EG", tax_rate=14.0, tax_type="VAT"),
+            "NG": TaxInfo(country_code="NG", tax_rate=7.5, tax_type="VAT"),
+            "KE": TaxInfo(country_code="KE", tax_rate=16.0, tax_type="VAT"),
+            "GH": TaxInfo(country_code="GH", tax_rate=15.0, tax_type="VAT"),
+            # Special territories
+            "CH": TaxInfo(country_code="CH", tax_rate=8.1, tax_type="VAT"),
+            "NO": TaxInfo(country_code="NO", tax_rate=25.0, tax_type="VAT"),
+            "IS": TaxInfo(country_code="IS", tax_rate=24.0, tax_type="VAT"),
+            "TR": TaxInfo(country_code="TR", tax_rate=20.0, tax_type="VAT"),
         }
 
 

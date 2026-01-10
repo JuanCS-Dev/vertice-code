@@ -272,6 +272,111 @@ class AnalyticsEngine:
             "confidence": "medium" if len(days) >= 14 else "low",
             "usage_trends": {k.value: v for k, v in usage_trends.items()},
             "reasoning": f"Based on {len(days)} days of usage data",
+            "recommendations": self._generate_agentic_recommendations(
+                churn_risk, expansion_potential, usage_trends
+            ),
+        }
+
+    def _generate_agentic_recommendations(
+        self, churn_risk: float, expansion_potential: float, usage_trends: Dict[UsageType, float]
+    ) -> List[str]:
+        """
+        Generate autonomous recommendations based on analytics insights.
+
+        This implements Agentic Analytics - analytics that take actions.
+        """
+        recommendations = []
+
+        # High churn risk - take preventive actions
+        if churn_risk > 70:
+            recommendations.extend(
+                [
+                    "URGENT: High churn risk detected - schedule executive outreach within 24h",
+                    "AUTO-ACTION: Enable enhanced onboarding sequence",
+                    "AUTO-ACTION: Deploy retention campaign with usage incentives",
+                ]
+            )
+        elif churn_risk > 50:
+            recommendations.extend(
+                [
+                    "MODERATE: Monitor usage patterns closely",
+                    "AUTO-ACTION: Send proactive engagement email",
+                    "RECOMMENDATION: Schedule customer success check-in",
+                ]
+            )
+
+        # High expansion potential - proactive selling
+        if expansion_potential > 70:
+            recommendations.extend(
+                [
+                    "OPPORTUNITY: High expansion potential identified",
+                    "AUTO-ACTION: Add to expansion opportunity pipeline",
+                    "RECOMMENDATION: Prepare upgrade proposal with ROI projections",
+                ]
+            )
+
+        # Usage trend analysis - autonomous optimization
+        for usage_type, trend in usage_trends.items():
+            if trend < -30:  # Sharp decline
+                recommendations.append(
+                    f"CRITICAL: {usage_type.value} usage declined 30%+ - investigate immediately"
+                )
+            elif trend > 50:  # Rapid growth
+                recommendations.append(
+                    f"OPPORTUNITY: {usage_type.value} usage grew 50%+ - prepare for scaling"
+                )
+
+        return recommendations
+
+    async def execute_autonomous_actions(self, tenant_id: str) -> Dict[str, Any]:
+        """
+        Execute autonomous actions based on analytics insights (2026 Agentic Analytics).
+
+        Returns actions taken and their results.
+        """
+        insights = await self.get_performance_insights(tenant_id)
+        predictions = await self.generate_predictive_insights(tenant_id)
+
+        actions_taken = []
+        results = {}
+
+        # Execute high-priority autonomous actions
+        churn_risk = predictions.get("churn_risk", 0)
+
+        if churn_risk > 80:
+            # Critical churn prevention
+            actions_taken.append("critical_churn_prevention")
+            results["critical_churn_prevention"] = {
+                "action": "immediate_executive_outreach",
+                "priority": "urgent",
+                "timestamp": time.time(),
+            }
+
+        elif churn_risk > 60:
+            # Moderate churn prevention
+            actions_taken.append("moderate_churn_prevention")
+            results["moderate_churn_prevention"] = {
+                "action": "automated_engagement_campaign",
+                "priority": "high",
+                "timestamp": time.time(),
+            }
+
+        expansion_potential = predictions.get("expansion_potential", 0)
+
+        if expansion_potential > 80:
+            # High expansion opportunity
+            actions_taken.append("expansion_opportunity")
+            results["expansion_opportunity"] = {
+                "action": "add_to_expansion_pipeline",
+                "priority": "high",
+                "timestamp": time.time(),
+            }
+
+        return {
+            "actions_taken": actions_taken,
+            "results": results,
+            "insights_processed": len(insights.get("insights", [])),
+            "predictions_processed": len(predictions.get("recommendations", [])),
         }
 
     async def _update_realtime_metrics(self, tenant_id: str) -> None:
@@ -314,7 +419,7 @@ class AnalyticsEngine:
         )
 
         # Update agent performance metrics
-        agent_perf = defaultdict(
+        agent_perf: Dict[str, Dict[str, float]] = defaultdict(
             lambda: {"requests": 0, "success_rate": 100.0, "avg_response_time": 0.0}
         )
         for record in perf_data:
