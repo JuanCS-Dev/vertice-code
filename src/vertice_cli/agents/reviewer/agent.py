@@ -94,6 +94,15 @@ class ReviewerAgent(BaseAgent):
     """
 
     def __init__(self, llm_client: Any, mcp_client: Any):
+        # Initialize SOFIA for ethical code analysis (Constituição Vértice v3.0)
+        self.sofia_agent = None
+        if SOFIA_AVAILABLE and SofiaAgent is not None:
+            try:
+                self.sofia_agent = SofiaAgent()
+                logger.info("SOFIA integrated for ethical code review")
+            except Exception as e:
+                logger.warning(f"Failed to initialize SOFIA: {e}")
+
         super().__init__(
             role=AgentRole.REVIEWER,
             capabilities=[AgentCapability.READ_ONLY, AgentCapability.BASH_EXEC],
@@ -108,15 +117,6 @@ class ReviewerAgent(BaseAgent):
         self.performance_agent = PerformanceAgent()
         self.test_agent = TestCoverageAgent()
         self.graph_agent = CodeGraphAnalysisAgent()
-
-        # Initialize SOFIA for ethical code analysis (Constituição Vértice v3.0)
-        self.sofia_agent = None
-        if SOFIA_AVAILABLE and SofiaAgent is not None:
-            try:
-                self.sofia_agent = SofiaAgent()
-                logger.info("SOFIA integrated for ethical code review")
-            except Exception as e:
-                logger.warning(f"Failed to initialize SOFIA: {e}")
 
     def _build_system_prompt(self) -> str:
         sofia_status = " + SOFIA (Ethical Analysis)" if self.sofia_agent else ""

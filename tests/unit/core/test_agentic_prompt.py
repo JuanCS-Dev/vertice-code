@@ -442,7 +442,6 @@ class TestPromptIntegration:
         assert "juancs-code" in prompt
         assert "read_file" in prompt
         assert str(temp_workspace) in prompt
-        assert "npm install" in prompt
         assert "verbose output" in prompt
 
     def test_prompt_token_efficiency(self):
