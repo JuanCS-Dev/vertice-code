@@ -11,8 +11,10 @@ from typing import TYPE_CHECKING
 from .base import CompactionStrategy_ABC
 
 if TYPE_CHECKING:
-    from vertice_core.agents.compaction.types import CompactionConfig, CompactionResult
+    from vertice_core.agents.compaction.types import CompactionConfig
     from vertice_core.agents.context import UnifiedContext
+
+from vertice_core.agents.compaction.types import CompactionResult
 
 logger = logging.getLogger(__name__)
 
