@@ -66,7 +66,8 @@ def generate_prompt_context(ctx: "UnifiedContext") -> str:
     if ctx._decisions:
         recent_decisions = ctx._decisions[-5:]
         decision_str = "\n".join(
-            f"- [{d.decision_type.value}] {d.description}" for d in recent_decisions
+            f"- [{d.decision_type.value if hasattr(d.decision_type, 'value') else d.decision_type}] {d.description}"
+            for d in recent_decisions
         )
         parts.append(f"## Recent Decisions\n{decision_str}")
 

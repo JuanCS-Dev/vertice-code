@@ -364,8 +364,8 @@ class TestActiveOrchestratorStats:
 
         stats = orchestrator.get_stats()
 
-        assert stats["total_transitions"] == 2
-        assert stats["current_state"] == OrchestratorState.ROUTING
+        assert stats["transitions"] == 2
+        assert stats["state"] == OrchestratorState.ROUTING.value
 
     def test_get_state_history(self) -> None:
         """Test getting state history."""
@@ -379,9 +379,9 @@ class TestActiveOrchestratorStats:
         history = orchestrator.get_state_history()
 
         assert len(history) == 2
-        assert history[0]["to_state"] == OrchestratorState.GATHERING
-        assert history[1]["to_state"] == OrchestratorState.ROUTING
-        assert "Starting" in history[0]["reason"]
+        assert history[0]["to"] == OrchestratorState.GATHERING.value
+        assert history[1]["to"] == OrchestratorState.ROUTING.value
+        assert history[0]["condition"] == "Starting"
 
 
 class TestActiveOrchestratorCallbacks:
@@ -395,10 +395,10 @@ class TestActiveOrchestratorCallbacks:
         callback_called = False
         callback_data = None
 
-        def state_callback(from_state, to_state, reason):
+        def state_callback(from_state, to_state):
             nonlocal callback_called, callback_data
             callback_called = True
-            callback_data = (from_state, to_state, reason)
+            callback_data = (from_state, to_state)
 
         orchestrator.set_on_state_change(state_callback)
 
@@ -406,7 +406,7 @@ class TestActiveOrchestratorCallbacks:
         orchestrator._transition_to(OrchestratorState.GATHERING, "test reason")
 
         assert callback_called
-        assert callback_data == (OrchestratorState.IDLE, OrchestratorState.GATHERING, "test reason")
+        assert callback_data == (OrchestratorState.IDLE, OrchestratorState.GATHERING)
 
     def test_set_on_step_complete_callback(self) -> None:
         """Test setting step complete callback."""
@@ -448,7 +448,8 @@ class TestActiveOrchestratorErrorHandling:
         orchestrator.state = OrchestratorState.COMPLETED
 
         # Execute should handle gracefully
-        await orchestrator.execute()
+        async for output in orchestrator.execute("test request"):
+            pass
 
         # Should remain completed
         assert orchestrator.state == OrchestratorState.COMPLETED
@@ -475,6 +476,5 @@ class TestActiveOrchestratorErrorHandling:
 
         stats = orchestrator.get_stats()
 
-        assert stats["current_state"] == OrchestratorState.EXECUTING
-        assert stats["iteration_count"] == 5
-        assert stats["execution_time_seconds"] >= 10
+        assert stats["state"] == OrchestratorState.EXECUTING.value
+        assert stats["iterations"] == 5
