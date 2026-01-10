@@ -120,8 +120,8 @@ class VerticeRouter:
     # Provider priorities (lower = higher priority)
     # Mode: "enterprise" prioritizes Vertex AI, "free" prioritizes free tiers
     PROVIDER_PRIORITY_ENTERPRISE = {
-        "anthropic-vertex": 1,  # Claude 3.5 Sonnet v2 - PRIMARY (Best code model)
-        "vertex-ai": 2,  # Vertex AI Gemini 2.0 - Secondary
+        "vertex-ai": 1,  # Vertex AI Gemini 2.5 Pro - PRIMARY (Best for code, 2026 standard)
+        "anthropic-vertex": 2,  # Claude 4.5 - Secondary
         "azure-openai": 3,  # Enterprise GPT-4 via Azure
         "groq": 4,  # 14,400 req/day, ultra-fast fallback
         "cerebras": 5,  # 1M tokens/day, fastest fallback
