@@ -16,6 +16,7 @@ import vertexai
 from vertexai.generative_models import GenerativeModel, Content, Part, SafetySetting
 import firebase_admin
 from firebase_admin import auth, credentials
+import json
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -24,7 +25,14 @@ print("DEBUG: Loading REAL VERTEX AI chat.py")
 
 # Initialize Firebase Admin SDK for authentication
 if not firebase_admin._apps:
-    cred = credentials.ApplicationDefault()
+    import json
+
+    firebase_key = os.getenv("FIREBASE_SERVICE_ACCOUNT_KEY")
+    if firebase_key:
+        cred = credentials.Certificate(json.loads(firebase_key))
+    else:
+        # Fallback to Application Default (for local dev)
+        cred = credentials.ApplicationDefault()
     firebase_admin.initialize_app(cred)
 
 
