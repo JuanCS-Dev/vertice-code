@@ -9,6 +9,7 @@ Tests cover:
 
 Based on pytest patterns from Anthropic's Claude Code.
 """
+
 import os
 import subprocess
 from pathlib import Path
@@ -33,24 +34,14 @@ def temp_git_repo(tmp_path: Path) -> Path:
     # Initialize git repo
     subprocess.run(["git", "init"], cwd=repo_dir, capture_output=True)
     subprocess.run(
-        ["git", "config", "user.email", "test@test.com"],
-        cwd=repo_dir,
-        capture_output=True
+        ["git", "config", "user.email", "test@test.com"], cwd=repo_dir, capture_output=True
     )
-    subprocess.run(
-        ["git", "config", "user.name", "Test"],
-        cwd=repo_dir,
-        capture_output=True
-    )
+    subprocess.run(["git", "config", "user.name", "Test"], cwd=repo_dir, capture_output=True)
 
     # Create initial commit
     (repo_dir / "README.md").write_text("# Test")
     subprocess.run(["git", "add", "."], cwd=repo_dir, capture_output=True)
-    subprocess.run(
-        ["git", "commit", "-m", "Initial commit"],
-        cwd=repo_dir,
-        capture_output=True
-    )
+    subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=repo_dir, capture_output=True)
 
     return repo_dir
 
@@ -58,6 +49,7 @@ def temp_git_repo(tmp_path: Path) -> Path:
 # =============================================================================
 # BUILD_AGENTIC_SYSTEM_PROMPT TESTS
 # =============================================================================
+
 
 class TestBuildAgenticSystemPrompt:
     """Tests for build_agentic_system_prompt function."""
@@ -77,10 +69,7 @@ class TestBuildAgenticSystemPrompt:
                 "name": "read_file",
                 "description": "Read a file",
                 "category": "file_ops",
-                "parameters": {
-                    "required": ["path"],
-                    "properties": {"path": {"type": "string"}}
-                }
+                "parameters": {"required": ["path"], "properties": {"path": {"type": "string"}}},
             },
             {
                 "name": "write_file",
@@ -88,12 +77,9 @@ class TestBuildAgenticSystemPrompt:
                 "category": "file_ops",
                 "parameters": {
                     "required": ["path", "content"],
-                    "properties": {
-                        "path": {"type": "string"},
-                        "content": {"type": "string"}
-                    }
-                }
-            }
+                    "properties": {"path": {"type": "string"}, "content": {"type": "string"}},
+                },
+            },
         ]
 
         prompt = build_agentic_system_prompt(tools=tools)
@@ -109,7 +95,7 @@ class TestBuildAgenticSystemPrompt:
             "git_branch": "feature/test",
             "git_status": "3 modified, 1 untracked",
             "modified_files": {"file1.py", "file2.py"},
-            "recent_files": {"recent.py"}
+            "recent_files": {"recent.py"},
         }
 
         prompt = build_agentic_system_prompt(tools=[], context=context)
@@ -195,12 +181,13 @@ Never modify config.json directly.
 # LOAD_PROJECT_MEMORY TESTS
 # =============================================================================
 
+
 class TestLoadProjectMemory:
     """Tests for load_project_memory function."""
 
     def test_load_juancs_md(self, temp_workspace):
-        """Test loading JUANCS.md file."""
-        memory_file = temp_workspace / "JUANCS.md"
+        """Test loading VERTICE.md file (renamed from JUANCS.md)."""
+        memory_file = temp_workspace / "VERTICE.md"
         memory_file.write_text("# Project Memory\nTest content")
 
         result = load_project_memory(str(temp_workspace))
@@ -220,10 +207,11 @@ class TestLoadProjectMemory:
         assert "Fallback content" in result
 
     def test_load_from_subdirectory(self, temp_workspace):
-        """Test loading from .juancs subdirectory."""
-        subdir = temp_workspace / ".juancs"
-        subdir.mkdir()
-        memory_file = subdir / "JUANCS.md"
+        """Test loading memory from .vertice subdirectory."""
+        vertice_dir = temp_workspace / ".vertice"
+        vertice_dir.mkdir()
+
+        memory_file = vertice_dir / "VERTICE.md"
         memory_file.write_text("# Hidden Memory")
 
         result = load_project_memory(str(temp_workspace))
@@ -238,19 +226,20 @@ class TestLoadProjectMemory:
         assert result is None
 
     def test_priority_juancs_over_claude(self, temp_workspace):
-        """Test JUANCS.md takes priority over CLAUDE.md."""
-        (temp_workspace / "JUANCS.md").write_text("JUANCS content")
+        """Test VERTICE.md takes priority over CLAUDE.md."""
+        (temp_workspace / "VERTICE.md").write_text("VERTICE content")
         (temp_workspace / "CLAUDE.md").write_text("CLAUDE content")
 
         result = load_project_memory(str(temp_workspace))
 
-        assert "JUANCS content" in result
+        assert "VERTICE content" in result
         assert "CLAUDE content" not in result
 
 
 # =============================================================================
 # GET_DYNAMIC_CONTEXT TESTS
 # =============================================================================
+
 
 class TestGetDynamicContext:
     """Tests for get_dynamic_context function."""
@@ -327,6 +316,7 @@ class TestGetDynamicContext:
 # ENHANCE_TOOL_RESULT TESTS
 # =============================================================================
 
+
 class TestEnhanceToolResult:
     """Tests for enhance_tool_result function."""
 
@@ -375,7 +365,9 @@ class TestEnhanceToolResult:
         result = enhance_tool_result("test_tool", "error", success=False)
 
         # Should include guidance for error recovery
-        assert "path" in result.lower() or "permission" in result.lower() or "retry" in result.lower()
+        assert (
+            "path" in result.lower() or "permission" in result.lower() or "retry" in result.lower()
+        )
 
     def test_xml_format(self):
         """Test result uses XML-style tags."""
@@ -412,6 +404,7 @@ class TestEnhanceToolResult:
 # INTEGRATION TESTS
 # =============================================================================
 
+
 class TestPromptIntegration:
     """Integration tests for prompt building."""
 
@@ -425,7 +418,7 @@ class TestPromptIntegration:
                 "name": "read_file",
                 "description": "Read file contents",
                 "category": "files",
-                "parameters": {"required": ["path"], "properties": {"path": {"type": "string"}}}
+                "parameters": {"required": ["path"], "properties": {"path": {"type": "string"}}},
             }
         ]
 
@@ -433,7 +426,7 @@ class TestPromptIntegration:
             "cwd": str(temp_workspace),
             "git_branch": "main",
             "modified_files": set(),
-            "recent_files": set()
+            "recent_files": set(),
         }
 
         memory = load_project_memory(str(temp_workspace))
@@ -442,7 +435,7 @@ class TestPromptIntegration:
             tools=tools,
             context=context,
             project_memory=memory,
-            user_memory="User prefers verbose output"
+            user_memory="User prefers verbose output",
         )
 
         # Verify all sections present
@@ -464,6 +457,7 @@ class TestPromptIntegration:
 # =============================================================================
 # EDGE CASES
 # =============================================================================
+
 
 class TestEdgeCases:
     """Tests for edge cases and boundary conditions."""
@@ -489,7 +483,7 @@ class TestEdgeCases:
         """Test context with many modified files (should truncate)."""
         context = {
             "modified_files": {f"file_{i}.py" for i in range(100)},
-            "recent_files": {f"recent_{i}.py" for i in range(50)}
+            "recent_files": {f"recent_{i}.py" for i in range(50)},
         }
 
         prompt = build_agentic_system_prompt(tools=[], context=context)
