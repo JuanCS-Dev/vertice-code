@@ -493,7 +493,7 @@ class TestEdgeCases:
 
     def test_unicode_in_memory(self, temp_workspace):
         """Test unicode characters in memory file."""
-        (temp_workspace / "JUANCS.md").write_text("# Projeto 日本語\n\nOlá mundo! 🎉")
+        (temp_workspace / "VERTICE.md").write_text("# Projeto 日本語\n\nOlá mundo! 🎉")
 
         memory = load_project_memory(str(temp_workspace))
 

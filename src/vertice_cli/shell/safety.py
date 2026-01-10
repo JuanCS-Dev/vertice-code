@@ -130,3 +130,19 @@ def get_safety_description(level: int) -> str:
         2: "Dangerous - requires double confirmation",
     }
     return descriptions.get(level, "Unknown safety level")
+
+
+# Mock functions for missing imports
+def assess_risk(command: str) -> int:
+    """Assess risk level of command (mock)."""
+    return get_safety_level(command)
+
+
+def danger_detector(command: str) -> bool:
+    """Detect if command is dangerous (mock)."""
+    return is_dangerous(command)
+
+
+def error_parser(error: str) -> dict:
+    """Parse error message (mock)."""
+    return {"type": "unknown", "message": error, "suggestion": "Check command syntax"}

@@ -236,11 +236,19 @@ class SafeCommandExecutor:
         suspicious_keywords = ["rm", "del", "fdisk", "mkfs", "dd", "wget", "curl"]
         command_lower = command.lower()
         for keyword in suspicious_keywords:
-            if keyword in command_lower and keyword not in ALLOWED_COMMANDS:
+            # Check for whole words, not substrings (avoid false positives like "rm" in "ruff")
+            import re
+
+            if (
+                re.search(r"\b" + re.escape(keyword) + r"\b", command_lower)
+                and keyword not in ALLOWED_COMMANDS
+            ):
                 violations.append(f"Suspicious command '{keyword}' not in whitelist")
 
         # Special handling for 'format' - only suspicious in dangerous contexts
-        if "format" in command_lower and "rm" in command_lower:
+        import re
+
+        if re.search(r"\bformat\b", command_lower) and re.search(r"\brm\b", command_lower):
             violations.append("Dangerous combination: format with rm")
 
         return violations
