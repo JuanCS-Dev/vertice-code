@@ -24,6 +24,7 @@ print("DEBUG: Loading REAL VERTEX AI chat.py")
 class ChatRequest(BaseModel):
     messages: List[Any]
     stream: bool = True
+    model: str = "gemini-1.5-pro"
 
 
 def convert_messages(messages):
@@ -42,18 +43,18 @@ def convert_messages(messages):
     return vertex_history
 
 
-async def stream_generator(messages_payload):
+async def stream_generator(request: ChatRequest):
     try:
         project_id = os.getenv("GOOGLE_CLOUD_PROJECT", "vertice-ai")
         # Initialize Vertex AI
         vertexai.init(project=project_id, location="us-central1")
 
-        # Updated to Gemini 1.5 Pro (Vertex AI / Stable Model)
-        model = GenerativeModel("gemini-1.5-pro")
+        # Updated to Gemini 2.5 Pro (Vertex AI / 2026 Standard)
+        model = GenerativeModel(request.model)
 
         # Split history and last message
-        history = convert_messages(messages_payload[:-1])
-        last_message_content = messages_payload[-1].get("content")
+        history = convert_messages(request.messages[:-1])
+        last_message_content = request.messages[-1].get("content")
 
         chat = model.start_chat(history=history)
 
@@ -78,4 +79,4 @@ async def stream_generator(messages_payload):
 
 @router.post("/")
 async def chat_endpoint(request: ChatRequest):
-    return StreamingResponse(stream_generator(request.messages), media_type="text/plain")
+    return StreamingResponse(stream_generator(request), media_type="text/plain")
