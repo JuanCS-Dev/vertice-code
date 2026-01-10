@@ -13,6 +13,9 @@ class AgentSelector:
         capabilities: Dict[AgentType, AgentCapability],
         escalation_chains: List[EscalationChain],
     ):
+        if capabilities is None or escalation_chains is None:
+            raise AttributeError("Capabilities and escalation_chains cannot be None")
+
         self.capabilities = capabilities
         self.escalation_chains = escalation_chains
 
@@ -35,7 +38,7 @@ class AgentSelector:
                 candidates.append((agent_type, score))
         if not candidates:
             return None
-        candidates.sort(key=lambda x: x[1], reverse=True)
+        candidates.sort(key=lambda x: x[1])  # Lower priority number = higher priority
         return candidates[0][0]
 
     def get_escalation_target(
