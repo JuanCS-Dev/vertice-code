@@ -226,7 +226,7 @@ class ToolExecutionHandler:
 
             # Add workflow step
             step_id = f"tool_{tool_name}_{i}"
-            dependencies = [f"tool_{tool_calls[i-1].get('tool', '')}_{i-1}"] if i > 0 else []
+            dependencies = [f"tool_{tool_calls[i - 1].get('tool', '')}_{i - 1}"] if i > 0 else []
             self.workflow_viz.add_step(
                 step_id, f"Execute {tool_name}", StepStatus.PENDING, dependencies=dependencies
             )
@@ -329,7 +329,7 @@ class ToolExecutionHandler:
             # If we have errors and retries left, attempt correction
             if attempt < max_corrections:
                 self.console.print(
-                    f"[yellow]Attempting self-correction (attempt {attempt+1}/{max_corrections})...[/yellow]"
+                    f"[yellow]Attempting self-correction (attempt {attempt + 1}/{max_corrections})...[/yellow]"
                 )
 
                 # Ask LLM for correction based on errors
@@ -499,7 +499,7 @@ Please generate corrected tool calls to fix these errors.
                 error=error_msg,
                 tool_name=tool_name,
                 args=args,
-                category=ErrorCategory.PARAMETER_ERROR,
+                category=ErrorCategory.TYPE_ERROR,
             )
 
             # Get diagnosis from LLM
@@ -549,8 +549,8 @@ Please generate corrected tool calls to fix these errors.
 
 Current context:
 - Working directory: {self.context.cwd}
-- Modified files: {list(self.context.modified_files) if self.context.modified_files else 'none'}
-- Read files: {list(self.context.read_files) if self.context.read_files else 'none'}
+- Modified files: {list(self.context.modified_files) if self.context.modified_files else "none"}
+- Read files: {list(self.context.read_files) if self.context.read_files else "none"}
 - Conversation turns: {len(self.conversation.turns)}
 - Context usage: {self.conversation.context_window.get_usage_percentage():.0%}
 

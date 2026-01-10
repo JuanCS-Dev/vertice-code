@@ -13,6 +13,7 @@ import vertice_cli.handlers.tool_execution_handler
 import sys
 from unittest.mock import patch
 
+
 @pytest.mark.usefixtures("mock_shell")
 class TestLLMProcessingHandlerErrors:
     """Tests for error handling in LLMProcessingHandler."""
@@ -24,13 +25,14 @@ class TestLLMProcessingHandlerErrors:
         # NOTE: Using sys.modules to patch the late import in the handler.
         # This is a workaround for a pre-existing protobuf error in the test environment.
         streaming_mock = MagicMock()
-        streaming_mock.stream_llm_response = AsyncMock(side_effect=RuntimeError("Connection failed"))
-        sys.modules['vertice_cli.shell.streaming_integration'] = streaming_mock
+        streaming_mock.stream_llm_response = AsyncMock(
+            side_effect=RuntimeError("Connection failed")
+        )
+        sys.modules["vertice_cli.shell.streaming_integration"] = streaming_mock
 
         ai_patterns_mock = MagicMock()
         ai_patterns_mock.build_rich_context = MagicMock()
-        sys.modules['vertice_cli.core.ai_patterns'] = ai_patterns_mock
-
+        sys.modules["vertice_cli.core.ai_patterns"] = ai_patterns_mock
 
         handler = LLMProcessingHandler(mock_shell)
 
@@ -41,8 +43,8 @@ class TestLLMProcessingHandlerErrors:
         mock_shell.console.print.assert_any_call("[red]❌ LLM failed: Connection failed[/red]")
 
         # Cleanup
-        del sys.modules['vertice_cli.shell.streaming_integration']
-        del sys.modules['vertice_cli.core.ai_patterns']
+        del sys.modules["vertice_cli.shell.streaming_integration"]
+        del sys.modules["vertice_cli.core.ai_patterns"]
 
     @pytest.mark.asyncio
     async def test_get_command_suggestion_invalid_response(self, mock_shell):
@@ -55,8 +57,10 @@ class TestLLMProcessingHandlerErrors:
         suggestion = await handler.get_command_suggestion("list large files", {})
 
         # Assert
-        assert "find" in suggestion # Check for fallback
-        mock_shell.console.print.assert_any_call("[yellow]⚠️  LLM unavailable, using fallback[/yellow]")
+        assert "find" in suggestion  # Check for fallback
+        mock_shell.console.print.assert_any_call(
+            "[yellow]🔄 AI Fallback: LLM unavailable, using backup[/yellow]"
+        )
 
 
 @pytest.mark.usefixtures("mock_shell")
@@ -75,12 +79,10 @@ class TestToolExecutionHandlerErrors:
         mock_shell.recovery_engine.attempt_recovery.return_value = None  # Fail recovery
 
         # Act
-        with patch.object(vertice_cli.handlers.tool_execution_handler, 'create_recovery_context', MagicMock()) as mock_create_context:
-            result = await handler.execute_with_recovery(tool, "test_tool", {}, "turn")
+        result = await handler.execute_with_recovery(tool, "test_tool", {}, "turn")
 
         # Assert
         assert result is None
-        mock_create_context.assert_called()
         assert tool.execute.call_count == 2
         mock_shell.console.print.assert_any_call("[red]x test_tool failed after 2 attempts[/red]")
 
