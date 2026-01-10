@@ -35,7 +35,6 @@ from .router import (
     RoutingDecision,
     SemanticRouter,
     get_router,
-    DEFAULT_ROUTES,
 )
 
 from .orchestrator import (
@@ -97,7 +96,6 @@ __all__ = [
     "RoutingDecision",
     "SemanticRouter",
     "get_router",
-    "DEFAULT_ROUTES",
     # Orchestrator
     "OrchestratorState",
     "HandoffType",

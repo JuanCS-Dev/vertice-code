@@ -111,10 +111,11 @@ class HandoffManager:
             if request.context_updates:
                 self.context.update(request.context_updates)
             self.context.record_decision(
-                decision_type=DecisionType.HANDOFF,
-                description=f"Handoff: {request.from_agent.value} → {target_agent.value}",
+                f"Handoff: {request.from_agent.value} → {target_agent.value}",
+                DecisionType.HANDOFF,
+                1.0,  # confidence
+                f"Reason: {request.reason.value}",
                 agent_id=request.from_agent.value,
-                reasoning=f"Reason: {request.reason.value}",
             )
             self.context.current_agent = target_agent.value
             request.status = HandoffStatus.COMPLETED
@@ -198,7 +199,7 @@ class HandoffManager:
         return AgentType(self.context.current_agent or "chat")
 
     def get_handoff_chain(self) -> List[AgentType]:
-        chain = []
+        chain: List[AgentType] = []
         for result in self._handoff_history:
             if result.success:
                 if not chain:

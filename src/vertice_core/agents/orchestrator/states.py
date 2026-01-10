@@ -27,7 +27,7 @@ async def state_initializing(orch: "ActiveOrchestrator") -> AsyncIterator[str]:
     orch.context.add_thought(
         agent_id="orchestrator",
         reasoning=f"Processing request: {orch.context.user_request}",
-        insights=["Starting orchestration pipeline"],
+        key_insights=["Starting orchestration pipeline"],
         next_action="gather_context",
     )
 
@@ -39,10 +39,11 @@ async def state_gathering(orch: "ActiveOrchestrator") -> AsyncIterator[str]:
     yield "🔍 Gathering context...\n"
 
     orch.context.record_decision(
-        decision_type=DecisionType.EXECUTION,
-        description="Context gathered for request",
+        "Context gathered for request",
+        DecisionType.EXECUTION,
+        1.0,  # confidence
+        "Initial context collection",
         agent_id="orchestrator",
-        reasoning="Initial context collection",
     )
 
     orch._transition_to(OrchestratorState.ROUTING)
@@ -54,28 +55,33 @@ async def state_routing(orch: "ActiveOrchestrator") -> AsyncIterator[str]:
 
     decision = await orch.router.route(
         orch.context.user_request,
-        context=orch.context.variables,
+        context=orch.context.variables(),
     )
 
     orch.context.record_decision(
-        decision_type=DecisionType.ROUTING,
-        description=f"Routed to {decision.primary_agent.value}",
+        f"Routed to {decision.agent_type.value}",
+        DecisionType.ROUTING,
+        decision.confidence,
+        decision.reasoning,
         agent_id="orchestrator",
-        reasoning=decision.reasoning,
-        confidence=decision.confidence,
     )
 
-    yield f"   Agent: {decision.primary_agent.value}\n"
+    yield f"   Agent: {decision.agent_type.value}\n"
     yield f"   Confidence: {decision.confidence:.2f}\n"
     yield f"   Complexity: {decision.complexity.value}\n"
 
-    orch.context.set("routing_decision", decision.to_dict())
-    orch.context.current_agent = decision.primary_agent.value
+    # Store routing decision in context
+    routing_data = {
+        "agent_type": decision.agent_type.value,
+        "confidence": decision.confidence,
+        "reasoning": decision.reasoning,
+        "complexity": decision.complexity.value,
+    }
+    orch.context.set("routing_decision", routing_data)
+    orch.context.current_agent = decision.agent_type.value
 
-    if decision.requires_planning:
-        orch._transition_to(OrchestratorState.PLANNING, routing=decision.to_dict())
-    else:
-        orch._transition_to(OrchestratorState.EXECUTING, routing=decision.to_dict())
+    # For now, always go to executing (simplified logic)
+    orch._transition_to(OrchestratorState.EXECUTING, routing=routing_data)
 
 
 async def state_planning(orch: "ActiveOrchestrator") -> AsyncIterator[str]:
@@ -105,9 +111,9 @@ async def state_planning(orch: "ActiveOrchestrator") -> AsyncIterator[str]:
     yield f"   Steps: {len(plan.steps)}\n"
 
     orch.context.add_thought(
-        agent_id="orchestrator",
         reasoning=f"Created plan with {len(plan.steps)} steps",
-        insights=[f"Step: {s.description}" for s in plan.steps[:3]],
+        agent_id="orchestrator",
+        key_insights=[f"Step: {s.description}" for s in plan.steps[:3]],
         next_action="execute_plan",
     )
 
@@ -147,37 +153,36 @@ async def state_executing(orch: "ActiveOrchestrator") -> AsyncIterator[str]:
             agent = orch.agents.get(step.agent_type)
 
             if agent:
-                async for event in agent.execute(
+                execution_result = await agent.execute(
                     step.parameters.get("request", orch.context.user_request),
                     orch.context,
-                ):
-                    yield f"     {event}"
+                )
+                yield f"     {execution_result}"
 
             step.status = "completed"
             step.completed_at = time.time()
 
-            result = ExecutionResult(
+            step_result = ExecutionResult(
                 step_id=step.step_id,
                 success=True,
                 duration_ms=(step.completed_at - step.started_at) * 1000,
             )
-            step.result = result
+            step.result = step_result
             orch.current_plan.completed_steps += 1
 
-            orch.context.add_step_result(result)
+            orch.context.add_step_result(step_result)
 
             yield f"   ✓ Completed: {step.description}\n"
 
             if orch._on_step_complete:
-                orch._on_step_complete(step, result)
+                orch._on_step_complete(step, step_result)
 
         except Exception as e:
             step.status = "failed"
             step.retry_count += 1
 
             orch.context.record_error(
-                error_type=type(e).__name__,
-                error_message=str(e),
+                e,  # error
                 agent_id=step.agent_type.value,
                 step_id=step.step_id,
             )
@@ -222,8 +227,10 @@ async def state_reviewing(orch: "ActiveOrchestrator") -> AsyncIterator[str]:
     yield "🔎 Reviewing results...\n"
 
     orch.context.record_decision(
-        decision_type=DecisionType.APPROVAL,
-        description="Results auto-approved",
+        "Results auto-approved",
+        DecisionType.APPROVAL,
+        1.0,  # confidence
+        "Automatic approval of results",
         agent_id="orchestrator",
     )
 
@@ -245,10 +252,11 @@ async def state_handoff(orch: "ActiveOrchestrator") -> AsyncIterator[str]:
     orch.context.current_agent = handoff.to_agent.value
 
     orch.context.record_decision(
-        decision_type=DecisionType.HANDOFF,
-        description=f"Handoff to {handoff.to_agent.value}",
+        f"Handoff to {handoff.to_agent.value}",
+        DecisionType.HANDOFF,
+        1.0,  # confidence
+        handoff.reason,
         agent_id=handoff.from_agent.value,
-        reasoning=handoff.reason,
     )
 
     orch.completed_handoffs.append(handoff)

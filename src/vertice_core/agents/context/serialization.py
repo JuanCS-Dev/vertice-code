@@ -64,15 +64,18 @@ def generate_prompt_context(ctx: "UnifiedContext") -> str:
 
     # Recent decisions
     if ctx._decisions:
-        recent = ctx._decisions[-5:]
-        decision_str = "\n".join(f"- [{d.decision_type.value}] {d.description}" for d in recent)
+        recent_decisions = ctx._decisions[-5:]
+        decision_str = "\n".join(
+            f"- [{d.decision_type.value}] {d.description}" for d in recent_decisions
+        )
         parts.append(f"## Recent Decisions\n{decision_str}")
 
     # Thought chain
     if ctx._thought_chain:
-        recent = ctx._thought_chain[-3:]
+        recent_thoughts = ctx._thought_chain[-3:]
         thought_str = "\n".join(
-            f"- {t.key_insights[0] if t.key_insights else 'N/A'} → {t.next_action}" for t in recent
+            f"- {t.key_insights[0] if t.key_insights else 'N/A'} → {t.next_action}"
+            for t in recent_thoughts
         )
         parts.append(f"## Reasoning Chain\n{thought_str}")
 
@@ -114,7 +117,7 @@ def context_from_dict(cls: type, data: Dict[str, Any]) -> "UnifiedContext":
     """Deserialize from dictionary."""
     ctx = cls(
         user_request=data.get("user_request", ""),
-        max_tokens=data.get("max_tokens", cls.DEFAULT_MAX_TOKENS),
+        max_tokens=data.get("max_tokens", 32000),  # DEFAULT_MAX_TOKENS
         session_id=data.get("session_id"),
     )
     ctx.created_at = data.get("created_at", time.time())

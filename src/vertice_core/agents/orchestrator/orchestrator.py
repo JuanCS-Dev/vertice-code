@@ -158,8 +158,7 @@ class ActiveOrchestrator:
         except Exception as e:
             self._transition_to(OrchestratorState.FAILED, error=str(e))
             self.context.record_error(
-                error_type=type(e).__name__,
-                error_message=str(e),
+                e,  # error
                 stack_trace=traceback.format_exc(),
             )
             yield f"❌ Error: {e}\n"
