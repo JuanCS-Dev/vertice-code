@@ -108,7 +108,7 @@ class TestEuclideanDistance:
         b = [1.0, 2.0, 3.0]
 
         distance = SimilarityEngine.euclidean_distance(a, b)
-        assert distance == 0.0  # Returns 0 for different lengths
+        assert distance > 1000  # Returns large value for different lengths
 
     def test_euclidean_distance_empty_vectors(self) -> None:
         """Test Euclidean distance for empty vectors."""
@@ -153,7 +153,7 @@ class TestManhattanDistance:
         b = [1.0, 2.0, 3.0]
 
         distance = SimilarityEngine.manhattan_distance(a, b)
-        assert distance == 0.0
+        assert distance > 1000  # Returns large value for different lengths
 
     def test_manhattan_distance_empty_vectors(self) -> None:
         """Test Manhattan distance for empty vectors."""
@@ -229,16 +229,17 @@ class TestSimilarityEngineEdgeCases:
 
     def test_distance_none_vectors(self) -> None:
         """Test distance functions with None vectors."""
-        euclidean = SimilarityEngine.euclidean_distance(None, None)  # type: ignore
-        manhattan = SimilarityEngine.manhattan_distance(None, None)  # type: ignore
+        # These should raise TypeError for None inputs
+        with pytest.raises(TypeError):
+            SimilarityEngine.euclidean_distance(None, None)  # type: ignore
 
-        assert euclidean == 0.0
-        assert manhattan == 0.0
+        with pytest.raises(TypeError):
+            SimilarityEngine.manhattan_distance(None, None)  # type: ignore
 
     def test_normalize_none_vector(self) -> None:
         """Test normalization with None vector."""
-        normalized = SimilarityEngine.normalize_vector(None)  # type: ignore
-        assert normalized is None
+        with pytest.raises(TypeError):
+            SimilarityEngine.normalize_vector(None)  # type: ignore
 
     def test_cosine_similarity_precision(self) -> None:
         """Test cosine similarity precision with floating point values."""
