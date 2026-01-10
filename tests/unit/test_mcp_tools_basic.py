@@ -126,12 +126,12 @@ class TestMultiEditTools:
 
         async def run_test():
             # Test missing file_path
-            result = await multi_edit("", [])
+            result = multi_edit("", [])
             assert result.success is False
             assert "file_path is required" in result.error
 
             # Test missing edits
-            result = await multi_edit("/tmp/test.txt", [])
+            result = multi_edit("/tmp/test.txt", [])
             assert result.success is False
             assert "edits list is required" in result.error
 
@@ -142,7 +142,7 @@ class TestMultiEditTools:
         """Test basic task launcher functionality."""
         from prometheus.mcp_server.tools.multi_edit_tools import task_launcher
 
-        result = await task_launcher("test task", "high")
+        result = task_launcher("test task", "high")
         assert result.success is True
         assert result.data["task_description"] == "test task"
         assert result.data["priority"] == "high"
@@ -157,20 +157,22 @@ class TestPlanModeTools:
         """Test entering plan mode."""
         from prometheus.mcp_server.tools.plan_mode_tools import enter_plan_mode
 
-        result = await enter_plan_mode("Test planning task")
+        result = enter_plan_mode("Test planning task")
         assert result.success is True
         assert "plan_mode_active" in result.data["status"]
-        assert result.data["task_description"] == "Test planning task"
+        assert result.data["status"] == "plan_mode_active"
+        assert result.metadata["task_description"] == "Test planning task"
 
     @pytest.mark.asyncio
     async def test_get_plan_status_not_active(self):
         """Test getting plan status when not active."""
         from prometheus.mcp_server.tools.plan_mode_tools import get_plan_status
 
-        result = await get_plan_status()
+        result = get_plan_status()
         assert result.success is True
         assert result.data["active"] is False
-        assert "not in plan mode" in result.data["message"]
+        assert result.data["message"] == "Not in plan mode"
+        assert result.data["active"] is False
 
     @pytest.mark.asyncio
     async def test_add_plan_note_without_plan_mode(self):

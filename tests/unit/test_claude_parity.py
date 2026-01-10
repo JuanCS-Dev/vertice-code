@@ -288,7 +288,7 @@ class TestPlanMode:
 
             assert result.success is True
             assert "Modo Planejamento ativado" in result.data
-            assert get_plan_state()["active"] is False  # Not implemented yet
+            assert get_plan_state()["active"] is True  # Plan mode should be active after entering
             # assert plan_file.exists()  # Plan file creation not implemented
 
     @pytest.mark.asyncio
