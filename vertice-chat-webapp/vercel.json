@@ -58,7 +58,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://vertice-chat-backend.fly.dev/api/$1"
+      "destination": "https://vertice-backend-nrpngfmr6a-uc.a.run.app/api/$1"
     }
   ],
 

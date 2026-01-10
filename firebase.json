@@ -1,15 +1,51 @@
 {
-  "hosting": {
-    "source": "vertice-chat-webapp/frontend",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "frameworksBackend": {
-      "region": "us-central1"
+  "hosting": [
+    {
+      "target": "vertice-ai",
+      "source": "vertice-chat-webapp/frontend",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "/api/**",
+          "run": {
+            "serviceId": "vertice-backend",
+            "region": "us-central1"
+          }
+        }
+      ],
+      "frameworksBackend": {
+        "region": "us-central1"
+      }
+    },
+    {
+      "target": "europe-west1",
+      "source": "vertice-chat-webapp/frontend",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "frameworksBackend": {
+        "region": "europe-west1"
+      }
+    },
+    {
+      "target": "asia-southeast1",
+      "source": "vertice-chat-webapp/frontend",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "frameworksBackend": {
+        "region": "asia-southeast1"
+      }
     }
-  },
+  ],
   "emulators": {
     "auth": {
       "port": 9099
