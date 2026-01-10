@@ -205,7 +205,7 @@ class VerticeRouter:
             "gemini": (GeminiProvider, {}),  # Legacy - prefer vertex-ai
             # Enterprise Providers (Your Infrastructure)
             "anthropic-vertex": (AnthropicVertexProvider, {"model_name": "sonnet-4.5"}),
-            "vertex-ai": (VertexAIProvider, {"model_name": "pro"}),  # Gemini 3 Pro!
+            "vertex-ai": (VertexAIProvider, {"model_name": "pro"}),  # Gemini 2.5 Pro
             "azure-openai": (AzureOpenAIProvider, {"deployment": "gpt4o-mini"}),
         }
 
