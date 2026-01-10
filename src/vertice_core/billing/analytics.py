@@ -138,7 +138,7 @@ class AnalyticsEngine:
             Daily usage data points
         """
         cutoff_time = time.time() - (days * 24 * 60 * 60)
-        daily_usage = defaultdict(int)
+        daily_usage: Dict[str, int] = defaultdict(int)
 
         for record in self.usage_records[tenant_id]:
             if record.timestamp.timestamp() >= cutoff_time and record.usage_type == usage_type:
@@ -164,8 +164,8 @@ class AnalyticsEngine:
             return {"insights": [], "recommendations": []}
 
         # Analyze performance patterns
-        insights = []
-        recommendations = []
+        insights: List[str] = []
+        recommendations: List[str] = []
 
         # Response time analysis
         response_times = [p["response_time_ms"] for p in perf_data]
@@ -191,7 +191,7 @@ class AnalyticsEngine:
             recommendations.append("Monitor for intermittent failures")
 
         # Agent usage analysis
-        agent_usage = defaultdict(int)
+        agent_usage: Dict[str, int] = defaultdict(int)
         for p in perf_data:
             agent_usage[p["agent_type"]] += 1
 
@@ -231,7 +231,7 @@ class AnalyticsEngine:
             }
 
         # Calculate usage trends
-        daily_usage = defaultdict(lambda: defaultdict(int))
+        daily_usage: Dict[str, Dict[UsageType, int]] = defaultdict(lambda: defaultdict(int))
         for record in recent_usage:
             day_key = record.timestamp.strftime("%Y-%m-%d")
             daily_usage[day_key][record.usage_type] += record.quantity
@@ -277,7 +277,7 @@ class AnalyticsEngine:
     async def _update_realtime_metrics(self, tenant_id: str) -> None:
         """Update real-time metrics cache for a tenant."""
         # Aggregate usage data
-        usage_summary = defaultdict(int)
+        usage_summary: Dict[UsageType, int] = defaultdict(int)
         for record in self.usage_records[tenant_id]:
             usage_summary[record.usage_type] += record.quantity
 

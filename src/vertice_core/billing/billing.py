@@ -212,7 +212,7 @@ class BillingEngine:
         # Add overage items if any
         if billing_period.overage_cost > 0:
             # Break down overages by type (simplified)
-            overage_descriptions = []
+            overage_descriptions: List[str] = []
 
             if (
                 billing_period.usage_summary.get(UsageType.AI_TOKENS, 0)
