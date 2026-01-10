@@ -139,11 +139,11 @@ class TestSemanticRouterStats:
             reasoning="Test",
         )
 
-        router.record_route("test query", decision, 150.0)  # 150ms
+        router.record_route("test query", decision.confidence, 150.0)  # 150ms
 
         stats = router.get_stats()
         assert stats["total_routes"] == 1
-        assert stats["successful_routes"] == 1
+        assert stats["fast_path"] == 1  # Fast path routing
 
     def test_record_error(self) -> None:
         """Test recording routing errors."""
@@ -195,7 +195,7 @@ class TestSemanticRouterDecisionCreation:
         decision = router._default_decision()
 
         assert decision.agent_type == AgentType.CHAT  # Default fallback
-        assert decision.route_name == "default"
+        assert decision.route_name == "chat"  # Default fallback agent
 
     def test_hash_based_embedding(self) -> None:
         """Test hash-based embedding fallback."""
