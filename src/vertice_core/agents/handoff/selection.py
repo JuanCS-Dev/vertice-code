@@ -2,7 +2,7 @@
 
 from typing import Dict, List, Optional, Set, Tuple
 from ..router import AgentType
-from .types import AgentCapability, EscalationChain
+from .types import AgentCapability, EscalationChain, HandoffReason
 
 
 class AgentSelector:
@@ -42,6 +42,7 @@ class AgentSelector:
         self,
         current_agent: AgentType,
         reason: HandoffReason,
+        chain_name: Optional[str] = None,
     ) -> Optional[AgentType]:
         """Get escalation target for failed handoff."""
         chains = self.escalation_chains
