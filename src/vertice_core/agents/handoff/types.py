@@ -46,6 +46,7 @@ class AgentCapability:
     description: str = ""
 
     def can_handle(self, required: Set[str]) -> bool:
+        """Check if agent can handle required capabilities."""
         return required.issubset(self.capabilities)
 
 
@@ -92,6 +93,7 @@ class EscalationChain:
     description: str = ""
 
     def get_next(self, current: AgentType) -> Optional[AgentType]:
+        """Get next agent in escalation chain."""
         try:
             idx = self.chain.index(current)
             if idx + 1 < len(self.chain):

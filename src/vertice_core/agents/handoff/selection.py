@@ -22,6 +22,7 @@ class AgentSelector:
         exclude: Optional[Set[AgentType]] = None,
         prefer_escalation: bool = False,
     ) -> Optional[AgentType]:
+        """Select appropriate agent based on required capabilities."""
         exclude = exclude or set()
         candidates: List[Tuple[AgentType, int]] = []
         for agent_type, capability in self.capabilities.items():
@@ -40,8 +41,9 @@ class AgentSelector:
     def get_escalation_target(
         self,
         current_agent: AgentType,
-        chain_name: Optional[str] = None,
+        reason: HandoffReason,
     ) -> Optional[AgentType]:
+        """Get escalation target for failed handoff."""
         chains = self.escalation_chains
         if chain_name:
             chains = [c for c in chains if c.name == chain_name]
