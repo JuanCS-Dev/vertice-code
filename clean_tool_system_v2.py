@@ -3,10 +3,11 @@ class BaseTool:
     pass
 
 class ToolResult:
-    def __init__(self, success=True, message='', data=None, error=None):
+    def __init__(self, success=True, message='', data=None, metadata=None, error=None):
         self.success = success
         self.message = message
         self.data = data
+        self.metadata = metadata
         self.error = error
 
 class CleanToolRegistry:

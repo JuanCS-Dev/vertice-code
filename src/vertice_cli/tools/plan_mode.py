@@ -73,6 +73,8 @@ class EnterPlanModeTool(Tool):
     async def execute(self, **kwargs) -> ToolResult:
         """Ativa Modo Planejamento."""
         try:
+            _plan_state["active"] = True
+            _plan_state["start_time"] = None  # Could set actual time
             return ToolResult(
                 success=True,
                 data="📋 Modo Planejamento ativado\n🎯 Execução Estruturada: Engajada\n📊 Controle de Progresso: Ativo\n⚡ Otimização Tática: Habilitada",
@@ -93,6 +95,10 @@ class ExitPlanModeTool(Tool):
     async def execute(self, **kwargs) -> ToolResult:
         """Desativa Modo Planejamento."""
         try:
+            if not _plan_state.get("active", False):
+                return ToolResult(success=False, error="Not currently in plan mode")
+
+            _plan_state["active"] = False
             return ToolResult(
                 success=True, data="✅ Modo Planejamento desativado\n🔄 Retornando ao modo normal"
             )
@@ -157,3 +163,26 @@ def get_plan_mode_tools():
         AddPlanNoteTool(),
         GetPlanStatusTool(),
     ]
+
+
+# Global state for plan mode
+_plan_state = {
+    "active": False,
+    "notes": [],
+    "start_time": None,
+}
+
+
+def get_plan_state():
+    """Get current plan state."""
+    return _plan_state.copy()
+
+
+def reset_plan_state():
+    """Reset plan state to initial values."""
+    global _plan_state
+    _plan_state = {
+        "active": False,
+        "notes": [],
+        "start_time": None,
+    }
