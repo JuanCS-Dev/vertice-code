@@ -7,7 +7,7 @@ Functions for converting UnifiedContext to/from various formats.
 from __future__ import annotations
 
 import json
-import time
+from dataclasses import asdict
 from typing import Any, Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -71,8 +71,8 @@ def generate_prompt_context(ctx: "UnifiedContext") -> str:
         parts.append(f"## Recent Decisions\n{decision_str}")
 
     # Thought chain
-    if ctx._thought_chain:
-        recent_thoughts = ctx._thought_chain[-3:]
+    if ctx._thoughts:
+        recent_thoughts = ctx._thoughts[-3:]
         thought_str = "\n".join(
             f"- {t.key_insights[0] if t.key_insights else 'N/A'} → {t.next_action}"
             for t in recent_thoughts
@@ -106,28 +106,19 @@ def context_to_dict(ctx: "UnifiedContext") -> Dict[str, Any]:
         "current_agent": ctx.current_agent,
         "current_plan_id": ctx.current_plan_id,
         "completed_steps": len(ctx.completed_steps),
-        "decisions": [d.to_dict() for d in ctx._decisions[-10:]],
+        "decisions": [asdict(d) for d in ctx._decisions[-10:]],
         "errors": [e.to_dict() for e in ctx._errors[-5:]],
+        "execution_results": [asdict(result) for result in ctx.get_execution_results()],
         "token_usage": ctx._token_usage,
         "max_tokens": ctx.max_tokens,
     }
 
 
-def context_from_dict(cls: type, data: Dict[str, Any]) -> "UnifiedContext":
+def context_from_dict(data: Dict[str, Any]) -> "UnifiedContext":
     """Deserialize from dictionary."""
-    ctx = cls(
-        user_request=data.get("user_request", ""),
-        max_tokens=data.get("max_tokens", 32000),  # DEFAULT_MAX_TOKENS
-        session_id=data.get("session_id"),
-    )
-    ctx.created_at = data.get("created_at", time.time())
-    ctx.user_intent = data.get("user_intent", "")
-    ctx._variables = data.get("variables", {})
-    ctx._summary = data.get("summary", "")
-    ctx._messages = data.get("messages", [])
-    ctx.current_agent = data.get("current_agent")
-    ctx.current_plan_id = data.get("current_plan_id")
-    return ctx
+    from .unified import UnifiedContext
+
+    return UnifiedContext.from_dict(data)
 
 
 __all__ = [

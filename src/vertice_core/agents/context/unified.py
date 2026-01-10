@@ -91,6 +91,12 @@ class UnifiedContext(
         # Token usage tracking
         self._token_usage: int = 0
 
+    def _update_state(self, new_state: str) -> None:
+        """Update the context state."""
+        from .types import ContextState
+
+        self.state = ContextState(new_state)
+
         # Thought chain (legacy compatibility)
         self._thought_chain: List[ThoughtSignature] = []
 
@@ -261,12 +267,21 @@ class UnifiedContext(
             ctx._thoughts.append(thought)
 
         # Restore execution results
-        exec_data = data.get("execution_results", {})
-        for step_id, result_dict in exec_data.items():
-            from .types import ExecutionResult
+        exec_data = data.get("execution_results", [])
+        if isinstance(exec_data, list):
+            # Handle list format from serialization
+            for result_dict in exec_data:
+                from .types import ExecutionResult
 
-            result = ExecutionResult(**result_dict)
-            ctx._execution_results[step_id] = result
+                result = ExecutionResult(**result_dict)
+                ctx._execution_results[result.step_id] = result
+        else:
+            # Handle dict format (legacy)
+            for step_id, result_dict in exec_data.items():
+                from .types import ExecutionResult
+
+                result = ExecutionResult(**result_dict)
+                ctx._execution_results[step_id] = result
 
         return ctx
 

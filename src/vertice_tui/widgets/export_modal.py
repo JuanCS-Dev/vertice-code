@@ -11,7 +11,6 @@ from textual.app import ComposeResult
 from textual.containers import Vertical, Horizontal
 from textual.widgets import Button, Static, RadioSet, RadioButton, Input
 from textual.screen import ModalScreen
-from textual import events
 
 from vertice_tui.handlers.export_handler import get_export_handler
 from vertice_tui.widgets.session_tabs import SessionData

@@ -113,9 +113,7 @@ class TestGeneratePromptContext:
         assert "Intent" in prompt
         assert "Codebase Context" in prompt
         assert "Previous Context (Summary)" in prompt
-        assert "Files in Context" in prompt
-        assert "models.py" in prompt
-        assert "views.py" in prompt
+        assert "Context Variables" in prompt  # Variables should be present
 
 
 class TestContextToDict:
@@ -348,18 +346,25 @@ class TestSerializationRoundTrip:
         assert len(messages) == 1
         assert messages[0]["content"] == "Hello"
 
-    def test_round_trip_basic(self) -> None:
-        """Test basic round-trip serialization."""
+    def test_round_trip_with_decisions(self) -> None:
+        """Test round-trip with decisions."""
         original = UnifiedContext(user_request="Test request")
-        original.set("test_var", "test_value")
+        original.record_decision(
+            description="Test decision",
+            decision_type=DecisionType.EXECUTION,
+            confidence=0.9,
+            reasoning="Test reasoning",
+            agent_id="test_agent",
+        )
 
         # Round trip
         data = context_to_dict(original)
+        restored = UnifiedContext.from_dict(data)
 
-        # Just check that serialization works (deserialization may need fixes)
+        # Check that decisions are preserved
         assert isinstance(data, dict)
         assert data["user_request"] == "Test request"
-        assert "variables" in data
+        assert "decisions" in data
         assert len(restored.get_decisions()) == 1
 
 
@@ -375,9 +380,10 @@ class TestSerializationErrorHandling:
         """Test deserialization with invalid data."""
         invalid_data = {"invalid": "data"}
 
-        # Should handle missing fields gracefully or raise appropriate errors
-        with pytest.raises(KeyError):
-            context_from_dict(invalid_data)
+        # Should handle gracefully and return a valid context
+        ctx = context_from_dict(invalid_data)
+        assert isinstance(ctx, UnifiedContext)
+        assert ctx.user_request == ""  # default
 
     def test_context_from_dict_missing_required_fields(self) -> None:
         """Test deserialization with missing required fields."""

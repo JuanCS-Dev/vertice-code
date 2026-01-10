@@ -18,8 +18,6 @@ from .strategies import (
 )
 from .types import (
     CompactionConfig,
-    CompactionResult,
-    CompactionStrategy,
     CompactionTrigger,
     MaskedObservation,
 )

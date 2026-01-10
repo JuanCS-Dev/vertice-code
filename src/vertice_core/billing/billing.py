@@ -5,14 +5,13 @@ Handles invoice generation, tax compliance, payment processing, and
 billing automation for enterprise customers.
 """
 
-import asyncio
 import logging
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from .types import BillingPeriod, PricingPlan, PricingTier, UsageType
+from .types import BillingPeriod, UsageType
 
 logger = logging.getLogger(__name__)
 
@@ -125,15 +124,17 @@ class Invoice:
                 }
                 for item in self.items
             ],
-            "tax_rates": [
-                {
-                    "display_name": f"{self.tax_info.tax_type} ({self.tax_info.tax_rate}%)",
-                    "percentage": self.tax_info.tax_rate,
-                    "inclusive": False,
-                }
-            ]
-            if self.tax_info
-            else [],
+            "tax_rates": (
+                [
+                    {
+                        "display_name": f"{self.tax_info.tax_type} ({self.tax_info.tax_rate}%)",
+                        "percentage": self.tax_info.tax_rate,
+                        "inclusive": False,
+                    }
+                ]
+                if self.tax_info
+                else []
+            ),
         }
 
 

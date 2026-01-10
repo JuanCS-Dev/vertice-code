@@ -2,7 +2,6 @@
 Error Tracking Mixin - Records and manages execution errors.
 """
 
-import time
 from typing import Any, Dict, List, Optional
 
 from ..types import ErrorContext

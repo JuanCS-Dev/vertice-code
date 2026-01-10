@@ -1,15 +1,13 @@
 """Handoff Manager implementation."""
 
 from __future__ import annotations
-import asyncio
 import logging
 import time
 import uuid
-from typing import Any, Callable, Dict, List, Optional, Set
-from ..context import DecisionType, UnifiedContext
+from typing import Any, Callable, Dict, List, Optional
+from ..context import UnifiedContext
 from ..router import AgentType
 from .types import (
-    HandoffStatus,
     HandoffReason,
     HandoffRequest,
     HandoffResult,
@@ -31,6 +29,9 @@ class HandoffManager:
         capabilities: Optional[Dict[AgentType, AgentCapability]] = None,
         escalation_chains: Optional[List[EscalationChain]] = None,
     ):
+        if context is None:
+            raise AttributeError("Context cannot be None")
+
         self.context = context
         self.capabilities = capabilities or DEFAULT_CAPABILITIES.copy()
         self.escalation_chains = escalation_chains or DEFAULT_ESCALATION_CHAINS.copy()
@@ -71,7 +72,8 @@ class HandoffManager:
             from_agent=from_agent,
             to_agent=to_agent,
             duration_ms=duration,
-            message=f"Handoff completed from {from_agent} to {to_agent}",
+            message=f"Handoff completed from {from_agent.value.upper()} to {to_agent.value.upper()}",
+            request=request,
         )
 
         self._handoff_history.append(result)
@@ -83,20 +85,45 @@ class HandoffManager:
             target = last.from_agent
         else:
             target = AgentType.CHAT
-        return self.create_handoff(
-            from_agent=AgentType.CHAT,  # Assume caller is CHAT for now
+
+        request_id = str(uuid.uuid4())[:8]
+        start_time = time.time()
+
+        # Create handoff request
+        request = HandoffRequest(
+            request_id=request_id,
+            from_agent=AgentType.CHAT,
             to_agent=target,
             reason=HandoffReason.TASK_COMPLETION,
             message=result,
+            context_updates={},
         )
+
+        # Execute the handoff (simplified for now)
+        duration = (time.time() - start_time) * 1000
+
+        handoff_result = HandoffResult(
+            request_id=request_id,
+            success=True,
+            from_agent=AgentType.CHAT,
+            to_agent=target,
+            duration_ms=duration,
+            message=result or "Task completed",
+            request=request,
+        )
+
+        self._handoff_history.append(handoff_result)
+        return handoff_result
 
     def get_history(self) -> List[HandoffResult]:
         """Get handoff history."""
         return self._handoff_history.copy()
 
     def get_current_agent(self) -> AgentType:
-        """Get currently active agent."""
-        return AgentType(self.context.current_agent or "chat")
+        """Get currently active agent from handoff history."""
+        if self._handoff_history:
+            return self._handoff_history[-1].to_agent
+        return AgentType.CHAT
 
     def get_handoff_chain(self) -> List[AgentType]:
         """Get the chain of agents involved in successful handoffs."""
@@ -112,11 +139,16 @@ class HandoffManager:
         """Get handoff statistics and metrics."""
         total = len(self._handoff_history)
         successful = sum(1 for h in self._handoff_history if h.success)
+        failed = total - successful
+        durations = [h.duration_ms for h in self._handoff_history if h.success]
+        avg_duration = sum(durations) / len(durations) if durations else 0.0
+
         return {
             "total_handoffs": total,
-            "successful": successful,
-            "failed": total - successful,
+            "successful_handoffs": successful,
+            "failed_handoffs": failed,
             "success_rate": f"{successful / max(total, 1) * 100:.1f}%",
+            "avg_duration_ms": avg_duration,
             "current_agent": self.get_current_agent().value,
             "chain_length": len(self.get_handoff_chain()),
         }

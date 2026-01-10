@@ -8,7 +8,6 @@ Inclui busca em sessão atual e sessões passadas.
 
 from __future__ import annotations
 
-import asyncio
 from typing import List, Optional, Dict, Any
 from dataclasses import dataclass
 
@@ -18,7 +17,6 @@ from textual.widgets import Input, ListView, ListItem, Label, Button, Static
 from textual.widget import Widget
 from textual.message import Message
 from textual.binding import Binding
-from textual import events
 
 try:
     from rapidfuzz import fuzz, process

@@ -2,7 +2,7 @@
 Router Stats Mixin - Statistics tracking for routing performance.
 """
 
-from typing import Dict, Any, Union
+from typing import Dict, Any
 
 
 class RouterStatsMixin:

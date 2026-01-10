@@ -12,7 +12,6 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from vertice_core.agents.context.types import ExecutionResult
 
 
 class PricingTier(str, Enum):

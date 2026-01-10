@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import os
 from datetime import datetime
-from typing import Dict, List, Any, Optional
+from typing import List, Optional
 from pathlib import Path
 
 from vertice_tui.widgets.session_tabs import SessionData

@@ -14,9 +14,8 @@ from typing import Optional
 from textual.widget import Widget
 from textual.widgets import Static
 from textual.app import ComposeResult
-from textual.containers import Horizontal, Vertical
+from textual.containers import Horizontal
 from textual.message import Message
-from textual import events
 
 
 class PerformanceHUD(Widget):

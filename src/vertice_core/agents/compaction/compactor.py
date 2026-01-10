@@ -16,7 +16,7 @@ from .strategies import (
     LLMSummaryStrategy,
     ObservationMaskingStrategy,
 )
-from .types import CompactionConfig, CompactionResult, CompactionStrategy
+from .types import CompactionConfig, CompactionStrategy
 
 if TYPE_CHECKING:
     from ..context import UnifiedContext

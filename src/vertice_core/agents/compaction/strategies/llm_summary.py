@@ -12,8 +12,10 @@ from typing import TYPE_CHECKING
 from .base import CompactionStrategy_ABC
 
 if TYPE_CHECKING:
-    from vertice_core.agents.compaction.types import CompactionConfig, CompactionResult
+    from vertice_core.agents.compaction.types import CompactionConfig
     from vertice_core.agents.context import UnifiedContext
+
+from vertice_core.agents.compaction.types import CompactionResult
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +94,7 @@ class LLMSummaryStrategy(CompactionStrategy_ABC):
         assistant_msgs = sum(1 for m in messages if m.get("role") == "assistant")
         tool_msgs = sum(1 for m in messages if m.get("role") == "tool")
 
-        summary_parts.append(f"Conversation Summary:")
+        summary_parts.append("Conversation Summary:")
         summary_parts.append(f"- {user_msgs} user messages")
         summary_parts.append(f"- {assistant_msgs} assistant responses")
         summary_parts.append(f"- {tool_msgs} tool executions")

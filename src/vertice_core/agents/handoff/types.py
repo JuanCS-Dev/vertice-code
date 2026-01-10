@@ -82,6 +82,7 @@ class HandoffResult:
     duration_ms: float = 0.0
     message: str = ""
     error: Optional[str] = None
+    request: Optional[HandoffRequest] = None
 
 
 @dataclass

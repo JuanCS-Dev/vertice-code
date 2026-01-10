@@ -6,11 +6,9 @@ Agent GitHub com integração real via GitHub CLI e API.
 Implementa autonomous PR management e code review.
 """
 
-import asyncio
-import json
 import subprocess
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 from datetime import datetime
 import re
 
@@ -134,7 +132,7 @@ class GitHubAgent:
                     {
                         "type": "todo_found",
                         "severity": "info",
-                        "message": f"TODO/FIXME found in commit message",
+                        "message": "TODO/FIXME found in commit message",
                         "commit": commit.get("id", "")[:8],
                     }
                 )
