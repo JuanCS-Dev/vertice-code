@@ -44,11 +44,22 @@ class FirebaseAuth:
         Verify and decode Firebase JWT token
         """
         try:
+            # Development mode: accept dev-token and mock tokens
+            is_dev = settings.ENVIRONMENT.lower() == "development" if hasattr(settings, 'ENVIRONMENT') else False
+            
             if self.mock_mode or token == "mock-jwt-token" or token.startswith("Bearer mock-jwt-token"):
                 return FirebaseUser(
                     user_id="mock-user-123",
                     email="mock@example.com",
                     name="Mock User",
+                )
+            
+            # Dev mode: also accept dev-token for local testing
+            if is_dev and (token == "dev-token" or token.startswith("Bearer dev-token")):
+                return FirebaseUser(
+                    user_id="dev-user-local",
+                    email="dev@vertice.local",
+                    name="Development User",
                 )
 
             # Verify the ID token using Firebase Admin SDK
