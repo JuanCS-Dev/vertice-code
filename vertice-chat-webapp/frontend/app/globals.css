@@ -4,63 +4,99 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* 
-  VERTICE SOVEREIGN THEME 2026 - HIGH CONTRAST EDITION
+  VERTICE SOVEREIGN THEME 2026 - PROJECT NARCISSUS (DEEP VOID + ELECTRIC CYAN)
 */
 
 @theme {
-  /* Font Stack */
+  /* Font Stack - Unified Geist */
   --font-sans: "Geist Sans", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --font-mono: "Geist Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Semantic Colors Mapped to CSS Variables */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  
+
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
-  
+
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
-  
+
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-  
+
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  
+
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  
+
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  
+
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
-  
+
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
 
   /* Custom Animations */
   --animate-pulse-fast: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-glow: glow 2s ease-in-out infinite alternate;
-  
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-gradient-fast: gradient 3s linear infinite;
+  --animate-gradient-slow: gradient 8s linear infinite;
+
   @keyframes glow {
-    from { box-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary); }
-    to { box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary); }
+    from {
+      box-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary);
+    }
+
+    to {
+      box-shadow: 0 0 20px var(--primary), 0 0 30px var(--primary);
+    }
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+
+  @keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+
+    100% {
+      background-position: 0% 50%;
+    }
   }
 }
 
 /* CSS Variables Definition */
 :root {
-  /* Light Mode Fallback */
+  /* Light Mode Fallback (Not optimized for Narcissus, but safe) */
   --background: oklch(100% 0 0);
   --foreground: oklch(3.9% 0.01 240);
   --card: oklch(100% 0 0);
   --card-foreground: oklch(3.9% 0.01 240);
   --popover: oklch(100% 0 0);
   --popover-foreground: oklch(3.9% 0.01 240);
-  --primary: oklch(40% 0.3 100); /* Darker lime */
+  --primary: oklch(50% 0.2 240);
+  /* Cyan fallback */
   --primary-foreground: oklch(98% 0 0);
   --secondary: oklch(96.1% 0 0);
   --secondary-foreground: oklch(3.9% 0.01 240);
@@ -72,67 +108,84 @@
   --destructive-foreground: oklch(98% 0 0);
   --border: oklch(89.8% 0.01 240);
   --input: oklch(89.8% 0.01 240);
-  --ring: oklch(40% 0.3 100);
+  --ring: oklch(50% 0.2 240);
   --radius: 0.5rem;
 }
 
 .dark {
-  /* VERTICE DARK MODE - NEON (Using OKLCH for vibrancy) */
-  --background: oklch(10% 0.01 240);      /* #080808 */
-  --foreground: oklch(98% 0 0);           /* #F2F2F2 */
-  
-  --card: oklch(15% 0 0);                 /* #121212 */
-  --card-foreground: oklch(98% 0 0);
-  
-  --popover: oklch(15% 0 0);
-  --popover-foreground: oklch(98% 0 0);
-  
-  --primary: oklch(85% 0.25 100);         /* #CCFF00 - Neon Lime */
-  --primary-foreground: oklch(5% 0.05 240); /* Black text */
-  
-  --secondary: oklch(20% 0 0);            /* #1F1F1F */
-  --secondary-foreground: oklch(98% 0 0);
-  
-  --muted: oklch(20% 0 0);
-  --muted-foreground: oklch(65% 0 0);     /* #A6A6A6 */
-  
-  --accent: oklch(25% 0 0);               /* #262626 */
-  --accent-foreground: oklch(85% 0.25 100); /* Neon text */
-  
-  --destructive: oklch(60% 0.25 20);      /* #FF4D4D */
-  --destructive-foreground: oklch(98% 0 0);
-  
-  --border: oklch(25% 0 0);               /* #333333 */
-  --input: oklch(20% 0 0);
-  
-  --ring: oklch(85% 0.25 100);
-  
-  /* Syntax Highlighting */
-  --sh-bg: #0D1117;
-  --sh-text: #C9D1D9;
-  --sh-comment: #8B949E;
-  --sh-keyword: #FF7B72;
-  --sh-string: #A5D6FF;
+  /* VERTICE DARK MODE - DEEP VOID + ELECTRIC CYAN */
+  --background: #050505;
+  /* Deep Void */
+  --foreground: #ffffff;
+  /* Pure White */
+
+  --card: rgba(255, 255, 255, 0.03);
+  /* Glass Card */
+  --card-foreground: #ffffff;
+
+  --popover: #0a0e1a;
+  /* Darker Void */
+  --popover-foreground: #ffffff;
+
+  --primary: #06b6d4;
+  /* Electric Cyan (Cyan-500) */
+  --primary-foreground: #ffffff;
+
+  --secondary: #0f172a;
+  /* Slate-900 */
+  --secondary-foreground: #ffffff;
+
+  --muted: rgba(255, 255, 255, 0.05);
+  --muted-foreground: #94a3b8;
+  /* Slate-400 */
+
+  --accent: rgba(6, 182, 212, 0.1);
+  /* Cyan Tint */
+  --accent-foreground: #06b6d4;
+  /* Cyan Text */
+
+  --destructive: #ef4444;
+  /* Red-500 */
+  --destructive-foreground: #ffffff;
+
+  --border: rgba(255, 255, 255, 0.05);
+  /* Subtle Border */
+  --input: rgba(255, 255, 255, 0.05);
+
+  --ring: rgba(6, 182, 212, 0.5);
+  /* Cyan Glow */
+
+  /* Syntax Highlighting (Tokyo Night Storm inspired) */
+  --sh-bg: #0c0e14;
+  --sh-text: #a9b1d6;
+  --sh-comment: #565f89;
+  --sh-keyword: #bb9af7;
+  --sh-string: #9ece6a;
 }
 
 /* Base Styles */
 @layer base {
   * {
-    border-color: var(--border); /* Fallback if utility fails */
+    border-color: var(--border);
   }
+
   body {
     background-color: var(--background);
     color: var(--foreground);
     font-feature-settings: "rlig" 1, "calt" 1;
+    background-image:
+      radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
+      linear-gradient(to bottom, transparent, #050505);
+    background-attachment: fixed;
   }
-  
+
   /* Code Blocks */
   pre {
     background-color: var(--sh-bg);
     border: 1px solid var(--border);
     border-radius: var(--radius);
   }
-  
+
   code {
     font-family: var(--font-mono);
     font-size: 0.875rem;
@@ -141,17 +194,42 @@
 
 /* Utilities */
 .glass {
-  background-color: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(5, 5, 5, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.neon-border {
+.cyan-border {
   border: 1px solid var(--primary);
-  box-shadow: 0 0 8px oklch(85% 0.25 100 / 0.2);
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
 }
 
-.neon-text {
+.cyan-text {
   color: var(--primary);
-  text-shadow: 0 0 10px oklch(85% 0.25 100 / 0.4);
+  text-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
+}
+
+.animate-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.text-shadow-glow {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.bg-size-200 {
+  background-size: 200% 200%;
 }
