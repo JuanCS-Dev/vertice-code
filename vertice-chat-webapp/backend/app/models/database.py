@@ -70,9 +70,9 @@ class Workspace(Base):
     # Relationships
     users: Mapped[List["User"]] = relationship("User", back_populates="workspace")
     agents: Mapped[List["Agent"]] = relationship("Agent", back_populates="workspace")
-    knowledge_entries: Mapped[List["KnowledgeEntry"]] = relationship(
-        "KnowledgeEntry", back_populates="workspace"
-    )
+    # knowledge_entries: Mapped[List["KnowledgeEntry"]] = relationship(
+    #     "KnowledgeEntry", back_populates="workspace"
+    # )
 
 
 class User(Base):
@@ -203,7 +203,7 @@ class KnowledgeEntry(Base):
     last_accessed_at: Mapped[Optional[datetime]] = Column(DateTime(timezone=True))
 
     # Relationships
-    workspace: Mapped["Workspace"] = relationship("Workspace", back_populates="knowledge_entries")
+    workspace: Mapped["Workspace"] = relationship("Workspace")
 
 
 class UsageRecord(Base):
@@ -274,7 +274,7 @@ class Subscription(Base):
     updated_at: Mapped[datetime] = Column(DateTime(timezone=True), server_default=text("NOW()"))
 
     # Relationships
-    workspace: Mapped["Workspace"] = relationship("Workspace", back_populates="subscription")
+    workspace: Mapped["Workspace"] = relationship("Workspace")
 
 
 class AuditLog(Base):
@@ -325,17 +325,20 @@ class ChatSession(Base):
         SQLUUID(as_uuid=True), ForeignKey("workspaces.id")
     )
     user_id: Mapped[Optional[uuid.UUID]] = Column(SQLUUID(as_uuid=True), ForeignKey("users.id"))
-    
+
     title: Mapped[Optional[str]] = Column(String(255))
-    model_used: Mapped[str] = Column(String(100), default="gemini-2.5-pro")
-    
+    model_used: Mapped[str] = Column(String(100), default="gemini-3-pro-preview")
+
     # Metadata
     created_at: Mapped[datetime] = Column(DateTime(timezone=True), server_default=text("NOW()"))
     updated_at: Mapped[datetime] = Column(DateTime(timezone=True), server_default=text("NOW()"))
-    
+
     # Relationships
     messages: Mapped[List["ChatMessage"]] = relationship(
-        "ChatMessage", back_populates="session", cascade="all, delete-orphan", order_by="ChatMessage.created_at"
+        "ChatMessage",
+        back_populates="session",
+        cascade="all, delete-orphan",
+        order_by="ChatMessage.created_at",
     )
 
 
@@ -348,15 +351,15 @@ class ChatMessage(Base):
     session_id: Mapped[uuid.UUID] = Column(
         SQLUUID(as_uuid=True), ForeignKey("chat_sessions.id"), nullable=False
     )
-    
+
     role: Mapped[str] = Column(String(20), nullable=False)  # user, assistant, system
     content: Mapped[str] = Column(Text, nullable=False)
-    
+
     # Token usage (optional)
     tokens_count: Mapped[Optional[int]] = Column(Integer)
-    
+
     created_at: Mapped[datetime] = Column(DateTime(timezone=True), server_default=text("NOW()"))
-    
+
     # Relationships
     session: Mapped["ChatSession"] = relationship("ChatSession", back_populates="messages")
 

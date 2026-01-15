@@ -7,7 +7,7 @@ Reference: https://sdk.vercel.ai/docs/ai-sdk-ui/stream-protocol#data-stream-prot
 REVISION: 2026-01-13-STREAM-PROTOCOL-FIX
 """
 
-from fastapi import APIRouter, HTTPException, Header, Request
+from fastapi import APIRouter, HTTPException, Header
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from typing import List, Any, Optional
@@ -25,7 +25,6 @@ from app.core.stream_protocol import (
     format_text_chunk,
     format_finish,
     format_error,
-    create_error_stream,
 )
 
 logger = logging.getLogger(__name__)
@@ -33,25 +32,26 @@ router = APIRouter()
 
 # Configuration
 STREAM_TIMEOUT_SECONDS = 120
-DEFAULT_MODEL = "gemini-2.5-pro"
-FALLBACK_MODEL = "gemini-1.5-flash"
+DEFAULT_MODEL = "gemini-3-pro-preview"
+FALLBACK_MODEL = "gemini-3-flash-preview"
 
-logger.info("Loading Vercel AI SDK compatible chat.py (PRODUCTION)")
+logger.info("Loading Vercel AI SDK compatible chat.py (PRODUCTION - GEMINI 3.0)")
 
 
 # Initialize Firebase Admin SDK for authentication (once)
 def _init_firebase():
     if firebase_admin._apps:
         return
-    
+
     firebase_key = os.getenv("FIREBASE_SERVICE_ACCOUNT_KEY")
     if firebase_key:
         import json
+
         cred = credentials.Certificate(json.loads(firebase_key))
     else:
         # Fallback to Application Default Credentials (GCP environments)
         cred = credentials.ApplicationDefault()
-    
+
     firebase_admin.initialize_app(cred)
 
 
@@ -63,6 +63,7 @@ except Exception as e:
 
 class ChatRequest(BaseModel):
     """Request model for chat endpoint."""
+
     messages: List[Any] = Field(..., min_length=1, description="Chat messages array")
     stream: bool = Field(default=True, description="Enable streaming response")
     model: str = Field(default=DEFAULT_MODEL, description="Model to use")
@@ -72,18 +73,18 @@ class ChatRequest(BaseModel):
 def convert_messages_to_vertex(messages: List[Any]) -> List[Content]:
     """
     Convert frontend message format to Vertex AI Content format.
-    
+
     Handles: user, assistant, system roles
     """
     vertex_history = []
-    
+
     for msg in messages:
         role = msg.get("role", "")
         content = msg.get("content", "")
-        
+
         if not content or not content.strip():
             continue
-        
+
         # Map roles: frontend uses 'assistant', Vertex uses 'model'
         if role == "user":
             vertex_history.append(Content(role="user", parts=[Part.from_text(content)]))
@@ -91,42 +92,47 @@ def convert_messages_to_vertex(messages: List[Any]) -> List[Content]:
             vertex_history.append(Content(role="model", parts=[Part.from_text(content)]))
         elif role == "system":
             # Prepend system message to first user message or as user context
-            vertex_history.append(Content(role="user", parts=[Part.from_text(f"[System]: {content}")]))
-    
+            vertex_history.append(
+                Content(role="user", parts=[Part.from_text(f"[System]: {content}")])
+            )
+
     return vertex_history
 
 
 async def stream_vertex_response(request: ChatRequest, session_id: Optional[str] = None):
     """
     Stream Vertex AI response using Vercel AI SDK Data Stream Protocol.
-    
+
     Protocol format:
     - 0:"text" for text chunks
     - d:{"finishReason":"stop"} for completion
     - 3:"error" for errors
     """
     project_id = os.getenv("GOOGLE_CLOUD_PROJECT", "vertice-ai")
-    location = os.getenv("VERTEX_AI_LOCATION", "us-central1")
-    
-    # Force valid location (never use 'global')
-    if location == "global":
-        location = "us-central1"
-    
+    # Gemini 3.0 Preview models require 'global' or specific regions like 'us-central1'
+    # For now, 'global' is the safest bet for Preview access.
+    location = os.getenv("VERTEX_AI_LOCATION", "global")
+
+    if location != "global":
+        logger.warning(
+            f"Using non-global location '{location}' for Gemini 3 Preview. This might fail."
+        )
+
     try:
         # Initialize Vertex AI
         vertexai.init(project=project_id, location=location)
         logger.info(f"Vertex AI initialized: project={project_id}, location={location}")
-        
+
     except Exception as init_err:
         logger.error(f"Vertex AI init failed: {init_err}")
         yield format_error(f"Failed to initialize AI service: {str(init_err)}")
         yield format_finish("error")
         return
-    
+
     # Model selection with fallback
     model_name = request.model or DEFAULT_MODEL
     model = None
-    
+
     for candidate in [model_name, DEFAULT_MODEL, FALLBACK_MODEL]:
         try:
             model = GenerativeModel(candidate)
@@ -136,44 +142,42 @@ async def stream_vertex_response(request: ChatRequest, session_id: Optional[str]
         except Exception as model_err:
             logger.warning(f"Model {candidate} unavailable: {model_err}")
             continue
-    
+
     if model is None:
         yield format_error("No AI models available. Please try again later.")
         yield format_finish("error")
         return
-    
+
     # Prepare conversation
     try:
         if len(request.messages) < 1:
             yield format_error("No messages provided")
             yield format_finish("error")
             return
-        
+
         # Split: history (all but last) and current message (last)
         history = convert_messages_to_vertex(request.messages[:-1])
         last_msg = request.messages[-1]
         user_message = last_msg.get("content", "")
-        
+
         if not user_message.strip():
             yield format_error("Empty message")
             yield format_finish("error")
             return
-        
+
         # Start chat session
         chat = model.start_chat(history=history)
-        
+
         # Stream the response with timeout protection
         logger.info(f"Streaming response for: '{user_message[:50]}...'")
-        
+
         response_stream = await asyncio.wait_for(
-            chat.send_message_async(user_message, stream=True),
-            timeout=STREAM_TIMEOUT_SECONDS
+            chat.send_message_async(user_message, stream=True), timeout=STREAM_TIMEOUT_SECONDS
         )
-        
-        
+
         total_chars = 0
         full_response_text = ""
-        
+
         async for chunk in response_stream:
             try:
                 text_content = chunk.text
@@ -188,11 +192,11 @@ async def stream_vertex_response(request: ChatRequest, session_id: Optional[str]
             except Exception as chunk_err:
                 logger.warning(f"Chunk processing error (continuing): {chunk_err}")
                 continue
-        
+
         # Finish signal
         logger.info(f"Stream completed: {total_chars} characters")
         yield format_finish("stop")
-        
+
         # ---------------------------------------------------------------------
         # SAVE ASSISTANT RESPONSE
         # ---------------------------------------------------------------------
@@ -201,24 +205,24 @@ async def stream_vertex_response(request: ChatRequest, session_id: Optional[str]
                 from app.core.database import get_db_session
                 from app.models.database import ChatMessage
                 import uuid
-                
+
                 async with get_db_session() as db_session:
                     ai_msg = ChatMessage(
                         session_id=uuid.UUID(session_id),
                         role="assistant",
-                        content=full_response_text
+                        content=full_response_text,
                     )
                     db_session.add(ai_msg)
                     await db_session.commit()
                     logger.info(f"Saved AI response to session {session_id}")
             except Exception as save_err:
                 logger.error(f"Failed to save AI response: {save_err}")
-        
+
     except asyncio.TimeoutError:
         logger.error("Response generation timed out")
         yield format_error("Response timed out. Please try a shorter query.")
         yield format_finish("error")
-        
+
     except Exception as e:
         error_msg = str(e)
         logger.error(f"Stream error: {error_msg}\n{traceback.format_exc()}")
@@ -233,23 +237,20 @@ async def chat_endpoint(
 ):
     """
     Chat endpoint with Firebase authentication and Vertex AI streaming.
-    
+
     Returns: StreamingResponse with Vercel AI SDK Data Stream Protocol
     """
     # Authentication check
     if not authorization or not authorization.startswith("Bearer "):
         logger.warning("Missing or invalid Authorization header")
-        raise HTTPException(
-            status_code=401,
-            detail="Authentication required. Please sign in."
-        )
-    
+        raise HTTPException(status_code=401, detail="Authentication required. Please sign in.")
+
     token = authorization.replace("Bearer ", "")
     user_id = "anonymous"
-    
+
     # Validate token (with dev mode escape hatch)
     is_dev = os.getenv("ENVIRONMENT", "").lower() == "development"
-    
+
     if is_dev and token == "dev-token":
         user_id = "dev-user"
         logger.info("Dev mode: using dev-token")
@@ -265,13 +266,12 @@ async def chat_endpoint(
             if not is_dev:
                 raise HTTPException(
                     status_code=401,
-                    detail="Invalid or expired authentication token. Please sign in again."
+                    detail="Invalid or expired authentication token. Please sign in again.",
                 )
             else:
                 logger.warning("Dev mode: allowing invalid token")
                 user_id = "dev-unverified"
-    
-    
+
     # -------------------------------------------------------------------------
     # PERSISTENCE LAYER: Save Chat History
     # -------------------------------------------------------------------------
@@ -279,33 +279,36 @@ async def chat_endpoint(
     from app.models.database import ChatSession, ChatMessage
     import uuid
 
-    session_id = request.session_id
-    workspace_id = getattr(user, "workspace_id", None) or getattr(user, "user_id", None)
-    
+    session_id = getattr(request, "session_id", None) or str(uuid.uuid4())
+
+    workspace_id = None  # getattr(user, "workspace_id", None) ... user is not defined here yet.
+
     # We need to handle DB ops here carefully to not block streaming significantly
     # but ensure user message is saved.
-    
+
     async with get_db_session() as db_session:
         # 1. Create or Get Session
         if not session_id:
             new_session = ChatSession(
-                user_id=uuid.UUID(user_id) if user_id not in ("anonymous", "dev-user", "dev-unverified") else None,
-                workspace_id=uuid.UUID(workspace_id) if workspace_id and workspace_id not in ("anonymous", "dev-user") else None,
+                user_id=uuid.UUID(user_id)
+                if user_id not in ("anonymous", "dev-user", "dev-unverified")
+                else None,
+                workspace_id=uuid.UUID(workspace_id)
+                if workspace_id and workspace_id not in ("anonymous", "dev-user")
+                else None,
                 title=request.messages[-1].get("content", "New Chat")[:50],
-                model_used=request.model
+                model_used=request.model,
             )
             db_session.add(new_session)
             await db_session.flush()
             session_id = str(new_session.id)
             logger.info(f"Created new chat session: {session_id}")
-        
+
         # 2. Save User Message
         user_content = request.messages[-1].get("content", "")
         if user_content:
             user_msg = ChatMessage(
-                session_id=uuid.UUID(session_id),
-                role="user",
-                content=user_content
+                session_id=uuid.UUID(session_id), role="user", content=user_content
             )
             db_session.add(user_msg)
             await db_session.commit()
@@ -316,7 +319,7 @@ async def chat_endpoint(
     # Return streaming response
     return StreamingResponse(
         stream_generator,
-        media_type="text/plain; charset=utf-8", 
+        media_type="text/plain; charset=utf-8",
         headers={
             "X-Vercel-AI-Data-Stream": "v1",
             "X-Accel-Buffering": "no",

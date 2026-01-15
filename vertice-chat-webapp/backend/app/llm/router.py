@@ -15,9 +15,8 @@ Cost comparison (per 1M tokens):
 Reference: https://ai.google.dev/pricing
 """
 
-from typing import List, Literal
+from typing import List
 from enum import Enum
-import re
 import logging
 
 
@@ -38,7 +37,7 @@ class ModelTier(str, Enum):
     BALANCED = "claude-sonnet-4-5-20250901"
     POWERFUL = "claude-opus-4-5-20251101"
     # Legacy fallback
-    GEMINI_FAST = "gemini-2.5-pro"
+    GEMINI_FAST = "gemini-3-flash-preview"
 
 
 class IntentType(str, Enum):
