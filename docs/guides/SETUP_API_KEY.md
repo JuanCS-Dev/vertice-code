@@ -11,7 +11,7 @@
 2. Clique em **+ New secret**
 3. Preencha:
    - **Name**: `GEMINI_API_KEY`
-   - **Value**: Cole sua chave da API do Gemini (começa com `AIza...`)
+   - **Value**: Cole sua chave da API do Gemini (começa com `AIza_EXAMPLE...`)
 4. Clique em **Add secret**
 
 ### 3. Reinicie o Space

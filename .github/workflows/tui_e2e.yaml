@@ -1,0 +1,38 @@
+
+name: TUI E2E Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  tui-e2e:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install pytest pytest-asyncio textual hypothesis
+        
+    - name: Run Headless & Interactive Tests
+      env:
+        PYTHONPATH: src
+      run: |
+        pytest tests/tui_e2e/test_headless_brain.py tests/tui_e2e/test_interactive.py
+        
+    - name: Run Scripted Quality Simulation
+      env:
+        PYTHONPATH: src
+      run: |
+        python scripts/e2e/measure_quality.py

@@ -38,7 +38,7 @@ class ModelTier(str, Enum):
     BALANCED = "claude-sonnet-4-5-20250901"
     POWERFUL = "claude-opus-4-5-20251101"
     # Legacy fallback
-    GEMINI_FAST = "gemini-1.5-flash"
+    GEMINI_FAST = "gemini-2.5-pro"
 
 
 class IntentType(str, Enum):

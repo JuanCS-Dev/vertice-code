@@ -1,0 +1,135 @@
+# OpenTelemetry Collector Configuration for Distributed Tracing and APM
+# Deployed as sidecar or daemonset for comprehensive observability
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: vertice
+  labels:
+    app: opentelemetry-collector
+data:
+  config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+      # Prometheus metrics receiver
+      prometheus:
+        config:
+          scrape_configs:
+          - job_name: 'kubernetes-pods'
+            kubernetes_sd_configs:
+            - role: pod
+            relabel_configs:
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+              regex: "true"
+              action: keep
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+              regex: (.+)
+              target_label: __metrics_path__
+              action: replace
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_port]
+              regex: (\d+)
+              target_label: __address__
+              replacement: ${1}:${2}
+              action: replace
+
+      # Kubernetes events receiver
+      k8s_events:
+        namespaces: ["vertice"]
+
+      # Google Cloud Logging receiver
+      gcplog:
+        subscription: projects/${PROJECT_ID}/subscriptions/vertice-logs-sub
+
+    processors:
+      batch:
+        send_batch_size: 1024
+        timeout: 1s
+
+      # Resource detection
+      resourcedetection:
+        detectors: [gcp, k8snode, env, system]
+        override: true
+
+      # Service name and version attribution
+      resource:
+        attributes:
+        - key: service.name
+          value: "vertice-vertex-ai"
+          action: upsert
+        - key: service.version
+          value: "1.0.0"
+          action: upsert
+        - key: service.namespace
+          value: "vertice"
+          action: upsert
+
+      # Filter out health check spans
+      filter:
+        spans:
+          exclude:
+            match_type: strict
+            span_names: ["/health", "/ready", "/metrics"]
+
+      # Memory limiter
+      memory_limiter:
+        limit_mib: 512
+        spike_limit_mib: 128
+        check_interval: 5s
+
+    exporters:
+      # Google Cloud Trace
+      googlecloud:
+        project: ${PROJECT_ID}
+        trace:
+          # Export traces to Cloud Trace
+        metrics:
+          # Export metrics to Cloud Monitoring
+          prefix: "custom.googleapis.com/opentelemetry/"
+        logs:
+          # Export logs to Cloud Logging
+
+      # Jaeger (for local development/debugging)
+      jaeger:
+        endpoint: "jaeger-collector.vertice.svc.cluster.local:14268"
+        tls:
+          insecure: true
+
+      # Prometheus (for local metrics)
+      prometheusremotewrite:
+        endpoint: "http://prometheus-server.vertice.svc.cluster.local:9090/api/v1/write"
+        tls:
+          insecure_skip_verify: true
+
+      # Logging exporter for debugging
+      logging:
+        verbosity: normal
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, resourcedetection, resource, filter, batch]
+          exporters: [googlecloud, jaeger]
+
+        metrics:
+          receivers: [otlp, prometheus, k8s_events]
+          processors: [memory_limiter, resourcedetection, resource, batch]
+          exporters: [googlecloud, prometheusremotewrite]
+
+        logs:
+          receivers: [otlp, gcplog]
+          processors: [memory_limiter, resourcedetection, resource, batch]
+          exporters: [googlecloud, logging]
+
+      telemetry:
+        logs:
+          level: "info"
+        metrics:
+          address: ":8888"

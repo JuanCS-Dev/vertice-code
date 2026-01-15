@@ -14,8 +14,8 @@ steps:
       - '-t'
       - '${_REGION}-docker.pkg.dev/$PROJECT_ID/vertice-cloud/backend:latest'
       - '-f'
-      - 'vertice-chat-webapp/backend/Dockerfile'
-      - 'vertice-chat-webapp/backend'
+      - 'Dockerfile.backend'
+      - '.'
     dir: '.'
 
   # ============================================
@@ -130,23 +130,21 @@ steps:
   # ============================================
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'deploy-frontend'
-    entrypoint: gcloud
+    entrypoint: 'bash'
     args:
-      - 'run'
-      - 'deploy'
-      - 'vertice-frontend'
-      - '--image'
-      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/vertice-cloud/frontend:$COMMIT_SHA'
-      - '--region'
-      - '${_REGION}'
-      - '--platform'
-      - 'managed'
-      - '--allow-unauthenticated'
-      - '--port'
-      - '8080'
-      - '--set-env-vars'
-      - 'NEXT_PUBLIC_API_URL=${_API_URL},NODE_ENV=production'
-    waitFor: ['push-all']
+      - '-c'
+      - |
+        # Get Backend URL
+        BACKEND_URL=$(gcloud run services describe vertice-backend --region ${_REGION} --format='value(status.url)')
+
+        gcloud run deploy vertice-frontend \
+          --image ${_REGION}-docker.pkg.dev/$PROJECT_ID/vertice-cloud/frontend:$COMMIT_SHA \
+          --region ${_REGION} \
+          --platform managed \
+          --allow-unauthenticated \
+          --port 8080 \
+          --set-env-vars NEXT_PUBLIC_API_URL=$$BACKEND_URL,NODE_ENV=production
+    waitFor: ['push-all', 'deploy-backend']
   
 # Artifact Registry images
 images:

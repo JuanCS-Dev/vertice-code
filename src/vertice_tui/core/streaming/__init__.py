@@ -8,7 +8,7 @@ Provides:
 
 Example:
     >>> from vertice_tui.core.streaming import ProductionGeminiStreamer, GeminiStreamConfig
-    >>> config = GeminiStreamConfig(api_key="...", model_name="gemini-2.0-flash")
+    >>> config = GeminiStreamConfig(api_key="...", model_name="gemini-2.5-pro")
     >>> streamer = ProductionGeminiStreamer(config)
     >>> await streamer.initialize()
     >>> async for chunk in streamer.stream_with_resilience("Hello!"):

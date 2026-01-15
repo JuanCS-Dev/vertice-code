@@ -103,7 +103,10 @@ autoScaling:
 # AI model scaling
 vertexScaling:
   models:
-    gemini-1.5-pro:
+gemini-2.5-pro:
+  - Enterprise-grade reasoning
+  - 128K context standard
+  - Native function calling optimization
       minReplicas: 10
       maxReplicas: 100
       scalingMetric: 'ai_tokens_per_minute'

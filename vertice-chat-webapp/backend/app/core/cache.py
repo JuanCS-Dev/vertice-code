@@ -50,3 +50,13 @@ async def get_cache() -> FirestoreCache:
         await init_cache_pool()
     return _firestore_cache or FirestoreCache()
 
+
+# Compatibility stub for modules expecting Redis
+def get_redis():
+    """
+    Compatibility stub - returns None.
+    This project uses Firestore, not Redis.
+    Callers should handle None gracefully.
+    """
+    logger.warning("get_redis called but Redis not configured (using Firestore)")
+    return None

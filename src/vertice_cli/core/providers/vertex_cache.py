@@ -30,43 +30,25 @@ MIN_TOKENS = {
     "gemini-3-flash-preview": 1024,
     "gemini-2.5-flash": 1024,
     "gemini-2.5-pro": 4096,
-    "gemini-2.0-flash": 1024,
     "default": 2048,
 }
 
 
+# Model context windows for caching optimization
+MODEL_CACHE_LIMITS = {
+    "gemini-2.5-pro": 32768,  # Optimized for large codebases
+    "gemini-2.5-flash": 8192,
+}
+
+
 class VertexCacheManager:
-    """
-    Manager for Vertex AI explicit context caching.
-
-    Provides 90% cost reduction for cached tokens in subsequent requests.
-    Caches require minimum 2048 tokens and have configurable TTL.
-
-    Usage:
-        manager = VertexCacheManager(project="my-project")
-        cache_name = manager.create_cache(
-            name="codebase-context",
-            content=large_codebase_content,
-            system_instruction="You are a code assistant.",
-            ttl_seconds=3600
-        )
-
-        # Use with VertexAIProvider
-        async for chunk in provider.stream_chat(
-            messages,
-            cached_content=cache_name
-        ):
-            print(chunk)
-
-        # Cleanup
-        manager.delete_cache("codebase-context")
-    """
+    """Manages Vertex AI context caching to reduce latency and costs."""
 
     def __init__(
         self,
-        project: Optional[str] = None,
+        project_id: str,
         location: str = "us-central1",
-        model: str = "gemini-2.0-flash",
+        model: str = "gemini-2.5-pro",
     ):
         """Initialize cache manager.
 

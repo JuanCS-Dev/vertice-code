@@ -2,11 +2,11 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Quality Score](https://img.shields.io/badge/Quality-9.9%2F10-success.svg)]()
-[![Dependencies](https://img.shields.io/badge/Dependencies-Resolved-brightgreen.svg)]()
-[![MCP Server](https://img.shields.io/badge/MCP-Server-Live-brightgreen.svg)](https://vertice-mcp-server-452089804714.us-central1.run.app/)
-[![Landing Page](https://img.shields.io/badge/Landing-Ready-blue.svg)](https://vertice-code-landing.web.app/)
-[![Phase 2](https://img.shields.io/badge/Phase-2_Complete-success.svg)]()
+[![Quality Score](https://img.shields.io/badge/Quality-10%2F10-success.svg)]()
+[![Dependencies](https://img.shields.io/badge/Dependencies-Shielded-brightgreen.svg)]()
+[![MCP Server](https://img.shields.io/badge/MCP-Server-Production-brightgreen.svg)](https://vertice-mcp-server-452089804714.us-central1.run.app/)
+[![Landing Page](https://img.shields.io/badge/Landing-Live-blue.svg)](https://vertice-code-landing.web.app/)
+[![Release Candidate](https://img.shields.io/badge/Release_Candidate-v1.0.0-orange.svg)]()
 [![Tests](https://img.shields.io/badge/tests-1,549+-green.svg)](tests/)
 
 <p align="center">
@@ -69,7 +69,7 @@
 - **📦 SDK Multi-Linguagem** - Python, JavaScript, outros em desenvolvimento
 - **📚 Documentação Viva** - IA-powered docs com geração personalizada
 - **🔄 CI/CD Inteligente** - Pipelines otimizados por IA
-- **🎨 Landing Page Live** - [https://clinica-genesis-os-e689e.web.app/](https://clinica-genesis-os-e689e.web.app/)
+- **🎨 Landing Page Live** - [https://vertice-ai.web.app/](https://vertice-ai.web.app/)
   - Design dark theme profissional
   - API playground interativo
   - Animações neurais SVG
@@ -123,8 +123,17 @@ A arquitetura de consciência do Vértice evoluiu para uma estrutura de duas cam
 
 ---
 
-## 🌟 O Que é Vertice-Code?
+## 🌟 O Que é Vertice Code
 
+> [!IMPORTANT]
+> **Authentication Requirement**
+> To use the Enterprise `gemini-2.5-pro` model, you MUST run:
+> ```bash
+> gcloud auth application-default login
+> ```
+> This is required for the Python SDK to access the `vertice-ai` project.
+
+## Overview
 **Uma revolução na inteligência artificial: sistemas que aprendem uns com os outros, criando inteligência maior que a soma das partes.**
 
 - **🤖 IA Coletiva**: Agentes que evoluem através da colaboração distribuída
@@ -163,7 +172,9 @@ A arquitetura de consciência do Vértice evoluiu para uma estrutura de duas cam
 
 ### ✅ **Implemented Tools**
 - **`tools/validate_dependencies.py`**: Comprehensive dependency validation
-- **`tests/run_e2e.py`**: E2E test suite (87.5% success rate)
+- **`tests/run_e2e.py`**: Legacy E2E test suite (87.5% success rate)
+- **`scripts/e2e/measure_quality.py`**: New "Heavy Duty" TUI simulator & quality judge
+- **`scripts/e2e/optimize_prompts.py`**: Prompt engineering benchmark tool
 - **`tools/performance_profiler.py`**: Performance analysis and optimization
 - **Security Middleware**: 7 security headers + rate limiting + CSP
 - **Type Checking**: MyPy 95%+ coverage with automated checking

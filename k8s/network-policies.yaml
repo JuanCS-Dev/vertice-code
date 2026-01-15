@@ -1,0 +1,167 @@
+# Zero-Trust Network Policies for Vertice Enterprise
+# Implements strict network segmentation and traffic control
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vertice-vertex-ai-egress
+  namespace: vertice
+spec:
+  podSelector:
+    matchLabels:
+      app: vertice-vertex-ai
+  policyTypes:
+  - Egress
+  egress:
+  # Allow DNS resolution
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+  # Allow HTTPS to Google Cloud APIs
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+    ports:
+    - protocol: TCP
+      port: 443
+  # Allow communication with OpenTelemetry Collector
+  - to:
+    - podSelector:
+        matchLabels:
+          app: opentelemetry-collector
+    ports:
+    - protocol: TCP
+      port: 4317
+    - protocol: TCP
+      port: 4318
+  # Allow communication with Prometheus
+  - to:
+    - podSelector:
+        matchLabels:
+          app: prometheus
+    ports:
+    - protocol: TCP
+      port: 9090
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vertice-vertex-ai-ingress
+  namespace: vertice
+spec:
+  podSelector:
+    matchLabels:
+      app: vertice-vertex-ai
+  policyTypes:
+  - Ingress
+  ingress:
+  # Allow traffic from Istio ingress gateway only
+  - from:
+    - podSelector:
+        matchLabels:
+          istio: ingressgateway
+    ports:
+    - protocol: TCP
+      port: 8080
+  # Allow health checks from Kubernetes
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 8080
+  # Allow metrics scraping from Prometheus
+  - from:
+    - podSelector:
+        matchLabels:
+          app: prometheus
+    ports:
+    - protocol: TCP
+      port: 9090
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vertice-observability-isolation
+  namespace: vertice
+spec:
+  podSelector:
+    matchLabels:
+      component: observability
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow metrics collection from all vertice pods
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: vertice
+    ports:
+    - protocol: TCP
+      port: 9090
+    - protocol: TCP
+      port: 8888
+  egress:
+  # Allow sending data to external monitoring services
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all-by-default
+  namespace: vertice
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress: []
+  egress: []
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+  namespace: vertice
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-kube-api
+  namespace: vertice
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 10.0.0.0/8
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 6443

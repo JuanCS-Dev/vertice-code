@@ -3,12 +3,12 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'us-central1-docker.pkg.dev/protovolt-studio/vertice/backend:latest'
+      - 'us-central1-docker.pkg.dev/vertice-ai/cloud-run-source-deploy/vertice-backend:latest'
       - '-f'
-      - 'vertice-chat-webapp/backend/Dockerfile'
-      - 'vertice-chat-webapp/backend'
+      - 'Dockerfile.backend'
+      - '.'
 
 images:
-  - 'us-central1-docker.pkg.dev/protovolt-studio/vertice/backend:latest'
+  - 'us-central1-docker.pkg.dev/vertice-ai/cloud-run-source-deploy/vertice-backend:latest'
 
 timeout: 1200s

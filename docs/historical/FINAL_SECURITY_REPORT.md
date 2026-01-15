@@ -19,7 +19,7 @@
    - No sensitive files in git index ✅
 
 3. **API Keys Found (Protected)**
-   - Gemini API Key: `AIzaSy...` (in `.env` - IGNORED)
+   - Gemini API Key: `AIza_EXAMPLE...` (in `.env` - IGNORED)
    - Nebius API Key: `v1.CmQ...` (in `.env` - IGNORED)
    - HuggingFace Token: `hf_my...` (in `.env` - IGNORED)
 

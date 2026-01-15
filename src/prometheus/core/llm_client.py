@@ -2,8 +2,8 @@
 Gemini LLM Client for PROMETHEUS.
 
 Supports:
-- Gemini 2.0 Flash (default, fast)
-- Gemini 2.0 Flash Thinking (extended reasoning)
+- Gemini 2.5 Pro (default, high quality)
+- Gemini 3.0 Flash (next-gen performance)
 - Streaming and non-streaming generation
 - Retry with exponential backoff
 """
@@ -44,21 +44,21 @@ class GeminiClient:
     Async Gemini API Client.
 
     Supports multiple models:
-    - gemini-2.0-flash-exp: Fast, general purpose
-    - gemini-2.0-flash-thinking-exp: Extended reasoning
+    - gemini-2.5-pro: High intelligence, code-optimized
+    - gemini-3-pro-preview: Extended reasoning
     """
 
     BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
 
     MODELS = {
-        "flash": "gemini-2.0-flash",
-        "thinking": "gemini-2.0-flash-thinking-exp-1219",
-        "pro": "gemini-1.5-pro",
+        "flash": "gemini-2.5-flash",
+        "thinking": "gemini-3-pro-preview",
+        "pro": "gemini-2.5-pro",
     }
 
     def __init__(
         self,
-        model: str = "flash",
+        model: str = "pro",
         api_key: Optional[str] = None,
         config: Optional[GenerationConfig] = None,
     ):

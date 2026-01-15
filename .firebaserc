@@ -5,7 +5,7 @@
   "targets": {
     "vertice-ai": {
       "hosting": {
-        "us-central1": [
+        "vertice-ai": [
           "vertice-ai"
         ]
       }

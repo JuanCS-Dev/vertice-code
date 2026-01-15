@@ -4,7 +4,7 @@
   "description": "Code review and security specialist. Thorough analysis of code quality and vulnerabilities.",
   "version": "1.0.0",
   "provider": "vertex-ai",
-  "model": "gemini-2.0-flash",
+  "model": "gemini-2.5-pro",
 
   "capabilities": [
     "code_review",

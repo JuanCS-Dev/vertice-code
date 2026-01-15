@@ -12,12 +12,17 @@ services:
       - DATABASE_URL=postgresql+asyncpg://user:password@db:5432/vertice_db
       - REDIS_URL=redis://redis:6379
       - MCP_SERVER_URL=http://mcp-server:3000
+      - GOOGLE_CLOUD_PROJECT=vertice-ai
+      - VERTEX_AI_LOCATION=us-central1
     depends_on:
       - db
       - redis
       - mcp-server
     networks:
       - vertice-network
+    # Mount gcloud credentials for local development if available
+    volumes:
+      - ~/.config/gcloud:/root/.config/gcloud:ro
 
   frontend:
     build:
@@ -31,6 +36,7 @@ services:
     environment:
       - NODE_ENV=production
       - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - BACKEND_URL=http://backend:8000
       - CLERK_SECRET_KEY=sk_test_mock_secret_key_for_local_dev
     depends_on:
       - backend

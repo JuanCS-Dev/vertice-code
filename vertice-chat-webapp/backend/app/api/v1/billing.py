@@ -76,16 +76,38 @@ async def get_subscription_status(user: FirebaseUser = Depends(get_current_user)
     Get current subscription status for the user's workspace.
     """
     try:
-        # In production, query database for subscription info
-        # For now, return mock data
-        return {
-            "status": "active",
-            "plan": "pro",
-            "current_period_start": "2026-01-01T00:00:00Z",
-            "current_period_end": "2026-02-01T00:00:00Z",
-            "trial_end": None,
-            "cancel_at_period_end": False,
-        }
+        from app.core.database import get_db_session
+        from app.models.database import Subscription
+        from sqlalchemy import select
+
+        workspace_id = user.workspace_id or user.user_id
+
+        async with get_db_session() as session:
+            # Query the subscription table directly
+            result = await session.execute(
+                select(Subscription).where(Subscription.workspace_id == workspace_id)
+            )
+            subscription = result.scalars().first()
+
+            if subscription:
+                return {
+                    "status": subscription.status,
+                    "plan": subscription.plan_name,
+                    "current_period_start": subscription.current_period_start,
+                    "current_period_end": subscription.current_period_end,
+                    "trial_end": subscription.trial_end,
+                    "cancel_at_period_end": subscription.cancel_at_period_end,
+                }
+            else:
+                # No subscription found = Free Tier
+                return {
+                    "status": "active",
+                    "plan": "free",
+                    "current_period_start": None,
+                    "current_period_end": None,
+                    "trial_end": None,
+                    "cancel_at_period_end": False,
+                }
 
     except Exception as e:
         logger.error(f"Failed to get subscription status: {e}")

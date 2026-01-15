@@ -5,9 +5,9 @@ Usa ADC (Application Default Credentials) - sem necessidade de API key.
 Inferência via Vertex AI, não Google AI Studio.
 
 Modelos disponíveis:
-- gemini-2.0-flash (recomendado)
-- gemini-2.5-flash
-- gemini-1.5-pro
+- gemini-2.5-flash (recomendado)
+- gemini-3-flash-preview (future fast)
+- gemini-2.5-pro (code optimized)
 """
 
 from __future__ import annotations

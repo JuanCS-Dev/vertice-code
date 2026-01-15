@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vertice-vertex-ai-eu
+  namespace: vertice
+  labels:
+    app: vertice-vertex-ai
+    region: europe-west1
+    component: ai-inference
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: vertice-vertex-ai
+      region: europe-west1
+  template:
+    metadata:
+      labels:
+        app: vertice-vertex-ai
+        region: europe-west1
+        component: ai-inference
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: vertex-ai
+        image: europe-west1-docker.pkg.dev/${PROJECT_ID}/vertice-cloud/vertex-ai:latest
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 9090
+          name: metrics
+        env:
+        - name: GOOGLE_CLOUD_PROJECT
+          value: "${PROJECT_ID}"
+        - name: VERTEX_AI_REGION
+          value: "europe-west1"
+        - name: GEMINI_MODEL
+          value: "gemini-2.5-pro"
+        - name: MAX_CONCURRENT_REQUESTS
+          value: "50"
+        - name: METRICS_ENABLED
+          value: "true"
+        resources:
+          requests:
+            cpu: "2"
+            memory: "4Gi"
+          limits:
+            cpu: "8"
+            memory: "16Gi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+            - ALL
+      serviceAccountName: vertice-vertex-ai-sa
+      nodeSelector:
+        cloud.google.com/gke-nodepool: ai-pool-eu
+      tolerations:
+      - key: "ai-workload"
+        operator: "Equal"
+        value: "vertex-ai"
+        effect: "NoSchedule"

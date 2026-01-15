@@ -18,7 +18,7 @@ from sentry_sdk.integrations.fastapi import FastApiIntegration
 
 from app.core.config import settings
 from app.core.observability import setup_telemetry
-from app.api.v1 import chat, artifacts, teleport, agents, billing
+from app.api.v1 import chat, artifacts, teleport, agents, billing, admin
 
 try:
     from app.api.v1 import terminal
@@ -165,6 +165,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
+    allow_origin_regex=settings.CORS_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -210,9 +211,20 @@ async def authentication_middleware(
     api_key = request.headers.get("X-API-Key")
 
     # Authenticate request (human or agent)
+    
+    # DEBUG: Pervasive Logging
+    logger.info(f"[Middleware] Processing {request.method} {request.url.path}")
+    if authorization:
+        logger.info(f"[Middleware] Auth Header Present. Length: {len(authorization)}")
+        if authorization.startswith("Bearer "):
+             logger.info(f"[Middleware] Token Prefix Valid. Sample: {authorization[:15]}...")
+    else:
+        logger.warning(f"[Middleware] NO AUTH HEADER RECEIVED for {request.url.path}")
+
     auth_result = await authenticate_request(token=authorization, api_key=api_key)
 
     if not auth_result:
+        logger.warning(f"[Middleware] Auth Result is None. Rejecting {request.url.path}")
         # Return 401 for unauthenticated requests
         return JSONResponse(
             status_code=401,
@@ -266,6 +278,7 @@ app.include_router(artifacts.router, prefix="/api/v1/artifacts", tags=["artifact
 app.include_router(teleport.router, prefix="/api/v1/teleport", tags=["teleport"])
 app.include_router(agents.router, prefix="/api/v1", tags=["agents"])
 app.include_router(billing.router, prefix="/api/v1/billing", tags=["billing"])
+app.include_router(admin.router, prefix="/api/v1/admin", tags=["admin"])
 
 if terminal:
     app.include_router(terminal.router, prefix="/api/v1/terminal", tags=["terminal"])

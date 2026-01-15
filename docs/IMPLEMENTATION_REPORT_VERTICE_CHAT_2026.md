@@ -942,7 +942,7 @@ export class GeminiLiveClient {
   private ws: WebSocket | null = null;
 
   async connect(): Promise<void> {
-    this.ws = new WebSocket('wss://generativelanguage.googleapis.com/ws/v1beta/models/gemini-2.0-flash-exp:streamGenerateContent');
+    this.ws = new WebSocket('wss://generativelanguage.googleapis.com/ws/v1beta/models/gemini-2.5-pro:streamGenerateContent');
 
     this.ws.onopen = () => {
       // Envia configuração
@@ -1094,7 +1094,7 @@ OpenAI GPT-4          ┘
 - claude-3-5-sonnet-20241022
 - claude-3-5-haiku-20241022
 - claude-opus-4-20250514
-- gemini-2.0-flash-exp
+gemini-2.5-pro
 - gpt-4-turbo-2024-04-09
 
 ### Infraestrutura

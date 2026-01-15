@@ -17,7 +17,7 @@
 ### 1. Forçar Gemini 2.0 Flash (Mais Rápido)
 ```python
 # qwen_dev_cli/core/providers/gemini.py
-default_model = "gemini-2.0-flash-exp"
+default_model = "gemini-2.5-pro"
 env_model = os.getenv("GEMINI_MODEL", "")
 
 # Only use env if it's a 2.0 model
@@ -70,7 +70,7 @@ Por que o tomate...
 ```
 qwen ⚡ › conte uma piada
 ────────────────────────────────
-✅ Gemini: gemini-2.0-flash-exp
+✅ Gemini: gemini-2.5-pro
 Um tomate foi atravessar a rua...
 ────────────────────────────────
 ✓ 27 words in 1.7s (16 wps)  ✅ 8X MAIS RÁPIDO
@@ -95,18 +95,18 @@ A programação funcional trata...
 
 ### Para Shell (Velocidade)
 ```bash
-GEMINI_MODEL=gemini-2.0-flash-exp  # RECOMENDADO ⚡
+GEMINI_MODEL=gemini-2.5-pro  # RECOMENDADO ⚡
 ```
 
 ### Para Quality (Pensamento)
 ```bash
-GEMINI_MODEL=gemini-2.0-flash-thinking-exp  # Para tarefas complexas 🧠
+GEMINI_MODEL=gemini-2.5-pro  # Para tarefas complexas 🧠
 ```
 
 ### Não Recomendado
 ```bash
 GEMINI_MODEL=gemini-2.5-flash  # ❌ Mais lento
-GEMINI_MODEL=gemini-1.5-pro    # ❌ Muito lento
+GEMINI_MODEL=gemini-2.5-pro    # Optimized for code quality and reasoning
 ```
 
 ## ✅ Status Final
@@ -126,7 +126,7 @@ GEMINI_MODEL=gemini-1.5-pro    # ❌ Muito lento
 
 **DEPOIS:**
 - ⚡ Rápido e responsivo
-- ✅ "Gemini: gemini-2.0-flash-exp" visível
+- ✅ "Gemini: gemini-2.5-pro" visível
 - 🚀 16-34 wps
 
 ---

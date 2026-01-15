@@ -7,13 +7,78 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Button } from '@/components/ui/button';
 import { Copy, Check, Play, Sparkles, Loader2 } from 'lucide-react';
-import { useState, memo } from 'react';
+import { useState, memo, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+import { SEMANTIC_TOKEN_MAP } from './semantic-icons';
+
+// -----------------------------------------------------------------------------
+// SEMANTIC PARSER ENGINE (2026)
+// Intercepts text streams and injects alive UI components for semantic tokens.
+// -----------------------------------------------------------------------------
+
+const parseSemanticText = (text: string): ReactNode[] => {
+  if (!text) return [];
+  
+  // Regex to match any of the semantic tokens
+  const tokenRegex = new RegExp(`(${Object.keys(SEMANTIC_TOKEN_MAP).map(k => k.replace(/[.*+?^${}()|[\\\]]/g, '\\$&')).join('|')})`, 'g');
+  
+  const parts = text.split(tokenRegex);
+  
+  return parts.map((part, index) => {
+    const Component = SEMANTIC_TOKEN_MAP[part];
+    if (Component) {
+      return <Component key={`${part}-${index}`} />;
+    }
+    return part;
+  });
+};
+
+const SemanticParagraph = ({ children }: { children?: ReactNode }) => {
+  // If children is a string, parse it. If it's an array, map over it.
+  const processNode = (node: ReactNode): ReactNode => {
+    if (!node) return null;
+    if (typeof node === 'string') {
+      return parseSemanticText(node);
+    }
+    if (Array.isArray(node)) {
+      return node.map((child, i) => <span key={i}>{processNode(child)}</span>);
+    }
+    return node;
+  };
+
+  return <p className="mb-4 last:mb-0 leading-relaxed text-zinc-300">{processNode(children)}</p>;
+};
+
+const SemanticListItem = ({ children }: { children?: ReactNode }) => {
+    const processNode = (node: ReactNode): ReactNode => {
+    if (!node) return null;
+    if (typeof node === 'string') {
+      return parseSemanticText(node);
+    }
+    if (Array.isArray(node)) {
+      return node.map((child, i) => <span key={i}>{processNode(child)}</span>);
+    }
+    return node;
+  };
+  return <li className="leading-relaxed">{processNode(children)}</li>;
+};
+
+// -----------------------------------------------------------------------------
+// CODE BLOCK COMPONENT
+// -----------------------------------------------------------------------------
+
+interface CodeBlockProps {
+  node?: any;
+  inline?: boolean;
+  className?: string;
+  children?: ReactNode;
+  [key: string]: any;
+}
 
 // Memoized CodeBlock for performance during streaming
-const CodeBlock = memo(function CodeBlock({ node, inline, className, children, ...props }: any) {
+const CodeBlock = memo(function CodeBlock({ node, inline, className, children, ...props }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
   const { toast } = useToast();
@@ -24,6 +89,7 @@ const CodeBlock = memo(function CodeBlock({ node, inline, className, children, .
   
   // High-fidelity streaming detection
   const isStreaming = content.endsWith('▋') || content.endsWith('█') || content.endsWith('_') || content.endsWith('▎');
+
 
   const copyToClipboard = async () => {
     try {
@@ -198,14 +264,15 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
             {children}
           </td>
         ),
-        // Typography enhancements
-        p: ({ children }) => <p className="mb-4 last:mb-0 leading-relaxed text-zinc-300">{children}</p>,
+        // SEMANTIC TYPOGRAPHY INJECTION
+        p: SemanticParagraph,
+        li: SemanticListItem,
+        
         h1: ({ children }) => <h1 className="text-2xl font-bold mb-6 mt-8 text-white tracking-tight">{children}</h1>,
         h2: ({ children }) => <h2 className="text-xl font-bold mb-4 mt-8 text-white tracking-tight">{children}</h2>,
         h3: ({ children }) => <h3 className="text-lg font-bold mb-3 mt-6 text-white tracking-tight">{children}</h3>,
         ul: ({ children }) => <ul className="list-disc pl-6 mb-4 space-y-2 text-zinc-300">{children}</ul>,
         ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 space-y-2 text-zinc-300">{children}</ol>,
-        li: ({ children }) => <li className="leading-relaxed">{children}</li>,
         blockquote: ({ children }) => (
           <blockquote className="border-l-2 border-cyan-500/50 pl-6 my-6 italic text-zinc-400 bg-cyan-500/5 py-4 rounded-r-lg">
             {children}

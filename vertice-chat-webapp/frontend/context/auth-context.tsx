@@ -1,12 +1,12 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { 
-  User, 
-  GoogleAuthProvider, 
-  signInWithPopup, 
-  signOut as firebaseSignOut, 
-  onAuthStateChanged 
+import {
+  User,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut as firebaseSignOut,
+  onAuthStateChanged
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase'; // We need to ensure this exists
 
@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut }}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 }

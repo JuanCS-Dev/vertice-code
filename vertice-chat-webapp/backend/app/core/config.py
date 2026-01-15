@@ -25,6 +25,7 @@ class Settings(BaseSettings):
 
     # CORS
     CORS_ORIGINS: List[str] = ["http://localhost:3000", "https://app.vertice.ai"]
+    CORS_ORIGIN_REGEX: Optional[str] = r"https://vertice-frontend-.*-uc\.a\.run\.app"
 
     # LLM API Keys
     ANTHROPIC_API_KEY: Optional[str] = None
@@ -69,7 +70,7 @@ class Settings(BaseSettings):
 
     # Google Identity (Firebase Auth)
     FIREBASE_PROJECT_ID: Optional[str] = "vertice-ai"
-    GOOGLE_CLOUD_PROJECT: Optional[str] = None
+    GOOGLE_CLOUD_PROJECT: Optional[str] = "vertice-ai"
 
     # Stripe Billing
     STRIPE_SECRET_KEY: Optional[str] = None

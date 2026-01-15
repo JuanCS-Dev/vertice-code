@@ -667,11 +667,14 @@ Working directory: {os.getcwd()}"""
     def set_model(self, model_name: str) -> None:
         self.llm.model_name = model_name
 
-    def get_current_model(self) -> str:
-        return getattr(self.llm, "model_name", "gemini-2.0-flash")
+    def get_model_name(self) -> str:
+        """Get current model name."""
+        return getattr(self.llm, "model_name", "gemini-2.5-pro")
 
     def get_available_models(self) -> List[str]:
-        return ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-pro"]
+        """Get list of available models."""
+        # Hardcoded for now, should come from provider
+        return ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-3-flash-preview", "gemini-3-pro-preview"]
 
     # Session management
     def resume_session(self, session_id: Optional[str] = None) -> Dict[str, Any]:

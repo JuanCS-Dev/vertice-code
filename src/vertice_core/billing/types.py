@@ -13,7 +13,6 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 
 
-
 class PricingTier(str, Enum):
     """Enterprise pricing tiers based on 2026 market research."""
 

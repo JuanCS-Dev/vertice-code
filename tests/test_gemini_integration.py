@@ -26,7 +26,10 @@ class TestGeminiProviderRealAPI:
         provider = GeminiProvider()
         assert provider.is_available() is True
         assert provider.client is not None
-        assert provider.model_name in ['gemini-pro', 'gemini-1.5-flash', 'gemini-1.5-pro']
+    # Verify configuration
+    assert provider.project == "vertice-ai"
+    assert provider.location == "us-central1"
+    assert provider.model_name in ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-3-pro-preview']
 
     @pytest.mark.asyncio
     async def test_generate_simple(self):

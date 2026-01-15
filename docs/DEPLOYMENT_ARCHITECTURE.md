@@ -133,7 +133,7 @@ firebase deploy --only hosting
 ### Variáveis de Ambiente Necessárias (Firebase)
 ```bash
 # Firebase Config (Client Side)
-NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSy...
+NEXT_PUBLIC_FIREBASE_API_KEY=AIza_EXAMPLE...
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=vertice-project.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=vertice-project
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=vertice-project.appspot.com

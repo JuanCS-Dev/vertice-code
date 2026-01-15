@@ -11,6 +11,7 @@ import { ptBR } from 'date-fns/locale';
 import { MarkdownRenderer } from './markdown-renderer';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { motion } from 'framer-motion';
 
 interface MessageBubbleProps {
   message: Message;
@@ -28,114 +29,132 @@ export const MessageBubble = memo(function MessageBubble({
     try {
       await navigator.clipboard.writeText(message.content);
       toast({
-        title: "Copiado!",
-        description: "Mensagem copiada para a área de transferência.",
+        title: "Copiado com Sucesso",
+        description: "Conteúdo transferido para a área de transferência.",
+        className: "border-primary/20 bg-background/80 backdrop-blur-xl"
       });
     } catch (err) {
       toast({
-        title: "Erro",
-        description: "Não foi possível copiar a mensagem.",
+        title: "Erro na Cópia",
+        description: "Não foi possível acessar a área de transferência.",
         variant: "destructive",
       });
     }
   };
 
   return (
-    <div className={cn(
-      "flex gap-3 group",
-      isUser ? "justify-end" : "justify-start"
-    )}>
-      {/* Avatar */}
+    <motion.div
+      initial={{ opacity: 0, y: 20, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+      className={cn(
+        "flex gap-4 group relative py-2",
+        isUser ? "justify-end" : "justify-start"
+      )}
+    >
+      {/* Avatar - System/Bot */}
       {!isUser && (
-        <Avatar className="h-8 w-8 flex-shrink-0">
-          <AvatarFallback className="bg-primary text-primary-foreground">
-            {isSystem ? 'S' : <Bot className="h-4 w-4" />}
+        <Avatar className="h-9 w-9 flex-shrink-0 border border-white/10 shadow-[0_0_15px_-3px_rgba(6,182,212,0.15)] ring-1 ring-white/5">
+          <AvatarFallback className="bg-card text-primary font-bold">
+            {isSystem ? 'S' : <Bot className="h-5 w-5" />}
           </AvatarFallback>
         </Avatar>
       )}
 
-      {/* Message Content */}
+      {/* Message Content Area */}
       <div className={cn(
-        "max-w-[80%] space-y-2",
+        "max-w-[85%] space-y-1.5",
         isUser ? "order-first" : "order-last"
       )}>
-        {/* Message Header */}
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          {isSystem && <Badge variant="secondary" className="text-xs">Sistema</Badge>}
+        {/* Metadata Header */}
+        <div className={cn(
+          "flex items-center gap-2 text-[10px] uppercase tracking-widest font-medium text-muted-foreground/60 px-1",
+          isUser ? "justify-end" : "justify-start"
+        )}>
+          {isSystem && <span className="text-primary font-bold">System Override</span>}
           {message.metadata?.model && (
-            <Badge variant="outline" className="text-xs">
-              {message.metadata.model.split('-')[0].toUpperCase()}
-            </Badge>
+            <span className="flex items-center gap-1.5">
+              <span className="w-1 h-1 rounded-full bg-primary/50"></span>
+              {message.metadata.model.split('-')[0]}
+            </span>
           )}
           <span className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            {formatDistanceToNow(message.timestamp, {
-              addSuffix: true,
-              locale: ptBR
-            })}
+            <Clock className="h-2.5 w-2.5" />
+            {(() => {
+              const date = message.timestamp instanceof Date ? message.timestamp : new Date(message.timestamp);
+              const isValid = !isNaN(date.getTime());
+              return isValid ? formatDistanceToNow(date, {
+                addSuffix: true,
+                locale: ptBR
+              }) : 'agora';
+            })()}
           </span>
         </div>
 
-        {/* Message Bubble */}
+        {/* The Bubble Artifact */}
         <div className={cn(
-          "rounded-2xl px-5 py-4 shadow-xl transition-all duration-300",
+          "relative rounded-2xl px-6 py-5 shadow-sm transition-all duration-500 overflow-hidden",
           isUser
-            ? "bg-gradient-to-br from-cyan-600 to-blue-700 text-white ml-auto"
-            : isSystem
-              ? "bg-zinc-900/50 border border-zinc-800 backdrop-blur-md"
-              : "bg-[#0f0f0f]/80 border border-white/10 backdrop-blur-xl hover:border-cyan-500/30 group-hover:shadow-[0_0_20px_rgba(6,182,212,0.05)]"
+            ? "bg-[#0891b2] text-white ml-auto shadow-[0_4px_20px_-5px_rgba(8,145,178,0.4)] border border-white/20"
+            : "bg-card border border-white/5 backdrop-blur-xl group-hover:border-primary/20 group-hover:shadow-[0_0_30px_-10px_rgba(6,182,212,0.05)]"
         )}>
-          <div className="prose prose-sm max-w-none dark:prose-invert prose-pre:bg-zinc-950 prose-pre:border prose-pre:border-white/5">
+          {/* Subtle Shine Effect for User Bubble */}
+          {isUser && (
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+          )}
+
+          <div className={cn(
+            "prose prose-sm max-w-none dark:prose-invert",
+            "prose-p:leading-relaxed prose-pre:my-4",
+            isUser ? "prose-p:text-white/95" : "prose-p:text-zinc-300"
+          )}>
             {isUser ? (
-              <div className="whitespace-pre-wrap font-medium">{message.content}</div>
+              <div className="whitespace-pre-wrap font-sans text-[15px]">{message.content}</div>
             ) : (
               <MarkdownRenderer content={message.content} />
             )}
           </div>
         </div>
 
-        {/* Message Footer */}
-        <div className="flex items-center justify-between text-[10px] uppercase tracking-widest font-bold text-zinc-500">
-          <div className="flex items-center gap-4">
-            {message.metadata?.executionTime && (
-              <span className="flex items-center gap-1 text-cyan-500/70">
+        {/* Footer Metrics & Actions */}
+        <div className={cn(
+          "flex items-center gap-3 text-[10px] font-mono font-medium text-muted-foreground/40 h-6 px-1 transition-opacity duration-300",
+          isUser ? "justify-end opacity-0 group-hover:opacity-100" : "justify-between"
+        )}>
+          <div className="flex items-center gap-3">
+            {!isUser && message.metadata?.executionTime && (
+              <span className="flex items-center gap-1 text-primary/60">
                 <Zap className="h-3 w-3" />
                 {(message.metadata.executionTime * 1000).toFixed(0)}ms
               </span>
             )}
-            {message.metadata?.tokens && (
-              <span className="border-l border-white/10 pl-4">
-                {message.metadata.tokens.toLocaleString()} TOKENS
+            {!isUser && message.metadata?.tokens && (
+              <span className="border-l border-white/5 pl-3">
+                {message.metadata.tokens.toLocaleString()} tks
               </span>
-            )}
-            {(message.metadata as any)?.effort && (
-              <Badge variant="outline" className="text-[8px] px-1 py-0 border-purple-500/30 text-purple-400">
-                EFFORT: {(message.metadata as any).effort}
-              </Badge>
             )}
           </div>
 
-          {/* Copy Button */}
           <Button
             variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+            size="icon"
+            className="h-6 w-6 rounded-full hover:bg-white/5 hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
             onClick={copyToClipboard}
-            title="Copiar mensagem"
+            title="Copiar conteúdo"
           >
             <Copy className="h-3 w-3" />
           </Button>
         </div>
       </div>
 
-      {/* User Avatar */}
+      {/* Avatar - User */}
       {isUser && (
-        <Avatar className="h-8 w-8 flex-shrink-0">
-          <AvatarFallback className="bg-secondary">
+        <Avatar className="h-9 w-9 flex-shrink-0 border border-white/10 shadow-lg">
+          <AvatarFallback className="bg-secondary/50 text-secondary-foreground backdrop-blur-md">
             <User className="h-4 w-4" />
           </AvatarFallback>
         </Avatar>
       )}
-    </div>
+    </motion.div>
   );
 });

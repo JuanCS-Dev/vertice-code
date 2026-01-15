@@ -1,0 +1,170 @@
+# Istio Service Mesh Configuration for Zero-Trust Security
+# Implements mTLS, traffic encryption, and advanced security policies
+
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: vertice
+spec:
+  mtls:
+    mode: STRICT
+
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: vertice-vertex-ai-mtls
+  namespace: vertice
+spec:
+  selector:
+    matchLabels:
+      app: vertice-vertex-ai
+  mtls:
+    mode: STRICT
+
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: vertice-vertex-ai-authz
+  namespace: vertice
+spec:
+  selector:
+    matchLabels:
+      app: vertice-vertex-ai
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/vertice/sa/vertice-frontend-sa"]
+    to:
+    - operation:
+        methods: ["GET", "POST"]
+        paths: ["/api/v1/*"]
+  - from:
+    - source:
+        principals: ["cluster.local/ns/vertice/sa/vertice-observability-sa"]
+    to:
+    - operation:
+        methods: ["GET"]
+        paths: ["/metrics", "/health", "/ready"]
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: vertice-gateway
+  namespace: vertice
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: vertice-tls
+    hosts:
+    - "*.vertice-maximus.com"
+    - "api.vertice-maximus.com"
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*.vertice-maximus.com"
+    - "api.vertice-maximus.com"
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: vertice-vertex-ai-vs
+  namespace: vertice
+spec:
+  hosts:
+  - "api.vertice-maximus.com"
+  gateways:
+  - vertice-gateway
+  http:
+  - match:
+    - uri:
+        prefix: "/api/v1/ai"
+    route:
+    - destination:
+        host: vertice-vertex-ai-global
+        subset: v1
+    timeout: 30s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+  - match:
+    - uri:
+        prefix: "/api/v1/health"
+    route:
+    - destination:
+        host: vertice-vertex-ai-global
+        subset: v1
+    timeout: 5s
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: vertice-vertex-ai-dr
+  namespace: vertice
+spec:
+  host: vertice-vertex-ai-global
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    loadBalancer:
+      simple: ROUND_ROBIN
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 10s
+      baseEjectionTime: 30s
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http2MaxRequests: 1000
+        maxRequestsPerConnection: 10
+
+---
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: vertice-observability
+  namespace: vertice
+spec:
+  selector:
+    matchLabels:
+      app: vertice-vertex-ai
+  metrics:
+  - providers:
+    - name: prometheus
+    overrides:
+    - match:
+        metric: REQUEST_COUNT
+        mode: CLIENT_AND_SERVER
+      tagOverrides:
+        request_operation:
+          value: "istio_request_operation"
+    - match:
+        metric: REQUEST_DURATION
+        mode: CLIENT_AND_SERVER
+      tagOverrides:
+        response_code:
+          value: "istio_response_code"
+  accessLogging:
+  - providers:
+    - name: envoy
+    disabled: false

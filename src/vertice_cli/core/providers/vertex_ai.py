@@ -45,11 +45,6 @@ class VertexAIProvider:
         "pro-3": "gemini-3-pro-preview",  # Next-Gen Reasoning
         "gemini-3-flash": "gemini-3-flash-preview",
         "gemini-3-pro": "gemini-3-pro-preview",
-        # Gemini 1.5 (Stable - Widely available)
-        "1.5-pro": "gemini-1.5-pro",
-        "gemini-1.5-pro": "gemini-1.5-pro",
-        # Legacy (deprecated)
-        "2.0-flash": "gemini-2.0-flash-exp",
     }
 
     def __init__(

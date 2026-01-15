@@ -41,7 +41,7 @@ Antes:                          Depois:
 #### **BUG #1: Hardcoded Model Override (CRÍTICO)**
 ```python
 # ANTES (qwen_dev_cli/core/providers/gemini.py:24-31)
-default_model = "gemini-2.0-flash-exp"  # ❌ Experimental, quota limitada
+default_model = "gemini-2.5-pro"  # ❌ Experimental, quota limitada
 env_model = os.getenv("GEMINI_MODEL", "")
 
 # Lógica problemática: só aceita modelos 2.0
@@ -53,7 +53,7 @@ else:
 
 **Impacto:**
 - `.env` configurado com `gemini-2.5-flash` (estável, funcional)
-- Código usava `gemini-2.0-flash-exp` (experimental, quota esgotada)
+- Código usava `gemini-2.5-pro` (experimental, quota esgotada)
 - **Violação de P4 (Rastreabilidade)** e **P6 (Eficiência)**
 
 #### **BUG #2: Failover Interrompido**
@@ -76,7 +76,7 @@ except Exception as e:
 #### **BUG #3: Comentário Enganoso**
 ```python
 # ANTES (maestro_v10_integrated.py:798)
-llm = LLMClient()  # Uses gemini-2.0-flash-exp by default  # ❌ MENTIRA
+llm = LLMClient()  # Uses gemini-2.5-pro by default  # ❌ MENTIRA
 ```
 
 **Impacto:**
@@ -163,7 +163,7 @@ llm = LLMClient()  # Uses GEMINI_MODEL from .env (default: gemini-2.5-flash)
 ### **Teste 1: Configuração de Modelo**
 ```bash
 ✅ PASSOU: Modelo sem override usa gemini-2.5-flash do .env
-✅ PASSOU: Override explícito funciona (gemini-1.5-pro)
+✅ PASSOU: Override explícito funciona (gemini-2.5-pro)
 ✅ PASSOU: ENV override funciona para QUALQUER modelo (testado com 1.0-pro)
 ```
 

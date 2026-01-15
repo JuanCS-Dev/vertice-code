@@ -2905,7 +2905,7 @@
           },
           "deployTaskName": "SGLang 32K context length",
           "deployMetadata": {
-            "sampleRequest": "{\n  \"instances\": [\n    { \"text\" : \"\u003cstart_of_turn\u003euser\\nWhat is a car?\u003cend_of_turn\u003e\\n\u003cstart_of_turn\u003emodel\\n\" }\n  ],\n  \"parameters\": {\n    \"sampling_params\": {\n      \"max_new_tokens\": 128,\n      \"temperature\": 0.95,\n      \"top_k\": 64\n    }\n  }\n}\n"
+            "sampleRequest": "{\n  \"instances\": [\n    { \"text\" : \"<start_of_turn>user\\nWhat is a car?<end_of_turn>\\n<start_of_turn>model\\n\" }\n  ],\n  \"parameters\": {\n    \"sampling_params\": {\n      \"max_new_tokens\": 128,\n      \"temperature\": 0.95,\n      \"top_k\": 64\n    }\n  }\n}\n"
           }
         },
         "openNotebooks": {
@@ -2963,7 +2963,7 @@
               },
               "deployTaskName": "SGLang 32K context length",
               "deployMetadata": {
-                "sampleRequest": "{\n  \"instances\": [\n    { \"text\" : \"\u003cstart_of_turn\u003euser\\nWhat is a car?\u003cend_of_turn\u003e\\n\u003cstart_of_turn\u003emodel\\n\" }\n  ],\n  \"parameters\": {\n    \"sampling_params\": {\n      \"max_new_tokens\": 128,\n      \"temperature\": 0.95,\n      \"top_k\": 64\n    }\n  }\n}\n"
+                "sampleRequest": "{\n  \"instances\": [\n    { \"text\" : \"<start_of_turn>user\\nWhat is a car?<end_of_turn>\\n<start_of_turn>model\\n\" }\n  ],\n  \"parameters\": {\n    \"sampling_params\": {\n      \"max_new_tokens\": 128,\n      \"temperature\": 0.95,\n      \"top_k\": 64\n    }\n  }\n}\n"
               }
             },
             {
@@ -3005,7 +3005,7 @@
               },
               "deployTaskName": "SGLang 32K context length",
               "deployMetadata": {
-                "sampleRequest": "{\n  \"instances\": [\n    { \"text\" : \"\u003cstart_of_turn\u003euser\\nWhat is a car?\u003cend_of_turn\u003e\\n\u003cstart_of_turn\u003emodel\\n\" }\n  ],\n  \"parameters\": {\n    \"sampling_params\": {\n      \"max_new_tokens\": 128,\n      \"temperature\": 0.95,\n      \"top_k\": 64\n    }\n  }\n}\n"
+                "sampleRequest": "{\n  \"instances\": [\n    { \"text\" : \"<start_of_turn>user\\nWhat is a car?<end_of_turn>\\n<start_of_turn>model\\n\" }\n  ],\n  \"parameters\": {\n    \"sampling_params\": {\n      \"max_new_tokens\": 128,\n      \"temperature\": 0.95,\n      \"top_k\": 64\n    }\n  }\n}\n"
               }
             },
             {
@@ -5500,45 +5500,6 @@
       "publisherModelTemplate": "projects/{project}/locations/{location}/publishers/google/models/veo-2.0-generate-001@default"
     },
     {
-      "name": "publishers/google/models/gemini-2.0-flash-001",
-      "versionId": "default",
-      "supportedActions": {
-        "openNotebook": {
-          "references": {
-            "us-central1": {
-              "uri": "https://colab.research.google.com/github/GoogleCloudPlatform/generative-ai/blob/main/gemini/getting-started/intro_gemini_2_0_flash.ipynb"
-            }
-          },
-          "resourceTitle": "Notebook",
-          "resourceUseCase": "Vertex Serving",
-          "resourceDescription": "Intro to Gemini 2.0 Flash."
-        },
-        "openGenerationAiStudio": {
-          "references": {
-            "us-central1": {
-              "uri": "https://console.cloud.google.com/vertex-ai/generative/multimodal/create/text?model=gemini-2.0-flash-001"
-            }
-          }
-        },
-        "openNotebooks": {
-          "notebooks": [
-            {
-              "references": {
-                "us-central1": {
-                  "uri": "https://colab.research.google.com/github/GoogleCloudPlatform/generative-ai/blob/main/gemini/getting-started/intro_gemini_2_0_flash.ipynb"
-                }
-              },
-              "resourceTitle": "Notebook",
-              "resourceUseCase": "Vertex Serving",
-              "resourceDescription": "Intro to Gemini 2.0 Flash."
-            }
-          ]
-        }
-      },
-      "launchStage": "GA",
-      "publisherModelTemplate": "projects/{project}/locations/{location}/publishers/google/models/gemini-2.0-flash-001@default"
-    },
-    {
       "name": "publishers/google/models/text-embedding-large-exp-03-07",
       "versionId": "default",
       "openSourceCategory": "PROPRIETARY",
@@ -5551,45 +5512,6 @@
       "openSourceCategory": "PROPRIETARY",
       "launchStage": "GA",
       "publisherModelTemplate": "projects/{project}/locations/{location}/publishers/google/models/gemini-embedding-001@default"
-    },
-    {
-      "name": "publishers/google/models/gemini-2.0-flash-lite-001",
-      "versionId": "default",
-      "supportedActions": {
-        "openNotebook": {
-          "references": {
-            "us-central1": {
-              "uri": "https://colab.research.google.com/github/GoogleCloudPlatform/generative-ai/blob/main/gemini/getting-started/intro_gemini_2_0_flash_lite.ipynb"
-            }
-          },
-          "resourceTitle": "Notebook",
-          "resourceUseCase": "Vertex Serving",
-          "resourceDescription": "Intro to Gemini 2.0 Flash-Lite."
-        },
-        "openGenerationAiStudio": {
-          "references": {
-            "us-central1": {
-              "uri": "https://console.cloud.google.com/vertex-ai/generative/multimodal/create/text?model=gemini-2.0-flash-lite-001"
-            }
-          }
-        },
-        "openNotebooks": {
-          "notebooks": [
-            {
-              "references": {
-                "us-central1": {
-                  "uri": "https://colab.research.google.com/github/GoogleCloudPlatform/generative-ai/blob/main/gemini/getting-started/intro_gemini_2_0_flash_lite.ipynb"
-                }
-              },
-              "resourceTitle": "Notebook",
-              "resourceUseCase": "Vertex Serving",
-              "resourceDescription": "Intro to Gemini 2.0 Flash-Lite."
-            }
-          ]
-        }
-      },
-      "launchStage": "GA",
-      "publisherModelTemplate": "projects/{project}/locations/{location}/publishers/google/models/gemini-2.0-flash-lite-001@default"
     },
     {
       "name": "publishers/google/models/weathernext",

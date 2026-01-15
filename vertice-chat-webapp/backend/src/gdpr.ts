@@ -44,7 +44,12 @@ export async function handleDataAccess(userId: string): Promise<any> {
         id: doc.id,
         timestamp: doc.data().timestamp,
         messages: doc.data().messages,
-        aiModel: doc.data().model || 'gemini-1.5-pro'
+    // Generate content (simplified for now, will add streaming later)
+    const logData = {
+      timestamp: new Date().toISOString(),
+      action: 'ai_processing',
+      aiModel: doc.data().model || 'gemini-2.5-pro'
+    };
       })),
       usageAnalytics: usageData.docs.map(doc => ({
         date: doc.data().timestamp,

@@ -311,7 +311,54 @@ class AuditLog(Base):
     data_subject_id: Mapped[Optional[str]] = Column(String(255))
 
     # Timestamp
+    # Timestamp
     created_at: Mapped[datetime] = Column(DateTime(timezone=True), server_default=text("NOW()"))
+
+
+class ChatSession(Base):
+    """Chat session history"""
+
+    __tablename__ = "chat_sessions"
+
+    id: Mapped[uuid.UUID] = Column(SQLUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    workspace_id: Mapped[Optional[uuid.UUID]] = Column(
+        SQLUUID(as_uuid=True), ForeignKey("workspaces.id")
+    )
+    user_id: Mapped[Optional[uuid.UUID]] = Column(SQLUUID(as_uuid=True), ForeignKey("users.id"))
+    
+    title: Mapped[Optional[str]] = Column(String(255))
+    model_used: Mapped[str] = Column(String(100), default="gemini-2.5-pro")
+    
+    # Metadata
+    created_at: Mapped[datetime] = Column(DateTime(timezone=True), server_default=text("NOW()"))
+    updated_at: Mapped[datetime] = Column(DateTime(timezone=True), server_default=text("NOW()"))
+    
+    # Relationships
+    messages: Mapped[List["ChatMessage"]] = relationship(
+        "ChatMessage", back_populates="session", cascade="all, delete-orphan", order_by="ChatMessage.created_at"
+    )
+
+
+class ChatMessage(Base):
+    """Individual chat message"""
+
+    __tablename__ = "chat_messages"
+
+    id: Mapped[uuid.UUID] = Column(SQLUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    session_id: Mapped[uuid.UUID] = Column(
+        SQLUUID(as_uuid=True), ForeignKey("chat_sessions.id"), nullable=False
+    )
+    
+    role: Mapped[str] = Column(String(20), nullable=False)  # user, assistant, system
+    content: Mapped[str] = Column(Text, nullable=False)
+    
+    # Token usage (optional)
+    tokens_count: Mapped[Optional[int]] = Column(Integer)
+    
+    created_at: Mapped[datetime] = Column(DateTime(timezone=True), server_default=text("NOW()"))
+    
+    # Relationships
+    session: Mapped["ChatSession"] = relationship("ChatSession", back_populates="messages")
 
 
 # Indexes for performance
@@ -323,6 +370,8 @@ Index("idx_agents_api_key_hash", Agent.api_key_hash)
 Index("idx_knowledge_workspace_id", KnowledgeEntry.workspace_id)
 Index("idx_usage_workspace_period", UsageRecord.workspace_id, UsageRecord.billing_period)
 Index("idx_audit_workspace_created", AuditLog.workspace_id, AuditLog.created_at.desc())
+Index("idx_chat_sessions_user", ChatSession.user_id, ChatSession.updated_at.desc())
+Index("idx_chat_messages_session", ChatMessage.session_id, ChatMessage.created_at)
 
 
 # =============================================================================

@@ -46,20 +46,6 @@ export function AccessibilityChecker() {
           ],
           // Disable noisy rules in development
           disableOtherRules: false,
-        },
-        (violations: any[]) => {
-          // Log violations to console
-          if (violations.length > 0) {
-            console.group('🚨 Accessibility Violations Found');
-            violations.forEach((violation, index) => {
-              console.log(`${index + 1}. ${violation.help}`);
-              console.log(`   Impact: ${violation.impact}`);
-              console.log(`   Element: ${violation.target}`);
-              console.log(`   Help: ${violation.helpUrl}`);
-              console.log('---');
-            });
-            console.groupEnd();
-          }
         }
       );
 

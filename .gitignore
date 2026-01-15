@@ -209,3 +209,10 @@ htmlcov/
 # Ignore test reports
 tests/e2e_textual/*.json
 tests/e2e_textual/*.md
+
+# Firebase and Next.js artifacts
+.firebase/
+.next/
+**/node_modules/
+**/.next/
+out/

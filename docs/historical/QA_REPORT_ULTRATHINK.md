@@ -23,7 +23,7 @@ Core infrastructure works, but agent execution has integration issues.
 ```
 Python: 3.11.13
 Environment: NOT in venv (using pyenv global)
-Provider: Gemini (gemini-2.0-flash-exp)
+Provider: Gemini (gemini-2.5-pro)
 API Key: Configured ✅
 Location: /media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli
 ```

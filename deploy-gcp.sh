@@ -67,18 +67,40 @@ cd ../..
 
 # 3. Frontend Sync
 echo -e "\n${YELLOW}[3/5] Syncing Frontend with Backend...${NC}"
+rm -f vertice-chat-webapp/frontend/.env* # Bulletproof: Remove potential conflict files
+
+# Fetch Firebase Config dynamically
+echo "Fetching Firebase Configuration..."
+FIREBASE_CONFIG=$(firebase apps:sdkconfig web --project $PROJECT_ID)
+
+# Extract values using simple grep/sed (avoiding jq dependency if possible, but jq is better if avail)
+# Assuming standard output format from firebase CLI
+API_KEY=$(echo "$FIREBASE_CONFIG" | grep "apiKey" | cut -d '"' -f 4)
+AUTH_DOMAIN=$(echo "$FIREBASE_CONFIG" | grep "authDomain" | cut -d '"' -f 4)
+STORAGE_BUCKET=$(echo "$FIREBASE_CONFIG" | grep "storageBucket" | cut -d '"' -f 4)
+PROJECT_ID_FETCHED=$(echo "$FIREBASE_CONFIG" | grep "projectId" | cut -d '"' -f 4)
+
+if [ -z "$API_KEY" ]; then
+  echo -e "${RED}Error: Could not fetch Firebase API Key. Ensure a Web App is created in Firebase Console.${NC}"
+  exit 1
+fi
+
 cat > vertice-chat-webapp/frontend/.env.production <<EOF
 NEXT_PUBLIC_API_URL=$BACKEND_URL
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=$PROJECT_ID
-NEXT_PUBLIC_FIREBASE_API_KEY=$NEXT_PUBLIC_FIREBASE_API_KEY
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=$PROJECT_ID.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=$PROJECT_ID.appspot.com
+NEXT_PUBLIC_FIREBASE_API_KEY=$API_KEY
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=$AUTH_DOMAIN
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=$STORAGE_BUCKET
 EOF
-echo -e "${GREEN}✓ Production environment variables generated${NC}"
+echo -e "${GREEN}✓ Production environment variables generated with REAL credentials${NC}"
 
 # 4. Frontend Deploy (Firebase)
 echo -e "\n${YELLOW}[4/5] Deploying Frontend (Next.js SSR)...${NC}"
 cd vertice-chat-webapp/frontend
+
+# Ensure clean slate for pnpm
+echo "Cleaning dependencies..."
+rm -rf node_modules package-lock.json .next
 
 # Ensure pnpm is used for speed and consistency
 echo "Installing dependencies..."

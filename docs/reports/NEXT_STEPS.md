@@ -58,7 +58,7 @@ nano .env
 # Ou: vim .env
 
 # Adicione suas keys:
-# GEMINI_API_KEY=AIzaSy...
+# GEMINI_API_KEY=AIza_EXAMPLE...
 # NEBIUS_API_KEY=v1.CmQ...
 # HF_TOKEN=hf_my...
 
@@ -135,8 +135,8 @@ git commit -m "fix: ensure .env is ignored"
 cat .env | grep API_KEY
 
 # Verificar formato (sem espaços, sem aspas extras)
-# Correto:   GEMINI_API_KEY=AIzaSy...
-# Incorreto: GEMINI_API_KEY = "AIzaSy..."
+# Correto:   GEMINI_API_KEY=AIza_EXAMPLE...
+# Incorreto: GEMINI_API_KEY = "AIza_EXAMPLE..."
 ```
 
 ### Problema: Import error

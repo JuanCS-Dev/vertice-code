@@ -10,8 +10,8 @@
 
 ### **1. Gemini API Key**
 ```bash
-Key: AIzaSyAeSz...xWkA (39 chars)
-Format: ✅ VALID (AIzaSy prefix)
+Key: AIza_EXAMPLEAeSz...xWkA (39 chars)
+Format: ✅ VALID (AIza_EXAMPLE prefix)
 Location: .env only
 Status: SECURE
 ```
@@ -69,7 +69,7 @@ Location: `.git/hooks/pre-commit`
 
 **Protections:**
 - ❌ Blocks `.env` commits
-- ❌ Detects Gemini API keys (AIzaSy pattern)
+- ❌ Detects Gemini API keys (AIza_EXAMPLE pattern)
 - ❌ Detects HuggingFace tokens (hf_ pattern)
 - ❌ Detects Nebius keys (v1.Cm pattern)
 - ⚠️ Warns on generic secret patterns
@@ -93,7 +93,7 @@ self.hf_token = os.getenv("HF_TOKEN")
 nebius_key = os.getenv("NEBIUS_API_KEY")
 
 # ❌ NEVER DO THIS:
-api_key = "AIzaSy..."  # HARDCODED - PROHIBITED!
+api_key = "AIza_EXAMPLE..."  # HARDCODED - PROHIBITED!
 ```
 
 ---
@@ -110,7 +110,7 @@ api_key = "AIzaSy..."  # HARDCODED - PROHIBITED!
 2. **Gemini API Key**
    - URL: https://makersuite.google.com/app/apikey
    - Type: API key
-   - Prefix: `AIzaSy`
+   - Prefix: `AIza_EXAMPLE`
 
 3. **Nebius API Key**
    - URL: https://nebius.com

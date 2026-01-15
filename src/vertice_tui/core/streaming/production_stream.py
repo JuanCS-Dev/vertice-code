@@ -89,8 +89,8 @@ class ProductionGeminiStreamer:
         3. Reconnect Mid-Stream - Checkpoint + retry on network failure
 
     Example:
-        >>> config = GeminiStreamConfig(api_key="...", model_name="gemini-2.0-flash")
-        >>> streamer = ProductionGeminiStreamer(config)
+        >>> config = GeminiStreamConfig(api_key="...", model_name="gemini-2.5-pro")
+        >>> streamer = GeminiStreamer(config)
         >>> await streamer.initialize()
         >>> async for chunk in streamer.stream_with_resilience("Hello!"):
         ...     print(chunk, end="", flush=True)

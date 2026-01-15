@@ -1,0 +1,216 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-server
+  namespace: vertice
+  labels:
+    app: prometheus
+    component: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+        component: monitoring
+    spec:
+      serviceAccountName: vertice-prometheus-sa
+      containers:
+      - name: prometheus
+        image: prom/prometheus:latest
+        ports:
+        - containerPort: 9090
+          name: http
+          protocol: TCP
+        volumeMounts:
+        - name: config
+          mountPath: /etc/prometheus
+        - name: storage
+          mountPath: /prometheus
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+          limits:
+            cpu: "1"
+            memory: "2Gi"
+        livenessProbe:
+          httpGet:
+            path: /-/healthy
+            port: 9090
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /-/ready
+            port: 9090
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: config
+        configMap:
+          name: prometheus-config
+      - name: storage
+        emptyDir: {}
+      nodeSelector:
+        kubernetes.io/os: linux
+      tolerations:
+      - key: "monitoring"
+        operator: "Equal"
+        value: "prometheus"
+        effect: "NoSchedule"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: vertice
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    rule_files:
+      - "alert_rules.yml"
+
+    alerting:
+      alertmanagers:
+        - static_configs:
+            - targets:
+              - alertmanager.vertice.svc.cluster.local:9093
+
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+
+      - job_name: 'kubernetes-pods'
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            regex: "true"
+            action: keep
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            regex: (.+)
+            target_label: __metrics_path__
+            action: replace
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_port]
+            regex: (\d+)
+            target_label: __address__
+            replacement: ${1}:${2}
+            action: replace
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+
+      - job_name: 'kubernetes-services'
+        kubernetes_sd_configs:
+          - role: service
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+            regex: "true"
+            action: keep
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+            regex: (https?)
+            target_label: __scheme__
+            action: replace
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+            regex: (.+)
+            target_label: __metrics_path__
+            action: replace
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_port]
+            regex: (\d+)
+            target_label: __address__
+            replacement: ${1}:${2}
+            action: replace
+
+      - job_name: 'opentelemetry-collector'
+        static_configs:
+          - targets: ['opentelemetry-collector.vertice.svc.cluster.local:8888']
+
+      - job_name: 'vertex-ai-services'
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            regex: "vertice-vertex-ai"
+            action: keep
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_port]
+            regex: (\d+)
+            target_label: __address__
+            replacement: ${1}:9090
+            action: replace
+          - target_label: job
+            replacement: vertex-ai
+
+  alert_rules.yml: |
+    groups:
+    - name: vertice.rules
+      rules:
+      - alert: HighCPUUsage
+        expr: rate(container_cpu_usage_seconds_total{pod=~"vertice-vertex-ai-.*"}[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value }}% for pod {{ $labels.pod }}"
+
+      - alert: HighMemoryUsage
+        expr: container_memory_usage_bytes{pod=~"vertice-vertex-ai-.*"} / container_spec_memory_limit_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value }}% for pod {{ $labels.pod }}"
+
+      - alert: AILatencyHigh
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="vertex-ai"}[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High AI inference latency"
+          description: "95th percentile latency is {{ $value }}s"
+
+      - alert: PodCrashLooping
+        expr: increase(kube_pod_container_status_restarts_total{pod=~"vertice-vertex-ai-.*"}[10m]) > 3
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Pod crash looping"
+          description: "Pod {{ $labels.pod }} has restarted {{ $value }} times in the last 10 minutes"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-server
+  namespace: vertice
+  labels:
+    app: prometheus
+spec:
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  selector:
+    app: prometheus

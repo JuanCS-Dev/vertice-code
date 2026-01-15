@@ -264,7 +264,7 @@ class CognitiveAutoScaler:
         # Clients
         self.monitoring_client = monitoring_v3.MetricServiceClient()
         self.container_client = container_v1.ClusterManagerClient()
-        self.ai_model = GenerativeModel("gemini-2.0-pro")
+        self.ai_model = GenerativeModel("gemini-2.5-pro")
 
         # Estado
         self.current_replicas = 3
@@ -737,7 +737,7 @@ spec:
   integrations:
     vertexAI:
       enabled: true
-      model: gemini-2.0-pro
+      model: gemini-2.5-pro
       useCases:
         - anomalyExplanation
         - predictiveAnalysis
@@ -819,7 +819,7 @@ class AIAlertAnalyzer:
         self.monitoring_client = monitoring_v3.AlertPolicyServiceClient()
         self.bq_client = bigquery.Client(project=project_id)
         self.pubsub_publisher = pubsub_v1.PublisherClient()
-        self.ai_model = GenerativeModel("gemini-2.0-pro")
+        self.ai_model = GenerativeModel("gemini-2.5-pro")
 
         # Estado
         self.analysis_cache = {}
@@ -1297,7 +1297,7 @@ class PredictiveHealthDashboard:
         self.project_id = project_id
         self.bq_client = bigquery.Client(project=project_id)
         self.monitoring_client = monitoring_v3.MetricServiceClient()
-        self.ai_model = GenerativeModel("gemini-2.0-pro")
+        self.ai_model = GenerativeModel("gemini-2.5-pro")
 
         # Estado do dashboard
         self.current_health = None
@@ -1906,7 +1906,7 @@ class AIThreatIntelligenceEngine:
         self.project_id = project_id
         self.bq_client = bigquery.Client(project=project_id)
         self.pubsub_publisher = pubsub_v1.PublisherClient()
-        self.ai_model = GenerativeModel("gemini-2.0-pro")
+        self.ai_model = GenerativeModel("gemini-2.5-pro")
 
         # Criptografia para dados sensíveis
         self.encryption_key = encryption_key or Fernet.generate_key()
@@ -2860,7 +2860,7 @@ spec:
     - type: "user-feedback"
       source: "bigquery:vertice-analytics.user_feedback"
   aiGeneration:
-    model: "gemini-2.0-pro"
+    model: "gemini-2.5-pro"
     features:
       - codeExamples: true
       - apiReferences: true
@@ -2937,7 +2937,7 @@ class IntelligentExampleGenerator:
     """Gera exemplos de código baseados em uso real."""
 
     def __init__(self):
-        self.model = GenerativeModel("gemini-2.0-pro")
+        self.model = GenerativeModel("gemini-2.5-pro")
         self.bq_client = bigquery.Client()
 
     async def generate_examples(self, api_endpoint: str) -> Dict[str, Any]:
@@ -3069,7 +3069,7 @@ class PersonalizedTutorialEngine:
     """Engine para geração de tutoriais personalizados."""
 
     def __init__(self):
-        self.model = GenerativeModel("gemini-2.0-pro")
+        self.model = GenerativeModel("gemini-2.5-pro")
         self.db = firestore.Client()
 
     async def generate_tutorial(self, user_id: str, topic: str) -> Dict[str, Any]:
@@ -3256,7 +3256,7 @@ jobs:
         id: ai-analysis
         uses: google-github-actions/code-analysis@v1
         with:
-          model: gemini-2.0-pro
+          model: gemini-2.5-pro
           analysis-type: comprehensive
           output-format: json
 
@@ -3376,7 +3376,7 @@ jobs:
         run: |
           python scripts/ai_security_analyzer.py \
             --source=. \
-            --model=gemini-2.0-pro \
+            --model=gemini-2.5-pro \
             --scan-type=comprehensive \
             --generate-report=true
 
@@ -3522,7 +3522,7 @@ class AITestExecutor:
     """Executor de testes alimentado por IA."""
 
     def __init__(self):
-        self.model = GenerativeModel("gemini-2.0-pro")
+        self.model = GenerativeModel("gemini-2.5-pro")
 
     async def execute_optimized_tests(self, test_type: str, strategy: Dict[str, Any]) -> Dict[str, Any]:
         """Executa testes otimizados baseados na estratégia AI."""
@@ -3710,7 +3710,7 @@ class AIDeploymentDecisionEngine:
     """Engine para decisões de deploy alimentadas por IA."""
 
     def __init__(self):
-        self.model = GenerativeModel("gemini-2.0-pro")
+        self.model = GenerativeModel("gemini-2.5-pro")
         self.bq_client = bigquery.Client()
 
     async def make_deployment_decision(self, risk_assessment: Dict[str, Any],
@@ -4058,7 +4058,7 @@ class AICommunityIntelligenceEngine:
         self.bq_client = bigquery.Client(project=project_id)
         self.firestore_client = firestore.Client(project=project_id)
         self.pubsub_publisher = pubsub_v1.PublisherClient()
-        self.ai_model = GenerativeModel("gemini-2.0-pro")
+        self.ai_model = GenerativeModel("gemini-2.5-pro")
 
         # API clients
         self.github = Github(github_token)
@@ -5039,7 +5039,7 @@ class CrossPlatformIntelligenceEngine:
         self.pubsub_publisher = pubsub_v1.PublisherClient()
 
         # Clients para diferentes plataformas
-        self.vertex_client = GenerativeModel("gemini-2.0-pro")
+        self.vertex_client = GenerativeModel("gemini-2.5-pro")
         self.anthropic_client = None  # Inicializado sob demanda
         self.openai_client = None     # Inicializado sob demanda
 
@@ -5055,7 +5055,7 @@ class CrossPlatformIntelligenceEngine:
         return {
             "vertex_ai": PlatformCapabilities(
                 platform_name="vertex_ai",
-                supported_models=["gemini-2.0-pro", "gemini-2.0-flash", "custom-models"],
+                supported_models=["gemini-2.5-pro", "gemini-2.5-pro", "custom-models"],
                 api_endpoints={"generate": "vertexai.googleapis.com", "embed": "vertexai.googleapis.com"},
                 rate_limits={"requests_per_minute": 1000, "tokens_per_minute": 100000},
                 cost_per_token=0.000001,  # $0.001 per 1000 tokens
@@ -5212,7 +5212,7 @@ class CrossPlatformIntelligenceEngine:
         return {
             "platform": "vertex_ai",
             "response": response.text,
-            "model": "gemini-2.0-pro",
+            "model": "gemini-2.5-pro",
             "tokens_used": len(prompt.split()) + len(response.text.split()),
             "timestamp": datetime.now().isoformat()
         }
@@ -5811,7 +5811,7 @@ class AIEthicsJudgeSystem:
         self.pubsub_publisher = pubsub_v1.PublisherClient()
 
         # Sistema de IA para julgamentos
-        self.judge_model = GenerativeModel("gemini-2.0-pro")
+        self.judge_model = GenerativeModel("gemini-2.5-pro")
 
         # Criptografia para dados sensíveis
         self.encryption_key = encryption_key or Fernet.generate_key()
@@ -6158,7 +6158,7 @@ class AIEthicsJudgeSystem:
             applied_principles=principles,
             alternative_actions=alternative_actions,
             timestamp=datetime.now(),
-            judge_model="gemini-2.0-pro"
+            judge_model="gemini-2.5-pro"
         )
 
         return ethical_decision

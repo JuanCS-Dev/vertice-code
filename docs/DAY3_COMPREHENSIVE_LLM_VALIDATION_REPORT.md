@@ -196,7 +196,7 @@ except Exception as e:
 ### Prova 1: LLM Real Utilizado
 ```bash
 # .env contém API key real
-GEMINI_API_KEY=AIzaSy...
+GEMINI_API_KEY=AIza_EXAMPLE...
 
 # Testes carregam .env explicitamente
 from dotenv import load_dotenv

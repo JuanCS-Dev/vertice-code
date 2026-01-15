@@ -313,7 +313,7 @@ def __init__(self, llm_client, mcp_client, model, temperature, max_tokens, timeo
 class AgentConfig:
     llm_client: LLMClient
     mcp_client: MCPClient
-    model: str = "gemini-2.0-flash"
+    model: str = "gemini-2.5-pro"
     temperature: float = 0.7
     max_tokens: int = 8192
     timeout: float = 30.0

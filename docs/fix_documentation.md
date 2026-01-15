@@ -27,7 +27,7 @@ The `ToolBridge` (legacy bridge used by TUI) imports tools from `vertice_cli.too
 ### B. The "404 Publisher Model Not Found" Error
 **Root Cause:**
 The user's GCP Project (`clinica-genesis-os-e689e`) lacks access to the requested models in the `us-central1` region.
-- Tried: `gemini-1.5-flash-001` (404)
+- Tried: `gemini-2.5-pro` (404)
 - Tried: `claude-3-5-sonnet-v2@20241022` (404)
 - Tried: `claude-sonnet-4-5@20250929` (404)
 

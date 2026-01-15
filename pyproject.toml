@@ -10,13 +10,12 @@ readme = "README.md"
 authors = [
     {name = "Juan Carlos de Souza", email = "juancs.dev@gmail.com"}
 ]
-license = {text = "MIT"}
+license = "MIT"
 requires-python = ">=3.11"
 keywords = ["ai", "code-assistant", "mcp", "llm", "multi-model", "vertice", "orchestration"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -114,6 +113,10 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = "-v --tb=short"
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+
 [tool.setuptools.packages.find]
 include = ["vertice_cli*", "vertice_tui*", "vertice_core*", "vertice_governance*", "prometheus*"]
+exclude = ["vertice_core.onboarding", "vertice_core.pilot_management", "vertice_core.core"]
 namespaces = false

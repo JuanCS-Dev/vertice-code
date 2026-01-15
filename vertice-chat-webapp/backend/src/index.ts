@@ -110,10 +110,10 @@ app.post('/api/chat', tenantMiddleware, requireAuth, async (req, res) => {
     logAudit('ai_chat_request', 'user_id', { messageCount: messages.length, tenantId: tenant.id });
 
     const generativeModel = vertexAI.getGenerativeModel({
-      model: 'gemini-1.5-pro',
+      model: 'gemini-3.0-pro',
       generationConfig: {
         temperature: 0.7,
-        maxOutputTokens: 2048,
+        maxOutputTokens: 8192, // Gemini 3 supports larger outputs
       }
     });
 

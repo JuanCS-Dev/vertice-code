@@ -1,0 +1,276 @@
+# Falco Configuration for Advanced Threat Detection
+# Runtime security monitoring and anomaly detection
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: falco-config
+  namespace: vertice
+data:
+  falco.yaml: |
+    rules_file:
+      - /etc/falco/falco_rules.yaml
+      - /etc/falco/falco_rules.local.yaml
+      - /etc/falco/rules.d
+
+    plugins:
+      - name: k8saudit
+        library_path: libk8saudit.so
+        init_config:
+          maxEventSize: 262144
+          webhookMaxBatchSize: 12582912
+        open_params: "http://:8765/k8s-audit"
+
+      - name: json
+        library_path: libjson.so
+
+    load_plugins: [k8saudit, json]
+
+    time_format_iso_8601: true
+
+    json_output: true
+    json_include_output_property: true
+
+    log_stderr: true
+    log_syslog: false
+    log_level: info
+
+    priority: debug
+
+    buffered_outputs: false
+
+    rule_matching: first
+
+    watch_config_files: true
+
+    syscall_event_drops:
+      actions:
+        - log
+        - alert
+      rate: 0.001
+      max_burst: 1
+      throttle: 1s
+
+    webserver:
+      enabled: true
+      listen_port: 8765
+      k8s_healthz_endpoint: /healthz
+      ssl_enabled: false
+
+    grpc:
+      enabled: true
+      listen_port: 5060
+      private_key: "/etc/falco/certs/server.key"
+      cert_chain: "/etc/falco/certs/server.crt"
+      root_certs: "/etc/falco/certs/ca.crt"
+
+    grpc_output:
+      enabled: true
+
+  falco_rules.local.yaml: |
+    - rule: Unexpected outbound connection from AI pod
+      desc: Detect outbound connections from AI inference pods that are not to allowed destinations
+      condition: >
+        evt.type=connect and evt.dir=< and
+        container.image.repository in (vertice-vertex-ai) and
+        not fd.sip in (allowed_ips) and
+        not fd.sport in (443, 80, 53)
+      output: >
+        Unexpected outbound connection from AI pod (command=%proc.cmdline connection=%fd.name user=%user.name %container.info image=%container.image.repository:%container.image.tag)
+      priority: WARNING
+      tags: [network, security, ai-workload]
+
+    - rule: High frequency API calls
+      desc: Detect potential API abuse with high frequency calls from same source
+      condition: >
+        evt.type=connect and evt.dir=< and
+        container.image.repository in (vertice-vertex-ai) and
+        rate_limiting.check(evt, 100, 60)
+      output: >
+        High frequency API calls detected (command=%proc.cmdline connection=%fd.name user=%user.name %container.info)
+      priority: WARNING
+      tags: [api, security, rate-limit]
+
+    - rule: Suspicious file access in AI container
+      desc: Detect access to sensitive files within AI inference containers
+      condition: >
+        evt.type=open and evt.dir=< and
+        container.image.repository in (vertice-vertex-ai) and
+        (fd.name pmatch (/etc/passwd, /etc/shadow, /root/.ssh, /home/*/.ssh))
+      output: >
+        Suspicious file access in AI container (file=%fd.name command=%proc.cmdline user=%user.name %container.info)
+      priority: CRITICAL
+      tags: [filesystem, security, ai-workload]
+
+    - rule: Anomalous process execution in AI pod
+      desc: Detect execution of unexpected processes in AI inference pods
+      condition: >
+        evt.type=execve and evt.dir=< and
+        container.image.repository in (vertice-vertex-ai) and
+        not proc.name in (python3, node, npm, vertex_ai, health_check)
+      output: >
+        Anomalous process execution in AI pod (command=%proc.cmdline user=%user.name %container.info)
+      priority: CRITICAL
+      tags: [process, security, ai-workload]
+
+    - rule: Kubernetes API abuse
+      desc: Detect potential Kubernetes API abuse patterns
+      condition: >
+        k8s_audit and
+        ka.req.configmap.name=null and
+        ka.req.namespace="vertice" and
+        ka.req.verb in (create, update, patch, delete) and
+        not ka.user.name endswith "vertice-admin"
+      output: >
+        Potential Kubernetes API abuse (user=%ka.user.name verb=%ka.req.verb resource=%ka.req.resource namespace=%ka.req.namespace)
+      priority: WARNING
+      tags: [k8s, security, api-abuse]
+
+    - rule: Container privilege escalation attempt
+      desc: Detect attempts to escalate privileges within containers
+      condition: >
+        evt.type=execve and evt.dir=< and
+        container.image.repository in (vertice-*) and
+        (proc.cmdline contains "sudo" or proc.cmdline contains "su" or proc.cmdline contains "--privileged")
+      output: >
+        Privilege escalation attempt detected (command=%proc.cmdline user=%user.name %container.info)
+      priority: CRITICAL
+      tags: [privilege, security, escalation]
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: falco-allowed-ips
+  namespace: vertice
+data:
+  allowed_ips: |
+    8.8.8.8/32
+    8.8.4.4/32
+    1.1.1.1/32
+    1.0.0.1/32
+    # Google Cloud API ranges
+    172.217.0.0/16
+    216.58.192.0/19
+    64.233.160.0/19
+    66.102.0.0/20
+    66.249.80.0/20
+    72.14.192.0/18
+    74.125.0.0/16
+    108.177.8.0/21
+    173.194.0.0/16
+    207.126.144.0/20
+    209.85.128.0/17
+    216.239.32.0/19
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: falco
+  namespace: vertice
+  labels:
+    app: falco
+    component: security
+spec:
+  selector:
+    matchLabels:
+      app: falco
+  template:
+    metadata:
+      labels:
+        app: falco
+        component: security
+    spec:
+      serviceAccountName: falco-sa
+      hostPID: true
+      hostNetwork: true
+      containers:
+      - name: falco
+        image: falcosecurity/falco:latest
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /host/var/run/docker.sock
+          name: docker-socket
+          readOnly: true
+        - mountPath: /host/dev
+          name: dev-fs
+          readOnly: true
+        - mountPath: /host/proc
+          name: proc-fs
+          readOnly: true
+        - mountPath: /host/boot
+          name: boot-fs
+          readOnly: true
+        - mountPath: /host/lib/modules
+          name: lib-modules
+          readOnly: true
+        - mountPath: /host/usr
+          name: usr-fs
+          readOnly: true
+        - mountPath: /etc/falco
+          name: falco-config
+        - mountPath: /etc/falco/rules.d
+          name: falco-rules
+        - mountPath: /etc/falco/certs
+          name: falco-certs
+          readOnly: true
+        ports:
+        - containerPort: 8765
+          name: http
+          protocol: TCP
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "1Gi"
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8765
+          initialDelaySeconds: 60
+          periodSeconds: 60
+      volumes:
+      - name: docker-socket
+        hostPath:
+          path: /var/run/docker.sock
+      - name: dev-fs
+        hostPath:
+          path: /dev
+      - name: proc-fs
+        hostPath:
+          path: /proc
+      - name: boot-fs
+        hostPath:
+          path: /boot
+      - name: lib-modules
+        hostPath:
+          path: /lib/modules
+      - name: usr-fs
+        hostPath:
+          path: /usr
+      - name: falco-config
+        configMap:
+          name: falco-config
+          items:
+          - key: falco.yaml
+            path: falco.yaml
+      - name: falco-rules
+        configMap:
+          name: falco-config
+          items:
+          - key: falco_rules.local.yaml
+            path: falco_rules.local.yaml
+      - name: falco-certs
+        secret:
+          secretName: falco-certs
+      nodeSelector:
+        kubernetes.io/os: linux
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
+      - effect: NoExecute
+        operator: Exists

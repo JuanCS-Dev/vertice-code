@@ -1,0 +1,168 @@
+# Cloud Build Configuration for US-Central1 Region
+# Deploys: Backend, Frontend, and MCP Server (Prometheus)
+
+steps:
+  # ============================================ 
+  # Step 1: Build Backend Docker Image
+  # ============================================ 
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-backend'
+    args:
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/backend:$COMMIT_SHA'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/backend:latest'
+      - '-f'
+      - 'vertice-chat-webapp/backend/Dockerfile'
+      - 'vertice-chat-webapp/backend'
+    dir: '.'
+
+  # ============================================
+  # Step 2: Build Frontend Docker Image
+  # ============================================
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-frontend'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        docker build \
+          -t us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/frontend:$COMMIT_SHA \
+          -t us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/frontend:latest \
+          --build-arg NEXT_PUBLIC_API_URL=${_API_URL} \
+          --build-arg NEXT_PUBLIC_FIREBASE_API_KEY=${_FIREBASE_API_KEY} \
+          --build-arg NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${_FIREBASE_AUTH_DOMAIN} \
+          --build-arg NEXT_PUBLIC_FIREBASE_PROJECT_ID=${_FIREBASE_PROJECT_ID} \
+          --build-arg NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${_FIREBASE_STORAGE_BUCKET} \
+          --build-arg NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${_FIREBASE_MESSAGING_SENDER_ID} \
+          --build-arg NEXT_PUBLIC_FIREBASE_APP_ID=${_FIREBASE_APP_ID} \
+          -f vertice-chat-webapp/frontend/Dockerfile \
+          vertice-chat-webapp/frontend
+    dir: '.'
+  # ============================================ 
+  # Step 3: Build MCP Server Image
+  # ============================================ 
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-mcp'
+    args:
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/mcp-server:$COMMIT_SHA'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/mcp-server:latest'
+      - '-f'
+      - 'prometheus/Dockerfile'
+      - '.' # Build context must be root to access all modules
+    dir: '.'
+
+  # ============================================ 
+  # Step 4: Push Images
+  # ============================================ 
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-all'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        docker push us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/backend:$COMMIT_SHA
+        docker push us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/backend:latest
+        docker push us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/frontend:$COMMIT_SHA
+        docker push us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/frontend:latest
+        docker push us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/mcp-server:$COMMIT_SHA
+        docker push us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/mcp-server:latest
+    waitFor: ['build-backend', 'build-frontend', 'build-mcp']
+
+  # ============================================ 
+  # Step 5: Deploy MCP Server (Must be first to get URL)
+  # ============================================ 
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-mcp'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'vertice-mcp-us'
+      - '--image'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/mcp-server:$COMMIT_SHA'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--port'
+      - '3000'
+      - '--memory'
+      - '2Gi'
+      - '--cpu'
+      - '2'
+      - '--min-instances'
+      - '1' # Keep one warm
+    waitFor: ['push-all']
+
+  # ============================================ 
+  # Step 6: Deploy Backend (Depends on MCP)
+  # ============================================ 
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-backend'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        # Get MCP URL
+        MCP_URL=$(gcloud run services describe vertice-mcp-us --region us-central1 --format='value(status.url)')
+        
+        gcloud run deploy vertice-backend-us \
+          --image us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/backend:$COMMIT_SHA \
+          --region us-central1 \
+          --platform managed \
+          --allow-unauthenticated \
+          --port 8000 \
+          --network default \
+          --subnet default \
+          --vpc-egress private-ranges-only \
+          --set-env-vars NODE_ENV=production,MCP_SERVER_URL=$$MCP_URL \
+          --set-secrets DATABASE_URL=DATABASE_URL:latest,REDIS_URL=REDIS_URL:latest
+    waitFor: ['deploy-mcp']
+
+  # ============================================
+  # Step 7: Deploy Frontend
+  # ============================================
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-frontend'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'vertice-frontend-us'
+      - '--image'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/frontend:$COMMIT_SHA'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--port'
+      - '8080'
+      - '--set-env-vars'
+      - 'NEXT_PUBLIC_API_URL=${_API_URL},NODE_ENV=production'
+    waitFor: ['push-all']
+   
+# Artifact Registry images
+images:
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/backend:$COMMIT_SHA'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/backend:latest'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/frontend:$COMMIT_SHA'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/frontend:latest'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/mcp-server:$COMMIT_SHA'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/mcp-server:latest'
+
+substitutions:
+  _REGION: 'us-central1'
+  _API_URL: 'https://vertice-backend-us-xxxxxxx-uc.a.run.app'
+  _FIREBASE_API_KEY: 'MUST_BE_PROVIDED'
+  _FIREBASE_AUTH_DOMAIN: 'MUST_BE_PROVIDED'
+  _FIREBASE_PROJECT_ID: 'MUST_BE_PROVIDED'
+  _FIREBASE_STORAGE_BUCKET: 'MUST_BE_PROVIDED'
+  _FIREBASE_MESSAGING_SENDER_ID: 'MUST_BE_PROVIDED'
+  _FIREBASE_APP_ID: 'MUST_BE_PROVIDED'

@@ -6,7 +6,7 @@
 
 ## 1. Provider Health
 - **Vertex AI (Gemini):** ✅ **FIXED**.
-    - Model: `gemini-2.0-flash-exp` (fallback from absent v3).
+    - Model: `gemini-2.5-pro` (stable model).
     - Status: "Phantom Error" (function call crash) patched. Tool calls flow silently and correctly.
 - **Groq & Azure:** ✅ **VERIFIED**.
     - Status: `.env` loading implemented in Router. Keys detected.

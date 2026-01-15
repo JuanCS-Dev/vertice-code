@@ -34,10 +34,15 @@ class FirebaseAuth:
             if not firebase_admin._apps:
                 # On GCP, ADC is used automatically. Locally, set GOOGLE_APPLICATION_CREDENTIALS
                 firebase_admin.initialize_app()
-            self.mock_mode = False
         except Exception as e:
-            logger.warning(f"Firebase not initialized: {e}. Falling back to mock mode.")
+            # CRITICAL: Do NOT fail open in production.
+            logger.error(f"Firebase initialization failed: {e}")
+            if not settings.DEBUG:
+                raise RuntimeError("Firebase Auth failed to initialize in Production") from e
+            logger.warning("Running in DEBUG/MOCK mode due to initialization failure.")
             self.mock_mode = True
+        else:
+            self.mock_mode = False
 
     async def verify_token(self, token: str) -> Optional[FirebaseUser]:
         """
@@ -63,7 +68,8 @@ class FirebaseAuth:
                 )
 
             # Verify the ID token using Firebase Admin SDK
-            decoded_token = auth.verify_id_token(token)
+            # check_revoked=True ensures revoked tokens (e.g. user disabled) are rejected
+            decoded_token = auth.verify_id_token(token, check_revoked=True)
             
             return FirebaseUser(
                 user_id=decoded_token.get("uid"),
@@ -72,6 +78,12 @@ class FirebaseAuth:
                 image_url=decoded_token.get("picture")
             )
 
+        except auth.RevokedIdTokenError:
+            logger.warning("Token revoked")
+            return None
+        except auth.ExpiredIdTokenError:
+            logger.warning("Token expired")
+            return None
         except Exception as e:
             logger.error(f"Token verification failed: {e}")
             return None

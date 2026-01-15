@@ -550,7 +550,7 @@ ipython==8.31.0
 LLM_PROVIDER=gemini
 
 # Gemini Config
-GEMINI_API_KEY=AIzaSyAe***  # ✅ Valid key
+GEMINI_API_KEY=AIza_EXAMPLEAe***  # ✅ Valid key
 GEMINI_MODEL=gemini-2.5-flash  # ✅ Verified available
 
 # Ollama Config

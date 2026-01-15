@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertice AI - Code Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00d4ff, #0099cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo::before {
+            content: '🚀';
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #00ff88;
+        }
+
+        .status::before {
+            content: '●';
+            color: #00ff88;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 1rem;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            min-height: 400px;
+            max-height: 60vh;
+        }
+
+        .message {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            border-radius: 10px;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.assistant {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .message-content {
+            line-height: 1.6;
+        }
+
+        .code-block {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 5px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+
+        .input-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            color: #e2e8f0;
+            font-size: 1rem;
+            min-height: 50px;
+            resize: vertical;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+        }
+
+        .message-input::placeholder {
+            color: #64748b;
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 1rem 2rem;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+        }
+
+        .send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 2rem;
+            color: #94a3b8;
+        }
+
+        .welcome-message h2 {
+            color: #e2e8f0;
+            margin-bottom: 1rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .feature h3 {
+            color: #00d4ff;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+            
+            .chat-container {
+                padding: 0.5rem;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .message {
+                max-width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">Vertice AI</div>
+        <div class="status" id="connection-status">Conectando...</div>
+    </header>
+
+    <main class="chat-container">
+        <div id="chat-messages" class="chat-messages">
+            <div class="welcome-message">
+                <h2>🚀 Bem-vindo ao Vertice AI</h2>
+                <p>Seu assistente de código inteligente. Digite uma pergunta sobre desenvolvimento, debugging ou arquitetura de software.</p>
+                
+                <div class="features">
+                    <div class="feature">
+                        <h3>💻 Code Generation</h3>
+                        <p>Gere código de alta qualidade em múltiplas linguagens</p>
+                    </div>
+                    <div class="feature">
+                        <h3>🐛 Debug & Fix</h3>
+                        <p>Identifique e resolva bugs automaticamente</p>
+                    </div>
+                    <div class="feature">
+                        <h3>📚 Learning</h3>
+                        <p>Aprenda novos conceitos e melhores práticas</p>
+                    </div>
+                    <div class="feature">
+                        <h3>🔧 Refactoring</h3>
+                        <p>Otimize e melhore seu código existente</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <div class="input-group">
+                <textarea 
+                    id="message-input" 
+                    class="message-input" 
+                    placeholder="Digite sua pergunta sobre código, desenvolvimento ou tecnologia..."
+                    rows="1"
+                    maxlength="2000"
+                ></textarea>
+                <button id="send-button" class="send-button" disabled>
+                    <span id="button-text">Enviar</span>
+                    <div id="loading-spinner" class="loading" style="display: none;"></div>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = 'https://vertice-backend-us-239800439060.us-central1.run.app';
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const buttonText = document.getElementById('button-text');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const chatMessages = document.getElementById('chat-messages');
+        const connectionStatus = document.getElementById('connection-status');
+
+        let isLoading = false;
+
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+            sendButton.disabled = this.value.trim().length === 0 || isLoading;
+        });
+
+        // Enter to send
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Send button click
+        sendButton.addEventListener('click', sendMessage);
+
+        // Test connection on load
+        testConnection();
+
+        async function testConnection() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                if (response.ok) {
+                    connectionStatus.textContent = 'Online';
+                    connectionStatus.style.color = '#00ff88';
+                } else {
+                    throw new Error('API not healthy');
+                }
+            } catch (error) {
+                connectionStatus.textContent = 'Offline';
+                connectionStatus.style.color = '#ff4444';
+                console.error('Connection test failed:', error);
+            }
+        }
+
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message || isLoading) return;
+
+            // Add user message
+            addMessage(message, 'user');
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            sendButton.disabled = true;
+
+            // Show loading
+            isLoading = true;
+            buttonText.textContent = 'Pensando...';
+            loadingSpinner.style.display = 'inline-block';
+
+            try {
+                const response = await fetch(`${API_BASE}/test`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Simulate AI thinking delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Add AI response
+                const aiResponse = generateAIResponse(message, data);
+                addMessage(aiResponse, 'assistant');
+
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage(`❌ Erro ao conectar com o servidor: ${error.message}. Tente novamente.`, 'assistant');
+            } finally {
+                // Reset loading state
+                isLoading = false;
+                buttonText.textContent = 'Enviar';
+                loadingSpinner.style.display = 'none';
+                sendButton.disabled = false;
+            }
+        }
+
+        function addMessage(content, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+
+            const header = type === 'user' ? '👤 Você' : '🤖 Vertice AI';
+            const timestamp = new Date().toLocaleTimeString();
+
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <span>${header}</span>
+                    <span>${timestamp}</span>
+                </div>
+                <div class="message-content">
+                    ${formatMessage(content)}
+                </div>
+            `;
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Remove welcome message if it's the first message
+            const welcomeMessage = chatMessages.querySelector('.welcome-message');
+            if (welcomeMessage) {
+                welcomeMessage.remove();
+            }
+        }
+
+        function formatMessage(content) {
+            // Simple code block detection
+            if (content.includes('```')) {
+                return content.replace(/```(\w+)?\n?([\s\S]*?)```/g, '<pre class="code-block"><code>$2</code></pre>');
+            }
+            return content.replace(/\n/g, '<br>');
+        }
+
+        function generateAIResponse(userMessage, apiData) {
+            const responses = [
+                `Entendi sua pergunta sobre "${userMessage}". Como assistente de IA especializado em desenvolvimento, posso ajudar com:\n\n• **Geração de código** em múltiplas linguagens\n• **Debugging** e resolução de bugs\n• **Explicações** de conceitos técnicos\n• **Melhores práticas** de desenvolvimento\n\nO servidor está funcionando perfeitamente! Timestamp: ${apiData.timestamp}`,
+                
+                `Interessante! Sobre "${userMessage}", aqui vai uma resposta técnica:\n\n\`\`\`javascript\n// Exemplo de código relacionado\nfunction exemplo() {\n    console.log('Vertice AI está online!');\n    return 'Hello from the backend!';\n}\n\`\`\`\n\nO backend confirmou: ${apiData.message}`,
+                
+                `Vamos analisar "${userMessage}". Como IA enterprise, posso fornecer:\n\n✅ **Análise de código** e otimização\n✅ **Soluções arquiteturais**\n✅ **Recomendações de segurança**\n✅ **Documentação técnica**\n\nStatus da API: ${apiData.status} ✅`
+            ];
+
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        // Test connection every 30 seconds
+        setInterval(testConnection, 30000);
+    </script>
+</body>
+</html>

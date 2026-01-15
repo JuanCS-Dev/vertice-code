@@ -4,7 +4,7 @@
 
 ### 🌐 URLs Ativas
 
-**Landing Page**: https://clinica-genesis-os-e689e.web.app/
+**Landing Page**: https://vertice-ai.web.app/
 - ✅ Design dark theme profissional
 - ✅ Animações neurais SVG
 - ✅ API playground interativo

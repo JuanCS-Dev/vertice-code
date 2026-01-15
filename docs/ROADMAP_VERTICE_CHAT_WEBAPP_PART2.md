@@ -1548,7 +1548,7 @@ export class GeminiLiveClient {
   private sendSetup(): void {
     this.send({
       setup: {
-        model: 'models/gemini-2.0-flash-exp',
+        model: 'models/gemini-2.5-pro',
         generationConfig: {
           responseModalities: ['AUDIO'],
         },

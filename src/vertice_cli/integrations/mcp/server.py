@@ -9,6 +9,7 @@ from vertice_cli.tools.registry_helper import get_default_registry
 from vertice_cli.integrations.mcp.config import MCPConfig
 from vertice_cli.integrations.mcp.shell_handler import ShellManager
 from vertice_cli.integrations.mcp.tools import MCPToolsAdapter
+from vertice_cli.integrations.mcp.daimon_adapter import DaimonMCPAdapter
 from prometheus.integrations.mcp_adapter import PrometheusMCPAdapter
 
 logger = logging.getLogger(__name__)
@@ -22,6 +23,7 @@ class QwenMCPServer:
         self.mcp = FastMCP("Qwen Dev CLI")
         self.shell_manager = ShellManager()
         self.tools_adapter: Optional[MCPToolsAdapter] = None
+        self.daimon_adapter: Optional[DaimonMCPAdapter] = None
         self._running = False
 
     def initialize(self, registry: ToolRegistry, prometheus_provider=None):
@@ -34,18 +36,25 @@ class QwenMCPServer:
                 prometheus_provider, self.shell_manager
             )
 
+        # Initialize Daimon adapter (always available - passive insights)
+        self.daimon_adapter = DaimonMCPAdapter()
+        self.daimon_adapter.register_all(self.mcp)
+
         self.tools_adapter.register_all(self.mcp)
 
         total_tools = len(registry.get_all())
+        daimon_tools = len(self.daimon_adapter.list_registered_tools())
+        
         if self.tools_adapter.prometheus_adapter:
             prometheus_tools = len(self.tools_adapter.prometheus_adapter.list_registered_tools())
-            total_tools += prometheus_tools
+            total_tools += prometheus_tools + daimon_tools
             logger.info(
-                f"MCP Server initialized with {len(registry.get_all())} CLI tools + {prometheus_tools} Prometheus tools"
+                f"MCP Server initialized with {len(registry.get_all())} CLI + {prometheus_tools} Prometheus + {daimon_tools} Daimon tools"
             )
         else:
+            total_tools += daimon_tools
             logger.info(
-                f"MCP Server initialized with {total_tools} CLI tools (shell tools registered)"
+                f"MCP Server initialized with {len(registry.get_all())} CLI + {daimon_tools} Daimon tools"
             )
 
     async def start(self):

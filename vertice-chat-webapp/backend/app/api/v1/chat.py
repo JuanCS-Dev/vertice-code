@@ -66,6 +66,7 @@ class ChatRequest(BaseModel):
     messages: List[Any] = Field(..., min_length=1, description="Chat messages array")
     stream: bool = Field(default=True, description="Enable streaming response")
     model: str = Field(default=DEFAULT_MODEL, description="Model to use")
+    session_id: Optional[str] = Field(default=None, description="Existing session ID")
 
 
 def convert_messages_to_vertex(messages: List[Any]) -> List[Content]:
@@ -95,7 +96,7 @@ def convert_messages_to_vertex(messages: List[Any]) -> List[Content]:
     return vertex_history
 
 
-async def stream_vertex_response(request: ChatRequest):
+async def stream_vertex_response(request: ChatRequest, session_id: Optional[str] = None):
     """
     Stream Vertex AI response using Vercel AI SDK Data Stream Protocol.
     
@@ -169,7 +170,10 @@ async def stream_vertex_response(request: ChatRequest):
             timeout=STREAM_TIMEOUT_SECONDS
         )
         
+        
         total_chars = 0
+        full_response_text = ""
+        
         async for chunk in response_stream:
             try:
                 text_content = chunk.text
@@ -177,6 +181,7 @@ async def stream_vertex_response(request: ChatRequest):
                     # Yield in Vercel AI SDK format: 0:"text"\n
                     yield format_text_chunk(text_content)
                     total_chars += len(text_content)
+                    full_response_text += text_content
             except ValueError:
                 # Empty chunk, continue
                 continue
@@ -187,6 +192,27 @@ async def stream_vertex_response(request: ChatRequest):
         # Finish signal
         logger.info(f"Stream completed: {total_chars} characters")
         yield format_finish("stop")
+        
+        # ---------------------------------------------------------------------
+        # SAVE ASSISTANT RESPONSE
+        # ---------------------------------------------------------------------
+        if session_id and full_response_text:
+            try:
+                from app.core.database import get_db_session
+                from app.models.database import ChatMessage
+                import uuid
+                
+                async with get_db_session() as db_session:
+                    ai_msg = ChatMessage(
+                        session_id=uuid.UUID(session_id),
+                        role="assistant",
+                        content=full_response_text
+                    )
+                    db_session.add(ai_msg)
+                    await db_session.commit()
+                    logger.info(f"Saved AI response to session {session_id}")
+            except Exception as save_err:
+                logger.error(f"Failed to save AI response: {save_err}")
         
     except asyncio.TimeoutError:
         logger.error("Response generation timed out")
@@ -229,7 +255,8 @@ async def chat_endpoint(
         logger.info("Dev mode: using dev-token")
     else:
         try:
-            decoded_token = auth.verify_id_token(token)
+            # check_revoked=True ensures revoked tokens are rejected immediately
+            decoded_token = auth.verify_id_token(token, check_revoked=True)
             user_id = decoded_token.get("uid", "unknown")
             logger.info(f"Authenticated user: {user_id}")
         except Exception as e:
@@ -244,16 +271,59 @@ async def chat_endpoint(
                 logger.warning("Dev mode: allowing invalid token")
                 user_id = "dev-unverified"
     
+    
+    # -------------------------------------------------------------------------
+    # PERSISTENCE LAYER: Save Chat History
+    # -------------------------------------------------------------------------
+    from app.core.database import get_db_session
+    from app.models.database import ChatSession, ChatMessage
+    import uuid
+
+    session_id = request.session_id
+    workspace_id = getattr(user, "workspace_id", None) or getattr(user, "user_id", None)
+    
+    # We need to handle DB ops here carefully to not block streaming significantly
+    # but ensure user message is saved.
+    
+    async with get_db_session() as db_session:
+        # 1. Create or Get Session
+        if not session_id:
+            new_session = ChatSession(
+                user_id=uuid.UUID(user_id) if user_id not in ("anonymous", "dev-user", "dev-unverified") else None,
+                workspace_id=uuid.UUID(workspace_id) if workspace_id and workspace_id not in ("anonymous", "dev-user") else None,
+                title=request.messages[-1].get("content", "New Chat")[:50],
+                model_used=request.model
+            )
+            db_session.add(new_session)
+            await db_session.flush()
+            session_id = str(new_session.id)
+            logger.info(f"Created new chat session: {session_id}")
+        
+        # 2. Save User Message
+        user_content = request.messages[-1].get("content", "")
+        if user_content:
+            user_msg = ChatMessage(
+                session_id=uuid.UUID(session_id),
+                role="user",
+                content=user_content
+            )
+            db_session.add(user_msg)
+            await db_session.commit()
+
+    # Pass session_id to stream for saving the AI response later
+    stream_generator = stream_vertex_response(request, session_id=session_id)
+
     # Return streaming response
     return StreamingResponse(
-        stream_vertex_response(request),
-        media_type="text/plain; charset=utf-8",  # Vercel AI SDK expects text/plain
+        stream_generator,
+        media_type="text/plain; charset=utf-8", 
         headers={
             "X-Vercel-AI-Data-Stream": "v1",
             "X-Accel-Buffering": "no",
             "Cache-Control": "no-cache, no-store, must-revalidate",
             "Connection": "keep-alive",
             "X-Vertice-User": user_id,
+            "X-Vertice-Session-Id": session_id,  # Return session ID to frontend
         },
     )
 

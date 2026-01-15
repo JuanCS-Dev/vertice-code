@@ -1,27 +1,44 @@
 // src/components/auth/SignUp.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 
+const PLAN_NAMES: Record<string, string> = {
+    free: 'Free',
+    developer: 'Developer',
+    team: 'Team',
+    enterprise: 'Enterprise',
+};
+
 export default function SignUpPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
+    const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+
+    useEffect(() => {
+        const plan = searchParams.get('plan');
+        if (plan && PLAN_NAMES[plan]) {
+            setSelectedPlan(plan);
+        }
+    }, [searchParams]);
 
     const handleGoogleSignIn = async () => {
         try {
             const provider = new GoogleAuthProvider();
             await signInWithPopup(auth, provider);
-            router.push("/onboarding"); // Redirect to onboarding after signup
+            // STUB: Stripe subscription creation pending - see docs/SAAS_IMPLEMENTATION_PLAN.md
+            router.push("/onboarding");
         } catch (err: any) {
             setError(err.message);
         }
@@ -36,26 +53,36 @@ export default function SignUpPage() {
 
         try {
             await createUserWithEmailAndPassword(auth, email, password);
-            router.push("/onboarding"); // Redirect to onboarding
+            // STUB: Stripe subscription creation pending - see docs/SAAS_IMPLEMENTATION_PLAN.md
+            router.push("/onboarding");
         } catch (err: any) {
             setError(err.message);
         }
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
-            <div className="w-full max-w-md space-y-8 p-8 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
+        <div className="flex min-h-screen items-center justify-center bg-[#050505]">
+            <div className="w-full max-w-md space-y-8 p-8 bg-[#0A0A0A] rounded-2xl border border-white/10">
+                {/* Plan Badge */}
+                {selectedPlan && (
+                    <div className="flex justify-center">
+                        <span className="px-3 py-1 text-[10px] font-bold uppercase tracking-widest bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-full">
+                            {PLAN_NAMES[selectedPlan]} Plan Selected
+                        </span>
+                    </div>
+                )}
+
                 <div className="text-center">
-                    <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+                    <h2 className="text-3xl font-bold tracking-tight text-white">
                         Create an account
                     </h2>
-                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    <p className="mt-2 text-sm text-zinc-400">
                         Join Vertice and build the future
                     </p>
                 </div>
 
                 {error && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg" role="alert">
                         <span className="block sm:inline">{error}</span>
                     </div>
                 )}

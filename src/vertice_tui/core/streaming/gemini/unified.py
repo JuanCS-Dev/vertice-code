@@ -28,9 +28,9 @@ class GeminiStreamer:
     Tries SDK first, falls back to HTTPX if SDK unavailable.
     Includes timeout protection and chunk stall detection.
 
-    Usage:
-        config = GeminiStreamConfig(api_key="...", model_name="gemini-2.0-flash")
-        streamer = GeminiStreamer(config)
+    Example:
+        >>> config = GeminiStreamConfig(api_key="...", model_name="gemini-2.5-pro")
+        >>> streamer = GeminiStreamer(config)
         await streamer.initialize()
 
         async for chunk in streamer.stream("Hello!"):

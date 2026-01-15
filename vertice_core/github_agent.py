@@ -8,7 +8,7 @@ Implementa autonomous PR management e code review.
 
 import subprocess
 import logging
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from datetime import datetime
 import re
 
@@ -28,10 +28,10 @@ class GitHubAgent:
 
     def __init__(self, webhook_secret: str = "test_secret_2026"):
         self.webhook_secret = webhook_secret
-        self.github_user = None
+        self.github_user: Optional[str] = None
         self._check_auth()
 
-    def _check_auth(self):
+    def _check_auth(self) -> None:
         """Check GitHub CLI authentication."""
         try:
             result = subprocess.run(
@@ -96,13 +96,15 @@ class GitHubAgent:
             logger.error(f"Failed to create test webhook: {e}")
             return {}
 
-    async def analyze_push(self, repo_full_name: str, commits: List[Dict], branch: str):
+    async def analyze_push(
+        self, repo_full_name: str, commits: List[Dict[str, Any]], branch: str
+    ) -> Dict[str, Any]:
         """
         Analyze push event and provide autonomous feedback.
         """
         logger.info(f"Analyzing push to {repo_full_name}:{branch} with {len(commits)} commits")
 
-        analysis = {
+        analysis: Dict[str, Any] = {
             "repo": repo_full_name,
             "branch": branch,
             "commits_analyzed": len(commits),
@@ -147,13 +149,13 @@ class GitHubAgent:
 
     async def review_pull_request(
         self, repo_full_name: str, pr_number: int, title: str, body: str, author: str
-    ):
+    ) -> Dict[str, Any]:
         """
         Perform autonomous PR review.
         """
         logger.info(f"Reviewing PR #{pr_number} in {repo_full_name} by {author}")
 
-        review = {
+        review: Dict[str, Any] = {
             "pr_number": pr_number,
             "title": title,
             "author": author,
@@ -228,13 +230,13 @@ class GitHubAgent:
         body: str,
         author: str,
         labels: List[str],
-    ):
+    ) -> Dict[str, Any]:
         """
         Analyze GitHub issue and suggest actions.
         """
         logger.info(f"Analyzing issue #{issue_number} in {repo_full_name}")
 
-        analysis = {
+        analysis: Dict[str, Any] = {
             "issue_number": issue_number,
             "title": title,
             "author": author,
@@ -274,14 +276,18 @@ class GitHubAgent:
 
     async def respond_to_mention(
         self, repo_full_name: str, issue_number: int, comment_body: str, author: str
-    ):
+    ) -> Dict[str, Any]:
         """
         Respond to @mentions in issues/PRs.
         """
         logger.info(f"Responding to mention in {repo_full_name}#{issue_number} by {author}")
 
         # Simple response logic
-        response = {"issue_number": issue_number, "response": "", "actions_taken": []}
+        response: Dict[str, Any] = {
+            "issue_number": issue_number,
+            "response": "",
+            "actions_taken": [],
+        }
 
         comment_lower = comment_body.lower()
 

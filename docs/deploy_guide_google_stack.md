@@ -222,7 +222,7 @@ export async function POST(request: Request) {
   const { messages } = await request.json()
 
   const vertexAI = new VertexAI({ project: 'vertice-chat-webapp' })
-  const model = vertexAI.getGenerativeModel({ model: 'gemini-1.5-pro' })
+  const model = vertexAI.getGenerativeModel({ model: 'gemini-2.5-pro' })
 
   const result = await model.generateContentStream({
     contents: messages,
@@ -403,7 +403,7 @@ gcloud compute firewall-rules create allow-cloud-run \
 **Erro: Streaming não funciona**
 ```bash
 # Verificar Vertex AI quota
-gcloud ai models describe gemini-1.5-pro --region=us-central1
+gcloud ai models describe gemini-2.5-pro --region=us-central1
 
 # Check App Hosting logs
 firebase apphosting:backends:list-builds us-central1

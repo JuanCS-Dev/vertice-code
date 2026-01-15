@@ -73,7 +73,7 @@ echo -n "redis://..." | gcloud secrets create REDIS_URL --data-file=-
 Como removemos a Anthropic, seu sistema depende 100% do Vertex AI (Gemini).
 
 *   **API Enable:** Garanta que a API `aiplatform.googleapis.com` (Vertex AI) está habilitada.
-*   **Quotas:** Verifique se você tem cota para `gemini-1.5-flash` e `gemini-1.5-pro` na região `us-central1`.
+*   **Quotas:** Verifique se você tem cota para `gemini-2.5-flash` e `gemini-2.5-pro` na região `us-central1`.
 *   **Permissões:** A "Service Account" padrão do Cloud Run (`Compute Engine default service account`) precisa da role **Vertex AI User**.
     ```bash
     gcloud projects add-iam-policy-binding SEU_PROJECT_ID \

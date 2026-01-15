@@ -71,11 +71,6 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Environment variables available to browser
-  env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
-  },
-
   // Webpack configuration for bundle optimization
   webpack: (config, { isServer }) => {
     // Optimize bundle size and splitting

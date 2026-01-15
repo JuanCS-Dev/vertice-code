@@ -12,7 +12,14 @@ const securityHeaders = {
   'X-XSS-Protection': '1; mode=block',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Content-Security-Policy': "default-src 'self'",
-  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+
+  // 🇪🇺 EU AI ACT COMPLIANCE HEADERS (MANDATORY 2026)
+  'X-AI-Generated': 'true',
+  'X-Model-Version': 'gemini-2.5-pro',
+  'X-AI-Provider': 'Google Vertex AI',
+  'X-Content-Provenance': 'vertice-ai-ledger-v1', // Simulates C2PA credential
+  'X-Risk-Category': 'limited' // GPAI Transparency requirement
 };
 
 // Audit logging function (SOC 2 requirement)

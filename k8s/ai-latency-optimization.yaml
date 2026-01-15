@@ -1,0 +1,47 @@
+# AI Inference Optimization for Global Latency <200ms
+# Edge caching, model optimization, and regional deployment
+
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: vertice-ai-global-optimized
+  namespace: vertice
+spec:
+  hosts:
+  - "ai-api.vertice-maximus.com"
+  gateways:
+  - vertice-gateway
+  http:
+  - match:
+    - headers:
+        x-region:
+          exact: "us-central1"
+    route:
+    - destination:
+        host: vertice-vertex-ai-us
+        subset: optimized
+  - match:
+    - headers:
+        x-region:
+          exact: "europe-west1"
+    route:
+    - destination:
+        host: vertice-vertex-ai-eu
+        subset: optimized
+  - match:
+    - headers:
+        x-region:
+          exact: "asia-southeast1"
+    route:
+    - destination:
+        host: vertice-vertex-ai-asia
+        subset: optimized
+  # Geo-routing fallback
+  - route:
+    - destination:
+        host: vertice-vertex-ai-global
+        subset: optimized
+    timeout: 200ms
+    retries:
+      attempts: 1
+      perTryTimeout: 100ms

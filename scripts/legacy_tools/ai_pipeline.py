@@ -73,7 +73,9 @@ class AIOptimizedCIDCPipeline:
         self.project_id = project_id
         self.bq_client = bigquery.Client(project=project_id)
         self.pubsub_publisher = pubsub_v1.PublisherClient()
-        self.ai_model = GenerativeModel("gemini-2.0-pro")
+    def __init__(self):
+        from vertexai.generative_models import GenerativeModel
+        self.ai_model = GenerativeModel("gemini-2.5-pro")
 
         # Estado da pipeline
         self.current_execution: Optional[PipelineExecution] = None

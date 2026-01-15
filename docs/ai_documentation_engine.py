@@ -60,7 +60,7 @@ class AIDocumentationEngine:
         self.project_id = project_id
         self.bq_client = bigquery.Client(project=project_id)
         self.firestore_client = firestore.Client(project=project_id)
-        self.ai_model = GenerativeModel("gemini-2.0-pro")
+        self.ai_model = GenerativeModel("gemini-2.5-pro")
 
         # GitHub integration
         self.github = Github(github_token)
@@ -105,7 +105,7 @@ class AIDocumentationEngine:
             user_profile=request.user_profile,
             generated_at=datetime.now(),
             source_code_hash=await self._get_current_code_hash(),
-            ai_model="gemini-2.0-pro",
+            ai_model="gemini-2.5-pro",
         )
 
         # Armazena no cache e banco

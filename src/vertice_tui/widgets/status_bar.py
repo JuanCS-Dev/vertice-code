@@ -54,8 +54,7 @@ class StatusBar(Horizontal):
         color: $warning;
         text-style: bold;
         background: $primary-darken-2;
-        padding: 0 0.5;
-        border-radius: 0.25;
+        padding: 0 1;
     }
 
     .autonomy-l0 {
@@ -71,7 +70,7 @@ class StatusBar(Horizontal):
     }
 
     .autonomy-l3 {
-        color: $info;
+        color: $accent;
     }
 
     MiniTokenMeter {
@@ -94,7 +93,7 @@ class StatusBar(Horizontal):
 
     # Core metrics
     mode: reactive[str] = reactive("READY")
-    model_name: reactive[str] = reactive("gemini-2.0")
+    model_name: reactive[str] = reactive("gemini-2.5-pro")
     agent_name: reactive[str] = reactive("Coder")
     token_used: reactive[int] = reactive(0)
     token_limit: reactive[int] = reactive(8000)

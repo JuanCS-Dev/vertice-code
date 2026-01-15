@@ -240,10 +240,9 @@ _PRICING_DB: Dict[str, Dict[str, ProviderPricing]] = {
         "gemini-2.5-flash": ProviderPricing(
             "vertex-ai", "gemini-2.5-flash", 0.075, 0.30, 0.0075, CostTier.LOW_COST
         ),
-        "gemini-1.5-pro": ProviderPricing(
-            "vertex-ai", "gemini-1.5-pro", 1.25, 5.0, 0.125, CostTier.MEDIUM
-        ),
-    },
+            "gemini-2.5-pro": ProviderPricing(
+                "vertex-ai", "gemini-2.5-pro", 1.25, 5.0, 0.125, CostTier.MEDIUM
+            ),    },
     "azure-openai": {
         "gpt4o-mini": ProviderPricing(
             "azure-openai", "gpt4o-mini", 0.15, 0.60, 0.015, CostTier.LOW_COST

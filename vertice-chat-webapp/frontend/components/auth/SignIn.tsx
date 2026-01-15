@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button"; 
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, ArrowRight } from "lucide-react";
@@ -47,30 +47,30 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#050505] relative overflow-hidden">
+    <div className="flex min-h-screen items-center justify-center bg-[#050505] relative overflow-hidden text-foreground">
       {/* Background Ambience */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
-      
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-cyan-500/5 rounded-full blur-[120px] pointer-events-none mix-blend-screen" />
+
       {/* Grid Pattern */}
-      <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10 pointer-events-none" />
+      <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03] pointer-events-none" />
 
       <div className="w-full max-w-md relative z-10 p-8">
         {/* Header */}
-        <div className="text-center mb-10 space-y-2">
-          <div className="inline-block px-3 py-1 border border-primary/20 rounded-full bg-primary/5 mb-4">
-            <span className="text-[10px] font-mono text-primary tracking-widest uppercase">Access Required</span>
+        <div className="text-center mb-10 space-y-3">
+          <div className="inline-block px-3 py-1 border border-white/5 rounded-full bg-white/[0.02] mb-6 backdrop-blur-sm">
+            <span className="text-[10px] font-medium text-zinc-400 tracking-widest uppercase">Access Required</span>
           </div>
-          <h2 className="text-4xl font-bold tracking-tighter text-white">
+          <h2 className="text-3xl font-bold tracking-tight text-white">
             Identify Yourself
           </h2>
-          <p className="text-sm text-muted-foreground font-mono">
+          <p className="text-sm text-zinc-400">
             Enter the sovereign domain.
           </p>
         </div>
 
-        <div className="bg-[#0A0A0A]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl transition-all hover:border-primary/20 hover:shadow-[0_0_30px_rgba(212,255,0,0.05)]">
+        <div className="bg-[#0A0A0A]/50 backdrop-blur-xl border border-white/5 rounded-2xl p-8 shadow-2xl transition-all hover:border-white/10 hover:shadow-[0_0_50px_rgba(0,0,0,0.5)]">
           {error && (
-            <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-xs font-mono flex items-center gap-2">
+            <div className="mb-6 p-3 bg-red-500/5 border border-red-500/10 rounded-lg text-red-400 text-xs flex items-center gap-2">
               <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
               {error}
             </div>
@@ -79,30 +79,30 @@ export default function SignInPage() {
           <form className="space-y-6" onSubmit={handleEmailSignIn}>
             <div className="space-y-4">
               <div className="group">
-                <Label htmlFor="email" className="text-xs font-mono text-zinc-500 uppercase tracking-wider mb-1.5 block group-focus-within:text-primary transition-colors">
+                <Label htmlFor="email" className="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-2 block group-focus-within:text-cyan-400 transition-colors">
                   Email Protocol
                 </Label>
                 <Input
                   id="email"
                   type="email"
                   required
-                  className="bg-transparent border-0 border-b border-white/10 rounded-none px-0 py-2 text-white placeholder:text-zinc-700 focus-visible:ring-0 focus-visible:border-primary transition-colors h-auto font-mono text-sm"
+                  className="bg-transparent border-0 border-b border-white/10 rounded-none px-0 py-2 text-white placeholder:text-zinc-800 focus-visible:ring-0 focus-visible:border-cyan-500 transition-all h-auto font-mono text-sm"
                   placeholder="user@domain.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isLoading}
                 />
               </div>
-              
+
               <div className="group">
-                <Label htmlFor="password" className="text-xs font-mono text-zinc-500 uppercase tracking-wider mb-1.5 block group-focus-within:text-primary transition-colors">
+                <Label htmlFor="password" className="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-2 block group-focus-within:text-cyan-400 transition-colors">
                   Security Token
                 </Label>
                 <Input
                   id="password"
                   type="password"
                   required
-                  className="bg-transparent border-0 border-b border-white/10 rounded-none px-0 py-2 text-white placeholder:text-zinc-700 focus-visible:ring-0 focus-visible:border-primary transition-colors h-auto font-mono text-sm"
+                  className="bg-transparent border-0 border-b border-white/10 rounded-none px-0 py-2 text-white placeholder:text-zinc-800 focus-visible:ring-0 focus-visible:border-cyan-500 transition-all h-auto font-mono text-sm"
                   placeholder="••••••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -115,7 +115,7 @@ export default function SignInPage() {
               type="submit"
               disabled={isLoading}
               className={cn(
-                "w-full h-12 bg-white hover:bg-zinc-200 text-black font-bold rounded-lg transition-all duration-300 relative overflow-hidden group",
+                "w-full h-12 bg-white hover:bg-zinc-200 text-black font-semibold rounded-lg transition-all duration-300 relative overflow-hidden group",
                 isLoading && "opacity-80"
               )}
             >
@@ -148,7 +148,7 @@ export default function SignInPage() {
                 onClick={handleGoogleSignIn}
                 disabled={isLoading}
                 variant="outline"
-                className="w-full h-12 border-white/10 hover:bg-white/5 hover:text-white hover:border-white/20 transition-all font-mono text-xs flex items-center justify-center gap-3 bg-transparent"
+                className="w-full h-12 border-white/5 hover:bg-white/5 hover:text-white hover:border-white/10 transition-all text-xs flex items-center justify-center gap-3 bg-transparent text-zinc-400"
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24">
                   <path
