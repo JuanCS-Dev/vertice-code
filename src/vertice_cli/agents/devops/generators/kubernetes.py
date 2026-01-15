@@ -9,7 +9,7 @@ Features:
 """
 
 import logging
-from typing import Any, Dict
+from typing import Any, AsyncIterator, Dict
 
 import yaml
 
@@ -49,6 +49,36 @@ class KubernetesGenerator(BaseGenerator):
                 "ArgoCD auto-sync enabled",
                 "Self-healing enabled",
             ],
+        }
+
+    async def generate_streaming(self, task_request: str) -> AsyncIterator[Dict[str, Any]]:
+        """Generate Kubernetes manifests with streaming output."""
+        yield {"type": "status", "data": "☸️ Kubernetes Generator starting..."}
+
+        app_name = self._extract_app_name(task_request)
+        namespace = "default"
+
+        yield {"type": "thinking", "data": f"Generating manifests for: {app_name}\n"}
+
+        yield {"type": "status", "data": "📦 Building Deployment manifest..."}
+        deployment = self._build_deployment(app_name, namespace, 3)
+
+        yield {"type": "status", "data": "🔌 Building Service manifest..."}
+        service = self._build_service(app_name, namespace)
+
+        yield {"type": "status", "data": "🔄 Configuring ArgoCD GitOps..."}
+        argocd_app = self._build_argocd_application(app_name, namespace)
+
+        yield {"type": "verdict", "data": "\n\n✅ Kubernetes manifests ready for GitOps"}
+
+        yield {
+            "type": "result",
+            "data": {
+                "deployment.yaml": yaml.dump(deployment),
+                "service.yaml": yaml.dump(service),
+                "argocd-application.yaml": yaml.dump(argocd_app),
+                "gitops_enabled": True,
+            },
         }
 
     def _extract_app_name(self, request: str) -> str:

@@ -8,7 +8,7 @@ integrated with Vertice-Code's existing agent architecture and tools.
 
 import logging
 import time
-from typing import Dict, Any, List, Optional
+from typing import AsyncIterator, Dict, Any, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime
 
@@ -140,6 +140,93 @@ class VertexDeepResearchAgent:
             return ResearchAgentResult(
                 success=False, content="Research execution failed", metadata={"error": str(e)}
             )
+
+    async def execute_streaming(
+        self, task: str, context: Optional[Dict[str, Any]] = None
+    ) -> AsyncIterator[Dict[str, Any]]:
+        """Stream deep research with progressive updates.
+
+        Yields status updates as each research phase progresses.
+
+        Args:
+            task: Research query/topic
+            context: Additional context
+
+        Yields:
+            StreamingChunk dicts with research progress
+        """
+        try:
+            yield {"type": "status", "data": f"🔬 Starting deep research: '{task[:50]}...'"}
+
+            # Safety check
+            if self.config.safety_checks:
+                yield {"type": "status", "data": "🔒 Running safety checks..."}
+                input_check, _ = await self.guardrails.check_interaction(task)
+                if not input_check.is_safe:
+                    yield {"type": "error", "data": "Research query failed safety checks"}
+                    return
+
+            # Phase 1: Generate queries
+            yield {"type": "reasoning", "data": "### Planning Research\n"}
+
+            initial_queries = await self._generate_search_queries(task, context or {})
+            yield {"type": "thinking", "data": f"Generated {len(initial_queries)} search queries\n"}
+
+            for i, query in enumerate(initial_queries[:3]):
+                yield {"type": "thinking", "data": f"  {i+1}. {query[:60]}...\n"}
+
+            # Phase 2: Execute searches
+            yield {"type": "status", "data": "🌐 Performing web searches..."}
+
+            iterations: List[ResearchIteration] = []
+            all_sources: List[Dict[str, Any]] = []
+
+            for i, query in enumerate(initial_queries[: self.config.max_iterations]):
+                yield {
+                    "type": "status",
+                    "data": f"📊 Iteration {i+1}/{len(initial_queries[:self.config.max_iterations])}...",
+                }
+
+                iteration = ResearchIteration(iteration=i + 1, query=query)
+
+                search_result = await self.web_search._execute_validated(
+                    query=query, max_results=self.config.max_search_results
+                )
+
+                if search_result.success and search_result.data:
+                    iteration.search_results = search_result.data
+                    all_sources.extend(search_result.data)
+                    yield {
+                        "type": "thinking",
+                        "data": f"  Found {len(search_result.data)} sources\n",
+                    }
+
+                iterations.append(iteration)
+
+            # Phase 3: Synthesis
+            yield {"type": "status", "data": "📝 Synthesizing findings..."}
+
+            final_report = await self._synthesize_report(task, iterations, all_sources)
+
+            # Final verdict
+            yield {
+                "type": "verdict",
+                "data": f"\n\n✅ Research complete: {len(iterations)} iterations, {len(all_sources)} sources",
+            }
+
+            yield {
+                "type": "result",
+                "data": {
+                    "report": final_report[:1000] + "..."
+                    if len(final_report) > 1000
+                    else final_report,
+                    "sources_count": len(all_sources),
+                    "iterations": len(iterations),
+                },
+            }
+
+        except Exception as e:
+            yield {"type": "error", "data": f"Research failed: {str(e)}"}
 
     async def _perform_research(self, query: str, context: Dict[str, Any]) -> DeepResearchResult:
         """Execute the multi-step research process."""

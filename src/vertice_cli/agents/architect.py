@@ -14,7 +14,7 @@ Philosophy (Boris Cherny):
 Capabilities: READ_ONLY only (no execution, no modification)
 """
 
-from typing import Any, Dict
+from typing import Any, AsyncIterator, Dict
 
 from vertice_cli.agents.base import (
     AgentCapability,
@@ -212,6 +212,74 @@ class ArchitectAgent(BaseAgent):
                 reasoning=f"Architect analysis failed: {str(e)}",
                 error=str(e),
             )
+
+    async def execute_streaming(self, task: AgentTask) -> AsyncIterator[Dict[str, Any]]:
+        """Stream architecture analysis with progressive feedback.
+
+        Yields status updates and reasoning chunks as the analysis progresses.
+
+        Args:
+            task: Task with user request and context
+
+        Yields:
+            StreamingChunk dicts with type and data
+        """
+        from vertice_cli.agents.protocol import StreamingChunk, StreamingChunkType
+
+        try:
+            # Phase 1: Announce start
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data="🏗️ Architect analyzing request..."
+            ).to_dict()
+
+            # Phase 2: Build analysis prompt
+            analysis_prompt = self._build_analysis_prompt(task)
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS,
+                data="📋 Context loaded, starting feasibility analysis...",
+            ).to_dict()
+
+            # Phase 3: Stream LLM response
+            yield StreamingChunk(
+                type=StreamingChunkType.REASONING, data="## Architecture Analysis\n\n"
+            ).to_dict()
+
+            # Call LLM (ideally stream, but use blocking call and simulate chunks)
+            llm_response = await self._call_llm(analysis_prompt)
+
+            # Stream the response in chunks
+            for i in range(0, len(llm_response), 100):
+                chunk = llm_response[i : i + 100]
+                yield StreamingChunk(type=StreamingChunkType.THINKING, data=chunk).to_dict()
+
+            # Phase 4: Parse decision
+            import json
+
+            try:
+                decision_data = json.loads(llm_response)
+            except json.JSONDecodeError:
+                decision_data = self._extract_decision_fallback(llm_response)
+
+            decision = decision_data.get("decision", "UNKNOWN").upper()
+            if decision == "APPROVE":
+                decision = "APPROVED"
+            elif decision == "VETO":
+                decision = "VETOED"
+
+            # Phase 5: Announce verdict
+            verdict_emoji = "✅" if decision == "APPROVED" else "❌"
+            yield StreamingChunk(
+                type=StreamingChunkType.VERDICT,
+                data=f"\n\n{verdict_emoji} **Decision: {decision}**",
+            ).to_dict()
+
+            # Final result
+            yield StreamingChunk(type=StreamingChunkType.RESULT, data=decision_data).to_dict()
+
+        except Exception as e:
+            yield StreamingChunk(
+                type=StreamingChunkType.ERROR, data=f"Architect analysis failed: {str(e)}"
+            ).to_dict()
 
     def _build_analysis_prompt(self, task: AgentTask) -> str:
         """Build prompt for LLM analysis.

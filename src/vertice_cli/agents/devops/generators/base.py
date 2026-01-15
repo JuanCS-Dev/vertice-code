@@ -5,7 +5,7 @@ All generators implement this protocol for consistent behavior.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from typing import Any, AsyncIterator, Dict
 
 
 class BaseGenerator(ABC):
@@ -20,6 +20,18 @@ class BaseGenerator(ABC):
 
         Returns:
             Dict containing generated configuration and metadata
+        """
+        pass
+
+    @abstractmethod
+    async def generate_streaming(self, task_request: str) -> AsyncIterator[Dict[str, Any]]:
+        """Generate infrastructure configuration with streaming output.
+
+        Args:
+            task_request: User's request description
+
+        Yields:
+            StreamingChunk dicts with progress updates and generated config
         """
         pass
 

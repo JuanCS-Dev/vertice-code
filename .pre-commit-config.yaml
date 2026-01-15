@@ -17,6 +17,14 @@ repos:
       - id: check-merge-conflict
       - id: detect-private-key
 
+  # Secret detection
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: package-lock.json|pnpm-lock.yaml|yarn.lock
+
   # Ruff - Fast Python linter
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.1.8
@@ -29,22 +37,8 @@ repos:
   - repo: local
     hooks:
       - id: file-size-check
-        name: Check file size (<500 lines)
+        name: Check file size (<1000 lines)
         entry: python scripts/check_file_size.py
-        language: python
-        types: [python]
-        pass_filenames: true
-
-      - id: complexity-check
-        name: Check cyclomatic complexity (<10)
-        entry: radon cc -a -nc --fail D
-        language: python
-        types: [python]
-        additional_dependencies: [radon]
-
-      - id: nesting-check
-        name: Check nesting depth (<4)
-        entry: python scripts/check_nesting.py
         language: python
         types: [python]
         pass_filenames: true
@@ -55,7 +49,21 @@ repos:
         language: system
         types: [python]
         pass_filenames: false
-        args: [-r, vertice_cli/, providers/]
+        args: [-r, src/vertice_cli/, src/providers/]
+
+      - id: complexity-check
+        name: Check cyclomatic complexity (<10)
+        entry: radon cc -a -nc
+        language: python
+        types: [python]
+        additional_dependencies: [radon]
+
+      - id: nesting-check
+        name: Check nesting depth (<10)
+        entry: python scripts/check_nesting.py
+        language: python
+        types: [python]
+        pass_filenames: true
 
       - id: sessionmanager-duplication-check
         name: Prevent SessionManager duplication

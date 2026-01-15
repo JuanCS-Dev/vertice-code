@@ -23,7 +23,7 @@ Philosophy (Boris Cherny):
 import ast
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, AsyncIterator, Dict, List, Optional
 
 from vertice_cli.utils import MarkdownExtractor
 
@@ -241,6 +241,103 @@ class DocumentationAgent(BaseAgent):
                 error=f"Documentation generation failed: {str(e)}",
                 reasoning="Unexpected error during execution",
             )
+
+    async def execute_streaming(self, task: AgentTask) -> AsyncIterator[Dict[str, Any]]:
+        """Stream documentation generation with progressive updates.
+
+        Yields status updates as documentation is generated.
+
+        Args:
+            task: Task containing request and context
+
+        Yields:
+            StreamingChunk dicts with progress updates
+        """
+        from vertice_cli.agents.protocol import StreamingChunk, StreamingChunkType
+
+        try:
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data="📝 DocumentationAgent starting..."
+            ).to_dict()
+
+            style = task.context.get("style", DocstringStyle.GOOGLE)
+
+            # Check for inline code
+            user_message = task.context.get("user_message", "")
+            inline_code = self._extract_code_blocks(user_message)
+
+            if inline_code:
+                yield StreamingChunk(
+                    type=StreamingChunkType.STATUS, data="📋 Found inline code, analyzing..."
+                ).to_dict()
+
+                result = await self._document_inline_code(inline_code, style)
+                yield StreamingChunk(type=StreamingChunkType.RESULT, data=result.data).to_dict()
+                return
+
+            # Get files to document
+            files_list = task.context.get("files_list", []) or task.context.get("files", [])
+            target_path_str = task.context.get("target_path", "")
+
+            if files_list:
+                target_path = (
+                    Path(files_list[0]).parent if Path(files_list[0]).exists() else Path(".")
+                )
+            else:
+                target_path = Path(target_path_str) if target_path_str else Path(".")
+
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data=f"📁 Scanning {target_path}..."
+            ).to_dict()
+
+            # Find Python files
+            if files_list:
+                python_files = [
+                    Path(f) for f in files_list if f.endswith(".py") and Path(f).exists()
+                ]
+            elif target_path.is_file():
+                python_files = [target_path]
+            else:
+                python_files = list(target_path.rglob("*.py"))[:20]
+
+            yield StreamingChunk(
+                type=StreamingChunkType.THINKING, data=f"Found {len(python_files)} Python files\n"
+            ).to_dict()
+
+            # Analyze each file
+            modules: List[ModuleDoc] = []
+            for i, py_file in enumerate(python_files[:10]):
+                if "__pycache__" in str(py_file):
+                    continue
+
+                yield StreamingChunk(
+                    type=StreamingChunkType.THINKING, data=f"  - Analyzing `{py_file.name}`...\n"
+                ).to_dict()
+
+                try:
+                    module_doc = analyze_module(py_file)
+                    modules.append(module_doc)
+                except (SyntaxError, OSError):
+                    continue
+
+            # Generate docs
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data="✨ Generating documentation..."
+            ).to_dict()
+
+            yield StreamingChunk(
+                type=StreamingChunkType.VERDICT, data=f"\n\n✅ Documented {len(modules)} modules"
+            ).to_dict()
+
+            yield StreamingChunk(
+                type=StreamingChunkType.RESULT,
+                data={"modules_analyzed": len(modules), "files_found": len(python_files)},
+            ).to_dict()
+
+        except Exception as e:
+            yield StreamingChunk(
+                type=StreamingChunkType.ERROR, data=f"Documentation failed: {str(e)}"
+            ).to_dict()
 
     async def _generate_docs(
         self,

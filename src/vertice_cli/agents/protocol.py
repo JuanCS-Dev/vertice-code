@@ -62,6 +62,8 @@ class AgentRole(Enum):
     JUSTICA = "justica"
     SOFIA = "sofia"
     MAESTRO = "maestro"
+    GOVERNANCE = "governance"  # Constitutional guardian
+    COUNSELOR = "counselor"  # Wise advisor
 
 
 class TaskStatus(Enum):

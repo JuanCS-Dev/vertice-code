@@ -23,7 +23,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, AsyncIterator, Dict, List, Optional
 
 from ..base import (
     AgentCapability,
@@ -144,6 +144,88 @@ class SecurityAgent(BaseAgent):
                 reasoning=f"Security scan failed: {str(e)}",
                 error=str(e),
             )
+
+    async def execute_streaming(self, task: AgentTask) -> AsyncIterator[Dict[str, Any]]:
+        """Stream security scan with progressive updates.
+
+        Yields status updates as each security phase completes.
+
+        Args:
+            task: Task with target to scan
+
+        Yields:
+            StreamingChunk dicts with scan progress
+        """
+        from vertice_cli.agents.protocol import StreamingChunk, StreamingChunkType
+
+        try:
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data="🔒 SecurityAgent starting scan..."
+            ).to_dict()
+
+            target_path = Path(task.context.get("root_dir", "."))
+            if "target_file" in task.metadata:
+                target_path = Path(task.metadata["target_file"])
+
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data=f"📁 Target: {target_path}"
+            ).to_dict()
+
+            # Phase 1: Vulnerabilities
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data="🔍 Phase 1: Scanning for vulnerabilities..."
+            ).to_dict()
+
+            vulnerabilities = await self._scan_vulnerabilities(target_path)
+            yield StreamingChunk(
+                type=StreamingChunkType.THINKING,
+                data=f"Found {len(vulnerabilities)} vulnerabilities\n",
+            ).to_dict()
+
+            # Phase 2: Secrets
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data="🔐 Phase 2: Detecting secrets..."
+            ).to_dict()
+
+            secrets = await detect_secrets(target_path, self._patterns)
+            yield StreamingChunk(
+                type=StreamingChunkType.THINKING, data=f"Found {len(secrets)} exposed secrets\n"
+            ).to_dict()
+
+            # Phase 3: Dependencies
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data="📦 Phase 3: Checking dependencies..."
+            ).to_dict()
+
+            dep_vulns = await check_dependencies(target_path)
+            yield StreamingChunk(
+                type=StreamingChunkType.THINKING,
+                data=f"Found {len(dep_vulns)} vulnerable dependencies\n",
+            ).to_dict()
+
+            # Phase 4: OWASP Score
+            owasp_score = calculate_owasp_score(vulnerabilities, secrets, dep_vulns)
+
+            verdict_emoji = "✅" if owasp_score >= 80 else "⚠️" if owasp_score >= 50 else "❌"
+            yield StreamingChunk(
+                type=StreamingChunkType.VERDICT,
+                data=f"\n\n{verdict_emoji} **OWASP Score: {owasp_score}/100**",
+            ).to_dict()
+
+            yield StreamingChunk(
+                type=StreamingChunkType.RESULT,
+                data={
+                    "owasp_score": owasp_score,
+                    "vulnerabilities": len(vulnerabilities),
+                    "secrets": len(secrets),
+                    "dep_vulns": len(dep_vulns),
+                },
+            ).to_dict()
+
+        except Exception as e:
+            yield StreamingChunk(
+                type=StreamingChunkType.ERROR, data=f"Security scan failed: {str(e)}"
+            ).to_dict()
 
     async def _scan_vulnerabilities(self, target: Path) -> List[Vulnerability]:
         """Scan for code vulnerabilities using pattern matching and AST analysis.

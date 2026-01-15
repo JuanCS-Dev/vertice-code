@@ -9,7 +9,7 @@ Features:
 """
 
 import logging
-from typing import Any, Dict
+from typing import Any, AsyncIterator, Dict
 
 from .base import BaseGenerator
 
@@ -46,6 +46,38 @@ class CICDGenerator(BaseGenerator):
                 "Zero manual steps",
                 "Auto-rollback on failure",
             ],
+        }
+
+    async def generate_streaming(self, task_request: str) -> AsyncIterator[Dict[str, Any]]:
+        """Generate CI/CD pipeline with streaming output."""
+        yield {"type": "status", "data": "🔄 CI/CD Generator starting..."}
+
+        provider = self._detect_provider(task_request)
+        yield {"type": "thinking", "data": f"Provider detected: {provider}\n"}
+
+        yield {"type": "status", "data": "📋 Configuring pipeline stages..."}
+
+        if provider == "github":
+            yield {"type": "thinking", "data": "  - test (pytest + coverage)\n"}
+            yield {"type": "thinking", "data": "  - build (Docker multi-arch)\n"}
+            yield {"type": "thinking", "data": "  - deploy (GitOps/ArgoCD)\n"}
+            pipeline = self._build_github_actions()
+        else:
+            pipeline = self._build_gitlab_ci()
+
+        yield {"type": "verdict", "data": f"\n\n✅ {provider.upper()} CI/CD pipeline generated"}
+
+        yield {
+            "type": "result",
+            "data": {
+                "pipeline": pipeline,
+                "provider": provider,
+                "features": [
+                    "Automated testing with coverage",
+                    "Docker multi-arch build",
+                    "GitOps deployment",
+                ],
+            },
         }
 
     def _detect_provider(self, request: str) -> str:

@@ -9,7 +9,7 @@ Features:
 """
 
 import logging
-from typing import Any, Dict
+from typing import Any, AsyncIterator, Dict
 
 from .base import BaseGenerator
 
@@ -37,6 +37,30 @@ class TerraformGenerator(BaseGenerator):
                 "Remote state in S3 with locking",
                 "Production-ready configuration",
             ],
+        }
+
+    async def generate_streaming(self, task_request: str) -> AsyncIterator[Dict[str, Any]]:
+        """Generate Terraform configuration with streaming output."""
+        yield {"type": "status", "data": "🏗️ Terraform Generator starting..."}
+
+        yield {"type": "thinking", "data": "Generating main.tf with EKS + VPC...\n"}
+
+        terraform = self._build_main_tf()
+
+        yield {"type": "status", "data": "✨ Building production-ready infrastructure..."}
+
+        yield {"type": "verdict", "data": "\n\n✅ Terraform configuration generated"}
+
+        yield {
+            "type": "result",
+            "data": {
+                "main.tf": terraform,
+                "features": [
+                    "EKS cluster with managed node groups",
+                    "VPC with public/private subnets",
+                    "Remote state in S3 with locking",
+                ],
+            },
         }
 
     def _build_main_tf(self) -> str:

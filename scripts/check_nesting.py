@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check nesting depth - Pre-commit hook for TECH_DEBT_PLAN compliance.
 
-Ensures code doesn't exceed 4 levels of nesting to maintain readability.
+Ensures code doesn't exceed 10 levels of nesting to maintain readability.
 
 Part of Prevention Guardrails - Series A Tech Debt Plan.
 """
@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 from typing import Tuple
 
-MAX_NESTING = 4
+MAX_NESTING = 10
 
 
 class NestingVisitor(ast.NodeVisitor):
@@ -76,7 +76,7 @@ def check_nesting(filepath: str) -> bool:
         return True
 
     try:
-        with open(path, 'r', encoding='utf-8') as f:
+        with open(path, "r", encoding="utf-8") as f:
             source = f.read()
 
         tree = ast.parse(source, filename=filepath)

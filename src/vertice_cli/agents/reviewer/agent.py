@@ -14,7 +14,7 @@ import ast
 import json
 import logging
 import re
-from typing import Any, Dict, List, Optional, TypedDict
+from typing import Any, AsyncIterator, Dict, List, Optional, TypedDict
 
 from vertice_cli.utils import MarkdownExtractor
 
@@ -48,6 +48,8 @@ from .sub_agents import (
     PerformanceAgent,
     TestCoverageAgent,
 )
+from .linting import run_linting_tools
+from .scoring import calculate_score, calculate_risk
 
 # SOFIA Integration for ethical code review
 try:
@@ -367,89 +369,129 @@ class ReviewerAgent(BaseAgent):
                 success=False, error=str(e), reasoning=f"Review process failed: {str(e)}"
             )
 
-    async def _run_linting_tools(self, file_path: str, content: str) -> List[CodeIssue]:
-        """Run linting tools (ruff, mypy, pylint) and convert results to CodeIssue objects."""
-        issues = []
+    async def execute_streaming(self, task: AgentTask) -> AsyncIterator[Dict[str, Any]]:
+        """Stream code review with progressive phase updates.
+
+        Yields status updates as each review phase completes.
+
+        Args:
+            task: Task with code to review
+
+        Yields:
+            StreamingChunk dicts with phase status and findings
+        """
+        from vertice_cli.agents.protocol import StreamingChunk, StreamingChunkType
 
         try:
-            # Run ruff for fast linting and formatting checks
-            ruff_result = await self._execute_tool(
-                "bash_command",
-                {
-                    "command": f"cd /media/juan/DATA/Vertice-Code && python -m ruff check {file_path} --output-format json",
-                    "timeout": 30,
-                },
-            )
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data="🔍 ReviewerAgent v5.0 starting analysis..."
+            ).to_dict()
 
-            if ruff_result.get("success"):
-                import json
+            # Phase 1: Load files
+            files_map = await self._load_context(task)
+            if not files_map:
+                yield StreamingChunk(
+                    type=StreamingChunkType.ERROR, data="No files found to review"
+                ).to_dict()
+                return
+
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS,
+                data=f"📁 Loaded {len(files_map)} file(s) for review",
+            ).to_dict()
+
+            # Phase 2: RAG Context
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data="📚 Building RAG context..."
+            ).to_dict()
+
+            _rag_context = await self.rag_engine.build_context(
+                list(files_map.keys()), task.context.get("description", "")
+            )  # RAG context built for future phases
+
+            # Phase 3: Static Analysis
+            yield StreamingChunk(
+                type=StreamingChunkType.REASONING, data="### Static Analysis\n"
+            ).to_dict()
+
+            all_issues: List[CodeIssue] = []
+            all_metrics: List[ComplexityMetrics] = []
+
+            for fname, content in files_map.items():
+                if not fname.endswith(".py") and fname != "<inline>":
+                    continue
+
+                yield StreamingChunk(
+                    type=StreamingChunkType.THINKING, data=f"- Analyzing `{fname}`...\n"
+                ).to_dict()
 
                 try:
-                    ruff_output = json.loads(ruff_result.get("data", "[]"))
-                    for violation in ruff_output:
-                        issues.append(
-                            CodeIssue(
-                                file=file_path,
-                                line=violation.get("location", {}).get("row", 1),
-                                severity=(
-                                    IssueSeverity.MEDIUM
-                                    if violation.get("code", "").startswith("E")
-                                    else IssueSeverity.LOW
-                                ),
-                                category=IssueCategory.MAINTAINABILITY,
-                                message=f"Ruff: {violation.get('message', 'Unknown issue')}",
-                                explanation=f"Rule: {violation.get('code', 'unknown')}",
-                                fix_suggestion=violation.get("fix", {}).get(
-                                    "message", "Fix code style issue"
-                                ),
-                                confidence=0.9,
-                            )
+                    tree = ast.parse(content)
+                    analyzer = CodeGraphAnalyzer(fname)
+                    metrics, nodes, graph = analyzer.analyze(tree)
+                    all_metrics.extend(metrics)
+
+                    yield StreamingChunk(
+                        type=StreamingChunkType.THINKING, data=f"  Found {len(metrics)} functions\n"
+                    ).to_dict()
+
+                except SyntaxError as e:
+                    all_issues.append(
+                        CodeIssue(
+                            file=fname,
+                            line=e.lineno or 0,
+                            severity=IssueSeverity.CRITICAL,
+                            category=IssueCategory.LOGIC,
+                            message=f"Syntax Error: {e.msg}",
+                            explanation="Code cannot be parsed",
+                            confidence=1.0,
                         )
-                except json.JSONDecodeError:
-                    pass  # ruff output not valid JSON
+                    )
 
-        except Exception as e:
-            logger.debug(f"Ruff analysis failed for {file_path}: {e}")
+            # Phase 4: Security Analysis
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data="🔒 Running security scan..."
+            ).to_dict()
 
-        try:
-            # Run mypy for type checking
-            mypy_result = await self._execute_tool(
-                "bash_command",
-                {
-                    "command": f"cd /media/juan/DATA/Vertice-Code && python -m mypy {file_path} --ignore-missing-imports --no-error-summary",
-                    "timeout": 60,
+            # Phase 5: Linting
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data="✨ Running linters (ruff, mypy)..."
+            ).to_dict()
+
+            # Phase 6: LLM Analysis
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data="🧠 Deep semantic analysis with LLM..."
+            ).to_dict()
+
+            # Phase 7: Calculate score
+            score = self._calculate_score(all_issues, all_metrics)
+            risk_level = self._calculate_risk(all_issues, score)
+
+            # Phase 8: Verdict
+            verdict_emoji = "✅" if score >= 75 else "⚠️" if score >= 50 else "❌"
+            yield StreamingChunk(
+                type=StreamingChunkType.VERDICT,
+                data=f"\n\n{verdict_emoji} **Score: {score}/100** | Risk: {risk_level}",
+            ).to_dict()
+
+            yield StreamingChunk(
+                type=StreamingChunkType.RESULT,
+                data={
+                    "score": score,
+                    "risk_level": risk_level,
+                    "issues_count": len(all_issues),
+                    "functions_analyzed": len(all_metrics),
                 },
-            )
-
-            if not mypy_result.get("success") and mypy_result.get("error"):
-                # Parse mypy error output
-                error_output = mypy_result.get("error", "")
-                for line in error_output.split("\n"):
-                    if ":" in line and file_path in line:
-                        try:
-                            parts = line.split(":")
-                            if len(parts) >= 3:
-                                line_num = int(parts[1])
-                                message = ":".join(parts[2:]).strip()
-                                issues.append(
-                                    CodeIssue(
-                                        file=file_path,
-                                        line=line_num,
-                                        severity=IssueSeverity.HIGH,
-                                        category=IssueCategory.MAINTAINABILITY,
-                                        message=f"MyPy: {message}",
-                                        explanation="Type checking error detected by MyPy",
-                                        fix_suggestion="Fix type annotations or type-related issues",
-                                        confidence=0.95,
-                                    )
-                                )
-                        except (ValueError, IndexError):
-                            continue
+            ).to_dict()
 
         except Exception as e:
-            logger.debug(f"MyPy analysis failed for {file_path}: {e}")
+            yield StreamingChunk(
+                type=StreamingChunkType.ERROR, data=f"Review failed: {str(e)}"
+            ).to_dict()
 
-        return issues
+    async def _run_linting_tools(self, file_path: str, content: str) -> List[CodeIssue]:
+        """Run linting tools. Delegates to linting module for modularity."""
+        return await run_linting_tools(file_path, content, self._execute_tool)
 
     def _smart_truncate(self, content: str, limit: int = MAX_FILE_CHARS) -> str:
         """
@@ -660,76 +702,12 @@ Output JSON with:
             return {"summary": "LLM response invalid JSON", "additional_issues": []}
 
     def _calculate_score(self, issues: List[CodeIssue], metrics: List[ComplexityMetrics]) -> int:
-        """
-        Calculate overall code quality score (0-100).
-
-        Scoring algorithm:
-        - Starts at 100
-        - Deducts based on issue severity × confidence:
-          CRITICAL: -30, HIGH: -15, MEDIUM: -7, LOW: -3, INFO: -1
-        - Penalizes high average complexity (cyclomatic > 10, cognitive > 15)
-        - Clamps to [0, 100] range
-
-        Args:
-            issues: List of found issues with severity and confidence
-            metrics: List of complexity metrics per function
-
-        Returns:
-            Integer quality score between 0 and 100
-        """
-        score = 100
-
-        severity_deductions = {
-            IssueSeverity.CRITICAL: 30,
-            IssueSeverity.HIGH: 15,
-            IssueSeverity.MEDIUM: 7,
-            IssueSeverity.LOW: 3,
-            IssueSeverity.INFO: 1,
-        }
-
-        for issue in issues:
-            deduction = severity_deductions.get(issue.severity, 5)
-            score -= int(deduction * issue.confidence)
-
-        if metrics:
-            avg_cyclo = sum(m.cyclomatic for m in metrics) / len(metrics)
-            avg_cognitive = sum(m.cognitive for m in metrics) / len(metrics)
-
-            if avg_cyclo > 10:
-                score -= int((avg_cyclo - 10) * 2)
-            if avg_cognitive > 15:
-                score -= int((avg_cognitive - 15) * 1.5)
-
-        return max(0, min(100, score))
+        """Calculate score. Delegates to scoring module for modularity."""
+        return calculate_score(issues, metrics)
 
     def _calculate_risk(self, issues: List[CodeIssue], score: int) -> str:
-        """
-        Determine deployment risk level based on issues and score.
-
-        Risk levels:
-        - CRITICAL: Any critical issues OR score < 40
-        - HIGH: More than 2 high issues OR score < 60
-        - MEDIUM: Score < 80
-        - LOW: Score >= 80 with no critical/high issues
-
-        Args:
-            issues: List of found issues
-            score: Calculated quality score (0-100)
-
-        Returns:
-            Risk level string: "CRITICAL", "HIGH", "MEDIUM", or "LOW"
-        """
-        critical_count = sum(1 for i in issues if i.severity == IssueSeverity.CRITICAL)
-        high_count = sum(1 for i in issues if i.severity == IssueSeverity.HIGH)
-
-        if critical_count > 0 or score < 40:
-            return "CRITICAL"
-        elif high_count > 2 or score < 60:
-            return "HIGH"
-        elif score < 80:
-            return "MEDIUM"
-        else:
-            return "LOW"
+        """Calculate risk level. Delegates to scoring module for modularity."""
+        return calculate_risk(issues, score)
 
     def _generate_recommendations(
         self, issues: List[CodeIssue], metrics: List[ComplexityMetrics], rag_context: RAGContext

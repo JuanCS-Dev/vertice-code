@@ -24,7 +24,7 @@ Capabilities:
 
 import logging
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, AsyncIterator, Dict, List, Optional
 
 from vertice_cli.utils import MarkdownExtractor
 
@@ -211,6 +211,81 @@ class TestRunnerAgent(BaseAgent):
                 reasoning=f"TestRunnerAgent execution failed: {str(e)}",
                 error=str(e),
             )
+
+    async def execute_streaming(self, task: AgentTask) -> AsyncIterator[Dict[str, Any]]:
+        """Stream test execution with progressive updates.
+
+        Yields status updates as tests are generated and run.
+
+        Args:
+            task: Task with testing request
+
+        Yields:
+            StreamingChunk dicts with test progress
+        """
+        from vertice_cli.agents.protocol import StreamingChunk, StreamingChunkType
+
+        try:
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data="🧪 TestRunnerAgent starting..."
+            ).to_dict()
+
+            action = task.context.get("action", "generate_tests")
+
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data=f"📋 Action: {action}"
+            ).to_dict()
+
+            if action == "generate_tests":
+                yield StreamingChunk(
+                    type=StreamingChunkType.REASONING, data="### Test Generation\n"
+                ).to_dict()
+
+                # Check for source code
+                user_message = task.context.get("user_message", "")
+                inline_code = self._extract_code_blocks(user_message)
+
+                if inline_code:
+                    yield StreamingChunk(
+                        type=StreamingChunkType.THINKING, data="Found inline code to test\n"
+                    ).to_dict()
+
+                # Execute
+                result = await self.execute(task)
+
+                if result.success:
+                    test_count = result.data.get("metrics", {}).get("total_tests", 0)
+                    yield StreamingChunk(
+                        type=StreamingChunkType.VERDICT,
+                        data=f"\n\n✅ Generated {test_count} test cases",
+                    ).to_dict()
+                else:
+                    yield StreamingChunk(
+                        type=StreamingChunkType.ERROR, data=result.error or "Test generation failed"
+                    ).to_dict()
+
+            elif action == "analyze_coverage":
+                yield StreamingChunk(
+                    type=StreamingChunkType.STATUS, data="📊 Running coverage analysis..."
+                ).to_dict()
+
+                result = await self.execute(task)
+                coverage = result.data.get("coverage", {}).get("coverage_percentage", 0)
+
+                yield StreamingChunk(
+                    type=StreamingChunkType.VERDICT, data=f"\n\n📈 Coverage: {coverage:.1f}%"
+                ).to_dict()
+            else:
+                result = await self.execute(task)
+
+            yield StreamingChunk(
+                type=StreamingChunkType.RESULT, data=result.data if result else {}
+            ).to_dict()
+
+        except Exception as e:
+            yield StreamingChunk(
+                type=StreamingChunkType.ERROR, data=f"Testing failed: {str(e)}"
+            ).to_dict()
 
     async def _handle_test_generation(self, task: AgentTask) -> AgentResponse:
         """Generate test suite for given code.

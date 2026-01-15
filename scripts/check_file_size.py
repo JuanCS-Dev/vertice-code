@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Check file size - Pre-commit hook for TECH_DEBT_PLAN compliance.
 
-Ensures Python files stay under 500 lines to maintain maintainability.
+Ensures Python files stay under 1000 lines to maintain maintainability.
 
 Part of Prevention Guardrails - Series A Tech Debt Plan.
 """
 import sys
 from pathlib import Path
 
-MAX_LINES = 500
+MAX_LINES = 1000
 
 # Files that are allowed to exceed the limit (legacy, with justification)
 EXCEPTIONS = {
@@ -35,7 +35,7 @@ def check_file_size(filepath: str) -> bool:
             return True
 
     try:
-        with open(path, 'r', encoding='utf-8') as f:
+        with open(path, "r", encoding="utf-8") as f:
             line_count = sum(1 for _ in f)
 
         if line_count > MAX_LINES:

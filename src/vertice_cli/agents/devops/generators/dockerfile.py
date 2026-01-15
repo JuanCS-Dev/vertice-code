@@ -10,7 +10,7 @@ Features:
 """
 
 import logging
-from typing import Any, Dict
+from typing import Any, AsyncIterator, Dict
 
 from .base import BaseGenerator
 
@@ -67,6 +67,33 @@ class DockerfileGenerator(BaseGenerator):
                 "Minimal base image",
                 "No secrets in layers",
             ],
+        }
+
+    async def generate_streaming(self, task_request: str) -> AsyncIterator[Dict[str, Any]]:
+        """Generate Dockerfile with streaming output."""
+        yield {"type": "status", "data": "🐳 Dockerfile Generator starting..."}
+
+        stack = self._detect_stack(task_request)
+        yield {"type": "thinking", "data": f"Detected stack: {stack}\n"}
+
+        template = DOCKER_TEMPLATES.get(stack, DOCKER_TEMPLATES["python_fastapi"])
+        yield {"type": "status", "data": "🔒 Applying security best practices..."}
+
+        dockerfile = self._build_dockerfile(template)
+
+        yield {"type": "verdict", "data": "\n\n✅ Dockerfile generated with security features"}
+
+        yield {
+            "type": "result",
+            "data": {
+                "dockerfile": dockerfile,
+                "stack": stack,
+                "security_features": [
+                    "Multi-stage build",
+                    "Non-root user",
+                    "Health check",
+                ],
+            },
         }
 
     def _detect_stack(self, request: str) -> str:

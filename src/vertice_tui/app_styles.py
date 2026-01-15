@@ -110,6 +110,32 @@ StreamingResponseWidget {
 }
 
 /* =============================================================================
+   SYSTEM MESSAGE PANELS - Premium 2026 Styling
+   ============================================================================= */
+
+.system-message {
+    margin: 1 0;
+    background: $surface;
+    border: round $border;
+    padding: 1 2;
+}
+
+.info-panel {
+    margin: 1 0;
+    background: $surface;
+    border: round $primary;
+    padding: 1 2;
+}
+
+.info-panel-header {
+    color: $text-primary;
+    text-style: bold;
+    padding-bottom: 1;
+    border-bottom: solid $border;
+}
+
+
+/* =============================================================================
    AUTOCOMPLETE DROPDOWN
    ============================================================================= */
 

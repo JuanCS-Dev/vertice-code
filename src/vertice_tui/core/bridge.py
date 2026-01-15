@@ -14,30 +14,10 @@ Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 from __future__ import annotations
 
 import logging
-
-logger = logging.getLogger(__name__)
 import os
-import logging
-
-logger = logging.getLogger(__name__)
 import threading
 from pathlib import Path
 from typing import Any, AsyncIterator, Dict, List, Optional, Tuple
-
-# Load .env file if exists
-try:
-    from dotenv import load_dotenv
-
-    load_dotenv()
-    script_dir = Path(__file__).parent.parent.parent
-    env_file = script_dir / ".env"
-    if env_file.exists():
-        load_dotenv(env_file)
-except ImportError:
-    # python-dotenv not installed - env vars must be set externally
-    import logging
-
-    logging.debug("python-dotenv not installed, skipping .env load")
 
 # Core systems
 from vertice_tui.core.resilience import AsyncLock
@@ -86,6 +66,21 @@ try:
 except ImportError:
     PlanModeManager = None  # type: ignore
 
+# Load .env file if exists
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv()
+    script_dir = Path(__file__).parent.parent.parent
+    env_file = script_dir / ".env"
+    if env_file.exists():
+        load_dotenv(env_file)
+except ImportError:
+    # python-dotenv not installed - env vars must be set externally
+    pass
+
+logger = logging.getLogger(__name__)
+
 
 class Bridge(ProtocolBridgeMixin):
     """Main integration bridge between TUI and agent system."""
@@ -107,7 +102,6 @@ class Bridge(ProtocolBridgeMixin):
             return component
         except Exception as e:
             logger.warning(f"{component_name} initialization failed: {e}")
-            partial_initialization = True
             return None
 
     def __init__(self) -> None:
@@ -674,7 +668,16 @@ Working directory: {os.getcwd()}"""
     def get_available_models(self) -> List[str]:
         """Get list of available models."""
         # Hardcoded for now, should come from provider
-        return ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-3-flash-preview", "gemini-3-pro-preview"]
+        return [
+            "gemini-2.5-flash",
+            "gemini-2.5-pro",
+            "gemini-3-flash-preview",
+            "gemini-3-pro-preview",
+        ]
+
+    def get_current_model(self) -> str:
+        """Alias for get_model_name (Claude parity)."""
+        return self.get_model_name()
 
     # Session management
     def resume_session(self, session_id: Optional[str] = None) -> Dict[str, Any]:

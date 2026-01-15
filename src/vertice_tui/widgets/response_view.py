@@ -127,14 +127,23 @@ class ResponseView(VerticalScroll):
         self.scroll_end(animate=True)
 
     def add_system_message(self, message: str) -> None:
-        """Add system/help message (Rich markup or markdown)."""
+        """Add system/help message with premium Panel styling."""
         # Detect Rich markup tags - if present, use Text.from_markup()
         if "[bold" in message or "[cyan]" in message or "[dim]" in message:
             content = Text.from_markup(message)
-            widget = SelectableStatic(content, classes="system-message")
         else:
-            # Standard markdown
-            widget = SelectableStatic(Markdown(message), classes="system-message")
+            # Standard markdown in a styled panel
+            content = Markdown(message)
+
+        # Wrap in a premium panel
+        panel = Panel(
+            content,
+            border_style=Colors.BORDER,
+            box=box.ROUNDED,
+            padding=(0, 1),
+        )
+
+        widget = SelectableStatic(panel, classes="system-message")
         self.mount(widget)
         self.scroll_end(animate=True)
 
@@ -347,6 +356,32 @@ class ResponseView(VerticalScroll):
         """Add a formatted response panel."""
         panel = OutputFormatter.format_response(text, title)
         widget = SelectableStatic(panel, classes="ai-response")
+        self.mount(widget)
+        self.scroll_end(animate=True)
+
+    def add_info_panel(
+        self, message: str, title: str = "Info", icon: str = "ℹ️", border_color: str = Colors.PRIMARY
+    ) -> None:
+        """Add a premium info panel with title, icon, and styled border.
+
+        Args:
+            message: Markdown content to display
+            title: Panel title
+            icon: Emoji icon for the panel header
+            border_color: Border color (from Colors constants)
+        """
+        content = Markdown(message)
+
+        panel = Panel(
+            content,
+            title=f"[bold {border_color}]{icon} {title}[/]",
+            title_align="left",
+            border_style=border_color,
+            box=box.ROUNDED,
+            padding=(1, 2),
+        )
+
+        widget = SelectableStatic(panel, classes="info-panel")
         self.mount(widget)
         self.scroll_end(animate=True)
 

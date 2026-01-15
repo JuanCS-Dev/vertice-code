@@ -10,9 +10,8 @@ Following Claude Code pattern: provide actual content for grounding.
 
 import logging
 import re
-import subprocess
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, AsyncIterator, Dict, List
 
 from vertice_cli.agents.base import (
     AgentCapability,
@@ -22,6 +21,8 @@ from vertice_cli.agents.base import (
     BaseAgent,
 )
 from vertice_core.protocols import LLMClientProtocol, MCPClientProtocol
+
+from .explorer_search import search_by_name, search_content, deep_search_imports
 
 logger = logging.getLogger(__name__)
 
@@ -218,6 +219,81 @@ class ExplorerAgent(BaseAgent):
 
         except Exception as e:
             return AgentResponse(success=False, error=str(e), reasoning=f"Erro: {e}")
+
+    async def execute_streaming(self, task: AgentTask) -> AsyncIterator[Dict[str, Any]]:
+        """Stream file discovery with progressive results.
+
+        Yields file matches as they are found for real-time feedback.
+
+        Args:
+            task: Task with search query and context
+
+        Yields:
+            StreamingChunk dicts with type and data
+        """
+        from vertice_cli.agents.protocol import StreamingChunk, StreamingChunkType
+
+        try:
+            query = task.request.lower()
+            _max_files = task.context.get("max_files", 25)  # Reserved for future use
+
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS,
+                data=f"🔍 Exploring project for: '{task.request[:50]}...'",
+            ).to_dict()
+
+            # Detect search type
+            search_type = self._detect_search_type(query)
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data=f"📂 Search mode: {search_type}"
+            ).to_dict()
+
+            found_files: List[Dict[str, Any]] = []
+            files_list = task.context.get("files", [])
+
+            # Stream context files first
+            if files_list:
+                yield StreamingChunk(
+                    type=StreamingChunkType.REASONING, data="### Files from context\n"
+                ).to_dict()
+
+                for f in files_list[:10]:
+                    if Path(f).exists():
+                        rel_path = Path(f).name
+                        yield StreamingChunk(
+                            type=StreamingChunkType.THINKING, data=f"- `{rel_path}` ✓\n"
+                        ).to_dict()
+                        found_files.append(
+                            {"path": str(f), "relevance": "HIGH", "reason": "Context file"}
+                        )
+
+            # Stream keyword search results
+            keywords = self._extract_keywords(query)
+            if keywords:
+                yield StreamingChunk(
+                    type=StreamingChunkType.STATUS,
+                    data=f"🔎 Searching for keywords: {', '.join(keywords[:5])}",
+                ).to_dict()
+
+            # Summary
+            yield StreamingChunk(
+                type=StreamingChunkType.VERDICT,
+                data=f"\n\n✅ Found {len(found_files)} relevant files",
+            ).to_dict()
+
+            yield StreamingChunk(
+                type=StreamingChunkType.RESULT,
+                data={
+                    "relevant_files": found_files,
+                    "context_summary": f"Found {len(found_files)} files",
+                    "token_estimate": len(found_files) * 200,
+                },
+            ).to_dict()
+
+        except Exception as e:
+            yield StreamingChunk(
+                type=StreamingChunkType.ERROR, data=f"Explorer failed: {str(e)}"
+            ).to_dict()
 
     def _detect_search_type(self, query: str) -> str:
         """Detecta o tipo de busca que o usuário quer."""
@@ -422,174 +498,16 @@ class ExplorerAgent(BaseAgent):
         return results[:30]
 
     def _search_by_name(self, keyword: str) -> List[Dict[str, Any]]:
-        """Busca arquivos/diretórios pelo nome."""
-        results = []
-
-        try:
-            # Buscar diretórios
-            for path in self._project_root.rglob(f"*{keyword}*"):
-                if any(ex in str(path) for ex in self.EXCLUDE_DIRS):
-                    continue
-
-                rel_path = str(path.relative_to(self._project_root))
-
-                if path.is_dir():
-                    results.append(
-                        {
-                            "path": f"{rel_path}/",
-                            "relevance": "HIGH",
-                            "reason": f"Diretório contém '{keyword}'",
-                        }
-                    )
-                    # Listar alguns arquivos do diretório
-                    try:
-                        for f in list(path.iterdir())[:5]:
-                            if f.is_file() and f.suffix in self.CODE_EXTENSIONS:
-                                results.append(
-                                    {
-                                        "path": str(f.relative_to(self._project_root)),
-                                        "relevance": "MEDIUM",
-                                        "reason": f"Em diretório '{keyword}'",
-                                    }
-                                )
-                    except (PermissionError, OSError):
-                        pass
-
-                elif path.is_file() and path.suffix in self.CODE_EXTENSIONS:
-                    results.append(
-                        {
-                            "path": rel_path,
-                            "relevance": "HIGH",
-                            "reason": f"Nome contém '{keyword}'",
-                        }
-                    )
-        except (OSError, PermissionError) as e:
-            logger.warning(f"Search by name for '{keyword}' failed: {e}")
-
-        return results
+        """Search files/directories by name. Delegates to search module."""
+        return search_by_name(keyword, self._project_root, self.EXCLUDE_DIRS, self.CODE_EXTENSIONS)
 
     def _search_content(self, keyword: str) -> List[Dict[str, Any]]:
-        """Busca keyword no conteúdo dos arquivos usando ripgrep.
-
-        FIX E2E: Now includes content snippets, not just paths.
-        """
-        results = []
-
-        try:
-            # Construir comando ripgrep
-            exclude_args = []
-            for ex in self.EXCLUDE_DIRS:
-                exclude_args.extend(["-g", f"!{ex}/**"])
-
-            cmd = (
-                ["rg", "-l", "-i", "--max-count=1"]
-                + exclude_args
-                + [keyword, str(self._project_root)]
-            )
-
-            output = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
-
-            if output.stdout:
-                for line in output.stdout.strip().split("\n")[:20]:
-                    if line:
-                        try:
-                            file_path = Path(line)
-                            rel_path = str(file_path.relative_to(self._project_root))
-
-                            # FIX E2E: Include content snippet for grounding
-                            snippet = self._extract_snippet(file_path)
-
-                            results.append(
-                                {
-                                    "path": rel_path,
-                                    "relevance": "MEDIUM",
-                                    "reason": f"Contém '{keyword}'",
-                                    "snippet": snippet,  # FIX E2E: Add actual content
-                                }
-                            )
-                        except (ValueError, OSError):
-                            pass
-
-        except FileNotFoundError:
-            # ripgrep não instalado, usar grep
-            try:
-                cmd = ["grep", "-rl", "-i", "--include=*.py", keyword, str(self._project_root)]
-                output = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
-                if output.stdout:
-                    for line in output.stdout.strip().split("\n")[:15]:
-                        if line and not any(ex in line for ex in self.EXCLUDE_DIRS):
-                            try:
-                                file_path = Path(line)
-                                rel_path = str(file_path.relative_to(self._project_root))
-
-                                # FIX E2E: Include content snippet
-                                snippet = self._extract_snippet(file_path)
-
-                                results.append(
-                                    {
-                                        "path": rel_path,
-                                        "relevance": "MEDIUM",
-                                        "reason": f"Contém '{keyword}'",
-                                        "snippet": snippet,
-                                    }
-                                )
-                            except (ValueError, OSError):
-                                pass
-            except (subprocess.TimeoutExpired, OSError):
-                pass
-        except (subprocess.TimeoutExpired, OSError):
-            pass
-
-        return results
+        """Search keyword in file contents. Delegates to search module."""
+        return search_content(keyword, self._project_root, self.EXCLUDE_DIRS, self._extract_snippet)
 
     def _deep_search_imports(self, keyword: str) -> List[Dict[str, Any]]:
-        """Deep search for imports and usages recursively."""
-        results = []
-        try:
-            # Use grep to find 'import ... keyword' or 'from ... keyword'
-            # Or usages like 'keyword('
-            cmd = [
-                "grep",
-                "-r",
-                "-l",
-                "-E",
-                rf"import.*{keyword}|from.*{keyword}|{keyword}\(",
-                str(self._project_root),
-            ]
-
-            # Exclude dirs
-            exclude_args = []
-            for ex in self.EXCLUDE_DIRS:
-                exclude_args.extend(["--exclude-dir", ex])
-
-            cmd.extend(exclude_args)
-
-            output = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
-
-            if output.stdout:
-                for line in output.stdout.strip().split("\n")[:30]:
-                    if line:
-                        try:
-                            file_path = Path(line)
-                            rel_path = str(file_path.relative_to(self._project_root))
-
-                            # FIX E2E: Include content snippet for grounding
-                            snippet = self._extract_snippet(file_path)
-
-                            results.append(
-                                {
-                                    "path": rel_path,
-                                    "relevance": "HIGH",
-                                    "reason": f"Deep usage/import of '{keyword}'",
-                                    "snippet": snippet,  # FIX E2E: Add actual content
-                                }
-                            )
-                        except (ValueError, OSError) as e:
-                            logger.debug(f"Failed to process file in deep search: {e}")
-        except (subprocess.TimeoutExpired, OSError) as e:
-            logger.warning(f"Deep search for '{keyword}' failed: {e}")
-
-        return results
+        """Deep search for imports. Delegates to search module."""
+        return deep_search_imports(keyword, self._project_root, self.EXCLUDE_DIRS)
 
     def _extract_snippet(self, file_path: Path, limit: int = 500) -> str:
         """FIX E2E: Extract meaningful snippet from file.

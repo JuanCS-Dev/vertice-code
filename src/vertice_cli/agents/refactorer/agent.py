@@ -24,7 +24,7 @@ import ast
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, AsyncIterator, Dict, List, Optional
 
 from ..base import (
     AgentCapability,
@@ -44,6 +44,7 @@ from .models import (
 from .session import TransactionalSession
 from .transformer import ASTTransformer
 from .rl_policy import RLRefactoringPolicy
+from .prompts import build_system_prompt, build_refactoring_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -95,30 +96,8 @@ class RefactorerAgent(BaseAgent):
         self.session: Optional[TransactionalSession] = None
 
     def _build_system_prompt(self) -> str:
-        """Build the system prompt for the agent."""
-        return """
-You are RefactorerAgent v8.0 - Enterprise Transactional Code Surgeon
-
-MISSION: Perform surgical code refactorings with zero behavior changes.
-
-PRINCIPLES:
-1. **Preserve Behavior**: Never change external behavior
-2. **Atomic Operations**: All changes or none (ACID)
-3. **Semantic Validity**: Check references before commit
-4. **Test-Driven**: Run tests before any commit
-5. **Format Preservation**: Keep comments, whitespace, style
-
-REFACTORING TYPES:
-- Extract Method: Pull code into new function
-- Inline Method: Replace calls with body
-- Rename Symbol: Update symbol + all references
-- Extract Class: Split large class
-- Simplify Expression: Reduce complexity
-- Modernize Syntax: Update to latest Python
-
-OUTPUT:
-Structured refactoring plan with dependencies and risk assessment.
-"""
+        """Build system prompt. Delegates to prompts module."""
+        return build_system_prompt()
 
     async def execute(self, task: AgentTask) -> AgentResponse:
         """Execute refactoring workflow.
@@ -160,6 +139,77 @@ Structured refactoring plan with dependencies and risk assessment.
                 error=str(e),
                 reasoning="Refactoring failed - all changes rolled back",
             )
+
+    async def execute_streaming(self, task: AgentTask) -> AsyncIterator[Dict[str, Any]]:
+        """Stream refactoring process with progressive updates.
+
+        Yields status updates as refactoring progresses.
+
+        Args:
+            task: Task containing refactoring request
+
+        Yields:
+            StreamingChunk dicts with refactoring progress
+        """
+        from vertice_cli.agents.protocol import StreamingChunk, StreamingChunkType
+
+        try:
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data="🔧 RefactorerAgent v8.0 starting..."
+            ).to_dict()
+
+            target = task.context.get("target_file")
+            refactoring_type = task.context.get("refactoring_type", "")
+
+            if not target:
+                yield StreamingChunk(
+                    type=StreamingChunkType.STATUS, data="🔍 Analyzing refactoring opportunities..."
+                ).to_dict()
+            else:
+                yield StreamingChunk(
+                    type=StreamingChunkType.STATUS, data=f"📁 Target: {Path(target).name}"
+                ).to_dict()
+
+            # Blast radius analysis
+            if target:
+                yield StreamingChunk(
+                    type=StreamingChunkType.STATUS, data="💥 Analyzing blast radius..."
+                ).to_dict()
+
+            # Plan generation
+            yield StreamingChunk(
+                type=StreamingChunkType.REASONING, data="### Refactoring Plan\n"
+            ).to_dict()
+
+            yield StreamingChunk(
+                type=StreamingChunkType.THINKING,
+                data=f"- Type: {refactoring_type or 'auto-detect'}\n",
+            ).to_dict()
+
+            # Execute plan
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data="⚡ Applying transformations..."
+            ).to_dict()
+
+            # Call actual execute
+            result = await self.execute(task)
+
+            if result.success:
+                yield StreamingChunk(
+                    type=StreamingChunkType.VERDICT,
+                    data="\n\n✅ Refactoring completed successfully",
+                ).to_dict()
+            else:
+                yield StreamingChunk(
+                    type=StreamingChunkType.ERROR, data=f"Refactoring failed: {result.error}"
+                ).to_dict()
+
+            yield StreamingChunk(type=StreamingChunkType.RESULT, data=result.data).to_dict()
+
+        except Exception as e:
+            yield StreamingChunk(
+                type=StreamingChunkType.ERROR, data=f"Refactoring failed: {str(e)}"
+            ).to_dict()
 
     async def _generate_standalone_plan(self, task: AgentTask) -> RefactoringPlan | AgentResponse:
         """Generate plan when no pre-existing plan is provided.
@@ -517,59 +567,8 @@ Format as markdown with specific line references."""
         metrics: Dict[str, Any],
         blast_radius: Dict[str, List[str]],
     ) -> str:
-        """Build LLM prompt for refactoring plan generation.
-
-        Args:
-            target: Target file path
-            content: File content
-            refactoring_type: Type of refactoring
-            metrics: Code metrics
-            blast_radius: Impact analysis
-
-        Returns:
-            Formatted prompt string
-        """
-        return f"""
-REFACTORING REQUEST:
-Target: {target}
-Type: {refactoring_type}
-
-CURRENT CODE:
-```python
-{content[:2000]}
-```
-
-CODE METRICS:
-{json.dumps(metrics, indent=2)}
-
-BLAST RADIUS:
-Affected Files: {", ".join(blast_radius.get("affected_files", []))}
-Risk Level: {blast_radius.get("risk_level", "UNKNOWN")}
-
-TASK:
-Generate a detailed refactoring plan that:
-1. Preserves all external behavior
-2. Updates ALL affected files in blast radius
-3. Maintains code formatting and comments
-4. Includes test updates if needed
-
-OUTPUT FORMAT (JSON):
-{{
-    "changes": [
-        {{
-            "file": "path/to/file.py",
-            "refactoring_type": "{refactoring_type}",
-            "line_start": 10,
-            "line_end": 20,
-            "description": "Extract validation logic into separate method",
-            "affected_symbols": ["old_name", "new_name"],
-            "new_code": "def validate_input():\\n    ..."
-        }}
-    ],
-    "execution_order": ["change-1", "change-2"],
-    "risk_assessment": "MEDIUM"
-}}
-"""
+        """Build refactoring prompt. Delegates to prompts module."""
+        return build_refactoring_prompt(target, content, refactoring_type, metrics, blast_radius)
 
     def _analyze_code_metrics(self, code: str) -> Dict[str, Any]:
         """Analyze code metrics for RL policy.

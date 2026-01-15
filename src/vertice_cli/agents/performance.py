@@ -26,7 +26,7 @@ import re
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, AsyncIterator, Dict, List, Optional
 
 from .base import (
     AgentCapability,
@@ -253,6 +253,99 @@ class PerformanceAgent(BaseAgent):
                 error=f"Performance analysis failed: {str(e)}",
                 reasoning="Error during performance analysis",
             )
+
+    async def execute_streaming(self, task: AgentTask) -> AsyncIterator[Dict[str, Any]]:
+        """Stream performance analysis with progressive updates.
+
+        Yields status updates as each analysis phase completes.
+
+        Args:
+            task: Task with target to analyze
+
+        Yields:
+            StreamingChunk dicts with analysis progress
+        """
+        from vertice_cli.agents.protocol import StreamingChunk, StreamingChunkType
+
+        try:
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data="⚡ PerformanceAgent starting analysis..."
+            ).to_dict()
+
+            target_path = Path(task.context.get("root_dir", "."))
+            if "target_file" in task.context:
+                target_path = Path(task.context["target_file"])
+
+            python_files = self._collect_python_files(target_path)
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS,
+                data=f"📁 Found {len(python_files)} Python files to analyze",
+            ).to_dict()
+
+            bottlenecks: List[Bottleneck] = []
+
+            # Phase 1: Complexity
+            yield StreamingChunk(
+                type=StreamingChunkType.REASONING, data="### Complexity Analysis\n"
+            ).to_dict()
+
+            complexity_issues = await self._analyze_complexity(python_files)
+            bottlenecks.extend(complexity_issues)
+            yield StreamingChunk(
+                type=StreamingChunkType.THINKING,
+                data=f"Found {len(complexity_issues)} complexity issues (O(n²)+)\n",
+            ).to_dict()
+
+            # Phase 2: N+1 Queries
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data="🔍 Detecting N+1 query patterns..."
+            ).to_dict()
+
+            n1_issues = await self._detect_n_plus_one(python_files)
+            bottlenecks.extend(n1_issues)
+            yield StreamingChunk(
+                type=StreamingChunkType.THINKING,
+                data=f"Found {len(n1_issues)} N+1 query patterns\n",
+            ).to_dict()
+
+            # Phase 3: Memory
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data="💾 Analyzing memory patterns..."
+            ).to_dict()
+
+            memory_issues = await self._analyze_memory_patterns(python_files)
+            bottlenecks.extend(memory_issues)
+
+            # Phase 4: Inefficiencies
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data="🔧 Detecting inefficiencies..."
+            ).to_dict()
+
+            ineff_issues = await self._detect_inefficiencies(python_files)
+            bottlenecks.extend(ineff_issues)
+
+            # Calculate score
+            score = self._calculate_performance_score(bottlenecks)
+
+            verdict_emoji = "✅" if score >= 80 else "⚠️" if score >= 50 else "❌"
+            yield StreamingChunk(
+                type=StreamingChunkType.VERDICT,
+                data=f"\n\n{verdict_emoji} **Performance Score: {score}/100** | {len(bottlenecks)} bottlenecks",
+            ).to_dict()
+
+            yield StreamingChunk(
+                type=StreamingChunkType.RESULT,
+                data={
+                    "score": score,
+                    "bottlenecks": len(bottlenecks),
+                    "files_analyzed": len(python_files),
+                },
+            ).to_dict()
+
+        except Exception as e:
+            yield StreamingChunk(
+                type=StreamingChunkType.ERROR, data=f"Performance analysis failed: {str(e)}"
+            ).to_dict()
 
     def _collect_python_files(self, path: Path) -> List[Path]:
         """Collect all Python files from target path."""
