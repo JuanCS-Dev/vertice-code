@@ -24,7 +24,7 @@ from typing import Set, Dict, Optional
 from dataclasses import dataclass, field
 from types import MappingProxyType
 
-from vertice_core.types import AgentRole
+from vertice_core.types.agents import AgentRole
 
 
 class AgentPermission(str, Enum):

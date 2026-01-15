@@ -128,7 +128,7 @@ class PrometheusOrchestrator:
                     # Create initial state
                     initial_state = WorldState()
                     # Simulate a thinking action
-                    simulation_result = await self.world_model.simulate_action(
+                    simulation_result, _ = await self.world_model.simulate_action(
                         action=ActionType.THINK,
                         parameters={"task": task[:200]},
                         current_state=initial_state,

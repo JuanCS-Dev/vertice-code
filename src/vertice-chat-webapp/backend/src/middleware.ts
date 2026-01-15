@@ -6,7 +6,7 @@ export function aiTransparencyMiddleware(request: NextRequest) {
 
   // Add EU AI Act required headers for AI-generated content
   response.headers.set('X-AI-Generated', 'true');
-  response.headers.set('X-Model-Version', 'gemini-pro-2026');
+  response.headers.set('X-Model-Version', 'gemini-3-pro-preview');
   response.headers.set('X-Content-Provenance', 'ai-generated');
   response.headers.set('X-AI-Provider', 'Google Vertex AI');
 
@@ -19,7 +19,7 @@ export function aiTransparencyMiddleware(request: NextRequest) {
     'credentialSubject': {
       'id': request.url,
       'contentType': 'ai-generated-text',
-      'aiModel': 'gemini-pro-2026',
+      'aiModel': 'gemini-3-pro-preview',
       'aiProvider': 'Google Vertex AI'
     }
   }));

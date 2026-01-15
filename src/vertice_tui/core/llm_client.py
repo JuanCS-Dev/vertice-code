@@ -106,7 +106,7 @@ class GeminiClient:
             Falls back to direct Gemini API only when Vertex AI unavailable.
         """
         self.api_key = api_key or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
-        self.model_name = model or os.getenv("GEMINI_MODEL") or "gemini-2.5-pro"
+        self.model_name = model or os.getenv("GEMINI_MODEL") or "gemini-3-pro-preview"
         self.temperature = temperature
         self.max_output_tokens = max_output_tokens
 

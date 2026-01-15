@@ -663,16 +663,16 @@ Working directory: {os.getcwd()}"""
 
     def get_model_name(self) -> str:
         """Get current model name."""
-        return getattr(self.llm, "model_name", "gemini-2.5-pro")
+        return getattr(self.llm, "model_name", "gemini-3-pro-preview")
 
     def get_available_models(self) -> List[str]:
         """Get list of available models."""
         # Hardcoded for now, should come from provider
         return [
-            "gemini-2.5-flash",
-            "gemini-2.5-pro",
             "gemini-3-flash-preview",
             "gemini-3-pro-preview",
+            "gemini-2.5-flash",
+            "gemini-2.5-pro",
         ]
 
     def get_current_model(self) -> str:

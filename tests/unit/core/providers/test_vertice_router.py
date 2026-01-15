@@ -13,6 +13,7 @@ from typing import TypedDict, NotRequired
 
 class ModelInfo(TypedDict):
     """Local copy of ModelInfo for isolated testing."""
+
     model: str
     provider: str
     cost_tier: NotRequired[str]
@@ -41,7 +42,7 @@ class TestModelInfoValidation:
     def test_valid_model_info_returns_model_name(self):
         """Valid model_info should return the model name."""
         model_info = ModelInfo(
-            model="gemini-2.5-pro",
+            model="gemini-3-pro-preview",
             provider="vertex-ai",
             cost_tier="enterprise",
             speed_tier="fast",
@@ -49,7 +50,7 @@ class TestModelInfoValidation:
 
         result = validate_model_info(model_info, "vertex-ai")
 
-        assert result == "gemini-2.5-pro"
+        assert result == "gemini-3-pro-preview"
 
     def test_missing_model_key_raises_value_error(self):
         """Missing 'model' key should raise ValueError with clear message."""

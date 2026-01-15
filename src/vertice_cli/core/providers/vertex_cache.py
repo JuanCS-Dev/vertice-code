@@ -36,7 +36,9 @@ MIN_TOKENS = {
 
 # Model context windows for caching optimization
 MODEL_CACHE_LIMITS = {
-    "gemini-2.5-pro": 32768,  # Optimized for large codebases
+    "gemini-3-pro-preview": 1000000,  # 1M Context
+    "gemini-3-flash-preview": 1000000,
+    "gemini-2.5-pro": 32768,
     "gemini-2.5-flash": 8192,
 }
 
@@ -47,8 +49,8 @@ class VertexCacheManager:
     def __init__(
         self,
         project_id: str,
-        location: str = "us-central1",
-        model: str = "gemini-2.5-pro",
+        location: str = "global",
+        model: str = "gemini-3-pro-preview",
     ):
         """Initialize cache manager.
 
@@ -57,7 +59,7 @@ class VertexCacheManager:
             location: Vertex AI location
             model: Default model for cache creation
         """
-        self.project = project or os.getenv("GOOGLE_CLOUD_PROJECT")
+        self.project = project_id or os.getenv("GOOGLE_CLOUD_PROJECT")
         self.location = location
         self.model = model
         self._client: Optional[Any] = None

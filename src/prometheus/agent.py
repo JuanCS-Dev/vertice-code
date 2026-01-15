@@ -114,7 +114,7 @@ class PrometheusIntegratedAgent(BaseAgent):
             # Use Vertex AI provider via adapter (RECOMMENDED)
             logger.info("Using unified Vertex AI provider via PrometheusLLMAdapter")
             vertex_provider = VertexAIProvider(
-                model_name="pro",  # gemini-2.5-pro (best quality for code)
+                model_name="pro",  # gemini-3-pro-preview (best quality for code)
             )
             llm_adapter = PrometheusLLMAdapter(
                 vertex_provider=vertex_provider,

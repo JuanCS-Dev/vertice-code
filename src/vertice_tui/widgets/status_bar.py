@@ -93,7 +93,7 @@ class StatusBar(Horizontal):
 
     # Core metrics
     mode: reactive[str] = reactive("READY")
-    model_name: reactive[str] = reactive("gemini-2.5-pro")
+    model_name: reactive[str] = reactive("gemini-3-pro-preview")
     agent_name: reactive[str] = reactive("Coder")
     token_used: reactive[int] = reactive(0)
     token_limit: reactive[int] = reactive(8000)

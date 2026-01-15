@@ -210,12 +210,8 @@ _PRICING_DB: Dict[str, Dict[str, ProviderPricing]] = {
         ),
     },
     "cerebras": {
-        "llama-3.3-70b": ProviderPricing(
-            "cerebras", "llama-3.3-70b", 0.0, 0.0, 0.0, CostTier.FREE
-        ),
-        "llama3.1-8b": ProviderPricing(
-            "cerebras", "llama3.1-8b", 0.0, 0.0, 0.0, CostTier.FREE
-        ),
+        "llama-3.3-70b": ProviderPricing("cerebras", "llama-3.3-70b", 0.0, 0.0, 0.0, CostTier.FREE),
+        "llama3.1-8b": ProviderPricing("cerebras", "llama3.1-8b", 0.0, 0.0, 0.0, CostTier.FREE),
     },
     "mistral": {
         "mistral-large-latest": ProviderPricing(
@@ -237,19 +233,25 @@ _PRICING_DB: Dict[str, Dict[str, ProviderPricing]] = {
         ),
     },
     "vertex-ai": {
-        "gemini-2.5-flash": ProviderPricing(
-            "vertex-ai", "gemini-2.5-flash", 0.075, 0.30, 0.0075, CostTier.LOW_COST
+        "gemini-3-flash": ProviderPricing(
+            "vertex-ai", "gemini-3-flash-preview", 0.075, 0.30, 0.0075, CostTier.LOW_COST
         ),
-            "gemini-2.5-pro": ProviderPricing(
-                "vertex-ai", "gemini-2.5-pro", 1.25, 5.0, 0.125, CostTier.MEDIUM
-            ),    },
+        "gemini-3-pro": ProviderPricing(
+            "vertex-ai", "gemini-3-pro-preview", 1.25, 5.0, 0.125, CostTier.MEDIUM
+        ),
+        # Legacy keys for compatibility
+        "gemini-2.5-flash": ProviderPricing(
+            "vertex-ai", "gemini-3-flash-preview", 0.075, 0.30, 0.0075, CostTier.LOW_COST
+        ),
+        "gemini-2.5-pro": ProviderPricing(
+            "vertex-ai", "gemini-3-pro-preview", 1.25, 5.0, 0.125, CostTier.MEDIUM
+        ),
+    },
     "azure-openai": {
         "gpt4o-mini": ProviderPricing(
             "azure-openai", "gpt4o-mini", 0.15, 0.60, 0.015, CostTier.LOW_COST
         ),
-        "gpt-4o": ProviderPricing(
-            "azure-openai", "gpt-4o", 2.50, 10.0, 0.25, CostTier.PREMIUM
-        ),
+        "gpt-4o": ProviderPricing("azure-openai", "gpt-4o", 2.50, 10.0, 0.25, CostTier.PREMIUM),
     },
 }
 

@@ -63,7 +63,7 @@ class PrometheusLLMAdapter:
         self,
         vertex_provider: Any,  # VertexAIProvider instance
         enable_thinking: bool = True,
-        default_model: str = "gemini-2.5-pro",
+        default_model: str = "gemini-3-pro-preview",
     ):
         """
         Initialize adapter with Vertex AI provider.
@@ -71,7 +71,7 @@ class PrometheusLLMAdapter:
         Args:
             vertex_provider: VertexAIProvider instance (enterprise-grade)
             enable_thinking: Whether to use thinking mode for complex tasks
-            default_model: Default model (gemini-2.5-pro for code quality)
+            default_model: Default model (gemini-3-pro-preview for code quality)
         """
         self.vertex_provider = vertex_provider
         self.enable_thinking = enable_thinking

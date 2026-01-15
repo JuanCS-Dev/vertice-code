@@ -100,6 +100,8 @@ class AgentRole(str, Enum):
     # Governance roles
     GOVERNANCE = "governance"
     COUNSELOR = "counselor"
+    MAESTRO = "maestro"
+    PROMETHEUS = "prometheus"
 
 
 class AgentCapability(str, Enum):
