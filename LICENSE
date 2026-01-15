@@ -1,83 +1,22 @@
-VERTICE AI PROPRIETARY LICENSE
-Version 1.0, January 2026
+PolyForm Shield License 1.0.0
 
-Copyright (c) 2025-2026 Juan Carlos de Souza. All Rights Reserved.
+Copyright (c) 2025-2026 Juan Carlos de Souza and Vertice AI.
 
-================================================================================
-                              PROPRIETARY LICENSE
-================================================================================
+1. Rights Granted
 
-This software and associated documentation files (the "Software") are the
-exclusive property of Juan Carlos de Souza and Vertice AI ("Licensor").
+Licensor grants to you a license, under its copyrights, to use, copy, modify, and distribute the software, provided that you do not compete with the software.
 
-1. GRANT OF LICENSE
--------------------
-Subject to payment of applicable fees and acceptance of the Terms of Service
-at https://vertice-ai.com/terms, Licensor grants you a limited, non-exclusive,
-non-transferable, revocable license to use the Software solely through the
-Vertice AI hosted service (SaaS).
+2. Limitations
 
-2. RESTRICTIONS
----------------
-Unless you have obtained a separate written license from the Licensor, you
-may NOT:
+This license is subject to the following limitations:
 
-   a) Copy, modify, merge, publish, distribute, sublicense, or sell copies
-      of the Software;
-   
-   b) Use the Software to provide a competing service, whether hosted or
-      self-hosted;
-   
-   c) Reverse engineer, decompile, disassemble, or attempt to derive the
-      source code of the Software;
-   
-   d) Remove, alter, or obscure any proprietary notices on the Software;
-   
-   e) Use the Software for any purpose other than as expressly permitted
-      herein.
+    a. Competitors: You may not use the software to develop, test, produce, or market a product or service that competes with the software.
+    b. Notices: You must include a copy of this license in all copies of the software you distribute.
 
-3. ACADEMIC & RESEARCH USE
---------------------------
-For academic, educational, or non-commercial research use, please refer to
-the separate ACADEMIC LICENSE available at:
+3. Termination
 
-   LICENSE-ACADEMIC.md
+If you violate any term of this license, your rights under this license terminate immediately.
 
-Academic licenses are granted free of charge to qualified educational
-institutions, researchers, and students for non-commercial purposes only.
+4. Disclaimer
 
-4. COMMERCIAL LICENSING
------------------------
-For commercial use, enterprise deployments, or custom licensing arrangements,
-please contact:
-
-   Email: licensing@vertice-ai.com
-   Website: https://vertice-ai.com/enterprise
-
-5. NO WARRANTY
---------------
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-6. TERMINATION
---------------
-This license is effective until terminated. Your rights under this license
-will terminate automatically without notice if you fail to comply with any
-of its terms.
-
-7. GOVERNING LAW
-----------------
-This license shall be governed by and construed in accordance with the laws
-of Brazil, without regard to its conflict of law provisions.
-
-================================================================================
-
-For questions about licensing, please contact: legal@vertice-ai.com
-
-Vertice AI - Intelligent Multi-LLM Orchestration Platform
-https://vertice-ai.com
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
