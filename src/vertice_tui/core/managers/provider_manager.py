@@ -216,6 +216,30 @@ class ProviderManager:
             self._maximus = self._maximus_factory()
         return self._maximus
 
+    # Patterns for messages that should NEVER go to heavy orchestration
+    SIMPLE_BYPASS_PATTERNS: List[str] = [
+        r"^(oi|ol[aá]|hi|hello|hey|e\s*a[ií])\b",  # Greetings
+        r"^(obrigad[oa]|thanks?|valeu|vlw)\b",  # Thanks
+        r"^(ok|certo|entend[io]|got\s*it)\b",  # Acknowledgments
+        r"^(sim|s[ií]|yes|yep|yeah|no|n[aã]o)\s*[,.]?$",  # Yes/No
+    ]
+
+    def _is_simple_message(self, message: str) -> bool:
+        """Check if message is too simple for heavy orchestration.
+        
+        Returns True for greetings, acknowledgments, and very short messages
+        that should bypass Prometheus/Maximus and go directly to Gemini.
+        """
+        if not message or len(message.strip()) < 5:
+            return True
+        
+        message_lower = message.lower().strip()
+        for pattern in self.SIMPLE_BYPASS_PATTERNS:
+            if re.match(pattern, message_lower, re.IGNORECASE):
+                return True
+        
+        return False
+
     def get_client(self, message: str = "") -> Tuple[LLMClientProtocol, str]:
         """Get appropriate LLM client based on mode and task complexity.
 
@@ -225,6 +249,12 @@ class ProviderManager:
         Returns:
             Tuple of (client, provider_name)
         """
+        # CRITICAL: Always bypass heavy orchestration for simple messages
+        # This prevents "oi" from triggering Prometheus/Maximus pipelines
+        if self._is_simple_message(message):
+            provider_name = self._get_gemini_provider_name()
+            return self.gemini, provider_name
+
         if self._mode == "prometheus":
             return self._get_prometheus(), "prometheus"
 

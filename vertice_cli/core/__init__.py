@@ -1,1 +1,0 @@
-# Vertice CLI core package

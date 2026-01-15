@@ -8,7 +8,10 @@ on:
 
 env:
   PYTHON_VERSION: '3.11'
-  NODE_VERSION: '18'
+  NODE_VERSION: '22'
+  GCP_PROJECT: vertice-ai
+  GCP_REGION: southamerica-east1
+  ARTIFACT_REGISTRY: southamerica-east1-docker.pkg.dev/vertice-ai/app-artifacts
 
 jobs:
   # ===== QUALITY GATES =====
@@ -317,20 +320,29 @@ jobs:
           name: build-artifacts
 
       # Deploy to staging environment
+      - name: 🔑 Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: 🛠️ Setup GCloud
+        uses: google-github-actions/setup-gcloud@v2
+
       - name: Deploy backend to staging
         run: |
-          echo "Deploying backend to staging..."
-          # Add your staging deployment commands here
+          gcloud run deploy vertice-backend-staging \
+            --image=${{ env.ARTIFACT_REGISTRY }}/vertice-backend:latest \
+            --region=$GCP_REGION \
+            --platform=managed \
+            --allow-unauthenticated
 
       - name: Deploy frontend to staging
         run: |
-          echo "Deploying frontend to staging..."
-          # Add your staging deployment commands here
-
-      - name: Run smoke tests
-        run: |
-          echo "Running smoke tests on staging..."
-          # Add smoke test commands here
+          gcloud run deploy vertice-frontend-staging \
+            --image=${{ env.ARTIFACT_REGISTRY }}/vertice-frontend:latest \
+            --region=us-central1 \
+            --platform=managed \
+            --allow-unauthenticated
 
   # ===== PRODUCTION DEPLOYMENT =====
   deploy-production:
@@ -350,20 +362,30 @@ jobs:
           name: build-artifacts
 
       # Production deployment with blue-green strategy
+      - name: 🔑 Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: 🛠️ Setup GCloud
+        uses: google-github-actions/setup-gcloud@v2
+
       - name: Deploy backend to production (blue-green)
         run: |
-          echo "Deploying backend to production (blue-green)..."
-          # Add blue-green deployment commands here
+          # Deploy with --no-traffic for blue-green
+          gcloud run deploy vertice-backend \
+            --image=${{ env.ARTIFACT_REGISTRY }}/vertice-backend:latest \
+            --region=$GCP_REGION \
+            --platform=managed \
+            --no-traffic \
+            --tag=green
 
       - name: Deploy frontend to production
         run: |
-          echo "Deploying frontend to production..."
-          # Add production deployment commands here
-
-      - name: Run production health checks
-        run: |
-          echo "Running production health checks..."
-          # Add production validation commands here
+          gcloud run deploy vertice-frontend \
+            --image=${{ env.ARTIFACT_REGISTRY }}/vertice-frontend:latest \
+            --region=us-central1 \
+            --platform=managed
 
       - name: Notify deployment success
         run: |

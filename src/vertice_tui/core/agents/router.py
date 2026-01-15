@@ -125,6 +125,12 @@ class AgentRouter:
             (r"\b(deploy|implant[ae]|infra|terraform|ansible)\b", 0.9),
             (r"\b(container|imagem|image|pod|service)\b", 0.8),
             (r"\b(github\s*actions?|gitlab\s*ci|jenkins|circleci)\b", 0.95),
+            # Audit patterns - high confidence for real system audits
+            (r"\b(audit|auditoria)\s*(complet[ao]?|completa?)?\b", 0.95),
+            (r"\b(prontid[aã]o|ready|pronto)\s*(para|for|de)?\s*(deploy|produ[çc][aã]o|production)?\b", 0.92),
+            (r"\bpronto[s]?\s*para\s*(deploy|produ[çc][aã]o)\b", 0.95),
+            (r"\bready\s*(for|to)\s*(deploy|production|ship)\b", 0.95),
+            (r"\b(chec[ck]|verif[iy]|analisa).*(infra|deploy|produ[çc][aã]o)\b", 0.88),
         ],
         "data": [
             (r"\b(database|banco\s*de\s*dados)\b", 0.9),

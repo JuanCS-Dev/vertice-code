@@ -28,6 +28,7 @@ class CommandRouter:
         self._session = None
         self._operations = None
         self._context = None
+        self._a2a = None
 
     @property
     def basic(self):
@@ -83,6 +84,15 @@ class CommandRouter:
             self._context = ContextCommandHandler(self.app)
         return self._context
 
+    @property
+    def a2a(self):
+        """Lazy load A2A commands handler."""
+        if self._a2a is None:
+            from vertice_tui.handlers.a2a import A2ACommandHandler
+
+            self._a2a = A2ACommandHandler(self.app)
+        return self._a2a
+
     async def dispatch(self, cmd: str, view: "ResponseView") -> bool:
         """
         Dispatch a command to the appropriate handler.
@@ -135,8 +145,17 @@ class CommandRouter:
             "/justica",
             "/sofia",
             "/data",
+            # Core agents (Phase 6)
+            "/orchestrator",
+            "/coder",
+            "/researcher",
         ):
             await self.agents.handle(command, args, view)
+            return True
+
+        # A2A commands (Phase 6.3)
+        if command == "/a2a":
+            await self.a2a.handle(command, args, view)
             return True
 
         # Claude parity commands
@@ -226,6 +245,11 @@ class CommandRouter:
             await self.app._handle_chat(custom_prompt, view)
             return True
 
+        # Unknown command
+        view.add_error(f"Unknown command: {command}")
+        view.add_system_message("Type `/help` for available commands.")
+        return False
+
     async def _handle_export(self, view) -> None:
         """Handle conversation export command."""
         from vertice_tui.widgets.export_modal import ExportModal
@@ -254,29 +278,3 @@ class CommandRouter:
         view.add_success("📤 Export modal opened. Select template and export your conversations!")
         return True
 
-    async def dispatch(self, raw_command: str, view=None) -> bool:
-        """Dispatch a command to the appropriate handler."""
-        command = raw_command.strip().lstrip("/")
-        args = ""
-
-        if " " in command:
-            command, args = command.split(" ", 1)
-
-        # Handle commands
-        if command == "help":
-            self._show_help(view)
-            return True
-        elif command == "status":
-            await self._show_status(view)
-            return True
-        elif command == "agents":
-            await self._show_agents(view)
-            return True
-        elif command == "export":
-            await self._handle_export(view)
-            return True
-
-        # Unknown command
-        view.add_error(f"Unknown command: {command}")
-        view.add_system_message("Type `/help` for available commands.")
-        return False

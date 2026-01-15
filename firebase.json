@@ -13,7 +13,7 @@
           "source": "/api/**",
           "run": {
             "serviceId": "vertice-backend",
-            "region": "us-central1"
+            "region": "southamerica-east1"
           }
         }
       ],

@@ -101,8 +101,8 @@ AGENT_REGISTRY: Dict[str, AgentInfo] = {
         name="devops",
         role="DEVOPS",
         description="Infrastructure and deployment",
-        capabilities=["docker", "kubernetes", "ci_cd"],
-        module_path="vertice_cli.agents.devops_agent",
+        capabilities=["docker", "kubernetes", "ci_cd", "audit"],
+        module_path="vertice_cli.agents.devops.agent",
         class_name="DevOpsAgent",
     ),
     "justica": AgentInfo(

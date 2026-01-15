@@ -16,11 +16,10 @@ from typing import Any, AsyncIterator, Dict, List, Optional, Protocol
 
 logger = logging.getLogger(__name__)
 
-# Priority order: Vertex AI FIRST (Gemini 3 via GCP), then FREE tier
+# Priority order: Vertex AI FIRST (Gemini 2.5 Pro - user's available model)
 DEFAULT_PRIORITY: List[str] = [
-    "anthropic-vertex",
-    "vertex-ai",
-    "groq",
+    "vertex-ai",  # PRIMARY - Gemini 2.5 Pro (user's only available model)
+    "groq",  # Fast free tier fallback
     "cerebras",
     "mistral",
     "azure",

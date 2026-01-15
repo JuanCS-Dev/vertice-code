@@ -1,15 +1,13 @@
 """Nebius API provider implementation."""
 
 import os
-from typing import Dict, List, Optional, AsyncGenerator
+from typing import Dict, List, Optional, AsyncGenerator, Any
 import logging
 
 logger = logging.getLogger(__name__)
 
-# REMOVED top-level import: import openai
-
 class NebiusProvider:
-    """Nebius AI Studio provider (OpenAI-compatible)."""
+    """Nebius Token Factory provider (OpenAI-compatible)."""
 
     def __init__(self, api_key: Optional[str] = None):
         """Initialize Nebius provider.
@@ -18,7 +16,8 @@ class NebiusProvider:
             api_key: Nebius API key (defaults to NEBIUS_API_KEY env var)
         """
         self.api_key = api_key or os.getenv("NEBIUS_API_KEY")
-        self.model_name = os.getenv("NEBIUS_MODEL", "Qwen/Qwen2.5-Coder-32B-Instruct")
+        # Default to DeepSeek V3 as requested by user ("deepseek novo")
+        self.model_name = os.getenv("NEBIUS_MODEL", "deepseek-ai/DeepSeek-V3-0324")
         self._client = None
         self._openai = None
 
@@ -28,7 +27,6 @@ class NebiusProvider:
             try:
                 import openai
                 self._openai = openai
-                logger.info("Lazy loaded openai")
             except ImportError:
                 logger.error("openai not installed")
                 raise RuntimeError("openai not installed")
@@ -42,7 +40,7 @@ class NebiusProvider:
                 try:
                     self._client = self._openai.AsyncOpenAI(
                         api_key=self.api_key,
-                        base_url="https://api.studio.nebius.ai/v1/"
+                        base_url="https://api.tokenfactory.nebius.com/v1/"
                     )
                     logger.info(f"Nebius provider initialized with model: {self.model_name}")
                 except Exception as e:
@@ -54,33 +52,38 @@ class NebiusProvider:
         """Check if provider is available."""
         return self.client is not None
 
+    def get_model_info(self) -> Dict[str, Any]:
+        """Get model information."""
+        return {
+            "model": self.model_name,
+            "provider": "nebius",
+            "context_window": 128000, # Approximate for V3
+            "capabilities": ["code", "chat", "reasoning"]
+        }
+
     async def generate(
         self,
         messages: List[Dict[str, str]],
-        max_tokens: int = 2048,
+        model: Optional[str] = None,
+        max_tokens: int = 4096,
         temperature: float = 0.6,
         **kwargs
     ) -> str:
-        """Generate completion from messages.
-        
-        Args:
-            messages: List of message dicts with 'role' and 'content'
-            max_tokens: Maximum tokens to generate
-            temperature: Sampling temperature
-            
-        Returns:
-            Generated text
-        """
+        """Generate completion from messages."""
         if not self.is_available():
             raise RuntimeError("Nebius provider not available")
 
+        # Use passed model or default
+        target_model = model or self.model_name
+
         try:
             response = await self.client.chat.completions.create(
-                model=self.model_name,
+                model=target_model,
                 messages=messages,
                 max_tokens=max_tokens,
                 temperature=temperature,
-                extra_body={"top_p": 0.9}
+                # DeepSeek often benefits from top_p
+                top_p=0.95
             )
 
             return response.choices[0].message.content
@@ -89,34 +92,28 @@ class NebiusProvider:
             logger.error(f"Nebius generation failed: {e}")
             raise
 
-    async def stream_generate(
+    async def stream_chat(
         self,
         messages: List[Dict[str, str]],
-        max_tokens: int = 2048,
+        model: Optional[str] = None,
+        max_tokens: int = 4096,
         temperature: float = 0.6,
         **kwargs
     ) -> AsyncGenerator[str, None]:
-        """Stream generation from messages.
-        
-        Args:
-            messages: List of message dicts
-            max_tokens: Maximum tokens to generate
-            temperature: Sampling temperature
-            
-        Yields:
-            Generated text chunks
-        """
+        """Stream generation from messages."""
         if not self.is_available():
             raise RuntimeError("Nebius provider not available")
 
+        target_model = model or self.model_name
+
         try:
             stream = await self.client.chat.completions.create(
-                model=self.model_name,
+                model=target_model,
                 messages=messages,
                 max_tokens=max_tokens,
                 temperature=temperature,
                 stream=True,
-                extra_body={"top_p": 0.9}
+                top_p=0.95
             )
 
             async for chunk in stream:
@@ -127,18 +124,7 @@ class NebiusProvider:
             logger.error(f"Nebius chat error: {e}")
             raise
 
-    async def stream_chat(
-        self,
-        messages: List[Dict[str, str]],
-        max_tokens: int = 2048,
-        temperature: float = 0.6,
-        **kwargs
-    ) -> AsyncGenerator[str, None]:
-        """
-        Alias for stream_generate to maintain compatibility.
-        
-        Some parts of the codebase call stream_chat() instead of stream_generate().
-        This method delegates to stream_generate().
-        """
-        async for chunk in self.stream_generate(messages, max_tokens, temperature, **kwargs):
+    # Compat for older shared protocol if needed
+    async def stream_generate(self, *args, **kwargs):
+        async for chunk in self.stream_chat(*args, **kwargs):
             yield chunk

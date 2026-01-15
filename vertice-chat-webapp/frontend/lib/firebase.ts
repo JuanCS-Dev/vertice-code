@@ -4,12 +4,12 @@ import { getFirestore } from 'firebase/firestore';
 
 // Firebase config - with fallback for build time
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "demo-api-key",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "demo.firebaseapp.com",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "demo-project",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "demo-project.appspot.com",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "123456789",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:123456789:web:abcdef",
+  apiKey: "AQ.Ab8RN6KEdIApACMC2Ozz95OJTOZyAWe6AZhMhTbD0qSD7CG_hA",
+  authDomain: "vertice-ai.firebaseapp.com",
+  projectId: "vertice-ai",
+  storageBucket: "vertice-ai.firebasestorage.app",
+  messagingSenderId: "239800439060",
+  appId: "1:239800439060:web:4f6c41b817c16260a7f201",
 };
 
 // Initialize Firebase (Singleton pattern)

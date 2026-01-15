@@ -17,6 +17,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
+# Create non-root user for security
+RUN groupadd -r vertice && useradd -r -g vertice vertice \
+    && chown -R vertice:vertice /app
+
+USER vertice
+
 # Expose port
 EXPOSE 8080
 

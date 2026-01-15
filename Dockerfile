@@ -20,5 +20,11 @@ COPY . .
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
+# Create non-root user for security
+RUN groupadd -r vertice && useradd -r -g vertice vertice \
+    && chown -R vertice:vertice /blaxel
+
+USER vertice
+
 # Run the entry point
 CMD ["python", "prometheus_entry.py"]

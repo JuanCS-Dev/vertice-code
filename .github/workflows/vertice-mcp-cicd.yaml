@@ -17,9 +17,9 @@ on:
           - production
 
 env:
-  GCP_PROJECT: vertice-ai-collective
+  GCP_PROJECT: vertice-ai
   GCP_REGION: us-central1
-  ARTIFACT_REGISTRY: us-central1-docker.pkg.dev/vertice-ai-collective/mcp-artifacts
+  ARTIFACT_REGISTRY: us-central1-docker.pkg.dev/vertice-ai/mcp-artifacts
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
@@ -207,7 +207,7 @@ jobs:
         run: |
           echo "🚀 Deploying to staging environment..."
 
-          gcloud run deploy vertice-mcp-staging \
+          gcloud run deploy vertice-mcp \
             --image=${{ needs.build.outputs.image-tag }} \
             --region=$GCP_REGION \
             --platform=managed \
@@ -240,7 +240,7 @@ jobs:
         run: |
           echo "🚀 Deploying to production..."
 
-          gcloud run deploy vertice-mcp-production \
+          gcloud run deploy vertice-mcp \
             --image=${{ needs.build.outputs.image-tag }} \
             --region=$GCP_REGION \
             --platform=managed \

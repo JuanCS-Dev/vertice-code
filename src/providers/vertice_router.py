@@ -121,30 +121,29 @@ class VerticeRouter:
     """
 
     # PROVIDER PRIORITIES (Lower = Higher Priority)
-    # Claude 4.5 is the supreme primary powerhouse for 2026.
+    # Vertex AI (Gemini 2.5 Pro) is the primary since user only has this available.
     PROVIDER_PRIORITY = {
-        "anthropic-vertex": 1,  # PRIMARY - Claude 4.5 (Optimized & Powerful)
-        "vertex-ai": 2,  # SECONDARY - Gemini (Stable Tooling)
-        "groq": 10,
-        "cerebras": 11,
-        "mistral": 12,
+        "vertex-ai": 1,  # PRIMARY - Gemini 2.5 Pro (User's only available model)
+        "nebius": 2,     # SECONDARY - DeepSeek V3 (Sovereign Code)
+        "groq": 3,  # Fast free tier fallback
+        "cerebras": 4,
+        "mistral": 5,
     }
 
-    # COMPLEXITY ROUTING (2026 Standards)
-    # All levels now prefer Anthropic Vertex as the first option.
+    # COMPLEXITY ROUTING (Vertex AI first - User's available model)
     COMPLEXITY_ROUTING = {
-        TaskComplexity.SIMPLE: ["anthropic-vertex", "vertex-ai", "groq"],
-        TaskComplexity.MODERATE: ["anthropic-vertex", "vertex-ai", "groq"],
-        TaskComplexity.COMPLEX: ["anthropic-vertex", "vertex-ai"],
-        TaskComplexity.CRITICAL: ["anthropic-vertex", "vertex-ai"],
+        TaskComplexity.SIMPLE: ["vertex-ai", "groq", "cerebras"],
+        TaskComplexity.MODERATE: ["vertex-ai", "nebius", "groq", "mistral"],
+        TaskComplexity.COMPLEX: ["vertex-ai", "nebius"],
+        TaskComplexity.CRITICAL: ["vertex-ai", "nebius"],
     }
 
     # SPEED ROUTING
     SPEED_ROUTING = {
-        SpeedRequirement.INSTANT: ["groq", "cerebras", "anthropic-vertex"],
-        SpeedRequirement.FAST: ["anthropic-vertex", "vertex-ai", "groq"],
-        SpeedRequirement.NORMAL: ["anthropic-vertex", "vertex-ai"],
-        SpeedRequirement.RELAXED: ["anthropic-vertex", "vertex-ai"],
+        SpeedRequirement.INSTANT: ["groq", "cerebras", "vertex-ai"],
+        SpeedRequirement.FAST: ["vertex-ai", "groq", "cerebras"],
+        SpeedRequirement.NORMAL: ["vertex-ai", "groq"],
+        SpeedRequirement.RELAXED: ["vertex-ai", "groq"],
     }
 
     def __init__(self):
@@ -184,6 +183,15 @@ class VerticeRouter:
         except Exception as e:
             logger.warning(f"Failed to initialize vertex-ai: {e}")
 
+        # Nebius (DeepSeek V3)
+        if os.getenv("NEBIUS_API_KEY"):
+            try:
+                from src.providers.nebius import NebiusProvider
+                self._providers["nebius"] = NebiusProvider()
+                self._status["nebius"] = ProviderStatus(name="nebius")
+            except Exception as e:
+                logger.warning(f"Failed to initialize nebius: {e}")
+
     def _init_provider_on_demand(self, provider_name: str):
         """Initialize a provider on demand."""
         # For now, just call _init_providers (they're all initialized at once)
@@ -218,13 +226,11 @@ class VerticeRouter:
             kw in task_description.lower() for kw in ["tool", "function", "api", "execute", "run"]
         )
 
-        # Force Anthropic for RAG in 2026 due to Prompt Caching efficiency
+        # Force Vertex AI for RAG (Gemini has good context handling)
         if is_rag and not required_provider:
-            required_provider = "anthropic-vertex"
+            required_provider = "vertex-ai"
 
-        # Force Gemini for Tooling (if user preferred and Gemini 3 works)
-        # Note: Gemini 3 is often preferred for latency in tools, but user reported issues.
-        # We stick to stable vertex-ai (Gemini 2.5) for now.
+        # Force Gemini for Tooling
         if is_tooling and not required_provider:
             required_provider = "vertex-ai"
 
@@ -280,6 +286,13 @@ class VerticeRouter:
                 model_name = "claude-sonnet-4-5@20250929"  # Sonnet
             else:
                 model_name = "claude-opus-4-5@20251101"  # Opus
+        
+        elif selected == "vertex-ai":
+            # Prefer Gemini 3 for 2026 workflows
+            if complexity in [TaskComplexity.SIMPLE, TaskComplexity.MODERATE]:
+                model_name = "flash-3" # Ultra-fast Gemini 3
+            else:
+                model_name = "pro-3"   # High-reasoning Gemini 3
 
         return RoutingDecision(
             provider_name=selected,

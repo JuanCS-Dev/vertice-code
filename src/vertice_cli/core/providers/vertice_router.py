@@ -146,10 +146,10 @@ class VerticeRouter:
 
     # Task complexity to provider mapping (Enterprise mode - Vertex AI first)
     COMPLEXITY_ROUTING = {
-        TaskComplexity.SIMPLE: ["anthropic-vertex", "vertex-ai", "groq"],
-        TaskComplexity.MODERATE: ["anthropic-vertex", "vertex-ai", "mistral"],
-        TaskComplexity.COMPLEX: ["anthropic-vertex", "azure-openai", "vertex-ai"],
-        TaskComplexity.CRITICAL: ["anthropic-vertex", "azure-openai"],  # Enterprise only
+        TaskComplexity.SIMPLE: ["vertex-ai", "groq", "cerebras"],
+        TaskComplexity.MODERATE: ["vertex-ai", "groq", "mistral"],
+        TaskComplexity.COMPLEX: ["vertex-ai", "azure-openai"],
+        TaskComplexity.CRITICAL: ["vertex-ai", "azure-openai"],  # Enterprise only
     }
 
     # Speed requirement to provider mapping (Vertex AI is fast!)
@@ -212,8 +212,8 @@ class VerticeRouter:
         for name, (cls, kwargs) in provider_classes.items():
             try:
                 provider = cls(**kwargs)
-                # Special handling for anthropic-vertex - try even if is_available() fails
-                if name == "anthropic-vertex" or provider.is_available():
+                # Only initialize providers that are actually available
+                if provider.is_available():
                     self._providers[name] = provider
                     info = provider.get_model_info()
                     daily_limit = info.get("requests_per_day", 10000)
@@ -260,10 +260,10 @@ class VerticeRouter:
         return self.route(task_description, complexity, speed, prefer_free)
 
     async def _analyze_task_with_claude(self, task_description: str) -> Dict[str, Any]:
-        """Use Claude to analyze task complexity and requirements."""
-        # Get the best available LLM (prefer Claude)
+        """Use LLM to analyze task complexity and requirements."""
+        # Get the best available LLM (prefer Vertex AI)
         llm_client = None
-        for provider_name in ["anthropic-vertex", "vertex-ai", "groq"]:
+        for provider_name in ["vertex-ai", "groq", "cerebras"]:
             if provider_name in self._providers:
                 llm_client = self._providers[provider_name]
                 break
@@ -287,7 +287,7 @@ Provide analysis in JSON format:
     "speed": "instant|fast|normal|relaxed",
     "skills_needed": ["skill1", "skill2"],
     "estimated_time": "short|medium|long",
-    "recommended_provider": "anthropic-vertex|vertex-ai|groq|etc",
+    "recommended_provider": "vertex-ai|groq|etc",
     "reasoning": "brief explanation"
 }}
 

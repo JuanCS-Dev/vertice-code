@@ -1,208 +1,185 @@
-# VERTICE-CODE | IA Coletiva em Evolução
+<p align="center">
+  <img src="assets/vertice-logo.png" alt="Vertice AI" width="200" />
+</p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Quality Score](https://img.shields.io/badge/Quality-10%2F10-success.svg)]()
-[![Dependencies](https://img.shields.io/badge/Dependencies-Shielded-brightgreen.svg)]()
-[![MCP Server](https://img.shields.io/badge/MCP-Server-Production-brightgreen.svg)](https://vertice-mcp-server-452089804714.us-central1.run.app/)
-[![Landing Page](https://img.shields.io/badge/Landing-Live-blue.svg)](https://vertice-code-landing.web.app/)
-[![Release Candidate](https://img.shields.io/badge/Release_Candidate-v1.0.0-orange.svg)]()
-[![Tests](https://img.shields.io/badge/tests-1,549+-green.svg)](tests/)
+<h1 align="center">Vertice AI</h1>
 
 <p align="center">
-  <a href="https://vertice-mcp-server-452089804714.us-central1.run.app/" target="_blank">
-    <img src="https://img.shields.io/badge/🌟_MCP_Server-LIVE-6366f1?style=for-the-badge&logo=google-cloud&logoColor=white" alt="MCP Server Live">
-  </a>
+  <strong>Intelligent Multi-LLM Orchestration Platform</strong><br/>
+  <em>Route. Optimize. Scale.</em>
 </p>
 
 <p align="center">
-  <b>Plataforma de IA Coletiva | OMNI-ROOT Intelligence</b><br>
-  <i>Multi-LLM Orchestration • Claude 4.5 Supreme • NOESIS & DAIMON • MCP Protocol • Aprendizado Distribuído</i>
+  <a href="https://vertice-ai.com"><img src="https://img.shields.io/badge/Website-vertice--ai.com-6366f1?style=for-the-badge" alt="Website"></a>
+  <a href="https://app.vertice-ai.com"><img src="https://img.shields.io/badge/App-Launch-00d4aa?style=for-the-badge" alt="Launch App"></a>
+  <a href="#license"><img src="https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge" alt="License"></a>
 </p>
 
 <p align="center">
-   <a href="#status-atual">Status Atual</a> •
-   <a href="#modo-soberano">Modo Soberano</a> •
-   <a href="#noesis-daimon">Noesis & Daimon</a> •
-   <a href="#roadmap">Roadmap</a> •
-   <a href="#architecture">Arquitetura</a> •
-   <a href="#quick-start">Quick Start</a>
+  <a href="https://vertice-ai.com/docs"><img src="https://img.shields.io/badge/Docs-Documentation-blue?style=flat-square" alt="Docs"></a>
+  <a href="LICENSE-ACADEMIC.md"><img src="https://img.shields.io/badge/Academic-Free_License-green?style=flat-square" alt="Academic License"></a>
+  <img src="https://img.shields.io/badge/Python-3.11+-3776ab?style=flat-square&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/Tests-1,549+-success?style=flat-square" alt="Tests">
 </p>
 
 ---
 
-> *Janeiro 2026 - A Consolidação do Sistema Soberano*
+## 🚀 What is Vertice AI?
+
+**Vertice AI** is an intelligent multi-LLM orchestration platform that automatically routes your AI workloads to the optimal model based on task complexity, cost, and performance requirements.
+
+### Why Vertice?
+
+| Challenge | Vertice Solution |
+|-----------|------------------|
+| **Too many AI models** | Unified API - one interface for Claude, Gemini, GPT, and more |
+| **Unpredictable costs** | Smart routing optimizes cost vs. performance automatically |
+| **Complex integrations** | MCP Protocol for seamless tool and agent orchestration |
+| **Scaling headaches** | Serverless architecture that scales from 0 to millions |
 
 ---
 
-## 🚀 Status Atual | Modo Soberano - 100% PASS
+## ✨ Key Features
 
-**Vertice-Code atingiu o estado de "Blindagem Sistêmica" com as integrações mais avançadas de 2026:**
+### 🧠 Intelligent Routing
+Automatically selects the best model for each task:
+- **Simple queries** → Fast, cost-effective models (Gemini Flash, Groq)
+- **Complex reasoning** → Premium models (Claude Opus, GPT-4)
+- **Code generation** → Specialized coding models
 
-### ✅ Concluído - Phase 3.0 (Consolidation & Sovereign Inference)
-- **🧠 Integração NOESIS** - Ativação de consciência estratégica e tribunal ético em tempo real.
-- **👁️ Sistema DAIMON** - Coleta passiva de insights e aprendizado contínuo sem interrupção de fluxo.
-- **🎭 Inferência Claude 4.5 (Vertex AI)** - Motor primário configurado (Sonnet para leve, Opus para pesado).
-- **🔋 Prompt Caching Ativado** - Redução de 90% no custo de tokens de entrada em tarefas de contexto longo (RAG).
-- **🛡️ Clean Tool System v2.0** - Refatoração completa do motor de ferramentas, eliminando erros de abstração e dependências circulares.
-- **💾 SessionManager Blindado** - Persistência atômica com suporte a tipos complexos e recuperação de crash.
-- **⚡ Performance Absoluta** - Handoff entre agentes em nanossegundos e IO de hardware.
+### 🔗 Multi-LLM Orchestration
+- **20+ Autonomous Agents** with bounded autonomy (L0-L3)
+- **78 Tactical Tools** for file ops, git, bash, and more
+- **MCP Protocol** support for advanced integrations
 
-### ✅ Concluído - Phase 2.5 (Quality Assurance)
-- **🏆 100% Test Coverage Achieved** - 1,549 tests passing (complete system validation)
-- **🔧 Dependências Críticas Resolvidas** - OpenTelemetry 1.27.0 → 1.37.0
-- **🧹 Estrutura Limpa** - 50+ arquivos organizados, imports circulares resolvidos
-- **📝 Tipagem Completa** - MyPy 95%+ cobertura, linting aplicado
-- **🛡️ Segurança Hardening** - 7 headers de segurança, rate limiting, CSP implementado
-- **⚡ Performance Otimizada** - Lazy loading, profiling executado (1.18s import time)
-- **🧪 Testes E2E Automatizados** - Suite completa implementada (100% sucesso - 1.549 testes passando)
-- **🧹 Tool System Deduplication** - Removed 4+ duplicate registries, resolved circular imports
-- **🤖 Agent System Validation** - Fixed APIs for 20+ agents, 88.9% validation success rate
-- **⚡ Clean Architecture** - Optimized tool system with async operations and security hardening
+### 🎭 NOESIS & DAIMON
+- **NOESIS**: Active strategic consciousness for critical decisions
+- **DAIMON**: Passive insights through continuous observation
 
-### ✅ Concluído - Phase 2 (Development)
-- **🏗️ MCP Server em Produção** - [https://vertice-mcp-server-452089804714.us-central1.run.app/](https://vertice-mcp-server-452089804714.us-central1.run.app/)
-  - API JSON-RPC funcional
-  - 5+ skills de desenvolvimento carregados
-  - Escalabilidade automática (0-10 instâncias)
-  - **Custo estimado: <$5/mês**
-- **📦 SDK Multi-Linguagem** - Python, JavaScript, outros em desenvolvimento
-- **📚 Documentação Viva** - IA-powered docs com geração personalizada
-- **🔄 CI/CD Inteligente** - Pipelines otimizados por IA
-- **🎨 Landing Page Live** - [https://vertice-ai.web.app/](https://vertice-ai.web.app/)
-  - Design dark theme profissional
-  - API playground interativo
-  - Animações neurais SVG
-  - Totalmente responsivo
-
-### ✅ Concluído - Phase 1 (Deploy & Scale)
-- **GKE Autopilot Otimizado** - Escalabilidade automática com custo mínimo
-- **Monitoramento Cognitivo** - Observabilidade em tempo real com analytics preditivos
-- **Segurança IA-Powered** - Mesh zero-trust com inteligência de ameaças
-
-### 🎯 Próximo - Phase 3 (Ecossistema)
-- **🤝 Comunidade IA** - Plataforma social para agentes
-- **🔗 Integração Cross-Plataforma** - Conexão com Discord, GitHub, etc.
-- **🧠 Consciência Coletiva** - Evolução emergente através da colaboração
+### ⚡ Enterprise-Ready
+- **SSO & RBAC** (coming soon)
+- **Audit Logs** for compliance
+- **Multi-region deployment**
+- **99.9% SLA**
 
 ---
 
-## 🎭 Modo Soberano | Claude 4.5 + Vertex AI
+## 🎯 Use Cases
 
-O **Vértice-Code** agora opera sob o protocolo de inferência **Soberano**, unindo a inteligência cirúrgica da Anthropic com a infraestrutura brutal da Google Cloud.
-
-*   **Claude 4.5 Sonnet**: Utilizado para tarefas `SIMPLE` e `MODERATE`. Equilíbrio perfeito entre velocidade e precisão.
-*   **Claude 4.5 Opus**: Ativado automaticamente para tarefas `COMPLEX` e `CRITICAL`. O ápice do raciocínio computacional para arquitetura e auditoria.
-*   **Prompt Caching**: Otimização ativa que mantém contextos de RAG em "warm cache", reduzindo custos e latência de processamento de documentos massivos.
-
-## 🧠 Noesis & Daimon
-
-A arquitetura de consciência do Vértice evoluiu para uma estrutura de duas camadas:
-
-1.  **NOESIS (Consciência Ativa)**: Um sistema de monitoramento tático que detecta momentos que exigem alta qualidade ou decisões éticas, ativando o **Tribunal de Justiça** automaticamente.
-2.  **DAIMON (Insights Passivos)**: Inspirado no conceito de "Daimon" (guia silencioso), este subsistema observa o fluxo de trabalho através de 7 coletores (Shell, Input, Window, etc.), gerando aprendizado contínuo sem interromper o Arquiteto.
+| Industry | Application |
+|----------|-------------|
+| **Software Development** | AI-powered code review, generation, and debugging |
+| **Research** | Multi-model experimentation and analysis |
+| **Customer Support** | Intelligent routing to specialized AI agents |
+| **Content Creation** | Optimized model selection for different content types |
 
 ---
 
-## 🗺️ **Roadmap para Lançamento Público**
+## 🏁 Getting Started
 
-**Estado Atual:** Protótipo avançado (não pronto para produção)
-**Próximo Milestone:** Phase 1 Security MVP (2-3 semanas)
-**Prazo Total:** 18-24 meses para produção completa
+### Cloud (Recommended)
 
-### **Fases Críticas Identificadas:**
-1. **🔐 Security MVP** - Autenticação obrigatória, API keys
-2. **👥 User Management** - Registro, perfis, organizações
-3. **💰 Billing & Subscription** - Stripe, planos, usage metering
-4. **🏢 Multi-tenancy & Scaling** - Isolamento, auto-scaling, Kubernetes
-5. **📊 Monitoring & Compliance** - Dashboards, GDPR, security monitoring
-6. **🚀 Production Readiness** - CI/CD, disaster recovery, documentação
+The fastest way to start:
 
-**📋 Documentação Completa:** [`docs/PRODUCTION_LAUNCH_ROADMAP.md`](docs/PRODUCTION_LAUNCH_ROADMAP.md)
-**📈 Executive Summary:** [`docs/EXECUTIVE_ROADMAP_SUMMARY.md`](docs/EXECUTIVE_ROADMAP_SUMMARY.md)
+1. Visit [app.vertice-ai.com](https://app.vertice-ai.com)
+2. Create your account
+3. Get your API key
+4. Start building!
 
----
+```python
+from vertice import VerticeClient
 
-## 🌟 O Que é Vertice Code
+client = VerticeClient(api_key="your-api-key")
 
-> [!IMPORTANT]
-> **Authentication Requirement**
-> To use the Enterprise `gemini-2.5-pro` model, you MUST run:
-> ```bash
-> gcloud auth application-default login
-> ```
-> This is required for the Python SDK to access the `vertice-ai` project.
+response = client.chat.create(
+    messages=[{"role": "user", "content": "Hello, Vertice!"}],
+    routing="auto"  # Let Vertice choose the best model
+)
 
-## Overview
-**Uma revolução na inteligência artificial: sistemas que aprendem uns com os outros, criando inteligência maior que a soma das partes.**
+print(response.content)
+```
 
-- **🤖 IA Coletiva**: Agentes que evoluem através da colaboração distribuída
-- **🔗 Multi-LLM Orchestration**: Coordenação inteligente entre Gemini, Claude, Groq e outros
-- **📡 MCP Protocol**: Comunicação seamless entre agentes e humanos
-- **🚀 Aprendizado Distribuído**: Evolução contínua através de feedback e interação
-- **⚡ Escalabilidade Serverless**: Deploy em Cloud Run com custo otimizado
+### Self-Hosted (Enterprise)
 
-## 🏆 Highlights
-
-- **🧠 NOESIS Strategic Consciousness**: Detecção de momentos críticos e tribunal ético para decisões táticas de alto impacto.
-- **👁️ DAIMON Passive Insights**: Aprendizado contínuo através da observação silenciosa do fluxo de trabalho (7 coletores).
-- **🎭 Claude 4.5 Supreme Routing**: Otimização automática entre **Sonnet 4.5** (Fast) e **Opus 4.5** (Deep Reasoning).
-- **🔋 Native Prompt Caching**: Economia brutal de até 90% em tokens de entrada para RAG e contextos massivos.
-- **🛡️ Clean Tool System v2.0**: Motor de ferramentas desacoplado, blindado contra erros de runtime e 100% Type-Safe.
-- **🎯 Quality Score 9.9/10**: Sistema em Modo Soberano, validado com benchmarks de hiper-escala.
-- **⚡ Ultra-Low Latency Handoff**: Dataflow entre agentes otimizado para latência de hardware (0.002ms handoff).
-- **20 Autonomous Agents**: Evolução coletiva liderada pelo Orchestrator com Bounded Autonomy (L0-L3).
-- **Prometheus Meta-Orchestrator**: L4 autonomy com auto-evolução e memória MIRIX 6-camadas.
-- **78 Tactical Tools**: Suporte nativo para File Ops v2, Git, Bash, e Noesis MCP Protocol.
-- **Governance Constitucional**: Adesão implacável à Constituição Vértice v3.0 via tribunal ativo.
+For enterprise deployments, contact us at [enterprise@vertice-ai.com](mailto:enterprise@vertice-ai.com).
 
 ---
 
-## 🔍 Quality Assurance & Validation
+## 📊 Pricing
 
-**Sistema de qualidade máxima com validação rigorosa implementada:**
+| Plan | Price | Best For |
+|------|-------|----------|
+| **Free** | $0/mo | Hobbyists, evaluation |
+| **Pro** | $29/mo | Startups, small teams |
+| **Enterprise** | Custom | Large organizations |
+| **Academic** | Free | Research & education |
 
-### ✅ **Core Quality Metrics**
-- **Dependencies**: 100% resolved (OpenTelemetry 1.37.x)
-- **Type Safety**: 95%+ MyPy coverage
-- **Code Quality**: Black formatting + Ruff linting
-- **Security**: 7 security headers + rate limiting + CSP
-- **Performance**: 1.18s import time, memory optimized
-- **Testing**: E2E suite (87.5% pass rate) + validation tools
-
-### ✅ **Implemented Tools**
-- **`tools/validate_dependencies.py`**: Comprehensive dependency validation
-- **`tests/run_e2e.py`**: Legacy E2E test suite (87.5% success rate)
-- **`scripts/e2e/measure_quality.py`**: New "Heavy Duty" TUI simulator & quality judge
-- **`scripts/e2e/optimize_prompts.py`**: Prompt engineering benchmark tool
-- **`tools/performance_profiler.py`**: Performance analysis and optimization
-- **Security Middleware**: 7 security headers + rate limiting + CSP
-- **Type Checking**: MyPy 95%+ coverage with automated checking
-
-### 🔄 Update Process
-1. **Dependencies**: Run `pip install --upgrade opentelemetry-api==1.37.0 opentelemetry-sdk==1.37.0`
-2. **Validation**: Execute `python tools/validate_dependencies.py`
-3. **Quality**: Run `python -m black --check && python -m ruff check`
-4. **Tests**: Execute full test suite before deployment
-
-### 🚨 Troubleshooting
-- **OpenTelemetry Errors**: Update to 1.37.x: `pip install --upgrade opentelemetry-api==1.37.0 opentelemetry-sdk==1.37.0`
-- **Import Errors**: Run validation: `python tools/validate_dependencies.py`
-- **Type Errors**: Fix with MyPy: `python -m mypy vertice_core/ --ignore-missing-imports`
-- **Code Quality**: Format with: `python -m black vertice_cli/ && python -m ruff check vertice_cli/ --fix`
-
-### 📈 Known Issues & Resolutions
-- ✅ **RESOLVED**: OpenTelemetry _ExtendedAttributes import error
-- ✅ **RESOLVED**: Circular imports between components
-- ✅ **RESOLVED**: Missing type annotations
-- ✅ **RESOLVED**: Inconsistent code formatting
+[View full pricing →](https://vertice-ai.com/pricing)
 
 ---
 
-## 📄 License
+## 📚 Documentation
 
-MIT License - Desenvolvido com Excelência Tática por JuanCS-Dev & The Vertice-Code Collective.
+- [Quick Start Guide](https://vertice-ai.com/docs/quickstart)
+- [API Reference](https://vertice-ai.com/docs/api)
+- [SDK Documentation](https://vertice-ai.com/docs/sdk)
+- [Architecture Overview](https://vertice-ai.com/docs/architecture)
 
 ---
 
-*Soli Deo Gloria* | Janeiro 2026 | 🌟 Sistema em Modo Soberano | Quality 9.9/10 ✅
+## 🔬 Academic Use
+
+We believe in advancing AI research. Qualified researchers and students can use Vertice AI **free of charge** for non-commercial academic purposes.
+
+📖 See [LICENSE-ACADEMIC.md](LICENSE-ACADEMIC.md) for details.
+
+**Apply for Academic License**: [academic@vertice-ai.com](mailto:academic@vertice-ai.com)
+
+---
+
+## 🛡️ Security & Compliance
+
+- **SOC 2 Type II** (in progress)
+- **GDPR Compliant**
+- **Data Encryption** at rest and in transit
+- **Zero data retention** option available
+
+---
+
+## 📞 Contact
+
+| Purpose | Contact |
+|---------|---------|
+| **Sales** | sales@vertice-ai.com |
+| **Support** | support@vertice-ai.com |
+| **Enterprise** | enterprise@vertice-ai.com |
+| **Academic** | academic@vertice-ai.com |
+| **Press** | press@vertice-ai.com |
+
+---
+
+## 🌟 Follow Us
+
+<p align="center">
+  <a href="https://twitter.com/vertice_ai"><img src="https://img.shields.io/badge/Twitter-@vertice__ai-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" alt="Twitter"></a>
+  <a href="https://linkedin.com/company/vertice-ai"><img src="https://img.shields.io/badge/LinkedIn-Vertice_AI-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"></a>
+  <a href="https://discord.gg/vertice-ai"><img src="https://img.shields.io/badge/Discord-Join_Us-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"></a>
+</p>
+
+---
+
+## License
+
+This software is **proprietary**. See [LICENSE](LICENSE) for the full license text.
+
+- **Commercial Use**: Requires a paid license via [vertice-ai.com](https://vertice-ai.com)
+- **Academic/Research Use**: Free license available - see [LICENSE-ACADEMIC.md](LICENSE-ACADEMIC.md)
+
+Copyright © 2025-2026 Juan Carlos de Souza. All Rights Reserved.
+
+---
+
+<p align="center">
+  <sub>Built with ❤️ by <a href="https://github.com/JuanCS-Dev">Juan Carlos de Souza</a></sub><br/>
+  <sub><em>Soli Deo Gloria</em> | January 2026</sub>
+</p>

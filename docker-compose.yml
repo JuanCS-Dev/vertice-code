@@ -9,7 +9,7 @@ services:
       - "8000:8000"
     environment:
       - ENVIRONMENT=development
-      - DATABASE_URL=postgresql+asyncpg://user:password@db:5432/vertice_db
+      - DATABASE_URL=${DATABASE_URL}
       - REDIS_URL=redis://redis:6379
       - MCP_SERVER_URL=http://mcp-server:3000
       - GOOGLE_CLOUD_PROJECT=vertice-ai
@@ -35,9 +35,9 @@ services:
       - "3000:8080"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
-      - BACKEND_URL=http://backend:8000
-      - CLERK_SECRET_KEY=sk_test_mock_secret_key_for_local_dev
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      - BACKEND_URL=${BACKEND_URL:-http://backend:8000}
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
     depends_on:
       - backend
     networks:
@@ -59,9 +59,9 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=vertice_db
+      - POSTGRES_USER=${POSTGRES_USER:-user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+      - POSTGRES_DB=${POSTGRES_DB:-vertice_db}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:

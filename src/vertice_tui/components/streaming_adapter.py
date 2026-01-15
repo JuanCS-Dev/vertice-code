@@ -106,7 +106,9 @@ class StreamingResponseWidget(Static):
         Args:
             enable_markdown: Habilita renderização markdown (default: True)
         """
-        super().__init__(*args, **kwargs)
+        # Always initialize with an empty string to prevent NotRenderableError
+        # Static widget requires a valid renderable at all times
+        super().__init__("", *args, **kwargs)
 
         self._content = ""
         self._enable_markdown = enable_markdown
@@ -231,7 +233,29 @@ class StreamingResponseWidget(Static):
                 # Check if this line is a duplicate of recent lines
                 is_duplicate = False
                 for prev_line in self._last_lines[-5:]:  # Check last 5 lines
-                    if line_stripped == prev_line.strip():
+                    prev_stripped = prev_line.strip()
+                    
+                    # Exact match
+                    if line_stripped == prev_stripped:
+                        is_duplicate = True
+                        break
+                    
+                    # PREFIX DEDUPLICATION: Detect "echo" pattern where partial
+                    # line was shown and now full line arrives
+                    # e.g., prev="Verde (Pronto para" curr="Verde (Pronto para Deploy):"
+                    # In this case, we should REPLACE the prefix with the full line
+                    if len(prev_stripped) > 10 and line_stripped.startswith(prev_stripped):
+                        # Current line extends previous - not a dup, but remove prefix from content
+                        # Actually, this means the previous line was incomplete
+                        # We should keep the new (complete) line
+                        is_duplicate = False
+                        # Don't break - allow this line through
+                        continue
+                    
+                    # REVERSE PREFIX: New line is prefix of existing line
+                    # e.g., curr="Verde (Pronto para" prev="Verde (Pronto para Deploy):"
+                    # This means LLM is echoing a partial - skip the new partial
+                    if len(line_stripped) > 10 and prev_stripped.startswith(line_stripped):
                         is_duplicate = True
                         break
 
