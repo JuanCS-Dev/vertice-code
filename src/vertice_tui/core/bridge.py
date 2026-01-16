@@ -16,6 +16,7 @@ from __future__ import annotations
 import logging
 import os
 import threading
+import time
 from pathlib import Path
 from typing import Any, AsyncIterator, Dict, List, Optional, Tuple
 
@@ -397,10 +398,43 @@ class Bridge(ProtocolBridgeMixin):
             agents=self.agents,
             agent_registry=AGENT_REGISTRY,
             config=ChatConfig(
-                max_tool_iterations=self.MAX_TOOL_ITERATIONS,
                 max_parallel_tools=self.MAX_PARALLEL_TOOLS,
             ),
         )
+
+    async def warmup(self) -> None:
+        """
+        Background warm-up of heavy components.
+
+        Called by VerticeApp.on_mount to perform lazy loading of
+        providers and tools without blocking the UI.
+        """
+        import asyncio
+
+        loop = asyncio.get_running_loop()
+        logger.debug("Starting Bridge warm-up (threaded)...")
+
+        # 1. Configure LLM tools (generates schemas) - CPU bound
+        if self.tools:
+            try:
+                await loop.run_in_executor(None, self._configure_llm_tools)
+                logger.debug("✓ Tools configured")
+            except Exception as e:
+                logger.warning(f"Warm-up: Tool config failed: {e}")
+
+        # 2. Initialize default provider (triggers heavy imports) - IO/CPU bound
+        try:
+            await loop.run_in_executor(None, self._warmup_provider)
+            logger.debug("✓ Default provider loaded")
+        except Exception as e:
+            logger.warning(f"Warm-up: Provider init failed: {e}")
+
+        logger.debug("Bridge warm-up complete")
+
+    def _warmup_provider(self) -> None:
+        """Helper for threaded provider warmup."""
+        if hasattr(self._provider_manager, "get_client"):
+            self._provider_manager.get_client()
 
     # =========================================================================
     # CORE PROPERTIES
@@ -517,15 +551,41 @@ Available tools: {tool_list}
 Working directory: {os.getcwd()}"""
 
     async def chat(self, message: str, auto_route: bool = True) -> AsyncIterator[str]:
-        """Handle chat message with streaming response."""
-        # Check for plan execution
-        last_plan = getattr(self.agents, "_last_plan", None)
-        message, skip_routing, preamble = prepare_plan_execution(message, last_plan)
-        if preamble:
-            yield preamble
-            self.agents._last_plan = None
+        """Handle chat message with streaming response and circuit breaker protection."""
+        # Circuit breaker check
+        if not self._check_circuit_breaker():
+            yield "❌ Service temporarily unavailable. Please try again later."
+            return
 
+        # Input validation
+        if not message or not isinstance(message, str) or len(message.strip()) == 0:
+            yield "❌ Invalid message"
+            return
+
+        if len(message) > 10000:  # Reasonable limit
+            yield "❌ Message too long (max 10000 characters)"
+            return
+
+        try:
+            # Check for plan execution
+            last_plan = getattr(self.agents, "_last_plan", None)
+            message, skip_routing, preamble = prepare_plan_execution(message, last_plan)
+            if preamble:
+                yield preamble
+                self.agents._last_plan = None
+
+            # Record success for circuit breaker
+            self._record_circuit_breaker_success()
+
+        except Exception as e:
+            self._record_circuit_breaker_failure()
+            yield f"❌ Error preparing chat: {str(e)[:100]}"
+            return
+
+        # Ensuring tools are configured (fast if already done in warmup)
         self._configure_llm_tools()
+
+        # Get client (may block on first run if warmup didn't finish, but safe)
         client, provider_name = self._get_client(message)
 
         self._chat_controller.config.auto_route_enabled = (
@@ -697,6 +757,48 @@ Working directory: {os.getcwd()}"""
 
     def rewind_to(self, index: int) -> Dict[str, Any]:
         return self.history.rewind_to_checkpoint(index)
+
+    # Circuit breaker for resilience
+    def _check_circuit_breaker(self) -> bool:
+        """Check circuit breaker state for chat operations."""
+        # Simple in-memory circuit breaker
+        if not hasattr(self, "_circuit_state"):
+            self._circuit_state = {
+                "failures": 0,
+                "last_failure": 0,
+                "state": "closed",  # closed, open, half-open
+            }
+
+        state = self._circuit_state
+        now = time.time()
+
+        if state["state"] == "open":
+            if now - state["last_failure"] > 60:  # 60 second timeout
+                state["state"] = "half-open"
+                return True
+            return False
+
+        return True
+
+    def _record_circuit_breaker_success(self) -> None:
+        """Record successful operation."""
+        if hasattr(self, "_circuit_state"):
+            state = self._circuit_state
+            if state["state"] == "half-open":
+                state["state"] = "closed"
+                state["failures"] = 0
+
+    def _record_circuit_breaker_failure(self) -> None:
+        """Record failed operation."""
+        if not hasattr(self, "_circuit_state"):
+            self._circuit_state = {"failures": 0, "last_failure": 0, "state": "closed"}
+
+        state = self._circuit_state
+        state["failures"] += 1
+        state["last_failure"] = time.time()
+
+        if state["failures"] >= 3:  # Lower threshold for TUI
+            state["state"] = "open"
 
     # Status management
     def check_health(self) -> Dict[str, Dict[str, Any]]:

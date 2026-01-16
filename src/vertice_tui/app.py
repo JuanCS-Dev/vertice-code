@@ -101,6 +101,11 @@ class VerticeApp(App):
             self._bridge = get_bridge()
         return self._bridge
 
+    @bridge.setter
+    def bridge(self, value):
+        """Allow setting bridge for testing purposes."""
+        self._bridge = value
+
     @property
     def router(self) -> CommandRouter:
         """Lazy load the command router."""
@@ -214,34 +219,115 @@ class VerticeApp(App):
 
         self.query_one("#prompt", Input).focus()
 
+        # Performance: Start background warm-up of heavy components
+        # This loads providers and tool schemas without blocking the UI rendering
+        self.run_worker(self.bridge.warmup(), name="bridge_warmup", group="system")
+
     async def on_input_submitted(self, event: Input.Submitted) -> None:
-        """Handle user input submission."""
-        user_input = event.value.strip()
-        if not user_input:
-            return
-
-        autocomplete = self.query_one("#autocomplete", AutocompleteDropdown)
-        autocomplete.hide()
-
-        prompt = self.query_one("#prompt", Input)
-        prompt.value = ""
-
-        self.history.append(user_input)
-        self.history_index = len(self.history)
-
-        response = self.query_one("#response", ResponseView)
-        response.add_user_message(user_input)
-
-        status = self.query_one(StatusBar)
-        status.mode = "PROCESSING"
-
+        """Handle user input submission with robust validation and error handling."""
         try:
-            if user_input.startswith("/"):
-                await self.router.dispatch(user_input, response)
+            # Input validation and sanitization
+            if not event.value or not isinstance(event.value, str):
+                return
+
+            user_input = event.value.strip()
+
+            # Length validation
+            if len(user_input) > 5000:  # Reasonable limit for terminal input
+                response = self.query_one("#response", ResponseView)
+                response.current_response += "\n❌ Error: Input too long (max 5000 characters)"
+                return
+
+            if len(user_input) == 0:
+                return
+
+            # Content validation - prevent obvious injection attempts
+            dangerous_patterns = ["<script", "javascript:", "data:", "\x00", "\r\n\r\n"]
+            if any(pattern in user_input.lower() for pattern in dangerous_patterns):
+                response = self.query_one("#response", ResponseView)
+                response.current_response += "\n❌ Error: Invalid input content"
+                return
+
+            # Rate limiting check - simple in-memory for TUI
+            current_time = asyncio.get_event_loop().time()
+            if hasattr(self, "_last_input_time"):
+                time_diff = current_time - self._last_input_time
+                if time_diff < 0.1:  # Minimum 100ms between inputs
+                    return  # Silently ignore rapid inputs
+            self._last_input_time = current_time
+
+            # UI updates
+            autocomplete = self.query_one("#autocomplete", AutocompleteDropdown)
+            autocomplete.hide()
+
+            prompt = self.query_one("#prompt", Input)
+            prompt.value = ""
+
+            # History management with bounds checking and memory optimization
+            self.history.append(user_input)
+            if len(self.history) > 1000:  # Limit history size for memory efficiency
+                self.history = self.history[-1000:]
+            self.history_index = len(self.history)
+
+            # Memory optimization: limit concurrent operations
+            if hasattr(self, "_active_operations"):
+                # Clean up completed operations
+                self._active_operations = [op for op in self._active_operations if not op.done()]
+                if len(self._active_operations) > 3:  # Max 3 concurrent operations
+                    return  # Silently drop if too many operations
             else:
-                await self._handle_chat(user_input, response)
+                self._active_operations = []
+
+            response = self.query_one("#response", ResponseView)
+            response.add_user_message(user_input)
+
+            status = self.query_one(StatusBar)
+            status.mode = "PROCESSING"
+
+            # Optimized UI update - minimal delay for responsiveness
+            # await asyncio.sleep(0)  # Removed for better performance
+
+            # Command routing with timeout protection
+            try:
+                if user_input.startswith("/"):
+                    # Add timeout to command execution
+                    await asyncio.wait_for(
+                        self.router.dispatch(user_input, response),
+                        timeout=30.0,  # 30 second timeout for commands
+                    )
+                else:
+                    # Add timeout to chat execution
+                    await asyncio.wait_for(
+                        self._handle_chat(user_input, response),
+                        timeout=120.0,  # 2 minute timeout for chat
+                    )
+            except asyncio.TimeoutError:
+                response.current_response += f"\n❌ Error: Operation timed out"
+                self.notify("Operation timed out", severity="error")
+            except Exception as op_error:
+                error_msg = str(op_error)
+                if len(error_msg) > 200:  # Truncate long error messages
+                    error_msg = error_msg[:197] + "..."
+                response.current_response += f"\n❌ Error: {error_msg}"
+                self.notify(f"Operation failed: {error_msg[:50]}...", severity="error")
+
+        except Exception as e:
+            # Ultimate error handler - ensure TUI remains functional
+            try:
+                response = self.query_one("#response", ResponseView)
+                response.current_response += f"\n💥 Critical error: {str(e)[:100]}"
+                self.notify("Critical error occurred", severity="error")
+            except:
+                # If even error reporting fails, at least log it
+                print(f"CRITICAL: Unhandled error in input submission: {e}")
+
         finally:
-            status.mode = "READY"
+            # Always reset status
+            try:
+                status = self.query_one(StatusBar)
+                status.mode = "READY"
+            except:
+                pass
 
     @on(Input.Changed, "#prompt")
     def on_input_changed(self, event: Input.Changed) -> None:
@@ -321,24 +407,40 @@ class VerticeApp(App):
             autocomplete.hide()
 
     async def _handle_chat(self, message: str, view: ResponseView) -> None:
-        """Handle natural language chat via Gemini streaming."""
-        self.is_processing = True
-        view.start_thinking()
+        """Handle natural language chat via Gemini Open Responses streaming."""
+        from vertice_tui.core.openresponses_events import OpenResponsesParser
 
+        # Create task for operation tracking
+        current_task = asyncio.current_task()
+        if hasattr(self, "_active_operations"):
+            self._active_operations.append(current_task)
+
+        self.is_processing = True
         status = self.query_one(StatusBar)
         status.mode = "THINKING"
 
-        try:
-            async for chunk in self.bridge.chat(message):
-                view.append_chunk(chunk)
-                await asyncio.sleep(0)
+        parser = OpenResponsesParser()
 
-            view.add_success("✓ Response complete")
+        try:
+            # bridge.chat now yields Open Responses SSE strings
+            async for sse_chunk in self.bridge.chat(message):
+                # SSE chunks may contain multiple lines
+                for line in sse_chunk.splitlines(keepends=True):
+                    event = parser.feed(line)
+                    if event:
+                        view.handle_open_responses_event(event)
+
+                # Optimized: removed unnecessary delay for better streaming performance
+
             status.governance_status = self.bridge.governance.get_status_emoji()
         except Exception as e:
             view.add_error(f"Chat error: {e}")
             status.errors += 1
         finally:
+            # Clean up operation tracking
+            if hasattr(self, "_active_operations") and current_task in self._active_operations:
+                self._active_operations.remove(current_task)
+
             self.is_processing = False
             status.mode = "READY"
             view.end_thinking()

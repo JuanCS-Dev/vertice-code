@@ -2,13 +2,15 @@
 
 import { useChat } from '@ai-sdk/react';
 import { useRef, useEffect, useState } from 'react';
+import { useOpenResponses } from '@/hooks/use-open-responses';
 import { ChatMessages } from './chat-messages';
 import { ChatInput } from './chat-input';
 import { ChatSidebar } from './chat-sidebar';
 import { ArtifactsPanel } from '../artifacts/artifacts-panel';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { PanelRightClose, Code } from 'lucide-react';
+import { PanelRightClose, Code, Settings } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 import { useArtifactsStore } from '@/lib/stores/artifacts-store';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
@@ -34,6 +36,7 @@ export function ChatInterface() {
 
   const [inputValue, setInputValue] = useState('');
   const [isArtifactOpen, setIsArtifactOpen] = useState(false);
+  const [protocol, setProtocol] = useState<'vercel' | 'open_responses'>('vercel');
   const { user } = useAuth();
   const [headers, setHeaders] = useState<Record<string, string>>({});
 
@@ -69,24 +72,39 @@ export function ChatInterface() {
     getToken();
   }, [user?.uid, user]);
 
-  // Hook into AI SDK Chat with data stream protocol
-  const chat = useChat({
-    // api: '/api/chat', // Default is /api/chat, commenting out to fix Type Error
-    // headers, // Headers passed dynamically in handleSubmit
-    // streamProtocol: 'data',
-    id: 'sovereign-chat', // Explicit ID
-    onError: (error) => {
-      console.error('[DEBUG] useChat Error:', error);
-    },
-    onFinish: () => {
-      console.log('[DEBUG] useChat Finish');
-    }
-  });
+   // Hook into AI SDK Chat with data stream protocol (Vercel)
+   const vercelChat = useChat({
+     // api: '/api/chat', // Default is /api/chat, commenting out to fix Type Error
+     // headers, // Headers passed dynamically in handleSubmit
+     // streamProtocol: 'data',
+     id: 'sovereign-chat', // Explicit ID
+     onError: (error) => {
+       console.error('[DEBUG] Vercel useChat Error:', error);
+     },
+     onFinish: () => {
+       console.log('[DEBUG] Vercel useChat Finish');
+     }
+   });
 
-  console.log('[DEBUG] useChat hook result keys:', Object.keys(chat || {}));
+   // Hook into Open Responses protocol
+   const openResponsesChat = useOpenResponses({
+     apiUrl: '/api/chat',
+     onError: (error) => {
+       console.error('[DEBUG] Open Responses Error:', error);
+     },
+     onFinish: (usage) => {
+       console.log('[DEBUG] Open Responses Finish:', usage);
+     }
+   });
 
-  // FALLBACK STRATEGY: newer SDK versions might use sendMessage instead of append
-  const { messages, append, sendMessage, isLoading } = chat as any;
+   // Use the appropriate chat hook based on protocol
+   const chat = protocol === 'vercel' ? vercelChat : openResponsesChat;
+   const messages = protocol === 'vercel' ? vercelChat.messages : openResponsesChat.messages;
+   const isLoading = protocol === 'vercel' ? vercelChat.isLoading : openResponsesChat.isLoading;
+   const sendMessage = protocol === 'vercel' ? vercelChat.sendMessage || vercelChat.append : openResponsesChat.sendMessage;
+
+   console.log('[DEBUG] Using protocol:', protocol);
+   console.log('[DEBUG] Chat hook result keys:', Object.keys(chat || {}));
 
   // FIX: Reactive Tool Handling with proper guards against infinite loops
   useEffect(() => {
@@ -144,10 +162,19 @@ export function ChatInterface() {
     }
 
     try {
-      await sendFunc({
+      // Add protocol to the request data
+      const messageData = {
         role: 'user',
         content: inputValue,
-      }, { headers }); // Pass headers dynamically here as well
+        protocol: protocol, // Add protocol to request
+      };
+
+      if (protocol === 'vercel') {
+        await sendFunc(messageData, { headers });
+      } else {
+        // For Open Responses, call sendMessage directly with content
+        await sendMessage(inputValue);
+      }
     } catch (err) {
       console.error('[CRITICAL] Send Failed', err);
     }
@@ -180,18 +207,27 @@ export function ChatInterface() {
           "flex flex-col h-full transition-all duration-300 ease-in-out relative z-10",
           isArtifactOpen ? "w-[35%] min-w-[400px] border-r border-white/5 shadow-2xl" : "w-full mx-auto"
         )}>
-          {!isArtifactOpen && (
-            <div className="absolute top-4 right-4 z-50">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setIsArtifactOpen(true)}
-                className="rounded-full shadow-lg border-primary/20 hover:border-primary hover:text-primary transition-colors bg-black/50 backdrop-blur"
-              >
-                <Code className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
+           {!isArtifactOpen && (
+             <div className="absolute top-4 right-4 z-50 flex gap-2">
+               <Select value={protocol} onValueChange={(value: 'vercel' | 'open_responses') => setProtocol(value)}>
+                 <SelectTrigger className="w-[140px] bg-black/50 backdrop-blur border-primary/20">
+                   <SelectValue />
+                 </SelectTrigger>
+                 <SelectContent>
+                   <SelectItem value="vercel">Vercel Protocol</SelectItem>
+                   <SelectItem value="open_responses">Open Responses</SelectItem>
+                 </SelectContent>
+               </Select>
+               <Button
+                 variant="outline"
+                 size="icon"
+                 onClick={() => setIsArtifactOpen(true)}
+                 className="rounded-full shadow-lg border-primary/20 hover:border-primary hover:text-primary transition-colors bg-black/50 backdrop-blur"
+               >
+                 <Code className="h-4 w-4" />
+               </Button>
+             </div>
+           )}
 
           <div className="flex-1 overflow-y-auto p-4 scrollbar-thin bg-background">
             <div className={cn("mx-auto h-full", isArtifactOpen ? "w-full" : "max-w-3xl")}>

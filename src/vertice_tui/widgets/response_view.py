@@ -220,6 +220,102 @@ class ResponseView(VerticalScroll):
             self.scroll_end(animate=False)
             self._last_scroll_time = current_time
 
+    def handle_open_responses_event(self, event) -> None:
+        """
+        Handle Open Responses streaming event.
+
+        Args:
+            event: OpenResponsesEvent instance
+        """
+        from vertice_tui.core.openresponses_events import (
+            OpenResponsesResponseCreatedEvent,
+            OpenResponsesResponseInProgressEvent,
+            OpenResponsesOutputItemAddedEvent,
+            OpenResponsesOutputTextDeltaEvent,
+            OpenResponsesOutputTextDoneEvent,
+            OpenResponsesResponseCompletedEvent,
+            OpenResponsesResponseFailedEvent,
+            OpenResponsesDoneEvent,
+            OpenResponsesReasoningContentDeltaEvent,
+            OpenResponsesReasoningSummaryDeltaEvent,
+            OpenResponsesFunctionCallArgumentsDeltaEvent,
+            OpenResponsesContentPartAddedEvent,
+            OpenResponsesContentPartDoneEvent,
+        )
+
+        if isinstance(event, OpenResponsesResponseCreatedEvent):
+            # Start new response session
+            self.start_thinking()
+            self.current_response = ""
+
+        elif isinstance(event, OpenResponsesResponseInProgressEvent):
+            # Response is now in progress
+            pass
+
+        elif isinstance(event, OpenResponsesOutputItemAddedEvent):
+            # New item added (message, function call, etc.)
+            if event.item_type == "reasoning":
+                self.start_thinking()
+            elif event.item_type == "message":
+                # Prepare for message content
+                pass
+
+        elif isinstance(event, OpenResponsesOutputTextDeltaEvent):
+            # Text chunk received
+            self.append_chunk(event.delta)
+
+        elif isinstance(event, OpenResponsesReasoningContentDeltaEvent):
+            # Reasoning chunk received
+            if self._thinking_widget and hasattr(self._thinking_widget, "append_chunk"):
+                self._thinking_widget.append_chunk(event.delta)
+            else:
+                # Fallback if reasoning stream not active
+                self.current_response += f"\n> [Thinking] {event.delta}"
+
+        elif isinstance(event, OpenResponsesReasoningSummaryDeltaEvent):
+            # Reasoning summary chunk received
+            if self._thinking_widget and hasattr(self._thinking_widget, "append_chunk"):
+                self._thinking_widget.append_chunk(f"Summary: {event.delta}")
+            else:
+                # Fallback
+                self.current_response += f"\n> [Summary] {event.delta}"
+
+        elif isinstance(event, OpenResponsesFunctionCallArgumentsDeltaEvent):
+            # Function call arguments chunk received
+            if self._thinking_widget and hasattr(self._thinking_widget, "append_chunk"):
+                self._thinking_widget.append_chunk(f"Args: {event.delta}")
+            else:
+                # Fallback
+                self.current_response += f"\n> [Function Args] {event.delta}"
+
+        elif isinstance(event, OpenResponsesContentPartAddedEvent):
+            # Content part starts
+            pass
+
+        elif isinstance(event, OpenResponsesContentPartDoneEvent):
+            # Content part finishes
+            pass
+
+        elif isinstance(event, OpenResponsesOutputTextDoneEvent):
+            # Text completed
+            self.current_response = event.text
+
+        elif isinstance(event, OpenResponsesResponseCompletedEvent):
+            # Response finished successfully
+            self.end_thinking()
+
+        elif isinstance(event, OpenResponsesResponseFailedEvent):
+            # Response failed
+            error_msg = (
+                event.error.get("message", "Unknown error") if event.error else "Response failed"
+            )
+            self.add_system_message(f"[error]{Icons.ERROR} {error_msg}[/error]")
+            self.end_thinking()
+
+        elif isinstance(event, OpenResponsesDoneEvent):
+            # Stream terminated
+            pass
+
     def add_code_block(
         self,
         code: str,

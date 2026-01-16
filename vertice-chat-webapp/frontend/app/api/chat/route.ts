@@ -16,7 +16,7 @@ export async function POST(req: Request) {
   const startTime = Date.now();
 
   try {
-    const { messages } = await req.json();
+    const { messages, protocol = 'vercel' } = await req.json();
 
     // Validate messages
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -40,14 +40,15 @@ export async function POST(req: Request) {
     // Backend URL from environment
     const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-    console.log(`[Route] Proxying to: ${backendUrl}/api/v1/chat`);
+    const chatUrl = `${backendUrl}/api/v1/chat${protocol === 'open_responses' ? '?protocol=open_responses' : ''}`;
+    console.log(`[Route] Proxying to: ${chatUrl} (protocol: ${protocol})`);
 
     // Create abort controller for timeout
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), BACKEND_TIMEOUT_MS);
 
     try {
-      const response = await fetch(`${backendUrl}/api/v1/chat`, {
+      const response = await fetch(chatUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -73,16 +74,25 @@ export async function POST(req: Request) {
         );
       }
 
-      // Pass-through the stream with correct headers for Data Stream Protocol
-      // CRITICAL: Content-Type must be text/plain for Vercel AI SDK
-      return new Response(response.body, {
-        headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
-          'X-Vercel-AI-Data-Stream': 'v1',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'X-Response-Time': `${Date.now() - startTime}ms`,
-        }
-      });
+       // Pass-through the stream with correct headers for the selected protocol
+       const headers: Record<string, string> = {
+         'Cache-Control': 'no-cache, no-store, must-revalidate',
+         'X-Response-Time': `${Date.now() - startTime}ms`,
+         'X-Vertice-Protocol': protocol,
+       };
+
+       if (protocol === 'vercel') {
+         // Vercel AI SDK protocol headers
+         headers['Content-Type'] = 'text/plain; charset=utf-8';
+         headers['X-Vercel-AI-Data-Stream'] = 'v1';
+       } else if (protocol === 'open_responses') {
+         // Open Responses protocol headers
+         headers['Content-Type'] = 'text/event-stream';
+         headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+         headers['Connection'] = 'keep-alive';
+       }
+
+       return new Response(response.body, { headers });
 
     } catch (fetchError: any) {
       clearTimeout(timeoutId);

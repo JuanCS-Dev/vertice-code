@@ -275,9 +275,9 @@ class ThinkingIndicator(Static):
 
 class ReasoningStream(Static):
     """
-    Advanced reasoning indicator showing Maestro's thought process in real-time.
+    Advanced reasoning indicator showing Vertice AI's thought process in real-time.
 
-    Shows keywords and phases of the Maestro's thinking:
+    Shows keywords and phases of Vertice AI's thinking:
     - "Analyzing request..."
     - "Decomposing task..."
     - "Routing to agents..."
@@ -351,7 +351,7 @@ class ReasoningStream(Static):
     def _update_display(self) -> None:
         """Update the display text."""
         phase = self._reasoning_phases[self._phase_index]
-        phase_text = f"🤖 Maestro: {phase}..."
+        phase_text = f"🤖 Vertice AI: {phase}..."
 
         if self._show_confidence and self._confidence_score > 0:
             confidence_text = f" ({self._confidence_score:.0f}% confidence)"
@@ -363,6 +363,20 @@ class ReasoningStream(Static):
 
         full_text = f"[cyan]{phase_text}{confidence_text} {dots}[/cyan]"
         self.update(full_text)
+
+    def append_chunk(self, chunk: str) -> None:
+        """Append reasoning chunk to the display."""
+        # For reasoning stream, we can update the phase or show the chunk
+        # For now, just update the display with the chunk as the current phase
+        if chunk.strip():
+            # Extract meaningful words from the chunk for display
+            words = chunk.strip().split()
+            if len(words) > 0:
+                # Use first few words as reasoning phase
+                phase = " ".join(words[:3])
+                if len(phase) > 30:  # Truncate long phases
+                    phase = phase[:27] + "..."
+                self.update_reasoning_phase(phase)
 
 
 class PulseIndicator(Static):
