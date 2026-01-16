@@ -30,6 +30,9 @@ pytest>=7.0.0
 black>=23.0.0
 mypy>=1.0.0
 pytest-asyncio
+hypothesis>=6.0.0
+respx>=0.20.0
+PyYAML>=6.0.0
 openai>=1.0.0
 prompt_toolkit>=3.0.0
 textual>=6.0.0
