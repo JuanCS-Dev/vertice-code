@@ -69,7 +69,7 @@ class AgenticRAGMixin:
             return f"Unable to find information about: {query}"
 
         # Import router and complexity
-        from providers.vertice_router import get_router, TaskComplexity
+        from vertice_cli.core.providers.vertice_router import get_router, TaskComplexity
         router = get_router()
 
         # Format context for Claude 4.5 Prompt Caching

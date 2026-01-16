@@ -16,7 +16,7 @@ from __future__ import annotations
 import logging
 from typing import Optional
 
-from core.observability import ObservabilityMixin
+from vertice_core.observability import ObservabilityMixin
 
 logger = logging.getLogger(__name__)
 

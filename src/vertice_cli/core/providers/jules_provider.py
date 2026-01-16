@@ -28,8 +28,8 @@ from vertice_core.types.jules_types import (
     JulesSessionState,
     JulesSource,
 )
-from providers.base import EnhancedProviderBase
-from providers.types import CostTier, SpeedTier
+from vertice_cli.core.providers.base import EnhancedProviderBase
+from vertice_cli.core.providers.types import CostTier, SpeedTier
 from typing import AsyncGenerator
 
 

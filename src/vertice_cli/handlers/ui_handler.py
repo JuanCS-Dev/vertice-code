@@ -62,7 +62,7 @@ class UIHandler:
         """Show welcome message with TUI styling."""
         from rich.text import Text
         from rich.panel import Panel
-        from vertice_tui.core.styles.base import COLORS, PRESET_STYLES
+        from vertice_cli.tui.styles import COLORS, PRESET_STYLES
 
         # Build styled welcome content
         content = Text()

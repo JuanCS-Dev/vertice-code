@@ -19,6 +19,8 @@ from datetime import datetime, timedelta
 import logging
 
 from vertice_cli.core.types import ModelInfo
+from vertice_core.openresponses_stream import OpenResponsesStreamBuilder
+from vertice_core.openresponses_types import OpenResponsesError, ErrorType
 
 logger = logging.getLogger(__name__)
 
@@ -560,6 +562,81 @@ Respond with ONLY the JSON object."""
                     continue
             logger.error("All available providers failed for the streaming task.")
             raise RuntimeError(f"All streaming providers failed: {e}")
+
+    async def stream_open_responses(
+        self,
+        messages: List[Dict[str, str]],
+        system_prompt: Optional[str] = None,
+        complexity: TaskComplexity = TaskComplexity.MODERATE,
+        speed: SpeedRequirement = SpeedRequirement.NORMAL,
+        **kwargs,
+    ) -> AsyncGenerator[str, None]:
+        """
+        Stream usando Open Responses com routing automático.
+
+        Rota para o provider apropriado e converte output para
+        formato Open Responses se necessário.
+        """
+        decision = self.route(complexity=complexity, speed=speed)
+        provider = self._providers[decision.provider_name]
+        status = self._status[decision.provider_name]
+
+        # Verifica se provider suporta Open Responses nativamente
+        if hasattr(provider, "stream_open_responses"):
+            try:
+                async for event in provider.stream_open_responses(
+                    messages, system_prompt=system_prompt, **kwargs
+                ):
+                    yield event
+                status.record_request()
+                return
+            except Exception as e:
+                status.record_error(str(e))
+                # Continua para fallback
+
+        # Fallback: Wrap legacy stream em Open Responses
+        builder = OpenResponsesStreamBuilder(model=decision.model_name)
+
+        try:
+            # Eventos iniciais
+            builder.start()
+            for event in builder.get_events():
+                yield event.to_sse()
+            builder.clear_events()
+
+            # Message item
+            message_item = builder.add_message()
+            for event in builder.get_events():
+                yield event.to_sse()
+            builder.clear_events()
+
+            # Stream legacy
+            async for chunk in provider.stream_chat(
+                messages, system_prompt=system_prompt, **kwargs
+            ):
+                builder.text_delta(message_item, chunk)
+                yield builder.get_last_event_sse()
+                builder.clear_events()
+
+            # Finaliza
+            builder.complete()
+            for event in builder.get_events():
+                yield event.to_sse()
+            yield builder.done()
+
+            status.record_request()
+
+        except Exception as e:
+            status.record_error(str(e))
+            error = OpenResponsesError(
+                type=ErrorType.SERVER_ERROR,
+                code="provider_failed",
+                message=f"{decision.provider_name}: {str(e)}",
+            )
+            builder.fail(error)
+            for event in builder.get_events():
+                yield event.to_sse()
+            yield builder.done()
 
     def get_status_report(self) -> str:
         """Get a status report of all providers."""

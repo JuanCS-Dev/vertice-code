@@ -103,7 +103,7 @@ class AnthropicVertexProvider:
                     "temperature": 0.0,
                     "messages": [{"role": "user", "content": "test"}],
                 }
-                response = loop.run_until_complete(
+                loop.run_until_complete(
                     loop.run_in_executor(None, lambda: self._client.messages.create(**test_params))
                 )
                 return True

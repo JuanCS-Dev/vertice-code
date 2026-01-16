@@ -31,7 +31,7 @@ from vertice_core.types import (
 from .core.orchestrator import PrometheusOrchestrator
 from .core.llm_client import GeminiClient
 from .core.llm_adapter import PrometheusLLMAdapter
-from providers.vertex_ai import VertexAIProvider
+from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 from vertice_core.messaging.events import get_event_bus
 
 logger = logging.getLogger(__name__)

@@ -6,7 +6,7 @@ This module provides Maximus-specific resilience helpers built on top of core.re
 - Tenacity retry decorators
 - Combined circuit breaker + retry utilities
 
-Base classes (CircuitBreaker, CircuitState, etc.) are re-exported from core.resilience
+Base classes (CircuitBreaker, CircuitState, etc.) are re-exported from vertice_core.resilience
 for convenience. Maximus-specific additions are defined here.
 
 Based on 2025 best practices:
@@ -31,8 +31,8 @@ from tenacity import (
     wait_exponential_jitter,
 )
 
-# Re-export base classes from core.resilience for convenience
-from core.resilience import (
+# Re-export base classes from vertice_core.resilience for convenience
+from vertice_core.resilience import (
     CircuitBreaker,
     CircuitOpenError as CircuitBreakerOpen,  # Alias for backward compat
     CircuitBreakerConfig,  # noqa: F401

@@ -18,6 +18,14 @@ import asyncio
 from typing import Any, Dict, List, Optional, AsyncGenerator
 import logging
 
+from vertice_core.openresponses_types import (
+    TokenUsage,
+    OpenResponsesError,
+    ErrorType,
+    JsonSchemaResponseFormat,
+)
+from vertice_core.openresponses_stream import OpenResponsesStreamBuilder
+
 # Configure Logging
 logger = logging.getLogger(__name__)
 
@@ -280,3 +288,101 @@ class VertexAIProvider:
 
     def count_tokens(self, text: str) -> int:
         return len(text) // 4
+
+    async def stream_open_responses(
+        self,
+        messages: List[Dict[str, str]],
+        system_prompt: Optional[str] = None,
+        max_tokens: int = 8192,
+        temperature: float = 0.7,
+        **kwargs,
+    ) -> AsyncGenerator[str, None]:
+        """
+        Stream usando protocolo Open Responses.
+
+        Emite eventos SSE seguindo a especificação Open Responses.
+
+        Yields:
+            str: Eventos SSE formatados
+
+        Exemplo de uso:
+            async for event in provider.stream_open_responses(messages):
+                print(event)  # event: response.output_text.delta\ndata: {...}\n\n
+        """
+        # Cria builder com nome do modelo
+        builder = OpenResponsesStreamBuilder(model=self.model_id)
+
+        try:
+            # Emite eventos iniciais
+            builder.start()
+            for event in builder.get_events():
+                yield event.to_sse()
+            builder.clear_events()
+
+            # Cria MessageItem
+            message_item = builder.add_message()
+            for event in builder.get_events():
+                yield event.to_sse()
+            builder.clear_events()
+
+            # Stream do conteúdo
+            token_count = 0
+            async for chunk in self.stream_chat(
+                messages,
+                system_prompt=system_prompt,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                **kwargs,
+            ):
+                token_count += len(chunk.split())  # Estimativa simples
+                builder.text_delta(message_item, chunk)
+                yield builder.get_last_event_sse()
+                builder.clear_events()
+
+            # Finaliza com sucesso
+            usage = TokenUsage(
+                input_tokens=sum(len(m.get("content", "")) // 4 for m in messages),
+                output_tokens=token_count,
+                total_tokens=0,  # Será calculado
+            )
+            usage.total_tokens = usage.input_tokens + usage.output_tokens
+
+            builder.complete(usage)
+            for event in builder.get_events():
+                yield event.to_sse()
+
+            # Evento terminal
+            yield builder.done()
+
+        except Exception as e:
+            # Emite erro
+            error = OpenResponsesError(
+                type=ErrorType.MODEL_ERROR, code="generation_failed", message=str(e)
+            )
+            builder.fail(error)
+            for event in builder.get_events():
+                yield event.to_sse()
+            yield builder.done()
+
+    async def stream_chat_structured(
+        self,
+        messages: List[Dict[str, str]],
+        response_format: "JsonSchemaResponseFormat",
+        **kwargs,
+    ) -> AsyncGenerator[str, None]:
+        """
+        Stream com structured output (JSON Schema).
+        """
+        from google.genai.types import GenerateContentConfig
+
+        config = GenerateContentConfig(
+            response_mime_type="application/json",
+            response_schema=response_format.schema,
+        )
+
+        async for chunk in self.stream_chat(
+            messages,
+            generation_config=config,
+            **kwargs,
+        ):
+            yield chunk

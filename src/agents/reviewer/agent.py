@@ -26,8 +26,8 @@ from .types import (
 )
 from .deep_think import DeepThinkMixin
 from agents.base import BaseAgent
-from core.resilience import ResilienceMixin
-from core.caching import CachingMixin
+from vertice_core.resilience import ResilienceMixin
+from vertice_core.caching import CachingMixin
 
 logger = logging.getLogger(__name__)
 

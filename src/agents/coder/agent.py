@@ -33,11 +33,11 @@ from .types import (
     EvaluationResult,
     GeneratedCode,
 )
-from providers.vertice_router import TaskComplexity
+from vertice_cli.core.providers.vertice_router import TaskComplexity
 from .darwin_godel import DarwinGodelMixin
 from agents.base import BaseAgent
-from core.resilience import ResilienceMixin
-from core.caching import CachingMixin
+from vertice_core.resilience import ResilienceMixin
+from vertice_core.caching import CachingMixin
 from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
 
 logger = logging.getLogger(__name__)

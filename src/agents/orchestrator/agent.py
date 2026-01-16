@@ -19,9 +19,9 @@ import logging
 from typing import Any, AsyncIterator, Dict, List, Optional
 
 from agents.base import BaseAgent
-from core.caching import CachingMixin
-from core.mesh.mixin import HybridMeshMixin
-from core.resilience import ResilienceMixin
+from vertice_core.caching import CachingMixin
+from vertice_core.mesh.mixin import HybridMeshMixin
+from vertice_core.resilience import ResilienceMixin
 
 from .bounded_autonomy import BoundedAutonomyMixin
 from .decomposer import TaskDecomposer
