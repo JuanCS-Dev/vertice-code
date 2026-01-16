@@ -1,13 +1,13 @@
 """
 Circuit Breaker Types for vertice_core.
 
-Re-exports from core.resilience with domain-specific additions:
+Re-exports from vertice_core.resilience with domain-specific additions:
 - CircuitBreakerStats: Extended statistics
 - SimpleCircuitBreaker: Dataclass-based simple breaker for backward compat
 
 Usage:
     # Preferred: direct from core
-    from core.resilience import CircuitBreaker, CircuitState
+    from vertice_core.resilience import CircuitBreaker, CircuitState
 
     # Domain types (this module)
     from vertice_core.types.circuit import CircuitBreakerStats, SimpleCircuitBreaker
@@ -172,7 +172,7 @@ class SimpleCircuitBreaker:
     """
     Simple dataclass-based circuit breaker for lightweight use cases.
 
-    For full-featured circuit breaker, use CircuitBreaker from core.resilience.
+    For full-featured circuit breaker, use CircuitBreaker from vertice_core.resilience.
     """
 
     failure_threshold: int = 5
@@ -247,7 +247,7 @@ class SimpleCircuitBreaker:
 
 
 __all__ = [
-    # Re-exports from core.resilience
+    # Re-exports from vertice_core.resilience
     "CircuitBreaker",
     "CircuitBreakerConfig",
     "CircuitOpenError",

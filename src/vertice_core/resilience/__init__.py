@@ -1,56 +1,46 @@
 """
-Vertice Core Resilience Module - Unified resilience patterns.
+Resilience Module - Production-grade fault tolerance for AI agents.
 
-SCALE & SUSTAIN Phase 2.1 - CircuitBreaker Consolidation.
-
-This module re-exports the canonical resilience implementation from
-core/resilience/ to provide a consistent import path within vertice_core.
-
-Canonical implementation: core/resilience/
-- CircuitBreaker: Failure isolation pattern
+Provides:
 - RetryHandler: Exponential backoff with jitter
+- CircuitBreaker: Failure isolation pattern
 - RateLimiter: Token bucket rate limiting
 - FallbackHandler: Multi-provider fallback orchestration
+- ResilienceMixin: Agent integration mixin
 
-Usage:
-    from vertice_core.resilience import (
-        CircuitBreaker,
-        CircuitBreakerConfig,
-        CircuitOpenError,
-        CircuitState,
-        RetryConfig,
-        RetryHandler,
-    )
-
-Author: Vertice Team
-Date: 2026-01-02
+References:
+- AWS Architecture: Build Resilient Generative AI Agents
+- Microsoft Circuit Breaker Pattern
+- resilient-llm library patterns
+- Tenacity retry library
 """
 
-# Re-export everything from canonical implementation
-from core.resilience import (
-    # Types and Enums
+from __future__ import annotations
+
+from .types import (
     ErrorCategory,
     ErrorSeverity,
-    CircuitState,
-    # Configs
     RetryConfig,
+    CircuitState,
+    CircuitBreakerConfig,
     RateLimitConfig,
     FallbackConfig,
-    # Exceptions
     ResilienceError,
     TransientError,
     PermanentError,
     RateLimitError,
     CircuitOpenError,
-    # Handlers
-    RetryHandler,
-    CircuitBreaker,
-    RateLimiter,
-    TokenBucket,
-    FallbackHandler,
-    # Mixin
-    ResilienceMixin,
-    # Web Rate Limiting
+)
+
+# Backward compatibility aliases
+CircuitBreakerOpen = CircuitOpenError  # Alias for backward compat
+CircuitBreakerStats = None  # Placeholder - use from vertice_tui.core.resilience_patterns
+from .retry import RetryHandler
+from .circuit_breaker import CircuitBreaker
+from .rate_limiter import RateLimiter, TokenBucket
+from .fallback import FallbackHandler
+from .mixin import ResilienceMixin
+from .web_rate_limiter import (
     WebRateLimitConfig,
     WebRateLimiter,
     WebRateLimiterRegistry,
@@ -58,25 +48,23 @@ from core.resilience import (
     get_search_limiter,
 )
 
-# Import CircuitBreakerConfig from types
-from core.resilience.types import CircuitBreakerConfig
-
 __all__ = [
-    # Types and Enums
+    # Types
     "ErrorCategory",
     "ErrorSeverity",
-    "CircuitState",
-    # Configs
     "RetryConfig",
+    "CircuitState",
     "CircuitBreakerConfig",
     "RateLimitConfig",
     "FallbackConfig",
-    # Exceptions
     "ResilienceError",
     "TransientError",
     "PermanentError",
     "RateLimitError",
     "CircuitOpenError",
+    # Backward compat aliases
+    "CircuitBreakerOpen",  # Alias for CircuitOpenError
+    "CircuitBreakerStats",  # Placeholder - use from TUI/vertice_core
     # Handlers
     "RetryHandler",
     "CircuitBreaker",

@@ -188,6 +188,50 @@ class StreamingAgentProtocol(AgentProtocol, Protocol):
         ...
 
 
+@runtime_checkable
+class LLMClientWithOpenResponsesProtocol(LLMClientWithChatProtocol, Protocol):
+    """Extended protocol with Open Responses streaming support."""
+
+    async def stream_open_responses(
+        self,
+        messages: List[Dict[str, str]],
+        system_prompt: Optional[str] = None,
+        **kwargs: Any,
+    ) -> AsyncIterator[str]:
+        """
+        Stream using Open Responses protocol.
+
+        Yields SSE-formatted events:
+        - event: response.created
+        - event: response.output_text.delta
+        - event: response.completed
+        - data: [DONE]
+        """
+        ...
+
+
+@runtime_checkable
+class OpenResponsesAgentProtocol(AgentProtocol, Protocol):
+    """Protocol for agents supporting Open Responses format."""
+
+    async def execute_open_responses(
+        self,
+        task: AgentTask,
+        previous_response_id: Optional[str] = None,
+    ) -> Any:  # Returns OpenResponse
+        """
+        Execute task returning Open Responses format.
+
+        Args:
+            task: Task to execute
+            previous_response_id: ID of previous response for context resumption
+
+        Returns:
+            OpenResponse object
+        """
+        ...
+
+
 # =============================================================================
 # TOOL PROTOCOL
 # =============================================================================

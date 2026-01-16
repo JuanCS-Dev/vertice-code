@@ -1,26 +1,22 @@
 """
-Vertice Core - Agency Foundation
+Vertice Core - Backward Compatibility Layer
 
-Central module for the Vertice multi-agent system.
-
-Phase 3 Integration:
-- Hybrid Mesh Coordination
-- A2A Protocol (Agent-to-Agent)
-- Meta-Cognitive Reflection
-- Comprehensive Benchmarks
+Re-exports everything from vertice_core for backward compatibility.
+This module is deprecated; import from vertice_core directly.
 
 Usage:
-    from core import Agency, get_agency
-    from core.mesh import HybridMeshMixin
-    from core.protocols import A2AProtocolMixin
-    from core.metacognition import MetaCognitiveMixin
-    from core.benchmarks import BenchmarkMixin
+    from core import Agency, get_agency  # Still works, but deprecated
+    # Preferred: from vertice_core import Agency, get_agency
 """
 
-from .agency import Agency, AgencyConfig, get_agency
+# Re-export everything from vertice_core
+from vertice_core import *
 
-# Phase 3 modules
-from .mesh import (
+# Additional imports for backward compatibility
+from vertice_core.agency import Agency, AgencyConfig, get_agency
+from vertice_core.simple_agents import Agent as SimpleAgent, AgentConfig, Handoff
+from vertice_core.a2a import A2AProtocolMixin, AgentCard, AgentCapabilities, AgentSkill, A2ATask
+from vertice_core.mesh import (
     HybridMeshMixin,
     CoordinationTopology,
     CoordinationPlane,
@@ -28,15 +24,7 @@ from .mesh import (
     TaskRoute,
     TopologySelector,
 )
-from .protocols import (
-    A2AProtocolMixin,
-    AgentCard,
-    AgentCapabilities,
-    AgentSkill,
-    A2ATask,
-    TaskStatus,
-)
-from .metacognition import (
+from vertice_core.metacognition import (
     MetaCognitiveMixin,
     ReflectionEngine,
     ExperienceMemory,
@@ -44,7 +32,7 @@ from .metacognition import (
     ReflectionLevel,
     ReflectionOutcome,
 )
-from .benchmarks import (
+from vertice_core.benchmarks import (
     BenchmarkMixin,
     BenchmarkRunner,
     BenchmarkSuite,
@@ -52,38 +40,3 @@ from .benchmarks import (
     BenchmarkResult,
     BenchmarkCategory,
 )
-
-__all__ = [
-    # Agency
-    "Agency",
-    "AgencyConfig",
-    "get_agency",
-    # Mesh
-    "HybridMeshMixin",
-    "CoordinationTopology",
-    "CoordinationPlane",
-    "MeshNode",
-    "TaskRoute",
-    "TopologySelector",
-    # A2A Protocol
-    "A2AProtocolMixin",
-    "AgentCard",
-    "AgentCapabilities",
-    "AgentSkill",
-    "A2ATask",
-    "TaskStatus",
-    # Metacognition
-    "MetaCognitiveMixin",
-    "ReflectionEngine",
-    "ExperienceMemory",
-    "ConfidenceCalibrator",
-    "ReflectionLevel",
-    "ReflectionOutcome",
-    # Benchmarks
-    "BenchmarkMixin",
-    "BenchmarkRunner",
-    "BenchmarkSuite",
-    "BenchmarkTask",
-    "BenchmarkResult",
-    "BenchmarkCategory",
-]
