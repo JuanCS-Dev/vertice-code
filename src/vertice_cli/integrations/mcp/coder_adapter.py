@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class CoderMCPAdapter:
     """Adapter to expose CoderAgent tools via MCP.
-    
+
     REUSES existing `coder` singleton from `agents.coder.agent`.
     Does NOT create a new agent instance.
     """
@@ -31,6 +31,7 @@ class CoderMCPAdapter:
         """Lazy import to avoid circular dependencies."""
         if self._coder is None:
             from agents.coder.agent import coder
+
             self._coder = coder
         return self._coder
 
@@ -46,18 +47,18 @@ class CoderMCPAdapter:
             """Generate code based on task description."""
             try:
                 from agents.coder.types import CodeGenerationRequest
-                
+
                 coder = self._get_coder()
                 request = CodeGenerationRequest(
                     task=task,
                     language=language,
                     requirements=requirements.split(",") if requirements else [],
                 )
-                
+
                 result_chunks = []
                 async for chunk in coder.generate(request, stream=True):
                     result_chunks.append(chunk)
-                
+
                 return {
                     "success": True,
                     "tool": "coder_generate",
@@ -78,7 +79,7 @@ class CoderMCPAdapter:
             try:
                 coder = self._get_coder()
                 result = await coder.refactor(code, instructions, language)
-                
+
                 return {
                     "success": True,
                     "tool": "coder_refactor",
@@ -99,7 +100,7 @@ class CoderMCPAdapter:
             try:
                 coder = self._get_coder()
                 result = await coder.complete(code_prefix, language, max_tokens)
-                
+
                 return {
                     "success": True,
                     "tool": "coder_complete",
@@ -119,7 +120,7 @@ class CoderMCPAdapter:
             try:
                 coder = self._get_coder()
                 result = await coder.evaluate_code(code, language)
-                
+
                 return {
                     "success": True,
                     "tool": "coder_evaluate",
@@ -134,12 +135,14 @@ class CoderMCPAdapter:
                 return {"success": False, "tool": "coder_evaluate", "error": str(e)}
 
         # Register all tools
-        self._mcp_tools.update({
-            "coder_generate": coder_generate,
-            "coder_refactor": coder_refactor,
-            "coder_complete": coder_complete,
-            "coder_evaluate": coder_evaluate,
-        })
+        self._mcp_tools.update(
+            {
+                "coder_generate": coder_generate,
+                "coder_refactor": coder_refactor,
+                "coder_complete": coder_complete,
+                "coder_evaluate": coder_evaluate,
+            }
+        )
 
         logger.info(f"Registered {len(self._mcp_tools)} Coder MCP tools")
 

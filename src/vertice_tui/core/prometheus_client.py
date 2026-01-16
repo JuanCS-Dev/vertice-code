@@ -3,6 +3,9 @@ PROMETHEUS Client for TUI - Streaming integration.
 
 Provides the same interface as GeminiClient but routes through
 PROMETHEUS for enhanced capabilities.
+
+PERFORMANCE OPTIMIZATION (Jan 2026):
+- Lazy import of PrometheusProvider to avoid heavy google.cloud imports
 """
 
 import logging
@@ -12,15 +15,31 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-try:
-    from vertice_cli.core.providers.prometheus_provider import PrometheusProvider, PrometheusConfig
+# Lazy loading flags - providers loaded on first use
+_prometheus_loaded = False
+_PrometheusProvider = None
+_PrometheusConfig = None
 
-    PROMETHEUS_AVAILABLE = True
-except ImportError as e:
-    logger.warning(f"Prometheus provider not available: {e}")
-    PROMETHEUS_AVAILABLE = False
-    PrometheusProvider = None  # type: ignore
-    PrometheusConfig = None  # type: ignore
+
+def _ensure_prometheus_imports():
+    """Lazy load prometheus provider to avoid slow startup."""
+    global _prometheus_loaded, _PrometheusProvider, _PrometheusConfig
+    if _prometheus_loaded:
+        return _PrometheusProvider is not None
+
+    _prometheus_loaded = True
+    try:
+        from vertice_cli.core.providers.prometheus_provider import (
+            PrometheusProvider as _PP,
+            PrometheusConfig as _PC,
+        )
+
+        _PrometheusProvider = _PP
+        _PrometheusConfig = _PC
+        return True
+    except ImportError as e:
+        logger.debug(f"Prometheus provider not available: {e}")
+        return False
 
 
 @dataclass
@@ -55,7 +74,7 @@ class PrometheusClient:
     ):
         self.config = config or PrometheusStreamConfig()
         self._tools = tools or []
-        self._provider: Optional[PrometheusProvider] = None
+        self._provider: Optional[Any] = None  # PrometheusProvider loaded lazily
         self._initialized = False
         self._init_error: Optional[str] = None
 
@@ -73,7 +92,9 @@ class PrometheusClient:
         if self._initialized:
             return self._provider is not None
 
-        if not PROMETHEUS_AVAILABLE or PrometheusProvider is None:
+        # Lazy load the provider
+        available = _ensure_prometheus_imports()
+        if not available or _PrometheusProvider is None:
             logger.error("Prometheus module not available")
             self._init_error = "Prometheus module not installed"
             self._initialized = True  # Prevent retry loops
@@ -81,12 +102,12 @@ class PrometheusClient:
 
         try:
             logger.info("Initializing Prometheus provider...")
-            prometheus_config = PrometheusConfig(
+            prometheus_config = _PrometheusConfig(
                 enable_world_model=self.config.enable_world_model,
                 enable_memory=self.config.enable_memory,
                 enable_reflection=self.config.enable_reflection,
             )
-            self._provider = PrometheusProvider(config=prometheus_config)
+            self._provider = _PrometheusProvider(config=prometheus_config)
             self._initialized = True
             self._init_error = None
             logger.info("Prometheus provider initialized successfully")

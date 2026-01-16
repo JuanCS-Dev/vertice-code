@@ -595,7 +595,7 @@ class VerticeContainer(BaseContainer):
     @classmethod
     def agency(cls):
         """Get agency singleton."""
-        from core.agency import get_agency
+        from vertice_core.agency import get_agency
 
         return get_agency()
 

@@ -6,7 +6,7 @@ Real-time AI performance monitoring and observability
 import logging
 import time
 from typing import Dict, Any, Optional, List
-from datetime import datetime, timedelta
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -47,23 +47,23 @@ class LangSmithMonitor:
         if not self.client:
             return
 
-        run_data = {
-            "run_id": run_id,
-            "name": f"AI Interaction - {model_name}",
-            "run_type": "llm",
-            "inputs": {"prompt": input_text},
-            "outputs": {"response": output_text},
-            "start_time": datetime.now() - timedelta(milliseconds=latency_ms),
-            "end_time": datetime.now(),
-            "extra": {
-                "model_name": model_name,
-                "latency_ms": latency_ms,
-                "token_count": token_count,
-                "safety_score": safety_score,
-                "bias_score": bias_score,
-                "metadata": metadata or {},
-            },
-        }
+        # run_data = {
+        #     "run_id": run_id,
+        #     "name": f"AI Interaction - {model_name}",
+        #     "run_type": "llm",
+        #     "inputs": {"prompt": input_text},
+        #     "outputs": {"response": output_text},
+        #     "start_time": datetime.now() - timedelta(milliseconds=latency_ms),
+        #     "end_time": datetime.now(),
+        #     "extra": {
+        #         "model_name": model_name,
+        #         "latency_ms": latency_ms,
+        #         "input_tokens": input_tokens,
+        #         "output_tokens": output_tokens,
+        #         "temperature": temperature,
+        #         "cost": cost,
+        #     },
+        # }
 
         try:
             # self.client.create_run(**run_data)

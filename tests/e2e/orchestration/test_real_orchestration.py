@@ -33,14 +33,10 @@ def has_api_key(provider: str) -> bool:
 
 
 # Skip markers
-requires_groq = pytest.mark.skipif(
-    not has_api_key("groq"),
-    reason="GROQ_API_KEY not set"
-)
+requires_groq = pytest.mark.skipif(not has_api_key("groq"), reason="GROQ_API_KEY not set")
 
 requires_anthropic = pytest.mark.skipif(
-    not has_api_key("anthropic"),
-    reason="ANTHROPIC_API_KEY not set"
+    not has_api_key("anthropic"), reason="ANTHROPIC_API_KEY not set"
 )
 
 
@@ -49,29 +45,25 @@ class TestRealProviderInitialization:
 
     def test_provider_router_available(self):
         """Test provider router is importable."""
-        from providers import get_router
+        from vertice_cli.core.providers.vertice_router import get_router
 
         router = get_router()
         assert router is not None
 
     def test_provider_has_available_providers(self):
         """Test that some providers are available."""
-        from providers import get_router
+        from vertice_cli.core.providers.vertice_router import get_router
 
         router = get_router()
         # Should have at least one provider configured
-        assert hasattr(router, 'providers') or hasattr(router, 'stream_chat')
+        assert hasattr(router, "providers") or hasattr(router, "stream_chat")
 
     @requires_groq
     @pytest.mark.asyncio
     async def test_groq_provider_init(self):
         """Test Groq provider initializes correctly."""
-        from providers import GroqProvider
-
-        provider = GroqProvider()
-        assert provider is not None
-        # Should have model configured
-        assert hasattr(provider, 'model') or hasattr(provider, 'client')
+        # GroqProvider removed in cleanup, skip this test
+        pytest.skip("GroqProvider removed in legacy code cleanup")
 
 
 class TestRealOrchestratorWorkflow:
@@ -96,7 +88,7 @@ class TestRealOrchestratorWorkflow:
         assert tasks[0].complexity in [
             TaskComplexity.MODERATE,
             TaskComplexity.COMPLEX,
-            TaskComplexity.CRITICAL
+            TaskComplexity.CRITICAL,
         ]
 
     @pytest.mark.asyncio
@@ -119,14 +111,11 @@ class TestRealOrchestratorWorkflow:
         ]
 
         for description, expected_role in test_cases:
-            task = Task(
-                id="test",
-                description=description,
-                complexity=TaskComplexity.SIMPLE
-            )
+            task = Task(id="test", description=description, complexity=TaskComplexity.SIMPLE)
             actual_role = await orchestrator.route(task)
-            assert actual_role == expected_role, \
+            assert actual_role == expected_role, (
                 f"Expected {expected_role} for '{description}', got {actual_role}"
+            )
 
     @pytest.mark.asyncio
     async def test_orchestrator_streaming_output(self):
@@ -166,33 +155,27 @@ class TestRealMultiAgentHandoffs:
         arch_task = Task(
             id="arch-1",
             description="Design microservices architecture",
-            complexity=TaskComplexity.COMPLEX
+            complexity=TaskComplexity.COMPLEX,
         )
-        h1 = await orchestrator.handoff(
-            arch_task, AgentRole.ARCHITECT, "Architecture phase"
-        )
+        h1 = await orchestrator.handoff(arch_task, AgentRole.ARCHITECT, "Architecture phase")
         handoff_results.append(h1)
 
         # Phase 2: Implementation
         impl_task = Task(
             id="impl-1",
             description="Code the authentication service",
-            complexity=TaskComplexity.MODERATE
+            complexity=TaskComplexity.MODERATE,
         )
-        h2 = await orchestrator.handoff(
-            impl_task, AgentRole.CODER, "Implementation phase"
-        )
+        h2 = await orchestrator.handoff(impl_task, AgentRole.CODER, "Implementation phase")
         handoff_results.append(h2)
 
         # Phase 3: Review
         review_task = Task(
             id="review-1",
             description="Review implementation for security",
-            complexity=TaskComplexity.MODERATE
+            complexity=TaskComplexity.MODERATE,
         )
-        h3 = await orchestrator.handoff(
-            review_task, AgentRole.REVIEWER, "Review phase"
-        )
+        h3 = await orchestrator.handoff(review_task, AgentRole.REVIEWER, "Review phase")
         handoff_results.append(h3)
 
         # Verify chain
@@ -226,11 +209,7 @@ class TestRealBoundedAutonomy:
             notify_callback=AsyncMock(),
         )
 
-        task = Task(
-            id="trivial-1",
-            description="List files",
-            complexity=TaskComplexity.TRIVIAL
-        )
+        task = Task(id="trivial-1", description="List files", complexity=TaskComplexity.TRIVIAL)
 
         can_proceed, _ = await orchestrator.check_autonomy(task)
 
@@ -258,7 +237,7 @@ class TestRealBoundedAutonomy:
         task = Task(
             id="critical-1",
             description="Delete production database",
-            complexity=TaskComplexity.CRITICAL
+            complexity=TaskComplexity.CRITICAL,
         )
 
         can_proceed, approval_request = await orchestrator.check_autonomy(task)
@@ -292,10 +271,10 @@ def calculate_factorial(n: int) -> int:
         """Test coder catches invalid Python."""
         from agents import coder
 
-        code = '''
+        code = """
 def broken_function(
     return "missing colon"
-'''
+"""
 
         result = coder.evaluate_code(code, "python")
 
@@ -306,11 +285,11 @@ def broken_function(
         """Test coder detects anti-patterns."""
         from agents import coder
 
-        code = '''
+        code = """
 def hacky_function():
     pass  # TODO: implement this
     # FIXME: this is broken
-'''
+"""
 
         result = coder.evaluate_code(code, "python")
 
@@ -343,11 +322,7 @@ class TestPerformanceMetrics:
 
         orchestrator = OrchestratorAgent()
 
-        task = Task(
-            id="perf-1",
-            description="Write code for API",
-            complexity=TaskComplexity.SIMPLE
-        )
+        task = Task(id="perf-1", description="Write code for API", complexity=TaskComplexity.SIMPLE)
 
         start = time.time()
         await orchestrator.route(task)
@@ -364,11 +339,7 @@ class TestPerformanceMetrics:
 
         orchestrator = OrchestratorAgent()
 
-        task = Task(
-            id="perf-2",
-            description="Test task",
-            complexity=TaskComplexity.SIMPLE
-        )
+        task = Task(id="perf-2", description="Test task", complexity=TaskComplexity.SIMPLE)
 
         start = time.time()
         await orchestrator.handoff(task, AgentRole.CODER, "Context")
@@ -383,23 +354,19 @@ class TestObservabilityIntegration:
 
     def test_agents_have_observability(self):
         """Test all agents have observability mixin."""
-        from agents import (
-            orchestrator, coder, reviewer,
-            architect, researcher, devops
-        )
-        from core.observability import ObservabilityMixin
+        from agents import orchestrator, coder, reviewer, architect, researcher, devops
+        from vertice_core.observability import ObservabilityMixin
 
         for agent in [orchestrator, coder, reviewer, architect, researcher, devops]:
-            assert isinstance(agent, ObservabilityMixin), \
-                f"{agent.name} missing ObservabilityMixin"
+            assert isinstance(agent, ObservabilityMixin), f"{agent.name} missing ObservabilityMixin"
 
     def test_agent_has_trace_methods(self):
         """Test agents have trace methods."""
         from agents import coder
 
-        assert hasattr(coder, 'trace_operation')
-        assert hasattr(coder, 'trace_llm_call')
-        assert hasattr(coder, 'record_tokens')
+        assert hasattr(coder, "trace_operation")
+        assert hasattr(coder, "trace_llm_call")
+        assert hasattr(coder, "record_tokens")
 
 
 class TestCompleteWorkflow:
@@ -419,9 +386,7 @@ class TestCompleteWorkflow:
         workflow = []
 
         # Step 1: Plan
-        tasks = await orchestrator.plan(
-            "Implement user authentication with OAuth2"
-        )
+        tasks = await orchestrator.plan("Implement user authentication with OAuth2")
         workflow.append(("plan", len(tasks)))
 
         # Step 2: Route and handoff

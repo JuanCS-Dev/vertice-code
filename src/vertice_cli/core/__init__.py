@@ -180,7 +180,12 @@ from .exceptions import *
 from .config import *
 from .logging_setup import *
 from .validation import *
-from .providers import *
+
+# PERFORMANCE OPTIMIZATION (Jan 2026):
+# Lazy load providers to avoid ~1.5s import of google.cloud.aiplatform
+# Use: from vertice_cli.core.providers import VertexAIProvider
+# from .providers import *  # DISABLED - causes 1.5s startup delay
+
 from .governance_pipeline import *
 from .observability import *
 from .input_enhancer import *

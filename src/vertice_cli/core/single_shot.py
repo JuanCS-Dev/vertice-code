@@ -11,7 +11,13 @@ from pathlib import Path
 
 from .llm import llm_client
 from .context import ContextBuilder
-from ..core.tool_registry import ToolRegistry
+from ..tools.base import ToolRegistry
+
+# Import tools
+from ..tools.file_ops import ReadFileTool, WriteFileTool, EditFileTool, ListDirectoryTool
+from ..tools.search import SearchFilesTool
+from ..tools.exec_hardened import BashCommandTool
+from ..tools.git_ops import GitStatusTool, GitDiffTool
 
 
 class SingleShotExecutor:

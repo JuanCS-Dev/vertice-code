@@ -21,6 +21,15 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from vertice_cli.utils.streaming import collect_stream
+from vertice_core.openresponses_types import (
+    OpenResponse,
+    MessageItem,
+    ItemStatus,
+    MessageRole,
+    OutputTextContent,
+    OpenResponsesError,
+    ErrorType,
+)
 
 # =============================================================================
 # IMPORTS FROM vertice_core (Single Source of Truth)
@@ -274,6 +283,61 @@ class BaseAgent(abc.ABC):
                 exc_info=True,
             )
             return {"success": False, "error": f"{type(e).__name__}: {str(e)}"}
+
+    async def execute_open_responses(
+        self, task: AgentTask, previous_response_id: Optional[str] = None
+    ) -> OpenResponse:
+        """
+        Executa task retornando formato Open Responses.
+
+        Args:
+            task: Task a executar
+            previous_response_id: ID do response anterior para continuação
+
+        Returns:
+            OpenResponse com resultado da execução
+        """
+        response = OpenResponse(model=self._get_model_name())
+
+        try:
+            # Execução padrão
+            agent_response = await self.execute(task)
+
+            # Converte para Open Responses
+            message_item = MessageItem(
+                role=MessageRole.ASSISTANT,
+                status=ItemStatus.COMPLETED,
+                content=[OutputTextContent(text=agent_response.content)],
+            )
+            response.output.append(message_item)
+            response.status = ItemStatus.COMPLETED
+
+            self.logger.info(f"Open Responses execution completed: {response.id}")
+
+        except CapabilityViolationError as e:
+            response.status = ItemStatus.FAILED
+            response.error = OpenResponsesError(
+                type=ErrorType.INVALID_REQUEST, code="capability_violation", message=str(e)
+            )
+            self.logger.error(f"Capability violation: {e}")
+
+        except Exception as e:
+            response.status = ItemStatus.FAILED
+            response.error = OpenResponsesError(
+                type=ErrorType.SERVER_ERROR, code="execution_failed", message=str(e)
+            )
+            self.logger.error(f"Execution failed: {e}", exc_info=True)
+
+        return response
+
+    def _get_model_name(self) -> str:
+        """Obtém nome do modelo do LLM client."""
+        if hasattr(self.llm_client, "get_model_info"):
+            info = self.llm_client.get_model_info()
+            return info.get("model", "unknown")
+        if hasattr(self.llm_client, "model_id"):
+            return self.llm_client.model_id
+        return "unknown"
 
 
 # Compatibility aliases for existing agents

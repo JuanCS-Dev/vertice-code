@@ -107,7 +107,10 @@ def is_ssrf_safe(url: str) -> Tuple[bool, Optional[str]]:
         try:
             # Get all IPs for this hostname
             results = socket.getaddrinfo(
-                hostname, None, socket.AF_UNSPEC, socket.SOCK_STREAM  # Both IPv4 and IPv6
+                hostname,
+                None,
+                socket.AF_UNSPEC,
+                socket.SOCK_STREAM,  # Both IPv4 and IPv6
             )
 
             for family, _, _, _, sockaddr in results:
@@ -229,7 +232,6 @@ class WebFetchTool(ValidatedTool):
     async def _execute_validated(self, **kwargs) -> ToolResult:
         """Fetch and process URL content."""
         url = kwargs.get("url", "")
-        prompt = kwargs.get("prompt", "")
         max_length = kwargs.get("max_length", 10000)
 
         # Validate URL

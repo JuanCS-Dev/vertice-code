@@ -35,7 +35,7 @@ from .agents import (
 )
 
 # Re-export unified Agent system
-from core.agents import Agent, AgentConfig, Handoff
+from vertice_core.simple_agents import Agent, AgentConfig, Handoff
 
 # Emit deprecation warning on import
 warnings.warn(

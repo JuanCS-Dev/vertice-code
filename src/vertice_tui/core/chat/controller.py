@@ -250,22 +250,18 @@ class ChatController:
             response_chunks: List[str] = []
             stream_filter = StreamFilter()
 
-            async for chunk in client.stream(
+            # Stream using Open Responses protocol
+            async for sse_event in client.stream_open_responses(
                 current_message,
                 system_prompt=system_prompt,
                 context=self.history.get_context(),
                 tools=self.tools.get_schemas_for_llm(),
             ):
-                response_chunks.append(chunk)
-                filtered_chunk = stream_filter.process_chunk(chunk)
-
-                if filtered_chunk and not filtered_chunk.startswith("[TOOL_CALL:"):
-                    yield filtered_chunk
-
-            # Flush remaining
-            remaining = stream_filter.flush()
-            if remaining and not remaining.startswith("[TOOL_CALL:"):
-                yield remaining
+                yield sse_event
+                # Extract text for tool call detection (legacy support)
+                # In a full OR implementation, we'd detect via events
+                # But for now, we still need to buffer for extraction
+                response_chunks.append(sse_event)
 
             # Check for tool calls
             accumulated = "".join(response_chunks)

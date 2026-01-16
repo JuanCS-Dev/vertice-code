@@ -277,4 +277,3 @@ class CommandRouter:
         await self.app.mount(modal)
         view.add_success("📤 Export modal opened. Select template and export your conversations!")
         return True
-

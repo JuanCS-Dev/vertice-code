@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 class MCPGateway:
     """Unified MCP Gateway - Single Source of Truth.
-    
+
     Centralizes registration of all MCP adapters.
     Provides health check and tool listing.
     """
@@ -41,11 +41,11 @@ class MCPGateway:
         self.reviewer_adapter = ReviewerMCPAdapter()
         self.architect_adapter = ArchitectMCPAdapter()
         self.noesis_adapter = NoesissMCPAdapter()
-        
+
         # Optional adapters (set by caller)
         self.prometheus_adapter: Optional[Any] = None
         self.shell_adapter: Optional[Any] = None
-        
+
         self._registered = False
 
     def set_prometheus_adapter(self, adapter) -> None:
@@ -54,7 +54,7 @@ class MCPGateway:
 
     def register_all(self, mcp_server) -> Dict[str, int]:
         """Register all tools from all adapters.
-        
+
         Returns:
             Dict mapping adapter name to tool count
         """
@@ -90,31 +90,31 @@ class MCPGateway:
             stats["prometheus"] = len(self.prometheus_adapter.list_registered_tools())
 
         self._registered = True
-        
+
         total = sum(stats.values())
         logger.info(f"MCPGateway registered {total} tools: {stats}")
-        
+
         return stats
 
     def list_all_tools(self) -> Dict[str, List[str]]:
         """List all registered tools by adapter."""
         result = {}
-        
+
         result["daimon"] = self.daimon_adapter.list_registered_tools()
         result["coder"] = self.coder_adapter.list_registered_tools()
         result["reviewer"] = self.reviewer_adapter.list_registered_tools()
         result["architect"] = self.architect_adapter.list_registered_tools()
-        
+
         if self.prometheus_adapter:
             result["prometheus"] = self.prometheus_adapter.list_registered_tools()
-            
+
         return result
 
     def get_health(self) -> Dict[str, Any]:
         """Get gateway health status."""
         tools = self.list_all_tools()
         total_tools = sum(len(t) for t in tools.values())
-        
+
         return {
             "status": "healthy" if self._registered else "not_initialized",
             "total_tools": total_tools,

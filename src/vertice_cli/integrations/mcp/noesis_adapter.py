@@ -17,11 +17,11 @@ logger = logging.getLogger(__name__)
 
 class NoesissMCPAdapter:
     """Adapter to expose Noesis tools via MCP.
-    
+
     WRAPS existing ValidatedTool classes from:
     - noesis_mcp.py (5 tools)
     - distributed_noesis_mcp.py (6+ tools)
-    
+
     Does NOT recreate any functionality.
     """
 
@@ -40,6 +40,7 @@ class NoesissMCPAdapter:
                 QueryNoesisTribunalTool,
                 ShareNoesisInsightTool,
             )
+
             self._noesis_tools = [
                 GetNoesisConsciousnessTool(),
                 ActivateNoesisConsciousnessTool(),
@@ -61,6 +62,7 @@ class NoesissMCPAdapter:
                 ShareDistributedInsightTool,
                 GetCollectiveInsightsTool,
             )
+
             self._distributed_tools = [
                 ActivateDistributedConsciousnessTool(),
                 DeactivateDistributedConsciousnessTool(),
@@ -74,7 +76,7 @@ class NoesissMCPAdapter:
 
     def register_all(self, mcp_server) -> None:
         """Register all Noesis tools as MCP tools."""
-        
+
         # Register core Noesis tools
         noesis_tools = self._get_noesis_tools()
         for tool in noesis_tools:
@@ -82,7 +84,7 @@ class NoesissMCPAdapter:
             async def create_handler(t):
                 async def handler(**kwargs):
                     result = await t._execute_validated(**kwargs)
-                    if hasattr(result, 'to_dict'):
+                    if hasattr(result, "to_dict"):
                         return result.to_dict()
                     return {
                         "success": result.success,
@@ -90,10 +92,12 @@ class NoesissMCPAdapter:
                         "data": result.data,
                         "error": result.error,
                     }
+
                 return handler
-            
+
             # Register with MCP
             import asyncio
+
             handler = asyncio.get_event_loop().run_until_complete(create_handler(tool))
             mcp_server.tool(name=tool.name)(handler)
             self._mcp_tools[tool.name] = handler
@@ -101,10 +105,11 @@ class NoesissMCPAdapter:
         # Register distributed consciousness tools
         distributed_tools = self._get_distributed_tools()
         for tool in distributed_tools:
+
             async def create_dist_handler(t):
                 async def handler(**kwargs):
                     result = await t._execute_validated(**kwargs)
-                    if hasattr(result, 'to_dict'):
+                    if hasattr(result, "to_dict"):
                         return result.to_dict()
                     return {
                         "success": result.success,
@@ -112,9 +117,11 @@ class NoesissMCPAdapter:
                         "data": result.data,
                         "error": result.error,
                     }
+
                 return handler
-            
+
             import asyncio
+
             handler = asyncio.get_event_loop().run_until_complete(create_dist_handler(tool))
             mcp_server.tool(name=tool.name)(handler)
             self._mcp_tools[tool.name] = handler

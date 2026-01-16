@@ -302,7 +302,7 @@ class VerticeApp(App):
                         timeout=120.0,  # 2 minute timeout for chat
                     )
             except asyncio.TimeoutError:
-                response.current_response += f"\n❌ Error: Operation timed out"
+                response.current_response += "\n❌ Error: Operation timed out"
                 self.notify("Operation timed out", severity="error")
             except Exception as op_error:
                 error_msg = str(op_error)
@@ -317,16 +317,18 @@ class VerticeApp(App):
                 response = self.query_one("#response", ResponseView)
                 response.current_response += f"\n💥 Critical error: {str(e)[:100]}"
                 self.notify("Critical error occurred", severity="error")
-            except:
+            except Exception as log_error:
                 # If even error reporting fails, at least log it
-                print(f"CRITICAL: Unhandled error in input submission: {e}")
+                print(
+                    f"CRITICAL: Unhandled error in input submission: {e}, logging failed: {log_error}"
+                )
 
         finally:
             # Always reset status
             try:
                 status = self.query_one(StatusBar)
                 status.mode = "READY"
-            except:
+            except Exception:
                 pass
 
     @on(Input.Changed, "#prompt")
@@ -598,7 +600,7 @@ class VerticeApp(App):
             try:
                 # This would get current session ID
                 current_session_id = getattr(self.session_manager, "current_session_id", None)
-            except:
+            except Exception:
                 pass
 
         # Create and mount fuzzy search modal

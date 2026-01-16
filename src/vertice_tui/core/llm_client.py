@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     pass  # Future type hints if needed
 
 # Import from canonical resilience module
-from core.resilience import (
+from vertice_core.resilience import (
     CircuitBreaker,
     CircuitBreakerConfig,
     CircuitBreakerOpen,
@@ -372,6 +372,68 @@ class GeminiClient:
         # Route 2: Direct Gemini API (fallback when VerticeClient unavailable or exhausted)
         async for chunk in self._stream_via_gemini(prompt, system_prompt, context, tools):
             yield chunk
+
+    async def stream_open_responses(
+        self,
+        prompt: str,
+        system_prompt: str = "",
+        context: Optional[List[Dict[str, str]]] = None,
+        tools: Optional[List[Dict[str, Any]]] = None,
+        **kwargs: Any,
+    ) -> AsyncIterator[str]:
+        """Stream using Open Responses semantic protocol."""
+        if self._vertice_client:
+            async for sse_chunk in self._stream_open_responses_via_client(
+                prompt, system_prompt, context, tools, **kwargs
+            ):
+                yield sse_chunk
+            return
+
+        # Fallback: Wrap direct stream into Open Responses events
+        from vertice_core.openresponses_stream import OpenResponsesStreamBuilder
+
+        builder = OpenResponsesStreamBuilder(model=self.model_name)
+        builder.start()
+        for event in builder.get_events():
+            yield event.to_sse()
+        builder.clear_events()
+
+        msg_item = builder.add_message()  # Default assistant message
+        for event in builder.get_events():
+            yield event.to_sse()
+        builder.clear_events()
+
+        async for chunk in self._stream_via_gemini(prompt, system_prompt, context, tools):
+            builder.text_delta(msg_item, chunk)
+            yield builder.get_last_event_sse()
+            builder.clear_events()
+
+        builder.complete()
+        for event in builder.get_events():
+            yield event.to_sse()
+        yield builder.done()
+
+    async def _stream_open_responses_via_client(
+        self, prompt, system_prompt, context, tools, **kwargs
+    ) -> AsyncIterator[str]:
+        """Stream via VerticeClient using Open Responses mode."""
+        messages = []
+        if context:
+            messages.extend(context)
+        messages.append({"role": "user", "content": prompt})
+
+        # Use the native Open Responses method of the router if it exists
+        if hasattr(self._vertice_client, "stream_open_responses"):
+            async for sse_event in self._vertice_client.stream_open_responses(
+                messages, system_prompt=system_prompt, tools=tools, **kwargs
+            ):
+                yield sse_event
+        else:
+            # Fallback to manual wrapping (but router already has it, this is a safety net)
+            async for chunk in self._stream_via_client(
+                prompt, system_prompt, context, tools, **kwargs
+            ):
+                yield chunk
 
     async def _stream_via_client(
         self,

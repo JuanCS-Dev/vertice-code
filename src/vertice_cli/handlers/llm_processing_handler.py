@@ -29,6 +29,9 @@ from typing import TYPE_CHECKING, Any, Dict
 if TYPE_CHECKING:
     from vertice_cli.shell_main import InteractiveShell
 
+# Import insights collector for telemetry
+from vertice_cli.core import insights_collector
+
 logger = logging.getLogger(__name__)
 
 
@@ -570,7 +573,6 @@ Output ONLY the command, no explanation, no markdown."""
         if isinstance(error, PermissionError):
             self.console.print("[red]🔒 Permission denied[/red]")
             self.console.print(f"[yellow]💡 AI Suggestion: Try: sudo {user_input}[/yellow]")
-            success = False
         elif isinstance(error, FileNotFoundError):
             self.console.print("[red]❌ File or command not found[/red]")
             self.console.print(

@@ -127,7 +127,10 @@ class AgentRouter:
             (r"\b(github\s*actions?|gitlab\s*ci|jenkins|circleci)\b", 0.95),
             # Audit patterns - high confidence for real system audits
             (r"\b(audit|auditoria)\s*(complet[ao]?|completa?)?\b", 0.95),
-            (r"\b(prontid[aã]o|ready|pronto)\s*(para|for|de)?\s*(deploy|produ[çc][aã]o|production)?\b", 0.92),
+            (
+                r"\b(prontid[aã]o|ready|pronto)\s*(para|for|de)?\s*(deploy|produ[çc][aã]o|production)?\b",
+                0.92,
+            ),
             (r"\bpronto[s]?\s*para\s*(deploy|produ[çc][aã]o)\b", 0.95),
             (r"\bready\s*(for|to)\s*(deploy|production|ship)\b", 0.95),
             (r"\b(chec[ck]|verif[iy]|analisa).*(infra|deploy|produ[çc][aã]o)\b", 0.88),

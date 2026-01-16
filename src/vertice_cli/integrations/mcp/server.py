@@ -44,7 +44,7 @@ class QwenMCPServer:
 
         total_tools = len(registry.get_all())
         daimon_tools = len(self.daimon_adapter.list_registered_tools())
-        
+
         if self.tools_adapter.prometheus_adapter:
             prometheus_tools = len(self.tools_adapter.prometheus_adapter.list_registered_tools())
             total_tools += prometheus_tools + daimon_tools

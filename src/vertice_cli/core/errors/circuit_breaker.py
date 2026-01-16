@@ -7,7 +7,7 @@ Provides EnhancedCircuitBreaker with:
 - Gradual recovery with success threshold
 
 For base CircuitBreaker class, use core.resilience:
-    from core.resilience import CircuitBreaker
+    from vertice_core.resilience import CircuitBreaker
 
 States:
 - CLOSED: Normal operation, requests pass through

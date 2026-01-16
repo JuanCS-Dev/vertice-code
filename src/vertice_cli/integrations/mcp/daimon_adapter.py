@@ -11,14 +11,14 @@ Tools:
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
 
 
 class DaimonMCPAdapter:
     """Adapter to expose DaimonInsightsCollector tools via MCP.
-    
+
     REUSES existing `insights_collector` from `vertice_cli.core`.
     Does NOT create a new collector instance.
     """
@@ -31,6 +31,7 @@ class DaimonMCPAdapter:
         """Lazy import to avoid circular dependencies."""
         if self._insights_collector is None:
             from vertice_cli.core import insights_collector
+
             self._insights_collector = insights_collector
         return self._insights_collector
 
@@ -42,12 +43,12 @@ class DaimonMCPAdapter:
             """Get current Daimon insights from VERTICE.md."""
             try:
                 collector = self._get_collector()
-                
+
                 # Read insights file if exists
                 insights_content = ""
                 if collector.insights_file.exists():
                     insights_content = collector.insights_file.read_text()
-                
+
                 return {
                     "success": True,
                     "tool": "get_daimon_insights",
@@ -68,14 +69,14 @@ class DaimonMCPAdapter:
             """Record an external event for Daimon pattern analysis."""
             try:
                 collector = self._get_collector()
-                
+
                 await collector.observe_command(
                     command=f"{event_type}: {event_data}",
                     duration=duration,
                     success=success,
                     context={"source": "mcp", "type": event_type},
                 )
-                
+
                 return {
                     "success": True,
                     "tool": "observe_event",
@@ -91,9 +92,9 @@ class DaimonMCPAdapter:
             """Get Daimon collector statistics."""
             try:
                 collector = self._get_collector()
-                
+
                 observations = collector.observations
-                
+
                 return {
                     "success": True,
                     "tool": "get_daimon_status",
@@ -113,10 +114,10 @@ class DaimonMCPAdapter:
             """Force immediate Daimon pattern analysis."""
             try:
                 collector = self._get_collector()
-                
+
                 # Force analysis regardless of observation count
                 await collector._analyze_and_update_insights()
-                
+
                 return {
                     "success": True,
                     "tool": "trigger_analysis",
@@ -127,12 +128,14 @@ class DaimonMCPAdapter:
                 return {"success": False, "tool": "trigger_analysis", "error": str(e)}
 
         # Register all tools
-        self._mcp_tools.update({
-            "get_daimon_insights": get_daimon_insights,
-            "observe_event": observe_event,
-            "get_daimon_status": get_daimon_status,
-            "trigger_analysis": trigger_analysis,
-        })
+        self._mcp_tools.update(
+            {
+                "get_daimon_insights": get_daimon_insights,
+                "observe_event": observe_event,
+                "get_daimon_status": get_daimon_status,
+                "trigger_analysis": trigger_analysis,
+            }
+        )
 
         logger.info(f"Registered {len(self._mcp_tools)} Daimon MCP tools")
 

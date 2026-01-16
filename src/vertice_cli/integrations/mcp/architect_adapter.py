@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class ArchitectMCPAdapter:
     """Adapter to expose ArchitectAgent tools via MCP.
-    
+
     REUSES existing `architect` singleton from `agents.architect.agent`.
     Does NOT create a new agent instance.
     """
@@ -30,6 +30,7 @@ class ArchitectMCPAdapter:
         """Lazy import to avoid circular dependencies."""
         if self._architect is None:
             from agents.architect.agent import architect
+
             self._architect = architect
         return self._architect
 
@@ -45,9 +46,9 @@ class ArchitectMCPAdapter:
             """Design architecture based on requirements."""
             try:
                 from agents.architect.types import DesignLevel
-                
+
                 architect = self._get_architect()
-                
+
                 # Map string to DesignLevel enum
                 level_map = {
                     "system": DesignLevel.SYSTEM,
@@ -56,7 +57,7 @@ class ArchitectMCPAdapter:
                 }
                 design_level = level_map.get(level.lower(), DesignLevel.SERVICE)
                 constraints_list = constraints.split(",") if constraints else None
-                
+
                 result_chunks = []
                 async for chunk in architect.design(
                     requirements=requirements,
@@ -65,7 +66,7 @@ class ArchitectMCPAdapter:
                     stream=True,
                 ):
                     result_chunks.append(chunk)
-                
+
                 return {
                     "success": True,
                     "tool": "architect_design",
@@ -84,14 +85,14 @@ class ArchitectMCPAdapter:
             """Generate Mermaid architecture diagram."""
             try:
                 architect = self._get_architect()
-                
+
                 result_chunks = []
                 async for chunk in architect.diagram(
                     description=description,
                     diagram_type=diagram_type,
                 ):
                     result_chunks.append(chunk)
-                
+
                 return {
                     "success": True,
                     "tool": "architect_diagram",
@@ -108,7 +109,7 @@ class ArchitectMCPAdapter:
             try:
                 architect = self._get_architect()
                 status = architect.get_status()
-                
+
                 return {
                     "success": True,
                     "tool": "architect_get_status",
@@ -119,11 +120,13 @@ class ArchitectMCPAdapter:
                 return {"success": False, "tool": "architect_get_status", "error": str(e)}
 
         # Register all tools
-        self._mcp_tools.update({
-            "architect_design": architect_design,
-            "architect_diagram": architect_diagram,
-            "architect_get_status": architect_get_status,
-        })
+        self._mcp_tools.update(
+            {
+                "architect_design": architect_design,
+                "architect_diagram": architect_diagram,
+                "architect_get_status": architect_get_status,
+            }
+        )
 
         logger.info(f"Registered {len(self._mcp_tools)} Architect MCP tools")
 

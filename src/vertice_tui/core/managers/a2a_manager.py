@@ -20,7 +20,7 @@ from dataclasses import dataclass, field, asdict
 from typing import Any, AsyncIterator, Dict, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from core.protocols.agent_card import AgentCard
+    from vertice_core.a2a.agent_card import AgentCard
 
 logger = logging.getLogger(__name__)
 
@@ -133,8 +133,8 @@ class A2AManager:
 
         try:
             # Lazy import to avoid dependency issues
-            from core.protocols.grpc_server import create_grpc_server
-            from core.protocols.proto import (
+            from vertice_core.a2a.grpc_server import create_grpc_server
+            from vertice_core.a2a.proto import (
                 AgentCard as AgentCardProto,
                 AgentCapabilities as AgentCapabilitiesProto,
             )
@@ -155,8 +155,8 @@ class A2AManager:
                 capabilities=capabilities,
             )
             # Store as dataclass for local use
-            from core.protocols.agent_card import AgentCard
-            from core.protocols.types import AgentCapabilities
+            from vertice_core.a2a.agent_card import AgentCard
+            from vertice_core.a2a.types import AgentCapabilities
 
             self._local_agent_card = AgentCard(
                 agent_id=proto_card.agent_id,
@@ -370,7 +370,7 @@ class A2AManager:
             return {"success": False, "error": "No local card. Start server first."}
 
         try:
-            from core.security.jws import JWSSigner, KeyPair, JWSAlgorithm
+            from vertice_core.security.jws import JWSSigner, KeyPair, JWSAlgorithm
 
             # Read private key PEM from file
             with open(private_key_path, "rb") as f:

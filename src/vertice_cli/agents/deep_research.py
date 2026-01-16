@@ -217,9 +217,9 @@ class VertexDeepResearchAgent:
             yield {
                 "type": "result",
                 "data": {
-                    "report": final_report[:1000] + "..."
-                    if len(final_report) > 1000
-                    else final_report,
+                    "report": (
+                        final_report[:1000] + "..." if len(final_report) > 1000 else final_report
+                    ),
                     "sources_count": len(all_sources),
                     "iterations": len(iterations),
                 },

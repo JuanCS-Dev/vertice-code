@@ -11,7 +11,11 @@ Following CODE_CONSTITUTION.md:
 - Zero placeholders
 """
 
+import logging
+
 from typing import Any, AsyncIterator, Callable, Dict, List, Optional, Tuple
+
+logger = logging.getLogger(__name__)
 
 # Base imports
 from ..base import AgentCapability, AgentResponse, AgentRole, AgentTask, BaseAgent

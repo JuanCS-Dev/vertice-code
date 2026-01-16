@@ -20,6 +20,8 @@ import logging
 from pathlib import Path
 from typing import List
 
+from ..base import Tool
+
 from vertice_cli.tools.base import ToolCategory, ToolResult
 from vertice_cli.tools.validated import ValidatedTool
 
@@ -335,12 +337,12 @@ class MultiEditTool(ValidatedTool):
             validation_errors = []
             for i, edit in enumerate(edits):
                 if not isinstance(edit, dict):
-                    validation_errors.append(f"Edit {i+1}: must be an object")
+                    validation_errors.append(f"Edit {i + 1}: must be an object")
                     continue
 
                 old_string = edit.get("old_string", "")
                 if old_string and old_string not in content:
-                    validation_errors.append(f"Edit {i+1}: old_string not found in file")
+                    validation_errors.append(f"Edit {i + 1}: old_string not found in file")
 
             if validation_errors:
                 return ToolResult(success=False, error="; ".join(validation_errors))
@@ -357,7 +359,7 @@ class MultiEditTool(ValidatedTool):
                     if count > 1:
                         return ToolResult(
                             success=False,
-                            error=f"Edit {i+1}: old_string appears {count} times (ambiguous)",
+                            error=f"Edit {i + 1}: old_string appears {count} times (ambiguous)",
                         )
 
                     content = content.replace(old_string, new_string, 1)

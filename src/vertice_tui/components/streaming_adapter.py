@@ -234,12 +234,12 @@ class StreamingResponseWidget(Static):
                 is_duplicate = False
                 for prev_line in self._last_lines[-5:]:  # Check last 5 lines
                     prev_stripped = prev_line.strip()
-                    
+
                     # Exact match
                     if line_stripped == prev_stripped:
                         is_duplicate = True
                         break
-                    
+
                     # PREFIX DEDUPLICATION: Detect "echo" pattern where partial
                     # line was shown and now full line arrives
                     # e.g., prev="Verde (Pronto para" curr="Verde (Pronto para Deploy):"
@@ -251,7 +251,7 @@ class StreamingResponseWidget(Static):
                         is_duplicate = False
                         # Don't break - allow this line through
                         continue
-                    
+
                     # REVERSE PREFIX: New line is prefix of existing line
                     # e.g., curr="Verde (Pronto para" prev="Verde (Pronto para Deploy):"
                     # This means LLM is echoing a partial - skip the new partial

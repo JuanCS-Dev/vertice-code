@@ -10,14 +10,14 @@ Tools:
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class ReviewerMCPAdapter:
     """Adapter to expose ReviewerAgent tools via MCP.
-    
+
     REUSES existing `reviewer` singleton from `agents.reviewer.agent`.
     Does NOT create a new agent instance.
     """
@@ -30,6 +30,7 @@ class ReviewerMCPAdapter:
         """Lazy import to avoid circular dependencies."""
         if self._reviewer is None:
             from agents.reviewer.agent import reviewer
+
             self._reviewer = reviewer
         return self._reviewer
 
@@ -47,7 +48,7 @@ class ReviewerMCPAdapter:
             try:
                 reviewer = self._get_reviewer()
                 focus_list = focus.split(",") if focus else None
-                
+
                 result_chunks = []
                 async for chunk in reviewer.review(
                     code=code,
@@ -57,7 +58,7 @@ class ReviewerMCPAdapter:
                     stream=True,
                 ):
                     result_chunks.append(chunk)
-                
+
                 return {
                     "success": True,
                     "tool": "reviewer_review",
@@ -77,7 +78,7 @@ class ReviewerMCPAdapter:
             try:
                 reviewer = self._get_reviewer()
                 result = await reviewer.security_audit(code, file_path)
-                
+
                 return {
                     "success": True,
                     "tool": "reviewer_security_audit",
@@ -87,7 +88,11 @@ class ReviewerMCPAdapter:
                     "findings": [
                         {
                             "id": f.id,
-                            "severity": f.severity.value if hasattr(f.severity, 'value') else str(f.severity),
+                            "severity": (
+                                f.severity.value
+                                if hasattr(f.severity, "value")
+                                else str(f.severity)
+                            ),
                             "title": f.title,
                             "description": f.description,
                         }
@@ -105,7 +110,7 @@ class ReviewerMCPAdapter:
             try:
                 reviewer = self._get_reviewer()
                 status = reviewer.get_status()
-                
+
                 return {
                     "success": True,
                     "tool": "reviewer_get_status",
@@ -116,11 +121,13 @@ class ReviewerMCPAdapter:
                 return {"success": False, "tool": "reviewer_get_status", "error": str(e)}
 
         # Register all tools
-        self._mcp_tools.update({
-            "reviewer_review": reviewer_review,
-            "reviewer_security_audit": reviewer_security_audit,
-            "reviewer_get_status": reviewer_get_status,
-        })
+        self._mcp_tools.update(
+            {
+                "reviewer_review": reviewer_review,
+                "reviewer_security_audit": reviewer_security_audit,
+                "reviewer_get_status": reviewer_get_status,
+            }
+        )
 
         logger.info(f"Registered {len(self._mcp_tools)} Reviewer MCP tools")
 

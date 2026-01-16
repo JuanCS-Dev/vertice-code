@@ -26,7 +26,7 @@ from .core_adapter import CoreAgentAdapter, CoreAgentContext
 from .orchestrator_integration import OrchestratorIntegration, OrchestrationContext
 
 if TYPE_CHECKING:
-    from core.agents import Agent
+    from vertice_core.simple_agents import Agent
 
 
 def get_unified_agents() -> Dict[str, "Agent"]:

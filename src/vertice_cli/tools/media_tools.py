@@ -359,10 +359,10 @@ class PDFReadTool(Tool):
     def _check_pypdf(self) -> bool:
         """Check if pypdf is available."""
         try:
-            import pypdf
+            import importlib.util
 
-            return True
-        except ImportError:
+            return importlib.util.find_spec("pypdf") is not None
+        except Exception:
             return False
 
     async def _execute_validated(self, **kwargs) -> ToolResult:

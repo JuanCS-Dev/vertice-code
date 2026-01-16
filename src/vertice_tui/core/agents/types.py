@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from core.agents import Agent
+    from vertice_core.simple_agents import Agent
 
 
 @dataclass
@@ -40,7 +40,7 @@ class AgentInfo:
 
         Creates a lightweight Agent wrapper for schema generation.
         """
-        from core.agents import Agent, AgentConfig
+        from vertice_core.simple_agents import Agent, AgentConfig
 
         return Agent(
             name=self.name,

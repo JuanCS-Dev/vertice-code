@@ -306,9 +306,10 @@ class ResponseView(VerticalScroll):
 
         elif isinstance(event, OpenResponsesResponseFailedEvent):
             # Response failed
-            error_msg = (
-                event.error.get("message", "Unknown error") if event.error else "Response failed"
-            )
+            if event.error and hasattr(event.error, "get"):
+                error_msg = event.error.get("message", "Unknown error")
+            else:
+                error_msg = "Response failed"
             self.add_system_message(f"[error]{Icons.ERROR} {error_msg}[/error]")
             self.end_thinking()
 

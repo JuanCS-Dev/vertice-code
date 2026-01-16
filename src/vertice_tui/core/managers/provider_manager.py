@@ -226,18 +226,18 @@ class ProviderManager:
 
     def _is_simple_message(self, message: str) -> bool:
         """Check if message is too simple for heavy orchestration.
-        
+
         Returns True for greetings, acknowledgments, and very short messages
         that should bypass Prometheus/Maximus and go directly to Gemini.
         """
         if not message or len(message.strip()) < 5:
             return True
-        
+
         message_lower = message.lower().strip()
         for pattern in self.SIMPLE_BYPASS_PATTERNS:
             if re.match(pattern, message_lower, re.IGNORECASE):
                 return True
-        
+
         return False
 
     def get_client(self, message: str = "") -> Tuple[LLMClientProtocol, str]:
