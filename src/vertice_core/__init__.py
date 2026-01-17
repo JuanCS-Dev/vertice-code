@@ -15,6 +15,12 @@ from vertice_core.types import (
     QwenCoreError,
 )
 
+from vertice_core.types.models import (
+    AgentTask,
+    AgentResponse,
+    TaskResult,
+)
+
 from vertice_core.protocols import (
     LLMClientProtocol,
     MCPClientProtocol,

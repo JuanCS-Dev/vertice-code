@@ -71,7 +71,8 @@ class RateLimitError(VerticeClientError):
 class ProviderProtocol(Protocol):
     """Protocol for LLM providers."""
 
-    def is_available(self) -> bool: ...
+    def is_available(self) -> bool:
+        ...
 
     async def stream_chat(
         self,
@@ -79,7 +80,8 @@ class ProviderProtocol(Protocol):
         max_tokens: int = DEFAULT_MAX_TOKENS,
         temperature: float = DEFAULT_TEMPERATURE,
         **kwargs: Any,
-    ) -> AsyncIterator[str]: ...
+    ) -> AsyncIterator[str]:
+        ...
 
     async def generate(
         self,
@@ -87,7 +89,8 @@ class ProviderProtocol(Protocol):
         max_tokens: int = DEFAULT_MAX_TOKENS,
         temperature: float = DEFAULT_TEMPERATURE,
         **kwargs: Any,
-    ) -> str: ...
+    ) -> str:
+        ...
 
 
 @dataclass
@@ -184,6 +187,72 @@ class VerticeClient:
         raise AllProvidersExhaustedError(
             f"All providers exhausted: {tried}", tried=tried, errors=self._errors.copy()
         )
+
+    async def stream_open_responses(
+        self,
+        messages: List[Dict[str, str]],
+        system_prompt: Optional[str] = None,
+        **kwargs: Any,
+    ) -> AsyncIterator[str]:
+        """Stream using Open Responses SSE protocol.
+
+        Wraps stream_chat() output with semantic SSE events that can be
+        parsed by OpenResponsesParser in the TUI.
+
+        Args:
+            messages: Chat messages
+            system_prompt: Optional system prompt
+            **kwargs: Additional kwargs passed to stream_chat
+
+        Yields:
+            SSE formatted events following Open Responses spec
+        """
+        from vertice_core.openresponses_stream import OpenResponsesStreamBuilder
+
+        # Get current model name
+        model_name = "gemini-3-pro-preview"
+        if self._current_provider:
+            model_name = f"{self._current_provider}-model"
+
+        builder = OpenResponsesStreamBuilder(model=model_name)
+
+        # Emit start events
+        builder.start()
+        for event in builder.get_events():
+            yield event.to_sse()
+        builder.clear_events()
+
+        # Add message item
+        msg_item = builder.add_message()
+        for event in builder.get_events():
+            yield event.to_sse()
+        builder.clear_events()
+
+        # Stream content and emit text deltas
+        try:
+            async for chunk in self.stream_chat(messages, system_prompt=system_prompt, **kwargs):
+                builder.text_delta(msg_item, chunk)
+                yield builder.get_last_event_sse()
+                builder.clear_events()
+
+            # Complete successfully
+            builder.complete()
+            for event in builder.get_events():
+                yield event.to_sse()
+            yield builder.done()
+
+        except Exception as e:
+            # Emit error event
+            from vertice_core.openresponses_types import OpenResponsesError
+
+            error = OpenResponsesError(
+                code="provider_error",
+                message=str(e)[:200],
+            )
+            builder.fail(error)
+            for event in builder.get_events():
+                yield event.to_sse()
+            yield builder.done()
 
     async def generate(
         self,

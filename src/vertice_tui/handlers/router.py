@@ -29,6 +29,7 @@ class CommandRouter:
         self._operations = None
         self._context = None
         self._a2a = None
+        self._autoaudit = None
 
     @property
     def basic(self):
@@ -93,6 +94,15 @@ class CommandRouter:
             self._a2a = A2ACommandHandler(self.app)
         return self._a2a
 
+    @property
+    def autoaudit(self):
+        """Lazy load AutoAudit commands handler."""
+        if self._autoaudit is None:
+            from vertice_tui.handlers.autoaudit import AutoAuditHandler
+
+            self._autoaudit = AutoAuditHandler(self.app)
+        return self._autoaudit
+
     async def dispatch(self, cmd: str, view: "ResponseView") -> bool:
         """
         Dispatch a command to the appropriate handler.
@@ -156,6 +166,11 @@ class CommandRouter:
         # A2A commands (Phase 6.3)
         if command == "/a2a":
             await self.a2a.handle(command, args, view)
+            return True
+
+        # AutoAudit command
+        if command == "/autoaudit":
+            await self.autoaudit.handle(command, args, view)
             return True
 
         # Claude parity commands

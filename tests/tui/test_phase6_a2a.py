@@ -245,15 +245,15 @@ class TestA2AManager:
         import tempfile
         import os
         from vertice_tui.core.managers.a2a_manager import A2AManager
-        from core.security.jws import KeyManager
-        from core.protocols.agent_card import AgentCard
-        from core.protocols.types import AgentCapabilities
+        from vertice_core.security.jws import KeyManager
+        from vertice_core.a2a.agent_card import AgentCard
+        from vertice_core.a2a.types import AgentCapabilities
 
         # Generate RSA keypair
         keypair = KeyManager.generate_rsa_keypair(key_size=2048)
 
         # Write private key to temp file
-        with tempfile.NamedTemporaryFile(mode='wb', suffix='.pem', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="wb", suffix=".pem", delete=False) as f:
             f.write(keypair.private_key)
             key_path = f.name
 
@@ -293,8 +293,8 @@ class TestA2AManager:
     async def test_sign_card_file_not_found(self) -> None:
         """Test sign_card with non-existent key file."""
         from vertice_tui.core.managers.a2a_manager import A2AManager
-        from core.protocols.agent_card import AgentCard
-        from core.protocols.types import AgentCapabilities
+        from vertice_core.a2a.agent_card import AgentCard
+        from vertice_core.a2a.types import AgentCapabilities
 
         manager = A2AManager()
 
