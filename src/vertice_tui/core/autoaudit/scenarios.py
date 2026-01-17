@@ -189,6 +189,72 @@ SCENARIOS: List[AuditScenario] = [
         description="🔬 Diagnóstico profundo Vertex AI",
         timeout_seconds=60,
     ),
+    # UI & COMMANDS (Batch 1)
+    AuditScenario(
+        id="audit_014_help_check",
+        category=ScenarioCategory.TOOLS,
+        prompt="/help commands",
+        expectations=[Expectation.HAS_RESPONSE, Expectation.LATENCY_UNDER_5S],
+        description="Help system check",
+    ),
+    AuditScenario(
+        id="audit_015_clear_screen",
+        category=ScenarioCategory.TOOLS,
+        prompt="/clear --force",
+        expectations=[Expectation.NO_CRASH, Expectation.HAS_RESPONSE],
+        description="Clear screen (forced)",
+    ),
+    AuditScenario(
+        id="audit_016_model_list",
+        category=ScenarioCategory.TOOLS,
+        prompt="/model",
+        expectations=[Expectation.HAS_RESPONSE],
+        description="List current model info",
+    ),
+    # FILESYSTEM & RAG (Batch 2)
+    AuditScenario(
+        id="audit_018_read_source",
+        category=ScenarioCategory.TOOLS,
+        prompt="/read src/vertice_tui/app.py",
+        expectations=[Expectation.HAS_RESPONSE, Expectation.USES_FILE_CONTEXT],
+        description="Read existing source file",
+    ),
+    AuditScenario(
+        id="audit_019_palette_search",
+        category=ScenarioCategory.TOOLS,
+        prompt="/palette usage",
+        expectations=[Expectation.HAS_RESPONSE],
+        description="Search via Command Palette",
+    ),
+    AuditScenario(
+        id="audit_020_file_listing",
+        category=ScenarioCategory.TOOLS,
+        prompt="/run ls -la",
+        expectations=[Expectation.HAS_RESPONSE, Expectation.LATENCY_UNDER_5S],
+        description="Bash file listing",
+    ),
+    # BATCH 3: AGENTS & STRESS
+    AuditScenario(
+        id="audit_021_planner_clarify",
+        category=ScenarioCategory.AGENTS,
+        prompt="/plan clarify 'Refactor utils.py'",
+        expectations=[Expectation.HAS_RESPONSE],
+        description="Planner v6.1 Clarify Mode",
+    ),
+    AuditScenario(
+        id="audit_022_context_files",
+        category=ScenarioCategory.TOOLS,
+        prompt="/files",
+        expectations=[Expectation.HAS_RESPONSE],
+        description="List file context",
+    ),
+    AuditScenario(
+        id="audit_023_stress_tokens",
+        category=ScenarioCategory.RESILIENCE,
+        prompt="A" * 5000,  # 5000 chars input
+        expectations=[Expectation.NO_CRASH, Expectation.TOKENS_UNDER_LIMIT],
+        description="Large Input Stress Test (5k chars)",
+    ),
 ]
 
 

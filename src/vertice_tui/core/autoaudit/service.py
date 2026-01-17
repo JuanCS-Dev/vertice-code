@@ -20,6 +20,7 @@ from .scenarios import (
 )
 from .monitor import StateMonitor
 from .logger import BlackBoxLogger
+from .validator import ScenarioValidator
 
 if TYPE_CHECKING:
     from vertice_tui.app import VerticeApp
@@ -212,10 +213,11 @@ class AutoAuditService:
             events = self.monitor.stop()
 
             # Valida expectativas
-            validations = self._validate(
+            validations = ScenarioValidator.validate(
                 scenario.expectations,
                 events,
                 end_time - start_time,
+                self.monitor,
             )
 
             all_passed = all(validations.values())
@@ -227,7 +229,7 @@ class AutoAuditService:
                 end_time=end_time,
                 latency_ms=(end_time - start_time) * 1000,
                 validation_results=validations,
-                error_message="" if all_passed else self._failure_reason(validations),
+                error_message="" if all_passed else ScenarioValidator.failure_reason(validations),
             )
 
         except asyncio.TimeoutError:
@@ -256,39 +258,6 @@ class AutoAuditService:
                 error_message=str(e),
                 exception_trace=traceback.format_exc(),
             )
-
-    def _validate(
-        self,
-        expectations: List[Expectation],
-        events: List[Any],
-        elapsed: float,
-    ) -> Dict[str, bool]:
-        """Valida expectativas."""
-        results = {}
-
-        for exp in expectations:
-            if exp == Expectation.HAS_RESPONSE:
-                results[exp.value] = len(events) > 0
-            elif exp == Expectation.LATENCY_UNDER_5S:
-                results[exp.value] = elapsed < 5.0
-            elif exp == Expectation.LATENCY_UNDER_10S:
-                results[exp.value] = elapsed < 10.0
-            elif exp == Expectation.SSE_EVENTS_COMPLETE:
-                results[exp.value] = self.monitor.has_event_type("response.completed")
-            elif exp == Expectation.NO_CRASH:
-                results[exp.value] = True
-            elif exp == Expectation.HANDLES_ERROR:
-                results[exp.value] = True
-            elif exp == Expectation.NO_DANGEROUS_ACTION:
-                results[exp.value] = True
-            else:
-                results[exp.value] = True
-
-        return results
-
-    def _failure_reason(self, validations: Dict[str, bool]) -> str:
-        failed = [k for k, v in validations.items() if not v]
-        return f"Falhou: {', '.join(failed)}"
 
     def _save_dump(self, scenario: AuditScenario, result: ScenarioResult) -> str:
         return self.logger.save_crash_dump(

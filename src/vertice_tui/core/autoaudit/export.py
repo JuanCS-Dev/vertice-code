@@ -87,6 +87,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                     <th>Cenário</th>
                     <th>Status</th>
                     <th>Latência</th>
+                    <th>Detalhes</th>
                 </tr>
             </thead>
             <tbody>
@@ -117,7 +118,8 @@ def export_html(report: AuditReport, output_path: Optional[Path] = None) -> str:
         rows.append(
             f"<tr><td>{r.scenario_id}</td>"
             f'<td class="{status_class}">{status_icon} {r.status}</td>'
-            f"<td>{r.latency_ms:.0f}ms</td></tr>"
+            f"<td>{r.latency_ms:.0f}ms</td>"
+            f"<td>{r.error_message or '-'}</td></tr>"
         )
 
     score_color = "#22c55e" if report.success_rate >= 80 else "#ef4444"

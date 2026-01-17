@@ -42,6 +42,10 @@ class StateMonitor:
         self._start_time: float = 0.0
         self._hooks: List[Callable[..., Any]] = []
 
+    def add_hook(self, hook: Callable[..., Any]) -> None:
+        """Adiciona hook para processamento de eventos em tempo real."""
+        self._hooks.append(hook)
+
     def start(self) -> None:
         """Inicia captura de eventos."""
         self._events.clear()
@@ -73,6 +77,13 @@ class StateMonitor:
                 latency_ms=(now - self._start_time) * 1000,
             )
         )
+
+        # Execute hooks
+        for hook in self._hooks:
+            try:
+                hook(event_type, payload)
+            except Exception:
+                pass  # Hooks não devem quebrar o monitor
 
     def record_sse_event(self, event: Any) -> None:
         """Registra evento SSE do OpenResponsesParser."""
