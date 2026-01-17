@@ -7,16 +7,15 @@ import asyncio
 import sys
 from unittest.mock import MagicMock
 
+from vertice_core.autonomy.escalation import EscalationManager
+from vertice_core.autonomy.types import AutonomyDecision, EscalationReason
+
 # WORKAROUND: Mock the problematic protobuf-related modules before they are imported.
 # This is a workaround for a known protobuf dependency conflict in the test environment
 # that causes a `TypeError` during test collection. The `escalation` module itself
 # does not depend on `core.protocols`, but the import chain through `core/__init__.py`
 # triggers the issue.
 sys.modules["core.protocols"] = MagicMock()
-
-
-from vertice_core.autonomy.escalation import EscalationManager
-from vertice_core.autonomy.types import AutonomyDecision, EscalationReason
 
 
 @pytest.fixture

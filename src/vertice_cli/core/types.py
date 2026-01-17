@@ -553,4 +553,3 @@ __all__ = [
 # ============================================================================
 
 # Additional legacy exports for compatibility during migration
-from vertice_cli.providers.types import CostTier, SpeedTier

@@ -32,15 +32,17 @@ from .blocks import (
     BlockRenderConfig,
 )
 
+# Message Types
+from .messages import (
+    MessageRole,
+    Message,
+    MessageList,
+)
+
 # Agent Types
 from .agents import (
     AgentRole,
-    AgentPriority,
     AgentCapability,
-    AgentIdentity,
-    TaskStatus,
-    PlanningMode,
-    ConfidenceLevel,
 )
 
 # Planner Types
@@ -79,11 +81,13 @@ __all__ = [
     "BlockType",
     "BlockInfo",
     "BlockRenderConfig",
+    # Messages
+    "MessageRole",
+    "Message",
+    "MessageList",
     # Agents
     "AgentRole",
-    "AgentPriority",
     "AgentCapability",
-    "AgentIdentity",
     "TaskStatus",
     "PlanningMode",
     "ConfidenceLevel",

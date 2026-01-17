@@ -10,11 +10,6 @@ from vertice_core.types import (
     # Enums
     AgentRole,
     AgentCapability,
-    TaskStatus,
-    # Models
-    AgentTask,
-    AgentResponse,
-    TaskResult,
     # Exceptions
     CapabilityViolationError,
     QwenCoreError,
@@ -33,14 +28,7 @@ from vertice_core.language_detector import (
 )
 
 # Moved modules from core
-from vertice_core.agency import Agency, AgencyConfig, get_agency
-from vertice_core.simple_agents import Agent as SimpleAgent, AgentConfig, Handoff
 from vertice_core.a2a import (
-    A2AProtocolMixin,
-    AgentCard,
-    AgentCapabilities,
-    AgentSkill,
-    A2ATask,
     TaskStatus,
 )
 

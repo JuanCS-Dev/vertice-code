@@ -118,7 +118,7 @@ class TestMCPClientEnhanced:
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            mcp = MCPClient(empty_registry)
+            MCPClient(empty_registry)  # Should emit warning
 
             assert len(w) == 1
             assert "empty registry" in str(w[0].message).lower()
