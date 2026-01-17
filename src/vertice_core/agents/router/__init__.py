@@ -2,8 +2,6 @@
 Router Module - Semantic routing for agent selection.
 """
 
-import asyncio
-from typing import Optional
 
 from .cache import RouterCacheMixin
 from .router import SemanticRouter

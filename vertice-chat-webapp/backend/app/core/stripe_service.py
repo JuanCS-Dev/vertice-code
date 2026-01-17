@@ -3,19 +3,15 @@ Stripe Integration Service
 Complete merchant-of-record solution for SaaS billing
 """
 
-import asyncio
-import json
 import time
-from typing import Dict, Any, Optional, List, Tuple
-from datetime import datetime, timedelta
+from typing import Dict, Any, Optional, List
+from datetime import datetime
 import logging
 
 import stripe
-from stripe import Customer, Subscription, Price, Product, Invoice
 
 from app.core.config import settings
 from app.core.database import get_db_session
-from app.models.database import Subscription as DBSubscription, UsageRecord
 
 logger = logging.getLogger(__name__)
 
@@ -41,11 +37,11 @@ class StripeService:
         # Webhook secret for signature verification
         self.webhook_secret = settings.STRIPE_WEBHOOK_SECRET
 
-        # Product/Price IDs (would be created in Stripe dashboard)
+        # Product mapping for Vertice-ai
         self.product_ids = {
-            "vertice_compute": "prod_compute_credits",
-            "vertice_storage": "prod_storage_gb",
-            "vertice_api": "prod_api_calls",
+            "developer": "prod_ToBF141qTm6ki5",
+            "team": "prod_ToBFtuSOov552S",
+            "free": "prod_ToBFdM5MfE9fkQ",
         }
 
     async def create_customer(self, workspace_id: str, email: str, name: str) -> Dict[str, Any]:

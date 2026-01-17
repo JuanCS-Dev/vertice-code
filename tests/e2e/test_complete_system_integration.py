@@ -25,13 +25,11 @@ import json
 import os
 import pytest
 import aiohttp
-from unittest.mock import AsyncMock, MagicMock, patch
-from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
+from unittest.mock import patch
+from datetime import datetime
 
 # Core Components
-from vertice_core.types import AgentTask, AgentResponse, TaskResult
-from vertice_core.protocols import AgentProtocol, ToolProtocol
+from vertice_core.types import AgentTask, TaskResult
 
 # Prometheus System
 from prometheus.core.orchestrator import PrometheusOrchestrator

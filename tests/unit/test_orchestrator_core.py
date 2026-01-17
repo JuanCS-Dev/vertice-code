@@ -15,13 +15,13 @@ Tests cover:
 import pytest
 import asyncio
 import time
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 from vertice_core.agents.orchestrator.orchestrator import ActiveOrchestrator
 from vertice_core.agents.context.unified import UnifiedContext
 from vertice_core.agents.router.router import SemanticRouter
 from vertice_core.agents.router.types import AgentType, RoutingDecision
-from vertice_core.agents.orchestrator.types import OrchestratorState, HandoffType
-from vertice_core.agents.orchestrator.models import ExecutionStep, ExecutionPlan, Handoff
+from vertice_core.agents.orchestrator.types import OrchestratorState
+from vertice_core.agents.orchestrator.models import Handoff
 from vertice_core.agents.orchestrator.protocol import AgentProtocol
 
 

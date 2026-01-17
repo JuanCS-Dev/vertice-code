@@ -12,12 +12,10 @@ Comprehensive end-to-end testing covering:
 import asyncio
 import pytest
 import time
-from typing import Dict, Any, List
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 # Test imports
-from vertice_tui.core.bridge import get_bridge, Bridge
-from vertice_tui.core.llm_client import GeminiClient
+from vertice_tui.core.bridge import get_bridge
 from vertice_tui.core.error_tracking import get_error_tracker
 from vertice_tui.core.logging import get_system_logger
 from vertice_tui.core.input_validator import validate_chat_message
@@ -186,7 +184,6 @@ class TestSystemIntegration:
     @pytest.mark.asyncio
     async def test_performance_under_load(self, system_bridge):
         """Test system performance under concurrent load."""
-        import threading
 
         # Test concurrent health checks
         results = []
@@ -382,9 +379,9 @@ class TestLoadPerformance:
         memory_increase_mb = memory_increase / (1024 * 1024)
 
         # Memory increase should be reasonable (less than 50MB)
-        assert memory_increase_mb < 50.0, (
-            f"Memory leak detected: {memory_increase_mb:.1f}MB increase"
-        )
+        assert (
+            memory_increase_mb < 50.0
+        ), f"Memory leak detected: {memory_increase_mb:.1f}MB increase"
 
     @pytest.mark.asyncio
     async def test_error_rate_under_load(self, system_under_test):

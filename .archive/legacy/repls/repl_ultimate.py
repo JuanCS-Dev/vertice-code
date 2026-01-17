@@ -28,8 +28,7 @@ from prompt_toolkit.patch_stdout import patch_stdout
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-from rich.live import Live
-from typing import Dict, Optional, List
+from typing import Dict, Optional
 import sys
 from pathlib import Path
 
@@ -122,12 +121,12 @@ class UltimateCompleter(Completer):
         self.commands = commands
         self.autocomplete = autocomplete_engine
         self.tools = {
-            '/read': {'icon': '📖', 'desc': 'Read file'},
-            '/write': {'icon': '✍️', 'desc': 'Write file'},
-            '/edit': {'icon': '✏️', 'desc': 'Edit file'},
-            '/run': {'icon': '⚡', 'desc': 'Execute command'},
-            '/git': {'icon': '🌿', 'desc': 'Git operations'},
-            '/search': {'icon': '🔍', 'desc': 'Search codebase'},
+            "/read": {"icon": "📖", "desc": "Read file"},
+            "/write": {"icon": "✍️", "desc": "Write file"},
+            "/edit": {"icon": "✏️", "desc": "Edit file"},
+            "/run": {"icon": "⚡", "desc": "Execute command"},
+            "/git": {"icon": "🌿", "desc": "Git operations"},
+            "/search": {"icon": "🔍", "desc": "Search codebase"},
         }
 
     def get_completions(self, document, complete_event):
@@ -135,21 +134,21 @@ class UltimateCompleter(Completer):
         words = text.split()
         if not words:
             return
-        
+
         word = words[-1]
-        if not word.startswith('/'):
+        if not word.startswith("/"):
             return
 
         # Use autocomplete engine for smart suggestions
         suggestions = self.autocomplete.get_suggestions(word)
-        
+
         for cmd_name, cmd_meta in {**self.commands, **self.tools}.items():
             if cmd_name.startswith(word):
-                desc = cmd_meta.get('description') or cmd_meta.get('desc', '')
+                desc = cmd_meta.get("description") or cmd_meta.get("desc", "")
                 yield Completion(
                     cmd_name,
                     start_position=-len(word),
-                    display_meta=HTML(f"<b>{cmd_meta['icon']}</b> {desc}")
+                    display_meta=HTML(f"<b>{cmd_meta['icon']}</b> {desc}"),
                 )
 
 
@@ -182,10 +181,10 @@ class UltimateREPL:
 
         # Tools
         self._init_tools()
-        
+
         # Agents
         self._agents = {}
-        
+
         # Commands
         self.commands = self._load_commands()
         self.session = self._create_session()
@@ -207,105 +206,104 @@ class UltimateREPL:
                 "icon": "❓",
                 "description": "Show all commands",
                 "category": CommandCategory.HELP,
-                "handler": self._cmd_help
+                "handler": self._cmd_help,
             },
             "/exit": {
                 "icon": "👋",
                 "description": "Exit shell",
                 "category": CommandCategory.SYSTEM,
-                "handler": self._cmd_exit
+                "handler": self._cmd_exit,
             },
             "/quit": {
                 "icon": "👋",
                 "description": "Exit (alias)",
                 "category": CommandCategory.SYSTEM,
-                "handler": self._cmd_exit
+                "handler": self._cmd_exit,
             },
             "/clear": {
                 "icon": "🧹",
                 "description": "Clear screen",
                 "category": CommandCategory.SYSTEM,
-                "handler": self._cmd_clear
+                "handler": self._cmd_clear,
             },
             "/dashboard": {
                 "icon": "📊",
                 "description": "Show dashboard",
                 "category": CommandCategory.UI,
-                "handler": self._cmd_dashboard
+                "handler": self._cmd_dashboard,
             },
             "/metrics": {
                 "icon": "📈",
                 "description": "Show metrics",
                 "category": CommandCategory.UI,
-                "handler": self._cmd_metrics
+                "handler": self._cmd_metrics,
             },
             "/history": {
                 "icon": "📜",
                 "description": "Show command history",
                 "category": CommandCategory.UI,
-                "handler": self._cmd_history
+                "handler": self._cmd_history,
             },
             "/timeline": {
                 "icon": "⏱️",
                 "description": "Show timeline",
                 "category": CommandCategory.UI,
-                "handler": self._cmd_timeline
+                "handler": self._cmd_timeline,
             },
-            
             # Agents
             "/architect": {
                 "icon": "🏗️",
                 "description": "Architect agent",
                 "category": CommandCategory.AGENT,
-                "handler": lambda msg: asyncio.run(self._invoke_agent("architect", msg))
+                "handler": lambda msg: asyncio.run(self._invoke_agent("architect", msg)),
             },
             "/refactor": {
                 "icon": "♻️",
                 "description": "Refactor agent",
                 "category": CommandCategory.AGENT,
-                "handler": lambda msg: asyncio.run(self._invoke_agent("refactorer", msg))
+                "handler": lambda msg: asyncio.run(self._invoke_agent("refactorer", msg)),
             },
             "/test": {
                 "icon": "🧪",
                 "description": "Test agent",
                 "category": CommandCategory.AGENT,
-                "handler": lambda msg: asyncio.run(self._invoke_agent("testing", msg))
+                "handler": lambda msg: asyncio.run(self._invoke_agent("testing", msg)),
             },
             "/review": {
                 "icon": "🔍",
                 "description": "Review agent",
                 "category": CommandCategory.AGENT,
-                "handler": lambda msg: asyncio.run(self._invoke_agent("reviewer", msg))
+                "handler": lambda msg: asyncio.run(self._invoke_agent("reviewer", msg)),
             },
             "/docs": {
                 "icon": "📚",
                 "description": "Documentation agent",
                 "category": CommandCategory.AGENT,
-                "handler": lambda msg: asyncio.run(self._invoke_agent("documentation", msg))
+                "handler": lambda msg: asyncio.run(self._invoke_agent("documentation", msg)),
             },
             "/explore": {
                 "icon": "🗺️",
                 "description": "Explorer agent",
                 "category": CommandCategory.AGENT,
-                "handler": lambda msg: asyncio.run(self._invoke_agent("explorer", msg))
+                "handler": lambda msg: asyncio.run(self._invoke_agent("explorer", msg)),
             },
             "/plan": {
                 "icon": "📋",
                 "description": "Planner agent",
                 "category": CommandCategory.AGENT,
-                "handler": lambda msg: asyncio.run(self._invoke_agent("planner", msg))
+                "handler": lambda msg: asyncio.run(self._invoke_agent("planner", msg)),
             },
             "/dream": {
                 "icon": "💭",
                 "description": "DREAM mode",
                 "category": CommandCategory.AGENT,
-                "handler": self._cmd_dream
+                "handler": self._cmd_dream,
             },
         }
 
     def _create_session(self) -> PromptSession:
         """Create prompt session."""
-        history_file = Path.home() / '.qwen-dev-history'
+        history_file = Path.home() / ".qwen-dev-history"
         return PromptSession(
             history=FileHistory(str(history_file)),
             auto_suggest=AutoSuggestFromHistory(),
@@ -342,21 +340,24 @@ class UltimateREPL:
         """Generate prompt."""
         prefix = []
         if self.dream_mode:
-            prefix.append(('ansimagenta', '💭 '))
+            prefix.append(("ansimagenta", "💭 "))
         if self.current_agent:
-            prefix.append(('ansiyellow', f'{self.current_agent} '))
+            prefix.append(("ansiyellow", f"{self.current_agent} "))
 
-        return FormattedText(prefix + [
-            ('ansibrightgreen', 'q'),
-            ('ansigreen', 'w'),
-            ('ansiyellow', 'e'),
-            ('ansiyellow', 'n'),
-            ('', ' '),
-            ('ansicyan', '⚡'),
-            ('', ' '),
-            ('ansibrightgreen', '›'),
-            ('', ' '),
-        ])
+        return FormattedText(
+            prefix
+            + [
+                ("ansibrightgreen", "q"),
+                ("ansigreen", "w"),
+                ("ansiyellow", "e"),
+                ("ansiyellow", "n"),
+                ("", " "),
+                ("ansicyan", "⚡"),
+                ("", " "),
+                ("ansibrightgreen", "›"),
+                ("", " "),
+            ]
+        )
 
     def _cmd_help(self, _):
         """Show help."""
@@ -366,11 +367,13 @@ class UltimateREPL:
         table.add_column("Description", style="dim")
 
         for cmd, meta in sorted(self.commands.items()):
-            table.add_row(cmd, meta['icon'], meta['description'])
+            table.add_row(cmd, meta["icon"], meta["description"])
 
         console.print("\n")
         console.print(table)
-        console.print("\n[dim]💡 Ctrl+P (palette) | Ctrl+D (DREAM) | Ctrl+S (dashboard) | Ctrl+M (metrics)[/dim]\n")
+        console.print(
+            "\n[dim]💡 Ctrl+P (palette) | Ctrl+D (DREAM) | Ctrl+S (dashboard) | Ctrl+M (metrics)[/dim]\n"
+        )
 
     def _cmd_exit(self, _):
         """Exit shell."""
@@ -450,7 +453,7 @@ class UltimateREPL:
             self._agents[agent_name] = agent_map[agent_name]()
 
         agent = self._agents[agent_name]
-        
+
         icon_map = {
             "architect": "🏗️",
             "refactorer": "♻️",
@@ -470,21 +473,18 @@ class UltimateREPL:
     async def _stream_response(self, message: str, system: Optional[str] = None):
         """Stream LLM response with renderer."""
         console.print("[dim]" + "─" * 60 + "[/dim]")
-        
+
         try:
             # Use streaming renderer
             async for chunk in self.llm_client.stream_chat(
-                prompt=message,
-                context=system,
-                max_tokens=4000,
-                temperature=0.7
+                prompt=message, context=system, max_tokens=4000, temperature=0.7
             ):
                 console.print(chunk, end="")
                 sys.stdout.flush()
-            
+
             console.print("\n")
             console.print("[dim]" + "─" * 60 + "[/dim]")
-            
+
         except Exception as e:
             console.print(f"\n[red]❌ Error: {e}[/red]")
 
@@ -498,21 +498,21 @@ class UltimateREPL:
         self.history.add(user_input)
 
         # Slash command
-        if user_input.startswith('/'):
+        if user_input.startswith("/"):
             parts = user_input.split(maxsplit=1)
             cmd = parts[0]
             args = parts[1] if len(parts) > 1 else ""
 
-            if cmd == '/':
+            if cmd == "/":
                 self._show_palette()
                 return
 
             if cmd in self.commands:
                 try:
-                    self.commands[cmd]['handler'](args)
+                    self.commands[cmd]["handler"](args)
                 except Exception as e:
                     console.print(f"[red]❌ Error: {e}[/red]")
-            elif cmd in ['/read', '/write', '/edit', '/run', '/git', '/search']:
+            elif cmd in ["/read", "/write", "/edit", "/run", "/git", "/search"]:
                 asyncio.run(self._process_tool(cmd, args))
             else:
                 console.print(f"[red]❌ Unknown: {cmd}[/red]")
@@ -524,13 +524,13 @@ class UltimateREPL:
     async def _process_tool(self, tool: str, args: str):
         """Execute tool."""
         try:
-            if tool == '/read':
+            if tool == "/read":
                 result = await self.file_read.execute(path=args)
-                content = str(result.content) if hasattr(result, 'content') else str(result)
+                content = str(result.content) if hasattr(result, "content") else str(result)
                 console.print(Panel(content, title=f"📖 {args}", border_style="green"))
                 self.context.remember_file(args, content, "read")
-                
-            elif tool == '/write':
+
+            elif tool == "/write":
                 parts = args.split(maxsplit=1)
                 if len(parts) < 2:
                     console.print("[yellow]Usage: /write <file> <content>[/yellow]")
@@ -538,30 +538,30 @@ class UltimateREPL:
                 path, content = parts
                 await self.file_write.execute(path=path, content=content)
                 console.print(f"[green]✓ Written: {path}[/green]")
-                
-            elif tool == '/edit':
+
+            elif tool == "/edit":
                 console.print("[yellow]Edit: use format '/edit <file> <old> <new>'[/yellow]")
-                
-            elif tool == '/run':
+
+            elif tool == "/run":
                 console.print(f"[dim]⚡ Running: {args}[/dim]")
                 result = await self.bash_tool.execute(command=args)
-                output = result.output if hasattr(result, 'output') else str(result)
+                output = result.output if hasattr(result, "output") else str(result)
                 console.print(Panel(output, title="⚡ Output", border_style="green"))
-                
-            elif tool == '/git':
-                if 'status' in args:
+
+            elif tool == "/git":
+                if "status" in args:
                     result = await self.git_status.execute()
-                elif 'diff' in args:
+                elif "diff" in args:
                     result = await self.git_diff.execute()
                 else:
                     console.print("[yellow]Usage: /git status | diff[/yellow]")
                     return
                 console.print(Panel(str(result), title="🌿 Git", border_style="green"))
-                
-            elif tool == '/search':
+
+            elif tool == "/search":
                 result = await self.search_tool.execute(pattern=args)
                 console.print(Panel(str(result), title="🔍 Search", border_style="green"))
-                
+
         except Exception as e:
             console.print(f"[red]❌ Error: {e}[/red]")
 
@@ -575,31 +575,33 @@ class UltimateREPL:
 
         # Check tool commands
         msg_lower = message.lower()
-        
-        if any(kw in msg_lower for kw in ['read', 'show', 'open']):
+
+        if any(kw in msg_lower for kw in ["read", "show", "open"]):
             import re
-            match = re.search(r'[\w/.]+\.\w+', message)
+
+            match = re.search(r"[\w/.]+\.\w+", message)
             if match:
-                await self._process_tool('/read', match.group(0))
+                await self._process_tool("/read", match.group(0))
                 return
-                
-        elif any(kw in msg_lower for kw in ['run', 'execute']):
+
+        elif any(kw in msg_lower for kw in ["run", "execute"]):
             import re
-            cmd = re.sub(r'^(run|execute|bash)\s+', '', message, flags=re.IGNORECASE)
-            await self._process_tool('/run', cmd)
+
+            cmd = re.sub(r"^(run|execute|bash)\s+", "", message, flags=re.IGNORECASE)
+            await self._process_tool("/run", cmd)
             return
-            
-        elif 'git' in msg_lower:
-            if 'status' in msg_lower:
-                await self._process_tool('/git', 'status')
-            elif 'diff' in msg_lower:
-                await self._process_tool('/git', 'diff')
+
+        elif "git" in msg_lower:
+            if "status" in msg_lower:
+                await self._process_tool("/git", "status")
+            elif "diff" in msg_lower:
+                await self._process_tool("/git", "diff")
             return
 
         # Chat with streaming
         if self.dream_mode:
             message = f"[CRITICAL ANALYSIS] {message}"
-        
+
         await self._stream_response(message)
 
     def _show_palette(self):
@@ -610,7 +612,7 @@ class UltimateREPL:
         table.add_column("Description", style="white")
 
         for cmd, meta in sorted(self.commands.items()):
-            table.add_row(cmd, meta['icon'], meta['description'])
+            table.add_row(cmd, meta["icon"], meta["description"])
 
         console.print("\n[bold cyan]📋 Command Palette[/bold cyan]\n")
         console.print(table)
@@ -627,17 +629,19 @@ class UltimateREPL:
             console.print("[bold cyan]═══════════════════════════════════════[/bold cyan]\n")
 
         console.print("[dim]✨ Ultimate REPL with ALL features integrated[/dim]")
-        console.print("[dim]💡 Ctrl+P (palette) | Ctrl+D (DREAM) | Ctrl+S (dashboard) | Ctrl+M (metrics)[/dim]\n")
+        console.print(
+            "[dim]💡 Ctrl+P (palette) | Ctrl+D (DREAM) | Ctrl+S (dashboard) | Ctrl+M (metrics)[/dim]\n"
+        )
 
         # Main loop
         while self.running:
             try:
                 with patch_stdout():
                     user_input = self.session.prompt(self._get_prompt())
-                
+
                 if user_input is None:
                     continue
-                
+
                 self._process_command(user_input)
 
             except KeyboardInterrupt:

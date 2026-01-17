@@ -9,8 +9,7 @@ Tests cover:
     - Error handling and edge cases
 """
 
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from vertice_core.agents.compaction.strategies.llm_summary import LLMSummaryStrategy
 from vertice_core.agents.compaction.types import CompactionConfig, CompactionResult
 from vertice_core.agents.context.unified import UnifiedContext

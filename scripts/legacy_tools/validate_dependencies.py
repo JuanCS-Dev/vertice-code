@@ -8,8 +8,7 @@ import sys
 import importlib
 import subprocess
 from pathlib import Path
-from typing import List, Dict, Set
-import json
+from typing import List
 
 
 class DependencyValidator:
@@ -94,7 +93,6 @@ class DependencyValidator:
         """Simple check for import cycles."""
         try:
             # Check if module1 imports module2 and vice versa
-            import inspect
 
             mod1 = importlib.import_module(module1)
             mod2 = importlib.import_module(module2)

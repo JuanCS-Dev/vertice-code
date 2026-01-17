@@ -3,14 +3,12 @@ Terminal API router with WebSocket support for MCP integration
 """
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from typing import Dict, Any
+from typing import Dict
 import json
 import logging
-import uuid
-import asyncio
 import os
 
-from app.integrations.mcp_client import get_mcp_client, MCPClient, CircuitBreakerOpenException
+from app.integrations.mcp_client import MCPClient, CircuitBreakerOpenException
 
 logger = logging.getLogger(__name__)
 

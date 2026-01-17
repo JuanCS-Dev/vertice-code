@@ -399,7 +399,8 @@ DO NOT just generate text. Take ACTION with your tools to fulfill the request.""
                             display_result = f"📊 Python Scan: Found {vulns} vulnerabilities."
                         else:
                             display_result = f"📦 JSON Result ({len(tool_result)} bytes)"
-                    except Exception:
+                    except Exception as e:
+                        logger.warning(f"Failed to parse tool result JSON: {e}")
                         display_result = tool_result[:400] + "..."
                 else:
                     display_result = tool_result[:400] + "... (truncated)"

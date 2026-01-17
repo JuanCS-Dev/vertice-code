@@ -2,7 +2,6 @@
 Tests for ContextCompactor - Sprint 2 Refactoring.
 """
 
-import pytest
 from vertice_core.agents.compaction.compactor import ContextCompactor
 from vertice_core.agents.compaction.types import CompactionConfig
 

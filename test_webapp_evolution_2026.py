@@ -11,10 +11,7 @@ Valida todas as implementações da evolução para 2026:
 
 import asyncio
 import json
-import os
-from pathlib import Path
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
 
 # Test imports
 try:
@@ -273,7 +270,6 @@ class TestWebappEvolution2026:
             return
 
         try:
-            from app.api.v1.webhooks import verify_signature
             from unittest.mock import AsyncMock
 
             # Mock request with signature
@@ -314,9 +310,6 @@ class TestWebappEvolution2026:
 
         try:
             from app.api.v1.webhooks import (
-                GitHubPushPayload,
-                GitHubPRPayload,
-                GitHubIssuePayload,
                 RepositoryInfo,
                 UserInfo,
                 CommitInfo,
@@ -459,8 +452,6 @@ class TestWebappEvolution2026:
 
 # Run tests if executed directly
 if __name__ == "__main__":
-    import sys
-
     # Create test instance
     test_suite = TestWebappEvolution2026()
 

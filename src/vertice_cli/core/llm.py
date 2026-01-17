@@ -178,8 +178,8 @@ class LLMClient:
         if self._vertice_client:
             try:
                 return self._vertice_client.get_available_providers()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Failed to check providers: {e}")
         return self.provider_priority
 
     @property

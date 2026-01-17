@@ -19,18 +19,6 @@ from prometheus.mcp_server.config import MCPServerConfig
 from prometheus.mcp_server.tools.registry import get_tool_registry
 
 # Import tools to register them
-import prometheus.mcp_server.tools.file_tools
-import prometheus.mcp_server.tools.search_tools
-import prometheus.mcp_server.tools.execution_tools
-import prometheus.mcp_server.tools.system_tools
-import prometheus.mcp_server.tools.git_tools
-import prometheus.mcp_server.tools.web_tools
-import prometheus.mcp_server.tools.media_tools
-import prometheus.mcp_server.tools.context_tools
-import prometheus.mcp_server.tools.prometheus_tools
-import prometheus.mcp_server.tools.notebook_tools
-import prometheus.mcp_server.tools.advanced_tools
-import prometheus.mcp_server.tools.agent_tools
 
 logger = logging.getLogger(__name__)
 

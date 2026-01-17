@@ -5,7 +5,6 @@ Simple Performance Profiler for Vertice-Code
 
 import time
 import json
-from pathlib import Path
 
 
 def profile_performance():

@@ -2,7 +2,7 @@
 Cache module (Firestore)
 """
 
-from typing import Optional, Any
+from typing import Optional
 import logging
 from app.integrations.firestore_cache import FirestoreCache
 

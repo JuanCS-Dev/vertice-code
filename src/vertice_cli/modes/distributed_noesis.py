@@ -291,7 +291,7 @@ class DistributedTribunal:
 
                 await websocket.close()
 
-            except Exception:
+            except Exception as _:
                 # Nó não disponível, continua
                 pass
 

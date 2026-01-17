@@ -2,7 +2,6 @@
 Unit tests for LLM Router
 """
 
-import pytest
 from app.llm.router import classify_intent, route_to_model, Message, IntentType, ModelTier
 
 

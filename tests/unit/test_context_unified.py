@@ -9,9 +9,7 @@ Tests cover:
     - Statistics and state management
 """
 
-import pytest
 import time
-from unittest.mock import MagicMock, patch
 from vertice_core.agents.context.unified import UnifiedContext
 from vertice_core.agents.context.types import ContextState, ExecutionResult
 

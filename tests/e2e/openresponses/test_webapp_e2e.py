@@ -6,11 +6,9 @@ Foca em endpoints, streaming SSE e protocol switching.
 """
 
 import pytest
-import aiohttp
 from aiohttp import web
 import asyncio
-from unittest.mock import AsyncMock, MagicMock
-from tests.e2e.openresponses import get_e2e_tester, E2ETestResult
+from tests.e2e.openresponses import get_e2e_tester
 
 
 class TestOpenResponsesWebAppE2E:
@@ -99,9 +97,9 @@ class TestOpenResponsesWebAppE2E:
             # Assertions
             assert result.success, f"Test failed with errors: {result.errors}"
             assert result.metrics.get("total_events", 0) > 0, "Should receive events"
-            assert "response.created" in [e.get("type") for e in result.events_received], (
-                "Should receive response.created event"
-            )
+            assert "response.created" in [
+                e.get("type") for e in result.events_received
+            ], "Should receive response.created event"
 
         except Exception as e:
             result.add_error(f"Exception: {str(e)}")
@@ -138,9 +136,9 @@ class TestOpenResponsesWebAppE2E:
                 protocol_header = response.headers.get("X-Vertice-Protocol", "")
 
                 assert "text/event-stream" in content_type, f"Expected SSE, got {content_type}"
-                assert protocol_header == "open_responses", (
-                    f"Expected open_responses protocol, got {protocol_header}"
-                )
+                assert (
+                    protocol_header == "open_responses"
+                ), f"Expected open_responses protocol, got {protocol_header}"
 
                 # Verificar eventos
                 events_found = []
@@ -185,9 +183,9 @@ class TestOpenResponsesWebAppE2E:
                 protocol_header = response.headers.get("X-Vertice-Protocol", "")
 
                 assert vercel_header == "v1", f"Expected Vercel header v1, got {vercel_header}"
-                assert protocol_header == "vercel", (
-                    f"Expected vercel protocol, got {protocol_header}"
-                )
+                assert (
+                    protocol_header == "vercel"
+                ), f"Expected vercel protocol, got {protocol_header}"
 
             result.mark_complete(True)
 
@@ -280,7 +278,6 @@ class TestOpenResponsesWebAppE2E:
 
         try:
             from vertice_core.openresponses_stream import OpenResponsesStreamBuilder
-            from vertice_core.openresponses_types import ReasoningItem, SummaryTextContent
 
             # Criar stream com reasoning
             builder = OpenResponsesStreamBuilder(model="gemini-3-pro")

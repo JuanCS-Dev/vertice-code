@@ -4,13 +4,14 @@ Stripe integration for subscriptions, invoices, and customer portal
 """
 
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
-from typing import Dict, Any, Optional
+from typing import Dict, Optional
 from pydantic import BaseModel
 import logging
 
 from app.core.auth import FirebaseUser, get_current_user
 from app.core.stripe_service import get_stripe_service
 from app.core.usage_metering import get_usage_metering_service
+from app.core.config import get_settings
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -45,6 +46,19 @@ async def create_subscription(
     4. Starts usage metering
     """
     try:
+        settings = get_settings()
+        allowed_prices = [
+            settings.STRIPE_PRICE_FREEMIUM,
+            settings.STRIPE_PRICE_PRO,
+            settings.STRIPE_PRICE_ENTERPRISE,
+        ]
+
+        if request.price_id not in allowed_prices:
+            logger.warning(
+                f"Unauthorized price ID attempt: {request.price_id} by user {user.user_id}"
+            )
+            raise HTTPException(status_code=400, detail="Invalid or unauthorized plan selected")
+
         stripe_service = get_stripe_service()
 
         # Create subscription
@@ -226,7 +240,8 @@ async def get_customer_portal_url(user: FirebaseUser = Depends(get_current_user)
 
 @router.get("/preview")
 async def get_invoice_preview(
-    upcoming_usage: Optional[Dict[str, float]] = None, user: FirebaseUser = Depends(get_current_user)
+    upcoming_usage: Optional[Dict[str, float]] = None,
+    user: FirebaseUser = Depends(get_current_user),
 ):
     """
     Generate invoice preview for next billing cycle.

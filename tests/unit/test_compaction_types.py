@@ -7,13 +7,11 @@ Tests cover:
     - Backward compatibility re-exports
 """
 
-import pytest
 from vertice_core.agents.compaction.types import (
     CompactionStrategy,
     CompactionTrigger,
     CompactionConfig,
     CompactionResult,
-    MaskedObservation,
 )
 
 

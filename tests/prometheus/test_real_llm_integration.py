@@ -7,8 +7,6 @@ Run with: pytest tests/prometheus/test_real_llm_integration.py -v -s
 
 import pytest
 import os
-import asyncio
-from unittest.mock import patch
 
 
 @pytest.mark.skipif(

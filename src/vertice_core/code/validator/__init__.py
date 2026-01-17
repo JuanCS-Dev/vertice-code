@@ -10,7 +10,6 @@ from .types import (
     EditValidation,
     FileBackup,
 )
-from .checks import check_syntax, check_lsp, check_imports
 from .backup import BackupManager
 from .manager import CodeValidator
 

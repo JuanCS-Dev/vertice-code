@@ -10,14 +10,8 @@ Testa TODO o sistema Vertice com Open Responses protocol:
 Foco: Validar que Open Responses funciona end-to-end em todas as interfaces.
 """
 
-import asyncio
-import pytest
 import json
-import time
 from typing import Dict, Any, List
-from pathlib import Path
-import subprocess
-import requests
 import aiohttp
 from dataclasses import dataclass, field
 from datetime import datetime

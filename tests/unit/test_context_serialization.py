@@ -8,14 +8,13 @@ Tests cover:
 """
 
 import pytest
-from unittest.mock import MagicMock
 from vertice_core.agents.context.serialization import (
     generate_prompt_context,
     context_to_dict,
     context_from_dict,
 )
 from vertice_core.agents.context.unified import UnifiedContext
-from vertice_core.agents.context.types import FileContext, DecisionType
+from vertice_core.agents.context.types import DecisionType
 
 
 class TestGeneratePromptContext:

@@ -11,8 +11,6 @@ Tests cover:
     - Quality preservation metrics
 """
 
-import pytest
-from unittest.mock import MagicMock
 from vertice_core.agents.compaction.strategies.hierarchical import HierarchicalStrategy
 from vertice_core.agents.compaction.types import CompactionConfig, CompactionResult
 from vertice_core.agents.context.unified import UnifiedContext

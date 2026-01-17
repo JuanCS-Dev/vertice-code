@@ -1,6 +1,5 @@
 """Testes para Open Responses Events na TUI."""
 
-import pytest
 from vertice_tui.core.openresponses_events import (
     OpenResponsesEvent,
     parse_open_responses_event,
@@ -85,4 +84,3 @@ class TestOpenResponsesEvent:
             event = parse_open_responses_event(sse_line)
             assert event is not None
             assert event.sequence_number == expected_seq
-

@@ -6,7 +6,7 @@ Foca em parsing de eventos SSE e handling de responses.
 """
 
 import pytest
-from tests.e2e.openresponses import get_e2e_tester, E2ETestResult
+from tests.e2e.openresponses import get_e2e_tester
 
 
 class TestOpenResponsesTUIE2E:
@@ -34,12 +34,12 @@ class TestOpenResponsesTUIE2E:
             # Assertions
             assert result.success, f"Test failed with errors: {result.errors}"
             assert result.metrics.get("total_parsed", 0) >= 4, "Should parse at least 4 events"
-            assert "response.created" in result.metrics.get("parsed_events", []), (
-                "Should parse response.created"
-            )
-            assert "response.completed" in result.metrics.get("parsed_events", []), (
-                "Should parse response.completed"
-            )
+            assert "response.created" in result.metrics.get(
+                "parsed_events", []
+            ), "Should parse response.created"
+            assert "response.completed" in result.metrics.get(
+                "parsed_events", []
+            ), "Should parse response.completed"
 
         except Exception as e:
             result.add_error(f"Exception: {str(e)}")
@@ -129,9 +129,9 @@ class TestOpenResponsesTUIE2E:
             ]
 
             assert events_parsed == expected_events, f"Event sequence mismatch: {events_parsed}"
-            assert sequence_numbers == list(range(1, 11)), (
-                f"Sequence numbers incorrect: {sequence_numbers}"
-            )
+            assert sequence_numbers == list(
+                range(1, 11)
+            ), f"Sequence numbers incorrect: {sequence_numbers}"
 
             result.add_metric("events_parsed", len(events_parsed))
             result.add_metric("sequence_valid", True)
@@ -154,8 +154,6 @@ class TestOpenResponsesTUIE2E:
         try:
             from vertice_core.openresponses_types import (
                 ReasoningItem,
-                SummaryTextContent,
-                OutputTextContent,
             )
 
             # Criar reasoning item

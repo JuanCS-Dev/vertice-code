@@ -3,32 +3,34 @@ Authentication utilities for Firebase JWT validation
 Validates Firebase (Google Identity) JWT tokens and extracts user information
 """
 
-import time
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any
 import logging
 from pydantic import BaseModel
 import firebase_admin
-from firebase_admin import auth, credentials
+from firebase_admin import auth
 
 from app.core.config import settings
-from app.core.agent_auth import get_agent_key_service, AgentKeyService
-from app.core.auth_utils import generate_agent_api_key, hash_api_key, AgentIdentity
+from app.core.agent_auth import get_agent_key_service
+from app.core.auth_utils import hash_api_key, AgentIdentity
 
 logger = logging.getLogger(__name__)
 
+
 class FirebaseUser(BaseModel):
     """Firebase user information extracted from JWT"""
+
     user_id: str
     email: str
     name: Optional[str] = None
     image_url: Optional[str] = None
+
 
 class FirebaseAuth:
     """Firebase authentication handler"""
 
     def __init__(self):
         self.project_id = settings.FIREBASE_PROJECT_ID or settings.GOOGLE_CLOUD_PROJECT
-        
+
         try:
             # Initialize firebase-admin if not already initialized
             if not firebase_admin._apps:
@@ -50,15 +52,23 @@ class FirebaseAuth:
         """
         try:
             # Development mode: accept dev-token and mock tokens
-            is_dev = settings.ENVIRONMENT.lower() == "development" if hasattr(settings, 'ENVIRONMENT') else False
-            
-            if self.mock_mode or token == "mock-jwt-token" or token.startswith("Bearer mock-jwt-token"):
+            is_dev = (
+                settings.ENVIRONMENT.lower() == "development"
+                if hasattr(settings, "ENVIRONMENT")
+                else False
+            )
+
+            if (
+                self.mock_mode
+                or token == "mock-jwt-token"
+                or token.startswith("Bearer mock-jwt-token")
+            ):
                 return FirebaseUser(
                     user_id="mock-user-123",
                     email="mock@example.com",
                     name="Mock User",
                 )
-            
+
             # Dev mode: also accept dev-token for local testing
             if is_dev and (token == "dev-token" or token.startswith("Bearer dev-token")):
                 return FirebaseUser(
@@ -70,12 +80,12 @@ class FirebaseAuth:
             # Verify the ID token using Firebase Admin SDK
             # check_revoked=True ensures revoked tokens (e.g. user disabled) are rejected
             decoded_token = auth.verify_id_token(token, check_revoked=True)
-            
+
             return FirebaseUser(
                 user_id=decoded_token.get("uid"),
                 email=decoded_token.get("email"),
                 name=decoded_token.get("name"),
-                image_url=decoded_token.get("picture")
+                image_url=decoded_token.get("picture"),
             )
 
         except auth.RevokedIdTokenError:
@@ -88,8 +98,10 @@ class FirebaseAuth:
             logger.error(f"Token verification failed: {e}")
             return None
 
+
 # Global auth instance
 _firebase_auth: Optional[FirebaseAuth] = None
+
 
 def get_firebase_auth() -> FirebaseAuth:
     """Get global Firebase auth instance"""
@@ -97,6 +109,7 @@ def get_firebase_auth() -> FirebaseAuth:
     if _firebase_auth is None:
         _firebase_auth = FirebaseAuth()
     return _firebase_auth
+
 
 async def get_current_user(token: str) -> Optional[FirebaseUser]:
     """

@@ -16,26 +16,27 @@ sys.path.insert(0, os.getcwd())
 # The exact JSON from the diagnostic
 TEST_JSON = '{"tool_call": {"name": "write_file", "arguments": {"content": "def hello_world():\\n  print(\\"hello world\\")", "path": "test_diagnostic.py"}}}'
 
+
 def test_parser():
     """Test ToolCallParser with real LLM output."""
     print("=" * 70)
     print("🔬 TUI E2E DIAGNOSTIC #2: ToolCallParser Test")
     print("=" * 70)
-    
+
     try:
         from vertice_tui.core.parsing.tool_call_parser import ToolCallParser
     except ImportError as e:
         print(f"❌ Import failed: {e}")
         return False
-    
+
     print(f"\n📥 Input JSON:\n{TEST_JSON}\n")
     print("-" * 70)
-    
+
     results = ToolCallParser.extract(TEST_JSON)
-    
-    print(f"📊 Extraction Results:")
+
+    print("📊 Extraction Results:")
     print(f"   Tool calls found: {len(results)}")
-    
+
     if results:
         for name, args in results:
             print(f"   - Tool: {name}")

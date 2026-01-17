@@ -8,17 +8,14 @@ Generated with ❤️ by Vertex AI Codey
 """
 
 import asyncio
-import os
 import json
 import logging
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
-from datetime import datetime, timedelta
-import subprocess
+from datetime import datetime
 import hashlib
 
 from google.cloud import bigquery, pubsub_v1
-from vertexai.generative_models import GenerativeModel
 
 logger = logging.getLogger(__name__)
 
@@ -73,8 +70,10 @@ class AIOptimizedCIDCPipeline:
         self.project_id = project_id
         self.bq_client = bigquery.Client(project=project_id)
         self.pubsub_publisher = pubsub_v1.PublisherClient()
+
     def __init__(self):
         from vertexai.generative_models import GenerativeModel
+
         self.ai_model = GenerativeModel("gemini-2.5-pro")
 
         # Estado da pipeline

@@ -1,6 +1,5 @@
 """Testes para Open Responses Fase 2."""
 
-import pytest
 from vertice_core.openresponses_types import (
     ReasoningItem,
     SummaryTextContent,

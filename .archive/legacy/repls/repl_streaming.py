@@ -22,9 +22,6 @@ from prompt_toolkit.patch_stdout import patch_stdout
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-from rich.markdown import Markdown
-from rich.live import Live
-from rich.text import Text
 from typing import Dict, Optional
 import sys
 from pathlib import Path
@@ -61,10 +58,10 @@ class EnhancedCompleter(Completer):
     def __init__(self, commands: Dict[str, Dict]):
         self.commands = commands
         self.tools = {
-            '/read': {'icon': '📖', 'description': 'Read file'},
-            '/write': {'icon': '✍️', 'description': 'Write file'},
-            '/run': {'icon': '⚡', 'description': 'Execute command'},
-            '/git': {'icon': '🌿', 'description': 'Git operations'},
+            "/read": {"icon": "📖", "description": "Read file"},
+            "/write": {"icon": "✍️", "description": "Write file"},
+            "/run": {"icon": "⚡", "description": "Execute command"},
+            "/git": {"icon": "🌿", "description": "Git operations"},
         }
 
     def get_completions(self, document, complete_event):
@@ -73,7 +70,7 @@ class EnhancedCompleter(Completer):
         if not words:
             return
         word = words[-1]
-        if not word.startswith('/'):
+        if not word.startswith("/"):
             return
 
         for cmd_name, cmd_meta in {**self.commands, **self.tools}.items():
@@ -81,7 +78,7 @@ class EnhancedCompleter(Completer):
                 yield Completion(
                     cmd_name,
                     start_position=-len(word),
-                    display_meta=HTML(f"<b>{cmd_meta['icon']}</b> {cmd_meta['description']}")
+                    display_meta=HTML(f"<b>{cmd_meta['icon']}</b> {cmd_meta['description']}"),
                 )
 
 
@@ -121,79 +118,79 @@ class StreamingREPL:
                 "icon": "❓",
                 "description": "Show commands",
                 "category": CommandCategory.HELP,
-                "handler": self._cmd_help
+                "handler": self._cmd_help,
             },
             "/exit": {
                 "icon": "👋",
                 "description": "Exit shell",
                 "category": CommandCategory.SYSTEM,
-                "handler": self._cmd_exit
+                "handler": self._cmd_exit,
             },
             "/quit": {
                 "icon": "👋",
                 "description": "Exit (alias)",
                 "category": CommandCategory.SYSTEM,
-                "handler": self._cmd_exit
+                "handler": self._cmd_exit,
             },
             "/clear": {
                 "icon": "🧹",
                 "description": "Clear screen",
                 "category": CommandCategory.SYSTEM,
-                "handler": self._cmd_clear
+                "handler": self._cmd_clear,
             },
             "/architect": {
                 "icon": "🏗️",
                 "description": "Architect agent",
                 "category": CommandCategory.AGENT,
-                "handler": lambda msg: asyncio.run(self._invoke_agent("architect", msg))
+                "handler": lambda msg: asyncio.run(self._invoke_agent("architect", msg)),
             },
             "/refactor": {
                 "icon": "♻️",
                 "description": "Refactor agent",
                 "category": CommandCategory.AGENT,
-                "handler": lambda msg: asyncio.run(self._invoke_agent("refactorer", msg))
+                "handler": lambda msg: asyncio.run(self._invoke_agent("refactorer", msg)),
             },
             "/test": {
                 "icon": "🧪",
                 "description": "Test agent",
                 "category": CommandCategory.AGENT,
-                "handler": lambda msg: asyncio.run(self._invoke_agent("testing", msg))
+                "handler": lambda msg: asyncio.run(self._invoke_agent("testing", msg)),
             },
             "/review": {
                 "icon": "🔍",
                 "description": "Review agent",
                 "category": CommandCategory.AGENT,
-                "handler": lambda msg: asyncio.run(self._invoke_agent("reviewer", msg))
+                "handler": lambda msg: asyncio.run(self._invoke_agent("reviewer", msg)),
             },
             "/docs": {
                 "icon": "📚",
                 "description": "Documentation agent",
                 "category": CommandCategory.AGENT,
-                "handler": lambda msg: asyncio.run(self._invoke_agent("documentation", msg))
+                "handler": lambda msg: asyncio.run(self._invoke_agent("documentation", msg)),
             },
             "/explore": {
                 "icon": "🗺️",
                 "description": "Explorer agent",
                 "category": CommandCategory.AGENT,
-                "handler": lambda msg: asyncio.run(self._invoke_agent("explorer", msg))
+                "handler": lambda msg: asyncio.run(self._invoke_agent("explorer", msg)),
             },
             "/plan": {
                 "icon": "📋",
                 "description": "Planner agent",
                 "category": CommandCategory.AGENT,
-                "handler": lambda msg: asyncio.run(self._invoke_agent("planner", msg))
+                "handler": lambda msg: asyncio.run(self._invoke_agent("planner", msg)),
             },
             "/dream": {
                 "icon": "💭",
                 "description": "DREAM mode",
                 "category": CommandCategory.AGENT,
-                "handler": self._cmd_dream
+                "handler": self._cmd_dream,
             },
         }
 
     def _create_session(self) -> PromptSession:
         """Criar prompt session."""
-        history_file = Path.home() / '.qwen-dev-history'
+        history_file = Path.home() / ".qwen-dev-history"
         return PromptSession(
             history=FileHistory(str(history_file)),
             auto_suggest=AutoSuggestFromHistory(),
@@ -223,21 +220,24 @@ class StreamingREPL:
         """Generate prompt."""
         prefix = []
         if self.dream_mode:
-            prefix.append(('ansimagenta', '💭 '))
+            prefix.append(("ansimagenta", "💭 "))
         if self.current_agent:
-            prefix.append(('ansiyellow', f'{self.current_agent} '))
+            prefix.append(("ansiyellow", f"{self.current_agent} "))
 
-        return FormattedText(prefix + [
-            ('ansibrightgreen', 'q'),
-            ('ansigreen', 'w'),
-            ('ansiyellow', 'e'),
-            ('ansiyellow', 'n'),
-            ('', ' '),
-            ('ansicyan', '⚡'),
-            ('', ' '),
-            ('ansibrightgreen', '›'),
-            ('', ' '),
-        ])
+        return FormattedText(
+            prefix
+            + [
+                ("ansibrightgreen", "q"),
+                ("ansigreen", "w"),
+                ("ansiyellow", "e"),
+                ("ansiyellow", "n"),
+                ("", " "),
+                ("ansicyan", "⚡"),
+                ("", " "),
+                ("ansibrightgreen", "›"),
+                ("", " "),
+            ]
+        )
 
     def _cmd_help(self, _):
         """Show help."""
@@ -247,7 +247,7 @@ class StreamingREPL:
         table.add_column("Description", style="dim")
 
         for cmd, meta in sorted(self.commands.items()):
-            table.add_row(cmd, meta['icon'], meta['description'])
+            table.add_row(cmd, meta["icon"], meta["description"])
 
         console.print("\n")
         console.print(table)
@@ -291,7 +291,7 @@ class StreamingREPL:
             self._agents[agent_name] = agent_map[agent_name]()
 
         agent = self._agents[agent_name]
-        
+
         icon_map = {
             "architect": "🏗️",
             "refactorer": "♻️",
@@ -311,30 +311,27 @@ class StreamingREPL:
     async def _stream_llm_response(self, message: str, system: Optional[str] = None):
         """Stream LLM response char-by-char (como GitHub Copilot CLI)."""
         console.print("[dim]" + "─" * 60 + "[/dim]")
-        
+
         buffer = []
         char_count = 0
-        
+
         try:
             # Stream chat (usando API correta: prompt + context)
             async for chunk in self.llm_client.stream_chat(
-                prompt=message,
-                context=system,
-                max_tokens=4000,
-                temperature=0.7
+                prompt=message, context=system, max_tokens=4000, temperature=0.7
             ):
                 # Print chunk immediately
                 console.print(chunk, end="")
                 buffer.append(chunk)
                 char_count += len(chunk)
-                
+
                 # Flush every 10 chars for smooth streaming
                 if char_count % 10 == 0:
                     sys.stdout.flush()
-            
+
             console.print("\n")
             console.print("[dim]" + "─" * 60 + "[/dim]")
-            
+
         except Exception as e:
             console.print(f"\n[red]❌ Error: {e}[/red]")
 
@@ -345,21 +342,21 @@ class StreamingREPL:
             return
 
         # Slash command
-        if user_input.startswith('/'):
+        if user_input.startswith("/"):
             parts = user_input.split(maxsplit=1)
             cmd = parts[0]
             args = parts[1] if len(parts) > 1 else ""
 
-            if cmd == '/':
+            if cmd == "/":
                 self._show_palette()
                 return
 
             if cmd in self.commands:
                 try:
-                    self.commands[cmd]['handler'](args)
+                    self.commands[cmd]["handler"](args)
                 except Exception as e:
                     console.print(f"[red]❌ Error: {e}[/red]")
-            elif cmd in ['/read', '/write', '/run', '/git']:
+            elif cmd in ["/read", "/write", "/run", "/git"]:
                 asyncio.run(self._process_tool(cmd, args))
             else:
                 console.print(f"[red]❌ Unknown: {cmd}[/red]")
@@ -371,16 +368,18 @@ class StreamingREPL:
     async def _process_tool(self, tool: str, args: str):
         """Execute tool command."""
         try:
-            if tool == '/read':
+            if tool == "/read":
                 result = await self.file_read.execute(path=args)
-                console.print(Panel(
-                    str(result.content) if hasattr(result, 'content') else str(result),
-                    title=f"📖 {args}",
-                    border_style="green"
-                ))
+                console.print(
+                    Panel(
+                        str(result.content) if hasattr(result, "content") else str(result),
+                        title=f"📖 {args}",
+                        border_style="green",
+                    )
+                )
                 self.context.remember_file(args, str(result), "read")
-                
-            elif tool == '/write':
+
+            elif tool == "/write":
                 parts = args.split(maxsplit=1)
                 if len(parts) < 2:
                     console.print("[yellow]Usage: /write <file> <content>[/yellow]")
@@ -388,23 +387,23 @@ class StreamingREPL:
                 path, content = parts
                 result = await self.file_write.execute(path=path, content=content)
                 console.print(f"[green]✓ Written to {path}[/green]")
-                
-            elif tool == '/run':
+
+            elif tool == "/run":
                 console.print(f"[dim]⚡ Running: {args}[/dim]")
                 result = await self.bash_tool.execute(command=args)
-                output = result.output if hasattr(result, 'output') else str(result)
+                output = result.output if hasattr(result, "output") else str(result)
                 console.print(Panel(output, title="⚡ Output", border_style="green"))
-                
-            elif tool == '/git':
-                if 'status' in args:
+
+            elif tool == "/git":
+                if "status" in args:
                     result = await self.git_status.execute()
-                elif 'diff' in args:
+                elif "diff" in args:
                     result = await self.git_diff.execute()
                 else:
                     console.print("[yellow]Usage: /git status | diff[/yellow]")
                     return
                 console.print(Panel(str(result), title="🌿 Git", border_style="green"))
-                
+
         except Exception as e:
             console.print(f"[red]❌ Error: {e}[/red]")
 
@@ -418,31 +417,33 @@ class StreamingREPL:
 
         # Check if tool command
         msg_lower = message.lower()
-        
-        if any(kw in msg_lower for kw in ['read', 'show', 'open']):
+
+        if any(kw in msg_lower for kw in ["read", "show", "open"]):
             import re
-            match = re.search(r'[\w/.]+\.\w+', message)
+
+            match = re.search(r"[\w/.]+\.\w+", message)
             if match:
-                await self._process_tool('/read', match.group(0))
+                await self._process_tool("/read", match.group(0))
                 return
-                
-        elif any(kw in msg_lower for kw in ['run', 'execute']):
+
+        elif any(kw in msg_lower for kw in ["run", "execute"]):
             import re
-            cmd = re.sub(r'^(run|execute|bash)\s+', '', message, flags=re.IGNORECASE)
-            await self._process_tool('/run', cmd)
+
+            cmd = re.sub(r"^(run|execute|bash)\s+", "", message, flags=re.IGNORECASE)
+            await self._process_tool("/run", cmd)
             return
-            
-        elif 'git' in msg_lower:
-            if 'status' in msg_lower:
-                await self._process_tool('/git', 'status')
-            elif 'diff' in msg_lower:
-                await self._process_tool('/git', 'diff')
+
+        elif "git" in msg_lower:
+            if "status" in msg_lower:
+                await self._process_tool("/git", "status")
+            elif "diff" in msg_lower:
+                await self._process_tool("/git", "diff")
             return
 
         # Chat mode with streaming
         if self.dream_mode:
             message = f"[CRITICAL ANALYSIS] {message}"
-        
+
         await self._stream_llm_response(message)
 
     def _show_palette(self):
@@ -453,7 +454,7 @@ class StreamingREPL:
         table.add_column("Description", style="white")
 
         for cmd, meta in sorted(self.commands.items()):
-            table.add_row(cmd, meta['icon'], meta['description'])
+            table.add_row(cmd, meta["icon"], meta["description"])
 
         console.print("\n[bold cyan]📋 Commands[/bold cyan]\n")
         console.print(table)
@@ -472,10 +473,10 @@ class StreamingREPL:
             try:
                 with patch_stdout():
                     user_input = self.session.prompt(self._get_prompt())
-                
+
                 if user_input is None:
                     continue
-                
+
                 self._process_command(user_input)
 
             except KeyboardInterrupt:

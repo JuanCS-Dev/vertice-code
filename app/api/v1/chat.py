@@ -15,12 +15,12 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 import json
-import asyncio
 import logging
 
 # Check if import works
 try:
     from src.providers.vertice_router import get_router
+
     ROUTER_AVAILABLE = True
 except ImportError:
     # Allow running without full context for basic health
@@ -30,6 +30,7 @@ except ImportError:
 
 try:
     from src.providers.vertex_ai import VertexAIProvider
+
     VERTEX_AVAILABLE = True
 except ImportError:
     VERTEX_AVAILABLE = False
@@ -75,7 +76,7 @@ async def stream_ai_sdk_response(messages: List[ChatMessage]):
     try:
         # internal message conversion
         internal_messages = [{"role": m.role, "content": m.content} for m in messages]
-        
+
         # Priority 1: Use Router if available
         if ROUTER_AVAILABLE and get_router:
             router_instance = get_router()
@@ -84,18 +85,16 @@ async def stream_ai_sdk_response(messages: List[ChatMessage]):
                 complexity="MODERATE",
             ):
                 yield chunk
-                
+
         # Priority 2: Use VertexAIProvider directly (Fallback/Testing)
         elif VERTEX_AVAILABLE:
-            provider = VertexAIProvider(model_name="pro") # Gemini 2.5 Pro
-            async for chunk in provider.stream_chat(
-                messages=internal_messages
-            ):
+            provider = VertexAIProvider(model_name="pro")  # Gemini 2.5 Pro
+            async for chunk in provider.stream_chat(messages=internal_messages):
                 # Protocol formatting: 0:"chunk"
-                yield f'0:{json.dumps(chunk)}\n'
-                
+                yield f"0:{json.dumps(chunk)}\n"
+
         else:
-            yield "0:\"Error: No AI provider available (Router and VertexAI failed to load).\"\n"
+            yield '0:"Error: No AI provider available (Router and VertexAI failed to load)."\n'
             return
 
     except Exception as e:

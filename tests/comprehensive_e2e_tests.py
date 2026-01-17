@@ -16,8 +16,7 @@ import asyncio
 import time
 import os
 import json
-from pathlib import Path
-from typing import Dict, List, Any
+from typing import Dict, Any
 
 # Test framework imports
 from vertice_tui import VerticeApp
@@ -26,7 +25,6 @@ from vertice_tui.widgets import (
     PerformanceHUD,
     StatusBar,
     FuzzySearchModal,
-    ExportModal,
 )
 from vertice_tui.handlers.export_handler import get_export_handler
 from vertice_tui.widgets.session_tabs import SessionData
@@ -114,13 +112,6 @@ class ComprehensiveE2ETestSuite:
             self.log_test("Core System Initialization", "PASS", "VerticeApp created successfully")
 
             # Test widget imports
-            from vertice_tui.widgets import (
-                ReasoningStream,
-                PerformanceHUD,
-                StatusBar,
-                FuzzySearchModal,
-                ExportModal,
-            )
 
             self.log_test("Widget Imports", "PASS", "All widgets imported successfully")
 

@@ -6,7 +6,7 @@ Cenários realistas de uso end-to-end.
 """
 
 import pytest
-from tests.e2e.openresponses import get_e2e_tester, E2ETestResult
+from tests.e2e.openresponses import get_e2e_tester
 
 
 class TestOpenResponsesIntegrationE2E:
@@ -69,7 +69,7 @@ class TestOpenResponsesIntegrationE2E:
         )
 
         try:
-            from vertice_core.openresponses_types import ReasoningItem, SummaryTextContent
+            from vertice_core.openresponses_types import ReasoningItem
             from vertice_core.openresponses_stream import OpenResponsesStreamBuilder
 
             # 1. Criar reasoning item (como CLI/agents fariam)
@@ -108,9 +108,9 @@ class TestOpenResponsesIntegrationE2E:
 
             # Validar fluxo completo
             assert len(parsed_events) > 5, "Should have multiple parsed events"
-            assert "response.reasoning_content.delta" in parsed_events, (
-                "Should have reasoning delta events"
-            )
+            assert (
+                "response.reasoning_content.delta" in parsed_events
+            ), "Should have reasoning delta events"
             assert "response.completed" in parsed_events, "Should complete successfully"
 
             result.add_metric("reasoning_content_length", len(reasoning.get_reasoning_text()))
@@ -139,7 +139,6 @@ class TestOpenResponsesIntegrationE2E:
                 ReasoningItem,
                 FunctionCallItem,
                 UrlCitation,
-                FileCitation,
                 JsonSchemaResponseFormat,
             )
 
@@ -151,12 +150,12 @@ class TestOpenResponsesIntegrationE2E:
             message.add_citation("https://github.com/example", "Example Repo", 15, 25)
 
             assert len(message.content[-1].annotations) == 2, "Should have 2 citations"
-            assert isinstance(message.content[-1].annotations[0], UrlCitation), (
-                "Should be UrlCitation"
-            )
-            assert isinstance(message.content[-1].annotations[1], UrlCitation), (
-                "Should be UrlCitation"
-            )
+            assert isinstance(
+                message.content[-1].annotations[0], UrlCitation
+            ), "Should be UrlCitation"
+            assert isinstance(
+                message.content[-1].annotations[1], UrlCitation
+            ), "Should be UrlCitation"
 
             # Test 2: Reasoning com structured output
             reasoning = ReasoningItem()
@@ -262,9 +261,9 @@ class TestOpenResponsesIntegrationE2E:
             # Asserts de performance
             assert stream_time < 5.0, f"Stream building too slow: {stream_time}s"
             assert parse_time < 2.0, f"Event parsing too slow: {parse_time}s"
-            assert parsed_count == len(events), (
-                f"Failed to parse {len(events) - parsed_count} events"
-            )
+            assert parsed_count == len(
+                events
+            ), f"Failed to parse {len(events) - parsed_count} events"
 
             result.mark_complete(True)
 
@@ -347,8 +346,6 @@ class TestOpenResponsesIntegrationE2E:
                 MessageItem,
                 ReasoningItem,
                 OutputTextContent,
-                UrlCitation,
-                FileCitation,
                 JsonSchemaResponseFormat,
             )
             from vertice_core.openresponses_stream import OpenResponsesStreamBuilder
@@ -451,9 +448,9 @@ print(calculate_fibonacci(10))
             assert "content" in user_dict, "User message should have content"
             assert "summary" in reasoning_dict, "Reasoning should have summary"
             assert len(ai_response.annotations) == 2, "Response should have citations"
-            assert schema_dict["json_schema"]["name"] == "code_review_suggestions", (
-                "Schema should be configured"
-            )
+            assert (
+                schema_dict["json_schema"]["name"] == "code_review_suggestions"
+            ), "Schema should be configured"
 
             result.add_metric("scenario_events", len(events))
             result.add_metric("user_message_valid", True)

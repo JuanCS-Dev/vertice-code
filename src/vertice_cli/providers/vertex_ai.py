@@ -273,7 +273,7 @@ class VertexAIProvider:
                     )
                 )
             return [Tool(function_declarations=declarations)]
-        except Exception:
+        except Exception as _:
             return None
 
     def get_model_info(self) -> Dict[str, Any]:

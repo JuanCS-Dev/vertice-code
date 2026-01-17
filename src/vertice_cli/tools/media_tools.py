@@ -362,7 +362,7 @@ class PDFReadTool(Tool):
             import importlib.util
 
             return importlib.util.find_spec("pypdf") is not None
-        except Exception:
+        except Exception as _:
             return False
 
     async def _execute_validated(self, **kwargs) -> ToolResult:

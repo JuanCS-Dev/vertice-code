@@ -9,15 +9,13 @@ Features:
 - Real-time status updates
 """
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException, Depends
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException
 from typing import Dict, Any, Optional
 import json
 import logging
-import asyncio
 import uuid
 
 from app.integrations.mcp_client import get_mcp_client, CircuitBreakerOpenException
-from app.core.auth import FirebaseUser, get_current_user
 
 logger = logging.getLogger(__name__)
 

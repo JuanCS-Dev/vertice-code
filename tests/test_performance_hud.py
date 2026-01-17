@@ -7,7 +7,6 @@ Testa o novo Performance HUD com métricas em tempo real.
 """
 
 import asyncio
-import time
 from vertice_tui.widgets import PerformanceHUD
 
 

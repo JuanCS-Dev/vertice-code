@@ -11,13 +11,11 @@ Tests cover:
 """
 
 import pytest
-from unittest.mock import MagicMock, patch
 from vertice_core.agents.handoff.manager import HandoffManager
 from vertice_core.agents.context.unified import UnifiedContext
 from vertice_core.agents.router.types import AgentType
 from vertice_core.agents.handoff.types import (
     HandoffReason,
-    HandoffStatus,
     HandoffRequest,
     HandoffResult,
     AgentCapability,

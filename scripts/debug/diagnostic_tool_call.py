@@ -13,7 +13,6 @@ Date: 2026-01-08
 import asyncio
 import os
 import sys
-import json
 
 sys.path.insert(0, os.getcwd())
 
@@ -25,10 +24,10 @@ WRITE_FILE_SCHEMA = {
         "type": "object",
         "properties": {
             "path": {"type": "string", "description": "Path to the file"},
-            "content": {"type": "string", "description": "Content to write"}
+            "content": {"type": "string", "description": "Content to write"},
         },
-        "required": ["path", "content"]
-    }
+        "required": ["path", "content"],
+    },
 }
 
 SYSTEM_PROMPT = """You are a coding assistant with access to tools.
@@ -43,36 +42,37 @@ async def run_diagnostic():
     print("=" * 70)
     print("🔬 TUI E2E DIAGNOSTIC: Raw LLM Output Analysis")
     print("=" * 70)
-    
+
     # Import provider
     try:
         from vertice_cli.core.providers.vertex_ai import VertexAIProvider
     except ImportError as e:
         print(f"❌ Import failed: {e}")
         return
-    
+
     # Initialize provider
     provider = VertexAIProvider(
         location="us-central1",
-        model_name="pro"  # gemini-2.5-pro
+        model_name="pro",  # gemini-2.5-pro
     )
-    
+
     print(f"📋 Model: {provider.model_name}")
     print(f"📍 Location: {provider.location}")
     print(f"🏗️ Project: {provider.project}")
     print()
-    
+
     # Build messages
     messages = [{"role": "user", "content": USER_MESSAGE}]
-    
+
     # Create a mock tool object with get_schema method
     class MockTool:
         name = "write_file"
+
         def get_schema(self):
             return WRITE_FILE_SCHEMA
-    
+
     tools = [MockTool()]
-    
+
     print("📤 Sending request with tools...")
     print(f"   System Prompt: {SYSTEM_PROMPT[:80]}...")
     print(f"   User Message: {USER_MESSAGE}")
@@ -81,11 +81,11 @@ async def run_diagnostic():
     print("-" * 70)
     print("📥 RAW LLM OUTPUT:")
     print("-" * 70)
-    
+
     raw_chunks = []
     function_calls_found = []
     text_found = []
-    
+
     try:
         async for chunk in provider.stream_chat(
             messages,
@@ -94,7 +94,7 @@ async def run_diagnostic():
             tool_config="AUTO",  # Current setting
         ):
             raw_chunks.append(chunk)
-            
+
             # Analyze chunk type
             if chunk.startswith('{"tool_call"'):
                 function_calls_found.append(chunk)
@@ -102,18 +102,18 @@ async def run_diagnostic():
             else:
                 text_found.append(chunk)
                 print(chunk, end="", flush=True)
-        
+
         print()
         print("-" * 70)
         print()
-        
+
         # Analysis
         print("📊 ANALYSIS:")
         print(f"   Total chunks: {len(raw_chunks)}")
         print(f"   Text chunks: {len(text_found)}")
         print(f"   Function call chunks: {len(function_calls_found)}")
         print()
-        
+
         if function_calls_found:
             print("✅ LLM IS using function calls!")
             print("   → Issue is likely in ToolCallParser pattern matching.")
@@ -129,17 +129,18 @@ async def run_diagnostic():
             print("   Text output sample (first 500 chars):")
             full_text = "".join(text_found)
             print(f"   {full_text[:500]}")
-        
+
         print()
         print("=" * 70)
         print("🔬 DIAGNOSTIC COMPLETE")
         print("=" * 70)
-        
+
         return len(function_calls_found) > 0
-        
+
     except Exception as e:
         print(f"\n❌ Error during diagnostic: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 

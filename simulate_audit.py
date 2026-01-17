@@ -1,13 +1,12 @@
-
 import asyncio
 import os
 import sys
 
 # Add src to path to emulate TUI environment
-sys.path.append(os.path.join(os.getcwd(), 'src'))
+sys.path.append(os.path.join(os.getcwd(), "src"))
 
-from vertice_cli.agents.devops.agent import DevOpsAgent, create_devops_agent
-from vertice_core.clients.vertice_client import VerticeClient
+from vertice_cli.agents.devops.agent import create_devops_agent
+
 
 # Mock MCP Client that actually works (since we don't have the full MCP server running)
 class LocalMCPClient:
@@ -22,12 +21,14 @@ class LocalMCPClient:
         # OR if we pass mcp_client but it fails.
         raise NotImplementedError("Simulating MCP failure to force fallback")
 
+
 # We need a real-ish LLM client
-# Since I can't easily spin up the real Vertex AI client without auth, 
+# Since I can't easily spin up the real Vertex AI client without auth,
 # I rely on the fact that the agent uses `llm_client`.
-# Wait, the user wants to see if *THE FIX* works. 
+# Wait, the user wants to see if *THE FIX* works.
 # The fix was in the TOOL USE LOOP.
 # So I need an LLM that *requests* tools.
+
 
 class MockToolUsingLLM:
     def __init__(self):
@@ -46,7 +47,7 @@ class MockToolUsingLLM:
 
     async def stream_chat(self, messages, **kwargs):
         prompt = str(messages)
-        
+
         # Simple state machine to simulate an audit flow
         if "EXECUTE A REAL AUDIT" in prompt and self.step == 0:
             self.step += 1
@@ -72,27 +73,29 @@ class MockToolUsingLLM:
 
         yield "Analysis complete."
 
+
 async def run_audit():
     print("🚀 Simulating DevOps Audit...")
-    
+
     # We use a Mock LLM that behaves deterministically to verify the TOOL LOOP works
     # If the tool loop works, the output will contain file contents.
     llm = MockToolUsingLLM()
-    
+
     # We DO NOT provide mcp_client to force usage of _execute_tool_fallback
     # which is where we applied the directory string fixes.
     agent = create_devops_agent(llm_client=llm, mcp_client=None)
-    
+
     request = "Faça uma auditoria completa do web-app e me diga se estamos prontos para o deploy"
-    
+
     output = []
     async for chunk in agent.execute_streaming(request):
         print(chunk, end="", flush=True)
         output.append(chunk)
-        
+
     # Save to file
     with open("audit_result_simulation.txt", "w") as f:
         f.write("".join(output))
+
 
 if __name__ == "__main__":
     asyncio.run(run_audit())

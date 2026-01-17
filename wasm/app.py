@@ -7,7 +7,7 @@ import json
 import sys
 import time
 import traceback
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 import io
 import contextlib
 

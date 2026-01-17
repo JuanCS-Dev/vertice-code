@@ -3,11 +3,7 @@ RAG Multi-tenancy Service
 Vector database isolation with workspace-level data segregation
 """
 
-import asyncio
-from typing import List, Dict, Any, Optional, Tuple
-import hashlib
-import json
-from datetime import datetime
+from typing import List, Dict, Any, Optional
 import logging
 
 from app.core.config import settings

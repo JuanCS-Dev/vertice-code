@@ -6,7 +6,6 @@ requirements as specified in CODE_CONSTITUTION.md.
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from prometheus.mcp_server.tools.base import ToolResult
 from prometheus.mcp_server.tools.registry import get_tool_registry
@@ -122,7 +121,6 @@ class TestMultiEditTools:
     def test_multi_edit_validates_inputs(self):
         """Test that multi_edit validates required inputs."""
         from prometheus.mcp_server.tools.multi_edit_tools import multi_edit
-        import asyncio
 
         async def run_test():
             # Test missing file_path

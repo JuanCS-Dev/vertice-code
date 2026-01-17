@@ -9,7 +9,6 @@ Testes reais usando GitHub CLI para validar integração completa.
 import asyncio
 import subprocess
 import json
-import time
 from pathlib import Path
 
 

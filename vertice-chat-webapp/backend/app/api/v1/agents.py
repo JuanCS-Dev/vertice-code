@@ -3,11 +3,11 @@ Agent API Key Management Endpoints
 REST API for creating, managing, and rotating agent API keys
 """
 
-from fastapi import APIRouter, HTTPException, Depends, Header
-from typing import List, Dict, Any, Optional
+from fastapi import APIRouter, HTTPException, Header
+from typing import List, Optional
 from pydantic import BaseModel
 
-from app.core.auth import FirebaseUser, get_current_user, authenticate_request
+from app.core.auth import FirebaseUser, authenticate_request
 from app.core.agent_auth import get_agent_key_service
 
 router = APIRouter()

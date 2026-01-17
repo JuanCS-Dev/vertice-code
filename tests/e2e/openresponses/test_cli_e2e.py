@@ -6,7 +6,7 @@ Foca em providers, routing e streaming de responses.
 """
 
 import pytest
-from tests.e2e.openresponses import get_e2e_tester, E2ETestResult
+from tests.e2e.openresponses import get_e2e_tester
 
 
 class TestOpenResponsesCLIE2E:
@@ -33,9 +33,9 @@ class TestOpenResponsesCLIE2E:
 
             # Assertions
             assert result.success, f"Test failed with errors: {result.errors}"
-            assert result.metrics.get("providers_supporting_open_responses", 0) > 0, (
-                "At least one provider should support Open Responses"
-            )
+            assert (
+                result.metrics.get("providers_supporting_open_responses", 0) > 0
+            ), "At least one provider should support Open Responses"
 
             providers_with_support = result.metrics.get("providers_with_open_responses", [])
             assert isinstance(providers_with_support, list), "Should track providers with support"
@@ -76,9 +76,9 @@ class TestOpenResponsesCLIE2E:
             success = has_open_responses
             result.mark_complete(success)
 
-            assert success, (
-                f"Selected provider {decision.provider_name} should support Open Responses"
-            )
+            assert (
+                success
+            ), f"Selected provider {decision.provider_name} should support Open Responses"
 
         except Exception as e:
             result.add_error(f"Exception: {str(e)}")
@@ -118,9 +118,9 @@ class TestOpenResponsesCLIE2E:
 
             # Assertions
             assert result.success, f"Test failed with errors: {result.errors}"
-            assert result.metrics.get("vertex_parts_created", 0) > 0, (
-                "Should create Vertex AI parts"
-            )
+            assert (
+                result.metrics.get("vertex_parts_created", 0) > 0
+            ), "Should create Vertex AI parts"
 
         except Exception as e:
             result.add_error(f"Exception: {str(e)}")
@@ -137,7 +137,7 @@ class TestOpenResponsesCLIE2E:
         try:
             from vertice_cli.agents.executor.agent import NextGenExecutorAgent
             from vertice_cli.core.providers.vertice_router import get_router
-            from vertice_core.types import AgentTask, AgentRole, AgentCapability
+            from vertice_core.types import AgentTask
 
             # Criar mock agent
             router = get_router()
@@ -189,7 +189,6 @@ class TestOpenResponsesCLIE2E:
 
         try:
             from vertice_core.openresponses_stream import OpenResponsesStreamBuilder
-            from vertice_core.openresponses_types import ItemStatus
 
             # Criar builder
             builder = OpenResponsesStreamBuilder(model="gemini-3-pro")
@@ -207,9 +206,9 @@ class TestOpenResponsesCLIE2E:
 
             # Verificar conteúdo
             current_text = message_item.get_text()
-            assert current_text == "Hello World!", (
-                f"Text should be 'Hello World!', got '{current_text}'"
-            )
+            assert (
+                current_text == "Hello World!"
+            ), f"Text should be 'Hello World!', got '{current_text}'"
 
             # Completar
             builder.complete()
@@ -234,9 +233,9 @@ class TestOpenResponsesCLIE2E:
             # Verificar que temos os eventos principais
             assert "response.created" in event_types, "Should have response.created event"
             assert "response.completed" in event_types, "Should have response.completed event"
-            assert event_types.count("response.output_text.delta") == 2, (
-                "Should have 2 text delta events"
-            )
+            assert (
+                event_types.count("response.output_text.delta") == 2
+            ), "Should have 2 text delta events"
 
             result.add_metric("builder_events_created", len(events))
             result.add_metric("stream_sequence_valid", True)

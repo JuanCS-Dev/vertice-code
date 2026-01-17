@@ -8,10 +8,8 @@ from unittest.mock import MagicMock, AsyncMock
 # Assuming the handlers are in these locations
 from vertice_cli.handlers.llm_processing_handler import LLMProcessingHandler
 from vertice_cli.handlers.tool_execution_handler import ToolExecutionHandler
-import vertice_cli.handlers.tool_execution_handler
 
 import sys
-from unittest.mock import patch
 
 
 @pytest.mark.usefixtures("mock_shell")

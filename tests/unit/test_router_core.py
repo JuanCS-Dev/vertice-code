@@ -11,13 +11,11 @@ Tests cover:
 
 import pytest
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
 from vertice_core.agents.router.router import SemanticRouter
 from vertice_core.agents.router.types import (
     AgentType,
     RouteDefinition,
     RoutingDecision,
-    TaskComplexity,
 )
 
 

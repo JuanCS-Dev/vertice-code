@@ -77,6 +77,11 @@ class Settings(BaseSettings):
     STRIPE_PUBLISHABLE_KEY: Optional[str] = None
     STRIPE_WEBHOOK_SECRET: Optional[str] = None
 
+    # Encryption (GDPR)
+    # Master key for deriving workspace encryption keys
+    # MUST be a 32-byte base64 encoded string
+    GDPR_MASTER_KEY: Optional[str] = "y6WjP6n_S8C1ZkL2yVvGzX9W_K3M1N4O5P6Q7R8S9T0="
+
     # Billing Plans (Stripe Price IDs)
     STRIPE_PRICE_FREEMIUM: str = "price_freemium_monthly"
     STRIPE_PRICE_PRO: str = "price_pro_monthly"

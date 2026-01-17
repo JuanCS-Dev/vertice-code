@@ -8,15 +8,12 @@ import asyncio
 import subprocess
 import sys
 import time
-import signal
 import os
 import socket
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Any
 import json
 import httpx
-import pytest
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 class E2ETester:
@@ -340,11 +337,6 @@ class E2ETester:
             import time
 
             start_time = time.time()
-
-            import vertice_cli
-            import vertice_tui
-            import vertice_core
-            import prometheus
 
             import_time = time.time() - start_time
 

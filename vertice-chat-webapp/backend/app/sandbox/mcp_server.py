@@ -12,10 +12,9 @@ References:
 import asyncio
 import logging
 import os
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Sequence
 import mcp.server.stdio
 from mcp.server import Server
-from mcp.server.models import InitializationOptions
 import mcp.types as types
 
 from app.sandbox.executor import SandboxExecutor, SandboxConfig

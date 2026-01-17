@@ -1,10 +1,8 @@
 import pytest
 import asyncio
-import os
 from pathlib import Path
-from typing import Optional, List, Callable, Any, AsyncIterator
+from typing import Any, AsyncIterator
 from textual.pilot import Pilot
-from textual.widgets import Input
 
 # Add src to python path for imports
 import sys
@@ -15,7 +13,6 @@ from vertice_tui.app import VerticeApp
 from vertice_tui.widgets import ResponseView, StatusBar
 from typing import AsyncIterator
 
-from unittest.mock import MagicMock
 
 from vertice_core.openresponses_stream import OpenResponsesStreamBuilder
 from vertice_core.openresponses_types import TokenUsage

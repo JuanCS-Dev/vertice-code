@@ -4,9 +4,8 @@ Real-time usage tracking and reporting to Stripe
 """
 
 import asyncio
-import time
-from typing import Dict, Any, List, Optional
-from datetime import datetime, timedelta
+from typing import Dict, Any, Optional
+from datetime import datetime
 import logging
 from collections import defaultdict
 

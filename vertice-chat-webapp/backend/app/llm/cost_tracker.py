@@ -13,13 +13,12 @@ Cost calculation formulas (Anthropic 2026):
 Reference: https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching#pricing
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from decimal import Decimal
 import logging
 from typing import Dict
 
 from app.core.cache import get_redis
-from app.core.database import get_db_session
 
 logger = logging.getLogger(__name__)
 

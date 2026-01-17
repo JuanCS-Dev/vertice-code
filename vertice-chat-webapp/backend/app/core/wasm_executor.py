@@ -6,10 +6,9 @@ Executes Python agent code in secure WebAssembly sandbox
 import asyncio
 import json
 import logging
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 from pathlib import Path
 import os
-import subprocess
 import tempfile
 
 # aiohttp is optional for HTTP API execution

@@ -96,8 +96,6 @@ async def test_corrected_agent_apis():
     # Test Prometheus agents
     print("\nTesting Prometheus agents...")
     try:
-        from prometheus.agent import PrometheusIntegratedAgent
-
         # Prometheus agents might need different setup
         # Let's just test import for now
         results["prometheus_import"] = "✅ PASSED"

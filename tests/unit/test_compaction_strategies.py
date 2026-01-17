@@ -5,8 +5,6 @@ Tests cover:
     - Strategy instantiation and basic functionality
 """
 
-import pytest
-from unittest.mock import MagicMock
 
 from vertice_core.agents.compaction.strategies import (
     ObservationMaskingStrategy,

@@ -18,16 +18,12 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.formatted_text import HTML, FormattedText
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.history import FileHistory
-import prompt_toolkit.enums
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.markdown import Markdown
-from rich.syntax import Syntax
-from typing import Dict, Callable, Optional, Tuple
+from typing import Dict, Optional
 import sys
-import os
-import time
 from pathlib import Path
 
 # Importar UI components (existentes no projeto)
@@ -67,34 +63,19 @@ class EnhancedCompleter(Completer):
 
         # Ferramentas principais
         self.tools = {
-            '/read': {
-                'icon': '📖',
-                'description': 'Read file contents - Example: /read config.json'
+            "/read": {
+                "icon": "📖",
+                "description": "Read file contents - Example: /read config.json",
             },
-            '/write': {
-                'icon': '✍️',
-                'description': 'Write content to file - Example: /write test.txt "content"'
+            "/write": {
+                "icon": "✍️",
+                "description": 'Write content to file - Example: /write test.txt "content"',
             },
-            '/edit': {
-                'icon': '✏️',
-                'description': 'Edit file with changes'
-            },
-            '/search': {
-                'icon': '🔍',
-                'description': 'Search for pattern'
-            },
-            '/run': {
-                'icon': '⚡',
-                'description': 'Execute bash command'
-            },
-            '/bash': {
-                'icon': '💻',
-                'description': 'Run bash command'
-            },
-            '/git': {
-                'icon': '🌿',
-                'description': 'Git operations'
-            },
+            "/edit": {"icon": "✏️", "description": "Edit file with changes"},
+            "/search": {"icon": "🔍", "description": "Search for pattern"},
+            "/run": {"icon": "⚡", "description": "Execute bash command"},
+            "/bash": {"icon": "💻", "description": "Run bash command"},
+            "/git": {"icon": "🌿", "description": "Git operations"},
         }
 
     def get_completions(self, document, complete_event):
@@ -107,34 +88,22 @@ class EnhancedCompleter(Completer):
 
         word = words[-1]
 
-        if not word.startswith('/'):
+        if not word.startswith("/"):
             return
 
         # Completar comandos do shell
         for cmd_name, cmd_meta in self.commands.items():
             if cmd_name.startswith(word):
-                display_meta = HTML(
-                    f"<b>{cmd_meta['icon']}</b> {cmd_meta['description']}"
-                )
+                display_meta = HTML(f"<b>{cmd_meta['icon']}</b> {cmd_meta['description']}")
 
-                yield Completion(
-                    cmd_name,
-                    start_position=-len(word),
-                    display_meta=display_meta
-                )
+                yield Completion(cmd_name, start_position=-len(word), display_meta=display_meta)
 
         # Completar ferramentas
         for tool_name, tool_meta in self.tools.items():
             if tool_name.startswith(word):
-                display_meta = HTML(
-                    f"<b>{tool_meta['icon']}</b> {tool_meta['description']}"
-                )
+                display_meta = HTML(f"<b>{tool_meta['icon']}</b> {tool_meta['description']}")
 
-                yield Completion(
-                    tool_name,
-                    start_position=-len(word),
-                    display_meta=display_meta
-                )
+                yield Completion(tool_name, start_position=-len(word), display_meta=display_meta)
 
 
 class EnhancedREPL:
@@ -183,77 +152,75 @@ class EnhancedREPL:
                 "icon": "❓",
                 "description": "Show all available commands",
                 "category": CommandCategory.HELP,
-                "handler": self._cmd_help
+                "handler": self._cmd_help,
             },
             "/exit": {
                 "icon": "👋",
                 "description": "Exit Qwen Dev CLI shell",
                 "category": CommandCategory.SYSTEM,
-                "handler": self._cmd_exit
+                "handler": self._cmd_exit,
             },
             "/quit": {
                 "icon": "👋",
                 "description": "Exit shell (alias)",
                 "category": CommandCategory.SYSTEM,
-                "handler": self._cmd_exit
+                "handler": self._cmd_exit,
             },
             "/clear": {
                 "icon": "🧹",
                 "description": "Clear screen",
                 "category": CommandCategory.SYSTEM,
-                "handler": self._cmd_clear
+                "handler": self._cmd_clear,
             },
-
             # Agentes
             "/architect": {
                 "icon": "🏗️",
                 "description": "Architect agent - system design",
                 "category": CommandCategory.AGENT,
-                "handler": lambda msg: self._invoke_agent("architect", msg)
+                "handler": lambda msg: self._invoke_agent("architect", msg),
             },
             "/refactor": {
                 "icon": "♻️",
                 "description": "Refactoring agent",
                 "category": CommandCategory.AGENT,
-                "handler": lambda msg: self._invoke_agent("refactorer", msg)
+                "handler": lambda msg: self._invoke_agent("refactorer", msg),
             },
             "/test": {
                 "icon": "🧪",
                 "description": "Test generation agent",
                 "category": CommandCategory.AGENT,
-                "handler": lambda msg: self._invoke_agent("testing", msg)
+                "handler": lambda msg: self._invoke_agent("testing", msg),
             },
             "/review": {
                 "icon": "🔍",
                 "description": "Code review agent",
                 "category": CommandCategory.AGENT,
-                "handler": lambda msg: self._invoke_agent("reviewer", msg)
+                "handler": lambda msg: self._invoke_agent("reviewer", msg),
             },
             "/docs": {
                 "icon": "📚",
                 "description": "Documentation agent",
                 "category": CommandCategory.AGENT,
-                "handler": lambda msg: self._invoke_agent("documentation", msg)
+                "handler": lambda msg: self._invoke_agent("documentation", msg),
             },
             "/explore": {
                 "icon": "🗺️",
                 "description": "Codebase exploration agent",
                 "category": CommandCategory.AGENT,
-                "handler": lambda msg: self._invoke_agent("explorer", msg)
+                "handler": lambda msg: self._invoke_agent("explorer", msg),
             },
             "/plan": {
                 "icon": "📋",
                 "description": "Planning agent",
                 "category": CommandCategory.AGENT,
-                "handler": lambda msg: self._invoke_agent("planner", msg)
+                "handler": lambda msg: self._invoke_agent("planner", msg),
             },
-
             # Modo DREAM
             "/dream": {
                 "icon": "💭",
                 "description": "DREAM Mode - Critical analysis",
                 "category": CommandCategory.AGENT,
-                "handler": self._cmd_dream
+                "handler": self._cmd_dream,
             },
         }
 
@@ -261,7 +228,7 @@ class EnhancedREPL:
 
     def _create_session(self) -> PromptSession:
         """Criar prompt session com todas features"""
-        history_file = Path.home() / '.qwen-dev-history'
+        history_file = Path.home() / ".qwen-dev-history"
 
         return PromptSession(
             history=FileHistory(str(history_file)),
@@ -296,13 +263,13 @@ class EnhancedREPL:
             from prompt_toolkit.formatted_text import HTML
 
             print_formatted_text()
-            print_formatted_text(HTML('<cyan><b>⚡ Quick Help - Keyboard Shortcuts</b></cyan>'))
+            print_formatted_text(HTML("<cyan><b>⚡ Quick Help - Keyboard Shortcuts</b></cyan>"))
             print_formatted_text()
-            print_formatted_text(HTML('  <b>Ctrl+P</b>  Command Palette'))
-            print_formatted_text(HTML('  <b>Ctrl+D</b>  Toggle DREAM Mode'))
-            print_formatted_text(HTML('  <b>Ctrl+Q</b>  Quick Help'))
+            print_formatted_text(HTML("  <b>Ctrl+P</b>  Command Palette"))
+            print_formatted_text(HTML("  <b>Ctrl+D</b>  Toggle DREAM Mode"))
+            print_formatted_text(HTML("  <b>Ctrl+Q</b>  Quick Help"))
             print_formatted_text()
-            print_formatted_text(HTML('  Type <b>/help</b> for full command list'))
+            print_formatted_text(HTML("  Type <b>/help</b> for full command list"))
             print_formatted_text()
 
         return bindings
@@ -333,7 +300,9 @@ class EnhancedREPL:
     def _invoke_agent(self, agent_name: str, message: str):
         """Invocar agente especializado."""
         if not message.strip():
-            console.print(f"\n[yellow]Please provide a message for the {agent_name} agent[/yellow]\n")
+            console.print(
+                f"\n[yellow]Please provide a message for the {agent_name} agent[/yellow]\n"
+            )
             return
 
         try:
@@ -353,15 +322,15 @@ class EnhancedREPL:
             console.print(f"\n{icon} [cyan]Invoking {agent_name} agent...[/cyan]\n")
 
             # Process message through agent
-            if hasattr(agent, 'process'):
+            if hasattr(agent, "process"):
                 response = agent.process(message)
                 if isinstance(response, str):
                     pass
-                elif hasattr(response, 'text'):
+                elif hasattr(response, "text"):
                     response = response.text
                 else:
                     response = str(response)
-            elif hasattr(agent, 'run'):
+            elif hasattr(agent, "run"):
                 response = agent.run(message)
                 if not isinstance(response, str):
                     response = str(response)
@@ -382,12 +351,14 @@ class EnhancedREPL:
             return
 
         # Check if looks like markdown
-        has_markdown = any([
-            '# ' in response or '## ' in response,
-            '```' in response,
-            '- ' in response or '* ' in response,
-            '**' in response,
-        ])
+        has_markdown = any(
+            [
+                "# " in response or "## " in response,
+                "```" in response,
+                "- " in response or "* " in response,
+                "**" in response,
+            ]
+        )
 
         if has_markdown:
             try:
@@ -406,7 +377,7 @@ class EnhancedREPL:
         table.add_column("Description", style="dim")
 
         for cmd, meta in sorted(self.commands.items()):
-            table.add_row(cmd, meta['icon'], meta['description'])
+            table.add_row(cmd, meta["icon"], meta["description"])
 
         console.print("\n")
         console.print(table)
@@ -441,28 +412,28 @@ class EnhancedREPL:
         # Mode indicators
         prefix_parts = []
         if self.dream_mode:
-            prefix_parts.append(('ansimagenta', '💭 '))
+            prefix_parts.append(("ansimagenta", "💭 "))
         if self.current_agent:
-            prefix_parts.append(('ansiyellow', f'{self.current_agent} '))
+            prefix_parts.append(("ansiyellow", f"{self.current_agent} "))
 
         # Main prompt
         prompt_parts = prefix_parts + [
-            ('ansibrightgreen', 'q'),
-            ('ansigreen', 'w'),
-            ('ansiyellow', 'e'),
-            ('ansiyellow', 'n'),
-            ('', ' '),
-            ('ansicyan', '⚡'),
-            ('', ' '),
-            ('ansibrightgreen', '›'),
-            ('', ' '),
+            ("ansibrightgreen", "q"),
+            ("ansigreen", "w"),
+            ("ansiyellow", "e"),
+            ("ansiyellow", "n"),
+            ("", " "),
+            ("ansicyan", "⚡"),
+            ("", " "),
+            ("ansibrightgreen", "›"),
+            ("", " "),
         ]
 
         return FormattedText(prompt_parts)
 
     def _process_command(self, user_input: str):
         """Processar comando ou natural language"""
-        if not hasattr(self, '_recursion_depth'):
+        if not hasattr(self, "_recursion_depth"):
             self._recursion_depth = 0
 
         self._recursion_depth += 1
@@ -479,18 +450,18 @@ class EnhancedREPL:
                 return
 
             # Comando especial
-            if user_input.startswith('/'):
+            if user_input.startswith("/"):
                 parts = user_input.split(maxsplit=1)
                 cmd = parts[0]
                 args = parts[1] if len(parts) > 1 else ""
 
-                if cmd == '/':
+                if cmd == "/":
                     self._show_command_palette()
                     return
 
                 if cmd in self.commands:
                     try:
-                        handler = self.commands[cmd].get('handler')
+                        handler = self.commands[cmd].get("handler")
                         if handler is None:
                             console.print(f"\n[red]❌ Command {cmd} has no handler[/red]\n")
                             return
@@ -498,8 +469,8 @@ class EnhancedREPL:
                     except Exception as e:
                         console.print(f"\n[red]❌ Error executing {cmd}: {e}[/red]\n")
 
-                elif cmd in ['/read', '/write', '/edit', '/search', '/run', '/bash']:
-                    tool_command = cmd[1:].capitalize() + ' ' + args
+                elif cmd in ["/read", "/write", "/edit", "/search", "/run", "/bash"]:
+                    tool_command = cmd[1:].capitalize() + " " + args
                     self._process_natural(tool_command)
 
                 else:
@@ -526,13 +497,13 @@ class EnhancedREPL:
             message_lower = message.lower()
 
             # Tool detection
-            if any(kw in message_lower for kw in ['read', 'open', 'show', 'cat']):
+            if any(kw in message_lower for kw in ["read", "open", "show", "cat"]):
                 self._execute_read(message)
-            elif any(kw in message_lower for kw in ['write', 'create', 'save']):
+            elif any(kw in message_lower for kw in ["write", "create", "save"]):
                 self._execute_write(message)
-            elif any(kw in message_lower for kw in ['run', 'execute', 'bash']):
+            elif any(kw in message_lower for kw in ["run", "execute", "bash"]):
                 self._execute_bash(message)
-            elif any(kw in message_lower for kw in ['git status', 'git diff', 'git log']):
+            elif any(kw in message_lower for kw in ["git status", "git diff", "git log"]):
                 self._execute_git(message)
             else:
                 # Fallback: Chat mode
@@ -544,20 +515,17 @@ class EnhancedREPL:
     def _execute_read(self, message: str):
         """Execute read command."""
         import re
-        match = re.search(r'[\w/.]+\.\w+', message)
+
+        match = re.search(r"[\w/.]+\.\w+", message)
         if match:
             file_path = match.group(0)
             try:
                 result = self.file_read_tool.execute(path=file_path)
-                if result and hasattr(result, 'content'):
+                if result and hasattr(result, "content"):
                     content = result.content
                 else:
                     content = str(result)
-                console.print(Panel(
-                    content,
-                    title=f"📖 {file_path}",
-                    border_style="green"
-                ))
+                console.print(Panel(content, title=f"📖 {file_path}", border_style="green"))
                 self.context.remember_file(file_path, content, "read")
             except Exception as e:
                 console.print(f"[red]❌ Error reading file: {e}[/red]")
@@ -572,16 +540,13 @@ class EnhancedREPL:
         """Execute bash command."""
         import re
         import asyncio
-        command = re.sub(r'^(run|execute|bash)\s+', '', message, flags=re.IGNORECASE)
+
+        command = re.sub(r"^(run|execute|bash)\s+", "", message, flags=re.IGNORECASE)
         try:
             # Run async tool in sync context
             result = asyncio.run(self.bash_tool.execute(command=command))
-            output = result.output if hasattr(result, 'output') else str(result)
-            console.print(Panel(
-                output,
-                title="⚡ Bash",
-                border_style="green"
-            ))
+            output = result.output if hasattr(result, "output") else str(result)
+            console.print(Panel(output, title="⚡ Bash", border_style="green"))
         except Exception as e:
             console.print(f"[red]❌ Error: {e}[/red]")
 
@@ -619,11 +584,7 @@ class EnhancedREPL:
         table.add_column("Description", style="white")
 
         for cmd_name, cmd_meta in sorted(self.commands.items()):
-            table.add_row(
-                cmd_name,
-                cmd_meta['icon'],
-                cmd_meta['description']
-            )
+            table.add_row(cmd_name, cmd_meta["icon"], cmd_meta["description"])
 
         console.print(table)
         console.print("\n[dim]Type any command to use it[/dim]\n")

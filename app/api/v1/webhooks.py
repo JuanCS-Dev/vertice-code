@@ -6,7 +6,7 @@ Handles GitHub webhooks for real-time repository synchronization.
 Implements autonomous PR management and conflict resolution.
 """
 
-from fastapi import APIRouter, Header, HTTPException, Request, Depends
+from fastapi import APIRouter, Header, Request
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
 import hmac

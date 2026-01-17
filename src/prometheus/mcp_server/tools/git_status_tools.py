@@ -10,7 +10,7 @@ import logging
 from typing import Optional
 from .base import ToolResult
 from .validated import create_validated_tool
-from .git_safety import run_git_command, get_current_branch, is_repo_clean
+from .git_safety import run_git_command
 
 logger = logging.getLogger(__name__)
 

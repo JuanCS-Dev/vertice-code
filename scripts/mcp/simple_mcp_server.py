@@ -4,10 +4,8 @@ Minimal implementation for testing Phase 2 deployment
 """
 
 import asyncio
-import json
 import logging
 import os
-from typing import Dict, Any
 
 try:
     import aiohttp

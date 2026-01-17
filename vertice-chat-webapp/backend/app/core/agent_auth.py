@@ -3,14 +3,11 @@ Agent API Key Management Service
 Handles creation, rotation, and management of agent API keys
 """
 
-import asyncio
 import time
 from typing import Optional, Dict, Any, List
-from datetime import datetime, timedelta
 import uuid
 
 from app.core.auth_utils import generate_agent_api_key, hash_api_key, AgentIdentity
-from app.core.config import settings
 
 
 class AgentKeyService:

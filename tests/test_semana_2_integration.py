@@ -10,7 +10,6 @@ Testa todas as implementações da Semana 2:
 """
 
 import asyncio
-import time
 from vertice_tui.widgets import ReasoningStream, PerformanceHUD, StatusBar
 
 

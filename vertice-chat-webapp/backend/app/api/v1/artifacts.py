@@ -3,7 +3,7 @@ Artifacts API router placeholder
 """
 
 from fastapi import APIRouter
-from typing import Dict, Any
+from typing import Dict
 
 router = APIRouter()
 

@@ -18,7 +18,6 @@ from typing import (
     List,
     Optional,
     Protocol,
-    Type,
     runtime_checkable,
 )
 

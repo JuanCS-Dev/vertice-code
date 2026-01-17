@@ -9,7 +9,7 @@ and directory management with safety validation.
 import shutil
 import logging
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import List
 from .base import ToolResult
 from .validated import create_validated_tool
 from .file_rw_tools import detect_encoding

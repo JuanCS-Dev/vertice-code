@@ -11,7 +11,7 @@ Comprehensive test suite covering:
 
 import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock, MagicMock
+from unittest.mock import Mock, AsyncMock
 import os
 
 
@@ -498,9 +498,9 @@ class TestNamespaceIsolation:
 
         # Verify no conflicts
         all_tools = namespaced_vertice + namespaced_prometheus + namespaced_shell
-        assert len(all_tools) == len(set(all_tools)), (
-            "Tool names should be unique across namespaces"
-        )
+        assert len(all_tools) == len(
+            set(all_tools)
+        ), "Tool names should be unique across namespaces"
 
     def test_tool_registration_tracking(self):
         """Test that tools are properly tracked after registration."""

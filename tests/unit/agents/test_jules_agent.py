@@ -18,7 +18,6 @@ import pytest
 from vertice_cli.agents.jules_agent import JulesAgent
 from vertice_cli.agents.protocol import StreamingChunk, StreamingChunkType
 from vertice_core.types import AgentTask
-from vertice_cli.core.providers.vertice_router import SpeedRequirement
 from vertice_core.types.jules_types import (
     JulesActivity,
     JulesActivityType,

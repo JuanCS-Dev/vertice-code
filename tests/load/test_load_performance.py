@@ -17,7 +17,6 @@ import os
 from typing import Dict, List, Any
 from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor
-import threading
 
 
 @dataclass
@@ -120,9 +119,9 @@ class LoadTester:
                 98
             ]  # 99th percentile
         else:
-            avg_response_time = min_response_time = max_response_time = p95_response_time = (
-                p99_response_time
-            ) = 0.0
+            avg_response_time = (
+                min_response_time
+            ) = max_response_time = p95_response_time = p99_response_time = 0.0
 
         # Resource usage
         memory_usage = self.process.memory_info().rss / (1024 * 1024)  # MB

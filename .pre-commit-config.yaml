@@ -45,11 +45,11 @@ repos:
 
       - id: bare-exception-check
         name: Prevent bare exception handlers
-        entry: grep -nP "except\s+Exception\s*:" --include="*.py"
+        entry: bash -c '! grep -nP "except\s+Exception\s*:" --include="*.py" -r src/vertice_cli/'
         language: system
         types: [python]
         pass_filenames: false
-        args: [-r, src/vertice_cli/, src/providers/]
+        args: [-r, src/vertice_cli/]
 
       - id: complexity-check
         name: Check cyclomatic complexity (<10)

@@ -2,7 +2,6 @@
 Tests for Context Types - Sprint 2 Refactoring.
 """
 
-import pytest
 from vertice_core.agents.context.types import (
     ContextState,
     DecisionType,

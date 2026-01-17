@@ -1,6 +1,5 @@
 """Testes para Open Responses Types."""
 
-import pytest
 from vertice_core.openresponses_types import (
     ItemStatus,
     MessageRole,

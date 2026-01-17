@@ -560,7 +560,7 @@ Respond with ONLY the JSON object."""
                         yield chunk
                     self._status[fallback_name].record_request()
                     return
-                except Exception:
+                except Exception as _:
                     logger.warning(
                         "Fallback streaming provider '%s' also failed.",
                         fallback_name,

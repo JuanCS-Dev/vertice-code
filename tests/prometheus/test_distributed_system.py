@@ -5,7 +5,6 @@ Tests peer-to-peer skills sharing, consensus mechanisms, and distributed learnin
 across multiple Prometheus instances.
 """
 
-import asyncio
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime, timedelta

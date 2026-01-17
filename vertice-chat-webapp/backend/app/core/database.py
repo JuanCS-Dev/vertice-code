@@ -3,9 +3,7 @@ Database module (PostgreSQL with SQLAlchemy)
 Multi-tenant SaaS database with GDPR compliance
 """
 
-import os
-import asyncio
-from typing import Any, AsyncContextManager, Optional
+from typing import Any, Optional
 from contextlib import asynccontextmanager
 import logging
 

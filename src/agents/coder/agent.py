@@ -162,7 +162,7 @@ If you need to create a file, use the 'write_file' tool.
             full_response = ""
             tool_calls = []
             json_buffer = ""
-            print(f"[DEBUG CODER] Calling llm.stream_chat")
+            print("[DEBUG CODER] Calling llm.stream_chat")
 
             async for chunk in llm.stream_chat(
                 messages, complexity=TaskComplexity.COMPLEX, max_tokens=4096, tools=tools

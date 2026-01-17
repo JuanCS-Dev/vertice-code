@@ -4,7 +4,6 @@ Tests for ObservationMaskingStrategy - Basic functionality tests.
 Tests cover basic initialization and core functionality.
 """
 
-import pytest
 from vertice_core.agents.compaction.strategies.observation_masking import ObservationMaskingStrategy
 from vertice_core.agents.compaction.types import CompactionConfig, CompactionResult
 from vertice_core.agents.context.unified import UnifiedContext

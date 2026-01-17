@@ -9,8 +9,6 @@ import argparse
 import logging
 from pathlib import Path
 from typing import Dict, Any, Optional
-import sys
-import os
 
 logger = logging.getLogger(__name__)
 

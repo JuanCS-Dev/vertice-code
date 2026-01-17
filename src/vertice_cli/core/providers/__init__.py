@@ -15,29 +15,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from .nebius import NebiusProvider
-    from .prometheus_provider import PrometheusProvider, PrometheusConfig
-    from .maximus_provider import MaximusProvider
-    from .maximus_config import MaximusConfig, TransportMode, MCPConfig
-    from .resilience import (
-        CircuitBreaker,
-        CircuitBreakerConfig,
-        RetryConfig,
-        ConnectionPoolConfig,
-    )
-    from .gemini import GeminiProvider
-    from .groq import GroqProvider
-    from .cerebras import CerebrasProvider
-    from .openrouter import OpenRouterProvider
-    from .mistral import MistralProvider
-    from .vertex_ai import VertexAIProvider
-    from .azure_openai import AzureOpenAIProvider
-    from .vertice_router import (
-        VerticeRouter,
-        TaskComplexity,
-        SpeedRequirement,
-        RoutingDecision,
-    )
+    pass
 
 
 # Mapping for lazy loading

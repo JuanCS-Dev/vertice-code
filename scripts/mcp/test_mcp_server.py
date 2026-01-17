@@ -47,7 +47,7 @@ async def test_mcp_server():
             return False
 
         logger.info("✅ MCP Server started successfully!")
-        logger.info(f"Test endpoints:")
+        logger.info("Test endpoints:")
         logger.info(f"  - Health: http://{config.host}:{config.port}/health")
         logger.info(f"  - Status: http://{config.host}:{config.port}/status")
         logger.info(f"  - MCP: http://{config.host}:{config.port}/mcp")

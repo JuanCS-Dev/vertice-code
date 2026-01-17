@@ -8,7 +8,7 @@ and structured output formatting.
 
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 from .base import ToolResult
 from .validated import create_validated_tool
 

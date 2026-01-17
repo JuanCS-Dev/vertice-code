@@ -326,7 +326,7 @@ class StreamingMarkdownWidget(Widget):
             self._render_buffer = renderable
             self._buffer_ready = True
 
-        except Exception:
+        except Exception as _:
             # Fallback to simple rendering
             self._render_buffer = Text(self._content[:1000] + "...")
             self._buffer_ready = True

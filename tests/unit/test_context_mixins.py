@@ -5,7 +5,6 @@ Tests cover:
     - ContextVariablesMixin: Variable management
 """
 
-import pytest
 from vertice_core.agents.context.mixins.variables import ContextVariablesMixin
 
 

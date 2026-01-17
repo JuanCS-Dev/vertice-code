@@ -99,13 +99,20 @@ class RoutingDecision:
 class LLMProvider(Protocol):
     """Protocol for LLM providers."""
 
-    def is_available(self) -> bool: ...
-    async def generate(self, messages: List[Dict], **kwargs) -> str: ...
-    async def stream_generate(
-        self, messages: List[Dict], **kwargs
-    ) -> AsyncGenerator[str, None]: ...
-    async def stream_chat(self, messages: List[Dict], **kwargs) -> AsyncGenerator[str, None]: ...
-    def get_model_info(self) -> ModelInfo: ...
+    def is_available(self) -> bool:
+        ...
+
+    async def generate(self, messages: List[Dict], **kwargs) -> str:
+        ...
+
+    async def stream_generate(self, messages: List[Dict], **kwargs) -> AsyncGenerator[str, None]:
+        ...
+
+    async def stream_chat(self, messages: List[Dict], **kwargs) -> AsyncGenerator[str, None]:
+        ...
+
+    def get_model_info(self) -> ModelInfo:
+        ...
 
 
 class VerticeRouter:
@@ -553,7 +560,7 @@ Respond with ONLY the JSON object."""
                         yield chunk
                     self._status[fallback_name].record_request()
                     return
-                except Exception:
+                except Exception as _:
                     logger.warning(
                         "Fallback streaming provider '%s' also failed.",
                         fallback_name,

@@ -12,12 +12,10 @@ May 2026 - JuanCS Dev & Claude Opus 4.5
 import asyncio
 import json
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime
 
 # Componentes que sabemos que funcionam
 from prometheus.distributed.skills_discovery import SkillsDiscoveryService, PeerInfo
-from prometheus.distributed.registry import DistributedSkillsRegistry, SkillsConsensusManager
+from prometheus.distributed.registry import DistributedSkillsRegistry
 from prometheus.distributed.peer_protocol import SkillsPeerProtocol, PeerMessage
 from prometheus.skills.registry import LearnedSkill
 from prometheus.mcp_server.server import PrometheusMCPServer

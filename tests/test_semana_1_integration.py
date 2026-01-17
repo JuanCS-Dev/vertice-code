@@ -10,10 +10,9 @@ Testa todas as implementações da Semana 1:
 """
 
 import asyncio
-import time
 from vertice_cli.tui.components.streaming_markdown.widget import StreamingMarkdownWidget
 from vertice_tui.widgets.fuzzy_search_modal import FuzzySearchModal, SearchResult
-from vertice_tui.widgets.session_tabs import SessionTabs, SessionData
+from vertice_tui.widgets.session_tabs import SessionTabs
 
 
 async def test_semana_1_integration():

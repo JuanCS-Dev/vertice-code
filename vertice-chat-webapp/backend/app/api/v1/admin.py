@@ -10,7 +10,6 @@ import logging
 from datetime import datetime, timedelta
 
 from app.core.auth import FirebaseUser, get_current_user
-from app.core.config import settings
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -21,6 +20,7 @@ ADMIN_EMAILS = ["juancs.d3v@gmail.com"]
 
 class AdminStats(BaseModel):
     """System-wide statistics."""
+
     total_users: int
     active_sessions: int
     total_tokens_today: int
@@ -31,6 +31,7 @@ class AdminStats(BaseModel):
 
 class UserSummary(BaseModel):
     """User summary for admin dashboard."""
+
     user_id: str
     email: str
     plan: str
@@ -50,7 +51,7 @@ def require_admin(user: FirebaseUser = Depends(get_current_user)) -> FirebaseUse
 async def get_admin_stats(admin: FirebaseUser = Depends(require_admin)):
     """
     Get system-wide statistics.
-    
+
     Returns:
         AdminStats with current system metrics
     """
@@ -62,7 +63,7 @@ async def get_admin_stats(admin: FirebaseUser = Depends(require_admin)):
         total_tokens_today=2_450_000,
         error_rate=0.2,
         db_size_mb=450.0,
-        last_updated=datetime.utcnow().isoformat()
+        last_updated=datetime.utcnow().isoformat(),
     )
 
 
@@ -71,11 +72,11 @@ async def list_users(
     limit: int = 50,
     offset: int = 0,
     status_filter: Optional[str] = None,
-    admin: FirebaseUser = Depends(require_admin)
+    admin: FirebaseUser = Depends(require_admin),
 ):
     """
     List all users with pagination.
-    
+
     Args:
         limit: Max number of users to return
         offset: Number of users to skip
@@ -89,22 +90,21 @@ async def list_users(
             plan="Developer" if i % 3 == 0 else "Free",
             tokens_used=10000 * i,
             last_active=(datetime.utcnow() - timedelta(hours=i)).isoformat(),
-            status="active"
+            status="active",
         )
         for i in range(1, min(limit + 1, 10))
     ]
-    
+
     return mock_users
 
 
 @router.get("/usage")
 async def get_aggregate_usage(
-    days: int = 7,
-    admin: FirebaseUser = Depends(require_admin)
+    days: int = 7, admin: FirebaseUser = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Get aggregate usage data for the last N days.
-    
+
     Args:
         days: Number of days to aggregate
     """
@@ -112,29 +112,30 @@ async def get_aggregate_usage(
     daily_data = []
     for i in range(days):
         date = (datetime.utcnow() - timedelta(days=i)).strftime("%Y-%m-%d")
-        daily_data.append({
-            "date": date,
-            "tokens": 350000 + (i * 10000),
-            "sessions": 45 + i,
-            "unique_users": 28 + i
-        })
-    
+        daily_data.append(
+            {
+                "date": date,
+                "tokens": 350000 + (i * 10000),
+                "sessions": 45 + i,
+                "unique_users": 28 + i,
+            }
+        )
+
     return {
         "period_days": days,
         "total_tokens": sum(d["tokens"] for d in daily_data),
         "total_sessions": sum(d["sessions"] for d in daily_data),
-        "daily_breakdown": daily_data
+        "daily_breakdown": daily_data,
     }
 
 
 @router.post("/users/{user_id}/suspend")
 async def suspend_user(
-    user_id: str,
-    admin: FirebaseUser = Depends(require_admin)
+    user_id: str, admin: FirebaseUser = Depends(require_admin)
 ) -> Dict[str, str]:
     """
     Suspend a user account.
-    
+
     Args:
         user_id: User ID to suspend
     """
@@ -145,12 +146,11 @@ async def suspend_user(
 
 @router.post("/users/{user_id}/activate")
 async def activate_user(
-    user_id: str,
-    admin: FirebaseUser = Depends(require_admin)
+    user_id: str, admin: FirebaseUser = Depends(require_admin)
 ) -> Dict[str, str]:
     """
     Reactivate a suspended user account.
-    
+
     Args:
         user_id: User ID to activate
     """
