@@ -547,3 +547,10 @@ __all__ = [
     "is_message_list",
     "is_file_path",
 ]
+
+# ============================================================================
+# SHIM COMPATIBILITY LAYER
+# ============================================================================
+
+# Additional legacy exports for compatibility during migration
+from vertice_cli.providers.types import CostTier, SpeedTier

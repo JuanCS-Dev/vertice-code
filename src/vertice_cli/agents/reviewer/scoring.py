@@ -59,7 +59,7 @@ def calculate_risk(issues: List[CodeIssue], score: int) -> str:
     Risk levels:
     - CRITICAL: Any critical issues OR score < 40
     - HIGH: More than 2 high issues OR score < 60
-    - MEDIUM: More than 3 medium issues OR score < 75
+    - MEDIUM: More than 3 medium issues OR score <= 75
     - LOW: Otherwise
 
     Args:
@@ -77,7 +77,7 @@ def calculate_risk(issues: List[CodeIssue], score: int) -> str:
         return "CRITICAL"
     if high_count > 2 or score < 60:
         return "HIGH"
-    if medium_count > 3 or score < 75:
+    if medium_count > 3 or score <= 75:
         return "MEDIUM"
     return "LOW"
 
