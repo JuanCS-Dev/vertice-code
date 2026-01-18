@@ -247,75 +247,55 @@ class ResponseView(VerticalScroll):
             # Start new response session
             self.start_thinking()
             self.current_response = ""
+            return
 
-        elif isinstance(event, OpenResponsesResponseInProgressEvent):
-            # Response is now in progress
-            pass
-
-        elif isinstance(event, OpenResponsesOutputItemAddedEvent):
-            # New item added (message, function call, etc.)
-            if event.item_type == "reasoning":
-                self.start_thinking()
-            elif event.item_type == "message":
-                # Prepare for message content
+        match event:
+            case OpenResponsesResponseInProgressEvent():
                 pass
 
-        elif isinstance(event, OpenResponsesOutputTextDeltaEvent):
-            # Text chunk received
-            self.append_chunk(event.delta)
+            case OpenResponsesOutputItemAddedEvent(item_type=item_type):
+                if item_type == "reasoning":
+                    self.start_thinking()
+                elif item_type == "message":
+                    pass
 
-        elif isinstance(event, OpenResponsesReasoningContentDeltaEvent):
-            # Reasoning chunk received
-            if self._thinking_widget and hasattr(self._thinking_widget, "append_chunk"):
-                self._thinking_widget.append_chunk(event.delta)
-            else:
-                # Fallback if reasoning stream not active
-                self.current_response += f"\n> [Thinking] {event.delta}"
+            case OpenResponsesOutputTextDeltaEvent(delta=delta):
+                self.append_chunk(delta)
 
-        elif isinstance(event, OpenResponsesReasoningSummaryDeltaEvent):
-            # Reasoning summary chunk received
-            if self._thinking_widget and hasattr(self._thinking_widget, "append_chunk"):
-                self._thinking_widget.append_chunk(f"Summary: {event.delta}")
-            else:
-                # Fallback
-                self.current_response += f"\n> [Summary] {event.delta}"
+            case OpenResponsesReasoningContentDeltaEvent(delta=delta):
+                if self._thinking_widget and hasattr(self._thinking_widget, "append_chunk"):
+                    self._thinking_widget.append_chunk(delta)
+                else:
+                    self.current_response += f"\n> [Thinking] {delta}"
 
-        elif isinstance(event, OpenResponsesFunctionCallArgumentsDeltaEvent):
-            # Function call arguments chunk received
-            if self._thinking_widget and hasattr(self._thinking_widget, "append_chunk"):
-                self._thinking_widget.append_chunk(f"Args: {event.delta}")
-            else:
-                # Fallback
-                self.current_response += f"\n> [Function Args] {event.delta}"
+            case OpenResponsesReasoningSummaryDeltaEvent(delta=delta):
+                if self._thinking_widget and hasattr(self._thinking_widget, "append_chunk"):
+                    self._thinking_widget.append_chunk(f"Summary: {delta}")
+                else:
+                    self.current_response += f"\n> [Summary] {delta}"
 
-        elif isinstance(event, OpenResponsesContentPartAddedEvent):
-            # Content part starts
-            pass
+            case OpenResponsesFunctionCallArgumentsDeltaEvent(delta=delta):
+                if self._thinking_widget and hasattr(self._thinking_widget, "append_chunk"):
+                    self._thinking_widget.append_chunk(f"Args: {delta}")
+                else:
+                    self.current_response += f"\n> [Function Args] {delta}"
 
-        elif isinstance(event, OpenResponsesContentPartDoneEvent):
-            # Content part finishes
-            pass
+            case OpenResponsesContentPartAddedEvent() | OpenResponsesContentPartDoneEvent():
+                pass
 
-        elif isinstance(event, OpenResponsesOutputTextDoneEvent):
-            # Text completed
-            self.current_response = event.text
+            case OpenResponsesOutputTextDoneEvent(text=text):
+                self.current_response = text
 
-        elif isinstance(event, OpenResponsesResponseCompletedEvent):
-            # Response finished successfully
-            self.end_thinking()
+            case OpenResponsesResponseCompletedEvent():
+                self.end_thinking()
 
-        elif isinstance(event, OpenResponsesResponseFailedEvent):
-            # Response failed
-            if event.error and hasattr(event.error, "get"):
-                error_msg = event.error.get("message", "Unknown error")
-            else:
-                error_msg = "Response failed"
-            self.add_system_message(f"[error]{Icons.ERROR} {error_msg}[/error]")
-            self.end_thinking()
+            case OpenResponsesResponseFailedEvent(error=error):
+                error_msg = error.get("message", "Unknown error") if error else "Response failed"
+                self.add_system_message(f"[error]{Icons.ERROR} {error_msg}[/error]")
+                self.end_thinking()
 
-        elif isinstance(event, OpenResponsesDoneEvent):
-            # Stream terminated
-            pass
+            case OpenResponsesDoneEvent():
+                pass
 
     def add_code_block(
         self,
