@@ -229,8 +229,12 @@ class VerticeClient:
         builder.clear_events()
 
         # Stream content and emit text deltas
+        # CRITICAL FIX: Extract tools from kwargs and pass explicitly
+        tools = kwargs.pop("tools", None)
         try:
-            async for chunk in self.stream_chat(messages, system_prompt=system_prompt, **kwargs):
+            async for chunk in self.stream_chat(
+                messages, system_prompt=system_prompt, tools=tools, **kwargs
+            ):
                 builder.text_delta(msg_item, chunk)
                 yield builder.get_last_event_sse()
                 builder.clear_events()

@@ -1,0 +1,65 @@
+name: TUI Stability Gate
+
+on:
+  push:
+    branches: [ main, develop, feature/* ]
+    paths:
+      - 'src/vertice_tui/**'
+      - 'tests/tui/**'
+      - 'tests/unit/autoaudit/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'src/vertice_tui/**'
+      - 'tests/tui/**'
+      - 'tests/unit/autoaudit/**'
+
+jobs:
+  tui-stability:
+    name: TUI Stability Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-asyncio pytest-cov
+
+    - name: TUI Smoke Test (Imports)
+      run: |
+        echo "Testing TUI imports..."
+        python -c "from vertice_tui.app import VerticeApp; print('✅ App imports OK')"
+        python -c "from vertice_tui.handlers.router import CommandRouter; print('✅ Router imports OK')"
+        python -c "from vertice_tui.core.bridge import get_bridge; print('✅ Bridge imports OK')"
+        python -c "from vertice_tui.core.autoaudit import AutoAuditService; print('✅ AutoAudit imports OK')"
+
+    - name: Run TUI Tests
+      run: |
+        pytest tests/tui/ -v --tb=short --cov=vertice_tui --cov-report=term-missing
+
+    - name: Run AutoAudit Tests
+      run: |
+        pytest tests/unit/autoaudit/ -v --tb=short
+
+    - name: Run Stability Suite
+      run: |
+        pytest tests/tui/test_stability_suite.py -v --tb=short
+
+    - name: Bridge Initialization Test
+      run: |
+        python -c "
+        from vertice_tui.core.bridge import get_bridge
+        b = get_bridge()
+        print(f'✅ Bridge connected: {b.is_connected}')
+        print(f'✅ Tools: {b.tools.get_tool_count() if b.tools else 0}')
+        print(f'✅ Agents: {len(b.agents.available_agents) if b.agents else 0}')
+        "

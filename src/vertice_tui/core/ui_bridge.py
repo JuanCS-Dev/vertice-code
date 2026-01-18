@@ -213,6 +213,9 @@ class AutocompleteBridge:
         self._file_cache: List[str] = []
         self._file_cache_valid = False
         self._recent_files: List[str] = []
+        # Performance: Cache completions to avoid recomputation
+        self._completion_cache: Dict[str, List[Dict]] = {}
+        self._completion_cache_time: float = 0.0
 
     def add_recent_file(self, file_path: str) -> None:
         """Track a recently accessed file for priority in @ completions."""
@@ -340,9 +343,20 @@ class AutocompleteBridge:
         return completions
 
     def get_completions(self, text: str, max_results: int = 10) -> List[Dict]:
-        """Get completions for text with fuzzy matching."""
+        """Get completions for text with fuzzy matching.
+
+        OPTIMIZED: Uses caching to avoid recomputation on every keystroke.
+        """
         if not text:
             return []
+
+        # Check cache (valid for 500ms to allow fast typing)
+        import time
+
+        cache_key = f"{text}:{max_results}"
+        now = time.time()
+        if cache_key in self._completion_cache and (now - self._completion_cache_time) < 0.5:
+            return self._completion_cache[cache_key]
 
         # Check for @ file picker trigger
         at_pos = None
@@ -484,6 +498,10 @@ class AutocompleteBridge:
             ("/command-create", "Create custom command"),
             ("/command-delete", "Delete custom command"),
             ("/a2a", "Agent-to-Agent protocol"),
+            ("/autoaudit", "Run TUI audit"),
+            ("/autoaudit quick", "Quick audit (<5s)"),
+            ("/autoaudit list", "List scenarios"),
+            ("/autoaudit help", "Audit help"),
             ("/tribunal", "Toggle TRIBUNAL mode"),
             # Core Agent Aliases (explicit slash access)
             ("/reviewer-core", "Deep-think code review (Core)"),
@@ -505,8 +523,15 @@ class AutocompleteBridge:
                 )
 
         # Sort by score
+        # Sort by score
         completions.sort(key=lambda x: x["score"], reverse=True)
-        return completions[:max_results]
+        result = completions[:max_results]
+
+        # Cache result
+        self._completion_cache[cache_key] = result
+        self._completion_cache_time = time.time()
+
+        return result
 
     def _fuzzy_score(self, query: str, target: str) -> float:
         """Calculate fuzzy match score."""

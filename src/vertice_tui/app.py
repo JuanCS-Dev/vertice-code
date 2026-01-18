@@ -284,8 +284,10 @@ class VerticeApp(App):
             status = self.query_one(StatusBar)
             status.mode = "PROCESSING"
 
-            # Optimized UI update - minimal delay for responsiveness
-            # await asyncio.sleep(0)  # Removed for better performance
+            # CRITICAL: Force UI refresh so user sees their input immediately
+            # Without this, the user message only appears after LLM response
+            await asyncio.sleep(0)  # Yield to event loop for rendering
+            self.refresh()  # Request screen redraw
 
             # Command routing with timeout protection
             try:

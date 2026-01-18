@@ -50,7 +50,13 @@ HELP_COMMANDS = """
 [bold yellow]Contexto[/bold yellow]
   [cyan]/context[/cyan] [dim]..........[/dim] Mostra contexto da conversa
   [cyan]/context-clear[/cyan] [dim]....[/dim] Limpa o contexto
- 
+
+[bold yellow]Auditoria[/bold yellow]
+  [cyan]/autoaudit[/cyan] [dim]..........[/dim] Auditoria completa da TUI
+  [cyan]/autoaudit quick[/cyan] [dim]....[/dim] Apenas cenários rápidos (<5s)
+  [cyan]/autoaudit list[/cyan] [dim].....[/dim] Lista cenários disponíveis
+  [cyan]/autoaudit help[/cyan] [dim].....[/dim] Ajuda detalhada
+
  [bold yellow]PROMETHEUS[/bold yellow]
    [cyan]/prometheus status[/cyan] [dim]..[/dim] Status do sistema de evolução
    [cyan]/prometheus evolve[/cyan] [white]N[/white] [dim][/dim] Executa N ciclos de evolução

@@ -238,7 +238,9 @@ class ProductionGeminiStreamer:
 
                 current_time = time.time()
                 time_since_last = current_time - last_yield_time
-                if time_since_last < min_interval:
+
+                # OPTIMIZATION: Instant yield for first chunk or if interval passed
+                if last_yield_time > 0 and time_since_last < min_interval:
                     await asyncio.sleep(min_interval - time_since_last)
 
                 last_yield_time = time.time()

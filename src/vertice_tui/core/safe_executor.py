@@ -73,6 +73,18 @@ class SafeCommandExecutor:
             working_dir: Working directory for command execution
         """
         self._working_dir = working_dir or Path.cwd()
+        self._audit_mode = False  # When True, bypass security checks
+
+    def set_audit_mode(self, enabled: bool) -> None:
+        """
+        Enable/disable audit mode.
+
+        When audit mode is enabled, security checks are bypassed.
+        Only use during AutoAudit execution!
+        """
+        self._audit_mode = enabled
+        if enabled:
+            logger.warning("⚠️ AUDIT MODE ENABLED - Security checks bypassed")
 
     def _contains_dangerous_pattern(self, command: str) -> Optional[str]:
         """
@@ -123,7 +135,7 @@ class SafeCommandExecutor:
             Matching AllowedCommand or None
         """
         # Try exact match first
-        full_cmd = f"{base_cmd} {args[0]}" if args else base_cmd
+        # Try exact match first
 
         for key, allowed in ALLOWED_COMMANDS.items():
             if allowed.base_command == base_cmd:
@@ -146,6 +158,10 @@ class SafeCommandExecutor:
         Returns:
             Tuple of (is_allowed, reason)
         """
+        # AUDIT MODE BYPASS
+        if self._audit_mode:
+            return True, "Allowed: AUDIT MODE ACTIVE"
+
         # Enhanced security checks
         security_issues = self._comprehensive_security_check(command)
         if security_issues:

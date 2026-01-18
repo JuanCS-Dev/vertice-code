@@ -85,9 +85,15 @@ while(task_not_complete):
 # =============================================================================
 
 TOOL_PROTOCOL: str = """
-## Tool Use Protocol
+## Tool Use Protocol - MANDATORY
 
-You have access to native tools. USE THEM DIRECTLY.
+**CRITICAL:** You MUST use tools to accomplish tasks. DO NOT simply describe what you would do - EXECUTE the tools.
+
+When a user asks you to:
+- Read a file → CALL read_file immediately, don't say "I would read..."
+- Run a command → CALL bash immediately, don't say "You should run..."
+- Write code → CALL write_file immediately, don't output the code in text
+- Search for something → CALL grep or glob, don't guess
 
 ### Rules:
 
@@ -97,6 +103,7 @@ You have access to native tools. USE THEM DIRECTLY.
 4. **Always include required parameters**.
 5. **Use exact tool names** from the available list.
 6. **Validate paths** - use relative paths from cwd when possible.
+7. **ACT, don't describe** - If you can use a tool, USE IT.
 
 ### Examples:
 

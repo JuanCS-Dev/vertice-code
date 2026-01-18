@@ -124,7 +124,7 @@ class ResponseView(VerticalScroll):
 
         widget = SelectableStatic(content, classes="user-message")
         self.mount(widget)
-        self.scroll_end(animate=True)
+        self.scroll_end(animate=False)
 
     def add_system_message(self, message: str) -> None:
         """Add system/help message with premium Panel styling."""
@@ -145,7 +145,7 @@ class ResponseView(VerticalScroll):
 
         widget = SelectableStatic(panel, classes="system-message")
         self.mount(widget)
-        self.scroll_end(animate=True)
+        self.scroll_end(animate=False)
 
     def start_thinking(self) -> None:
         """Show advanced reasoning stream indicator."""
@@ -154,7 +154,7 @@ class ResponseView(VerticalScroll):
         self.is_thinking = True
         self._thinking_widget = ReasoningStream(id="reasoning-stream")
         self.mount(self._thinking_widget)
-        self.scroll_end(animate=True)
+        self.scroll_end(animate=False)
 
     def end_thinking(self) -> None:
         """Remove thinking indicator and finalize response."""
@@ -361,7 +361,7 @@ class ResponseView(VerticalScroll):
 
         widget = SelectableStatic(panel, classes="code-block")
         self.mount(widget)
-        self.scroll_end(animate=True)
+        self.scroll_end(animate=False)
 
     def add_diff_block(
         self, diff_content: str, title: str = "Diff", file_path: str | None = None
@@ -403,7 +403,7 @@ class ResponseView(VerticalScroll):
 
         widget = SelectableStatic(panel, classes="diff-block")
         self.mount(widget)
-        self.scroll_end(animate=True)
+        self.scroll_end(animate=False)
 
     def add_action(self, action: str) -> None:
         """Add action indicator with accent color."""
@@ -412,7 +412,7 @@ class ResponseView(VerticalScroll):
             classes="action",
         )
         self.mount(widget)
-        self.scroll_end(animate=True)
+        self.scroll_end(animate=False)
 
     def add_warning(self, message: str) -> None:
         """Add warning message with triangle icon."""
@@ -421,7 +421,7 @@ class ResponseView(VerticalScroll):
             classes="warning",
         )
         self.mount(widget)
-        self.scroll_end(animate=True)
+        self.scroll_end(animate=False)
 
     def add_success(self, message: str) -> None:
         """Add success message with checkmark."""
@@ -430,7 +430,7 @@ class ResponseView(VerticalScroll):
             classes="success",
         )
         self.mount(widget)
-        self.scroll_end(animate=True)
+        self.scroll_end(animate=False)
 
     def add_error(self, message: str) -> None:
         """Add error message with X."""
@@ -438,7 +438,7 @@ class ResponseView(VerticalScroll):
             f"[bold {Colors.ERROR}]{Icons.ERROR}[/] [{Colors.ERROR}]{message}[/]", classes="error"
         )
         self.mount(widget)
-        self.scroll_end(animate=True)
+        self.scroll_end(animate=False)
 
     def add_tool_result(
         self, tool_name: str, success: bool, data: str | None = None, error: str | None = None
@@ -447,14 +447,14 @@ class ResponseView(VerticalScroll):
         panel = OutputFormatter.format_tool_result(tool_name, success, data, error)
         widget = SelectableStatic(panel, classes="tool-result")
         self.mount(widget)
-        self.scroll_end(animate=True)
+        self.scroll_end(animate=False)
 
     def add_response_panel(self, text: str, title: str = "Response") -> None:
         """Add a formatted response panel."""
         panel = OutputFormatter.format_response(text, title)
         widget = SelectableStatic(panel, classes="ai-response")
         self.mount(widget)
-        self.scroll_end(animate=True)
+        self.scroll_end(animate=False)
 
     def add_info_panel(
         self, message: str, title: str = "Info", icon: str = "ℹ️", border_color: str = Colors.PRIMARY
@@ -480,7 +480,7 @@ class ResponseView(VerticalScroll):
 
         widget = SelectableStatic(panel, classes="info-panel")
         self.mount(widget)
-        self.scroll_end(animate=True)
+        self.scroll_end(animate=False)
 
     def add_markdown_response(self, text: str, title: str = "Response") -> None:
         """Add markdown response with syntax highlighting for code blocks."""
@@ -526,7 +526,7 @@ class ResponseView(VerticalScroll):
             panel = OutputFormatter.format_response(text, title)
             widget = SelectableStatic(panel, classes="ai-response")
             self.mount(widget)
-            self.scroll_end(animate=True)
+            self.scroll_end(animate=False)
             return
 
         # Render parts
@@ -555,7 +555,7 @@ class ResponseView(VerticalScroll):
             widget = SelectableStatic(panel, classes="ai-response")
             self.mount(widget)
 
-        self.scroll_end(animate=True)
+        self.scroll_end(animate=False)
 
     def clear_all(self) -> None:
         """Clear all content."""

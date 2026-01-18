@@ -108,7 +108,12 @@ class Bridge(ProtocolBridgeMixin):
     def __init__(self) -> None:
         """Initialize Bridge with all subsystems using phased approach with graceful degradation."""
         initialization_errors = []
+        initialization_errors = []
         partial_initialization = False
+
+        # System prompt cache init
+        self._system_prompt_cache: Optional[str] = None
+        self._system_prompt_time: float = 0.0
 
         # Import structured logging and error tracking
         from .logging import get_bridge_logger, create_operation_context
@@ -519,7 +524,16 @@ class Bridge(ProtocolBridgeMixin):
             self._tools_configured = True
 
     def _get_system_prompt(self) -> str:
-        """Get system prompt for agentic interaction."""
+        """Get system prompt for agentic interaction (Cached 5s)."""
+        import time
+
+        now = time.time()
+        if (
+            hasattr(self, "_system_prompt_cache")
+            and self._system_prompt_cache
+            and (now - self._system_prompt_time) < 5.0
+        ):
+            return self._system_prompt_cache
         try:
             from vertice_tui.core.agentic_prompt import (
                 build_agentic_system_prompt,
@@ -534,12 +548,17 @@ class Bridge(ProtocolBridgeMixin):
             memory_result = self.read_memory(scope="project")
             if memory_result.get("success"):
                 user_memory = memory_result.get("content")
-            return build_agentic_system_prompt(
+            prompt = build_agentic_system_prompt(
                 tools=tool_schemas,
                 context=context,
                 project_memory=project_memory,
                 user_memory=user_memory,
             )
+
+            # Update cache
+            self._system_prompt_cache = prompt
+            self._system_prompt_time = time.time()
+            return prompt
         except Exception as e:
             logger.warning(f"Agentic system prompt failed, using fallback: {e}")
 

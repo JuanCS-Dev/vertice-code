@@ -26,8 +26,17 @@ class BlackBoxLogger:
     """
 
     def __init__(self, output_dir: Optional[Path] = None) -> None:
-        self.output_dir = output_dir or Path("logs/autoaudit")
-        self.output_dir.mkdir(parents=True, exist_ok=True)
+        # CRITICAL FIX: Use absolute path relative to project root
+        root_dir = (
+            Path(__file__).resolve().parent.parent.parent.parent.parent
+        )  # src/vertice_tui/core/autoaudit/logger.py -> root
+        self.output_dir = output_dir or (root_dir / "logs" / "autoaudit")
+        try:
+            self.output_dir.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            # Fallback to tmp if permissions fail
+            self.output_dir = Path("/tmp/vertice_logs/autoaudit")
+            self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def save_crash_dump(
         self,

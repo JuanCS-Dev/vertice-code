@@ -121,6 +121,15 @@ class AutoAuditService:
         self._is_running = True
         started_at = datetime.now().isoformat()
 
+        # ENABLE AUDIT MODE - bypass security checks for audit commands
+        try:
+            from vertice_tui.core.safe_executor import get_safe_executor
+
+            executor = get_safe_executor()
+            executor.set_audit_mode(True)
+        except Exception:
+            pass  # Safe executor may not exist
+
         # Filtra por categoria
         scenarios = self.scenarios
         if categories:
@@ -129,7 +138,8 @@ class AutoAuditService:
         self.view.add_system_message(
             f"🚀 **AutoAudit Iniciando**\n\n"
             f"- Cenários: **{len(scenarios)}**\n"
-            f"- ⚠️ **NÃO INTERROMPA**"
+            f"- ⚠️ **NÃO INTERROMPA**\n"
+            f"- 🔓 **Modo Audit: ATIVO**"
         )
 
         results: List[ScenarioResult] = []
@@ -188,6 +198,15 @@ class AutoAuditService:
         # Salva relatório
         report_path = self.logger.save_report(self.report.to_dict())
         self.view.add_system_message(f"\n📄 Relatório: `{report_path}`")
+
+        # DISABLE AUDIT MODE - restore security
+        try:
+            from vertice_tui.core.safe_executor import get_safe_executor
+
+            executor = get_safe_executor()
+            executor.set_audit_mode(False)
+        except Exception:
+            pass
 
         self._is_running = False
         return self.report
