@@ -20,8 +20,9 @@ import re
 from datetime import datetime
 
 
-FORBIDDEN_NAMES = {'exec', 'eval', 'compile', 'open', '__import__', 'getattr', 'setattr', 'delattr'}
-FORBIDDEN_MODULES = {'os', 'sys', 'subprocess', 'shutil', 'pathlib'}
+FORBIDDEN_NAMES = {"exec", "eval", "compile", "open", "__import__", "getattr", "setattr", "delattr"}
+FORBIDDEN_MODULES = {"os", "sys", "subprocess", "shutil", "pathlib"}
+
 
 def _validate_code_ast(code: str) -> None:
     """Validate code safety using AST analysis."""
@@ -34,10 +35,10 @@ def _validate_code_ast(code: str) -> None:
         # Block imports
         if isinstance(node, ast.Import):
             for alias in node.names:
-                if alias.name.split('.')[0] in FORBIDDEN_MODULES:
+                if alias.name.split(".")[0] in FORBIDDEN_MODULES:
                     raise ValueError(f"Forbidden import: {alias.name}")
         if isinstance(node, ast.ImportFrom):
-            if node.module and node.module.split('.')[0] in FORBIDDEN_MODULES:
+            if node.module and node.module.split(".")[0] in FORBIDDEN_MODULES:
                 raise ValueError(f"Forbidden import: {node.module}")
 
         # Block dangerous calls
@@ -49,6 +50,7 @@ def _validate_code_ast(code: str) -> None:
 @dataclass
 class ToolSpec:
     """Specification of a generated tool."""
+
     name: str
     description: str
     parameters: Dict[str, dict]  # param_name -> {type, description, required}
@@ -89,6 +91,7 @@ class ToolSpec:
 @dataclass
 class ToolGenerationRequest:
     """Request to generate a new tool."""
+
     description: str
     input_examples: List[dict]
     expected_outputs: List[Any]
@@ -99,6 +102,7 @@ class ToolGenerationRequest:
 
 class ToolGenerationError(Exception):
     """Error during tool generation."""
+
     pass
 
 
@@ -156,11 +160,7 @@ class ToolFactory:
         )
 
         # Test the tool
-        test_results = await self._test_tool(
-            spec,
-            request.input_examples,
-            request.expected_outputs
-        )
+        test_results = await self._test_tool(spec, request.input_examples, request.expected_outputs)
 
         if test_results["success_rate"] >= 0.8:
             spec.success_rate = test_results["success_rate"]
@@ -170,20 +170,14 @@ class ToolFactory:
 
         # Try to improve if initial test failed
         for attempt in range(max_attempts - 1):
-            improved_code = await self._improve_tool(
-                spec,
-                test_results["failures"],
-                request
-            )
+            improved_code = await self._improve_tool(spec, test_results["failures"], request)
 
             if improved_code:
                 spec.code = improved_code
                 spec.version += 1
 
                 test_results = await self._test_tool(
-                    spec,
-                    request.input_examples,
-                    request.expected_outputs
+                    spec, request.input_examples, request.expected_outputs
                 )
 
                 if test_results["success_rate"] >= 0.8:
@@ -211,10 +205,7 @@ class ToolFactory:
         """
         # Build description from examples
         if not description:
-            examples_str = "\n".join([
-                f"  {inp} -> {out}"
-                for inp, out in input_output_pairs[:5]
-            ])
+            examples_str = "\n".join([f"  {inp} -> {out}" for inp, out in input_output_pairs[:5]])
             description = f"Function that transforms inputs as follows:\n{examples_str}"
 
         request = ToolGenerationRequest(
@@ -228,10 +219,7 @@ class ToolFactory:
 
     async def _generate_code(self, request: ToolGenerationRequest) -> str:
         """Generate initial code using LLM."""
-        examples_formatted = self._format_examples(
-            request.input_examples,
-            request.expected_outputs
-        )
+        examples_formatted = self._format_examples(request.input_examples, request.expected_outputs)
 
         prompt = f"""Generate a Python function that does the following:
 
@@ -307,39 +295,47 @@ except Exception as e:
                 if result.success:
                     # Parse output
                     try:
-                        output = json.loads(result.stdout.strip().split('\n')[-1])
+                        output = json.loads(result.stdout.strip().split("\n")[-1])
                         if output.get("passed"):
                             successes += 1
                         else:
-                            failures.append({
+                            failures.append(
+                                {
+                                    "test_case": i + 1,
+                                    "input": inp,
+                                    "expected": exp,
+                                    "got": output.get("result"),
+                                    "error": output.get("error"),
+                                }
+                            )
+                    except json.JSONDecodeError:
+                        failures.append(
+                            {
                                 "test_case": i + 1,
                                 "input": inp,
                                 "expected": exp,
-                                "got": output.get("result"),
-                                "error": output.get("error"),
-                            })
-                    except json.JSONDecodeError:
-                        failures.append({
+                                "error": f"Invalid output: {result.stdout}",
+                            }
+                        )
+                else:
+                    failures.append(
+                        {
                             "test_case": i + 1,
                             "input": inp,
                             "expected": exp,
-                            "error": f"Invalid output: {result.stdout}",
-                        })
-                else:
-                    failures.append({
+                            "error": result.stderr or result.error_message,
+                        }
+                    )
+
+            except Exception as e:
+                failures.append(
+                    {
                         "test_case": i + 1,
                         "input": inp,
                         "expected": exp,
-                        "error": result.stderr or result.error_message,
-                    })
-
-            except Exception as e:
-                failures.append({
-                    "test_case": i + 1,
-                    "input": inp,
-                    "expected": exp,
-                    "error": str(e),
-                })
+                        "error": str(e),
+                    }
+                )
 
         total = len(inputs)
         return {
@@ -357,11 +353,13 @@ except Exception as e:
         request: ToolGenerationRequest,
     ) -> Optional[str]:
         """Improve a tool based on test failures."""
-        failures_formatted = "\n".join([
-            f"Test {f['test_case']}: Input={f.get('input')}, Expected={f.get('expected')}, "
-            f"Got={f.get('got', 'N/A')}, Error={f.get('error', 'None')}"
-            for f in failures[:5]  # Limit to 5 failures
-        ])
+        failures_formatted = "\n".join(
+            [
+                f"Test {f['test_case']}: Input={f.get('input')}, Expected={f.get('expected')}, "
+                f"Got={f.get('got', 'N/A')}, Error={f.get('error', 'None')}"
+                for f in failures[:5]  # Limit to 5 failures
+            ]
+        )
 
         prompt = f"""The following Python function has bugs. Fix them.
 
@@ -455,22 +453,26 @@ Output only the corrected code:
 
         # Builtin tools
         for name, func in self.builtin_tools.items():
-            tools.append({
-                "name": name,
-                "type": "builtin",
-                "description": func.__doc__ or "No description",
-            })
+            tools.append(
+                {
+                    "name": name,
+                    "type": "builtin",
+                    "description": func.__doc__ or "No description",
+                }
+            )
 
         # Generated tools
         for name, spec in self.generated_tools.items():
-            tools.append({
-                "name": name,
-                "type": "generated",
-                "description": spec.description,
-                "success_rate": spec.success_rate,
-                "usage_count": spec.usage_count,
-                "parameters": list(spec.parameters.keys()),
-            })
+            tools.append(
+                {
+                    "name": name,
+                    "type": "generated",
+                    "description": spec.description,
+                    "success_rate": spec.success_rate,
+                    "usage_count": spec.usage_count,
+                    "parameters": list(spec.parameters.keys()),
+                }
+            )
 
         return tools
 
@@ -492,12 +494,12 @@ Output only the corrected code:
     def _extract_code(self, text: str) -> str:
         """Extract Python code from LLM response."""
         # Try to find code block
-        code_match = re.search(r'```python\n(.*?)```', text, re.DOTALL)
+        code_match = re.search(r"```python\n(.*?)```", text, re.DOTALL)
         if code_match:
             return code_match.group(1).strip()
 
         # Try generic code block
-        code_match = re.search(r'```\n(.*?)```', text, re.DOTALL)
+        code_match = re.search(r"```\n(.*?)```", text, re.DOTALL)
         if code_match:
             return code_match.group(1).strip()
 
@@ -588,13 +590,15 @@ Output only the corrected code:
         success: bool,
     ):
         """Log tool generation attempt."""
-        self.generation_history.append({
-            "tool_name": spec.name,
-            "success": success,
-            "test_results": test_results,
-            "timestamp": datetime.now().isoformat(),
-            "version": spec.version,
-        })
+        self.generation_history.append(
+            {
+                "tool_name": spec.name,
+                "success": success,
+                "test_results": test_results,
+                "timestamp": datetime.now().isoformat(),
+                "version": spec.version,
+            }
+        )
 
     def export_tools(self) -> dict:
         """Export all generated tools."""
@@ -627,10 +631,6 @@ Output only the corrected code:
             "builtin_tools": len(self.builtin_tools),
             "generated_tools": len(self.generated_tools),
             "total_generations": len(self.generation_history),
-            "successful_generations": sum(
-                1 for h in self.generation_history if h["success"]
-            ),
-            "total_tool_uses": sum(
-                spec.usage_count for spec in self.generated_tools.values()
-            ),
+            "successful_generations": sum(1 for h in self.generation_history if h["success"]),
+            "total_tool_uses": sum(spec.usage_count for spec in self.generated_tools.values()),
         }

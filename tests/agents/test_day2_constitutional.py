@@ -23,13 +23,14 @@ from vertice_cli.agents.base import AgentTask, AgentRole, AgentCapability
 # CATEGORY 1: CONSTITUTIONAL COMPLIANCE (16 tests)
 # ============================================================================
 
+
 class TestConstitutionalCompliance:
     """Tests for Constituicao Vertice v3.0 compliance."""
 
     @pytest.mark.asyncio
     async def test_article2_zero_placeholders_testing(self):
         """Art. II: Zero placeholders in TestRunnerAgent."""
-        agent = TestRunnerAgent(model=MagicMock())
+        TestRunnerAgent(model=MagicMock())
 
         # Check source code
         source_file = Path("vertice_cli/agents/testing.py")
@@ -42,7 +43,7 @@ class TestConstitutionalCompliance:
     @pytest.mark.asyncio
     async def test_article2_zero_placeholders_refactor(self):
         """Art. II: Zero placeholders in RefactorAgent."""
-        agent = RefactorAgent(llm_client=MagicMock(), mcp_client=MagicMock())
+        RefactorAgent(llm_client=MagicMock(), mcp_client=MagicMock())
 
         source_file = Path("vertice_cli/agents/refactor.py")
         if source_file.exists():
@@ -72,7 +73,7 @@ class TestConstitutionalCompliance:
         assert callable(agent.execute)
         # Internal components (actual implementation)
         assert hasattr(agent, "transformer")  # ASTTransformer
-        assert hasattr(agent, "rl_policy")    # RLRefactoringPolicy
+        assert hasattr(agent, "rl_policy")  # RLRefactoringPolicy
 
     @pytest.mark.asyncio
     async def test_p2_validation_testing(self):
@@ -233,6 +234,7 @@ class TestConstitutionalCompliance:
 # CATEGORY 2: REAL-WORLD END-TO-END (36 tests)
 # ============================================================================
 
+
 @pytest.mark.skip(reason="RefactorAgent actions (detect_smells, quality_score) not implemented")
 class TestRealWorldEndToEnd:
     """End-to-end tests with real code scenarios."""
@@ -274,7 +276,7 @@ class User(models.Model):
     username = models.CharField(max_length=100)
     email = models.EmailField()
     is_active = models.BooleanField(default=True)
-    
+
     def activate(self):
         self.is_active = True
         self.save()
@@ -366,10 +368,10 @@ from sqlalchemy.orm import Session
 class UserRepository:
     def __init__(self, session: Session):
         self.session = session
-    
+
     def get_by_id(self, user_id: int):
         return self.session.query(User).filter_by(id=user_id).first()
-    
+
     def create(self, username: str, email: str):
         user = User(username=username, email=email)
         self.session.add(user)
@@ -389,6 +391,7 @@ class UserRepository:
 
 # Add 30 more similar E2E tests for different frameworks and patterns
 # (abbreviated for space - in real implementation, all 52 tests would be here)
+
 
 def test_day2_final_validation():
     """Final validation: All agents working."""

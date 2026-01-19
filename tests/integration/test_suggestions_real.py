@@ -28,11 +28,11 @@ class TestRealProjectIntegration:
         assert len(recommendations) > 0, "No recommendations found"
 
         # Should suggest test file
-        test_files = [r for r in recommendations if 'test' in str(r.file_path).lower()]
+        test_files = [r for r in recommendations if "test" in str(r.file_path).lower()]
         print(f"Found {len(test_files)} test file recommendations")
 
         # Should suggest imported files
-        import_recs = [r for r in recommendations if r.relationship_type == 'import']
+        import_recs = [r for r in recommendations if r.relationship_type == "import"]
         print(f"Found {len(import_recs)} import recommendations")
         assert len(import_recs) > 0, "Should suggest imported files"
 
@@ -72,8 +72,8 @@ class TestRealProjectIntegration:
 
         for sug in suggestions[:3]:  # Check first 3
             assert sug.line_number > 0, "Invalid line number"
-            assert sug.impact in ['high', 'medium', 'low'], f"Invalid impact: {sug.impact}"
-            assert sug.category in ['refactor', 'bug', 'performance', 'style'], "Invalid category"
+            assert sug.impact in ["high", "medium", "low"], f"Invalid impact: {sug.impact}"
+            assert sug.category in ["refactor", "bug", "performance", "style"], "Invalid category"
             print(f"  Line {sug.line_number}: {sug.suggestion}")
 
     def test_analyze_context_real_file(self):
@@ -85,18 +85,20 @@ class TestRealProjectIntegration:
         context = engine.analyze_file_context(shell_py)
 
         # Validate context structure
-        assert 'language' in context, "Missing language"
-        assert context['language'] == 'python', "Wrong language detected"
-        assert 'imports' in context, "Missing imports"
-        assert 'definitions' in context, "Missing definitions"
+        assert "language" in context, "Missing language"
+        assert context["language"] == "python", "Wrong language detected"
+        assert "imports" in context, "Missing imports"
+        assert "definitions" in context, "Missing definitions"
 
         # shell_main.py should have many imports
-        assert len(context['imports']) > 10, f"Too few imports: {len(context['imports'])}"
+        assert len(context["imports"]) > 10, f"Too few imports: {len(context['imports'])}"
 
         # shell_main.py should have class definitions
-        assert len(context['definitions']) > 0, "No definitions found"
+        assert len(context["definitions"]) > 0, "No definitions found"
 
-        print(f"✓ Analyzed shell_main.py: {len(context['imports'])} imports, {len(context['definitions'])} definitions")
+        print(
+            f"✓ Analyzed shell_main.py: {len(context['imports'])} imports, {len(context['definitions'])} definitions"
+        )
 
 
 class TestEdgeCases:
@@ -123,7 +125,7 @@ class TestEdgeCases:
         if toml_file.exists():
             context = engine.analyze_file_context(toml_file)
             # Should fallback to text analysis
-            assert 'language' in context
+            assert "language" in context
 
     def test_empty_file(self, tmp_path):
         """Test with empty file."""
@@ -133,8 +135,8 @@ class TestEdgeCases:
         empty_file.write_text("")
 
         context = engine.analyze_file_context(empty_file)
-        assert context['import_count'] == 0
-        assert context['definition_count'] == 0
+        assert context["import_count"] == 0
+        assert context["definition_count"] == 0
 
     def test_syntax_error_file(self, tmp_path):
         """Test with file containing syntax errors."""
@@ -145,4 +147,4 @@ class TestEdgeCases:
 
         # Should fallback to text analysis, not crash
         context = engine.analyze_file_context(broken_file)
-        assert 'language' in context  # Should still return something
+        assert "language" in context  # Should still return something

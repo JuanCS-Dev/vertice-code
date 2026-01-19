@@ -10,6 +10,7 @@ logger = logging.getLogger("test_opus45")
 # Ensure we can import from the current directory
 sys.path.insert(0, os.getcwd())
 
+
 async def test_opus45():
     """Test Claude 3 Opus 4.5 on Vertex AI."""
     print("=" * 60)
@@ -28,7 +29,7 @@ async def test_opus45():
         print(f"📋 Model: {provider.model_name}")
         print(f"📍 Location: {provider.location}")
         print(f"🏗️ Project: {provider.project}")
-        
+
         # Check if project is set
         if not provider.project:
             print("❌ GOOGLE_CLOUD_PROJECT is not set.")
@@ -36,9 +37,12 @@ async def test_opus45():
 
         print("\n🚀 Attempting generation...")
         messages = [
-            {"role": "user", "content": "Hello Claude Opus 4.5. Please identify yourself and confirm you are running on Vertex AI."}
+            {
+                "role": "user",
+                "content": "Hello Claude Opus 4.5. Please identify yourself and confirm you are running on Vertex AI.",
+            }
         ]
-        
+
         # Try generation
         response = await provider.generate(messages, max_tokens=100)
         print(f"\n📝 Response:\n{response}")
@@ -48,8 +52,10 @@ async def test_opus45():
     except Exception as e:
         print(f"\n❌ ERROR: {e}")
         import traceback
+
         traceback.print_exc()
         return False
+
 
 if __name__ == "__main__":
     success = asyncio.run(test_opus45())

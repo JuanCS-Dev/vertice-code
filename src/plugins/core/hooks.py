@@ -17,11 +17,12 @@ from enum import Enum, auto
 from typing import Any, Callable, Dict, List, Optional, TypeVar, Generic
 from functools import wraps
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class HookType(Enum):
     """Standard plugin hook types."""
+
     # Lifecycle hooks
     PRE_ACTIVATE = auto()
     POST_ACTIVATE = auto()
@@ -72,6 +73,7 @@ class HookResult(Generic[T]):
         stop_propagation: If True, don't call remaining hooks
         modified_input: Modified input to pass to next hooks
     """
+
     success: bool = True
     data: Optional[T] = None
     error: Optional[str] = None
@@ -79,22 +81,22 @@ class HookResult(Generic[T]):
     modified_input: Optional[Any] = None
 
     @classmethod
-    def ok(cls, data: T = None) -> 'HookResult[T]':
+    def ok(cls, data: T = None) -> "HookResult[T]":
         """Create successful result."""
         return cls(success=True, data=data)
 
     @classmethod
-    def fail(cls, error: str) -> 'HookResult[T]':
+    def fail(cls, error: str) -> "HookResult[T]":
         """Create failed result."""
         return cls(success=False, error=error)
 
     @classmethod
-    def stop(cls, data: T = None) -> 'HookResult[T]':
+    def stop(cls, data: T = None) -> "HookResult[T]":
         """Create result that stops propagation."""
         return cls(success=True, data=data, stop_propagation=True)
 
     @classmethod
-    def modify(cls, modified_input: Any) -> 'HookResult[T]':
+    def modify(cls, modified_input: Any) -> "HookResult[T]":
         """Create result with modified input."""
         return cls(success=True, modified_input=modified_input)
 
@@ -102,6 +104,7 @@ class HookResult(Generic[T]):
 @dataclass
 class HookRegistration:
     """Internal hook registration."""
+
     hook_type: HookType
     handler: Callable
     priority: int = 0
@@ -123,7 +126,7 @@ class HookRegistry:
         hook_type: HookType,
         handler: Callable,
         priority: int = 0,
-        plugin_name: Optional[str] = None
+        plugin_name: Optional[str] = None,
     ) -> None:
         """
         Register a hook handler.
@@ -138,10 +141,7 @@ class HookRegistry:
             self._hooks[hook_type] = []
 
         registration = HookRegistration(
-            hook_type=hook_type,
-            handler=handler,
-            priority=priority,
-            plugin_name=plugin_name
+            hook_type=hook_type, handler=handler, priority=priority, plugin_name=plugin_name
         )
 
         self._hooks[hook_type].append(registration)
@@ -158,18 +158,12 @@ class HookRegistry:
         for hook_type in self._hooks:
             before = len(self._hooks[hook_type])
             self._hooks[hook_type] = [
-                r for r in self._hooks[hook_type]
-                if r.plugin_name != plugin_name
+                r for r in self._hooks[hook_type] if r.plugin_name != plugin_name
             ]
             count += before - len(self._hooks[hook_type])
         return count
 
-    async def dispatch(
-        self,
-        hook_type: HookType,
-        *args,
-        **kwargs
-    ) -> List[HookResult]:
+    async def dispatch(self, hook_type: HookType, *args, **kwargs) -> List[HookResult]:
         """
         Dispatch hook to all registered handlers.
 
@@ -191,7 +185,7 @@ class HookRegistry:
                 result = registration.handler(*current_args, **current_kwargs)
 
                 # Handle async handlers
-                if hasattr(result, '__await__'):
+                if hasattr(result, "__await__"):
                     result = await result
 
                 # Wrap raw results
@@ -221,10 +215,7 @@ class HookRegistry:
         return list(self._hooks.get(hook_type, []))
 
 
-def PluginHook(
-    hook_type: HookType,
-    priority: int = 0
-) -> Callable:
+def PluginHook(hook_type: HookType, priority: int = 0) -> Callable:
     """
     Decorator for registering plugin hook handlers.
 
@@ -240,12 +231,10 @@ def PluginHook(
                 # Process LLM response
                 return HookResult.modify(response.upper())
     """
+
     def decorator(func: Callable) -> Callable:
         # Store hook metadata on function
-        func._plugin_hook = {
-            'type': hook_type,
-            'priority': priority
-        }
+        func._plugin_hook = {"type": hook_type, "priority": priority}
 
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -258,9 +247,9 @@ def PluginHook(
 
 
 __all__ = [
-    'HookType',
-    'HookResult',
-    'HookRegistry',
-    'HookRegistration',
-    'PluginHook',
+    "HookType",
+    "HookResult",
+    "HookRegistry",
+    "HookRegistration",
+    "PluginHook",
 ]

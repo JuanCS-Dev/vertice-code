@@ -33,17 +33,19 @@ def render_toast(toast, width=60):
             current_length += len(word) + 1
         else:
             if current_line:
-                lines.append(' '.join(current_line))
+                lines.append(" ".join(current_line))
             current_line = [word]
             current_length = len(word)
 
     if current_line:
-        lines.append(' '.join(current_line))
+        lines.append(" ".join(current_line))
 
     # Build toast
     output = []
     output.append("┌" + "─" * (width - 2) + "┐")
-    output.append(f"│ {toast.color}{header}{COLORS['reset']}" + " " * (width - len(header) - 4) + "│")
+    output.append(
+        f"│ {toast.color}{header}{COLORS['reset']}" + " " * (width - len(header) - 4) + "│"
+    )
     output.append("├" + "─" * (width - 2) + "┤")
 
     for line in lines:
@@ -58,7 +60,9 @@ def render_toast(toast, width=60):
 def main():
     """Demo toast system."""
     print(f"\n{COLORS['accent_blue']}{'═' * 70}{COLORS['reset']}")
-    print(f"{COLORS['accent_blue']}  🔔 TOAST NOTIFICATION SYSTEM - Gemini-inspired{COLORS['reset']}")
+    print(
+        f"{COLORS['accent_blue']}  🔔 TOAST NOTIFICATION SYSTEM - Gemini-inspired{COLORS['reset']}"
+    )
     print(f"{COLORS['accent_blue']}{'═' * 70}{COLORS['reset']}\n")
 
     manager = ToastManager(max_toasts=5)
@@ -69,7 +73,7 @@ def main():
         type=ToastType.SUCCESS,
         title="File Saved",
         message="config.yaml has been saved successfully",
-        duration=5.0
+        duration=5.0,
     )
 
     toast = manager.toasts[0]
@@ -83,7 +87,7 @@ def main():
         type=ToastType.WARNING,
         title="Large File",
         message="This file is over 5MB. Consider splitting it into smaller files.",
-        duration=5.0
+        duration=5.0,
     )
 
     toast = manager.toasts[0]  # Warning has priority
@@ -97,7 +101,7 @@ def main():
         type=ToastType.ERROR,
         title="Syntax Error",
         message="Line 42: unexpected token '}'. Expected ';' before closing brace.",
-        duration=0  # Persistent
+        duration=0,  # Persistent
     )
 
     toast = manager.toasts[0]  # Error jumps to top
@@ -111,7 +115,7 @@ def main():
         type=ToastType.WISDOM,
         title="Proverbs 16:3",
         message="Commit to the LORD whatever you do, and he will establish your plans.",
-        duration=8.0
+        duration=8.0,
     )
 
     toast = [t for t in manager.toasts if t.type == ToastType.WISDOM][0]
@@ -125,7 +129,7 @@ def main():
         type=ToastType.INFO,
         title="Indexing Complete",
         message="Indexed 141 files with 1470 symbols in 0.51s",
-        duration=4.0
+        duration=4.0,
     )
 
     toast = [t for t in manager.toasts if t.type == ToastType.INFO][0]
@@ -140,8 +144,10 @@ def main():
     for i, toast in enumerate(manager.toasts, 1):
         type_color = toast.color
         duration_text = f"{toast.duration}s" if toast.duration > 0 else "persistent"
-        print(f"  {i}. {type_color}{toast.icon} {toast.type.value.upper()}{COLORS['reset']} "
-              f"{COLORS['dim']}({duration_text}){COLORS['reset']}")
+        print(
+            f"  {i}. {type_color}{toast.icon} {toast.type.value.upper()}{COLORS['reset']} "
+            f"{COLORS['dim']}({duration_text}){COLORS['reset']}"
+        )
         print(f"     {toast.title}")
         print()
 
@@ -156,7 +162,7 @@ def main():
         "Max queue size (overflow protection)",
         "Beautiful icons and colors (Gemini-inspired)",
         "Biblical wisdom integration (unique feature!)",
-        "Non-intrusive feedback (top-right positioning)"
+        "Non-intrusive feedback (top-right positioning)",
     ]
 
     for feature in features:

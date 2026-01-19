@@ -91,7 +91,7 @@ qwen-dev-cli ❯ /lsp hover src/main.py:42:4
 
 def main() -> int:
     '''Main entry point for the application.
-    
+
     Returns:
         int: Exit code (0 = success)
     '''

@@ -10,7 +10,7 @@ from vertice_cli.intelligence.types import (
     SuggestionConfidence,
     Context,
     SuggestionPattern,
-    SuggestionResult
+    SuggestionResult,
 )
 from vertice_cli.intelligence.engine import SuggestionEngine
 from vertice_cli.intelligence.patterns import register_builtin_patterns
@@ -25,7 +25,7 @@ class TestTypes:
             type=SuggestionType.NEXT_STEP,
             content="git push",
             confidence=SuggestionConfidence.HIGH,
-            reasoning="After commit"
+            reasoning="After commit",
         )
 
         # Should not be able to modify
@@ -54,7 +54,7 @@ class TestTypes:
             type=SuggestionType.NEXT_STEP,
             content="test",
             confidence=SuggestionConfidence.HIGH,
-            reasoning="reason"
+            reasoning="reason",
         )
 
         assert "🎯" in str(suggestion)
@@ -67,27 +67,24 @@ class TestTypes:
                 type=SuggestionType.NEXT_STEP,
                 content="low",
                 confidence=SuggestionConfidence.LOW,
-                reasoning="r"
+                reasoning="r",
             ),
             Suggestion(
                 type=SuggestionType.NEXT_STEP,
                 content="high",
                 confidence=SuggestionConfidence.HIGH,
-                reasoning="r"
+                reasoning="r",
             ),
             Suggestion(
                 type=SuggestionType.NEXT_STEP,
                 content="medium",
                 confidence=SuggestionConfidence.MEDIUM,
-                reasoning="r"
+                reasoning="r",
             ),
         ]
 
         result = SuggestionResult(
-            suggestions=suggestions,
-            context=Context(),
-            generation_time_ms=1.0,
-            patterns_evaluated=3
+            suggestions=suggestions, context=Context(), generation_time_ms=1.0, patterns_evaluated=3
         )
 
         assert result.best_suggestion.content == "high"
@@ -157,7 +154,7 @@ class TestEngine:
                     type=SuggestionType.NEXT_STEP,
                     content="pytest",
                     confidence=SuggestionConfidence.HIGH,
-                    reasoning="Testing"
+                    reasoning="Testing",
                 )
             return None
 
@@ -176,12 +173,13 @@ class TestEngine:
 
         # Register 5 patterns that all match
         for i in range(5):
+
             def suggest(ctx):
                 return Suggestion(
                     type=SuggestionType.NEXT_STEP,
                     content=f"suggestion_{i}",
                     confidence=SuggestionConfidence.MEDIUM,
-                    reasoning="test"
+                    reasoning="test",
                 )
 
             pattern = SuggestionPattern(f"p{i}", "", suggest)
@@ -201,7 +199,7 @@ class TestEngine:
                 type=SuggestionType.NEXT_STEP,
                 content="test",
                 confidence=SuggestionConfidence.HIGH,
-                reasoning="r"
+                reasoning="r",
             )
 
         pattern = SuggestionPattern("test", "", suggest)
@@ -233,7 +231,7 @@ class TestEngine:
                 type=SuggestionType.NEXT_STEP,
                 content="works",
                 confidence=SuggestionConfidence.HIGH,
-                reasoning="r"
+                reasoning="r",
             )
 
         engine.register_pattern(SuggestionPattern("bad", "", bad_pattern))
@@ -253,10 +251,7 @@ class TestBuiltinPatterns:
         engine = SuggestionEngine()
         register_builtin_patterns(engine)
 
-        context = Context(
-            command_history=["git commit -m 'test'"],
-            git_branch="main"
-        )
+        context = Context(command_history=["git commit -m 'test'"], git_branch="main")
 
         result = engine.generate_suggestions(context)
 
@@ -285,10 +280,7 @@ class TestBuiltinPatterns:
         result = engine.generate_suggestions(context)
 
         # Should have safety suggestion
-        assert any(
-            s.type == SuggestionType.ERROR_PREVENTION
-            for s in result.suggestions
-        )
+        assert any(s.type == SuggestionType.ERROR_PREVENTION for s in result.suggestions)
 
     def test_test_after_changes(self):
         """Should suggest tests after code changes."""
@@ -316,7 +308,7 @@ class TestIntegration:
             current_command="git commit -m 'Added feature'",
             command_history=["git add .", "git status"],
             git_branch="feature/new-feature",
-            recent_files=["src/feature.py"]
+            recent_files=["src/feature.py"],
         )
 
         result = engine.generate_suggestions(context)
@@ -330,5 +322,5 @@ class TestIntegration:
         assert best.confidence in [
             SuggestionConfidence.HIGH,
             SuggestionConfidence.MEDIUM,
-            SuggestionConfidence.LOW
+            SuggestionConfidence.LOW,
         ]

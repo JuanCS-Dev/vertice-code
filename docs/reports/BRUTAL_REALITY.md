@@ -1,6 +1,6 @@
 # 🔴 VERDADE BRUTAL: QWEN-DEV-CLI vs GITHUB COPILOT CLI
 
-**Data:** 2025-11-17  
+**Data:** 2025-11-17
 **Status Atual:** ~25-30% de paridade com GitHub Copilot CLI
 
 ---
@@ -19,7 +19,7 @@
 Copilot: "find all python files modified in the last week"
 → Gera: find . -name "*.py" -mtime -7
 
-Nosso: "find all python files modified in the last week"  
+Nosso: "find all python files modified in the last week"
 → Erro: tool "find" não existe
 ```
 - ❌ Só chama tools pré-definidas
@@ -104,7 +104,7 @@ class QwenLLMClient:
     def __init__(self):
         self.api_url = "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-72B-Instruct"
         self.api_key = os.getenv("HF_TOKEN")
-    
+
     async def generate(self, messages, tools=None):
         # Implementação REAL com retry, timeout, etc
         pass
@@ -129,10 +129,10 @@ class QwenLLMClient:
 class CommandStrategy:
     def analyze_intent(self, user_input: str):
         """Decide: use tools OR generate shell command"""
-        
+
     def generate_shell_command(self, intent: dict):
         """Generate actual shell command"""
-        
+
     def execute_hybrid(self, tools: list, commands: list):
         """Execute mix of tools + shell"""
 ```
@@ -143,10 +143,10 @@ class ConversationManager:
     def __init__(self):
         self.history = []
         self.context_window = 4096
-    
+
     def add_message(self, role, content):
         self.history.append(...)
-    
+
     def get_context_for_llm(self):
         # Sliding window + summarization
         pass
@@ -166,7 +166,7 @@ async def execute_with_recovery(self, command, max_retries=3):
         result = await execute(command)
         if result.success:
             return result
-        
+
         # Ask LLM to fix it
         fixed_command = await self.llm.fix_error(
             command=command,
@@ -259,5 +259,5 @@ Sem isso, temos um shell bonito que NÃO PENSA.
 
 ---
 
-**Última atualização:** 2025-11-17 21:23  
+**Última atualização:** 2025-11-17 21:23
 **Autor:** Análise brutal e honesta do projeto

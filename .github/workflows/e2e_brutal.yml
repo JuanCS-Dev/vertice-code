@@ -39,7 +39,7 @@ jobs:
       # Requires GCP_WORKLOAD_IDENTITY_PROVIDER and GCP_SERVICE_ACCOUNT secrets
       - name: Authenticate to Google Cloud
         id: 'auth'
-        if: env.GOOGLE_APPLICATION_CREDENTIALS == '' 
+        if: env.GOOGLE_APPLICATION_CREDENTIALS == ''
         continue-on-error: true # Allow running without secrets (will skip real calls)
         uses: 'google-github-actions/auth@v2'
         with:
@@ -66,7 +66,7 @@ jobs:
             -m "brutal_e2e" \
             --html=e2e-report.html \
             --self-contained-html
-      
+
       - name: Upload E2E Report
         if: always()
         uses: actions/upload-artifact@v4

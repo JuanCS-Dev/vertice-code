@@ -1,6 +1,6 @@
 # 🔬 PHASE 4: INTELLIGENCE LAYER - RESEARCH
 
-**Date:** 2025-11-18  
+**Date:** 2025-11-18
 **Focus:** How Cursor AI and Claude Code implement intelligent suggestions
 
 ---
@@ -131,7 +131,7 @@ if 'react' in dependencies:
         'confidence': 0.9
     })
 
-# Example: Cursor detects Django project  
+# Example: Cursor detects Django project
 if 'django' in dependencies:
     suggestions.append({
         'content': 'python manage.py runserver',
@@ -212,7 +212,7 @@ Cursor maintains a **local learning database:**
 ```
 User: "rm -rf node_modules/"
 
-Claude: 
+Claude:
 "⚠️ This will permanently delete all installed packages.
 
 What this does:
@@ -269,7 +269,7 @@ suggestion = {
     - git push: Upload commits
     - origin: Your GitHub repository
     - main: The main branch
-    
+
     What happens next:
     1. Git authenticates with GitHub
     2. Commits are uploaded
@@ -323,14 +323,14 @@ class RichContext(Context):
     current_command: Optional[str]
     command_history: List[str]
     recent_errors: List[str]
-    
+
     # NEW from Cursor
     recent_files: List[str]           # Last edited (5 mins)
     git_status: GitStatus              # Staged, unstaged, branch
     workspace_type: Optional[str]      # React, Django, Node, etc
     dependencies: Dict[str, str]       # package.json, requirements.txt
     terminal_info: TerminalInfo        # cwd, last_exit_code
-    
+
     # NEW from Claude
     user_expertise: ExpertiseLevel     # BEGINNER, INTERMEDIATE, EXPERT
     risk_tolerance: RiskTolerance      # CAUTIOUS, BALANCED, AGGRESSIVE
@@ -343,30 +343,30 @@ class RichContext(Context):
 # ENHANCEMENT: State machine for workflows
 class WorkflowStateMachine:
     """Track multi-step workflows."""
-    
+
     def __init__(self):
         self.states = {
             'git_workflow': GitWorkflow(),
             'npm_workflow': NpmWorkflow(),
             'docker_workflow': DockerWorkflow()
         }
-    
+
     def suggest_next_step(self, context: RichContext) -> List[Suggestion]:
         """Suggest based on workflow state."""
         suggestions = []
-        
+
         for workflow in self.states.values():
             if workflow.is_active(context):
                 next_steps = workflow.suggest_next(context)
                 suggestions.extend(next_steps)
-        
+
         return suggestions
 
 # Example: GitWorkflow
 class GitWorkflow:
     def suggest_next(self, context):
         last_cmd = context.command_history[-1] if context.command_history else ""
-        
+
         # State machine
         if "git add" in last_cmd:
             return [Suggestion(
@@ -375,7 +375,7 @@ class GitWorkflow:
                 confidence=SuggestionConfidence.HIGH,
                 reasoning="Staged files ready to commit"
             )]
-        
+
         elif "git commit" in last_cmd:
             return [Suggestion(
                 type=SuggestionType.NEXT_STEP,
@@ -383,7 +383,7 @@ class GitWorkflow:
                 confidence=SuggestionConfidence.HIGH,
                 reasoning="Commit ready to push"
             )]
-        
+
         return []
 ```
 
@@ -398,7 +398,7 @@ class RiskScore:
     reversibility: float    # 0.0-1.0 (1.0 = easily reversible)
     scope: float            # 0.0-1.0 (1.0 = affects entire system)
     security: float         # 0.0-1.0
-    
+
     @property
     def overall(self) -> float:
         """Weighted overall risk."""
@@ -408,7 +408,7 @@ class RiskScore:
             self.scope * 0.2 +
             self.security * 0.1
         )
-    
+
     @property
     def level(self) -> str:
         if self.overall > 0.7:
@@ -425,22 +425,22 @@ def assess_risk(command: str) -> RiskScore:
         destructive = 0.9
     elif 'rm ' in command:
         destructive = 0.6
-    
+
     # Reversibility
     reversible = 1.0
     if 'rm ' in command or 'truncate' in command:
         reversible = 0.1
-    
+
     # Scope
     scope = 0.3
     if '/*' in command or '/root' in command:
         scope = 1.0
-    
+
     # Security
     security = 0.0
     if 'curl' in command and '|' in command and 'sh' in command:
         security = 0.9  # Piping curl to sh is dangerous
-    
+
     return RiskScore(
         destructiveness=destructive,
         reversibility=reversible,
@@ -461,14 +461,14 @@ class ExplanationEngine:
         context: RichContext
     ) -> str:
         """Generate explanation based on user expertise."""
-        
+
         if context.user_expertise == ExpertiseLevel.BEGINNER:
             return self._detailed_explanation(suggestion)
         elif context.user_expertise == ExpertiseLevel.INTERMEDIATE:
             return self._balanced_explanation(suggestion)
         else:  # EXPERT
             return self._concise_explanation(suggestion)
-    
+
     def _detailed_explanation(self, suggestion: Suggestion) -> str:
         """Beginner-friendly explanation."""
         return f"""
@@ -483,7 +483,7 @@ Why suggested:
 What happens next:
 {self._predict_outcome(suggestion.content)}
 """
-    
+
     def _concise_explanation(self, suggestion: Suggestion) -> str:
         """Expert-level brief explanation."""
         return f"{suggestion.content} - {suggestion.reasoning}"
@@ -496,17 +496,17 @@ What happens next:
 # ENHANCEMENT: Workspace analyzer
 class WorkspaceAnalyzer:
     """Detect project type and configuration."""
-    
+
     def analyze(self, working_dir: str) -> WorkspaceInfo:
         """Analyze workspace and detect frameworks."""
         info = WorkspaceInfo()
-        
+
         # Check for package.json (Node.js)
         if os.path.exists(f"{working_dir}/package.json"):
             with open(f"{working_dir}/package.json") as f:
                 pkg = json.load(f)
                 info.dependencies = pkg.get('dependencies', {})
-                
+
                 # Detect framework
                 if 'react' in info.dependencies:
                     info.framework = 'react'
@@ -514,7 +514,7 @@ class WorkspaceAnalyzer:
                     info.framework = 'vue'
                 elif 'next' in info.dependencies:
                     info.framework = 'next'
-        
+
         # Check for requirements.txt (Python)
         elif os.path.exists(f"{working_dir}/requirements.txt"):
             with open(f"{working_dir}/requirements.txt") as f:
@@ -523,11 +523,11 @@ class WorkspaceAnalyzer:
                     info.framework = 'django'
                 elif 'flask' in reqs:
                     info.framework = 'flask'
-        
+
         # Check for Cargo.toml (Rust)
         elif os.path.exists(f"{working_dir}/Cargo.toml"):
             info.language = 'rust'
-        
+
         return info
 ```
 

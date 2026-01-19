@@ -23,7 +23,8 @@ class TestSemanticSearch:
         # Create temp directory with test file
         with tempfile.TemporaryDirectory() as tmpdir:
             test_file = Path(tmpdir) / "test.py"
-            test_file.write_text("""
+            test_file.write_text(
+                """
 def hello_world():
     '''Say hello'''
     pass
@@ -31,7 +32,8 @@ def hello_world():
 class MyClass:
     '''A test class'''
     pass
-""")
+"""
+            )
 
             # Index the file
             indexer = SemanticIndexer(root_path=tmpdir)
@@ -40,37 +42,34 @@ class MyClass:
             # Search with semantic mode
             tool = SearchFilesTool()
             result = await tool._execute_validated(
-                pattern="hello",
-                semantic=True,
-                indexer=indexer,
-                max_results=10
+                pattern="hello", semantic=True, indexer=indexer, max_results=10
             )
 
             # Verify: Found the function
             assert result.success is True
             assert len(result.data) >= 1
-            assert any(r['name'] == 'hello_world' for r in result.data)
-            assert result.metadata['tool'] == 'semantic_indexer'
+            assert any(r["name"] == "hello_world" for r in result.data)
+            assert result.metadata["tool"] == "semantic_indexer"
 
     @pytest.mark.asyncio
     async def test_semantic_search_returns_symbol_metadata(self):
         """Test that semantic search returns rich symbol metadata."""
         with tempfile.TemporaryDirectory() as tmpdir:
             test_file = Path(tmpdir) / "code.py"
-            test_file.write_text("""
+            test_file.write_text(
+                """
 def calculate(x: int, y: int) -> int:
     '''Calculate sum of x and y'''
     return x + y
-""")
+"""
+            )
 
             indexer = SemanticIndexer(root_path=tmpdir)
             indexer.index_codebase()
 
             tool = SearchFilesTool()
             result = await tool._execute_validated(
-                pattern="calculate",
-                semantic=True,
-                indexer=indexer
+                pattern="calculate", semantic=True, indexer=indexer
             )
 
             # Verify: Returns metadata
@@ -78,11 +77,11 @@ def calculate(x: int, y: int) -> int:
             assert len(result.data) == 1
 
             symbol = result.data[0]
-            assert symbol['name'] == 'calculate'
-            assert symbol['type'] == 'function'
-            assert 'signature' in symbol
-            assert 'docstring' in symbol
-            assert 'Calculate sum' in symbol['docstring']
+            assert symbol["name"] == "calculate"
+            assert symbol["type"] == "function"
+            assert "signature" in symbol
+            assert "docstring" in symbol
+            assert "Calculate sum" in symbol["docstring"]
 
     @pytest.mark.asyncio
     async def test_semantic_search_faster_than_text(self):
@@ -93,13 +92,15 @@ def calculate(x: int, y: int) -> int:
             # Create multiple files
             for i in range(10):
                 test_file = Path(tmpdir) / f"module{i}.py"
-                test_file.write_text(f"""
+                test_file.write_text(
+                    f"""
 def func{i}():
     pass
 
 class Class{i}:
     pass
-""")
+"""
+                )
 
             indexer = SemanticIndexer(root_path=tmpdir)
             indexer.index_codebase()
@@ -109,9 +110,7 @@ class Class{i}:
             # Semantic search
             start = time.time()
             result_semantic = await tool._execute_validated(
-                pattern="func5",
-                semantic=True,
-                indexer=indexer
+                pattern="func5", semantic=True, indexer=indexer
             )
             time_semantic = time.time() - start
 
@@ -137,10 +136,7 @@ class Class{i}:
 
             # Should handle error gracefully (either fallback or error result)
             result = await tool._execute_validated(
-                pattern="hello",
-                semantic=True,
-                indexer=indexer,
-                path=tmpdir
+                pattern="hello", semantic=True, indexer=indexer, path=tmpdir
             )
 
             # Verify: Either succeeds with fallback OR returns error gracefully
@@ -158,12 +154,12 @@ class Class{i}:
             result = await tool._execute_validated(
                 pattern="hello",
                 path=tmpdir,
-                semantic=False  # Explicit text search
+                semantic=False,  # Explicit text search
             )
 
             # Verify: Text search works
             assert result.success is True
-            assert result.metadata['tool'] in ['ripgrep', 'grep']
+            assert result.metadata["tool"] in ["ripgrep", "grep"]
 
     @pytest.mark.asyncio
     async def test_semantic_search_empty_query(self):
@@ -177,15 +173,13 @@ class Class{i}:
 
             tool = SearchFilesTool()
             result = await tool._execute_validated(
-                pattern="nonexistent_symbol",
-                semantic=True,
-                indexer=indexer
+                pattern="nonexistent_symbol", semantic=True, indexer=indexer
             )
 
             # Verify: Returns empty results (not error)
             assert result.success is True
             assert len(result.data) == 0
-            assert result.metadata['count'] == 0
+            assert result.metadata["count"] == 0
 
 
 if __name__ == "__main__":

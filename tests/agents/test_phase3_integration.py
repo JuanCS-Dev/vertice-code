@@ -17,6 +17,7 @@ import asyncio
 # HYBRID MESH TESTS
 # =============================================================================
 
+
 class TestCoordinationTopology:
     """Tests for CoordinationTopology enum."""
 
@@ -275,6 +276,7 @@ class TestHybridMeshMixin:
 # =============================================================================
 # A2A PROTOCOL TESTS
 # =============================================================================
+
 
 class TestTaskStatus:
     """Tests for TaskStatus enum."""
@@ -580,6 +582,7 @@ class TestJSONRPC:
 # METACOGNITION TESTS
 # =============================================================================
 
+
 class TestConfidenceLevel:
     """Tests for ConfidenceLevel enum."""
 
@@ -763,10 +766,7 @@ class TestExperienceMemory:
         from core.metacognition import ExperienceMemory
 
         memory = ExperienceMemory()
-        memory.record_experience(
-            "coding", "tdd", "success", 0.5, 0.8,
-            ["Write tests first"]
-        )
+        memory.record_experience("coding", "tdd", "success", 0.5, 0.8, ["Write tests first"])
 
         lessons = memory.get_relevant_lessons("coding")
         assert "Write tests first" in lessons
@@ -906,6 +906,7 @@ class TestMetaCognitiveMixin:
 # BENCHMARK TESTS
 # =============================================================================
 
+
 class TestBenchmarkCategory:
     """Tests for BenchmarkCategory enum."""
 
@@ -1005,15 +1006,16 @@ class TestBenchmarkSuite:
 
     def test_add_task(self):
         from core.benchmarks import (
-            BenchmarkSuite, BenchmarkTask,
-            BenchmarkCategory, DifficultyLevel
+            BenchmarkSuite,
+            BenchmarkTask,
+            BenchmarkCategory,
+            DifficultyLevel,
         )
 
-        suite = BenchmarkSuite(
-            id="test", name="Test", description="Test", version="1.0"
-        )
+        suite = BenchmarkSuite(id="test", name="Test", description="Test", version="1.0")
         task = BenchmarkTask(
-            id="t1", name="T1",
+            id="t1",
+            name="T1",
             category=BenchmarkCategory.CODE_GENERATION,
             difficulty=DifficultyLevel.EASY,
             description="Test",
@@ -1025,23 +1027,33 @@ class TestBenchmarkSuite:
 
     def test_get_tasks_by_category(self):
         from core.benchmarks import (
-            BenchmarkSuite, BenchmarkTask,
-            BenchmarkCategory, DifficultyLevel
+            BenchmarkSuite,
+            BenchmarkTask,
+            BenchmarkCategory,
+            DifficultyLevel,
         )
 
         suite = BenchmarkSuite(id="s", name="S", description="S", version="1")
-        suite.add_task(BenchmarkTask(
-            id="t1", name="T1",
-            category=BenchmarkCategory.CODE_GENERATION,
-            difficulty=DifficultyLevel.EASY,
-            description="", input_data={},
-        ))
-        suite.add_task(BenchmarkTask(
-            id="t2", name="T2",
-            category=BenchmarkCategory.TERMINAL,
-            difficulty=DifficultyLevel.EASY,
-            description="", input_data={},
-        ))
+        suite.add_task(
+            BenchmarkTask(
+                id="t1",
+                name="T1",
+                category=BenchmarkCategory.CODE_GENERATION,
+                difficulty=DifficultyLevel.EASY,
+                description="",
+                input_data={},
+            )
+        )
+        suite.add_task(
+            BenchmarkTask(
+                id="t2",
+                name="T2",
+                category=BenchmarkCategory.TERMINAL,
+                difficulty=DifficultyLevel.EASY,
+                description="",
+                input_data={},
+            )
+        )
 
         code_tasks = suite.get_tasks_by_category(BenchmarkCategory.CODE_GENERATION)
         assert len(code_tasks) == 1
@@ -1052,16 +1064,20 @@ class TestBenchmarkValidator:
 
     def test_exact_match_validator_pass(self):
         from core.benchmarks import (
-            ExactMatchValidator, BenchmarkTask,
-            BenchmarkCategory, DifficultyLevel
+            ExactMatchValidator,
+            BenchmarkTask,
+            BenchmarkCategory,
+            DifficultyLevel,
         )
 
         validator = ExactMatchValidator()
         task = BenchmarkTask(
-            id="t1", name="T1",
+            id="t1",
+            name="T1",
             category=BenchmarkCategory.CODE_GENERATION,
             difficulty=DifficultyLevel.EASY,
-            description="", input_data={},
+            description="",
+            input_data={},
             expected_output={"result": "success"},
         )
 
@@ -1072,16 +1088,20 @@ class TestBenchmarkValidator:
 
     def test_exact_match_validator_fail(self):
         from core.benchmarks import (
-            ExactMatchValidator, BenchmarkTask,
-            BenchmarkCategory, DifficultyLevel
+            ExactMatchValidator,
+            BenchmarkTask,
+            BenchmarkCategory,
+            DifficultyLevel,
         )
 
         validator = ExactMatchValidator()
         task = BenchmarkTask(
-            id="t1", name="T1",
+            id="t1",
+            name="T1",
             category=BenchmarkCategory.CODE_GENERATION,
             difficulty=DifficultyLevel.EASY,
-            description="", input_data={},
+            description="",
+            input_data={},
             expected_output={"result": "success"},
         )
 
@@ -1092,16 +1112,20 @@ class TestBenchmarkValidator:
 
     def test_contains_validator(self):
         from core.benchmarks import (
-            ContainsValidator, BenchmarkTask,
-            BenchmarkCategory, DifficultyLevel
+            ContainsValidator,
+            BenchmarkTask,
+            BenchmarkCategory,
+            DifficultyLevel,
         )
 
         validator = ContainsValidator()
         task = BenchmarkTask(
-            id="t1", name="T1",
+            id="t1",
+            name="T1",
             category=BenchmarkCategory.CODE_GENERATION,
             difficulty=DifficultyLevel.EASY,
-            description="", input_data={},
+            description="",
+            input_data={},
             expected_output={"a": 1, "b": 2},
         )
 
@@ -1135,19 +1159,26 @@ class TestBenchmarkRunner:
     @pytest.mark.asyncio
     async def test_run_suite(self):
         from core.benchmarks import (
-            BenchmarkRunner, BenchmarkSuite, BenchmarkTask,
-            BenchmarkCategory, DifficultyLevel
+            BenchmarkRunner,
+            BenchmarkSuite,
+            BenchmarkTask,
+            BenchmarkCategory,
+            DifficultyLevel,
         )
 
         runner = BenchmarkRunner()
         suite = BenchmarkSuite(id="s", name="S", description="S", version="1")
-        suite.add_task(BenchmarkTask(
-            id="t1", name="T1",
-            category=BenchmarkCategory.CODE_GENERATION,
-            difficulty=DifficultyLevel.EASY,
-            description="", input_data={},
-            expected_output={"result": "ok"},
-        ))
+        suite.add_task(
+            BenchmarkTask(
+                id="t1",
+                name="T1",
+                category=BenchmarkCategory.CODE_GENERATION,
+                difficulty=DifficultyLevel.EASY,
+                description="",
+                input_data={},
+                expected_output={"result": "ok"},
+            )
+        )
 
         async def executor(task):
             return {"result": "ok"}
@@ -1160,19 +1191,26 @@ class TestBenchmarkRunner:
     @pytest.mark.asyncio
     async def test_run_suite_with_timeout(self):
         from core.benchmarks import (
-            BenchmarkRunner, BenchmarkSuite, BenchmarkTask,
-            BenchmarkCategory, DifficultyLevel
+            BenchmarkRunner,
+            BenchmarkSuite,
+            BenchmarkTask,
+            BenchmarkCategory,
+            DifficultyLevel,
         )
 
         runner = BenchmarkRunner()
         suite = BenchmarkSuite(id="s", name="S", description="S", version="1")
-        suite.add_task(BenchmarkTask(
-            id="t1", name="T1",
-            category=BenchmarkCategory.CODE_GENERATION,
-            difficulty=DifficultyLevel.EASY,
-            description="", input_data={},
-            timeout_seconds=1,
-        ))
+        suite.add_task(
+            BenchmarkTask(
+                id="t1",
+                name="T1",
+                category=BenchmarkCategory.CODE_GENERATION,
+                difficulty=DifficultyLevel.EASY,
+                description="",
+                input_data={},
+                timeout_seconds=1,
+            )
+        )
 
         async def slow_executor(task):
             await asyncio.sleep(10)
@@ -1251,9 +1289,7 @@ class TestBenchmarkMixin:
             pass
 
         agent = TestAgent()
-        custom_suite = BenchmarkSuite(
-            id="custom", name="Custom", description="Custom", version="1"
-        )
+        custom_suite = BenchmarkSuite(id="custom", name="Custom", description="Custom", version="1")
         agent.register_suite(custom_suite)
 
         assert "custom" in agent.get_available_suites()
@@ -1304,6 +1340,7 @@ class TestBenchmarkMixin:
 # INTEGRATION TESTS
 # =============================================================================
 
+
 class TestPhase3Integration:
     """Integration tests combining all Phase 3 components."""
 
@@ -1314,12 +1351,7 @@ class TestPhase3Integration:
         from core.metacognition import MetaCognitiveMixin
         from core.benchmarks import BenchmarkMixin
 
-        class AdvancedAgent(
-            HybridMeshMixin,
-            A2AProtocolMixin,
-            MetaCognitiveMixin,
-            BenchmarkMixin
-        ):
+        class AdvancedAgent(HybridMeshMixin, A2AProtocolMixin, MetaCognitiveMixin, BenchmarkMixin):
             name = "advanced-agent"
             description = "Agent with all Phase 3 capabilities"
 
@@ -1383,6 +1415,7 @@ class TestPhase3Integration:
 # =============================================================================
 # ADDITIONAL COVERAGE TESTS
 # =============================================================================
+
 
 class TestTaskRouteDataclass:
     """Additional tests for TaskRoute."""
@@ -1568,77 +1601,93 @@ class TestTestPassValidator:
 
     def test_validator_with_test_results(self):
         from core.benchmarks import (
-            TestPassValidator, BenchmarkTask,
-            BenchmarkCategory, DifficultyLevel
+            TestPassValidator,
+            BenchmarkTask,
+            BenchmarkCategory,
+            DifficultyLevel,
         )
 
         validator = TestPassValidator()
         task = BenchmarkTask(
-            id="t1", name="T1",
+            id="t1",
+            name="T1",
             category=BenchmarkCategory.CODE_GENERATION,
             difficulty=DifficultyLevel.EASY,
-            description="", input_data={},
+            description="",
+            input_data={},
         )
 
         # Test with passing tests
-        passed, score, details = validator.validate(task, {
-            "test_results": {"passed": 10, "failed": 0}
-        })
+        passed, score, details = validator.validate(
+            task, {"test_results": {"passed": 10, "failed": 0}}
+        )
         assert passed is True
         assert score == 1.0
 
     def test_validator_with_failed_tests(self):
         from core.benchmarks import (
-            TestPassValidator, BenchmarkTask,
-            BenchmarkCategory, DifficultyLevel
+            TestPassValidator,
+            BenchmarkTask,
+            BenchmarkCategory,
+            DifficultyLevel,
         )
 
         validator = TestPassValidator()
         task = BenchmarkTask(
-            id="t1", name="T1",
+            id="t1",
+            name="T1",
             category=BenchmarkCategory.CODE_GENERATION,
             difficulty=DifficultyLevel.EASY,
-            description="", input_data={},
+            description="",
+            input_data={},
         )
 
-        passed, score, details = validator.validate(task, {
-            "test_results": {"passed": 8, "failed": 2}
-        })
+        passed, score, details = validator.validate(
+            task, {"test_results": {"passed": 8, "failed": 2}}
+        )
         assert passed is False
         assert score == 0.8
 
     def test_validator_no_tests_executed(self):
         from core.benchmarks import (
-            TestPassValidator, BenchmarkTask,
-            BenchmarkCategory, DifficultyLevel
+            TestPassValidator,
+            BenchmarkTask,
+            BenchmarkCategory,
+            DifficultyLevel,
         )
 
         validator = TestPassValidator()
         task = BenchmarkTask(
-            id="t1", name="T1",
+            id="t1",
+            name="T1",
             category=BenchmarkCategory.CODE_GENERATION,
             difficulty=DifficultyLevel.EASY,
-            description="", input_data={},
+            description="",
+            input_data={},
         )
 
-        passed, score, details = validator.validate(task, {
-            "test_results": {"passed": 0, "failed": 0}
-        })
+        passed, score, details = validator.validate(
+            task, {"test_results": {"passed": 0, "failed": 0}}
+        )
         assert passed is False
         assert "No tests executed" in details["error"]
 
     def test_validator_no_test_results(self):
         from core.benchmarks import (
-            TestPassValidator, BenchmarkTask,
-            BenchmarkCategory, DifficultyLevel
+            TestPassValidator,
+            BenchmarkTask,
+            BenchmarkCategory,
+            DifficultyLevel,
         )
 
         validator = TestPassValidator()
         task = BenchmarkTask(
-            id="t1", name="T1",
+            id="t1",
+            name="T1",
             category=BenchmarkCategory.CODE_GENERATION,
             difficulty=DifficultyLevel.EASY,
-            description="", input_data={},
+            description="",
+            input_data={},
         )
 
         passed, score, details = validator.validate(task, {"other": "data"})
@@ -1650,9 +1699,7 @@ class TestSuiteRunResult:
     """Tests for SuiteRunResult."""
 
     def test_suite_run_result_to_dict(self):
-        from core.benchmarks import (
-            SuiteRunResult, BenchmarkResult, BenchmarkStatus
-        )
+        from core.benchmarks import SuiteRunResult, BenchmarkResult, BenchmarkStatus
 
         result = SuiteRunResult(
             suite_id="suite-1",
@@ -1682,23 +1729,33 @@ class TestBenchmarkSuiteFilters:
 
     def test_get_tasks_by_difficulty(self):
         from core.benchmarks import (
-            BenchmarkSuite, BenchmarkTask,
-            BenchmarkCategory, DifficultyLevel
+            BenchmarkSuite,
+            BenchmarkTask,
+            BenchmarkCategory,
+            DifficultyLevel,
         )
 
         suite = BenchmarkSuite(id="s", name="S", description="S", version="1")
-        suite.add_task(BenchmarkTask(
-            id="t1", name="T1",
-            category=BenchmarkCategory.CODE_GENERATION,
-            difficulty=DifficultyLevel.EASY,
-            description="", input_data={},
-        ))
-        suite.add_task(BenchmarkTask(
-            id="t2", name="T2",
-            category=BenchmarkCategory.CODE_GENERATION,
-            difficulty=DifficultyLevel.HARD,
-            description="", input_data={},
-        ))
+        suite.add_task(
+            BenchmarkTask(
+                id="t1",
+                name="T1",
+                category=BenchmarkCategory.CODE_GENERATION,
+                difficulty=DifficultyLevel.EASY,
+                description="",
+                input_data={},
+            )
+        )
+        suite.add_task(
+            BenchmarkTask(
+                id="t2",
+                name="T2",
+                category=BenchmarkCategory.CODE_GENERATION,
+                difficulty=DifficultyLevel.HARD,
+                description="",
+                input_data={},
+            )
+        )
 
         easy_tasks = suite.get_tasks_by_difficulty(DifficultyLevel.EASY)
         assert len(easy_tasks) == 1
@@ -1732,9 +1789,7 @@ class TestExperienceMemoryEdgeCases:
         memory = ExperienceMemory(max_records=5)
 
         for i in range(10):
-            memory.record_experience(
-                f"task-{i}", "strategy", "success", 0.5, 0.8, []
-            )
+            memory.record_experience(f"task-{i}", "strategy", "success", 0.5, 0.8, [])
 
         # Should only keep max_records
         stats = memory.get_memory_stats()
@@ -1787,9 +1842,7 @@ class TestMetaCognitiveMixinAdvanced:
 
         # Record some experiences
         for _ in range(5):
-            agent._experience_memory.record_experience(
-                "coding", "tdd", "success", 0.5, 0.9, []
-            )
+            agent._experience_memory.record_experience("coding", "tdd", "success", 0.5, 0.9, [])
 
         suggestion = agent.get_strategy_suggestion("implement feature")
         assert suggestion == "tdd"
@@ -2043,18 +2096,25 @@ class TestBenchmarkRunnerAdvanced:
     @pytest.mark.asyncio
     async def test_run_suite_with_error(self):
         from core.benchmarks import (
-            BenchmarkRunner, BenchmarkSuite, BenchmarkTask,
-            BenchmarkCategory, DifficultyLevel
+            BenchmarkRunner,
+            BenchmarkSuite,
+            BenchmarkTask,
+            BenchmarkCategory,
+            DifficultyLevel,
         )
 
         runner = BenchmarkRunner()
         suite = BenchmarkSuite(id="s", name="S", description="S", version="1")
-        suite.add_task(BenchmarkTask(
-            id="t1", name="T1",
-            category=BenchmarkCategory.CODE_GENERATION,
-            difficulty=DifficultyLevel.EASY,
-            description="", input_data={},
-        ))
+        suite.add_task(
+            BenchmarkTask(
+                id="t1",
+                name="T1",
+                category=BenchmarkCategory.CODE_GENERATION,
+                difficulty=DifficultyLevel.EASY,
+                description="",
+                input_data={},
+            )
+        )
 
         async def failing_executor(task):
             raise RuntimeError("Executor error")
@@ -2065,19 +2125,26 @@ class TestBenchmarkRunnerAdvanced:
     @pytest.mark.asyncio
     async def test_run_suite_with_sync_executor(self):
         from core.benchmarks import (
-            BenchmarkRunner, BenchmarkSuite, BenchmarkTask,
-            BenchmarkCategory, DifficultyLevel
+            BenchmarkRunner,
+            BenchmarkSuite,
+            BenchmarkTask,
+            BenchmarkCategory,
+            DifficultyLevel,
         )
 
         runner = BenchmarkRunner()
         suite = BenchmarkSuite(id="s", name="S", description="S", version="1")
-        suite.add_task(BenchmarkTask(
-            id="t1", name="T1",
-            category=BenchmarkCategory.CODE_GENERATION,
-            difficulty=DifficultyLevel.EASY,
-            description="", input_data={},
-            expected_output={"result": "ok"},
-        ))
+        suite.add_task(
+            BenchmarkTask(
+                id="t1",
+                name="T1",
+                category=BenchmarkCategory.CODE_GENERATION,
+                difficulty=DifficultyLevel.EASY,
+                description="",
+                input_data={},
+                expected_output={"result": "ok"},
+            )
+        )
 
         def sync_executor(task):
             return {"result": "ok"}
@@ -2088,18 +2155,25 @@ class TestBenchmarkRunnerAdvanced:
     @pytest.mark.asyncio
     async def test_run_suite_with_progress_callback(self):
         from core.benchmarks import (
-            BenchmarkRunner, BenchmarkSuite, BenchmarkTask,
-            BenchmarkCategory, DifficultyLevel
+            BenchmarkRunner,
+            BenchmarkSuite,
+            BenchmarkTask,
+            BenchmarkCategory,
+            DifficultyLevel,
         )
 
         runner = BenchmarkRunner()
         suite = BenchmarkSuite(id="s", name="S", description="S", version="1")
-        suite.add_task(BenchmarkTask(
-            id="t1", name="T1",
-            category=BenchmarkCategory.CODE_GENERATION,
-            difficulty=DifficultyLevel.EASY,
-            description="", input_data={},
-        ))
+        suite.add_task(
+            BenchmarkTask(
+                id="t1",
+                name="T1",
+                category=BenchmarkCategory.CODE_GENERATION,
+                difficulty=DifficultyLevel.EASY,
+                description="",
+                input_data={},
+            )
+        )
 
         progress_calls = []
 
@@ -2119,16 +2193,20 @@ class TestContainsValidatorPartialMatch:
 
     def test_contains_partial_string_match(self):
         from core.benchmarks import (
-            ContainsValidator, BenchmarkTask,
-            BenchmarkCategory, DifficultyLevel
+            ContainsValidator,
+            BenchmarkTask,
+            BenchmarkCategory,
+            DifficultyLevel,
         )
 
         validator = ContainsValidator()
         task = BenchmarkTask(
-            id="t1", name="T1",
+            id="t1",
+            name="T1",
             category=BenchmarkCategory.CODE_GENERATION,
             difficulty=DifficultyLevel.EASY,
-            description="", input_data={},
+            description="",
+            input_data={},
             expected_output={"message": "hello"},
         )
 
@@ -2138,16 +2216,20 @@ class TestContainsValidatorPartialMatch:
 
     def test_contains_no_match(self):
         from core.benchmarks import (
-            ContainsValidator, BenchmarkTask,
-            BenchmarkCategory, DifficultyLevel
+            ContainsValidator,
+            BenchmarkTask,
+            BenchmarkCategory,
+            DifficultyLevel,
         )
 
         validator = ContainsValidator()
         task = BenchmarkTask(
-            id="t1", name="T1",
+            id="t1",
+            name="T1",
             category=BenchmarkCategory.CODE_GENERATION,
             difficulty=DifficultyLevel.EASY,
-            description="", input_data={},
+            description="",
+            input_data={},
             expected_output={"key": "value"},
         )
 
@@ -2186,20 +2268,30 @@ class TestReflectionEngineConfidenceDrops:
 # 100% COVERAGE TESTS - QUERÊNCIA!
 # =============================================================================
 
+
 class TestBenchmarkMixinFullCoverage:
     """Tests for 100% coverage of benchmarks/mixin.py."""
 
     def test_default_benchmark_executor(self):
         """Cover line 113: _default_benchmark_executor."""
-        from core.benchmarks import BenchmarkMixin, BenchmarkTask, BenchmarkCategory, DifficultyLevel
+        from core.benchmarks import (
+            BenchmarkMixin,
+            BenchmarkTask,
+            BenchmarkCategory,
+            DifficultyLevel,
+        )
 
         class TestOrchestrator(BenchmarkMixin):
             pass
 
         orchestrator = TestOrchestrator()
         task = BenchmarkTask(
-            id="test", name="Test", category=BenchmarkCategory.CODE_GENERATION,
-            difficulty=DifficultyLevel.EASY, description="Test", input_data={}
+            id="test",
+            name="Test",
+            category=BenchmarkCategory.CODE_GENERATION,
+            difficulty=DifficultyLevel.EASY,
+            description="Test",
+            input_data={},
         )
         result = orchestrator._default_benchmark_executor(task)
         assert result == {"status": "not_implemented"}
@@ -2228,14 +2320,36 @@ class TestBenchmarkMixinFullCoverage:
         # Add fake history
         orchestrator._benchmark_history = [
             SuiteRunResult(
-                suite_id="suite-a", run_id="run-1", results=[], start_time="", end_time="",
-                total_tasks=0, passed=0, failed=0, errors=0, timeouts=0, skipped=0,
-                avg_execution_time_ms=0, total_tokens=0, pass_rate=0.0
+                suite_id="suite-a",
+                run_id="run-1",
+                results=[],
+                start_time="",
+                end_time="",
+                total_tasks=0,
+                passed=0,
+                failed=0,
+                errors=0,
+                timeouts=0,
+                skipped=0,
+                avg_execution_time_ms=0,
+                total_tokens=0,
+                pass_rate=0.0,
             ),
             SuiteRunResult(
-                suite_id="suite-b", run_id="run-2", results=[], start_time="", end_time="",
-                total_tasks=0, passed=0, failed=0, errors=0, timeouts=0, skipped=0,
-                avg_execution_time_ms=0, total_tokens=0, pass_rate=0.0
+                suite_id="suite-b",
+                run_id="run-2",
+                results=[],
+                start_time="",
+                end_time="",
+                total_tasks=0,
+                passed=0,
+                failed=0,
+                errors=0,
+                timeouts=0,
+                skipped=0,
+                avg_execution_time_ms=0,
+                total_tokens=0,
+                pass_rate=0.0,
             ),
         ]
         history = orchestrator.get_benchmark_history(suite_id="suite-a")
@@ -2264,14 +2378,36 @@ class TestBenchmarkMixinFullCoverage:
         orchestrator._init_benchmarks()
         orchestrator._benchmark_history = [
             SuiteRunResult(
-                suite_id="suite", run_id="run-a", results=[], start_time="", end_time="",
-                total_tasks=10, passed=8, failed=2, errors=0, timeouts=0, skipped=0,
-                avg_execution_time_ms=100, total_tokens=1000, pass_rate=0.8
+                suite_id="suite",
+                run_id="run-a",
+                results=[],
+                start_time="",
+                end_time="",
+                total_tasks=10,
+                passed=8,
+                failed=2,
+                errors=0,
+                timeouts=0,
+                skipped=0,
+                avg_execution_time_ms=100,
+                total_tokens=1000,
+                pass_rate=0.8,
             ),
             SuiteRunResult(
-                suite_id="suite", run_id="run-b", results=[], start_time="", end_time="",
-                total_tasks=10, passed=9, failed=1, errors=0, timeouts=0, skipped=0,
-                avg_execution_time_ms=90, total_tokens=900, pass_rate=0.9
+                suite_id="suite",
+                run_id="run-b",
+                results=[],
+                start_time="",
+                end_time="",
+                total_tasks=10,
+                passed=9,
+                failed=1,
+                errors=0,
+                timeouts=0,
+                skipped=0,
+                avg_execution_time_ms=90,
+                total_tokens=900,
+                pass_rate=0.9,
             ),
         ]
         result = orchestrator.compare_runs("run-a", "run-b")
@@ -2313,12 +2449,21 @@ class TestBenchmarkValidatorFullCoverage:
 
     def test_base_validator_raises_not_implemented(self):
         """Cover line 31: BenchmarkValidator.validate raises NotImplementedError."""
-        from core.benchmarks import BenchmarkValidator, BenchmarkTask, BenchmarkCategory, DifficultyLevel
+        from core.benchmarks import (
+            BenchmarkValidator,
+            BenchmarkTask,
+            BenchmarkCategory,
+            DifficultyLevel,
+        )
 
         validator = BenchmarkValidator()
         task = BenchmarkTask(
-            id="test", name="Test", category=BenchmarkCategory.CODE_GENERATION,
-            difficulty=DifficultyLevel.EASY, description="Test", input_data={}
+            id="test",
+            name="Test",
+            category=BenchmarkCategory.CODE_GENERATION,
+            difficulty=DifficultyLevel.EASY,
+            description="Test",
+            input_data={},
         )
         with pytest.raises(NotImplementedError):
             validator.validate(task, {})
@@ -2437,7 +2582,7 @@ class TestMetacognitionEngineFullCoverage:
         outcome, confidence, reasoning = engine.evaluate_decision(
             decision="simple_choice",
             alternatives=[],  # No alternatives = no penalty
-            context={}  # Empty context = no penalty
+            context={},  # Empty context = no penalty
         )
         assert outcome == ReflectionOutcome.PROCEED
         assert confidence > 0.7
@@ -2494,7 +2639,7 @@ class TestMetacognitionMixinFullCoverage:
             outcome="success",
             confidence_before=0.5,
             confidence_after=0.8,
-            lessons_learned=["Write tests first", "Keep functions small"]
+            lessons_learned=["Write tests first", "Keep functions small"],
         )
 
         # Begin reflection on a coding task - should apply lessons
@@ -2516,7 +2661,12 @@ class TestMetacognitionMixinFullCoverage:
     def test_should_continue_abort(self):
         """Cover line 108: should_continue with ABORT outcome using mock."""
         from unittest.mock import patch
-        from core.metacognition import MetaCognitiveMixin, ReflectionOutcome, ReflectionResult, ReflectionLevel
+        from core.metacognition import (
+            MetaCognitiveMixin,
+            ReflectionOutcome,
+            ReflectionResult,
+            ReflectionLevel,
+        )
 
         class TestAgent(MetaCognitiveMixin):
             pass
@@ -2531,11 +2681,11 @@ class TestMetacognitionMixinFullCoverage:
             outcome=ReflectionOutcome.ABORT,
             confidence=0.0,
             reasoning="Critical failure detected",
-            suggestions=[]
+            suggestions=[],
         )
 
         # Mock the reflect method to return ABORT
-        with patch.object(agent, 'reflect', return_value=abort_result):
+        with patch.object(agent, "reflect", return_value=abort_result):
             should_continue, reason = agent.should_continue(threshold=0.5)
             assert should_continue is False
             assert "Reflection suggests aborting" in reason
@@ -2614,7 +2764,7 @@ class TestProtocolsJsonrpcFullCoverage:
             code=-32000,
             message="Custom error",
             request_id="req-123",
-            data={"details": "Something went wrong"}
+            data={"details": "Something went wrong"},
         )
         assert error["error"]["data"] == {"details": "Something went wrong"}
 
@@ -2669,7 +2819,7 @@ class TestProtocolsMixinFullCoverage:
                 raise RuntimeError("Simulated processing error")
             return original_add_message(role, content)
 
-        with patch.object(task, 'add_message', side_effect=raise_on_agent_message):
+        with patch.object(task, "add_message", side_effect=raise_on_agent_message):
             result = await agent.process_task(task)
 
         # The exception should be caught and task should be FAILED

@@ -15,7 +15,7 @@ from vertice_cli.core.llm import (
     CircuitBreaker,
     CircuitState,
     RateLimiter,
-    RequestMetrics
+    RequestMetrics,
 )
 
 
@@ -200,7 +200,7 @@ class TestLLMClientResilience:
             max_retries=3,
             enable_circuit_breaker=True,
             enable_rate_limiting=True,
-            enable_telemetry=True
+            enable_telemetry=True,
         )
 
         assert client.max_retries == 3
@@ -298,6 +298,7 @@ class TestLLMClientFailover:
         # Simplified test - just verify failover logic exists
         providers = client._get_failover_providers()
         assert len(providers) >= 1
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

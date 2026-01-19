@@ -31,18 +31,18 @@ async def edit_file(
     # Validações robustas
     if not old_string:
         return ToolResult(success=False, error="old_string cannot be empty")
-    
+
     # Backup automático
     if create_backup:
         backup_path = file_path.with_suffix(file_path.suffix + ".bak")
         backup_path.write_text(content, encoding=encoding)
-    
+
     # Substituição inteligente
     if replace_all:
         new_content = content.replace(old_string, new_string)
     else:
         new_content = content.replace(old_string, new_string, 1)
-    
+
     # Validação de tamanho
     if len(new_content.encode('utf-8')) > 100 * 1024 * 1024:
         return ToolResult(success=False, error=f"Result too large")

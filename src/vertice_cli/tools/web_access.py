@@ -320,7 +320,7 @@ class DownloadFileTool(ValidatedTool):
                     resp.raise_for_status()
 
                     # Get file size if available
-                    total_size = int(resp.headers.get("content-length", 0))
+                    int(resp.headers.get("content-length", 0))
 
                     # Write to file
                     with open(dest_path, "wb") as f:

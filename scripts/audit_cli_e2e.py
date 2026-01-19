@@ -53,7 +53,7 @@ def test_core_imports():
 
     for module, submodules in imports_to_test:
         try:
-            imported = __import__(module, fromlist=submodules or ["__init__"])
+            __import__(module, fromlist=submodules or ["__init__"])
             log_result("imports", module, True, "imported")
         except Exception as e:
             log_result("imports", module, False, str(e)[:60])

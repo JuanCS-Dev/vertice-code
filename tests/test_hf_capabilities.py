@@ -20,7 +20,7 @@ import numpy as np
 @pytest.fixture
 def hf_client():
     """Real HF client for testing."""
-    token = os.getenv('HF_TOKEN')
+    token = os.getenv("HF_TOKEN")
     if not token:
         pytest.skip("HF_TOKEN not set - skipping real API tests")
     return InferenceClient(token=token)
@@ -72,20 +72,13 @@ class TestSentenceSimilarity:
         """Should detect semantically similar code."""
         user_query = "How do I add two numbers?"
 
-        context_options = [
-            "def add(a, b): return a + b",
-            "class FileReader: pass",
-            "import os"
-        ]
+        context_options = ["def add(a, b): return a + b", "class FileReader: pass", "import os"]
 
         # Test similarity scoring
         scores = []
         for ctx in context_options:
             try:
-                score = hf_client.sentence_similarity(
-                    user_query,
-                    ctx
-                )
+                score = hf_client.sentence_similarity(user_query, ctx)
                 scores.append(score)
             except Exception as e:
                 # Fallback: some models don't support this
@@ -116,7 +109,7 @@ class TestSummarization:
             assert summary is not None
             assert len(summary) > 0
             assert isinstance(summary[0], dict)
-            assert 'summary_text' in summary[0]
+            assert "summary_text" in summary[0]
         except Exception as e:
             # Some models may not support summarization
             pytest.skip(f"Summarization not supported: {e}")
@@ -128,28 +121,24 @@ class TestSummarization:
         class ComplexSystem:
             def __init__(self):
                 self.data = []
-            
+
             def process(self, item):
                 self.data.append(item)
                 return self._validate(item)
-            
+
             def _validate(self, item):
                 return item is not None
-            
+
             def get_results(self):
                 return [x for x in self.data if x]
         """
 
         try:
-            summary = hf_client.summarization(
-                long_code,
-                max_length=30,
-                min_length=10
-            )
+            summary = hf_client.summarization(long_code, max_length=30, min_length=10)
 
             assert summary is not None
             # Summary should be shorter than input
-            summary_text = summary[0]['summary_text']
+            summary_text = summary[0]["summary_text"]
             assert len(summary_text) < len(long_code)
         except Exception as e:
             pytest.skip(f"Summarization not supported: {e}")
@@ -172,18 +161,15 @@ class TestQuestionAnswering:
         question = "What does this function do?"
 
         try:
-            answer = hf_client.question_answering(
-                question=question,
-                context=context
-            )
+            answer = hf_client.question_answering(question=question, context=context)
 
             assert answer is not None
-            assert 'answer' in answer
-            assert len(answer['answer']) > 0
+            assert "answer" in answer
+            assert len(answer["answer"]) > 0
 
             # Should mention calculation or total
-            answer_text = answer['answer'].lower()
-            assert any(word in answer_text for word in ['calculate', 'total', 'price', 'tax'])
+            answer_text = answer["answer"].lower()
+            assert any(word in answer_text for word in ["calculate", "total", "price", "tax"])
         except Exception as e:
             pytest.skip(f"QA not supported: {e}")
 
@@ -193,10 +179,10 @@ class TestQuestionAnswering:
         context = """
         def validate_email(email: str) -> bool:
             '''Validates email format using regex.
-            
+
             Args:
                 email: Email address to validate
-            
+
             Returns:
                 True if valid, False otherwise
             '''
@@ -208,17 +194,14 @@ class TestQuestionAnswering:
         question = "What does validate_email return?"
 
         try:
-            answer = hf_client.question_answering(
-                question=question,
-                context=context
-            )
+            answer = hf_client.question_answering(question=question, context=context)
 
             assert answer is not None
-            assert 'answer' in answer
+            assert "answer" in answer
 
             # Should mention True/False or bool
-            answer_text = answer['answer'].lower()
-            assert any(word in answer_text for word in ['true', 'false', 'bool'])
+            answer_text = answer["answer"].lower()
+            assert any(word in answer_text for word in ["true", "false", "bool"])
         except Exception as e:
             pytest.skip(f"QA not supported: {e}")
 
@@ -240,8 +223,8 @@ class TestFillMask:
             assert len(predictions) > 0
 
             # Should suggest 'sum' as top prediction
-            top_prediction = predictions[0]['token_str'].strip().lower()
-            assert 'sum' in top_prediction or 'add' in top_prediction
+            top_prediction = predictions[0]["token_str"].strip().lower()
+            assert "sum" in top_prediction or "add" in top_prediction
         except Exception as e:
             pytest.skip(f"Fill mask not supported: {e}")
 
@@ -256,18 +239,15 @@ class TestTranslation:
 
         try:
             # Translate to Portuguese
-            translation = hf_client.translation(
-                error_en,
-                model="Helsinki-NLP/opus-mt-en-pt"
-            )
+            translation = hf_client.translation(error_en, model="Helsinki-NLP/opus-mt-en-pt")
 
             assert translation is not None
             assert isinstance(translation, list)
             assert len(translation) > 0
-            assert 'translation_text' in translation[0]
+            assert "translation_text" in translation[0]
 
             # Should be different from input
-            translated = translation[0]['translation_text']
+            translated = translation[0]["translation_text"]
             assert translated != error_en
         except Exception as e:
             pytest.skip(f"Translation not supported: {e}")
@@ -284,7 +264,7 @@ class TestRealWorldScenarios:
         codebase = {
             "auth.py": "def login(user, pass): return authenticate(user, pass)",
             "db.py": "def query(sql): return execute(sql)",
-            "utils.py": "def format_date(d): return d.strftime('%Y-%m-%d')"
+            "utils.py": "def format_date(d): return d.strftime('%Y-%m-%d')",
         }
 
         # Generate embeddings for request
@@ -320,10 +300,7 @@ class TestRealWorldScenarios:
             summary = hf_client.summarization(diff, max_length=30)
 
             # Answer questions about change
-            answer = hf_client.question_answering(
-                question="What was improved?",
-                context=diff
-            )
+            answer = hf_client.question_answering(question="What was improved?", context=diff)
 
             assert summary is not None or answer is not None
             # At least one capability should work

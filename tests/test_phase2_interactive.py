@@ -17,7 +17,7 @@ from vertice_cli.tui.input_enhanced import MultiLineMode, IntelligentCompleter, 
 from vertice_cli.tui.components.autocomplete import (
     ContextAwareCompleter,
     CompletionItem,
-    CompletionType
+    CompletionType,
 )
 from vertice_cli.tui.history import CommandHistory, HistoryEntry
 from datetime import datetime
@@ -90,7 +90,7 @@ class TestIntelligentCompleter:
             cwd=str(tmp_path),
             recent_files=["file1.py", "file2.py"],
             command_history=["ls", "cd", "git status"],
-            session_data={}
+            session_data={},
         )
 
     def test_completer_initialization(self, context):
@@ -104,7 +104,7 @@ class TestIntelligentCompleter:
         completer = IntelligentCompleter(context)
         # Note: Actual completion testing requires prompt_toolkit event loop
         # which is complex to set up in unit tests
-        assert hasattr(completer, 'commands')
+        assert hasattr(completer, "commands")
 
 
 class TestContextAwareCompleter:
@@ -117,7 +117,7 @@ class TestContextAwareCompleter:
             display="my_command - does something",
             type=CompletionType.COMMAND,
             description="A test command",
-            score=0.9
+            score=0.9,
         )
 
         assert item.text == "my_command"
@@ -163,7 +163,7 @@ class TestCommandHistory:
             command="test command",
             cwd="/tmp",
             success=True,
-            duration_ms=100
+            duration_ms=100,
         )
         history.add(entry)
 
@@ -179,14 +179,14 @@ class TestCommandHistory:
             command="test command",
             cwd="/tmp",
             success=True,
-            duration_ms=100
+            duration_ms=100,
         )
         entry2 = HistoryEntry(
             timestamp=datetime.now().isoformat(),
             command="test command",
             cwd="/tmp",
             success=True,
-            duration_ms=100
+            duration_ms=100,
         )
         history.add(entry1)
         history.add(entry2)
@@ -204,7 +204,7 @@ class TestCommandHistory:
                 command=cmd,
                 cwd="/tmp",
                 success=True,
-                duration_ms=100
+                duration_ms=100,
             )
             history.add(entry)
 
@@ -222,7 +222,7 @@ class TestCommandHistory:
                 command=cmd,
                 cwd="/tmp",
                 success=True,
-                duration_ms=100
+                duration_ms=100,
             )
             history1.add(entry)
 
@@ -248,11 +248,7 @@ class TestEdgeCases:
 
     def test_completion_with_special_chars(self):
         """Test completion with special characters."""
-        item = CompletionItem(
-            text="my-command",
-            display="my-command",
-            type=CompletionType.COMMAND
-        )
+        item = CompletionItem(text="my-command", display="my-command", type=CompletionType.COMMAND)
         assert "-" in item.text
 
     def test_history_empty_file(self, tmp_path):
@@ -267,11 +263,7 @@ class TestRealUseCases:
 
     def test_python_function_multiline(self):
         """Test real Python function input."""
-        lines = [
-            "def calculate_sum(a, b):",
-            "    result = a + b",
-            "    return result"
-        ]
+        lines = ["def calculate_sum(a, b):", "    result = a + b", "    return result"]
 
         # First line should continue
         assert MultiLineMode.should_continue(lines[0])
@@ -302,12 +294,7 @@ class TestRealUseCases:
         history = CommandHistory(str(history_file))
 
         # Add commands
-        commands = [
-            "git status",
-            "git add .",
-            "git commit -m 'test'",
-            "git push"
-        ]
+        commands = ["git status", "git add .", "git commit -m 'test'", "git push"]
 
         for cmd in commands:
             entry = HistoryEntry(
@@ -315,7 +302,7 @@ class TestRealUseCases:
                 command=cmd,
                 cwd="/tmp",
                 success=True,
-                duration_ms=100
+                duration_ms=100,
             )
             history.add(entry)
 
@@ -345,12 +332,13 @@ class TestPerformance:
                 command=f"command_{i}",
                 cwd="/tmp",
                 success=True,
-                duration_ms=100
+                duration_ms=100,
             )
             history.add(entry)
 
         # Search should still be fast
         import time
+
         start = time.time()
         results = history.search("command_5")
         duration = time.time() - start

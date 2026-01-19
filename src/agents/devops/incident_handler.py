@@ -279,47 +279,55 @@ class IncidentHandlerMixin:
         category = incident.root_cause.category
 
         if category == RootCauseCategory.CODE_CHANGE:
-            remediations.append(Remediation(
-                id="rem-rollback",
-                action="rollback",
-                description="Rollback to previous stable version",
-                risk_level="medium",
-                requires_approval=True,
-                estimated_impact="Service restart, brief downtime",
-                rollback_plan="Re-deploy current version if issues persist",
-            ))
+            remediations.append(
+                Remediation(
+                    id="rem-rollback",
+                    action="rollback",
+                    description="Rollback to previous stable version",
+                    risk_level="medium",
+                    requires_approval=True,
+                    estimated_impact="Service restart, brief downtime",
+                    rollback_plan="Re-deploy current version if issues persist",
+                )
+            )
 
         elif category == RootCauseCategory.RESOURCE_LIMIT:
-            remediations.append(Remediation(
-                id="rem-scale",
-                action="scale_up",
-                description="Increase resource allocation",
-                risk_level="low",
-                requires_approval=False,
-                estimated_impact="Temporary increased cost",
-                rollback_plan="Scale down after stabilization",
-            ))
+            remediations.append(
+                Remediation(
+                    id="rem-scale",
+                    action="scale_up",
+                    description="Increase resource allocation",
+                    risk_level="low",
+                    requires_approval=False,
+                    estimated_impact="Temporary increased cost",
+                    rollback_plan="Scale down after stabilization",
+                )
+            )
 
         elif category == RootCauseCategory.DEPENDENCY:
-            remediations.append(Remediation(
-                id="rem-circuit-breaker",
-                action="enable_circuit_breaker",
-                description="Enable circuit breaker for failing dependency",
+            remediations.append(
+                Remediation(
+                    id="rem-circuit-breaker",
+                    action="enable_circuit_breaker",
+                    description="Enable circuit breaker for failing dependency",
+                    risk_level="low",
+                    requires_approval=False,
+                    estimated_impact="Graceful degradation of affected feature",
+                    rollback_plan="Disable circuit breaker when dependency recovers",
+                )
+            )
+
+        remediations.append(
+            Remediation(
+                id="rem-restart",
+                action="restart_service",
+                description="Restart affected services",
                 risk_level="low",
                 requires_approval=False,
-                estimated_impact="Graceful degradation of affected feature",
-                rollback_plan="Disable circuit breaker when dependency recovers",
-            ))
-
-        remediations.append(Remediation(
-            id="rem-restart",
-            action="restart_service",
-            description="Restart affected services",
-            risk_level="low",
-            requires_approval=False,
-            estimated_impact="Brief service interruption",
-            rollback_plan="N/A - non-destructive action",
-        ))
+                estimated_impact="Brief service interruption",
+                rollback_plan="N/A - non-destructive action",
+            )
+        )
 
         return remediations
 
@@ -334,10 +342,7 @@ class IncidentHandlerMixin:
             return {"success": False, "error": "Incident not found"}
 
         incident = self._incidents[incident_id]
-        remediation = next(
-            (r for r in incident.remediations if r.id == remediation_id),
-            None
-        )
+        remediation = next((r for r in incident.remediations if r.id == remediation_id), None)
 
         if not remediation:
             return {"success": False, "error": "Remediation not found"}
@@ -396,13 +401,15 @@ class IncidentHandlerMixin:
         if not hasattr(self, "_deployment_history"):
             self._init_incident_system()
 
-        self._deployment_history.append({
-            "service": service,
-            "version": version,
-            "environment": environment,
-            "deployed_by": deployed_by,
-            "deployed_at": datetime.now().isoformat(),
-        })
+        self._deployment_history.append(
+            {
+                "service": service,
+                "version": version,
+                "environment": environment,
+                "deployed_by": deployed_by,
+                "deployed_at": datetime.now().isoformat(),
+            }
+        )
 
     def get_incident_metrics(self) -> Dict[str, Any]:
         """Get incident handling metrics."""
@@ -412,8 +419,7 @@ class IncidentHandlerMixin:
         total = len(self._incidents)
         resolved = sum(1 for i in self._incidents.values() if i.status == IncidentStatus.RESOLVED)
         mttr_values = [
-            i.mttr_seconds for i in self._incidents.values()
-            if i.mttr_seconds is not None
+            i.mttr_seconds for i in self._incidents.values() if i.mttr_seconds is not None
         ]
 
         return {

@@ -289,7 +289,7 @@ class TestAgencyIntegration:
     @pytest.mark.asyncio
     async def test_agent_manager_has_llm(self, agent_manager):
         """AgentManager has working LLM client."""
-        assert hasattr(agent_manager, 'llm_client')
+        assert hasattr(agent_manager, "llm_client")
         assert agent_manager.llm_client is not None
 
     @pytest.mark.asyncio

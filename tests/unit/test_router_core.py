@@ -209,7 +209,7 @@ class TestSemanticRouterDecisionCreation:
         assert embedding == embedding2
 
 
-class TestSemanticRouterInitialization:
+class TestSemanticRouterStartup:
     """Test router initialization."""
 
     @pytest.mark.asyncio

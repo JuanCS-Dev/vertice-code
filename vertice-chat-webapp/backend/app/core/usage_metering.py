@@ -125,8 +125,8 @@ class UsageMeteringService:
         Handles different token types and billing calculations.
         """
         try:
-            total_input_tokens = input_tokens + cached_input_tokens
-            total_output_tokens = output_tokens + cached_output_tokens
+            input_tokens + cached_input_tokens
+            output_tokens + cached_output_tokens
 
             # Calculate billable tokens (cached tokens are discounted)
             billable_input_tokens = input_tokens + (cached_input_tokens * 0.1)  # 10% of cached

@@ -299,9 +299,9 @@ Temos:
 
 ---
 
-**Data:** 2025-11-23  
-**Version:** 1.0 Ultimate Shell  
-**Following:** Nov 2025 Best Practices  
-**Performance:** 71 wps | 90% less output  
+**Data:** 2025-11-23
+**Version:** 1.0 Ultimate Shell
+**Following:** Nov 2025 Best Practices
+**Performance:** 71 wps | 90% less output
 
 **Soli Deo Gloria** 🙏

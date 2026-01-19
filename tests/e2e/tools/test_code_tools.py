@@ -24,7 +24,8 @@ def python_project():
         project = Path(tmpdir)
 
         # Create source files
-        (project / "main.py").write_text('''
+        (project / "main.py").write_text(
+            '''
 """Main module."""
 
 def hello(name: str) -> str:
@@ -43,9 +44,11 @@ class Calculator:
     def multiply(self, x: int, y: int) -> int:
         """Multiply two numbers."""
         return x * y
-''')
+'''
+        )
 
-        (project / "utils.py").write_text('''
+        (project / "utils.py").write_text(
+            '''
 """Utility functions."""
 
 from typing import List
@@ -54,10 +57,12 @@ from typing import List
 def flatten(nested: List[List[int]]) -> List[int]:
     """Flatten nested list."""
     return [item for sublist in nested for item in sublist]
-''')
+'''
+        )
 
         # Create test file
-        (project / "test_main.py").write_text('''
+        (project / "test_main.py").write_text(
+            '''
 """Tests for main module."""
 
 from main import hello, add, Calculator
@@ -74,7 +79,8 @@ def test_add():
 def test_calculator():
     calc = Calculator()
     assert calc.multiply(3, 4) == 12
-''')
+'''
+        )
 
         yield project
 
@@ -85,9 +91,7 @@ class TestLintTool:
     def test_ruff_lint_clean_file(self, python_project):
         """Ruff passes on clean Python."""
         result = subprocess.run(
-            ["ruff", "check", str(python_project / "main.py")],
-            capture_output=True,
-            text=True
+            ["ruff", "check", str(python_project / "main.py")], capture_output=True, text=True
         )
         # Should pass or have minor issues
         assert result.returncode in [0, 1]
@@ -98,11 +102,7 @@ class TestLintTool:
         bad_file = python_project / "bad.py"
         bad_file.write_text("import os\nimport sys\nx=1")  # unused imports
 
-        result = subprocess.run(
-            ["ruff", "check", str(bad_file)],
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run(["ruff", "check", str(bad_file)], capture_output=True, text=True)
         # Should detect unused imports
         assert result.returncode == 1 or "F401" in result.stdout
 
@@ -115,7 +115,7 @@ class TestFormatTool:
         result = subprocess.run(
             ["ruff", "format", "--check", str(python_project / "main.py")],
             capture_output=True,
-            text=True
+            text=True,
         )
         # Already formatted should return 0
         assert result.returncode in [0, 1]
@@ -125,7 +125,7 @@ class TestFormatTool:
         result = subprocess.run(
             ["ruff", "format", "--diff", str(python_project / "main.py")],
             capture_output=True,
-            text=True
+            text=True,
         )
         assert result.returncode in [0, 1]
 
@@ -139,7 +139,7 @@ class TestTestRunnerTool:
             ["python", "-m", "pytest", str(python_project / "test_main.py"), "-v"],
             capture_output=True,
             text=True,
-            cwd=str(python_project)
+            cwd=str(python_project),
         )
         # Tests should pass
         assert result.returncode == 0
@@ -152,7 +152,7 @@ class TestTestRunnerTool:
             ["python", "-m", "pytest", str(python_project), "--collect-only", "-q"],
             capture_output=True,
             text=True,
-            cwd=str(python_project)
+            cwd=str(python_project),
         )
         assert result.returncode == 0
         assert "3 test" in result.stdout  # 3 tests collected
@@ -165,12 +165,18 @@ class TestCoverageTool:
         """Coverage runs tests."""
         result = subprocess.run(
             [
-                "python", "-m", "coverage", "run",
-                "-m", "pytest", str(python_project / "test_main.py"), "-q"
+                "python",
+                "-m",
+                "coverage",
+                "run",
+                "-m",
+                "pytest",
+                str(python_project / "test_main.py"),
+                "-q",
             ],
             capture_output=True,
             text=True,
-            cwd=str(python_project)
+            cwd=str(python_project),
         )
         assert result.returncode == 0
 
@@ -185,7 +191,7 @@ class TestComplexityTool:
             result = subprocess.run(
                 ["radon", "cc", str(python_project / "main.py"), "-s"],
                 capture_output=True,
-                text=True
+                text=True,
             )
             if result.returncode == 0:
                 # Should show low complexity (A or B grade)
@@ -200,9 +206,7 @@ class TestSymbolsAndReferences:
     def test_find_definitions_grep(self, python_project):
         """Find function definitions with grep."""
         result = subprocess.run(
-            ["grep", "-rn", "^def ", str(python_project)],
-            capture_output=True,
-            text=True
+            ["grep", "-rn", "^def ", str(python_project)], capture_output=True, text=True
         )
         assert result.returncode == 0
         assert "hello" in result.stdout
@@ -211,9 +215,7 @@ class TestSymbolsAndReferences:
     def test_find_class_definitions(self, python_project):
         """Find class definitions with grep."""
         result = subprocess.run(
-            ["grep", "-rn", "^class ", str(python_project)],
-            capture_output=True,
-            text=True
+            ["grep", "-rn", "^class ", str(python_project)], capture_output=True, text=True
         )
         assert result.returncode == 0
         assert "Calculator" in result.stdout
@@ -221,9 +223,7 @@ class TestSymbolsAndReferences:
     def test_find_imports(self, python_project):
         """Find import statements."""
         result = subprocess.run(
-            ["grep", "-rn", "^from\\|^import", str(python_project)],
-            capture_output=True,
-            text=True
+            ["grep", "-rn", "^from\\|^import", str(python_project)], capture_output=True, text=True
         )
         assert result.returncode == 0
         assert "typing" in result.stdout or "main" in result.stdout

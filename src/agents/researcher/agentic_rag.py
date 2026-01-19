@@ -70,6 +70,7 @@ class AgenticRAGMixin:
 
         # Import router and complexity
         from vertice_cli.core.providers.vertice_router import get_router, TaskComplexity
+
         router = get_router()
 
         # Format context for Claude 4.5 Prompt Caching
@@ -77,32 +78,30 @@ class AgenticRAGMixin:
         context_parts = []
         for i, res in enumerate(results):
             context_parts.append(f"Source {i+1} ({res.title}):\n{res.content or 'No content'}\n")
-        
+
         context_str = "\n---\n".join(context_parts)
 
         system_prompt = "You are an expert researcher. Synthesize the following search results into a clear, concise, and accurate answer."
-        
+
         user_prompt = f"""CONTEXT FOR RESEARCH:
 {context_str}
 
 USER QUERY: {query}
 
-Synthesize the context above to answer the query. 
+Synthesize the context above to answer the query.
 Use markdown. Cite sources by their source number [1], [2], etc.
 If the context doesn't contain the answer, say so.
 """
 
         messages = [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
+            {"role": "user", "content": user_prompt},
         ]
 
         try:
             # Use TaskComplexity.COMPLEX to route to Claude 4.5
             answer = await router.generate(
-                messages, 
-                complexity=TaskComplexity.COMPLEX,
-                max_tokens=4096
+                messages, complexity=TaskComplexity.COMPLEX, max_tokens=4096
             )
             return answer
         except Exception as e:

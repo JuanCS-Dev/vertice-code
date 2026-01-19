@@ -84,10 +84,10 @@ class TestSessionManager:
             sessions = manager.list_sessions()
 
             assert len(sessions) == 2
-            assert all('id' in s for s in sessions)
-            assert all('messages' in s for s in sessions)
-            assert any(s['messages'] == 1 for s in sessions)
-            assert any(s['messages'] == 2 for s in sessions)
+            assert all("id" in s for s in sessions)
+            assert all("messages" in s for s in sessions)
+            assert any(s["messages"] == 1 for s in sessions)
+            assert any(s["messages"] == 2 for s in sessions)
 
     def test_delete_session(self):
         """Test deleting a session."""
@@ -124,17 +124,22 @@ class TestSessionManager:
 
             # Create old session file
             old_session = tmpdir / "old-session.json"
-            old_session.write_text(json.dumps({
-                'session_id': 'old-session',
-                'cwd': '/tmp',
-                'created_at': '2020-01-01T00:00:00',
-                'last_activity': '2020-01-01T00:00:00',
-            }))
+            old_session.write_text(
+                json.dumps(
+                    {
+                        "session_id": "old-session",
+                        "cwd": "/tmp",
+                        "created_at": "2020-01-01T00:00:00",
+                        "last_activity": "2020-01-01T00:00:00",
+                    }
+                )
+            )
 
             # Make it old (modify timestamp)
             old_time = (datetime.now() - timedelta(days=60)).timestamp()
             old_session.touch()
             import os
+
             os.utime(old_session, (old_time, old_time))
 
             # Create recent session
@@ -159,14 +164,15 @@ class TestSessionManager:
 
             # Create sessions
             state1 = manager.create_session()
-            state1.metadata['order'] = 1
+            state1.metadata["order"] = 1
             manager.save_session(state1)
 
             import time
+
             time.sleep(0.1)  # Longer delay to ensure file timestamp difference
 
             state2 = manager.create_session()
-            state2.metadata['order'] = 2
+            state2.metadata["order"] = 2
             manager.save_session(state2)
 
             # Get latest (should be one of the two sessions)
@@ -174,7 +180,7 @@ class TestSessionManager:
 
             assert latest is not None
             # Just verify we got a valid session, order might vary by filesystem
-            assert latest.metadata.get('order') in [1, 2]
+            assert latest.metadata.get("order") in [1, 2]
 
     def test_session_metadata_preservation(self):
         """Test that all session metadata is preserved."""
@@ -189,8 +195,8 @@ class TestSessionManager:
             state.add_file_read("file2.py")
             state.add_file_modified("file3.py")
             state.tool_calls_count = 10
-            state.context = {'key': 'value'}
-            state.metadata = {'custom': 'data'}
+            state.context = {"key": "value"}
+            state.metadata = {"custom": "data"}
 
             manager.save_session(state)
             loaded = manager.load_session(state.session_id)
@@ -200,5 +206,5 @@ class TestSessionManager:
             assert loaded.files_read == {"file1.py", "file2.py"}
             assert loaded.files_modified == {"file3.py"}
             assert loaded.tool_calls_count == 10
-            assert loaded.context == {'key': 'value'}
-            assert loaded.metadata == {'custom': 'data'}
+            assert loaded.context == {"key": "value"}
+            assert loaded.metadata == {"custom": "data"}

@@ -27,11 +27,13 @@ from vertice_cli.agents.base import AgentTask, AgentRole
 
 class MockLLMClient:
     """Mock LLM client for testing."""
+
     pass
 
 
 class MockMCPClient:
     """Mock MCP client for testing."""
+
     pass
 
 
@@ -94,8 +96,7 @@ class TestCounselProvision:
     def test_provide_counsel_basic(self, sofia_agent):
         """Test basic counsel provision."""
         response = sofia_agent.provide_counsel(
-            query="Should I refactor this code?",
-            agent_id="test-agent"
+            query="Should I refactor this code?", agent_id="test-agent"
         )
 
         assert isinstance(response, CounselResponse)
@@ -109,8 +110,7 @@ class TestCounselProvision:
     async def test_provide_counsel_async(self, sofia_agent):
         """Test async counsel provision."""
         response = await sofia_agent.provide_counsel_async(
-            query="Is it ethical to track users?",
-            agent_id="async-test"
+            query="Is it ethical to track users?", agent_id="async-test"
         )
 
         assert isinstance(response, CounselResponse)
@@ -121,7 +121,7 @@ class TestCounselProvision:
         response = sofia_agent.provide_counsel(
             query="Should I delete user data?",
             context={"reason": "GDPR request"},
-            agent_id="context-test"
+            agent_id="context-test",
         )
 
         assert response.counsel is not None
@@ -200,27 +200,21 @@ class TestAutoDetection:
 
     def test_should_trigger_on_delete(self, sofia_agent):
         """Test auto-trigger on delete keyword."""
-        should, reason = sofia_agent.should_trigger_counsel(
-            "I want to delete user data"
-        )
+        should, reason = sofia_agent.should_trigger_counsel("I want to delete user data")
 
         assert should is True
         assert "delete" in reason.lower()
 
     def test_should_trigger_on_ethical(self, sofia_agent):
         """Test auto-trigger on ethical keywords."""
-        should, reason = sofia_agent.should_trigger_counsel(
-            "Is this ethical?"
-        )
+        should, reason = sofia_agent.should_trigger_counsel("Is this ethical?")
 
         assert should is True
         assert "ethical" in reason.lower()
 
     def test_no_trigger_on_normal(self, sofia_agent):
         """Test no trigger on normal content."""
-        should, reason = sofia_agent.should_trigger_counsel(
-            "Hello, how are you?"
-        )
+        should, reason = sofia_agent.should_trigger_counsel("Hello, how are you?")
 
         assert should is False
 
@@ -249,7 +243,7 @@ class TestBaseAgentInterface:
             context={"requesting_agent_id": "executor"},
             session_id="session-1",
             metadata={},
-            history=[]
+            history=[],
         )
 
         response = await sofia_agent.execute(task)
@@ -268,7 +262,7 @@ class TestBaseAgentInterface:
             context={},
             session_id="session-2",
             metadata={},
-            history=[]
+            history=[],
         )
 
         chunks = []
@@ -295,10 +289,7 @@ class TestErrorHandling:
 
     def test_none_session_id(self, sofia_agent):
         """Test handling of None session_id."""
-        response = sofia_agent.provide_counsel(
-            "Test query",
-            session_id=None
-        )
+        response = sofia_agent.provide_counsel("Test query", session_id=None)
         assert response is not None
 
 
@@ -323,20 +314,14 @@ class TestCounselTypes:
 
     def test_counsel_type_recorded(self, sofia_agent):
         """Test that counsel type is recorded."""
-        response = sofia_agent.provide_counsel(
-            "I'm feeling anxious",
-            agent_id="type-test"
-        )
+        response = sofia_agent.provide_counsel("I'm feeling anxious", agent_id="type-test")
 
         assert response.counsel_type is not None
         # Likely SUPPORTING due to "anxious" keyword
 
     def test_thinking_mode_recorded(self, sofia_agent):
         """Test that thinking mode is recorded."""
-        response = sofia_agent.provide_counsel(
-            "Simple question",
-            agent_id="mode-test"
-        )
+        response = sofia_agent.provide_counsel("Simple question", agent_id="mode-test")
 
         assert response.thinking_mode in ["SYSTEM_1", "SYSTEM_2"]
 

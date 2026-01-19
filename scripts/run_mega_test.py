@@ -58,140 +58,200 @@ def main():
     # =========================================================================
     section("1. CORE IMPORTS")
 
-    test("Import vertice_tui.app",
-         "from vertice_tui.app import QwenApp")
+    test("Import vertice_tui.app", "from vertice_tui.app import QwenApp")
 
-    test("Import vertice_tui.core",
-         "from vertice_tui.core import Bridge, OutputFormatter, ToolCallParser")
+    test(
+        "Import vertice_tui.core",
+        "from vertice_tui.core import Bridge, OutputFormatter, ToolCallParser",
+    )
 
-    test("Import vertice_cli.tools",
-         "from vertice_cli.tools.base import Tool, ToolRegistry")
+    test("Import vertice_cli.tools", "from vertice_cli.tools.base import Tool, ToolRegistry")
 
-    test("Import vertice_cli.agents",
-         "from vertice_cli.agents.base import BaseAgent")
+    test("Import vertice_cli.agents", "from vertice_cli.agents.base import BaseAgent")
 
     # =========================================================================
     # 2. BRIDGE
     # =========================================================================
     section("2. BRIDGE INITIALIZATION")
 
-    test("Bridge creates",
-         "from vertice_tui.core import Bridge; b = Bridge()")
+    test("Bridge creates", "from vertice_tui.core import Bridge; b = Bridge()")
 
-    test("Bridge has LLM",
-         "from vertice_tui.core import Bridge; b = Bridge(); assert b.llm is not None")
+    test(
+        "Bridge has LLM",
+        "from vertice_tui.core import Bridge; b = Bridge(); assert b.llm is not None",
+    )
 
-    test("Bridge has governance",
-         "from vertice_tui.core import Bridge; b = Bridge(); assert b.governance is not None")
+    test(
+        "Bridge has governance",
+        "from vertice_tui.core import Bridge; b = Bridge(); assert b.governance is not None",
+    )
 
-    test("Bridge has tools",
-         "from vertice_tui.core import Bridge; b = Bridge(); assert b.tools is not None")
+    test(
+        "Bridge has tools",
+        "from vertice_tui.core import Bridge; b = Bridge(); assert b.tools is not None",
+    )
 
-    test("Bridge has autocomplete",
-         "from vertice_tui.core import Bridge; b = Bridge(); assert b.autocomplete is not None")
+    test(
+        "Bridge has autocomplete",
+        "from vertice_tui.core import Bridge; b = Bridge(); assert b.autocomplete is not None",
+    )
 
     # =========================================================================
     # 3. TOOLS
     # =========================================================================
     section("3. TOOL REGISTRY")
 
-    test("ToolBridge loads tools",
-         "from vertice_tui.core.bridge import ToolBridge; tb = ToolBridge(); tools = tb.list_tools(); assert len(tools) >= 10, f'Only {len(tools)} tools'")
+    test(
+        "ToolBridge loads tools",
+        "from vertice_tui.core.bridge import ToolBridge; tb = ToolBridge(); tools = tb.list_tools(); assert len(tools) >= 10, f'Only {len(tools)} tools'",
+    )
 
-    test("Tool schemas generate",
-         "from vertice_tui.core.bridge import ToolBridge; tb = ToolBridge(); schemas = tb.get_schemas_for_llm(); assert len(schemas) >= 5")
+    test(
+        "Tool schemas generate",
+        "from vertice_tui.core.bridge import ToolBridge; tb = ToolBridge(); schemas = tb.get_schemas_for_llm(); assert len(schemas) >= 5",
+    )
 
-    test("File tools present",
-         "from vertice_tui.core.bridge import ToolBridge; tb = ToolBridge(); tools = tb.list_tools(); assert any('read' in t.lower() for t in tools)")
+    test(
+        "File tools present",
+        "from vertice_tui.core.bridge import ToolBridge; tb = ToolBridge(); tools = tb.list_tools(); assert any('read' in t.lower() for t in tools)",
+    )
 
-    test("Bash tool present",
-         "from vertice_tui.core.bridge import ToolBridge; tb = ToolBridge(); tools = tb.list_tools(); assert any('bash' in t.lower() for t in tools)")
+    test(
+        "Bash tool present",
+        "from vertice_tui.core.bridge import ToolBridge; tb = ToolBridge(); tools = tb.list_tools(); assert any('bash' in t.lower() for t in tools)",
+    )
 
-    test("Git tools present",
-         "from vertice_tui.core.bridge import ToolBridge; tb = ToolBridge(); tools = tb.list_tools(); assert any('git' in t.lower() for t in tools)")
+    test(
+        "Git tools present",
+        "from vertice_tui.core.bridge import ToolBridge; tb = ToolBridge(); tools = tb.list_tools(); assert any('git' in t.lower() for t in tools)",
+    )
 
     # =========================================================================
     # 4. AGENTS
     # =========================================================================
     section("4. AGENTS")
 
-    agents = ["planner", "executor", "architect", "reviewer", "explorer",
-              "refactorer", "testing", "security", "documentation",
-              "performance", "devops", "justica", "sofia"]
+    agents = [
+        "planner",
+        "executor",
+        "architect",
+        "reviewer",
+        "explorer",
+        "refactorer",
+        "testing",
+        "security",
+        "documentation",
+        "performance",
+        "devops",
+        "justica",
+        "sofia",
+    ]
 
     for agent in agents:
-        test(f"Agent: {agent}",
-             f"from vertice_tui.core.bridge import AgentManager, GeminiClient; am = AgentManager(GeminiClient()); assert '{agent}' in am.available_agents")
+        test(
+            f"Agent: {agent}",
+            f"from vertice_tui.core.bridge import AgentManager, GeminiClient; am = AgentManager(GeminiClient()); assert '{agent}' in am.available_agents",
+        )
 
     # =========================================================================
     # 5. TOOL CALL PARSER
     # =========================================================================
     section("5. TOOL CALL PARSER")
 
-    test("Extract tool calls",
-         'from vertice_tui.core.bridge import ToolCallParser; calls = ToolCallParser.extract(\'[TOOL_CALL:write_file:{"path":"test.txt"}]\'); assert len(calls) == 1')
+    test(
+        "Extract tool calls",
+        'from vertice_tui.core.bridge import ToolCallParser; calls = ToolCallParser.extract(\'[TOOL_CALL:write_file:{"path":"test.txt"}]\'); assert len(calls) == 1',
+    )
 
-    test("Remove markers",
-         "from vertice_tui.core.bridge import ToolCallParser; clean = ToolCallParser.remove('Before [TOOL_CALL:x:{}] After'); assert '[TOOL_CALL' not in clean")
+    test(
+        "Remove markers",
+        "from vertice_tui.core.bridge import ToolCallParser; clean = ToolCallParser.remove('Before [TOOL_CALL:x:{}] After'); assert '[TOOL_CALL' not in clean",
+    )
 
-    test("Roundtrip",
-         "from vertice_tui.core.bridge import ToolCallParser; marker = ToolCallParser.format_marker('test', {'a': 1}); calls = ToolCallParser.extract(marker); assert calls[0][0] == 'test'")
+    test(
+        "Roundtrip",
+        "from vertice_tui.core.bridge import ToolCallParser; marker = ToolCallParser.format_marker('test', {'a': 1}); calls = ToolCallParser.extract(marker); assert calls[0][0] == 'test'",
+    )
 
     # =========================================================================
     # 6. OUTPUT FORMATTER
     # =========================================================================
     section("6. OUTPUT FORMATTER")
 
-    test("format_response",
-         "from vertice_tui.core.output_formatter import OutputFormatter; from rich.panel import Panel; p = OutputFormatter.format_response('test'); assert isinstance(p, Panel)")
+    test(
+        "format_response",
+        "from vertice_tui.core.output_formatter import OutputFormatter; from rich.panel import Panel; p = OutputFormatter.format_response('test'); assert isinstance(p, Panel)",
+    )
 
-    test("format_tool_result",
-         "from vertice_tui.core.output_formatter import OutputFormatter; OutputFormatter.format_tool_result('test', True, 'data')")
+    test(
+        "format_tool_result",
+        "from vertice_tui.core.output_formatter import OutputFormatter; OutputFormatter.format_tool_result('test', True, 'data')",
+    )
 
-    test("format_code_block",
-         "from vertice_tui.core.output_formatter import OutputFormatter; OutputFormatter.format_code_block('print(1)', 'python')")
+    test(
+        "format_code_block",
+        "from vertice_tui.core.output_formatter import OutputFormatter; OutputFormatter.format_code_block('print(1)', 'python')",
+    )
 
-    test("Truncates long content",
-         "from vertice_tui.core.output_formatter import OutputFormatter; from io import StringIO; from rich.console import Console; c = Console(file=StringIO()); c.print(OutputFormatter.format_response('x'*10000)); assert 'truncat' in c.file.getvalue().lower()")
+    test(
+        "Truncates long content",
+        "from vertice_tui.core.output_formatter import OutputFormatter; from io import StringIO; from rich.console import Console; c = Console(file=StringIO()); c.print(OutputFormatter.format_response('x'*10000)); assert 'truncat' in c.file.getvalue().lower()",
+    )
 
     # =========================================================================
     # 7. AUTOCOMPLETE
     # =========================================================================
     section("7. AUTOCOMPLETE")
 
-    test("AutocompleteBridge init",
-         "from vertice_tui.core.bridge import AutocompleteBridge, ToolBridge; AutocompleteBridge(ToolBridge())")
+    test(
+        "AutocompleteBridge init",
+        "from vertice_tui.core.bridge import AutocompleteBridge, ToolBridge; AutocompleteBridge(ToolBridge())",
+    )
 
-    test("Completions for /",
-         "from vertice_tui.core.bridge import AutocompleteBridge, ToolBridge; ab = AutocompleteBridge(ToolBridge()); comps = ab.get_completions('/h'); assert len(comps) > 0")
+    test(
+        "Completions for /",
+        "from vertice_tui.core.bridge import AutocompleteBridge, ToolBridge; ab = AutocompleteBridge(ToolBridge()); comps = ab.get_completions('/h'); assert len(comps) > 0",
+    )
 
-    test("Completions for tools",
-         "from vertice_tui.core.bridge import AutocompleteBridge, ToolBridge; ab = AutocompleteBridge(ToolBridge()); comps = ab.get_completions('read'); assert len(comps) > 0")
+    test(
+        "Completions for tools",
+        "from vertice_tui.core.bridge import AutocompleteBridge, ToolBridge; ab = AutocompleteBridge(ToolBridge()); comps = ab.get_completions('read'); assert len(comps) > 0",
+    )
 
     # =========================================================================
     # 8. GOVERNANCE
     # =========================================================================
     section("8. GOVERNANCE")
 
-    test("GovernanceObserver init",
-         "from vertice_tui.core.bridge import GovernanceObserver; GovernanceObserver()")
+    test(
+        "GovernanceObserver init",
+        "from vertice_tui.core.bridge import GovernanceObserver; GovernanceObserver()",
+    )
 
-    test("Risk assessment",
-         "from vertice_tui.core.bridge import GovernanceObserver; go = GovernanceObserver(); go.assess_risk('rm -rf /')")
+    test(
+        "Risk assessment",
+        "from vertice_tui.core.bridge import GovernanceObserver; go = GovernanceObserver(); go.assess_risk('rm -rf /')",
+    )
 
-    test("Observer mode",
-         "from vertice_tui.core.bridge import GovernanceObserver; go = GovernanceObserver(); assert go.config.block_on_violation == False")
+    test(
+        "Observer mode",
+        "from vertice_tui.core.bridge import GovernanceObserver; go = GovernanceObserver(); assert go.config.block_on_violation == False",
+    )
 
     # =========================================================================
     # 9. SYSTEM PROMPT
     # =========================================================================
     section("9. SYSTEM PROMPT")
 
-    test("Contains tools",
-         "from vertice_tui.core.bridge import Bridge; b = Bridge(); prompt = b._get_system_prompt(); assert 'tool' in prompt.lower()")
+    test(
+        "Contains tools",
+        "from vertice_tui.core.bridge import Bridge; b = Bridge(); prompt = b._get_system_prompt(); assert 'tool' in prompt.lower()",
+    )
 
-    test("Action focused",
-         "from vertice_tui.core.bridge import Bridge; b = Bridge(); prompt = b._get_system_prompt(); assert 'action' in prompt.lower() or 'execute' in prompt.lower()")
+    test(
+        "Action focused",
+        "from vertice_tui.core.bridge import Bridge; b = Bridge(); prompt = b._get_system_prompt(); assert 'action' in prompt.lower() or 'execute' in prompt.lower()",
+    )
 
     # =========================================================================
     # SUMMARY
@@ -216,6 +276,7 @@ def main():
     # Get tool and agent counts
     try:
         from vertice_tui.core.bridge import ToolBridge, AgentManager, GeminiClient
+
         tb = ToolBridge()
         tools = tb.list_tools()
         am = AgentManager(GeminiClient())

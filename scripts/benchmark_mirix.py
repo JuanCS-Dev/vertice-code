@@ -23,7 +23,9 @@ from tests.benchmarks.utils import MIRIXBenchmark, SAMPLE_QUERIES
 async def amain():
     parser = argparse.ArgumentParser(description="MIRIX Benchmark CLI")
     parser.add_argument("--queries", type=int, default=50, help="Number of queries to run.")
-    parser.add_argument("--compare", action="store_true", help="Run sequential and concurrent comparison.")
+    parser.add_argument(
+        "--compare", action="store_true", help="Run sequential and concurrent comparison."
+    )
     parser.add_argument("--json", action="store_true", help="Output results in JSON format.")
     args = parser.parse_args()
 
@@ -34,14 +36,14 @@ async def amain():
     for i in range(100):
         cortex.remember(f"Test memory entry {i}", memory_type="episodic")
 
-    queries = (SAMPLE_QUERIES * (args.queries // len(SAMPLE_QUERIES) + 1))[:args.queries]
+    queries = (SAMPLE_QUERIES * (args.queries // len(SAMPLE_QUERIES) + 1))[: args.queries]
 
     report = {}
 
     if args.compare:
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("MIRIX STRESS BENCHMARK REPORT")
-        print("="*70)
+        print("=" * 70)
 
         # Sequential baseline
         seq_stats = await benchmark.run_sequential(cortex, queries)
@@ -60,13 +62,13 @@ async def amain():
         print(f"  p99: {conc_stats.get('p99_ms', 0):.2f}ms")
 
         # Improvement calculation
-        if seq_stats.get('p99_ms', 0) > 0 and conc_stats.get('p99_ms') is not None:
-            improvement = ((seq_stats['p99_ms'] - conc_stats['p99_ms']) / seq_stats['p99_ms']) * 100
+        if seq_stats.get("p99_ms", 0) > 0 and conc_stats.get("p99_ms") is not None:
+            improvement = ((seq_stats["p99_ms"] - conc_stats["p99_ms"]) / seq_stats["p99_ms"]) * 100
             report["improvement_p99_percent"] = improvement
             print("\n[IMPROVEMENT]")
             print(f"  p99 improved by: {improvement:.1f}%")
 
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
     else:
         stats = await benchmark.run_concurrent(cortex, queries)
         report["concurrent"] = stats
@@ -78,6 +80,7 @@ async def amain():
 
     if args.json:
         print(json.dumps(report, indent=2))
+
 
 if __name__ == "__main__":
     asyncio.run(amain())

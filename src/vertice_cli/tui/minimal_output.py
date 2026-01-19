@@ -127,7 +127,7 @@ class MinimalOutput:
         lines = text.split("\n")
         line_count = len(lines)
         char_count = len(text)
-        word_count = len(text.split())
+        len(text.split())
 
         # Decision logic
         if mode == "auto":
@@ -166,7 +166,6 @@ class MinimalOutput:
 
         # Auto-detect best column count
         max_item_len = max(len(item) for item in items)
-        terminal_width = console.width
 
         if max_item_len < 30:
             cols = 3

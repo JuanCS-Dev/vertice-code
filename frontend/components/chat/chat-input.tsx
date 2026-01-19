@@ -12,10 +12,10 @@ export function ChatInput() {
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
-    
+
     const content = input;
     setInput("");
-    
+
     // Reset height
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -33,7 +33,7 @@ export function ChatInput() {
 
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
-    
+
     // Auto-resize
     e.target.style.height = "auto";
     e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
@@ -42,7 +42,7 @@ export function ChatInput() {
   return (
     <div className="w-full max-w-4xl mx-auto px-4 pb-6 pt-2">
       <div className="relative flex items-end gap-2 bg-muted/50 border border-input rounded-xl p-2 shadow-sm focus-within:ring-1 focus-within:ring-ring focus-within:border-accent/50 transition-all">
-        
+
         {/* Attachment Button */}
         <button className="p-2 text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-lg transition-colors pb-3">
           <Paperclip className="w-5 h-5" />
@@ -66,12 +66,12 @@ export function ChatInput() {
                <Mic className="w-5 h-5" />
              </button>
            ) : (
-             <button 
+             <button
                onClick={handleSend}
                disabled={isLoading}
                className={cn(
                  "p-2 rounded-lg transition-all duration-200",
-                 isLoading 
+                 isLoading
                    ? "bg-muted text-muted-foreground cursor-not-allowed"
                    : "bg-accent text-accent-foreground hover:bg-accent/90 shadow-sm"
                )}
@@ -81,7 +81,7 @@ export function ChatInput() {
            )}
         </div>
       </div>
-      
+
       {/* Footer / Hint */}
       <div className="text-center mt-2">
         <p className="text-[10px] text-muted-foreground/50">

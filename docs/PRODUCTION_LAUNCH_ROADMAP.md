@@ -222,7 +222,7 @@ def search_knowledge(
     logger = logging.getLogger(__name__)
 
     # Configuração de Retry/Circuit Breaker implícita na arquitetura
-    
+
     def report_usage_to_stripe(active_users: List[str], redis_client: redis.Redis) -> None:
         """
         Reporta uso agregado ao Stripe para evitar Rate Limits.
@@ -236,13 +236,13 @@ def search_knowledge(
             # Pega consumo acumulado e reseta atomicamente (GETDEL)
             token_key = f"usage:{user_id}:tokens"
             tokens_str: Optional[str] = redis_client.getdel(token_key)
-            
+
             if not tokens_str:
                 continue
 
             try:
                 subscription_item_id = _get_sub_item_id(user_id) # Helper function
-                
+
                 stripe.SubscriptionItem.create_usage_record(
                     subscription_item_id=subscription_item_id,
                     quantity=int(tokens_str),
@@ -257,7 +257,7 @@ def search_knowledge(
                 # Re-adiciona os tokens ao Redis para não perder cobrança
                 redis_client.incrby(token_key, int(tokens_str))
                 raise # Permite que o worker do Celery faça o retry
-    
+
     def _get_sub_item_id(user_id: str) -> str:
         """Helper para recuperar ID da subscription no banco."""
         # Implementação simulada
@@ -307,17 +307,17 @@ class IncomingHandler(http.IncomingHandler):
     def handle_request(self, request: Request) -> Response:
         """
         Executa a lógica do agente dentro da Sandbox Wasm.
-        
+
         Args:
             request: Objeto de requisição HTTP do Spin.
-            
+
         Returns:
             Response: Resposta HTTP processada.
         """
         # Isolamento total de memória garantido pelo Runtime Wasm
         # TODO(implementação): Adicionar lógica de inferência aqui
         # Nota: Placeholder permitido neste documento de planejamento, proibido no código final.
-        
+
         return Response(
             200,
             {"content-type": "text/plain"},
@@ -363,10 +363,10 @@ class SecurityException(Exception):
 def check_prompt_safety(prompt: str) -> None:
     """
     Verifica se o prompt contém injeções ou conteúdo malicioso usando Lakera Guard.
-    
+
     Args:
         prompt: O texto do usuário.
-    
+
     Raises:
         SecurityException: Se o prompt for sinalizado como inseguro.
         RuntimeError: Se a API de segurança falhar.
@@ -376,20 +376,20 @@ def check_prompt_safety(prompt: str) -> None:
         raise RuntimeError("Missing LAKERA_GUARD_API_KEY configuration.")
 
     url = "https://api.lakera.ai/v2/guard"
-    
+
     try:
         response = requests.post(
-            url, 
+            url,
             json={"messages": [{"role": "user", "content": prompt}]},
             headers={"Authorization": f"Bearer {api_key}"},
             timeout=2.0 # Fail fast
         )
         response.raise_for_status()
         data: Dict[str, Any] = response.json()
-        
+
         if data.get("flagged", False):
             raise SecurityException(f"Prompt Injection Detected: {data.get('category')}")
-            
+
     except requests.RequestException as e:
         # Fail safe: Se o guardrail cair, bloqueamos o acesso por precaução?
         # Ou permitimos com log? Política: Bloquear em alta segurança.
@@ -414,14 +414,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Run Evals (Promptfoo/DeepEval)
         run: |
           # Executa 500 prompts de teste (Golden Dataset)
           # Compara performance com a versão anterior (Baseline)
           # Quality Gate: 99% rule apply here too
           npx promptfoo eval -c promptfooconfig.yaml --output report.json
-          
+
       - name: Check Quality Gate
         run: |
           # Falha se a acurácia cair mais que 2%

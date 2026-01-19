@@ -29,8 +29,8 @@ pytestmark = [
     pytest.mark.real,
     pytest.mark.skipif(
         not os.environ.get("GOOGLE_API_KEY") and not os.environ.get("ANTHROPIC_API_KEY"),
-        reason="No API keys configured"
-    )
+        reason="No API keys configured",
+    ),
 ]
 
 
@@ -43,7 +43,7 @@ def load_env():
                 line = line.strip()
                 if line and not line.startswith("#") and "=" in line:
                     key, value = line.split("=", 1)
-                    os.environ.setdefault(key.strip(), value.strip().strip('"\''))
+                    os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
 
 
 # Load env at module import
@@ -161,27 +161,29 @@ class TestRealTaskDecomposition:
         print(f"[REAL TEST] Output length: {len(result['output'])} chars")
         print(f"[REAL TEST] Success: {result['success']}")
 
-        if result['error']:
+        if result["error"]:
             print(f"[REAL TEST] Error: {result['error']}")
             pytest.skip(f"LLM error: {result['error']}")
 
         # Validate decomposition happened
-        output_lower = result['output'].lower()
+        output_lower = result["output"].lower()
 
         # Should mention multiple components
-        components_found = sum([
-            "registration" in output_lower or "register" in output_lower,
-            "login" in output_lower,
-            "password" in output_lower,
-            "session" in output_lower or "jwt" in output_lower,
-        ])
+        components_found = sum(
+            [
+                "registration" in output_lower or "register" in output_lower,
+                "login" in output_lower,
+                "password" in output_lower,
+                "session" in output_lower or "jwt" in output_lower,
+            ]
+        )
 
-        assert components_found >= 2, \
-            f"Expected multiple components addressed, found {components_found}"
+        assert (
+            components_found >= 2
+        ), f"Expected multiple components addressed, found {components_found}"
 
         # Output should be substantial (not just "ok")
-        assert len(result['output']) > 100, \
-            "Output too short for complex request"
+        assert len(result["output"]) > 100, "Output too short for complex request"
 
     @pytest.mark.timeout(60)
     async def test_simple_request_handled(self, real_client):
@@ -195,8 +197,8 @@ class TestRealTaskDecomposition:
         print(f"\n[REAL TEST] Duration: {result['duration_ms']}ms")
         print(f"[REAL TEST] Output: {result['output'][:200]}...")
 
-        assert result['success'] or result['error'] is None
-        assert len(result['output']) > 20, "Should produce some output"
+        assert result["success"] or result["error"] is None
+        assert len(result["output"]) > 20, "Should produce some output"
 
 
 class TestRealIntentRecognition:
@@ -213,21 +215,22 @@ class TestRealIntentRecognition:
 
         print(f"\n[REAL TEST] Duration: {result['duration_ms']}ms")
 
-        if result['error']:
+        if result["error"]:
             pytest.skip(f"LLM error: {result['error']}")
 
         # Should contain code markers
-        has_code = any([
-            "def " in result['output'],
-            "```python" in result['output'],
-            "```" in result['output'],
-        ])
+        has_code = any(
+            [
+                "def " in result["output"],
+                "```python" in result["output"],
+                "```" in result["output"],
+            ]
+        )
 
         assert has_code, "Coding request should produce code"
 
         # Should mention prime
-        assert "prime" in result['output'].lower(), \
-            "Output should relate to the request"
+        assert "prime" in result["output"].lower(), "Output should relate to the request"
 
     @pytest.mark.timeout(60)
     async def test_planning_intent_produces_plan(self, real_client):
@@ -240,20 +243,26 @@ class TestRealIntentRecognition:
 
         print(f"\n[REAL TEST] Duration: {result['duration_ms']}ms")
 
-        if result['error']:
+        if result["error"]:
             pytest.skip(f"LLM error: {result['error']}")
 
-        output_lower = result['output'].lower()
+        output_lower = result["output"].lower()
 
         # Should mention architectural concepts
         architectural_terms = [
-            "service", "api", "database", "component",
-            "architecture", "microservice", "gateway"
+            "service",
+            "api",
+            "database",
+            "component",
+            "architecture",
+            "microservice",
+            "gateway",
         ]
 
         terms_found = sum(1 for term in architectural_terms if term in output_lower)
-        assert terms_found >= 2, \
-            f"Planning output should mention architectural concepts, found {terms_found}"
+        assert (
+            terms_found >= 2
+        ), f"Planning output should mention architectural concepts, found {terms_found}"
 
 
 class TestRealToolExecution:
@@ -272,12 +281,11 @@ class TestRealToolExecution:
         print(f"\n[REAL TEST] Duration: {result['duration_ms']}ms")
         print(f"[REAL TEST] Tools called: {result['tools_called']}")
 
-        if result['error']:
+        if result["error"]:
             pytest.skip(f"LLM error: {result['error']}")
 
         # Should mention the project name (vertice)
-        assert "vertice" in result['output'].lower(), \
-            "Should read and report the project name"
+        assert "vertice" in result["output"].lower(), "Should read and report the project name"
 
     @pytest.mark.timeout(90)
     async def test_code_search_tool(self, real_client):
@@ -290,12 +298,11 @@ class TestRealToolExecution:
 
         print(f"\n[REAL TEST] Duration: {result['duration_ms']}ms")
 
-        if result['error']:
+        if result["error"]:
             pytest.skip(f"LLM error: {result['error']}")
 
         # Should find the file
-        assert "bridge" in result['output'].lower(), \
-            "Should mention the bridge file"
+        assert "bridge" in result["output"].lower(), "Should mention the bridge file"
 
 
 class TestRealProviderRouting:
@@ -314,8 +321,9 @@ class TestRealProviderRouting:
         print(f"[REAL TEST] Success: {result['success']}")
 
         # Should get some response
-        assert result['success'] or len(result['output']) > 0, \
-            "Should get a response from at least one provider"
+        assert (
+            result["success"] or len(result["output"]) > 0
+        ), "Should get a response from at least one provider"
 
 
 class TestRealStreaming:
@@ -333,13 +341,12 @@ class TestRealStreaming:
         print(f"\n[REAL TEST] Duration: {result['duration_ms']}ms")
         print(f"[REAL TEST] Chunks received: {len(result['chunks'])}")
 
-        if result['error']:
+        if result["error"]:
             pytest.skip(f"LLM error: {result['error']}")
 
         # Should have received multiple chunks (streaming)
         # Note: Some providers may batch, so allow minimum of 1
-        assert len(result['chunks']) >= 1, \
-            "Should receive streaming chunks"
+        assert len(result["chunks"]) >= 1, "Should receive streaming chunks"
 
 
 class TestRealQualityValidation:
@@ -354,11 +361,11 @@ class TestRealQualityValidation:
 
         result = await real_client.process(request)
 
-        if result['error']:
+        if result["error"]:
             pytest.skip(f"LLM error: {result['error']}")
 
         # Extract code from output
-        output = result['output']
+        output = result["output"]
 
         # Try to find code block
         if "```python" in output:
@@ -367,7 +374,7 @@ class TestRealQualityValidation:
             code = output[code_start:code_end].strip()
         elif "def " in output:
             # Find the function definition
-            lines = output.split('\n')
+            lines = output.split("\n")
             code_lines = []
             in_code = False
             for line in lines:
@@ -375,16 +382,16 @@ class TestRealQualityValidation:
                     in_code = True
                 if in_code:
                     code_lines.append(line)
-                    if line.strip() and not line.startswith(' ') and not line.startswith('def'):
+                    if line.strip() and not line.startswith(" ") and not line.startswith("def"):
                         break
-            code = '\n'.join(code_lines)
+            code = "\n".join(code_lines)
         else:
             code = ""
 
         if code:
             # Validate syntax
             try:
-                compile(code, '<string>', 'exec')
+                compile(code, "<string>", "exec")
                 syntax_valid = True
             except SyntaxError as e:
                 print(f"[REAL TEST] Syntax error: {e}")
@@ -401,17 +408,18 @@ class TestRealQualityValidation:
 
         result = await real_client.process(request)
 
-        if result['error']:
+        if result["error"]:
             pytest.skip(f"LLM error: {result['error']}")
 
-        output_lower = result['output'].lower()
+        output_lower = result["output"].lower()
 
         # Should mention type-related concepts
         relevant_terms = ["type", "hint", "annotation", "static", "check", "error", "ide"]
         terms_found = sum(1 for term in relevant_terms if term in output_lower)
 
-        assert terms_found >= 2, \
-            f"Response should be relevant to type hints, found {terms_found} relevant terms"
+        assert (
+            terms_found >= 2
+        ), f"Response should be relevant to type hints, found {terms_found} relevant terms"
 
 
 class TestRealErrorHandling:
@@ -428,14 +436,14 @@ class TestRealErrorHandling:
 
         # Should not crash
         # May produce error message or ask for clarification
-        assert result['success'] or result['error'] is not None or len(result['output']) > 0
+        assert result["success"] or result["error"] is not None or len(result["output"]) > 0
 
     @pytest.mark.timeout(60)
     async def test_empty_request_handled(self, real_client):
         """
         REAL TEST: Empty requests should be handled gracefully.
         """
-        result = await real_client.process("")
+        await real_client.process("")
 
         # Should not crash
         # May produce error or prompt for input
@@ -457,8 +465,8 @@ class TestRealPerformance:
         durations = []
         for i in range(3):
             result = await real_client.process(request)
-            if result['success']:
-                durations.append(result['duration_ms'])
+            if result["success"]:
+                durations.append(result["duration_ms"])
 
         if durations:
             avg_ms = sum(durations) / len(durations)

@@ -35,6 +35,7 @@ from vertice_cli.core.mcp_client import MCPClient
 # Professional use, edge cases, performance-critical scenarios
 # ============================================================================
 
+
 class TestSeniorProgrammer:
     """
     Senior programmer knows what they're doing but hits edge cases.
@@ -58,17 +59,14 @@ class TestSeniorProgrammer:
         await gov.initialize()
 
         # Create multiple tasks
-        tasks = [
-            AgentTask(request=f"Task {i}", context={"id": i})
-            for i in range(10)
-        ]
+        tasks = [AgentTask(request=f"Task {i}", context={"id": i}) for i in range(10)]
 
         # Execute all concurrently
         # BUG EXPECTED: Race conditions, shared state corruption
         try:
             results = await asyncio.gather(
                 *[gov.detect_risk_level(t.request, "executor") for t in tasks],
-                return_exceptions=True
+                return_exceptions=True,
             )
 
             # Check for exceptions
@@ -86,7 +84,7 @@ class TestSeniorProgrammer:
         # ISSUE: Can system handle realistic large contexts?
 
         llm = Mock(spec=LLMClient)
-        mcp = Mock(spec=MCPClient)
+        Mock(spec=MCPClient)
         llm.generate = AsyncMock(return_value="Analysis complete")
 
         # Create realistic 5MB codebase context
@@ -96,10 +94,7 @@ class TestSeniorProgrammer:
         }
 
         try:
-            task = AgentTask(
-                request="Analyze this codebase for security issues",
-                context=large_context
-            )
+            AgentTask(request="Analyze this codebase for security issues", context=large_context)
             # ISSUE #2: Should fail with our 10MB limit, but is it clear?
             pytest.fail("ISSUE #2: Should have failed with size limit")
 
@@ -126,10 +121,7 @@ class TestSeniorProgrammer:
             current = current["level_" + str(i)]
 
         try:
-            task = AgentTask(
-                request="Create detailed plan",
-                context=nested_context
-            )
+            AgentTask(request="Create detailed plan", context=nested_context)
 
             gov = MaestroGovernance(llm, mcp)
             await gov.initialize()
@@ -155,8 +147,8 @@ class TestSeniorProgrammer:
             context={
                 "文件.py": "def 函数():\n    return '你好世界' + '🎉'",
                 "ملف.py": "def وظيفة():\n    return 'مرحبا'",
-                "emoji.js": "const 💻 = '🔥'; const test = () => 🎯;"
-            }
+                "emoji.js": "const 💻 = '🔥'; const test = () => 🎯;",
+            },
         )
 
         gov = MaestroGovernance(llm, mcp)
@@ -192,10 +184,7 @@ class TestSeniorProgrammer:
 
         try:
             # Should timeout after reasonable time
-            result = await asyncio.wait_for(
-                gov.execute_with_governance(Mock(), task),
-                timeout=5.0
-            )
+            await asyncio.wait_for(gov.execute_with_governance(Mock(), task), timeout=5.0)
             # ISSUE #7: No internal timeouts!
             pytest.fail("ISSUE #7: No timeout mechanism - runs forever!")
 
@@ -219,7 +208,7 @@ class TestSeniorProgrammer:
         task = AgentTask(request="Test request")
 
         try:
-            result = await gov.execute_with_governance(Mock(), task)
+            await gov.execute_with_governance(Mock(), task)
             # ISSUE #8: Should fail gracefully with clear error
 
         except ConnectionError:
@@ -270,7 +259,7 @@ class TestSeniorProgrammer:
             task = AgentTask(request=f"Task {i}")
             try:
                 await gov.execute_with_governance(Mock(), task)
-            except:
+            except Exception:
                 pass
 
         # Check memory growth
@@ -297,13 +286,13 @@ class TestSeniorProgrammer:
 
         try:
             await gov.execute_with_governance(Mock(), task)
-        except:
+        except Exception:
             pass
 
         # Check if governor is still usable
         try:
             status = gov.get_governance_status()
-            assert status["initialized"] == True
+            assert status["initialized"]
         except Exception as e:
             pytest.fail(f"ISSUE #11: Cleanup failed, state corrupted: {e}")
 
@@ -320,12 +309,10 @@ class TestSeniorProgrammer:
         await gov.initialize()
 
         # Fire 1000 requests as fast as possible
-        tasks = [
-            gov.detect_risk_level(f"Request {i}", "executor")
-            for i in range(1000)
-        ]
+        tasks = [gov.detect_risk_level(f"Request {i}", "executor") for i in range(1000)]
 
         import time
+
         start = time.time()
 
         try:
@@ -347,6 +334,7 @@ class TestSeniorProgrammer:
 # CATEGORY 2: VIBE CODER (15 tests)
 # Beginner mistakes, copy-paste errors, misunderstanding APIs
 # ============================================================================
+
 
 class TestVibeCoder:
     """
@@ -380,7 +368,7 @@ class TestVibeCoder:
 
         try:
             # Wrong parameter name
-            gov = MaestroGovernance(
+            MaestroGovernance(
                 llm_client=llm,
                 mcp=mcp,  # Should be mcp_client
             )
@@ -406,10 +394,10 @@ class TestVibeCoder:
 
         # Wrong risk level (should be uppercase)
         try:
-            response = await gov.execute_with_governance(
+            await gov.execute_with_governance(
                 Mock(),
                 task,
-                risk_level="high"  # Should be "HIGH"
+                risk_level="high",  # Should be "HIGH"
             )
             pytest.fail("ISSUE #18: Accepts lowercase risk level!")
 
@@ -430,7 +418,7 @@ class TestVibeCoder:
         # Try to call async method without await
         try:
             # This will return a coroutine
-            coro = gov.initialize()
+            gov.initialize()
             status = gov.get_governance_status()
 
             # ISSUE #20: Uninitialized but didn't crash
@@ -456,7 +444,7 @@ class TestVibeCoder:
 
         try:
             # Should auto-initialize or fail clearly
-            result = await gov.execute_with_governance(Mock(), task)
+            await gov.execute_with_governance(Mock(), task)
             # If it works, good - auto-initialized
 
         except Exception as e:
@@ -468,14 +456,14 @@ class TestVibeCoder:
         """Vibe coder copy-pastes example with wrong context type"""
         # ISSUE: Does validation catch type errors?
 
-        llm = Mock(spec=LLMClient)
-        mcp = Mock(spec=MCPClient)
+        Mock(spec=LLMClient)
+        Mock(spec=MCPClient)
 
         try:
             # Copy-pasted from somewhere, wrong type
-            task = AgentTask(
+            AgentTask(
                 request="Do something",
-                context="not a dict"  # Should be dict
+                context="not a dict",  # Should be dict
             )
             pytest.fail("ISSUE #22: Accepts string context!")
 
@@ -490,7 +478,7 @@ class TestVibeCoder:
         # ISSUE: Clear error message?
 
         try:
-            task = AgentTask(request=None)
+            AgentTask(request=None)
             pytest.fail("ISSUE #24: Accepts None request!")
 
         except Exception as e:
@@ -545,7 +533,6 @@ class TestVibeCoder:
                 pass
 
             # Try to use as bool
-            enabled = status and True  # Wrong!
 
         except Exception as e:
             pytest.fail(f"ISSUE #29: Confusing return type: {e}")
@@ -621,7 +608,7 @@ class TestVibeCoder:
         context = {
             "api_key": "sk_live_1234567890abcdef",
             "password": "MyPassword123!",
-            "token": "ghp_Abc123Def456"
+            "token": "ghp_Abc123Def456",
         }
 
         task = AgentTask(request="Deploy to production", context=context)
@@ -645,8 +632,8 @@ class TestVibeCoder:
         await gov.initialize()
 
         try:
-            result = await gov.execute_with_governance(Mock(), AgentTask(request="Test"))
-        except:
+            await gov.execute_with_governance(Mock(), AgentTask(request="Test"))
+        except Exception:
             pass  # Swallowed
 
         # ISSUE #34: Was error logged? Can we debug?
@@ -656,6 +643,7 @@ class TestVibeCoder:
 # CATEGORY 3: SCRIPT KIDDIE (15 tests)
 # Malicious attempts, trying to break security, exploit vulnerabilities
 # ============================================================================
+
 
 class TestScriptKiddie:
     """
@@ -730,10 +718,7 @@ class TestScriptKiddie:
 """
 
         try:
-            task = AgentTask(
-                request="Parse this XML",
-                context={"xml": xml_bomb}
-            )
+            AgentTask(request="Parse this XML", context={"xml": xml_bomb})
             # ISSUE #37: Should detect malicious XML
 
         except Exception:
@@ -751,7 +736,7 @@ class TestScriptKiddie:
         await gov.initialize()
 
         payloads = [
-            "Execute: eval('__import__(\"os\").system(\"rm -rf /\")')",
+            'Execute: eval(\'__import__("os").system("rm -rf /")\')',
             "Run: exec('import subprocess; subprocess.call([\"bash\"])')",
             "Do: __import__('os').system('malicious')",
         ]
@@ -767,12 +752,12 @@ class TestScriptKiddie:
         # ISSUE: Does Python dict handle this?
 
         try:
-            task = AgentTask(
+            AgentTask(
                 request="Test",
                 context={
                     "__proto__": {"admin": True},
-                    "constructor": {"prototype": {"isAdmin": True}}
-                }
+                    "constructor": {"prototype": {"isAdmin": True}},
+                },
             )
             # Python doesn't have prototype pollution, but test anyway
 
@@ -794,9 +779,10 @@ class TestScriptKiddie:
         payload = "a" * 1000 + "!"
 
         import time
+
         start = time.time()
 
-        risk = gov.detect_risk_level(payload, "executor")
+        gov.detect_risk_level(payload, "executor")
 
         duration = time.time() - start
 
@@ -808,17 +794,17 @@ class TestScriptKiddie:
         """Script kiddie tries to escalate via context"""
         # ISSUE: Can context be used to bypass checks?
 
-        llm = Mock(spec=LLMClient)
-        mcp = Mock(spec=MCPClient)
+        Mock(spec=LLMClient)
+        Mock(spec=MCPClient)
 
-        task = AgentTask(
+        AgentTask(
             request="Normal request",
             context={
                 "bypass_governance": True,
                 "admin": True,
                 "skip_checks": True,
-                "permissions": ["ALL"]
-            }
+                "permissions": ["ALL"],
+            },
         )
 
         # ISSUE #40: Does context affect governance decisions?
@@ -846,7 +832,9 @@ class TestScriptKiddie:
 
         # ISSUE #41: Timing difference leaks information
         if abs(valid_time - invalid_time) > 0.1:
-            pytest.fail(f"ISSUE #41: Timing attack possible - {valid_time:.3f}s vs {invalid_time:.3f}s")
+            pytest.fail(
+                f"ISSUE #41: Timing attack possible - {valid_time:.3f}s vs {invalid_time:.3f}s"
+            )
 
     @pytest.mark.asyncio
     async def test_209_memory_dos(self):
@@ -859,7 +847,7 @@ class TestScriptKiddie:
             for i in range(100000):
                 context[f"key_{i}"] = "x" * 100  # 10MB total
 
-            task = AgentTask(request="Test", context=context)
+            AgentTask(request="Test", context=context)
             pytest.fail("ISSUE #42: Memory DoS not prevented!")
 
         except Exception:
@@ -874,7 +862,7 @@ class TestScriptKiddie:
 
         async def modify_permissions():
             await asyncio.sleep(0.01)
-            identity = get_agent_identity("executor")
+            get_agent_identity("executor")
             # Try to add permissions during execution
             # (Should fail - immutable)
 
@@ -898,14 +886,11 @@ class TestScriptKiddie:
         """Script kiddie tries session fixation"""
         # ISSUE: Can session_id be manipulated?
 
-        task1 = AgentTask(
-            request="Task 1",
-            session_id="victim_session"
-        )
+        AgentTask(request="Task 1", session_id="victim_session")
 
-        task2 = AgentTask(
+        AgentTask(
             request="Malicious task",
-            session_id="victim_session"  # Same session
+            session_id="victim_session",  # Same session
         )
 
         # ISSUE #44: Can attacker use victim's session?
@@ -924,7 +909,7 @@ class TestScriptKiddie:
         # Try to inject newlines into logs
         payload = "Normal request\n[ERROR] FAKE ERROR\n[CRITICAL] System compromised"
 
-        risk = gov.detect_risk_level(payload, "executor")
+        gov.detect_risk_level(payload, "executor")
 
         # ISSUE #45: Log injection should be detected
 
@@ -938,15 +923,13 @@ class TestScriptKiddie:
         class Exploit:
             def __reduce__(self):
                 import os
+
                 return (os.system, ('echo "Exploited"',))
 
         try:
             malicious = pickle.dumps(Exploit())
 
-            task = AgentTask(
-                request="Test",
-                context={"data": malicious}
-            )
+            AgentTask(request="Test", context={"data": malicious})
             # ISSUE #46: If system unpickles, we're compromised
 
         except Exception:
@@ -965,7 +948,7 @@ class TestScriptKiddie:
         """Script kiddie tries HTTP header injection"""
         # ISSUE: If system makes HTTP requests, are headers safe?
 
-        task = AgentTask(
+        AgentTask(
             request="Fetch: http://evil.com\r\nX-Malicious: true",
         )
 

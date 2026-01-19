@@ -8,6 +8,7 @@ import asyncio
 import tempfile
 from pathlib import Path
 
+
 async def test_lsp_features():
     print("🧪 LSP Features...")
     from vertice_cli.intelligence.lsp_client import Language, LSPClient
@@ -24,13 +25,14 @@ async def test_lsp_features():
     print(f"✅ LSP client initialized: {client.language.value}")
     return True
 
+
 async def test_refactoring():
     print("\n🧪 Refactoring Engine...")
     from vertice_cli.refactoring.engine import RefactoringEngine
 
     engine = RefactoringEngine(project_root=Path.cwd())
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
         f.write('def old_name():\n    return "test"\n\nresult = old_name()\n')
         temp_path = Path(f.name)
 
@@ -44,6 +46,7 @@ async def test_refactoring():
         return True
     finally:
         temp_path.unlink()
+
 
 async def test_context_suggestions():
     print("\n🧪 Context Suggestions...")
@@ -62,10 +65,11 @@ async def test_context_suggestions():
         print(f"   - {rec.file_path.name}: {rec.relevance_score:.2f}")
     return True
 
+
 async def main():
-    print("="*60)
+    print("=" * 60)
     print("🐕 DOGFOODING - Core Features Test")
-    print("="*60)
+    print("=" * 60)
 
     results = [
         ("LSP Features", await test_lsp_features()),
@@ -73,9 +77,9 @@ async def main():
         ("Context Suggestions", await test_context_suggestions()),
     ]
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("📊 RESULTS")
-    print("="*60)
+    print("=" * 60)
 
     passed = sum(1 for _, r in results if r)
     for name, r in results:
@@ -84,6 +88,7 @@ async def main():
     print(f"\nTotal: {passed}/{len(results)} ({passed/len(results)*100:.0f}%)")
     print("\n🎉 ALL FEATURES WORKING!" if passed == len(results) else "\n⚠️ Some issues found")
     return passed == len(results)
+
 
 if __name__ == "__main__":
     sys.exit(0 if asyncio.run(main()) else 1)

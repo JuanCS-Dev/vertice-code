@@ -125,7 +125,7 @@ Script Completo (Copie para Google Docs)
 ## CENA 1: INTRO (20s)
 **Visual**: Terminal com banner PROMETHEUS
 **Narração**: (opcional - você decide se vai narrar ou só música)
-"Agentes de IA são burros. 
+"Agentes de IA são burros.
 Eles executam comandos sem memória.
 Sem simulação.
 Sem evolução.
@@ -761,7 +761,7 @@ echo "YouTube: https://youtu.be/XXXXXXXXXXX" >> ~/Desktop/mcp_demo_video/product
 Twitter/X Post
 Template:
 
-🔥 Submitting PROMETHEUS to #MCPHackathon! 
+🔥 Submitting PROMETHEUS to #MCPHackathon!
 A self-evolving AI agent that:
 - Simulates BEFORE acting (SimuRA)
 - Remembers everything (MIRIX 6-type memory)

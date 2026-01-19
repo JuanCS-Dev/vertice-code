@@ -51,13 +51,13 @@ class SofiaAgent:
     7. Adaptativo > Rigido
     """
 
-    BANNER = '''
+    BANNER = """
 ==============================================================================
                               SOFIA
                          Sabedoria Encarnada
               "Voce nao substitui sabedoria humana - voce a cultiva."
 ==============================================================================
-    '''
+    """
 
     def __init__(self, config: Optional[SofiaConfig] = None):
         """Inicializa SOFIA."""
@@ -134,9 +134,7 @@ class SofiaAgent:
         )
 
         # FASE 1: DETERMINAR MODO DE PENSAMENTO
-        should_system2, trigger = self.deliberation_engine.should_activate_system2(
-            user_input
-        )
+        should_system2, trigger = self.deliberation_engine.should_activate_system2(user_input)
 
         if should_system2:
             counsel.thinking_mode = ThinkingMode.SYSTEM_2
@@ -474,9 +472,7 @@ O que voce gostaria de explorar sobre isso?"""
                 "total_interactions": self.total_interactions,
                 "total_questions_asked": self.total_questions_asked,
                 "total_counsels_given": self.total_counsels_given,
-                "question_ratio": (
-                    self.total_questions_asked / max(1, self.total_interactions)
-                ),
+                "question_ratio": (self.total_questions_asked / max(1, self.total_interactions)),
             },
             "virtues": self.virtue_engine.get_virtue_balance(),
             "socratic": self.socratic_engine.get_metrics(),
@@ -485,10 +481,7 @@ O que voce gostaria de explorar sobre isso?"""
         }
 
     def __repr__(self) -> str:
-        return (
-            f"SofiaAgent(state={self.state.name}, "
-            f"interactions={self.total_interactions})"
-        )
+        return f"SofiaAgent(state={self.state.name}, " f"interactions={self.total_interactions})"
 
 
 __all__ = ["SofiaAgent"]

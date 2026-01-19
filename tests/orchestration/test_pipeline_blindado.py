@@ -161,9 +161,7 @@ class TestStateMachineIntegration:
         squad._state_machine = squad._init_state_machine("test-123")
 
         squad._save_checkpoint(
-            WorkflowPhase.ARCHITECTURE,
-            {"input": "test"},
-            {"decision": "APPROVED"}
+            WorkflowPhase.ARCHITECTURE, {"input": "test"}, {"decision": "APPROVED"}
         )
 
         checkpoint = squad._state_machine.get_checkpoint(Phase.ARCHITECT)
@@ -180,11 +178,7 @@ class TestStateMachineIntegration:
         )
 
         # This should not raise even without state machine
-        squad._save_checkpoint(
-            WorkflowPhase.ARCHITECTURE,
-            {},
-            {}
-        )
+        squad._save_checkpoint(WorkflowPhase.ARCHITECTURE, {}, {})
 
         assert squad._state_machine is None
 
@@ -193,11 +187,7 @@ class TestStateMachineIntegration:
         squad._state_machine = squad._init_state_machine("test-123")
 
         # Save a checkpoint
-        squad._save_checkpoint(
-            WorkflowPhase.PLANNING,
-            {"files": ["a.py"]},
-            {"plan": {"steps": []}}
-        )
+        squad._save_checkpoint(WorkflowPhase.PLANNING, {"files": ["a.py"]}, {"plan": {"steps": []}})
 
         # Retrieve it
         checkpoint = squad.get_rollback_checkpoint(WorkflowPhase.PLANNING)
@@ -217,8 +207,7 @@ class TestGovernanceGate:
     async def test_governance_check_passes(self, squad_with_governance, mock_governance_pipeline):
         """Governance check passes when approved."""
         approved, reason = await squad_with_governance._run_governance_check(
-            {"steps": [{"action": "write"}]},
-            "session-123"
+            {"steps": [{"action": "write"}]}, "session-123"
         )
 
         assert approved is True
@@ -229,12 +218,13 @@ class TestGovernanceGate:
     async def test_governance_check_blocks(self, squad_with_governance, mock_governance_pipeline):
         """Governance check blocks when rejected."""
         mock_governance_pipeline.pre_execution_check.return_value = (
-            False, "Action violates constitutional principle", {}
+            False,
+            "Action violates constitutional principle",
+            {},
         )
 
         approved, reason = await squad_with_governance._run_governance_check(
-            {"steps": [{"action": "delete_all"}]},
-            "session-123"
+            {"steps": [{"action": "delete_all"}]}, "session-123"
         )
 
         assert approved is False
@@ -243,22 +233,20 @@ class TestGovernanceGate:
     @pytest.mark.asyncio
     async def test_governance_check_skipped_when_not_configured(self, squad):
         """Governance check is skipped when no pipeline configured."""
-        approved, reason = await squad._run_governance_check(
-            {"steps": []},
-            "session-123"
-        )
+        approved, reason = await squad._run_governance_check({"steps": []}, "session-123")
 
         assert approved is True
         assert reason is None
 
     @pytest.mark.asyncio
-    async def test_governance_check_fails_safe_on_error(self, squad_with_governance, mock_governance_pipeline):
+    async def test_governance_check_fails_safe_on_error(
+        self, squad_with_governance, mock_governance_pipeline
+    ):
         """Governance check blocks on error (fail-safe)."""
         mock_governance_pipeline.pre_execution_check.side_effect = Exception("Connection error")
 
         approved, reason = await squad_with_governance._run_governance_check(
-            {"steps": []},
-            "session-123"
+            {"steps": []}, "session-123"
         )
 
         assert approved is False
@@ -286,7 +274,7 @@ class TestWorkflowIntegration:
     async def test_workflow_initializes_state_machine(self, squad):
         """Workflow initializes state machine when checkpoints enabled."""
         # Mock all agents to avoid actual execution
-        with patch.object(squad, '_phase_architecture') as mock_arch:
+        with patch.object(squad, "_phase_architecture") as mock_arch:
             mock_arch.return_value = PhaseResult(
                 phase=WorkflowPhase.ARCHITECTURE,
                 success=False,
@@ -302,7 +290,7 @@ class TestWorkflowIntegration:
     @pytest.mark.asyncio
     async def test_workflow_tracks_failed_phase(self, squad):
         """Workflow tracks which phase failed."""
-        with patch.object(squad, '_phase_architecture') as mock_arch:
+        with patch.object(squad, "_phase_architecture") as mock_arch:
             mock_arch.return_value = PhaseResult(
                 phase=WorkflowPhase.ARCHITECTURE,
                 success=False,
@@ -355,27 +343,33 @@ class TestDangerousPatterns:
     def squad_instance(self, mock_llm_client, mock_mcp_client):
         return DevSquad(mock_llm_client, mock_mcp_client)
 
-    @pytest.mark.parametrize("dangerous_input", [
-        "rm -rf /",
-        "rm -rf / --no-preserve-root",
-        "sudo rm -rf /home",
-        "echo 'x' > /dev/sda",
-        "dd if=/dev/zero of=/dev/sda",
-        "mkfs.ext4 /dev/sda1",
-        ":(){:|:&};:",
-    ])
+    @pytest.mark.parametrize(
+        "dangerous_input",
+        [
+            "rm -rf /",
+            "rm -rf / --no-preserve-root",
+            "sudo rm -rf /home",
+            "echo 'x' > /dev/sda",
+            "dd if=/dev/zero of=/dev/sda",
+            "mkfs.ext4 /dev/sda1",
+            ":(){:|:&};:",
+        ],
+    )
     def test_dangerous_patterns_blocked(self, squad_instance, dangerous_input):
         """Known dangerous patterns are blocked."""
         is_valid, error = squad_instance._validate_input(f"Please run: {dangerous_input}")
         assert is_valid is False
 
-    @pytest.mark.parametrize("safe_input", [
-        "Create a new Python file",
-        "Refactor the authentication module",
-        "Add unit tests for the user service",
-        "Remove unused imports",  # 'remove' is safe when not 'rm -rf'
-        "Delete the deprecated function",
-    ])
+    @pytest.mark.parametrize(
+        "safe_input",
+        [
+            "Create a new Python file",
+            "Refactor the authentication module",
+            "Add unit tests for the user service",
+            "Remove unused imports",  # 'remove' is safe when not 'rm -rf'
+            "Delete the deprecated function",
+        ],
+    )
     def test_safe_patterns_allowed(self, squad_instance, safe_input):
         """Normal development requests are allowed."""
         is_valid, error = squad_instance._validate_input(safe_input)

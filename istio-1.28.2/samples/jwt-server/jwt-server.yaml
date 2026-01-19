@@ -37,7 +37,7 @@ metadata:
   name: jwt-cert-key-secret
 # command to generate certificate
 # use the generated server.crt, server.key by following https://github.com/istio/istio/blob/master/samples/jwt-server/testdata/README.MD
-stringData: 
+stringData:
   server.crt: |
     -----BEGIN CERTIFICATE-----
     MIIDjzCCAnegAwIBAgIUfIuuQDfWakIpZ7bZAuuLUWhSm2AwDQYJKoZIhvcNAQEL

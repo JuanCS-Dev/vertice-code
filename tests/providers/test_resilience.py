@@ -207,7 +207,7 @@ class TestCreateHttpClient:
         assert client is not None
         # Check limits via transport if accessible
         transport = client._transport
-        if hasattr(transport, '_pool') and hasattr(transport._pool, '_limits'):
+        if hasattr(transport, "_pool") and hasattr(transport._pool, "_limits"):
             assert transport._pool._limits.max_connections == 50
         else:
             # Fallback: just verify client was created successfully
@@ -274,9 +274,7 @@ class TestCallWithResilience:
                 raise httpx.ConnectError("connection failed")
             return "success after retry"
 
-        result: str = await call_with_resilience(
-            flaky_func, breaker, retry_config
-        )
+        result: str = await call_with_resilience(flaky_func, breaker, retry_config)
         assert result == "success after retry"
         assert call_count == 3
 

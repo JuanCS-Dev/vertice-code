@@ -346,9 +346,9 @@ class SandboxExecutor:
         network_disabled: bool = False,
         auto_pull: bool = True
     )
-    
+
     def is_available(self) -> bool
-    
+
     def execute(
         self,
         command: str,
@@ -358,7 +358,7 @@ class SandboxExecutor:
         env: Optional[Dict[str, str]] = None,
         working_dir: str = "/workspace"
     ) -> SandboxResult
-    
+
     def execute_with_files(
         self,
         command: str,
@@ -366,9 +366,9 @@ class SandboxExecutor:
         timeout: int = 30,
         env: Optional[Dict[str, str]] = None
     ) -> SandboxResult
-    
+
     def test_availability(self) -> Dict[str, Any]
-    
+
     def cleanup_old_containers(self, older_than_hours: int = 24)
 ```
 
@@ -383,7 +383,7 @@ class SandboxResult:
     duration_ms: float
     container_id: str
     success: bool
-    
+
     @property
     def output(self) -> str  # Combined stdout + stderr
 ```

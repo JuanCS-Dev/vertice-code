@@ -26,6 +26,7 @@ from vertice_tui.core.output_formatter import OutputFormatter
 # ToolCallParser Tests
 # =============================================================================
 
+
 class TestToolCallParser:
     """Tests for ToolCallParser - extracting tool calls from text."""
 
@@ -41,10 +42,10 @@ class TestToolCallParser:
 
     def test_extract_multiple_tool_calls(self):
         """Test extracting multiple tool calls."""
-        text = '''
+        text = """
         First, let me read the file. [TOOL_CALL:read_file:{"path":"config.py"}]
         Now I'll edit it. [TOOL_CALL:edit_file:{"path":"config.py","edits":[]}]
-        '''
+        """
 
         calls = ToolCallParser.extract(text)
 
@@ -81,7 +82,9 @@ class TestToolCallParser:
 
     def test_format_marker(self):
         """Test creating a tool call marker."""
-        marker = ToolCallParser.format_marker("write_file", {"path": "test.txt", "content": "hello"})
+        marker = ToolCallParser.format_marker(
+            "write_file", {"path": "test.txt", "content": "hello"}
+        )
 
         assert "[TOOL_CALL:write_file:" in marker
         assert '"path"' in marker
@@ -102,6 +105,7 @@ class TestToolCallParser:
 # =============================================================================
 # OutputFormatter Tests
 # =============================================================================
+
 
 class TestOutputFormatter:
     """Tests for OutputFormatter - Panel formatting."""
@@ -129,9 +133,7 @@ class TestOutputFormatter:
         from rich.panel import Panel
 
         result = OutputFormatter.format_tool_result(
-            "write_file",
-            success=True,
-            data="File created at /tmp/test.txt"
+            "write_file", success=True, data="File created at /tmp/test.txt"
         )
 
         assert isinstance(result, Panel)
@@ -139,9 +141,7 @@ class TestOutputFormatter:
     def test_format_tool_result_failure(self):
         """Test formatting failed tool result."""
         result = OutputFormatter.format_tool_result(
-            "read_file",
-            success=False,
-            error="File not found: /nonexistent"
+            "read_file", success=False, error="File not found: /nonexistent"
         )
 
         # Render to check it works
@@ -201,6 +201,7 @@ class TestOutputFormatter:
 # Bridge Tool Configuration Tests
 # =============================================================================
 
+
 class TestBridgeToolConfiguration:
     """Tests for Bridge tool configuration without full integration."""
 
@@ -236,6 +237,7 @@ class TestBridgeToolConfiguration:
 # =============================================================================
 # Integration Tests (with mocks)
 # =============================================================================
+
 
 class TestBridgeChatIntegration:
     """Integration tests for Bridge.chat() with mocked LLM."""
@@ -295,6 +297,7 @@ class TestBridgeChatIntegration:
 # =============================================================================
 # Tool Registry Tests
 # =============================================================================
+
 
 class TestToolBridgeRegistry:
     """Tests for ToolBridge tool loading."""

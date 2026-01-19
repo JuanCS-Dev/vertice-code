@@ -1,8 +1,8 @@
 # 🔥 BASH EXECUTION HARDENING - SCIENTIFIC VALIDATION COMPLETE
 
-**Date:** 2025-11-21  
-**Implementation:** Boris Cherny (Linus Mode + Scientific Rigor)  
-**Status:** ✅ PRODUCTION-READY - BULLETPROOF  
+**Date:** 2025-11-21
+**Implementation:** Boris Cherny (Linus Mode + Scientific Rigor)
+**Status:** ✅ PRODUCTION-READY - BULLETPROOF
 **Test Coverage:** 108 tests, 100% passing
 
 ---
@@ -11,7 +11,7 @@
 
 **Challenge:** Make bash command execution production-grade and bulletproof
 
-**Approach:** 
+**Approach:**
 1. Linus Torvalds design principles
 2. Scientific test methodology
 3. Real-world scenario validation
@@ -442,32 +442,32 @@ Peak during test: < 50MB
 ## 🏆 LINUS TORVALDS PRINCIPLES APPLIED
 
 ### **1. "Talk is cheap. Show me the code."**
-✅ 850 lines of hardened implementation  
-✅ 1150+ lines of scientific tests  
+✅ 850 lines of hardened implementation
+✅ 1150+ lines of scientific tests
 ✅ 2000+ lines total
 
 ### **2. "Never trust user input."**
-✅ Validation BEFORE execution  
-✅ Whitelist + Blacklist  
-✅ Heuristic analysis  
+✅ Validation BEFORE execution
+✅ Whitelist + Blacklist
+✅ Heuristic analysis
 ✅ Input sanitization
 
 ### **3. "Fail loudly and early."**
-✅ Validation errors returned immediately  
-✅ Comprehensive error messages  
-✅ Metadata for debugging  
+✅ Validation errors returned immediately
+✅ Comprehensive error messages
+✅ Metadata for debugging
 ✅ Logging at all levels
 
 ### **4. "Bad programmers worry about the code. Good programmers worry about data structures."**
-✅ `ExecutionLimits` dataclass  
-✅ `CommandValidator` class  
-✅ `ToolResult` structure  
+✅ `ExecutionLimits` dataclass
+✅ `CommandValidator` class
+✅ `ToolResult` structure
 ✅ Clean separation of concerns
 
 ### **5. "Security over convenience."**
-✅ Blocked dangerous commands (no exceptions)  
-✅ Resource limits (hard, not soft)  
-✅ Environment filtering (security first)  
+✅ Blocked dangerous commands (no exceptions)
+✅ Resource limits (hard, not soft)
+✅ Environment filtering (security first)
 ✅ No sudo, no root, no negotiation
 
 ---
@@ -655,13 +655,13 @@ result.metadata: {
 
 ---
 
-**Implementation By:** Boris Cherny (Linus Mode + Scientific Rigor)  
-**Date:** 2025-11-21  
-**Version:** 1.0 - Complete  
-**Test Time:** 28.57 seconds  
+**Implementation By:** Boris Cherny (Linus Mode + Scientific Rigor)
+**Date:** 2025-11-21
+**Version:** 1.0 - Complete
+**Test Time:** 28.57 seconds
 **Tests:** 108/108 passing
 
 ---
 
-**Arquiteto-Chefe:** Bash execution agora é **bulletproof**. 🔥  
+**Arquiteto-Chefe:** Bash execution agora é **bulletproof**. 🔥
 **Next:** Deploy to production? More hardening? Your call.

@@ -37,6 +37,7 @@ from vertice_tui.core.safe_executor import (
 # COMMAND PARSING EDGE CASES - COMPREHENSIVE
 # =============================================================================
 
+
 class TestCommandParsingEdgeCases:
     """Tests for command parsing edge cases using shlex."""
 
@@ -49,32 +50,27 @@ class TestCommandParsingEdgeCases:
     # ESCAPED QUOTES TESTS
     # =========================================================================
 
-    @pytest.mark.parametrize("command,expected_allowed", [
-        # Single quotes preserved
-        ("echo 'hello world'", False),  # echo not whitelisted
-        ("pwd", True),  # Simple command
-
-        # Double quotes preserved
-        ("echo \"hello world\"", False),  # echo not whitelisted
-
-        # Escaped quotes within quotes
-        ("echo \"test\\\"quote\"", False),  # echo not whitelisted
-        ("echo 'test\\'quote'", False),  # echo not whitelisted
-    ])
+    @pytest.mark.parametrize(
+        "command,expected_allowed",
+        [
+            # Single quotes preserved
+            ("echo 'hello world'", False),  # echo not whitelisted
+            ("pwd", True),  # Simple command
+            # Double quotes preserved
+            ('echo "hello world"', False),  # echo not whitelisted
+            # Escaped quotes within quotes
+            ('echo "test\\"quote"', False),  # echo not whitelisted
+            ("echo 'test\\'quote'", False),  # echo not whitelisted
+        ],
+    )
     def test_quoted_arguments_parsed_correctly(
-        self,
-        executor: SafeCommandExecutor,
-        command: str,
-        expected_allowed: bool
+        self, executor: SafeCommandExecutor, command: str, expected_allowed: bool
     ) -> None:
         """Quoted arguments should be parsed correctly by shlex."""
         is_allowed, reason = executor.is_command_allowed(command)
         assert is_allowed == expected_allowed, f"Parsing failed for: {command}"
 
-    def test_escaped_quotes_in_whitelisted_command(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    def test_escaped_quotes_in_whitelisted_command(self, executor: SafeCommandExecutor) -> None:
         """Escaped quotes in whitelisted commands should parse correctly."""
         # pytest accepts quoted paths
         command = 'pytest -k "test_name"'
@@ -82,20 +78,14 @@ class TestCommandParsingEdgeCases:
         # This depends on whether pytest with quoted args is in whitelist
         assert isinstance(is_allowed, bool)
 
-    def test_single_quote_escape_sequences(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    def test_single_quote_escape_sequences(self, executor: SafeCommandExecutor) -> None:
         """Single quotes should preserve content literally."""
         command = "ls -la"  # Safe command
         base_cmd, args = executor._parse_command(command)
         assert base_cmd == "ls"
         assert "-la" in args
 
-    def test_double_quote_escape_sequences(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    def test_double_quote_escape_sequences(self, executor: SafeCommandExecutor) -> None:
         """Double quotes should allow escape sequences."""
         command = 'pytest -v -k "test_"'
         base_cmd, args = executor._parse_command(command)
@@ -103,10 +93,7 @@ class TestCommandParsingEdgeCases:
         assert "-v" in args
         assert "-k" in args
 
-    def test_mismatched_quotes_raises_value_error(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    def test_mismatched_quotes_raises_value_error(self, executor: SafeCommandExecutor) -> None:
         """Mismatched quotes should raise ValueError in shlex.split()."""
         command = 'pytest "unclosed quote'
         base_cmd, args = executor._parse_command(command)
@@ -114,20 +101,14 @@ class TestCommandParsingEdgeCases:
         assert base_cmd == ""
         assert args == []
 
-    def test_unmatched_single_quote(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    def test_unmatched_single_quote(self, executor: SafeCommandExecutor) -> None:
         """Unmatched single quote should be caught."""
         command = "ls 'path"
         base_cmd, args = executor._parse_command(command)
         assert base_cmd == ""
         assert args == []
 
-    def test_nested_quotes_parsing(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    def test_nested_quotes_parsing(self, executor: SafeCommandExecutor) -> None:
         """Nested quotes should parse correctly."""
         command = """pytest -v -k 'test and "important"'"""
         base_cmd, args = executor._parse_command(command)
@@ -138,57 +119,46 @@ class TestCommandParsingEdgeCases:
     # MULTIPLE SPACES TESTS
     # =========================================================================
 
-    @pytest.mark.parametrize("command", [
-        "ls  -la",           # double space
-        "ls   -la",          # triple space
-        "ls     -la",        # many spaces
-        "ls\t-la",           # tab separator
-        "ls\t\t-la",         # multiple tabs
-        "ls  \t  -la",       # mixed spaces and tabs
-    ])
-    def test_multiple_spaces_normalized(
-        self,
-        executor: SafeCommandExecutor,
-        command: str
-    ) -> None:
+    @pytest.mark.parametrize(
+        "command",
+        [
+            "ls  -la",  # double space
+            "ls   -la",  # triple space
+            "ls     -la",  # many spaces
+            "ls\t-la",  # tab separator
+            "ls\t\t-la",  # multiple tabs
+            "ls  \t  -la",  # mixed spaces and tabs
+        ],
+    )
+    def test_multiple_spaces_normalized(self, executor: SafeCommandExecutor, command: str) -> None:
         """Multiple spaces/tabs should be normalized correctly."""
         base_cmd, args = executor._parse_command(command)
         # shlex.split() handles whitespace normalization
         assert base_cmd == "ls"
         assert "-la" in args
 
-    def test_leading_whitespace_stripped(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    def test_leading_whitespace_stripped(self, executor: SafeCommandExecutor) -> None:
         """Leading whitespace should be stripped."""
         command = "   pwd"
         base_cmd, args = executor._parse_command(command)
         assert base_cmd == "pwd"
         assert args == []
 
-    def test_trailing_whitespace_stripped(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    def test_trailing_whitespace_stripped(self, executor: SafeCommandExecutor) -> None:
         """Trailing whitespace should be stripped."""
         command = "pwd   "
         base_cmd, args = executor._parse_command(command)
         assert base_cmd == "pwd"
         assert args == []
 
-    def test_mixed_leading_trailing_whitespace(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    def test_mixed_leading_trailing_whitespace(self, executor: SafeCommandExecutor) -> None:
         """Mixed leading/trailing whitespace should be handled."""
         command = "  \t pwd -v  \t "
         base_cmd, args = executor._parse_command(command)
         assert base_cmd == "pwd"
 
     def test_internal_multiple_spaces_preserved_in_args(
-        self,
-        executor: SafeCommandExecutor
+        self, executor: SafeCommandExecutor
     ) -> None:
         """Multiple spaces within quoted strings should be preserved."""
         # This tests that "multiple spaces" inside quotes stay intact
@@ -200,30 +170,21 @@ class TestCommandParsingEdgeCases:
     # MALFORMED QUOTES TESTS
     # =========================================================================
 
-    def test_mismatched_single_quote_start(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    def test_mismatched_single_quote_start(self, executor: SafeCommandExecutor) -> None:
         """Single quote without closing should fail gracefully."""
         command = "pytest 'incomplete"
         base_cmd, args = executor._parse_command(command)
         assert base_cmd == ""
         assert args == []
 
-    def test_mismatched_double_quote_start(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    def test_mismatched_double_quote_start(self, executor: SafeCommandExecutor) -> None:
         """Double quote without closing should fail gracefully."""
         command = 'pytest "incomplete'
         base_cmd, args = executor._parse_command(command)
         assert base_cmd == ""
         assert args == []
 
-    def test_alternating_quotes_incomplete(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    def test_alternating_quotes_incomplete(self, executor: SafeCommandExecutor) -> None:
         """Alternating quotes without proper closing should fail."""
         command = '''pytest "start 'middle" more"'''
         # shlex might handle this, depends on nesting
@@ -232,40 +193,28 @@ class TestCommandParsingEdgeCases:
         assert isinstance(base_cmd, str)
         assert isinstance(args, list)
 
-    def test_quote_at_end_incomplete(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    def test_quote_at_end_incomplete(self, executor: SafeCommandExecutor) -> None:
         """Quote at end without closing should fail."""
         command = "ls -la '"
         base_cmd, args = executor._parse_command(command)
         assert base_cmd == ""
         assert args == []
 
-    def test_empty_quoted_string(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    def test_empty_quoted_string(self, executor: SafeCommandExecutor) -> None:
         """Empty quoted strings should parse correctly."""
         command = 'pytest -v -k ""'
         base_cmd, args = executor._parse_command(command)
         assert base_cmd == "pytest"
         assert "-v" in args
 
-    def test_only_quotes(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    def test_only_quotes(self, executor: SafeCommandExecutor) -> None:
         """Command with only quotes should fail."""
         command = '""'
         base_cmd, args = executor._parse_command(command)
         assert base_cmd == ""
         assert args == []
 
-    def test_whitespace_in_quotes_preserved(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    def test_whitespace_in_quotes_preserved(self, executor: SafeCommandExecutor) -> None:
         """Whitespace inside quotes should be preserved."""
         command = 'pytest -v -k "test with spaces"'
         base_cmd, args = executor._parse_command(command)
@@ -273,20 +222,14 @@ class TestCommandParsingEdgeCases:
         assert "-v" in args
         # The quoted string with spaces should be one element
 
-    def test_backslash_quote_escaping(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    def test_backslash_quote_escaping(self, executor: SafeCommandExecutor) -> None:
         """Backslash-escaped quotes should be handled."""
         command = r'pytest -k "test\"quote"'
         base_cmd, args = executor._parse_command(command)
         # shlex should handle this
         assert base_cmd == "pytest"
 
-    def test_mixed_quote_types_in_one_command(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    def test_mixed_quote_types_in_one_command(self, executor: SafeCommandExecutor) -> None:
         """Mixed single and double quotes should parse."""
         command = """pytest -v -k 'test' -m "mark" """
         base_cmd, args = executor._parse_command(command)
@@ -296,6 +239,7 @@ class TestCommandParsingEdgeCases:
 # =============================================================================
 # ERROR HANDLING - COMPREHENSIVE
 # =============================================================================
+
 
 class TestErrorHandlingExecution:
     """Tests for error handling during command execution."""
@@ -311,12 +255,11 @@ class TestErrorHandlingExecution:
 
     @pytest.mark.asyncio
     async def test_nonexistent_whitelisted_command_file_not_found(
-        self,
-        executor: SafeCommandExecutor
+        self, executor: SafeCommandExecutor
     ) -> None:
         """Whitelisted but non-installed command should return FileNotFoundError result."""
         # Create a mock that raises FileNotFoundError
-        with patch('asyncio.create_subprocess_exec') as mock_exec:
+        with patch("asyncio.create_subprocess_exec") as mock_exec:
             mock_exec.side_effect = FileNotFoundError("Command not found")
 
             result = await executor.execute("pytest")
@@ -328,12 +271,9 @@ class TestErrorHandlingExecution:
             assert result.stderr == ""
 
     @pytest.mark.asyncio
-    async def test_file_not_found_error_captured(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    async def test_file_not_found_error_captured(self, executor: SafeCommandExecutor) -> None:
         """FileNotFoundError should be caught and returned as error result."""
-        with patch('asyncio.create_subprocess_exec') as mock_exec:
+        with patch("asyncio.create_subprocess_exec") as mock_exec:
             mock_exec.side_effect = FileNotFoundError("No such file")
 
             result = await executor.execute("pwd")
@@ -344,11 +284,10 @@ class TestErrorHandlingExecution:
 
     @pytest.mark.asyncio
     async def test_file_not_found_includes_command_name(
-        self,
-        executor: SafeCommandExecutor
+        self, executor: SafeCommandExecutor
     ) -> None:
         """FileNotFoundError message should include command name."""
-        with patch('asyncio.create_subprocess_exec') as mock_exec:
+        with patch("asyncio.create_subprocess_exec") as mock_exec:
             mock_exec.side_effect = FileNotFoundError()
 
             result = await executor.execute("mypy")
@@ -360,12 +299,9 @@ class TestErrorHandlingExecution:
     # =========================================================================
 
     @pytest.mark.asyncio
-    async def test_permission_denied_error_handled(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    async def test_permission_denied_error_handled(self, executor: SafeCommandExecutor) -> None:
         """PermissionError should be caught and returned as error result."""
-        with patch('asyncio.create_subprocess_exec') as mock_exec:
+        with patch("asyncio.create_subprocess_exec") as mock_exec:
             mock_exec.side_effect = PermissionError("Permission denied")
 
             result = await executor.execute("pwd")
@@ -376,11 +312,10 @@ class TestErrorHandlingExecution:
 
     @pytest.mark.asyncio
     async def test_permission_error_includes_command_name(
-        self,
-        executor: SafeCommandExecutor
+        self, executor: SafeCommandExecutor
     ) -> None:
         """PermissionError message should include command name."""
-        with patch('asyncio.create_subprocess_exec') as mock_exec:
+        with patch("asyncio.create_subprocess_exec") as mock_exec:
             mock_exec.side_effect = PermissionError()
 
             result = await executor.execute("ruff")
@@ -389,14 +324,13 @@ class TestErrorHandlingExecution:
 
     @pytest.mark.asyncio
     async def test_permission_error_with_custom_working_dir(
-        self,
-        executor: SafeCommandExecutor
+        self, executor: SafeCommandExecutor
     ) -> None:
         """PermissionError should be handled even with custom working_dir."""
         with tempfile.TemporaryDirectory() as tmpdir:
             executor_with_dir = SafeCommandExecutor(working_dir=Path(tmpdir))
 
-            with patch('asyncio.create_subprocess_exec') as mock_exec:
+            with patch("asyncio.create_subprocess_exec") as mock_exec:
                 mock_exec.side_effect = PermissionError("Access denied")
 
                 result = await executor_with_dir.execute("pwd")
@@ -410,8 +344,7 @@ class TestErrorHandlingExecution:
 
     @pytest.mark.asyncio
     async def test_timeout_kills_process_and_returns_error(
-        self,
-        executor: SafeCommandExecutor
+        self, executor: SafeCommandExecutor
     ) -> None:
         """Command timeout should kill process and return error."""
         # Mock subprocess that times out
@@ -419,10 +352,10 @@ class TestErrorHandlingExecution:
         mock_proc.kill = MagicMock()
         mock_proc.wait = AsyncMock()
 
-        with patch('asyncio.create_subprocess_exec') as mock_exec:
+        with patch("asyncio.create_subprocess_exec") as mock_exec:
             mock_exec.return_value = mock_proc
 
-            with patch('asyncio.wait_for') as mock_wait_for:
+            with patch("asyncio.wait_for") as mock_wait_for:
                 mock_wait_for.side_effect = asyncio.TimeoutError()
 
                 result = await executor.execute("pwd")
@@ -436,18 +369,17 @@ class TestErrorHandlingExecution:
 
     @pytest.mark.asyncio
     async def test_timeout_error_message_includes_timeout_seconds(
-        self,
-        executor: SafeCommandExecutor
+        self, executor: SafeCommandExecutor
     ) -> None:
         """Timeout error message should include timeout value in seconds."""
         mock_proc = AsyncMock()
         mock_proc.kill = MagicMock()
         mock_proc.wait = AsyncMock()
 
-        with patch('asyncio.create_subprocess_exec') as mock_exec:
+        with patch("asyncio.create_subprocess_exec") as mock_exec:
             mock_exec.return_value = mock_proc
 
-            with patch('asyncio.wait_for') as mock_wait_for:
+            with patch("asyncio.wait_for") as mock_wait_for:
                 mock_wait_for.side_effect = asyncio.TimeoutError()
 
                 result = await executor.execute("pytest")
@@ -456,19 +388,16 @@ class TestErrorHandlingExecution:
                 assert "300" in result.error_message or "timed out" in result.error_message.lower()
 
     @pytest.mark.asyncio
-    async def test_timeout_with_short_timeout_command(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    async def test_timeout_with_short_timeout_command(self, executor: SafeCommandExecutor) -> None:
         """Commands with short timeout should timeout quickly."""
         mock_proc = AsyncMock()
         mock_proc.kill = MagicMock()
         mock_proc.wait = AsyncMock()
 
-        with patch('asyncio.create_subprocess_exec') as mock_exec:
+        with patch("asyncio.create_subprocess_exec") as mock_exec:
             mock_exec.return_value = mock_proc
 
-            with patch('asyncio.wait_for') as mock_wait_for:
+            with patch("asyncio.wait_for") as mock_wait_for:
                 mock_wait_for.side_effect = asyncio.TimeoutError()
 
                 result = await executor.execute("python --version")
@@ -478,22 +407,19 @@ class TestErrorHandlingExecution:
                 assert "timed out" in result.error_message.lower()
 
     @pytest.mark.asyncio
-    async def test_timeout_closes_stderr_stdout_pipes(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    async def test_timeout_closes_stderr_stdout_pipes(self, executor: SafeCommandExecutor) -> None:
         """Timeout handling should properly clean up process."""
         mock_proc = AsyncMock()
         mock_proc.kill = MagicMock()
         mock_proc.wait = AsyncMock()
 
-        with patch('asyncio.create_subprocess_exec') as mock_exec:
+        with patch("asyncio.create_subprocess_exec") as mock_exec:
             mock_exec.return_value = mock_proc
 
-            with patch('asyncio.wait_for') as mock_wait_for:
+            with patch("asyncio.wait_for") as mock_wait_for:
                 mock_wait_for.side_effect = asyncio.TimeoutError()
 
-                result = await executor.execute("pwd")
+                await executor.execute("pwd")
 
                 # Should ensure process is killed
                 assert mock_proc.kill.called or mock_proc.wait.called
@@ -503,12 +429,9 @@ class TestErrorHandlingExecution:
     # =========================================================================
 
     @pytest.mark.asyncio
-    async def test_unexpected_exception_caught(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    async def test_unexpected_exception_caught(self, executor: SafeCommandExecutor) -> None:
         """Unexpected exceptions should be caught and returned."""
-        with patch('asyncio.create_subprocess_exec') as mock_exec:
+        with patch("asyncio.create_subprocess_exec") as mock_exec:
             mock_exec.side_effect = RuntimeError("Unexpected error")
 
             result = await executor.execute("pwd")
@@ -518,12 +441,9 @@ class TestErrorHandlingExecution:
             assert "RuntimeError" in result.error_message
 
     @pytest.mark.asyncio
-    async def test_os_error_handled(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    async def test_os_error_handled(self, executor: SafeCommandExecutor) -> None:
         """OSError should be caught and returned as error."""
-        with patch('asyncio.create_subprocess_exec') as mock_exec:
+        with patch("asyncio.create_subprocess_exec") as mock_exec:
             mock_exec.side_effect = OSError("System error")
 
             result = await executor.execute("pwd")
@@ -531,12 +451,9 @@ class TestErrorHandlingExecution:
             assert not result.success
 
     @pytest.mark.asyncio
-    async def test_exception_includes_traceback_info(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    async def test_exception_includes_traceback_info(self, executor: SafeCommandExecutor) -> None:
         """Exception message should include exception type."""
-        with patch('asyncio.create_subprocess_exec') as mock_exec:
+        with patch("asyncio.create_subprocess_exec") as mock_exec:
             mock_exec.side_effect = ValueError("Invalid value")
 
             result = await executor.execute("pwd")
@@ -544,18 +461,13 @@ class TestErrorHandlingExecution:
             assert "ValueError" in result.error_message
 
     @pytest.mark.asyncio
-    async def test_process_returns_nonzero_exit_code(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    async def test_process_returns_nonzero_exit_code(self, executor: SafeCommandExecutor) -> None:
         """Non-zero exit code should mark result as failed."""
         mock_proc = AsyncMock()
         mock_proc.returncode = 1
-        mock_proc.communicate = AsyncMock(
-            return_value=(b"", b"error output")
-        )
+        mock_proc.communicate = AsyncMock(return_value=(b"", b"error output"))
 
-        with patch('asyncio.create_subprocess_exec') as mock_exec:
+        with patch("asyncio.create_subprocess_exec") as mock_exec:
             mock_exec.return_value = mock_proc
 
             result = await executor.execute("pwd")
@@ -565,18 +477,13 @@ class TestErrorHandlingExecution:
             assert result.error_message != ""
 
     @pytest.mark.asyncio
-    async def test_stderr_captured_on_failure(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    async def test_stderr_captured_on_failure(self, executor: SafeCommandExecutor) -> None:
         """stderr should be captured when command fails."""
         mock_proc = AsyncMock()
         mock_proc.returncode = 1
-        mock_proc.communicate = AsyncMock(
-            return_value=(b"", b"error message")
-        )
+        mock_proc.communicate = AsyncMock(return_value=(b"", b"error message"))
 
-        with patch('asyncio.create_subprocess_exec') as mock_exec:
+        with patch("asyncio.create_subprocess_exec") as mock_exec:
             mock_exec.return_value = mock_proc
 
             result = await executor.execute("pwd")
@@ -584,19 +491,14 @@ class TestErrorHandlingExecution:
             assert result.stderr == "error message"
 
     @pytest.mark.asyncio
-    async def test_utf8_decode_error_handling(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    async def test_utf8_decode_error_handling(self, executor: SafeCommandExecutor) -> None:
         """Invalid UTF-8 in output should be handled gracefully."""
         mock_proc = AsyncMock()
         mock_proc.returncode = 0
         # Invalid UTF-8 bytes
-        mock_proc.communicate = AsyncMock(
-            return_value=(b"\xff\xfe invalid utf8", b"")
-        )
+        mock_proc.communicate = AsyncMock(return_value=(b"\xff\xfe invalid utf8", b""))
 
-        with patch('asyncio.create_subprocess_exec') as mock_exec:
+        with patch("asyncio.create_subprocess_exec") as mock_exec:
             mock_exec.return_value = mock_proc
 
             result = await executor.execute("pwd")
@@ -610,17 +512,20 @@ class TestErrorHandlingExecution:
 # SINGLETON PATTERN - COMPREHENSIVE
 # =============================================================================
 
+
 class TestSingletonPatternComprehensive:
     """Comprehensive tests for get_safe_executor singleton behavior."""
 
     def setup_method(self):
         """Reset singleton state before each test."""
         import vertice_tui.core.safe_executor as se_module
+
         se_module._executor = None
 
     def teardown_method(self):
         """Reset singleton state after each test."""
         import vertice_tui.core.safe_executor as se_module
+
         se_module._executor = None
 
     # =========================================================================
@@ -778,9 +683,9 @@ class TestSingletonPatternComprehensive:
         executor = get_safe_executor()
 
         assert isinstance(executor, SafeCommandExecutor)
-        assert hasattr(executor, 'execute')
-        assert hasattr(executor, 'is_command_allowed')
-        assert hasattr(executor, '_working_dir')
+        assert hasattr(executor, "execute")
+        assert hasattr(executor, "is_command_allowed")
+        assert hasattr(executor, "_working_dir")
 
     # =========================================================================
     # SINGLETON GLOBAL STATE
@@ -801,10 +706,10 @@ class TestSingletonPatternComprehensive:
         """Global _executor should not be reset on subsequent calls."""
         import vertice_tui.core.safe_executor as se_module
 
-        executor1 = get_safe_executor()
+        get_safe_executor()
         first_id = id(se_module._executor)
 
-        executor2 = get_safe_executor()
+        get_safe_executor()
         second_id = id(se_module._executor)
 
         assert first_id == second_id
@@ -813,6 +718,7 @@ class TestSingletonPatternComprehensive:
 # =============================================================================
 # WORKING DIRECTORY TESTS
 # =============================================================================
+
 
 class TestWorkingDirectoryHandling:
     """Tests for working directory handling in command execution."""
@@ -824,33 +730,33 @@ class TestWorkingDirectoryHandling:
             custom_path = Path(tmpdir)
             executor = SafeCommandExecutor(working_dir=custom_path)
 
-            with patch('asyncio.create_subprocess_exec') as mock_exec:
+            with patch("asyncio.create_subprocess_exec") as mock_exec:
                 mock_proc = AsyncMock()
                 mock_proc.returncode = 0
                 mock_proc.communicate = AsyncMock(return_value=(b"output", b""))
                 mock_exec.return_value = mock_proc
 
-                result = await executor.execute("pwd")
+                await executor.execute("pwd")
 
                 # Check that cwd was passed
                 call_args = mock_exec.call_args
-                assert call_args[1]['cwd'] == str(custom_path)
+                assert call_args[1]["cwd"] == str(custom_path)
 
     @pytest.mark.asyncio
     async def test_default_working_dir_is_cwd(self) -> None:
         """Default working_dir should be current working directory."""
         executor = SafeCommandExecutor()
 
-        with patch('asyncio.create_subprocess_exec') as mock_exec:
+        with patch("asyncio.create_subprocess_exec") as mock_exec:
             mock_proc = AsyncMock()
             mock_proc.returncode = 0
             mock_proc.communicate = AsyncMock(return_value=(b"output", b""))
             mock_exec.return_value = mock_proc
 
-            result = await executor.execute("pwd")
+            await executor.execute("pwd")
 
             call_args = mock_exec.call_args
-            assert call_args[1]['cwd'] == str(Path.cwd())
+            assert call_args[1]["cwd"] == str(Path.cwd())
 
     @pytest.mark.asyncio
     async def test_working_dir_path_object_converted_to_string(self) -> None:
@@ -859,22 +765,23 @@ class TestWorkingDirectoryHandling:
             custom_path = Path(tmpdir)
             executor = SafeCommandExecutor(working_dir=custom_path)
 
-            with patch('asyncio.create_subprocess_exec') as mock_exec:
+            with patch("asyncio.create_subprocess_exec") as mock_exec:
                 mock_proc = AsyncMock()
                 mock_proc.returncode = 0
                 mock_proc.communicate = AsyncMock(return_value=(b"output", b""))
                 mock_exec.return_value = mock_proc
 
-                result = await executor.execute("pwd")
+                await executor.execute("pwd")
 
                 call_args = mock_exec.call_args
                 # Should be string, not Path
-                assert isinstance(call_args[1]['cwd'], str)
+                assert isinstance(call_args[1]["cwd"], str)
 
 
 # =============================================================================
 # COMBINED EDGE CASES - STRESS TESTING
 # =============================================================================
+
 
 class TestCombinedEdgeCases:
     """Tests combining multiple edge cases for stress testing."""
@@ -883,10 +790,7 @@ class TestCombinedEdgeCases:
     def executor(self) -> SafeCommandExecutor:
         return SafeCommandExecutor()
 
-    def test_complex_command_with_multiple_edge_cases(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    def test_complex_command_with_multiple_edge_cases(self, executor: SafeCommandExecutor) -> None:
         """Complex command with quotes and spaces should parse correctly."""
         # Multiple spaces, escaped quotes
         command = 'pytest  -v  -k  "test_name"  --tb=short'
@@ -899,8 +803,7 @@ class TestCombinedEdgeCases:
 
     @pytest.mark.asyncio
     async def test_blocked_command_with_complex_parsing(
-        self,
-        executor: SafeCommandExecutor
+        self, executor: SafeCommandExecutor
     ) -> None:
         """Dangerous command with complex parsing should still be blocked."""
         # Malformed quotes with dangerous pattern
@@ -911,19 +814,16 @@ class TestCombinedEdgeCases:
         assert not is_allowed
 
     @pytest.mark.asyncio
-    async def test_timeout_with_complex_command(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    async def test_timeout_with_complex_command(self, executor: SafeCommandExecutor) -> None:
         """Timeout should work with complex whitelisted commands."""
         mock_proc = AsyncMock()
         mock_proc.kill = MagicMock()
         mock_proc.wait = AsyncMock()
 
-        with patch('asyncio.create_subprocess_exec') as mock_exec:
+        with patch("asyncio.create_subprocess_exec") as mock_exec:
             mock_exec.return_value = mock_proc
 
-            with patch('asyncio.wait_for') as mock_wait_for:
+            with patch("asyncio.wait_for") as mock_wait_for:
                 mock_wait_for.side_effect = asyncio.TimeoutError()
 
                 result = await executor.execute('pytest -v -k "test" --tb=short')
@@ -932,8 +832,7 @@ class TestCombinedEdgeCases:
                 assert "timed out" in result.error_message.lower()
 
     def test_dangerous_pattern_in_quoted_string_still_blocked(
-        self,
-        executor: SafeCommandExecutor
+        self, executor: SafeCommandExecutor
     ) -> None:
         """Dangerous patterns should be blocked even in quoted strings."""
         # Even though shlex would parse this as a single quoted argument,
@@ -944,15 +843,12 @@ class TestCombinedEdgeCases:
 
         assert not is_allowed
 
-    def test_multiple_parsing_failures_in_sequence(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    def test_multiple_parsing_failures_in_sequence(self, executor: SafeCommandExecutor) -> None:
         """Sequence of malformed commands should all fail gracefully."""
         malformed_commands = [
             'pytest "unclosed',
             "pytest 'unclosed",
-            'pytest "test\' mixed',
+            "pytest \"test' mixed",
         ]
 
         for command in malformed_commands:

@@ -60,7 +60,7 @@ export function ChatSidebar({ className }: { className?: string }) {
             <div className="text-[10px] text-primary font-mono tracking-tighter">SOVEREIGN V3.0</div>
           </div>
         </Link>
-        
+
         <Button
           onClick={handleNewChat}
           className="w-full bg-primary text-black hover:bg-primary/90 font-bold border-none transition-all duration-300 shadow-[0_0_10px_rgba(212,255,0,0.1)]"
@@ -85,8 +85,8 @@ export function ChatSidebar({ className }: { className?: string }) {
                   key={session.id}
                   className={cn(
                     "group relative flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200",
-                    currentSessionId === session.id 
-                      ? "bg-white/5 text-white" 
+                    currentSessionId === session.id
+                      ? "bg-white/5 text-white"
                       : "hover:bg-white/5 text-zinc-500 hover:text-zinc-300"
                   )}
                   onClick={() => setCurrentSession(session.id)}
@@ -122,7 +122,7 @@ export function ChatSidebar({ className }: { className?: string }) {
                 <Book className="h-4 w-4 text-zinc-600 group-hover:text-primary" />
                 <span>Documentation</span>
             </Link>
-            
+
             {user?.email === 'juancs.d3v@gmail.com' && (
                 <Link href="/admin" className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 text-sm transition-colors group">
                     <ShieldAlert className="h-4 w-4 text-zinc-600 group-hover:text-red-500" />
@@ -150,10 +150,10 @@ export function ChatSidebar({ className }: { className?: string }) {
                     <p className="text-[9px] text-zinc-600 font-mono">Verified Node</p>
                 </div>
             </div>
-            
-            <Button 
-                variant="ghost" 
-                size="icon" 
+
+            <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => signOut()}
                 className="h-8 w-8 text-zinc-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg"
                 title="Sign Out"

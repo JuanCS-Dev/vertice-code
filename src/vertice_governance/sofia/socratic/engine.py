@@ -135,11 +135,7 @@ class SocraticEngine:
             (QuestionType.META_REFLECTION, 0.05),
         ]
 
-        return random.choices(
-            [w[0] for w in weights],
-            weights=[w[1] for w in weights],
-            k=1
-        )[0]
+        return random.choices([w[0] for w in weights], weights=[w[1] for w in weights], k=1)[0]
 
     def _fill_template(self, template: str, context: str) -> str:
         """Preenche template com termos do contexto."""

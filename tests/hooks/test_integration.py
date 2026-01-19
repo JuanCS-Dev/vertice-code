@@ -6,11 +6,7 @@ import tempfile
 import shutil
 from pathlib import Path
 
-from vertice_cli.hooks import (
-    HookExecutor,
-    HookEvent,
-    HookContext
-)
+from vertice_cli.hooks import HookExecutor, HookEvent, HookContext
 
 
 class TestHooksIntegration:
@@ -35,22 +31,15 @@ class TestHooksIntegration:
         test_file.write_text("hello world")
 
         ctx = HookContext(
-            file_path=test_file,
-            event_name="post_write",
-            cwd=temp_dir,
-            project_name="test-project"
+            file_path=test_file, event_name="post_write", cwd=temp_dir, project_name="test-project"
         )
 
         hooks = [
             "python -c \"with open('{dir}/format.log', 'w') as f: f.write('Formatted {file_name}')\"",
-            "cat {file}"
+            "cat {file}",
         ]
 
-        results = await executor.execute_hooks(
-            HookEvent.POST_WRITE,
-            ctx,
-            hooks
-        )
+        results = await executor.execute_hooks(HookEvent.POST_WRITE, ctx, hooks)
 
         assert len(results) == 2
         assert all(r.success for r in results)
@@ -90,17 +79,9 @@ class TestHooksIntegration:
 
         ctx = HookContext(test_file, "post_write", cwd=temp_dir)
 
-        hooks = [
-            "echo 'Step 1: Validation'",
-            "echo 'Step 2: Formatting'",
-            "echo 'Step 3: Testing'"
-        ]
+        hooks = ["echo 'Step 1: Validation'", "echo 'Step 2: Formatting'", "echo 'Step 3: Testing'"]
 
-        results = await executor.execute_hooks(
-            HookEvent.POST_WRITE,
-            ctx,
-            hooks
-        )
+        results = await executor.execute_hooks(HookEvent.POST_WRITE, ctx, hooks)
 
         assert len(results) == 3
         assert all(r.success for r in results)
@@ -119,14 +100,10 @@ class TestHooksIntegration:
         hooks = [
             "echo 'Before failure'",
             "python -c 'import sys; sys.exit(1)'",
-            "echo 'After failure'"
+            "echo 'After failure'",
         ]
 
-        results = await executor.execute_hooks(
-            HookEvent.POST_WRITE,
-            ctx,
-            hooks
-        )
+        results = await executor.execute_hooks(HookEvent.POST_WRITE, ctx, hooks)
 
         assert len(results) == 3
         assert results[0].success
@@ -144,11 +121,7 @@ class TestHooksIntegration:
         # Try to run black (skip if not installed)
         hook = "python -c 'print(\"Would format {file}\")'"
 
-        result = await executor.execute_hook(
-            HookEvent.POST_EDIT,
-            ctx,
-            hook
-        )
+        result = await executor.execute_hook(HookEvent.POST_EDIT, ctx, hook)
 
         assert result.success
         assert "Would format" in result.stdout
@@ -160,18 +133,12 @@ class TestHooksIntegration:
         for f in files:
             f.write_text(f"content of {f.name}")
 
-        contexts = [
-            HookContext(f, "post_write", cwd=temp_dir)
-            for f in files
-        ]
+        contexts = [HookContext(f, "post_write", cwd=temp_dir) for f in files]
 
         hook = "echo {file_name}"
 
         # Execute all hooks concurrently
-        tasks = [
-            executor.execute_hook(HookEvent.POST_WRITE, ctx, hook)
-            for ctx in contexts
-        ]
+        tasks = [executor.execute_hook(HookEvent.POST_WRITE, ctx, hook) for ctx in contexts]
 
         results = await asyncio.gather(*tasks)
 
@@ -194,18 +161,18 @@ class TestHooksIntegration:
             "echo 'success1'",
             "echo 'success2'",
             "python -c 'import sys; sys.exit(1)'",
-            "echo 'success3'"
+            "echo 'success3'",
         ]
 
         await executor.execute_hooks(HookEvent.POST_WRITE, ctx, hooks)
 
         stats = executor.get_stats()
 
-        assert stats['total_executions'] == 4
-        assert stats['direct_executions'] == 4
-        assert stats['sandboxed_executions'] == 0
-        assert stats['failed_executions'] == 1
-        assert 70 < stats['success_rate'] < 80  # 75% (3/4)
+        assert stats["total_executions"] == 4
+        assert stats["direct_executions"] == 4
+        assert stats["sandboxed_executions"] == 0
+        assert stats["failed_executions"] == 1
+        assert 70 < stats["success_rate"] < 80  # 75% (3/4)
 
     @pytest.mark.asyncio
     async def test_different_events_same_file(self, temp_dir, executor):
@@ -219,15 +186,9 @@ class TestHooksIntegration:
 
         hook = "echo {event}: {file_name}"
 
-        result_write = await executor.execute_hook(
-            HookEvent.POST_WRITE, ctx_write, hook
-        )
-        result_edit = await executor.execute_hook(
-            HookEvent.POST_EDIT, ctx_edit, hook
-        )
-        result_delete = await executor.execute_hook(
-            HookEvent.POST_DELETE, ctx_delete, hook
-        )
+        result_write = await executor.execute_hook(HookEvent.POST_WRITE, ctx_write, hook)
+        result_edit = await executor.execute_hook(HookEvent.POST_EDIT, ctx_edit, hook)
+        result_delete = await executor.execute_hook(HookEvent.POST_DELETE, ctx_delete, hook)
 
         assert "post_write" in result_write.stdout
         assert "post_edit" in result_edit.stdout
@@ -245,10 +206,7 @@ class TestHooksIntegration:
             event_name="post_write",
             cwd=temp_dir,
             project_name="awesome-project",
-            metadata={
-                "version": "1.0.0",
-                "author": "test-user"
-            }
+            metadata={"version": "1.0.0", "author": "test-user"},
         )
 
         hook = "echo '{project_name} v{version} by {author}'"

@@ -472,6 +472,7 @@ class TestConfidenceRouter:
     @pytest.fixture
     def router(self):
         from core.autonomy.router import ConfidenceRouter
+
         return ConfidenceRouter()
 
     @pytest.fixture
@@ -521,11 +522,14 @@ class TestConfidenceRouter:
             uncertainty=low_uncertainty,
         )
         assert decision.risk_level >= 0.5
-        assert "destructive" in decision.risk_factors or "high_risk_pattern" in decision.risk_factors
+        assert (
+            "destructive" in decision.risk_factors or "high_risk_pattern" in decision.risk_factors
+        )
 
     def test_route_blocked_action(self, router, high_confidence, low_uncertainty):
         """Test routing with blocked action."""
         from core.autonomy.router import ConfidenceRouter
+
         config = AutonomyConfig(blocked_actions=["rm -rf"])
         blocking_router = ConfidenceRouter(config)
         decision = blocking_router.route(
@@ -539,6 +543,7 @@ class TestConfidenceRouter:
     def test_route_always_escalate_pattern(self, router, high_confidence, low_uncertainty):
         """Test routing with always-escalate pattern."""
         from core.autonomy.router import ConfidenceRouter
+
         config = AutonomyConfig(always_escalate_patterns=["production"])
         escalate_router = ConfidenceRouter(config)
         decision = escalate_router.route(
@@ -584,6 +589,7 @@ class TestUncertaintyEstimator:
     @pytest.fixture
     def estimator(self):
         from core.autonomy.uncertainty import UncertaintyEstimator
+
         return UncertaintyEstimator()
 
     def test_estimate_basic(self, estimator):
@@ -649,6 +655,7 @@ class TestConfidenceCalibrator:
     @pytest.fixture
     def calibrator(self):
         from core.autonomy.calibrator import ConfidenceCalibrator
+
         return ConfidenceCalibrator()
 
     def test_calibrate_default(self, calibrator):
@@ -659,6 +666,7 @@ class TestConfidenceCalibrator:
     def test_calibrate_temperature_scaling(self):
         """Test temperature scaling calibration."""
         from core.autonomy.calibrator import ConfidenceCalibrator
+
         calibrator = ConfidenceCalibrator(method="temperature_scaling")
         calibrated = calibrator.calibrate(0.9)
         assert 0.0 <= calibrated <= 1.0
@@ -694,6 +702,7 @@ class TestEscalationManager:
     @pytest.fixture
     def manager(self):
         from core.autonomy.escalation import EscalationManager
+
         return EscalationManager()
 
     @pytest.fixture
@@ -840,6 +849,7 @@ class TestConfidenceCalibratorPlatt:
     @pytest.fixture
     def platt_calibrator(self):
         from core.autonomy.calibrator import ConfidenceCalibrator
+
         return ConfidenceCalibrator(method="platt")
 
     def test_calibrate_platt_unfitted(self, platt_calibrator):
@@ -895,6 +905,7 @@ class TestConfidenceCalibratorIsotonic:
     @pytest.fixture
     def isotonic_calibrator(self):
         from core.autonomy.calibrator import ConfidenceCalibrator
+
         return ConfidenceCalibrator(method="isotonic")
 
     def test_calibrate_isotonic_unfitted(self, isotonic_calibrator):
@@ -947,6 +958,7 @@ class TestConfidenceCalibratorStats:
     def test_get_stats_empty(self):
         """Test stats with no data."""
         from core.autonomy.calibrator import ConfidenceCalibrator
+
         calibrator = ConfidenceCalibrator()
         stats = calibrator.get_stats()
         assert stats["fitted"] is False
@@ -955,6 +967,7 @@ class TestConfidenceCalibratorStats:
     def test_get_stats_with_data(self):
         """Test stats after calibration."""
         from core.autonomy.calibrator import ConfidenceCalibrator
+
         calibrator = ConfidenceCalibrator()
         for i in range(60):
             calibrator.add_calibration_point(0.3 + (i / 100), i % 2 == 0)
@@ -966,6 +979,7 @@ class TestConfidenceCalibratorStats:
     def test_get_stats_platt(self):
         """Test stats for Platt calibrator."""
         from core.autonomy.calibrator import ConfidenceCalibrator
+
         calibrator = ConfidenceCalibrator(method="platt")
         for i in range(60):
             calibrator.add_calibration_point(0.3 + (i / 100), i % 2 == 0)
@@ -976,6 +990,7 @@ class TestConfidenceCalibratorStats:
     def test_reset(self):
         """Test calibrator reset."""
         from core.autonomy.calibrator import ConfidenceCalibrator
+
         calibrator = ConfidenceCalibrator()
         calibrator.add_calibration_point(0.8, True)
         calibrator._is_fitted = True
@@ -990,6 +1005,7 @@ class TestEscalationManagerExtended:
     @pytest.fixture
     def manager(self):
         from core.autonomy.escalation import EscalationManager
+
         return EscalationManager()
 
     def test_create_escalation_with_context(self, manager):
@@ -1096,6 +1112,7 @@ class TestEscalationManagerAsync:
     def manager_with_callback(self):
         from core.autonomy.escalation import EscalationManager
         from core.autonomy.types import AutonomyConfig
+
         self.callback_called = False
         self.callback_request = None
 
@@ -1131,6 +1148,7 @@ class TestEscalationManagerAsync:
     def test_get_pending_by_severity(self):
         """Test filtering pending by severity."""
         from core.autonomy.escalation import EscalationManager
+
         manager = EscalationManager()
         # Create high severity
         high_decision = AutonomyDecision(action="delete", risk_level=0.9)
@@ -1152,6 +1170,7 @@ class TestEscalationManagerAsync:
     def test_safety_concern_severity(self):
         """Test that SAFETY_CONCERN gives critical severity."""
         from core.autonomy.escalation import EscalationManager
+
         manager = EscalationManager()
         decision = AutonomyDecision(action="dangerous", risk_level=0.5)
         esc = manager.create_escalation(
@@ -1163,6 +1182,7 @@ class TestEscalationManagerAsync:
     def test_policy_violation_severity(self):
         """Test that POLICY_VIOLATION gives critical severity."""
         from core.autonomy.escalation import EscalationManager
+
         manager = EscalationManager()
         decision = AutonomyDecision(action="violation", risk_level=0.3)
         esc = manager.create_escalation(
@@ -1174,6 +1194,7 @@ class TestEscalationManagerAsync:
     def test_respond_invalid_response_still_works(self):
         """Test that invalid response (not in options) still works but logs warning."""
         from core.autonomy.escalation import EscalationManager
+
         manager = EscalationManager()
         decision = AutonomyDecision(action="test", risk_level=0.5)
         esc = manager.create_escalation(
@@ -1190,6 +1211,7 @@ class TestEscalationManagerAsync:
     def test_clear_history(self):
         """Test clearing escalation history."""
         from core.autonomy.escalation import EscalationManager
+
         manager = EscalationManager()
         decision = AutonomyDecision(action="test", risk_level=0.5)
         esc = manager.create_escalation(decision=decision, reason=EscalationReason.HIGH_RISK)
@@ -1202,6 +1224,7 @@ class TestEscalationManagerAsync:
     async def test_wait_for_response_not_pending(self):
         """Test wait_for_response returns None if not pending."""
         from core.autonomy.escalation import EscalationManager
+
         manager = EscalationManager()
         result = await manager.wait_for_response("nonexistent_id")
         assert result is None
@@ -1211,6 +1234,7 @@ class TestEscalationManagerAsync:
         """Test wait_for_response times out correctly."""
         from core.autonomy.escalation import EscalationManager
         from core.autonomy.types import AutonomyConfig
+
         config = AutonomyConfig(escalation_timeout_seconds=1)
         manager = EscalationManager(config=config)
         decision = AutonomyDecision(action="test", risk_level=0.5)
@@ -1225,6 +1249,7 @@ class TestEscalationManagerAsync:
         """Test wait_for_response receives response."""
         import asyncio
         from core.autonomy.escalation import EscalationManager
+
         manager = EscalationManager()
         decision = AutonomyDecision(action="test", risk_level=0.5)
         esc = manager.create_escalation(decision=decision, reason=EscalationReason.HIGH_RISK)
@@ -1284,7 +1309,7 @@ class TestAutonomyMixinAsync:
 
     def test_upgrade_autonomy_auto_init(self, agent_uninit):
         """Test upgrade_autonomy auto-initializes."""
-        result = agent_uninit.upgrade_autonomy(AutonomyLevel.NOTIFY)
+        agent_uninit.upgrade_autonomy(AutonomyLevel.NOTIFY)
         # Will fail because can't skip levels, but should init
         assert hasattr(agent_uninit, "_current_autonomy_level")
 
@@ -1313,6 +1338,7 @@ class TestAutonomyMixinAsync:
     async def test_request_approval_auto_init(self, agent_uninit):
         """Test request_approval auto-initializes."""
         import asyncio
+
         # Create task to respond quickly
         async def timeout_test():
             return await asyncio.wait_for(
@@ -1322,7 +1348,8 @@ class TestAutonomyMixinAsync:
                 ),
                 timeout=0.5,
             )
-        result = await timeout_test()
+
+        await timeout_test()
         # Should timeout and return None, but should have initialized
         assert hasattr(agent_uninit, "_escalation_manager")
 
@@ -1335,6 +1362,7 @@ class TestConfidenceRouterEdgeCases:
         """Router with block_high_risk=False."""
         from core.autonomy.router import ConfidenceRouter
         from core.autonomy.types import AutonomyConfig
+
         config = AutonomyConfig(
             block_high_risk=False,
             high_risk_threshold=0.7,
@@ -1346,6 +1374,7 @@ class TestConfidenceRouterEdgeCases:
         """Router with escalation patterns."""
         from core.autonomy.router import ConfidenceRouter
         from core.autonomy.types import AutonomyConfig
+
         config = AutonomyConfig(
             blocked_actions=["shutdown", "format"],
             always_escalate_patterns=["deploy", "migrate"],
@@ -1355,6 +1384,7 @@ class TestConfidenceRouterEdgeCases:
     def test_high_risk_no_block(self, router_no_block):
         """Test high risk without blocking (line 176)."""
         from core.autonomy.types import ConfidenceScore, UncertaintyEstimate
+
         conf = ConfidenceScore(raw_confidence=0.9, calibrated_confidence=0.9)
         uncertainty = UncertaintyEstimate(total_uncertainty=0.1)
         # Action with high risk
@@ -1370,6 +1400,7 @@ class TestConfidenceRouterEdgeCases:
         """Test medium risk pattern matching (lines 230-231)."""
         from core.autonomy.router import ConfidenceRouter
         from core.autonomy.types import ConfidenceScore, UncertaintyEstimate
+
         router = ConfidenceRouter()
         conf = ConfidenceScore(raw_confidence=0.9, calibrated_confidence=0.9)
         uncertainty = UncertaintyEstimate(total_uncertainty=0.1)
@@ -1385,6 +1416,7 @@ class TestConfidenceRouterEdgeCases:
         """Test production context increases risk (lines 236-237)."""
         from core.autonomy.router import ConfidenceRouter
         from core.autonomy.types import ConfidenceScore, UncertaintyEstimate
+
         router = ConfidenceRouter()
         conf = ConfidenceScore(raw_confidence=0.9, calibrated_confidence=0.9)
         uncertainty = UncertaintyEstimate(total_uncertainty=0.1)
@@ -1401,6 +1433,7 @@ class TestConfidenceRouterEdgeCases:
         """Test context high_risk flag (lines 240-241)."""
         from core.autonomy.router import ConfidenceRouter
         from core.autonomy.types import ConfidenceScore, UncertaintyEstimate
+
         router = ConfidenceRouter()
         conf = ConfidenceScore(raw_confidence=0.9, calibrated_confidence=0.9)
         uncertainty = UncertaintyEstimate(total_uncertainty=0.1)
@@ -1415,6 +1448,7 @@ class TestConfidenceRouterEdgeCases:
     def test_get_risk_factors_medium_pattern(self):
         """Test medium risk factor detection (lines 256-257)."""
         from core.autonomy.router import ConfidenceRouter
+
         router = ConfidenceRouter()
         # Action with medium risk pattern only
         factors = router._get_risk_factors("update user settings")
@@ -1423,6 +1457,7 @@ class TestConfidenceRouterEdgeCases:
     def test_get_risk_factors_sensitive_data(self):
         """Test sensitive data risk factor (line 265)."""
         from core.autonomy.router import ConfidenceRouter
+
         router = ConfidenceRouter()
         factors = router._get_risk_factors("access secret credentials")
         assert "sensitive_data" in factors
@@ -1431,6 +1466,7 @@ class TestConfidenceRouterEdgeCases:
         """Test LOW_CONFIDENCE escalation reason (line 275)."""
         from core.autonomy.router import ConfidenceRouter
         from core.autonomy.types import AutonomyDecision, ConfidenceScore, UncertaintyEstimate
+
         router = ConfidenceRouter()
         decision = AutonomyDecision(
             action="test",
@@ -1445,6 +1481,7 @@ class TestConfidenceRouterEdgeCases:
         """Test AMBIGUOUS_INPUT escalation reason (line 278)."""
         from core.autonomy.router import ConfidenceRouter
         from core.autonomy.types import AutonomyDecision, ConfidenceScore, UncertaintyEstimate
+
         router = ConfidenceRouter()
         decision = AutonomyDecision(
             action="test",
@@ -1459,6 +1496,7 @@ class TestConfidenceRouterEdgeCases:
         """Test POLICY_VIOLATION escalation reason (line 281)."""
         from core.autonomy.router import ConfidenceRouter
         from core.autonomy.types import AutonomyDecision, ConfidenceScore, UncertaintyEstimate
+
         router = ConfidenceRouter()
         decision = AutonomyDecision(
             action="test",
@@ -1477,6 +1515,7 @@ class TestCalibratorEdgeCases:
     def test_calibrate_platt_method_fitted(self):
         """Test Platt calibration when fitted (lines 76, 82)."""
         from core.autonomy.calibrator import ConfidenceCalibrator
+
         calibrator = ConfidenceCalibrator(method="platt")
         # Add enough data to fit
         for i in range(60):
@@ -1488,6 +1527,7 @@ class TestCalibratorEdgeCases:
     def test_calibrate_unknown_method(self):
         """Test calibration with unknown method (line 82)."""
         from core.autonomy.calibrator import ConfidenceCalibrator
+
         calibrator = ConfidenceCalibrator(method="unknown_method")
         calibrator._is_fitted = True
         result = calibrator.calibrate(0.7)
@@ -1496,6 +1536,7 @@ class TestCalibratorEdgeCases:
     def test_calibrate_default_unfitted(self):
         """Test default calibration when not fitted (line 87)."""
         from core.autonomy.calibrator import ConfidenceCalibrator
+
         calibrator = ConfidenceCalibrator()
         result = calibrator.calibrate(0.7)
         # Should use default temperature 1.2
@@ -1504,6 +1545,7 @@ class TestCalibratorEdgeCases:
     def test_isotonic_last_bin(self):
         """Test isotonic regression last bin (line 120)."""
         from core.autonomy.calibrator import ConfidenceCalibrator
+
         calibrator = ConfidenceCalibrator(method="isotonic")
         calibrator._isotonic_bins = [
             (0.2, 0.3),
@@ -1517,6 +1559,7 @@ class TestCalibratorEdgeCases:
     def test_fit_insufficient_data(self):
         """Test _fit with insufficient data (line 143)."""
         from core.autonomy.calibrator import ConfidenceCalibrator
+
         calibrator = ConfidenceCalibrator()
         for i in range(10):  # Less than 20
             calibrator._calibration_data.append((0.5, True))
@@ -1532,6 +1575,7 @@ class TestEscalationCancelFuture:
         """Test cancelling escalation with active wait future."""
         import asyncio
         from core.autonomy.escalation import EscalationManager
+
         manager = EscalationManager()
         decision = AutonomyDecision(action="test", risk_level=0.5)
         esc = manager.create_escalation(decision=decision, reason=EscalationReason.HIGH_RISK)
@@ -1558,6 +1602,7 @@ class TestEscalationCancelFuture:
         """Test timeout with auto_deny_on_timeout=True (lines 254-257)."""
         from core.autonomy.escalation import EscalationManager
         from core.autonomy.types import AutonomyConfig
+
         config = AutonomyConfig(auto_deny_on_timeout=True, escalation_timeout_seconds=1)
         manager = EscalationManager(config=config)
         decision = AutonomyDecision(action="test", risk_level=0.5)
@@ -1572,6 +1617,7 @@ class TestEscalationCancelFuture:
         """Test timeout with auto_deny_on_timeout=False."""
         from core.autonomy.escalation import EscalationManager
         from core.autonomy.types import AutonomyConfig
+
         config = AutonomyConfig(auto_deny_on_timeout=False)
         manager = EscalationManager(config=config)
         decision = AutonomyDecision(action="test", risk_level=0.5)
@@ -1584,6 +1630,7 @@ class TestEscalationCancelFuture:
     async def test_timeout_with_active_future(self):
         """Test timeout sets future result to None (line 266)."""
         from core.autonomy.escalation import EscalationManager
+
         manager = EscalationManager()
         decision = AutonomyDecision(action="test", risk_level=0.5)
         esc = manager.create_escalation(decision=decision, reason=EscalationReason.HIGH_RISK)
@@ -1635,6 +1682,7 @@ class TestUncertaintyEstimatorEdgeCases:
     def test_input_uncertainty_multiple_questions(self):
         """Test input uncertainty with multiple questions (line 186)."""
         from core.autonomy.uncertainty import UncertaintyEstimator
+
         estimator = UncertaintyEstimator()
         # Input with multiple questions
         estimate = estimator.estimate(
@@ -1647,6 +1695,7 @@ class TestUncertaintyEstimatorEdgeCases:
     def test_from_logits_empty(self):
         """Test _estimate_from_logits with empty logits (line 237)."""
         from core.autonomy.uncertainty import UncertaintyEstimator
+
         estimator = UncertaintyEstimator()
         entropy, variance = estimator._estimate_from_logits([])
         assert entropy == 0.5
@@ -1655,6 +1704,7 @@ class TestUncertaintyEstimatorEdgeCases:
     def test_from_samples_single(self):
         """Test _estimate_from_samples with single sample (line 272)."""
         from core.autonomy.uncertainty import UncertaintyEstimator
+
         estimator = UncertaintyEstimator()
         mi, agreement = estimator._estimate_from_samples(["only one sample"])
         assert mi == 0.0
@@ -1667,6 +1717,7 @@ class TestEscalationManagerEdgeCases:
     def test_timeout_escalation_not_in_pending(self):
         """Test _timeout_escalation when request not in pending (line 249)."""
         from core.autonomy.escalation import EscalationManager
+
         manager = EscalationManager()
         # Call with non-existent ID - should just return
         manager._timeout_escalation("nonexistent_id")
@@ -1676,7 +1727,12 @@ class TestEscalationManagerEdgeCases:
     async def test_cancel_escalation_with_future(self):
         """Test cancel_escalation when future exists."""
         from core.autonomy.escalation import EscalationManager
-        from core.autonomy.types import AutonomyDecision, ConfidenceScore, UncertaintyEstimate, EscalationReason
+        from core.autonomy.types import (
+            AutonomyDecision,
+            ConfidenceScore,
+            UncertaintyEstimate,
+            EscalationReason,
+        )
         import asyncio
 
         manager = EscalationManager()
@@ -1722,6 +1778,7 @@ class TestCalibratorTemperatureZero:
     def test_apply_temperature_zero(self):
         """Test _apply_temperature with temperature 0 (line 87)."""
         from core.autonomy.calibrator import ConfidenceCalibrator
+
         calibrator = ConfidenceCalibrator()
         # Temperature of 0 should return original confidence
         result = calibrator._apply_temperature(0.7, 0.0)
@@ -1730,6 +1787,7 @@ class TestCalibratorTemperatureZero:
     def test_apply_temperature_negative(self):
         """Test _apply_temperature with negative temperature."""
         from core.autonomy.calibrator import ConfidenceCalibrator
+
         calibrator = ConfidenceCalibrator()
         result = calibrator._apply_temperature(0.7, -1.0)
         assert result == 0.7
@@ -1767,6 +1825,7 @@ class TestCalibratorTemperatureScalingFitted:
     def test_temperature_scaling_fitted(self):
         """Test calibrated temperature scaling method."""
         from core.autonomy.calibrator import ConfidenceCalibrator
+
         calibrator = ConfidenceCalibrator(method="temperature_scaling")
         # Add enough data to fit
         for i in range(60):
@@ -1787,7 +1846,12 @@ class TestEscalationTimeoutWithFuture:
     async def test_timeout_sets_future_result(self):
         """Test _timeout_escalation sets result on waiting future."""
         from core.autonomy.escalation import EscalationManager
-        from core.autonomy.types import AutonomyDecision, ConfidenceScore, UncertaintyEstimate, EscalationReason
+        from core.autonomy.types import (
+            AutonomyDecision,
+            ConfidenceScore,
+            UncertaintyEstimate,
+            EscalationReason,
+        )
         import asyncio
 
         manager = EscalationManager()

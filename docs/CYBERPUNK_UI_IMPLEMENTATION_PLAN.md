@@ -87,22 +87,22 @@ TAILWIND_CDN = """
     @apply border border-cyber-accent/20 rounded-lg;
     box-shadow: 0 0 10px rgba(0, 217, 255, 0.1) inset;
   }
-  
+
   /* Glowing Text */
   .cyber-glow {
     text-shadow: 0 0 10px rgba(0, 217, 255, 0.8);
   }
-  
+
   /* Panel Glass Effect */
   .cyber-glass {
     @apply bg-cyber-panel/80 backdrop-blur-xl;
     border: 1px solid rgba(0, 217, 255, 0.15);
   }
-  
+
   /* Animated Border */
   .cyber-border-animated {
     position: relative;
-    background: linear-gradient(90deg, 
+    background: linear-gradient(90deg,
       transparent 0%,
       rgba(0, 217, 255, 0.4) 50%,
       transparent 100%
@@ -110,7 +110,7 @@ TAILWIND_CDN = """
     background-size: 200% 100%;
     animation: border-slide 3s linear infinite;
   }
-  
+
   @keyframes border-slide {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
@@ -128,7 +128,7 @@ TAILWIND_CDN = """
 ```python
 with gr.Column(scale=1, elem_classes="cyber-glass cyber-border"):
     gr.Markdown("### PROJECT-ALPHA", elem_classes="cyber-glow font-mono text-sm")
-    
+
     file_explorer = gr.FileExplorer(
         root_dir=PROJECT_ROOT,
         glob="**/*",
@@ -241,7 +241,7 @@ def render_gauge(percentage: float, label: str, max_value: str) -> str:
     radius = 70
     circumference = 2 * 3.14159 * radius
     offset = circumference - (percentage / 100) * circumference
-    
+
     return f"""
     <div class="flex flex-col items-center justify-center p-6 cyber-glass cyber-border">
         <h3 class="text-sm font-mono text-cyber-text mb-4">{label}</h3>
@@ -286,7 +286,7 @@ def render_bar_chart(values: List[float], label: str) -> str:
             </div>
         </div>
         """
-    
+
     return f"""
     <div class="cyber-glass cyber-border p-4">
         <h3 class="text-sm font-mono text-cyber-text mb-2">{label}</h3>
@@ -302,7 +302,7 @@ safety_chart = gr.HTML(render_bar_chart([0.6, 0.8, 0.9, 0.7, 0.85, 0.95], "Safet
 
 #### 3. Dual Status Gauges (Model + Environment)
 ```python
-def render_dual_gauge(left_val: float, left_label: str, 
+def render_dual_gauge(left_val: float, left_label: str,
                      right_val: float, right_label: str) -> str:
     """Render two small circular gauges side-by-side"""
     def mini_gauge(val, label, color):
@@ -321,7 +321,7 @@ def render_dual_gauge(left_val: float, left_label: str,
             <p class="text-lg font-bold" style="color:{color}">{val}%</p>
         </div>
         """
-    
+
     return f"""
     <div class="cyber-glass cyber-border p-4 flex gap-4 justify-around">
         {mini_gauge(left_val, left_label, "#00D9FF")}
@@ -346,7 +346,7 @@ async def stream_with_typewriter_effect(text: str):
         chunk = text[:i+3]
         yield gr.update(value=chunk + "█")  # Blinking cursor
         await asyncio.sleep(0.05)
-    
+
     yield gr.update(value=text)  # Final without cursor
 ```
 
@@ -371,7 +371,7 @@ async def stream_with_typewriter_effect(text: str):
     const circle = document.querySelector(`#${elementId} circle:last-child`);
     const circumference = 2 * Math.PI * 70;
     const offset = circumference - (newPercentage / 100) * circumference;
-    
+
     circle.style.transition = 'stroke-dashoffset 0.5s ease-out';
     circle.style.strokeDashoffset = offset;
   }
@@ -457,11 +457,11 @@ demo.launch(
 
 ## SUCCESS CRITERIA
 
-✅ **Visual Parity**: 95%+ match to reference image  
-✅ **Smooth Animations**: 60fps gauge updates  
-✅ **Responsive**: Works on 1920x1080 minimum  
-✅ **Real-time**: Metrics update with &lt;100ms latency  
-✅ **Accessible**: Keyboard navigation works  
+✅ **Visual Parity**: 95%+ match to reference image
+✅ **Smooth Animations**: 60fps gauge updates
+✅ **Responsive**: Works on 1920x1080 minimum
+✅ **Real-time**: Metrics update with &lt;100ms latency
+✅ **Accessible**: Keyboard navigation works
 
 ---
 

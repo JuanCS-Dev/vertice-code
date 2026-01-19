@@ -49,9 +49,7 @@ class AgentSession:
     events: Deque["MonitoringEvent"] = field(default_factory=lambda: deque(maxlen=1000))
 
     # Historico de scores
-    suspicion_history: Deque["SuspicionScore"] = field(
-        default_factory=lambda: deque(maxlen=100)
-    )
+    suspicion_history: Deque["SuspicionScore"] = field(default_factory=lambda: deque(maxlen=100))
 
     # Contadores
     total_events: int = 0

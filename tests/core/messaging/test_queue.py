@@ -172,6 +172,7 @@ class TestInMemoryQueue:
     @pytest.mark.asyncio
     async def test_consume_with_timeout(self, queue):
         """Test consuming with wait timeout."""
+
         # Start consuming in background
         async def delayed_publish():
             await asyncio.sleep(0.05)

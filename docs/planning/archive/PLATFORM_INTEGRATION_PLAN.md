@@ -1,6 +1,6 @@
 # 🚀 PLATFORM INTEGRATION PLAN - SambaNova, Blaze, Modal
 
-**Date:** 2025-11-17  
+**Date:** 2025-11-17
 **Status:** Research & Planning Phase
 
 ---
@@ -79,17 +79,17 @@ class LLMClient:
         self.ollama_client = ...  # ✅ Existing
         self.sambanova_client = ... # 🆕 NEW
         self.blaxel_client = ...  # 🆕 NEW (Agentic)
-    
+
     async def stream_chat(self, prompt, provider="auto"):
         # Auto-select best provider based on:
         # - Speed requirements
         # - Task complexity (simple vs multi-step)
         # - Availability
         # - Rate limits
-        
+
         if provider == "auto":
             provider = self._select_best_provider(prompt)
-        
+
         if provider == "sambanova":
             return self._stream_sambanova(prompt)
         elif provider == "blaxel":
@@ -157,7 +157,7 @@ async def inference_webhook(data: dict):
 
 class ProviderRouter:
     """Intelligent routing to best LLM provider."""
-    
+
     PROVIDER_STRENGTHS = {
         "sambanova": {
             "speed": 10,      # Ultra-fast
@@ -190,11 +190,11 @@ class ProviderRouter:
             "general": 9
         }
     }
-    
+
     def select_provider(self, prompt: str, priority="balanced"):
         """Select best provider for task."""
         task_type = self._classify_task(prompt)
-        
+
         if task_type == "code_generation":
             return "blaze"  # Best for code
         elif task_type == "code_explanation":
@@ -205,12 +205,12 @@ class ProviderRouter:
             return "modal"  # GPU-powered Qwen
         else:
             return "hf"  # Default, reliable
-    
+
     def _classify_task(self, prompt: str):
         """Classify task type from prompt."""
         code_keywords = ["generate", "write", "create", "function", "class"]
         explain_keywords = ["explain", "what is", "how does", "review"]
-        
+
         if any(kw in prompt.lower() for kw in code_keywords):
             return "code_generation"
         elif any(kw in prompt.lower() for kw in explain_keywords):

@@ -60,7 +60,7 @@
         <h1>🚀 Vertice Enterprise SaaS</h1>
         <div class="status">✅ Sistema Operacional na GCP</div>
         <p>AI-Powered Code Assistance Platform</p>
-        
+
         <div class="features">
             <div class="feature">
                 <h3>⚡ Real-time AI</h3>
@@ -91,11 +91,11 @@
         async function testAPI() {
             const resultDiv = document.getElementById('api-result');
             resultDiv.innerHTML = '⏳ Testando...';
-            
+
             try {
                 const response = await fetch('https://vertice-backend-us-239800439060.us-central1.run.app/');
                 const data = await response.json();
-                
+
                 resultDiv.innerHTML = `
                     <div style="color: #00ff88; margin-top: 1rem;">
                         ✅ API Funcionando!<br>

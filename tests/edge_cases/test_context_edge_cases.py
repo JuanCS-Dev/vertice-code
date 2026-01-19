@@ -5,7 +5,6 @@ Tests for edge cases in context window management.
 """
 
 
-
 class TestContextAtLimit:
     """Test behavior at exact context limits."""
 
@@ -65,7 +64,7 @@ class TestContextOverflowGraceful:
         """System prompt preserved during truncation."""
         messages = [
             {"role": "system", "content": "You are helpful"},
-            *[{"role": "user", "content": f"msg_{i}"} for i in range(100)]
+            *[{"role": "user", "content": f"msg_{i}"} for i in range(100)],
         ]
 
         # Keep system + last N
@@ -111,16 +110,16 @@ class TestTokenCountAccuracy:
 
         # Unicode generally needs same or more tokens
         ascii_estimate = len(ascii_text) // 4
-        unicode_estimate = len(unicode_text.encode('utf-8')) // 4
+        unicode_estimate = len(unicode_text.encode("utf-8")) // 4
 
         assert unicode_estimate >= ascii_estimate - 1
 
     def test_code_block_tokens(self):
         """Code blocks may tokenize differently."""
-        code = '''
+        code = """
 def hello():
     print("Hello, World!")
-'''
+"""
         # Code often tokenizes to more tokens than prose
         token_estimate = len(code) // 3  # Code is ~3 chars/token
         assert token_estimate > 0

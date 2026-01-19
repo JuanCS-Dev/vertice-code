@@ -1,6 +1,6 @@
 # 🔴 BRUTAL AUDIT FIX PLAN
-**Data:** 2025-11-20  
-**Auditor:** Vertice-MAXIMUS (Modo: Zero Tolerância)  
+**Data:** 2025-11-20
+**Auditor:** Vertice-MAXIMUS (Modo: Zero Tolerância)
 **Status:** CRÍTICO - Sistema não está production-ready
 
 ---
@@ -65,7 +65,7 @@ import asyncio
 class Session:
     def __init__(self):
         self._save_lock = asyncio.Lock()
-    
+
     async def save_session(self):
         async with self._save_lock:
             # Atomic write pattern
@@ -104,7 +104,7 @@ class TokenTracker(Static):
 class LLMClient:
     async def generate(self, prompt: str):
         response = await self.model.generate(prompt)
-        
+
         # ❌ ISSO NÃO EXISTE:
         # self.app.query_one(TokenTracker).update_tokens(
         #     used=response.usage.total_tokens,
@@ -118,7 +118,7 @@ class LLMClient:
 class LLMClient:
     def __init__(self, token_callback=None):
         self.token_callback = token_callback
-    
+
     async def generate(self, prompt: str):
         response = await self.model.generate(prompt)
         if self.token_callback:
@@ -164,7 +164,7 @@ async def on_option_list_option_selected(self, event):
 async def on_option_list_option_selected(self, event):
     command = event.option.id
     self.dismiss()
-    
+
     # Executar comando real:
     shell = self.app.query_one(InteractiveShell)
     await shell.execute_command(command)
@@ -205,7 +205,7 @@ def render_code(self, code: str, language: str):
     if len(lines) > 1000:
         code = '\n'.join(lines[:1000])
         code += f"\n\n... ({len(lines) - 1000} linhas omitidas)"
-    
+
     return Syntax(code, language, theme="monokai", line_numbers=True)
 ```
 
@@ -277,11 +277,11 @@ class InlinePreview(Widget):
     def __init__(self):
         super().__init__()
         self.history = HistoryManager()
-    
+
     def apply_edit(self, edit: Edit):
         self.history.add_state(self.current_content)
         self.current_content = edit.apply(self.current_content)
-    
+
     def action_undo(self):
         if state := self.history.undo():
             self.current_content = state
@@ -325,7 +325,7 @@ class AutoOptimizer:
     def optimize(self):
         # ❌ MÉTODO VAZIO!
         pass
-    
+
     def analyze_context(self):
         # ❌ RETORNA SEMPRE O MESMO!
         return {"status": "optimal"}
@@ -341,14 +341,14 @@ class AutoOptimizer:
 ```python
 # Arquivos usam 3 estilos diferentes:
 qwen_dev_cli/ui/widgets/commandPalette.py  # ❌ camelCase
-qwen_dev_cli/ui/widgets/token_tracker.py   # ✅ snake_case  
+qwen_dev_cli/ui/widgets/token_tracker.py   # ✅ snake_case
 qwen_dev_cli/ui/widgets/InlinePreview.py   # ❌ PascalCase
 ```
 
 ### QUAL #2: Imports Circulares
 ```python
 # shell.py importa llm.py
-# llm.py importa session.py  
+# llm.py importa session.py
 # session.py importa shell.py
 # ❌ LOOP!
 ```
@@ -569,6 +569,6 @@ Cada bug corrigido = +credibilidade.
 
 ---
 
-**Assinado:** Vertice-MAXIMUS Auditor  
-**Data:** 2025-11-20  
+**Assinado:** Vertice-MAXIMUS Auditor
+**Data:** 2025-11-20
 **Próxima Auditoria:** Após Fase 1 (estimado: 12h)

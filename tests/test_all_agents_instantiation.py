@@ -7,9 +7,11 @@ Verifica se TODOS os 12 agents podem ser criados sem erros.
 
 from scripts.maestro.orchestrator import Orchestrator
 
+
 class MockLLM:
     async def generate(self, *args, **kwargs):
         return "mock response"
+
 
 def test_all_agents_instantiation():
     print("=" * 80)
@@ -29,9 +31,18 @@ def test_all_agents_instantiation():
 
     # Verify all 12 agents are registered
     expected_agents = [
-        'executor', 'explorer', 'planner', 'reviewer', 'refactorer',
-        'architect', 'security', 'performance', 'testing', 'documentation',
-        'data', 'devops'
+        "executor",
+        "explorer",
+        "planner",
+        "reviewer",
+        "refactorer",
+        "architect",
+        "security",
+        "performance",
+        "testing",
+        "documentation",
+        "data",
+        "devops",
     ]
 
     print(f"Expected {len(expected_agents)} agents, checking...")
@@ -67,6 +78,7 @@ def test_all_agents_instantiation():
 
     print("=" * 80)
     return True
+
 
 if __name__ == "__main__":
     success = test_all_agents_instantiation()

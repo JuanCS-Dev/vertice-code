@@ -6,7 +6,7 @@ from vertice_cli.tools.web_access import (
     PackageSearchTool,
     FetchURLTool,
     DownloadFileTool,
-    HTTPRequestTool
+    HTTPRequestTool,
 )
 
 
@@ -18,10 +18,7 @@ class TestPackageSearchTool:
         """Test searching PyPI for a known package."""
         tool = PackageSearchTool()
 
-        result = await tool.execute(
-            package_name="requests",
-            registry="pypi"
-        )
+        result = await tool.execute(package_name="requests", registry="pypi")
 
         assert result.success
         assert result.data["name"] == "requests"
@@ -34,10 +31,7 @@ class TestPackageSearchTool:
         """Test searching npm for a known package."""
         tool = PackageSearchTool()
 
-        result = await tool.execute(
-            package_name="express",
-            registry="npm"
-        )
+        result = await tool.execute(package_name="express", registry="npm")
 
         assert result.success
         assert result.data["name"] == "express"
@@ -51,8 +45,7 @@ class TestPackageSearchTool:
         tool = PackageSearchTool()
 
         result = await tool.execute(
-            package_name="this-package-definitely-does-not-exist-xyz123",
-            registry="pypi"
+            package_name="this-package-definitely-does-not-exist-xyz123", registry="pypi"
         )
 
         assert not result.success
@@ -63,10 +56,7 @@ class TestPackageSearchTool:
         """Test invalid registry name."""
         tool = PackageSearchTool()
 
-        result = await tool.execute(
-            package_name="test",
-            registry="invalid"
-        )
+        result = await tool.execute(package_name="test", registry="invalid")
 
         assert not result.success
         assert "invalid registry" in result.error.lower()
@@ -90,9 +80,7 @@ class TestFetchURLTool:
         """Test fetching JSON from API."""
         tool = FetchURLTool()
 
-        result = await tool.execute(
-            url="https://api.github.com/repos/python/cpython"
-        )
+        result = await tool.execute(url="https://api.github.com/repos/python/cpython")
 
         assert result.success
         assert result.data["data_type"] == "json"
@@ -104,10 +92,7 @@ class TestFetchURLTool:
         """Test fetching HTML page."""
         tool = FetchURLTool()
 
-        result = await tool.execute(
-            url="https://www.python.org",
-            extract_text=False
-        )
+        result = await tool.execute(url="https://www.python.org", extract_text=False)
 
         assert result.success
         assert result.data["data_type"] in ["html", "text"]
@@ -118,10 +103,7 @@ class TestFetchURLTool:
         """Test fetching HTML with text extraction."""
         tool = FetchURLTool()
 
-        result = await tool.execute(
-            url="https://www.python.org",
-            extract_text=True
-        )
+        result = await tool.execute(url="https://www.python.org", extract_text=True)
 
         assert result.success
         assert result.data["data_type"] == "text"
@@ -143,10 +125,7 @@ class TestFetchURLTool:
         """Test max_length parameter."""
         tool = FetchURLTool()
 
-        result = await tool.execute(
-            url="https://www.python.org",
-            max_length=1000
-        )
+        result = await tool.execute(url="https://www.python.org", max_length=1000)
 
         assert result.success
         assert len(result.data["content"]) <= 1000
@@ -165,7 +144,7 @@ class TestDownloadFileTool:
         # Download a small text file from GitHub
         result = await tool.execute(
             url="https://raw.githubusercontent.com/python/cpython/main/README.rst",
-            destination="./test_downloads/README.rst"
+            destination="./test_downloads/README.rst",
         )
 
         assert result.success
@@ -195,7 +174,7 @@ class TestDownloadFileTool:
         if dest_path.parent.name == "downloads":
             try:
                 dest_path.parent.rmdir()
-            except:
+            except Exception:
                 pass
 
     @pytest.mark.asyncio
@@ -217,10 +196,7 @@ class TestHTTPRequestTool:
         """Test GET request."""
         tool = HTTPRequestTool()
 
-        result = await tool.execute(
-            url="https://httpbin.org/get",
-            method="GET"
-        )
+        result = await tool.execute(url="https://httpbin.org/get", method="GET")
 
         assert result.success
         assert result.data["method"] == "GET"
@@ -232,9 +208,7 @@ class TestHTTPRequestTool:
         tool = HTTPRequestTool()
 
         result = await tool.execute(
-            url="https://httpbin.org/post",
-            method="POST",
-            body='{"test": "data", "number": 123}'
+            url="https://httpbin.org/post", method="POST", body='{"test": "data", "number": 123}'
         )
 
         assert result.success
@@ -249,7 +223,7 @@ class TestHTTPRequestTool:
         result = await tool.execute(
             url="https://httpbin.org/headers",
             method="GET",
-            headers={"X-Custom-Header": "test-value"}
+            headers={"X-Custom-Header": "test-value"},
         )
 
         assert result.success
@@ -261,9 +235,7 @@ class TestHTTPRequestTool:
         tool = HTTPRequestTool()
 
         result = await tool.execute(
-            url="https://httpbin.org/get",
-            method="GET",
-            params={"foo": "bar", "test": "123"}
+            url="https://httpbin.org/get", method="GET", params={"foo": "bar", "test": "123"}
         )
 
         assert result.success
@@ -274,10 +246,7 @@ class TestHTTPRequestTool:
         """Test invalid HTTP method."""
         tool = HTTPRequestTool()
 
-        result = await tool.execute(
-            url="https://httpbin.org/get",
-            method="INVALID"
-        )
+        result = await tool.execute(url="https://httpbin.org/get", method="INVALID")
 
         assert not result.success
         assert "invalid http method" in result.error.lower()
@@ -287,10 +256,7 @@ class TestHTTPRequestTool:
         """Test invalid URL."""
         tool = HTTPRequestTool()
 
-        result = await tool.execute(
-            url="not-a-valid-url",
-            method="GET"
-        )
+        result = await tool.execute(url="not-a-valid-url", method="GET")
 
         assert not result.success
         assert "invalid url" in result.error.lower()

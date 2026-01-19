@@ -10,6 +10,7 @@ import asyncio
 from vertice_cli.agents.data_agent_production import create_data_agent
 from vertice_cli.agents.base import AgentTask, AgentRole, AgentCapability
 
+
 # Mock LLM for testing
 class SimpleMockLLM:
     async def generate(self, prompt, system_prompt=None, **kwargs):
@@ -20,6 +21,7 @@ class SimpleMockLLM:
         elif "migration" in prompt.lower():
             return "Low risk migration, can run online, 0 downtime"
         return "Task completed successfully"
+
 
 async def main():
     print("=" * 80)
@@ -77,7 +79,7 @@ async def main():
 
     task = AgentTask(
         request="Analyze the users table for optimization opportunities",
-        context={"database": "production"}
+        context={"database": "production"},
     )
 
     response = await agent.execute(task)
@@ -101,6 +103,7 @@ async def main():
     print("  • AgentTask/AgentResponse (standard interface)")
     print()
     print("Ready for production use!")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -37,7 +37,7 @@ class TestParallelToolExecution:
 
         start = time.time()
         result = await executor.execute(tool_calls)
-        duration = time.time() - start
+        time.time() - start
 
         assert result.wave_count == 1  # All should execute in one wave
         assert len(result.results) == len(files)
@@ -66,7 +66,7 @@ class TestParallelToolExecution:
 
         start = time.time()
         result = await executor.execute(tool_calls)
-        duration = time.time() - start
+        time.time() - start
 
         assert result.wave_count == 1
         assert len(result.results) == 3
@@ -75,7 +75,10 @@ class TestParallelToolExecution:
     @pytest.mark.asyncio
     async def test_sequential_dependent_write_read(self, temp_project):
         """Test sequential execution of dependent write->read."""
-        from vertice_tui.core.parallel_executor import ParallelToolExecutor, detect_tool_dependencies
+        from vertice_tui.core.parallel_executor import (
+            ParallelToolExecutor,
+            detect_tool_dependencies,
+        )
         from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
 
         write_tool = WriteFileTool()
@@ -128,7 +131,10 @@ class TestParallelToolExecution:
         test_file = str(temp_project / "chain.txt")
         tool_calls = [
             ("write_file", {"path": test_file, "content": "original"}),
-            ("edit_file", {"path": test_file, "edits": [{"search": "original", "replace": "modified"}]}),
+            (
+                "edit_file",
+                {"path": test_file, "edits": [{"search": "original", "replace": "modified"}]},
+            ),
             ("read_file", {"path": test_file}),
         ]
 
@@ -400,10 +406,12 @@ class TestConcurrentStressTest:
 
         # Add 20 edits
         for i in range(1, 21):
-            tool_calls.append((
-                "edit_file",
-                {"path": test_file, "edits": [{"search": str(i - 1), "replace": str(i)}]}
-            ))
+            tool_calls.append(
+                (
+                    "edit_file",
+                    {"path": test_file, "edits": [{"search": str(i - 1), "replace": str(i)}]},
+                )
+            )
 
         result = await executor.execute(tool_calls)
 

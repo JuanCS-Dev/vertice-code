@@ -57,7 +57,8 @@ class TestMemorySystem:
 
             # Create JUAN.md (primary) or CLAUDE.md (compatibility)
             memory_file = tmpdir / "JUAN.md"
-            memory_file.write_text("""# Project Memory
+            memory_file.write_text(
+                """# Project Memory
 
 ## Instructions
 
@@ -69,7 +70,8 @@ class TestMemorySystem:
 
 - **code_style**: functional
 - **testing**: pytest
-""")
+"""
+            )
 
             manager = MemoryManager(project_root=tmpdir)
             result = manager.load()
@@ -88,11 +90,13 @@ class TestMemorySystem:
             tmpdir = Path(tmpdir)
 
             memory_file = tmpdir / "CLAUDE.md"
-            memory_file.write_text("""## Instructions
+            memory_file.write_text(
+                """## Instructions
 
 - Rule 1
 - Rule 2
-""")
+"""
+            )
 
             manager = MemoryManager(project_root=tmpdir)
             manager.load()

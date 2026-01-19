@@ -151,7 +151,7 @@ export function ArtifactsPanel() {
 
       {/* Toggle Tab for Tree when closed */}
       {!showTree && (
-        <button 
+        <button
             onClick={() => setShowTree(true)}
             className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-12 bg-white/5 border border-white/5 border-l-0 rounded-r-md flex items-center justify-center hover:bg-white/10 transition-colors z-20"
         >

@@ -256,7 +256,7 @@ qwen_dev_cli/
 **Para JusticaIntegratedAgent**:
 ```python
 from qwen_dev_cli.agents.base import (
-    BaseAgent, AgentTask, AgentResponse, 
+    BaseAgent, AgentTask, AgentResponse,
     AgentRole, AgentCapability
 )
 

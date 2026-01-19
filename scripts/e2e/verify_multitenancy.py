@@ -60,7 +60,7 @@ class TestTenantIsolation(unittest.TestCase):
         self.isolation.store_resource("public_info", "announcement", "Welcome All", tenant=None)
 
         # Tenant A reads
-        val_a = self.isolation.get_resource("public_info", "announcement", tenant=self.tenant_a)
+        self.isolation.get_resource("public_info", "announcement", tenant=self.tenant_a)
         # Assuming global lookup implementation:
         # If logic allows falling back to global? Isolation.py implementation checks tenant_id specific map.
         # Let's check implementation behavior.

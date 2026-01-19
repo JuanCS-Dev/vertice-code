@@ -21,7 +21,7 @@ async def test_tui_startup():
 
         # Use run_test context manager for headless testing
         print("   Starting run_test() context...")
-        async with app.run_test() as pilot:
+        async with app.run_test():
             print("   ✅ App started successfully!")
 
             # Basic sanity check of the widget tree
@@ -31,13 +31,13 @@ async def test_tui_startup():
 
             # Check for critical widgets
             try:
-                sidebar = screen.query_one("#sidebar")
+                screen.query_one("#sidebar")
                 print("   ✅ Sidebar found")
             except Exception:
                 print("   ⚠️ Sidebar not found (Might be hidden or different ID)")
 
             try:
-                chat_view = screen.query_one("ChatView")
+                screen.query_one("ChatView")
                 print("   ✅ ChatView found")
             except Exception:
                 print("   ⚠️ ChatView not found")

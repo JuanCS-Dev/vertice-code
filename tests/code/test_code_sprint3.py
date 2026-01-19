@@ -50,6 +50,7 @@ from vertice_core.code import (
 # LSP Types Tests
 # =============================================================================
 
+
 class TestLSPTypes:
     """Tests for LSP data types."""
 
@@ -161,18 +162,20 @@ class TestLSPTypes:
         assert info1.contents == "Simple string"
 
         # Dict content
-        info2 = HoverInfo.from_dict({
-            "contents": {"value": "Markdown **content**", "kind": "markdown"}
-        })
+        info2 = HoverInfo.from_dict(
+            {"contents": {"value": "Markdown **content**", "kind": "markdown"}}
+        )
         assert "Markdown" in info2.contents
 
         # List content
-        info3 = HoverInfo.from_dict({
-            "contents": [
-                {"value": "Line 1"},
-                {"value": "Line 2"},
-            ]
-        })
+        info3 = HoverInfo.from_dict(
+            {
+                "contents": [
+                    {"value": "Line 1"},
+                    {"value": "Line 2"},
+                ]
+            }
+        )
         assert "Line 1" in info3.contents
         assert "Line 2" in info3.contents
 
@@ -219,6 +222,7 @@ class TestLSPTypes:
 # AST Editor Tests
 # =============================================================================
 
+
 class TestASTEditor:
     """Tests for ASTEditor."""
 
@@ -254,11 +258,11 @@ class TestASTEditor:
         """Test finding text in code."""
         editor = ASTEditor()
 
-        code = '''
+        code = """
 def hello():
     message = "hello world"
     print(message)
-'''
+"""
 
         # Find in code (not in strings)
         matches = editor.find_in_code(code, "message", "python")
@@ -274,10 +278,10 @@ def hello():
         """Test that find excludes string literals by default."""
         editor = ASTEditor()
 
-        code = '''
+        code = """
 name = "hello"
 x = hello
-'''
+"""
 
         matches = editor.find_in_code(code, "hello", "python", include_strings=False)
 
@@ -290,10 +294,10 @@ x = hello
         """Test that find excludes comments by default."""
         editor = ASTEditor()
 
-        code = '''
+        code = """
 # This is a test comment
 test = 1
-'''
+"""
 
         matches = editor.find_in_code(code, "test", "python", include_comments=False)
 
@@ -305,10 +309,10 @@ test = 1
         """Test finding with strings included."""
         editor = ASTEditor()
 
-        code = '''
+        code = """
 message = "hello"
 x = hello
-'''
+"""
 
         matches = editor.find_in_code(code, "hello", "python", include_strings=True)
 
@@ -319,13 +323,16 @@ x = hello
         """Test replacing text only in code."""
         editor = ASTEditor()
 
-        code = '''
+        code = """
 old_name = "old_name in string"
 print(old_name)
-'''
+"""
 
         result = editor.replace_in_code(
-            code, "old_name", "new_name", "python",
+            code,
+            "old_name",
+            "new_name",
+            "python",
             include_strings=False,
         )
 
@@ -342,11 +349,11 @@ print(old_name)
         """Test replacing all occurrences."""
         editor = ASTEditor()
 
-        code = '''
+        code = """
 x = foo
 y = foo
 z = foo
-'''
+"""
 
         result = editor.replace_in_code(code, "foo", "bar", "python")
 
@@ -359,14 +366,17 @@ z = foo
         """Test replacing with limit."""
         editor = ASTEditor()
 
-        code = '''
+        code = """
 x = foo
 y = foo
 z = foo
-'''
+"""
 
         result = editor.replace_in_code(
-            code, "foo", "bar", "python",
+            code,
+            "foo",
+            "bar",
+            "python",
             max_replacements=1,
         )
 
@@ -379,7 +389,7 @@ z = foo
         """Test extracting function symbols."""
         editor = ASTEditor()
 
-        code = '''
+        code = """
 def function1():
     pass
 
@@ -388,7 +398,7 @@ def function2(arg1, arg2):
 
 async def async_function():
     pass
-'''
+"""
 
         symbols = editor.get_symbols(code, "python")
 
@@ -400,14 +410,14 @@ async def async_function():
         """Test extracting class symbols."""
         editor = ASTEditor()
 
-        code = '''
+        code = """
 class MyClass:
     def method1(self):
         pass
 
     def method2(self):
         pass
-'''
+"""
 
         symbols = editor.get_symbols(code, "python")
 
@@ -425,13 +435,13 @@ class MyClass:
         """Test finding specific symbol."""
         editor = ASTEditor()
 
-        code = '''
+        code = """
 def target_function():
     pass
 
 def other_function():
     pass
-'''
+"""
 
         symbol = editor.find_symbol(code, "target_function", "python")
 
@@ -443,10 +453,10 @@ def other_function():
         """Test finding symbol that doesn't exist."""
         editor = ASTEditor()
 
-        code = '''
+        code = """
 def something():
     pass
-'''
+"""
 
         symbol = editor.find_symbol(code, "nonexistent", "python")
         assert symbol is None
@@ -455,10 +465,10 @@ def something():
         """Test syntax validation with valid code."""
         editor = ASTEditor()
 
-        code = '''
+        code = """
 def valid_function():
     return 42
-'''
+"""
 
         is_valid, error = editor.is_valid_syntax(code, "python")
         assert is_valid is True
@@ -468,10 +478,10 @@ def valid_function():
         """Test syntax validation with invalid code."""
         editor = ASTEditor()
 
-        code = '''
+        code = """
 def broken_function(
     return 42
-'''
+"""
 
         is_valid, error = editor.is_valid_syntax(code, "python")
         assert is_valid is False
@@ -481,10 +491,10 @@ def broken_function(
         """Test getting node at specific position."""
         editor = ASTEditor()
 
-        code = '''
+        code = """
 def my_function():
     x = 42
-'''
+"""
 
         # Position at 'my_function'
         node_info = editor.get_node_at_position(code, 2, 5, "python")
@@ -530,6 +540,7 @@ def my_function():
 # Code Validator Tests
 # =============================================================================
 
+
 class TestCodeValidator:
     """Tests for CodeValidator."""
 
@@ -543,11 +554,11 @@ class TestCodeValidator:
         """Test validating valid Python code."""
         validator = CodeValidator()
 
-        code = '''
+        code = """
 def valid_function():
     x = 42
     return x
-'''
+"""
 
         result = await validator.validate("test.py", code, ValidationLevel.SYNTAX_ONLY)
 
@@ -559,10 +570,10 @@ def valid_function():
         """Test validating code with syntax errors."""
         validator = CodeValidator()
 
-        code = '''
+        code = """
 def broken(
     return 42
-'''
+"""
 
         result = await validator.validate("test.py", code, ValidationLevel.SYNTAX_ONLY)
 
@@ -601,15 +612,15 @@ def broken(
         """Test edit validation with no new errors."""
         validator = CodeValidator()
 
-        old_code = '''
+        old_code = """
 def foo():
     return 1
-'''
+"""
 
-        new_code = '''
+        new_code = """
 def bar():
     return 2
-'''
+"""
 
         validation = await validator.validate_edit(
             "test.py", old_code, new_code, ValidationLevel.SYNTAX_ONLY
@@ -623,15 +634,15 @@ def bar():
         """Test edit validation that introduces errors."""
         validator = CodeValidator()
 
-        old_code = '''
+        old_code = """
 def foo():
     return 1
-'''
+"""
 
-        new_code = '''
+        new_code = """
 def foo(
     return 1
-'''
+"""
 
         validation = await validator.validate_edit(
             "test.py", old_code, new_code, ValidationLevel.SYNTAX_ONLY
@@ -646,15 +657,15 @@ def foo(
         """Test edit validation that fixes errors."""
         validator = CodeValidator()
 
-        old_code = '''
+        old_code = """
 def foo(
     return 1
-'''
+"""
 
-        new_code = '''
+        new_code = """
 def foo():
     return 1
-'''
+"""
 
         validation = await validator.validate_edit(
             "test.py", old_code, new_code, ValidationLevel.SYNTAX_ONLY
@@ -718,7 +729,9 @@ def foo():
             filepath.write_text(old_code)
 
             success, validation = await validator.safe_edit(
-                str(filepath), old_code, new_code,
+                str(filepath),
+                old_code,
+                new_code,
                 level=ValidationLevel.SYNTAX_ONLY,
             )
 
@@ -739,7 +752,9 @@ def foo():
             filepath.write_text(old_code)
 
             success, validation = await validator.safe_edit(
-                str(filepath), old_code, new_code,
+                str(filepath),
+                old_code,
+                new_code,
                 auto_rollback=True,
                 level=ValidationLevel.SYNTAX_ONLY,
             )
@@ -828,6 +843,7 @@ def foo():
 # Integration Tests
 # =============================================================================
 
+
 class TestIntegration:
     """Integration tests for Code Intelligence."""
 
@@ -837,15 +853,13 @@ class TestIntegration:
         editor = get_ast_editor()
         validator = CodeValidator()
 
-        code = '''
+        code = """
 def old_function():
     return 42
-'''
+"""
 
         # Use AST editor to replace
-        result = editor.replace_in_code(
-            code, "old_function", "new_function", "python"
-        )
+        result = editor.replace_in_code(code, "old_function", "new_function", "python")
 
         assert result.success is True
 
@@ -862,20 +876,18 @@ def old_function():
         editor = get_ast_editor()
         validator = CodeValidator()
 
-        original_code = '''
+        original_code = """
 def calculate(value):
     result = value * 2
     return result
-'''
+"""
 
         # 1. Find occurrences
         matches = editor.find_in_code(original_code, "result", "python")
         assert len(matches) >= 2  # Declaration and return
 
         # 2. Replace
-        edit_result = editor.replace_in_code(
-            original_code, "result", "output", "python"
-        )
+        edit_result = editor.replace_in_code(original_code, "result", "output", "python")
         assert edit_result.success is True
 
         # 3. Validate edit
@@ -893,7 +905,7 @@ def calculate(value):
         """Test using symbol extraction for code navigation."""
         editor = get_ast_editor()
 
-        code = '''
+        code = """
 class UserService:
     def get_user(self, user_id):
         pass
@@ -904,7 +916,7 @@ class UserService:
 class OrderService:
     def get_order(self, order_id):
         pass
-'''
+"""
 
         symbols = editor.get_symbols(code, "python")
 
@@ -917,9 +929,7 @@ class OrderService:
     @pytest.mark.asyncio
     async def test_validation_with_temp_file(self):
         """Test validation with actual temp file."""
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".py", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write("def test(): return 42")
             filepath = f.name
 

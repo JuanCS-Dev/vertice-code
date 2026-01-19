@@ -81,8 +81,10 @@ TEST_CATEGORIES = [
 # DATA STRUCTURES
 # =============================================================================
 
+
 class Severity(Enum):
     """Issue severity levels."""
+
     INFO = "info"
     WARNING = "warning"
     ERROR = "error"
@@ -92,6 +94,7 @@ class Severity(Enum):
 @dataclass
 class ValidationIssue:
     """A single validation issue."""
+
     category: str
     severity: Severity
     message: str
@@ -104,6 +107,7 @@ class ValidationIssue:
 @dataclass
 class ValidationResult:
     """Result of a single validation check."""
+
     name: str
     passed: bool
     duration: float
@@ -116,6 +120,7 @@ class ValidationResult:
 @dataclass
 class ValidationReport:
     """Complete validation report."""
+
     started_at: datetime
     finished_at: datetime | None = None
     results: list[ValidationResult] = field(default_factory=list)
@@ -126,11 +131,7 @@ class ValidationReport:
 
     @property
     def critical_issues(self) -> int:
-        return sum(
-            1 for r in self.results
-            for i in r.issues
-            if i.severity == Severity.CRITICAL
-        )
+        return sum(1 for r in self.results for i in r.issues if i.severity == Severity.CRITICAL)
 
     @property
     def passed_checks(self) -> int:
@@ -148,6 +149,7 @@ class ValidationReport:
 # =============================================================================
 # UTILITIES
 # =============================================================================
+
 
 def run_command(
     cmd: list[str],
@@ -203,6 +205,7 @@ def parse_python_file(filepath: Path) -> tuple[ast.Module | None, str | None]:
 # =============================================================================
 # VALIDATORS
 # =============================================================================
+
 
 class Validator:
     """Base validator with resilient execution."""
@@ -276,17 +279,17 @@ class ImportValidator(Validator):
                 else:
                     failed += 1
                     severity = (
-                        Severity.CRITICAL
-                        if module_name in CRITICAL_MODULES
-                        else Severity.ERROR
+                        Severity.CRITICAL if module_name in CRITICAL_MODULES else Severity.ERROR
                     )
-                    issues.append(ValidationIssue(
-                        category="imports",
-                        severity=severity,
-                        message=f"Failed to import {module_name}",
-                        file=str(py_file),
-                        suggestion=error,
-                    ))
+                    issues.append(
+                        ValidationIssue(
+                            category="imports",
+                            severity=severity,
+                            message=f"Failed to import {module_name}",
+                            file=str(py_file),
+                            suggestion=error,
+                        )
+                    )
 
                 # Quick mode: stop after first error per package
                 if self.quick_mode and failed > 0:
@@ -324,12 +327,14 @@ class SyntaxValidator(Validator):
                 tree, error = parse_python_file(py_file)
 
                 if error:
-                    issues.append(ValidationIssue(
-                        category="syntax",
-                        severity=Severity.CRITICAL,
-                        message=error,
-                        file=str(py_file),
-                    ))
+                    issues.append(
+                        ValidationIssue(
+                            category="syntax",
+                            severity=Severity.CRITICAL,
+                            message=error,
+                            file=str(py_file),
+                        )
+                    )
 
         return ValidationResult(
             name=self.name,
@@ -375,25 +380,29 @@ class TypeHintValidator(Validator):
                         # Check return type
                         if node.returns is None:
                             missing += 1
-                            issues.append(ValidationIssue(
-                                category="type_hints",
-                                severity=Severity.WARNING,
-                                message=f"Missing return type hint: {node.name}",
-                                file=str(py_file),
-                                line=node.lineno,
-                                suggestion="Add -> ReturnType annotation",
-                            ))
+                            issues.append(
+                                ValidationIssue(
+                                    category="type_hints",
+                                    severity=Severity.WARNING,
+                                    message=f"Missing return type hint: {node.name}",
+                                    file=str(py_file),
+                                    line=node.lineno,
+                                    suggestion="Add -> ReturnType annotation",
+                                )
+                            )
 
                         # Check argument types (skip self/cls)
                         for arg in node.args.args[1:] if node.args.args else []:
                             if arg.annotation is None:
-                                issues.append(ValidationIssue(
-                                    category="type_hints",
-                                    severity=Severity.INFO,
-                                    message=f"Missing type hint for arg '{arg.arg}' in {node.name}",
-                                    file=str(py_file),
-                                    line=node.lineno,
-                                ))
+                                issues.append(
+                                    ValidationIssue(
+                                        category="type_hints",
+                                        severity=Severity.INFO,
+                                        message=f"Missing type hint for arg '{arg.arg}' in {node.name}",
+                                        file=str(py_file),
+                                        line=node.lineno,
+                                    )
+                                )
 
                 # Quick mode: limit issues per file
                 if self.quick_mode and len(issues) > 50:
@@ -444,21 +453,25 @@ class BlackValidator(Validator):
             for line in check_stderr.split("\n"):
                 if "would reformat" in line:
                     filepath = line.replace("would reformat ", "").strip()
-                    issues.append(ValidationIssue(
-                        category="black",
-                        severity=Severity.WARNING,
-                        message="File needs formatting",
-                        file=filepath,
-                        auto_fixable=True,
-                        suggestion="Run: black <file>",
-                    ))
+                    issues.append(
+                        ValidationIssue(
+                            category="black",
+                            severity=Severity.WARNING,
+                            message="File needs formatting",
+                            file=filepath,
+                            auto_fixable=True,
+                            suggestion="Run: black <file>",
+                        )
+                    )
 
         if code < 0:
-            issues.append(ValidationIssue(
-                category="black",
-                severity=Severity.ERROR,
-                message=stderr or "Black command failed",
-            ))
+            issues.append(
+                ValidationIssue(
+                    category="black",
+                    severity=Severity.ERROR,
+                    message=stderr or "Black command failed",
+                )
+            )
 
         return ValidationResult(
             name=self.name,
@@ -490,11 +503,13 @@ class RuffValidator(Validator):
                 name=self.name,
                 passed=False,
                 duration=0,
-                issues=[ValidationIssue(
-                    category="ruff",
-                    severity=Severity.ERROR,
-                    message=stderr or "Ruff command failed",
-                )],
+                issues=[
+                    ValidationIssue(
+                        category="ruff",
+                        severity=Severity.ERROR,
+                        message=stderr or "Ruff command failed",
+                    )
+                ],
             )
 
         # Parse JSON output
@@ -502,14 +517,16 @@ class RuffValidator(Validator):
             if stdout.strip():
                 ruff_issues = json.loads(stdout)
                 for ri in ruff_issues[:100]:  # Limit
-                    issues.append(ValidationIssue(
-                        category="ruff",
-                        severity=Severity.WARNING,
-                        message=f"[{ri.get('code', '?')}] {ri.get('message', '?')}",
-                        file=ri.get("filename"),
-                        line=ri.get("location", {}).get("row"),
-                        auto_fixable=ri.get("fix") is not None,
-                    ))
+                    issues.append(
+                        ValidationIssue(
+                            category="ruff",
+                            severity=Severity.WARNING,
+                            message=f"[{ri.get('code', '?')}] {ri.get('message', '?')}",
+                            file=ri.get("filename"),
+                            line=ri.get("location", {}).get("row"),
+                            auto_fixable=ri.get("fix") is not None,
+                        )
+                    )
         except json.JSONDecodeError:
             pass
 
@@ -537,11 +554,13 @@ class DependencyValidator(Validator):
                 name=self.name,
                 passed=False,
                 duration=0,
-                issues=[ValidationIssue(
-                    category="dependencies",
-                    severity=Severity.CRITICAL,
-                    message="pyproject.toml not found",
-                )],
+                issues=[
+                    ValidationIssue(
+                        category="dependencies",
+                        severity=Severity.CRITICAL,
+                        message="pyproject.toml not found",
+                    )
+                ],
             )
 
         # Try pip check
@@ -553,23 +572,27 @@ class DependencyValidator(Validator):
         if code != 0:
             for line in stdout.split("\n"):
                 if line.strip():
-                    issues.append(ValidationIssue(
-                        category="dependencies",
-                        severity=Severity.ERROR,
-                        message=line.strip(),
-                        suggestion="Run: pip install -e .",
-                    ))
+                    issues.append(
+                        ValidationIssue(
+                            category="dependencies",
+                            severity=Severity.ERROR,
+                            message=line.strip(),
+                            suggestion="Run: pip install -e .",
+                        )
+                    )
 
         # Check for common missing deps
         try:
             import networkx  # noqa: F401
         except ImportError:
-            issues.append(ValidationIssue(
-                category="dependencies",
-                severity=Severity.ERROR,
-                message="networkx not installed",
-                suggestion="Run: pip install networkx",
-            ))
+            issues.append(
+                ValidationIssue(
+                    category="dependencies",
+                    severity=Severity.ERROR,
+                    message="networkx not installed",
+                    suggestion="Run: pip install networkx",
+                )
+            )
 
         return ValidationResult(
             name=self.name,
@@ -599,12 +622,14 @@ class EntryPointValidator(Validator):
             if code == 0:
                 working += 1
             else:
-                issues.append(ValidationIssue(
-                    category="entry_points",
-                    severity=Severity.ERROR,
-                    message=f"Entry point '{name}' failed",
-                    suggestion=f"Check {module_path}",
-                ))
+                issues.append(
+                    ValidationIssue(
+                        category="entry_points",
+                        severity=Severity.ERROR,
+                        message=f"Entry point '{name}' failed",
+                        suggestion=f"Check {module_path}",
+                    )
+                )
 
         return ValidationResult(
             name=self.name,
@@ -636,8 +661,10 @@ class TestValidator(Validator):
                 continue
 
             cmd = [
-                "pytest", str(test_path),
-                "-v", "--tb=short",
+                "pytest",
+                str(test_path),
+                "-v",
+                "--tb=short",
                 f"--timeout={timeout}",
                 "-x",  # Stop on first failure
             ]
@@ -653,11 +680,13 @@ class TestValidator(Validator):
                 # Extract failure summary
                 for line in (stdout + stderr).split("\n"):
                     if "FAILED" in line or "ERROR" in line:
-                        issues.append(ValidationIssue(
-                            category="tests",
-                            severity=Severity.ERROR,
-                            message=f"[{category}] {line.strip()[:100]}",
-                        ))
+                        issues.append(
+                            ValidationIssue(
+                                category="tests",
+                                severity=Severity.ERROR,
+                                message=f"[{category}] {line.strip()[:100]}",
+                            )
+                        )
                         if len(issues) > 10:
                             break
 
@@ -710,13 +739,15 @@ class DocstringValidator(Validator):
 
                         if not docstring:
                             missing += 1
-                            issues.append(ValidationIssue(
-                                category="docstrings",
-                                severity=Severity.INFO,
-                                message=f"Missing docstring: {node.name}",
-                                file=str(py_file),
-                                line=node.lineno,
-                            ))
+                            issues.append(
+                                ValidationIssue(
+                                    category="docstrings",
+                                    severity=Severity.INFO,
+                                    message=f"Missing docstring: {node.name}",
+                                    file=str(py_file),
+                                    line=node.lineno,
+                                )
+                            )
 
                 if self.quick_mode and len(issues) > 30:
                     break
@@ -770,13 +801,15 @@ class SecurityValidator(Validator):
                             # Skip if in comment or test
                             if line.strip().startswith("#") or "test" in str(py_file).lower():
                                 continue
-                            issues.append(ValidationIssue(
-                                category="security",
-                                severity=Severity.WARNING,
-                                message=message,
-                                file=str(py_file),
-                                line=i,
-                            ))
+                            issues.append(
+                                ValidationIssue(
+                                    category="security",
+                                    severity=Severity.WARNING,
+                                    message=message,
+                                    file=str(py_file),
+                                    line=i,
+                                )
+                            )
 
         return ValidationResult(
             name=self.name,
@@ -801,36 +834,43 @@ class ConfigValidator(Validator):
         if pyproject.exists():
             try:
                 import tomllib
+
                 with open(pyproject, "rb") as f:
                     tomllib.load(f)
             except ImportError:
                 pass  # Python < 3.11
             except Exception as e:
-                issues.append(ValidationIssue(
-                    category="config",
-                    severity=Severity.CRITICAL,
-                    message=f"Invalid pyproject.toml: {e}",
-                    file=str(pyproject),
-                ))
+                issues.append(
+                    ValidationIssue(
+                        category="config",
+                        severity=Severity.CRITICAL,
+                        message=f"Invalid pyproject.toml: {e}",
+                        file=str(pyproject),
+                    )
+                )
 
         # Check .env.example exists
         env_example = PROJECT_ROOT / ".env.example"
         if not env_example.exists():
-            issues.append(ValidationIssue(
-                category="config",
-                severity=Severity.INFO,
-                message=".env.example not found",
-                suggestion="Create .env.example with required variables",
-            ))
+            issues.append(
+                ValidationIssue(
+                    category="config",
+                    severity=Severity.INFO,
+                    message=".env.example not found",
+                    suggestion="Create .env.example with required variables",
+                )
+            )
 
         # Check AGENTS.md
         agents_md = PROJECT_ROOT / "AGENTS.md"
         if not agents_md.exists():
-            issues.append(ValidationIssue(
-                category="config",
-                severity=Severity.WARNING,
-                message="AGENTS.md not found",
-            ))
+            issues.append(
+                ValidationIssue(
+                    category="config",
+                    severity=Severity.WARNING,
+                    message="AGENTS.md not found",
+                )
+            )
 
         return ValidationResult(
             name=self.name,
@@ -864,18 +904,22 @@ class CircularImportValidator(Validator):
                     timeout=30,
                 )
                 if code != 0 and "circular" in stderr.lower():
-                    issues.append(ValidationIssue(
-                        category="circular_imports",
-                        severity=Severity.ERROR,
-                        message=f"Circular import in {module}",
-                        suggestion=stderr[:200],
-                    ))
+                    issues.append(
+                        ValidationIssue(
+                            category="circular_imports",
+                            severity=Severity.ERROR,
+                            message=f"Circular import in {module}",
+                            suggestion=stderr[:200],
+                        )
+                    )
             except Exception as e:
-                issues.append(ValidationIssue(
-                    category="circular_imports",
-                    severity=Severity.WARNING,
-                    message=f"Could not check {module}: {e}",
-                ))
+                issues.append(
+                    ValidationIssue(
+                        category="circular_imports",
+                        severity=Severity.WARNING,
+                        message=f"Could not check {module}: {e}",
+                    )
+                )
 
         return ValidationResult(
             name=self.name,
@@ -896,7 +940,8 @@ class UnusedCodeValidator(Validator):
 
         # Use ruff for unused imports
         cmd = [
-            "ruff", "check",
+            "ruff",
+            "check",
             "--select=F401,F841",  # Unused imports, unused variables
             "--output-format=json",
         ]
@@ -908,14 +953,16 @@ class UnusedCodeValidator(Validator):
             try:
                 ruff_issues = json.loads(stdout)
                 for ri in ruff_issues[:30]:
-                    issues.append(ValidationIssue(
-                        category="unused_code",
-                        severity=Severity.INFO,
-                        message=f"[{ri.get('code')}] {ri.get('message')}",
-                        file=ri.get("filename"),
-                        line=ri.get("location", {}).get("row"),
-                        auto_fixable=True,
-                    ))
+                    issues.append(
+                        ValidationIssue(
+                            category="unused_code",
+                            severity=Severity.INFO,
+                            message=f"[{ri.get('code')}] {ri.get('message')}",
+                            file=ri.get("filename"),
+                            line=ri.get("location", {}).get("row"),
+                            auto_fixable=True,
+                        )
+                    )
             except json.JSONDecodeError:
                 pass
 
@@ -932,6 +979,7 @@ class UnusedCodeValidator(Validator):
 # REPORT GENERATOR
 # =============================================================================
 
+
 def generate_report(report: ValidationReport) -> str:
     """Generate Markdown report."""
     lines = [
@@ -939,7 +987,9 @@ def generate_report(report: ValidationReport) -> str:
         "",
         f"**Generated:** {report.started_at.strftime('%Y-%m-%d %H:%M:%S')}",
         f"**Finished:** {report.finished_at.strftime('%H:%M:%S') if report.finished_at else 'N/A'}",
-        f"**Duration:** {(report.finished_at - report.started_at).total_seconds():.1f}s" if report.finished_at else "",
+        f"**Duration:** {(report.finished_at - report.started_at).total_seconds():.1f}s"
+        if report.finished_at
+        else "",
         "",
         "## Summary",
         "",
@@ -988,7 +1038,12 @@ def generate_report(report: ValidationReport) -> str:
                 for issue in result.issues:
                     by_severity[issue.severity].append(issue)
 
-                for severity in [Severity.CRITICAL, Severity.ERROR, Severity.WARNING, Severity.INFO]:
+                for severity in [
+                    Severity.CRITICAL,
+                    Severity.ERROR,
+                    Severity.WARNING,
+                    Severity.INFO,
+                ]:
                     if severity in by_severity:
                         lines.append(f"*{severity.value.upper()}:*")
                         for issue in by_severity[severity][:10]:
@@ -1001,12 +1056,14 @@ def generate_report(report: ValidationReport) -> str:
         lines.append("")
 
     # Footer
-    lines.extend([
-        "---",
-        "",
-        "*Generated by pre_release_validation.py*",
-        f"*Vertice-Code v1.0 | {datetime.now().strftime('%Y-%m-%d')}*",
-    ])
+    lines.extend(
+        [
+            "---",
+            "",
+            "*Generated by pre_release_validation.py*",
+            f"*Vertice-Code v1.0 | {datetime.now().strftime('%Y-%m-%d')}*",
+        ]
+    )
 
     return "\n".join(lines)
 
@@ -1014,6 +1071,7 @@ def generate_report(report: ValidationReport) -> str:
 # =============================================================================
 # MAIN RUNNER
 # =============================================================================
+
 
 def run_validation(quick_mode: bool = False, auto_fix: bool = False) -> ValidationReport:
     """Run all validators."""
@@ -1060,7 +1118,9 @@ def run_validation(quick_mode: bool = False, auto_fix: bool = False) -> Validati
     print("\n" + "=" * 60)
     print("VALIDATION COMPLETE")
     print("=" * 60)
-    print(f"Passed: {report.passed_checks} | Failed: {report.failed_checks} | Issues: {report.total_issues}")
+    print(
+        f"Passed: {report.passed_checks} | Failed: {report.failed_checks} | Issues: {report.total_issues}"
+    )
 
     return report
 

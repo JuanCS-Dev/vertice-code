@@ -28,7 +28,11 @@ AGENTS = {
     "testing": ("CLI", "Gere teste para: def add(a,b): return a+b", ["test|def|assert"]),
     "security": ("CLI", "Analise: os.system(input())", ["security|injection|vulnerab"]),
     "documentation": ("CLI", "Documente: class Calc: pass", ["calc|doc|class"]),
-    "performance": ("CLI", "Analise: for i in range(n): for j in range(n): pass", ["loop|O(n|complex"]),
+    "performance": (
+        "CLI",
+        "Analise: for i in range(n): for j in range(n): pass",
+        ["loop|O(n|complex"],
+    ),
     "devops": ("CLI", "Configure CI/CD basico", ["ci|cd|pipeline|docker"]),
     "justica": ("CLI", "Avalie etica de coletar dados sem permissao", ["etica|consent|violacao"]),
     "sofia": ("CLI", "Reflita sobre IA e privacidade", ["ia|privac|reflex"]),
@@ -107,7 +111,9 @@ async def main():
 
         if status == "OK":
             atendidos, total, veredicto = avaliar(output, criterios)
-            emoji = {"EXCELENTE": "🏆", "BOM": "✅", "PARCIAL": "⚠️", "FALHA": "❌"}.get(veredicto, "")
+            emoji = {"EXCELENTE": "🏆", "BOM": "✅", "PARCIAL": "⚠️", "FALHA": "❌"}.get(
+                veredicto, ""
+            )
             print(f"{emoji} {veredicto} ({atendidos}/{total}) [{tempo:.1f}s] [{len(output)}c]")
         elif status == "TIMEOUT":
             veredicto = "TIMEOUT"
@@ -118,15 +124,17 @@ async def main():
             atendidos, total = 0, len(criterios)
             print(f"💀 ERRO: {output[:50]}")
 
-        resultados.append({
-            "agente": agente,
-            "tipo": tipo,
-            "veredicto": veredicto,
-            "score": f"{atendidos}/{total}",
-            "tempo": tempo,
-            "output_len": len(output),
-            "status": status
-        })
+        resultados.append(
+            {
+                "agente": agente,
+                "tipo": tipo,
+                "veredicto": veredicto,
+                "score": f"{atendidos}/{total}",
+                "tempo": tempo,
+                "output_len": len(output),
+                "status": status,
+            }
+        )
 
     # Gerar tabela
     print()
@@ -137,8 +145,17 @@ async def main():
     print("-" * 100)
 
     for r in sorted(resultados, key=lambda x: (x["tipo"], x["agente"])):
-        emoji = {"EXCELENTE": "🏆", "BOM": "✅", "PARCIAL": "⚠️", "FALHA": "❌", "TIMEOUT": "⏱️", "ERRO": "💀"}.get(r["veredicto"], "")
-        print(f"{r['agente']:<22} {r['tipo']:<6} {emoji} {r['veredicto']:<10} {r['score']:<8} {r['tempo']:.1f}s     {r['output_len']}c")
+        emoji = {
+            "EXCELENTE": "🏆",
+            "BOM": "✅",
+            "PARCIAL": "⚠️",
+            "FALHA": "❌",
+            "TIMEOUT": "⏱️",
+            "ERRO": "💀",
+        }.get(r["veredicto"], "")
+        print(
+            f"{r['agente']:<22} {r['tipo']:<6} {emoji} {r['veredicto']:<10} {r['score']:<8} {r['tempo']:.1f}s     {r['output_len']}c"
+        )
 
     print("-" * 100)
 

@@ -8,11 +8,11 @@ def _fuzzy_match(pattern: str, text: str) -> int:
     # Exact prefix → 1000+ points
     if text.startswith(pattern):
         return 1000 + len(pattern)
-    
+
     # Contains → 500+ points
     if pattern in text:
         return 500 + len(pattern)
-    
+
     # Fuzzy (chars in order) → 0-500 points
     # Earlier matches score higher
 ```
@@ -278,8 +278,8 @@ qwen ⚡ › /ref
 
 ---
 
-**Data:** 2025-11-23  
-**Feature:** Fuzzy Command Search  
-**Following:** VSCode UX standards  
+**Data:** 2025-11-23
+**Feature:** Fuzzy Command Search
+**Following:** VSCode UX standards
 
 **Soli Deo Gloria** 🙏

@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 // -----------------------------------------------------------------------------
 
 export const FlashAction = () => (
-  <motion.span 
+  <motion.span
     className="inline-flex items-center justify-center align-middle mx-1 px-1.5 py-0.5 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-[10px] font-bold tracking-wider uppercase select-none"
     initial={{ scale: 0.9, opacity: 0 }}
     animate={{ scale: 1, opacity: 1 }}
@@ -28,7 +28,7 @@ export const FlashAction = () => (
 );
 
 export const BrainProcess = () => (
-  <motion.span 
+  <motion.span
     className="inline-flex items-center justify-center align-middle mx-1 px-1.5 py-0.5 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-400 text-[10px] font-bold tracking-wider uppercase select-none"
     initial={{ scale: 0.9, opacity: 0 }}
     animate={{ scale: 1, opacity: 1 }}
@@ -45,7 +45,7 @@ export const BrainProcess = () => (
 );
 
 export const SearchRadar = () => (
-  <motion.span 
+  <motion.span
     className="inline-flex items-center justify-center align-middle mx-1 px-1.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px] font-bold tracking-wider uppercase select-none"
     initial={{ scale: 0.9, opacity: 0 }}
     animate={{ scale: 1, opacity: 1 }}
@@ -62,7 +62,7 @@ export const SearchRadar = () => (
 );
 
 export const SecurityShield = () => (
-  <motion.span 
+  <motion.span
     className="inline-flex items-center justify-center align-middle mx-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold tracking-wider uppercase select-none"
     initial={{ scale: 0.9, opacity: 0 }}
     animate={{ scale: 1, opacity: 1 }}
@@ -73,7 +73,7 @@ export const SecurityShield = () => (
 );
 
 export const SaveDisk = () => (
-  <motion.span 
+  <motion.span
     className="inline-flex items-center justify-center align-middle mx-1 px-1.5 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold tracking-wider uppercase select-none"
     initial={{ scale: 0.9, opacity: 0 }}
     animate={{ scale: 1, opacity: 1 }}
@@ -89,7 +89,7 @@ export const SaveDisk = () => (
 );
 
 export const WarningAlert = () => (
-  <motion.span 
+  <motion.span
     className="inline-flex items-center justify-center align-middle mx-1 px-1.5 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] font-bold tracking-wider uppercase select-none"
     initial={{ scale: 0.9, opacity: 0 }}
     animate={{ scale: 1, opacity: 1 }}
@@ -106,7 +106,7 @@ export const WarningAlert = () => (
 );
 
 export const SuccessCheck = () => (
-  <motion.span 
+  <motion.span
     className="inline-flex items-center justify-center align-middle mx-1 px-1.5 py-0.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold tracking-wider uppercase select-none"
     initial={{ scale: 0.9, opacity: 0 }}
     animate={{ scale: 1, opacity: 1 }}
@@ -124,7 +124,7 @@ export const SuccessCheck = () => (
 );
 
 export const TerminalCommand = () => (
-  <motion.span 
+  <motion.span
     className="inline-flex items-center justify-center align-middle mx-1 px-1.5 py-0.5 rounded-full bg-zinc-700/50 border border-zinc-600 text-zinc-300 text-[10px] font-mono tracking-tight select-none"
     initial={{ scale: 0.9, opacity: 0 }}
     animate={{ scale: 1, opacity: 1 }}

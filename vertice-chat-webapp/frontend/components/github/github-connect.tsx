@@ -40,10 +40,10 @@ export function GitHubConnect() {
       {!isConnected ? (
         <div className="space-y-4">
           <p className="text-xs text-zinc-400 leading-relaxed font-mono">
-            Enable Vertice to manifest changes directly into your repositories. 
+            Enable Vertice to manifest changes directly into your repositories.
             Required for Auto-Review and Pull Request automation.
           </p>
-          <Button 
+          <Button
             onClick={handleConnect}
             disabled={isConnecting}
             className="w-full bg-white hover:bg-zinc-200 text-black font-bold h-11"
@@ -76,8 +76,8 @@ export function GitHubConnect() {
                     </div>
                 </div>
             </div>
-            <Button 
-                variant="outline" 
+            <Button
+                variant="outline"
                 className="w-full h-11 border-white/10 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 text-zinc-500 transition-all font-mono text-xs"
                 onClick={() => setIsConnected(false)}
             >

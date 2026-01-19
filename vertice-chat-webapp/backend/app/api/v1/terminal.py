@@ -137,7 +137,7 @@ async def terminal_websocket(websocket: WebSocket):
         logger.error(f"Terminal WebSocket error: {e}")
         try:
             await websocket.send_json({"type": "error", "data": f"WebSocket error: {str(e)}"})
-        except:
+        except Exception:
             pass  # Connection might be closed
 
 

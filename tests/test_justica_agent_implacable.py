@@ -931,6 +931,7 @@ class TestErrorHandling:
     @pytest.mark.asyncio
     async def test_json_serialization_error(self, justica_agent):
         """TEST 057: Erro de serialização JSON no audit log."""
+
         # Send non-serializable context
         class NonSerializable:
             pass
@@ -954,7 +955,7 @@ class TestErrorHandling:
 
         # Set timeout
         try:
-            verdict = await asyncio.wait_for(
+            await asyncio.wait_for(
                 agent.evaluate_action(
                     agent_id="executor",
                     action_type="bash_exec",
@@ -1020,7 +1021,7 @@ class TestSecurity:
         verdict = await justica_agent.evaluate_action(
             agent_id="executor",
             action_type="bash_exec",
-            content="eval('__import__(\"os\").system(\"rm -rf /\")')",
+            content='eval(\'__import__("os").system("rm -rf /")\')',
         )
         assert verdict is not None
 
@@ -1460,7 +1461,7 @@ class TestIntegration:
     @pytest.mark.asyncio
     async def test_audit_log_persistence(self, mock_llm_client, mock_mcp_client, tmp_path):
         """TEST 095: Persistência do audit log em arquivo."""
-        log_file = tmp_path / "audit.jsonl"
+        tmp_path / "audit.jsonl"
         agent = JusticaIntegratedAgent(
             llm_client=mock_llm_client,
             mcp_client=mock_mcp_client,

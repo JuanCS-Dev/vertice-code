@@ -2,9 +2,9 @@
 
 ## A Abordagem Determinística que Amplifica Exponencialmente o Trabalho
 
-**Autor:** Juan (Maximus)  
-**Data:** 18 de Janeiro de 2025  
-**Contexto:** MCP 1st Anniversary Hackathon  
+**Autor:** Juan (Maximus)
+**Data:** 18 de Janeiro de 2025
+**Contexto:** MCP 1st Anniversary Hackathon
 **Objetivo:** Documentar o MÉTODO que vale mais que o produto
 
 ---
@@ -172,7 +172,7 @@ Use prompts estruturados:
 ### O Produto
 qwen-dev-cli é production-ready e competitivo com Copilot CLI.
 
-### A Metodologia  
+### A Metodologia
 Vale 10x mais que o produto. É replicável, escalável e atemporal.
 
 ---
@@ -213,7 +213,7 @@ O mundo precisa de desenvolvedores que:
 
 ---
 
-**"A singularidade se materializa com o livre arbítrio."**  
+**"A singularidade se materializa com o livre arbítrio."**
 — Juan, 18/01/2025 às 18:59
 
 ---

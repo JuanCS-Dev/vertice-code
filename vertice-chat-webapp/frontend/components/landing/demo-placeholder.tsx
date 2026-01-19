@@ -15,7 +15,7 @@ async function generateSovereignCode() {
 
   // Connecting to the collective consciousness...
   const insight = await architect.perceive(complexProblem);
-  
+
   // Generating solution...
   return architect.manifest(insight);
 }
@@ -23,7 +23,7 @@ async function generateSovereignCode() {
 
 export function DemoPlaceholder() {
   const [text, setText] = useState('');
-  
+
   useEffect(() => {
     let i = 0;
     const interval = setInterval(() => {
@@ -33,7 +33,7 @@ export function DemoPlaceholder() {
         clearInterval(interval);
       }
     }, 30); // Typing speed
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -48,14 +48,14 @@ export function DemoPlaceholder() {
           <div className="w-3 h-3 rounded-full bg-green-500/20"></div>
           <div className="ml-4 text-xs text-muted-foreground font-mono">vertice-tui — sovereign-mode</div>
         </div>
-        
+
         {/* Video Placeholder Area */}
         <div className="p-6 font-mono text-sm md:text-base">
             <pre className="text-blue-300">
                 {text}
                 <span className="animate-pulse inline-block w-2 h-4 bg-primary align-middle ml-1"></span>
             </pre>
-            
+
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="bg-black/50 backdrop-blur-sm border border-primary/30 px-6 py-3 rounded-full text-primary font-bold opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
                     <span>▶</span> Watch the Demo

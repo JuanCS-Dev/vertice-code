@@ -9,6 +9,7 @@ Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 
 from __future__ import annotations
 
+import asyncio
 import os
 import time
 from typing import TYPE_CHECKING
@@ -26,6 +27,7 @@ from rich import box
 from vertice_tui.constants import BANNER
 from vertice_tui.widgets.selectable import SelectableStatic
 from vertice_tui.core.formatting import OutputFormatter, Colors, Icons
+from vertice_tui.core.streaming.soft_buffer import SoftBuffer
 
 if TYPE_CHECKING:
     from textual.widgets._markdown import MarkdownStream
@@ -112,6 +114,12 @@ class ResponseView(VerticalScroll):
         self._thinking_widget: Static | None = None
         self._use_textual_markdown_stream: bool = True
         self._max_view_items = self._get_max_view_items()
+        self._pending_stream_chunks: list[str] = []
+        self._soft_buffer = SoftBuffer()
+        self._flush_timer = None
+        self._flush_lock = asyncio.Lock()
+        self._flush_scheduled = False
+        self._stream_flush_interval_s = self._get_stream_flush_interval_s()
 
     def _get_max_view_items(self) -> int:
         """
@@ -123,6 +131,43 @@ class ResponseView(VerticalScroll):
             return int(os.getenv("VERTICE_TUI_MAX_VIEW_ITEMS", "300"))
         except ValueError:
             return 300
+
+    def _get_stream_flush_interval_s(self) -> float:
+        """
+        Flush cadence for streaming updates.
+
+        Goal: reduce layout thrash (many tiny writes) while keeping perceived latency low.
+        """
+        try:
+            ms = int(os.getenv("VERTICE_TUI_STREAM_FLUSH_MS", "33"))
+            return max(ms, 5) / 1000.0
+        except ValueError:
+            return 0.033
+
+    def _ensure_flush_timer(self) -> None:
+        if self._flush_timer is not None:
+            return
+        self._flush_timer = self.set_interval(self._stream_flush_interval_s, self._flush_tick)
+
+    def _schedule_flush(self) -> None:
+        if self._flush_scheduled or self._flush_lock.locked():
+            return
+        self._flush_scheduled = True
+        self.call_later(self._flush_pending_stream_async)
+
+    def _stop_flush_timer(self) -> None:
+        if self._flush_timer is None:
+            return
+        try:
+            self._flush_timer.stop()
+        finally:
+            self._flush_timer = None
+
+    def _flush_tick(self) -> None:
+        """Timer tick: schedule async flush if needed (keeps tick handler sync)."""
+        if not self._pending_stream_chunks:
+            return
+        self._schedule_flush()
 
     def _trim_view_items(self) -> None:
         """Trim old widgets to keep the view responsive in long sessions."""
@@ -198,6 +243,9 @@ class ResponseView(VerticalScroll):
             self._thinking_widget.remove()
             self._thinking_widget = None
 
+        self._stop_flush_timer()
+        await self._flush_pending_stream_async(final=True)
+
         # Flush any pending markdown fragments.
         if self._markdown_stream is not None:
             try:
@@ -210,22 +258,23 @@ class ResponseView(VerticalScroll):
         # Reset for next response
         self.current_response = ""
         self._response_widget = None
+        self._pending_stream_chunks.clear()
+        self._soft_buffer = SoftBuffer()
 
     async def append_chunk(self, chunk: str) -> None:
-        """Append streaming chunk. Optimized for smooth, incremental markdown updates."""
-        self.current_response += chunk
+        """Append streaming chunk (buffers + coalesces flushes for smooth rendering)."""
+        self._pending_stream_chunks.append(chunk)
+        self._ensure_flush_timer()
 
         if self._response_widget:
             if self._use_textual_markdown_stream and isinstance(
                 self._response_widget, TextualMarkdown
             ):
-                if self._markdown_stream is not None:
-                    await self._markdown_stream.write(chunk)
-                else:
+                if self._markdown_stream is None:
                     self._markdown_stream = TextualMarkdown.get_stream(self._response_widget)
-                    await self._markdown_stream.write(chunk)
             else:
-                self._response_widget.update(self.current_response)
+                # Non-streaming mode: flush will update the widget.
+                pass
         else:
             # Create new widget (first chunk)
             if self._thinking_widget:
@@ -237,22 +286,53 @@ class ResponseView(VerticalScroll):
                 self.mount(self._response_widget)
                 self._trim_view_items()
                 self._markdown_stream = TextualMarkdown.get_stream(self._response_widget)
-                await self._markdown_stream.write(chunk)
             else:
-                self._response_widget = SelectableStatic(
-                    self.current_response, classes="ai-response"
-                )
+                self._response_widget = SelectableStatic("", classes="ai-response")
                 self.mount(self._response_widget)
                 self._trim_view_items()
+            # First token latency: flush as soon as possible, then keep cadence via timer.
+            self._schedule_flush()
 
-        # Throttled scroll (max 20fps = 50ms) to prevent layout thrashing
-        current_time = time.time()
-        if not hasattr(self, "_last_scroll_time"):
-            self._last_scroll_time = 0.0
+    async def _flush_pending_stream_async(self, final: bool = False) -> None:
+        """
+        Flush pending chunks to the UI.
 
-        if current_time - self._last_scroll_time >= 0.05:
-            self.scroll_end(animate=False)
-            self._last_scroll_time = current_time
+        This coalesces many tiny deltas into fewer markdown stream writes to reduce
+        render/layout overhead while streaming.
+        """
+        self._flush_scheduled = False
+        async with self._flush_lock:
+            pending = "".join(self._pending_stream_chunks)
+            self._pending_stream_chunks.clear()
+
+            safe = self._soft_buffer.feed(pending) if pending else ""
+            if final:
+                safe += self._soft_buffer.flush()
+
+            if not safe:
+                return
+
+            if self._response_widget is None:
+                return
+
+            if (
+                self._use_textual_markdown_stream
+                and isinstance(self._response_widget, TextualMarkdown)
+                and self._markdown_stream is not None
+            ):
+                await self._markdown_stream.write(safe)
+            else:
+                self.current_response += safe
+                self._response_widget.update(self.current_response)
+
+            # Throttled scroll (max 20fps = 50ms) to prevent layout thrashing
+            current_time = time.time()
+            if not hasattr(self, "_last_scroll_time"):
+                self._last_scroll_time = 0.0
+
+            if current_time - self._last_scroll_time >= 0.05:
+                self.scroll_end(animate=False)
+                self._last_scroll_time = current_time
 
     async def handle_open_responses_event(self, event) -> None:
         """
@@ -282,6 +362,8 @@ class ResponseView(VerticalScroll):
             self.start_thinking()
             self.current_response = ""
             self._markdown_stream = None
+            self._pending_stream_chunks.clear()
+            self._soft_buffer = SoftBuffer()
             return
 
         match event:

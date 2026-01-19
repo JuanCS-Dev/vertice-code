@@ -10,11 +10,12 @@ from unittest.mock import Mock, AsyncMock
 
 from vertice_cli.core.conversation import ConversationManager, ConversationState
 from vertice_cli.core.recovery import (
-    ErrorRecoveryEngine, ErrorCategory, RecoveryContext, RecoveryStrategy
+    ErrorRecoveryEngine,
+    ErrorCategory,
+    RecoveryContext,
+    RecoveryStrategy,
 )
-from vertice_cli.core.workflow import (
-    WorkflowStep, DependencyGraph, AutoCritique, ThoughtPath
-)
+from vertice_cli.core.workflow import WorkflowStep, DependencyGraph, AutoCritique, ThoughtPath
 
 
 class TestMultiTurnConversation:
@@ -22,10 +23,7 @@ class TestMultiTurnConversation:
 
     def test_scenario_1_context_preservation(self):
         """✓ Scenario 1: Context preserved across 3 turns."""
-        manager = ConversationManager(
-            session_id="test_context",
-            max_context_tokens=4000
-        )
+        manager = ConversationManager(session_id="test_context", max_context_tokens=4000)
 
         # Turn 1
         turn1 = manager.start_turn("Create fibonacci function")
@@ -44,7 +42,7 @@ class TestMultiTurnConversation:
         manager.transition_state(ConversationState.IDLE, "done")
 
         # Turn 3
-        turn3 = manager.start_turn("Add tests")
+        manager.start_turn("Add tests")
         context = manager.get_context_for_llm(include_last_n=3)
 
         # SUCCESS CRITERIA
@@ -57,23 +55,22 @@ class TestMultiTurnConversation:
         """✓ Scenario 2: Context compaction trigger."""
         manager = ConversationManager(
             session_id="test_compaction",
-            max_context_tokens=200  # Small for testing
+            max_context_tokens=200,  # Small for testing
         )
 
         # Add many turns
         for i in range(20):
             turn = manager.start_turn(f"Query {i} with some long text to fill context")
             manager.add_llm_response(
-                turn,
-                f"Response {i} with additional text to increase token count",
-                tokens_used=15
+                turn, f"Response {i} with additional text to increase token count", tokens_used=15
             )
             manager.transition_state(ConversationState.IDLE, "done")
 
         # SUCCESS CRITERIA
         assert len(manager.turns) < 20, f"Expected compaction, got {len(manager.turns)} turns"
-        assert manager.context_window.get_usage_percentage() < 0.8, \
-            f"Usage {manager.context_window.get_usage_percentage():.0%} should be < 80%"
+        assert (
+            manager.context_window.get_usage_percentage() < 0.8
+        ), f"Usage {manager.context_window.get_usage_percentage():.0%} should be < 80%"
 
         print(f"✓ PASS: Context compacted from 20 to {len(manager.turns)} turns")
         print(f"  Usage: {manager.context_window.get_usage_percentage():.0%}")
@@ -86,11 +83,13 @@ class TestErrorRecovery:
     async def test_scenario_3_file_not_found(self):
         """✓ Scenario 3: File not found recovery."""
         llm = Mock()
-        llm.generate_async = AsyncMock(return_value={
-            "content": """DIAGNOSIS: File does not exist
+        llm.generate_async = AsyncMock(
+            return_value={
+                "content": """DIAGNOSIS: File does not exist
 CORRECTION: Search for similar files
 TOOL_CALL: {"tool": "search_files", "args": {"pattern": "*missing*"}}"""
-        })
+            }
+        )
 
         engine = ErrorRecoveryEngine(llm_client=llm, max_attempts=2)
 
@@ -108,15 +107,16 @@ TOOL_CALL: {"tool": "search_files", "args": {"pattern": "*missing*"}}"""
             failed_args={"path": "missing.txt"},
             previous_result=None,
             user_intent="Read file",
-            previous_commands=[]
+            previous_commands=[],
         )
 
         result = await engine.attempt_recovery(context)
 
         # SUCCESS CRITERIA
         assert result.success, "Recovery should provide correction"
-        assert result.corrected_tool == "search_files", \
-            f"Expected search_files, got {result.corrected_tool}"
+        assert (
+            result.corrected_tool == "search_files"
+        ), f"Expected search_files, got {result.corrected_tool}"
 
         print("✓ PASS: File not found recovery succeeded")
         print(f"  Category: {category.value}")
@@ -140,14 +140,15 @@ TOOL_CALL: {"tool": "search_files", "args": {"pattern": "*missing*"}}"""
             failed_args={"path": "/root/protected.txt"},
             previous_result=None,
             user_intent="Delete file",
-            previous_commands=[]
+            previous_commands=[],
         )
 
         strategy = engine.determine_strategy(category, context)
 
         # SUCCESS CRITERIA
-        assert strategy == RecoveryStrategy.SUGGEST_PERMISSION, \
-            f"Expected SUGGEST_PERMISSION, got {strategy}"
+        assert (
+            strategy == RecoveryStrategy.SUGGEST_PERMISSION
+        ), f"Expected SUGGEST_PERMISSION, got {strategy}"
 
         print("✓ PASS: Permission error correctly categorized")
         print(f"  Strategy: {strategy.value}")
@@ -162,8 +163,12 @@ class TestWorkflowOrchestration:
 
         step1 = WorkflowStep("read_app", "read_file", {"path": "app.py"})
         step2 = WorkflowStep("edit_app", "edit_file", {"path": "app.py"}, dependencies=["read_app"])
-        step3 = WorkflowStep("read_test", "read_file", {"path": "test.py"}, dependencies=["edit_app"])
-        step4 = WorkflowStep("edit_test", "edit_file", {"path": "test.py"}, dependencies=["read_test"])
+        step3 = WorkflowStep(
+            "read_test", "read_file", {"path": "test.py"}, dependencies=["edit_app"]
+        )
+        step4 = WorkflowStep(
+            "edit_test", "edit_file", {"path": "test.py"}, dependencies=["read_test"]
+        )
 
         graph.add_step(step1)
         graph.add_step(step2)
@@ -272,8 +277,9 @@ class TestConstitutionalCompliance:
         """✓ LEI < 1.0 threshold."""
         critique_system = AutoCritique()
 
-        assert critique_system.lei_threshold == 1.0, \
-            f"Expected 1.0, got {critique_system.lei_threshold}"
+        assert (
+            critique_system.lei_threshold == 1.0
+        ), f"Expected 1.0, got {critique_system.lei_threshold}"
 
         print("✓ PASS: LEI < 1.0 threshold enforced")
 
@@ -295,8 +301,7 @@ class TestConstitutionalCompliance:
         score = path.calculate_score()
         expected = 0.8 * 0.4 + 0.6 * 0.3 + 0.4 * 0.3  # 0.62
 
-        assert abs(score - expected) < 0.01, \
-            f"Score {score} != expected {expected}"
+        assert abs(score - expected) < 0.01, f"Score {score} != expected {expected}"
 
         print("✓ PASS: Constitutional weights (0.4, 0.3, 0.3) correct")
 
@@ -310,7 +315,7 @@ class TestPerformance:
 
         # Add 100 steps with dependencies
         for i in range(100):
-            deps = [f"step{j}" for j in range(max(0, i-3), i)]
+            deps = [f"step{j}" for j in range(max(0, i - 3), i)]
             step = WorkflowStep(f"step{i}", "tool", {}, dependencies=deps)
             graph.add_step(step)
 
@@ -328,9 +333,9 @@ class TestPerformance:
 # Summary function
 def print_summary():
     """Print validation summary."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("SCIENTIFIC VALIDATION SUMMARY")
-    print("="*60)
+    print("=" * 60)
     print("\nPhase 2.3: Multi-Turn Conversation")
     print("  ✓ Context preservation")
     print("  ✓ Context compaction")
@@ -347,9 +352,9 @@ def print_summary():
     print("  ✓ Scoring weights (0.4, 0.3, 0.3)")
     print("\nPerformance")
     print("  ✓ Topological sort < 100ms")
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("ALL VALIDATIONS PASSED! ✅")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
 
 if __name__ == "__main__":

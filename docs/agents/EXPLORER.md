@@ -1,9 +1,9 @@
 # 🔍 ExplorerAgent: The Context Navigator
 
-**Role:** Smart Context Gatherer with Token Budget Awareness  
-**Personality:** Meticulous librarian who hates waste  
-**Capabilities:** `READ_ONLY` + smart search (grep, find)  
-**Output:** Relevant context map (token-optimized)  
+**Role:** Smart Context Gatherer with Token Budget Awareness
+**Personality:** Meticulous librarian who hates waste
+**Capabilities:** `READ_ONLY` + smart search (grep, find)
+**Output:** Relevant context map (token-optimized)
 **Position:** Second gate in DevSquad workflow (after Architect)
 
 ---
@@ -295,24 +295,24 @@ EXPLORER_CONFIG = {
 
 ### Problem: Explorer finds too many files
 
-**Cause:** Keywords too broad (e.g., "user")  
+**Cause:** Keywords too broad (e.g., "user")
 **Solution:** Be more specific in request ("user authentication" not just "user")
 
 ### Problem: Explorer misses relevant files
 
-**Cause:** File doesn't match keywords  
-**Solution:** 
+**Cause:** File doesn't match keywords
+**Solution:**
 - Add context with file paths: `context={"hint_files": ["app/custom_auth.py"]}`
 - Use broader keywords
 
 ### Problem: Over budget even with few files
 
-**Cause:** Large files (1000+ LOC)  
+**Cause:** Large files (1000+ LOC)
 **Solution:** Decrease `max_lines_per_file` to 100-150
 
 ### Problem: Dependencies not detected
 
-**Cause:** Non-standard import format  
+**Cause:** Non-standard import format
 **Solution:** Manually specify in context: `context={"known_dependencies": ["mylib"]}`
 
 ---
@@ -331,9 +331,9 @@ async def test_explorer_finds_relevant_files(mock_llm, mock_mcp):
         request="Find API routes",
         context={"token_budget": 10000, "max_files": 10}
     )
-    
+
     response = await explorer.execute(task)
-    
+
     assert response.success is True
     assert len(response.data["relevant_files"]) <= 10
     assert response.data["token_usage"]["within_budget"] is True
@@ -345,9 +345,9 @@ async def test_explorer_respects_token_budget(mock_llm, mock_mcp):
         request="Find all Python files",  # Intentionally broad
         context={"token_budget": 5000, "max_files": 5}
     )
-    
+
     response = await explorer.execute(task)
-    
+
     assert response.data["token_usage"]["estimated"] <= 5000
     assert len(response.data["relevant_files"]) <= 5
 ```
@@ -451,7 +451,7 @@ print(f"Files found: {len(explorer_context['relevant_files'])}")
 
 ---
 
-**Version:** 1.0.0  
-**Last Updated:** 2025-11-22  
-**Status:** Production-ready ✅  
+**Version:** 1.0.0
+**Last Updated:** 2025-11-22
+**Status:** Production-ready ✅
 **Grade:** A+ (Boris Cherny approved)

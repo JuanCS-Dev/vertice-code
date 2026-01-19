@@ -21,4 +21,3 @@ _internal_defaults_do_not_set:
   sidecarInjectorWebhook:
     # This enables injection of sidecar in all namespaces,
     enableNamespacesByDefault: false
-

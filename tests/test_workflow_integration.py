@@ -52,24 +52,21 @@ class TestWorkflowIntegration:
 
         # Mock tools
         mock_tool = AsyncMock()
-        mock_tool.execute = AsyncMock(return_value=ToolResult(
-            success=True,
-            data="Success"
-        ))
+        mock_tool.execute = AsyncMock(return_value=ToolResult(success=True, data="Success"))
         shell.registry.get = Mock(return_value=mock_tool)
 
         # Mock conversation tracking
         shell.conversation.add_tool_result = Mock()
 
         # Mock _execute_with_recovery (with proper metadata for read_file)
-        shell._execute_with_recovery = AsyncMock(return_value=ToolResult(
-            success=True,
-            data="Success",
-            metadata={'path': 'test.py', 'lines': 10}
-        ))
+        shell._execute_with_recovery = AsyncMock(
+            return_value=ToolResult(
+                success=True, data="Success", metadata={"path": "test.py", "lines": 10}
+            )
+        )
 
         # Execute
-        result = await shell._execute_tool_calls(tool_calls, turn=1)
+        await shell._execute_tool_calls(tool_calls, turn=1)
 
         # Verify: Workflow.start_workflow should have been called (2 tools)
         shell.workflow_viz.start_workflow.assert_called_once()
@@ -95,20 +92,20 @@ class TestWorkflowIntegration:
         shell.conversation.add_tool_result = Mock()
 
         # Mock recovery (should fail)
-        shell._execute_with_recovery = AsyncMock(return_value=ToolResult(
-            success=False,
-            error="File not found"
-        ))
+        shell._execute_with_recovery = AsyncMock(
+            return_value=ToolResult(success=False, error="File not found")
+        )
 
         # Execute
-        result = await shell._execute_tool_calls(tool_calls, turn=1)
+        await shell._execute_tool_calls(tool_calls, turn=1)
 
         # Verify: Step added
         shell.workflow_viz.add_step.assert_called_once()
 
         # Verify: Step marked as FAILED (called with StepStatus.FAILED)
         failed_calls = [
-            call for call in shell.workflow_viz.update_step_status.call_args_list
+            call
+            for call in shell.workflow_viz.update_step_status.call_args_list
             if StepStatus.FAILED in call[0]
         ]
         assert len(failed_calls) >= 1
@@ -128,10 +125,9 @@ class TestWorkflowIntegration:
         shell.conversation.add_tool_result = Mock()
 
         # Mock recovery - track args passed
-        shell._execute_with_recovery = AsyncMock(return_value=ToolResult(
-            success=True,
-            data="Written"
-        ))
+        shell._execute_with_recovery = AsyncMock(
+            return_value=ToolResult(success=True, data="Written")
+        )
 
         # Execute
         await shell._execute_tool_calls(tool_calls, turn=1)
@@ -143,10 +139,10 @@ class TestWorkflowIntegration:
         call_args = shell._execute_with_recovery.call_args[0]  # positional args
         args_dict = call_args[2]  # 3rd positional arg is args dict
 
-        assert 'console' in args_dict, "console not passed to tool"
-        assert args_dict['console'] == shell.console
-        assert 'preview' in args_dict, "preview not passed to tool"
-        assert args_dict['preview'] is True
+        assert "console" in args_dict, "console not passed to tool"
+        assert args_dict["console"] == shell.console
+        assert "preview" in args_dict, "preview not passed to tool"
+        assert args_dict["preview"] is True
 
 
 class TestPreviewCommands:
@@ -213,15 +209,13 @@ class TestPreviewCommands:
         shell.registry.get = Mock(return_value=mock_tool)
         shell.conversation = Mock()
         shell.conversation.add_tool_result = Mock()
-        shell._execute_with_recovery = AsyncMock(return_value=ToolResult(
-            success=True, data="OK"
-        ))
+        shell._execute_with_recovery = AsyncMock(return_value=ToolResult(success=True, data="OK"))
 
         await shell._execute_tool_calls(tool_calls, turn=1)
 
         # Verify: preview=False was passed
         call_args = shell._execute_with_recovery.call_args[0][2]
-        assert call_args['preview'] is False
+        assert call_args["preview"] is False
 
 
 class TestSessionContext:
@@ -231,7 +225,7 @@ class TestSessionContext:
         """Test that SessionContext initializes with preview_enabled=True."""
         context = SessionContext()
 
-        assert hasattr(context, 'preview_enabled')
+        assert hasattr(context, "preview_enabled")
         assert context.preview_enabled is True
 
 

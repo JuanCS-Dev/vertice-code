@@ -8,6 +8,7 @@ import asyncio
 from pathlib import Path
 import tempfile
 
+
 async def test_lsp_features():
     """Test LSP features."""
     print("🧪 Testing LSP features...")
@@ -24,30 +25,34 @@ async def test_lsp_features():
 
     # Test language detection
     from vertice_cli.intelligence.lsp_client import Language
+
     lang = Language.detect(test_file)
     print(f"✅ Language detected: {lang.value}")
 
     # Test LSP client initialization
     from vertice_cli.intelligence.lsp_client import LSPClient
+
     client = LSPClient(root_path=Path.cwd())
     print(f"✅ LSP client created for language: {client.language.value}")
 
     return True
+
 
 async def test_refactoring():
     """Test refactoring engine."""
     print("\n🧪 Testing refactoring engine...")
 
     from vertice_cli.refactoring.engine import RefactoringEngine
+
     engine = RefactoringEngine(project_root=Path.cwd())
 
     # Create temp file for testing
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-        test_code = '''def old_name():
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
+        test_code = """def old_name():
     return "test"
 
 result = old_name()
-'''
+"""
         f.write(test_code)
         temp_path = Path(f.name)
 
@@ -68,6 +73,7 @@ result = old_name()
             return False
     finally:
         temp_path.unlink()
+
 
 async def test_context_suggestions():
     """Test context suggestions."""
@@ -91,6 +97,7 @@ async def test_context_suggestions():
         print(f"❌ Test file not found: {test_file}")
         return False
 
+
 async def test_indexer():
     """Test semantic indexer."""
     print("\n🧪 Testing semantic indexer...")
@@ -107,6 +114,7 @@ async def test_indexer():
         print(f"   - {result.name} ({result.type})")
 
     return len(results) > 0
+
 
 async def test_consolidated_context():
     """Test consolidated context manager."""
@@ -132,6 +140,7 @@ async def test_consolidated_context():
     else:
         print(f"❌ Expected 2 items, got {len(context)}")
         return False
+
 
 async def main():
     """Run all dogfooding tests."""
@@ -168,7 +177,7 @@ async def main():
         status = "✅ PASS" if result else "❌ FAIL"
         print(f"{status} - {name}")
 
-    pct = passed/total*100
+    pct = passed / total * 100
     print(f"\nTotal: {passed}/{total} ({pct:.0f}%)")
 
     if passed == total:
@@ -177,6 +186,7 @@ async def main():
         print(f"\n⚠️ {total-passed} features need attention")
 
     return passed == total
+
 
 if __name__ == "__main__":
     success = asyncio.run(main())

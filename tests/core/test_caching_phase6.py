@@ -173,6 +173,7 @@ class TestSemanticCache:
     @pytest.mark.asyncio
     async def test_semantic_similarity(self) -> None:
         """Finds semantically similar queries."""
+
         # Use custom embedding that returns same vector for similar queries
         async def mock_embed(text: str) -> List[float]:
             if "python" in text.lower():
@@ -192,6 +193,7 @@ class TestSemanticCache:
     @pytest.mark.asyncio
     async def test_semantic_miss_low_similarity(self) -> None:
         """Misses when similarity too low."""
+
         async def mock_embed(text: str) -> List[float]:
             if "python" in text.lower():
                 return [1.0, 0.0, 0.0] * 11

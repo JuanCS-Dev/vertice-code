@@ -36,143 +36,139 @@ TEST_SCENARIOS = [
     {
         "category": "Tool Factory",
         "name": "Mandelbrot Generator",
-        "prompt": "Write a Python script to generate a Mandelbrot fractal using only stdlib. Output the first 10 characters of the result."
+        "prompt": "Write a Python script to generate a Mandelbrot fractal using only stdlib. Output the first 10 characters of the result.",
     },
     {
         "category": "Tool Factory",
         "name": "CSV Analyzer",
-        "prompt": "Create a Python function to calculate mean and std deviation of a list of numbers. Test with [10, 20, 30, 40, 50]."
+        "prompt": "Create a Python function to calculate mean and std deviation of a list of numbers. Test with [10, 20, 30, 40, 50].",
     },
     {
         "category": "Sandbox",
         "name": "Prime Sieve",
-        "prompt": "Implement Sieve of Eratosthenes to find primes up to 100. How many primes are there?"
+        "prompt": "Implement Sieve of Eratosthenes to find primes up to 100. How many primes are there?",
     },
     {
         "category": "Tool Factory",
         "name": "JSON Validator",
-        "prompt": "Create a function to validate if a string is valid JSON. Test with '{\"name\": \"test\"}' and 'invalid{'."
+        "prompt": "Create a function to validate if a string is valid JSON. Test with '{\"name\": \"test\"}' and 'invalid{'.",
     },
     {
         "category": "Sandbox",
         "name": "Binary Search",
-        "prompt": "Implement binary search in Python. Search for 7 in [1,3,5,7,9,11]. Return the index."
+        "prompt": "Implement binary search in Python. Search for 7 in [1,3,5,7,9,11]. Return the index.",
     },
-
     # =========================================================================
     # 🌍 CATEGORIA 2: World Model & Reasoning (Simulação Complexa)
     # =========================================================================
     {
         "category": "World Model",
         "name": "Disaster Recovery",
-        "prompt": "Plan a 3-step database recovery strategy for a crashed production server. Be concise."
+        "prompt": "Plan a 3-step database recovery strategy for a crashed production server. Be concise.",
     },
     {
         "category": "World Model",
         "name": "Security Analysis",
-        "prompt": "What are the top 2 security risks for a REST API? Suggest mitigations in one sentence each."
+        "prompt": "What are the top 2 security risks for a REST API? Suggest mitigations in one sentence each.",
     },
     {
         "category": "Reasoning",
         "name": "Algorithm Compare",
-        "prompt": "Compare QuickSort vs MergeSort in 2 sentences. Which is better for large datasets?"
+        "prompt": "Compare QuickSort vs MergeSort in 2 sentences. Which is better for large datasets?",
     },
     {
         "category": "World Model",
         "name": "Architecture Design",
-        "prompt": "Design a simple microservice for user authentication. List 3 components needed."
+        "prompt": "Design a simple microservice for user authentication. List 3 components needed.",
     },
     {
         "category": "Reasoning",
         "name": "SQL vs NoSQL",
-        "prompt": "When should you use NoSQL over SQL? Give 2 specific use cases."
+        "prompt": "When should you use NoSQL over SQL? Give 2 specific use cases.",
     },
-
     # =========================================================================
     # 🧠 CATEGORIA 3: Memory & Reflection (Contexto e Auto-Análise)
     # =========================================================================
     {
         "category": "Memory",
         "name": "Quantum Basics",
-        "prompt": "Explain quantum entanglement in 2 sentences for a programmer."
+        "prompt": "Explain quantum entanglement in 2 sentences for a programmer.",
     },
     {
         "category": "Reflection",
         "name": "Self-Analysis",
-        "prompt": "As PROMETHEUS, what is your main capability? Answer in one sentence."
+        "prompt": "As PROMETHEUS, what is your main capability? Answer in one sentence.",
     },
     {
         "category": "Memory",
         "name": "Store Fact",
-        "prompt": "Remember: PROMETHEUS version is 1.0.0. Now tell me what version you are."
+        "prompt": "Remember: PROMETHEUS version is 1.0.0. Now tell me what version you are.",
     },
     {
         "category": "Reflection",
         "name": "Code Review",
-        "prompt": "Review this code: 'def fib(n): return fib(n-1)+fib(n-2) if n>1 else n'. What's the main issue?"
+        "prompt": "Review this code: 'def fib(n): return fib(n-1)+fib(n-2) if n>1 else n'. What's the main issue?",
     },
     {
         "category": "Memory",
         "name": "Pattern Recognition",
-        "prompt": "What pattern do you see in: 2, 4, 8, 16, 32? What comes next?"
+        "prompt": "What pattern do you see in: 2, 4, 8, 16, 32? What comes next?",
     },
-
     # =========================================================================
     # ⚡ CATEGORIA 4: Evolution & Benchmarking (Auto-Melhoria)
     # =========================================================================
     {
         "category": "Evolution",
         "name": "Self-Challenge",
-        "prompt": "Generate a simple coding challenge about string manipulation. Then solve it."
+        "prompt": "Generate a simple coding challenge about string manipulation. Then solve it.",
     },
     {
         "category": "Benchmark",
         "name": "Math Problem",
-        "prompt": "Two trains are 300km apart. One goes 60km/h, other 90km/h toward each other. When do they meet?"
+        "prompt": "Two trains are 300km apart. One goes 60km/h, other 90km/h toward each other. When do they meet?",
     },
     {
         "category": "Evolution",
         "name": "Tool Design",
-        "prompt": "Design a simple calculator tool interface. What 4 functions would it have?"
+        "prompt": "Design a simple calculator tool interface. What 4 functions would it have?",
     },
     {
         "category": "Benchmark",
         "name": "Logic Puzzle",
-        "prompt": "I have 3 boxes labeled wrong. How many boxes do I need to open to fix all labels? Explain."
+        "prompt": "I have 3 boxes labeled wrong. How many boxes do I need to open to fix all labels? Explain.",
     },
     {
         "category": "Evolution",
         "name": "Learning Path",
-        "prompt": "Create 3 progressively harder Python challenges for learning loops."
+        "prompt": "Create 3 progressively harder Python challenges for learning loops.",
     },
-
     # =========================================================================
     # 🎯 CATEGORIA 5: Integration & Complex Workflows
     # =========================================================================
     {
         "category": "Integration",
         "name": "Data Pipeline",
-        "prompt": "Convert this JSON to CSV format: {'name': 'Alice', 'age': 30}. Show the output."
+        "prompt": "Convert this JSON to CSV format: {'name': 'Alice', 'age': 30}. Show the output.",
     },
     {
         "category": "Integration",
         "name": "API Endpoint",
-        "prompt": "Write a Python function that returns HTTP 200 with {'status': 'ok'} as JSON."
+        "prompt": "Write a Python function that returns HTTP 200 with {'status': 'ok'} as JSON.",
     },
     {
         "category": "Integration",
         "name": "Bug Fix",
-        "prompt": "Fix this bug: 'def avg(nums): return sum(nums)/len(nums)' crashes on empty list. Show fixed code."
+        "prompt": "Fix this bug: 'def avg(nums): return sum(nums)/len(nums)' crashes on empty list. Show fixed code.",
     },
     {
         "category": "Integration",
         "name": "Documentation",
-        "prompt": "Write a one-line docstring for: 'def add(a, b): return a + b'"
+        "prompt": "Write a one-line docstring for: 'def add(a, b): return a + b'",
     },
     {
         "category": "Integration",
         "name": "Refactoring",
-        "prompt": "Refactor to list comprehension: 'result = []; for x in items: if x > 0: result.append(x)'"
+        "prompt": "Refactor to list comprehension: 'result = []; for x in items: if x > 0: result.append(x)'",
     },
 ]
 
@@ -181,9 +177,11 @@ TEST_SCENARIOS = [
 # DATA CLASSES
 # ============================================================================
 
+
 @dataclass
 class TestResult:
     """Result of a single test."""
+
     id: int
     category: str
     name: str
@@ -199,6 +197,7 @@ class TestResult:
 @dataclass
 class TestReport:
     """Complete test report."""
+
     start_time: datetime
     end_time: datetime = None
     total_requests: int = 0
@@ -214,6 +213,7 @@ class TestReport:
 # TEST RUNNER
 # ============================================================================
 
+
 def run_single_test(scenario: dict, req_id: int) -> TestResult:
     """Run a single test using bl CLI."""
     category = scenario.get("category", "Unknown")
@@ -225,17 +225,9 @@ def run_single_test(scenario: dict, req_id: int) -> TestResult:
     start = time.time()
 
     try:
-        cmd = [
-            "bl", "run", "agent", "prometheus",
-            "--data", json.dumps({"inputs": prompt})
-        ]
+        cmd = ["bl", "run", "agent", "prometheus", "--data", json.dumps({"inputs": prompt})]
 
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=TIMEOUT_PER_REQUEST
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=TIMEOUT_PER_REQUEST)
 
         duration = time.time() - start
         success = result.returncode == 0 and "PROMETHEUS" in result.stdout
@@ -252,7 +244,7 @@ def run_single_test(scenario: dict, req_id: int) -> TestResult:
             duration=duration,
             response=result.stdout[:500] if result.stdout else "",
             error=result.stderr[:200] if result.stderr else "",
-            success=success
+            success=success,
         )
 
     except subprocess.TimeoutExpired:
@@ -266,7 +258,7 @@ def run_single_test(scenario: dict, req_id: int) -> TestResult:
             status="TIMEOUT",
             duration=duration,
             error=f"Timeout after {TIMEOUT_PER_REQUEST}s",
-            success=False
+            success=False,
         )
 
     except Exception as e:
@@ -280,7 +272,7 @@ def run_single_test(scenario: dict, req_id: int) -> TestResult:
             status="EXCEPTION",
             duration=duration,
             error=str(e),
-            success=False
+            success=False,
         )
 
 
@@ -288,15 +280,15 @@ def run_stress_test() -> TestReport:
     """Run the complete stress test."""
     report = TestReport(start_time=datetime.now())
 
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("🔥 PROMETHEUS MEGA STRESS TEST - OPERAÇÃO TERRA ARRASADA 🔥")
-    print("="*70)
+    print("=" * 70)
     print(f"⚡ Concurrency: {CONCURRENCY} workers")
     print(f"📊 Total Requests: {TOTAL_REQUESTS}")
     print(f"🧪 Test Scenarios: {len(TEST_SCENARIOS)}")
     print(f"⏱️  Timeout per request: {TIMEOUT_PER_REQUEST}s")
     print("💰 Objective: DRAIN THE BUDGET & BUILD KNOWLEDGE")
-    print("="*70 + "\n")
+    print("=" * 70 + "\n")
 
     results = []
 
@@ -351,7 +343,9 @@ def run_stress_test() -> TestReport:
 
 def generate_markdown_report(report: TestReport) -> str:
     """Generate markdown report."""
-    success_rate = (report.successful / report.total_requests * 100) if report.total_requests > 0 else 0
+    success_rate = (
+        (report.successful / report.total_requests * 100) if report.total_requests > 0 else 0
+    )
 
     md = f"""# 🔥 PROMETHEUS Stress Test Report
 
@@ -401,7 +395,9 @@ def generate_markdown_report(report: TestReport) -> str:
 
     for r in report.results:
         status_icon = "✅" if r.success else "❌"
-        output = r.response[:30].replace("\n", " ").replace("|", "/") if r.response else r.error[:30]
+        output = (
+            r.response[:30].replace("\n", " ").replace("|", "/") if r.response else r.error[:30]
+        )
         md += f"| {r.id:03d} | {r.category} | {r.name[:20]} | {status_icon} {r.status} | {r.duration:.1f}s | {output}... |\n"
 
     # Sample outputs section
@@ -464,24 +460,28 @@ def main():
     report = run_stress_test()
 
     # Print summary
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("📊 RELATÓRIO FINAL - OPERAÇÃO TERRA ARRASADA")
-    print("="*70)
+    print("=" * 70)
     print(f"⏱️  Duração Total: {report.total_duration:.1f}s ({report.total_duration/60:.1f} min)")
     print(f"📨 Total Requests: {report.total_requests}")
     print(f"✅ Sucesso: {report.successful}")
     print(f"❌ Falhas: {report.failed}")
-    success_rate = (report.successful / report.total_requests * 100) if report.total_requests > 0 else 0
+    success_rate = (
+        (report.successful / report.total_requests * 100) if report.total_requests > 0 else 0
+    )
     print(f"📈 Taxa de Sucesso: {success_rate:.1f}%")
     print(f"⚡ Tempo Médio: {report.avg_duration:.2f}s")
-    print("="*70)
+    print("=" * 70)
 
     # Print by category
     print("\n📊 Por Categoria:")
     for cat, data in sorted(report.by_category.items()):
         rate = (data["success"] / data["total"] * 100) if data["total"] > 0 else 0
         status = "✅" if rate >= 80 else "⚠️" if rate >= 50 else "❌"
-        print(f"   {status} {cat}: {data['success']}/{data['total']} ({rate:.0f}%) - avg {data['avg_duration']:.1f}s")
+        print(
+            f"   {status} {cat}: {data['success']}/{data['total']} ({rate:.0f}%) - avg {data['avg_duration']:.1f}s"
+        )
 
     # Generate and save markdown report
     md_report = generate_markdown_report(report)
@@ -496,33 +496,37 @@ def main():
     # Also save JSON for analysis
     json_path = "tests/prometheus/stress_test_results.json"
     with open(json_path, "w") as f:
-        json.dump({
-            "summary": {
-                "start_time": report.start_time.isoformat(),
-                "end_time": report.end_time.isoformat(),
-                "total_duration": report.total_duration,
-                "total_requests": report.total_requests,
-                "successful": report.successful,
-                "failed": report.failed,
-                "success_rate": success_rate,
-                "avg_duration": report.avg_duration,
+        json.dump(
+            {
+                "summary": {
+                    "start_time": report.start_time.isoformat(),
+                    "end_time": report.end_time.isoformat(),
+                    "total_duration": report.total_duration,
+                    "total_requests": report.total_requests,
+                    "successful": report.successful,
+                    "failed": report.failed,
+                    "success_rate": success_rate,
+                    "avg_duration": report.avg_duration,
+                },
+                "by_category": report.by_category,
+                "results": [
+                    {
+                        "id": r.id,
+                        "category": r.category,
+                        "name": r.name,
+                        "prompt": r.prompt,
+                        "status": r.status,
+                        "duration": r.duration,
+                        "success": r.success,
+                        "error": r.error,
+                        "response_preview": r.response[:200] if r.response else "",
+                    }
+                    for r in report.results
+                ],
             },
-            "by_category": report.by_category,
-            "results": [
-                {
-                    "id": r.id,
-                    "category": r.category,
-                    "name": r.name,
-                    "prompt": r.prompt,
-                    "status": r.status,
-                    "duration": r.duration,
-                    "success": r.success,
-                    "error": r.error,
-                    "response_preview": r.response[:200] if r.response else "",
-                }
-                for r in report.results
-            ]
-        }, f, indent=2)
+            f,
+            indent=2,
+        )
 
     print(f"📊 JSON salvo em: {json_path}")
 

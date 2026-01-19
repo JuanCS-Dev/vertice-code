@@ -6,15 +6,9 @@ import tempfile
 from pathlib import Path
 import time
 
-from vertice_cli.core.cache import (
-    LRUCache, DiskCache, PerformanceCache, cache_key
-)
-from vertice_cli.core.async_executor import (
-    AsyncExecutor, ToolCall, detect_dependencies
-)
-from vertice_cli.core.file_watcher import (
-    FileWatcher, RecentFilesTracker
-)
+from vertice_cli.core.cache import LRUCache, DiskCache, PerformanceCache, cache_key
+from vertice_cli.core.async_executor import AsyncExecutor, ToolCall, detect_dependencies
+from vertice_cli.core.file_watcher import FileWatcher, RecentFilesTracker
 
 
 class TestLRUCache:
@@ -205,7 +199,7 @@ class TestFileWatcher:
 
             events = watcher.recent_events
             assert len(events) == 1
-            assert events[0].event_type == 'modified'
+            assert events[0].event_type == "modified"
 
 
 class TestRecentFilesTracker:

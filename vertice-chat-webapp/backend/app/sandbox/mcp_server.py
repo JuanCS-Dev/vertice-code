@@ -219,8 +219,6 @@ class CodeExecutionServer:
 
 # For running as standalone MCP server
 if __name__ == "__main__":
-    import os
-
     # Setup logging
     logging.basicConfig(level=logging.INFO)
 

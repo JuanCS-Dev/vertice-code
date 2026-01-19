@@ -26,16 +26,13 @@ class TestFileSizeEdgeCases:
         read_tool = ReadFileTool()
 
         result = await write_tool._execute_validated(
-            path=str(temp_project / "empty.txt"),
-            content=""
+            path=str(temp_project / "empty.txt"), content=""
         )
 
         assert result.success
 
         # Verify read works on empty file
-        read_result = await read_tool._execute_validated(
-            path=str(temp_project / "empty.txt")
-        )
+        read_result = await read_tool._execute_validated(path=str(temp_project / "empty.txt"))
         assert read_result.success
         assert read_result.data["content"] == ""
         assert read_result.data["lines"] == 1  # Empty file has 1 line
@@ -46,10 +43,7 @@ class TestFileSizeEdgeCases:
         from vertice_cli.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
-        result = await tool._execute_validated(
-            path=str(temp_project / "single.txt"),
-            content="x"
-        )
+        result = await tool._execute_validated(path=str(temp_project / "single.txt"), content="x")
 
         assert result.success
         assert (temp_project / "single.txt").read_text() == "x"
@@ -61,8 +55,7 @@ class TestFileSizeEdgeCases:
 
         tool = WriteFileTool()
         result = await tool._execute_validated(
-            path=str(temp_project / "whitespace.txt"),
-            content="   \n\n\t\t\n   "
+            path=str(temp_project / "whitespace.txt"), content="   \n\n\t\t\n   "
         )
 
         assert result.success
@@ -76,8 +69,7 @@ class TestFileSizeEdgeCases:
         content = "\n" * 10000
 
         result = await tool._execute_validated(
-            path=str(temp_project / "newlines.txt"),
-            content=content
+            path=str(temp_project / "newlines.txt"), content=content
         )
 
         assert result.success
@@ -94,27 +86,18 @@ class TestFileSizeEdgeCases:
         tool = ReadFileTool()
 
         # Read first line only
-        result = await tool._execute_validated(
-            path=str(test_file),
-            line_range=(1, 1)
-        )
+        result = await tool._execute_validated(path=str(test_file), line_range=(1, 1))
         assert result.success
         assert "line1" in result.data["content"]
         assert "line2" not in result.data["content"]
 
         # Read last line only
-        result = await tool._execute_validated(
-            path=str(test_file),
-            line_range=(3, 3)
-        )
+        result = await tool._execute_validated(path=str(test_file), line_range=(3, 3))
         assert result.success
         assert "line3" in result.data["content"]
 
         # Read beyond end (should handle gracefully)
-        result = await tool._execute_validated(
-            path=str(test_file),
-            line_range=(1, 1000)
-        )
+        result = await tool._execute_validated(path=str(test_file), line_range=(1, 1000))
         assert result.success
 
 
@@ -130,9 +113,7 @@ class TestPathEdgeCases:
         file_path = temp_project / "path with spaces" / "file with spaces.txt"
 
         result = await tool._execute_validated(
-            path=str(file_path),
-            content="content",
-            create_dirs=True
+            path=str(file_path), content="content", create_dirs=True
         )
 
         assert result.success
@@ -147,10 +128,7 @@ class TestPathEdgeCases:
         # Most systems limit filenames to 255 chars
         long_name = "a" * 200 + ".txt"
 
-        result = await tool._execute_validated(
-            path=str(temp_project / long_name),
-            content="test"
-        )
+        result = await tool._execute_validated(path=str(temp_project / long_name), content="test")
 
         assert result.success
 
@@ -163,9 +141,7 @@ class TestPathEdgeCases:
         deep_path = temp_project / "/".join([f"dir{i}" for i in range(20)]) / "deep.txt"
 
         result = await tool._execute_validated(
-            path=str(deep_path),
-            content="deep content",
-            create_dirs=True
+            path=str(deep_path), content="deep content", create_dirs=True
         )
 
         assert result.success
@@ -179,10 +155,7 @@ class TestPathEdgeCases:
         (temp_project / "subdir").mkdir()
 
         write_tool = WriteFileTool()
-        await write_tool._execute_validated(
-            path=str(temp_project / "test.txt"),
-            content="content"
-        )
+        await write_tool._execute_validated(path=str(temp_project / "test.txt"), content="content")
 
         read_tool = ReadFileTool()
         # Use relative path with ..
@@ -207,10 +180,7 @@ class TestConcurrentAccess:
         tool = ReadFileTool()
 
         # Launch 10 concurrent reads
-        tasks = [
-            tool._execute_validated(path=str(test_file))
-            for _ in range(10)
-        ]
+        tasks = [tool._execute_validated(path=str(test_file)) for _ in range(10)]
 
         results = await asyncio.gather(*tasks)
 
@@ -225,10 +195,7 @@ class TestConcurrentAccess:
         tool = WriteFileTool()
 
         tasks = [
-            tool._execute_validated(
-                path=str(temp_project / f"file{i}.txt"),
-                content=f"content{i}"
-            )
+            tool._execute_validated(path=str(temp_project / f"file{i}.txt"), content=f"content{i}")
             for i in range(20)
         ]
 
@@ -249,10 +216,7 @@ class TestSearchEdgeCases:
         (temp_project / "test.txt").write_text("content")
 
         tool = SearchFilesTool()
-        result = await tool._execute_validated(
-            pattern="",
-            path=str(temp_project)
-        )
+        result = await tool._execute_validated(pattern="", path=str(temp_project))
 
         # Should handle gracefully (ripgrep might return everything or error)
         assert result.success or not result.success  # Either is acceptable
@@ -266,10 +230,7 @@ class TestSearchEdgeCases:
 
         tool = SearchFilesTool()
         # Search for literal $100.50 (need to escape)
-        result = await tool._execute_validated(
-            pattern=r"\$100\.50",
-            path=str(temp_project)
-        )
+        result = await tool._execute_validated(pattern=r"\$100\.50", path=str(temp_project))
 
         assert result.success
         matches = result.data.get("matches", [])
@@ -283,10 +244,7 @@ class TestSearchEdgeCases:
         (temp_project / "multi.txt").write_text("line1\nline2\nline3")
 
         tool = SearchFilesTool()
-        result = await tool._execute_validated(
-            pattern="line2",
-            path=str(temp_project)
-        )
+        result = await tool._execute_validated(pattern="line2", path=str(temp_project))
 
         assert result.success
         matches = result.data.get("matches", [])
@@ -302,10 +260,7 @@ class TestSearchEdgeCases:
         binary_file.write_bytes(b"\x00\x01\x02\xFF\xFE")
 
         tool = SearchFilesTool()
-        result = await tool._execute_validated(
-            pattern="test",
-            path=str(temp_project)
-        )
+        result = await tool._execute_validated(pattern="test", path=str(temp_project))
 
         # Should handle binary files gracefully (ripgrep skips them)
         assert result.success
@@ -319,10 +274,7 @@ class TestSearchEdgeCases:
         empty_dir.mkdir()
 
         tool = SearchFilesTool()
-        result = await tool._execute_validated(
-            pattern="anything",
-            path=str(empty_dir)
-        )
+        result = await tool._execute_validated(pattern="anything", path=str(empty_dir))
 
         assert result.success
         assert len(result.data.get("matches", [])) == 0
@@ -337,10 +289,7 @@ class TestSearchEdgeCases:
         (temp_project / "longline.txt").write_text(long_line)
 
         tool = SearchFilesTool()
-        result = await tool._execute_validated(
-            pattern="target",
-            path=str(temp_project)
-        )
+        result = await tool._execute_validated(pattern="target", path=str(temp_project))
 
         assert result.success
         matches = result.data.get("matches", [])
@@ -363,7 +312,7 @@ class TestEditEdgeCases:
             path=str(test_file),
             edits=[{"search": "remove_this ", "replace": ""}],
             preview=False,
-            create_backup=False
+            create_backup=False,
         )
 
         assert result.success
@@ -379,11 +328,11 @@ class TestEditEdgeCases:
 
         tool = EditFileTool()
         # Note: searching for empty string is edge case
-        result = await tool._execute_validated(
+        await tool._execute_validated(
             path=str(test_file),
             edits=[{"search": "", "replace": "hello "}],
             preview=False,
-            create_backup=False
+            create_backup=False,
         )
 
         # Behavior depends on implementation
@@ -405,7 +354,7 @@ class TestEditEdgeCases:
             path=str(test_file),
             edits=[{"search": "abc", "replace": "xyz"}],
             preview=False,
-            create_backup=False
+            create_backup=False,
         )
         assert result1.success
 
@@ -414,7 +363,7 @@ class TestEditEdgeCases:
             path=str(test_file),
             edits=[{"search": "bcd", "replace": "123"}],
             preview=False,
-            create_backup=False
+            create_backup=False,
         )
         assert not result2.success  # Should fail - not found
 
@@ -431,7 +380,7 @@ class TestEditEdgeCases:
             path=str(test_file),
             edits=[{"search": "line1\nline2", "replace": "merged_line"}],
             preview=False,
-            create_backup=False
+            create_backup=False,
         )
 
         assert result.success
@@ -500,10 +449,7 @@ class TestErrorRecovery:
         os.chmod(readonly_dir, 0o444)
 
         tool = WriteFileTool()
-        result = await tool._execute_validated(
-            path=str(readonly_dir / "file.txt"),
-            content="test"
-        )
+        result = await tool._execute_validated(path=str(readonly_dir / "file.txt"), content="test")
 
         # Should fail gracefully
         assert not result.success
@@ -538,7 +484,7 @@ class TestErrorRecovery:
             path=str(temp_project / "nonexistent.txt"),
             edits=[{"search": "old", "replace": "new"}],
             preview=False,
-            create_backup=False
+            create_backup=False,
         )
 
         assert not result.success
@@ -557,15 +503,12 @@ class TestBoundaryValues:
 
         write_tool = WriteFileTool()
         result = await write_tool._execute_validated(
-            path=str(temp_project / "10mb.txt"),
-            content=large_content
+            path=str(temp_project / "10mb.txt"), content=large_content
         )
         assert result.success
 
         read_tool = ReadFileTool()
-        result = await read_tool._execute_validated(
-            path=str(temp_project / "10mb.txt")
-        )
+        result = await read_tool._execute_validated(path=str(temp_project / "10mb.txt"))
         assert result.success
         assert len(result.data["content"]) == 10 * 1024 * 1024
 
@@ -582,9 +525,7 @@ class TestBoundaryValues:
 
         # Test max_results=50
         result = await tool._execute_validated(
-            pattern="match",
-            path=str(temp_project),
-            max_results=50
+            pattern="match", path=str(temp_project), max_results=50
         )
 
         assert result.success
@@ -593,9 +534,7 @@ class TestBoundaryValues:
 
         # Test max_results=1
         result = await tool._execute_validated(
-            pattern="match",
-            path=str(temp_project),
-            max_results=1
+            pattern="match", path=str(temp_project), max_results=1
         )
 
         assert result.success
@@ -611,9 +550,7 @@ class TestBoundaryValues:
 
         tool = SearchFilesTool()
         result = await tool._execute_validated(
-            pattern="match",
-            path=str(temp_project),
-            max_results=0
+            pattern="match", path=str(temp_project), max_results=0
         )
 
         # Should handle edge case (return empty or all)

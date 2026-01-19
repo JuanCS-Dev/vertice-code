@@ -31,7 +31,7 @@ class TestFileOpsHooksIntegration:
         config = QwenConfig()
         config.hooks = HooksConfig(
             post_write=["echo 'post_write hook executed'"],
-            post_edit=["echo 'post_edit hook executed'"]
+            post_edit=["echo 'post_edit hook executed'"],
         )
 
         mock_loader = Mock()
@@ -60,58 +60,45 @@ class TestFileOpsHooksIntegration:
         self, temp_dir, executor, mock_config_with_hooks
     ):
         """Test WriteFileTool executes post_write hooks."""
-        tool = WriteFileTool(
-            hook_executor=executor,
-            config_loader=mock_config_with_hooks
-        )
+        tool = WriteFileTool(hook_executor=executor, config_loader=mock_config_with_hooks)
 
         test_file = temp_dir / "test.py"
 
         # Change to temp directory
         import os
+
         old_cwd = os.getcwd()
         try:
             os.chdir(temp_dir)
 
-            result = await tool.execute(
-                path=str(test_file),
-                content="x = 1"
-            )
+            result = await tool.execute(path=str(test_file), content="x = 1")
 
             assert result.success
             assert test_file.exists()
 
             # Hook should have been executed
             stats = executor.get_stats()
-            assert stats['total_executions'] == 1
-            assert stats['direct_executions'] == 1
+            assert stats["total_executions"] == 1
+            assert stats["direct_executions"] == 1
 
         finally:
             os.chdir(old_cwd)
 
     @pytest.mark.asyncio
-    async def test_write_tool_no_hooks_configured(
-        self, temp_dir, executor, mock_config_no_hooks
-    ):
+    async def test_write_tool_no_hooks_configured(self, temp_dir, executor, mock_config_no_hooks):
         """Test WriteFileTool when no hooks configured."""
-        tool = WriteFileTool(
-            hook_executor=executor,
-            config_loader=mock_config_no_hooks
-        )
+        tool = WriteFileTool(hook_executor=executor, config_loader=mock_config_no_hooks)
 
         test_file = temp_dir / "test.py"
 
-        result = await tool.execute(
-            path=str(test_file),
-            content="x = 1"
-        )
+        result = await tool.execute(path=str(test_file), content="x = 1")
 
         assert result.success
         assert test_file.exists()
 
         # No hooks should have been executed
         stats = executor.get_stats()
-        assert stats['total_executions'] == 0
+        assert stats["total_executions"] == 0
 
     @pytest.mark.asyncio
     async def test_write_tool_hook_failure_doesnt_block(
@@ -119,26 +106,19 @@ class TestFileOpsHooksIntegration:
     ):
         """Test WriteFileTool continues even if hook fails."""
         # Configure a failing hook
-        mock_config_with_hooks.config.hooks.post_write = [
-            "python -c 'import sys; sys.exit(1)'"
-        ]
+        mock_config_with_hooks.config.hooks.post_write = ["python -c 'import sys; sys.exit(1)'"]
 
-        tool = WriteFileTool(
-            hook_executor=executor,
-            config_loader=mock_config_with_hooks
-        )
+        tool = WriteFileTool(hook_executor=executor, config_loader=mock_config_with_hooks)
 
         test_file = temp_dir / "test.py"
 
         import os
+
         old_cwd = os.getcwd()
         try:
             os.chdir(temp_dir)
 
-            result = await tool.execute(
-                path=str(test_file),
-                content="x = 1"
-            )
+            result = await tool.execute(path=str(test_file), content="x = 1")
 
             # File operation should succeed despite hook failure
             assert result.success
@@ -154,22 +134,19 @@ class TestFileOpsHooksIntegration:
         self, temp_dir, executor, mock_config_with_hooks
     ):
         """Test EditFileTool executes post_edit hooks."""
-        tool = EditFileTool(
-            hook_executor=executor,
-            config_loader=mock_config_with_hooks
-        )
+        tool = EditFileTool(hook_executor=executor, config_loader=mock_config_with_hooks)
 
         test_file = temp_dir / "test.py"
         test_file.write_text("x = 1")
 
         import os
+
         old_cwd = os.getcwd()
         try:
             os.chdir(temp_dir)
 
             result = await tool.execute(
-                path=str(test_file),
-                edits=[{"search": "x = 1", "replace": "x = 2"}]
+                path=str(test_file), edits=[{"search": "x = 1", "replace": "x = 2"}]
             )
 
             assert result.success
@@ -177,52 +154,40 @@ class TestFileOpsHooksIntegration:
 
             # Hook should have been executed
             stats = executor.get_stats()
-            assert stats['total_executions'] == 1
-            assert stats['direct_executions'] == 1
+            assert stats["total_executions"] == 1
+            assert stats["direct_executions"] == 1
 
         finally:
             os.chdir(old_cwd)
 
     @pytest.mark.asyncio
-    async def test_edit_tool_no_hooks_configured(
-        self, temp_dir, executor, mock_config_no_hooks
-    ):
+    async def test_edit_tool_no_hooks_configured(self, temp_dir, executor, mock_config_no_hooks):
         """Test EditFileTool when no hooks configured."""
-        tool = EditFileTool(
-            hook_executor=executor,
-            config_loader=mock_config_no_hooks
-        )
+        tool = EditFileTool(hook_executor=executor, config_loader=mock_config_no_hooks)
 
         test_file = temp_dir / "test.py"
         test_file.write_text("x = 1")
 
         result = await tool.execute(
-            path=str(test_file),
-            edits=[{"search": "x = 1", "replace": "x = 2"}]
+            path=str(test_file), edits=[{"search": "x = 1", "replace": "x = 2"}]
         )
 
         assert result.success
 
         # No hooks should have been executed
         stats = executor.get_stats()
-        assert stats['total_executions'] == 0
+        assert stats["total_executions"] == 0
 
     # ========== HOOK EXECUTOR DISABLED ==========
 
     @pytest.mark.asyncio
     async def test_write_tool_no_executor(self, temp_dir):
         """Test WriteFileTool works without hook executor."""
-        tool = WriteFileTool(
-            hook_executor=None,
-            config_loader=None
-        )
+        tool = WriteFileTool(hook_executor=None, config_loader=None)
 
         test_file = temp_dir / "test.py"
 
-        result = await tool.execute(
-            path=str(test_file),
-            content="x = 1"
-        )
+        result = await tool.execute(path=str(test_file), content="x = 1")
 
         assert result.success
         assert test_file.exists()
@@ -230,17 +195,13 @@ class TestFileOpsHooksIntegration:
     @pytest.mark.asyncio
     async def test_edit_tool_no_executor(self, temp_dir):
         """Test EditFileTool works without hook executor."""
-        tool = EditFileTool(
-            hook_executor=None,
-            config_loader=None
-        )
+        tool = EditFileTool(hook_executor=None, config_loader=None)
 
         test_file = temp_dir / "test.py"
         test_file.write_text("x = 1")
 
         result = await tool.execute(
-            path=str(test_file),
-            edits=[{"search": "x = 1", "replace": "x = 2"}]
+            path=str(test_file), edits=[{"search": "x = 1", "replace": "x = 2"}]
         )
 
         assert result.success
@@ -248,38 +209,31 @@ class TestFileOpsHooksIntegration:
     # ========== MULTIPLE HOOKS ==========
 
     @pytest.mark.asyncio
-    async def test_write_tool_multiple_hooks(
-        self, temp_dir, executor, mock_config_with_hooks
-    ):
+    async def test_write_tool_multiple_hooks(self, temp_dir, executor, mock_config_with_hooks):
         """Test WriteFileTool executes multiple hooks."""
         mock_config_with_hooks.config.hooks.post_write = [
             "echo 'hook1'",
             "echo 'hook2'",
-            "echo 'hook3'"
+            "echo 'hook3'",
         ]
 
-        tool = WriteFileTool(
-            hook_executor=executor,
-            config_loader=mock_config_with_hooks
-        )
+        tool = WriteFileTool(hook_executor=executor, config_loader=mock_config_with_hooks)
 
         test_file = temp_dir / "test.py"
 
         import os
+
         old_cwd = os.getcwd()
         try:
             os.chdir(temp_dir)
 
-            result = await tool.execute(
-                path=str(test_file),
-                content="x = 1"
-            )
+            result = await tool.execute(path=str(test_file), content="x = 1")
 
             assert result.success
 
             # All 3 hooks should have been executed
             stats = executor.get_stats()
-            assert stats['total_executions'] == 3
+            assert stats["total_executions"] == 3
 
         finally:
             os.chdir(old_cwd)
@@ -287,35 +241,26 @@ class TestFileOpsHooksIntegration:
     # ========== VARIABLE SUBSTITUTION ==========
 
     @pytest.mark.asyncio
-    async def test_hooks_use_correct_variables(
-        self, temp_dir, executor, mock_config_with_hooks
-    ):
+    async def test_hooks_use_correct_variables(self, temp_dir, executor, mock_config_with_hooks):
         """Test hooks receive correct variable substitution."""
-        mock_config_with_hooks.config.hooks.post_write = [
-            "echo {file_name}"
-        ]
+        mock_config_with_hooks.config.hooks.post_write = ["echo {file_name}"]
 
-        tool = WriteFileTool(
-            hook_executor=executor,
-            config_loader=mock_config_with_hooks
-        )
+        tool = WriteFileTool(hook_executor=executor, config_loader=mock_config_with_hooks)
 
         test_file = temp_dir / "myfile.py"
 
         import os
+
         old_cwd = os.getcwd()
         try:
             os.chdir(temp_dir)
 
-            result = await tool.execute(
-                path=str(test_file),
-                content="x = 1"
-            )
+            result = await tool.execute(path=str(test_file), content="x = 1")
 
             assert result.success
 
             stats = executor.get_stats()
-            assert stats['total_executions'] == 1
+            assert stats["total_executions"] == 1
 
         finally:
             os.chdir(old_cwd)
@@ -328,26 +273,19 @@ class TestFileOpsHooksIntegration:
     ):
         """Test WriteFileTool handles hook exceptions gracefully."""
         # Configure a hook that will raise exception
-        mock_config_with_hooks.config.hooks.post_write = [
-            "nonexistent_command_xyz"
-        ]
+        mock_config_with_hooks.config.hooks.post_write = ["nonexistent_command_xyz"]
 
-        tool = WriteFileTool(
-            hook_executor=executor,
-            config_loader=mock_config_with_hooks
-        )
+        tool = WriteFileTool(hook_executor=executor, config_loader=mock_config_with_hooks)
 
         test_file = temp_dir / "test.py"
 
         import os
+
         old_cwd = os.getcwd()
         try:
             os.chdir(temp_dir)
 
-            result = await tool.execute(
-                path=str(test_file),
-                content="x = 1"
-            )
+            result = await tool.execute(path=str(test_file), content="x = 1")
 
             # File operation should succeed
             assert result.success

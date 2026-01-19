@@ -186,9 +186,7 @@ class TestCoreAgentAdapter:
         adapter = CoreAgentAdapter(mock_core_agent, "test")
         assert adapter._normalize_chunk("hello") == "hello"
 
-    def test_normalize_chunk_object_with_text(
-        self, mock_core_agent: MockCoreAgent
-    ) -> None:
+    def test_normalize_chunk_object_with_text(self, mock_core_agent: MockCoreAgent) -> None:
         from vertice_tui.core.agents.core_adapter import CoreAgentAdapter
 
         adapter = CoreAgentAdapter(mock_core_agent, "test")
@@ -198,17 +196,13 @@ class TestCoreAgentAdapter:
 
         assert adapter._normalize_chunk(ChunkWithText()) == "hello from object"
 
-    def test_normalize_chunk_dict_with_text(
-        self, mock_core_agent: MockCoreAgent
-    ) -> None:
+    def test_normalize_chunk_dict_with_text(self, mock_core_agent: MockCoreAgent) -> None:
         from vertice_tui.core.agents.core_adapter import CoreAgentAdapter
 
         adapter = CoreAgentAdapter(mock_core_agent, "test")
         assert adapter._normalize_chunk({"text": "hello"}) == "hello"
 
-    def test_normalize_chunk_dict_with_content(
-        self, mock_core_agent: MockCoreAgent
-    ) -> None:
+    def test_normalize_chunk_dict_with_content(self, mock_core_agent: MockCoreAgent) -> None:
         from vertice_tui.core.agents.core_adapter import CoreAgentAdapter
 
         adapter = CoreAgentAdapter(mock_core_agent, "test")
@@ -267,9 +261,7 @@ class TestCoreAgentAdapter:
         assert status["core_agent_type"] == "MockCoreAgent"
         assert "core_status" in status
 
-    def test_get_pending_approvals_empty(
-        self, mock_core_agent: MockCoreAgent
-    ) -> None:
+    def test_get_pending_approvals_empty(self, mock_core_agent: MockCoreAgent) -> None:
         from vertice_tui.core.agents.core_adapter import CoreAgentAdapter
 
         adapter = CoreAgentAdapter(mock_core_agent, "test")
@@ -344,9 +336,7 @@ class TestOrchestratorIntegration:
         assert "Fallback" in combined
         assert "planner" in combined.lower()
 
-    def test_set_autonomy_level_valid(
-        self, mock_agent_manager: MagicMock
-    ) -> None:
+    def test_set_autonomy_level_valid(self, mock_agent_manager: MagicMock) -> None:
         from vertice_tui.core.agents.orchestrator_integration import OrchestratorIntegration
 
         integration = OrchestratorIntegration(mock_agent_manager)
@@ -357,9 +347,7 @@ class TestOrchestratorIntegration:
         assert integration.set_autonomy_level("l2") is True
         assert integration._context.autonomy_level == "L2"
 
-    def test_set_autonomy_level_invalid(
-        self, mock_agent_manager: MagicMock
-    ) -> None:
+    def test_set_autonomy_level_invalid(self, mock_agent_manager: MagicMock) -> None:
         from vertice_tui.core.agents.orchestrator_integration import OrchestratorIntegration
 
         integration = OrchestratorIntegration(mock_agent_manager)
@@ -372,11 +360,9 @@ class TestOrchestratorIntegration:
         from vertice_tui.core.agents.orchestrator_integration import OrchestratorIntegration
 
         integration = OrchestratorIntegration(mock_agent_manager)
-        integration._approval_queue.append({
-            "id": "approval-0",
-            "operation": "delete files",
-            "status": "pending"
-        })
+        integration._approval_queue.append(
+            {"id": "approval-0", "operation": "delete files", "status": "pending"}
+        )
 
         result = integration.approve("approval-0", "admin")
 
@@ -395,11 +381,9 @@ class TestOrchestratorIntegration:
         from vertice_tui.core.agents.orchestrator_integration import OrchestratorIntegration
 
         integration = OrchestratorIntegration(mock_agent_manager)
-        integration._approval_queue.append({
-            "id": "approval-0",
-            "operation": "delete files",
-            "status": "pending"
-        })
+        integration._approval_queue.append(
+            {"id": "approval-0", "operation": "delete files", "status": "pending"}
+        )
 
         result = integration.reject("approval-0", "user")
 
@@ -459,9 +443,7 @@ class TestAgentManagerCoreIntegration:
     def test_core_agent_detection(self) -> None:
         from vertice_tui.core.agents.registry import AGENT_REGISTRY
 
-        core_agents = [
-            name for name, info in AGENT_REGISTRY.items() if info.is_core
-        ]
+        core_agents = [name for name, info in AGENT_REGISTRY.items() if info.is_core]
 
         assert "orchestrator_core" in core_agents
         assert "coder_core" in core_agents

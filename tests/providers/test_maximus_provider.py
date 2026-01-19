@@ -107,9 +107,7 @@ class TestMaximusProviderTribunal:
         }
         mock_response.raise_for_status = MagicMock()
 
-        with patch.object(
-            provider, '_ensure_initialized', new_callable=AsyncMock
-        ):
+        with patch.object(provider, "_ensure_initialized", new_callable=AsyncMock):
             mock_client: AsyncMock = AsyncMock()
             mock_client.request.return_value = mock_response
             provider._client = mock_client
@@ -132,17 +130,14 @@ class TestMaximusProviderTribunal:
         }
         mock_response.raise_for_status = MagicMock()
 
-        with patch.object(
-            provider, '_ensure_initialized', new_callable=AsyncMock
-        ):
+        with patch.object(provider, "_ensure_initialized", new_callable=AsyncMock):
             mock_client: AsyncMock = AsyncMock()
             mock_client.request.return_value = mock_response
             provider._client = mock_client
             provider._initialized = True
 
             result: Dict[str, Any] = await provider.tribunal_evaluate(
-                "test log",
-                context={"user_id": "123", "session": "abc"}
+                "test log", context={"user_id": "123", "session": "abc"}
             )
 
             assert result["decision"] == "PASS"
@@ -159,9 +154,7 @@ class TestMaximusProviderTribunal:
         mock_response.json.return_value = {"status": "healthy"}
         mock_response.raise_for_status = MagicMock()
 
-        with patch.object(
-            provider, '_ensure_initialized', new_callable=AsyncMock
-        ):
+        with patch.object(provider, "_ensure_initialized", new_callable=AsyncMock):
             mock_client: AsyncMock = AsyncMock()
             mock_client.request.return_value = mock_response
             provider._client = mock_client
@@ -187,9 +180,7 @@ class TestMaximusProviderMemory:
         }
         mock_response.raise_for_status = MagicMock()
 
-        with patch.object(
-            provider, '_ensure_initialized', new_callable=AsyncMock
-        ):
+        with patch.object(provider, "_ensure_initialized", new_callable=AsyncMock):
             mock_client: AsyncMock = AsyncMock()
             mock_client.request.return_value = mock_response
             provider._client = mock_client
@@ -217,9 +208,7 @@ class TestMaximusProviderMemory:
         }
         mock_response.raise_for_status = MagicMock()
 
-        with patch.object(
-            provider, '_ensure_initialized', new_callable=AsyncMock
-        ):
+        with patch.object(provider, "_ensure_initialized", new_callable=AsyncMock):
             mock_client: AsyncMock = AsyncMock()
             mock_client.request.return_value = mock_response
             provider._client = mock_client
@@ -236,24 +225,16 @@ class TestMaximusProviderMemory:
         provider: MaximusProvider = MaximusProvider()
 
         mock_response: MagicMock = MagicMock()
-        mock_response.json.return_value = {
-            "memories": [{"id": "mem_1", "type": "episodic"}]
-        }
+        mock_response.json.return_value = {"memories": [{"id": "mem_1", "type": "episodic"}]}
         mock_response.raise_for_status = MagicMock()
 
-        with patch.object(
-            provider, '_ensure_initialized', new_callable=AsyncMock
-        ):
+        with patch.object(provider, "_ensure_initialized", new_callable=AsyncMock):
             mock_client: AsyncMock = AsyncMock()
             mock_client.request.return_value = mock_response
             provider._client = mock_client
             provider._initialized = True
 
-            result = await provider.memory_search(
-                "test query",
-                memory_type="episodic",
-                limit=5
-            )
+            result = await provider.memory_search("test query", memory_type="episodic", limit=5)
 
             assert len(result) == 1
             # Verify request was called with memory_type param
@@ -276,9 +257,7 @@ class TestMaximusProviderFactory:
         }
         mock_response.raise_for_status = MagicMock()
 
-        with patch.object(
-            provider, '_ensure_initialized', new_callable=AsyncMock
-        ):
+        with patch.object(provider, "_ensure_initialized", new_callable=AsyncMock):
             mock_client: AsyncMock = AsyncMock()
             mock_client.request.return_value = mock_response
             provider._client = mock_client
@@ -306,9 +285,7 @@ class TestMaximusProviderFactory:
         }
         mock_response.raise_for_status = MagicMock()
 
-        with patch.object(
-            provider, '_ensure_initialized', new_callable=AsyncMock
-        ):
+        with patch.object(provider, "_ensure_initialized", new_callable=AsyncMock):
             mock_client: AsyncMock = AsyncMock()
             mock_client.request.return_value = mock_response
             provider._client = mock_client
@@ -327,9 +304,7 @@ class TestMaximusProviderInitialization:
         """HYPOTHESIS: _ensure_initialized creates HTTP client."""
         provider: MaximusProvider = MaximusProvider()
 
-        with patch(
-            'vertice_cli.core.providers.maximus_provider.create_http_client'
-        ) as mock_create:
+        with patch("vertice_cli.core.providers.maximus_provider.create_http_client") as mock_create:
             mock_client: AsyncMock = AsyncMock()
             mock_response: MagicMock = MagicMock()
             mock_response.json.return_value = {"status": "ok"}
@@ -348,9 +323,7 @@ class TestMaximusProviderInitialization:
         provider: MaximusProvider = MaximusProvider()
         provider._initialized = True
 
-        with patch(
-            'vertice_cli.core.providers.maximus_provider.create_http_client'
-        ) as mock_create:
+        with patch("vertice_cli.core.providers.maximus_provider.create_http_client") as mock_create:
             await provider._ensure_initialized()
 
             mock_create.assert_not_called()
@@ -374,6 +347,7 @@ class TestMaximusProviderInitialization:
     async def test_check_health_handles_http_error(self) -> None:
         """HYPOTHESIS: _check_health handles HTTP errors."""
         import httpx
+
         provider: MaximusProvider = MaximusProvider()
         mock_client: AsyncMock = AsyncMock()
         mock_client.get.side_effect = httpx.HTTPError("Connection failed")
@@ -418,11 +392,10 @@ class TestMaximusProviderCircuitBreaker:
     async def test_request_handles_http_error(self) -> None:
         """HYPOTHESIS: _request handles HTTP errors gracefully."""
         import httpx
+
         provider: MaximusProvider = MaximusProvider()
 
-        with patch.object(
-            provider, '_ensure_initialized', new_callable=AsyncMock
-        ):
+        with patch.object(provider, "_ensure_initialized", new_callable=AsyncMock):
             mock_client: AsyncMock = AsyncMock()
             mock_client.request.side_effect = httpx.HTTPError("Server error")
             provider._client = mock_client
@@ -473,9 +446,7 @@ class TestMaximusProviderTribunalStats:
         }
         mock_response.raise_for_status = MagicMock()
 
-        with patch.object(
-            provider, '_ensure_initialized', new_callable=AsyncMock
-        ):
+        with patch.object(provider, "_ensure_initialized", new_callable=AsyncMock):
             mock_client: AsyncMock = AsyncMock()
             mock_client.request.return_value = mock_response
             provider._client = mock_client
@@ -502,9 +473,7 @@ class TestMaximusProviderMemoryContext:
         }
         mock_response.raise_for_status = MagicMock()
 
-        with patch.object(
-            provider, '_ensure_initialized', new_callable=AsyncMock
-        ):
+        with patch.object(provider, "_ensure_initialized", new_callable=AsyncMock):
             mock_client: AsyncMock = AsyncMock()
             mock_client.request.return_value = mock_response
             provider._client = mock_client
@@ -527,9 +496,7 @@ class TestMaximusProviderMemoryContext:
         }
         mock_response.raise_for_status = MagicMock()
 
-        with patch.object(
-            provider, '_ensure_initialized', new_callable=AsyncMock
-        ):
+        with patch.object(provider, "_ensure_initialized", new_callable=AsyncMock):
             mock_client: AsyncMock = AsyncMock()
             mock_client.request.return_value = mock_response
             provider._client = mock_client
@@ -549,9 +516,7 @@ class TestMaximusProviderMemoryContext:
         mock_response.json.return_value = {"error": "Service unavailable"}
         mock_response.raise_for_status = MagicMock()
 
-        with patch.object(
-            provider, '_ensure_initialized', new_callable=AsyncMock
-        ):
+        with patch.object(provider, "_ensure_initialized", new_callable=AsyncMock):
             mock_client: AsyncMock = AsyncMock()
             mock_client.request.return_value = mock_response
             provider._client = mock_client
@@ -577,9 +542,7 @@ class TestMaximusProviderFactoryExecute:
         }
         mock_response.raise_for_status = MagicMock()
 
-        with patch.object(
-            provider, '_ensure_initialized', new_callable=AsyncMock
-        ):
+        with patch.object(provider, "_ensure_initialized", new_callable=AsyncMock):
             mock_client: AsyncMock = AsyncMock()
             mock_client.request.return_value = mock_response
             provider._client = mock_client
@@ -602,9 +565,7 @@ class TestMaximusProviderFactoryExecute:
         mock_response.json.return_value = {"success": True}
         mock_response.raise_for_status = MagicMock()
 
-        with patch.object(
-            provider, '_ensure_initialized', new_callable=AsyncMock
-        ):
+        with patch.object(provider, "_ensure_initialized", new_callable=AsyncMock):
             mock_client: AsyncMock = AsyncMock()
             mock_client.request.return_value = mock_response
             provider._client = mock_client
@@ -623,9 +584,7 @@ class TestMaximusProviderFactoryExecute:
         mock_response.json.return_value = {"success": False}
         mock_response.raise_for_status = MagicMock()
 
-        with patch.object(
-            provider, '_ensure_initialized', new_callable=AsyncMock
-        ):
+        with patch.object(provider, "_ensure_initialized", new_callable=AsyncMock):
             mock_client: AsyncMock = AsyncMock()
             mock_client.request.return_value = mock_response
             provider._client = mock_client
@@ -659,9 +618,7 @@ class TestMaximusProviderErrorHandling:
         mock_response.json.return_value = {"error": "Service unavailable"}
         mock_response.raise_for_status = MagicMock()
 
-        with patch.object(
-            provider, '_ensure_initialized', new_callable=AsyncMock
-        ):
+        with patch.object(provider, "_ensure_initialized", new_callable=AsyncMock):
             mock_client: AsyncMock = AsyncMock()
             mock_client.request.return_value = mock_response
             provider._client = mock_client
@@ -747,9 +704,7 @@ class TestMaximusProviderBackgroundTasks:
         """HYPOTHESIS: _evaluate_in_tribunal catches exceptions."""
         provider: MaximusProvider = MaximusProvider()
 
-        with patch.object(
-            provider, 'tribunal_evaluate', new_callable=AsyncMock
-        ) as mock_evaluate:
+        with patch.object(provider, "tribunal_evaluate", new_callable=AsyncMock) as mock_evaluate:
             mock_evaluate.side_effect = Exception("Test error")
 
             # Should not raise - best effort
@@ -760,9 +715,7 @@ class TestMaximusProviderBackgroundTasks:
         """HYPOTHESIS: _store_interaction catches exceptions."""
         provider: MaximusProvider = MaximusProvider()
 
-        with patch.object(
-            provider, 'memory_store', new_callable=AsyncMock
-        ) as mock_store:
+        with patch.object(provider, "memory_store", new_callable=AsyncMock) as mock_store:
             mock_store.side_effect = Exception("Test error")
 
             # Should not raise - best effort

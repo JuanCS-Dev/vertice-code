@@ -21,12 +21,14 @@ import os
 # TESTE 1: PATH TRAVERSAL PROTECTION
 # =============================================================================
 
+
 class TestPathTraversalProtection:
     """Testa proteção contra path traversal."""
 
     @pytest.fixture
     def validator(self):
         from vertice_cli.core.input_validator import InputValidator
+
         return InputValidator()
 
     def test_blocks_parent_directory_traversal(self, validator):
@@ -100,12 +102,14 @@ class TestPathTraversalProtection:
 # TESTE 2: COMMAND INJECTION PROTECTION
 # =============================================================================
 
+
 class TestCommandInjectionProtection:
     """Testa proteção contra command injection."""
 
     @pytest.fixture
     def validator(self):
         from vertice_cli.core.input_validator import InputValidator
+
         return InputValidator()
 
     def test_blocks_command_chaining_semicolon(self, validator):
@@ -118,8 +122,9 @@ class TestCommandInjectionProtection:
 
         for cmd in dangerous:
             result = validator.validate_command(cmd, allow_shell=False)
-            assert not result.is_valid or result.warnings, \
-                f"VULNERABILITY: {cmd} not blocked/warned"
+            assert (
+                not result.is_valid or result.warnings
+            ), f"VULNERABILITY: {cmd} not blocked/warned"
 
     def test_blocks_command_chaining_and(self, validator):
         """Bloqueia && para encadear comandos."""
@@ -130,8 +135,9 @@ class TestCommandInjectionProtection:
 
         for cmd in dangerous:
             result = validator.validate_command(cmd, allow_shell=False)
-            assert not result.is_valid or result.warnings, \
-                f"VULNERABILITY: {cmd} not blocked/warned"
+            assert (
+                not result.is_valid or result.warnings
+            ), f"VULNERABILITY: {cmd} not blocked/warned"
 
     def test_blocks_command_chaining_or(self, validator):
         """Bloqueia || para encadear comandos."""
@@ -142,8 +148,9 @@ class TestCommandInjectionProtection:
 
         for cmd in dangerous:
             result = validator.validate_command(cmd, allow_shell=False)
-            assert not result.is_valid or result.warnings, \
-                f"VULNERABILITY: {cmd} not blocked/warned"
+            assert (
+                not result.is_valid or result.warnings
+            ), f"VULNERABILITY: {cmd} not blocked/warned"
 
     def test_blocks_command_substitution_backticks(self, validator):
         """Bloqueia `command` substitution."""
@@ -154,8 +161,9 @@ class TestCommandInjectionProtection:
 
         for cmd in dangerous:
             result = validator.validate_command(cmd, allow_shell=False)
-            assert not result.is_valid or result.warnings, \
-                f"VULNERABILITY: {cmd} not blocked/warned"
+            assert (
+                not result.is_valid or result.warnings
+            ), f"VULNERABILITY: {cmd} not blocked/warned"
 
     def test_blocks_command_substitution_dollar(self, validator):
         """Bloqueia $(command) substitution."""
@@ -166,8 +174,9 @@ class TestCommandInjectionProtection:
 
         for cmd in dangerous:
             result = validator.validate_command(cmd, allow_shell=False)
-            assert not result.is_valid or result.warnings, \
-                f"VULNERABILITY: {cmd} not blocked/warned"
+            assert (
+                not result.is_valid or result.warnings
+            ), f"VULNERABILITY: {cmd} not blocked/warned"
 
     def test_blocks_pipe_to_shell(self, validator):
         """Bloqueia pipe para shell."""
@@ -178,8 +187,9 @@ class TestCommandInjectionProtection:
 
         for cmd in dangerous:
             result = validator.validate_command(cmd, allow_shell=False)
-            assert not result.is_valid or result.warnings, \
-                f"VULNERABILITY: {cmd} not blocked/warned"
+            assert (
+                not result.is_valid or result.warnings
+            ), f"VULNERABILITY: {cmd} not blocked/warned"
 
     def test_blocks_destructive_commands(self, validator):
         """Bloqueia comandos destrutivos."""
@@ -194,13 +204,13 @@ class TestCommandInjectionProtection:
 
         for cmd in dangerous:
             result = validator.validate_command(cmd, allow_shell=False)
-            assert not result.is_valid, \
-                f"VULNERABILITY: destructive command not blocked: {cmd}"
+            assert not result.is_valid, f"VULNERABILITY: destructive command not blocked: {cmd}"
 
 
 # =============================================================================
 # TESTE 3: RESOURCE EXHAUSTION PROTECTION
 # =============================================================================
+
 
 class TestResourceExhaustionProtection:
     """Testa proteção contra resource exhaustion."""
@@ -213,16 +223,13 @@ class TestResourceExhaustionProtection:
         huge_context = {"data": "x" * (100 * 1024 * 1024)}
 
         with pytest.raises((ValueError, Exception)) as exc_info:
-            AgentTask(
-                request="test",
-                session_id="test",
-                context=huge_context
-            )
+            AgentTask(request="test", session_id="test", context=huge_context)
 
         # Deve mencionar tamanho ou memória
         error_msg = str(exc_info.value).lower()
-        assert any(word in error_msg for word in ["size", "memory", "exceeds", "maximum"]), \
-            f"Error should mention size limit, got: {exc_info.value}"
+        assert any(
+            word in error_msg for word in ["size", "memory", "exceeds", "maximum"]
+        ), f"Error should mention size limit, got: {exc_info.value}"
 
     def test_agent_task_blocks_too_many_keys(self):
         """AgentTask deve bloquear contexto com muitas keys."""
@@ -232,21 +239,19 @@ class TestResourceExhaustionProtection:
         huge_keys = {f"key_{i}": i for i in range(20000)}
 
         with pytest.raises((ValueError, Exception)) as exc_info:
-            AgentTask(
-                request="test",
-                session_id="test",
-                context=huge_keys
-            )
+            AgentTask(request="test", session_id="test", context=huge_keys)
 
         # Deve mencionar keys ou quantidade
         error_msg = str(exc_info.value).lower()
-        assert any(word in error_msg for word in ["keys", "maximum", "10000"]), \
-            f"Error should mention key limit, got: {exc_info.value}"
+        assert any(
+            word in error_msg for word in ["keys", "maximum", "10000"]
+        ), f"Error should mention key limit, got: {exc_info.value}"
 
 
 # =============================================================================
 # TESTE 4: SANDBOX ISOLATION
 # =============================================================================
+
 
 class TestSandboxIsolation:
     """Testa isolamento de sandbox para execução de comandos."""
@@ -254,6 +259,7 @@ class TestSandboxIsolation:
     def test_sandbox_exists(self):
         """Sandbox module deve existir."""
         from vertice_cli.core.sandbox import SecureExecutor
+
         assert SecureExecutor is not None
 
     def test_sandbox_has_safe_commands(self):
@@ -261,8 +267,7 @@ class TestSandboxIsolation:
         from vertice_cli.core.sandbox import SecureExecutor
 
         # Deve ter SAFE_COMMANDS definido na classe
-        assert hasattr(SecureExecutor, 'SAFE_COMMANDS'), \
-            "SecureExecutor missing SAFE_COMMANDS list"
+        assert hasattr(SecureExecutor, "SAFE_COMMANDS"), "SecureExecutor missing SAFE_COMMANDS list"
 
     def test_sandbox_validates_commands(self):
         """Sandbox deve validar comandos antes de executar."""
@@ -279,6 +284,7 @@ class TestSandboxIsolation:
 # TESTE 5: ENVIRONMENT VARIABLE PROTECTION
 # =============================================================================
 
+
 class TestEnvironmentProtection:
     """Testa proteção de variáveis de ambiente."""
 
@@ -286,7 +292,7 @@ class TestEnvironmentProtection:
         """API keys não devem aparecer em mensagens de erro."""
         # Simula um erro com API key no ambiente
         test_key = "sk-test-1234567890abcdef"
-        os.environ['TEST_API_KEY'] = test_key
+        os.environ["TEST_API_KEY"] = test_key
 
         try:
             # Cria uma exceção e verifica que não vaza a key
@@ -296,7 +302,7 @@ class TestEnvironmentProtection:
             assert test_key not in error_msg
 
         finally:
-            del os.environ['TEST_API_KEY']
+            del os.environ["TEST_API_KEY"]
 
     def test_sensitive_env_vars_sanitized(self):
         """Variáveis sensíveis devem ser sanitizadas."""
@@ -305,17 +311,18 @@ class TestEnvironmentProtection:
         executor = SecureExecutor()
 
         # Se tem método de sanitizar env, deve bloquear vars perigosas
-        if hasattr(executor, '_sanitize_environment'):
+        if hasattr(executor, "_sanitize_environment"):
             env = executor._sanitize_environment()
 
             # Não deve ter LD_PRELOAD (pode injetar código)
-            assert 'LD_PRELOAD' not in env or env.get('LD_PRELOAD') == ''
-            assert 'LD_LIBRARY_PATH' not in env or env.get('LD_LIBRARY_PATH') == ''
+            assert "LD_PRELOAD" not in env or env.get("LD_PRELOAD") == ""
+            assert "LD_LIBRARY_PATH" not in env or env.get("LD_LIBRARY_PATH") == ""
 
 
 # =============================================================================
 # TESTE 6: FILE OPERATION SAFETY
 # =============================================================================
+
 
 class TestFileOperationSafety:
     """Testa segurança de operações de arquivo."""
@@ -325,43 +332,48 @@ class TestFileOperationSafety:
         from vertice_cli.tools.base import ToolRegistry
 
         registry = ToolRegistry()
-        write_tool = registry.get('write_file')
+        write_tool = registry.get("write_file")
         if write_tool is None:
             # Tool pode não estar registrada - verificar via input_validator
             from vertice_cli.core.input_validator import validate_file_path
+
             result = validate_file_path("/etc/passwd")
             assert not result.is_valid, "Path validation should block /etc/passwd"
             return
 
         # Tentar escrever em path perigoso deve falhar
-        assert hasattr(write_tool, 'validate_inputs') or \
-               hasattr(write_tool, '_validate') or \
-               hasattr(write_tool, 'execute'), \
-            "write_file tool should have input validation"
+        assert (
+            hasattr(write_tool, "validate_inputs")
+            or hasattr(write_tool, "_validate")
+            or hasattr(write_tool, "execute")
+        ), "write_file tool should have input validation"
 
     def test_read_tool_validates_path(self):
         """Read tool deve validar path antes de ler."""
         from vertice_cli.tools.base import ToolRegistry
 
         registry = ToolRegistry()
-        read_tool = registry.get('read_file')
+        read_tool = registry.get("read_file")
         if read_tool is None:
             # Tool pode não estar registrada - verificar via input_validator
             from vertice_cli.core.input_validator import validate_file_path
+
             result = validate_file_path("~/.ssh/id_rsa")
             assert not result.is_valid, "Path validation should block ~/.ssh/id_rsa"
             return
 
         # Deve ter validação
-        assert hasattr(read_tool, 'validate_inputs') or \
-               hasattr(read_tool, '_validate') or \
-               hasattr(read_tool, 'execute'), \
-            "read_file tool should have input validation"
+        assert (
+            hasattr(read_tool, "validate_inputs")
+            or hasattr(read_tool, "_validate")
+            or hasattr(read_tool, "execute")
+        ), "read_file tool should have input validation"
 
 
 # =============================================================================
 # SMOKE TEST DE SEGURANÇA
 # =============================================================================
+
 
 class TestSecuritySmokeTest:
     """Smoke test rápido de segurança."""
@@ -409,7 +421,7 @@ class TestSecuritySmokeTest:
                 for node in ast.walk(tree):
                     if isinstance(node, ast.Call):
                         if isinstance(node.func, ast.Name):
-                            if node.func.id in ('eval', 'exec'):
+                            if node.func.id in ("eval", "exec"):
                                 dangerous_calls.append(
                                     f"{py_file.name}:{node.lineno} - {node.func.id}()"
                                 )
@@ -418,6 +430,6 @@ class TestSecuritySmokeTest:
 
         if dangerous_calls:
             pytest.fail(
-                "VULNERABILITY: Found eval/exec in non-sandbox core files:\n" +
-                "\n".join(dangerous_calls)
+                "VULNERABILITY: Found eval/exec in non-sandbox core files:\n"
+                + "\n".join(dangerous_calls)
             )

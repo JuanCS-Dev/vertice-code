@@ -33,6 +33,7 @@ class Veredicto(Enum):
 @dataclass
 class AnaliseDetalhada:
     """Análise detalhada de um resultado de teste."""
+
     teste_nome: str
     agente: str
     tarefa: str
@@ -80,17 +81,13 @@ class TesteE2EReal:
         except Exception as e:
             chunks.append(f"\n[ERRO]: {e}")
             import traceback
+
             chunks.append(traceback.format_exc())
 
         return "".join(chunks)
 
     def analisar_resultado(
-        self,
-        nome: str,
-        agente: str,
-        tarefa: str,
-        output: str,
-        expectativas: Dict[str, Any]
+        self, nome: str, agente: str, tarefa: str, output: str, expectativas: Dict[str, Any]
     ) -> AnaliseDetalhada:
         """Analisa criticamente o resultado de um teste."""
 
@@ -213,7 +210,7 @@ class TesteE2EReal:
         agente: str,
         tarefa: str,
         expectativas: Dict[str, Any],
-        arquivos: Optional[List[str]] = None
+        arquivos: Optional[List[str]] = None,
     ) -> AnaliseDetalhada:
         """Executa um teste completo com análise."""
 
@@ -268,12 +265,15 @@ class TesteE2EReal:
             tarefa="Faça uma auditoria de segurança completa deste código",
             expectativas={
                 "keywords": [
-                    "sql", "injection",  # SQL Injection
-                    "password", "secret",  # Credenciais expostas
+                    "sql",
+                    "injection",  # SQL Injection
+                    "password",
+                    "secret",  # Credenciais expostas
                     "md5",  # Criptografia fraca
-                    "vulnerability", "critical",  # Severidade
+                    "vulnerability",
+                    "critical",  # Severidade
                 ]
-            }
+            },
         )
 
         # ================================================================
@@ -286,11 +286,12 @@ class TesteE2EReal:
             expectativas={
                 "keywords": [
                     "score",  # Score de qualidade
-                    "issue", "problem",  # Problemas identificados
+                    "issue",
+                    "problem",  # Problemas identificados
                     "function",  # Análise de funções
                     "recommendation",  # Recomendações
                 ]
-            }
+            },
         )
 
         # ================================================================
@@ -302,11 +303,14 @@ class TesteE2EReal:
             tarefa="Explore este codebase e liste todos os arquivos, classes e funções principais",
             expectativas={
                 "keywords": [
-                    "file", "src",  # Arquivos
-                    "class", "userservice",  # Classes
-                    "function", "def",  # Funções
+                    "file",
+                    "src",  # Arquivos
+                    "class",
+                    "userservice",  # Classes
+                    "function",
+                    "def",  # Funções
                 ]
-            }
+            },
         )
 
         # ================================================================
@@ -319,10 +323,11 @@ class TesteE2EReal:
             expectativas={
                 "keywords": [
                     "performance",  # Tema
-                    "bottleneck", "optimization",  # Problemas
+                    "bottleneck",
+                    "optimization",  # Problemas
                     "score",  # Métricas
                 ]
-            }
+            },
         )
 
         # ================================================================
@@ -335,10 +340,11 @@ class TesteE2EReal:
             expectativas={
                 "keywords": [
                     "refactor",  # Tema
-                    "duplicate", "extract",  # Padrões
+                    "duplicate",
+                    "extract",  # Padrões
                     "improve",  # Melhorias
                 ]
-            }
+            },
         )
 
         # ================================================================
@@ -350,11 +356,12 @@ class TesteE2EReal:
             tarefa="Gere casos de teste para as funções principais",
             expectativas={
                 "keywords": [
-                    "test", "assert",  # Estrutura de teste
+                    "test",
+                    "assert",  # Estrutura de teste
                     "def test_",  # Funções de teste
                     "case",  # Casos
                 ]
-            }
+            },
         )
 
         # ================================================================
@@ -366,11 +373,13 @@ class TesteE2EReal:
             tarefa="Gere documentação para as funções e classes",
             expectativas={
                 "keywords": [
-                    "docstring", "documentation",  # Tipo
-                    "param", "return",  # Estrutura
+                    "docstring",
+                    "documentation",  # Tipo
+                    "param",
+                    "return",  # Estrutura
                     "function",  # Escopo
                 ]
-            }
+            },
         )
 
         # ================================================================
@@ -382,11 +391,13 @@ class TesteE2EReal:
             tarefa="Analise a arquitetura deste código e sugira melhorias",
             expectativas={
                 "keywords": [
-                    "architecture", "design",  # Tema
-                    "module", "component",  # Estrutura
+                    "architecture",
+                    "design",  # Tema
+                    "module",
+                    "component",  # Estrutura
                     "pattern",  # Padrões
                 ]
-            }
+            },
         )
 
         # ================================================================
@@ -398,10 +409,12 @@ class TesteE2EReal:
             tarefa="Planeje como adicionar autenticação JWT a este código",
             expectativas={
                 "keywords": [
-                    "plan", "step",  # Estrutura
-                    "task", "implementation",  # Detalhes
+                    "plan",
+                    "step",  # Estrutura
+                    "task",
+                    "implementation",  # Detalhes
                 ]
-            }
+            },
         )
 
         # ================================================================
@@ -413,11 +426,12 @@ class TesteE2EReal:
             tarefa="Sugira configuração de deploy para este projeto",
             expectativas={
                 "keywords": [
-                    "deploy", "docker",  # Ferramentas
+                    "deploy",
+                    "docker",  # Ferramentas
                     "configuration",  # Config
                     "infrastructure",  # Infra
                 ]
-            }
+            },
         )
 
         return self.gerar_relatorio()
@@ -528,7 +542,9 @@ class TesteE2EReal:
             linhas.append("Muitos agentes não estão funcionando adequadamente.")
 
         # Agentes que precisam de atenção
-        problematicos = [r for r in self.resultados if r.veredicto in [Veredicto.RUIM, Veredicto.FALHA_TOTAL]]
+        problematicos = [
+            r for r in self.resultados if r.veredicto in [Veredicto.RUIM, Veredicto.FALHA_TOTAL]
+        ]
         if problematicos:
             linhas.append("\n🔧 AGENTES QUE PRECISAM DE ATENÇÃO:")
             for r in problematicos:
@@ -541,6 +557,7 @@ class TesteE2EReal:
 
         if todos_negativos:
             from collections import Counter
+
             mais_comuns = Counter(todos_negativos).most_common(5)
             linhas.append("\n🔴 PROBLEMAS MAIS FREQUENTES:")
             for problema, count in mais_comuns:

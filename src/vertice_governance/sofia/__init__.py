@@ -49,20 +49,9 @@
 """
 
 # Import from individual modules (flat structure)
-from .virtues import (
-    VirtueEngine,
-    VirtueType,
-    VirtueDefinition,
-    VirtueExpression
-)
+from .virtues import VirtueEngine, VirtueType, VirtueDefinition, VirtueExpression
 
-from .socratic import (
-    SocraticEngine,
-    SocraticQuestion,
-    QuestionType,
-    DialoguePhase,
-    DialogueState
-)
+from .socratic import SocraticEngine, SocraticQuestion, QuestionType, DialoguePhase, DialogueState
 
 from .deliberation import (
     DeliberationEngine,
@@ -71,7 +60,7 @@ from .deliberation import (
     DeliberationPhase,
     ThinkingMode,
     Perspective,
-    ConsequenceAnalysis
+    ConsequenceAnalysis,
 )
 
 from .discernment import (
@@ -79,16 +68,10 @@ from .discernment import (
     DiscernmentResult,
     DiscernmentPhase,
     WayType,
-    TraditionWisdom
+    TraditionWisdom,
 )
 
-from .agent import (
-    SofiaAgent,
-    SofiaConfig,
-    SofiaState,
-    SofiaCounsel,
-    CounselType
-)
+from .agent import SofiaAgent, SofiaConfig, SofiaState, SofiaCounsel, CounselType
 
 __version__ = "3.0.0"
 __codename__ = "2030 Vision"
@@ -102,20 +85,17 @@ __all__ = [
     "__codename__",
     "__author__",
     "__license__",
-
     # Virtues
     "VirtueEngine",
     "VirtueType",
     "VirtueDefinition",
     "VirtueExpression",
-
     # Socratic
     "SocraticEngine",
     "SocraticQuestion",
     "QuestionType",
     "DialoguePhase",
     "DialogueState",
-
     # Deliberation
     "DeliberationEngine",
     "DeliberationResult",
@@ -124,14 +104,12 @@ __all__ = [
     "ThinkingMode",
     "Perspective",
     "ConsequenceAnalysis",
-
     # Discernment
     "DiscernmentEngine",
     "DiscernmentResult",
     "DiscernmentPhase",
     "WayType",
     "TraditionWisdom",
-
     # Agent
     "SofiaAgent",
     "SofiaConfig",
@@ -152,15 +130,13 @@ def quick_start_sofia() -> SofiaAgent:
         agent_id="sofia-quick-start",
         socratic_ratio=0.7,
         system2_threshold=0.6,
-        always_suggest_community=True
+        always_suggest_community=True,
     )
     return SofiaAgent(config=config)
 
 
 def create_sofia(
-    agent_id: str = "sofia",
-    socratic_ratio: float = 0.7,
-    system2_threshold: float = 0.6
+    agent_id: str = "sofia", socratic_ratio: float = 0.7, system2_threshold: float = 0.6
 ) -> SofiaAgent:
     """
     Create Sofia with custom configuration.
@@ -174,9 +150,7 @@ def create_sofia(
         SofiaAgent: Configured Sofia counselor agent
     """
     config = SofiaConfig(
-        agent_id=agent_id,
-        socratic_ratio=socratic_ratio,
-        system2_threshold=system2_threshold
+        agent_id=agent_id, socratic_ratio=socratic_ratio, system2_threshold=system2_threshold
     )
     return SofiaAgent(config=config)
 

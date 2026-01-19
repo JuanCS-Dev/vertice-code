@@ -410,9 +410,9 @@ class TestTypeSafetyCompliance:
                         # All parameters should have annotations
                         for param_name, param in sig.parameters.items():
                             if param_name not in ("self", "cls"):
-                                assert param.annotation != inspect.Parameter.empty, (
-                                    f"{name}.{method_name} parameter '{param_name}' missing type hint"
-                                )
+                                assert (
+                                    param.annotation != inspect.Parameter.empty
+                                ), f"{name}.{method_name} parameter '{param_name}' missing type hint"
 
     def test_pydantic_models_use_field_validators(self) -> None:
         """Test that Pydantic models use Field for validation."""

@@ -50,9 +50,9 @@ class DialogueState:
     def should_synthesize(self) -> bool:
         """Verifica se e hora de sintetizar."""
         return (
-            len(self.questions_asked) >= 3 or
-            self.depth_level >= 2 or
-            self.user_understanding_level > 0.8
+            len(self.questions_asked) >= 3
+            or self.depth_level >= 2
+            or self.user_understanding_level > 0.8
         )
 
 

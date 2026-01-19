@@ -47,25 +47,28 @@ logger = logging.getLogger(__name__)
 
 class OrchestratorType(Enum):
     """Type of orchestrator to use."""
-    CORE = auto()      # OrchestratorAgent - for L0-L3 decisions
-    STATE = auto()     # ActiveOrchestrator - for complex state workflows
-    SQUAD = auto()     # DevSquad - for 5-phase dev tasks
-    AUTO = auto()      # Let coordinator decide
+
+    CORE = auto()  # OrchestratorAgent - for L0-L3 decisions
+    STATE = auto()  # ActiveOrchestrator - for complex state workflows
+    SQUAD = auto()  # DevSquad - for 5-phase dev tasks
+    AUTO = auto()  # Let coordinator decide
 
 
 class TaskCategory(Enum):
     """Category of task for routing."""
-    SIMPLE_QUERY = "simple_query"           # L0: Just answer
-    CODE_CHANGE = "code_change"             # L1: Execute + notify
-    ARCHITECTURE = "architecture"            # L2: Requires approval
-    PRODUCTION = "production"                # L3: Human only
-    FULL_FEATURE = "full_feature"           # DevSquad 5-phase
-    COMPLEX_WORKFLOW = "complex_workflow"    # ActiveOrchestrator
+
+    SIMPLE_QUERY = "simple_query"  # L0: Just answer
+    CODE_CHANGE = "code_change"  # L1: Execute + notify
+    ARCHITECTURE = "architecture"  # L2: Requires approval
+    PRODUCTION = "production"  # L3: Human only
+    FULL_FEATURE = "full_feature"  # DevSquad 5-phase
+    COMPLEX_WORKFLOW = "complex_workflow"  # ActiveOrchestrator
 
 
 @dataclass
 class CoordinationDecision:
     """Record of a coordination decision."""
+
     orchestrator: OrchestratorType
     category: TaskCategory
     confidence: float
@@ -76,6 +79,7 @@ class CoordinationDecision:
 @dataclass
 class CoordinationResult:
     """Result of coordinated execution."""
+
     success: bool
     orchestrator_used: OrchestratorType
     output: Any
@@ -123,28 +127,65 @@ class AgencyCoordinator:
     # Keywords for task categorization
     CATEGORY_KEYWORDS = {
         TaskCategory.SIMPLE_QUERY: [
-            "what is", "explain", "how does", "show me", "list",
-            "describe", "tell me", "why", "when", "where",
+            "what is",
+            "explain",
+            "how does",
+            "show me",
+            "list",
+            "describe",
+            "tell me",
+            "why",
+            "when",
+            "where",
         ],
         TaskCategory.CODE_CHANGE: [
-            "fix", "update", "change", "modify", "refactor",
-            "add", "remove", "rename", "move", "optimize",
+            "fix",
+            "update",
+            "change",
+            "modify",
+            "refactor",
+            "add",
+            "remove",
+            "rename",
+            "move",
+            "optimize",
         ],
         TaskCategory.ARCHITECTURE: [
-            "design", "architect", "structure", "pattern",
-            "migration", "rewrite", "redesign", "api change",
+            "design",
+            "architect",
+            "structure",
+            "pattern",
+            "migration",
+            "rewrite",
+            "redesign",
+            "api change",
         ],
         TaskCategory.PRODUCTION: [
-            "deploy", "production", "release", "publish",
-            "database migration", "security", "credentials",
+            "deploy",
+            "production",
+            "release",
+            "publish",
+            "database migration",
+            "security",
+            "credentials",
         ],
         TaskCategory.FULL_FEATURE: [
-            "implement", "create feature", "build", "develop",
-            "new feature", "full implementation", "end to end",
+            "implement",
+            "create feature",
+            "build",
+            "develop",
+            "new feature",
+            "full implementation",
+            "end to end",
         ],
         TaskCategory.COMPLEX_WORKFLOW: [
-            "workflow", "pipeline", "orchestrate", "coordinate",
-            "multi-step", "complex task", "long running",
+            "workflow",
+            "pipeline",
+            "orchestrate",
+            "coordinate",
+            "multi-step",
+            "complex task",
+            "long running",
         ],
     }
 
@@ -201,6 +242,7 @@ class AgencyCoordinator:
 
         try:
             from agents.orchestrator import OrchestratorAgent
+
             self._core_orchestrator = OrchestratorAgent(
                 approval_callback=self._approval_callback,
                 notify_callback=self._notify_callback,
@@ -239,6 +281,7 @@ class AgencyCoordinator:
 
         try:
             from vertice_cli.orchestration.squad import DevSquad
+
             self._squad_orchestrator = DevSquad(
                 llm_client=self._vertice_client,  # VerticeClient is LLM-compatible
                 mcp_client=self._mcp_client,
@@ -312,7 +355,7 @@ class AgencyCoordinator:
         # Map to orchestrator
         orchestrator = self.CATEGORY_ORCHESTRATOR.get(
             category,
-            OrchestratorType.CORE  # Default
+            OrchestratorType.CORE,  # Default
         )
 
         # Check availability

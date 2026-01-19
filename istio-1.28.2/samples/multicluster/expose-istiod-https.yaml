@@ -69,7 +69,7 @@ spec:
         mode: SIMPLE
       connectionPool:
         http:
-          h2UpgradePolicy: UPGRADE        
+          h2UpgradePolicy: UPGRADE
     - port:
         number: 443
       tls:

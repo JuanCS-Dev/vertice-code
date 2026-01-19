@@ -5,7 +5,7 @@ import asyncio
 import sys
 from unittest.mock import AsyncMock, MagicMock
 
-sys.path.insert(0, '.')
+sys.path.insert(0, ".")
 
 from vertice_cli.shell import InteractiveShell
 
@@ -25,7 +25,7 @@ async def test_repl_flow():
 
     # Test 1: Command suggestion
     print("\n1. Testing command suggestion...")
-    rich_ctx = {'working_dir': '.', 'os': 'Linux'}
+    rich_ctx = {"working_dir": ".", "os": "Linux"}
     suggestion = await shell._get_command_suggestion("list large files", rich_ctx)
     print(f"   Suggestion: {suggestion}")
     assert "find" in suggestion, "Should suggest find command"
@@ -57,8 +57,8 @@ async def test_repl_flow():
     print("\n5. Testing command execution...")
     result = await shell._execute_command("echo 'test'")
     print(f"   Result: {result}")
-    assert result['success'], "Should execute successfully"
-    assert "test" in result['output'], "Should contain output"
+    assert result["success"], "Should execute successfully"
+    assert "test" in result["output"], "Should contain output"
     print("   ✅ PASS")
 
     # Test 6: Error handling
@@ -102,7 +102,7 @@ async def test_manual_flow_simulation():
     print()
 
     print("[THINKING] Step 1/3: Analyzing request...")
-    suggestion = await shell._get_command_suggestion("list large files", {'working_dir': '.'})
+    suggestion = await shell._get_command_suggestion("list large files", {"working_dir": "."})
     print("[THINKING] Step 2/3: Command ready (0.1s) ✓")
     print()
 
@@ -122,14 +122,14 @@ async def test_manual_flow_simulation():
     print()
 
     result = await shell._execute_command(suggestion)
-    if result['success']:
+    if result["success"]:
         print("✓ Success")
         # Show some output
-        output_lines = result['output'].strip().split('\n')[:3]
+        output_lines = result["output"].strip().split("\n")[:3]
         for line in output_lines:
             if line.strip():
                 print(line)
-        if len(result['output'].split('\n')) > 3:
+        if len(result["output"].split("\n")) > 3:
             print("...")
 
     print()

@@ -1,15 +1,15 @@
 # 📚 OPEN RESPONSES - FASE 2: ENHANCEMENTS
 
-**Versão**: 2.0  
-**Data**: 16 de Janeiro de 2026  
-**Autor**: Antigravity AI Assistant  
-**Para**: Desenvolvedor Sênior (Implementador Offline)  
+**Versão**: 2.0
+**Data**: 16 de Janeiro de 2026
+**Autor**: Antigravity AI Assistant
+**Para**: Desenvolvedor Sênior (Implementador Offline)
 **Pré-requisito**: Fase 1 já implementada (Types, Streaming, Tools, Providers, Agents, Protocols, WebApp, TUI)
 
 ---
 
 > **NOTA IMPORTANTE**: Este documento é **100% autocontido**. Toda a documentação,
-> schemas, exemplos e especificações necessárias estão incluídos aqui. Você NÃO 
+> schemas, exemplos e especificações necessárias estão incluídos aqui. Você NÃO
 > precisa de acesso à internet para implementar.
 
 ---
@@ -103,13 +103,13 @@ Adicionar ao arquivo `src/vertice_core/openresponses_types.py`:
 class SummaryTextContent:
     """
     Resumo do raciocínio seguro para mostrar ao usuário.
-    
+
     Spec: "Summaries are designed to be safe to show to end users"
     """
-    
+
     type: Literal["summary_text"] = "summary_text"
     text: str = ""
-    
+
     def to_dict(self) -> dict:
         return {"type": self.type, "text": self.text}
 
@@ -118,14 +118,14 @@ class SummaryTextContent:
 class ReasoningItem:
     """
     Item de raciocínio (chain-of-thought).
-    
+
     Spec: "Reasoning items expose the model's internal thought process"
-    
+
     Campos:
     - content: Raciocínio raw (pode ser null/truncado por segurança)
     - summary: Resumo seguro para usuários
     - encrypted_content: Dados opacos para round-trip (provider-specific)
-    
+
     Exemplo:
     {
         "type": "reasoning",
@@ -136,14 +136,14 @@ class ReasoningItem:
         "encrypted_content": null
     }
     """
-    
+
     type: Literal["reasoning"] = "reasoning"
     id: str = field(default_factory=lambda: _generate_id("rs"))
     status: ItemStatus = ItemStatus.IN_PROGRESS
     content: List[OutputTextContent] = field(default_factory=list)
     summary: List[SummaryTextContent] = field(default_factory=list)
     encrypted_content: Optional[str] = None
-    
+
     def to_dict(self) -> dict:
         result = {
             "type": self.type,
@@ -155,22 +155,22 @@ class ReasoningItem:
         if self.encrypted_content:
             result["encrypted_content"] = self.encrypted_content
         return result
-    
+
     def get_reasoning_text(self) -> str:
         """Retorna todo o texto de raciocínio concatenado."""
         return "".join(c.text for c in self.content if hasattr(c, 'text'))
-    
+
     def get_summary_text(self) -> str:
         """Retorna todo o texto do resumo concatenado."""
         return "".join(s.text for s in self.summary)
-    
+
     def append_content(self, text: str) -> None:
         """Adiciona texto ao content."""
         if self.content:
             self.content[0].text += text
         else:
             self.content.append(OutputTextContent(text=text))
-    
+
     def set_summary(self, text: str) -> None:
         """Define o summary."""
         self.summary = [SummaryTextContent(text=text)]
@@ -187,18 +187,18 @@ Adicionar ao arquivo `src/vertice_core/openresponses_stream.py`:
 class ReasoningContentDeltaEvent(StreamEvent):
     """
     Evento: response.reasoning_content.delta
-    
+
     Emitido durante streaming de conteúdo de raciocínio.
     """
-    
+
     item_id: str = ""
     output_index: int = 0
     content_index: int = 0
     delta: str = ""
-    
+
     def __post_init__(self):
         self.type = "response.reasoning_content.delta"
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
@@ -214,17 +214,17 @@ class ReasoningContentDeltaEvent(StreamEvent):
 class ReasoningSummaryDeltaEvent(StreamEvent):
     """
     Evento: response.reasoning_summary.delta
-    
+
     Emitido durante streaming de resumo de raciocínio.
     """
-    
+
     item_id: str = ""
     output_index: int = 0
     delta: str = ""
-    
+
     def __post_init__(self):
         self.type = "response.reasoning_summary.delta"
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
@@ -239,18 +239,18 @@ class ReasoningSummaryDeltaEvent(StreamEvent):
 class ReasoningContentDoneEvent(StreamEvent):
     """
     Evento: response.reasoning_content.done
-    
+
     Emitido quando conteúdo de raciocínio está completo.
     """
-    
+
     item_id: str = ""
     output_index: int = 0
     content_index: int = 0
     text: str = ""
-    
+
     def __post_init__(self):
         self.type = "response.reasoning_content.done"
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
@@ -270,15 +270,15 @@ class ReasoningContentDoneEvent(StreamEvent):
 def add_reasoning(self) -> ReasoningItem:
     """
     Adiciona ReasoningItem e emite output_item.added.
-    
+
     Retorna o item para uso posterior.
     """
     from .openresponses_types import ReasoningItem
-    
+
     item = ReasoningItem(status=ItemStatus.IN_PROGRESS)
     self.response.output.append(item)
     output_index = len(self.response.output) - 1
-    
+
     self._events.append(
         OutputItemAddedEvent(
             sequence_number=self._next_seq(),
@@ -286,7 +286,7 @@ def add_reasoning(self) -> ReasoningItem:
             item=item.to_dict()
         )
     )
-    
+
     return item
 
 
@@ -296,7 +296,7 @@ def reasoning_delta(self, item: "ReasoningItem", delta: str) -> "OpenResponsesSt
     """
     item.append_content(delta)
     output_index = self.response.output.index(item)
-    
+
     self._events.append(
         ReasoningContentDeltaEvent(
             sequence_number=self._next_seq(),
@@ -362,7 +362,7 @@ from enum import Enum
 
 class ImageDetail(str, Enum):
     """Nível de detalhe para processamento de imagem."""
-    
+
     AUTO = "auto"
     LOW = "low"
     HIGH = "high"
@@ -372,13 +372,13 @@ class ImageDetail(str, Enum):
 class InputImageContent:
     """
     Conteúdo de imagem no input do usuário.
-    
+
     Spec: "User inputs can include multiple modalities (e.g. text, images)"
-    
+
     Suporta dois modos:
     - image_url: URL pública da imagem
     - image_base64: Dados codificados em base64
-    
+
     Exemplo:
     {
         "type": "input_image",
@@ -386,13 +386,13 @@ class InputImageContent:
         "detail": "auto"
     }
     """
-    
+
     type: Literal["input_image"] = "input_image"
     image_url: Optional[str] = None
     image_base64: Optional[str] = None
     media_type: Optional[str] = None  # e.g., "image/png"
     detail: ImageDetail = ImageDetail.AUTO
-    
+
     def to_dict(self) -> dict:
         result = {"type": self.type, "detail": self.detail.value}
         if self.image_url:
@@ -402,16 +402,16 @@ class InputImageContent:
             if self.media_type:
                 result["media_type"] = self.media_type
         return result
-    
+
     def to_vertex_part(self):
         """
         Converte para formato Vertex AI Part.
-        
+
         Vertex AI usa um formato específico para imagens.
         """
         from vertexai.generative_models import Part
         import base64
-        
+
         if self.image_url:
             # Para URLs, Vertex AI pode usar diretamente
             return Part.from_uri(self.image_url, mime_type=self.media_type or "image/jpeg")
@@ -419,7 +419,7 @@ class InputImageContent:
             # Para base64, decodificar e criar Part
             image_bytes = base64.b64decode(self.image_base64)
             return Part.from_data(image_bytes, mime_type=self.media_type or "image/jpeg")
-        
+
         raise ValueError("InputImageContent must have image_url or image_base64")
 
 
@@ -427,9 +427,9 @@ class InputImageContent:
 class InputFileContent:
     """
     Conteúdo de arquivo no input do usuário.
-    
+
     Spec: "User content must support multiple data types"
-    
+
     Exemplo:
     {
         "type": "input_file",
@@ -438,12 +438,12 @@ class InputFileContent:
         "filename": "document.pdf"
     }
     """
-    
+
     type: Literal["input_file"] = "input_file"
     file_data: str = ""  # Base64 encoded
     media_type: str = "application/octet-stream"
     filename: Optional[str] = None
-    
+
     def to_dict(self) -> dict:
         result = {
             "type": self.type,
@@ -459,15 +459,15 @@ class InputFileContent:
 class InputVideoContent:
     """
     Conteúdo de vídeo no input do usuário.
-    
+
     Suportado por modelos como Gemini 1.5/2.0/3.0.
     """
-    
+
     type: Literal["input_video"] = "input_video"
     video_url: Optional[str] = None
     video_base64: Optional[str] = None
     media_type: Optional[str] = None
-    
+
     def to_dict(self) -> dict:
         result = {"type": self.type}
         if self.video_url:
@@ -486,15 +486,15 @@ UserContent = InputTextContent | InputImageContent | InputFileContent | InputVid
 def convert_user_content_to_vertex(content: List[Any]) -> List:
     """
     Converte lista de UserContent para formato Vertex AI.
-    
+
     Args:
         content: Lista de InputText, InputImage, etc.
-        
+
     Returns:
         Lista de Vertex AI Parts
     """
     from vertexai.generative_models import Part
-    
+
     parts = []
     for item in content:
         if hasattr(item, 'type'):
@@ -514,7 +514,7 @@ def convert_user_content_to_vertex(content: List[Any]) -> List:
             elif item.get("type") == "input_image":
                 if "image_url" in item:
                     parts.append(Part.from_uri(item["image_url"], mime_type="image/jpeg"))
-    
+
     return parts
 
 
@@ -569,9 +569,9 @@ Adicionar ao arquivo `src/vertice_core/openresponses_types.py`:
 class UrlCitation:
     """
     Anotação de citação de URL.
-    
+
     Spec: Annotations são metadados sobre o texto gerado.
-    
+
     Exemplo:
     {
         "type": "url_citation",
@@ -581,13 +581,13 @@ class UrlCitation:
         "end_index": 50
     }
     """
-    
+
     type: Literal["url_citation"] = "url_citation"
     url: str = ""
     title: Optional[str] = None
     start_index: int = 0
     end_index: int = 0
-    
+
     def to_dict(self) -> dict:
         result = {
             "type": self.type,
@@ -604,17 +604,17 @@ class UrlCitation:
 class FileCitation:
     """
     Anotação de citação de arquivo.
-    
+
     Usado quando o modelo cita conteúdo de um arquivo fornecido.
     """
-    
+
     type: Literal["file_citation"] = "file_citation"
     file_id: str = ""
     filename: Optional[str] = None
     quote: Optional[str] = None
     start_index: int = 0
     end_index: int = 0
-    
+
     def to_dict(self) -> dict:
         result = {
             "type": self.type,
@@ -640,21 +640,21 @@ Annotation = UrlCitation | FileCitation
 class OutputTextContent:
     """
     Conteúdo de texto gerado pelo model.
-    
+
     Spec: "Model content is intentionally narrower"
     """
-    
+
     type: Literal["output_text"] = "output_text"
     text: str = ""
     annotations: List[Annotation] = field(default_factory=list)
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
             "text": self.text,
             "annotations": [a.to_dict() for a in self.annotations] if self.annotations else [],
         }
-    
+
     def add_citation(self, url: str, title: str = None, start: int = 0, end: int = None) -> None:
         """Adiciona uma citação de URL."""
         self.annotations.append(UrlCitation(
@@ -720,7 +720,7 @@ Adicionar ao arquivo `src/vertice_core/openresponses_types.py`:
 
 class TextFormatType(str, Enum):
     """Tipos de formato de texto."""
-    
+
     TEXT = "text"
     JSON_OBJECT = "json_object"
     JSON_SCHEMA = "json_schema"
@@ -731,9 +731,9 @@ class TextResponseFormat:
     """
     Formato de resposta padrão (texto livre).
     """
-    
+
     type: Literal["text"] = "text"
-    
+
     def to_dict(self) -> dict:
         return {"type": self.type}
 
@@ -742,12 +742,12 @@ class TextResponseFormat:
 class JsonObjectResponseFormat:
     """
     Formato de resposta JSON object.
-    
+
     O modelo retornará JSON válido, mas sem schema específico.
     """
-    
+
     type: Literal["json_object"] = "json_object"
-    
+
     def to_dict(self) -> dict:
         return {"type": self.type}
 
@@ -756,9 +756,9 @@ class JsonObjectResponseFormat:
 class JsonSchemaResponseFormat:
     """
     Formato de resposta JSON com schema definido.
-    
+
     Spec: "Structured Output permite forçar JSON válido"
-    
+
     Exemplo:
     {
         "type": "json_schema",
@@ -773,13 +773,13 @@ class JsonSchemaResponseFormat:
         }
     }
     """
-    
+
     type: Literal["json_schema"] = "json_schema"
     name: str = ""
     description: Optional[str] = None
     schema: Dict[str, Any] = field(default_factory=dict)
     strict: bool = True
-    
+
     def to_dict(self) -> dict:
         result = {
             "type": self.type,
@@ -792,16 +792,16 @@ class JsonSchemaResponseFormat:
         if self.description:
             result["json_schema"]["description"] = self.description
         return result
-    
+
     @classmethod
     def from_pydantic_model(cls, model_class, name: str = None) -> "JsonSchemaResponseFormat":
         """
         Cria JsonSchemaResponseFormat a partir de model Pydantic.
-        
+
         Args:
             model_class: Classe Pydantic (BaseModel subclass)
             name: Nome opcional (usa nome da classe se não fornecido)
-            
+
         Returns:
             JsonSchemaResponseFormat configurado
         """
@@ -833,12 +833,12 @@ async def stream_chat_structured(
     Stream com structured output (JSON Schema).
     """
     from google.genai.types import GenerateContentConfig
-    
+
     config = GenerateContentConfig(
         response_mime_type="application/json",
         response_schema=response_format.schema,
     )
-    
+
     async for chunk in self.stream_chat(
         messages,
         generation_config=config,
@@ -855,7 +855,7 @@ async def stream_chat_structured(
 
 Extensões devem usar prefixo do implementador:
 
-> "New item types that are not part of this specification MUST be prefixed 
+> "New item types that are not part of this specification MUST be prefixed
 > with the implementor slug (for example, `acme:search_result`)"
 
 ## 6.2 Prefixo Vertice
@@ -882,9 +882,9 @@ Adicionar ao arquivo `src/vertice_core/openresponses_types.py`:
 class VerticeTelemetryItem:
     """
     Item de telemetria (extensão Vertice).
-    
+
     Spec: "New item types MUST be prefixed with implementor slug"
-    
+
     Exemplo:
     {
         "type": "vertice:telemetry",
@@ -896,7 +896,7 @@ class VerticeTelemetryItem:
         "provider": "vertex-ai"
     }
     """
-    
+
     type: Literal["vertice:telemetry"] = "vertice:telemetry"
     id: str = field(default_factory=lambda: _generate_id("vt"))
     status: ItemStatus = ItemStatus.COMPLETED
@@ -906,7 +906,7 @@ class VerticeTelemetryItem:
     provider: str = ""
     tokens_input: int = 0
     tokens_output: int = 0
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
@@ -925,10 +925,10 @@ class VerticeTelemetryItem:
 class VerticeGovernanceItem:
     """
     Item de governança (extensão Vertice).
-    
+
     Resultado de verificação de segurança/compliance.
     """
-    
+
     type: Literal["vertice:governance"] = "vertice:governance"
     id: str = field(default_factory=lambda: _generate_id("vg"))
     status: ItemStatus = ItemStatus.COMPLETED
@@ -936,7 +936,7 @@ class VerticeGovernanceItem:
     reason: Optional[str] = None
     violations: List[str] = field(default_factory=list)
     checked_at: Optional[str] = None  # ISO timestamp
-    
+
     def to_dict(self) -> dict:
         result = {
             "type": self.type,
@@ -977,7 +977,7 @@ from vertice_core.openresponses_types import (
 
 class TestReasoningItem:
     """Testes para ReasoningItem."""
-    
+
     def test_creation(self):
         item = ReasoningItem()
         assert item.type == "reasoning"
@@ -986,25 +986,25 @@ class TestReasoningItem:
         assert item.content == []
         assert item.summary == []
         assert item.encrypted_content is None
-    
+
     def test_append_content(self):
         item = ReasoningItem()
         item.append_content("Step 1: Analyze")
         item.append_content(" Step 2: Process")
         assert item.get_reasoning_text() == "Step 1: Analyze Step 2: Process"
-    
+
     def test_set_summary(self):
         item = ReasoningItem()
         item.set_summary("Analyzed user request and found solution.")
         assert len(item.summary) == 1
         assert item.get_summary_text() == "Analyzed user request and found solution."
-    
+
     def test_to_dict(self):
         item = ReasoningItem()
         item.append_content("Thinking...")
         item.set_summary("Short summary")
         item.status = ItemStatus.COMPLETED
-        
+
         d = item.to_dict()
         assert d["type"] == "reasoning"
         assert d["status"] == "completed"
@@ -1014,7 +1014,7 @@ class TestReasoningItem:
 
 class TestUrlCitation:
     """Testes para UrlCitation."""
-    
+
     def test_creation(self):
         citation = UrlCitation(
             url="https://example.com",
@@ -1024,7 +1024,7 @@ class TestUrlCitation:
         )
         assert citation.type == "url_citation"
         assert citation.url == "https://example.com"
-    
+
     def test_to_dict(self):
         citation = UrlCitation(url="https://example.com", start_index=10, end_index=20)
         d = citation.to_dict()
@@ -1035,7 +1035,7 @@ class TestUrlCitation:
 
 class TestJsonSchemaResponseFormat:
     """Testes para JsonSchemaResponseFormat."""
-    
+
     def test_creation(self):
         schema_format = JsonSchemaResponseFormat(
             name="user_info",
@@ -1051,7 +1051,7 @@ class TestJsonSchemaResponseFormat:
         assert schema_format.type == "json_schema"
         assert schema_format.name == "user_info"
         assert schema_format.strict is True
-    
+
     def test_to_dict(self):
         schema_format = JsonSchemaResponseFormat(name="test", schema={"type": "object"})
         d = schema_format.to_dict()
@@ -1062,7 +1062,7 @@ class TestJsonSchemaResponseFormat:
 
 class TestVerticeExtensions:
     """Testes para extensões Vertice."""
-    
+
     def test_telemetry_item(self):
         item = VerticeTelemetryItem(
             latency_ms=142,
@@ -1072,7 +1072,7 @@ class TestVerticeExtensions:
         )
         assert item.type == "vertice:telemetry"
         assert item.id.startswith("vt_")
-        
+
         d = item.to_dict()
         assert d["latency_ms"] == 142
         assert d["model"] == "gemini-3-pro"
@@ -1146,6 +1146,6 @@ print('✅ All Phase 2 types imported successfully!')
 
 **FIM DO DOCUMENTO**
 
-Autor: Antigravity AI Assistant  
-Data: 16 de Janeiro de 2026  
+Autor: Antigravity AI Assistant
+Data: 16 de Janeiro de 2026
 Versão: 2.0

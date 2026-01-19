@@ -11,12 +11,14 @@ from pathlib import Path
 import tempfile
 
 from vertice_cli.core.conversation import ConversationManager, ConversationState
-from vertice_cli.core.recovery import (
-    ErrorRecoveryEngine, ErrorCategory, RecoveryContext
-)
+from vertice_cli.core.recovery import ErrorRecoveryEngine, ErrorCategory, RecoveryContext
 from vertice_cli.core.workflow import (
-    WorkflowStep, DependencyGraph, AutoCritique, ThoughtPath,
-    CheckpointManager, Transaction
+    WorkflowStep,
+    DependencyGraph,
+    AutoCritique,
+    ThoughtPath,
+    CheckpointManager,
+    Transaction,
 )
 
 
@@ -27,7 +29,7 @@ class TestConversationEdgeCases:
         """Edge: Zero context window size."""
         manager = ConversationManager(
             session_id="edge_empty",
-            max_context_tokens=0  # EDGE: Zero size
+            max_context_tokens=0,  # EDGE: Zero size
         )
 
         turn = manager.start_turn("Test")
@@ -43,7 +45,7 @@ class TestConversationEdgeCases:
         """Edge: Context window of 1 token."""
         manager = ConversationManager(
             session_id="edge_single",
-            max_context_tokens=1  # EDGE: Minimal size
+            max_context_tokens=1,  # EDGE: Minimal size
         )
 
         turn = manager.start_turn("Long query that exceeds one token limit by far")
@@ -53,37 +55,36 @@ class TestConversationEdgeCases:
         assert manager.context_window.get_usage_percentage() <= 1.0
 
         print("✓ EDGE: Single token context handled")
-# UPDATED
-# UPDATED
-# UPDATED
-# UPDATED
-# UPDATED
-# UPDATED
-# UPDATED
-# UPDATED
-# UPDATED
-# UPDATED
-# UPDATED
-# UPDATED
-# UPDATED
-# UPDATED
-# UPDATED
-# UPDATED
-# UPDATED
-# UPDATED
+        # UPDATED
+        # UPDATED
+        # UPDATED
+        # UPDATED
+        # UPDATED
+        # UPDATED
+        # UPDATED
+        # UPDATED
+        # UPDATED
+        # UPDATED
+        # UPDATED
+        # UPDATED
+        # UPDATED
+        # UPDATED
+        # UPDATED
+        # UPDATED
+        # UPDATED
+        # UPDATED
         # - Preemptive compaction for large inputs
         assert len(manager.turns) <= manager.max_turns, "Memory leak prevented ✅"
         # Note: Usage may exceed 100% temporarily (adversarial input)
         # but memory is bounded and system survives
 
-        print(f"✓ EDGE: Extreme overflow survived (turns bounded to {len(manager.turns)}, compaction triggered)")
+        print(
+            f"✓ EDGE: Extreme overflow survived (turns bounded to {len(manager.turns)}, compaction triggered)"
+        )
 
     def test_rapid_fire_turns(self):
         """Edge: 1000 turns added rapidly."""
-        manager = ConversationManager(
-            session_id="edge_rapid",
-            max_context_tokens=1000
-        )
+        manager = ConversationManager(session_id="edge_rapid", max_context_tokens=1000)
 
         start = time.time()
         for i in range(1000):
@@ -148,9 +149,9 @@ class TestRecoveryEdgeCases:
     async def test_extremely_long_error(self):
         """Edge: 10,000 character error message."""
         llm = Mock()
-        llm.generate_async = AsyncMock(return_value={
-            "content": "DIAGNOSIS: Too long\nCORRECTION: Truncate"
-        })
+        llm.generate_async = AsyncMock(
+            return_value={"content": "DIAGNOSIS: Too long\nCORRECTION: Truncate"}
+        )
 
         engine = ErrorRecoveryEngine(llm_client=llm, max_attempts=2)
 
@@ -180,7 +181,7 @@ class TestRecoveryEdgeCases:
             failed_args={},
             previous_result=None,
             user_intent="test",
-            previous_commands=[]
+            previous_commands=[],
         )
 
         # Should handle timeout gracefully
@@ -195,9 +196,9 @@ class TestRecoveryEdgeCases:
     async def test_malformed_llm_response(self):
         """Edge: LLM returns garbage."""
         llm = Mock()
-        llm.generate_async = AsyncMock(return_value={
-            "content": "asdkfjasldkfj random garbage !@#$%^&*()"
-        })
+        llm.generate_async = AsyncMock(
+            return_value={"content": "asdkfjasldkfj random garbage !@#$%^&*()"}
+        )
 
         engine = ErrorRecoveryEngine(llm_client=llm, max_attempts=2)
 
@@ -210,7 +211,7 @@ class TestRecoveryEdgeCases:
             failed_args={},
             previous_result=None,
             user_intent="test",
-            previous_commands=[]
+            previous_commands=[],
         )
 
         diagnosis, correction = await engine.diagnose_error(context)
@@ -360,7 +361,7 @@ class TestWorkflowEdgeCases:
 
         result = Mock()
         result.success = True
-        result.data = b'\x00\x01\x02\xff\xfe'  # Binary data
+        result.data = b"\x00\x01\x02\xff\xfe"  # Binary data
 
         # Should handle without crash
         critique_result = critique.critique_step(step, result)
@@ -423,6 +424,7 @@ class TestWorkflowEdgeCases:
 
         # Rollback with mock checkpoint manager
         import asyncio
+
         result = asyncio.run(tx.rollback(Mock()))
 
         # Should handle gracefully
@@ -436,7 +438,7 @@ class TestConstitutionalEdgeCases:
 
     def test_constitutional_weights_sum(self):
         """Edge: Verify weights sum to 1.0."""
-        path = ThoughtPath("test", "Test", [])
+        ThoughtPath("test", "Test", [])
 
         # Weights should sum to 1.0
         weights_sum = 0.4 + 0.3 + 0.3
@@ -485,7 +487,7 @@ class TestConstitutionalEdgeCases:
         """Edge: NaN/Infinity in scoring."""
         path = ThoughtPath("nan", "Test", [])
 
-        path.completeness_score = float('nan')
+        path.completeness_score = float("nan")
         path.validation_score = 0.5
         path.efficiency_score = 0.5
 
@@ -506,10 +508,7 @@ class TestPerformanceEdgeCases:
 
     def test_context_compaction_stress(self):
         """Stress: Compact context 1000 times."""
-        manager = ConversationManager(
-            session_id="stress_compact",
-            max_context_tokens=100
-        )
+        manager = ConversationManager(session_id="stress_compact", max_context_tokens=100)
 
         start = time.time()
         for i in range(1000):
@@ -542,7 +541,7 @@ class TestPerformanceEdgeCases:
 
         # Create complex graph
         for i in range(500):
-            deps = [f"step{j}" for j in range(max(0, i-5), i)]
+            deps = [f"step{j}" for j in range(max(0, i - 5), i)]
             step = WorkflowStep(f"step{i}", "tool", {}, dependencies=deps)
             graph.add_step(step)
 
@@ -566,7 +565,7 @@ class TestMemoryLeaks:
         manager = ConversationManager(
             session_id="mem_test",
             max_context_tokens=1000,
-            max_turns=1000  # FIX: Enforce limit
+            max_turns=1000,  # FIX: Enforce limit
         )
 
         # Add 10000 turns (should cap at max_turns)
@@ -576,8 +575,9 @@ class TestMemoryLeaks:
             manager.transition_state(ConversationState.IDLE, "done")
 
         # Should be capped at max_turns
-        assert len(manager.turns) <= manager.max_turns, \
-            f"Turns {len(manager.turns)} exceeds max {manager.max_turns}"
+        assert (
+            len(manager.turns) <= manager.max_turns
+        ), f"Turns {len(manager.turns)} exceeds max {manager.max_turns}"
 
         print(f"✓ MEMORY: Growth bounded to {len(manager.turns)} turns (max: {manager.max_turns})")
 
@@ -604,9 +604,9 @@ class TestMemoryLeaks:
 # Summary
 def print_edge_case_summary():
     """Print edge case summary."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("EDGE CASE TESTING SUMMARY")
-    print("="*60)
+    print("=" * 60)
     print("\nConversation Edge Cases:")
     print("  ✓ Zero context window")
     print("  ✓ Single token context")
@@ -643,9 +643,9 @@ def print_edge_case_summary():
     print("\nMemory Safety:")
     print("  ✓ Bounded growth (10K turns)")
     print("  ✓ Checkpoint storage")
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("ALL EDGE CASES HANDLED! ✅")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
 
 if __name__ == "__main__":

@@ -35,25 +35,25 @@ TOP 5 VULNERABILIDADES CRÍTICAS
    Risco: TUI trava por 1+ minuto quando API responde lentamente
    Impacto: Usuário acredita app crashou, força kill
    Solução: Mudar timeout de 60s para 5s
-   
+
 2. SEM TIMEOUT NO _ensure_initialized() (CRÍTICO - Severidade 5)
    Arquivo: vertice_tui/core/llm_client.py:233
    Risco: App pode hangar na inicialização indefinidamente
    Impacto: Startup congelado, impossível usar
    Solução: Adicionar timeout de 5s com asyncio.wait_for()
-   
+
 3. MCP CLIENT SEM FALLBACK (CRÍTICO - Severidade 5)
    Arquivo: vertice_cli/core/mcp.py
    Risco: Se MCP falha, TODAS as ferramentas ficam indisponíveis
    Impacto: Chat continua, mas nenhuma ferramenta funciona
    Solução: Implementar fallback com subprocess direto
-   
+
 4. HISTORY MANAGER SEM LOCK (CRÍTICO - Severidade 3)
    Arquivo: vertice_tui/core/history_manager.py
    Risco: Race condition em contexto mutável
    Impacto: Contexto corrompido pode gerar respostas aleatórias
    Solução: Adicionar threading.RLock() ao context list
-   
+
 5. FILE I/O SEM TIMEOUT (CRÍTICO - Severidade 4)
    Arquivo: vertice_tui/core/bridge.py:174, 1325
    Risco: NFS hang pode travar TUI indefinidamente
@@ -147,11 +147,11 @@ PONTOS DE FALHA SILENCIOSOS
 1. ToolBridge._create_registry() - 7 blocos try/except
    Se qualquer categoria falha → SILENCIOSO
    Usuário não sabe que tools não carregaram
-   
+
 2. Agent dynamic imports - AGENT_REGISTRY lazy-load
    ImportError capturado → SILENCIOSO
    Usuário vê "Agent invocation failed"
-   
+
 3. Bridge.__init__() - Múltiplos subsystems
    Nenhuma validação de sucesso
    Estado inconsistente possível

@@ -1,8 +1,8 @@
 # 🗄️ Archive Manifest
 
-**Purpose:** Historical artifacts, deprecated code, and backups  
-**Retention Policy:** 90 days auto-cleanup  
-**Access:** Read-only  
+**Purpose:** Historical artifacts, deprecated code, and backups
+**Retention Policy:** 90 days auto-cleanup
+**Access:** Read-only
 
 ---
 
@@ -37,5 +37,5 @@ find .archive/ -type f -mtime +90 -delete
 
 ---
 
-**Last Cleanup:** Never (just created)  
+**Last Cleanup:** Never (just created)
 **Next Cleanup:** 2026-02-21

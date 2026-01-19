@@ -104,9 +104,7 @@ class ProceduralMemory:
                 seen.add(entry.id)
                 unique_results.append(entry)
 
-        unique_results.sort(
-            key=lambda e: e.metadata.get("success_rate", 0), reverse=True
-        )
+        unique_results.sort(key=lambda e: e.metadata.get("success_rate", 0), reverse=True)
         return unique_results[:top_k]
 
     def update_success_rate(self, skill_name: str, success: bool) -> None:
@@ -124,9 +122,7 @@ class ProceduralMemory:
             entry.metadata["execution_count"] = exec_count + 1
             entry.importance = new_rate
 
-    def add_step(
-        self, skill_name: str, step: str, position: Optional[int] = None
-    ) -> None:
+    def add_step(self, skill_name: str, step: str, position: Optional[int] = None) -> None:
         """Add a step to an existing procedure."""
         if skill_name in self.procedures:
             entry = self.procedures[skill_name]

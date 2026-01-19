@@ -80,9 +80,7 @@ class TestMaximusClientTribunal:
             "consensus_score": 0.9,
         }
 
-        with patch.object(
-            client, '_ensure_provider', new_callable=AsyncMock
-        ):
+        with patch.object(client, "_ensure_provider", new_callable=AsyncMock):
             client._provider = mock_provider
             client._initialized = True
 
@@ -99,9 +97,7 @@ class TestMaximusClientTribunal:
         mock_provider = AsyncMock()
         mock_provider.tribunal_health.return_value = {"status": "healthy"}
 
-        with patch.object(
-            client, '_ensure_provider', new_callable=AsyncMock
-        ):
+        with patch.object(client, "_ensure_provider", new_callable=AsyncMock):
             client._provider = mock_provider
             client._initialized = True
 
@@ -121,9 +117,7 @@ class TestMaximusClientMemory:
         mock_provider = AsyncMock()
         mock_provider.memory_store.return_value = {"id": "mem_123"}
 
-        with patch.object(
-            client, '_ensure_provider', new_callable=AsyncMock
-        ):
+        with patch.object(client, "_ensure_provider", new_callable=AsyncMock):
             client._provider = mock_provider
             client._initialized = True
 
@@ -142,9 +136,7 @@ class TestMaximusClientMemory:
         mock_provider = AsyncMock()
         mock_provider.memory_search.return_value = [{"id": "mem_1"}]
 
-        with patch.object(
-            client, '_ensure_provider', new_callable=AsyncMock
-        ):
+        with patch.object(client, "_ensure_provider", new_callable=AsyncMock):
             client._provider = mock_provider
             client._initialized = True
 
@@ -160,9 +152,7 @@ class TestMaximusClientMemory:
         mock_provider = AsyncMock()
         mock_provider.memory_consolidate.return_value = {"episodic": 5}
 
-        with patch.object(
-            client, '_ensure_provider', new_callable=AsyncMock
-        ):
+        with patch.object(client, "_ensure_provider", new_callable=AsyncMock):
             client._provider = mock_provider
             client._initialized = True
 
@@ -185,9 +175,7 @@ class TestMaximusClientFactory:
             "code": "def x(): pass",
         }
 
-        with patch.object(
-            client, '_ensure_provider', new_callable=AsyncMock
-        ):
+        with patch.object(client, "_ensure_provider", new_callable=AsyncMock):
             client._provider = mock_provider
             client._initialized = True
 
@@ -210,9 +198,7 @@ class TestMaximusClientFactory:
             {"name": "tool2"},
         ]
 
-        with patch.object(
-            client, '_ensure_provider', new_callable=AsyncMock
-        ):
+        with patch.object(client, "_ensure_provider", new_callable=AsyncMock):
             client._provider = mock_provider
             client._initialized = True
 
@@ -236,9 +222,7 @@ class TestMaximusClientStreaming:
         mock_provider = AsyncMock()
         mock_provider.stream = mock_stream
 
-        with patch.object(
-            client, '_ensure_provider', new_callable=AsyncMock
-        ):
+        with patch.object(client, "_ensure_provider", new_callable=AsyncMock):
             client._provider = mock_provider
             client._initialized = True
 
@@ -259,9 +243,7 @@ class TestMaximusClientStreaming:
         mock_provider = AsyncMock()
         mock_provider.stream = mock_stream
 
-        with patch.object(
-            client, '_ensure_provider', new_callable=AsyncMock
-        ):
+        with patch.object(client, "_ensure_provider", new_callable=AsyncMock):
             client._provider = mock_provider
             client._initialized = True
 

@@ -218,11 +218,13 @@ class MemoryCortex:
             sources.append("episodic")
 
         if "semantic" in memory_types:
-            tasks.append(self.semantic.search(
-                query=query,
-                embedding=kwargs.get("embedding"),
-                limit=limit,
-            ))
+            tasks.append(
+                self.semantic.search(
+                    query=query,
+                    embedding=kwargs.get("embedding"),
+                    limit=limit,
+                )
+            )
             sources.append("semantic")
 
         search_results = await asyncio.gather(*tasks)

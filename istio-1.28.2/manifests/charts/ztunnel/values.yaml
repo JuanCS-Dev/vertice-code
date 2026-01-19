@@ -31,7 +31,7 @@ _internal_defaults_do_not_set:
 
   # Additional volumes to the ztunnel pod
   volumes: []
-  
+
   # Tolerations for the ztunnel pod
   tolerations:
     - effect: NoSchedule
@@ -118,7 +118,7 @@ _internal_defaults_do_not_set:
   # TODO Ambient inpod - for OpenShift, set to the following to get writable sockets in hostmounts to work, eventually consider CSI driver instead
   #seLinuxOptions:
   #  type: spc_t
-  
+
   # resourceScope controls what resources will be processed by helm.
   # This is useful when installing Istio on a cluster where some resources need to be owned by a cluster administrator and some can be owned by the mesh administrator.
   # It can be one of:

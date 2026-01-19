@@ -26,27 +26,26 @@ def git_repo():
         subprocess.run(["git", "init"], cwd=repo, capture_output=True, check=True)
         subprocess.run(
             ["git", "config", "user.email", "test@example.com"],
-            cwd=repo, capture_output=True, check=True
+            cwd=repo,
+            capture_output=True,
+            check=True,
         )
         subprocess.run(
-            ["git", "config", "user.name", "Test User"],
-            cwd=repo, capture_output=True, check=True
+            ["git", "config", "user.name", "Test User"], cwd=repo, capture_output=True, check=True
         )
 
         # Create initial commit
         (repo / "README.md").write_text("# Test Project\n")
         subprocess.run(["git", "add", "."], cwd=repo, capture_output=True, check=True)
         subprocess.run(
-            ["git", "commit", "-m", "Initial commit"],
-            cwd=repo, capture_output=True, check=True
+            ["git", "commit", "-m", "Initial commit"], cwd=repo, capture_output=True, check=True
         )
 
         # Create second commit
         (repo / "main.py").write_text("def main():\n    pass\n")
         subprocess.run(["git", "add", "."], cwd=repo, capture_output=True, check=True)
         subprocess.run(
-            ["git", "commit", "-m", "Add main.py"],
-            cwd=repo, capture_output=True, check=True
+            ["git", "commit", "-m", "Add main.py"], cwd=repo, capture_output=True, check=True
         )
 
         yield repo
@@ -126,9 +125,7 @@ class TestGitLogTool:
     def test_git_log_shows_history(self, git_repo):
         """Log shows commit history."""
         result = subprocess.run(
-            ["git", "-C", str(git_repo), "log", "--oneline", "-5"],
-            capture_output=True,
-            text=True
+            ["git", "-C", str(git_repo), "log", "--oneline", "-5"], capture_output=True, text=True
         )
 
         assert result.returncode == 0
@@ -138,9 +135,7 @@ class TestGitLogTool:
     def test_git_log_count(self, git_repo):
         """Log respects count limit."""
         result = subprocess.run(
-            ["git", "-C", str(git_repo), "log", "--oneline", "-1"],
-            capture_output=True,
-            text=True
+            ["git", "-C", str(git_repo), "log", "--oneline", "-1"], capture_output=True, text=True
         )
 
         assert result.returncode == 0
@@ -156,18 +151,13 @@ class TestGitAddTool:
         # Create new file
         (git_repo / "new.py").write_text("# new file")
 
-        result = subprocess.run(
-            ["git", "-C", str(git_repo), "add", "new.py"],
-            capture_output=True
-        )
+        result = subprocess.run(["git", "-C", str(git_repo), "add", "new.py"], capture_output=True)
 
         assert result.returncode == 0
 
         # Verify staged
         status = subprocess.run(
-            ["git", "-C", str(git_repo), "status", "--porcelain"],
-            capture_output=True,
-            text=True
+            ["git", "-C", str(git_repo), "status", "--porcelain"], capture_output=True, text=True
         )
         assert "A  new.py" in status.stdout
 
@@ -177,10 +167,7 @@ class TestGitAddTool:
         (git_repo / "file1.txt").write_text("content1")
         (git_repo / "file2.txt").write_text("content2")
 
-        result = subprocess.run(
-            ["git", "-C", str(git_repo), "add", "."],
-            capture_output=True
-        )
+        result = subprocess.run(["git", "-C", str(git_repo), "add", "."], capture_output=True)
 
         assert result.returncode == 0
 
@@ -191,26 +178,21 @@ class TestGitBranchTool:
     def test_git_branch_create(self, git_repo):
         """Create new branch."""
         result = subprocess.run(
-            ["git", "-C", str(git_repo), "branch", "feature-test"],
-            capture_output=True
+            ["git", "-C", str(git_repo), "branch", "feature-test"], capture_output=True
         )
 
         assert result.returncode == 0
 
         # Verify branch exists
         branches = subprocess.run(
-            ["git", "-C", str(git_repo), "branch"],
-            capture_output=True,
-            text=True
+            ["git", "-C", str(git_repo), "branch"], capture_output=True, text=True
         )
         assert "feature-test" in branches.stdout
 
     def test_git_branch_list(self, git_repo):
         """List branches shows current."""
         result = subprocess.run(
-            ["git", "-C", str(git_repo), "branch"],
-            capture_output=True,
-            text=True
+            ["git", "-C", str(git_repo), "branch"], capture_output=True, text=True
         )
 
         assert result.returncode == 0
@@ -224,23 +206,17 @@ class TestGitCheckoutTool:
     def test_git_checkout_branch(self, git_repo):
         """Checkout switches branch."""
         # Create and switch to new branch
-        subprocess.run(
-            ["git", "-C", str(git_repo), "branch", "test-branch"],
-            capture_output=True
-        )
+        subprocess.run(["git", "-C", str(git_repo), "branch", "test-branch"], capture_output=True)
 
         result = subprocess.run(
-            ["git", "-C", str(git_repo), "checkout", "test-branch"],
-            capture_output=True
+            ["git", "-C", str(git_repo), "checkout", "test-branch"], capture_output=True
         )
 
         assert result.returncode == 0
 
         # Verify on new branch
         status = subprocess.run(
-            ["git", "-C", str(git_repo), "branch", "--show-current"],
-            capture_output=True,
-            text=True
+            ["git", "-C", str(git_repo), "branch", "--show-current"], capture_output=True, text=True
         )
         assert "test-branch" in status.stdout
 
@@ -254,18 +230,14 @@ class TestGitStashTool:
         (git_repo / "README.md").write_text("# Modified content\n")
 
         result = subprocess.run(
-            ["git", "-C", str(git_repo), "stash"],
-            capture_output=True,
-            text=True
+            ["git", "-C", str(git_repo), "stash"], capture_output=True, text=True
         )
 
         assert result.returncode == 0
 
         # Verify clean working tree
         status = subprocess.run(
-            ["git", "-C", str(git_repo), "status", "--porcelain"],
-            capture_output=True,
-            text=True
+            ["git", "-C", str(git_repo), "status", "--porcelain"], capture_output=True, text=True
         )
         assert status.stdout.strip() == ""
 
@@ -276,10 +248,7 @@ class TestGitStashTool:
         subprocess.run(["git", "-C", str(git_repo), "stash"], capture_output=True)
 
         # Pop stash
-        result = subprocess.run(
-            ["git", "-C", str(git_repo), "stash", "pop"],
-            capture_output=True
-        )
+        result = subprocess.run(["git", "-C", str(git_repo), "stash", "pop"], capture_output=True)
 
         assert result.returncode == 0
 

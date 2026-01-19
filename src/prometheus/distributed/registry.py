@@ -263,9 +263,7 @@ class DistributedSkillsRegistry(PrometheusSkillsRegistry):
             skill
             for skill in all_skills[: top_k * 2]  # Get more to filter
             if skill.success_rate >= min_quality
-        ][
-            :top_k
-        ]  # Take top k
+        ][:top_k]  # Take top k
 
         if not top_skills:
             logger.debug("No high-quality skills to share")

@@ -378,8 +378,7 @@ class TestElicitationIntegration:
         manager = ElicitationManager("github-mcp")
         request = manager.request_oauth_flow(
             authorization_url=(
-                "https://github.com/login/oauth/authorize"
-                "?client_id=xxx&scope=repo&state=abc123"
+                "https://github.com/login/oauth/authorize" "?client_id=xxx&scope=repo&state=abc123"
             ),
             service_name="GitHub",
         )

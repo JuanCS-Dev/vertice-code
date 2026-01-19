@@ -1,6 +1,6 @@
 # 🔧 API REFERENCE
 
-**Version:** 1.0.0  
+**Version:** 1.0.0
 **For Developers & Contributors**
 
 ---
@@ -239,10 +239,10 @@ if selected:
 elif cmd.startswith("/mycmd "):
     # Your command logic here
     arg = cmd[7:].strip()
-    
+
     # Do something
     result = my_custom_function(arg)
-    
+
     # Return (continue_loop, output)
     return False, f"Result: {result}"
 ```
@@ -296,23 +296,23 @@ def extract_function(
     try:
         content = file_path.read_text()
         lines = content.splitlines()
-        
+
         # Extract selected lines
         selected = lines[start_line:end_line+1]
-        
+
         # Create new function
         new_func = f"def {new_func_name}():\n"
         new_func += "\n".join(f"    {line}" for line in selected)
-        
+
         # Replace in original
         lines[start_line:end_line+1] = [f"{new_func_name}()"]
-        
+
         # Add function definition
         lines.insert(start_line, new_func)
-        
+
         # Write back
         file_path.write_text("\n".join(lines))
-        
+
         return RefactoringResult(
             success=True,
             message=f"Extracted {end_line-start_line+1} lines",
@@ -410,7 +410,7 @@ from pathlib import Path
 def test_shell_initialization():
     """Test shell starts correctly."""
     shell = InteractiveShell()
-    
+
     assert shell.indexer is not None
     assert shell.lsp_client is not None
     assert shell.suggestion_engine is not None
@@ -418,7 +418,7 @@ def test_shell_initialization():
 def test_language_detection():
     """Test LSP language detection."""
     from qwen_dev_cli.intelligence.lsp_client import Language
-    
+
     assert Language.detect(Path("test.py")) == Language.PYTHON
     assert Language.detect(Path("test.ts")) == Language.TYPESCRIPT
     assert Language.detect(Path("test.go")) == Language.GO

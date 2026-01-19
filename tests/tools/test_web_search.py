@@ -12,10 +12,7 @@ class TestWebSearchTool:
         """Test basic web search."""
         tool = WebSearchTool()
 
-        result = await tool.execute(
-            query="Python programming language",
-            max_results=3
-        )
+        result = await tool.execute(query="Python programming language", max_results=3)
 
         assert result.success
         assert len(result.data) <= 3
@@ -37,7 +34,7 @@ class TestWebSearchTool:
         result = await tool.execute(
             query="Gradio 6 release",
             max_results=5,
-            time_range="m"  # Last month
+            time_range="m",  # Last month
         )
 
         assert result.success
@@ -48,10 +45,7 @@ class TestWebSearchTool:
         """Test search with unlikely query returns gracefully."""
         tool = WebSearchTool()
 
-        result = await tool.execute(
-            query="xyzabc123unlikely456query789",
-            max_results=5
-        )
+        result = await tool.execute(query="xyzabc123unlikely456query789", max_results=5)
 
         # Should succeed (DuckDuckGo may return related results even for nonsense)
         assert result.success
@@ -67,7 +61,7 @@ class TestWebSearchTool:
         # Test upper bound
         result = await tool.execute(
             query="Python",
-            max_results=100  # Should be clamped to 20
+            max_results=100,  # Should be clamped to 20
         )
 
         assert result.success
@@ -76,7 +70,7 @@ class TestWebSearchTool:
         # Test lower bound
         result = await tool.execute(
             query="Python",
-            max_results=0  # Should be clamped to 1
+            max_results=0,  # Should be clamped to 1
         )
 
         assert result.success
@@ -87,10 +81,7 @@ class TestWebSearchTool:
         """Test real-world use case: searching Gradio documentation."""
         tool = WebSearchTool()
 
-        result = await tool.execute(
-            query="Gradio 6.0.0 Blocks API documentation",
-            max_results=5
-        )
+        result = await tool.execute(query="Gradio 6.0.0 Blocks API documentation", max_results=5)
 
         assert result.success
         assert len(result.data) > 0
@@ -111,10 +102,7 @@ class TestSearchDocumentationTool:
         """Test documentation search without site restriction."""
         tool = SearchDocumentationTool()
 
-        result = await tool.execute(
-            query="asyncio documentation",
-            max_results=3
-        )
+        result = await tool.execute(query="asyncio documentation", max_results=3)
 
         assert result.success
         assert len(result.data) <= 3
@@ -125,11 +113,7 @@ class TestSearchDocumentationTool:
         """Test documentation search with site restriction."""
         tool = SearchDocumentationTool()
 
-        result = await tool.execute(
-            query="Blocks API",
-            site="gradio.app",
-            max_results=5
-        )
+        result = await tool.execute(query="Blocks API", site="gradio.app", max_results=5)
 
         assert result.success
         assert result.metadata["search_type"] == "documentation"
@@ -145,9 +129,7 @@ class TestSearchDocumentationTool:
         tool = SearchDocumentationTool()
 
         result = await tool.execute(
-            query="Actions workflow syntax",
-            site="docs.github.com",
-            max_results=3
+            query="Actions workflow syntax", site="docs.github.com", max_results=3
         )
 
         assert result.success
@@ -162,11 +144,7 @@ class TestSearchDocumentationTool:
         """Test searching Read the Docs."""
         tool = SearchDocumentationTool()
 
-        result = await tool.execute(
-            query="Django models",
-            site="readthedocs.io",
-            max_results=3
-        )
+        result = await tool.execute(query="Django models", site="readthedocs.io", max_results=3)
 
         assert result.success
         # Results may vary, just ensure no crash

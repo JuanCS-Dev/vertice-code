@@ -28,30 +28,44 @@ def create_strict_constitution() -> Constitution:
     )
 
     # Adicionar principios extras de seguranca
-    constitution.add_principle(ConstitutionalPrinciple(
-        id=uuid4(),
-        name="Principio da Menor Permissao",
-        description="""
+    constitution.add_principle(
+        ConstitutionalPrinciple(
+            id=uuid4(),
+            name="Principio da Menor Permissao",
+            description="""
         Todo agente deve operar com o minimo de permissoes necessarias.
         Qualquer request de permissao adicional deve ser justificado,
         logado e aprovado explicitamente.
         """,
-        category="DISALLOW",
-        severity=Severity.HIGH,
-        patterns=frozenset([
-            "preciso de mais permissoes",
-            "acesso root",
-            "modo admin",
-            "sudo",
-        ]),
-    ))
+            category="DISALLOW",
+            severity=Severity.HIGH,
+            patterns=frozenset(
+                [
+                    "preciso de mais permissoes",
+                    "acesso root",
+                    "modo admin",
+                    "sudo",
+                ]
+            ),
+        )
+    )
 
     # Red flags adicionais
-    constitution._red_flags.update([
-        "rm -rf", "chmod 777", "disable firewall", "open port",
-        "base64 decode", "eval(", "exec(", "compile(",
-        "__import__", "os.system", "subprocess.call",
-    ])
+    constitution._red_flags.update(
+        [
+            "rm -rf",
+            "chmod 777",
+            "disable firewall",
+            "open port",
+            "base64 decode",
+            "eval(",
+            "exec(",
+            "compile(",
+            "__import__",
+            "os.system",
+            "subprocess.call",
+        ]
+    )
 
     return constitution
 

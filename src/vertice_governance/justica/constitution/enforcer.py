@@ -128,9 +128,7 @@ class ConstitutionalEnforcer:
                 )
         return None
 
-    def _check_escalate_principles(
-        self, action: str
-    ) -> Optional[EnforcementResult]:
+    def _check_escalate_principles(self, action: str) -> Optional[EnforcementResult]:
         """Check ESCALATE principles."""
         escalate_principles = self.constitution.get_principles_by_category("ESCALATE")
         for principle in escalate_principles:
@@ -157,9 +155,7 @@ class ConstitutionalEnforcer:
                 )
         return None
 
-    def _check_escalation_triggers(
-        self, context: Dict[str, Any]
-    ) -> Optional[EnforcementResult]:
+    def _check_escalation_triggers(self, context: Dict[str, Any]) -> Optional[EnforcementResult]:
         """Check escalation triggers from context."""
         escalation_triggers = self.constitution.check_escalation_needed(context)
         if escalation_triggers:
@@ -191,9 +187,7 @@ class ConstitutionalEnforcer:
                     f"Patterns: {matched_patterns}"
                 )
 
-    def _escalate_for_red_flags(
-        self, red_flags_found: List[str]
-    ) -> EnforcementResult:
+    def _escalate_for_red_flags(self, red_flags_found: List[str]) -> EnforcementResult:
         """Escalate when multiple red flags detected."""
         self._escalations_count += 1
         return EnforcementResult(
@@ -211,10 +205,7 @@ class ConstitutionalEnforcer:
 
     def _allow_action(self, red_flags_found: List[str]) -> EnforcementResult:
         """Allow action with optional monitoring."""
-        category = (
-            EnforcementCategory.MONITOR if red_flags_found
-            else EnforcementCategory.ALLOW
-        )
+        category = EnforcementCategory.MONITOR if red_flags_found else EnforcementCategory.ALLOW
 
         return EnforcementResult(
             allowed=True,
@@ -260,12 +251,12 @@ class ConstitutionalEnforcer:
             "total_blocks": self._blocks_count,
             "total_escalations": self._escalations_count,
             "block_rate": (
-                self._blocks_count / self._enforcement_count
-                if self._enforcement_count > 0 else 0.0
+                self._blocks_count / self._enforcement_count if self._enforcement_count > 0 else 0.0
             ),
             "escalation_rate": (
                 self._escalations_count / self._enforcement_count
-                if self._enforcement_count > 0 else 0.0
+                if self._enforcement_count > 0
+                else 0.0
             ),
         }
 

@@ -57,6 +57,7 @@ class TestOrchestratorAgentE2E:
         assert len(tasks) >= 1
         # Complex task should have higher complexity
         from agents.orchestrator.types import TaskComplexity
+
         assert tasks[0].complexity in [
             TaskComplexity.MODERATE,
             TaskComplexity.COMPLEX,
@@ -117,9 +118,7 @@ class TestOrchestratorAgentE2E:
         )
 
         handoff = await orchestrator.handoff(
-            task=task,
-            to_agent=AgentRole.DEVOPS,
-            context="Deploying new feature"
+            task=task, to_agent=AgentRole.DEVOPS, context="Deploying new feature"
         )
 
         assert handoff.from_agent == AgentRole.ORCHESTRATOR
@@ -156,6 +155,7 @@ class TestCoderAgentE2E:
     def coder(self):
         """Create coder agent."""
         from agents import CoderAgent
+
         return CoderAgent()
 
     def test_coder_initialization(self, coder):
@@ -186,10 +186,10 @@ def add(a: int, b: int) -> int:
 
     def test_coder_evaluate_invalid_python(self, coder):
         """Test evaluating invalid Python code."""
-        code = '''
+        code = """
 def add(a, b)
     return a + b
-'''
+"""
         result = coder.evaluate_code(code, "python")
 
         assert result.valid_syntax is False
@@ -197,7 +197,7 @@ def add(a, b)
 
     def test_coder_extract_code_block(self, coder):
         """Test extracting code from markdown."""
-        text = '''
+        text = """
 Here is the code:
 
 ```python
@@ -206,7 +206,7 @@ def hello():
 ```
 
 That's the function.
-'''
+"""
         code = coder._extract_code_block(text, "python")
         assert "def hello():" in code
         assert "```" not in code
@@ -244,6 +244,7 @@ class TestReviewerAgentE2E:
     def reviewer(self):
         """Create reviewer agent."""
         from agents import ReviewerAgent
+
         return ReviewerAgent()
 
     def test_reviewer_initialization(self, reviewer):
@@ -265,6 +266,7 @@ class TestArchitectAgentE2E:
     def architect(self):
         """Create architect agent."""
         from agents import ArchitectAgent
+
         return ArchitectAgent()
 
     def test_architect_initialization(self, architect):
@@ -284,6 +286,7 @@ class TestResearcherAgentE2E:
     def researcher(self):
         """Create researcher agent."""
         from agents import ResearcherAgent
+
         return ResearcherAgent()
 
     def test_researcher_initialization(self, researcher):
@@ -303,6 +306,7 @@ class TestDevOpsAgentE2E:
     def devops(self):
         """Create devops agent."""
         from agents import DevOpsAgent
+
         return DevOpsAgent()
 
     def test_devops_initialization(self, devops):
@@ -337,9 +341,7 @@ class TestAgentInteractions:
 
         # Handoff
         handoff = await orchestrator.handoff(
-            task=task,
-            to_agent=agent,
-            context="Generate sorting function"
+            task=task, to_agent=agent, context="Generate sorting function"
         )
         assert handoff.to_agent == AgentRole.CODER
 
@@ -365,36 +367,42 @@ class TestAgentSingletons:
     def test_orchestrator_singleton(self):
         """Test orchestrator singleton."""
         from agents import orchestrator
+
         assert orchestrator is not None
         assert orchestrator.name == "orchestrator"
 
     def test_coder_singleton(self):
         """Test coder singleton."""
         from agents import coder
+
         assert coder is not None
         assert coder.name == "coder"
 
     def test_reviewer_singleton(self):
         """Test reviewer singleton."""
         from agents import reviewer
+
         assert reviewer is not None
         assert reviewer.name == "reviewer"
 
     def test_architect_singleton(self):
         """Test architect singleton."""
         from agents import architect
+
         assert architect is not None
         assert architect.name == "architect"
 
     def test_researcher_singleton(self):
         """Test researcher singleton."""
         from agents import researcher
+
         assert researcher is not None
         assert researcher.name == "researcher"
 
     def test_devops_singleton(self):
         """Test devops singleton."""
         from agents import devops
+
         assert devops is not None
         assert devops.name == "devops"
 
@@ -413,9 +421,9 @@ class TestAgentObservability:
         """Test trace_operation method exists."""
         from agents import orchestrator
 
-        assert hasattr(orchestrator, 'trace_operation')
-        assert hasattr(orchestrator, 'trace_llm_call')
-        assert hasattr(orchestrator, 'record_tokens')
+        assert hasattr(orchestrator, "trace_operation")
+        assert hasattr(orchestrator, "trace_llm_call")
+        assert hasattr(orchestrator, "record_tokens")
 
 
 class TestBoundedAutonomy:

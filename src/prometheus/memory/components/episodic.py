@@ -113,9 +113,7 @@ class EpisodicMemory:
 
     def recall_by_outcome(self, outcome_type: str) -> List[MemoryEntry]:
         """Retrieve experiences by outcome type (success/failure)."""
-        return [
-            e for e in self.entries if e.metadata.get("outcome_type") == outcome_type
-        ]
+        return [e for e in self.entries if e.metadata.get("outcome_type") == outcome_type]
 
     def recall_recent(self, n: int = 10) -> List[MemoryEntry]:
         """Retrieve most recent experiences."""

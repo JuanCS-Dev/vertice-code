@@ -1,16 +1,16 @@
-
 import os
 import sys
 import unittest
 from unittest.mock import MagicMock, patch
 
 # Add project root to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 
 class TestFinalAirgap(unittest.IsolatedAsyncioTestCase):
     """
     Operation 'Final Airgap' - Deep System Audit
-    
+
     Targeting 5 Dimensions of Failure:
     1. Physical Airgap (Local vs Remote Filesystem)
     2. State Airgap (Provider Switching Amnesia)
@@ -42,7 +42,9 @@ class TestFinalAirgap(unittest.IsolatedAsyncioTestCase):
 
         # Check if file content is injected (It SHOULD be for a fix, but we expect it NOT to be for the audit)
         if "./test_data/secret.txt" in full_prompt and "SECRET_CONTENT" not in full_prompt:
-            print("🔴 VULNERABILITY CONFIRMED: Local file path sent to remote agent without content injection.")
+            print(
+                "🔴 VULNERABILITY CONFIRMED: Local file path sent to remote agent without content injection."
+            )
         else:
             print("🟢 SAFE: File content appears to be injected (or test setup is wrong).")
 
@@ -61,7 +63,7 @@ class TestFinalAirgap(unittest.IsolatedAsyncioTestCase):
         context = [
             {"role": "user", "content": "My name is Juan."},
             {"role": "assistant", "content": "Hello Juan."},
-            {"role": "user", "content": "Who am I?"}
+            {"role": "user", "content": "Who am I?"},
         ]
 
         full_prompt = provider._build_prompt("Who am I?", None, context)
@@ -97,9 +99,9 @@ class TestFinalAirgap(unittest.IsolatedAsyncioTestCase):
         print(f"  State after chunk 2: {current.block_type if current else 'None'}")
 
         if current and current.block_type == BlockType.TOOL_CALL:
-             print("🟢 SAFE: BlockDetector handled split tokens correctly.")
+            print("🟢 SAFE: BlockDetector handled split tokens correctly.")
         else:
-             print("🟡 UX GLITCH: BlockDetector failed to identify split TOOL_CALL tag.")
+            print("🟡 UX GLITCH: BlockDetector failed to identify split TOOL_CALL tag.")
 
     async def test_4_protocol_airgap_mcp_timeout(self):
         """
@@ -116,9 +118,11 @@ class TestFinalAirgap(unittest.IsolatedAsyncioTestCase):
         print(f"  Long Running Tools: {MCPClient.LONG_RUNNING_TOOLS}")
 
         if "prometheus_simulate" not in MCPClient.LONG_RUNNING_TOOLS:
-            print("🔴 VULNERABILITY CONFIRMED: 'prometheus_simulate' missing from LONG_RUNNING_TOOLS.")
+            print(
+                "🔴 VULNERABILITY CONFIRMED: 'prometheus_simulate' missing from LONG_RUNNING_TOOLS."
+            )
         else:
-             print("🟢 SAFE: 'prometheus_simulate' is marked as long-running.")
+            print("🟢 SAFE: 'prometheus_simulate' is marked as long-running.")
 
     async def test_5_auth_airgap_env_check(self):
         """
@@ -130,12 +134,14 @@ class TestFinalAirgap(unittest.IsolatedAsyncioTestCase):
         # Simulate missing env
         with patch.dict(os.environ, {}, clear=True):
             from vertice_cli.core.providers.prometheus_provider import PrometheusProvider
+
             provider = PrometheusProvider()
 
             if not provider.is_available():
-                 print("🟢 SAFE: Provider reports unavailable without API key.")
+                print("🟢 SAFE: Provider reports unavailable without API key.")
             else:
-                 print("🔴 VULNERABILITY: Provider claims availability without API key!")
+                print("🔴 VULNERABILITY: Provider claims availability without API key!")
+
 
 if __name__ == "__main__":
     unittest.main()

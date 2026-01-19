@@ -75,10 +75,7 @@ class TestFileToolsE2E:
         from vertice_cli.tools.parity.file_tools import GlobTool
 
         tool = GlobTool()
-        result = await tool._execute_validated(
-            pattern="**/*.py",
-            path=str(temp_workspace)
-        )
+        result = await tool._execute_validated(pattern="**/*.py", path=str(temp_workspace))
 
         assert result.success
         # Should find test.py and nested.py
@@ -97,19 +94,12 @@ class TestGitToolsE2E:
             repo = Path(tmpdir)
             subprocess.run(["git", "init"], cwd=repo, capture_output=True)
             subprocess.run(
-                ["git", "config", "user.email", "test@test.com"],
-                cwd=repo, capture_output=True
+                ["git", "config", "user.email", "test@test.com"], cwd=repo, capture_output=True
             )
-            subprocess.run(
-                ["git", "config", "user.name", "Test"],
-                cwd=repo, capture_output=True
-            )
+            subprocess.run(["git", "config", "user.name", "Test"], cwd=repo, capture_output=True)
             (repo / "README.md").write_text("# Test Project")
             subprocess.run(["git", "add", "."], cwd=repo, capture_output=True)
-            subprocess.run(
-                ["git", "commit", "-m", "Initial commit"],
-                cwd=repo, capture_output=True
-            )
+            subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=repo, capture_output=True)
             yield repo
 
     @pytest.mark.asyncio
@@ -143,9 +133,7 @@ class TestGitToolsE2E:
 
         # Use subprocess directly since GitLogTool may not exist
         result = subprocess.run(
-            ["git", "-C", str(git_repo), "log", "--oneline", "-5"],
-            capture_output=True,
-            text=True
+            ["git", "-C", str(git_repo), "log", "--oneline", "-5"], capture_output=True, text=True
         )
 
         assert result.returncode == 0
@@ -208,10 +196,9 @@ class TestCodeAnalysisToolsE2E:
     @pytest.fixture
     def python_file(self):
         """Create temporary Python file."""
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".py", delete=False
-        ) as f:
-            f.write('''
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
+            f.write(
+                '''
 def example_function(x: int, y: int) -> int:
     """Add two numbers."""
     return x + y
@@ -221,7 +208,8 @@ class ExampleClass:
 
     def method(self) -> str:
         return "hello"
-''')
+'''
+            )
             yield Path(f.name)
 
     @pytest.mark.asyncio
@@ -229,11 +217,7 @@ class ExampleClass:
         """Test Python linting with ruff."""
         import subprocess
 
-        result = subprocess.run(
-            ["ruff", "check", str(python_file)],
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run(["ruff", "check", str(python_file)], capture_output=True, text=True)
         # Valid Python should pass or have minor issues
         assert result.returncode in [0, 1]
 
@@ -296,10 +280,7 @@ class TestToolErrorHandling:
         from vertice_cli.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
-        result = await tool.execute(
-            path="/nonexistent/path/file.txt",
-            content="test"
-        )
+        result = await tool.execute(path="/nonexistent/path/file.txt", content="test")
 
         assert not result.success
 
@@ -327,4 +308,5 @@ class TestToolsSummary:
     def test_bash_tool_exists(self):
         """Verify bash tool is importable."""
         from vertice_cli.tools.exec_hardened import BashCommandToolHardened
+
         assert BashCommandToolHardened is not None

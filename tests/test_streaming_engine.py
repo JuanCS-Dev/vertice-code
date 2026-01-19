@@ -5,11 +5,13 @@ import asyncio
 import time
 from vertice_cli.core.streaming_engine import StreamingEngine
 
+
 async def mock_generator(count: int, delay: float = 0.01):
     """Simulate LLM streaming tokens."""
     for i in range(count):
         yield f"token_{i} "
         await asyncio.sleep(delay)
+
 
 @pytest.mark.asyncio
 async def test_streaming_chunking():
@@ -30,10 +32,11 @@ async def test_streaming_chunking():
     # So we expect roughly 1-2 tokens per chunk
     assert len(chunks) > 0
 
+
 @pytest.mark.asyncio
 async def test_streaming_latency():
     """Test first token latency."""
-    engine = StreamingEngine(chunk_size=1) # Small chunk for fast first token
+    engine = StreamingEngine(chunk_size=1)  # Small chunk for fast first token
 
     start_time = time.time()
     first_chunk_time = None

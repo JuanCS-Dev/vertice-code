@@ -8,8 +8,9 @@ from prometheus.core.skill_registry import (
     validate_skills,
     get_invalid_skills,
     suggest_similar_skill,
-    get_skill_difficulty
+    get_skill_difficulty,
 )
+
 
 def test_normalize_skill():
     """Test skill normalization."""
@@ -17,11 +18,13 @@ def test_normalize_skill():
     assert normalize_skill("async") == "async_programming"
     assert normalize_skill("e2e") == "e2e_testing"
 
+
 def test_is_valid_skill():
     """Test skill validation."""
     assert is_valid_skill("python_basics") is True
     assert is_valid_skill("PyTest Fixtures") is True
     assert is_valid_skill("invalid_skill") is False
+
 
 def test_validate_skills():
     """Test filtering and normalization of a skill list."""
@@ -32,6 +35,7 @@ def test_validate_skills():
     assert "Invalid Skill" not in validated
     assert len(validated) == 2  # Duplicates should be removed
 
+
 def test_get_invalid_skills():
     """Test detection of invalid skills."""
     skills = ["python_basics", "Invalid Skill", "another_bad_one"]
@@ -40,12 +44,14 @@ def test_get_invalid_skills():
     assert "another_bad_one" in invalid
     assert "python_basics" not in invalid
 
+
 def test_suggest_similar_skill():
     """Test suggestion of similar valid skills."""
     assert suggest_similar_skill("python") == "python_basics"
     assert suggest_similar_skill("python-syntax") == "python_syntax"
     assert suggest_similar_skill("testingg") == "testing"
     assert suggest_similar_skill("nonexistent") is None
+
 
 def test_get_skill_difficulty():
     """Test getting the difficulty of a skill."""

@@ -14,6 +14,7 @@ from .types import DiscernmentPhase, WayType
 @dataclass
 class DiscernmentQuestion:
     """Uma pergunta para guiar o discernimento."""
+
     category: str
     question: str
     purpose: str
@@ -23,6 +24,7 @@ class DiscernmentQuestion:
 @dataclass
 class ExperienceWitness:
     """Um testemunho de experiencia relevante."""
+
     description: str
     lessons_learned: List[str]
     relevance_to_situation: str
@@ -32,6 +34,7 @@ class ExperienceWitness:
 @dataclass
 class TraditionWisdom:
     """Sabedoria da tradicao."""
+
     teaching: str
     source: str
     application: str
@@ -41,6 +44,7 @@ class TraditionWisdom:
 @dataclass
 class DiscernmentResult:
     """Resultado do processo de discernimento."""
+
     id: UUID = field(default_factory=uuid4)
     situation: str = ""
     phases_completed: List[DiscernmentPhase] = field(default_factory=list)
@@ -61,7 +65,9 @@ class DiscernmentResult:
             "id": str(self.id),
             "situation": self.situation[:100],
             "phases_completed": [p.name for p in self.phases_completed],
-            "discerned_direction": self.discerned_direction.name if self.discerned_direction else None,
+            "discerned_direction": self.discerned_direction.name
+            if self.discerned_direction
+            else None,
             "confidence": self.confidence,
             "need_for_community": self.need_for_community,
         }

@@ -33,8 +33,12 @@ import pytest
 # Skip if no API keys
 pytestmark = [
     pytest.mark.skipif(
-        not (os.getenv("ANTHROPIC_API_KEY") or os.getenv("GOOGLE_API_KEY") or os.getenv("GROQ_API_KEY")),
-        reason="No LLM API key available"
+        not (
+            os.getenv("ANTHROPIC_API_KEY")
+            or os.getenv("GOOGLE_API_KEY")
+            or os.getenv("GROQ_API_KEY")
+        ),
+        reason="No LLM API key available",
     ),
     pytest.mark.slow,  # Mark as slow tests
 ]
@@ -43,6 +47,7 @@ pytestmark = [
 @dataclass
 class ScenarioResult:
     """Result of a brutal scenario test."""
+
     scenario_name: str
     success: bool
     duration: float
@@ -101,7 +106,7 @@ class BrutalScenarioRunner:
             from vertice_cli.prompts.system_prompts import build_enhanced_system_prompt
 
             tool_schemas = self.registry.get_schemas()
-            context = {'cwd': str(self.work_dir)}
+            context = {"cwd": str(self.work_dir)}
 
             system_prompt = build_enhanced_system_prompt(tool_schemas, context)
 
@@ -117,7 +122,11 @@ class BrutalScenarioRunner:
                 max_tokens=4000,
             )
 
-            response_text = response.get("content", str(response)) if isinstance(response, dict) else str(response)
+            response_text = (
+                response.get("content", str(response))
+                if isinstance(response, dict)
+                else str(response)
+            )
 
             # Parse and execute tool calls
             tool_calls = self._parse_tool_calls(response_text)
@@ -146,9 +155,9 @@ class BrutalScenarioRunner:
     def _parse_tool_calls(self, response: str) -> List[Dict]:
         """Parse tool calls from response."""
         try:
-            if '[' in response and ']' in response:
-                start = response.index('[')
-                end = response.rindex(']') + 1
+            if "[" in response and "]" in response:
+                start = response.index("[")
+                end = response.rindex("]") + 1
                 return json.loads(response[start:end])
         except (json.JSONDecodeError, ValueError):
             pass
@@ -180,6 +189,7 @@ class BrutalScenarioRunner:
 # SCENARIO: CREATE FASTAPI APPLICATION
 # =============================================================================
 
+
 class TestFastAPICreation:
     """Brutal test: Create a complete FastAPI application."""
 
@@ -205,11 +215,26 @@ class TestFastAPICreation:
         steps_completed = 0
 
         steps = [
-            ("Create main app", "Cria um arquivo app.py com FastAPI app basico com endpoint GET /health retornando status ok"),
-            ("Create models", "Cria models.py com Pydantic models User (id, name, email) e Item (id, title, price)"),
-            ("Add CRUD endpoints", "Adiciona em app.py endpoints POST /users, GET /users/{id}, PUT /users/{id}, DELETE /users/{id}"),
-            ("Add validation", "Adiciona validacao de email no model User e validacao de price > 0 no model Item"),
-            ("Add error handling", "Adiciona tratamento de erros 404 para usuario nao encontrado e 400 para dados invalidos"),
+            (
+                "Create main app",
+                "Cria um arquivo app.py com FastAPI app basico com endpoint GET /health retornando status ok",
+            ),
+            (
+                "Create models",
+                "Cria models.py com Pydantic models User (id, name, email) e Item (id, title, price)",
+            ),
+            (
+                "Add CRUD endpoints",
+                "Adiciona em app.py endpoints POST /users, GET /users/{id}, PUT /users/{id}, DELETE /users/{id}",
+            ),
+            (
+                "Add validation",
+                "Adiciona validacao de email no model User e validacao de price > 0 no model Item",
+            ),
+            (
+                "Add error handling",
+                "Adiciona tratamento de erros 404 para usuario nao encontrado e 400 para dados invalidos",
+            ),
         ]
 
         for desc, request in steps:
@@ -221,11 +246,13 @@ class TestFastAPICreation:
         validations = {
             "app.py exists": runner.validate_file_exists("app.py"),
             "models.py exists": runner.validate_file_exists("models.py"),
-            "has FastAPI import": runner.validate_file_contains("app.py", "FastAPI") or
-                                  runner.validate_file_contains("app.py", "fastapi"),
-            "has health endpoint": runner.validate_file_contains("app.py", "/health") or
-                                   runner.validate_file_contains("app.py", "health"),
-            "has User model": runner.validate_file_contains("models.py", "User") if runner.validate_file_exists("models.py") else False,
+            "has FastAPI import": runner.validate_file_contains("app.py", "FastAPI")
+            or runner.validate_file_contains("app.py", "fastapi"),
+            "has health endpoint": runner.validate_file_contains("app.py", "/health")
+            or runner.validate_file_contains("app.py", "health"),
+            "has User model": runner.validate_file_contains("models.py", "User")
+            if runner.validate_file_exists("models.py")
+            else False,
         }
 
         result = ScenarioResult(
@@ -252,6 +279,7 @@ class TestFastAPICreation:
 # SCENARIO: CREATE CLI TOOL WITH TESTING
 # =============================================================================
 
+
 class TestCLIToolCreation:
     """Brutal test: Create a CLI tool with tests."""
 
@@ -275,9 +303,18 @@ class TestCLIToolCreation:
         steps_completed = 0
 
         steps = [
-            ("Create CLI structure", "Cria cli.py com argparse, subcomandos 'add' e 'list', e funcao main()"),
-            ("Implement add command", "Implementa o comando 'add' que adiciona um item a uma lista em JSON"),
-            ("Implement list command", "Implementa o comando 'list' que lista todos os itens do JSON"),
+            (
+                "Create CLI structure",
+                "Cria cli.py com argparse, subcomandos 'add' e 'list', e funcao main()",
+            ),
+            (
+                "Implement add command",
+                "Implementa o comando 'add' que adiciona um item a uma lista em JSON",
+            ),
+            (
+                "Implement list command",
+                "Implementa o comando 'list' que lista todos os itens do JSON",
+            ),
             ("Create tests", "Cria test_cli.py com testes pytest para os comandos add e list"),
         ]
 
@@ -289,7 +326,9 @@ class TestCLIToolCreation:
         validations = {
             "cli.py exists": runner.validate_file_exists("cli.py"),
             "test_cli.py exists": runner.validate_file_exists("test_cli.py"),
-            "has argparse": runner.validate_file_contains("cli.py", "argparse") if runner.validate_file_exists("cli.py") else False,
+            "has argparse": runner.validate_file_contains("cli.py", "argparse")
+            if runner.validate_file_exists("cli.py")
+            else False,
         }
 
         result = ScenarioResult(
@@ -311,6 +350,7 @@ class TestCLIToolCreation:
 # SCENARIO: REFACTOR LEGACY CODE
 # =============================================================================
 
+
 class TestLegacyRefactoring:
     """Brutal test: Refactor legacy code to modern standards."""
 
@@ -323,7 +363,7 @@ class TestLegacyRefactoring:
 
     async def _setup_legacy_code(self, runner):
         """Setup legacy code files for refactoring."""
-        legacy_code = '''
+        legacy_code = """
 # Old style Python code with many issues
 
 class user_manager:
@@ -367,7 +407,7 @@ class user_manager:
         if "@" in email:
             return True
         return False
-'''
+"""
         (runner.work_dir / "user_manager.py").write_text(legacy_code)
 
     @pytest.mark.asyncio
@@ -386,10 +426,19 @@ class user_manager:
         steps_completed = 0
 
         steps = [
-            ("Analyze code", "Leia user_manager.py e identifique os principais problemas de qualidade"),
+            (
+                "Analyze code",
+                "Leia user_manager.py e identifique os principais problemas de qualidade",
+            ),
             ("Add type hints", "Adiciona type hints em todas as funcoes de user_manager.py"),
-            ("Convert to dataclass", "Cria uma dataclass User separada e refatora user_manager para usa-la"),
-            ("Add validation", "Adiciona validacao de email e age >= 0 nos metodos add_user e update_user"),
+            (
+                "Convert to dataclass",
+                "Cria uma dataclass User separada e refatora user_manager para usa-la",
+            ),
+            (
+                "Add validation",
+                "Adiciona validacao de email e age >= 0 nos metodos add_user e update_user",
+            ),
             ("Rename class", "Renomeia a classe user_manager para UserManager seguindo PEP8"),
         ]
 
@@ -400,8 +449,8 @@ class user_manager:
 
         validations = {
             "file exists": runner.validate_file_exists("user_manager.py"),
-            "has type hints": runner.validate_file_contains("user_manager.py", "->") or
-                             runner.validate_file_contains("user_manager.py", ": str"),
+            "has type hints": runner.validate_file_contains("user_manager.py", "->")
+            or runner.validate_file_contains("user_manager.py", ": str"),
         }
 
         result = ScenarioResult(
@@ -422,6 +471,7 @@ class user_manager:
 # =============================================================================
 # SCENARIO: CREATE DATA PIPELINE
 # =============================================================================
+
 
 class TestDataPipelineCreation:
     """Brutal test: Create a data processing pipeline."""
@@ -448,10 +498,19 @@ class TestDataPipelineCreation:
 
         steps = [
             ("Create reader", "Cria reader.py com classe DataReader que le arquivos CSV e JSON"),
-            ("Create transformer", "Cria transformer.py com classe DataTransformer com metodos normalize, filter, aggregate"),
+            (
+                "Create transformer",
+                "Cria transformer.py com classe DataTransformer com metodos normalize, filter, aggregate",
+            ),
             ("Create writer", "Cria writer.py com classe DataWriter que escreve para CSV e JSON"),
-            ("Create pipeline", "Cria pipeline.py que usa Reader, Transformer e Writer em sequencia"),
-            ("Add error handling", "Adiciona try/except em pipeline.py para tratar erros de arquivo e dados"),
+            (
+                "Create pipeline",
+                "Cria pipeline.py que usa Reader, Transformer e Writer em sequencia",
+            ),
+            (
+                "Add error handling",
+                "Adiciona try/except em pipeline.py para tratar erros de arquivo e dados",
+            ),
         ]
 
         for desc, request in steps:
@@ -460,9 +519,7 @@ class TestDataPipelineCreation:
                 steps_completed += 1
 
         files_needed = ["reader.py", "transformer.py", "writer.py", "pipeline.py"]
-        validations = {
-            f"{f} exists": runner.validate_file_exists(f) for f in files_needed
-        }
+        validations = {f"{f} exists": runner.validate_file_exists(f) for f in files_needed}
 
         result = ScenarioResult(
             scenario_name="Data Pipeline Creation",
@@ -482,6 +539,7 @@ class TestDataPipelineCreation:
 # =============================================================================
 # SCENARIO: PORTUGUESE-ONLY WORKFLOW
 # =============================================================================
+
 
 class TestPortugueseWorkflow:
     """Brutal test: Complete workflow in Portuguese only."""
@@ -507,12 +565,21 @@ class TestPortugueseWorkflow:
         steps_completed = 0
 
         steps = [
-            ("Cria calculadora", "Cria um arquivo calculadora.py com funcoes soma, subtracao, multiplicacao e divisao"),
+            (
+                "Cria calculadora",
+                "Cria um arquivo calculadora.py com funcoes soma, subtracao, multiplicacao e divisao",
+            ),
             ("Mostra conteudo", "Mostra o conteudo do arquivo calculadora.py"),
-            ("Adiciona docstrings", "Adiciona docstrings em portugues para todas as funcoes em calculadora.py"),
+            (
+                "Adiciona docstrings",
+                "Adiciona docstrings em portugues para todas as funcoes em calculadora.py",
+            ),
             ("Cria testes", "Cria um arquivo test_calculadora.py com testes para cada funcao"),
             ("Busca funcoes", "Busca todas as funcoes definidas nos arquivos Python"),
-            ("Refatora divisao", "Refatora a funcao divisao em calculadora.py para tratar divisao por zero"),
+            (
+                "Refatora divisao",
+                "Refatora a funcao divisao em calculadora.py para tratar divisao por zero",
+            ),
         ]
 
         for desc, request in steps:
@@ -522,8 +589,8 @@ class TestPortugueseWorkflow:
 
         validations = {
             "calculadora.py exists": runner.validate_file_exists("calculadora.py"),
-            "has soma function": runner.validate_file_contains("calculadora.py", "def soma") or
-                                 runner.validate_file_contains("calculadora.py", "soma"),
+            "has soma function": runner.validate_file_contains("calculadora.py", "def soma")
+            or runner.validate_file_contains("calculadora.py", "soma"),
         }
 
         result = ScenarioResult(
@@ -545,6 +612,7 @@ class TestPortugueseWorkflow:
 # =============================================================================
 # SCENARIO: MICROSERVICES ARCHITECTURE
 # =============================================================================
+
 
 class TestMicroservicesCreation:
     """Brutal test: Create microservices architecture."""
@@ -571,9 +639,18 @@ class TestMicroservicesCreation:
 
         steps = [
             ("Create directory structure", "Cria pastas services/user, services/order, shared"),
-            ("Create shared models", "Cria shared/models.py com classes User e Order usando dataclass"),
-            ("Create user service", "Cria services/user/app.py com FastAPI e endpoints CRUD para User"),
-            ("Create order service", "Cria services/order/app.py com FastAPI e endpoints para criar e listar Orders"),
+            (
+                "Create shared models",
+                "Cria shared/models.py com classes User e Order usando dataclass",
+            ),
+            (
+                "Create user service",
+                "Cria services/user/app.py com FastAPI e endpoints CRUD para User",
+            ),
+            (
+                "Create order service",
+                "Cria services/order/app.py com FastAPI e endpoints para criar e listar Orders",
+            ),
             ("Create gateway", "Cria gateway.py que roteia requests para os servicos user e order"),
         ]
 
@@ -584,9 +661,9 @@ class TestMicroservicesCreation:
 
         validations = {
             "shared dir exists": runner.validate_directory_exists("shared"),
-            "user service exists": runner.validate_file_exists("services/user/app.py") or
-                                   runner.validate_file_exists("user/app.py") or
-                                   len([f for f in runner.get_created_files() if "user" in f]) > 0,
+            "user service exists": runner.validate_file_exists("services/user/app.py")
+            or runner.validate_file_exists("user/app.py")
+            or len([f for f in runner.get_created_files() if "user" in f]) > 0,
         }
 
         result = ScenarioResult(
@@ -609,15 +686,16 @@ class TestMicroservicesCreation:
 # FINAL REPORT
 # =============================================================================
 
+
 def pytest_terminal_summary(terminalreporter, exitstatus, config):
     """Generate final report."""
     print("\n" + "=" * 70)
     print("BRUTAL SCENARIO TEST REPORT")
     print("=" * 70)
 
-    passed = len(terminalreporter.stats.get('passed', []))
-    failed = len(terminalreporter.stats.get('failed', []))
-    skipped = len(terminalreporter.stats.get('skipped', []))
+    passed = len(terminalreporter.stats.get("passed", []))
+    failed = len(terminalreporter.stats.get("failed", []))
+    skipped = len(terminalreporter.stats.get("skipped", []))
 
     print(f"Passed:  {passed}")
     print(f"Failed:  {failed}")

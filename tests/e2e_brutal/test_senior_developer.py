@@ -23,7 +23,9 @@ from pathlib import Path
 class TestSeniorFileOperations:
     """Senior developer file operation tests."""
 
-    def test_ISSUE_001_file_creation_without_parent_directory(self, test_workspace, issue_collector):
+    def test_ISSUE_001_file_creation_without_parent_directory(
+        self, test_workspace, issue_collector
+    ):
         """
         ISSUE-001: Creating file in non-existent directory should fail gracefully.
 
@@ -34,10 +36,12 @@ class TestSeniorFileOperations:
         tool = WriteFileTool()
 
         # Try to create file in non-existent directory
-        result = asyncio.run(tool._execute_validated(
-            path=str(test_workspace / "nonexistent" / "deep" / "path" / "file.txt"),
-            content="test content"
-        ))
+        result = asyncio.run(
+            tool._execute_validated(
+                path=str(test_workspace / "nonexistent" / "deep" / "path" / "file.txt"),
+                content="test content",
+            )
+        )
 
         # ISSUE: Many tools silently create parent directories or fail with cryptic errors
         if result.success:
@@ -49,12 +53,12 @@ class TestSeniorFileOperations:
                 reproduction_steps=[
                     "1. Call WriteFileTool with path containing non-existent directories",
                     "2. Tool silently creates all parent directories",
-                    "3. User has no control over directory structure"
+                    "3. User has no control over directory structure",
                 ],
                 expected="Error message asking user to create directory first, or explicit mkdir option",
                 actual="Silently creates parent directories",
                 component="tools/file_ops.py:WriteFileTool",
-                persona="SENIOR"
+                persona="SENIOR",
             )
             pytest.fail("Tool should not silently create parent directories")
 
@@ -67,12 +71,12 @@ class TestSeniorFileOperations:
                 description="Error message doesn't clearly indicate which directory is missing",
                 reproduction_steps=[
                     "1. Call WriteFileTool with deeply nested non-existent path",
-                    "2. Error message is generic"
+                    "2. Error message is generic",
                 ],
                 expected="Error: Directory 'nonexistent/deep/path' does not exist",
                 actual=f"Error: {result.error}",
                 component="tools/file_ops.py:WriteFileTool",
-                persona="SENIOR"
+                persona="SENIOR",
             )
 
     def test_ISSUE_002_atomic_file_write_failure(self, test_workspace, issue_collector):
@@ -94,10 +98,7 @@ class TestSeniorFileOperations:
 
         try:
             # This should be atomic - use temp file + rename
-            result = asyncio.run(tool._execute_validated(
-                path=str(test_file),
-                content=large_content
-            ))
+            asyncio.run(tool._execute_validated(path=str(test_file), content=large_content))
         except Exception:
             # Check if original content is preserved
             if test_file.exists():
@@ -111,12 +112,12 @@ class TestSeniorFileOperations:
                         reproduction_steps=[
                             "1. Create file with important content",
                             "2. Attempt to overwrite with large content",
-                            "3. If write fails, check file state"
+                            "3. If write fails, check file state",
                         ],
                         expected="Original content preserved on failure",
                         actual=f"File corrupted: {current[:100]}...",
                         component="tools/file_ops.py:WriteFileTool",
-                        persona="SENIOR"
+                        persona="SENIOR",
                     )
                     pytest.fail("Non-atomic write caused data corruption")
 
@@ -143,12 +144,12 @@ class TestSeniorFileOperations:
                     reproduction_steps=[
                         "1. Navigate to non-git directory",
                         "2. Call GitStatusTool",
-                        "3. Tool reports success"
+                        "3. Tool reports success",
                     ],
                     expected="Clear error: 'Not a git repository'",
                     actual=f"Success with data: {result.data}",
                     component="tools/git_tools.py:GitStatusTool",
-                    persona="SENIOR"
+                    persona="SENIOR",
                 )
                 pytest.fail("Git tool should fail outside git repo")
 
@@ -161,12 +162,12 @@ class TestSeniorFileOperations:
                     description="Error message for git operations is not helpful",
                     reproduction_steps=[
                         "1. Run git command outside repo",
-                        "2. Error doesn't clearly indicate git issue"
+                        "2. Error doesn't clearly indicate git issue",
                     ],
                     expected="Error: Not a git repository (or any parent)",
                     actual=f"Error: {result.error}",
                     component="tools/git_tools.py",
-                    persona="SENIOR"
+                    persona="SENIOR",
                 )
 
         except ImportError:
@@ -179,7 +180,7 @@ class TestSeniorFileOperations:
                 expected="Tool exists and is importable",
                 actual="ImportError",
                 component="tools/git_tools.py",
-                persona="SENIOR"
+                persona="SENIOR",
             )
 
     def test_ISSUE_004_concurrent_file_access(self, test_workspace, issue_collector):
@@ -194,21 +195,20 @@ class TestSeniorFileOperations:
         from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
 
         write_tool = WriteFileTool()
-        read_tool = ReadFileTool()
-
-        errors = []
+        ReadFileTool()
 
         async def concurrent_writes():
             tasks = []
             for i in range(10):
-                tasks.append(write_tool._execute_validated(
-                    path=str(test_file),
-                    content=f"content from task {i}"
-                ))
+                tasks.append(
+                    write_tool._execute_validated(
+                        path=str(test_file), content=f"content from task {i}"
+                    )
+                )
             results = await asyncio.gather(*tasks, return_exceptions=True)
             return results
 
-        results = asyncio.run(concurrent_writes())
+        asyncio.run(concurrent_writes())
 
         # Check for race conditions
         final_content = test_file.read_text()
@@ -221,12 +221,12 @@ class TestSeniorFileOperations:
                 reproduction_steps=[
                     "1. Start 10 concurrent write operations to same file",
                     "2. Check final file content",
-                    "3. Content may be corrupted or from wrong task"
+                    "3. Content may be corrupted or from wrong task",
                 ],
                 expected="Last write wins OR locking prevents concurrent access",
                 actual=f"Content: {final_content[:100]}",
                 component="tools/file_ops.py:WriteFileTool",
-                persona="SENIOR"
+                persona="SENIOR",
             )
 
     def test_ISSUE_005_path_traversal_in_file_ops(self, test_workspace, issue_collector):
@@ -259,12 +259,12 @@ class TestSeniorFileOperations:
                     description="ReadFileTool allows reading files outside workspace",
                     reproduction_steps=[
                         f"1. Call ReadFileTool with path: {malicious_path}",
-                        "2. Tool reads file outside allowed directory"
+                        "2. Tool reads file outside allowed directory",
                     ],
                     expected="Error: Path traversal blocked",
                     actual=f"Read succeeded, got {len(result.data)} bytes",
                     component="tools/file_ops.py:ReadFileTool",
-                    persona="SENIOR"
+                    persona="SENIOR",
                 )
                 pytest.fail(f"Path traversal vulnerability: {malicious_path}")
 
@@ -291,12 +291,12 @@ class TestSeniorFileOperations:
                 reproduction_steps=[
                     "1. Create empty file",
                     "2. Read with ReadFileTool",
-                    "3. Tool reports error"
+                    "3. Tool reports error",
                 ],
                 expected="Success with empty string content",
                 actual=f"Error: {result.error}",
                 component="tools/file_ops.py:ReadFileTool",
-                persona="SENIOR"
+                persona="SENIOR",
             )
 
         if result.success and result.data is None:
@@ -308,12 +308,12 @@ class TestSeniorFileOperations:
                 reproduction_steps=[
                     "1. Create empty file",
                     "2. Read with ReadFileTool",
-                    "3. data is None, not ''"
+                    "3. data is None, not ''",
                 ],
                 expected="result.data == ''",
                 actual="result.data is None",
                 component="tools/file_ops.py:ReadFileTool",
-                persona="SENIOR"
+                persona="SENIOR",
             )
 
     def test_ISSUE_007_large_file_memory_handling(self, test_workspace, issue_collector):
@@ -334,9 +334,10 @@ class TestSeniorFileOperations:
         tool = ReadFileTool()
 
         import tracemalloc
+
         tracemalloc.start()
 
-        result = asyncio.run(tool._execute_validated(path=str(large_file)))
+        asyncio.run(tool._execute_validated(path=str(large_file)))
 
         current, peak = tracemalloc.get_traced_memory()
         tracemalloc.stop()
@@ -351,12 +352,12 @@ class TestSeniorFileOperations:
                 reproduction_steps=[
                     "1. Create 100MB file",
                     "2. Read with ReadFileTool",
-                    "3. Monitor memory usage"
+                    "3. Monitor memory usage",
                 ],
                 expected="Memory usage proportional to file size (≤150MB)",
                 actual=f"Peak memory: {peak / (1024*1024):.0f}MB",
                 component="tools/file_ops.py:ReadFileTool",
-                persona="SENIOR"
+                persona="SENIOR",
             )
 
         # Cleanup
@@ -377,7 +378,7 @@ class TestSeniorAgentBehavior:
 
         # Test empty request
         try:
-            task = AgentTask(request="")
+            AgentTask(request="")
             issue_collector.add_issue(
                 severity="MEDIUM",
                 category="LOGIC",
@@ -385,19 +386,19 @@ class TestSeniorAgentBehavior:
                 description="AgentTask doesn't validate that request is non-empty",
                 reproduction_steps=[
                     "1. Create AgentTask with empty string request",
-                    "2. No validation error raised"
+                    "2. No validation error raised",
                 ],
                 expected="ValidationError: request cannot be empty",
                 actual="Task created successfully with empty request",
                 component="agents/base.py:AgentTask",
-                persona="SENIOR"
+                persona="SENIOR",
             )
         except Exception:
             pass  # Good - validation exists
 
         # Test whitespace-only request
         try:
-            task = AgentTask(request="   \n\t  ")
+            AgentTask(request="   \n\t  ")
             issue_collector.add_issue(
                 severity="MEDIUM",
                 category="LOGIC",
@@ -405,12 +406,12 @@ class TestSeniorAgentBehavior:
                 description="AgentTask doesn't strip/validate whitespace requests",
                 reproduction_steps=[
                     "1. Create AgentTask with whitespace-only request",
-                    "2. No validation error raised"
+                    "2. No validation error raised",
                 ],
                 expected="ValidationError: request cannot be blank",
                 actual="Task created with whitespace request",
                 component="agents/base.py:AgentTask",
-                persona="SENIOR"
+                persona="SENIOR",
             )
         except Exception:
             pass
@@ -433,7 +434,7 @@ class TestSeniorAgentBehavior:
         issues_found = []
 
         # Both should have reasoning
-        if not hasattr(success, 'reasoning') or not hasattr(error, 'reasoning'):
+        if not hasattr(success, "reasoning") or not hasattr(error, "reasoning"):
             issues_found.append("reasoning field missing")
 
         # Error should not have data, or data should be empty
@@ -452,12 +453,12 @@ class TestSeniorAgentBehavior:
                 description=f"AgentResponse has inconsistencies: {issues_found}",
                 reproduction_steps=[
                     "1. Create success and error AgentResponse",
-                    "2. Compare structures"
+                    "2. Compare structures",
                 ],
                 expected="Consistent fields: success=True → no error; success=False → no data",
                 actual=f"Issues: {issues_found}",
                 component="agents/base.py:AgentResponse",
-                persona="SENIOR"
+                persona="SENIOR",
             )
 
     def test_ISSUE_010_capability_enforcement(self, issue_collector):
@@ -470,9 +471,7 @@ class TestSeniorAgentBehavior:
         from vertice_cli.agents.planner import PlannerAgent
 
         # Create planner (should be READ_ONLY + DESIGN)
-        mock_llm = type('MockLLM', (), {
-            'generate': lambda self, **kwargs: "test response"
-        })()
+        mock_llm = type("MockLLM", (), {"generate": lambda self, **kwargs: "test response"})()
 
         try:
             planner = PlannerAgent(mock_llm, None)
@@ -487,12 +486,12 @@ class TestSeniorAgentBehavior:
                     reproduction_steps=[
                         "1. Create PlannerAgent",
                         "2. Check capabilities",
-                        "3. FILE_EDIT is present"
+                        "3. FILE_EDIT is present",
                     ],
                     expected="Capabilities: [READ_ONLY, DESIGN]",
                     actual=f"Capabilities: {planner.capabilities}",
                     component="agents/planner.py:PlannerAgent",
-                    persona="SENIOR"
+                    persona="SENIOR",
                 )
 
             if AgentCapability.BASH_EXEC in planner.capabilities:
@@ -504,12 +503,12 @@ class TestSeniorAgentBehavior:
                     reproduction_steps=[
                         "1. Create PlannerAgent",
                         "2. Check capabilities",
-                        "3. BASH_EXEC is present"
+                        "3. BASH_EXEC is present",
                     ],
                     expected="Capabilities: [READ_ONLY, DESIGN]",
                     actual=f"Capabilities: {planner.capabilities}",
                     component="agents/planner.py:PlannerAgent",
-                    persona="SENIOR"
+                    persona="SENIOR",
                 )
 
         except Exception as e:
@@ -520,12 +519,12 @@ class TestSeniorAgentBehavior:
                 description=f"Cannot create PlannerAgent: {e}",
                 reproduction_steps=[
                     "1. Try to create PlannerAgent with mock LLM",
-                    "2. Exception raised"
+                    "2. Exception raised",
                 ],
                 expected="PlannerAgent initializes successfully",
                 actual=f"Exception: {e}",
                 component="agents/planner.py:PlannerAgent",
-                persona="SENIOR"
+                persona="SENIOR",
             )
 
 
@@ -544,20 +543,17 @@ class TestSeniorErrorHandling:
         client = LLMClient()
 
         # Check if timeout is configurable
-        if not hasattr(client, 'timeout') and not hasattr(client, '_timeout'):
+        if not hasattr(client, "timeout") and not hasattr(client, "_timeout"):
             issue_collector.add_issue(
                 severity="HIGH",
                 category="LOGIC",
                 title="LLMClient has no timeout configuration",
                 description="LLMClient doesn't expose timeout setting",
-                reproduction_steps=[
-                    "1. Create LLMClient",
-                    "2. Check for timeout attribute"
-                ],
+                reproduction_steps=["1. Create LLMClient", "2. Check for timeout attribute"],
                 expected="client.timeout or client._timeout exists",
                 actual="No timeout attribute found",
                 component="core/llm.py:LLMClient",
-                persona="SENIOR"
+                persona="SENIOR",
             )
 
     def test_ISSUE_012_network_error_handling(self, issue_collector):
@@ -571,11 +567,13 @@ class TestSeniorErrorHandling:
         client = LLMClient()
 
         # Check for retry logic
-        has_retry = any([
-            hasattr(client, 'max_retries'),
-            hasattr(client, '_retries'),
-            hasattr(client, 'retry_count'),
-        ])
+        has_retry = any(
+            [
+                hasattr(client, "max_retries"),
+                hasattr(client, "_retries"),
+                hasattr(client, "retry_count"),
+            ]
+        )
 
         if not has_retry:
             issue_collector.add_issue(
@@ -583,14 +581,11 @@ class TestSeniorErrorHandling:
                 category="LOGIC",
                 title="LLMClient has no retry configuration",
                 description="LLMClient doesn't have configurable retry logic",
-                reproduction_steps=[
-                    "1. Create LLMClient",
-                    "2. Check for retry attributes"
-                ],
+                reproduction_steps=["1. Create LLMClient", "2. Check for retry attributes"],
                 expected="Retry configuration with exponential backoff",
                 actual="No retry configuration found",
                 component="core/llm.py:LLMClient",
-                persona="SENIOR"
+                persona="SENIOR",
             )
 
     def test_ISSUE_013_graceful_shutdown(self, test_workspace, issue_collector):
@@ -618,12 +613,12 @@ class TestSeniorErrorHandling:
                     reproduction_steps=[
                         "1. Start shell",
                         "2. Press Ctrl+C during operation",
-                        "3. Check for clean shutdown"
+                        "3. Check for clean shutdown",
                     ],
                     expected="Graceful shutdown with cleanup",
                     actual="No signal handling code found",
                     component="shell_simple.py",
-                    persona="SENIOR"
+                    persona="SENIOR",
                 )
 
     def test_ISSUE_014_error_message_localization(self, issue_collector):
@@ -645,7 +640,7 @@ class TestSeniorErrorHandling:
                 content = py_file.read_text()
 
                 has_portuguese = any(word in content.lower() for word in portuguese_words)
-                has_english = any(word in content.lower() for word in english_words)
+                any(word in content.lower() for word in english_words)
 
                 # Check for Portuguese in error messages specifically
                 if has_portuguese and '"erro' in content.lower():
@@ -662,12 +657,12 @@ class TestSeniorErrorHandling:
                 description=f"Found Portuguese in: {mixed_language_files[:5]}",
                 reproduction_steps=[
                     "1. Scan source files for error messages",
-                    "2. Check for mixed English/Portuguese"
+                    "2. Check for mixed English/Portuguese",
                 ],
                 expected="Consistent language (all English or all Portuguese)",
                 actual=f"Mixed in {len(mixed_language_files)} files",
                 component="Various",
-                persona="SENIOR"
+                persona="SENIOR",
             )
 
 
@@ -687,17 +682,13 @@ class TestSeniorCLIInterface:
             ["python", "-m", "vertice_cli.cli", "--help"],
             capture_output=True,
             text=True,
-            cwd=Path(__file__).parent.parent.parent
+            cwd=Path(__file__).parent.parent.parent,
         )
 
         help_text = result.stdout
 
         # Check for essential information
-        required_sections = [
-            "usage",
-            "commands",
-            "options"
-        ]
+        required_sections = ["usage", "commands", "options"]
 
         missing_sections = []
         for section in required_sections:
@@ -712,12 +703,12 @@ class TestSeniorCLIInterface:
                 description=f"Help text missing: {missing_sections}",
                 reproduction_steps=[
                     "1. Run: python -m vertice_cli.cli --help",
-                    "2. Check for standard sections"
+                    "2. Check for standard sections",
                 ],
                 expected="Usage, Commands, Options sections present",
                 actual=f"Missing: {missing_sections}",
                 component="cli.py",
-                persona="SENIOR"
+                persona="SENIOR",
             )
 
     def test_ISSUE_016_cli_version_format(self, issue_collector):
@@ -732,7 +723,8 @@ class TestSeniorCLIInterface:
             content = cli_path.read_text()
 
             import re
-            version_matches = re.findall(r'v?\d+\.\d+\.\d+', content)
+
+            version_matches = re.findall(r"v?\d+\.\d+\.\d+", content)
 
             if version_matches:
                 # Check if version is hardcoded
@@ -744,12 +736,12 @@ class TestSeniorCLIInterface:
                         description="Version should come from pyproject.toml or __version__",
                         reproduction_steps=[
                             "1. Check cli.py for version string",
-                            "2. Version is hardcoded"
+                            "2. Version is hardcoded",
                         ],
                         expected="Version from package metadata",
                         actual="Hardcoded 'v0.1.0'",
                         component="cli.py",
-                        persona="SENIOR"
+                        persona="SENIOR",
                     )
 
     def test_ISSUE_017_exit_codes(self, issue_collector):
@@ -764,7 +756,7 @@ class TestSeniorCLIInterface:
         result = subprocess.run(
             ["python", "-m", "vertice_cli.cli", "version"],
             capture_output=True,
-            cwd=Path(__file__).parent.parent.parent
+            cwd=Path(__file__).parent.parent.parent,
         )
 
         if result.returncode != 0:
@@ -775,19 +767,19 @@ class TestSeniorCLIInterface:
                 description="Version command should return 0 on success",
                 reproduction_steps=[
                     "1. Run: python -m vertice_cli.cli version",
-                    "2. Check exit code"
+                    "2. Check exit code",
                 ],
                 expected="Exit code 0",
                 actual=f"Exit code {result.returncode}",
                 component="cli.py",
-                persona="SENIOR"
+                persona="SENIOR",
             )
 
         # Test invalid command
         result = subprocess.run(
             ["python", "-m", "vertice_cli.cli", "nonexistent_command"],
             capture_output=True,
-            cwd=Path(__file__).parent.parent.parent
+            cwd=Path(__file__).parent.parent.parent,
         )
 
         if result.returncode == 0:
@@ -798,10 +790,10 @@ class TestSeniorCLIInterface:
                 description="Invalid command should return non-zero exit code",
                 reproduction_steps=[
                     "1. Run: python -m vertice_cli.cli nonexistent_command",
-                    "2. Check exit code"
+                    "2. Check exit code",
                 ],
                 expected="Exit code != 0 (typically 1 or 2)",
                 actual="Exit code 0",
                 component="cli.py",
-                persona="SENIOR"
+                persona="SENIOR",
             )

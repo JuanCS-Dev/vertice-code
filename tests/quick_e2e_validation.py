@@ -166,7 +166,7 @@ async def quick_e2e_validation():
         try:
             if os.path.exists(file):
                 os.remove(file)
-        except:
+        except Exception:
             pass
 
     return results

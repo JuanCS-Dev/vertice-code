@@ -22,6 +22,7 @@ from vertice_cli.agents.planner import (
 # TEST FIXTURES
 # ============================================================================
 
+
 @pytest.fixture
 def mock_llm_client():
     """Mock LLM client"""
@@ -197,6 +198,7 @@ def sample_steps_partial_cycle():
 # TEST SUITE 1: DependencyAnalyzer.detect_cycles()
 # ============================================================================
 
+
 class TestDetectCycles:
     """Test cases for DependencyAnalyzer.detect_cycles()"""
 
@@ -313,6 +315,7 @@ class TestDetectCycles:
 # TEST SUITE 2: PlannerAgent._robust_json_parse()
 # ============================================================================
 
+
 class TestRobustJsonParse:
     """Test cases for PlannerAgent._robust_json_parse()"""
 
@@ -326,15 +329,17 @@ class TestRobustJsonParse:
 
     def test_parse_valid_json_with_nested_objects(self, planner_agent):
         """Test parsing valid JSON with nested structures"""
-        json_str = json.dumps({
-            "plan": {
-                "id": "plan-1",
-                "steps": [
-                    {"id": "step-1", "name": "Design"},
-                    {"id": "step-2", "name": "Implement"}
-                ]
+        json_str = json.dumps(
+            {
+                "plan": {
+                    "id": "plan-1",
+                    "steps": [
+                        {"id": "step-1", "name": "Design"},
+                        {"id": "step-2", "name": "Implement"},
+                    ],
+                }
             }
-        })
+        )
         result = planner_agent._robust_json_parse(json_str)
         assert result is not None
         assert result["plan"]["id"] == "plan-1"
@@ -399,7 +404,7 @@ That's all!
 
     def test_parse_json_with_trailing_commas(self, planner_agent):
         """Test parsing JSON with trailing commas (common LLM mistake)"""
-        json_str = '''{
+        json_str = """{
             "steps": [
                 {"id": "1", "name": "Design"},
                 {"id": "2", "name": "Code"},
@@ -407,7 +412,7 @@ That's all!
             "config": {
                 "parallel": true,
             }
-        }'''
+        }"""
         result = planner_agent._robust_json_parse(json_str)
         assert result is not None, "Should fix trailing commas"
         assert len(result["steps"]) == 2
@@ -456,11 +461,13 @@ That's all!
 
     def test_parse_json_with_special_characters(self, planner_agent):
         """Test parsing JSON with special characters and escapes"""
-        json_str = json.dumps({
-            "message": "Deploy to \"production\" environment\n with newlines",
-            "path": "C:\\Users\\John\\file.txt",
-            "emoji": "✅"
-        })
+        json_str = json.dumps(
+            {
+                "message": 'Deploy to "production" environment\n with newlines',
+                "path": "C:\\Users\\John\\file.txt",
+                "emoji": "✅",
+            }
+        )
         result = planner_agent._robust_json_parse(json_str)
         assert result is not None
         assert "production" in result["message"]
@@ -468,37 +475,37 @@ That's all!
 
     def test_parse_json_complex_nested(self, planner_agent):
         """Test parsing deeply nested JSON structures"""
-        json_str = json.dumps({
-            "plan": {
-                "stages": [
-                    {
-                        "name": "Stage 1",
-                        "steps": [
-                            {
-                                "id": "1",
-                                "config": {
-                                    "timeout": 300,
-                                    "retry": {"max": 3, "backoff": "exponential"}
+        json_str = json.dumps(
+            {
+                "plan": {
+                    "stages": [
+                        {
+                            "name": "Stage 1",
+                            "steps": [
+                                {
+                                    "id": "1",
+                                    "config": {
+                                        "timeout": 300,
+                                        "retry": {"max": 3, "backoff": "exponential"},
+                                    },
                                 }
-                            }
-                        ]
-                    }
-                ]
+                            ],
+                        }
+                    ]
+                }
             }
-        })
+        )
         result = planner_agent._robust_json_parse(json_str)
         assert result is not None
-        assert result["plan"]["stages"][0]["steps"][0]["config"]["retry"]["backoff"] == "exponential"
+        assert (
+            result["plan"]["stages"][0]["steps"][0]["config"]["retry"]["backoff"] == "exponential"
+        )
 
     def test_parse_json_with_numbers(self, planner_agent):
         """Test parsing JSON with various number formats"""
-        json_str = json.dumps({
-            "integer": 42,
-            "float": 3.14159,
-            "negative": -100,
-            "scientific": 1.23e-4,
-            "zero": 0
-        })
+        json_str = json.dumps(
+            {"integer": 42, "float": 3.14159, "negative": -100, "scientific": 1.23e-4, "zero": 0}
+        )
         result = planner_agent._robust_json_parse(json_str)
         assert result is not None
         assert result["integer"] == 42
@@ -507,12 +514,9 @@ That's all!
 
     def test_parse_json_with_boolean_and_null(self, planner_agent):
         """Test parsing JSON with boolean and null values"""
-        json_str = json.dumps({
-            "active": True,
-            "disabled": False,
-            "nullable": None,
-            "list_with_null": [1, None, 3]
-        })
+        json_str = json.dumps(
+            {"active": True, "disabled": False, "nullable": None, "list_with_null": [1, None, 3]}
+        )
         result = planner_agent._robust_json_parse(json_str)
         assert result is not None
         assert result["active"] is True
@@ -530,11 +534,9 @@ That's all!
 
     def test_parse_json_unicode(self, planner_agent):
         """Test parsing JSON with unicode characters"""
-        json_str = json.dumps({
-            "chinese": "你好世界",
-            "arabic": "مرحبا",
-            "emoji_text": "🚀 Rocket to success"
-        })
+        json_str = json.dumps(
+            {"chinese": "你好世界", "arabic": "مرحبا", "emoji_text": "🚀 Rocket to success"}
+        )
         result = planner_agent._robust_json_parse(json_str)
         assert result is not None
         assert "世界" in result["chinese"]
@@ -542,10 +544,12 @@ That's all!
 
     def test_parse_json_multiline_strings(self, planner_agent):
         """Test parsing JSON with multiline string content"""
-        json_str = json.dumps({
-            "multiline_doc": "Line 1\nLine 2\nLine 3",
-            "description": "Multi-step\nexecution\nplan"
-        })
+        json_str = json.dumps(
+            {
+                "multiline_doc": "Line 1\nLine 2\nLine 3",
+                "description": "Multi-step\nexecution\nplan",
+            }
+        )
         result = planner_agent._robust_json_parse(json_str)
         assert result is not None
         assert "\n" in result["multiline_doc"]
@@ -553,10 +557,9 @@ That's all!
 
     def test_parse_json_with_html_entities(self, planner_agent):
         """Test parsing JSON that might contain HTML-like content"""
-        json_str = json.dumps({
-            "html_content": "<div>Hello</div>",
-            "script_content": "if (x > 5) { return true; }"
-        })
+        json_str = json.dumps(
+            {"html_content": "<div>Hello</div>", "script_content": "if (x > 5) { return true; }"}
+        )
         result = planner_agent._robust_json_parse(json_str)
         assert result is not None
         assert "<div>" in result["html_content"]
@@ -591,7 +594,7 @@ That's all!
     def test_parse_json_robustness_with_extra_quotes(self, planner_agent):
         """Test fallback strategies with various quote issues"""
         # This is broken JSON but testing robustness
-        json_str = '{"status": \'incomplete\'}'  # Single quotes instead of double
+        json_str = "{\"status\": 'incomplete'}"  # Single quotes instead of double
         result = planner_agent._robust_json_parse(json_str)
         # May or may not parse; just ensure no crash
         assert isinstance(result, (dict, type(None)))
@@ -600,6 +603,7 @@ That's all!
 # ============================================================================
 # INTEGRATION TESTS
 # ============================================================================
+
 
 class TestDependencyAnalyzerIntegration:
     """Integration tests for DependencyAnalyzer with other methods"""
@@ -610,7 +614,7 @@ class TestDependencyAnalyzerIntegration:
         assert len(cycles) > 0, "Should detect cycle"
 
         # Even if we try parallel groups, it should handle gracefully
-        parallel_groups = DependencyAnalyzer.find_parallel_groups(sample_steps_simple_cycle)
+        DependencyAnalyzer.find_parallel_groups(sample_steps_simple_cycle)
         # Result depends on implementation, but should not crash
 
     def test_detect_cycles_and_critical_path(self, sample_steps_no_cycles):
@@ -629,31 +633,33 @@ class TestPlannerAgentJsonParsing:
 
     def test_parse_execution_plan_json(self, planner_agent):
         """Test parsing a realistic ExecutionPlan JSON response"""
-        plan_json = json.dumps({
-            "plan_id": "plan-12345",
-            "goal": "Implement new feature",
-            "strategy_overview": "Multi-stage execution",
-            "sops": [
-                {
-                    "id": "step-1",
-                    "role": "architect",
-                    "action": "Design",
-                    "objective": "Create design",
-                    "definition_of_done": "Design complete",
-                    "dependencies": [],
-                    "cost": 2.0
-                },
-                {
-                    "id": "step-2",
-                    "role": "coder",
-                    "action": "Implement",
-                    "objective": "Write code",
-                    "definition_of_done": "Code done",
-                    "dependencies": ["step-1"],
-                    "cost": 5.0
-                }
-            ]
-        })
+        plan_json = json.dumps(
+            {
+                "plan_id": "plan-12345",
+                "goal": "Implement new feature",
+                "strategy_overview": "Multi-stage execution",
+                "sops": [
+                    {
+                        "id": "step-1",
+                        "role": "architect",
+                        "action": "Design",
+                        "objective": "Create design",
+                        "definition_of_done": "Design complete",
+                        "dependencies": [],
+                        "cost": 2.0,
+                    },
+                    {
+                        "id": "step-2",
+                        "role": "coder",
+                        "action": "Implement",
+                        "objective": "Write code",
+                        "definition_of_done": "Code done",
+                        "dependencies": ["step-1"],
+                        "cost": 5.0,
+                    },
+                ],
+            }
+        )
         result = planner_agent._robust_json_parse(plan_json)
         assert result is not None
         assert result["plan_id"] == "plan-12345"
@@ -691,6 +697,7 @@ This plan focuses on proper investigation before any fixes.
 # EDGE CASE & STRESS TESTS
 # ============================================================================
 
+
 class TestEdgeCases:
     """Edge case tests for robustness"""
 
@@ -700,14 +707,16 @@ class TestEdgeCases:
         # Create 100-step linear chain
         for i in range(100):
             deps = [f"step-{i-1}"] if i > 0 else []
-            steps.append(SOPStep(
-                id=f"step-{i}",
-                role="agent",
-                action=f"Action {i}",
-                objective=f"Do {i}",
-                definition_of_done=f"Done {i}",
-                dependencies=deps,
-            ))
+            steps.append(
+                SOPStep(
+                    id=f"step-{i}",
+                    role="agent",
+                    action=f"Action {i}",
+                    objective=f"Do {i}",
+                    definition_of_done=f"Done {i}",
+                    dependencies=deps,
+                )
+            )
 
         cycles = DependencyAnalyzer.detect_cycles(steps)
         assert cycles == [], "Large linear graph should have no cycles"
@@ -715,10 +724,7 @@ class TestEdgeCases:
     def test_parse_json_very_large_object(self, planner_agent):
         """Test parsing very large JSON object"""
         large_data = {
-            "steps": [
-                {"id": f"step-{i}", "value": i, "data": "x" * 100}
-                for i in range(1000)
-            ]
+            "steps": [{"id": f"step-{i}", "value": i, "data": "x" * 100} for i in range(1000)]
         }
         json_str = json.dumps(large_data)
         result = planner_agent._robust_json_parse(json_str)
@@ -767,14 +773,18 @@ class TestEdgeCases:
 # PARAMETRIZED TESTS
 # ============================================================================
 
+
 class TestParametrized:
     """Parametrized tests for comprehensive coverage"""
 
-    @pytest.mark.parametrize("json_str,expected_keys", [
-        ('{"a": 1, "b": 2}', ["a", "b"]),
-        ('{"id": "test", "data": null}', ["id", "data"]),
-        ('{"arr": [1, 2, 3]}', ["arr"]),
-    ])
+    @pytest.mark.parametrize(
+        "json_str,expected_keys",
+        [
+            ('{"a": 1, "b": 2}', ["a", "b"]),
+            ('{"id": "test", "data": null}', ["id", "data"]),
+            ('{"arr": [1, 2, 3]}', ["arr"]),
+        ],
+    )
     def test_parse_various_valid_json(self, planner_agent, json_str, expected_keys):
         """Test parsing various valid JSON formats"""
         result = planner_agent._robust_json_parse(json_str)
@@ -782,13 +792,16 @@ class TestParametrized:
         for key in expected_keys:
             assert key in result
 
-    @pytest.mark.parametrize("invalid_json", [
-        "{invalid}",
-        "[incomplete",
-        "not json",
-        "{'single': 'quotes'}",
-        "{,}",
-    ])
+    @pytest.mark.parametrize(
+        "invalid_json",
+        [
+            "{invalid}",
+            "[incomplete",
+            "not json",
+            "{'single': 'quotes'}",
+            "{,}",
+        ],
+    )
     def test_parse_invalid_json(self, planner_agent, invalid_json):
         """Test that invalid JSON either parses or returns None gracefully"""
         result = planner_agent._robust_json_parse(invalid_json)
@@ -801,13 +814,15 @@ class TestParametrized:
         steps = []
         for i in range(step_count):
             deps = [f"step-{i-1}"] if i > 0 else []
-            steps.append(SOPStep(
-                id=f"step-{i}",
-                role="agent",
-                action=f"Action {i}",
-                objective=f"Do {i}",
-                definition_of_done=f"Done {i}",
-                dependencies=deps,
-            ))
+            steps.append(
+                SOPStep(
+                    id=f"step-{i}",
+                    role="agent",
+                    action=f"Action {i}",
+                    objective=f"Do {i}",
+                    definition_of_done=f"Done {i}",
+                    dependencies=deps,
+                )
+            )
         cycles = DependencyAnalyzer.detect_cycles(steps)
         assert cycles == [], f"Linear chain of size {step_count} should have no cycles"

@@ -38,7 +38,7 @@
 **Status:** ✅ INTEGRADO
 
 ### 8. ⚡ Performance Agent
-**Command:** `/performance`  
+**Command:** `/performance`
 **Detection:** "performance", "otimizar", "lento", "rápido"
 **Status:** ✅ INTEGRADO
 
@@ -55,7 +55,7 @@ qwen ⚡ › vamos criar um plano
 📋 Auto-routing to planner agent...
 ```
 
-### Context Injection  
+### Context Injection
 ```
 qwen ⚡ › review "/path/to/file.py"
 📁 Analyzing project at /path/to/file.py...
@@ -87,8 +87,8 @@ qwen ⚡ › review "/path/to/file.py"
 WARNING: All log messages before absl::InitializeLog()...
 E0000 00:00:... ALTS creds ignored...
 ```
-**Status:** Aparece apenas quando usa Gemini API  
-**Impacto:** Cosmético (não afeta funcionalidade)  
+**Status:** Aparece apenas quando usa Gemini API
+**Impacto:** Cosmético (não afeta funcionalidade)
 **Solução:** Não é possível silenciar 100% (vem do C++ do gRPC)
 
 ## 📊 Testes Realizados
@@ -120,7 +120,7 @@ qwen ⚡ › vamos criar um plano estratégico
 → Auto-routes to Planner
 
 qwen ⚡ › faça review deste código
-→ Auto-routes to Reviewer  
+→ Auto-routes to Reviewer
 
 qwen ⚡ › como melhorar performance aqui
 → Auto-routes to Performance
@@ -150,8 +150,8 @@ qwen ⚡ › como melhorar performance aqui
 
 ---
 
-**Data:** 2025-11-23  
-**Squad:** DevSquad v1.0  
-**Líder:** Gemini Flash 2.0  
+**Data:** 2025-11-23
+**Squad:** DevSquad v1.0
+**Líder:** Gemini Flash 2.0
 
 **Soli Deo Gloria** 🙏

@@ -51,17 +51,17 @@ from .hooks import (
 
 __all__ = [
     # Base
-    'Plugin',
-    'PluginMetadata',
-    'PluginPriority',
-    'PluginContext',
-    'PluginState',
+    "Plugin",
+    "PluginMetadata",
+    "PluginPriority",
+    "PluginContext",
+    "PluginState",
     # Loader
-    'PluginLoader',
+    "PluginLoader",
     # Registry
-    'PluginRegistry',
+    "PluginRegistry",
     # Hooks
-    'PluginHook',
-    'HookType',
-    'HookResult',
+    "PluginHook",
+    "HookType",
+    "HookResult",
 ]

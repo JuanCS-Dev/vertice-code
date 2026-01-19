@@ -26,6 +26,7 @@ import pytest
 # Test Data / Fixtures
 # =============================================================================
 
+
 @pytest.fixture
 def sample_base64_image() -> str:
     """Small base64-encoded PNG (1x1 red pixel)."""
@@ -38,11 +39,7 @@ def sample_image_content_block(sample_base64_image: str) -> Dict[str, Any]:
     """Sample image content block in Anthropic-style format."""
     return {
         "type": "image",
-        "source": {
-            "type": "base64",
-            "media_type": "image/png",
-            "data": sample_base64_image
-        }
+        "source": {"type": "base64", "media_type": "image/png", "data": sample_base64_image},
     }
 
 
@@ -55,30 +52,28 @@ def sample_messages_with_image(sample_image_content_block: Dict[str, Any]) -> Li
             "role": "user",
             "content": [
                 {"type": "text", "text": "What's in this image?"},
-                sample_image_content_block
-            ]
-        }
+                sample_image_content_block,
+            ],
+        },
     ]
 
 
 @pytest.fixture
 def sample_text_messages() -> List[Dict[str, str]]:
     """Simple text messages without images."""
-    return [
-        {"role": "user", "content": "Hello, how are you?"}
-    ]
+    return [{"role": "user", "content": "Hello, how are you?"}]
 
 
 # =============================================================================
 # Test: Image Content Block Format
 # =============================================================================
 
+
 class TestImageContentBlockFormat:
     """Test image content block structure."""
 
     def test_content_block_has_required_fields(
-        self,
-        sample_image_content_block: Dict[str, Any]
+        self, sample_image_content_block: Dict[str, Any]
     ) -> None:
         """HYPOTHESIS: Content block has type, source with type/media_type/data."""
         assert "type" in sample_image_content_block
@@ -91,8 +86,7 @@ class TestImageContentBlockFormat:
         assert "data" in source
 
     def test_content_block_base64_is_valid(
-        self,
-        sample_image_content_block: Dict[str, Any]
+        self, sample_image_content_block: Dict[str, Any]
     ) -> None:
         """HYPOTHESIS: Base64 data can be decoded."""
         data = sample_image_content_block["source"]["data"]
@@ -111,8 +105,8 @@ class TestImageContentBlockFormat:
                 "source": {
                     "type": "base64",
                     "media_type": mime,
-                    "data": "dGVzdA=="  # "test" in base64
-                }
+                    "data": "dGVzdA==",  # "test" in base64
+                },
             }
             assert block["source"]["media_type"] == mime
 
@@ -121,21 +115,21 @@ class TestImageContentBlockFormat:
 # Test: _format_content_parts()
 # =============================================================================
 
+
 class TestFormatContentParts:
     """Test _format_content_parts() method in VertexAIProvider."""
 
     def test_format_text_content_returns_text_part(self) -> None:
         """HYPOTHESIS: String content returns Part.from_text()."""
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
 
             mock_text_part = MagicMock()
-            with patch('vertexai.generative_models.Part') as MockPart:
+            with patch("vertexai.generative_models.Part") as MockPart:
                 MockPart.from_text.return_value = mock_text_part
 
                 result = provider._format_content_parts("Hello world")
@@ -144,23 +138,21 @@ class TestFormatContentParts:
                 assert result == [mock_text_part]
 
     def test_format_image_content_returns_data_part(
-        self,
-        sample_image_content_block: Dict[str, Any]
+        self, sample_image_content_block: Dict[str, Any]
     ) -> None:
         """HYPOTHESIS: Image content block returns Part.from_data()."""
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
 
             mock_data_part = MagicMock()
-            with patch('vertexai.generative_models.Part') as MockPart:
+            with patch("vertexai.generative_models.Part") as MockPart:
                 MockPart.from_data.return_value = mock_data_part
 
-                result = provider._format_content_parts(sample_image_content_block)
+                provider._format_content_parts(sample_image_content_block)
 
                 # Should call from_data with decoded bytes and mime type
                 MockPart.from_data.assert_called_once()
@@ -170,27 +162,25 @@ class TestFormatContentParts:
                 assert "data" in call_kwargs
 
     def test_format_mixed_content_returns_multiple_parts(
-        self,
-        sample_image_content_block: Dict[str, Any]
+        self, sample_image_content_block: Dict[str, Any]
     ) -> None:
         """HYPOTHESIS: Mixed text+image content returns multiple parts."""
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
 
             mixed_content = [
                 {"type": "text", "text": "What's in this image?"},
-                sample_image_content_block
+                sample_image_content_block,
             ]
 
             mock_text_part = MagicMock(name="text_part")
             mock_data_part = MagicMock(name="data_part")
 
-            with patch('vertexai.generative_models.Part') as MockPart:
+            with patch("vertexai.generative_models.Part") as MockPart:
                 MockPart.from_text.return_value = mock_text_part
                 MockPart.from_data.return_value = mock_data_part
 
@@ -203,10 +193,9 @@ class TestFormatContentParts:
 
     def test_format_content_handles_none(self) -> None:
         """HYPOTHESIS: None content returns empty list."""
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
@@ -219,19 +208,18 @@ class TestFormatContentParts:
 # Test: stream_chat() with multimodal messages
 # =============================================================================
 
+
 class TestStreamChatMultimodal:
     """Test stream_chat() with image content."""
 
     @pytest.mark.asyncio
     async def test_stream_chat_processes_image_messages(
-        self,
-        sample_messages_with_image: List[Dict[str, Any]]
+        self, sample_messages_with_image: List[Dict[str, Any]]
     ) -> None:
         """HYPOTHESIS: Messages with images are converted to Content with Parts."""
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
@@ -242,9 +230,11 @@ class TestStreamChatMultimodal:
             mock_response.__iter__ = lambda self: iter([])
             mock_model.generate_content.return_value = mock_response
 
-            with patch('vertexai.generative_models.GenerativeModel', return_value=mock_model):
-                with patch('vertexai.generative_models.Content') as MockContent:
-                    with patch.object(provider, '_format_content_parts', return_value=[MagicMock()]) as mock_format:
+            with patch("vertexai.generative_models.GenerativeModel", return_value=mock_model):
+                with patch("vertexai.generative_models.Content"):
+                    with patch.object(
+                        provider, "_format_content_parts", return_value=[MagicMock()]
+                    ) as mock_format:
                         async for _ in provider.stream_chat(sample_messages_with_image):
                             pass
 
@@ -253,14 +243,12 @@ class TestStreamChatMultimodal:
 
     @pytest.mark.asyncio
     async def test_stream_chat_text_messages_still_work(
-        self,
-        sample_text_messages: List[Dict[str, str]]
+        self, sample_text_messages: List[Dict[str, str]]
     ) -> None:
         """HYPOTHESIS: Plain text messages continue to work."""
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
@@ -273,7 +261,7 @@ class TestStreamChatMultimodal:
             mock_response.__iter__ = lambda self: iter([mock_chunk])
             mock_model.generate_content.return_value = mock_response
 
-            with patch('vertexai.generative_models.GenerativeModel', return_value=mock_model):
+            with patch("vertexai.generative_models.GenerativeModel", return_value=mock_model):
                 chunks = []
                 async for chunk in provider.stream_chat(sample_text_messages):
                     chunks.append(chunk)
@@ -286,14 +274,12 @@ class TestStreamChatMultimodal:
 # Test: ImageReadTool content_block output
 # =============================================================================
 
+
 class TestImageReadToolContentBlock:
     """Test ImageReadTool returns content_block for vision."""
 
     @pytest.mark.asyncio
-    async def test_image_read_returns_content_block_when_requested(
-        self,
-        tmp_path
-    ) -> None:
+    async def test_image_read_returns_content_block_when_requested(self, tmp_path) -> None:
         """HYPOTHESIS: ImageReadTool returns content_block format."""
         # Create a minimal test image
         test_image = tmp_path / "test.png"
@@ -307,9 +293,7 @@ class TestImageReadToolContentBlock:
 
         tool = ImageReadTool()
         result = await tool._execute_validated(
-            file_path=str(test_image),
-            include_base64=True,
-            return_content_block=True
+            file_path=str(test_image), include_base64=True, return_content_block=True
         )
 
         assert result.success
@@ -324,6 +308,7 @@ class TestImageReadToolContentBlock:
 # =============================================================================
 # Integration Test (requires actual SDK - skip in CI)
 # =============================================================================
+
 
 @pytest.mark.skip(reason="Requires Vertex AI credentials - run manually")
 class TestVertexVisionIntegration:
@@ -350,9 +335,7 @@ class TestVertexVisionIntegration:
         # Read image
         tool = ImageReadTool()
         image_result = await tool._execute_validated(
-            file_path=str(test_image),
-            include_base64=True,
-            return_content_block=True
+            file_path=str(test_image), include_base64=True, return_content_block=True
         )
 
         # Create multimodal message
@@ -361,8 +344,8 @@ class TestVertexVisionIntegration:
                 "role": "user",
                 "content": [
                     {"type": "text", "text": "Describe this image in one word."},
-                    image_result.data["content_block"]
-                ]
+                    image_result.data["content_block"],
+                ],
             }
         ]
 
@@ -372,4 +355,3 @@ class TestVertexVisionIntegration:
 
         full_response = "".join(chunks)
         assert len(full_response) > 0
-

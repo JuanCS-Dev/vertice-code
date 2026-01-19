@@ -23,7 +23,7 @@ Todos os 50 testes simulando comportamento humano e casos extremos **PASSARAM**.
 **O que valida**: Fix do loop infinito / tela piscando
 
 - `pause()` para o live display ✅
-- `resume()` reinicia o live display ✅  
+- `resume()` reinicia o live display ✅
 - Múltiplas chamadas `pause()` são idempotentes ✅
 - Múltiplas chamadas `resume()` são idempotentes ✅
 - Sequência pause→resume funciona corretamente ✅
@@ -312,7 +312,7 @@ Validation: 10/10 pause/resume tests + 15/15 approval tests passed ✅
 
 ---
 
-**Implementado por**: Claude Code (Sonnet 4.5)  
+**Implementado por**: Claude Code (Sonnet 4.5)
 **Tempo de implementação**:
 - Streaming: 15 minutos (commit 54df7d3)
 - Loop fix: 20 minutos (commit 08db192)

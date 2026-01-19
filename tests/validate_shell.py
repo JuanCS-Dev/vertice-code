@@ -22,7 +22,7 @@ async def test_tool_execution():
 
     assert result.success, "ReadFile failed"
     assert result.data, "No data returned"
-    assert result.metadata['lines'] > 0, "No lines counted"
+    assert result.metadata["lines"] > 0, "No lines counted"
 
     console.print("  ✅ Tool execution works")
     return True
@@ -44,7 +44,7 @@ async def test_tool_registry():
 
     schemas = registry.get_schemas()
     assert len(schemas) == 2, "Wrong schema count"
-    assert schemas[0]['name'], "Schema missing name"
+    assert schemas[0]["name"], "Schema missing name"
 
     console.print("  ✅ Registry works")
     return True
@@ -78,8 +78,7 @@ async def test_file_workflow():
         # Step 1: Create file
         write_tool = WriteFileTool()
         result = await write_tool.execute(
-            path=str(test_file),
-            content="def hello():\n    return 'world'"
+            path=str(test_file), content="def hello():\n    return 'world'"
         )
         assert result.success, f"Write failed: {result.error}"
 
@@ -92,8 +91,7 @@ async def test_file_workflow():
         # Step 3: Edit file
         edit_tool = EditFileTool()
         result = await edit_tool.execute(
-            path=str(test_file),
-            edits=[{"search": "world", "replace": "python"}]
+            path=str(test_file), edits=[{"search": "world", "replace": "python"}]
         )
         assert result.success, f"Edit failed: {result.error}"
 
@@ -117,15 +115,11 @@ async def test_search_functionality():
     from vertice_cli.tools.search import SearchFilesTool
 
     search_tool = SearchFilesTool()
-    result = await search_tool.execute(
-        pattern="def",
-        path="vertice_cli/tools",
-        file_pattern="*.py"
-    )
+    result = await search_tool.execute(pattern="def", path="vertice_cli/tools", file_pattern="*.py")
 
     assert result.success, f"Search failed: {result.error}"
     assert len(result.data) > 0, "No results found"
-    assert result.metadata['count'] > 0, "Count is zero"
+    assert result.metadata["count"] > 0, "Count is zero"
 
     console.print(f"  ✅ Found {result.metadata['count']} matches")
     return True
@@ -170,7 +164,7 @@ async def test_bash_execution():
     # Test simple command
     result = await bash_tool.execute(command="echo 'test'")
     assert result.success, "Bash command failed"
-    assert "test" in result.data['stdout'], "Output incorrect"
+    assert "test" in result.data["stdout"], "Output incorrect"
 
     # Test dangerous command blocking
     result = await bash_tool.execute(command="rm -rf /")
@@ -198,16 +192,12 @@ async def test_multi_tool_workflow():
         write_tool = WriteFileTool()
         for i in range(3):
             await write_tool.execute(
-                path=str(Path(tmpdir) / f"file{i}.py"),
-                content=f"# File {i}\nprint('Hello {i}')"
+                path=str(Path(tmpdir) / f"file{i}.py"), content=f"# File {i}\nprint('Hello {i}')"
             )
 
         # Search in created files
         search_tool = SearchFilesTool()
-        result = await search_tool.execute(
-            pattern="Hello",
-            path=tmpdir
-        )
+        result = await search_tool.execute(pattern="Hello", path=tmpdir)
         assert result.success, "Search failed"
         assert len(result.data) >= 3, "Not all files found"
 
@@ -248,13 +238,13 @@ async def test_tool_schemas():
     schemas = shell.registry.get_schemas()
 
     for schema in schemas:
-        assert 'name' in schema, f"Schema missing name: {schema}"
-        assert 'description' in schema, f"Schema missing description: {schema}"
-        assert 'parameters' in schema, f"Schema missing parameters: {schema}"
+        assert "name" in schema, f"Schema missing name: {schema}"
+        assert "description" in schema, f"Schema missing description: {schema}"
+        assert "parameters" in schema, f"Schema missing parameters: {schema}"
 
-        params = schema['parameters']
-        assert 'type' in params, f"Schema {schema['name']} missing type"
-        assert 'properties' in params, f"Schema {schema['name']} missing properties"
+        params = schema["parameters"]
+        assert "type" in params, f"Schema {schema['name']} missing type"
+        assert "properties" in params, f"Schema {schema['name']} missing properties"
 
     console.print(f"  ✅ All {len(schemas)} schemas valid")
     return True
@@ -285,7 +275,7 @@ async def run_validation():
 
     for name, test_func in tests:
         try:
-            result = await test_func()
+            await test_func()
             results.append((name, True, None))
         except AssertionError as e:
             results.append((name, False, str(e)))
@@ -294,6 +284,7 @@ async def run_validation():
             results.append((name, False, f"Exception: {e}"))
             console.print(f"  ❌ Exception: {e}", style="red")
             import traceback
+
             traceback.print_exc()
 
     # Summary
@@ -322,18 +313,22 @@ async def run_validation():
     console.print()
 
     if failed == 0:
-        console.print(Panel(
-            f"[bold green]✅ ALL {passed} TESTS PASSED![/bold green]\n\n"
-            "Shell is READY for production use!",
-            style="green"
-        ))
+        console.print(
+            Panel(
+                f"[bold green]✅ ALL {passed} TESTS PASSED![/bold green]\n\n"
+                "Shell is READY for production use!",
+                style="green",
+            )
+        )
         return True
     else:
-        console.print(Panel(
-            f"[bold red]❌ {failed} TEST(S) FAILED[/bold red]\n\n"
-            f"Passed: {passed}/{len(results)}",
-            style="red"
-        ))
+        console.print(
+            Panel(
+                f"[bold red]❌ {failed} TEST(S) FAILED[/bold red]\n\n"
+                f"Passed: {passed}/{len(results)}",
+                style="red",
+            )
+        )
         return False
 
 

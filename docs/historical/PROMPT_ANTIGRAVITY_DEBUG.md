@@ -1,7 +1,7 @@
 # 🚀 PROMPT PARA ANTIGRAVITY (Google Gemini 2.0 Flash Thinking)
 ## **Autonomous Debug & Fix Mission: Maestro v10.0 Shell**
 
-**Data:** 2024-11-24  
+**Data:** 2024-11-24
 **Objetivo:** Debug autônomo, como um engenheiro humano, com autorização para modificar código
 
 ---
@@ -77,7 +77,7 @@ cat UI_FIX_EXECUTOR_PANEL.md
 ./maestro
 
 # 2. Aguardar inicialização (framework @ 30 FPS)
-# Expectativa: 
+# Expectativa:
 #   ✅ Framework initialized @ 30 FPS
 #   🎵 MAESTRO v10.0 [● LIVE] 5 agents
 
@@ -105,11 +105,11 @@ cat UI_FIX_EXECUTOR_PANEL.md
 
 **Comportamento Problemático (❌):**
 ```
-❌ Gemini streaming error: Invalid operation: 
-   The `response.text` quick accessor requires 
-   the response to contain a valid `Part`, but 
+❌ Gemini streaming error: Invalid operation:
+   The `response.text` quick accessor requires
+   the response to contain a valid `Part`, but
    none were returned.
-   
+
 ❌ Frame budget exceeded: 6255.3ms (target: 33.3ms)
 
 ❌ Box do Executor com borda cinza (ilegível)
@@ -155,7 +155,7 @@ Causa provável:
 
 Arquivos envolvidos:
   - qwen_dev_cli/core/providers/gemini.py (linha ~220-230)
-  
+
 Função problemática:
   - async def stream_chat() → for chunk in response: chunk.text
 ```
@@ -165,10 +165,10 @@ Função problemática:
 Causa provável:
   [ ] border_style='bright_green' não renderiza neon no terminal
   [ ] Deveria ser 'bright_cyan' (igual CODE EXECUTOR)
-  
+
 Arquivos envolvidos:
   - maestro_v10_integrated.py (linha ~1438)
-  
+
 Código problemático:
   - Panel(..., border_style="bright_green", ...)
 ```
@@ -178,7 +178,7 @@ Código problemático:
 Causa provável:
   [ ] Panel() sem expand=False
   [ ] Rich trunca texto longo automaticamente
-  
+
 Solução:
   - Adicionar expand=False ao Panel
 ```
@@ -189,7 +189,7 @@ Solução:
 
 ### **4.1 Fix #1: Gemini Streaming Robusto**
 
-**Arquivo:** `qwen_dev_cli/core/providers/gemini.py`  
+**Arquivo:** `qwen_dev_cli/core/providers/gemini.py`
 **Localização:** Função `async def stream_chat()`, linha ~220
 
 **Código ANTES (QUEBRADO):**
@@ -220,7 +220,7 @@ for chunk in response:
         if hasattr(chunk, 'finish_reason'):
             logger.warning(f"Chunk finish_reason: {chunk.finish_reason}")
         continue
-    
+
     await asyncio.sleep(0)
 
 # If no chunks received, yield fallback message
@@ -244,7 +244,7 @@ python3 -m py_compile qwen_dev_cli/core/providers/gemini.py
 
 ### **4.2 Fix #2: UI Executor Box NEON**
 
-**Arquivo:** `maestro_v10_integrated.py`  
+**Arquivo:** `maestro_v10_integrated.py`
 **Localização:** Linha ~1438
 
 **Código ANTES (CINZA):**
@@ -306,18 +306,18 @@ from qwen_dev_cli.core.providers.gemini import GeminiProvider
 async def test():
     provider = GeminiProvider()
     print(f"✅ Provider initialized: {provider.model_name}")
-    
+
     messages = [{"role": "user", "content": "Diga apenas: OK TESTE"}]
-    
+
     chunks = []
     async for chunk in provider.stream_chat(messages):
         chunks.append(chunk)
         print(f"Chunk {len(chunks)}: {chunk[:50]}")
-    
+
     response = "".join(chunks)
     print(f"\n✅ Total chunks: {len(chunks)}")
     print(f"✅ Response: {response}")
-    
+
     assert len(chunks) > 0, "FALHA: Nenhum chunk recebido"
     assert "OK" in response.upper(), "FALHA: Resposta incorreta"
     print("\n🎉 TESTE PASSOU!")
@@ -449,8 +449,8 @@ Constitutional Compliance:
 ```bash
 cat > DEBUG_SESSION_REPORT.md << 'EOF'
 # 🔧 DEBUG SESSION REPORT
-**Data:** 2024-11-24  
-**Agente:** Antigravity (Gemini 2.0 Flash Thinking)  
+**Data:** 2024-11-24
+**Agente:** Antigravity (Gemini 2.0 Flash Thinking)
 **Status:** ✅ **COMPLETO**
 
 ---
@@ -477,18 +477,18 @@ cat > DEBUG_SESSION_REPORT.md << 'EOF'
 ## 🔍 ANÁLISE TÉCNICA
 
 ### Causa-Raiz #1: Gemini Streaming
-**Problema:** AttributeError ao acessar chunk.text  
-**Causa:** Gemini retorna chunks vazios (finish_reason=1)  
+**Problema:** AttributeError ao acessar chunk.text
+**Causa:** Gemini retorna chunks vazios (finish_reason=1)
 **Fix:** hasattr checks + fallback para chunk.parts
 
 ### Causa-Raiz #2: UI Cinza
-**Problema:** bright_green renderiza cinza no terminal  
-**Causa:** Incompatibilidade de cores com terminal scheme  
+**Problema:** bright_green renderiza cinza no terminal
+**Causa:** Incompatibilidade de cores com terminal scheme
 **Fix:** bright_cyan (NEON, igual CODE EXECUTOR)
 
 ### Causa-Raiz #3: Truncamento
-**Problema:** Rich trunca texto longo automaticamente  
-**Causa:** Panel() sem expand=False  
+**Problema:** Rich trunca texto longo automaticamente
+**Causa:** Panel() sem expand=False
 **Fix:** expand=False adicionado
 
 ---

@@ -1,6 +1,6 @@
 # 🚨 EMERGENCY FIX PLAN - 12 HOUR SPRINT
-**Mission:** Transform 55% parity → 90% parity  
-**Timeline:** 12 hours focused execution  
+**Mission:** Transform 55% parity → 90% parity
+**Timeline:** 12 hours focused execution
 **Methodology:** Fix, Test, Validate, Ship
 
 ---
@@ -19,7 +19,7 @@ PHASE 3: VALIDATE REALITY (2h)  → Prove it works
 
 ## 🔴 TASK 1.1: TOKEN TRACKING INTEGRATION (60 min)
 
-### **Current State:** Code exists but isolated  
+### **Current State:** Code exists but isolated
 ### **Target State:** Real-time token display in UI
 
 ### **Subtasks:**
@@ -44,21 +44,21 @@ async def generate(
     chunks = []
     total_input_tokens = 0
     total_output_tokens = 0
-    
+
     async for chunk in self.stream_chat(prompt, context, max_tokens, temperature, provider):
         chunks.append(chunk)
-    
+
     response = "".join(chunks)
-    
+
     # NEW: Extract token usage if available
     if hasattr(self, '_last_usage_metadata'):
         total_input_tokens = self._last_usage_metadata.get('input_tokens', 0)
         total_output_tokens = self._last_usage_metadata.get('output_tokens', 0)
-        
+
         # Notify token tracker (if shell has one)
         if hasattr(self, 'token_callback') and self.token_callback:
             self.token_callback(total_input_tokens, total_output_tokens)
-    
+
     return response
 ```
 
@@ -66,7 +66,7 @@ async def generate(
 ```python
 async def stream_chat(...):
     # ... existing code ...
-    
+
     # After getting response
     if hasattr(response, 'usage_metadata'):
         self._last_usage_metadata = {
@@ -84,21 +84,21 @@ async def stream_chat(...):
 ```python
 def __init__(self, llm_client=None, ...):
     # ... existing init ...
-    
+
     # Context engine (already exists at line 196)
     self.context_engine = ContextAwarenessEngine(
         max_context_tokens=100_000,
         console=self.console
     )
-    
+
     # NEW: Register token callback with LLM
     if self.llm:
         self.llm.token_callback = self._on_tokens_used
-        
+
 def _on_tokens_used(self, input_tokens: int, output_tokens: int):
     """Callback when LLM uses tokens."""
     self.context_engine.update_tokens(input_tokens, output_tokens)
-    
+
     # Show in UI if enabled
     if self.show_token_usage:
         usage = self.context_engine.get_usage_summary()
@@ -143,7 +143,7 @@ python -m qwen_dev_cli.cli shell
 
 ## 🟡 TASK 1.2: COMMAND PALETTE UI (90 min)
 
-### **Current State:** Backend works, no UI or keybinding  
+### **Current State:** Backend works, no UI or keybinding
 ### **Target State:** Ctrl+K opens modal, fuzzy search works
 
 ### **Subtasks:**
@@ -161,26 +161,26 @@ from prompt_toolkit.keys import Keys
 class EnhancedInputSession:
     def __init__(self, ...):
         # ... existing init ...
-        
+
         # Create key bindings
         self.kb = KeyBindings()
-        
+
         # Register Ctrl+K for command palette
         @self.kb.add('c-k')
         def _(event):
             """Open command palette."""
             event.app.exit(result="__PALETTE__")
-        
+
         # Register Ctrl+? for help
         @self.kb.add('c-question')
         def _(event):
             """Show keyboard shortcuts."""
             event.app.exit(result="__HELP__")
-    
+
     async def prompt_async(self) -> Optional[str]:
         """Prompt with keybindings."""
         # ... existing code ...
-        
+
         # Add key_bindings to session
         result = await self.session.prompt_async(
             "You> ",
@@ -188,7 +188,7 @@ class EnhancedInputSession:
             style=self.style,
             key_bindings=self.kb  # NEW
         )
-        
+
         return result
 ```
 
@@ -209,47 +209,47 @@ from .palette import CommandPalette, Command
 
 class PaletteModal(ModalScreen):
     """Modal overlay for command palette."""
-    
+
     def __init__(self, palette: CommandPalette):
         super().__init__()
         self.palette = palette
         self.filtered_commands = palette.commands
-    
+
     def compose(self) -> ComposeResult:
         """Create modal layout."""
         with Container(id="palette-container"):
             yield Label("🎨 Command Palette", id="palette-title")
             yield Input(placeholder="Type to search...", id="search-input")
             yield ListView(id="command-list")
-    
+
     def on_mount(self) -> None:
         """Focus search input on mount."""
         self.query_one("#search-input").focus()
         self._update_list()
-    
+
     def on_input_changed(self, event: Input.Changed) -> None:
         """Filter commands on input."""
         query = event.value
         self.filtered_commands = self.palette.search(query)
         self._update_list()
-    
+
     def _update_list(self):
         """Update command list."""
         list_view = self.query_one("#command-list", ListView)
         list_view.clear()
-        
+
         for cmd in self.filtered_commands[:10]:  # Top 10
             item = ListItem(
                 Label(f"{cmd.title} - {cmd.description}")
             )
             item.command = cmd
             list_view.append(item)
-    
+
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         """Execute selected command."""
         if hasattr(event.item, 'command'):
             self.dismiss(result=event.item.command)
-    
+
     def on_key(self, event) -> None:
         """Handle escape to close."""
         if event.key == "escape":
@@ -282,32 +282,32 @@ class PaletteModal(ModalScreen):
 async def _show_palette_interactive(self) -> Optional[Command]:
     """Show command palette modal."""
     from .tui.components.palette_modal import PaletteModal
-    
+
     # Create and push modal
     modal = PaletteModal(self.palette)
-    
+
     # For now, use fallback text-based until textual integration
     # TODO: Integrate with textual app when available
-    
+
     # Fallback: Text-based menu
     self.console.print("\n[cyan bold]Command Palette[/cyan bold]\n")
-    
+
     # Show search prompt
     query = input("Search commands: ").strip()
-    
+
     # Search
     results = self.palette.search(query, limit=10)
-    
+
     if not results:
         self.console.print("[yellow]No commands found[/yellow]")
         return None
-    
+
     # Show results
     for i, cmd in enumerate(results, 1):
         kb = f" [{cmd.keybinding}]" if cmd.keybinding else ""
         self.console.print(f"{i}. {cmd.title}{kb}")
         self.console.print(f"   [dim]{cmd.description}[/dim]")
-    
+
     # Get selection
     try:
         choice = int(input("\nSelect (number): "))
@@ -315,7 +315,7 @@ async def _show_palette_interactive(self) -> Optional[Command]:
             return results[choice - 1]
     except (ValueError, KeyError):
         pass
-    
+
     return None
 ```
 
@@ -323,7 +323,7 @@ async def _show_palette_interactive(self) -> Optional[Command]:
 
 ## 🟠 TASK 1.3: PREVIEW INTEGRATION (90 min)
 
-### **Current State:** Complete code, never used  
+### **Current State:** Complete code, never used
 ### **Target State:** File edits show preview before applying
 
 ### **Subtasks:**
@@ -360,18 +360,18 @@ from qwen_dev_cli.tui.components.preview import FileEdit, EditAction
 
 class WriteFileTool(BaseTool):
     # ... existing code ...
-    
+
     async def execute(self, path: str, content: str, **kwargs) -> ToolResult:
         """Execute file write with preview."""
         path_obj = Path(path)
-        
+
         # Check if preview is enabled (from shell context)
         preview_manager = kwargs.get('preview_manager')
-        
+
         if preview_manager and path_obj.exists():
             # Show preview for edits
             original_content = path_obj.read_text()
-            
+
             # Create edit
             edit = FileEdit(
                 filepath=str(path_obj),
@@ -379,16 +379,16 @@ class WriteFileTool(BaseTool):
                 new_content=content,
                 action=EditAction.MODIFY
             )
-            
+
             # Add to preview
             preview_id = preview_manager.add_edit(edit)
-            
+
             # Show diff
             preview_manager.show_preview(preview_id)
-            
+
             # Ask for confirmation
             response = input("\nAccept changes? [Y/n/e(dit)] ").strip().lower()
-            
+
             if response in ('', 'y', 'yes'):
                 # Apply changes
                 result = preview_manager.apply_edit(preview_id)
@@ -407,7 +407,7 @@ class WriteFileTool(BaseTool):
                 # Reject
                 preview_manager.reject_edit(preview_id)
                 return ToolResult.error("Changes rejected by user")
-        
+
         # Original behavior (no preview)
         # ... existing write code ...
 ```
@@ -485,7 +485,7 @@ self.console.print(self.animator.success_checkmark())  # ✓ with animation
 # Line 1416: Before LLM call
 with self.console.status("[cyan]Thinking...[/cyan]") as status:
     suggestion = await self._get_command_suggestion(user_input, rich_ctx)
-    
+
     # NEW: Animated completion
     status.update("[green]Ready![/green]")
     await asyncio.sleep(0.2)  # Brief pause for visual feedback
@@ -499,7 +499,7 @@ with self.console.status("[cyan]Thinking...[/cyan]") as status:
 def show_preview(self, preview_id: str):
     """Show preview with animation."""
     edit = self.get_edit(preview_id)
-    
+
     # Render diff line-by-line with delay
     for line in edit.diff_lines:
         self.console.print(line.render())
@@ -526,23 +526,23 @@ elif user_input.strip().lower() == '/dashboard':
 def _show_dashboard(self):
     """Display interactive dashboard."""
     self.console.clear()
-    
+
     # Render current state
     dashboard_view = self.dashboard.render_full()
     self.console.print(dashboard_view)
-    
+
     # Show stats
     stats = self.dashboard.get_statistics()
-    
+
     stats_table = Table(title="Session Statistics")
     stats_table.add_column("Metric", style="cyan")
     stats_table.add_column("Value", style="green", justify="right")
-    
+
     stats_table.add_row("Total Operations", str(stats['total_operations']))
     stats_table.add_row("Success Rate", f"{stats['success_rate']:.1f}%")
     stats_table.add_row("Avg Duration", f"{stats['avg_duration']:.2f}s")
     stats_table.add_row("Active Operations", str(stats['active_count']))
-    
+
     self.console.print(stats_table)
 ```
 
@@ -555,17 +555,17 @@ from rich.live import Live
 
 class Dashboard:
     # ... existing code ...
-    
+
     def start_live_display(self):
         """Start live-updating dashboard in separate thread."""
         self.live = Live(self.render_compact(), console=self.console)
         self.live.start()
-    
+
     def update_live(self):
         """Update live display."""
         if hasattr(self, 'live') and self.live:
             self.live.update(self.render_compact())
-    
+
     def stop_live_display(self):
         """Stop live display."""
         if hasattr(self, 'live') and self.live:
@@ -597,36 +597,36 @@ self.dashboard.update_live()  # Refresh display
 def _register_keybindings(self):
     """Register all keyboard shortcuts."""
     kb = KeyBindings()
-    
+
     # Command palette
     @kb.add('c-k')
     def _(event):
         event.app.exit(result="__PALETTE__")
-    
+
     # Undo/Redo
     @kb.add('c-z')
     def _(event):
         event.app.exit(result="__UNDO__")
-    
+
     @kb.add('c-y')
     def _(event):
         event.app.exit(result="__REDO__")
-    
+
     # Help
     @kb.add('c-slash')
     def _(event):
         event.app.exit(result="__HELP__")
-    
+
     # Dashboard
     @kb.add('c-d')
     def _(event):
         event.app.exit(result="__DASHBOARD__")
-    
+
     # Clear screen
     @kb.add('c-l')
     def _(event):
         event.app.exit(result="__CLEAR__")
-    
+
     return kb
 ```
 
@@ -644,7 +644,7 @@ def _show_keyboard_shortcuts(self):
     shortcuts_table = Table(title="⌨️  Keyboard Shortcuts")
     shortcuts_table.add_column("Shortcut", style="cyan bold")
     shortcuts_table.add_column("Action", style="white")
-    
+
     shortcuts = [
         ("Ctrl+K", "Open Command Palette"),
         ("Ctrl+D", "Show Dashboard"),
@@ -655,10 +655,10 @@ def _show_keyboard_shortcuts(self):
         ("Ctrl+C", "Cancel Operation"),
         ("Ctrl+D", "Exit Shell"),
     ]
-    
+
     for shortcut, action in shortcuts:
         shortcuts_table.add_row(shortcut, action)
-    
+
     self.console.print(shortcuts_table)
 ```
 
@@ -709,21 +709,21 @@ import pytest
 def timeout_guard():
     """Add 10s timeout to all async tests."""
     import asyncio
-    
+
     # Set event loop policy with timeout
     policy = asyncio.get_event_loop_policy()
     loop = policy.get_event_loop()
-    
+
     # Add timeout wrapper
     original_run = loop.run_until_complete
-    
+
     def run_with_timeout(coro):
         return original_run(asyncio.wait_for(coro, timeout=10.0))
-    
+
     loop.run_until_complete = run_with_timeout
-    
+
     yield
-    
+
     loop.run_until_complete = original_run
 ```
 
@@ -764,44 +764,44 @@ from qwen_dev_cli.core.llm import llm_client
 
 class Benchmark:
     """Benchmark runner."""
-    
+
     async def bench_llm_response(self):
         """Measure LLM response time."""
         times = []
-        
+
         for _ in range(10):
             start = time.time()
             await llm_client.generate("Hello", max_tokens=50)
             elapsed = time.time() - start
             times.append(elapsed)
-        
+
         avg = sum(times) / len(times)
         print(f"LLM Response: {avg*1000:.1f}ms avg")
         assert avg < 2.0, "LLM too slow"
-    
+
     async def bench_file_read(self):
         """Measure file read tool speed."""
         from qwen_dev_cli.tools.file_ops import ReadFileTool
         tool = ReadFileTool()
-        
+
         times = []
         for _ in range(100):
             start = time.time()
             await tool.execute("shell.py")
             elapsed = time.time() - start
             times.append(elapsed)
-        
+
         avg = sum(times) / len(times)
         print(f"File Read: {avg*1000:.1f}ms avg")
         assert avg < 0.05, "File read too slow"
-    
+
     async def bench_workflow_viz(self):
         """Measure visualization overhead."""
         from qwen_dev_cli.tui.components.workflow_visualizer import WorkflowVisualizer
         from rich.console import Console
-        
+
         viz = WorkflowVisualizer(console=Console())
-        
+
         start = time.time()
         for i in range(100):
             viz.start_workflow(f"Test {i}")
@@ -809,7 +809,7 @@ class Benchmark:
             viz.update_step_status("step1", "completed")
             viz.complete_workflow()
         elapsed = time.time() - start
-        
+
         per_workflow = elapsed / 100
         print(f"Workflow Viz: {per_workflow*1000:.1f}ms per workflow")
         assert per_workflow < 0.01, "Viz too slow"
@@ -966,6 +966,6 @@ git commit -m "chore: emergency fix sprint complete - 90% parity achieved"
 
 ---
 
-**Sprint Start Time:** [TBD]  
-**Expected Completion:** [TBD + 12h]  
+**Sprint Start Time:** [TBD]
+**Expected Completion:** [TBD + 12h]
 **Status:** READY TO EXECUTE

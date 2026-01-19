@@ -8,20 +8,19 @@ from vertice_cli.orchestration.squad import WorkflowResult, WorkflowStatus
 
 runner = CliRunner()
 
+
 @pytest.fixture
 def mock_squad():
     # Patch where get_squad is called (in cli_app), not where it's imported (in cli)
     with patch("vertice_cli.cli_app.get_squad") as mock:
         squad_instance = MagicMock()
         # Mock execute_workflow to return a dummy result
-        result = WorkflowResult(
-            request="test",
-            status=WorkflowStatus.COMPLETED
-        )
+        result = WorkflowResult(request="test", status=WorkflowStatus.COMPLETED)
         squad_instance.execute_workflow = AsyncMock(return_value=result)
         squad_instance.get_phase_summary.return_value = "Workflow Completed Successfully"
         mock.return_value = squad_instance
         yield mock
+
 
 def test_squad_run_command(mock_squad):
     """Test 'qwen-dev squad run' command."""
@@ -31,6 +30,7 @@ def test_squad_run_command(mock_squad):
     assert "Create a hello world script" in result.stdout
     assert "Workflow Completed Successfully" in result.stdout
 
+
 def test_squad_status_command():
     """Test 'qwen-dev squad status' command."""
     result = runner.invoke(app, ["squad", "status"])
@@ -39,6 +39,7 @@ def test_squad_status_command():
     assert "Architect" in result.stdout
     assert "Architecture Analysis" in result.stdout
 
+
 def test_workflow_list_command():
     """Test 'qwen-dev workflow list' command."""
     result = runner.invoke(app, ["workflow", "list"])
@@ -46,6 +47,7 @@ def test_workflow_list_command():
     assert "Available Workflows" in result.stdout
     assert "setup-fastapi" in result.stdout
     assert "add-auth" in result.stdout
+
 
 def test_workflow_run_command(mock_squad):
     """Test 'qwen-dev workflow run' command."""
@@ -56,6 +58,7 @@ def test_workflow_run_command(mock_squad):
     assert "setup-fastapi" in result.stdout
     assert "Execution Plan" in result.stdout
     assert "Workflow Completed Successfully" in result.stdout
+
 
 def test_workflow_run_invalid():
     """Test 'qwen-dev workflow run' with invalid workflow."""

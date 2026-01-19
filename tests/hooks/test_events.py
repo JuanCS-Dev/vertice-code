@@ -55,12 +55,12 @@ class TestHookPriority:
             HookPriority.LOW,
             HookPriority.CRITICAL,
             HookPriority.NORMAL,
-            HookPriority.HIGH
+            HookPriority.HIGH,
         ]
         sorted_priorities = sorted(priorities, reverse=True)
         assert sorted_priorities == [
             HookPriority.CRITICAL,
             HookPriority.HIGH,
             HookPriority.NORMAL,
-            HookPriority.LOW
+            HookPriority.LOW,
         ]

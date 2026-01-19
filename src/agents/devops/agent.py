@@ -249,6 +249,7 @@ Generate complete, production-ready configuration.
         # Try to use sandbox for safe command execution
         try:
             from vertice_cli.integration.sandbox import get_sandbox
+
             sandbox = get_sandbox()
             if sandbox.is_available():
                 result = await sandbox.execute(command)

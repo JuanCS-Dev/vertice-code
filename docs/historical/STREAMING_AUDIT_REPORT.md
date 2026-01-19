@@ -1,8 +1,8 @@
 # STREAMING AUDIT REPORT - MAESTRO UI v10.0
 
-**Date**: 2025-11-24  
-**Auditor**: Claude Code (Constitutional Analysis Mode)  
-**Issue**: Agent streaming not displaying in real-time in MAESTRO UI  
+**Date**: 2025-11-24
+**Auditor**: Claude Code (Constitutional Analysis Mode)
+**Issue**: Agent streaming not displaying in real-time in MAESTRO UI
 **Severity**: 🔴 **CRITICAL** - Core feature non-functional
 
 ---
@@ -13,7 +13,7 @@
 
 **Root Cause Identified**: **12 out of 15 agents** (80%) are missing `execute_streaming()` method required for real-time UI updates.
 
-**Impact**: 
+**Impact**:
 - ❌ No real-time streaming for PLANNER, EXPLORER, REVIEWER, etc.
 - ❌ Users see empty panels during execution
 - ❌ 30 FPS streaming architecture present but unused
@@ -28,7 +28,7 @@
 **Top Section (Before Approval)**:
 ```
 ⚠️  APPROVAL REQUIRED
-echo "1. Ferva água.\n2. Coloque o milho na água fervente por 3 
+echo "1. Ferva água.\n2. Coloque o milho na água fervente por 3
 minutos.\n3. Adicione o tempero.\n4. Misture bem e sirva."
 ```
 ✅ Approval system working
@@ -135,22 +135,22 @@ async def execute_streaming(self, task: AgentTask) -> AsyncIterator[Dict[str, An
     """
     # 1. Stream thinking phase
     yield {"type": "status", "data": "🤔 Thinking..."}
-    
+
     command_buffer = []
     async for token in self._stream_command_generation(task.request, task.context):
         command_buffer.append(token)
         yield {"type": "thinking", "data": token}  # ← Real-time tokens!
-    
+
     command = ''.join(command_buffer).strip()
     yield {"type": "command", "data": command}
-    
+
     # 2. Security validation
     yield {"type": "status", "data": "🔒 Validating..."}
-    
+
     # 3. Execute command
     yield {"type": "executing", "data": "Running..."}
     result = await self._execute_command(command)
-    
+
     # 4. Final result
     yield {"type": "result", "data": result}
 ```
@@ -232,7 +232,7 @@ async for update in self.orch.execute_streaming(q, context={'cwd': ...}):
 async def execute(self, task: AgentTask) -> AgentResponse:
     # Thinks internally, NO streaming
     plan = await self._generate_plan(task)
-    
+
     # Returns FINAL result only
     return AgentResponse(success=True, data={"plan": plan})
     # ❌ NO intermediate updates yielded
@@ -257,21 +257,21 @@ async def execute_streaming(
 ) -> AsyncIterator[Dict[str, Any]]:
     """
     Stream agent execution with real-time updates.
-    
+
     Yields dictionaries with structure:
         {
             "type": "thinking" | "status" | "command" | "executing" | "result",
             "data": <content>,
             "meta": {Optional metadata}
         }
-    
+
     Update Types:
         - "thinking": LLM token-by-token generation
         - "status": Status messages (e.g., "Validating...", "Loading context...")
         - "command": Generated command/action
         - "executing": Execution in progress
         - "result": Final result (required, terminal event)
-    
+
     Example Flow:
         yield {"type": "status", "data": "Loading files..."}
         yield {"type": "thinking", "data": "Based on"}
@@ -289,37 +289,37 @@ async def execute_streaming(
     task: AgentTask
 ) -> AsyncIterator[Dict[str, Any]]:
     """Streaming execution for [AgentName]"""
-    
+
     # Phase 1: Context gathering (with status updates)
     yield {"type": "status", "data": "🔍 Gathering context..."}
     context = await self._gather_context(task)
-    
+
     # Phase 2: LLM generation (with token streaming)
     yield {"type": "status", "data": "🤔 Analyzing..."}
-    
+
     response_buffer = []
     async for token in self.llm.generate_stream(prompt, context):
         response_buffer.append(token)
         yield {"type": "thinking", "data": token}  # ← KEY: Stream tokens!
-    
+
     response_text = ''.join(response_buffer)
-    
+
     # Phase 3: Processing (with status updates)
     yield {"type": "status", "data": "⚙️  Processing..."}
     processed_data = await self._process_response(response_text, task)
-    
+
     # Phase 4: Tool execution (if needed, with updates)
     if requires_tools:
         yield {"type": "status", "data": "🔧 Executing tools..."}
         tool_results = await self._execute_tools(processed_data)
-    
+
     # Phase 5: Final result (required)
     final_result = AgentResponse(
         success=True,
         data=processed_data,
         reasoning=response_text
     )
-    
+
     yield {"type": "result", "data": final_result}
 ```
 
@@ -340,7 +340,7 @@ async def generate_stream(
 ) -> AsyncIterator[str]:
     """
     Stream LLM generation token-by-token.
-    
+
     Yields individual tokens as they're generated.
     """
     if self.provider == "gemini":
@@ -350,11 +350,11 @@ async def generate_stream(
             stream=True,  # ← Enable streaming
             **kwargs
         )
-        
+
         async for chunk in response:
             if chunk.text:
                 yield chunk.text
-    
+
     elif self.provider == "ollama":
         # Ollama streaming
         async for chunk in self.client.chat(
@@ -363,7 +363,7 @@ async def generate_stream(
             stream=True
         ):
             yield chunk['message']['content']
-    
+
     else:
         # Fallback: Simulate streaming by splitting response
         full_response = await self.generate(prompt, context, **kwargs)
@@ -378,8 +378,8 @@ async def generate_stream(
 
 ### Phase 1: Critical Agents (P0) - Required for Basic Functionality
 
-**Priority**: 🔴 CRITICAL  
-**Agents**: PlannerAgent, ExplorerAgent  
+**Priority**: 🔴 CRITICAL
+**Agents**: PlannerAgent, ExplorerAgent
 **Timeline**: Implement first
 
 #### 1.1 PlannerAgent Streaming
@@ -396,38 +396,38 @@ async def execute_streaming(
     task: AgentTask
 ) -> AsyncIterator[Dict[str, Any]]:
     """Stream plan generation with real-time updates"""
-    
+
     # 1. Load context
     yield {"type": "status", "data": "📋 Loading project context..."}
     context = await self._gather_context(task)
-    
+
     # 2. Stream plan generation
     yield {"type": "status", "data": "🎯 Generating plan..."}
-    
+
     prompt = self._build_prompt(task, context)
-    
+
     plan_buffer = []
     async for token in self.llm.generate_stream(prompt):
         plan_buffer.append(token)
         yield {"type": "thinking", "data": token}  # ← Stream to PLANNER panel
-    
+
     plan_text = ''.join(plan_buffer)
-    
+
     # 3. Parse plan into steps
     yield {"type": "status", "data": "⚙️  Parsing plan steps..."}
     parsed_plan = self._parse_plan(plan_text)
-    
+
     # 4. Validate plan
     yield {"type": "status", "data": "✅ Validating plan..."}
     validated_plan = await self._validate_plan(parsed_plan, context)
-    
+
     # 5. Final result
     result = AgentResponse(
         success=True,
         data={"plan": validated_plan, "raw_plan": plan_text},
         reasoning=f"Generated {len(validated_plan)} steps"
     )
-    
+
     yield {"type": "result", "data": result}
 ```
 
@@ -465,60 +465,60 @@ async def execute_streaming(
     task: AgentTask
 ) -> AsyncIterator[Dict[str, Any]]:
     """Stream code exploration with real-time updates"""
-    
+
     # 1. Scan filesystem
     yield {"type": "status", "data": "🗺️  Scanning codebase..."}
     file_tree = await self._scan_directory(task.context.get('cwd', '.'))
     yield {"type": "status", "data": f"Found {len(file_tree)} files"}
-    
+
     # 2. Build context
     yield {"type": "status", "data": "📖 Building context..."}
     context = await self._build_context(task, file_tree)
-    
+
     # 3. Stream analysis
     yield {"type": "status", "data": "🔍 Analyzing code structure..."}
-    
+
     prompt = self._build_exploration_prompt(task, context)
-    
+
     analysis_buffer = []
     async for token in self.llm.generate_stream(prompt):
         analysis_buffer.append(token)
         yield {"type": "thinking", "data": token}  # ← Stream to EXPLORER panel
-    
+
     analysis = ''.join(analysis_buffer)
-    
+
     # 4. Extract findings
     yield {"type": "status", "data": "📊 Extracting insights..."}
     findings = self._extract_findings(analysis)
-    
+
     # 5. Final result
     result = AgentResponse(
         success=True,
         data={"findings": findings, "file_tree": file_tree},
         reasoning=analysis
     )
-    
+
     yield {"type": "result", "data": result}
 ```
 
 ### Phase 2: High-Impact Agents (P1)
 
-**Priority**: 🟠 HIGH  
-**Agents**: ReviewerAgent, RefactorerAgent  
+**Priority**: 🟠 HIGH
+**Agents**: ReviewerAgent, RefactorerAgent
 **Timeline**: Implement after P0
 
 Same pattern as above, adapted for each agent's specific workflow.
 
 ### Phase 3: Medium-Impact Agents (P2)
 
-**Priority**: 🟡 MEDIUM  
-**Agents**: ArchitectAgent, SecurityAgent, PerformanceAgent, TestingAgent  
+**Priority**: 🟡 MEDIUM
+**Agents**: ArchitectAgent, SecurityAgent, PerformanceAgent, TestingAgent
 **Timeline**: Implement incrementally
 
 ### Phase 4: Low-Priority Agents (P3)
 
-**Priority**: 🟢 LOW  
-**Agents**: DocumentationAgent, DevOpsAgent  
+**Priority**: 🟢 LOW
+**Agents**: DocumentationAgent, DevOpsAgent
 **Timeline**: Optional, nice-to-have
 
 ---
@@ -550,14 +550,14 @@ Wrap MCP tool execution to automatically track file operations:
 
 async def call_tool(self, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
     """Execute tool with automatic file operation tracking"""
-    
+
     # Execute tool
     result = await tool._execute_validated(**arguments)
-    
+
     # Track file operations
     if tool_name in ['read_file', 'write_file', 'edit_file', 'move_file', 'copy_file']:
         self._track_file_operation(tool_name, arguments, result)
-    
+
     return result
 
 def _track_file_operation(self, tool_name, arguments, result):
@@ -581,7 +581,7 @@ Each agent manually tracks file operations:
 async for update in agent.execute_streaming(task):
     if update["type"] == "file_operation":
         self.file_tracker.track_operation(update["data"])
-    
+
     yield update
 ```
 
@@ -601,15 +601,15 @@ async def test_planner_streams_thinking_tokens():
     """PlannerAgent should yield thinking tokens during execution"""
     planner = PlannerAgent(mock_llm, mock_mcp)
     task = AgentTask(request="Create feature X")
-    
+
     thinking_tokens = []
     async for update in planner.execute_streaming(task):
         if update["type"] == "thinking":
             thinking_tokens.append(update["data"])
-    
+
     # Should have received multiple tokens
     assert len(thinking_tokens) > 10
-    
+
     # Tokens should form coherent text
     full_text = ''.join(thinking_tokens)
     assert len(full_text) > 100
@@ -619,12 +619,12 @@ async def test_planner_yields_final_result():
     """PlannerAgent streaming must yield final result"""
     planner = PlannerAgent(mock_llm, mock_mcp)
     task = AgentTask(request="Create feature X")
-    
+
     final_result = None
     async for update in planner.execute_streaming(task):
         if update["type"] == "result":
             final_result = update["data"]
-    
+
     assert final_result is not None
     assert isinstance(final_result, AgentResponse)
     assert final_result.success
@@ -639,29 +639,29 @@ async def test_planner_yields_final_result():
 async def test_maestro_ui_displays_planner_stream():
     """MAESTRO UI should display PlannerAgent streaming"""
     from maestro_v10_integrated import Shell
-    
+
     shell = Shell()
     shell.init()
-    
+
     # Capture UI updates
     ui_updates = []
     original_update = shell.maestro_ui.update_agent_stream
-    
+
     async def capture_update(agent_name, text, *args, **kwargs):
         ui_updates.append((agent_name, text))
         await original_update(agent_name, text, *args, **kwargs)
-    
+
     shell.maestro_ui.update_agent_stream = capture_update
-    
+
     # Execute command that routes to PlannerAgent
     await shell.orch.execute_streaming(
         "Plan a refactoring for auth module",
         context={'cwd': '.'}
     )
-    
+
     # Verify UI received updates
     assert len(ui_updates) > 0
-    
+
     # Verify planner panel got updates
     planner_updates = [u for u in ui_updates if u[0] == 'planner']
     assert len(planner_updates) > 10  # Should have multiple tokens
@@ -795,7 +795,7 @@ async for token in phase2_stream():
 
 ### Issue #3: Streaming increases LLM API costs (slightly)
 
-**Impact**: Minimal (streaming uses same tokens)  
+**Impact**: Minimal (streaming uses same tokens)
 **Mitigation**: Streaming is more efficient (can cancel early)
 
 ---
@@ -853,40 +853,40 @@ async def execute_streaming(
     task: AgentTask
 ) -> AsyncIterator[Dict[str, Any]]:
     """Stream execution for [YOUR AGENT NAME]"""
-    
+
     # 1. Pre-processing
     yield {"type": "status", "data": "🔄 Starting [agent name]..."}
-    
+
     # 2. Main LLM generation (STREAMING!)
     yield {"type": "status", "data": "🤔 Analyzing..."}
-    
+
     prompt = self._build_prompt(task)
     response_buffer = []
-    
+
     async for token in self.llm.generate_stream(prompt):
         response_buffer.append(token)
         yield {"type": "thinking", "data": token}  # ← CRITICAL: Stream tokens!
-    
+
     response_text = ''.join(response_buffer)
-    
+
     # 3. Post-processing
     yield {"type": "status", "data": "⚙️  Processing..."}
     processed = self._process(response_text)
-    
+
     # 4. Final result (REQUIRED!)
     result = AgentResponse(
         success=True,
         data=processed,
         reasoning=response_text
     )
-    
+
     yield {"type": "result", "data": result}
 ```
 
 ---
 
-**Report Version**: 1.0  
-**Last Updated**: 2025-11-24  
+**Report Version**: 1.0
+**Last Updated**: 2025-11-24
 **Next Review**: After Phase 1 implementation
 
 **For Implementer**: This report contains EVERYTHING needed to fix streaming. Start with Phase 1 (LLMClient), then Phase 2 (PlannerAgent + ExplorerAgent). The architecture is sound, we just need to implement the streaming methods.

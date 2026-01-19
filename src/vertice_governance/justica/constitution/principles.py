@@ -99,6 +99,7 @@ class EnforcementResult:
     - Severity classification
     - Recommended action
     """
+
     allowed: bool
     category: EnforcementCategory
     principle_id: Optional[UUID] = None

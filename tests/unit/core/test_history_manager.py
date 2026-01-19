@@ -19,12 +19,13 @@ from vertice_tui.core.history_manager import HistoryManager
 # FIXTURES
 # =============================================================================
 
+
 @pytest.fixture
 def temp_paths(tmp_path):
     """Create temporary paths for history and sessions."""
     return {
         "history_file": tmp_path / ".vertice_tui_history",
-        "session_dir": tmp_path / ".juancs" / "sessions"
+        "session_dir": tmp_path / ".juancs" / "sessions",
     }
 
 
@@ -32,8 +33,7 @@ def temp_paths(tmp_path):
 def history_manager(temp_paths):
     """Create HistoryManager with temp paths."""
     return HistoryManager(
-        history_file=temp_paths["history_file"],
-        session_dir=temp_paths["session_dir"]
+        history_file=temp_paths["history_file"], session_dir=temp_paths["session_dir"]
     )
 
 
@@ -46,26 +46,30 @@ def history_with_data(temp_paths):
     # Create session directory with a session
     temp_paths["session_dir"].mkdir(parents=True, exist_ok=True)
     session_file = temp_paths["session_dir"] / "20250101_120000.json"
-    session_file.write_text(json.dumps({
-        "session_id": "20250101_120000",
-        "timestamp": "2025-01-01T12:00:00",
-        "context": [
-            {"role": "user", "content": "Hello"},
-            {"role": "assistant", "content": "Hi there!"}
-        ],
-        "commands": ["git status"],
-        "version": "1.0"
-    }))
+    session_file.write_text(
+        json.dumps(
+            {
+                "session_id": "20250101_120000",
+                "timestamp": "2025-01-01T12:00:00",
+                "context": [
+                    {"role": "user", "content": "Hello"},
+                    {"role": "assistant", "content": "Hi there!"},
+                ],
+                "commands": ["git status"],
+                "version": "1.0",
+            }
+        )
+    )
 
     return HistoryManager(
-        history_file=temp_paths["history_file"],
-        session_dir=temp_paths["session_dir"]
+        history_file=temp_paths["history_file"], session_dir=temp_paths["session_dir"]
     )
 
 
 # =============================================================================
 # INITIALIZATION TESTS
 # =============================================================================
+
 
 class TestHistoryManagerInit:
     """Tests for HistoryManager initialization."""
@@ -82,7 +86,7 @@ class TestHistoryManagerInit:
             max_commands=500,
             max_context=25,
             history_file=temp_paths["history_file"],
-            session_dir=temp_paths["session_dir"]
+            session_dir=temp_paths["session_dir"],
         )
         assert manager.max_commands == 500
         assert manager.max_context == 25
@@ -90,8 +94,7 @@ class TestHistoryManagerInit:
     def test_init_custom_paths(self, temp_paths):
         """Test custom file paths."""
         manager = HistoryManager(
-            history_file=temp_paths["history_file"],
-            session_dir=temp_paths["session_dir"]
+            history_file=temp_paths["history_file"], session_dir=temp_paths["session_dir"]
         )
         assert manager._history_file == temp_paths["history_file"]
         assert manager._session_dir == temp_paths["session_dir"]
@@ -111,6 +114,7 @@ class TestHistoryManagerInit:
 # =============================================================================
 # COMMAND HISTORY TESTS
 # =============================================================================
+
 
 class TestCommandHistory:
     """Tests for command history functionality."""
@@ -148,15 +152,13 @@ class TestCommandHistory:
     def test_add_command_persists(self, temp_paths):
         """Test command is persisted to file."""
         manager = HistoryManager(
-            history_file=temp_paths["history_file"],
-            session_dir=temp_paths["session_dir"]
+            history_file=temp_paths["history_file"], session_dir=temp_paths["session_dir"]
         )
         manager.add_command("test command")
 
         # Reload and verify
         manager2 = HistoryManager(
-            history_file=temp_paths["history_file"],
-            session_dir=temp_paths["session_dir"]
+            history_file=temp_paths["history_file"], session_dir=temp_paths["session_dir"]
         )
         assert "test command" in manager2.commands
 
@@ -210,6 +212,7 @@ class TestCommandHistory:
 # CONVERSATION CONTEXT TESTS
 # =============================================================================
 
+
 class TestConversationContext:
     """Tests for conversation context management."""
 
@@ -232,7 +235,7 @@ class TestConversationContext:
         manager = HistoryManager(
             max_context=3,
             history_file=temp_paths["history_file"],
-            session_dir=temp_paths["session_dir"]
+            session_dir=temp_paths["session_dir"],
         )
 
         for i in range(5):
@@ -262,6 +265,7 @@ class TestConversationContext:
 # SESSION PERSISTENCE TESTS
 # =============================================================================
 
+
 class TestSessionPersistence:
     """Tests for session save/load/list functionality."""
 
@@ -280,7 +284,7 @@ class TestSessionPersistence:
 
     def test_save_session_creates_file(self, history_manager, temp_paths):
         """Test saving creates session file."""
-        session_id = history_manager.save_session("test_session")
+        history_manager.save_session("test_session")
         session_file = temp_paths["session_dir"] / "test_session.json"
         assert session_file.exists()
 
@@ -290,7 +294,7 @@ class TestSessionPersistence:
         history_manager.add_context("assistant", "Hi!")
         history_manager.add_command("git status")
 
-        session_id = history_manager.save_session("test")
+        history_manager.save_session("test")
 
         session_file = temp_paths["session_dir"] / "test.json"
         data = json.loads(session_file.read_text())
@@ -327,7 +331,7 @@ class TestSessionPersistence:
 
         # Clear and load without ID
         history_manager.clear_context()
-        result = history_manager.load_session()
+        history_manager.load_session()
 
         assert history_manager.context[0]["content"] == "Second"
 
@@ -392,6 +396,7 @@ class TestSessionPersistence:
 # =============================================================================
 # CHECKPOINT TESTS
 # =============================================================================
+
 
 class TestCheckpoints:
     """Tests for checkpoint system."""
@@ -501,6 +506,7 @@ class TestCheckpoints:
 # STATISTICS TESTS
 # =============================================================================
 
+
 class TestStatistics:
     """Tests for statistics functionality."""
 
@@ -530,6 +536,7 @@ class TestStatistics:
 # =============================================================================
 # EDGE CASES
 # =============================================================================
+
 
 class TestEdgeCases:
     """Tests for edge cases and boundary conditions."""
@@ -571,7 +578,7 @@ class TestEdgeCases:
         manager = HistoryManager(
             max_commands=100,
             history_file=temp_paths["history_file"],
-            session_dir=temp_paths["session_dir"]
+            session_dir=temp_paths["session_dir"],
         )
 
         for i in range(150):
@@ -581,7 +588,7 @@ class TestEdgeCases:
         manager2 = HistoryManager(
             max_commands=100,
             history_file=temp_paths["history_file"],
-            session_dir=temp_paths["session_dir"]
+            session_dir=temp_paths["session_dir"],
         )
         assert len(manager2.commands) <= 100
 
@@ -591,8 +598,7 @@ class TestEdgeCases:
 
         # Should not crash
         manager = HistoryManager(
-            history_file=temp_paths["history_file"],
-            session_dir=temp_paths["session_dir"]
+            history_file=temp_paths["history_file"], session_dir=temp_paths["session_dir"]
         )
         assert manager.commands == []
 
@@ -603,8 +609,7 @@ class TestEdgeCases:
         corrupt_file.write_text("not valid json {{{")
 
         manager = HistoryManager(
-            history_file=temp_paths["history_file"],
-            session_dir=temp_paths["session_dir"]
+            history_file=temp_paths["history_file"], session_dir=temp_paths["session_dir"]
         )
 
         # Should skip corrupt files
@@ -615,6 +620,7 @@ class TestEdgeCases:
 # =============================================================================
 # INTEGRATION TESTS
 # =============================================================================
+
 
 class TestIntegration:
     """Integration tests for HistoryManager."""

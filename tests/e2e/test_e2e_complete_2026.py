@@ -48,6 +48,7 @@ class Veredicto(Enum):
 @dataclass
 class ObservacaoCompleta:
     """Observacao completa de um teste E2E."""
+
     agente: str
     tipo: str  # CLI ou CORE
 
@@ -81,19 +82,24 @@ ALL_AGENTS = {
         "tipo": "CLI",
         "prompt": "Planeje a implementacao de uma API REST para gerenciar usuarios com autenticacao JWT.",
         "pede": "Plano estruturado com etapas para criar API de usuarios",
-        "criterios": ["passo|step|fase|etapa", "api|rest|endpoint", "usuario|user", "jwt|autenticacao|auth"]
+        "criterios": [
+            "passo|step|fase|etapa",
+            "api|rest|endpoint",
+            "usuario|user",
+            "jwt|autenticacao|auth",
+        ],
     },
     "executor": {
         "tipo": "CLI",
         "prompt": "Execute o comando 'echo Hello World' e mostre o resultado.",
         "pede": "Execucao de comando shell com output",
-        "criterios": ["hello|world", "execut|result|output", "echo|command"]
+        "criterios": ["hello|world", "execut|result|output", "echo|command"],
     },
     "architect": {
         "tipo": "CLI",
         "prompt": "Analise a arquitetura para um sistema de cache distribuido usando Redis.",
         "pede": "Analise arquitetural de sistema de cache",
-        "criterios": ["cache|redis", "distribuido|distributed", "arquitetura|architecture|sistema"]
+        "criterios": ["cache|redis", "distribuido|distributed", "arquitetura|architecture|sistema"],
     },
     "reviewer": {
         "tipo": "CLI",
@@ -103,13 +109,13 @@ def soma(a, b):
     return a + b
 ```""",
         "pede": "Review de codigo com analise da funcao soma",
-        "criterios": ["soma|add|funcao", "review|analise|code", "return|parametro"]
+        "criterios": ["soma|add|funcao", "review|analise|code", "return|parametro"],
     },
     "explorer": {
         "tipo": "CLI",
         "prompt": "Encontre arquivos relacionados a 'BaseAgent' no projeto e mostre trechos relevantes.",
         "pede": "Busca de arquivos com BaseAgent e snippets de codigo",
-        "criterios": ["base|agent", "arquivo|file|path", "encontr|found|relevante"]
+        "criterios": ["base|agent", "arquivo|file|path", "encontr|found|relevante"],
     },
     "refactorer": {
         "tipo": "CLI",
@@ -120,7 +126,7 @@ def f(x):
     else: return x/2
 ```""",
         "pede": "Refatoracao para codigo mais legivel",
-        "criterios": ["refator|refactor|melhora", "def|function", "legib|readable|clean"]
+        "criterios": ["refator|refactor|melhora", "def|function", "legib|readable|clean"],
     },
     "testing": {
         "tipo": "CLI",
@@ -130,7 +136,7 @@ def is_palindrome(s):
     return s == s[::-1]
 ```""",
         "pede": "Testes unitarios para funcao palindrome",
-        "criterios": ["test|teste", "palindrome|palindromo", "assert|def test_|unittest"]
+        "criterios": ["test|teste", "palindrome|palindromo", "assert|def test_|unittest"],
     },
     "security": {
         "tipo": "CLI",
@@ -140,7 +146,11 @@ import os
 os.system(f"cat {user_input}")
 ```""",
         "pede": "Analise de seguranca identificando command injection",
-        "criterios": ["seguranca|security|vulnerab", "injecao|injection|command", "os.system|perig|dangerous"]
+        "criterios": [
+            "seguranca|security|vulnerab",
+            "injecao|injection|command",
+            "os.system|perig|dangerous",
+        ],
     },
     "documentation": {
         "tipo": "CLI",
@@ -151,7 +161,7 @@ class Calculator:
     def subtract(self, a, b): return a - b
 ```""",
         "pede": "Documentacao com docstrings para Calculator",
-        "criterios": ["calculator|calculadora", "add|soma|subtract", "docstring|doc|descricao"]
+        "criterios": ["calculator|calculadora", "add|soma|subtract", "docstring|doc|descricao"],
     },
     "performance": {
         "tipo": "CLI",
@@ -165,44 +175,52 @@ def slow_sum(n):
     return result
 ```""",
         "pede": "Analise de complexidade O(n^2)",
-        "criterios": ["performance|complex|O(n", "loop|iteracao|nested", "otimiz|improve|slow"]
+        "criterios": ["performance|complex|O(n", "loop|iteracao|nested", "otimiz|improve|slow"],
     },
     "devops": {
         "tipo": "CLI",
         "prompt": "Configure um pipeline CI/CD basico para um projeto Python com testes e deploy.",
         "pede": "Configuracao de pipeline CI/CD",
-        "criterios": ["ci/cd|pipeline|github|gitlab", "docker|container|deploy", "test|pytest|build"]
+        "criterios": [
+            "ci/cd|pipeline|github|gitlab",
+            "docker|container|deploy",
+            "test|pytest|build",
+        ],
     },
     "justica": {
         "tipo": "CLI",
         "prompt": "Avalie a conformidade etica desta acao: coletar dados de usuarios sem consentimento explicito.",
         "pede": "Avaliacao etica de coleta de dados sem consentimento",
-        "criterios": ["etica|ethical|moral", "consentimento|consent|permiss", "violacao|violation|problema|block"]
+        "criterios": [
+            "etica|ethical|moral",
+            "consentimento|consent|permiss",
+            "violacao|violation|problema|block",
+        ],
     },
     "sofia": {
         "tipo": "CLI",
         "prompt": "Reflita sobre os dilemas eticos na coleta de dados para treinamento de IA.",
         "pede": "Reflexao filosofica sobre etica em IA",
-        "criterios": ["etica|ethical|moral", "dados|data|privac", "reflex|consider|dilema"]
+        "criterios": ["etica|ethical|moral", "dados|data|privac", "reflex|consider|dilema"],
     },
     "data": {
         "tipo": "CLI",
         "prompt": "Otimize esta query SQL lenta: SELECT * FROM users WHERE name LIKE '%test%' ORDER BY created_at",
         "pede": "Otimizacao de query SQL com sugestoes de indice",
-        "criterios": ["sql|query|select", "index|indice|otimiz", "like|performance|slow"]
+        "criterios": ["sql|query|select", "index|indice|otimiz", "like|performance|slow"],
     },
     # === CORE AGENTS (6) ===
     "orchestrator_core": {
         "tipo": "CORE",
         "prompt": "Orquestre uma tarefa: criar um endpoint de login com validacao e JWT.",
         "pede": "Orquestracao multi-agente para tarefa de login",
-        "criterios": ["orquestr|coordinat|agent", "login|endpoint|jwt", "tarefa|task|plano"]
+        "criterios": ["orquestr|coordinat|agent", "login|endpoint|jwt", "tarefa|task|plano"],
     },
     "coder_core": {
         "tipo": "CORE",
         "prompt": "Implemente uma funcao Python para calcular os primeiros N numeros de Fibonacci.",
         "pede": "Implementacao de funcao Fibonacci",
-        "criterios": ["def|function|fibonacci", "return|yield|list", "n|numero|sequence"]
+        "criterios": ["def|function|fibonacci", "return|yield|list", "n|numero|sequence"],
     },
     "reviewer_core": {
         "tipo": "CORE",
@@ -216,25 +234,33 @@ def process(data):
             handle_b(item)
 ```""",
         "pede": "Revisao profunda com metacognicao",
-        "criterios": ["review|revisao|analise", "type|tipo|condicao", "suggest|recomend|melhoria"]
+        "criterios": ["review|revisao|analise", "type|tipo|condicao", "suggest|recomend|melhoria"],
     },
     "architect_core": {
         "tipo": "CORE",
         "prompt": "Projete a arquitetura para um sistema de mensagens em tempo real com WebSocket.",
         "pede": "Arquitetura de sistema real-time",
-        "criterios": ["arquitetura|architecture|design", "websocket|real-time|tempo", "mensag|message|sistema"]
+        "criterios": [
+            "arquitetura|architecture|design",
+            "websocket|real-time|tempo",
+            "mensag|message|sistema",
+        ],
     },
     "researcher_core": {
         "tipo": "CORE",
         "prompt": "Pesquise sobre as melhores praticas de seguranca em APIs REST em 2026.",
         "pede": "Pesquisa sobre seguranca em APIs",
-        "criterios": ["api|rest|seguranca", "pratica|practice|recommend", "pesquis|research|estudo"]
+        "criterios": [
+            "api|rest|seguranca",
+            "pratica|practice|recommend",
+            "pesquis|research|estudo",
+        ],
     },
     "devops_core": {
         "tipo": "CORE",
         "prompt": "Configure monitoring e observabilidade para aplicacao em Kubernetes.",
         "pede": "Configuracao de monitoring em K8s",
-        "criterios": ["kubernetes|k8s|container", "monitor|observab|metric", "config|setup|deploy"]
+        "criterios": ["kubernetes|k8s|container", "monitor|observab|metric", "config|setup|deploy"],
     },
 }
 
@@ -288,7 +314,7 @@ class TestesE2ECompletos:
         output: str,
         chunks: int,
         tempo: float,
-        criterios: List[str]
+        criterios: List[str],
     ) -> ObservacaoCompleta:
         """
         Analisa resultado comparando prompt vs output.
@@ -334,7 +360,9 @@ class TestesE2ECompletos:
             justificativa = "Todos os criterios atendidos - entrega completa"
         elif len(criterios_atendidos) >= len(criterios) * 0.75:
             veredicto = Veredicto.BOM
-            justificativa = f"Maioria dos criterios atendidos ({len(criterios_atendidos)}/{len(criterios)})"
+            justificativa = (
+                f"Maioria dos criterios atendidos ({len(criterios_atendidos)}/{len(criterios)})"
+            )
         elif len(criterios_atendidos) >= len(criterios) * 0.5:
             veredicto = Veredicto.PARCIAL
             justificativa = f"Metade dos criterios ({len(criterios_atendidos)}/{len(criterios)})"
@@ -359,7 +387,7 @@ class TestesE2ECompletos:
             criterios_faltando=criterios_faltando,
             veredicto=veredicto,
             justificativa=justificativa,
-            erro=erro
+            erro=erro,
         )
         self.resultados.append(obs)
         return obs
@@ -383,7 +411,7 @@ class TestesE2ECompletos:
         # 3. MOSTRAR OUTPUT
         print(f"\n📤 OUTPUT RECEBIDO ({len(output)} chars, {chunks} chunks, {tempo:.2f}s):")
         output_display = output[:500] + "..." if len(output) > 500 else output
-        for line in output_display.split('\n')[:15]:
+        for line in output_display.split("\n")[:15]:
             print(f"   {line}")
         if len(output) > 500:
             print(f"   [...{len(output)-500} chars mais...]")
@@ -397,7 +425,7 @@ class TestesE2ECompletos:
             output=output,
             chunks=chunks,
             tempo=tempo,
-            criterios=config["criterios"]
+            criterios=config["criterios"],
         )
 
         # 5. MOSTRAR ANALISE
@@ -435,7 +463,9 @@ class TestesE2ECompletos:
         print("=" * 100)
 
         # Header
-        print(f"\n{'AGENTE':<22} {'TIPO':<6} {'VEREDICTO':<12} {'SCORE':<8} {'TEMPO':<8} {'OUTPUT':<10} {'JUSTIFICATIVA':<30}")
+        print(
+            f"\n{'AGENTE':<22} {'TIPO':<6} {'VEREDICTO':<12} {'SCORE':<8} {'TEMPO':<8} {'OUTPUT':<10} {'JUSTIFICATIVA':<30}"
+        )
         print("-" * 100)
 
         # Sort by type then name
@@ -443,9 +473,19 @@ class TestesE2ECompletos:
             score = f"{len(obs.criterios_atendidos)}/{len(obs.criterios_esperados)}"
             tempo = f"{obs.tempo_resposta:.1f}s"
             output = f"{len(obs.output_completo)}c"
-            emoji = {"EXCELENTE": "🏆", "BOM": "✅", "PARCIAL": "⚠️", "RUIM": "❌", "FALHA_TOTAL": "💀"}
-            just = obs.justificativa[:28] + ".." if len(obs.justificativa) > 30 else obs.justificativa
-            print(f"{obs.agente:<22} {obs.tipo:<6} {emoji.get(obs.veredicto.value,'')} {obs.veredicto.value:<10} {score:<8} {tempo:<8} {output:<10} {just:<30}")
+            emoji = {
+                "EXCELENTE": "🏆",
+                "BOM": "✅",
+                "PARCIAL": "⚠️",
+                "RUIM": "❌",
+                "FALHA_TOTAL": "💀",
+            }
+            just = (
+                obs.justificativa[:28] + ".." if len(obs.justificativa) > 30 else obs.justificativa
+            )
+            print(
+                f"{obs.agente:<22} {obs.tipo:<6} {emoji.get(obs.veredicto.value,'')} {obs.veredicto.value:<10} {score:<8} {tempo:<8} {output:<10} {just:<30}"
+            )
 
         print("-" * 100)
 

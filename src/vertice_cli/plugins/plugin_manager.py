@@ -8,8 +8,11 @@ import importlib
 class Plugin(Protocol):
     """Plugin interface."""
 
-    async def initialize(self) -> None: ...
-    async def shutdown(self) -> None: ...
+    async def initialize(self) -> None:
+        ...
+
+    async def shutdown(self) -> None:
+        ...
 
 
 class PluginManager:

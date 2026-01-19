@@ -1,10 +1,10 @@
-
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
 # Mocked components
 from vertice_tui.core.chat.controller import ChatController
 from vertice_tui.core.tools_bridge import ToolBridge
+
 
 @pytest.mark.asyncio
 async def test_llm_client_memory_cortex_integration(mock_llm, cortex):
@@ -14,6 +14,7 @@ async def test_llm_client_memory_cortex_integration(mock_llm, cortex):
     assert mock_llm is not None
     assert cortex is not None
 
+
 @pytest.mark.asyncio
 async def test_chat_controller_tool_bridge_integration(monkeypatch):
     """Test integration between ChatController and ToolBridge."""
@@ -21,7 +22,9 @@ async def test_chat_controller_tool_bridge_integration(monkeypatch):
 
     # Mock the tool registry and the tool itself
     mock_tool = MagicMock()
-    mock_tool._execute_validated = AsyncMock(return_value=MagicMock(success=True, data="The weather in London is sunny."))
+    mock_tool._execute_validated = AsyncMock(
+        return_value=MagicMock(success=True, data="The weather in London is sunny.")
+    )
 
     mock_registry = MagicMock()
     mock_registry.get.return_value = mock_tool

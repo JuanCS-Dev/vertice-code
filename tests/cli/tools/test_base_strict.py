@@ -304,8 +304,14 @@ class TestToolCategory:
     def test_all_categories_exist(self) -> None:
         """All expected categories exist."""
         expected = [
-            "FILE_READ", "FILE_WRITE", "FILE_MGMT",
-            "SEARCH", "EXECUTION", "GIT", "CONTEXT", "SYSTEM"
+            "FILE_READ",
+            "FILE_WRITE",
+            "FILE_MGMT",
+            "SEARCH",
+            "EXECUTION",
+            "GIT",
+            "CONTEXT",
+            "SYSTEM",
         ]
         for cat in expected:
             assert hasattr(ToolCategory, cat)

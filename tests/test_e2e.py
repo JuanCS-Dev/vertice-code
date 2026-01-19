@@ -39,8 +39,7 @@ class TestE2EIntegration:
         register_builtin_patterns(engine)
 
         context = build_rich_context(
-            current_command="git commit -m 'test'",
-            command_history=["git add ."]
+            current_command="git commit -m 'test'", command_history=["git add ."]
         )
 
         result = engine.generate_suggestions(context)
@@ -60,10 +59,7 @@ class TestE2EIntegration:
     def test_constitutional_metrics(self):
         """Constitutional metrics should be calculable."""
         metrics = generate_constitutional_report(
-            codebase_path="vertice_cli",
-            completeness=0.95,
-            precision=0.98,
-            recall=0.92
+            codebase_path="vertice_cli", completeness=0.95, precision=0.98, recall=0.92
         )
 
         assert metrics is not None
@@ -87,9 +83,7 @@ class TestFeatureIntegration:
 
     def test_workflows_import(self):
         """Workflows should be importable."""
-        from vertice_cli.intelligence.workflows import (
-            WorkflowOrchestrator
-        )
+        from vertice_cli.intelligence.workflows import WorkflowOrchestrator
 
         orchestrator = WorkflowOrchestrator()
         assert len(orchestrator.workflows) > 0

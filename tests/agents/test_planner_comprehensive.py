@@ -26,9 +26,7 @@ class TestPlannerImplementationPlanning:
         """Deve criar plano step-by-step detalhado"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Implement feature X",
-            working_dir=Path("/tmp")
+            task_id="test", description="Implement feature X", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -38,9 +36,7 @@ class TestPlannerImplementationPlanning:
         """Deve estimar tempo para cada step"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Refactor module Y",
-            working_dir=Path("/tmp")
+            task_id="test", description="Refactor module Y", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert "estimated_duration" in result.metadata
@@ -49,9 +45,7 @@ class TestPlannerImplementationPlanning:
         """Deve identificar pré-requisitos"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Add new API endpoint",
-            working_dir=Path("/tmp")
+            task_id="test", description="Add new API endpoint", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert "prerequisites" in result.output or result.status == TaskStatus.SUCCESS
@@ -60,9 +54,7 @@ class TestPlannerImplementationPlanning:
         """Deve sugerir estratégia de testes"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Implement authentication",
-            working_dir=Path("/tmp")
+            task_id="test", description="Implement authentication", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -74,7 +66,7 @@ class TestPlannerImplementationPlanning:
             task_id="test",
             description="Extend current system",
             working_dir=Path("/tmp"),
-            metadata={"existing_files": ["main.py"]}
+            metadata={"existing_files": ["main.py"]},
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -83,9 +75,7 @@ class TestPlannerImplementationPlanning:
         """Deve tratar projeto greenfield"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Create new microservice",
-            working_dir=Path("/tmp")
+            task_id="test", description="Create new microservice", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -94,9 +84,7 @@ class TestPlannerImplementationPlanning:
         """Deve tratar codebase legado"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Modernize old module",
-            working_dir=Path("/tmp")
+            task_id="test", description="Modernize old module", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -107,7 +95,7 @@ class TestPlannerImplementationPlanning:
         context = TaskContext(
             task_id="test",
             description="Fix security vulnerability + add feature",
-            working_dir=Path("/tmp")
+            working_dir=Path("/tmp"),
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -116,9 +104,7 @@ class TestPlannerImplementationPlanning:
         """Deve separar concerns no plano"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Build full-stack feature",
-            working_dir=Path("/tmp")
+            task_id="test", description="Build full-stack feature", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -127,9 +113,7 @@ class TestPlannerImplementationPlanning:
         """Deve incluir estratégia de rollback"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Deploy database migration",
-            working_dir=Path("/tmp")
+            task_id="test", description="Deploy database migration", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -142,9 +126,7 @@ class TestPlannerRiskAssessment:
         """Deve identificar áreas de alto risco"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Change authentication system",
-            working_dir=Path("/tmp")
+            task_id="test", description="Change authentication system", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -153,9 +135,7 @@ class TestPlannerRiskAssessment:
         """Deve sugerir estratégias de mitigação"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Refactor core module",
-            working_dir=Path("/tmp")
+            task_id="test", description="Refactor core module", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -164,9 +144,7 @@ class TestPlannerRiskAssessment:
         """Deve recomendar abordagem incremental para mudanças grandes"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Rewrite entire subsystem",
-            working_dir=Path("/tmp")
+            task_id="test", description="Rewrite entire subsystem", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -175,9 +153,7 @@ class TestPlannerRiskAssessment:
         """Deve marcar breaking changes"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Change public API",
-            working_dir=Path("/tmp")
+            task_id="test", description="Change public API", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -186,9 +162,7 @@ class TestPlannerRiskAssessment:
         """Deve avaliar impacto em technical debt"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Quick fix vs proper solution",
-            working_dir=Path("/tmp")
+            task_id="test", description="Quick fix vs proper solution", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -197,9 +171,7 @@ class TestPlannerRiskAssessment:
         """Deve considerar impacto em performance"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Add caching layer",
-            working_dir=Path("/tmp")
+            task_id="test", description="Add caching layer", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -208,9 +180,7 @@ class TestPlannerRiskAssessment:
         """Deve avaliar escalabilidade"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Handle 10x traffic increase",
-            working_dir=Path("/tmp")
+            task_id="test", description="Handle 10x traffic increase", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -219,9 +189,7 @@ class TestPlannerRiskAssessment:
         """Deve verificar riscos de dependências"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Upgrade major dependency",
-            working_dir=Path("/tmp")
+            task_id="test", description="Upgrade major dependency", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -232,7 +200,7 @@ class TestPlannerRiskAssessment:
         context = TaskContext(
             task_id="test",
             description="Implement complex distributed algorithm",
-            working_dir=Path("/tmp")
+            working_dir=Path("/tmp"),
         )
         result = agent.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -241,9 +209,7 @@ class TestPlannerRiskAssessment:
         """Deve sugerir PoC para ideias incertas"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Try experimental approach",
-            working_dir=Path("/tmp")
+            task_id="test", description="Try experimental approach", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -256,9 +222,7 @@ class TestPlannerResourcePlanning:
         """Deve estimar tempo de desenvolvimento"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Build feature X",
-            working_dir=Path("/tmp")
+            task_id="test", description="Build feature X", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -267,9 +231,7 @@ class TestPlannerResourcePlanning:
         """Deve identificar skills necessários"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Implement ML pipeline",
-            working_dir=Path("/tmp")
+            task_id="test", description="Implement ML pipeline", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -278,9 +240,7 @@ class TestPlannerResourcePlanning:
         """Deve sugerir ferramentas necessárias"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Setup CI/CD pipeline",
-            working_dir=Path("/tmp")
+            task_id="test", description="Setup CI/CD pipeline", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -289,9 +249,7 @@ class TestPlannerResourcePlanning:
         """Deve estimar necessidades de infraestrutura"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Deploy high-traffic service",
-            working_dir=Path("/tmp")
+            task_id="test", description="Deploy high-traffic service", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -303,7 +261,7 @@ class TestPlannerResourcePlanning:
             task_id="test",
             description="Choose between paid/free solutions",
             working_dir=Path("/tmp"),
-            metadata={"budget": "limited"}
+            metadata={"budget": "limited"},
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -318,7 +276,7 @@ class TestPlannerDependencyManagement:
         context = TaskContext(
             task_id="test",
             description="Multi-step feature implementation",
-            working_dir=Path("/tmp")
+            working_dir=Path("/tmp"),
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -327,9 +285,7 @@ class TestPlannerDependencyManagement:
         """Deve sugerir tarefas paralelas"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Independent modules",
-            working_dir=Path("/tmp")
+            task_id="test", description="Independent modules", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -338,9 +294,7 @@ class TestPlannerDependencyManagement:
         """Deve detectar dependências circulares"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Complex refactoring",
-            working_dir=Path("/tmp")
+            task_id="test", description="Complex refactoring", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -349,9 +303,7 @@ class TestPlannerDependencyManagement:
         """Deve otimizar ordem de execução"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Many interdependent tasks",
-            working_dir=Path("/tmp")
+            task_id="test", description="Many interdependent tasks", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -364,9 +316,7 @@ class TestPlannerQualityAssurance:
         """Deve incluir steps de code review"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Implement critical feature",
-            working_dir=Path("/tmp")
+            task_id="test", description="Implement critical feature", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -375,9 +325,7 @@ class TestPlannerQualityAssurance:
         """Deve definir critérios de aceitação"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Build user story X",
-            working_dir=Path("/tmp")
+            task_id="test", description="Build user story X", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -386,9 +334,7 @@ class TestPlannerQualityAssurance:
         """Deve sugerir pirâmide de testes"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Test strategy for new module",
-            working_dir=Path("/tmp")
+            task_id="test", description="Test strategy for new module", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -397,9 +343,7 @@ class TestPlannerQualityAssurance:
         """Deve incluir checks de segurança"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Handle user authentication",
-            working_dir=Path("/tmp")
+            task_id="test", description="Handle user authentication", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -407,11 +351,7 @@ class TestPlannerQualityAssurance:
     def test_planner_suggests_documentation_updates(self):
         """Deve sugerir updates de documentação"""
         agent = PlannerAgent()
-        context = TaskContext(
-            task_id="test",
-            description="Add new API",
-            working_dir=Path("/tmp")
-        )
+        context = TaskContext(task_id="test", description="Add new API", working_dir=Path("/tmp"))
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
 
@@ -423,9 +363,7 @@ class TestPlannerEdgeCases:
         """Deve tratar requisitos vagos"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Make it better",
-            working_dir=Path("/tmp")
+            task_id="test", description="Make it better", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -434,9 +372,7 @@ class TestPlannerEdgeCases:
         """Deve tratar requisitos conflitantes"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Fast AND secure AND cheap",
-            working_dir=Path("/tmp")
+            task_id="test", description="Fast AND secure AND cheap", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -448,7 +384,7 @@ class TestPlannerEdgeCases:
             task_id="test",
             description="Complete in 1 hour",
             working_dir=Path("/tmp"),
-            metadata={"deadline": "1h", "complexity": "high"}
+            metadata={"deadline": "1h", "complexity": "high"},
         )
         result = agent.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -457,9 +393,7 @@ class TestPlannerEdgeCases:
         """Deve tratar tecnologia desconhecida"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Use XYZ framework",
-            working_dir=Path("/tmp")
+            task_id="test", description="Use XYZ framework", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -467,11 +401,7 @@ class TestPlannerEdgeCases:
     def test_planner_handles_minimal_context(self):
         """Deve tratar contexto mínimo"""
         agent = PlannerAgent()
-        context = TaskContext(
-            task_id="test",
-            description="Fix bug",
-            working_dir=Path("/tmp")
-        )
+        context = TaskContext(task_id="test", description="Fix bug", working_dir=Path("/tmp"))
         result = agent.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
 
@@ -483,9 +413,7 @@ class TestPlannerConstitutionalCompliance:
         """Deve respeitar budget de tokens"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Create detailed plan",
-            working_dir=Path("/tmp")
+            task_id="test", description="Create detailed plan", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -494,11 +422,7 @@ class TestPlannerConstitutionalCompliance:
     def test_planner_avoids_redundant_planning(self):
         """Deve evitar planejamento redundante"""
         agent = PlannerAgent()
-        context = TaskContext(
-            task_id="test",
-            description="Simple task",
-            working_dir=Path("/tmp")
-        )
+        context = TaskContext(task_id="test", description="Simple task", working_dir=Path("/tmp"))
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
 
@@ -506,9 +430,7 @@ class TestPlannerConstitutionalCompliance:
         """Deve prover output acionável"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Implement feature",
-            working_dir=Path("/tmp")
+            task_id="test", description="Implement feature", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS

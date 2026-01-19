@@ -356,7 +356,9 @@ class Dashboard:
         mem_color = (
             "green"
             if metrics.memory_percent < 50
-            else "yellow" if metrics.memory_percent < 80 else "red"
+            else "yellow"
+            if metrics.memory_percent < 80
+            else "red"
         )
         table.add_row(
             "Memory:",

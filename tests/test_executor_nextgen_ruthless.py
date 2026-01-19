@@ -39,6 +39,7 @@ from vertice_cli.agents.base import AgentTask, AgentResponse
 # MOCK LLM CLIENT
 # ============================================================================
 
+
 class MockLLMClient:
     """Mock LLM for testing"""
 
@@ -77,9 +78,11 @@ class MockLLMClient:
 # FIXTURES
 # ============================================================================
 
+
 @pytest.fixture
 def mock_llm():
     return MockLLMClient()
+
 
 @pytest.fixture
 def agent(mock_llm):
@@ -89,8 +92,9 @@ def agent(mock_llm):
         mcp_client=None,
         execution_mode=ExecutionMode.LOCAL,
         security_level=SecurityLevel.STANDARD,
-        config={"timeout": 5.0, "max_retries": 3}
+        config={"timeout": 5.0, "max_retries": 3},
     )
+
 
 @pytest.fixture
 def strict_agent(mock_llm):
@@ -100,8 +104,9 @@ def strict_agent(mock_llm):
         mcp_client=None,
         execution_mode=ExecutionMode.LOCAL,
         security_level=SecurityLevel.STRICT,
-        config={"timeout": 5.0}
+        config={"timeout": 5.0},
     )
+
 
 @pytest.fixture
 def paranoid_agent(mock_llm):
@@ -111,13 +116,14 @@ def paranoid_agent(mock_llm):
         mcp_client=None,
         execution_mode=ExecutionMode.LOCAL,
         security_level=SecurityLevel.PARANOID,
-        config={"timeout": 5.0}
+        config={"timeout": 5.0},
     )
 
 
 # ============================================================================
 # SECURITY TESTS - Layer 1: Pattern Detection
 # ============================================================================
+
 
 class TestSecurityPatternDetection:
     """Test regex-based security pattern detection"""
@@ -199,16 +205,14 @@ class TestSecurityPatternDetection:
 # EXECUTION ENGINE TESTS
 # ============================================================================
 
+
 class TestCodeExecutionEngine:
     """Test execution engine"""
 
     @pytest.mark.asyncio
     async def test_local_execution_success(self):
         """Test successful local execution"""
-        engine = CodeExecutionEngine(
-            mode=ExecutionMode.LOCAL,
-            timeout=5.0
-        )
+        engine = CodeExecutionEngine(mode=ExecutionMode.LOCAL, timeout=5.0)
 
         result = await engine.execute("echo 'test'")
 
@@ -219,10 +223,7 @@ class TestCodeExecutionEngine:
     @pytest.mark.asyncio
     async def test_local_execution_failure(self):
         """Test failed local execution"""
-        engine = CodeExecutionEngine(
-            mode=ExecutionMode.LOCAL,
-            timeout=5.0
-        )
+        engine = CodeExecutionEngine(mode=ExecutionMode.LOCAL, timeout=5.0)
 
         result = await engine.execute("nonexistent_command_xyz")
 
@@ -232,10 +233,7 @@ class TestCodeExecutionEngine:
     @pytest.mark.asyncio
     async def test_execution_timeout(self):
         """Test execution respects timeout"""
-        engine = CodeExecutionEngine(
-            mode=ExecutionMode.LOCAL,
-            timeout=0.5
-        )
+        engine = CodeExecutionEngine(mode=ExecutionMode.LOCAL, timeout=0.5)
 
         start = time.time()
         result = await engine.execute("sleep 10")
@@ -248,11 +246,7 @@ class TestCodeExecutionEngine:
     @pytest.mark.asyncio
     async def test_retry_logic(self):
         """Test retry logic with exponential backoff"""
-        engine = CodeExecutionEngine(
-            mode=ExecutionMode.LOCAL,
-            timeout=0.1,
-            max_retries=3
-        )
+        engine = CodeExecutionEngine(mode=ExecutionMode.LOCAL, timeout=0.1, max_retries=3)
 
         result = await engine.execute("sleep 1")
 
@@ -273,6 +267,7 @@ class TestCodeExecutionEngine:
 # ============================================================================
 # AGENT INTEGRATION TESTS
 # ============================================================================
+
 
 class TestAgentExecution:
     """Test complete agent execution flow"""
@@ -329,6 +324,7 @@ class TestAgentExecution:
 # STRESS TESTS
 # ============================================================================
 
+
 class TestStress:
     """Stress tests for agent under load"""
 
@@ -355,9 +351,9 @@ class TestStress:
 
         start = time.time()
 
-        responses = await asyncio.gather(*[
-            agent.execute(task) for task in tasks
-        ], return_exceptions=True)
+        responses = await asyncio.gather(
+            *[agent.execute(task) for task in tasks], return_exceptions=True
+        )
 
         elapsed = time.time() - start
 
@@ -370,6 +366,7 @@ class TestStress:
 # ============================================================================
 # EDGE CASES & CHAOS
 # ============================================================================
+
 
 class TestEdgeCases:
     """Edge cases and chaos scenarios"""
@@ -405,9 +402,9 @@ class TestEdgeCases:
                     break
             return events
 
-        results = await asyncio.gather(*[
-            stream_task(task) for task in tasks
-        ], return_exceptions=True)
+        results = await asyncio.gather(
+            *[stream_task(task) for task in tasks], return_exceptions=True
+        )
 
         # At least some should complete
         valid_results = [r for r in results if isinstance(r, list)]
@@ -417,6 +414,7 @@ class TestEdgeCases:
 # ============================================================================
 # TOKEN EFFICIENCY TESTS (MCP Pattern)
 # ============================================================================
+
 
 class TestTokenEfficiency:
     """Test MCP Code Execution Pattern efficiency"""
@@ -436,6 +434,7 @@ class TestTokenEfficiency:
 # ============================================================================
 # PERFORMANCE BENCHMARKS
 # ============================================================================
+
 
 class TestBenchmarks:
     """Performance benchmarks"""
@@ -476,10 +475,13 @@ class TestBenchmarks:
 # ============================================================================
 
 if __name__ == "__main__":
-    pytest.main([
-        __file__,
-        "-v",
-        "-s",
-        "--tb=short",
-        "-m", "not slow",
-    ])
+    pytest.main(
+        [
+            __file__,
+            "-v",
+            "-s",
+            "--tb=short",
+            "-m",
+            "not slow",
+        ]
+    )

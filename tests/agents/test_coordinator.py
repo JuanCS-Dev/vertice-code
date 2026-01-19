@@ -170,6 +170,7 @@ class TestCoordinatorInit:
 
     def test_create_with_callbacks(self) -> None:
         """Can create coordinator with callbacks."""
+
         async def approval_cb(x):
             return True
 
@@ -451,6 +452,7 @@ class TestCallbackManagement:
 
     def test_set_partial_callbacks(self) -> None:
         """Can set only one callback."""
+
         async def existing(x):
             return True
 

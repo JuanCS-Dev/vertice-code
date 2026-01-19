@@ -2387,4 +2387,4 @@
      │ 8. PROMETHEUS Orchestrator: prometheus/core/orchestrator.py (coordenador)                                     │
      │                                                                                                               │
      │ ---                                                                                                           │
-     │ Pronto para execução pelo Gemini 3!      
+     │ Pronto para execução pelo Gemini 3!

@@ -21,6 +21,7 @@ from vertice_cli.agents.base import TaskContext, TaskStatus, AgentRole
 import time
 import os
 
+
 # Verificação de API key no início
 @pytest.fixture(scope="session", autouse=True)
 def check_api_key():
@@ -40,7 +41,7 @@ class TestPlannerOutputQuality:
         context = TaskContext(
             task_id="plan_simple",
             description="Create a Python function that adds two numbers",
-            working_dir=Path("/tmp")
+            working_dir=Path("/tmp"),
         )
         result = agent.execute(context)
 
@@ -56,7 +57,7 @@ class TestPlannerOutputQuality:
         context = TaskContext(
             task_id="plan_multi",
             description="Build a REST API with authentication, database, and testing",
-            working_dir=Path("/tmp")
+            working_dir=Path("/tmp"),
         )
         result = agent.execute(context)
 
@@ -70,9 +71,7 @@ class TestPlannerOutputQuality:
         """Planner deve lidar com requisitos ambíguos"""
         agent = PlannerAgent()
         context = TaskContext(
-            task_id="plan_ambiguous",
-            description="Make it better",
-            working_dir=Path("/tmp")
+            task_id="plan_ambiguous", description="Make it better", working_dir=Path("/tmp")
         )
         result = agent.execute(context)
 
@@ -88,7 +87,7 @@ class TestPlannerOutputQuality:
             task_id=task_id,
             description="Test context preservation",
             working_dir=Path("/tmp"),
-            metadata={"priority": "high"}
+            metadata={"priority": "high"},
         )
         result = agent.execute(context)
 
@@ -104,17 +103,19 @@ class TestRefactorerOutputQuality:
         """Refactorer deve analisar código real e dar sugestões"""
         # Criar arquivo com code smell óbvio
         code_file = tmp_path / "bad_code.py"
-        code_file.write_text("""
+        code_file.write_text(
+            """
 def func(a,b,c,d,e,f,g):  # Too many parameters
     x=a+b+c+d+e+f+g  # No spaces
     return x
-""")
+"""
+        )
 
         agent = RefactorerAgent()
         context = TaskContext(
             task_id="refactor_real",
             description=f"Analyze and refactor {code_file}",
-            working_dir=tmp_path
+            working_dir=tmp_path,
         )
         result = agent.execute(context)
 
@@ -127,17 +128,17 @@ def func(a,b,c,d,e,f,g):  # Too many parameters
     def test_refactorer_handles_clean_code(self, tmp_path):
         """Refactorer deve reconhecer código limpo"""
         code_file = tmp_path / "clean_code.py"
-        code_file.write_text("""
+        code_file.write_text(
+            """
 def calculate_sum(numbers: list[int]) -> int:
     \"\"\"Calculate sum of numbers.\"\"\"
     return sum(numbers)
-""")
+"""
+        )
 
         agent = RefactorerAgent()
         context = TaskContext(
-            task_id="refactor_clean",
-            description=f"Analyze {code_file}",
-            working_dir=tmp_path
+            task_id="refactor_clean", description=f"Analyze {code_file}", working_dir=tmp_path
         )
         result = agent.execute(context)
 
@@ -147,7 +148,8 @@ def calculate_sum(numbers: list[int]) -> int:
     def test_refactorer_detects_complexity_issues(self, tmp_path):
         """Refactorer deve detectar complexidade ciclomática"""
         code_file = tmp_path / "complex.py"
-        code_file.write_text("""
+        code_file.write_text(
+            """
 def complex_func(x):
     if x > 10:
         if x > 20:
@@ -158,13 +160,14 @@ def complex_func(x):
             return "medium"
         return "low"
     return "very low"
-""")
+"""
+        )
 
         agent = RefactorerAgent()
         context = TaskContext(
             task_id="refactor_complex",
             description=f"Analyze complexity in {code_file}",
-            working_dir=tmp_path
+            working_dir=tmp_path,
         )
         result = agent.execute(context)
 
@@ -216,7 +219,9 @@ class TestAgentPerformanceCharacteristics:
         """Deve executar concorrentemente sem conflitos"""
         agent = RefactorerAgent()
         contexts = [
-            TaskContext(task_id=f"concurrent_{i}", description=f"Task {i}", working_dir=Path("/tmp"))
+            TaskContext(
+                task_id=f"concurrent_{i}", description=f"Task {i}", working_dir=Path("/tmp")
+            )
             for i in range(5)
         ]
 
@@ -232,7 +237,7 @@ class TestAgentPerformanceCharacteristics:
         complex = TaskContext(
             task_id="complex",
             description="Do X and Y and Z with dependencies",
-            working_dir=Path("/tmp")
+            working_dir=Path("/tmp"),
         )
 
         start1 = time.time()
@@ -335,22 +340,14 @@ class TestTaskContextValidation:
     def test_planner_validates_required_fields(self):
         """Planner deve validar campos obrigatórios"""
         agent = PlannerAgent()
-        context = TaskContext(
-            task_id="valid",
-            description="Valid task",
-            working_dir=Path("/tmp")
-        )
+        context = TaskContext(task_id="valid", description="Valid task", working_dir=Path("/tmp"))
         result = agent.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
 
     def test_refactorer_validates_required_fields(self):
         """Refactorer deve validar campos obrigatórios"""
         agent = RefactorerAgent()
-        context = TaskContext(
-            task_id="valid",
-            description="Valid task",
-            working_dir=Path("/tmp")
-        )
+        context = TaskContext(task_id="valid", description="Valid task", working_dir=Path("/tmp"))
         result = agent.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
 
@@ -361,7 +358,7 @@ class TestTaskContextValidation:
             task_id="opt",
             description="Task",
             working_dir=Path("/tmp"),
-            metadata={"optional": "value"}
+            metadata={"optional": "value"},
         )
         result = agent.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -373,7 +370,7 @@ class TestTaskContextValidation:
             task_id="opt",
             description="Task",
             working_dir=Path("/tmp"),
-            metadata={"optional": "value"}
+            metadata={"optional": "value"},
         )
         result = agent.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -543,7 +540,9 @@ class TestIdempotency:
     def test_planner_is_idempotent(self):
         """Múltiplas execuções devem produzir resultado consistente"""
         agent = PlannerAgent()
-        context = TaskContext(task_id="idem", description="Idempotent task", working_dir=Path("/tmp"))
+        context = TaskContext(
+            task_id="idem", description="Idempotent task", working_dir=Path("/tmp")
+        )
 
         result1 = agent.execute(context)
         result2 = agent.execute(context)
@@ -554,7 +553,9 @@ class TestIdempotency:
     def test_refactorer_is_idempotent(self):
         """Múltiplas execuções devem produzir resultado consistente"""
         agent = RefactorerAgent()
-        context = TaskContext(task_id="idem", description="Idempotent task", working_dir=Path("/tmp"))
+        context = TaskContext(
+            task_id="idem", description="Idempotent task", working_dir=Path("/tmp")
+        )
 
         result1 = agent.execute(context)
         result2 = agent.execute(context)
@@ -577,7 +578,7 @@ class TestComposability:
             task_id="refactor",
             description="Execute",
             working_dir=Path("/tmp"),
-            metadata={"plan": plan_result.output}
+            metadata={"plan": plan_result.output},
         )
         refactor_result = refactorer.execute(refactor_context)
 
@@ -596,7 +597,7 @@ class TestComposability:
             task_id="2",
             description="Refactor",
             working_dir=Path("/tmp"),
-            metadata={"previous": result1.output}
+            metadata={"previous": result1.output},
         )
         result2 = refactorer.execute(context2)
 

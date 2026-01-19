@@ -35,7 +35,7 @@ def load_env():
                 line = line.strip()
                 if line and not line.startswith("#") and "=" in line:
                     key, value = line.split("=", 1)
-                    os.environ.setdefault(key.strip(), value.strip().strip('"\''))
+                    os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
 
 
 load_env()
@@ -61,7 +61,7 @@ class AgentCoordinationTester:
             await self.bridge.initialize()
 
             # Access agent manager through bridge
-            if hasattr(self.bridge, 'agent_manager'):
+            if hasattr(self.bridge, "agent_manager"):
                 self.agent_manager = self.bridge.agent_manager
                 self.initialized = True
                 return True
@@ -93,7 +93,7 @@ class AgentCoordinationTester:
         start = time.time()
 
         try:
-            if hasattr(self, 'agent_manager') and self.agent_manager:
+            if hasattr(self, "agent_manager") and self.agent_manager:
                 # Use agent manager routing
                 agent_id, confidence = await self.agent_manager.route(message)
                 result["agent_selected"] = agent_id
@@ -101,7 +101,7 @@ class AgentCoordinationTester:
 
                 # Process through selected agent
                 async for chunk in self.bridge.process_message(message):
-                    if hasattr(chunk, 'content'):
+                    if hasattr(chunk, "content"):
                         result["output"] += chunk.content
                     elif isinstance(chunk, str):
                         result["output"] += chunk
@@ -126,7 +126,7 @@ class AgentCoordinationTester:
 
     async def cleanup(self):
         """Cleanup resources."""
-        if hasattr(self, 'bridge') and self.bridge:
+        if hasattr(self, "bridge") and self.bridge:
             try:
                 await self.bridge.shutdown()
             except Exception:
@@ -164,9 +164,12 @@ class TestRealAgentRouting:
         print(f"[REAL] Duration: {result['duration_ms']}ms")
 
         # Should route to planner or architect
-        if result['agent_selected']:
-            assert result['agent_selected'] in ['planner', 'architect', 'orchestrator'], \
-                f"Unexpected agent: {result['agent_selected']}"
+        if result["agent_selected"]:
+            assert result["agent_selected"] in [
+                "planner",
+                "architect",
+                "orchestrator",
+            ], f"Unexpected agent: {result['agent_selected']}"
 
     @pytest.mark.timeout(90)
     async def test_coding_request_routes_to_coder(self, coordinator):
@@ -180,10 +183,11 @@ class TestRealAgentRouting:
         print(f"\n[REAL] Agent selected: {result['agent_selected']}")
 
         # Should produce code output
-        if result['output']:
-            has_code = "def " in result['output'] or "function" in result['output']
-            assert has_code or len(result['output']) > 50, \
-                "Coding request should produce code or substantial output"
+        if result["output"]:
+            has_code = "def " in result["output"] or "function" in result["output"]
+            assert (
+                has_code or len(result["output"]) > 50
+            ), "Coding request should produce code or substantial output"
 
     @pytest.mark.timeout(90)
     async def test_review_request_routes_to_reviewer(self, coordinator):
@@ -197,12 +201,22 @@ class TestRealAgentRouting:
         print(f"\n[REAL] Agent selected: {result['agent_selected']}")
 
         # Should mention security concerns
-        if result['output']:
-            output_lower = result['output'].lower()
-            has_security_mention = any(word in output_lower for word in
-                ['security', 'dangerous', 'vulnerability', 'eval', 'injection', 'unsafe'])
-            assert has_security_mention, \
-                "Review should mention security concerns for eval(user_input)"
+        if result["output"]:
+            output_lower = result["output"].lower()
+            has_security_mention = any(
+                word in output_lower
+                for word in [
+                    "security",
+                    "dangerous",
+                    "vulnerability",
+                    "eval",
+                    "injection",
+                    "unsafe",
+                ]
+            )
+            assert (
+                has_security_mention
+            ), "Review should mention security concerns for eval(user_input)"
 
 
 class TestRealAgentCoordination:
@@ -225,20 +239,23 @@ class TestRealAgentCoordination:
         print(f"\n[REAL] Duration: {result['duration_ms']}ms")
         print(f"[REAL] Output length: {len(result['output'])} chars")
 
-        if result.get('error'):
+        if result.get("error"):
             pytest.skip(f"Error: {result['error']}")
 
-        output_lower = result['output'].lower()
+        output_lower = result["output"].lower()
 
         # Should address multiple aspects
-        aspects_covered = sum([
-            'cache' in output_lower or 'design' in output_lower,
-            'def ' in result['output'] or 'class ' in result['output'],
-            'test' in output_lower or 'assert' in output_lower,
-        ])
+        aspects_covered = sum(
+            [
+                "cache" in output_lower or "design" in output_lower,
+                "def " in result["output"] or "class " in result["output"],
+                "test" in output_lower or "assert" in output_lower,
+            ]
+        )
 
-        assert aspects_covered >= 2, \
-            f"Multi-step task should cover multiple aspects, found {aspects_covered}"
+        assert (
+            aspects_covered >= 2
+        ), f"Multi-step task should cover multiple aspects, found {aspects_covered}"
 
     @pytest.mark.timeout(120)
     async def test_context_preserved_across_agents(self, coordinator):
@@ -255,17 +272,18 @@ class TestRealAgentCoordination:
 
         print(f"\n[REAL] Output: {result['output'][:300]}...")
 
-        if result.get('error'):
+        if result.get("error"):
             pytest.skip(f"Error: {result['error']}")
 
-        output_lower = result['output'].lower()
+        output_lower = result["output"].lower()
 
         # Should reference FastAPI or Python concepts
-        context_preserved = any(word in output_lower for word in
-            ['fastapi', 'python', 'api', 'endpoint', 'route', 'dependency'])
+        context_preserved = any(
+            word in output_lower
+            for word in ["fastapi", "python", "api", "endpoint", "route", "dependency"]
+        )
 
-        assert context_preserved, \
-            "Context from previous request should be preserved"
+        assert context_preserved, "Context from previous request should be preserved"
 
 
 class TestRealAgentSpecialization:
@@ -282,15 +300,16 @@ class TestRealAgentSpecialization:
 
         print(f"\n[REAL] Output: {result['output'][:300]}...")
 
-        if result.get('error'):
+        if result.get("error"):
             pytest.skip(f"Error: {result['error']}")
 
         # Should mention file paths or locations
-        output = result['output']
-        has_path_reference = any(s in output for s in ['.py', '/', 'file', 'module', 'entry'])
+        output = result["output"]
+        has_path_reference = any(s in output for s in [".py", "/", "file", "module", "entry"])
 
-        assert has_path_reference or len(output) > 50, \
-            "Explorer should find and report code locations"
+        assert (
+            has_path_reference or len(output) > 50
+        ), "Explorer should find and report code locations"
 
     @pytest.mark.timeout(90)
     async def test_refactorer_suggests_improvements(self, coordinator):
@@ -312,17 +331,18 @@ class TestRealAgentSpecialization:
 
         print(f"\n[REAL] Output: {result['output'][:300]}...")
 
-        if result.get('error'):
+        if result.get("error"):
             pytest.skip(f"Error: {result['error']}")
 
-        output_lower = result['output'].lower()
+        output_lower = result["output"].lower()
 
         # Should suggest simplification
-        suggests_improvement = any(word in output_lower for word in
-            ['simplif', 'return x', 'redundant', 'unneces', 'improve', 'better'])
+        suggests_improvement = any(
+            word in output_lower
+            for word in ["simplif", "return x", "redundant", "unneces", "improve", "better"]
+        )
 
-        assert suggests_improvement, \
-            "Refactorer should suggest improvements for redundant code"
+        assert suggests_improvement, "Refactorer should suggest improvements for redundant code"
 
     @pytest.mark.timeout(90)
     async def test_documentation_agent_generates_docs(self, coordinator):
@@ -342,15 +362,18 @@ class TestRealAgentSpecialization:
 
         print(f"\n[REAL] Output: {result['output'][:300]}...")
 
-        if result.get('error'):
+        if result.get("error"):
             pytest.skip(f"Error: {result['error']}")
 
         # Should produce docstring format
-        output = result['output']
-        has_docstring = '"""' in output or "'''" in output or 'Args:' in output or 'Parameters' in output
+        output = result["output"]
+        has_docstring = (
+            '"""' in output or "'''" in output or "Args:" in output or "Parameters" in output
+        )
 
-        assert has_docstring or 'discount' in output.lower(), \
-            "Documentation agent should generate proper docstring"
+        assert (
+            has_docstring or "discount" in output.lower()
+        ), "Documentation agent should generate proper docstring"
 
 
 class TestRealAgentErrorHandling:
@@ -367,7 +390,7 @@ class TestRealAgentErrorHandling:
 
         # Should not crash, should provide some response
         assert result is not None
-        assert not result.get('error') or len(result.get('output', '')) > 0
+        assert not result.get("error") or len(result.get("output", "")) > 0
 
     @pytest.mark.timeout(60)
     async def test_agent_handles_ambiguous_request(self, coordinator):
@@ -380,9 +403,9 @@ class TestRealAgentErrorHandling:
 
         # Should ask for clarification or provide general response
         assert result is not None
-        if result['output']:
+        if result["output"]:
             # Should ask what "it" refers to or provide general advice
-            assert len(result['output']) > 10
+            assert len(result["output"]) > 10
 
 
 class TestRealAgentPerformance:
@@ -403,7 +426,7 @@ class TestRealAgentPerformance:
         latencies = []
         for request in requests:
             start = time.time()
-            result = await coordinator.route_to_agent(request)
+            await coordinator.route_to_agent(request)
             latency = (time.time() - start) * 1000
             latencies.append(latency)
 

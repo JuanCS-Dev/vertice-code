@@ -22,6 +22,7 @@ from vertice_cli.core.integration_types import (
 # FIXTURES
 # ============================================================================
 
+
 @pytest.fixture
 def event_bus():
     """Create event bus for testing."""
@@ -38,16 +39,19 @@ def coordinator(event_bus, tmp_path):
 def mock_context():
     """Create mock rich context (uses existing dataclass structure)."""
     from vertice_cli.intelligence.context_enhanced import (
-        RichContext, GitStatus, WorkspaceInfo, TerminalInfo
+        RichContext,
+        GitStatus,
+        WorkspaceInfo,
+        TerminalInfo,
     )
     from vertice_cli.intelligence.types import Context
 
     # Create base context
-    base = Context(
+    Context(
         working_directory="/test/project",
         recent_files=["test.py", "main.py"],
         command_history=[],
-        recent_errors=[]
+        recent_errors=[],
     )
 
     # Add git status
@@ -58,7 +62,7 @@ def mock_context():
         untracked_files=[],
         has_remote=True,
         ahead=0,
-        behind=0
+        behind=0,
     )
 
     # Add workspace info
@@ -67,15 +71,11 @@ def mock_context():
         framework="pytest",
         dependencies={},
         has_tests=True,
-        test_command="pytest"
+        test_command="pytest",
     )
 
     # Add terminal info
-    terminal = TerminalInfo(
-        working_directory="/test/project",
-        last_exit_code=0,
-        shell="bash"
-    )
+    terminal = TerminalInfo(working_directory="/test/project", last_exit_code=0, shell="bash")
 
     return RichContext(
         working_directory="/test/project",
@@ -84,7 +84,7 @@ def mock_context():
         recent_errors=[],
         git_status=git,
         workspace=workspace,
-        terminal=terminal
+        terminal=terminal,
     )
 
 
@@ -124,6 +124,7 @@ def mock_failing_executor(param1: str) -> str:
 # EVENT BUS TESTS
 # ============================================================================
 
+
 def test_event_bus_subscribe_publish(event_bus):
     """Test event bus subscription and publishing."""
     received_events = []
@@ -133,10 +134,7 @@ def test_event_bus_subscribe_publish(event_bus):
 
     event_bus.subscribe(EventType.CONTEXT_UPDATED, handler)
 
-    test_event = Event(
-        type=EventType.CONTEXT_UPDATED,
-        data={"test": "data"}
-    )
+    test_event = Event(type=EventType.CONTEXT_UPDATED, data={"test": "data"})
 
     event_bus.publish(test_event)
 
@@ -186,6 +184,7 @@ def test_event_bus_unsubscribe(event_bus):
 # ============================================================================
 # COORDINATOR - AGENT REGISTRY TESTS
 # ============================================================================
+
 
 def test_coordinator_register_agent(coordinator):
     """Test registering an agent."""
@@ -253,18 +252,14 @@ async def test_coordinator_agent_failure_event(coordinator, event_bus):
 # COORDINATOR - TOOL REGISTRY TESTS
 # ============================================================================
 
+
 def test_coordinator_register_tool(coordinator):
     """Test registering a tool."""
     tool_def = ToolDefinition(
         name="test_tool",
         description="Test tool",
         category=ToolCategory.FILE,
-        parameters={
-            "type": "object",
-            "properties": {
-                "param1": {"type": "string"}
-            }
-        }
+        parameters={"type": "object", "properties": {"param1": {"type": "string"}}},
     )
 
     coordinator.register_tool(tool_def, mock_tool_executor)
@@ -280,12 +275,7 @@ def test_coordinator_get_tools_for_gemini(coordinator):
         name="read_file",
         description="Read a file",
         category=ToolCategory.FILE,
-        parameters={
-            "type": "object",
-            "properties": {
-                "path": {"type": "string"}
-            }
-        }
+        parameters={"type": "object", "properties": {"path": {"type": "string"}}},
     )
 
     coordinator.register_tool(tool_def, mock_tool_executor)
@@ -304,7 +294,7 @@ async def test_coordinator_execute_tool_success(coordinator):
         name="test_tool",
         description="Test",
         category=ToolCategory.SHELL,
-        parameters={"type": "object"}
+        parameters={"type": "object"},
     )
 
     coordinator.register_tool(tool_def, mock_tool_executor)
@@ -323,7 +313,7 @@ async def test_coordinator_execute_tool_failure(coordinator):
         name="failing_tool",
         description="Fails",
         category=ToolCategory.SHELL,
-        parameters={"type": "object"}
+        parameters={"type": "object"},
     )
 
     coordinator.register_tool(tool_def, mock_failing_executor)
@@ -357,7 +347,7 @@ async def test_coordinator_tool_execution_events(coordinator, event_bus):
         name="test_tool",
         description="Test",
         category=ToolCategory.FILE,
-        parameters={"type": "object"}
+        parameters={"type": "object"},
     )
 
     coordinator.register_tool(tool_def, mock_tool_executor)
@@ -373,17 +363,21 @@ async def test_coordinator_tool_execution_events(coordinator, event_bus):
 # COORDINATOR - INTENT DETECTION TESTS
 # ============================================================================
 
-@pytest.mark.parametrize("message,expected_intent", [
-    ("please review this code", IntentType.REVIEW),
-    ("analyze the architecture", IntentType.ARCHITECTURE),
-    ("run tests on this module", IntentType.TESTING),
-    ("check for security vulnerabilities", IntentType.SECURITY),
-    ("optimize performance", IntentType.PERFORMANCE),
-    ("refactor this function", IntentType.REFACTORING),
-    ("create a plan", IntentType.PLANNING),
-    ("explore the codebase", IntentType.EXPLORATION),
-    ("write documentation", IntentType.DOCUMENTATION),
-])
+
+@pytest.mark.parametrize(
+    "message,expected_intent",
+    [
+        ("please review this code", IntentType.REVIEW),
+        ("analyze the architecture", IntentType.ARCHITECTURE),
+        ("run tests on this module", IntentType.TESTING),
+        ("check for security vulnerabilities", IntentType.SECURITY),
+        ("optimize performance", IntentType.PERFORMANCE),
+        ("refactor this function", IntentType.REFACTORING),
+        ("create a plan", IntentType.PLANNING),
+        ("explore the codebase", IntentType.EXPLORATION),
+        ("write documentation", IntentType.DOCUMENTATION),
+    ],
+)
 def test_coordinator_detect_intent(coordinator, message, expected_intent):
     """Test intent detection from various messages."""
     intent = coordinator.detect_intent(message)
@@ -413,12 +407,13 @@ def test_coordinator_detect_intent_confidence(coordinator):
 # COORDINATOR - CONTEXT MANAGEMENT TESTS
 # ============================================================================
 
+
 def test_coordinator_get_context(coordinator):
     """Test getting context."""
     context = coordinator.get_context()
 
     assert context is not None
-    assert hasattr(context, 'working_directory')
+    assert hasattr(context, "working_directory")
     assert str(coordinator.cwd) in context.working_directory
 
 

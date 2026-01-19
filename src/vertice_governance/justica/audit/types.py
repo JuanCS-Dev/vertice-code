@@ -12,12 +12,12 @@ from enum import Enum, auto
 class AuditLevel(Enum):
     """Niveis de audit log."""
 
-    DEBUG = auto()      # Informacoes de debug
-    INFO = auto()       # Operacoes normais
-    WARNING = auto()    # Situacoes que merecem atencao
-    ERROR = auto()      # Erros que nao impedem operacao
-    CRITICAL = auto()   # Situacoes criticas
-    SECURITY = auto()   # Eventos de seguranca (sempre logados)
+    DEBUG = auto()  # Informacoes de debug
+    INFO = auto()  # Operacoes normais
+    WARNING = auto()  # Situacoes que merecem atencao
+    ERROR = auto()  # Erros que nao impedem operacao
+    CRITICAL = auto()  # Situacoes criticas
+    SECURITY = auto()  # Eventos de seguranca (sempre logados)
 
 
 class AuditCategory(Enum):

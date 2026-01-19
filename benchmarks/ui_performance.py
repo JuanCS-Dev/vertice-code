@@ -29,6 +29,7 @@ from vertice_cli.tui.context_awareness import ContextAwareness
 @dataclass
 class BenchmarkResult:
     """Performance benchmark result"""
+
     operation: str
     mean_ms: float
     median_ms: float
@@ -53,8 +54,8 @@ class UIPerformanceBenchmark:
     """Comprehensive UI performance testing"""
 
     TARGET_LATENCY_MS = 100.0  # <100ms target
-    TARGET_FPS = 60.0          # 60fps target
-    ITERATIONS = 100           # Statistical significance
+    TARGET_FPS = 60.0  # 60fps target
+    ITERATIONS = 100  # Statistical significance
 
     def __init__(self):
         self.console = Console()
@@ -66,10 +67,7 @@ class UIPerformanceBenchmark:
         return process.memory_info().rss / 1024 / 1024
 
     def benchmark_operation(
-        self,
-        operation_name: str,
-        operation_func: callable,
-        iterations: int = None
+        self, operation_name: str, operation_func: callable, iterations: int = None
     ) -> BenchmarkResult:
         """Benchmark a single operation"""
         iterations = iterations or self.ITERATIONS
@@ -116,7 +114,7 @@ class UIPerformanceBenchmark:
             max_ms=max_lat,
             memory_mb=mem_delta,
             fps=fps,
-            passed=passed
+            passed=passed,
         )
 
         self.results.append(result)
@@ -145,7 +143,7 @@ class UIPerformanceBenchmark:
                 files_processed=50,
                 total_files=100,
                 errors=2,
-                warnings=5
+                warnings=5,
             )
             console.file.write("")  # Force render
 
@@ -198,7 +196,7 @@ class UIPerformanceBenchmark:
             panel = Panel(
                 "This is a test panel with multiple lines\n" * 5,
                 title="Test Panel",
-                border_style="blue"
+                border_style="blue",
             )
             console.print(panel)
             console.file.write("")  # Force render
@@ -238,7 +236,7 @@ class UIPerformanceBenchmark:
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
-            console=self.console
+            console=self.console,
         ) as progress:
             task = progress.add_task("Running benchmarks...", total=len(benchmarks))
 
@@ -263,12 +261,7 @@ class UIPerformanceBenchmark:
         else:
             self.console.print("[bold red]❌ POOR - Significant optimization required[/bold red]")
 
-        return {
-            "passed": passed,
-            "total": total,
-            "pass_rate": pass_rate,
-            "results": self.results
-        }
+        return {"passed": passed, "total": total, "pass_rate": pass_rate, "results": self.results}
 
 
 def main():

@@ -15,4 +15,3 @@ spec:
     profile: ambient
     global:
       platform: openshift
-

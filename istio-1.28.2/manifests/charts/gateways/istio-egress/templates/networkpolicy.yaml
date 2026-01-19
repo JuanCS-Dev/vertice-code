@@ -46,4 +46,4 @@ spec:
   egress:
   # Allow all egress (gateways need to reach external services, istiod, and other cluster services)
   - {}
-{{- end }} 
+{{- end }}

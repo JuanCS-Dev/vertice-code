@@ -78,11 +78,7 @@ class PluginRegistry:
     def _get_context(self) -> PluginContext:
         """Get or create plugin context."""
         if self._context is None:
-            self._context = PluginContext(
-                config=self._config,
-                registry=self,
-                logger=logger
-            )
+            self._context = PluginContext(config=self._config, registry=self, logger=logger)
         return self._context
 
     def discover(self) -> List[PluginMetadata]:
@@ -147,9 +143,7 @@ class PluginRegistry:
         """Unload all plugins."""
         # Unload in reverse priority order
         plugins = sorted(
-            self._plugins.items(),
-            key=lambda x: x[1].metadata.priority.value,
-            reverse=True
+            self._plugins.items(), key=lambda x: x[1].metadata.priority.value, reverse=True
         )
         for name, _ in plugins:
             await self.unload(name)
@@ -188,11 +182,7 @@ class PluginRegistry:
 
     # ========== Hook Dispatch ==========
 
-    async def dispatch_command(
-        self,
-        command: str,
-        args: str
-    ) -> Optional[Any]:
+    async def dispatch_command(self, command: str, args: str) -> Optional[Any]:
         """
         Dispatch command to plugins.
 
@@ -212,11 +202,7 @@ class PluginRegistry:
                 logger.error(f"Plugin {plugin.metadata.name} command error: {e}")
         return None
 
-    async def dispatch_tool_execute(
-        self,
-        tool_name: str,
-        params: Dict[str, Any]
-    ) -> Optional[Any]:
+    async def dispatch_tool_execute(self, tool_name: str, params: Dict[str, Any]) -> Optional[Any]:
         """
         Dispatch tool execution to plugins.
 
@@ -280,7 +266,7 @@ class PluginRegistry:
         """Get list of active plugins sorted by priority."""
         return sorted(
             [p for p in self._plugins.values() if p.is_active],
-            key=lambda p: p.metadata.priority.value
+            key=lambda p: p.metadata.priority.value,
         )
 
     # ========== Status ==========
@@ -298,11 +284,8 @@ class PluginRegistry:
                 }
                 for name, p in self._plugins.items()
             },
-            "capabilities": {
-                cap: list(names)
-                for cap, names in self._capabilities.items()
-            }
+            "capabilities": {cap: list(names) for cap, names in self._capabilities.items()},
         }
 
 
-__all__ = ['PluginRegistry']
+__all__ = ["PluginRegistry"]

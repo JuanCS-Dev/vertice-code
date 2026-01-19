@@ -103,7 +103,7 @@ qwen ⚡ › vamos criar um plano para dominar o mundo
 ────────────────────────────────────────────────────────────
 ✓ 24 words in 12.9s (2 wps)
 
-qwen ⚡ › 
+qwen ⚡ ›
 ```
 
 ## 🔧 Arquitetura das Melhorias
@@ -140,12 +140,12 @@ logger.debug(f"Provider {provider} failed...")  # Not warning!
 async def _process_natural(self, message: str):
     # Smart agent detection
     should_use_agent, detected_agent = self.intent_detector.should_use_agent(message)
-    
+
     if should_use_agent:
         console.print(f"📋 Auto-routing to {detected_agent} agent...")
         await self._invoke_agent(detected_agent, message)
         return
-    
+
     # Fallback: normal chat
     await self._stream_response(message)
 ```

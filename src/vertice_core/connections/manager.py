@@ -154,7 +154,7 @@ class ConnectionManager:
         results = {}
         for name, pool in self._pools.items():
             try:
-                async with await pool.acquire() as conn:
+                async with await pool.acquire():
                     results[name] = True
             except Exception as e:
                 logger.debug(f"Health check failed for pool {name}: {e}")

@@ -54,11 +54,13 @@ class TestDashboardIntegration:
         shell.registry.get = Mock(return_value=mock_tool)
 
         # Mock recovery (success) with proper metadata for read_file
-        shell._execute_with_recovery = AsyncMock(return_value=ToolResult(
-            success=True,
-            data="Success",
-            metadata={'tokens': 100, 'cost': 0.01, 'path': 'test.py', 'lines': 10}
-        ))
+        shell._execute_with_recovery = AsyncMock(
+            return_value=ToolResult(
+                success=True,
+                data="Success",
+                metadata={"tokens": 100, "cost": 0.01, "path": "test.py", "lines": 10},
+            )
+        )
 
         # Execute
         await shell._execute_tool_calls(tool_calls, turn=1)
@@ -83,11 +85,13 @@ class TestDashboardIntegration:
         shell.registry.get = Mock(return_value=mock_tool)
 
         # Mock successful execution with metadata
-        shell._execute_with_recovery = AsyncMock(return_value=ToolResult(
-            success=True,
-            data="Success",
-            metadata={'tokens': 150, 'cost': 0.02, 'path': 'test.py', 'lines': 10}
-        ))
+        shell._execute_with_recovery = AsyncMock(
+            return_value=ToolResult(
+                success=True,
+                data="Success",
+                metadata={"tokens": 150, "cost": 0.02, "path": "test.py", "lines": 10},
+            )
+        )
 
         # Execute
         await shell._execute_tool_calls(tool_calls, turn=1)
@@ -99,8 +103,8 @@ class TestDashboardIntegration:
         # First arg is op_id, second is status
         assert call_args[0][1] == OperationStatus.SUCCESS
         # Check kwargs for tokens and cost
-        assert call_args[1]['tokens_used'] == 150
-        assert call_args[1]['cost'] == 0.02
+        assert call_args[1]["tokens_used"] == 150
+        assert call_args[1]["cost"] == 0.02
 
     @pytest.mark.asyncio
     async def test_dashboard_updated_on_failure(self, shell):
@@ -114,10 +118,9 @@ class TestDashboardIntegration:
         shell.registry.get = Mock(return_value=mock_tool)
 
         # Mock failed execution
-        shell._execute_with_recovery = AsyncMock(return_value=ToolResult(
-            success=False,
-            error="File not found"
-        ))
+        shell._execute_with_recovery = AsyncMock(
+            return_value=ToolResult(success=False, error="File not found")
+        )
 
         # Execute
         await shell._execute_tool_calls(tool_calls, turn=1)
@@ -162,11 +165,11 @@ class TestDashboardIntegration:
         mock_tool = AsyncMock()
         shell.registry.get = Mock(return_value=mock_tool)
 
-        shell._execute_with_recovery = AsyncMock(return_value=ToolResult(
-            success=True,
-            data="OK",
-            metadata={'path': 'file.py', 'lines': 10}
-        ))
+        shell._execute_with_recovery = AsyncMock(
+            return_value=ToolResult(
+                success=True, data="OK", metadata={"path": "file.py", "lines": 10}
+            )
+        )
 
         # Execute
         await shell._execute_tool_calls(tool_calls, turn=1)

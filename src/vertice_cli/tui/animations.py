@@ -155,7 +155,6 @@ class StateTransition:
             self.animator.fade_out(lambda opacity: on_exit(opacity))
 
         # Update state
-        old_state = self.current_state
         self.current_state = new_state
 
         # Enter new state with fade-in

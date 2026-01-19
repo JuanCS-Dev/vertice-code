@@ -51,12 +51,12 @@ class ConsoleBackend(AuditBackend):
     """Backend que escreve para console com formatacao colorida."""
 
     LEVEL_COLORS = {
-        AuditLevel.DEBUG: "\033[90m",      # Cinza
-        AuditLevel.INFO: "\033[97m",       # Branco
-        AuditLevel.WARNING: "\033[93m",    # Amarelo
-        AuditLevel.ERROR: "\033[91m",      # Vermelho
-        AuditLevel.CRITICAL: "\033[95m",   # Magenta
-        AuditLevel.SECURITY: "\033[96m",   # Ciano
+        AuditLevel.DEBUG: "\033[90m",  # Cinza
+        AuditLevel.INFO: "\033[97m",  # Branco
+        AuditLevel.WARNING: "\033[93m",  # Amarelo
+        AuditLevel.ERROR: "\033[91m",  # Vermelho
+        AuditLevel.CRITICAL: "\033[95m",  # Magenta
+        AuditLevel.SECURITY: "\033[96m",  # Ciano
     }
     RESET = "\033[0m"
 
@@ -98,7 +98,7 @@ class ConsoleBackend(AuditBackend):
         # SECURITY FIX: Check if stream is closed
         # Prevents "ValueError: I/O operation on closed file" in atexit
         try:
-            if hasattr(self.stream, 'closed') and not self.stream.closed:
+            if hasattr(self.stream, "closed") and not self.stream.closed:
                 self.stream.flush()
         except (ValueError, AttributeError):
             pass
@@ -197,7 +197,7 @@ class InMemoryBackend(AuditBackend):
         with self._lock:
             self.entries.append(entry)
             if len(self.entries) > self.max_entries:
-                self.entries = self.entries[-self.max_entries:]
+                self.entries = self.entries[-self.max_entries :]
         return True
 
     def flush(self) -> None:

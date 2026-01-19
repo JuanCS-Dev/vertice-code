@@ -259,10 +259,7 @@ def examine_values(
     tensions = tensions[:3]
 
     # Trade-offs
-    trade_offs = [
-        f"Escolher {t[0]} pode significar menos {t[1]}"
-        for t in tensions
-    ]
+    trade_offs = [f"Escolher {t[0]} pode significar menos {t[1]}" for t in tensions]
 
     return {
         "identified": identified,
@@ -308,17 +305,21 @@ def search_precedents(
         wisdom.append("Relacionamentos significativos requerem investimento contínuo")
 
     # Sabedoria do Cristianismo Primitivo
-    wisdom.extend([
-        "Didaquê: 'Seja manso, paciente, sem malícia, gentil, bom'",
-        "O discernimento verdadeiro acontece em comunidade (Atos 15)",
-        "Humildade reconhece que não temos todas as respostas",
-    ])
+    wisdom.extend(
+        [
+            "Didaquê: 'Seja manso, paciente, sem malícia, gentil, bom'",
+            "O discernimento verdadeiro acontece em comunidade (Atos 15)",
+            "Humildade reconhece que não temos todas as respostas",
+        ]
+    )
 
     # Sabedoria prática (Phronesis)
-    wisdom.extend([
-        "Sabedoria prática: considerar contexto específico, não só princípios abstratos",
-        "Decisões importantes merecem tempo de maturação",
-    ])
+    wisdom.extend(
+        [
+            "Sabedoria prática: considerar contexto específico, não só princípios abstratos",
+            "Decisões importantes merecem tempo de maturação",
+        ]
+    )
 
     return {
         "precedents": precedents[:4],

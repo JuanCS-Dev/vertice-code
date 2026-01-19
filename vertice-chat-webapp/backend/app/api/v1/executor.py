@@ -248,7 +248,7 @@ async def execute_agent_websocket(
         logger.error(f"Agent execution WebSocket error: {e}")
         try:
             await websocket.send_json({"type": "error", "data": f"WebSocket error: {str(e)}"})
-        except:
+        except Exception:
             pass  # Connection might be closed
     finally:
         # Cleanup MCP client

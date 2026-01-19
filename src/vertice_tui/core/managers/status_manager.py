@@ -109,7 +109,9 @@ class StatusManager(IStatusManager):
                 "status": (
                     "healthy"
                     if agent_count >= 3
-                    else "degraded" if agent_count > 0 else "unhealthy"
+                    else "degraded"
+                    if agent_count > 0
+                    else "unhealthy"
                 ),
                 "message": f"{agent_count} agents available",
                 "count": agent_count,

@@ -45,9 +45,7 @@ class MockMCPClient:
 @pytest.fixture
 def agent():
     """Create PerformanceAgent instance for testing."""
-    return PerformanceAgent(
-        llm_client=MockLLMClient(), mcp_client=MockMCPClient(), config={}
-    )
+    return PerformanceAgent(llm_client=MockLLMClient(), mcp_client=MockMCPClient(), config={})
 
 
 @pytest.fixture

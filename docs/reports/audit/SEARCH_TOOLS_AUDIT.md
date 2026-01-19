@@ -1,15 +1,15 @@
 # 🔍 SEARCH & RESEARCH TOOLS AUDIT
-**Date:** 2025-11-21  
-**Auditor:** Boris Cherny  
+**Date:** 2025-11-21
+**Auditor:** Boris Cherny
 **Status:** 🔴 CRITICAL GAPS DETECTED
 
 ---
 
 ## 📊 EXECUTIVE SUMMARY
 
-**Current State:** 
+**Current State:**
 - ✅ Local file search (ripgrep/grep) - WORKING
-- ✅ Semantic code search - WORKING  
+- ✅ Semantic code search - WORKING
 - ❌ Web search - **NOT IMPLEMENTED**
 - ❌ API documentation search - **NOT IMPLEMENTED**
 - ❌ Package registry search (PyPI, npm) - **NOT IMPLEMENTED**
@@ -82,15 +82,15 @@ from duckduckgo_search import DDGS
 
 class WebSearchTool(ValidatedTool):
     async def _execute_validated(
-        self, 
-        query: str, 
+        self,
+        query: str,
         max_results: int = 5,
         time_range: str = "y"  # d/w/m/y
     ) -> ToolResult:
         """Search web via DuckDuckGo."""
         with DDGS() as ddgs:
             results = list(ddgs.text(
-                query, 
+                query,
                 max_results=max_results,
                 timelimit=time_range
             ))
@@ -117,10 +117,10 @@ import requests
 class WebSearchTool(ValidatedTool):
     def __init__(self):
         self.api_key = os.getenv("SERPAPI_KEY")
-        
+
     async def _execute_validated(
-        self, 
-        query: str, 
+        self,
+        query: str,
         engine: str = "google"
     ) -> ToolResult:
         """Search via SerpAPI."""
@@ -155,9 +155,9 @@ from tavily import TavilyClient
 class WebSearchTool(ValidatedTool):
     def __init__(self):
         self.client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
-        
+
     async def _execute_validated(
-        self, 
+        self,
         query: str,
         search_depth: str = "advanced"  # basic/advanced
     ) -> ToolResult:
@@ -183,7 +183,7 @@ class WebSearchTool(ValidatedTool):
 
 ---
 
-**RECOMMENDATION:** 
+**RECOMMENDATION:**
 - **Phase 1:** Implement DuckDuckGo (immediate, no auth)
 - **Phase 2:** Add Tavily as optional upgrade (better quality)
 
@@ -202,7 +202,7 @@ class WebSearchTool(ValidatedTool):
 ```python
 class PackageSearchTool(ValidatedTool):
     """Search PyPI/npm registries."""
-    
+
     async def _execute_validated(
         self,
         package_name: str,
@@ -213,18 +213,18 @@ class PackageSearchTool(ValidatedTool):
             url = f"https://pypi.org/pypi/{package_name}/json"
         elif registry == "npm":
             url = f"https://registry.npmjs.org/{package_name}"
-        
+
         async with httpx.AsyncClient() as client:
             resp = await client.get(url)
-            
+
         if resp.status_code == 404:
             return ToolResult(
                 success=False,
                 error=f"Package '{package_name}' not found in {registry}"
             )
-        
+
         data = resp.json()
-        
+
         # Extract key info
         if registry == "pypi":
             info = {
@@ -245,7 +245,7 @@ class PackageSearchTool(ValidatedTool):
                 "license": data.get("license"),
                 "homepage": data.get("homepage")
             }
-        
+
         return ToolResult(success=True, data=info)
 ```
 
@@ -295,22 +295,22 @@ class SearchFilesTool(ValidatedTool):
                 "required": False
             }
         }
-    
+
     async def _execute_validated(
-        self, 
+        self,
         pattern: str,
         context_before: int = 0,
         context_after: int = 0,
         **kwargs
     ):
         cmd = ["rg", "--line-number", "--with-filename"]
-        
+
         # Add context flags
         if context_before > 0:
             cmd.extend(["-B", str(context_before)])
         if context_after > 0:
             cmd.extend(["-A", str(context_after)])
-        
+
         # ... rest of implementation
 ```
 
@@ -329,7 +329,7 @@ from thefuzz import fuzz
 def fuzzy_filter(results, query, threshold=80):
     """Filter results by fuzzy match score."""
     return [
-        r for r in results 
+        r for r in results
         if fuzz.partial_ratio(query.lower(), r["text"].lower()) >= threshold
     ]
 ```
@@ -344,20 +344,20 @@ def rank_results(results, query):
     """Rank results by relevance."""
     for r in results:
         score = 0
-        
+
         # Exact match in filename
         if query in r["file"]:
             score += 10
-        
+
         # Match at start of line
         if r["text"].strip().startswith(query):
             score += 5
-        
+
         # Multiple occurrences
         score += r["text"].count(query)
-        
+
         r["relevance_score"] = score
-    
+
     return sorted(results, key=lambda x: x["relevance_score"], reverse=True)
 ```
 
@@ -375,7 +375,7 @@ def build_tree(dir_path: Path, prefix: str = "", depth: int = 0):
         if item.is_file():
             size = item.stat().st_size
             size_str = f" ({format_size(size)})"
-        
+
         lines.append(
             f"{prefix}{current_prefix}{item.name}{size_str}"
         )
@@ -407,7 +407,7 @@ def load_gitignore(path: Path) -> pathspec.PathSpec:
 # In build_tree:
 gitignore_spec = load_gitignore(dir_path)
 items = [
-    x for x in items 
+    x for x in items
     if not gitignore_spec or not gitignore_spec.match_file(str(x))
 ]
 ```
@@ -437,7 +437,7 @@ items = [
    ```python
    # In tools/__init__.py
    from .web_search import WebSearchTool
-   
+
    # In registry initialization
    registry.register(WebSearchTool())
    ```
@@ -517,9 +517,9 @@ items = [
 
 ---
 
-**Audit Complete**  
-**Status:** 🔴 CRITICAL - Web search needed ASAP  
-**Estimated Fix Time:** 4 hours (Phase 1 only)  
+**Audit Complete**
+**Status:** 🔴 CRITICAL - Web search needed ASAP
+**Estimated Fix Time:** 4 hours (Phase 1 only)
 **Blocker Resolution:** Phase 1 completion
 
 ---

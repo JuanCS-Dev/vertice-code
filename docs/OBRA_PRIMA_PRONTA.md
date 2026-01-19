@@ -335,11 +335,11 @@ mas quando não há nada a remover"
 
 ---
 
-**Data:** 2025-11-23  
-**Version:** v0.2.0 Obra-Prima  
-**Inspired by:** MAX-CODE CLI  
-**Following:** Nov 2025 Best Practices  
-**Quality:** ⭐⭐⭐⭐⭐ (5/5)  
+**Data:** 2025-11-23
+**Version:** v0.2.0 Obra-Prima
+**Inspired by:** MAX-CODE CLI
+**Following:** Nov 2025 Best Practices
+**Quality:** ⭐⭐⭐⭐⭐ (5/5)
 
 **Soli Deo Gloria** 🙏✨
 
@@ -357,7 +357,7 @@ mas quando não há nada a remover"
 
 **Features:**
 - ✅ `>` verde neon
-- ✅ `|` amarelo neon  
+- ✅ `|` amarelo neon
 - ✅ Placeholder cinza suave
 - ✅ Bottom toolbar (borda inferior)
 
@@ -389,8 +389,8 @@ bottom_toolbar=get_bottom_toolbar  # Borda inferior
 
 ### 🚀 Status
 
-**Prompt Neon:** ✅ Completo  
-**Qualidade:** ⭐⭐⭐⭐⭐ (5/5)  
+**Prompt Neon:** ✅ Completo
+**Qualidade:** ⭐⭐⭐⭐⭐ (5/5)
 **Max-Code Compliance:** 95%
 
 ---

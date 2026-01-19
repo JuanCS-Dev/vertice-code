@@ -74,7 +74,9 @@ class DeepThinkMixin:
         thinking_steps.extend(static_steps)
 
         logger.info("[Deep Think] Stage 2: Deep Reasoning")
-        reasoned_findings, reasoning_steps = self._stage_deep_reasoning(code, all_findings, language)
+        reasoned_findings, reasoning_steps = self._stage_deep_reasoning(
+            code, all_findings, language
+        )
         thinking_steps.extend(reasoning_steps)
 
         logger.info("[Deep Think] Stage 3: Critique")
@@ -123,7 +125,7 @@ class DeepThinkMixin:
         for name, pattern in self.SECURITY_CHECKS:
             matches = list(re.finditer(pattern, code, re.IGNORECASE))
             for match in matches:
-                line_num = code[:match.start()].count("\n") + 1
+                line_num = code[: match.start()].count("\n") + 1
                 line_content = lines[line_num - 1] if line_num <= len(lines) else ""
 
                 finding = ReviewFinding(
@@ -140,12 +142,14 @@ class DeepThinkMixin:
                 )
                 findings.append(finding)
 
-                steps.append(ThinkingStep(
-                    stage=DeepThinkStage.STATIC_ANALYSIS,
-                    thought=f"Pattern '{name}' matched at line {line_num}",
-                    confidence=0.6,
-                    evidence=[line_content.strip()],
-                ))
+                steps.append(
+                    ThinkingStep(
+                        stage=DeepThinkStage.STATIC_ANALYSIS,
+                        thought=f"Pattern '{name}' matched at line {line_num}",
+                        confidence=0.6,
+                        evidence=[line_content.strip()],
+                    )
+                )
 
         if language == "python":
             ast_findings, ast_steps = self._analyze_python_ast(code, file_path)
@@ -166,17 +170,19 @@ class DeepThinkMixin:
         try:
             tree = ast.parse(code)
         except SyntaxError as e:
-            findings.append(ReviewFinding(
-                id="ast-syntax-error",
-                severity=ReviewSeverity.CRITICAL,
-                category="syntax",
-                file_path=file_path,
-                line_start=e.lineno or 0,
-                line_end=e.lineno or 0,
-                title="Syntax Error",
-                description=str(e.msg),
-                confidence=1.0,
-            ))
+            findings.append(
+                ReviewFinding(
+                    id="ast-syntax-error",
+                    severity=ReviewSeverity.CRITICAL,
+                    category="syntax",
+                    file_path=file_path,
+                    line_start=e.lineno or 0,
+                    line_end=e.lineno or 0,
+                    title="Syntax Error",
+                    description=str(e.msg),
+                    confidence=1.0,
+                )
+            )
             return findings, steps
 
         dangerous_calls = {
@@ -206,12 +212,14 @@ class DeepThinkMixin:
                     )
                     findings.append(finding)
 
-                    steps.append(ThinkingStep(
-                        stage=DeepThinkStage.STATIC_ANALYSIS,
-                        thought=f"AST found dangerous call to {func_name}",
-                        confidence=0.7,
-                        evidence=[f"Line {node.lineno}: {func_name}()"],
-                    ))
+                    steps.append(
+                        ThinkingStep(
+                            stage=DeepThinkStage.STATIC_ANALYSIS,
+                            thought=f"AST found dangerous call to {func_name}",
+                            confidence=0.7,
+                            evidence=[f"Line {node.lineno}: {func_name}()"],
+                        )
+                    )
 
         return findings, steps
 
@@ -268,16 +276,18 @@ class DeepThinkMixin:
 
             finding.confidence = max(0.0, min(1.0, finding.confidence))
 
-            steps.append(ThinkingStep(
-                stage=DeepThinkStage.DEEP_REASONING,
-                thought=f"Analyzed {finding.title}: confidence {original_confidence:.2f} -> {finding.confidence:.2f}",
-                confidence=finding.confidence,
-                evidence=[
-                    f"Sanitized: {is_sanitized}",
-                    f"Commented: {is_in_comment}",
-                    f"Test code: {is_test_code}",
-                ],
-            ))
+            steps.append(
+                ThinkingStep(
+                    stage=DeepThinkStage.DEEP_REASONING,
+                    thought=f"Analyzed {finding.title}: confidence {original_confidence:.2f} -> {finding.confidence:.2f}",
+                    confidence=finding.confidence,
+                    evidence=[
+                        f"Sanitized: {is_sanitized}",
+                        f"Commented: {is_in_comment}",
+                        f"Test code: {is_test_code}",
+                    ],
+                )
+            )
 
         return findings, steps
 
@@ -342,12 +352,14 @@ class DeepThinkMixin:
 
             finding.confidence = max(0.0, min(1.0, finding.confidence))
 
-            steps.append(ThinkingStep(
-                stage=DeepThinkStage.CRITIQUE,
-                thought=f"Critiqued {finding.title}: {', '.join(critique_notes) or 'OK'}",
-                confidence=finding.confidence,
-                evidence=critique_notes,
-            ))
+            steps.append(
+                ThinkingStep(
+                    stage=DeepThinkStage.CRITIQUE,
+                    thought=f"Critiqued {finding.title}: {', '.join(critique_notes) or 'OK'}",
+                    confidence=finding.confidence,
+                    evidence=critique_notes,
+                )
+            )
 
         return findings, steps
 
@@ -384,20 +396,24 @@ class DeepThinkMixin:
             if finding.confidence >= CONFIDENCE_THRESHOLD:
                 finding.validated = True
                 validated.append(finding)
-                steps.append(ThinkingStep(
-                    stage=DeepThinkStage.VALIDATION,
-                    thought=f"VALIDATED: {finding.title} (confidence: {finding.confidence:.2f})",
-                    confidence=finding.confidence,
-                    evidence=[f"Above threshold: {CONFIDENCE_THRESHOLD}"],
-                ))
+                steps.append(
+                    ThinkingStep(
+                        stage=DeepThinkStage.VALIDATION,
+                        thought=f"VALIDATED: {finding.title} (confidence: {finding.confidence:.2f})",
+                        confidence=finding.confidence,
+                        evidence=[f"Above threshold: {CONFIDENCE_THRESHOLD}"],
+                    )
+                )
             else:
                 rejected.append(finding)
-                steps.append(ThinkingStep(
-                    stage=DeepThinkStage.VALIDATION,
-                    thought=f"REJECTED (false positive): {finding.title} (confidence: {finding.confidence:.2f})",
-                    confidence=finding.confidence,
-                    evidence=[f"Below threshold: {CONFIDENCE_THRESHOLD}"],
-                ))
+                steps.append(
+                    ThinkingStep(
+                        stage=DeepThinkStage.VALIDATION,
+                        thought=f"REJECTED (false positive): {finding.title} (confidence: {finding.confidence:.2f})",
+                        confidence=finding.confidence,
+                        evidence=[f"Below threshold: {CONFIDENCE_THRESHOLD}"],
+                    )
+                )
 
         return validated, rejected, steps
 

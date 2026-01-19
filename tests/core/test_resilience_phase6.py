@@ -125,7 +125,9 @@ class TestRetryHandler:
         """Classifies rate limit errors correctly."""
         handler = RetryHandler()
         assert handler.classify_error(Exception("rate limit exceeded")) == ErrorCategory.RATE_LIMIT
-        assert handler.classify_error(Exception("429 Too Many Requests")) == ErrorCategory.RATE_LIMIT
+        assert (
+            handler.classify_error(Exception("429 Too Many Requests")) == ErrorCategory.RATE_LIMIT
+        )
 
     @pytest.mark.asyncio
     async def test_retry_decorator(self) -> None:
@@ -217,9 +219,7 @@ class TestCircuitBreaker:
     @pytest.mark.asyncio
     async def test_closes_after_success_in_half_open(self) -> None:
         """Closes after successes in half-open."""
-        config = CircuitBreakerConfig(
-            failure_threshold=1, success_threshold=1, timeout=0.01
-        )
+        config = CircuitBreakerConfig(failure_threshold=1, success_threshold=1, timeout=0.01)
         circuit = CircuitBreaker(name="test", config=config)
 
         async def fail() -> None:

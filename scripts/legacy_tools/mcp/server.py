@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 # Try to import FastMCP
 try:
     from mcp.server.fastmcp import FastMCP
+
     MCP_AVAILABLE = True
 except ImportError:
     MCP_AVAILABLE = False
@@ -33,6 +34,7 @@ except ImportError:
 
 class AgentType(str, Enum):
     """Available agent types for delegation."""
+
     ORCHESTRATOR = "orchestrator"
     CODER = "coder"
     REVIEWER = "reviewer"
@@ -44,6 +46,7 @@ class AgentType(str, Enum):
 
 class TaskPriority(str, Enum):
     """Task priority levels."""
+
     LOW = "low"
     NORMAL = "normal"
     HIGH = "high"
@@ -53,6 +56,7 @@ class TaskPriority(str, Enum):
 @dataclass
 class DelegationResult:
     """Result from agent delegation."""
+
     agent: str
     task: str
     result: str
@@ -242,14 +246,13 @@ class VerticeMCPServer:
         # Lazy load router
         if self._router is None:
             from providers.vertice_router import get_router
+
             self._router = get_router()
 
         # Lazy load agents
         if not self._agents:
-            from agents import (
-                orchestrator, coder, reviewer,
-                architect, researcher, devops
-            )
+            from agents import orchestrator, coder, reviewer, architect, researcher, devops
+
             self._agents = {
                 AgentType.ORCHESTRATOR: orchestrator,
                 AgentType.CODER: coder,
@@ -315,6 +318,7 @@ class VerticeMCPServer:
         """Store in Memory Cortex."""
         if self._cortex is None:
             from memory.cortex import get_cortex
+
             self._cortex = get_cortex()
 
         memory_id = self._cortex.remember(
@@ -334,6 +338,7 @@ class VerticeMCPServer:
         """Retrieve from Memory Cortex."""
         if self._cortex is None:
             from memory.cortex import get_cortex
+
             self._cortex = get_cortex()
 
         results = self._cortex.recall(
@@ -392,6 +397,7 @@ class VerticeMCPServer:
         """Record agent contribution to ledger."""
         if self._cortex is None:
             from memory.cortex import get_cortex
+
             self._cortex = get_cortex()
 
         # Calculate contribution value based on task type

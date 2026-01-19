@@ -24,15 +24,17 @@ if TYPE_CHECKING:
 
 class PluginPriority(Enum):
     """Plugin loading priority."""
-    CORE = 0        # System core, always loads first
-    HIGH = 100      # Important plugins
-    NORMAL = 500    # Standard plugins
-    LOW = 900       # Optional plugins
-    LAZY = 1000     # Load on demand only
+
+    CORE = 0  # System core, always loads first
+    HIGH = 100  # Important plugins
+    NORMAL = 500  # Standard plugins
+    LOW = 900  # Optional plugins
+    LAZY = 1000  # Load on demand only
 
 
 class PluginState(Enum):
     """Plugin lifecycle state."""
+
     UNLOADED = auto()
     LOADING = auto()
     ACTIVE = auto()
@@ -56,6 +58,7 @@ class PluginMetadata:
         provides: List of capabilities this plugin provides
         config_schema: Optional JSON schema for plugin config
     """
+
     name: str
     version: str
     description: str
@@ -84,12 +87,13 @@ class PluginContext:
     - Event bus for inter-plugin communication
     - Logger
     """
+
     config: Dict[str, Any] = field(default_factory=dict)
-    registry: Optional['PluginRegistry'] = None
+    registry: Optional["PluginRegistry"] = None
     logger: Optional[Any] = None
     event_bus: Optional[Any] = None
 
-    def get_plugin(self, name: str) -> Optional['Plugin']:
+    def get_plugin(self, name: str) -> Optional["Plugin"]:
         """Get another plugin by name."""
         if self.registry:
             return self.registry.get(name)
@@ -192,11 +196,7 @@ class Plugin(ABC):
         """
         return None
 
-    def on_tool_execute(
-        self,
-        tool_name: str,
-        params: Dict[str, Any]
-    ) -> Optional[Any]:
+    def on_tool_execute(self, tool_name: str, params: Dict[str, Any]) -> Optional[Any]:
         """
         Intercept tool execution.
 
@@ -260,9 +260,9 @@ class Plugin(ABC):
 
 
 __all__ = [
-    'Plugin',
-    'PluginMetadata',
-    'PluginPriority',
-    'PluginContext',
-    'PluginState',
+    "Plugin",
+    "PluginMetadata",
+    "PluginPriority",
+    "PluginContext",
+    "PluginState",
 ]

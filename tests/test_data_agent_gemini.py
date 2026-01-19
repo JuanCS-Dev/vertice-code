@@ -25,11 +25,7 @@ async def main():
     llm = LLMClient()
 
     # Create DataAgent with thinking enabled
-    agent = create_data_agent(
-        llm_client=llm,
-        mcp_client=None,
-        enable_thinking=True
-    )
+    agent = create_data_agent(llm_client=llm, mcp_client=None, enable_thinking=True)
 
     console.print("[green]✅ DataAgent initialized with Gemini 2.0 Flash[/green]\n")
 
@@ -61,7 +57,7 @@ async def main():
             "constraints": [
                 {"type": "PRIMARY_KEY", "columns": ["order_id"]},
             ],
-        }
+        },
     }
 
     console.print("[dim]Analyzing schema with Gemini...[/dim]\n")
@@ -77,7 +73,9 @@ async def main():
             "low": "🟢",
         }.get(issue.severity.value, "⚪")
 
-        console.print(f"{severity_icon} [bold]{issue.severity.value.upper()}[/bold]: {issue.description}")
+        console.print(
+            f"{severity_icon} [bold]{issue.severity.value.upper()}[/bold]: {issue.description}"
+        )
         console.print(f"   💡 [dim]{issue.recommendation}[/dim]")
         console.print()
 
@@ -138,8 +136,12 @@ async def main():
     console.print("[green]✅ Migration plan generated:[/green]\n")
     console.print(f"  {risk_icon} [bold]Risk Level:[/bold] {migration.risk_level.value.upper()}")
     console.print(f"  ⏱️  [bold]Downtime:[/bold] {migration.estimated_downtime_seconds}s")
-    console.print(f"  {'✅' if migration.can_run_online else '❌'} [bold]Can run online:[/bold] {migration.can_run_online}")
-    console.print(f"  {'⚠️' if migration.requires_backup else '✅'} [bold]Requires backup:[/bold] {migration.requires_backup}")
+    console.print(
+        f"  {'✅' if migration.can_run_online else '❌'} [bold]Can run online:[/bold] {migration.can_run_online}"
+    )
+    console.print(
+        f"  {'⚠️' if migration.requires_backup else '✅'} [bold]Requires backup:[/bold] {migration.requires_backup}"
+    )
     console.print(f"\n  [dim]Version:[/dim] {migration.version_id}")
 
     # Summary

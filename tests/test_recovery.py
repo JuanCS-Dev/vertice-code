@@ -45,7 +45,10 @@ class TestErrorCategorization:
         """Test command not found detection (should not be confused with NOT_FOUND)."""
         engine = ErrorRecoveryEngine(llm_client=Mock())
 
-        assert engine.categorize_error("bash: command not found: xyz") == ErrorCategory.COMMAND_NOT_FOUND
+        assert (
+            engine.categorize_error("bash: command not found: xyz")
+            == ErrorCategory.COMMAND_NOT_FOUND
+        )
         assert engine.categorize_error("command not recognized") == ErrorCategory.COMMAND_NOT_FOUND
 
     def test_timeout_errors(self):
@@ -59,7 +62,9 @@ class TestErrorCategorization:
         """Test type error detection."""
         engine = ErrorRecoveryEngine(llm_client=Mock())
 
-        assert engine.categorize_error("TypeError: expected str, got int") == ErrorCategory.TYPE_ERROR
+        assert (
+            engine.categorize_error("TypeError: expected str, got int") == ErrorCategory.TYPE_ERROR
+        )
 
     def test_value_errors(self):
         """Test value error detection."""
@@ -98,7 +103,7 @@ class TestRecoveryStrategy:
             failed_args={},
             previous_result=None,
             user_intent="test",
-            previous_commands=[]
+            previous_commands=[],
         )
 
         strategy = engine.determine_strategy(ErrorCategory.SYNTAX, context)
@@ -117,7 +122,7 @@ class TestRecoveryStrategy:
             failed_args={},
             previous_result=None,
             user_intent="test",
-            previous_commands=[]
+            previous_commands=[],
         )
 
         strategy = engine.determine_strategy(ErrorCategory.PERMISSION, context)
@@ -136,7 +141,7 @@ class TestRecoveryStrategy:
             failed_args={},
             previous_result=None,
             user_intent="test",
-            previous_commands=[]
+            previous_commands=[],
         )
 
         strategy = engine.determine_strategy(ErrorCategory.COMMAND_NOT_FOUND, context)
@@ -155,7 +160,7 @@ class TestRecoveryStrategy:
             failed_args={},
             previous_result=None,
             user_intent="test",
-            previous_commands=[]
+            previous_commands=[],
         )
 
         strategy = engine.determine_strategy(ErrorCategory.UNKNOWN, context)
@@ -168,11 +173,7 @@ class TestRecoveryEngine:
     def test_engine_initialization(self):
         """Test creating recovery engine."""
         llm = Mock()
-        engine = ErrorRecoveryEngine(
-            llm_client=llm,
-            max_attempts=2,
-            enable_learning=True
-        )
+        engine = ErrorRecoveryEngine(llm_client=llm, max_attempts=2, enable_learning=True)
 
         assert engine.llm == llm
         assert engine.max_attempts == 2
@@ -194,7 +195,7 @@ class TestRecoveryEngine:
             failed_args={},
             previous_result=None,
             user_intent="test",
-            previous_commands=[]
+            previous_commands=[],
         )
 
         result = await engine.attempt_recovery(context)
@@ -207,11 +208,13 @@ class TestRecoveryEngine:
     async def test_llm_diagnosis(self):
         """Test LLM diagnosis for error."""
         llm = Mock()
-        llm.generate_async = AsyncMock(return_value={
-            "content": """DIAGNOSIS: Missing argument in function call
+        llm.generate_async = AsyncMock(
+            return_value={
+                "content": """DIAGNOSIS: Missing argument in function call
 CORRECTION: Add required parameter
 TOOL_CALL: {"tool": "corrected_tool", "args": {"fixed": "value"}}"""
-        })
+            }
+        )
 
         engine = ErrorRecoveryEngine(llm_client=llm, max_attempts=2)
 
@@ -224,7 +227,7 @@ TOOL_CALL: {"tool": "corrected_tool", "args": {"fixed": "value"}}"""
             failed_args={"bad": "args"},
             previous_result=None,
             user_intent="Do something",
-            previous_commands=[]
+            previous_commands=[],
         )
 
         diagnosis, correction = await engine.diagnose_error(context)
@@ -238,10 +241,12 @@ TOOL_CALL: {"tool": "corrected_tool", "args": {"fixed": "value"}}"""
     async def test_recovery_with_correction(self):
         """Test recovery with LLM correction."""
         llm = Mock()
-        llm.generate_async = AsyncMock(return_value={
-            "content": """DIAGNOSIS: Wrong file path
+        llm.generate_async = AsyncMock(
+            return_value={
+                "content": """DIAGNOSIS: Wrong file path
 TOOL_CALL: {"tool": "read_file", "args": {"path": "correct_path.txt"}}"""
-        })
+            }
+        )
 
         engine = ErrorRecoveryEngine(llm_client=llm, max_attempts=2)
 
@@ -254,7 +259,7 @@ TOOL_CALL: {"tool": "read_file", "args": {"path": "correct_path.txt"}}"""
             failed_args={"path": "wrong_path.txt"},
             previous_result=None,
             user_intent="Read a file",
-            previous_commands=[]
+            previous_commands=[],
         )
 
         result = await engine.attempt_recovery(context)
@@ -267,9 +272,9 @@ TOOL_CALL: {"tool": "read_file", "args": {"path": "correct_path.txt"}}"""
     async def test_recovery_without_correction(self):
         """Test recovery when LLM cannot provide correction."""
         llm = Mock()
-        llm.generate_async = AsyncMock(return_value={
-            "content": "DIAGNOSIS: Error is too complex to auto-fix"
-        })
+        llm.generate_async = AsyncMock(
+            return_value={"content": "DIAGNOSIS: Error is too complex to auto-fix"}
+        )
 
         engine = ErrorRecoveryEngine(llm_client=llm, max_attempts=2)
 
@@ -282,7 +287,7 @@ TOOL_CALL: {"tool": "read_file", "args": {"path": "correct_path.txt"}}"""
             failed_args={},
             previous_result=None,
             user_intent="test",
-            previous_commands=[]
+            previous_commands=[],
         )
 
         result = await engine.attempt_recovery(context)
@@ -296,7 +301,9 @@ TOOL_CALL: {"tool": "read_file", "args": {"path": "correct_path.txt"}}"""
 
         # Record same error multiple times
         for i in range(5):
-            engine.common_errors["File not found"] = engine.common_errors.get("File not found", 0) + 1
+            engine.common_errors["File not found"] = (
+                engine.common_errors.get("File not found", 0) + 1
+            )
 
         assert engine.common_errors["File not found"] == 5
 
@@ -314,14 +321,10 @@ TOOL_CALL: {"tool": "read_file", "args": {"path": "correct_path.txt"}}"""
             previous_result=None,
             user_intent="test",
             previous_commands=[],
-            suggested_fix="Fixed it"
+            suggested_fix="Fixed it",
         )
 
-        result = RecoveryResult(
-            success=True,
-            recovered=True,
-            attempts_used=1
-        )
+        result = RecoveryResult(success=True, recovered=True, attempts_used=1)
 
         engine.record_recovery_outcome(context, result, final_success=True)
 
@@ -333,17 +336,19 @@ TOOL_CALL: {"tool": "read_file", "args": {"path": "correct_path.txt"}}"""
         engine = ErrorRecoveryEngine(llm_client=Mock(), enable_learning=True)
 
         # Add some recovery history
-        engine.recovery_history.extend([
-            {"final_success": True},
-            {"final_success": False},
-            {"final_success": True},
-        ])
+        engine.recovery_history.extend(
+            [
+                {"final_success": True},
+                {"final_success": False},
+                {"final_success": True},
+            ]
+        )
 
         stats = engine.get_statistics()
 
         assert stats["total_recovery_attempts"] == 3
         assert stats["successful_recoveries"] == 2
-        assert stats["success_rate"] == 2/3
+        assert stats["success_rate"] == 2 / 3
 
     def test_constitutional_p6_max_attempts(self):
         """Test Constitutional P6: Max 2 attempts enforced."""
@@ -366,7 +371,7 @@ class TestRecoveryContext:
             failed_args={"arg": "value"},
             previous_result=None,
             user_intent="Do something",
-            previous_commands=[{"tool": "prev", "args": {}}]
+            previous_commands=[{"tool": "prev", "args": {}}],
         )
 
         assert context.attempt_number == 1
@@ -388,7 +393,7 @@ class TestRecoveryContext:
             previous_commands=[],
             diagnosis="Test diagnosis",
             suggested_fix="Test fix",
-            recovery_strategy=RecoveryStrategy.RETRY_MODIFIED
+            recovery_strategy=RecoveryStrategy.RETRY_MODIFIED,
         )
 
         data = context.to_dict()
@@ -411,7 +416,7 @@ class TestRecoveryResult:
             attempts_used=1,
             corrected_tool="fixed_tool",
             corrected_args={"fixed": "args"},
-            what_worked="LLM correction"
+            what_worked="LLM correction",
         )
 
         assert result.success
@@ -426,7 +431,7 @@ class TestRecoveryResult:
             recovered=False,
             attempts_used=2,
             final_error="Could not fix",
-            escalation_reason="Too complex"
+            escalation_reason="Too complex",
         )
 
         assert not result.success

@@ -4,16 +4,8 @@ Boris Cherny: Test all public APIs, edge cases, and integrations.
 """
 
 import pytest
-from vertice_cli.explainer import (
-    ExplanationEngine,
-    explain_command,
-    Explanation,
-    ExplanationLevel
-)
-from vertice_cli.intelligence.context_enhanced import (
-    RichContext,
-    ExpertiseLevel
-)
+from vertice_cli.explainer import ExplanationEngine, explain_command, Explanation, ExplanationLevel
+from vertice_cli.intelligence.context_enhanced import RichContext, ExpertiseLevel
 
 
 class TestExplanationTypes:
@@ -21,10 +13,7 @@ class TestExplanationTypes:
 
     def test_explanation_immutable(self):
         """Explanations should be immutable."""
-        exp = Explanation(
-            command="ls",
-            summary="List files"
-        )
+        exp = Explanation(command="ls", summary="List files")
 
         with pytest.raises(AttributeError):
             exp.command = "modified"  # type: ignore
@@ -35,7 +24,7 @@ class TestExplanationTypes:
             command="git add .",
             summary="Stage all files",
             warnings=["Warning 1"],
-            level=ExplanationLevel.DETAILED
+            level=ExplanationLevel.DETAILED,
         )
 
         formatted = exp.format()
@@ -134,7 +123,7 @@ class TestSpecificCommands:
         engine = ExplanationEngine()
         exp = engine.explain("git commit -m 'message'")
 
-        assert ("commit" in exp.summary.lower() or "record" in exp.summary.lower())
+        assert "commit" in exp.summary.lower() or "record" in exp.summary.lower()
         assert len(exp.summary) > 0
 
     def test_docker_run_explanation(self):
@@ -178,8 +167,7 @@ class TestIntegration:
         """Test complete explanation workflow."""
         engine = ExplanationEngine()
         context = RichContext(
-            user_expertise=ExpertiseLevel.INTERMEDIATE,
-            current_command="git push -f origin main"
+            user_expertise=ExpertiseLevel.INTERMEDIATE, current_command="git push -f origin main"
         )
 
         exp = engine.explain(context.current_command, context)

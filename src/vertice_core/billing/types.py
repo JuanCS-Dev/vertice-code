@@ -141,7 +141,7 @@ class PricingPlan:
 
             for outcome_key, outcome_value in outcomes.items():
                 if outcome_key in self.value_multipliers:
-                    multiplier = self.value_multipliers[outcome_key]
+                    self.value_multipliers[outcome_key]
 
                     # Apply outcome-based adjustments
                     if outcome_key == "roi_achieved" and outcome_value > 100:

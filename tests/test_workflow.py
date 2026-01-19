@@ -141,15 +141,17 @@ class TestTreeOfThought:
         tot = TreeOfThought()
 
         # Path with fewer steps (more efficient) but no validation
-        path1 = ThoughtPath("path1", "Fast but unsafe", [
-            WorkflowStep("step1", "tool1", {})
-        ])
+        path1 = ThoughtPath("path1", "Fast but unsafe", [WorkflowStep("step1", "tool1", {})])
 
         # Path with validation step (safer, better)
-        path2 = ThoughtPath("path2", "Safe path", [
-            WorkflowStep("step1", "tool1", {}),
-            WorkflowStep("step2", "test_tool", {})  # Validation step
-        ])
+        path2 = ThoughtPath(
+            "path2",
+            "Safe path",
+            [
+                WorkflowStep("step1", "tool1", {}),
+                WorkflowStep("step2", "test_tool", {}),  # Validation step
+            ],
+        )
 
         best = tot.select_best_path([path1, path2])
 
@@ -183,7 +185,7 @@ def hello():
 def hello():
     # TODO: implement
     pass
-    
+
 def world():
     raise NotImplementedError
 """
@@ -346,10 +348,7 @@ class TestWorkflowStep:
     def test_step_creation(self):
         """Test creating workflow step."""
         step = WorkflowStep(
-            step_id="step1",
-            tool_name="read_file",
-            args={"path": "test.py"},
-            dependencies=[]
+            step_id="step1", tool_name="read_file", args={"path": "test.py"}, dependencies=[]
         )
 
         assert step.step_id == "step1"
@@ -413,9 +412,7 @@ class TestWorkflowEngine:
         simple_path = ThoughtPath(
             path_id="test_path",
             description="Test path",
-            steps=[
-                WorkflowStep("step1", "test_tool", {"arg": "value"})
-            ]
+            steps=[WorkflowStep("step1", "test_tool", {"arg": "value"})],
         )
         simple_path.completeness_score = 0.9
         simple_path.validation_score = 0.9
@@ -443,7 +440,7 @@ class TestConstitutionalCompliance:
 
     def test_tree_of_thought_scoring_weights(self):
         """Test Constitutional scoring weights."""
-        tot = TreeOfThought()
+        TreeOfThought()
 
         path = ThoughtPath("test", "Test", [])
         path.completeness_score = 1.0
@@ -470,10 +467,10 @@ class TestConstitutionalCompliance:
         critique = critique_system.critique_step(step, result)
 
         # Must check: completeness (P1), validation (P2), efficiency (P6), LEI
-        assert hasattr(critique, 'completeness_score')
-        assert hasattr(critique, 'validation_passed')
-        assert hasattr(critique, 'efficiency_score')
-        assert hasattr(critique, 'lei')
+        assert hasattr(critique, "completeness_score")
+        assert hasattr(critique, "validation_passed")
+        assert hasattr(critique, "efficiency_score")
+        assert hasattr(critique, "lei")
 
 
 if __name__ == "__main__":

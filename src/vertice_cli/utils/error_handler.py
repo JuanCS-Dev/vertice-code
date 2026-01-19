@@ -498,7 +498,7 @@ def retry_sync_with_backoff(
 
             if not policy.should_retry(attempt, e) or not ErrorClassifier.should_retry(e):
                 if logger:
-                    elapsed = (time.time() - start_time) * 1000
+                    (time.time() - start_time) * 1000
                     logger.error(f"Non-retryable [{category.value}]: {context}: {e}")
                 raise
 

@@ -53,7 +53,7 @@ class TestPlanModeManagerInit:
         manager = PlanModeManager()
 
         # Simulate missing state
-        delattr(manager, '_plan_mode')
+        delattr(manager, "_plan_mode")
         manager._init_plan_mode()
 
         assert manager._plan_mode["active"] is False
@@ -135,7 +135,7 @@ class TestEnterPlanMode:
         """Test handling of file creation error."""
         manager = PlanModeManager(plan_dir=tmp_path)
 
-        with patch.object(Path, 'write_text', side_effect=IOError("Write failed")):
+        with patch.object(Path, "write_text", side_effect=IOError("Write failed")):
             result = manager.enter_plan_mode(task="Test")
 
             assert result["success"] is False
@@ -148,7 +148,9 @@ class TestEnterPlanMode:
         result = manager.enter_plan_mode(task="Test")
 
         assert "restrictions" in result
-        assert "blocked" in result["restrictions"].lower() or "write" in result["restrictions"].lower()
+        assert (
+            "blocked" in result["restrictions"].lower() or "write" in result["restrictions"].lower()
+        )
 
 
 class TestExitPlanMode:
@@ -220,7 +222,7 @@ class TestExitPlanMode:
         manager = PlanModeManager(plan_dir=tmp_path)
         manager.enter_plan_mode(task="Test")
 
-        with patch.object(Path, 'read_text', side_effect=IOError("Read failed")):
+        with patch.object(Path, "read_text", side_effect=IOError("Read failed")):
             # Should not raise, just log warning
             result = manager.exit_plan_mode(approved=True)
 
@@ -370,7 +372,7 @@ class TestAddPlanNote:
         manager = PlanModeManager(plan_dir=tmp_path)
         manager.enter_plan_mode(task="Test")
 
-        with patch.object(Path, 'read_text', side_effect=IOError("Read failed")):
+        with patch.object(Path, "read_text", side_effect=IOError("Read failed")):
             result = manager.add_plan_note("Test note")
 
             # Should still succeed (in memory)

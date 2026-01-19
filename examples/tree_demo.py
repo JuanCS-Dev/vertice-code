@@ -51,22 +51,15 @@ def main():
 
     try:
         import subprocess
+
         result = subprocess.run(
-            ["git", "rev-parse", "--git-dir"],
-            capture_output=True,
-            cwd=root_path,
-            timeout=2
+            ["git", "rev-parse", "--git-dir"], capture_output=True, cwd=root_path, timeout=2
         )
 
         if result.returncode == 0:
             print(f"{COLORS['success']}✓ Git repository detected{COLORS['reset']}\n")
 
-            tree = FileTree(
-                root_path,
-                max_depth=1,
-                show_git_status=True,
-                show_hidden=False
-            )
+            tree = FileTree(root_path, max_depth=1, show_git_status=True, show_hidden=False)
 
             console.print(tree.render())
 
@@ -89,14 +82,7 @@ def main():
         root_path,
         max_depth=2,
         show_hidden=False,
-        exclude_patterns=[
-            "__pycache__",
-            ".git",
-            "node_modules",
-            "*.pyc",
-            "venv",
-            ".pytest_cache"
-        ]
+        exclude_patterns=["__pycache__", ".git", "node_modules", "*.pyc", "venv", ".pytest_cache"],
     )
 
     console.print(tree.render())
@@ -112,7 +98,7 @@ def main():
         "Configurable depth",
         "Keyboard navigation ready",
         "Apple-style elegance",
-        "Performance optimized (lazy loading)"
+        "Performance optimized (lazy loading)",
     ]
 
     for feature in features:

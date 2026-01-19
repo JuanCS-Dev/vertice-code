@@ -19,7 +19,7 @@ from vertice_cli.core.agent_identity import (
     AGENT_IDENTITIES,
     AgentPermission,
     check_permission,
-    enforce_permission
+    enforce_permission,
 )
 
 
@@ -34,9 +34,21 @@ class TestConstitutionalAuditFixes:
     def test_all_agent_roles_present(self):
         """Verify all expected agent roles exist."""
         expected_roles = [
-            "architect", "explorer", "planner", "refactorer", "reviewer",
-            "security", "performance", "testing", "documentation", "database",
-            "devops", "refactor", "governance", "counselor", "executor"
+            "architect",
+            "explorer",
+            "planner",
+            "refactorer",
+            "reviewer",
+            "security",
+            "performance",
+            "testing",
+            "documentation",
+            "database",
+            "devops",
+            "refactor",
+            "governance",
+            "counselor",
+            "executor",
         ]
 
         available_roles = [r.value for r in AgentRole]
@@ -66,14 +78,16 @@ class TestConstitutionalAuditFixes:
             AgentPermission.NETWORK_ACCESS,
         }
 
-        assert executor.permissions == expected_permissions, \
-            f"Executor permissions mismatch. Expected: {expected_permissions}, Got: {executor.permissions}"
+        assert (
+            executor.permissions == expected_permissions
+        ), f"Executor permissions mismatch. Expected: {expected_permissions}, Got: {executor.permissions}"
 
     def test_executor_does_not_have_write_files(self):
         """Test that executor doesn't have WRITE_FILES permission (security)."""
         executor = get_agent_identity("executor")
-        assert not executor.can(AgentPermission.WRITE_FILES), \
-            "Executor should NOT have WRITE_FILES permission for security"
+        assert not executor.can(
+            AgentPermission.WRITE_FILES
+        ), "Executor should NOT have WRITE_FILES permission for security"
 
     def test_executor_resource_boundaries(self):
         """Test that executor has proper resource boundaries."""
@@ -96,30 +110,31 @@ class TestConstitutionalAuditFixes:
     def test_architect_has_write_files(self):
         """Test that architect has WRITE_FILES permission."""
         architect = get_agent_identity("architect")
-        assert architect.can(AgentPermission.WRITE_FILES), \
-            "Architect should have WRITE_FILES permission"
+        assert architect.can(
+            AgentPermission.WRITE_FILES
+        ), "Architect should have WRITE_FILES permission"
 
     def test_architect_no_execute_commands(self):
         """Test that architect doesn't have EXECUTE_COMMANDS (separation)."""
         architect = get_agent_identity("architect")
-        assert not architect.can(AgentPermission.EXECUTE_COMMANDS), \
-            "Architect should NOT have EXECUTE_COMMANDS (executor's job)"
+        assert not architect.can(
+            AgentPermission.EXECUTE_COMMANDS
+        ), "Architect should NOT have EXECUTE_COMMANDS (executor's job)"
 
     def test_all_core_identities_registered(self):
         """Test that all core agent identities are registered."""
         expected_identities = [
-            "maestro",      # Orchestrator
-            "governance",   # Justiça
-            "counselor",    # Sofia
-            "executor",     # Command execution
-            "architect",    # Architecture
-            "explorer",     # Codebase exploration
-            "reviewer",     # Code review
+            "maestro",  # Orchestrator
+            "governance",  # Justiça
+            "counselor",  # Sofia
+            "executor",  # Command execution
+            "architect",  # Architecture
+            "explorer",  # Codebase exploration
+            "reviewer",  # Code review
         ]
 
         for identity_id in expected_identities:
-            assert identity_id in AGENT_IDENTITIES, \
-                f"Identity '{identity_id}' must be registered"
+            assert identity_id in AGENT_IDENTITIES, f"Identity '{identity_id}' must be registered"
 
     def test_governance_identities_have_correct_roles(self):
         """Test governance and counselor identities."""
@@ -172,11 +187,7 @@ class TestConstitutionalAuditFixes:
 
     def test_observability_imports(self):
         """Test that observability module imports correctly."""
-        from vertice_cli.core.observability import (
-            get_tracer,
-            trace_operation,
-            setup_observability
-        )
+        from vertice_cli.core.observability import get_tracer, trace_operation, setup_observability
 
         assert get_tracer is not None
         assert trace_operation is not None
@@ -249,8 +260,9 @@ class TestConstitutionalAuditRegression:
         all_role_values = [r.value for r in AgentRole]
 
         for agent_id, identity in AGENT_IDENTITIES.items():
-            assert identity.role.value in all_role_values, \
-                f"Identity '{agent_id}' uses role '{identity.role.value}' which doesn't exist in AgentRole enum"
+            assert (
+                identity.role.value in all_role_values
+            ), f"Identity '{agent_id}' uses role '{identity.role.value}' which doesn't exist in AgentRole enum"
 
     def test_executor_files_use_correct_role(self):
         """Test that executor agent files use AgentRole.EXECUTOR.

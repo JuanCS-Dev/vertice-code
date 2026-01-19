@@ -47,7 +47,7 @@ export function ChatMessage({ message, isLast }: ChatMessageProps) {
               <Sparkles className="w-5 h-5" />
             )}
           </div>
-          
+
           {/* Connecting Line (Optional aesthetics) */}
           {/* <div className="w-px h-full bg-border/50 my-2 group-last:hidden" /> */}
         </div>
@@ -67,7 +67,7 @@ export function ChatMessage({ message, isLast }: ChatMessageProps) {
           {/* The Message Body */}
           <div className="text-sm md:text-base leading-relaxed">
             <MarkdownRenderer content={message.content} />
-            
+
             {/* Streaming Cursor */}
             {message.isStreaming && (
               <span className="inline-block w-2 h-4 ml-1 align-middle bg-accent animate-pulse" />

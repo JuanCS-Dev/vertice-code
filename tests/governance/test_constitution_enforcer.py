@@ -52,13 +52,15 @@ class TestConstitution:
         hash1 = constitution.integrity_hash
 
         # Add new principle
-        constitution.add_principle(ConstitutionalPrinciple(
-            id=uuid4(),
-            name="Test Principle",
-            description="A test principle",
-            category="MONITOR",
-            severity=Severity.INFO,
-        ))
+        constitution.add_principle(
+            ConstitutionalPrinciple(
+                id=uuid4(),
+                name="Test Principle",
+                description="A test principle",
+                category="MONITOR",
+                severity=Severity.INFO,
+            )
+        )
 
         hash2 = constitution.integrity_hash
         assert hash1 != hash2
@@ -94,7 +96,6 @@ class TestConstitution:
     def test_serialization_roundtrip(self):
         """Test serialization and deserialization."""
         constitution = Constitution()
-        original_hash = constitution.integrity_hash
 
         # Serialize
         data = constitution.to_dict()

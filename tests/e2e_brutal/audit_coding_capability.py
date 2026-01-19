@@ -1,4 +1,3 @@
-
 import pytest
 import asyncio
 from pathlib import Path
@@ -16,6 +15,7 @@ from memory.cortex import get_cortex
 # 4. Run the test.
 # 5. Fix any errors (self-correction).
 
+
 @pytest.mark.brutal_e2e
 @pytest.mark.asyncio
 async def test_agency_coding_capability_fibonacci():
@@ -25,12 +25,12 @@ async def test_agency_coding_capability_fibonacci():
     Create 'test_math_utils.py' to verify it.
     The agent must handle everything.
     """
-    
+
     # 1. Setup Agency & Tools
     agency = get_agency()
     # Force context reset for clean slate
     cortex = get_cortex()
-    if hasattr(cortex, 'clear_working_memory'):
+    if hasattr(cortex, "clear_working_memory"):
         cortex.clear_working_memory()
 
     # Define the complex task
@@ -43,60 +43,61 @@ async def test_agency_coding_capability_fibonacci():
     2. It MUST use memoization (functools.lru_cache or custom dictionary) for performance.
     3. It MUST handle edge cases (negative numbers should raise ValueError).
     4. It MUST have type hints and docstrings.
-    
+
     Then, create a pytest file named 'test_temp_math_utils.py' that covers:
     1. Standard cases (0, 1, 10).
     2. Performance check (n=50 should be fast).
     3. Error handling (negative input).
-    
+
     Finally, run the tests using pytest and report the result.
     If tests fail, fix the code and retry.
     """
     print("\n[AUDIT] Starting Heavy Coding Task...")
-    
+
     # 2. Execute via Agency (Orchestrator -> Coder -> Tools)
     # We capture the output stream to analyze the thought process
     execution_log = []
-    
+
     try:
         async for chunk in agency.execute(task_description):
             print(chunk, end="", flush=True)
             execution_log.append(chunk)
-            
+
     except Exception as e:
         pytest.fail(f"Agency execution crashed: {e}")
 
-    # 3. Verification Phase (The 'Brutal' Check) 
-    
+    # 3. Verification Phase (The 'Brutal' Check)
+
     # Check if files exist
     assert Path("temp_math_utils.py").exists(), "Agent failed to create source file"
     assert Path("test_temp_math_utils.py").exists(), "Agent failed to create test file"
-    
+
     # Analyze Source Code Quality
     content = Path("temp_math_utils.py").read_text()
-    
+
     # Quality Check 1: Memoization
-    assert "lru_cache" in content or "memo" in content or "cache" in content, \
-        "Failed requirement: Memoization not found in code"
-        
+    assert (
+        "lru_cache" in content or "memo" in content or "cache" in content
+    ), "Failed requirement: Memoization not found in code"
+
     # Quality Check 2: Error Handling
-    assert "ValueError" in content, \
-        "Failed requirement: ValueError for negative inputs not found"
-        
+    assert "ValueError" in content, "Failed requirement: ValueError for negative inputs not found"
+
     # Quality Check 3: Type Hints
-    assert "-> int" in content or "->int" in content, \
-        "Failed requirement: Return type hint missing"
+    assert "-> int" in content or "->int" in content, "Failed requirement: Return type hint missing"
 
     # Analyze Test Execution
-    # We check if the agent actually ran the tests. 
+    # We check if the agent actually ran the tests.
     # The log should contain "pytest" output or similar.
     full_log = "".join(execution_log)
-    assert "pytest" in full_log or "passed" in full_log, \
-        "Agent did not appear to run the tests (no pytest output detected)"
+    assert (
+        "pytest" in full_log or "passed" in full_log
+    ), "Agent did not appear to run the tests (no pytest output detected)"
 
     # Cleanup (if successful)
     # Path("temp_math_utils.py").unlink()
     # Path("test_temp_math_utils.py").unlink()
+
 
 if __name__ == "__main__":
     asyncio.run(test_agency_coding_capability_fibonacci())

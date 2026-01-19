@@ -16,6 +16,7 @@ from vertice_cli.tui.components.streaming_markdown import BlockWidgetFactory
 
 console = Console()
 
+
 def test_soft_buffer():
     print("\n[1] Testing SoftBuffer...")
     buffer = SoftBuffer()
@@ -42,12 +43,13 @@ def test_soft_buffer():
     assert buffer.feed(" ") == "Code `print()` "
     print("✅ Complete code released by space")
 
+
 def test_block_detector():
     print("\n[2] Testing BlockDetector...")
     detector = BlockDetector()
 
     # Test Gemini Native Tool Call
-    chunk = "[TOOL_CALL:code_execution:{\"code\": \"print('hello')\"}]"
+    chunk = '[TOOL_CALL:code_execution:{"code": "print(\'hello\')"}]'
     blocks = detector.process_chunk(chunk)
 
     found = False
@@ -60,12 +62,13 @@ def test_block_detector():
     if not found:
         print(f"❌ Failed to detect TOOL_CALL. Blocks: {blocks}")
 
+
 def test_widget_factory():
     print("\n[3] Testing BlockWidgetFactory...")
     factory = BlockWidgetFactory()
     detector = BlockDetector()
 
-    chunk = "[TOOL_CALL:code_execution:{\"code\": \"print('hello')\"}]"
+    chunk = '[TOOL_CALL:code_execution:{"code": "print(\'hello\')"}]'
     blocks = detector.process_chunk(chunk)
 
     for block in blocks:
@@ -73,6 +76,7 @@ def test_widget_factory():
             renderable = factory.render_block(block)
             console.print(renderable)
             print("✅ Rendered TOOL_CALL (Visual Check)")
+
 
 if __name__ == "__main__":
     test_soft_buffer()

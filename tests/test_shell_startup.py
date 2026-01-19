@@ -26,8 +26,8 @@ class TestShellStartup:
         shell = InteractiveShell()
 
         # ContextSuggestionEngine requires indexer
-        assert hasattr(shell, 'indexer')
-        assert hasattr(shell, 'suggestion_engine')
+        assert hasattr(shell, "indexer")
+        assert hasattr(shell, "suggestion_engine")
 
         # Verify indexer is usable
         assert shell.suggestion_engine.indexer is shell.indexer
@@ -37,5 +37,5 @@ class TestShellStartup:
         shell = InteractiveShell()
 
         # Verify dashboard exists
-        assert hasattr(shell, 'dashboard')
+        assert hasattr(shell, "dashboard")
         assert shell.dashboard is not None

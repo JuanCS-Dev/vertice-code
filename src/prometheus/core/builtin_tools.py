@@ -18,6 +18,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class BuiltinTools:
     """Implementations for Prometheus internal tools."""
 
@@ -76,6 +77,7 @@ class BuiltinTools:
     async def remember(self, key: str, value: str) -> str:
         """Store something in memory."""
         from .persistence import persistence
+
         self.orch.memory.learn_fact(key, value, source="tool_remember")
         try:
             await persistence.store_memory(
@@ -83,7 +85,7 @@ class BuiltinTools:
                 type="semantic",
                 content=f"{key}: {value}",
                 metadata={"source": "tool_remember", "key": key},
-                importance=0.8
+                importance=0.8,
             )
             return f"Remembered and persisted: {key}"
         except Exception as e:
@@ -92,6 +94,7 @@ class BuiltinTools:
     async def recall(self, query: str) -> str:
         """Recall from memory."""
         from .persistence import persistence
+
         session_results = self.orch.memory.search_knowledge(query, top_k=3)
         try:
             persistent_results = await persistence.retrieve_memories(type="semantic", limit=5)
@@ -109,5 +112,5 @@ class BuiltinTools:
         if persistent_matches:
             results.append("\nLong-term Memory:")
             results.extend([f"- {r['content']}" for r in persistent_matches])
-            
+
         return "\n".join(results) if results else "Nothing relevant found in memory"

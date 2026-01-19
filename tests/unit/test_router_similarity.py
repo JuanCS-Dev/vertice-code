@@ -172,7 +172,7 @@ class TestVectorNormalization:
         vector = [3.0, 4.0]
 
         normalized = SimilarityEngine.normalize_vector(vector)
-        expected_magnitude = math.sqrt(3**2 + 4**2)  # 5.0
+        math.sqrt(3**2 + 4**2)  # 5.0
         expected = [3.0 / 5.0, 4.0 / 5.0]
 
         assert normalized == pytest.approx(expected)
@@ -196,7 +196,7 @@ class TestVectorNormalization:
         vector = [-3.0, 4.0]
 
         normalized = SimilarityEngine.normalize_vector(vector)
-        magnitude = math.sqrt((-3) ** 2 + 4**2)  # 5.0
+        math.sqrt((-3) ** 2 + 4**2)  # 5.0
         expected = [-3.0 / 5.0, 4.0 / 5.0]
 
         assert normalized == pytest.approx(expected)

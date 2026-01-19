@@ -20,6 +20,7 @@ from prometheus.sandbox.executor import SandboxExecutor
 # FIXTURES
 # ==============================================================================
 
+
 @pytest.fixture
 def buggy_project(tmp_path):
     """Create a project with various bugs to fix."""
@@ -28,32 +29,39 @@ def buggy_project(tmp_path):
     (project_dir / "src").mkdir()
 
     # File with syntax error
-    (project_dir / "src" / "syntax_error.py").write_text('''"""Module with syntax error."""
+    (project_dir / "src" / "syntax_error.py").write_text(
+        '''"""Module with syntax error."""
 
 def broken_function():
     print("Hello"
     return 42
-''')
+'''
+    )
 
     # File with import error
-    (project_dir / "src" / "import_error.py").write_text('''"""Module with import error."""
+    (project_dir / "src" / "import_error.py").write_text(
+        '''"""Module with import error."""
 from nonexistent_module import something
 
 def use_import():
     return something()
-''')
+'''
+    )
 
     # File with type error
-    (project_dir / "src" / "type_error.py").write_text('''"""Module with type error."""
+    (project_dir / "src" / "type_error.py").write_text(
+        '''"""Module with type error."""
 
 def add_numbers(a, b):
     return a + b
 
 result = add_numbers("5", 3)  # Type error: str + int
-''')
+'''
+    )
 
     # File with logic bug
-    (project_dir / "src" / "logic_bug.py").write_text('''"""Module with logic bug."""
+    (project_dir / "src" / "logic_bug.py").write_text(
+        '''"""Module with logic bug."""
 
 def calculate_average(numbers):
     """Calculate average of numbers."""
@@ -69,10 +77,12 @@ def find_max(numbers):
         if num > max_val:
             max_val = num
     return max_val
-''')
+'''
+    )
 
     # File with runtime error
-    (project_dir / "src" / "runtime_error.py").write_text('''"""Module with runtime error."""
+    (project_dir / "src" / "runtime_error.py").write_text(
+        '''"""Module with runtime error."""
 
 def divide(a, b):
     return a / b  # No zero check
@@ -82,7 +92,8 @@ def access_list(lst, index):
 
 def get_key(d, key):
     return d[key]  # No key check
-''')
+'''
+    )
 
     return project_dir
 
@@ -90,6 +101,7 @@ def get_key(d, key):
 # ==============================================================================
 # TEST CLASS: Syntax Error Fixes
 # ==============================================================================
+
 
 @pytest.mark.e2e
 class TestSyntaxErrorFixes:
@@ -114,6 +126,7 @@ def broken_function():
 
         # Verify fix compiles
         import ast
+
         try:
             ast.parse(fixed_content)
             syntax_valid = True
@@ -127,19 +140,22 @@ def broken_function():
         file_path = buggy_project / "src" / "indent_error.py"
 
         # Create file with indentation error
-        file_path.write_text('''def function():
+        file_path.write_text(
+            """def function():
 print("wrong indent")
     return 1
-''')
+"""
+        )
 
         # Fix: correct indentation
-        fixed_content = '''def function():
+        fixed_content = """def function():
     print("correct indent")
     return 1
-'''
+"""
         file_path.write_text(fixed_content)
 
         import ast
+
         try:
             ast.parse(fixed_content)
             syntax_valid = True
@@ -152,6 +168,7 @@ print("wrong indent")
 # ==============================================================================
 # TEST CLASS: Import Error Fixes
 # ==============================================================================
+
 
 @pytest.mark.e2e
 class TestImportErrorFixes:
@@ -175,32 +192,38 @@ def use_import():
         file_path.write_text(fixed_content)
 
         # Verify fix
-        assert "nonexistent_module" not in file_path.read_text() or \
-               "#" in file_path.read_text().split("nonexistent_module")[0].split("\n")[-1]
+        assert (
+            "nonexistent_module" not in file_path.read_text()
+            or "#" in file_path.read_text().split("nonexistent_module")[0].split("\n")[-1]
+        )
 
     def test_fixes_typo_in_import(self, buggy_project):
         """Fixes typo in module name."""
         file_path = buggy_project / "src" / "typo_import.py"
 
         # Create file with typo
-        file_path.write_text('''import jsn  # Typo: should be json
+        file_path.write_text(
+            """import jsn  # Typo: should be json
 data = jsn.dumps({"key": "value"})
-''')
+"""
+        )
 
         # Fix: correct the typo
-        fixed_content = '''import json  # Fixed typo
+        fixed_content = """import json  # Fixed typo
 data = json.dumps({"key": "value"})
-'''
+"""
         file_path.write_text(fixed_content)
 
         # Verify fix works
         import ast
+
         ast.parse(fixed_content)  # Should not raise
 
 
 # ==============================================================================
 # TEST CLASS: Type Error Fixes
 # ==============================================================================
+
 
 @pytest.mark.e2e
 class TestTypeErrorFixes:
@@ -235,7 +258,8 @@ result = add_numbers(5, 3)  # Fixed: both are ints now
         file_path = buggy_project / "src" / "typed_module.py"
 
         # Create module with type hints
-        file_path.write_text('''"""Module with type hints."""
+        file_path.write_text(
+            '''"""Module with type hints."""
 from typing import List, Dict, Optional
 
 def add_numbers(a: int, b: int) -> int:
@@ -249,7 +273,8 @@ def process_items(items: List[str]) -> Dict[str, int]:
 def find_value(data: Dict[str, int], key: str) -> Optional[int]:
     """Find value by key, return None if not found."""
     return data.get(key)
-''')
+'''
+        )
 
         content = file_path.read_text()
 
@@ -262,6 +287,7 @@ def find_value(data: Dict[str, int], key: str) -> Optional[int]:
 # ==============================================================================
 # TEST CLASS: Logic Bug Fixes
 # ==============================================================================
+
 
 @pytest.mark.e2e
 class TestLogicBugFixes:
@@ -297,7 +323,9 @@ def find_max(numbers):
         file_path.write_text(fixed_content)
 
         # Verify fixes
-        test_code = fixed_content + """
+        test_code = (
+            fixed_content
+            + """
 # Test edge cases
 assert calculate_average([]) == 0
 assert calculate_average([1, 2, 3]) == 2
@@ -305,6 +333,7 @@ assert find_max([]) is None
 assert find_max([-5, -3, -1]) == -1
 print("Assertions passed")
 """
+        )
         sandbox = SandboxExecutor()
         result = await sandbox.execute(test_code)
         assert result.success, f"Sandbox execution failed: {result.stderr}"
@@ -316,7 +345,8 @@ print("Assertions passed")
         file_path = buggy_project / "src" / "off_by_one.py"
 
         # Create file with off-by-one bug
-        file_path.write_text('''"""Module with off-by-one bug."""
+        file_path.write_text(
+            '''"""Module with off-by-one bug."""
 
 def get_last_n_items(items, n):
     """Get last n items from list."""
@@ -324,7 +354,8 @@ def get_last_n_items(items, n):
     for i in range(len(items) - n, len(items) + 1):  # Bug: +1 causes IndexError
         result.append(items[i])
     return result
-''')
+'''
+        )
 
         # Fix: correct the range
         fixed_content = '''"""Module with fixed off-by-one."""
@@ -340,13 +371,16 @@ def get_last_n_items(items, n):
         file_path.write_text(fixed_content)
 
         # Verify fix
-        test_code = fixed_content + """
+        test_code = (
+            fixed_content
+            + """
 get_last_n = get_last_n_items
 assert get_last_n([1, 2, 3, 4, 5], 2) == [4, 5]
 assert get_last_n([1, 2, 3], 0) == []
 assert get_last_n([1, 2], 5) == [1, 2]
 print("Assertions passed")
 """
+        )
         sandbox = SandboxExecutor()
         result = await sandbox.execute(test_code)
         assert result.success, f"Sandbox execution failed: {result.stderr}"
@@ -356,6 +390,7 @@ print("Assertions passed")
 # ==============================================================================
 # TEST CLASS: Runtime Error Fixes
 # ==============================================================================
+
 
 @pytest.mark.e2e
 class TestRuntimeErrorFixes:
@@ -386,7 +421,9 @@ def get_key(d, key, default=None):
         file_path.write_text(fixed_content)
 
         # Verify fixes
-        test_code = fixed_content + '''
+        test_code = (
+            fixed_content
+            + """
 # Test error handling
 try:
     divide(10, 0)
@@ -401,7 +438,8 @@ assert access_list([1, 2, 3], 1) == 2
 assert get_key({}, "missing") is None
 assert get_key({"a": 1}, "a") == 1
 print("Assertions passed")
-'''
+"""
+        )
         sandbox = SandboxExecutor()
         result = await sandbox.execute(test_code)
 
@@ -443,7 +481,9 @@ def safe_parse_json(json_string):
         file_path.write_text(file_content)
 
         # Verify error handling
-        test_code = file_content + """
+        test_code = (
+            file_content
+            + """
 assert safe_divide(10, 0)["success"] is False
 assert safe_divide(10, 2)["result"] == 5
 
@@ -451,6 +491,7 @@ assert safe_parse_json("invalid")["success"] is False
 assert safe_parse_json('{"key": "value"}')["success"] is True
 print("Assertions passed")
 """
+        )
         sandbox = SandboxExecutor()
         result = await sandbox.execute(test_code)
         assert result.success, f"Sandbox execution failed: {result.stderr}"

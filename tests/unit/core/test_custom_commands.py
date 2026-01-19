@@ -35,10 +35,7 @@ class TestCustomCommandsManagerInit:
         project_dir = tmp_path / "project_commands"
         global_dir = tmp_path / "global_commands"
 
-        manager = CustomCommandsManager(
-            project_dir=project_dir,
-            global_dir=global_dir
-        )
+        manager = CustomCommandsManager(project_dir=project_dir, global_dir=global_dir)
 
         assert manager._project_dir == project_dir
         assert manager._global_dir == global_dir
@@ -70,10 +67,7 @@ class TestCustomCommandsManagerInit:
         global_dir = tmp_path / "global"
         project_dir.mkdir(parents=True)
 
-        manager = CustomCommandsManager(
-            project_dir=project_dir,
-            global_dir=global_dir
-        )
+        manager = CustomCommandsManager(project_dir=project_dir, global_dir=global_dir)
 
         assert manager._get_commands_dir() == project_dir
 
@@ -82,10 +76,7 @@ class TestCustomCommandsManagerInit:
         project_dir = tmp_path / "project"  # Not created
         global_dir = tmp_path / "global"
 
-        manager = CustomCommandsManager(
-            project_dir=project_dir,
-            global_dir=global_dir
-        )
+        manager = CustomCommandsManager(project_dir=project_dir, global_dir=global_dir)
 
         assert manager._get_commands_dir() == global_dir
 
@@ -107,8 +98,7 @@ class TestLoadCommands:
     def test_load_commands_nonexistent_directory(self, tmp_path):
         """Test loading from non-existent directories."""
         manager = CustomCommandsManager(
-            project_dir=tmp_path / "nonexistent_project",
-            global_dir=tmp_path / "nonexistent_global"
+            project_dir=tmp_path / "nonexistent_project", global_dir=tmp_path / "nonexistent_global"
         )
 
         commands = manager.load_commands()
@@ -235,10 +225,7 @@ class TestLoadCommands:
         (global_dir / "review.md").write_text("Global review")
         (global_dir / "deploy.md").write_text("Global deploy")
 
-        manager = CustomCommandsManager(
-            project_dir=project_dir,
-            global_dir=global_dir
-        )
+        manager = CustomCommandsManager(project_dir=project_dir, global_dir=global_dir)
         commands = manager.load_commands()
 
         # Project version should win
@@ -277,12 +264,16 @@ class TestLoadCommands:
         bad_file = commands_dir / "bad.md"
         bad_file.write_text("Bad command")
 
-        with patch.object(Path, 'read_text', side_effect=[
-            "Good command",  # First file works
-            IOError("Permission denied")  # Second file fails
-        ]):
+        with patch.object(
+            Path,
+            "read_text",
+            side_effect=[
+                "Good command",  # First file works
+                IOError("Permission denied"),  # Second file fails
+            ],
+        ):
             # Should not raise, just skip bad file
-            commands = manager.load_commands(force_reload=True)
+            manager.load_commands(force_reload=True)
 
 
 class TestExtractDescription:
@@ -516,9 +507,7 @@ class TestCreateCommand:
 
         manager = CustomCommandsManager(project_dir=commands_dir)
         result = manager.create_command(
-            "review",
-            "Review the code",
-            description="Code Review Helper"
+            "review", "Review the code", description="Code Review Helper"
         )
 
         assert result["description"] == "Code Review Helper"
@@ -531,10 +520,7 @@ class TestCreateCommand:
         """Test creating a global scope command."""
         global_dir = tmp_path / "global"
 
-        manager = CustomCommandsManager(
-            project_dir=tmp_path / "project",
-            global_dir=global_dir
-        )
+        manager = CustomCommandsManager(project_dir=tmp_path / "project", global_dir=global_dir)
         result = manager.create_command("test", "Test", scope="global")
 
         assert result["type"] == "global"
@@ -580,7 +566,7 @@ class TestCreateCommand:
 
         # The sanitize function will clean this, but we test the security check
         # by mocking to bypass sanitization
-        with patch.object(manager, '_sanitize_command_name', return_value="../../../etc/passwd"):
+        with patch.object(manager, "_sanitize_command_name", return_value="../../../etc/passwd"):
             with pytest.raises(ValueError, match="path traversal"):
                 manager.create_command("malicious", "Evil content")
 
@@ -622,7 +608,7 @@ class TestDeleteCommand:
         manager = CustomCommandsManager(project_dir=commands_dir)
         manager.load_commands()
 
-        with patch.object(Path, 'unlink', side_effect=PermissionError("Denied")):
+        with patch.object(Path, "unlink", side_effect=PermissionError("Denied")):
             result = manager.delete_command("test")
             assert result is False
 
@@ -705,8 +691,7 @@ class TestGetStats:
     def test_get_stats_empty(self, tmp_path):
         """Test stats with no commands."""
         manager = CustomCommandsManager(
-            project_dir=tmp_path / "project",
-            global_dir=tmp_path / "global"
+            project_dir=tmp_path / "project", global_dir=tmp_path / "global"
         )
 
         stats = manager.get_stats()
@@ -727,10 +712,7 @@ class TestGetStats:
         (project_dir / "p2.md").write_text("P2")
         (global_dir / "g1.md").write_text("G1")
 
-        manager = CustomCommandsManager(
-            project_dir=project_dir,
-            global_dir=global_dir
-        )
+        manager = CustomCommandsManager(project_dir=project_dir, global_dir=global_dir)
 
         stats = manager.get_stats()
 
@@ -828,10 +810,7 @@ class TestIntegration:
         manager = CustomCommandsManager(project_dir=commands_dir)
 
         # Create (without description to keep prompt clean)
-        manager.create_command(
-            "greet",
-            "Hello, $ARGUMENTS! Welcome."
-        )
+        manager.create_command("greet", "Hello, $ARGUMENTS! Welcome.")
 
         # Verify creation
         assert manager.command_exists("greet")
@@ -857,10 +836,7 @@ class TestIntegration:
         (global_dir / "status.md").write_text("Global: git status")
         (project_dir / "status.md").write_text("Project: npm status")
 
-        manager = CustomCommandsManager(
-            project_dir=project_dir,
-            global_dir=global_dir
-        )
+        manager = CustomCommandsManager(project_dir=project_dir, global_dir=global_dir)
 
         result = manager.execute_command("status")
         assert result == "Project: npm status"

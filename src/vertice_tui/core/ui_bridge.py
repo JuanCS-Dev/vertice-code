@@ -12,6 +12,7 @@ Features:
 
 from __future__ import annotations
 
+import threading
 from pathlib import Path
 from typing import Dict, List, Optional, TYPE_CHECKING
 
@@ -216,6 +217,7 @@ class AutocompleteBridge:
         # Performance: Cache completions to avoid recomputation
         self._completion_cache: Dict[str, List[Dict]] = {}
         self._completion_cache_time: float = 0.0
+        self._lock = threading.Lock()
 
     def add_recent_file(self, file_path: str) -> None:
         """Track a recently accessed file for priority in @ completions."""
@@ -523,7 +525,6 @@ class AutocompleteBridge:
                 )
 
         # Sort by score
-        # Sort by score
         completions.sort(key=lambda x: x["score"], reverse=True)
         result = completions[:max_results]
 
@@ -532,6 +533,11 @@ class AutocompleteBridge:
         self._completion_cache_time = time.time()
 
         return result
+
+    def get_completions_threadsafe(self, text: str, max_results: int = 10) -> List[Dict]:
+        """Thread-safe wrapper for `get_completions` (safe for asyncio.to_thread)."""
+        with self._lock:
+            return self.get_completions(text, max_results)
 
     def _fuzzy_score(self, query: str, target: str) -> float:
         """Calculate fuzzy match score."""

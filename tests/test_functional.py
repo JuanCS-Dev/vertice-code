@@ -18,9 +18,9 @@ from vertice_cli.core.llm import llm_client
 
 async def test_basic_generation():
     """Test basic LLM generation."""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("🧪 TEST 1: BASIC GENERATION")
-    print("="*80)
+    print("=" * 80)
 
     prompt = "What is 2+2? Answer in one short sentence."
 
@@ -44,9 +44,9 @@ async def test_basic_generation():
 
 async def test_streaming():
     """Test streaming generation."""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("🧪 TEST 2: STREAMING GENERATION")
-    print("="*80)
+    print("=" * 80)
 
     prompt = "Count from 1 to 5."
 
@@ -79,15 +79,16 @@ async def test_streaming():
     except Exception as e:
         print(f"❌ TEST FAILED: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
 
 async def test_multi_provider():
     """Test multi-provider system."""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("🧪 TEST 3: MULTI-PROVIDER ROUTING")
-    print("="*80)
+    print("=" * 80)
 
     prompt = "Say 'Hello from provider!'"
     providers = llm_client.get_available_providers()
@@ -96,7 +97,7 @@ async def test_multi_provider():
 
     results = {}
 
-    for provider in ['hf', 'hf']:
+    for provider in ["hf", "hf"]:
         if provider not in providers:
             print(f"⏭️  Skipping {provider} (not available)")
             continue
@@ -105,55 +106,41 @@ async def test_multi_provider():
             print(f"\n🔄 Testing provider: {provider}")
             start = time.time()
 
-            response = await llm_client.generate(
-                prompt,
-                max_tokens=50,
-                provider=provider
-            )
+            response = await llm_client.generate(prompt, max_tokens=50, provider=provider)
 
             elapsed = time.time() - start
-            results[provider] = {
-                'success': True,
-                'time': elapsed,
-                'response': response[:100]
-            }
+            results[provider] = {"success": True, "time": elapsed, "response": response[:100]}
 
             print(f"✅ {provider}: {elapsed:.2f}s")
             print(f"   Response: {response[:80]}...")
 
         except Exception as e:
             print(f"❌ {provider} failed: {e}")
-            results[provider] = {
-                'success': False,
-                'error': str(e)
-            }
+            results[provider] = {"success": False, "error": str(e)}
 
     # Summary
     print("\n📊 PROVIDER COMPARISON:")
     print("-" * 80)
     for provider, result in results.items():
-        if result['success']:
+        if result["success"]:
             print(f"✅ {provider:12s}: {result['time']:.2f}s")
         else:
             print(f"❌ {provider:12s}: {result.get('error', 'Unknown error')}")
 
-    success_count = sum(1 for r in results.values() if r['success'])
+    success_count = sum(1 for r in results.values() if r["success"])
     print(f"\n✅ TEST PASSED: {success_count}/{len(results)} providers working!")
     return success_count > 0
 
 
 async def test_error_handling():
     """Test error handling."""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("🧪 TEST 4: ERROR HANDLING")
-    print("="*80)
+    print("=" * 80)
 
     try:
         print("📝 Testing with invalid provider...")
-        response = await llm_client.generate(
-            "test",
-            provider="invalid_provider_xyz"
-        )
+        await llm_client.generate("test", provider="invalid_provider_xyz")
         print("❌ TEST FAILED: Should have raised error!")
         return False
 
@@ -166,9 +153,9 @@ async def test_error_handling():
 
 async def test_context_builder():
     """Test context builder."""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("🧪 TEST 5: CONTEXT BUILDER")
-    print("="*80)
+    print("=" * 80)
 
     from vertice_cli.core.context import context_builder
 
@@ -182,7 +169,7 @@ async def test_context_builder():
         stats_after = context_builder.get_stats()
         print(f"📊 Stats after clear: {stats_after}")
 
-        if stats_after['files'] == 0:
+        if stats_after["files"] == 0:
             print("✅ TEST PASSED: Context builder works!")
             return True
         else:
@@ -196,10 +183,10 @@ async def test_context_builder():
 
 async def main():
     """Run all functional tests."""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("🚀 FUNCTIONAL TEST SUITE")
     print("   Testing real behavior and functionality")
-    print("="*80)
+    print("=" * 80)
 
     tests = [
         ("Basic Generation", test_basic_generation),
@@ -218,13 +205,14 @@ async def main():
         except Exception as e:
             print(f"\n❌ {name} crashed: {e}")
             import traceback
+
             traceback.print_exc()
             results.append((name, False))
 
     # Final summary
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("📊 FUNCTIONAL TEST SUMMARY")
-    print("="*80)
+    print("=" * 80)
 
     for name, passed in results:
         status = "✅ PASS" if passed else "❌ FAIL"
@@ -242,7 +230,7 @@ async def main():
         print(f"\n⚠️  {total_count - passed_count} test(s) failed!")
         print("⚠️  Review failures above")
 
-    print("="*80 + "\n")
+    print("=" * 80 + "\n")
 
     return passed_count == total_count
 

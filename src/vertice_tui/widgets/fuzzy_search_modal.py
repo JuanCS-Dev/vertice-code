@@ -352,5 +352,5 @@ class FuzzySearchModal(Widget):
 
     def _update_selection(self) -> None:
         """Update visual selection in list."""
-        list_view = self.query_one("#results-list", ListView)
+        self.query_one("#results-list", ListView)
         # This would highlight the selected item visually

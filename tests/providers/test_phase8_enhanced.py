@@ -143,7 +143,9 @@ class TestCostInfo:
     def test_free_tier_zero_cost(self) -> None:
         """Test free tier has zero cost."""
         usage = UsageInfo(prompt_tokens=1000000, completion_tokens=500000)
-        cost = CostInfo.calculate(usage=usage, input_price_per_million=0, output_price_per_million=0)
+        cost = CostInfo.calculate(
+            usage=usage, input_price_per_million=0, output_price_per_million=0
+        )
 
         assert cost.total_cost == 0.0
 

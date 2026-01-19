@@ -184,10 +184,7 @@ class JusticaMonitor:
         now = datetime.now(timezone.utc)
 
         # FATOR 1: Eventos Recentes
-        recent_events = [
-            e for e in session.events
-            if now - e.timestamp < self.analysis_window
-        ]
+        recent_events = [e for e in session.events if now - e.timestamp < self.analysis_window]
 
         event_contribution = sum(e.suspicion_contribution for e in recent_events)
         if event_contribution > 0:
@@ -266,10 +263,7 @@ class JusticaMonitor:
                 continue
 
             # Verificar atividade na janela de correlacao
-            recent = [
-                e for e in session.events
-                if now - e.timestamp < self.correlation_window
-            ]
+            recent = [e for e in session.events if now - e.timestamp < self.correlation_window]
 
             if not recent:
                 continue
@@ -353,9 +347,9 @@ class JusticaMonitor:
         session = self.get_or_create_session(agent_id)
 
         # Coletar eventos flagged recentes
-        flagged_events = [
-            e.to_dict() for e in session.events if e.flags
-        ][-20:]  # Ultimos 20 flagged
+        flagged_events = [e.to_dict() for e in session.events if e.flags][
+            -20:
+        ]  # Ultimos 20 flagged
 
         return {
             "report_id": str(uuid4()),
@@ -408,7 +402,9 @@ class JusticaMonitor:
         }
 
     def __repr__(self) -> str:
-        return f"JusticaMonitor(sessions={len(self._sessions)}, events={self.total_events_processed})"
+        return (
+            f"JusticaMonitor(sessions={len(self._sessions)}, events={self.total_events_processed})"
+        )
 
 
 __all__ = ["JusticaMonitor"]

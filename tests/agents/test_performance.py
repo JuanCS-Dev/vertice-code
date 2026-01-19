@@ -126,9 +126,7 @@ def triple_loop(data):
         )
         assert on3_found, "O(n³) triple loop not detected as critical"
 
-    async def test_single_loop_no_false_positive(
-        self, performance_agent, temp_project
-    ):
+    async def test_single_loop_no_false_positive(self, performance_agent, temp_project):
         """Test that single loops don't trigger complexity warnings."""
         test_file = temp_project / "single_loop.py"
         test_file.write_text(
@@ -153,15 +151,11 @@ def process_items(items):
 
         # Should not detect complexity issue for single loop
         complexity_issues = [
-            b
-            for b in bottlenecks
-            if b["type"] == BottleneckType.ALGORITHMIC_COMPLEXITY
+            b for b in bottlenecks if b["type"] == BottleneckType.ALGORITHMIC_COMPLEXITY
         ]
         assert len(complexity_issues) == 0, "False positive on single loop"
 
-    async def test_comprehension_vs_nested_loop(
-        self, performance_agent, temp_project
-    ):
+    async def test_comprehension_vs_nested_loop(self, performance_agent, temp_project):
         """Test detection suggests list comprehension."""
         test_file = temp_project / "comprehension_opportunity.py"
         test_file.write_text(
@@ -186,9 +180,7 @@ def transform(matrix):
         bottlenecks = response.data["bottlenecks"]
 
         # Should detect nested loop
-        nested = any(
-            b["type"] == BottleneckType.ALGORITHMIC_COMPLEXITY for b in bottlenecks
-        )
+        nested = any(b["type"] == BottleneckType.ALGORITHMIC_COMPLEXITY for b in bottlenecks)
         assert nested, "Nested loop not detected"
 
         # Should suggest optimization
@@ -200,9 +192,7 @@ def transform(matrix):
         )
         assert suggestions, "No optimization suggestion provided"
 
-    async def test_complexity_severity_scoring(
-        self, performance_agent, temp_project
-    ):
+    async def test_complexity_severity_scoring(self, performance_agent, temp_project):
         """Test that complexity severity is correctly assigned."""
         # Create file with both O(n²) and O(n³)
         test_file = temp_project / "mixed_complexity.py"
@@ -232,20 +222,12 @@ def on3_function(data):
         bottlenecks = response.data["bottlenecks"]
 
         # Find O(n²) - should be "high"
-        on2 = [
-            b
-            for b in bottlenecks
-            if b.get("complexity") == ComplexityLevel.O_N2
-        ]
+        on2 = [b for b in bottlenecks if b.get("complexity") == ComplexityLevel.O_N2]
         if on2:
             assert on2[0]["severity"] == "high"
 
         # Find O(n³) - should be "critical"
-        on3 = [
-            b
-            for b in bottlenecks
-            if b.get("complexity") == ComplexityLevel.O_N3
-        ]
+        on3 = [b for b in bottlenecks if b.get("complexity") == ComplexityLevel.O_N3]
         if on3:
             assert on3[0]["severity"] == "critical"
 
@@ -284,15 +266,11 @@ def get_users_with_profiles(user_ids):
         bottlenecks = response.data["bottlenecks"]
 
         # Find N+1 issue
-        n_plus_one = any(
-            b["type"] == BottleneckType.N_PLUS_ONE_QUERY for b in bottlenecks
-        )
+        n_plus_one = any(b["type"] == BottleneckType.N_PLUS_ONE_QUERY for b in bottlenecks)
         assert n_plus_one, "N+1 query not detected"
 
         # Should be high severity
-        issue = next(
-            b for b in bottlenecks if b["type"] == BottleneckType.N_PLUS_ONE_QUERY
-        )
+        issue = next(b for b in bottlenecks if b["type"] == BottleneckType.N_PLUS_ONE_QUERY)
         assert issue["severity"] == "high"
 
     async def test_filter_in_loop(self, performance_agent, temp_project):
@@ -319,14 +297,10 @@ def load_related_data(items):
         assert response.success
         bottlenecks = response.data["bottlenecks"]
 
-        n_plus_one = any(
-            b["type"] == BottleneckType.N_PLUS_ONE_QUERY for b in bottlenecks
-        )
+        n_plus_one = any(b["type"] == BottleneckType.N_PLUS_ONE_QUERY for b in bottlenecks)
         assert n_plus_one, ".filter() in loop not detected"
 
-    async def test_n_plus_one_suggests_prefetch(
-        self, performance_agent, temp_project
-    ):
+    async def test_n_plus_one_suggests_prefetch(self, performance_agent, temp_project):
         """Test that N+1 detection suggests select_related/prefetch_related."""
         test_file = temp_project / "need_prefetch.py"
         test_file.write_text(
@@ -399,9 +373,7 @@ def process_large_file(filename):
         assert response.success
         bottlenecks = response.data["bottlenecks"]
 
-        memory_issue = any(
-            b["type"] == BottleneckType.MEMORY_LEAK for b in bottlenecks
-        )
+        memory_issue = any(b["type"] == BottleneckType.MEMORY_LEAK for b in bottlenecks)
         assert memory_issue, "Unbounded list growth not detected"
 
     async def test_generator_suggestion(self, performance_agent, temp_project):
@@ -429,17 +401,13 @@ def read_huge_dataset():
 
         if any(b["type"] == BottleneckType.MEMORY_LEAK for b in bottlenecks):
             optimization = next(
-                b["optimization"]
-                for b in bottlenecks
-                if b["type"] == BottleneckType.MEMORY_LEAK
+                b["optimization"] for b in bottlenecks if b["type"] == BottleneckType.MEMORY_LEAK
             )
             assert (
                 "generator" in optimization.lower() or "yield" in optimization.lower()
             ), "Missing generator suggestion"
 
-    async def test_no_false_positive_with_break(
-        self, performance_agent, temp_project
-    ):
+    async def test_no_false_positive_with_break(self, performance_agent, temp_project):
         """Test that loops with break conditions don't trigger false positives."""
         test_file = temp_project / "bounded_loop.py"
         test_file.write_text(
@@ -476,9 +444,7 @@ def find_first_match(items):
 class TestAntiPatterns:
     """Test performance anti-pattern detection."""
 
-    async def test_string_concatenation_in_loop(
-        self, performance_agent, temp_project
-    ):
+    async def test_string_concatenation_in_loop(self, performance_agent, temp_project):
         """Test detection of string += in loop."""
         test_file = temp_project / "string_concat.py"
         test_file.write_text(
@@ -501,9 +467,7 @@ def build_html(items):
         assert response.success
         bottlenecks = response.data["bottlenecks"]
 
-        string_concat = any(
-            b["type"] == BottleneckType.STRING_CONCAT for b in bottlenecks
-        )
+        string_concat = any(b["type"] == BottleneckType.STRING_CONCAT for b in bottlenecks)
         assert string_concat, "String concatenation in loop not detected"
 
     async def test_uncompiled_regex_in_loop(self, performance_agent, temp_project):
@@ -532,14 +496,10 @@ def validate_emails(emails):
         assert response.success
         bottlenecks = response.data["bottlenecks"]
 
-        regex_issue = any(
-            b["type"] == BottleneckType.REGEX_COMPILE for b in bottlenecks
-        )
+        regex_issue = any(b["type"] == BottleneckType.REGEX_COMPILE for b in bottlenecks)
         assert regex_issue, "Uncompiled regex in loop not detected"
 
-    async def test_optimization_suggests_precompile(
-        self, performance_agent, temp_project
-    ):
+    async def test_optimization_suggests_precompile(self, performance_agent, temp_project):
         """Test that regex issues suggest pre-compilation."""
         test_file = temp_project / "need_compile.py"
         test_file.write_text(
@@ -567,9 +527,7 @@ def filter_patterns(lines):
 
         if any(b["type"] == BottleneckType.REGEX_COMPILE for b in bottlenecks):
             optimization = next(
-                b["optimization"]
-                for b in bottlenecks
-                if b["type"] == BottleneckType.REGEX_COMPILE
+                b["optimization"] for b in bottlenecks if b["type"] == BottleneckType.REGEX_COMPILE
             )
             assert "compile" in optimization.lower(), "Missing compile suggestion"
 
@@ -607,9 +565,7 @@ def calculate_sum(numbers):
         score = response.data["performance_score"]
         assert score >= 95, f"Clean code should score near 100, got {score}"
 
-    async def test_score_decreases_with_issues(
-        self, performance_agent, temp_project
-    ):
+    async def test_score_decreases_with_issues(self, performance_agent, temp_project):
         """Test that score decreases with more issues."""
         test_file = temp_project / "problematic.py"
         test_file.write_text(
@@ -620,18 +576,18 @@ def bad_performance(data):
         for j in data:
             for k in data:
                 pass
-    
+
     # N+1 query - high
     results = []
     for item in data:
         result = db.get(item.id)
         results.append(result)
-    
+
     # String concat - medium
     html = ""
     for item in data:
         html += str(item)
-    
+
     return html
 """
         )
@@ -670,9 +626,7 @@ class TestEdgeCases:
         assert response.data["files_analyzed"] == 0
         assert response.data["performance_score"] == 100  # No issues = perfect
 
-    async def test_syntax_error_file_graceful_handling(
-        self, performance_agent, temp_project
-    ):
+    async def test_syntax_error_file_graceful_handling(self, performance_agent, temp_project):
         """Test that syntax errors don't crash the agent."""
         bad_file = temp_project / "syntax_error.py"
         bad_file.write_text("def broken(\n    this is invalid python")

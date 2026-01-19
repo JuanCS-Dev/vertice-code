@@ -17,15 +17,15 @@ class TestBinaryFileHandling:
         """Detect binary file before reading."""
         # Create temp binary file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as f:
-            f.write(b'\x00\x01\x02\x03\xff\xfe')
+            f.write(b"\x00\x01\x02\x03\xff\xfe")
             temp_path = f.name
 
         try:
-            with open(temp_path, 'rb') as f:
+            with open(temp_path, "rb") as f:
                 header = f.read(512)
 
             # Check for null bytes (common binary indicator)
-            is_binary = b'\x00' in header
+            is_binary = b"\x00" in header
             assert is_binary
         finally:
             os.unlink(temp_path)
@@ -34,12 +34,12 @@ class TestBinaryFileHandling:
         """Appropriate error for binary file read attempt."""
         with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as f:
             # Write invalid UTF-8 sequences
-            f.write(b'\x80\x81\x82\xff\xfe\xfd')
+            f.write(b"\x80\x81\x82\xff\xfe\xfd")
             temp_path = f.name
 
         try:
             try:
-                with open(temp_path, 'r', encoding='utf-8') as f:
+                with open(temp_path, "r", encoding="utf-8") as f:
                     f.read()
                 failed = False
             except UnicodeDecodeError:
@@ -52,15 +52,15 @@ class TestBinaryFileHandling:
     def test_image_file_detection(self):
         """Detect common image file types."""
         # PNG magic bytes
-        png_header = b'\x89PNG\r\n\x1a\n'
+        png_header = b"\x89PNG\r\n\x1a\n"
         # JPEG magic bytes
-        jpeg_header = b'\xff\xd8\xff'
+        jpeg_header = b"\xff\xd8\xff"
         # GIF magic bytes
-        gif_header = b'GIF89a'
+        gif_header = b"GIF89a"
 
-        assert png_header.startswith(b'\x89PNG')
-        assert jpeg_header.startswith(b'\xff\xd8')
-        assert gif_header.startswith(b'GIF')
+        assert png_header.startswith(b"\x89PNG")
+        assert jpeg_header.startswith(b"\xff\xd8")
+        assert gif_header.startswith(b"GIF")
 
 
 class TestFileLocking:
@@ -68,13 +68,13 @@ class TestFileLocking:
 
     def test_read_while_writing(self):
         """Handle reading file being written to."""
-        with tempfile.NamedTemporaryFile(delete=False, mode='w') as f:
+        with tempfile.NamedTemporaryFile(delete=False, mode="w") as f:
             f.write("initial content")
             temp_path = f.name
 
         try:
             # Simulate concurrent read
-            with open(temp_path, 'r') as reader:
+            with open(temp_path, "r") as reader:
                 content = reader.read()
                 assert "initial" in content
         finally:
@@ -91,7 +91,7 @@ class TestFileLocking:
 
         # Try to read deleted file
         try:
-            with open(temp_path, 'r') as f:
+            with open(temp_path, "r") as f:
                 f.read()
             exists = True
         except FileNotFoundError:
@@ -103,7 +103,7 @@ class TestFileLocking:
 class TestSymlinkHandling:
     """Test symlink handling edge cases."""
 
-    @pytest.mark.skipif(os.name == 'nt', reason="Symlinks require admin on Windows")
+    @pytest.mark.skipif(os.name == "nt", reason="Symlinks require admin on Windows")
     def test_symlink_resolution(self):
         """Resolve symlinks to actual file."""
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -123,7 +123,7 @@ class TestSymlinkHandling:
             resolved = link.resolve()
             assert resolved == real_file.resolve()
 
-    @pytest.mark.skipif(os.name == 'nt', reason="Symlinks require admin on Windows")
+    @pytest.mark.skipif(os.name == "nt", reason="Symlinks require admin on Windows")
     def test_broken_symlink_detection(self):
         """Detect and handle broken symlinks."""
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -136,7 +136,7 @@ class TestSymlinkHandling:
             assert link.is_symlink()
             assert not link.exists()  # Broken symlink
 
-    @pytest.mark.skipif(os.name == 'nt', reason="Symlinks require admin on Windows")
+    @pytest.mark.skipif(os.name == "nt", reason="Symlinks require admin on Windows")
     def test_symlink_loop_detection(self):
         """Detect symlink loops."""
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -150,9 +150,8 @@ class TestSymlinkHandling:
             # Attempting to resolve should fail
             try:
                 link_a.resolve(strict=True)
-                looped = False
             except (OSError, RuntimeError):
-                looped = True
+                pass
 
             # Note: Python's resolve() may not always raise
             assert link_a.is_symlink()
@@ -173,7 +172,7 @@ class TestFilePathEdgeCases:
 
     def test_special_characters_in_path(self):
         """Handle special characters in file paths."""
-        special_chars = ['$', '!', '@', '#', '%', '&', '(', ')']
+        special_chars = ["$", "!", "@", "#", "%", "&", "(", ")"]
 
         with tempfile.TemporaryDirectory() as tmpdir:
             for char in special_chars:
@@ -206,7 +205,7 @@ class TestFilePathEdgeCases:
 class TestFilePermissions:
     """Test file permission edge cases."""
 
-    @pytest.mark.skipif(os.name == 'nt', reason="Unix permissions only")
+    @pytest.mark.skipif(os.name == "nt", reason="Unix permissions only")
     def test_read_only_file(self):
         """Handle read-only file write attempt."""
         with tempfile.NamedTemporaryFile(delete=False) as f:
@@ -219,7 +218,7 @@ class TestFilePermissions:
 
             # Try to write
             try:
-                with open(temp_path, 'w') as f:
+                with open(temp_path, "w") as f:
                     f.write("new content")
                 write_failed = False
             except PermissionError:
@@ -230,7 +229,7 @@ class TestFilePermissions:
             os.chmod(temp_path, 0o644)
             os.unlink(temp_path)
 
-    @pytest.mark.skipif(os.name == 'nt', reason="Unix permissions only")
+    @pytest.mark.skipif(os.name == "nt", reason="Unix permissions only")
     def test_no_read_permission(self):
         """Handle file with no read permission."""
         with tempfile.NamedTemporaryFile(delete=False) as f:
@@ -244,7 +243,7 @@ class TestFilePermissions:
             # Try to read (may need to check if running as root)
             if os.geteuid() != 0:  # Not root
                 try:
-                    with open(temp_path, 'r') as f:
+                    with open(temp_path, "r") as f:
                         f.read()
                     read_failed = False
                 except PermissionError:

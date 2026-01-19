@@ -1,7 +1,7 @@
 # 🔍 CONTEXTO SISTÊMICO COMPLETO - QWEN-DEV-CLI
 
-**Gerado em:** 2025-11-19 19:25 UTC  
-**Executor:** Claude (Copilot CLI) sob Constituicao Vertice v3.0  
+**Gerado em:** 2025-11-19 19:25 UTC
+**Executor:** Claude (Copilot CLI) sob Constituicao Vertice v3.0
 **Status:** ✅ ANÁLISE COMPLETA E VALIDADA
 
 ---
@@ -87,13 +87,13 @@ Gerenciadores:
   - context: SessionContext     # Estado da sessão
   - conversation: ConversationManager  # Multi-turn tracking
   - recovery_engine: ErrorRecoveryEngine  # Auto-correção
-  
+
 Ferramentas:
   - registry: ToolRegistry      # 27+ tools registradas
   - indexer: SemanticIndexer    # Cursor-style intelligence
   - file_watcher: FileWatcher   # Context tracking em tempo real
   - async_executor: AsyncExecutor  # Execução paralela
-  
+
 UI/UX:
   - session: PromptSession      # Input com history e suggestions
   - rich_context: RichContextBuilder  # Context injection
@@ -127,15 +127,15 @@ Etapas (Visual Feedback):
   [THINKING] Step 1/3: Analyzing request...
     → rich_context.build_rich_context()
     → _get_command_suggestion(user_input, context)
-  
+
   [THINKING] Step 2/3: Command ready (Xs) ✓
-  
+
   Step 3/3: Show suggestion
     → Visual hierarchy display
     → danger_detector.analyze()      # P1: Safety check
     → Tiered confirmation (0/1/2)
     → _execute_command()
-  
+
   [EXECUTING] Running command...
     → Show result
     → error_parser.parse() if failed  # P1: Error analysis
@@ -399,7 +399,7 @@ class ToolResult:
     data: Any                  # Result data
     error: Optional[str]
     metadata: Dict[str, Any]   # Extra info
-    
+
     @property
     def output(self) -> str:   # Backward compatibility
         return str(self.data)
@@ -509,7 +509,7 @@ SemanticIndexer:
   - query_symbol(name)      # Find classes/functions
   - get_references()        # Find all usages
   - Cache persistence       # .qwen/index.json
-  
+
 Supported Languages:
   - Python (ast module)
   - JavaScript/TypeScript (regex fallback)
@@ -524,7 +524,7 @@ SuggestionEngine:
   - register_pattern()      # Add pattern recognition
   - analyze_command()       # Suggest improvements
   - predict_next_action()   # Cursor-style predictions
-  
+
 Patterns (intelligence/patterns.py):
   - Git workflows
   - File operations
@@ -543,7 +543,7 @@ assess_risk(command: str) → RiskAnalysis:
     - MEDIUM: mv, chmod
     - HIGH: rm, dd
     - CRITICAL: rm -rf /, dd if=/dev/zero
-  
+
   Returns:
     - level: RiskLevel
     - description: str
@@ -721,19 +721,19 @@ Testes:
   Total: 364 tests
   Passing: 364 (100%)
   Coverage: Constitutional + Core + Integration + Edge Cases
-  
+
 Constitutional Compliance:
   LEI (Lazy Execution Index): 0.369 (target <0.5) ✅
   P1-P6 Principles: Enforced ✅
   Defense Layer: 26 tests passing ✅
   Max Recovery Attempts: 2 (P6) ✅
-  
+
 Performance:
   TTFT: <10s (relaxed for variable hardware)
   Throughput: >3 tokens/sec
   Parallel Execution: 5 concurrent tasks
   Context Window: 1M tokens (Nebius)
-  
+
 Code Quality:
   God Methods: 0 (refatorados)
   Bare Excepts: 0
@@ -764,24 +764,24 @@ Core:
   qwen_dev_cli/core/llm.py       - Multi-provider LLM
   qwen_dev_cli/core/conversation.py - Multi-turn tracking
   qwen_dev_cli/core/recovery.py  - Error recovery engine
-  
+
 Tools:
   qwen_dev_cli/tools/base.py     - Tool architecture
   qwen_dev_cli/tools/file_ops.py - File operations (10 tools)
   qwen_dev_cli/tools/exec.py     - Shell execution
   qwen_dev_cli/tools/terminal.py - Unix commands (9 tools)
-  
+
 Intelligence:
   qwen_dev_cli/intelligence/indexer.py - Cursor-style semantic search
   qwen_dev_cli/intelligence/engine.py  - Suggestion engine
   qwen_dev_cli/intelligence/risk.py    - Risk assessment
-  
+
 TUI:
   qwen_dev_cli/tui/components/message.py - Chat interface
   qwen_dev_cli/tui/components/status.py  - Status badges
   qwen_dev_cli/tui/components/code.py    - Syntax highlighting
   qwen_dev_cli/tui/theme.py              - Color scheme
-  
+
 Tests:
   tests/test_tui_llm_edge_cases.py - 8 LLM integration tests
   tests/test_integration.py         - Full integration tests
@@ -903,5 +903,5 @@ Se o objetivo é **trabalhar no CLI/shell interativo**, as áreas de foco seriam
 
 ---
 
-**Relatório gerado sob Constituicao Vertice v3.0**  
+**Relatório gerado sob Constituicao Vertice v3.0**
 **Status:** ✅ CONTEXTO SISTÊMICO COMPLETO E VALIDADO

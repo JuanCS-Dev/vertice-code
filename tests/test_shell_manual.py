@@ -53,7 +53,7 @@ async def test_basic_functionality():
         print(f"   Input: '{test_input}'")
 
         # Check if shell has conversation manager
-        has_conversation = hasattr(shell, 'conversation')
+        has_conversation = hasattr(shell, "conversation")
         print(f"✓ Has conversation manager: {has_conversation}")
 
     except Exception as e:
@@ -110,7 +110,7 @@ async def test_with_mock_llm():
 
     # Create shell with mock LLM
     print("\n1. Creating shell with mock LLM...")
-    shell = InteractiveShell(llm_client=mock_llm)
+    InteractiveShell(llm_client=mock_llm)
     print("✓ Shell with mock LLM created")
 
     # Test tool execution
@@ -121,7 +121,9 @@ async def test_with_mock_llm():
     result = await bash_tool.execute(command="echo 'test'")
 
     if result.success:
-        output = result.data.get("stdout", "") if isinstance(result.data, dict) else str(result.data)
+        output = (
+            result.data.get("stdout", "") if isinstance(result.data, dict) else str(result.data)
+        )
         print(f"✓ Bash tool works: {output.strip()}")
     else:
         print(f"✗ Bash tool failed: {result.error}")
@@ -149,7 +151,9 @@ async def test_real_command():
     print("\n1. Test: echo")
     result = await bash_tool.execute(command="echo 'Shell is alive!'")
     if result.success:
-        output = result.data.get("stdout", "") if isinstance(result.data, dict) else str(result.data)
+        output = (
+            result.data.get("stdout", "") if isinstance(result.data, dict) else str(result.data)
+        )
         print(f"✓ Output: {output.strip()}")
     else:
         print(f"✗ Failed: {result.error}")
@@ -159,7 +163,9 @@ async def test_real_command():
     print("\n2. Test: find large files")
     result = await bash_tool.execute(command="find . -type f -size +10M 2>/dev/null | head -5")
     if result.success:
-        output = result.data.get("stdout", "") if isinstance(result.data, dict) else str(result.data)
+        output = (
+            result.data.get("stdout", "") if isinstance(result.data, dict) else str(result.data)
+        )
         if output.strip():
             print(f"✓ Found files:\n{output.strip()}")
         else:

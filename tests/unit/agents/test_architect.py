@@ -31,6 +31,7 @@ from vertice_cli.agents.base import (
 # SYSTEM PROMPT TESTS
 # =============================================================================
 
+
 class TestArchitectSystemPrompt:
     """Tests for ARCHITECT_SYSTEM_PROMPT constant."""
 
@@ -76,6 +77,7 @@ class TestArchitectSystemPrompt:
 # =============================================================================
 # ARCHITECTAGENT INITIALIZATION TESTS
 # =============================================================================
+
 
 class TestArchitectAgentInitialization:
     """Tests for ArchitectAgent initialization."""
@@ -128,6 +130,7 @@ class TestArchitectAgentInitialization:
 # EXECUTE TESTS - APPROVED SCENARIOS
 # =============================================================================
 
+
 class TestArchitectExecuteApproved:
     """Tests for ArchitectAgent.execute() - APPROVED scenarios."""
 
@@ -149,17 +152,19 @@ class TestArchitectExecuteApproved:
     @pytest.mark.asyncio
     async def test_approved_decision_json(self, architect):
         """Test execute with valid APPROVED JSON response."""
-        llm_response = json.dumps({
-            "decision": "APPROVED",
-            "reasoning": "Request is feasible with current codebase",
-            "architecture": {
-                "approach": "Add new module for JWT handling",
-                "risks": ["Token expiry handling", "Key rotation"],
-                "constraints": ["Must integrate with existing auth"],
-                "estimated_complexity": "MEDIUM"
-            },
-            "recommendations": ["Use PyJWT library", "Add token refresh"]
-        })
+        llm_response = json.dumps(
+            {
+                "decision": "APPROVED",
+                "reasoning": "Request is feasible with current codebase",
+                "architecture": {
+                    "approach": "Add new module for JWT handling",
+                    "risks": ["Token expiry handling", "Key rotation"],
+                    "constraints": ["Must integrate with existing auth"],
+                    "estimated_complexity": "MEDIUM",
+                },
+                "recommendations": ["Use PyJWT library", "Add token refresh"],
+            }
+        )
         architect._call_llm = AsyncMock(return_value=llm_response)
 
         task = AgentTask(request="Add JWT authentication")
@@ -174,10 +179,12 @@ class TestArchitectExecuteApproved:
     @pytest.mark.asyncio
     async def test_approved_normalizes_approve_variant(self, architect):
         """Test execute accepts 'APPROVE' variant."""
-        llm_response = json.dumps({
-            "decision": "APPROVE",  # Without 'D'
-            "reasoning": "Looks good"
-        })
+        llm_response = json.dumps(
+            {
+                "decision": "APPROVE",  # Without 'D'
+                "reasoning": "Looks good",
+            }
+        )
         architect._call_llm = AsyncMock(return_value=llm_response)
 
         task = AgentTask(request="Simple feature")
@@ -191,16 +198,18 @@ class TestArchitectExecuteApproved:
     @pytest.mark.asyncio
     async def test_approved_with_low_complexity(self, architect):
         """Test APPROVED with LOW complexity estimate."""
-        llm_response = json.dumps({
-            "decision": "APPROVED",
-            "reasoning": "Simple change",
-            "architecture": {
-                "approach": "Single file edit",
-                "risks": [],
-                "constraints": [],
-                "estimated_complexity": "LOW"
+        llm_response = json.dumps(
+            {
+                "decision": "APPROVED",
+                "reasoning": "Simple change",
+                "architecture": {
+                    "approach": "Single file edit",
+                    "risks": [],
+                    "constraints": [],
+                    "estimated_complexity": "LOW",
+                },
             }
-        })
+        )
         architect._call_llm = AsyncMock(return_value=llm_response)
 
         task = AgentTask(request="Fix typo in README")
@@ -214,6 +223,7 @@ class TestArchitectExecuteApproved:
 # EXECUTE TESTS - VETOED SCENARIOS
 # =============================================================================
 
+
 class TestArchitectExecuteVetoed:
     """Tests for ArchitectAgent.execute() - VETOED scenarios."""
 
@@ -225,17 +235,19 @@ class TestArchitectExecuteVetoed:
     @pytest.mark.asyncio
     async def test_vetoed_decision_json(self, architect):
         """Test execute with valid VETOED JSON response."""
-        llm_response = json.dumps({
-            "decision": "VETOED",
-            "reasoning": "Request conflicts with architectural principles",
-            "architecture": {
-                "approach": "N/A - Request vetoed",
-                "risks": ["Breaking existing API", "Data loss"],
-                "constraints": ["Backwards compatibility required"],
-                "estimated_complexity": "HIGH"
-            },
-            "recommendations": ["Reconsider approach", "Break into phases"]
-        })
+        llm_response = json.dumps(
+            {
+                "decision": "VETOED",
+                "reasoning": "Request conflicts with architectural principles",
+                "architecture": {
+                    "approach": "N/A - Request vetoed",
+                    "risks": ["Breaking existing API", "Data loss"],
+                    "constraints": ["Backwards compatibility required"],
+                    "estimated_complexity": "HIGH",
+                },
+                "recommendations": ["Reconsider approach", "Break into phases"],
+            }
+        )
         architect._call_llm = AsyncMock(return_value=llm_response)
 
         task = AgentTask(request="Delete all user data and rebuild")
@@ -247,10 +259,12 @@ class TestArchitectExecuteVetoed:
     @pytest.mark.asyncio
     async def test_vetoed_normalizes_veto_variant(self, architect):
         """Test execute accepts 'VETO' variant."""
-        llm_response = json.dumps({
-            "decision": "VETO",  # Without 'ED'
-            "reasoning": "Too risky"
-        })
+        llm_response = json.dumps(
+            {
+                "decision": "VETO",  # Without 'ED'
+                "reasoning": "Too risky",
+            }
+        )
         architect._call_llm = AsyncMock(return_value=llm_response)
 
         task = AgentTask(request="Dangerous operation")
@@ -264,6 +278,7 @@ class TestArchitectExecuteVetoed:
 # =============================================================================
 # EXECUTE TESTS - ERROR HANDLING
 # =============================================================================
+
 
 class TestArchitectExecuteErrors:
     """Tests for ArchitectAgent.execute() - error handling."""
@@ -289,11 +304,13 @@ class TestArchitectExecuteErrors:
     @pytest.mark.asyncio
     async def test_missing_decision_field(self, architect):
         """Test error when LLM response missing 'decision' field."""
-        llm_response = json.dumps({
-            "reasoning": "Analysis complete",
-            "architecture": {"approach": "TBD"}
-            # Missing 'decision' field
-        })
+        llm_response = json.dumps(
+            {
+                "reasoning": "Analysis complete",
+                "architecture": {"approach": "TBD"},
+                # Missing 'decision' field
+            }
+        )
         architect._call_llm = AsyncMock(return_value=llm_response)
 
         task = AgentTask(request="Add feature")
@@ -305,10 +322,12 @@ class TestArchitectExecuteErrors:
     @pytest.mark.asyncio
     async def test_invalid_decision_value(self, architect):
         """Test error when decision is neither APPROVED nor VETOED."""
-        llm_response = json.dumps({
-            "decision": "MAYBE",  # Invalid
-            "reasoning": "Uncertain"
-        })
+        llm_response = json.dumps(
+            {
+                "decision": "MAYBE",  # Invalid
+                "reasoning": "Uncertain",
+            }
+        )
         architect._call_llm = AsyncMock(return_value=llm_response)
 
         task = AgentTask(request="Add feature")
@@ -332,10 +351,12 @@ class TestArchitectExecuteErrors:
     @pytest.mark.asyncio
     async def test_case_insensitive_decision(self, architect):
         """Test decision parsing is case insensitive."""
-        llm_response = json.dumps({
-            "decision": "approved",  # Lowercase
-            "reasoning": "OK"
-        })
+        llm_response = json.dumps(
+            {
+                "decision": "approved",  # Lowercase
+                "reasoning": "OK",
+            }
+        )
         architect._call_llm = AsyncMock(return_value=llm_response)
 
         task = AgentTask(request="Add feature")
@@ -350,6 +371,7 @@ class TestArchitectExecuteErrors:
 # =============================================================================
 # _BUILD_ANALYSIS_PROMPT TESTS
 # =============================================================================
+
 
 class TestBuildAnalysisPrompt:
     """Tests for _build_analysis_prompt() helper."""
@@ -372,7 +394,7 @@ class TestBuildAnalysisPrompt:
         """Test prompt includes file context."""
         task = AgentTask(
             request="Refactor auth module",
-            context={"files": ["src/auth.py", "src/users.py", "tests/test_auth.py"]}
+            context={"files": ["src/auth.py", "src/users.py", "tests/test_auth.py"]},
         )
         prompt = architect._build_analysis_prompt(task)
 
@@ -383,10 +405,7 @@ class TestBuildAnalysisPrompt:
     def test_prompt_limits_files_to_five(self, architect):
         """Test prompt shows max 5 files."""
         files = [f"src/file_{i}.py" for i in range(10)]
-        task = AgentTask(
-            request="Large refactor",
-            context={"files": files}
-        )
+        task = AgentTask(request="Large refactor", context={"files": files})
         prompt = architect._build_analysis_prompt(task)
 
         assert "10 files" in prompt
@@ -399,8 +418,7 @@ class TestBuildAnalysisPrompt:
     def test_prompt_with_constraints(self, architect):
         """Test prompt includes constraints."""
         task = AgentTask(
-            request="Add new API",
-            context={"constraints": "Must be backwards compatible"}
+            request="Add new API", context={"constraints": "Must be backwards compatible"}
         )
         prompt = architect._build_analysis_prompt(task)
 
@@ -425,6 +443,7 @@ class TestBuildAnalysisPrompt:
 # =============================================================================
 # _EXTRACT_DECISION_FALLBACK TESTS
 # =============================================================================
+
 
 class TestExtractDecisionFallback:
     """Tests for _extract_decision_fallback() helper."""
@@ -518,6 +537,7 @@ class TestExtractDecisionFallback:
 # EXECUTE WITH CONTEXT TESTS
 # =============================================================================
 
+
 class TestArchitectExecuteWithContext:
     """Tests for execute with various context scenarios."""
 
@@ -529,16 +549,12 @@ class TestArchitectExecuteWithContext:
     @pytest.mark.asyncio
     async def test_execute_with_file_context(self, architect):
         """Test execute passes file context to analysis."""
-        llm_response = json.dumps({
-            "decision": "APPROVED",
-            "reasoning": "Feasible with existing files"
-        })
+        llm_response = json.dumps(
+            {"decision": "APPROVED", "reasoning": "Feasible with existing files"}
+        )
         architect._call_llm = AsyncMock(return_value=llm_response)
 
-        task = AgentTask(
-            request="Modify auth",
-            context={"files": ["src/auth.py"]}
-        )
+        task = AgentTask(request="Modify auth", context={"files": ["src/auth.py"]})
         response = await architect.execute(task)
 
         assert response.success is True
@@ -549,16 +565,10 @@ class TestArchitectExecuteWithContext:
     @pytest.mark.asyncio
     async def test_execute_with_constraints(self, architect):
         """Test execute passes constraints to analysis."""
-        llm_response = json.dumps({
-            "decision": "APPROVED",
-            "reasoning": "Meets constraints"
-        })
+        llm_response = json.dumps({"decision": "APPROVED", "reasoning": "Meets constraints"})
         architect._call_llm = AsyncMock(return_value=llm_response)
 
-        task = AgentTask(
-            request="Add feature",
-            context={"constraints": "No breaking changes"}
-        )
+        task = AgentTask(request="Add feature", context={"constraints": "No breaking changes"})
         response = await architect.execute(task)
 
         assert response.success is True
@@ -568,10 +578,7 @@ class TestArchitectExecuteWithContext:
     @pytest.mark.asyncio
     async def test_execute_empty_context(self, architect):
         """Test execute with empty context."""
-        llm_response = json.dumps({
-            "decision": "APPROVED",
-            "reasoning": "Simple request"
-        })
+        llm_response = json.dumps({"decision": "APPROVED", "reasoning": "Simple request"})
         architect._call_llm = AsyncMock(return_value=llm_response)
 
         task = AgentTask(request="Simple task", context={})
@@ -584,6 +591,7 @@ class TestArchitectExecuteWithContext:
 # DATA CONTENT TESTS
 # =============================================================================
 
+
 class TestArchitectResponseData:
     """Tests for response data contents."""
 
@@ -595,10 +603,7 @@ class TestArchitectResponseData:
     @pytest.mark.asyncio
     async def test_data_contains_decision(self, architect):
         """Test data contains decision."""
-        llm_response = json.dumps({
-            "decision": "APPROVED",
-            "reasoning": "OK"
-        })
+        llm_response = json.dumps({"decision": "APPROVED", "reasoning": "OK"})
         architect._call_llm = AsyncMock(return_value=llm_response)
 
         task = AgentTask(request="Test")
@@ -610,11 +615,13 @@ class TestArchitectResponseData:
     @pytest.mark.asyncio
     async def test_data_contains_complexity(self, architect):
         """Test data contains complexity in architecture section."""
-        llm_response = json.dumps({
-            "decision": "APPROVED",
-            "reasoning": "OK",
-            "architecture": {"estimated_complexity": "HIGH"}
-        })
+        llm_response = json.dumps(
+            {
+                "decision": "APPROVED",
+                "reasoning": "OK",
+                "architecture": {"estimated_complexity": "HIGH"},
+            }
+        )
         architect._call_llm = AsyncMock(return_value=llm_response)
 
         task = AgentTask(request="Test")
@@ -626,10 +633,7 @@ class TestArchitectResponseData:
     @pytest.mark.asyncio
     async def test_data_preserves_reasoning(self, architect):
         """Test data preserves reasoning from LLM."""
-        llm_response = json.dumps({
-            "decision": "APPROVED",
-            "reasoning": "Detailed reasoning here"
-        })
+        llm_response = json.dumps({"decision": "APPROVED", "reasoning": "Detailed reasoning here"})
         architect._call_llm = AsyncMock(return_value=llm_response)
 
         task = AgentTask(request="Test")
@@ -644,6 +648,7 @@ class TestArchitectResponseData:
 # INTEGRATION TESTS
 # =============================================================================
 
+
 class TestArchitectIntegration:
     """Integration tests for complete workflow."""
 
@@ -656,29 +661,31 @@ class TestArchitectIntegration:
         architect = ArchitectAgent(llm_client=mock_llm, mcp_client=mock_mcp)
 
         # Simulate realistic LLM response
-        llm_response = json.dumps({
-            "decision": "APPROVED",
-            "reasoning": "JWT authentication is feasible. The codebase has existing auth infrastructure.",
-            "architecture": {
-                "approach": "Create new jwt_handler.py module, integrate with existing auth middleware",
-                "risks": ["Token storage security", "Key rotation complexity"],
-                "constraints": ["Must maintain backwards compatibility with session auth"],
-                "estimated_complexity": "MEDIUM"
-            },
-            "recommendations": [
-                "Use PyJWT library",
-                "Implement refresh token mechanism",
-                "Add rate limiting to token endpoints"
-            ]
-        })
+        llm_response = json.dumps(
+            {
+                "decision": "APPROVED",
+                "reasoning": "JWT authentication is feasible. The codebase has existing auth infrastructure.",
+                "architecture": {
+                    "approach": "Create new jwt_handler.py module, integrate with existing auth middleware",
+                    "risks": ["Token storage security", "Key rotation complexity"],
+                    "constraints": ["Must maintain backwards compatibility with session auth"],
+                    "estimated_complexity": "MEDIUM",
+                },
+                "recommendations": [
+                    "Use PyJWT library",
+                    "Implement refresh token mechanism",
+                    "Add rate limiting to token endpoints",
+                ],
+            }
+        )
         architect._call_llm = AsyncMock(return_value=llm_response)
 
         task = AgentTask(
             request="Add JWT authentication to the API",
             context={
                 "files": ["src/auth/middleware.py", "src/auth/users.py"],
-                "constraints": "Must support both JWT and existing session auth"
-            }
+                "constraints": "Must support both JWT and existing session auth",
+            },
         )
 
         response = await architect.execute(task)
@@ -697,26 +704,27 @@ class TestArchitectIntegration:
 
         architect = ArchitectAgent(llm_client=mock_llm, mcp_client=mock_mcp)
 
-        llm_response = json.dumps({
-            "decision": "VETOED",
-            "reasoning": "Deleting the database without backup is too risky and violates data safety principles.",
-            "architecture": {
-                "approach": "N/A - Request vetoed",
-                "risks": ["Complete data loss", "No recovery possible", "Violates regulations"],
-                "constraints": ["Data retention policy requires backups"],
-                "estimated_complexity": "N/A"
-            },
-            "recommendations": [
-                "Create backup before any destructive operations",
-                "Use soft delete instead of hard delete",
-                "Implement proper migration strategy"
-            ]
-        })
+        llm_response = json.dumps(
+            {
+                "decision": "VETOED",
+                "reasoning": "Deleting the database without backup is too risky and violates data safety principles.",
+                "architecture": {
+                    "approach": "N/A - Request vetoed",
+                    "risks": ["Complete data loss", "No recovery possible", "Violates regulations"],
+                    "constraints": ["Data retention policy requires backups"],
+                    "estimated_complexity": "N/A",
+                },
+                "recommendations": [
+                    "Create backup before any destructive operations",
+                    "Use soft delete instead of hard delete",
+                    "Implement proper migration strategy",
+                ],
+            }
+        )
         architect._call_llm = AsyncMock(return_value=llm_response)
 
         task = AgentTask(
-            request="Delete the production database and rebuild from scratch",
-            context={}
+            request="Delete the production database and rebuild from scratch", context={}
         )
 
         response = await architect.execute(task)
@@ -758,6 +766,7 @@ class TestArchitectIntegration:
 # EDGE CASES
 # =============================================================================
 
+
 class TestArchitectEdgeCases:
     """Tests for edge cases and boundary conditions."""
 
@@ -769,10 +778,9 @@ class TestArchitectEdgeCases:
     @pytest.mark.asyncio
     async def test_empty_request(self, architect):
         """Test handling of empty request."""
-        llm_response = json.dumps({
-            "decision": "VETOED",
-            "reasoning": "Empty request cannot be analyzed"
-        })
+        llm_response = json.dumps(
+            {"decision": "VETOED", "reasoning": "Empty request cannot be analyzed"}
+        )
         architect._call_llm = AsyncMock(return_value=llm_response)
 
         task = AgentTask(request="")
@@ -784,10 +792,7 @@ class TestArchitectEdgeCases:
     @pytest.mark.asyncio
     async def test_very_long_request(self, architect):
         """Test handling of very long request."""
-        llm_response = json.dumps({
-            "decision": "VETOED",
-            "reasoning": "Request too complex"
-        })
+        llm_response = json.dumps({"decision": "VETOED", "reasoning": "Request too complex"})
         architect._call_llm = AsyncMock(return_value=llm_response)
 
         long_request = "Add feature " * 1000  # Very long
@@ -799,10 +804,7 @@ class TestArchitectEdgeCases:
     @pytest.mark.asyncio
     async def test_unicode_in_request(self, architect):
         """Test handling of unicode characters."""
-        llm_response = json.dumps({
-            "decision": "APPROVED",
-            "reasoning": "Supported characters"
-        })
+        llm_response = json.dumps({"decision": "APPROVED", "reasoning": "Supported characters"})
         architect._call_llm = AsyncMock(return_value=llm_response)
 
         task = AgentTask(request="Add 日本語 support to the API 🚀")
@@ -813,12 +815,14 @@ class TestArchitectEdgeCases:
     @pytest.mark.asyncio
     async def test_json_with_extra_fields(self, architect):
         """Test handling of JSON with extra unexpected fields."""
-        llm_response = json.dumps({
-            "decision": "APPROVED",
-            "reasoning": "OK",
-            "extra_field": "Should be ignored",
-            "another_extra": {"nested": "data"}
-        })
+        llm_response = json.dumps(
+            {
+                "decision": "APPROVED",
+                "reasoning": "OK",
+                "extra_field": "Should be ignored",
+                "another_extra": {"nested": "data"},
+            }
+        )
         architect._call_llm = AsyncMock(return_value=llm_response)
 
         task = AgentTask(request="Test")
@@ -843,10 +847,7 @@ class TestArchitectEdgeCases:
     @pytest.mark.asyncio
     async def test_none_context(self, architect):
         """Test handling of None values in context."""
-        llm_response = json.dumps({
-            "decision": "APPROVED",
-            "reasoning": "OK"
-        })
+        llm_response = json.dumps({"decision": "APPROVED", "reasoning": "OK"})
         architect._call_llm = AsyncMock(return_value=llm_response)
 
         task = AgentTask(request="Test", context={"files": None})

@@ -64,7 +64,6 @@ class ContextAwareCompleter(Completer):
 
     def get_completions(self, document: Document, complete_event):
         """Get completions for current document."""
-        text = document.text_before_cursor
         word = document.get_word_before_cursor()
 
         if not word:

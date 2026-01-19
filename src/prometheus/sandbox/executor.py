@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SandboxResult:
     """Result of sandbox execution."""
+
     success: bool
     stdout: str
     stderr: str
@@ -49,19 +50,48 @@ class SandboxResult:
 @dataclass
 class SandboxConfig:
     """Configuration for sandbox execution."""
+
     timeout: float = 30.0  # seconds
     max_memory_mb: int = 512
     max_output_size: int = 100000  # characters
-    allowed_imports: List[str] = field(default_factory=lambda: [
-        "json", "re", "math", "random", "datetime", "collections",
-        "itertools", "functools", "operator", "string", "textwrap",
-        "hashlib", "base64", "urllib", "dataclasses", "typing",
-        "os.path", "pathlib", "statistics", "decimal", "fractions",
-    ])
-    blocked_imports: List[str] = field(default_factory=lambda: [
-        "subprocess", "shutil", "socket", "http", "ftplib",
-        "smtplib", "telnetlib", "ctypes", "multiprocessing",
-    ])
+    allowed_imports: List[str] = field(
+        default_factory=lambda: [
+            "json",
+            "re",
+            "math",
+            "random",
+            "datetime",
+            "collections",
+            "itertools",
+            "functools",
+            "operator",
+            "string",
+            "textwrap",
+            "hashlib",
+            "base64",
+            "urllib",
+            "dataclasses",
+            "typing",
+            "os.path",
+            "pathlib",
+            "statistics",
+            "decimal",
+            "fractions",
+        ]
+    )
+    blocked_imports: List[str] = field(
+        default_factory=lambda: [
+            "subprocess",
+            "shutil",
+            "socket",
+            "http",
+            "ftplib",
+            "smtplib",
+            "telnetlib",
+            "ctypes",
+            "multiprocessing",
+        ]
+    )
 
 
 class SandboxExecutor:
@@ -115,18 +145,15 @@ class SandboxExecutor:
             code = self._wrap_code_for_return(code)
 
         # Create temporary file
-        with tempfile.NamedTemporaryFile(
-            mode='w',
-            suffix='.py',
-            delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write(code)
             temp_file = f.name
 
         try:
             # Execute in subprocess
             process = await asyncio.create_subprocess_exec(
-                sys.executable, temp_file,
+                sys.executable,
+                temp_file,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
                 cwd=tempfile.gettempdir(),
@@ -134,24 +161,25 @@ class SandboxExecutor:
 
             try:
                 stdout_bytes, stderr_bytes = await asyncio.wait_for(
-                    process.communicate(),
-                    timeout=timeout
+                    process.communicate(), timeout=timeout
                 )
 
-                stdout = stdout_bytes.decode('utf-8', errors='replace')
-                stderr = stderr_bytes.decode('utf-8', errors='replace')
+                stdout = stdout_bytes.decode("utf-8", errors="replace")
+                stderr = stderr_bytes.decode("utf-8", errors="replace")
 
                 # Truncate if too long
                 if len(stdout) > self.config.max_output_size:
-                    stdout = stdout[:self.config.max_output_size] + "\n...[truncated]"
+                    stdout = stdout[: self.config.max_output_size] + "\n...[truncated]"
                 if len(stderr) > self.config.max_output_size:
-                    stderr = stderr[:self.config.max_output_size] + "\n...[truncated]"
+                    stderr = stderr[: self.config.max_output_size] + "\n...[truncated]"
 
                 # Extract return value if present
                 return_value = None
                 if capture_return and "__SANDBOX_RETURN__:" in stdout:
                     try:
-                        return_line = [l for l in stdout.split('\n') if "__SANDBOX_RETURN__:" in l][-1]
+                        return_line = [l for l in stdout.split("\n") if "__SANDBOX_RETURN__:" in l][
+                            -1
+                        ]
                         return_json = return_line.split("__SANDBOX_RETURN__:")[1].strip()
                         return_value = json.loads(return_json)
                         # Remove return line from stdout
@@ -219,7 +247,7 @@ class SandboxExecutor:
 
         # Build execution code
         args_repr = repr(args)[1:-1]  # Remove parentheses
-        if args_repr.endswith(','):
+        if args_repr.endswith(","):
             args_repr = args_repr[:-1]
 
         kwargs_repr = ", ".join(f"{k}={repr(v)}" for k, v in kwargs.items())
@@ -255,29 +283,29 @@ print(f"__SANDBOX_RETURN__:{{_json.dumps(__result__)}}")
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
                 for alias in node.names:
-                    module = alias.name.split('.')[0]
+                    module = alias.name.split(".")[0]
                     if module in self.config.blocked_imports:
                         return f"Blocked import: {module}"
 
             elif isinstance(node, ast.ImportFrom):
                 if node.module:
-                    module = node.module.split('.')[0]
+                    module = node.module.split(".")[0]
                     if module in self.config.blocked_imports:
                         return f"Blocked import: {module}"
 
             # Check for dangerous builtins
             elif isinstance(node, ast.Call):
                 if isinstance(node.func, ast.Name):
-                    if node.func.id in ['eval', 'exec', 'compile', '__import__', 'open']:
+                    if node.func.id in ["eval", "exec", "compile", "__import__", "open"]:
                         # Allow open() for reading
-                        if node.func.id == 'open':
+                        if node.func.id == "open":
                             # Check if mode is 'r' or not specified
                             if len(node.args) >= 2:
                                 mode_arg = node.args[1]
                                 if isinstance(mode_arg, ast.Constant):
-                                    if 'w' in str(mode_arg.value) or 'a' in str(mode_arg.value):
+                                    if "w" in str(mode_arg.value) or "a" in str(mode_arg.value):
                                         return "File write operations not allowed"
-                        elif node.func.id != 'open':
+                        elif node.func.id != "open":
                             return f"Dangerous builtin: {node.func.id}"
 
         return None
@@ -299,10 +327,13 @@ print(f"__SANDBOX_RETURN__:{{_json.dumps(__result__)}}")
 
             # Wrap last expression
             last_expr = ast.unparse(tree.body[-1].value)
-            code_lines = code.rsplit('\n', 1)
+            code_lines = code.rsplit("\n", 1)
 
             if len(code_lines) == 2:
-                code = code_lines[0] + f"\n__result__ = {last_expr}\nimport json; print(f'__SANDBOX_RETURN__:{{json.dumps(__result__)}}')"
+                code = (
+                    code_lines[0]
+                    + f"\n__result__ = {last_expr}\nimport json; print(f'__SANDBOX_RETURN__:{{json.dumps(__result__)}}')"
+                )
             else:
                 code = f"__result__ = {last_expr}\nimport json; print(f'__SANDBOX_RETURN__:{{json.dumps(__result__)}}')"
 
@@ -349,23 +380,27 @@ print(f"__SANDBOX_RETURN__:{{json.dumps({{'passed': __passed__, 'result': __resu
             result = await self.execute(test_code, capture_return=True)
 
             if result.success and result.return_value:
-                if result.return_value.get('passed'):
+                if result.return_value.get("passed"):
                     passed += 1
                 else:
                     failed += 1
-                results.append({
-                    "test_case": i + 1,
-                    "passed": result.return_value.get('passed'),
-                    "result": result.return_value.get('result'),
-                    "expected": result.return_value.get('expected'),
-                })
+                results.append(
+                    {
+                        "test_case": i + 1,
+                        "passed": result.return_value.get("passed"),
+                        "result": result.return_value.get("result"),
+                        "expected": result.return_value.get("expected"),
+                    }
+                )
             else:
                 failed += 1
-                results.append({
-                    "test_case": i + 1,
-                    "passed": False,
-                    "error": result.stderr or result.error_message,
-                })
+                results.append(
+                    {
+                        "test_case": i + 1,
+                        "passed": False,
+                        "error": result.stderr or result.error_message,
+                    }
+                )
 
         return {
             "passed": passed,

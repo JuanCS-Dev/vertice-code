@@ -30,16 +30,14 @@ import logging
 sys.path.insert(0, str(Path(__file__).parent))
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 
 # ============================================================================
 # TEST FRAMEWORK
 # ============================================================================
+
 
 class TestStatus(Enum):
     PASSED = "✅ PASSED"
@@ -91,15 +89,15 @@ class TestSuite:
             "skipped": skipped,
             "warnings": warnings,
             "duration": duration,
-            "success_rate": (passed / total * 100) if total > 0 else 0
+            "success_rate": (passed / total * 100) if total > 0 else 0,
         }
 
     def print_summary(self):
         summary = self.summary()
 
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print(f"TEST SUITE: {self.name}")
-        print("="*80)
+        print("=" * 80)
         print(f"Total Tests:    {summary['total']}")
         print(f"✅ Passed:      {summary['passed']}")
         print(f"❌ Failed:      {summary['failed']}")
@@ -107,10 +105,10 @@ class TestSuite:
         print(f"⏭️  Skipped:     {summary['skipped']}")
         print(f"Success Rate:  {summary['success_rate']:.1f}%")
         print(f"Duration:      {summary['duration']:.2f}s")
-        print("="*80)
+        print("=" * 80)
 
         # Detailed failures
-        if summary['failed'] > 0:
+        if summary["failed"] > 0:
             print("\n❌ FAILED TESTS:")
             for r in self.results:
                 if r.status == TestStatus.FAILED:
@@ -119,12 +117,13 @@ class TestSuite:
                     print(f"    Actual:   {r.actual}")
                     print(f"    Message:  {r.message}")
 
-        return summary['failed'] == 0
+        return summary["failed"] == 0
 
 
 # ============================================================================
 # MOCK COMPONENTS (Simulate Real System)
 # ============================================================================
+
 
 class MockMaestroShellUI:
     """Mock UI that simulates MaestroShellUI behavior."""
@@ -174,15 +173,41 @@ class MockLLMClient:
         system_prompt: Optional[str] = None,
         max_tokens: int = 2048,
         temperature: float = 0.7,
-        **kwargs
+        **kwargs,
     ):
         """Simulate token streaming."""
         tokens = [
-            "Based", " on", " the", " request", ",", "\n",
-            "I", " will", " create", " a", " comprehensive", " plan", ":\n\n",
-            "Step", " 1", ":", " Analyze", " requirements", "\n",
-            "Step", " 2", ":", " Design", " architecture", "\n",
-            "Step", " 3", ":", " Implement", " solution", "\n",
+            "Based",
+            " on",
+            " the",
+            " request",
+            ",",
+            "\n",
+            "I",
+            " will",
+            " create",
+            " a",
+            " comprehensive",
+            " plan",
+            ":\n\n",
+            "Step",
+            " 1",
+            ":",
+            " Analyze",
+            " requirements",
+            "\n",
+            "Step",
+            " 2",
+            ":",
+            " Design",
+            " architecture",
+            "\n",
+            "Step",
+            " 3",
+            ":",
+            " Implement",
+            " solution",
+            "\n",
         ]
 
         for i, token in enumerate(tokens):
@@ -196,6 +221,7 @@ class MockLLMClient:
 
 class MockAgentTask:
     """Mock agent task."""
+
     def __init__(self, request: str, context: Optional[Dict] = None):
         self.request = request
         self.context = context or {"cwd": "/test"}
@@ -204,6 +230,7 @@ class MockAgentTask:
 
 class MockAgentResponse:
     """Mock agent response."""
+
     def __init__(self, success: bool, data: Any, reasoning: str = ""):
         self.success = success
         self.data = data
@@ -213,6 +240,7 @@ class MockAgentResponse:
 # ============================================================================
 # CATEGORY 1: PAUSE/RESUME MECHANISM TESTS (10 tests)
 # ============================================================================
+
 
 async def test_pause_stops_live_display():
     """Test that pause() actually stops the live display."""
@@ -232,7 +260,7 @@ async def test_pause_stops_live_display():
         category="PAUSE_RESUME",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Live display correctly stopped"
+        message="Live display correctly stopped",
     )
 
 
@@ -253,7 +281,7 @@ async def test_resume_restarts_live_display():
         category="PAUSE_RESUME",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Live display correctly restarted"
+        message="Live display correctly restarted",
     )
 
 
@@ -276,7 +304,7 @@ async def test_multiple_pauses_idempotent():
         category="PAUSE_RESUME",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Multiple pauses handled safely"
+        message="Multiple pauses handled safely",
     )
 
 
@@ -300,7 +328,7 @@ async def test_multiple_resumes_idempotent():
         category="PAUSE_RESUME",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Multiple resumes handled safely"
+        message="Multiple resumes handled safely",
     )
 
 
@@ -330,7 +358,7 @@ async def test_pause_resume_sequence():
         category="PAUSE_RESUME",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="State transitions work correctly"
+        message="State transitions work correctly",
     )
 
 
@@ -351,7 +379,7 @@ async def test_pause_before_resume_requirement():
         category="PAUSE_RESUME",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Resume without pause handled gracefully"
+        message="Resume without pause handled gracefully",
     )
 
 
@@ -376,7 +404,7 @@ async def test_state_history_tracking():
         category="PAUSE_RESUME",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message=f"Tracked {len(ui.state_history)} state changes"
+        message=f"Tracked {len(ui.state_history)} state changes",
     )
 
 
@@ -402,7 +430,7 @@ async def test_is_paused_property():
         category="PAUSE_RESUME",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Property correctly reflects pause state"
+        message="Property correctly reflects pause state",
     )
 
 
@@ -425,7 +453,7 @@ async def test_pause_timing_accuracy():
         status=TestStatus.PASSED,
         duration=time.time() - start,
         message=f"Pause took {pause_duration*1000:.3f}ms",
-        metadata={"pause_duration_ms": pause_duration*1000}
+        metadata={"pause_duration_ms": pause_duration * 1000},
     )
 
 
@@ -449,13 +477,14 @@ async def test_resume_timing_accuracy():
         status=TestStatus.PASSED,
         duration=time.time() - start,
         message=f"Resume took {resume_duration*1000:.3f}ms",
-        metadata={"resume_duration_ms": resume_duration*1000}
+        metadata={"resume_duration_ms": resume_duration * 1000},
     )
 
 
 # ============================================================================
 # CATEGORY 2: STREAMING TESTS (15 tests)
 # ============================================================================
+
 
 async def test_llm_generates_tokens():
     """Test that LLM generates tokens correctly."""
@@ -475,7 +504,7 @@ async def test_llm_generates_tokens():
         category="STREAMING",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message=f"Generated {len(tokens)} tokens"
+        message=f"Generated {len(tokens)} tokens",
     )
 
 
@@ -499,7 +528,7 @@ async def test_streaming_token_order():
         category="STREAMING",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Token order preserved"
+        message="Token order preserved",
     )
 
 
@@ -524,7 +553,7 @@ async def test_streaming_performance():
         status=TestStatus.PASSED,
         duration=duration,
         message=f"Throughput: {throughput:.1f} tokens/s",
-        metadata={"throughput": throughput}
+        metadata={"throughput": throughput},
     )
 
 
@@ -547,7 +576,7 @@ async def test_streaming_with_slow_network():
         category="STREAMING",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Handled 100ms/token delay"
+        message="Handled 100ms/token delay",
     )
 
 
@@ -573,7 +602,7 @@ async def test_streaming_handles_empty_response():
         category="STREAMING",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Empty response handled gracefully"
+        message="Empty response handled gracefully",
     )
 
 
@@ -599,7 +628,7 @@ async def test_streaming_handles_single_token():
         category="STREAMING",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Single token handled correctly"
+        message="Single token handled correctly",
     )
 
 
@@ -627,7 +656,7 @@ async def test_streaming_handles_large_tokens():
         category="STREAMING",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Large token handled correctly"
+        message="Large token handled correctly",
     )
 
 
@@ -661,7 +690,7 @@ async def test_streaming_handles_unicode():
         category="STREAMING",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Unicode characters preserved"
+        message="Unicode characters preserved",
     )
 
 
@@ -679,10 +708,7 @@ async def test_streaming_concurrent_streams():
         return tokens
 
     # Run concurrently
-    results = await asyncio.gather(
-        collect_stream(llm1),
-        collect_stream(llm2)
-    )
+    results = await asyncio.gather(collect_stream(llm1), collect_stream(llm2))
 
     assert len(results[0]) > 0, "Stream 1 should have tokens"
     assert len(results[1]) > 0, "Stream 2 should have tokens"
@@ -693,7 +719,7 @@ async def test_streaming_concurrent_streams():
         category="STREAMING",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="2 concurrent streams successful"
+        message="2 concurrent streams successful",
     )
 
 
@@ -717,7 +743,7 @@ async def test_streaming_with_backpressure():
         category="STREAMING",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Slow consumer handled correctly"
+        message="Slow consumer handled correctly",
     )
 
 
@@ -744,7 +770,7 @@ async def test_streaming_error_recovery():
         category="STREAMING",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message=f"Collected {len(tokens)} tokens before error"
+        message=f"Collected {len(tokens)} tokens before error",
     )
 
 
@@ -771,7 +797,7 @@ async def test_streaming_cancellation():
         category="STREAMING",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Early cancellation handled correctly"
+        message="Early cancellation handled correctly",
     )
 
 
@@ -794,7 +820,7 @@ async def test_streaming_memory_efficiency():
         category="STREAMING",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message=f"Processed {count} tokens without accumulation"
+        message=f"Processed {count} tokens without accumulation",
     )
 
 
@@ -817,7 +843,7 @@ async def test_streaming_latency():
         status=TestStatus.PASSED,
         duration=time.time() - start,
         message=f"First token in {first_token_time*1000:.1f}ms",
-        metadata={"first_token_ms": first_token_time*1000}
+        metadata={"first_token_ms": first_token_time * 1000},
     )
 
 
@@ -825,7 +851,7 @@ async def test_streaming_consistency():
     """Test streaming produces same output on multiple runs."""
     start = time.time()
 
-    llm = MockLLMClient(delay=0.001)
+    MockLLMClient(delay=0.001)
 
     # Run 3 times
     results = []
@@ -844,13 +870,14 @@ async def test_streaming_consistency():
         category="STREAMING",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="3 runs produced identical output"
+        message="3 runs produced identical output",
     )
 
 
 # ============================================================================
 # CATEGORY 3: APPROVAL FLOW TESTS (15 tests)
 # ============================================================================
+
 
 async def test_approval_pauses_before_input():
     """Test that UI is paused before requesting input."""
@@ -874,7 +901,7 @@ async def test_approval_pauses_before_input():
         category="APPROVAL",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Pause→Input→Resume sequence correct"
+        message="Pause→Input→Resume sequence correct",
     )
 
 
@@ -897,7 +924,7 @@ async def test_approval_resumes_on_success():
         category="APPROVAL",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="UI resumed after approval"
+        message="UI resumed after approval",
     )
 
 
@@ -919,7 +946,7 @@ async def test_approval_resumes_on_denial():
         category="APPROVAL",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="UI resumed after denial"
+        message="UI resumed after denial",
     )
 
 
@@ -945,7 +972,7 @@ async def test_approval_resumes_on_exception():
         category="APPROVAL",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Finally block ensures resume"
+        message="Finally block ensures resume",
     )
 
 
@@ -979,7 +1006,7 @@ async def test_approval_multiple_sequential():
         category="APPROVAL",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="3 sequential approvals successful"
+        message="3 sequential approvals successful",
     )
 
 
@@ -1003,7 +1030,7 @@ async def test_approval_rapid_fire():
         category="APPROVAL",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="5 approvals in <50ms"
+        message="5 approvals in <50ms",
     )
 
 
@@ -1037,7 +1064,7 @@ async def test_approval_during_streaming():
         category="APPROVAL",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Streaming resumed after approval"
+        message="Streaming resumed after approval",
     )
 
 
@@ -1059,7 +1086,7 @@ async def test_approval_timeout_scenario():
         category="APPROVAL",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Slow response (100ms) handled"
+        message="Slow response (100ms) handled",
     )
 
 
@@ -1084,7 +1111,7 @@ async def test_approval_state_persistence():
         category="APPROVAL",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="State correctly isolated"
+        message="State correctly isolated",
     )
 
 
@@ -1110,7 +1137,7 @@ async def test_approval_with_invalid_input():
         category="APPROVAL",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Invalid input handled with loop"
+        message="Invalid input handled with loop",
     )
 
 
@@ -1135,7 +1162,7 @@ async def test_approval_always_allow_mode():
         category="APPROVAL",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Allowlist bypasses approval"
+        message="Allowlist bypasses approval",
     )
 
 
@@ -1160,7 +1187,7 @@ async def test_approval_dangerous_commands():
         category="APPROVAL",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message=f"Validated {len(dangerous_commands)} dangerous commands"
+        message=f"Validated {len(dangerous_commands)} dangerous commands",
     )
 
 
@@ -1183,7 +1210,7 @@ async def test_approval_safe_commands():
         category="APPROVAL",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message=f"Validated {len(safe_commands)} safe commands"
+        message=f"Validated {len(safe_commands)} safe commands",
     )
 
 
@@ -1212,7 +1239,7 @@ async def test_approval_ui_visibility():
         category="APPROVAL",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Live stops → UI visible → Live resumes"
+        message="Live stops → UI visible → Live resumes",
     )
 
 
@@ -1238,13 +1265,14 @@ async def test_approval_keyboard_interrupt():
         category="APPROVAL",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="KeyboardInterrupt handled gracefully"
+        message="KeyboardInterrupt handled gracefully",
     )
 
 
 # ============================================================================
 # CATEGORY 4: EDGE CASES (10 tests)
 # ============================================================================
+
 
 async def test_edge_empty_prompt():
     """Test system handles empty prompt."""
@@ -1263,7 +1291,7 @@ async def test_edge_empty_prompt():
         category="EDGE_CASES",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Empty prompt handled"
+        message="Empty prompt handled",
     )
 
 
@@ -1287,7 +1315,7 @@ async def test_edge_very_long_prompt():
         category="EDGE_CASES",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="10KB prompt handled"
+        message="10KB prompt handled",
     )
 
 
@@ -1309,7 +1337,7 @@ async def test_edge_special_characters_prompt():
         category="EDGE_CASES",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Special chars handled"
+        message="Special chars handled",
     )
 
 
@@ -1334,7 +1362,7 @@ async def test_edge_null_bytes_prompt():
         category="EDGE_CASES",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Null bytes handled or rejected"
+        message="Null bytes handled or rejected",
     )
 
 
@@ -1364,7 +1392,7 @@ async def test_edge_concurrent_approval_requests():
         category="EDGE_CASES",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Concurrent approvals handled"
+        message="Concurrent approvals handled",
     )
 
 
@@ -1385,7 +1413,7 @@ async def test_edge_pause_without_ui():
             category="EDGE_CASES",
             status=TestStatus.FAILED,
             duration=time.time() - start,
-            message="Should handle None UI gracefully"
+            message="Should handle None UI gracefully",
         )
 
     return TestResult(
@@ -1393,7 +1421,7 @@ async def test_edge_pause_without_ui():
         category="EDGE_CASES",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="None UI handled gracefully"
+        message="None UI handled gracefully",
     )
 
 
@@ -1419,7 +1447,7 @@ async def test_edge_resume_before_start():
         category="EDGE_CASES",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Resume with no Live handled"
+        message="Resume with no Live handled",
     )
 
 
@@ -1444,7 +1472,7 @@ async def test_edge_memory_pressure():
         category="EDGE_CASES",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message=f"Accumulated {count} tokens"
+        message=f"Accumulated {count} tokens",
     )
 
 
@@ -1468,7 +1496,7 @@ async def test_edge_rapid_pause_resume():
         category="EDGE_CASES",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="100 pause/resume cycles completed"
+        message="100 pause/resume cycles completed",
     )
 
 
@@ -1503,7 +1531,7 @@ async def test_edge_streaming_timeout():
         category="EDGE_CASES",
         status=TestStatus.PASSED,
         duration=time.time() - start,
-        message="Timeout handled gracefully"
+        message="Timeout handled gracefully",
     )
 
 
@@ -1511,16 +1539,17 @@ async def test_edge_streaming_timeout():
 # MAIN TEST RUNNER
 # ============================================================================
 
+
 async def run_all_tests():
     """Run all 50+ tests."""
     suite = TestSuite("Streaming + Approval Comprehensive Test Suite")
 
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("🧪 RUNNING COMPREHENSIVE TEST SUITE")
-    print("="*80)
+    print("=" * 80)
     print("Total tests: 50+")
     print("Categories: PAUSE_RESUME, STREAMING, APPROVAL, EDGE_CASES")
-    print("="*80 + "\n")
+    print("=" * 80 + "\n")
 
     # Category 1: Pause/Resume (10 tests)
     print("📍 CATEGORY 1: PAUSE/RESUME MECHANISM (10 tests)\n")

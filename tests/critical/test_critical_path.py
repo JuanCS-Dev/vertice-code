@@ -16,6 +16,7 @@ import os
 # TESTE 1: IMPORTAÇÕES CRÍTICAS
 # =============================================================================
 
+
 class TestCriticalImports:
     """Testa que todos os módulos críticos podem ser importados."""
 
@@ -63,6 +64,7 @@ class TestCriticalImports:
 # TESTE 2: LLM CLIENT
 # =============================================================================
 
+
 class TestLLMClient:
     """Testa o cliente LLM (Gemini)."""
 
@@ -81,8 +83,9 @@ class TestLLMClient:
         client = LLMClient()
 
         # Métodos que DEVEM existir
-        assert hasattr(client, 'generate') or hasattr(client, 'stream'), \
-            "LLMClient must have 'generate' or 'stream' method"
+        assert hasattr(client, "generate") or hasattr(
+            client, "stream"
+        ), "LLMClient must have 'generate' or 'stream' method"
 
     @pytest.mark.asyncio
     async def test_llm_handles_missing_api_key_gracefully(self):
@@ -90,27 +93,29 @@ class TestLLMClient:
         from vertice_cli.core.llm import LLMClient
 
         # Backup e remove API key
-        original_key = os.environ.get('GEMINI_API_KEY')
-        if 'GEMINI_API_KEY' in os.environ:
-            del os.environ['GEMINI_API_KEY']
+        original_key = os.environ.get("GEMINI_API_KEY")
+        if "GEMINI_API_KEY" in os.environ:
+            del os.environ["GEMINI_API_KEY"]
 
         try:
-            client = LLMClient()
+            LLMClient()
             # Deve ou retornar erro claro ou não crashar
             # Não deve levantar exceção não tratada
         except Exception as e:
             # Se levantar, deve ser erro claro
-            assert "API" in str(e).upper() or "KEY" in str(e).upper(), \
-                f"Error should mention API key, got: {e}"
+            assert (
+                "API" in str(e).upper() or "KEY" in str(e).upper()
+            ), f"Error should mention API key, got: {e}"
         finally:
             # Restaura
             if original_key:
-                os.environ['GEMINI_API_KEY'] = original_key
+                os.environ["GEMINI_API_KEY"] = original_key
 
 
 # =============================================================================
 # TESTE 3: TOOL REGISTRY
 # =============================================================================
+
 
 class TestToolRegistry:
     """Testa o registry de ferramentas."""
@@ -130,10 +135,10 @@ class TestToolRegistry:
         registry = ToolRegistry()
 
         # Métodos que devem existir
-        assert hasattr(registry, 'register') or hasattr(registry, 'add'), \
-            "ToolRegistry should have register/add method"
-        assert hasattr(registry, 'get'), \
-            "ToolRegistry should have get method"
+        assert hasattr(registry, "register") or hasattr(
+            registry, "add"
+        ), "ToolRegistry should have register/add method"
+        assert hasattr(registry, "get"), "ToolRegistry should have get method"
 
     def test_tool_base_class_exists(self):
         """Tool base class deve existir."""
@@ -161,6 +166,7 @@ class TestToolRegistry:
 # TESTE 4: AGENTS
 # =============================================================================
 
+
 class TestAgents:
     """Testa o sistema de agentes."""
 
@@ -180,10 +186,7 @@ class TestAgents:
         """AgentTask deve ser criável com dados válidos."""
         from vertice_cli.agents.base import AgentTask
 
-        task = AgentTask(
-            request="Test request",
-            session_id="test-session"
-        )
+        task = AgentTask(request="Test request", session_id="test-session")
 
         assert task.request == "Test request"
         assert task.session_id == "test-session"
@@ -192,11 +195,7 @@ class TestAgents:
         """AgentResponse deve ser criável."""
         from vertice_cli.agents.base import AgentResponse
 
-        response = AgentResponse(
-            success=True,
-            data={"result": "test"},
-            reasoning="Test reasoning"
-        )
+        response = AgentResponse(success=True, data={"result": "test"}, reasoning="Test reasoning")
 
         assert response.success is True
         assert response.data["result"] == "test"
@@ -228,6 +227,7 @@ class TestAgents:
 # TESTE 5: INPUT VALIDATION (SEGURANÇA)
 # =============================================================================
 
+
 class TestInputValidation:
     """Testa validação de entrada para segurança."""
 
@@ -244,8 +244,7 @@ class TestInputValidation:
 
         for path in dangerous_paths:
             result = validate_file_path(path)
-            assert not result.is_valid, \
-                f"Path traversal not blocked: {path}"
+            assert not result.is_valid, f"Path traversal not blocked: {path}"
 
     def test_command_injection_blocked(self):
         """Command injection deve ser bloqueado."""
@@ -261,8 +260,7 @@ class TestInputValidation:
         for cmd in dangerous_commands:
             result = validate_command(cmd, allow_shell=False)
             # Deve bloquear OU retornar warning
-            assert not result.is_valid or result.warnings, \
-                f"Command injection not blocked: {cmd}"
+            assert not result.is_valid or result.warnings, f"Command injection not blocked: {cmd}"
 
     def test_safe_commands_allowed(self):
         """Comandos seguros devem ser permitidos."""
@@ -278,13 +276,13 @@ class TestInputValidation:
         for cmd in safe_commands:
             result = validate_command(cmd, allow_shell=False)
             # Pode ter warnings, mas deve ser válido
-            assert result.is_valid, \
-                f"Safe command blocked: {cmd}, errors: {result.errors}"
+            assert result.is_valid, f"Safe command blocked: {cmd}, errors: {result.errors}"
 
 
 # =============================================================================
 # TESTE 6: ERROR HANDLING
 # =============================================================================
+
 
 class TestErrorHandling:
     """Testa que erros são tratados e mostrados claramente."""
@@ -309,9 +307,7 @@ class TestErrorHandling:
 
         # Resposta de erro
         response = AgentResponse(
-            success=False,
-            reasoning="Failed because X",
-            error="Detailed error message"
+            success=False, reasoning="Failed because X", error="Detailed error message"
         )
 
         assert response.success is False
@@ -323,12 +319,14 @@ class TestErrorHandling:
 # TESTE 7: STREAMING COMPONENTS
 # =============================================================================
 
+
 class TestStreamingComponents:
     """Testa componentes de streaming."""
 
     def test_block_detector_imports(self):
         """BlockDetector deve importar."""
         from vertice_cli.tui.components.block_detector import BlockDetector
+
         assert BlockDetector is not None
 
     def test_block_detector_processes_chunks(self):
@@ -370,12 +368,14 @@ class TestStreamingComponents:
 # TESTE 8: CONFIGURATION
 # =============================================================================
 
+
 class TestConfiguration:
     """Testa sistema de configuração."""
 
     def test_config_loader_exists(self):
         """ConfigLoader deve existir."""
         from vertice_cli.config.loader import ConfigLoader
+
         assert ConfigLoader is not None
 
     def test_config_has_defaults(self):
@@ -393,6 +393,7 @@ class TestConfiguration:
 # SMOKE TEST - O SISTEMA FUNCIONA?
 # =============================================================================
 
+
 class TestSmokeTest:
     """Smoke test - verifica que o sistema básico funciona."""
 
@@ -402,16 +403,14 @@ class TestSmokeTest:
         from vertice_cli.tools.base import ToolResult
 
         # 1. Criar task
-        task = AgentTask(request="test", session_id="smoke")
+        AgentTask(request="test", session_id="smoke")
 
         # 2. Criar resultado de ferramenta
         tool_result = ToolResult(success=True, data="file content")
 
         # 3. Criar resposta do agente
         response = AgentResponse(
-            success=True,
-            data={"tool_result": tool_result.data},
-            reasoning="Processed successfully"
+            success=True, data={"tool_result": tool_result.data}, reasoning="Processed successfully"
         )
 
         assert response.success
@@ -425,9 +424,8 @@ class TestSmokeTest:
         result = subprocess.run(
             ["python", "-c", "from vertice_cli.main import cli_main"],
             capture_output=True,
-            text=True
+            text=True,
         )
 
         # Deve importar sem erro
-        assert result.returncode == 0, \
-            f"Entry point import failed: {result.stderr}"
+        assert result.returncode == 0, f"Entry point import failed: {result.stderr}"

@@ -226,9 +226,7 @@ class TestTaskStore:
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_update_task_state(
-        self, store: TaskStore, sample_message: Message
-    ) -> None:
+    async def test_update_task_state(self, store: TaskStore, sample_message: Message) -> None:
         """Update task state."""
         task = await store.create_task(sample_message)
         updated = await store.update_task(
@@ -241,9 +239,7 @@ class TestTaskStore:
         assert len(updated.history) == 1
 
     @pytest.mark.asyncio
-    async def test_update_task_message(
-        self, store: TaskStore, sample_message: Message
-    ) -> None:
+    async def test_update_task_message(self, store: TaskStore, sample_message: Message) -> None:
         """Add message to task."""
         task = await store.create_task(sample_message)
 
@@ -268,9 +264,7 @@ class TestTaskStore:
         assert len(tasks) == 2
 
     @pytest.mark.asyncio
-    async def test_list_tasks_by_state(
-        self, store: TaskStore, sample_message: Message
-    ) -> None:
+    async def test_list_tasks_by_state(self, store: TaskStore, sample_message: Message) -> None:
         """List tasks filtered by state."""
         task1 = await store.create_task(sample_message)
         await store.create_task(sample_message)
@@ -284,9 +278,7 @@ class TestTaskStore:
         assert len(submitted) == 1
 
     @pytest.mark.asyncio
-    async def test_subscribe_unsubscribe(
-        self, store: TaskStore, sample_message: Message
-    ) -> None:
+    async def test_subscribe_unsubscribe(self, store: TaskStore, sample_message: Message) -> None:
         """Subscribe and unsubscribe from task updates."""
         task = await store.create_task(sample_message)
 
@@ -328,9 +320,7 @@ class TestA2AServiceImpl:
         return context
 
     @pytest.mark.asyncio
-    async def test_health_check(
-        self, service: A2AServiceImpl, mock_context: AsyncMock
-    ) -> None:
+    async def test_health_check(self, service: A2AServiceImpl, mock_context: AsyncMock) -> None:
         """Health check returns healthy status."""
         request = HealthCheckRequest()
         response = await service.HealthCheck(request, mock_context)
@@ -340,9 +330,7 @@ class TestA2AServiceImpl:
         assert response.uptime_seconds >= 0
 
     @pytest.mark.asyncio
-    async def test_get_agent_card(
-        self, service: A2AServiceImpl, mock_context: AsyncMock
-    ) -> None:
+    async def test_get_agent_card(self, service: A2AServiceImpl, mock_context: AsyncMock) -> None:
         """GetAgentCard returns configured card."""
         request = GetAgentCardRequest()
         response = await service.GetAgentCard(request, mock_context)
@@ -368,28 +356,20 @@ class TestA2AServiceImpl:
         assert response.task.state == TaskState.TASK_STATE_COMPLETED
 
     @pytest.mark.asyncio
-    async def test_get_task(
-        self, service: A2AServiceImpl, mock_context: AsyncMock
-    ) -> None:
+    async def test_get_task(self, service: A2AServiceImpl, mock_context: AsyncMock) -> None:
         """GetTask retrieves existing task."""
         # First create a task
         msg = Message(id=str(uuid.uuid4()), role=MessageRole.MESSAGE_ROLE_USER)
-        send_response = await service.SendMessage(
-            SendMessageRequest(message=msg), mock_context
-        )
+        send_response = await service.SendMessage(SendMessageRequest(message=msg), mock_context)
         task_id = send_response.task.id
 
         # Then get it
-        get_response = await service.GetTask(
-            GetTaskRequest(task_id=task_id), mock_context
-        )
+        get_response = await service.GetTask(GetTaskRequest(task_id=task_id), mock_context)
 
         assert get_response.id == task_id
 
     @pytest.mark.asyncio
-    async def test_list_tasks(
-        self, service: A2AServiceImpl, mock_context: AsyncMock
-    ) -> None:
+    async def test_list_tasks(self, service: A2AServiceImpl, mock_context: AsyncMock) -> None:
         """ListTasks returns all tasks."""
         # Create some tasks
         for _ in range(3):
@@ -413,9 +393,7 @@ class TestA2AServiceImpl:
         task_id = tasks[0].id
 
         # Set to working state
-        await service._task_store.update_task(
-            task_id, state=TaskState.TASK_STATE_WORKING
-        )
+        await service._task_store.update_task(task_id, state=TaskState.TASK_STATE_WORKING)
 
         # Cancel
         response = await service.CancelTask(
@@ -433,15 +411,11 @@ class TestA2AServiceImpl:
         """CancelTask fails for completed task."""
         # Create and complete task
         msg = Message(id=str(uuid.uuid4()), role=MessageRole.MESSAGE_ROLE_USER)
-        send_response = await service.SendMessage(
-            SendMessageRequest(message=msg), mock_context
-        )
+        send_response = await service.SendMessage(SendMessageRequest(message=msg), mock_context)
         task_id = send_response.task.id
 
         # Try to cancel
-        response = await service.CancelTask(
-            CancelTaskRequest(task_id=task_id), mock_context
-        )
+        response = await service.CancelTask(CancelTaskRequest(task_id=task_id), mock_context)
 
         assert response.success is False
 
@@ -631,9 +605,7 @@ class TestJWSSigner:
             "skills": [],
         }
 
-    def test_sign_agent_card_rsa(
-        self, rsa_keypair: KeyPair, sample_agent_card: dict
-    ) -> None:
+    def test_sign_agent_card_rsa(self, rsa_keypair: KeyPair, sample_agent_card: dict) -> None:
         """Sign agent card with RSA."""
         signer = JWSSigner(rsa_keypair)
         signature = signer.sign_agent_card(sample_agent_card)
@@ -641,9 +613,7 @@ class TestJWSSigner:
         assert signature.protected is not None
         assert signature.signature is not None
 
-    def test_sign_agent_card_ec(
-        self, ec_keypair: KeyPair, sample_agent_card: dict
-    ) -> None:
+    def test_sign_agent_card_ec(self, ec_keypair: KeyPair, sample_agent_card: dict) -> None:
         """Sign agent card with EC."""
         signer = JWSSigner(ec_keypair)
         signature = signer.sign_agent_card(sample_agent_card)
@@ -651,9 +621,7 @@ class TestJWSSigner:
         assert signature.protected is not None
         assert signature.signature is not None
 
-    def test_verify_signature_rsa(
-        self, rsa_keypair: KeyPair, sample_agent_card: dict
-    ) -> None:
+    def test_verify_signature_rsa(self, rsa_keypair: KeyPair, sample_agent_card: dict) -> None:
         """Verify RSA signature."""
         signer = JWSSigner(rsa_keypair)
         signature = signer.sign_agent_card(sample_agent_card)
@@ -662,9 +630,7 @@ class TestJWSSigner:
 
         assert is_valid is True
 
-    def test_verify_signature_ec(
-        self, ec_keypair: KeyPair, sample_agent_card: dict
-    ) -> None:
+    def test_verify_signature_ec(self, ec_keypair: KeyPair, sample_agent_card: dict) -> None:
         """Verify EC signature."""
         signer = JWSSigner(ec_keypair)
         signature = signer.sign_agent_card(sample_agent_card)
@@ -702,9 +668,7 @@ class TestJWSSigner:
         is_valid = signer.verify_signature(sample_agent_card, signature)
         assert is_valid is True
 
-    def test_sign_with_jku(
-        self, rsa_keypair: KeyPair, sample_agent_card: dict
-    ) -> None:
+    def test_sign_with_jku(self, rsa_keypair: KeyPair, sample_agent_card: dict) -> None:
         """Sign with JKU field."""
         signer = JWSSigner(
             rsa_keypair,
@@ -741,9 +705,7 @@ class TestSignedAgentCard:
 
         assert len(signed.signatures) == 1
 
-    def test_add_multiple_signatures(
-        self, keypair: KeyPair, sample_card: dict
-    ) -> None:
+    def test_add_multiple_signatures(self, keypair: KeyPair, sample_card: dict) -> None:
         """Add multiple signatures."""
         keypair2 = KeyManager.generate_rsa_keypair()
         signed = SignedAgentCard(card=sample_card)
@@ -753,9 +715,7 @@ class TestSignedAgentCard:
 
         assert len(signed.signatures) == 2
 
-    def test_verify_all_signatures(
-        self, keypair: KeyPair, sample_card: dict
-    ) -> None:
+    def test_verify_all_signatures(self, keypair: KeyPair, sample_card: dict) -> None:
         """Verify all signatures."""
         signed = SignedAgentCard(card=sample_card)
         signer = JWSSigner(keypair)
@@ -803,23 +763,17 @@ class TestA2AIntegration:
             id=str(uuid.uuid4()),
             role=MessageRole.MESSAGE_ROLE_USER,
         )
-        response = await service.SendMessage(
-            SendMessageRequest(message=msg), context
-        )
+        response = await service.SendMessage(SendMessageRequest(message=msg), context)
 
         assert response.task.state == TaskState.TASK_STATE_COMPLETED
 
         # 2. Get task
-        task = await service.GetTask(
-            GetTaskRequest(task_id=response.task.id), context
-        )
+        task = await service.GetTask(GetTaskRequest(task_id=response.task.id), context)
 
         assert task.id == response.task.id
 
         # 3. List tasks
-        tasks_response = await service.ListTasks(
-            ListTasksRequest(limit=10), context
-        )
+        tasks_response = await service.ListTasks(ListTasksRequest(limit=10), context)
 
         assert len(tasks_response.tasks) >= 1
 

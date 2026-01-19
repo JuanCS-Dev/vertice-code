@@ -20,7 +20,7 @@ rules:
     - "Use dataclasses for data structures"
     - "Handle exceptions explicitly with try/except"
     - "Write unit tests for all new functions"
-  
+
   style_guide: "PEP 8"
   max_line_length: 100
   use_type_hints: true
@@ -34,7 +34,7 @@ safety:
     - ./tests
     - ./docs
     - ./examples
-  
+
   # Commands that are blocked (dangerous operations)
   dangerous_commands:
     - "rm -rf"
@@ -42,7 +42,7 @@ safety:
     - "dd if="
     - "mkfs"
     - "> /dev/"
-  
+
   # Commands that require user approval before execution
   require_approval:
     - "git push"
@@ -50,10 +50,10 @@ safety:
     - "pip install"
     - "npm install"
     - "cargo publish"
-  
+
   # Maximum file size in MB for operations
   max_file_size_mb: 10
-  
+
   # Enable sandbox mode (experimental)
   enable_sandbox: false
 
@@ -64,14 +64,14 @@ hooks:
   post_write:
     - "ruff check {file}"
     - "black {file}"
-  
+
   # Commands run after editing an existing file
   post_edit:
     - "ruff format {file}"
-  
+
   # Commands run after deleting a file
   post_delete: []
-  
+
   # Commands run before git commit
   pre_commit:
     - "pytest tests/ --tb=short"
@@ -82,16 +82,16 @@ hooks:
 context:
   # Maximum tokens for context window
   max_tokens: 32000
-  
+
   # Include git information in context
   include_git: true
-  
+
   # Include test files in context
   include_tests: true
-  
+
   # Include documentation in context
   include_docs: true
-  
+
   # Patterns to exclude from context
   exclude_patterns:
     - "**/__pycache__/**"
@@ -103,7 +103,7 @@ context:
     - "**/.DS_Store"
     - "**/build/**"
     - "**/dist/**"
-  
+
   # File extensions to include in context
   file_extensions:
     - ".py"

@@ -25,11 +25,9 @@ async def test_zero_ui_blocking():
     # Simulate heavy I/O (should not block renderer)
     async def slow_callback(chunk):
         await asyncio.sleep(0.01)  # Simulate processing
-        await renderer.emit(RenderEvent(
-            event_type=RenderEventType.OUTPUT,
-            content=chunk.content,
-            metadata={}
-        ))
+        await renderer.emit(
+            RenderEvent(event_type=RenderEventType.OUTPUT, content=chunk.content, metadata={})
+        )
 
     result = await executor.execute('echo "test"', stream_callback=slow_callback)
 
@@ -49,8 +47,7 @@ async def test_realtime_streaming():
 
     # Command that produces multiple lines
     result = await executor.execute(
-        'for i in 1 2 3; do echo "Line $i"; done',
-        stream_callback=capture_callback
+        'for i in 1 2 3; do echo "Line $i"; done', stream_callback=capture_callback
     )
 
     assert result.success
@@ -62,13 +59,7 @@ async def test_concurrent_execution():
     """P3: Multiple parallel streams without race conditions."""
     executor = AsyncCommandExecutor()
 
-    commands = [
-        'echo "Task 1"',
-        'echo "Task 2"',
-        'echo "Task 3"',
-        'echo "Task 4"',
-        'echo "Task 5"'
-    ]
+    commands = ['echo "Task 1"', 'echo "Task 2"', 'echo "Task 3"', 'echo "Task 4"', 'echo "Task 5"']
 
     results = await executor.execute_parallel(commands, max_concurrent=3)
 
@@ -86,11 +77,9 @@ async def test_optimistic_ui():
     start = asyncio.get_event_loop().time()
 
     for i in range(100):
-        await renderer.emit(RenderEvent(
-            event_type=RenderEventType.OUTPUT,
-            content=f"Line {i}\n",
-            metadata={}
-        ))
+        await renderer.emit(
+            RenderEvent(event_type=RenderEventType.OUTPUT, content=f"Line {i}\n", metadata={})
+        )
 
     elapsed = asyncio.get_event_loop().time() - start
 
@@ -113,12 +102,11 @@ async def test_no_buffering():
         if first_line_time is None:
             first_line_time = asyncio.get_event_loop().time()
 
-    start = asyncio.get_event_loop().time()
+    asyncio.get_event_loop().time()
 
     # Slow command (0.5s total)
-    result = await executor.execute(
-        'echo "First"; sleep 0.3; echo "Last"',
-        stream_callback=timestamp_callback
+    await executor.execute(
+        'echo "First"; sleep 0.3; echo "Last"', stream_callback=timestamp_callback
     )
 
     completion_time = asyncio.get_event_loop().time()
@@ -136,12 +124,12 @@ async def test_integration_shell_streaming():
     tool = BashCommandTool()
 
     # Execute command via tool
-    result = await tool.execute(command='ls -la | head -3')
+    result = await tool.execute(command="ls -la | head -3")
 
     assert result.success
-    assert 'exit_code' in result.data
-    assert result.data['exit_code'] == 0
+    assert "exit_code" in result.data
+    assert result.data["exit_code"] == 0
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

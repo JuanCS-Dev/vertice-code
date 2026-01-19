@@ -41,7 +41,7 @@ def load_env():
                 line = line.strip()
                 if line and not line.startswith("#") and "=" in line:
                     key, value = line.split("=", 1)
-                    os.environ.setdefault(key.strip(), value.strip().strip('"\''))
+                    os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
 
 
 # Test suites
@@ -192,10 +192,7 @@ class ObservedRunner:
 
         # Bottleneck analysis
         if stage_times:
-            avg_by_stage = {
-                stage: sum(times)/len(times)
-                for stage, times in stage_times.items()
-            }
+            avg_by_stage = {stage: sum(times) / len(times) for stage, times in stage_times.items()}
             slowest = max(avg_by_stage, key=avg_by_stage.get)
             print(f"\nBottleneck: {slowest} (avg {avg_by_stage[slowest]:.0f}ms)")
 
@@ -232,9 +229,9 @@ class ObservedRunner:
                     analysis = self.observer.get_failure_analysis()
                     print(f"\nTotal traces: {analysis['total_traces']}")
                     print(f"Success rate: {analysis['success_rate']:.1%}")
-                    if analysis['failures_by_stage']:
+                    if analysis["failures_by_stage"]:
                         print("Failures by stage:")
-                        for stage, data in analysis['failures_by_stage'].items():
+                        for stage, data in analysis["failures_by_stage"].items():
                             print(f"  {stage}: {data['count']}")
                     continue
 
@@ -267,26 +264,27 @@ class ObservedRunner:
 
 async def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Run Vertice pipeline with full observability"
-    )
+    parser = argparse.ArgumentParser(description="Run Vertice pipeline with full observability")
     parser.add_argument(
         "prompt",
         nargs="?",
         help="Prompt to test",
     )
     parser.add_argument(
-        "--interactive", "-i",
+        "--interactive",
+        "-i",
         action="store_true",
         help="Run in interactive mode",
     )
     parser.add_argument(
-        "--suite", "-s",
+        "--suite",
+        "-s",
         help="Run a test suite",
         choices=list(TEST_SUITES.keys()),
     )
     parser.add_argument(
-        "--quiet", "-q",
+        "--quiet",
+        "-q",
         action="store_true",
         help="Suppress streaming output",
     )

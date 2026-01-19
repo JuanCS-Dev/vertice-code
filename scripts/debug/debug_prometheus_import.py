@@ -16,6 +16,7 @@ try:
     print("Attempting import...")
     from prometheus.main import PrometheusAgent
     from prometheus.core.orchestrator import PrometheusOrchestrator
+
     print("SUCCESS: Imported PrometheusAgent and PrometheusOrchestrator")
 except ImportError as e:
     print(f"FAILED: {e}")
@@ -27,8 +28,9 @@ except ImportError as e:
         print(f"Contents: {os.listdir(prom_path)}")
     else:
         print(f"Prometheus directory DOES NOT EXIST at {prom_path}")
-    
+
     import traceback
+
     traceback.print_exc()
 except Exception as e:
     print(f"OTHER ERROR: {e}")

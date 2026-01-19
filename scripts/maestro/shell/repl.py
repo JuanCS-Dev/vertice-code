@@ -8,6 +8,7 @@ from rich.text import Text
 from rich.table import Table
 from vertice_cli.agents.base import AgentResponse
 
+
 class ReplMixin:
     """Main loop and UI update logic."""
 
@@ -24,15 +25,14 @@ class ReplMixin:
 
                 # Get input
                 q = await asyncio.get_event_loop().run_in_executor(
-                    None,
-                    lambda: self.prompt.prompt('▶ ')
+                    None, lambda: self.prompt.prompt("▶ ")
                 )
 
                 if not q.strip():
                     continue
 
                 # Commands
-                if q.startswith('/'):
+                if q.startswith("/"):
                     if self.cmd(q):
                         continue
 
@@ -41,7 +41,7 @@ class ReplMixin:
                     Text(q, style="bright_white"),
                     title="[bold bright_green]👤 User[/bold bright_green]",
                     border_style="bright_green",
-                    padding=(0, 2)
+                    padding=(0, 2),
                 )
                 self.messages.append(user_msg)
 
@@ -56,14 +56,12 @@ class ReplMixin:
                 self.layout.update_header(
                     title="MAESTRO v10.0",
                     session_id=f"session_{int(time.time())}",
-                    agent=agent_name.title()
+                    agent=agent_name.title(),
                 )
 
                 # Show agent routing
                 routing_panel = self.routing_display.render(
-                    agent_name=agent_name,
-                    confidence=1.0,
-                    eta="calculating..."
+                    agent_name=agent_name, confidence=1.0, eta="calculating..."
                 )
 
                 # Update status panel with routing
@@ -84,7 +82,9 @@ class ReplMixin:
                     thinking_text = []
                     final_result = None
 
-                    async for update in self.orch.execute_streaming(q, context={'cwd': str(Path.cwd())}):
+                    async for update in self.orch.execute_streaming(
+                        q, context={"cwd": str(Path.cwd())}
+                    ):
                         if update["type"] == "thinking":
                             # LLM generating command - stream token-by-token @ 30 FPS
                             token = update.get("data", update.get("text", ""))
@@ -98,16 +98,14 @@ class ReplMixin:
                             # Final command ready - show in agent stream
                             command = update.get("data", "")
                             await self.maestro_ui.update_agent_stream(
-                                agent_name,
-                                f"\n$ {command}\n"
+                                agent_name, f"\n$ {command}\n"
                             )
 
                         elif update["type"] == "status":
                             # Status update (security validation, etc) - show in stream
                             status_msg = update.get("data", "")
                             await self.maestro_ui.update_agent_stream(
-                                agent_name,
-                                f"\n{status_msg}\n"
+                                agent_name, f"\n{status_msg}\n"
                             )
 
                         elif update["type"] == "result":
@@ -124,7 +122,7 @@ class ReplMixin:
                                 success=final_result.get("success", False),
                                 data=final_result.get("data", final_result),
                                 error=final_result.get("error"),
-                                reasoning=final_result.get("reasoning", "")
+                                reasoning=final_result.get("reasoning", ""),
                             )
                         else:
                             result = final_result
@@ -133,7 +131,7 @@ class ReplMixin:
                             success=False,
                             data={},
                             error="No result received from agent",
-                            reasoning="Streaming interrupted"
+                            reasoning="Streaming interrupted",
                         )
 
                 # Update MAESTRO UI after execution
@@ -142,19 +140,21 @@ class ReplMixin:
                     self.maestro_ui.mark_agent_done(agent_name)
 
                     # Update metrics
-                    exec_time = result.data.get('execution_time', 0) if isinstance(result.data, dict) else 0
+                    exec_time = (
+                        result.data.get("execution_time", 0) if isinstance(result.data, dict) else 0
+                    )
                     self.maestro_ui.update_metrics(
                         latency_ms=int(exec_time * 1000) if exec_time > 0 else 187,
                         execution_count=self.maestro_ui.metrics.execution_count + 1,
-                        success_rate=99.87  # Will be calculated properly later
+                        success_rate=99.87,  # Will be calculated properly later
                     )
 
                     # Display result stdout in agent stream
-                    if isinstance(result.data, dict) and 'stdout' in result.data:
-                        stdout = result.data.get('stdout', '')
+                    if isinstance(result.data, dict) and "stdout" in result.data:
+                        stdout = result.data.get("stdout", "")
                         if stdout:
                             # Stream output line by line for visual effect
-                            for line in stdout.split('\n')[:30]:  # Limit to 30 lines
+                            for line in stdout.split("\n")[:30]:  # Limit to 30 lines
                                 await self.maestro_ui.update_agent_stream(agent_name, line)
                                 await asyncio.sleep(0.02)
                 else:
@@ -172,28 +172,31 @@ class ReplMixin:
                 # Create response panel based on result
                 if result.success:
                     # Check if result has stdout/stderr from executor
-                    if isinstance(result.data, dict) and 'stdout' in result.data:
+                    if isinstance(result.data, dict) and "stdout" in result.data:
                         # Executor output - show stdout/stderr
                         output_lines = []
-                        if result.data.get('stdout'):
-                            output_lines.append(Text(result.data['stdout'], style="bright_white"))
-                        if result.data.get('stderr'):
-                            output_lines.append(Text(result.data['stderr'], style="bright_yellow"))
+                        if result.data.get("stdout"):
+                            output_lines.append(Text(result.data["stdout"], style="bright_white"))
+                        if result.data.get("stderr"):
+                            output_lines.append(Text(result.data["stderr"], style="bright_yellow"))
 
                         if output_lines:
                             from rich.console import Group
+
                             response_content = Group(*output_lines)
                         else:
                             response_content = Text("(no output)", style="dim")
 
-                        cmd_executed = result.data.get('command', '')
+                        cmd_executed = result.data.get("command", "")
                         response_panel = Panel(
                             response_content,
                             title=f"[bold bright_cyan]✅ {agent_name.title()}[/bold bright_cyan]",
-                            subtitle=f"[dim bright_cyan]$ {cmd_executed}[/dim]" if cmd_executed else None,
+                            subtitle=f"[dim bright_cyan]$ {cmd_executed}[/dim]"
+                            if cmd_executed
+                            else None,
                             border_style="bright_cyan",  # NEON CYAN instead of green
                             padding=(1, 2),
-                            expand=False  # Prevent text truncation
+                            expand=False,  # Prevent text truncation
                         )
                     else:
                         # Other agent output (Planner, Reviewer, Refactorer, Explorer)
@@ -202,6 +205,7 @@ class ReplMixin:
                             response_text = result.data
                         elif isinstance(result.data, dict):
                             import json
+
                             response_text = json.dumps(result.data, indent=2)
                         else:
                             response_text = str(result.data)
@@ -210,7 +214,7 @@ class ReplMixin:
                             Text(response_text, style="bright_cyan"),
                             title=f"[bold bright_magenta]🤖 {agent_name.title()}[/bold bright_magenta]",
                             border_style="bright_magenta",
-                            padding=(1, 2)
+                            padding=(1, 2),
                         )
                 else:
                     # Error output
@@ -219,7 +223,7 @@ class ReplMixin:
                         Text(response_text, style="bright_red"),
                         title=f"[bold bright_red]❌ {agent_name.title()}[/bold bright_red]",
                         border_style="bright_red",
-                        padding=(1, 2)
+                        padding=(1, 2),
                     )
 
                 # Add response to messages
@@ -238,7 +242,7 @@ class ReplMixin:
                 status_table.add_row("Duration:", f"{duration:.2f}s")
 
                 # Handle both 'fps' and 'current_fps' keys for compatibility
-                fps_value = perf_stats.get('current_fps', perf_stats.get('fps', 0.0))
+                fps_value = perf_stats.get("current_fps", perf_stats.get("fps", 0.0))
                 status_table.add_row("FPS:", f"{fps_value:.1f}")
                 status_table.add_row("Agent:", agent_name.title())
 
@@ -246,7 +250,7 @@ class ReplMixin:
                     status_table,
                     title="[bold bright_yellow]📊 Status[/bold bright_yellow]",
                     border_style="bright_yellow",
-                    padding=(0, 1)
+                    padding=(0, 1),
                 )
 
                 self.layout.update_status(status_panel)
@@ -270,4 +274,5 @@ class ReplMixin:
             except Exception as e:
                 self.c.print(f"\n[red]Error: {e}[/red]\n")
                 import traceback
+
                 self.c.print(f"[dim]{traceback.format_exc()}[/dim]")

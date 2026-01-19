@@ -20,12 +20,12 @@ import { SEMANTIC_TOKEN_MAP } from './semantic-icons';
 
 const parseSemanticText = (text: string): ReactNode[] => {
   if (!text) return [];
-  
+
   // Regex to match any of the semantic tokens
   const tokenRegex = new RegExp(`(${Object.keys(SEMANTIC_TOKEN_MAP).map(k => k.replace(/[.*+?^${}()|[\\\]]/g, '\\$&')).join('|')})`, 'g');
-  
+
   const parts = text.split(tokenRegex);
-  
+
   return parts.map((part, index) => {
     const Component = SEMANTIC_TOKEN_MAP[part];
     if (Component) {
@@ -86,7 +86,7 @@ const CodeBlock = memo(function CodeBlock({ node, inline, className, children, .
   const match = /language-(\w+)/.exec(className || '');
   const language = match ? match[1] : '';
   const content = String(children).replace(/\n$/, '');
-  
+
   // High-fidelity streaming detection
   const isStreaming = content.endsWith('▋') || content.endsWith('█') || content.endsWith('_') || content.endsWith('▎');
 
@@ -126,7 +126,7 @@ const CodeBlock = memo(function CodeBlock({ node, inline, className, children, .
 
   if (!inline && language) {
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 10, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
@@ -154,7 +154,7 @@ const CodeBlock = memo(function CodeBlock({ node, inline, className, children, .
               </div>
             )}
           </div>
-          
+
           <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
             <Button
               variant="ghost"
@@ -267,7 +267,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
         // SEMANTIC TYPOGRAPHY INJECTION
         p: SemanticParagraph,
         li: SemanticListItem,
-        
+
         h1: ({ children }) => <h1 className="text-2xl font-bold mb-6 mt-8 text-white tracking-tight">{children}</h1>,
         h2: ({ children }) => <h2 className="text-xl font-bold mb-4 mt-8 text-white tracking-tight">{children}</h2>,
         h3: ({ children }) => <h3 className="text-lg font-bold mb-3 mt-6 text-white tracking-tight">{children}</h3>,

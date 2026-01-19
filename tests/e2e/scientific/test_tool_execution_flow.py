@@ -22,6 +22,7 @@ from pathlib import Path
 # FIXTURES
 # =============================================================================
 
+
 @pytest.fixture
 def temp_workspace():
     """Create temporary workspace for tests."""
@@ -36,12 +37,14 @@ def temp_workspace():
 def bash_tool():
     """Create hardened bash tool."""
     from vertice_cli.tools.exec_hardened import BashCommandToolHardened
+
     return BashCommandToolHardened()
 
 
 # =============================================================================
 # 1. INPUT VALIDATION BOUNDARY TESTS
 # =============================================================================
+
 
 class TestInputValidationBoundaries:
     """Test input validation at boundaries."""
@@ -95,6 +98,7 @@ class TestInputValidationBoundaries:
 # =============================================================================
 # 2. COMMAND INJECTION PREVENTION TESTS
 # =============================================================================
+
 
 class TestCommandInjectionPrevention:
     """Test that dangerous commands are blocked."""
@@ -165,6 +169,7 @@ class TestCommandInjectionPrevention:
 # 3. SAFE COMMAND EXECUTION TESTS
 # =============================================================================
 
+
 class TestSafeCommandExecution:
     """Test that safe commands execute correctly."""
 
@@ -199,24 +204,21 @@ class TestSafeCommandExecution:
     @pytest.mark.asyncio
     async def test_grep_pattern(self, bash_tool, temp_workspace):
         """grep command finds pattern."""
-        result = await bash_tool.execute(
-            command=f"grep 'Hello' {temp_workspace}/test.txt"
-        )
+        result = await bash_tool.execute(command=f"grep 'Hello' {temp_workspace}/test.txt")
         assert result.success
         assert "Hello" in result.data["stdout"]
 
     @pytest.mark.asyncio
     async def test_wc_command(self, bash_tool, temp_workspace):
         """wc command counts correctly."""
-        result = await bash_tool.execute(
-            command=f"wc -l {temp_workspace}/test.txt"
-        )
+        result = await bash_tool.execute(command=f"wc -l {temp_workspace}/test.txt")
         assert result.success
 
 
 # =============================================================================
 # 4. RESOURCE LIMITS TESTS
 # =============================================================================
+
 
 class TestResourceLimits:
     """Test resource limit enforcement."""
@@ -246,6 +248,7 @@ class TestResourceLimits:
 # =============================================================================
 # 5. OUTPUT HANDLING TESTS
 # =============================================================================
+
 
 class TestOutputHandling:
     """Test output handling and truncation."""
@@ -292,15 +295,14 @@ class TestOutputHandling:
 # 6. UNICODE AND ENCODING TESTS
 # =============================================================================
 
+
 class TestUnicodeHandling:
     """Test Unicode and encoding edge cases."""
 
     @pytest.mark.asyncio
     async def test_unicode_in_output(self, bash_tool, temp_workspace):
         """Unicode in command output is preserved."""
-        result = await bash_tool.execute(
-            command=f"cat {temp_workspace}/unicode.txt"
-        )
+        result = await bash_tool.execute(command=f"cat {temp_workspace}/unicode.txt")
         assert result.success
         assert "日本語" in result.data["stdout"]
         assert "🚀" in result.data["stdout"]
@@ -331,6 +333,7 @@ class TestUnicodeHandling:
 # =============================================================================
 # 7. CONCURRENT EXECUTION TESTS
 # =============================================================================
+
 
 class TestConcurrentExecution:
     """Test concurrent command execution."""
@@ -380,6 +383,7 @@ class TestConcurrentExecution:
 # 8. ERROR CONDITIONS TESTS
 # =============================================================================
 
+
 class TestErrorConditions:
     """Test error handling in various conditions."""
 
@@ -416,6 +420,7 @@ class TestErrorConditions:
 # 9. RESULT DATA INTEGRITY TESTS
 # =============================================================================
 
+
 class TestResultDataIntegrity:
     """Test that result data is complete and consistent."""
 
@@ -423,7 +428,7 @@ class TestResultDataIntegrity:
     async def test_result_has_success_field(self, bash_tool):
         """Result always has success field."""
         result = await bash_tool.execute(command="echo test")
-        assert hasattr(result, 'success')
+        assert hasattr(result, "success")
         assert isinstance(result.success, bool)
 
     @pytest.mark.asyncio
@@ -447,4 +452,4 @@ class TestResultDataIntegrity:
         """Result has metadata for observability."""
         result = await bash_tool.execute(command="echo test")
         # Should have some form of metadata or at least core fields
-        assert hasattr(result, 'data') or hasattr(result, 'metadata')
+        assert hasattr(result, "data") or hasattr(result, "metadata")

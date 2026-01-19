@@ -127,7 +127,9 @@ class TestComplexityAnalysis:
     @pytest.mark.asyncio
     async def test_moderate_complexity(self, orchestrator):
         """Test moderate request detection."""
-        request = "Implement a function that validates user input and returns appropriate error messages"
+        request = (
+            "Implement a function that validates user input and returns appropriate error messages"
+        )
         complexity = await orchestrator._analyze_complexity(request)
         assert complexity == TaskComplexity.MODERATE
 

@@ -1,5 +1,5 @@
 :root {
-    /* 
+    /*
      * VERTICE DESIGN SYSTEM 2026
      * Palette: Deep Void + Electric Cyan
      */
@@ -7,14 +7,14 @@
     --bg-deep: #0a0e1a;
     --bg-card: rgba(255, 255, 255, 0.03);
     --bg-card-hover: rgba(255, 255, 255, 0.06);
-    
+
     --text-primary: #ffffff;
     --text-secondary: #94a3b8;
     --text-muted: #475569;
 
     --accent-cyan: #06b6d4;
     --accent-glow: rgba(6, 182, 212, 0.3);
-    
+
     --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
@@ -31,7 +31,7 @@ body {
     font-family: var(--font-sans);
     color: var(--text-primary);
     background-color: var(--bg-void);
-    background-image: 
+    background-image:
         radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
         linear-gradient(to bottom, transparent, var(--bg-void));
     min-height: 100vh;
@@ -81,7 +81,7 @@ body {
     background: #0f1219;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
-    box-shadow: 
+    box-shadow:
         0 20px 50px -10px rgba(0, 0, 0, 0.5),
         0 0 0 1px rgba(255, 255, 255, 0.05);
     overflow: hidden;
@@ -90,7 +90,7 @@ body {
 
 .console-window:hover {
     transform: translateY(-2px);
-    box-shadow: 
+    box-shadow:
         0 30px 60px -15px rgba(0, 0, 0, 0.6),
         0 0 0 1px rgba(6, 182, 212, 0.2);
 }

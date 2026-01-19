@@ -33,10 +33,7 @@ class TestArchitectEdgeCases:
         )
 
         architect = ArchitectAgent(llm_client, MagicMock())
-        task = AgentTask(
-            request="Create script that uses eval() for user input",
-            session_id="test"
-        )
+        task = AgentTask(request="Create script that uses eval() for user input", session_id="test")
 
         response = await architect.execute(task)
 
@@ -55,7 +52,7 @@ class TestArchitectEdgeCases:
         task = AgentTask(
             request="Add logging",
             session_id="test",
-            context={}  # Empty context
+            context={},  # Empty context
         )
 
         response = await architect.execute(task)
@@ -70,20 +67,13 @@ class TestExplorerEdgeCases:
     async def test_explorer_handles_missing_files(self):
         """Test Explorer handles non-existent files gracefully."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(
-            return_value='{"relevant_files": ["nonexistent.py"]}'
-        )
+        llm_client.generate = AsyncMock(return_value='{"relevant_files": ["nonexistent.py"]}')
 
         mcp_client = MagicMock()
-        mcp_client.call_tool = AsyncMock(
-            side_effect=Exception("File not found")
-        )
+        mcp_client.call_tool = AsyncMock(side_effect=Exception("File not found"))
 
         explorer = ExplorerAgent(llm_client, mcp_client)
-        task = AgentTask(
-            request="Explore project",
-            session_id="test"
-        )
+        task = AgentTask(request="Explore project", session_id="test")
 
         response = await explorer.execute(task)
 
@@ -94,15 +84,13 @@ class TestExplorerEdgeCases:
     async def test_explorer_token_budget_awareness(self):
         """Test Explorer respects token budget limits."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(
-            return_value='{"relevant_files": []}'
-        )
+        llm_client.generate = AsyncMock(return_value='{"relevant_files": []}')
 
         explorer = ExplorerAgent(llm_client, MagicMock())
         task = AgentTask(
             request="Explore large codebase",
             session_id="test",
-            context={"token_budget": 1000}  # Small budget
+            context={"token_budget": 1000},  # Small budget
         )
 
         response = await explorer.execute(task)
@@ -123,10 +111,7 @@ class TestPlannerEdgeCases:
         )
 
         planner = PlannerAgent(llm_client, MagicMock())
-        task = AgentTask(
-            request="Do nothing",
-            session_id="test"
-        )
+        task = AgentTask(request="Do nothing", session_id="test")
 
         response = await planner.execute(task)
 
@@ -139,15 +124,10 @@ class TestPlannerEdgeCases:
     async def test_planner_invalid_json_fallback(self):
         """Test Planner fallback when LLM returns invalid JSON."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(
-            return_value="Step 1: Create file\nStep 2: Edit file"
-        )
+        llm_client.generate = AsyncMock(return_value="Step 1: Create file\nStep 2: Edit file")
 
         planner = PlannerAgent(llm_client, MagicMock())
-        task = AgentTask(
-            request="Simple task",
-            session_id="test"
-        )
+        task = AgentTask(request="Simple task", session_id="test")
 
         response = await planner.execute(task)
 
@@ -170,7 +150,7 @@ class TestRefactorerEdgeCases:
         task = AgentTask(
             request="Execute",
             session_id="test",
-            context={"step": {}}  # Missing required fields
+            context={"step": {}},  # Missing required fields
         )
 
         response = await refactorer.execute(task)
@@ -179,9 +159,10 @@ class TestRefactorerEdgeCases:
         # Error message should indicate the problem (file not found, step, missing, etc.)
         reasoning = response.reasoning.lower() if response.reasoning else ""
         error = (response.error or "").lower()
-        assert any(term in reasoning or term in error for term in [
-            "step", "missing", "file", "target", "not found", "failed", "rollback"
-        ])
+        assert any(
+            term in reasoning or term in error
+            for term in ["step", "missing", "file", "target", "not found", "failed", "rollback"]
+        )
 
 
 class TestReviewerEdgeCases:
@@ -197,9 +178,7 @@ class TestReviewerEdgeCases:
 
         reviewer = ReviewerAgent(llm_client, MagicMock())
         task = AgentTask(
-            request="Review code",
-            session_id="test",
-            context={"diff": "eval(user_input)"}
+            request="Review code", session_id="test", context={"diff": "eval(user_input)"}
         )
 
         response = await reviewer.execute(task)
@@ -211,15 +190,13 @@ class TestReviewerEdgeCases:
     async def test_reviewer_handles_empty_diff(self):
         """Test Reviewer handles empty diffs."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(
-            return_value='{"approved": true, "grade": "A"}'
-        )
+        llm_client.generate = AsyncMock(return_value='{"approved": true, "grade": "A"}')
 
         reviewer = ReviewerAgent(llm_client, MagicMock())
         task = AgentTask(
             request="Review",
             session_id="test",
-            context={"diff": ""}  # Empty diff
+            context={"diff": ""},  # Empty diff
         )
 
         response = await reviewer.execute(task)

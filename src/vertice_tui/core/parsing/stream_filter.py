@@ -145,7 +145,6 @@ class StreamFilter:
 
                 # Reset state
                 self._in_potential_json = False
-                remaining = ""
 
                 # If we have extra text after the JSON, return it
                 # This is tricky without a full parser, but let's try to be safe
@@ -154,7 +153,6 @@ class StreamFilter:
                 # For now, let's just suppress the whole buffer if it matches the pattern
                 # and assume the model outputs clean blocks.
 
-                buffer_content = self._buffer
                 self._buffer = ""
                 return ""
             else:

@@ -7,11 +7,11 @@ import { cn } from "@/lib/utils";
 
 export function ArtifactHeader() {
   const { activeFileId, closeFile, files } = useArtifactStore();
-  
+
   if (!activeFileId) return null;
 
   // Truth: Files are currently in-memory only until backend persistence is connected
-  const isInMemory = true; 
+  const isInMemory = true;
 
   return (
     <div className="h-10 border-b border-border flex items-center px-0 bg-background select-none">
@@ -21,9 +21,9 @@ export function ArtifactHeader() {
           <span className="text-xs font-mono text-foreground font-medium truncate max-w-[120px]">
             {activeFileId}
           </span>
-          
+
           {/* Close Button (Hover) */}
-          <button 
+          <button
             onClick={(e) => { e.stopPropagation(); closeFile(activeFileId); }}
             className="absolute right-2 opacity-0 group-hover:opacity-100 p-0.5 hover:bg-white/10 rounded text-muted-foreground hover:text-foreground transition-all"
           >

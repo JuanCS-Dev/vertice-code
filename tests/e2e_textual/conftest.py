@@ -14,6 +14,7 @@ from dataclasses import dataclass, field, asdict
 @dataclass
 class TestResult:
     """Result of a single test."""
+
     name: str
     status: str  # passed, failed, error, skipped
     duration: float
@@ -26,6 +27,7 @@ class TestResult:
 @dataclass
 class E2EReport:
     """Full E2E test report."""
+
     timestamp: str
     total_tests: int = 0
     passed: int = 0
@@ -57,10 +59,12 @@ class E2EReport:
                 "failed": self.failed,
                 "errors": self.errors,
                 "skipped": self.skipped,
-                "pass_rate": f"{(self.passed/self.total_tests*100):.1f}%" if self.total_tests > 0 else "N/A",
-                "duration": f"{self.duration:.2f}s"
+                "pass_rate": f"{(self.passed/self.total_tests*100):.1f}%"
+                if self.total_tests > 0
+                else "N/A",
+                "duration": f"{self.duration:.2f}s",
             },
-            "results": [asdict(r) for r in self.results]
+            "results": [asdict(r) for r in self.results],
         }
 
 
@@ -113,7 +117,8 @@ def sample_python_project(temp_project):
 
     # Main module
     (temp_project / "src" / "__init__.py").write_text("")
-    (temp_project / "src" / "main.py").write_text('''"""Main application module."""
+    (temp_project / "src" / "main.py").write_text(
+        '''"""Main application module."""
 
 def greet(name: str) -> str:
     """Greet someone."""
@@ -147,19 +152,23 @@ class Calculator:
             raise ValueError(f"Unknown op: {op}")
         self.history.append((op, a, b, result))
         return result
-''')
+'''
+    )
 
     # Config file
-    (temp_project / "config.py").write_text('''"""Configuration."""
+    (temp_project / "config.py").write_text(
+        '''"""Configuration."""
 
 DEBUG = True
 API_KEY = "sk-1234567890"  # BUG: hardcoded secret
 DATABASE_URL = "postgresql://user:pass@localhost/db"
-''')
+'''
+    )
 
     # Test file
     (temp_project / "tests" / "__init__.py").write_text("")
-    (temp_project / "tests" / "test_main.py").write_text('''"""Tests for main module."""
+    (temp_project / "tests" / "test_main.py").write_text(
+        '''"""Tests for main module."""
 
 import pytest
 from src.main import greet, add, Calculator
@@ -173,16 +182,20 @@ def test_add():
 def test_calculator():
     calc = Calculator()
     assert calc.calculate("+", 2, 3) == 5
-''')
+'''
+    )
 
     # Requirements
-    (temp_project / "requirements.txt").write_text('''pytest>=7.0.0
+    (temp_project / "requirements.txt").write_text(
+        """pytest>=7.0.0
 black>=23.0.0
 ruff>=0.1.0
-''')
+"""
+    )
 
     # README
-    (temp_project / "README.md").write_text('''# Sample Project
+    (temp_project / "README.md").write_text(
+        """# Sample Project
 
 A sample project for E2E testing.
 
@@ -191,7 +204,8 @@ A sample project for E2E testing.
 - Greeting function
 - Calculator class
 - Basic math operations
-''')
+"""
+    )
 
     # Commit initial state
     os.system(f"cd {temp_project} && git add -A && git commit -q -m 'Initial commit'")
@@ -205,17 +219,17 @@ def mock_llm_responses():
     return {
         "create_app": {
             "files": ["app.py", "requirements.txt", "README.md"],
-            "description": "Created FastAPI application"
+            "description": "Created FastAPI application",
         },
         "refactor": {
             "changes": ["Added type hints", "Extracted functions", "Fixed bugs"],
-            "files_modified": 2
+            "files_modified": 2,
         },
         "audit": {
             "issues": [
                 {"severity": "high", "message": "Hardcoded API key"},
                 {"severity": "medium", "message": "No input validation"},
-                {"severity": "low", "message": "Missing docstrings"}
+                {"severity": "low", "message": "Missing docstrings"},
             ]
         },
         "plan": {
@@ -224,9 +238,9 @@ def mock_llm_responses():
                 "Design architecture",
                 "Implement core features",
                 "Add tests",
-                "Document"
+                "Document",
             ]
-        }
+        },
     }
 
 
@@ -251,12 +265,18 @@ def pytest_sessionfinish(session, exitstatus):
         f.write(f"| Passed | {report.passed} |\n")
         f.write(f"| Failed | {report.failed} |\n")
         f.write(f"| Errors | {report.errors} |\n")
-        f.write(f"| Pass Rate | {(report.passed/report.total_tests*100):.1f}% |\n" if report.total_tests > 0 else "| Pass Rate | N/A |\n")
+        f.write(
+            f"| Pass Rate | {(report.passed/report.total_tests*100):.1f}% |\n"
+            if report.total_tests > 0
+            else "| Pass Rate | N/A |\n"
+        )
         f.write(f"| Duration | {report.duration:.2f}s |\n")
         f.write("\n## Test Results\n\n")
 
         for result in report.results:
-            status_emoji = {"passed": "✅", "failed": "❌", "error": "💥", "skipped": "⏭️"}.get(result.status, "❓")
+            status_emoji = {"passed": "✅", "failed": "❌", "error": "💥", "skipped": "⏭️"}.get(
+                result.status, "❓"
+            )
             f.write(f"### {status_emoji} {result.name}\n\n")
             f.write(f"- **Status:** {result.status}\n")
             f.write(f"- **Duration:** {result.duration:.2f}s\n")

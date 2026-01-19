@@ -14,6 +14,7 @@ from enum import Enum
 
 class DesignLevel(str, Enum):
     """Abstraction levels for architecture."""
+
     SYSTEM = "system"
     SERVICE = "service"
     COMPONENT = "component"
@@ -23,6 +24,7 @@ class DesignLevel(str, Enum):
 @dataclass
 class DesignProposal:
     """Architecture design proposal."""
+
     id: str
     name: str
     description: str
@@ -36,6 +38,7 @@ class DesignProposal:
 @dataclass
 class ArchitectureReview:
     """Review of architecture proposal."""
+
     proposal_id: str
     score: float
     strengths: List[str]
@@ -46,6 +49,7 @@ class ArchitectureReview:
 # =============================================================================
 # THREE LOOPS FRAMEWORK TYPES
 # =============================================================================
+
 
 class ArchitectLoop(str, Enum):
     """
@@ -58,29 +62,33 @@ class ArchitectLoop(str, Enum):
 
     Reference: https://www.infoq.com/articles/architects-ai-era/
     """
-    IN_THE_LOOP = "AITL"   # Architect In The Loop - co-design, human decides
-    ON_THE_LOOP = "AOTL"   # Architect On The Loop - AI operates, human supervises
+
+    IN_THE_LOOP = "AITL"  # Architect In The Loop - co-design, human decides
+    ON_THE_LOOP = "AOTL"  # Architect On The Loop - AI operates, human supervises
     OUT_OF_LOOP = "AOOTL"  # Architect Out Of Loop - AI self-designs
 
 
 class DecisionImpact(str, Enum):
     """Impact level of architectural decisions."""
-    CRITICAL = "critical"    # Affects entire system, hard to reverse
-    HIGH = "high"            # Affects multiple services
-    MEDIUM = "medium"        # Affects single service
-    LOW = "low"              # Localized change
+
+    CRITICAL = "critical"  # Affects entire system, hard to reverse
+    HIGH = "high"  # Affects multiple services
+    MEDIUM = "medium"  # Affects single service
+    LOW = "low"  # Localized change
 
 
 class DecisionRisk(str, Enum):
     """Risk level of architectural decisions."""
-    HIGH = "high"        # Unknown territory, complex dependencies
-    MEDIUM = "medium"    # Some uncertainty, manageable
-    LOW = "low"          # Well-understood patterns
+
+    HIGH = "high"  # Unknown territory, complex dependencies
+    MEDIUM = "medium"  # Some uncertainty, manageable
+    LOW = "low"  # Well-understood patterns
 
 
 @dataclass
 class LoopContext:
     """Context for loop selection decision."""
+
     decision_type: str
     impact: DecisionImpact
     risk: DecisionRisk
@@ -93,6 +101,7 @@ class LoopContext:
 @dataclass
 class LoopRecommendation:
     """Recommendation for which loop to use."""
+
     recommended_loop: ArchitectLoop
     confidence: float
     reasoning: str
@@ -103,6 +112,7 @@ class LoopRecommendation:
 @dataclass
 class ThreeLoopsDesignResult:
     """Result of designing with Three Loops pattern."""
+
     loop_used: ArchitectLoop
     design: DesignProposal
     human_interventions: List[str]

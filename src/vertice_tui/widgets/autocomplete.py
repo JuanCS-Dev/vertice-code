@@ -7,7 +7,7 @@ Shows suggestions as user types, with fuzzy matching.
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
+from typing import ClassVar, Dict, List, Optional
 
 from textual.containers import VerticalScroll
 from textual.reactive import reactive
@@ -44,6 +44,10 @@ class AutocompleteDropdown(VerticalScroll):
         color: $foreground;
     }
 
+    AutocompleteDropdown .item.hidden {
+        display: none;
+    }
+
     AutocompleteDropdown .item.selected {
         background: $accent;
         color: $background;
@@ -66,6 +70,8 @@ class AutocompleteDropdown(VerticalScroll):
     }
     """
 
+    MAX_ITEMS: ClassVar[int] = 15
+
     selected_index: reactive[int] = reactive(0)
 
     def __init__(self, *args, **kwargs):
@@ -73,55 +79,69 @@ class AutocompleteDropdown(VerticalScroll):
         self.items: List[Dict] = []
         self._item_widgets: List[Static] = []
 
-    def show_completions(self, completions: List[Dict]) -> None:
-        """Show completion items."""
-        self.items = completions
-        self.selected_index = 0
-
-        # Clear existing
-        for widget in self._item_widgets:
-            widget.remove()
-        self._item_widgets.clear()
-
-        if not completions:
-            self.remove_class("visible")
+    def on_mount(self) -> None:
+        """Pre-mount item widgets to avoid mount/remove churn per keystroke."""
+        if self._item_widgets:
             return
 
-        # Add items
-        for i, item in enumerate(completions[:15]):  # Max 15 items
-            item_type = item.get("type", "tool")
-
-            # Use display from item if available
-            if "display" in item:
-                text = item["display"]
-            else:
-                icon = "⚡" if item_type == "command" else "🔧"
-                text = f"{icon} {item['text']}"
-
-            # Add description if available
-            if desc := item.get("description"):
-                text += f" [dim]{desc}[/dim]"
-
-            # Set CSS class based on type
-            type_class = (
-                f"item-{item_type}" if item_type in ("command", "tool", "file") else "item-tool"
-            )
-            classes = f"item {type_class}"
-            if i == 0:
-                classes += " selected"
-
-            widget = Static(text, classes=classes)
+        for _ in range(self.MAX_ITEMS):
+            widget = Static("", classes="item hidden")
             self._item_widgets.append(widget)
             self.mount(widget)
+
+    def show_completions(self, completions: List[Dict]) -> None:
+        """Show completion items."""
+        self.items = completions[: self.MAX_ITEMS]
+        self.selected_index = 0
+
+        if not self.items:
+            self.hide()
+            return
+
+        with self.app.batch_update():
+            for i, widget in enumerate(self._item_widgets):
+                if i >= len(self.items):
+                    widget.update("")
+                    widget.add_class("hidden")
+                    widget.remove_class("selected")
+                    widget.set_class(False, "item-command")
+                    widget.set_class(False, "item-tool")
+                    widget.set_class(False, "item-file")
+                    continue
+
+                item = self.items[i]
+                item_type = item.get("type", "tool")
+
+                if "display" in item:
+                    text = item["display"]
+                else:
+                    icon = "⚡" if item_type == "command" else "🔧"
+                    text = f"{icon} {item['text']}"
+
+                if desc := item.get("description"):
+                    text += f" [dim]{desc}[/dim]"
+
+                widget.update(text)
+                widget.remove_class("hidden")
+                widget.set_class(i == 0, "selected")
+                widget.set_class(True, "item")
+                widget.set_class(item_type == "command", "item-command")
+                widget.set_class(item_type == "tool", "item-tool")
+                widget.set_class(item_type == "file", "item-file")
 
         self.add_class("visible")
 
     def hide(self) -> None:
         """Hide dropdown."""
-        self.remove_class("visible")
-        for widget in self._item_widgets:
-            widget.remove()
-        self._item_widgets.clear()
+        with self.app.batch_update():
+            self.remove_class("visible")
+            for widget in self._item_widgets:
+                widget.update("")
+                widget.add_class("hidden")
+                widget.remove_class("selected")
+                widget.set_class(False, "item-command")
+                widget.set_class(False, "item-tool")
+                widget.set_class(False, "item-file")
         self.items = []
 
     def move_selection(self, delta: int) -> None:
@@ -130,14 +150,14 @@ class AutocompleteDropdown(VerticalScroll):
             return
 
         # Update old selection
-        if self._item_widgets and 0 <= self.selected_index < len(self._item_widgets):
+        if 0 <= self.selected_index < len(self.items):
             self._item_widgets[self.selected_index].remove_class("selected")
 
         # Calculate new index
         self.selected_index = (self.selected_index + delta) % len(self.items)
 
         # Update new selection
-        if self._item_widgets and 0 <= self.selected_index < len(self._item_widgets):
+        if 0 <= self.selected_index < len(self.items):
             self._item_widgets[self.selected_index].add_class("selected")
 
     def get_selected(self) -> Optional[str]:

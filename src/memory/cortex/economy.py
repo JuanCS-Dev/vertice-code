@@ -55,9 +55,7 @@ class ContributionLedger:
                 )
             """
             )
-            conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_contrib_agent ON contributions(agent_id)"
-            )
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_contrib_agent ON contributions(agent_id)")
             conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_contrib_type ON contributions(contribution_type)"
             )

@@ -30,7 +30,7 @@ class TestReviewCommand:
         session.read_files = {"file3.py"}
         session.tool_calls_count = 5
 
-        context = {'session': session, 'cwd': Path.cwd()}
+        context = {"session": session, "cwd": Path.cwd()}
         result = await handle_review("", context)
 
         assert "Session Review" in result
@@ -52,7 +52,7 @@ class TestReviewCommand:
         session.read_files = set()
         session.tool_calls_count = 0
 
-        context = {'session': session}
+        context = {"session": session}
         result = await handle_review("", context)
 
         assert "Session Review" in result
@@ -68,13 +68,13 @@ class TestReviewCommand:
         session.read_files = {f"file{i}.py" for i in range(20)}
         session.tool_calls_count = 0
 
-        context = {'session': session}
+        context = {"session": session}
         result = await handle_review("", context)
 
         assert "Files Read (20)" in result
         assert "... and" in result  # Truncation message
 
-    @patch('vertice_cli.commands.review.subprocess.run')
+    @patch("vertice_cli.commands.review.subprocess.run")
     async def test_stats_flag(self, mock_run):
         """Test --stats flag."""
         # Mock git diff --numstat
@@ -90,14 +90,14 @@ class TestReviewCommand:
         session.read_files = set()
         session.tool_calls_count = 0
 
-        context = {'session': session}
+        context = {"session": session}
         result = await handle_review("--stats", context)
 
         assert "Statistics" in result
         assert "Lines Added" in result
         assert "Lines Removed" in result
 
-    @patch('vertice_cli.commands.review._export_review')
+    @patch("vertice_cli.commands.review._export_review")
     async def test_export_flag(self, mock_export):
         """Test --export flag."""
         mock_export.return_value = Path("/tmp/review.txt")
@@ -109,13 +109,13 @@ class TestReviewCommand:
         session.read_files = set()
         session.tool_calls_count = 0
 
-        context = {'session': session}
+        context = {"session": session}
         result = await handle_review("--export", context)
 
         assert "exported" in result.lower()
         mock_export.assert_called_once()
 
-    @patch('vertice_cli.commands.review.subprocess.run')
+    @patch("vertice_cli.commands.review.subprocess.run")
     async def test_git_status(self, mock_run):
         """Test git status integration."""
         mock_result = Mock()
@@ -130,7 +130,7 @@ class TestReviewCommand:
         session.read_files = set()
         session.tool_calls_count = 0
 
-        context = {'session': session, 'cwd': Path.cwd()}
+        context = {"session": session, "cwd": Path.cwd()}
         result = await handle_review("", context)
 
         assert "Git Status" in result

@@ -620,7 +620,7 @@ class TestExecuteHook:
                         )
                     },
                 ):
-                    result = await hooks_manager.execute_hook("post_write", "/path/to/file.py")
+                    await hooks_manager.execute_hook("post_write", "/path/to/file.py")
 
 
 # =============================================================================

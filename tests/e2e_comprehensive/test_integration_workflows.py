@@ -77,8 +77,7 @@ async def delete_product(product_id: int):
 '''
 
         result = await write_tool._execute_validated(
-            path=str(temp_project / "api.py"),
-            content=api_code
+            path=str(temp_project / "api.py"), content=api_code
         )
         assert result.success
 
@@ -125,15 +124,13 @@ def test_delete_product():
 '''
 
         result = await write_tool._execute_validated(
-            path=str(temp_project / "test_api.py"),
-            content=test_code
+            path=str(temp_project / "test_api.py"), content=test_code
         )
         assert result.success
 
         # Step 3: Verify structure
         search_result = await search_tool._execute_validated(
-            pattern="@app\\.",
-            path=str(temp_project)
+            pattern="@app\\.", path=str(temp_project)
         )
         assert search_result.success
         assert len(search_result.data.get("matches", [])) >= 5  # 5 endpoints
@@ -144,11 +141,11 @@ def test_delete_product():
         from vertice_cli.tools.file_ops import WriteFileTool, EditFileTool, ReadFileTool
 
         write_tool = WriteFileTool()
-        edit_tool = EditFileTool()
+        EditFileTool()
         read_tool = ReadFileTool()
 
         # Step 1: Create file with duplicated code
-        duplicated = '''def process_users(users):
+        duplicated = """def process_users(users):
     valid = []
     for user in users:
         if user.get("email") and "@" in user["email"]:
@@ -161,11 +158,10 @@ def process_admins(admins):
         if admin.get("email") and "@" in admin["email"]:
             valid.append(admin)
     return valid
-'''
+"""
 
         await write_tool._execute_validated(
-            path=str(temp_project / "duplicate.py"),
-            content=duplicated
+            path=str(temp_project / "duplicate.py"), content=duplicated
         )
 
         # Step 2: Refactor to extract common function
@@ -187,9 +183,7 @@ def process_admins(admins):
         (temp_project / "duplicate.py").write_text(refactored)
 
         # Step 3: Verify refactoring
-        read_result = await read_tool._execute_validated(
-            path=str(temp_project / "duplicate.py")
-        )
+        read_result = await read_tool._execute_validated(path=str(temp_project / "duplicate.py"))
         assert read_result.success
         assert "validate_email_items" in read_result.data["content"]
         assert read_result.data["content"].count("for item in items") == 1  # Only once now
@@ -210,8 +204,7 @@ class TestSecurityWorkflows:
 
         # Step 1: Find hardcoded secrets
         search_result = await search_tool._execute_validated(
-            pattern='API_KEY.*=.*"sk-',
-            path=str(sample_python_project)
+            pattern='API_KEY.*=.*"sk-', path=str(sample_python_project)
         )
 
         assert search_result.success
@@ -226,12 +219,14 @@ class TestSecurityWorkflows:
         # Step 3: Fix by using environment variables
         edit_result = await edit_tool._execute_validated(
             path=config_file,
-            edits=[{
-                "search": 'API_KEY = "sk-test123456789"',
-                "replace": 'API_KEY = os.getenv("API_KEY", "")'
-            }],
+            edits=[
+                {
+                    "search": 'API_KEY = "sk-test123456789"',
+                    "replace": 'API_KEY = os.getenv("API_KEY", "")',
+                }
+            ],
             preview=False,
-            create_backup=True
+            create_backup=True,
         )
 
         assert edit_result.success
@@ -245,23 +240,23 @@ class TestSecurityWorkflows:
         edit_tool = EditFileTool()
 
         # Step 1: Create unsafe code
-        unsafe_code = '''def process_user_input(user_input):
+        unsafe_code = """def process_user_input(user_input):
     # Unsafe - no validation
     result = eval(user_input)
     return result
-'''
+"""
 
         await write_tool._execute_validated(
-            path=str(temp_project / "unsafe.py"),
-            content=unsafe_code
+            path=str(temp_project / "unsafe.py"), content=unsafe_code
         )
 
         # Step 2: Add validation
         edit_result = await edit_tool._execute_validated(
             path=str(temp_project / "unsafe.py"),
-            edits=[{
-                "search": "def process_user_input(user_input):\n    # Unsafe - no validation\n    result = eval(user_input)\n    return result",
-                "replace": '''def process_user_input(user_input):
+            edits=[
+                {
+                    "search": "def process_user_input(user_input):\n    # Unsafe - no validation\n    result = eval(user_input)\n    return result",
+                    "replace": """def process_user_input(user_input):
     # Added validation
     if not isinstance(user_input, str):
         raise ValueError("Input must be string")
@@ -270,10 +265,11 @@ class TestSecurityWorkflows:
     # Still unsafe, but now commented
     # result = eval(user_input)  # UNSAFE: arbitrary code execution
     result = str(user_input)
-    return result'''
-            }],
+    return result""",
+                }
+            ],
             preview=False,
-            create_backup=False
+            create_backup=False,
         )
 
         assert edit_result.success
@@ -299,8 +295,7 @@ class TestGitWorkflows:
 
         # Step 1: Create and commit initial file
         await write_tool._execute_validated(
-            path=str(temp_project / "file.txt"),
-            content="version 1"
+            path=str(temp_project / "file.txt"), content="version 1"
         )
 
         subprocess.run(["git", "add", "."], cwd=temp_project)
@@ -350,8 +345,7 @@ class TestProjectGenerationWorkflows:
 
         for filepath, content in files_to_create:
             result = await write_tool._execute_validated(
-                path=str(temp_project / filepath),
-                content=content
+                path=str(temp_project / filepath), content=content
             )
             assert result.success
 
@@ -369,28 +363,33 @@ class TestProjectGenerationWorkflows:
         write_tool = WriteFileTool()
 
         files = [
-            ("main.py", '''from fastapi import FastAPI
+            (
+                "main.py",
+                """from fastapi import FastAPI
 
 app = FastAPI()
 
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
-'''),
-            ("models.py", '''from pydantic import BaseModel
+""",
+            ),
+            (
+                "models.py",
+                """from pydantic import BaseModel
 
 class Item(BaseModel):
     name: str
     price: float
-'''),
+""",
+            ),
             ("requirements.txt", "fastapi>=0.104.0\nuvicorn>=0.24.0\npydantic>=2.5.0"),
             ("README.md", "# FastAPI Project\n\nRun with: `uvicorn main:app --reload`"),
         ]
 
         for filepath, content in files:
             result = await write_tool._execute_validated(
-                path=str(temp_project / filepath),
-                content=content
+                path=str(temp_project / filepath), content=content
             )
             assert result.success
 
@@ -414,8 +413,7 @@ class TestDataTransformationWorkflows:
 
         # Step 1: Find "def " pattern (simple, will match Python files)
         search_result = await search_tool._execute_validated(
-            pattern="def ",
-            path=str(sample_python_project)
+            pattern="def ", path=str(sample_python_project)
         )
 
         assert search_result.success
@@ -439,8 +437,7 @@ class TestDataTransformationWorkflows:
         # Step 1: Create multiple files
         for i in range(10):
             await write_tool._execute_validated(
-                path=str(temp_project / f"file{i}.txt"),
-                content=f"content {i}\nstatus: draft"
+                path=str(temp_project / f"file{i}.txt"), content=f"content {i}\nstatus: draft"
             )
 
         # Step 2: Batch update all files
@@ -450,7 +447,7 @@ class TestDataTransformationWorkflows:
                 path=filepath,
                 edits=[{"search": "status: draft", "replace": "status: published"}],
                 preview=False,
-                create_backup=False
+                create_backup=False,
             )
 
         # Step 3: Verify all updated
@@ -476,14 +473,11 @@ class TestComplexDependencyChains:
 
         # Stage 1: Create raw data
         await write_tool._execute_validated(
-            path=str(temp_project / "data.txt"),
-            content="raw,data,here\n1,2,3\n4,5,6"
+            path=str(temp_project / "data.txt"), content="raw,data,here\n1,2,3\n4,5,6"
         )
 
         # Stage 2: Read and process
-        read_result = await read_tool._execute_validated(
-            path=str(temp_project / "data.txt")
-        )
+        read_result = await read_tool._execute_validated(path=str(temp_project / "data.txt"))
         assert read_result.success
 
         # Stage 3: Transform
@@ -491,14 +485,13 @@ class TestComplexDependencyChains:
             path=str(temp_project / "data.txt"),
             edits=[{"search": "raw", "replace": "processed"}],
             preview=False,
-            create_backup=False
+            create_backup=False,
         )
 
         # Stage 4: Create derived file
         processed_content = (temp_project / "data.txt").read_text()
         await write_tool._execute_validated(
-            path=str(temp_project / "summary.txt"),
-            content=f"Summary of:\n{processed_content}"
+            path=str(temp_project / "summary.txt"), content=f"Summary of:\n{processed_content}"
         )
 
         # Verify pipeline output
@@ -516,7 +509,7 @@ class TestErrorRecoveryWorkflows:
         from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
 
         write_tool = WriteFileTool()
-        read_tool = ReadFileTool()
+        ReadFileTool()
 
         # Try to process 5 files, where some fail
         results = []
@@ -524,13 +517,11 @@ class TestErrorRecoveryWorkflows:
             if i == 2:
                 # Intentionally fail this one (invalid path)
                 result = await write_tool._execute_validated(
-                    path="/invalid/path/file.txt",
-                    content="fail"
+                    path="/invalid/path/file.txt", content="fail"
                 )
             else:
                 result = await write_tool._execute_validated(
-                    path=str(temp_project / f"file{i}.txt"),
-                    content=f"data{i}"
+                    path=str(temp_project / f"file{i}.txt"), content=f"data{i}"
                 )
             results.append(result)
 
@@ -543,7 +534,6 @@ class TestErrorRecoveryWorkflows:
         for i in failed_indices:
             # Retry with valid path
             result = await write_tool._execute_validated(
-                path=str(temp_project / f"file{i}_retry.txt"),
-                content=f"retry{i}"
+                path=str(temp_project / f"file{i}_retry.txt"), content=f"retry{i}"
             )
             assert result.success

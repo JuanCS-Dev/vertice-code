@@ -189,7 +189,7 @@ async def media_info(file_path: str) -> dict:
                 width, height = _get_image_dimensions(path)
                 result["width"] = width
                 result["height"] = height
-            except:
+            except Exception:
                 pass
 
         elif path.suffix.lower() == ".pdf":
@@ -206,7 +206,7 @@ async def media_info(file_path: str) -> dict:
                     result["author"] = metadata.get("/Author", "")
             except ImportError:
                 result["pages"] = "unknown (install pypdf)"
-            except:
+            except Exception:
                 result["pages"] = "unknown"
 
         elif mime_type and mime_type.startswith("video/"):

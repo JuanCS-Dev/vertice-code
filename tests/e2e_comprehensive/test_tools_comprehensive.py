@@ -24,8 +24,7 @@ class TestFileOperationsComprehensive:
 
         tool = WriteFileTool()
         result = await tool._execute_validated(
-            path=str(temp_project / "test.py"),
-            content="print('hello')"
+            path=str(temp_project / "test.py"), content="print('hello')"
         )
 
         assert result.success
@@ -41,7 +40,7 @@ class TestFileOperationsComprehensive:
         result = await tool._execute_validated(
             path=str(temp_project / "a" / "b" / "c" / "deep.py"),
             content="# deep nested file",
-            create_dirs=True
+            create_dirs=True,
         )
 
         assert result.success
@@ -56,8 +55,7 @@ class TestFileOperationsComprehensive:
         large_content = "x" * (10 * 1024 * 1024)  # 10MB
 
         result = await tool._execute_validated(
-            path=str(temp_project / "large.txt"),
-            content=large_content
+            path=str(temp_project / "large.txt"), content=large_content
         )
 
         assert result.success
@@ -72,8 +70,7 @@ class TestFileOperationsComprehensive:
         unicode_content = "Hello 世界 🌍 Привет مرحبا"
 
         result = await tool._execute_validated(
-            path=str(temp_project / "unicode.txt"),
-            content=unicode_content
+            path=str(temp_project / "unicode.txt"), content=unicode_content
         )
 
         assert result.success
@@ -87,8 +84,7 @@ class TestFileOperationsComprehensive:
         tool = WriteFileTool()
         # Note: some chars not allowed in filenames
         result = await tool._execute_validated(
-            path=str(temp_project / "file-with_special.chars.txt"),
-            content="test"
+            path=str(temp_project / "file-with_special.chars.txt"), content="test"
         )
 
         assert result.success
@@ -117,10 +113,7 @@ class TestFileOperationsComprehensive:
         test_file.write_text("line1\nline2\nline3\nline4\nline5")
 
         tool = ReadFileTool()
-        result = await tool._execute_validated(
-            path=str(test_file),
-            line_range=(2, 4)
-        )
+        result = await tool._execute_validated(path=str(test_file), line_range=(2, 4))
 
         assert result.success
         assert "line2" in result.data["content"]
@@ -147,9 +140,7 @@ class TestFileOperationsComprehensive:
         from vertice_cli.tools.file_ops import ReadFileTool
 
         tool = ReadFileTool()
-        result = await tool._execute_validated(
-            path=str(temp_project / "nonexistent.txt")
-        )
+        result = await tool._execute_validated(path=str(temp_project / "nonexistent.txt"))
 
         assert not result.success
         assert "not found" in result.error.lower()
@@ -167,7 +158,7 @@ class TestFileOperationsComprehensive:
             path=str(test_file),
             edits=[{"search": "old_name", "replace": "new_name"}],
             preview=False,
-            create_backup=False
+            create_backup=False,
         )
 
         assert result.success
@@ -191,7 +182,7 @@ class TestFileOperationsComprehensive:
                 {"search": "b = 2", "replace": "b = 20"},
             ],
             preview=False,
-            create_backup=False
+            create_backup=False,
         )
 
         assert result.success
@@ -213,7 +204,7 @@ class TestFileOperationsComprehensive:
             edits=[{"search": "foo", "replace": "bar"}],
             replace_all=True,
             preview=False,
-            create_backup=False
+            create_backup=False,
         )
 
         assert result.success
@@ -233,7 +224,7 @@ class TestFileOperationsComprehensive:
             path=str(test_file),
             edits=[{"search": "nonexistent", "replace": "something"}],
             preview=False,
-            create_backup=False
+            create_backup=False,
         )
 
         assert not result.success
@@ -253,7 +244,7 @@ class TestFileOperationsComprehensive:
             path=str(test_file),
             edits=[{"search": "original", "replace": "modified"}],
             preview=False,
-            create_backup=True
+            create_backup=True,
         )
 
         assert result.success
@@ -290,10 +281,7 @@ class TestFileOperationsComprehensive:
         (temp_project / "a" / "b" / "file2.py").write_text("")
 
         tool = ListDirectoryTool()
-        result = await tool._execute_validated(
-            path=str(temp_project / "a"),
-            recursive=True
-        )
+        result = await tool._execute_validated(path=str(temp_project / "a"), recursive=True)
 
         assert result.success
         assert result.metadata["file_count"] >= 2
@@ -308,10 +296,7 @@ class TestFileOperationsComprehensive:
         (temp_project / "data.json").write_text("")
 
         tool = ListDirectoryTool()
-        result = await tool._execute_validated(
-            path=str(temp_project),
-            pattern="*.py"
-        )
+        result = await tool._execute_validated(path=str(temp_project), pattern="*.py")
 
         assert result.success
         assert result.metadata["file_count"] == 1
@@ -325,10 +310,7 @@ class TestFileOperationsComprehensive:
         test_file.write_text("delete this")
 
         tool = DeleteFileTool()
-        result = await tool._execute_validated(
-            path=str(test_file),
-            permanent=False
-        )
+        result = await tool._execute_validated(path=str(test_file), permanent=False)
 
         assert result.success
         assert not test_file.exists()
@@ -345,10 +327,7 @@ class TestFileOperationsComprehensive:
         test_file.write_text("gone forever")
 
         tool = DeleteFileTool()
-        result = await tool._execute_validated(
-            path=str(test_file),
-            permanent=True
-        )
+        result = await tool._execute_validated(path=str(test_file), permanent=True)
 
         assert result.success
         assert not test_file.exists()
@@ -363,10 +342,7 @@ class TestSearchOperationsComprehensive:
         from vertice_cli.tools.search import SearchFilesTool
 
         tool = SearchFilesTool()
-        result = await tool._execute_validated(
-            pattern="def ",
-            path=str(sample_python_project)
-        )
+        result = await tool._execute_validated(pattern="def ", path=str(sample_python_project))
 
         assert result.success
         matches = result.data.get("matches", [])
@@ -381,9 +357,7 @@ class TestSearchOperationsComprehensive:
 
         tool = SearchFilesTool()
         result = await tool._execute_validated(
-            pattern="hello",
-            path=str(temp_project),
-            ignore_case=True
+            pattern="hello", path=str(temp_project), ignore_case=True
         )
 
         assert result.success
@@ -399,9 +373,7 @@ class TestSearchOperationsComprehensive:
 
         tool = SearchFilesTool()
         result = await tool._execute_validated(
-            pattern="hello",
-            path=str(temp_project),
-            ignore_case=False
+            pattern="hello", path=str(temp_project), ignore_case=False
         )
 
         assert result.success
@@ -418,9 +390,7 @@ class TestSearchOperationsComprehensive:
 
         tool = SearchFilesTool()
         result = await tool._execute_validated(
-            pattern="def foo",
-            path=str(temp_project),
-            file_pattern="*.py"
+            pattern="def foo", path=str(temp_project), file_pattern="*.py"
         )
 
         assert result.success
@@ -436,10 +406,7 @@ class TestSearchOperationsComprehensive:
         (temp_project / "code.py").write_text("def func1():\n    pass\ndef func2():\n    pass")
 
         tool = SearchFilesTool()
-        result = await tool._execute_validated(
-            pattern=r"def func",
-            path=str(temp_project)
-        )
+        result = await tool._execute_validated(pattern=r"def func", path=str(temp_project))
 
         assert result.success
         matches = result.data.get("matches", [])
@@ -455,9 +422,7 @@ class TestSearchOperationsComprehensive:
 
         tool = SearchFilesTool()
         result = await tool._execute_validated(
-            pattern="line",
-            path=str(temp_project),
-            max_results=10
+            pattern="line", path=str(temp_project), max_results=10
         )
 
         assert result.success
@@ -473,8 +438,7 @@ class TestSearchOperationsComprehensive:
 
         tool = SearchFilesTool()
         result = await tool._execute_validated(
-            pattern="nonexistent_pattern_xyz",
-            path=str(temp_project)
+            pattern="nonexistent_pattern_xyz", path=str(temp_project)
         )
 
         assert result.success
@@ -505,10 +469,7 @@ class TestSearchOperationsComprehensive:
         (temp_project / "a" / "b" / "c" / "d").mkdir(parents=True)
 
         tool = GetDirectoryTreeTool()
-        result = await tool._execute_validated(
-            path=str(temp_project),
-            max_depth=2
-        )
+        result = await tool._execute_validated(path=str(temp_project), max_depth=2)
 
         assert result.success
         # Should not include deep nested dirs
@@ -631,10 +592,7 @@ class TestGitOperationsComprehensive:
         subprocess.run(["git", "add", "test.py"], cwd=temp_project)
 
         tool = GitDiffTool()
-        result = await tool._execute_validated(
-            path=str(temp_project),
-            staged=True
-        )
+        result = await tool._execute_validated(path=str(temp_project), staged=True)
 
         assert result.success
         assert result.data["has_changes"]
@@ -659,10 +617,7 @@ class TestGitOperationsComprehensive:
         file2.write_text("modified2")
 
         tool = GitDiffTool()
-        result = await tool._execute_validated(
-            path=str(temp_project),
-            file="file1.py"
-        )
+        result = await tool._execute_validated(path=str(temp_project), file="file1.py")
 
         assert result.success
         assert "file1.py" in result.data["diff"]

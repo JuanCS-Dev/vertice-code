@@ -10,6 +10,7 @@ from pathlib import Path
 # Add project to path
 sys.path.insert(0, str(Path(__file__).parent))
 
+
 async def test_llm_generate_stream():
     """Test 1: LLMClient.generate_stream() exists"""
     print("🔍 Test 1: Verificando LLMClient.generate_stream()...")
@@ -19,14 +20,18 @@ async def test_llm_generate_stream():
     client = LLMClient()
 
     # Check method exists
-    assert hasattr(client, 'generate_stream'), "❌ generate_stream() não existe!"
+    assert hasattr(client, "generate_stream"), "❌ generate_stream() não existe!"
 
     # Check it's async generator
     import inspect
-    assert inspect.isasyncgenfunction(client.generate_stream), "❌ generate_stream() não é async generator!"
+
+    assert inspect.isasyncgenfunction(
+        client.generate_stream
+    ), "❌ generate_stream() não é async generator!"
 
     print("✅ LLMClient.generate_stream() OK")
     return True
+
 
 async def test_planner_execute_streaming():
     """Test 2: PlannerAgent.execute_streaming() exists"""
@@ -36,22 +41,25 @@ async def test_planner_execute_streaming():
     import inspect
 
     # Check method exists in class definition
-    assert hasattr(PlannerAgent, 'execute_streaming'), "❌ execute_streaming() não existe na classe!"
+    assert hasattr(
+        PlannerAgent, "execute_streaming"
+    ), "❌ execute_streaming() não existe na classe!"
 
     # Check it's async generator
-    method = getattr(PlannerAgent, 'execute_streaming')
+    method = getattr(PlannerAgent, "execute_streaming")
     assert inspect.isasyncgenfunction(method), "❌ execute_streaming() não é async generator!"
 
     print("✅ PlannerAgent.execute_streaming() OK")
     return True
 
+
 async def test_imports():
     """Test 3: Verificar imports necessários"""
     print("\n🔍 Test 3: Verificando imports...")
 
-
     print("✅ Imports OK (AsyncIterator, asyncio, uuid)")
     return True
+
 
 async def main():
     print("=" * 60)
@@ -79,8 +87,10 @@ async def main():
     except Exception as e:
         print(f"\n❌ ERRO: {e}")
         import traceback
+
         traceback.print_exc()
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(asyncio.run(main()))

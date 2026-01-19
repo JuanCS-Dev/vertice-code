@@ -13,11 +13,12 @@ async def test_app_startup_and_layout(mock_tool_bridge):
         pytest.skip("VerticeApp not importable")
 
     # Patch get_bridge to return a mock
-    from unittest.mock import patch, MagicMock
+    from unittest.mock import patch, MagicMock, AsyncMock
 
     with patch("vertice_tui.core.bridge.get_bridge") as mock_get_bridge:
         mock_bridge = MagicMock()
         mock_bridge.is_connected = True
+        mock_bridge.warmup = AsyncMock(return_value=None)
         mock_get_bridge.return_value = mock_bridge
 
         app = VerticeApp()
@@ -37,11 +38,12 @@ async def test_input_flow_interactive(mock_tool_bridge):
     if not VerticeApp:
         pytest.skip("VerticeApp not importable")
 
-    from unittest.mock import patch, MagicMock
+    from unittest.mock import patch, MagicMock, AsyncMock
 
     with patch("vertice_tui.core.bridge.get_bridge") as mock_get_bridge:
         mock_bridge = MagicMock()
         mock_bridge.is_connected = True
+        mock_bridge.warmup = AsyncMock(return_value=None)
 
         # Mock chat to yield nothing so it doesn't crash loop
         async def mock_chat(*args):
@@ -74,8 +76,8 @@ async def test_input_flow_interactive(mock_tool_bridge):
             # Wait for processing
             await pilot.pause()
 
-            # Check response view for user message
-            response_view = pilot.app.query_one("ResponseView")
+            # Sanity check: response view still present
+            assert pilot.app.query_one("ResponseView")
             # We can't easily check internal rendering in E2E without screenshot or deep inspection
             # But we can check if history updated
             assert "Hello" in app.history

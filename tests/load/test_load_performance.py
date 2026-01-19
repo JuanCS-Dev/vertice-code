@@ -195,7 +195,7 @@ class LoadTester:
 
         end_time = time.time()
         final_memory = self.process.memory_info().rss / (1024 * 1024)
-        memory_increase = final_memory - initial_memory
+        final_memory - initial_memory
 
         # Cleanup
         del memory_objects

@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 class PluginLoadError(Exception):
     """Raised when plugin loading fails."""
+
     def __init__(self, plugin_name: str, reason: str):
         self.plugin_name = plugin_name
         self.reason = reason
@@ -35,12 +36,10 @@ class PluginLoadError(Exception):
 
 class DependencyError(PluginLoadError):
     """Raised when plugin dependencies cannot be resolved."""
+
     def __init__(self, plugin_name: str, missing: List[str]):
         self.missing = missing
-        super().__init__(
-            plugin_name,
-            f"Missing dependencies: {', '.join(missing)}"
-        )
+        super().__init__(plugin_name, f"Missing dependencies: {', '.join(missing)}")
 
 
 class PluginLoader:
@@ -124,14 +123,10 @@ class PluginLoader:
         """Load metadata from a plugin file without fully loading it."""
         # Load module temporarily to get metadata
         spec = importlib.util.spec_from_file_location(
-            f"_plugin_probe_{plugin_path.parent.name}",
-            plugin_path
+            f"_plugin_probe_{plugin_path.parent.name}", plugin_path
         )
         if spec is None or spec.loader is None:
-            raise PluginLoadError(
-                plugin_path.parent.name,
-                "Could not create module spec"
-            )
+            raise PluginLoadError(plugin_path.parent.name, "Could not create module spec")
 
         module = importlib.util.module_from_spec(spec)
 
@@ -139,17 +134,13 @@ class PluginLoader:
         try:
             spec.loader.exec_module(module)
         except Exception as e:
-            raise PluginLoadError(
-                plugin_path.parent.name,
-                f"Failed to execute module: {e}"
-            )
+            raise PluginLoadError(plugin_path.parent.name, f"Failed to execute module: {e}")
 
         # Find plugin class
         plugin_class = self._find_plugin_class(module, plugin_path.parent.name)
         if plugin_class is None:
             raise PluginLoadError(
-                plugin_path.parent.name,
-                f"No Plugin subclass found in {plugin_path}"
+                plugin_path.parent.name, f"No Plugin subclass found in {plugin_path}"
             )
 
         # Get metadata from class
@@ -157,23 +148,20 @@ class PluginLoader:
             instance = plugin_class()
             return instance.metadata
         except Exception as e:
-            raise PluginLoadError(
-                plugin_path.parent.name,
-                f"Failed to get metadata: {e}"
-            )
+            raise PluginLoadError(plugin_path.parent.name, f"Failed to get metadata: {e}")
 
     def _find_plugin_class(self, module, plugin_name: str) -> Optional[Type[Plugin]]:
         """Find the Plugin subclass in a module."""
         for name in dir(module):
-            if name.startswith('_'):
+            if name.startswith("_"):
                 continue
 
             obj = getattr(module, name)
             if (
-                isinstance(obj, type) and
-                issubclass(obj, Plugin) and
-                obj is not Plugin and
-                name.endswith(self.PLUGIN_CLASS_SUFFIX)
+                isinstance(obj, type)
+                and issubclass(obj, Plugin)
+                and obj is not Plugin
+                and name.endswith(self.PLUGIN_CLASS_SUFFIX)
             ):
                 return obj
 
@@ -277,9 +265,7 @@ class PluginLoader:
         # Check if other plugins depend on this one
         dependents = self._get_dependents(name)
         if dependents:
-            logger.warning(
-                f"Unloading {name} which is required by: {', '.join(dependents)}"
-            )
+            logger.warning(f"Unloading {name} which is required by: {', '.join(dependents)}")
 
         await plugin._do_deactivate()
         del self._loaded[name]
@@ -303,7 +289,7 @@ class PluginLoader:
 
 
 __all__ = [
-    'PluginLoader',
-    'PluginLoadError',
-    'DependencyError',
+    "PluginLoader",
+    "PluginLoadError",
+    "DependencyError",
 ]

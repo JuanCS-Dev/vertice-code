@@ -178,7 +178,6 @@ class TestSofiaChatMode:
         await chat.send_message("First question")
         await chat.send_message("Second question")
         old_session_id = chat.session_id
-        old_turn_count = chat.turn_count
 
         # Clear session
         chat.clear()
@@ -255,14 +254,14 @@ class TestSofiaChatMode:
         chat = SofiaChatMode(sofia_agent)
 
         # First turn
-        response1 = await chat.send_message("Should I do X?")
+        await chat.send_message("Should I do X?")
 
         # Check session history grows
         history1 = chat.get_history()
         assert len(history1) == 1
 
         # Second turn
-        response2 = await chat.send_message("What about Y?")
+        await chat.send_message("What about Y?")
 
         # History should have both
         history2 = chat.get_history()
@@ -396,8 +395,7 @@ class TestPreExecutionCounsel:
         assert risk.lower() in query.lower() or risk in query
         assert action in query
         assert any(
-            keyword in query.lower()
-            for keyword in ["consider", "wrong", "ethical", "implications"]
+            keyword in query.lower() for keyword in ["consider", "wrong", "ethical", "implications"]
         )
 
     @pytest.mark.asyncio

@@ -21,6 +21,7 @@ import pytest
 # CODER: Darwin Gödel Evolution Tests
 # =============================================================================
 
+
 class TestDarwinGodelTypes:
     """Test coder types module."""
 
@@ -137,8 +138,12 @@ class TestDarwinGodelTypes:
         from agents.coder.types import EvolutionResult, AgentVariant
 
         child = AgentVariant(
-            id="c1", parent_id="p1", generation=1,
-            system_prompt="New", tools=[], strategies={},
+            id="c1",
+            parent_id="p1",
+            generation=1,
+            system_prompt="New",
+            tools=[],
+            strategies={},
         )
         result = EvolutionResult(
             new_variant=child,
@@ -170,6 +175,7 @@ class TestDarwinGodelMixin:
     def coder(self):
         """Create coder agent instance."""
         from agents.coder.agent import CoderAgent
+
         return CoderAgent()
 
     def test_get_archive_initializes(self, coder):
@@ -221,6 +227,7 @@ class TestDarwinGodelMixin:
 # =============================================================================
 # RESEARCHER: Agentic RAG Tests
 # =============================================================================
+
 
 class TestAgenticRAGTypes:
     """Test researcher types module."""
@@ -329,6 +336,7 @@ class TestAgenticRAGMixin:
     def researcher(self):
         """Create researcher agent instance."""
         from agents.researcher.agent import ResearcherAgent
+
         return ResearcherAgent()
 
     def test_classify_complexity_simple(self, researcher):
@@ -442,6 +450,7 @@ class TestAgenticRAGMixin:
 # ARCHITECT: Three Loops Framework Tests
 # =============================================================================
 
+
 class TestThreeLoopsTypes:
     """Test architect types module."""
 
@@ -527,9 +536,7 @@ class TestThreeLoopsTypes:
         )
 
         # Low impact, low risk -> OUT_OF_LOOP
-        assert LOOP_RULES[(DecisionImpact.LOW, DecisionRisk.LOW)] == (
-            ArchitectLoop.OUT_OF_LOOP
-        )
+        assert LOOP_RULES[(DecisionImpact.LOW, DecisionRisk.LOW)] == (ArchitectLoop.OUT_OF_LOOP)
 
 
 class TestThreeLoopsMixin:
@@ -539,6 +546,7 @@ class TestThreeLoopsMixin:
     def architect(self):
         """Create architect agent instance."""
         from agents.architect.agent import ArchitectAgent
+
         return ArchitectAgent()
 
     def test_classify_decision_critical_impact(self, architect):
@@ -745,6 +753,7 @@ class TestThreeLoopsMixin:
 # DEVOPS: Incident Handler Tests
 # =============================================================================
 
+
 class TestIncidentHandlerTypes:
     """Test devops types module."""
 
@@ -835,6 +844,7 @@ class TestIncidentHandlerMixin:
     def devops(self):
         """Create devops agent instance."""
         from agents.devops.agent import DevOpsAgent
+
         return DevOpsAgent()
 
     def test_build_topology(self, devops):
@@ -869,9 +879,11 @@ class TestIncidentHandlerMixin:
         """Test incident investigation."""
         from agents.devops.types import Alert, IncidentSeverity
 
-        devops.build_topology([
-            {"id": "api", "name": "API", "type": "service"},
-        ])
+        devops.build_topology(
+            [
+                {"id": "api", "name": "API", "type": "service"},
+            ]
+        )
 
         alert = Alert(
             id="alert-1",
@@ -925,6 +937,7 @@ class TestIncidentHandlerMixin:
 # REVIEWER: Deep Think Tests
 # =============================================================================
 
+
 class TestDeepThinkTypes:
     """Test reviewer types module."""
 
@@ -966,7 +979,9 @@ class TestDeepThinkTypes:
 
         finding = ReviewFinding(
             id="f1",
-            severity=ReviewSeverity.WARNING if hasattr(ReviewSeverity, 'WARNING') else ReviewSeverity.MEDIUM,
+            severity=ReviewSeverity.WARNING
+            if hasattr(ReviewSeverity, "WARNING")
+            else ReviewSeverity.MEDIUM,
             category="security",
             file_path="app.py",
             line_start=42,
@@ -998,6 +1013,7 @@ class TestDeepThinkMixin:
     def reviewer(self):
         """Create reviewer agent instance."""
         from agents.reviewer.agent import ReviewerAgent
+
         return ReviewerAgent()
 
     def test_stage_static_analysis(self, reviewer):
@@ -1142,6 +1158,7 @@ def add(a: int, b: int) -> int:
 # ORCHESTRATOR: Bounded Autonomy Tests
 # =============================================================================
 
+
 class TestBoundedAutonomyTypes:
     """Test orchestrator types module."""
 
@@ -1241,6 +1258,7 @@ class TestBoundedAutonomyMixin:
     def orchestrator(self):
         """Create orchestrator agent instance."""
         from agents.orchestrator.agent import OrchestratorAgent
+
         return OrchestratorAgent()
 
     def test_get_autonomy_level_l0(self, orchestrator):
@@ -1513,6 +1531,7 @@ class TestBoundedAutonomyMixin:
 # =============================================================================
 # INTEGRATION TESTS
 # =============================================================================
+
 
 class TestAgentIntegration:
     """Integration tests for all agents working together."""

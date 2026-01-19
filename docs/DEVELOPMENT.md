@@ -184,7 +184,7 @@ class MyAgent(BaseAgent):
     async def _think(self, task: AgentTask) -> str:
         # Reasoning logic
         pass
-    
+
     async def _act(self, task: AgentTask, reasoning: str) -> AgentResponse:
         # Execution logic
         pass
@@ -210,7 +210,7 @@ class MyTool(BaseTool):
     name = "my_tool"
     description = "Tool description"
     parameters_schema = MyToolParams
-    
+
     async def _execute(self, **kwargs) -> ToolResult:
         # Tool logic
         return ToolResult(success=True, data={"result": "output"})
@@ -367,5 +367,5 @@ Commit message format:
 
 ---
 
-**Last Updated**: 2025-11-24  
+**Last Updated**: 2025-11-24
 **Compliance**: Vertice Constitution v3.0 - P4 (Documentation)

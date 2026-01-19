@@ -28,9 +28,7 @@ def synthesize_deliberation(result: DeliberationResult) -> Dict[str, Any]:
 
     # Insight das perspectivas
     if result.perspectives_considered:
-        perspectives_summary = ", ".join(
-            p.name for p in result.perspectives_considered[:3]
-        )
+        perspectives_summary = ", ".join(p.name for p in result.perspectives_considered[:3])
         insights.append(
             f"Múltiplas perspectivas éticas iluminam diferentes aspectos: {perspectives_summary}"
         )
@@ -42,9 +40,7 @@ def synthesize_deliberation(result: DeliberationResult) -> Dict[str, Any]:
                 "Esta é uma decisão com consequências irreversíveis - merece cautela extra"
             )
         elif result.consequence_analysis.reversibility == "easy":
-            insights.append(
-                "Esta decisão é relativamente reversível - há espaço para experimentar"
-            )
+            insights.append("Esta decisão é relativamente reversível - há espaço para experimentar")
 
     # Insight dos valores
     if result.values_in_tension:
@@ -157,8 +153,7 @@ def calculate_confidence(result: DeliberationResult) -> float:
         confidence -= 0.1
 
     # Diminuir se irreversível (mais cautela)
-    if result.consequence_analysis and \
-       result.consequence_analysis.reversibility == "irreversible":
+    if result.consequence_analysis and result.consequence_analysis.reversibility == "irreversible":
         confidence -= 0.1
 
     # Limitar (nunca muito confiante)
@@ -196,8 +191,7 @@ def meta_reflect(result: DeliberationResult) -> Dict[str, Any]:
     if result.trigger == DeliberationTrigger.EMOTIONAL_WEIGHT:
         consultations.append("Um profissional de saúde mental, se a angústia persistir")
 
-    if result.trigger in [DeliberationTrigger.ETHICAL_DILEMMA,
-                          DeliberationTrigger.VALUES_CONFLICT]:
+    if result.trigger in [DeliberationTrigger.ETHICAL_DILEMMA, DeliberationTrigger.VALUES_CONFLICT]:
         consultations.append("Um mentor espiritual ou conselheiro")
 
     return {

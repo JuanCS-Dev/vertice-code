@@ -4,7 +4,6 @@ from vertexai.generative_models import GenerativeModel
 
 def verify_vertex_status():
     project_id = "vertice-ai"
-    location = "us-central1"
 
     print(f"🔍 DIAGNOSTIC: Verifying Vertex AI for Project '{project_id}'...")
 

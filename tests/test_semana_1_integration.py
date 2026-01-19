@@ -66,7 +66,7 @@ async def test_semana_1_integration():
         )
 
         # Test search result creation
-        result = SearchResult(
+        SearchResult(
             session_id="session-123",
             message_index=5,
             content="Test content",
@@ -96,7 +96,7 @@ async def test_semana_1_integration():
 
         # Test session creation
         session1 = tabs.create_session("Test Session 1")
-        session2 = tabs.create_session("Test Session 2")
+        tabs.create_session("Test Session 2")
 
         if tabs.session_count == 2:
             print("✅ Session creation working")

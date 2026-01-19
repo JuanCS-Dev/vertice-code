@@ -14,14 +14,18 @@ from .timing import timing_decorator
 class MemorySubsystem(Protocol):
     """Protocol for memory subsystems that support search."""
 
-    def search(self, query: str, limit: int = 5) -> Coroutine[Any, Any, List[Any]]: ...
+    def search(self, query: str, limit: int = 5) -> Coroutine[Any, Any, List[Any]]:
+        ...
 
 
 class CoreMemoryProtocol(Protocol):
     """Protocol for core memory."""
 
-    def get_persona(self) -> Dict[str, Any]: ...
-    def to_context_string(self) -> str: ...
+    def get_persona(self) -> Dict[str, Any]:
+        ...
+
+    def to_context_string(self) -> str:
+        ...
 
 
 class ActiveRetrieval:
@@ -76,10 +80,10 @@ class ActiveRetrieval:
         results["core"] = [self.core.get_persona()]
 
         # Process results
-        for (memory_type, search_result) in zip(tasks.keys(), search_results):
+        for memory_type, search_result in zip(tasks.keys(), search_results):
             if search_result:
                 if memory_type == "procedural" or memory_type == "resource":
-                     results[memory_type] = [
+                    results[memory_type] = [
                         p.to_dict() if hasattr(p, "to_dict") else p for p in search_result
                     ]
                 else:

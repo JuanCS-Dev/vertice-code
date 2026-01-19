@@ -23,12 +23,13 @@ import pytest
 # Test Data / Fixtures
 # =============================================================================
 
+
 @pytest.fixture
 def sample_messages() -> List[Dict[str, str]]:
     """Sample chat messages for grounding tests."""
     return [
         {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Who won the 2024 Euro Championship?"}
+        {"role": "user", "content": "Who won the 2024 Euro Championship?"},
     ]
 
 
@@ -43,7 +44,7 @@ def mock_grounding_response() -> Dict[str, Any]:
                 {
                     "web": {
                         "uri": "https://www.uefa.com/euro2024/",
-                        "title": "UEFA Euro 2024 Official"
+                        "title": "UEFA Euro 2024 Official",
                     }
                 }
             ],
@@ -51,10 +52,10 @@ def mock_grounding_response() -> Dict[str, Any]:
                 {
                     "segment": {"start_index": 0, "end_index": 38},
                     "grounding_chunk_indices": [0],
-                    "confidence_scores": [0.95]
+                    "confidence_scores": [0.95],
                 }
-            ]
-        }
+            ],
+        },
     }
 
 
@@ -62,20 +63,20 @@ def mock_grounding_response() -> Dict[str, Any]:
 # Test: _get_grounding_tool()
 # =============================================================================
 
+
 class TestGetGroundingTool:
     """Test _get_grounding_tool() method."""
 
     def test_get_grounding_tool_returns_tool_instance(self) -> None:
         """HYPOTHESIS: Returns a valid Tool instance for Google Search."""
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
             mock_tool = MagicMock()
 
-            with patch('vertexai.generative_models.Tool') as MockTool:
+            with patch("vertexai.generative_models.Tool") as MockTool:
                 MockTool.from_google_search_retrieval.return_value = mock_tool
 
                 provider = VertexAIProvider()
@@ -87,13 +88,12 @@ class TestGetGroundingTool:
 
     def test_get_grounding_tool_fallback_on_error(self) -> None:
         """HYPOTHESIS: Returns None gracefully if SDK not available."""
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
-            with patch('vertexai.generative_models.Tool') as MockTool:
+            with patch("vertexai.generative_models.Tool") as MockTool:
                 MockTool.from_google_search_retrieval.side_effect = ImportError("SDK not found")
 
                 provider = VertexAIProvider()
@@ -107,19 +107,18 @@ class TestGetGroundingTool:
 # Test: stream_chat() with enable_grounding
 # =============================================================================
 
+
 class TestStreamChatWithGrounding:
     """Test stream_chat() with grounding enabled."""
 
     @pytest.mark.asyncio
     async def test_stream_chat_passes_grounding_tool_when_enabled(
-        self,
-        sample_messages: List[Dict[str, str]]
+        self, sample_messages: List[Dict[str, str]]
     ) -> None:
         """HYPOTHESIS: Grounding tool is added when enable_grounding=True."""
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
@@ -131,13 +130,14 @@ class TestStreamChatWithGrounding:
             mock_response.__iter__ = lambda self: iter([])
             mock_model.generate_content.return_value = mock_response
 
-            with patch.object(provider, '_get_grounding_tool', return_value=mock_grounding_tool) as mock_get_tool:
-                with patch('vertexai.generative_models.GenerativeModel', return_value=mock_model) as MockModel:
+            with patch.object(
+                provider, "_get_grounding_tool", return_value=mock_grounding_tool
+            ) as mock_get_tool:
+                with patch(
+                    "vertexai.generative_models.GenerativeModel", return_value=mock_model
+                ) as MockModel:
                     chunks = []
-                    async for chunk in provider.stream_chat(
-                        sample_messages,
-                        enable_grounding=True
-                    ):
+                    async for chunk in provider.stream_chat(sample_messages, enable_grounding=True):
                         chunks.append(chunk)
 
                     # _get_grounding_tool should be called
@@ -145,19 +145,17 @@ class TestStreamChatWithGrounding:
 
                     # Model should be created with grounding tool
                     call_kwargs = MockModel.call_args.kwargs
-                    assert 'tools' in call_kwargs
-                    assert mock_grounding_tool in call_kwargs['tools']
+                    assert "tools" in call_kwargs
+                    assert mock_grounding_tool in call_kwargs["tools"]
 
     @pytest.mark.asyncio
     async def test_stream_chat_no_grounding_tool_when_disabled(
-        self,
-        sample_messages: List[Dict[str, str]]
+        self, sample_messages: List[Dict[str, str]]
     ) -> None:
         """HYPOTHESIS: No grounding tool when enable_grounding=False."""
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
@@ -168,12 +166,9 @@ class TestStreamChatWithGrounding:
             mock_response.__iter__ = lambda self: iter([])
             mock_model.generate_content.return_value = mock_response
 
-            with patch.object(provider, '_get_grounding_tool') as mock_get_tool:
-                with patch('vertexai.generative_models.GenerativeModel', return_value=mock_model):
-                    async for _ in provider.stream_chat(
-                        sample_messages,
-                        enable_grounding=False
-                    ):
+            with patch.object(provider, "_get_grounding_tool") as mock_get_tool:
+                with patch("vertexai.generative_models.GenerativeModel", return_value=mock_model):
+                    async for _ in provider.stream_chat(sample_messages, enable_grounding=False):
                         pass
 
                     # _get_grounding_tool should NOT be called
@@ -181,14 +176,12 @@ class TestStreamChatWithGrounding:
 
     @pytest.mark.asyncio
     async def test_stream_chat_combines_tools_and_grounding(
-        self,
-        sample_messages: List[Dict[str, str]]
+        self, sample_messages: List[Dict[str, str]]
     ) -> None:
         """HYPOTHESIS: Both function calling tools and grounding can be used together."""
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
@@ -202,23 +195,25 @@ class TestStreamChatWithGrounding:
             mock_model.generate_content.return_value = mock_response
 
             # Mock _convert_tools to return a function tool
-            with patch.object(provider, '_get_grounding_tool', return_value=mock_grounding_tool):
-                with patch.object(provider, '_convert_tools', return_value=[mock_function_tool]):
-                    with patch('vertexai.generative_models.GenerativeModel', return_value=mock_model) as MockModel:
-                        function_tools = [{"name": "read_file", "description": "Read", "parameters": {}}]
+            with patch.object(provider, "_get_grounding_tool", return_value=mock_grounding_tool):
+                with patch.object(provider, "_convert_tools", return_value=[mock_function_tool]):
+                    with patch(
+                        "vertexai.generative_models.GenerativeModel", return_value=mock_model
+                    ) as MockModel:
+                        function_tools = [
+                            {"name": "read_file", "description": "Read", "parameters": {}}
+                        ]
 
                         async for _ in provider.stream_chat(
-                            sample_messages,
-                            tools=function_tools,
-                            enable_grounding=True
+                            sample_messages, tools=function_tools, enable_grounding=True
                         ):
                             pass
 
                         # Model should have BOTH tools
                         call_kwargs = MockModel.call_args.kwargs
-                        assert 'tools' in call_kwargs
+                        assert "tools" in call_kwargs
                         # Should contain both function tool and grounding tool
-                        tools_list = call_kwargs['tools']
+                        tools_list = call_kwargs["tools"]
                         assert len(tools_list) >= 2
 
 
@@ -226,16 +221,16 @@ class TestStreamChatWithGrounding:
 # Test: Grounding metadata parsing
 # =============================================================================
 
+
 class TestGroundingMetadataParsing:
     """Test parsing grounding metadata from response."""
 
     @pytest.mark.asyncio
     async def test_yields_grounding_metadata_as_json(self) -> None:
         """HYPOTHESIS: Grounding metadata is yielded as structured JSON."""
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
@@ -267,11 +262,10 @@ class TestGroundingMetadataParsing:
             mock_response.__iter__ = lambda self: iter([mock_chunk])
             mock_model.generate_content.return_value = mock_response
 
-            with patch('vertexai.generative_models.GenerativeModel', return_value=mock_model):
+            with patch("vertexai.generative_models.GenerativeModel", return_value=mock_model):
                 chunks = []
                 async for chunk in provider.stream_chat(
-                    [{"role": "user", "content": "test"}],
-                    enable_grounding=True
+                    [{"role": "user", "content": "test"}], enable_grounding=True
                 ):
                     chunks.append(chunk)
 
@@ -283,15 +277,15 @@ class TestGroundingMetadataParsing:
 # Test: Grounding toggle
 # =============================================================================
 
+
 class TestGroundingToggle:
     """Test runtime grounding toggle."""
 
     def test_set_grounding_updates_flag(self) -> None:
         """HYPOTHESIS: set_grounding() method updates internal flag."""
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
@@ -309,10 +303,9 @@ class TestGroundingToggle:
 
     def test_grounding_default_can_be_set_in_constructor(self) -> None:
         """HYPOTHESIS: enable_grounding can be set in __init__."""
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
             # Create with grounding enabled by default
@@ -323,6 +316,7 @@ class TestGroundingToggle:
 # =============================================================================
 # Integration Test (requires actual SDK - skip in CI)
 # =============================================================================
+
 
 @pytest.mark.skip(reason="Requires Vertex AI credentials - run manually")
 class TestVertexGroundingIntegration:
@@ -343,10 +337,7 @@ class TestVertexGroundingIntegration:
         ]
 
         chunks = []
-        async for chunk in provider.stream_chat(
-            messages,
-            enable_grounding=True
-        ):
+        async for chunk in provider.stream_chat(messages, enable_grounding=True):
             chunks.append(chunk)
 
         # Should have received a response with grounding
@@ -354,4 +345,3 @@ class TestVertexGroundingIntegration:
         assert len(full_response) > 0
         # Grounding responses typically reference sources
         # Note: Can't assert specific content as it changes
-

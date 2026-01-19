@@ -26,9 +26,7 @@ async def test_race_condition(test_id: int) -> None:
             return gov.detect_risk_level("test", "executor")
 
         num_concurrent = test_id % 10 + 1
-        results = await asyncio.gather(*[
-            detect_risk() for _ in range(num_concurrent)
-        ])
+        results = await asyncio.gather(*[detect_risk() for _ in range(num_concurrent)])
         assert len(results) > 0
     except Exception:
         pass  # Expected for race conditions

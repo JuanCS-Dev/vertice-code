@@ -14,41 +14,28 @@ from datetime import datetime
 
 def run_prometheus(prompt: str, timeout: int = 120) -> dict:
     """Run PROMETHEUS via Blaxel CLI."""
-    cmd = [
-        "bl", "run", "agent", "prometheus",
-        "--data", json.dumps({"inputs": prompt})
-    ]
+    cmd = ["bl", "run", "agent", "prometheus", "--data", json.dumps({"inputs": prompt})]
 
     start = time.time()
     try:
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=timeout
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
         duration = time.time() - start
 
         return {
             "success": result.returncode == 0,
             "output": result.stdout,
             "error": result.stderr,
-            "duration": duration
+            "duration": duration,
         }
     except subprocess.TimeoutExpired:
         return {
             "success": False,
             "output": "",
             "error": f"Timeout after {timeout}s",
-            "duration": timeout
+            "duration": timeout,
         }
     except Exception as e:
-        return {
-            "success": False,
-            "output": "",
-            "error": str(e),
-            "duration": time.time() - start
-        }
+        return {"success": False, "output": "", "error": str(e), "duration": time.time() - start}
 
 
 def test_basic_math():
@@ -98,9 +85,9 @@ def test_reflection():
 
 
 def main():
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🔥 PROMETHEUS E2E Quick Test Suite")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
     start_time = datetime.now()
 
@@ -126,10 +113,10 @@ def main():
     passed = sum(1 for _, p in results if p)
     total = len(results)
 
-    print("="*60)
+    print("=" * 60)
     print(f"📊 Results: {passed}/{total} tests passed ({passed/total*100:.0f}%)")
     print(f"⏱️  Total time: {total_time:.1f}s")
-    print("="*60)
+    print("=" * 60)
 
     # Return exit code
     return 0 if passed == total else 1

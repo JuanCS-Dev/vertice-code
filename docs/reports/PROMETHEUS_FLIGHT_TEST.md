@@ -480,7 +480,7 @@ Quality Assessment: ________________________________
 #### BUG #___: [Short Description]
 **Found During**: Test X.Y
 **Severity**: 🔴 Critical / 🟡 Medium / 🟢 Low
-**Symptoms**: 
+**Symptoms**:
 ___
 
 **Expected Behavior**:

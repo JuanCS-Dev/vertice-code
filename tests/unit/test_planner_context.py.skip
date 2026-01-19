@@ -169,7 +169,7 @@ class TestPlannerWithoutContext:
         Analyzing the task: Create a simple Python function.
         This requires creating a new file with function definition.
         </think>
-        
+
         <action>
         Plan to create hello.py with a greeting function.
         Steps:

@@ -20,7 +20,7 @@ class TestCodeRefactoring:
             name="add_type_hints",
             status="passed",
             duration=0.0,
-            metadata={"refactor_type": "type_hints"}
+            metadata={"refactor_type": "type_hints"},
         )
 
         try:
@@ -30,7 +30,7 @@ class TestCodeRefactoring:
             edit_tool = EditFileTool()
 
             # Create untyped code
-            untyped_code = '''def process_data(items):
+            untyped_code = """def process_data(items):
     results = []
     for item in items:
         if item > 0:
@@ -56,12 +56,12 @@ class DataProcessor:
 
     def get_all(self):
         return self.data.copy()
-'''
+"""
             test_file = sample_python_project / "untyped.py"
             test_file.write_text(untyped_code)
 
             # Apply type hints via edit
-            typed_code = '''from typing import List, Optional
+            typed_code = """from typing import List, Optional
 
 def process_data(items: List[int]) -> List[int]:
     results: List[int] = []
@@ -89,12 +89,12 @@ class DataProcessor:
 
     def get_all(self) -> List[any]:
         return self.data.copy()
-'''
+"""
             edit_result = await edit_tool._execute_validated(
                 path=str(test_file),
                 edits=[{"search": untyped_code, "replace": typed_code}],
                 preview=False,
-                create_backup=False
+                create_backup=False,
             )
             assert edit_result.success, f"Edit failed: {edit_result.error}"
 
@@ -130,17 +130,17 @@ class DataProcessor:
             name="extract_function",
             status="passed",
             duration=0.0,
-            metadata={"refactor_type": "extract_function"}
+            metadata={"refactor_type": "extract_function"},
         )
 
         try:
             from vertice_cli.tools.file_ops import WriteFileTool, EditFileTool
 
-            write_tool = WriteFileTool()
-            edit_tool = EditFileTool()
+            WriteFileTool()
+            EditFileTool()
 
             # Code with duplication
-            duplicated_code = '''def process_users(users):
+            duplicated_code = """def process_users(users):
     # Validate and transform users
     valid_users = []
     for user in users:
@@ -175,7 +175,7 @@ def process_guests(guests):
                     "email": guest["email"].strip().lower()
                 })
     return valid_guests
-'''
+"""
             test_file = sample_python_project / "duplicated.py"
             test_file.write_text(duplicated_code)
 
@@ -258,7 +258,7 @@ def process_guests(guests: List[Dict[str, Any]]) -> List[Dict[str, str]]:
             name="fix_security_issues",
             status="passed",
             duration=0.0,
-            metadata={"refactor_type": "security_fix"}
+            metadata={"refactor_type": "security_fix"},
         )
 
         try:
@@ -272,7 +272,7 @@ def process_guests(guests: List[Dict[str, Any]]) -> List[Dict[str, str]]:
             read_result = await read_tool._execute_validated(path=str(config_file))
             original_content = read_result.data["content"]
 
-            assert "API_KEY = \"sk-" in original_content, "Test file should have hardcoded secret"
+            assert 'API_KEY = "sk-' in original_content, "Test file should have hardcoded secret"
 
             # Fix by using environment variables
             fixed_config = '''"""Configuration - Secure version."""
@@ -295,11 +295,11 @@ DATABASE_URL = get_env("DATABASE_URL", "postgresql://localhost/db")
 if not API_KEY:
     raise ValueError("API_KEY environment variable must be set")
 '''
-            edit_result = await edit_tool._execute_validated(
+            await edit_tool._execute_validated(
                 path=str(config_file),
                 edits=[{"search": original_content, "replace": fixed_config}],
                 preview=False,
-                create_backup=False
+                create_backup=False,
             )
 
             # Verify fix
@@ -333,7 +333,7 @@ if not API_KEY:
             name="add_error_handling",
             status="passed",
             duration=0.0,
-            metadata={"refactor_type": "error_handling"}
+            metadata={"refactor_type": "error_handling"},
         )
 
         try:
@@ -345,7 +345,7 @@ if not API_KEY:
             # Read main.py which has divide without zero check
             main_file = sample_python_project / "src" / "main.py"
             read_result = await read_tool._execute_validated(path=str(main_file))
-            original = read_result.data["content"]
+            read_result.data["content"]
 
             # Find and fix the divide function
             old_divide = '''def divide(a: float, b: float) -> float:
@@ -373,27 +373,27 @@ if not API_KEY:
                 path=str(main_file),
                 edits=[{"search": old_divide, "replace": new_divide}],
                 preview=False,
-                create_backup=False
+                create_backup=False,
             )
             assert edit_result.success
 
             # Also fix Calculator.calculate
             read_result = await read_tool._execute_validated(path=str(main_file))
-            content = read_result.data["content"]
+            read_result.data["content"]
 
-            old_calc = '''elif op == "/":
-            result = a / b  # BUG: no zero check'''
+            old_calc = """elif op == "/":
+            result = a / b  # BUG: no zero check"""
 
-            new_calc = '''elif op == "/":
+            new_calc = """elif op == "/":
             if b == 0:
                 raise ZeroDivisionError("Cannot divide by zero")
-            result = a / b'''
+            result = a / b"""
 
             edit_result = await edit_tool._execute_validated(
                 path=str(main_file),
                 edits=[{"search": old_calc, "replace": new_calc}],
                 preview=False,
-                create_backup=False
+                create_backup=False,
             )
             assert edit_result.success
 
@@ -432,7 +432,7 @@ class TestBulkRefactoring:
             name="rename_across_files",
             status="passed",
             duration=0.0,
-            metadata={"refactor_type": "rename"}
+            metadata={"refactor_type": "rename"},
         )
 
         try:
@@ -444,9 +444,7 @@ class TestBulkRefactoring:
 
             # Search for 'greet' function usage
             search_result = await search_tool._execute_validated(
-                pattern="greet",
-                path=str(sample_python_project),
-                file_pattern="*.py"
+                pattern="greet", path=str(sample_python_project), file_pattern="*.py"
             )
 
             files_with_greet = []
@@ -455,25 +453,28 @@ class TestBulkRefactoring:
 
             # Rename greet -> say_hello in main.py
             main_file = sample_python_project / "src" / "main.py"
-            edit_result = await edit_tool._execute_validated(
+            await edit_tool._execute_validated(
                 path=str(main_file),
                 edits=[{"search": "def greet(", "replace": "def say_hello("}],
                 preview=False,
                 create_backup=False,
-                replace_all=True
+                replace_all=True,
             )
 
             # Rename in test file too
             test_file = sample_python_project / "tests" / "test_main.py"
-            edit_result = await edit_tool._execute_validated(
+            await edit_tool._execute_validated(
                 path=str(test_file),
                 edits=[
-                    {"search": "from src.main import greet", "replace": "from src.main import say_hello"},
-                    {"search": "greet(", "replace": "say_hello("}
+                    {
+                        "search": "from src.main import greet",
+                        "replace": "from src.main import say_hello",
+                    },
+                    {"search": "greet(", "replace": "say_hello("},
                 ],
                 preview=False,
                 create_backup=False,
-                replace_all=True
+                replace_all=True,
             )
 
             # Verify

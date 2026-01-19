@@ -1,22 +1,22 @@
 # 🏆 QWEN-DEV-CLI: MASTER PLAN DEFINITIVO
 
-**Updated:** 2025-11-19 06:48 UTC (09:48 BRT)  
-**Current Status:** 🔴 CRITICAL FIXES IN PROGRESS  
-**Target:** 90%+ paridade ✅ ACHIEVED (architecture complete)  
-**Deadline:** 2025-11-30 (11 dias restantes)  
+**Updated:** 2025-11-19 06:48 UTC (09:48 BRT)
+**Current Status:** 🔴 CRITICAL FIXES IN PROGRESS
+**Target:** 90%+ paridade ✅ ACHIEVED (architecture complete)
+**Deadline:** 2025-11-30 (11 dias restantes)
 **Hackathon Focus:** MCP Integration + Constitutional AI + **TUI System ✨**
 
 ---
 
 ## 🚨 CRITICAL FIXES SESSION (2025-11-19 06:48 UTC)
 
-**Status:** 🔴 ACTIVE - Constitutional Code Review Complete  
-**Reviewer:** Constitutional AI Senior Reviewer  
+**Status:** 🔴 ACTIVE - Constitutional Code Review Complete
+**Reviewer:** Constitutional AI Senior Reviewer
 **Findings:** 3 blockers, 2 serious issues identified
 
 ### **BLOCKER #1: Import Error - `create_progress_bar` Missing** ⚡
-**Priority:** P0 (CRITICAL - Shell won't start)  
-**Location:** `qwen_dev_cli/tui/components/__init__.py:34`  
+**Priority:** P0 (CRITICAL - Shell won't start)
+**Location:** `qwen_dev_cli/tui/components/__init__.py:34`
 **Status:** 🟡 IN PROGRESS
 
 **Problem:**
@@ -37,14 +37,14 @@ from .progress import ProgressBar, ProgressState, create_progress_bar
 - [ ] Run shell: `python3 -m qwen_dev_cli.shell`
 - [ ] Verify all 515 tests collect: `pytest --collect-only`
 
-**Estimated Time:** 5 minutes  
-**Assigned:** Maestro AI  
+**Estimated Time:** 5 minutes
+**Assigned:** Maestro AI
 **Deadline:** IMMEDIATE
 
 ---
 
 ### **BLOCKER #2: LEI = 2.43 (Target: <1.0)** ⚡
-**Priority:** P0 (CONSTITUTIONAL VIOLATION - Artigo II, Seção 3)  
+**Priority:** P0 (CONSTITUTIONAL VIOLATION - Artigo II, Seção 3)
 **Status:** 🔴 NOT STARTED
 
 **Measured LEI Breakdown:**
@@ -69,7 +69,7 @@ Line 131-132: except: pass  # ❌ Bare except + placeholder
 
 # file_tree.py
 Line 83:   pass  # ❌ Empty handler
-Line 243:  pass  # ❌ Empty handler  
+Line 243:  pass  # ❌ Empty handler
 Line 251:  pass  # ❌ Empty handler
 
 # autocomplete.py
@@ -117,15 +117,15 @@ Line 24:   pass  # ❌ Placeholder
 - [ ] Find all: `grep -rn "NotImplemented" qwen_dev_cli/`
 - [ ] Either implement or convert to proper stubs with docstrings
 
-**Target LEI:** < 1.0 (< 19 patterns for 18,938 LOC)  
-**Estimated Time:** 2 hours  
-**Assigned:** Maestro AI  
+**Target LEI:** < 1.0 (< 19 patterns for 18,938 LOC)
+**Estimated Time:** 2 hours
+**Assigned:** Maestro AI
 **Deadline:** 2025-11-19 12:00 UTC
 
 ---
 
 ### **BLOCKER #3: Bare Except Clauses (5 occurrences)** ⚡
-**Priority:** P0 (SECURITY VULNERABILITY)  
+**Priority:** P0 (SECURITY VULNERABILITY)
 **Status:** 🔴 NOT STARTED
 
 **Locations:**
@@ -154,15 +154,15 @@ Line 131-132:
 - [ ] Use `except (ProcessLookupError, ChildProcessError) as e:` for process ops
 - [ ] Add proper cleanup in finally blocks
 
-**Target:** 0 bare except clauses  
-**Estimated Time:** 30 minutes  
-**Assigned:** Maestro AI  
+**Target:** 0 bare except clauses
+**Estimated Time:** 30 minutes
+**Assigned:** Maestro AI
 **Deadline:** 2025-11-19 10:30 UTC
 
 ---
 
 ### **SERIOUS ISSUE #1: God Methods (2 occurrences)** 🟡
-**Priority:** P1 (CODE QUALITY - Technical Debt)  
+**Priority:** P1 (CODE QUALITY - Technical Debt)
 **Status:** 🔴 NOT STARTED
 
 **Locations:**
@@ -206,9 +206,9 @@ async def run(self):
     await self._cleanup()            # ~30 LOC
 ```
 
-**Target:** No methods > 100 LOC  
-**Estimated Time:** 2 hours (OPTIONAL - not blocking)  
-**Assigned:** Maestro AI  
+**Target:** No methods > 100 LOC
+**Estimated Time:** 2 hours (OPTIONAL - not blocking)
+**Assigned:** Maestro AI
 **Deadline:** 2025-11-20 (after blockers fixed)
 
 ---
@@ -222,7 +222,7 @@ async def run(self):
 | Bare Excepts | P0 | 🔴 Not Started | 10:30 UTC | 30min |
 | God Methods | P1 | 🔴 Not Started | 2025-11-20 | 2h (optional) |
 
-**Total P0 Time:** 2h 35min  
+**Total P0 Time:** 2h 35min
 **Total P0+P1 Time:** 4h 35min
 
 **Success Criteria:**
@@ -340,13 +340,13 @@ async def run(self):
 
 ## 🎯 PHASE 4A: CURSOR INTELLIGENCE (Option A - ACTIVE)
 
-**⏰ START:** 2025-11-18 19:16 BRT (22:16 UTC)  
-**⏰ INDEXER COMPLETE:** 2025-11-18 19:30 BRT (22:30 UTC)  
-**🎯 TARGET:** Bring Cursor's "bruxaria" (magic) into our CLI  
+**⏰ START:** 2025-11-18 19:16 BRT (22:16 UTC)
+**⏰ INDEXER COMPLETE:** 2025-11-18 19:30 BRT (22:30 UTC)
+**🎯 TARGET:** Bring Cursor's "bruxaria" (magic) into our CLI
 **⚡ APPROACH:** Quality-first, no time constraints, surgical precision
 
 ### **✅ MILESTONE 1: Semantic Indexer (14 min)**
-**⏰ 19:16-19:30 BRT**  
+**⏰ 19:16-19:30 BRT**
 **Files Created:**
 - `qwen_dev_cli/intelligence/indexer.py` (540 LOC)
 - `examples/indexer_demo.py` (153 LOC)
@@ -375,7 +375,7 @@ qwen> paste error trace   # Auto-map to source
 ---
 
 ### **✅ MILESTONE 2: TUI Component Demos (34 min)**
-**⏰ 19:30-20:04 BRT**  
+**⏰ 19:30-20:04 BRT**
 **Files Created:**
 - `examples/toasts_demo.py` (154 LOC)
 - `examples/palette_demo.py` (241 LOC)
@@ -413,7 +413,7 @@ qwen> paste error trace   # Auto-map to source
 ---
 
 ### **✅ MILESTONE 3: Complete Showcase (15 min)**
-**⏰ 20:04-20:19 BRT**  
+**⏰ 20:04-20:19 BRT**
 **Files Created:**
 - `examples/showcase_all.py` (205 LOC)
 
@@ -437,7 +437,7 @@ qwen> paste error trace   # Auto-map to source
 ---
 
 ### **✅ MILESTONE 4: UI Polish & Integration (1h 5min)**
-**⏰ 19:19-20:24 BRT**  
+**⏰ 19:19-20:24 BRT**
 **Files Created/Enhanced:**
 - `qwen_dev_cli/tui/biblical_wisdom.py` (316 LOC) ✨ NEW
 - Enhanced all TUI components with polish
@@ -500,8 +500,8 @@ qwen> paste error trace   # Auto-map to source
 
 ## 📊 PHASE 4A SUMMARY (2h 39min total)
 
-**⏰ START:** 2025-11-18 19:16 BRT (22:16 UTC)  
-**⏰ END:** 2025-11-18 20:24 BRT (23:24 UTC)  
+**⏰ START:** 2025-11-18 19:16 BRT (22:16 UTC)
+**⏰ END:** 2025-11-18 20:24 BRT (23:24 UTC)
 **⏰ DURATION:** 2 hours 39 minutes
 
 ### **What We Accomplished:**
@@ -541,7 +541,7 @@ qwen> paste error trace   # Auto-map to source
 
 ### **Total Code Written:**
 - Production: 856 LOC (indexer 540 + wisdom 316)
-- Demos: 721 LOC  
+- Demos: 721 LOC
 - Total: 1,577 LOC in 159 minutes
 - **Efficiency:** 9.9 LOC/min (surgical precision)
 - **Average: 13.4 LOC/min** 🔥
@@ -566,7 +566,7 @@ qwen> paste error trace   # Auto-map to source
 - 💎 **Innovation:** Biblical wisdom integration (unique!)
 - 🔥 **Execution:** Surgical precision, no wasted effort
 
-**"Whatever you do, work at it with all your heart, as working for the Lord."**  
+**"Whatever you do, work at it with all your heart, as working for the Lord."**
 *- Colossians 3:23*
 
 ### **Why Cursor Dominates:**
@@ -608,8 +608,8 @@ qwen> paste error trace   # Auto-map to source
 
 ## 🎨 PHASE 4B: UI POLISH & REFINEMENT (Apple-Style)
 
-**⏰ START:** 2025-11-18 22:54 UTC  
-**🎯 GOAL:** Elevate from "excellent" to "Apple-level polish"  
+**⏰ START:** 2025-11-18 22:54 UTC
+**🎯 GOAL:** Elevate from "excellent" to "Apple-level polish"
 **🎨 PHILOSOPHY:** Craft, not code. Artist, not engineer.
 
 ### **✅ MILESTONE 1: Animation System (15 min)**
@@ -727,8 +727,8 @@ qwen> paste error trace   # Auto-map to source
 
 ## 📊 PHASE 4B SUMMARY (1h 45min total)
 
-**⏰ START:** 2025-11-18 22:54 UTC  
-**⏰ END:** 2025-11-18 00:39 UTC  
+**⏰ START:** 2025-11-18 22:54 UTC
+**⏰ END:** 2025-11-18 00:39 UTC
 **⏰ DURATION:** 1 hour 45 minutes
 
 ### **What We Accomplished:**
@@ -801,7 +801,7 @@ qwen> paste error trace   # Auto-map to source
 - ⚡ **Efficient Execution:** 1h 45min for complete polish
 - 🏆 **World-Class Quality:** Apple-tier execution
 
-**"Whatever you do, work at it with all your heart, as working for the Lord."**  
+**"Whatever you do, work at it with all your heart, as working for the Lord."**
 *- Colossians 3:23*
 
 ---
@@ -850,7 +850,7 @@ qwen> paste error trace   # Auto-map to source
 1. **Smart Error Detection → Source Mapping:**
    ```python
    # qwen_dev_cli/intelligence/error_tracker.py
-   
+
    class CursorStyleErrorIntelligence:
        """
        When user pastes an error:
@@ -870,7 +870,7 @@ qwen> paste error trace   # Auto-map to source
 2. **Semantic Code Search:**
    ```python
    # Enhance qwen_dev_cli/indexing/semantic_search.py
-   
+
    class DeepSemanticSearch:
        """
        Search not just by text, but by meaning:
@@ -887,7 +887,7 @@ qwen> paste error trace   # Auto-map to source
 3. **Proactive Context Suggestion:**
    ```python
    # qwen_dev_cli/intelligence/context_suggester.py
-   
+
    class SmartContextSuggester:
        """
        Before user even asks:
@@ -921,7 +921,7 @@ qwen> paste error trace   # Auto-map to source
 2. **Enhanced Real-Time Preview:**
    ```python
    # Upgrade qwen_dev_cli/tui/components/preview.py
-   
+
    Features:
    - [ ] Multiple diff views (split/unified/semantic)
    - [ ] Inline comments on changes
@@ -932,7 +932,7 @@ qwen> paste error trace   # Auto-map to source
 3. **Shell Integration:**
    ```python
    # qwen_dev_cli/core/shell_interactive.py
-   
+
    New Commands:
    - /ctx-show       → Display current context (visual tree)
    - /ctx-why <file> → Explain why file is in context
@@ -1057,7 +1057,7 @@ Phase 4A Completion:
 - ✅ Circuit breaker + rate limiting
 - ✅ Error handling + failover
 - **Files:** `qwen_dev_cli/core/llm.py` (470 LOC)
-- **Providers:** 
+- **Providers:**
   - HuggingFace Inference API
   - Nebius AI (Qwen3-235B, QwQ-32B)
   - Ollama local inference
@@ -1179,7 +1179,7 @@ qwen_dev_cli/ui.py  431 LOC
 - ✅ Dashboard-ready export
 - ✅ Defense layer integration
 - ✅ 10/10 tests passing
-- **Commits:** 
+- **Commits:**
   - `40c01e9` fix: Constitutional features - 100% tests passing
 - **Files:** `qwen_dev_cli/core/metrics.py` (enhanced)
 
@@ -1226,7 +1226,7 @@ qwen_dev_cli/ui.py  431 LOC
 
 ### **Commits Realizados:**
 1. ✅ `0224f48` - MCP server integration - 10/10 tests passing
-2. ✅ `40c01e9` - Constitutional features - 100% tests passing  
+2. ✅ `40c01e9` - Constitutional features - 100% tests passing
 3. ✅ `e9246d9` - Critical test failures fixed (edge cases, safety, truncation)
 
 ### **Features Completadas:**
@@ -1601,8 +1601,8 @@ Overall:         [█████████████████░░░] 
 
 ---
 
-**Last Updated:** 2025-11-18 20:45 UTC  
-**Next Update:** Daily (evening retrospective)  
+**Last Updated:** 2025-11-18 20:45 UTC
+**Next Update:** Daily (evening retrospective)
 **Owner:** Juan (Arquiteto-Chefe)
 
 **Soli Deo Gloria!** 🙏✨
@@ -1612,7 +1612,7 @@ Overall:         [█████████████████░░░] 
 ## 🎉 TODAY'S VICTORIES (2025-11-18)
 
 ### ✅ MAJOR ACHIEVEMENT: 100% TEST PASS RATE
-**Time:** 2.5 hours  
+**Time:** 2.5 hours
 **Impact:** MASSIVE (88% → 95% parity)
 
 **What Was Accomplished:**
@@ -1668,7 +1668,7 @@ aa60c51 🎯 Fix all failing tests - 364/364 passing (100%)
 
 ## 🎨 TUI FINALIZATION - DEEP RESEARCH & IMPLEMENTATION PLAN
 
-**Research Date:** 2025-11-18  
+**Research Date:** 2025-11-18
 **Goal:** Create MINIMALIST yet IMPACTFUL TUI combining best of Gemini CLI, Cursor, Claude Code, Grok CLI, and GitHub Copilot
 
 ---
@@ -1860,7 +1860,7 @@ Found 3 failing tests:
   2. Adjust rate limit threshold in test config
   3. Increase connection timeout to 5s
 
-Run these fixes? (Y/n) 
+Run these fixes? (Y/n)
 ```
 
 **Design Philosophy:**
@@ -1896,19 +1896,19 @@ COLORS = {
     'bg_primary': '#0d1117',      # Deep background (GitHub dark)
     'bg_secondary': '#161b22',    # Card backgrounds
     'bg_tertiary': '#21262d',     # Hover states
-    
+
     # Text
     'text_primary': '#c9d1d9',    # Main text (high contrast)
     'text_secondary': '#8b949e',  # Muted text
     'text_tertiary': '#6e7681',   # Dimmed text
-    
+
     # Accents
     'accent_blue': '#58a6ff',     # Info, links
     'accent_green': '#3fb950',    # Success, done
     'accent_yellow': '#d29922',   # Warning
     'accent_red': '#f85149',      # Error, danger
     'accent_purple': '#bc8cff',   # AI responses
-    
+
     # Syntax (for code blocks)
     'syntax_keyword': '#ff7b72',
     'syntax_string': '#a5d6ff',
@@ -2118,11 +2118,11 @@ def typing_animation(text: str, wpm: int = 400):
     """Simulate human-like typing (not too fast)"""
     chars_per_second = (wpm * 5) / 60  # ~33 chars/sec
     delay = 1.0 / chars_per_second
-    
+
     for char in text:
         yield char
         time.sleep(delay)
-        
+
         # Pause at punctuation (more realistic)
         if char in '.!?,;:':
             time.sleep(delay * 3)
@@ -2188,19 +2188,19 @@ SHORTCUTS = {
     'Ctrl+R': 'Search history (fuzzy)',
     '↑/↓': 'Navigate history',
     'Tab': 'Autocomplete',
-    
+
     # Commands
     'Ctrl+K': 'Open command palette',
     'Ctrl+/': 'Toggle help panel',
     'Ctrl+\\': 'Toggle file tree',
     'Ctrl+`': 'Toggle terminal',
-    
+
     # Editing
     'Ctrl+Z': 'Undo last action',
     'Ctrl+Shift+Z': 'Redo',
     'Ctrl+A': 'Select all',
     'Ctrl+W': 'Delete word backward',
-    
+
     # Application
     'Ctrl+,': 'Open settings',
     'Ctrl+Shift+P': 'Command palette',
@@ -2269,7 +2269,7 @@ class InteractiveShell:
     registry: ToolRegistry      # 27 tools
     conversation: ConversationManager  # Multi-turn with 4000 token context
     recovery_engine: ErrorRecoveryEngine  # Max 2 attempts (Constitutional P6)
-    
+
     # Intelligence
     rich_context: RichContextBuilder
     file_watcher: FileWatcher   # Auto-detect changes
@@ -2433,14 +2433,14 @@ class ReactiveRenderer:
     _output_buffer: deque(maxlen=1000)
     _progress: Progress  # Rich Progress
     _live: Live          # Rich Live display
-    
+
     async def emit(event: RenderEvent)
     # Non-blocking UI updates via event queue
-    
+
 class ConcurrentRenderer:
     _panels: Dict[str, Panel]
     _layout: Layout
-    
+
     async def add_process(id, title)
     async def update_process(id, content)
     # Multiple parallel process panels (not used in shell yet)
@@ -2458,7 +2458,7 @@ class TokenStream:
 # Colors (via Rich markup)
 "[cyan]"    # System messages, info
 "[green]"   # Success, done
-"[yellow]"  # Warnings, confirmations  
+"[yellow]"  # Warnings, confirmations
 "[red]"     # Errors, dangers
 "[bold]"    # Emphasis
 "[dim]"     # Secondary text
@@ -2681,11 +2681,11 @@ qwen_dev_cli/tui/animations.py
 # Typing effect (for AI responses)
 async def typing_effect(text: str, wpm: int = 400) -> AsyncIterator[str]:
     # Character-by-character with punctuation pauses
-    
+
 # Fade transitions
 async def fade_in(widget, duration: float = 0.2):
     # Smooth opacity 0→1
-    
+
 async def fade_out(widget, duration: float = 0.2):
     # Smooth opacity 1→0
 
@@ -2703,11 +2703,11 @@ class Spinner:
 async def animate_progress(start: float, end: float, duration: float = 0.5):
     # Ease-out cubic easing
     # 30 steps for smooth 60 FPS
-    
+
 # Slide animations
 async def slide_in(widget, direction: str = 'right', duration: float = 0.3):
     # Slide from direction
-    
+
 async def slide_out(widget, direction: str = 'right', duration: float = 0.3):
     # Slide to direction
 
@@ -2738,7 +2738,7 @@ qwen_dev_cli/tui/layouts.py
 
 class ShellLayout:
     """Main shell layout with sidebars"""
-    
+
     # Three-column layout
     ├─ Left Sidebar (280px)
     │  ├─ FileTree (collapsible)
@@ -2753,10 +2753,10 @@ class ShellLayout:
        ├─ Context Pills (attached files)
        ├─ Metrics Panel (LEI, HRI, CPI)
        └─ Tool Status (active tools)
-    
+
     def toggle_sidebar(side: str):
         # Hide/show sidebar (Ctrl+\ for left, Ctrl+` for right)
-    
+
     def set_focus(area: str):
         # Move keyboard focus between areas
 
@@ -2787,24 +2787,24 @@ class InteractiveShell:
         # Replace basic console with ShellLayout
         self.layout = ShellLayout()
         self.console = self.layout.main_console
-        
+
     async def _process_request_with_llm(self, user_input: str, ...):
         # Replace text status with StatusBadge
         badge = StatusBadge("Thinking...", level="info", animated=True)
         self.layout.set_status(badge)
-        
+
         # ... LLM processing ...
-        
+
         # Replace instant response with typing effect
         response_box = MessageBox(content="", role="assistant")
         async for char in typing_effect(response):
             response_box.content += char
             self.layout.update_message(response_box)
-        
+
     async def _execute_tool_calls(self, tool_calls, turn):
         # Replace basic progress with ProgressBar
         progress = ProgressBar(0, len(tool_calls), "Executing tools...")
-        
+
         for i, call in enumerate(tool_calls):
             await progress.animate_to(i + 1)
             # ... execute tool ...
@@ -2889,7 +2889,7 @@ class InteractiveShell:
 
 ### 🎨 TUI SYSTEM IMPLEMENTATION - COMPLETED! ✅
 
-**Executed:** 2025-11-18 17:05-17:40 BRT (33 minutes)  
+**Executed:** 2025-11-18 17:05-17:40 BRT (33 minutes)
 **Status:** ✅ PRODUCTION READY FOR HACKATHON
 
 #### **Implementation Timeline:**
@@ -3044,8 +3044,8 @@ Shows all 5 components in action with animations!
 - [x] Demo creation - Full showcase working
 - [x] Documentation - Comprehensive docstrings
 
-**Original Estimate:** 30 hours (6 phases)  
-**Actual Time:** 33 minutes (0.55 hours)  
+**Original Estimate:** 30 hours (6 phases)
+**Actual Time:** 33 minutes (0.55 hours)
 **Efficiency:** 54.5X FASTER 🔥⚡
 
 **Strategy:** Focused on essential components for hackathon impact, optimized out nice-to-haves.
@@ -3138,10 +3138,10 @@ Shows all 5 components in action with animations!
 
 ---
 
-**Implementation Priority:** 🔴 P0 (CRITICAL - Hackathon Differentiator)  
-**Estimated Time:** 30 hours (4 days full focus)  
-**Impact:** ⭐⭐⭐⭐⭐ MASSIVE (WOW factor for hackathon judges)  
-**Owner:** Maestro AI (me) + Arquiteto-Chefe Juan  
+**Implementation Priority:** 🔴 P0 (CRITICAL - Hackathon Differentiator)
+**Estimated Time:** 30 hours (4 days full focus)
+**Impact:** ⭐⭐⭐⭐⭐ MASSIVE (WOW factor for hackathon judges)
+**Owner:** Maestro AI (me) + Arquiteto-Chefe Juan
 **Status:** ⏰ READY TO START - Awaiting GO signal
 
 ---
@@ -3152,8 +3152,8 @@ Shows all 5 components in action with animations!
 
 ## 🎨 PHASE 4A: CURSOR INTELLIGENCE SYSTEM (Deep Research Complete)
 
-**Research Date:** 2025-11-18 19:05 BRT (22:05 UTC)  
-**Goal:** Understand and replicate Cursor's "bruxaria" (magic)  
+**Research Date:** 2025-11-18 19:05 BRT (22:05 UTC)
+**Goal:** Understand and replicate Cursor's "bruxaria" (magic)
 **Status:** 📊 RESEARCH COMPLETE - READY FOR IMPLEMENTATION
 
 ---
@@ -3331,7 +3331,7 @@ TypeError: Cannot read property 'name' of undefined
 5. **Inject Into LLM:**
    ```
    System: You are analyzing a TypeError in auth.js line 42.
-   
+
    Code context:
    ```javascript
    40: function getUserName(user) {
@@ -3339,11 +3339,11 @@ TypeError: Cannot read property 'name' of undefined
    42:   return user.name;  // ← ERROR HAPPENS HERE
    43: }
    ```
-   
+
    Callers:
    - api.js:128 calls getUserName(req.user)
    - req.user may be undefined if not authenticated
-   
+
    Suggestion:
    ```javascript
    function getUserName(user) {
@@ -3385,7 +3385,7 @@ class StackTraceParser:
         - Rust panics
         - Java stack traces
         """
-        
+
 class StackFrame:
     file_path: str
     line_number: int
@@ -3400,7 +3400,7 @@ class CodebaseIndexer:
     def __init__(self, root_path: str):
         self.root = Path(root_path)
         self.index: Dict[str, FileIndex] = {}
-        
+
     async def index_project(self):
         """
         Full codebase indexing:
@@ -3409,7 +3409,7 @@ class CodebaseIndexer:
         - Build dependency graph
         - Create search index
         """
-        
+
     async def index_file(self, file_path: str):
         """
         Single file indexing with AST:
@@ -3418,7 +3418,7 @@ class CodebaseIndexer:
         - Track imports/exports
         - Update symbol table
         """
-        
+
     def get_code_at(self, file: str, line: int, context: int = 10) -> str:
         """Fetch code around specific line with syntax highlighting"""
 ```
@@ -3429,7 +3429,7 @@ class SemanticCodeSearch:
     def __init__(self, index: CodebaseIndexer):
         self.index = index
         self.embeddings = {}  # Cache embeddings
-        
+
     async def search(self, query: str, top_k: int = 5) -> List[SearchResult]:
         """
         Semantic search using embeddings:
@@ -3437,7 +3437,7 @@ class SemanticCodeSearch:
         - Find nearest neighbor code chunks
         - Rank by relevance
         """
-        
+
     async def find_related_code(self, file: str, line: int) -> List[str]:
         """
         Find related code for error context:
@@ -3453,14 +3453,14 @@ class ErrorContextBuilder:
     def __init__(self, indexer: CodebaseIndexer, search: SemanticCodeSearch):
         self.indexer = indexer
         self.search = search
-        
+
     async def build_error_context(self, error_text: str) -> ErrorContext:
         """
         THE MAGIC FUNCTION!
-        
+
         Input: Raw error message (paste from terminal)
         Output: Rich context for LLM
-        
+
         Steps:
         1. Parse stack trace
         2. Fetch exact code locations
@@ -3468,7 +3468,7 @@ class ErrorContextBuilder:
         4. Search for similar fixes
         5. Build minimal context window
         """
-        
+
 class ErrorContext:
     error_summary: str
     stack_frames: List[StackFrame]
@@ -3484,10 +3484,10 @@ class FileWatcher:
         self.root = Path(root_path)
         self.indexer = indexer
         self.observer = Observer()  # watchdog
-        
+
     async def start(self):
         """Watch for file changes and re-index"""
-        
+
     def on_file_changed(self, event):
         """Debounced re-indexing (300ms delay)"""
 ```
@@ -3575,7 +3575,7 @@ async def handle_error_paste(self, user_input: str):
     if self.intelligence.is_error(user_input):
         # Build rich context automatically
         context = await self.intelligence.build_error_context(user_input)
-        
+
         # Show user what we found
         self.console.print("[cyan]🔍 Analyzing error...[/]")
         self.console.print(Panel(
@@ -3584,19 +3584,19 @@ async def handle_error_paste(self, user_input: str):
             f"Type: {context.error_type}",
             title="Error Analysis"
         ))
-        
+
         # Inject context into LLM prompt
         prompt = f"""
         The user pasted an error. I've analyzed the codebase and found:
-        
+
         {context.format_for_llm()}
-        
+
         Please:
         1. Explain the root cause
         2. Suggest a fix
         3. Show code changes needed
         """
-        
+
         # Process with LLM
         await self._process_request_with_llm(prompt, context)
 ```
@@ -3630,10 +3630,10 @@ class SimpleEmbedder:
     def __init__(self):
         self.vectorizer = TfidfVectorizer()
         self.index = []
-        
+
     def add_document(self, doc_id: str, text: str):
         self.index.append((doc_id, text))
-        
+
     def search(self, query: str, top_k: int = 5):
         # TF-IDF cosine similarity
         vectors = self.vectorizer.fit_transform([d[1] for d in self.index])
@@ -3653,7 +3653,7 @@ class EmbeddingSearch:
         self.model = SentenceTransformer('all-MiniLM-L6-v2')  # Fast, 80MB
         self.vectors = []
         self.metadata = []
-        
+
     def search(self, query: str):
         query_vec = self.model.encode(query)
         # FAISS or simple cosine similarity
@@ -3690,14 +3690,14 @@ class CodeChangeHandler(FileSystemEventHandler):
         self.indexer = indexer
         self.debounce_ms = debounce_ms
         self.pending = {}
-        
+
     def on_modified(self, event):
         if event.is_directory or not self.is_source_file(event.src_path):
             return
-            
+
         # Debounce: wait for changes to stop
         self.pending[event.src_path] = time.time()
-        
+
     async def process_pending(self):
         """Background task: Re-index files after debounce"""
         while True:
@@ -3989,8 +3989,8 @@ Input → Constitutional Validation → Deliberation → Verified Output → 12 
 
 ### **SESSÃO DE QUALIDADE MÁXIMA**
 
-**Horário Início:** 18/11/2025 17:05 BRT (20:05 UTC)  
-**Horário Atual:** 18/11/2025 23:58 BRT (02:58 UTC+1)  
+**Horário Início:** 18/11/2025 17:05 BRT (20:05 UTC)
+**Horário Atual:** 18/11/2025 23:58 BRT (02:58 UTC+1)
 **Duração até agora:** ~7h
 
 ### **Filosofia desta Sessão**
@@ -4044,7 +4044,7 @@ Input → Constitutional Validation → Deliberation → Verified Output → 12 
    - Fast rendering ✅
    - Theme lookups ✅
 
-**Score Atual:** 12/20 PASSED (60%)  
+**Score Atual:** 12/20 PASSED (60%)
 **Meta:** 20/20 PASSED (100%)
 
 #### **2. P1 Violation Fixed - LEI = 0.0 RESTORED**
@@ -4139,13 +4139,13 @@ return Markdown(content)
 
 ### **Time Tracking (Para HYBRID_CELL_METHODOLOGY.md)**
 
-**Planejado:** 30h (estimate inicial)  
-**Real (até agora):** 7h  
-**Restante:** ~23h  
+**Planejado:** 30h (estimate inicial)
+**Real (até agora):** 7h
+**Restante:** ~23h
 
 **Atualização final:** Quando Phase 5 concluída
 
 ---
 
-_Master Plan atualizado em: 18/11/2025 23:58 BRT_  
+_Master Plan atualizado em: 18/11/2025 23:58 BRT_
 _Next Update: Após todos testes passarem (100%)_

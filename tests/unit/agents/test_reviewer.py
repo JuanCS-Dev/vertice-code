@@ -42,6 +42,7 @@ from vertice_cli.agents.base import (
 # ENUM TESTS
 # =============================================================================
 
+
 class TestIssueSeverity:
     """Tests for IssueSeverity enum."""
 
@@ -89,6 +90,7 @@ class TestIssueCategory:
 # CODEGRAPHNODE TESTS
 # =============================================================================
 
+
 class TestCodeGraphNode:
     """Tests for CodeGraphNode data structure."""
 
@@ -100,7 +102,7 @@ class TestCodeGraphNode:
             name="my_function",
             file_path="src/module.py",
             line_start=10,
-            line_end=25
+            line_end=25,
         )
 
         assert node.id == "func_1"
@@ -122,7 +124,7 @@ class TestCodeGraphNode:
             complexity=15,
             dependencies={"base_class", "helper_func"},
             used_by={"main_module", "test_module"},
-            metadata={"author": "dev", "version": "1.0"}
+            metadata={"author": "dev", "version": "1.0"},
         )
 
         assert node.complexity == 15
@@ -133,8 +135,7 @@ class TestCodeGraphNode:
     def test_node_dependencies_mutable(self):
         """Test node dependencies can be modified."""
         node = CodeGraphNode(
-            id="n1", type="function", name="f",
-            file_path="f.py", line_start=1, line_end=10
+            id="n1", type="function", name="f", file_path="f.py", line_start=1, line_end=10
         )
 
         node.dependencies.add("new_dep")
@@ -148,6 +149,7 @@ class TestCodeGraphNode:
 # COMPLEXITYMETRICS TESTS
 # =============================================================================
 
+
 class TestComplexityMetrics:
     """Tests for ComplexityMetrics Pydantic model."""
 
@@ -159,7 +161,7 @@ class TestComplexityMetrics:
             cognitive=1,
             loc=5,
             args_count=0,
-            returns_count=1
+            returns_count=1,
         )
 
         assert metrics.function_name == "simple_func"
@@ -179,7 +181,7 @@ class TestComplexityMetrics:
             args_count=7,
             returns_count=5,
             nesting_depth=4,
-            branch_count=12
+            branch_count=12,
         )
 
         assert metrics.cyclomatic == 15
@@ -189,12 +191,7 @@ class TestComplexityMetrics:
     def test_metrics_serialization(self):
         """Test metrics can be serialized to dict."""
         metrics = ComplexityMetrics(
-            function_name="test",
-            cyclomatic=5,
-            cognitive=3,
-            loc=20,
-            args_count=2,
-            returns_count=1
+            function_name="test", cyclomatic=5, cognitive=3, loc=20, args_count=2, returns_count=1
         )
 
         data = metrics.model_dump()
@@ -207,6 +204,7 @@ class TestComplexityMetrics:
 # CODEISSUE TESTS
 # =============================================================================
 
+
 class TestCodeIssue:
     """Tests for CodeIssue Pydantic model."""
 
@@ -218,7 +216,7 @@ class TestCodeIssue:
             severity=IssueSeverity.HIGH,
             category=IssueCategory.SECURITY,
             message="SQL injection vulnerability",
-            explanation="User input passed directly to query"
+            explanation="User input passed directly to query",
         )
 
         assert issue.file == "src/main.py"
@@ -241,7 +239,7 @@ class TestCodeIssue:
             fix_suggestion="Split into smaller functions",
             auto_fixable=False,
             related_issues=["issue_1", "issue_2"],
-            confidence=0.85
+            confidence=0.85,
         )
 
         assert issue.end_line == 110
@@ -259,7 +257,7 @@ class TestCodeIssue:
             message="Missing trailing newline",
             explanation="PEP8 requires trailing newline",
             fix_suggestion="Add newline at end of file",
-            auto_fixable=True
+            auto_fixable=True,
         )
 
         assert issue.auto_fixable is True
@@ -269,6 +267,7 @@ class TestCodeIssue:
 # =============================================================================
 # RAGCONTEXT TESTS
 # =============================================================================
+
 
 class TestRAGContext:
     """Tests for RAGContext model."""
@@ -288,7 +287,7 @@ class TestRAGContext:
             related_functions=["parse_input", "validate_data"],
             similar_patterns=["pattern_1.py:10-20", "pattern_2.py:5-15"],
             team_standards={"naming": "snake_case", "max_line": "100"},
-            historical_issues=["Previous SQL injection in similar code"]
+            historical_issues=["Previous SQL injection in similar code"],
         )
 
         assert len(context.related_functions) == 2
@@ -299,6 +298,7 @@ class TestRAGContext:
 # =============================================================================
 # REVIEWREPORT TESTS
 # =============================================================================
+
 
 class TestReviewReport:
     """Tests for ReviewReport model."""
@@ -312,7 +312,7 @@ class TestReviewReport:
             metrics=[],
             issues=[],
             rag_context=RAGContext(),
-            summary="Code looks good, minor improvements suggested"
+            summary="Code looks good, minor improvements suggested",
         )
 
         assert report.approved is True
@@ -328,7 +328,7 @@ class TestReviewReport:
             severity=IssueSeverity.CRITICAL,
             category=IssueCategory.SECURITY,
             message="Hardcoded password",
-            explanation="Password stored in plaintext"
+            explanation="Password stored in plaintext",
         )
         report = ReviewReport(
             approved=False,
@@ -340,7 +340,7 @@ class TestReviewReport:
             summary="Critical security vulnerability found",
             recommendations=["Remove hardcoded credentials", "Use secrets manager"],
             estimated_fix_time="2 hours",
-            requires_human_review=True
+            requires_human_review=True,
         )
 
         assert report.approved is False
@@ -357,7 +357,7 @@ class TestReviewReport:
             cognitive=15,
             loc=80,
             args_count=4,
-            returns_count=2
+            returns_count=2,
         )
         report = ReviewReport(
             approved=True,
@@ -366,7 +366,7 @@ class TestReviewReport:
             metrics=[metrics],
             issues=[],
             rag_context=RAGContext(),
-            summary="Acceptable but could be improved"
+            summary="Acceptable but could be improved",
         )
 
         assert len(report.metrics) == 1
@@ -376,6 +376,7 @@ class TestReviewReport:
 # =============================================================================
 # CODEGRAPHANALYZER TESTS
 # =============================================================================
+
 
 class TestCodeGraphAnalyzer:
     """Tests for CodeGraphAnalyzer AST analysis."""
@@ -391,10 +392,10 @@ class TestCodeGraphAnalyzer:
 
     def test_analyze_simple_function(self):
         """Test analyzing simple function."""
-        code = '''
+        code = """
 def hello():
     return "world"
-'''
+"""
         tree = ast.parse(code)
         analyzer = CodeGraphAnalyzer("test.py")
         metrics, nodes, graph = analyzer.analyze(tree)
@@ -407,7 +408,7 @@ def hello():
 
     def test_analyze_function_with_branches(self):
         """Test analyzing function with if/else branches."""
-        code = '''
+        code = """
 def check_value(x):
     if x > 0:
         return "positive"
@@ -415,7 +416,7 @@ def check_value(x):
         return "negative"
     else:
         return "zero"
-'''
+"""
         tree = ast.parse(code)
         analyzer = CodeGraphAnalyzer("test.py")
         metrics, nodes, graph = analyzer.analyze(tree)
@@ -427,14 +428,14 @@ def check_value(x):
 
     def test_analyze_function_with_loops(self):
         """Test analyzing function with loops."""
-        code = '''
+        code = """
 def process_list(items):
     result = []
     for item in items:
         if item > 0:
             result.append(item)
     return result
-'''
+"""
         tree = ast.parse(code)
         analyzer = CodeGraphAnalyzer("test.py")
         metrics, nodes, graph = analyzer.analyze(tree)
@@ -446,14 +447,14 @@ def process_list(items):
 
     def test_analyze_class(self):
         """Test analyzing class with methods."""
-        code = '''
+        code = """
 class Calculator:
     def add(self, a, b):
         return a + b
 
     def subtract(self, a, b):
         return a - b
-'''
+"""
         tree = ast.parse(code)
         analyzer = CodeGraphAnalyzer("test.py")
         metrics, nodes, graph = analyzer.analyze(tree)
@@ -464,12 +465,12 @@ class Calculator:
 
     def test_analyze_nested_functions(self):
         """Test analyzing nested functions."""
-        code = '''
+        code = """
 def outer():
     def inner():
         return 1
     return inner()
-'''
+"""
         tree = ast.parse(code)
         analyzer = CodeGraphAnalyzer("test.py")
         metrics, nodes, graph = analyzer.analyze(tree)
@@ -482,7 +483,7 @@ def outer():
 
     def test_analyze_complex_function(self):
         """Test analyzing complex function with high complexity."""
-        code = '''
+        code = """
 def complex_logic(a, b, c, d, e):
     result = 0
     if a > 0:
@@ -504,7 +505,7 @@ def complex_logic(a, b, c, d, e):
         except ZeroDivisionError:
             result = 0
     return result
-'''
+"""
         tree = ast.parse(code)
         analyzer = CodeGraphAnalyzer("test.py")
         metrics, nodes, graph = analyzer.analyze(tree)
@@ -516,7 +517,7 @@ def complex_logic(a, b, c, d, e):
 
     def test_analyze_empty_file(self):
         """Test analyzing empty file."""
-        code = ''
+        code = ""
         tree = ast.parse(code)
         analyzer = CodeGraphAnalyzer("empty.py")
         metrics, nodes, graph = analyzer.analyze(tree)
@@ -525,11 +526,11 @@ def complex_logic(a, b, c, d, e):
 
     def test_analyze_only_imports(self):
         """Test analyzing file with only imports."""
-        code = '''
+        code = """
 import os
 import sys
 from typing import Dict, List
-'''
+"""
         tree = ast.parse(code)
         analyzer = CodeGraphAnalyzer("imports.py")
         metrics, nodes, graph = analyzer.analyze(tree)
@@ -541,6 +542,7 @@ from typing import Dict, List
 # =============================================================================
 # REVIEWERAGENT TESTS
 # =============================================================================
+
 
 class TestReviewerAgent:
     """Tests for ReviewerAgent."""
@@ -556,19 +558,15 @@ class TestReviewerAgent:
     def mock_mcp(self):
         """Create mock MCP client."""
         client = MagicMock()
-        client.call_tool = AsyncMock(return_value={
-            "success": True,
-            "content": "def hello(): return 'world'"
-        })
+        client.call_tool = AsyncMock(
+            return_value={"success": True, "content": "def hello(): return 'world'"}
+        )
         return client
 
     @pytest.fixture
     def reviewer_agent(self, mock_llm, mock_mcp):
         """Create ReviewerAgent instance."""
-        return ReviewerAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp
-        )
+        return ReviewerAgent(llm_client=mock_llm, mcp_client=mock_mcp)
 
     def test_reviewer_initialization(self, reviewer_agent):
         """Test ReviewerAgent initializes correctly."""
@@ -608,6 +606,7 @@ class TestReviewerAgent:
 # SECURITYAGENT TESTS
 # =============================================================================
 
+
 class TestSecurityAgent:
     """Tests for SecurityAgent AST-based security analysis."""
 
@@ -619,11 +618,11 @@ class TestSecurityAgent:
     @pytest.mark.asyncio
     async def test_detect_eval(self, security_agent):
         """Test detection of eval() calls."""
-        code = '''
+        code = """
 def dangerous():
     user_input = input()
     return eval(user_input)
-'''
+"""
         tree = ast.parse(code)
         issues = await security_agent.analyze(code, tree)
 
@@ -636,10 +635,10 @@ def dangerous():
     @pytest.mark.asyncio
     async def test_detect_exec(self, security_agent):
         """Test detection of exec() calls."""
-        code = '''
+        code = """
 def run_code(code_str):
     exec(code_str)
-'''
+"""
         tree = ast.parse(code)
         issues = await security_agent.analyze(code, tree)
 
@@ -650,29 +649,29 @@ def run_code(code_str):
     @pytest.mark.asyncio
     async def test_detect_os_system(self, security_agent):
         """Test detection of os.system() calls."""
-        code = '''
+        code = """
 import os
 def run_command(cmd):
     os.system(cmd)
-'''
+"""
         tree = ast.parse(code)
         issues = await security_agent.analyze(code, tree)
 
         # Should detect os.system
-        os_issues = [i for i in issues if "os.system" in i.message.lower() or "system" in i.message.lower()]
+        [i for i in issues if "os.system" in i.message.lower() or "system" in i.message.lower()]
         # Note: Detection depends on implementation - check if any security issue found
         assert isinstance(issues, list)
 
     @pytest.mark.asyncio
     async def test_no_issues_safe_code(self, security_agent):
         """Test no issues for safe code."""
-        code = '''
+        code = """
 def safe_function(x, y):
     return x + y
 
 def process_data(items):
     return [item * 2 for item in items]
-'''
+"""
         tree = ast.parse(code)
         issues = await security_agent.analyze(code, tree)
 
@@ -683,10 +682,10 @@ def process_data(items):
     @pytest.mark.asyncio
     async def test_eval_in_string_not_detected(self, security_agent):
         """Test that 'eval' in strings is not flagged (AST-based)."""
-        code = '''
+        code = """
 def explain():
     return "Use eval() carefully"  # This should NOT be flagged
-'''
+"""
         tree = ast.parse(code)
         issues = await security_agent.analyze(code, tree)
 
@@ -711,6 +710,7 @@ def explain():
 # =============================================================================
 # RAGCONTEXTENGINE TESTS
 # =============================================================================
+
 
 class TestRAGContextEngine:
     """Tests for RAGContextEngine."""
@@ -740,8 +740,7 @@ class TestRAGContextEngine:
     async def test_build_context_returns_rag_context(self, rag_engine):
         """Test build_context returns RAGContext."""
         context = await rag_engine.build_context(
-            files=["src/main.py"],
-            task_description="Review code"
+            files=["src/main.py"], task_description="Review code"
         )
 
         assert isinstance(context, RAGContext)
@@ -750,8 +749,7 @@ class TestRAGContextEngine:
     async def test_build_context_has_team_standards(self, rag_engine):
         """Test build_context loads team standards."""
         context = await rag_engine.build_context(
-            files=["test.py"],
-            task_description="Check standards"
+            files=["test.py"], task_description="Check standards"
         )
 
         # Should have some default standards
@@ -787,17 +785,18 @@ class TestRAGContextEngine:
 # CODEGRAPHANALYZER DETAILED TESTS
 # =============================================================================
 
+
 class TestCodeGraphAnalyzerDetailed:
     """Detailed tests for CodeGraphAnalyzer methods."""
 
     def test_visit_if_increases_complexity(self):
         """Test visit_If increases complexity."""
-        code = '''
+        code = """
 def check(x):
     if x > 0:
         return True
     return False
-'''
+"""
         tree = ast.parse(code)
         analyzer = CodeGraphAnalyzer("test.py")
         metrics, _, _ = analyzer.analyze(tree)
@@ -807,11 +806,11 @@ def check(x):
 
     def test_visit_for_increases_complexity(self):
         """Test visit_For increases complexity."""
-        code = '''
+        code = """
 def iterate(items):
     for item in items:
         print(item)
-'''
+"""
         tree = ast.parse(code)
         analyzer = CodeGraphAnalyzer("test.py")
         metrics, _, _ = analyzer.analyze(tree)
@@ -821,11 +820,11 @@ def iterate(items):
 
     def test_visit_while_increases_complexity(self):
         """Test visit_While increases complexity."""
-        code = '''
+        code = """
 def loop():
     while True:
         break
-'''
+"""
         tree = ast.parse(code)
         analyzer = CodeGraphAnalyzer("test.py")
         metrics, _, _ = analyzer.analyze(tree)
@@ -835,7 +834,7 @@ def loop():
 
     def test_visit_try_increases_complexity(self):
         """Test visit_Try increases complexity per handler."""
-        code = '''
+        code = """
 def risky():
     try:
         x = 1/0
@@ -843,7 +842,7 @@ def risky():
         pass
     except ValueError:
         pass
-'''
+"""
         tree = ast.parse(code)
         analyzer = CodeGraphAnalyzer("test.py")
         metrics, _, _ = analyzer.analyze(tree)
@@ -853,10 +852,10 @@ def risky():
 
     def test_visit_boolop_increases_complexity(self):
         """Test visit_BoolOp increases complexity."""
-        code = '''
+        code = """
 def check(a, b, c):
     return a and b and c
-'''
+"""
         tree = ast.parse(code)
         analyzer = CodeGraphAnalyzer("test.py")
         metrics, _, _ = analyzer.analyze(tree)
@@ -866,14 +865,14 @@ def check(a, b, c):
 
     def test_returns_count(self):
         """Test returns are counted."""
-        code = '''
+        code = """
 def multi_return(x):
     if x > 0:
         return 1
     elif x < 0:
         return -1
     return 0
-'''
+"""
         tree = ast.parse(code)
         analyzer = CodeGraphAnalyzer("test.py")
         metrics, _, _ = analyzer.analyze(tree)
@@ -883,10 +882,10 @@ def multi_return(x):
 
     def test_args_count(self):
         """Test args are counted."""
-        code = '''
+        code = """
 def many_args(a, b, c, d, e):
     return a + b + c + d + e
-'''
+"""
         tree = ast.parse(code)
         analyzer = CodeGraphAnalyzer("test.py")
         metrics, _, _ = analyzer.analyze(tree)
@@ -896,13 +895,13 @@ def many_args(a, b, c, d, e):
 
     def test_loc_calculation(self):
         """Test LOC is calculated."""
-        code = '''
+        code = """
 def multiline():
     x = 1
     y = 2
     z = 3
     return x + y + z
-'''
+"""
         tree = ast.parse(code)
         analyzer = CodeGraphAnalyzer("test.py")
         metrics, _, _ = analyzer.analyze(tree)
@@ -912,14 +911,14 @@ def multiline():
 
     def test_nesting_depth_tracked(self):
         """Test nesting depth is tracked."""
-        code = '''
+        code = """
 def nested(x):
     if x > 0:
         if x > 10:
             if x > 100:
                 return "big"
     return "small"
-'''
+"""
         tree = ast.parse(code)
         analyzer = CodeGraphAnalyzer("test.py")
         metrics, _, _ = analyzer.analyze(tree)
@@ -930,10 +929,10 @@ def nested(x):
 
     def test_async_function_analyzed(self):
         """Test async functions are analyzed."""
-        code = '''
+        code = """
 async def async_func():
     return await something()
-'''
+"""
         tree = ast.parse(code)
         analyzer = CodeGraphAnalyzer("test.py")
         metrics, _, _ = analyzer.analyze(tree)
@@ -943,13 +942,13 @@ async def async_func():
 
     def test_graph_nodes_created(self):
         """Test CodeGraphNodes are created."""
-        code = '''
+        code = """
 def func_a():
     pass
 
 def func_b():
     func_a()
-'''
+"""
         tree = ast.parse(code)
         analyzer = CodeGraphAnalyzer("test.py")
         _, nodes, graph = analyzer.analyze(tree)
@@ -961,7 +960,7 @@ def func_b():
 
     def test_function_calls_tracked(self):
         """Test function calls are tracked for dependency graph."""
-        code = '''
+        code = """
 def caller():
     helper()
     return process()
@@ -971,7 +970,7 @@ def helper():
 
 def process():
     return 42
-'''
+"""
         tree = ast.parse(code)
         analyzer = CodeGraphAnalyzer("test.py")
         analyzer.analyze(tree)
@@ -986,6 +985,7 @@ def process():
 # EDGE CASES
 # =============================================================================
 
+
 class TestEdgeCases:
     """Tests for edge cases and boundary conditions."""
 
@@ -998,7 +998,7 @@ class TestEdgeCases:
             category=IssueCategory.STYLE,
             message="Possible improvement",
             explanation="Not sure about this",
-            confidence=0.0
+            confidence=0.0,
         )
 
         assert issue.confidence == 0.0
@@ -1012,7 +1012,7 @@ class TestEdgeCases:
             metrics=[],
             issues=[],
             rag_context=RAGContext(),
-            summary="Terrible code"
+            summary="Terrible code",
         )
         report_hundred = ReviewReport(
             approved=True,
@@ -1021,7 +1021,7 @@ class TestEdgeCases:
             metrics=[],
             issues=[],
             rag_context=RAGContext(),
-            summary="Perfect code"
+            summary="Perfect code",
         )
 
         assert report_zero.score == 0
@@ -1030,10 +1030,10 @@ class TestEdgeCases:
     def test_analyzer_with_syntax_error_code(self):
         """Test analyzer handles being given invalid AST."""
         # Note: ast.parse would fail first, so we test with valid but tricky code
-        code = '''
+        code = """
 def func():
     pass  # Empty function
-'''
+"""
         tree = ast.parse(code)
         analyzer = CodeGraphAnalyzer("test.py")
         metrics, nodes, graph = analyzer.analyze(tree)
@@ -1049,7 +1049,7 @@ def func():
             severity=IssueSeverity.LOW,
             category=IssueCategory.DOCUMENTATION,
             message="Missing translation for '你好世界'",
-            explanation="String needs localization 🌍"
+            explanation="String needs localization 🌍",
         )
 
         assert "你好世界" in issue.message
@@ -1063,7 +1063,7 @@ def func():
             cognitive=0,
             loc=0,
             args_count=0,
-            returns_count=0
+            returns_count=0,
         )
 
         assert metrics.loc == 0
@@ -1072,12 +1072,7 @@ def func():
     def test_node_with_empty_name(self):
         """Test node with empty name (lambda)."""
         node = CodeGraphNode(
-            id="lambda_1",
-            type="lambda",
-            name="",
-            file_path="test.py",
-            line_start=1,
-            line_end=1
+            id="lambda_1", type="lambda", name="", file_path="test.py", line_start=1, line_end=1
         )
 
         assert node.name == ""
@@ -1092,7 +1087,7 @@ def func():
                 severity=IssueSeverity.LOW,
                 category=IssueCategory.STYLE,
                 message=f"Issue {i}",
-                explanation=f"Explanation {i}"
+                explanation=f"Explanation {i}",
             )
             for i in range(100)
         ]
@@ -1104,7 +1099,7 @@ def func():
             metrics=[],
             issues=issues,
             rag_context=RAGContext(),
-            summary="Many issues found"
+            summary="Many issues found",
         )
 
         assert len(report.issues) == 100
@@ -1113,6 +1108,7 @@ def func():
 # =============================================================================
 # SECURITYAGENT ADVANCED TESTS
 # =============================================================================
+
 
 class TestSecurityAgentAdvanced:
     """Advanced tests for SecurityAgent covering subprocess and attribute chains."""
@@ -1125,11 +1121,11 @@ class TestSecurityAgentAdvanced:
     @pytest.mark.asyncio
     async def test_subprocess_call_with_shell_true(self, security_agent):
         """Test detection of subprocess.call with shell=True."""
-        code = '''
+        code = """
 import subprocess
 def run_cmd(cmd):
     subprocess.call(cmd, shell=True)
-'''
+"""
         tree = ast.parse(code)
         issues = await security_agent.analyze(code, tree)
 
@@ -1141,11 +1137,11 @@ def run_cmd(cmd):
     @pytest.mark.asyncio
     async def test_subprocess_call_without_shell_not_flagged(self, security_agent):
         """Test subprocess.call without shell=True is NOT flagged."""
-        code = '''
+        code = """
 import subprocess
 def safe_run(cmd):
     subprocess.call(['ls', '-la'])  # Safe: list form, no shell
-'''
+"""
         tree = ast.parse(code)
         issues = await security_agent.analyze(code, tree)
 
@@ -1156,11 +1152,11 @@ def safe_run(cmd):
     @pytest.mark.asyncio
     async def test_subprocess_call_with_shell_false(self, security_agent):
         """Test subprocess.call with explicit shell=False is safe."""
-        code = '''
+        code = """
 import subprocess
 def safe_run(cmd):
     subprocess.call(cmd, shell=False)
-'''
+"""
         tree = ast.parse(code)
         issues = await security_agent.analyze(code, tree)
 
@@ -1171,11 +1167,11 @@ def safe_run(cmd):
     @pytest.mark.asyncio
     async def test_pickle_loads_detected(self, security_agent):
         """Test detection of pickle.loads()."""
-        code = '''
+        code = """
 import pickle
 def load_data(data):
     return pickle.loads(data)
-'''
+"""
         tree = ast.parse(code)
         issues = await security_agent.analyze(code, tree)
 
@@ -1186,24 +1182,26 @@ def load_data(data):
     @pytest.mark.asyncio
     async def test_dynamic_import_detected(self, security_agent):
         """Test detection of __import__()."""
-        code = '''
+        code = """
 def load_module(name):
     return __import__(name)
-'''
+"""
         tree = ast.parse(code)
         issues = await security_agent.analyze(code, tree)
 
-        import_issues = [i for i in issues if "__import__" in i.message.lower() or "import" in i.message.lower()]
+        import_issues = [
+            i for i in issues if "__import__" in i.message.lower() or "import" in i.message.lower()
+        ]
         assert len(import_issues) >= 1
 
     @pytest.mark.asyncio
     async def test_nested_attribute_chain(self, security_agent):
         """Test detection with nested attribute chains (a.b.c.d)."""
-        code = '''
+        code = """
 import some.nested.module as m
 def danger():
     m.subprocess.call("cmd", shell=True)
-'''
+"""
         tree = ast.parse(code)
         # Should not crash on nested chains
         issues = await security_agent.analyze(code, tree)
@@ -1212,7 +1210,7 @@ def danger():
     def test_get_attribute_chain(self, security_agent):
         """Test _get_attribute_chain extracts correct chain."""
         code = "os.path.join"
-        tree = ast.parse(code, mode='eval')
+        tree = ast.parse(code, mode="eval")
 
         # Get the Attribute node
         attr_node = tree.body
@@ -1223,7 +1221,7 @@ def danger():
     def test_get_attribute_chain_simple(self, security_agent):
         """Test _get_attribute_chain for simple case."""
         code = "os.system"
-        tree = ast.parse(code, mode='eval')
+        tree = ast.parse(code, mode="eval")
         attr_node = tree.body
         chain = security_agent._get_attribute_chain(attr_node)
 
@@ -1234,6 +1232,7 @@ def danger():
 # PERFORMANCEAGENT TESTS
 # =============================================================================
 
+
 class TestPerformanceAgent:
     """Tests for PerformanceAgent."""
 
@@ -1241,6 +1240,7 @@ class TestPerformanceAgent:
     def perf_agent(self):
         """Create PerformanceAgent instance."""
         from vertice_cli.agents.reviewer import PerformanceAgent
+
         return PerformanceAgent()
 
     @pytest.mark.asyncio
@@ -1253,7 +1253,7 @@ class TestPerformanceAgent:
                 cognitive=25,  # Above threshold of 15
                 loc=100,
                 args_count=5,
-                returns_count=3
+                returns_count=3,
             )
         ]
 
@@ -1274,7 +1274,7 @@ class TestPerformanceAgent:
                 cognitive=5,  # Below threshold
                 loc=20,
                 args_count=2,
-                returns_count=1
+                returns_count=1,
             )
         ]
 
@@ -1292,7 +1292,7 @@ class TestPerformanceAgent:
                 cognitive=20,
                 loc=80,
                 args_count=4,
-                returns_count=2
+                returns_count=2,
             ),
             ComplexityMetrics(
                 function_name="func2",
@@ -1300,8 +1300,8 @@ class TestPerformanceAgent:
                 cognitive=25,
                 loc=100,
                 args_count=6,
-                returns_count=4
-            )
+                returns_count=4,
+            ),
         ]
 
         issues = await perf_agent.analyze("code", metrics)
@@ -1314,6 +1314,7 @@ class TestPerformanceAgent:
 # TESTCOVERAGEAGENT TESTS
 # =============================================================================
 
+
 class TestTestCoverageAgent:
     """Tests for TestCoverageAgent."""
 
@@ -1321,6 +1322,7 @@ class TestTestCoverageAgent:
     def test_agent(self):
         """Create TestCoverageAgent instance."""
         from vertice_cli.agents.reviewer import TestCoverageAgent
+
         return TestCoverageAgent()
 
     @pytest.mark.asyncio
@@ -1358,6 +1360,7 @@ class TestTestCoverageAgent:
 # CODEGRAPHANALYSISAGENT TESTS
 # =============================================================================
 
+
 class TestCodeGraphAnalysisAgent:
     """Tests for CodeGraphAnalysisAgent."""
 
@@ -1365,6 +1368,7 @@ class TestCodeGraphAnalysisAgent:
     def graph_agent(self):
         """Create CodeGraphAnalysisAgent instance."""
         from vertice_cli.agents.reviewer import CodeGraphAnalysisAgent
+
         agent = CodeGraphAnalysisAgent()
         agent.logger = MagicMock()  # Mock logger to avoid AttributeError
         return agent
@@ -1388,12 +1392,30 @@ class TestCodeGraphAnalysisAgent:
         graph.add_edge("C::func_c", "A::func_a")  # Cycle!
 
         nodes = [
-            CodeGraphNode(id="A::func_a", type="function", name="func_a",
-                         file_path="a.py", line_start=1, line_end=10),
-            CodeGraphNode(id="B::func_b", type="function", name="func_b",
-                         file_path="b.py", line_start=1, line_end=10),
-            CodeGraphNode(id="C::func_c", type="function", name="func_c",
-                         file_path="c.py", line_start=1, line_end=10),
+            CodeGraphNode(
+                id="A::func_a",
+                type="function",
+                name="func_a",
+                file_path="a.py",
+                line_start=1,
+                line_end=10,
+            ),
+            CodeGraphNode(
+                id="B::func_b",
+                type="function",
+                name="func_b",
+                file_path="b.py",
+                line_start=1,
+                line_end=10,
+            ),
+            CodeGraphNode(
+                id="C::func_c",
+                type="function",
+                name="func_c",
+                file_path="c.py",
+                line_start=1,
+                line_end=10,
+            ),
         ]
 
         issues = await graph_agent.analyze(graph, nodes)
@@ -1416,12 +1438,30 @@ class TestCodeGraphAnalysisAgent:
         graph.add_node("main::orphan")  # Dead code - isolated node!
 
         nodes = [
-            CodeGraphNode(id="main::entry", type="function", name="entry",
-                         file_path="main.py", line_start=1, line_end=10),
-            CodeGraphNode(id="main::helper", type="function", name="helper",
-                         file_path="main.py", line_start=12, line_end=20),
-            CodeGraphNode(id="main::orphan", type="function", name="orphan",
-                         file_path="main.py", line_start=22, line_end=30),
+            CodeGraphNode(
+                id="main::entry",
+                type="function",
+                name="entry",
+                file_path="main.py",
+                line_start=1,
+                line_end=10,
+            ),
+            CodeGraphNode(
+                id="main::helper",
+                type="function",
+                name="helper",
+                file_path="main.py",
+                line_start=12,
+                line_end=20,
+            ),
+            CodeGraphNode(
+                id="main::orphan",
+                type="function",
+                name="orphan",
+                file_path="main.py",
+                line_start=22,
+                line_end=30,
+            ),
         ]
 
         issues = await graph_agent.analyze(graph, nodes)
@@ -1442,8 +1482,16 @@ class TestCodeGraphAnalysisAgent:
         for i in range(12):
             graph.add_edge("god::func", f"util::helper_{i}")
 
-        nodes = [CodeGraphNode(id="god::func", type="function", name="func",
-                              file_path="god.py", line_start=1, line_end=100)]
+        nodes = [
+            CodeGraphNode(
+                id="god::func",
+                type="function",
+                name="func",
+                file_path="god.py",
+                line_start=1,
+                line_end=100,
+            )
+        ]
 
         issues = await graph_agent.analyze(graph, nodes)
 
@@ -1460,8 +1508,16 @@ class TestCodeGraphAnalysisAgent:
         for i in range(16):
             graph.add_edge(f"caller::func_{i}", "critical::utility")
 
-        nodes = [CodeGraphNode(id="critical::utility", type="function", name="utility",
-                              file_path="critical.py", line_start=1, line_end=20)]
+        nodes = [
+            CodeGraphNode(
+                id="critical::utility",
+                type="function",
+                name="utility",
+                file_path="critical.py",
+                line_start=1,
+                line_end=20,
+            )
+        ]
 
         issues = await graph_agent.analyze(graph, nodes)
 
@@ -1477,14 +1533,24 @@ class TestCodeGraphAnalysisAgent:
         for i in range(8):
             graph.add_edge(f"chain::func_{i}", f"chain::func_{i+1}")
 
-        nodes = [CodeGraphNode(id=f"chain::func_{i}", type="function", name=f"func_{i}",
-                              file_path="chain.py", line_start=i*10, line_end=i*10+8)
-                 for i in range(9)]
+        nodes = [
+            CodeGraphNode(
+                id=f"chain::func_{i}",
+                type="function",
+                name=f"func_{i}",
+                file_path="chain.py",
+                line_start=i * 10,
+                line_end=i * 10 + 8,
+            )
+            for i in range(9)
+        ]
 
         issues = await graph_agent.analyze(graph, nodes)
 
         # Should detect deep chain
-        chain_issues = [i for i in issues if "chain" in i.message.lower() or "depth" in i.message.lower()]
+        chain_issues = [
+            i for i in issues if "chain" in i.message.lower() or "depth" in i.message.lower()
+        ]
         assert len(chain_issues) >= 1
 
     @pytest.mark.asyncio
@@ -1497,14 +1563,38 @@ class TestCodeGraphAnalysisAgent:
         graph.add_edge("util::helper2", "util::common")
 
         nodes = [
-            CodeGraphNode(id="main::entry", type="function", name="entry",
-                         file_path="main.py", line_start=1, line_end=10),
-            CodeGraphNode(id="util::helper1", type="function", name="helper1",
-                         file_path="util.py", line_start=1, line_end=10),
-            CodeGraphNode(id="util::helper2", type="function", name="helper2",
-                         file_path="util.py", line_start=12, line_end=20),
-            CodeGraphNode(id="util::common", type="function", name="common",
-                         file_path="util.py", line_start=22, line_end=30),
+            CodeGraphNode(
+                id="main::entry",
+                type="function",
+                name="entry",
+                file_path="main.py",
+                line_start=1,
+                line_end=10,
+            ),
+            CodeGraphNode(
+                id="util::helper1",
+                type="function",
+                name="helper1",
+                file_path="util.py",
+                line_start=1,
+                line_end=10,
+            ),
+            CodeGraphNode(
+                id="util::helper2",
+                type="function",
+                name="helper2",
+                file_path="util.py",
+                line_start=12,
+                line_end=20,
+            ),
+            CodeGraphNode(
+                id="util::common",
+                type="function",
+                name="common",
+                file_path="util.py",
+                line_start=22,
+                line_end=30,
+            ),
         ]
 
         issues = await graph_agent.analyze(graph, nodes)
@@ -1518,6 +1608,7 @@ class TestCodeGraphAnalysisAgent:
 # REVIEWERAGENT EXECUTE TESTS
 # =============================================================================
 
+
 class TestReviewerAgentExecute:
     """Tests for ReviewerAgent.execute method."""
 
@@ -1525,7 +1616,9 @@ class TestReviewerAgentExecute:
     def mock_llm(self):
         """Create mock LLM client."""
         client = MagicMock()
-        client.generate = AsyncMock(return_value='{"summary": "Review complete", "additional_issues": []}')
+        client.generate = AsyncMock(
+            return_value='{"summary": "Review complete", "additional_issues": []}'
+        )
         return client
 
     @pytest.fixture
@@ -1553,16 +1646,14 @@ class TestReviewerAgentExecute:
     @pytest.mark.asyncio
     async def test_execute_with_python_file(self, reviewer, mock_mcp):
         """Test execute with valid Python file."""
-        mock_mcp.call_tool = AsyncMock(return_value={
-            "success": True,
-            "content": "def hello(): return 'world'"
-        })
+        mock_mcp.call_tool = AsyncMock(
+            return_value={"success": True, "content": "def hello(): return 'world'"}
+        )
 
         # Mock _execute_tool
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": "def hello(): return 'world'"
-        })
+        reviewer._execute_tool = AsyncMock(
+            return_value={"success": True, "content": "def hello(): return 'world'"}
+        )
 
         # Mock _call_llm
         reviewer._call_llm = AsyncMock(return_value='{"summary": "OK", "additional_issues": []}')
@@ -1576,10 +1667,12 @@ class TestReviewerAgentExecute:
     @pytest.mark.asyncio
     async def test_execute_syntax_error_handling(self, reviewer):
         """Test execute handles syntax errors gracefully."""
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": "def broken( return"  # Syntax error
-        })
+        reviewer._execute_tool = AsyncMock(
+            return_value={
+                "success": True,
+                "content": "def broken( return",  # Syntax error
+            }
+        )
         reviewer._call_llm = AsyncMock(return_value='{"summary": "Error", "additional_issues": []}')
 
         task = AgentTask(request="Review", context={"files": ["broken.py"]})
@@ -1592,11 +1685,12 @@ class TestReviewerAgentExecute:
     @pytest.mark.asyncio
     async def test_execute_creates_report(self, reviewer):
         """Test execute creates ReviewReport."""
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": "def simple(): pass"
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Clean code", "additional_issues": []}')
+        reviewer._execute_tool = AsyncMock(
+            return_value={"success": True, "content": "def simple(): pass"}
+        )
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Clean code", "additional_issues": []}'
+        )
 
         task = AgentTask(request="Review", context={"files": ["clean.py"]})
 
@@ -1609,6 +1703,7 @@ class TestReviewerAgentExecute:
 # =============================================================================
 # REVIEWERAGENT HELPER METHODS TESTS
 # =============================================================================
+
 
 class TestReviewerAgentHelpers:
     """Tests for ReviewerAgent helper methods."""
@@ -1623,10 +1718,11 @@ class TestReviewerAgentHelpers:
     def test_build_llm_prompt(self, reviewer):
         """Test _build_llm_prompt creates proper prompt."""
         files = {"test.py": "def foo(): pass"}
-        metrics = [ComplexityMetrics(
-            function_name="foo", cyclomatic=1, cognitive=0,
-            loc=1, args_count=0, returns_count=0
-        )]
+        metrics = [
+            ComplexityMetrics(
+                function_name="foo", cyclomatic=1, cognitive=0, loc=1, args_count=0, returns_count=0
+            )
+        ]
         rag_context = RAGContext()
         issues = []
 
@@ -1649,11 +1745,11 @@ class TestReviewerAgentHelpers:
 
     def test_parse_llm_json_with_markdown(self, reviewer):
         """Test _parse_llm_json extracts JSON from markdown."""
-        text = '''Here's my analysis:
+        text = """Here's my analysis:
 ```json
 {"summary": "Analysis complete", "additional_issues": []}
 ```
-'''
+"""
         result = reviewer._parse_llm_json(text)
 
         assert result["summary"] == "Analysis complete"
@@ -1678,12 +1774,16 @@ class TestReviewerAgentHelpers:
 
     def test_calculate_score_critical_issue(self, reviewer):
         """Test _calculate_score with critical issue."""
-        issues = [CodeIssue(
-            file="test.py", line=1,
-            severity=IssueSeverity.CRITICAL,
-            category=IssueCategory.SECURITY,
-            message="SQL injection", explanation="Bad"
-        )]
+        issues = [
+            CodeIssue(
+                file="test.py",
+                line=1,
+                severity=IssueSeverity.CRITICAL,
+                category=IssueCategory.SECURITY,
+                message="SQL injection",
+                explanation="Bad",
+            )
+        ]
         metrics = []
 
         score = reviewer._calculate_score(issues, metrics)
@@ -1694,14 +1794,16 @@ class TestReviewerAgentHelpers:
     def test_calculate_score_high_complexity(self, reviewer):
         """Test _calculate_score deducts for high complexity."""
         issues = []
-        metrics = [ComplexityMetrics(
-            function_name="complex",
-            cyclomatic=20,  # High
-            cognitive=25,   # High
-            loc=200,
-            args_count=8,
-            returns_count=5
-        )]
+        metrics = [
+            ComplexityMetrics(
+                function_name="complex",
+                cyclomatic=20,  # High
+                cognitive=25,  # High
+                loc=200,
+                args_count=8,
+                returns_count=5,
+            )
+        ]
 
         score = reviewer._calculate_score(issues, metrics)
 
@@ -1710,12 +1812,17 @@ class TestReviewerAgentHelpers:
     def test_calculate_score_clamped(self, reviewer):
         """Test _calculate_score is clamped to 0-100."""
         # Many critical issues
-        issues = [CodeIssue(
-            file="test.py", line=i,
-            severity=IssueSeverity.CRITICAL,
-            category=IssueCategory.SECURITY,
-            message=f"Issue {i}", explanation="Bad"
-        ) for i in range(10)]
+        issues = [
+            CodeIssue(
+                file="test.py",
+                line=i,
+                severity=IssueSeverity.CRITICAL,
+                category=IssueCategory.SECURITY,
+                message=f"Issue {i}",
+                explanation="Bad",
+            )
+            for i in range(10)
+        ]
         metrics = []
 
         score = reviewer._calculate_score(issues, metrics)
@@ -1725,12 +1832,16 @@ class TestReviewerAgentHelpers:
 
     def test_calculate_risk_critical(self, reviewer):
         """Test _calculate_risk returns CRITICAL."""
-        issues = [CodeIssue(
-            file="test.py", line=1,
-            severity=IssueSeverity.CRITICAL,
-            category=IssueCategory.SECURITY,
-            message="Critical", explanation="Bad"
-        )]
+        issues = [
+            CodeIssue(
+                file="test.py",
+                line=1,
+                severity=IssueSeverity.CRITICAL,
+                category=IssueCategory.SECURITY,
+                message="Critical",
+                explanation="Bad",
+            )
+        ]
 
         risk = reviewer._calculate_risk(issues, 50)
 
@@ -1738,12 +1849,17 @@ class TestReviewerAgentHelpers:
 
     def test_calculate_risk_high(self, reviewer):
         """Test _calculate_risk returns HIGH."""
-        issues = [CodeIssue(
-            file="test.py", line=i,
-            severity=IssueSeverity.HIGH,
-            category=IssueCategory.LOGIC,
-            message=f"High {i}", explanation="Bad"
-        ) for i in range(3)]
+        issues = [
+            CodeIssue(
+                file="test.py",
+                line=i,
+                severity=IssueSeverity.HIGH,
+                category=IssueCategory.LOGIC,
+                message=f"High {i}",
+                explanation="Bad",
+            )
+            for i in range(3)
+        ]
 
         risk = reviewer._calculate_risk(issues, 55)
 
@@ -1765,12 +1881,16 @@ class TestReviewerAgentHelpers:
 
     def test_generate_recommendations_security(self, reviewer):
         """Test _generate_recommendations for security issues."""
-        issues = [CodeIssue(
-            file="test.py", line=1,
-            severity=IssueSeverity.CRITICAL,
-            category=IssueCategory.SECURITY,
-            message="SQL injection", explanation="Bad"
-        )]
+        issues = [
+            CodeIssue(
+                file="test.py",
+                line=1,
+                severity=IssueSeverity.CRITICAL,
+                category=IssueCategory.SECURITY,
+                message="SQL injection",
+                explanation="Bad",
+            )
+        ]
         metrics = []
         rag_context = RAGContext()
 
@@ -1782,11 +1902,17 @@ class TestReviewerAgentHelpers:
     def test_generate_recommendations_complexity(self, reviewer):
         """Test _generate_recommendations for complex code."""
         issues = []
-        metrics = [ComplexityMetrics(
-            function_name=f"func_{i}",
-            cyclomatic=15, cognitive=20,
-            loc=100, args_count=5, returns_count=3
-        ) for i in range(5)]  # 5 complex functions
+        metrics = [
+            ComplexityMetrics(
+                function_name=f"func_{i}",
+                cyclomatic=15,
+                cognitive=20,
+                loc=100,
+                args_count=5,
+                returns_count=3,
+            )
+            for i in range(5)
+        ]  # 5 complex functions
         rag_context = RAGContext()
 
         recs = reviewer._generate_recommendations(issues, metrics, rag_context)
@@ -1807,12 +1933,16 @@ class TestReviewerAgentHelpers:
 
     def test_estimate_fix_time_minimal(self, reviewer):
         """Test _estimate_fix_time with few issues."""
-        issues = [CodeIssue(
-            file="test.py", line=1,
-            severity=IssueSeverity.LOW,
-            category=IssueCategory.STYLE,
-            message="Style issue", explanation="Minor"
-        )]
+        issues = [
+            CodeIssue(
+                file="test.py",
+                line=1,
+                severity=IssueSeverity.LOW,
+                category=IssueCategory.STYLE,
+                message="Style issue",
+                explanation="Minor",
+            )
+        ]
 
         time = reviewer._estimate_fix_time(issues)
 
@@ -1820,12 +1950,17 @@ class TestReviewerAgentHelpers:
 
     def test_estimate_fix_time_critical(self, reviewer):
         """Test _estimate_fix_time with critical issues."""
-        issues = [CodeIssue(
-            file="test.py", line=i,
-            severity=IssueSeverity.CRITICAL,
-            category=IssueCategory.SECURITY,
-            message=f"Critical {i}", explanation="Bad"
-        ) for i in range(3)]  # 3 criticals = 12 hours
+        issues = [
+            CodeIssue(
+                file="test.py",
+                line=i,
+                severity=IssueSeverity.CRITICAL,
+                category=IssueCategory.SECURITY,
+                message=f"Critical {i}",
+                explanation="Bad",
+            )
+            for i in range(3)
+        ]  # 3 criticals = 12 hours
 
         time = reviewer._estimate_fix_time(issues)
 
@@ -1834,12 +1969,30 @@ class TestReviewerAgentHelpers:
     def test_estimate_fix_time_mixed(self, reviewer):
         """Test _estimate_fix_time with mixed issues."""
         issues = [
-            CodeIssue(file="test.py", line=1, severity=IssueSeverity.HIGH,
-                     category=IssueCategory.LOGIC, message="High", explanation="Bad"),
-            CodeIssue(file="test.py", line=2, severity=IssueSeverity.MEDIUM,
-                     category=IssueCategory.COMPLEXITY, message="Medium", explanation="OK"),
-            CodeIssue(file="test.py", line=3, severity=IssueSeverity.MEDIUM,
-                     category=IssueCategory.COMPLEXITY, message="Medium", explanation="OK"),
+            CodeIssue(
+                file="test.py",
+                line=1,
+                severity=IssueSeverity.HIGH,
+                category=IssueCategory.LOGIC,
+                message="High",
+                explanation="Bad",
+            ),
+            CodeIssue(
+                file="test.py",
+                line=2,
+                severity=IssueSeverity.MEDIUM,
+                category=IssueCategory.COMPLEXITY,
+                message="Medium",
+                explanation="OK",
+            ),
+            CodeIssue(
+                file="test.py",
+                line=3,
+                severity=IssueSeverity.MEDIUM,
+                category=IssueCategory.COMPLEXITY,
+                message="Medium",
+                explanation="OK",
+            ),
         ]  # 2 + 1 + 1 = 4 hours
 
         time = reviewer._estimate_fix_time(issues)
@@ -1850,6 +2003,7 @@ class TestReviewerAgentHelpers:
 # =============================================================================
 # LOAD CONTEXT TESTS
 # =============================================================================
+
 
 class TestLoadContext:
     """Tests for _load_context method."""
@@ -1873,10 +2027,9 @@ class TestLoadContext:
     @pytest.mark.asyncio
     async def test_load_context_tool_success(self, reviewer):
         """Test _load_context when tool returns content."""
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": "def foo(): pass"
-        })
+        reviewer._execute_tool = AsyncMock(
+            return_value={"success": True, "content": "def foo(): pass"}
+        )
 
         task = AgentTask(request="Review", context={"files": ["test.py"]})
 
@@ -1919,6 +2072,7 @@ class TestLoadContext:
 # INTEGRATION TEST
 # =============================================================================
 
+
 class TestReviewerIntegration:
     """Integration tests for complete review workflow."""
 
@@ -1927,7 +2081,8 @@ class TestReviewerIntegration:
         """Test complete review from file to report."""
         # Create test file
         test_file = tmp_path / "sample.py"
-        test_file.write_text('''
+        test_file.write_text(
+            """
 def calculate(x, y, z):
     if x > 0:
         if y > 0:
@@ -1938,20 +2093,24 @@ def calculate(x, y, z):
 def dangerous():
     user_input = input()
     return eval(user_input)  # Security issue!
-''')
+"""
+        )
 
         mock_llm = MagicMock()
-        mock_llm.generate = AsyncMock(return_value='{"summary": "Issues found", "additional_issues": []}')
+        mock_llm.generate = AsyncMock(
+            return_value='{"summary": "Issues found", "additional_issues": []}'
+        )
         mock_mcp = MagicMock()
 
         reviewer = ReviewerAgent(llm_client=mock_llm, mcp_client=mock_mcp)
 
         # Mock tools
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": test_file.read_text()
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Review done", "additional_issues": []}')
+        reviewer._execute_tool = AsyncMock(
+            return_value={"success": True, "content": test_file.read_text()}
+        )
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Review done", "additional_issues": []}'
+        )
 
         task = AgentTask(request="Review code", context={"files": [str(test_file)]})
 

@@ -186,7 +186,7 @@ class MockOrchestrator:
             if keyword in request.lower():
                 tasks.append(
                     MockTask(
-                        id=f"task-{i+1}",
+                        id=f"task-{i + 1}",
                         description=f"{keyword.capitalize()} component",
                         dependencies=[f"task-{i}"] if i > 0 else [],
                     )
@@ -260,9 +260,7 @@ class MockToolExecutor:
             result = await self.tools[tool_name](**args)
             duration = int((asyncio.get_event_loop().time() - start) * 1000)
 
-            self.execution_log.append(
-                {"tool": tool_name, "args": args, "success": True}
-            )
+            self.execution_log.append({"tool": tool_name, "args": args, "success": True})
 
             return MockToolResult(
                 tool_name=tool_name, success=True, output=result, duration_ms=duration
@@ -372,9 +370,7 @@ class MockRouter:
         }
         self.routing_order = ["claude", "gemini", "groq", "vertex-ai"]
 
-    async def generate(
-        self, prompt: str, provider: Optional[str] = None
-    ) -> MockResponse:
+    async def generate(self, prompt: str, provider: Optional[str] = None) -> MockResponse:
         """Generate using router with failover."""
         providers_to_try = [provider] if provider else self.routing_order
 
@@ -546,11 +542,3 @@ def mock_user_input():
 def vertice_client():
     """Provide full mock Vertice client."""
     return MockVerticeClient()
-
-
-@pytest.fixture
-def event_loop():
-    """Create event loop for async tests."""
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()

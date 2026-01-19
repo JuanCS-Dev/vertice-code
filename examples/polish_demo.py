@@ -275,7 +275,7 @@ def main():
 
     panel = Panel(
         title,
-        border_style=COLORS['accent_purple'],
+        border_style=COLORS["accent_purple"],
         padding=(1, 2),
     )
     console.print(panel)

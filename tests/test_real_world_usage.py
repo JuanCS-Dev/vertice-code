@@ -112,7 +112,7 @@ def divide_numbers(a, b):
         long_prompt = "x" * 50000  # Very long input
 
         try:
-            response = await llm.generate(long_prompt, max_tokens=50)
+            await llm.generate(long_prompt, max_tokens=50)
             # Should either truncate or handle gracefully
             assert True
         except Exception as e:
@@ -122,11 +122,11 @@ def divide_numbers(a, b):
     @pytest.mark.asyncio
     async def test_edge_case_special_characters(self, llm):
         """Edge case: Handle special characters in code."""
-        code_with_special = '''
+        code_with_special = """
 def regex_test():
     pattern = r"[a-z]{2,4}@\w+\.\w+"
     return re.match(pattern, "test@example.com")
-'''
+"""
         prompt = f"Explain this regex pattern:\n{code_with_special}"
 
         response = await llm.generate(prompt, max_tokens=200)
@@ -169,11 +169,7 @@ def regex_test():
     @pytest.mark.asyncio
     async def test_concurrent_requests_handling(self, llm):
         """Real scenario: Multiple requests simultaneously."""
-        prompts = [
-            "What is Python?",
-            "What is JavaScript?",
-            "What is Rust?"
-        ]
+        prompts = ["What is Python?", "What is JavaScript?", "What is Rust?"]
 
         tasks = [llm.generate(p, max_tokens=50) for p in prompts]
         responses = await asyncio.gather(*tasks, return_exceptions=True)
@@ -238,11 +234,11 @@ class TestContextManagerRealUsage:
 
         context_mgr.add_file(str(file1))
         ctx = context_mgr.build_context()
-        assert ctx['file_count'] > 0
+        assert ctx["file_count"] > 0
 
         context_mgr.files.clear()
         ctx_empty = context_mgr.build_context()
-        assert ctx_empty['file_count'] == 0
+        assert ctx_empty["file_count"] == 0
 
 
 class TestErrorHandlingRealWorld:
@@ -273,9 +269,9 @@ class TestErrorHandlingRealWorld:
         prompt = "Quick test"
 
         try:
-            response = await asyncio.wait_for(
+            await asyncio.wait_for(
                 llm.generate(prompt, max_tokens=10),
-                timeout=0.001  # Artificially small
+                timeout=0.001,  # Artificially small
             )
         except asyncio.TimeoutError:
             # Expected for this test

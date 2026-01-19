@@ -64,9 +64,7 @@ class TestPrometheusExecuteTool:
     @pytest.mark.asyncio
     async def test_execute_with_context(self, mock_engine):
         """Execute with additional context."""
-        result = await mock_engine.execute(
-            "Refactor the function to use async"
-        )
+        result = await mock_engine.execute("Refactor the function to use async")
 
         assert result["success"]
 
@@ -105,10 +103,9 @@ class TestPrometheusSimulateTool:
     @pytest.mark.asyncio
     async def test_simulate_failure_scenario(self, mock_engine):
         """Simulate failure scenario."""
-        mock_engine.simulate = AsyncMock(return_value={
-            "outcome": "failure",
-            "reason": "Network timeout"
-        })
+        mock_engine.simulate = AsyncMock(
+            return_value={"outcome": "failure", "reason": "Network timeout"}
+        )
         result = await mock_engine.simulate("Deploy during outage")
 
         assert result["outcome"] == "failure"
@@ -153,7 +150,7 @@ class TestPrometheusCreateToolTool:
         tool_spec = {
             "name": "custom_grep",
             "description": "Custom grep with context",
-            "parameters": {"pattern": "str", "context_lines": "int"}
+            "parameters": {"pattern": "str", "context_lines": "int"},
         }
 
         mock_engine.tools_created.append(tool_spec)

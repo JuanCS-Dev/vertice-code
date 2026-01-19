@@ -129,7 +129,9 @@ class TestStreamBufferOverflow:
         large_chunk = "x" * 5000
 
         # Should truncate or handle gracefully
-        processed = large_chunk[:MAX_CHUNK_SIZE] if len(large_chunk) > MAX_CHUNK_SIZE else large_chunk
+        processed = (
+            large_chunk[:MAX_CHUNK_SIZE] if len(large_chunk) > MAX_CHUNK_SIZE else large_chunk
+        )
         assert len(processed) <= MAX_CHUNK_SIZE
 
     @pytest.mark.asyncio

@@ -101,10 +101,7 @@ class TestObservationMasker:
 
         masker = ObservationMasker()
         # Large log-like content should be masked
-        large_content = "\n".join(
-            f"2024-01-01 12:00:00 INFO: Log line {i}"
-            for i in range(50)
-        )
+        large_content = "\n".join(f"2024-01-01 12:00:00 INFO: Log line {i}" for i in range(50))
         assert masker.should_mask(large_content) is True
 
     def test_mask_content_basic(self):
@@ -146,10 +143,7 @@ ValueError: Invalid format: expected JSON"""
         from vertice_tui.core.context.masking import ObservationMasker
 
         masker = ObservationMasker()
-        messages = [
-            {"role": "user", "content": f"message {i}" * 100}
-            for i in range(10)
-        ]
+        messages = [{"role": "user", "content": f"message {i}" * 100} for i in range(10)]
 
         masked_msgs, result = masker.mask_messages(messages, keep_recent=3)
 
@@ -200,10 +194,7 @@ class TestMaskingConvenienceFunctions:
         assert result == "small"  # Not masked
 
         # Use content that matches a rule (indented code-like content)
-        large_content = "\n".join(
-            f"    line {i}: some code here with details"
-            for i in range(50)
-        )
+        large_content = "\n".join(f"    line {i}: some code here with details" for i in range(50))
         result = mask_observation(large_content)
         assert len(result) < len(large_content)  # Masked
 
@@ -587,13 +578,13 @@ class TestThoughtSignatureManager:
 
         manager = ThoughtSignatureManager()
 
-        sig1 = manager.create_signature(
+        manager.create_signature(
             reasoning="Step 1",
             insights=["Insight 1"],
             next_action="Continue",
         )
 
-        sig2 = manager.create_signature(
+        manager.create_signature(
             reasoning="Step 2",
             insights=["Insight 2"],
             next_action="Finish",

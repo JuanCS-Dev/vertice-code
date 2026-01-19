@@ -1,6 +1,6 @@
 # 🔬 PHASE 2 RESEARCH: Best Parser → Shell Integration Strategies (2025)
 
-**Research Date:** 2025-11-17  
+**Research Date:** 2025-11-17
 **Focus:** How the best AI coding tools (Cursor, Claude Code, Codex, Aider) integrate LLM parsers with shell execution
 
 ---
@@ -11,7 +11,7 @@
 
 #### **Core Technology Stack:**
 ```
-tree-sitter (AST parsing) 
+tree-sitter (AST parsing)
     ↓
 Merkle trees (change detection)
     ↓
@@ -293,22 +293,22 @@ class ShellBridge:
         self.parser = parser
         self.shell = shell
         self.validator = safety_validator
-    
+
     async def execute_tool_calls(self, llm_response):
         # Parse LLM output → extract tool calls
         tool_calls = await self.parser.parse_response(llm_response)
-        
+
         results = []
         for call in tool_calls:
             # Safety check
             if not self.validator.is_safe(call):
                 results.append({"error": "Unsafe command blocked"})
                 continue
-            
+
             # Execute via shell
             result = await self.shell.execute(call)
             results.append(result)
-        
+
         return results
 ```
 
@@ -321,7 +321,7 @@ class SafetyValidator:
         r"dd if=/dev/zero",
         r"chmod -R 777",
     ]
-    
+
     def is_safe(self, tool_call):
         command = tool_call.get("command", "")
         for pattern in self.DANGEROUS_PATTERNS:
@@ -335,7 +335,7 @@ class SafetyValidator:
 class SessionManager:
     def __init__(self):
         self.sessions = {}
-    
+
     def get_or_create(self, session_id):
         if session_id not in self.sessions:
             self.sessions[session_id] = {

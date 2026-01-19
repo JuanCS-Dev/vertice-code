@@ -59,13 +59,13 @@ jobs:
             ================================================================
 
             EXECUTION PROTOCOL:
-            1. ANALYZE SCOPE: Check the issue description for "Scope (LIMITED)". 
+            1. ANALYZE SCOPE: Check the issue description for "Scope (LIMITED)".
                - CRITICAL: Do NOT touch files outside this list unless absolutely necessary for imports/types.
                - If "Out of Scope" is defined, respect it religiously.
-            
+
             2. ENVIRONMENT:
                - The environment is pre-configured. Use `pip install -e .` if needed.
-            
+
             3. IMPLEMENTATION:
                - Write idiomatic, async Python 3.11+.
                - Use specific exceptions (no `except Exception`).

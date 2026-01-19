@@ -28,8 +28,7 @@ class TestOllamaIntegration:
         """Test streaming with Ollama."""
         chunks = []
         async for chunk in ollama_client.stream_chat(
-            prompt="Say 'test' and nothing else",
-            provider="ollama"
+            prompt="Say 'test' and nothing else", provider="ollama"
         ):
             chunks.append(chunk)
 
@@ -40,10 +39,7 @@ class TestOllamaIntegration:
     async def test_ollama_with_temperature(self, ollama_client):
         """Test temperature parameter."""
         result1 = await ollama_client.generate(
-            "Say hello in 3 words",
-            temperature=0.1,
-            provider="ollama",
-            max_tokens=20
+            "Say hello in 3 words", temperature=0.1, provider="ollama", max_tokens=20
         )
 
         assert len(result1) > 0
@@ -52,10 +48,7 @@ class TestOllamaIntegration:
         """Test context injection."""
         context = "You are a pirate. Always say 'Arrr' in your responses."
         result = await ollama_client.generate(
-            "Say hello",
-            context=context,
-            provider="ollama",
-            max_tokens=50
+            "Say hello", context=context, provider="ollama", max_tokens=50
         )
 
         assert len(result) > 0
@@ -65,7 +58,7 @@ class TestOllamaIntegration:
         result = await ollama_client.generate(
             "Write a Python function that adds two numbers. Just the code, no explanation.",
             provider="ollama",
-            max_tokens=200
+            max_tokens=200,
         )
 
         assert "def" in result
@@ -77,11 +70,7 @@ class TestOllamaIntegration:
         config.ollama_model = "nonexistent-model"
 
         # Failover happens automatically in stream_chat
-        result = await ollama_client.generate(
-            "Say test",
-            provider="auto",
-            max_tokens=20
-        )
+        result = await ollama_client.generate("Say test", provider="auto", max_tokens=20)
 
         assert len(result) > 0
         config.ollama_model = original_model
@@ -100,11 +89,7 @@ class TestOllamaPerformance:
         import time
 
         start = time.time()
-        await ollama_client.generate(
-            "Say hi",
-            provider="ollama",
-            max_tokens=10
-        )
+        await ollama_client.generate("Say hi", provider="ollama", max_tokens=10)
         latency = time.time() - start
 
         assert latency < 10.0
@@ -116,11 +101,7 @@ class TestOllamaPerformance:
         start = time.time()
         first_token_time = None
 
-        async for chunk in ollama_client.stream_chat(
-            "Say hello",
-            provider="ollama",
-            max_tokens=20
-        ):
+        async for chunk in ollama_client.stream_chat("Say hello", provider="ollama", max_tokens=20):
             if first_token_time is None:
                 first_token_time = time.time() - start
             if first_token_time:
@@ -150,11 +131,7 @@ class TestOllamaHFComparison:
 
     async def test_auto_provider_selection(self, client):
         """Test auto provider selection logic."""
-        result = await client.generate(
-            "Say hi",
-            provider="auto",
-            max_tokens=20
-        )
+        result = await client.generate("Say hi", provider="auto", max_tokens=20)
 
         assert len(result) > 0
 

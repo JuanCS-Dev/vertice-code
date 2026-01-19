@@ -53,8 +53,8 @@ from qwen_dev_cli.tui.minimal_output import MinimalOutput, StreamingMinimal
 ### DEPOIS (Minimal - Nov 2025)
 ```
 ────────────────────────────────────────────────────────────
-Programação funcional é um paradigma que trata 
-computação como avaliação de funções matemáticas 
+Programação funcional é um paradigma que trata
+computação como avaliação de funções matemáticas
 e evita mudanças de estado.
 
 **Em resumo:**
@@ -92,7 +92,7 @@ Intelligent summarization (preserva headers, code, lists)
 ```python
 class StreamingMinimal:
     max_visible_lines = 20
-    
+
     def add_chunk(self, chunk: str):
         if self.line_count > self.max_visible_lines:
             console.print("\n[dim]... streaming (use /expand) ...[/dim]")
@@ -271,9 +271,9 @@ Seguindo as melhores práticas de Nov 2025:
 
 ---
 
-**Data:** 2025-11-23  
-**Version:** 1.0 Minimal Output  
-**Following:** Nov 2025 Best Practices  
-**Status:** ✅ PRODUCTION READY  
+**Data:** 2025-11-23
+**Version:** 1.0 Minimal Output
+**Following:** Nov 2025 Best Practices
+**Status:** ✅ PRODUCTION READY
 
 **Soli Deo Gloria** 🙏

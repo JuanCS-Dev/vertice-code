@@ -1,8 +1,8 @@
 # 🏛️ QWEN-DEV-CLI: Technical Architecture
 
-**Project:** AI-Powered Development Assistant  
-**Version:** 0.3.0-devsquad  
-**Architecture:** Multi-Layer Agentic System  
+**Project:** AI-Powered Development Assistant
+**Version:** 0.3.0-devsquad
+**Architecture:** Multi-Layer Agentic System
 **Grade:** A+ (Production-Ready)
 
 ---
@@ -74,8 +74,8 @@
 
 ### Layer 1: CLI (Command-Line Interface)
 
-**File:** `qwen_dev_cli/cli.py`  
-**Framework:** Typer  
+**File:** `qwen_dev_cli/cli.py`
+**Framework:** Typer
 **Purpose:** Entry point for one-shot commands
 
 **Responsibilities:**
@@ -122,8 +122,8 @@ def squad(mission: str):
 
 ### Layer 2: Shell (Interactive REPL)
 
-**File:** `qwen_dev_cli/shell.py`  
-**Framework:** prompt_toolkit + rich  
+**File:** `qwen_dev_cli/shell.py`
+**Framework:** prompt_toolkit + rich
 **Purpose:** Interactive development environment
 
 **Responsibilities:**
@@ -158,12 +158,12 @@ class InteractiveShell:
         self.context = ContextBuilder()
         self.registry = ToolRegistry()
         self.squad = DevSquad(llm_client, mcp_client)
-        
+
     async def run(self):
         """Main REPL loop."""
         while True:
             user_input = await self.session.prompt_async("> ")
-            
+
             if user_input.startswith("/"):
                 # Shell command
                 await self.execute_command(user_input)
@@ -186,29 +186,29 @@ class ConversationState:
 
 ### Layer 3: Agent Squad (Federation of Specialists)
 
-**Directory:** `qwen_dev_cli/agents/`  
-**Orchestrator:** `qwen_dev_cli/orchestration/squad.py`  
+**Directory:** `qwen_dev_cli/agents/`
+**Orchestrator:** `qwen_dev_cli/orchestration/squad.py`
 **Purpose:** Multi-agent collaboration for complex tasks
 
 #### 3.1. BaseAgent (Abstract)
 
-**File:** `agents/base.py`  
+**File:** `agents/base.py`
 **Pattern:** Template Method + Strategy
 
 ```python
 class BaseAgent(ABC):
     role: AgentRole          # ARCHITECT, EXPLORER, etc.
     capabilities: List[AgentCapability]  # READ_ONLY, EDIT, etc.
-    
+
     @abstractmethod
     async def execute(self, task: AgentTask) -> AgentResponse:
         """Execute agent-specific logic."""
         pass
-    
+
     def _can_use_tool(self, tool_name: str) -> bool:
         """Capability-based tool validation."""
         return tool_name in self.get_allowed_tools()
-    
+
     async def _call_llm(self, prompt: str) -> str:
         """LLM wrapper with execution counter."""
         self.execution_count += 1
@@ -229,14 +229,14 @@ class AgentCapability(Enum):
 
 ##### **ArchitectAgent** (The Visionary Skeptic)
 
-**File:** `agents/architect.py`  
+**File:** `agents/architect.py`
 **Role:** Feasibility analysis + veto authority
 
 ```python
 class ArchitectAgent(BaseAgent):
     role = AgentRole.ARCHITECT
     capabilities = [AgentCapability.READ_ONLY]
-    
+
     async def execute(self, task: AgentTask) -> AgentResponse:
         """
         1. Analyze request feasibility
@@ -245,7 +245,7 @@ class ArchitectAgent(BaseAgent):
         4. APPROVE or VETO
         """
         analysis = await self._analyze_feasibility(task.request)
-        
+
         if analysis.is_feasible:
             return AgentResponse(
                 success=True,
@@ -268,14 +268,14 @@ class ArchitectAgent(BaseAgent):
 
 ##### **ExplorerAgent** (The Context Navigator)
 
-**File:** `agents/explorer.py`  
+**File:** `agents/explorer.py`
 **Role:** Smart context gathering (token-aware)
 
 ```python
 class ExplorerAgent(BaseAgent):
     role = AgentRole.EXPLORER
     capabilities = [AgentCapability.READ_ONLY]
-    
+
     async def execute(self, task: AgentTask) -> AgentResponse:
         """
         1. Extract keywords from request
@@ -287,9 +287,9 @@ class ExplorerAgent(BaseAgent):
         keywords = self._extract_keywords(task.request)
         search_results = await self._grep_search(keywords)
         relevant_files = self._rank_by_relevance(search_results)[:10]
-        
+
         context = await self._load_files(relevant_files, max_tokens=10000)
-        
+
         return AgentResponse(
             success=True,
             data={
@@ -309,14 +309,14 @@ class ExplorerAgent(BaseAgent):
 
 ##### **PlannerAgent** (The Project Manager)
 
-**File:** `agents/planner.py`  
+**File:** `agents/planner.py`
 **Role:** Break architecture into atomic steps
 
 ```python
 class PlannerAgent(BaseAgent):
     role = AgentRole.PLANNER
     capabilities = [AgentCapability.DESIGN]
-    
+
     async def execute(self, task: AgentTask) -> AgentResponse:
         """
         1. Read Architect's approved plan
@@ -327,12 +327,12 @@ class PlannerAgent(BaseAgent):
         """
         architecture = task.context["approved_architecture"]
         steps = self._generate_atomic_steps(architecture)
-        
+
         for step in steps:
             step.risk = self._assess_risk(step)
             step.requires_approval = (step.risk == "HIGH")
             step.dependencies = self._find_dependencies(step, steps)
-        
+
         return AgentResponse(
             success=True,
             data={
@@ -355,7 +355,7 @@ class PlannerAgent(BaseAgent):
 
 ##### **RefactorerAgent** (The Code Surgeon)
 
-**File:** `agents/refactorer.py`  
+**File:** `agents/refactorer.py`
 **Role:** Execute plan with self-correction
 
 ```python
@@ -367,37 +367,37 @@ class RefactorerAgent(BaseAgent):
         AgentCapability.BASH_EXEC,
         AgentCapability.GIT_OPS
     ]
-    
+
     MAX_ATTEMPTS = 3
-    
+
     async def execute(self, task: AgentTask) -> AgentResponse:
         """
         Execute plan with self-correction loop.
         Max 3 attempts per step.
         """
         plan = task.context["execution_plan"]
-        
+
         for step in plan.steps:
             success = False
-            
+
             for attempt in range(1, self.MAX_ATTEMPTS + 1):
                 result = await self._execute_step(step)
-                
+
                 if result.success:
                     success = True
                     break
-                
+
                 if attempt < self.MAX_ATTEMPTS:
                     correction = await self._generate_correction(result.error)
                     await self._apply_correction(correction)
-            
+
             if not success:
                 await self._rollback()
                 return AgentResponse(
                     success=False,
                     data={"failed_step": step.id, "errors": result.errors}
                 )
-        
+
         return AgentResponse(success=True, data={"steps_completed": len(plan.steps)})
 ```
 
@@ -411,14 +411,14 @@ class RefactorerAgent(BaseAgent):
 
 ##### **ReviewerAgent** (The QA Guardian)
 
-**File:** `agents/reviewer.py`  
+**File:** `agents/reviewer.py`
 **Role:** Quality validation + Constitutional AI
 
 ```python
 class ReviewerAgent(BaseAgent):
     role = AgentRole.REVIEWER
     capabilities = [AgentCapability.READ_ONLY, AgentCapability.GIT_OPS]
-    
+
     async def execute(self, task: AgentTask) -> AgentResponse:
         """
         5 Quality Gates:
@@ -429,7 +429,7 @@ class ReviewerAgent(BaseAgent):
         5. Constitutional AI (LEI, HRI, CPI)
         """
         git_diff = task.context["git_diff"]
-        
+
         gates = {
             "code_quality": await self._check_code_quality(git_diff),
             "security": await self._check_security(git_diff),
@@ -437,10 +437,10 @@ class ReviewerAgent(BaseAgent):
             "performance": await self._check_performance(git_diff),
             "constitutional": await self._check_constitutional(git_diff)
         }
-        
+
         final_score = self._calculate_score(gates)
         grade = self._assign_grade(final_score)
-        
+
         if all(gate["passed"] for gate in gates.values()):
             return AgentResponse(
                 success=True,
@@ -475,7 +475,7 @@ grade = {
 
 #### 3.3. DevSquad Orchestrator
 
-**File:** `orchestration/squad.py`  
+**File:** `orchestration/squad.py`
 **Pattern:** Chain of Responsibility + Orchestrator
 
 ```python
@@ -487,7 +487,7 @@ class DevSquad:
         self.refactorer = RefactorerAgent(llm_client, mcp_client)
         self.reviewer = ReviewerAgent(llm_client, mcp_client)
         self.memory = MemoryManager()
-    
+
     async def execute_workflow(self, request: str) -> Dict[str, Any]:
         """
         5-Phase Workflow:
@@ -502,12 +502,12 @@ class DevSquad:
         arch_result = await self.architect.execute(AgentTask(request=request))
         if not arch_result.success:
             return {"status": "VETO", "reason": arch_result.reasoning}
-        
+
         # Phase 2: Explorer
         explorer_result = await self.explorer.execute(
             AgentTask(request=request, context={"architecture": arch_result.data})
         )
-        
+
         # Phase 3: Planner
         planner_result = await self.planner.execute(
             AgentTask(request=request, context={
@@ -515,16 +515,16 @@ class DevSquad:
                 "relevant_files": explorer_result.data["relevant_files"]
             })
         )
-        
+
         # Phase 4: Human Gate
         if not await self._human_approval(planner_result.data):
             return {"status": "REJECTED", "reason": "Human declined plan"}
-        
+
         # Phase 5: Refactorer
         refactor_result = await self.refactorer.execute(
             AgentTask(request=request, context={"execution_plan": planner_result.data})
         )
-        
+
         # Phase 6: Reviewer
         review_result = await self.reviewer.execute(
             AgentTask(request=request, context={
@@ -532,7 +532,7 @@ class DevSquad:
                 "execution_log": refactor_result.data["execution_log"]
             })
         )
-        
+
         return {
             "status": "SUCCESS" if review_result.success else "CHANGES_REQUESTED",
             "architect": arch_result.data,
@@ -548,13 +548,13 @@ class DevSquad:
 async def _human_approval(self, plan: Dict) -> bool:
     """Display plan and request approval."""
     console.print(Panel(self._format_plan(plan), title="Execution Plan"))
-    
+
     high_risk_steps = [s for s in plan["steps"] if s["risk"] == "HIGH"]
     if high_risk_steps:
         console.print("[bold red]⚠️  HIGH-RISK STEPS:[/]")
         for step in high_risk_steps:
             console.print(f"  - {step['description']}")
-    
+
     response = Prompt.ask("Approve plan?", choices=["y", "n"], default="n")
     return response == "y"
 ```
@@ -565,7 +565,7 @@ async def _human_approval(self, plan: Dict) -> bool:
 
 ### 4.1. LLM Client
 
-**File:** `core/llm.py`  
+**File:** `core/llm.py`
 **Purpose:** Unified interface to LLM providers
 
 ```python
@@ -573,7 +573,7 @@ class LLMClient:
     def __init__(self, provider: str = "gemini"):
         self.provider = provider
         self.client = self._initialize_client()
-    
+
     async def complete(self, prompt: str, **kwargs) -> str:
         """Generate completion."""
         if self.provider == "gemini":
@@ -581,7 +581,7 @@ class LLMClient:
         elif self.provider == "anthropic":
             return await self._anthropic_complete(prompt, **kwargs)
         # ... other providers
-    
+
     async def stream(self, prompt: str):
         """Stream completion tokens."""
         async for chunk in self._stream_chunks(prompt):
@@ -598,27 +598,27 @@ class LLMClient:
 
 ### 4.2. MCP Client
 
-**File:** `core/mcp_client.py`  
+**File:** `core/mcp_client.py`
 **Purpose:** Model Context Protocol tool execution
 
 ```python
 class MCPClient:
     def __init__(self, registry: ToolRegistry):
         self.registry = registry
-    
+
     async def call_tool(self, tool_name: str, params: Dict) -> ToolResult:
         """Execute MCP tool with validation."""
         tool = self.registry.get_tool(tool_name)
-        
+
         if not tool:
             raise ToolNotFoundError(f"Tool {tool_name} not found")
-        
+
         # Validate parameters
         validated_params = tool.validate_params(params)
-        
+
         # Execute tool
         result = await tool.execute(**validated_params)
-        
+
         return ToolResult(
             success=result.success,
             output=result.output,
@@ -637,7 +637,7 @@ class MCPClient:
 
 ### 4.3. Context Builder
 
-**File:** `core/context.py`  
+**File:** `core/context.py`
 **Purpose:** Intelligent context management
 
 ```python
@@ -646,34 +646,34 @@ class ContextBuilder:
         self.max_tokens = max_tokens
         self.files = []
         self.conversation_history = []
-    
+
     async def add_file(self, path: Path):
         """Add file to context with token tracking."""
         content = path.read_text()
         token_count = self._estimate_tokens(content)
-        
+
         if self.current_tokens + token_count > self.max_tokens:
             # Evict least recently used
             self._evict_lru()
-        
+
         self.files.append({
             "path": path,
             "content": content,
             "tokens": token_count,
             "timestamp": datetime.now()
         })
-    
+
     def build_context(self) -> str:
         """Build context string for LLM."""
         context_parts = []
-        
+
         # Add conversation history (compressed)
         context_parts.append(self._compress_history())
-        
+
         # Add file contents
         for file in self.files:
             context_parts.append(f"File: {file['path']}\n{file['content']}")
-        
+
         return "\n\n".join(context_parts)
 ```
 
@@ -681,7 +681,7 @@ class ContextBuilder:
 
 ### 4.4. Memory Manager
 
-**File:** `orchestration/memory.py`  
+**File:** `orchestration/memory.py`
 **Purpose:** Session + agent memory
 
 ```python
@@ -689,7 +689,7 @@ class MemoryManager:
     def __init__(self):
         self.sessions: Dict[str, SharedContext] = {}
         self._lock = asyncio.Lock()
-    
+
     async def create_session(self, session_id: str) -> SharedContext:
         """Create new session with shared context."""
         async with self._lock:
@@ -703,7 +703,7 @@ class MemoryManager:
             )
             self.sessions[session_id] = context
             return context
-    
+
     async def update_context(self, session_id: str, agent: str, data: Dict):
         """Update agent-specific context."""
         async with self._lock:
@@ -820,7 +820,7 @@ async def _execute_tool(self, tool_name: str, params: Dict) -> ToolResult:
     """Execute tool with capability check."""
     if not self._can_use_tool(tool_name):
         raise PermissionError(f"Agent {self.role} cannot use {tool_name}")
-    
+
     return await self.mcp_client.call_tool(tool_name, params)
 ```
 
@@ -847,7 +847,7 @@ class BaseAgent(ABC):
         self._validate_task(task)
         result = await self._execute_impl(task)  # Subclass implements
         return self._format_response(result)
-    
+
     @abstractmethod
     async def _execute_impl(self, task: AgentTask):
         """Subclass implements specific logic."""
@@ -875,7 +875,7 @@ async def execute_workflow(self, request: str):
     result = await self.architect.execute(...)
     if not result.success:
         return  # Chain breaks
-    
+
     result = await self.explorer.execute(...)
     # ... continue chain
 ```
@@ -886,10 +886,10 @@ async def execute_workflow(self, request: str):
 class FileWatcher:
     def __init__(self):
         self.observers = []
-    
+
     def subscribe(self, callback):
         self.observers.append(callback)
-    
+
     async def notify_change(self, path: Path):
         for observer in self.observers:
             await observer(path)
@@ -939,7 +939,7 @@ async def execute_bash(command: str) -> str:
     # Validate command (no rm -rf /, etc.)
     if is_dangerous_command(command):
         raise SecurityError("Dangerous command blocked")
-    
+
     # Run in subprocess with timeout
     result = await asyncio.create_subprocess_shell(
         command,
@@ -962,9 +962,9 @@ async def _check_constitutional(self, code: str) -> Dict:
     lei = calculate_lei(code)  # Count TODOs, placeholders
     hri = calculate_hri(code)  # Readability metrics
     cpi = calculate_cpi(code)  # SOLID, DRY, KISS
-    
+
     passed = (lei < 1.0 and hri >= 0.9 and cpi >= 0.9)
-    
+
     return {
         "passed": passed,
         "lei": lei,
@@ -1150,14 +1150,14 @@ Each agent has ONE job:
 
 ---
 
-**Version:** 1.0.0  
-**Last Updated:** 2025-11-22  
-**Status:** Production-Ready ✅  
-**Grade:** A+ (Boris Cherny approved)  
-**Author:** Juan Carlos Souza (JuanCS-Dev)  
+**Version:** 1.0.0
+**Last Updated:** 2025-11-22
+**Status:** Production-Ready ✅
+**Grade:** A+ (Boris Cherny approved)
+**Author:** Juan Carlos Souza (JuanCS-Dev)
 **License:** MIT
 
 ---
 
-> **"Architecture is about making decisions that preserve options  
+> **"Architecture is about making decisions that preserve options
 > for as long as possible."** — Robert C. Martin (Uncle Bob)

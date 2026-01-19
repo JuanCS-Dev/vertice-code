@@ -30,6 +30,7 @@ from vertice_cli.agents.base import AgentTask
 # CATEGORY 1: REAL CODE ANALYSIS (30 tests)
 # ============================================================================
 
+
 class TestRealCodeAnalysis:
     """Tests with actual Python code, not mocks."""
 
@@ -83,15 +84,15 @@ def validate_age(age: int) -> bool:
 class Calculator:
     def __init__(self):
         self.result = 0
-    
+
     def add(self, x: int) -> int:
         self.result += x
         return self.result
-    
+
     def subtract(self, x: int) -> int:
         self.result -= x
         return self.result
-    
+
     def reset(self) -> None:
         self.result = 0
 """
@@ -137,11 +138,11 @@ class User:
 class Person:
     def __init__(self, name: str):
         self._name = name
-    
+
     @property
     def name(self) -> str:
         return self._name
-    
+
     @name.setter
     def name(self, value: str) -> None:
         if not value:
@@ -165,7 +166,7 @@ class FileHandler:
     def __enter__(self):
         self.file = open("test.txt", "w")
         return self.file
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.file.close()
 """
@@ -447,7 +448,7 @@ def process_data(
 class AsyncResource:
     async def __aenter__(self):
         return self
-    
+
     async def __aexit__(self, exc_type, exc, tb):
         pass
 """
@@ -501,7 +502,7 @@ async def async_range(n: int):
 class User:
     def __init__(self, name: str):
         self.name = name
-    
+
     @classmethod
     def from_dict(cls, data: dict):
         return cls(data["name"])
@@ -620,6 +621,7 @@ def classify_number(n: int) -> str:
 # ============================================================================
 # CATEGORY 2: AST PARSING EDGE CASES (25 tests)
 # ============================================================================
+
 
 class TestASTParsingEdgeCases:
     """Tests for AST parsing robustness."""
@@ -1019,7 +1021,7 @@ class User(JSONMixin):
         code = """
 class Point:
     __slots__ = ['x', 'y']
-    
+
     def __init__(self, x: int, y: int):
         self.x = x
         self.y = y
@@ -1039,7 +1041,7 @@ class Point:
 class Descriptor:
     def __get__(self, obj, objtype=None):
         return 42
-    
+
     def __set__(self, obj, value):
         pass
 """
@@ -1060,7 +1062,8 @@ def test_extended_test_count():
 
     current_module = sys.modules[__name__]
     test_classes = [
-        obj for name, obj in inspect.getmembers(current_module)
+        obj
+        for name, obj in inspect.getmembers(current_module)
         if inspect.isclass(obj) and name.startswith("Test")
     ]
 

@@ -113,7 +113,7 @@ Based on official documentation from Google AI, OpenAI, and Anthropic.
 
 2. **Rich Descriptions**: Explain what, why, when
    ```
-   "Read the complete contents of a file. Use this when user asks 
+   "Read the complete contents of a file. Use this when user asks
    to view, read, or examine file contents. Returns full text."
    ```
 
@@ -170,7 +170,7 @@ User: Create a new Python file called utils.py with a hello function
 Expected Response:
 [
   {"tool": "writefile", "args": {
-    "path": "utils.py", 
+    "path": "utils.py",
     "content": "def hello(name):\n    return f'Hello, {name}!'\n"
   }}
 ]

@@ -24,14 +24,17 @@ class TestPlanningFlowE2E:
         response = await vertice_client.process(request, mode="plan_only")
 
         # Should decompose into at least 4 tasks
-        assert len(response["tasks"]) >= 4, f"Expected at least 4 tasks, got {len(response['tasks'])}"
+        assert (
+            len(response["tasks"]) >= 4
+        ), f"Expected at least 4 tasks, got {len(response['tasks'])}"
 
         # Verify key components are present
         task_descriptions = [t.description.lower() for t in response["tasks"]]
-        all_text = " ".join(task_descriptions)
+        " ".join(task_descriptions)
 
-        assert any("login" in d or "auth" in d for d in task_descriptions), \
-            "Should have login-related task"
+        assert any(
+            "login" in d or "auth" in d for d in task_descriptions
+        ), "Should have login-related task"
 
     @pytest.mark.e2e
     async def test_plan_gating(self, vertice_client, mock_user_input):
@@ -45,8 +48,7 @@ class TestPlanningFlowE2E:
         # Should have shown plan before execution
         assert response["plan_displayed"], "Plan should be displayed"
         assert response["user_approved"], "User should have approved"
-        assert response["execution_started_after_approval"], \
-            "Execution should start after approval"
+        assert response["execution_started_after_approval"], "Execution should start after approval"
 
     @pytest.mark.e2e
     async def test_plan_rejection(self, vertice_client, mock_user_input):
@@ -85,8 +87,9 @@ class TestPlanningFlowE2E:
         response = await vertice_client.process(request, mode="plan_only")
 
         # Complex request = many tasks
-        assert len(response["tasks"]) >= 5, \
-            f"Complex request should have many tasks, got {len(response['tasks'])}"
+        assert (
+            len(response["tasks"]) >= 5
+        ), f"Complex request should have many tasks, got {len(response['tasks'])}"
 
 
 class TestPlanningQuality:
@@ -137,8 +140,7 @@ class TestPlanningQuality:
         unique_descriptions = set(descriptions)
 
         # Allow some similarity but not exact duplicates
-        assert len(unique_descriptions) >= len(descriptions) * 0.8, \
-            "Too many duplicate tasks"
+        assert len(unique_descriptions) >= len(descriptions) * 0.8, "Too many duplicate tasks"
 
 
 class TestPlanningUserInteraction:
@@ -221,7 +223,7 @@ class TestPlanningPerformance:
         request = "Create a complete user management system"
 
         start = asyncio.get_event_loop().time()
-        response = await vertice_client.process(request, mode="plan_only")
+        await vertice_client.process(request, mode="plan_only")
         duration = asyncio.get_event_loop().time() - start
 
         # Planning should be fast (no execution)

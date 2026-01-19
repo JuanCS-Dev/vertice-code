@@ -80,7 +80,7 @@ import os
 def backup_file(filename):
     # VULNERABLE: shell=True with user input
     subprocess.run(f"tar -czf backup.tar.gz {filename}", shell=True)
-    
+
     # VULNERABLE: os.system
     os.system(f"rm -rf {filename}")
 """
@@ -104,7 +104,7 @@ import hashlib
 def hash_password(password):
     # VULNERABLE: MD5 is broken
     return hashlib.md5(password.encode()).hexdigest()
-    
+
 def hash_token(token):
     # VULNERABLE: SHA1 is broken
     return hashlib.sha1(token.encode()).hexdigest()
@@ -120,7 +120,7 @@ import yaml
 def load_data(data):
     # VULNERABLE: pickle can execute code
     return pickle.loads(data)
-    
+
 def load_config(config_str):
     # VULNERABLE: yaml.load without SafeLoader
     return yaml.load(config_str)
@@ -133,10 +133,10 @@ def load_config(config_str):
 def execute_code(user_code):
     # VULNERABLE: eval allows arbitrary code execution
     result = eval(user_code)
-    
+
     # VULNERABLE: exec allows arbitrary code execution
     exec(user_code)
-    
+
     return result
 """
         )
@@ -182,7 +182,7 @@ class TestSecurityAgentVulnerabilities:
 
         result = await security_agent.execute(task)
 
-        assert result.success == True
+        assert result.success
         vulns = result.data.get("vulnerabilities", [])
         assert len(vulns) >= 1
 
@@ -207,18 +207,14 @@ class TestSecurityAgentVulnerabilities:
 
         result = await security_agent.execute(task)
 
-        assert result.success == True
+        assert result.success
         vulns = result.data.get("vulnerabilities", [])
 
-        cmd_vulns = [
-            v for v in vulns if v["type"] == VulnerabilityType.COMMAND_INJECTION
-        ]
+        cmd_vulns = [v for v in vulns if v["type"] == VulnerabilityType.COMMAND_INJECTION]
         assert len(cmd_vulns) >= 2  # shell=True + os.system
 
         # Check for shell=True detection
-        shell_vuln = next(
-            (v for v in cmd_vulns if "shell=True" in v["remediation"]), None
-        )
+        shell_vuln = next((v for v in cmd_vulns if "shell=True" in v["remediation"]), None)
         assert shell_vuln is not None
         assert shell_vuln["severity"] == SeverityLevel.CRITICAL
 
@@ -234,12 +230,10 @@ class TestSecurityAgentVulnerabilities:
 
         result = await security_agent.execute(task)
 
-        assert result.success == True
+        assert result.success
         vulns = result.data.get("vulnerabilities", [])
 
-        path_vulns = [
-            v for v in vulns if v["type"] == VulnerabilityType.PATH_TRAVERSAL
-        ]
+        path_vulns = [v for v in vulns if v["type"] == VulnerabilityType.PATH_TRAVERSAL]
         # Note: Detection requires ".." in the path, which our test doesn't have
         # This tests that the agent doesn't false-positive
         assert len(path_vulns) == 0  # No ".." in our test case
@@ -256,7 +250,7 @@ class TestSecurityAgentVulnerabilities:
 
         result = await security_agent.execute(task)
 
-        assert result.success == True
+        assert result.success
         vulns = result.data.get("vulnerabilities", [])
 
         crypto_vulns = [v for v in vulns if v["type"] == VulnerabilityType.WEAK_CRYPTO]
@@ -277,12 +271,10 @@ class TestSecurityAgentVulnerabilities:
 
         result = await security_agent.execute(task)
 
-        assert result.success == True
+        assert result.success
         vulns = result.data.get("vulnerabilities", [])
 
-        deser_vulns = [
-            v for v in vulns if v["type"] == VulnerabilityType.UNSAFE_DESERIALIZATION
-        ]
+        deser_vulns = [v for v in vulns if v["type"] == VulnerabilityType.UNSAFE_DESERIALIZATION]
         assert len(deser_vulns) >= 2  # pickle + yaml
 
         # Check for pickle.loads detection
@@ -303,7 +295,7 @@ class TestSecurityAgentVulnerabilities:
 
         result = await security_agent.execute(task)
 
-        assert result.success == True
+        assert result.success
         vulns = result.data.get("vulnerabilities", [])
 
         eval_vulns = [v for v in vulns if v["type"] == VulnerabilityType.EVAL_USAGE]
@@ -331,7 +323,7 @@ class TestSecurityAgentSecrets:
 
         result = await security_agent.execute(task)
 
-        assert result.success == True
+        assert result.success
         secrets = result.data.get("secrets", [])
 
         api_keys = [s for s in secrets if s["type"] == "api_key"]
@@ -379,9 +371,7 @@ class TestSecurityAgentDependencies:
 
     @pytest.mark.asyncio
     @patch("subprocess.run")
-    async def test_dependency_scanning_with_vulns(
-        self, mock_run, security_agent, temp_project
-    ):
+    async def test_dependency_scanning_with_vulns(self, mock_run, security_agent, temp_project):
         """Test dependency scanning with vulnerabilities found."""
         # Mock pip-audit output
         mock_run.return_value = MagicMock(
@@ -397,7 +387,7 @@ class TestSecurityAgentDependencies:
 
         result = await security_agent.execute(task)
 
-        assert result.success == True
+        assert result.success
         deps = result.data.get("dependencies", [])
         assert len(deps) >= 1
         assert deps[0]["package"] == "flask"
@@ -405,9 +395,7 @@ class TestSecurityAgentDependencies:
 
     @pytest.mark.asyncio
     @patch("subprocess.run")
-    async def test_dependency_scanning_no_vulns(
-        self, mock_run, security_agent, temp_project
-    ):
+    async def test_dependency_scanning_no_vulns(self, mock_run, security_agent, temp_project):
         """Test dependency scanning with no vulnerabilities."""
         # Mock pip-audit output (clean)
         mock_run.return_value = MagicMock(returncode=0, stdout='{"vulnerabilities": []}')
@@ -420,7 +408,7 @@ class TestSecurityAgentDependencies:
 
         result = await security_agent.execute(task)
 
-        assert result.success == True
+        assert result.success
         deps = result.data.get("dependencies", [])
         assert len(deps) == 0
 
@@ -442,7 +430,7 @@ class TestSecurityAgentDependencies:
         result = await security_agent.execute(task)
 
         # Should succeed but return no dependencies
-        assert result.success == True
+        assert result.success
         deps = result.data.get("dependencies", [])
         assert len(deps) == 0
 
@@ -470,7 +458,7 @@ def safe_function():
 
             result = await security_agent.execute(task)
 
-            assert result.success == True
+            assert result.success
             score = result.data.get("owasp_score", 0)
             assert score == 100  # Perfect score
 
@@ -485,7 +473,7 @@ def safe_function():
 
         result = await security_agent.execute(task)
 
-        assert result.success == True
+        assert result.success
         score = result.data.get("owasp_score", 100)
 
         # Should have deductions
@@ -502,14 +490,17 @@ def safe_function():
             project = Path(tmpdir)
 
             # Create file with MANY critical vulnerabilities
-            vuln_code = """
+            vuln_code = (
+                """
 import subprocess
 import os
 eval("code")
 exec("code")
 subprocess.run("cmd", shell=True)
 os.system("cmd")
-""" * 20  # Repeat 20 times
+"""
+                * 20
+            )  # Repeat 20 times
 
             (project / "many_vulns.py").write_text(vuln_code)
 
@@ -539,7 +530,7 @@ class TestSecurityAgentReporting:
 
         result = await security_agent.execute(task)
 
-        assert result.success == True
+        assert result.success
         report = result.data.get("report", "")
         # Check all sections present
         assert "SECURITY AUDIT REPORT" in report
@@ -582,7 +573,7 @@ class TestSecurityAgentEdgeCases:
         result = await security_agent.execute(task)
 
         # Should fail gracefully
-        assert result.success == False
+        assert not result.success
         assert "failed" in result.output.lower() or "error" in result.output.lower()
 
     @pytest.mark.asyncio
@@ -597,7 +588,7 @@ class TestSecurityAgentEdgeCases:
 
             result = await security_agent.execute(task)
 
-            assert result.success == True
+            assert result.success
             score = result.data.get("owasp_score", 0)
             assert score == 100  # No code = no vulnerabilities
 
@@ -622,7 +613,7 @@ def broken(
             result = await security_agent.execute(task)
 
             # Should succeed but skip AST analysis for broken file
-            assert result.success == True
+            assert result.success
 
     @pytest.mark.asyncio
     async def test_binary_file_handling(self, security_agent):
@@ -641,7 +632,7 @@ def broken(
             result = await security_agent.execute(task)
 
             # Should succeed and skip binary files
-            assert result.success == True
+            assert result.success
 
 
 class TestSecurityAgentIntegration:

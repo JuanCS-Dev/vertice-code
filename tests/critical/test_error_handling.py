@@ -19,6 +19,7 @@ from unittest.mock import MagicMock
 # TESTE 1: ERROR UTILS MODULE
 # =============================================================================
 
+
 class TestErrorUtilsModule:
     """Testa o módulo error_utils."""
 
@@ -88,6 +89,7 @@ class TestErrorUtilsModule:
 # TESTE 2: USER-FRIENDLY MESSAGES
 # =============================================================================
 
+
 class TestUserFriendlyMessages:
     """Testa formatação de mensagens para usuário."""
 
@@ -134,6 +136,7 @@ class TestUserFriendlyMessages:
 # =============================================================================
 # TESTE 3: RETRYABLE ERROR DETECTION
 # =============================================================================
+
 
 class TestRetryableErrorDetection:
     """Testa detecção de erros que podem ser retentados."""
@@ -183,6 +186,7 @@ class TestRetryableErrorDetection:
 # TESTE 4: ERROR RESULT CREATION
 # =============================================================================
 
+
 class TestErrorResultCreation:
     """Testa criação de resultados de erro padronizados."""
 
@@ -213,6 +217,7 @@ class TestErrorResultCreation:
 # =============================================================================
 # TESTE 5: ERROR CONTEXT MANAGER
 # =============================================================================
+
 
 class TestErrorContextManager:
     """Testa o context manager para erros."""
@@ -259,6 +264,7 @@ class TestErrorContextManager:
 # =============================================================================
 # TESTE 6: NO SENSITIVE DATA LEAK
 # =============================================================================
+
 
 class TestNoSensitiveDataLeak:
     """Testa que dados sensíveis não vazam em mensagens de erro."""

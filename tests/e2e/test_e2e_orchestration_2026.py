@@ -35,6 +35,7 @@ class Veredicto(Enum):
 @dataclass
 class TestResult:
     """Result of a single test."""
+
     nome: str
     agente: str
     prompt: str
@@ -54,7 +55,9 @@ class TestesE2EOrquestracao:
         self.resultados: List[TestResult] = []
         self.inicio = datetime.now()
 
-    async def invocar_agente(self, agente: str, prompt: str, context: Dict[str, Any] = None) -> Tuple[str, float]:
+    async def invocar_agente(
+        self, agente: str, prompt: str, context: Dict[str, Any] = None
+    ) -> Tuple[str, float]:
         """Invoke an agent and return output + duration."""
         try:
             from vertice_tui.core.agents.manager import AgentManager
@@ -76,13 +79,7 @@ class TestesE2EOrquestracao:
             return f"[ERRO]: {e}\n{traceback.format_exc()}", 0.0
 
     def avaliar(
-        self,
-        nome: str,
-        agente: str,
-        prompt: str,
-        output: str,
-        criterios: List[str],
-        duracao: float
+        self, nome: str, agente: str, prompt: str, output: str, criterios: List[str], duracao: float
     ) -> TestResult:
         """Evaluate test result against criteria."""
         output_lower = output.lower()
@@ -126,7 +123,7 @@ class TestesE2EOrquestracao:
             criterios_faltando=criterios_faltando,
             veredicto=veredicto,
             duracao=duracao,
-            erro=erro
+            erro=erro,
         )
         self.resultados.append(result)
         return result
@@ -144,15 +141,15 @@ class TestesE2EOrquestracao:
         variations = [
             {
                 "prompt": "Crie uma funcao Python que calcule o fatorial de um numero.",
-                "criterios": ["def|function", "factorial|fatorial", "return", "if|while|for"]
+                "criterios": ["def|function", "factorial|fatorial", "return", "if|while|for"],
             },
             {
                 "prompt": "Write a class that implements a simple stack data structure.",
-                "criterios": ["class", "push|append", "pop", "self"]
+                "criterios": ["class", "push|append", "pop", "self"],
             },
             {
                 "prompt": "Implemente um decorator que mede o tempo de execucao de funcoes.",
-                "criterios": ["def", "wrapper", "@|decorator", "time"]
+                "criterios": ["def", "wrapper", "@|decorator", "time"],
             },
         ]
 
@@ -167,10 +164,12 @@ class TestesE2EOrquestracao:
                 prompt=var["prompt"],
                 output=output,
                 criterios=var["criterios"],
-                duracao=duracao
+                duracao=duracao,
             )
             results.append(result)
-            print(f"    Veredicto: {result.veredicto.value} ({len(result.criterios_atendidos)}/{len(result.criterios)})")
+            print(
+                f"    Veredicto: {result.veredicto.value} ({len(result.criterios_atendidos)}/{len(result.criterios)})"
+            )
 
         return results
 
@@ -183,11 +182,11 @@ class TestesE2EOrquestracao:
         variations = [
             {
                 "prompt": "Planeje a implementacao de um sistema de autenticacao JWT.",
-                "criterios": ["jwt|token", "autenticacao|auth", "passo|step", "endpoint|api"]
+                "criterios": ["jwt|token", "autenticacao|auth", "passo|step", "endpoint|api"],
             },
             {
                 "prompt": "Plan the refactoring of a monolithic application to microservices.",
-                "criterios": ["microservice|service", "api|endpoint", "database|db", "step|phase"]
+                "criterios": ["microservice|service", "api|endpoint", "database|db", "step|phase"],
             },
         ]
 
@@ -201,10 +200,12 @@ class TestesE2EOrquestracao:
                 prompt=var["prompt"],
                 output=output,
                 criterios=var["criterios"],
-                duracao=duracao
+                duracao=duracao,
             )
             results.append(result)
-            print(f"    Veredicto: {result.veredicto.value} ({len(result.criterios_atendidos)}/{len(result.criterios)})")
+            print(
+                f"    Veredicto: {result.veredicto.value} ({len(result.criterios_atendidos)}/{len(result.criterios)})"
+            )
 
         return results
 
@@ -217,11 +218,21 @@ class TestesE2EOrquestracao:
         variations = [
             {
                 "prompt": "Analise a arquitetura para um sistema de e-commerce escalavel.",
-                "criterios": ["arquitetura|architecture", "escalavel|scalable", "servico|service", "database|banco"]
+                "criterios": [
+                    "arquitetura|architecture",
+                    "escalavel|scalable",
+                    "servico|service",
+                    "database|banco",
+                ],
             },
             {
                 "prompt": "Design a real-time chat system architecture.",
-                "criterios": ["websocket|real-time", "message|mensagem", "server|servidor", "client|cliente"]
+                "criterios": [
+                    "websocket|real-time",
+                    "message|mensagem",
+                    "server|servidor",
+                    "client|cliente",
+                ],
             },
         ]
 
@@ -235,10 +246,12 @@ class TestesE2EOrquestracao:
                 prompt=var["prompt"],
                 output=output,
                 criterios=var["criterios"],
-                duracao=duracao
+                duracao=duracao,
             )
             results.append(result)
-            print(f"    Veredicto: {result.veredicto.value} ({len(result.criterios_atendidos)}/{len(result.criterios)})")
+            print(
+                f"    Veredicto: {result.veredicto.value} ({len(result.criterios_atendidos)}/{len(result.criterios)})"
+            )
 
         return results
 
@@ -276,7 +289,7 @@ class TestesE2EOrquestracao:
                 "current_level": "MEDIUM",
                 "skills_mastered": ["python_basics"],
                 "skills_to_improve": ["regex", "testing"],
-                "current_frontier": "MEDIUM"
+                "current_frontier": "MEDIUM",
             }
 
             task = await agent.generate_task(executor_stats, TaskDomain.CODE)
@@ -296,7 +309,7 @@ class TestesE2EOrquestracao:
                 prompt="Generate a task for code domain",
                 output=task_str,
                 criterios=criterios,
-                duracao=0.0
+                duracao=0.0,
             )
 
         except Exception as e:
@@ -306,7 +319,7 @@ class TestesE2EOrquestracao:
                 prompt="Generate a task for code domain",
                 output=f"[ERRO]: {e}\n{traceback.format_exc()}",
                 criterios=["task", "skills", "criteria"],
-                duracao=0.0
+                duracao=0.0,
             )
 
     async def test_prometheus_skill_validation(self) -> TestResult:
@@ -364,10 +377,12 @@ class TestesE2EOrquestracao:
                 criterios_atendidos=criterios_atendidos,
                 criterios_faltando=[c for c in criterios if c not in criterios_atendidos],
                 veredicto=veredicto,
-                duracao=0.0
+                duracao=0.0,
             )
             self.resultados.append(result)
-            print(f"    Veredicto: {result.veredicto.value} ({len(result.criterios_atendidos)}/{len(result.criterios)})")
+            print(
+                f"    Veredicto: {result.veredicto.value} ({len(result.criterios_atendidos)}/{len(result.criterios)})"
+            )
             return result
 
         except Exception as e:
@@ -377,7 +392,7 @@ class TestesE2EOrquestracao:
                 prompt="Validate skills",
                 output=f"[ERRO]: {e}\n{traceback.format_exc()}",
                 criterios=["valid", "filter", "hallucination"],
-                duracao=0.0
+                duracao=0.0,
             )
 
     # =========================================================================
@@ -397,7 +412,7 @@ class TestesE2EOrquestracao:
         output, duracao = await self.invocar_agente(
             "explorer",
             "Encontre o arquivo pyproject.toml e mostre seu conteudo",
-            {"cwd": VERTICE_PATH}
+            {"cwd": VERTICE_PATH},
         )
         result = self.avaliar(
             nome="MCP File Read",
@@ -405,7 +420,7 @@ class TestesE2EOrquestracao:
             prompt="Find pyproject.toml",
             output=output,
             criterios=["pyproject|toml", "vertice|name", "python|version"],
-            duracao=duracao
+            duracao=duracao,
         )
         results.append(result)
         print(f"    Veredicto: {result.veredicto.value}")
@@ -413,9 +428,7 @@ class TestesE2EOrquestracao:
         # Test 2: Grep search via agent
         print("\n  Test 2: Grep search via MCP...")
         output, duracao = await self.invocar_agente(
-            "explorer",
-            "Busque arquivos que contenham 'async def execute'",
-            {"cwd": VERTICE_PATH}
+            "explorer", "Busque arquivos que contenham 'async def execute'", {"cwd": VERTICE_PATH}
         )
         result = self.avaliar(
             nome="MCP Grep Search",
@@ -423,7 +436,7 @@ class TestesE2EOrquestracao:
             prompt="Search for 'async def execute'",
             output=output,
             criterios=["async|execute", "agent|py", "Encontrado|Found"],
-            duracao=duracao
+            duracao=duracao,
         )
         results.append(result)
         print(f"    Veredicto: {result.veredicto.value}")
@@ -463,7 +476,7 @@ class TestesE2EOrquestracao:
             prompt="Plan then implement CPF validation",
             output=combined_output,
             criterios=["cpf|validar", "def|function", "passo|step", "return|digito"],
-            duracao=total_duracao
+            duracao=total_duracao,
         )
 
     async def test_parallel_capability(self) -> TestResult:
@@ -495,7 +508,7 @@ class TestesE2EOrquestracao:
             prompt="Run explorer and coder in parallel",
             output=combined_output,
             criterios=["test|arquivo", "def|function", "return|soma"],
-            duracao=total_duracao
+            duracao=total_duracao,
         )
 
     # =========================================================================
@@ -540,7 +553,13 @@ class TestesE2EOrquestracao:
         print("\nRESUMO:")
         print(f"  Total de testes: {total}")
         for v in Veredicto:
-            emoji = {"EXCELENTE": "🏆", "BOM": "✓", "PARCIAL": "⚠️", "RUIM": "✗", "FALHA_TOTAL": "💀"}.get(v.value, "")
+            emoji = {
+                "EXCELENTE": "🏆",
+                "BOM": "✓",
+                "PARCIAL": "⚠️",
+                "RUIM": "✗",
+                "FALHA_TOTAL": "💀",
+            }.get(v.value, "")
             print(f"  {emoji} {v.value}: {contagem[v]}")
 
         print(f"\n  Taxa de Sucesso: {taxa_sucesso:.1f}%")
@@ -558,13 +577,23 @@ class TestesE2EOrquestracao:
         print("-" * 70)
 
         for cat, tests in categories.items():
-            cat_sucesso = sum(1 for t in tests if t.veredicto in [Veredicto.EXCELENTE, Veredicto.BOM])
+            cat_sucesso = sum(
+                1 for t in tests if t.veredicto in [Veredicto.EXCELENTE, Veredicto.BOM]
+            )
             cat_total = len(tests)
             print(f"\n📁 {cat.upper()} ({cat_sucesso}/{cat_total} sucesso)")
 
             for t in tests:
-                emoji = {"EXCELENTE": "✅", "BOM": "✓", "PARCIAL": "⚠️", "RUIM": "✗", "FALHA_TOTAL": "💀"}.get(t.veredicto.value, "")
-                print(f"   {emoji} {t.nome}: {t.veredicto.value} ({len(t.criterios_atendidos)}/{len(t.criterios)}) [{t.duracao:.2f}s]")
+                emoji = {
+                    "EXCELENTE": "✅",
+                    "BOM": "✓",
+                    "PARCIAL": "⚠️",
+                    "RUIM": "✗",
+                    "FALHA_TOTAL": "💀",
+                }.get(t.veredicto.value, "")
+                print(
+                    f"   {emoji} {t.nome}: {t.veredicto.value} ({len(t.criterios_atendidos)}/{len(t.criterios)}) [{t.duracao:.2f}s]"
+                )
                 if t.criterios_faltando:
                     print(f"      Faltando: {t.criterios_faltando[:3]}")
 

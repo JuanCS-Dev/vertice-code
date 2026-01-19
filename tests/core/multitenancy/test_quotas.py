@@ -28,7 +28,7 @@ class TestQuotaUsage:
             used=25,
             remaining=75,
             period_start=0,
-            period_end=60
+            period_end=60,
         )
 
         assert usage.percentage_used == 25.0
@@ -36,22 +36,12 @@ class TestQuotaUsage:
     def test_usage_is_exceeded(self):
         """Test is_exceeded property."""
         usage_ok = QuotaUsage(
-            quota_name="test",
-            limit=10,
-            used=5,
-            remaining=5,
-            period_start=0,
-            period_end=60
+            quota_name="test", limit=10, used=5, remaining=5, period_start=0, period_end=60
         )
         assert usage_ok.is_exceeded is False
 
         usage_exceeded = QuotaUsage(
-            quota_name="test",
-            limit=10,
-            used=10,
-            remaining=0,
-            period_start=0,
-            period_end=60
+            quota_name="test", limit=10, used=10, remaining=0, period_start=0, period_end=60
         )
         assert usage_exceeded.is_exceeded is True
 
@@ -62,11 +52,7 @@ class TestQuotaExceededError:
     def test_error_attributes(self):
         """Test error contains expected attributes."""
         error = QuotaExceededError(
-            "Quota exceeded",
-            quota_name="requests/minute",
-            limit=100,
-            current=150,
-            reset_at=12345.0
+            "Quota exceeded", quota_name="requests/minute", limit=100, current=150, reset_at=12345.0
         )
 
         assert error.quota_name == "requests/minute"
@@ -87,9 +73,7 @@ class TestQuotaManager:
     def tenant(self):
         """Create a test tenant."""
         return Tenant(
-            name="TestTenant",
-            tier=TenantTier.BASIC,
-            config=TenantConfig.for_tier(TenantTier.BASIC)
+            name="TestTenant", tier=TenantTier.BASIC, config=TenantConfig.for_tier(TenantTier.BASIC)
         )
 
     @pytest.mark.asyncio
@@ -140,10 +124,7 @@ class TestQuotaManager:
     @pytest.mark.asyncio
     async def test_quota_with_tenant_context(self, manager):
         """Test quota management with tenant context."""
-        tenant = Tenant(
-            name="ContextTenant",
-            config=TenantConfig(requests_per_minute=10)
-        )
+        tenant = Tenant(name="ContextTenant", config=TenantConfig(requests_per_minute=10))
 
         with tenant_context(tenant):
             # No need to pass tenant explicitly
@@ -166,10 +147,7 @@ class TestQuotaManager:
         assert len(usages) > 0
 
         # Find the minute quota
-        minute_usage = next(
-            (u for u in usages if u.quota_name == "requests/minute"),
-            None
-        )
+        minute_usage = next((u for u in usages if u.quota_name == "requests/minute"), None)
         assert minute_usage is not None
         assert minute_usage.used == 5
 
@@ -187,14 +165,8 @@ class TestQuotaManager:
     @pytest.mark.asyncio
     async def test_quota_isolation_between_tenants(self, manager):
         """Test quotas are isolated per tenant."""
-        tenant1 = Tenant(
-            name="Tenant1",
-            config=TenantConfig(requests_per_minute=100)
-        )
-        tenant2 = Tenant(
-            name="Tenant2",
-            config=TenantConfig(requests_per_minute=100)
-        )
+        tenant1 = Tenant(name="Tenant1", config=TenantConfig(requests_per_minute=100))
+        tenant2 = Tenant(name="Tenant2", config=TenantConfig(requests_per_minute=100))
 
         await manager.increment_quota(tenant1, "requests", "minute", amount=50)
         await manager.increment_quota(tenant2, "requests", "minute", amount=20)

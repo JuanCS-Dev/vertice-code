@@ -1,8 +1,8 @@
 # RELATÓRIO DE FALHA CRÔNICA: Chat Streaming Não Renderiza
-**Projeto:** Vertice Chat Web Application  
-**Data:** 2026-01-10  
-**Severidade:** CRÍTICA  
-**Status:** NÃO RESOLVIDO  
+**Projeto:** Vertice Chat Web Application
+**Data:** 2026-01-10
+**Severidade:** CRÍTICA
+**Status:** NÃO RESOLVIDO
 
 ---
 
@@ -112,14 +112,14 @@ INFO:app.api.v1.chat:Authenticated request from user WRSFR5AzDvbXIjOeeUPkxBgC27I
 async def stream_generator(request: ChatRequest):
     # ... Vertex AI init ...
     response_stream = await chat.send_message_async(message, stream=True)
-    
+
     async for chunk in response_stream:
         text_content = chunk.text
         if text_content:
             yield text_content  # << APENAS TEXTO RAW
 
 return StreamingResponse(
-    stream_generator(request), 
+    stream_generator(request),
     media_type="text/plain",
     headers={
         "X-Accel-Buffering": "no",
@@ -165,16 +165,16 @@ const { messages, sendMessage } = chat;
 
 ## 5. DOCUMENTAÇÃO OFICIAL (Vercel AI SDK v6 - Janeiro 2026)
 
-> **FONTE:** https://ai-sdk.dev/docs/ai-sdk-ui/stream-protocol  
+> **FONTE:** https://ai-sdk.dev/docs/ai-sdk-ui/stream-protocol
 > **Última atualização:** Janeiro 2026
 
 ### 5.1 Text Stream Protocol
 
-> A text stream contains chunks in **plain text**, that are streamed to the 
+> A text stream contains chunks in **plain text**, that are streamed to the
 > frontend. Each chunk is then appended together to form a full text response.
-> 
-> Text streams are supported by `useChat`, `useCompletion`, and `useObject`. 
-> When you use `useChat`, you need to enable text streaming by setting the 
+>
+> Text streams are supported by `useChat`, `useCompletion`, and `useObject`.
+> When you use `useChat`, you need to enable text streaming by setting the
 > `streamProtocol` option to `'text'`.
 
 **Exemplo Oficial do Backend (Next.js):**
@@ -209,8 +209,8 @@ const { messages, sendMessage } = useChat({
 ### 5.2 Data Stream Protocol (Alternativa Mais Robusta)
 
 > A data stream follows a special protocol that the AI SDK provides.
-> Uses **Server-Sent Events (SSE)** format. When you provide data streams 
-> from a custom backend, you need to set the `x-vercel-ai-ui-message-stream` 
+> Uses **Server-Sent Events (SSE)** format. When you provide data streams
+> from a custom backend, you need to set the `x-vercel-ai-ui-message-stream`
 > header to `v1`.
 
 **Formato SSE Esperado:**
@@ -284,16 +284,16 @@ import uuid
 
 async def stream_generator_sse(request: ChatRequest):
     msg_id = str(uuid.uuid4())
-    
+
     # Start Event
     yield f"data: {json.dumps({'type': 'start', 'messageId': msg_id})}\n\n"
     yield f"data: {json.dumps({'type': 'text-start', 'id': msg_id})}\n\n"
-    
+
     response_stream = await chat.send_message_async(message, stream=True)
     async for chunk in response_stream:
         if chunk.text:
             yield f"data: {json.dumps({'type': 'text-delta', 'id': msg_id, 'delta': chunk.text})}\n\n"
-    
+
     # End Events
     yield f"data: {json.dumps({'type': 'text-end', 'id': msg_id})}\n\n"
     yield f"data: {json.dumps({'type': 'finish-message', 'messageId': msg_id, 'finishReason': 'stop'})}\n\n"

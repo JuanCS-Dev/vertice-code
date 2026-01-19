@@ -344,9 +344,7 @@ class TestConsentManager:
 
     def test_custom_consent_level(self, manager: ConsentManager) -> None:
         """Override consent level for category."""
-        manager.set_consent_level(
-            OperationCategory.FILE_WRITE, ConsentLevel.NONE
-        )
+        manager.set_consent_level(OperationCategory.FILE_WRITE, ConsentLevel.NONE)
 
         level = manager.get_consent_level(OperationCategory.FILE_WRITE)
         assert level == ConsentLevel.NONE
@@ -441,6 +439,7 @@ class TestRequiresConsentDecorator:
     @pytest.mark.asyncio
     async def test_decorator_grants(self) -> None:
         """Decorator allows execution when granted."""
+
         @requires_consent(OperationCategory.FILE_WRITE, "Write test file")
         async def write_file(path: str) -> str:
             return f"wrote to {path}"
@@ -455,6 +454,7 @@ class TestRequiresConsentDecorator:
     @pytest.mark.asyncio
     async def test_decorator_denies(self) -> None:
         """Decorator raises when denied."""
+
         @requires_consent(OperationCategory.FILE_DELETE, "Delete file")
         async def delete_file(path: str) -> str:
             return f"deleted {path}"
@@ -469,6 +469,7 @@ class TestRequiresConsentDecorator:
     @pytest.mark.asyncio
     async def test_decorator_without_manager(self) -> None:
         """Decorator allows execution without manager."""
+
         @requires_consent(OperationCategory.FILE_WRITE)
         async def write_file(path: str) -> str:
             return f"wrote to {path}"

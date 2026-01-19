@@ -53,7 +53,7 @@ The structure will be flattened further to resemble a web app more than a market
     </nav>
 
     <main class="relative pt-32 pb-20">
-        
+
         <!-- 2. Hero Section (Centered, Typography-Led) -->
         <section class="max-w-4xl mx-auto px-6 text-center mb-24">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-accent mb-8">
@@ -65,7 +65,7 @@ The structure will be flattened further to resemble a web app more than a market
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50">Tactical Executor.</span>
             </h1>
             <p class="text-xl text-muted max-w-2xl mx-auto mb-10 leading-relaxed">
-                A unified multi-agent agency with constitutional governance. 
+                A unified multi-agent agency with constitutional governance.
                 Orchestrating 20 agents and 85+ tools with millisecond latency.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -143,11 +143,11 @@ The structure will be flattened further to resemble a web app more than a market
                     </div>
                     <h3 class="text-2xl font-bold mb-3">Multi-LLM Routing</h3>
                     <p class="text-muted leading-relaxed max-w-lg">
-                        Intelligent traffic direction between Claude 3.5 Sonnet, Gemini 1.5 Pro, and Groq. 
+                        Intelligent traffic direction between Claude 3.5 Sonnet, Gemini 1.5 Pro, and Groq.
                         Optimizes for cost, speed, and capability per-token.
                     </p>
                 </div>
-                
+
                 <!-- Tall Card -->
                 <div class="md:row-span-2 p-8 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors relative overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 pointer-events-none"></div>
@@ -177,7 +177,7 @@ The structure will be flattened further to resemble a web app more than a market
                 </div>
             </div>
         </section>
-        
+
         <!-- 5. Minimal Footer -->
         <footer class="max-w-6xl mx-auto px-6 pt-12 pb-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-sm text-muted">
             <div>
@@ -191,7 +191,7 @@ The structure will be flattened further to resemble a web app more than a market
         </footer>
 
     </main>
-    
+
     <!-- Scripts -->
     <script src="landing/script-v2.js"></script>
 </body>
@@ -207,18 +207,18 @@ To achieve the "Anthropic/OpenAI" look:
     /* Backgrounds */
     --bg-primary: #0a0e1a;  /* Deep Navy/Black */
     --bg-secondary: #0f1219; /* Slightly lighter for cards */
-    
+
     /* Text */
     --text-primary: #ffffff;
     --text-muted: #94a3b8;  /* Slate 400 */
-    
+
     /* Accent */
     --accent: #06b6d4;      /* Cyan 500 */
     --accent-hover: #0891b2; /* Cyan 600 */
-    
+
     /* Borders */
     --border-subtle: rgba(255, 255, 255, 0.05);
-    
+
     /* Typography */
     --font-sans: 'Inter', -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;

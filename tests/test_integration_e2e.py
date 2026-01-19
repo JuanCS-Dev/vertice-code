@@ -74,14 +74,16 @@ class TestEndToEndIntegration:
         shell.registry.get = Mock(return_value=mock_tool)
 
         # Mock successful execution for all tools
-        shell._execute_with_recovery = AsyncMock(return_value=ToolResult(
-            success=True,
-            data="Success",
-            metadata={'path': 'file.py', 'lines': 10, 'tokens': 50, 'cost': 0.01}
-        ))
+        shell._execute_with_recovery = AsyncMock(
+            return_value=ToolResult(
+                success=True,
+                data="Success",
+                metadata={"path": "file.py", "lines": 10, "tokens": 50, "cost": 0.01},
+            )
+        )
 
         # Execute
-        result = await shell._execute_tool_calls(tool_calls, turn=1)
+        await shell._execute_tool_calls(tool_calls, turn=1)
 
         # === WORKFLOW VISUALIZER VALIDATION ===
 
@@ -108,7 +110,8 @@ class TestEndToEndIntegration:
 
         # Verify: All marked as SUCCESS (not ERROR)
         success_calls = [
-            call for call in shell.dashboard.complete_operation.call_args_list
+            call
+            for call in shell.dashboard.complete_operation.call_args_list
             if call[0][1] == OperationStatus.SUCCESS
         ]
         assert len(success_calls) == 3
@@ -120,15 +123,15 @@ class TestEndToEndIntegration:
 
         # Check edit_file call (index 1)
         edit_args = recovery_calls[1][0][2]
-        assert 'console' in edit_args
-        assert edit_args['console'] == shell.console
-        assert 'preview' in edit_args
-        assert edit_args['preview'] is True  # Default enabled
+        assert "console" in edit_args
+        assert edit_args["console"] == shell.console
+        assert "preview" in edit_args
+        assert edit_args["preview"] is True  # Default enabled
 
         # Check write_file call (index 2)
         write_args = recovery_calls[2][0][2]
-        assert 'console' in write_args
-        assert 'preview' in write_args
+        assert "console" in write_args
+        assert "preview" in write_args
 
     @pytest.mark.asyncio
     async def test_failure_handling_across_all_systems(self, shell):
@@ -148,10 +151,12 @@ class TestEndToEndIntegration:
         shell.registry.get = Mock(return_value=mock_tool)
 
         # Mock: First succeeds, second fails
-        shell._execute_with_recovery = AsyncMock(side_effect=[
-            ToolResult(success=True, data="OK", metadata={'path': 'f.py', 'lines': 10}),
-            ToolResult(success=False, error="File not found"),
-        ])
+        shell._execute_with_recovery = AsyncMock(
+            side_effect=[
+                ToolResult(success=True, data="OK", metadata={"path": "f.py", "lines": 10}),
+                ToolResult(success=False, error="File not found"),
+            ]
+        )
 
         # Execute
         await shell._execute_tool_calls(tool_calls, turn=1)
@@ -163,7 +168,8 @@ class TestEndToEndIntegration:
 
         # Verify: Second step marked as FAILED
         failed_calls = [
-            call for call in shell.workflow_viz.update_step_status.call_args_list
+            call
+            for call in shell.workflow_viz.update_step_status.call_args_list
             if StepStatus.FAILED in call[0]
         ]
         assert len(failed_calls) >= 1
@@ -172,14 +178,16 @@ class TestEndToEndIntegration:
 
         # Verify: First operation SUCCESS
         success_calls = [
-            call for call in shell.dashboard.complete_operation.call_args_list
+            call
+            for call in shell.dashboard.complete_operation.call_args_list
             if call[0][1] == OperationStatus.SUCCESS
         ]
         assert len(success_calls) == 1
 
         # Verify: Second operation ERROR
         error_calls = [
-            call for call in shell.dashboard.complete_operation.call_args_list
+            call
+            for call in shell.dashboard.complete_operation.call_args_list
             if call[0][1] == OperationStatus.ERROR
         ]
         assert len(error_calls) == 1
@@ -201,18 +209,16 @@ class TestEndToEndIntegration:
         mock_tool = AsyncMock()
         shell.registry.get = Mock(return_value=mock_tool)
 
-        shell._execute_with_recovery = AsyncMock(return_value=ToolResult(
-            success=True,
-            data="Written",
-            metadata={}
-        ))
+        shell._execute_with_recovery = AsyncMock(
+            return_value=ToolResult(success=True, data="Written", metadata={})
+        )
 
         # Execute
         await shell._execute_tool_calls(tool_calls, turn=1)
 
         # Verify: preview=False passed
         args = shell._execute_with_recovery.call_args[0][2]
-        assert args['preview'] is False
+        assert args["preview"] is False
 
         # Verify: Workflow and dashboard still called
         assert shell.workflow_viz.add_step.called

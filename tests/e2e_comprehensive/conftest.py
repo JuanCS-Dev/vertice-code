@@ -30,7 +30,8 @@ def sample_python_project(temp_project):
 
     # Create source files
     (src_dir / "__init__.py").write_text("")
-    (src_dir / "main.py").write_text('''"""Main module."""
+    (src_dir / "main.py").write_text(
+        '''"""Main module."""
 
 def greet(name: str) -> str:
     """Greet someone."""
@@ -60,16 +61,20 @@ class Calculator:
         elif op == "sub":
             result = a - b
         return result
-''')
+'''
+    )
 
-    (src_dir / "config.py").write_text('''"""Configuration."""
+    (src_dir / "config.py").write_text(
+        '''"""Configuration."""
 
 API_KEY = "sk-test123456789"  # Hardcoded secret
 DATABASE_URL = "postgresql://user:pass@localhost/db"
 DEBUG = True
-''')
+'''
+    )
 
-    (src_dir / "utils.py").write_text('''"""Utilities."""
+    (src_dir / "utils.py").write_text(
+        '''"""Utilities."""
 
 def process_data(data):
     """Process data."""
@@ -81,11 +86,13 @@ def validate(value):
     if not value:
         return False
     return True
-''')
+'''
+    )
 
     # Create test files
     (tests_dir / "__init__.py").write_text("")
-    (tests_dir / "test_main.py").write_text('''"""Tests for main module."""
+    (tests_dir / "test_main.py").write_text(
+        '''"""Tests for main module."""
 
 def test_greet():
     assert True
@@ -95,12 +102,15 @@ def test_add():
 
 def test_calculator():
     assert True
-''')
+'''
+    )
 
     # Create README
-    (temp_project / "README.md").write_text('''# Sample Project
+    (temp_project / "README.md").write_text(
+        """# Sample Project
 
 This is a sample project for testing.
-''')
+"""
+    )
 
     return temp_project

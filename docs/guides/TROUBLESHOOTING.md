@@ -1,6 +1,6 @@
 # 🔧 DevSquad Troubleshooting Guide
 
-**Last Updated:** 2025-11-22  
+**Last Updated:** 2025-11-22
 **Coverage:** Common issues + solutions
 
 ---

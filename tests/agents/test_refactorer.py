@@ -57,10 +57,14 @@ class TestRefactorerBasic:
     async def test_refactorer_executes_with_plan(self) -> None:
         """Test Refactorer executes plan from PlannerAgent."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(return_value=json.dumps({
-            "refactoring_type": "rename_symbol",
-            "changes": [{"description": "Rename function"}]
-        }))
+        llm_client.generate = AsyncMock(
+            return_value=json.dumps(
+                {
+                    "refactoring_type": "rename_symbol",
+                    "changes": [{"description": "Rename function"}],
+                }
+            )
+        )
 
         refactorer = RefactorerAgent(llm_client, MagicMock())
 
@@ -76,12 +80,12 @@ class TestRefactorerBasic:
                             "action": "rename_symbol",
                             "target_file": "test.py",
                             "description": "Rename function foo to bar",
-                            "dependencies": []
+                            "dependencies": [],
                         }
                     ]
                 },
-                "target_file": "test.py"
-            }
+                "target_file": "test.py",
+            },
         )
 
         response = await refactorer.execute(task)
@@ -93,21 +97,16 @@ class TestRefactorerBasic:
     async def test_refactorer_standalone_mode(self) -> None:
         """Test Refactorer works in standalone mode with target_file."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(return_value=json.dumps({
-            "plan_id": "auto-1",
-            "changes": [],
-            "execution_order": []
-        }))
+        llm_client.generate = AsyncMock(
+            return_value=json.dumps({"plan_id": "auto-1", "changes": [], "execution_order": []})
+        )
 
         refactorer = RefactorerAgent(llm_client, MagicMock())
 
         task = AgentTask(
             request="Simplify expression",
             session_id="test",
-            context={
-                "target_file": "app/utils.py",
-                "refactoring_type": "simplify_expression"
-            }
+            context={"target_file": "app/utils.py", "refactoring_type": "simplify_expression"},
         )
 
         response = await refactorer.execute(task)
@@ -122,11 +121,7 @@ class TestRefactorerBasic:
         llm_client.generate = AsyncMock(side_effect=Exception("LLM Error"))
 
         refactorer = RefactorerAgent(llm_client, MagicMock())
-        task = AgentTask(
-            request="Refactor",
-            session_id="test",
-            context={"target_file": "test.py"}
-        )
+        task = AgentTask(request="Refactor", session_id="test", context={"target_file": "test.py"})
 
         response = await refactorer.execute(task)
 
@@ -150,14 +145,12 @@ class TestRefactorerBasic:
                     "stages": [
                         {
                             "name": "Extract Methods",
-                            "steps": [
-                                {"id": 1, "action": "extract_method", "file": "main.py"}
-                            ]
+                            "steps": [{"id": 1, "action": "extract_method", "file": "main.py"}],
                         }
                     ]
                 },
-                "target_file": "main.py"
-            }
+                "target_file": "main.py",
+            },
         )
 
         response = await refactorer.execute(task)
@@ -228,7 +221,7 @@ class TestTransactionalSession:
             new_content="x = 1  # simplified",
             description="Add comment",
             line_start=1,
-            line_end=1
+            line_end=1,
         )
 
         result = session.stage_change(change, validate=True)
@@ -248,7 +241,7 @@ class TestTransactionalSession:
             new_content="def broken(  # Invalid Python",
             description="Broken refactoring",
             line_start=1,
-            line_end=1
+            line_end=1,
         )
 
         result = session.stage_change(change, validate=True)
@@ -293,7 +286,7 @@ class TestRefactoringPlan:
             changes=[{"id": "c1", "action": "extract_method"}],
             execution_order=["c1"],
             affected_files=["utils.py"],
-            risk_level="LOW"
+            risk_level="LOW",
         )
 
         assert plan.plan_id == "plan-123"
@@ -327,7 +320,7 @@ class TestCodeChange:
             line_start=10,
             line_end=50,
             affected_symbols=["long_function", "helper"],
-            dependencies=[]
+            dependencies=[],
         )
 
         assert change.id == "change-1"
@@ -345,7 +338,7 @@ class TestCodeChange:
             new_content="x = 1",
             description="No-op",
             line_start=1,
-            line_end=1
+            line_end=1,
         )
 
         assert change.affected_symbols == []

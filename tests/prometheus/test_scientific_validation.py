@@ -25,19 +25,20 @@ from dataclasses import dataclass, field
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 # Load .env
-env_file = '.env'
+env_file = ".env"
 if os.path.exists(env_file):
     with open(env_file) as f:
         for line in f:
             line = line.strip()
-            if line and not line.startswith('#') and '=' in line:
-                key, _, value = line.partition('=')
+            if line and not line.startswith("#") and "=" in line:
+                key, _, value = line.partition("=")
                 os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
 
 
 @dataclass
 class TestResult:
     """Result of a single test."""
+
     name: str
     category: str
     passed: bool
@@ -50,6 +51,7 @@ class TestResult:
 @dataclass
 class TestSuite:
     """Collection of test results."""
+
     name: str
     results: List[TestResult] = field(default_factory=list)
     start_time: datetime = field(default_factory=datetime.now)
@@ -282,10 +284,7 @@ class ScientificValidator:
         """Test handling of concurrent requests."""
         start = time.time()
         try:
-            tasks = [
-                self.provider.generate(f"What is {i}+{i}?")
-                for i in range(3)
-            ]
+            tasks = [self.provider.generate(f"What is {i}+{i}?") for i in range(3)]
             results = await asyncio.gather(*tasks, return_exceptions=True)
             passed = all(not isinstance(r, Exception) for r in results)
             return TestResult(
@@ -519,9 +518,13 @@ def average(numbers):
         """Test documentation generation capability."""
         start = time.time()
         try:
-            code = "def process_data(data, threshold=0.5): return [x for x in data if x > threshold]"
+            code = (
+                "def process_data(data, threshold=0.5): return [x for x in data if x > threshold]"
+            )
             result = await self.provider.generate(f"Write a docstring for: {code}")
-            has_docstring = '"""' in result or "'''" in result or "Args" in result or "param" in result.lower()
+            has_docstring = (
+                '"""' in result or "'''" in result or "Args" in result or "param" in result.lower()
+            )
             passed = has_docstring
             return TestResult(
                 name="Documentation",
@@ -824,8 +827,8 @@ for i in range(10):
         start = time.time()
         try:
             has_orchestrator = self.provider._orchestrator is not None
-            has_memory = hasattr(self.provider._orchestrator, 'memory')
-            has_world_model = hasattr(self.provider._orchestrator, 'world_model')
+            has_memory = hasattr(self.provider._orchestrator, "memory")
+            has_world_model = hasattr(self.provider._orchestrator, "world_model")
 
             passed = has_orchestrator and has_memory and has_world_model
             return TestResult(

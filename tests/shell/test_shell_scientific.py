@@ -3,7 +3,7 @@
 Test Methodology:
 - State machine testing (shell states)
 - Command flow testing
-- Tool integration testing  
+- Tool integration testing
 - Error recovery testing
 - Real-world usage scenarios
 - Edge case boundary testing
@@ -40,6 +40,7 @@ def restore_cwd():
 # TEST SUITE 1: SHELL INITIALIZATION (10 TESTS)
 # =============================================================================
 
+
 class TestShellInitializationScientific:
     """Scientific testing of shell initialization."""
 
@@ -51,7 +52,7 @@ class TestShellInitializationScientific:
     def test_shell_has_registry(self):
         """Shell has tool registry."""
         shell = InteractiveShell()
-        assert hasattr(shell, 'registry')
+        assert hasattr(shell, "registry")
         assert shell.registry is not None
 
     def test_shell_has_bash_tool(self):
@@ -64,27 +65,27 @@ class TestShellInitializationScientific:
         shell = InteractiveShell()
         tool = shell.registry.tools["bash_command"]
         assert isinstance(tool, BashCommandTool)
-        assert hasattr(tool, 'limits')
-        assert hasattr(tool, 'validator')
+        assert hasattr(tool, "limits")
+        assert hasattr(tool, "validator")
 
     def test_shell_has_console(self):
         """Shell has Rich console."""
         shell = InteractiveShell()
-        assert hasattr(shell, 'console')
+        assert hasattr(shell, "console")
         assert shell.console is not None
 
     def test_shell_has_conversation_manager(self):
         """Shell has conversation manager."""
         shell = InteractiveShell()
-        assert hasattr(shell, 'conversation')
+        assert hasattr(shell, "conversation")
         assert shell.conversation is not None
 
     def test_shell_working_directory_set(self):
         """Shell working directory is set."""
         shell = InteractiveShell()
-        cwd = Path.cwd()
+        Path.cwd()
         # Shell should track current directory
-        assert hasattr(shell, 'registry')
+        assert hasattr(shell, "registry")
 
     def test_shell_tool_count_correct(self):
         """Shell has correct number of tools."""
@@ -95,17 +96,18 @@ class TestShellInitializationScientific:
     def test_shell_initializes_indexer(self):
         """Shell initializes semantic indexer."""
         shell = InteractiveShell()
-        assert hasattr(shell, 'indexer')
+        assert hasattr(shell, "indexer")
 
     def test_shell_initializes_file_watcher(self):
         """Shell initializes file watcher."""
         shell = InteractiveShell()
-        assert hasattr(shell, 'file_watcher')
+        assert hasattr(shell, "file_watcher")
 
 
 # =============================================================================
 # TEST SUITE 2: TOOL EXECUTION (15 TESTS)
 # =============================================================================
+
 
 class TestToolExecutionScientific:
     """Scientific testing of tool execution in shell."""
@@ -170,7 +172,7 @@ class TestToolExecutionScientific:
         """File read tool works."""
         shell = InteractiveShell()
 
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
             f.write("test content")
             temp_path = f.name
 
@@ -192,10 +194,7 @@ class TestToolExecutionScientific:
             temp_path = Path(tmpdir) / "new_file.txt"
 
             tool = shell.registry.tools["write_file"]
-            result = await tool.execute(
-                path=str(temp_path),
-                content="new content"
-            )
+            result = await tool.execute(path=str(temp_path), content="new content")
 
             assert result.success
 
@@ -231,10 +230,7 @@ class TestToolExecutionScientific:
         shell = InteractiveShell()
         tool = shell.registry.tools["search_files"]
 
-        result = await tool.execute(
-            pattern="test",
-            directory="."
-        )
+        result = await tool.execute(pattern="test", directory=".")
 
         assert result.success or not result.success
 
@@ -260,10 +256,7 @@ class TestToolExecutionScientific:
             write_tool = shell.registry.tools["write_file"]
             test_file = Path(tmpdir) / "test.txt"
 
-            result1 = await write_tool.execute(
-                path=str(test_file),
-                content="test"
-            )
+            result1 = await write_tool.execute(path=str(test_file), content="test")
             assert result1.success
 
             # Read file
@@ -304,7 +297,7 @@ class TestToolExecutionScientific:
         tasks = [
             tool.execute(command="echo test1"),
             tool.execute(command="echo test2"),
-            tool.execute(command="echo test3")
+            tool.execute(command="echo test3"),
         ]
 
         results = await asyncio.gather(*tasks)

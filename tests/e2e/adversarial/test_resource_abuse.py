@@ -27,17 +27,19 @@ from datetime import datetime, timedelta
 # FIXTURES
 # ==============================================================================
 
+
 @pytest.fixture
 def rate_limiter():
     """Provide rate limiting functionality."""
+
     class RateLimiter:
         def __init__(self):
             self.requests: Dict[str, list] = defaultdict(list)
             self.limits = {
-                "default": (100, 60),      # 100 requests per 60 seconds
-                "api": (30, 60),           # 30 API calls per minute
-                "file_ops": (50, 60),      # 50 file operations per minute
-                "expensive": (5, 60),      # 5 expensive operations per minute
+                "default": (100, 60),  # 100 requests per 60 seconds
+                "api": (30, 60),  # 30 API calls per minute
+                "file_ops": (50, 60),  # 50 file operations per minute
+                "expensive": (5, 60),  # 5 expensive operations per minute
             }
 
         def is_allowed(self, key: str, limit_type: str = "default") -> bool:
@@ -71,11 +73,12 @@ def rate_limiter():
 @pytest.fixture
 def resource_limits():
     """Provide resource limitation utilities."""
+
     class ResourceLimiter:
         def __init__(self):
             self.max_file_size = 10 * 1024 * 1024  # 10MB
-            self.max_memory = 100 * 1024 * 1024    # 100MB
-            self.max_execution_time = 30           # 30 seconds
+            self.max_memory = 100 * 1024 * 1024  # 100MB
+            self.max_execution_time = 30  # 30 seconds
             self.max_recursion_depth = 100
             self.max_output_lines = 10000
             self.max_concurrent_tasks = 10
@@ -97,7 +100,8 @@ def resource_limits():
             def wrapper(*args, _depth=0, **kwargs):
                 if _depth > max_depth:
                     raise RecursionError(f"Max recursion depth {max_depth} exceeded")
-                return func(*args, _depth=_depth+1, **kwargs)
+                return func(*args, _depth=_depth + 1, **kwargs)
+
             return wrapper
 
         def timeout_context(self, seconds: int = None):
@@ -133,6 +137,7 @@ def resource_limits():
 # ==============================================================================
 # TEST CLASS: Rate Limiting
 # ==============================================================================
+
 
 @pytest.mark.e2e
 @pytest.mark.security
@@ -187,6 +192,7 @@ class TestRateLimiting:
 # TEST CLASS: Resource Exhaustion
 # ==============================================================================
 
+
 @pytest.mark.e2e
 @pytest.mark.security
 class TestResourceExhaustion:
@@ -214,6 +220,7 @@ class TestResourceExhaustion:
 
     def test_limits_recursion_depth(self, resource_limits):
         """Limits recursion to prevent stack overflow."""
+
         @resource_limits.limited_recursion
         def recursive_func(n, _depth=0):
             if n <= 0:
@@ -234,7 +241,7 @@ class TestResourceExhaustion:
 
         def check_zip_safety(zip_path: Path, max_ratio: float = 100) -> bool:
             """Check if zip file is safe (not a zip bomb)."""
-            with zipfile.ZipFile(zip_path, 'r') as zf:
+            with zipfile.ZipFile(zip_path, "r") as zf:
                 compressed_size = sum(info.compress_size for info in zf.infolist())
                 uncompressed_size = sum(info.file_size for info in zf.infolist())
 
@@ -246,16 +253,16 @@ class TestResourceExhaustion:
 
         # Create a safe zip
         safe_zip = tmp_path / "safe.zip"
-        with zipfile.ZipFile(safe_zip, 'w', zipfile.ZIP_DEFLATED) as zf:
+        with zipfile.ZipFile(safe_zip, "w", zipfile.ZIP_DEFLATED) as zf:
             zf.writestr("file.txt", "Hello World" * 100)
 
         assert check_zip_safety(safe_zip)
 
         # Create a suspicious zip (high compression ratio)
         suspicious_zip = tmp_path / "suspicious.zip"
-        with zipfile.ZipFile(suspicious_zip, 'w', zipfile.ZIP_DEFLATED) as zf:
+        with zipfile.ZipFile(suspicious_zip, "w", zipfile.ZIP_DEFLATED) as zf:
             # Highly compressible data (but not truly malicious for test)
-            zf.writestr("zeros.bin", b'\x00' * 1000000)
+            zf.writestr("zeros.bin", b"\x00" * 1000000)
 
         # This may or may not trigger depending on compression
         # Real zip bombs would have ratio > 1000
@@ -264,6 +271,7 @@ class TestResourceExhaustion:
 # ==============================================================================
 # TEST CLASS: Concurrent Access
 # ==============================================================================
+
 
 @pytest.mark.e2e
 @pytest.mark.security
@@ -312,7 +320,7 @@ class TestConcurrentAccess:
                         break
                     processed[client_id] += 1
                     fair_queue.task_done()
-                except:
+                except Exception:
                     break
 
         # Start workers
@@ -325,7 +333,7 @@ class TestConcurrentAccess:
             for client in ["A", "B", "C"]:
                 try:
                     fair_queue.put(client, timeout=0.1)
-                except:
+                except Exception:
                     pass
 
         # Wait for processing
@@ -335,7 +343,7 @@ class TestConcurrentAccess:
         for _ in workers:
             try:
                 fair_queue.put(None, timeout=0.1)
-            except:
+            except Exception:
                 pass
 
         # Each client should get fair share (within tolerance)

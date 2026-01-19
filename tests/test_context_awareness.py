@@ -17,9 +17,7 @@ class TestSessionContext:
     def test_track_file_modifications(self):
         ctx = SessionContext()
         ctx.track_tool_call(
-            "write_file",
-            {"path": "test.py"},
-            type('obj', (object,), {'success': True})()
+            "write_file", {"path": "test.py"}, type("obj", (object,), {"success": True})()
         )
         assert "test.py" in ctx.modified_files
 
@@ -36,7 +34,7 @@ class TestContextBuilder:
         success, msg = builder.add_file("README.md")
         assert success
         stats = builder.get_stats()
-        assert stats['files'] == 1
+        assert stats["files"] == 1
 
 
 if __name__ == "__main__":

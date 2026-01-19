@@ -12,11 +12,7 @@ class TestHookContext:
     def test_context_creation(self):
         """Test basic context creation."""
         file_path = Path("src/utils/helper.py")
-        ctx = HookContext(
-            file_path=file_path,
-            event_name="post_write",
-            project_name="test-project"
-        )
+        ctx = HookContext(file_path=file_path, event_name="post_write", project_name="test-project")
 
         assert ctx.file_path == file_path
         assert ctx.event_name == "post_write"
@@ -56,11 +52,7 @@ class TestHookContext:
         cwd = Path("/home/user/project")
         file_path = Path("/home/user/project/src/test.py")
 
-        ctx = HookContext(
-            file_path=file_path,
-            event_name="post_write",
-            cwd=cwd
-        )
+        ctx = HookContext(file_path=file_path, event_name="post_write", cwd=cwd)
 
         assert ctx.relative_path == "src/test.py"
 
@@ -69,11 +61,7 @@ class TestHookContext:
         cwd = Path("/home/user/project")
         file_path = Path("/tmp/test.py")
 
-        ctx = HookContext(
-            file_path=file_path,
-            event_name="post_write",
-            cwd=cwd
-        )
+        ctx = HookContext(file_path=file_path, event_name="post_write", cwd=cwd)
 
         # Should return absolute path when not relative to cwd
         assert ctx.relative_path == str(file_path)
@@ -84,7 +72,7 @@ class TestHookContext:
             file_path=Path("src/utils/helper.py"),
             event_name="post_write",
             project_name="my-project",
-            metadata={"custom": "value"}
+            metadata={"custom": "value"},
         )
 
         variables = ctx.get_variables()
@@ -103,7 +91,7 @@ class TestHookContext:
         ctx = HookContext(
             file_path=Path("test.py"),
             event_name="post_write",
-            metadata={"branch": "main", "commit": "abc123"}
+            metadata={"branch": "main", "commit": "abc123"},
         )
 
         variables = ctx.get_variables()

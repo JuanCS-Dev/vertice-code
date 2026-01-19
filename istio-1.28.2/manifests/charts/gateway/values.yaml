@@ -102,10 +102,10 @@ _internal_defaults_do_not_set:
 
   # Deployment Update strategy
   strategy: {}
-  
+
   # Sets the Deployment minReadySeconds value
   minReadySeconds:
-  
+
   # Optionally configure a custom readinessProbe. By default the control plane
   # automatically injects the readinessProbe. If you wish to override that
   # behavior, you may define your own readinessProbe here.

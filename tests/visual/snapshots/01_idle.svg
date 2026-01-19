@@ -32,14 +32,14 @@
         font-family: arial;
     }
 
-    
+
     </style>
 
     <defs>
     <clipPath id="terminal-1160054612-clip-terminal">
       <rect x="0" y="0" width="975.0" height="23.4" />
     </clipPath>
-    
+
     </defs>
 
     <rect fill="#292929" stroke="rgba(255,255,255,0.35)" stroke-width="1" x="1" y="1" width="992" height="72.4" rx="8"/><text class="terminal-1160054612-title" fill="#c5c8c6" text-anchor="middle" x="496" y="27">AntigravityTestApp</text>
@@ -48,11 +48,11 @@
             <circle cx="22" cy="0" r="7" fill="#febc2e"/>
             <circle cx="44" cy="0" r="7" fill="#28c840"/>
             </g>
-        
+
     <g transform="translate(9, 41)" clip-path="url(#terminal-1160054612-clip-terminal)">
-    
+
     <g class="terminal-1160054612-matrix">
-    
+
     </g>
     </g>
 </svg>

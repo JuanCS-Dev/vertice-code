@@ -31,14 +31,17 @@ import pytest
 
 # Skip all tests if no API keys available
 pytestmark = pytest.mark.skipif(
-    not (os.getenv("ANTHROPIC_API_KEY") or os.getenv("GOOGLE_API_KEY") or os.getenv("GROQ_API_KEY")),
-    reason="No LLM API key available (set ANTHROPIC_API_KEY, GOOGLE_API_KEY, or GROQ_API_KEY)"
+    not (
+        os.getenv("ANTHROPIC_API_KEY") or os.getenv("GOOGLE_API_KEY") or os.getenv("GROQ_API_KEY")
+    ),
+    reason="No LLM API key available (set ANTHROPIC_API_KEY, GOOGLE_API_KEY, or GROQ_API_KEY)",
 )
 
 
 @dataclass
 class TestResult:
     """Result of an E2E test."""
+
     success: bool
     duration: float
     tool_calls: List[Dict[str, Any]]
@@ -72,10 +75,12 @@ class VerticeE2ETestRunner:
 
         # Initialize LLM client
         from vertice_cli.core.llm_client import get_llm_client
+
         self.llm = await get_llm_client()
 
         # Initialize tool registry
         from vertice_cli.tools.registry_setup import create_full_registry
+
         self.registry = create_full_registry()
 
     async def cleanup(self):
@@ -102,12 +107,13 @@ class VerticeE2ETestRunner:
         try:
             # Build system prompt
             from vertice_cli.prompts.system_prompts import build_enhanced_system_prompt
+
             tool_schemas = self.registry.get_schemas()
 
             context = {
-                'cwd': str(self.work_dir),
-                'modified_files': [],
-                'read_files': [],
+                "cwd": str(self.work_dir),
+                "modified_files": [],
+                "read_files": [],
             }
 
             system_prompt = build_enhanced_system_prompt(tool_schemas, context)
@@ -125,7 +131,11 @@ class VerticeE2ETestRunner:
                     max_tokens=4000,
                 )
 
-                llm_response = response.get("content", str(response)) if isinstance(response, dict) else str(response)
+                llm_response = (
+                    response.get("content", str(response))
+                    if isinstance(response, dict)
+                    else str(response)
+                )
 
                 # Parse tool calls
                 parsed_calls = self._parse_tool_calls(llm_response)
@@ -150,11 +160,20 @@ class VerticeE2ETestRunner:
                     if tool:
                         try:
                             result = await tool.execute(**args)
-                            result_str = str(result.data)[:500] if hasattr(result, 'data') else str(result)[:500]
+                            result_str = (
+                                str(result.data)[:500]
+                                if hasattr(result, "data")
+                                else str(result)[:500]
+                            )
 
                             # Add result to conversation
                             messages.append({"role": "assistant", "content": llm_response})
-                            messages.append({"role": "user", "content": f"Tool {tool_name} result: {result_str}"})
+                            messages.append(
+                                {
+                                    "role": "user",
+                                    "content": f"Tool {tool_name} result: {result_str}",
+                                }
+                            )
                         except Exception as e:
                             errors.append(f"Tool {tool_name} failed: {e}")
                     else:
@@ -165,7 +184,11 @@ class VerticeE2ETestRunner:
 
         # Calculate files created/modified
         files_after = set(self.work_dir.rglob("*"))
-        files_created = [str(f.relative_to(self.work_dir)) for f in (files_after - self.files_before) if f.is_file()]
+        files_created = [
+            str(f.relative_to(self.work_dir))
+            for f in (files_after - self.files_before)
+            if f.is_file()
+        ]
 
         duration = time.time() - start_time
 
@@ -182,9 +205,9 @@ class VerticeE2ETestRunner:
     def _parse_tool_calls(self, response: str) -> List[Dict]:
         """Parse tool calls from LLM response."""
         try:
-            if '[' in response and ']' in response:
-                start = response.index('[')
-                end = response.rindex(']') + 1
+            if "[" in response and "]" in response:
+                start = response.index("[")
+                end = response.rindex("]") + 1
                 json_str = response[start:end]
                 calls = json.loads(json_str)
                 if isinstance(calls, list):
@@ -197,6 +220,7 @@ class VerticeE2ETestRunner:
 # =============================================================================
 # APP CREATION TESTS
 # =============================================================================
+
 
 class TestAppCreation:
     """Tests for creating applications from scratch."""
@@ -217,8 +241,9 @@ class TestAppCreation:
             "Cria um arquivo hello.py com uma funcao que imprime 'Ola Mundo'"
         )
 
-        assert "hello.py" in result.files_created or any("hello" in f for f in result.files_created), \
-            f"Expected hello.py to be created. Files: {result.files_created}"
+        assert "hello.py" in result.files_created or any(
+            "hello" in f for f in result.files_created
+        ), f"Expected hello.py to be created. Files: {result.files_created}"
         assert len(result.tool_calls) > 0, "Expected at least one tool call"
 
         # Verify file content
@@ -235,8 +260,9 @@ class TestAppCreation:
             "Cria um arquivo calculator.py com funcoes de soma, subtracao, multiplicacao e divisao"
         )
 
-        assert any("calculator" in f.lower() for f in result.files_created), \
-            f"Expected calculator.py. Files: {result.files_created}"
+        assert any(
+            "calculator" in f.lower() for f in result.files_created
+        ), f"Expected calculator.py. Files: {result.files_created}"
 
         calc_path = runner.work_dir / "calculator.py"
         if calc_path.exists():
@@ -253,7 +279,7 @@ class TestAppCreation:
         )
 
         # Should create at least one Python file
-        py_files = [f for f in result.files_created if f.endswith('.py')]
+        py_files = [f for f in result.files_created if f.endswith(".py")]
         assert len(py_files) > 0, f"Expected Python files. Created: {result.files_created}"
 
         # Check for Flask imports
@@ -273,7 +299,7 @@ class TestAppCreation:
             "Cria uma ferramenta CLI em Python usando argparse com opcoes --input e --output"
         )
 
-        py_files = [f for f in result.files_created if f.endswith('.py')]
+        py_files = [f for f in result.files_created if f.endswith(".py")]
         assert len(py_files) > 0, "Expected Python files"
 
         # Check for argparse usage
@@ -293,8 +319,9 @@ class TestAppCreation:
             "Cria um arquivo models.py com dataclasses User e Product com campos apropriados"
         )
 
-        assert any("model" in f.lower() for f in result.files_created), \
-            f"Expected models.py. Created: {result.files_created}"
+        assert any(
+            "model" in f.lower() for f in result.files_created
+        ), f"Expected models.py. Created: {result.files_created}"
 
         models_path = runner.work_dir / "models.py"
         if models_path.exists():
@@ -306,6 +333,7 @@ class TestAppCreation:
 # =============================================================================
 # REFACTORING TESTS
 # =============================================================================
+
 
 class TestRefactoring:
     """Tests for code refactoring operations."""
@@ -328,7 +356,7 @@ class TestRefactoring:
     @pytest.mark.timeout(120)
     async def test_refactor_extract_function(self, runner):
         """Test extracting a function from inline code."""
-        initial_code = '''
+        initial_code = """
 def process_data(data):
     # Validation logic that should be extracted
     if not data:
@@ -342,7 +370,7 @@ def process_data(data):
     result = data.copy()
     result["processed"] = True
     return result
-'''
+"""
         await self._create_initial_file(runner, "processor.py", initial_code)
 
         result = await runner.execute_request(
@@ -361,7 +389,7 @@ def process_data(data):
     @pytest.mark.timeout(120)
     async def test_refactor_rename_variable(self, runner):
         """Test renaming a variable throughout a file."""
-        initial_code = '''
+        initial_code = """
 def calculate(x):
     temp = x * 2
     temp = temp + 10
@@ -371,7 +399,7 @@ def calculate(x):
 def process(x):
     temp = x ** 2
     return temp
-'''
+"""
         await self._create_initial_file(runner, "calc.py", initial_code)
 
         result = await runner.execute_request(
@@ -388,7 +416,7 @@ def process(x):
     @pytest.mark.timeout(120)
     async def test_refactor_add_type_hints(self, runner):
         """Test adding type hints to a function."""
-        initial_code = '''
+        initial_code = """
 def add(a, b):
     return a + b
 
@@ -397,7 +425,7 @@ def greet(name):
 
 def process_items(items):
     return [item.upper() for item in items]
-'''
+"""
         await self._create_initial_file(runner, "functions.py", initial_code)
 
         result = await runner.execute_request(
@@ -415,7 +443,7 @@ def process_items(items):
     @pytest.mark.timeout(120)
     async def test_refactor_add_docstrings(self, runner):
         """Test adding docstrings to functions."""
-        initial_code = '''
+        initial_code = """
 def calculate_total(items, tax_rate):
     subtotal = sum(item.price for item in items)
     tax = subtotal * tax_rate
@@ -423,7 +451,7 @@ def calculate_total(items, tax_rate):
 
 def apply_discount(price, discount_percent):
     return price * (1 - discount_percent / 100)
-'''
+"""
         await self._create_initial_file(runner, "pricing.py", initial_code)
 
         result = await runner.execute_request(
@@ -441,7 +469,7 @@ def apply_discount(price, discount_percent):
     @pytest.mark.timeout(180)
     async def test_refactor_class_to_dataclass(self, runner):
         """Test converting a regular class to a dataclass."""
-        initial_code = '''
+        initial_code = """
 class User:
     def __init__(self, name, email, age):
         self.name = name
@@ -450,7 +478,7 @@ class User:
 
     def __repr__(self):
         return f"User(name={self.name}, email={self.email}, age={self.age})"
-'''
+"""
         await self._create_initial_file(runner, "user.py", initial_code)
 
         result = await runner.execute_request(
@@ -467,6 +495,7 @@ class User:
 # =============================================================================
 # PORTUGUESE NLU TESTS
 # =============================================================================
+
 
 class TestPortugueseNLU:
     """Tests for Portuguese natural language understanding."""
@@ -489,16 +518,17 @@ class TestPortugueseNLU:
 
         # Should call readfile tool
         read_calls = [c for c in result.tool_calls if "read" in c["tool"].lower()]
-        assert len(read_calls) > 0 or "print" in result.llm_response, \
-            "Expected file read operation"
+        assert len(read_calls) > 0 or "print" in result.llm_response, "Expected file read operation"
 
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
     async def test_portuguese_imperative_cria(self, runner):
         """Test 'cria' command in Portuguese."""
-        result = await runner.execute_request("cria um arquivo config.json com chave 'nome' valor 'teste'")
+        result = await runner.execute_request(
+            "cria um arquivo config.json com chave 'nome' valor 'teste'"
+        )
 
-        json_files = [f for f in result.files_created if f.endswith('.json')]
+        json_files = [f for f in result.files_created if f.endswith(".json")]
         assert len(json_files) > 0 or len(result.tool_calls) > 0
 
     @pytest.mark.asyncio
@@ -511,7 +541,11 @@ class TestPortugueseNLU:
 
         result = await runner.execute_request("busca todos os TODO nos arquivos Python")
 
-        search_calls = [c for c in result.tool_calls if "search" in c["tool"].lower() or "grep" in c["tool"].lower()]
+        search_calls = [
+            c
+            for c in result.tool_calls
+            if "search" in c["tool"].lower() or "grep" in c["tool"].lower()
+        ]
         assert len(search_calls) > 0 or "TODO" in result.llm_response
 
     @pytest.mark.asyncio
@@ -530,9 +564,7 @@ class TestPortugueseNLU:
     @pytest.mark.timeout(120)
     async def test_portuguese_accented_input(self, runner):
         """Test handling of accented Portuguese input."""
-        result = await runner.execute_request(
-            "Cria uma função que calcula a média de números"
-        )
+        result = await runner.execute_request("Cria uma função que calcula a média de números")
 
         # Should understand and create file
         assert len(result.tool_calls) > 0 or len(result.files_created) > 0
@@ -556,6 +588,7 @@ class TestPortugueseNLU:
 # COMPLEX WORKFLOW TESTS
 # =============================================================================
 
+
 class TestComplexWorkflows:
     """Tests for complex multi-step workflows."""
 
@@ -575,8 +608,9 @@ class TestComplexWorkflows:
             "Cria um modulo math_utils.py com funcoes add, subtract, multiply, divide"
         )
 
-        assert any("math" in f.lower() for f in result1.files_created), \
-            "Expected math_utils.py to be created"
+        assert any(
+            "math" in f.lower() for f in result1.files_created
+        ), "Expected math_utils.py to be created"
 
         # Step 2: Create tests
         result2 = await runner.execute_request(
@@ -591,7 +625,7 @@ class TestComplexWorkflows:
     async def test_read_analyze_refactor(self, runner):
         """Test reading, analyzing, and refactoring a file."""
         # Create complex file
-        complex_code = '''
+        complex_code = """
 def process_user_data(user_dict):
     # This function does too many things
     if not user_dict:
@@ -615,7 +649,7 @@ def process_user_data(user_dict):
     }
 
     return result
-'''
+"""
         (runner.work_dir / "processor.py").write_text(complex_code)
 
         result = await runner.execute_request(
@@ -634,8 +668,9 @@ def process_user_data(user_dict):
         )
 
         # Should create multiple files/directories
-        assert len(result.files_created) >= 3, \
-            f"Expected multiple files. Created: {result.files_created}"
+        assert (
+            len(result.files_created) >= 3
+        ), f"Expected multiple files. Created: {result.files_created}"
 
     @pytest.mark.asyncio
     @pytest.mark.timeout(300)
@@ -645,7 +680,7 @@ def process_user_data(user_dict):
             "Cria um endpoint FastAPI POST /users que recebe JSON com name e email, valida os campos e retorna o usuario criado"
         )
 
-        py_files = [f for f in result.files_created if f.endswith('.py')]
+        py_files = [f for f in result.files_created if f.endswith(".py")]
         assert len(py_files) > 0
 
         # Check for FastAPI code
@@ -660,6 +695,7 @@ def process_user_data(user_dict):
 # =============================================================================
 # ERROR HANDLING TESTS
 # =============================================================================
+
 
 class TestErrorHandling:
     """Tests for error handling and recovery."""
@@ -678,8 +714,11 @@ class TestErrorHandling:
         result = await runner.execute_request("mostra o arquivo nao_existe.py")
 
         # Should handle gracefully - either error message or search
-        assert len(result.tool_calls) > 0 or "not found" in result.llm_response.lower() or \
-               "nao encontr" in result.llm_response.lower()
+        assert (
+            len(result.tool_calls) > 0
+            or "not found" in result.llm_response.lower()
+            or "nao encontr" in result.llm_response.lower()
+        )
 
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
@@ -694,13 +733,13 @@ class TestErrorHandling:
     @pytest.mark.timeout(120)
     async def test_handle_invalid_syntax_fix(self, runner):
         """Test fixing a file with invalid syntax."""
-        invalid_code = '''
+        invalid_code = """
 def broken_function(
     print("missing closing paren"
 
 def another_function():
     return "ok"
-'''
+"""
         (runner.work_dir / "broken.py").write_text(invalid_code)
 
         result = await runner.execute_request("corrija os erros de sintaxe em broken.py")
@@ -711,6 +750,7 @@ def another_function():
 # =============================================================================
 # PERFORMANCE TESTS
 # =============================================================================
+
 
 class TestPerformance:
     """Performance and stress tests."""
@@ -747,6 +787,7 @@ class TestPerformance:
 # INTEGRATION TESTS
 # =============================================================================
 
+
 class TestIntegration:
     """Integration tests combining multiple components."""
 
@@ -762,7 +803,9 @@ class TestIntegration:
     async def test_full_development_cycle(self, runner):
         """Test a complete development cycle: create, read, modify."""
         # Create
-        result1 = await runner.execute_request("Cria utils.py com funcao format_name que recebe um nome")
+        result1 = await runner.execute_request(
+            "Cria utils.py com funcao format_name que recebe um nome"
+        )
         assert len(result1.files_created) > 0 or len(result1.tool_calls) > 0
 
         # Read
@@ -771,7 +814,9 @@ class TestIntegration:
             assert "def" in result2.llm_response or len(result2.tool_calls) > 0
 
         # Modify
-        result3 = await runner.execute_request("Adiciona uma docstring na funcao format_name em utils.py")
+        result3 = await runner.execute_request(
+            "Adiciona uma docstring na funcao format_name em utils.py"
+        )
         assert len(result3.tool_calls) > 0
 
     @pytest.mark.asyncio
@@ -790,7 +835,7 @@ class TestIntegration:
         assert intent_result.intent == Intent.EXPLORE
 
         # Request amplification
-        context = {'cwd': str(runner.work_dir)}
+        context = {"cwd": str(runner.work_dir)}
         amplifier = RequestAmplifier(context=context)
         amplified = await amplifier.analyze(request)
         assert amplified.amplified != ""
@@ -808,11 +853,12 @@ class TestIntegration:
 # REPORT GENERATION
 # =============================================================================
 
+
 def pytest_terminal_summary(terminalreporter, exitstatus, config):
     """Generate summary report after tests."""
-    passed = len(terminalreporter.stats.get('passed', []))
-    failed = len(terminalreporter.stats.get('failed', []))
-    skipped = len(terminalreporter.stats.get('skipped', []))
+    passed = len(terminalreporter.stats.get("passed", []))
+    failed = len(terminalreporter.stats.get("failed", []))
+    skipped = len(terminalreporter.stats.get("skipped", []))
 
     terminalreporter.write_sep("=", "VERTICE E2E TEST SUMMARY")
     terminalreporter.write_line(f"Passed: {passed}")

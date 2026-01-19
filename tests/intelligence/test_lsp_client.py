@@ -15,18 +15,20 @@ from vertice_cli.intelligence.lsp_client import (
     CompletionItem,
     SignatureHelp,
     SignatureInformation,
-    ParameterInformation
+    ParameterInformation,
 )
 
 
 @pytest.fixture
 def temp_project(tmp_path):
     """Create temporary Python project."""
-    (tmp_path / "example.py").write_text("""
+    (tmp_path / "example.py").write_text(
+        """
 def greet(name: str) -> str:
     '''Greet someone by name.'''
     return f"Hello, {name}!"
-""")
+"""
+    )
     return tmp_path
 
 
@@ -132,11 +134,7 @@ class TestCompletionItem:
 
     def test_from_lsp_basic(self):
         """Test basic completion item."""
-        data = {
-            "label": "test_func",
-            "kind": 3,
-            "detail": "() -> None"
-        }
+        data = {"label": "test_func", "kind": 3, "detail": "() -> None"}
         item = CompletionItem.from_lsp(data)
 
         assert item.label == "test_func"
@@ -146,11 +144,7 @@ class TestCompletionItem:
 
     def test_from_lsp_with_documentation(self):
         """Test completion item with documentation."""
-        data = {
-            "label": "test_var",
-            "kind": 6,
-            "documentation": {"value": "Test variable"}
-        }
+        data = {"label": "test_var", "kind": 6, "documentation": {"value": "Test variable"}}
         item = CompletionItem.from_lsp(data)
 
         assert item.label == "test_var"
@@ -163,10 +157,7 @@ class TestSignatureHelp:
 
     def test_parameter_information(self):
         """Test parameter info parsing."""
-        data = {
-            "label": "param1: str",
-            "documentation": "First parameter"
-        }
+        data = {"label": "param1: str", "documentation": "First parameter"}
         param = ParameterInformation.from_lsp(data)
 
         assert param.label == "param1: str"
@@ -177,10 +168,7 @@ class TestSignatureHelp:
         data = {
             "label": "func(a: str, b: int) -> None",
             "documentation": "Test function",
-            "parameters": [
-                {"label": "a: str"},
-                {"label": "b: int"}
-            ]
+            "parameters": [{"label": "a: str"}, {"label": "b: int"}],
         }
         sig = SignatureInformation.from_lsp(data)
 
@@ -191,14 +179,9 @@ class TestSignatureHelp:
     def test_signature_help_full(self):
         """Test full signature help."""
         data = {
-            "signatures": [
-                {
-                    "label": "func(a: str) -> None",
-                    "parameters": [{"label": "a: str"}]
-                }
-            ],
+            "signatures": [{"label": "func(a: str) -> None", "parameters": [{"label": "a: str"}]}],
             "activeSignature": 0,
-            "activeParameter": 0
+            "activeParameter": 0,
         }
         help_data = SignatureHelp.from_lsp(data)
 
@@ -233,9 +216,7 @@ class TestMultiLanguageLSP:
 
         # Mock completion (real would require running server)
         completions = await client.completion(
-            file_path=temp_project / "example.py",
-            line=2,
-            character=10
+            file_path=temp_project / "example.py", line=2, character=10
         )
 
         # Should return empty or mock data since no real server
@@ -247,9 +228,7 @@ class TestMultiLanguageLSP:
 
         # Mock signature help (real would require running server)
         sig_help = await client.signature_help(
-            file_path=temp_project / "example.py",
-            line=2,
-            character=10
+            file_path=temp_project / "example.py", line=2, character=10
         )
 
         # Should return None or mock data since no real server

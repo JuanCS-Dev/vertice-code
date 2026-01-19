@@ -21,15 +21,10 @@ async def test_none_injection(test_id: int) -> None:
     """
     try:
         gov = MaestroGovernance(Mock(), Mock())
-        task = AgentTask(
-            request="test" if test_id % 2 else None,
-            context={}
-        )
+        task = AgentTask(request="test" if test_id % 2 else None, context={})
         agent = Mock()
         agent.role = AgentRole.EXECUTOR
-        agent.execute = AsyncMock(
-            return_value=AgentResponse(success=True, reasoning="ok", data={})
-        )
+        agent.execute = AsyncMock(return_value=AgentResponse(success=True, reasoning="ok", data={}))
         response = await gov.execute_with_governance(agent, task)
         assert response is not None
     except Exception:

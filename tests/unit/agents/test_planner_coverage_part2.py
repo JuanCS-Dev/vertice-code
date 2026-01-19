@@ -32,6 +32,7 @@ from vertice_cli.agents.planner.optimization import estimate_duration
 # EXECUTION MONITOR TESTS
 # =============================================================================
 
+
 class TestExecutionMonitor:
     """Tests for ExecutionMonitor class."""
 
@@ -52,7 +53,7 @@ class TestExecutionMonitor:
             event_type="started",
             step_id="step_1",
             agent_role="executor",
-            correlation_id="corr-001"
+            correlation_id="corr-001",
         )
 
         monitor.emit(event)
@@ -68,7 +69,7 @@ class TestExecutionMonitor:
                 event_type="started",
                 step_id="step_1",
                 agent_role="executor",
-                correlation_id="corr-001"
+                correlation_id="corr-001",
             ),
             ExecutionEvent(
                 timestamp="2025-01-01T12:00:05Z",
@@ -76,14 +77,14 @@ class TestExecutionMonitor:
                 step_id="step_1",
                 agent_role="executor",
                 correlation_id="corr-001",
-                duration_ms=5000
+                duration_ms=5000,
             ),
             ExecutionEvent(
                 timestamp="2025-01-01T12:00:06Z",
                 event_type="started",
                 step_id="step_2",
                 agent_role="tester",
-                correlation_id="corr-002"
+                correlation_id="corr-002",
             ),
         ]
 
@@ -102,7 +103,7 @@ class TestExecutionMonitor:
             event_type="started",
             step_id="design_phase",
             agent_role="architect",
-            correlation_id="arch-001"
+            correlation_id="arch-001",
         )
 
         monitor.emit(event)
@@ -118,7 +119,7 @@ class TestExecutionMonitor:
             step_id="implementation",
             agent_role="coder",
             correlation_id="code-001",
-            duration_ms=30000
+            duration_ms=30000,
         )
 
         monitor.emit(event)
@@ -135,7 +136,7 @@ class TestExecutionMonitor:
             agent_role="tester",
             correlation_id="test-001",
             duration_ms=10000,
-            error="Test suite failed: 3 tests failed"
+            error="Test suite failed: 3 tests failed",
         )
 
         monitor.emit(event)
@@ -152,7 +153,7 @@ class TestExecutionMonitor:
             step_id="stage_1_checkpoint",
             agent_role="orchestrator",
             correlation_id="orch-001",
-            metadata={"checkpoint_type": "validation", "state_saved": True}
+            metadata={"checkpoint_type": "validation", "state_saved": True},
         )
 
         monitor.emit(event)
@@ -168,11 +169,7 @@ class TestExecutionMonitor:
             step_id="step_1",
             agent_role="executor",
             correlation_id="corr-001",
-            metadata={
-                "tokens_allocated": 4000,
-                "priority": "high",
-                "retries_allowed": 3
-            }
+            metadata={"tokens_allocated": 4000, "priority": "high", "retries_allowed": 3},
         )
 
         monitor.emit(event)
@@ -198,7 +195,7 @@ class TestExecutionMonitor:
                 event_type="started",
                 step_id=f"step_{i}",
                 agent_role="executor",
-                correlation_id=f"corr-{i:03d}"
+                correlation_id=f"corr-{i:03d}",
             )
             for i in range(3)
         ]
@@ -220,7 +217,7 @@ class TestExecutionMonitor:
                 event_type="started",
                 step_id="step_1",
                 agent_role="executor",
-                correlation_id="corr-001"
+                correlation_id="corr-001",
             ),
             ExecutionEvent(
                 timestamp="2025-01-01T12:00:10Z",
@@ -228,7 +225,7 @@ class TestExecutionMonitor:
                 step_id="step_1",
                 agent_role="executor",
                 correlation_id="corr-001",
-                duration_ms=10000
+                duration_ms=10000,
             ),
             ExecutionEvent(
                 timestamp="2025-01-01T12:00:15Z",
@@ -236,7 +233,7 @@ class TestExecutionMonitor:
                 step_id="step_2",
                 agent_role="tester",
                 correlation_id="corr-002",
-                duration_ms=5000
+                duration_ms=5000,
             ),
         ]
 
@@ -260,7 +257,7 @@ class TestExecutionMonitor:
                 event_type="started",
                 step_id="step_1",
                 agent_role="executor",
-                correlation_id="corr-001"
+                correlation_id="corr-001",
             ),
             ExecutionEvent(
                 timestamp="2025-01-01T12:00:05Z",
@@ -268,14 +265,14 @@ class TestExecutionMonitor:
                 step_id="step_1",
                 agent_role="executor",
                 correlation_id="corr-001",
-                duration_ms=5000
+                duration_ms=5000,
             ),
             ExecutionEvent(
                 timestamp="2025-01-01T12:00:10Z",
                 event_type="started",
                 step_id="step_2",
                 agent_role="tester",
-                correlation_id="corr-002"
+                correlation_id="corr-002",
             ),
             ExecutionEvent(
                 timestamp="2025-01-01T12:00:15Z",
@@ -284,7 +281,7 @@ class TestExecutionMonitor:
                 agent_role="tester",
                 correlation_id="corr-002",
                 duration_ms=5000,
-                error="Test failed"
+                error="Test failed",
             ),
         ]
 
@@ -308,7 +305,7 @@ class TestExecutionMonitor:
                 step_id="step_1",
                 agent_role="executor",
                 correlation_id="corr-001",
-                duration_ms=1000
+                duration_ms=1000,
             ),
             ExecutionEvent(
                 timestamp="2025-01-01T12:00:01Z",
@@ -316,7 +313,7 @@ class TestExecutionMonitor:
                 step_id="step_2",
                 agent_role="executor",
                 correlation_id="corr-002",
-                duration_ms=2000
+                duration_ms=2000,
             ),
             ExecutionEvent(
                 timestamp="2025-01-01T12:00:03Z",
@@ -324,7 +321,7 @@ class TestExecutionMonitor:
                 step_id="step_3",
                 agent_role="executor",
                 correlation_id="corr-003",
-                duration_ms=3000
+                duration_ms=3000,
             ),
         ]
 
@@ -345,7 +342,7 @@ class TestExecutionMonitor:
                 step_id="step_1",
                 agent_role="executor",
                 correlation_id="corr-001",
-                duration_ms=1000
+                duration_ms=1000,
             ),
             ExecutionEvent(
                 timestamp="2025-01-01T12:00:01Z",
@@ -353,7 +350,7 @@ class TestExecutionMonitor:
                 step_id="step_2",
                 agent_role="executor",
                 correlation_id="corr-002",
-                duration_ms=None  # No duration
+                duration_ms=None,  # No duration
             ),
         ]
 
@@ -373,7 +370,7 @@ class TestExecutionMonitor:
                 event_type="started",
                 step_id=f"step_{i}",
                 agent_role="executor",
-                correlation_id=f"corr-{i:03d}"
+                correlation_id=f"corr-{i:03d}",
             )
             monitor.emit(event)
 
@@ -391,7 +388,7 @@ class TestExecutionMonitor:
             correlation_id="corr-001",
             duration_ms=5000,
             error=None,
-            metadata={"key": "value"}
+            metadata={"key": "value"},
         )
 
         monitor.emit(original_event)
@@ -406,6 +403,7 @@ class TestExecutionMonitor:
 # PLANNER AGENT HELPER METHODS TESTS
 # =============================================================================
 
+
 class TestPlannerAgentHelperMethods:
     """Tests for PlannerAgent helper methods."""
 
@@ -413,11 +411,11 @@ class TestPlannerAgentHelperMethods:
     def mock_llm(self):
         """Create mock LLM client."""
         client = MagicMock()
-        client.generate = AsyncMock(return_value=json.dumps({
-            "goal": "Test goal",
-            "strategy_overview": "Test strategy",
-            "sops": []
-        }))
+        client.generate = AsyncMock(
+            return_value=json.dumps(
+                {"goal": "Test goal", "strategy_overview": "Test strategy", "sops": []}
+            )
+        )
         return client
 
     @pytest.fixture
@@ -428,22 +426,25 @@ class TestPlannerAgentHelperMethods:
     @pytest.fixture
     def planner(self, mock_llm, mock_mcp):
         """Create PlannerAgent instance."""
-        return PlannerAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp
-        )
+        return PlannerAgent(llm_client=mock_llm, mcp_client=mock_mcp)
 
     # Tests for _infer_stage_name()
     def test_infer_stage_name_single_role(self, planner):
         """Test stage name inference with single role."""
         steps = [
             SOPStep(
-                id="s1", role="architect", action="design",
-                objective="Design", definition_of_done="Done"
+                id="s1",
+                role="architect",
+                action="design",
+                objective="Design",
+                definition_of_done="Done",
             ),
             SOPStep(
-                id="s2", role="architect", action="document",
-                objective="Document", definition_of_done="Done"
+                id="s2",
+                role="architect",
+                action="document",
+                objective="Document",
+                definition_of_done="Done",
             ),
         ]
 
@@ -456,16 +457,21 @@ class TestPlannerAgentHelperMethods:
         """Test stage name inference with multiple roles."""
         steps = [
             SOPStep(
-                id="s1", role="architect", action="design",
-                objective="Design", definition_of_done="Done"
+                id="s1",
+                role="architect",
+                action="design",
+                objective="Design",
+                definition_of_done="Done",
             ),
             SOPStep(
-                id="s2", role="coder", action="implement",
-                objective="Implement", definition_of_done="Done"
+                id="s2",
+                role="coder",
+                action="implement",
+                objective="Implement",
+                definition_of_done="Done",
             ),
             SOPStep(
-                id="s3", role="tester", action="test",
-                objective="Test", definition_of_done="Done"
+                id="s3", role="tester", action="test", objective="Test", definition_of_done="Done"
             ),
         ]
 
@@ -477,8 +483,11 @@ class TestPlannerAgentHelperMethods:
         """Test stage name with single step."""
         steps = [
             SOPStep(
-                id="s1", role="security", action="audit",
-                objective="Audit", definition_of_done="Done"
+                id="s1",
+                role="security",
+                action="audit",
+                objective="Audit",
+                definition_of_done="Done",
             ),
         ]
 
@@ -491,8 +500,7 @@ class TestPlannerAgentHelperMethods:
         """Test role name is properly titlecased."""
         steps = [
             SOPStep(
-                id="s1", role="documenter", action="doc",
-                objective="Doc", definition_of_done="Done"
+                id="s1", role="documenter", action="doc", objective="Doc", definition_of_done="Done"
             ),
         ]
 
@@ -506,14 +514,22 @@ class TestPlannerAgentHelperMethods:
         """Test risk assessment returns LOW for simple plans with security."""
         sops = [
             SOPStep(
-                id="s1", role="executor", action="task",
-                objective="Do task", definition_of_done="Done",
-                priority=AgentPriority.LOW, cost=1.0
+                id="s1",
+                role="executor",
+                action="task",
+                objective="Do task",
+                definition_of_done="Done",
+                priority=AgentPriority.LOW,
+                cost=1.0,
             ),
             SOPStep(
-                id="s2", role="security", action="audit",
-                objective="Audit", definition_of_done="Done",
-                priority=AgentPriority.MEDIUM, cost=2.0
+                id="s2",
+                role="security",
+                action="audit",
+                objective="Audit",
+                definition_of_done="Done",
+                priority=AgentPriority.MEDIUM,
+                cost=2.0,
             ),
         ]
 
@@ -525,16 +541,24 @@ class TestPlannerAgentHelperMethods:
         """Test risk assessment returns MEDIUM for moderate cost with security."""
         sops = [
             SOPStep(
-                id=f"s{i}", role="executor", action="task",
-                objective="Task", definition_of_done="Done",
-                priority=AgentPriority.MEDIUM, cost=8.0
+                id=f"s{i}",
+                role="executor",
+                action="task",
+                objective="Task",
+                definition_of_done="Done",
+                priority=AgentPriority.MEDIUM,
+                cost=8.0,
             )
             for i in range(2)
         ] + [
             SOPStep(
-                id="s_sec", role="security", action="audit",
-                objective="Audit", definition_of_done="Done",
-                priority=AgentPriority.MEDIUM, cost=6.0
+                id="s_sec",
+                role="security",
+                action="audit",
+                objective="Audit",
+                definition_of_done="Done",
+                priority=AgentPriority.MEDIUM,
+                cost=6.0,
             )
         ]
 
@@ -546,24 +570,40 @@ class TestPlannerAgentHelperMethods:
         """Test risk assessment returns MEDIUM for critical steps with security."""
         sops = [
             SOPStep(
-                id="s1", role="executor", action="task",
-                objective="Task", definition_of_done="Done",
-                priority=AgentPriority.CRITICAL, cost=1.0
+                id="s1",
+                role="executor",
+                action="task",
+                objective="Task",
+                definition_of_done="Done",
+                priority=AgentPriority.CRITICAL,
+                cost=1.0,
             ),
             SOPStep(
-                id="s2", role="executor", action="task",
-                objective="Task", definition_of_done="Done",
-                priority=AgentPriority.CRITICAL, cost=1.0
+                id="s2",
+                role="executor",
+                action="task",
+                objective="Task",
+                definition_of_done="Done",
+                priority=AgentPriority.CRITICAL,
+                cost=1.0,
             ),
             SOPStep(
-                id="s3", role="executor", action="task",
-                objective="Task", definition_of_done="Done",
-                priority=AgentPriority.CRITICAL, cost=1.0
+                id="s3",
+                role="executor",
+                action="task",
+                objective="Task",
+                definition_of_done="Done",
+                priority=AgentPriority.CRITICAL,
+                cost=1.0,
             ),
             SOPStep(
-                id="s_sec", role="security", action="audit",
-                objective="Audit", definition_of_done="Done",
-                priority=AgentPriority.MEDIUM, cost=1.0
+                id="s_sec",
+                role="security",
+                action="audit",
+                objective="Audit",
+                definition_of_done="Done",
+                priority=AgentPriority.MEDIUM,
+                cost=1.0,
             ),
         ]
 
@@ -575,9 +615,13 @@ class TestPlannerAgentHelperMethods:
         """Test risk assessment returns HIGH with many critical steps."""
         sops = [
             SOPStep(
-                id=f"s{i}", role="executor", action="task",
-                objective="Task", definition_of_done="Done",
-                priority=AgentPriority.CRITICAL, cost=5.0
+                id=f"s{i}",
+                role="executor",
+                action="task",
+                objective="Task",
+                definition_of_done="Done",
+                priority=AgentPriority.CRITICAL,
+                cost=5.0,
             )
             for i in range(6)
         ]
@@ -590,9 +634,13 @@ class TestPlannerAgentHelperMethods:
         """Test risk assessment returns HIGH with high total cost."""
         sops = [
             SOPStep(
-                id=f"s{i}", role="executor", action="task",
-                objective="Task", definition_of_done="Done",
-                priority=AgentPriority.MEDIUM, cost=10.0
+                id=f"s{i}",
+                role="executor",
+                action="task",
+                objective="Task",
+                definition_of_done="Done",
+                priority=AgentPriority.MEDIUM,
+                cost=10.0,
             )
             for i in range(6)  # Total cost: 60
         ]
@@ -605,34 +653,58 @@ class TestPlannerAgentHelperMethods:
         """Test risk assessment returns HIGH when no security steps."""
         sops = [
             SOPStep(
-                id="s1", role="architect", action="design",
-                objective="Task", definition_of_done="Done",
-                priority=AgentPriority.CRITICAL, cost=1.0
+                id="s1",
+                role="architect",
+                action="design",
+                objective="Task",
+                definition_of_done="Done",
+                priority=AgentPriority.CRITICAL,
+                cost=1.0,
             ),
             SOPStep(
-                id="s2", role="coder", action="code",
-                objective="Task", definition_of_done="Done",
-                priority=AgentPriority.CRITICAL, cost=1.0
+                id="s2",
+                role="coder",
+                action="code",
+                objective="Task",
+                definition_of_done="Done",
+                priority=AgentPriority.CRITICAL,
+                cost=1.0,
             ),
             SOPStep(
-                id="s3", role="coder", action="code",
-                objective="Task", definition_of_done="Done",
-                priority=AgentPriority.CRITICAL, cost=1.0
+                id="s3",
+                role="coder",
+                action="code",
+                objective="Task",
+                definition_of_done="Done",
+                priority=AgentPriority.CRITICAL,
+                cost=1.0,
             ),
             SOPStep(
-                id="s4", role="coder", action="code",
-                objective="Task", definition_of_done="Done",
-                priority=AgentPriority.CRITICAL, cost=1.0
+                id="s4",
+                role="coder",
+                action="code",
+                objective="Task",
+                definition_of_done="Done",
+                priority=AgentPriority.CRITICAL,
+                cost=1.0,
             ),
             SOPStep(
-                id="s5", role="coder", action="code",
-                objective="Task", definition_of_done="Done",
-                priority=AgentPriority.CRITICAL, cost=1.0
+                id="s5",
+                role="coder",
+                action="code",
+                objective="Task",
+                definition_of_done="Done",
+                priority=AgentPriority.CRITICAL,
+                cost=1.0,
             ),
             SOPStep(
-                id="s6", role="tester", action="test",
-                objective="Task", definition_of_done="Done",
-                priority=AgentPriority.CRITICAL, cost=1.0
+                id="s6",
+                role="tester",
+                action="test",
+                objective="Task",
+                definition_of_done="Done",
+                priority=AgentPriority.CRITICAL,
+                cost=1.0,
             ),
         ]
 
@@ -644,11 +716,8 @@ class TestPlannerAgentHelperMethods:
     @pytest.mark.asyncio
     async def test_load_team_standards_file_exists(self, planner):
         """Test loading team standards when CLAUDE.md exists."""
-        with patch.object(planner, '_execute_tool') as mock_tool:
-            mock_tool.return_value = {
-                "success": True,
-                "content": "# CLAUDE.md\nTeam standards..."
-            }
+        with patch.object(planner, "_execute_tool") as mock_tool:
+            mock_tool.return_value = {"success": True, "content": "# CLAUDE.md\nTeam standards..."}
 
             standards = await planner._load_team_standards()
 
@@ -659,7 +728,7 @@ class TestPlannerAgentHelperMethods:
     @pytest.mark.asyncio
     async def test_load_team_standards_file_not_found(self, planner):
         """Test loading standards when CLAUDE.md doesn't exist."""
-        with patch.object(planner, '_execute_tool') as mock_tool:
+        with patch.object(planner, "_execute_tool") as mock_tool:
             mock_tool.side_effect = FileNotFoundError("CLAUDE.md not found")
 
             standards = await planner._load_team_standards()
@@ -669,7 +738,7 @@ class TestPlannerAgentHelperMethods:
     @pytest.mark.asyncio
     async def test_load_team_standards_execute_tool_error(self, planner):
         """Test handling of execute_tool errors."""
-        with patch.object(planner, '_execute_tool') as mock_tool:
+        with patch.object(planner, "_execute_tool") as mock_tool:
             mock_tool.side_effect = Exception("Tool execution failed")
 
             standards = await planner._load_team_standards()
@@ -679,11 +748,8 @@ class TestPlannerAgentHelperMethods:
     @pytest.mark.asyncio
     async def test_load_team_standards_empty_content(self, planner):
         """Test handling of empty CLAUDE.md content."""
-        with patch.object(planner, '_execute_tool') as mock_tool:
-            mock_tool.return_value = {
-                "success": True,
-                "content": ""
-            }
+        with patch.object(planner, "_execute_tool") as mock_tool:
+            mock_tool.return_value = {"success": True, "content": ""}
 
             standards = await planner._load_team_standards()
 
@@ -693,7 +759,7 @@ class TestPlannerAgentHelperMethods:
     @pytest.mark.asyncio
     async def test_load_team_standards_partial_content(self, planner):
         """Test loading standards with partial result."""
-        with patch.object(planner, '_execute_tool') as mock_tool:
+        with patch.object(planner, "_execute_tool") as mock_tool:
             mock_tool.return_value = {
                 "success": True
                 # Missing "content" key
@@ -708,6 +774,7 @@ class TestPlannerAgentHelperMethods:
 # =============================================================================
 # PLANNER AGENT ADDITIONAL HELPER TESTS
 # =============================================================================
+
 
 class TestPlannerAgentAdditionalHelpers:
     """Tests for additional PlannerAgent helper methods."""
@@ -727,17 +794,17 @@ class TestPlannerAgentAdditionalHelpers:
     @pytest.fixture
     def planner(self, mock_llm, mock_mcp):
         """Create PlannerAgent instance."""
-        return PlannerAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp
-        )
+        return PlannerAgent(llm_client=mock_llm, mcp_client=mock_mcp)
 
     def test_generate_stage_description_single_step(self, planner):
         """Test stage description generation for single step."""
         steps = [
             SOPStep(
-                id="s1", role="architect", action="design system",
-                objective="Create architecture", definition_of_done="Done"
+                id="s1",
+                role="architect",
+                action="design system",
+                objective="Create architecture",
+                definition_of_done="Done",
             ),
         ]
 
@@ -749,16 +816,25 @@ class TestPlannerAgentAdditionalHelpers:
         """Test stage description generation for multiple steps."""
         steps = [
             SOPStep(
-                id="s1", role="coder", action="implement feature",
-                objective="Write code", definition_of_done="Done"
+                id="s1",
+                role="coder",
+                action="implement feature",
+                objective="Write code",
+                definition_of_done="Done",
             ),
             SOPStep(
-                id="s2", role="tester", action="write tests",
-                objective="Test code", definition_of_done="Done"
+                id="s2",
+                role="tester",
+                action="write tests",
+                objective="Test code",
+                definition_of_done="Done",
             ),
             SOPStep(
-                id="s3", role="reviewer", action="review code",
-                objective="Review", definition_of_done="Done"
+                id="s3",
+                role="reviewer",
+                action="review code",
+                objective="Review",
+                definition_of_done="Done",
             ),
         ]
 
@@ -793,12 +869,13 @@ class TestPlannerAgentAdditionalHelpers:
         """Test strategy overview for sequential stages."""
         stages = [
             ExecutionStage(
-                name="Stage 1", description="First",
-                steps=[], strategy=ExecutionStrategy.SEQUENTIAL
+                name="Stage 1", description="First", steps=[], strategy=ExecutionStrategy.SEQUENTIAL
             ),
             ExecutionStage(
-                name="Stage 2", description="Second",
-                steps=[], strategy=ExecutionStrategy.SEQUENTIAL
+                name="Stage 2",
+                description="Second",
+                steps=[],
+                strategy=ExecutionStrategy.SEQUENTIAL,
             ),
         ]
 
@@ -812,16 +889,16 @@ class TestPlannerAgentAdditionalHelpers:
         """Test strategy overview with parallel stages."""
         stages = [
             ExecutionStage(
-                name="Stage 1", description="First",
-                steps=[], strategy=ExecutionStrategy.PARALLEL
+                name="Stage 1", description="First", steps=[], strategy=ExecutionStrategy.PARALLEL
             ),
             ExecutionStage(
-                name="Stage 2", description="Second",
-                steps=[], strategy=ExecutionStrategy.SEQUENTIAL
+                name="Stage 2",
+                description="Second",
+                steps=[],
+                strategy=ExecutionStrategy.SEQUENTIAL,
             ),
             ExecutionStage(
-                name="Stage 3", description="Third",
-                steps=[], strategy=ExecutionStrategy.PARALLEL
+                name="Stage 3", description="Third", steps=[], strategy=ExecutionStrategy.PARALLEL
             ),
         ]
 
@@ -834,9 +911,13 @@ class TestPlannerAgentAdditionalHelpers:
         """Test duration estimation for low cost."""
         sops = [
             SOPStep(
-                id="s1", role="r", action="a",
-                objective="o", definition_of_done="d",
-                cost=1.0, dependencies=[]
+                id="s1",
+                role="r",
+                action="a",
+                objective="o",
+                definition_of_done="d",
+                cost=1.0,
+                dependencies=[],
             ),
         ]
         parallel_groups = [["s1"]]
@@ -850,9 +931,13 @@ class TestPlannerAgentAdditionalHelpers:
         """Test duration estimation for medium cost."""
         sops = [
             SOPStep(
-                id=f"s{i}", role="r", action="a",
-                objective="o", definition_of_done="d",
-                cost=2.0, dependencies=[] if i == 0 else [f"s{i-1}"]
+                id=f"s{i}",
+                role="r",
+                action="a",
+                objective="o",
+                definition_of_done="d",
+                cost=2.0,
+                dependencies=[] if i == 0 else [f"s{i-1}"],
             )
             for i in range(4)
         ]
@@ -867,9 +952,13 @@ class TestPlannerAgentAdditionalHelpers:
         """Test duration estimation for high cost."""
         sops = [
             SOPStep(
-                id=f"s{i}", role="r", action="a",
-                objective="o", definition_of_done="d",
-                cost=5.0, dependencies=[] if i == 0 else [f"s{i-1}"]
+                id=f"s{i}",
+                role="r",
+                action="a",
+                objective="o",
+                definition_of_done="d",
+                cost=5.0,
+                dependencies=[] if i == 0 else [f"s{i-1}"],
             )
             for i in range(5)
         ]
@@ -883,14 +972,8 @@ class TestPlannerAgentAdditionalHelpers:
     def test_identify_checkpoints_none(self, planner):
         """Test identifying checkpoints when none exist."""
         stages = [
-            ExecutionStage(
-                name="Stage 1", description="First",
-                steps=[], checkpoint=False
-            ),
-            ExecutionStage(
-                name="Stage 2", description="Second",
-                steps=[], checkpoint=False
-            ),
+            ExecutionStage(name="Stage 1", description="First", steps=[], checkpoint=False),
+            ExecutionStage(name="Stage 2", description="Second", steps=[], checkpoint=False),
         ]
 
         checkpoints = planner._identify_checkpoints(stages)
@@ -900,18 +983,11 @@ class TestPlannerAgentAdditionalHelpers:
     def test_identify_checkpoints_multiple(self, planner):
         """Test identifying multiple checkpoints."""
         stages = [
+            ExecutionStage(name="Design Stage", description="Design", steps=[], checkpoint=True),
             ExecutionStage(
-                name="Design Stage", description="Design",
-                steps=[], checkpoint=True
+                name="Implementation Stage", description="Code", steps=[], checkpoint=False
             ),
-            ExecutionStage(
-                name="Implementation Stage", description="Code",
-                steps=[], checkpoint=False
-            ),
-            ExecutionStage(
-                name="Testing Stage", description="Test",
-                steps=[], checkpoint=True
-            ),
+            ExecutionStage(name="Testing Stage", description="Test", steps=[], checkpoint=True),
         ]
 
         checkpoints = planner._identify_checkpoints(stages)
@@ -924,6 +1000,7 @@ class TestPlannerAgentAdditionalHelpers:
 # =============================================================================
 # EXECUTION MONITOR INTEGRATION TESTS
 # =============================================================================
+
 
 class TestExecutionMonitorIntegration:
     """Integration tests for ExecutionMonitor with PlannerAgent."""
@@ -943,7 +1020,6 @@ class TestExecutionMonitorIntegration:
         ]
 
         for ts, event_type, step_id, role in timeline:
-            duration_ms = None
             if event_type == "completed":
                 # Calculate duration from previous event
                 pass
@@ -954,7 +1030,7 @@ class TestExecutionMonitorIntegration:
                 step_id=step_id,
                 agent_role=role,
                 correlation_id=f"{step_id}-corr",
-                duration_ms=15000 if event_type == "completed" else None
+                duration_ms=15000 if event_type == "completed" else None,
             )
             monitor.emit(event)
 
@@ -974,7 +1050,7 @@ class TestExecutionMonitorIntegration:
                 event_type="started",
                 step_id="step_1",
                 agent_role="executor",
-                correlation_id="corr-1"
+                correlation_id="corr-1",
             ),
             ExecutionEvent(
                 timestamp="2025-01-01T12:00:05Z",
@@ -982,14 +1058,14 @@ class TestExecutionMonitorIntegration:
                 step_id="step_1",
                 agent_role="executor",
                 correlation_id="corr-1",
-                duration_ms=5000
+                duration_ms=5000,
             ),
             ExecutionEvent(
                 timestamp="2025-01-01T12:00:06Z",
                 event_type="started",
                 step_id="step_2",
                 agent_role="executor",
-                correlation_id="corr-2"
+                correlation_id="corr-2",
             ),
             ExecutionEvent(
                 timestamp="2025-01-01T12:00:10Z",
@@ -998,14 +1074,14 @@ class TestExecutionMonitorIntegration:
                 agent_role="executor",
                 correlation_id="corr-2",
                 duration_ms=4000,
-                error="Timeout exceeded"
+                error="Timeout exceeded",
             ),
             ExecutionEvent(
                 timestamp="2025-01-01T12:00:11Z",
                 event_type="started",
                 step_id="step_2_retry",
                 agent_role="executor",
-                correlation_id="corr-2-retry"
+                correlation_id="corr-2-retry",
             ),
             ExecutionEvent(
                 timestamp="2025-01-01T12:00:20Z",
@@ -1013,7 +1089,7 @@ class TestExecutionMonitorIntegration:
                 step_id="step_2_retry",
                 agent_role="executor",
                 correlation_id="corr-2-retry",
-                duration_ms=9000
+                duration_ms=9000,
             ),
         ]
 
@@ -1026,7 +1102,7 @@ class TestExecutionMonitorIntegration:
         assert metrics["completed_steps"] == 2
         assert metrics["failed_steps"] == 1
         # success_rate = completed / started = 2/3 = 0.666... (implementation uses started as denominator)
-        assert metrics["success_rate"] == pytest.approx(2/3, rel=1e-2)
+        assert metrics["success_rate"] == pytest.approx(2 / 3, rel=1e-2)
 
     def test_monitor_metrics_consistency(self):
         """Test metrics remain consistent across multiple calls."""
@@ -1040,7 +1116,7 @@ class TestExecutionMonitorIntegration:
                 agent_role="executor",
                 correlation_id=f"corr-{i}",
                 duration_ms=1000 * (i + 1),
-                error="Failed" if i % 2 == 1 else None
+                error="Failed" if i % 2 == 1 else None,
             )
             for i in range(6)
         ]
@@ -1066,7 +1142,7 @@ class TestExecutionMonitorIntegration:
                 event_type="started",
                 step_id="step_1",
                 agent_role="executor",
-                correlation_id="corr-1"
+                correlation_id="corr-1",
             ),
             ExecutionEvent(
                 timestamp="2025-01-01T12:00:01Z",
@@ -1074,14 +1150,14 @@ class TestExecutionMonitorIntegration:
                 step_id="step_1",
                 agent_role="executor",
                 correlation_id="corr-1",
-                duration_ms=1000
+                duration_ms=1000,
             ),
             ExecutionEvent(
                 timestamp="2025-01-01T12:00:02Z",
                 event_type="checkpoint",
                 step_id="checkpoint_1",
                 agent_role="orchestrator",
-                correlation_id="chk-1"
+                correlation_id="chk-1",
             ),
         ]
 

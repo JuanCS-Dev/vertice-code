@@ -52,6 +52,7 @@ from vertice_core.agents import (
 # UnifiedContext Tests
 # =============================================================================
 
+
 class TestUnifiedContext:
     """Tests for UnifiedContext."""
 
@@ -290,7 +291,7 @@ class TestUnifiedContext:
     def test_context_singleton(self):
         """Test context singleton functions."""
         # Create new context
-        ctx1 = new_context(user_request="request1")
+        new_context(user_request="request1")
         assert get_context().user_request == "request1"
 
         # Set different context
@@ -302,6 +303,7 @@ class TestUnifiedContext:
 # =============================================================================
 # SemanticRouter Tests
 # =============================================================================
+
 
 class TestSemanticRouter:
     """Tests for SemanticRouter."""
@@ -460,6 +462,7 @@ class TestSemanticRouter:
 # ActiveOrchestrator Tests
 # =============================================================================
 
+
 class TestActiveOrchestrator:
     """Tests for ActiveOrchestrator."""
 
@@ -593,6 +596,7 @@ class TestActiveOrchestrator:
 # =============================================================================
 # HandoffManager Tests
 # =============================================================================
+
 
 class TestHandoffManager:
     """Tests for HandoffManager."""
@@ -799,6 +803,7 @@ class TestHandoffManager:
 # ContextCompactor Tests
 # =============================================================================
 
+
 class TestContextCompactor:
     """Tests for ContextCompactor."""
 
@@ -882,7 +887,9 @@ class TestContextCompactor:
         ctx = UnifiedContext(max_tokens=10000)
 
         # Add tool-like output
-        ctx.add_message("tool", """
+        ctx.add_message(
+            "tool",
+            """
             ```python
             def long_function():
                 # lots of code
@@ -890,7 +897,8 @@ class TestContextCompactor:
             ```
             Success: Operation completed
             Files: 3 modified
-        """)
+        """,
+        )
         ctx.add_message("user", "Thanks!")
 
         config = CompactionConfig(keep_recent_messages=1)
@@ -975,6 +983,7 @@ class TestContextCompactor:
 # Integration Tests
 # =============================================================================
 
+
 class TestIntegration:
     """Integration tests for Sprint 2 components."""
 
@@ -1001,7 +1010,7 @@ class TestIntegration:
     async def test_orchestrator_with_handoffs(self):
         """Test orchestrator with handoff manager."""
         ctx = UnifiedContext(user_request="test")
-        handoff_manager = HandoffManager(ctx)
+        HandoffManager(ctx)
         orchestrator = ActiveOrchestrator(ctx)
 
         # Execute with handoff
@@ -1024,7 +1033,7 @@ class TestIntegration:
 
         # Route
         router = SemanticRouter()
-        decision = await router.route(ctx.user_request)
+        await router.route(ctx.user_request)
 
         # Orchestrate
         orchestrator = ActiveOrchestrator(ctx, router)

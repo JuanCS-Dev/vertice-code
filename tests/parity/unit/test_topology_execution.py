@@ -38,9 +38,7 @@ class MockMeshExecutor:
         """Register an agent."""
         self.agents[name] = AsyncMock(return_value=f"Result from {name}")
 
-    async def execute_centralized(
-        self, agents: List[str], context: Dict
-    ) -> Dict[str, Any]:
+    async def execute_centralized(self, agents: List[str], context: Dict) -> Dict[str, Any]:
         """Execute in centralized topology - single coordinator."""
         coordinator = agents[0]  # First agent is coordinator
 
@@ -61,9 +59,7 @@ class MockMeshExecutor:
 
         return {"coordinator": coordinator, "results": results}
 
-    async def execute_decentralized(
-        self, agents: List[str], context: Dict
-    ) -> Dict[str, Any]:
+    async def execute_decentralized(self, agents: List[str], context: Dict) -> Dict[str, Any]:
         """Execute in decentralized topology - parallel peer-to-peer."""
         self.execution_log.append(
             ExecutionRecord(
@@ -81,9 +77,7 @@ class MockMeshExecutor:
 
         return {"results": dict(zip(agents, results))}
 
-    async def execute_hybrid(
-        self, agents: List[str], context: Dict
-    ) -> Dict[str, Any]:
+    async def execute_hybrid(self, agents: List[str], context: Dict) -> Dict[str, Any]:
         """Execute in hybrid topology - centralized planning, decentralized execution."""
         coordinator = agents[0]
 
@@ -130,9 +124,7 @@ class TestTopologySelection:
     @pytest.mark.unit
     async def test_centralized_uses_coordinator(self, mesh_executor):
         """Centralized topology should use a single coordinator."""
-        result = await mesh_executor.execute_centralized(
-            ["planner", "coder", "reviewer"], {}
-        )
+        result = await mesh_executor.execute_centralized(["planner", "coder", "reviewer"], {})
 
         assert result["coordinator"] == "planner"
         assert len(mesh_executor.execution_log) == 1
@@ -142,9 +134,7 @@ class TestTopologySelection:
     @pytest.mark.unit
     async def test_decentralized_no_coordinator(self, mesh_executor):
         """Decentralized topology should have no coordinator."""
-        result = await mesh_executor.execute_decentralized(
-            ["coder", "reviewer", "tester"], {}
-        )
+        await mesh_executor.execute_decentralized(["coder", "reviewer", "tester"], {})
 
         assert mesh_executor.execution_log[0].topology == "decentralized"
         assert mesh_executor.execution_log[0].coordinator is None
@@ -153,9 +143,7 @@ class TestTopologySelection:
     @pytest.mark.unit
     async def test_hybrid_has_both_phases(self, mesh_executor):
         """Hybrid topology should have planning and execution phases."""
-        result = await mesh_executor.execute_hybrid(
-            ["planner", "coder", "tester"], {}
-        )
+        result = await mesh_executor.execute_hybrid(["planner", "coder", "tester"], {})
 
         assert result["coordinator"] == "planner"
         assert "plan" in result
@@ -183,7 +171,7 @@ class TestTopologyExecution:
 
         start = asyncio.get_event_loop().time()
         await mesh_executor.execute_decentralized(agents, {})
-        duration = asyncio.get_event_loop().time() - start
+        asyncio.get_event_loop().time() - start
 
         # Should be parallel (fast)
         assert mesh_executor.execution_log[0].parallel is True
@@ -284,9 +272,7 @@ class TestTopologyEdgeCases:
         """Context should be passed to all agents."""
         context = {"project": "test", "language": "python"}
 
-        await mesh_executor.execute_decentralized(
-            ["coder", "reviewer"], context
-        )
+        await mesh_executor.execute_decentralized(["coder", "reviewer"], context)
 
         # Verify context was passed
         for agent in ["coder", "reviewer"]:
@@ -301,7 +287,7 @@ class TestTopologyIntegration:
     @pytest.mark.integration
     @pytest.mark.skipif(
         not os.path.exists("/media/juan/DATA/Vertice-Code/core/mesh/mixin.py"),
-        reason="Mesh mixin not available"
+        reason="Mesh mixin not available",
     )
     async def test_real_mesh_topology_applied(self):
         """Test that real mesh system applies topology."""

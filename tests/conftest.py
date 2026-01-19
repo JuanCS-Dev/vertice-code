@@ -129,19 +129,6 @@ def mock_llm_with_responses():
 # =============================================================================
 
 
-@pytest.fixture(scope="session")
-def event_loop():
-    """Create session-scoped event loop for all async tests.
-
-    Based on 2025 best practices for pytest-asyncio + Textual.
-    Prevents 'Event loop is closed' errors.
-    """
-    policy = asyncio.get_event_loop_policy()
-    loop = policy.new_event_loop()
-    yield loop
-    loop.close()
-
-
 @pytest.fixture(scope="function")
 def mock_config():
     """Mock configuration for testing."""

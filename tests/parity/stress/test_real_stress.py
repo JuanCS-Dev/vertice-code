@@ -38,7 +38,7 @@ def load_env():
                 line = line.strip()
                 if line and not line.startswith("#") and "=" in line:
                     key, value = line.split("=", 1)
-                    os.environ.setdefault(key.strip(), value.strip().strip('"\''))
+                    os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
 
 
 load_env()
@@ -91,11 +91,8 @@ class StressTester:
         start = time.time()
         try:
             output = ""
-            async for chunk in asyncio.wait_for(
-                self._process_with_async(message),
-                timeout=timeout
-            ):
-                if hasattr(chunk, 'content'):
+            async for chunk in asyncio.wait_for(self._process_with_async(message), timeout=timeout):
+                if hasattr(chunk, "content"):
                     output += chunk.content
                 elif isinstance(chunk, str):
                     output += chunk
@@ -116,10 +113,7 @@ class StressTester:
             yield chunk
 
     async def run_concurrent(
-        self,
-        messages: List[str],
-        max_concurrent: int = 5,
-        timeout: int = 120
+        self, messages: List[str], max_concurrent: int = 5, timeout: int = 120
     ) -> StressTestResult:
         """Run multiple requests concurrently."""
         semaphore = asyncio.Semaphore(max_concurrent)
@@ -274,7 +268,7 @@ class TestContextOverflow:
         print(f"[STRESS] Success: {result['success']}")
 
         # Should handle gracefully (success or informative error)
-        assert result['success'] or result['error'] is not None
+        assert result["success"] or result["error"] is not None
 
     @pytest.mark.timeout(180)
     async def test_context_accumulation(self, stress_tester):
@@ -299,7 +293,7 @@ class TestContextOverflow:
         print(f"\n[STRESS] Final response: {final['output'][:200]}...")
 
         # At least the final should succeed
-        assert final['success'], "Context accumulation request failed"
+        assert final["success"], "Context accumulation request failed"
 
 
 class TestRecoveryBehavior:
@@ -313,22 +307,18 @@ class TestRecoveryBehavior:
         # First request - very short timeout might fail
         result1 = await stress_tester.single_request(
             "Write a very long essay about programming",
-            timeout=2  # Very short, likely to timeout
+            timeout=2,  # Very short, likely to timeout
         )
 
         # Second request - normal timeout should work
-        result2 = await stress_tester.single_request(
-            "What is 1+1?",
-            timeout=60
-        )
+        result2 = await stress_tester.single_request("What is 1+1?", timeout=60)
 
         print(f"\n[RECOVERY] First request (short timeout): {result1['success']}")
         print(f"[RECOVERY] Second request (normal): {result2['success']}")
 
         # System should recover and handle second request
         # (First may or may not timeout depending on model speed)
-        assert result2['success'] or result2.get('output'), \
-            "Should recover after timeout"
+        assert result2["success"] or result2.get("output"), "Should recover after timeout"
 
     @pytest.mark.timeout(120)
     async def test_malformed_request_recovery(self, stress_tester):
@@ -345,7 +335,7 @@ class TestRecoveryBehavior:
         print(f"[RECOVERY] Normal after: {result2['success']}")
 
         # Should handle both gracefully
-        assert result2['success'] or len(result2.get('output', '')) > 0
+        assert result2["success"] or len(result2.get("output", "")) > 0
 
 
 class TestProviderFailover:
@@ -385,6 +375,7 @@ class TestMemoryBehavior:
         # Get baseline (if psutil available)
         try:
             import psutil
+
             process = psutil.Process()
             baseline_memory = process.memory_info().rss / 1024 / 1024  # MB
         except ImportError:

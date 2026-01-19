@@ -154,7 +154,7 @@ class QualityThresholdChecker:
 
         all_checks = results["passed_checks"] + results["failed_checks"]
         for check in all_checks:
-            status = "✅" if check["passed"] else "❌"
+            "✅" if check["passed"] else "❌"
             print("6.2f")
 
         print()

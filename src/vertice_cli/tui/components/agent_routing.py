@@ -77,7 +77,7 @@ class AgentRoutingDisplay:
         table.add_row("Agent:", Text(agent_display, style=f"bold {color}"))
 
         # Confidence bar
-        confidence_pct = int(confidence * 100)
+        int(confidence * 100)
         confidence_bar = self._create_confidence_bar(confidence)
         table.add_row("Confidence:", confidence_bar)
 

@@ -26,7 +26,7 @@ async def test_performance_improvements():
     print("\n📝 Test 1: Small content rendering")
     start = time.time()
     await widget.append_chunk("Hello **world**!\n\nThis is a test.")
-    small_time = time.time() - start
+    time.time() - start
     print(".2f")
 
     # Test 2: Large content with viewport buffering
@@ -36,7 +36,7 @@ async def test_performance_improvements():
     )
     start = time.time()
     await widget.append_chunk(large_content)
-    large_time = time.time() - start
+    time.time() - start
     print(".2f")
 
     # Check metrics

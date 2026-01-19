@@ -225,7 +225,6 @@ class BillingEngine:
         # Add overage items if any
         if billing_period.overage_cost > 0:
             # Break down overages by type (simplified)
-            overage_descriptions: List[str] = []
 
             if (
                 billing_period.usage_summary.get(UsageType.AI_TOKENS, 0)
@@ -293,7 +292,7 @@ class BillingEngine:
             # In a real implementation, this would call Stripe API
             # For now, we'll simulate the Stripe integration
 
-            stripe_data = invoice.to_stripe_format()
+            invoice.to_stripe_format()
 
             # Simulate Stripe API call
             logger.info(f"Simulating Stripe invoice creation for {invoice_id}")

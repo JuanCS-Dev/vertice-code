@@ -20,7 +20,7 @@ def test_type_confusion(test_id: int) -> None:
     try:
         gov = MaestroGovernance(
             llm_client=None if test_id % 2 == 0 else Mock(),
-            mcp_client=test_id if test_id % 3 == 0 else Mock()
+            mcp_client=test_id if test_id % 3 == 0 else Mock(),
         )
         assert gov is not None
     except Exception:

@@ -32,7 +32,7 @@ else:
 # qwen_dev_cli/core/llm.py
 def _get_failover_providers(self) -> List[str]:
     available = []
-    
+
     # GEMINI FIRST (fastest)
     if self.gemini_client:
         available.append("gemini")
@@ -131,8 +131,8 @@ GEMINI_MODEL=gemini-2.5-pro    # Optimized for code quality and reasoning
 
 ---
 
-**Data:** 2025-11-23  
-**Fix:** Performance 10-17x improvement  
-**Status:** ✅ PRODUCTION READY  
+**Data:** 2025-11-23
+**Fix:** Performance 10-17x improvement
+**Status:** ✅ PRODUCTION READY
 
 **Soli Deo Gloria** 🙏

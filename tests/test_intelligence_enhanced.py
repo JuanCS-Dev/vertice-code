@@ -4,15 +4,9 @@ Testing: Risk assessment, workflows, rich context.
 """
 
 import pytest
-from vertice_cli.intelligence.risk import (
-    assess_risk, RiskLevel, get_risk_warning
-)
-from vertice_cli.intelligence.context_enhanced import (
-    RichContext, GitStatus, WorkspaceInfo
-)
-from vertice_cli.intelligence.workflows import (
-    GitWorkflow, NpmWorkflow, WorkflowOrchestrator
-)
+from vertice_cli.intelligence.risk import assess_risk, RiskLevel, get_risk_warning
+from vertice_cli.intelligence.context_enhanced import RichContext, GitStatus, WorkspaceInfo
+from vertice_cli.intelligence.workflows import GitWorkflow, NpmWorkflow, WorkflowOrchestrator
 
 
 class TestRiskAssessment:
@@ -57,10 +51,7 @@ class TestRichContext:
 
     def test_rich_context_immutable(self):
         """RichContext should be immutable."""
-        ctx = RichContext(
-            current_command="test",
-            git_status=GitStatus(branch="main")
-        )
+        ctx = RichContext(current_command="test", git_status=GitStatus(branch="main"))
 
         with pytest.raises(AttributeError):
             ctx.current_command = "modified"  # type: ignore
@@ -95,10 +86,7 @@ class TestGitWorkflow:
         workflow = GitWorkflow()
         context = RichContext(
             command_history=["git add ."],
-            git_status=GitStatus(
-                branch="main",
-                staged_files=["file.py"]
-            )
+            git_status=GitStatus(branch="main", staged_files=["file.py"]),
         )
 
         suggestions = workflow.suggest_next(context)
@@ -111,10 +99,7 @@ class TestGitWorkflow:
         workflow = GitWorkflow()
         context = RichContext(
             command_history=["git commit -m 'test'"],
-            git_status=GitStatus(
-                branch="main",
-                has_remote=True
-            )
+            git_status=GitStatus(branch="main", has_remote=True),
         )
 
         suggestions = workflow.suggest_next(context)
@@ -125,12 +110,7 @@ class TestGitWorkflow:
     def test_suggest_add_with_unstaged_files(self):
         """Should suggest git add with unstaged files."""
         workflow = GitWorkflow()
-        context = RichContext(
-            git_status=GitStatus(
-                branch="main",
-                unstaged_files=["file.py"]
-            )
-        )
+        context = RichContext(git_status=GitStatus(branch="main", unstaged_files=["file.py"]))
 
         suggestions = workflow.suggest_next(context)
 
@@ -152,8 +132,7 @@ class TestNpmWorkflow:
         """Should suggest npm run dev after install."""
         workflow = NpmWorkflow()
         context = RichContext(
-            command_history=["npm install"],
-            workspace=WorkspaceInfo(language="javascript")
+            command_history=["npm install"], workspace=WorkspaceInfo(language="javascript")
         )
 
         suggestions = workflow.suggest_next(context)
@@ -166,11 +145,7 @@ class TestNpmWorkflow:
         workflow = NpmWorkflow()
         context = RichContext(
             command_history=["npm install"],
-            workspace=WorkspaceInfo(
-                language="javascript",
-                has_tests=True,
-                test_command="npm test"
-            )
+            workspace=WorkspaceInfo(language="javascript", has_tests=True, test_command="npm test"),
         )
 
         suggestions = workflow.suggest_next(context)
@@ -189,11 +164,8 @@ class TestWorkflowOrchestrator:
 
         context = RichContext(
             command_history=["git add ."],
-            git_status=GitStatus(
-                branch="main",
-                staged_files=["file.js"]
-            ),
-            workspace=WorkspaceInfo(language="javascript")
+            git_status=GitStatus(branch="main", staged_files=["file.js"]),
+            workspace=WorkspaceInfo(language="javascript"),
         )
 
         suggestions = orchestrator.get_workflow_suggestions(context)
@@ -206,17 +178,11 @@ class TestWorkflowOrchestrator:
         orchestrator = WorkflowOrchestrator()
 
         context = RichContext(
-            git_status=GitStatus(
-                branch="main",
-                unstaged_files=["a.py", "b.py"]
-            ),
-            workspace=WorkspaceInfo(language="python")
+            git_status=GitStatus(branch="main", unstaged_files=["a.py", "b.py"]),
+            workspace=WorkspaceInfo(language="python"),
         )
 
-        suggestions = orchestrator.get_workflow_suggestions(
-            context,
-            max_per_workflow=1
-        )
+        suggestions = orchestrator.get_workflow_suggestions(context, max_per_workflow=1)
 
         # Each active workflow contributes max 1 suggestion
         assert len(suggestions) <= 2  # Git + Python workflows
@@ -233,7 +199,7 @@ class TestIntegration:
         ctx = RichContext(
             current_command="git push -f origin main",
             command_history=["git commit -m 'test'"],
-            git_status=GitStatus(branch="main", has_remote=True)
+            git_status=GitStatus(branch="main", has_remote=True),
         )
 
         # Check risk of force push

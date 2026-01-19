@@ -30,11 +30,11 @@
 
 ### Pontos Fortes (Manter)
 
-✅ **27 Tools Funcionais** - Bem estruturadas e testadas  
-✅ **DevSquad Orchestration** - Sistema de agentes robusto  
-✅ **MCP Integration** - Protocolo moderno de contexto  
-✅ **Rich TUI Components** - Interface visual bem feita  
-✅ **Circuit Breaker & Rate Limiting** - LLM client resiliente  
+✅ **27 Tools Funcionais** - Bem estruturadas e testadas
+✅ **DevSquad Orchestration** - Sistema de agentes robusto
+✅ **MCP Integration** - Protocolo moderno de contexto
+✅ **Rich TUI Components** - Interface visual bem feita
+✅ **Circuit Breaker & Rate Limiting** - LLM client resiliente
 
 ---
 
@@ -73,12 +73,12 @@ class InteractiveShell:
         self.llm = default_llm_client
         self.registry = ToolRegistry()
         self._register_tools()  # Rápido
-        
+
         # Lazy properties
         self._indexer = None
         self._lsp_client = None
         self._squad = None
-    
+
     @property
     def indexer(self):
         if self._indexer is None:
@@ -108,22 +108,22 @@ class InteractiveShell:
 ```python
 async def run(self):
     self._show_welcome()
-    
+
     while True:
         try:
             # Input simples, sem enhanced_input complexo
             user_input = await asyncio.to_thread(
                 self.console.input, "❯ "
             )
-            
+
             if not user_input.strip():
                 continue
-                
+
             # Process async, não bloqueia
             asyncio.create_task(
                 self._process_input(user_input)
             )
-            
+
         except KeyboardInterrupt:
             break
 ```
@@ -149,7 +149,7 @@ async def run(self):
 async def _process_input_streaming(self, user_input: str):
     # Minimal loading indicator
     self.console.print("[dim]...[/dim]", end="", flush=True)
-    
+
     # Stream LLM response
     full_response = ""
     async for chunk in self.llm.stream_chat(
@@ -159,7 +159,7 @@ async def _process_input_streaming(self, user_input: str):
         full_response += chunk
         # Update display incrementally
         self.console.print(f"\r{chunk}", end="", flush=True)
-    
+
     # Parse tool calls from complete response
     tool_calls = self._parse_tool_calls(full_response)
     if tool_calls:
@@ -322,6 +322,6 @@ async def _execute_tools_parallel(self, tool_calls):
 
 ---
 
-**Última Atualização**: 2025-11-22  
-**Status**: Plano aprovado, pronto para execução  
+**Última Atualização**: 2025-11-22
+**Status**: Plano aprovado, pronto para execução
 **Próxima Revisão**: Após Fase 1 completa

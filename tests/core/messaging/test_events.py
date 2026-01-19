@@ -224,13 +224,16 @@ class TestEventBus:
         assert bus.handler_count == 0
 
         @bus.on(Event)
-        def h1(e): pass
+        def h1(e):
+            pass
 
         @bus.on(Event)
-        def h2(e): pass
+        def h2(e):
+            pass
 
         @bus.on(TaskStartedEvent)
-        def h3(e): pass
+        def h3(e):
+            pass
 
         assert bus.handler_count == 3
 
@@ -260,9 +263,10 @@ class TestEventHandlerDecorator:
 
     def test_decorator_marks_function(self):
         """Test decorator adds _event_type attribute."""
+
         @event_handler(TaskStartedEvent)
         def my_handler(event):
             pass
 
-        assert hasattr(my_handler, '_event_type')
+        assert hasattr(my_handler, "_event_type")
         assert my_handler._event_type == TaskStartedEvent

@@ -76,7 +76,7 @@ class TestOpenResponse:
 
     def test_add_message(self):
         resp = OpenResponse()
-        msg = resp.add_message()
+        resp.add_message()
         assert len(resp.output) == 1
 
         # Test with custom role

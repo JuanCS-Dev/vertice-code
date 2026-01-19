@@ -11,11 +11,7 @@ from pathlib import Path
 # Add parent to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from vertice_cli.tui.components.palette import (
-    CommandPalette,
-    Command,
-    CommandCategory
-)
+from vertice_cli.tui.components.palette import CommandPalette, Command, CommandCategory
 from vertice_cli.tui.theme import COLORS
 
 
@@ -28,7 +24,7 @@ def print_header(text: str):
 
 def print_command(cmd, score=None, highlight=False):
     """Print command result."""
-    color = COLORS['accent_green'] if highlight else COLORS['text']
+    color = COLORS["accent_green"] if highlight else COLORS["text"]
     category_icon = "📄" if cmd.category == CommandCategory.FILE else "🔍"
 
     # Title with keybinding
@@ -62,7 +58,7 @@ def main():
             description="Open a file in the editor",
             category=CommandCategory.FILE,
             keywords=["read", "load"],
-            keybinding="Ctrl+O"
+            keybinding="Ctrl+O",
         ),
         Command(
             id="file.save",
@@ -70,21 +66,21 @@ def main():
             description="Save current file",
             category=CommandCategory.FILE,
             keywords=["write"],
-            keybinding="Ctrl+S"
+            keybinding="Ctrl+S",
         ),
         Command(
             id="file.new",
             title="New File",
             description="Create a new file",
             category=CommandCategory.FILE,
-            keybinding="Ctrl+N"
+            keybinding="Ctrl+N",
         ),
         Command(
             id="file.close",
             title="Close File",
             description="Close current file",
             category=CommandCategory.FILE,
-            keybinding="Ctrl+W"
+            keybinding="Ctrl+W",
         ),
     ]
 
@@ -96,7 +92,7 @@ def main():
             description="Search across all files",
             category=CommandCategory.SEARCH,
             keywords=["grep", "search"],
-            keybinding="Ctrl+Shift+F"
+            keybinding="Ctrl+Shift+F",
         ),
         Command(
             id="search.symbol",
@@ -104,7 +100,7 @@ def main():
             description="Jump to a symbol in the project",
             category=CommandCategory.SEARCH,
             keywords=["navigate", "jump"],
-            keybinding="Ctrl+T"
+            keybinding="Ctrl+T",
         ),
     ]
 
@@ -141,7 +137,7 @@ def main():
             description="Auto-format current file",
             category=CommandCategory.TOOLS,
             keywords=["prettier", "black"],
-            keybinding="Shift+Alt+F"
+            keybinding="Shift+Alt+F",
         ),
     ]
 
@@ -205,16 +201,13 @@ def main():
 
     print(f"{COLORS['info']}Commands with keybindings:{COLORS['reset']}\n")
 
-    commands_with_keys = [
-        cmd for cmd in palette.commands.values()
-        if cmd.keybinding
-    ]
+    commands_with_keys = [cmd for cmd in palette.commands.values() if cmd.keybinding]
 
     # Sort by category
     commands_with_keys.sort(key=lambda c: c.category.value)
 
     for cmd in commands_with_keys:
-        category_color = COLORS['accent_blue']
+        category_color = COLORS["accent_blue"]
         print(f"  {category_color}{cmd.keybinding:20s}{COLORS['reset']} {cmd.title}")
         print(f"  {COLORS['dim']}{' ' * 20} {cmd.description}{COLORS['reset']}")
         print()
@@ -230,7 +223,7 @@ def main():
         "Score-based ranking",
         "Keyword expansion",
         "Usage statistics",
-        "< 50ms response time"
+        "< 50ms response time",
     ]
 
     for feature in features:

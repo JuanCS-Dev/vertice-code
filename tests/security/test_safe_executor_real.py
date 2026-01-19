@@ -255,8 +255,9 @@ class TestWhitelistStructure:
         """Test: Dangerous commands NOT in whitelist"""
         dangerous = ["rm", "sudo", "dd", "mkfs", "shutdown", "kill"]
         for cmd in dangerous:
-            assert cmd not in ALLOWED_COMMANDS, \
-                f"Dangerous command '{cmd}' should NOT be in whitelist"
+            assert (
+                cmd not in ALLOWED_COMMANDS
+            ), f"Dangerous command '{cmd}' should NOT be in whitelist"
 
 
 class TestGetSafeExecutorSingleton:
@@ -315,7 +316,10 @@ class TestRealWorldUseCases:
 
         assert result.success is False
         assert result.exit_code == -1
-        assert "dangerous" in result.error_message.lower() or "not allowed" in result.error_message.lower()
+        assert (
+            "dangerous" in result.error_message.lower()
+            or "not allowed" in result.error_message.lower()
+        )
 
     @pytest.mark.asyncio
     async def test_command_injection_via_semicolon_blocked(self, executor):

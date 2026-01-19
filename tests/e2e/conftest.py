@@ -1,20 +1,19 @@
-import pytest
 import asyncio
+import contextlib
+import sys
 from pathlib import Path
 from typing import Any, AsyncIterator
+
+import pytest
 from textual.pilot import Pilot
 
 # Add src to python path for imports
-import sys
-
 sys.path.insert(0, str(Path(__file__).parents[2] / "src"))
-
-from vertice_tui.app import VerticeApp  # noqa: E402
-from vertice_tui.widgets import ResponseView, StatusBar  # noqa: E402
-
 
 from vertice_core.openresponses_stream import OpenResponsesStreamBuilder  # noqa: E402
 from vertice_core.openresponses_types import TokenUsage  # noqa: E402
+from vertice_tui.app import VerticeApp  # noqa: E402
+from vertice_tui.widgets import ResponseView, StatusBar  # noqa: E402
 
 
 # Mock response generator using Open Responses protocol
@@ -230,17 +229,26 @@ def mock_bridge():
 
 
 @pytest.fixture
-async def app_instance(mock_bridge):
-    """Provides a VerticeApp instance with mock bridge."""
-    app = VerticeApp()
-    app.bridge = mock_bridge
-    return app
+def tui_harness_ctx(mock_bridge):
+    """
+    Factory fixture that returns an async context manager for the TUI harness.
 
+    Usage:
+        async def test_foo(tui_harness_ctx):
+            async with tui_harness_ctx() as harness:
+                ...
 
-@pytest.fixture
-async def tui_harness(app_instance):
-    """Provides a VerticeTUIHarness instance for E2E testing."""
-    async with app_instance.run_test() as pilot:
-        harness = VerticeTUIHarness(app_instance, pilot)
-        await harness.wait_for_ready()
-        yield harness
+    This avoids ContextVar errors by keeping the run_test context
+    inside the test function's task.
+    """
+
+    @contextlib.asynccontextmanager
+    async def _ctx():
+        app = VerticeApp()
+        app.bridge = mock_bridge
+        async with app.run_test() as pilot:
+            harness = VerticeTUIHarness(app, pilot)
+            await harness.wait_for_ready()
+            yield harness
+
+    return _ctx

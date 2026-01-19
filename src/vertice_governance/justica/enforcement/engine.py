@@ -96,41 +96,47 @@ class EnforcementEngine:
         if self.policy.block_suspended_agents:
             is_suspended, reason = self.trust_engine.check_suspension(agent_id)
             if is_suspended:
-                actions.append(EnforcementAction(
-                    action_type=ActionType.BLOCK_AGENT,
-                    target=agent_id,
-                    reason=f"Agente suspenso: {reason}",
-                    severity=Severity.CRITICAL,
-                    classification_report=classification,
-                ))
+                actions.append(
+                    EnforcementAction(
+                        action_type=ActionType.BLOCK_AGENT,
+                        target=agent_id,
+                        reason=f"Agente suspenso: {reason}",
+                        severity=Severity.CRITICAL,
+                        classification_report=classification,
+                    )
+                )
                 return actions
 
         # FASE 2: Verificar Trust Level
-        trust_factor = self.trust_engine.get_or_create_trust_factor(agent_id)
+        self.trust_engine.get_or_create_trust_factor(agent_id)
         # Trust logic can be extended here
 
         # FASE 3: Resultado SAFE - Permitir
         if classification.result == ClassificationResult.SAFE:
             self.trust_engine.record_good_action(agent_id, "Acao segura aprovada")
-            actions.append(EnforcementAction(
-                action_type=ActionType.ALLOW,
-                target=agent_id,
-                reason="Classificacao SAFE",
-                severity=Severity.INFO,
-                classification_report=classification,
-            ))
+            actions.append(
+                EnforcementAction(
+                    action_type=ActionType.ALLOW,
+                    target=agent_id,
+                    reason="Classificacao SAFE",
+                    severity=Severity.INFO,
+                    classification_report=classification,
+                )
+            )
             return actions
 
         # FASE 4: Resultado NEEDS_REVIEW - Escalar
         if classification.result == ClassificationResult.NEEDS_REVIEW:
-            actions.append(EnforcementAction(
-                action_type=ActionType.ESCALATE_TO_HUMAN,
-                target=agent_id,
-                reason="Classificacao ambigua requer revisao humana",
-                severity=classification.severity,
-                classification_report=classification,
-                metadata={"detected_patterns": classification.detected_patterns},
-            ))
+            actions.append(
+                EnforcementAction(
+                    action_type=ActionType.ESCALATE_TO_HUMAN,
+                    target=agent_id,
+                    reason="Classificacao ambigua requer revisao humana",
+                    severity=classification.severity,
+                    classification_report=classification,
+                    metadata={"detected_patterns": classification.detected_patterns},
+                )
+            )
             return actions
 
         # FASE 5: Violacao/Critico - Aplicar Politica
@@ -171,18 +177,20 @@ class EnforcementEngine:
 
         # FASE 7: Escalacao Critica Obrigatoria
         if (
-            self.policy.always_escalate_critical and
-            severity == Severity.CRITICAL and
-            ActionType.ESCALATE_TO_ADMIN not in action_types and
-            ActionType.ESCALATE_TO_HUMAN not in action_types
+            self.policy.always_escalate_critical
+            and severity == Severity.CRITICAL
+            and ActionType.ESCALATE_TO_ADMIN not in action_types
+            and ActionType.ESCALATE_TO_HUMAN not in action_types
         ):
-            actions.append(EnforcementAction(
-                action_type=ActionType.ESCALATE_TO_ADMIN,
-                target=agent_id,
-                reason="Violacao critica requer atencao administrativa",
-                severity=Severity.CRITICAL,
-                classification_report=classification,
-            ))
+            actions.append(
+                EnforcementAction(
+                    action_type=ActionType.ESCALATE_TO_ADMIN,
+                    target=agent_id,
+                    reason="Violacao critica requer atencao administrativa",
+                    severity=Severity.CRITICAL,
+                    classification_report=classification,
+                )
+            )
 
         return actions
 
@@ -248,7 +256,7 @@ class EnforcementEngine:
         """Adiciona acao ao historico."""
         self._action_history.append(action)
         if len(self._action_history) > self._max_history:
-            self._action_history = self._action_history[-self._max_history:]
+            self._action_history = self._action_history[-self._max_history :]
 
     def _notify_callbacks(self, action: EnforcementAction) -> None:
         """Notify registered callbacks."""

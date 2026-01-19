@@ -104,6 +104,8 @@ class VerticeApp(App):
         Binding("ctrl+down", "scroll_down", "Scroll Down", show=False),
     ]
 
+    AUTOCOMPLETE_DEBOUNCE_S: ClassVar[float] = 0.06
+
     # State
     is_processing: reactive[bool] = reactive(False)
 
@@ -116,6 +118,11 @@ class VerticeApp(App):
         self._pending_image = None
         self._pending_pdf = None
         self._perf_log_path = self._resolve_perf_log_path()
+        self._prompt: Input | None = None
+        self._autocomplete: AutocompleteDropdown | None = None
+        self._response_view: ResponseView | None = None
+        self._status_bar: StatusBar | None = None
+        self._token_dashboard: TokenDashboard | None = None
 
     def _resolve_perf_log_path(self) -> Path | None:
         path_str = os.getenv("VERTICE_TUI_PERF_LOG_PATH", "").strip()
@@ -171,18 +178,24 @@ class VerticeApp(App):
         self.register_theme(THEME_DARK)
         self.theme = ThemeManager.get_theme_preference()
 
+        self._autocomplete = self.query_one("#autocomplete", AutocompleteDropdown)
+        self._prompt = self.query_one("#prompt", Input)
+        self._response_view = self.query_one("#response", ResponseView)
+        self._status_bar = self.query_one(StatusBar)
+        self._token_dashboard = self.query_one("#token-dashboard", TokenDashboard)
+
         # Restore PROMETHEUS mode preference
         prometheus_enabled = ThemeManager.get_prometheus_preference()
         if prometheus_enabled:
-            status = self.query_one(StatusBar)
+            status = self._status_bar
             status.prometheus_mode = True
             self.bridge.prometheus_mode = True
 
-        response = self.query_one("#response", ResponseView)
+        response = self._response_view
         response.add_banner()
 
         # Initialize TokenDashboard with model limits
-        dashboard = self.query_one("#token-dashboard", TokenDashboard)
+        dashboard = self._token_dashboard
         model_limits = {
             "gpt-4": 128_000,
             "gpt-4-turbo": 128_000,
@@ -200,7 +213,7 @@ class VerticeApp(App):
         except (AttributeError, KeyError):
             dashboard.update_usage(0, default_limit)
 
-        status = self.query_one(StatusBar)
+        status = self._status_bar
         try:
             status.llm_connected = self.bridge.is_connected
             status.agent_count = (
@@ -248,7 +261,7 @@ class VerticeApp(App):
         except Exception as e:
             response.add_system_message(f"⚠️ Bridge init: {e}\n\nType `/help` for commands.")
 
-        self.query_one("#prompt", Input).focus()
+        self._prompt.focus()
 
         # Performance: Start background warm-up of heavy components
         # This loads providers and tool schemas without blocking the UI rendering
@@ -367,8 +380,8 @@ class VerticeApp(App):
     @on(Input.Changed, "#prompt")
     def on_input_changed(self, event: Input.Changed) -> None:
         """Handle input changes for autocomplete."""
-        text = event.value
-        autocomplete = self.query_one("#autocomplete", AutocompleteDropdown)
+        text = event.value or ""
+        autocomplete = self._autocomplete or self.query_one("#autocomplete", AutocompleteDropdown)
 
         if not text:
             autocomplete.hide()
@@ -381,32 +394,52 @@ class VerticeApp(App):
         )
 
         # Show autocomplete for / commands or @ files
-        if text.startswith("/") or has_at_trigger:
-            try:
-                completions = self.bridge.autocomplete.get_completions(text, max_results=15)
-                if completions:
-                    autocomplete.show_completions(completions)
-                else:
-                    autocomplete.hide()
-            except (AttributeError, TypeError, ValueError):
-                autocomplete.hide()
-        elif len(text) >= 2:
-            # Regular text - need at least 2 chars
-            try:
-                completions = self.bridge.autocomplete.get_completions(text, max_results=15)
-                if completions:
-                    autocomplete.show_completions(completions)
-                else:
-                    autocomplete.hide()
-            except (AttributeError, TypeError, ValueError):
-                autocomplete.hide()
+        should_autocomplete = text.startswith("/") or has_at_trigger or len(text) >= 2
+        if not should_autocomplete:
+            autocomplete.hide()
+            return
+
+        self.run_worker(
+            self._update_autocomplete_after_debounce(text),
+            name="autocomplete",
+            group="autocomplete",
+            exclusive=True,
+        )
+
+    async def _update_autocomplete_after_debounce(self, text: str) -> None:
+        """Debounced autocomplete update (keeps input handlers non-blocking)."""
+        await asyncio.sleep(self.AUTOCOMPLETE_DEBOUNCE_S)
+
+        prompt = self._prompt
+        if prompt is None or prompt.value != text:
+            return
+
+        autocomplete = self._autocomplete
+        if autocomplete is None:
+            return
+
+        try:
+            completer = self.bridge.autocomplete
+            get_completions = getattr(
+                completer, "get_completions_threadsafe", completer.get_completions
+            )
+            completions = await asyncio.to_thread(get_completions, text, 15)
+        except Exception:
+            autocomplete.hide()
+            return
+
+        if prompt.value != text:
+            return
+
+        if completions:
+            autocomplete.show_completions(completions)
         else:
             autocomplete.hide()
 
     async def on_key(self, event: events.Key) -> None:
         """Handle special keys for autocomplete navigation."""
-        autocomplete = self.query_one("#autocomplete", AutocompleteDropdown)
-        prompt = self.query_one("#prompt", Input)
+        autocomplete = self._autocomplete or self.query_one("#autocomplete", AutocompleteDropdown)
+        prompt = self._prompt or self.query_one("#prompt", Input)
 
         if not autocomplete.has_class("visible"):
             # Handle history navigation when autocomplete hidden

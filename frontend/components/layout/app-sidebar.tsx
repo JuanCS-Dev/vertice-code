@@ -3,12 +3,12 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  MessageSquare, 
-  Layers, 
-  Github, 
-  Settings, 
-  Command, 
+import {
+  MessageSquare,
+  Layers,
+  Github,
+  Settings,
+  Command,
   Activity,
   Box,
   TerminalSquare
@@ -56,8 +56,8 @@ export function AppSidebar() {
           Operations
         </div>
         {mainNav.map((item) => {
-          const isActive = item.match 
-            ? item.match.test(pathname) 
+          const isActive = item.match
+            ? item.match.test(pathname)
             : pathname === item.href;
 
           return (
@@ -66,14 +66,14 @@ export function AppSidebar() {
               href={item.href}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-200 relative overflow-hidden group/item",
-                isActive 
-                  ? "bg-accent/10 text-accent shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]" 
+                isActive
+                  ? "bg-accent/10 text-accent shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
                   : "text-muted-foreground hover:text-foreground hover:bg-white/5"
               )}
             >
               <item.icon className={cn("w-5 h-5 shrink-0", isActive && "animate-pulse-subtle")} />
               <span className="hidden md:block truncate">{item.label}</span>
-              
+
               {/* Active Indicator Line */}
               {isActive && (
                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-accent rounded-r-full shadow-[0_0_10px_var(--accent)]" />
@@ -88,7 +88,7 @@ export function AppSidebar() {
         <div className="mb-2 px-2 text-xs font-mono text-muted-foreground uppercase tracking-widest hidden md:block">
           System
         </div>
-        
+
         {secondaryNav.map((item) => (
           <Link
             key={item.href}

@@ -143,18 +143,18 @@ class PipelineTrace:
 
         for obs in self.observations:
             status = "✓" if obs.success else "✗"
-            lines.append(
-                f"  {status} {obs.stage.value}: {obs.duration_ms:.0f}ms"
-            )
+            lines.append(f"  {status} {obs.stage.value}: {obs.duration_ms:.0f}ms")
             if not obs.success:
                 lines.append(f"      ERROR: {obs.error}")
 
         if self.thinking_steps:
-            lines.extend([
-                "",
-                "THINKING PROCESS:",
-                "-" * 70,
-            ])
+            lines.extend(
+                [
+                    "",
+                    "THINKING PROCESS:",
+                    "-" * 70,
+                ]
+            )
             for step in self.thinking_steps:
                 lines.append(f"  Step {step.step_number}: {step.thought[:80]}...")
                 lines.append(f"    Confidence: {step.confidence:.1%}")
@@ -162,63 +162,72 @@ class PipelineTrace:
                     lines.append(f"    Decision: {step.decision}")
 
         if self.tasks_generated:
-            lines.extend([
-                "",
-                "TASKS GENERATED:",
-                "-" * 70,
-            ])
+            lines.extend(
+                [
+                    "",
+                    "TASKS GENERATED:",
+                    "-" * 70,
+                ]
+            )
             for i, task in enumerate(self.tasks_generated, 1):
                 lines.append(f"  {i}. {task.get('description', 'Unknown')[:60]}")
 
         if self.tools_called:
-            lines.extend([
-                "",
-                "TOOLS CALLED:",
-                "-" * 70,
-            ])
+            lines.extend(
+                [
+                    "",
+                    "TOOLS CALLED:",
+                    "-" * 70,
+                ]
+            )
             for tool in self.tools_called:
-                status = "✓" if tool.get('success') else "✗"
+                status = "✓" if tool.get("success") else "✗"
                 lines.append(
                     f"  {status} {tool.get('name', 'Unknown')}: {tool.get('duration_ms', 0):.0f}ms"
                 )
 
         if self.failure_point:
-            lines.extend([
-                "",
-                "FAILURE ANALYSIS:",
-                "-" * 70,
-                f"  Failed at: {self.failure_point.value}",
-                f"  Reason: {self.failure_reason}",
-            ])
+            lines.extend(
+                [
+                    "",
+                    "FAILURE ANALYSIS:",
+                    "-" * 70,
+                    f"  Failed at: {self.failure_point.value}",
+                    f"  Reason: {self.failure_reason}",
+                ]
+            )
 
         lines.append("=" * 70)
         return "\n".join(lines)
 
     def to_json(self) -> str:
         """Export trace as JSON."""
-        return json.dumps({
-            "trace_id": self.trace_id,
-            "prompt": self.prompt,
-            "started_at": self.started_at,
-            "completed_at": self.completed_at,
-            "total_duration_ms": self.get_total_duration(),
-            "success": self.success,
-            "failure_point": self.failure_point.value if self.failure_point else None,
-            "failure_reason": self.failure_reason,
-            "observations": [obs.to_dict() for obs in self.observations],
-            "thinking_steps": [
-                {
-                    "step": s.step_number,
-                    "thought": s.thought,
-                    "confidence": s.confidence,
-                    "decision": s.decision,
-                }
-                for s in self.thinking_steps
-            ],
-            "tasks_generated": self.tasks_generated,
-            "tools_called": self.tools_called,
-            "todos_created": self.todos_created,
-        }, indent=2)
+        return json.dumps(
+            {
+                "trace_id": self.trace_id,
+                "prompt": self.prompt,
+                "started_at": self.started_at,
+                "completed_at": self.completed_at,
+                "total_duration_ms": self.get_total_duration(),
+                "success": self.success,
+                "failure_point": self.failure_point.value if self.failure_point else None,
+                "failure_reason": self.failure_reason,
+                "observations": [obs.to_dict() for obs in self.observations],
+                "thinking_steps": [
+                    {
+                        "step": s.step_number,
+                        "thought": s.thought,
+                        "confidence": s.confidence,
+                        "decision": s.decision,
+                    }
+                    for s in self.thinking_steps
+                ],
+                "tasks_generated": self.tasks_generated,
+                "tools_called": self.tools_called,
+                "todos_created": self.todos_created,
+            },
+            indent=2,
+        )
 
 
 class PipelineObserver:
@@ -232,9 +241,7 @@ class PipelineObserver:
         self.current_trace: Optional[PipelineTrace] = None
         self.all_traces: List[PipelineTrace] = []
         self._stage_start_time: float = 0
-        self._hooks: Dict[PipelineStage, List[Callable]] = {
-            stage: [] for stage in PipelineStage
-        }
+        self._hooks: Dict[PipelineStage, List[Callable]] = {stage: [] for stage in PipelineStage}
 
     def start_trace(self, prompt: str) -> PipelineTrace:
         """Start a new pipeline trace."""
@@ -282,11 +289,7 @@ class PipelineObserver:
         )
 
     def observe_intent(
-        self,
-        text: str,
-        intent: str,
-        confidence: float,
-        alternatives: List[str] = None
+        self, text: str, intent: str, confidence: float, alternatives: List[str] = None
     ):
         """Observe intent classification stage."""
         self._observe(
@@ -299,16 +302,16 @@ class PipelineObserver:
             },
             success=confidence > 0.3,
             metadata={
-                "confidence_level": "high" if confidence > 0.8 else "medium" if confidence > 0.5 else "low"
+                "confidence_level": "high"
+                if confidence > 0.8
+                else "medium"
+                if confidence > 0.5
+                else "low"
             },
         )
 
     def observe_agent_selection(
-        self,
-        intent: str,
-        agent_id: str,
-        reason: str,
-        candidates: List[str] = None
+        self, intent: str, agent_id: str, reason: str, candidates: List[str] = None
     ):
         """Observe agent selection stage."""
         self._observe(
@@ -323,10 +326,7 @@ class PipelineObserver:
         )
 
     def observe_task_decomposition(
-        self,
-        request: str,
-        tasks: List[Dict],
-        decomposition_method: str = "unknown"
+        self, request: str, tasks: List[Dict], decomposition_method: str = "unknown"
     ):
         """Observe task decomposition stage."""
         if self.current_trace:
@@ -347,10 +347,7 @@ class PipelineObserver:
         )
 
     def observe_tool_identification(
-        self,
-        task: str,
-        tools: List[str],
-        selection_method: str = "unknown"
+        self, task: str, tools: List[str], selection_method: str = "unknown"
     ):
         """Observe tool identification stage."""
         self._observe(
@@ -362,12 +359,7 @@ class PipelineObserver:
         )
 
     def observe_llm_call(
-        self,
-        prompt: str,
-        model: str,
-        provider: str,
-        tokens_in: int = 0,
-        tokens_out: int = 0
+        self, prompt: str, model: str, provider: str, tokens_in: int = 0, tokens_out: int = 0
     ):
         """Observe LLM call stage."""
         self._observe(
@@ -394,7 +386,7 @@ class PipelineObserver:
         reasoning: str,
         confidence: float,
         alternatives: List[str] = None,
-        decision: str = None
+        decision: str = None,
     ):
         """Observe a single thinking step."""
         step = ThinkingStep(
@@ -431,12 +423,7 @@ class PipelineObserver:
         )
 
     def observe_tool_execution(
-        self,
-        tool_name: str,
-        args: Dict,
-        result: Any,
-        success: bool,
-        error: str = None
+        self, tool_name: str, args: Dict, result: Any, success: bool, error: str = None
     ):
         """Observe tool execution."""
         tool_record = {
@@ -458,12 +445,7 @@ class PipelineObserver:
             error=error,
         )
 
-    def observe_streaming_chunk(
-        self,
-        chunk_number: int,
-        content: str,
-        chunk_type: str = "text"
-    ):
+    def observe_streaming_chunk(self, chunk_number: int, content: str, chunk_type: str = "text"):
         """Observe streaming chunk."""
         self._observe(
             PipelineStage.STREAMING_CHUNK,
@@ -473,12 +455,7 @@ class PipelineObserver:
             metadata={"chunk_type": chunk_type},
         )
 
-    def observe_todo_update(
-        self,
-        action: str,
-        todo_item: Dict,
-        all_todos: List[Dict]
-    ):
+    def observe_todo_update(self, action: str, todo_item: Dict, all_todos: List[Dict]):
         """Observe todo list update."""
         if self.current_trace:
             self.current_trace.todos_created = all_todos
@@ -490,12 +467,7 @@ class PipelineObserver:
             success=True,
         )
 
-    def observe_error(
-        self,
-        stage: PipelineStage,
-        error: Exception,
-        context: Dict = None
-    ):
+    def observe_error(self, stage: PipelineStage, error: Exception, context: Dict = None):
         """Observe an error at any stage."""
         self._observe(
             PipelineStage.ERROR_OCCURRED,
@@ -521,7 +493,7 @@ class PipelineObserver:
         output_data: Any,
         success: bool,
         error: str = None,
-        metadata: Dict = None
+        metadata: Dict = None,
     ):
         """Internal method to record an observation."""
         duration = self._get_stage_duration()
@@ -590,7 +562,9 @@ class PipelineObserver:
             "total_traces": total_traces,
             "successful": total_traces - len(failed_traces),
             "failed": len(failed_traces),
-            "success_rate": (total_traces - len(failed_traces)) / total_traces if total_traces > 0 else 0,
+            "success_rate": (total_traces - len(failed_traces)) / total_traces
+            if total_traces > 0
+            else 0,
             "failures_by_stage": failures_by_stage,
         }
 

@@ -164,9 +164,7 @@ class TestSkillsConsensusManager:
             learned_at=datetime.now(),
         )
 
-        conflict = consensus_manager.resolve_skill_conflict(
-            "test_skill", local_skill, peer_skill, "peer1"
-        )
+        consensus_manager.resolve_skill_conflict("test_skill", local_skill, peer_skill, "peer1")
 
         assert len(consensus_manager.conflict_history) == 1
         assert consensus_manager.conflict_history[0].resolution_strategy == "peer_higher_score"

@@ -40,11 +40,7 @@ class TestPoolConfig:
 
     def test_custom_config(self):
         """Test custom configuration."""
-        config = PoolConfig(
-            min_size=5,
-            max_size=20,
-            acquire_timeout=10.0
-        )
+        config = PoolConfig(min_size=5, max_size=20, acquire_timeout=10.0)
 
         assert config.min_size == 5
         assert config.max_size == 20
@@ -65,6 +61,7 @@ class TestPoolStats:
     def test_stats_uptime(self):
         """Test uptime calculation."""
         import time
+
         stats = PoolStats(created_at=time.time() - 10)
 
         assert stats.uptime_seconds >= 10
@@ -80,19 +77,18 @@ class TestConnectionPool:
 
     def create_factory(self, counter):
         """Create a connection factory."""
+
         def factory():
             counter["count"] += 1
             return MockConnection(counter["count"])
+
         return factory
 
     @pytest.mark.asyncio
     async def test_pool_initialization(self, connection_counter):
         """Test pool creates min_size connections on init."""
         config = PoolConfig(min_size=3, max_size=10)
-        pool = ConnectionPool(
-            factory=self.create_factory(connection_counter),
-            config=config
-        )
+        pool = ConnectionPool(factory=self.create_factory(connection_counter), config=config)
 
         await pool.initialize()
 
@@ -105,10 +101,7 @@ class TestConnectionPool:
     async def test_acquire_and_release(self, connection_counter):
         """Test acquiring and releasing connections."""
         config = PoolConfig(min_size=1, max_size=5)
-        pool = ConnectionPool(
-            factory=self.create_factory(connection_counter),
-            config=config
-        )
+        pool = ConnectionPool(factory=self.create_factory(connection_counter), config=config)
         await pool.initialize()
 
         # Acquire connection
@@ -126,10 +119,7 @@ class TestConnectionPool:
     async def test_pool_creates_new_connections(self, connection_counter):
         """Test pool creates new connections when needed."""
         config = PoolConfig(min_size=1, max_size=5)
-        pool = ConnectionPool(
-            factory=self.create_factory(connection_counter),
-            config=config
-        )
+        pool = ConnectionPool(factory=self.create_factory(connection_counter), config=config)
         await pool.initialize()
 
         # Acquire multiple connections
@@ -151,10 +141,7 @@ class TestConnectionPool:
     async def test_pool_exhaustion(self, connection_counter):
         """Test pool exhaustion raises error."""
         config = PoolConfig(min_size=1, max_size=2, acquire_timeout=0.1)
-        pool = ConnectionPool(
-            factory=self.create_factory(connection_counter),
-            config=config
-        )
+        pool = ConnectionPool(factory=self.create_factory(connection_counter), config=config)
         await pool.initialize()
 
         # Exhaust the pool
@@ -173,10 +160,7 @@ class TestConnectionPool:
     async def test_pool_stats_tracking(self, connection_counter):
         """Test pool statistics are tracked."""
         config = PoolConfig(min_size=1, max_size=5)
-        pool = ConnectionPool(
-            factory=self.create_factory(connection_counter),
-            config=config
-        )
+        pool = ConnectionPool(factory=self.create_factory(connection_counter), config=config)
         await pool.initialize()
 
         # Initial stats
@@ -203,9 +187,7 @@ class TestConnectionPool:
 
         config = PoolConfig(min_size=1, max_size=5, validate_on_acquire=True)
         pool = ConnectionPool(
-            factory=self.create_factory(connection_counter),
-            validator=validator,
-            config=config
+            factory=self.create_factory(connection_counter), validator=validator, config=config
         )
         await pool.initialize()
 
@@ -225,9 +207,7 @@ class TestConnectionPool:
 
         config = PoolConfig(min_size=3, max_size=5)
         pool = ConnectionPool(
-            factory=self.create_factory(connection_counter),
-            closer=closer,
-            config=config
+            factory=self.create_factory(connection_counter), closer=closer, config=config
         )
         await pool.initialize()
 

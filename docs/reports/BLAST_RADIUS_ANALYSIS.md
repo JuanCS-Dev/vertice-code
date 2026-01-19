@@ -178,7 +178,7 @@ Se QUALQUER um falhar silenciosamente → estado inconsistente
 ```
 Bridge.chat(message, auto_route=True)
   ├─ routing = agents.router.route(message) ← PODE RETORNAR NONE
-  ├─ if routing → invoke_agent(agent_name) 
+  ├─ if routing → invoke_agent(agent_name)
   │  └─ agent.execute(task) ← PODE FALHAR
   │     └─ agent._call_llm() ← TIMEOUT?
   │        └─ GeminiClient.stream() ← FALHA CASCATA
@@ -210,7 +210,7 @@ AGENT_REGISTRY[agent_name].module_path = "vertice_cli.agents.executor"
 ToolBridge.registry (lazy-loaded)
   ├─ FileOperations (5 imports)
   │  └─ ImportError → silencioso
-  ├─ Terminal (9 imports)  
+  ├─ Terminal (9 imports)
   │  └─ ImportError → silencioso
   ├─ Web (6 imports)
   │  └─ ImportError → silencioso
@@ -548,7 +548,7 @@ class CircuitBreaker:
     recovery_timeout: float = 60.0
     # IMPLEMENTADO CORRETAMENTE
 
-@dataclass  
+@dataclass
 class RateLimiter:
     requests_per_minute: int = 50
     tokens_per_minute: int = 10000
@@ -583,7 +583,7 @@ Impacto: ✓ VISÍVEL
 ```
 Bridge.chat("Generate code")
   ├─ GeminiClient.stream() called (LAZY INIT)
-  │   └─ _ensure_initialized() 
+  │   └─ _ensure_initialized()
   │       └─ genai.configure(api_key) ← API UNREACHABLE
   │           └─ TIMEOUT AFTER 60s (httpx)
   ├─ TUI fica congelada por 60 segundos
@@ -728,10 +728,10 @@ Thread 2 (Agent execution):
 async def _ensure_initialized(self) -> bool:
     if self._initialized:
         return True
-    
+
     if not self.api_key:
         return False
-    
+
     try:
         import google.generativeai as genai
         # ADICIONE:
@@ -756,13 +756,13 @@ class GeminiClient:
             failure_threshold=3,
             recovery_timeout=30.0
         )
-    
+
     async def stream(self, ...):
         can_attempt, reason = self._circuit_breaker.can_attempt()
         if not can_attempt:
             yield f"Circuit open: {reason}"
             return
-        
+
         try:
             # ... stream logic ...
             self._circuit_breaker.record_success()
@@ -787,11 +787,11 @@ class HistoryManager:
     def __init__(self):
         self._context_lock = threading.RLock()
         self.context = []
-    
+
     def add_context(self, role, content):
         with self._context_lock:
             self.context.append({...})
-    
+
     def get_context(self):
         with self._context_lock:
             return copy.deepcopy(self.context)
@@ -807,7 +807,7 @@ def __init__(self):
         self._api_key_missing = True
     else:
         self._api_key_missing = False
-    
+
     # ... resto do init ...
 ```
 
@@ -847,7 +847,7 @@ async def health_check_loop(self):
             self._health_status = "ok"
         except:
             self._health_status = "degraded"
-        
+
         await asyncio.sleep(30)  # Check a cada 30s
 ```
 
@@ -859,12 +859,12 @@ class MetricsCollector:
         self.tool_exec_times = []
         self.error_count = 0
         self.timeout_count = 0
-    
+
     def record_api_call(self, duration, success):
         self.api_latencies.append(duration)
         if not success:
             self.error_count += 1
-    
+
     def get_stats(self):
         return {
             'avg_latency': statistics.mean(self.api_latencies),
@@ -923,4 +923,3 @@ class MetricsCollector:
 3. Adicionar observabilidade
 4. Testar cascatas (chaos engineering)
 5. Documentar SLAs e recovery procedures
-

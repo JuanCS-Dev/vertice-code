@@ -67,18 +67,21 @@ class DeliberationEngine:
 
         # Verificar contexto adicional
         if context.get("high_stakes"):
-            trigger_scores[DeliberationTrigger.HIGH_STAKES] = \
+            trigger_scores[DeliberationTrigger.HIGH_STAKES] = (
                 trigger_scores.get(DeliberationTrigger.HIGH_STAKES, 0) + 2
+            )
 
         if context.get("user_confused"):
-            trigger_scores[DeliberationTrigger.USER_UNCERTAINTY] = \
+            trigger_scores[DeliberationTrigger.USER_UNCERTAINTY] = (
                 trigger_scores.get(DeliberationTrigger.USER_UNCERTAINTY, 0) + 2
+            )
 
         # Verificar comprimento/complexidade
         word_count = len(user_input.split())
         if word_count > 50:  # Questão longa indica complexidade
-            trigger_scores[DeliberationTrigger.MULTI_DIMENSIONAL] = \
+            trigger_scores[DeliberationTrigger.MULTI_DIMENSIONAL] = (
                 trigger_scores.get(DeliberationTrigger.MULTI_DIMENSIONAL, 0) + 1
+            )
 
         # Decidir
         if not trigger_scores:
@@ -198,7 +201,7 @@ class DeliberationEngine:
             String formatada com insights e recomendação
         """
         output = []
-        
+
         # Cabeçalho
         output.append("🤔 DELIBERAÇÃO PROFUNDA (SISTEMA 2)\n")
         output.append("Esta questão é complexa e merece uma análise cuidadosa.\n")

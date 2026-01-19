@@ -193,7 +193,9 @@ class DarwinGodelMixin:
 
             self._save_archive()
         else:
-            logger.info(f"[DGM] Variant rejected: {improvement*100:.1f}% < {improvement_threshold*100:.1f}%")
+            logger.info(
+                f"[DGM] Variant rejected: {improvement*100:.1f}% < {improvement_threshold*100:.1f}%"
+            )
 
         result = EvolutionResult(
             new_variant=new_variant,
@@ -213,7 +215,7 @@ class DarwinGodelMixin:
 
         if random.random() < 0.7:
             sorted_archive = sorted(self._archive, key=lambda v: v.fitness, reverse=True)
-            top_half = sorted_archive[:max(1, len(sorted_archive) // 2)]
+            top_half = sorted_archive[: max(1, len(sorted_archive) // 2)]
             return random.choice(top_half)
         else:
             return random.choice(self._archive)
@@ -245,7 +247,10 @@ class DarwinGodelMixin:
                 new_strategies = parent.strategies.copy()
                 tuning_options = [
                     ("max_corrections", lambda x: min(5, x + 1)),
-                    ("quality_threshold", lambda x: max(0.5, min(0.9, x + random.uniform(-0.1, 0.1)))),
+                    (
+                        "quality_threshold",
+                        lambda x: max(0.5, min(0.9, x + random.uniform(-0.1, 0.1))),
+                    ),
                     ("review_before_submit", lambda x: not x),
                 ]
                 option = random.choice(tuning_options)
@@ -258,7 +263,12 @@ class DarwinGodelMixin:
                 modifications["description"] += f"Tuned {key}. "
 
             elif mod_type == "tool_addition":
-                new_tools = ["patch_validator", "multi_solution_ranker", "attempt_history", "test_generator"]
+                new_tools = [
+                    "patch_validator",
+                    "multi_solution_ranker",
+                    "attempt_history",
+                    "test_generator",
+                ]
                 for tool in new_tools:
                     if tool not in parent.tools:
                         modifications["tools"] = parent.tools + [tool]

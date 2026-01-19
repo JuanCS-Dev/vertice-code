@@ -1,14 +1,14 @@
 # 📚 OPEN RESPONSES - GUIA COMPLETO DE IMPLEMENTAÇÃO PARA VÉRTICE
 
-**Versão**: 1.0  
-**Data**: 16 de Janeiro de 2026  
-**Autor**: Antigravity AI Assistant  
+**Versão**: 1.0
+**Data**: 16 de Janeiro de 2026
+**Autor**: Antigravity AI Assistant
 **Para**: Desenvolvedor Sênior (Implementador Offline)
 
 ---
 
-> **NOTA IMPORTANTE**: Este documento é **100% autocontido**. Toda a documentação, schemas, 
-> exemplos e especificações necessárias estão incluídos aqui. Você NÃO precisa de acesso à 
+> **NOTA IMPORTANTE**: Este documento é **100% autocontido**. Toda a documentação, schemas,
+> exemplos e especificações necessárias estão incluídos aqui. Você NÃO precisa de acesso à
 > internet para implementar. Apenas leia, entenda e codifique.
 
 ---
@@ -434,7 +434,7 @@ import uuid
 class ItemStatus(str, Enum):
     """
     Status do ciclo de vida de um Item.
-    
+
     Spec: "Items are state machines"
     - in_progress: Model está gerando este item
     - completed: Item finalizado (TERMINAL)
@@ -450,7 +450,7 @@ class ItemStatus(str, Enum):
 class ItemType(str, Enum):
     """
     Discriminador para Item union.
-    
+
     Spec: "Items are polymorphic"
     """
     MESSAGE = "message"
@@ -462,7 +462,7 @@ class ItemType(str, Enum):
 class MessageRole(str, Enum):
     """
     Roles de mensagem.
-    
+
     Spec: "Content - User Content vs Model Content"
     """
     USER = "user"
@@ -482,7 +482,7 @@ class FinishReason(str, Enum):
 class ErrorType(str, Enum):
     """
     Tipos de erro.
-    
+
     Spec: "Errors - Error Types"
     """
     SERVER_ERROR = "server_error"
@@ -500,13 +500,13 @@ class ErrorType(str, Enum):
 class OutputTextContent:
     """
     Conteúdo de texto gerado pelo model.
-    
+
     Spec: "Model content is intentionally narrower"
     """
     type: Literal["output_text"] = "output_text"
     text: str = ""
     annotations: List[Any] = field(default_factory=list)
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
@@ -519,12 +519,12 @@ class OutputTextContent:
 class InputTextContent:
     """
     Conteúdo de texto do usuário.
-    
+
     Spec: "User content captures what the model is being asked to process"
     """
     type: Literal["input_text"] = "input_text"
     text: str = ""
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
@@ -545,9 +545,9 @@ def _generate_id(prefix: str) -> str:
 class MessageItem:
     """
     Item de mensagem.
-    
+
     Spec: "Items are polymorphic" + "Items are state machines"
-    
+
     Exemplo:
     {
         "type": "message",
@@ -562,7 +562,7 @@ class MessageItem:
     role: MessageRole = MessageRole.ASSISTANT
     status: ItemStatus = ItemStatus.IN_PROGRESS
     content: List[OutputTextContent] = field(default_factory=list)
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
@@ -571,11 +571,11 @@ class MessageItem:
             "status": self.status.value if isinstance(self.status, Enum) else self.status,
             "content": [c.to_dict() for c in self.content]
         }
-    
+
     def get_text(self) -> str:
         """Retorna todo o texto concatenado."""
         return "".join(c.text for c in self.content if hasattr(c, 'text'))
-    
+
     def append_text(self, delta: str) -> None:
         """Adiciona texto ao content."""
         if not self.content:
@@ -587,9 +587,9 @@ class MessageItem:
 class FunctionCallItem:
     """
     Item de function call.
-    
+
     Spec: "Tools - Externally-hosted tools"
-    
+
     Exemplo:
     {
         "type": "function_call",
@@ -606,7 +606,7 @@ class FunctionCallItem:
     name: str = ""
     arguments: str = ""  # JSON string
     status: ItemStatus = ItemStatus.IN_PROGRESS
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
@@ -616,7 +616,7 @@ class FunctionCallItem:
             "arguments": self.arguments,
             "status": self.status.value if isinstance(self.status, Enum) else self.status
         }
-    
+
     def get_arguments_dict(self) -> dict:
         """Parse arguments JSON."""
         import json
@@ -626,13 +626,13 @@ class FunctionCallItem:
             return {}
 
 
-@dataclass  
+@dataclass
 class FunctionCallOutputItem:
     """
     Item de output de function call.
-    
+
     Spec: "Developer envia resultado de volta"
-    
+
     Exemplo:
     {
         "type": "function_call_output",
@@ -645,7 +645,7 @@ class FunctionCallOutputItem:
     call_id: str = ""  # Correlaciona com FunctionCallItem.call_id
     output: str = ""
     status: ItemStatus = ItemStatus.COMPLETED
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
@@ -660,7 +660,7 @@ class FunctionCallOutputItem:
 class ReasoningItem:
     """
     Item de reasoning (chain-of-thought).
-    
+
     Spec: "Reasoning - Reasoning items expose the model's internal thought process"
     """
     type: Literal["reasoning"] = "reasoning"
@@ -669,7 +669,7 @@ class ReasoningItem:
     summary: List[dict] = field(default_factory=list)
     content: List[OutputTextContent] = field(default_factory=list)
     encrypted_content: Optional[str] = None
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
@@ -693,9 +693,9 @@ Item = Union[MessageItem, FunctionCallItem, FunctionCallOutputItem, ReasoningIte
 class OpenResponsesError:
     """
     Estrutura de erro.
-    
+
     Spec: "Errors"
-    
+
     Exemplo:
     {
         "type": "invalid_request_error",
@@ -708,7 +708,7 @@ class OpenResponsesError:
     code: str = "server_error"
     message: str = ""
     param: Optional[str] = None
-    
+
     def to_dict(self) -> dict:
         result = {
             "type": self.type.value if isinstance(self.type, Enum) else self.type,
@@ -730,7 +730,7 @@ class TokenUsage:
     input_tokens: int = 0
     output_tokens: int = 0
     total_tokens: int = 0
-    
+
     def to_dict(self) -> dict:
         return {
             "input_tokens": self.input_tokens,
@@ -747,9 +747,9 @@ class TokenUsage:
 class OpenResponse:
     """
     Response object principal.
-    
+
     Spec: "Response is a state machine"
-    
+
     Exemplo:
     {
         "id": "resp_abc123",
@@ -765,7 +765,7 @@ class OpenResponse:
     output: List[Item] = field(default_factory=list)
     usage: Optional[TokenUsage] = None
     error: Optional[OpenResponsesError] = None
-    
+
     def to_dict(self) -> dict:
         result = {
             "id": self.id,
@@ -778,19 +778,19 @@ class OpenResponse:
         if self.error:
             result["error"] = self.error.to_dict()
         return result
-    
+
     def add_message(self, role: MessageRole = MessageRole.ASSISTANT) -> MessageItem:
         """Adiciona novo MessageItem ao output."""
         item = MessageItem(role=role)
         self.output.append(item)
         return item
-    
+
     def add_function_call(self, name: str, arguments: str = "") -> FunctionCallItem:
         """Adiciona novo FunctionCallItem ao output."""
         item = FunctionCallItem(name=name, arguments=arguments)
         self.output.append(item)
         return item
-    
+
     def complete(self, usage: Optional[TokenUsage] = None) -> None:
         """Marca response como completo."""
         self.status = ItemStatus.COMPLETED
@@ -799,7 +799,7 @@ class OpenResponse:
                 item.status = ItemStatus.COMPLETED
         if usage:
             self.usage = usage
-    
+
     def fail(self, error: OpenResponsesError) -> None:
         """Marca response como falho."""
         self.status = ItemStatus.FAILED
@@ -813,7 +813,7 @@ class OpenResponse:
 __all__ = [
     # Enums
     "ItemStatus",
-    "ItemType", 
+    "ItemType",
     "MessageRole",
     "FinishReason",
     "ErrorType",
@@ -859,8 +859,8 @@ from typing import Optional, Generator, Any
 from dataclasses import dataclass, field
 
 from .openresponses_types import (
-    ItemStatus, 
-    MessageItem, 
+    ItemStatus,
+    MessageItem,
     FunctionCallItem,
     OpenResponse,
     TokenUsage,
@@ -876,26 +876,26 @@ from .openresponses_types import (
 class StreamEvent:
     """
     Evento base de streaming.
-    
+
     Todos os eventos têm:
     - type: Tipo do evento (usado no campo 'event' do SSE)
     - sequence_number: Número sequencial para ordenação
     """
     type: str
     sequence_number: int = 0
-    
+
     def to_dict(self) -> dict:
         """Converte para dicionário."""
         raise NotImplementedError
-    
+
     def to_sse(self) -> str:
         """
         Converte para formato Server-Sent Events.
-        
+
         Formato:
         event: <type>
         data: <json>
-        
+
         """
         data = json.dumps(self.to_dict(), ensure_ascii=False)
         return f"event: {self.type}\ndata: {data}\n\n"
@@ -909,14 +909,14 @@ class StreamEvent:
 class ResponseCreatedEvent(StreamEvent):
     """
     Evento: response.created
-    
+
     Emitido quando Response é criado.
     """
     response: dict = field(default_factory=dict)
-    
+
     def __post_init__(self):
         self.type = "response.created"
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
@@ -929,14 +929,14 @@ class ResponseCreatedEvent(StreamEvent):
 class ResponseInProgressEvent(StreamEvent):
     """
     Evento: response.in_progress
-    
+
     Emitido quando Response começa processamento.
     """
     response: dict = field(default_factory=dict)
-    
+
     def __post_init__(self):
         self.type = "response.in_progress"
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
@@ -949,14 +949,14 @@ class ResponseInProgressEvent(StreamEvent):
 class ResponseCompletedEvent(StreamEvent):
     """
     Evento: response.completed
-    
+
     Emitido quando Response finaliza com sucesso.
     """
     response: dict = field(default_factory=dict)
-    
+
     def __post_init__(self):
         self.type = "response.completed"
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
@@ -969,15 +969,15 @@ class ResponseCompletedEvent(StreamEvent):
 class ResponseFailedEvent(StreamEvent):
     """
     Evento: response.failed
-    
+
     Emitido quando Response falha.
     """
     response: dict = field(default_factory=dict)
     error: dict = field(default_factory=dict)
-    
+
     def __post_init__(self):
         self.type = "response.failed"
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
@@ -995,15 +995,15 @@ class ResponseFailedEvent(StreamEvent):
 class OutputItemAddedEvent(StreamEvent):
     """
     Evento: response.output_item.added
-    
+
     Emitido quando novo item é adicionado ao output.
     """
     output_index: int = 0
     item: dict = field(default_factory=dict)
-    
+
     def __post_init__(self):
         self.type = "response.output_item.added"
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
@@ -1017,17 +1017,17 @@ class OutputItemAddedEvent(StreamEvent):
 class ContentPartAddedEvent(StreamEvent):
     """
     Evento: response.content_part.added
-    
+
     Emitido quando content part é adicionado a um item.
     """
     item_id: str = ""
     output_index: int = 0
     content_index: int = 0
     part: dict = field(default_factory=dict)
-    
+
     def __post_init__(self):
         self.type = "response.content_part.added"
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
@@ -1043,7 +1043,7 @@ class ContentPartAddedEvent(StreamEvent):
 class OutputTextDeltaEvent(StreamEvent):
     """
     Evento: response.output_text.delta
-    
+
     Emitido para cada chunk de texto gerado.
     Este é o evento mais frequente durante streaming.
     """
@@ -1051,10 +1051,10 @@ class OutputTextDeltaEvent(StreamEvent):
     output_index: int = 0
     content_index: int = 0
     delta: str = ""
-    
+
     def __post_init__(self):
         self.type = "response.output_text.delta"
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
@@ -1070,17 +1070,17 @@ class OutputTextDeltaEvent(StreamEvent):
 class OutputTextDoneEvent(StreamEvent):
     """
     Evento: response.output_text.done
-    
+
     Emitido quando texto está completo.
     """
     item_id: str = ""
     output_index: int = 0
     content_index: int = 0
     text: str = ""
-    
+
     def __post_init__(self):
         self.type = "response.output_text.done"
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
@@ -1096,17 +1096,17 @@ class OutputTextDoneEvent(StreamEvent):
 class ContentPartDoneEvent(StreamEvent):
     """
     Evento: response.content_part.done
-    
+
     Emitido quando content part está completo.
     """
     item_id: str = ""
     output_index: int = 0
     content_index: int = 0
     part: dict = field(default_factory=dict)
-    
+
     def __post_init__(self):
         self.type = "response.content_part.done"
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
@@ -1122,15 +1122,15 @@ class ContentPartDoneEvent(StreamEvent):
 class OutputItemDoneEvent(StreamEvent):
     """
     Evento: response.output_item.done
-    
+
     Emitido quando item está completo.
     """
     output_index: int = 0
     item: dict = field(default_factory=dict)
-    
+
     def __post_init__(self):
         self.type = "response.output_item.done"
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
@@ -1144,16 +1144,16 @@ class OutputItemDoneEvent(StreamEvent):
 class FunctionCallArgumentsDeltaEvent(StreamEvent):
     """
     Evento: response.function_call_arguments.delta
-    
+
     Emitido durante streaming de argumentos de function call.
     """
     item_id: str = ""
     output_index: int = 0
     delta: str = ""
-    
+
     def __post_init__(self):
         self.type = "response.function_call_arguments.delta"
-    
+
     def to_dict(self) -> dict:
         return {
             "type": self.type,
@@ -1171,35 +1171,35 @@ class FunctionCallArgumentsDeltaEvent(StreamEvent):
 class OpenResponsesStreamBuilder:
     """
     Builder para criar streams Open Responses.
-    
+
     Uso:
         builder = OpenResponsesStreamBuilder(model="gemini-3-pro")
         builder.start()
         msg = builder.add_message()
-        
+
         for chunk in text_chunks:
             builder.text_delta(msg, chunk)
             yield builder.get_last_event_sse()
-        
+
         builder.complete()
         yield from builder.get_pending_events_sse()
         yield builder.done()
     """
-    
+
     def __init__(self, model: str):
         self.response = OpenResponse(model=model, status=ItemStatus.IN_PROGRESS)
         self._sequence = 0
         self._events: list[StreamEvent] = []
-    
+
     def _next_seq(self) -> int:
         """Incrementa e retorna próximo sequence number."""
         self._sequence += 1
         return self._sequence
-    
+
     def start(self) -> "OpenResponsesStreamBuilder":
         """
         Emite eventos iniciais (created + in_progress).
-        
+
         DEVE ser chamado primeiro.
         """
         self._events.append(ResponseCreatedEvent(
@@ -1211,22 +1211,22 @@ class OpenResponsesStreamBuilder:
             response={"id": self.response.id, "status": "in_progress"}
         ))
         return self
-    
+
     def add_message(self) -> MessageItem:
         """
         Adiciona MessageItem e emite output_item.added.
-        
+
         Retorna o item para uso posterior.
         """
         item = self.response.add_message()
         output_index = len(self.response.output) - 1
-        
+
         self._events.append(OutputItemAddedEvent(
             sequence_number=self._next_seq(),
             output_index=output_index,
             item=item.to_dict()
         ))
-        
+
         # Adiciona content_part.added para o texto
         self._events.append(ContentPartAddedEvent(
             sequence_number=self._next_seq(),
@@ -1235,20 +1235,20 @@ class OpenResponsesStreamBuilder:
             content_index=0,
             part={"type": "output_text", "annotations": [], "text": ""}
         ))
-        
+
         return item
-    
+
     def text_delta(self, item: MessageItem, delta: str) -> "OpenResponsesStreamBuilder":
         """
         Emite delta de texto para um item.
-        
+
         Args:
             item: MessageItem alvo
             delta: Chunk de texto a adicionar
         """
         item.append_text(delta)
         output_index = self.response.output.index(item)
-        
+
         self._events.append(OutputTextDeltaEvent(
             sequence_number=self._next_seq(),
             item_id=item.id,
@@ -1257,11 +1257,11 @@ class OpenResponsesStreamBuilder:
             delta=delta
         ))
         return self
-    
+
     def complete(self, usage: Optional[TokenUsage] = None) -> "OpenResponsesStreamBuilder":
         """
         Finaliza response com sucesso.
-        
+
         Emite eventos de finalização para todos os items.
         """
         # Finaliza cada item
@@ -1284,7 +1284,7 @@ class OpenResponsesStreamBuilder:
                         content_index=0,
                         part=item.content[0].to_dict()
                     ))
-            
+
             # output_item.done
             item.status = ItemStatus.COMPLETED
             self._events.append(OutputItemDoneEvent(
@@ -1292,16 +1292,16 @@ class OpenResponsesStreamBuilder:
                 output_index=idx,
                 item=item.to_dict()
             ))
-        
+
         # Finaliza response
         self.response.complete(usage)
         self._events.append(ResponseCompletedEvent(
             sequence_number=self._next_seq(),
             response=self.response.to_dict()
         ))
-        
+
         return self
-    
+
     def fail(self, error: OpenResponsesError) -> "OpenResponsesStreamBuilder":
         """
         Finaliza response com erro.
@@ -1313,34 +1313,34 @@ class OpenResponsesStreamBuilder:
             error=error.to_dict()
         ))
         return self
-    
+
     def get_events(self) -> list[StreamEvent]:
         """Retorna todos os eventos pendentes."""
         return self._events
-    
+
     def get_last_event(self) -> Optional[StreamEvent]:
         """Retorna último evento."""
         return self._events[-1] if self._events else None
-    
+
     def get_last_event_sse(self) -> str:
         """Retorna último evento em formato SSE."""
         event = self.get_last_event()
         return event.to_sse() if event else ""
-    
+
     def get_pending_events_sse(self) -> Generator[str, None, None]:
         """Gera todos os eventos pendentes em SSE."""
         for event in self._events:
             yield event.to_sse()
-    
+
     def clear_events(self) -> None:
         """Limpa lista de eventos."""
         self._events.clear()
-    
+
     @staticmethod
     def done() -> str:
         """
         Retorna evento terminal [DONE].
-        
+
         DEVE ser o último item do stream.
         """
         return "data: [DONE]\n\n"
@@ -1355,7 +1355,7 @@ __all__ = [
     "StreamEvent",
     # State Machine Events
     "ResponseCreatedEvent",
-    "ResponseInProgressEvent", 
+    "ResponseInProgressEvent",
     "ResponseCompletedEvent",
     "ResponseFailedEvent",
     # Delta Events
@@ -1385,7 +1385,7 @@ Localizar o método `get_schema` e substituir por:
 def get_schema(self) -> Dict[str, Any]:
     """
     Get tool schema for LLM tool use.
-    
+
     IMPORTANTE: Segue formato Open Responses FunctionToolParam.
     - 'required' DEVE estar no nível TOP do parameters, não dentro de properties
     """
@@ -1394,7 +1394,7 @@ def get_schema(self) -> Dict[str, Any]:
     for k, v in self.parameters.items():
         prop_copy = {key: val for key, val in v.items() if key != 'required'}
         clean_properties[k] = prop_copy
-    
+
     return {
         "name": self.name,
         "description": self.description,
@@ -1402,7 +1402,7 @@ def get_schema(self) -> Dict[str, Any]:
             "type": "object",
             "properties": clean_properties,
             "required": [
-                k for k, v in self.parameters.items() 
+                k for k, v in self.parameters.items()
                 if v.get('required', False)
             ]
         }
@@ -1411,7 +1411,7 @@ def get_schema(self) -> Dict[str, Any]:
 def to_function_tool_param(self) -> Dict[str, Any]:
     """
     Get Open Responses FunctionToolParam format.
-    
+
     Retorna:
     {
         "type": "function",
@@ -1434,7 +1434,7 @@ def to_function_tool_param(self) -> Dict[str, Any]:
 ```python
 class WriteFileTool(BaseTool):
     """Ferramenta para escrever arquivos."""
-    
+
     name = "write_file"
     description = "Write content to a file at the specified path."
     parameters = {
@@ -1444,7 +1444,7 @@ class WriteFileTool(BaseTool):
             "required": True  # Será movido para required[] no schema
         },
         "content": {
-            "type": "string", 
+            "type": "string",
             "description": "The content to write",
             "required": True
         },
@@ -1455,7 +1455,7 @@ class WriteFileTool(BaseTool):
             "required": False  # Opcional
         }
     }
-    
+
     async def execute(self, path: str, content: str, mode: str = "write") -> ToolResult:
         ...
 ```
@@ -1499,8 +1499,8 @@ Adicionar imports no topo:
 
 ```python
 from vertice_core.openresponses_types import (
-    OpenResponse, 
-    MessageItem, 
+    OpenResponse,
+    MessageItem,
     ItemStatus,
     TokenUsage,
     OpenResponsesError,
@@ -1522,36 +1522,36 @@ async def stream_open_responses(
 ) -> AsyncGenerator[str, None]:
     """
     Stream usando protocolo Open Responses.
-    
+
     Emite eventos SSE seguindo a especificação Open Responses.
-    
+
     Yields:
         str: Eventos SSE formatados
-    
+
     Exemplo de uso:
         async for event in provider.stream_open_responses(messages):
             print(event)  # event: response.output_text.delta\ndata: {...}\n\n
     """
     # Cria builder com nome do modelo
     builder = OpenResponsesStreamBuilder(model=self.model_id)
-    
+
     try:
         # Emite eventos iniciais
         builder.start()
         for event in builder.get_events():
             yield event.to_sse()
         builder.clear_events()
-        
+
         # Cria MessageItem
         message_item = builder.add_message()
         for event in builder.get_events():
             yield event.to_sse()
         builder.clear_events()
-        
+
         # Stream do conteúdo
         token_count = 0
         async for chunk in self.stream_chat(
-            messages, 
+            messages,
             system_prompt=system_prompt,
             max_tokens=max_tokens,
             temperature=temperature,
@@ -1561,7 +1561,7 @@ async def stream_open_responses(
             builder.text_delta(message_item, chunk)
             yield builder.get_last_event_sse()
             builder.clear_events()
-        
+
         # Finaliza com sucesso
         usage = TokenUsage(
             input_tokens=sum(len(m.get("content", "")) // 4 for m in messages),
@@ -1569,14 +1569,14 @@ async def stream_open_responses(
             total_tokens=0  # Será calculado
         )
         usage.total_tokens = usage.input_tokens + usage.output_tokens
-        
+
         builder.complete(usage)
         for event in builder.get_events():
             yield event.to_sse()
-        
+
         # Evento terminal
         yield builder.done()
-        
+
     except Exception as e:
         # Emite erro
         error = OpenResponsesError(
@@ -1612,14 +1612,14 @@ async def stream_open_responses(
 ) -> AsyncGenerator[str, None]:
     """
     Stream usando Open Responses com routing automático.
-    
+
     Rota para o provider apropriado e converte output para
     formato Open Responses se necessário.
     """
     decision = self.route(complexity=complexity, speed=speed)
     provider = self._providers[decision.provider_name]
     status = self._status[decision.provider_name]
-    
+
     # Verifica se provider suporta Open Responses nativamente
     if hasattr(provider, 'stream_open_responses'):
         try:
@@ -1632,23 +1632,23 @@ async def stream_open_responses(
         except Exception as e:
             status.record_error(str(e))
             # Continua para fallback
-    
+
     # Fallback: Wrap legacy stream em Open Responses
     builder = OpenResponsesStreamBuilder(model=decision.model_name)
-    
+
     try:
         # Eventos iniciais
         builder.start()
         for event in builder.get_events():
             yield event.to_sse()
         builder.clear_events()
-        
+
         # Message item
         message_item = builder.add_message()
         for event in builder.get_events():
             yield event.to_sse()
         builder.clear_events()
-        
+
         # Stream legacy
         async for chunk in provider.stream_chat(
             messages, system_prompt=system_prompt, **kwargs
@@ -1656,15 +1656,15 @@ async def stream_open_responses(
             builder.text_delta(message_item, chunk)
             yield builder.get_last_event_sse()
             builder.clear_events()
-        
+
         # Finaliza
         builder.complete()
         for event in builder.get_events():
             yield event.to_sse()
         yield builder.done()
-        
+
         status.record_request()
-        
+
     except Exception as e:
         status.record_error(str(e))
         error = OpenResponsesError(
@@ -1702,26 +1702,26 @@ Adicionar método na classe `BaseAgent`:
 
 ```python
 async def execute_open_responses(
-    self, 
+    self,
     task: AgentTask,
     previous_response_id: Optional[str] = None
 ) -> OpenResponse:
     """
     Executa task retornando formato Open Responses.
-    
+
     Args:
         task: Task a executar
         previous_response_id: ID do response anterior para continuação
-        
+
     Returns:
         OpenResponse com resultado da execução
     """
     response = OpenResponse(model=self._get_model_name())
-    
+
     try:
         # Execução padrão
         agent_response = await self.execute(task)
-        
+
         # Converte para Open Responses
         message_item = MessageItem(
             role=MessageRole.ASSISTANT,
@@ -1730,9 +1730,9 @@ async def execute_open_responses(
         )
         response.output.append(message_item)
         response.status = ItemStatus.COMPLETED
-        
+
         self.logger.info(f"Open Responses execution completed: {response.id}")
-        
+
     except CapabilityViolationError as e:
         response.status = ItemStatus.FAILED
         response.error = OpenResponsesError(
@@ -1741,7 +1741,7 @@ async def execute_open_responses(
             message=str(e)
         )
         self.logger.error(f"Capability violation: {e}")
-        
+
     except Exception as e:
         response.status = ItemStatus.FAILED
         response.error = OpenResponsesError(
@@ -1750,7 +1750,7 @@ async def execute_open_responses(
             message=str(e)
         )
         self.logger.error(f"Execution failed: {e}", exc_info=True)
-    
+
     return response
 
 def _get_model_name(self) -> str:
@@ -1792,7 +1792,7 @@ from vertice_core.openresponses_types import (
 
 class TestItemStatus:
     """Testes para ItemStatus enum."""
-    
+
     def test_values(self):
         assert ItemStatus.IN_PROGRESS.value == "in_progress"
         assert ItemStatus.COMPLETED.value == "completed"
@@ -1802,7 +1802,7 @@ class TestItemStatus:
 
 class TestMessageItem:
     """Testes para MessageItem."""
-    
+
     def test_creation(self):
         item = MessageItem()
         assert item.type == "message"
@@ -1810,20 +1810,20 @@ class TestMessageItem:
         assert item.role == MessageRole.ASSISTANT
         assert item.status == ItemStatus.IN_PROGRESS
         assert item.content == []
-    
+
     def test_to_dict(self):
         item = MessageItem(role=MessageRole.USER)
         d = item.to_dict()
         assert d["type"] == "message"
         assert d["role"] == "user"
         assert d["status"] == "in_progress"
-    
+
     def test_append_text(self):
         item = MessageItem()
         item.append_text("Hello")
         item.append_text(" World")
         assert item.get_text() == "Hello World"
-    
+
     def test_get_text_empty(self):
         item = MessageItem()
         assert item.get_text() == ""
@@ -1831,19 +1831,19 @@ class TestMessageItem:
 
 class TestFunctionCallItem:
     """Testes para FunctionCallItem."""
-    
+
     def test_creation(self):
         item = FunctionCallItem(name="get_weather", arguments='{"location":"SF"}')
         assert item.type == "function_call"
         assert item.id.startswith("fc_")
         assert item.name == "get_weather"
         assert item.arguments == '{"location":"SF"}'
-    
+
     def test_get_arguments_dict(self):
         item = FunctionCallItem(arguments='{"location":"SF","unit":"celsius"}')
         args = item.get_arguments_dict()
         assert args == {"location": "SF", "unit": "celsius"}
-    
+
     def test_get_arguments_dict_invalid(self):
         item = FunctionCallItem(arguments='not json')
         assert item.get_arguments_dict() == {}
@@ -1851,37 +1851,37 @@ class TestFunctionCallItem:
 
 class TestOpenResponse:
     """Testes para OpenResponse."""
-    
+
     def test_creation(self):
         resp = OpenResponse(model="gemini-3-pro")
         assert resp.id.startswith("resp_")
         assert resp.status == ItemStatus.IN_PROGRESS
         assert resp.model == "gemini-3-pro"
         assert resp.output == []
-    
+
     def test_add_message(self):
         resp = OpenResponse()
         msg = resp.add_message()
         assert len(resp.output) == 1
         assert isinstance(msg, MessageItem)
-    
+
     def test_add_function_call(self):
         resp = OpenResponse()
         fc = resp.add_function_call("my_tool", '{"arg": 1}')
         assert len(resp.output) == 1
         assert isinstance(fc, FunctionCallItem)
         assert fc.name == "my_tool"
-    
+
     def test_complete(self):
         resp = OpenResponse()
         msg = resp.add_message()
         usage = TokenUsage(input_tokens=10, output_tokens=20, total_tokens=30)
         resp.complete(usage)
-        
+
         assert resp.status == ItemStatus.COMPLETED
         assert msg.status == ItemStatus.COMPLETED
         assert resp.usage == usage
-    
+
     def test_fail(self):
         resp = OpenResponse()
         error = OpenResponsesError(
@@ -1890,16 +1890,16 @@ class TestOpenResponse:
             message="Test failed"
         )
         resp.fail(error)
-        
+
         assert resp.status == ItemStatus.FAILED
         assert resp.error == error
-    
+
     def test_to_dict(self):
         resp = OpenResponse(model="test-model")
         msg = resp.add_message()
         msg.append_text("Hello")
         resp.complete()
-        
+
         d = resp.to_dict()
         assert d["id"].startswith("resp_")
         assert d["status"] == "completed"
@@ -1926,64 +1926,64 @@ from vertice_core.openresponses_types import TokenUsage
 
 class TestStreamBuilder:
     """Testes para OpenResponsesStreamBuilder."""
-    
+
     def test_creation(self):
         builder = OpenResponsesStreamBuilder(model="gemini-3-pro")
         assert builder.response.model == "gemini-3-pro"
         assert builder._sequence == 0
-    
+
     def test_start(self):
         builder = OpenResponsesStreamBuilder(model="test")
         builder.start()
-        
+
         events = builder.get_events()
         assert len(events) == 2
         assert events[0].type == "response.created"
         assert events[1].type == "response.in_progress"
-    
+
     def test_add_message(self):
         builder = OpenResponsesStreamBuilder(model="test")
         builder.start()
         builder.clear_events()
-        
+
         msg = builder.add_message()
-        
+
         events = builder.get_events()
         assert len(events) == 2  # output_item.added + content_part.added
         assert events[0].type == "response.output_item.added"
         assert events[1].type == "response.content_part.added"
-    
+
     def test_text_delta(self):
         builder = OpenResponsesStreamBuilder(model="test")
         builder.start()
         msg = builder.add_message()
         builder.clear_events()
-        
+
         builder.text_delta(msg, "Hello")
-        
+
         events = builder.get_events()
         assert len(events) == 1
         assert events[0].type == "response.output_text.delta"
         assert events[0].delta == "Hello"
-    
+
     def test_complete(self):
         builder = OpenResponsesStreamBuilder(model="test")
         builder.start()
         msg = builder.add_message()
         builder.text_delta(msg, "Hello World")
         builder.clear_events()
-        
+
         usage = TokenUsage(input_tokens=5, output_tokens=10, total_tokens=15)
         builder.complete(usage)
-        
+
         events = builder.get_events()
         # output_text.done, content_part.done, output_item.done, response.completed
         assert events[-1].type == "response.completed"
-    
+
     def test_done(self):
         done = OpenResponsesStreamBuilder.done()
         assert done == "data: [DONE]\n\n"
-    
+
     def test_sse_format(self):
         event = OutputTextDeltaEvent(
             sequence_number=5,
@@ -1992,16 +1992,16 @@ class TestStreamBuilder:
             content_index=0,
             delta="Test"
         )
-        
+
         sse = event.to_sse()
         assert "event: response.output_text.delta" in sse
         assert "data:" in sse
-        
+
         # Parse data
         lines = sse.strip().split("\n")
         data_line = [l for l in lines if l.startswith("data:")][0]
         data = json.loads(data_line[5:].strip())
-        
+
         assert data["type"] == "response.output_text.delta"
         assert data["sequence_number"] == 5
         assert data["delta"] == "Test"
@@ -2009,36 +2009,36 @@ class TestStreamBuilder:
 
 class TestFullStream:
     """Teste de stream completo."""
-    
+
     def test_full_stream_sequence(self):
         builder = OpenResponsesStreamBuilder(model="gemini-3-pro")
-        
+
         # Coleta todos os eventos SSE
         all_sse = []
-        
+
         builder.start()
         all_sse.extend([e.to_sse() for e in builder.get_events()])
         builder.clear_events()
-        
+
         msg = builder.add_message()
         all_sse.extend([e.to_sse() for e in builder.get_events()])
         builder.clear_events()
-        
+
         for chunk in ["Hello", " ", "World", "!"]:
             builder.text_delta(msg, chunk)
             all_sse.append(builder.get_last_event_sse())
             builder.clear_events()
-        
+
         builder.complete()
         all_sse.extend([e.to_sse() for e in builder.get_events()])
         all_sse.append(builder.done())
-        
+
         # Verifica sequência
         assert "response.created" in all_sse[0]
         assert "response.in_progress" in all_sse[1]
         assert "output_item.added" in all_sse[2]
         assert "[DONE]" in all_sse[-1]
-        
+
         # Verifica que msg tem texto completo
         assert msg.get_text() == "Hello World!"
 ```
@@ -2063,18 +2063,18 @@ async def test_provider_stream_open_responses():
         from vertice_cli.core.providers.vertex_ai import VertexAIProvider
     except ImportError:
         pytest.skip("VertexAIProvider not available")
-    
+
     provider = VertexAIProvider(model_name="flash")
-    
+
     if not provider.is_available():
         pytest.skip("Vertex AI not configured")
-    
+
     messages = [{"role": "user", "content": "Say hello in one word."}]
-    
+
     events = []
     async for event in provider.stream_open_responses(messages):
         events.append(event)
-    
+
     # Verifica eventos básicos
     assert any("response.created" in e for e in events)
     assert any("response.output_text.delta" in e for e in events)
@@ -2089,19 +2089,19 @@ async def test_router_stream_open_responses():
         from vertice_cli.core.providers.vertice_router import VerticeRouter
     except ImportError:
         pytest.skip("VerticeRouter not available")
-    
+
     router = VerticeRouter()
-    
+
     available = router.get_available_providers()
     if not available:
         pytest.skip("No providers available")
-    
+
     messages = [{"role": "user", "content": "Count to 3."}]
-    
+
     events = []
     async for event in router.stream_open_responses(messages):
         events.append(event)
-    
+
     assert len(events) > 0
     assert "[DONE]" in events[-1]
 ```
@@ -2240,8 +2240,8 @@ pytest tests/ --cov=vertice_core --cov-report=html
 
 **FIM DO DOCUMENTO**
 
-Autor: Antigravity AI Assistant  
-Data: 16 de Janeiro de 2026  
+Autor: Antigravity AI Assistant
+Data: 16 de Janeiro de 2026
 Versão: 1.0
 
 
@@ -2268,7 +2268,7 @@ class LLMClientWithOpenResponsesProtocol(LLMClientWithChatProtocol, Protocol):
     ) -> AsyncIterator[str]:
         """
         Stream using Open Responses protocol.
-        
+
         Yields SSE-formatted events:
         - event: response.created
         - event: response.output_text.delta
@@ -2292,11 +2292,11 @@ class OpenResponsesAgentProtocol(AgentProtocol, Protocol):
     ) -> Any:  # Returns OpenResponse
         """
         Execute task returning Open Responses format.
-        
+
         Args:
             task: Task to execute
             previous_response_id: ID of previous response for context resumption
-            
+
         Returns:
             OpenResponse object
         """
@@ -2320,17 +2320,17 @@ Adicionar após `stream_vertex_response` function (~linha 250):
 
 ```python
 async def stream_vertex_response_open_responses(
-    request: ChatRequest, 
+    request: ChatRequest,
     session_id: Optional[str] = None
 ):
     """
     Stream Vertex AI response using Open Responses protocol.
-    
+
     Alternative to Vercel AI SDK protocol for Open Responses compatibility.
-    
+
     Events emitted:
     - response.created
-    - response.in_progress  
+    - response.in_progress
     - response.output_item.added
     - response.output_text.delta (repeated)
     - response.output_text.done
@@ -2347,58 +2347,58 @@ async def stream_vertex_response_open_responses(
         format_output_item_done,
         format_response_completed,
     )
-    
+
     project_id = os.getenv("GOOGLE_CLOUD_PROJECT", "vertice-ai")
     location = os.getenv("VERTEX_AI_LOCATION", "global")
-    
+
     # Initialize
     vertexai.init(project=project_id, location=location)
     model_name = request.model or DEFAULT_MODEL
-    
+
     # Generate IDs
     response_id = f"resp_{uuid.uuid4().hex[:24]}"
     message_id = f"msg_{uuid.uuid4().hex[:24]}"
     sequence = 0
-    
+
     def next_seq():
         nonlocal sequence
         sequence += 1
         return sequence
-    
+
     try:
         model = GenerativeModel(model_name)
         history = convert_messages_to_vertex(request.messages[:-1])
         user_message = request.messages[-1].get("content", "")
-        
+
         # Emit initial events
         yield format_response_created(response_id, model_name, next_seq())
         yield format_response_in_progress(response_id, next_seq())
         yield format_output_item_added(message_id, "assistant", 0, next_seq())
-        
+
         # Stream content
         chat = model.start_chat(history=history)
         response = await chat.send_message_async(
             user_message,
             stream=True,
         )
-        
+
         full_text = ""
         async for chunk in response:
             if chunk.text:
                 full_text += chunk.text
                 yield format_output_text_delta(message_id, chunk.text, 0, 0, next_seq())
-        
+
         # Finalize
         yield format_output_text_done(message_id, full_text, 0, 0, next_seq())
         yield format_output_item_done(message_id, "message", "assistant", full_text, 0, next_seq())
-        
+
         usage = {
             "input_tokens": sum(len(m.get("content", "")) // 4 for m in request.messages),
             "output_tokens": len(full_text) // 4,
         }
         yield format_response_completed(response_id, usage, next_seq())
         yield "data: [DONE]\n\n"
-        
+
     except Exception as e:
         from app.core.stream_protocol import format_response_failed
         yield format_response_failed(response_id, str(e), next_seq())
@@ -2414,7 +2414,7 @@ async def chat_endpoint(
     authorization: Optional[str] = Header(None),
 ):
     # ... authentication code ...
-    
+
     # Choose stream protocol based on feature flag
     if settings.USE_OPEN_RESPONSES:
         stream_generator = stream_vertex_response_open_responses(request, session_id)
@@ -2433,7 +2433,7 @@ async def chat_endpoint(
             "Cache-Control": "no-cache, no-store, must-revalidate",
             "Connection": "keep-alive",
         }
-    
+
     return StreamingResponse(
         stream_generator,
         media_type=content_type,
@@ -2459,22 +2459,22 @@ from typing import Optional
 
 class Settings(BaseSettings):
     """Application settings loaded from environment."""
-    
+
     # Database
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./vertice.db")
-    
+
     # Google Cloud
     GOOGLE_CLOUD_PROJECT: str = os.getenv("GOOGLE_CLOUD_PROJECT", "vertice-ai")
     VERTEX_AI_LOCATION: str = os.getenv("VERTEX_AI_LOCATION", "global")
-    
+
     # Feature Flags
     USE_OPEN_RESPONSES: bool = os.getenv(
         "VERTICE_USE_OPEN_RESPONSES", "false"
     ).lower() == "true"
-    
+
     # Logging
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
-    
+
     class Config:
         env_file = ".env"
         case_sensitive = True
@@ -2619,17 +2619,17 @@ class OpenResponsesEvent:
     event_type: str
     sequence_number: int
     data: Dict[str, Any]
-    
+
     @property
     def is_text_delta(self) -> bool:
         return self.event_type == "response.output_text.delta"
-    
+
     @property
     def delta_text(self) -> str:
         if self.is_text_delta:
             return self.data.get("delta", "")
         return ""
-    
+
     @property
     def is_done(self) -> bool:
         return self.event_type == "response.completed"
@@ -2637,17 +2637,17 @@ class OpenResponsesEvent:
 
 class LLMClient:
     # ... existing code ...
-    
+
     async def stream_open_responses(
-        self, 
+        self,
         messages: list,
         **kwargs
     ) -> AsyncIterator[OpenResponsesEvent]:
         """
         Stream with Open Responses protocol parsing.
-        
+
         Parses SSE events and yields structured OpenResponsesEvent objects.
-        
+
         Usage:
             async for event in client.stream_open_responses(messages):
                 if event.is_text_delta:
@@ -2656,23 +2656,23 @@ class LLMClient:
                     print("\\nCompleted!")
         """
         current_event_type = None
-        
+
         async for line in self._stream_raw_sse(messages, **kwargs):
             line = line.strip()
-            
+
             if not line:
                 continue
-            
+
             if line.startswith("event:"):
                 current_event_type = line[7:].strip()
-            
+
             elif line.startswith("data:"):
                 data_str = line[5:].strip()
-                
+
                 # Terminal event
                 if data_str == "[DONE]":
                     break
-                
+
                 try:
                     data = json.loads(data_str)
                     yield OpenResponsesEvent(
@@ -2682,11 +2682,11 @@ class LLMClient:
                     )
                 except json.JSONDecodeError:
                     continue
-    
+
     async def _stream_raw_sse(self, messages: list, **kwargs) -> AsyncIterator[str]:
         """
         Raw SSE line streaming. Override in subclasses.
-        
+
         Should yield individual lines from the SSE stream.
         """
         # Implementation depends on the underlying HTTP client
@@ -2708,11 +2708,11 @@ from vertice_tui.core.llm_client import OpenResponsesEvent
 
 class ResponseView:
     # ... existing code ...
-    
+
     async def stream_response_open_responses(self, messages: list):
         """Stream response using Open Responses protocol."""
         self.clear()
-        
+
         async for event in self.llm_client.stream_open_responses(messages):
             if event.is_text_delta:
                 self.append_text(event.delta_text)
@@ -2739,15 +2739,15 @@ import os
 def stream_protocol(request):
     """Fixture to test both streaming protocols."""
     protocol = request.param
-    
+
     # Set environment variable for each test
     if protocol == "open_responses":
         os.environ["VERTICE_USE_OPEN_RESPONSES"] = "true"
     else:
         os.environ["VERTICE_USE_OPEN_RESPONSES"] = "false"
-    
+
     yield protocol
-    
+
     # Cleanup
     os.environ.pop("VERTICE_USE_OPEN_RESPONSES", None)
 
@@ -2759,11 +2759,11 @@ async def test_chat_streaming(stream_protocol, async_client):
         "/api/v1/chat",
         json={"messages": [{"role": "user", "content": "Say hello"}], "stream": True}
     )
-    
+
     assert response.status_code == 200
-    
+
     content = await response.aread()
-    
+
     if stream_protocol == "open_responses":
         # Verify Open Responses format
         assert b"event: response.created" in content
@@ -2782,20 +2782,20 @@ async def test_chat_streaming(stream_protocol, async_client):
 async def test_open_responses_event_sequence():
     """Verify correct event sequence in Open Responses stream."""
     os.environ["VERTICE_USE_OPEN_RESPONSES"] = "true"
-    
+
     # ... test code ...
-    
+
     events = parse_sse_events(content)
-    
+
     # Verify sequence
     event_types = [e["type"] for e in events]
-    
+
     assert event_types[0] == "response.created"
     assert event_types[1] == "response.in_progress"
     assert "response.output_item.added" in event_types
     assert "response.output_text.delta" in event_types
     assert event_types[-1] == "response.completed"
-    
+
     # Verify sequence numbers are monotonically increasing
     seq_numbers = [e["sequence_number"] for e in events]
     assert seq_numbers == sorted(seq_numbers)

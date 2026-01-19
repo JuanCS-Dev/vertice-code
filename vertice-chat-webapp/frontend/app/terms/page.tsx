@@ -12,7 +12,7 @@ const SECTIONS = [
         icon: FileText,
         iconColor: 'text-cyan-400',
         title: '1. Acceptance of Terms',
-        content: `By accessing or using Vertice Code ("Service"), you agree to be bound by these Terms of Service ("Terms"). 
+        content: `By accessing or using Vertice Code ("Service"), you agree to be bound by these Terms of Service ("Terms").
     If you do not agree, do not use the Service. We reserve the right to update these Terms at any time.`,
     },
     {
@@ -20,7 +20,7 @@ const SECTIONS = [
         icon: Scale,
         iconColor: 'text-green-400',
         title: '2. License Grant',
-        content: `We grant you a limited, non-exclusive, non-transferable, revocable license to use the Service for your 
+        content: `We grant you a limited, non-exclusive, non-transferable, revocable license to use the Service for your
     internal business or personal purposes. This license does not include the right to sublicense, resell, or redistribute the Service.`,
     },
     {
@@ -41,7 +41,7 @@ const SECTIONS = [
         icon: CreditCard,
         iconColor: 'text-blue-400',
         title: '4. Billing & Payments',
-        content: `Paid subscriptions are billed in advance on a monthly or annual basis. All fees are non-refundable except 
+        content: `Paid subscriptions are billed in advance on a monthly or annual basis. All fees are non-refundable except
     as required by law. We use Stripe for payment processing. You are responsible for providing accurate billing information.`,
     },
     {
@@ -49,8 +49,8 @@ const SECTIONS = [
         icon: XCircle,
         iconColor: 'text-red-400',
         title: '5. Termination',
-        content: `We may suspend or terminate your access at any time for violation of these Terms or for any other reason 
-    with 30 days notice. Upon termination, your right to use the Service ceases immediately. You may export your data 
+        content: `We may suspend or terminate your access at any time for violation of these Terms or for any other reason
+    with 30 days notice. Upon termination, your right to use the Service ceases immediately. You may export your data
     before termination via our GDPR endpoints.`,
     },
 ];

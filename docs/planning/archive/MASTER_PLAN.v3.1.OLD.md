@@ -1,8 +1,8 @@
 # 🏆 QWEN-DEV-CLI: BRUTALLY HONEST MASTER PLAN v3.1 (MERGED)
 
-**Updated:** 2025-11-18 13:15 UTC  
-**Current Status:** 60-65% paridade com GitHub Copilot CLI 🔥  
-**Target:** 90% paridade  
+**Updated:** 2025-11-18 13:15 UTC
+**Current Status:** 60-65% paridade com GitHub Copilot CLI 🔥
+**Target:** 90% paridade
 **Time Needed:** 12-15 dias restantes (deadline: Nov 30)
 
 > **MERGE NOTE:** Este documento consolida v2.0 (planejamento detalhado) + v3.0 (progresso real implementado)
@@ -63,7 +63,7 @@ Tarefas:
   - [x] Temperature guidelines (0.1-0.3)
   - [x] Success target: 80%+
 
-**LOC:** 1,544 (best of Google + OpenAI + Anthropic!) 🔥  
+**LOC:** 1,544 (best of Google + OpenAI + Anthropic!) 🔥
 **Critério:** ✅ 80%+ tool calls corretos (validated in Phase 2)
 
 ---
@@ -91,7 +91,7 @@ Tarefas:
 - [x] Testes: 11/11 passing
 - [x] **ADDED:** arguments → args normalization
 
-**LOC:** 648 (production-grade parser!) 🔥  
+**LOC:** 648 (production-grade parser!) 🔥
 **Critério:** ✅ 95%+ parse success rate (validated in Phase 2)
 
 ---
@@ -115,7 +115,7 @@ Tarefas:
 - [ ] **TODO:** Full telemetria dashboard [PENDING]
 - [ ] **TODO:** Token counting + context window mgmt [PENDING]
 
-**LOC:** 470 (needs +150 for complete production features)  
+**LOC:** 470 (needs +150 for complete production features)
 **Critério:** 99%+ uptime, <2s latency [PARTIAL - works but can be enhanced]
 
 **NOTE:** Phase 1.3 can be completed in Phase 3-4 (não é bloqueador crítico)
@@ -158,8 +158,8 @@ Tarefas COMPLETADAS:
   - [x] **5/5 tests passing** ✅
   - [x] **End-to-end test passing** ✅
 
-**LOC:** 1,049 (production-grade integration!)  
-**Tests:** 20/20 passing (100%!) 🔥  
+**LOC:** 1,049 (production-grade integration!)
+**Tests:** 20/20 passing (100%!) 🔥
 **Critério:** ✅ 100% dangerous commands blocked
 
 ---
@@ -199,8 +199,8 @@ Tarefas:
   - [x] Support both "args" and "arguments"
   - [x] Backward compatibility
 
-**LOC:** +152 (shell_bridge), research: 486  
-**Tests:** 20/20 passing (100%!) 🔥  
+**LOC:** +152 (shell_bridge), research: 486
+**Tests:** 20/20 passing (100%!) 🔥
 **Critério:** ✅ All tools registered, <200ms execution latency
 
 ---
@@ -233,8 +233,8 @@ Tarefas COMPLETADAS:
   - [x] Dashboard-ready export
   - [x] **5/5 tests passing** ✅
 
-**LOC:** 540 (production-grade defense + monitoring!)  
-**Tests:** 10/10 passing (100%!) 🔥  
+**LOC:** 540 (production-grade defense + monitoring!)
+**Tests:** 10/10 passing (100%!) 🔥
 **Critério:** ✅ Prompt injection defense + rate limiting + monitoring active
 
 **Constitutional Adherence:**
@@ -271,7 +271,7 @@ Tarefas:
   - [ ] Persistence (save/load)
 - [ ] **TODO:** Tool result feedback loop
   - [ ] Previous commands → LLM
-  - [ ] Previous results → LLM  
+  - [ ] Previous results → LLM
   - [ ] Previous errors → LLM
   - [ ] Success/failure → next action
 - [ ] **TODO:** Error correction mechanism
@@ -286,7 +286,7 @@ Tarefas:
   - [ ] Errors trigger corrections
   - [ ] State transitions valid
 
-**LOC:** ~600 (new conversation.py + shell.py enhancements)  
+**LOC:** ~600 (new conversation.py + shell.py enhancements)
 **Critério:** Context mantido por 10+ turnos, auto-correction works
 
 **Constitutional Adherence:**
@@ -330,7 +330,7 @@ Tarefas:
   - [ ] Correções que funcionaram
   - [ ] Padrões de falha
 
-**LOC:** ~500  
+**LOC:** ~500
 **Critério:** 70%+ auto-recovery success
 
 **Constitutional Adherence:**
@@ -371,7 +371,7 @@ Tarefas:
   - [ ] Commit/Rollback
   - [ ] State checkpoints
 
-**LOC:** ~600  
+**LOC:** ~600
 **Critério:** Workflows com 5+ steps funcionam
 
 **Constitutional Adherence:**
@@ -396,7 +396,7 @@ Tarefas:
 - [ ] Common patterns detection
 - [ ] Personalization
 
-**LOC:** ~400  
+**LOC:** ~400
 **Critério:** Sugestões úteis 60%+ das vezes
 
 ---
@@ -415,7 +415,7 @@ Tarefas:
 - [ ] Exemplos práticos
 - [ ] Break-down de comandos complexos
 
-**LOC:** ~300  
+**LOC:** ~300
 **Critério:** Explicações claras e úteis
 
 ---
@@ -432,7 +432,7 @@ Tarefas:
 - [ ] Context pre-loading
 - [ ] Lazy tool loading
 
-**LOC:** ~200 (espalhados)  
+**LOC:** ~200 (espalhados)
 **Critério:** <2s latency p95
 
 ---
@@ -452,7 +452,7 @@ Tarefas:
 - [ ] Language/framework detection
 - [ ] Environment variables awareness
 
-**LOC:** ~350  
+**LOC:** ~350
 **Critério:** Context relevante sempre disponível
 
 ---
@@ -513,7 +513,7 @@ Tarefas:
   - [ ] Real-time updates
   - [ ] Historical trends
 
-**LOC:** +150  
+**LOC:** +150
 **Critério:** All 3 metrics calculated correctly, dashboard-ready
 
 ---
@@ -581,22 +581,22 @@ class StreamChunk:
 
 class StreamEngine:
     """Engine de streaming assíncrono.
-    
+
     Producer: Worker threads leem stdout/stderr
     Consumer: UI thread renderiza em tempo real
     """
-    
+
     def __init__(self):
         self.queue: asyncio.Queue[StreamChunk] = asyncio.Queue()
         self.active_processes: Dict[str, Process] = {}
-    
+
     async def execute_streaming(
         self,
         command: str,
         process_id: str
     ) -> AsyncGenerator[StreamChunk, None]:
         """Execute command with real-time streaming.
-        
+
         Boris Cherny: Async generators for backpressure control.
         """
         process = await asyncio.create_subprocess_shell(
@@ -604,9 +604,9 @@ class StreamEngine:
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
-        
+
         self.active_processes[process_id] = process
-        
+
         # Producer: Read stdout line-by-line
         async def read_stdout():
             async for line in process.stdout:
@@ -617,7 +617,7 @@ class StreamEngine:
                     process_id=process_id
                 )
                 await self.queue.put(chunk)
-        
+
         # Producer: Read stderr line-by-line
         async def read_stderr():
             async for line in process.stderr:
@@ -628,7 +628,7 @@ class StreamEngine:
                     process_id=process_id
                 )
                 await self.queue.put(chunk)
-        
+
         # Start both readers in parallel
         await asyncio.gather(
             read_stdout(),
@@ -642,20 +642,20 @@ class StreamEngine:
 ```python
 class RealtimeRenderer:
     """UI thread - NUNCA bloqueia em I/O.
-    
+
     Cursor pattern: Optimistic UI + Background processing
     """
-    
+
     def __init__(self):
         self.console = Console()
         self.active_spinners: Dict[str, Spinner] = {}
-    
+
     async def render_stream(
         self,
         engine: StreamEngine
     ):
         """Consume stream and render em tempo real."""
-        
+
         while True:
             try:
                 # Non-blocking get with timeout
@@ -663,7 +663,7 @@ class RealtimeRenderer:
                     engine.queue.get(),
                     timeout=0.1
                 )
-                
+
                 # Render imediatamente (linha-por-linha)
                 if chunk.source == "stdout":
                     self.console.print(chunk.content, end="")
@@ -672,7 +672,7 @@ class RealtimeRenderer:
                         f"[red]{chunk.content}[/red]",
                         end=""
                     )
-                
+
             except asyncio.TimeoutError:
                 # Update spinners while waiting
                 self._update_spinners()
@@ -684,20 +684,20 @@ class RealtimeRenderer:
 ```python
 class ConcurrentRenderer:
     """Gerencia múltiplos processos paralelos.
-    
+
     Cursor pattern: Múltiplos streams sem glitch visual
     """
-    
+
     def __init__(self):
         self.lock = asyncio.Lock()  # Mutex para UI
         self.process_views: Dict[str, ProcessView] = {}
-    
+
     async def render_parallel_streams(
         self,
         processes: List[str]
     ):
         """Renderiza N processos em paralelo."""
-        
+
         async with self.lock:
             # Create visual sections for each process
             for pid in processes:
@@ -705,19 +705,19 @@ class ConcurrentRenderer:
                     title=f"Process {pid}",
                     live=Live(auto_refresh=True)
                 )
-        
+
         # Render each stream in parallel
         tasks = [
             self._render_process_stream(pid)
             for pid in processes
         ]
-        
+
         await asyncio.gather(*tasks)
-    
+
     async def _render_process_stream(self, pid: str):
         """Render single process stream (thread-safe)."""
         view = self.process_views[pid]
-        
+
         async for chunk in self.engine.stream(pid):
             async with self.lock:  # Race condition protection
                 view.append(chunk.content)
@@ -730,29 +730,29 @@ class ConcurrentRenderer:
 ```python
 class OptimisticUI:
     """Feedback visual imediato.
-    
+
     Claude Code pattern: Mostrar intenção antes de execução
     """
-    
+
     async def execute_with_feedback(
         self,
         command: str
     ):
         """Execute with immediate visual feedback."""
-        
+
         # 1. IMMEDIATE: Show what we're about to do
         with self.console.status(
             f"[bold blue]Executing:[/] {command}"
         ) as status:
-            
+
             # 2. BACKGROUND: Actually execute
             result = await self.engine.execute_streaming(command)
-            
+
             # 3. REAL-TIME: Stream output as it comes
             async for chunk in result:
                 self.console.print(chunk.content, end="")
                 status.update(f"Running... (line {chunk.line_number})")
-        
+
         # 4. FINAL: Show completion
         self.console.print("[green]✓[/green] Complete")
 ```
@@ -1026,8 +1026,8 @@ Com 1 desenvolvedor full-time:
 
 ## 🎯 PRÓXIMO PASSO IMEDIATO (2025-11-18 00:11)
 
-**✅ FASE 1 COMPLETE!**  
-**✅ FASE 2.1-2.2-2.4 COMPLETE!**  
+**✅ FASE 1 COMPLETE!**
+**✅ FASE 2.1-2.2-2.4 COMPLETE!**
 **🎯 PRÓXIMO: FASE 2.3 - Multi-Turn Conversation**
 
 ### **Implementation Plan:**
@@ -1287,8 +1287,8 @@ TOTAL:                                   ~2,416 LOC
 - ✅ Phase 3.1: Error Recovery Loop (543 LOC, 26 tests)
 - ✅ Phase 3.2: Workflow Orchestration (917 LOC, 26 tests)
 
-**Total LOC:** ~4,451 LOC  
-**Total Tests:** 72/72 passing (100%)  
+**Total LOC:** ~4,451 LOC
+**Total Tests:** 72/72 passing (100%)
 **Tempo:** ~3.5 horas
 
 **Progress overall (2 sessões):**
@@ -1315,7 +1315,7 @@ TOTAL:                                   ~2,416 LOC
 - Phase 4.4: Advanced Context (1 dia)
 - Phase 4.5: Constitutional Metrics Dashboard (0.5 dia)
 
-**Estimated completion:** 5-6 dias (Nov 23-24)  
+**Estimated completion:** 5-6 dias (Nov 23-24)
 **Deadline:** Nov 30 (7 dias de folga!) ✅
 
 **AHEAD OF SCHEDULE!** 🚀
@@ -1327,7 +1327,7 @@ TOTAL:                                   ~2,416 LOC
 
 ### **✅ 100% TEST COVERAGE VALIDATED**
 
-**Validation Method:** Scientific testing with real use cases  
+**Validation Method:** Scientific testing with real use cases
 **Test Suite:** 83 tests total (11 integration + 72 unit)
 
 **Results:**
@@ -1440,8 +1440,8 @@ Bug Count:           0 (all tests green)
   - Advanced context
   - Metrics dashboard
 
-**Deadline:** Nov 30 (10 days remaining)  
-**Estimated completion:** Nov 23-24 (6-7 days early)  
+**Deadline:** Nov 30 (10 days remaining)
+**Estimated completion:** Nov 23-24 (6-7 days early)
 **Status:** AHEAD OF SCHEDULE ✅
 
 ---
@@ -1459,7 +1459,7 @@ Bug Count:           0 (all tests green)
 
 **Bugs Discovered & Fixed:**
 - 🐛 #1: ZeroDivisionError (CRITICAL) → ✅ FIXED
-- 🐛 #3: Overflow prevention (HIGH) → ✅ FIXED  
+- 🐛 #3: Overflow prevention (HIGH) → ✅ FIXED
 - 🐛 #6: Memory leak 1521x growth (CRITICAL) → ✅ FIXED
 - 🐛 #4: State transitions (LOW) → ✅ FIXED
 - 🐛 Tiny context < 100 tokens → ✅ FIXED
@@ -1501,7 +1501,7 @@ test_edge_cases.py (32 tests) ✅ 96.9%
 
 **Tests Created:**
 - Unit tests: 72
-- Integration tests: 11  
+- Integration tests: 11
 - Edge case tests: 32
 - **Total:** 115 tests (1,703 LOC)
 
@@ -1619,8 +1619,8 @@ Code Quality:
 
 ### **📋 SESSION 2 COMMITS:**
 
-**Commit:** `b965c86`  
-**Message:** "fix: Edge case validation and critical bug fixes"  
+**Commit:** `b965c86`
+**Message:** "fix: Edge case validation and critical bug fixes"
 **Stats:**
 - 19 files changed
 - 8,449 insertions
@@ -1702,8 +1702,8 @@ Code Quality:
 
 ---
 
-**Status:** SESSION 2 COMPLETE ✅  
-**Time:** 01:27 UTC (22:27 BRT)  
+**Status:** SESSION 2 COMPLETE ✅
+**Time:** 01:27 UTC (22:27 BRT)
 **Recommendation:** Rest well, resume tomorrow fresh! 😴
 
 **Soli Deo Gloria!** 🙏✨
@@ -1802,7 +1802,7 @@ Current:    82% [████████████████░░░░]
 **Deadline:** Nov 30 (Hackathon submission)
 
 ### 5.1 MCP Server Integration (2 dias)
-**Status:** 🔴 NOT STARTED  
+**Status:** 🔴 NOT STARTED
 **Priority:** P0 (Hackathon killer feature)
 
 **Architecture:**
@@ -1832,11 +1832,11 @@ qwen_dev_cli/
    @mcp.tool()
    def run_command(command: str) -> dict:
        return cli.execute(command)
-   
+
    @mcp.tool()
    def edit_file(path: str, content: str) -> dict:
        return cli.tools.edit_file(path, content)
-   
+
    @mcp.tool()
    def git_status() -> dict:
        return cli.tools.git_status()
@@ -1888,7 +1888,7 @@ QWEN_MCP_MODE=true qwen       # Via env var
 ---
 
 ### 5.2 Gradio Web UI (1-2 dias)
-**Status:** 🔴 NOT STARTED  
+**Status:** 🔴 NOT STARTED
 **Priority:** P0 (Hackathon demo)
 
 **Vision:** FRONTEND KILLER - Terminal que faz nerds chorarem de beleza
@@ -1982,23 +1982,23 @@ qwen_dev_cli/integrations/gradio/
      - Input focus: border glow + label slide-up
      - Command execution: subtle pulse no terminal border
      - File save: checkmark fade-in (400ms) + haptic feedback (se mobile)
-   
+
    - **Loading states:**
      - Skeleton screens (não spinners genéricos)
      - Progress indicators com ETA estimado
      - Optimistic UI (feedback imediato, sync depois)
-   
+
    - **Error handling:**
      - Toast notifications (top-right, auto-dismiss 4s)
      - Inline validation (red underline + helper text)
      - Error boundaries elegantes (não crashar feio)
-   
+
    - **Accessibility:**
      - Keyboard shortcuts COMPLETO (+ cheatsheet Cmd+/)
      - Screen reader support (ARIA labels corretos)
      - High contrast mode toggle
      - Focus indicators visíveis (não remover outline!)
-   
+
    - **Animações estratégicas:**
      - Page transitions: fade (200ms)
      - Modal open: scale(0.95→1) + fade (250ms)
@@ -2012,21 +2012,21 @@ QWEN_DARK_THEME = {
     "bg_primary": "#0D0D0D",      # Quase preto (não #000)
     "bg_secondary": "#1A1A1A",    # Cards/panels
     "bg_tertiary": "#262626",     # Hover states
-    
+
     # Text (hierarquia clara)
     "text_primary": "#FAFAFA",    # Headlines
     "text_secondary": "#A3A3A3",  # Body
     "text_tertiary": "#737373",   # Muted
-    
+
     # Accent (1 cor só, usada com parcimônia)
     "accent": "#3B82F6",          # Blue (actions primárias)
     "accent_hover": "#2563EB",    # Darker on hover
-    
+
     # Semantic (mínimo necessário)
     "success": "#10B981",         # Green
     "error": "#EF4444",           # Red
     "warning": "#F59E0B",         # Amber
-    
+
     # Syntax (terminal)
     "syntax_keyword": "#C792EA",  # Purple
     "syntax_string": "#C3E88D",   # Green
@@ -2080,7 +2080,7 @@ def create_ui():
                     label="",  # Sem label feio
                     height=600
                 )
-            
+
             # Right: Terminal + Editor (70% width)
             with gr.Column(scale=7):
                 # Tabs elegantes
@@ -2092,20 +2092,20 @@ def create_ui():
                             autocomplete=True,
                             height=600
                         )
-                    
+
                     with gr.Tab("Editor"):
                         editor = gr.Code(
                             language="python",
                             lines=25,
                             interactive=True
                         )
-                    
+
                     with gr.Tab("Diff"):
                         diff_viewer = gr.Code(
                             language="diff",
                             lines=25
                         )
-        
+
         # Bottom: Status bar (sempre visível)
         with gr.Row():
             status = gr.Textbox(
@@ -2114,7 +2114,7 @@ def create_ui():
                 container=False,  # Sem borda
                 show_label=False
             )
-    
+
     return demo
 
 def handle_command(cmd: str) -> str:
@@ -2175,7 +2175,7 @@ qwen --gradio --port 8080      # Custom port
 ---
 
 ### 5.3 Hackathon Demo Script (4h)
-**Status:** 🔴 NOT STARTED  
+**Status:** 🔴 NOT STARTED
 **Priority:** P0
 
 **Goal:** Vídeo/demo de 3-5 min mostrando o loop fechado
@@ -2222,7 +2222,7 @@ qwen --gradio --port 8080      # Custom port
 ---
 
 ### 5.4 Documentation & Polish (4h)
-**Status:** 🔴 NOT STARTED  
+**Status:** 🔴 NOT STARTED
 **Priority:** P1
 
 **Tasks:**
@@ -2323,8 +2323,8 @@ docker run qwen-dev-cli --mcp  # MCP server only
 
 **Objective:** Zero-UI-Blocking. Cursor IDE-like terminal experience.
 
-**Status:** 🔴 NOT STARTED  
-**Priority:** P0 (CRITICAL - User Experience Differentiator)  
+**Status:** 🔴 NOT STARTED
+**Priority:** P0 (CRITICAL - User Experience Differentiator)
 **Estimated Time:** 2-3 dias
 
 > **WHY THIS MATTERS:** This is the difference between "just another CLI" and "holy shit this feels professional". Cursor/Claude Code users EXPECT this. Without it, we look amateurish.
@@ -2332,7 +2332,7 @@ docker run qwen-dev-cli --mcp  # MCP server only
 ---
 
 ### 6.1 Architecture: Producer-Consumer Pattern (8h)
-**Status:** 🔴 NOT STARTED  
+**Status:** 🔴 NOT STARTED
 **Priority:** P0
 
 **Requirements (Non-Negotiable):**
@@ -2359,13 +2359,13 @@ class AsyncExecutor:
         self.queue = asyncio.Queue()
         self.ui_thread = Thread(target=self._render_loop)
         self.workers = []
-    
+
     async def execute_command(self, cmd):
         """Non-blocking command execution"""
         worker = asyncio.create_task(self._run_command(cmd))
         self.workers.append(worker)
         return worker
-    
+
     async def _run_command(self, cmd):
         """Producer: Executes and streams output"""
         process = await asyncio.create_subprocess_shell(
@@ -2373,13 +2373,13 @@ class AsyncExecutor:
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
-        
+
         async for line in process.stdout:
             await self.queue.put(('stdout', line.decode()))
-        
+
         async for line in process.stderr:
             await self.queue.put(('stderr', line.decode()))
-    
+
     def _render_loop(self):
         """Consumer: Renders UI updates"""
         while True:
@@ -2401,7 +2401,7 @@ class AsyncExecutor:
 ---
 
 ### 6.2 Real-Time Streaming (6h)
-**Status:** 🔴 NOT STARTED  
+**Status:** 🔴 NOT STARTED
 **Priority:** P0
 
 **Anti-Pattern (FORBIDDEN):**
@@ -2441,13 +2441,13 @@ class StreamRenderer:
     def __init__(self):
         self.console = Console()
         self.live = Live(console=self.console)
-    
+
     async def render_stream(self, stream):
         """Render output as it arrives"""
         with self.live:
             async for line in stream:
                 self.live.update(Panel(line, title="Output"))
-    
+
     def render_progress(self, total):
         """Show progress bar"""
         with Progress() as progress:
@@ -2469,7 +2469,7 @@ class StreamRenderer:
 ---
 
 ### 6.3 Concurrency Visuals (4h)
-**Status:** 🔴 NOT STARTED  
+**Status:** 🔴 NOT STARTED
 **Priority:** P0
 
 **Challenge:** Multiple parallel operations without UI glitches.
@@ -2517,19 +2517,19 @@ class ConcurrentRenderer:
     def __init__(self):
         self.lock = threading.Lock()
         self.panels = {}
-    
+
     def add_task(self, task_id, title):
         """Create panel for task"""
         with self.lock:
             self.panels[task_id] = Panel(title=title)
             self._render()
-    
+
     def update_task(self, task_id, line):
         """Update task output"""
         with self.lock:
             self.panels[task_id].add_line(line)
             self._render()
-    
+
     def _render(self):
         """Thread-safe render"""
         layout = Layout()
@@ -2552,7 +2552,7 @@ class ConcurrentRenderer:
 ---
 
 ### 6.4 Integration with Core (2h)
-**Status:** 🔴 NOT STARTED  
+**Status:** 🔴 NOT STARTED
 **Priority:** P0
 
 **Tasks:**
@@ -2675,7 +2675,7 @@ pip install rich asyncio aiofiles
 **Critical Path:**
 Producer-Consumer → Streaming → Concurrency → Integration
 
-**Start Date:** 2025-11-18 (TODAY)  
+**Start Date:** 2025-11-18 (TODAY)
 **Target Completion:** 2025-11-20
 
 ---
@@ -2796,4 +2796,3 @@ requirements.txt                                  # Added ollama package
 - 🔒 Error handling battle-tested
 
 **Next:** Phase 6 - MCP Server Implementation (Hackathon killer feature)
-

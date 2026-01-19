@@ -36,7 +36,7 @@ CODE_INJECTION_PATTERNS: List[str] = [
     r"javascript:",
     r"on\w+\s*=",
     r"\{\{.*\}\}",  # Template injection
-    r"\$\{.*\}",     # Variable injection
+    r"\$\{.*\}",  # Variable injection
     r"exec\s*\(",
     r"eval\s*\(",
     r"__import__",
@@ -55,7 +55,7 @@ EXFILTRATION_PATTERNS: List[str] = [
     r"print.*content",
     r"cat\s+/etc/passwd",
     r"read.*file.*",
-    r"find.*file.*/"
+    r"find.*file.*/",
 ]
 
 # =============================================================================

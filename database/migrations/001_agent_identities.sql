@@ -6,15 +6,15 @@
 CREATE TABLE IF NOT EXISTS agent_identities (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     workspace_id UUID REFERENCES workspaces(id) ON DELETE CASCADE NOT NULL,
-    
+
     -- Identity
     agent_name VARCHAR(255) NOT NULL,
     api_key_hash VARCHAR(255) NOT NULL UNIQUE, -- Store only SHA-256 hash
-    
+
     -- Security & Limits (Circuit Breakers)
     scopes JSONB DEFAULT '["read:memory", "write:logs"]'::jsonb,
     daily_budget_cents INTEGER DEFAULT 1000 CHECK (daily_budget_cents > 0),
-    
+
     -- Lifecycle
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,

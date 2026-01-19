@@ -27,11 +27,7 @@ class TestTenantContext:
     def test_context_creation(self):
         """Test basic context creation."""
         tenant = Tenant(name="Test")
-        ctx = TenantContext(
-            tenant=tenant,
-            request_id="req-123",
-            user_id="user-456"
-        )
+        ctx = TenantContext(tenant=tenant, request_id="req-123", user_id="user-456")
 
         assert ctx.tenant == tenant
         assert ctx.tenant_id == tenant.id
@@ -70,7 +66,7 @@ class TestContextVariables:
         tenant = Tenant(name="Test")
         ctx = TenantContext(tenant=tenant)
 
-        token = set_current_tenant(ctx)
+        set_current_tenant(ctx)
         try:
             result = get_current_tenant()
             assert result == ctx
@@ -92,10 +88,10 @@ class TestContextVariables:
         tenant1 = Tenant(name="Outer")
         tenant2 = Tenant(name="Inner")
 
-        with tenant_context(tenant1) as ctx1:
+        with tenant_context(tenant1):
             assert get_current_tenant().tenant == tenant1
 
-            with tenant_context(tenant2) as ctx2:
+            with tenant_context(tenant2):
                 assert get_current_tenant().tenant == tenant2
 
             # Back to outer context

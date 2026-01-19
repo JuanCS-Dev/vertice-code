@@ -386,10 +386,6 @@ class TestSerializationErrorHandling:
 
     def test_context_from_dict_missing_required_fields(self) -> None:
         """Test deserialization with missing required fields."""
-        incomplete_data = {
-            "user_request": "Test"
-            # Missing required fields like session_id, etc.
-        }
 
         # Test that from_dict exists and can be called
         assert hasattr(UnifiedContext, "from_dict")

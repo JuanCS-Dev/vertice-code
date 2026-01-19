@@ -15,7 +15,7 @@ interface ChatState {
   messages: ChatMessage[];
   isLoading: boolean;
   error: string | null;
-  
+
   // Actions
   addMessage: (message: Omit<ChatMessage, 'id' | 'timestamp'>) => void;
   sendMessage: (content: string) => Promise<void>;
@@ -44,10 +44,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   sendMessage: async (content: string) => {
     const { addMessage } = get();
-    
+
     // 1. Add User Message
     addMessage({ role: 'user', content });
-    
+
     // 2. Prepare Assistant Message Placeholder
     const assistantMsgId = uuidv4();
     set((state) => ({
@@ -109,7 +109,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
               // Handle "token" event
               if (event.type === 'token') {
                 const token = event.data?.token || '';
-                
+
                 // Update specific message content efficiently
                 set((state) => ({
                   messages: state.messages.map((msg) =>
@@ -119,7 +119,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
                   ),
                 }));
               }
-              
+
               // Handle "error" event
               if (event.type === 'error') {
                  console.error('Stream error:', event.data);

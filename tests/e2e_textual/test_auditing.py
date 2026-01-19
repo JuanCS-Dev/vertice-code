@@ -21,7 +21,7 @@ class TestSecurityAudit:
             name="detect_hardcoded_secrets",
             status="passed",
             duration=0.0,
-            metadata={"audit_type": "secrets"}
+            metadata={"audit_type": "secrets"},
         )
 
         try:
@@ -44,17 +44,19 @@ class TestSecurityAudit:
                     pattern=pattern,
                     path=str(sample_python_project),
                     file_pattern="*.py",
-                    ignore_case=True
+                    ignore_case=True,
                 )
 
                 if search_result.success and search_result.data.get("matches"):
                     for match in search_result.data["matches"]:
-                        findings.append({
-                            "type": name,
-                            "file": match["file"],
-                            "line": match.get("line", "?"),
-                            "severity": "HIGH"
-                        })
+                        findings.append(
+                            {
+                                "type": name,
+                                "file": match["file"],
+                                "line": match.get("line", "?"),
+                                "severity": "HIGH",
+                            }
+                        )
 
             # Should find the hardcoded secrets in config.py
             assert len(findings) > 0, "Should detect hardcoded secrets"
@@ -86,7 +88,7 @@ class TestSecurityAudit:
             name="detect_security_vulnerabilities",
             status="passed",
             duration=0.0,
-            metadata={"audit_type": "vulnerabilities"}
+            metadata={"audit_type": "vulnerabilities"},
         )
 
         try:
@@ -136,10 +138,7 @@ def hash_password(password):
     return hashlib.md5(password.encode()).hexdigest()  # MD5 is weak!
 '''
             vuln_file = temp_project / "vulnerable.py"
-            await write_tool._execute_validated(
-                path=str(vuln_file),
-                content=vulnerable_code
-            )
+            await write_tool._execute_validated(path=str(vuln_file), content=vulnerable_code)
 
             # Scan for vulnerabilities
             vuln_patterns = [
@@ -150,25 +149,25 @@ def hash_password(password):
                 ("eval\\(", "Code Injection", "CRITICAL"),
                 ("exec\\(", "Code Execution", "CRITICAL"),
                 ("md5|sha1", "Weak Hashing", "MEDIUM"),
-                ("SELECT.*\\+|SELECT.*%|SELECT.*f\"", "SQL Injection", "CRITICAL"),
+                ('SELECT.*\\+|SELECT.*%|SELECT.*f"', "SQL Injection", "CRITICAL"),
             ]
 
             vulnerabilities = []
             for pattern, name, severity in vuln_patterns:
                 search_result = await search_tool._execute_validated(
-                    pattern=pattern,
-                    path=str(temp_project),
-                    file_pattern="*.py"
+                    pattern=pattern, path=str(temp_project), file_pattern="*.py"
                 )
 
                 if search_result.success and search_result.data.get("matches"):
                     for match in search_result.data["matches"]:
-                        vulnerabilities.append({
-                            "type": name,
-                            "severity": severity,
-                            "file": match["file"],
-                            "line": match.get("line", "?")
-                        })
+                        vulnerabilities.append(
+                            {
+                                "type": name,
+                                "severity": severity,
+                                "file": match["file"],
+                                "line": match.get("line", "?"),
+                            }
+                        )
 
             result.logs.append(f"✓ Checked {len(vuln_patterns)} vulnerability patterns")
             result.logs.append(f"✓ Found {len(vulnerabilities)} vulnerabilities")
@@ -208,7 +207,7 @@ class TestCodeQualityAudit:
             name="detect_code_smells",
             status="passed",
             duration=0.0,
-            metadata={"audit_type": "code_quality"}
+            metadata={"audit_type": "code_quality"},
         )
 
         try:
@@ -295,25 +294,23 @@ def unused_function():
 OLD_CONSTANT = "not used"
 '''
             smell_file = temp_project / "smelly.py"
-            await write_tool._execute_validated(
-                path=str(smell_file),
-                content=smelly_code
-            )
+            await write_tool._execute_validated(path=str(smell_file), content=smelly_code)
 
             # Detect code smells
             smells_found = []
 
             # Check for magic numbers
             search_result = await search_tool._execute_validated(
-                pattern=r"\d+\.\d{2}",
-                path=str(temp_project / "smelly.py")
+                pattern=r"\d+\.\d{2}", path=str(temp_project / "smelly.py")
             )
             if search_result.success and search_result.data.get("matches"):
-                smells_found.append({
-                    "type": "Magic Numbers",
-                    "count": len(search_result.data["matches"]),
-                    "severity": "LOW"
-                })
+                smells_found.append(
+                    {
+                        "type": "Magic Numbers",
+                        "count": len(search_result.data["matches"]),
+                        "severity": "LOW",
+                    }
+                )
 
             # Check for long functions (by counting lines with same indent)
             content = smell_file.read_text()
@@ -321,39 +318,46 @@ OLD_CONSTANT = "not used"
             lines = len(content.splitlines())
             avg_func_length = lines / max(functions, 1)
             if avg_func_length > 20:
-                smells_found.append({
-                    "type": "Long Functions",
-                    "count": 1,
-                    "severity": "MEDIUM",
-                    "detail": f"Average {avg_func_length:.0f} lines/function"
-                })
+                smells_found.append(
+                    {
+                        "type": "Long Functions",
+                        "count": 1,
+                        "severity": "MEDIUM",
+                        "detail": f"Average {avg_func_length:.0f} lines/function",
+                    }
+                )
 
             # Check for deep nesting
-            max_indent = max(len(line) - len(line.lstrip()) for line in content.splitlines() if line.strip())
+            max_indent = max(
+                len(line) - len(line.lstrip()) for line in content.splitlines() if line.strip()
+            )
             if max_indent > 16:
-                smells_found.append({
-                    "type": "Deep Nesting",
-                    "count": 1,
-                    "severity": "MEDIUM",
-                    "detail": f"Max indent: {max_indent} spaces"
-                })
+                smells_found.append(
+                    {
+                        "type": "Deep Nesting",
+                        "count": 1,
+                        "severity": "MEDIUM",
+                        "detail": f"Max indent: {max_indent} spaces",
+                    }
+                )
 
             # Check for too many parameters
             search_result = await search_tool._execute_validated(
-                pattern=r"def \w+\([^)]{100,}\)",
-                path=str(temp_project / "smelly.py")
+                pattern=r"def \w+\([^)]{100,}\)", path=str(temp_project / "smelly.py")
             )
             if search_result.success and search_result.data.get("matches"):
-                smells_found.append({
-                    "type": "Too Many Parameters",
-                    "count": len(search_result.data["matches"]),
-                    "severity": "MEDIUM"
-                })
+                smells_found.append(
+                    {
+                        "type": "Too Many Parameters",
+                        "count": len(search_result.data["matches"]),
+                        "severity": "MEDIUM",
+                    }
+                )
 
             result.logs.append("✓ Analyzed code for smells")
             result.logs.append(f"✓ Found {len(smells_found)} types of code smells")
             for smell in smells_found:
-                detail = smell.get('detail', f"{smell['count']} occurrences")
+                detail = smell.get("detail", f"{smell['count']} occurrences")
                 result.logs.append(f"  ⚠️ {smell['type']}: {detail}")
 
             result.metadata["smells_found"] = len(smells_found)
@@ -377,7 +381,7 @@ OLD_CONSTANT = "not used"
             name="check_test_coverage",
             status="passed",
             duration=0.0,
-            metadata={"audit_type": "coverage"}
+            metadata={"audit_type": "coverage"},
         )
 
         try:
@@ -387,14 +391,16 @@ OLD_CONSTANT = "not used"
 
             # Find all Python files
             py_files = list(sample_python_project.rglob("*.py"))
-            src_files = [f for f in py_files if "test" not in f.name.lower() and f.parent.name != "tests"]
-            test_files = [f for f in py_files if "test" in f.name.lower() or f.parent.name == "tests"]
+            src_files = [
+                f for f in py_files if "test" not in f.name.lower() and f.parent.name != "tests"
+            ]
+            test_files = [
+                f for f in py_files if "test" in f.name.lower() or f.parent.name == "tests"
+            ]
 
             # Find functions in source files
             search_result = await search_tool._execute_validated(
-                pattern=r"def \w+\(",
-                path=str(sample_python_project / "src"),
-                file_pattern="*.py"
+                pattern=r"def \w+\(", path=str(sample_python_project / "src"), file_pattern="*.py"
             )
 
             src_functions = 0
@@ -405,7 +411,7 @@ OLD_CONSTANT = "not used"
             search_result = await search_tool._execute_validated(
                 pattern=r"def test_\w+\(",
                 path=str(sample_python_project / "tests"),
-                file_pattern="*.py"
+                file_pattern="*.py",
             )
 
             test_functions = 0
@@ -454,7 +460,7 @@ class TestComplianceAudit:
             name="license_compliance",
             status="passed",
             duration=0.0,
-            metadata={"audit_type": "license"}
+            metadata={"audit_type": "license"},
         )
 
         try:
@@ -462,7 +468,7 @@ class TestComplianceAudit:
             from vertice_cli.tools.search import SearchFilesTool
 
             write_tool = WriteFileTool()
-            search_tool = SearchFilesTool()
+            SearchFilesTool()
 
             # Create requirements with various licenses
             requirements = """# Production dependencies
@@ -479,8 +485,7 @@ black>=23.0.0  # MIT
 ruff>=0.1.0  # MIT
 """
             await write_tool._execute_validated(
-                path=str(temp_project / "requirements.txt"),
-                content=requirements
+                path=str(temp_project / "requirements.txt"), content=requirements
             )
 
             # Create a license file
@@ -503,8 +508,7 @@ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 """
             await write_tool._execute_validated(
-                path=str(temp_project / "LICENSE"),
-                content=license_content
+                path=str(temp_project / "LICENSE"), content=license_content
             )
 
             # Check for license file
@@ -516,7 +520,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
                 "MIT": req_content.count("# MIT"),
                 "BSD": req_content.count("# BSD"),
                 "Apache": req_content.count("# Apache"),
-                "GPL": req_content.count("# GPL")
+                "GPL": req_content.count("# GPL"),
             }
 
             result.logs.append(f"✓ License file present: {license_exists}")
@@ -552,7 +556,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
             name="documentation_audit",
             status="passed",
             duration=0.0,
-            metadata={"audit_type": "documentation"}
+            metadata={"audit_type": "documentation"},
         )
 
         try:
@@ -565,9 +569,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 
             # Check for docstrings in Python files
             search_result = await search_tool._execute_validated(
-                pattern=r'"""[^"]+"""',
-                path=str(sample_python_project / "src"),
-                file_pattern="*.py"
+                pattern=r'"""[^"]+"""', path=str(sample_python_project / "src"), file_pattern="*.py"
             )
 
             docstrings_count = 0
@@ -578,7 +580,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
             search_result = await search_tool._execute_validated(
                 pattern=r"def \w+\([^)]*\):\s*\n\s*[^\"']",
                 path=str(sample_python_project / "src"),
-                file_pattern="*.py"
+                file_pattern="*.py",
             )
 
             undocumented = 0
@@ -589,7 +591,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
             search_result = await search_tool._execute_validated(
                 pattern=r"def \w+\([^)]*:[^)]+\)",
                 path=str(sample_python_project / "src"),
-                file_pattern="*.py"
+                file_pattern="*.py",
             )
 
             typed_functions = 0

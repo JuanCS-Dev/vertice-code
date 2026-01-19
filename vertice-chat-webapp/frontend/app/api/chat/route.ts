@@ -1,9 +1,9 @@
 /**
  * Vercel AI SDK Data Stream Protocol Bridge
- * 
+ *
  * Proxies chat requests to FastAPI backend and passes through
  * the streaming response in Vercel AI SDK Data Stream format.
- * 
+ *
  * REVISION: 2026-01-13-STREAM-PROTOCOL-FIX
  */
 
@@ -119,4 +119,3 @@ export async function POST(req: Request) {
     );
   }
 }
-

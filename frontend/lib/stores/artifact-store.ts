@@ -11,7 +11,7 @@ export interface ArtifactFile {
 interface ArtifactState {
   files: Record<string, ArtifactFile>;
   activeFileId: string | null;
-  
+
   // Actions
   createOrUpdateFile: (name: string, content: string, language?: string) => void;
   setActiveFile: (name: string) => void;
@@ -43,7 +43,7 @@ export const useArtifactStore = create<ArtifactState>((set) => ({
   },
   activeFileId: 'welcome.md',
 
-  createOrUpdateFile: (name, content, language) => 
+  createOrUpdateFile: (name, content, language) =>
     set((state) => {
       const existing = state.files[name];
       return {
@@ -62,15 +62,15 @@ export const useArtifactStore = create<ArtifactState>((set) => ({
     }),
 
   setActiveFile: (name) => set({ activeFileId: name }),
-  
+
   closeFile: (name) => set((state) => {
     const newFiles = { ...state.files };
     delete newFiles[name];
     // If closing active file, switch to another or null
-    const newActive = state.activeFileId === name 
-      ? Object.keys(newFiles)[0] || null 
+    const newActive = state.activeFileId === name
+      ? Object.keys(newFiles)[0] || null
       : state.activeFileId;
-      
+
     return { files: newFiles, activeFileId: newActive };
   }),
 }));

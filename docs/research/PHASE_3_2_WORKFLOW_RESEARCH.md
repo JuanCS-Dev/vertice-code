@@ -1,7 +1,7 @@
 # 🔬 PHASE 3.2: WORKFLOW ORCHESTRATION RESEARCH
 
-**Research Target:** Cursor AI + Anthropic Claude Code workflow orchestration  
-**Goal:** Understand maestria-level multi-step execution  
+**Research Target:** Cursor AI + Anthropic Claude Code workflow orchestration
+**Goal:** Understand maestria-level multi-step execution
 **Date:** 2025-11-18 00:46 UTC
 
 ---
@@ -56,13 +56,13 @@ class DependencyGraph:
     def __init__(self):
         self.nodes = []  # Steps
         self.edges = []  # Dependencies
-    
+
     def add_step(self, step, depends_on=[]):
         """Add step with dependencies."""
         self.nodes.append(step)
         for dep in depends_on:
             self.edges.append((dep, step))
-    
+
     def topological_sort(self):
         """Order steps respecting dependencies."""
         # Returns execution order
@@ -88,11 +88,11 @@ class Checkpoint:
     def __init__(self):
         self.file_backups = {}
         self.state_snapshots = []
-    
+
     def save(self, context):
         """Save current state."""
         self.state_snapshots.append(context.copy())
-    
+
     def rollback(self):
         """Restore previous state."""
         return self.state_snapshots.pop()
@@ -110,7 +110,7 @@ class WorkflowResult:
     completed_steps: List[Step]
     failed_step: Optional[Step]
     partial_success: bool
-    
+
     def resume_from_failure(self):
         """Resume workflow from failed step."""
         # Don't re-execute completed steps
@@ -135,9 +135,9 @@ async def execute_workflow(steps):
     for step in steps:
         # Show user what's happening
         ui.show_progress(f"→ {step.name}")
-        
+
         result = await step.execute()
-        
+
         if result.success:
             ui.show_success(f"✓ {step.name}")
         else:
@@ -174,11 +174,11 @@ class WorkflowContext:
         self.variables = {}  # Shared state
         self.files_modified = []
         self.step_results = []
-    
+
     def share(self, key, value):
         """Share data between steps."""
         self.variables[key] = value
-    
+
     def get(self, key):
         """Get shared data."""
         return self.variables.get(key)
@@ -225,7 +225,7 @@ Adjust if needed
 ```python
 class TreeOfThought:
     """Multi-path reasoning for complex tasks."""
-    
+
     def generate_paths(self, goal):
         """Generate multiple solution paths."""
         paths = [
@@ -234,7 +234,7 @@ class TreeOfThought:
             Path3: [analyze_first, plan, execute]
         ]
         return paths
-    
+
     def evaluate_paths(self, paths):
         """Score each path by feasibility."""
         scores = []
@@ -242,7 +242,7 @@ class TreeOfThought:
             score = self.score_path(path)
             scores.append((path, score))
         return sorted(scores, key=lambda x: x[1], reverse=True)
-    
+
     def select_best_path(self):
         """Choose optimal path."""
         best_path, score = self.evaluate_paths()[0]
@@ -276,31 +276,31 @@ Selected: Path C
 ```python
 class SelfCritique:
     """Validate each step before proceeding."""
-    
+
     async def validate_step(self, step, result):
         """Ask: Did this step work correctly?"""
-        
+
         critique_prompt = f"""
         Step: {step.name}
         Result: {result}
-        
+
         Questions to answer:
         1. Did the step achieve its goal?
         2. Are there any issues with the result?
         3. Should we proceed or fix something?
-        
+
         Be critical and precise.
         """
-        
+
         critique = await llm.analyze(critique_prompt)
-        
+
         if critique.issues_found:
             return ValidationResult(
                 valid=False,
                 issues=critique.issues,
                 suggested_fix=critique.fix
             )
-        
+
         return ValidationResult(valid=True)
 ```
 
@@ -322,7 +322,7 @@ Action: Fix issues before proceeding
 ```python
 class LazyDetector:
     """Detect incomplete/lazy implementations (Constitutional P2)."""
-    
+
     def analyze_code(self, code):
         """Check for lazy patterns."""
         lazy_patterns = [
@@ -332,12 +332,12 @@ class LazyDetector:
             "return None  # placeholder",
             "... # fill this in"
         ]
-        
+
         issues = []
         for pattern in lazy_patterns:
             if pattern in code:
                 issues.append(f"Lazy pattern detected: {pattern}")
-        
+
         return LazyAnalysis(
             is_lazy=len(issues) > 0,
             issues=issues,
@@ -365,14 +365,14 @@ Target: LEI < 1.0 (0.1% lazy patterns)
 ```python
 class AdaptivePlanner:
     """Adjust plan based on execution results."""
-    
+
     def execute_with_adaptation(self, initial_plan):
         """Execute and adapt as needed."""
         current_plan = initial_plan
-        
+
         for step in current_plan:
             result = await step.execute()
-            
+
             if not result.success:
                 # Replan from this point
                 new_plan = await self.replan(
@@ -382,10 +382,10 @@ class AdaptivePlanner:
                 )
                 current_plan = new_plan
                 continue
-            
+
             # Learn from result
             self.context.update(result)
-            
+
             # Check if plan needs adjustment
             if self.should_adjust_plan(result):
                 adjusted = await self.adjust_plan(current_plan, result)
@@ -413,35 +413,35 @@ After Step 1:
 ```python
 class Transaction:
     """ACID-like properties for workflows."""
-    
+
     def __init__(self):
         self.operations = []
         self.committed = False
-    
+
     def add_operation(self, op):
         """Add operation to transaction."""
         self.operations.append(op)
-    
+
     async def execute(self):
         """Execute all or rollback."""
         completed = []
-        
+
         try:
             for op in self.operations:
                 result = await op.execute()
                 completed.append((op, result))
-                
+
                 if not result.success:
                     raise TransactionError(f"Operation {op} failed")
-            
+
             self.committed = True
             return TransactionResult(success=True, operations=completed)
-        
+
         except TransactionError as e:
             # Rollback all completed operations
             for op, result in reversed(completed):
                 await op.rollback(result)
-            
+
             return TransactionResult(success=False, error=e)
 ```
 
@@ -474,42 +474,42 @@ If step 4 fails:
 class ConstitutionalTreeOfThought:
     """
     Constitutional Layer 2 (Deliberation) implementation.
-    
+
     Requirements:
     - Multi-path exploration
     - Auto-critique at each node
     - Lazy execution detection (LEI metric)
     """
-    
+
     def generate_thought_tree(self, goal):
         """Generate tree of possible approaches."""
         root = ThoughtNode(goal=goal)
-        
+
         # Generate multiple approaches
         approaches = self.brainstorm_approaches(goal)
-        
+
         for approach in approaches:
             node = ThoughtNode(
                 approach=approach,
                 parent=root
             )
-            
+
             # Critique this approach
             critique = self.critique_approach(approach)
             node.critique = critique
-            
+
             # Expand promising approaches
             if critique.score > 0.7:
                 self.expand_node(node)
-            
+
             root.children.append(node)
-        
+
         return root
-    
+
     def select_best_path(self, tree):
         """Select optimal path using Constitutional metrics."""
         paths = self.enumerate_paths(tree)
-        
+
         scored_paths = []
         for path in paths:
             score = self.score_path(
@@ -521,7 +521,7 @@ class ConstitutionalTreeOfThought:
                 ]
             )
             scored_paths.append((path, score))
-        
+
         return max(scored_paths, key=lambda x: x[1])[0]
 ```
 
@@ -531,28 +531,28 @@ class ConstitutionalTreeOfThought:
 class AutoCritique:
     """
     Constitutional Layer 2: Auto-critique mechanism.
-    
+
     Validates:
     - Completeness (P1)
     - Correctness (P2)
     - Efficiency (P6)
     """
-    
+
     async def critique_step(self, step, result):
         """Critique step execution."""
-        
+
         # P1: Completeness check
         completeness = self.check_completeness(result)
-        
+
         # P2: Validation check
         validation = self.validate_result(result)
-        
+
         # P6: Efficiency check
         efficiency = self.check_efficiency(step, result)
-        
+
         # Calculate LEI
         lei = self.calculate_lei(result)
-        
+
         critique = Critique(
             completeness_score=completeness,
             validation_passed=validation,
@@ -565,22 +565,22 @@ class AutoCritique:
                 lei < 1.0
             ])
         )
-        
+
         if not critique.passed:
             critique.issues = self.identify_issues(result)
             critique.suggestions = self.generate_suggestions(critique.issues)
-        
+
         return critique
-    
+
     def calculate_lei(self, result):
         """
         Calculate Lazy Execution Index (Constitutional metric).
-        
+
         LEI = (lazy_patterns / total_statements) * 1000
         Target: < 1.0
         """
         code = result.get('code', '')
-        
+
         lazy_patterns = [
             'TODO',
             'FIXME',
@@ -590,13 +590,13 @@ class AutoCritique:
             '... #',
             'raise NotImplementedError'
         ]
-        
+
         lazy_count = sum(1 for pattern in lazy_patterns if pattern in code)
         total_lines = len([l for l in code.split('\n') if l.strip()])
-        
+
         if total_lines == 0:
             return 0
-        
+
         lei = (lazy_count / total_lines) * 1000
         return lei
 ```
@@ -613,13 +613,13 @@ class AutoCritique:
 class WorkflowEngine:
     """
     Multi-step workflow orchestration.
-    
+
     Combines:
     - Cursor AI: Dependency graph + checkpoints
     - Claude: Tree-of-Thought + self-critique
     - Constitutional: LEI tracking + validation
     """
-    
+
     def __init__(self, llm_client, recovery_engine):
         self.llm = llm_client
         self.recovery = recovery_engine
@@ -627,33 +627,33 @@ class WorkflowEngine:
         self.thought_tree = TreeOfThought()
         self.checkpoints = CheckpointManager()
         self.critique = AutoCritique()
-    
+
     async def execute_workflow(self, user_goal, tools):
         """Execute multi-step workflow."""
-        
+
         # 1. Tree-of-Thought planning
         thought_tree = self.thought_tree.generate_tree(user_goal)
         best_path = self.thought_tree.select_best_path(thought_tree)
-        
+
         # 2. Build dependency graph
         steps = self.build_steps(best_path, tools)
         self.dependency_graph.add_steps(steps)
         execution_order = self.dependency_graph.topological_sort()
-        
+
         # 3. Create transaction
         transaction = Transaction()
-        
+
         # 4. Execute with checkpoints
         context = WorkflowContext()
-        
+
         for step in execution_order:
             # Checkpoint before risky operations
             if step.is_risky():
                 self.checkpoints.save(context)
-            
+
             # Execute step
             result = await self.execute_step_with_recovery(step, context)
-            
+
             if not result.success:
                 # Rollback
                 await transaction.rollback()
@@ -662,24 +662,24 @@ class WorkflowEngine:
                     completed_steps=transaction.completed,
                     failed_step=step
                 )
-            
+
             # Auto-critique (Constitutional Layer 2)
             critique = await self.critique.critique_step(step, result)
-            
+
             if not critique.passed:
                 # Issues found, attempt fix
                 fixed = await self.recovery.fix_issues(step, critique)
                 if not fixed:
                     await transaction.rollback()
                     return WorkflowResult(success=False, critique=critique)
-            
+
             # Add to transaction
             transaction.add_operation(step, result)
             context.update(result)
-        
+
         # 5. Commit transaction
         await transaction.commit()
-        
+
         return WorkflowResult(
             success=True,
             completed_steps=transaction.completed,
@@ -756,4 +756,3 @@ class WorkflowEngine:
 ---
 
 **RESEARCH COMPLETE - Ready for implementation!** 🚀
-

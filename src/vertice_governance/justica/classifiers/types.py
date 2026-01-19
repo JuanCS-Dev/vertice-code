@@ -19,10 +19,10 @@ if TYPE_CHECKING:
 class ClassificationResult(Enum):
     """Resultado da classificacao."""
 
-    SAFE = auto()          # Conteudo seguro, pode prosseguir
-    SUSPICIOUS = auto()    # Suspeito, requer analise adicional
-    VIOLATION = auto()     # Violacao detectada, bloquear
-    CRITICAL = auto()      # Violacao critica, bloquear + alertar
+    SAFE = auto()  # Conteudo seguro, pode prosseguir
+    SUSPICIOUS = auto()  # Suspeito, requer analise adicional
+    VIOLATION = auto()  # Violacao detectada, bloquear
+    CRITICAL = auto()  # Violacao critica, bloquear + alertar
     NEEDS_REVIEW = auto()  # Ambiguo, requer revisao humana
 
 
@@ -80,9 +80,7 @@ class ClassificationReport:
             "result": self.result.name,
             "confidence": self.confidence,
             "input_text_preview": (
-                self.input_text[:200] + "..."
-                if len(self.input_text) > 200
-                else self.input_text
+                self.input_text[:200] + "..." if len(self.input_text) > 200 else self.input_text
             ),
             "detected_patterns": self.detected_patterns,
             "detected_keywords": self.detected_keywords,

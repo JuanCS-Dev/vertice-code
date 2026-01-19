@@ -58,7 +58,7 @@ class TestExtremeInputSizes:
     async def test_refactorer_handles_empty_description(self):
         """Refactorer com descrição vazia"""
         llm = MagicMock()
-        llm.generate = AsyncMock(return_value='{}')
+        llm.generate = AsyncMock(return_value="{}")
 
         agent = RefactorerAgent(llm_client=llm)
         task = AgentTask(request="", session_id="empty", context={"target_file": "test.py"})
@@ -69,7 +69,7 @@ class TestExtremeInputSizes:
     async def test_refactorer_handles_max_description(self):
         """Refactorer com descrição máxima"""
         llm = MagicMock()
-        llm.generate = AsyncMock(return_value='{}')
+        llm.generate = AsyncMock(return_value="{}")
 
         agent = RefactorerAgent(llm_client=llm)
         desc = "x" * 100000
@@ -120,15 +120,12 @@ class TestExtremeMetadata:
     async def test_refactorer_handles_null_metadata_values(self):
         """Refactorer com valores null em metadata"""
         llm = MagicMock()
-        llm.generate = AsyncMock(return_value='{}')
+        llm.generate = AsyncMock(return_value="{}")
 
         agent = RefactorerAgent(llm_client=llm)
         meta = {"key1": None, "key2": None}
         task = AgentTask(
-            request="Task",
-            session_id="test",
-            metadata=meta,
-            context={"target_file": "test.py"}
+            request="Task", session_id="test", metadata=meta, context={"target_file": "test.py"}
         )
         result = await agent.execute(task)
         assert isinstance(result.success, bool)
@@ -137,7 +134,7 @@ class TestExtremeMetadata:
     async def test_refactorer_handles_mixed_type_metadata(self):
         """Refactorer com tipos mistos em metadata"""
         llm = MagicMock()
-        llm.generate = AsyncMock(return_value='{}')
+        llm.generate = AsyncMock(return_value="{}")
 
         agent = RefactorerAgent(llm_client=llm)
         meta = {
@@ -146,13 +143,10 @@ class TestExtremeMetadata:
             "float": 3.14,
             "bool": True,
             "list": [1, 2, 3],
-            "nested": {"a": 1}
+            "nested": {"a": 1},
         }
         task = AgentTask(
-            request="Task",
-            session_id="test",
-            metadata=meta,
-            context={"target_file": "test.py"}
+            request="Task", session_id="test", metadata=meta, context={"target_file": "test.py"}
         )
         result = await agent.execute(task)
         assert isinstance(result.success, bool)
@@ -179,10 +173,7 @@ class TestExtremeUnicode:
         llm.generate = AsyncMock(return_value='{"sops": []}')
 
         agent = PlannerAgent(llm_client=llm)
-        task = AgentTask(
-            request="Hello世界مرحباПривет",
-            session_id="mixed"
-        )
+        task = AgentTask(request="Hello世界مرحباПривет", session_id="mixed")
         result = await agent.execute(task)
         assert isinstance(result.success, bool)
 
@@ -201,13 +192,13 @@ class TestExtremeUnicode:
     async def test_refactorer_handles_special_characters(self):
         """Refactorer com caracteres especiais"""
         llm = MagicMock()
-        llm.generate = AsyncMock(return_value='{}')
+        llm.generate = AsyncMock(return_value="{}")
 
         agent = RefactorerAgent(llm_client=llm)
         task = AgentTask(
             request="Fix bug in <script>alert('xss')</script>",
             session_id="special",
-            context={"target_file": "test.py"}
+            context={"target_file": "test.py"},
         )
         result = await agent.execute(task)
         assert isinstance(result.success, bool)
@@ -216,13 +207,13 @@ class TestExtremeUnicode:
     async def test_refactorer_handles_control_characters(self):
         """Refactorer com caracteres de controle"""
         llm = MagicMock()
-        llm.generate = AsyncMock(return_value='{}')
+        llm.generate = AsyncMock(return_value="{}")
 
         agent = RefactorerAgent(llm_client=llm)
         task = AgentTask(
             request="Fix\x00bug\x0a\x0dwith\ttabs",
             session_id="control",
-            context={"target_file": "test.py"}
+            context={"target_file": "test.py"},
         )
         result = await agent.execute(task)
         assert isinstance(result.success, bool)
@@ -240,9 +231,7 @@ class TestExtremePaths:
         agent = PlannerAgent(llm_client=llm)
         long_path = "/tmp/" + "a" * 200 + "/file.py"
         task = AgentTask(
-            request="Edit file",
-            session_id="longpath",
-            context={"target_file": long_path}
+            request="Edit file", session_id="longpath", context={"target_file": long_path}
         )
         result = await agent.execute(task)
         assert isinstance(result.success, bool)
@@ -257,7 +246,7 @@ class TestExtremePaths:
         task = AgentTask(
             request="Edit file",
             session_id="specialpath",
-            context={"target_file": "/tmp/my file (1).py"}
+            context={"target_file": "/tmp/my file (1).py"},
         )
         result = await agent.execute(task)
         assert isinstance(result.success, bool)
@@ -272,7 +261,7 @@ class TestExtremePaths:
         task = AgentTask(
             request="Edit file",
             session_id="unicodepath",
-            context={"target_file": "/tmp/arquivo_日本語.py"}
+            context={"target_file": "/tmp/arquivo_日本語.py"},
         )
         result = await agent.execute(task)
         assert isinstance(result.success, bool)
@@ -281,13 +270,13 @@ class TestExtremePaths:
     async def test_refactorer_handles_relative_path(self):
         """Refactorer com path relativo"""
         llm = MagicMock()
-        llm.generate = AsyncMock(return_value='{}')
+        llm.generate = AsyncMock(return_value="{}")
 
         agent = RefactorerAgent(llm_client=llm)
         task = AgentTask(
             request="Edit file",
             session_id="relpath",
-            context={"target_file": "../../../etc/passwd"}
+            context={"target_file": "../../../etc/passwd"},
         )
         result = await agent.execute(task)
         assert isinstance(result.success, bool)
@@ -296,13 +285,13 @@ class TestExtremePaths:
     async def test_refactorer_handles_symlink_path(self):
         """Refactorer com symlink no path"""
         llm = MagicMock()
-        llm.generate = AsyncMock(return_value='{}')
+        llm.generate = AsyncMock(return_value="{}")
 
         agent = RefactorerAgent(llm_client=llm)
         task = AgentTask(
             request="Edit file",
             session_id="symlink",
-            context={"target_file": "/tmp/link -> /real/file.py"}
+            context={"target_file": "/tmp/link -> /real/file.py"},
         )
         result = await agent.execute(task)
         assert isinstance(result.success, bool)
@@ -349,13 +338,13 @@ class TestExtremeTaskIds:
     async def test_refactorer_handles_uuid_task_id(self):
         """Refactorer com UUID como task_id"""
         llm = MagicMock()
-        llm.generate = AsyncMock(return_value='{}')
+        llm.generate = AsyncMock(return_value="{}")
 
         agent = RefactorerAgent(llm_client=llm)
         task = AgentTask(
             request="Task",
             session_id="550e8400-e29b-41d4-a716-446655440000",
-            context={"target_file": "test.py"}
+            context={"target_file": "test.py"},
         )
         result = await agent.execute(task)
         assert isinstance(result.success, bool)
@@ -364,14 +353,10 @@ class TestExtremeTaskIds:
     async def test_refactorer_handles_numeric_task_id(self):
         """Refactorer com número como task_id"""
         llm = MagicMock()
-        llm.generate = AsyncMock(return_value='{}')
+        llm.generate = AsyncMock(return_value="{}")
 
         agent = RefactorerAgent(llm_client=llm)
-        task = AgentTask(
-            request="Task",
-            session_id="12345",
-            context={"target_file": "test.py"}
-        )
+        task = AgentTask(request="Task", session_id="12345", context={"target_file": "test.py"})
         result = await agent.execute(task)
         assert isinstance(result.success, bool)
 
@@ -414,7 +399,7 @@ class TestConcurrencyEdgeCases:
     async def test_refactorer_handles_interleaved_calls(self):
         """Refactorer com chamadas intercaladas"""
         llm = MagicMock()
-        llm.generate = AsyncMock(return_value='{}')
+        llm.generate = AsyncMock(return_value="{}")
 
         agent = RefactorerAgent(llm_client=llm)
         results = []
@@ -422,7 +407,7 @@ class TestConcurrencyEdgeCases:
             task = AgentTask(
                 request=f"Task {i}",
                 session_id=f"interleaved-{i}",
-                context={"target_file": f"file{i}.py"}
+                context={"target_file": f"file{i}.py"},
             )
             result = await agent.execute(task)
             results.append(result)
@@ -462,13 +447,11 @@ class TestMemoryPressure:
     async def test_refactorer_handles_repeated_execution(self):
         """Refactorer com execução repetida"""
         llm = MagicMock()
-        llm.generate = AsyncMock(return_value='{}')
+        llm.generate = AsyncMock(return_value="{}")
 
         agent = RefactorerAgent(llm_client=llm)
         task = AgentTask(
-            request="Refactor",
-            session_id="repeat",
-            context={"target_file": "test.py"}
+            request="Refactor", session_id="repeat", context={"target_file": "test.py"}
         )
         for _ in range(50):
             result = await agent.execute(task)
@@ -497,11 +480,7 @@ class TestBoundaryValues:
 
         agent = PlannerAgent(llm_client=llm)
         large_context = {f"key_{i}": "x" * 1000 for i in range(100)}
-        task = AgentTask(
-            request="Task with large context",
-            session_id="max",
-            context=large_context
-        )
+        task = AgentTask(request="Task with large context", session_id="max", context=large_context)
         result = await agent.execute(task)
         assert isinstance(result.success, bool)
 
@@ -509,13 +488,13 @@ class TestBoundaryValues:
     async def test_refactorer_with_zero_timeout(self):
         """Refactorer sem timeout específico"""
         llm = MagicMock()
-        llm.generate = AsyncMock(return_value='{}')
+        llm.generate = AsyncMock(return_value="{}")
 
         agent = RefactorerAgent(llm_client=llm)
         task = AgentTask(
             request="Task",
             session_id="zero-timeout",
-            context={"target_file": "test.py", "timeout": 0}
+            context={"target_file": "test.py", "timeout": 0},
         )
         result = await agent.execute(task)
         assert isinstance(result.success, bool)
@@ -524,13 +503,13 @@ class TestBoundaryValues:
     async def test_refactorer_with_negative_values(self):
         """Refactorer com valores negativos no contexto"""
         llm = MagicMock()
-        llm.generate = AsyncMock(return_value='{}')
+        llm.generate = AsyncMock(return_value="{}")
 
         agent = RefactorerAgent(llm_client=llm)
         task = AgentTask(
             request="Task",
             session_id="negative",
-            context={"target_file": "test.py", "retries": -1, "timeout": -100}
+            context={"target_file": "test.py", "retries": -1, "timeout": -100},
         )
         result = await agent.execute(task)
         assert isinstance(result.success, bool)
@@ -543,10 +522,7 @@ class TestErrorRecovery:
     async def test_planner_recovers_from_partial_failure(self):
         """Planner recupera de falha parcial"""
         llm = MagicMock()
-        llm.generate = AsyncMock(side_effect=[
-            Exception("First fails"),
-            '{"sops": []}'
-        ])
+        llm.generate = AsyncMock(side_effect=[Exception("First fails"), '{"sops": []}'])
 
         agent = PlannerAgent(llm_client=llm)
         task = AgentTask(request="Task", session_id="partial")
@@ -582,9 +558,7 @@ class TestErrorRecovery:
 
         for i in range(5):
             task = AgentTask(
-                request=f"Task {i}",
-                session_id=f"cascade-{i}",
-                context={"target_file": "test.py"}
+                request=f"Task {i}", session_id=f"cascade-{i}", context={"target_file": "test.py"}
             )
             result = await agent.execute(task)
             assert result.success is False
@@ -603,7 +577,7 @@ class TestRandomizedInputs:
         agent = PlannerAgent(llm_client=llm)
 
         for _ in range(10):
-            random_desc = ''.join(random.choices(string.printable, k=random.randint(1, 1000)))
+            random_desc = "".join(random.choices(string.printable, k=random.randint(1, 1000)))
             task = AgentTask(request=random_desc, session_id="random")
             result = await agent.execute(task)
             assert isinstance(result.success, bool)
@@ -612,21 +586,22 @@ class TestRandomizedInputs:
     async def test_refactorer_handles_random_metadata(self):
         """Refactorer com metadata aleatória"""
         llm = MagicMock()
-        llm.generate = AsyncMock(return_value='{}')
+        llm.generate = AsyncMock(return_value="{}")
 
         agent = RefactorerAgent(llm_client=llm)
 
         for _ in range(10):
             random_meta = {
-                ''.join(random.choices(string.ascii_letters, k=10)):
-                ''.join(random.choices(string.printable, k=50))
+                "".join(random.choices(string.ascii_letters, k=10)): "".join(
+                    random.choices(string.printable, k=50)
+                )
                 for _ in range(random.randint(1, 20))
             }
             task = AgentTask(
                 request="Task",
                 session_id="random-meta",
                 metadata=random_meta,
-                context={"target_file": "test.py"}
+                context={"target_file": "test.py"},
             )
             result = await agent.execute(task)
             assert isinstance(result.success, bool)
@@ -654,9 +629,7 @@ class TestTypeCoercion:
 
         agent = PlannerAgent(llm_client=llm)
         task = AgentTask(
-            request="Task",
-            session_id="bool",
-            metadata={"enabled": True, "disabled": False}
+            request="Task", session_id="bool", metadata={"enabled": True, "disabled": False}
         )
         result = await agent.execute(task)
         assert isinstance(result.success, bool)
@@ -665,13 +638,13 @@ class TestTypeCoercion:
     async def test_refactorer_handles_stringified_numbers(self):
         """Refactorer com números como strings"""
         llm = MagicMock()
-        llm.generate = AsyncMock(return_value='{}')
+        llm.generate = AsyncMock(return_value="{}")
 
         agent = RefactorerAgent(llm_client=llm)
         task = AgentTask(
             request="Task",
             session_id="stringnum",
-            context={"target_file": "test.py", "retries": "3", "timeout": "100"}
+            context={"target_file": "test.py", "retries": "3", "timeout": "100"},
         )
         result = await agent.execute(task)
         assert isinstance(result.success, bool)
@@ -699,7 +672,7 @@ class TestImmutability:
     async def test_refactorer_does_not_modify_input_context(self):
         """Refactorer não modifica contexto de entrada"""
         llm = MagicMock()
-        llm.generate = AsyncMock(return_value='{}')
+        llm.generate = AsyncMock(return_value="{}")
 
         agent = RefactorerAgent(llm_client=llm)
         original_context = {"target_file": "test.py", "data": {"x": 1}}

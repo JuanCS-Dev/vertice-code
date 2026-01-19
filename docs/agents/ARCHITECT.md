@@ -1,9 +1,9 @@
 # 🏗️ ArchitectAgent: The Visionary Skeptic
 
-**Role:** Feasibility Analyst & Risk Assessor  
-**Personality:** Senior Principal Engineer who questions everything  
-**Capabilities:** `READ_ONLY` (ls, cat, grep)  
-**Output:** Architecture plan OR veto with detailed reasoning  
+**Role:** Feasibility Analyst & Risk Assessor
+**Personality:** Senior Principal Engineer who questions everything
+**Capabilities:** `READ_ONLY` (ls, cat, grep)
+**Output:** Architecture plan OR veto with detailed reasoning
 **Position:** First gate in DevSquad workflow
 
 ---
@@ -191,7 +191,7 @@ Add JWT authentication to FastAPI app with refresh tokens
   "architecture": {
     "files": [
       "app/auth/jwt.py",
-      "app/auth/dependencies.py", 
+      "app/auth/dependencies.py",
       "app/models/token.py",
       "app/routes/auth.py"
     ],
@@ -288,22 +288,22 @@ ARCHITECT_CONFIG = {
 
 ### Problem: Architect always approves
 
-**Cause:** Temperature too high (>0.5)  
+**Cause:** Temperature too high (>0.5)
 **Solution:** Lower temperature to 0.2-0.3
 
 ### Problem: Architect is too cautious (vetoes everything)
 
-**Cause:** Insufficient context provided  
+**Cause:** Insufficient context provided
 **Solution:** Pass more codebase context in `task.context`
 
 ### Problem: Architect gives vague reasoning
 
-**Cause:** Weak LLM model (e.g., gpt-3.5-turbo)  
+**Cause:** Weak LLM model (e.g., gpt-3.5-turbo)
 **Solution:** Upgrade to GPT-4, Claude Sonnet 3.5, or Gemini Pro
 
 ### Problem: Architect takes too long
 
-**Cause:** Large codebase being analyzed  
+**Cause:** Large codebase being analyzed
 **Solution:** Use ExplorerAgent first to narrow context
 
 ---
@@ -319,9 +319,9 @@ from qwen_dev_cli.agents.base import AgentTask
 async def test_architect_approves_valid_request(mock_llm, mock_mcp):
     architect = ArchitectAgent(mock_llm, mock_mcp)
     task = AgentTask(request="Add logging middleware to FastAPI")
-    
+
     response = await architect.execute(task)
-    
+
     assert response.success is True
     assert response.data["decision"] == "APPROVED"
     assert "middleware" in response.reasoning.lower()
@@ -330,9 +330,9 @@ async def test_architect_approves_valid_request(mock_llm, mock_mcp):
 async def test_architect_vetoes_impossible_request(mock_llm, mock_mcp):
     architect = ArchitectAgent(mock_llm, mock_mcp)
     task = AgentTask(request="Integrate with Mars rover API")
-    
+
     response = await architect.execute(task)
-    
+
     assert response.success is False
     assert response.data["decision"] == "VETO"
     assert len(response.data.get("blockers", [])) > 0
@@ -375,7 +375,7 @@ response = await architect.execute(task)
 if not response.success:
     # ❌ Bad: Force execution anyway
     # proceed_anyway()
-    
+
     # ✅ Good: Understand and address blockers
     print(f"Blockers: {response.data['blockers']}")
     print(f"Alternatives: {response.data['alternatives']}")
@@ -395,7 +395,7 @@ response2 = await architect.execute(task2)  # APPROVED
 
 ---
 
-**Version:** 1.0.0  
-**Last Updated:** 2025-11-22  
-**Status:** Production-ready ✅  
+**Version:** 1.0.0
+**Last Updated:** 2025-11-22
+**Status:** Production-ready ✅
 **Grade:** A+ (Boris Cherny approved)

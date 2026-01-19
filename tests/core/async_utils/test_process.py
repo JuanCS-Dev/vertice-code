@@ -19,24 +19,14 @@ class TestProcessResult:
 
     def test_process_result_success(self):
         """Test successful process result."""
-        result = ProcessResult(
-            returncode=0,
-            stdout="output",
-            stderr="",
-            command="echo test"
-        )
+        result = ProcessResult(returncode=0, stdout="output", stderr="", command="echo test")
 
         assert result.success is True
         assert result.output == "output"
 
     def test_process_result_failure(self):
         """Test failed process result."""
-        result = ProcessResult(
-            returncode=1,
-            stdout="",
-            stderr="error message",
-            command="false"
-        )
+        result = ProcessResult(returncode=1, stdout="", stderr="error message", command="false")
 
         assert result.success is False
         assert "error message" in result.output
@@ -44,10 +34,7 @@ class TestProcessResult:
     def test_process_result_combined_output(self):
         """Test combined stdout and stderr."""
         result = ProcessResult(
-            returncode=0,
-            stdout="stdout line",
-            stderr="stderr line",
-            command="test"
+            returncode=0, stdout="stdout line", stderr="stderr line", command="test"
         )
 
         assert "stdout line" in result.output
@@ -102,6 +89,7 @@ class TestRunCommand:
     async def test_run_command_with_env(self):
         """Test running command with custom environment."""
         import os
+
         env = {**os.environ, "TEST_VAR": "test_value"}
         # SEC-003: Use run_shell instead of shell=True
         result = await run_shell("echo $TEST_VAR", env=env)

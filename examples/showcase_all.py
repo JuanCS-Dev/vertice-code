@@ -37,11 +37,7 @@ def print_title():
     title_text.append("TUI Components + Cursor Intelligence\n", style="dim")
     title_text.append("Built with surgical precision. Zero compromises.\n", style="dim italic")
 
-    panel = Panel(
-        title_text,
-        border_style="cyan",
-        padding=(1, 2)
-    )
+    panel = Panel(title_text, border_style="cyan", padding=(1, 2))
 
     console.print("\n")
     console.print(panel)
@@ -96,8 +92,10 @@ def main():
 
     results = indexer.search_symbols("Tool", limit=3)
     for symbol in results:
-        print(f"  {COLORS['accent_green']}• {symbol.name}{COLORS['reset']} "
-              f"{COLORS['dim']}({symbol.type}) at {symbol.file_path}:{symbol.line_number}{COLORS['reset']}")
+        print(
+            f"  {COLORS['accent_green']}• {symbol.name}{COLORS['reset']} "
+            f"{COLORS['dim']}({symbol.type}) at {symbol.file_path}:{symbol.line_number}{COLORS['reset']}"
+        )
 
     time.sleep(1)
 
@@ -111,7 +109,11 @@ def main():
         (ToastType.SUCCESS, "Build Complete", "Project compiled successfully in 2.3s"),
         (ToastType.WARNING, "Large File", "Consider splitting file (> 1000 lines)"),
         (ToastType.ERROR, "Type Error", "Expected 'str', got 'int' at line 42"),
-        (ToastType.WISDOM, "Proverbs 16:3", "Commit your work to the LORD, and your plans will be established"),
+        (
+            ToastType.WISDOM,
+            "Proverbs 16:3",
+            "Commit your work to the LORD, and your plans will be established",
+        ),
     ]
 
     for toast_type, title, message in toasts_to_add:
@@ -135,9 +137,17 @@ def main():
     # Add sample commands
     commands = [
         Command("file.open", "Open File", "Open a file", CommandCategory.FILE, keybinding="Ctrl+O"),
-        Command("file.save", "Save File", "Save current file", CommandCategory.FILE, keybinding="Ctrl+S"),
+        Command(
+            "file.save", "Save File", "Save current file", CommandCategory.FILE, keybinding="Ctrl+S"
+        ),
         Command("git.status", "Git Status", "Show repository status", CommandCategory.GIT),
-        Command("tools.format", "Format Code", "Auto-format", CommandCategory.TOOLS, keybinding="Shift+Alt+F"),
+        Command(
+            "tools.format",
+            "Format Code",
+            "Auto-format",
+            CommandCategory.TOOLS,
+            keybinding="Shift+Alt+F",
+        ),
     ]
 
     palette.add_commands(commands)
@@ -152,9 +162,11 @@ def main():
 
         for cmd in results:
             score = palette.matcher.score(cmd.search_text, query)
-            print(f"  {COLORS['accent_green']}→ {cmd.title}{COLORS['reset']} "
-                  f"{COLORS['dim']}({cmd.category.value}){COLORS['reset']} "
-                  f"{COLORS['accent_yellow']}[{score:.2f}]{COLORS['reset']}")
+            print(
+                f"  {COLORS['accent_green']}→ {cmd.title}{COLORS['reset']} "
+                f"{COLORS['dim']}({cmd.category.value}){COLORS['reset']} "
+                f"{COLORS['accent_yellow']}[{score:.2f}]{COLORS['reset']}"
+            )
         print()
 
     time.sleep(1)
@@ -173,7 +185,10 @@ def main():
     section("SUMMARY - What We Built", "✨")
 
     accomplishments = [
-        ("🔍 Semantic Indexer", f"{count} files, {stats['total_symbols']} symbols in {elapsed:.2f}s"),
+        (
+            "🔍 Semantic Indexer",
+            f"{count} files, {stats['total_symbols']} symbols in {elapsed:.2f}s",
+        ),
         ("🔔 Toast System", "5-level priority queue with Biblical wisdom"),
         ("⌘ Command Palette", "Fuzzy search, < 50ms response"),
         ("🌳 File Tree", "13 file types, Git integration"),
@@ -197,7 +212,9 @@ def main():
 
     # Stats
     print(f"{COLORS['dim']}Built with ❤️ by Célula Híbrida (Maximus + AI){COLORS['reset']}")
-    print(f"{COLORS['dim']}Quality-first. Zero compromises. Disruptive excellence.{COLORS['reset']}\n")
+    print(
+        f"{COLORS['dim']}Quality-first. Zero compromises. Disruptive excellence.{COLORS['reset']}\n"
+    )
 
 
 if __name__ == "__main__":

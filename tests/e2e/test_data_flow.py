@@ -1,8 +1,6 @@
-
 import asyncio
 import pytest
 from unittest.mock import AsyncMock
-
 
 
 class TestDataFlowE2E:
@@ -12,12 +10,14 @@ class TestDataFlowE2E:
     def mock_llm_client(self):
         """Mock LLM client that returns predictable responses."""
         client = AsyncMock()
+
         async def mock_stream(messages, system_prompt=None, context=None, tools=None):
             yield "Here's the implementation:\n"
             yield "```python\n"
             yield "def hello():\n"
             yield "    return 'world'\n"
             yield "```\n"
+
         client.stream = mock_stream
         return client
 
@@ -59,12 +59,12 @@ class TestDataFlowE2E:
         parser = ToolCallParser()
 
         # Simulate LLM response with tool call
-        response_with_tool = '''
+        response_with_tool = """
         I'll read the file for you.
         <tool_code>
         read_file(path="test.py")
         </tool_code>
-        '''
+        """
 
         tool_calls = parser.extract(response_with_tool)
         assert len(tool_calls) >= 1
@@ -73,6 +73,7 @@ class TestDataFlowE2E:
     @pytest.mark.asyncio
     async def test_error_propagation(self, mock_llm_client):
         """Test: Errors are properly propagated and formatted."""
+
         # Simulate API error
         async def failing_stream(*args, **kwargs):
             raise Exception("API rate limit")
@@ -119,7 +120,7 @@ class TestRealDeveloperScenarios:
             cortex.episodic.record(
                 event_type="conversation",
                 content=f"Turn {i}: User asked about feature {i}",
-                session_id="test-session"
+                session_id="test-session",
             )
 
         # Verify context doesn't explode
@@ -156,10 +157,10 @@ class TestRealDeveloperScenarios:
 
         # Quality checks
         assert "def " in generated_code  # Has function
-        assert ": " in generated_code    # Has type hints
-        assert '"""' in generated_code   # Has docstring
+        assert ": " in generated_code  # Has type hints
+        assert '"""' in generated_code  # Has docstring
         assert "raise " in generated_code  # Has error handling
-        assert "if " in generated_code   # Has validation
+        assert "if " in generated_code  # Has validation
 
 
 class TestStressScenarios:
@@ -180,7 +181,7 @@ class TestStressScenarios:
         special_prompts = [
             "What does `def __init__(self):` do?",
             "Explain the regex: ^[a-z]+$",
-            "Parse this JSON: {\"key\": \"value\"}",
+            'Parse this JSON: {"key": "value"}',
             "SQL query: SELECT * FROM users WHERE id = 1; --",
             "Shell command: rm -rf /",  # Should be safe in context
         ]
@@ -192,12 +193,13 @@ class TestStressScenarios:
     @pytest.mark.asyncio
     async def test_concurrent_sessions(self, cortex):
         """Multiple simulated users/sessions."""
+
         async def simulate_session(session_id: str, num_turns: int):
             for i in range(num_turns):
                 cortex.episodic.record(
                     event_type="conversation",
                     content=f"Session {session_id} turn {i}",
-                    session_id=session_id
+                    session_id=session_id,
                 )
                 await asyncio.sleep(0.01)  # Simulate real timing
 
@@ -216,5 +218,5 @@ class TestStressScenarios:
 
         assert len(user1_context) >= 10
         assert len(user2_context) >= 10
-        assert "user1" in user1_context[0]['content']
-        assert "user2" in user2_context[0]['content']
+        assert "user1" in user1_context[0]["content"]
+        assert "user2" in user2_context[0]["content"]

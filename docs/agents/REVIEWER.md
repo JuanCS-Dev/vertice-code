@@ -1,9 +1,9 @@
 # 👀 ReviewerAgent: The QA Guardian
 
-**Role:** Quality Validation + Constitutional AI Enforcement  
-**Personality:** Implacable code reviewer who finds everything  
-**Capabilities:** `READ_ONLY` + `GIT_OPS` (read diffs)  
-**Output:** LGTM / REQUEST_CHANGES / COMMENT with detailed feedback  
+**Role:** Quality Validation + Constitutional AI Enforcement
+**Personality:** Implacable code reviewer who finds everything
+**Capabilities:** `READ_ONLY` + `GIT_OPS` (read diffs)
+**Output:** LGTM / REQUEST_CHANGES / COMMENT with detailed feedback
 **Position:** Final gate in DevSquad workflow (after Refactorer)
 
 ---
@@ -394,7 +394,7 @@ def verify_password(plain: str, hashed: str) -> bool:
 def login(email, password):
     # SQL injection vulnerability
     user = db.execute(f"SELECT * FROM users WHERE email='{email}'")
-    
+
     # Weak password check (plain text!)
     if user and user.password == password:
         # Hardcoded secret
@@ -451,17 +451,17 @@ REVIEWER_CONFIG = {
 
 ### Problem: Reviewer rejects valid code
 
-**Cause:** False positive in security scanning  
+**Cause:** False positive in security scanning
 **Solution:** Add exception in config or review manually
 
 ### Problem: Reviewer approves bad code
 
-**Cause:** LLM model too lenient  
+**Cause:** LLM model too lenient
 **Solution:** Use stricter model (GPT-4, Claude Opus) or lower thresholds
 
 ### Problem: Review takes too long
 
-**Cause:** Large diff (1000+ lines)  
+**Cause:** Large diff (1000+ lines)
 **Solution:** Break into smaller commits
 
 ---
@@ -480,11 +480,11 @@ async def test_reviewer_detects_sql_injection(mock_llm, mock_mcp):
     +query = f"SELECT * FROM users WHERE email='{email}'"
     """
     task = AgentTask(request="Review code", context={"git_diff": diff})
-    
+
     response = await reviewer.execute(task)
-    
+
     assert response.data["status"] == "REQUEST_CHANGES"
-    assert any("SQL injection" in issue["message"] 
+    assert any("SQL injection" in issue["message"]
                for issue in response.data["issues"])
 
 @pytest.mark.asyncio
@@ -495,9 +495,9 @@ async def test_reviewer_approves_good_code(mock_llm, mock_mcp):
     +    return jwt.encode({"sub": user_id}, SECRET_KEY)
     """
     task = AgentTask(request="Review code", context={"git_diff": diff})
-    
+
     response = await reviewer.execute(task)
-    
+
     assert response.data["status"] == "LGTM"
     assert response.data["grade"] in ["A+", "A", "B+"]
 ```
@@ -558,7 +558,7 @@ if not constitutional["passed"]:
 
 ---
 
-**Version:** 1.0.0  
-**Last Updated:** 2025-11-22  
-**Status:** Production-ready ✅  
+**Version:** 1.0.0
+**Last Updated:** 2025-11-22
+**Status:** Production-ready ✅
 **Grade:** A+ (Boris Cherny approved)

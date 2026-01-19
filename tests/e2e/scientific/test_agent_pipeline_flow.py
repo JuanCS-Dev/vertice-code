@@ -25,8 +25,10 @@ from enum import Enum, auto
 # AGENT PIPELINE MODELS FOR TESTING
 # =============================================================================
 
+
 class RequestType(Enum):
     """Types of user requests."""
+
     CODE_GENERATION = auto()
     CODE_REVIEW = auto()
     BUG_FIX = auto()
@@ -39,6 +41,7 @@ class RequestType(Enum):
 @dataclass
 class UserRequest:
     """Parsed user request."""
+
     raw_input: str
     request_type: RequestType
     intent: str
@@ -49,6 +52,7 @@ class UserRequest:
 @dataclass
 class AgentPlan:
     """Plan created by agent."""
+
     steps: List[str]
     tools_needed: List[str]
     estimated_complexity: str  # low, medium, high
@@ -58,6 +62,7 @@ class AgentPlan:
 @dataclass
 class ExecutionResult:
     """Result of execution."""
+
     success: bool
     output: str
     artifacts: List[str] = field(default_factory=list)
@@ -96,7 +101,7 @@ class RequestParser:
             request_type=request_type,
             intent=self._extract_intent(raw_input, request_type),
             entities=self._extract_entities(raw_input),
-            context={}
+            context={},
         )
 
     def _extract_intent(self, raw: str, rtype: RequestType) -> str:
@@ -109,7 +114,8 @@ class RequestParser:
         entities = {}
         # Extract file paths
         import re
-        paths = re.findall(r'[\w/]+\.\w+', raw)
+
+        paths = re.findall(r"[\w/]+\.\w+", raw)
         if paths:
             entities["files"] = paths
         return entities
@@ -146,7 +152,7 @@ class MockAgent:
         plan = AgentPlan(
             steps=[f"Step 1 for {request.intent}", "Step 2: Execute", "Step 3: Verify"],
             tools_needed=["read_file", "write_file"],
-            estimated_complexity="medium"
+            estimated_complexity="medium",
         )
         self.plans_created.append(plan)
         return plan
@@ -158,7 +164,7 @@ class MockAgent:
             success=True,
             output=f"Executed {len(plan.steps)} steps",
             artifacts=[f"artifact_{i}" for i in range(len(plan.steps))],
-            duration_ms=10
+            duration_ms=10,
         )
         self.executions.append(result)
         return result
@@ -195,12 +201,9 @@ class AgentPipeline:
         result = await agent.execute(plan)
 
         # Record history
-        self.history.append({
-            "request": request,
-            "agent": agent_name,
-            "plan": plan,
-            "result": result
-        })
+        self.history.append(
+            {"request": request, "agent": agent_name, "plan": plan, "result": result}
+        )
 
         return result
 
@@ -208,6 +211,7 @@ class AgentPipeline:
 # =============================================================================
 # FIXTURES
 # =============================================================================
+
 
 @pytest.fixture
 def parser():
@@ -236,6 +240,7 @@ def mock_agent():
 # =============================================================================
 # 1. REQUEST PARSING TESTS
 # =============================================================================
+
 
 class TestRequestParsing:
     """Test request parsing and validation."""
@@ -320,69 +325,54 @@ class TestRequestParsing:
 # 2. AGENT ROUTING TESTS
 # =============================================================================
 
+
 class TestAgentRouting:
     """Test agent selection/routing."""
 
     def test_route_code_generation(self, router):
         """Code generation routes to coder."""
         request = UserRequest(
-            raw_input="create function",
-            request_type=RequestType.CODE_GENERATION,
-            intent="create"
+            raw_input="create function", request_type=RequestType.CODE_GENERATION, intent="create"
         )
         assert router.route(request) == "coder"
 
     def test_route_code_review(self, router):
         """Code review routes to reviewer."""
         request = UserRequest(
-            raw_input="review code",
-            request_type=RequestType.CODE_REVIEW,
-            intent="review"
+            raw_input="review code", request_type=RequestType.CODE_REVIEW, intent="review"
         )
         assert router.route(request) == "reviewer"
 
     def test_route_bug_fix(self, router):
         """Bug fix routes to coder."""
-        request = UserRequest(
-            raw_input="fix bug",
-            request_type=RequestType.BUG_FIX,
-            intent="fix"
-        )
+        request = UserRequest(raw_input="fix bug", request_type=RequestType.BUG_FIX, intent="fix")
         assert router.route(request) == "coder"
 
     def test_route_refactor(self, router):
         """Refactor routes to refactorer."""
         request = UserRequest(
-            raw_input="refactor",
-            request_type=RequestType.REFACTOR,
-            intent="refactor"
+            raw_input="refactor", request_type=RequestType.REFACTOR, intent="refactor"
         )
         assert router.route(request) == "refactorer"
 
     def test_route_documentation(self, router):
         """Documentation routes to documenter."""
         request = UserRequest(
-            raw_input="document",
-            request_type=RequestType.DOCUMENTATION,
-            intent="document"
+            raw_input="document", request_type=RequestType.DOCUMENTATION, intent="document"
         )
         assert router.route(request) == "documenter"
 
     def test_route_question(self, router):
         """Question routes to researcher."""
         request = UserRequest(
-            raw_input="what is this?",
-            request_type=RequestType.QUESTION,
-            intent="question"
+            raw_input="what is this?", request_type=RequestType.QUESTION, intent="question"
         )
         assert router.route(request) == "researcher"
 
     def test_route_command(self, router):
         """Command routes to executor."""
         request = UserRequest(
-            raw_input="/run tests",
-            request_type=RequestType.COMMAND,
-            intent="command"
+            raw_input="/run tests", request_type=RequestType.COMMAND, intent="command"
         )
         assert router.route(request) == "executor"
 
@@ -391,15 +381,14 @@ class TestAgentRouting:
 # 3. PLANNING PHASE TESTS
 # =============================================================================
 
+
 class TestPlanningPhase:
     """Test planning phase correctness."""
 
     def test_plan_has_steps(self, mock_agent):
         """Plan includes steps."""
         request = UserRequest(
-            raw_input="create function",
-            request_type=RequestType.CODE_GENERATION,
-            intent="create"
+            raw_input="create function", request_type=RequestType.CODE_GENERATION, intent="create"
         )
         plan = mock_agent.plan(request)
         assert len(plan.steps) > 0
@@ -407,9 +396,7 @@ class TestPlanningPhase:
     def test_plan_identifies_tools(self, mock_agent):
         """Plan identifies needed tools."""
         request = UserRequest(
-            raw_input="edit file",
-            request_type=RequestType.CODE_GENERATION,
-            intent="edit"
+            raw_input="edit file", request_type=RequestType.CODE_GENERATION, intent="edit"
         )
         plan = mock_agent.plan(request)
         assert len(plan.tools_needed) > 0
@@ -417,9 +404,7 @@ class TestPlanningPhase:
     def test_plan_estimates_complexity(self, mock_agent):
         """Plan estimates complexity."""
         request = UserRequest(
-            raw_input="create function",
-            request_type=RequestType.CODE_GENERATION,
-            intent="create"
+            raw_input="create function", request_type=RequestType.CODE_GENERATION, intent="create"
         )
         plan = mock_agent.plan(request)
         assert plan.estimated_complexity in ["low", "medium", "high"]
@@ -427,9 +412,7 @@ class TestPlanningPhase:
     def test_plan_is_recorded(self, mock_agent):
         """Plans are recorded for history."""
         request = UserRequest(
-            raw_input="create",
-            request_type=RequestType.CODE_GENERATION,
-            intent="create"
+            raw_input="create", request_type=RequestType.CODE_GENERATION, intent="create"
         )
         mock_agent.plan(request)
         assert len(mock_agent.plans_created) == 1
@@ -438,9 +421,7 @@ class TestPlanningPhase:
         """Multiple plans are independent."""
         for i in range(3):
             request = UserRequest(
-                raw_input=f"task {i}",
-                request_type=RequestType.CODE_GENERATION,
-                intent=f"task {i}"
+                raw_input=f"task {i}", request_type=RequestType.CODE_GENERATION, intent=f"task {i}"
             )
             mock_agent.plan(request)
         assert len(mock_agent.plans_created) == 3
@@ -450,28 +431,21 @@ class TestPlanningPhase:
 # 4. EXECUTION TESTS
 # =============================================================================
 
+
 class TestExecution:
     """Test execution with tools."""
 
     @pytest.mark.asyncio
     async def test_execution_returns_result(self, mock_agent):
         """Execution returns result."""
-        plan = AgentPlan(
-            steps=["step1"],
-            tools_needed=["tool1"],
-            estimated_complexity="low"
-        )
+        plan = AgentPlan(steps=["step1"], tools_needed=["tool1"], estimated_complexity="low")
         result = await mock_agent.execute(plan)
         assert isinstance(result, ExecutionResult)
 
     @pytest.mark.asyncio
     async def test_execution_success_flag(self, mock_agent):
         """Execution sets success flag."""
-        plan = AgentPlan(
-            steps=["step1"],
-            tools_needed=["tool1"],
-            estimated_complexity="low"
-        )
+        plan = AgentPlan(steps=["step1"], tools_needed=["tool1"], estimated_complexity="low")
         result = await mock_agent.execute(plan)
         assert result.success is True
 
@@ -479,9 +453,7 @@ class TestExecution:
     async def test_execution_produces_output(self, mock_agent):
         """Execution produces output."""
         plan = AgentPlan(
-            steps=["step1", "step2"],
-            tools_needed=["tool1"],
-            estimated_complexity="low"
+            steps=["step1", "step2"], tools_needed=["tool1"], estimated_complexity="low"
         )
         result = await mock_agent.execute(plan)
         assert len(result.output) > 0
@@ -490,9 +462,7 @@ class TestExecution:
     async def test_execution_creates_artifacts(self, mock_agent):
         """Execution creates artifacts."""
         plan = AgentPlan(
-            steps=["step1", "step2", "step3"],
-            tools_needed=["tool1"],
-            estimated_complexity="low"
+            steps=["step1", "step2", "step3"], tools_needed=["tool1"], estimated_complexity="low"
         )
         result = await mock_agent.execute(plan)
         assert len(result.artifacts) == 3
@@ -500,22 +470,14 @@ class TestExecution:
     @pytest.mark.asyncio
     async def test_execution_tracks_duration(self, mock_agent):
         """Execution tracks duration."""
-        plan = AgentPlan(
-            steps=["step1"],
-            tools_needed=["tool1"],
-            estimated_complexity="low"
-        )
+        plan = AgentPlan(steps=["step1"], tools_needed=["tool1"], estimated_complexity="low")
         result = await mock_agent.execute(plan)
         assert result.duration_ms > 0
 
     @pytest.mark.asyncio
     async def test_execution_is_recorded(self, mock_agent):
         """Executions are recorded."""
-        plan = AgentPlan(
-            steps=["step1"],
-            tools_needed=["tool1"],
-            estimated_complexity="low"
-        )
+        plan = AgentPlan(steps=["step1"], tools_needed=["tool1"], estimated_complexity="low")
         await mock_agent.execute(plan)
         assert len(mock_agent.executions) == 1
 
@@ -534,6 +496,7 @@ class TestExecution:
 # =============================================================================
 # 5. FULL PIPELINE TESTS
 # =============================================================================
+
 
 class TestFullPipeline:
     """Test full pipeline from request to response."""
@@ -592,6 +555,7 @@ class TestFullPipeline:
 # 6. CONTEXT PRESERVATION TESTS
 # =============================================================================
 
+
 class TestContextPreservation:
     """Test context preservation across pipeline."""
 
@@ -628,6 +592,7 @@ class TestContextPreservation:
 # 7. HANDOFF INTEGRITY TESTS
 # =============================================================================
 
+
 class TestHandoffIntegrity:
     """Test handoff integrity between components."""
 
@@ -648,9 +613,7 @@ class TestHandoffIntegrity:
     async def test_plan_to_execution_handoff(self, mock_agent):
         """Plan is correctly handed to execution."""
         request = UserRequest(
-            raw_input="create",
-            request_type=RequestType.CODE_GENERATION,
-            intent="create"
+            raw_input="create", request_type=RequestType.CODE_GENERATION, intent="create"
         )
         plan = mock_agent.plan(request)
         result = await mock_agent.execute(plan)
@@ -662,6 +625,7 @@ class TestHandoffIntegrity:
 # =============================================================================
 # 8. ERROR HANDLING IN PIPELINE TESTS
 # =============================================================================
+
 
 class TestPipelineErrorHandling:
     """Test error handling in pipeline."""
@@ -689,6 +653,7 @@ class TestPipelineErrorHandling:
 # =============================================================================
 # 9. RESPONSE FORMATTING TESTS
 # =============================================================================
+
 
 class TestResponseFormatting:
     """Test response formatting."""
@@ -724,6 +689,7 @@ class TestResponseFormatting:
 # 10. CONCURRENT PIPELINE TESTS
 # =============================================================================
 
+
 class TestConcurrentPipeline:
     """Test concurrent pipeline operations."""
 
@@ -738,13 +704,7 @@ class TestConcurrentPipeline:
     @pytest.mark.asyncio
     async def test_parallel_different_types(self, pipeline):
         """Parallel requests of different types."""
-        requests = [
-            "create function",
-            "review code",
-            "fix bug",
-            "document api",
-            "what is this?"
-        ]
+        requests = ["create function", "review code", "fix bug", "document api", "what is this?"]
         results = await asyncio.gather(*[pipeline.process(r) for r in requests])
         assert len(results) == 5
 
@@ -762,6 +722,7 @@ class TestConcurrentPipeline:
 # =============================================================================
 # 11. PERFORMANCE TESTS
 # =============================================================================
+
 
 class TestPipelinePerformance:
     """Test pipeline performance characteristics."""

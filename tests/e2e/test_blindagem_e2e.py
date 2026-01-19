@@ -187,9 +187,20 @@ class TestELPSymbols:
     def test_all_symbols_defined(self):
         """All required ELP symbols are defined."""
         required = [
-            "approved", "warning", "alert", "observed", "blocked",
-            "low", "medium", "high", "critical",
-            "agent", "tool", "thinking", "done", "error"
+            "approved",
+            "warning",
+            "alert",
+            "observed",
+            "blocked",
+            "low",
+            "medium",
+            "high",
+            "critical",
+            "agent",
+            "tool",
+            "thinking",
+            "done",
+            "error",
         ]
         for symbol in required:
             assert symbol in ELP, f"Missing ELP symbol: {symbol}"

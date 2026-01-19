@@ -7,10 +7,7 @@ Showcase das features que elevam nosso CLI ao nível Cursor
 import time
 from rich.console import Console
 from vertice_cli.tui.components.preview import UndoRedoStack
-from vertice_cli.tui.components.execution_timeline import (
-    ExecutionTimeline,
-    TimelinePlayback
-)
+from vertice_cli.tui.components.execution_timeline import ExecutionTimeline, TimelinePlayback
 
 
 def demo_undo_redo():
@@ -73,15 +70,15 @@ def demo_timeline_playback():
         ("process", "Process Data", 1.2),
         ("optimize", "Optimize Results", 0.6),
         ("save", "Save Output", 0.4),
-        ("cleanup", "Cleanup Resources", 0.2)
+        ("cleanup", "Cleanup Resources", 0.2),
     ]
 
     console.print("[yellow]⚡ Executando workflow...[/yellow]\n")
     for step_id, name, duration in workflow_steps:
-        timeline.record_event(step_id, 'start', {'name': name})
+        timeline.record_event(step_id, "start", {"name": name})
         console.print(f"▶ {name}")
         time.sleep(duration)
-        timeline.record_event(step_id, 'end')
+        timeline.record_event(step_id, "end")
 
     # Mostrar performance stats
     console.print("\n")
@@ -136,25 +133,25 @@ def demo_comparison():
         "Undo/Redo Stack",
         "[red]❌ 0%[/red]",
         "[green]✅ 100%[/green]",
-        "[bold green]+5pts[/bold green]"
+        "[bold green]+5pts[/bold green]",
     )
     table.add_row(
         "Timeline Replay",
         "[yellow]⚠️ 40%[/yellow]",
         "[green]✅ 100%[/green]",
-        "[bold green]+5pts[/bold green]"
+        "[bold green]+5pts[/bold green]",
     )
     table.add_row(
         "Visual History",
         "[red]❌ 0%[/red]",
         "[green]✅ 100%[/green]",
-        "[bold cyan]+bonus[/bold cyan]"
+        "[bold cyan]+bonus[/bold cyan]",
     )
     table.add_row(
         "Playback Controls",
         "[red]❌ 0%[/red]",
         "[green]✅ 100%[/green]",
-        "[bold cyan]+bonus[/bold cyan]"
+        "[bold cyan]+bonus[/bold cyan]",
     )
 
     console.print(table)
@@ -177,7 +174,9 @@ if __name__ == "__main__":
         input("\n[Press ENTER to start Timeline Playback demo]")
         demo_timeline_playback()
 
-        console.print("\n[bold green]✨ Demo completo! Features prontas para produção.[/bold green]\n")
+        console.print(
+            "\n[bold green]✨ Demo completo! Features prontas para produção.[/bold green]\n"
+        )
 
     except KeyboardInterrupt:
         console.print("\n[yellow]Demo interrompido pelo usuário.[/yellow]")

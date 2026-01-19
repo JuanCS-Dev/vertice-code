@@ -382,6 +382,7 @@ class TestPromptMutator:
     @pytest.fixture
     def mutator(self):
         from core.evolution.operators import PromptMutator
+
         return PromptMutator()
 
     @pytest.fixture
@@ -442,6 +443,7 @@ class TestToolMutator:
     @pytest.fixture
     def mutator(self):
         from core.evolution.operators import ToolMutator
+
         return ToolMutator()
 
     @pytest.fixture
@@ -454,7 +456,7 @@ class TestToolMutator:
 
     def test_propose_add_tool(self, mutator, variant_no_tools):
         """Test propose adds tool to empty toolset."""
-        with patch('random.random', return_value=0.5):  # Force add path
+        with patch("random.random", return_value=0.5):  # Force add path
             proposal = mutator.propose(variant_no_tools)
         assert proposal is not None
         assert proposal.target_key == "add"
@@ -462,7 +464,7 @@ class TestToolMutator:
 
     def test_propose_synergy_preference(self, mutator, variant_with_tools):
         """Test synergy-aware tool selection."""
-        with patch('random.random', return_value=0.5):  # Force add path
+        with patch("random.random", return_value=0.5):  # Force add path
             proposal = mutator.propose(variant_with_tools)
         if proposal and proposal.target_key == "add":
             # Should prefer tools with synergies to existing tools
@@ -470,7 +472,7 @@ class TestToolMutator:
 
     def test_propose_remove_tool(self, mutator, variant_with_tools):
         """Test propose can remove tools."""
-        with patch('random.random', return_value=0.9):  # Force remove path
+        with patch("random.random", return_value=0.9):  # Force remove path
             proposal = mutator.propose(variant_with_tools)
         if proposal:  # May still add if available is empty
             assert proposal.target_key in ["add", "remove"]
@@ -507,6 +509,7 @@ class TestWorkflowMutator:
     @pytest.fixture
     def mutator(self):
         from core.evolution.operators import WorkflowMutator
+
         return WorkflowMutator()
 
     @pytest.fixture
@@ -548,6 +551,7 @@ class TestParameterMutator:
     @pytest.fixture
     def mutator(self):
         from core.evolution.operators import ParameterMutator
+
         return ParameterMutator()
 
     @pytest.fixture
@@ -573,7 +577,7 @@ class TestParameterMutator:
     def test_propose_int_params_rounded(self, mutator):
         """Test integer parameters are rounded."""
         variant = AgentVariant(parameters={"max_tokens": 2000})
-        with patch('random.choice', return_value="max_tokens"):
+        with patch("random.choice", return_value="max_tokens"):
             proposal = mutator.propose(variant)
         if proposal:
             assert isinstance(proposal.proposed_value, int)
@@ -597,6 +601,7 @@ class TestCompositeMutator:
     @pytest.fixture
     def mutator(self):
         from core.evolution.mutator import CompositeMutator
+
         return CompositeMutator()
 
     @pytest.fixture
@@ -663,6 +668,7 @@ class TestSolutionArchive:
     @pytest.fixture
     def archive(self):
         from core.evolution.archive import SolutionArchive
+
         return SolutionArchive()
 
     @pytest.fixture
@@ -759,6 +765,7 @@ class TestSolutionArchive:
     def test_archive_enforces_max_size(self, archive):
         """Test archive respects max_archive_size."""
         from core.evolution.archive import SolutionArchive
+
         small_archive = SolutionArchive(config=EvolutionConfig(max_archive_size=3))
         for i in range(5):
             v = AgentVariant(
@@ -776,6 +783,7 @@ class TestBenchmarkEvaluator:
     @pytest.fixture
     def evaluator(self):
         from core.evolution.evaluator import BenchmarkEvaluator
+
         return BenchmarkEvaluator()
 
     @pytest.fixture
@@ -789,6 +797,7 @@ class TestBenchmarkEvaluator:
                 "code_generation": 0.80,
                 "debugging": 0.70,
             }
+
         return BenchmarkEvaluator(benchmark_runner=custom_runner)
 
     @pytest.fixture
@@ -826,7 +835,7 @@ class TestBenchmarkEvaluator:
     @pytest.mark.asyncio
     async def test_evaluate_with_custom_benchmark(self, custom_benchmark_evaluator, variant):
         """Test evaluation with custom benchmark runner."""
-        result = await custom_benchmark_evaluator.evaluate(variant)
+        await custom_benchmark_evaluator.evaluate(variant)
         assert variant.benchmark_results["overall"] == 0.75
         assert variant.benchmark_results["code_generation"] == 0.80
 
@@ -1188,6 +1197,7 @@ class TestSolutionArchiveExtended:
     @pytest.fixture
     def archive_with_variants(self):
         from core.evolution.archive import SolutionArchive
+
         archive = SolutionArchive(config=EvolutionConfig(max_archive_size=10))
         # Add some variants with different niches
         for i in range(5):
@@ -1204,6 +1214,7 @@ class TestSolutionArchiveExtended:
         """Test that high novelty variant replaces worst."""
         # Fill archive to max
         from core.evolution.archive import SolutionArchive
+
         archive = SolutionArchive(config=EvolutionConfig(max_archive_size=3))
         for i in range(3):
             v = AgentVariant(
@@ -1226,6 +1237,7 @@ class TestSolutionArchiveExtended:
     def test_new_niche_case(self):
         """Test that new niche variant gets added."""
         from core.evolution.archive import SolutionArchive
+
         archive = SolutionArchive(config=EvolutionConfig(max_archive_size=3))
         # Fill with same niche
         for i in range(3):
@@ -1252,7 +1264,7 @@ class TestSolutionArchiveExtended:
     def test_get_lineage_break(self, archive_with_variants):
         """Test lineage breaks when parent not in archive."""
         # Get a variant and check its lineage
-        best = archive_with_variants.get_best(1)[0]
+        archive_with_variants.get_best(1)[0]
         # Create child with parent_id that doesn't exist
         child = AgentVariant(
             prompts={"system": "Child"},
@@ -1266,13 +1278,15 @@ class TestSolutionArchiveExtended:
     def test_behavior_distance_different_length(self):
         """Test behavior distance with different length descriptors."""
         from core.evolution.archive import SolutionArchive
+
         archive = SolutionArchive()
         dist = archive._behavior_distance([0.1, 0.2], [0.1, 0.2, 0.3])
-        assert dist == float('inf')
+        assert dist == float("inf")
 
     def test_get_worst_variant_empty(self):
         """Test get_worst_variant with empty archive."""
         from core.evolution.archive import SolutionArchive
+
         archive = SolutionArchive()
         worst = archive._get_worst_variant()
         assert worst is None
@@ -1280,6 +1294,7 @@ class TestSolutionArchiveExtended:
     def test_persistence_to_disk(self, tmp_path):
         """Test archive persistence to disk."""
         from core.evolution.archive import SolutionArchive
+
         persistence_path = tmp_path / "archive.json"
         archive = SolutionArchive(persistence_path=persistence_path)
         # Add variant
@@ -1295,24 +1310,27 @@ class TestSolutionArchiveExtended:
         """Test archive loading from disk."""
         from core.evolution.archive import SolutionArchive
         import json
+
         # Create archive file manually
         persistence_path = tmp_path / "archive.json"
         data = {
-            "variants": [{
-                "id": "test_variant",
-                "prompts": {"system": "Loaded prompt"},
-                "tools": ["tool_a"],
-                "workflow": {},
-                "parameters": {},
-                "fitness_score": 0.8,
-                "behavior_descriptor": [0.5, 0.5, 0.5],
-                "novelty_score": 0.5,
-                "niche_id": "5_5_5",
-                "benchmark_results": {},
-                "generation": 1,
-                "parent_id": None,
-                "created_at": "2025-01-01T00:00:00",
-            }],
+            "variants": [
+                {
+                    "id": "test_variant",
+                    "prompts": {"system": "Loaded prompt"},
+                    "tools": ["tool_a"],
+                    "workflow": {},
+                    "parameters": {},
+                    "fitness_score": 0.8,
+                    "behavior_descriptor": [0.5, 0.5, 0.5],
+                    "novelty_score": 0.5,
+                    "niche_id": "5_5_5",
+                    "benchmark_results": {},
+                    "generation": 1,
+                    "parent_id": None,
+                    "created_at": "2025-01-01T00:00:00",
+                }
+            ],
             "fitness_history": [0.8],
             "generation_count": 1,
             "niche_map": {"5_5_5": "test_variant"},
@@ -1329,10 +1347,13 @@ class TestSolutionArchiveExtended:
     def test_rejected_variant_logged(self):
         """Test that rejected variants are logged."""
         from core.evolution.archive import SolutionArchive
-        archive = SolutionArchive(config=EvolutionConfig(
-            max_archive_size=2,
-            novelty_threshold=0.99,  # Very high threshold
-        ))
+
+        archive = SolutionArchive(
+            config=EvolutionConfig(
+                max_archive_size=2,
+                novelty_threshold=0.99,  # Very high threshold
+            )
+        )
         # Add two variants
         for i in range(2):
             v = AgentVariant(
@@ -1353,6 +1374,7 @@ class TestSolutionArchiveExtended:
     def test_niche_improvement_case(self):
         """Test niche improvement replaces existing variant (lines 107-113)."""
         from core.evolution.archive import SolutionArchive
+
         archive = SolutionArchive(config=EvolutionConfig(max_archive_size=5))
         # Add initial variant
         initial = AgentVariant(
@@ -1361,7 +1383,6 @@ class TestSolutionArchiveExtended:
             behavior_descriptor=[0.5, 0.5, 0.5],
         )
         archive.add(initial)
-        initial_niche = initial.niche_id
         # Add variant in same niche with better fitness
         improved = AgentVariant(
             prompts={"system": "Improved"},
@@ -1379,6 +1400,7 @@ class TestBenchmarkEvaluatorEdgeCases:
     def evaluator_with_timeout(self):
         from core.evolution.evaluator import BenchmarkEvaluator
         from core.evolution.types import EvolutionConfig
+
         config = EvolutionConfig(benchmark_timeout_seconds=0.01)  # Very short
         return BenchmarkEvaluator(config=config)
 
@@ -1387,9 +1409,10 @@ class TestBenchmarkEvaluatorEdgeCases:
         """Test IMPROVED status path (lines 147-156)."""
         from core.evolution.evaluator import BenchmarkEvaluator
         from core.evolution.types import EvolutionConfig
+
         config = EvolutionConfig(
             improvement_threshold=0.01,  # Low threshold
-            verification_threshold=0.5,   # Lower verification threshold
+            verification_threshold=0.5,  # Lower verification threshold
         )
         evaluator = BenchmarkEvaluator(config=config)
 
@@ -1518,6 +1541,7 @@ class TestMutatorEdgeCases:
     def test_composite_mutator_propose(self):
         """Test CompositeMutator propose (lines 66-84)."""
         from core.evolution.mutator import CompositeMutator
+
         mutator = CompositeMutator()
         # Variant with basic content
         variant = AgentVariant(
@@ -1534,6 +1558,7 @@ class TestMutatorEdgeCases:
         """Test mutator apply when no handler found (lines 92-93)."""
         from core.evolution.mutator import CompositeMutator
         from core.evolution.types import MutationProposal, MutationType
+
         mutator = CompositeMutator(mutators=[])  # Empty mutators
         variant = AgentVariant(prompts={"system": "Test"})
         # Create proposal with architecture type (no handler)
@@ -1554,6 +1579,7 @@ class TestOperatorsEdgeCases:
     def test_prompt_mutator_empty_prompts(self):
         """Test PromptMutator with empty prompts."""
         from core.evolution.operators import PromptMutator
+
         mutator = PromptMutator()
         variant = AgentVariant(prompts={})
         # Should propose initializing system prompt
@@ -1565,6 +1591,7 @@ class TestOperatorsEdgeCases:
         """Test ToolMutator synergy-based selection."""
         from core.evolution.operators import ToolMutator
         import random
+
         random.seed(42)
         mutator = ToolMutator()
         # Variant with file_reader (should prefer code_search for synergy)
@@ -1576,16 +1603,25 @@ class TestOperatorsEdgeCases:
     def test_workflow_mutator_patterns(self):
         """Test WorkflowMutator pattern selection."""
         from core.evolution.operators import WorkflowMutator
+
         mutator = WorkflowMutator()
         variant = AgentVariant(workflow={"pattern": "default"})
         proposal = mutator.propose(variant)
         assert proposal is not None
-        assert proposal.proposed_value in ["react", "cot", "tot", "reflexion", "self_consistency", "iterative"]
+        assert proposal.proposed_value in [
+            "react",
+            "cot",
+            "tot",
+            "reflexion",
+            "self_consistency",
+            "iterative",
+        ]
 
     def test_parameter_mutator_no_change(self):
         """Test ParameterMutator when perturbation results in same value."""
         from core.evolution.operators import ParameterMutator
         import random
+
         # Test multiple times since it uses random
         random.seed(123)
         mutator = ParameterMutator()
@@ -1601,10 +1637,13 @@ class TestArchiveNewNicheCase:
     def test_new_niche_replaces_worst(self):
         """Test that new niche variant replaces worst."""
         from core.evolution.archive import SolutionArchive
-        archive = SolutionArchive(config=EvolutionConfig(
-            max_archive_size=3,
-            novelty_threshold=0.99,  # High threshold so novelty doesn't trigger
-        ))
+
+        archive = SolutionArchive(
+            config=EvolutionConfig(
+                max_archive_size=3,
+                novelty_threshold=0.99,  # High threshold so novelty doesn't trigger
+            )
+        )
         # Fill archive with same niche
         for i in range(3):
             v = AgentVariant(
@@ -1623,7 +1662,7 @@ class TestArchiveNewNicheCase:
             behavior_descriptor=[0.95, 0.95, 0.95],  # Different niche
         )
         archive._niche_map.pop(new_niche.niche_id, None)  # Ensure niche is new
-        result = archive.add(new_niche)
+        archive.add(new_niche)
         # Should be added as new niche
         assert len(archive._variants) <= 3
 
@@ -1726,6 +1765,7 @@ class TestEvolutionTypesEdgeCases:
     def test_kappa_metrics_acceleration_compute(self):
         """Test KappaMetrics acceleration computation."""
         from core.evolution.types import KappaMetrics
+
         metrics = KappaMetrics()
         # Need at least 3 points for acceleration - use accelerating pattern
         history = [0.5, 0.55, 0.65, 0.85]  # Accelerating improvement
@@ -1738,6 +1778,7 @@ class TestEvolutionTypesEdgeCases:
     def test_agent_variant_from_dict_with_kappa(self):
         """Test AgentVariant.from_dict with kappa_metrics (line 234)."""
         from core.evolution.types import AgentVariant
+
         data = {
             "id": "test123",
             "parent_id": None,
@@ -1774,6 +1815,7 @@ class TestArchiveGetWorstAndNiche:
     def test_archive_get_stats_empty(self):
         """Test archive stats when empty."""
         from core.evolution.archive import SolutionArchive
+
         archive = SolutionArchive()
         stats = archive.get_stats()
         assert stats["size"] == 0
@@ -1782,6 +1824,7 @@ class TestArchiveGetWorstAndNiche:
     def test_archive_get_lineage_not_found(self):
         """Test archive get_lineage when variant not found (line 240)."""
         from core.evolution.archive import SolutionArchive
+
         archive = SolutionArchive()
         # Add one variant
         v = AgentVariant(prompts={"system": "Test"})
@@ -1816,6 +1859,7 @@ class TestEvaluatorRemainingCases:
     async def test_compare_variants_unevaluated(self):
         """Test compare triggers evaluation (line 240)."""
         from core.evolution.evaluator import BenchmarkEvaluator
+
         evaluator = BenchmarkEvaluator()
         a = AgentVariant(prompts={"system": "A"})
         b = AgentVariant(prompts={"system": "B"})
@@ -1843,6 +1887,7 @@ class TestEvaluatorRemainingCases:
     def test_check_significance_empty_results(self):
         """Test _check_significance with empty results (line 380)."""
         from core.evolution.evaluator import BenchmarkEvaluator
+
         evaluator = BenchmarkEvaluator()
         # Empty results should return False
         result = evaluator._check_significance({}, {"a": 0.5})
@@ -1853,6 +1898,7 @@ class TestEvaluatorRemainingCases:
     def test_check_significance_no_common_keys(self):
         """Test _check_significance with no common keys (line 380)."""
         from core.evolution.evaluator import BenchmarkEvaluator
+
         evaluator = BenchmarkEvaluator()
         result = evaluator._check_significance(
             {"a": 0.5},
@@ -1863,6 +1909,7 @@ class TestEvaluatorRemainingCases:
     def test_estimate_false_positive_zero_samples(self):
         """Test _estimate_false_positive_risk with zero samples (line 395)."""
         from core.evolution.evaluator import BenchmarkEvaluator
+
         evaluator = BenchmarkEvaluator()
         risk = evaluator._estimate_false_positive_risk(0.9, 0)
         assert risk == 1.0
@@ -1883,10 +1930,12 @@ class TestMutatorLine84:
             def apply(self, variant, proposal):
                 return variant.clone()
 
-        mutator = CompositeMutator(mutators=[
-            AlwaysNoneMutator(),
-            AlwaysNoneMutator(),
-        ])
+        mutator = CompositeMutator(
+            mutators=[
+                AlwaysNoneMutator(),
+                AlwaysNoneMutator(),
+            ]
+        )
         variant = AgentVariant(prompts={"system": "Test"})
         result = mutator.propose(variant)
         assert result is None
@@ -1898,6 +1947,7 @@ class TestArchiveNewNichePath:
     def test_new_niche_when_full_replaces_worst(self):
         """Test new niche variant replaces worst when archive is full."""
         from core.evolution.archive import SolutionArchive
+
         archive = SolutionArchive(config=EvolutionConfig(max_archive_size=2))
 
         # Fill archive with same niche
@@ -2054,6 +2104,7 @@ class TestToolMutatorEdgeCases:
         """Test when synergy_scores is empty (line 188)."""
         from core.evolution.operators import ToolMutator
         import random
+
         random.seed(42)
 
         mutator = ToolMutator()
@@ -2074,6 +2125,7 @@ class TestToolMutatorEdgeCases:
         """Test removal when tools have no synergies (line 215)."""
         from core.evolution.operators import ToolMutator
         import random
+
         random.seed(123)
 
         mutator = ToolMutator()
@@ -2093,6 +2145,7 @@ class TestToolMutatorEdgeCases:
         """Test when no tools and all available already used (line 227)."""
         from core.evolution.operators import ToolMutator
         import random
+
         random.seed(456)
 
         mutator = ToolMutator()
@@ -2101,7 +2154,7 @@ class TestToolMutatorEdgeCases:
         variant = AgentVariant(tools=all_tools)
 
         # Force random to pick removal path but no tools to remove logic
-        proposals = [mutator.propose(variant) for _ in range(10)]
+        [mutator.propose(variant) for _ in range(10)]
         # Some may be None or remove proposals
         assert True  # Just verify no crash
 
@@ -2112,6 +2165,7 @@ class TestTypesKappaEmptyVelocities:
     def test_kappa_same_timesteps(self):
         """Test when all timesteps are same (dt=0)."""
         from core.evolution.types import KappaMetrics
+
         metrics = KappaMetrics()
         # Same timestamps - all dt=0
         history = [0.5, 0.6, 0.7]
@@ -2126,6 +2180,7 @@ class TestEvaluatorFalsePositiveEdge:
     def test_estimate_false_positive_low_samples(self):
         """Test _estimate_false_positive_risk with low samples."""
         from core.evolution.evaluator import BenchmarkEvaluator
+
         evaluator = BenchmarkEvaluator()
         # Compare risk with 1 vs 10 samples - more samples = lower risk
         risk_1_sample = evaluator._estimate_false_positive_risk(0.5, 1)
@@ -2229,8 +2284,10 @@ class TestEvolutionMixinImprovedPath:
         """Test evolve method triggering IMPROVED status (lines 162-168)."""
         from core.evolution.mixin import EvolutionMixin
         from core.evolution.types import (
-            EvolutionConfig, AgentVariant, EvolutionStatus,
-            EvolutionResult
+            EvolutionConfig,
+            AgentVariant,
+            EvolutionStatus,
+            EvolutionResult,
         )
         from unittest.mock import AsyncMock, patch
 
@@ -2269,7 +2326,7 @@ class TestEvolutionMixinImprovedPath:
         )
 
         # Mock the evaluator's evaluate method
-        with patch.object(agent._evaluator, 'evaluate', new_callable=AsyncMock) as mock_eval:
+        with patch.object(agent._evaluator, "evaluate", new_callable=AsyncMock) as mock_eval:
             mock_eval.return_value = mock_result
 
             # Run evolve
@@ -2300,7 +2357,7 @@ class TestEvolutionMixinImprovedPath:
         )
 
         # Run evolve
-        result = await agent.evolve()
+        await agent.evolve()
         # Method should complete without error
 
 
@@ -2344,7 +2401,7 @@ class TestToolMutatorNoSynergyScores:
 
         # Force removal path by seeding random
         random.seed(1)
-        proposal = mutator.propose(variant)
+        mutator.propose(variant)
 
 
 class TestWorkflowMutatorOnlyCurrentPattern:
@@ -2401,9 +2458,8 @@ class TestToolMutatorEmptySynergyScores:
         )
 
         # Force random.random() < 0.75 and patch the dict creation
-        with patch('random.random', return_value=0.5):
+        with patch("random.random", return_value=0.5):
             # Patch the synergy_scores dict after creation
-            original_propose = mutator.propose
 
             def patched_propose(v):
                 # Call original logic but intercept synergy_scores
@@ -2420,6 +2476,7 @@ class TestToolMutatorEmptySynergyScores:
 
                 # Force bool to be False
                 import random as rand
+
                 if available and rand.random() < 0.75:
                     if synergy_scores:
                         max_synergy = max(synergy_scores.values())
@@ -2452,7 +2509,7 @@ class TestToolMutatorEmptySynergyScores:
         )
 
         # Force random.random() > 0.75 to skip add branch, enter remove branch
-        with patch('random.random', return_value=0.8):
+        with patch("random.random", return_value=0.8):
             proposal = mutator.propose(variant)
             # Should propose removal since variant has tools
             assert proposal is not None
@@ -2507,7 +2564,9 @@ class TestToolMutatorEdgeCasesForce:
 
         # Test that the normal paths work correctly
         variant_empty = AgentVariant(id="v1", tools=[], niche_id="test")
-        variant_full = AgentVariant(id="v2", tools=list(mutator.TOOL_CATALOG.keys()), niche_id="test")
+        variant_full = AgentVariant(
+            id="v2", tools=list(mutator.TOOL_CATALOG.keys()), niche_id="test"
+        )
         variant_partial = AgentVariant(id="v3", tools=["linter", "code_search"], niche_id="test")
 
         # Run many times to exercise both branches

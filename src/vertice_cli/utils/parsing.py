@@ -101,10 +101,12 @@ class JSONExtractor:
         self.strategy = strategy
 
     @overload
-    def extract(self, text: str) -> dict[str, Any]: ...
+    def extract(self, text: str) -> dict[str, Any]:
+        ...
 
     @overload
-    def extract(self, text: str, default: T) -> dict[str, Any] | T: ...
+    def extract(self, text: str, default: T) -> dict[str, Any] | T:
+        ...
 
     def extract(
         self,

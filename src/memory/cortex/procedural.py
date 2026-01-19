@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 class ProcedureType(str, Enum):
     """Types of procedural entries (MIRIX spec)."""
+
     WORKFLOW = "workflow"
     GUIDE = "guide"
     SCRIPT = "script"
@@ -50,6 +51,7 @@ class Procedure:
         created_at: Creation timestamp.
         last_used: Last usage timestamp.
     """
+
     id: str
     entry_type: ProcedureType
     description: str
@@ -111,7 +113,8 @@ class ProceduralMemory:
     def _init_db(self) -> None:
         """Initialize database schema."""
         with self.pool.get_conn(self.db_path) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS procedures (
                     id TEXT PRIMARY KEY,
                     entry_type TEXT NOT NULL,
@@ -124,13 +127,10 @@ class ProceduralMemory:
                     created_at TEXT,
                     last_used TEXT
                 )
-            """)
-            conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_proc_type ON procedures(entry_type)"
+            """
             )
-            conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_proc_agent ON procedures(agent_id)"
-            )
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_proc_type ON procedures(entry_type)")
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_proc_agent ON procedures(agent_id)")
 
     def store(
         self,
@@ -168,7 +168,7 @@ class ProceduralMemory:
                     agent_id,
                     json.dumps(metadata or {}),
                     datetime.now().isoformat(),
-                )
+                ),
             )
 
         logger.debug(f"Stored procedure {procedure_id}: {description[:50]}...")
@@ -186,10 +186,7 @@ class ProceduralMemory:
         """
         with self.pool.get_conn(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
-            row = conn.execute(
-                "SELECT * FROM procedures WHERE id = ?",
-                (procedure_id,)
-            ).fetchone()
+            row = conn.execute("SELECT * FROM procedures WHERE id = ?", (procedure_id,)).fetchone()
 
             if row:
                 return self._row_to_procedure(row)
@@ -242,7 +239,7 @@ class ProceduralMemory:
                                  NULLIF(success_count + failure_count, 0)) DESC,
                                  created_at DESC
                         LIMIT ?""",
-                    (*params, limit)
+                    (*params, limit),
                 ).fetchall()
 
                 procedures = [self._row_to_procedure(row) for row in rows]
@@ -270,12 +267,10 @@ class ProceduralMemory:
                     SET {column} = {column} + 1,
                         last_used = ?
                     WHERE id = ?""",
-                (datetime.now().isoformat(), procedure_id)
+                (datetime.now().isoformat(), procedure_id),
             )
 
-        logger.debug(
-            f"Recorded {'success' if success else 'failure'} for {procedure_id}"
-        )
+        logger.debug(f"Recorded {'success' if success else 'failure'} for {procedure_id}")
 
     async def get_best_for_task(
         self,

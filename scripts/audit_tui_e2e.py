@@ -132,7 +132,7 @@ def test_managers(bridge):
 
     # ContextManager
     try:
-        stats = bridge.get_token_stats()
+        bridge.get_token_stats()
         log_result("managers", "ContextManager.get_token_stats", True, "tokens tracked")
     except Exception as e:
         log_result("managers", "ContextManager", False, str(e)[:50])

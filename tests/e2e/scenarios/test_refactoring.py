@@ -20,6 +20,7 @@ from prometheus.sandbox.executor import SandboxExecutor
 # FIXTURES
 # ==============================================================================
 
+
 @pytest.fixture
 def legacy_codebase(tmp_path):
     """Create a codebase with code that needs refactoring."""
@@ -28,7 +29,8 @@ def legacy_codebase(tmp_path):
     (project_dir / "src").mkdir()
 
     # File with long function that needs extraction
-    (project_dir / "src" / "long_function.py").write_text('''"""Module with overly long function."""
+    (project_dir / "src" / "long_function.py").write_text(
+        '''"""Module with overly long function."""
 
 def process_order(order_data):
     """Process an order - does too many things."""
@@ -74,10 +76,12 @@ def process_order(order_data):
         "shipping": shipping,
         "total": total
     }
-''')
+'''
+    )
 
     # File with duplicated code
-    (project_dir / "src" / "duplicated.py").write_text('''"""Module with duplicated code."""
+    (project_dir / "src" / "duplicated.py").write_text(
+        '''"""Module with duplicated code."""
 
 def process_user_a(user):
     """Process user type A."""
@@ -108,10 +112,12 @@ def process_user_c(user):
     if not email:
         return None
     return {"name": name.strip().title(), "email": email.lower()}
-''')
+'''
+    )
 
     # File with deep nesting
-    (project_dir / "src" / "deeply_nested.py").write_text('''"""Module with deeply nested code."""
+    (project_dir / "src" / "deeply_nested.py").write_text(
+        '''"""Module with deeply nested code."""
 
 def check_permissions(user, resource, action):
     """Check if user can perform action on resource."""
@@ -140,10 +146,12 @@ def check_permissions(user, resource, action):
             return False
     else:
         return False
-''')
+'''
+    )
 
     # File with magic numbers
-    (project_dir / "src" / "magic_numbers.py").write_text('''"""Module with magic numbers."""
+    (project_dir / "src" / "magic_numbers.py").write_text(
+        '''"""Module with magic numbers."""
 
 def calculate_price(base_price, quantity):
     """Calculate final price."""
@@ -172,7 +180,8 @@ def calculate_shipping_time(distance):
         return 5
     else:
         return 7
-''')
+'''
+    )
 
     return project_dir
 
@@ -180,6 +189,7 @@ def calculate_shipping_time(distance):
 # ==============================================================================
 # TEST CLASS: Extract Method Refactoring
 # ==============================================================================
+
 
 @pytest.mark.e2e
 class TestExtractMethodRefactoring:
@@ -257,12 +267,15 @@ def process_order(order_data):
         assert "def calculate_shipping" in content
 
         # Verify functionality preserved
-        test_code = content + """
+        test_code = (
+            content
+            + """
 result = process_order({"items": [{"price": 10, "quantity": 2}]})
 assert result["subtotal"] == 20
 assert "error" not in result
 print("Assertions passed")
 """
+        )
         sandbox = SandboxExecutor()
         result = await sandbox.execute(test_code)
         assert result.success, f"Sandbox execution failed: {result.stderr}"
@@ -297,13 +310,16 @@ process_user_c = normalize_user
         assert content.count("name.strip().title()") == 1  # Only in one place
 
         # Verify functionality preserved
-        test_code = content + """
+        test_code = (
+            content
+            + """
 test_user = {"name": "  john doe  ", "email": "JOHN@EXAMPLE.COM"}
 result = process_user_a(test_user)
 assert result["name"] == "John Doe"
 assert result["email"] == "john@example.com"
 print("Assertions passed")
 """
+        )
         sandbox = SandboxExecutor()
         result = await sandbox.execute(test_code)
         assert result.success, f"Sandbox execution failed: {result.stderr}"
@@ -313,6 +329,7 @@ print("Assertions passed")
 # ==============================================================================
 # TEST CLASS: Flatten Nested Code
 # ==============================================================================
+
 
 @pytest.mark.e2e
 class TestFlattenNestedCode:
@@ -362,13 +379,16 @@ def check_permissions(user, resource, action):
         assert max_indent <= 8, f"Max indent {max_indent} too deep"
 
         # Verify functionality
-        test_code = content + """
+        test_code = (
+            content
+            + """
 check = check_permissions
 assert check(None, None, "read") is False
 assert check({"active": True, "role": "admin"}, None, "write") is True
 assert check({"active": True, "role": "user", "id": 1}, {"owner": 1}, "write") is True
 print("Assertions passed")
 """
+        )
         sandbox = SandboxExecutor()
         result = await sandbox.execute(test_code)
         assert result.success, f"Sandbox execution failed: {result.stderr}"
@@ -408,7 +428,9 @@ def process_payment(payment):
 '''
         file_path.write_text(file_content)
 
-        test_code = file_content + """
+        test_code = (
+            file_content
+            + """
 process = process_payment
 # Test guard clauses
 try:
@@ -426,6 +448,7 @@ result = process({"amount": 100, "method": "card"})
 assert result["status"] == "charged"
 print("Assertions passed")
 """
+        )
         sandbox = SandboxExecutor()
         result = await sandbox.execute(test_code)
         assert result.success, f"Sandbox execution failed: {result.stderr}"
@@ -435,6 +458,7 @@ print("Assertions passed")
 # ==============================================================================
 # TEST CLASS: Replace Magic Numbers
 # ==============================================================================
+
 
 @pytest.mark.e2e
 class TestReplaceMagicNumbers:
@@ -548,12 +572,15 @@ def can_cancel(status: OrderStatus) -> bool:
 '''
         file_path.write_text(file_content)
 
-        test_code = file_content + """
+        test_code = (
+            file_content
+            + """
 fee = calculate_processing_fee(100, PaymentMethod.CREDIT_CARD)
 assert abs(fee - 2.9) < 0.001
 assert calculate_processing_fee(100, PaymentMethod.BANK_TRANSFER) == 0
 print("Assertions passed")
 """
+        )
         sandbox = SandboxExecutor()
         result = await sandbox.execute(test_code)
         assert result.success, f"Sandbox execution failed: {result.stderr}"
@@ -564,6 +591,7 @@ print("Assertions passed")
 # TEST CLASS: Improve Code Structure
 # ==============================================================================
 
+
 @pytest.mark.e2e
 class TestImproveCodeStructure:
     """Tests for improving overall code structure."""
@@ -573,7 +601,8 @@ class TestImproveCodeStructure:
         src_dir = legacy_codebase / "src"
 
         # Create focused modules
-        (src_dir / "validation.py").write_text('''"""Validation utilities."""
+        (src_dir / "validation.py").write_text(
+            '''"""Validation utilities."""
 
 def validate_email(email):
     """Validate email format."""
@@ -586,9 +615,11 @@ def validate_phone(phone):
     import re
     cleaned = re.sub(r'[^0-9]', '', phone)
     return len(cleaned) == 10
-''')
+'''
+        )
 
-        (src_dir / "formatting.py").write_text('''"""Formatting utilities."""
+        (src_dir / "formatting.py").write_text(
+            '''"""Formatting utilities."""
 
 def format_currency(amount):
     """Format amount as currency."""
@@ -601,9 +632,11 @@ def format_phone(phone):
     if len(digits) == 10:
         return f"({digits[:3]}) {digits[3:6]}-{digits[6:]}"
     return phone
-''')
+'''
+        )
 
-        (src_dir / "calculations.py").write_text('''"""Calculation utilities."""
+        (src_dir / "calculations.py").write_text(
+            '''"""Calculation utilities."""
 
 def calculate_tax(amount, rate=0.08):
     """Calculate tax amount."""
@@ -612,7 +645,8 @@ def calculate_tax(amount, rate=0.08):
 def calculate_discount(amount, percentage):
     """Calculate discount amount."""
     return round(amount * (percentage / 100), 2)
-''')
+'''
+        )
 
         # Verify modules exist and are focused
         assert (src_dir / "validation.py").exists()
@@ -629,7 +663,8 @@ def calculate_discount(amount, percentage):
         """Adds type hints to improve clarity."""
         file_path = legacy_codebase / "src" / "typed_module.py"
 
-        file_path.write_text('''"""Module with comprehensive type hints."""
+        file_path.write_text(
+            '''"""Module with comprehensive type hints."""
 from typing import Optional, List, Dict, Union, TypedDict
 from decimal import Decimal
 
@@ -680,7 +715,8 @@ def process_orders(
         "count": len(orders),
         "total": sum(calculate_order_total(o) for o in orders)
     }
-''')
+'''
+        )
 
         content = file_path.read_text()
 
@@ -695,7 +731,8 @@ def process_orders(
         src_dir = legacy_codebase / "src"
 
         # OrderValidator - only validates
-        (src_dir / "order_validator.py").write_text('''"""Order validation - single responsibility."""
+        (src_dir / "order_validator.py").write_text(
+            '''"""Order validation - single responsibility."""
 
 class OrderValidator:
     """Validates orders."""
@@ -708,10 +745,12 @@ class OrderValidator:
         if not order.get("customer_id"):
             errors.append("Order must have customer")
         return len(errors) == 0, errors
-''')
+'''
+        )
 
         # OrderCalculator - only calculates
-        (src_dir / "order_calculator.py").write_text('''"""Order calculations - single responsibility."""
+        (src_dir / "order_calculator.py").write_text(
+            '''"""Order calculations - single responsibility."""
 
 class OrderCalculator:
     """Calculates order totals."""
@@ -730,10 +769,12 @@ class OrderCalculator:
         """Calculate total with tax."""
         subtotal = self.calculate_subtotal(order)
         return subtotal * (1 + self.tax_rate)
-''')
+'''
+        )
 
         # OrderProcessor - orchestrates
-        (src_dir / "order_processor.py").write_text('''"""Order processing - orchestration."""
+        (src_dir / "order_processor.py").write_text(
+            '''"""Order processing - orchestration."""
 from order_validator import OrderValidator
 from order_calculator import OrderCalculator
 
@@ -753,14 +794,21 @@ class OrderProcessor:
 
         total = self.calculator.calculate_total(order)
         return {"success": True, "total": total}
-''')
+'''
+        )
 
         # Verify each class has single responsibility
         validator_content = (src_dir / "order_validator.py").read_text()
         calculator_content = (src_dir / "order_calculator.py").read_text()
 
-        assert "calculate" not in validator_content.lower() or "calculate" in validator_content.split("class")[0]
-        assert "validate" not in calculator_content.lower() or "validate" in calculator_content.split("class")[0]
+        assert (
+            "calculate" not in validator_content.lower()
+            or "calculate" in validator_content.split("class")[0]
+        )
+        assert (
+            "validate" not in calculator_content.lower()
+            or "validate" in calculator_content.split("class")[0]
+        )
 
 
 # ==============================================================================

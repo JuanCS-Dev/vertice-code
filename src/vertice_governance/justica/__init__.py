@@ -58,7 +58,7 @@ from .constitution import (
     ConstitutionalPrinciple,
     Severity,
     ViolationType,
-    create_default_constitution
+    create_default_constitution,
 )
 
 # Classifiers
@@ -68,15 +68,11 @@ from .classifiers import (
     BaseClassifier,
     InputClassifier,
     OutputClassifier,
-    ConstitutionalClassifier
+    ConstitutionalClassifier,
 )
 
 # Trust Engine
-from .trust import (
-    TrustEngine,
-    TrustFactor,
-    TrustLevel
-)
+from .trust import TrustEngine, TrustFactor, TrustLevel
 
 # Enforcement
 from .enforcement import (
@@ -84,7 +80,7 @@ from .enforcement import (
     ActionType,
     EnforcementAction,
     EnforcementPolicy,
-    EnforcementEngine
+    EnforcementEngine,
 )
 
 # Monitoring
@@ -111,12 +107,7 @@ from .audit import (
 )
 
 # Main Agent
-from .agent import (
-    JusticaState,
-    JusticaConfig,
-    JusticaVerdict,
-    JusticaAgent
-)
+from .agent import JusticaState, JusticaConfig, JusticaVerdict, JusticaAgent
 
 # Aliases for compatibility
 Verdict = JusticaVerdict
@@ -131,14 +122,12 @@ __all__ = [
     "__version__",
     "__author__",
     "__license__",
-
     # Constitution
     "Constitution",
     "ConstitutionalPrinciple",
     "Severity",
     "ViolationType",
     "create_default_constitution",
-
     # Classifiers
     "ClassificationResult",
     "ClassificationReport",
@@ -146,26 +135,22 @@ __all__ = [
     "InputClassifier",
     "OutputClassifier",
     "ConstitutionalClassifier",
-
     # Trust
     "TrustEngine",
     "TrustFactor",
     "TrustLevel",
-
     # Enforcement
     "EnforcementMode",
     "ActionType",
     "EnforcementAction",
     "EnforcementPolicy",
     "EnforcementEngine",
-
     # Monitoring
     "JusticaMonitor",
     "SuspicionLevel",
     "SuspicionScore",
     "MonitoringEvent",
     "AgentSession",
-
     # Audit
     "AuditLevel",
     "AuditCategory",
@@ -177,7 +162,6 @@ __all__ = [
     "AuditLogger",
     "create_test_logger",
     "create_default_logger",
-
     # Agent
     "JusticaState",
     "JusticaConfig",

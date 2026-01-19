@@ -14,8 +14,9 @@ from vertice_cli.orchestration.squad import DevSquad, WorkflowStatus
 # Skip if no keys are present
 requires_api_key = pytest.mark.skipif(
     not (os.getenv("GEMINI_API_KEY") or os.getenv("NEBIUS_API_KEY") or os.getenv("HF_TOKEN")),
-    reason="No API key found in environment"
+    reason="No API key found in environment",
 )
+
 
 @pytest.fixture
 def real_squad():
@@ -25,11 +26,12 @@ def real_squad():
     mcp = MCPClient(registry)
     return DevSquad(llm_client=llm, mcp_client=mcp)
 
+
 @pytest.mark.asyncio
 @requires_api_key
 async def test_devsquad_pipeline_execution(real_squad):
     """Test that DevSquad pipeline executes all phases with real LLM.
-    
+
     This test validates the integration, not the quality of LLM responses.
     Success criteria:
     - Pipeline executes without crashes
@@ -61,13 +63,14 @@ async def test_devsquad_pipeline_execution(real_squad):
     assert result.status in [
         WorkflowStatus.COMPLETED,
         WorkflowStatus.FAILED,
-        WorkflowStatus.AWAITING_APPROVAL
+        WorkflowStatus.AWAITING_APPROVAL,
     ], f"Unexpected status: {result.status}"
 
     print("\n✅ Pipeline Integration Test PASSED")
     print(f"   - Executed {len(result.phases)} phases")
     print(f"   - Final status: {result.status}")
     print(f"   - Total duration: {result.total_duration_seconds:.2f}s")
+
 
 @pytest.mark.asyncio
 @requires_api_key
@@ -88,8 +91,8 @@ async def test_architect_decision_normalization(real_squad):
 
     # Validation: Architect should return a valid decision
     if arch_phase.success:
-        decision = arch_phase.agent_response.metadata.get('decision')
-        assert decision in ['APPROVED', 'VETOED'], f"Invalid decision: {decision}"
+        decision = arch_phase.agent_response.metadata.get("decision")
+        assert decision in ["APPROVED", "VETOED"], f"Invalid decision: {decision}"
         print(f"\n✅ Architect Decision Test PASSED: {decision}")
     else:
         print("\n⚠️  Architect failed (acceptable for integration test)")

@@ -36,6 +36,7 @@ class TestRetryAfterHeader:
     @pytest.mark.asyncio
     async def test_respect_retry_after_from_429(self):
         """Respect Retry-After from 429 response."""
+
         class MockResponse:
             status = 429
             headers = {"Retry-After": "5"}
@@ -64,7 +65,7 @@ class TestAnthropicOverloaded:
 
         delays = []
         for attempt in range(5):
-            delay = min(base_delay * (2 ** attempt), max_delay)
+            delay = min(base_delay * (2**attempt), max_delay)
             delays.append(delay)
 
         assert delays == [1.0, 2.0, 4.0, 8.0, 16.0]
@@ -165,7 +166,7 @@ class TestProviderSpecificErrors:
             "error": {
                 "message": "Rate limit reached for gpt-4",
                 "type": "tokens",
-                "code": "rate_limit_exceeded"
+                "code": "rate_limit_exceeded",
             }
         }
 
@@ -174,25 +175,14 @@ class TestProviderSpecificErrors:
 
     def test_anthropic_overloaded_format(self):
         """Handle Anthropic overloaded response format."""
-        error = {
-            "type": "error",
-            "error": {
-                "type": "overloaded_error",
-                "message": "Overloaded"
-            }
-        }
+        error = {"type": "error", "error": {"type": "overloaded_error", "message": "Overloaded"}}
 
         is_overloaded = error.get("error", {}).get("type") == "overloaded_error"
         assert is_overloaded
 
     def test_groq_rate_limit_format(self):
         """Handle Groq rate limit response format."""
-        error = {
-            "error": {
-                "message": "Rate limit reached",
-                "code": 429
-            }
-        }
+        error = {"error": {"message": "Rate limit reached", "code": 429}}
 
         is_rate_limit = error.get("error", {}).get("code") == 429
         assert is_rate_limit

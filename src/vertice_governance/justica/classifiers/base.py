@@ -31,9 +31,7 @@ class BaseClassifier(ABC):
         self.constitution = constitution
         self.classification_count = 0
         self.violation_count = 0
-        self._custom_rules: List[
-            Callable[[str], Optional[Tuple["ViolationType", "Severity"]]]
-        ] = []
+        self._custom_rules: List[Callable[[str], Optional[Tuple["ViolationType", "Severity"]]]] = []
 
     @abstractmethod
     def classify(
@@ -63,9 +61,7 @@ class BaseClassifier(ABC):
         """
         self._custom_rules.append(rule)
 
-    def _apply_custom_rules(
-        self, text: str
-    ) -> List[Tuple["ViolationType", "Severity"]]:
+    def _apply_custom_rules(self, text: str) -> List[Tuple["ViolationType", "Severity"]]:
         """Aplica todas as regras customizadas."""
         results = []
         for rule in self._custom_rules:

@@ -25,12 +25,19 @@ class TestArchitectBoundaryConditions:
         """Test Architect handles empty request gracefully."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "decision": "VETOED",
-                "reasoning": "Empty request cannot be analyzed",
-                "architecture": {"approach": "N/A", "risks": [], "constraints": [], "estimated_complexity": "UNKNOWN"},
-                "recommendations": ["Provide a specific request"],
-            })
+            return_value=json.dumps(
+                {
+                    "decision": "VETOED",
+                    "reasoning": "Empty request cannot be analyzed",
+                    "architecture": {
+                        "approach": "N/A",
+                        "risks": [],
+                        "constraints": [],
+                        "estimated_complexity": "UNKNOWN",
+                    },
+                    "recommendations": ["Provide a specific request"],
+                }
+            )
         )
         architect = ArchitectAgent(llm_client, MagicMock())
         task = AgentTask(request="", session_id="test")
@@ -46,12 +53,19 @@ class TestArchitectBoundaryConditions:
         long_request = "A" * 10000
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "decision": "VETOED",
-                "reasoning": "Request too vague",
-                "architecture": {"approach": "N/A", "risks": [], "constraints": [], "estimated_complexity": "HIGH"},
-                "recommendations": [],
-            })
+            return_value=json.dumps(
+                {
+                    "decision": "VETOED",
+                    "reasoning": "Request too vague",
+                    "architecture": {
+                        "approach": "N/A",
+                        "risks": [],
+                        "constraints": [],
+                        "estimated_complexity": "HIGH",
+                    },
+                    "recommendations": [],
+                }
+            )
         )
 
         architect = ArchitectAgent(llm_client, MagicMock())
@@ -65,19 +79,23 @@ class TestArchitectBoundaryConditions:
         """Test Architect with unicode characters."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "decision": "APPROVED",
-                "reasoning": "Internacionalization request is valid",
-                "architecture": {"approach": "Add i18n", "risks": [], "constraints": [], "estimated_complexity": "MEDIUM"},
-                "recommendations": [],
-            })
+            return_value=json.dumps(
+                {
+                    "decision": "APPROVED",
+                    "reasoning": "Internacionalization request is valid",
+                    "architecture": {
+                        "approach": "Add i18n",
+                        "risks": [],
+                        "constraints": [],
+                        "estimated_complexity": "MEDIUM",
+                    },
+                    "recommendations": [],
+                }
+            )
         )
 
         architect = ArchitectAgent(llm_client, MagicMock())
-        task = AgentTask(
-            request="Adicionar autenticação JWT 🔐 中文",
-            session_id="test"
-        )
+        task = AgentTask(request="Adicionar autenticação JWT 🔐 中文", session_id="test")
 
         response = await architect.execute(task)
         assert response.success is True
@@ -87,18 +105,24 @@ class TestArchitectBoundaryConditions:
         """Test Architect with special characters."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "decision": "APPROVED",
-                "reasoning": "Request is clear despite special chars",
-                "architecture": {"approach": "Standard", "risks": [], "constraints": [], "estimated_complexity": "LOW"},
-                "recommendations": [],
-            })
+            return_value=json.dumps(
+                {
+                    "decision": "APPROVED",
+                    "reasoning": "Request is clear despite special chars",
+                    "architecture": {
+                        "approach": "Standard",
+                        "risks": [],
+                        "constraints": [],
+                        "estimated_complexity": "LOW",
+                    },
+                    "recommendations": [],
+                }
+            )
         )
 
         architect = ArchitectAgent(llm_client, MagicMock())
         task = AgentTask(
-            request="Add feature with 'quotes' and \"escapes\" and \n newlines",
-            session_id="test"
+            request="Add feature with 'quotes' and \"escapes\" and \n newlines", session_id="test"
         )
 
         response = await architect.execute(task)
@@ -113,21 +137,26 @@ class TestArchitectRealWorldScenarios:
         """Test realistic scenario: adding REST API endpoint."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "decision": "APPROVED",
-                "reasoning": "Adding REST endpoint is straightforward with existing framework",
-                "architecture": {
-                    "approach": "Add route handler in api/routes.py, connect to service layer",
-                    "risks": ["Input validation needed", "Rate limiting should be considered"],
-                    "constraints": ["Must follow existing REST conventions", "OpenAPI spec needs update"],
-                    "estimated_complexity": "LOW",
-                },
-                "recommendations": [
-                    "Add input validation with Pydantic",
-                    "Include unit tests",
-                    "Update API documentation",
-                ],
-            })
+            return_value=json.dumps(
+                {
+                    "decision": "APPROVED",
+                    "reasoning": "Adding REST endpoint is straightforward with existing framework",
+                    "architecture": {
+                        "approach": "Add route handler in api/routes.py, connect to service layer",
+                        "risks": ["Input validation needed", "Rate limiting should be considered"],
+                        "constraints": [
+                            "Must follow existing REST conventions",
+                            "OpenAPI spec needs update",
+                        ],
+                        "estimated_complexity": "LOW",
+                    },
+                    "recommendations": [
+                        "Add input validation with Pydantic",
+                        "Include unit tests",
+                        "Update API documentation",
+                    ],
+                }
+            )
         )
 
         architect = ArchitectAgent(llm_client, MagicMock())
@@ -148,21 +177,26 @@ class TestArchitectRealWorldScenarios:
         """Test realistic scenario: dangerous breaking change."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "decision": "VETOED",
-                "reasoning": "Changing database schema without migration breaks production",
-                "architecture": {
-                    "approach": "Not recommended",
-                    "risks": ["Data loss", "Service downtime", "Client compatibility break"],
-                    "constraints": ["Requires database migration", "Backward compatibility needed"],
-                    "estimated_complexity": "HIGH",
-                },
-                "recommendations": [
-                    "Create migration script first",
-                    "Use blue-green deployment",
-                    "Add deprecation warnings before removal",
-                ],
-            })
+            return_value=json.dumps(
+                {
+                    "decision": "VETOED",
+                    "reasoning": "Changing database schema without migration breaks production",
+                    "architecture": {
+                        "approach": "Not recommended",
+                        "risks": ["Data loss", "Service downtime", "Client compatibility break"],
+                        "constraints": [
+                            "Requires database migration",
+                            "Backward compatibility needed",
+                        ],
+                        "estimated_complexity": "HIGH",
+                    },
+                    "recommendations": [
+                        "Create migration script first",
+                        "Use blue-green deployment",
+                        "Add deprecation warnings before removal",
+                    ],
+                }
+            )
         )
 
         architect = ArchitectAgent(llm_client, MagicMock())
@@ -176,29 +210,42 @@ class TestArchitectRealWorldScenarios:
         assert response.data["decision"] == "VETOED"
         # Check reasoning contains risk keywords
         reasoning_lower = response.reasoning.lower()
-        assert ("downtime" in reasoning_lower or "data loss" in reasoning_lower or
-                "breaks" in reasoning_lower or "migration" in reasoning_lower)
+        assert (
+            "downtime" in reasoning_lower
+            or "data loss" in reasoning_lower
+            or "breaks" in reasoning_lower
+            or "migration" in reasoning_lower
+        )
 
     @pytest.mark.asyncio
     async def test_architect_handles_microservice_request(self) -> None:
         """Test realistic scenario: microservice architecture."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "decision": "APPROVED",
-                "reasoning": "Service extraction is feasible with clear boundaries",
-                "architecture": {
-                    "approach": "Extract payment processing to separate service with message queue",
-                    "risks": ["Network latency", "Service discovery complexity", "Transaction boundaries"],
-                    "constraints": ["Requires message broker (RabbitMQ/Kafka)", "Service mesh recommended"],
-                    "estimated_complexity": "HIGH",
-                },
-                "recommendations": [
-                    "Start with strangler pattern",
-                    "Implement circuit breakers",
-                    "Add distributed tracing",
-                ],
-            })
+            return_value=json.dumps(
+                {
+                    "decision": "APPROVED",
+                    "reasoning": "Service extraction is feasible with clear boundaries",
+                    "architecture": {
+                        "approach": "Extract payment processing to separate service with message queue",
+                        "risks": [
+                            "Network latency",
+                            "Service discovery complexity",
+                            "Transaction boundaries",
+                        ],
+                        "constraints": [
+                            "Requires message broker (RabbitMQ/Kafka)",
+                            "Service mesh recommended",
+                        ],
+                        "estimated_complexity": "HIGH",
+                    },
+                    "recommendations": [
+                        "Start with strangler pattern",
+                        "Implement circuit breakers",
+                        "Add distributed tracing",
+                    ],
+                }
+            )
         )
 
         architect = ArchitectAgent(llm_client, MagicMock())
@@ -221,14 +268,21 @@ class TestArchitectMalformedInputs:
         """Test Architect ignores extra fields in JSON response."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "decision": "APPROVED",
-                "reasoning": "Valid",
-                "architecture": {"approach": "Test", "risks": [], "constraints": [], "estimated_complexity": "LOW"},
-                "recommendations": [],
-                "extra_field": "should be ignored",
-                "another_field": 123,
-            })
+            return_value=json.dumps(
+                {
+                    "decision": "APPROVED",
+                    "reasoning": "Valid",
+                    "architecture": {
+                        "approach": "Test",
+                        "risks": [],
+                        "constraints": [],
+                        "estimated_complexity": "LOW",
+                    },
+                    "recommendations": [],
+                    "extra_field": "should be ignored",
+                    "another_field": 123,
+                }
+            )
         )
 
         architect = ArchitectAgent(llm_client, MagicMock())
@@ -243,15 +297,17 @@ class TestArchitectMalformedInputs:
         """Test Architect handles architecture with missing fields."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "decision": "APPROVED",
-                "reasoning": "Valid",
-                "architecture": {
-                    "approach": "Test",
-                    # Missing risks, constraints, complexity
-                },
-                "recommendations": [],
-            })
+            return_value=json.dumps(
+                {
+                    "decision": "APPROVED",
+                    "reasoning": "Valid",
+                    "architecture": {
+                        "approach": "Test",
+                        # Missing risks, constraints, complexity
+                    },
+                    "recommendations": [],
+                }
+            )
         )
 
         architect = ArchitectAgent(llm_client, MagicMock())
@@ -266,12 +322,14 @@ class TestArchitectMalformedInputs:
         """Test Architect handles null values in response (may fail gracefully)."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "decision": "VETOED",
-                "reasoning": None,  # Null reasoning
-                "architecture": None,  # Null architecture
-                "recommendations": None,
-            })
+            return_value=json.dumps(
+                {
+                    "decision": "VETOED",
+                    "reasoning": None,  # Null reasoning
+                    "architecture": None,  # Null architecture
+                    "recommendations": None,
+                }
+            )
         )
 
         architect = ArchitectAgent(llm_client, MagicMock())
@@ -286,10 +344,12 @@ class TestArchitectMalformedInputs:
         """Test Architect handles decision with wrong type."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "decision": 123,  # Number instead of string
-                "reasoning": "Test",
-            })
+            return_value=json.dumps(
+                {
+                    "decision": 123,  # Number instead of string
+                    "reasoning": "Test",
+                }
+            )
         )
 
         architect = ArchitectAgent(llm_client, MagicMock())
@@ -308,12 +368,19 @@ class TestArchitectContextHandling:
         """Test Architect with large file list in context."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "decision": "APPROVED",
-                "reasoning": "Large codebase but request is focused",
-                "architecture": {"approach": "Focused change", "risks": [], "constraints": [], "estimated_complexity": "MEDIUM"},
-                "recommendations": [],
-            })
+            return_value=json.dumps(
+                {
+                    "decision": "APPROVED",
+                    "reasoning": "Large codebase but request is focused",
+                    "architecture": {
+                        "approach": "Focused change",
+                        "risks": [],
+                        "constraints": [],
+                        "estimated_complexity": "MEDIUM",
+                    },
+                    "recommendations": [],
+                }
+            )
         )
 
         architect = ArchitectAgent(llm_client, MagicMock())
@@ -334,12 +401,19 @@ class TestArchitectContextHandling:
         """Test Architect with deeply nested context."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "decision": "APPROVED",
-                "reasoning": "Valid",
-                "architecture": {"approach": "Test", "risks": [], "constraints": [], "estimated_complexity": "LOW"},
-                "recommendations": [],
-            })
+            return_value=json.dumps(
+                {
+                    "decision": "APPROVED",
+                    "reasoning": "Valid",
+                    "architecture": {
+                        "approach": "Test",
+                        "risks": [],
+                        "constraints": [],
+                        "estimated_complexity": "LOW",
+                    },
+                    "recommendations": [],
+                }
+            )
         )
 
         architect = ArchitectAgent(llm_client, MagicMock())
@@ -363,12 +437,19 @@ class TestArchitectContextHandling:
         """Test Architect with empty context dict."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "decision": "APPROVED",
-                "reasoning": "Request is self-contained",
-                "architecture": {"approach": "Simple", "risks": [], "constraints": [], "estimated_complexity": "LOW"},
-                "recommendations": [],
-            })
+            return_value=json.dumps(
+                {
+                    "decision": "APPROVED",
+                    "reasoning": "Request is self-contained",
+                    "architecture": {
+                        "approach": "Simple",
+                        "risks": [],
+                        "constraints": [],
+                        "estimated_complexity": "LOW",
+                    },
+                    "recommendations": [],
+                }
+            )
         )
 
         architect = ArchitectAgent(llm_client, MagicMock())
@@ -386,12 +467,19 @@ class TestArchitectPerformance:
         """Test that execution count increments correctly."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "decision": "APPROVED",
-                "reasoning": "Test",
-                "architecture": {"approach": "Test", "risks": [], "constraints": [], "estimated_complexity": "LOW"},
-                "recommendations": [],
-            })
+            return_value=json.dumps(
+                {
+                    "decision": "APPROVED",
+                    "reasoning": "Test",
+                    "architecture": {
+                        "approach": "Test",
+                        "risks": [],
+                        "constraints": [],
+                        "estimated_complexity": "LOW",
+                    },
+                    "recommendations": [],
+                }
+            )
         )
 
         architect = ArchitectAgent(llm_client, MagicMock())
@@ -407,12 +495,19 @@ class TestArchitectPerformance:
         """Test Architect handles multiple calls in sequence."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "decision": "APPROVED",
-                "reasoning": "Test",
-                "architecture": {"approach": "Test", "risks": [], "constraints": [], "estimated_complexity": "LOW"},
-                "recommendations": [],
-            })
+            return_value=json.dumps(
+                {
+                    "decision": "APPROVED",
+                    "reasoning": "Test",
+                    "architecture": {
+                        "approach": "Test",
+                        "risks": [],
+                        "constraints": [],
+                        "estimated_complexity": "LOW",
+                    },
+                    "recommendations": [],
+                }
+            )
         )
 
         architect = ArchitectAgent(llm_client, MagicMock())

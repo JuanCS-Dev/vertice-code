@@ -7,8 +7,15 @@ import os
 from pathlib import Path
 
 from vertice_cli.tools.terminal import (
-    CdTool, LsTool, PwdTool, MkdirTool, RmTool,
-    CpTool, MvTool, TouchTool, CatTool
+    CdTool,
+    LsTool,
+    PwdTool,
+    MkdirTool,
+    RmTool,
+    CpTool,
+    MvTool,
+    TouchTool,
+    CatTool,
 )
 
 
@@ -65,7 +72,7 @@ async def test_ls_tool():
     # ls -l
     result = await ls.execute(".", long=True)
     assert result.success
-    assert 'size' in result.data[0]
+    assert "size" in result.data[0]
     print("  ✓ ls -l works")
 
 
@@ -121,7 +128,7 @@ async def test_cat_tool():
         # Test head -n
         result = await cat.execute(str(test_file), lines=2)
         assert result.success
-        assert result.data.count('\n') <= 2
+        assert result.data.count("\n") <= 2
         print("  ✓ cat with lines works")
 
 
@@ -229,6 +236,7 @@ async def run_tests():
         except Exception as e:
             print(f"  ❌ ERROR: {e}")
             import traceback
+
             traceback.print_exc()
             return False
 

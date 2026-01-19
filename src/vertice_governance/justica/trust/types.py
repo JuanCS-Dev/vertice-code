@@ -22,10 +22,11 @@ class AuthorizationLevel(Enum):
     - ADMIN: Human administrator with elevated permissions
     - RSO: Responsible Scaling Officer (highest authority)
     """
-    SYSTEM = 1      # Automated operations
-    OPERATOR = 2    # Human operator
-    ADMIN = 3       # Human administrator
-    RSO = 4         # Responsible Scaling Officer (Anthropic pattern)
+
+    SYSTEM = 1  # Automated operations
+    OPERATOR = 2  # Human operator
+    ADMIN = 3  # Human administrator
+    RSO = 4  # Responsible Scaling Officer (Anthropic pattern)
 
 
 @dataclass
@@ -45,6 +46,7 @@ class AuthorizationContext:
         ticket_id: Optional support ticket or incident ID
         second_party: Optional second authorizer for two-party auth
     """
+
     principal: str
     level: AuthorizationLevel
     reason: str
@@ -75,12 +77,12 @@ class TrustLevel(Enum):
     Cada nivel determina as permissoes e capacidades do agente.
     """
 
-    MAXIMUM = auto()     # Trust Factor > 0.95 - Todas as permissoes
-    HIGH = auto()        # Trust Factor 0.80-0.95 - Permissoes padrao
-    STANDARD = auto()    # Trust Factor 0.60-0.80 - Permissoes basicas
-    REDUCED = auto()     # Trust Factor 0.40-0.60 - Permissoes restritas
-    MINIMAL = auto()     # Trust Factor 0.20-0.40 - Apenas leitura
-    SUSPENDED = auto()   # Trust Factor < 0.20 - Suspenso, requer revisao
+    MAXIMUM = auto()  # Trust Factor > 0.95 - Todas as permissoes
+    HIGH = auto()  # Trust Factor 0.80-0.95 - Permissoes padrao
+    STANDARD = auto()  # Trust Factor 0.60-0.80 - Permissoes basicas
+    REDUCED = auto()  # Trust Factor 0.40-0.60 - Permissoes restritas
+    MINIMAL = auto()  # Trust Factor 0.20-0.40 - Apenas leitura
+    SUSPENDED = auto()  # Trust Factor < 0.20 - Suspenso, requer revisao
 
     @classmethod
     def from_factor(cls, factor: float) -> TrustLevel:

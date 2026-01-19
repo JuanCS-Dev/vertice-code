@@ -52,8 +52,8 @@ class TestAsyncFileOperations:
         test_file = tmp_path / "unicode.txt"
         content = "Olá, mundo! 你好世界! 🎉"
 
-        await write_file(test_file, content, encoding='utf-8')
-        result = await read_file(test_file, encoding='utf-8')
+        await write_file(test_file, content, encoding="utf-8")
+        result = await read_file(test_file, encoding="utf-8")
 
         assert result == content
 

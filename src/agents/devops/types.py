@@ -15,6 +15,7 @@ from enum import Enum
 
 class DeploymentEnvironment(str, Enum):
     """Deployment environments."""
+
     DEV = "development"
     STAGING = "staging"
     PRODUCTION = "production"
@@ -22,6 +23,7 @@ class DeploymentEnvironment(str, Enum):
 
 class PipelineStatus(str, Enum):
     """CI/CD pipeline status."""
+
     PENDING = "pending"
     RUNNING = "running"
     SUCCESS = "success"
@@ -32,6 +34,7 @@ class PipelineStatus(str, Enum):
 @dataclass
 class DeploymentConfig:
     """Deployment configuration."""
+
     environment: DeploymentEnvironment
     branch: str
     version: str
@@ -44,6 +47,7 @@ class DeploymentConfig:
 @dataclass
 class PipelineRun:
     """A CI/CD pipeline run."""
+
     id: str
     name: str
     status: PipelineStatus
@@ -57,8 +61,10 @@ class PipelineRun:
 # AWS-STYLE INCIDENT HANDLING TYPES
 # =============================================================================
 
+
 class IncidentSeverity(str, Enum):
     """Incident severity levels."""
+
     SEV1 = "sev1"  # Critical - immediate response required
     SEV2 = "sev2"  # High - significant impact
     SEV3 = "sev3"  # Medium - partial impact
@@ -67,6 +73,7 @@ class IncidentSeverity(str, Enum):
 
 class IncidentStatus(str, Enum):
     """Incident lifecycle status."""
+
     DETECTED = "detected"
     INVESTIGATING = "investigating"
     IDENTIFIED = "identified"
@@ -77,6 +84,7 @@ class IncidentStatus(str, Enum):
 
 class RootCauseCategory(str, Enum):
     """Categories of root causes."""
+
     CODE_CHANGE = "code_change"
     RESOURCE_LIMIT = "resource_limit"
     DEPENDENCY = "dependency"
@@ -95,6 +103,7 @@ class TopologyNode:
     AWS DevOps Agent: "builds a topology map of an application's
     resources and their relationships"
     """
+
     id: str
     name: str
     type: str  # service, database, cache, queue, etc.
@@ -107,6 +116,7 @@ class TopologyNode:
 @dataclass
 class Alert:
     """An alert from monitoring systems."""
+
     id: str
     source: str
     severity: IncidentSeverity
@@ -120,6 +130,7 @@ class Alert:
 @dataclass
 class InvestigationStep:
     """A step in the incident investigation."""
+
     id: str
     action: str
     findings: str
@@ -131,6 +142,7 @@ class InvestigationStep:
 @dataclass
 class RootCauseAnalysis:
     """Root cause analysis result."""
+
     category: RootCauseCategory
     description: str
     confidence: float
@@ -142,6 +154,7 @@ class RootCauseAnalysis:
 @dataclass
 class Remediation:
     """A proposed remediation action."""
+
     id: str
     action: str
     description: str
@@ -154,6 +167,7 @@ class Remediation:
 @dataclass
 class Incident:
     """Complete incident record."""
+
     id: str
     title: str
     severity: IncidentSeverity
@@ -170,7 +184,9 @@ class Incident:
 
     def add_timeline_event(self, event: str) -> None:
         """Add event to incident timeline."""
-        self.timeline.append({
-            "timestamp": datetime.now().isoformat(),
-            "event": event,
-        })
+        self.timeline.append(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "event": event,
+            }
+        )

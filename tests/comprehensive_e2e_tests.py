@@ -108,7 +108,7 @@ class ComprehensiveE2ETestSuite:
         """Test core system initialization and dependencies."""
         try:
             # Test app creation
-            app = VerticeApp()
+            VerticeApp()
             self.log_test("Core System Initialization", "PASS", "VerticeApp created successfully")
 
             # Test widget imports
@@ -118,7 +118,7 @@ class ComprehensiveE2ETestSuite:
             # Test handler imports
             from vertice_tui.handlers.export_handler import get_export_handler
 
-            handler = get_export_handler()
+            get_export_handler()
             self.log_test("Handler Imports", "PASS", "Export handler initialized")
 
         except Exception as e:
@@ -310,7 +310,7 @@ except Exception as e:
             self.log_test("Fuzzy Search Modal", "PASS", "Modal created successfully")
 
             # Test search result creation
-            result = SearchResult(
+            SearchResult(
                 session_id=sessions[0].id,
                 message_index=0,
                 content="fibonacci implementation",
@@ -339,7 +339,7 @@ except Exception as e:
 
             # Test session creation
             session1 = tabs.create_session("Test Session 1")
-            session2 = tabs.create_session("Test Session 2")
+            tabs.create_session("Test Session 2")
 
             if tabs.session_count == 2:
                 self.log_test("Session Creation", "PASS", "Multiple sessions created")
@@ -832,9 +832,7 @@ except Exception as e:
             )
 
             try:
-                corrupted_file = handler.export_session(
-                    corrupted_session, "formatted", "e2e_corrupted.md"
-                )
+                handler.export_session(corrupted_session, "formatted", "e2e_corrupted.md")
                 self.log_test(
                     "Corrupted Session Handling", "FAIL", "Should have failed with corrupted data"
                 )
@@ -913,7 +911,7 @@ except Exception as e:
             if valid_times:
                 avg_response_time = sum(valid_times) / len(valid_times)
                 max_response_time = max(valid_times)
-                min_response_time = min(valid_times)
+                min(valid_times)
 
                 # Performance criteria
                 if avg_response_time < 3.0:  # Average under 3 seconds
@@ -1004,11 +1002,10 @@ except Exception as e:
         """Test accessibility features and keyboard navigation."""
         try:
             # Test keyboard shortcuts availability
-            app = VerticeApp()
+            VerticeApp()
 
             # Check if key bindings are registered (this is a simplified test)
             # In a real test, we'd use Textual's testing framework
-            expected_bindings = ["ctrl+c", "ctrl+f", "ctrl+space"]
 
             # This is a placeholder - actual binding testing requires Textual test framework
             self.log_test(
@@ -1033,7 +1030,7 @@ except Exception as e:
             # This is challenging to test without a full Textual app instance
 
             # Test HUD scaling
-            hud = PerformanceHUD()
+            PerformanceHUD()
             # In a real test, we'd resize the terminal and check widget adaptation
 
             self.log_test(
@@ -1041,13 +1038,12 @@ except Exception as e:
             )
 
             # Test modal centering
-            modal = FuzzySearchModal(None, None)
+            FuzzySearchModal(None, None)
             self.log_test(
                 "Modal Centering", "SKIP", "Requires Textual test framework for layout testing"
             )
 
             # Test text wrapping
-            long_text = "A" * 200  # Very long text
             # Test how widgets handle long content
 
             self.log_test(
@@ -1140,7 +1136,7 @@ except Exception as e:
             try:
                 if os.path.exists(file):
                     os.remove(file)
-            except:
+            except Exception:
                 pass  # Ignore cleanup errors
 
         # Clean up directories
@@ -1151,7 +1147,7 @@ except Exception as e:
                 shutil.rmtree("e2e_multi")
             if os.path.exists("e2e_stress"):
                 shutil.rmtree("e2e_stress")
-        except:
+        except Exception:
             pass
 
 

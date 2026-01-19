@@ -25,6 +25,7 @@ class TestRunSync:
 
     def test_run_sync_simple_coroutine(self):
         """Test running a simple coroutine synchronously."""
+
         async def simple_coro():
             return 42
 
@@ -33,6 +34,7 @@ class TestRunSync:
 
     def test_run_sync_with_await(self):
         """Test run_sync with coroutine that awaits."""
+
         async def awaiting_coro():
             await asyncio.sleep(0.01)
             return "done"
@@ -47,6 +49,7 @@ class TestGatherWithLimit:
     @pytest.mark.asyncio
     async def test_gather_with_limit_basic(self):
         """Test basic concurrent execution with limit."""
+
         async def task(n):
             await asyncio.sleep(0.01)
             return n * 2
@@ -59,6 +62,7 @@ class TestGatherWithLimit:
     @pytest.mark.asyncio
     async def test_gather_with_limit_preserves_order(self):
         """Test that results are in original order."""
+
         async def task(n):
             await asyncio.sleep(0.05 - n * 0.01)  # Reverse completion order
             return n
@@ -71,6 +75,7 @@ class TestGatherWithLimit:
     @pytest.mark.asyncio
     async def test_gather_with_limit_handles_exceptions(self):
         """Test handling exceptions with return_exceptions."""
+
         async def failing_task(n):
             if n == 2:
                 raise ValueError("Task 2 failed")
@@ -91,6 +96,7 @@ class TestTimeout:
     @pytest.mark.asyncio
     async def test_timeout_succeeds(self):
         """Test timeout when operation completes in time."""
+
         async def fast_task():
             await asyncio.sleep(0.01)
             return "completed"
@@ -101,6 +107,7 @@ class TestTimeout:
     @pytest.mark.asyncio
     async def test_timeout_returns_default(self):
         """Test timeout returns default on timeout."""
+
         async def slow_task():
             await asyncio.sleep(10)
             return "never"
@@ -111,6 +118,7 @@ class TestTimeout:
     @pytest.mark.asyncio
     async def test_timeout_returns_none_by_default(self):
         """Test timeout returns None when no default specified."""
+
         async def slow_task():
             await asyncio.sleep(10)
 
@@ -124,6 +132,7 @@ class TestTimeoutOrRaise:
     @pytest.mark.asyncio
     async def test_timeout_or_raise_succeeds(self):
         """Test timeout_or_raise when operation succeeds."""
+
         async def fast_task():
             return "done"
 
@@ -133,6 +142,7 @@ class TestTimeoutOrRaise:
     @pytest.mark.asyncio
     async def test_timeout_or_raise_raises(self):
         """Test timeout_or_raise raises TimeoutError."""
+
         async def slow_task():
             await asyncio.sleep(10)
 
@@ -183,6 +193,7 @@ class TestRetryDecorator:
     @pytest.mark.asyncio
     async def test_retry_exhausted_raises(self):
         """Test retry raises after exhausting attempts."""
+
         @retry(max_attempts=2, delay=0.01)
         async def always_fails():
             raise RuntimeError("Always fails")
@@ -218,6 +229,7 @@ class TestFirstCompleted:
     @pytest.mark.asyncio
     async def test_first_completed_returns_fastest(self):
         """Test that first completed result is returned."""
+
         async def slow_task():
             await asyncio.sleep(1)
             return "slow"

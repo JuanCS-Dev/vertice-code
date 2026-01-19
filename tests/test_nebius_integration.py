@@ -20,8 +20,7 @@ async def test_nebius_model_72b_basic():
 
     response = ""
     async for chunk in client.stream_chat(
-        prompt="What is 2+2? Answer in one word.",
-        provider="nebius"
+        prompt="What is 2+2? Answer in one word.", provider="nebius"
     ):
         response += chunk
 
@@ -42,7 +41,7 @@ async def test_nebius_code_generation():
     async for chunk in client.stream_chat(
         prompt="Write a Python function to calculate fibonacci(5). Just the function, no explanation.",
         provider="nebius",
-        max_tokens=200
+        max_tokens=200,
     ):
         response += chunk
 
@@ -62,18 +61,14 @@ async def test_nebius_temperature_variation():
     # Low temperature (deterministic)
     response_low = ""
     async for chunk in client.stream_chat(
-        prompt="Say 'hello' in one word.",
-        provider="nebius",
-        temperature=0.1
+        prompt="Say 'hello' in one word.", provider="nebius", temperature=0.1
     ):
         response_low += chunk
 
     # High temperature (creative)
     response_high = ""
     async for chunk in client.stream_chat(
-        prompt="Say 'hello' creatively.",
-        provider="nebius",
-        temperature=0.9
+        prompt="Say 'hello' creatively.", provider="nebius", temperature=0.9
     ):
         response_high += chunk
 
@@ -92,9 +87,7 @@ async def test_nebius_max_tokens_limit():
 
     response = ""
     async for chunk in client.stream_chat(
-        prompt="Write a long essay about Python.",
-        provider="nebius",
-        max_tokens=50
+        prompt="Write a long essay about Python.", provider="nebius", max_tokens=50
     ):
         response += chunk
 
@@ -116,7 +109,7 @@ async def test_nebius_context_awareness():
     async for chunk in client.stream_chat(
         prompt="What language am I an expert in?",
         context="You are a Python programming expert with 10 years experience.",
-        provider="nebius"
+        provider="nebius",
     ):
         response += chunk
 
@@ -133,10 +126,7 @@ async def test_nebius_streaming_incremental():
     client = LLMClient()
 
     chunks = []
-    async for chunk in client.stream_chat(
-        prompt="Count from 1 to 5.",
-        provider="nebius"
-    ):
+    async for chunk in client.stream_chat(prompt="Count from 1 to 5.", provider="nebius"):
         chunks.append(chunk)
 
     # Should receive multiple chunks
@@ -157,10 +147,7 @@ async def test_nebius_error_handling():
     # Empty prompt should still work (model decides response)
     response = ""
     try:
-        async for chunk in client.stream_chat(
-            prompt="",
-            provider="nebius"
-        ):
+        async for chunk in client.stream_chat(prompt="", provider="nebius"):
             response += chunk
         # If it works, that's fine - API allows empty prompts
         assert True
@@ -186,9 +173,7 @@ async def test_nebius_concurrent_requests():
 
     # Run 3 concurrent requests
     results = await asyncio.gather(
-        make_request("Say 'A'"),
-        make_request("Say 'B'"),
-        make_request("Say 'C'")
+        make_request("Say 'A'"), make_request("Say 'B'"), make_request("Say 'C'")
     )
 
     assert len(results) == 3
@@ -208,8 +193,7 @@ async def test_nebius_qwq_model():
     # For now test with default model (Qwen2.5-72B)
     response = ""
     async for chunk in client.stream_chat(
-        prompt="Solve: If x + 5 = 12, what is x?",
-        provider="nebius"
+        prompt="Solve: If x + 5 = 12, what is x?", provider="nebius"
     ):
         response += chunk
 

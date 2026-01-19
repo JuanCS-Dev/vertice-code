@@ -15,9 +15,9 @@ from vertice_cli.orchestration.squad import DevSquad, WorkflowStatus
 def mock_llm_client():
     """Mock LLM client."""
     client = MagicMock()
-    client.generate_content = AsyncMock(return_value=MagicMock(
-        text='{"approved": true, "reasoning": "Feasible"}'
-    ))
+    client.generate_content = AsyncMock(
+        return_value=MagicMock(text='{"approved": true, "reasoning": "Feasible"}')
+    )
     return client
 
 
@@ -33,9 +33,7 @@ def mock_mcp_client():
 def dev_squad(mock_llm_client, mock_mcp_client):
     """Create DevSquad instance without approval gate."""
     return DevSquad(
-        llm_client=mock_llm_client,
-        mcp_client=mock_mcp_client,
-        require_human_approval=False
+        llm_client=mock_llm_client, mcp_client=mock_mcp_client, require_human_approval=False
     )
 
 
@@ -54,11 +52,13 @@ class TestDevSquadCore:
     @pytest.mark.asyncio
     async def test_workflow_stops_on_architect_veto(self, dev_squad):
         """Test workflow stops if architect vetoes."""
-        dev_squad.architect.execute = AsyncMock(return_value=AgentResponse(
-            success=True,
-            data={"decision": "VETOED", "reasoning": "Not feasible"},
-            reasoning="Vetoed"
-        ))
+        dev_squad.architect.execute = AsyncMock(
+            return_value=AgentResponse(
+                success=True,
+                data={"decision": "VETOED", "reasoning": "Not feasible"},
+                reasoning="Vetoed",
+            )
+        )
 
         result = await dev_squad.execute_workflow("Impossible task")
 
@@ -69,35 +69,39 @@ class TestDevSquadCore:
     async def test_workflow_complete_success(self, dev_squad):
         """Test complete successful workflow."""
         # Mock all agents to succeed
-        dev_squad.architect.execute = AsyncMock(return_value=AgentResponse(
-            success=True,
-            data={"decision": "APPROVED", "architecture": {}},
-            reasoning="Approved"
-        ))
+        dev_squad.architect.execute = AsyncMock(
+            return_value=AgentResponse(
+                success=True,
+                data={"decision": "APPROVED", "architecture": {}},
+                reasoning="Approved",
+            )
+        )
 
-        dev_squad.explorer.execute = AsyncMock(return_value=AgentResponse(
-            success=True,
-            data={"context": {}, "files": []},
-            reasoning="Context gathered"
-        ))
+        dev_squad.explorer.execute = AsyncMock(
+            return_value=AgentResponse(
+                success=True, data={"context": {}, "files": []}, reasoning="Context gathered"
+            )
+        )
 
-        dev_squad.planner.execute = AsyncMock(return_value=AgentResponse(
-            success=True,
-            data={"plan": {"steps": []}},
-            reasoning="Plan created"
-        ))
+        dev_squad.planner.execute = AsyncMock(
+            return_value=AgentResponse(
+                success=True, data={"plan": {"steps": []}}, reasoning="Plan created"
+            )
+        )
 
-        dev_squad.refactorer.execute = AsyncMock(return_value=AgentResponse(
-            success=True,
-            data={"modified_files": []},
-            reasoning="Changes applied"
-        ))
+        dev_squad.refactorer.execute = AsyncMock(
+            return_value=AgentResponse(
+                success=True, data={"modified_files": []}, reasoning="Changes applied"
+            )
+        )
 
-        dev_squad.reviewer.execute = AsyncMock(return_value=AgentResponse(
-            success=True,
-            data={"report": {"approved": True, "grade": "A+"}},
-            reasoning="Review passed"
-        ))
+        dev_squad.reviewer.execute = AsyncMock(
+            return_value=AgentResponse(
+                success=True,
+                data={"report": {"approved": True, "grade": "A+"}},
+                reasoning="Review passed",
+            )
+        )
 
         result = await dev_squad.execute_workflow("Add new feature")
 

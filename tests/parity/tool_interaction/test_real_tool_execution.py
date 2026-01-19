@@ -34,7 +34,7 @@ def load_env():
                 line = line.strip()
                 if line and not line.startswith("#") and "=" in line:
                     key, value = line.split("=", 1)
-                    os.environ.setdefault(key.strip(), value.strip().strip('"\''))
+                    os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
 
 
 load_env()
@@ -77,27 +77,27 @@ class ToolExecutionTester:
         try:
             output = ""
             async for chunk in self.bridge.process_message(message):
-                if hasattr(chunk, 'content'):
+                if hasattr(chunk, "content"):
                     output += chunk.content
                 elif isinstance(chunk, str):
                     output += chunk
                 elif isinstance(chunk, dict):
-                    if 'content' in chunk:
-                        output += chunk['content']
-                    if 'tool_call' in chunk:
-                        result['tools_detected'].append(chunk['tool_call'])
-                    if 'tool_result' in chunk:
-                        result['tool_results'].append(chunk['tool_result'])
+                    if "content" in chunk:
+                        output += chunk["content"]
+                    if "tool_call" in chunk:
+                        result["tools_detected"].append(chunk["tool_call"])
+                    if "tool_result" in chunk:
+                        result["tool_results"].append(chunk["tool_result"])
 
-            result['output'] = output
-            result['success'] = True
+            result["output"] = output
+            result["success"] = True
 
         except asyncio.TimeoutError:
-            result['error'] = 'Timeout'
+            result["error"] = "Timeout"
         except Exception as e:
-            result['error'] = str(e)
+            result["error"] = str(e)
 
-        result['latency_ms'] = int((time.time() - start) * 1000)
+        result["latency_ms"] = int((time.time() - start) * 1000)
         return result
 
     async def cleanup(self):
@@ -139,13 +139,14 @@ class TestFileOperationTools:
         print(f"\n[TOOL] Duration: {result['latency_ms']}ms")
         print(f"[TOOL] Output: {result['output'][:300]}...")
 
-        if result['error']:
+        if result["error"]:
             pytest.skip(f"Error: {result['error']}")
 
         # Should find the project name
-        output_lower = result['output'].lower()
-        assert 'vertice' in output_lower, \
-            "Should read and report the project name from pyproject.toml"
+        output_lower = result["output"].lower()
+        assert (
+            "vertice" in output_lower
+        ), "Should read and report the project name from pyproject.toml"
 
     @pytest.mark.timeout(120)
     async def test_search_code_tool(self, tool_tester):
@@ -158,15 +159,14 @@ class TestFileOperationTools:
 
         print(f"\n[TOOL] Duration: {result['latency_ms']}ms")
 
-        if result['error']:
+        if result["error"]:
             pytest.skip(f"Error: {result['error']}")
 
         # Should mention the file location
-        output = result['output']
-        found_location = any(s in output for s in ['bridge.py', 'vertice_tui', 'core'])
+        output = result["output"]
+        found_location = any(s in output for s in ["bridge.py", "vertice_tui", "core"])
 
-        assert found_location or 'TUIBridge' in output, \
-            "Should find where TUIBridge is defined"
+        assert found_location or "TUIBridge" in output, "Should find where TUIBridge is defined"
 
     @pytest.mark.timeout(120)
     async def test_list_files_tool(self, tool_tester):
@@ -179,16 +179,15 @@ class TestFileOperationTools:
 
         print(f"\n[TOOL] Duration: {result['latency_ms']}ms")
 
-        if result['error']:
+        if result["error"]:
             pytest.skip(f"Error: {result['error']}")
 
         # Should mention common project files
-        output_lower = result['output'].lower()
-        common_files = ['pyproject.toml', 'readme', 'setup', '.git', 'tests']
+        output_lower = result["output"].lower()
+        common_files = ["pyproject.toml", "readme", "setup", ".git", "tests"]
         found_files = sum(1 for f in common_files if f in output_lower)
 
-        assert found_files >= 1, \
-            "Should list recognizable project files"
+        assert found_files >= 1, "Should list recognizable project files"
 
 
 class TestCodeExecutionTools:
@@ -206,12 +205,11 @@ class TestCodeExecutionTools:
         print(f"\n[TOOL] Duration: {result['latency_ms']}ms")
         print(f"[TOOL] Output: {result['output'][:300]}...")
 
-        if result['error']:
+        if result["error"]:
             pytest.skip(f"Error: {result['error']}")
 
         # Should produce the correct answer (120)
-        assert '120' in result['output'], \
-            "Should calculate factorial(5) = 120"
+        assert "120" in result["output"], "Should calculate factorial(5) = 120"
 
     @pytest.mark.timeout(120)
     async def test_code_analysis(self, tool_tester):
@@ -230,17 +228,18 @@ class TestCodeExecutionTools:
 
         print(f"\n[TOOL] Duration: {result['latency_ms']}ms")
 
-        if result['error']:
+        if result["error"]:
             pytest.skip(f"Error: {result['error']}")
 
-        output_lower = result['output'].lower()
+        output_lower = result["output"].lower()
 
         # Should mention division by zero risk
-        mentions_issue = any(word in output_lower for word in
-            ['zero', 'divide', 'error', 'exception', 'check', 'handle'])
+        mentions_issue = any(
+            word in output_lower
+            for word in ["zero", "divide", "error", "exception", "check", "handle"]
+        )
 
-        assert mentions_issue, \
-            "Should identify division by zero as potential issue"
+        assert mentions_issue, "Should identify division by zero as potential issue"
 
 
 class TestToolChaining:
@@ -257,12 +256,11 @@ class TestToolChaining:
 
         print(f"\n[TOOL] Duration: {result['latency_ms']}ms")
 
-        if result['error']:
+        if result["error"]:
             pytest.skip(f"Error: {result['error']}")
 
         # Should produce a summary (substantial output)
-        assert len(result['output']) > 100, \
-            "Should produce a meaningful summary"
+        assert len(result["output"]) > 100, "Should produce a meaningful summary"
 
     @pytest.mark.timeout(180)
     async def test_search_then_read(self, tool_tester):
@@ -275,16 +273,16 @@ class TestToolChaining:
 
         print(f"\n[TOOL] Duration: {result['latency_ms']}ms")
 
-        if result['error']:
+        if result["error"]:
             pytest.skip(f"Error: {result['error']}")
 
         # Should find and show config content
-        output_lower = result['output'].lower()
-        found_config = any(word in output_lower for word in
-            ['config', 'settings', 'yaml', 'toml', 'json', 'env'])
+        output_lower = result["output"].lower()
+        found_config = any(
+            word in output_lower for word in ["config", "settings", "yaml", "toml", "json", "env"]
+        )
 
-        assert found_config or len(result['output']) > 50, \
-            "Should find and display configuration"
+        assert found_config or len(result["output"]) > 50, "Should find and display configuration"
 
 
 class TestToolErrorHandling:
@@ -302,13 +300,15 @@ class TestToolErrorHandling:
         print(f"\n[TOOL] Output: {result['output'][:200]}...")
 
         # Should not crash, should report file not found
-        assert result['output'] or result['error']
+        assert result["output"] or result["error"]
 
-        if result['output']:
-            output_lower = result['output'].lower()
-            handled_gracefully = any(word in output_lower for word in
-                ['not found', 'doesn\'t exist', 'cannot', 'unable', 'error', 'no such'])
-            assert handled_gracefully or len(result['output']) > 0
+        if result["output"]:
+            output_lower = result["output"].lower()
+            handled_gracefully = any(
+                word in output_lower
+                for word in ["not found", "doesn't exist", "cannot", "unable", "error", "no such"]
+            )
+            assert handled_gracefully or len(result["output"]) > 0
 
     @pytest.mark.timeout(90)
     async def test_invalid_path(self, tool_tester):
@@ -337,15 +337,14 @@ class TestToolIntegration:
 
         print(f"\n[TOOL] Duration: {result['latency_ms']}ms")
 
-        if result['error']:
+        if result["error"]:
             pytest.skip(f"Error: {result['error']}")
 
         # Should mention Python version
-        output = result['output']
-        has_version = any(v in output for v in ['3.', 'python', 'version'])
+        output = result["output"]
+        has_version = any(v in output for v in ["3.", "python", "version"])
 
-        assert has_version, \
-            "Response should include Python version from file"
+        assert has_version, "Response should include Python version from file"
 
     @pytest.mark.timeout(180)
     async def test_multi_tool_coordination(self, tool_tester):
@@ -362,17 +361,17 @@ class TestToolIntegration:
 
         print(f"\n[TOOL] Duration: {result['latency_ms']}ms")
 
-        if result['error']:
+        if result["error"]:
             pytest.skip(f"Error: {result['error']}")
 
-        output_lower = result['output'].lower()
+        output_lower = result["output"].lower()
 
         # Should mention tests
-        mentions_tests = any(word in output_lower for word in
-            ['test', 'pytest', 'unittest', 'files', 'found'])
+        mentions_tests = any(
+            word in output_lower for word in ["test", "pytest", "unittest", "files", "found"]
+        )
 
-        assert mentions_tests, \
-            "Should address the multi-part request about tests"
+        assert mentions_tests, "Should address the multi-part request about tests"
 
 
 class TestToolPerformance:
@@ -393,8 +392,8 @@ class TestToolPerformance:
         latencies = []
         for req in requests:
             result = await tool_tester.execute_request(req)
-            if result['success']:
-                latencies.append(result['latency_ms'])
+            if result["success"]:
+                latencies.append(result["latency_ms"])
 
         if latencies:
             avg = sum(latencies) / len(latencies)

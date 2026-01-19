@@ -1,6 +1,6 @@
 # 🔬 PHASE 4.3 & 4.4: PERFORMANCE + CONTEXT - RESEARCH
 
-**Date:** 2025-11-18  
+**Date:** 2025-11-18
 **Focus:** How OpenAI, Google, Anthropic, and Cursor implement performance optimization and advanced context
 
 ---
@@ -274,7 +274,7 @@ async def execute_tools(tool_calls):
     for call in tool_calls:
         if not depends_on_others(call):
             tasks.append(execute_async(call))
-    
+
     results = await asyncio.gather(*tasks)
     return results
 ```
@@ -336,7 +336,7 @@ def build_dep_graph(project_root):
     for file in find_all_code_files(project_root):
         imports = extract_imports(file)
         graph[file] = imports
-    
+
     return graph
 
 # Used for context: "These files are related to your question"
@@ -359,23 +359,23 @@ class CursorCache:
         self.memory_cache = LRUCache(1000)      # 100ms
         self.disk_cache = SqliteCache("~/.cursor/cache.db")  # 500ms
         self.remote_cache = RedisCache()        # 1000ms
-    
+
     def get(self, key):
         # Try memory first
         if key in self.memory_cache:
             return self.memory_cache[key]
-        
+
         # Try disk
         if result := self.disk_cache.get(key):
             self.memory_cache[key] = result  # Promote to L1
             return result
-        
+
         # Try remote
         if result := self.remote_cache.get(key):
             self.disk_cache.set(key, result)  # Promote to L2
             self.memory_cache[key] = result   # Promote to L1
             return result
-        
+
         return None
 ```
 
@@ -397,11 +397,11 @@ class PredictiveLoader:
             recent_commands,
             time_of_day
         ])
-        
+
         # Pre-load top 3 predictions
         for pred in predictions[:3]:
             asyncio.create_task(self.preload(pred))
-    
+
     async def preload(self, context):
         # Load in background, cache result
         data = await self.fetch(context)
@@ -415,17 +415,17 @@ class RequestBatcher:
     def __init__(self, max_wait_ms=50):
         self.queue = []
         self.max_wait = max_wait_ms
-    
+
     def add_request(self, req):
         self.queue.append(req)
-        
+
         if len(self.queue) == 1:
             # Start timer for batch
             asyncio.create_task(self.flush_after_delay())
-    
+
     async def flush_after_delay(self):
         await asyncio.sleep(self.max_wait / 1000)
-        
+
         # Send all as one request
         response = await self.api.batch_call(self.queue)
         self.queue.clear()
@@ -444,18 +444,18 @@ class ContextManager:
     def __init__(self):
         self.context = {}
         self.dirty = False
-        
+
         # Update loop
         asyncio.create_task(self.update_loop())
-    
+
     async def update_loop(self):
         while True:
             await asyncio.sleep(0.1)  # 100ms
-            
+
             if self.dirty:
                 self.context = self.build_context()
                 self.dirty = False
-    
+
     def mark_dirty(self):
         self.dirty = True
 ```
@@ -465,27 +465,27 @@ class ContextManager:
 # Cursor ranks files by relevance
 def rank_files(query):
     scores = {}
-    
+
     for file in project_files:
         score = 0
-        
+
         # Recency (40%)
         if file in recent_files:
             score += 0.4 * (1 / (time.now() - file.last_modified))
-        
+
         # Similarity (30%)
         score += 0.3 * cosine_similarity(query, file.content)
-        
+
         # Dependency (20%)
         if file in get_dependencies(current_file):
             score += 0.2
-        
+
         # Open in editor (10%)
         if file in open_tabs:
             score += 0.1
-        
+
         scores[file] = score
-    
+
     return sorted(scores.items(), key=lambda x: x[1], reverse=True)[:10]
 ```
 
@@ -496,11 +496,11 @@ class IncrementalIndexer:
     def __init__(self):
         self.index = {}
         self.file_hashes = {}
-    
+
     def update(self, file_path):
         content = read_file(file_path)
         new_hash = hashlib.sha256(content).hexdigest()
-        
+
         if new_hash != self.file_hashes.get(file_path):
             # File changed, re-index
             self.index[file_path] = self.analyze(content)

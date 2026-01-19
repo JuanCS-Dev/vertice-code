@@ -201,7 +201,7 @@ class ThoughtSignature:
     parent_id: Optional[str]
     created_at: datetime
     status: SignatureStatus
-    
+
     def encode(self) -> str
     @classmethod
     def decode(cls, encoded: str) -> "ThoughtSignature"
@@ -296,7 +296,7 @@ from tui.core.context import (
     ObservationMasker,
     mask_observation,
     mask_tool_output,
-    
+
     # Sliding Window
     WindowStrategy,
     WindowConfig,
@@ -304,7 +304,7 @@ from tui.core.context import (
     CompressionResult,
     SlidingWindowCompressor,
     get_sliding_window,
-    
+
     # Thought Signatures
     ThinkingLevel,
     SignatureStatus,

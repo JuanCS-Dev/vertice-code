@@ -27,6 +27,7 @@ from unittest.mock import MagicMock, AsyncMock
 # TESTE 1: NEW DATA MODELS
 # =============================================================================
 
+
 class TestV6DataModels:
     """Testa os novos modelos de dados v6.0."""
 
@@ -38,7 +39,7 @@ class TestV6DataModels:
             question="What is the scope?",
             category="scope",
             options=["Single file", "Module", "Project"],
-            required=True
+            required=True,
         )
 
         assert q.question == "What is the scope?"
@@ -51,11 +52,7 @@ class TestV6DataModels:
         """ClarificationResponse deve ter campos corretos."""
         from vertice_cli.agents.planner import ClarificationResponse
 
-        r = ClarificationResponse(
-            question_id="q-123",
-            answer="Single file",
-            skipped=False
-        )
+        r = ClarificationResponse(question_id="q-123", answer="Single file", skipped=False)
 
         assert r.question_id == "q-123"
         assert r.answer == "Single file"
@@ -83,6 +80,7 @@ class TestV6DataModels:
 # =============================================================================
 # TESTE 2: STEP CONFIDENCE
 # =============================================================================
+
 
 class TestStepConfidence:
     """Testa o cálculo de confiança por step."""
@@ -130,6 +128,7 @@ class TestStepConfidence:
 # TESTE 3: SOP STEP WITH CONFIDENCE
 # =============================================================================
 
+
 class TestSOPStepConfidence:
     """Testa SOPStep com campos de confidence."""
 
@@ -145,7 +144,7 @@ class TestSOPStepConfidence:
             definition_of_done="Tests pass",
             confidence_score=0.85,
             confidence_reasoning="Well-understood task",
-            risk_factors=["External API dependency"]
+            risk_factors=["External API dependency"],
         )
 
         assert step.confidence_score == 0.85
@@ -161,7 +160,7 @@ class TestSOPStepConfidence:
             role="coder",
             action="Implement feature",
             objective="Add new capability",
-            definition_of_done="Tests pass"
+            definition_of_done="Tests pass",
         )
 
         assert step.confidence_score == 0.7
@@ -178,13 +177,14 @@ class TestSOPStepConfidence:
                 action="test",
                 objective="test",
                 definition_of_done="test",
-                confidence_score=1.5  # Invalid: > 1.0
+                confidence_score=1.5,  # Invalid: > 1.0
             )
 
 
 # =============================================================================
 # TESTE 4: EXECUTION PLAN V6.0 FIELDS
 # =============================================================================
+
 
 class TestExecutionPlanV6:
     """Testa ExecutionPlan com campos v6.0."""
@@ -199,7 +199,7 @@ class TestExecutionPlanV6:
             strategy_overview="Sequential execution",
             mode=PlanningMode.PLANNING,
             overall_confidence=0.8,
-            confidence_summary="Good confidence"
+            confidence_summary="Good confidence",
         )
 
         assert plan.mode == PlanningMode.PLANNING
@@ -212,19 +212,15 @@ class TestExecutionPlanV6:
         from vertice_cli.agents.planner import (
             ExecutionPlan,
             ClarifyingQuestion,
-            ClarificationResponse
+            ClarificationResponse,
         )
 
         plan = ExecutionPlan(
             plan_id="plan-123",
             goal="Test",
             strategy_overview="Test",
-            clarifying_questions=[
-                ClarifyingQuestion(question="Scope?", category="scope")
-            ],
-            clarification_responses=[
-                ClarificationResponse(question_id="q-1", answer="Module")
-            ]
+            clarifying_questions=[ClarifyingQuestion(question="Scope?", category="scope")],
+            clarification_responses=[ClarificationResponse(question_id="q-1", answer="Module")],
         )
 
         assert len(plan.clarifying_questions) == 1
@@ -234,6 +230,7 @@ class TestExecutionPlanV6:
 # =============================================================================
 # TESTE 5: PLANNER AGENT V6.0
 # =============================================================================
+
 
 class TestPlannerAgentV6:
     """Testa PlannerAgent v6.0."""
@@ -249,7 +246,7 @@ class TestPlannerAgentV6:
             llm_client=mock_llm,
             mcp_client=mock_mcp,
             plan_artifact_dir="/tmp/plans",
-            ask_clarifying_questions=True
+            ask_clarifying_questions=True,
         )
 
         assert planner.plan_artifact_dir == "/tmp/plans"
@@ -280,6 +277,7 @@ class TestPlannerAgentV6:
 # TESTE 6: CONFIDENCE CALCULATION
 # =============================================================================
 
+
 class TestConfidenceCalculation:
     """Testa cálculo de confidence."""
 
@@ -298,7 +296,7 @@ class TestConfidenceCalculation:
             objective="Test",
             definition_of_done="Test",
             dependencies=[],
-            cost=1.0
+            cost=1.0,
         )
 
         score, reasoning, risks = planner._calculate_step_confidence(step, {})
@@ -319,7 +317,7 @@ class TestConfidenceCalculation:
             role="exotic_agent",  # Unfamiliar
             action="Test",
             objective="Test",
-            definition_of_done="Test"
+            definition_of_done="Test",
         )
 
         score, reasoning, risks = planner._calculate_step_confidence(step, {})
@@ -343,7 +341,7 @@ class TestConfidenceCalculation:
             action="Test",
             objective="Test",
             definition_of_done="Test",
-            dependencies=["step-0", "step-a", "step-b", "step-c"]  # 4 deps
+            dependencies=["step-0", "step-a", "step-b", "step-c"],  # 4 deps
         )
 
         score, reasoning, risks = planner._calculate_step_confidence(step, {})
@@ -354,6 +352,7 @@ class TestConfidenceCalculation:
 # =============================================================================
 # TESTE 7: CONFIDENCE SUMMARY
 # =============================================================================
+
 
 class TestConfidenceSummary:
     """Testa geração de resumo de confidence."""
@@ -399,6 +398,7 @@ class TestConfidenceSummary:
 # TESTE 8: PLAN.MD ARTIFACT
 # =============================================================================
 
+
 class TestPlanArtifact:
     """Testa geração de plan.md."""
 
@@ -427,9 +427,9 @@ class TestPlanArtifact:
                     "role": "coder",
                     "action": "Write code",
                     "definition_of_done": "Tests pass",
-                    "confidence_score": 0.8
+                    "confidence_score": 0.8,
                 }
-            ]
+            ],
         }
 
         markdown = planner._format_plan_as_markdown(plan_data, task)
@@ -449,18 +449,14 @@ class TestPlanArtifact:
         mock_mcp = MagicMock()
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            planner = PlannerAgent(
-                mock_llm,
-                mock_mcp,
-                plan_artifact_dir=tmpdir
-            )
+            planner = PlannerAgent(mock_llm, mock_mcp, plan_artifact_dir=tmpdir)
 
             task = AgentTask(request="Test task")
             plan_data = {
                 "plan_id": "plan-test",
                 "goal": "Test",
                 "strategy_overview": "Test",
-                "sops": []
+                "sops": [],
             }
 
             path = await planner._generate_plan_artifact(plan_data, task)
@@ -474,16 +470,14 @@ class TestPlanArtifact:
 # TESTE 9: EXPLORATION MODE
 # =============================================================================
 
+
 class TestExplorationMode:
     """Testa modo de exploração."""
 
     @pytest.mark.asyncio
     async def test_explore_returns_analysis(self):
         """explore() deve retornar análise."""
-        from vertice_cli.agents.planner import (
-            PlannerAgent,
-            AgentTask
-        )
+        from vertice_cli.agents.planner import PlannerAgent, AgentTask
 
         mock_llm = AsyncMock()
         mock_llm.generate = AsyncMock(return_value='{"understanding": "Test task"}')
@@ -502,14 +496,10 @@ class TestExplorationMode:
     @pytest.mark.asyncio
     async def test_explore_restricts_capabilities(self):
         """explore() deve restringir para READ_ONLY."""
-        from vertice_cli.agents.planner import (
-            PlannerAgent,
-            AgentTask,
-            AgentCapability
-        )
+        from vertice_cli.agents.planner import PlannerAgent, AgentTask, AgentCapability
 
         mock_llm = AsyncMock()
-        mock_llm.generate = AsyncMock(return_value='{}')
+        mock_llm.generate = AsyncMock(return_value="{}")
         mock_mcp = MagicMock()
 
         planner = PlannerAgent(mock_llm, mock_mcp)
@@ -517,8 +507,6 @@ class TestExplorationMode:
 
         # Track capabilities during exploration
         caps_during_explore = []
-
-        original_gather = planner._gather_context
 
         async def tracking_gather(task):
             caps_during_explore.extend(planner.capabilities)
@@ -541,6 +529,7 @@ class TestExplorationMode:
 # TESTE 10: CLARIFYING QUESTIONS GENERATION
 # =============================================================================
 
+
 class TestClarifyingQuestionsGeneration:
     """Testa geração de perguntas clarificadoras."""
 
@@ -550,14 +539,16 @@ class TestClarifyingQuestionsGeneration:
         from vertice_cli.agents.planner import PlannerAgent, AgentTask
 
         mock_llm = AsyncMock()
-        mock_llm.generate = AsyncMock(return_value='''
+        mock_llm.generate = AsyncMock(
+            return_value="""
         {
             "questions": [
                 {"question": "What scope?", "category": "scope", "options": ["A", "B"]},
                 {"question": "Which approach?", "category": "approach", "options": ["X", "Y"]}
             ]
         }
-        ''')
+        """
+        )
         mock_mcp = MagicMock()
 
         planner = PlannerAgent(mock_llm, mock_mcp)
@@ -592,16 +583,14 @@ class TestClarifyingQuestionsGeneration:
 # TESTE 11: EXECUTE WITH CLARIFICATION
 # =============================================================================
 
+
 class TestExecuteWithClarification:
     """Testa execute_with_clarification."""
 
     @pytest.mark.asyncio
     async def test_execute_with_clarification_basic(self):
         """execute_with_clarification deve funcionar."""
-        from vertice_cli.agents.planner import (
-            PlannerAgent,
-            AgentTask
-        )
+        from vertice_cli.agents.planner import PlannerAgent, AgentTask
 
         mock_llm = AsyncMock()
         # Mock for clarifying questions
@@ -611,13 +600,12 @@ class TestExecuteWithClarification:
         planner = PlannerAgent(mock_llm, mock_mcp, ask_clarifying_questions=False)
 
         # Mock execute to return a basic response
-        planner.execute = AsyncMock(return_value=MagicMock(
-            success=True,
-            data={"plan": {"plan_id": "test", "sops": []}}
-        ))
+        planner.execute = AsyncMock(
+            return_value=MagicMock(success=True, data={"plan": {"plan_id": "test", "sops": []}})
+        )
 
         task = AgentTask(request="Test task")
-        response = await planner.execute_with_clarification(task)
+        await planner.execute_with_clarification(task)
 
         assert planner.execute.called
 
@@ -625,6 +613,7 @@ class TestExecuteWithClarification:
 # =============================================================================
 # TESTE 12: BACKWARD COMPATIBILITY
 # =============================================================================
+
 
 class TestBackwardCompatibility:
     """Testa compatibilidade com código existente."""
@@ -652,7 +641,7 @@ class TestBackwardCompatibility:
             role="coder",
             action="Write code",
             objective="Implement feature",
-            definition_of_done="Tests pass"
+            definition_of_done="Tests pass",
         )
 
         # Should have defaults
@@ -665,11 +654,7 @@ class TestBackwardCompatibility:
         from vertice_cli.agents.planner import ExecutionPlan
 
         # v5 style creation
-        plan = ExecutionPlan(
-            plan_id="plan-123",
-            goal="Test goal",
-            strategy_overview="Sequential"
-        )
+        plan = ExecutionPlan(plan_id="plan-123", goal="Test goal", strategy_overview="Sequential")
 
         # Should have defaults
         assert plan.overall_confidence == 0.7
@@ -680,6 +665,7 @@ class TestBackwardCompatibility:
 # =============================================================================
 # TESTE 13: MULTI-PLAN DATA MODELS (v6.1)
 # =============================================================================
+
 
 class TestMultiPlanDataModels:
     """Testa os novos modelos de dados v6.1 para Multi-Plan."""
@@ -696,12 +682,7 @@ class TestMultiPlanDataModels:
         """PlanProbabilities deve calcular scores corretamente."""
         from vertice_cli.agents.planner import PlanProbabilities
 
-        probs = PlanProbabilities(
-            success=0.8,
-            friction=0.2,
-            time_overrun=0.3,
-            quality=0.7
-        )
+        probs = PlanProbabilities(success=0.8, friction=0.2, time_overrun=0.3, quality=0.7)
 
         assert probs.success == 0.8
         assert probs.friction == 0.2
@@ -715,12 +696,7 @@ class TestMultiPlanDataModels:
         """PlanProbabilities deve calcular risk/reward ratio."""
         from vertice_cli.agents.planner import PlanProbabilities
 
-        probs = PlanProbabilities(
-            success=0.9,
-            friction=0.1,
-            time_overrun=0.1,
-            quality=0.8
-        )
+        probs = PlanProbabilities(success=0.9, friction=0.1, time_overrun=0.1, quality=0.8)
 
         # reward = success * quality = 0.9 * 0.8 = 0.72
         # risk = friction + time_overrun = 0.1 + 0.1 = 0.2
@@ -732,12 +708,7 @@ class TestMultiPlanDataModels:
         """PlanProbabilities deve formatar para display."""
         from vertice_cli.agents.planner import PlanProbabilities
 
-        probs = PlanProbabilities(
-            success=0.85,
-            friction=0.15,
-            time_overrun=0.2,
-            quality=0.9
-        )
+        probs = PlanProbabilities(success=0.85, friction=0.15, time_overrun=0.2, quality=0.9)
 
         display = probs.to_display()
 
@@ -749,6 +720,7 @@ class TestMultiPlanDataModels:
 # =============================================================================
 # TESTE 14: ALTERNATIVE PLAN MODEL
 # =============================================================================
+
 
 class TestAlternativePlan:
     """Testa o modelo AlternativePlan."""
@@ -766,7 +738,7 @@ class TestAlternativePlan:
             p_friction=0.2,
             pros=["Low risk", "Easy to understand"],
             cons=["May take longer"],
-            best_for="Production critical features"
+            best_for="Production critical features",
         )
 
         assert plan.strategy == PlanStrategy.STANDARD
@@ -786,7 +758,7 @@ class TestAlternativePlan:
             p_success=0.7,
             p_friction=0.4,
             p_time_overrun=0.2,
-            p_quality=0.6
+            p_quality=0.6,
         )
 
         probs = plan.probabilities
@@ -805,7 +777,7 @@ class TestAlternativePlan:
             p_success=0.6,
             p_friction=0.5,
             p_time_overrun=0.5,
-            p_quality=0.8
+            p_quality=0.8,
         )
 
         assert 0.0 <= plan.overall_score <= 1.0
@@ -815,16 +787,13 @@ class TestAlternativePlan:
 # TESTE 15: MULTI-PLAN RESULT
 # =============================================================================
 
+
 class TestMultiPlanResult:
     """Testa o modelo MultiPlanResult."""
 
     def test_multi_plan_result_creation(self):
         """MultiPlanResult deve ser criado corretamente."""
-        from vertice_cli.agents.planner import (
-            MultiPlanResult,
-            AlternativePlan,
-            PlanStrategy
-        )
+        from vertice_cli.agents.planner import MultiPlanResult, AlternativePlan, PlanStrategy
 
         plans = [
             AlternativePlan(
@@ -833,7 +802,7 @@ class TestMultiPlanResult:
                 description="Safe path",
                 plan={},
                 p_success=0.8,
-                p_friction=0.2
+                p_friction=0.2,
             ),
             AlternativePlan(
                 strategy=PlanStrategy.ACCELERATOR,
@@ -841,15 +810,15 @@ class TestMultiPlanResult:
                 description="Quick path",
                 plan={},
                 p_success=0.7,
-                p_friction=0.4
-            )
+                p_friction=0.4,
+            ),
         ]
 
         result = MultiPlanResult(
             task_summary="Implement feature X",
             plans=plans,
             recommended_plan=PlanStrategy.STANDARD,
-            recommendation_reasoning="Higher success probability"
+            recommendation_reasoning="Higher success probability",
         )
 
         assert len(result.plans) == 2
@@ -857,11 +826,7 @@ class TestMultiPlanResult:
 
     def test_multi_plan_result_get_plan(self):
         """MultiPlanResult.get_plan deve retornar plano correto."""
-        from vertice_cli.agents.planner import (
-            MultiPlanResult,
-            AlternativePlan,
-            PlanStrategy
-        )
+        from vertice_cli.agents.planner import MultiPlanResult, AlternativePlan, PlanStrategy
 
         plans = [
             AlternativePlan(
@@ -870,7 +835,7 @@ class TestMultiPlanResult:
                 description="",
                 plan={},
                 p_success=0.8,
-                p_friction=0.2
+                p_friction=0.2,
             ),
             AlternativePlan(
                 strategy=PlanStrategy.LATERAL,
@@ -878,15 +843,15 @@ class TestMultiPlanResult:
                 description="",
                 plan={},
                 p_success=0.6,
-                p_friction=0.3
-            )
+                p_friction=0.3,
+            ),
         ]
 
         result = MultiPlanResult(
             task_summary="Test",
             plans=plans,
             recommended_plan=PlanStrategy.STANDARD,
-            recommendation_reasoning="Test"
+            recommendation_reasoning="Test",
         )
 
         standard = result.get_plan(PlanStrategy.STANDARD)
@@ -899,11 +864,7 @@ class TestMultiPlanResult:
 
     def test_multi_plan_result_to_markdown(self):
         """MultiPlanResult.to_markdown deve gerar markdown válido."""
-        from vertice_cli.agents.planner import (
-            MultiPlanResult,
-            AlternativePlan,
-            PlanStrategy
-        )
+        from vertice_cli.agents.planner import MultiPlanResult, AlternativePlan, PlanStrategy
 
         plans = [
             AlternativePlan(
@@ -915,7 +876,7 @@ class TestMultiPlanResult:
                 p_friction=0.15,
                 pros=["Low risk"],
                 cons=["Slower"],
-                best_for="Production"
+                best_for="Production",
             )
         ]
 
@@ -923,7 +884,7 @@ class TestMultiPlanResult:
             task_summary="Implement feature",
             plans=plans,
             recommended_plan=PlanStrategy.STANDARD,
-            recommendation_reasoning="Best risk/reward"
+            recommendation_reasoning="Best risk/reward",
         )
 
         markdown = result.to_markdown()
@@ -939,25 +900,19 @@ class TestMultiPlanResult:
 # TESTE 16: PLANNER AGENT MULTI-PLAN METHODS
 # =============================================================================
 
+
 class TestPlannerMultiPlan:
     """Testa métodos multi-plan do PlannerAgent."""
 
     def test_create_fallback_plan(self):
         """_create_fallback_plan deve criar plano básico."""
-        from vertice_cli.agents.planner import (
-            PlannerAgent,
-            AgentTask,
-            PlanStrategy
-        )
+        from vertice_cli.agents.planner import PlannerAgent, AgentTask, PlanStrategy
 
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
         planner = PlannerAgent(mock_llm, mock_mcp)
 
-        fallback = planner._create_fallback_plan(
-            AgentTask(request="Test"),
-            PlanStrategy.STANDARD
-        )
+        fallback = planner._create_fallback_plan(AgentTask(request="Test"), PlanStrategy.STANDARD)
 
         assert fallback.strategy == PlanStrategy.STANDARD
         assert fallback.name == "Basic Sequential Plan"
@@ -970,7 +925,7 @@ class TestPlannerMultiPlan:
             PlannerAgent,
             AgentTask,
             AlternativePlan,
-            PlanStrategy
+            PlanStrategy,
         )
 
         mock_llm = MagicMock()
@@ -984,7 +939,7 @@ class TestPlannerMultiPlan:
                 description="",
                 plan={},
                 p_success=0.5,
-                p_friction=0.5
+                p_friction=0.5,
             ),
             AlternativePlan(
                 strategy=PlanStrategy.ACCELERATOR,
@@ -992,8 +947,8 @@ class TestPlannerMultiPlan:
                 description="",
                 plan={},
                 p_success=0.9,
-                p_friction=0.1
-            )
+                p_friction=0.1,
+            ),
         ]
 
         task = AgentTask(request="Test")
@@ -1003,11 +958,7 @@ class TestPlannerMultiPlan:
 
     def test_build_comparison_summary(self):
         """_build_comparison_summary deve gerar resumo."""
-        from vertice_cli.agents.planner import (
-            PlannerAgent,
-            AlternativePlan,
-            PlanStrategy
-        )
+        from vertice_cli.agents.planner import PlannerAgent, AlternativePlan, PlanStrategy
 
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
@@ -1020,7 +971,7 @@ class TestPlannerMultiPlan:
                 description="",
                 plan={},
                 p_success=0.8,
-                p_friction=0.2
+                p_friction=0.2,
             ),
             AlternativePlan(
                 strategy=PlanStrategy.LATERAL,
@@ -1028,8 +979,8 @@ class TestPlannerMultiPlan:
                 description="",
                 plan={},
                 p_success=0.6,
-                p_friction=0.4
-            )
+                p_friction=0.4,
+            ),
         ]
 
         summary = planner._build_comparison_summary(plans)
@@ -1042,14 +993,11 @@ class TestPlannerMultiPlan:
     @pytest.mark.asyncio
     async def test_generate_multi_plan_returns_result(self):
         """generate_multi_plan deve retornar MultiPlanResult."""
-        from vertice_cli.agents.planner import (
-            PlannerAgent,
-            AgentTask,
-            MultiPlanResult
-        )
+        from vertice_cli.agents.planner import PlannerAgent, AgentTask, MultiPlanResult
 
         mock_llm = AsyncMock()
-        mock_llm.generate = AsyncMock(return_value='''
+        mock_llm.generate = AsyncMock(
+            return_value="""
         {
             "name": "Test Plan",
             "description": "Test",
@@ -1062,7 +1010,8 @@ class TestPlannerMultiPlan:
             "best_for": "Testing",
             "sops": []
         }
-        ''')
+        """
+        )
         mock_mcp = MagicMock()
 
         planner = PlannerAgent(mock_llm, mock_mcp)
@@ -1080,7 +1029,8 @@ class TestPlannerMultiPlan:
         from vertice_cli.agents.planner import PlannerAgent, AgentTask
 
         mock_llm = AsyncMock()
-        mock_llm.generate = AsyncMock(return_value='''
+        mock_llm.generate = AsyncMock(
+            return_value="""
         {
             "name": "Auto Selected",
             "description": "Best plan",
@@ -1088,7 +1038,8 @@ class TestPlannerMultiPlan:
             "p_friction": 0.1,
             "sops": [{"id": "step-1", "role": "coder", "action": "Test"}]
         }
-        ''')
+        """
+        )
         mock_mcp = MagicMock()
 
         planner = PlannerAgent(mock_llm, mock_mcp)
@@ -1105,7 +1056,8 @@ class TestPlannerMultiPlan:
         from vertice_cli.agents.planner import PlannerAgent, AgentTask
 
         mock_llm = AsyncMock()
-        mock_llm.generate = AsyncMock(return_value='''
+        mock_llm.generate = AsyncMock(
+            return_value="""
         {
             "name": "Option",
             "description": "A plan option",
@@ -1113,7 +1065,8 @@ class TestPlannerMultiPlan:
             "p_friction": 0.3,
             "sops": []
         }
-        ''')
+        """
+        )
         mock_mcp = MagicMock()
 
         planner = PlannerAgent(mock_llm, mock_mcp)

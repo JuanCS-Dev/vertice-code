@@ -27,7 +27,7 @@ ISSUE #1: Gemini Streaming Error
   File:    qwen_dev_cli/core/providers/gemini.py:~220
   Status:  🟡 Fix available (needs application)
 
-ISSUE #2: UI Executor Box Gray/Unreadable  
+ISSUE #2: UI Executor Box Gray/Unreadable
   Symptom: Border too dim (bright_green → cinza)
   File:    maestro_v10_integrated.py:~1438
   Status:  🟡 Fix available (needs application)
@@ -60,7 +60,7 @@ This system follows "CONSTITUIÇÃO VERTICE v3.0":
 
 Your changes MUST:
   ✅ Be minimal (change only what's broken)
-  ✅ Be tested (validate before committing)  
+  ✅ Be tested (validate before committing)
   ✅ Be documented (explain WHY, not just WHAT)
 
 ╔═══════════════════════════════════════════════════════════════════╗
@@ -87,7 +87,7 @@ If completely stuck:
   1. Check git log (recent fixes documented)
   2. Read CONSTITUTIONAL_FIX_REPORT.md
   3. Consult docs/CONSTITUIÇÃO_VERTICE_v3.0.md
-  
+
 Rollback if needed:
   git reset --hard HEAD~1
 
@@ -100,4 +100,3 @@ Next step: Open PROMPT_ANTIGRAVITY_DEBUG.md and begin FASE 1.
 Remember: You're a human engineer. Think, test, fix, validate.
 
 Good luck, Antigravity! 💪🤖
-

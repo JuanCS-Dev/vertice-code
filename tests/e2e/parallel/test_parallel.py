@@ -169,9 +169,7 @@ class TestParallelAgentInvocation:
             "Research best practices",
         ]
 
-        tasks = [
-            o.plan(r) for o, r in zip(orchestrators, requests)
-        ]
+        tasks = [o.plan(r) for o, r in zip(orchestrators, requests)]
 
         results = await asyncio.gather(*tasks)
 
@@ -188,13 +186,15 @@ class TestParallelAgentInvocation:
 
         tasks = [
             Task(id=f"route-{i}", description=desc, complexity=TaskComplexity.SIMPLE)
-            for i, desc in enumerate([
-                "Write code for API",
-                "Review security issues",
-                "Design architecture",
-                "Deploy to kubernetes",
-                "Research documentation",
-            ])
+            for i, desc in enumerate(
+                [
+                    "Write code for API",
+                    "Review security issues",
+                    "Design architecture",
+                    "Deploy to kubernetes",
+                    "Research documentation",
+                ]
+            )
         ]
 
         routing_tasks = [orchestrator.route(t) for t in tasks]
@@ -234,10 +234,7 @@ class TestConcurrencyPatterns:
 
         async def with_timeout(cmd, timeout=5):
             try:
-                return await asyncio.wait_for(
-                    tool.execute(command=cmd),
-                    timeout=timeout
-                )
+                return await asyncio.wait_for(tool.execute(command=cmd), timeout=timeout)
             except asyncio.TimeoutError:
                 return None
 

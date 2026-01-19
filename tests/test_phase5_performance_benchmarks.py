@@ -47,6 +47,7 @@ from vertice_cli.agents.base import AgentTask, AgentResponse, AgentRole
 @dataclass
 class BenchmarkResult:
     """Performance benchmark result."""
+
     name: str
     duration_seconds: float
     operations: int
@@ -135,7 +136,7 @@ class PerformanceTracker:
             latency_p99_ms=p99,
             memory_usage_mb=memory_mb,
             error_count=self.errors,
-            success_rate=success_rate
+            success_rate=success_rate,
         )
 
 
@@ -147,8 +148,9 @@ def mock_governance():
 
     # Disable verbose logging for clean benchmark output
     import logging
-    logging.getLogger('vertice_cli.maestro_governance').setLevel(logging.CRITICAL)
-    logging.getLogger('vertice_cli.core.governance_pipeline').setLevel(logging.CRITICAL)
+
+    logging.getLogger("vertice_cli.maestro_governance").setLevel(logging.CRITICAL)
+    logging.getLogger("vertice_cli.core.governance_pipeline").setLevel(logging.CRITICAL)
 
     gov = MaestroGovernance(
         llm_client=mock_llm,
@@ -156,25 +158,25 @@ def mock_governance():
         enable_governance=True,
         enable_counsel=True,
         enable_observability=False,  # Disable for performance tests
-        auto_risk_detection=True
+        auto_risk_detection=True,
     )
 
     # Mock agents with fast responses
     mock_justica = Mock(spec=JusticaIntegratedAgent)
-    mock_justica.evaluate_action = AsyncMock(return_value=Mock(
-        approved=True,
-        reasoning="Approved",
-        trust_score=0.95
-    ))
+    mock_justica.evaluate_action = AsyncMock(
+        return_value=Mock(approved=True, reasoning="Approved", trust_score=0.95)
+    )
 
     mock_sofia = Mock(spec=SofiaIntegratedAgent)
     mock_sofia.should_trigger_counsel = Mock(return_value=(False, None))
-    mock_sofia.pre_execution_counsel = AsyncMock(return_value=Mock(
-        counsel_type="advisory",
-        confidence=0.9,
-        requires_professional=False,
-        counsel="Advisory counsel"
-    ))
+    mock_sofia.pre_execution_counsel = AsyncMock(
+        return_value=Mock(
+            counsel_type="advisory",
+            confidence=0.9,
+            requires_professional=False,
+            counsel="Advisory counsel",
+        )
+    )
 
     mock_pipeline = Mock(spec=GovernancePipeline)
     mock_pipeline.pre_execution_check = AsyncMock(return_value=(True, None, {}))
@@ -192,17 +194,18 @@ def mock_agent():
     """Create mock agent for execution tests."""
     agent = Mock()
     agent.role = AgentRole.EXECUTOR
-    agent.execute = AsyncMock(return_value=AgentResponse(
-        success=True,
-        reasoning="Executed successfully",
-        data={"result": "success"}
-    ))
+    agent.execute = AsyncMock(
+        return_value=AgentResponse(
+            success=True, reasoning="Executed successfully", data={"result": "success"}
+        )
+    )
     return agent
 
 
 # ============================================================================
 # LATENCY BENCHMARKS
 # ============================================================================
+
 
 @pytest.mark.asyncio
 @pytest.mark.latency
@@ -273,7 +276,7 @@ async def test_latency_risk_detection(mock_governance):
         "Read user configuration",
         "Deploy to production",
         "List available files",
-        "Modify security settings"
+        "Modify security settings",
     ]
 
     tracker.start()
@@ -298,6 +301,7 @@ async def test_latency_risk_detection(mock_governance):
 # ============================================================================
 # THROUGHPUT BENCHMARKS
 # ============================================================================
+
 
 @pytest.mark.asyncio
 @pytest.mark.throughput
@@ -343,10 +347,7 @@ async def test_throughput_mixed_risk_levels(mock_governance, mock_agent):
     operations = 1000
 
     risk_levels = ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
-    tasks = [
-        AgentTask(request=f"operation {i}", context={})
-        for i in range(operations)
-    ]
+    tasks = [AgentTask(request=f"operation {i}", context={}) for i in range(operations)]
 
     tracker.start()
 
@@ -371,6 +372,7 @@ async def test_throughput_mixed_risk_levels(mock_governance, mock_agent):
 # ============================================================================
 # STRESS TESTS
 # ============================================================================
+
 
 @pytest.mark.asyncio
 @pytest.mark.stress
@@ -425,7 +427,7 @@ async def test_stress_rapid_fire_risk_detection(mock_governance):
         "Modify security",
         "Change password",
         "Refactor code",
-        "Write tests"
+        "Write tests",
     ]
 
     tracker.start()
@@ -526,6 +528,7 @@ async def test_stress_graceful_degradation(mock_agent):
 # COMPARISON BENCHMARKS
 # ============================================================================
 
+
 @pytest.mark.asyncio
 @pytest.mark.comparison
 async def test_comparison_with_vs_without_governance(mock_governance, mock_agent):
@@ -560,23 +563,31 @@ async def test_comparison_with_vs_without_governance(mock_governance, mock_agent
     result_with = tracker_with.get_result("WITH Governance", operations)
 
     # Print comparison
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("GOVERNANCE OVERHEAD COMPARISON")
-    print("="*80)
+    print("=" * 80)
     print(result_without)
     print(result_with)
 
     # Calculate overhead
     overhead_latency_p50 = result_with.latency_p50_ms - result_without.latency_p50_ms
     overhead_latency_p95 = result_with.latency_p95_ms - result_without.latency_p95_ms
-    overhead_percentage = (overhead_latency_p50 / result_without.latency_p50_ms) * 100 if result_without.latency_p50_ms > 0 else 0
+    overhead_percentage = (
+        (overhead_latency_p50 / result_without.latency_p50_ms) * 100
+        if result_without.latency_p50_ms > 0
+        else 0
+    )
 
     print("\nOVERHEAD ANALYSIS:")
     print(f"  p50 overhead: +{overhead_latency_p50:.3f}ms ({overhead_percentage:.1f}%)")
     print(f"  p95 overhead: +{overhead_latency_p95:.3f}ms")
-    print(f"  Throughput ratio: {result_without.throughput_ops_per_sec / result_with.throughput_ops_per_sec:.2f}x")
-    print(f"  Memory overhead: +{result_with.memory_usage_mb - result_without.memory_usage_mb:.2f}MB")
-    print("="*80)
+    print(
+        f"  Throughput ratio: {result_without.throughput_ops_per_sec / result_with.throughput_ops_per_sec:.2f}x"
+    )
+    print(
+        f"  Memory overhead: +{result_with.memory_usage_mb - result_without.memory_usage_mb:.2f}MB"
+    )
+    print("=" * 80)
 
     # Governance overhead should be acceptable
     assert overhead_latency_p50 < 10.0, "Governance overhead should be < 10ms at p50"
@@ -585,6 +596,7 @@ async def test_comparison_with_vs_without_governance(mock_governance, mock_agent
 # ============================================================================
 # REAL-WORLD SCENARIO BENCHMARKS
 # ============================================================================
+
 
 @pytest.mark.asyncio
 @pytest.mark.realistic
@@ -637,6 +649,7 @@ async def test_realistic_maestro_workflow(mock_governance, mock_agent):
 # ============================================================================
 # SUMMARY
 # ============================================================================
+
 
 def test_generate_performance_report():
     """Generate final performance report."""

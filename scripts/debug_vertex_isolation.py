@@ -1,4 +1,3 @@
-
 import os
 import logging
 import traceback
@@ -7,15 +6,16 @@ import traceback
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 def debug_vertex_connection():
     print("=== DIAGNOSTICO DE ISOLAMENTO VERTEX AI ===")
-    
+
     # 1. Environment Dump (Sanitized)
     project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
     # FORCE us-central1 for diagnostic, ignoring env var if it is 'global'
     env_location = os.getenv("VERTEX_AI_LOCATION")
     location = "us-central1"
-    
+
     print("1. ENV VARS:")
     print(f"   - GOOGLE_CLOUD_PROJECT: {project_id}")
     print(f"   - VERTEX_AI_LOCATION (Raw): {env_location}")
@@ -31,7 +31,10 @@ def debug_vertex_connection():
     try:
         import vertexai
         from vertexai.generative_models import GenerativeModel
-        print(f"   ✅ Vertex AI SDK importado. Versão: {vertexai.__version__ if hasattr(vertexai, '__version__') else 'unknown'}")
+
+        print(
+            f"   ✅ Vertex AI SDK importado. Versão: {vertexai.__version__ if hasattr(vertexai, '__version__') else 'unknown'}"
+        )
     except ImportError as e:
         print(f"❌ FALHA NO IMPORT: {e}")
         return
@@ -50,6 +53,7 @@ def debug_vertex_connection():
     print("\n4. TENTATIVA DE LISTAGEM DE MODELOS (via ModelGarden/Service)...")
     try:
         from google.cloud import aiplatform
+
         aiplatform.init(project=project_id, location=location)
         # List PUBLISHER models (Google's models)
         print("   ℹ️ Consultando Model Garden (Publisher Models)...")
@@ -57,11 +61,12 @@ def debug_vertex_connection():
         try:
             # Try to get a specific model reference to see if it resolves
             from google.cloud.aiplatform import Model
+
             # This is for custom models. For Generative, we check if we can reach the service.
             pass
         except (ImportError, AttributeError):
             pass
-            
+
     except Exception as e:
         print(f"   ⚠️ Falha ao listar modelos: {e}")
 
@@ -71,7 +76,7 @@ def debug_vertex_connection():
         "gemini-3.0-pro-001",
         "gemini-3.0-flash-001",
         "gemini-3.0-pro",
-        "gemini-3.0-flash"
+        "gemini-3.0-flash",
     ]
 
     for model_name in models_to_test:
@@ -80,12 +85,15 @@ def debug_vertex_connection():
             model = GenerativeModel(model_name)
             response = model.generate_content("Say 'Hello Vertex' if you can hear me.")
             print(f"   ✅ SUCESSO! Resposta: {response.text}")
-            return # Sair no primeiro sucesso
+            return  # Sair no primeiro sucesso
         except Exception as e:
             print(f"   ❌ FALHA ({model_name}): {str(e)}")
             # Se for 404, imprime detalhes
             if "404" in str(e):
-                print("      -> DIAGNÓSTICO: O endpoint retornou 404. O SDK montou a URL errada ou o projeto não tem acesso.")
+                print(
+                    "      -> DIAGNÓSTICO: O endpoint retornou 404. O SDK montou a URL errada ou o projeto não tem acesso."
+                )
+
 
 if __name__ == "__main__":
     debug_vertex_connection()

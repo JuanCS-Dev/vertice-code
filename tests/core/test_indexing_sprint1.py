@@ -100,7 +100,7 @@ class Calculator:
 @pytest.fixture
 def sample_js_code():
     """Sample JavaScript code for testing."""
-    return '''
+    return """
 // Module imports
 import { useState } from 'react';
 
@@ -124,7 +124,7 @@ class UserService {
         return this.fetch(`/users/${id}`);
     }
 }
-'''
+"""
 
 
 @pytest.fixture
@@ -209,7 +209,10 @@ class TestCodeChunker:
 
         chunk_names = [c.name for c in chunks]
         # At least one function should be detected
-        assert any("processData" in name or "fetchData" in name for name in chunk_names) or len(chunks) > 0
+        assert (
+            any("processData" in name or "fetchData" in name for name in chunk_names)
+            or len(chunks) > 0
+        )
 
     def test_chunk_nonexistent_file(self):
         """Test handling of nonexistent file."""
@@ -355,9 +358,7 @@ class TestSemanticEmbedder:
         """Test availability check."""
         # mock_azure_env removes Azure env vars to force is_available() = False
         config = EmbeddingConfig(
-            cache_dir=str(temp_dir / "cache"),
-            azure_endpoint="",
-            azure_api_key=""
+            cache_dir=str(temp_dir / "cache"), azure_endpoint="", azure_api_key=""
         )
         embedder = SemanticEmbedder(config)
 
@@ -440,7 +441,8 @@ class TestSemanticEmbedder:
         assert len(embedding) == 64
         # Should be normalized (L2 norm ~= 1)
         import math
-        norm = math.sqrt(sum(x*x for x in embedding))
+
+        norm = math.sqrt(sum(x * x for x in embedding))
         assert 0.9 < norm < 1.1
 
     def test_stats(self, temp_dir):
@@ -528,14 +530,24 @@ class TestVectorStore:
         # Create chunks for different languages
         chunks = [
             CodeChunk(
-                chunk_id="py1", filepath="/test.py", content="def foo(): pass",
-                start_line=1, end_line=1, chunk_type=ChunkType.FUNCTION,
-                name="foo", language="python"
+                chunk_id="py1",
+                filepath="/test.py",
+                content="def foo(): pass",
+                start_line=1,
+                end_line=1,
+                chunk_type=ChunkType.FUNCTION,
+                name="foo",
+                language="python",
             ),
             CodeChunk(
-                chunk_id="js1", filepath="/test.js", content="function bar() {}",
-                start_line=1, end_line=1, chunk_type=ChunkType.FUNCTION,
-                name="bar", language="javascript"
+                chunk_id="js1",
+                filepath="/test.js",
+                content="function bar() {}",
+                start_line=1,
+                end_line=1,
+                chunk_type=ChunkType.FUNCTION,
+                name="bar",
+                language="javascript",
             ),
         ]
         embeddings = [[1.0] * 64, [1.0] * 64]  # Same embedding
@@ -670,13 +682,10 @@ class TestCodebaseIndexer:
             root_dir=str(sample_project),
             index_dir=str(sample_project / ".index"),
             embedding_config=EmbeddingConfig(
-                use_local_fallback=True,
-                dimensions=64,
-                cache_dir=str(sample_project / ".cache")
+                use_local_fallback=True, dimensions=64, cache_dir=str(sample_project / ".cache")
             ),
             vector_config=VectorStoreConfig(
-                use_chromadb=False,
-                persist_dir=str(sample_project / ".vectors")
+                use_chromadb=False, persist_dir=str(sample_project / ".vectors")
             ),
         )
         indexer = CodebaseIndexer(config)
@@ -697,13 +706,10 @@ class TestCodebaseIndexer:
             index_dir=str(sample_project / ".index"),
             check_modified=True,
             embedding_config=EmbeddingConfig(
-                use_local_fallback=True,
-                dimensions=64,
-                cache_dir=str(sample_project / ".cache")
+                use_local_fallback=True, dimensions=64, cache_dir=str(sample_project / ".cache")
             ),
             vector_config=VectorStoreConfig(
-                use_chromadb=False,
-                persist_dir=str(sample_project / ".vectors")
+                use_chromadb=False, persist_dir=str(sample_project / ".vectors")
             ),
         )
         indexer = CodebaseIndexer(config)
@@ -725,9 +731,7 @@ class TestCodebaseIndexer:
             root_dir=str(sample_project),
             index_dir=str(sample_project / ".index"),
             embedding_config=EmbeddingConfig(
-                use_local_fallback=True,
-                dimensions=64,
-                cache_dir=str(sample_project / ".cache")
+                use_local_fallback=True, dimensions=64, cache_dir=str(sample_project / ".cache")
             ),
             vector_config=VectorStoreConfig(
                 use_chromadb=False,
@@ -755,13 +759,10 @@ class TestCodebaseIndexer:
             root_dir=str(sample_project),
             index_dir=str(sample_project / ".index"),
             embedding_config=EmbeddingConfig(
-                use_local_fallback=True,
-                dimensions=64,
-                cache_dir=str(sample_project / ".cache")
+                use_local_fallback=True, dimensions=64, cache_dir=str(sample_project / ".cache")
             ),
             vector_config=VectorStoreConfig(
-                use_chromadb=False,
-                persist_dir=str(sample_project / ".vectors")
+                use_chromadb=False, persist_dir=str(sample_project / ".vectors")
             ),
         )
         indexer = CodebaseIndexer(config)
@@ -780,13 +781,10 @@ class TestCodebaseIndexer:
             root_dir=str(sample_project),
             index_dir=str(sample_project / ".index"),
             embedding_config=EmbeddingConfig(
-                use_local_fallback=True,
-                dimensions=64,
-                cache_dir=str(sample_project / ".cache")
+                use_local_fallback=True, dimensions=64, cache_dir=str(sample_project / ".cache")
             ),
             vector_config=VectorStoreConfig(
-                use_chromadb=False,
-                persist_dir=str(sample_project / ".vectors")
+                use_chromadb=False, persist_dir=str(sample_project / ".vectors")
             ),
         )
         indexer = CodebaseIndexer(config)
@@ -815,13 +813,10 @@ class TestCodebaseIndexer:
             root_dir=str(sample_project),
             index_dir=str(sample_project / ".index"),
             embedding_config=EmbeddingConfig(
-                use_local_fallback=True,
-                dimensions=64,
-                cache_dir=str(sample_project / ".cache")
+                use_local_fallback=True, dimensions=64, cache_dir=str(sample_project / ".cache")
             ),
             vector_config=VectorStoreConfig(
-                use_chromadb=False,
-                persist_dir=str(sample_project / ".vectors")
+                use_chromadb=False, persist_dir=str(sample_project / ".vectors")
             ),
         )
         indexer = CodebaseIndexer(config, on_progress=on_progress)
@@ -843,13 +838,10 @@ class TestCodebaseIndexer:
             root_dir=str(sample_project),
             index_dir=str(sample_project / ".index"),
             embedding_config=EmbeddingConfig(
-                use_local_fallback=True,
-                dimensions=64,
-                cache_dir=str(sample_project / ".cache")
+                use_local_fallback=True, dimensions=64, cache_dir=str(sample_project / ".cache")
             ),
             vector_config=VectorStoreConfig(
-                use_chromadb=False,
-                persist_dir=str(sample_project / ".vectors")
+                use_chromadb=False, persist_dir=str(sample_project / ".vectors")
             ),
         )
         indexer = CodebaseIndexer(config)
@@ -870,13 +862,10 @@ class TestCodebaseIndexer:
             root_dir=str(sample_project),
             index_dir=str(sample_project / ".index"),
             embedding_config=EmbeddingConfig(
-                use_local_fallback=True,
-                dimensions=64,
-                cache_dir=str(sample_project / ".cache")
+                use_local_fallback=True, dimensions=64, cache_dir=str(sample_project / ".cache")
             ),
             vector_config=VectorStoreConfig(
-                use_chromadb=False,
-                persist_dir=str(sample_project / ".vectors")
+                use_chromadb=False, persist_dir=str(sample_project / ".vectors")
             ),
         )
         indexer = CodebaseIndexer(config)
@@ -920,9 +909,7 @@ def validate_config(config: dict) -> bool:
             root_dir=str(temp_dir),
             index_dir=str(temp_dir / ".index"),
             embedding_config=EmbeddingConfig(
-                use_local_fallback=True,
-                dimensions=64,
-                cache_dir=str(temp_dir / ".cache")
+                use_local_fallback=True, dimensions=64, cache_dir=str(temp_dir / ".cache")
             ),
             vector_config=VectorStoreConfig(
                 use_chromadb=False,

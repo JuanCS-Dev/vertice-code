@@ -33,6 +33,7 @@ from vertice_cli.permissions import PermissionLevel
 # CODEEXECUTIONENGINE - DOCKER MODE TESTS
 # =============================================================================
 
+
 class TestCodeExecutionEngineDocker:
     """Comprehensive tests for Docker execution mode."""
 
@@ -46,28 +47,24 @@ class TestCodeExecutionEngineDocker:
     def test_docker_custom_resource_limits(self):
         """Test Docker with custom resource limits."""
         limits = {"max_memory_mb": 2048, "max_cpu_percent": 75}
-        engine = CodeExecutionEngine(
-            mode=ExecutionMode.DOCKER,
-            resource_limits=limits
-        )
+        engine = CodeExecutionEngine(mode=ExecutionMode.DOCKER, resource_limits=limits)
         assert engine.resource_limits == limits
 
     @pytest.mark.asyncio
     async def test_docker_execution_builds_command_structure(self):
         """Test Docker execution builds correct command structure."""
         engine = CodeExecutionEngine(
-            mode=ExecutionMode.DOCKER,
-            resource_limits={"max_memory_mb": 512, "max_cpu_percent": 50}
+            mode=ExecutionMode.DOCKER, resource_limits={"max_memory_mb": 512, "max_cpu_percent": 50}
         )
 
-        with patch.object(engine, '_execute_local', new_callable=AsyncMock) as mock_local:
+        with patch.object(engine, "_execute_local", new_callable=AsyncMock) as mock_local:
             mock_local.return_value = CommandResult(
                 success=True,
                 stdout="output",
                 stderr="",
                 exit_code=0,
                 command="docker run...",
-                execution_time=1.0
+                execution_time=1.0,
             )
 
             await engine.execute("echo test")
@@ -82,19 +79,16 @@ class TestCodeExecutionEngineDocker:
     async def test_docker_execution_with_high_memory_limit(self):
         """Test Docker with high memory limits."""
         limits = {"max_memory_mb": 4096, "max_cpu_percent": 100}
-        engine = CodeExecutionEngine(
-            mode=ExecutionMode.DOCKER,
-            resource_limits=limits
-        )
+        engine = CodeExecutionEngine(mode=ExecutionMode.DOCKER, resource_limits=limits)
 
-        with patch.object(engine, '_execute_local', new_callable=AsyncMock) as mock_local:
+        with patch.object(engine, "_execute_local", new_callable=AsyncMock) as mock_local:
             mock_local.return_value = CommandResult(
                 success=True,
                 stdout="",
                 stderr="",
                 exit_code=0,
                 command="docker run...",
-                execution_time=1.0
+                execution_time=1.0,
             )
 
             await engine.execute("python heavy_script.py")
@@ -107,19 +101,16 @@ class TestCodeExecutionEngineDocker:
     async def test_docker_execution_with_low_memory_limit(self):
         """Test Docker with minimal memory limits."""
         limits = {"max_memory_mb": 64, "max_cpu_percent": 10}
-        engine = CodeExecutionEngine(
-            mode=ExecutionMode.DOCKER,
-            resource_limits=limits
-        )
+        engine = CodeExecutionEngine(mode=ExecutionMode.DOCKER, resource_limits=limits)
 
-        with patch.object(engine, '_execute_local', new_callable=AsyncMock) as mock_local:
+        with patch.object(engine, "_execute_local", new_callable=AsyncMock) as mock_local:
             mock_local.return_value = CommandResult(
                 success=True,
                 stdout="",
                 stderr="",
                 exit_code=0,
                 command="docker run...",
-                execution_time=1.0
+                execution_time=1.0,
             )
 
             await engine.execute("ls")
@@ -132,6 +123,7 @@ class TestCodeExecutionEngineDocker:
 # =============================================================================
 # CODEEXECUTIONENGINE - E2B MODE TESTS
 # =============================================================================
+
 
 class TestCodeExecutionEngineE2B:
     """Comprehensive tests for E2B execution mode."""
@@ -155,10 +147,7 @@ class TestCodeExecutionEngineE2B:
     @pytest.mark.asyncio
     async def test_e2b_with_timeout(self):
         """Test E2B execution with timeout."""
-        engine = CodeExecutionEngine(
-            mode=ExecutionMode.E2B,
-            timeout=0.1
-        )
+        engine = CodeExecutionEngine(mode=ExecutionMode.E2B, timeout=0.1)
 
         result = await engine.execute("sleep 5", trace_id="e2b-timeout-test")
 
@@ -180,6 +169,7 @@ class TestCodeExecutionEngineE2B:
 # RETRY LOGIC & TIMEOUT TESTS
 # =============================================================================
 
+
 class TestCodeExecutionEngineRetryLogic:
     """Comprehensive tests for retry logic with timeout."""
 
@@ -198,7 +188,7 @@ class TestCodeExecutionEngineRetryLogic:
         """Test successful retry after timeout."""
         engine = CodeExecutionEngine(timeout=0.05, max_retries=3)
 
-        with patch.object(engine, '_execute_local', new_callable=AsyncMock) as mock_local:
+        with patch.object(engine, "_execute_local", new_callable=AsyncMock) as mock_local:
             # First call times out, second succeeds
             mock_local.side_effect = [
                 asyncio.TimeoutError(),
@@ -208,8 +198,8 @@ class TestCodeExecutionEngineRetryLogic:
                     stderr="",
                     exit_code=0,
                     command="test",
-                    execution_time=0.1
-                )
+                    execution_time=0.1,
+                ),
             ]
 
             result = await engine.execute("test command")
@@ -224,11 +214,10 @@ class TestCodeExecutionEngineRetryLogic:
         """Test exponential backoff between retries."""
         engine = CodeExecutionEngine(timeout=0.01, max_retries=3)
 
-        with patch.object(engine, '_execute_local', new_callable=AsyncMock) as mock_local:
+        with patch.object(engine, "_execute_local", new_callable=AsyncMock) as mock_local:
             mock_local.side_effect = asyncio.TimeoutError()
-            with patch('asyncio.sleep', new_callable=AsyncMock) as mock_sleep:
-
-                result = await engine.execute("timeout command")
+            with patch("asyncio.sleep", new_callable=AsyncMock) as mock_sleep:
+                await engine.execute("timeout command")
 
                 # Should have slept with exponential backoff
                 # 2^0 = 1s, 2^1 = 2s
@@ -241,7 +230,7 @@ class TestCodeExecutionEngineRetryLogic:
         """Test max retries limit is enforced."""
         engine = CodeExecutionEngine(timeout=0.01, max_retries=2)
 
-        with patch.object(engine, '_execute_local', new_callable=AsyncMock) as mock_local:
+        with patch.object(engine, "_execute_local", new_callable=AsyncMock) as mock_local:
             mock_local.side_effect = asyncio.TimeoutError()
 
             result = await engine.execute("always timeout")
@@ -256,7 +245,7 @@ class TestCodeExecutionEngineRetryLogic:
         """Test retry on general exceptions."""
         engine = CodeExecutionEngine(max_retries=3)
 
-        with patch.object(engine, '_execute_local', new_callable=AsyncMock) as mock_local:
+        with patch.object(engine, "_execute_local", new_callable=AsyncMock) as mock_local:
             # First call raises, second succeeds
             mock_local.side_effect = [
                 RuntimeError("Network error"),
@@ -266,8 +255,8 @@ class TestCodeExecutionEngineRetryLogic:
                     stderr="",
                     exit_code=0,
                     command="test",
-                    execution_time=0.1
-                )
+                    execution_time=0.1,
+                ),
             ]
 
             result = await engine.execute("test")
@@ -280,7 +269,7 @@ class TestCodeExecutionEngineRetryLogic:
         """Test max retries with exceptions."""
         engine = CodeExecutionEngine(max_retries=2)
 
-        with patch.object(engine, '_execute_local', new_callable=AsyncMock) as mock_local:
+        with patch.object(engine, "_execute_local", new_callable=AsyncMock) as mock_local:
             mock_local.side_effect = ValueError("Persistent error")
 
             result = await engine.execute("failing command")
@@ -312,6 +301,7 @@ class TestCodeExecutionEngineRetryLogic:
 # =============================================================================
 # ERROR RECOVERY TESTS
 # =============================================================================
+
 
 class TestCodeExecutionEngineErrorRecovery:
     """Tests for error recovery mechanisms."""
@@ -352,6 +342,7 @@ class TestCodeExecutionEngineErrorRecovery:
 # NEXTGENEXECUTORAGENT - VALIDATION WITH PERMISSION LEVELS
 # =============================================================================
 
+
 class TestNextGenExecutorValidationPermissionLevels:
     """Tests for validation with all PermissionLevels (DENY, ASK, ALLOW)."""
 
@@ -361,9 +352,7 @@ class TestNextGenExecutorValidationPermissionLevels:
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
         return NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp,
-            security_level=SecurityLevel.STANDARD
+            llm_client=mock_llm, mcp_client=mock_mcp, security_level=SecurityLevel.STANDARD
         )
 
     @pytest.mark.asyncio
@@ -424,7 +413,7 @@ class TestNextGenExecutorValidationPermissionLevels:
             side_effect=[
                 (PermissionLevel.ALLOW, "Safe read"),  # ls
                 (PermissionLevel.ASK, "Network command"),  # curl
-                (PermissionLevel.DENY, "Destructive")  # rm
+                (PermissionLevel.DENY, "Destructive"),  # rm
             ]
         )
 
@@ -445,6 +434,7 @@ class TestNextGenExecutorValidationPermissionLevels:
 # APPROVAL CALLBACK TESTS - ADVANCED
 # =============================================================================
 
+
 class TestApprovalCallbackAdvanced:
     """Advanced tests for approval callback system."""
 
@@ -453,10 +443,7 @@ class TestApprovalCallbackAdvanced:
         """Create agent."""
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
-        return NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp
-        )
+        return NextGenExecutorAgent(llm_client=mock_llm, mcp_client=mock_mcp)
 
     @pytest.mark.asyncio
     async def test_approval_callback_sync_approved(self, agent):
@@ -479,6 +466,7 @@ class TestApprovalCallbackAdvanced:
     @pytest.mark.asyncio
     async def test_approval_callback_async_approved(self, agent):
         """Test async callback that approves."""
+
         async def async_callback(cmd):
             await asyncio.sleep(0.01)
             return True
@@ -492,6 +480,7 @@ class TestApprovalCallbackAdvanced:
     @pytest.mark.asyncio
     async def test_approval_callback_async_denied(self, agent):
         """Test async callback that denies."""
+
         async def async_callback(cmd):
             await asyncio.sleep(0.01)
             return False
@@ -521,11 +510,9 @@ class TestApprovalCallbackAdvanced:
     async def test_approval_callback_with_execution_flow(self, agent):
         """Test approval callback in full execution flow."""
         agent._generate_command = AsyncMock(return_value="curl http://example.com")
-        agent._validate_command = AsyncMock(return_value={
-            "allowed": True,
-            "reason": "Network",
-            "requires_approval": True
-        })
+        agent._validate_command = AsyncMock(
+            return_value={"allowed": True, "reason": "Network", "requires_approval": True}
+        )
 
         approval_called = []
 
@@ -538,7 +525,7 @@ class TestApprovalCallbackAdvanced:
         agent._reflect_on_execution = AsyncMock(return_value=[])
 
         task = AgentTask(request="Fetch URL")
-        response = await agent.execute(task)
+        await agent.execute(task)
 
         assert len(approval_called) > 0
 
@@ -546,6 +533,7 @@ class TestApprovalCallbackAdvanced:
 # =============================================================================
 # HISTORY MANAGEMENT TESTS - 100 ITEM LIMIT
 # =============================================================================
+
 
 class TestHistoryManagement:
     """Tests for execution history management with 100-item limit."""
@@ -556,9 +544,7 @@ class TestHistoryManagement:
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
         return NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp,
-            security_level=SecurityLevel.PERMISSIVE
+            llm_client=mock_llm, mcp_client=mock_mcp, security_level=SecurityLevel.PERMISSIVE
         )
 
     def test_history_empty_initially(self, agent):
@@ -573,7 +559,7 @@ class TestHistoryManagement:
             stderr="",
             exit_code=0,
             command="test",
-            execution_time=0.1
+            execution_time=0.1,
         )
 
         agent.execution_history.append(result)
@@ -585,11 +571,9 @@ class TestHistoryManagement:
     async def test_history_limit_not_exceeded_after_execute(self, agent):
         """Test history doesn't exceed limit after executions."""
         agent._generate_command = AsyncMock(return_value="echo test")
-        agent._validate_command = AsyncMock(return_value={
-            "allowed": True,
-            "reason": "Safe",
-            "requires_approval": False
-        })
+        agent._validate_command = AsyncMock(
+            return_value={"allowed": True, "reason": "Safe", "requires_approval": False}
+        )
         agent._observe_result = AsyncMock(return_value="OK")
         agent._reflect_on_execution = AsyncMock(return_value=[])
 
@@ -610,7 +594,7 @@ class TestHistoryManagement:
                 stderr="",
                 exit_code=0,
                 command=f"cmd_{i}",
-                execution_time=0.1
+                execution_time=0.1,
             )
             agent.execution_history.append(result)
 
@@ -627,7 +611,7 @@ class TestHistoryManagement:
                 stderr="",
                 exit_code=0,
                 command=f"cmd_{i}",
-                execution_time=0.1
+                execution_time=0.1,
             )
             agent.execution_history.append(result)
             # Simulate the trimming that happens in execute()
@@ -649,7 +633,7 @@ class TestHistoryManagement:
                 stderr="",
                 exit_code=0,
                 command=f"cmd_{i}",
-                execution_time=0.1
+                execution_time=0.1,
             )
             agent.execution_history.append(result)
 
@@ -658,12 +642,16 @@ class TestHistoryManagement:
         # Should contain last 5 commands
         assert "cmd_9" in context
         assert "cmd_5" in context
-        assert "cmd_4" not in context or len([l for l in context.split('\n') if 'cmd_' in l]) <= 5
+        assert (
+            "cmd_4" not in context
+            or len([line for line in context.split("\n") if "cmd_" in line]) <= 5
+        )
 
 
 # =============================================================================
 # PARANOID MODE VALIDATION TESTS
 # =============================================================================
+
 
 class TestParanoidModeValidation:
     """Comprehensive tests for PARANOID security level validation."""
@@ -674,9 +662,7 @@ class TestParanoidModeValidation:
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
         return NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp,
-            security_level=SecurityLevel.PARANOID
+            llm_client=mock_llm, mcp_client=mock_mcp, security_level=SecurityLevel.PARANOID
         )
 
     @pytest.fixture
@@ -685,9 +671,7 @@ class TestParanoidModeValidation:
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
         return NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp,
-            security_level=SecurityLevel.STANDARD
+            llm_client=mock_llm, mcp_client=mock_mcp, security_level=SecurityLevel.STANDARD
         )
 
     @pytest.mark.asyncio
@@ -700,7 +684,7 @@ class TestParanoidModeValidation:
             return_value='{"is_safe": true, "reason": "Safe"}'
         )
 
-        result = await paranoid_agent._validate_command("ls")
+        await paranoid_agent._validate_command("ls")
 
         # LLM should be called
         assert paranoid_agent.llm_client.generate.called
@@ -742,7 +726,7 @@ class TestParanoidModeValidation:
         )
         standard_agent.llm_client.generate = AsyncMock()
 
-        result = await standard_agent._validate_command("echo test")
+        await standard_agent._validate_command("echo test")
 
         # LLM should NOT be called in STANDARD mode
         assert not standard_agent.llm_client.generate.called
@@ -773,9 +757,7 @@ class TestParanoidModeValidation:
         ]
 
         for cmd, llm_response, expected_allowed in test_cases:
-            paranoid_agent.llm_client.generate = AsyncMock(
-                return_value=llm_response
-            )
+            paranoid_agent.llm_client.generate = AsyncMock(return_value=llm_response)
 
             result = await paranoid_agent._validate_command(cmd)
 
@@ -786,6 +768,7 @@ class TestParanoidModeValidation:
 # COMPLEX VALIDATION SCENARIOS
 # =============================================================================
 
+
 class TestComplexValidationScenarios:
     """Tests for complex validation scenarios."""
 
@@ -794,10 +777,7 @@ class TestComplexValidationScenarios:
         """Create agent."""
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
-        return NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp
-        )
+        return NextGenExecutorAgent(llm_client=mock_llm, mcp_client=mock_mcp)
 
     @pytest.mark.asyncio
     async def test_validation_combines_multiple_checks(self, agent):
@@ -806,9 +786,7 @@ class TestComplexValidationScenarios:
         agent.permission_manager.check_permission = MagicMock(
             return_value=(PermissionLevel.ALLOW, "Allowed")
         )
-        agent.llm_client.generate = AsyncMock(
-            return_value='{"is_safe": true, "reason": "OK"}'
-        )
+        agent.llm_client.generate = AsyncMock(return_value='{"is_safe": true, "reason": "OK"}')
 
         result = await agent._validate_command("ls -la")
 
@@ -844,6 +822,7 @@ class TestComplexValidationScenarios:
 # RETRY INTERACTION WITH VALIDATION
 # =============================================================================
 
+
 class TestRetryAndValidationInteraction:
     """Tests for interaction between retry logic and validation."""
 
@@ -853,20 +832,16 @@ class TestRetryAndValidationInteraction:
         mock_llm = MagicMock()
         mock_mcp = MagicMock()
         return NextGenExecutorAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp,
-            config={"max_retries": 3}
+            llm_client=mock_llm, mcp_client=mock_mcp, config={"max_retries": 3}
         )
 
     @pytest.mark.asyncio
     async def test_validation_happens_before_execution(self, agent):
         """Test validation happens before execution attempts."""
         agent._generate_command = AsyncMock(return_value="rm -rf /")
-        agent._validate_command = AsyncMock(return_value={
-            "allowed": False,
-            "reason": "Blocked",
-            "requires_approval": False
-        })
+        agent._validate_command = AsyncMock(
+            return_value={"allowed": False, "reason": "Blocked", "requires_approval": False}
+        )
 
         task = AgentTask(request="delete everything")
         response = await agent.execute(task)
@@ -880,11 +855,9 @@ class TestRetryAndValidationInteraction:
     async def test_approval_requested_before_retry_loop(self, agent):
         """Test approval requested before retry loop."""
         agent._generate_command = AsyncMock(return_value="curl http://api.com")
-        agent._validate_command = AsyncMock(return_value={
-            "allowed": True,
-            "reason": "Network",
-            "requires_approval": True
-        })
+        agent._validate_command = AsyncMock(
+            return_value={"allowed": True, "reason": "Network", "requires_approval": True}
+        )
         agent._request_approval = AsyncMock(return_value=False)
 
         task = AgentTask(request="Call API")

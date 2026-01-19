@@ -12,7 +12,7 @@ from vertice_cli.tools.preview_mixin import (
     PreviewMixin,
     PreviewableWriteTool,
     get_undo_manager,
-    undo_last_operation
+    undo_last_operation,
 )
 
 
@@ -27,7 +27,7 @@ class TestPreviewMixin:
 
     def test_get_file_content_safe_existing(self):
         """Test reading existing file."""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as tmp:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as tmp:
             tmp.write("test content")
             tmp.flush()
 
@@ -46,7 +46,7 @@ class TestPreviewMixin:
 
     def test_backup_for_undo(self):
         """Test backup creation."""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as tmp:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as tmp:
             tmp.write("original content")
             tmp.flush()
 
@@ -78,7 +78,7 @@ class TestPreviewMixin:
 
     def test_undo_last_success(self):
         """Test successful undo."""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as tmp:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as tmp:
             tmp.write("original")
             tmp.flush()
 
@@ -118,10 +118,10 @@ class TestPreviewableWriteTool:
             result = tool.execute(
                 path=str(path),
                 content="test content",
-                preview=False  # Disable preview for test
+                preview=False,  # Disable preview for test
             )
 
-            assert result['success'] is True
+            assert result["success"] is True
             assert path.exists()
             assert path.read_text() == "test content"
 
@@ -131,14 +131,10 @@ class TestPreviewableWriteTool:
             tool = PreviewableWriteTool()
             path = Path(tmpdir) / "new.txt"
 
-            result = tool.execute(
-                path=str(path),
-                content="new content",
-                preview=False
-            )
+            result = tool.execute(path=str(path), content="new content", preview=False)
 
-            assert result['success'] is True
-            assert "Written" in result['message']
+            assert result["success"] is True
+            assert "Written" in result["message"]
             assert path.exists()
 
     def test_write_creates_parent_dirs(self):
@@ -147,13 +143,9 @@ class TestPreviewableWriteTool:
             tool = PreviewableWriteTool()
             path = Path(tmpdir) / "deep" / "nested" / "file.txt"
 
-            result = tool.execute(
-                path=str(path),
-                content="deep content",
-                preview=False
-            )
+            result = tool.execute(path=str(path), content="deep content", preview=False)
 
-            assert result['success'] is True
+            assert result["success"] is True
             assert path.exists()
             assert path.read_text() == "deep content"
 
@@ -167,14 +159,10 @@ class TestPreviewableWriteTool:
             path.write_text("original")
 
             # Modify with tool
-            result = tool.execute(
-                path=str(path),
-                content="modified",
-                preview=False
-            )
+            result = tool.execute(path=str(path), content="modified", preview=False)
 
-            assert result['success'] is True
-            assert result['can_undo'] is True
+            assert result["success"] is True
+            assert result["can_undo"] is True
 
             # Verify can undo
             undo_result = tool.undo_last()
@@ -196,7 +184,7 @@ class TestUndoManager:
         manager = get_undo_manager()
         manager._undo_stack.clear()  # Reset
 
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as tmp:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as tmp:
             tmp.write("test")
             tmp.flush()
 

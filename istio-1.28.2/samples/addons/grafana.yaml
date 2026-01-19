@@ -24,7 +24,7 @@ metadata:
     app.kubernetes.io/instance: grafana
     app.kubernetes.io/version: "12.0.1"
 data:
-  
+
   grafana.ini: |
     [analytics]
     check_for_updates = true
@@ -133,7 +133,7 @@ spec:
         checksum/sc-dashboard-provider-config: e70bf6a851099d385178a76de9757bb0bef8299da6d8443602590e44f05fdf24
         kubectl.kubernetes.io/default-container: grafana
     spec:
-      
+
       serviceAccountName: grafana
       automountServiceAccountToken: true
       shareProcessNamespace: false

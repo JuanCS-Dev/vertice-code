@@ -130,9 +130,7 @@ IMPROVED SOLUTION:"""
         if not relevant_experiences:
             return ""
 
-        exp_list = [
-            f"- {e.get('content', '')[:100]}" for e in relevant_experiences[:3]
-        ]
+        exp_list = [f"- {e.get('content', '')[:100]}" for e in relevant_experiences[:3]]
         return "\nRELEVANT EXPERIENCES:\n" + "\n".join(exp_list)
 
     @staticmethod
@@ -150,8 +148,7 @@ IMPROVED SOLUTION:"""
             return ""
 
         proc_list = [
-            f"- {p.get('skill', '')}: {p.get('steps', [])[:2]}"
-            for p in relevant_procedures[:3]
+            f"- {p.get('skill', '')}: {p.get('steps', [])[:2]}" for p in relevant_procedures[:3]
         ]
         return "\nRELEVANT PROCEDURES:\n" + "\n".join(proc_list)
 
@@ -170,8 +167,7 @@ IMPROVED SOLUTION:"""
             return ""
 
         formatted = [
-            f"- {t['name']}: {t.get('description', 'No description')[:50]}"
-            for t in tools_list[:10]
+            f"- {t['name']}: {t.get('description', 'No description')[:50]}" for t in tools_list[:10]
         ]
         return "\nAVAILABLE TOOLS:\n" + "\n".join(formatted)
 

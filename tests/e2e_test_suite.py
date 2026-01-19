@@ -160,7 +160,7 @@ class E2ETester:
                             }
                             print("  ✅ Backend startup successful")
                             return
-                except:
+                except Exception:
                     pass
 
             # If we reach here, it failed
@@ -349,7 +349,7 @@ class E2ETester:
             # Test API response time
             async with httpx.AsyncClient(timeout=5.0) as client:
                 start_time = time.time()
-                response = await client.get(f"http://127.0.0.1:{self.backend_port}/")
+                await client.get(f"http://127.0.0.1:{self.backend_port}/")
                 response_time = time.time() - start_time
 
                 if response_time < 1.0:  # Should respond in under 1 second

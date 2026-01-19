@@ -121,12 +121,12 @@ class BaseAgent(abc.ABC):
         prompt = f"""
         TASK: {task.request}
         CONTEXT: {context_str}
-        
-        Analyze the situation. 
+
+        Analyze the situation.
         1. Identify the goal.
         2. Identify constraints.
         3. Formulate a plan.
-        
+
         Respond with your reasoning trace.
         """
         return await self._call_llm(prompt, system_prompt=self.system_prompt)

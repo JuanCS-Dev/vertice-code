@@ -1,7 +1,7 @@
 # 🎨 UI FIX: Executor Panel - NEON Cyan Border + No Truncation
 
-**Data:** 2024-11-24  
-**Commit:** `(next)`  
+**Data:** 2024-11-24
+**Commit:** `(next)`
 **Status:** ✅ **APLICADO**
 
 ---
@@ -155,15 +155,15 @@ $ echo "1. Ferva 500ml de água..."  ← Subtitle cyan dim
 ### **Princípios Aplicados:**
 
 #### **P1 - Completude Obrigatória**
-✅ UI totalmente funcional e completa  
+✅ UI totalmente funcional e completa
 ✅ Texto renderizado sem truncamento
 
 #### **P6 - Eficiência de Token**
-✅ Visual claro = menor cognitive load  
+✅ Visual claro = menor cognitive load
 ✅ Menos tempo perdido tentando ler texto cinza
 
 #### **Cláusula 3.6 - Soberania da Intenção**
-✅ Respeitando feedback direto do Arquiteto  
+✅ Respeitando feedback direto do Arquiteto
 ✅ Mudanças cirúrgicas e rastreáveis
 
 ---

@@ -45,6 +45,7 @@ from vertice_cli.agents.base import (
 # TEST CATEGORY 1: TEST GENERATION (30 tests)
 # ============================================================================
 
+
 class TestTestGeneration:
     """Tests for automatic test generation functionality."""
 
@@ -97,7 +98,7 @@ def create_user(name, email, is_active=True):
 class Calculator:
     def __init__(self):
         self.value = 0
-    
+
     def add(self, n):
         self.value += n
         return self.value
@@ -217,9 +218,7 @@ def broken_func(
     @pytest.mark.asyncio
     async def test_generate_tests_from_file_path(self, agent):
         """Should generate tests by reading from file path."""
-        agent._execute_tool = AsyncMock(
-            return_value={"content": "def foo(): pass"}
-        )
+        agent._execute_tool = AsyncMock(return_value={"content": "def foo(): pass"})
 
         task = AgentTask(
             request="Generate tests",
@@ -292,7 +291,7 @@ def generate_numbers():
 class User:
     def __init__(self, name):
         self._name = name
-    
+
     @property
     def name(self):
         return self._name
@@ -418,6 +417,7 @@ def func_with_defaults(a, b=10, c="hello"):
 # ============================================================================
 # TEST CATEGORY 2: COVERAGE ANALYSIS (25 tests)
 # ============================================================================
+
 
 class TestCoverageAnalysis:
     """Tests for code coverage analysis functionality."""
@@ -560,9 +560,7 @@ class TestCoverageAnalysis:
     async def test_coverage_handles_missing_coverage_json(self, agent):
         """Should handle missing coverage.json gracefully."""
         agent._execute_tool = AsyncMock(return_value={"output": ""})
-        agent._parse_coverage_json = AsyncMock(
-            side_effect=Exception("File not found")
-        )
+        agent._parse_coverage_json = AsyncMock(side_effect=Exception("File not found"))
 
         task = AgentTask(
             request="Analyze coverage",
@@ -572,7 +570,7 @@ class TestCoverageAnalysis:
         response = await agent.execute(task)
 
         assert response.success is False
-        assert ("error" in response.error.lower() or "file not found" in response.error.lower())
+        assert "error" in response.error.lower() or "file not found" in response.error.lower()
 
     @pytest.mark.asyncio
     async def test_coverage_reports_missing_lines_count(self, agent):
@@ -709,6 +707,7 @@ class TestCoverageAnalysis:
 # TEST CATEGORY 3: MUTATION TESTING (20 tests)
 # ============================================================================
 
+
 class TestMutationTesting:
     """Tests for mutation testing functionality."""
 
@@ -720,9 +719,7 @@ class TestMutationTesting:
     @pytest.mark.asyncio
     async def test_mutation_testing_runs_mutmut(self, agent):
         """Should run mutmut with correct parameters."""
-        agent._execute_tool = AsyncMock(
-            return_value={"output": "KILLED KILLED SURVIVED"}
-        )
+        agent._execute_tool = AsyncMock(return_value={"output": "KILLED KILLED SURVIVED"})
 
         task = AgentTask(
             request="Run mutation testing",
@@ -737,9 +734,7 @@ class TestMutationTesting:
     @pytest.mark.asyncio
     async def test_mutation_testing_calculates_score(self, agent):
         """Should calculate mutation score correctly."""
-        agent._execute_tool = AsyncMock(
-            return_value={"output": "KILLED KILLED KILLED SURVIVED"}
-        )
+        agent._execute_tool = AsyncMock(return_value={"output": "KILLED KILLED KILLED SURVIVED"})
 
         task = AgentTask(
             request="Run mutation testing",
@@ -775,9 +770,7 @@ class TestMutationTesting:
     @pytest.mark.asyncio
     async def test_mutation_testing_tracks_survived_mutants(self, agent):
         """Should track mutants that survived (weakness in tests)."""
-        agent._execute_tool = AsyncMock(
-            return_value={"output": "KILLED SURVIVED SURVIVED KILLED"}
-        )
+        agent._execute_tool = AsyncMock(return_value={"output": "KILLED SURVIVED SURVIVED KILLED"})
 
         task = AgentTask(
             request="Run mutation testing",
@@ -792,9 +785,7 @@ class TestMutationTesting:
     @pytest.mark.asyncio
     async def test_mutation_testing_handles_timeout(self, agent):
         """Should handle mutations that timeout."""
-        agent._execute_tool = AsyncMock(
-            return_value={"output": "KILLED TIMEOUT SURVIVED"}
-        )
+        agent._execute_tool = AsyncMock(return_value={"output": "KILLED TIMEOUT SURVIVED"})
 
         task = AgentTask(
             request="Run mutation testing",
@@ -809,9 +800,7 @@ class TestMutationTesting:
     @pytest.mark.asyncio
     async def test_mutation_testing_perfect_score(self, agent):
         """Should handle 100% mutation score."""
-        agent._execute_tool = AsyncMock(
-            return_value={"output": "KILLED KILLED KILLED KILLED"}
-        )
+        agent._execute_tool = AsyncMock(return_value={"output": "KILLED KILLED KILLED KILLED"})
 
         task = AgentTask(
             request="Run mutation testing",
@@ -826,9 +815,7 @@ class TestMutationTesting:
     @pytest.mark.asyncio
     async def test_mutation_testing_zero_mutants_killed(self, agent):
         """Should handle worst case (zero mutants killed)."""
-        agent._execute_tool = AsyncMock(
-            return_value={"output": "SURVIVED SURVIVED SURVIVED"}
-        )
+        agent._execute_tool = AsyncMock(return_value={"output": "SURVIVED SURVIVED SURVIVED"})
 
         task = AgentTask(
             request="Run mutation testing",
@@ -843,9 +830,7 @@ class TestMutationTesting:
     @pytest.mark.asyncio
     async def test_mutation_testing_with_custom_source_path(self, agent):
         """Should accept custom source path."""
-        agent._execute_tool = AsyncMock(
-            return_value={"output": "KILLED KILLED"}
-        )
+        agent._execute_tool = AsyncMock(return_value={"output": "KILLED KILLED"})
 
         task = AgentTask(
             request="Run mutation testing",
@@ -859,9 +844,7 @@ class TestMutationTesting:
     @pytest.mark.asyncio
     async def test_mutation_testing_includes_metadata(self, agent):
         """Should include mutation metrics."""
-        agent._execute_tool = AsyncMock(
-            return_value={"output": "KILLED KILLED"}
-        )
+        agent._execute_tool = AsyncMock(return_value={"output": "KILLED KILLED"})
 
         task = AgentTask(
             request="Run mutation testing",
@@ -879,6 +862,7 @@ class TestMutationTesting:
 # ============================================================================
 # TEST CATEGORY 4: FLAKY TEST DETECTION (15 tests)
 # ============================================================================
+
 
 class TestFlakyDetection:
     """Tests for flaky test detection functionality."""
@@ -1031,6 +1015,7 @@ class TestFlakyDetection:
 # TEST CATEGORY 5: QUALITY SCORING (15 tests)
 # ============================================================================
 
+
 class TestQualityScoring:
     """Tests for comprehensive quality scoring."""
 
@@ -1158,9 +1143,7 @@ class TestQualityScoring:
                 data={"coverage": {"coverage_percentage": 90.0}},
             )
         )
-        agent._handle_mutation_testing = AsyncMock(
-            side_effect=Exception("Mutation testing failed")
-        )
+        agent._handle_mutation_testing = AsyncMock(side_effect=Exception("Mutation testing failed"))
 
         task = AgentTask(
             request="Calculate quality score",
@@ -1204,6 +1187,7 @@ class TestQualityScoring:
 # ============================================================================
 # TEST CATEGORY 6: EDGE CASES (20 tests)
 # ============================================================================
+
 
 class TestEdgeCases:
     """Tests for edge cases and error handling."""
@@ -1470,6 +1454,7 @@ class Order:
 # TEST CATEGORY 7: INTEGRATION TESTS (15 tests)
 # ============================================================================
 
+
 class TestIntegration:
     """Integration tests with real-world scenarios."""
 
@@ -1566,14 +1551,14 @@ Base = declarative_base()
 
 class User(Base):
     __tablename__ = 'users'
-    
+
     id = Column(Integer, primary_key=True)
     email = Column(String, unique=True, nullable=False)
     is_active = Column(Boolean, default=True)
-    
+
     def activate(self):
         self.is_active = True
-    
+
     def deactivate(self):
         self.is_active = False
 """
@@ -1599,11 +1584,11 @@ class APIClient:
     def __init__(self, base_url: str):
         self.base_url = base_url
         self.client = httpx.AsyncClient()
-    
+
     async def get(self, endpoint: str):
         response = await self.client.get(f"{self.base_url}/{endpoint}")
         return response.json()
-    
+
     async def post(self, endpoint: str, data: dict):
         response = await self.client.post(
             f"{self.base_url}/{endpoint}",
@@ -1692,6 +1677,7 @@ def aggregate_data(df: pd.DataFrame) -> dict:
 # EXECUTION COUNT
 # ============================================================================
 
+
 def test_total_test_count():
     """Verify we have 75+ tests (adjusted after refactoring)."""
     import sys
@@ -1699,16 +1685,14 @@ def test_total_test_count():
 
     current_module = sys.modules[__name__]
     test_classes = [
-        obj for name, obj in inspect.getmembers(current_module)
+        obj
+        for name, obj in inspect.getmembers(current_module)
         if inspect.isclass(obj) and name.startswith("Test")
     ]
 
     total_tests = 0
     for test_class in test_classes:
-        test_methods = [
-            method for method in dir(test_class)
-            if method.startswith("test_")
-        ]
+        test_methods = [method for method in dir(test_class) if method.startswith("test_")]
         total_tests += len(test_methods)
 
     # Threshold adjusted to 75 after Phase 2 refactoring (was 100)

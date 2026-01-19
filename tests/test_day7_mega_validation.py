@@ -19,12 +19,9 @@ from vertice_cli.core.recovery import (
     RecoveryContext,
     ErrorCategory,
     RetryPolicy,
-    RecoveryCircuitBreaker
+    RecoveryCircuitBreaker,
 )
-from vertice_cli.core.workflow import (
-    GitRollback,
-    PartialRollback
-)
+from vertice_cli.core.workflow import GitRollback, PartialRollback
 
 
 class TestRealWorldScenarios:
@@ -34,20 +31,20 @@ class TestRealWorldScenarios:
     def mock_llm(self):
         """Mock LLM that provides realistic responses."""
         llm = Mock()
-        llm.generate_async = AsyncMock(return_value={
-            "content": """DIAGNOSIS: File permission denied
+        llm.generate_async = AsyncMock(
+            return_value={
+                "content": """DIAGNOSIS: File permission denied
 CORRECTION: Use sudo or change file permissions
 TOOL_CALL: {"tool": "bash", "args": {"command": "sudo rm file.txt"}}"""
-        })
+            }
+        )
         return llm
 
     @pytest.mark.asyncio
     async def test_network_timeout_recovery(self, mock_llm):
         """Test recovery from network timeout."""
         engine = ErrorRecoveryEngine(
-            llm_client=mock_llm,
-            enable_retry_policy=True,
-            enable_circuit_breaker=True
+            llm_client=mock_llm, enable_retry_policy=True, enable_circuit_breaker=True
         )
 
         # Simulate network timeout
@@ -60,12 +57,11 @@ TOOL_CALL: {"tool": "bash", "args": {"command": "sudo rm file.txt"}}"""
             failed_args={"url": "https://api.example.com"},
             previous_result=None,
             user_intent="Fetch API data",
-            previous_commands=[]
+            previous_commands=[],
         )
 
         result = await engine.attempt_recovery_with_backoff(
-            context,
-            Exception("Connection timeout after 30s")
+            context, Exception("Connection timeout after 30s")
         )
 
         # Should provide correction
@@ -75,9 +71,7 @@ TOOL_CALL: {"tool": "bash", "args": {"command": "sudo rm file.txt"}}"""
     async def test_permission_denied_recovery(self, mock_llm):
         """Test recovery from permission denied error."""
         engine = ErrorRecoveryEngine(
-            llm_client=mock_llm,
-            enable_retry_policy=True,
-            enable_circuit_breaker=False
+            llm_client=mock_llm, enable_retry_policy=True, enable_circuit_breaker=False
         )
 
         context = RecoveryContext(
@@ -89,13 +83,10 @@ TOOL_CALL: {"tool": "bash", "args": {"command": "sudo rm file.txt"}}"""
             failed_args={"path": "/root/file.txt", "content": "test"},
             previous_result=None,
             user_intent="Write to file",
-            previous_commands=[]
+            previous_commands=[],
         )
 
-        result = await engine.attempt_recovery_with_backoff(
-            context,
-            Exception("Permission denied")
-        )
+        result = await engine.attempt_recovery_with_backoff(context, Exception("Permission denied"))
 
         # Permanent error - should NOT retry with policy
         # But should provide correction (use sudo, change location, etc)
@@ -105,9 +96,7 @@ TOOL_CALL: {"tool": "bash", "args": {"command": "sudo rm file.txt"}}"""
     async def test_file_not_found_recovery(self, mock_llm):
         """Test recovery from file not found."""
         engine = ErrorRecoveryEngine(
-            llm_client=mock_llm,
-            enable_retry_policy=True,
-            enable_circuit_breaker=False
+            llm_client=mock_llm, enable_retry_policy=True, enable_circuit_breaker=False
         )
 
         context = RecoveryContext(
@@ -119,12 +108,11 @@ TOOL_CALL: {"tool": "bash", "args": {"command": "sudo rm file.txt"}}"""
             failed_args={"path": "config.json"},
             previous_result=None,
             user_intent="Read configuration",
-            previous_commands=[]
+            previous_commands=[],
         )
 
         result = await engine.attempt_recovery_with_backoff(
-            context,
-            Exception("FileNotFoundError: config.json")
+            context, Exception("FileNotFoundError: config.json")
         )
 
         # Should suggest alternatives (create file, use default, etc)
@@ -164,10 +152,7 @@ class TestEdgeCases:
 
     def test_circuit_breaker_success_at_threshold(self):
         """Test circuit breaker success at exact threshold."""
-        breaker = RecoveryCircuitBreaker(
-            failure_threshold=3,
-            success_threshold=2
-        )
+        breaker = RecoveryCircuitBreaker(failure_threshold=3, success_threshold=2)
 
         # Open the circuit
         for _ in range(3):
@@ -203,9 +188,9 @@ class TestEdgeCases:
         rollback = PartialRollback()
 
         summary = rollback.get_summary()
-        assert summary['total_operations'] == 0
-        assert summary['oldest'] is None
-        assert summary['newest'] is None
+        assert summary["total_operations"] == 0
+        assert summary["oldest"] is None
+        assert summary["newest"] is None
 
 
 class TestCascadingFailurePrevention:
@@ -222,9 +207,7 @@ class TestCascadingFailurePrevention:
     async def test_circuit_breaker_stops_cascading_failures(self, failing_llm):
         """Test circuit breaker stops cascade after threshold."""
         engine = ErrorRecoveryEngine(
-            llm_client=failing_llm,
-            enable_retry_policy=False,
-            enable_circuit_breaker=True
+            llm_client=failing_llm, enable_retry_policy=False, enable_circuit_breaker=True
         )
 
         # Configure fast failure
@@ -241,13 +224,10 @@ class TestCascadingFailurePrevention:
                 failed_args={},
                 previous_result=None,
                 user_intent="Test",
-                previous_commands=[]
+                previous_commands=[],
             )
 
-            result = await engine.attempt_recovery_with_backoff(
-                context,
-                Exception(f"Error {i}")
-            )
+            result = await engine.attempt_recovery_with_backoff(context, Exception(f"Error {i}"))
 
             attempts += 1
 
@@ -269,7 +249,7 @@ class TestPerformance:
 
         start = time.time()
         for attempt in range(1, 1001):
-            delay = policy.get_delay(attempt)
+            policy.get_delay(attempt)
         elapsed = time.time() - start
 
         # Should complete 1000 calculations in < 0.1s
@@ -293,11 +273,7 @@ class TestPerformance:
 
         start = time.time()
         for i in range(1000):
-            rollback.add_operation(
-                f"op_{i}",
-                {"data": i},
-                reversible=True
-            )
+            rollback.add_operation(f"op_{i}", {"data": i}, reversible=True)
         elapsed = time.time() - start
 
         # Should add 1000 operations in < 0.05s
@@ -316,15 +292,14 @@ class TestConstitutionalCompliance:
 
         # Check recovery module
         source_recovery = inspect.getsource(recovery)
-        assert 'TODO' not in source_recovery
-        assert 'FIXME' not in source_recovery
-        assert 'HACK' not in source_recovery
+        assert "TODO" not in source_recovery
+        assert "FIXME" not in source_recovery
+        assert "HACK" not in source_recovery
 
         # Check workflow module
         source_workflow = inspect.getsource(workflow)
         # Exclude detection patterns (they're in strings)
-        lines = [l for l in source_workflow.split('\n')
-                 if 'TODO' not in l or "'" in l or '"' in l]
+        [l for l in source_workflow.split("\n") if "TODO" not in l or "'" in l or '"' in l]
         # All TODO mentions should be in strings
         assert True  # If we got here, we're good
 
@@ -337,9 +312,7 @@ class TestConstitutionalCompliance:
     def test_p3_ceticismo_error_handling(self):
         """P3: Skeptical - all error paths handled."""
         engine = ErrorRecoveryEngine(
-            llm_client=Mock(),
-            enable_retry_policy=True,
-            enable_circuit_breaker=True
+            llm_client=Mock(), enable_retry_policy=True, enable_circuit_breaker=True
         )
 
         # Verify error handling exists
@@ -366,10 +339,10 @@ class TestConstitutionalCompliance:
 
         # Should track state
         status = breaker.get_status()
-        assert 'state' in status
-        assert 'failure_count' in status
-        assert 'success_count' in status
-        assert 'failure_threshold' in status
+        assert "state" in status
+        assert "failure_count" in status
+        assert "success_count" in status
+        assert "failure_threshold" in status
 
     def test_p6_eficiencia_max_attempts_enforced(self):
         """P6: Efficiency - max 2 attempts enforced."""
@@ -389,16 +362,16 @@ class TestIntegrationRealistic:
         llm = Mock()
 
         def generate_response(**kwargs):
-            messages = kwargs.get('messages', [])
-            user_msg = messages[-1]['content'] if messages else ""
+            messages = kwargs.get("messages", [])
+            user_msg = messages[-1]["content"] if messages else ""
 
-            if 'timeout' in user_msg.lower():
+            if "timeout" in user_msg.lower():
                 return {
                     "content": """DIAGNOSIS: Network timeout indicates slow connection or server overload
 CORRECTION: Retry with exponential backoff or increase timeout
 TOOL_CALL: {"tool": "http_get", "args": {"url": "https://api.example.com", "timeout": 60}}"""
                 }
-            elif 'permission' in user_msg.lower():
+            elif "permission" in user_msg.lower():
                 return {
                     "content": """DIAGNOSIS: Insufficient permissions to write to system directory
 CORRECTION: Use user home directory or run with appropriate permissions
@@ -422,7 +395,7 @@ TOOL_CALL: {}"""
             max_attempts=3,
             enable_retry_policy=True,
             enable_circuit_breaker=True,
-            enable_learning=True
+            enable_learning=True,
         )
 
         # Attempt 1: Network timeout
@@ -435,12 +408,11 @@ TOOL_CALL: {}"""
             failed_args={"url": "https://api.example.com", "timeout": 30},
             previous_result=None,
             user_intent="Fetch data from API",
-            previous_commands=[]
+            previous_commands=[],
         )
 
         result1 = await engine.attempt_recovery_with_backoff(
-            context1,
-            Exception("Connection timeout after 30s")
+            context1, Exception("Connection timeout after 30s")
         )
 
         # Should provide correction
@@ -451,7 +423,7 @@ TOOL_CALL: {}"""
 
         # Check statistics
         stats = engine.get_statistics()
-        assert stats['total_recovery_attempts'] >= 1
+        assert stats["total_recovery_attempts"] >= 1
 
         # Circuit breaker should still be closed
         assert engine.circuit_breaker.state == "CLOSED"
@@ -464,7 +436,7 @@ TOOL_CALL: {}"""
             max_attempts=2,
             enable_retry_policy=True,
             enable_circuit_breaker=False,
-            enable_learning=True
+            enable_learning=True,
         )
 
         context = RecoveryContext(
@@ -476,12 +448,11 @@ TOOL_CALL: {}"""
             failed_args={"path": "/etc/config.txt", "content": "config"},
             previous_result=None,
             user_intent="Save configuration",
-            previous_commands=[]
+            previous_commands=[],
         )
 
         result = await engine.attempt_recovery_with_backoff(
-            context,
-            Exception("Permission denied: /etc/config.txt")
+            context, Exception("Permission denied: /etc/config.txt")
         )
 
         # Should provide correction (alternative path)
@@ -492,4 +463,4 @@ TOOL_CALL: {}"""
 
         # Should have learned from this error
         stats = engine.get_statistics()
-        assert stats['total_recovery_attempts'] >= 1
+        assert stats["total_recovery_attempts"] >= 1

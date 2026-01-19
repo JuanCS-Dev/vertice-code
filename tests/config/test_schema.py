@@ -24,10 +24,7 @@ class TestProjectConfig:
     def test_custom_values(self):
         """Test custom project config values."""
         config = ProjectConfig(
-            name="test-project",
-            type="rust",
-            version="2.0.0",
-            description="Test project"
+            name="test-project", type="rust", version="2.0.0", description="Test project"
         )
         assert config.name == "test-project"
         assert config.type == "rust"
@@ -46,11 +43,7 @@ class TestRulesConfig:
 
     def test_with_rules(self):
         """Test rules config with custom rules."""
-        config = RulesConfig(
-            rules=["Rule 1", "Rule 2"],
-            style_guide="PEP 8",
-            max_line_length=120
-        )
+        config = RulesConfig(rules=["Rule 1", "Rule 2"], style_guide="PEP 8", max_line_length=120)
         assert len(config.rules) == 2
         assert config.style_guide == "PEP 8"
 
@@ -91,10 +84,7 @@ class TestHooksConfig:
 
     def test_custom_hooks(self):
         """Test custom hook configuration."""
-        config = HooksConfig(
-            post_write=["ruff check {file}"],
-            pre_commit=["pytest tests/"]
-        )
+        config = HooksConfig(post_write=["ruff check {file}"], pre_commit=["pytest tests/"])
         assert len(config.post_write) == 1
         assert len(config.pre_commit) == 1
 
@@ -142,42 +132,42 @@ class TestQwenConfig:
         config = QwenConfig()
         data = config.to_dict()
 
-        assert 'project' in data
-        assert 'rules' in data
-        assert 'safety' in data
-        assert 'hooks' in data
-        assert 'context' in data
+        assert "project" in data
+        assert "rules" in data
+        assert "safety" in data
+        assert "hooks" in data
+        assert "context" in data
 
-        assert isinstance(data['project'], dict)
-        assert isinstance(data['rules'], dict)
+        assert isinstance(data["project"], dict)
+        assert isinstance(data["rules"], dict)
 
     def test_from_dict(self):
         """Test creating config from dictionary."""
         data = {
-            'project': {'name': 'test', 'type': 'python'},
-            'rules': {'max_line_length': 120},
-            'safety': {'max_file_size_mb': 20},
-            'hooks': {'post_write': ['echo test']},
-            'context': {'max_tokens': 16000},
+            "project": {"name": "test", "type": "python"},
+            "rules": {"max_line_length": 120},
+            "safety": {"max_file_size_mb": 20},
+            "hooks": {"post_write": ["echo test"]},
+            "context": {"max_tokens": 16000},
         }
 
         config = QwenConfig.from_dict(data)
 
-        assert config.project.name == 'test'
+        assert config.project.name == "test"
         assert config.rules.max_line_length == 120
         assert config.safety.max_file_size_mb == 20
-        assert config.hooks.post_write == ['echo test']
+        assert config.hooks.post_write == ["echo test"]
         assert config.context.max_tokens == 16000
 
     def test_from_dict_partial(self):
         """Test from_dict with partial data uses defaults."""
         data = {
-            'project': {'name': 'partial'},
+            "project": {"name": "partial"},
         }
 
         config = QwenConfig.from_dict(data)
 
-        assert config.project.name == 'partial'
+        assert config.project.name == "partial"
         # Should use defaults for missing fields
-        assert config.project.type == 'python'
+        assert config.project.type == "python"
         assert config.rules.max_line_length == 100

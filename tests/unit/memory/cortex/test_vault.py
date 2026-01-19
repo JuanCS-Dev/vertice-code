@@ -5,11 +5,13 @@ Unit tests for the KnowledgeVault.
 import pytest
 from memory.cortex.vault import KnowledgeVault, VaultEntryType, SensitivityLevel
 
+
 @pytest.fixture
 def vault(tmp_path):
     """Provides a KnowledgeVault instance with a temporary database."""
     db_path = tmp_path / "test_vault.db"
     return KnowledgeVault(db_path, password="test_password")
+
 
 def test_store_and_get_entry(vault):
     """Test storing and retrieving a vault entry."""
@@ -17,7 +19,7 @@ def test_store_and_get_entry(vault):
         name="api_key",
         value="secret_key",
         entry_type=VaultEntryType.API_KEY,
-        sensitivity_level=SensitivityLevel.HIGH
+        sensitivity_level=SensitivityLevel.HIGH,
     )
     entry = vault.get("api_key")
     assert entry is not None
@@ -26,10 +28,12 @@ def test_store_and_get_entry(vault):
     assert entry.entry_type == VaultEntryType.API_KEY
     assert entry.sensitivity_level == SensitivityLevel.HIGH
 
+
 def test_get_nonexistent_entry(vault):
     """Test that getting a nonexistent entry returns None."""
     entry = vault.get("nonexistent")
     assert entry is None
+
 
 def test_delete_entry(vault):
     """Test deleting a vault entry."""
@@ -38,9 +42,11 @@ def test_delete_entry(vault):
     assert vault.delete("to_delete") is True
     assert not vault.exists("to_delete")
 
+
 def test_delete_nonexistent_entry(vault):
     """Test that deleting a nonexistent entry returns False."""
     assert vault.delete("nonexistent") is False
+
 
 def test_list_entries(vault):
     """Test listing vault entries."""
@@ -52,12 +58,14 @@ def test_list_entries(vault):
     assert entries[1]["name"] == "entry2"
     assert entries[0]["value"] == "[REDACTED]"
 
+
 def test_list_entries_with_values(vault):
     """Test listing vault entries with their values."""
     vault.store("entry1", "value1", VaultEntryType.NOTE)
     entries = vault.list_entries(include_values=True)
     assert len(entries) == 1
     assert entries[0]["value"] == "value1"
+
 
 def test_list_entries_by_type(vault):
     """Test filtering vault entries by type."""

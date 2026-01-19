@@ -192,6 +192,7 @@ async def main():
     except Exception as e:
         console.print(f"\n[bold red]✗ Demo failed: {e}[/bold red]")
         import traceback
+
         traceback.print_exc()
         return 1
 

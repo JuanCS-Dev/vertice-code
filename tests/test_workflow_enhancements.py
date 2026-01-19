@@ -10,10 +10,7 @@ import tempfile
 import shutil
 from pathlib import Path
 
-from vertice_cli.core.workflow import (
-    GitRollback,
-    PartialRollback
-)
+from vertice_cli.core.workflow import GitRollback, PartialRollback
 
 
 class TestGitRollback:
@@ -27,26 +24,19 @@ class TestGitRollback:
 
         # Initialize git repo
         import subprocess
+
         subprocess.run(["git", "init"], cwd=temp_dir, capture_output=True)
         subprocess.run(
-            ["git", "config", "user.email", "test@example.com"],
-            cwd=temp_dir,
-            capture_output=True
+            ["git", "config", "user.email", "test@example.com"], cwd=temp_dir, capture_output=True
         )
         subprocess.run(
-            ["git", "config", "user.name", "Test User"],
-            cwd=temp_dir,
-            capture_output=True
+            ["git", "config", "user.name", "Test User"], cwd=temp_dir, capture_output=True
         )
 
         # Create initial commit
         (temp_path / "README.md").write_text("# Test Repo")
         subprocess.run(["git", "add", "README.md"], cwd=temp_dir, capture_output=True)
-        subprocess.run(
-            ["git", "commit", "-m", "Initial commit"],
-            cwd=temp_dir,
-            capture_output=True
-        )
+        subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=temp_dir, capture_output=True)
 
         yield temp_path
 
@@ -116,7 +106,7 @@ class TestGitRollback:
         # Make more changes
         (temp_git_repo / "file1.txt").write_text("version 2")
         (temp_git_repo / "file2.txt").write_text("new file")
-        sha2 = await rollback.create_checkpoint_commit("Checkpoint 2")
+        await rollback.create_checkpoint_commit("Checkpoint 2")
 
         assert (temp_git_repo / "file1.txt").read_text() == "version 2"
         assert (temp_git_repo / "file2.txt").exists()
@@ -138,10 +128,10 @@ class TestGitRollback:
 
         # Create checkpoints
         (temp_git_repo / "file.txt").write_text("v1")
-        sha1 = await rollback.create_checkpoint_commit("CP1")
+        await rollback.create_checkpoint_commit("CP1")
 
         (temp_git_repo / "file.txt").write_text("v2")
-        sha2 = await rollback.create_checkpoint_commit("CP2")
+        await rollback.create_checkpoint_commit("CP2")
 
         assert len(rollback.commits_made) == 2
 
@@ -190,15 +180,15 @@ class TestPartialRollback:
         rollback.add_operation(
             op_type="file_write",
             data={"file_path": "test.txt", "backup_path": "test.txt.bak"},
-            reversible=True
+            reversible=True,
         )
 
         assert len(rollback.operations) == 1
         op = rollback.operations[0]
 
-        assert op['type'] == "file_write"
-        assert op['reversible'] is True
-        assert 'timestamp' in op
+        assert op["type"] == "file_write"
+        assert op["reversible"] is True
+        assert "timestamp" in op
 
     def test_add_multiple_operations(self):
         """Test adding multiple operations."""
@@ -223,11 +213,7 @@ class TestPartialRollback:
         backup_file.write_text("original content")
 
         rollback.add_operation(
-            "file_write",
-            {
-                "file_path": str(original_file),
-                "backup_path": str(backup_file)
-            }
+            "file_write", {"file_path": str(original_file), "backup_path": str(backup_file)}
         )
 
         # Rollback
@@ -246,11 +232,7 @@ class TestPartialRollback:
         deleted_file = tmp_path / "deleted.txt"
 
         rollback.add_operation(
-            "file_delete",
-            {
-                "file_path": str(deleted_file),
-                "backup_content": "recovered content"
-            }
+            "file_delete", {"file_path": str(deleted_file), "backup_content": "recovered content"}
         )
 
         # Rollback
@@ -270,11 +252,7 @@ class TestPartialRollback:
         edited_file.write_text("new content")
 
         rollback.add_operation(
-            "file_edit",
-            {
-                "file_path": str(edited_file),
-                "original_content": "old content"
-            }
+            "file_edit", {"file_path": str(edited_file), "original_content": "old content"}
         )
 
         # Rollback
@@ -288,11 +266,7 @@ class TestPartialRollback:
         """Test handling irreversible operations."""
         rollback = PartialRollback()
 
-        rollback.add_operation(
-            "command_execute",
-            {"command": "rm -rf /tmp/test"},
-            reversible=False
-        )
+        rollback.add_operation("command_execute", {"command": "rm -rf /tmp/test"}, reversible=False)
 
         # Rollback
         successful, failed = await rollback.rollback_last_n(1)
@@ -311,11 +285,7 @@ class TestPartialRollback:
             file.write_text(f"content {i}")
 
             rollback.add_operation(
-                "file_write",
-                {
-                    "file_path": str(file),
-                    "backup_path": str(file) + ".bak"
-                }
+                "file_write", {"file_path": str(file), "backup_path": str(file) + ".bak"}
             )
 
         # Create backups
@@ -384,9 +354,9 @@ class TestPartialRollback:
 
         summary = rollback.get_summary()
 
-        assert summary['total_operations'] == 3
-        assert summary['reversible'] == 2
-        assert summary['irreversible'] == 1
-        assert set(summary['types']) == {'file_write', 'file_edit', 'command'}
-        assert summary['oldest'] is not None
-        assert summary['newest'] is not None
+        assert summary["total_operations"] == 3
+        assert summary["reversible"] == 2
+        assert summary["irreversible"] == 1
+        assert set(summary["types"]) == {"file_write", "file_edit", "command"}
+        assert summary["oldest"] is not None
+        assert summary["newest"] is not None

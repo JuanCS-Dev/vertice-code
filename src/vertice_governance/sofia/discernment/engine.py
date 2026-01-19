@@ -67,7 +67,14 @@ class DiscernmentEngine:
         death_indicators = []
 
         positive_keywords = ["ajudar", "amar", "cuidar", "verdade", "paz", "perdoar", "servir"]
-        negative_keywords = ["mentir", "esconder", "prejudicar", "vinganca", "explorar", "manipular"]
+        negative_keywords = [
+            "mentir",
+            "esconder",
+            "prejudicar",
+            "vinganca",
+            "explorar",
+            "manipular",
+        ]
 
         for indicator in WAY_OF_LIFE_INDICATORS:
             if any(kw in situation_lower for kw in positive_keywords):
@@ -115,7 +122,9 @@ class DiscernmentEngine:
         result.phases_completed.append(DiscernmentPhase.GATHERING)
 
         # FASE 2: DELIBERATION
-        result.questions_explored.extend(self.get_questions_for_phase(DiscernmentPhase.DELIBERATION))
+        result.questions_explored.extend(
+            self.get_questions_for_phase(DiscernmentPhase.DELIBERATION)
+        )
         result.phases_completed.append(DiscernmentPhase.DELIBERATION)
 
         # FASE 3: EXPERIENCE
@@ -128,7 +137,9 @@ class DiscernmentEngine:
         result.phases_completed.append(DiscernmentPhase.TRADITION)
 
         # FASE 5: ELDER_WISDOM
-        result.questions_explored.extend(self.get_questions_for_phase(DiscernmentPhase.ELDER_WISDOM))
+        result.questions_explored.extend(
+            self.get_questions_for_phase(DiscernmentPhase.ELDER_WISDOM)
+        )
         result.suggested_advisors = [
             "Um mentor espiritual de confianca",
             "Uma pessoa mais experiente na area",
@@ -184,9 +195,7 @@ class DiscernmentEngine:
                 "ou mentor espiritual."
             )
 
-        counsel_parts.append(
-            f"\n\nConsidere consultar: {', '.join(result.suggested_advisors[:2])}"
-        )
+        counsel_parts.append(f"\n\nConsidere consultar: {', '.join(result.suggested_advisors[:2])}")
 
         counsel_parts.append(
             "\n\n'Pareceu bem ao Espirito Santo e a nos...' (Atos 15:28) - "
@@ -221,13 +230,15 @@ class DiscernmentEngine:
             for ind in result.way_of_death_indicators[:3]:
                 output.append(f"  - {ind}")
 
-        output.extend([
-            "",
-            "-" * 60,
-            "CONSELHO:",
-            result.counsel,
-            "-" * 60,
-        ])
+        output.extend(
+            [
+                "",
+                "-" * 60,
+                "CONSELHO:",
+                result.counsel,
+                "-" * 60,
+            ]
+        )
 
         return "\n".join(output)
 

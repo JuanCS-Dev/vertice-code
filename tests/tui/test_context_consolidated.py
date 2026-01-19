@@ -1,6 +1,7 @@
 """Consolidated Context Tests - Week 4 Day 1"""
 from vertice_cli.tui.components.context_awareness import ContextAwarenessEngine, ContentType
 
+
 class TestConsolidation:
     def test_lru_features(self):
         engine = ContextAwarenessEngine(max_context_tokens=1000)

@@ -1,18 +1,20 @@
-
 import sys
 import os
 
 # Add project root to path
 sys.path.append(os.getcwd())
 
+
 def test_prometheus_client():
     print("\n--- Testing PrometheusClient ---")
     try:
         from vertice_tui.core.prometheus_client import PrometheusClient
-        client = PrometheusClient()
+
+        PrometheusClient()
         print("✅ PrometheusClient instantiated successfully.")
     except Exception as e:
         print(f"❌ PrometheusClient instantiation failed: {e}")
+
 
 def test_auto_detect():
     print("\n--- Testing Auto-Detect Logic ---")
@@ -32,6 +34,7 @@ def test_auto_detect():
     except Exception as e:
         print(f"❌ Bridge import failed: {e}")
 
+
 def test_mcp_tools():
     print("\n--- Testing MCP Tools Registration ---")
     try:
@@ -46,12 +49,16 @@ def test_mcp_tools():
         if len(prom_tools) >= 8:
             print(f"✅ Found {len(prom_tools)} Prometheus tools: {[t.name for t in prom_tools]}")
         else:
-            print(f"❌ Expected 8+ Prometheus tools, found {len(prom_tools)}: {[t.name for t in prom_tools]}")
+            print(
+                f"❌ Expected 8+ Prometheus tools, found {len(prom_tools)}: {[t.name for t in prom_tools]}"
+            )
 
     except Exception as e:
         import traceback
+
         traceback.print_exc()
         print(f"❌ MCP Tools verification failed: {e}")
+
 
 if __name__ == "__main__":
     print("🚀 Starting Integration Verification")

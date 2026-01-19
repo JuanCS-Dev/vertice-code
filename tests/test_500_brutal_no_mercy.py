@@ -29,6 +29,7 @@ from vertice_cli.core.agent_identity import get_agent_identity, AGENT_IDENTITIES
 # CATEGORIA 1: TYPE INJECTION (100 testes) - Tests 1-100
 # ============================================================================
 
+
 class TestTypeInjection:
     """Injetar tipos maliciosos em cada parâmetro"""
 
@@ -36,21 +37,24 @@ class TestTypeInjection:
         """Float como llm_client"""
         # 🔒 AIR GAP #1 FIX: Now raises TypeError immediately (better!)
         with pytest.raises(TypeError):
-            gov = MaestroGovernance(llm_client=3.14, mcp_client=Mock())
+            MaestroGovernance(llm_client=3.14, mcp_client=Mock())
 
     def test_002_governance_bytes_mcp(self):
         """Bytes como mcp_client"""
         # 🔒 AIR GAP #2 FIX: Now raises TypeError immediately (better!)
         with pytest.raises(TypeError):
-            gov = MaestroGovernance(llm_client=Mock(), mcp_client=b"bytes")
+            MaestroGovernance(llm_client=Mock(), mcp_client=b"bytes")
 
     def test_003_governance_class_llm(self):
         """Class como llm_client"""
-        class FakeLLM: pass
+
+        class FakeLLM:
+            pass
+
         try:
             gov = MaestroGovernance(llm_client=FakeLLM, mcp_client=Mock())
             assert gov is not None
-        except:
+        except Exception:
             pass
 
     def test_004_governance_lambda_mcp(self):
@@ -58,7 +62,7 @@ class TestTypeInjection:
         try:
             gov = MaestroGovernance(llm_client=Mock(), mcp_client=lambda: None)
             assert gov is not None
-        except:
+        except Exception:
             pass
 
     def test_005_governance_generator_llm(self):
@@ -66,43 +70,43 @@ class TestTypeInjection:
         try:
             gov = MaestroGovernance(llm_client=(x for x in range(10)), mcp_client=Mock())
             assert gov is not None
-        except:
+        except Exception:
             pass
 
     @pytest.mark.asyncio
     async def test_006_task_float_request(self):
         """Float como request"""
         try:
-            task = AgentTask(request=3.14, context={})
+            AgentTask(request=3.14, context={})
             pytest.fail("Should raise ValidationError")
-        except:
+        except Exception:
             pass  # Expected
 
     @pytest.mark.asyncio
     async def test_007_task_bytes_request(self):
         """Bytes como request"""
         try:
-            task = AgentTask(request=b"bytes request", context={})
+            AgentTask(request=b"bytes request", context={})
             pytest.fail("Should raise ValidationError")
-        except:
+        except Exception:
             pass
 
     @pytest.mark.asyncio
     async def test_008_task_tuple_context(self):
         """Tuple como context"""
         try:
-            task = AgentTask(request="test", context=("a", "b"))
+            AgentTask(request="test", context=("a", "b"))
             pytest.fail("Should raise ValidationError")
-        except:
+        except Exception:
             pass
 
     @pytest.mark.asyncio
     async def test_009_task_set_context(self):
         """Set como context"""
         try:
-            task = AgentTask(request="test", context={"a", "b", "c"})
+            AgentTask(request="test", context={"a", "b", "c"})
             pytest.fail("Should raise ValidationError")
-        except:
+        except Exception:
             pass
 
     @pytest.mark.asyncio
@@ -112,15 +116,15 @@ class TestTypeInjection:
             response = AgentResponse(success=1.0, reasoning="test", data={})
             # Python pode aceitar - é truthy
             assert response.success == 1.0
-        except:
+        except Exception:
             pass
 
     def test_011_response_list_reasoning(self):
         """List como reasoning"""
         try:
-            response = AgentResponse(success=True, reasoning=["not", "string"], data={})
+            AgentResponse(success=True, reasoning=["not", "string"], data={})
             pytest.fail("Should raise ValidationError")
-        except:
+        except Exception:
             pass
 
     def test_012_response_none_data(self):
@@ -129,25 +133,29 @@ class TestTypeInjection:
             response = AgentResponse(success=True, reasoning="test", data=None)
             # Pode ser válido se Optional
             assert response.data is None
-        except:
+        except Exception:
             pass
 
     def test_013_pipeline_function_justica(self):
         """Function como justica"""
         try:
-            def fake_justica(): pass
+
+            def fake_justica():
+                pass
+
             pipeline = GovernancePipeline(justica=fake_justica, sofia=Mock())
             assert pipeline is not None
-        except:
+        except Exception:
             pass
 
     def test_014_pipeline_module_sofia(self):
         """Module como sofia"""
         try:
             import sys
+
             pipeline = GovernancePipeline(justica=Mock(), sofia=sys)
             assert pipeline is not None
-        except:
+        except Exception:
             pass
 
     def test_015_detect_risk_bytes_prompt(self):
@@ -173,7 +181,7 @@ class TestTypeInjection:
             risk = gov.detect_risk_level("test", {"agent": "name"})
             # Pode funcionar se converte para string
             assert risk in ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
-        except:
+        except Exception:
             pass
 
     @pytest.mark.asyncio
@@ -182,7 +190,10 @@ class TestTypeInjection:
         gov = MaestroGovernance(Mock(), Mock())
         task = AgentTask(request="test", context={})
         try:
-            class FakeAgent: pass
+
+            class FakeAgent:
+                pass
+
             await gov.execute_with_governance(FakeAgent, task)
             pytest.fail("Should crash")
         except (TypeError, AttributeError):
@@ -195,6 +206,7 @@ class TestTypeInjection:
         agent = Mock()
         agent.role = AgentRole.EXECUTOR
         import sys
+
         try:
             await gov.execute_with_governance(agent, sys)
             pytest.fail("Should crash")
@@ -204,7 +216,7 @@ class TestTypeInjection:
     def test_020_identity_bytes_id(self):
         """Bytes como agent_id"""
         try:
-            identity = get_agent_identity(b"executor")
+            get_agent_identity(b"executor")
             pytest.fail("Should crash")
         except (TypeError, KeyError):
             pass
@@ -214,7 +226,7 @@ class TestTypeInjection:
         """Placeholder para testes 21-100"""
         # Testar TODOS os tipos Python: frozenset, complex, memoryview, etc
         evil_types = [
-            frozenset([1,2,3]),
+            frozenset([1, 2, 3]),
             complex(1, 2),
             memoryview(b"test"),
             range(10),
@@ -229,18 +241,20 @@ class TestTypeInjection:
             try:
                 # Tentar usar como llm_client
                 MaestroGovernance(llm_client=evil, mcp_client=Mock())
-            except:
+            except Exception:
                 pass
 
             try:
                 # Tentar como prompt
                 gov.detect_risk_level(evil, "executor")
-            except:
+            except Exception:
                 pass
+
 
 # ============================================================================
 # CATEGORIA 2: EXTREME VALUES (100 testes) - Tests 101-200
 # ============================================================================
+
 
 class TestExtremeValues:
     """Valores extremos e edge cases"""
@@ -256,28 +270,28 @@ class TestExtremeValues:
         gov = MaestroGovernance(Mock(), Mock())
         try:
             gov.detect_risk_level("test", sys.maxsize)
-        except:
+        except Exception:
             pass
 
     def test_103_negative_infinity(self):
         """float('-inf') como parâmetro"""
         try:
-            gov = MaestroGovernance(llm_client=float('-inf'), mcp_client=Mock())
-        except:
+            MaestroGovernance(llm_client=float("-inf"), mcp_client=Mock())
+        except Exception:
             pass
 
     def test_104_positive_infinity(self):
         """float('inf') como parâmetro"""
         try:
-            gov = MaestroGovernance(llm_client=Mock(), mcp_client=float('inf'))
-        except:
+            MaestroGovernance(llm_client=Mock(), mcp_client=float("inf"))
+        except Exception:
             pass
 
     def test_105_nan_value(self):
         """float('nan') como parâmetro"""
         try:
-            gov = MaestroGovernance(llm_client=float('nan'), mcp_client=Mock())
-        except:
+            MaestroGovernance(llm_client=float("nan"), mcp_client=Mock())
+        except Exception:
             pass
 
     def test_106_unicode_hell(self):
@@ -375,9 +389,11 @@ class TestExtremeValues:
                 # Algumas podem crashar - isso é um air gap
                 pass
 
+
 # ============================================================================
 # CATEGORIA 3: STATE CORRUPTION (100 testes) - Tests 201-300
 # ============================================================================
+
 
 class TestStateCorruption:
     """Corromper estado interno"""
@@ -439,7 +455,7 @@ class TestStateCorruption:
             return AgentResponse(success=True, reasoning="ok", data={})
 
         agent.execute = corrupt_execute
-        response = await gov.execute_with_governance(agent, task)
+        await gov.execute_with_governance(agent, task)
         # Task foi corrompido!
         assert task.request == "CORRUPTED"
 
@@ -465,12 +481,14 @@ class TestStateCorruption:
                 status = gov.get_governance_status()
                 # Deveria detectar corrupção
                 assert isinstance(status, dict)
-            except:
+            except Exception:
                 pass
+
 
 # ============================================================================
 # CATEGORIA 4: CONCURRENCY CHAOS (100 testes) - Tests 301-400
 # ============================================================================
+
 
 class TestConcurrencyChaos:
     """Race conditions e problemas de concorrência"""
@@ -486,7 +504,9 @@ class TestConcurrencyChaos:
         async def execute():
             agent = Mock()
             agent.role = AgentRole.EXECUTOR
-            agent.execute = AsyncMock(return_value=AgentResponse(success=True, reasoning="ok", data={}))
+            agent.execute = AsyncMock(
+                return_value=AgentResponse(success=True, reasoning="ok", data={})
+            )
             task = AgentTask(request="test", context={})
             return await gov.execute_with_governance(agent, task)
 
@@ -507,7 +527,7 @@ class TestConcurrencyChaos:
 
         async def check():
             for _ in range(100):
-                status = gov.get_governance_status()
+                gov.get_governance_status()
                 await asyncio.sleep(0.001)
 
         await asyncio.gather(corrupt(), corrupt(), check(), check())
@@ -515,7 +535,7 @@ class TestConcurrencyChaos:
     @pytest.mark.asyncio
     async def test_303_deadlock_simulation(self):
         """Simular deadlock"""
-        gov = MaestroGovernance(Mock(), Mock())
+        MaestroGovernance(Mock(), Mock())
         lock1 = asyncio.Lock()
         lock2 = asyncio.Lock()
 
@@ -532,10 +552,7 @@ class TestConcurrencyChaos:
                     pass
 
         try:
-            await asyncio.wait_for(
-                asyncio.gather(task1(), task2()),
-                timeout=1.0
-            )
+            await asyncio.wait_for(asyncio.gather(task1(), task2()), timeout=1.0)
         except asyncio.TimeoutError:
             pass  # Deadlock detectado
 
@@ -544,9 +561,11 @@ class TestConcurrencyChaos:
         # Threading chaos tests
         pass
 
+
 # ============================================================================
 # CATEGORIA 5: MEMORY/RESOURCE ATTACKS (100 testes) - Tests 401-500
 # ============================================================================
+
 
 class TestResourceAttacks:
     """Ataques de exaustão de recursos"""
@@ -562,7 +581,7 @@ class TestResourceAttacks:
 
         # Should raise ValidationError due to size limit
         with pytest.raises(ValidationError) as exc_info:
-            task = AgentTask(request="test", context=huge_context)
+            AgentTask(request="test", context=huge_context)
 
         # Verify it's specifically about size limit
         assert "exceeds maximum allowed size" in str(exc_info.value)
@@ -582,6 +601,7 @@ class TestResourceAttacks:
 
     def test_403_pickle_bomb(self):
         """Pickle bomb attack"""
+
         class Evil:
             def __reduce__(self):
                 return (eval, ("print('pwned')",))
@@ -591,7 +611,7 @@ class TestResourceAttacks:
             response = AgentResponse(success=True, reasoning="test", data=evil_data)
             pickle.dumps(response.data)
             pytest.fail("Pickle bomb not detected!")
-        except:
+        except Exception:
             pass
 
     def test_404_thread_bomb(self):
@@ -603,12 +623,12 @@ class TestResourceAttacks:
                 t.daemon = True
                 t.start()
                 threads.append(t)
-        except:
+        except Exception:
             pass  # Resource limit hit
 
     def test_405_gc_thrashing(self):
         """GC thrashing attack"""
-        gov = MaestroGovernance(Mock(), Mock())
+        MaestroGovernance(Mock(), Mock())
         for _ in range(10000):
             # Criar e descartar objetos rapidamente
             temp = AgentTask(request="test" * 100, context={"data": "x" * 1000})
@@ -623,6 +643,7 @@ class TestResourceAttacks:
         # CPU spinning
         # etc
         pass
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=line", "-q"])

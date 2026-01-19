@@ -81,7 +81,7 @@ async for chunk in client.stream_chat(
 
 ```
 Attempt 1: Immediate request → 429 Error
-Attempt 2: Wait ~1.2s → 429 Error  
+Attempt 2: Wait ~1.2s → 429 Error
 Attempt 3: Wait ~2.4s → 429 Error
 Attempt 4: Wait ~4.8s → Success ✅
 ```
@@ -268,21 +268,21 @@ def monitor_loop(client):
     """Monitor client health."""
     while True:
         metrics = client.get_metrics()
-        
+
         # Check success rate
         success_rate = float(metrics["success_rate"].rstrip("%"))
         if success_rate < 90:
             print(f"⚠️  Low success rate: {success_rate}%")
-        
+
         # Check circuit breaker
         if metrics["circuit_breaker"]["state"] != "closed":
             print(f"⚠️  Circuit breaker: {metrics['circuit_breaker']['state']}")
-        
+
         # Check rate limit utilization
         rpm = metrics["rate_limiter"]["requests_last_minute"]
         if rpm > 45:  # 90% of 50 RPM limit
             print(f"⚠️  High rate limit usage: {rpm}/50 RPM")
-        
+
         time.sleep(10)
 ```
 
@@ -540,7 +540,7 @@ The **Production-Grade LLM Client** provides enterprise-level resilience with:
 
 ---
 
-**Built with ❤️ for QWEN-DEV-CLI**  
+**Built with ❤️ for QWEN-DEV-CLI**
 *Combining the best of Codex, Claude, Gemini, and Cursor*
 
 **Soli Deo Gloria** 🙏

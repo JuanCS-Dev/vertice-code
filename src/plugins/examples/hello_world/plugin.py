@@ -64,7 +64,7 @@ class HelloWorldPlugin(Plugin):
         return {
             "type": "greeting",
             "message": f"Hello, {name}! 👋",
-            "greet_count": self._greet_count
+            "greet_count": self._greet_count,
         }
 
     def on_message(self, role: str, content: str) -> Optional[str]:
@@ -73,4 +73,4 @@ class HelloWorldPlugin(Plugin):
         return None
 
 
-__all__ = ['HelloWorldPlugin']
+__all__ = ["HelloWorldPlugin"]

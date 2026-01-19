@@ -1,15 +1,15 @@
-# Skaffold - https://skaffold.dev/                 
+# Skaffold - https://skaffold.dev/
 # ------------------------------------------------ #
-# This is for illustration purposes only           
+# This is for illustration purposes only
 # ------------------------------------------------ #
-# Installation options & modules 
+# Installation options & modules
 # ------------------------------------------------ #
-# istio              - `skaffold run -m istiod`    
+# istio              - `skaffold run -m istiod`
 # ingress            - `skaffold run -m ingress`
 # Addons:
 #   - kiali          - `skaffold run -m kiali`
 #   - prometheus     - `skaffold run -m prometheus`
-# Demos: 
+# Demos:
 #   - bookinfo       - `skaffold run -m bookinfo`
 # ------------------------------------------------ #
 # Development mode - skaffold dev #

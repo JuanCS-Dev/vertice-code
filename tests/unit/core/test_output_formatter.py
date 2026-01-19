@@ -33,6 +33,7 @@ from vertice_tui.core.output_formatter import (
 # FORMAT_RESPONSE TESTS
 # =============================================================================
 
+
 class TestFormatResponse:
     """Tests for format_response method."""
 
@@ -105,15 +106,14 @@ class TestFormatResponse:
 # FORMAT_TOOL_RESULT TESTS
 # =============================================================================
 
+
 class TestFormatToolResult:
     """Tests for format_tool_result method."""
 
     def test_successful_tool(self):
         """Test successful tool result."""
         panel = OutputFormatter.format_tool_result(
-            tool_name="read_file",
-            success=True,
-            data="File contents here"
+            tool_name="read_file", success=True, data="File contents here"
         )
 
         assert isinstance(panel, Panel)
@@ -124,9 +124,7 @@ class TestFormatToolResult:
     def test_failed_tool(self):
         """Test failed tool result."""
         panel = OutputFormatter.format_tool_result(
-            tool_name="write_file",
-            success=False,
-            error="Permission denied"
+            tool_name="write_file", success=False, error="Permission denied"
         )
 
         assert panel.border_style == OutputFormatter.ERROR_BORDER
@@ -165,6 +163,7 @@ class TestFormatToolResult:
 # =============================================================================
 # FORMAT_CODE_BLOCK TESTS
 # =============================================================================
+
 
 class TestFormatCodeBlock:
     """Tests for format_code_block method."""
@@ -224,6 +223,7 @@ class TestFormatCodeBlock:
 # FORMAT_ERROR/SUCCESS/WARNING/INFO TESTS
 # =============================================================================
 
+
 class TestFormatMessages:
     """Tests for format_error, format_success, format_warning, format_info."""
 
@@ -276,6 +276,7 @@ class TestFormatMessages:
 # FORMAT_ACTION AND FORMAT_THINKING TESTS
 # =============================================================================
 
+
 class TestFormatIndicators:
     """Tests for format_action and format_thinking."""
 
@@ -301,6 +302,7 @@ class TestFormatIndicators:
 # =============================================================================
 # CONVENIENCE FUNCTION TESTS
 # =============================================================================
+
 
 class TestConvenienceFunctions:
     """Tests for convenience helper functions."""
@@ -336,6 +338,7 @@ class TestConvenienceFunctions:
 # =============================================================================
 # EDGE CASES AND BOUNDARY CONDITIONS
 # =============================================================================
+
 
 class TestEdgeCases:
     """Tests for edge cases and boundary conditions."""
@@ -411,6 +414,7 @@ class TestEdgeCases:
 # CLASS CONSTANTS TESTS
 # =============================================================================
 
+
 class TestClassConstants:
     """Tests for class constants."""
 
@@ -448,6 +452,7 @@ class TestClassConstants:
 # INTEGRATION-STYLE TESTS
 # =============================================================================
 
+
 class TestIntegrationPatterns:
     """Tests simulating real usage patterns."""
 
@@ -479,17 +484,13 @@ Let me know if you need more details.
         """Test typical tool execution result flow."""
         # Success case
         read_result = OutputFormatter.format_tool_result(
-            "read_file",
-            success=True,
-            data="def hello(): return 'world'"
+            "read_file", success=True, data="def hello(): return 'world'"
         )
         assert read_result.border_style == Colors.SUCCESS  # Now uses hex color
 
         # Failure case
         write_result = OutputFormatter.format_tool_result(
-            "write_file",
-            success=False,
-            error="EACCES: permission denied"
+            "write_file", success=False, error="EACCES: permission denied"
         )
         assert write_result.border_style == Colors.ERROR  # Now uses hex color
 
@@ -508,9 +509,7 @@ class Calculator:
         return a / b
 '''
         panel = OutputFormatter.format_code_block(
-            code.strip(),
-            language="python",
-            title="calculator.py"
+            code.strip(), language="python", title="calculator.py"
         )
 
         assert isinstance(panel, Panel)
@@ -520,6 +519,7 @@ class Calculator:
 # =============================================================================
 # SMART TRUNCATOR TESTS
 # =============================================================================
+
 
 class TestSmartTruncator:
     """Tests for SmartTruncator class."""
@@ -594,7 +594,7 @@ class TestSmartTruncator:
             is_truncated=True,
             full_length=1000,
             preview_length=100,
-            content_type="text"
+            content_type="text",
         )
         assert "more chars" in result.truncation_info
 
@@ -605,7 +605,7 @@ class TestSmartTruncator:
             is_truncated=True,
             full_length=100,
             preview_length=20,
-            content_type="code"
+            content_type="code",
         )
         assert "more lines" in result.truncation_info
 

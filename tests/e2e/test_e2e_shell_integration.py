@@ -29,8 +29,10 @@ import pytest
 
 # Skip if no API keys
 pytestmark = pytest.mark.skipif(
-    not (os.getenv("ANTHROPIC_API_KEY") or os.getenv("GOOGLE_API_KEY") or os.getenv("GROQ_API_KEY")),
-    reason="No LLM API key available"
+    not (
+        os.getenv("ANTHROPIC_API_KEY") or os.getenv("GOOGLE_API_KEY") or os.getenv("GROQ_API_KEY")
+    ),
+    reason="No LLM API key available",
 )
 
 
@@ -45,21 +47,22 @@ class TestToolRegistry:
         schemas = registry.get_schemas()
 
         # Should have minimum set of tools
-        tool_names = {s['name'] for s in schemas}
+        tool_names = {s["name"] for s in schemas}
 
-        essential_tools = ['readfile', 'writefile', 'searchfiles', 'bashcommand']
+        essential_tools = ["readfile", "writefile", "searchfiles", "bashcommand"]
         for tool in essential_tools:
             # Check variations of tool names
             has_tool = any(tool.lower() in name.lower() for name in tool_names)
-            assert has_tool or len(tool_names) > 10, \
-                f"Expected tool '{tool}' or many tools. Found: {tool_names}"
+            assert (
+                has_tool or len(tool_names) > 10
+            ), f"Expected tool '{tool}' or many tools. Found: {tool_names}"
 
     def test_registry_includes_think_tool(self):
         """Test that think tool is registered."""
         from vertice_cli.tools.registry_setup import create_full_registry
 
         registry = create_full_registry(include_think=True)
-        tool = registry.get('think')
+        tool = registry.get("think")
 
         assert tool is not None, "Think tool should be registered"
 
@@ -71,8 +74,8 @@ class TestToolRegistry:
         schemas = registry.get_schemas()
 
         for schema in schemas:
-            assert 'name' in schema, f"Schema missing 'name': {schema}"
-            assert 'description' in schema, f"Schema missing 'description': {schema}"
+            assert "name" in schema, f"Schema missing 'name': {schema}"
+            assert "description" in schema, f"Schema missing 'description': {schema}"
 
 
 class TestIntentClassification:
@@ -81,6 +84,7 @@ class TestIntentClassification:
     @pytest.fixture
     def classifier(self):
         from vertice_cli.core.intent_classifier import SemanticIntentClassifier
+
         return SemanticIntentClassifier()
 
     @pytest.mark.asyncio
@@ -141,10 +145,10 @@ class TestRequestAmplifier:
         from vertice_cli.core.request_amplifier import RequestAmplifier
 
         context = {
-            'cwd': '/project/src',
-            'recent_files': ['main.py', 'utils.py'],
-            'modified_files': ['main.py'],
-            'git_branch': 'feature/test',
+            "cwd": "/project/src",
+            "recent_files": ["main.py", "utils.py"],
+            "modified_files": ["main.py"],
+            "git_branch": "feature/test",
         }
 
         amplifier = RequestAmplifier(context=context)
@@ -209,7 +213,7 @@ class TestComplexityAnalyzer:
         result = analyzer.analyze(
             "refatora todos os modulos e depois roda os testes",
             intent=Intent.REFACTOR,
-            confidence=0.5
+            confidence=0.5,
         )
 
         # Should have some complexity factors
@@ -275,6 +279,7 @@ class TestToolExecution:
         d = tempfile.mkdtemp(prefix="vertice_tool_test_")
         yield Path(d)
         import shutil
+
         shutil.rmtree(d, ignore_errors=True)
 
     @pytest.mark.asyncio
@@ -289,7 +294,7 @@ class TestToolExecution:
         registry = create_full_registry()
 
         # Find read tool
-        read_tool = registry.get('readfile') or registry.get('read_file')
+        read_tool = registry.get("readfile") or registry.get("read_file")
         if read_tool:
             result = await read_tool.execute(path=str(test_file))
             assert result.success
@@ -303,13 +308,10 @@ class TestToolExecution:
         registry = create_full_registry()
 
         # Find write tool
-        write_tool = registry.get('writefile') or registry.get('write_file')
+        write_tool = registry.get("writefile") or registry.get("write_file")
         if write_tool:
             test_file = temp_dir / "output.txt"
-            result = await write_tool.execute(
-                path=str(test_file),
-                content="Test content"
-            )
+            result = await write_tool.execute(path=str(test_file), content="Test content")
             assert result.success
             assert test_file.exists()
             assert test_file.read_text() == "Test content"
@@ -320,13 +322,15 @@ class TestToolExecution:
         from vertice_cli.tools.think_tool import ThinkTool
 
         tool = ThinkTool()
-        result = await tool.execute(thought="""
+        result = await tool.execute(
+            thought="""
         1) Entendimento: Preciso criar um arquivo
         2) Abordagens: Usar writefile ou bashcommand
         3) Decisao: Usar writefile por ser mais seguro
         4) Riscos: Sobrescrever arquivo existente
         5) Proximos passos: Verificar se existe, depois criar
-        """)
+        """
+        )
 
         assert result.success
         assert result.metadata.get("has_structure", False)
@@ -364,12 +368,17 @@ class TestPromptGeneration:
 
         tool_schemas = [
             {"name": "readfile", "description": "Read file", "parameters": {}, "category": "file"},
-            {"name": "writefile", "description": "Write file", "parameters": {}, "category": "file"},
+            {
+                "name": "writefile",
+                "description": "Write file",
+                "parameters": {},
+                "category": "file",
+            },
         ]
 
         context = {
-            'cwd': '/project',
-            'modified_files': ['main.py'],
+            "cwd": "/project",
+            "modified_files": ["main.py"],
         }
 
         prompt = build_enhanced_system_prompt(tool_schemas, context)
@@ -403,8 +412,8 @@ class TestFewShotExamples:
 
         # Check example structure
         for example in FEW_SHOT_EXAMPLES_PTBR:
-            assert 'user' in example
-            assert 'assistant' in example
+            assert "user" in example
+            assert "assistant" in example
 
     def test_bilingual_example_selection(self):
         """Test bilingual example selection."""
@@ -428,8 +437,8 @@ class TestErrorMessages:
 
         # Check that messages have both languages
         for key, messages in ERROR_MESSAGES.items():
-            assert 'en' in messages, f"Missing English for {key}"
-            assert 'pt' in messages, f"Missing Portuguese for {key}"
+            assert "en" in messages, f"Missing English for {key}"
+            assert "pt" in messages, f"Missing Portuguese for {key}"
 
     def test_get_error_message_formatting(self):
         """Test error message formatting."""
@@ -448,6 +457,7 @@ class TestErrorMessages:
 # CLI EXECUTION TESTS (Optional - requires vtc installed)
 # =============================================================================
 
+
 class TestCLIExecution:
     """Test actual CLI execution (optional)."""
 
@@ -456,34 +466,27 @@ class TestCLIExecution:
         d = tempfile.mkdtemp(prefix="vertice_cli_test_")
         yield Path(d)
         import shutil
+
         shutil.rmtree(d, ignore_errors=True)
 
     @pytest.mark.skipif(
-        not os.path.exists("/usr/local/bin/vtc") and not os.path.exists(os.path.expanduser("~/.local/bin/vtc")),
-        reason="vtc not installed"
+        not os.path.exists("/usr/local/bin/vtc")
+        and not os.path.exists(os.path.expanduser("~/.local/bin/vtc")),
+        reason="vtc not installed",
     )
     def test_vtc_help(self):
         """Test vtc --help command."""
-        result = subprocess.run(
-            ["vtc", "--help"],
-            capture_output=True,
-            text=True,
-            timeout=10
-        )
+        result = subprocess.run(["vtc", "--help"], capture_output=True, text=True, timeout=10)
         assert result.returncode == 0 or "vertice" in result.stdout.lower()
 
     @pytest.mark.skipif(
-        not os.path.exists("/usr/local/bin/vtc") and not os.path.exists(os.path.expanduser("~/.local/bin/vtc")),
-        reason="vtc not installed"
+        not os.path.exists("/usr/local/bin/vtc")
+        and not os.path.exists(os.path.expanduser("~/.local/bin/vtc")),
+        reason="vtc not installed",
     )
     def test_vtc_version(self):
         """Test vtc --version command."""
-        result = subprocess.run(
-            ["vtc", "--version"],
-            capture_output=True,
-            text=True,
-            timeout=10
-        )
+        result = subprocess.run(["vtc", "--version"], capture_output=True, text=True, timeout=10)
         # Should return version or help
         assert result.returncode == 0 or len(result.stdout) > 0
 
@@ -491,6 +494,7 @@ class TestCLIExecution:
 # =============================================================================
 # STRESS TESTS
 # =============================================================================
+
 
 class TestStress:
     """Stress tests for the system."""
@@ -511,9 +515,7 @@ class TestStress:
         ] * 10  # 50 requests
 
         start = time.time()
-        results = await asyncio.gather(*[
-            classifier.classify(req) for req in requests
-        ])
+        results = await asyncio.gather(*[classifier.classify(req) for req in requests])
         duration = time.time() - start
 
         assert len(results) == 50
@@ -524,15 +526,13 @@ class TestStress:
         """Test rapid request amplification."""
         from vertice_cli.core.request_amplifier import RequestAmplifier
 
-        context = {'cwd': '/project'}
+        context = {"cwd": "/project"}
         amplifier = RequestAmplifier(context=context)
 
         requests = ["mostra arquivo", "cria funcao", "busca TODO"] * 20
 
         start = time.time()
-        results = await asyncio.gather(*[
-            amplifier.analyze(req) for req in requests
-        ])
+        results = await asyncio.gather(*[amplifier.analyze(req) for req in requests])
         duration = time.time() - start
 
         assert len(results) == 60
@@ -542,6 +542,7 @@ class TestStress:
 # =============================================================================
 # JULES RUNNER REPORT
 # =============================================================================
+
 
 @pytest.fixture(scope="session", autouse=True)
 def test_session_report(request):

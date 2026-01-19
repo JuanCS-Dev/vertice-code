@@ -27,25 +27,16 @@ import gc
 import tracemalloc
 
 # Import components to test
-from vertice_cli.tui.components.maestro_shell_ui import (
-    MaestroShellUI,
-    AgentStreamPanel
-)
-from vertice_cli.tui.components.agent_stream_panel import (
-    AgentStreamPanel
-)
-from vertice_cli.tui.components.file_operations_panel import (
-    FileOperationsPanel
-)
-from vertice_cli.tui.components.metrics_dashboard import (
-    MetricsDashboard
-)
+from vertice_cli.tui.components.maestro_shell_ui import MaestroShellUI
+from vertice_cli.tui.components.agent_stream_panel import AgentStreamPanel
+from vertice_cli.tui.components.file_operations_panel import FileOperationsPanel
+from vertice_cli.tui.components.metrics_dashboard import MetricsDashboard
 from vertice_cli.tui.components.maestro_data_structures import (
     AgentState,
     AgentStatus,
     FileOperation,
     FileStatus,
-    MetricsData
+    MetricsData,
 )
 from vertice_cli.tui.theme import COLORS
 
@@ -56,39 +47,36 @@ from rich.text import Text
 # TEST FIXTURES
 # ============================================================================
 
+
 @pytest.fixture
 def console():
     """Mock console for testing"""
     return Console(file=io.StringIO(), width=120, height=40, force_terminal=True)
+
 
 @pytest.fixture
 def ui(console):
     """Fresh UI instance"""
     return MaestroShellUI(console=console)
 
+
 @pytest.fixture
 def agent_state():
     """Sample agent state"""
-    return AgentState(
-        name="TEST AGENT",
-        icon="🧪",
-        status=AgentStatus.IDLE
-    )
+    return AgentState(name="TEST AGENT", icon="🧪", status=AgentStatus.IDLE)
+
 
 @pytest.fixture
 def file_ops():
     """File operations panel"""
     return FileOperationsPanel()
 
+
 @pytest.fixture
 def metrics():
     """Sample metrics"""
     return MetricsData(
-        success_rate=99.87,
-        tokens_used=2100,
-        tokens_saved=98.7,
-        saved_money=1234.0,
-        latency_ms=187
+        success_rate=99.87, tokens_used=2100, tokens_saved=98.7, saved_money=1234.0, latency_ms=187
     )
 
 
@@ -96,36 +84,37 @@ def metrics():
 # UNIT TESTS - Agent Stream Panel
 # ============================================================================
 
+
 class TestAgentStreamPanel:
     """Test AgentStreamPanel in isolation"""
 
     def test_panel_creation(self, agent_state):
         """Test basic panel creation"""
-        panel = AgentStreamPanel(agent_state, COLORS['neon_cyan'])
+        panel = AgentStreamPanel(agent_state, COLORS["neon_cyan"])
         assert panel.state == agent_state
-        assert panel.color == COLORS['neon_cyan']
+        assert panel.color == COLORS["neon_cyan"]
 
     def test_render_idle_state(self, agent_state):
         """Test rendering idle agent"""
-        panel = AgentStreamPanel(agent_state, COLORS['neon_cyan'])
+        panel = AgentStreamPanel(agent_state, COLORS["neon_cyan"])
         rendered = panel.render(show_cursor=False)
 
         assert rendered is not None
-        assert hasattr(rendered, 'title')
+        assert hasattr(rendered, "title")
 
     def test_render_executing_state(self, agent_state):
         """Test rendering executing agent with spinner"""
         agent_state.status = AgentStatus.EXECUTING
         agent_state.spinner_frame = 5
 
-        panel = AgentStreamPanel(agent_state, COLORS['neon_cyan'])
+        panel = AgentStreamPanel(agent_state, COLORS["neon_cyan"])
         rendered = panel.render(show_cursor=True)
 
         assert rendered is not None
 
     def test_cursor_animation(self, agent_state):
         """Test cursor cycles through all frames"""
-        panel = AgentStreamPanel(agent_state, COLORS['neon_cyan'])
+        panel = AgentStreamPanel(agent_state, COLORS["neon_cyan"])
 
         initial_index = panel.cursor_index
         for _ in range(len(panel.CURSOR_FRAMES)):
@@ -138,8 +127,8 @@ class TestAgentStreamPanel:
         """Test content truncates after max lines"""
         agent_state.content = [f"Line {i}" for i in range(100)]
 
-        panel = AgentStreamPanel(agent_state, COLORS['neon_cyan'])
-        rendered = panel.render(max_display_lines=20)
+        panel = AgentStreamPanel(agent_state, COLORS["neon_cyan"])
+        panel.render(max_display_lines=20)
 
         # Should only show last 20 lines
         assert len(agent_state.content[-20:]) == 20
@@ -148,7 +137,7 @@ class TestAgentStreamPanel:
         """Test progress bar renders correctly"""
         agent_state.progress = 75.5
 
-        panel = AgentStreamPanel(agent_state, COLORS['neon_cyan'])
+        panel = AgentStreamPanel(agent_state, COLORS["neon_cyan"])
         rendered = panel.render()
 
         assert rendered is not None
@@ -157,7 +146,7 @@ class TestAgentStreamPanel:
         """Test done status shows checkmark"""
         agent_state.status = AgentStatus.DONE
 
-        panel = AgentStreamPanel(agent_state, COLORS['neon_cyan'])
+        panel = AgentStreamPanel(agent_state, COLORS["neon_cyan"])
         rendered = panel.render()
 
         assert rendered is not None
@@ -166,6 +155,7 @@ class TestAgentStreamPanel:
 # ============================================================================
 # UNIT TESTS - File Operations Panel
 # ============================================================================
+
 
 class TestFileOperationsPanel:
     """Test FileOperationsPanel in isolation"""
@@ -177,10 +167,7 @@ class TestFileOperationsPanel:
     def test_add_operation(self, file_ops):
         """Test adding file operation"""
         op = FileOperation(
-            path="test.py",
-            status=FileStatus.MODIFIED,
-            lines_added=10,
-            lines_removed=5
+            path="test.py", status=FileStatus.MODIFIED, lines_added=10, lines_removed=5
         )
 
         file_ops.add_operation(op)
@@ -199,7 +186,7 @@ class TestFileOperationsPanel:
                 path=f"file{i}.py",
                 status=FileStatus.MODIFIED,
                 lines_added=i * 10,
-                lines_removed=i * 5
+                lines_removed=i * 5,
             )
             file_ops.add_operation(op)
 
@@ -219,9 +206,7 @@ class TestFileOperationsPanel:
     def test_operation_limit(self, file_ops):
         """Test operations are stored up to limit"""
         for i in range(60):
-            file_ops.add_operation(
-                FileOperation(f"file{i}.py", FileStatus.MODIFIED, 1, 1)
-            )
+            file_ops.add_operation(FileOperation(f"file{i}.py", FileStatus.MODIFIED, 1, 1))
 
         # Should cap at 50
         assert len(file_ops.operations) == 50
@@ -230,6 +215,7 @@ class TestFileOperationsPanel:
 # ============================================================================
 # UNIT TESTS - Metrics Dashboard
 # ============================================================================
+
 
 class TestMetricsDashboard:
     """Test MetricsDashboard"""
@@ -249,7 +235,7 @@ class TestMetricsDashboard:
         text_str = rendered.plain
 
         assert "99." in text_str  # success_rate
-        assert "2.1K" in text_str or "2100" in text_str   # tokens
+        assert "2.1K" in text_str or "2100" in text_str  # tokens
         assert "1,234" in text_str or "1234" in text_str  # saved_money
 
 
@@ -257,14 +243,15 @@ class TestMetricsDashboard:
 # INTEGRATION TESTS - Full UI
 # ============================================================================
 
+
 class TestMaestroShellUI:
     """Test complete UI integration"""
 
     def test_ui_initialization(self, ui):
         """Test UI initializes correctly"""
         assert ui.console is not None
-        assert 'executor' in ui.agents
-        assert 'planner' in ui.agents
+        assert "executor" in ui.agents
+        assert "planner" in ui.agents
         assert ui.file_ops is not None
         assert ui.metrics is not None
 
@@ -289,11 +276,11 @@ class TestMaestroShellUI:
         """Test executor stream updates"""
         await ui.start()
 
-        initial_len = len(ui.agents['executor'].content)
+        initial_len = len(ui.agents["executor"].content)
         await ui.update_executor_stream("Test message")
 
-        assert len(ui.agents['executor'].content) == initial_len + 1
-        assert ui.agents['executor'].content[-1] == "Test message"
+        assert len(ui.agents["executor"].content) == initial_len + 1
+        assert ui.agents["executor"].content[-1] == "Test message"
 
         ui.stop()
 
@@ -304,7 +291,7 @@ class TestMaestroShellUI:
 
         await ui.update_planner_stream("Test plan")
 
-        assert "Test plan" in ui.agents['planner'].content
+        assert "Test plan" in ui.agents["planner"].content
 
         ui.stop()
 
@@ -312,7 +299,7 @@ class TestMaestroShellUI:
         """Test progress bar updates"""
         ui.update_executor_progress(50.0)
 
-        assert ui.agents['executor'].progress == 50.0
+        assert ui.agents["executor"].progress == 50.0
 
     def test_file_operation_add(self, ui):
         """Test adding file operations"""
@@ -324,17 +311,14 @@ class TestMaestroShellUI:
 
     def test_mark_agent_done(self, ui):
         """Test marking agent as done"""
-        ui.mark_agent_done('executor')
+        ui.mark_agent_done("executor")
 
-        assert ui.agents['executor'].status == AgentStatus.DONE
-        assert ui.agents['executor'].progress == 100.0
+        assert ui.agents["executor"].status == AgentStatus.DONE
+        assert ui.agents["executor"].progress == 100.0
 
     def test_metrics_update(self, ui):
         """Test metrics updates"""
-        ui.update_metrics(
-            success_rate=99.9,
-            tokens_used=1500
-        )
+        ui.update_metrics(success_rate=99.9, tokens_used=1500)
 
         assert ui.metrics.success_rate == 99.9
         assert ui.metrics.tokens_used == 1500
@@ -343,6 +327,7 @@ class TestMaestroShellUI:
 # ============================================================================
 # STRESS TESTS - Performance Under Load
 # ============================================================================
+
 
 class TestPerformanceStress:
     """Stress test performance limits"""
@@ -365,7 +350,7 @@ class TestPerformanceStress:
 
         # Should complete in reasonable time
         assert elapsed < 10.0
-        assert len(ui.agents['executor'].content) <= 1000  # May truncate
+        assert len(ui.agents["executor"].content) <= 1000  # May truncate
 
     @pytest.mark.asyncio
     @pytest.mark.timeout(10)
@@ -395,7 +380,7 @@ class TestPerformanceStress:
         while time.time() - start < duration:
             await ui.update_executor_stream(f"Frame {frame_count}")
             frame_count += 1
-            await asyncio.sleep(1/30)  # 30 FPS
+            await asyncio.sleep(1 / 30)  # 30 FPS
 
         elapsed = time.time() - start
         actual_fps = frame_count / elapsed
@@ -409,16 +394,16 @@ class TestPerformanceStress:
         """Test handling very large content"""
         # Add 10,000 lines
         for i in range(10000):
-            ui.agents['executor'].add_content(f"Line {i}")
+            ui.agents["executor"].add_content(f"Line {i}")
 
         # Should have truncated to max (100 by default)
-        assert len(ui.agents['executor'].content) <= 100
+        assert len(ui.agents["executor"].content) <= 100
 
     def test_many_file_operations(self, ui):
         """Test handling many file operations"""
         # Add 100 file operations
         for i in range(100):
-            ui.add_file_operation(f"file{i}.py", "modified", i, i//2)
+            ui.add_file_operation(f"file{i}.py", "modified", i, i // 2)
 
         # Should still render
         ui.refresh_display()
@@ -427,6 +412,7 @@ class TestPerformanceStress:
 # ============================================================================
 # CHAOS TESTS - Random Failures & Edge Cases
 # ============================================================================
+
 
 class TestChaosEngineering:
     """Chaos tests - random failures, race conditions, edge cases"""
@@ -452,17 +438,13 @@ class TestChaosEngineering:
                 await asyncio.sleep(0.001)
 
         # Run all concurrently
-        await asyncio.gather(
-            update_executor(),
-            update_planner(),
-            update_files()
-        )
+        await asyncio.gather(update_executor(), update_planner(), update_files())
 
         ui.stop()
 
         # All updates should have been processed (may be truncated)
-        assert len(ui.agents['executor'].content) > 0
-        assert len(ui.agents['planner'].content) > 0
+        assert len(ui.agents["executor"].content) > 0
+        assert len(ui.agents["planner"].content) > 0
         assert len(ui.file_ops.operations) > 0
 
     @pytest.mark.asyncio
@@ -480,10 +462,10 @@ class TestChaosEngineering:
     def test_invalid_agent_name(self, ui):
         """Test marking invalid agent as done"""
         # Should not crash
-        ui.mark_agent_done('nonexistent_agent')
+        ui.mark_agent_done("nonexistent_agent")
 
         # Should not have added agent
-        assert 'nonexistent_agent' not in ui.agents
+        assert "nonexistent_agent" not in ui.agents
 
     @pytest.mark.asyncio
     async def test_empty_string_updates(self, ui):
@@ -533,6 +515,7 @@ class TestChaosEngineering:
 # MEMORY LEAK TESTS
 # ============================================================================
 
+
 class TestMemoryLeaks:
     """Test for memory leaks in long-running scenarios"""
 
@@ -558,7 +541,7 @@ class TestMemoryLeaks:
         ui.stop()
 
         # Compare memory
-        top_stats = snapshot2.compare_to(snapshot1, 'lineno')
+        top_stats = snapshot2.compare_to(snapshot1, "lineno")
 
         # Total memory increase should be reasonable
         total_increase = sum(stat.size_diff for stat in top_stats)
@@ -572,15 +555,16 @@ class TestMemoryLeaks:
         """Test content lists are managed properly"""
         # Add 10,000 messages
         for i in range(10000):
-            ui.agents['executor'].add_content(f"Message {i}")
+            ui.agents["executor"].add_content(f"Message {i}")
 
         # Should have truncated automatically
-        assert len(ui.agents['executor'].content) <= 100
+        assert len(ui.agents["executor"].content) <= 100
 
 
 # ============================================================================
 # EDGE CASES - Boundary Conditions
 # ============================================================================
+
 
 class TestEdgeCases:
     """Test edge cases and boundary conditions"""
@@ -620,7 +604,7 @@ class TestEdgeCases:
             success_rate=999999.99,
             tokens_used=2**31 - 1,  # Max int
             saved_money=1e10,
-            latency_ms=0
+            latency_ms=0,
         )
 
         ui.refresh_display()
@@ -632,10 +616,13 @@ class TestEdgeCases:
 # ============================================================================
 
 if __name__ == "__main__":
-    pytest.main([
-        __file__,
-        "-v",
-        "-s",
-        "--tb=short",
-        "-m", "not integration",
-    ])
+    pytest.main(
+        [
+            __file__,
+            "-v",
+            "-s",
+            "--tb=short",
+            "-m",
+            "not integration",
+        ]
+    )

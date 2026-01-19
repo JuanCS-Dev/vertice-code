@@ -20,6 +20,7 @@ from unittest.mock import patch
 # TESTE 1: GRACEFUL DEGRADATION
 # =============================================================================
 
+
 class TestGracefulDegradation:
     """Testa que o sistema degrada graciosamente."""
 
@@ -27,10 +28,7 @@ class TestGracefulDegradation:
         """ToolResult de erro deve ter mensagem clara."""
         from vertice_cli.tools.base import ToolResult
 
-        error_result = ToolResult(
-            success=False,
-            error="File not found: /path/to/file.txt"
-        )
+        error_result = ToolResult(success=False, error="File not found: /path/to/file.txt")
 
         # Deve ter informação útil
         assert error_result.error is not None
@@ -44,7 +42,7 @@ class TestGracefulDegradation:
         error_response = AgentResponse(
             success=False,
             reasoning="Failed to execute because X happened",
-            error="Detailed: X caused Y which resulted in Z"
+            error="Detailed: X caused Y which resulted in Z",
         )
 
         # Deve ter explicação
@@ -64,7 +62,7 @@ class TestGracefulDegradation:
             await asyncio.sleep(10)  # Simula resposta lenta
             return "response"
 
-        with patch.object(client, 'generate', slow_response):
+        with patch.object(client, "generate", slow_response):
             # Deve ter timeout interno ou permitir cancelamento
             try:
                 task = asyncio.create_task(client.generate("test"))
@@ -83,6 +81,7 @@ class TestGracefulDegradation:
 # TESTE 2: ERROR MESSAGE QUALITY
 # =============================================================================
 
+
 class TestErrorMessageQuality:
     """Testa que mensagens de erro são úteis."""
 
@@ -96,8 +95,9 @@ class TestErrorMessageQuality:
             # Deve ter erros descritivos
             assert result.errors
             # Pelo menos um erro deve ser descritivo
-            assert any(len(e) > 10 for e in result.errors), \
-                f"Errors not descriptive: {result.errors}"
+            assert any(
+                len(e) > 10 for e in result.errors
+            ), f"Errors not descriptive: {result.errors}"
 
     def test_tool_error_includes_context(self):
         """Erro de tool deve incluir contexto."""
@@ -107,7 +107,7 @@ class TestErrorMessageQuality:
         error = ToolResult(
             success=False,
             error="FileNotFoundError: [Errno 2] No such file: 'missing.txt'",
-            metadata={"path": "missing.txt", "operation": "read"}
+            metadata={"path": "missing.txt", "operation": "read"},
         )
 
         # Deve ter o nome do arquivo
@@ -121,18 +121,21 @@ class TestErrorMessageQuality:
         response = AgentResponse(
             success=False,
             reasoning="Task failed: API rate limit exceeded. Wait 60 seconds and retry.",
-            error="Rate limit exceeded"
+            error="Rate limit exceeded",
         )
 
         # Deve ter sugestão de ação
-        assert "retry" in response.reasoning.lower() or \
-               "wait" in response.reasoning.lower() or \
-               "try" in response.reasoning.lower()
+        assert (
+            "retry" in response.reasoning.lower()
+            or "wait" in response.reasoning.lower()
+            or "try" in response.reasoning.lower()
+        )
 
 
 # =============================================================================
 # TESTE 3: RECOVERY FROM FAILURES
 # =============================================================================
+
 
 class TestRecoveryFromFailures:
     """Testa recuperação de falhas."""
@@ -147,7 +150,7 @@ class TestRecoveryFromFailures:
         # Registry não deve crashar
         try:
             # Se tem método de registro
-            if hasattr(registry, 'register'):
+            if hasattr(registry, "register"):
                 # Tenta registrar None ou objeto inválido
                 registry.register(None)
         except (TypeError, ValueError, AttributeError):
@@ -174,6 +177,7 @@ class TestRecoveryFromFailures:
 # =============================================================================
 # TESTE 4: EDGE CASES
 # =============================================================================
+
 
 class TestEdgeCases:
     """Testa edge cases que podem causar problemas."""
@@ -209,19 +213,22 @@ class TestEdgeCases:
 
         # Não deve travar ou levar muito tempo
         import time
+
         start = time.time()
 
         try:
-            result = validator.validate(long_input, "text")
+            validator.validate(long_input, "text")
             elapsed = time.time() - start
 
             # Deve completar em menos de 5 segundos
             assert elapsed < 5, f"Validation took too long: {elapsed}s"
         except Exception as e:
             # Se falhar, deve ser erro claro
-            assert "too long" in str(e).lower() or \
-                   "size" in str(e).lower() or \
-                   "maximum" in str(e).lower()
+            assert (
+                "too long" in str(e).lower()
+                or "size" in str(e).lower()
+                or "maximum" in str(e).lower()
+            )
 
     def test_special_characters_in_command(self):
         """Caracteres especiais em comando não devem crashar."""
@@ -253,17 +260,14 @@ class TestEdgeCases:
         assert result.success is True
 
         # AgentResponse com dados vazios
-        response = AgentResponse(
-            success=True,
-            data={},
-            reasoning=""
-        )
+        response = AgentResponse(success=True, data={}, reasoning="")
         assert response.success is True
 
 
 # =============================================================================
 # TESTE 5: CONCURRENT OPERATIONS
 # =============================================================================
+
 
 class TestConcurrentOperations:
     """Testa operações concorrentes."""
@@ -325,6 +329,7 @@ class TestConcurrentOperations:
 # SMOKE TEST DE RESILIÊNCIA
 # =============================================================================
 
+
 class TestResilienceSmokeTest:
     """Smoke test de resiliência."""
 
@@ -352,9 +357,9 @@ class TestResilienceSmokeTest:
 
         # Criar múltiplos objetos
         for i in range(100):
-            task = AgentTask(request=f"task {i}", session_id="test")
-            result = ToolResult(success=True, data=i)
-            response = AgentResponse(success=True, data={"i": i})
+            AgentTask(request=f"task {i}", session_id="test")
+            ToolResult(success=True, data=i)
+            AgentResponse(success=True, data={"i": i})
 
         # Se chegou aqui, não teve side effects problemáticos
         assert True

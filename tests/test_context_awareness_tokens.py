@@ -5,10 +5,7 @@ Real-time token usage and optimization tests
 
 import pytest
 from datetime import datetime
-from vertice_cli.tui.components.context_awareness import (
-    ContextAwarenessEngine,
-    TokenUsageSnapshot
-)
+from vertice_cli.tui.components.context_awareness import ContextAwarenessEngine, TokenUsageSnapshot
 
 
 class TestTokenTracking:
@@ -25,7 +22,7 @@ class TestTokenTracking:
             total_tokens=1500,
             input_tokens=1000,
             output_tokens=500,
-            cost_estimate_usd=0.0025
+            cost_estimate_usd=0.0025,
         )
 
         assert snapshot.input_tokens == 1000
@@ -37,9 +34,7 @@ class TestTokenTracking:
         """Test: Snapshots are added to context window history"""
         # Add snapshot
         self.engine.window.add_token_snapshot(
-            input_tokens=1000,
-            output_tokens=500,
-            cost_estimate=0.002
+            input_tokens=1000, output_tokens=500, cost_estimate=0.002
         )
 
         # Verify
@@ -66,9 +61,7 @@ class TestTokenTracking:
 
         # Finalize (resets streaming counter)
         self.engine.finalize_streaming_session(
-            final_input_tokens=1000,
-            final_output_tokens=15,
-            cost_estimate=0.001
+            final_input_tokens=1000, final_output_tokens=15, cost_estimate=0.001
         )
 
         assert self.engine.window.streaming_tokens == 0
@@ -80,9 +73,7 @@ class TestTokenTracking:
         # Add 150 snapshots
         for i in range(150):
             self.engine.window.add_token_snapshot(
-                input_tokens=100 * i,
-                output_tokens=50 * i,
-                cost_estimate=0.001 * i
+                input_tokens=100 * i, output_tokens=50 * i, cost_estimate=0.001 * i
             )
 
         # Should only keep last 100
@@ -136,9 +127,7 @@ class TestTokenTracking:
 
         for cost in costs:
             self.engine.window.add_token_snapshot(
-                input_tokens=1000,
-                output_tokens=500,
-                cost_estimate=cost
+                input_tokens=1000, output_tokens=500, cost_estimate=cost
             )
 
         # Calculate total cost
@@ -172,7 +161,7 @@ class TestTokenTracking:
         self.engine.finalize_streaming_session(
             final_input_tokens=input_tokens,
             final_output_tokens=final_output_tokens,
-            cost_estimate=cost
+            cost_estimate=cost,
         )
 
         # Verify final state

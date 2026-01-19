@@ -32,9 +32,14 @@ class TestSingleShotExecutor:
         # Check essential tools exist
         tool_names = set(tools.keys())
         essential_tools = {
-            'read_file', 'write_file', 'edit_file',
-            'list_directory', 'search_files',
-            'bash_command', 'git_status', 'git_diff'
+            "read_file",
+            "write_file",
+            "edit_file",
+            "list_directory",
+            "search_files",
+            "bash_command",
+            "git_status",
+            "git_diff",
         }
 
         # At least some essential tools should be registered
@@ -45,10 +50,10 @@ class TestSingleShotExecutor:
         executor = SingleShotExecutor()
         context = executor._build_context()
 
-        assert 'cwd' in context
-        assert 'project_structure' in context
-        assert isinstance(context['cwd'], str)
-        assert len(context['cwd']) > 0
+        assert "cwd" in context
+        assert "project_structure" in context
+        assert isinstance(context["cwd"], str)
+        assert len(context["cwd"]) > 0
 
     def test_parse_tool_calls_valid(self):
         """Test parsing valid tool calls."""
@@ -59,8 +64,8 @@ class TestSingleShotExecutor:
 
         assert isinstance(tool_calls, list)
         assert len(tool_calls) == 1
-        assert tool_calls[0]['tool'] == 'readfile'
-        assert tool_calls[0]['args']['path'] == 'test.py'
+        assert tool_calls[0]["tool"] == "readfile"
+        assert tool_calls[0]["args"]["path"] == "test.py"
 
     def test_parse_tool_calls_with_text(self):
         """Test parsing tool calls embedded in text."""
@@ -71,13 +76,13 @@ class TestSingleShotExecutor:
 
         assert isinstance(tool_calls, list)
         assert len(tool_calls) == 1
-        assert tool_calls[0]['tool'] == 'gitstatus'
+        assert tool_calls[0]["tool"] == "gitstatus"
 
     def test_parse_tool_calls_no_tools(self):
         """Test parsing response without tool calls."""
         executor = SingleShotExecutor()
 
-        response = 'This is just a plain text response without any tool calls.'
+        response = "This is just a plain text response without any tool calls."
         tool_calls = executor._parse_tool_calls(response)
 
         assert isinstance(tool_calls, list)
@@ -88,33 +93,33 @@ class TestSingleShotExecutor:
         executor = SingleShotExecutor()
 
         results = [
-            {'success': True, 'tool': 'readfile', 'output': 'content here'},
-            {'success': True, 'tool': 'gitstatus', 'output': 'clean'}
+            {"success": True, "tool": "readfile", "output": "content here"},
+            {"success": True, "tool": "gitstatus", "output": "clean"},
         ]
 
         formatted = executor._format_results(results)
 
-        assert formatted['success'] is True
-        assert len(formatted['actions_taken']) == 2
-        assert len(formatted['errors']) == 0
-        assert 'readfile' in formatted['output']
-        assert 'gitstatus' in formatted['output']
+        assert formatted["success"] is True
+        assert len(formatted["actions_taken"]) == 2
+        assert len(formatted["errors"]) == 0
+        assert "readfile" in formatted["output"]
+        assert "gitstatus" in formatted["output"]
 
     def test_format_results_with_errors(self):
         """Test formatting results with errors."""
         executor = SingleShotExecutor()
 
         results = [
-            {'success': True, 'tool': 'readfile', 'output': 'content'},
-            {'success': False, 'tool': 'writefile', 'error': 'Permission denied'}
+            {"success": True, "tool": "readfile", "output": "content"},
+            {"success": False, "tool": "writefile", "error": "Permission denied"},
         ]
 
         formatted = executor._format_results(results)
 
-        assert formatted['success'] is False
-        assert len(formatted['actions_taken']) == 2
-        assert len(formatted['errors']) == 1
-        assert 'Permission denied' in formatted['errors'][0]
+        assert formatted["success"] is False
+        assert len(formatted["actions_taken"]) == 2
+        assert len(formatted["errors"]) == 1
+        assert "Permission denied" in formatted["errors"][0]
 
     @pytest.mark.asyncio
     async def test_execute_simple_request(self):
@@ -158,12 +163,7 @@ class TestCLINonInteractive:
 
     def test_chat_json_output_format(self):
         """Test JSON output format."""
-        result = runner.invoke(app, [
-            "chat",
-            "--message", "test",
-            "--json",
-            "--no-context"
-        ])
+        result = runner.invoke(app, ["chat", "--message", "test", "--json", "--no-context"])
 
         # Should attempt to produce JSON (even if LLM fails)
         # Check command doesn't crash
@@ -171,16 +171,13 @@ class TestCLINonInteractive:
 
     def test_chat_output_to_file(self):
         """Test saving output to file."""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
             output_path = f.name
 
         try:
-            result = runner.invoke(app, [
-                "chat",
-                "--message", "hello",
-                "--output", output_path,
-                "--no-context"
-            ])
+            runner.invoke(
+                app, ["chat", "--message", "hello", "--output", output_path, "--no-context"]
+            )
 
             # File should be created (even if content is error message)
             assert Path(output_path).exists()
@@ -192,11 +189,7 @@ class TestCLINonInteractive:
 
     def test_chat_no_context_flag(self):
         """Test --no-context flag."""
-        result = runner.invoke(app, [
-            "chat",
-            "--message", "test",
-            "--no-context"
-        ])
+        result = runner.invoke(app, ["chat", "--message", "test", "--no-context"])
 
         # Should not crash
         assert result.exit_code in [0, 1]
@@ -209,19 +202,14 @@ class TestExecuteSingleShot:
     async def test_execute_returns_dict(self):
         """Test execute_single_shot returns proper structure."""
         # Mock test - doesn't actually call LLM
-        result = {
-            'success': True,
-            'output': 'test',
-            'actions_taken': [],
-            'errors': []
-        }
+        result = {"success": True, "output": "test", "actions_taken": [], "errors": []}
 
         # Verify structure
         assert isinstance(result, dict)
-        assert 'success' in result
-        assert 'output' in result
-        assert 'actions_taken' in result
-        assert 'errors' in result
+        assert "success" in result
+        assert "output" in result
+        assert "actions_taken" in result
+        assert "errors" in result
 
     @pytest.mark.asyncio
     async def test_execute_with_context(self):
@@ -243,22 +231,15 @@ class TestNonInteractiveIntegration:
     async def test_real_single_shot_execution(self):
         """Test real single-shot execution with LLM."""
         # Requires valid API credentials
-        result = await execute_single_shot(
-            "What is 2+2?",
-            include_context=False
-        )
+        result = await execute_single_shot("What is 2+2?", include_context=False)
 
-        assert result['success'] is True
-        assert len(result['output']) > 0
+        assert result["success"] is True
+        assert len(result["output"]) > 0
 
     @pytest.mark.integration
     def test_real_cli_single_message(self):
         """Test real CLI single message."""
-        result = runner.invoke(app, [
-            "chat",
-            "--message", "What is Python?",
-            "--no-context"
-        ])
+        result = runner.invoke(app, ["chat", "--message", "What is Python?", "--no-context"])
 
         # Should succeed with valid API key
         assert result.exit_code == 0
@@ -267,16 +248,20 @@ class TestNonInteractiveIntegration:
     @pytest.mark.integration
     def test_real_cli_with_json_output(self):
         """Test real CLI with JSON output."""
-        result = runner.invoke(app, [
-            "chat",
-            "--message", "say hello",  # Simple message for cleaner JSON
-            "--json",
-            "--no-context"
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "chat",
+                "--message",
+                "say hello",  # Simple message for cleaner JSON
+                "--json",
+                "--no-context",
+            ],
+        )
 
         # Should succeed or fail gracefully
         assert result.exit_code in [0, 1]
 
         # Should have JSON-like structure in output
-        assert '{' in result.output
+        assert "{" in result.output
         assert '"success"' in result.output or '"error"' in result.output

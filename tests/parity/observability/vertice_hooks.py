@@ -55,6 +55,7 @@ class VerticeHookedClient:
         except Exception as e:
             print(f"Initialization error: {e}")
             import traceback
+
             traceback.print_exc()
             return False
 
@@ -64,28 +65,28 @@ class VerticeHookedClient:
             return
 
         # Hook into agent router if available
-        if hasattr(self.bridge, 'agent_manager'):
+        if hasattr(self.bridge, "agent_manager"):
             self._hook_agent_router()
 
         # Hook into chat controller if available
-        if hasattr(self.bridge, 'chat_controller'):
+        if hasattr(self.bridge, "chat_controller"):
             self._hook_chat_controller()
 
         # Hook into tool executor if available
-        if hasattr(self.bridge, 'tool_bridge'):
+        if hasattr(self.bridge, "tool_bridge"):
             self._hook_tool_bridge()
 
     def _hook_agent_router(self):
         """Hook into agent routing."""
-        if hasattr(self.bridge.agent_manager, 'route'):
+        if hasattr(self.bridge.agent_manager, "route"):
             original = self.bridge.agent_manager.route
-            self.original_methods['route'] = original
+            self.original_methods["route"] = original
 
             @functools.wraps(original)
             async def hooked_route(message: str, *args, **kwargs):
                 start = time.time()
                 result = await original(message, *args, **kwargs)
-                duration = (time.time() - start) * 1000
+                (time.time() - start) * 1000
 
                 # Observe
                 agent_id, confidence = result if isinstance(result, tuple) else (result, 0.8)
@@ -107,16 +108,16 @@ class VerticeHookedClient:
 
     def _hook_tool_bridge(self):
         """Hook into tool execution."""
-        if hasattr(self.bridge.tool_bridge, 'execute'):
+        if hasattr(self.bridge.tool_bridge, "execute"):
             original = self.bridge.tool_bridge.execute
-            self.original_methods['tool_execute'] = original
+            self.original_methods["tool_execute"] = original
 
             @functools.wraps(original)
             async def hooked_execute(tool_name: str, args: Dict, *a, **kw):
                 start = time.time()
                 try:
                     result = await original(tool_name, args, *a, **kw)
-                    duration = (time.time() - start) * 1000
+                    (time.time() - start) * 1000
 
                     self.observer.observe_tool_execution(
                         tool_name=tool_name,
@@ -138,11 +139,7 @@ class VerticeHookedClient:
 
             self.bridge.tool_bridge.execute = hooked_execute
 
-    async def process_with_observation(
-        self,
-        prompt: str,
-        verbose: bool = True
-    ) -> Dict[str, Any]:
+    async def process_with_observation(self, prompt: str, verbose: bool = True) -> Dict[str, Any]:
         """
         Process a prompt with full pipeline observation.
 
@@ -186,12 +183,12 @@ class VerticeHookedClient:
                 chunk_count += 1
 
                 # Extract content
-                if hasattr(chunk, 'content'):
+                if hasattr(chunk, "content"):
                     content = chunk.content
                 elif isinstance(chunk, str):
                     content = chunk
                 elif isinstance(chunk, dict):
-                    content = chunk.get('content', '')
+                    content = chunk.get("content", "")
                 else:
                     content = str(chunk)
 
@@ -206,7 +203,7 @@ class VerticeHookedClient:
                 )
 
                 # Check for thinking markers
-                if '<thinking>' in content.lower() or 'thinking:' in content.lower():
+                if "<thinking>" in content.lower() or "thinking:" in content.lower():
                     self.observer.observe_thinking_start(content[:100])
 
                 # Check for tool calls
@@ -245,15 +242,15 @@ class VerticeHookedClient:
             "raw": prompt,
             "length": len(prompt),
             "words": len(prompt.split()),
-            "has_code": '```' in prompt,
-            "has_question": '?' in prompt,
-            "lines": len(prompt.split('\n')),
+            "has_code": "```" in prompt,
+            "has_question": "?" in prompt,
+            "lines": len(prompt.split("\n")),
         }
 
     async def _classify_intent(self, prompt: str) -> tuple:
         """Classify intent using the router if available."""
         try:
-            if hasattr(self.bridge, 'agent_manager'):
+            if hasattr(self.bridge, "agent_manager"):
                 result = await self.bridge.agent_manager.route(prompt)
                 if isinstance(result, tuple):
                     return result
@@ -263,56 +260,56 @@ class VerticeHookedClient:
 
         # Fallback: simple keyword-based
         prompt_lower = prompt.lower()
-        if any(w in prompt_lower for w in ['plan', 'design', 'architect']):
-            return ('planner', 0.7)
-        elif any(w in prompt_lower for w in ['review', 'check', 'analyze']):
-            return ('reviewer', 0.7)
-        elif any(w in prompt_lower for w in ['fix', 'debug', 'error']):
-            return ('debugger', 0.7)
+        if any(w in prompt_lower for w in ["plan", "design", "architect"]):
+            return ("planner", 0.7)
+        elif any(w in prompt_lower for w in ["review", "check", "analyze"]):
+            return ("reviewer", 0.7)
+        elif any(w in prompt_lower for w in ["fix", "debug", "error"]):
+            return ("debugger", 0.7)
         else:
-            return ('coder', 0.6)
+            return ("coder", 0.6)
 
     def _detect_chunk_type(self, chunk: Any) -> str:
         """Detect the type of streaming chunk."""
-        if hasattr(chunk, 'tool_call'):
-            return 'tool_call'
-        if hasattr(chunk, 'thinking'):
-            return 'thinking'
+        if hasattr(chunk, "tool_call"):
+            return "tool_call"
+        if hasattr(chunk, "thinking"):
+            return "thinking"
         if isinstance(chunk, dict):
-            if 'tool_call' in chunk:
-                return 'tool_call'
-            if 'thinking' in chunk:
-                return 'thinking'
-        return 'text'
+            if "tool_call" in chunk:
+                return "tool_call"
+            if "thinking" in chunk:
+                return "thinking"
+        return "text"
 
     def _is_tool_call(self, chunk: Any) -> bool:
         """Check if chunk represents a tool call."""
-        if hasattr(chunk, 'tool_call'):
+        if hasattr(chunk, "tool_call"):
             return True
-        if isinstance(chunk, dict) and 'tool_call' in chunk:
+        if isinstance(chunk, dict) and "tool_call" in chunk:
             return True
         return False
 
     def _extract_tool_info(self, chunk: Any) -> Dict:
         """Extract tool information from chunk."""
-        if hasattr(chunk, 'tool_call'):
+        if hasattr(chunk, "tool_call"):
             tc = chunk.tool_call
             return {
-                'name': getattr(tc, 'name', 'unknown'),
-                'args': getattr(tc, 'args', {}),
+                "name": getattr(tc, "name", "unknown"),
+                "args": getattr(tc, "args", {}),
             }
-        if isinstance(chunk, dict) and 'tool_call' in chunk:
-            return chunk['tool_call']
-        return {'name': 'unknown', 'args': {}}
+        if isinstance(chunk, dict) and "tool_call" in chunk:
+            return chunk["tool_call"]
+        return {"name": "unknown", "args": {}}
 
     async def cleanup(self):
         """Cleanup and restore original methods."""
         # Restore original methods
         if self.bridge:
-            if hasattr(self.bridge, 'agent_manager') and 'route' in self.original_methods:
-                self.bridge.agent_manager.route = self.original_methods['route']
-            if hasattr(self.bridge, 'tool_bridge') and 'tool_execute' in self.original_methods:
-                self.bridge.tool_bridge.execute = self.original_methods['tool_execute']
+            if hasattr(self.bridge, "agent_manager") and "route" in self.original_methods:
+                self.bridge.agent_manager.route = self.original_methods["route"]
+            if hasattr(self.bridge, "tool_bridge") and "tool_execute" in self.original_methods:
+                self.bridge.tool_bridge.execute = self.original_methods["tool_execute"]
 
             try:
                 await self.bridge.shutdown()
@@ -339,7 +336,11 @@ class LivePipelineMonitor:
     def _live_update(self, observation):
         """Print live update for an observation."""
         status = "✓" if observation.success else "✗"
-        stage_name = observation.stage.value.split('_', 1)[1] if '_' in observation.stage.value else observation.stage.value
+        stage_name = (
+            observation.stage.value.split("_", 1)[1]
+            if "_" in observation.stage.value
+            else observation.stage.value
+        )
 
         # Color coding
         if observation.success:
@@ -357,12 +358,14 @@ class LivePipelineMonitor:
         if observation.stage == PipelineStage.INTENT_CLASSIFIED:
             data = observation.output_data
             if isinstance(data, dict):
-                print(f"      └─ Intent: {data.get('intent')} (confidence: {data.get('confidence', 0):.1%})")
+                print(
+                    f"      └─ Intent: {data.get('intent')} (confidence: {data.get('confidence', 0):.1%})"
+                )
 
         elif observation.stage == PipelineStage.TASKS_DECOMPOSED:
             data = observation.output_data
             if isinstance(data, dict):
-                count = data.get('task_count', 0)
+                count = data.get("task_count", 0)
                 print(f"      └─ Tasks generated: {count}")
 
         elif observation.stage == PipelineStage.TOOL_EXECUTED:
@@ -388,7 +391,7 @@ async def run_observed_test(prompt: str, verbose: bool = True) -> Dict:
         return {"error": "Failed to initialize"}
 
     # Install live monitor
-    monitor = LivePipelineMonitor(client.observer)
+    LivePipelineMonitor(client.observer)
 
     print("\n" + "=" * 70)
     print("OBSERVED PIPELINE EXECUTION")

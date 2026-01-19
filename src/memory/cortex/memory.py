@@ -40,15 +40,19 @@ logger = logging.getLogger(__name__)
 # Try to import LanceDB (optional for now)
 try:
     import lancedb
+
     LANCEDB_AVAILABLE = True
 except ImportError:
     LANCEDB_AVAILABLE = False
-    logger.warning("LanceDB not installed. Vector search disabled. Install with: pip install lancedb")
+    logger.warning(
+        "LanceDB not installed. Vector search disabled. Install with: pip install lancedb"
+    )
 
 
 @dataclass
 class Memory:
     """A single memory entry."""
+
     id: str
     content: str
     memory_type: str  # working, episodic, semantic, procedural, meta, social
@@ -62,6 +66,7 @@ class Memory:
 @dataclass
 class Contribution:
     """Track agent contributions for economy system."""
+
     id: str
     agent_id: str
     contribution_type: str  # code_commit, code_review, task_completion, etc.
@@ -135,7 +140,8 @@ class EpisodicMemory:
     def _init_db(self):
         """Initialize SQLite database."""
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS episodes (
                     id TEXT PRIMARY KEY,
                     session_id TEXT,
@@ -145,7 +151,8 @@ class EpisodicMemory:
                     metadata TEXT,
                     timestamp TEXT
                 )
-            """)
+            """
+            )
             conn.execute("CREATE INDEX IF NOT EXISTS idx_session ON episodes(session_id)")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_agent ON episodes(agent_id)")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_timestamp ON episodes(timestamp)")
@@ -160,6 +167,7 @@ class EpisodicMemory:
     ) -> str:
         """Record an episode."""
         import uuid
+
         episode_id = str(uuid.uuid4())
 
         with sqlite3.connect(self.db_path) as conn:
@@ -175,7 +183,7 @@ class EpisodicMemory:
                     content,
                     json.dumps(metadata or {}),
                     datetime.now().isoformat(),
-                )
+                ),
             )
 
         return episode_id
@@ -185,8 +193,7 @@ class EpisodicMemory:
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             rows = conn.execute(
-                "SELECT * FROM episodes WHERE session_id = ? ORDER BY timestamp",
-                (session_id,)
+                "SELECT * FROM episodes WHERE session_id = ? ORDER BY timestamp", (session_id,)
             ).fetchall()
 
             return [dict(row) for row in rows]
@@ -218,7 +225,7 @@ class EpisodicMemory:
             conn.row_factory = sqlite3.Row
             rows = conn.execute(
                 f"SELECT * FROM episodes WHERE {where_clause} ORDER BY timestamp DESC LIMIT ?",
-                (*params, limit)
+                (*params, limit),
             ).fetchall()
 
             return [dict(row) for row in rows]
@@ -255,10 +262,12 @@ class SemanticMemory:
         """Initialize SQLite FTS as fallback."""
         fallback_path = self.db_path.parent / "semantic_fallback.db"
         with sqlite3.connect(fallback_path) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 CREATE VIRTUAL TABLE IF NOT EXISTS semantic_fts
                 USING fts5(id, content, category, metadata)
-            """)
+            """
+            )
         self._fallback_db = fallback_path
         logger.info("Using SQLite FTS fallback for semantic memory")
 
@@ -271,17 +280,20 @@ class SemanticMemory:
     ) -> str:
         """Store a fact or knowledge entry."""
         import uuid
+
         entry_id = str(uuid.uuid4())
 
         if self._lance_db and embedding:
             # Store in LanceDB with embedding
-            data = [{
-                "id": entry_id,
-                "content": content,
-                "category": category,
-                "metadata": json.dumps(metadata or {}),
-                "vector": embedding,
-            }]
+            data = [
+                {
+                    "id": entry_id,
+                    "content": content,
+                    "category": category,
+                    "metadata": json.dumps(metadata or {}),
+                    "vector": embedding,
+                }
+            ]
 
             table_name = "knowledge"
             if table_name in self._lance_db.table_names():
@@ -294,7 +306,7 @@ class SemanticMemory:
             with sqlite3.connect(self._fallback_db) as conn:
                 conn.execute(
                     "INSERT INTO semantic_fts VALUES (?, ?, ?, ?)",
-                    (entry_id, content, category, json.dumps(metadata or {}))
+                    (entry_id, content, category, json.dumps(metadata or {})),
                 )
 
         return entry_id
@@ -328,8 +340,7 @@ class SemanticMemory:
         with sqlite3.connect(self._fallback_db) as conn:
             conn.row_factory = sqlite3.Row
             rows = conn.execute(
-                "SELECT * FROM semantic_fts WHERE content MATCH ? LIMIT ?",
-                (query, limit)
+                "SELECT * FROM semantic_fts WHERE content MATCH ? LIMIT ?", (query, limit)
             ).fetchall()
 
             return [
@@ -392,7 +403,8 @@ class MemoryCortex:
     def _init_ledger(self):
         """Initialize contribution ledger."""
         with sqlite3.connect(self.base_path / "ledger.db") as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS contributions (
                     id TEXT PRIMARY KEY,
                     agent_id TEXT,
@@ -402,8 +414,10 @@ class MemoryCortex:
                     metadata TEXT,
                     timestamp TEXT
                 )
-            """)
-            conn.execute("""
+            """
+            )
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS reputation (
                     agent_id TEXT PRIMARY KEY,
                     total_contributions REAL DEFAULT 0,
@@ -412,7 +426,8 @@ class MemoryCortex:
                     quality_score REAL DEFAULT 0.5,
                     last_updated TEXT
                 )
-            """)
+            """
+            )
 
     def record_contribution(
         self,
@@ -439,7 +454,7 @@ class MemoryCortex:
                     task_id,
                     json.dumps(metadata or {}),
                     datetime.now().isoformat(),
-                )
+                ),
             )
 
             # Update reputation
@@ -455,7 +470,7 @@ class MemoryCortex:
                     datetime.now().isoformat(),
                     value,
                     datetime.now().isoformat(),
-                )
+                ),
             )
 
     def get_agent_reputation(self, agent_id: str) -> Dict:
@@ -463,8 +478,7 @@ class MemoryCortex:
         with sqlite3.connect(self.base_path / "ledger.db") as conn:
             conn.row_factory = sqlite3.Row
             row = conn.execute(
-                "SELECT * FROM reputation WHERE agent_id = ?",
-                (agent_id,)
+                "SELECT * FROM reputation WHERE agent_id = ?", (agent_id,)
             ).fetchone()
 
             if row:
@@ -639,7 +653,9 @@ class MemoryCortex:
         if "resource" in retrieved and retrieved["resource"]:
             parts.append("<resource_memory>")
             for res in retrieved["resource"][:3]:
-                parts.append(f"  [{res.get('resource_type', 'unknown')}] {res.get('title', '')}: {res.get('summary', '')[:100]}")
+                parts.append(
+                    f"  [{res.get('resource_type', 'unknown')}] {res.get('title', '')}: {res.get('summary', '')[:100]}"
+                )
             parts.append("</resource_memory>")
 
         parts.append("</memory_context>")

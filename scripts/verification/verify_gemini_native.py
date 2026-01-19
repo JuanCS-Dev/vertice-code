@@ -16,16 +16,13 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+
 async def verify_native_capabilities():
     print("🚀 Verifying Gemini Native Capabilities...")
 
     # 1. Initialize Provider with Code Execution
     print("\n[1] Initializing Provider...")
-    provider = GeminiProvider(
-        enable_code_execution=True,
-        enable_search=False,
-        enable_caching=True
-    )
+    provider = GeminiProvider(enable_code_execution=True, enable_search=False, enable_caching=True)
 
     if not provider.is_available():
         print("❌ Gemini API key not found or provider unavailable.")
@@ -56,7 +53,10 @@ async def verify_native_capabilities():
     print("   Prompt: 'Calculate the 50th Fibonacci number using Python code.'")
 
     messages = [
-        {"role": "user", "content": "Calculate the 50th Fibonacci number using Python code. Show me the code and the result."}
+        {
+            "role": "user",
+            "content": "Calculate the 50th Fibonacci number using Python code. Show me the code and the result.",
+        }
     ]
 
     print("   Streaming Response:")
@@ -71,12 +71,13 @@ async def verify_native_capabilities():
         print("\n   " + "-" * 40)
 
         if "12586269025" in full_response:
-             print("✅ Correct Result Found (12586269025)")
+            print("✅ Correct Result Found (12586269025)")
         else:
-             print("⚠️ Result not explicitly found (Check output)")
+            print("⚠️ Result not explicitly found (Check output)")
 
     except Exception as e:
         print(f"❌ Streaming Failed: {e}")
+
 
 if __name__ == "__main__":
     asyncio.run(verify_native_capabilities())

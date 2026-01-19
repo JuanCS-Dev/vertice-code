@@ -10,12 +10,7 @@ import tempfile
 import shutil
 from pathlib import Path
 
-from vertice_cli.hooks import (
-    HookExecutor,
-    HookEvent,
-    HookContext,
-    SafeCommandWhitelist
-)
+from vertice_cli.hooks import HookExecutor, HookEvent, HookContext, SafeCommandWhitelist
 
 
 class TestEdgeCasesScientific:
@@ -144,10 +139,7 @@ class TestEdgeCasesScientific:
         hook = "echo {file_name}"
 
         # Execute all concurrently
-        tasks = [
-            executor.execute_hook(HookEvent.POST_WRITE, ctx, hook)
-            for ctx in contexts
-        ]
+        tasks = [executor.execute_hook(HookEvent.POST_WRITE, ctx, hook) for ctx in contexts]
         results = await asyncio.gather(*tasks)
 
         assert len(results) == 10
@@ -256,7 +248,7 @@ class TestEdgeCasesScientific:
             "black --line-length=100 test.py",
             "pytest -v -s --tb=short",
             "ruff check . --fix",
-            "mypy --strict src/"
+            "mypy --strict src/",
         ]
 
         for cmd in commands:
@@ -280,8 +272,9 @@ class TestEdgeCasesScientific:
         for cmd, expected_pattern in dangerous:
             is_safe, reason = SafeCommandWhitelist.is_safe(cmd)
             assert not is_safe, f"Command should be dangerous: {cmd}"
-            assert expected_pattern.lower() in reason.lower(), \
-                f"Expected '{expected_pattern}' in reason, got: {reason}"
+            assert (
+                expected_pattern.lower() in reason.lower()
+            ), f"Expected '{expected_pattern}' in reason, got: {reason}"
 
     # ========== CONTEXT EDGE CASES ==========
 
@@ -289,9 +282,7 @@ class TestEdgeCasesScientific:
         """Test context handles both path types."""
         abs_path = Path("/home/user/project/src/test.py")
         ctx = HookContext(
-            file_path=abs_path,
-            event_name="post_write",
-            cwd=Path("/home/user/project")
+            file_path=abs_path, event_name="post_write", cwd=Path("/home/user/project")
         )
 
         assert ctx.file == "/home/user/project/src/test.py"
@@ -301,16 +292,21 @@ class TestEdgeCasesScientific:
     def test_context_variables_all_present(self):
         """Test all expected variables are present."""
         ctx = HookContext(
-            file_path=Path("src/utils/helper.py"),
-            event_name="post_write",
-            project_name="test-proj"
+            file_path=Path("src/utils/helper.py"), event_name="post_write", project_name="test-proj"
         )
 
         variables = ctx.get_variables()
 
         expected_vars = [
-            "file", "file_name", "file_stem", "file_extension",
-            "dir", "relative_path", "cwd", "project_name", "event"
+            "file",
+            "file_name",
+            "file_stem",
+            "file_extension",
+            "dir",
+            "relative_path",
+            "cwd",
+            "project_name",
+            "event",
         ]
 
         for var in expected_vars:
@@ -336,10 +332,10 @@ class TestEdgeCasesScientific:
 
         stats = executor.get_stats()
 
-        assert stats['total_executions'] == 4
-        assert stats['direct_executions'] == 4  # All are safe (echo + python)
-        assert stats['failed_executions'] == 1
-        assert stats['success_rate'] == 75.0
+        assert stats["total_executions"] == 4
+        assert stats["direct_executions"] == 4  # All are safe (echo + python)
+        assert stats["failed_executions"] == 1
+        assert stats["success_rate"] == 75.0
 
     # ========== FILE SYSTEM EDGE CASES ==========
 
@@ -382,11 +378,7 @@ class TestEdgeCasesScientific:
         ctx = HookContext(
             file_path=Path("test.py"),
             event_name="post_write",
-            metadata={
-                "custom1": "value1",
-                "custom2": "value2",
-                "number": "123"
-            }
+            metadata={"custom1": "value1", "custom2": "value2", "number": "123"},
         )
 
         hook = "echo {custom1} {custom2} {number}"
@@ -409,10 +401,7 @@ class TestEdgeCasesScientific:
         contexts = [HookContext(f, "post_write", cwd=temp_dir) for f in files]
         hook = "echo ok"
 
-        tasks = [
-            executor.execute_hook(HookEvent.POST_WRITE, ctx, hook)
-            for ctx in contexts
-        ]
+        tasks = [executor.execute_hook(HookEvent.POST_WRITE, ctx, hook) for ctx in contexts]
 
         results = await asyncio.gather(*tasks)
 

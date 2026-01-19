@@ -10,7 +10,7 @@ Demonstrates:
 - Smart suggestions
 - Biblical wisdom loading messages
 
-"For I know the plans I have for you, declares the Lord, plans for welfare 
+"For I know the plans I have for you, declares the Lord, plans for welfare
 and not for evil, to give you a future and a hope."
 - Jeremiah 29:11
 
@@ -36,7 +36,7 @@ from vertice_cli.tui.components import (
     create_file_pill,
     create_function_pill,
     create_tool_pill,
-    create_completer
+    create_completer,
 )
 from vertice_cli.tui.biblical_wisdom import get_random_wisdom
 
@@ -47,12 +47,7 @@ async def demo_file_tree(console: Console):
     console.print(f"[dim {COLORS['muted']}]VSCode/Cursor-style collapsible file explorer[/]\n")
 
     # Create file tree
-    tree = FileTree(
-        root_path=Path.cwd(),
-        console=console,
-        max_depth=2,
-        show_hidden=False
-    )
+    tree = FileTree(root_path=Path.cwd(), console=console, max_depth=2, show_hidden=False)
     tree.build_tree()
 
     # Expand some directories
@@ -107,20 +102,12 @@ async def demo_toast_notifications(console: Console):
     await asyncio.sleep(0.5)
 
     # Progress toast
-    progress_toast = toast_manager.show_progress(
-        "Building project...",
-        title="Build",
-        progress=0.0
-    )
+    progress_toast = toast_manager.show_progress("Building project...", title="Build", progress=0.0)
 
     # Simulate progress
     for i in range(5):
         await asyncio.sleep(0.3)
-        toast_manager.update_progress(
-            progress_toast.id,
-            (i + 1) / 5,
-            f"Step {i + 1}/5..."
-        )
+        toast_manager.update_progress(progress_toast.id, (i + 1) / 5, f"Step {i + 1}/5...")
 
     toast_manager.dismiss(progress_toast.id)
     toast_manager.show("Build complete!", title="✅ Success")
@@ -145,8 +132,8 @@ async def demo_biblical_wisdom(console: Console):
         panel = Panel(
             text,
             title=f"[bold {COLORS['accent']}]Wisdom {i+1}[/]",
-            border_style=COLORS['primary'],
-            padding=(1, 2)
+            border_style=COLORS["primary"],
+            padding=(1, 2),
         )
 
         console.print(panel)
@@ -159,7 +146,7 @@ async def demo_autocomplete(console: Console):
     console.print(f"[dim {COLORS['muted']}]Context-aware completions with fuzzy search[/]\n")
 
     # Create mock completer
-    completer = create_completer()
+    create_completer()
 
     # Show example completions
     console.print("[bold]Sample completions for 'read':[/]")
@@ -225,11 +212,11 @@ async def main():
             "✅ Toast Notifications\n"
             "✅ Biblical Wisdom\n"
             "✅ Smart Autocomplete",
-            style=COLORS['secondary']
+            style=COLORS["secondary"],
         ),
         title=f"[bold {COLORS['primary']}]🚀 Qwen Dev CLI[/]",
-        border_style=COLORS['accent'],
-        padding=(1, 2)
+        border_style=COLORS["accent"],
+        padding=(1, 2),
     )
     console.print(welcome)
 
@@ -247,14 +234,15 @@ async def main():
     console.print(f"\n[bold {COLORS['success']}]✅ Demo Complete![/]")
     console.print(f"[dim {COLORS['muted']}]All components working beautifully together[/]\n")
 
-    console.print(Panel(
-        Text(
-            '"I can do all things through him who strengthens me."\n'
-            '— Philippians 4:13',
-            style=f"italic {COLORS['primary']}"
-        ),
-        border_style=COLORS['accent']
-    ))
+    console.print(
+        Panel(
+            Text(
+                '"I can do all things through him who strengthens me."\n' "— Philippians 4:13",
+                style=f"italic {COLORS['primary']}",
+            ),
+            border_style=COLORS["accent"],
+        )
+    )
 
 
 if __name__ == "__main__":

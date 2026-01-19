@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 class ResourceType(str, Enum):
     """Types of resources (MIRIX spec)."""
+
     DOC = "doc"
     MARKDOWN = "markdown"
     PDF_TEXT = "pdf_text"
@@ -56,6 +57,7 @@ class Resource:
         created_at: Creation timestamp.
         last_accessed: Last access timestamp.
     """
+
     id: str
     title: str
     summary: str
@@ -110,7 +112,8 @@ class ResourceMemory:
     def _init_db(self) -> None:
         """Initialize database schema."""
         with self.pool.get_conn(self.db_path) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS resources (
                     id TEXT PRIMARY KEY,
                     title TEXT NOT NULL,
@@ -124,18 +127,17 @@ class ResourceMemory:
                     created_at TEXT,
                     last_accessed TEXT
                 )
-            """)
-            conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_res_type ON resources(resource_type)"
+            """
             )
-            conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_res_title ON resources(title)"
-            )
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_res_type ON resources(resource_type)")
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_res_title ON resources(title)")
             # Full-text search on summary and content
-            conn.execute("""
+            conn.execute(
+                """
                 CREATE VIRTUAL TABLE IF NOT EXISTS resources_fts
                 USING fts5(id, title, summary, content)
-            """)
+            """
+            )
 
     def store(
         self,
@@ -180,13 +182,13 @@ class ResourceMemory:
                     agent_id,
                     json.dumps(metadata or {}),
                     datetime.now().isoformat(),
-                )
+                ),
             )
             # Index for FTS
             conn.execute(
                 """INSERT INTO resources_fts (id, title, summary, content)
                    VALUES (?, ?, ?, ?)""",
-                (resource_id, title, summary, content or "")
+                (resource_id, title, summary, content or ""),
             )
 
         logger.debug(f"Stored resource {resource_id}: {title}")
@@ -204,10 +206,7 @@ class ResourceMemory:
         """
         with self.pool.get_conn(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
-            row = conn.execute(
-                "SELECT * FROM resources WHERE id = ?",
-                (resource_id,)
-            ).fetchone()
+            row = conn.execute("SELECT * FROM resources WHERE id = ?", (resource_id,)).fetchone()
 
             if row:
                 # Update access tracking
@@ -216,7 +215,7 @@ class ResourceMemory:
                        SET access_count = access_count + 1,
                            last_accessed = ?
                        WHERE id = ?""",
-                    (datetime.now().isoformat(), resource_id)
+                    (datetime.now().isoformat(), resource_id),
                 )
                 return self._row_to_resource(row)
             return None
@@ -254,7 +253,7 @@ class ResourceMemory:
                        WHERE resources_fts MATCH ?
                        ORDER BY rank
                        LIMIT ?""",
-                    (sanitized_query, limit * 2)  # Get extra for filtering
+                    (sanitized_query, limit * 2),  # Get extra for filtering
                 ).fetchall()
 
                 if not fts_rows:
@@ -301,7 +300,7 @@ class ResourceMemory:
                 WHERE {where_clause}
                 ORDER BY access_count DESC
                 LIMIT ?""",
-            (*params, limit)
+            (*params, limit),
         ).fetchall()
 
         return [self._row_to_resource(row) for row in rows]
@@ -328,7 +327,7 @@ class ResourceMemory:
                    WHERE resource_type = ?
                    ORDER BY access_count DESC, created_at DESC
                    LIMIT ?""",
-                (resource_type.value, limit)
+                (resource_type.value, limit),
             ).fetchall()
 
             return [self._row_to_resource(row) for row in rows]
@@ -350,7 +349,7 @@ class ResourceMemory:
                    WHERE last_accessed IS NOT NULL
                    ORDER BY last_accessed DESC
                    LIMIT ?""",
-                (limit,)
+                (limit,),
             ).fetchall()
 
             return [self._row_to_resource(row) for row in rows]

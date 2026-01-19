@@ -57,9 +57,9 @@ class ConsequenceAnalysis:
     action_considered: str = ""
 
     # Horizontes temporais
-    short_term: List[str] = field(default_factory=list)   # Dias/semanas
+    short_term: List[str] = field(default_factory=list)  # Dias/semanas
     medium_term: List[str] = field(default_factory=list)  # Meses
-    long_term: List[str] = field(default_factory=list)    # Anos
+    long_term: List[str] = field(default_factory=list)  # Anos
 
     # Impactos por stakeholder
     stakeholder_impacts: Dict[str, List[str]] = field(default_factory=dict)

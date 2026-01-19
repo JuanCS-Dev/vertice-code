@@ -45,7 +45,7 @@ def load_env():
                 line = line.strip()
                 if line and not line.startswith("#") and "=" in line:
                     key, value = line.split("=", 1)
-                    os.environ.setdefault(key.strip(), value.strip().strip('"\''))
+                    os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
 
 
 load_env()
@@ -96,7 +96,7 @@ class TestObservedPromptProcessing:
         print("=" * 70)
 
         # Install live monitor
-        monitor = LivePipelineMonitor(observer)
+        LivePipelineMonitor(observer)
 
         result = await hooked_client.process_with_observation(prompt, verbose=True)
 
@@ -107,20 +107,18 @@ class TestObservedPromptProcessing:
         stages_observed = [obs.stage for obs in result["trace"].observations]
 
         # MUST have prompt received
-        assert PipelineStage.PROMPT_RECEIVED in stages_observed, \
-            "FAILED: Prompt not received"
+        assert PipelineStage.PROMPT_RECEIVED in stages_observed, "FAILED: Prompt not received"
 
         # MUST have intent classification
-        assert PipelineStage.INTENT_CLASSIFIED in stages_observed, \
-            "FAILED: Intent not classified"
+        assert PipelineStage.INTENT_CLASSIFIED in stages_observed, "FAILED: Intent not classified"
 
         # MUST have result
-        assert PipelineStage.RESULT_GENERATED in stages_observed, \
-            "FAILED: No result generated"
+        assert PipelineStage.RESULT_GENERATED in stages_observed, "FAILED: No result generated"
 
         # Output should contain "4"
-        assert "4" in result["output"], \
-            f"FAILED: Expected '4' in output, got: {result['output'][:100]}"
+        assert (
+            "4" in result["output"]
+        ), f"FAILED: Expected '4' in output, got: {result['output'][:100]}"
 
         print("\n✓ All stages passed")
 
@@ -142,7 +140,7 @@ class TestObservedPromptProcessing:
         print("TEST: Coding Request - Full Flow")
         print("=" * 70)
 
-        monitor = LivePipelineMonitor(observer)
+        LivePipelineMonitor(observer)
         result = await hooked_client.process_with_observation(prompt, verbose=True)
 
         print("\n" + result["diagnostic_report"])
@@ -161,8 +159,9 @@ class TestObservedPromptProcessing:
             print(f"  Confidence: {intent_data.get('confidence', 0):.1%}")
 
             # For coding request, should have high confidence in coding intent
-            assert intent_data.get('confidence', 0) > 0.5, \
-                f"FAILED: Low confidence in intent: {intent_data.get('confidence')}"
+            assert (
+                intent_data.get("confidence", 0) > 0.5
+            ), f"FAILED: Low confidence in intent: {intent_data.get('confidence')}"
 
         # Check task decomposition
         task_obs = None
@@ -178,12 +177,13 @@ class TestObservedPromptProcessing:
 
             # THIS IS THE BUG: Should be more than 1 for complex request
             # Currently always 1 due to range(1, 2)
-            if task_data.get('task_count', 0) == 1:
+            if task_data.get("task_count", 0) == 1:
                 print("  ⚠ WARNING: Only 1 task generated - decomposition may be broken!")
 
         # Validate output has code
-        assert "def " in result["output"] or "```python" in result["output"], \
-            "FAILED: No Python code in output"
+        assert (
+            "def " in result["output"] or "```python" in result["output"]
+        ), "FAILED: No Python code in output"
 
         print("\n✓ Coding flow completed")
 
@@ -207,7 +207,7 @@ class TestObservedPromptProcessing:
         print("TEST: Planning Request - Task Decomposition")
         print("=" * 70)
 
-        monitor = LivePipelineMonitor(observer)
+        LivePipelineMonitor(observer)
         result = await hooked_client.process_with_observation(prompt, verbose=True)
 
         print("\n" + result["diagnostic_report"])
@@ -240,8 +240,9 @@ class TestObservedPromptProcessing:
             print(f"    {status} {c}")
 
         # At minimum, should mention multiple components
-        assert len(components_found) >= 2, \
-            f"FAILED: Only {len(components_found)} components addressed"
+        assert (
+            len(components_found) >= 2
+        ), f"FAILED: Only {len(components_found)} components addressed"
 
     @pytest.mark.timeout(180)
     async def test_tool_execution_observation(self, hooked_client, observer):
@@ -260,7 +261,7 @@ class TestObservedPromptProcessing:
         print("TEST: Tool Execution Observation")
         print("=" * 70)
 
-        monitor = LivePipelineMonitor(observer)
+        LivePipelineMonitor(observer)
         result = await hooked_client.process_with_observation(prompt, verbose=True)
 
         print("\n" + result["diagnostic_report"])
@@ -272,15 +273,14 @@ class TestObservedPromptProcessing:
         print(f"  Tools called: {len(tools_called)}")
 
         for tool in tools_called:
-            status = "✓" if tool.get('success') else "✗"
+            status = "✓" if tool.get("success") else "✗"
             print(f"    {status} {tool.get('name', 'unknown')}")
             print(f"        Duration: {tool.get('duration_ms', 0):.0f}ms")
-            if tool.get('error'):
+            if tool.get("error"):
                 print(f"        Error: {tool['error']}")
 
         # Should have found project name
-        assert "vertice" in result["output"].lower(), \
-            "FAILED: Project name not found in output"
+        assert "vertice" in result["output"].lower(), "FAILED: Project name not found in output"
 
     @pytest.mark.timeout(180)
     async def test_thinking_process_observation(self, hooked_client, observer):
@@ -301,7 +301,7 @@ class TestObservedPromptProcessing:
         print("TEST: Thinking Process Observation")
         print("=" * 70)
 
-        monitor = LivePipelineMonitor(observer)
+        LivePipelineMonitor(observer)
         result = await hooked_client.process_with_observation(prompt, verbose=True)
 
         print("\n" + result["diagnostic_report"])
@@ -324,8 +324,15 @@ class TestObservedPromptProcessing:
         # Check output for reasoning indicators
         output_lower = result["output"].lower()
         reasoning_markers = [
-            "because", "therefore", "consider", "first", "then",
-            "possible", "likely", "suggest", "recommend"
+            "because",
+            "therefore",
+            "consider",
+            "first",
+            "then",
+            "possible",
+            "likely",
+            "suggest",
+            "recommend",
         ]
         markers_found = [m for m in reasoning_markers if m in output_lower]
 
@@ -351,7 +358,7 @@ class TestObservedFailurePoints:
         print("DIAGNOSTIC: Task Decomposition Failure Point")
         print("=" * 70)
 
-        monitor = LivePipelineMonitor(observer)
+        LivePipelineMonitor(observer)
         result = await hooked_client.process_with_observation(prompt, verbose=False)
 
         # Find decomposition stage
@@ -369,7 +376,7 @@ class TestObservedFailurePoints:
             print("  → Check: Is OrchestratorAgent.plan() being called?")
         else:
             task_data = decomp_obs.output_data
-            task_count = task_data.get('task_count', 0) if isinstance(task_data, dict) else 0
+            task_count = task_data.get("task_count", 0) if isinstance(task_data, dict) else 0
 
             if task_count == 1:
                 print("  ✗ FAILURE: Only 1 task generated")
@@ -408,11 +415,9 @@ class TestObservedFailurePoints:
 
         for prompt, expected_agent in test_cases:
             reset_observer()
-            observer = get_observer()
+            get_observer()
 
-            result = await hooked_client.process_with_observation(
-                prompt, verbose=False
-            )
+            result = await hooked_client.process_with_observation(prompt, verbose=False)
 
             # Find agent selection
             agent_obs = None
@@ -424,7 +429,7 @@ class TestObservedFailurePoints:
             print(f"\n[{prompt[:30]}...]")
             if agent_obs:
                 data = agent_obs.output_data
-                actual = data.get('agent_id', 'unknown') if isinstance(data, dict) else 'unknown'
+                actual = data.get("agent_id", "unknown") if isinstance(data, dict) else "unknown"
                 match = expected_agent in str(actual).lower()
                 status = "✓" if match else "✗"
                 print(f"  Expected: {expected_agent}")
@@ -448,7 +453,7 @@ class TestObservedQualityValidation:
         print("OBSERVED QUALITY TEST")
         print("=" * 70)
 
-        monitor = LivePipelineMonitor(observer)
+        LivePipelineMonitor(observer)
         result = await hooked_client.process_with_observation(prompt, verbose=True)
 
         print("\n[QUALITY ANALYSIS]")
@@ -498,7 +503,7 @@ class TestObservedBenchmarks:
         print("BENCHMARK: Pipeline Stage Timing")
         print("=" * 70)
 
-        monitor = LivePipelineMonitor(observer)
+        LivePipelineMonitor(observer)
         result = await hooked_client.process_with_observation(prompt, verbose=False)
 
         # Analyze timing
@@ -526,6 +531,7 @@ class TestObservedBenchmarks:
 
 # Standalone execution for quick testing
 if __name__ == "__main__":
+
     async def main():
         """Run a quick observed test."""
         result = await run_observed_test(

@@ -29,37 +29,42 @@ logger = logging.getLogger(__name__)
 # BLAST RADIUS TYPES
 # =============================================================================
 
+
 class ComponentType(str, Enum):
     """System component categories."""
-    PROVIDER = "provider"      # LLM providers (Gemini, Vertex, etc.)
-    AGENT = "agent"            # CLI/TUI agents
-    TOOL = "tool"              # MCP tools
-    CACHE = "cache"            # Caching layer
-    STREAMING = "streaming"    # Streaming pipeline
-    NETWORK = "network"        # External network calls
+
+    PROVIDER = "provider"  # LLM providers (Gemini, Vertex, etc.)
+    AGENT = "agent"  # CLI/TUI agents
+    TOOL = "tool"  # MCP tools
+    CACHE = "cache"  # Caching layer
+    STREAMING = "streaming"  # Streaming pipeline
+    NETWORK = "network"  # External network calls
 
 
 class FailureMode(str, Enum):
     """Types of failures that can occur."""
-    LATENCY = "latency"        # Slow responses
-    TIMEOUT = "timeout"        # No response within deadline
-    PARTITION = "partition"    # Network unreachable
-    CRASH = "crash"            # Component dies
+
+    LATENCY = "latency"  # Slow responses
+    TIMEOUT = "timeout"  # No response within deadline
+    PARTITION = "partition"  # Network unreachable
+    CRASH = "crash"  # Component dies
     CORRUPTION = "corruption"  # Invalid data returned
     RATE_LIMIT = "rate_limit"  # Too many requests
 
 
 class SeverityLevel(str, Enum):
     """Impact severity classification."""
-    DEGRADED = "degraded"      # Slower but functional
-    PARTIAL = "partial"        # Some features unavailable
-    CRITICAL = "critical"      # Core functionality lost
+
+    DEGRADED = "degraded"  # Slower but functional
+    PARTIAL = "partial"  # Some features unavailable
+    CRITICAL = "critical"  # Core functionality lost
     CATASTROPHIC = "catastrophic"  # System unusable
 
 
 @dataclass
 class DependencyNode:
     """Node in dependency graph."""
+
     name: str
     component_type: ComponentType
     dependencies: Set[str] = field(default_factory=set)
@@ -71,6 +76,7 @@ class DependencyNode:
 @dataclass
 class BlastRadius:
     """Impact assessment of a failure."""
+
     failed_component: str
     failure_mode: FailureMode
     directly_affected: Set[str] = field(default_factory=set)
@@ -82,6 +88,7 @@ class BlastRadius:
 # =============================================================================
 # BLAST RADIUS ANALYZER
 # =============================================================================
+
 
 class BlastRadiusAnalyzer:
     """
@@ -101,8 +108,12 @@ class BlastRadiusAnalyzer:
             self.nodes[provider] = DependencyNode(
                 name=provider,
                 component_type=ComponentType.PROVIDER,
-                failure_modes={FailureMode.LATENCY, FailureMode.TIMEOUT,
-                              FailureMode.RATE_LIMIT, FailureMode.PARTITION},
+                failure_modes={
+                    FailureMode.LATENCY,
+                    FailureMode.TIMEOUT,
+                    FailureMode.RATE_LIMIT,
+                    FailureMode.PARTITION,
+                },
                 recovery_time_ms=30000,
             )
 
@@ -183,11 +194,7 @@ class BlastRadiusAnalyzer:
                 if dep in self.nodes:
                     self.nodes[dep].dependents.add(name)
 
-    def calculate_blast_radius(
-        self,
-        component: str,
-        failure_mode: FailureMode
-    ) -> BlastRadius:
+    def calculate_blast_radius(self, component: str, failure_mode: FailureMode) -> BlastRadius:
         """Calculate the blast radius for a component failure."""
         if component not in self.nodes:
             return BlastRadius(
@@ -272,9 +279,11 @@ class BlastRadiusAnalyzer:
 # CHAOS EXPERIMENTS
 # =============================================================================
 
+
 @dataclass
 class ChaosExperiment:
     """Definition of a chaos experiment."""
+
     name: str
     description: str
     target_component: str
@@ -286,6 +295,7 @@ class ChaosExperiment:
 @dataclass
 class ExperimentResult:
     """Result of running a chaos experiment."""
+
     experiment: ChaosExperiment
     success: bool
     observed_behavior: str
@@ -311,12 +321,7 @@ class ChaosInjector:
         self._injection_lock = asyncio.Lock()
 
     @asynccontextmanager
-    async def inject_latency(
-        self,
-        target: str,
-        latency_ms: int,
-        jitter_ms: int = 100
-    ):
+    async def inject_latency(self, target: str, latency_ms: int, jitter_ms: int = 100):
         """Inject latency into a component."""
         experiment = ChaosExperiment(
             name=f"latency_{target}",
@@ -403,8 +408,10 @@ class ChaosInjector:
 # OBSERVABILITY SIGNALS
 # =============================================================================
 
+
 class HealthSignal(str, Enum):
     """Health signal types for distinguishing degradation from failure."""
+
     LATENCY_P50 = "latency_p50"
     LATENCY_P99 = "latency_p99"
     ERROR_RATE = "error_rate"
@@ -418,6 +425,7 @@ class HealthSignal(str, Enum):
 @dataclass
 class HealthThresholds:
     """Thresholds for health signal classification."""
+
     degraded: float  # Above this = degraded
     critical: float  # Above this = failure
 
@@ -451,15 +459,12 @@ class ObservabilityMonitor:
     }
 
     def __init__(self) -> None:
-        self._metrics: Dict[str, List[Tuple[float, float]]] = {}  # component -> [(timestamp, value)]
+        self._metrics: Dict[
+            str, List[Tuple[float, float]]
+        ] = {}  # component -> [(timestamp, value)]
         self._window_seconds = 60
 
-    def record_metric(
-        self,
-        component: str,
-        signal: HealthSignal,
-        value: float
-    ) -> None:
+    def record_metric(self, component: str, signal: HealthSignal, value: float) -> None:
         """Record a health metric."""
         key = f"{component}:{signal.value}"
         if key not in self._metrics:
@@ -470,9 +475,7 @@ class ObservabilityMonitor:
 
         # Prune old entries
         cutoff = now - self._window_seconds
-        self._metrics[key] = [
-            (ts, v) for ts, v in self._metrics[key] if ts >= cutoff
-        ]
+        self._metrics[key] = [(ts, v) for ts, v in self._metrics[key] if ts >= cutoff]
 
     def get_current_health(self, component: str) -> Dict[HealthSignal, SeverityLevel]:
         """Get current health status for a component."""
@@ -505,7 +508,8 @@ class ObservabilityMonitor:
         """Get list of signals indicating degradation."""
         health = self.get_current_health(component)
         return [
-            signal.value for signal, severity in health.items()
+            signal.value
+            for signal, severity in health.items()
             if severity in (SeverityLevel.DEGRADED, SeverityLevel.CRITICAL)
         ]
 
@@ -514,19 +518,22 @@ class ObservabilityMonitor:
 # SELF-HEALING MECHANISMS
 # =============================================================================
 
+
 class RecoveryAction(str, Enum):
     """Types of recovery actions."""
-    RESTART = "restart"        # Restart component
-    SCALE = "scale"            # Add capacity
-    FALLBACK = "fallback"      # Switch to backup
+
+    RESTART = "restart"  # Restart component
+    SCALE = "scale"  # Add capacity
+    FALLBACK = "fallback"  # Switch to backup
     CIRCUIT_OPEN = "circuit_open"  # Open circuit breaker
-    SHED_LOAD = "shed_load"    # Drop non-critical requests
+    SHED_LOAD = "shed_load"  # Drop non-critical requests
     CACHE_WARM = "cache_warm"  # Pre-warm cache
 
 
 @dataclass
 class RecoveryPlan:
     """Plan for recovering from a failure."""
+
     trigger: str
     actions: List[RecoveryAction]
     priority: int = 1  # Lower = higher priority
@@ -597,11 +604,7 @@ class SelfHealingController:
 
         return None
 
-    async def _apply_recovery(
-        self,
-        component: str,
-        failure_mode: FailureMode
-    ) -> RecoveryAction:
+    async def _apply_recovery(self, component: str, failure_mode: FailureMode) -> RecoveryAction:
         """Apply recovery plan for a failure."""
         plan = self.RECOVERY_PLANS.get(failure_mode)
         if not plan:
@@ -617,11 +620,7 @@ class SelfHealingController:
 
         return plan.actions[-1] if plan.actions else RecoveryAction.FALLBACK
 
-    async def _execute_action(
-        self,
-        component: str,
-        action: RecoveryAction
-    ) -> bool:
+    async def _execute_action(self, component: str, action: RecoveryAction) -> bool:
         """Execute a single recovery action."""
         try:
             if action == RecoveryAction.RESTART:
@@ -682,6 +681,7 @@ class SelfHealingController:
 # CHAOS ORCHESTRATOR (MAIN CONTROLLER)
 # =============================================================================
 
+
 class ChaosOrchestrator:
     """
     Main orchestrator for chaos engineering.
@@ -700,10 +700,7 @@ class ChaosOrchestrator:
         self.healer = SelfHealingController(self.monitor)
         self._experiment_results: List[ExperimentResult] = []
 
-    async def run_experiment(
-        self,
-        experiment: ChaosExperiment
-    ) -> ExperimentResult:
+    async def run_experiment(self, experiment: ChaosExperiment) -> ExperimentResult:
         """Run a single chaos experiment."""
         start_time = time.time()
         cascading_failures: List[str] = []
@@ -880,6 +877,7 @@ class ChaosOrchestrator:
 # =============================================================================
 # MAIN ENTRY POINT
 # =============================================================================
+
 
 async def main():
     """Run chaos engineering suite."""

@@ -8,7 +8,7 @@ from vertice_cli.streaming import (
     ReactiveRenderer,
     ConcurrentRenderer,
     RenderEvent,
-    RenderEventType
+    RenderEventType,
 )
 
 
@@ -36,7 +36,7 @@ async def test_real_time_streaming():
         print(f"   {time.time():.2f}s: {event.content.strip()}")
 
     start = time.time()
-    result = await executor.execute(cmd, stream_callback=track_lines)
+    await executor.execute(cmd, stream_callback=track_lines)
     total_time = time.time() - start
 
     print("\n📊 Resultado:")
@@ -46,7 +46,7 @@ async def test_real_time_streaming():
 
     # Check if streaming was real (not buffered)
     if len(timestamps) >= 2:
-        time_diffs = [timestamps[i+1] - timestamps[i] for i in range(len(timestamps)-1)]
+        time_diffs = [timestamps[i + 1] - timestamps[i] for i in range(len(timestamps) - 1)]
         avg_diff = sum(time_diffs) / len(time_diffs)
         print(f"   Avg time between lines: {avg_diff:.2f}s")
 
@@ -97,11 +97,7 @@ async def test_concurrent_processes():
             await asyncio.sleep(0.03)
 
     # Run all in parallel
-    await asyncio.gather(
-        update_proc1(),
-        update_proc2(),
-        update_proc3()
-    )
+    await asyncio.gather(update_proc1(), update_proc2(), update_proc3())
 
     print("✓ Todas as atualizações completadas sem crash")
 
@@ -139,11 +135,11 @@ async def test_progress_indicators():
             event_type=RenderEventType.PROGRESS_BAR,
             content="",
             metadata={
-                'task_id': 'download',
-                'completed': i,
-                'total': 100,
-                'description': f'Downloading... {i}%'
-            }
+                "task_id": "download",
+                "completed": i,
+                "total": 100,
+                "description": f"Downloading... {i}%",
+            },
         )
         await renderer.emit(event)
         await asyncio.sleep(0.1)
@@ -151,7 +147,7 @@ async def test_progress_indicators():
     await asyncio.sleep(0.3)  # Let render loop process
 
     # Check if progress was tracked
-    if 'download' not in renderer._active_tasks:
+    if "download" not in renderer._active_tasks:
         print("❌ Progress bar não foi registrado")
         await renderer.stop()
         return False
@@ -165,10 +161,7 @@ async def test_progress_indicators():
         event = RenderEvent(
             event_type=RenderEventType.SPINNER,
             content="",
-            metadata={
-                'task_id': 'spinner1',
-                'message': f'Processing step {i+1}...'
-            }
+            metadata={"task_id": "spinner1", "message": f"Processing step {i+1}..."},
         )
         await renderer.emit(event)
         await asyncio.sleep(0.1)
@@ -195,11 +188,7 @@ async def test_memory_leak():
 
     start = time.time()
     for i in range(1000):
-        event = RenderEvent(
-            event_type=RenderEventType.OUTPUT,
-            content=f"Line {i}\n",
-            metadata={}
-        )
+        event = RenderEvent(event_type=RenderEventType.OUTPUT, content=f"Line {i}\n", metadata={})
         await renderer.emit(event)
 
     # Wait for processing
@@ -247,7 +236,7 @@ async def test_error_cases():
     # Test 2: Command with huge output
     print("\n2. Large output...")
     result = await executor.execute("seq 1 10000")
-    lines = result.stdout.count('\n')
+    lines = result.stdout.count("\n")
     print(f"   ✓ Handled {lines} lines")
 
     # Test 3: Command with stderr
@@ -280,7 +269,7 @@ async def test_real_world_scenario():
     packages = [
         ("react", "echo 'Installing react...'; sleep 0.3; echo 'react@18.0.0'"),
         ("lodash", "echo 'Installing lodash...'; sleep 0.2; echo 'lodash@4.17.21'"),
-        ("axios", "echo 'Installing axios...'; sleep 0.25; echo 'axios@1.5.0'")
+        ("axios", "echo 'Installing axios...'; sleep 0.25; echo 'axios@1.5.0'"),
     ]
 
     print("\n📊 Simulando instalação paralela de 3 pacotes...")
@@ -297,9 +286,7 @@ async def test_real_world_scenario():
         await renderer.complete_process(pkg, success=success)
         return success
 
-    results = await asyncio.gather(*[
-        install_package(pkg, cmd) for pkg, cmd in packages
-    ])
+    results = await asyncio.gather(*[install_package(pkg, cmd) for pkg, cmd in packages])
 
     print(f"\n✓ Instalados: {sum(results)}/{len(results)} pacotes")
 
@@ -338,6 +325,7 @@ async def main():
             results.append((test_name, False, str(e)))
             print(f"\n💥 {test_name} CRASHED: {e}")
             import traceback
+
             traceback.print_exc()
 
     # Summary

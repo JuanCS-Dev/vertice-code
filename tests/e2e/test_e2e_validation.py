@@ -7,6 +7,7 @@ import sys
 import tempfile
 from pathlib import Path
 
+
 # Test 1: Shell can initialize
 def test_shell_initialization():
     print("🧪 Test 1: Shell Initialization...")
@@ -24,6 +25,7 @@ def test_shell_initialization():
     except Exception as e:
         print(f"❌ FAIL: {e}")
         return False
+
 
 # Test 2: LSP multi-language detection
 def test_lsp_language_detection():
@@ -54,6 +56,7 @@ def test_lsp_language_detection():
         print(f"❌ FAIL: {passed}/{len(tests)} correct")
         return False
 
+
 # Test 3: Refactoring engine
 def test_refactoring_engine():
     print("\n🧪 Test 3: Refactoring Engine...")
@@ -62,8 +65,8 @@ def test_refactoring_engine():
     engine = RefactoringEngine(project_root=Path.cwd())
 
     # Create temp file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-        f.write('def old_func():\n    pass\n\nresult = old_func()\n')
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
+        f.write("def old_func():\n    pass\n\nresult = old_func()\n")
         temp_file = Path(f.name)
 
     try:
@@ -90,10 +93,16 @@ def test_refactoring_engine():
     finally:
         temp_file.unlink()
 
+
 # Test 4: LSP completion data structures
 def test_lsp_completion_structures():
     print("\n🧪 Test 4: LSP Completion Structures...")
-    from vertice_cli.intelligence.lsp_client import CompletionItem, SignatureHelp, SignatureInformation, ParameterInformation
+    from vertice_cli.intelligence.lsp_client import (
+        CompletionItem,
+        SignatureHelp,
+        SignatureInformation,
+        ParameterInformation,
+    )
 
     try:
         # Test CompletionItem
@@ -101,7 +110,7 @@ def test_lsp_completion_structures():
             "label": "test_func",
             "kind": 3,
             "detail": "() -> None",
-            "documentation": "Test function"
+            "documentation": "Test function",
         }
         item = CompletionItem.from_lsp(item_data)
         assert item.label == "test_func"
@@ -113,20 +122,13 @@ def test_lsp_completion_structures():
         assert param.label == "x: int"
 
         # Test SignatureInformation
-        sig_data = {
-            "label": "func(x: int) -> str",
-            "parameters": [{"label": "x: int"}]
-        }
+        sig_data = {"label": "func(x: int) -> str", "parameters": [{"label": "x: int"}]}
         sig = SignatureInformation.from_lsp(sig_data)
         assert sig.label == "func(x: int) -> str"
         assert len(sig.parameters) == 1
 
         # Test SignatureHelp
-        help_data = {
-            "signatures": [sig_data],
-            "activeSignature": 0,
-            "activeParameter": 0
-        }
+        help_data = {"signatures": [sig_data], "activeSignature": 0, "activeParameter": 0}
         help_obj = SignatureHelp.from_lsp(help_data)
         assert len(help_obj.signatures) == 1
 
@@ -137,6 +139,7 @@ def test_lsp_completion_structures():
         print(f"❌ FAIL: {e}")
         return False
 
+
 # Test 5: Edge cases
 def test_edge_cases():
     print("\n🧪 Test 5: Edge Cases...")
@@ -145,8 +148,8 @@ def test_edge_cases():
     engine = RefactoringEngine(project_root=Path.cwd())
 
     # Test 5.1: Empty file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-        f.write('')
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
+        f.write("")
         temp_file = Path(f.name)
 
     try:
@@ -157,7 +160,7 @@ def test_edge_cases():
         print("  ✅ Empty file handled correctly")
 
         # Test 5.2: Rename nonexistent symbol
-        temp_file.write_text('def func():\n    pass\n')
+        temp_file.write_text("def func():\n    pass\n")
         result = engine.rename_symbol(temp_file, "nonexistent", "new_name")
 
         if result.success and result.message == "Renamed 0 occurrences":
@@ -171,6 +174,7 @@ def test_edge_cases():
 
     finally:
         temp_file.unlink()
+
 
 # Test 6: Constitutional compliance (P3 - Ceticismo)
 def test_constitutional_compliance():
@@ -200,10 +204,11 @@ def test_constitutional_compliance():
         print(f"  ❌ Unhandled exception (should be caught): {e}")
         return False
 
+
 def main():
-    print("="*70)
+    print("=" * 70)
     print("🔬 END-TO-END SCIENTIFIC VALIDATION")
-    print("="*70)
+    print("=" * 70)
 
     tests = [
         ("Shell Initialization", test_shell_initialization),
@@ -223,9 +228,9 @@ def main():
             print(f"\n❌ CRASH in {name}: {e}")
             results.append((name, False))
 
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("📊 FINAL RESULTS")
-    print("="*70)
+    print("=" * 70)
 
     passed = sum(1 for _, r in results if r)
     total = len(results)
@@ -234,7 +239,7 @@ def main():
         status = "✅ PASS" if result else "❌ FAIL"
         print(f"{status} - {name}")
 
-    pct = passed/total*100
+    pct = passed / total * 100
     print(f"\nTotal: {passed}/{total} ({pct:.0f}%)")
 
     if passed == total:
@@ -243,6 +248,7 @@ def main():
     else:
         print(f"\n⚠️ {total-passed} tests failed - needs attention")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

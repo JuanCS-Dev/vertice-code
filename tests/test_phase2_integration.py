@@ -2,7 +2,7 @@
 
 Tests the complete pipeline:
 - Safety validation
-- Session management  
+- Session management
 - Shell bridge execution
 - End-to-end integration
 """
@@ -26,10 +26,7 @@ class TestSafetyValidator:
         """Should block rm -rf /"""
         validator = SafetyValidator()
 
-        tool_call = {
-            "tool": "bash_command",
-            "arguments": {"command": "rm -rf /"}
-        }
+        tool_call = {"tool": "bash_command", "arguments": {"command": "rm -rf /"}}
 
         is_safe, reason = validator.is_safe(tool_call)
         assert not is_safe
@@ -39,10 +36,7 @@ class TestSafetyValidator:
         """Should block fork bomb."""
         validator = SafetyValidator()
 
-        tool_call = {
-            "tool": "bash_command",
-            "arguments": {"command": ":(){ :|:& };:"}
-        }
+        tool_call = {"tool": "bash_command", "arguments": {"command": ":(){ :|:& };:"}}
 
         is_safe, reason = validator.is_safe(tool_call)
         assert not is_safe
@@ -52,10 +46,7 @@ class TestSafetyValidator:
         """Should allow safe commands."""
         validator = SafetyValidator()
 
-        tool_call = {
-            "tool": "bash_command",
-            "arguments": {"command": "ls -la"}
-        }
+        tool_call = {"tool": "bash_command", "arguments": {"command": "ls -la"}}
 
         is_safe, reason = validator.is_safe(tool_call)
         assert is_safe
@@ -65,10 +56,7 @@ class TestSafetyValidator:
         """Should block path traversal attempts."""
         validator = SafetyValidator(allowed_paths=["/tmp/test"])
 
-        tool_call = {
-            "tool": "write_file",
-            "arguments": {"path": "/etc/passwd", "content": "hack"}
-        }
+        tool_call = {"tool": "write_file", "arguments": {"path": "/etc/passwd", "content": "hack"}}
 
         is_safe, reason = validator.is_safe(tool_call)
         assert not is_safe
@@ -78,10 +66,7 @@ class TestSafetyValidator:
         validator = SafetyValidator()
 
         # Git commands should be whitelisted
-        tool_call = {
-            "tool": "bash_command",
-            "arguments": {"command": "git status"}
-        }
+        tool_call = {"tool": "bash_command", "arguments": {"command": "git status"}}
 
         is_safe, reason = validator.is_safe(tool_call)
         assert is_safe
@@ -97,10 +82,7 @@ class TestSafetyValidator:
             large_file = f.name
 
         try:
-            tool_call = {
-                "tool": "read_file",
-                "arguments": {"path": large_file}
-            }
+            tool_call = {"tool": "read_file", "arguments": {"path": large_file}}
 
             is_safe, reason = validator.is_safe(tool_call)
             assert not is_safe
@@ -114,10 +96,7 @@ class TestSafetyValidator:
 
         validator.add_whitelisted_command("my_custom_script")
 
-        tool_call = {
-            "tool": "bash_command",
-            "arguments": {"command": "my_custom_script --flag"}
-        }
+        tool_call = {"tool": "bash_command", "arguments": {"command": "my_custom_script --flag"}}
 
         is_safe, reason = validator.is_safe(tool_call)
         assert is_safe
@@ -206,7 +185,7 @@ class TestSessionManager:
         with tempfile.TemporaryDirectory() as tmpdir:
             manager = SessionManager(storage_dir=Path(tmpdir))
 
-            session = manager.create_session("to_delete")
+            manager.create_session("to_delete")
             session_file = Path(tmpdir) / "to_delete.json"
 
             # Verify file exists
@@ -244,7 +223,7 @@ class TestShellBridge:
         # Simulate dangerous LLM response
         llm_response = """
         I'll delete that for you.
-        
+
         ```json
         {"tool": "bash_command", "arguments": {"command": "rm -rf /"}}
         ```
@@ -257,18 +236,24 @@ class TestShellBridge:
         result = results[0]
 
         # Defense in depth: Either blocked by safety validator OR failed in tool
-        is_blocked = result.blocked or (result.result and hasattr(result.result, 'success') and not result.result.success)
+        is_blocked = result.blocked or (
+            result.result and hasattr(result.result, "success") and not result.result.success
+        )
         assert is_blocked, f"Expected blocking but got: {result}"
 
         # Check error message contains dangerous keywords
         if result.blocked:
             # Blocked by safety validator
-            assert ("root directory" in result.block_reason.lower() or "dangerous" in result.block_reason.lower())
-        elif result.result and hasattr(result.result, 'error'):
+            assert (
+                "root directory" in result.block_reason.lower()
+                or "dangerous" in result.block_reason.lower()
+            )
+        elif result.result and hasattr(result.result, "error"):
             # Blocked by tool's internal validation
             error_msg = result.result.error.lower() if result.result.error else ""
-            assert ("dangerous" in error_msg or "blocked" in error_msg or "rm -rf" in error_msg), \
-                   f"Expected dangerous command error, got: {result.result.error}"
+            assert (
+                "dangerous" in error_msg or "blocked" in error_msg or "rm -rf" in error_msg
+            ), f"Expected dangerous command error, got: {result.result.error}"
 
     @pytest.mark.asyncio
     async def test_executes_safe_tools(self):
@@ -284,7 +269,7 @@ class TestShellBridge:
             # Simulate LLM response with tool call
             llm_response = f"""
             I'll read that file.
-            
+
             ```json
             {{"tool": "read_file", "arguments": {{"path": "{temp_file}"}}}}
             ```
@@ -331,7 +316,7 @@ class TestShellBridge:
                 ```
                 """
 
-                results = await bridge.execute_tool_calls(llm_response, session_id="test")
+                await bridge.execute_tool_calls(llm_response, session_id="test")
 
                 # Check session was updated
                 session = sessions.get_session("test")
@@ -360,7 +345,7 @@ async def test_end_to_end_integration():
         # Instead, test with pre-parsed response
         llm_response = f"""
         I'll read that file for you.
-        
+
         ```json
         {{"tool": "read_file", "arguments": {{"path": "{test_file}"}}}}
         ```

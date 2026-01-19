@@ -30,9 +30,11 @@ import resource
 # DATA CLASSES
 # ==============================================================================
 
+
 @dataclass
 class BenchmarkResult:
     """Result of a benchmark run."""
+
     name: str
     iterations: int
     total_time_s: float
@@ -53,6 +55,7 @@ class BenchmarkResult:
 @dataclass
 class LoadTestResult:
     """Result of a load test."""
+
     name: str
     total_requests: int
     successful_requests: int
@@ -71,6 +74,7 @@ class LoadTestResult:
 @dataclass
 class PerformanceMetrics:
     """Aggregated performance metrics."""
+
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
     benchmarks: List[BenchmarkResult] = field(default_factory=list)
     load_tests: List[LoadTestResult] = field(default_factory=list)
@@ -81,16 +85,18 @@ class PerformanceMetrics:
 # BENCHMARK FIXTURES
 # ==============================================================================
 
+
 @pytest.fixture
 def benchmark_runner():
     """Provide benchmark execution utilities."""
+
     class BenchmarkRunner:
         def __init__(self):
             self.results: List[BenchmarkResult] = []
             self.thresholds = {
-                "fast": 10,      # 10ms
-                "normal": 100,   # 100ms
-                "slow": 1000,    # 1s
+                "fast": 10,  # 10ms
+                "normal": 100,  # 100ms
+                "slow": 1000,  # 1s
                 "very_slow": 5000,  # 5s
             }
 
@@ -102,7 +108,7 @@ def benchmark_runner():
             warmup: int = 5,
             threshold_ms: float = None,
             args: tuple = (),
-            kwargs: dict = None
+            kwargs: dict = None,
         ) -> BenchmarkResult:
             """Run benchmark on function."""
             if kwargs is None:
@@ -133,9 +139,9 @@ def benchmark_runner():
                 std_dev_s=statistics.stdev(times) if len(times) > 1 else 0,
                 min_time_s=min(times),
                 max_time_s=max(times),
-                ops_per_second=1 / mean_time if mean_time > 0 else float('inf'),
+                ops_per_second=1 / mean_time if mean_time > 0 else float("inf"),
                 threshold_ms=threshold_ms,
-                passed_threshold=threshold_ms is None or (mean_time * 1000) <= threshold_ms
+                passed_threshold=threshold_ms is None or (mean_time * 1000) <= threshold_ms,
             )
 
             self.results.append(result)
@@ -149,7 +155,7 @@ def benchmark_runner():
             warmup: int = 5,
             threshold_ms: float = None,
             args: tuple = (),
-            kwargs: dict = None
+            kwargs: dict = None,
         ) -> BenchmarkResult:
             """Run benchmark on async function."""
             if kwargs is None:
@@ -180,9 +186,9 @@ def benchmark_runner():
                 std_dev_s=statistics.stdev(times) if len(times) > 1 else 0,
                 min_time_s=min(times),
                 max_time_s=max(times),
-                ops_per_second=1 / mean_time if mean_time > 0 else float('inf'),
+                ops_per_second=1 / mean_time if mean_time > 0 else float("inf"),
                 threshold_ms=threshold_ms,
-                passed_threshold=threshold_ms is None or (mean_time * 1000) <= threshold_ms
+                passed_threshold=threshold_ms is None or (mean_time * 1000) <= threshold_ms,
             )
 
             self.results.append(result)
@@ -201,7 +207,7 @@ def benchmark_runner():
                 "total_benchmarks": len(self.results),
                 "passed": sum(1 for r in self.results if r.passed_threshold),
                 "failed": sum(1 for r in self.results if not r.passed_threshold),
-                "results": [r.to_dict() for r in self.results]
+                "results": [r.to_dict() for r in self.results],
             }
 
     return BenchmarkRunner()
@@ -210,6 +216,7 @@ def benchmark_runner():
 @pytest.fixture
 def memory_profiler():
     """Provide memory profiling utilities."""
+
     class MemoryProfiler:
         def __init__(self):
             self.baseline = self._get_memory_mb()
@@ -245,9 +252,11 @@ def memory_profiler():
 # LOAD TEST FIXTURES
 # ==============================================================================
 
+
 @pytest.fixture
 def load_tester():
     """Provide load testing utilities."""
+
     class LoadTester:
         def __init__(self):
             self.results: List[LoadTestResult] = []
@@ -260,7 +269,7 @@ def load_tester():
             concurrent_users: int = 10,
             timeout_s: float = 30,
             args: tuple = (),
-            kwargs: dict = None
+            kwargs: dict = None,
         ) -> LoadTestResult:
             """Run load test with concurrent users."""
             if kwargs is None:
@@ -325,7 +334,7 @@ def load_tester():
                 p99_ms=sorted_times[min(p99_idx, len(sorted_times) - 1)] if sorted_times else 0,
                 max_response_time_ms=max(response_times) if response_times else 0,
                 error_rate=len(errors) / total_requests if total_requests > 0 else 0,
-                concurrent_users=concurrent_users
+                concurrent_users=concurrent_users,
             )
 
             self.results.append(result)
@@ -338,7 +347,7 @@ def load_tester():
             total_requests: int = 100,
             concurrent_users: int = 10,
             args: tuple = (),
-            kwargs: dict = None
+            kwargs: dict = None,
         ) -> LoadTestResult:
             """Run async load test."""
             if kwargs is None:
@@ -384,7 +393,7 @@ def load_tester():
                 p99_ms=sorted_times[min(p99_idx, len(sorted_times) - 1)] if sorted_times else 0,
                 max_response_time_ms=max(response_times) if response_times else 0,
                 error_rate=len(errors) / total_requests if total_requests > 0 else 0,
-                concurrent_users=concurrent_users
+                concurrent_users=concurrent_users,
             )
 
             self.results.append(result)
@@ -397,6 +406,7 @@ def load_tester():
 # PERFORMANCE THRESHOLDS
 # ==============================================================================
 
+
 @pytest.fixture
 def performance_thresholds():
     """Performance thresholds for different operations."""
@@ -406,28 +416,23 @@ def performance_thresholds():
         "agent_process_simple": 500,
         "agent_process_complex": 2000,
         "agent_tool_call": 200,
-
         # File operations (ms)
         "file_read_small": 10,
         "file_read_large": 100,
         "file_write_small": 20,
         "file_search": 50,
-
         # LLM operations (ms)
         "llm_tokenize": 10,
         "llm_prompt_build": 50,
         "llm_parse_response": 20,
-
         # Orchestration (ms)
         "task_queue": 5,
         "state_transition": 10,
         "context_switch": 50,
-
         # Memory limits (MB)
         "memory_per_agent": 50,
         "memory_per_session": 200,
         "memory_total": 500,
-
         # Throughput (requests/sec)
         "min_throughput": 10,
         "target_throughput": 50,
@@ -438,9 +443,11 @@ def performance_thresholds():
 # REPORT GENERATION
 # ==============================================================================
 
+
 @pytest.fixture
 def performance_reporter(tmp_path):
     """Generate performance reports."""
+
     class PerformanceReporter:
         def __init__(self, output_dir: Path):
             self.output_dir = output_dir
@@ -454,13 +461,17 @@ def performance_reporter(tmp_path):
 
         def generate_report(self) -> Path:
             """Generate JSON report."""
-            report_path = self.output_dir / f"performance_report_{datetime.now():%Y%m%d_%H%M%S}.json"
+            report_path = (
+                self.output_dir / f"performance_report_{datetime.now():%Y%m%d_%H%M%S}.json"
+            )
 
             report = {
                 "timestamp": self.metrics.timestamp,
                 "summary": {
                     "total_benchmarks": len(self.metrics.benchmarks),
-                    "benchmarks_passed": sum(1 for b in self.metrics.benchmarks if b.passed_threshold),
+                    "benchmarks_passed": sum(
+                        1 for b in self.metrics.benchmarks if b.passed_threshold
+                    ),
                     "total_load_tests": len(self.metrics.load_tests),
                 },
                 "benchmarks": [asdict(b) for b in self.metrics.benchmarks],
@@ -480,7 +491,9 @@ def performance_reporter(tmp_path):
                 print("\nBenchmarks:")
                 for b in self.metrics.benchmarks:
                     status = "✓" if b.passed_threshold else "✗"
-                    print(f"  {status} {b.name}: {b.mean_time_s * 1000:.2f}ms (threshold: {b.threshold_ms}ms)")
+                    print(
+                        f"  {status} {b.name}: {b.mean_time_s * 1000:.2f}ms (threshold: {b.threshold_ms}ms)"
+                    )
 
             if self.metrics.load_tests:
                 print("\nLoad Tests:")

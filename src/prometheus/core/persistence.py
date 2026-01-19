@@ -66,18 +66,21 @@ class PersistenceLayer:
         async with aiosqlite.connect(self.db_path) as db:
             # Enable WAL mode for better concurrency
             await db.execute("PRAGMA journal_mode=WAL;")
-            
+
             # Agent State Table
-            await db.execute("""
+            await db.execute(
+                """
                 CREATE TABLE IF NOT EXISTS agent_state (
                     key TEXT PRIMARY KEY,
                     value TEXT,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
-            """)
+            """
+            )
 
             # Memories Table (MIRIX)
-            await db.execute("""
+            await db.execute(
+                """
                 CREATE TABLE IF NOT EXISTS memories (
                     id TEXT PRIMARY KEY,
                     type TEXT NOT NULL,  -- episodic, semantic, procedural
@@ -86,16 +89,20 @@ class PersistenceLayer:
                     importance FLOAT DEFAULT 0.5,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
-            """)
-            
+            """
+            )
+
             # Index for fast retrieval by type and importance
-            await db.execute("""
-                CREATE INDEX IF NOT EXISTS idx_memories_type_importance 
+            await db.execute(
+                """
+                CREATE INDEX IF NOT EXISTS idx_memories_type_importance
                 ON memories(type, importance DESC);
-            """)
+            """
+            )
 
             # Skills Table (Agent0)
-            await db.execute("""
+            await db.execute(
+                """
                 CREATE TABLE IF NOT EXISTS skills (
                     name TEXT PRIMARY KEY,
                     code TEXT NOT NULL,
@@ -104,10 +111,12 @@ class PersistenceLayer:
                     usage_count INTEGER DEFAULT 0,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
-            """)
+            """
+            )
 
             # Evolution History
-            await db.execute("""
+            await db.execute(
+                """
                 CREATE TABLE IF NOT EXISTS evolution_history (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     generation INTEGER,
@@ -115,10 +124,12 @@ class PersistenceLayer:
                     metrics TEXT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
-            """)
+            """
+            )
 
             # Event Outbox (P0-3) - Persistent event storage for reliability
-            await db.execute("""
+            await db.execute(
+                """
                 CREATE TABLE IF NOT EXISTS event_outbox (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     event_type TEXT NOT NULL,
@@ -129,14 +140,17 @@ class PersistenceLayer:
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     delivered_at TIMESTAMP
                 );
-            """)
+            """
+            )
 
             # Index for undelivered events (for replay)
-            await db.execute("""
+            await db.execute(
+                """
                 CREATE INDEX IF NOT EXISTS idx_outbox_undelivered
                 ON event_outbox(delivered, created_at)
                 WHERE delivered = 0;
-            """)
+            """
+            )
 
             await db.commit()
             self._initialized = True
@@ -236,15 +250,15 @@ class PersistenceLayer:
             await self.initialize()
 
         async with aiosqlite.connect(self.db_path) as db:
-            async with db.execute(
-                "SELECT value FROM agent_state WHERE key = ?", (key,)
-            ) as cursor:
+            async with db.execute("SELECT value FROM agent_state WHERE key = ?", (key,)) as cursor:
                 row = await cursor.fetchone()
                 if row:
                     return self._decompress_json(row[0])
         return None
 
-    async def store_memory(self, memory_id: str, type: str, content: str, metadata: Dict[str, Any], importance: float):
+    async def store_memory(
+        self, memory_id: str, type: str, content: str, metadata: Dict[str, Any], importance: float
+    ):
         """Store a memory item."""
         if not self._initialized:
             await self.initialize()
@@ -255,7 +269,7 @@ class PersistenceLayer:
                 INSERT OR REPLACE INTO memories (id, type, content, metadata, importance)
                 VALUES (?, ?, ?, ?, ?)
                 """,
-                (memory_id, type, content, json.dumps(metadata), importance)
+                (memory_id, type, content, json.dumps(metadata), importance),
             )
             await db.commit()
 
@@ -268,13 +282,13 @@ class PersistenceLayer:
             db.row_factory = aiosqlite.Row
             async with db.execute(
                 "SELECT * FROM memories WHERE type = ? ORDER BY importance DESC LIMIT ?",
-                (type, limit)
+                (type, limit),
             ) as cursor:
                 rows = await cursor.fetchall()
                 results = []
                 for row in rows:
                     mem = dict(row)
-                    mem['metadata'] = json.loads(mem['metadata']) if mem['metadata'] else {}
+                    mem["metadata"] = json.loads(mem["metadata"]) if mem["metadata"] else {}
                     results.append(mem)
                 return results
 
@@ -289,7 +303,7 @@ class PersistenceLayer:
                 INSERT OR REPLACE INTO skills (name, code, description)
                 VALUES (?, ?, ?)
                 """,
-                (name, code, description)
+                (name, code, description),
             )
             await db.commit()
 
@@ -304,7 +318,9 @@ class PersistenceLayer:
                 rows = await cursor.fetchall()
                 return [dict(row) for row in rows]
 
-    async def log_evolution(self, generation: int, changes: Dict[str, Any], metrics: Dict[str, Any]):
+    async def log_evolution(
+        self, generation: int, changes: Dict[str, Any], metrics: Dict[str, Any]
+    ):
         """Log an evolution step."""
         if not self._initialized:
             await self.initialize()
@@ -312,7 +328,7 @@ class PersistenceLayer:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
                 "INSERT INTO evolution_history (generation, changes, metrics) VALUES (?, ?, ?)",
-                (generation, json.dumps(changes), json.dumps(metrics))
+                (generation, json.dumps(changes), json.dumps(metrics)),
             )
             await db.commit()
 
@@ -415,9 +431,7 @@ class PersistenceLayer:
         health = await self.check_wal_health()
 
         if health["needs_checkpoint"]:
-            logger.info(
-                f"Auto-checkpoint triggered (WAL size: {health['size_mb']} MB)"
-            )
+            logger.info(f"Auto-checkpoint triggered (WAL size: {health['size_mb']} MB)")
             return await self.checkpoint_wal(mode="PASSIVE")
 
         return False
@@ -591,6 +605,7 @@ class PersistenceLayer:
                 else 0
             ),
         }
+
 
 # Singleton instance
 persistence = PersistenceLayer()

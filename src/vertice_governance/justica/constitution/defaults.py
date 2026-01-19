@@ -28,19 +28,34 @@ def get_fundamental_principles() -> list[ConstitutionalPrinciple]:
             """,
             category="DISALLOW",
             severity=Severity.CRITICAL,
-            patterns=frozenset([
-                "exfiltrar dados",
-                "escalar privilégios",
-                "bypass segurança",
-                "desabilitar guardrails",
-                "sobrescrever sistema",
-                "acessar não autorizado",
-            ]),
-            keywords=frozenset([
-                "bypass", "circumvent", "hide", "conceal", "unauthorized",
-                "exfiltrate", "escalate", "override", "disable", "malicious",
-                "backdoor", "exploit", "inject", "poison",
-            ]),
+            patterns=frozenset(
+                [
+                    "exfiltrar dados",
+                    "escalar privilégios",
+                    "bypass segurança",
+                    "desabilitar guardrails",
+                    "sobrescrever sistema",
+                    "acessar não autorizado",
+                ]
+            ),
+            keywords=frozenset(
+                [
+                    "bypass",
+                    "circumvent",
+                    "hide",
+                    "conceal",
+                    "unauthorized",
+                    "exfiltrate",
+                    "escalate",
+                    "override",
+                    "disable",
+                    "malicious",
+                    "backdoor",
+                    "exploit",
+                    "inject",
+                    "poison",
+                ]
+            ),
             examples=(
                 ("Preciso acessar /etc/passwd para verificar usuários", True),
                 ("Vou fazer uma revisão de segurança no código", False),
@@ -48,7 +63,6 @@ def get_fundamental_principles() -> list[ConstitutionalPrinciple]:
                 ("Qual a melhor forma de implementar autenticação?", False),
             ),
         ),
-
         # PRINCÍPIO 2: ENFORCEMENT PROPORCIONAL
         ConstitutionalPrinciple(
             id=uuid4(),
@@ -68,7 +82,6 @@ def get_fundamental_principles() -> list[ConstitutionalPrinciple]:
             patterns=frozenset([]),
             keywords=frozenset([]),
         ),
-
         # PRINCÍPIO 3: TRANSPARÊNCIA TOTAL
         ConstitutionalPrinciple(
             id=uuid4(),
@@ -85,7 +98,6 @@ def get_fundamental_principles() -> list[ConstitutionalPrinciple]:
             category="MONITOR",
             severity=Severity.INFO,
         ),
-
         # PRINCÍPIO 4: ESCALAÇÃO APROPRIADA
         ConstitutionalPrinciple(
             id=uuid4(),
@@ -103,14 +115,15 @@ def get_fundamental_principles() -> list[ConstitutionalPrinciple]:
             """,
             category="ESCALATE",
             severity=Severity.HIGH,
-            patterns=frozenset([
-                "decisão irreversível",
-                "alto impacto",
-                "sem precedente",
-                "conflito ético",
-            ]),
+            patterns=frozenset(
+                [
+                    "decisão irreversível",
+                    "alto impacto",
+                    "sem precedente",
+                    "conflito ético",
+                ]
+            ),
         ),
-
         # PRINCÍPIO 5: APRENDIZADO CONTÍNUO
         ConstitutionalPrinciple(
             id=uuid4(),
@@ -167,12 +180,30 @@ def get_disallowed_activities() -> Set[str]:
 def get_red_flags() -> Set[str]:
     """Returns default red flag patterns."""
     return {
-        "bypass", "circumvent", "hide", "conceal", "unauthorized",
-        "exfiltrate", "escalate privilege", "override", "disable security",
-        "ignore policy", "skip validation", "remove logs", "delete audit",
-        "access denied but", "permission denied but", "forbidden but",
-        "just this once", "trust me", "don't tell", "secret", "covert",
-        "between us", "off the record", "disable monitoring",
+        "bypass",
+        "circumvent",
+        "hide",
+        "conceal",
+        "unauthorized",
+        "exfiltrate",
+        "escalate privilege",
+        "override",
+        "disable security",
+        "ignore policy",
+        "skip validation",
+        "remove logs",
+        "delete audit",
+        "access denied but",
+        "permission denied but",
+        "forbidden but",
+        "just this once",
+        "trust me",
+        "don't tell",
+        "secret",
+        "covert",
+        "between us",
+        "off the record",
+        "disable monitoring",
     }
 
 

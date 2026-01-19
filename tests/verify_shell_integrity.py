@@ -1,12 +1,12 @@
-
 import asyncio
 import sys
 import os
 
 # Add project root to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from vertice_cli.core.lazy_loader import LazyLoader
+
 
 async def verify_plugins():
     print("🔍 Verifying Shell Integrity & Plugins...")
@@ -17,8 +17,8 @@ async def verify_plugins():
     # 1. Verify Intelligence Plugin
     try:
         print("  Checking Intelligence Plugin...", end=" ")
-        mod = await loader.load('intelligence')
-        if not hasattr(mod, 'Plugin'):
+        mod = await loader.load("intelligence")
+        if not hasattr(mod, "Plugin"):
             raise AttributeError("Module has no 'Plugin' class")
 
         plugin = mod.Plugin()
@@ -34,14 +34,14 @@ async def verify_plugins():
     # 2. Verify DevSquad Plugin
     try:
         print("  Checking DevSquad Plugin...", end=" ")
-        mod = await loader.load('devsquad')
-        if not hasattr(mod, 'Plugin'):
+        mod = await loader.load("devsquad")
+        if not hasattr(mod, "Plugin"):
             raise AttributeError("Module has no 'Plugin' class")
 
         plugin = mod.Plugin()
         # Check if it has 'squad' attribute (might be None before init)
-        if not hasattr(plugin, 'squad'):
-             raise AttributeError("Plugin instance has no 'squad' attribute")
+        if not hasattr(plugin, "squad"):
+            raise AttributeError("Plugin instance has no 'squad' attribute")
 
         print("✅ OK (Plugin class found)")
     except Exception as e:
@@ -51,11 +51,11 @@ async def verify_plugins():
     # 3. Verify Tools Plugin
     try:
         print("  Checking Tools Plugin...", end=" ")
-        mod = await loader.load('tools')
-        if not hasattr(mod, 'tool_registry'):
-             # Tools plugin might expose registry directly or via Plugin class
-             # Let's check what it actually does
-             pass
+        mod = await loader.load("tools")
+        if not hasattr(mod, "tool_registry"):
+            # Tools plugin might expose registry directly or via Plugin class
+            # Let's check what it actually does
+            pass
         print("✅ OK (Module loaded)")
     except Exception as e:
         print(f"❌ FAILED: {e}")
@@ -64,9 +64,9 @@ async def verify_plugins():
     # 4. Verify LLM Plugin
     try:
         print("  Checking LLM Plugin...", end=" ")
-        mod = await loader.load('llm')
-        if not hasattr(mod, 'llm_client'):
-             raise AttributeError("Module has no 'llm_client'")
+        mod = await loader.load("llm")
+        if not hasattr(mod, "llm_client"):
+            raise AttributeError("Module has no 'llm_client'")
         print("✅ OK")
     except Exception as e:
         print(f"❌ FAILED: {e}")
@@ -81,6 +81,7 @@ async def verify_plugins():
     else:
         print("✨ All systems go! Shell integrity verified.")
         sys.exit(0)
+
 
 if __name__ == "__main__":
     asyncio.run(verify_plugins())

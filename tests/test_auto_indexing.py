@@ -28,10 +28,10 @@ class TestAutoIndexing:
 
             # Create shell in temp directory (use object.__setattr__ to bypass property)
             shell = object.__new__(InteractiveShell)
-            object.__setattr__(shell, 'console', Mock())
-            object.__setattr__(shell, '_indexer', SemanticIndexer(root_path=tmpdir))
-            object.__setattr__(shell, '_indexer_initialized', False)
-            object.__setattr__(shell, '_auto_index_task', None)
+            object.__setattr__(shell, "console", Mock())
+            object.__setattr__(shell, "_indexer", SemanticIndexer(root_path=tmpdir))
+            object.__setattr__(shell, "_indexer_initialized", False)
+            object.__setattr__(shell, "_auto_index_task", None)
 
             # Call _auto_index_background directly
             await shell._auto_index_background()
@@ -49,9 +49,9 @@ class TestAutoIndexing:
                 test_file.write_text(f"def func{i}():\n    pass\n")
 
             shell = object.__new__(InteractiveShell)
-            object.__setattr__(shell, 'console', Mock())
-            object.__setattr__(shell, '_indexer', SemanticIndexer(root_path=tmpdir))
-            object.__setattr__(shell, '_indexer_initialized', False)
+            object.__setattr__(shell, "console", Mock())
+            object.__setattr__(shell, "_indexer", SemanticIndexer(root_path=tmpdir))
+            object.__setattr__(shell, "_indexer_initialized", False)
 
             # Start indexing task
             task = asyncio.create_task(shell._auto_index_background())
@@ -71,9 +71,9 @@ class TestAutoIndexing:
         with tempfile.TemporaryDirectory() as tmpdir:
             shell = object.__new__(InteractiveShell)
             indexer = SemanticIndexer(root_path=tmpdir)
-            object.__setattr__(shell, 'console', Mock())
-            object.__setattr__(shell, '_indexer', indexer)
-            object.__setattr__(shell, '_indexer_initialized', True)  # Already initialized
+            object.__setattr__(shell, "console", Mock())
+            object.__setattr__(shell, "_indexer", indexer)
+            object.__setattr__(shell, "_indexer_initialized", True)  # Already initialized
 
             # Mock index_codebase to track calls
             indexer.index_codebase = Mock(return_value=0)
@@ -90,9 +90,9 @@ class TestAutoIndexing:
         with tempfile.TemporaryDirectory() as tmpdir:
             shell = object.__new__(InteractiveShell)
             indexer = SemanticIndexer(root_path=tmpdir)
-            object.__setattr__(shell, 'console', Mock())
-            object.__setattr__(shell, '_indexer', indexer)
-            object.__setattr__(shell, '_indexer_initialized', False)
+            object.__setattr__(shell, "console", Mock())
+            object.__setattr__(shell, "_indexer", indexer)
+            object.__setattr__(shell, "_indexer_initialized", False)
 
             # Make index_codebase raise an error
             def raise_error(*args, **kwargs):
@@ -113,13 +113,13 @@ class TestAutoIndexing:
         with tempfile.TemporaryDirectory() as tmpdir:
             shell = object.__new__(InteractiveShell)
             indexer = SemanticIndexer(root_path=tmpdir)
-            object.__setattr__(shell, 'console', Mock())
-            object.__setattr__(shell, '_indexer', indexer)
-            object.__setattr__(shell, '_indexer_initialized', False)
+            object.__setattr__(shell, "console", Mock())
+            object.__setattr__(shell, "_indexer", indexer)
+            object.__setattr__(shell, "_indexer_initialized", False)
 
             # Mock index_codebase to capture arguments
             indexer.index_codebase = Mock(return_value=5)
-            indexer.get_stats = Mock(return_value={'total_symbols': 10, 'unique_symbols': 8})
+            indexer.get_stats = Mock(return_value={"total_symbols": 10, "unique_symbols": 8})
 
             # Call auto-index
             await shell._auto_index_background()

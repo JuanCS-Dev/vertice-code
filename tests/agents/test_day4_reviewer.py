@@ -30,9 +30,9 @@ from vertice_cli.agents.reviewer import ReviewerAgent
 def mock_llm_client():
     """Mock LLM client."""
     client = MagicMock()
-    client.generate_content = AsyncMock(return_value=MagicMock(
-        text="Code review complete with good quality. Recommend approval."
-    ))
+    client.generate_content = AsyncMock(
+        return_value=MagicMock(text="Code review complete with good quality. Recommend approval.")
+    )
     return client
 
 
@@ -74,10 +74,10 @@ class TestCodeQualityGate:
             "test.py": '''
 def calculate_sum(numbers: List[int]) -> int:
     """Calculate sum of numbers.
-    
+
     Args:
         numbers: List of integers
-    
+
     Returns:
         Sum of all numbers
     """
@@ -129,13 +129,13 @@ def func3():
     async def test_gate_detects_naming_violations(self, reviewer_agent):
         """Test gate detects PEP 8 naming violations."""
         file_contents = {
-            "test.py": '''
+            "test.py": """
 def CamelCaseFunction():
     pass
 
 class snake_case_class:
     pass
-'''
+"""
         }
 
         gate = await reviewer_agent._gate_code_quality(file_contents)
@@ -151,13 +151,13 @@ class TestSecurityGate:
     async def test_gate_passes_with_secure_code(self, reviewer_agent):
         """Test security gate passes with secure code."""
         file_contents = {
-            "test.py": '''
+            "test.py": """
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 api_key = os.getenv("API_KEY")
-'''
+"""
         }
 
         gate = await reviewer_agent._gate_security(file_contents)
@@ -169,9 +169,7 @@ api_key = os.getenv("API_KEY")
     @pytest.mark.asyncio
     async def test_gate_detects_hardcoded_passwords(self, reviewer_agent):
         """Test gate detects hardcoded passwords."""
-        file_contents = {
-            "test.py": 'password = "secret123"'
-        }
+        file_contents = {"test.py": 'password = "secret123"'}
 
         gate = await reviewer_agent._gate_security(file_contents)
 
@@ -182,9 +180,7 @@ api_key = os.getenv("API_KEY")
     @pytest.mark.asyncio
     async def test_gate_detects_api_keys(self, reviewer_agent):
         """Test gate detects hardcoded API keys."""
-        file_contents = {
-            "test.py": 'api_key = "sk-1234567890abcdef"'
-        }
+        file_contents = {"test.py": 'api_key = "sk-1234567890abcdef"'}
 
         gate = await reviewer_agent._gate_security(file_contents)
 
@@ -195,10 +191,10 @@ api_key = os.getenv("API_KEY")
     async def test_gate_detects_sql_injection(self, reviewer_agent):
         """Test gate detects SQL injection risks."""
         file_contents = {
-            "test.py": '''
+            "test.py": """
 query = "SELECT * FROM users WHERE id = " + user_id
 cursor.execute(query)
-'''
+"""
         }
 
         gate = await reviewer_agent._gate_security(file_contents)
@@ -209,9 +205,7 @@ cursor.execute(query)
     @pytest.mark.asyncio
     async def test_gate_detects_command_injection(self, reviewer_agent):
         """Test gate detects command injection risks."""
-        file_contents = {
-            "test.py": 'os.system("rm -rf " + user_input)'
-        }
+        file_contents = {"test.py": 'os.system("rm -rf " + user_input)'}
 
         gate = await reviewer_agent._gate_security(file_contents)
 
@@ -221,9 +215,7 @@ cursor.execute(query)
     @pytest.mark.asyncio
     async def test_gate_detects_unsafe_eval(self, reviewer_agent):
         """Test gate detects unsafe eval usage."""
-        file_contents = {
-            "test.py": 'result = eval(user_input)'
-        }
+        file_contents = {"test.py": "result = eval(user_input)"}
 
         gate = await reviewer_agent._gate_security(file_contents)
 
@@ -237,10 +229,7 @@ class TestTestingGate:
     @pytest.mark.asyncio
     async def test_gate_passes_with_good_coverage(self, reviewer_agent):
         """Test gate passes with adequate test coverage."""
-        file_contents = {
-            "module.py": "def func(): pass",
-            "test_module.py": "def test_func(): pass"
-        }
+        file_contents = {"module.py": "def func(): pass", "test_module.py": "def test_func(): pass"}
         context = {"test_coverage": 90}
 
         gate = await reviewer_agent._gate_testing(file_contents, context)
@@ -263,10 +252,7 @@ class TestTestingGate:
     @pytest.mark.asyncio
     async def test_gate_detects_missing_tests(self, reviewer_agent):
         """Test gate detects missing test files."""
-        file_contents = {
-            "module.py": "def func(): pass",
-            "utils.py": "def helper(): pass"
-        }
+        file_contents = {"module.py": "def func(): pass", "utils.py": "def helper(): pass"}
         context = {"test_coverage": 0}
 
         gate = await reviewer_agent._gate_testing(file_contents, context)
@@ -278,13 +264,13 @@ class TestTestingGate:
     async def test_gate_warns_about_mocks(self, reviewer_agent):
         """Test gate warns about excessive mock usage."""
         file_contents = {
-            "test_module.py": '''
+            "test_module.py": """
 from unittest.mock import Mock, MagicMock
 
 def test_something():
     mock_obj = Mock()
     mock_obj.method.return_value = True
-'''
+"""
         }
         context = {"test_coverage": 90}
 
@@ -300,11 +286,11 @@ class TestPerformanceGate:
     async def test_gate_passes_with_efficient_code(self, reviewer_agent):
         """Test gate passes with efficient code."""
         file_contents = {
-            "test.py": '''
+            "test.py": """
 def process_data(items):
     with open("data.txt") as f:
         return [item.strip() for item in items]
-'''
+"""
         }
 
         gate = await reviewer_agent._gate_performance(file_contents)
@@ -317,13 +303,13 @@ def process_data(items):
     async def test_gate_detects_nested_loops(self, reviewer_agent):
         """Test gate detects deeply nested loops."""
         file_contents = {
-            "test.py": '''
+            "test.py": """
 for i in range(n):
     for j in range(n):
         for k in range(n):
             for m in range(n):
                 process(i, j, k, m)
-'''
+"""
         }
 
         gate = await reviewer_agent._gate_performance(file_contents)
@@ -335,11 +321,11 @@ for i in range(n):
     async def test_gate_detects_resource_leaks(self, reviewer_agent):
         """Test gate detects unclosed file handles."""
         file_contents = {
-            "test.py": '''
+            "test.py": """
 def read_data():
     f = open("data.txt")
     return f.read()
-'''
+"""
         }
 
         gate = await reviewer_agent._gate_performance(file_contents)
@@ -354,7 +340,7 @@ class TestConstitutionalGate:
     async def test_gate_passes_with_typed_code(self, reviewer_agent):
         """Test gate passes with properly typed code."""
         file_contents = {
-            "test.py": '''
+            "test.py": """
 from typing import List
 
 def process(items: List[int]) -> int:
@@ -362,7 +348,7 @@ def process(items: List[int]) -> int:
         return sum(items)
     except Exception as e:
         return 0
-'''
+"""
         }
 
         gate = await reviewer_agent._gate_constitutional(file_contents)
@@ -375,7 +361,7 @@ def process(items: List[int]) -> int:
     async def test_gate_detects_missing_type_hints(self, reviewer_agent):
         """Test gate detects missing type hints."""
         file_contents = {
-            "test.py": '''
+            "test.py": """
 def func1(a, b):
     return a + b
 
@@ -384,7 +370,7 @@ def func2(x, y):
 
 def func3(items: List[int]) -> int:
     return sum(items)
-'''
+"""
         }
 
         gate = await reviewer_agent._gate_constitutional(file_contents)
@@ -396,11 +382,11 @@ def func3(items: List[int]) -> int:
     async def test_gate_recommends_error_handling(self, reviewer_agent):
         """Test gate recommends error handling."""
         file_contents = {
-            "test.py": '''
+            "test.py": """
 def risky_operation():
     result = 1 / 0
     return result
-'''
+"""
         }
 
         gate = await reviewer_agent._gate_constitutional(file_contents)
@@ -414,18 +400,14 @@ class TestReviewerAgentExecution:
     @pytest.mark.asyncio
     async def test_execute_with_valid_files(self, reviewer_agent, mock_mcp_client):
         """Test execute with valid file list."""
-        mock_mcp_client.call_tool = AsyncMock(return_value={
-            "success": True,
-            "content": "def func(): pass"
-        })
+        mock_mcp_client.call_tool = AsyncMock(
+            return_value={"success": True, "content": "def func(): pass"}
+        )
 
         task = AgentTask(
             request="Review code quality",
-            context={
-                "files": ["test.py"],
-                "test_coverage": 90
-            },
-            session_id="test_session"
+            context={"files": ["test.py"], "test_coverage": 90},
+            session_id="test_session",
         )
 
         result = await reviewer_agent.execute(task)
@@ -437,16 +419,17 @@ class TestReviewerAgentExecution:
     @pytest.mark.asyncio
     async def test_execute_generates_comprehensive_report(self, reviewer_agent, mock_mcp_client):
         """Test execute generates comprehensive review report."""
-        mock_mcp_client.call_tool = AsyncMock(return_value={
-            "success": True,
-            "content": '''
+        mock_mcp_client.call_tool = AsyncMock(
+            return_value={
+                "success": True,
+                "content": '''
 def well_documented_function(x: int, y: int) -> int:
     """Add two numbers.
-    
+
     Args:
         x: First number
         y: Second number
-    
+
     Returns:
         Sum of x and y
     """
@@ -454,16 +437,14 @@ def well_documented_function(x: int, y: int) -> int:
         return x + y
     except Exception:
         return 0
-'''
-        })
+''',
+            }
+        )
 
         task = AgentTask(
             request="Review code",
-            context={
-                "files": ["math_utils.py"],
-                "test_coverage": 95
-            },
-            session_id="test_session"
+            context={"files": ["math_utils.py"], "test_coverage": 95},
+            session_id="test_session",
         )
 
         result = await reviewer_agent.execute(task)
@@ -478,11 +459,7 @@ def well_documented_function(x: int, y: int) -> int:
     @pytest.mark.asyncio
     async def test_execute_fails_without_files(self, reviewer_agent):
         """Test execute fails without files or diff."""
-        task = AgentTask(
-            request="Review code",
-            context={},
-            session_id="test_session"
-        )
+        task = AgentTask(request="Review code", context={}, session_id="test_session")
 
         result = await reviewer_agent.execute(task)
 
@@ -567,13 +544,13 @@ def func3():
 
     def test_check_naming_conventions_violations(self, reviewer_agent):
         """Test naming convention violation detection."""
-        code = '''
+        code = """
 def CamelCase():
     pass
 
 class snake_case:
     pass
-'''
+"""
         issues = reviewer_agent._check_naming_conventions(code)
 
         assert len(issues) == 2
@@ -582,22 +559,22 @@ class snake_case:
 
     def test_find_nested_loops_simple(self, reviewer_agent):
         """Test nested loop detection - simple case."""
-        code = '''
+        code = """
 for i in range(10):
     for j in range(10):
         print(i, j)
-'''
+"""
         depth = reviewer_agent._find_nested_loops(code)
         assert depth == 2
 
     def test_find_nested_loops_deep(self, reviewer_agent):
         """Test nested loop detection - deep nesting."""
-        code = '''
+        code = """
 for i in range(n):
     for j in range(n):
         for k in range(n):
             process(i, j, k)
-'''
+"""
         depth = reviewer_agent._find_nested_loops(code)
         assert depth == 3
 
@@ -608,17 +585,18 @@ class TestRealWorldScenarios:
     @pytest.mark.asyncio
     async def test_review_production_ready_code(self, reviewer_agent, mock_mcp_client):
         """Test reviewing production-ready code."""
-        mock_mcp_client.call_tool = AsyncMock(return_value={
-            "success": True,
-            "content": '''
+        mock_mcp_client.call_tool = AsyncMock(
+            return_value={
+                "success": True,
+                "content": '''
 from typing import List, Optional
 
 def calculate_average(numbers: List[float]) -> Optional[float]:
     """Calculate average of numbers.
-    
+
     Args:
         numbers: List of numbers to average
-    
+
     Returns:
         Average value or None if list is empty
     """
@@ -629,16 +607,14 @@ def calculate_average(numbers: List[float]) -> Optional[float]:
     except Exception as e:
         logging.error(f"Error calculating average: {e}")
         return None
-'''
-        })
+''',
+            }
+        )
 
         task = AgentTask(
             request="Review production code",
-            context={
-                "files": ["math_utils.py"],
-                "test_coverage": 95
-            },
-            session_id="test_session"
+            context={"files": ["math_utils.py"], "test_coverage": 95},
+            session_id="test_session",
         )
 
         result = await reviewer_agent.execute(task)
@@ -651,25 +627,24 @@ def calculate_average(numbers: List[float]) -> Optional[float]:
     @pytest.mark.asyncio
     async def test_review_insecure_code(self, reviewer_agent, mock_mcp_client):
         """Test reviewing code with security issues."""
-        mock_mcp_client.call_tool = AsyncMock(return_value={
-            "success": True,
-            "content": '''
+        mock_mcp_client.call_tool = AsyncMock(
+            return_value={
+                "success": True,
+                "content": """
 password = "admin123"
 api_key = "sk-1234567890"
 
 def execute_query(user_input):
     query = "SELECT * FROM users WHERE name = " + user_input
     cursor.execute(query)
-'''
-        })
+""",
+            }
+        )
 
         task = AgentTask(
             request="Review security",
-            context={
-                "files": ["auth.py"],
-                "test_coverage": 80
-            },
-            session_id="test_session"
+            context={"files": ["auth.py"], "test_coverage": 80},
+            session_id="test_session",
         )
 
         result = await reviewer_agent.execute(task)

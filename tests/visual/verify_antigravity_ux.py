@@ -13,6 +13,7 @@ from rich.panel import Panel
 
 # --- MOCK COMPONENTS (Para isolar a UI da Rede) ---
 
+
 class MockGeminiStream:
     """Simulates Gemini 3 Pro gRPC stream with Antigravity pacing."""
 
@@ -20,29 +21,30 @@ class MockGeminiStream:
         # Phase 1: Thinking (Fast, dimmed)
         {"text": "Analyzing request...", "type": "thought"},
         {"text": " The user wants to calculate Fibonacci.", "type": "thought"},
-
         # Phase 2: Native Tool Call (High visibility)
         {"text": "", "tool_call": {"name": "code_execution", "args": {"code": "def fib(n):..."}}},
-
         # Phase 3: Tool Result (System feedback)
         {"text": "", "tool_result": "12586269025"},
-
         # Phase 4: Status Badges
         {"text": "\n### Security Analysis\n", "type": "content"},
         {"text": "🔴 **BLOCKER**: Critical vulnerability in auth.\n", "type": "content"},
         {"text": "🟡 **WARNING**: Deprecated dependency detected.\n", "type": "content"},
-        {"text": "🟢 **SUGESTÃO**: Use `crypto/rand` instead of `math/rand`.\n\n", "type": "content"},
-
+        {
+            "text": "🟢 **SUGESTÃO**: Use `crypto/rand` instead of `math/rand`.\n\n",
+            "type": "content",
+        },
         # Phase 5: Table
         {"text": "| Severity | Count | Status |\n", "type": "content"},
         {"text": "|---|---|---|\n", "type": "content"},
         {"text": "| 🔴 BLOCKER | 6 | Immediate Action |\n", "type": "content"},
         {"text": "| 🟡 WARNING | 41 | High Priority |\n", "type": "content"},
         {"text": "| 🟢 SUGGESTION | 43 | Nice to have |\n\n", "type": "content"},
-
         # Phase 6: Final Response (Markdown, structured)
         {"text": "The 50th Fibonacci number is **12,586,269,025**.\n\n", "type": "content"},
-        {"text": "I calculated this using the native sandbox to ensure precision.", "type": "content"}
+        {
+            "text": "I calculated this using the native sandbox to ensure precision.",
+            "type": "content",
+        },
     ]
 
     async def stream(self):
@@ -51,8 +53,10 @@ class MockGeminiStream:
             await asyncio.sleep(0.05)
             yield chunk
 
+
 class AntigravityTestApp(App):
     """Harness to verify rendering without booting the full shell."""
+
     CSS = """
     Screen { background: #0d1117; }
     #stream-container { padding: 1; }
@@ -76,7 +80,6 @@ class AntigravityTestApp(App):
         self.save_screenshot("tests/visual/snapshots/01_idle.svg")
 
         async for chunk in mock.stream():
-
             # -- Lógica de Renderização Simplificada (simulando seu ResponseView) --
             if chunk.get("type") == "thought":
                 # Render Thinking
@@ -84,11 +87,11 @@ class AntigravityTestApp(App):
 
             elif "tool_call" in chunk:
                 # Render Tool
-                tool = chunk['tool_call']
+                tool = chunk["tool_call"]
                 panel = Panel(
                     f"Running: {tool['args'].get('code', '')[:20]}...",
                     title=f"🐍 {tool['name']}",
-                    style="green"
+                    style="green",
                 )
                 self.container.mount(Static(panel))
 
@@ -98,20 +101,25 @@ class AntigravityTestApp(App):
             elif "tool_result" in chunk:
                 # Render Result
                 from rich.text import Text
-                self.container.mount(Static(Text(f"└─ Result: {chunk['tool_result']}", style="dim green")))
+
+                self.container.mount(
+                    Static(Text(f"└─ Result: {chunk['tool_result']}", style="dim green"))
+                )
 
             elif chunk.get("type") == "content":
                 # Render Content
-                buffer += chunk['text']
+                buffer += chunk["text"]
                 # In real app, you'd update a Markdown widget here
-                self.container.mount(Static(Markdown(chunk['text'])))
+                self.container.mount(Static(Markdown(chunk["text"])))
 
         # --- SNAPSHOT 3: FINAL STATE ---
         self.save_screenshot("tests/visual/snapshots/03_final.svg")
         self.exit()
 
+
 if __name__ == "__main__":
     import os
+
     os.makedirs("tests/visual/snapshots", exist_ok=True)
     app = AntigravityTestApp()
     app.run()

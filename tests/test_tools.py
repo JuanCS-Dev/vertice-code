@@ -5,13 +5,13 @@ import asyncio
 import tempfile
 from pathlib import Path
 
-from vertice_cli.tools.file_ops import (
-    ReadFileTool, WriteFileTool, EditFileTool,
-    ListDirectoryTool
-)
+from vertice_cli.tools.file_ops import ReadFileTool, WriteFileTool, EditFileTool, ListDirectoryTool
 from vertice_cli.tools.file_mgmt import (
-    MoveFileTool, CopyFileTool, CreateDirectoryTool,
-    ReadMultipleFilesTool, InsertLinesTool
+    MoveFileTool,
+    CopyFileTool,
+    CreateDirectoryTool,
+    ReadMultipleFilesTool,
+    InsertLinesTool,
 )
 from vertice_cli.tools.search import SearchFilesTool, GetDirectoryTreeTool
 from vertice_cli.tools.exec import BashCommandTool
@@ -28,10 +28,7 @@ async def test_file_ops():
         # Test write_file
         print("  Testing write_file...")
         write_tool = WriteFileTool()
-        result = await write_tool.execute(
-            path=str(test_file),
-            content="Hello World\nLine 2"
-        )
+        result = await write_tool.execute(path=str(test_file), content="Hello World\nLine 2")
         assert result.success, f"write_file failed: {result.error}"
         assert test_file.exists()
         print("    ✓ write_file works")
@@ -42,15 +39,14 @@ async def test_file_ops():
         result = await read_tool.execute(path=str(test_file))
         assert result.success
         assert "Hello World" in result.data
-        assert result.metadata['lines'] == 2
+        assert result.metadata["lines"] == 2
         print("    ✓ read_file works")
 
         # Test edit_file
         print("  Testing edit_file...")
         edit_tool = EditFileTool()
         result = await edit_tool.execute(
-            path=str(test_file),
-            edits=[{"search": "Hello World", "replace": "Hello Python"}]
+            path=str(test_file), edits=[{"search": "Hello World", "replace": "Hello Python"}]
         )
         assert result.success
         content = test_file.read_text()
@@ -62,19 +58,17 @@ async def test_file_ops():
         list_tool = ListDirectoryTool()
         result = await list_tool.execute(path=tmpdir)
         assert result.success
-        assert len(result.data['files']) == 1
+        assert len(result.data["files"]) == 1
         print("    ✓ list_directory works")
 
         # Test insert_lines
         print("  Testing insert_lines...")
         insert_tool = InsertLinesTool()
         result = await insert_tool.execute(
-            path=str(test_file),
-            line_number=2,
-            content="Inserted line"
+            path=str(test_file), line_number=2, content="Inserted line"
         )
         assert result.success
-        lines = test_file.read_text().split('\n')
+        lines = test_file.read_text().split("\n")
         assert "Inserted line" in lines
         print("    ✓ insert_lines works")
 
@@ -94,8 +88,7 @@ async def test_file_mgmt():
         print("  Testing copy_file...")
         copy_tool = CopyFileTool()
         result = await copy_tool.execute(
-            source=str(test_file),
-            destination=str(tmpdir / "copy.txt")
+            source=str(test_file), destination=str(tmpdir / "copy.txt")
         )
         assert result.success
         assert (tmpdir / "copy.txt").exists()
@@ -105,8 +98,7 @@ async def test_file_mgmt():
         print("  Testing move_file...")
         move_tool = MoveFileTool()
         result = await move_tool.execute(
-            source=str(tmpdir / "copy.txt"),
-            destination=str(tmpdir / "moved.txt")
+            source=str(tmpdir / "copy.txt"), destination=str(tmpdir / "moved.txt")
         )
         assert result.success
         assert (tmpdir / "moved.txt").exists()
@@ -124,9 +116,7 @@ async def test_file_mgmt():
         # Test read_multiple_files
         print("  Testing read_multiple_files...")
         read_multi_tool = ReadMultipleFilesTool()
-        result = await read_multi_tool.execute(
-            paths=[str(test_file), str(tmpdir / "moved.txt")]
-        )
+        result = await read_multi_tool.execute(paths=[str(test_file), str(tmpdir / "moved.txt")])
         assert result.success
         assert len(result.data) == 2
         print("    ✓ read_multiple_files works")
@@ -146,11 +136,7 @@ async def test_search():
         # Test search_files
         print("  Testing search_files...")
         search_tool = SearchFilesTool()
-        result = await search_tool.execute(
-            pattern="def",
-            path=str(tmpdir),
-            file_pattern="*.py"
-        )
+        result = await search_tool.execute(pattern="def", path=str(tmpdir), file_pattern="*.py")
         assert result.success
         assert len(result.data) >= 2
         print("    ✓ search_files works")
@@ -173,7 +159,7 @@ async def test_execution():
     bash_tool = BashCommandTool()
     result = await bash_tool.execute(command="echo 'Hello from bash'")
     assert result.success
-    assert "Hello from bash" in result.data['stdout']
+    assert "Hello from bash" in result.data["stdout"]
     print("    ✓ bash_command works")
 
     # Test with timeout
@@ -238,6 +224,7 @@ async def run_all_tests():
     except Exception as e:
         print(f"\n❌ ERROR: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 

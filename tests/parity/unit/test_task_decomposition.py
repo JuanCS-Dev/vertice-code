@@ -54,14 +54,17 @@ class TestTaskDecompositionBasics:
     async def test_decomposition_not_hardcoded(self, orchestrator):
         """Decomposition should vary based on request complexity."""
         simple_request = "Add a comment"
-        complex_request = "Build a complete e-commerce system with cart, checkout, payments, and inventory"
+        complex_request = (
+            "Build a complete e-commerce system with cart, checkout, payments, and inventory"
+        )
 
         simple_plan = await orchestrator.plan(simple_request)
         complex_plan = await orchestrator.plan(complex_request)
 
         # Complex request should have more tasks
-        assert len(complex_plan) > len(simple_plan), \
-            "Complex requests should decompose into more tasks than simple ones"
+        assert len(complex_plan) > len(
+            simple_plan
+        ), "Complex requests should decompose into more tasks than simple ones"
 
 
 class TestTaskDecompositionQuality:
@@ -91,7 +94,11 @@ class TestTaskDecompositionQuality:
 
         # Each component should be represented
         assert "login" in all_descriptions or "authentication" in all_descriptions
-        assert "logout" in all_descriptions or "signout" in all_descriptions or "session" in all_descriptions
+        assert (
+            "logout" in all_descriptions
+            or "signout" in all_descriptions
+            or "session" in all_descriptions
+        )
         assert "password" in all_descriptions or "reset" in all_descriptions
 
     @pytest.mark.unit
@@ -171,7 +178,7 @@ class TestTaskDecompositionIntegration:
     @pytest.mark.integration
     @pytest.mark.skipif(
         not os.path.exists("/media/juan/DATA/Vertice-Code/agents/orchestrator/agent.py"),
-        reason="Orchestrator not available"
+        reason="Orchestrator not available",
     )
     async def test_real_orchestrator_decomposes(self):
         """Test with real orchestrator if available."""

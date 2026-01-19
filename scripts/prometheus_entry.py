@@ -88,10 +88,7 @@ async def handle_request(request: Request):
     body = await request.json()
     input_text = body.get("inputs", body.get("input", ""))
 
-    return StreamingResponse(
-        agent(input_text, user_id, session_id),
-        media_type="text/event-stream"
-    )
+    return StreamingResponse(agent(input_text, user_id, session_id), media_type="text/event-stream")
 
 
 @app.get("/health")

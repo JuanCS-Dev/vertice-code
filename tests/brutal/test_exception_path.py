@@ -24,13 +24,11 @@ async def test_exception_path(test_id: int) -> None:
         gov.pipeline = Mock()
         gov.pipeline.pre_execution_check = AsyncMock(
             side_effect=RuntimeError(f"Fail {test_id}") if test_id % 2 else None,
-            return_value=(True, None, {})
+            return_value=(True, None, {}),
         )
         agent = Mock()
         agent.role = AgentRole.EXECUTOR
-        agent.execute = AsyncMock(
-            return_value=AgentResponse(success=True, reasoning="ok", data={})
-        )
+        agent.execute = AsyncMock(return_value=AgentResponse(success=True, reasoning="ok", data={}))
         task = AgentTask(request="test", context={})
         response = await gov.execute_with_governance(agent, task)
         assert response is not None

@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 class VaultEntryType(str, Enum):
     """Types of vault entries (MIRIX spec)."""
+
     CREDENTIAL = "credential"
     BOOKMARK = "bookmark"
     CONTACT_INFO = "contact_info"
@@ -45,6 +46,7 @@ class VaultEntryType(str, Enum):
 
 class SensitivityLevel(str, Enum):
     """Sensitivity levels for vault entries."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -66,6 +68,7 @@ class VaultEntry:
         created_at: Creation timestamp.
         last_accessed: Last access timestamp.
     """
+
     id: str
     name: str
     entry_type: VaultEntryType
@@ -145,6 +148,7 @@ class KnowledgeVault:
         try:
             # Use username and home path as basic salt
             import os
+
             user = os.getenv("USER", os.getenv("USERNAME", "default"))
             home = str(Path.home())
             return hashlib.sha256(f"{user}:{home}".encode()).hexdigest()[:16]
@@ -154,7 +158,8 @@ class KnowledgeVault:
     def _init_db(self) -> None:
         """Initialize database schema."""
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS vault (
                     id TEXT PRIMARY KEY,
                     name TEXT NOT NULL UNIQUE,
@@ -166,13 +171,10 @@ class KnowledgeVault:
                     created_at TEXT,
                     last_accessed TEXT
                 )
-            """)
-            conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_vault_type ON vault(entry_type)"
+            """
             )
-            conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_vault_name ON vault(name)"
-            )
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_vault_type ON vault(entry_type)")
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_vault_name ON vault(name)")
 
     def encrypt(self, value: str) -> str:
         """Encrypt value with AES-128-CBC (Fernet)."""
@@ -248,7 +250,7 @@ class KnowledgeVault:
                     obfuscated,
                     json.dumps(metadata or {}),
                     datetime.now().isoformat(),
-                )
+                ),
             )
 
         logger.info(f"Stored vault entry: {name} ({entry_type.value})")
@@ -266,10 +268,7 @@ class KnowledgeVault:
         """
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
-            row = conn.execute(
-                "SELECT * FROM vault WHERE name = ?",
-                (name,)
-            ).fetchone()
+            row = conn.execute("SELECT * FROM vault WHERE name = ?", (name,)).fetchone()
 
             if row:
                 # Update access tracking
@@ -277,7 +276,7 @@ class KnowledgeVault:
                     """UPDATE vault
                        SET last_accessed = ?
                        WHERE name = ?""",
-                    (datetime.now().isoformat(), name)
+                    (datetime.now().isoformat(), name),
                 )
                 return self._row_to_entry(row)
             return None
@@ -302,13 +301,10 @@ class KnowledgeVault:
 
             if entry_type:
                 rows = conn.execute(
-                    "SELECT * FROM vault WHERE entry_type = ? ORDER BY name",
-                    (entry_type.value,)
+                    "SELECT * FROM vault WHERE entry_type = ? ORDER BY name", (entry_type.value,)
                 ).fetchall()
             else:
-                rows = conn.execute(
-                    "SELECT * FROM vault ORDER BY name"
-                ).fetchall()
+                rows = conn.execute("SELECT * FROM vault ORDER BY name").fetchall()
 
             entries = [self._row_to_entry(row) for row in rows]
             return [e.to_dict(include_value=include_values) for e in entries]
@@ -324,10 +320,7 @@ class KnowledgeVault:
             True if deleted, False if not found.
         """
         with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.execute(
-                "DELETE FROM vault WHERE name = ?",
-                (name,)
-            )
+            cursor = conn.execute("DELETE FROM vault WHERE name = ?", (name,))
             deleted = cursor.rowcount > 0
 
         if deleted:
@@ -337,10 +330,7 @@ class KnowledgeVault:
     def exists(self, name: str) -> bool:
         """Check if an entry exists."""
         with sqlite3.connect(self.db_path) as conn:
-            row = conn.execute(
-                "SELECT 1 FROM vault WHERE name = ?",
-                (name,)
-            ).fetchone()
+            row = conn.execute("SELECT 1 FROM vault WHERE name = ?", (name,)).fetchone()
             return row is not None
 
     def _row_to_entry(self, row: sqlite3.Row) -> VaultEntry:

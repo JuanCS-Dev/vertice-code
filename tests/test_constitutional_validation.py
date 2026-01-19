@@ -66,17 +66,11 @@ class TestDeliberation:
         conv = ConversationManager(session_id="test")
 
         # Turn 1
-        turn1 = await conv.add_turn(
-            user_input="list files",
-            assistant_response="ls -la",
-            tool_calls=[]
-        )
+        await conv.add_turn(user_input="list files", assistant_response="ls -la", tool_calls=[])
 
         # Turn 2 (referencia turn 1)
-        turn2 = await conv.add_turn(
-            user_input="delete the biggest",
-            assistant_response="rm largest.file",
-            tool_calls=[]
+        await conv.add_turn(
+            user_input="delete the biggest", assistant_response="rm largest.file", tool_calls=[]
         )
 
         # Should have 2 turns
@@ -93,7 +87,7 @@ class TestStateManagement:
         builder = ContextBuilder()
         context = builder.build_context()
 
-        assert 'cwd' in context or 'working_dir' in str(context)
+        assert "cwd" in context or "working_dir" in str(context)
 
     def test_session_persistence(self):
         """P7: Session deve persistir estado."""
@@ -138,7 +132,7 @@ class TestIncentives:
         from vertice_cli.core.metrics import MetricsCollector
 
         metrics = MetricsCollector()
-        assert hasattr(metrics, 'track_execution')
+        assert hasattr(metrics, "track_execution")
 
     def test_lei_calculation(self):
         """P11: LEI < 1.0 (não lazy)."""
@@ -147,12 +141,7 @@ class TestIncentives:
         metrics = MetricsCollector()
 
         # Simulate execution
-        metrics.track_execution(
-            prompt_tokens=100,
-            llm_calls=1,
-            tools_executed=1,
-            success=True
-        )
+        metrics.track_execution(prompt_tokens=100, llm_calls=1, tools_executed=1, success=True)
 
         lei = metrics.calculate_lei()
         assert lei < 1.0, f"LEI should be < 1.0, got {lei}"
@@ -165,16 +154,16 @@ def test_all_layers_integrated():
     shell = InteractiveShell()
 
     # Layer 1: Defense
-    assert hasattr(shell, 'registry'), "Missing tool registry"
+    assert hasattr(shell, "registry"), "Missing tool registry"
 
     # Layer 2: Deliberation
-    assert hasattr(shell, 'conversation'), "Missing conversation"
+    assert hasattr(shell, "conversation"), "Missing conversation"
 
     # Layer 3: State
-    assert hasattr(shell, 'context'), "Missing context"
+    assert hasattr(shell, "context"), "Missing context"
 
     # Layer 4: Execution
-    assert hasattr(shell, 'recovery_engine'), "Missing recovery"
+    assert hasattr(shell, "recovery_engine"), "Missing recovery"
 
     # Layer 5: Metrics
     # Metrics are in core, not shell directly (ok)

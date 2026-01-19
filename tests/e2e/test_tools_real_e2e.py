@@ -39,17 +39,24 @@ class ToolTestSuite:
         """Initialize tool registry and MCP client."""
         try:
             from vertice_cli.tools.registry_setup import setup_default_tools
+
             self.registry, self.mcp_client = setup_default_tools()
             print(f"Registry initialized with {len(self.registry.tools)} tools")
             return True
         except Exception as e:
             print(f"Failed to setup tools: {e}")
             import traceback
+
             traceback.print_exc()
             return False
 
-    async def test_tool(self, name: str, tool_name: str, params: Dict[str, Any],
-                        expected_in_output: List[str] = None) -> ToolTestResult:
+    async def test_tool(
+        self,
+        name: str,
+        tool_name: str,
+        params: Dict[str, Any],
+        expected_in_output: List[str] = None,
+    ) -> ToolTestResult:
         """Test a single tool with given parameters."""
         print(f"\n{'='*70}")
         print(f"TOOL TEST: {name}")
@@ -68,16 +75,16 @@ class ToolTestSuite:
                 result.success = False
             else:
                 # Execute tool - try different execute methods
-                if hasattr(tool, 'execute'):
+                if hasattr(tool, "execute"):
                     output = await tool.execute(**params)
-                elif hasattr(tool, '_execute_validated'):
+                elif hasattr(tool, "_execute_validated"):
                     output = await tool._execute_validated(**params)
                 else:
                     result.error = f"Tool '{tool_name}' has no execute method"
                     output = None
 
                 # Handle ToolResult or raw output
-                if hasattr(output, 'data'):
+                if hasattr(output, "data"):
                     result.output = str(output.data) if output.data else str(output)
                 else:
                     result.output = str(output) if output else ""
@@ -100,6 +107,7 @@ class ToolTestSuite:
             result.error = str(e)
             result.success = False
             import traceback
+
             traceback.print_exc()
 
         result.duration = (datetime.now() - start).total_seconds()
@@ -125,7 +133,7 @@ class ToolTestSuite:
             name="ReadFile - Read Python file",
             tool_name="read_file",
             params={"path": str(test_dir / "src" / "user_service.py")},
-            expected_in_output=["UserService", "def", "class", "sql"]
+            expected_in_output=["UserService", "def", "class", "sql"],
         )
 
         # Test GetDirectoryTree (instead of ListDirectory)
@@ -133,7 +141,7 @@ class ToolTestSuite:
             name="DirectoryTree - Get src/ structure",
             tool_name="get_directory_tree",
             params={"path": str(test_dir / "src")},
-            expected_in_output=["user_service", "data_processor"]
+            expected_in_output=["user_service", "data_processor"],
         )
 
         # Test WriteFileTool (to temp file)
@@ -142,7 +150,7 @@ class ToolTestSuite:
             name="WriteFile - Create temp file",
             tool_name="write_file",
             params={"path": str(temp_file), "content": "# Test content\nprint('hello')"},
-            expected_in_output=[]
+            expected_in_output=[],
         )
 
         # Verify written file
@@ -151,7 +159,7 @@ class ToolTestSuite:
                 name="ReadFile - Verify written file",
                 tool_name="read_file",
                 params={"path": str(temp_file)},
-                expected_in_output=["Test content", "hello"]
+                expected_in_output=["Test content", "hello"],
             )
             temp_file.unlink()  # Cleanup
 
@@ -159,8 +167,12 @@ class ToolTestSuite:
         await self.test_tool(
             name="EditFile - Check edit capability",
             tool_name="edit_file",
-            params={"path": str(test_dir / "src" / "user_service.py"), "old_text": "# Fake edit test", "new_text": "# Nothing"},
-            expected_in_output=[]  # Will fail gracefully - text not found
+            params={
+                "path": str(test_dir / "src" / "user_service.py"),
+                "old_text": "# Fake edit test",
+                "new_text": "# Nothing",
+            },
+            expected_in_output=[],  # Will fail gracefully - text not found
         )
 
         # Test CopyFile
@@ -170,7 +182,7 @@ class ToolTestSuite:
             name="CopyFile - Copy source file",
             tool_name="copy_file",
             params={"source": src_file, "destination": dst_file},
-            expected_in_output=[]
+            expected_in_output=[],
         )
         if Path(dst_file).exists():
             Path(dst_file).unlink()
@@ -186,7 +198,7 @@ class ToolTestSuite:
             name="SearchFiles - Find SQL injection",
             tool_name="search_files",
             params={"pattern": "SELECT.*FROM", "path": str(Path.cwd())},
-            expected_in_output=["user_service", "SELECT"]
+            expected_in_output=["user_service", "SELECT"],
         )
 
         # Test GetDirectoryTreeTool
@@ -194,7 +206,7 @@ class ToolTestSuite:
             name="DirectoryTree - Get project structure",
             tool_name="get_directory_tree",
             params={"path": str(Path.cwd()), "max_depth": 3},
-            expected_in_output=["src", "user_service", "data_processor"]
+            expected_in_output=["src", "user_service", "data_processor"],
         )
 
     async def run_terminal_tests(self):
@@ -208,7 +220,7 @@ class ToolTestSuite:
             name="Bash - pwd command",
             tool_name="bash_command",
             params={"command": "pwd"},
-            expected_in_output=["vertice_e2e_test"]
+            expected_in_output=["vertice_e2e_test"],
         )
 
         # Test BashCommand - ls
@@ -216,7 +228,7 @@ class ToolTestSuite:
             name="Bash - ls command",
             tool_name="bash_command",
             params={"command": "ls -la"},
-            expected_in_output=["src"]
+            expected_in_output=["src"],
         )
 
         # Test BashCommand - cat
@@ -224,7 +236,7 @@ class ToolTestSuite:
             name="Bash - cat file",
             tool_name="bash_command",
             params={"command": "cat src/user_service.py | head -20"},
-            expected_in_output=["UserService", "sql"]
+            expected_in_output=["UserService", "sql"],
         )
 
         # Test BashCommand - grep
@@ -232,7 +244,7 @@ class ToolTestSuite:
             name="Bash - grep for SQL",
             tool_name="bash_command",
             params={"command": "grep -r 'SELECT' src/"},
-            expected_in_output=["SELECT", "FROM"]
+            expected_in_output=["SELECT", "FROM"],
         )
 
     async def run_git_tests(self):
@@ -246,7 +258,7 @@ class ToolTestSuite:
             name="GitStatus - Repository status",
             tool_name="git_status",
             params={"path": str(Path.cwd())},
-            expected_in_output=[]  # May or may not be a git repo
+            expected_in_output=[],  # May or may not be a git repo
         )
 
     async def run_prometheus_tests(self):
@@ -260,7 +272,7 @@ class ToolTestSuite:
             name="Prometheus - Get Status",
             tool_name="prometheus_get_status",
             params={},
-            expected_in_output=[]  # May not be initialized
+            expected_in_output=[],  # May not be initialized
         )
 
     async def run_all_tests(self):
@@ -314,7 +326,7 @@ class ToolTestSuite:
             if r.error:
                 lines.append(f"  Error: {r.error}")
             if r.output:
-                preview = r.output[:200].replace('\n', ' ')
+                preview = r.output[:200].replace("\n", " ")
                 lines.append(f"  Output: {preview}...")
 
         # Summary
@@ -344,9 +356,9 @@ class AgentToolCombinationSuite:
         self.results: List[Dict[str, Any]] = []
         self.start_time = datetime.now()
 
-    async def test_agent_with_tools(self, agent_name: str, task: str,
-                                     expected_tools: List[str],
-                                     expected_output: List[str]) -> Dict[str, Any]:
+    async def test_agent_with_tools(
+        self, agent_name: str, task: str, expected_tools: List[str], expected_output: List[str]
+    ) -> Dict[str, Any]:
         """Test agent invocation that should use specific tools."""
         print(f"\n{'='*70}")
         print(f"AGENT+TOOLS TEST: {agent_name}")
@@ -365,12 +377,14 @@ class AgentToolCombinationSuite:
             "tools_used": [],
             "success": False,
             "error": "",
-            "duration": 0.0
+            "duration": 0.0,
         }
 
         start = datetime.now()
         cwd = Path.cwd()
-        files = [str(f) for f in cwd.glob("**/*.py") if f.is_file() and not f.name.startswith("test_")]
+        files = [
+            str(f) for f in cwd.glob("**/*.py") if f.is_file() and not f.name.startswith("test_")
+        ]
 
         context = {
             "cwd": str(cwd),
@@ -401,6 +415,7 @@ class AgentToolCombinationSuite:
         except Exception as e:
             result["error"] = str(e)
             import traceback
+
             traceback.print_exc()
 
         result["duration"] = (datetime.now() - start).total_seconds()
@@ -425,7 +440,7 @@ class AgentToolCombinationSuite:
             agent_name="explorer",
             task="List all Python files and their main classes",
             expected_tools=["list_directory", "read_file"],
-            expected_output=["src", "user_service", "data_processor", "class"]
+            expected_output=["src", "user_service", "data_processor", "class"],
         )
 
         # Test 2: Security with search tools
@@ -433,7 +448,7 @@ class AgentToolCombinationSuite:
             agent_name="security",
             task="Find all SQL vulnerabilities using search",
             expected_tools=["search_files"],
-            expected_output=["sql", "injection", "vulnerability"]
+            expected_output=["sql", "injection", "vulnerability"],
         )
 
         # Test 3: Performance with file analysis
@@ -441,7 +456,7 @@ class AgentToolCombinationSuite:
             agent_name="performance",
             task="Analyze code for performance issues",
             expected_tools=["read_file"],
-            expected_output=["performance", "function"]
+            expected_output=["performance", "function"],
         )
 
         # Test 4: Reviewer with code reading
@@ -449,7 +464,7 @@ class AgentToolCombinationSuite:
             agent_name="reviewer",
             task="Review code quality issues",
             expected_tools=["read_file"],
-            expected_output=["issue", "code", "review"]
+            expected_output=["issue", "code", "review"],
         )
 
         return self.generate_report()
@@ -477,7 +492,7 @@ class AgentToolCombinationSuite:
             if r["error"]:
                 lines.append(f"  Error: {r['error']}")
             if r["output"]:
-                preview = r["output"][:300].replace('\n', ' ')
+                preview = r["output"][:300].replace("\n", " ")
                 lines.append(f"  Output preview: {preview}...")
 
         report = "\n".join(lines)

@@ -56,7 +56,9 @@ class ClaudeParityTasksHandler:
                         status_icon = (
                             "🟢"
                             if t["status"] == "running"
-                            else "✅" if t["status"] == "completed" else "❌"
+                            else "✅"
+                            if t["status"] == "completed"
+                            else "❌"
                         )
                         lines.append(f"{status_icon} `{t['id']}` - {t['command']} ({t['status']})")
                     view.add_system_message("\n".join(lines))
@@ -209,7 +211,9 @@ class ClaudeParityTasksHandler:
                     status_icon = (
                         "🟢"
                         if s["status"] == "running"
-                        else "✅" if s["status"] == "completed" else "❌"
+                        else "✅"
+                        if s["status"] == "completed"
+                        else "❌"
                     )
                     lines.append(
                         f"{status_icon} `{s['id']}` - **{s['type']}** ({s['status']})\n"

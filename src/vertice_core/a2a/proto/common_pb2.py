@@ -20,9 +20,11 @@ DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "common_pb2", _globals)
-if _descriptor._USE_C_DESCRIPTORS == False:
+if not _descriptor._USE_C_DESCRIPTORS:
     _globals["DESCRIPTOR"]._options = None
-    _globals["DESCRIPTOR"]._serialized_options = (
+    _globals[
+        "DESCRIPTOR"
+    ]._serialized_options = (
         b"\n\017com.vertice.a2aB\013CommonProtoZ\034github.com/vertice/a2a/proto"
     )
     _globals["_PART_METADATAENTRY"]._options = None

@@ -22,17 +22,12 @@ class MockValidatedTool(ValidatedTool):
         return "Mock tool for testing"
 
     def get_validators(self) -> Dict[str, Any]:
-        return {
-            'path': Required('path'),
-            'content': TypeCheck(str, 'content')
-        }
+        return {"path": Required("path"), "content": TypeCheck(str, "content")}
 
     async def _execute_validated(self, **kwargs) -> ToolResult:
         """Execute after validation."""
         return ToolResult(
-            success=True,
-            data={'executed_with': kwargs},
-            metadata={'validated': True}
+            success=True, data={"executed_with": kwargs}, metadata={"validated": True}
         )
 
 
@@ -44,15 +39,11 @@ class TestValidatedTool:
         """Valid inputs should pass validation and execute."""
         tool = MockValidatedTool()
 
-        result = await tool.execute(
-            path="/tmp/test.txt",
-            content="test content",
-            mode="rw"
-        )
+        result = await tool.execute(path="/tmp/test.txt", content="test content", mode="rw")
 
         assert result.success is True
-        assert result.metadata.get('validated') is True
-        assert 'executed_with' in result.data
+        assert result.metadata.get("validated") is True
+        assert "executed_with" in result.data
 
     @pytest.mark.asyncio
     async def test_missing_required_fails(self):
@@ -61,7 +52,7 @@ class TestValidatedTool:
 
         result = await tool.execute(
             content="test content",
-            mode="rw"
+            mode="rw",
             # Missing 'path'
         )
 
@@ -77,7 +68,7 @@ class TestValidatedTool:
         result = await tool.execute(
             path="/tmp/test.txt",
             content=123,  # Should be str
-            mode="rw"
+            mode="rw",
         )
 
         assert result.success is False
@@ -106,8 +97,8 @@ class TestValidatedTool:
         )
 
         assert result.success is False
-        assert 'validation_errors' in result.metadata
-        assert len(result.metadata['validation_errors']) >= 1  # path
+        assert "validation_errors" in result.metadata
+        assert len(result.metadata["validation_errors"]) >= 1  # path
 
     @pytest.mark.asyncio
     async def test_extra_params_allowed(self):
@@ -117,7 +108,7 @@ class TestValidatedTool:
         result = await tool.execute(
             path="/tmp/test.txt",
             content="test",
-            extra_param="allowed"  # Not validated, should be ok
+            extra_param="allowed",  # Not validated, should be ok
         )
 
         assert result.success is True
@@ -128,29 +119,20 @@ class TestValidateToolInputs:
 
     def test_valid_inputs(self):
         """Valid inputs should pass."""
-        validators = {
-            'name': Required('name'),
-            'age': TypeCheck(int, 'age')
-        }
+        validators = {"name": Required("name"), "age": TypeCheck(int, "age")}
 
-        result = validate_tool_inputs(
-            {'name': 'John', 'age': 30},
-            validators
-        )
+        result = validate_tool_inputs({"name": "John", "age": 30}, validators)
 
         assert result.is_valid is True
         assert len(result.errors) == 0
 
     def test_invalid_inputs(self):
         """Invalid inputs should fail."""
-        validators = {
-            'name': Required('name'),
-            'age': TypeCheck(int, 'age')
-        }
+        validators = {"name": Required("name"), "age": TypeCheck(int, "age")}
 
         result = validate_tool_inputs(
-            {'age': 'thirty'},  # Missing name, wrong type for age
-            validators
+            {"age": "thirty"},  # Missing name, wrong type for age
+            validators,
         )
 
         assert result.is_valid is False
@@ -158,10 +140,7 @@ class TestValidateToolInputs:
 
     def test_empty_validators(self):
         """Empty validators should pass anything."""
-        result = validate_tool_inputs(
-            {'anything': 'goes'},
-            {}
-        )
+        result = validate_tool_inputs({"anything": "goes"}, {})
 
         assert result.is_valid is True
         assert len(result.errors) == 0
@@ -173,6 +152,7 @@ class TestValidatedToolIntegration:
     @pytest.mark.asyncio
     async def test_file_write_tool_validation(self):
         """Test file write tool with validation."""
+
         class FileWriteTool(ValidatedTool):
             def get_name(self) -> str:
                 return "write_file"
@@ -181,25 +161,19 @@ class TestValidatedToolIntegration:
                 return "Write content to file"
 
             def get_validators(self) -> Dict[str, Any]:
-                return {
-                    'path': Required('path'),
-                    'content': TypeCheck(str, 'content')
-                }
+                return {"path": Required("path"), "content": TypeCheck(str, "content")}
 
             async def _execute_validated(self, path: str, content: str, **kwargs) -> ToolResult:
                 # In real tool, would write to file
-                return ToolResult(
-                    success=True,
-                    data={'bytes_written': len(content), 'path': path}
-                )
+                return ToolResult(success=True, data={"bytes_written": len(content), "path": path})
 
         tool = FileWriteTool()
 
         # Valid case
         result = await tool.execute(path="/tmp/test.txt", content="Hello World")
         assert result.success is True
-        assert result.data['bytes_written'] == 11
-        assert result.data['path'] == "/tmp/test.txt"
+        assert result.data["bytes_written"] == 11
+        assert result.data["path"] == "/tmp/test.txt"
 
         # Invalid case - missing content
         result = await tool.execute(path="/tmp/test.txt")
@@ -209,6 +183,7 @@ class TestValidatedToolIntegration:
     @pytest.mark.asyncio
     async def test_execution_error_handling(self):
         """Test that execution errors are caught and returned properly."""
+
         class FailingTool(ValidatedTool):
             def get_name(self) -> str:
                 return "failing_tool"
@@ -217,7 +192,7 @@ class TestValidatedToolIntegration:
                 return "Tool that fails"
 
             def get_validators(self) -> Dict[str, Any]:
-                return {'input': Required('input')}
+                return {"input": Required("input")}
 
             async def _execute_validated(self, **kwargs) -> ToolResult:
                 raise RuntimeError("Intentional failure")
@@ -227,8 +202,8 @@ class TestValidatedToolIntegration:
 
         assert result.success is False
         assert "Execution failed" in result.error
-        assert result.metadata['error_type'] == 'execution'
-        assert result.metadata['exception'] == 'RuntimeError'
+        assert result.metadata["error_type"] == "execution"
+        assert result.metadata["exception"] == "RuntimeError"
 
 
 if __name__ == "__main__":

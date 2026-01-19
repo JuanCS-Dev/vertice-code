@@ -1,9 +1,9 @@
 # 📋 PlannerAgent: The Project Manager
 
-**Role:** Execution Plan Generator  
-**Personality:** Pragmatic PM who breaks work into atomic steps  
-**Capabilities:** `DESIGN` only (no execution)  
-**Output:** Step-by-step execution plan with risk assessment  
+**Role:** Execution Plan Generator
+**Personality:** Pragmatic PM who breaks work into atomic steps
+**Capabilities:** `DESIGN` only (no execution)
+**Output:** Step-by-step execution plan with risk assessment
 **Position:** Third gate in DevSquad workflow (after Explorer)
 
 ---
@@ -323,17 +323,17 @@ PLANNER_CONFIG = {
 
 ### Problem: Plan has circular dependencies
 
-**Cause:** Step A depends on Step B, Step B depends on Step A  
+**Cause:** Step A depends on Step B, Step B depends on Step A
 **Solution:** Planner will detect and fail. Refine architecture or break cycle.
 
 ### Problem: Too many HIGH-risk steps
 
-**Cause:** Complex/dangerous request  
+**Cause:** Complex/dangerous request
 **Solution:** Consider breaking into multiple missions or use staging environment.
 
 ### Problem: Plan is too granular (100+ steps)
 
-**Cause:** Overly detailed architecture  
+**Cause:** Overly detailed architecture
 **Solution:** Lower `max_steps` or request higher-level plan.
 
 ---
@@ -352,9 +352,9 @@ async def test_planner_generates_atomic_steps(mock_llm, mock_mcp):
         request="Add logging middleware",
         context={"approved_architecture": {...}}
     )
-    
+
     response = await planner.execute(task)
-    
+
     assert response.success is True
     assert len(response.data["steps"]) > 0
     # Each step should be atomic (single action)
@@ -368,9 +368,9 @@ async def test_planner_generates_atomic_steps(mock_llm, mock_mcp):
 async def test_planner_marks_high_risk_steps(mock_llm, mock_mcp):
     planner = PlannerAgent(mock_llm, mock_mcp)
     task = AgentTask(request="Delete old database tables")
-    
+
     response = await planner.execute(task)
-    
+
     # Destructive operations should be HIGH risk
     high_risk_steps = [
         step for step in response.data["steps"]
@@ -428,7 +428,7 @@ for step in high_risk:
 
 ---
 
-**Version:** 1.0.0  
-**Last Updated:** 2025-11-22  
-**Status:** Production-ready ✅  
+**Version:** 1.0.0
+**Last Updated:** 2025-11-22
+**Status:** Production-ready ✅
 **Grade:** A+ (Boris Cherny approved)

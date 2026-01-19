@@ -39,19 +39,13 @@ class OutputClassifier(BaseClassifier):
     def __init__(self, constitution):
         super().__init__(constitution)
 
-        self._sensitive_re = [
-            re.compile(p, re.IGNORECASE) for p in SENSITIVE_PATTERNS
-        ]
-        self._dangerous_code_re = [
-            re.compile(p, re.IGNORECASE) for p in DANGEROUS_CODE_PATTERNS
-        ]
+        self._sensitive_re = [re.compile(p, re.IGNORECASE) for p in SENSITIVE_PATTERNS]
+        self._dangerous_code_re = [re.compile(p, re.IGNORECASE) for p in DANGEROUS_CODE_PATTERNS]
         self._dangerous_instruction_re = [
             re.compile(p, re.IGNORECASE) for p in DANGEROUS_INSTRUCTION_PATTERNS
         ]
 
-    def classify(
-        self, text: str, context: Optional[Dict[str, Any]] = None
-    ) -> ClassificationReport:
+    def classify(self, text: str, context: Optional[Dict[str, Any]] = None) -> ClassificationReport:
         """Classifica um output quanto a violacoes de seguranca."""
         start_time = time.time()
 
@@ -74,9 +68,7 @@ class OutputClassifier(BaseClassifier):
                 )
                 detected_patterns.append(f"SENSITIVE_DATA: {masked}")
                 violation_types.append(ViolationType.DATA_EXFILTRATION)
-                reasoning_parts.append(
-                    "Possivel vazamento de informacao sensivel detectado"
-                )
+                reasoning_parts.append("Possivel vazamento de informacao sensivel detectado")
                 principles_violated.append("Protecao da Integridade do Sistema")
 
         # FASE 2: Deteccao de Codigo Perigoso
@@ -85,9 +77,7 @@ class OutputClassifier(BaseClassifier):
             if match:
                 detected_patterns.append(f"DANGEROUS_CODE: {match.group()}")
                 violation_types.append(ViolationType.MALICIOUS_CODE)
-                reasoning_parts.append(
-                    f"Codigo potencialmente destrutivo: '{match.group()}'"
-                )
+                reasoning_parts.append(f"Codigo potencialmente destrutivo: '{match.group()}'")
                 principles_violated.append("Protecao da Integridade do Sistema")
 
         # FASE 3: Deteccao de Instrucoes Perigosas
@@ -96,9 +86,7 @@ class OutputClassifier(BaseClassifier):
             if match:
                 detected_patterns.append(f"DANGEROUS_INSTRUCTION: {match.group()}")
                 violation_types.append(ViolationType.SECURITY_BYPASS)
-                reasoning_parts.append(
-                    f"Instrucao potencialmente perigosa: '{match.group()}'"
-                )
+                reasoning_parts.append(f"Instrucao potencialmente perigosa: '{match.group()}'")
                 principles_violated.append("Protecao da Integridade do Sistema")
 
         # FASE 4: Red Flags Constitucionais

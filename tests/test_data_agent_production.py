@@ -38,6 +38,7 @@ from vertice_cli.agents.base import AgentTask, AgentResponse
 # MOCK LLM CLIENT (Simulates YOUR LLMClient)
 # ============================================================================
 
+
 class MockLLMClient:
     """Mock that behaves like YOUR real LLMClient"""
 
@@ -45,41 +46,37 @@ class MockLLMClient:
         self.generate_calls = []
         self.stream_calls = []
 
-    async def generate(
-        self,
-        prompt: str,
-        system_prompt: str = None,
-        **kwargs: Any
-    ) -> str:
+    async def generate(self, prompt: str, system_prompt: str = None, **kwargs: Any) -> str:
         """Mock generate() - tracks calls"""
-        self.generate_calls.append({
-            "prompt": prompt,
-            "system_prompt": system_prompt,
-            "kwargs": kwargs,
-            "timestamp": datetime.utcnow(),
-        })
+        self.generate_calls.append(
+            {
+                "prompt": prompt,
+                "system_prompt": system_prompt,
+                "kwargs": kwargs,
+                "timestamp": datetime.utcnow(),
+            }
+        )
 
         # Return intelligent mock response based on prompt
         if "schema" in prompt.lower():
             return "Schema analysis shows 3 issues: missing PK, no audit trail, JSON overuse"
         elif "optimize" in prompt.lower() or "query" in prompt.lower():
-            return "Query can be optimized by adding index on email column. 70% improvement expected."
+            return (
+                "Query can be optimized by adding index on email column. 70% improvement expected."
+            )
         elif "migration" in prompt.lower():
             return "Migration is LOW risk. Can run online. Estimated downtime: 0 seconds."
         else:
             return "Task completed successfully."
 
-    async def stream(
-        self,
-        prompt: str,
-        system_prompt: str = None,
-        **kwargs: Any
-    ):
+    async def stream(self, prompt: str, system_prompt: str = None, **kwargs: Any):
         """Mock stream() - yields chunks"""
-        self.stream_calls.append({
-            "prompt": prompt,
-            "system_prompt": system_prompt,
-        })
+        self.stream_calls.append(
+            {
+                "prompt": prompt,
+                "system_prompt": system_prompt,
+            }
+        )
 
         response = await self.generate(prompt, system_prompt, **kwargs)
         for word in response.split():
@@ -89,6 +86,7 @@ class MockLLMClient:
 # ============================================================================
 # FIXTURES
 # ============================================================================
+
 
 @pytest.fixture
 def mock_llm():
@@ -140,6 +138,7 @@ def sample_schema():
 # TEST: LLM ADAPTER
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_adapter_wraps_original_client(mock_llm):
     """Test that adapter preserves original client functionality"""
@@ -188,15 +187,16 @@ def test_adapter_capabilities(mock_llm):
     adapter = LLMClientAdapter(mock_llm)
     caps = adapter.get_capabilities()
 
-    assert caps["generate"] == True
-    assert caps["stream"] == True
-    assert caps["thinking_simulation"] == True
-    assert caps["native_thinking"] == False  # Our mock doesn't have this
+    assert caps["generate"]
+    assert caps["stream"]
+    assert caps["thinking_simulation"]
+    assert not caps["native_thinking"]  # Our mock doesn't have this
 
 
 # ============================================================================
 # TEST: SCHEMA ANALYSIS
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_analyze_schema_detects_missing_pk(data_agent, sample_schema):
@@ -204,10 +204,7 @@ async def test_analyze_schema_detects_missing_pk(data_agent, sample_schema):
     issues = await data_agent.analyze_schema(sample_schema)
 
     # Should find missing PK in 'users' table
-    pk_issues = [
-        i for i in issues
-        if i.issue_type == "MISSING_PRIMARY_KEY" and i.table == "users"
-    ]
+    pk_issues = [i for i in issues if i.issue_type == "MISSING_PRIMARY_KEY" and i.table == "users"]
 
     assert len(pk_issues) == 1
     assert pk_issues[0].severity == IssueSeverity.CRITICAL
@@ -221,8 +218,7 @@ async def test_analyze_schema_detects_missing_audit(data_agent, sample_schema):
 
     # Should find missing audit in 'users' table
     audit_issues = [
-        i for i in issues
-        if i.issue_type == "MISSING_AUDIT_TRAIL" and i.table == "users"
+        i for i in issues if i.issue_type == "MISSING_AUDIT_TRAIL" and i.table == "users"
     ]
 
     assert len(audit_issues) == 1
@@ -236,8 +232,7 @@ async def test_analyze_schema_detects_json_overuse(data_agent, sample_schema):
 
     # Should find JSON overuse in 'users' table (3 JSONB columns)
     json_issues = [
-        i for i in issues
-        if i.issue_type == "DENORMALIZATION_RISK" and i.table == "users"
+        i for i in issues if i.issue_type == "DENORMALIZATION_RISK" and i.table == "users"
     ]
 
     assert len(json_issues) == 1
@@ -258,6 +253,7 @@ async def test_analyze_schema_no_issues_for_good_table(data_agent, sample_schema
 # ============================================================================
 # TEST: QUERY OPTIMIZATION
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_optimize_query_returns_optimization(data_agent):
@@ -302,6 +298,7 @@ async def test_optimize_query_without_thinking(data_agent):
 # TEST: MIGRATION PLANNING
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_generate_migration_low_risk(data_agent):
     """Test migration for low-risk changes"""
@@ -313,7 +310,7 @@ async def test_generate_migration_low_risk(data_agent):
 
     assert isinstance(migration, MigrationPlan)
     assert migration.risk_level == IssueSeverity.LOW
-    assert migration.can_run_online == True
+    assert migration.can_run_online
     assert migration.estimated_downtime_seconds == 0.0
 
 
@@ -327,8 +324,8 @@ async def test_generate_migration_high_risk_drop(data_agent):
     migration = await data_agent.generate_migration(changes, use_thinking=True)
 
     assert migration.risk_level == IssueSeverity.CRITICAL
-    assert migration.can_run_online == False
-    assert migration.requires_backup == True
+    assert not migration.can_run_online
+    assert migration.requires_backup
 
 
 @pytest.mark.asyncio
@@ -359,6 +356,7 @@ async def test_generate_migration_version_id(data_agent):
 # TEST: BASE AGENT INTEGRATION
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_execute_task_returns_response(data_agent):
     """Test that execute() returns valid AgentResponse"""
@@ -370,7 +368,7 @@ async def test_execute_task_returns_response(data_agent):
     response = await data_agent.execute(task)
 
     assert isinstance(response, AgentResponse)
-    assert response.success == True
+    assert response.success
     assert "response" in response.data
 
 
@@ -381,7 +379,7 @@ async def test_execute_task_with_thinking(data_agent):
 
     response = await data_agent.execute(task)
 
-    assert response.success == True
+    assert response.success
     assert response.reasoning != ""
     assert "thinking_tokens" in response.metrics
 
@@ -389,6 +387,7 @@ async def test_execute_task_with_thinking(data_agent):
 @pytest.mark.asyncio
 async def test_execute_handles_errors(mock_llm):
     """Test that execute() handles errors gracefully"""
+
     # Create mock that will fail
     class FailingLLMClient:
         async def generate(self, *args, **kwargs):
@@ -406,13 +405,14 @@ async def test_execute_handles_errors(mock_llm):
     task = AgentTask(request="Test error handling")
     response = await agent.execute(task)
 
-    assert response.success == False
+    assert not response.success
     assert response.error is not None
 
 
 # ============================================================================
 # TEST: STREAMING
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_execute_streaming_yields_events(data_agent):
@@ -431,6 +431,7 @@ async def test_execute_streaming_yields_events(data_agent):
 # ============================================================================
 # TEST: FACTORY FUNCTION
 # ============================================================================
+
 
 def test_create_data_agent_with_defaults(mock_llm):
     """Test factory function creates agent with defaults"""

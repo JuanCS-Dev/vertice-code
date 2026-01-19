@@ -32,6 +32,10 @@ class SoftBuffer:
     def __init__(self):
         self._buffer = ""
 
+    def has_pending(self) -> bool:
+        """Return True when there is buffered (not yet flushed) content."""
+        return bool(self._buffer)
+
     def feed(self, chunk: str) -> str:
         """
         Feed a chunk and return safe-to-render text.

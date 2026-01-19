@@ -71,9 +71,7 @@ analysis, and multi-step reasoning.
         """Initialize PROMETHEUS agent."""
         # Get API key
         self.api_key = (
-            api_key or
-            os.environ.get("GOOGLE_API_KEY") or
-            os.environ.get("GEMINI_API_KEY")
+            api_key or os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
         )
 
         # Lazy initialization
@@ -133,6 +131,7 @@ analysis, and multi-step reasoning.
         )
 
         import json
+
         return f"Evolution Complete:\n{json.dumps(summary, indent=2, default=str)}"
 
     @tool
@@ -185,6 +184,7 @@ analysis, and multi-step reasoning.
         await self._ensure_initialized()
 
         import json
+
         status = self._orchestrator.get_status()
         return json.dumps(status, indent=2, default=str)
 
@@ -201,6 +201,7 @@ analysis, and multi-step reasoning.
         await self._ensure_initialized()
 
         import json
+
         results = await self._orchestrator.benchmark_capabilities()
         return f"Benchmark Results:\n{json.dumps(results, indent=2, default=str)}"
 
@@ -233,6 +234,7 @@ agent = PrometheusAgent()
 # CLI INTERFACE
 # ============================================================================
 
+
 def print_banner():
     """Print PROMETHEUS banner."""
     banner = """
@@ -256,36 +258,14 @@ async def main():
     """CLI entry point."""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="PROMETHEUS: Self-Evolving Meta-Agent"
-    )
+    parser = argparse.ArgumentParser(description="PROMETHEUS: Self-Evolving Meta-Agent")
+    parser.add_argument("task", nargs="?", help="Task to execute")
     parser.add_argument(
-        "task",
-        nargs="?",
-        help="Task to execute"
+        "--evolve", type=int, default=0, help="Run N evolution iterations before task"
     )
-    parser.add_argument(
-        "--evolve",
-        type=int,
-        default=0,
-        help="Run N evolution iterations before task"
-    )
-    parser.add_argument(
-        "--benchmark",
-        action="store_true",
-        help="Run capability benchmark"
-    )
-    parser.add_argument(
-        "--status",
-        action="store_true",
-        help="Show system status"
-    )
-    parser.add_argument(
-        "--interactive",
-        "-i",
-        action="store_true",
-        help="Interactive mode"
-    )
+    parser.add_argument("--benchmark", action="store_true", help="Run capability benchmark")
+    parser.add_argument("--status", action="store_true", help="Show system status")
+    parser.add_argument("--interactive", "-i", action="store_true", help="Interactive mode")
 
     args = parser.parse_args()
 
@@ -318,7 +298,7 @@ async def main():
         while True:
             try:
                 task = input("\n> ")
-                if task.lower() in ['exit', 'quit', 'q']:
+                if task.lower() in ["exit", "quit", "q"]:
                     print("Goodbye!")
                     break
                 if task.strip():

@@ -2,6 +2,7 @@
 
 from vertice_cli.core.mcp import MCPManager
 
+
 def test_mcp_manager():
     """Test MCP manager functionality."""
     print("🔍 Testing MCPManager...\n")
@@ -97,7 +98,7 @@ def test_mcp_manager():
     stats = mcp.get_stats()
     print(f"✅ Context cleared: {stats['files']} files")
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🎉 All MCPManager tests complete!")
 
 

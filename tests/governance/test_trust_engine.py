@@ -308,5 +308,3 @@ class TestTrustEngine:
         assert metrics["total_events"] >= 2
         assert "average_trust_factor" in metrics
         assert "agents_by_level" in metrics
-
-

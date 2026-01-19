@@ -1,12 +1,13 @@
-
 import sqlite3
 import queue
 from contextlib import contextmanager
 from typing import Dict
 from pathlib import Path
 
+
 class ConnectionPool:
     """A thread-safe SQLite connection pool."""
+
     def __init__(self, max_connections: int = 10):
         self._pools: Dict[str, queue.Queue] = {}
         self.max_connections = max_connections
@@ -42,7 +43,9 @@ class ConnectionPool:
         finally:
             self.release_connection(db_path, conn)
 
+
 _connection_pool = ConnectionPool()
+
 
 def get_connection_pool() -> ConnectionPool:
     """Get the global connection pool instance."""

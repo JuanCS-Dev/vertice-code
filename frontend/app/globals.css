@@ -4,12 +4,12 @@
 
 @layer base {
   :root {
-    /* 
+    /*
      * VERTICE DESIGN SYSTEM - VOID THEME
      * Base: Deep Space (#030304) -> Surface (#0A0E17) -> Highlight (#151B2B)
      * Accent: Electric Cyan (#06B6D4)
      */
-    
+
     /* Backgrounds */
     --background: 240 10% 2%;      /* #050505 - Void */
     --foreground: 210 40% 98%;     /* #F8FAFC - Starlight */
@@ -17,7 +17,7 @@
     /* Surface Levels (Elevation) */
     --card: 222 47% 6%;            /* #080C14 - Deep Surface */
     --card-foreground: 210 40% 98%;
-    
+
     --popover: 222 47% 8%;         /* #0B101B - Floating Surface */
     --popover-foreground: 210 40% 98%;
 
@@ -37,7 +37,7 @@
     /* Semantic States */
     --destructive: 0 84% 60%;      /* #EF4444 - Red 500 */
     --destructive-foreground: 210 40% 98%;
-    
+
     --success: 142 71% 45%;        /* #10B981 - Emerald 500 */
     --warning: 38 92% 50%;         /* #F59E0B - Amber 500 */
     --info: 217 91% 60%;           /* #3B82F6 - Blue 500 */
@@ -55,7 +55,7 @@
   * {
     @apply border-border;
   }
-  
+
   html {
     scroll-behavior: smooth;
     height: 100%;
@@ -83,7 +83,7 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-  
+
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -93,15 +93,15 @@
     width: 6px;
     height: 6px;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-track {
     @apply bg-transparent;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-thumb {
     @apply bg-muted-foreground/20 rounded-full transition-colors;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     @apply bg-muted-foreground/40;
   }

@@ -15,11 +15,12 @@ from enum import Enum
 
 class TaskComplexity(str, Enum):
     """Task complexity levels for routing decisions."""
-    TRIVIAL = "trivial"      # Simple formatting, typos
-    SIMPLE = "simple"        # Single-file changes
-    MODERATE = "moderate"    # Multi-file, clear scope
-    COMPLEX = "complex"      # Architecture decisions
-    CRITICAL = "critical"    # Production, security
+
+    TRIVIAL = "trivial"  # Simple formatting, typos
+    SIMPLE = "simple"  # Single-file changes
+    MODERATE = "moderate"  # Multi-file, clear scope
+    COMPLEX = "complex"  # Architecture decisions
+    CRITICAL = "critical"  # Production, security
 
 
 class AutonomyLevel(str, Enum):
@@ -34,14 +35,16 @@ class AutonomyLevel(str, Enum):
 
     Reference: https://www.infoq.com/articles/architects-ai-era/
     """
-    L0_AUTONOMOUS = "L0"     # Full autonomy - execute without approval
-    L1_NOTIFY = "L1"         # Execute + notify human afterward
-    L2_APPROVE = "L2"        # Propose + wait for human approval
-    L3_HUMAN_ONLY = "L3"     # Human must execute, agent only advises
+
+    L0_AUTONOMOUS = "L0"  # Full autonomy - execute without approval
+    L1_NOTIFY = "L1"  # Execute + notify human afterward
+    L2_APPROVE = "L2"  # Propose + wait for human approval
+    L3_HUMAN_ONLY = "L3"  # Human must execute, agent only advises
 
 
 class AgentRole(str, Enum):
     """Agent roles in the agency."""
+
     ORCHESTRATOR = "orchestrator"
     CODER = "coder"
     REVIEWER = "reviewer"
@@ -54,6 +57,7 @@ class AgentRole(str, Enum):
 @dataclass
 class ApprovalRequest:
     """Request for human approval (L2/L3 operations)."""
+
     id: str
     task_id: str
     operation: str
@@ -86,6 +90,7 @@ class ApprovalRequest:
 @dataclass
 class Task:
     """A task to be executed by an agent."""
+
     id: str
     description: str
     complexity: TaskComplexity = TaskComplexity.MODERATE
@@ -101,6 +106,7 @@ class Task:
 @dataclass
 class Handoff:
     """Handoff between agents (OpenAI pattern)."""
+
     from_agent: AgentRole
     to_agent: AgentRole
     context: str

@@ -213,12 +213,15 @@ class BoundedAutonomyMixin:
         """Notify human of task completion (for L1 operations)."""
         if task.autonomy_level == AutonomyLevel.L1_NOTIFY:
             if self._notify_callback:
-                self._notify_callback("task_completed", {
-                    "task_id": task.id,
-                    "description": task.description,
-                    "result": result,
-                    "autonomy_level": task.autonomy_level.value,
-                })
+                self._notify_callback(
+                    "task_completed",
+                    {
+                        "task_id": task.id,
+                        "description": task.description,
+                        "result": result,
+                        "autonomy_level": task.autonomy_level.value,
+                    },
+                )
 
             logger.info(f"[L1 Notify] Task {task.id} completed: {result[:100]}...")
 
@@ -250,8 +253,4 @@ class BoundedAutonomyMixin:
 
     def get_pending_approvals(self) -> List[Dict[str, Any]]:
         """Get all pending approval requests."""
-        return [
-            a.to_dict()
-            for a in self.pending_approvals.values()
-            if a.approved is None
-        ]
+        return [a.to_dict() for a in self.pending_approvals.values() if a.approved is None]

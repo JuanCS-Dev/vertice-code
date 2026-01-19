@@ -158,14 +158,14 @@ class TestKeyboardNavigation:
         enhanced_input = EnhancedInput()
 
         for key in ["up", "down", "left", "right"]:
-            result = enhanced_input.handle_key(key)
+            enhanced_input.handle_key(key)
             # Should not crash
 
     def test_escape_key_cancel(self):
         """Test Escape key cancels operations"""
         enhanced_input = EnhancedInput()
 
-        result = enhanced_input.handle_key("escape")
+        enhanced_input.handle_key("escape")
         # Should cancel or close
 
     def test_enter_key_submit(self):
@@ -241,7 +241,7 @@ class TestHighContrastMode:
     def test_high_contrast_detection(self):
         """Test detection of high contrast mode preference"""
         # Should detect system preference (mock)
-        with patch.dict('os.environ', {'HIGH_CONTRAST': '1'}):
+        with patch.dict("os.environ", {"HIGH_CONTRAST": "1"}):
             accessibility = AccessibilityManager()  # Create AFTER patching
             assert accessibility.is_high_contrast_mode()
 
@@ -250,7 +250,7 @@ class TestHighContrastMode:
         accessibility = AccessibilityManager()
 
         # Normal mode
-        normal_colors = accessibility.get_color_scheme(high_contrast=False)
+        accessibility.get_color_scheme(high_contrast=False)
 
         # High contrast mode
         hc_colors = accessibility.get_color_scheme(high_contrast=True)
@@ -265,19 +265,19 @@ class TestReducedMotion:
 
     def test_reduced_motion_detection(self):
         """Test detection of reduced motion preference"""
-        with patch.dict('os.environ', {'REDUCE_MOTION': '1'}):
+        with patch.dict("os.environ", {"REDUCE_MOTION": "1"}):
             accessibility = AccessibilityManager()  # Create AFTER patching
             assert accessibility.prefers_reduced_motion()
 
     def test_animation_disabled_with_reduced_motion(self):
         """Test animations are disabled with reduced motion preference"""
         # With reduced motion
-        with patch.dict('os.environ', {'REDUCE_MOTION': '1'}):
+        with patch.dict("os.environ", {"REDUCE_MOTION": "1"}):
             accessibility = AccessibilityManager()
             assert accessibility.should_animate() is False
 
         # Without reduced motion
-        with patch.dict('os.environ', {'REDUCE_MOTION': '0'}):
+        with patch.dict("os.environ", {"REDUCE_MOTION": "0"}):
             accessibility = AccessibilityManager()
             assert accessibility.should_animate() is True
 
@@ -286,8 +286,8 @@ def test_accessibility_manager_initialization():
     """Test AccessibilityManager initializes correctly"""
     manager = AccessibilityManager()
     assert manager is not None
-    assert hasattr(manager, 'calculate_contrast_ratio')
-    assert hasattr(manager, 'is_wcag_aa_compliant')
+    assert hasattr(manager, "calculate_contrast_ratio")
+    assert hasattr(manager, "is_wcag_aa_compliant")
 
 
 if __name__ == "__main__":

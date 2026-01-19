@@ -24,6 +24,7 @@ import pytest
 # DARWIN GÖDEL (darwin_godel.py) - Full Coverage
 # =============================================================================
 
+
 class TestDarwinGodelFullCoverage:
     """Complete coverage for Darwin Gödel mixin."""
 
@@ -538,6 +539,7 @@ class TestDarwinGodelFullCoverage:
 # AGENTIC RAG (agentic_rag.py) - Full Coverage
 # =============================================================================
 
+
 class TestAgenticRAGFullCoverage:
     """Complete coverage for Agentic RAG mixin."""
 
@@ -555,7 +557,9 @@ class TestAgenticRAGFullCoverage:
 
         # Force DIRECT_ANSWER by mocking strategy selection
         with patch.object(agent, "_classify_complexity", return_value=QueryComplexity.SIMPLE):
-            with patch.object(agent, "_select_strategy", return_value=RetrievalStrategy.DIRECT_ANSWER):
+            with patch.object(
+                agent, "_select_strategy", return_value=RetrievalStrategy.DIRECT_ANSWER
+            ):
                 result = await agent.agentic_research("What is Python?")
 
         assert result.strategy_used == RetrievalStrategy.DIRECT_ANSWER
@@ -576,13 +580,17 @@ class TestAgenticRAGFullCoverage:
 
         with patch.object(agent, "_classify_complexity", return_value=QueryComplexity.COMPLEX):
             with patch.object(agent, "_select_strategy", return_value=RetrievalStrategy.MULTI_HOP):
-                with patch.object(agent, "_plan_retrieval", return_value=RetrievalPlan(
-                    original_query="Compare Python vs JavaScript",
-                    sub_queries=["sub1", "sub2"],
-                    sources_to_check=["docs", "code"],
-                    estimated_hops=2,
-                    reasoning="Test plan",
-                )):
+                with patch.object(
+                    agent,
+                    "_plan_retrieval",
+                    return_value=RetrievalPlan(
+                        original_query="Compare Python vs JavaScript",
+                        sub_queries=["sub1", "sub2"],
+                        sources_to_check=["docs", "code"],
+                        estimated_hops=2,
+                        reasoning="Test plan",
+                    ),
+                ):
                     result = await agent.agentic_research(
                         "Compare Python vs JavaScript",
                         max_iterations=1,
@@ -595,7 +603,9 @@ class TestAgenticRAGFullCoverage:
         """Test CORRECTIVE strategy refines query when insufficient."""
         from agents.researcher.agentic_rag import AgenticRAGMixin
         from agents.researcher.types import (
-            QueryComplexity, RetrievalStrategy, SufficiencyEvaluation
+            QueryComplexity,
+            RetrievalStrategy,
+            SufficiencyEvaluation,
         )
 
         class TestAgent(AgenticRAGMixin):
@@ -852,15 +862,14 @@ class TestAgenticRAGFullCoverage:
 # THREE LOOPS (three_loops.py) - Full Coverage
 # =============================================================================
 
+
 class TestThreeLoopsFullCoverage:
     """Complete coverage for Three Loops mixin."""
 
     def test_select_loop_low_confidence_escalation(self):
         """Test select_loop escalates loop when confidence is low."""
         from agents.architect.three_loops import ThreeLoopsMixin
-        from agents.architect.types import (
-            LoopContext, DecisionImpact, DecisionRisk, ArchitectLoop
-        )
+        from agents.architect.types import LoopContext, DecisionImpact, DecisionRisk, ArchitectLoop
 
         class TestAgent(ThreeLoopsMixin):
             pass
@@ -885,9 +894,7 @@ class TestThreeLoopsFullCoverage:
     def test_select_loop_on_to_in_escalation(self):
         """Test ON_THE_LOOP escalates to IN_THE_LOOP with low confidence."""
         from agents.architect.three_loops import ThreeLoopsMixin
-        from agents.architect.types import (
-            LoopContext, DecisionImpact, DecisionRisk, ArchitectLoop
-        )
+        from agents.architect.types import LoopContext, DecisionImpact, DecisionRisk, ArchitectLoop
 
         class TestAgent(ThreeLoopsMixin):
             pass
@@ -912,9 +919,7 @@ class TestThreeLoopsFullCoverage:
     def test_select_loop_out_of_loop_confidence_floor(self):
         """Test OUT_OF_LOOP has minimum confidence of 0.7."""
         from agents.architect.three_loops import ThreeLoopsMixin
-        from agents.architect.types import (
-            LoopContext, DecisionImpact, DecisionRisk, ArchitectLoop
-        )
+        from agents.architect.types import LoopContext, DecisionImpact, DecisionRisk, ArchitectLoop
 
         class TestAgent(ThreeLoopsMixin):
             pass
@@ -1021,9 +1026,7 @@ class TestThreeLoopsFullCoverage:
     def test_get_transition_triggers(self):
         """Test _get_transition_triggers returns appropriate triggers."""
         from agents.architect.three_loops import ThreeLoopsMixin
-        from agents.architect.types import (
-            ArchitectLoop, LoopContext, DecisionImpact, DecisionRisk
-        )
+        from agents.architect.types import ArchitectLoop, LoopContext, DecisionImpact, DecisionRisk
 
         class TestAgent(ThreeLoopsMixin):
             pass
@@ -1046,9 +1049,7 @@ class TestThreeLoopsFullCoverage:
     def test_build_reasoning(self):
         """Test _build_reasoning generates explanation."""
         from agents.architect.three_loops import ThreeLoopsMixin
-        from agents.architect.types import (
-            ArchitectLoop, LoopContext, DecisionImpact, DecisionRisk
-        )
+        from agents.architect.types import ArchitectLoop, LoopContext, DecisionImpact, DecisionRisk
 
         class TestAgent(ThreeLoopsMixin):
             pass
@@ -1072,6 +1073,7 @@ class TestThreeLoopsFullCoverage:
 # =============================================================================
 # INCIDENT HANDLER (incident_handler.py) - Full Coverage
 # =============================================================================
+
 
 class TestIncidentHandlerFullCoverage:
     """Complete coverage for Incident Handler mixin."""
@@ -1113,8 +1115,13 @@ class TestIncidentHandlerFullCoverage:
 
         # Build topology
         services = [
-            {"id": "api", "name": "API", "type": "service", "dependencies": ["db"],
-             "metrics": {"cpu_percent": 95, "memory_percent": 92}},
+            {
+                "id": "api",
+                "name": "API",
+                "type": "service",
+                "dependencies": ["db"],
+                "metrics": {"cpu_percent": 95, "memory_percent": 92},
+            },
             {"id": "db", "name": "Database", "type": "database", "dependencies": []},
         ]
         agent.build_topology(services)
@@ -1142,8 +1149,12 @@ class TestIncidentHandlerFullCoverage:
         """Test _identify_root_cause detects code changes."""
         from agents.devops.incident_handler import IncidentHandlerMixin
         from agents.devops.types import (
-            RootCauseCategory, InvestigationStep, Incident,
-            IncidentSeverity, IncidentStatus, Alert
+            RootCauseCategory,
+            InvestigationStep,
+            Incident,
+            IncidentSeverity,
+            IncidentStatus,
+            Alert,
         )
 
         class TestAgent(IncidentHandlerMixin):
@@ -1188,8 +1199,12 @@ class TestIncidentHandlerFullCoverage:
         """Test _identify_root_cause detects resource limits."""
         from agents.devops.incident_handler import IncidentHandlerMixin
         from agents.devops.types import (
-            RootCauseCategory, InvestigationStep, Incident,
-            IncidentSeverity, IncidentStatus, Alert
+            RootCauseCategory,
+            InvestigationStep,
+            Incident,
+            IncidentSeverity,
+            IncidentStatus,
+            Alert,
         )
 
         class TestAgent(IncidentHandlerMixin):
@@ -1234,8 +1249,12 @@ class TestIncidentHandlerFullCoverage:
         """Test _identify_root_cause detects dependency issues."""
         from agents.devops.incident_handler import IncidentHandlerMixin
         from agents.devops.types import (
-            RootCauseCategory, InvestigationStep, Incident,
-            IncidentSeverity, IncidentStatus, Alert
+            RootCauseCategory,
+            InvestigationStep,
+            Incident,
+            IncidentSeverity,
+            IncidentStatus,
+            Alert,
         )
 
         class TestAgent(IncidentHandlerMixin):
@@ -1280,8 +1299,12 @@ class TestIncidentHandlerFullCoverage:
         """Test _propose_remediations for code change category."""
         from agents.devops.incident_handler import IncidentHandlerMixin
         from agents.devops.types import (
-            RootCauseCategory, RootCauseAnalysis, Incident,
-            IncidentSeverity, IncidentStatus, Alert
+            RootCauseCategory,
+            RootCauseAnalysis,
+            Incident,
+            IncidentSeverity,
+            IncidentStatus,
+            Alert,
         )
 
         class TestAgent(IncidentHandlerMixin):
@@ -1326,8 +1349,12 @@ class TestIncidentHandlerFullCoverage:
         """Test _propose_remediations for resource limit category."""
         from agents.devops.incident_handler import IncidentHandlerMixin
         from agents.devops.types import (
-            RootCauseCategory, RootCauseAnalysis, Incident,
-            IncidentSeverity, IncidentStatus, Alert
+            RootCauseCategory,
+            RootCauseAnalysis,
+            Incident,
+            IncidentSeverity,
+            IncidentStatus,
+            Alert,
         )
 
         class TestAgent(IncidentHandlerMixin):
@@ -1372,8 +1399,12 @@ class TestIncidentHandlerFullCoverage:
         """Test _propose_remediations for dependency category."""
         from agents.devops.incident_handler import IncidentHandlerMixin
         from agents.devops.types import (
-            RootCauseCategory, RootCauseAnalysis, Incident,
-            IncidentSeverity, IncidentStatus, Alert
+            RootCauseCategory,
+            RootCauseAnalysis,
+            Incident,
+            IncidentSeverity,
+            IncidentStatus,
+            Alert,
         )
 
         class TestAgent(IncidentHandlerMixin):
@@ -1439,10 +1470,7 @@ class TestIncidentHandlerFullCoverage:
         incident = await agent.investigate_incident(alert)
 
         # Find a remediation that doesn't require approval
-        no_approval_rem = next(
-            (r for r in incident.remediations if not r.requires_approval),
-            None
-        )
+        no_approval_rem = next((r for r in incident.remediations if not r.requires_approval), None)
 
         if no_approval_rem:
             result = await agent.execute_remediation(incident.id, no_approval_rem.id)
@@ -1476,10 +1504,7 @@ class TestIncidentHandlerFullCoverage:
         incident = await agent.investigate_incident(alert)
 
         # Find rollback (requires approval)
-        rollback = next(
-            (r for r in incident.remediations if r.requires_approval),
-            None
-        )
+        rollback = next((r for r in incident.remediations if r.requires_approval), None)
 
         if rollback:
             # Without approval
@@ -1488,9 +1513,7 @@ class TestIncidentHandlerFullCoverage:
             assert "approval" in result["error"].lower()
 
             # With approval
-            result = await agent.execute_remediation(
-                incident.id, rollback.id, approved_by="admin"
-            )
+            result = await agent.execute_remediation(incident.id, rollback.id, approved_by="admin")
             assert result["success"] is True
 
     @pytest.mark.asyncio
@@ -1619,6 +1642,7 @@ class TestIncidentHandlerFullCoverage:
 # DEEP THINK (deep_think.py) - Full Coverage
 # =============================================================================
 
+
 class TestDeepThinkFullCoverage:
     """Complete coverage for Deep Think mixin."""
 
@@ -1636,13 +1660,13 @@ class TestDeepThinkFullCoverage:
 
         agent = TestAgent()
 
-        code = '''
+        code = """
 import os
 
 def run_command(user_input):
     os.system("ls " + user_input)  # Dangerous!
     return "done"
-'''
+"""
 
         result = await agent.deep_think_review(code, "app.py", "python")
 
@@ -1680,10 +1704,10 @@ def run_command(user_input):
 
         agent = TestAgent()
 
-        code = '''
+        code = """
 result = eval(user_input)
 exec(dynamic_code)
-'''
+"""
 
         findings, steps = agent._stage_static_analysis(code, "test.py", "python")
 
@@ -1700,14 +1724,14 @@ exec(dynamic_code)
 
         agent = TestAgent()
 
-        code = '''
+        code = """
 import pickle
 import os
 
 data = pickle.loads(user_data)
 os.system("rm -rf /")
 result = eval("2+2")
-'''
+"""
 
         findings, steps = agent._analyze_python_ast(code, "test.py")
 
@@ -1744,11 +1768,11 @@ result = eval("2+2")
 
         agent = TestAgent()
 
-        code = '''
+        code = """
 user_input = sanitize(request.input)
 escaped = escape(user_input)
 result = execute(escaped)
-'''
+"""
 
         finding = ReviewFinding(
             id="f1",
@@ -1777,11 +1801,11 @@ result = execute(escaped)
 
         agent = TestAgent()
 
-        code = '''
+        code = """
 # This is a comment
 # eval(user_input)  # Old code
 safe_code()
-'''
+"""
 
         finding = ReviewFinding(
             id="f1",
@@ -1839,10 +1863,10 @@ safe_code()
 
         agent = TestAgent()
 
-        code = '''
+        code = """
 user_input = request.get("input")
 result = eval(user_input)
-'''
+"""
 
         finding = ReviewFinding(
             id="f1",
@@ -2020,6 +2044,7 @@ result = eval(user_input)
 # BOUNDED AUTONOMY (bounded_autonomy.py) - Full Coverage
 # =============================================================================
 
+
 class TestBoundedAutonomyFullCoverage:
     """Complete coverage for Bounded Autonomy mixin."""
 
@@ -2130,7 +2155,10 @@ class TestBoundedAutonomyFullCoverage:
         # Test approval
         class ApproveAgent(BoundedAutonomyMixin):
             pending_approvals = {}
-            _approval_callback = lambda self, req: True
+
+            def _approval_callback(self, req):
+                return True
+
             _notify_callback = None
 
         approve_agent = ApproveAgent()
@@ -2142,7 +2170,10 @@ class TestBoundedAutonomyFullCoverage:
         # Test rejection
         class RejectAgent(BoundedAutonomyMixin):
             pending_approvals = {}
-            _approval_callback = lambda self, req: False
+
+            def _approval_callback(self, req):
+                return False
+
             _notify_callback = None
 
         reject_agent = RejectAgent()
@@ -2162,7 +2193,9 @@ class TestBoundedAutonomyFullCoverage:
         class TestAgent(BoundedAutonomyMixin):
             pending_approvals = {}
             _approval_callback = None
-            _notify_callback = lambda self, event, data: notifications.append((event, data))
+
+            def _notify_callback(self, event, data):
+                return notifications.append((event, data))
 
         agent = TestAgent()
 
@@ -2321,15 +2354,14 @@ class TestBoundedAutonomyFullCoverage:
 # ADDITIONAL COVERAGE TESTS
 # =============================================================================
 
+
 class TestAdditionalCoverage:
     """Additional tests to achieve 100% coverage."""
 
     def test_three_loops_ethical_considerations(self):
         """Test select_loop with ethical considerations."""
         from agents.architect.three_loops import ThreeLoopsMixin
-        from agents.architect.types import (
-            LoopContext, DecisionImpact, DecisionRisk, ArchitectLoop
-        )
+        from agents.architect.types import LoopContext, DecisionImpact, DecisionRisk, ArchitectLoop
 
         class TestAgent(ThreeLoopsMixin):
             pass
@@ -2354,9 +2386,7 @@ class TestAdditionalCoverage:
     def test_three_loops_domain_expertise_required(self):
         """Test select_loop with domain expertise requirement."""
         from agents.architect.three_loops import ThreeLoopsMixin
-        from agents.architect.types import (
-            LoopContext, DecisionImpact, DecisionRisk, ArchitectLoop
-        )
+        from agents.architect.types import LoopContext, DecisionImpact, DecisionRisk, ArchitectLoop
 
         class TestAgent(ThreeLoopsMixin):
             pass
@@ -2925,7 +2955,11 @@ class TestAdditionalCoverage:
         """Test _analyze_metrics detects various anomalies."""
         from agents.devops.incident_handler import IncidentHandlerMixin
         from agents.devops.types import (
-            Alert, Incident, IncidentSeverity, IncidentStatus, TopologyNode
+            Alert,
+            Incident,
+            IncidentSeverity,
+            IncidentStatus,
+            TopologyNode,
         )
 
         class TestAgent(IncidentHandlerMixin):
@@ -2976,8 +3010,12 @@ class TestAdditionalCoverage:
         """Test _identify_root_cause returns UNKNOWN for unclear findings."""
         from agents.devops.incident_handler import IncidentHandlerMixin
         from agents.devops.types import (
-            RootCauseCategory, Incident, IncidentSeverity,
-            IncidentStatus, Alert, InvestigationStep
+            RootCauseCategory,
+            Incident,
+            IncidentSeverity,
+            IncidentStatus,
+            Alert,
+            InvestigationStep,
         )
 
         class TestAgent(IncidentHandlerMixin):
@@ -3022,8 +3060,12 @@ class TestAdditionalCoverage:
         """Test _identify_root_cause detects error rate issues."""
         from agents.devops.incident_handler import IncidentHandlerMixin
         from agents.devops.types import (
-            RootCauseCategory, Incident, IncidentSeverity,
-            IncidentStatus, Alert, InvestigationStep
+            RootCauseCategory,
+            Incident,
+            IncidentSeverity,
+            IncidentStatus,
+            Alert,
+            InvestigationStep,
         )
 
         class TestAgent(IncidentHandlerMixin):
@@ -3067,9 +3109,7 @@ class TestAdditionalCoverage:
     def test_propose_remediations_no_root_cause(self):
         """Test _propose_remediations returns empty for no root cause."""
         from agents.devops.incident_handler import IncidentHandlerMixin
-        from agents.devops.types import (
-            Incident, IncidentSeverity, IncidentStatus, Alert
-        )
+        from agents.devops.types import Incident, IncidentSeverity, IncidentStatus, Alert
 
         class TestAgent(IncidentHandlerMixin):
             pass
@@ -3104,8 +3144,12 @@ class TestAdditionalCoverage:
         """Test _propose_remediations for UNKNOWN category."""
         from agents.devops.incident_handler import IncidentHandlerMixin
         from agents.devops.types import (
-            RootCauseCategory, RootCauseAnalysis, Incident,
-            IncidentSeverity, IncidentStatus, Alert
+            RootCauseCategory,
+            RootCauseAnalysis,
+            Incident,
+            IncidentSeverity,
+            IncidentStatus,
+            Alert,
         )
 
         class TestAgent(IncidentHandlerMixin):
@@ -3181,7 +3225,11 @@ class TestAdditionalCoverage:
         """Test _correlate_topology finds downstream dependencies."""
         from agents.devops.incident_handler import IncidentHandlerMixin
         from agents.devops.types import (
-            Alert, Incident, IncidentSeverity, IncidentStatus, TopologyNode
+            Alert,
+            Incident,
+            IncidentSeverity,
+            IncidentStatus,
+            TopologyNode,
         )
 
         class TestAgent(IncidentHandlerMixin):
@@ -3317,23 +3365,26 @@ class TestAdditionalCoverage:
         )
 
         # Force strategy_tuning to be selected
-        original_sample = random.sample
+
         def force_strategy_tuning(population, k=1):
             return ["strategy_tuning"]
+
         monkeypatch.setattr(random, "sample", force_strategy_tuning)
 
         # Force a specific tuning option - max_corrections (not in strategies)
         original_choice = random.choice
         call_count = [0]
+
         def force_tuning_option(seq):
             call_count[0] += 1
             seq_list = list(seq)
             # Check if this is the tuning_options list
             if len(seq_list) == 3:
                 first = seq_list[0]
-                if hasattr(first, '__getitem__') and first[0] == "max_corrections":
+                if hasattr(first, "__getitem__") and first[0] == "max_corrections":
                     return seq_list[0]  # max_corrections option
             return original_choice(seq)
+
         monkeypatch.setattr(random, "choice", force_tuning_option)
 
         mods = await agent._propose_modifications(parent)
@@ -3352,9 +3403,10 @@ class TestAdditionalCoverage:
         agent._init_evolution(archive_path=tmp_path / "archive.json")
 
         # Patch Path.unlink to raise exception
-        original_unlink = Path.unlink
+
         def raise_on_unlink(self, missing_ok=False):
             raise PermissionError("Cannot delete file")
+
         monkeypatch.setattr(Path, "unlink", raise_on_unlink)
 
         # Run test code - should work despite cleanup failure

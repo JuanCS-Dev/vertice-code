@@ -389,14 +389,13 @@ class AnalyticsEngine:
         if perf_data:
             total_response_time = sum(p["response_time_ms"] for p in perf_data)
             successful_requests = sum(1 for p in perf_data if p["success"])
-            total_tokens = sum(p.get("tokens_used", 0) for p in perf_data)
+            sum(p.get("tokens_used", 0) for p in perf_data)
 
             avg_response_time = total_response_time / len(perf_data)
             success_rate = (successful_requests / len(perf_data)) * 100
         else:
             avg_response_time = 0.0
             success_rate = 100.0
-            total_tokens = 0
 
         # Get predictive insights
         predictive_data = await self.generate_predictive_insights(tenant_id)

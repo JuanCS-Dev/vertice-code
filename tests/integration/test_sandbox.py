@@ -14,11 +14,7 @@ import pytest
 from pathlib import Path
 import tempfile
 
-from vertice_cli.integration.sandbox import (
-    SandboxExecutor,
-    SandboxResult,
-    get_sandbox
-)
+from vertice_cli.integration.sandbox import SandboxExecutor, SandboxResult, get_sandbox
 
 
 # Skip tests if Docker is not available
@@ -28,10 +24,7 @@ def check_docker():
     return sandbox.is_available()
 
 
-pytestmark = pytest.mark.skipif(
-    not check_docker(),
-    reason="Docker not available"
-)
+pytestmark = pytest.mark.skipif(not check_docker(), reason="Docker not available")
 
 
 class TestSandboxExecutor:
@@ -101,10 +94,7 @@ class TestSandboxExecutor:
 
             sandbox = SandboxExecutor()
             result = sandbox.execute(
-                "cat /workspace/test.txt",
-                cwd=tmppath,
-                timeout=5,
-                readonly=True
+                "cat /workspace/test.txt", cwd=tmppath, timeout=5, readonly=True
             )
 
             assert result.success is True
@@ -117,10 +107,7 @@ class TestSandboxExecutor:
 
             sandbox = SandboxExecutor()
             result = sandbox.execute(
-                "touch /workspace/newfile.txt",
-                cwd=tmppath,
-                timeout=5,
-                readonly=True
+                "touch /workspace/newfile.txt", cwd=tmppath, timeout=5, readonly=True
             )
 
             # Should fail due to readonly
@@ -133,10 +120,7 @@ class TestSandboxExecutor:
 
             sandbox = SandboxExecutor()
             result = sandbox.execute(
-                "echo 'test' > /workspace/output.txt",
-                cwd=tmppath,
-                timeout=5,
-                readonly=False
+                "echo 'test' > /workspace/output.txt", cwd=tmppath, timeout=5, readonly=False
             )
 
             assert result.success is True
@@ -149,11 +133,7 @@ class TestSandboxExecutor:
     def test_environment_variables(self):
         """Test environment variable passing."""
         sandbox = SandboxExecutor()
-        result = sandbox.execute(
-            "echo $TEST_VAR",
-            timeout=5,
-            env={'TEST_VAR': 'test_value'}
-        )
+        result = sandbox.execute("echo $TEST_VAR", timeout=5, env={"TEST_VAR": "test_value"})
 
         assert result.success is True
         assert "test_value" in result.stdout
@@ -162,16 +142,9 @@ class TestSandboxExecutor:
         """Test execution with temporary files."""
         sandbox = SandboxExecutor()
 
-        files = {
-            'script.py': 'print("Hello from script")',
-            'data.txt': 'test data'
-        }
+        files = {"script.py": 'print("Hello from script")', "data.txt": "test data"}
 
-        result = sandbox.execute_with_files(
-            "python /workspace/script.py",
-            files=files,
-            timeout=10
-        )
+        result = sandbox.execute_with_files("python /workspace/script.py", files=files, timeout=10)
 
         assert result.success is True
         assert "Hello from script" in result.stdout
@@ -180,8 +153,7 @@ class TestSandboxExecutor:
         """Test stderr capture."""
         sandbox = SandboxExecutor()
         result = sandbox.execute(
-            "python -c 'import sys; sys.stderr.write(\"error message\\n\")'",
-            timeout=10
+            "python -c 'import sys; sys.stderr.write(\"error message\\n\")'", timeout=10
         )
 
         assert result.success is True  # Python exits 0
@@ -200,10 +172,7 @@ class TestSandboxExecutor:
     def test_network_disabled(self):
         """Test network isolation."""
         sandbox = SandboxExecutor(network_disabled=True)
-        result = sandbox.execute(
-            "ping -c 1 google.com",
-            timeout=5
-        )
+        result = sandbox.execute("ping -c 1 google.com", timeout=5)
 
         # Should fail due to no network
         assert result.success is False
@@ -224,9 +193,9 @@ class TestSandboxExecutor:
         sandbox = SandboxExecutor()
         status = sandbox.test_availability()
 
-        assert status['available'] is True
-        assert status['test_result'] is True
-        assert 'Sandbox test' in status['test_output']
+        assert status["available"] is True
+        assert status["test_result"] is True
+        assert "Sandbox test" in status["test_output"]
 
     def test_multiple_executions(self):
         """Test multiple sequential executions."""
@@ -240,10 +209,7 @@ class TestSandboxExecutor:
     def test_long_output(self):
         """Test handling of long output."""
         sandbox = SandboxExecutor()
-        result = sandbox.execute(
-            "for i in $(seq 1 100); do echo $i; done",
-            timeout=10
-        )
+        result = sandbox.execute("for i in $(seq 1 100); do echo $i; done", timeout=10)
 
         assert result.success is True
         assert "100" in result.stdout
@@ -253,7 +219,7 @@ class TestSandboxExecutor:
         sandbox = SandboxExecutor()
         result = sandbox.execute(
             "mkdir -p /tmp/test && cd /tmp/test && echo 'data' > file.txt && cat file.txt",
-            timeout=10
+            timeout=10,
         )
 
         assert result.success is True
@@ -278,7 +244,7 @@ class TestSandboxResult:
             stderr="",
             duration_ms=123.45,
             container_id="abc123",
-            success=True
+            success=True,
         )
 
         assert result.exit_code == 0
@@ -294,7 +260,7 @@ class TestSandboxResult:
             stderr="err",
             duration_ms=100,
             container_id="abc",
-            success=True
+            success=True,
         )
 
         assert result.output == "outerr"
@@ -321,10 +287,7 @@ class TestSandboxEdgeCases:
     def test_special_characters_in_command(self):
         """Test command with special characters."""
         sandbox = SandboxExecutor()
-        result = sandbox.execute(
-            "echo 'Test with $pecial ch@racters! & < >'",
-            timeout=5
-        )
+        result = sandbox.execute("echo 'Test with $pecial ch@racters! & < >'", timeout=5)
 
         assert result.success is True
 
@@ -334,11 +297,7 @@ class TestSandboxEdgeCases:
 
         # Docker will create the directory if it doesn't exist
         # So we just test that it doesn't crash
-        result = sandbox.execute(
-            "ls /workspace",
-            cwd=Path("/nonexistent/path"),
-            timeout=5
-        )
+        result = sandbox.execute("ls /workspace", cwd=Path("/nonexistent/path"), timeout=5)
 
         # Should succeed (empty directory)
         assert result.exit_code == 0

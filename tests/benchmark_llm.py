@@ -10,10 +10,13 @@ import time
 ALIAS = "neuroshell-code"
 PROMPT = "Oi"
 
+
 def run_shell_once():
     start = time.time()
     # Start the shell process
-    proc = subprocess.Popen([ALIAS], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    proc = subprocess.Popen(
+        [ALIAS], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+    )
     # Wait a short moment for the landing screen to render
     time.sleep(0.5)
     # Send the prompt and newline, then exit
@@ -30,6 +33,7 @@ def run_shell_once():
     proc.communicate(timeout=10)
     return time.time() - start
 
+
 def benchmark(iterations=5):
     times = []
     for i in range(iterations):
@@ -42,6 +46,7 @@ def benchmark(iterations=5):
         print("✅ Performance OK")
     else:
         print("⚠️ Performance may be slow")
+
 
 if __name__ == "__main__":
     benchmark()

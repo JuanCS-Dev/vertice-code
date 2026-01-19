@@ -34,7 +34,7 @@ class SlashCommandCompleter(Completer):
     def get_completions(self, document: Document, complete_event):
         """Get completions for slash commands."""
         text = document.text_before_cursor
-        word = document.get_word_before_cursor()
+        document.get_word_before_cursor()
 
         # Only complete if starts with /
         if not text.startswith("/"):

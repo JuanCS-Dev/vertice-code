@@ -40,7 +40,7 @@ echo -e "${CYAN}☁️  [2/3] Building and Deploying SaaS Web App...${NC}"
 if command -v gcloud &> /dev/null; then
     echo "   Submitting build to Cloud Build..."
     gcloud builds submit vertice-chat-webapp/backend --config vertice-chat-webapp/backend/cloudbuild.yaml
-    
+
     echo "   Deploying to Cloud Run..."
     gcloud run deploy vertice-backend \
         --image gcr.io/vertice-ai/vertice-backend:latest \

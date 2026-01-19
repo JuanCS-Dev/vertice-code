@@ -193,10 +193,7 @@ class AuditLogger:
                 break
 
         return self.log(
-            level=(
-                AuditLevel.SECURITY if "BLOCK" in action_type.upper()
-                else AuditLevel.INFO
-            ),
+            level=(AuditLevel.SECURITY if "BLOCK" in action_type.upper() else AuditLevel.INFO),
             category=category,
             action=f"Enforcement: {action_type}",
             reasoning=reason,
@@ -248,8 +245,7 @@ class AuditLogger:
         return self.log(
             level=AuditLevel.SECURITY if is_violation else AuditLevel.INFO,
             category=(
-                AuditCategory.MONITOR_VIOLATION if is_violation
-                else AuditCategory.MONITOR_SUSPICION
+                AuditCategory.MONITOR_VIOLATION if is_violation else AuditCategory.MONITOR_SUSPICION
             ),
             action=f"Monitor: Suspicion Score {suspicion_score:.1f}",
             reasoning=f"Factors: {factors}",

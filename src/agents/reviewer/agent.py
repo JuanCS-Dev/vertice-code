@@ -210,16 +210,18 @@ Provide detailed findings.
 
         issues = self._quick_security_scan(code)
         for i, issue in enumerate(issues):
-            findings.append(ReviewFinding(
-                id=f"sec-{i}",
-                severity=ReviewSeverity.HIGH,
-                category="security",
-                file_path=file_path,
-                line_start=0,
-                line_end=0,
-                title=issue,
-                description=f"Potential security issue: {issue}",
-            ))
+            findings.append(
+                ReviewFinding(
+                    id=f"sec-{i}",
+                    severity=ReviewSeverity.HIGH,
+                    category="security",
+                    file_path=file_path,
+                    line_start=0,
+                    line_end=0,
+                    title=issue,
+                    description=f"Potential security issue: {issue}",
+                )
+            )
 
         return ReviewResult(
             file_path=file_path,

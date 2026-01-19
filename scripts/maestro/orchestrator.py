@@ -9,11 +9,7 @@ from vertice_cli.agents.planner import PlannerAgent
 from vertice_cli.agents.reviewer import ReviewerAgent
 from vertice_cli.agents.refactorer import RefactorerAgent
 from vertice_cli.agents.explorer import ExplorerAgent
-from vertice_cli.agents.executor import (
-    NextGenExecutorAgent,
-    ExecutionMode,
-    SecurityLevel
-)
+from vertice_cli.agents.executor import NextGenExecutorAgent, ExecutionMode, SecurityLevel
 from vertice_cli.agents.architect import ArchitectAgent
 from vertice_cli.agents.security import SecurityAgent
 from vertice_cli.agents.performance import PerformanceAgent
@@ -23,6 +19,7 @@ from vertice_cli.agents.data_agent_production import create_data_agent
 from vertice_cli.agents.devops import create_devops_agent
 
 from .routing import route_to_agent
+
 
 class Orchestrator:
     """Routes tasks to appropriate v6.0 agents"""
@@ -35,28 +32,31 @@ class Orchestrator:
         explorer = ExplorerAgent(llm_client, mcp_client)
 
         self.agents = {
-            'executor': NextGenExecutorAgent(
+            "executor": NextGenExecutorAgent(
                 llm_client=llm_client,
                 mcp_client=mcp_client,
                 execution_mode=ExecutionMode.LOCAL,  # Fast local execution
                 security_level=SecurityLevel.PERMISSIVE,  # No approval required (per Architect request)
                 approval_callback=None,  # Disabled: approval system too intrusive
-                config={
-                    "timeout": 30.0,
-                    "max_retries": 3
-                }
+                config={"timeout": 30.0, "max_retries": 3},
             ),
-            'explorer': explorer,
-            'planner': PlannerAgent(llm_client, mcp_client),
-            'reviewer': ReviewerAgent(llm_client, mcp_client),
-            'refactorer': RefactorerAgent(llm_client, mcp_client, explorer),  # Pass explorer directly
-            'architect': ArchitectAgent(llm_client, mcp_client),
-            'security': SecurityAgent(llm_client, mcp_client),
-            'performance': PerformanceAgent(llm_client, mcp_client),
-            'testing': TestRunnerAgent(llm_client, mcp_client),
-            'documentation': DocumentationAgent(llm_client, mcp_client),
-            'data': create_data_agent(llm_client, mcp_client, enable_thinking=True),  # DataAgent v1.0
-            'devops': create_devops_agent(llm_client, mcp_client, auto_remediate=False, policy_mode="require_approval")  # DevOpsAgent v1.0
+            "explorer": explorer,
+            "planner": PlannerAgent(llm_client, mcp_client),
+            "reviewer": ReviewerAgent(llm_client, mcp_client),
+            "refactorer": RefactorerAgent(
+                llm_client, mcp_client, explorer
+            ),  # Pass explorer directly
+            "architect": ArchitectAgent(llm_client, mcp_client),
+            "security": SecurityAgent(llm_client, mcp_client),
+            "performance": PerformanceAgent(llm_client, mcp_client),
+            "testing": TestRunnerAgent(llm_client, mcp_client),
+            "documentation": DocumentationAgent(llm_client, mcp_client),
+            "data": create_data_agent(
+                llm_client, mcp_client, enable_thinking=True
+            ),  # DataAgent v1.0
+            "devops": create_devops_agent(
+                llm_client, mcp_client, auto_remediate=False, policy_mode="require_approval"
+            ),  # DevOpsAgent v1.0
         }
 
     def route(self, prompt: str) -> str:
@@ -73,7 +73,7 @@ class Orchestrator:
         task = AgentTask(
             request=prompt,
             context=context or {},
-            metadata={'interface': 'maestro_v10', 'timestamp': datetime.now().isoformat()}
+            metadata={"interface": "maestro_v10", "timestamp": datetime.now().isoformat()},
         )
 
         # Execute REAL agent
@@ -92,11 +92,11 @@ class Orchestrator:
         task = AgentTask(
             request=prompt,
             context=context or {},
-            metadata={'interface': 'maestro_v10', 'timestamp': datetime.now().isoformat()}
+            metadata={"interface": "maestro_v10", "timestamp": datetime.now().isoformat()},
         )
 
         # Check if agent supports streaming
-        if hasattr(agent, 'execute_streaming'):
+        if hasattr(agent, "execute_streaming"):
             # Stream updates from agent
             async for update in agent.execute_streaming(task):
                 yield update

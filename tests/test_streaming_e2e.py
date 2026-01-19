@@ -12,7 +12,7 @@ Expected output:
     ✅ LLM Streaming: PASSED
     ✅ Agent Streaming: PASSED
     ✅ UI Integration: PASSED
-    
+
 Author: Claude Code
 Date: November 2025
 """
@@ -28,6 +28,7 @@ from enum import Enum
 # ============================================================================
 # TEST FRAMEWORK
 # ============================================================================
+
 
 class TestResult(Enum):
     PASSED = "✅ PASSED"
@@ -77,16 +78,42 @@ class TestSuite:
 # MOCK IMPLEMENTATIONS
 # ============================================================================
 
+
 class MockLLMClient:
     """Mock LLM that simulates token streaming"""
 
     def __init__(self, response_tokens: List[str] = None, delay: float = 0.02):
         self.response_tokens = response_tokens or [
-            "Based", " on", " the", " request", ",", "\n",
-            "I", " will", " create", " a", " plan", ":",
-            "\n\n", "Step", " 1", ":", " Analyze", " requirements",
-            "\n", "Step", " 2", ":", " Design", " solution",
-            "\n", "Step", " 3", ":", " Implement", " code",
+            "Based",
+            " on",
+            " the",
+            " request",
+            ",",
+            "\n",
+            "I",
+            " will",
+            " create",
+            " a",
+            " plan",
+            ":",
+            "\n\n",
+            "Step",
+            " 1",
+            ":",
+            " Analyze",
+            " requirements",
+            "\n",
+            "Step",
+            " 2",
+            ":",
+            " Design",
+            " solution",
+            "\n",
+            "Step",
+            " 3",
+            ":",
+            " Implement",
+            " code",
         ]
         self.delay = delay
         self.call_count = 0
@@ -96,7 +123,7 @@ class MockLLMClient:
         prompt: str,
         system_prompt: str = None,
         max_tokens: int = 2048,
-        temperature: float = 0.7
+        temperature: float = 0.7,
     ) -> AsyncIterator[str]:
         """Simulate token-by-token streaming"""
         self.call_count += 1
@@ -110,7 +137,7 @@ class MockLLMClient:
         messages: List[Dict],
         max_tokens: int = 2048,
         temperature: float = 0.7,
-        provider: str = None
+        provider: str = None,
     ) -> AsyncIterator[str]:
         """Alternative interface for compatibility"""
         async for token in self.generate_stream(messages[-1].get("content", "")):
@@ -120,6 +147,7 @@ class MockLLMClient:
 @dataclass
 class MockAgentTask:
     """Mock agent task"""
+
     request: str
     context: Dict[str, Any] = None
     trace_id: str = "test-trace-001"
@@ -132,6 +160,7 @@ class MockAgentTask:
 @dataclass
 class MockAgentResponse:
     """Mock agent response"""
+
     success: bool
     data: Dict[str, Any] = None
     error: str = None
@@ -145,10 +174,7 @@ class MockPlannerAgent:
         self.llm = llm
         self.name = "planner"
 
-    async def execute_streaming(
-        self,
-        task: MockAgentTask
-    ) -> AsyncIterator[Dict[str, Any]]:
+    async def execute_streaming(self, task: MockAgentTask) -> AsyncIterator[Dict[str, Any]]:
         """Streaming execution - this is what we're testing"""
 
         # Phase 1: Status
@@ -161,15 +187,12 @@ class MockPlannerAgent:
         # Phase 3: Stream LLM tokens
         buffer = []
         async for token in self.llm.generate_stream(
-            prompt=task.request,
-            system_prompt="You are a planner",
-            max_tokens=2048,
-            temperature=0.3
+            prompt=task.request, system_prompt="You are a planner", max_tokens=2048, temperature=0.3
         ):
             buffer.append(token)
             yield {"type": "thinking", "data": token}  # ← THE CRITICAL PART!
 
-        response_text = ''.join(buffer)
+        response_text = "".join(buffer)
 
         # Phase 4: Process
         yield {"type": "status", "data": "⚙️ Processing plan..."}
@@ -179,10 +202,8 @@ class MockPlannerAgent:
         yield {
             "type": "result",
             "data": MockAgentResponse(
-                success=True,
-                data={"plan": response_text},
-                reasoning="Plan generated successfully"
-            )
+                success=True, data={"plan": response_text}, reasoning="Plan generated successfully"
+            ),
         }
 
 
@@ -191,26 +212,18 @@ class MockMaestroUI:
 
     def __init__(self):
         self.updates: List[Dict[str, Any]] = []
-        self.panels = {
-            "executor": [],
-            "planner": [],
-            "file_ops": []
-        }
+        self.panels = {"executor": [], "planner": [], "file_ops": []}
 
     async def update_agent_stream(self, agent_name: str, data: str):
         """Receive streaming token update"""
-        self.updates.append({
-            "agent": agent_name,
-            "data": data,
-            "timestamp": time.time()
-        })
+        self.updates.append({"agent": agent_name, "data": data, "timestamp": time.time()})
 
         if agent_name in self.panels:
             self.panels[agent_name].append(data)
 
     def get_panel_content(self, panel_name: str) -> str:
         """Get accumulated content for a panel"""
-        return ''.join(self.panels.get(panel_name, []))
+        return "".join(self.panels.get(panel_name, []))
 
 
 class MockOrchestrator:
@@ -219,14 +232,10 @@ class MockOrchestrator:
     def __init__(self, ui: MockMaestroUI):
         self.ui = ui
         self.llm = MockLLMClient()
-        self.agents = {
-            "planner": MockPlannerAgent(self.llm)
-        }
+        self.agents = {"planner": MockPlannerAgent(self.llm)}
 
     async def execute_streaming(
-        self,
-        prompt: str,
-        context: Dict[str, Any] = None
+        self, prompt: str, context: Dict[str, Any] = None
     ) -> AsyncIterator[Dict[str, Any]]:
         """Execute and stream to UI"""
 
@@ -246,6 +255,7 @@ class MockOrchestrator:
 # ============================================================================
 # TEST CASES
 # ============================================================================
+
 
 async def test_llm_streaming() -> TestCase:
     """Test 1: LLM generates tokens correctly"""
@@ -332,8 +342,7 @@ async def test_ui_receives_updates() -> TestCase:
 
         updates = []
         async for update in orch.execute_streaming(
-            "Create user authentication",
-            context={"cwd": "/test"}
+            "Create user authentication", context={"cwd": "/test"}
         ):
             updates.append(update)
 
@@ -348,7 +357,9 @@ async def test_ui_receives_updates() -> TestCase:
             test.message = "Planner panel is empty"
         else:
             test.result = TestResult.PASSED
-            test.message = f"UI received {len(ui.updates)} updates, panel has {len(planner_content)} chars"
+            test.message = (
+                f"UI received {len(ui.updates)} updates, panel has {len(planner_content)} chars"
+            )
 
     except Exception as e:
         test.result = TestResult.FAILED
@@ -405,6 +416,7 @@ async def test_error_handling() -> TestCase:
     start = time.time()
 
     try:
+
         class FailingLLM:
             async def generate_stream(self, *args, **kwargs):
                 yield "token1"
@@ -456,7 +468,7 @@ async def test_streaming_performance() -> TestCase:
         # Fast LLM simulation
         llm = MockLLMClient(
             response_tokens=["token"] * 100,
-            delay=0.01  # 10ms per token = 100 tokens/sec
+            delay=0.01,  # 10ms per token = 100 tokens/sec
         )
         agent = MockPlannerAgent(llm)
         task = MockAgentTask(request="Performance test")
@@ -493,6 +505,7 @@ async def test_streaming_performance() -> TestCase:
 # ============================================================================
 # MAIN TEST RUNNER
 # ============================================================================
+
 
 async def run_all_tests():
     """Run all streaming tests"""

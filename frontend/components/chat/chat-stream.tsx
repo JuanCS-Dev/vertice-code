@@ -33,13 +33,13 @@ export function ChatStream() {
     <div className="flex flex-col min-h-0 w-full pb-4">
       <div className="flex-1 w-full">
         {messages.map((msg, index) => (
-          <ChatMessage 
-            key={msg.id} 
-            message={msg} 
-            isLast={index === messages.length - 1} 
+          <ChatMessage
+            key={msg.id}
+            message={msg}
+            isLast={index === messages.length - 1}
           />
         ))}
-        
+
         {error && (
           <div className="mx-auto max-w-2xl mt-4 p-4 rounded-lg bg-destructive/10 border border-destructive/20 flex items-center gap-3 text-destructive">
              <AlertCircle className="w-5 h-5" />

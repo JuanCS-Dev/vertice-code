@@ -7,10 +7,7 @@ Tests:
 
 import time
 
-from vertice_cli.core.recovery import (
-    RetryPolicy,
-    RecoveryCircuitBreaker
-)
+from vertice_cli.core.recovery import RetryPolicy, RecoveryCircuitBreaker
 
 
 class TestRetryPolicy:
@@ -18,12 +15,7 @@ class TestRetryPolicy:
 
     def test_initialization(self):
         """Test retry policy initialization."""
-        policy = RetryPolicy(
-            base_delay=1.0,
-            max_delay=60.0,
-            exponential_base=2.0,
-            jitter=True
-        )
+        policy = RetryPolicy(base_delay=1.0, max_delay=60.0, exponential_base=2.0, jitter=True)
 
         assert policy.base_delay == 1.0
         assert policy.max_delay == 60.0
@@ -48,11 +40,7 @@ class TestRetryPolicy:
 
     def test_max_delay_enforcement(self):
         """Test max delay cap is enforced."""
-        policy = RetryPolicy(
-            base_delay=1.0,
-            max_delay=10.0,
-            jitter=False
-        )
+        policy = RetryPolicy(base_delay=1.0, max_delay=10.0, jitter=False)
 
         # Attempt 10: would be 512, but capped at 10
         delay = policy.get_delay(10)
@@ -122,11 +110,7 @@ class TestRecoveryCircuitBreaker:
 
     def test_initialization(self):
         """Test circuit breaker initialization."""
-        breaker = RecoveryCircuitBreaker(
-            failure_threshold=5,
-            success_threshold=2,
-            timeout=60.0
-        )
+        breaker = RecoveryCircuitBreaker(failure_threshold=5, success_threshold=2, timeout=60.0)
 
         assert breaker.failure_threshold == 5
         assert breaker.success_threshold == 2
@@ -185,11 +169,7 @@ class TestRecoveryCircuitBreaker:
 
     def test_closes_on_success_threshold(self):
         """Test closes after success threshold in HALF_OPEN."""
-        breaker = RecoveryCircuitBreaker(
-            failure_threshold=1,
-            success_threshold=2,
-            timeout=0.1
-        )
+        breaker = RecoveryCircuitBreaker(failure_threshold=1, success_threshold=2, timeout=0.1)
 
         # Open and wait
         breaker.record_failure()
@@ -227,11 +207,11 @@ class TestRecoveryCircuitBreaker:
 
         status = breaker.get_status()
 
-        assert status['state'] == 'CLOSED'
-        assert status['failure_count'] == 0
-        assert status['success_count'] == 0
-        assert 'failure_threshold' in status
-        assert 'success_threshold' in status
+        assert status["state"] == "CLOSED"
+        assert status["failure_count"] == 0
+        assert status["success_count"] == 0
+        assert "failure_threshold" in status
+        assert "success_threshold" in status
 
     def test_reset(self):
         """Test reset clears state."""

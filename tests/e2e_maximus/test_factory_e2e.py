@@ -295,9 +295,7 @@ class TestFactoryIntegrationFlow:
         assert "result" in exec_result or "success" in exec_result
 
         # Step 4: Delete the tool
-        delete_result: bool = await maximus_provider.factory_delete(
-            tool_name="lifecycle_tool"
-        )
+        delete_result: bool = await maximus_provider.factory_delete(tool_name="lifecycle_tool")
         assert isinstance(delete_result, bool)
 
     @pytest.mark.asyncio

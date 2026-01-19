@@ -1,6 +1,6 @@
 # 🔬 CLI RESEARCH 2025: Cursor, Claude Code, Gemini CLI
 
-**Data:** 2025-11-18  
+**Data:** 2025-11-18
 **Objetivo:** Extrair o melhor de cada para implementar em qwen-dev-cli
 
 ---
@@ -20,7 +20,7 @@
 ```
 You: "find large files and delete the biggest one"
 
-Cursor: 
+Cursor:
 🔍 Analyzing request...
 📊 Found these large files:
   • file1.log (500MB)
@@ -221,14 +221,14 @@ User experience: Slightly worse, but NOT BROKEN
 
 def execute_with_checkpoints(operations):
     checkpoint = load_checkpoint()
-    
+
     for i, op in enumerate(operations):
         if i < checkpoint:
             continue  # Skip já executadas
-        
+
         execute(op)
         save_checkpoint(i)
-    
+
     clear_checkpoint()
 ```
 
@@ -289,18 +289,18 @@ GEMINI_COLORS = {
     "bg": "#0F0F0F",        # Almost black
     "surface": "#1A1A1A",   # Panels
     "border": "#2A2A2A",    # Subtle dividers
-    
+
     # Text (hierarchy)
     "text_primary": "#F5F5F5",    # Main text
     "text_secondary": "#A0A0A0",  # Supporting
     "text_tertiary": "#6A6A6A",   # Muted
-    
+
     # Semantic (minimal)
     "accent": "#4285F4",     # Google Blue (primary action)
     "success": "#34A853",    # Green (completed)
     "warning": "#FBBC04",    # Yellow (caution)
     "error": "#EA4335",      # Red (destructive)
-    
+
     # Special
     "user": "#8AB4F8",       # User messages (lighter blue)
     "ai": "#9AA0A6",         # AI messages (neutral)
@@ -542,10 +542,10 @@ url = f"https://cli.app/session/{session.id}"
 3. **Visual hierarchy** (Gemini pattern)
    ```
    You: [user input]
-   
+
    💡 Suggested:
       [command]
-   
+
    ⚠️  Warning: [if dangerous]
    ```
 
@@ -570,7 +570,7 @@ Armed with:
 
 ---
 
-**Research complete:** 2025-11-18 17:10 UTC  
+**Research complete:** 2025-11-18 17:10 UTC
 **Next step:** P0 Implementation com best practices
 
 Soli Deo Gloria! 🙏✨

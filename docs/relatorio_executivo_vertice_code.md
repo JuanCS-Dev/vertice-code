@@ -63,6 +63,6 @@ O Vertice-Code evoluiu de uma TUI básica para uma plataforma multimodal (TUI + 
 
 ---
 
-**Equipe**: Senior Python Developer (Async/AI/TUI)  
-**Tecnologias**: Python 3.11+, Textual, Next.js, GCP, Vercel AI SDK  
+**Equipe**: Senior Python Developer (Async/AI/TUI)
+**Tecnologias**: Python 3.11+, Textual, Next.js, GCP, Vercel AI SDK
 **Última Atualização**: 09/01/2026

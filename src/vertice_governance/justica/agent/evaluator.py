@@ -68,9 +68,7 @@ class VerdictEvaluator:
         if trust_factor.level in (TrustLevel.MINIMAL, TrustLevel.SUSPENDED):
             if approved:  # Ainda nao foi reprovado
                 requires_human = True
-                reasoning_parts.append(
-                    f"Trust level {trust_factor.level.name} requer supervisao"
-                )
+                reasoning_parts.append(f"Trust level {trust_factor.level.name} requer supervisao")
 
         # CONSTRUIR VEREDICTO
         if approved and not reasoning_parts:
@@ -102,9 +100,7 @@ class VerdictEvaluator:
 
         if classification.result == ClassificationResult.CRITICAL:
             approved = False
-            reasoning_parts.append(
-                f"Classificacao CRITICA: {classification.reasoning}"
-            )
+            reasoning_parts.append(f"Classificacao CRITICA: {classification.reasoning}")
             constitutional_basis.extend(classification.constitutional_principles_violated)
 
             if self.require_human_for_critical:
@@ -129,9 +125,7 @@ class VerdictEvaluator:
                 approved = False
                 reasoning_parts.append("Conteudo suspeito de agente com baixo trust")
             else:
-                reasoning_parts.append(
-                    "Conteudo suspeito mas aprovado (trust adequado)"
-                )
+                reasoning_parts.append("Conteudo suspeito mas aprovado (trust adequado)")
 
         return approved, requires_human
 

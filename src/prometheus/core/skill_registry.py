@@ -20,8 +20,10 @@ from enum import Enum
 # SKILL CATEGORIES
 # =============================================================================
 
+
 class SkillCategory(str, Enum):
     """Categories of skills."""
+
     PYTHON = "python"
     ASYNC = "async"
     TESTING = "testing"
@@ -51,7 +53,6 @@ VALID_SKILLS: Set[str] = {
     "python_decorators",
     "python_generators",
     "python_context_managers",
-
     # Async Programming
     "async_programming",
     "async_basics",
@@ -63,7 +64,6 @@ VALID_SKILLS: Set[str] = {
     "concurrent_programming",
     "threading",
     "multiprocessing",
-
     # Testing
     "testing",
     "unit_testing",
@@ -76,7 +76,6 @@ VALID_SKILLS: Set[str] = {
     "test_coverage",
     "mutation_testing",
     "property_based_testing",
-
     # Debugging
     "debugging",
     "debugging_basics",
@@ -87,7 +86,6 @@ VALID_SKILLS: Set[str] = {
     "memory_debugging",
     "stack_traces",
     "error_analysis",
-
     # Error Handling
     "error_handling",
     "exception_handling",
@@ -95,7 +93,6 @@ VALID_SKILLS: Set[str] = {
     "error_recovery",
     "graceful_degradation",
     "retry_logic",
-
     # File Operations
     "file_operations",
     "file_reading",
@@ -103,7 +100,6 @@ VALID_SKILLS: Set[str] = {
     "path_handling",
     "directory_operations",
     "file_streaming",
-
     # API Design
     "api_design",
     "rest_api",
@@ -113,7 +109,6 @@ VALID_SKILLS: Set[str] = {
     "openapi_spec",
     "request_validation",
     "response_formatting",
-
     # Architecture
     "architecture",
     "design_patterns",
@@ -124,7 +119,6 @@ VALID_SKILLS: Set[str] = {
     "event_driven",
     "cqrs",
     "domain_driven_design",
-
     # DevOps
     "devops",
     "ci_cd",
@@ -136,7 +130,6 @@ VALID_SKILLS: Set[str] = {
     "alerting",
     "deployment",
     "rollback",
-
     # Data
     "data_processing",
     "data_validation",
@@ -147,7 +140,6 @@ VALID_SKILLS: Set[str] = {
     "nosql",
     "data_modeling",
     "etl",
-
     # Security
     "security",
     "authentication",
@@ -157,7 +149,6 @@ VALID_SKILLS: Set[str] = {
     "sql_injection_prevention",
     "xss_prevention",
     "secure_coding",
-
     # Documentation
     "documentation",
     "docstrings",
@@ -165,7 +156,6 @@ VALID_SKILLS: Set[str] = {
     "api_documentation",
     "code_comments",
     "architecture_docs",
-
     # Performance
     "performance",
     "optimization",
@@ -174,7 +164,6 @@ VALID_SKILLS: Set[str] = {
     "memory_optimization",
     "algorithm_complexity",
     "database_optimization",
-
     # Code Quality
     "code_quality",
     "code_review",
@@ -182,7 +171,6 @@ VALID_SKILLS: Set[str] = {
     "linting",
     "type_hints",
     "static_analysis",
-
     # Version Control
     "git",
     "git_basics",
@@ -190,7 +178,6 @@ VALID_SKILLS: Set[str] = {
     "merging",
     "rebasing",
     "pull_requests",
-
     # Frameworks
     "fastapi",
     "django",
@@ -211,12 +198,10 @@ SKILL_ALIASES: Dict[str, str] = {
     "python": "python_basics",
     "py": "python_basics",
     "python3": "python_basics",
-
     # Async variations
     "async": "async_programming",
     "asyncio": "async_programming",
     "asynchronous": "async_programming",
-
     # Testing variations
     "test": "testing",
     "tests": "testing",
@@ -224,48 +209,38 @@ SKILL_ALIASES: Dict[str, str] = {
     "unit_test": "unit_testing",
     "e2e": "e2e_testing",
     "end_to_end": "e2e_testing",
-
     # Debug variations
     "debug": "debugging",
-
     # Error variations
     "errors": "error_handling",
     "exceptions": "exception_handling",
-
     # File variations
     "files": "file_operations",
     "io": "file_operations",
-
     # API variations
     "api": "api_design",
     "rest": "rest_api",
-
     # Architecture variations
     "arch": "architecture",
     "patterns": "design_patterns",
     "solid": "solid_principles",
     "ddd": "domain_driven_design",
-
     # DevOps variations
     "ci": "ci_cd",
     "cd": "ci_cd",
     "k8s": "kubernetes",
     "deploy": "deployment",
-
     # Data variations
     "data": "data_processing",
     "db": "sql",
     "database": "sql",
-
     # Security variations
     "auth": "authentication",
     "authz": "authorization",
     "authn": "authentication",
-
     # Docs variations
     "docs": "documentation",
     "doc": "documentation",
-
     # Perf variations
     "perf": "performance",
     "optimize": "optimization",
@@ -276,6 +251,7 @@ SKILL_ALIASES: Dict[str, str] = {
 # =============================================================================
 # VALIDATION FUNCTIONS
 # =============================================================================
+
 
 def normalize_skill(skill: str) -> str:
     """Normalize a skill name to its canonical form.
@@ -397,28 +373,24 @@ SKILL_DIFFICULTY: Dict[str, int] = {
     "file_writing": 1,
     "logging": 1,
     "git_basics": 1,
-
     # Level 2 - Elementary
     "python_functions": 2,
     "python_classes": 2,
     "error_handling": 2,
     "unit_testing": 2,
     "debugging_basics": 2,
-
     # Level 3 - Intermediate
     "python_decorators": 3,
     "async_basics": 3,
     "pytest_fixtures": 3,
     "api_design": 3,
     "design_patterns": 3,
-
     # Level 4 - Advanced
     "python_generators": 4,
     "async_programming": 4,
     "mocking": 4,
     "caching": 4,
     "clean_architecture": 4,
-
     # Level 5 - Expert
     "asyncio_locks": 5,
     "mutation_testing": 5,

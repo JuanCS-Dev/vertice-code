@@ -42,6 +42,7 @@ from vertice_cli.agents.base import (
 # WORLDSTATE TESTS
 # =============================================================================
 
+
 class TestWorldState:
     """Tests for WorldState data structure."""
 
@@ -56,7 +57,7 @@ class TestWorldState:
         """Test world state with initial facts."""
         state = WorldState(
             facts={"file_exists": True, "tests_passing": False},
-            resources={"tokens": 1000, "time": 60}
+            resources={"tokens": 1000, "time": 60},
         )
 
         assert state.facts["file_exists"] is True
@@ -67,8 +68,7 @@ class TestWorldState:
         """Test state satisfies goal when all facts match."""
         state = WorldState(facts={"code_written": True, "tests_passing": True})
         goal = GoalState(
-            name="feature_complete",
-            desired_facts={"code_written": True, "tests_passing": True}
+            name="feature_complete", desired_facts={"code_written": True, "tests_passing": True}
         )
 
         assert state.satisfies(goal) is True
@@ -77,8 +77,7 @@ class TestWorldState:
         """Test state doesn't satisfy goal when fact is missing."""
         state = WorldState(facts={"code_written": True})
         goal = GoalState(
-            name="feature_complete",
-            desired_facts={"code_written": True, "tests_passing": True}
+            name="feature_complete", desired_facts={"code_written": True, "tests_passing": True}
         )
 
         assert state.satisfies(goal) is False
@@ -87,8 +86,7 @@ class TestWorldState:
         """Test state doesn't satisfy goal when value differs."""
         state = WorldState(facts={"code_written": True, "tests_passing": False})
         goal = GoalState(
-            name="feature_complete",
-            desired_facts={"code_written": True, "tests_passing": True}
+            name="feature_complete", desired_facts={"code_written": True, "tests_passing": True}
         )
 
         assert state.satisfies(goal) is False
@@ -117,10 +115,7 @@ class TestWorldState:
     def test_distance_to_goal_multiple_facts(self):
         """Test distance calculation with multiple facts."""
         state = WorldState(facts={"a": True})  # Missing b, wrong c
-        goal = GoalState(
-            name="complete",
-            desired_facts={"a": True, "b": True, "c": True}
-        )
+        goal = GoalState(name="complete", desired_facts={"a": True, "b": True, "c": True})
 
         # a matches (0), b missing (1.0), c missing (1.0)
         assert state.distance_to(goal) == 2.0
@@ -130,15 +125,13 @@ class TestWorldState:
 # GOALSTATE TESTS
 # =============================================================================
 
+
 class TestGoalState:
     """Tests for GoalState data structure."""
 
     def test_basic_goal(self):
         """Test creating basic goal."""
-        goal = GoalState(
-            name="feature_done",
-            desired_facts={"implemented": True}
-        )
+        goal = GoalState(name="feature_done", desired_facts={"implemented": True})
 
         assert goal.name == "feature_done"
         assert goal.desired_facts["implemented"] is True
@@ -146,11 +139,7 @@ class TestGoalState:
 
     def test_goal_with_priority(self):
         """Test goal with custom priority."""
-        goal = GoalState(
-            name="critical_fix",
-            desired_facts={"bug_fixed": True},
-            priority=10.0
-        )
+        goal = GoalState(name="critical_fix", desired_facts={"bug_fixed": True}, priority=10.0)
 
         assert goal.priority == 10.0
 
@@ -158,6 +147,7 @@ class TestGoalState:
 # =============================================================================
 # ACTION TESTS
 # =============================================================================
+
 
 class TestAction:
     """Tests for GOAP Action."""
@@ -172,7 +162,7 @@ class TestAction:
             preconditions={"requirements_clear": True},
             effects={"code_written": True},
             cost=2.0,
-            duration_estimate="15m"
+            duration_estimate="15m",
         )
 
     @pytest.fixture
@@ -185,7 +175,7 @@ class TestAction:
             preconditions={"code_written": True},
             effects={"tests_passing": True},
             cost=1.0,
-            duration_estimate="5m"
+            duration_estimate="5m",
         )
 
     def test_action_creation(self, write_code_action):
@@ -232,12 +222,9 @@ class TestAction:
             agent_role="test",
             description="Test",
             preconditions={},
-            effects={"done": True}
+            effects={"done": True},
         )
-        initial_state = WorldState(
-            facts={},
-            resources={"tokens": 1000}
-        )
+        initial_state = WorldState(facts={}, resources={"tokens": 1000})
 
         new_state = action.apply(initial_state)
 
@@ -247,6 +234,7 @@ class TestAction:
 # =============================================================================
 # GOAP PLANNER TESTS
 # =============================================================================
+
 
 class TestGOAPPlanner:
     """Tests for GOAPPlanner A* algorithm."""
@@ -261,7 +249,7 @@ class TestGOAPPlanner:
                 description="Gather requirements",
                 preconditions={},
                 effects={"requirements_clear": True},
-                cost=1.0
+                cost=1.0,
             ),
             Action(
                 id="write_code",
@@ -269,7 +257,7 @@ class TestGOAPPlanner:
                 description="Write code",
                 preconditions={"requirements_clear": True},
                 effects={"code_written": True},
-                cost=2.0
+                cost=2.0,
             ),
             Action(
                 id="run_tests",
@@ -277,7 +265,7 @@ class TestGOAPPlanner:
                 description="Run tests",
                 preconditions={"code_written": True},
                 effects={"tests_passing": True},
-                cost=1.0
+                cost=1.0,
             ),
         ]
 
@@ -293,10 +281,7 @@ class TestGOAPPlanner:
     def test_plan_simple_goal(self, planner):
         """Test planning for a simple goal."""
         initial = WorldState(facts={})
-        goal = GoalState(
-            name="code_complete",
-            desired_facts={"code_written": True}
-        )
+        goal = GoalState(name="code_complete", desired_facts={"code_written": True})
 
         plan = planner.plan(initial, goal)
 
@@ -308,10 +293,7 @@ class TestGOAPPlanner:
     def test_plan_complex_goal(self, planner):
         """Test planning for goal requiring all actions."""
         initial = WorldState(facts={})
-        goal = GoalState(
-            name="feature_complete",
-            desired_facts={"tests_passing": True}
-        )
+        goal = GoalState(name="feature_complete", desired_facts={"tests_passing": True})
 
         plan = planner.plan(initial, goal)
 
@@ -324,10 +306,7 @@ class TestGOAPPlanner:
     def test_plan_already_satisfied(self, planner):
         """Test planning when goal already satisfied."""
         initial = WorldState(facts={"tests_passing": True})
-        goal = GoalState(
-            name="complete",
-            desired_facts={"tests_passing": True}
-        )
+        goal = GoalState(name="complete", desired_facts={"tests_passing": True})
 
         plan = planner.plan(initial, goal)
 
@@ -337,10 +316,7 @@ class TestGOAPPlanner:
     def test_plan_partial_state(self, planner):
         """Test planning from partial state."""
         initial = WorldState(facts={"requirements_clear": True})
-        goal = GoalState(
-            name="code_complete",
-            desired_facts={"code_written": True}
-        )
+        goal = GoalState(name="code_complete", desired_facts={"code_written": True})
 
         plan = planner.plan(initial, goal)
 
@@ -356,7 +332,7 @@ class TestGOAPPlanner:
                 agent_role="test",
                 description="A",
                 preconditions={"impossible": True},  # Can never be true
-                effects={"done": True}
+                effects={"done": True},
             )
         ]
         planner = GOAPPlanner(actions)
@@ -370,10 +346,7 @@ class TestGOAPPlanner:
     def test_plan_respects_max_depth(self, planner):
         """Test planner respects max depth limit."""
         initial = WorldState(facts={})
-        goal = GoalState(
-            name="tests_passing",
-            desired_facts={"tests_passing": True}
-        )
+        goal = GoalState(name="tests_passing", desired_facts={"tests_passing": True})
 
         # With max_depth=2, can't reach goal (needs 3 actions)
         plan = planner.plan(initial, goal, max_depth=2)
@@ -389,7 +362,7 @@ class TestGOAPPlanner:
                 description="Expensive path",
                 preconditions={},
                 effects={"done": True},
-                cost=100.0
+                cost=100.0,
             ),
             Action(
                 id="cheap",
@@ -397,7 +370,7 @@ class TestGOAPPlanner:
                 description="Cheap path",
                 preconditions={},
                 effects={"done": True},
-                cost=1.0
+                cost=1.0,
             ),
         ]
         planner = GOAPPlanner(actions)
@@ -425,6 +398,7 @@ class TestGOAPPlanner:
 # DEPENDENCY ANALYZER TESTS
 # =============================================================================
 
+
 class TestDependencyAnalyzer:
     """Tests for DependencyAnalyzer."""
 
@@ -438,7 +412,7 @@ class TestDependencyAnalyzer:
                 action="analyze",
                 objective="Analyze requirements",
                 definition_of_done="Requirements documented",
-                dependencies=[]
+                dependencies=[],
             ),
             SOPStep(
                 id="step_2",
@@ -446,7 +420,7 @@ class TestDependencyAnalyzer:
                 action="implement",
                 objective="Implement feature",
                 definition_of_done="Code written",
-                dependencies=["step_1"]
+                dependencies=["step_1"],
             ),
             SOPStep(
                 id="step_3",
@@ -454,7 +428,7 @@ class TestDependencyAnalyzer:
                 action="test",
                 objective="Run tests",
                 definition_of_done="Tests passing",
-                dependencies=["step_2"]
+                dependencies=["step_2"],
             ),
             SOPStep(
                 id="step_4",
@@ -462,7 +436,7 @@ class TestDependencyAnalyzer:
                 action="document",
                 objective="Write docs",
                 definition_of_done="Docs written",
-                dependencies=["step_1"]  # Can run parallel with step_2
+                dependencies=["step_1"],  # Can run parallel with step_2
             ),
         ]
 
@@ -479,16 +453,28 @@ class TestDependencyAnalyzer:
         """Test finding parallel groups with simple chain."""
         steps = [
             SOPStep(
-                id="a", role="r", action="a", objective="o",
-                definition_of_done="done", dependencies=[]
+                id="a",
+                role="r",
+                action="a",
+                objective="o",
+                definition_of_done="done",
+                dependencies=[],
             ),
             SOPStep(
-                id="b", role="r", action="a", objective="o",
-                definition_of_done="done", dependencies=["a"]
+                id="b",
+                role="r",
+                action="a",
+                objective="o",
+                definition_of_done="done",
+                dependencies=["a"],
             ),
             SOPStep(
-                id="c", role="r", action="a", objective="o",
-                definition_of_done="done", dependencies=["b"]
+                id="c",
+                role="r",
+                action="a",
+                objective="o",
+                definition_of_done="done",
+                dependencies=["b"],
             ),
         ]
 
@@ -515,16 +501,28 @@ class TestDependencyAnalyzer:
         """Test when all steps are independent."""
         steps = [
             SOPStep(
-                id="a", role="r", action="a", objective="o",
-                definition_of_done="done", dependencies=[]
+                id="a",
+                role="r",
+                action="a",
+                objective="o",
+                definition_of_done="done",
+                dependencies=[],
             ),
             SOPStep(
-                id="b", role="r", action="a", objective="o",
-                definition_of_done="done", dependencies=[]
+                id="b",
+                role="r",
+                action="a",
+                objective="o",
+                definition_of_done="done",
+                dependencies=[],
             ),
             SOPStep(
-                id="c", role="r", action="a", objective="o",
-                definition_of_done="done", dependencies=[]
+                id="c",
+                role="r",
+                action="a",
+                objective="o",
+                definition_of_done="done",
+                dependencies=[],
             ),
         ]
 
@@ -549,6 +547,7 @@ class TestDependencyAnalyzer:
 # SOPSTEP MODEL TESTS
 # =============================================================================
 
+
 class TestSOPStep:
     """Tests for SOPStep Pydantic model."""
 
@@ -559,7 +558,7 @@ class TestSOPStep:
             role="executor",
             action="implement",
             objective="Build feature",
-            definition_of_done="Feature works"
+            definition_of_done="Feature works",
         )
 
         assert step.id == "test_step"
@@ -588,7 +587,7 @@ class TestSOPStep:
             rollback_on_error=True,
             retry_count=3,
             correlation_id="corr-123",
-            telemetry_tags={"team": "security"}
+            telemetry_tags={"team": "security"},
         )
 
         assert step.priority == AgentPriority.CRITICAL
@@ -598,10 +597,7 @@ class TestSOPStep:
 
     def test_step_default_values(self):
         """Test step default values are set correctly."""
-        step = SOPStep(
-            id="s", role="r", action="a",
-            objective="o", definition_of_done="d"
-        )
+        step = SOPStep(id="s", role="r", action="a", objective="o", definition_of_done="d")
 
         assert step.cost == 1.0
         assert step.context_isolation is True
@@ -614,6 +610,7 @@ class TestSOPStep:
 # EXECUTION PLAN TESTS
 # =============================================================================
 
+
 class TestExecutionPlan:
     """Tests for ExecutionPlan model."""
 
@@ -622,7 +619,7 @@ class TestExecutionPlan:
         plan = ExecutionPlan(
             plan_id="plan-001",
             goal="Implement feature X",
-            strategy_overview="Write code, test, deploy"
+            strategy_overview="Write code, test, deploy",
         )
 
         assert plan.plan_id == "plan-001"
@@ -632,22 +629,19 @@ class TestExecutionPlan:
 
     def test_plan_with_stages(self):
         """Test plan with execution stages."""
-        step1 = SOPStep(
-            id="s1", role="r", action="a",
-            objective="o", definition_of_done="d"
-        )
+        step1 = SOPStep(id="s1", role="r", action="a", objective="o", definition_of_done="d")
         stage = ExecutionStage(
             name="Implementation",
             description="Write the code",
             steps=[step1],
             strategy=ExecutionStrategy.SEQUENTIAL,
-            checkpoint=True
+            checkpoint=True,
         )
         plan = ExecutionPlan(
             plan_id="plan-002",
             goal="Build feature",
             strategy_overview="Implement and test",
-            stages=[stage]
+            stages=[stage],
         )
 
         assert len(plan.stages) == 1
@@ -656,9 +650,7 @@ class TestExecutionPlan:
 
     def test_plan_defaults(self):
         """Test plan default values."""
-        plan = ExecutionPlan(
-            plan_id="p", goal="g", strategy_overview="s"
-        )
+        plan = ExecutionPlan(plan_id="p", goal="g", strategy_overview="s")
 
         assert plan.estimated_cost == 0.0
         assert plan.rollback_strategy == "Restore from last checkpoint"
@@ -671,6 +663,7 @@ class TestExecutionPlan:
 # =============================================================================
 # ENUMS TESTS
 # =============================================================================
+
 
 class TestEnums:
     """Tests for enum types."""
@@ -701,6 +694,7 @@ class TestEnums:
 # PLANNER AGENT TESTS
 # =============================================================================
 
+
 class TestPlannerAgent:
     """Tests for PlannerAgent."""
 
@@ -708,19 +702,23 @@ class TestPlannerAgent:
     def mock_llm(self):
         """Create mock LLM client."""
         client = MagicMock()
-        client.generate = AsyncMock(return_value=json.dumps({
-            "goal": "Test goal",
-            "strategy_overview": "Test strategy",
-            "sops": [
+        client.generate = AsyncMock(
+            return_value=json.dumps(
                 {
-                    "id": "step_1",
-                    "role": "executor",
-                    "action": "implement",
-                    "objective": "Build it",
-                    "definition_of_done": "It works"
+                    "goal": "Test goal",
+                    "strategy_overview": "Test strategy",
+                    "sops": [
+                        {
+                            "id": "step_1",
+                            "role": "executor",
+                            "action": "implement",
+                            "objective": "Build it",
+                            "definition_of_done": "It works",
+                        }
+                    ],
                 }
-            ]
-        }))
+            )
+        )
         return client
 
     @pytest.fixture
@@ -731,10 +729,7 @@ class TestPlannerAgent:
     @pytest.fixture
     def planner_agent(self, mock_llm, mock_mcp):
         """Create PlannerAgent instance."""
-        return PlannerAgent(
-            llm_client=mock_llm,
-            mcp_client=mock_mcp
-        )
+        return PlannerAgent(llm_client=mock_llm, mcp_client=mock_mcp)
 
     def test_planner_initialization(self, planner_agent):
         """Test PlannerAgent initializes correctly."""
@@ -767,6 +762,7 @@ class TestPlannerAgent:
 # EDGE CASES
 # =============================================================================
 
+
 class TestEdgeCases:
     """Tests for edge cases and boundary conditions."""
 
@@ -782,11 +778,9 @@ class TestEdgeCases:
 
     def test_world_state_with_complex_values(self):
         """Test world state with complex fact values."""
-        state = WorldState(facts={
-            "files": ["a.py", "b.py"],
-            "config": {"debug": True},
-            "count": 42
-        })
+        state = WorldState(
+            facts={"files": ["a.py", "b.py"], "config": {"debug": True}, "count": 42}
+        )
 
         assert state.facts["files"] == ["a.py", "b.py"]
         assert state.facts["config"]["debug"] is True
@@ -796,12 +790,20 @@ class TestEdgeCases:
         # Create steps with circular dependency
         steps = [
             SOPStep(
-                id="a", role="r", action="a", objective="o",
-                definition_of_done="d", dependencies=["b"]
+                id="a",
+                role="r",
+                action="a",
+                objective="o",
+                definition_of_done="d",
+                dependencies=["b"],
             ),
             SOPStep(
-                id="b", role="r", action="a", objective="o",
-                definition_of_done="d", dependencies=["a"]
+                id="b",
+                role="r",
+                action="a",
+                objective="o",
+                definition_of_done="d",
+                dependencies=["a"],
             ),
         ]
 
@@ -817,7 +819,7 @@ class TestEdgeCases:
             role="executor",
             action="实现功能",  # Chinese
             objective="Implementar funcionalidade 🚀",
-            definition_of_done="Tudo funcionando ✓"
+            definition_of_done="Tudo funcionando ✓",
         )
 
         assert "🚀" in step.objective
@@ -830,7 +832,7 @@ class TestEdgeCases:
             agent_role="test",
             description="Always ready",
             preconditions={},
-            effects={"done": True}
+            effects={"done": True},
         )
         state = WorldState(facts={})
 
@@ -841,14 +843,16 @@ class TestEdgeCases:
 # PLANNER AGENT ADVANCED TESTS
 # =============================================================================
 
+
 class TestPlannerAgentAdvanced:
     """Advanced tests for PlannerAgent methods."""
 
     @pytest.fixture
     def mock_llm_streaming(self):
         """Create mock LLM client with streaming support."""
+
         async def mock_stream(**kwargs):
-            for token in ['{"goal": "Test', '", "sops": [', '{"id": "s1"}', ']}']:
+            for token in ['{"goal": "Test', '", "sops": [', '{"id": "s1"}', "]}"]:
                 yield token
 
         client = MagicMock()
@@ -859,10 +863,7 @@ class TestPlannerAgentAdvanced:
     @pytest.fixture
     def planner_with_stream(self, mock_llm_streaming):
         """Create PlannerAgent with streaming LLM."""
-        return PlannerAgent(
-            llm_client=mock_llm_streaming,
-            mcp_client=MagicMock()
-        )
+        return PlannerAgent(llm_client=mock_llm_streaming, mcp_client=MagicMock())
 
     @pytest.mark.asyncio
     async def test_run_yields_streaming_updates(self, planner_with_stream):
@@ -880,6 +881,7 @@ class TestPlannerAgentAdvanced:
     @pytest.mark.asyncio
     async def test_run_handles_error(self):
         """Test run() handles errors gracefully."""
+
         async def error_stream(**kwargs):
             yield "start"
             raise Exception("Streaming error")
@@ -887,10 +889,7 @@ class TestPlannerAgentAdvanced:
         mock_llm = MagicMock()
         mock_llm.stream_chat = error_stream
 
-        planner = PlannerAgent(
-            llm_client=mock_llm,
-            mcp_client=MagicMock()
-        )
+        planner = PlannerAgent(llm_client=mock_llm, mcp_client=MagicMock())
         task = AgentTask(request="Fail task")
 
         updates = []
@@ -910,7 +909,7 @@ class TestPlannerAgentAdvanced:
                 description="Read source code",
                 preconditions={},
                 effects={"code_read": True},
-                cost=1.0
+                cost=1.0,
             ),
             Action(
                 id="analyze_code",
@@ -918,17 +917,14 @@ class TestPlannerAgentAdvanced:
                 description="Analyze code quality",
                 preconditions={"code_read": True},
                 effects={"analysis_done": True},
-                cost=2.0
+                cost=2.0,
             ),
         ]
 
         # Create planner to access the method
         mock_llm = MagicMock()
         mock_llm.generate = AsyncMock(return_value="{}")
-        planner = PlannerAgent(
-            llm_client=mock_llm,
-            mcp_client=MagicMock()
-        )
+        planner = PlannerAgent(llm_client=mock_llm, mcp_client=MagicMock())
 
         sops = planner._actions_to_sops(actions)
 
@@ -941,12 +937,18 @@ class TestPlannerAgentAdvanced:
         """Test _actions_to_sops with independent actions."""
         actions = [
             Action(
-                id="task_a", agent_role="exec", description="Task A",
-                preconditions={}, effects={"a_done": True}
+                id="task_a",
+                agent_role="exec",
+                description="Task A",
+                preconditions={},
+                effects={"a_done": True},
             ),
             Action(
-                id="task_b", agent_role="exec", description="Task B",
-                preconditions={}, effects={"b_done": True}
+                id="task_b",
+                agent_role="exec",
+                description="Task B",
+                preconditions={},
+                effects={"b_done": True},
             ),
         ]
 
@@ -963,6 +965,7 @@ class TestPlannerAgentAdvanced:
 # =============================================================================
 # PLAN VALIDATION TESTS
 # =============================================================================
+
 
 class TestPlanValidation:
     """Tests for plan validation functionality."""
@@ -987,7 +990,7 @@ class TestPlanValidation:
             rollback_on_error=True,
             retry_count=3,
             correlation_id="feat-001",
-            telemetry_tags={"feature": "auth", "sprint": "5"}
+            telemetry_tags={"feature": "auth", "sprint": "5"},
         )
 
         assert step.retry_count == 3
@@ -1006,7 +1009,7 @@ class TestPlanValidation:
             steps=steps,
             strategy=ExecutionStrategy.PARALLEL,
             checkpoint=True,
-            timeout_minutes=60
+            timeout_minutes=60,
         )
 
         assert stage.name == "Implementation Stage"
@@ -1016,8 +1019,21 @@ class TestPlanValidation:
     def test_plan_with_sops(self):
         """Test ExecutionPlan with direct SOPs."""
         sops = [
-            SOPStep(id="s1", role="architect", action="design", objective="Design system", definition_of_done="Approved"),
-            SOPStep(id="s2", role="executor", action="implement", objective="Write code", definition_of_done="Passing tests", dependencies=["s1"]),
+            SOPStep(
+                id="s1",
+                role="architect",
+                action="design",
+                objective="Design system",
+                definition_of_done="Approved",
+            ),
+            SOPStep(
+                id="s2",
+                role="executor",
+                action="implement",
+                objective="Write code",
+                definition_of_done="Passing tests",
+                dependencies=["s1"],
+            ),
         ]
 
         plan = ExecutionPlan(
@@ -1027,7 +1043,7 @@ class TestPlanValidation:
             sops=sops,
             estimated_cost=100.0,
             risk_assessment="LOW",
-            estimated_duration="2-4 hours"
+            estimated_duration="2-4 hours",
         )
 
         assert len(plan.sops) == 2
@@ -1038,6 +1054,7 @@ class TestPlanValidation:
 # =============================================================================
 # GOAP PLANNER ADVANCED TESTS
 # =============================================================================
+
 
 class TestGOAPPlannerAdvanced:
     """Advanced tests for GOAP planner."""
@@ -1051,15 +1068,12 @@ class TestGOAPPlannerAdvanced:
                 description="Expensive operation",
                 preconditions={"budget_available": True},
                 effects={"result": True},
-                cost=50.0
+                cost=50.0,
             )
         ]
 
         planner = GOAPPlanner(actions)
-        initial = WorldState(
-            facts={"budget_available": True},
-            resources={"budget": 100}
-        )
+        initial = WorldState(facts={"budget_available": True}, resources={"budget": 100})
         goal = GoalState(name="result", desired_facts={"result": True})
 
         plan = planner.plan(initial, goal)
@@ -1077,20 +1091,36 @@ class TestGOAPPlannerAdvanced:
         # Use distinct costs to avoid heapq comparison issues
         actions = [
             Action(
-                id="step1", agent_role="a", description="Step 1",
-                preconditions={}, effects={"phase1_done": True}, cost=1.0
+                id="step1",
+                agent_role="a",
+                description="Step 1",
+                preconditions={},
+                effects={"phase1_done": True},
+                cost=1.0,
             ),
             Action(
-                id="step2", agent_role="b", description="Step 2",
-                preconditions={"phase1_done": True}, effects={"phase2_done": True}, cost=2.0
+                id="step2",
+                agent_role="b",
+                description="Step 2",
+                preconditions={"phase1_done": True},
+                effects={"phase2_done": True},
+                cost=2.0,
             ),
             Action(
-                id="step3", agent_role="c", description="Step 3",
-                preconditions={"phase2_done": True}, effects={"phase3_done": True}, cost=3.0
+                id="step3",
+                agent_role="c",
+                description="Step 3",
+                preconditions={"phase2_done": True},
+                effects={"phase3_done": True},
+                cost=3.0,
             ),
             Action(
-                id="step4", agent_role="d", description="Step 4",
-                preconditions={"phase3_done": True}, effects={"complete": True}, cost=4.0
+                id="step4",
+                agent_role="d",
+                description="Step 4",
+                preconditions={"phase3_done": True},
+                effects={"complete": True},
+                cost=4.0,
             ),
         ]
 
@@ -1109,13 +1139,31 @@ class TestGOAPPlannerAdvanced:
         """Test planner chooses optimal from alternative paths."""
         actions = [
             # Path A: expensive
-            Action(id="pathA", agent_role="a", description="Path A",
-                   preconditions={}, effects={"done": True}, cost=100),
+            Action(
+                id="pathA",
+                agent_role="a",
+                description="Path A",
+                preconditions={},
+                effects={"done": True},
+                cost=100,
+            ),
             # Path B: two steps but cheaper total
-            Action(id="pathB1", agent_role="b", description="Path B Step 1",
-                   preconditions={}, effects={"intermediate": True}, cost=10),
-            Action(id="pathB2", agent_role="b", description="Path B Step 2",
-                   preconditions={"intermediate": True}, effects={"done": True}, cost=10),
+            Action(
+                id="pathB1",
+                agent_role="b",
+                description="Path B Step 1",
+                preconditions={},
+                effects={"intermediate": True},
+                cost=10,
+            ),
+            Action(
+                id="pathB2",
+                agent_role="b",
+                description="Path B Step 2",
+                preconditions={"intermediate": True},
+                effects={"done": True},
+                cost=10,
+            ),
         ]
 
         planner = GOAPPlanner(actions)
@@ -1134,20 +1182,49 @@ class TestGOAPPlannerAdvanced:
 # DEPENDENCY ANALYZER ADVANCED TESTS
 # =============================================================================
 
+
 class TestDependencyAnalyzerAdvanced:
     """Advanced tests for dependency analysis."""
 
     def test_find_critical_path_complex(self):
         """Test critical path with complex dependencies."""
         steps = [
-            SOPStep(id="s1", role="a", action="a", objective="o", definition_of_done="d",
-                    cost=5.0, dependencies=[]),
-            SOPStep(id="s2", role="b", action="a", objective="o", definition_of_done="d",
-                    cost=10.0, dependencies=["s1"]),
-            SOPStep(id="s3", role="c", action="a", objective="o", definition_of_done="d",
-                    cost=3.0, dependencies=["s1"]),
-            SOPStep(id="s4", role="d", action="a", objective="o", definition_of_done="d",
-                    cost=8.0, dependencies=["s2", "s3"]),
+            SOPStep(
+                id="s1",
+                role="a",
+                action="a",
+                objective="o",
+                definition_of_done="d",
+                cost=5.0,
+                dependencies=[],
+            ),
+            SOPStep(
+                id="s2",
+                role="b",
+                action="a",
+                objective="o",
+                definition_of_done="d",
+                cost=10.0,
+                dependencies=["s1"],
+            ),
+            SOPStep(
+                id="s3",
+                role="c",
+                action="a",
+                objective="o",
+                definition_of_done="d",
+                cost=3.0,
+                dependencies=["s1"],
+            ),
+            SOPStep(
+                id="s4",
+                role="d",
+                action="a",
+                objective="o",
+                definition_of_done="d",
+                cost=8.0,
+                dependencies=["s2", "s3"],
+            ),
         ]
 
         path = DependencyAnalyzer.find_critical_path(steps)
@@ -1159,12 +1236,30 @@ class TestDependencyAnalyzerAdvanced:
     def test_parallel_groups_all_sequential(self):
         """Test parallel groups when all steps are sequential."""
         steps = [
-            SOPStep(id="s1", role="a", action="a", objective="o", definition_of_done="d",
-                    dependencies=[]),
-            SOPStep(id="s2", role="b", action="a", objective="o", definition_of_done="d",
-                    dependencies=["s1"]),
-            SOPStep(id="s3", role="c", action="a", objective="o", definition_of_done="d",
-                    dependencies=["s2"]),
+            SOPStep(
+                id="s1",
+                role="a",
+                action="a",
+                objective="o",
+                definition_of_done="d",
+                dependencies=[],
+            ),
+            SOPStep(
+                id="s2",
+                role="b",
+                action="a",
+                objective="o",
+                definition_of_done="d",
+                dependencies=["s1"],
+            ),
+            SOPStep(
+                id="s3",
+                role="c",
+                action="a",
+                objective="o",
+                definition_of_done="d",
+                dependencies=["s2"],
+            ),
         ]
 
         groups = DependencyAnalyzer.find_parallel_groups(steps)
@@ -1179,24 +1274,32 @@ class TestDependencyAnalyzerAdvanced:
 # PLAN VALIDATOR TESTS
 # =============================================================================
 
+
 class TestPlanValidator:
     """Tests for PlanValidator."""
 
     def test_valid_plan(self):
         """Test validation of a valid plan."""
         sops = [
-            SOPStep(id="s1", role="architect", action="design",
-                    objective="Design", definition_of_done="Approved",
-                    dependencies=[]),
-            SOPStep(id="s2", role="executor", action="implement",
-                    objective="Implement", definition_of_done="Done",
-                    dependencies=["s1"]),
+            SOPStep(
+                id="s1",
+                role="architect",
+                action="design",
+                objective="Design",
+                definition_of_done="Approved",
+                dependencies=[],
+            ),
+            SOPStep(
+                id="s2",
+                role="executor",
+                action="implement",
+                objective="Implement",
+                definition_of_done="Done",
+                dependencies=["s1"],
+            ),
         ]
         plan = ExecutionPlan(
-            plan_id="test",
-            goal="Test goal",
-            strategy_overview="Test strategy",
-            sops=sops
+            plan_id="test", goal="Test goal", strategy_overview="Test strategy", sops=sops
         )
 
         is_valid, errors = PlanValidator.validate(plan)
@@ -1207,17 +1310,24 @@ class TestPlanValidator:
     def test_circular_dependency_detection(self):
         """Test detection of circular dependencies."""
         sops = [
-            SOPStep(id="s1", role="a", action="a", objective="o",
-                    definition_of_done="d", dependencies=["s2"]),
-            SOPStep(id="s2", role="b", action="b", objective="o",
-                    definition_of_done="d", dependencies=["s1"]),
+            SOPStep(
+                id="s1",
+                role="a",
+                action="a",
+                objective="o",
+                definition_of_done="d",
+                dependencies=["s2"],
+            ),
+            SOPStep(
+                id="s2",
+                role="b",
+                action="b",
+                objective="o",
+                definition_of_done="d",
+                dependencies=["s1"],
+            ),
         ]
-        plan = ExecutionPlan(
-            plan_id="circular",
-            goal="Test",
-            strategy_overview="Test",
-            sops=sops
-        )
+        plan = ExecutionPlan(plan_id="circular", goal="Test", strategy_overview="Test", sops=sops)
 
         is_valid, errors = PlanValidator.validate(plan)
 
@@ -1227,15 +1337,16 @@ class TestPlanValidator:
     def test_missing_dependency_detection(self):
         """Test detection of non-existent dependencies."""
         sops = [
-            SOPStep(id="s1", role="a", action="a", objective="o",
-                    definition_of_done="d", dependencies=["nonexistent"]),
+            SOPStep(
+                id="s1",
+                role="a",
+                action="a",
+                objective="o",
+                definition_of_done="d",
+                dependencies=["nonexistent"],
+            ),
         ]
-        plan = ExecutionPlan(
-            plan_id="missing",
-            goal="Test",
-            strategy_overview="Test",
-            sops=sops
-        )
+        plan = ExecutionPlan(plan_id="missing", goal="Test", strategy_overview="Test", sops=sops)
 
         is_valid, errors = PlanValidator.validate(plan)
 
@@ -1245,19 +1356,32 @@ class TestPlanValidator:
     def test_no_entry_point_detection(self):
         """Test detection of plans without entry point."""
         sops = [
-            SOPStep(id="s1", role="a", action="a", objective="o",
-                    definition_of_done="d", dependencies=["s2"]),
-            SOPStep(id="s2", role="b", action="b", objective="o",
-                    definition_of_done="d", dependencies=["s3"]),
-            SOPStep(id="s3", role="c", action="c", objective="o",
-                    definition_of_done="d", dependencies=["s1"]),
+            SOPStep(
+                id="s1",
+                role="a",
+                action="a",
+                objective="o",
+                definition_of_done="d",
+                dependencies=["s2"],
+            ),
+            SOPStep(
+                id="s2",
+                role="b",
+                action="b",
+                objective="o",
+                definition_of_done="d",
+                dependencies=["s3"],
+            ),
+            SOPStep(
+                id="s3",
+                role="c",
+                action="c",
+                objective="o",
+                definition_of_done="d",
+                dependencies=["s1"],
+            ),
         ]
-        plan = ExecutionPlan(
-            plan_id="no_entry",
-            goal="Test",
-            strategy_overview="Test",
-            sops=sops
-        )
+        plan = ExecutionPlan(plan_id="no_entry", goal="Test", strategy_overview="Test", sops=sops)
 
         is_valid, errors = PlanValidator.validate(plan)
 
@@ -1268,15 +1392,21 @@ class TestPlanValidator:
     def test_excessive_token_budget(self):
         """Test detection of excessive token budget."""
         sops = [
-            SOPStep(id="s1", role="a", action="a", objective="o",
-                    definition_of_done="d", dependencies=[]),
+            SOPStep(
+                id="s1",
+                role="a",
+                action="a",
+                objective="o",
+                definition_of_done="d",
+                dependencies=[],
+            ),
         ]
         plan = ExecutionPlan(
             plan_id="expensive",
             goal="Test",
             strategy_overview="Test",
             sops=sops,
-            token_budget=500000  # Over 200k limit
+            token_budget=500000,  # Over 200k limit
         )
 
         is_valid, errors = PlanValidator.validate(plan)
@@ -1290,15 +1420,23 @@ class TestPlanValidator:
             name="Empty Stage",
             description="No steps",
             steps=[],
-            strategy=ExecutionStrategy.SEQUENTIAL
+            strategy=ExecutionStrategy.SEQUENTIAL,
         )
         plan = ExecutionPlan(
             plan_id="empty_stage",
             goal="Test",
             strategy_overview="Test",
             stages=[stage],
-            sops=[SOPStep(id="s1", role="a", action="a", objective="o",
-                          definition_of_done="d", dependencies=[])]
+            sops=[
+                SOPStep(
+                    id="s1",
+                    role="a",
+                    action="a",
+                    objective="o",
+                    definition_of_done="d",
+                    dependencies=[],
+                )
+            ],
         )
 
         is_valid, errors = PlanValidator.validate(plan)
@@ -1309,16 +1447,19 @@ class TestPlanValidator:
     def test_critical_without_checkpoint_warning(self):
         """Test detection of critical steps without checkpoints."""
         sops = [
-            SOPStep(id="s1", role="a", action="critical_action", objective="o",
-                    definition_of_done="d", dependencies=[],
-                    priority=AgentPriority.CRITICAL,
-                    checkpoint=None),
+            SOPStep(
+                id="s1",
+                role="a",
+                action="critical_action",
+                objective="o",
+                definition_of_done="d",
+                dependencies=[],
+                priority=AgentPriority.CRITICAL,
+                checkpoint=None,
+            ),
         ]
         plan = ExecutionPlan(
-            plan_id="no_checkpoint",
-            goal="Test",
-            strategy_overview="Test",
-            sops=sops
+            plan_id="no_checkpoint", goal="Test", strategy_overview="Test", sops=sops
         )
 
         is_valid, errors = PlanValidator.validate(plan)
@@ -1329,16 +1470,19 @@ class TestPlanValidator:
     def test_valid_plan_with_checkpoints(self):
         """Test valid plan with critical steps and checkpoints."""
         sops = [
-            SOPStep(id="s1", role="a", action="critical_action", objective="o",
-                    definition_of_done="d", dependencies=[],
-                    priority=AgentPriority.CRITICAL,
-                    checkpoint=CheckpointType.VALIDATION),
+            SOPStep(
+                id="s1",
+                role="a",
+                action="critical_action",
+                objective="o",
+                definition_of_done="d",
+                dependencies=[],
+                priority=AgentPriority.CRITICAL,
+                checkpoint=CheckpointType.VALIDATION,
+            ),
         ]
         plan = ExecutionPlan(
-            plan_id="with_checkpoint",
-            goal="Test",
-            strategy_overview="Test",
-            sops=sops
+            plan_id="with_checkpoint", goal="Test", strategy_overview="Test", sops=sops
         )
 
         is_valid, errors = PlanValidator.validate(plan)
@@ -1350,18 +1494,37 @@ class TestPlanValidator:
 # DEPENDENCY GRAPH TESTS
 # =============================================================================
 
+
 class TestDependencyGraph:
     """Tests for dependency graph building."""
 
     def test_build_graph_structure(self):
         """Test building dependency graph structure."""
         steps = [
-            SOPStep(id="s1", role="a", action="a", objective="o",
-                    definition_of_done="d", dependencies=[]),
-            SOPStep(id="s2", role="b", action="b", objective="o",
-                    definition_of_done="d", dependencies=["s1"]),
-            SOPStep(id="s3", role="c", action="c", objective="o",
-                    definition_of_done="d", dependencies=["s1", "s2"]),
+            SOPStep(
+                id="s1",
+                role="a",
+                action="a",
+                objective="o",
+                definition_of_done="d",
+                dependencies=[],
+            ),
+            SOPStep(
+                id="s2",
+                role="b",
+                action="b",
+                objective="o",
+                definition_of_done="d",
+                dependencies=["s1"],
+            ),
+            SOPStep(
+                id="s3",
+                role="c",
+                action="c",
+                objective="o",
+                definition_of_done="d",
+                dependencies=["s1", "s2"],
+            ),
         ]
 
         graph = DependencyAnalyzer.build_graph(steps)
@@ -1373,10 +1536,12 @@ class TestDependencyGraph:
     def test_graph_with_no_dependencies(self):
         """Test graph with independent steps."""
         steps = [
-            SOPStep(id="a", role="r", action="a", objective="o",
-                    definition_of_done="d", dependencies=[]),
-            SOPStep(id="b", role="r", action="b", objective="o",
-                    definition_of_done="d", dependencies=[]),
+            SOPStep(
+                id="a", role="r", action="a", objective="o", definition_of_done="d", dependencies=[]
+            ),
+            SOPStep(
+                id="b", role="r", action="b", objective="o", definition_of_done="d", dependencies=[]
+            ),
         ]
 
         graph = DependencyAnalyzer.build_graph(steps)
@@ -1386,14 +1551,38 @@ class TestDependencyGraph:
     def test_graph_complex_structure(self):
         """Test complex dependency graph."""
         steps = [
-            SOPStep(id="s1", role="r", action="a", objective="o",
-                    definition_of_done="d", dependencies=[]),
-            SOPStep(id="s2", role="r", action="a", objective="o",
-                    definition_of_done="d", dependencies=["s1"]),
-            SOPStep(id="s3", role="r", action="a", objective="o",
-                    definition_of_done="d", dependencies=["s1"]),
-            SOPStep(id="s4", role="r", action="a", objective="o",
-                    definition_of_done="d", dependencies=["s2", "s3"]),
+            SOPStep(
+                id="s1",
+                role="r",
+                action="a",
+                objective="o",
+                definition_of_done="d",
+                dependencies=[],
+            ),
+            SOPStep(
+                id="s2",
+                role="r",
+                action="a",
+                objective="o",
+                definition_of_done="d",
+                dependencies=["s1"],
+            ),
+            SOPStep(
+                id="s3",
+                role="r",
+                action="a",
+                objective="o",
+                definition_of_done="d",
+                dependencies=["s1"],
+            ),
+            SOPStep(
+                id="s4",
+                role="r",
+                action="a",
+                objective="o",
+                definition_of_done="d",
+                dependencies=["s2", "s3"],
+            ),
         ]
 
         graph = DependencyAnalyzer.build_graph(steps)
@@ -1406,6 +1595,7 @@ class TestDependencyGraph:
 # EXECUTION EVENT TESTS
 # =============================================================================
 
+
 class TestExecutionEvent:
     """Tests for ExecutionEvent dataclass."""
 
@@ -1416,7 +1606,7 @@ class TestExecutionEvent:
             event_type="started",
             step_id="step_1",
             agent_role="executor",
-            correlation_id="corr-123"
+            correlation_id="corr-123",
         )
 
         assert event.timestamp == "2025-01-01T12:00:00"
@@ -1433,7 +1623,7 @@ class TestExecutionEvent:
             step_id="step_1",
             agent_role="executor",
             correlation_id="corr-123",
-            duration_ms=5000
+            duration_ms=5000,
         )
 
         assert event.duration_ms == 5000
@@ -1447,7 +1637,7 @@ class TestExecutionEvent:
             agent_role="executor",
             correlation_id="corr-123",
             duration_ms=3000,
-            error="Timeout exceeded"
+            error="Timeout exceeded",
         )
 
         assert event.error == "Timeout exceeded"

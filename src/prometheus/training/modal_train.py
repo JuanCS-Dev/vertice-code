@@ -18,6 +18,7 @@ volume = modal.Volume.from_name("prometheus-memory", create_if_missing=True)
 
 # Load .env if present
 from dotenv import load_dotenv
+
 load_dotenv("/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/.env")
 
 # Define the image
@@ -31,6 +32,7 @@ image = (
         ignore=["**/.git", "**/__pycache__", "**/.venv", "**/.env", "**/venv"],
     )
 )
+
 
 @app.function(
     image=image,
@@ -57,6 +59,7 @@ async def train_prometheus(num_iterations: int = 10):
         print(f"❌ Import Error: {e}")
         # Debug: list files
         import subprocess
+
         subprocess.run(["find", "/root/qwen-dev-cli", "-maxdepth", "3"])
         raise
 
@@ -91,6 +94,7 @@ async def train_prometheus(num_iterations: int = 10):
     filename = f"/data/prometheus_memory_{timestamp}.json"
 
     import json
+
     with open(filename, "w") as f:
         json.dump(memory_state, f, indent=2)
 
@@ -104,6 +108,7 @@ async def train_prometheus(num_iterations: int = 10):
     print(f"📈 Stats: {stats.to_dict()}")
 
     return stats.to_dict()
+
 
 @app.local_entrypoint()
 def main(iterations: int = 10):

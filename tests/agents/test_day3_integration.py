@@ -31,9 +31,7 @@ class TestPlannerRefactorerCollaboration:
         refactorer = RefactorerAgent()
 
         plan_context = TaskContext(
-            task_id="plan",
-            description="Plan code improvement",
-            working_dir=Path("/tmp")
+            task_id="plan", description="Plan code improvement", working_dir=Path("/tmp")
         )
         plan_result = planner.execute(plan_context)
 
@@ -42,14 +40,14 @@ class TestPlannerRefactorerCollaboration:
             task_id="refactor",
             description="Execute plan",
             working_dir=Path("/tmp"),
-            metadata={"plan": plan_result.output}
+            metadata={"plan": plan_result.output},
         )
         refactor_result = refactorer.execute(refactor_context)
         assert refactor_result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
 
     def test_refactorer_validates_planner_output(self):
         """Refactorer deve validar output do Planner"""
-        planner = PlannerAgent()
+        PlannerAgent()
         refactorer = RefactorerAgent()
 
         # Plano inválido
@@ -57,7 +55,7 @@ class TestPlannerRefactorerCollaboration:
             task_id="test",
             description="Execute invalid plan",
             working_dir=Path("/tmp"),
-            metadata={"plan": "invalid"}
+            metadata={"plan": "invalid"},
         )
         result = refactorer.execute(invalid_context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -66,9 +64,7 @@ class TestPlannerRefactorerCollaboration:
         """Planner deve sugerir steps específicos de refatoração"""
         planner = PlannerAgent()
         context = TaskContext(
-            task_id="test",
-            description="Plan refactoring",
-            working_dir=Path("/tmp")
+            task_id="test", description="Plan refactoring", working_dir=Path("/tmp")
         )
         result = planner.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -80,7 +76,7 @@ class TestPlannerRefactorerCollaboration:
             task_id="test",
             description="Execute steps",
             working_dir=Path("/tmp"),
-            metadata={"steps": ["step1", "step2"]}
+            metadata={"steps": ["step1", "step2"]},
         )
         result = refactorer.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -92,7 +88,7 @@ class TestPlannerRefactorerCollaboration:
             task_id="test",
             description="Plan with constraints",
             working_dir=Path("/tmp"),
-            metadata={"constraints": ["no_breaking_changes"]}
+            metadata={"constraints": ["no_breaking_changes"]},
         )
         result = planner.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -104,11 +100,7 @@ class TestCoordinatorWorkflowSimulation:
     def test_coordinator_workflow_analyze_plan_refactor(self):
         """Simula workflow: Analyze -> Plan -> Refactor"""
         # Fase 1: Análise (seria feita por Explorer, mas testamos contexto)
-        analysis_context = TaskContext(
-            task_id="analyze",
-            description="Analyze codebase",
-            working_dir=Path("/tmp")
-        )
+        TaskContext(task_id="analyze", description="Analyze codebase", working_dir=Path("/tmp"))
 
         # Fase 2: Planejamento
         planner = PlannerAgent()
@@ -116,7 +108,7 @@ class TestCoordinatorWorkflowSimulation:
             task_id="plan",
             description="Create refactoring plan",
             working_dir=Path("/tmp"),
-            metadata={"analysis": "mock_analysis"}
+            metadata={"analysis": "mock_analysis"},
         )
         plan_result = planner.execute(plan_context)
         assert plan_result.status == TaskStatus.SUCCESS
@@ -127,7 +119,7 @@ class TestCoordinatorWorkflowSimulation:
             task_id="refactor",
             description="Execute plan",
             working_dir=Path("/tmp"),
-            metadata={"plan": plan_result.output}
+            metadata={"plan": plan_result.output},
         )
         refactor_result = refactorer.execute(refactor_context)
         assert refactor_result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -136,9 +128,7 @@ class TestCoordinatorWorkflowSimulation:
         """Simula workflow: apenas Planning sem execução"""
         planner = PlannerAgent()
         context = TaskContext(
-            task_id="plan",
-            description="Plan without execution",
-            working_dir=Path("/tmp")
+            task_id="plan", description="Plan without execution", working_dir=Path("/tmp")
         )
         result = planner.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -149,9 +139,7 @@ class TestCoordinatorWorkflowSimulation:
 
         # Iteração 1
         context1 = TaskContext(
-            task_id="iter1",
-            description="First refactoring pass",
-            working_dir=Path("/tmp")
+            task_id="iter1", description="First refactoring pass", working_dir=Path("/tmp")
         )
         result1 = refactorer.execute(context1)
 
@@ -160,7 +148,7 @@ class TestCoordinatorWorkflowSimulation:
             task_id="iter2",
             description="Second refactoring pass",
             working_dir=Path("/tmp"),
-            metadata={"previous_result": result1.output}
+            metadata={"previous_result": result1.output},
         )
         result2 = refactorer.execute(context2)
         assert result2.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -170,7 +158,9 @@ class TestCoordinatorWorkflowSimulation:
         planner = PlannerAgent()
 
         contexts = [
-            TaskContext(task_id=f"plan_{i}", description=f"Plan module {i}", working_dir=Path("/tmp"))
+            TaskContext(
+                task_id=f"plan_{i}", description=f"Plan module {i}", working_dir=Path("/tmp")
+            )
             for i in range(3)
         ]
 
@@ -183,17 +173,13 @@ class TestCoordinatorWorkflowSimulation:
         refactorer = RefactorerAgent()
 
         plan_context = TaskContext(
-            task_id="plan",
-            description="Conditional plan",
-            working_dir=Path("/tmp")
+            task_id="plan", description="Conditional plan", working_dir=Path("/tmp")
         )
         plan_result = planner.execute(plan_context)
 
         if plan_result.status == TaskStatus.SUCCESS:
             refactor_context = TaskContext(
-                task_id="refactor",
-                description="Execute if plan succeeds",
-                working_dir=Path("/tmp")
+                task_id="refactor", description="Execute if plan succeeds", working_dir=Path("/tmp")
             )
             refactor_result = refactorer.execute(refactor_context)
             assert refactor_result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -207,11 +193,7 @@ class TestAgentCommunicationProtocol:
         planner = PlannerAgent()
         refactorer = RefactorerAgent()
 
-        context = TaskContext(
-            task_id="test",
-            description="Test metadata",
-            working_dir=Path("/tmp")
-        )
+        context = TaskContext(task_id="test", description="Test metadata", working_dir=Path("/tmp"))
 
         plan_result = planner.execute(context)
         refactor_result = refactorer.execute(context)
@@ -228,7 +210,7 @@ class TestAgentCommunicationProtocol:
             task_id="test",
             description="Test context chain",
             working_dir=Path("/tmp"),
-            metadata={"parent_task": "root"}
+            metadata={"parent_task": "root"},
         )
 
         result = planner.execute(context)
@@ -238,11 +220,7 @@ class TestAgentCommunicationProtocol:
         """Agentes devem tratar metadata ausente"""
         planner = PlannerAgent()
 
-        context = TaskContext(
-            task_id="test",
-            description="No metadata",
-            working_dir=Path("/tmp")
-        )
+        context = TaskContext(task_id="test", description="No metadata", working_dir=Path("/tmp"))
 
         result = planner.execute(context)
         assert result.status == TaskStatus.SUCCESS
@@ -253,9 +231,7 @@ class TestAgentCommunicationProtocol:
 
         # Contexto mínimo válido
         context = TaskContext(
-            task_id="test",
-            description="Minimal context",
-            working_dir=Path("/tmp")
+            task_id="test", description="Minimal context", working_dir=Path("/tmp")
         )
 
         result = planner.execute(context)
@@ -266,9 +242,7 @@ class TestAgentCommunicationProtocol:
         planner = PlannerAgent()
 
         context = TaskContext(
-            task_id="test",
-            description="Parseable output",
-            working_dir=Path("/tmp")
+            task_id="test", description="Parseable output", working_dir=Path("/tmp")
         )
 
         result = planner.execute(context)
@@ -286,7 +260,7 @@ class TestErrorPropagation:
         error_context = TaskContext(
             task_id="error",
             description="",  # Descrição vazia pode causar erro
-            working_dir=Path("/tmp")
+            working_dir=Path("/tmp"),
         )
 
         plan_result = planner.execute(error_context)
@@ -305,7 +279,7 @@ class TestErrorPropagation:
             task_id="test",
             description="Invalid input",
             working_dir=Path("/tmp"),
-            metadata={"invalid_key": "bad_value"}
+            metadata={"invalid_key": "bad_value"},
         )
 
         result = refactorer.execute(context)
@@ -319,7 +293,7 @@ class TestErrorPropagation:
             task_id="test",
             description="Slow operation",
             working_dir=Path("/tmp"),
-            metadata={"timeout": 1}
+            metadata={"timeout": 1},
         )
 
         result = planner.execute(context)
@@ -330,9 +304,7 @@ class TestErrorPropagation:
         refactorer = RefactorerAgent()
 
         context = TaskContext(
-            task_id="test",
-            description="Large refactoring",
-            working_dir=Path("/tmp")
+            task_id="test", description="Large refactoring", working_dir=Path("/tmp")
         )
 
         result = refactorer.execute(context)
@@ -361,7 +333,9 @@ class TestStateConsistency:
         planner = PlannerAgent()
 
         contexts = [
-            TaskContext(task_id=f"concurrent_{i}", description=f"Task {i}", working_dir=Path("/tmp"))
+            TaskContext(
+                task_id=f"concurrent_{i}", description=f"Task {i}", working_dir=Path("/tmp")
+            )
             for i in range(5)
         ]
 
@@ -373,9 +347,7 @@ class TestStateConsistency:
         refactorer = RefactorerAgent()
 
         context = TaskContext(
-            task_id="cleanup",
-            description="Task with cleanup",
-            working_dir=Path("/tmp")
+            task_id="cleanup", description="Task with cleanup", working_dir=Path("/tmp")
         )
 
         result = refactorer.execute(context)
@@ -391,12 +363,11 @@ class TestPerformanceCharacteristics:
         planner = PlannerAgent()
 
         context = TaskContext(
-            task_id="perf",
-            description="Performance test",
-            working_dir=Path("/tmp")
+            task_id="perf", description="Performance test", working_dir=Path("/tmp")
         )
 
         import time
+
         start = time.time()
         result = planner.execute(context)
         duration = time.time() - start
@@ -410,12 +381,11 @@ class TestPerformanceCharacteristics:
         refactorer = RefactorerAgent()
 
         context = TaskContext(
-            task_id="perf",
-            description="Performance test",
-            working_dir=Path("/tmp")
+            task_id="perf", description="Performance test", working_dir=Path("/tmp")
         )
 
         import time
+
         start = time.time()
         result = refactorer.execute(context)
         duration = time.time() - start
@@ -428,15 +398,13 @@ class TestPerformanceCharacteristics:
         planner = PlannerAgent()
 
         simple_context = TaskContext(
-            task_id="simple",
-            description="Simple task",
-            working_dir=Path("/tmp")
+            task_id="simple", description="Simple task", working_dir=Path("/tmp")
         )
 
         complex_context = TaskContext(
             task_id="complex",
             description="Very complex multi-step task with many dependencies",
-            working_dir=Path("/tmp")
+            working_dir=Path("/tmp"),
         )
 
         simple_result = planner.execute(simple_context)
@@ -457,7 +425,7 @@ class TestRobustness:
         context = TaskContext(
             task_id="malformed",
             description=None,  # type: ignore
-            working_dir=Path("/tmp")
+            working_dir=Path("/tmp"),
         )
 
         try:
@@ -472,9 +440,7 @@ class TestRobustness:
         planner = PlannerAgent()
 
         context = TaskContext(
-            task_id="fs_error",
-            description="Task",
-            working_dir=Path("/nonexistent/path")
+            task_id="fs_error", description="Task", working_dir=Path("/nonexistent/path")
         )
 
         result = planner.execute(context)
@@ -485,9 +451,7 @@ class TestRobustness:
         planner = PlannerAgent()
 
         context = TaskContext(
-            task_id="unicode",
-            description="Teste com 中文 и русский 🚀",
-            working_dir=Path("/tmp")
+            task_id="unicode", description="Teste com 中文 и русский 🚀", working_dir=Path("/tmp")
         )
 
         result = planner.execute(context)
@@ -497,11 +461,7 @@ class TestRobustness:
         """Agentes devem tratar input muito longo"""
         planner = PlannerAgent()
 
-        context = TaskContext(
-            task_id="long",
-            description="x" * 10000,
-            working_dir=Path("/tmp")
-        )
+        context = TaskContext(task_id="long", description="x" * 10000, working_dir=Path("/tmp"))
 
         result = planner.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -515,12 +475,10 @@ class TestObservability:
         planner = PlannerAgent()
 
         context = TaskContext(
-            task_id="log_test",
-            description="Logging test",
-            working_dir=Path("/tmp")
+            task_id="log_test", description="Logging test", working_dir=Path("/tmp")
         )
 
-        with patch('logging.Logger.info') as mock_log:
+        with patch("logging.Logger.info"):
             result = planner.execute(context)
             # Deve ter logado
             assert result.status == TaskStatus.SUCCESS
@@ -530,9 +488,7 @@ class TestObservability:
         refactorer = RefactorerAgent()
 
         context = TaskContext(
-            task_id="log_test",
-            description="Logging test",
-            working_dir=Path("/tmp")
+            task_id="log_test", description="Logging test", working_dir=Path("/tmp")
         )
 
         result = refactorer.execute(context)
@@ -542,11 +498,7 @@ class TestObservability:
         """Agentes devem incluir timing em metadata"""
         planner = PlannerAgent()
 
-        context = TaskContext(
-            task_id="timing",
-            description="Timing test",
-            working_dir=Path("/tmp")
-        )
+        context = TaskContext(task_id="timing", description="Timing test", working_dir=Path("/tmp"))
 
         result = planner.execute(context)
         # Metadata deve existir
@@ -563,9 +515,7 @@ class TestConstitutionalComplianceIntegration:
 
         # Simula workflow
         plan_context = TaskContext(
-            task_id="budget_test",
-            description="Budget compliance test",
-            working_dir=Path("/tmp")
+            task_id="budget_test", description="Budget compliance test", working_dir=Path("/tmp")
         )
 
         plan_result = planner.execute(plan_context)
@@ -574,7 +524,7 @@ class TestConstitutionalComplianceIntegration:
             task_id="budget_test_2",
             description="Execute plan",
             working_dir=Path("/tmp"),
-            metadata={"plan": plan_result.output}
+            metadata={"plan": plan_result.output},
         )
 
         refactor_result = refactorer.execute(refactor_context)
@@ -585,9 +535,7 @@ class TestConstitutionalComplianceIntegration:
         planner = PlannerAgent()
 
         context = TaskContext(
-            task_id="redundancy",
-            description="Same task",
-            working_dir=Path("/tmp")
+            task_id="redundancy", description="Same task", working_dir=Path("/tmp")
         )
 
         result1 = planner.execute(context)
@@ -604,9 +552,7 @@ class TestConstitutionalComplianceIntegration:
         # Simula múltiplas falhas
         for i in range(3):
             context = TaskContext(
-                task_id=f"fail_{i}",
-                description="Failing task",
-                working_dir=Path("/tmp")
+                task_id=f"fail_{i}", description="Failing task", working_dir=Path("/tmp")
             )
             result = refactorer.execute(context)
             # Deve continuar tentando ou breaker ativa

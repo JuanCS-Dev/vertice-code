@@ -68,16 +68,18 @@ def format_deliberation_output(result: DeliberationResult) -> str:
             output.append(f"  • {insight}")
 
     # Recomendação
-    output.extend([
-        "",
-        "─" * 60,
-        "📜 SÍNTESE E RECOMENDAÇÃO:",
-        "─" * 60,
-        result.recommendation,
-        "",
-        "─" * 60,
-        f"📊 Confiança na análise: {result.confidence_level:.0%}",
-    ])
+    output.extend(
+        [
+            "",
+            "─" * 60,
+            "📜 SÍNTESE E RECOMENDAÇÃO:",
+            "─" * 60,
+            result.recommendation,
+            "",
+            "─" * 60,
+            f"📊 Confiança na análise: {result.confidence_level:.0%}",
+        ]
+    )
 
     # Limitações
     if result.limitations:

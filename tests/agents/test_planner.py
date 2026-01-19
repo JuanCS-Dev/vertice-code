@@ -40,45 +40,47 @@ class TestPlannerBasic:
         """Test Planner generates valid execution plan with GOAP stages."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "plan_name": "Add JWT Auth",
-                "total_steps": 3,
-                "estimated_duration": "30 minutes",
-                "steps": [
-                    {
-                        "id": 1,
-                        "action": "create_directory",
-                        "description": "Create auth folder",
-                        "params": {"path": "app/auth"},
-                        "risk": "LOW",
-                        "requires_approval": False,
-                        "dependencies": [],
-                        "validation": "Directory exists"
-                    },
-                    {
-                        "id": 2,
-                        "action": "create_file",
-                        "description": "Create JWT handler",
-                        "params": {"path": "app/auth/jwt.py", "content": "# JWT"},
-                        "risk": "LOW",
-                        "requires_approval": False,
-                        "dependencies": [1],
-                        "validation": "File exists"
-                    },
-                    {
-                        "id": 3,
-                        "action": "bash_command",
-                        "description": "Run tests",
-                        "params": {"command": "pytest"},
-                        "risk": "LOW",
-                        "requires_approval": False,
-                        "dependencies": [2],
-                        "validation": "Tests pass"
-                    }
-                ],
-                "checkpoints": [{"after_step": 3, "description": "Auth complete"}],
-                "rollback_strategy": "Delete app/auth if tests fail"
-            })
+            return_value=json.dumps(
+                {
+                    "plan_name": "Add JWT Auth",
+                    "total_steps": 3,
+                    "estimated_duration": "30 minutes",
+                    "steps": [
+                        {
+                            "id": 1,
+                            "action": "create_directory",
+                            "description": "Create auth folder",
+                            "params": {"path": "app/auth"},
+                            "risk": "LOW",
+                            "requires_approval": False,
+                            "dependencies": [],
+                            "validation": "Directory exists",
+                        },
+                        {
+                            "id": 2,
+                            "action": "create_file",
+                            "description": "Create JWT handler",
+                            "params": {"path": "app/auth/jwt.py", "content": "# JWT"},
+                            "risk": "LOW",
+                            "requires_approval": False,
+                            "dependencies": [1],
+                            "validation": "File exists",
+                        },
+                        {
+                            "id": 3,
+                            "action": "bash_command",
+                            "description": "Run tests",
+                            "params": {"command": "pytest"},
+                            "risk": "LOW",
+                            "requires_approval": False,
+                            "dependencies": [2],
+                            "validation": "Tests pass",
+                        },
+                    ],
+                    "checkpoints": [{"after_step": 3, "description": "Auth complete"}],
+                    "rollback_strategy": "Delete app/auth if tests fail",
+                }
+            )
         )
 
         planner = PlannerAgent(llm_client, MagicMock())
@@ -102,14 +104,30 @@ class TestPlannerBasic:
         """Test Planner uses Architect's architecture in planning."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "plan_name": "Implement API",
-                "total_steps": 2,
-                "steps": [
-                    {"id": 1, "action": "create_file", "params": {}, "risk": "LOW", "requires_approval": False, "dependencies": []},
-                    {"id": 2, "action": "bash_command", "params": {}, "risk": "LOW", "requires_approval": False, "dependencies": [1]}
-                ]
-            })
+            return_value=json.dumps(
+                {
+                    "plan_name": "Implement API",
+                    "total_steps": 2,
+                    "steps": [
+                        {
+                            "id": 1,
+                            "action": "create_file",
+                            "params": {},
+                            "risk": "LOW",
+                            "requires_approval": False,
+                            "dependencies": [],
+                        },
+                        {
+                            "id": 2,
+                            "action": "bash_command",
+                            "params": {},
+                            "risk": "LOW",
+                            "requires_approval": False,
+                            "dependencies": [1],
+                        },
+                    ],
+                }
+            )
         )
 
         planner = PlannerAgent(llm_client, MagicMock())
@@ -120,9 +138,9 @@ class TestPlannerBasic:
                 "architecture": {
                     "approach": "FastAPI with SQLAlchemy",
                     "risks": ["Database migration needed"],
-                    "constraints": ["Must use existing models"]
+                    "constraints": ["Must use existing models"],
                 }
-            }
+            },
         )
 
         response = await planner.execute(task)
@@ -133,15 +151,38 @@ class TestPlannerBasic:
         """Test Planner assesses and tracks risk level."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "plan_name": "Dangerous Plan",
-                "total_steps": 3,
-                "steps": [
-                    {"id": 1, "action": "create_file", "params": {}, "risk": "LOW", "requires_approval": False, "dependencies": []},
-                    {"id": 2, "action": "delete_file", "params": {}, "risk": "HIGH", "requires_approval": True, "dependencies": []},
-                    {"id": 3, "action": "edit_file", "params": {}, "risk": "MEDIUM", "requires_approval": False, "dependencies": []}
-                ]
-            })
+            return_value=json.dumps(
+                {
+                    "plan_name": "Dangerous Plan",
+                    "total_steps": 3,
+                    "steps": [
+                        {
+                            "id": 1,
+                            "action": "create_file",
+                            "params": {},
+                            "risk": "LOW",
+                            "requires_approval": False,
+                            "dependencies": [],
+                        },
+                        {
+                            "id": 2,
+                            "action": "delete_file",
+                            "params": {},
+                            "risk": "HIGH",
+                            "requires_approval": True,
+                            "dependencies": [],
+                        },
+                        {
+                            "id": 3,
+                            "action": "edit_file",
+                            "params": {},
+                            "risk": "MEDIUM",
+                            "requires_approval": False,
+                            "dependencies": [],
+                        },
+                    ],
+                }
+            )
         )
 
         planner = PlannerAgent(llm_client, MagicMock())
@@ -172,14 +213,37 @@ class TestPlannerBasic:
         """Test Planner generates execution stages."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "plan_name": "Multi-stage Plan",
-                "steps": [
-                    {"id": 1, "action": "analyze", "params": {}, "risk": "LOW", "requires_approval": False, "dependencies": []},
-                    {"id": 2, "action": "implement", "params": {}, "risk": "LOW", "requires_approval": False, "dependencies": [1]},
-                    {"id": 3, "action": "test", "params": {}, "risk": "LOW", "requires_approval": False, "dependencies": [2]}
-                ]
-            })
+            return_value=json.dumps(
+                {
+                    "plan_name": "Multi-stage Plan",
+                    "steps": [
+                        {
+                            "id": 1,
+                            "action": "analyze",
+                            "params": {},
+                            "risk": "LOW",
+                            "requires_approval": False,
+                            "dependencies": [],
+                        },
+                        {
+                            "id": 2,
+                            "action": "implement",
+                            "params": {},
+                            "risk": "LOW",
+                            "requires_approval": False,
+                            "dependencies": [1],
+                        },
+                        {
+                            "id": 3,
+                            "action": "test",
+                            "params": {},
+                            "risk": "LOW",
+                            "requires_approval": False,
+                            "dependencies": [2],
+                        },
+                    ],
+                }
+            )
         )
 
         planner = PlannerAgent(llm_client, MagicMock())
@@ -197,10 +261,21 @@ class TestPlannerBasic:
         """Test Planner tracks execution count."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "plan_name": "Test",
-                "steps": [{"id": 1, "action": "create_file", "params": {}, "risk": "LOW", "requires_approval": False, "dependencies": []}]
-            })
+            return_value=json.dumps(
+                {
+                    "plan_name": "Test",
+                    "steps": [
+                        {
+                            "id": 1,
+                            "action": "create_file",
+                            "params": {},
+                            "risk": "LOW",
+                            "requires_approval": False,
+                            "dependencies": [],
+                        }
+                    ],
+                }
+            )
         )
 
         planner = PlannerAgent(llm_client, MagicMock())
@@ -234,13 +309,29 @@ class TestPlannerBasic:
         """Test Planner uses GOAP for planning."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "plan_name": "GOAP Plan",
-                "steps": [
-                    {"id": 1, "action": "read", "params": {}, "risk": "LOW", "requires_approval": False, "dependencies": []},
-                    {"id": 2, "action": "analyze", "params": {}, "risk": "LOW", "requires_approval": False, "dependencies": [1]}
-                ]
-            })
+            return_value=json.dumps(
+                {
+                    "plan_name": "GOAP Plan",
+                    "steps": [
+                        {
+                            "id": 1,
+                            "action": "read",
+                            "params": {},
+                            "risk": "LOW",
+                            "requires_approval": False,
+                            "dependencies": [],
+                        },
+                        {
+                            "id": 2,
+                            "action": "analyze",
+                            "params": {},
+                            "risk": "LOW",
+                            "requires_approval": False,
+                            "dependencies": [1],
+                        },
+                    ],
+                }
+            )
         )
 
         planner = PlannerAgent(llm_client, MagicMock())
@@ -259,14 +350,37 @@ class TestPlannerBasic:
         """Test Planner identifies parallel execution opportunities."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "plan_name": "Parallel Plan",
-                "steps": [
-                    {"id": 1, "action": "task_a", "params": {}, "risk": "LOW", "requires_approval": False, "dependencies": []},
-                    {"id": 2, "action": "task_b", "params": {}, "risk": "LOW", "requires_approval": False, "dependencies": []},
-                    {"id": 3, "action": "task_c", "params": {}, "risk": "LOW", "requires_approval": False, "dependencies": [1, 2]}
-                ]
-            })
+            return_value=json.dumps(
+                {
+                    "plan_name": "Parallel Plan",
+                    "steps": [
+                        {
+                            "id": 1,
+                            "action": "task_a",
+                            "params": {},
+                            "risk": "LOW",
+                            "requires_approval": False,
+                            "dependencies": [],
+                        },
+                        {
+                            "id": 2,
+                            "action": "task_b",
+                            "params": {},
+                            "risk": "LOW",
+                            "requires_approval": False,
+                            "dependencies": [],
+                        },
+                        {
+                            "id": 3,
+                            "action": "task_c",
+                            "params": {},
+                            "risk": "LOW",
+                            "requires_approval": False,
+                            "dependencies": [1, 2],
+                        },
+                    ],
+                }
+            )
         )
 
         planner = PlannerAgent(llm_client, MagicMock())

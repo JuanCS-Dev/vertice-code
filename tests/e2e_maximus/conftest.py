@@ -51,9 +51,7 @@ def mock_maximus_health(
 ) -> Generator[respx.MockRouter, None, None]:
     """Mock MAXIMUS health endpoint."""
     with respx.mock(assert_all_called=False) as router:
-        router.get(f"{maximus_base_url}/health").respond(
-            json=mock_factory.health_response()
-        )
+        router.get(f"{maximus_base_url}/health").respond(json=mock_factory.health_response())
         yield router
 
 
@@ -64,9 +62,7 @@ def mock_maximus_tribunal(
 ) -> Generator[respx.MockRouter, None, None]:
     """Mock MAXIMUS Tribunal endpoints."""
     with respx.mock(assert_all_called=False) as router:
-        router.get(f"{maximus_base_url}/health").respond(
-            json=mock_factory.health_response()
-        )
+        router.get(f"{maximus_base_url}/health").respond(json=mock_factory.health_response())
         router.post(f"{maximus_base_url}/v1/tribunal/evaluate").respond(
             json=mock_factory.tribunal_evaluate()
         )
@@ -86,12 +82,8 @@ def mock_maximus_memory(
 ) -> Generator[respx.MockRouter, None, None]:
     """Mock MAXIMUS Memory endpoints."""
     with respx.mock(assert_all_called=False) as router:
-        router.get(f"{maximus_base_url}/health").respond(
-            json=mock_factory.health_response()
-        )
-        router.post(f"{maximus_base_url}/v1/memories").respond(
-            json=mock_factory.memory_store()
-        )
+        router.get(f"{maximus_base_url}/health").respond(json=mock_factory.health_response())
+        router.post(f"{maximus_base_url}/v1/memories").respond(json=mock_factory.memory_store())
         router.get(f"{maximus_base_url}/v1/memories/search").respond(
             json=mock_factory.memory_search()
         )
@@ -111,21 +103,15 @@ def mock_maximus_factory(
 ) -> Generator[respx.MockRouter, None, None]:
     """Mock MAXIMUS Factory endpoints."""
     with respx.mock(assert_all_called=False) as router:
-        router.get(f"{maximus_base_url}/health").respond(
-            json=mock_factory.health_response()
-        )
+        router.get(f"{maximus_base_url}/health").respond(json=mock_factory.health_response())
         router.post(f"{maximus_base_url}/v1/tools/generate").respond(
             json=mock_factory.factory_generate()
         )
-        router.get(f"{maximus_base_url}/v1/tools").respond(
-            json=mock_factory.factory_list()
-        )
+        router.get(f"{maximus_base_url}/v1/tools").respond(json=mock_factory.factory_list())
         router.post(url__regex=r".*/v1/tools/.*/execute").respond(
             json=mock_factory.factory_execute("test_tool")
         )
-        router.delete(url__regex=r".*/v1/tools/.*").respond(
-            json={"success": True}
-        )
+        router.delete(url__regex=r".*/v1/tools/.*").respond(json={"success": True})
         yield router
 
 
@@ -137,9 +123,7 @@ def mock_maximus_all(
     """Mock all MAXIMUS endpoints."""
     with respx.mock(assert_all_called=False) as router:
         # Health
-        router.get(f"{maximus_base_url}/health").respond(
-            json=mock_factory.health_response()
-        )
+        router.get(f"{maximus_base_url}/health").respond(json=mock_factory.health_response())
 
         # Tribunal
         router.post(f"{maximus_base_url}/v1/tribunal/evaluate").respond(
@@ -153,9 +137,7 @@ def mock_maximus_all(
         )
 
         # Memory
-        router.post(f"{maximus_base_url}/v1/memories").respond(
-            json=mock_factory.memory_store()
-        )
+        router.post(f"{maximus_base_url}/v1/memories").respond(json=mock_factory.memory_store())
         router.get(f"{maximus_base_url}/v1/memories/search").respond(
             json=mock_factory.memory_search()
         )
@@ -170,15 +152,11 @@ def mock_maximus_all(
         router.post(f"{maximus_base_url}/v1/tools/generate").respond(
             json=mock_factory.factory_generate()
         )
-        router.get(f"{maximus_base_url}/v1/tools").respond(
-            json=mock_factory.factory_list()
-        )
+        router.get(f"{maximus_base_url}/v1/tools").respond(json=mock_factory.factory_list())
         router.post(url__regex=r".*/v1/tools/.*/execute").respond(
             json=mock_factory.factory_execute("test_tool")
         )
-        router.delete(url__regex=r".*/v1/tools/.*").respond(
-            json={"success": True}
-        )
+        router.delete(url__regex=r".*/v1/tools/.*").respond(json={"success": True})
 
         yield router
 

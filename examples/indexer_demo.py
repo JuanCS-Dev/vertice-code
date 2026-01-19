@@ -26,18 +26,20 @@ def print_header(text: str):
 
 def print_symbol(symbol, highlight: bool = False):
     """Print symbol info."""
-    color = COLORS['success'] if highlight else COLORS['text']
-    type_color = COLORS['warning']
+    color = COLORS["success"] if highlight else COLORS["text"]
+    type_color = COLORS["warning"]
 
-    print(f"{color}  {symbol.name}{COLORS['reset']} "
-          f"{type_color}[{symbol.type}]{COLORS['reset']} "
-          f"{COLORS['dim']}at {symbol.file_path}:{symbol.line_number}{COLORS['reset']}")
+    print(
+        f"{color}  {symbol.name}{COLORS['reset']} "
+        f"{type_color}[{symbol.type}]{COLORS['reset']} "
+        f"{COLORS['dim']}at {symbol.file_path}:{symbol.line_number}{COLORS['reset']}"
+    )
 
     if symbol.signature:
         print(f"    {COLORS['dim']}{symbol.signature}{COLORS['reset']}")
 
     if symbol.docstring:
-        doc_preview = symbol.docstring.split('\n')[0][:60]
+        doc_preview = symbol.docstring.split("\n")[0][:60]
         print(f"    {COLORS['dim']}→ {doc_preview}...{COLORS['reset']}")
 
 
@@ -72,8 +74,10 @@ def main():
     print(f"  Unique names:  {COLORS['success']}{stats['unique_symbols']}{COLORS['reset']}")
 
     print("\n  Symbol breakdown:")
-    for sym_type, count in stats['symbol_types'].items():
-        print(f"    {COLORS['dim']}{sym_type:12s}{COLORS['reset']} {COLORS['info']}{count:4d}{COLORS['reset']}")
+    for sym_type, count in stats["symbol_types"].items():
+        print(
+            f"    {COLORS['dim']}{sym_type:12s}{COLORS['reset']} {COLORS['info']}{count:4d}{COLORS['reset']}"
+        )
 
     # Demo 1: Symbol search
     print_header("🔍 Demo 1: Symbol Search")

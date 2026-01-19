@@ -11,6 +11,7 @@ sys.path.insert(0, str(project_root))
 
 # Load .env if present
 from dotenv import load_dotenv
+
 load_dotenv()
 
 # Launch the integrated v10.0 shell

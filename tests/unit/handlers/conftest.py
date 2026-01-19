@@ -5,6 +5,7 @@ Fixtures for handler unit tests.
 import pytest
 from unittest.mock import MagicMock, AsyncMock
 
+
 @pytest.fixture
 def mock_shell():
     """Provides a mock InteractiveShell instance."""

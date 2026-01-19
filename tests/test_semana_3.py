@@ -49,11 +49,11 @@ async def test_semana_3():
         )
 
         # Test formatted export
-        formatted_file = handler.export_session(session, "formatted", "test_formatted.md")
+        handler.export_session(session, "formatted", "test_formatted.md")
         print("✅ Formatted export successful")
 
         # Test raw export
-        raw_file = handler.export_session(session, "raw", "test_raw.md")
+        handler.export_session(session, "raw", "test_raw.md")
         print("✅ Raw export successful")
 
         # Verify files were created
@@ -82,11 +82,11 @@ async def test_semana_3():
     try:
         # Test modal instantiation
         sessions = [session]
-        modal = ExportModal(sessions, session.id)
+        ExportModal(sessions, session.id)
         print("✅ Export Modal instantiated")
 
         # Test with empty sessions
-        empty_modal = ExportModal([], None)
+        ExportModal([], None)
         print("✅ Empty modal handled")
 
     except Exception as e:

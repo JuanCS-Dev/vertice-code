@@ -12,11 +12,11 @@ from enum import Enum, auto
 class Severity(Enum):
     """Níveis de severidade para violações."""
 
-    CRITICAL = auto()   # Bloqueio imediato + alerta + escalação
-    HIGH = auto()       # Bloqueio + documentação
-    MEDIUM = auto()     # Warning + monitoramento aumentado
-    LOW = auto()        # Log + análise posterior
-    INFO = auto()       # Apenas registro informativo
+    CRITICAL = auto()  # Bloqueio imediato + alerta + escalação
+    HIGH = auto()  # Bloqueio + documentação
+    MEDIUM = auto()  # Warning + monitoramento aumentado
+    LOW = auto()  # Log + análise posterior
+    INFO = auto()  # Apenas registro informativo
 
 
 class ViolationType(Enum):
@@ -58,10 +58,11 @@ class ViolationType(Enum):
 
 class EnforcementCategory(Enum):
     """Categories of enforcement decisions."""
-    ALLOW = "allow"           # Action is permitted
-    DISALLOW = "disallow"     # Action is blocked
-    ESCALATE = "escalate"     # Action requires human review
-    MONITOR = "monitor"       # Action is allowed but monitored
+
+    ALLOW = "allow"  # Action is permitted
+    DISALLOW = "disallow"  # Action is blocked
+    ESCALATE = "escalate"  # Action requires human review
+    MONITOR = "monitor"  # Action is allowed but monitored
 
 
 __all__ = [

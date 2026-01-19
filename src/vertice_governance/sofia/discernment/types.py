@@ -8,6 +8,7 @@ from enum import Enum, auto
 
 class DiscernmentPhase(Enum):
     """Fases do processo de discernimento (baseado em Atos 15)."""
+
     GATHERING = auto()
     DELIBERATION = auto()
     EXPERIENCE = auto()
@@ -19,6 +20,7 @@ class DiscernmentPhase(Enum):
 
 class WayType(Enum):
     """Os Dois Caminhos da Didaque."""
+
     WAY_OF_LIFE = auto()
     WAY_OF_DEATH = auto()
     UNCLEAR = auto()

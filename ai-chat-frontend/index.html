@@ -240,15 +240,15 @@
             .header {
                 padding: 1rem;
             }
-            
+
             .chat-container {
                 padding: 0.5rem;
             }
-            
+
             .input-group {
                 flex-direction: column;
             }
-            
+
             .message {
                 max-width: 95%;
             }
@@ -266,7 +266,7 @@
             <div class="welcome-message">
                 <h2>🚀 Bem-vindo ao Vertice AI</h2>
                 <p>Seu assistente de código inteligente. Digite uma pergunta sobre desenvolvimento, debugging ou arquitetura de software.</p>
-                
+
                 <div class="features">
                     <div class="feature">
                         <h3>💻 Code Generation</h3>
@@ -290,9 +290,9 @@
 
         <div class="input-container">
             <div class="input-group">
-                <textarea 
-                    id="message-input" 
-                    class="message-input" 
+                <textarea
+                    id="message-input"
+                    class="message-input"
                     placeholder="Digite sua pergunta sobre código, desenvolvimento ou tecnologia..."
                     rows="1"
                     maxlength="2000"
@@ -439,9 +439,9 @@
         function generateAIResponse(userMessage, apiData) {
             const responses = [
                 `Entendi sua pergunta sobre "${userMessage}". Como assistente de IA especializado em desenvolvimento, posso ajudar com:\n\n• **Geração de código** em múltiplas linguagens\n• **Debugging** e resolução de bugs\n• **Explicações** de conceitos técnicos\n• **Melhores práticas** de desenvolvimento\n\nO servidor está funcionando perfeitamente! Timestamp: ${apiData.timestamp}`,
-                
+
                 `Interessante! Sobre "${userMessage}", aqui vai uma resposta técnica:\n\n\`\`\`javascript\n// Exemplo de código relacionado\nfunction exemplo() {\n    console.log('Vertice AI está online!');\n    return 'Hello from the backend!';\n}\n\`\`\`\n\nO backend confirmou: ${apiData.message}`,
-                
+
                 `Vamos analisar "${userMessage}". Como IA enterprise, posso fornecer:\n\n✅ **Análise de código** e otimização\n✅ **Soluções arquiteturais**\n✅ **Recomendações de segurança**\n✅ **Documentação técnica**\n\nStatus da API: ${apiData.status} ✅`
             ];
 

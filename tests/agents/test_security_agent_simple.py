@@ -37,7 +37,7 @@ class TestSecurityAgentCore:
                 context={"root_dir": tmpdir},
             )
             result = await security_agent.execute(task)
-            assert result.success == True
+            assert result.success
             assert result.data.get("owasp_score") == 100
 
     @pytest.mark.asyncio
@@ -55,7 +55,7 @@ cursor.execute(f"SELECT * FROM users WHERE id = {user_id}")
                 context={"root_dir": str(project)},
             )
             result = await security_agent.execute(task)
-            assert result.success == True
+            assert result.success
             vulns = result.data.get("vulnerabilities", [])
             assert any("sql" in v.get("type", "").lower() for v in vulns)
 
@@ -75,7 +75,7 @@ subprocess.run(cmd, shell=True)
                 context={"root_dir": str(project)},
             )
             result = await security_agent.execute(task)
-            assert result.success == True
+            assert result.success
             vulns = result.data.get("vulnerabilities", [])
             assert len(vulns) > 0
 
@@ -94,7 +94,7 @@ result = eval(user_input)
                 context={"root_dir": str(project)},
             )
             result = await security_agent.execute(task)
-            assert result.success == True
+            assert result.success
             vulns = result.data.get("vulnerabilities", [])
             assert any("eval" in v.get("type", "").lower() for v in vulns)
 
@@ -113,7 +113,7 @@ API_KEY="FAKE_TEST_KEY_NOT_REAL_STRIPE_PATTERN"
                 context={"root_dir": str(project)},
             )
             result = await security_agent.execute(task)
-            assert result.success == True
+            assert result.success
             secrets = result.data.get("secrets", [])
             assert len(secrets) >= 1
 
@@ -135,7 +135,7 @@ subprocess.run("cmd", shell=True)
                 context={"root_dir": str(project)},
             )
             result = await security_agent.execute(task)
-            assert result.success == True
+            assert result.success
             score = result.data.get("owasp_score", 100)
             assert score < 100  # Should have deductions
             assert score >= 0  # Never negative
@@ -151,7 +151,7 @@ subprocess.run("cmd", shell=True)
                 context={"root_dir": str(project)},
             )
             result = await security_agent.execute(task)
-            assert result.success == True
+            assert result.success
             report = result.data.get("report", "")
             assert "SECURITY AUDIT REPORT" in report
             assert "OWASP COMPLIANCE SCORE" in report

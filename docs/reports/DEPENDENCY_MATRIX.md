@@ -95,9 +95,9 @@
 **Cadeia 1: Chat → Agent → Tool → Subprocess**
 ```
 1. Bridge.chat(message)
-2. → AgentRouter.route() 
+2. → AgentRouter.route()
 3. → AgentManager.invoke_agent()
-4. → Agent.execute() 
+4. → Agent.execute()
 5. → BaseAgent._stream_llm()
 6. → GeminiClient.stream()
 7. → httpx timeout (60s!) ← PONTO DE FALHA
@@ -232,7 +232,7 @@ AGENT_REGISTRY["executor"].module_path = "vertice_cli.agents.executor"
 
 **Exemplo 1: Gemini API Down (Cascata Total)**
 ```
-GeminiClient.stream() → [ERROR] 
+GeminiClient.stream() → [ERROR]
   ↓
 Bridge.chat() → [ERROR]
   ↓
@@ -242,7 +242,7 @@ TUI frozen (60s timeout)
   ↓
 User must kill + restart
 
-Mitigation: 
+Mitigation:
 ✓ Add 5s timeout (not 60s)
 ✓ Add circuit breaker
 ✓ Add exponential backoff
@@ -337,4 +337,3 @@ Race Conditions:                 3
 Missing Timeouts:                8
 Missing Fallbacks:               6
 ```
-

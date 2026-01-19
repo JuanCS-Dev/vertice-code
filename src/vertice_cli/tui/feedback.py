@@ -220,7 +220,7 @@ class LoadingState:
         """
         from .components.progress import ProgressBar, ProgressConfig
 
-        percentage = int((current / total) * 100) if total > 0 else 0
+        int((current / total) * 100) if total > 0 else 0
 
         config = ProgressConfig(
             width=40,
@@ -260,7 +260,7 @@ class StateTransition:
 
             # Simulate opacity with color intensity
             # This is a simplification - real terminals don't support opacity
-            alpha_char = " ░▒▓█"[int(eased * 4)]
+            " ░▒▓█"[int(eased * 4)]
 
             console.clear()
 

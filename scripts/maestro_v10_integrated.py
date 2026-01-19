@@ -5,10 +5,9 @@ Deprecated: Use scripts.maestro directly.
 import warnings
 
 warnings.warn(
-    "maestro_v10_integrated.py is deprecated. "
-    "Use 'from scripts.maestro import main' instead.",
+    "maestro_v10_integrated.py is deprecated. " "Use 'from scripts.maestro import main' instead.",
     DeprecationWarning,
-    stacklevel=2
+    stacklevel=2,
 )
 
 from scripts.maestro import main

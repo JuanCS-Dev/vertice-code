@@ -120,7 +120,7 @@ class TestVertexAIAsyncStreaming:
         assert len(chunks_received) >= 1, "Should receive streaming chunks"
 
         print(
-            f"✅ First chunk in {first_chunk_time*1000:.0f}ms, total {len(chunks_received)} chunks"
+            f"✅ First chunk in {first_chunk_time * 1000:.0f}ms, total {len(chunks_received)} chunks"
         )
 
 
@@ -157,6 +157,108 @@ class TestControllerIntegration:
             assert "test_command" in history_file.read_text()
 
             print("✅ Fire-and-forget pattern works correctly")
+
+
+class TestAutocompleteDropdownReuse:
+    """Performance regression tests for autocomplete widget churn."""
+
+    @pytest.mark.asyncio
+    async def test_dropdown_does_not_mount_unmount_per_keystroke(self) -> None:
+        """
+        PROVA: show/hide não deve remover/remontar children.
+
+        Motivo: mount/remove em cada tecla gera layout thrash.
+        """
+        from textual.app import App, ComposeResult
+
+        from vertice_tui.widgets.autocomplete import AutocompleteDropdown
+
+        class _App(App):
+            def compose(self) -> ComposeResult:
+                yield AutocompleteDropdown(id="autocomplete")
+
+        app = _App()
+        async with app.run_test() as pilot:
+            dropdown = pilot.app.query_one("#autocomplete", AutocompleteDropdown)
+            await pilot.pause(0)
+
+            assert len(list(dropdown.children)) == dropdown.MAX_ITEMS
+            initial_child_ids = [id(child) for child in dropdown.children]
+
+            dropdown.show_completions(
+                [
+                    {"text": "/help", "display": "⚡ /help", "type": "command", "score": 1.0},
+                    {"text": "/clear", "display": "⚡ /clear", "type": "command", "score": 0.9},
+                ]
+            )
+            await pilot.pause(0)
+            assert [id(child) for child in dropdown.children] == initial_child_ids
+
+            dropdown.hide()
+            await pilot.pause(0)
+            assert [id(child) for child in dropdown.children] == initial_child_ids
+
+            dropdown.show_completions(
+                [
+                    {"text": "tool.foo", "display": "🔧 tool.foo", "type": "tool", "score": 1.0},
+                ]
+            )
+            await pilot.pause(0)
+            assert [id(child) for child in dropdown.children] == initial_child_ids
+
+
+class TestResponseViewStreamingCoalescing:
+    """Performance regression tests for streaming smoothness."""
+
+    @pytest.mark.asyncio
+    async def test_markdown_stream_writes_are_coalesced(self, monkeypatch) -> None:
+        """
+        PROVA: múltiplos deltas devem virar poucos writes no MarkdownStream.
+
+        Estratégia: monkeypatch do `Markdown.get_stream()` para capturar writes,
+        sem depender de timers (determinístico).
+        """
+        from textual.app import App, ComposeResult
+        from textual.widgets import Markdown
+
+        from vertice_tui.widgets.response_view import ResponseView
+
+        class _FakeStream:
+            def __init__(self) -> None:
+                self.writes: list[str] = []
+
+            async def write(self, text: str) -> None:
+                self.writes.append(text)
+
+            async def stop(self) -> None:
+                return None
+
+        fake_stream = _FakeStream()
+        monkeypatch.setattr(
+            Markdown,
+            "get_stream",
+            classmethod(lambda cls, markdown: fake_stream),
+        )
+
+        class _App(App):
+            def compose(self) -> ComposeResult:
+                yield ResponseView(id="response")
+
+        app = _App()
+        async with app.run_test() as pilot:
+            view = pilot.app.query_one("#response", ResponseView)
+
+            # Disable interval/timer scheduling so the test is deterministic.
+            monkeypatch.setattr(view, "_ensure_flush_timer", lambda: None)
+            monkeypatch.setattr(view, "_schedule_flush", lambda: None)
+
+            chunks = ["hello", " ", "world", "!", "\n"] * 10
+            for chunk in chunks:
+                await view.append_chunk(chunk)
+
+            await view._flush_pending_stream_async(final=True)
+
+            assert fake_stream.writes == ["".join(chunks)]
 
 
 if __name__ == "__main__":

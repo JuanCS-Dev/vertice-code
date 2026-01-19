@@ -14,19 +14,19 @@ class VirtueType(Enum):
 
     # Virtudes Cardinais (Cristianismo Primitivo)
     TAPEINOPHROSYNE = auto()  # Humildade
-    MAKROTHYMIA = auto()       # Paciencia
-    DIAKONIA = auto()          # Servico
-    PRAOTES = auto()           # Mansidao/Gentileza
+    MAKROTHYMIA = auto()  # Paciencia
+    DIAKONIA = auto()  # Servico
+    PRAOTES = auto()  # Mansidao/Gentileza
 
     # Virtudes Meta
-    PHRONESIS = auto()         # Prudencia/Sabedoria Pratica
-    FORTITUDE = auto()         # Coragem/Fortaleza
+    PHRONESIS = auto()  # Prudencia/Sabedoria Pratica
+    FORTITUDE = auto()  # Coragem/Fortaleza
 
     # Virtudes Eticas Adicionais
-    DIKAIOSYNE = auto()        # Justica
-    ALETHEIA = auto()          # Honestidade/Verdade
-    AGAPE = auto()             # Amor/Cuidado
-    PISTIS = auto()            # Fidelidade/Confiabilidade
+    DIKAIOSYNE = auto()  # Justica
+    ALETHEIA = auto()  # Honestidade/Verdade
+    AGAPE = auto()  # Amor/Cuidado
+    PISTIS = auto()  # Fidelidade/Confiabilidade
 
 
 __all__ = ["VirtueType"]

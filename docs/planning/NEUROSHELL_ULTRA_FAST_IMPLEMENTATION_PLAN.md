@@ -544,7 +544,7 @@ Validação completa com testes de regressão e benchmarks.
 def test_startup_benchmark():
     legacy_time = measure_shell_startup('neuroshell-code')
     fast_time = measure_shell_startup('neuroshell-fast')
-    
+
     assert fast_time < 0.5, f"Startup too slow: {fast_time}s"
     speedup = legacy_time / fast_time
     assert speedup >= 5, f"Speedup only {speedup}x (target 8-10x)"

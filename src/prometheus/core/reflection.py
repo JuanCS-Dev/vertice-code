@@ -27,6 +27,7 @@ import re
 
 class ReflectionType(Enum):
     """Types of reflection."""
+
     ACTION_CRITIQUE = "action_critique"
     OUTPUT_CRITIQUE = "output_critique"
     STRATEGY_CRITIQUE = "strategy_critique"
@@ -36,6 +37,7 @@ class ReflectionType(Enum):
 
 class CritiqueAspect(Enum):
     """Aspects to critique."""
+
     CORRECTNESS = "correctness"
     EFFICIENCY = "efficiency"
     COMPLETENESS = "completeness"
@@ -47,6 +49,7 @@ class CritiqueAspect(Enum):
 @dataclass
 class Reflection:
     """A reflection entry."""
+
     id: str
     type: ReflectionType
     subject: str  # What is being evaluated
@@ -74,6 +77,7 @@ class Reflection:
 @dataclass
 class ImprovementCycle:
     """A complete Generate → Critique → Improve cycle."""
+
     original: str
     critiques: List[Reflection]
     iterations: List[str]  # Each improved version
@@ -165,8 +169,8 @@ Be specific, constructive, and actionable in your feedback."""
 
         # Calculate overall score
         score = (
-            data.get("appropriateness_score", 0.5) * 0.4 +
-            data.get("effectiveness_score", 0.5) * 0.6
+            data.get("appropriateness_score", 0.5) * 0.4
+            + data.get("effectiveness_score", 0.5) * 0.6
         )
 
         reflection = Reflection(
@@ -268,12 +272,7 @@ Score each criterion 0-1 and provide your assessment in JSON:
                 break  # Good enough
 
             # Generate improved version
-            improved = await self._generate_improvement(
-                current,
-                task,
-                critique,
-                criteria
-            )
+            improved = await self._generate_improvement(current, task, critique, criteria)
             iterations.append(improved)
 
             # Re-critique
@@ -341,7 +340,7 @@ Provide thorough analysis in JSON:
             type=ReflectionType.ERROR_ANALYSIS,
             subject=error_message[:200],
             critique=f"Error Type: {data.get('error_type', 'Unknown')}\n"
-                     f"Root Cause: {data.get('root_cause', 'Unknown')}",
+            f"Root Cause: {data.get('root_cause', 'Unknown')}",
             score=1.0 - data.get("severity", 0.5),  # Invert severity
             improvements=data.get("fix_steps", []),
             lessons_learned=data.get("prevention_strategies", []),
@@ -411,9 +410,7 @@ Provide honest self-assessment in JSON:
         # Update memory with learnings
         for lesson in data.get("key_learnings", []):
             self.memory.learn_fact(
-                f"self_learning_{self._reflection_count}",
-                lesson,
-                source="self_assessment"
+                f"self_learning_{self._reflection_count}", lesson, source="self_assessment"
             )
 
         return reflection
@@ -519,6 +516,7 @@ Output ONLY the improved version, no explanations."""
     def _generate_id(self) -> str:
         """Generate unique reflection ID."""
         import hashlib
+
         self._reflection_count += 1
         return hashlib.md5(
             f"reflection_{self._reflection_count}_{datetime.now().isoformat()}".encode()
@@ -527,7 +525,7 @@ Output ONLY the improved version, no explanations."""
     def _parse_json_response(self, text: str) -> dict:
         """Parse JSON from LLM response."""
         # Try to find JSON block
-        json_match = re.search(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', text, re.DOTALL)
+        json_match = re.search(r"\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}", text, re.DOTALL)
         if json_match:
             try:
                 return json.loads(json_match.group())
@@ -542,6 +540,7 @@ Output ONLY the improved version, no explanations."""
     def _get_common_items(self, items: List[str], n: int) -> List[str]:
         """Get most common items from a list."""
         from collections import Counter
+
         counter = Counter(items)
         return [item for item, _ in counter.most_common(n)]
 

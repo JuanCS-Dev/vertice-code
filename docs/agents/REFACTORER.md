@@ -1,9 +1,9 @@
 # 🔧 RefactorerAgent: The Code Surgeon
 
-**Role:** Plan Execution with Self-Correction  
-**Personality:** Precise surgeon who tries 3 times before giving up  
-**Capabilities:** `FULL ACCESS` (READ, EDIT, BASH, GIT)  
-**Output:** Modified code + git commits + execution log  
+**Role:** Plan Execution with Self-Correction
+**Personality:** Precise surgeon who tries 3 times before giving up
+**Capabilities:** `FULL ACCESS` (READ, EDIT, BASH, GIT)
+**Output:** Modified code + git commits + execution log
 **Position:** Fourth gate in DevSquad workflow (after Planner)
 
 ---
@@ -193,11 +193,11 @@ for step in plan.steps:
     success = False
     for attempt in range(1, MAX_ATTEMPTS + 1):
         result = execute_step(step)
-        
+
         if result.success:
             success = True
             break
-        
+
         if attempt < MAX_ATTEMPTS:
             # Attempt correction
             diagnosis = analyze_error(result.error)
@@ -208,7 +208,7 @@ for step in plan.steps:
             rollback()
             escalate_to_human(step, result.errors)
             break
-    
+
     if not success:
         break  # Stop execution
 ```
@@ -314,7 +314,7 @@ $ alembic upgrade head
 
 **Step:** Delete production database
 
-**Attempt 1-3:** All attempts fail due to Constitutional AI block  
+**Attempt 1-3:** All attempts fail due to Constitutional AI block
 **Escalation:**
 ```
 ⚠️ HUMAN INTERVENTION REQUIRED
@@ -346,22 +346,22 @@ REFACTORER_CONFIG = {
 
 ### Problem: Refactorer fails on first attempt every time
 
-**Cause:** Environment issues (missing deps, wrong Python version)  
+**Cause:** Environment issues (missing deps, wrong Python version)
 **Solution:** Validate environment before running DevSquad
 
 ### Problem: Self-correction loops infinitely
 
-**Cause:** Bug in correction logic  
+**Cause:** Bug in correction logic
 **Solution:** Max attempts enforced (3), but report if this happens
 
 ### Problem: Tests fail after successful execution
 
-**Cause:** Tests are outdated or incorrect  
+**Cause:** Tests are outdated or incorrect
 **Solution:** Update tests or run `pytest --lf` to re-run last failed
 
 ### Problem: Git rollback didn't restore state
 
-**Cause:** Uncommitted changes before DevSquad start  
+**Cause:** Uncommitted changes before DevSquad start
 **Solution:** Always commit/stash before running DevSquad
 
 ---
@@ -383,9 +383,9 @@ async def test_refactorer_executes_plan(mock_llm, mock_mcp):
         ]
     }
     task = AgentTask(request="Execute plan", context={"execution_plan": plan})
-    
+
     response = await refactorer.execute(task)
-    
+
     assert response.success is True
     assert response.data["steps_completed"] == 2
 
@@ -399,9 +399,9 @@ async def test_refactorer_self_corrects(mock_llm, mock_mcp):
         ]
     }
     task = AgentTask(request="Execute plan", context={"execution_plan": plan})
-    
+
     response = await refactorer.execute(task)
-    
+
     # Should succeed after correction
     assert response.success is True
     # Check that correction happened
@@ -460,7 +460,7 @@ print(f"Reached checkpoints: {reached_checkpoints}")
 
 ---
 
-**Version:** 1.0.0  
-**Last Updated:** 2025-11-22  
-**Status:** Production-ready ✅  
+**Version:** 1.0.0
+**Last Updated:** 2025-11-22
+**Status:** Production-ready ✅
 **Grade:** A+ (Boris Cherny approved)

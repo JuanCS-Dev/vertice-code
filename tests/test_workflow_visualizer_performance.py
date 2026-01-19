@@ -5,10 +5,7 @@ Tests 60fps target and render optimization
 
 import pytest
 import time
-from vertice_cli.tui.components.workflow_visualizer import (
-    WorkflowVisualizer,
-    StepStatus
-)
+from vertice_cli.tui.components.workflow_visualizer import WorkflowVisualizer, StepStatus
 from rich.console import Console
 
 
@@ -27,11 +24,7 @@ class TestWorkflowVisualizerPerformance:
         """
         # Setup complex workflow (10 steps)
         for i in range(10):
-            self.viz.add_step(
-                f"step{i}",
-                f"Task {i}",
-                dependencies=[f"step{i-1}"] if i > 0 else []
-            )
+            self.viz.add_step(f"step{i}", f"Task {i}", dependencies=[f"step{i-1}"] if i > 0 else [])
 
         # Update all steps to RUNNING (worst case - all panels active)
         for i in range(10):
@@ -55,9 +48,9 @@ class TestWorkflowVisualizerPerformance:
         assert cold_time_ms < 50, f"Cold render too slow: {cold_time_ms:.2f}ms > 50ms"
 
         # Hot render MUST be <16.67ms (60fps guarantee)
-        assert hot_time_ms < TARGET_MS, (
-            f"Hot render failed 60fps target: {hot_time_ms:.2f}ms > {TARGET_MS}ms"
-        )
+        assert (
+            hot_time_ms < TARGET_MS
+        ), f"Hot render failed 60fps target: {hot_time_ms:.2f}ms > {TARGET_MS}ms"
 
         print("\n✅ Performance OK:")
         print(f"   Cold render: {cold_time_ms:.2f}ms")
@@ -182,11 +175,7 @@ class TestWorkflowVisualizerPerformance:
             step_idx = frame % 5
             progress = (frame % 100) / 100.0
 
-            self.viz.update_step(
-                f"step{step_idx}",
-                status=StepStatus.RUNNING,
-                progress=progress
-            )
+            self.viz.update_step(f"step{step_idx}", status=StepStatus.RUNNING, progress=progress)
 
             # Measure render
             start = time.perf_counter()

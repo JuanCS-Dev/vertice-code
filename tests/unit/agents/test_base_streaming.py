@@ -33,15 +33,14 @@ from vertice_cli.agents.base import (
 # TEST FIXTURES
 # =============================================================================
 
+
 class ConcreteAgent(BaseAgent):
     """Concrete implementation for testing BaseAgent."""
 
     async def execute(self, task: AgentTask) -> AgentResponse:
         """Simple execute implementation."""
         return AgentResponse(
-            success=True,
-            data={"executed": task.request},
-            reasoning="Test execution"
+            success=True, data={"executed": task.request}, reasoning="Test execution"
         )
 
 
@@ -69,7 +68,7 @@ def agent(mock_llm, mock_mcp):
         capabilities=[AgentCapability.READ_ONLY],
         llm_client=mock_llm,
         mcp_client=mock_mcp,
-        system_prompt="Test prompt"
+        system_prompt="Test prompt",
     )
 
 
@@ -77,12 +76,14 @@ def agent(mock_llm, mock_mcp):
 # _STREAM_LLM WITH STREAM_CHAT TESTS
 # =============================================================================
 
+
 class TestStreamLlmWithStreamChat:
     """Tests for _stream_llm using stream_chat method."""
 
     @pytest.mark.asyncio
     async def test_stream_chat_basic_tokens(self, mock_mcp):
         """Test _stream_llm yields tokens from stream_chat."""
+
         async def mock_stream_chat(**kwargs):
             for token in ["Hello", " ", "World"]:
                 yield token
@@ -95,7 +96,7 @@ class TestStreamLlmWithStreamChat:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         chunks = []
@@ -108,6 +109,7 @@ class TestStreamLlmWithStreamChat:
     @pytest.mark.asyncio
     async def test_stream_chat_empty_tokens(self, mock_mcp):
         """Test _stream_llm with empty token stream."""
+
         async def mock_stream_chat(**kwargs):
             return
             yield  # Empty generator
@@ -120,7 +122,7 @@ class TestStreamLlmWithStreamChat:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         chunks = []
@@ -133,6 +135,7 @@ class TestStreamLlmWithStreamChat:
     @pytest.mark.asyncio
     async def test_stream_chat_single_token(self, mock_mcp):
         """Test _stream_llm with single token."""
+
         async def mock_stream_chat(**kwargs):
             yield "SingleToken"
 
@@ -144,7 +147,7 @@ class TestStreamLlmWithStreamChat:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         chunks = []
@@ -171,7 +174,7 @@ class TestStreamLlmWithStreamChat:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="System Test"
+            system_prompt="System Test",
         )
 
         async for _ in agent._stream_llm("Test prompt"):
@@ -197,7 +200,7 @@ class TestStreamLlmWithStreamChat:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Default"
+            system_prompt="Default",
         )
 
         async for _ in agent._stream_llm("Test prompt", system_prompt="Custom"):
@@ -208,6 +211,7 @@ class TestStreamLlmWithStreamChat:
     @pytest.mark.asyncio
     async def test_stream_chat_long_token_stream(self, mock_mcp):
         """Test _stream_llm with many tokens."""
+
         async def mock_stream_chat(**kwargs):
             for i in range(1000):
                 yield f"token{i}"
@@ -220,7 +224,7 @@ class TestStreamLlmWithStreamChat:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         chunks = []
@@ -234,6 +238,7 @@ class TestStreamLlmWithStreamChat:
     @pytest.mark.asyncio
     async def test_stream_chat_special_characters(self, mock_mcp):
         """Test _stream_llm handles special characters in tokens."""
+
         async def mock_stream_chat(**kwargs):
             special_tokens = [
                 "Hello\n",
@@ -254,7 +259,7 @@ class TestStreamLlmWithStreamChat:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         chunks = []
@@ -282,14 +287,11 @@ class TestStreamLlmWithStreamChat:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         async for _ in agent._stream_llm(
-            "Test",
-            temperature=0.7,
-            max_tokens=100,
-            custom_param="value"
+            "Test", temperature=0.7, max_tokens=100, custom_param="value"
         ):
             pass
 
@@ -302,17 +304,19 @@ class TestStreamLlmWithStreamChat:
 # _STREAM_LLM WITH STREAM METHOD FALLBACK TESTS
 # =============================================================================
 
+
 class TestStreamLlmWithStreamFallback:
     """Tests for _stream_llm using stream method when stream_chat unavailable."""
 
     @pytest.mark.asyncio
     async def test_stream_method_fallback(self, mock_mcp):
         """Test _stream_llm falls back to stream method."""
+
         async def mock_stream(**kwargs):
             for token in ["Token1", "Token2", "Token3"]:
                 yield token
 
-        mock_llm = MagicMock(spec=['stream'])  # Only stream, no stream_chat
+        mock_llm = MagicMock(spec=["stream"])  # Only stream, no stream_chat
         mock_llm.stream = mock_stream
 
         agent = ConcreteAgent(
@@ -320,7 +324,7 @@ class TestStreamLlmWithStreamFallback:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         chunks = []
@@ -339,7 +343,7 @@ class TestStreamLlmWithStreamFallback:
             captured_kwargs.update(kwargs)
             yield "Response"
 
-        mock_llm = MagicMock(spec=['stream'])
+        mock_llm = MagicMock(spec=["stream"])
         mock_llm.stream = mock_stream
 
         agent = ConcreteAgent(
@@ -347,7 +351,7 @@ class TestStreamLlmWithStreamFallback:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Default"
+            system_prompt="Default",
         )
 
         async for _ in agent._stream_llm("Test", system_prompt="Custom"):
@@ -380,7 +384,7 @@ class TestStreamLlmWithStreamFallback:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         chunks = []
@@ -396,12 +400,14 @@ class TestStreamLlmWithStreamFallback:
 # _STREAM_LLM ERROR HANDLING TESTS
 # =============================================================================
 
+
 class TestStreamLlmErrorHandling:
     """Tests for _stream_llm error handling during streaming."""
 
     @pytest.mark.asyncio
     async def test_stream_chat_error_raised(self, mock_mcp):
         """Test _stream_llm propagates stream_chat errors."""
+
         async def mock_stream_error(**kwargs):
             yield "First"
             raise ValueError("Stream error occurred")
@@ -414,7 +420,7 @@ class TestStreamLlmErrorHandling:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         chunks = []
@@ -427,6 +433,7 @@ class TestStreamLlmErrorHandling:
     @pytest.mark.asyncio
     async def test_stream_chat_timeout_error(self, mock_mcp):
         """Test _stream_llm handles timeout errors."""
+
         async def mock_stream_timeout(**kwargs):
             yield "Partial"
             raise asyncio.TimeoutError("Stream timeout")
@@ -439,7 +446,7 @@ class TestStreamLlmErrorHandling:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         with pytest.raises(asyncio.TimeoutError, match="Stream timeout"):
@@ -449,6 +456,7 @@ class TestStreamLlmErrorHandling:
     @pytest.mark.asyncio
     async def test_stream_chat_api_error(self, mock_mcp):
         """Test _stream_llm handles API errors."""
+
         async def mock_stream_api_error(**kwargs):
             raise ConnectionError("API connection failed")
             yield  # Never reached
@@ -461,7 +469,7 @@ class TestStreamLlmErrorHandling:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         with pytest.raises(ConnectionError, match="API connection failed"):
@@ -472,13 +480,14 @@ class TestStreamLlmErrorHandling:
     async def test_stream_method_error_logged(self, mock_mcp, caplog):
         """Test stream errors are logged."""
         import logging
+
         caplog.set_level(logging.ERROR)
 
         async def mock_stream_error(**kwargs):
             raise RuntimeError("Test error")
             yield  # Never reached
 
-        mock_llm = MagicMock(spec=['stream'])
+        mock_llm = MagicMock(spec=["stream"])
         mock_llm.stream = mock_stream_error
 
         agent = ConcreteAgent(
@@ -486,7 +495,7 @@ class TestStreamLlmErrorHandling:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         with pytest.raises(RuntimeError):
@@ -498,6 +507,7 @@ class TestStreamLlmErrorHandling:
     @pytest.mark.asyncio
     async def test_stream_error_increments_execution_count_before_error(self, mock_mcp):
         """Test execution_count is incremented before stream errors."""
+
         async def mock_stream_error(**kwargs):
             raise ValueError("Stream failed")
             yield  # Never reached
@@ -510,7 +520,7 @@ class TestStreamLlmErrorHandling:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         initial_count = agent.execution_count
@@ -545,7 +555,7 @@ class TestStreamLlmErrorHandling:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         chunks = []
@@ -562,6 +572,7 @@ class TestStreamLlmErrorHandling:
 # _CALL_LLM WITH STREAMING FALLBACK TESTS
 # =============================================================================
 
+
 class TestCallLlmWithStreamingFallback:
     """Tests for _call_llm using stream method as fallback."""
 
@@ -576,7 +587,7 @@ class TestCallLlmWithStreamingFallback:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         response = await agent._call_llm("Test prompt")
@@ -588,11 +599,12 @@ class TestCallLlmWithStreamingFallback:
     @pytest.mark.asyncio
     async def test_call_llm_stream_fallback(self, mock_mcp):
         """Test _call_llm falls back to stream when generate unavailable."""
+
         async def mock_stream(**kwargs):
             for token in ["A", "B", "C"]:
                 yield token
 
-        mock_llm = MagicMock(spec=['stream'])  # Only stream, no generate
+        mock_llm = MagicMock(spec=["stream"])  # Only stream, no generate
         mock_llm.stream = mock_stream
 
         agent = ConcreteAgent(
@@ -600,7 +612,7 @@ class TestCallLlmWithStreamingFallback:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         response = await agent._call_llm("Test prompt")
@@ -611,12 +623,13 @@ class TestCallLlmWithStreamingFallback:
     @pytest.mark.asyncio
     async def test_call_llm_concatenates_stream_tokens(self, mock_mcp):
         """Test _call_llm concatenates stream tokens correctly."""
+
         async def mock_stream(**kwargs):
             tokens = ["Hello", " ", "World", "!"]
             for token in tokens:
                 yield token
 
-        mock_llm = MagicMock(spec=['stream'])
+        mock_llm = MagicMock(spec=["stream"])
         mock_llm.stream = mock_stream
 
         agent = ConcreteAgent(
@@ -624,7 +637,7 @@ class TestCallLlmWithStreamingFallback:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         response = await agent._call_llm("Test prompt")
@@ -634,11 +647,12 @@ class TestCallLlmWithStreamingFallback:
     @pytest.mark.asyncio
     async def test_call_llm_empty_stream(self, mock_mcp):
         """Test _call_llm handles empty token stream."""
+
         async def mock_stream(**kwargs):
             return
             yield  # Empty generator
 
-        mock_llm = MagicMock(spec=['stream'])
+        mock_llm = MagicMock(spec=["stream"])
         mock_llm.stream = mock_stream
 
         agent = ConcreteAgent(
@@ -646,7 +660,7 @@ class TestCallLlmWithStreamingFallback:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         response = await agent._call_llm("Test prompt")
@@ -657,11 +671,12 @@ class TestCallLlmWithStreamingFallback:
     @pytest.mark.asyncio
     async def test_call_llm_large_token_stream(self, mock_mcp):
         """Test _call_llm handles large token stream."""
+
         async def mock_stream(**kwargs):
             for i in range(10000):
                 yield f"token{i}|"
 
-        mock_llm = MagicMock(spec=['stream'])
+        mock_llm = MagicMock(spec=["stream"])
         mock_llm.stream = mock_stream
 
         agent = ConcreteAgent(
@@ -669,7 +684,7 @@ class TestCallLlmWithStreamingFallback:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         response = await agent._call_llm("Test prompt")
@@ -688,7 +703,7 @@ class TestCallLlmWithStreamingFallback:
             captured_kwargs.update(kwargs)
             yield "Response"
 
-        mock_llm = MagicMock(spec=['stream'])
+        mock_llm = MagicMock(spec=["stream"])
         mock_llm.stream = mock_stream
 
         agent = ConcreteAgent(
@@ -696,7 +711,7 @@ class TestCallLlmWithStreamingFallback:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Default"
+            system_prompt="Default",
         )
 
         await agent._call_llm("Test", system_prompt="Custom")
@@ -712,7 +727,7 @@ class TestCallLlmWithStreamingFallback:
             captured_kwargs.update(kwargs)
             yield "Response"
 
-        mock_llm = MagicMock(spec=['stream'])
+        mock_llm = MagicMock(spec=["stream"])
         mock_llm.stream = mock_stream
 
         agent = ConcreteAgent(
@@ -720,7 +735,7 @@ class TestCallLlmWithStreamingFallback:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="AgentDefault"
+            system_prompt="AgentDefault",
         )
 
         await agent._call_llm("Test")  # No system_prompt override
@@ -736,7 +751,7 @@ class TestCallLlmWithStreamingFallback:
             captured_kwargs.update(kwargs)
             yield "Response"
 
-        mock_llm = MagicMock(spec=['stream'])
+        mock_llm = MagicMock(spec=["stream"])
         mock_llm.stream = mock_stream
 
         agent = ConcreteAgent(
@@ -744,15 +759,10 @@ class TestCallLlmWithStreamingFallback:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
-        await agent._call_llm(
-            "Test",
-            temperature=0.9,
-            max_tokens=500,
-            top_p=0.95
-        )
+        await agent._call_llm("Test", temperature=0.9, max_tokens=500, top_p=0.95)
 
         assert captured_kwargs["temperature"] == 0.9
         assert captured_kwargs["max_tokens"] == 500
@@ -762,6 +772,7 @@ class TestCallLlmWithStreamingFallback:
 # =============================================================================
 # _CALL_LLM ERROR HANDLING TESTS
 # =============================================================================
+
 
 class TestCallLlmErrorHandling:
     """Tests for _call_llm error handling."""
@@ -777,7 +788,7 @@ class TestCallLlmErrorHandling:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         with pytest.raises(ValueError, match="Generate failed"):
@@ -786,11 +797,12 @@ class TestCallLlmErrorHandling:
     @pytest.mark.asyncio
     async def test_call_llm_stream_error(self, mock_mcp):
         """Test _call_llm propagates stream errors."""
+
         async def mock_stream_error(**kwargs):
             yield "Partial"
             raise RuntimeError("Stream failed")
 
-        mock_llm = MagicMock(spec=['stream'])
+        mock_llm = MagicMock(spec=["stream"])
         mock_llm.stream = mock_stream_error
 
         agent = ConcreteAgent(
@@ -798,7 +810,7 @@ class TestCallLlmErrorHandling:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         with pytest.raises(RuntimeError, match="Stream failed"):
@@ -815,7 +827,7 @@ class TestCallLlmErrorHandling:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         initial_count = agent.execution_count
@@ -830,6 +842,7 @@ class TestCallLlmErrorHandling:
     async def test_call_llm_error_logged(self, mock_mcp, caplog):
         """Test _call_llm errors are logged."""
         import logging
+
         caplog.set_level(logging.ERROR)
 
         mock_llm = MagicMock()
@@ -840,7 +853,7 @@ class TestCallLlmErrorHandling:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         with pytest.raises(Exception):
@@ -852,6 +865,7 @@ class TestCallLlmErrorHandling:
 # =============================================================================
 # EXECUTION COUNT AND STATE MANAGEMENT TESTS
 # =============================================================================
+
 
 class TestExecutionCountManagement:
     """Tests for execution_count state management."""
@@ -867,7 +881,7 @@ class TestExecutionCountManagement:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         assert agent.execution_count == 0
@@ -881,10 +895,11 @@ class TestExecutionCountManagement:
     @pytest.mark.asyncio
     async def test_execution_count_increments_on_stream(self, mock_mcp):
         """Test execution_count increments after successful stream."""
+
         async def mock_stream(**kwargs):
             yield "Response"
 
-        mock_llm = MagicMock(spec=['stream'])
+        mock_llm = MagicMock(spec=["stream"])
         mock_llm.stream = mock_stream
 
         agent = ConcreteAgent(
@@ -892,7 +907,7 @@ class TestExecutionCountManagement:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         assert agent.execution_count == 0
@@ -903,6 +918,7 @@ class TestExecutionCountManagement:
     @pytest.mark.asyncio
     async def test_execution_count_separate_for_stream_llm(self, mock_mcp):
         """Test _stream_llm has separate execution_count increment."""
+
         async def mock_stream_chat(**kwargs):
             yield "Token"
 
@@ -914,7 +930,7 @@ class TestExecutionCountManagement:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         assert agent.execution_count == 0
@@ -929,12 +945,14 @@ class TestExecutionCountManagement:
 # ASYNC ITERATION TESTS
 # =============================================================================
 
+
 class TestAsyncIteration:
     """Tests for async iteration behavior."""
 
     @pytest.mark.asyncio
     async def test_stream_llm_async_iteration_order(self, mock_mcp):
         """Test tokens are yielded in correct order."""
+
         async def mock_stream_chat(**kwargs):
             for token in ["1", "2", "3", "4", "5"]:
                 yield token
@@ -947,7 +965,7 @@ class TestAsyncIteration:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         chunks = []
@@ -959,6 +977,7 @@ class TestAsyncIteration:
     @pytest.mark.asyncio
     async def test_stream_llm_early_exit(self, mock_mcp):
         """Test early exit from stream iteration."""
+
         async def mock_stream_chat(**kwargs):
             for i in range(100):
                 yield f"token{i}"
@@ -971,7 +990,7 @@ class TestAsyncIteration:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         chunks = []
@@ -1002,7 +1021,7 @@ class TestAsyncIteration:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         # First iteration
@@ -1023,6 +1042,7 @@ class TestAsyncIteration:
     @pytest.mark.asyncio
     async def test_stream_llm_collect_all_tokens(self, mock_mcp):
         """Test collecting all tokens from stream."""
+
         async def mock_stream_chat(**kwargs):
             text = "The quick brown fox jumps over the lazy dog"
             for word in text.split():
@@ -1037,7 +1057,7 @@ class TestAsyncIteration:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         result = ""
@@ -1053,12 +1073,14 @@ class TestAsyncIteration:
 # INTEGRATION TESTS
 # =============================================================================
 
+
 class TestStreamingIntegration:
     """Integration tests combining multiple streaming features."""
 
     @pytest.mark.asyncio
     async def test_stream_chat_with_kwargs_and_error(self, mock_mcp):
         """Test stream_chat with multiple kwargs and error handling."""
+
         async def mock_stream_chat(**kwargs):
             # Verify kwargs were passed
             assert kwargs["temperature"] == 0.5
@@ -1074,16 +1096,12 @@ class TestStreamingIntegration:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         chunks = []
         with pytest.raises(RuntimeError):
-            async for chunk in agent._stream_llm(
-                "Test",
-                temperature=0.5,
-                max_tokens=100
-            ):
+            async for chunk in agent._stream_llm("Test", temperature=0.5, max_tokens=100):
                 chunks.append(chunk)
 
         assert chunks == ["Partial"]
@@ -1091,12 +1109,13 @@ class TestStreamingIntegration:
     @pytest.mark.asyncio
     async def test_call_llm_fallback_chain(self, mock_mcp):
         """Test complete fallback chain: no generate, use stream."""
+
         async def mock_stream(**kwargs):
             text = "Hello World"
             for char in text:
                 yield char
 
-        mock_llm = MagicMock(spec=['stream'])
+        mock_llm = MagicMock(spec=["stream"])
         mock_llm.stream = mock_stream
 
         agent = ConcreteAgent(
@@ -1104,7 +1123,7 @@ class TestStreamingIntegration:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         result = await agent._call_llm("Test")
@@ -1115,10 +1134,11 @@ class TestStreamingIntegration:
     @pytest.mark.asyncio
     async def test_stream_llm_full_fallback_chain(self, mock_mcp):
         """Test full fallback chain: stream_chat -> stream -> generate."""
+
         async def mock_generate(**kwargs):
             return "Generated response"
 
-        mock_llm = MagicMock(spec=['generate'])
+        mock_llm = MagicMock(spec=["generate"])
         mock_llm.generate = mock_generate
 
         agent = ConcreteAgent(
@@ -1126,7 +1146,7 @@ class TestStreamingIntegration:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         # _stream_llm falls back to _call_llm which uses generate

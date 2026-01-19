@@ -2,6 +2,7 @@
 
 from vertice_cli.core.context import ContextBuilder
 
+
 def test_context_builder():
     """Test context builder functionality."""
     print("🔍 Testing ContextBuilder...\n")
@@ -99,7 +100,7 @@ def test_context_builder():
     stats = builder.get_stats()
     print(f"✅ Context cleared: {stats['files']} files")
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🎉 All ContextBuilder tests complete!")
 
 

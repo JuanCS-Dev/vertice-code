@@ -36,5 +36,3 @@ Total startup time: 0.13s
         1    0.000    0.000    0.426    0.426 /home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/huggingface_hub/inference/_client.py:1(<module>)
       451    0.011    0.000    0.348    0.001 /home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/pydantic/_internal/_model_construction.py:80(__new__)
         1    0.000    0.000    0.319    0.319 /home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/openai/types/batch.py:1(<module>)
-
-

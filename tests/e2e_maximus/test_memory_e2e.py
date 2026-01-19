@@ -218,9 +218,7 @@ class TestMemoryConsolidate:
         """
         threshold = 0.8
 
-        result: Dict[str, int] = await maximus_provider.memory_consolidate(
-            threshold=threshold
-        )
+        result: Dict[str, int] = await maximus_provider.memory_consolidate(threshold=threshold)
 
         assert isinstance(result, dict)
         # Should have counts per memory type
@@ -239,9 +237,7 @@ class TestMemoryConsolidate:
         """
         threshold = 0.95
 
-        result: Dict[str, int] = await maximus_provider.memory_consolidate(
-            threshold=threshold
-        )
+        result: Dict[str, int] = await maximus_provider.memory_consolidate(threshold=threshold)
 
         assert isinstance(result, dict)
 

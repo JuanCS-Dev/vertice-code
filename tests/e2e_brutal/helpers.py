@@ -17,6 +17,7 @@ from dataclasses import dataclass, field
 @dataclass
 class Issue:
     """Represents a discovered issue."""
+
     id: str
     severity: str
     category: str
@@ -43,7 +44,7 @@ class Issue:
             "affected_component": self.affected_component,
             "user_persona": self.user_persona,
             "timestamp": self.timestamp.isoformat(),
-            "traceback": self.traceback
+            "traceback": self.traceback,
         }
 
 
@@ -70,7 +71,7 @@ class IssueCollector:
         actual: str,
         component: str,
         persona: str,
-        traceback: Optional[str] = None
+        traceback: Optional[str] = None,
     ) -> Issue:
         """Add a new issue to the collector."""
         self.issue_counter += 1
@@ -85,7 +86,7 @@ class IssueCollector:
             actual_behavior=actual,
             affected_component=component,
             user_persona=persona,
-            traceback=traceback
+            traceback=traceback,
         )
         self.issues.append(issue)
         return issue
@@ -106,7 +107,7 @@ class IssueCollector:
             "by_severity": {k: len(v) for k, v in by_severity.items()},
             "by_category": {k: len(v) for k, v in by_category.items()},
             "by_persona": {k: len(v) for k, v in by_persona.items()},
-            "issues": [i.to_dict() for i in self.issues]
+            "issues": [i.to_dict() for i in self.issues],
         }
 
     def clear(self):
@@ -117,6 +118,7 @@ class IssueCollector:
 
 class UserPersona:
     """Base class for user personas."""
+
     name: str = "base"
     skill_level: str = "unknown"
     typical_mistakes: List[str] = []
@@ -128,20 +130,21 @@ class UserPersona:
 
 class SeniorDeveloper(UserPersona):
     """Senior developer persona."""
+
     name = "SENIOR"
     skill_level = "expert"
     typical_mistakes = [
         "Assumes tool understands complex context",
         "Uses advanced git workflows",
         "Expects atomic operations",
-        "Demands precise error messages"
+        "Demands precise error messages",
     ]
     expectations = [
         "Correct first time",
         "No data loss ever",
         "Predictable behavior",
         "Proper error handling",
-        "Transaction-like operations"
+        "Transaction-like operations",
     ]
 
     def get_prompt_style(self, intent: str) -> str:
@@ -150,13 +153,14 @@ class SeniorDeveloper(UserPersona):
             "run_tests": "Execute pytest with coverage report for {module}",
             "git_commit": "Stage {files} and commit with conventional message: {message}",
             "debug": "Trace execution of {function} with breakpoints at {lines}",
-            "refactor": "Extract method {method} from {class} preserving interface"
+            "refactor": "Extract method {method} from {class} preserving interface",
         }
         return styles.get(intent, intent)
 
 
 class VibeCoder(UserPersona):
     """Vibe coder persona."""
+
     name = "VIBE_CODER"
     skill_level = "beginner"
     typical_mistakes = [
@@ -164,13 +168,13 @@ class VibeCoder(UserPersona):
         "Contradictory requirements",
         "No error handling awareness",
         "Expects magic",
-        "Copy-pastes random code"
+        "Copy-pastes random code",
     ]
     expectations = [
         "Just make it work",
         "Fix my errors automatically",
         "Understand what I mean not what I say",
-        "Be patient with confusion"
+        "Be patient with confusion",
     ]
 
     def get_prompt_style(self, intent: str) -> str:
@@ -179,13 +183,14 @@ class VibeCoder(UserPersona):
             "run_tests": "test it I guess",
             "git_commit": "save my changes plz",
             "debug": "its broken fix it",
-            "refactor": "make the code better"
+            "refactor": "make the code better",
         }
         return styles.get(intent, intent)
 
 
 class ScriptKid(UserPersona):
     """Script kid persona for security testing."""
+
     name = "SCRIPT_KID"
     skill_level = "malicious"
     typical_mistakes = [
@@ -193,13 +198,13 @@ class ScriptKid(UserPersona):
         "Path traversal",
         "Privilege escalation",
         "Resource exhaustion",
-        "Data exfiltration"
+        "Data exfiltration",
     ]
     expectations = [
         "Find vulnerabilities",
         "Break the system",
         "Escape sandbox",
-        "Access forbidden resources"
+        "Access forbidden resources",
     ]
 
     def get_prompt_style(self, intent: str) -> str:
@@ -208,7 +213,7 @@ class ScriptKid(UserPersona):
             "run_tests": "; rm -rf / #",
             "git_commit": "commit $(whoami > /tmp/pwned)",
             "debug": "__import__('os').system('id')",
-            "refactor": "eval(input())"
+            "refactor": "eval(input())",
         }
         return styles.get(intent, intent)
 
@@ -222,7 +227,8 @@ class MiniAppGenerator:
         app_dir = workspace / "flask_app"
         app_dir.mkdir()
 
-        (app_dir / "app.py").write_text('''"""Minimal Flask app for testing."""
+        (app_dir / "app.py").write_text(
+            '''"""Minimal Flask app for testing."""
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
@@ -237,7 +243,8 @@ def echo():
 
 if __name__ == "__main__":
     app.run(debug=True)
-''')
+'''
+        )
 
         (app_dir / "requirements.txt").write_text("flask>=2.0.0\n")
         return app_dir
@@ -248,7 +255,8 @@ if __name__ == "__main__":
         cli_dir = workspace / "cli_tool"
         cli_dir.mkdir()
 
-        (cli_dir / "main.py").write_text('''"""Minimal CLI tool for testing."""
+        (cli_dir / "main.py").write_text(
+            '''"""Minimal CLI tool for testing."""
 import argparse
 import sys
 
@@ -265,16 +273,17 @@ def main():
 
 if __name__ == "__main__":
     main()
-''')
+'''
+        )
         return cli_dir
 
 
 __all__ = [
-    'Issue',
-    'IssueCollector',
-    'UserPersona',
-    'SeniorDeveloper',
-    'VibeCoder',
-    'ScriptKid',
-    'MiniAppGenerator',
+    "Issue",
+    "IssueCollector",
+    "UserPersona",
+    "SeniorDeveloper",
+    "VibeCoder",
+    "ScriptKid",
+    "MiniAppGenerator",
 ]

@@ -170,9 +170,7 @@ class TestProductionGeminiStreamer:
         assert "not initialized" in chunks[0]
 
     @pytest.mark.asyncio
-    async def test_streamer_get_stats(
-        self, streamer: ProductionGeminiStreamer
-    ) -> None:
+    async def test_streamer_get_stats(self, streamer: ProductionGeminiStreamer) -> None:
         """Stats returns correct structure."""
         stats = streamer.get_stats()
 
@@ -184,18 +182,14 @@ class TestProductionGeminiStreamer:
         assert "last_activity" in stats
 
     @pytest.mark.asyncio
-    async def test_streamer_get_checkpoint(
-        self, streamer: ProductionGeminiStreamer
-    ) -> None:
+    async def test_streamer_get_checkpoint(self, streamer: ProductionGeminiStreamer) -> None:
         """Get checkpoint returns checkpoint object."""
         checkpoint = streamer.get_checkpoint()
 
         assert isinstance(checkpoint, StreamCheckpoint)
 
     @pytest.mark.asyncio
-    async def test_heartbeat_marker_is_filtered(
-        self, config: GeminiStreamConfig
-    ) -> None:
+    async def test_heartbeat_marker_is_filtered(self, config: GeminiStreamConfig) -> None:
         """Heartbeat markers are not yielded to consumer."""
         # The HEARTBEAT_MARKER is internal and shouldn't appear in output
         assert ProductionGeminiStreamer.HEARTBEAT_MARKER == ": heartbeat\n"
@@ -224,9 +218,7 @@ class TestProductionStreamerWithMocks:
         )
 
     @pytest.mark.asyncio
-    async def test_backpressure_queue_bounded(
-        self, config: GeminiStreamConfig
-    ) -> None:
+    async def test_backpressure_queue_bounded(self, config: GeminiStreamConfig) -> None:
         """Queue has bounded size for backpressure."""
         streamer = ProductionGeminiStreamer(config)
 
@@ -237,9 +229,7 @@ class TestProductionStreamerWithMocks:
         assert streamer._chunk_queue.maxsize == 10
 
     @pytest.mark.asyncio
-    async def test_checkpoint_updated_periodically(
-        self, config: GeminiStreamConfig
-    ) -> None:
+    async def test_checkpoint_updated_periodically(self, config: GeminiStreamConfig) -> None:
         """Checkpoint is saved periodically during streaming."""
         streamer = ProductionGeminiStreamer(config)
 
@@ -252,9 +242,7 @@ class TestProductionStreamerWithMocks:
         assert streamer._checkpoint.accumulated_content == "chunk1chunk2chunk3"
 
     @pytest.mark.asyncio
-    async def test_cleanup_cancels_tasks(
-        self, config: GeminiStreamConfig
-    ) -> None:
+    async def test_cleanup_cancels_tasks(self, config: GeminiStreamConfig) -> None:
         """Cleanup properly cancels heartbeat and producer tasks."""
         streamer = ProductionGeminiStreamer(config)
         streamer._stream_active = True
@@ -295,9 +283,7 @@ class TestReconnectLogic:
         )
 
     @pytest.mark.asyncio
-    async def test_reconnect_respects_max_attempts(
-        self, config: GeminiStreamConfig
-    ) -> None:
+    async def test_reconnect_respects_max_attempts(self, config: GeminiStreamConfig) -> None:
         """Reconnect stops after max attempts reached."""
         streamer = ProductionGeminiStreamer(config)
         streamer._reconnect_attempts = config.max_reconnect_attempts
@@ -307,9 +293,7 @@ class TestReconnectLogic:
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_reconnect_requires_checkpoint(
-        self, config: GeminiStreamConfig
-    ) -> None:
+    async def test_reconnect_requires_checkpoint(self, config: GeminiStreamConfig) -> None:
         """Reconnect fails without checkpoint data."""
         streamer = ProductionGeminiStreamer(config)
         streamer._checkpoint = StreamCheckpoint()  # Empty checkpoint
@@ -319,9 +303,7 @@ class TestReconnectLogic:
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_reconnect_increments_attempts(
-        self, config: GeminiStreamConfig
-    ) -> None:
+    async def test_reconnect_increments_attempts(self, config: GeminiStreamConfig) -> None:
         """Each reconnect attempt increments counter."""
         streamer = ProductionGeminiStreamer(config)
         await streamer._checkpoint.update("some content")  # async method
@@ -337,9 +319,7 @@ class TestReconnectLogic:
             assert streamer._reconnect_attempts == initial_attempts + 1
 
     @pytest.mark.asyncio
-    async def test_reconnect_uses_exponential_backoff(
-        self, config: GeminiStreamConfig
-    ) -> None:
+    async def test_reconnect_uses_exponential_backoff(self, config: GeminiStreamConfig) -> None:
         """Reconnect delay increases exponentially."""
         streamer = ProductionGeminiStreamer(config)
         await streamer._checkpoint.update("some content")  # async method
@@ -351,6 +331,6 @@ class TestReconnectLogic:
         # Attempt 3: 0.01 * 2^2 = 0.04
 
         base = config.reconnect_base_delay
-        assert base * (2 ** 0) == 0.01  # First attempt
-        assert base * (2 ** 1) == 0.02  # Second attempt
-        assert base * (2 ** 2) == 0.04  # Third attempt
+        assert base * (2**0) == 0.01  # First attempt
+        assert base * (2**1) == 0.02  # Second attempt
+        assert base * (2**2) == 0.04  # Third attempt

@@ -396,6 +396,7 @@ class TestTraceContextPropagation:
 # AgentTracer Tests
 # ==============================================================================
 
+
 class TestAgentTracer:
     """Tests for AgentTracer."""
 
@@ -403,12 +404,14 @@ class TestAgentTracer:
     def tracer(self):
         """Create test tracer."""
         from core.observability.tracer import AgentTracer
+
         return AgentTracer()
 
     @pytest.fixture
     def tracer_with_config(self):
         """Create tracer with custom config."""
         from core.observability.tracer import AgentTracer
+
         config = ObservabilityConfig(
             service_name="test-service",
             trace_tool_results=True,
@@ -441,7 +444,7 @@ class TestAgentTracer:
             with tracer.start_agent_span(
                 operation_name="failing_op",
                 agent_id="agent_1",
-            ) as span:
+            ):
                 raise ValueError("Test error")
 
         assert len(tracer._completed_spans) == 1
@@ -473,7 +476,7 @@ class TestAgentTracer:
     def test_llm_span_with_error(self, tracer):
         """Test LLM span with exception."""
         with pytest.raises(RuntimeError):
-            with tracer.start_llm_span(model="gpt-4") as span:
+            with tracer.start_llm_span(model="gpt-4"):
                 raise RuntimeError("API error")
 
         assert len(tracer._llm_spans) == 1
@@ -493,7 +496,7 @@ class TestAgentTracer:
     def test_tool_span_with_error(self, tracer):
         """Test tool span with exception."""
         with pytest.raises(Exception):
-            with tracer.start_tool_span(tool_name="failing_tool") as span:
+            with tracer.start_tool_span(tool_name="failing_tool"):
                 raise Exception("Tool failed")
 
         assert len(tracer._tool_spans) == 1
@@ -504,7 +507,7 @@ class TestAgentTracer:
         with tracer.start_agent_span(
             operation_name="outer",
             agent_id="agent_1",
-        ) as agent_span:
+        ):
             with tracer.start_llm_span(model="gpt-4") as llm_span:
                 llm_span.gen_ai_usage_input_tokens = 50
 
@@ -545,7 +548,7 @@ class TestAgentTracer:
         with tracer.start_agent_span(
             operation_name="test",
             agent_id="agent_1",
-        ) as span:
+        ):
             tracer.add_event_to_current_span("custom_event", {"key": "value"})
 
     def test_set_attribute(self, tracer):
@@ -608,6 +611,7 @@ class TestAgentTracer:
 # MetricsCollector Tests
 # ==============================================================================
 
+
 class TestMetricsCollector:
     """Tests for MetricsCollector."""
 
@@ -615,6 +619,7 @@ class TestMetricsCollector:
     def collector(self):
         """Create test metrics collector."""
         from core.observability.metrics import MetricsCollector
+
         return MetricsCollector()
 
     def test_collector_creation(self, collector):
@@ -787,6 +792,7 @@ class TestHistogram:
     def histogram(self):
         """Create test histogram."""
         from core.observability.metrics import Histogram
+
         return Histogram(name="test")
 
     def test_histogram_creation(self, histogram):
@@ -807,11 +813,11 @@ class TestHistogram:
     def test_histogram_bucket_counts(self, histogram):
         """Test bucket counting."""
         histogram.observe(0.001)  # Fits in 0.005 bucket
-        histogram.observe(0.1)   # Fits in 0.1 bucket
-        histogram.observe(100)   # Goes to inf bucket
+        histogram.observe(0.1)  # Fits in 0.1 bucket
+        histogram.observe(100)  # Goes to inf bucket
 
         assert histogram.counts[0.005] == 1
-        assert histogram.counts[float('inf')] == 3  # All values go to inf
+        assert histogram.counts[float("inf")] == 3  # All values go to inf
 
     def test_histogram_percentile_empty(self, histogram):
         """Test percentile on empty histogram."""
@@ -833,6 +839,7 @@ class TestHistogram:
 # Exporter Tests
 # ==============================================================================
 
+
 class TestSpanExporter:
     """Tests for SpanExporter."""
 
@@ -840,12 +847,14 @@ class TestSpanExporter:
     def exporter(self, tmp_path):
         """Create test span exporter."""
         from core.observability.exporter import SpanExporter
+
         return SpanExporter(export_path=tmp_path / "spans.json")
 
     @pytest.fixture
     def exporter_no_path(self):
         """Create exporter without path."""
         from core.observability.exporter import SpanExporter
+
         return SpanExporter()
 
     def test_exporter_creation(self, exporter):
@@ -897,6 +906,7 @@ class TestMetricsExporter:
     def exporter(self, tmp_path):
         """Create test metrics exporter."""
         from core.observability.exporter import MetricsExporter
+
         return MetricsExporter(export_path=tmp_path / "metrics.json")
 
     def test_exporter_creation(self, exporter):
@@ -995,6 +1005,7 @@ class TestSpanExporterExtended:
         """Create exporter with OTLP endpoint configured."""
         from core.observability.exporter import SpanExporter
         from core.observability.types import ObservabilityConfig
+
         config = ObservabilityConfig(
             otlp_endpoint="http://localhost:4318",
             batch_size=1,
@@ -1004,6 +1015,7 @@ class TestSpanExporterExtended:
     def test_export_to_file_exception(self, tmp_path):
         """Test file export handles exceptions."""
         from core.observability.exporter import SpanExporter
+
         exporter = SpanExporter(export_path=tmp_path / "subdir" / "spans.json")
         exporter._batch = [{"span": "data"}]
         # Should not raise, returns True/False
@@ -1015,6 +1027,7 @@ class TestSpanExporterExtended:
         """Test file export with invalid path."""
         from core.observability.exporter import SpanExporter
         from pathlib import Path
+
         exporter = SpanExporter(export_path=Path("/nonexistent/readonly/spans.json"))
         exporter._batch = [{"span": "data"}]
         # Should handle exception and return False
@@ -1025,7 +1038,7 @@ class TestSpanExporterExtended:
         """Test flush exports to both OTLP and file."""
         exporter_with_otlp._batch = [{"spanId": "1", "name": "test"}]
         # OTLP will fail (no server) but file should succeed
-        result = exporter_with_otlp._flush()
+        exporter_with_otlp._flush()
         # File export succeeded
         assert (tmp_path / "spans.json").exists()
 
@@ -1045,6 +1058,7 @@ class TestMetricsExporterExtended:
         """Test metrics export handles file exceptions."""
         from core.observability.exporter import MetricsExporter
         from pathlib import Path
+
         exporter = MetricsExporter(export_path=Path("/nonexistent/readonly/metrics.json"))
         result = exporter._export_to_file([{"metric": "data"}])
         assert result is False
@@ -1052,6 +1066,7 @@ class TestMetricsExporterExtended:
     def test_prometheus_empty_metrics(self):
         """Test Prometheus format with empty metrics."""
         from core.observability.exporter import MetricsExporter
+
         exporter = MetricsExporter()
         output = exporter.to_prometheus_format({})
         assert output == ""
@@ -1059,6 +1074,7 @@ class TestMetricsExporterExtended:
     def test_prometheus_all_metric_types(self):
         """Test Prometheus format with all metric types."""
         from core.observability.exporter import MetricsExporter
+
         exporter = MetricsExporter()
         metrics = {
             "counters": {
@@ -1091,11 +1107,13 @@ class TestConsoleExporter:
     def exporter(self):
         """Create console exporter."""
         from core.observability.exporter import ConsoleExporter
+
         return ConsoleExporter()
 
     def test_export(self, exporter, caplog):
         """Test console export."""
         import logging
+
         caplog.set_level(logging.INFO)
 
         result = exporter.export([{"key": "value"}])
@@ -1110,6 +1128,7 @@ class TestConsoleExporter:
 # ==============================================================================
 # ObservabilityMixin Tests
 # ==============================================================================
+
 
 class TestObservabilityMixin:
     """Tests for ObservabilityMixin."""
@@ -1288,6 +1307,7 @@ class TestObservabilityMixin:
 # Additional Edge Case Tests for 100% Coverage
 # ==============================================================================
 
+
 class TestEdgeCases:
     """Additional tests for edge cases to improve coverage."""
 
@@ -1358,7 +1378,7 @@ class TestEdgeCases:
         with tracer.start_agent_span(
             operation_name="test",
             agent_id="agent_1",
-        ) as span:
+        ):
             # The span should be in active_spans and events should be added
             tracer.add_event_to_current_span("event1", {"key": "value"})
             # Event is added via the span's context manager
@@ -1372,7 +1392,7 @@ class TestEdgeCases:
         with tracer.start_agent_span(
             operation_name="test",
             agent_id="agent_1",
-        ) as span:
+        ):
             tracer.set_attribute("custom.key", "value")
 
     def test_get_histogram_stats_empty(self):

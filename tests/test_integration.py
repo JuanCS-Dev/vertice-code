@@ -19,12 +19,7 @@ class _TestMetrics:
     """Scientific metrics collection."""
 
     def __init__(self):
-        self.results = {
-            "ttft": [],
-            "throughput": [],
-            "accuracy": [],
-            "latency": []
-        }
+        self.results = {"ttft": [], "throughput": [], "accuracy": [], "latency": []}
 
     def record_ttft(self, ms: float):
         self.results["ttft"].append(ms)
@@ -37,6 +32,7 @@ class _TestMetrics:
 
     def get_stats(self):
         """Calculate statistical metrics."""
+
         def avg(lst):
             return sum(lst) / len(lst) if lst else 0
 
@@ -46,15 +42,15 @@ class _TestMetrics:
             sorted_lst = sorted(lst)
             n = len(sorted_lst)
             if n % 2 == 0:
-                return (sorted_lst[n//2-1] + sorted_lst[n//2]) / 2
-            return sorted_lst[n//2]
+                return (sorted_lst[n // 2 - 1] + sorted_lst[n // 2]) / 2
+            return sorted_lst[n // 2]
 
         return {
             "ttft_avg": avg(self.results["ttft"]),
             "ttft_median": median(self.results["ttft"]),
             "throughput_avg": avg(self.results["throughput"]),
             "latency_avg": avg(self.results["latency"]),
-            "samples": len(self.results["ttft"])
+            "samples": len(self.results["ttft"]),
         }
 
 
@@ -63,9 +59,9 @@ metrics = _TestMetrics()
 
 def test_01_config_validation():
     """Test 1: Configuration validation."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TEST 1: Configuration Validation")
-    print("="*60)
+    print("=" * 60)
 
     # Validate config
     is_valid, message = config.validate()
@@ -83,9 +79,9 @@ def test_01_config_validation():
 
 def test_02_llm_client_validation():
     """Test 2: LLM client validation."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TEST 2: LLM Client Validation")
-    print("="*60)
+    print("=" * 60)
 
     # Validate client
     is_valid, message = llm_client.validate()
@@ -98,9 +94,9 @@ def test_02_llm_client_validation():
 @pytest.mark.asyncio
 async def test_03_llm_basic_response():
     """Test 3: Basic LLM response (non-streaming)."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TEST 3: Basic LLM Response")
-    print("="*60)
+    print("=" * 60)
 
     prompt = "Say 'Hello World' and nothing else."
 
@@ -112,7 +108,9 @@ async def test_03_llm_basic_response():
 
     assert response is not None, "No response received"
     assert len(response) > 0, "Empty response"
-    assert "hello" in response.lower() or "world" in response.lower(), "Response doesn't contain expected words"
+    assert (
+        "hello" in response.lower() or "world" in response.lower()
+    ), "Response doesn't contain expected words"
 
     print(f"✅ Response received in {elapsed:.0f}ms")
     print(f"   Length: {len(response)} chars")
@@ -122,9 +120,9 @@ async def test_03_llm_basic_response():
 @pytest.mark.asyncio
 async def test_04_llm_streaming():
     """Test 4: LLM streaming validation."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TEST 4: LLM Streaming Validation")
-    print("="*60)
+    print("=" * 60)
 
     prompt = "Count from 1 to 5"
 
@@ -168,20 +166,18 @@ async def test_04_llm_streaming():
     assert ttft < 5000, f"TTFT too slow: {ttft:.0f}ms (target: <5000ms)"
     assert throughput > 1.0, f"Throughput too low: {throughput:.1f} t/s (target: >1.0 t/s)"
 
+
 def test_05_context_builder():
     """Test 5: Context builder functionality."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TEST 5: Context Builder")
-    print("="*60)
+    print("=" * 60)
 
     # Clear any previous context
     context_builder.clear()
 
     # Test reading test files with correct paths
-    test_files = [
-        "tests/test_llm.py",
-        "tests/test_context.py"
-    ]
+    test_files = ["tests/test_llm.py", "tests/test_context.py"]
 
     results = context_builder.add_files(test_files)
 
@@ -212,9 +208,9 @@ def test_05_context_builder():
 
 def test_06_mcp_manager():
     """Test 6: MCP manager functionality."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TEST 6: MCP Manager")
-    print("="*60)
+    print("=" * 60)
 
     # Clear context
     mcp_manager.clear()
@@ -251,9 +247,9 @@ def test_06_mcp_manager():
 @pytest.mark.asyncio
 async def test_07_context_aware_generation():
     """Test 7: Context-aware LLM generation."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TEST 7: Context-Aware Generation")
-    print("="*60)
+    print("=" * 60)
 
     # Add a test file to context with correct path
     context_builder.clear()
@@ -262,16 +258,14 @@ async def test_07_context_aware_generation():
     assert success, f"Failed to add context: {msg}"
 
     # Get context
-    context = context_builder.get_context()
+    context_builder.get_context()
 
     # Ask about the file
     prompt = "What does the test_streaming function do?"
 
     start = time.time()
     response = await llm_client.generate(
-        context_builder.inject_to_prompt(prompt),
-        max_tokens=200,
-        temperature=0.3
+        context_builder.inject_to_prompt(prompt), max_tokens=200, temperature=0.3
     )
     elapsed = (time.time() - start) * 1000
 
@@ -280,7 +274,9 @@ async def test_07_context_aware_generation():
 
     # Check if response mentions streaming or testing
     response_lower = response.lower()
-    context_aware = "stream" in response_lower or "test" in response_lower or "llm" in response_lower
+    context_aware = (
+        "stream" in response_lower or "test" in response_lower or "llm" in response_lower
+    )
 
     print("✅ Context-aware generation works!")
     print(f"   Latency: {elapsed:.0f}ms")
@@ -295,14 +291,14 @@ async def test_07_context_aware_generation():
 @pytest.mark.asyncio
 async def test_08_performance_benchmark():
     """Test 8: Performance benchmarking (3 samples)."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TEST 8: Performance Benchmark (Scientific)")
-    print("="*60)
+    print("=" * 60)
 
     prompts = [
         "Write a hello world function",
         "Explain what is recursion",
-        "Generate a sorting algorithm"
+        "Generate a sorting algorithm",
     ]
 
     for i, prompt in enumerate(prompts, 1):
@@ -320,7 +316,7 @@ async def test_08_performance_benchmark():
         end = time.time()
 
         ttft = (first_token - start) * 1000 if first_token else 0
-        total_time = end - start
+        end - start
         tokens = chars // 4
         throughput = tokens / (end - first_token) if first_token else 0
 
@@ -339,15 +335,17 @@ async def test_08_performance_benchmark():
     print(f"   Throughput (avg): {stats['throughput_avg']:.1f} t/s")
 
     # Validate against targets
-    assert stats['ttft_avg'] < 10000, f"Avg TTFT too slow: {stats['ttft_avg']:.0f}ms (target: <10000ms)"
-    assert stats['throughput_avg'] > 5, f"Avg throughput too low: {stats['throughput_avg']:.1f} t/s"
+    assert (
+        stats["ttft_avg"] < 10000
+    ), f"Avg TTFT too slow: {stats['ttft_avg']:.0f}ms (target: <10000ms)"
+    assert stats["throughput_avg"] > 5, f"Avg throughput too low: {stats['throughput_avg']:.1f} t/s"
 
 
 def test_09_error_handling():
     """Test 9: Error handling robustness."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TEST 9: Error Handling")
-    print("="*60)
+    print("=" * 60)
 
     # Test 1: Invalid file
     success, content, error = context_builder.read_file("nonexistent_file.py")
@@ -379,9 +377,9 @@ def test_09_error_handling():
 
 def test_10_constitutional_compliance():
     """Test 10: Constitutional compliance validation."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TEST 10: Constitutional Compliance (P1-P6)")
-    print("="*60)
+    print("=" * 60)
 
     # P1: Completude - No placeholders
     print("  Checking P1 (Completude)...")
@@ -402,7 +400,7 @@ def test_10_constitutional_compliance():
 
     # P3: Ceticismo - Error handling exists
     print("  Checking P3 (Ceticismo)...")
-    assert hasattr(context_builder, 'read_file'), "Missing read_file method"
+    assert hasattr(context_builder, "read_file"), "Missing read_file method"
     success, _, error = context_builder.read_file("fake.py")
     assert not success, "Should return error for invalid file"
     assert len(error) > 0, "Error message empty"
@@ -410,12 +408,15 @@ def test_10_constitutional_compliance():
 
     # P4: Rastreabilidade - Using official libraries
     print("  Checking P4 (Rastreabilidade)...")
-    assert llm_client.hf_client is not None or llm_client.ollama_client is not None, "No official client"
+    assert (
+        llm_client.hf_client is not None or llm_client.ollama_client is not None
+    ), "No official client"
     print("    ✅ P4: Using official libraries")
 
     # P5: Consciência Sistêmica - Modular architecture
     print("  Checking P5 (Consciência)...")
     from vertice_cli.core import llm, context, mcp, config as cfg
+
     assert llm is not None, "LLM module missing"
     assert context is not None, "Context module missing"
     assert mcp is not None, "MCP module missing"
@@ -425,10 +426,16 @@ def test_10_constitutional_compliance():
     # P6: Eficiência - Performance targets met
     print("  Checking P6 (Eficiência)...")
     stats = metrics.get_stats()
-    if stats['samples'] > 0:
-        assert stats['ttft_avg'] < 10000, f"TTFT target not met: {stats['ttft_avg']:.0f}ms (target: <10000ms)"
-        assert stats['throughput_avg'] > 3, f"Throughput target not met: {stats['throughput_avg']:.1f} t/s (target: >3 t/s)"
-        print(f"    ✅ P6: Performance targets met (TTFT: {stats['ttft_avg']:.0f}ms, Throughput: {stats['throughput_avg']:.1f} t/s)")
+    if stats["samples"] > 0:
+        assert (
+            stats["ttft_avg"] < 10000
+        ), f"TTFT target not met: {stats['ttft_avg']:.0f}ms (target: <10000ms)"
+        assert (
+            stats["throughput_avg"] > 3
+        ), f"Throughput target not met: {stats['throughput_avg']:.1f} t/s (target: >3 t/s)"
+        print(
+            f"    ✅ P6: Performance targets met (TTFT: {stats['ttft_avg']:.0f}ms, Throughput: {stats['throughput_avg']:.1f} t/s)"
+        )
     else:
         print("    ⚠️ P6: No performance samples yet")
 
@@ -437,9 +444,9 @@ def test_10_constitutional_compliance():
 
 async def run_all_tests():
     """Run complete test suite."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🧪 SCIENTIFIC TEST SUITE - QWEN-DEV-CLI")
-    print("="*60)
+    print("=" * 60)
     print("Date: 2025-11-17T18:53 UTC")
     print("Constitutional Validation: Enabled")
     print("Performance Metrics: Enabled")
@@ -465,9 +472,9 @@ async def run_all_tests():
 
         total_time = time.time() - total_start
 
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("✅ ALL TESTS PASSED!")
-        print("="*60)
+        print("=" * 60)
 
         # Final statistics
         stats = metrics.get_stats()
@@ -479,9 +486,13 @@ async def run_all_tests():
         print(f"   Total time: {total_time:.1f}s")
 
         print("\n⚡ PERFORMANCE METRICS:")
-        print(f"   TTFT (avg): {stats['ttft_avg']:.0f}ms (target: <3000ms) {'✅' if stats['ttft_avg'] < 3000 else '❌'}")
+        print(
+            f"   TTFT (avg): {stats['ttft_avg']:.0f}ms (target: <3000ms) {'✅' if stats['ttft_avg'] < 3000 else '❌'}"
+        )
         print(f"   TTFT (median): {stats['ttft_median']:.0f}ms")
-        print(f"   Throughput (avg): {stats['throughput_avg']:.1f} t/s (target: >5 t/s) {'✅' if stats['throughput_avg'] > 5 else '❌'}")
+        print(
+            f"   Throughput (avg): {stats['throughput_avg']:.1f} t/s (target: >5 t/s) {'✅' if stats['throughput_avg'] > 5 else '❌'}"
+        )
         print(f"   Samples: {stats['samples']}")
 
         print("\n🏛️ CONSTITUTIONAL COMPLIANCE:")
@@ -502,6 +513,7 @@ async def run_all_tests():
     except Exception as e:
         print(f"\n❌ TEST FAILED: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 

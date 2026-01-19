@@ -56,8 +56,8 @@ function ArtifactTreeItem({ artifact, level }: ArtifactTreeItemProps) {
       <div
         className={cn(
           "flex items-center gap-2 py-1.5 px-3 cursor-pointer group transition-colors",
-          isActive 
-            ? "bg-white/[0.05] text-white" 
+          isActive
+            ? "bg-white/[0.05] text-white"
             : "hover:bg-white/[0.03] text-zinc-500 hover:text-zinc-300"
         )}
         style={{ paddingLeft: `${level * 12 + 12}px` }}

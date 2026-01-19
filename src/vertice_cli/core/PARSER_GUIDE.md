@@ -212,15 +212,15 @@ async def retry_callback(invalid_response: str, error: str) -> str:
     prompt = f"""
     The previous response was invalid:
     Error: {error}
-    
+
     Response: {invalid_response}
-    
+
     Please reformat it as a valid JSON array of tool calls:
     [
         {{"tool": "tool_name", "args": {{"param": "value"}}}}
     ]
     """
-    
+
     fixed_response = await llm_client.chat(prompt)
     return fixed_response
 
@@ -325,7 +325,7 @@ result = parser.parse(response)
 # Validate each tool call
 for tool_call in result.tool_calls:
     is_valid, error = parser.validate_tool_call(tool_call, tool_schemas)
-    
+
     if not is_valid:
         print(f"Invalid tool call: {error}")
     else:
@@ -461,13 +461,13 @@ ResponseParser(
 class CustomParser(ResponseParser):
     def _sanitize_tool_calls(self, result):
         result = super()._sanitize_tool_calls(result)
-        
+
         # Add custom rules
         for tool_call in result.tool_calls:
             if tool_call["tool"] == "sensitive_operation":
                 # Block sensitive operations
                 result.tool_calls.remove(tool_call)
-        
+
         return result
 ```
 
@@ -480,10 +480,10 @@ class CustomParser(ResponseParser):
         result = self._try_custom_strategy(response)
         if result.success:
             return result
-        
+
         # Fall back to default strategies
         return super().parse(response)
-    
+
     def _try_custom_strategy(self, response):
         # Your custom parsing logic
         pass
@@ -541,5 +541,5 @@ ls ~/.qwen_logs/
 
 ---
 
-**Built with ❤️ for QWEN-DEV-CLI**  
+**Built with ❤️ for QWEN-DEV-CLI**
 *Combining the best of 4 world-class parsers*

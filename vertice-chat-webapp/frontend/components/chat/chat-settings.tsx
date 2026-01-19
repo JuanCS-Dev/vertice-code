@@ -80,7 +80,7 @@ export function ChatSettings() {
             <div className="flex items-center gap-2 text-zinc-500 uppercase tracking-widest text-[10px] font-bold">
                 <Cpu className="h-3 w-3" /> Intelligence Matrix
             </div>
-            
+
             <div className="grid grid-cols-1 gap-4">
                 {AVAILABLE_MODELS.map((model) => (
                     <button
@@ -88,8 +88,8 @@ export function ChatSettings() {
                         onClick={() => handleModelChange(model.id)}
                         className={cn(
                             "flex items-center justify-between p-4 rounded-xl border transition-all text-left group",
-                            session.model === model.id 
-                                ? "bg-primary/5 border-primary/30" 
+                            session.model === model.id
+                                ? "bg-primary/5 border-primary/30"
                                 : "bg-white/[0.02] border-white/5 hover:border-white/10"
                         )}
                     >
@@ -119,7 +119,7 @@ export function ChatSettings() {
             <div className="flex items-center gap-2 text-zinc-500 uppercase tracking-widest text-[10px] font-bold">
                 <Shield className="h-3 w-3" /> Core Harmonics
             </div>
-            
+
             <div className="space-y-4 px-2">
                 <div className="flex justify-between items-center">
                     <Label className="text-xs font-mono text-zinc-400">Entropy Level (Temperature)</Label>

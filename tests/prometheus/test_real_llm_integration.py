@@ -155,7 +155,7 @@ class TestPerformanceBenchmarks:
             # Test memory retrieval speed
             start_time = time.time()
             for i in range(10):
-                context = provider.get_memory_context(f"test query {i}")
+                provider.get_memory_context(f"test query {i}")
             end_time = time.time()
 
             avg_time = (end_time - start_time) / 10

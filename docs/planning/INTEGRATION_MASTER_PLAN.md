@@ -1,8 +1,8 @@
 # 🔧 INTEGRATION MASTER PLAN - QWEN-DEV-CLI
-> **Plano Detalhado de Integração: Conectando Features Existentes**  
-> **Data:** 2025-11-20 18:00 UTC  
-> **Baseline:** 32% parity (Grade D+)  
-> **Target:** 80% parity (Grade B) em 4 semanas  
+> **Plano Detalhado de Integração: Conectando Features Existentes**
+> **Data:** 2025-11-20 18:00 UTC
+> **Baseline:** 32% parity (Grade D+)
+> **Target:** 80% parity (Grade B) em 4 semanas
 > **Método:** Integration-First (não construir, conectar)
 
 ---
@@ -189,7 +189,7 @@ self._register_palette_commands()  # New method
 def _register_palette_commands(self):
     """Register commands in palette"""
     from .tui.components.palette import Command, CommandCategory
-    
+
     # File commands
     self.palette.add_command(Command(
         id="file.read",
@@ -199,7 +199,7 @@ def _register_palette_commands(self):
         keywords=["open", "cat", "view"],
         action=lambda: self._prompt_and_read_file()
     ))
-    
+
     self.palette.add_command(Command(
         id="file.edit",
         title="Edit File",
@@ -208,7 +208,7 @@ def _register_palette_commands(self):
         keywords=["modify", "change", "update"],
         action=lambda: self._prompt_and_edit_file()
     ))
-    
+
     # Git commands
     self.palette.add_command(Command(
         id="git.status",
@@ -218,7 +218,7 @@ def _register_palette_commands(self):
         keywords=["git", "status", "changes"],
         action=lambda: self._run_git_status()
     ))
-    
+
     # Add 10-15 more commands...
     # (Full list in implementation)
 
@@ -229,10 +229,10 @@ user_input = await self.enhanced_input.prompt_async()
 if user_input == "__PALETTE__":
     # Palette triggered via Ctrl+K
     self.console.print("\n[cyan]Opening command palette...[/cyan]")
-    
+
     # Show palette (interactive)
     selected = await self._show_palette_interactive()
-    
+
     if selected:
         # Execute selected command
         try:
@@ -246,36 +246,36 @@ async def _show_palette_interactive(self) -> Optional[Command]:
     """Show interactive palette and return selected command"""
     from prompt_toolkit.shortcuts import radiolist_dialog
     from .tui.components.palette import Command
-    
+
     # Search loop
     while True:
         query = await self.enhanced_input.prompt_async(
             prompt="Search commands: ",
             placeholder="Type to search..."
         )
-        
+
         if not query:
             return None
-        
+
         # Fuzzy search
         results = self.palette.search(query, limit=10)
-        
+
         if not results:
             self.console.print("[yellow]No commands found[/yellow]")
             continue
-        
+
         # Show results
         choices = [
             (cmd.id, f"{cmd.title} - {cmd.description}")
             for cmd in results
         ]
-        
+
         # Let user select
         selected_id = await radiolist_dialog(
             title="Select Command",
             values=choices
         ).run_async()
-        
+
         if selected_id:
             return self.palette.get_command(selected_id)
 ```
@@ -339,7 +339,7 @@ async for chunk in response:
     content = chunk.get("content", "")
     if content:
         yield content
-        
+
         # NEW: Track tokens in real-time
         token_count = len(content.split())  # Rough estimate
         if hasattr(self, 'context_engine'):
@@ -351,7 +351,7 @@ if hasattr(self, 'context_engine'):
     input_tokens = response.usage.prompt_tokens
     output_tokens = response.usage.completion_tokens
     cost = self._estimate_cost(input_tokens, output_tokens)
-    
+
     self.context_engine.finalize_streaming_session(
         final_input_tokens=input_tokens,
         final_output_tokens=output_tokens,
@@ -368,7 +368,7 @@ if hasattr(self, 'context_engine'):
 if self.context_engine.window.current_output_tokens > 0:
     token_panel = self.context_engine.render_token_usage_realtime()
     self.console.print(token_panel)
-    
+
     # Warning if approaching limit
     if self.context_engine.window.is_critical:
         self.console.print(
@@ -388,7 +388,7 @@ elif command == "/tokens":
     # Show detailed token usage
     panel = self.context_engine.render_token_usage_realtime()
     self.console.print(panel)
-    
+
     # Show history
     if self.context_engine.window.usage_history:
         history_table = Table(title="Token Usage History")
@@ -397,7 +397,7 @@ elif command == "/tokens":
         history_table.add_column("Output", justify="right")
         history_table.add_column("Total", justify="right")
         history_table.add_column("Cost", justify="right")
-        
+
         for snapshot in list(self.context_engine.window.usage_history)[-10:]:
             history_table.add_row(
                 snapshot.timestamp.strftime("%H:%M:%S"),
@@ -406,9 +406,9 @@ elif command == "/tokens":
                 f"{snapshot.total_tokens:,}",
                 f"${snapshot.cost_estimate_usd:.4f}"
             )
-        
+
         self.console.print(history_table)
-    
+
     return False, None
 ```
 
@@ -466,16 +466,16 @@ from pathlib import Path
 
 async def execute(self, path: str, content: str, **kwargs) -> ToolResult:
     """Write content to file with preview"""
-    
+
     # Check if file exists
     file_path = Path(path)
     show_preview = kwargs.get("preview", True)
-    
+
     if file_path.exists() and show_preview:
         # Read existing content
         with open(file_path, 'r') as f:
             original = f.read()
-        
+
         # Create preview
         preview = EditPreview()
         accepted = await preview.show_diff_interactive(
@@ -484,18 +484,18 @@ async def execute(self, path: str, content: str, **kwargs) -> ToolResult:
             file_path=str(file_path),
             console=kwargs.get("console")  # Pass console from shell
         )
-        
+
         if not accepted:
             return ToolResult(
                 success=False,
                 data={"path": path},
                 message="Edit cancelled by user"
             )
-    
+
     # If accepted (or new file), write
     with open(file_path, 'w') as f:
         f.write(content)
-    
+
     return ToolResult(
         success=True,
         data={"path": path, "size": len(content)},
@@ -517,7 +517,7 @@ async def show_diff_interactive(
 ) -> bool:
     """
     Show interactive diff and ask user to accept/reject
-    
+
     Returns:
         True if user accepts, False if rejects
     """
@@ -525,21 +525,21 @@ async def show_diff_interactive(
     from rich.columns import Columns
     from rich.syntax import Syntax
     from prompt_toolkit.shortcuts import yes_no_dialog
-    
+
     # Generate diff
     diff_panel = self.render_side_by_side_diff(
         original_content,
         proposed_content,
         file_path
     )
-    
+
     # Show diff
     console.print(Panel(
         diff_panel,
         title=f"[bold cyan]Preview: {file_path}[/bold cyan]",
         border_style="cyan"
     ))
-    
+
     # Show stats
     stats = self._calculate_diff_stats(original_content, proposed_content)
     console.print(
@@ -547,13 +547,13 @@ async def show_diff_interactive(
         f"[red]-{stats['removed']} lines[/red] "
         f"[yellow]~{stats['modified']} lines[/yellow]\n"
     )
-    
+
     # Ask user
     result = await yes_no_dialog(
         title="Accept Changes?",
         text="Do you want to apply these changes to the file?"
     ).run_async()
-    
+
     return result if result is not None else False
 ```
 
@@ -566,11 +566,11 @@ async def show_diff_interactive(
 for tool_call in tool_calls:
     tool = self.registry.get(tool_call["name"])
     args = tool_call["arguments"]
-    
+
     # ADD THIS: Pass console for preview
     args["console"] = self.console
     args["preview"] = True  # Enable preview by default
-    
+
     result = await self._execute_with_recovery(
         tool, tool_call["name"], args, turn
     )
@@ -702,10 +702,10 @@ for tool_call in tool_calls:
         dependencies=["llm_call"]
     )
     self.workflow_viz.update_step(step_id, status=StepStatus.RUNNING)
-    
+
     # Execute tool
     result = await tool.execute(**args)
-    
+
     # Update status
     if result.success:
         self.workflow_viz.update_step(
@@ -734,14 +734,14 @@ async def _process_with_workflow(self, ...):
 # Option 2: Summary after completion
 async def _process_with_workflow(self, ...):
     # ... process steps ...
-    
+
     # Show summary
     metrics = self.workflow_viz.get_metrics()
     self.console.print(
         f"\n[cyan]Workflow completed in {metrics['total_duration']:.2f}s[/cyan]"
     )
     self.console.print(f"  Steps: {metrics['completed']}/{metrics['total']}")
-    
+
     if metrics['failed'] > 0:
         self.console.print(f"  [red]Failed: {metrics['failed']}[/red]")
 ```
@@ -753,13 +753,13 @@ elif command == "/workflow":
     # Show current workflow state
     panel = self.workflow_viz.render_full_view()
     self.console.print(panel)
-    
+
     # Show metrics
     metrics = self.workflow_viz.get_performance_metrics()
     self.console.print(f"\nPerformance:")
     self.console.print(f"  FPS: {metrics['current_fps']:.1f}")
     self.console.print(f"  Render time: {metrics['last_frame_time_ms']:.2f}ms")
-    
+
     return False, None
 ```
 
@@ -849,10 +849,10 @@ async def _print_animated(
             else:
                 style = "bold"
             self.console.print(f"[{style}]{text}[/{style}]", end="\r")
-        
+
         self.animator.fade_in(update)
         self.console.print(text)  # Final version
-    
+
     elif animation == "fade_out":
         # Similar for fade_out
         pass
@@ -866,11 +866,11 @@ async def _print_animated(
 class StatusBadge:
     def __init__(self, ...):
         self.animator = Animator()
-    
+
     def transition_to(self, new_level: StatusLevel):
         """Transition to new status with animation"""
         old_level = self.level
-        
+
         # Animate color transition
         def update(progress):
             # Interpolate between old and new colors
@@ -881,7 +881,7 @@ class StatusBadge:
             else:
                 self.level = new_level
                 self.render()  # Show new
-        
+
         self.animator.animate(0.0, 1.0, update)
 ```
 
@@ -903,9 +903,9 @@ async with self._animated_status("Loading...") as status:
 async def _animated_status(self, message: str):
     """Animated status context manager"""
     from .tui.animations import animate_pulse
-    
+
     stop_animation = False
-    
+
     async def animation_loop():
         while not stop_animation:
             for frame in animate_pulse(message):
@@ -913,9 +913,9 @@ async def _animated_status(self, message: str):
                     break
                 self.console.print(frame, end="\r")
                 await asyncio.sleep(0.1)
-    
+
     task = asyncio.create_task(animation_loop())
-    
+
     try:
         yield
     finally:
@@ -980,7 +980,7 @@ async def dashboard_update_loop():
     while True:
         self.dashboard.update_metrics({
             "memory": self._get_memory_usage(),
-            "tokens": self.context_engine.window.current_input_tokens + 
+            "tokens": self.context_engine.window.current_input_tokens +
                      self.context_engine.window.current_output_tokens,
             "files_modified": len(self.context.modified_files),
             "tools_called": len(self.context.tool_calls),
@@ -1125,11 +1125,11 @@ async def test_preview_shows_for_edit():
     shell = InteractiveShell()
     # Create test file
     Path("test.txt").write_text("old content")
-    
+
     # Mock user accepts preview
     with patch('prompt_toolkit.shortcuts.yes_no_dialog') as mock:
         mock.return_value.run_async.return_value = True
-        
+
         # Execute edit
         tool = shell.registry.get("write_file")
         result = await tool.execute(
@@ -1137,7 +1137,7 @@ async def test_preview_shows_for_edit():
             content="new content",
             console=shell.console
         )
-    
+
     assert result.success
     assert Path("test.txt").read_text() == "new content"
 
@@ -1145,18 +1145,18 @@ async def test_preview_reject():
     """Test rejecting preview leaves file unchanged"""
     shell = InteractiveShell()
     Path("test.txt").write_text("old content")
-    
+
     # Mock user rejects
     with patch('prompt_toolkit.shortcuts.yes_no_dialog') as mock:
         mock.return_value.run_async.return_value = False
-        
+
         tool = shell.registry.get("write_file")
         result = await tool.execute(
             path="test.txt",
             content="new content",
             console=shell.console
         )
-    
+
     assert not result.success
     assert Path("test.txt").read_text() == "old content"
 ```
@@ -1168,10 +1168,10 @@ async def test_preview_reject():
 async def test_workflow_tracks_steps():
     """Test workflow visualizer tracks operation steps"""
     shell = InteractiveShell()
-    
+
     # Process request
     await shell._process_request_with_llm("test")
-    
+
     # Check steps were added
     assert len(shell.workflow_viz.steps) > 0
     assert "parse_input" in shell.workflow_viz.steps
@@ -1181,7 +1181,7 @@ async def test_workflow_metrics():
     """Test workflow performance metrics"""
     shell = InteractiveShell()
     await shell._process_request_with_llm("test")
-    
+
     metrics = shell.workflow_viz.get_performance_metrics()
     assert metrics['current_fps'] > 0
     assert metrics['last_frame_time_ms'] < 20  # <20ms = good
@@ -1275,7 +1275,7 @@ Documentation:
    **Description:** "git status" doesn't match "Git Status" command
    **Fix:** Improve fuzzy matching (case-insensitive)
    **Time:** 30min
-   
+
    ## Issue #2: Preview diff hard to read
    **Severity:** High
    **Description:** No syntax highlighting in diff
@@ -1330,15 +1330,15 @@ Documentation:
        async def execute(self, file_path: str, function_name: str):
            # Read function code
            code = extract_function(file_path, function_name)
-           
+
            # Ask LLM to generate tests
            prompt = f"Generate pytest tests for:\n\n{code}"
            tests = await llm_client.generate(prompt)
-           
+
            # Write tests to test_<file>.py
            test_file = f"test_{Path(file_path).name}"
            Path(test_file).write_text(tests)
-           
+
            return ToolResult(success=True, ...)
    ```
 
@@ -1381,7 +1381,7 @@ Documentation:
            # Use SemanticIndexer
            indexer = SemanticIndexer(root_path=".")
            results = indexer.find_symbol(symbol)
-           
+
            if results:
                first = results[0]
                return ToolResult(
@@ -1415,7 +1415,7 @@ Dogfooding:
   Issues Found: ~15-20
   Issues Fixed: Top 10
   UX Polish: Significant
-  
+
 Ready For:
   Private beta (10 users)
   Public demo
@@ -1519,7 +1519,7 @@ git checkout -b feature/integration-sprint-week1
 
 ---
 
-**Plan Created:** 2025-11-20 18:00 UTC  
-**Author:** Gemini-Vertice MAXIMUS  
-**Status:** READY TO EXECUTE  
+**Plan Created:** 2025-11-20 18:00 UTC
+**Author:** Gemini-Vertice MAXIMUS
+**Status:** READY TO EXECUTE
 **First Task:** Task 1.1 - Command Palette Integration

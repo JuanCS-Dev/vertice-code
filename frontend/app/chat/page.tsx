@@ -2,10 +2,10 @@
 
 import { Suspense } from "react";
 import { WorkbenchShell } from "@/components/layout/workbench-shell";
-import { 
-  ResizableHandle, 
-  ResizablePanel, 
-  ResizablePanelGroup 
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup
 } from "@/components/ui/resizable";
 import { ChatSkeleton } from "@/components/chat/chat-skeleton";
 import { ChatStream } from "@/components/chat/chat-stream";
@@ -17,7 +17,7 @@ export default function ChatPage() {
   return (
     <WorkbenchShell>
       <ResizablePanelGroup direction="horizontal" className="h-full items-stretch">
-        
+
         {/* LEFT PANEL: Context / History */}
         <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="hidden md:block bg-muted/5 border-r border-border">
           <div className="h-full flex flex-col p-3">
@@ -43,7 +43,7 @@ export default function ChatPage() {
                  <ChatStream />
                </div>
             </Suspense>
-            
+
             {/* Input Area (Sticky Bottom) */}
             <div className="absolute bottom-0 w-full bg-gradient-to-t from-background via-background to-transparent pt-10 pb-4 z-20">
                <ChatInput />

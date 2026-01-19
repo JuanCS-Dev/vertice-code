@@ -35,6 +35,7 @@ from tests.chaos.chaos_orchestrator import (
 # BLAST RADIUS TESTS
 # =============================================================================
 
+
 class TestBlastRadiusAnalyzer:
     """Test blast radius calculation."""
 
@@ -113,6 +114,7 @@ class TestBlastRadiusAnalyzer:
 # CHAOS INJECTION TESTS
 # =============================================================================
 
+
 class TestChaosInjector:
     """Test chaos injection mechanisms."""
 
@@ -186,6 +188,7 @@ class TestChaosInjector:
 # OBSERVABILITY TESTS
 # =============================================================================
 
+
 class TestObservabilityMonitor:
     """Test health signal monitoring."""
 
@@ -255,6 +258,7 @@ class TestObservabilityMonitor:
 # SELF-HEALING TESTS
 # =============================================================================
 
+
 class TestSelfHealingController:
     """Test automated self-healing mechanisms."""
 
@@ -272,8 +276,11 @@ class TestSelfHealingController:
 
         # Should have taken recovery action
         assert action is not None
-        assert action in (RecoveryAction.RESTART, RecoveryAction.FALLBACK,
-                         RecoveryAction.CIRCUIT_OPEN)
+        assert action in (
+            RecoveryAction.RESTART,
+            RecoveryAction.FALLBACK,
+            RecoveryAction.CIRCUIT_OPEN,
+        )
 
     @pytest.mark.asyncio
     async def test_healing_on_degradation(self) -> None:
@@ -339,6 +346,7 @@ class TestSelfHealingController:
 # =============================================================================
 # CHAOS ORCHESTRATOR TESTS
 # =============================================================================
+
 
 class TestChaosOrchestrator:
     """Test the main chaos orchestrator."""
@@ -449,6 +457,7 @@ class TestChaosOrchestrator:
 # INTEGRATION TESTS
 # =============================================================================
 
+
 class TestChaosIntegration:
     """Integration tests for chaos engineering with real components."""
 
@@ -478,11 +487,7 @@ class TestChaosIntegration:
 
         # Inject error condition
         for _ in range(5):
-            orchestrator.monitor.record_metric(
-                "test_component",
-                HealthSignal.ERROR_RATE,
-                0.5
-            )
+            orchestrator.monitor.record_metric("test_component", HealthSignal.ERROR_RATE, 0.5)
 
         # Run experiment that triggers healing
         experiment = ChaosExperiment(
@@ -516,9 +521,7 @@ class TestChaosIntegration:
         ]
 
         # Run concurrently
-        results = await asyncio.gather(*[
-            orchestrator.run_experiment(exp) for exp in experiments
-        ])
+        results = await asyncio.gather(*[orchestrator.run_experiment(exp) for exp in experiments])
 
         assert all(r.success for r in results)
         assert len(results) == 3

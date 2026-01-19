@@ -23,12 +23,12 @@ from ..trust import TrustFactor
 class JusticaState(Enum):
     """Estados possiveis do agente JUSTICA."""
 
-    INITIALIZING = auto()   # Inicializando componentes
-    READY = auto()          # Pronto para operar
-    MONITORING = auto()     # Em modo de monitoramento ativo
+    INITIALIZING = auto()  # Inicializando componentes
+    READY = auto()  # Pronto para operar
+    MONITORING = auto()  # Em modo de monitoramento ativo
     INVESTIGATING = auto()  # Investigando incidente
-    SUSPENDED = auto()      # Suspenso (requer intervencao humana)
-    SHUTDOWN = auto()       # Desligado
+    SUSPENDED = auto()  # Suspenso (requer intervencao humana)
+    SHUTDOWN = auto()  # Desligado
 
 
 @dataclass
@@ -146,12 +146,8 @@ class JusticaVerdict:
             "classification_result": (
                 self.classification.result.name if self.classification else None
             ),
-            "suspicion_score": (
-                self.suspicion_score.score if self.suspicion_score else None
-            ),
-            "trust_level": (
-                self.trust_factor.level.name if self.trust_factor else None
-            ),
+            "suspicion_score": (self.suspicion_score.score if self.suspicion_score else None),
+            "trust_level": (self.trust_factor.level.name if self.trust_factor else None),
             "actions_count": len(self.actions_taken),
             "reasoning": self.reasoning,
             "constitutional_basis": self.constitutional_basis,

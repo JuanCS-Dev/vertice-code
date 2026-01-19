@@ -10,6 +10,7 @@ from vertice_cli.core.llm import LLMClient
 # Real HF API Token
 HF_TOKEN = os.getenv("HF_TOKEN_GOD", os.getenv("HF_TOKEN"))
 
+
 @pytest.fixture
 def hf_client():
     """Real HF client"""
@@ -28,7 +29,9 @@ class TestHFBasicGeneration:
     async def test_simple_completion(self, hf_client):
         """Most basic case: simple text completion"""
         response = ""
-        async for chunk in hf_client.stream_chat("Say 'Hello World' and nothing else.", provider="hf"):
+        async for chunk in hf_client.stream_chat(
+            "Say 'Hello World' and nothing else.", provider="hf"
+        ):
             response += chunk
         assert response
         assert len(response) > 0
@@ -104,9 +107,7 @@ class TestHFMaxTokens:
         """Force very short response"""
         response = ""
         async for chunk in hf_client.stream_chat(
-            "Write a long essay",
-            provider="hf",
-            max_tokens=10
+            "Write a long essay", provider="hf", max_tokens=10
         ):
             response += chunk
         assert response
@@ -118,9 +119,7 @@ class TestHFMaxTokens:
         """Allow longer response"""
         response = ""
         async for chunk in hf_client.stream_chat(
-            "List numbers 1 to 20",
-            provider="hf",
-            max_tokens=200
+            "List numbers 1 to 20", provider="hf", max_tokens=200
         ):
             response += chunk
         assert response
@@ -136,7 +135,7 @@ class TestHFSystemInstructions:
         async for chunk in hf_client.stream_chat(
             "Sort an array",
             provider="hf",
-            system_instruction="You are a Python expert. Write only code."
+            system_instruction="You are a Python expert. Write only code.",
         ):
             response += chunk
         assert response
@@ -180,8 +179,7 @@ class TestHFRealWorldScenarios:
         """Real: generate git command"""
         response = ""
         async for chunk in hf_client.stream_chat(
-            "Git command for uncommitted changes? Command only.",
-            provider="hf"
+            "Git command for uncommitted changes? Command only.", provider="hf"
         ):
             response += chunk
         assert response

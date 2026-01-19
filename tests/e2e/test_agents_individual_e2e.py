@@ -49,12 +49,25 @@ class TestRegistryStructure:
 class TestCLIAgentsPresent:
     """All 14 CLI agents present in registry."""
 
-    @pytest.mark.parametrize("agent_name", [
-        "planner", "executor", "architect", "reviewer",
-        "explorer", "refactorer", "testing", "security",
-        "documentation", "performance", "devops",
-        "justica", "sofia", "data"
-    ])
+    @pytest.mark.parametrize(
+        "agent_name",
+        [
+            "planner",
+            "executor",
+            "architect",
+            "reviewer",
+            "explorer",
+            "refactorer",
+            "testing",
+            "security",
+            "documentation",
+            "performance",
+            "devops",
+            "justica",
+            "sofia",
+            "data",
+        ],
+    )
     def test_cli_agent_in_registry(self, agent_name):
         """CLI agent exists in registry."""
         assert agent_name in AGENT_REGISTRY
@@ -64,10 +77,17 @@ class TestCLIAgentsPresent:
 class TestCoreAgentsPresent:
     """All 6 core agents present in registry."""
 
-    @pytest.mark.parametrize("agent_name", [
-        "orchestrator_core", "coder_core", "reviewer_core",
-        "architect_core", "researcher_core", "devops_core"
-    ])
+    @pytest.mark.parametrize(
+        "agent_name",
+        [
+            "orchestrator_core",
+            "coder_core",
+            "reviewer_core",
+            "architect_core",
+            "researcher_core",
+            "devops_core",
+        ],
+    )
     def test_core_agent_in_registry(self, agent_name):
         """Core agent exists in registry."""
         assert agent_name in AGENT_REGISTRY
@@ -230,13 +250,13 @@ class TestAgentInterfaces:
     async def test_planner_has_execute(self, agent_manager):
         """Planner has execute method."""
         agent = await agent_manager.get_agent("planner")
-        assert hasattr(agent, 'execute') or hasattr(agent, 'execute_streaming')
+        assert hasattr(agent, "execute") or hasattr(agent, "execute_streaming")
 
     @pytest.mark.asyncio
     async def test_architect_has_execute(self, agent_manager):
         """Architect has execute method."""
         agent = await agent_manager.get_agent("architect")
-        assert hasattr(agent, 'execute') or hasattr(agent, 'execute_streaming')
+        assert hasattr(agent, "execute") or hasattr(agent, "execute_streaming")
 
 
 # =============================================================================

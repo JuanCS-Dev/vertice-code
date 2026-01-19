@@ -29,10 +29,10 @@ async def test_manual_scenario():
     print(f"   Success: {result.success}")
 
     if result.success:
-        stdout = result.data['stdout'].strip()
+        stdout = result.data["stdout"].strip()
         if stdout:
             print("   Arquivos encontrados:")
-            for line in stdout.split('\n'):
+            for line in stdout.split("\n"):
                 print(f"     • {line}")
         else:
             print("   ✓ Nenhum arquivo grande encontrado (>10M)")
@@ -76,7 +76,7 @@ Este comando:
     result = await bash.execute(command=suggested_command)
 
     if result.success:
-        output = result.data['stdout'].split('\n')
+        output = result.data["stdout"].split("\n")
         print("✓ Output (primeiras 3 linhas):")
         for line in output[:3]:
             if line.strip():

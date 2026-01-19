@@ -19,6 +19,7 @@ class TestPlannerAgentAPI:
         """Test planner agent can be imported."""
         try:
             from vertice_cli.agents.planner.agent import PlannerAgent
+
             assert PlannerAgent is not None
         except ImportError as e:
             pytest.fail(f"Failed to import PlannerAgent: {e}")
@@ -27,7 +28,8 @@ class TestPlannerAgentAPI:
         """Test planner module has expected structure."""
         try:
             from vertice_cli.agents import planner
-            assert hasattr(planner, 'PlannerAgent')
+
+            assert hasattr(planner, "PlannerAgent")
         except (ImportError, AttributeError) as e:
             pytest.skip(f"Planner module structure different: {e}")
 
@@ -39,6 +41,7 @@ class TestArchitectAgentAPI:
         """Test architect agent can be imported."""
         try:
             from vertice_cli.agents.architect import ArchitectAgent
+
             assert ArchitectAgent is not None
         except ImportError as e:
             pytest.skip(f"ArchitectAgent not found: {e}")
@@ -47,6 +50,7 @@ class TestArchitectAgentAPI:
         """Test architect is a class."""
         try:
             from vertice_cli.agents.architect import ArchitectAgent
+
             assert isinstance(ArchitectAgent, type)
         except ImportError:
             pytest.skip("ArchitectAgent not found")
@@ -59,6 +63,7 @@ class TestReviewerAgentAPI:
         """Test reviewer agent can be imported."""
         try:
             from vertice_cli.agents.reviewer import ReviewerAgent
+
             assert ReviewerAgent is not None
         except ImportError as e:
             pytest.skip(f"ReviewerAgent not found: {e}")
@@ -67,6 +72,7 @@ class TestReviewerAgentAPI:
         """Test reviewer is a class."""
         try:
             from vertice_cli.agents.reviewer import ReviewerAgent
+
             assert isinstance(ReviewerAgent, type)
         except ImportError:
             pytest.skip("ReviewerAgent not found")
@@ -79,6 +85,7 @@ class TestExecutorAgentAPI:
         """Test executor agent can be imported."""
         try:
             from vertice_cli.agents.executor import NextGenExecutorAgent
+
             assert NextGenExecutorAgent is not None
         except ImportError as e:
             pytest.skip(f"NextGenExecutorAgent not found: {e}")
@@ -87,6 +94,7 @@ class TestExecutorAgentAPI:
         """Test executor is a class."""
         try:
             from vertice_cli.agents.executor import NextGenExecutorAgent
+
             assert isinstance(NextGenExecutorAgent, type)
         except ImportError:
             pytest.skip("NextGenExecutorAgent not found")
@@ -99,6 +107,7 @@ class TestOtherAgents:
         """Test explorer agent can be imported."""
         try:
             from vertice_cli.agents.explorer import ExplorerAgent
+
             assert ExplorerAgent is not None
         except ImportError:
             pytest.skip("ExplorerAgent not found")
@@ -107,6 +116,7 @@ class TestOtherAgents:
         """Test security agent can be imported."""
         try:
             from vertice_cli.agents.security import SecurityAgent
+
             assert SecurityAgent is not None
         except ImportError:
             pytest.skip("SecurityAgent not found")
@@ -115,6 +125,7 @@ class TestOtherAgents:
         """Test refactor agent can be imported."""
         try:
             from vertice_cli.agents.refactor import RefactorAgent
+
             assert RefactorAgent is not None
         except ImportError:
             pytest.skip("RefactorAgent not found")
@@ -123,6 +134,7 @@ class TestOtherAgents:
         """Test documentation agent can be imported."""
         try:
             from vertice_cli.agents.documentation import DocumentationAgent
+
             assert DocumentationAgent is not None
         except ImportError:
             pytest.skip("DocumentationAgent not found")
@@ -131,6 +143,7 @@ class TestOtherAgents:
         """Test performance agent can be imported."""
         try:
             from vertice_cli.agents.performance import PerformanceAgent
+
             assert PerformanceAgent is not None
         except ImportError:
             pytest.skip("PerformanceAgent not found")
@@ -139,6 +152,7 @@ class TestOtherAgents:
         """Test devops agent can be imported."""
         try:
             from vertice_cli.agents.devops import DevOpsAgent
+
             assert DevOpsAgent is not None
         except ImportError:
             pytest.skip("DevOpsAgent not found")
@@ -151,6 +165,7 @@ class TestAgentBaseClass:
         """Test base agent can be imported."""
         try:
             from vertice_cli.agents.base import BaseAgent
+
             assert BaseAgent is not None
         except ImportError as e:
             pytest.fail(f"Failed to import BaseAgent: {e}")
@@ -159,6 +174,7 @@ class TestAgentBaseClass:
         """Test base agent is a class."""
         try:
             from vertice_cli.agents.base import BaseAgent
+
             assert isinstance(BaseAgent, type)
         except ImportError:
             pytest.fail("BaseAgent not found")

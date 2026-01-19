@@ -39,7 +39,7 @@ class GovernanceVerdict:
 class PrometheusGovernanceBridge:
     """
     Bridge for SOFIA and JUSTICA governance.
-    
+
     Implements the 'Guardian Agent' pattern from CODE_CONSTITUTION.
     """
 
@@ -49,9 +49,9 @@ class PrometheusGovernanceBridge:
             llm_client=llm_client,
             mcp_client=mcp_client,
             enforcement_mode=EnforcementMode.NORMATIVE,
-            verbose_ui=True
+            verbose_ui=True,
         )
-        
+
         # Initialize SOFIA (Wise Counselor)
         self.sofia = SofiaAgent()
         self.sofia.start()
@@ -59,37 +59,34 @@ class PrometheusGovernanceBridge:
     async def review_task(self, task: str, context: Dict[str, Any]) -> GovernanceVerdict:
         """
         Perform a pre-execution review of a task.
-        
+
         Evaluates constitutional alignment and ethical risk.
         """
         logger.info(f"[Governance] Reviewing task: {task[:50]}...")
 
         # 1. First, consult SOFIA for deliberation if task looks complex/risky
         sofia_counsel = self.sofia.respond(task, context=context)
-        
+
         if sofia_counsel.confidence < 0.4:
             return GovernanceVerdict(
                 approved=False,
                 reasoning=f"SOFIA expressed high uncertainty: {sofia_counsel.response}",
                 risk_level="HIGH",
                 governor="SOFIA",
-                suggestions="Clarify user intent or seek human approval."
+                suggestions="Clarify user intent or seek human approval.",
             )
 
         # 2. Then, get a verdict from JUSTICA
         # We adapt the task into a format JUSTICA understands
         verdict = await self.justica.evaluate_action(
-            agent_id="prometheus",
-            action_type="autonomous_execution",
-            content=task,
-            context=context
+            agent_id="prometheus", action_type="autonomous_execution", content=task, context=context
         )
 
         return GovernanceVerdict(
             approved=verdict.approved,
             reasoning=verdict.reasoning,
             risk_level="HIGH" if not verdict.approved else "LOW",
-            governor="JUSTICA"
+            governor="JUSTICA",
         )
 
     def get_governance_status(self) -> Dict[str, Any]:
@@ -98,5 +95,5 @@ class PrometheusGovernanceBridge:
             "justica_active": True,
             "sofia_active": True,
             "sofia_state": self.sofia.state.name,
-            "metrics": self.justica.get_all_metrics()
+            "metrics": self.justica.get_all_metrics(),
         }

@@ -4,12 +4,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import Mock
 
-from vertice_cli.hooks import (
-    HookExecutor,
-    HookEvent,
-    HookContext,
-    HookResult
-)
+from vertice_cli.hooks import HookExecutor, HookEvent, HookContext, HookResult
 
 
 class TestHookExecutor:
@@ -40,35 +35,24 @@ class TestHookExecutor:
         """Test variable substitution in commands."""
         executor = HookExecutor()
         ctx = HookContext(
-            file_path=Path("src/test.py"),
-            event_name="post_write",
-            project_name="myproject"
+            file_path=Path("src/test.py"), event_name="post_write", project_name="myproject"
         )
 
         command = executor._substitute_variables("black {file}", ctx)
         assert command == "black src/test.py"
 
-        command = executor._substitute_variables(
-            "pytest tests/test_{file_stem}.py", ctx
-        )
+        command = executor._substitute_variables("pytest tests/test_{file_stem}.py", ctx)
         assert command == "pytest tests/test_test.py"
 
-        command = executor._substitute_variables(
-            "echo {project_name}/{file_name}", ctx
-        )
+        command = executor._substitute_variables("echo {project_name}/{file_name}", ctx)
         assert command == "echo myproject/test.py"
 
     def test_substitute_multiple_variables(self):
         """Test substitution of multiple variables in one command."""
         executor = HookExecutor()
-        ctx = HookContext(
-            file_path=Path("src/utils/helper.py"),
-            event_name="post_edit"
-        )
+        ctx = HookContext(file_path=Path("src/utils/helper.py"), event_name="post_edit")
 
-        command = executor._substitute_variables(
-            "cp {file} {dir}/backup_{file_name}", ctx
-        )
+        command = executor._substitute_variables("cp {file} {dir}/backup_{file_name}", ctx)
         assert command == "cp src/utils/helper.py src/utils/backup_helper.py"
 
     @pytest.mark.asyncio
@@ -88,10 +72,7 @@ class TestHookExecutor:
         """Test direct execution of command that fails."""
         executor = HookExecutor()
 
-        result = await executor._execute_direct(
-            "python -c 'import sys; sys.exit(1)'",
-            Path.cwd()
-        )
+        result = await executor._execute_direct("python -c 'import sys; sys.exit(1)'", Path.cwd())
 
         assert not result.success
         assert result.exit_code == 1
@@ -103,8 +84,7 @@ class TestHookExecutor:
         executor = HookExecutor(timeout_seconds=1)
 
         result = await executor._execute_direct(
-            "python -c 'import time; time.sleep(10)'",
-            Path.cwd()
+            "python -c 'import time; time.sleep(10)'", Path.cwd()
         )
 
         assert not result.success
@@ -116,11 +96,7 @@ class TestHookExecutor:
         executor = HookExecutor()
         ctx = HookContext(Path("test.py"), "post_write")
 
-        result = await executor.execute_hook(
-            HookEvent.POST_WRITE,
-            ctx,
-            "echo {file}"
-        )
+        result = await executor.execute_hook(HookEvent.POST_WRITE, ctx, "echo {file}")
 
         assert result.success
         assert not result.executed_in_sandbox
@@ -133,11 +109,7 @@ class TestHookExecutor:
         executor = HookExecutor(enable_sandbox=False)
         ctx = HookContext(Path("test.py"), "post_write")
 
-        result = await executor.execute_hook(
-            HookEvent.POST_WRITE,
-            ctx,
-            "unknown_command {file}"
-        )
+        result = await executor.execute_hook(HookEvent.POST_WRITE, ctx, "unknown_command {file}")
 
         assert not result.success
         assert "not whitelisted" in result.error
@@ -148,23 +120,14 @@ class TestHookExecutor:
     async def test_execute_dangerous_command_sandboxed(self):
         """Test dangerous command executes in sandbox."""
         mock_sandbox = Mock()
-        mock_sandbox.execute_sandboxed = Mock(return_value={
-            'success': True,
-            'output': 'test output',
-            'exit_code': 0
-        })
-
-        executor = HookExecutor(
-            sandbox_executor=mock_sandbox,
-            enable_sandbox=True
+        mock_sandbox.execute_sandboxed = Mock(
+            return_value={"success": True, "output": "test output", "exit_code": 0}
         )
+
+        executor = HookExecutor(sandbox_executor=mock_sandbox, enable_sandbox=True)
         ctx = HookContext(Path("test.py"), "post_write")
 
-        result = await executor.execute_hook(
-            HookEvent.POST_WRITE,
-            ctx,
-            "dangerous_command {file}"
-        )
+        result = await executor.execute_hook(HookEvent.POST_WRITE, ctx, "dangerous_command {file}")
 
         assert result.success
         assert result.executed_in_sandbox
@@ -177,17 +140,9 @@ class TestHookExecutor:
         executor = HookExecutor()
         ctx = HookContext(Path("test.py"), "post_write")
 
-        hooks = [
-            "echo first",
-            "echo second",
-            "echo third"
-        ]
+        hooks = ["echo first", "echo second", "echo third"]
 
-        results = await executor.execute_hooks(
-            HookEvent.POST_WRITE,
-            ctx,
-            hooks
-        )
+        results = await executor.execute_hooks(HookEvent.POST_WRITE, ctx, hooks)
 
         assert len(results) == 3
         assert all(r.success for r in results)
@@ -199,11 +154,7 @@ class TestHookExecutor:
         executor = HookExecutor()
         ctx = HookContext(Path("test.py"), "post_write")
 
-        results = await executor.execute_hooks(
-            HookEvent.POST_WRITE,
-            ctx,
-            []
-        )
+        results = await executor.execute_hooks(HookEvent.POST_WRITE, ctx, [])
 
         assert results == []
         assert executor._execution_count == 0
@@ -214,17 +165,9 @@ class TestHookExecutor:
         executor = HookExecutor()
         ctx = HookContext(Path("test.py"), "post_write")
 
-        hooks = [
-            "echo success",
-            "python -c 'import sys; sys.exit(1)'",
-            "echo after_failure"
-        ]
+        hooks = ["echo success", "python -c 'import sys; sys.exit(1)'", "echo after_failure"]
 
-        results = await executor.execute_hooks(
-            HookEvent.POST_WRITE,
-            ctx,
-            hooks
-        )
+        results = await executor.execute_hooks(HookEvent.POST_WRITE, ctx, hooks)
 
         assert len(results) == 3
         assert results[0].success
@@ -237,11 +180,11 @@ class TestHookExecutor:
         executor = HookExecutor()
         stats = executor.get_stats()
 
-        assert stats['total_executions'] == 0
-        assert stats['direct_executions'] == 0
-        assert stats['sandboxed_executions'] == 0
-        assert stats['failed_executions'] == 0
-        assert stats['success_rate'] == 0
+        assert stats["total_executions"] == 0
+        assert stats["direct_executions"] == 0
+        assert stats["sandboxed_executions"] == 0
+        assert stats["failed_executions"] == 0
+        assert stats["success_rate"] == 0
 
     @pytest.mark.asyncio
     async def test_get_stats_after_executions(self):
@@ -252,17 +195,15 @@ class TestHookExecutor:
         await executor.execute_hook(HookEvent.POST_WRITE, ctx, "echo success")
         await executor.execute_hook(HookEvent.POST_WRITE, ctx, "echo success2")
         await executor.execute_hook(
-            HookEvent.POST_WRITE,
-            ctx,
-            "python -c 'import sys; sys.exit(1)'"
+            HookEvent.POST_WRITE, ctx, "python -c 'import sys; sys.exit(1)'"
         )
 
         stats = executor.get_stats()
 
-        assert stats['total_executions'] == 3
-        assert stats['direct_executions'] == 3
-        assert stats['failed_executions'] == 1
-        assert stats['success_rate'] == pytest.approx(66.67, rel=0.1)
+        assert stats["total_executions"] == 3
+        assert stats["direct_executions"] == 3
+        assert stats["failed_executions"] == 1
+        assert stats["success_rate"] == pytest.approx(66.67, rel=0.1)
 
     @pytest.mark.asyncio
     async def test_execution_time_recorded(self):
@@ -270,11 +211,7 @@ class TestHookExecutor:
         executor = HookExecutor()
         ctx = HookContext(Path("test.py"), "post_write")
 
-        result = await executor.execute_hook(
-            HookEvent.POST_WRITE,
-            ctx,
-            "echo test"
-        )
+        result = await executor.execute_hook(HookEvent.POST_WRITE, ctx, "echo test")
 
         assert result.execution_time_ms > 0
         assert result.execution_time_ms < 5000  # Should be fast
@@ -285,11 +222,7 @@ class TestHookExecutor:
         executor = HookExecutor(enable_sandbox=False)
         ctx = HookContext(Path("test.py"), "post_write")
 
-        result = await executor.execute_hook(
-            HookEvent.POST_WRITE,
-            ctx,
-            "nonexistent_command_xyz"
-        )
+        result = await executor.execute_hook(HookEvent.POST_WRITE, ctx, "nonexistent_command_xyz")
 
         assert not result.success
         assert result.error is not None
@@ -305,7 +238,7 @@ class TestHookResult:
             command="black test.py",
             stdout="reformatted test.py",
             exit_code=0,
-            execution_time_ms=150.5
+            execution_time_ms=150.5,
         )
 
         assert result.success
@@ -322,7 +255,7 @@ class TestHookResult:
             success=False,
             command="dangerous_command",
             error="Command not whitelisted",
-            execution_time_ms=5.0
+            execution_time_ms=5.0,
         )
 
         assert not result.success

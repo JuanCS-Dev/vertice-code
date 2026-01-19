@@ -34,7 +34,7 @@ class TestFileOperations:
 
     def test_read_valid_file(self):
         """Test reading a valid file."""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
             f.write("test content\n")
             temp_path = f.name
 
@@ -63,8 +63,8 @@ class TestFileOperations:
 
     def test_read_binary_file(self):
         """Test reading binary file fails gracefully."""
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.bin') as f:
-            f.write(b'\x00\x01\x02\x03\xff\xfe')
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as f:
+            f.write(b"\x00\x01\x02\x03\xff\xfe")
             temp_path = f.name
 
         try:
@@ -79,7 +79,7 @@ class TestFileOperations:
         """Test reading file exceeding size limit."""
         builder = ContextBuilder(max_file_size_kb=1)  # 1KB limit
 
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
             f.write("x" * 2000)  # 2KB file
             temp_path = f.name
 
@@ -92,7 +92,7 @@ class TestFileOperations:
 
     def test_add_file_success(self):
         """Test adding file successfully."""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.py') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".py") as f:
             f.write("print('hello')\n")
             temp_path = f.name
 
@@ -111,7 +111,7 @@ class TestFileOperations:
 
         files = []
         for i in range(3):
-            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:
+            with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
                 f.write(f"content {i}\n")
                 files.append(f.name)
 
@@ -132,7 +132,7 @@ class TestFileOperations:
         """Test adding multiple files at once."""
         files = []
         for i in range(3):
-            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:
+            with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
                 f.write(f"content {i}\n")
                 files.append(f.name)
 
@@ -158,7 +158,7 @@ class TestContextFormatting:
 
     def test_single_file_context(self):
         """Test context with single file."""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.py') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".py") as f:
             f.write("def hello():\n    print('world')\n")
             temp_path = f.name
 
@@ -178,7 +178,7 @@ class TestContextFormatting:
         """Test context with multiple files."""
         files = []
         for i in range(2):
-            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:
+            with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
                 f.write(f"file {i} content\n")
                 files.append(f.name)
 
@@ -195,7 +195,7 @@ class TestContextFormatting:
 
     def test_inject_to_empty_prompt(self):
         """Test injecting context to prompt."""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
             f.write("test content\n")
             temp_path = f.name
 
@@ -235,7 +235,7 @@ class TestContextStats:
         """Test stats with files added."""
         content = "line1\nline2\nline3\n"
 
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
             f.write(content)
             temp_path = f.name
 
@@ -264,7 +264,7 @@ class TestGlobalInstance:
         """Test global instance can be used independently."""
         context_builder.clear()
 
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
             f.write("global test\n")
             temp_path = f.name
 
@@ -295,7 +295,7 @@ if __name__ == "__main__":
     print(function())
 '''
 
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.py') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".py") as f:
             f.write(code)
             temp_path = f.name
 
@@ -313,14 +313,14 @@ if __name__ == "__main__":
     def test_mixed_file_types(self):
         """Test context with different file types."""
         files = [
-            ('.py', 'print("hello")\n'),
-            ('.js', 'console.log("world");\n'),
-            ('.md', '# Title\n\nContent\n'),
+            (".py", 'print("hello")\n'),
+            (".js", 'console.log("world");\n'),
+            (".md", "# Title\n\nContent\n"),
         ]
 
         temp_files = []
         for ext, content in files:
-            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=ext) as f:
+            with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=ext) as f:
                 f.write(content)
                 temp_files.append(f.name)
 
@@ -339,7 +339,7 @@ if __name__ == "__main__":
 
     def test_workflow_add_inject_clear(self):
         """Test typical workflow: add files, inject, clear."""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
             f.write("context data\n")
             temp_path = f.name
 

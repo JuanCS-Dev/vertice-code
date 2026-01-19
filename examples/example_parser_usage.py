@@ -20,11 +20,11 @@ async def main():
 
     # Create parser with retry enabled
     parser = ResponseParser(
-        strict_mode=False,       # Enable fallback strategies
-        enable_retry=True,       # Enable secondary LLM pass
-        max_retries=2,          # Max 2 retry attempts
-        enable_logging=True,     # Log responses for debugging
-        sanitize_args=True      # Enable security sanitization
+        strict_mode=False,  # Enable fallback strategies
+        enable_retry=True,  # Enable secondary LLM pass
+        max_retries=2,  # Max 2 retry attempts
+        enable_logging=True,  # Log responses for debugging
+        sanitize_args=True,  # Enable security sanitization
     )
 
     # Define retry callback for secondary LLM pass (sync version for demo)
@@ -146,11 +146,8 @@ These commands will list files and show current directory.
             "name": "read_file",
             "parameters": {
                 "required": ["path"],
-                "properties": {
-                    "path": {"type": "string"},
-                    "encoding": {"type": "string"}
-                }
-            }
+                "properties": {"path": {"type": "string"}, "encoding": {"type": "string"}},
+            },
         }
     ]
 
@@ -182,8 +179,8 @@ These commands will list files and show current directory.
     print(f"Retries: {stats['retries']}")
     print(f"Security Blocks: {stats['security_blocks']}")
 
-    if stats['total'] > 0:
-        success_rate = (stats['total'] - stats['failures']) / stats['total'] * 100
+    if stats["total"] > 0:
+        success_rate = (stats["total"] - stats["failures"]) / stats["total"] * 100
         print(f"\nSuccess Rate: {success_rate:.1f}%")
 
     print("\n✅ Demonstration complete!")

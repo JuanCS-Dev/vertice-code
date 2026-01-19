@@ -24,6 +24,7 @@ import pytest
 # Test Data / Fixtures
 # =============================================================================
 
+
 @pytest.fixture
 def sample_tool_schema() -> Dict[str, Any]:
     """Sample tool schema matching Tool.get_schema() format."""
@@ -33,13 +34,10 @@ def sample_tool_schema() -> Dict[str, Any]:
         "parameters": {
             "type": "object",
             "properties": {
-                "path": {
-                    "type": "string",
-                    "description": "File path relative to current directory"
-                }
+                "path": {"type": "string", "description": "File path relative to current directory"}
             },
-            "required": ["path"]
-        }
+            "required": ["path"],
+        },
     }
 
 
@@ -52,11 +50,9 @@ def multiple_tool_schemas() -> List[Dict[str, Any]]:
             "description": "Read file contents",
             "parameters": {
                 "type": "object",
-                "properties": {
-                    "path": {"type": "string", "description": "File path"}
-                },
-                "required": ["path"]
-            }
+                "properties": {"path": {"type": "string", "description": "File path"}},
+                "required": ["path"],
+            },
         },
         {
             "name": "write_file",
@@ -65,34 +61,27 @@ def multiple_tool_schemas() -> List[Dict[str, Any]]:
                 "type": "object",
                 "properties": {
                     "path": {"type": "string", "description": "File path"},
-                    "content": {"type": "string", "description": "Content to write"}
+                    "content": {"type": "string", "description": "Content to write"},
                 },
-                "required": ["path", "content"]
-            }
+                "required": ["path", "content"],
+            },
         },
         {
             "name": "list_directory",
             "description": "List directory contents",
             "parameters": {
                 "type": "object",
-                "properties": {
-                    "path": {"type": "string", "description": "Directory path"}
-                },
-                "required": ["path"]
-            }
-        }
+                "properties": {"path": {"type": "string", "description": "Directory path"}},
+                "required": ["path"],
+            },
+        },
     ]
 
 
 @pytest.fixture
 def mock_function_call_response() -> Dict[str, Any]:
     """Mock response with function call from Vertex AI."""
-    return {
-        "tool_call": {
-            "name": "read_file",
-            "arguments": {"path": "README.md"}
-        }
-    }
+    return {"tool_call": {"name": "read_file", "arguments": {"path": "README.md"}}}
 
 
 @pytest.fixture
@@ -100,13 +89,14 @@ def sample_messages() -> List[Dict[str, str]]:
     """Sample chat messages."""
     return [
         {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Read the README.md file"}
+        {"role": "user", "content": "Read the README.md file"},
     ]
 
 
 # =============================================================================
 # Test: _convert_tools()
 # =============================================================================
+
 
 class TestConvertTools:
     """Test _convert_tools() method."""
@@ -125,26 +115,25 @@ class TestConvertTools:
         result = provider._convert_tools([])
         assert result is None
 
-    @patch('vertice_cli.core.providers.vertex_ai.VertexAIProvider._ensure_client')
+    @patch("vertice_cli.core.providers.vertex_ai.VertexAIProvider._ensure_client")
     def test_convert_tools_from_schema_dict(
-        self,
-        mock_ensure: MagicMock,
-        sample_tool_schema: Dict[str, Any]
+        self, mock_ensure: MagicMock, sample_tool_schema: Dict[str, Any]
     ) -> None:
         """HYPOTHESIS: Converts dict schema to FunctionDeclaration."""
         # Mock Vertex AI SDK
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
             # Create mock FunctionDeclaration and Tool
             mock_func_decl = MagicMock()
             mock_tool = MagicMock()
 
-            with patch('vertexai.generative_models.FunctionDeclaration', return_value=mock_func_decl) as MockFD:
-                with patch('vertexai.generative_models.Tool', return_value=mock_tool) as MockTool:
+            with patch(
+                "vertexai.generative_models.FunctionDeclaration", return_value=mock_func_decl
+            ) as MockFD:
+                with patch("vertexai.generative_models.Tool", return_value=mock_tool) as MockTool:
                     provider = VertexAIProvider()
                     result = provider._convert_tools([sample_tool_schema])
 
@@ -152,7 +141,7 @@ class TestConvertTools:
                     MockFD.assert_called_once_with(
                         name="read_file",
                         description="Read complete contents of a file",
-                        parameters=sample_tool_schema["parameters"]
+                        parameters=sample_tool_schema["parameters"],
                     )
 
                     # Verify Tool was created with declarations
@@ -162,26 +151,25 @@ class TestConvertTools:
                     assert result is not None
                     assert len(result) == 1
 
-    @patch('vertice_cli.core.providers.vertex_ai.VertexAIProvider._ensure_client')
+    @patch("vertice_cli.core.providers.vertex_ai.VertexAIProvider._ensure_client")
     def test_convert_tools_multiple_tools(
-        self,
-        mock_ensure: MagicMock,
-        multiple_tool_schemas: List[Dict[str, Any]]
+        self, mock_ensure: MagicMock, multiple_tool_schemas: List[Dict[str, Any]]
     ) -> None:
         """HYPOTHESIS: Converts multiple tools into single Tool object."""
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
             mock_func_decl = MagicMock()
             mock_tool = MagicMock()
 
-            with patch('vertexai.generative_models.FunctionDeclaration', return_value=mock_func_decl) as MockFD:
-                with patch('vertexai.generative_models.Tool', return_value=mock_tool) as MockTool:
+            with patch(
+                "vertexai.generative_models.FunctionDeclaration", return_value=mock_func_decl
+            ) as MockFD:
+                with patch("vertexai.generative_models.Tool", return_value=mock_tool) as MockTool:
                     provider = VertexAIProvider()
-                    result = provider._convert_tools(multiple_tool_schemas)
+                    provider._convert_tools(multiple_tool_schemas)
 
                     # FunctionDeclaration should be called 3 times
                     assert MockFD.call_count == 3
@@ -195,19 +183,20 @@ class TestConvertTools:
         mock_tool_obj = MagicMock()
         mock_tool_obj.get_schema.return_value = sample_tool_schema
 
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
             mock_func_decl = MagicMock()
             mock_tool = MagicMock()
 
-            with patch('vertexai.generative_models.FunctionDeclaration', return_value=mock_func_decl) as MockFD:
-                with patch('vertexai.generative_models.Tool', return_value=mock_tool):
+            with patch(
+                "vertexai.generative_models.FunctionDeclaration", return_value=mock_func_decl
+            ) as MockFD:
+                with patch("vertexai.generative_models.Tool", return_value=mock_tool):
                     provider = VertexAIProvider()
-                    result = provider._convert_tools([mock_tool_obj])
+                    provider._convert_tools([mock_tool_obj])
 
                     # get_schema should be called
                     mock_tool_obj.get_schema.assert_called_once()
@@ -216,7 +205,7 @@ class TestConvertTools:
                     MockFD.assert_called_once_with(
                         name="read_file",
                         description="Read complete contents of a file",
-                        parameters=sample_tool_schema["parameters"]
+                        parameters=sample_tool_schema["parameters"],
                     )
 
 
@@ -224,20 +213,18 @@ class TestConvertTools:
 # Test: stream_chat() with tools
 # =============================================================================
 
+
 class TestStreamChatWithTools:
     """Test stream_chat() with native function calling."""
 
     @pytest.mark.asyncio
     async def test_stream_chat_passes_tools_to_model(
-        self,
-        sample_messages: List[Dict[str, str]],
-        sample_tool_schema: Dict[str, Any]
+        self, sample_messages: List[Dict[str, str]], sample_tool_schema: Dict[str, Any]
     ) -> None:
         """HYPOTHESIS: tools parameter is passed to GenerativeModel."""
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
@@ -248,12 +235,13 @@ class TestStreamChatWithTools:
             mock_response.__iter__ = lambda self: iter([])
             mock_model.generate_content.return_value = mock_response
 
-            with patch('vertexai.generative_models.GenerativeModel', return_value=mock_model):
-                with patch.object(provider, '_convert_tools', return_value=[MagicMock()]) as mock_convert:
+            with patch("vertexai.generative_models.GenerativeModel", return_value=mock_model):
+                with patch.object(
+                    provider, "_convert_tools", return_value=[MagicMock()]
+                ) as mock_convert:
                     chunks = []
                     async for chunk in provider.stream_chat(
-                        sample_messages,
-                        tools=[sample_tool_schema]
+                        sample_messages, tools=[sample_tool_schema]
                     ):
                         chunks.append(chunk)
 
@@ -262,15 +250,12 @@ class TestStreamChatWithTools:
 
     @pytest.mark.asyncio
     async def test_stream_chat_sets_tool_config_auto(
-        self,
-        sample_messages: List[Dict[str, str]],
-        sample_tool_schema: Dict[str, Any]
+        self, sample_messages: List[Dict[str, str]], sample_tool_schema: Dict[str, Any]
     ) -> None:
         """HYPOTHESIS: ToolConfig is set to AUTO mode when tools provided."""
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
@@ -283,23 +268,25 @@ class TestStreamChatWithTools:
 
             mock_tool_config = MagicMock()
 
-            with patch('vertexai.generative_models.GenerativeModel', return_value=mock_model) as MockModel:
-                with patch('vertexai.generative_models.ToolConfig', return_value=mock_tool_config) as MockToolConfig:
-                    with patch.object(provider, '_convert_tools', return_value=[MagicMock()]):
+            with patch(
+                "vertexai.generative_models.GenerativeModel", return_value=mock_model
+            ) as MockModel:
+                with patch("vertexai.generative_models.ToolConfig", return_value=mock_tool_config):
+                    with patch.object(provider, "_convert_tools", return_value=[MagicMock()]):
                         async for _ in provider.stream_chat(
-                            sample_messages,
-                            tools=[sample_tool_schema]
+                            sample_messages, tools=[sample_tool_schema]
                         ):
                             pass
 
                         # GenerativeModel should be created with tool_config
                         call_kwargs = MockModel.call_args.kwargs
-                        assert 'tool_config' in call_kwargs or 'tools' in call_kwargs
+                        assert "tool_config" in call_kwargs or "tools" in call_kwargs
 
 
 # =============================================================================
 # Test: Function call response parsing
 # =============================================================================
+
 
 class TestFunctionCallResponseParsing:
     """Test parsing function call responses from Vertex AI."""
@@ -307,10 +294,9 @@ class TestFunctionCallResponseParsing:
     @pytest.mark.asyncio
     async def test_yields_function_call_json_when_present(self) -> None:
         """HYPOTHESIS: Function calls are yielded as JSON."""
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
@@ -339,13 +325,13 @@ class TestFunctionCallResponseParsing:
             mock_response.__iter__ = lambda self: iter([mock_chunk])
             mock_model.generate_content.return_value = mock_response
 
-            with patch('vertexai.generative_models.GenerativeModel', return_value=mock_model):
-                with patch('vertexai.generative_models.Content'):
-                    with patch('vertexai.generative_models.Part'):
+            with patch("vertexai.generative_models.GenerativeModel", return_value=mock_model):
+                with patch("vertexai.generative_models.Content"):
+                    with patch("vertexai.generative_models.Part"):
                         chunks = []
                         async for chunk in provider.stream_chat(
                             [{"role": "user", "content": "Read README"}],
-                            tools=[{"name": "read_file", "description": "Read", "parameters": {}}]
+                            tools=[{"name": "read_file", "description": "Read", "parameters": {}}],
                         ):
                             chunks.append(chunk)
 
@@ -363,6 +349,7 @@ class TestFunctionCallResponseParsing:
 # Test: Fallback to text parsing
 # =============================================================================
 
+
 class TestFallbackToTextParsing:
     """Test fallback to regex-based text parsing."""
 
@@ -373,15 +360,10 @@ class TestFallbackToTextParsing:
 
         native_response = {
             "content": "I'll read the file for you.",
-            "tool_calls": [
-                {"name": "read_file", "args": {"path": "README.md"}}
-            ]
+            "tool_calls": [{"name": "read_file", "args": {"path": "README.md"}}],
         }
 
         # Expected parsed format
-        expected = [
-            {"tool": "read_file", "args": {"path": "README.md"}}
-        ]
 
         # This will fail until implementation is done (TDD)
         # The handler should detect dict response and extract tool_calls
@@ -390,17 +372,17 @@ class TestFallbackToTextParsing:
 
     def test_parse_tool_calls_from_text_fallback(self) -> None:
         """HYPOTHESIS: Text response falls back to regex parsing."""
-        text_response = '''I'll read that file for you.
+        text_response = """I'll read that file for you.
 
-[{"tool": "read_file", "args": {"path": "README.md"}}]'''
+[{"tool": "read_file", "args": {"path": "README.md"}}]"""
 
         # This tests backward compatibility with text-based parsing
         # Should extract the JSON array from text
 
         # Simple extraction logic (what the fallback should do)
-        if '[' in text_response and ']' in text_response:
-            start = text_response.index('[')
-            end = text_response.rindex(']') + 1
+        if "[" in text_response and "]" in text_response:
+            start = text_response.index("[")
+            end = text_response.rindex("]") + 1
             json_str = text_response[start:end]
             result = json.loads(json_str)
 
@@ -415,9 +397,9 @@ class TestFallbackToTextParsing:
         # Should return None, not raise exception
         result = None
         try:
-            if '[' in malformed_response:
-                start = malformed_response.index('[')
-                end = malformed_response.rindex(']') + 1
+            if "[" in malformed_response:
+                start = malformed_response.index("[")
+                end = malformed_response.rindex("]") + 1
                 json_str = malformed_response[start:end]
                 result = json.loads(json_str)
         except (json.JSONDecodeError, ValueError):
@@ -429,6 +411,7 @@ class TestFallbackToTextParsing:
 # =============================================================================
 # Integration Test (requires actual SDK - skip in CI)
 # =============================================================================
+
 
 @pytest.mark.skip(reason="Requires Vertex AI credentials - run manually")
 class TestVertexFunctionCallingIntegration:
@@ -444,24 +427,19 @@ class TestVertexFunctionCallingIntegration:
         if not provider.is_available():
             pytest.skip("Vertex AI not available")
 
-        tools = [{
-            "name": "get_weather",
-            "description": "Get the current weather for a location",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "location": {
-                        "type": "string",
-                        "description": "City name"
-                    }
+        tools = [
+            {
+                "name": "get_weather",
+                "description": "Get the current weather for a location",
+                "parameters": {
+                    "type": "object",
+                    "properties": {"location": {"type": "string", "description": "City name"}},
+                    "required": ["location"],
                 },
-                "required": ["location"]
             }
-        }]
-
-        messages = [
-            {"role": "user", "content": "What's the weather in Boston?"}
         ]
+
+        messages = [{"role": "user", "content": "What's the weather in Boston?"}]
 
         chunks = []
         async for chunk in provider.stream_chat(messages, tools=tools):

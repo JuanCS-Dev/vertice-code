@@ -337,7 +337,7 @@ class TestPrometheusSkillsProvider:
         """Test invoking skill with prometheus: prefix."""
         skills_registry.invoke_skill = AsyncMock(return_value={"success": True})
 
-        result = await skills_provider.invoke_skill("prometheus:test_skill")
+        await skills_provider.invoke_skill("prometheus:test_skill")
 
         skills_registry.invoke_skill.assert_called_once_with("test_skill", {})
 

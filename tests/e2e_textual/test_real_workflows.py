@@ -21,7 +21,7 @@ class TestFileOperations:
             name="write_and_read_file",
             status="passed",
             duration=0.0,
-            metadata={"tools": ["WriteFileTool", "ReadFileTool"]}
+            metadata={"tools": ["WriteFileTool", "ReadFileTool"]},
         )
 
         try:
@@ -43,8 +43,7 @@ if __name__ == "__main__":
             test_file = temp_project / "test_module.py"
 
             write_result = await write_tool._execute_validated(
-                path=str(test_file),
-                content=test_content
+                path=str(test_file), content=test_content
             )
             assert write_result.success, f"Write failed: {write_result.error}"
             result.logs.append("✓ File written successfully")
@@ -82,7 +81,7 @@ if __name__ == "__main__":
             name="edit_file",
             status="passed",
             duration=0.0,
-            metadata={"tools": ["WriteFileTool", "EditFileTool", "ReadFileTool"]}
+            metadata={"tools": ["WriteFileTool", "EditFileTool", "ReadFileTool"]},
         )
 
         try:
@@ -93,9 +92,9 @@ if __name__ == "__main__":
             read_tool = ReadFileTool()
 
             # Create initial file
-            initial_content = '''def calculate(a, b):
+            initial_content = """def calculate(a, b):
     return a + b
-'''
+"""
             test_file = temp_project / "calc.py"
             await write_tool._execute_validated(path=str(test_file), content=initial_content)
             result.logs.append("✓ Created initial file")
@@ -103,12 +102,14 @@ if __name__ == "__main__":
             # Edit it to add type hints
             edit_result = await edit_tool._execute_validated(
                 path=str(test_file),
-                edits=[{
-                    "search": "def calculate(a, b):",
-                    "replace": "def calculate(a: int, b: int) -> int:"
-                }],
+                edits=[
+                    {
+                        "search": "def calculate(a, b):",
+                        "replace": "def calculate(a: int, b: int) -> int:",
+                    }
+                ],
                 preview=False,
-                create_backup=False
+                create_backup=False,
             )
             assert edit_result.success, f"Edit failed: {edit_result.error}"
             result.logs.append("✓ File edited successfully")
@@ -143,7 +144,7 @@ class TestSearchOperations:
             name="search_in_files",
             status="passed",
             duration=0.0,
-            metadata={"tools": ["SearchFilesTool"]}
+            metadata={"tools": ["SearchFilesTool"]},
         )
 
         try:
@@ -153,10 +154,7 @@ class TestSearchOperations:
 
             # Search for function definitions
             search_result = await search_tool._execute_validated(
-                pattern="def ",
-                path=str(sample_python_project),
-                file_pattern="*.py",
-                max_results=20
+                pattern="def ", path=str(sample_python_project), file_pattern="*.py", max_results=20
             )
             assert search_result.success, f"Search failed: {search_result.error}"
 
@@ -171,7 +169,9 @@ class TestSearchOperations:
                 assert "file" in first_match
                 assert "line" in first_match
                 assert "text" in first_match
-                result.logs.append(f"✓ First match: {Path(first_match['file']).name}:{first_match['line']}")
+                result.logs.append(
+                    f"✓ First match: {Path(first_match['file']).name}:{first_match['line']}"
+                )
 
             result.metadata["matches_found"] = len(matches)
 
@@ -193,7 +193,7 @@ class TestSearchOperations:
             name="search_for_bugs",
             status="passed",
             duration=0.0,
-            metadata={"tools": ["SearchFilesTool"]}
+            metadata={"tools": ["SearchFilesTool"]},
         )
 
         try:
@@ -203,9 +203,7 @@ class TestSearchOperations:
 
             # Search for BUG markers
             search_result = await search_tool._execute_validated(
-                pattern="BUG",
-                path=str(sample_python_project),
-                file_pattern="*.py"
+                pattern="BUG", path=str(sample_python_project), file_pattern="*.py"
             )
             assert search_result.success
 
@@ -213,7 +211,9 @@ class TestSearchOperations:
             result.logs.append(f"✓ Found {len(matches)} BUG markers")
 
             for match in matches[:3]:
-                result.logs.append(f"  - {Path(match['file']).name}:{match['line']}: {match['text'][:50]}...")
+                result.logs.append(
+                    f"  - {Path(match['file']).name}:{match['line']}: {match['text'][:50]}..."
+                )
 
             result.metadata["bugs_found"] = len(matches)
 
@@ -239,7 +239,7 @@ class TestProjectCreation:
             name="create_python_module",
             status="passed",
             duration=0.0,
-            metadata={"project_type": "python_module"}
+            metadata={"project_type": "python_module"},
         )
 
         try:
@@ -299,7 +299,7 @@ def test_validate_success():
 def test_validate_missing_field():
     assert not validate({"name": "test"})
 ''',
-                "README.md": '''# MyPackage
+                "README.md": """# MyPackage
 
 A test package created by E2E tests.
 
@@ -317,8 +317,8 @@ from mypackage import process, validate
 items = process([1, None, 2])
 is_valid = validate({"name": "test", "value": 123})
 ```
-''',
-                "pyproject.toml": '''[build-system]
+""",
+                "pyproject.toml": """[build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
@@ -326,15 +326,14 @@ build-backend = "setuptools.build_meta"
 name = "mypackage"
 version = "0.1.0"
 requires-python = ">=3.9"
-'''
+""",
             }
 
             (temp_project / "tests").mkdir(exist_ok=True)
 
             for path, content in files_to_create.items():
                 write_result = await write_tool._execute_validated(
-                    path=str(temp_project / path),
-                    content=content
+                    path=str(temp_project / path), content=content
                 )
                 assert write_result.success, f"Failed to create {path}: {write_result.error}"
                 result.logs.append(f"✓ Created {path}")
@@ -360,10 +359,7 @@ class TestGitOperations:
         """Test getting git status."""
         start_time = time.time()
         result = TestResult(
-            name="git_status",
-            status="passed",
-            duration=0.0,
-            metadata={"tools": ["GitStatusTool"]}
+            name="git_status", status="passed", duration=0.0, metadata={"tools": ["GitStatusTool"]}
         )
 
         try:
@@ -411,7 +407,7 @@ class TestPlanMode:
             name="plan_mode_cycle",
             status="passed",
             duration=0.0,
-            metadata={"tools": ["EnterPlanModeTool", "ExitPlanModeTool"]}
+            metadata={"tools": ["EnterPlanModeTool", "ExitPlanModeTool"]},
         )
 
         try:
@@ -419,7 +415,7 @@ class TestPlanMode:
                 EnterPlanModeTool,
                 ExitPlanModeTool,
                 get_plan_state,
-                reset_plan_state
+                reset_plan_state,
             )
 
             reset_plan_state()
@@ -430,8 +426,7 @@ class TestPlanMode:
             # Enter plan mode
             plan_file = temp_project / ".vertice" / "plans" / "e2e_plan.md"
             enter_result = await enter_tool._execute_validated(
-                task_description="E2E Test Planning",
-                plan_file=str(plan_file)
+                task_description="E2E Test Planning", plan_file=str(plan_file)
             )
 
             assert enter_result.success, f"Enter failed: {enter_result.error}"
@@ -439,7 +434,8 @@ class TestPlanMode:
             result.logs.append("✓ Entered plan mode")
 
             # Write some plan content
-            plan_file.write_text("""# E2E Test Plan
+            plan_file.write_text(
+                """# E2E Test Plan
 
 ## Objective
 Test the planning mode functionality.
@@ -451,13 +447,12 @@ Test the planning mode functionality.
 
 ## Notes
 This is an automated test.
-""")
+"""
+            )
             result.logs.append("✓ Plan content written")
 
             # Exit plan mode
-            exit_result = await exit_tool._execute_validated(
-                summary="E2E test planning complete"
-            )
+            exit_result = await exit_tool._execute_validated(summary="E2E test planning complete")
 
             assert exit_result.success, f"Exit failed: {exit_result.error}"
             result.logs.append("✓ Exited plan mode")
@@ -486,7 +481,7 @@ class TestCombinedWorkflow:
             name="search_and_fix_workflow",
             status="passed",
             duration=0.0,
-            metadata={"workflow": "search_fix", "tools": 3}
+            metadata={"workflow": "search_fix", "tools": 3},
         )
 
         try:
@@ -501,9 +496,7 @@ class TestCombinedWorkflow:
             result.logs.append("Step 1: Searching for issues...")
 
             search_result = await search_tool._execute_validated(
-                pattern="# BUG",
-                path=str(sample_python_project),
-                file_pattern="*.py"
+                pattern="# BUG", path=str(sample_python_project), file_pattern="*.py"
             )
 
             if search_result.success and search_result.data:
@@ -526,12 +519,14 @@ class TestCombinedWorkflow:
 
                             edit_result = await edit_tool._execute_validated(
                                 path=first_file,
-                                edits=[{
-                                    "search": "a / b  # BUG: no zero check",
-                                    "replace": "a / b if b != 0 else 0  # FIXED"
-                                }],
+                                edits=[
+                                    {
+                                        "search": "a / b  # BUG: no zero check",
+                                        "replace": "a / b if b != 0 else 0  # FIXED",
+                                    }
+                                ],
                                 preview=False,
-                                create_backup=False
+                                create_backup=False,
                             )
 
                             if edit_result.success:
@@ -544,7 +539,9 @@ class TestCombinedWorkflow:
                 result.logs.append("  No issues found (clean code!)")
                 result.metadata["fixed"] = False
 
-            result.metadata["issues_found"] = len(search_result.data.get("matches", [])) if search_result.data else 0
+            result.metadata["issues_found"] = (
+                len(search_result.data.get("matches", [])) if search_result.data else 0
+            )
 
         except Exception as e:
             result.status = "failed"

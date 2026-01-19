@@ -146,7 +146,7 @@ class GitHubIntegrationTester:
             from app.api.v1.webhooks import GitHubPushPayload, GitHubPRPayload
 
             # Validate payload structure
-            push_data = GitHubPushPayload(**webhook_payload)
+            GitHubPushPayload(**webhook_payload)
             self.test_result("Webhook Payload Validation", True, "Push payload validated")
 
             # Test PR payload structure
@@ -167,7 +167,7 @@ class GitHubIntegrationTester:
                 "sender": webhook_payload["pusher"],
             }
 
-            pr_data = GitHubPRPayload(**pr_payload)
+            GitHubPRPayload(**pr_payload)
             self.test_result("PR Payload Validation", True, "PR payload validated")
 
         except Exception as e:

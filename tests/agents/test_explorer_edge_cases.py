@@ -34,12 +34,16 @@ class TestExplorerTokenBudgetEdgeCases:
         """Test Explorer at exactly 10K token budget limit."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "relevant_files": [{"path": f"f{i}.py", "relevance": "MEDIUM"} for i in range(50)],
-                "dependencies": [],
-                "context_summary": "Exactly at budget",
-                "token_estimate": 10000,
-            })
+            return_value=json.dumps(
+                {
+                    "relevant_files": [
+                        {"path": f"f{i}.py", "relevance": "MEDIUM"} for i in range(50)
+                    ],
+                    "dependencies": [],
+                    "context_summary": "Exactly at budget",
+                    "token_estimate": 10000,
+                }
+            )
         )
 
         explorer = ExplorerAgent(llm_client, MagicMock())
@@ -55,12 +59,14 @@ class TestExplorerTokenBudgetEdgeCases:
         """Test Explorer just over 10K token budget."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "relevant_files": [{"path": f"f{i}.py", "relevance": "LOW"} for i in range(51)],
-                "dependencies": [],
-                "context_summary": "Over budget",
-                "token_estimate": 10001,
-            })
+            return_value=json.dumps(
+                {
+                    "relevant_files": [{"path": f"f{i}.py", "relevance": "LOW"} for i in range(51)],
+                    "dependencies": [],
+                    "context_summary": "Over budget",
+                    "token_estimate": 10001,
+                }
+            )
         )
 
         explorer = ExplorerAgent(llm_client, MagicMock())
@@ -75,15 +81,17 @@ class TestExplorerTokenBudgetEdgeCases:
         """Test Explorer when LLM doesn't provide token estimate."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "relevant_files": [
-                    {"path": "a.py", "relevance": "HIGH"},
-                    {"path": "b.py", "relevance": "HIGH"},
-                ],
-                "dependencies": [],
-                "context_summary": "Test",
-                "token_estimate": 0,  # Zero provided
-            })
+            return_value=json.dumps(
+                {
+                    "relevant_files": [
+                        {"path": "a.py", "relevance": "HIGH"},
+                        {"path": "b.py", "relevance": "HIGH"},
+                    ],
+                    "dependencies": [],
+                    "context_summary": "Test",
+                    "token_estimate": 0,  # Zero provided
+                }
+            )
         )
 
         explorer = ExplorerAgent(llm_client, MagicMock())
@@ -99,12 +107,14 @@ class TestExplorerTokenBudgetEdgeCases:
         """Test Explorer with unrealistic token estimate."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "relevant_files": [{"path": "huge.py", "relevance": "HIGH"}],
-                "dependencies": [],
-                "context_summary": "One huge file",
-                "token_estimate": 1000000,  # 1M tokens
-            })
+            return_value=json.dumps(
+                {
+                    "relevant_files": [{"path": "huge.py", "relevance": "HIGH"}],
+                    "dependencies": [],
+                    "context_summary": "One huge file",
+                    "token_estimate": 1000000,  # 1M tokens
+                }
+            )
         )
 
         explorer = ExplorerAgent(llm_client, MagicMock())
@@ -123,14 +133,16 @@ class TestExplorerFileLimitEdgeCases:
         """Test Explorer with max_files=1."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "relevant_files": [
-                    {"path": "a.py", "relevance": "HIGH"},
-                    {"path": "b.py", "relevance": "MEDIUM"},
-                ],
-                "dependencies": [],
-                "context_summary": "Multiple files returned",
-            })
+            return_value=json.dumps(
+                {
+                    "relevant_files": [
+                        {"path": "a.py", "relevance": "HIGH"},
+                        {"path": "b.py", "relevance": "MEDIUM"},
+                    ],
+                    "dependencies": [],
+                    "context_summary": "Multiple files returned",
+                }
+            )
         )
 
         explorer = ExplorerAgent(llm_client, MagicMock())
@@ -145,11 +157,15 @@ class TestExplorerFileLimitEdgeCases:
         """Test Explorer with large max_files limit."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "relevant_files": [{"path": f"file{i}.py", "relevance": "LOW"} for i in range(150)],
-                "dependencies": [],
-                "context_summary": "Many files",
-            })
+            return_value=json.dumps(
+                {
+                    "relevant_files": [
+                        {"path": f"file{i}.py", "relevance": "LOW"} for i in range(150)
+                    ],
+                    "dependencies": [],
+                    "context_summary": "Many files",
+                }
+            )
         )
 
         explorer = ExplorerAgent(llm_client, MagicMock())
@@ -164,11 +180,13 @@ class TestExplorerFileLimitEdgeCases:
         """Test Explorer when LLM returns zero files."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "relevant_files": [],  # Empty list
-                "dependencies": [],
-                "context_summary": "No relevant files found",
-            })
+            return_value=json.dumps(
+                {
+                    "relevant_files": [],  # Empty list
+                    "dependencies": [],
+                    "context_summary": "No relevant files found",
+                }
+            )
         )
 
         explorer = ExplorerAgent(llm_client, MagicMock())
@@ -188,41 +206,43 @@ class TestExplorerRealWorldScenarios:
         """Test realistic scenario: finding authentication code."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "relevant_files": [
-                    {
-                        "path": "src/auth/jwt_handler.py",
-                        "relevance": "HIGH",
-                        "reason": "Core JWT token handling",
-                        "key_symbols": ["create_token", "verify_token", "decode_token"],
-                        "line_range": [1, 200],
-                    },
-                    {
-                        "path": "src/auth/middleware.py",
-                        "relevance": "HIGH",
-                        "reason": "Authentication middleware",
-                        "key_symbols": ["auth_required", "check_permissions"],
-                    },
-                    {
-                        "path": "src/models/user.py",
-                        "relevance": "MEDIUM",
-                        "reason": "User model with authentication fields",
-                        "key_symbols": ["User", "password_hash", "last_login"],
-                    },
-                    {
-                        "path": "tests/test_auth.py",
-                        "relevance": "MEDIUM",
-                        "reason": "Authentication tests",
-                        "key_symbols": ["test_login", "test_token_validation"],
-                    },
-                ],
-                "dependencies": [
-                    {"from": "middleware.py", "to": "jwt_handler.py", "type": "imports"},
-                    {"from": "jwt_handler.py", "to": "user.py", "type": "uses"},
-                ],
-                "context_summary": "Found 4 auth-related files covering JWT, middleware, models, and tests",
-                "token_estimate": 3500,
-            })
+            return_value=json.dumps(
+                {
+                    "relevant_files": [
+                        {
+                            "path": "src/auth/jwt_handler.py",
+                            "relevance": "HIGH",
+                            "reason": "Core JWT token handling",
+                            "key_symbols": ["create_token", "verify_token", "decode_token"],
+                            "line_range": [1, 200],
+                        },
+                        {
+                            "path": "src/auth/middleware.py",
+                            "relevance": "HIGH",
+                            "reason": "Authentication middleware",
+                            "key_symbols": ["auth_required", "check_permissions"],
+                        },
+                        {
+                            "path": "src/models/user.py",
+                            "relevance": "MEDIUM",
+                            "reason": "User model with authentication fields",
+                            "key_symbols": ["User", "password_hash", "last_login"],
+                        },
+                        {
+                            "path": "tests/test_auth.py",
+                            "relevance": "MEDIUM",
+                            "reason": "Authentication tests",
+                            "key_symbols": ["test_login", "test_token_validation"],
+                        },
+                    ],
+                    "dependencies": [
+                        {"from": "middleware.py", "to": "jwt_handler.py", "type": "imports"},
+                        {"from": "jwt_handler.py", "to": "user.py", "type": "uses"},
+                    ],
+                    "context_summary": "Found 4 auth-related files covering JWT, middleware, models, and tests",
+                    "token_estimate": 3500,
+                }
+            )
         )
 
         explorer = ExplorerAgent(llm_client, MagicMock())
@@ -243,28 +263,30 @@ class TestExplorerRealWorldScenarios:
         """Test realistic scenario: finding database migrations."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "relevant_files": [
-                    {
-                        "path": "migrations/001_create_users_table.sql",
-                        "relevance": "HIGH",
-                        "reason": "Initial users table creation",
-                    },
-                    {
-                        "path": "migrations/002_add_email_column.sql",
-                        "relevance": "HIGH",
-                        "reason": "Adds email column",
-                    },
-                    {
-                        "path": "migrations/003_create_index_email.sql",
-                        "relevance": "MEDIUM",
-                        "reason": "Performance index on email",
-                    },
-                ],
-                "dependencies": [],
-                "context_summary": "Found 3 sequential migrations affecting users table",
-                "token_estimate": 2000,
-            })
+            return_value=json.dumps(
+                {
+                    "relevant_files": [
+                        {
+                            "path": "migrations/001_create_users_table.sql",
+                            "relevance": "HIGH",
+                            "reason": "Initial users table creation",
+                        },
+                        {
+                            "path": "migrations/002_add_email_column.sql",
+                            "relevance": "HIGH",
+                            "reason": "Adds email column",
+                        },
+                        {
+                            "path": "migrations/003_create_index_email.sql",
+                            "relevance": "MEDIUM",
+                            "reason": "Performance index on email",
+                        },
+                    ],
+                    "dependencies": [],
+                    "context_summary": "Found 3 sequential migrations affecting users table",
+                    "token_estimate": 2000,
+                }
+            )
         )
 
         explorer = ExplorerAgent(llm_client, MagicMock())
@@ -283,33 +305,40 @@ class TestExplorerRealWorldScenarios:
         """Test realistic scenario: finding API routes."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "relevant_files": [
-                    {
-                        "path": "src/api/users.py",
-                        "relevance": "HIGH",
-                        "reason": "User CRUD endpoints",
-                        "key_symbols": ["get_user", "create_user", "update_user", "delete_user"],
-                    },
-                    {
-                        "path": "src/api/auth.py",
-                        "relevance": "HIGH",
-                        "reason": "Authentication endpoints",
-                        "key_symbols": ["login", "logout", "refresh_token"],
-                    },
-                    {
-                        "path": "src/api/__init__.py",
-                        "relevance": "MEDIUM",
-                        "reason": "API router configuration",
-                    },
-                ],
-                "dependencies": [
-                    {"from": "__init__.py", "to": "users.py", "type": "registers"},
-                    {"from": "__init__.py", "to": "auth.py", "type": "registers"},
-                ],
-                "context_summary": "Found 3 API-related files with route handlers",
-                "token_estimate": 4000,
-            })
+            return_value=json.dumps(
+                {
+                    "relevant_files": [
+                        {
+                            "path": "src/api/users.py",
+                            "relevance": "HIGH",
+                            "reason": "User CRUD endpoints",
+                            "key_symbols": [
+                                "get_user",
+                                "create_user",
+                                "update_user",
+                                "delete_user",
+                            ],
+                        },
+                        {
+                            "path": "src/api/auth.py",
+                            "relevance": "HIGH",
+                            "reason": "Authentication endpoints",
+                            "key_symbols": ["login", "logout", "refresh_token"],
+                        },
+                        {
+                            "path": "src/api/__init__.py",
+                            "relevance": "MEDIUM",
+                            "reason": "API router configuration",
+                        },
+                    ],
+                    "dependencies": [
+                        {"from": "__init__.py", "to": "users.py", "type": "registers"},
+                        {"from": "__init__.py", "to": "auth.py", "type": "registers"},
+                    ],
+                    "context_summary": "Found 3 API-related files with route handlers",
+                    "token_estimate": 4000,
+                }
+            )
         )
 
         explorer = ExplorerAgent(llm_client, MagicMock())
@@ -412,9 +441,7 @@ class TestExplorerMalformedResponses:
     async def test_explorer_handles_malformed_json(self) -> None:
         """Test Explorer handles malformed JSON."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(
-            return_value='{"relevant_files": [incomplete'
-        )
+        llm_client.generate = AsyncMock(return_value='{"relevant_files": [incomplete')
 
         explorer = ExplorerAgent(llm_client, MagicMock())
         task = AgentTask(request="Find files", session_id="test")
@@ -428,11 +455,13 @@ class TestExplorerMalformedResponses:
         """Test Explorer when relevant_files is string instead of array."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "relevant_files": "file1.py, file2.py",  # String not array
-                "dependencies": [],
-                "context_summary": "Test",
-            })
+            return_value=json.dumps(
+                {
+                    "relevant_files": "file1.py, file2.py",  # String not array
+                    "dependencies": [],
+                    "context_summary": "Test",
+                }
+            )
         )
 
         explorer = ExplorerAgent(llm_client, MagicMock())
@@ -487,11 +516,13 @@ class TestExplorerPerformance:
         """Test execution count increments."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "relevant_files": [],
-                "dependencies": [],
-                "context_summary": "Test",
-            })
+            return_value=json.dumps(
+                {
+                    "relevant_files": [],
+                    "dependencies": [],
+                    "context_summary": "Test",
+                }
+            )
         )
 
         explorer = ExplorerAgent(llm_client, MagicMock())
@@ -507,11 +538,13 @@ class TestExplorerPerformance:
         """Test Explorer handles multiple tasks in sequence."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "relevant_files": [{"path": "test.py", "relevance": "HIGH"}],
-                "dependencies": [],
-                "context_summary": "Test",
-            })
+            return_value=json.dumps(
+                {
+                    "relevant_files": [{"path": "test.py", "relevance": "HIGH"}],
+                    "dependencies": [],
+                    "context_summary": "Test",
+                }
+            )
         )
 
         explorer = ExplorerAgent(llm_client, MagicMock())
@@ -532,19 +565,21 @@ class TestExplorerDependencyHandling:
         """Test Explorer with complex dependency graph."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "relevant_files": [
-                    {"path": "a.py", "relevance": "HIGH"},
-                    {"path": "b.py", "relevance": "MEDIUM"},
-                    {"path": "c.py", "relevance": "MEDIUM"},
-                ],
-                "dependencies": [
-                    {"from": "a.py", "to": "b.py", "type": "imports"},
-                    {"from": "a.py", "to": "c.py", "type": "imports"},
-                    {"from": "b.py", "to": "c.py", "type": "uses"},
-                ],
-                "context_summary": "Complex dependency graph",
-            })
+            return_value=json.dumps(
+                {
+                    "relevant_files": [
+                        {"path": "a.py", "relevance": "HIGH"},
+                        {"path": "b.py", "relevance": "MEDIUM"},
+                        {"path": "c.py", "relevance": "MEDIUM"},
+                    ],
+                    "dependencies": [
+                        {"from": "a.py", "to": "b.py", "type": "imports"},
+                        {"from": "a.py", "to": "c.py", "type": "imports"},
+                        {"from": "b.py", "to": "c.py", "type": "uses"},
+                    ],
+                    "context_summary": "Complex dependency graph",
+                }
+            )
         )
 
         explorer = ExplorerAgent(llm_client, MagicMock())
@@ -559,11 +594,13 @@ class TestExplorerDependencyHandling:
         """Test Explorer with no dependencies."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "relevant_files": [{"path": "standalone.py", "relevance": "HIGH"}],
-                "dependencies": [],  # No dependencies
-                "context_summary": "Standalone file",
-            })
+            return_value=json.dumps(
+                {
+                    "relevant_files": [{"path": "standalone.py", "relevance": "HIGH"}],
+                    "dependencies": [],  # No dependencies
+                    "context_summary": "Standalone file",
+                }
+            )
         )
 
         explorer = ExplorerAgent(llm_client, MagicMock())

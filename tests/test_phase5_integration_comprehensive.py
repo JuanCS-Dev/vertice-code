@@ -31,6 +31,7 @@ from vertice_cli.core.llm import LLMClient
 # CATEGORY 1: REAL-WORLD USAGE SCENARIOS (10 Tests)
 # ============================================================================
 
+
 class TestRealWorldScenarios:
     """Test actual usage patterns from production scenarios."""
 
@@ -158,6 +159,7 @@ class TestRealWorldScenarios:
 # ============================================================================
 # CATEGORY 2: EDGE CASES & BOUNDARY CONDITIONS (10 Tests)
 # ============================================================================
+
 
 class TestEdgeCases:
     """Test boundary conditions and edge cases."""
@@ -311,6 +313,7 @@ class TestEdgeCases:
 # CATEGORY 3: ERROR HANDLING & RECOVERY (10 Tests)
 # ============================================================================
 
+
 class TestErrorHandling:
     """Test error handling and graceful degradation."""
 
@@ -336,11 +339,7 @@ class TestErrorHandling:
         mock_llm = Mock(spec=LLMClient)
         mock_mcp = Mock()
 
-        gov = MaestroGovernance(
-            mock_llm, mock_mcp,
-            enable_governance=False,
-            enable_counsel=False
-        )
+        gov = MaestroGovernance(mock_llm, mock_mcp, enable_governance=False, enable_counsel=False)
 
         status = gov.get_governance_status()
         assert status["governance_enabled"] is False
@@ -357,11 +356,11 @@ class TestErrorHandling:
 
         mock_agent = Mock(spec=BaseAgent)
         mock_agent.role = AgentRole.PLANNER
-        mock_agent.execute = AsyncMock(return_value=AgentResponse(
-            success=True,
-            reasoning="Direct execution",
-            data={"result": "ok"}
-        ))
+        mock_agent.execute = AsyncMock(
+            return_value=AgentResponse(
+                success=True, reasoning="Direct execution", data={"result": "ok"}
+            )
+        )
 
         task = AgentTask(request="Test", context={})
 
@@ -443,11 +442,9 @@ class TestErrorHandling:
 
         mock_agent = Mock(spec=BaseAgent)
         mock_agent.role = AgentRole.PLANNER
-        mock_agent.execute = AsyncMock(return_value=AgentResponse(
-            success=True,
-            reasoning="Test",
-            data={}
-        ))
+        mock_agent.execute = AsyncMock(
+            return_value=AgentResponse(success=True, reasoning="Test", data={})
+        )
 
         task = AgentTask(request="read file", context={})
 
@@ -456,7 +453,7 @@ class TestErrorHandling:
         # (We can't easily test this without real pipeline, but we verify parameter acceptance)
         try:
             await gov.execute_with_governance(mock_agent, task, risk_level="CRITICAL")
-        except:
+        except Exception:
             # May fail due to mock pipeline, but parameter should be accepted
             pass
 
@@ -485,6 +482,7 @@ class TestErrorHandling:
 # CATEGORY 4: CONCURRENT OPERATIONS & RACE CONDITIONS (10 Tests)
 # ============================================================================
 
+
 class TestConcurrency:
     """Test concurrent operations and potential race conditions."""
 
@@ -496,13 +494,7 @@ class TestConcurrency:
 
         gov = MaestroGovernance(mock_llm, mock_mcp)
 
-        prompts = [
-            "read file",
-            "delete production",
-            "update api",
-            "write tests",
-            "deploy to prod"
-        ]
+        prompts = ["read file", "delete production", "update api", "write tests", "deploy to prod"]
 
         # Detect risks concurrently
         async def detect(prompt):
@@ -525,7 +517,9 @@ class TestConcurrency:
         gov = MaestroGovernance(mock_llm, mock_mcp)
 
         # Get status multiple times concurrently
-        tasks = [asyncio.create_task(asyncio.to_thread(gov.get_governance_status)) for _ in range(10)]
+        tasks = [
+            asyncio.create_task(asyncio.to_thread(gov.get_governance_status)) for _ in range(10)
+        ]
         statuses = await asyncio.gather(*tasks)
 
         # All should return valid status dicts
@@ -563,9 +557,7 @@ class TestConcurrency:
 
         # 100 rapid detections
         tasks = [
-            asyncio.create_task(asyncio.to_thread(
-                gov.detect_risk_level, f"action {i}", "planner"
-            ))
+            asyncio.create_task(asyncio.to_thread(gov.detect_risk_level, f"action {i}", "planner"))
             for i in range(100)
         ]
 
@@ -701,6 +693,7 @@ class TestConcurrency:
 # CATEGORY 5: INTEGRATION AIR GAPS (10 Tests)
 # ============================================================================
 
+
 class TestIntegrationAirGaps:
     """Deep integration tests looking for hidden air gaps."""
 
@@ -762,8 +755,9 @@ class TestIntegrationAirGaps:
         executor = get_agent_identity("executor")
 
         assert executor is not None
-        assert not executor.can(AgentPermission.WRITE_FILES), \
-            "Executor should NOT have WRITE_FILES (security separation)"
+        assert not executor.can(
+            AgentPermission.WRITE_FILES
+        ), "Executor should NOT have WRITE_FILES (security separation)"
 
     @pytest.mark.asyncio
     async def test_airgap_07_maestro_cannot_execute(self):
@@ -771,8 +765,9 @@ class TestIntegrationAirGaps:
         maestro = get_agent_identity("maestro")
 
         assert maestro is not None
-        assert not maestro.can(AgentPermission.EXECUTE_COMMANDS), \
-            "Maestro should NOT execute (orchestrator-worker pattern)"
+        assert not maestro.can(
+            AgentPermission.EXECUTE_COMMANDS
+        ), "Maestro should NOT execute (orchestrator-worker pattern)"
 
     @pytest.mark.asyncio
     async def test_airgap_08_all_roles_have_string_values(self):
@@ -794,13 +789,7 @@ class TestIntegrationAirGaps:
         valid_levels = {"LOW", "MEDIUM", "HIGH", "CRITICAL"}
 
         # Test various inputs
-        test_cases = [
-            "test",
-            "",
-            "delete production",
-            "read file",
-            "x" * 1000
-        ]
+        test_cases = ["test", "", "delete production", "read file", "x" * 1000]
 
         for test_case in test_cases:
             risk = gov.detect_risk_level(test_case, "planner")
@@ -823,7 +812,7 @@ class TestIntegrationAirGaps:
             "justica_available",
             "sofia_available",
             "pipeline_available",
-            "auto_risk_detection"
+            "auto_risk_detection",
         ]
 
         for key in expected_keys:

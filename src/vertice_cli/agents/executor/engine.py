@@ -12,6 +12,7 @@ import logging
 import shlex
 import time
 import uuid
+from contextlib import suppress
 from typing import Any, Dict, Optional
 
 from .types import CommandResult, ExecutionMode
@@ -126,6 +127,14 @@ class CodeExecutionEngine:
         """Execute command locally with subprocess."""
         start_time = time.time()
 
+        # On Unix, asyncio subprocesses depend on a child watcher that is bound to the
+        # current event loop. With function-scoped loops (e.g., in pytest-asyncio),
+        # the watcher can remain attached to a closed loop after a timeout/cancel,
+        # causing subsequent subprocess waits to hang. Re-attach defensively.
+        with suppress(Exception):
+            watcher = asyncio.get_child_watcher()
+            watcher.attach_loop(asyncio.get_running_loop())
+
         # SECURITY: Use create_subprocess_exec with shlex.split for safety
         args = shlex.split(command)
         process = await asyncio.create_subprocess_exec(
@@ -150,7 +159,11 @@ class CodeExecutionEngine:
             )
 
         except asyncio.TimeoutError:
-            process.kill()
+            with suppress(ProcessLookupError):
+                process.kill()
+            # Ensure subprocess pipes are closed to avoid leaked transports when the loop closes.
+            with suppress(Exception):
+                await process.communicate()
             raise
 
     async def _execute_docker(self, command: str, trace_id: str) -> CommandResult:

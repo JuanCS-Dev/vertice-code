@@ -53,12 +53,12 @@ async def stream_ai_sdk_response(messages: List[ChatMessage]) -> AsyncIterator[s
     # Protocol: 0:"text_chunk"\n 2:{json_data}\n 3:{tool_results}\n
     for chunk in chunks:
         yield f'0:{json.dumps(chunk)}\n'  # Text streaming
-    
+
     if tool_calls:
         yield f'2:{json.dumps({"toolCall": tool_call})}\n'  # Tool calls
-    
+
     yield f'3:{json.dumps({"toolResult": result})}\n'  # Tool results
-    
+
     yield f'd:{json.dumps(final_data)}\n'  # Completion data
 ```
 
@@ -177,7 +177,7 @@ async def github_webhook(
     # 1. Security: Verify HMAC-SHA256 signature
     if not await verify_signature(request, x_hub_signature_256):
         raise HTTPException(status_code=401, detail="Invalid signature")
-    
+
     # 2. Route by event type
     data = await request.json()
     if x_github_event == "push":

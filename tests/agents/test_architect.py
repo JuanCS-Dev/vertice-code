@@ -30,7 +30,9 @@ class TestArchitectAgentInitialization:
         assert architect.role.value == "architect"
         assert AgentCapability.READ_ONLY in architect.capabilities
         assert len(architect.capabilities) == 1  # Only READ_ONLY
-        assert "pragmatic" in architect.system_prompt.lower()  # FIX 1.5: Changed from skeptical to pragmatic
+        assert (
+            "pragmatic" in architect.system_prompt.lower()
+        )  # FIX 1.5: Changed from skeptical to pragmatic
 
     def test_architect_has_no_write_capabilities(self) -> None:
         """Test that Architect cannot use write tools."""
@@ -51,17 +53,19 @@ class TestArchitectDecisions:
         """Test that Architect approves feasible requests."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "decision": "APPROVED",
-                "reasoning": "Request is feasible and well-structured",
-                "architecture": {
-                    "approach": "Add JWT middleware to Express",
-                    "risks": ["Token expiry management"],
-                    "constraints": ["Requires jsonwebtoken package"],
-                    "estimated_complexity": "MEDIUM",
-                },
-                "recommendations": ["Use RS256 algorithm", "Store secrets in env"],
-            })
+            return_value=json.dumps(
+                {
+                    "decision": "APPROVED",
+                    "reasoning": "Request is feasible and well-structured",
+                    "architecture": {
+                        "approach": "Add JWT middleware to Express",
+                        "risks": ["Token expiry management"],
+                        "constraints": ["Requires jsonwebtoken package"],
+                        "estimated_complexity": "MEDIUM",
+                    },
+                    "recommendations": ["Use RS256 algorithm", "Store secrets in env"],
+                }
+            )
         )
 
         architect = ArchitectAgent(llm_client, MagicMock())
@@ -83,17 +87,19 @@ class TestArchitectDecisions:
         """Test that Architect vetoes impossible requests."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "decision": "VETOED",
-                "reasoning": "Request requires unavailable quantum computing infrastructure",
-                "architecture": {
-                    "approach": "Not applicable",
-                    "risks": ["Impossible with current tech"],
-                    "constraints": ["Quantum hardware unavailable"],
-                    "estimated_complexity": "HIGH",
-                },
-                "recommendations": ["Use classical algorithms instead"],
-            })
+            return_value=json.dumps(
+                {
+                    "decision": "VETOED",
+                    "reasoning": "Request requires unavailable quantum computing infrastructure",
+                    "architecture": {
+                        "approach": "Not applicable",
+                        "risks": ["Impossible with current tech"],
+                        "constraints": ["Quantum hardware unavailable"],
+                        "estimated_complexity": "HIGH",
+                    },
+                    "recommendations": ["Use classical algorithms instead"],
+                }
+            )
         )
 
         architect = ArchitectAgent(llm_client, MagicMock())
@@ -106,7 +112,9 @@ class TestArchitectDecisions:
 
         assert response.success is True
         assert response.data["decision"] == "VETOED"
-        assert "quantum" in response.reasoning.lower() or "unavailable" in response.reasoning.lower()
+        assert (
+            "quantum" in response.reasoning.lower() or "unavailable" in response.reasoning.lower()
+        )
 
     @pytest.mark.asyncio
     async def test_architect_handles_invalid_json(self) -> None:
@@ -129,10 +137,12 @@ class TestArchitectDecisions:
         """Test that Architect rejects responses with invalid decisions."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                "decision": "MAYBE",  # Invalid
-                "reasoning": "I'm not sure",
-            })
+            return_value=json.dumps(
+                {
+                    "decision": "MAYBE",  # Invalid
+                    "reasoning": "I'm not sure",
+                }
+            )
         )
 
         architect = ArchitectAgent(llm_client, MagicMock())
@@ -214,9 +224,7 @@ class TestArchitectFallbackExtraction:
         """Test extracting VETOED from text."""
         architect = ArchitectAgent(MagicMock(), MagicMock())
 
-        result = architect._extract_decision_fallback(
-            "This request is VETOED due to high risk."
-        )
+        result = architect._extract_decision_fallback("This request is VETOED due to high risk.")
 
         assert result["decision"] == "VETOED"
         assert "high risk" in result["reasoning"]
@@ -225,9 +233,7 @@ class TestArchitectFallbackExtraction:
         """Test extracting UNKNOWN when decision unclear."""
         architect = ArchitectAgent(MagicMock(), MagicMock())
 
-        result = architect._extract_decision_fallback(
-            "This is ambiguous and unclear."
-        )
+        result = architect._extract_decision_fallback("This is ambiguous and unclear.")
 
         assert result["decision"] == "UNKNOWN"
 
@@ -255,10 +261,12 @@ class TestArchitectErrorHandling:
         """Test handling of malformed LLM response."""
         llm_client = MagicMock()
         llm_client.generate = AsyncMock(
-            return_value=json.dumps({
-                # Missing "decision" field
-                "reasoning": "Some reasoning",
-            })
+            return_value=json.dumps(
+                {
+                    # Missing "decision" field
+                    "reasoning": "Some reasoning",
+                }
+            )
         )
 
         architect = ArchitectAgent(llm_client, MagicMock())

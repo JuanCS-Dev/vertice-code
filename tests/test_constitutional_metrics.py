@@ -11,7 +11,7 @@ from vertice_cli.core.constitutional_metrics import (
     calculate_hri,
     calculate_cpi,
     generate_constitutional_report,
-    ConstitutionalMetrics
+    ConstitutionalMetrics,
 )
 
 
@@ -23,15 +23,17 @@ class TestLEI:
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create clean Python file
             filepath = os.path.join(tmpdir, "clean.py")
-            with open(filepath, 'w') as f:
-                f.write("""
+            with open(filepath, "w") as f:
+                f.write(
+                    """
 def hello():
     return "world"
 
 class MyClass:
     def method(self):
         return 42
-""")
+"""
+                )
 
             lei, details = calculate_lei(tmpdir)
             assert lei < 1.0
@@ -41,8 +43,9 @@ class MyClass:
         """Code with TODOs/pass should have higher LEI."""
         with tempfile.TemporaryDirectory() as tmpdir:
             filepath = os.path.join(tmpdir, "lazy.py")
-            with open(filepath, 'w') as f:
-                f.write("""
+            with open(filepath, "w") as f:
+                f.write(
+                    """
 # TODO: Implement this
 def todo_function():
     pass
@@ -50,7 +53,8 @@ def todo_function():
 # FIXME: Fix this later
 def fixme_function():
     raise NotImplementedError
-""")
+"""
+                )
 
             lei, details = calculate_lei(tmpdir)
             assert lei > 0.0
@@ -63,7 +67,7 @@ def fixme_function():
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create file with exactly 1 TODO in 1000 lines
             filepath = os.path.join(tmpdir, "target.py")
-            with open(filepath, 'w') as f:
+            with open(filepath, "w") as f:
                 f.write("# TODO: One todo\n")
                 for _ in range(999):
                     f.write("x = 1\n")
@@ -130,12 +134,7 @@ class TestConstitutionalMetrics:
     def test_metrics_immutable(self):
         """Metrics should be immutable."""
         metrics = ConstitutionalMetrics(
-            lei=0.5,
-            lei_details={},
-            hri=0.05,
-            hri_details={},
-            cpi=0.95,
-            cpi_details={}
+            lei=0.5, lei_details={}, hri=0.05, hri_details={}, cpi=0.95, cpi_details={}
         )
 
         with pytest.raises(AttributeError):
@@ -145,35 +144,20 @@ class TestConstitutionalMetrics:
         """is_compliant should check all thresholds."""
         # All targets met
         compliant = ConstitutionalMetrics(
-            lei=0.5,
-            lei_details={},
-            hri=0.05,
-            hri_details={},
-            cpi=0.95,
-            cpi_details={}
+            lei=0.5, lei_details={}, hri=0.05, hri_details={}, cpi=0.95, cpi_details={}
         )
         assert compliant.is_compliant
 
         # LEI too high
         non_compliant = ConstitutionalMetrics(
-            lei=1.5,
-            lei_details={},
-            hri=0.05,
-            hri_details={},
-            cpi=0.95,
-            cpi_details={}
+            lei=1.5, lei_details={}, hri=0.05, hri_details={}, cpi=0.95, cpi_details={}
         )
         assert not non_compliant.is_compliant
 
     def test_compliance_score(self):
         """compliance_score should be 0.0-1.0."""
         metrics = ConstitutionalMetrics(
-            lei=0.5,
-            lei_details={},
-            hri=0.05,
-            hri_details={},
-            cpi=0.95,
-            cpi_details={}
+            lei=0.5, lei_details={}, hri=0.05, hri_details={}, cpi=0.95, cpi_details={}
         )
 
         score = metrics.compliance_score
@@ -187,7 +171,7 @@ class TestConstitutionalMetrics:
             hri=0.05,
             hri_details={"api_errors": 2},
             cpi=0.95,
-            cpi_details={"completeness": 0.95}
+            cpi_details={"completeness": 0.95},
         )
 
         report = metrics.format_report()
@@ -206,22 +190,20 @@ class TestIntegration:
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create sample code
             filepath = os.path.join(tmpdir, "sample.py")
-            with open(filepath, 'w') as f:
-                f.write("""
+            with open(filepath, "w") as f:
+                f.write(
+                    """
 def clean_function():
     return 42
 
 class GoodClass:
     def method(self):
         return "result"
-""")
+"""
+                )
 
             metrics = generate_constitutional_report(
-                codebase_path=tmpdir,
-                error_log=[],
-                completeness=0.95,
-                precision=0.95,
-                recall=0.90
+                codebase_path=tmpdir, error_log=[], completeness=0.95, precision=0.95, recall=0.90
             )
 
             assert isinstance(metrics, ConstitutionalMetrics)

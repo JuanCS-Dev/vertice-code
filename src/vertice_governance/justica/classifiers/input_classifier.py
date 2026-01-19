@@ -40,19 +40,11 @@ class InputClassifier(BaseClassifier):
         super().__init__(constitution)
 
         # Compilar padroes para performance
-        self._jailbreak_re = [
-            re.compile(p, re.IGNORECASE) for p in JAILBREAK_PATTERNS
-        ]
-        self._code_injection_re = [
-            re.compile(p, re.IGNORECASE) for p in CODE_INJECTION_PATTERNS
-        ]
-        self._exfiltration_re = [
-            re.compile(p, re.IGNORECASE) for p in EXFILTRATION_PATTERNS
-        ]
+        self._jailbreak_re = [re.compile(p, re.IGNORECASE) for p in JAILBREAK_PATTERNS]
+        self._code_injection_re = [re.compile(p, re.IGNORECASE) for p in CODE_INJECTION_PATTERNS]
+        self._exfiltration_re = [re.compile(p, re.IGNORECASE) for p in EXFILTRATION_PATTERNS]
 
-    def classify(
-        self, text: str, context: Optional[Dict[str, Any]] = None
-    ) -> ClassificationReport:
+    def classify(self, text: str, context: Optional[Dict[str, Any]] = None) -> ClassificationReport:
         """Classifica um input quanto a violacoes de seguranca."""
         start_time = time.time()
 
@@ -69,9 +61,7 @@ class InputClassifier(BaseClassifier):
             if match:
                 detected_patterns.append(f"JAILBREAK: {match.group()}")
                 violation_types.append(ViolationType.JAILBREAK_ATTEMPT)
-                reasoning_parts.append(
-                    f"Padrao de jailbreak detectado: '{match.group()}'"
-                )
+                reasoning_parts.append(f"Padrao de jailbreak detectado: '{match.group()}'")
                 principles_violated.append("Protecao da Integridade do Sistema")
 
         # FASE 2: Deteccao de Injecao de Codigo
@@ -80,9 +70,7 @@ class InputClassifier(BaseClassifier):
             if match:
                 detected_patterns.append(f"CODE_INJECTION: {match.group()}")
                 violation_types.append(ViolationType.CODE_INJECTION)
-                reasoning_parts.append(
-                    f"Padrao de injecao de codigo detectado: '{match.group()}'"
-                )
+                reasoning_parts.append(f"Padrao de injecao de codigo detectado: '{match.group()}'")
                 principles_violated.append("Protecao da Integridade do Sistema")
 
         # FASE 3: Deteccao de Exfiltracao
@@ -91,9 +79,7 @@ class InputClassifier(BaseClassifier):
             if match:
                 detected_patterns.append(f"EXFILTRATION: {match.group()}")
                 violation_types.append(ViolationType.DATA_EXFILTRATION)
-                reasoning_parts.append(
-                    f"Padrao de exfiltracao detectado: '{match.group()}'"
-                )
+                reasoning_parts.append(f"Padrao de exfiltracao detectado: '{match.group()}'")
                 principles_violated.append("Protecao da Integridade do Sistema")
 
         # FASE 4: Deteccao de Red Flags Constitucionais
@@ -112,9 +98,7 @@ class InputClassifier(BaseClassifier):
                     [f"PRINCIPLE({principle.name}): {p}" for p in matched_patterns]
                 )
                 detected_keywords.extend(matched_keywords)
-                reasoning_parts.append(
-                    f"Principio '{principle.name}' possivelmente violado"
-                )
+                reasoning_parts.append(f"Principio '{principle.name}' possivelmente violado")
                 if principle.name not in principles_violated:
                     principles_violated.append(principle.name)
 

@@ -206,7 +206,7 @@ class WasmAgentExecutor:
                 # Cleanup temporary file
                 try:
                     os.unlink(payload_file)
-                except:
+                except Exception:
                     pass
 
         except Exception as e:

@@ -40,8 +40,8 @@ class TestSessionAtomicWrites:
         assert session_file.exists()
         with open(session_file) as f:
             data = json.load(f)
-            assert data['session_id'] == state.session_id
-            assert 'test command' in data['history']
+            assert data["session_id"] == state.session_id
+            assert "test command" in data["history"]
 
         # Verify no temp files left behind
         temp_files = list(session_file.parent.glob("*.tmp"))
@@ -85,10 +85,10 @@ class TestTokenTrackingIntegration:
 
         # Verify totals
         usage = tracker.get_usage()
-        assert usage['total_tokens'] == 450
-        assert usage['input_tokens'] == 300
-        assert usage['output_tokens'] == 150
-        assert usage['requests'] == 2
+        assert usage["total_tokens"] == 450
+        assert usage["input_tokens"] == 300
+        assert usage["output_tokens"] == 150
+        assert usage["requests"] == 2
 
     def test_token_tracker_budget_warning(self):
         """Test budget warning levels."""
@@ -106,11 +106,11 @@ class TestTokenTrackingIntegration:
 
     def test_llm_client_token_callback(self):
         """Test LLM client calls token callback."""
-        tracker = TokenTracker(budget=100000)
+        TokenTracker(budget=100000)
         callback_called = []
 
         def token_callback(input_tokens: int, output_tokens: int):
-            callback_called.append({'input': input_tokens, 'output': output_tokens})
+            callback_called.append({"input": input_tokens, "output": output_tokens})
 
         # Create LLM client with callback
         client = LLMClient(token_callback=token_callback)
@@ -123,8 +123,8 @@ class TestTokenTrackingIntegration:
 
         # Verify callback was called
         assert len(callback_called) == 1
-        assert callback_called[0]['input'] == 150
-        assert callback_called[0]['output'] == 75
+        assert callback_called[0]["input"] == 150
+        assert callback_called[0]["output"] == 75
 
 
 class TestLargeFilePreview:
@@ -141,7 +141,7 @@ class TestLargeFilePreview:
             old_content=old_content,
             new_content=new_content,
             file_path="large_file.py",
-            language="python"
+            language="python",
         )
 
         # Verify diff was generated
@@ -167,7 +167,7 @@ class TestLargeFilePreview:
             new_content=new_content,
             file_path="test.py",
             language="python",
-            context_lines=3
+            context_lines=3,
         )
 
         # Should have 1 hunk (the modified section)
@@ -215,7 +215,7 @@ class TestAsyncErrorHandling:
 
         try:
             async with asyncio.TaskGroup() as tg:
-                tasks = [tg.create_task(failing_task(i)) for i in range(5)]
+                [tg.create_task(failing_task(i)) for i in range(5)]
         except* ValueError as eg:
             # ExceptionGroup catches grouped exceptions
             assert len(eg.exceptions) == 1
@@ -266,10 +266,10 @@ class TestRealWorldUsage:
 
         # Parse and verify
         stats = json.loads(stats_json)
-        assert stats['total_tokens'] == 675
-        assert stats['requests'] == 3
-        assert 'history' in stats
-        assert len(stats['history']) == 3
+        assert stats["total_tokens"] == 675
+        assert stats["requests"] == 3
+        assert "history" in stats
+        assert len(stats["history"]) == 3
 
 
 # Performance benchmarks
@@ -296,8 +296,9 @@ class TestPerformance:
         """Diff generation should be fast even for large files."""
         # 1000 line file
         old_content = "\n".join([f"line {i}" for i in range(1000)])
-        new_content = "\n".join([f"line {i} modified" if i % 10 == 0 else f"line {i}"
-                                for i in range(1000)])
+        new_content = "\n".join(
+            [f"line {i} modified" if i % 10 == 0 else f"line {i}" for i in range(1000)]
+        )
 
         # Measure diff time
         start = time.time()

@@ -20,13 +20,14 @@ from pathlib import Path
 from vertice_cli.tools.exec_hardened import (
     BashCommandToolHardened,
     CommandValidator,
-    ExecutionLimits
+    ExecutionLimits,
 )
 
 
 # =============================================================================
 # TEST SUITE 1: COMMAND VALIDATION (30 TESTS)
 # =============================================================================
+
 
 class TestCommandValidationScientific:
     """Scientific validation of command input."""
@@ -233,6 +234,7 @@ class TestCommandValidationScientific:
 # TEST SUITE 2: BASIC EXECUTION (15 TESTS)
 # =============================================================================
 
+
 class TestBasicExecutionScientific:
     """Scientific testing of basic command execution."""
 
@@ -322,9 +324,7 @@ class TestBasicExecutionScientific:
     async def test_stdout_and_stderr_separate(self):
         """STDOUT and STDERR are separate."""
         tool = BashCommandToolHardened()
-        result = await tool.execute(
-            command="echo stdout1; echo stderr1 >&2; echo stdout2"
-        )
+        result = await tool.execute(command="echo stdout1; echo stderr1 >&2; echo stdout2")
 
         assert result.success
         assert "stdout1" in result.data["stdout"]
@@ -396,6 +396,7 @@ class TestBasicExecutionScientific:
 # TEST SUITE 3: CWD & PATH HANDLING (10 TESTS)
 # =============================================================================
 
+
 class TestCwdAndPathScientific:
     """Scientific testing of working directory handling."""
 
@@ -431,10 +432,7 @@ class TestCwdAndPathScientific:
     async def test_cwd_nonexistent_rejected(self):
         """Nonexistent CWD is rejected."""
         tool = BashCommandToolHardened()
-        result = await tool.execute(
-            command="pwd",
-            cwd="/nonexistent/directory/xyz123"
-        )
+        result = await tool.execute(command="pwd", cwd="/nonexistent/directory/xyz123")
 
         assert not result.success
         assert "does not exist" in result.error.lower()
@@ -507,6 +505,7 @@ class TestCwdAndPathScientific:
 # =============================================================================
 # TEST SUITE 4: TIMEOUT & RESOURCE LIMITS (12 TESTS)
 # =============================================================================
+
 
 class TestTimeoutAndLimitsScientific:
     """Scientific testing of timeouts and resource limits."""
@@ -607,11 +606,7 @@ class TestTimeoutAndLimitsScientific:
     @pytest.mark.asyncio
     async def test_multiple_limits_enforced(self):
         """Multiple limits enforced simultaneously."""
-        limits = ExecutionLimits(
-            timeout_seconds=5,
-            max_output_bytes=500,
-            max_memory_mb=256
-        )
+        limits = ExecutionLimits(timeout_seconds=5, max_output_bytes=500, max_memory_mb=256)
         tool = BashCommandToolHardened(limits=limits)
 
         assert tool.limits.timeout_seconds == 5
@@ -642,6 +637,7 @@ class TestTimeoutAndLimitsScientific:
 # TEST SUITE 5: ENVIRONMENT VARIABLES (8 TESTS)
 # =============================================================================
 
+
 class TestEnvironmentVariablesScientific:
     """Scientific testing of environment variable handling."""
 
@@ -649,10 +645,7 @@ class TestEnvironmentVariablesScientific:
     async def test_env_var_passed(self):
         """Custom env var is passed."""
         tool = BashCommandToolHardened()
-        result = await tool.execute(
-            command="echo $TEST_VAR",
-            env={"TEST_VAR": "test_value"}
-        )
+        result = await tool.execute(command="echo $TEST_VAR", env={"TEST_VAR": "test_value"})
 
         assert result.success
         assert "test_value" in result.data["stdout"]
@@ -662,8 +655,7 @@ class TestEnvironmentVariablesScientific:
         """Multiple env vars are passed."""
         tool = BashCommandToolHardened()
         result = await tool.execute(
-            command="echo $VAR1 $VAR2 $VAR3",
-            env={"VAR1": "val1", "VAR2": "val2", "VAR3": "val3"}
+            command="echo $VAR1 $VAR2 $VAR3", env={"VAR1": "val1", "VAR2": "val2", "VAR3": "val3"}
         )
 
         assert result.success
@@ -676,8 +668,7 @@ class TestEnvironmentVariablesScientific:
         """Env vars with spaces work."""
         tool = BashCommandToolHardened()
         result = await tool.execute(
-            command="echo \"$TEST_VAR\"",
-            env={"TEST_VAR": "value with spaces"}
+            command='echo "$TEST_VAR"', env={"TEST_VAR": "value with spaces"}
         )
 
         assert result.success
@@ -687,10 +678,7 @@ class TestEnvironmentVariablesScientific:
     async def test_env_var_special_chars(self):
         """Env vars with special characters."""
         tool = BashCommandToolHardened()
-        result = await tool.execute(
-            command="echo \"$TEST_VAR\"",
-            env={"TEST_VAR": "test!@#$%"}
-        )
+        result = await tool.execute(command='echo "$TEST_VAR"', env={"TEST_VAR": "test!@#$%"})
 
         assert result.success
         assert "test" in result.data["stdout"]
@@ -699,10 +687,7 @@ class TestEnvironmentVariablesScientific:
     async def test_ld_preload_filtered(self):
         """LD_PRELOAD is filtered out."""
         tool = BashCommandToolHardened()
-        result = await tool.execute(
-            command="echo $LD_PRELOAD",
-            env={"LD_PRELOAD": "/evil/lib.so"}
-        )
+        result = await tool.execute(command="echo $LD_PRELOAD", env={"LD_PRELOAD": "/evil/lib.so"})
 
         assert result.success
         # Should be empty because LD_PRELOAD was filtered
@@ -713,8 +698,7 @@ class TestEnvironmentVariablesScientific:
         """LD_LIBRARY_PATH is filtered out."""
         tool = BashCommandToolHardened()
         result = await tool.execute(
-            command="echo $LD_LIBRARY_PATH",
-            env={"LD_LIBRARY_PATH": "/evil/lib"}
+            command="echo $LD_LIBRARY_PATH", env={"LD_LIBRARY_PATH": "/evil/lib"}
         )
 
         assert result.success
@@ -724,10 +708,7 @@ class TestEnvironmentVariablesScientific:
     async def test_bash_env_filtered(self):
         """BASH_ENV is filtered out."""
         tool = BashCommandToolHardened()
-        result = await tool.execute(
-            command="echo $BASH_ENV",
-            env={"BASH_ENV": "/evil/script.sh"}
-        )
+        result = await tool.execute(command="echo $BASH_ENV", env={"BASH_ENV": "/evil/script.sh"})
 
         assert result.success
         assert result.data["stdout"].strip() == ""
@@ -737,8 +718,7 @@ class TestEnvironmentVariablesScientific:
         """Safe env vars are preserved."""
         tool = BashCommandToolHardened()
         result = await tool.execute(
-            command="echo $SAFE_VAR",
-            env={"SAFE_VAR": "safe_value", "LD_PRELOAD": "evil"}
+            command="echo $SAFE_VAR", env={"SAFE_VAR": "safe_value", "LD_PRELOAD": "evil"}
         )
 
         assert result.success
@@ -748,6 +728,7 @@ class TestEnvironmentVariablesScientific:
 # =============================================================================
 # TEST SUITE 6: METADATA & LOGGING (5 TESTS)
 # =============================================================================
+
 
 class TestMetadataAndLoggingScientific:
     """Scientific testing of metadata and logging."""

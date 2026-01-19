@@ -45,7 +45,7 @@ async def demo_messages(console: Console):
         "Here's a simple example of async/await in Python:\n\n"
         "```python\nimport asyncio\n\nasync def main():\n    await asyncio.sleep(1)\n    print('Done!')\n\n"
         "asyncio.run(main())\n```",
-        role="assistant"
+        role="assistant",
     )
     assistant_box = MessageBox(assistant_msg, console=console)
     console.print(assistant_box.render())
@@ -75,8 +75,8 @@ async def demo_status(console: Console):
     # Show a few frames
     frames_shown = 0
     async for frame in spinner.spin(duration=2.0, fps=12):
-        console.print(frame, end='\r')
-        await asyncio.sleep(1/12)
+        console.print(frame, end="\r")
+        await asyncio.sleep(1 / 12)
         frames_shown += 1
         if frames_shown >= 24:  # 2 seconds at 12 FPS
             break
@@ -94,7 +94,7 @@ async def demo_progress(console: Console):
     # Animate progress
     for value in [0, 25, 50, 75, 100]:
         progress.state.current = value
-        console.print(progress.render(), end='\r')
+        console.print(progress.render(), end="\r")
         await asyncio.sleep(0.3)
 
     console.print()  # Final newline
@@ -116,11 +116,7 @@ result = fibonacci(10)
 print(f"Fibonacci(10) = {result}")'''
 
     code_block = CodeBlock(
-        python_code,
-        language="python",
-        show_line_numbers=True,
-        show_language=True,
-        copyable=True
+        python_code, language="python", show_line_numbers=True, show_language=True, copyable=True
     )
     console.print(code_block.render())
 
@@ -171,12 +167,14 @@ async def main():
     header.append("• Code Blocks (syntax highlighting)\n", style="tertiary")
     header.append("• Diff Viewer (GitHub-style)\n", style="tertiary")
 
-    console.print(Panel(
-        header,
-        title="[bold]🎨 TUI Demo[/bold]",
-        border_style=COLORS['accent_purple'],
-        padding=(1, 2)
-    ))
+    console.print(
+        Panel(
+            header,
+            title="[bold]🎨 TUI Demo[/bold]",
+            border_style=COLORS["accent_purple"],
+            padding=(1, 2),
+        )
+    )
 
     # Run demos
     await demo_messages(console)
@@ -186,16 +184,18 @@ async def main():
     demo_diff(console)
 
     # Footer
-    console.print(Panel(
-        "[success]✓ Demo complete![/success]\n\n"
-        "All components are production-ready with:\n"
-        "• LEI: 0.0 (zero placeholders)\n"
-        "• Smooth 60 FPS animations\n"
-        "• WCAG AA color compliance\n"
-        "• Constitutional adherence: 100%",
-        title="[bold]Summary[/bold]",
-        border_style=COLORS['accent_green']
-    ))
+    console.print(
+        Panel(
+            "[success]✓ Demo complete![/success]\n\n"
+            "All components are production-ready with:\n"
+            "• LEI: 0.0 (zero placeholders)\n"
+            "• Smooth 60 FPS animations\n"
+            "• WCAG AA color compliance\n"
+            "• Constitutional adherence: 100%",
+            title="[bold]Summary[/bold]",
+            border_style=COLORS["accent_green"],
+        )
+    )
 
 
 if __name__ == "__main__":

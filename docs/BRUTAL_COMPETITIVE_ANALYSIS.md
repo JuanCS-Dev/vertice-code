@@ -1,7 +1,7 @@
 # 🔥 BRUTAL COMPETITIVE ANALYSIS - QWEN-DEV-CLI
-> **HONESTIDADE BRUTAL: O Estado Real vs. A Competição**  
-> **Date:** 2025-11-20  
-> **Analyst:** Gemini-Vertice MAXIMUS (Constitutional AI)  
+> **HONESTIDADE BRUTAL: O Estado Real vs. A Competição**
+> **Date:** 2025-11-20
+> **Analyst:** Gemini-Vertice MAXIMUS (Constitutional AI)
 > **Classification:** INTERNAL - EYES ONLY
 
 ---
@@ -47,11 +47,11 @@ Propósito: Identificar gaps críticos entre o que **prometemos** e o que **entr
 | **Dark/Light Mode** | ✅ Both | ✅ Both | ✅ Both | ✅ Both | 🟡 Dark | **-50%** |
 | **Customization** | ✅ Full | ✅ Full | ✅ Medium | ✅ Good | 🟡 Basic | **-60%** |
 
-**Overall Visual Grade:** 
-- **Cursor:** A+ (98%)  
-- **Claude-Code:** A (92%)  
-- **Codex:** B+ (85%)  
-- **Gemini-CLI:** B (80%)  
+**Overall Visual Grade:**
+- **Cursor:** A+ (98%)
+- **Claude-Code:** A (92%)
+- **Codex:** B+ (85%)
+- **Gemini-CLI:** B (80%)
 - **Qwen-Dev:** **C+ (65%)** ⚠️
 
 **PROBLEMA CRÍTICO #1:** Nosso TUI parece "terminal script" dos anos 2000, não produto de 2025.
@@ -92,10 +92,10 @@ welcome = Panel(
 | **Session Management** | ✅ Auto-save | ✅ Cloud | ✅ Local | 🟡 Local | 🟡 Local | **-30%** |
 
 **Overall Fluidity Grade:**
-- **Cursor:** A+ (96%)  
-- **Claude-Code:** A (94%)  
-- **Codex:** B+ (88%)  
-- **Gemini-CLI:** B (82%)  
+- **Cursor:** A+ (96%)
+- **Claude-Code:** A (94%)
+- **Codex:** B+ (88%)
+- **Gemini-CLI:** B (82%)
 - **Qwen-Dev:** **C (70%)** ⚠️
 
 **PROBLEMA CRÍTICO #2:** Interação parece "batch script", não conversação fluida.
@@ -131,10 +131,10 @@ welcome = Panel(
 | **Token Efficiency** | Good | Excellent | Medium | Good | **Unknown** | ⚠️ |
 
 **Overall Performance Grade:**
-- **Qwen-Dev:** **A+ (95%)** ✅  
-- **Cursor:** A (90%)  
-- **Claude-Code:** A (92%)  
-- **Codex:** B+ (85%)  
+- **Qwen-Dev:** **A+ (95%)** ✅
+- **Cursor:** A (90%)
+- **Claude-Code:** A (92%)
+- **Codex:** B+ (85%)
 - **Gemini-CLI:** B+ (88%)
 
 **VITÓRIA:** Somos **LÍDERES** em performance técnica (7612fps é absurdo).
@@ -158,10 +158,10 @@ welcome = Panel(
 | **Total Tools** | **120+** | **80+** | **60+** | **50+** | **27** ⚠️ | **-77%** |
 
 **Overall Tools Grade:**
-- **Cursor:** A+ (98%)  
-- **Claude-Code:** A (92%)  
-- **Codex:** B+ (85%)  
-- **Gemini-CLI:** B (80%)  
+- **Cursor:** A+ (98%)
+- **Claude-Code:** A (92%)
+- **Codex:** B+ (85%)
+- **Gemini-CLI:** B (80%)
 - **Qwen-Dev:** **D+ (55%)** 🔴
 
 **PROBLEMA CRÍTICO #3:** Temos apenas **27 tools** vs. **120+ do Cursor**.
@@ -696,7 +696,7 @@ Feedback:        0
 
 ---
 
-**Report Generated:** 2025-11-20 17:30 UTC  
-**By:** Gemini-Vertice MAXIMUS (Constitutional AI)  
-**Classification:** INTERNAL - NO MARKETING SPIN  
+**Report Generated:** 2025-11-20 17:30 UTC
+**By:** Gemini-Vertice MAXIMUS (Constitutional AI)
+**Classification:** INTERNAL - NO MARKETING SPIN
 **Next Action:** DOGFOOD IMMEDIATELY + UX QUICK WINS

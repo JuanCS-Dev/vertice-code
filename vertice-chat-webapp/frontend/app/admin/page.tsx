@@ -10,7 +10,7 @@ import Link from 'next/link';
 function AdminContent() {
   const { user } = useAuth();
   const router = useRouter();
-  
+
   const [stats] = useState({
     users: 124,
     activeSessions: 18,

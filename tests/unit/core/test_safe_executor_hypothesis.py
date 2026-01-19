@@ -15,7 +15,7 @@ from hypothesis import given, strategies as st, settings
 
 pytest.skip(
     "SafeExecutor API changed - AllowedCommand and CommandCategory not exported",
-    allow_module_level=True
+    allow_module_level=True,
 )
 
 from vertice_tui.core.safe_executor import (
@@ -31,18 +31,49 @@ from vertice_tui.core.safe_executor import (
 # =============================================================================
 
 # Strategy for valid command prefixes
-valid_commands = st.sampled_from([
-    "pytest", "ruff check", "ruff format", "python -m pytest",
-    "git status", "git log", "git diff", "git branch",
-    "ls", "pwd", "cat", "echo", "tree"
-])
+valid_commands = st.sampled_from(
+    [
+        "pytest",
+        "ruff check",
+        "ruff format",
+        "python -m pytest",
+        "git status",
+        "git log",
+        "git diff",
+        "git branch",
+        "ls",
+        "pwd",
+        "cat",
+        "echo",
+        "tree",
+    ]
+)
 
 # Strategy for dangerous patterns
-dangerous_patterns = st.sampled_from([
-    "rm ", "sudo ", "chmod ", "chown ", ";", "&&", "||",
-    "|", "$(", "`", "${", ">", ">>", "<", "eval ", "exec ",
-    "\n", "\\n", "| sh", "| bash"
-])
+dangerous_patterns = st.sampled_from(
+    [
+        "rm ",
+        "sudo ",
+        "chmod ",
+        "chown ",
+        ";",
+        "&&",
+        "||",
+        "|",
+        "$(",
+        "`",
+        "${",
+        ">",
+        ">>",
+        "<",
+        "eval ",
+        "exec ",
+        "\n",
+        "\\n",
+        "| sh",
+        "| bash",
+    ]
+)
 
 # Strategy for safe argument characters
 safe_chars = st.sampled_from(
@@ -76,6 +107,7 @@ malicious_inputs = st.one_of(
 # =============================================================================
 # PROPERTY TESTS - COMMAND VALIDATION
 # =============================================================================
+
 
 class TestPropertyBasedValidation:
     """Property-based tests for command validation."""
@@ -153,6 +185,7 @@ class TestPropertyBasedValidation:
 # PROPERTY TESTS - SHELL INJECTION RESISTANCE
 # =============================================================================
 
+
 class TestShellInjectionResistance:
     """Property-based tests specifically for shell injection resistance."""
 
@@ -210,13 +243,19 @@ class TestShellInjectionResistance:
 # PROPERTY TESTS - UNICODE AND ENCODING
 # =============================================================================
 
+
 class TestUnicodeHandling:
     """Property-based tests for unicode and encoding edge cases."""
 
-    @given(unicode_text=st.text(alphabet=st.characters(
-        whitelist_categories=('Lu', 'Ll', 'Nd', 'Zs'),
-        blacklist_characters='\x00'
-    ), min_size=0, max_size=100))
+    @given(
+        unicode_text=st.text(
+            alphabet=st.characters(
+                whitelist_categories=("Lu", "Ll", "Nd", "Zs"), blacklist_characters="\x00"
+            ),
+            min_size=0,
+            max_size=100,
+        )
+    )
     @settings(max_examples=100)
     def test_unicode_commands_handled(self, unicode_text):
         """Property: unicode text is handled without crashes."""
@@ -248,6 +287,7 @@ class TestUnicodeHandling:
 # =============================================================================
 # PROPERTY TESTS - BOUNDARY CONDITIONS
 # =============================================================================
+
 
 class TestBoundaryConditions:
     """Property-based tests for boundary conditions."""
@@ -283,6 +323,7 @@ class TestBoundaryConditions:
 # =============================================================================
 # PROPERTY TESTS - ALLOWED COMMANDS STRUCTURE
 # =============================================================================
+
 
 class TestAllowedCommandsStructure:
     """Property-based tests for AllowedCommand dataclass."""
@@ -329,6 +370,7 @@ class TestAllowedCommandsStructure:
 # PROPERTY TESTS - EXECUTION RESULT
 # =============================================================================
 
+
 class TestExecutionResultProperties:
     """Property-based tests for ExecutionResult dataclass."""
 
@@ -360,6 +402,7 @@ class TestExecutionResultProperties:
 # =============================================================================
 # INVARIANT TESTS
 # =============================================================================
+
 
 class TestInvariants:
     """Tests for system invariants that should always hold."""

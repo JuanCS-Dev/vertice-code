@@ -367,7 +367,7 @@ _internal_defaults_do_not_set:
 
       #If set to true, istio-proxy container will have privileged securityContext
       privileged: false
-      
+
       seccompProfile: {}
 
       # The number of successive failed probes before indicating readiness failure.
@@ -571,7 +571,7 @@ _internal_defaults_do_not_set:
   #         type: ClusterIP
   # Per-Gateway configuration can also be set in the `Gateway.spec.infrastructure.parametersRef` field.
   gatewayClasses: {}
-  
+
   pdb:
     # -- Minimum available pods set in PodDisruptionBudget.
     # Define either 'minAvailable' or 'maxUnavailable', never both.

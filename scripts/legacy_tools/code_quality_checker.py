@@ -510,7 +510,7 @@ class CodeQualityChecker:
         print("-" * 50)
 
         for result in summary["detailed_results"]:
-            status = "✅" if result["passed"] else "❌"
+            "✅" if result["passed"] else "❌"
             print("15")
 
         print("\n💡 RECOMMENDATIONS:")

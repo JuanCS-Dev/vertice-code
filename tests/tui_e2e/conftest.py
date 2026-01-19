@@ -1,8 +1,6 @@
 import pytest
-import asyncio
 import sys
 import os
-from typing import Generator
 from unittest.mock import MagicMock, AsyncMock
 
 # Add src to path to ensure imports work
@@ -17,14 +15,6 @@ except ImportError:
     VerticeApp = None
     ChatController = None
     ToolBridge = None
-
-
-@pytest.fixture(scope="session")
-def event_loop() -> Generator:
-    """Create an instance of the default event loop for each test case."""
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
 
 
 @pytest.fixture

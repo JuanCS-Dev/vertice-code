@@ -1,6 +1,6 @@
-# This example shows how to use Istio local rate limiting with descriptors to limit by path. 
+# This example shows how to use Istio local rate limiting with descriptors to limit by path.
 # This uses the base book-info demo and adds rate limiting by path, specifically rate limiting the product page
-# to 10 requests per minute, and the overall fdqn will be able to accept 100 requests per minute. 
+# to 10 requests per minute, and the overall fdqn will be able to accept 100 requests per minute.
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
@@ -84,4 +84,3 @@ spec:
                     max_tokens: 10
                     tokens_per_fill: 10
                     fill_interval: 60s
-                    

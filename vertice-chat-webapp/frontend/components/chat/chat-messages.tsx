@@ -23,7 +23,7 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
         <div className="text-center space-y-10 max-w-2xl relative">
           {/* Decorative Elements */}
           <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-          
+
           <div className="relative">
             <div className="w-20 h-20 rounded-3xl bg-[#0A0A0A] border border-primary/20 flex items-center justify-center mx-auto shadow-[0_0_40px_rgba(212,255,0,0.1)] relative z-10 group transition-all hover:border-primary/50">
                 <Sparkles className="h-10 w-10 text-primary animate-pulse" />
@@ -32,7 +32,7 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 border border-white/5 rounded-full animate-[spin_10s_linear_infinite]" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 border border-white/5 rounded-full animate-[spin_15s_linear_infinite_reverse]" />
           </div>
-          
+
           <div className="space-y-4">
             <h2 className="text-4xl font-bold tracking-tighter text-white">
               Sovereign Console <span className="text-primary opacity-50 font-mono text-xl ml-2">v3.0</span>
@@ -50,7 +50,7 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
               </div>
               <p className="text-xs text-zinc-500 group-hover:text-zinc-300 transition-colors">"Generate a React dashboard with real-time analytics..."</p>
             </button>
-            
+
             <button className="p-5 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-primary/30 hover:bg-white/[0.04] transition-all group">
               <div className="flex items-center gap-3 mb-2">
                 <Terminal className="h-4 w-4 text-primary opacity-50 group-hover:opacity-100" />
@@ -59,7 +59,7 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
               <p className="text-xs text-zinc-500 group-hover:text-zinc-300 transition-colors">"Explain the memory synchronization patterns in Rust..."</p>
             </button>
           </div>
-          
+
           <div className="pt-8 flex items-center justify-center gap-6 opacity-30 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500">
              <div className="flex flex-col items-center gap-1">
                 <Cpu className="h-4 w-4" />
@@ -85,12 +85,12 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
     <ScrollArea className="flex-1 h-full pr-4">
       <div className="max-w-3xl mx-auto space-y-8 py-10">
         {messages.map((message, index) => (
-          <MessageBubble 
-            key={message.id || index} 
+          <MessageBubble
+            key={message.id || index}
             message={{
                 ...message,
                 role: message.role === 'data' ? 'assistant' : message.role
-            }} 
+            }}
           />
         ))}
 

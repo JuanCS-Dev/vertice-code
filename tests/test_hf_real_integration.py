@@ -4,57 +4,10 @@ import os
 from vertice_cli.core.llm import LLMClient
 from vertice_cli.core.context import ContextBuilder
 
+
 class TestHFRealIntegration:
     """Test real LLM behavior with actual API calls"""
 
-    @pytest.fixture
-    def client(self):
-        token = os.getenv("HF_TOKEN")
-        if not token:
-            pytest.skip("HF_TOKEN not available")
-        return LLMClient()
-    @pytest.fixture
-    def client(self):
-        token = os.getenv("HF_TOKEN")
-        if not token:
-            pytest.skip("HF_TOKEN not available")
-        return LLMClient()
-    @pytest.fixture
-    def client(self):
-        token = os.getenv("HF_TOKEN")
-        if not token:
-            pytest.skip("HF_TOKEN not available")
-        return LLMClient()
-    @pytest.fixture
-    def client(self):
-        token = os.getenv("HF_TOKEN")
-        if not token:
-            pytest.skip("HF_TOKEN not available")
-        return LLMClient()
-    @pytest.fixture
-    def client(self):
-        token = os.getenv("HF_TOKEN")
-        if not token:
-            pytest.skip("HF_TOKEN not available")
-        return LLMClient()
-    @pytest.fixture
-    def client(self):
-        token = os.getenv("HF_TOKEN")
-        if not token:
-            pytest.skip("HF_TOKEN not available")
-        return LLMClient()
-    @pytest.fixture
-    def client(self):
-        token = os.getenv("HF_TOKEN")
-        if not token:
-            pytest.skip("HF_TOKEN not available")
-        return LLMClient()
-    @pytest.fixture
-    def client(self):
-        token = os.getenv("HF_TOKEN")
-        if not token:
-            pytest.skip("HF_TOKEN not available")
-        return LLMClient()
     @pytest.fixture
     def client(self):
         token = os.getenv("HF_TOKEN")
@@ -66,18 +19,16 @@ class TestHFRealIntegration:
     def context_manager(self):
         return ContextBuilder()
 
-
     async def test_code_generation_quality(self, client):
         """Test if LLM generates syntactically correct code"""
         response = await client.generate(
-            "Write a Python function to calculate fibonacci sequence",
-            max_tokens=200,
-            provider="hf"
+            "Write a Python function to calculate fibonacci sequence", max_tokens=200, provider="hf"
         )
 
         # Extract code from markdown if present
         import re
-        code_match = re.search(r'```python\n(.+?)```', response, re.DOTALL)
+
+        code_match = re.search(r"```python\n(.+?)```", response, re.DOTALL)
         if code_match:
             code = code_match.group(1)
         else:
@@ -85,7 +36,7 @@ class TestHFRealIntegration:
 
         assert "def" in code
         try:
-            compile(code, '<string>', 'exec')
+            compile(code, "<string>", "exec")
         except SyntaxError as e:
             pytest.fail(f"Invalid Python: {e}")
 
@@ -116,15 +67,13 @@ class TestHFRealIntegration:
     async def test_error_handling_invalid_model(self):
         """Test graceful handling of invalid model"""
         with pytest.raises(Exception):
-            client = LLMClient(
-                model="invalid/model/name",
-                api_key=os.getenv("HF_TOKEN")
-            )
+            client = LLMClient(model="invalid/model/name", api_key=os.getenv("HF_TOKEN"))
             client.generate("test")
 
     async def test_token_limit_respect(self, client):
         """Test if LLM respects max_tokens parameter"""
-        response = await client.generate("Write a very long essay about Python", max_tokens=50, provider="hf"
+        response = await client.generate(
+            "Write a very long essay about Python", max_tokens=50, provider="hf"
         )
 
         # Response should be truncated, not thousands of tokens
@@ -133,12 +82,13 @@ class TestHFRealIntegration:
 
     async def test_instruction_following(self, client):
         """Test if LLM follows specific formatting instructions"""
-        response = await client.generate("List 3 Python frameworks. Format: 1. Name - Description", max_tokens=150, provider="hf"
+        response = await client.generate(
+            "List 3 Python frameworks. Format: 1. Name - Description", max_tokens=150, provider="hf"
         )
 
         assert "1." in response
         assert "-" in response or ":" in response
-        lines = [l for l in response.split("\n") if l.strip()]
+        lines = [line for line in response.split("\n") if line.strip()]
         assert len(lines) >= 3, "Should list at least 3 items"
 
     async def test_code_explanation_accuracy(self, client):
@@ -147,10 +97,7 @@ class TestHFRealIntegration:
 def factorial(n):
     return 1 if n <= 1 else n * factorial(n-1)
 """
-        response = await client.generate(
-            f"Explain what this code does:\n{code}",
-            max_tokens=100
-        )
+        response = await client.generate(f"Explain what this code does:\n{code}", max_tokens=100)
 
         assert "factorial" in response.lower()
         assert "recursive" in response.lower() or "recursion" in response.lower()
@@ -173,16 +120,10 @@ def factorial(n):
         prompt = "Say hello"
 
         # Low temp - deterministic
-        responses_low = [
-            client.generate(prompt, temperature=0.1, max_tokens=20)
-            for _ in range(3)
-        ]
+        responses_low = [client.generate(prompt, temperature=0.1, max_tokens=20) for _ in range(3)]
 
         # High temp - creative
-        responses_high = [
-            client.generate(prompt, temperature=1.5, max_tokens=20)
-            for _ in range(3)
-        ]
+        responses_high = [client.generate(prompt, temperature=1.5, max_tokens=20) for _ in range(3)]
 
         # Low temp should be more consistent
         assert len(set(responses_low)) <= len(set(responses_high))
@@ -192,9 +133,7 @@ def factorial(n):
         system_prompt = "You are a Python expert. Always include code examples."
 
         response = await client.generate(
-            "Explain list comprehension",
-            system_prompt=system_prompt,
-            max_tokens=150
+            "Explain list comprehension", system_prompt=system_prompt, max_tokens=150
         )
 
         # Should contain code
@@ -217,14 +156,13 @@ def factorial(n):
 
     async def test_special_characters_handling(self, client):
         """Test handling of code with special characters"""
-        code_with_special = r'''
+        code_with_special = r"""
 def regex_test():
     pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
     return pattern
-'''
+"""
         response = await client.generate(
-            f"What does this regex match?\n{code_with_special}",
-            max_tokens=50
+            f"What does this regex match?\n{code_with_special}", max_tokens=50
         )
 
         assert "email" in response.lower() or "@" in response

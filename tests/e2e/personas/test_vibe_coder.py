@@ -23,13 +23,12 @@ NOTE: These tests require InputEnhancer typo correction features
 import pytest
 
 # Skip all tests until InputEnhancer typo correction is implemented
-pytestmark = pytest.mark.skip(
-    reason="InputEnhancer typo correction features not implemented"
-)
+pytestmark = pytest.mark.skip(reason="InputEnhancer typo correction features not implemented")
 from pathlib import Path
 
 # Import test utilities
 import sys
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from vertice_cli.core.input_enhancer import InputEnhancer
@@ -41,6 +40,7 @@ from vertice_cli.core.context_tracker import ContextTracker
 # FIXTURES
 # ==============================================================================
 
+
 @pytest.fixture
 def vibe_workspace(tmp_path):
     """Create a messy beginner workspace."""
@@ -48,25 +48,31 @@ def vibe_workspace(tmp_path):
     workspace.mkdir()
 
     # Messy file structure typical of beginners
-    (workspace / "main.py").write_text('''# my first program
+    (workspace / "main.py").write_text(
+        """# my first program
 print("hello world")
 x = 1
 y = 2
 print(x + y)
-''')
+"""
+    )
 
-    (workspace / "test.py").write_text('''# trying to test something
+    (workspace / "test.py").write_text(
+        """# trying to test something
 from main import x
 print(x)
-''')
+"""
+    )
 
-    (workspace / "stuff.py").write_text('''# random stuff
+    (workspace / "stuff.py").write_text(
+        """# random stuff
 def do_thing():
     pass
 
 def another_thing(x):
     return x * 2
-''')
+"""
+    )
 
     (workspace / "NOTES.txt").write_text("TODO: fix the bug\nmaybe try stackoverflow\n")
 
@@ -95,6 +101,7 @@ def context_tracker():
 # TEST CLASS: TYPO CORRECTION (Vibe coder makes lots of typos)
 # ==============================================================================
 
+
 @pytest.mark.e2e
 @pytest.mark.vibe_coder
 class TestVibeCoderTypos:
@@ -110,8 +117,9 @@ class TestVibeCoderTypos:
 
         for typo, expected in typo_inputs:
             result = input_enhancer.enhance(typo)
-            assert result.corrected_text == expected or result.suggested_correction == expected, \
-                f"Should correct '{typo}' to '{expected}'"
+            assert (
+                result.corrected_text == expected or result.suggested_correction == expected
+            ), f"Should correct '{typo}' to '{expected}'"
 
     def test_corrects_command_typos(self, input_enhancer):
         """Vibe coder types 'ptest' instead of 'pytest'."""
@@ -124,16 +132,17 @@ class TestVibeCoderTypos:
 
         for typo, expected in typo_inputs:
             result = input_enhancer.enhance(typo)
-            assert expected in [result.corrected_text, result.suggested_correction], \
-                f"Should suggest correction for '{typo}'"
+            assert expected in [
+                result.corrected_text,
+                result.suggested_correction,
+            ], f"Should suggest correction for '{typo}'"
 
     def test_suggests_did_you_mean(self, input_enhancer):
         """Vibe coder should see 'Did you mean...?' suggestions."""
         result = input_enhancer.enhance("cretae file.py")
 
         assert result.suggestions, "Should provide suggestions"
-        assert any("create" in s.lower() for s in result.suggestions), \
-            "Should suggest 'create'"
+        assert any("create" in s.lower() for s in result.suggestions), "Should suggest 'create'"
 
     def test_handles_case_insensitivity(self, input_enhancer):
         """Vibe coder doesn't care about case."""
@@ -151,14 +160,15 @@ class TestVibeCoderTypos:
         """Vibe coder's class names should keep their case."""
         result = input_enhancer.enhance("create class MyClassName")
 
-        assert "MyClassName" in result.corrected_text or \
-               "MyClassName" in result.original_text, \
-            "Should preserve intentional PascalCase"
+        assert (
+            "MyClassName" in result.corrected_text or "MyClassName" in result.original_text
+        ), "Should preserve intentional PascalCase"
 
 
 # ==============================================================================
 # TEST CLASS: VAGUE INPUT HANDLING (Vibe coder is imprecise)
 # ==============================================================================
+
 
 @pytest.mark.e2e
 @pytest.mark.vibe_coder
@@ -210,13 +220,15 @@ class TestVibeCoderVagueInput:
         """Vibe coder says 'make it work' - should ask for clarification."""
         result = input_enhancer.enhance("make it work")
 
-        assert result.needs_clarification or result.clarification_questions, \
-            "Should ask for clarification on vague requests"
+        assert (
+            result.needs_clarification or result.clarification_questions
+        ), "Should ask for clarification on vague requests"
 
 
 # ==============================================================================
 # TEST CLASS: CODE PASTE HANDLING (Vibe coder copy-pastes a lot)
 # ==============================================================================
+
 
 @pytest.mark.e2e
 @pytest.mark.vibe_coder
@@ -225,22 +237,23 @@ class TestVibeCoderCodePaste:
 
     def test_handles_stackoverflow_paste(self, input_enhancer):
         """Vibe coder pastes code with >>> prompts."""
-        pasted_code = '''>>> def hello():
+        pasted_code = """>>> def hello():
 ...     print("Hello")
 >>> hello()
 Hello
-'''
+"""
 
         result = input_enhancer.extract_code(pasted_code)
 
         assert result.clean_code, "Should extract clean code"
         assert ">>>" not in result.clean_code, "Should remove REPL prompts"
-        assert "..." not in result.clean_code or "..." in '""" docstring """', \
-            "Should remove continuation prompts"
+        assert (
+            "..." not in result.clean_code or "..." in '""" docstring """'
+        ), "Should remove continuation prompts"
 
     def test_handles_jupyter_paste(self, input_enhancer):
         """Vibe coder pastes from Jupyter with [1]:."""
-        pasted_code = '''In [1]: import pandas as pd
+        pasted_code = """In [1]: import pandas as pd
 In [2]: df = pd.DataFrame({'a': [1,2,3]})
 In [3]: df.head()
 Out[3]:
@@ -248,7 +261,7 @@ Out[3]:
 0  1
 1  2
 2  3
-'''
+"""
 
         result = input_enhancer.extract_code(pasted_code)
 
@@ -258,14 +271,14 @@ Out[3]:
 
     def test_handles_markdown_code_blocks(self, input_enhancer):
         """Vibe coder pastes markdown with ```python blocks."""
-        pasted = '''here's my code:
+        pasted = """here's my code:
 
 ```python
 def add(a, b):
     return a + b
 ```
 
-can you fix it?'''
+can you fix it?"""
 
         result = input_enhancer.extract_code(pasted)
 
@@ -275,12 +288,12 @@ can you fix it?'''
 
     def test_handles_mixed_language_paste(self, input_enhancer):
         """Vibe coder pastes code mixed with natural language."""
-        pasted = '''so I tried this:
+        pasted = """so I tried this:
 x = 1
 y = 2
 but then it gave me an error when I did
 print(x + z)
-because z isn't defined I think?'''
+because z isn't defined I think?"""
 
         result = input_enhancer.extract_code(pasted)
 
@@ -289,22 +302,24 @@ because z isn't defined I think?'''
 
     def test_handles_shell_paste(self, input_enhancer):
         """Vibe coder pastes terminal output with $ prompts."""
-        pasted = '''$ python main.py
+        pasted = """$ python main.py
 Traceback (most recent call last):
   File "main.py", line 5, in <module>
     print(undefined_var)
 NameError: name 'undefined_var' is not defined
-$ '''
+$ """
 
         result = input_enhancer.extract_code(pasted)
 
-        assert result.error_detected or result.contains_error, \
-            "Should detect error in pasted output"
+        assert (
+            result.error_detected or result.contains_error
+        ), "Should detect error in pasted output"
 
 
 # ==============================================================================
 # TEST CLASS: BEGINNER ERROR MESSAGES (Vibe coder needs simple explanations)
 # ==============================================================================
+
 
 @pytest.mark.e2e
 @pytest.mark.vibe_coder
@@ -321,9 +336,10 @@ class TestVibeCoderErrorMessages:
         presented = error_presenter.present(error, mode="beginner")
 
         assert presented.simple_explanation, "Should have simple explanation"
-        assert any(word in presented.simple_explanation.lower()
-                   for word in ["missing", "parenthesis", "bracket", "close"]), \
-            "Should explain missing parenthesis simply"
+        assert any(
+            word in presented.simple_explanation.lower()
+            for word in ["missing", "parenthesis", "bracket", "close"]
+        ), "Should explain missing parenthesis simply"
 
     def test_explains_name_error_simply(self, error_presenter):
         """Vibe coder needs help with undefined variables."""
@@ -333,9 +349,9 @@ class TestVibeCoderErrorMessages:
 
         assert presented.simple_explanation, "Should have simple explanation"
         assert presented.suggestions, "Should suggest corrections"
-        assert any("print" in s.lower() or "typo" in s.lower()
-                   for s in presented.suggestions), \
-            "Should suggest 'print' as correction"
+        assert any(
+            "print" in s.lower() or "typo" in s.lower() for s in presented.suggestions
+        ), "Should suggest 'print' as correction"
 
     def test_explains_import_error_simply(self, error_presenter):
         """Vibe coder needs help with import errors."""
@@ -344,11 +360,10 @@ class TestVibeCoderErrorMessages:
         presented = error_presenter.present(error, mode="beginner")
 
         assert presented.simple_explanation, "Should have simple explanation"
-        assert any(word in presented.simple_explanation.lower()
-                   for word in ["install", "pip", "package"]), \
-            "Should mention installation"
-        assert any("pandas" in s.lower() for s in presented.suggestions), \
-            "Should suggest 'pandas'"
+        assert any(
+            word in presented.simple_explanation.lower() for word in ["install", "pip", "package"]
+        ), "Should mention installation"
+        assert any("pandas" in s.lower() for s in presented.suggestions), "Should suggest 'pandas'"
 
     def test_provides_example_fix(self, error_presenter):
         """Vibe coder learns from examples."""
@@ -356,8 +371,7 @@ class TestVibeCoderErrorMessages:
 
         presented = error_presenter.present(error, mode="beginner")
 
-        assert presented.example_fix or presented.code_example, \
-            "Should provide example fix"
+        assert presented.example_fix or presented.code_example, "Should provide example fix"
 
     def test_uses_simple_language(self, error_presenter):
         """Vibe coder doesn't understand jargon."""
@@ -372,14 +386,16 @@ class TestVibeCoderErrorMessages:
         for word in jargon_words:
             if word.lower() in explanation:
                 # Should have a simple explanation nearby
-                assert any(simple in explanation
-                           for simple in ["means", "because", "empty", "nothing", "None"]), \
-                    f"Should explain jargon '{word}' simply"
+                assert any(
+                    simple in explanation
+                    for simple in ["means", "because", "empty", "nothing", "None"]
+                ), f"Should explain jargon '{word}' simply"
 
 
 # ==============================================================================
 # TEST CLASS: PATIENCE & GUIDANCE (Vibe coder needs handholding)
 # ==============================================================================
+
 
 @pytest.mark.e2e
 @pytest.mark.vibe_coder
@@ -393,8 +409,7 @@ class TestVibeCoderGuidance:
 
         presented = error_presenter.present(error, mode="beginner")
 
-        assert presented.steps or presented.how_to_fix, \
-            "Should provide step-by-step instructions"
+        assert presented.steps or presented.how_to_fix, "Should provide step-by-step instructions"
 
         if presented.steps:
             assert len(presented.steps) >= 2, "Should have multiple steps"
@@ -407,9 +422,9 @@ class TestVibeCoderGuidance:
 
         # Should explain WHY indentation matters
         explanation = presented.simple_explanation.lower()
-        assert any(word in explanation
-                   for word in ["space", "tab", "indent", "block", "python needs"]), \
-            "Should explain why indentation matters"
+        assert any(
+            word in explanation for word in ["space", "tab", "indent", "block", "python needs"]
+        ), "Should explain why indentation matters"
 
     def test_encourages_beginner(self, error_presenter):
         """Vibe coder needs encouragement, not judgment."""
@@ -431,14 +446,17 @@ class TestVibeCoderGuidance:
         presented = error_presenter.present(error, mode="beginner")
 
         # Should offer further help
-        assert presented.help_available or presented.further_help or \
-               any("help" in (s or "").lower() for s in (presented.suggestions or [])), \
-            "Should offer further assistance"
+        assert (
+            presented.help_available
+            or presented.further_help
+            or any("help" in (s or "").lower() for s in (presented.suggestions or []))
+        ), "Should offer further assistance"
 
 
 # ==============================================================================
 # TEST CLASS: CONTRADICTION HANDLING (Vibe coder gives conflicting info)
 # ==============================================================================
+
 
 @pytest.mark.e2e
 @pytest.mark.vibe_coder
@@ -449,8 +467,9 @@ class TestVibeCoderContradictions:
         """Vibe coder says 'delete the file but keep it'."""
         result = input_enhancer.enhance("delete main.py but save the contents")
 
-        assert result.needs_clarification or result.detected_contradiction, \
-            "Should detect contradiction"
+        assert (
+            result.needs_clarification or result.detected_contradiction
+        ), "Should detect contradiction"
 
     def test_handles_changing_mind(self, context_tracker):
         """Vibe coder changes mind mid-conversation."""
@@ -475,8 +494,9 @@ class TestVibeCoderContradictions:
 
         for inp in incomplete_inputs:
             result = input_enhancer.enhance(inp)
-            assert result.needs_clarification or result.is_incomplete, \
-                f"Should detect incomplete: '{inp}'"
+            assert (
+                result.needs_clarification or result.is_incomplete
+            ), f"Should detect incomplete: '{inp}'"
 
     def test_handles_multiple_requests(self, input_enhancer):
         """Vibe coder asks for many things at once."""
@@ -484,13 +504,15 @@ class TestVibeCoderContradictions:
             "fix the bug and also add tests and make it faster and can you also document it"
         )
 
-        assert result.multiple_intents or len(result.extracted_tasks or []) > 1, \
-            "Should detect multiple requests"
+        assert (
+            result.multiple_intents or len(result.extracted_tasks or []) > 1
+        ), "Should detect multiple requests"
 
 
 # ==============================================================================
 # TEST CLASS: LEARNING SUPPORT (Vibe coder wants to learn)
 # ==============================================================================
+
 
 @pytest.mark.e2e
 @pytest.mark.vibe_coder
@@ -501,8 +523,7 @@ class TestVibeCoderLearning:
         """Vibe coder asks 'what does this do?'."""
         result = input_enhancer.enhance("what does 'for i in range(10)' do?")
 
-        assert result.is_question or result.wants_explanation, \
-            "Should detect explanation request"
+        assert result.is_question or result.wants_explanation, "Should detect explanation request"
 
     def test_suggests_learning_resources(self, error_presenter):
         """Vibe coder benefits from learning resources."""
@@ -512,23 +533,25 @@ class TestVibeCoderLearning:
         presented = error_presenter.present(error, mode="beginner")
 
         # Should suggest learning more
-        assert presented.learn_more or presented.resources or \
-               any("learn" in (s or "").lower() for s in (presented.suggestions or [])), \
-            "Should suggest learning resources"
+        assert (
+            presented.learn_more
+            or presented.resources
+            or any("learn" in (s or "").lower() for s in (presented.suggestions or []))
+        ), "Should suggest learning resources"
 
     def test_builds_on_previous_context(self, context_tracker):
         """Vibe coder asks follow-up questions."""
         # First question
         context_tracker.record_interaction(
-            "what is a function?",
-            "A function is a reusable block of code..."
+            "what is a function?", "A function is a reusable block of code..."
         )
 
         # Follow-up
         result = context_tracker.resolve_reference("how do I make one?")
 
-        assert result.context_hint or result.related_to_previous, \
-            "Should connect to previous topic (functions)"
+        assert (
+            result.context_hint or result.related_to_previous
+        ), "Should connect to previous topic (functions)"
 
 
 # ==============================================================================

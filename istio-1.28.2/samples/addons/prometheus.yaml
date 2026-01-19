@@ -476,7 +476,7 @@ spec:
         app.kubernetes.io/version: v3.5.0
         helm.sh/chart: prometheus-27.37.0
         app.kubernetes.io/part-of: prometheus
-        
+
         sidecar.istio.io/inject: "false"
     spec:
       enableServiceLinks: true

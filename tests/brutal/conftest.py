@@ -13,18 +13,14 @@ from unittest.mock import Mock
 def gov_mock():
     """Create MaestroGovernance mock for basic tests."""
     from vertice_cli.maestro_governance import MaestroGovernance
-    return MaestroGovernance(
-        llm_client=Mock(),
-        mcp_client=Mock()
-    )
+
+    return MaestroGovernance(llm_client=Mock(), mcp_client=Mock())
 
 
 @pytest.fixture
 def gov_with_detect_risk():
     """Create MaestroGovernance with mocked detect_risk_level."""
     from vertice_cli.maestro_governance import MaestroGovernance
-    gov = MaestroGovernance(
-        llm_client=Mock(),
-        mcp_client=Mock()
-    )
+
+    gov = MaestroGovernance(llm_client=Mock(), mcp_client=Mock())
     return gov

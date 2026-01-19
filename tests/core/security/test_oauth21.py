@@ -220,9 +220,7 @@ class TestOAuth21Client:
         assert client.is_authenticated is False
         assert client.token is None
 
-    def test_create_authorization_url_requires_discovery(
-        self, client: OAuth21Client
-    ) -> None:
+    def test_create_authorization_url_requires_discovery(self, client: OAuth21Client) -> None:
         """create_authorization_url fails without discovery."""
         with pytest.raises(ValueError, match="Call discover"):
             client.create_authorization_url()
@@ -269,17 +267,13 @@ class TestOAuth21Client:
         assert client.validate_callback("wrong_state") is False
 
     @pytest.mark.asyncio
-    async def test_exchange_code_requires_flow_started(
-        self, client: OAuth21Client
-    ) -> None:
+    async def test_exchange_code_requires_flow_started(self, client: OAuth21Client) -> None:
         """exchange_code fails if flow not started."""
         with pytest.raises(ValueError, match="not started"):
             await client.exchange_code("some_code")
 
     @pytest.mark.asyncio
-    async def test_get_valid_token_requires_token(
-        self, client: OAuth21Client
-    ) -> None:
+    async def test_get_valid_token_requires_token(self, client: OAuth21Client) -> None:
         """get_valid_token fails without token."""
         with pytest.raises(ValueError, match="No token available"):
             await client.get_valid_token()

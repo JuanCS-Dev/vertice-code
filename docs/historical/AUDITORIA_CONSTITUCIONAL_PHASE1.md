@@ -21,8 +21,8 @@
 
 🎉 **APROVADO - Código em Conformidade Constitucional**
 
-O código integrado apresenta **qualidade excepcional** com score médio de 92.0%, 
-superando o limiar de aprovação (80%). Está **pronto para integração** no sistema 
+O código integrado apresenta **qualidade excepcional** com score médio de 92.0%,
+superando o limiar de aprovação (80%). Está **pronto para integração** no sistema
 qwen-dev-cli.
 
 ---
@@ -49,10 +49,10 @@ qwen-dev-cli.
 class AuditLogger:
     """
     Transparent audit logger for constitutional governance.
-    
+
     Logs all governance decisions, enforcement actions, and violations
     with full reasoning and context for transparency.
-    
+
     Supports multiple backends: Console, File (JSON Lines), InMemory.
     """
 ```
@@ -74,7 +74,7 @@ class AuditLogger:
   - Funções de parsing (JSON, configurações)
   - Operações de arquivo (leitura/escrita)
   - Validações de entrada de usuário
-  
+
 **Exemplo de Melhoria Necessária**:
 ```python
 # ANTES (sem error handling)
@@ -139,7 +139,7 @@ from uuid import uuid4
 
 def execute(self, task: AgentTask) -> AgentResponse:
     trace_id = getattr(task, 'trace_id', str(uuid4()))
-    
+
     self.logger.info(
         f"[{trace_id}] Starting execution",
         extra={"trace_id": trace_id, "agent": self.agent_id}
@@ -414,21 +414,21 @@ Nenhum issue crítico foi identificado. O código está **pronto para produção
 
 ## 📝 OBSERVAÇÕES FINAIS
 
-1. **Qualidade Excepcional**: O código integrado apresenta qualidade superior 
+1. **Qualidade Excepcional**: O código integrado apresenta qualidade superior
    ao padrão da indústria (92% vs 82-85%).
 
 2. **Zero Bloqueadores**: Não há issues críticos que impeçam a integração.
 
-3. **Arquitetura Sólida**: Ambos os frameworks demonstram design patterns 
+3. **Arquitetura Sólida**: Ambos os frameworks demonstram design patterns
    maduros e bem pensados.
 
-4. **Manutenibilidade**: Alta cobertura de type hints (100%) e documentação 
+4. **Manutenibilidade**: Alta cobertura de type hints (100%) e documentação
    (85%+) garantem manutenibilidade a longo prazo.
 
-5. **Performance**: Zero dependências externas e uso eficiente de async/await 
+5. **Performance**: Zero dependências externas e uso eficiente de async/await
    garantem performance adequada.
 
-6. **Segurança**: Frameworks de governance (Justiça) e counseling (Sofia) 
+6. **Segurança**: Frameworks de governance (Justiça) e counseling (Sofia)
    adicionam camadas de segurança e sabedoria ao sistema.
 
 ---

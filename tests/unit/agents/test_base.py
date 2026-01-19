@@ -32,6 +32,7 @@ from vertice_cli.agents.base import (
 # AGENTROLE ENUM TESTS
 # =============================================================================
 
+
 class TestAgentRole:
     """Tests for AgentRole enum."""
 
@@ -76,6 +77,7 @@ class TestAgentRole:
 # AGENTCAPABILITY ENUM TESTS
 # =============================================================================
 
+
 class TestAgentCapability:
     """Tests for AgentCapability enum."""
 
@@ -98,6 +100,7 @@ class TestAgentCapability:
 # TASKSTATUS ENUM TESTS
 # =============================================================================
 
+
 class TestTaskStatus:
     """Tests for TaskStatus enum."""
 
@@ -114,6 +117,7 @@ class TestTaskStatus:
 # =============================================================================
 # AGENTTASK MODEL TESTS
 # =============================================================================
+
 
 class TestAgentTask:
     """Tests for AgentTask Pydantic model."""
@@ -135,7 +139,7 @@ class TestAgentTask:
             context={"key": "value"},
             session_id="session-123",
             metadata={"meta": "data"},
-            history=[{"step": 1}]
+            history=[{"step": 1}],
         )
 
         assert task.task_id == "custom-id"
@@ -173,10 +177,7 @@ class TestAgentTask:
 
     def test_context_size_validation_small(self):
         """Test small context passes validation."""
-        task = AgentTask(
-            request="Task",
-            context={"small": "context"}
-        )
+        task = AgentTask(request="Task", context={"small": "context"})
 
         assert task.context["small"] == "context"
 
@@ -203,15 +204,14 @@ class TestAgentTask:
 # AGENTRESPONSE MODEL TESTS
 # =============================================================================
 
+
 class TestAgentResponse:
     """Tests for AgentResponse Pydantic model."""
 
     def test_success_response(self):
         """Test successful response creation."""
         response = AgentResponse(
-            success=True,
-            data={"result": "OK"},
-            reasoning="Task completed successfully"
+            success=True, data={"result": "OK"}, reasoning="Task completed successfully"
         )
 
         assert response.success is True
@@ -221,10 +221,7 @@ class TestAgentResponse:
 
     def test_error_response(self):
         """Test error response creation."""
-        response = AgentResponse(
-            success=False,
-            error="Something went wrong"
-        )
+        response = AgentResponse(success=False, error="Something went wrong")
 
         assert response.success is False
         assert response.error == "Something went wrong"
@@ -245,10 +242,7 @@ class TestAgentResponse:
 
     def test_metadata_alias(self):
         """Test metadata property returns metrics."""
-        response = AgentResponse(
-            success=True,
-            metrics={"latency": 0.5}
-        )
+        response = AgentResponse(success=True, metrics={"latency": 0.5})
 
         assert response.metadata == response.metrics
         assert response.metadata["latency"] == 0.5
@@ -264,15 +258,14 @@ class TestAgentResponse:
 # TASKRESULT MODEL TESTS
 # =============================================================================
 
+
 class TestTaskResult:
     """Tests for TaskResult model."""
 
     def test_basic_result(self):
         """Test basic task result creation."""
         result = TaskResult(
-            task_id="task-123",
-            status=TaskStatus.COMPLETED,
-            output={"result": "done"}
+            task_id="task-123", status=TaskStatus.COMPLETED, output={"result": "done"}
         )
 
         assert result.task_id == "task-123"
@@ -282,9 +275,7 @@ class TestTaskResult:
     def test_failed_result(self):
         """Test failed task result."""
         result = TaskResult(
-            task_id="task-456",
-            status=TaskStatus.FAILED,
-            metadata={"error": "timeout"}
+            task_id="task-456", status=TaskStatus.FAILED, metadata={"error": "timeout"}
         )
 
         assert result.status == TaskStatus.FAILED
@@ -295,15 +286,14 @@ class TestTaskResult:
 # BASEAGENT TESTS
 # =============================================================================
 
+
 class ConcreteAgent(BaseAgent):
     """Concrete implementation for testing BaseAgent."""
 
     async def execute(self, task: AgentTask) -> AgentResponse:
         """Simple execute implementation."""
         return AgentResponse(
-            success=True,
-            data={"executed": task.request},
-            reasoning="Test execution"
+            success=True, data={"executed": task.request}, reasoning="Test execution"
         )
 
 
@@ -332,7 +322,7 @@ class TestBaseAgent:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test prompt"
+            system_prompt="Test prompt",
         )
 
     @pytest.fixture
@@ -343,7 +333,7 @@ class TestBaseAgent:
             capabilities=list(AgentCapability),
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Full access"
+            system_prompt="Full access",
         )
 
     def test_agent_initialization(self, read_only_agent):
@@ -391,10 +381,7 @@ class TestBaseAgent:
     @pytest.mark.asyncio
     async def test_execute_tool_success(self, full_agent, mock_mcp):
         """Test successful tool execution."""
-        result = await full_agent._execute_tool(
-            "read_file",
-            {"path": "test.py"}
-        )
+        result = await full_agent._execute_tool("read_file", {"path": "test.py"})
 
         assert result["success"] is True
         mock_mcp.call_tool.assert_called_once()
@@ -403,10 +390,7 @@ class TestBaseAgent:
     async def test_execute_tool_blocked(self, read_only_agent):
         """Test blocked tool raises CapabilityViolationError."""
         with pytest.raises(CapabilityViolationError, match="SECURITY VIOLATION"):
-            await read_only_agent._execute_tool(
-                "bash_command",
-                {"command": "rm -rf /"}
-            )
+            await read_only_agent._execute_tool("bash_command", {"command": "rm -rf /"})
 
     @pytest.mark.asyncio
     async def test_execute_tool_no_mcp(self, mock_llm):
@@ -416,13 +400,10 @@ class TestBaseAgent:
             capabilities=[AgentCapability.BASH_EXEC],
             llm_client=mock_llm,
             mcp_client=None,  # No MCP
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
-        result = await agent._execute_tool(
-            "bash_command",
-            {"command": "ls"}
-        )
+        result = await agent._execute_tool("bash_command", {"command": "ls"})
 
         assert result["success"] is False
         assert "not initialized" in result["error"]
@@ -447,14 +428,14 @@ class TestBaseAgent:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=mock_mcp,
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         with pytest.raises(Exception, match="API Error"):
             await agent._call_llm("Test")
 
     @pytest.mark.asyncio
-    async def test_execute_returns_response(self, read_only_agent):
+    async def test_execute_returns_agent_response(self, read_only_agent):
         """Test execute() method returns AgentResponse."""
         task = AgentTask(request="Test execute")
 
@@ -474,7 +455,7 @@ class TestBaseAgent:
         assert result == "LLM response"
         # Verify prompt includes task and context
         call_args = mock_llm.generate.call_args
-        prompt = call_args.kwargs.get('prompt', call_args.args[0] if call_args.args else '')
+        prompt = call_args.kwargs.get("prompt", call_args.args[0] if call_args.args else "")
         assert "Analyze code" in prompt
         assert "main.py" in prompt
 
@@ -483,12 +464,14 @@ class TestBaseAgent:
 # TOOL PERMISSION MAPPING TESTS
 # =============================================================================
 
+
 class TestToolPermissionMapping:
     """Tests for tool permission mapping in BaseAgent."""
 
     @pytest.fixture
     def agent_factory(self):
         """Factory for creating agents with specific capabilities."""
+
         def create(capabilities):
             mock_llm = MagicMock()
             mock_llm.generate = AsyncMock(return_value="OK")
@@ -497,8 +480,9 @@ class TestToolPermissionMapping:
                 capabilities=capabilities,
                 llm_client=mock_llm,
                 mcp_client=MagicMock(),
-                system_prompt="Test"
+                system_prompt="Test",
             )
+
         return create
 
     def test_read_tools_require_read_only(self, agent_factory):
@@ -546,6 +530,7 @@ class TestToolPermissionMapping:
 # SECURITY TESTS
 # =============================================================================
 
+
 class TestAgentSecurity:
     """Security-focused tests for agent system."""
 
@@ -559,15 +544,12 @@ class TestAgentSecurity:
             capabilities=[],  # No capabilities
             llm_client=mock_llm,
             mcp_client=MagicMock(),
-            system_prompt="Restricted"
+            system_prompt="Restricted",
         )
 
     def test_no_capabilities_blocks_all(self, restricted_agent):
         """Test agent with no capabilities cannot use any tools."""
-        all_tools = [
-            "read_file", "write_file", "bash_command",
-            "git_commit", "db_query"
-        ]
+        all_tools = ["read_file", "write_file", "bash_command", "git_commit", "db_query"]
 
         for tool in all_tools:
             assert restricted_agent._can_use_tool(tool) is False
@@ -576,6 +558,7 @@ class TestAgentSecurity:
     async def test_capability_violation_logged(self, restricted_agent, caplog):
         """Test capability violations are logged as CRITICAL."""
         import logging
+
         caplog.set_level(logging.CRITICAL)
 
         with pytest.raises(CapabilityViolationError):
@@ -588,15 +571,13 @@ class TestAgentSecurity:
         # Create context that would exceed size limit
         # 10MB limit => need > 10,000,000 bytes
         with pytest.raises(ValueError):
-            AgentTask(
-                request="Test",
-                context={f"key_{i}": "x" * 1000 for i in range(15000)}
-            )
+            AgentTask(request="Test", context={f"key_{i}": "x" * 1000 for i in range(15000)})
 
 
 # =============================================================================
 # EDGE CASES
 # =============================================================================
+
 
 class TestEdgeCases:
     """Tests for edge cases and boundary conditions."""
@@ -608,20 +589,14 @@ class TestEdgeCases:
 
     def test_task_with_special_characters(self):
         """Test task with special characters in request."""
-        task = AgentTask(
-            request="Handle <script>alert('xss')</script> and SQL' OR '1'='1"
-        )
+        task = AgentTask(request="Handle <script>alert('xss')</script> and SQL' OR '1'='1")
 
         assert "<script>" in task.request
         assert "SQL'" in task.request
 
     def test_response_with_none_values(self):
         """Test response handles None values."""
-        response = AgentResponse(
-            success=True,
-            data={"value": None},
-            error=None
-        )
+        response = AgentResponse(success=True, data={"value": None}, error=None)
 
         assert response.data["value"] is None
         assert response.error is None
@@ -648,7 +623,7 @@ class TestEdgeCases:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=MagicMock(),
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         # _stream_llm checks hasattr for stream_chat and stream
@@ -665,6 +640,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_stream_llm_with_stream_chat(self):
         """Test _stream_llm using stream_chat method."""
+
         async def mock_stream_chat(**kwargs):
             for token in ["Hello", " ", "World"]:
                 yield token
@@ -677,7 +653,7 @@ class TestEdgeCases:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=MagicMock(),
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         chunks = []
@@ -689,11 +665,12 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_stream_llm_with_stream_method(self):
         """Test _stream_llm using stream method when stream_chat unavailable."""
+
         async def mock_stream(**kwargs):
             for token in ["Token1", "Token2"]:
                 yield token
 
-        mock_llm = MagicMock(spec=['stream'])  # Only stream, no stream_chat
+        mock_llm = MagicMock(spec=["stream"])  # Only stream, no stream_chat
         mock_llm.stream = mock_stream
 
         agent = ConcreteAgent(
@@ -701,7 +678,7 @@ class TestEdgeCases:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=MagicMock(),
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         chunks = []
@@ -713,6 +690,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_stream_llm_error_handling(self):
         """Test _stream_llm error handling."""
+
         async def mock_stream_error(**kwargs):
             yield "First"
             raise Exception("Stream error")
@@ -725,7 +703,7 @@ class TestEdgeCases:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=MagicMock(),
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         with pytest.raises(Exception, match="Stream error"):
@@ -735,11 +713,12 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_call_llm_with_stream_fallback(self):
         """Test _call_llm using stream method as fallback."""
+
         async def mock_stream(**kwargs):
             for token in ["A", "B", "C"]:
                 yield token
 
-        mock_llm = MagicMock(spec=['stream'])  # Only stream, no generate
+        mock_llm = MagicMock(spec=["stream"])  # Only stream, no generate
         mock_llm.stream = mock_stream
 
         agent = ConcreteAgent(
@@ -747,7 +726,7 @@ class TestEdgeCases:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=MagicMock(),
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         # _call_llm should use stream and join
@@ -770,15 +749,14 @@ class TestEdgeCases:
 # ADDITIONAL COVERAGE TESTS
 # =============================================================================
 
+
 class TestAdditionalCoverage:
     """Additional tests to improve coverage."""
 
     def test_capability_violation_error(self):
         """Test CapabilityViolationError exception."""
         error = CapabilityViolationError(
-            agent_id="explorer",
-            capability="bash_command",
-            message="SECURITY VIOLATION"
+            agent_id="explorer", capability="bash_command", message="SECURITY VIOLATION"
         )
 
         assert "explorer" in str(error)
@@ -790,7 +768,7 @@ class TestAdditionalCoverage:
             task_id="task-789",
             status=TaskStatus.IN_PROGRESS,  # THINKING doesn't exist, use IN_PROGRESS
             output={"partial": True},
-            metadata={"progress": 50}
+            metadata={"progress": 50},
         )
 
         assert result.status == TaskStatus.IN_PROGRESS
@@ -799,6 +777,7 @@ class TestAdditionalCoverage:
     @pytest.mark.asyncio
     async def test_run_with_failed_execute(self):
         """Test execute() failure raises exception."""
+
         class FailingAgent(BaseAgent):
             async def execute(self, task: AgentTask) -> AgentResponse:
                 raise ValueError("Execution failed")
@@ -811,7 +790,7 @@ class TestAdditionalCoverage:
             capabilities=[AgentCapability.READ_ONLY],
             llm_client=mock_llm,
             mcp_client=MagicMock(),
-            system_prompt="Test"
+            system_prompt="Test",
         )
 
         task = AgentTask(request="Fail task")
@@ -827,9 +806,9 @@ class TestAdditionalCoverage:
             data={
                 "result": "done",
                 "details": {"count": 10},
-                "suggestions": ["Suggestion 1", "Suggestion 2"]
+                "suggestions": ["Suggestion 1", "Suggestion 2"],
             },
-            reasoning="Completed"
+            reasoning="Completed",
         )
 
         assert response.data["details"]["count"] == 10
@@ -837,10 +816,7 @@ class TestAdditionalCoverage:
 
     def test_agent_task_with_context_files(self):
         """Test AgentTask with files in context."""
-        task = AgentTask(
-            request="Process files",
-            context={"files": ["file1.py", "file2.py"]}
-        )
+        task = AgentTask(request="Process files", context={"files": ["file1.py", "file2.py"]})
 
         assert len(task.context["files"]) == 2
         assert "file1.py" in task.context["files"]

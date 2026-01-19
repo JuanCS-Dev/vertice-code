@@ -121,12 +121,17 @@ class StatusBar(Horizontal):
         yield Static(self._format_agent(), id="agent", classes="agent")
         yield Static("│", classes="separator")
         yield MiniTokenMeter(id="mini-meter")
+        yield Static(self._format_tokens(), id="tokens", classes="tokens")
         yield Static("│", classes="separator")
         yield Static(self._format_cost(), id="cost", classes="cost")
         yield Static("│", classes="separator")
         yield Static(self._format_errors(), id="errors", classes="errors")
         yield Static("│", classes="separator")
         yield Static(self._format_agent_state(), id="agent-state", classes="agent-state")
+
+    def on_mount(self) -> None:
+        self._update_element("#tokens", self._format_tokens())
+        self._update_mini_meter()
 
     def _format_mode(self) -> str:
         """Format mode indicator."""
@@ -216,11 +221,15 @@ class StatusBar(Horizontal):
 
     def watch_token_used(self, value: int) -> None:
         """Update both token display and mini meter when usage changes."""
+        if not self.is_mounted:
+            return
         self._update_element("#tokens", self._format_tokens())
         self._update_mini_meter()
 
     def watch_token_limit(self, value: int) -> None:
         """Update both token display and mini meter when limit changes."""
+        if not self.is_mounted:
+            return
         self._update_element("#tokens", self._format_tokens())
         self._update_mini_meter()
 
@@ -254,7 +263,7 @@ class StatusBar(Horizontal):
             meter = self.query_one("#mini-meter", MiniTokenMeter)
             meter.used = self.token_used
             meter.limit = self.token_limit
-        except (AttributeError, ValueError):
+        except Exception:
             pass
 
     def update_tokens(self, used: int, limit: int) -> None:

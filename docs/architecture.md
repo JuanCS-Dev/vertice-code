@@ -159,7 +159,7 @@ class SlidingWindowCompressor:
     def compress(self, strategy: WindowStrategy, force: bool = False) -> CompressionResult
     def get_context_string(self) -> str
     def get_stats(self) -> Dict[str, Any]
-    
+
     @property
     def utilization(self) -> float
     @property
@@ -178,7 +178,7 @@ class ThoughtSignatureManager:
         thinking_level: ThinkingLevel,
         parent_id: Optional[str] = None,
     ) -> ThoughtSignature
-    
+
     def get_chain(self, signature_id: str) -> List[ThoughtSignature]
     def get_active_signature(self) -> Optional[ThoughtSignature]
     def get_reasoning_context(self) -> str

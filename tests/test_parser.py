@@ -19,7 +19,7 @@ def parser():
         strict_mode=False,
         enable_retry=False,  # Disable for unit tests
         enable_logging=False,  # Disable for tests
-        sanitize_args=True
+        sanitize_args=True,
     )
 
 
@@ -28,10 +28,7 @@ class TestStrictJSON:
 
     def test_single_tool_call(self, parser):
         """Test single tool call parsing."""
-        response = json.dumps({
-            "tool": "read_file",
-            "args": {"path": "main.py"}
-        })
+        response = json.dumps({"tool": "read_file", "args": {"path": "main.py"}})
 
         result = parser.parse(response)
 
@@ -43,10 +40,12 @@ class TestStrictJSON:
 
     def test_multiple_tool_calls(self, parser):
         """Test multiple tool calls parsing."""
-        response = json.dumps([
-            {"tool": "read_file", "args": {"path": "main.py"}},
-            {"tool": "write_file", "args": {"path": "test.py", "content": "print('hello')"}}
-        ])
+        response = json.dumps(
+            [
+                {"tool": "read_file", "args": {"path": "main.py"}},
+                {"tool": "write_file", "args": {"path": "test.py", "content": "print('hello')"}},
+            ]
+        )
 
         result = parser.parse(response)
 
@@ -56,9 +55,7 @@ class TestStrictJSON:
 
     def test_missing_args(self, parser):
         """Test tool call without args (should default to empty dict)."""
-        response = json.dumps({
-            "tool": "ls"
-        })
+        response = json.dumps({"tool": "ls"})
 
         result = parser.parse(response)
 
@@ -195,10 +192,7 @@ class TestSecuritySanitization:
 
     def test_path_traversal_blocked(self, parser):
         """Test path traversal attack is blocked."""
-        response = json.dumps({
-            "tool": "read_file",
-            "args": {"path": "../../etc/passwd"}
-        })
+        response = json.dumps({"tool": "read_file", "args": {"path": "../../etc/passwd"}})
 
         result = parser.parse(response)
 
@@ -209,10 +203,7 @@ class TestSecuritySanitization:
 
     def test_command_injection_blocked(self, parser):
         """Test command injection is blocked."""
-        response = json.dumps({
-            "tool": "bash_command",
-            "args": {"command": "ls; rm -rf /"}
-        })
+        response = json.dumps({"tool": "bash_command", "args": {"command": "ls; rm -rf /"}})
 
         result = parser.parse(response)
 
@@ -223,10 +214,7 @@ class TestSecuritySanitization:
 
     def test_safe_command_allowed(self, parser):
         """Test safe commands are allowed."""
-        response = json.dumps({
-            "tool": "read_file",
-            "args": {"path": "main.py"}
-        })
+        response = json.dumps({"tool": "read_file", "args": {"path": "main.py"}})
 
         result = parser.parse(response)
 
@@ -241,10 +229,7 @@ class TestRetryLogic:
     def test_retry_with_callback(self):
         """Test retry with secondary LLM pass."""
         parser_with_retry = ResponseParser(
-            strict_mode=False,
-            enable_retry=True,
-            max_retries=1,
-            enable_logging=False
+            strict_mode=False, enable_retry=True, max_retries=1, enable_logging=False
         )
 
         retry_called = False
@@ -269,10 +254,7 @@ class TestRetryLogic:
     def test_max_retries_limit(self):
         """Test max retries limit is respected."""
         parser_with_retry = ResponseParser(
-            strict_mode=True,
-            enable_retry=True,
-            max_retries=2,
-            enable_logging=False
+            strict_mode=True, enable_retry=True, max_retries=2, enable_logging=False
         )
 
         retry_count = 0
@@ -298,20 +280,12 @@ class TestToolCallValidation:
 
     def test_valid_tool_call(self, parser):
         """Test validation of valid tool call."""
-        tool_call = {
-            "tool": "read_file",
-            "args": {"path": "main.py"}
-        }
+        tool_call = {"tool": "read_file", "args": {"path": "main.py"}}
 
         tool_schemas = [
             {
                 "name": "read_file",
-                "parameters": {
-                    "required": ["path"],
-                    "properties": {
-                        "path": {"type": "string"}
-                    }
-                }
+                "parameters": {"required": ["path"], "properties": {"path": {"type": "string"}}},
             }
         ]
 
@@ -322,20 +296,12 @@ class TestToolCallValidation:
 
     def test_missing_required_param(self, parser):
         """Test validation fails for missing required param."""
-        tool_call = {
-            "tool": "read_file",
-            "args": {}
-        }
+        tool_call = {"tool": "read_file", "args": {}}
 
         tool_schemas = [
             {
                 "name": "read_file",
-                "parameters": {
-                    "required": ["path"],
-                    "properties": {
-                        "path": {"type": "string"}
-                    }
-                }
+                "parameters": {"required": ["path"], "properties": {"path": {"type": "string"}}},
             }
         ]
 
@@ -346,17 +312,9 @@ class TestToolCallValidation:
 
     def test_unknown_tool(self, parser):
         """Test validation fails for unknown tool."""
-        tool_call = {
-            "tool": "unknown_tool",
-            "args": {}
-        }
+        tool_call = {"tool": "unknown_tool", "args": {}}
 
-        tool_schemas = [
-            {
-                "name": "read_file",
-                "parameters": {"required": [], "properties": {}}
-            }
-        ]
+        tool_schemas = [{"name": "read_file", "parameters": {"required": [], "properties": {}}}]
 
         is_valid, error = parser.validate_tool_call(tool_call, tool_schemas)
 

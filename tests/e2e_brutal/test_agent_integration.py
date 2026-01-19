@@ -16,7 +16,6 @@ import subprocess
 from pathlib import Path
 
 
-
 @pytest.mark.integration
 class TestAgentHandoff:
     """Tests for agent-to-agent communication."""
@@ -36,12 +35,12 @@ class TestAgentHandoff:
             reproduction_steps=[
                 "1. Ask Planner to create execution plan",
                 "2. Pass plan to Executor",
-                "3. Executor may not understand plan format"
+                "3. Executor may not understand plan format",
             ],
             expected="Standardized ExecutionPlan model that both agents use",
             actual="Ad-hoc plan format, not validated",
             component="agents/planner.py → agents/executor.py",
-            persona="INTEGRATION"
+            persona="INTEGRATION",
         )
 
     def test_ISSUE_072_explorer_context_propagation(self, issue_collector):
@@ -58,12 +57,12 @@ class TestAgentHandoff:
             reproduction_steps=[
                 "1. Explorer analyzes codebase",
                 "2. Ask Planner to create plan",
-                "3. Planner doesn't have Explorer's context"
+                "3. Planner doesn't have Explorer's context",
             ],
             expected="Shared context store accessible by all agents",
             actual="Each agent has isolated context",
             component="context propagation system",
-            persona="INTEGRATION"
+            persona="INTEGRATION",
         )
 
     def test_ISSUE_073_reviewer_feedback_loop(self, issue_collector):
@@ -80,12 +79,12 @@ class TestAgentHandoff:
             reproduction_steps=[
                 "1. Executor creates code",
                 "2. Reviewer finds issues",
-                "3. No automatic fix cycle"
+                "3. No automatic fix cycle",
             ],
             expected="Reviewer issues sent back to Executor for fixing",
             actual="Manual intervention required",
             component="review feedback loop",
-            persona="INTEGRATION"
+            persona="INTEGRATION",
         )
 
 
@@ -103,7 +102,7 @@ class TestDevSquadWorkflow:
             from vertice_cli.agents.architect import ArchitectAgent
 
             # Check if it has required methods
-            required_methods = ['execute', 'design_architecture', 'validate_constraints']
+            required_methods = ["execute", "design_architecture", "validate_constraints"]
 
             for method in required_methods:
                 if not hasattr(ArchitectAgent, method):
@@ -114,12 +113,12 @@ class TestDevSquadWorkflow:
                         description="Agent doesn't implement expected interface",
                         reproduction_steps=[
                             f"1. Check for {method} on ArchitectAgent",
-                            "2. Method not found"
+                            "2. Method not found",
                         ],
                         expected=f"{method} method exists",
                         actual="Method missing",
                         component="agents/architect.py",
-                        persona="INTEGRATION"
+                        persona="INTEGRATION",
                     )
 
         except ImportError:
@@ -132,7 +131,7 @@ class TestDevSquadWorkflow:
                 expected="ArchitectAgent importable",
                 actual="ImportError",
                 component="agents/architect.py",
-                persona="INTEGRATION"
+                persona="INTEGRATION",
             )
 
     def test_ISSUE_075_phase_state_machine(self, issue_collector):
@@ -149,12 +148,12 @@ class TestDevSquadWorkflow:
             reproduction_steps=[
                 "1. Try to run Executor before Planner",
                 "2. System allows it",
-                "3. Execution has no plan context"
+                "3. Execution has no plan context",
             ],
             expected="Error: Must complete Planning phase before Execution",
             actual="Allows out-of-order execution",
             component="orchestration/squad.py",
-            persona="INTEGRATION"
+            persona="INTEGRATION",
         )
 
     def test_ISSUE_076_phase_rollback(self, issue_collector):
@@ -171,12 +170,12 @@ class TestDevSquadWorkflow:
             reproduction_steps=[
                 "1. Complete Planner phase",
                 "2. Executor phase fails",
-                "3. Can't return to Planner to revise"
+                "3. Can't return to Planner to revise",
             ],
             expected="'Execution failed. Return to Planning? [Y/n]'",
             actual="Must start from scratch",
             component="orchestration/squad.py",
-            persona="INTEGRATION"
+            persona="INTEGRATION",
         )
 
 
@@ -184,7 +183,9 @@ class TestDevSquadWorkflow:
 class TestMiniAppCreation:
     """Tests for creating real mini-applications."""
 
-    def test_ISSUE_077_flask_app_creation(self, test_workspace, mini_app_generator, issue_collector):
+    def test_ISSUE_077_flask_app_creation(
+        self, test_workspace, mini_app_generator, issue_collector
+    ):
         """
         ISSUE-077: System should create working Flask app.
 
@@ -205,12 +206,12 @@ class TestMiniAppCreation:
                 description="Generated Flask app structure incomplete",
                 reproduction_steps=[
                     "1. Generate Flask app with mini_app_generator",
-                    f"2. Missing: {missing}"
+                    f"2. Missing: {missing}",
                 ],
                 expected="All standard Flask files present",
                 actual=f"Missing: {missing}",
                 component="mini_app_generator.create_flask_app",
-                persona="INTEGRATION"
+                persona="INTEGRATION",
             )
             return
 
@@ -220,7 +221,7 @@ class TestMiniAppCreation:
             cwd=app_dir,
             capture_output=True,
             text=True,
-            timeout=30
+            timeout=30,
         )
 
         if result.returncode != 0 and "ModuleNotFoundError" in result.stderr:
@@ -232,12 +233,12 @@ class TestMiniAppCreation:
                 reproduction_steps=[
                     "1. Generate Flask app",
                     "2. Run tests",
-                    "3. Flask not installed"
+                    "3. Flask not installed",
                 ],
                 expected="Tests pass or clear dependency message",
                 actual=f"Error: {result.stderr[:200]}",
                 component="mini_app_generator",
-                persona="INTEGRATION"
+                persona="INTEGRATION",
             )
         elif result.returncode != 0:
             issue_collector.add_issue(
@@ -248,12 +249,12 @@ class TestMiniAppCreation:
                 reproduction_steps=[
                     "1. Generate Flask app",
                     "2. Run pytest",
-                    f"3. Exit code: {result.returncode}"
+                    f"3. Exit code: {result.returncode}",
                 ],
                 expected="All tests pass",
                 actual=f"Tests failed:\n{result.stdout[:300]}",
                 component="mini_app_generator.create_flask_app",
-                persona="INTEGRATION"
+                persona="INTEGRATION",
             )
 
     def test_ISSUE_078_cli_tool_creation(self, test_workspace, mini_app_generator, issue_collector):
@@ -271,14 +272,11 @@ class TestMiniAppCreation:
                 category="INTEGRATION",
                 title="CLI tool main.py missing",
                 description="Generated CLI tool missing entry point",
-                reproduction_steps=[
-                    "1. Generate CLI tool",
-                    "2. main.py not created"
-                ],
+                reproduction_steps=["1. Generate CLI tool", "2. main.py not created"],
                 expected="main.py exists with CLI logic",
                 actual="main.py missing",
                 component="mini_app_generator.create_cli_tool",
-                persona="INTEGRATION"
+                persona="INTEGRATION",
             )
             return
 
@@ -290,13 +288,7 @@ class TestMiniAppCreation:
         ]
 
         for cmd, expected_output in tests:
-            result = subprocess.run(
-                cmd,
-                cwd=cli_dir,
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
+            result = subprocess.run(cmd, cwd=cli_dir, capture_output=True, text=True, timeout=10)
 
             if result.returncode != 0:
                 issue_collector.add_issue(
@@ -306,15 +298,17 @@ class TestMiniAppCreation:
                     description="Generated CLI command doesn't work",
                     reproduction_steps=[
                         f"1. Run: {' '.join(cmd)}",
-                        f"2. Exit code: {result.returncode}"
+                        f"2. Exit code: {result.returncode}",
                     ],
                     expected=expected_output,
                     actual=f"Error: {result.stderr}",
                     component="mini_app_generator.create_cli_tool",
-                    persona="INTEGRATION"
+                    persona="INTEGRATION",
                 )
 
-    def test_ISSUE_079_data_processor_creation(self, test_workspace, mini_app_generator, issue_collector):
+    def test_ISSUE_079_data_processor_creation(
+        self, test_workspace, mini_app_generator, issue_collector
+    ):
         """
         ISSUE-079: System should create working data processor.
 
@@ -336,12 +330,12 @@ class TestMiniAppCreation:
                 expected="All files present",
                 actual=f"Missing: {missing}",
                 component="mini_app_generator.create_data_processor",
-                persona="INTEGRATION"
+                persona="INTEGRATION",
             )
             return
 
         # Test processing
-        test_code = '''
+        test_code = """
 import sys
 sys.path.insert(0, ".")
 from processor import DataProcessor
@@ -352,16 +346,12 @@ print(f"Loaded {len(dp.data)} items")
 
 dp.filter("name", "Alice")
 print(f"After filter: {len(dp.data)} items")
-'''
+"""
         test_file = data_dir / "test_run.py"
         test_file.write_text(test_code)
 
         result = subprocess.run(
-            ["python", "test_run.py"],
-            cwd=data_dir,
-            capture_output=True,
-            text=True,
-            timeout=10
+            ["python", "test_run.py"], cwd=data_dir, capture_output=True, text=True, timeout=10
         )
 
         if result.returncode != 0:
@@ -373,12 +363,12 @@ print(f"After filter: {len(dp.data)} items")
                 reproduction_steps=[
                     "1. Generate data processor",
                     "2. Run basic test",
-                    f"3. Error: {result.stderr[:200]}"
+                    f"3. Error: {result.stderr[:200]}",
                 ],
                 expected="Processing succeeds",
                 actual=f"Error: {result.stderr[:200]}",
                 component="mini_app_generator.create_data_processor",
-                persona="INTEGRATION"
+                persona="INTEGRATION",
             )
 
 
@@ -402,12 +392,12 @@ class TestGovernanceIntegration:
                 description="No simple way to test if governance blocks operations",
                 reproduction_steps=[
                     "1. Want to verify governance blocks 'rm -rf /'",
-                    "2. No test hook or dry-run mode"
+                    "2. No test hook or dry-run mode",
                 ],
                 expected="governance.would_block(action) method for testing",
                 actual="Must actually try operation",
                 component="maestro_governance.py",
-                persona="INTEGRATION"
+                persona="INTEGRATION",
             )
 
         except ImportError:
@@ -420,7 +410,7 @@ class TestGovernanceIntegration:
                 expected="Imports successfully",
                 actual="ImportError",
                 component="maestro_governance.py",
-                persona="INTEGRATION"
+                persona="INTEGRATION",
             )
 
     def test_ISSUE_081_sofia_counsel_availability(self, issue_collector):
@@ -433,7 +423,7 @@ class TestGovernanceIntegration:
             from vertice_cli.agents.sofia import SofiaIntegratedAgent as SofiaAgent
 
             # Check Sofia has wisdom methods
-            wisdom_methods = ['counsel', 'ask_question', 'reflect']
+            wisdom_methods = ["counsel", "ask_question", "reflect"]
 
             missing = [m for m in wisdom_methods if not hasattr(SofiaAgent, m)]
 
@@ -447,7 +437,7 @@ class TestGovernanceIntegration:
                     expected="All wisdom methods present",
                     actual=f"Missing: {missing}",
                     component="agents/sofia_agent.py",
-                    persona="INTEGRATION"
+                    persona="INTEGRATION",
                 )
 
         except ImportError:
@@ -460,7 +450,7 @@ class TestGovernanceIntegration:
                 expected="Imports successfully",
                 actual="ImportError",
                 component="agents/sofia_agent.py",
-                persona="INTEGRATION"
+                persona="INTEGRATION",
             )
 
     def test_ISSUE_082_governance_audit_log(self, issue_collector):
@@ -477,12 +467,12 @@ class TestGovernanceIntegration:
             reproduction_steps=[
                 "1. Governance makes several decisions",
                 "2. Want to review what was blocked/allowed",
-                "3. No audit log accessible"
+                "3. No audit log accessible",
             ],
             expected="governance.get_audit_log() returns decision history",
             actual="No audit log method found",
             component="maestro_governance.py",
-            persona="INTEGRATION"
+            persona="INTEGRATION",
         )
 
 
@@ -518,7 +508,7 @@ class TestToolChaining:
                 expected="Read succeeds",
                 actual=f"Error: {read_result.error}",
                 component="tools/file_ops.py:ReadFileTool",
-                persona="INTEGRATION"
+                persona="INTEGRATION",
             )
             return
 
@@ -526,10 +516,9 @@ class TestToolChaining:
         modified = read_result.data.replace("original", "modified")
 
         # Write
-        write_result = asyncio.run(write_tool._execute_validated(
-            path=str(test_file),
-            content=modified
-        ))
+        write_result = asyncio.run(
+            write_tool._execute_validated(path=str(test_file), content=modified)
+        )
 
         if not write_result.success:
             issue_collector.add_issue(
@@ -537,11 +526,15 @@ class TestToolChaining:
                 category="INTEGRATION",
                 title="Tool chain fails at write step",
                 description="Read-modify-write chain broken at write",
-                reproduction_steps=["1. Read OK", "2. Modify OK", f"3. Write error: {write_result.error}"],
+                reproduction_steps=[
+                    "1. Read OK",
+                    "2. Modify OK",
+                    f"3. Write error: {write_result.error}",
+                ],
                 expected="Write succeeds",
                 actual=f"Error: {write_result.error}",
                 component="tools/file_ops.py:WriteFileTool",
-                persona="INTEGRATION"
+                persona="INTEGRATION",
             )
             return
 
@@ -557,12 +550,12 @@ class TestToolChaining:
                     "1. Read file",
                     "2. Replace 'original' with 'modified'",
                     "3. Write file",
-                    "4. Content doesn't contain 'modified'"
+                    "4. Content doesn't contain 'modified'",
                 ],
                 expected="File contains 'modified'",
                 actual=f"File contains: {final_content[:50]}...",
                 component="tool chaining",
-                persona="INTEGRATION"
+                persona="INTEGRATION",
             )
 
     def test_ISSUE_084_search_then_edit_chain(self, test_workspace, issue_collector):
@@ -585,12 +578,12 @@ class TestToolChaining:
             reproduction_steps=[
                 "1. Search for 'def foo'",
                 "2. Want to edit all matches",
-                "3. Must manually coordinate tools"
+                "3. Must manually coordinate tools",
             ],
             expected="tools.search_and_replace('def foo', 'def bar')",
             actual="Manual multi-tool coordination",
             component="tool orchestration",
-            persona="INTEGRATION"
+            persona="INTEGRATION",
         )
 
     def test_ISSUE_085_git_workflow_chain(self, test_workspace, issue_collector):
@@ -612,12 +605,12 @@ class TestToolChaining:
             reproduction_steps=[
                 "1. Edit file",
                 "2. Want to stage and commit atomically",
-                "3. Must call 3 separate tools"
+                "3. Must call 3 separate tools",
             ],
             expected="tools.save_and_commit(path, content, message)",
             actual="Three separate tool calls",
             component="git workflow integration",
-            persona="INTEGRATION"
+            persona="INTEGRATION",
         )
 
 
@@ -639,12 +632,12 @@ class TestSessionPersistence:
             reproduction_steps=[
                 "1. Run command that sets context (e.g., cd)",
                 "2. Run another command",
-                "3. Context may or may not be available"
+                "3. Context may or may not be available",
             ],
             expected="Explicit session state management",
             actual="Ad-hoc context handling",
             component="session management",
-            persona="INTEGRATION"
+            persona="INTEGRATION",
         )
 
     def test_ISSUE_087_crash_recovery(self, issue_collector):
@@ -661,12 +654,12 @@ class TestSessionPersistence:
             reproduction_steps=[
                 "1. Build up session context",
                 "2. Shell crashes",
-                "3. Restart loses everything"
+                "3. Restart loses everything",
             ],
             expected="Session checkpoints that can be restored",
             actual="All state lost on crash",
             component="session persistence",
-            persona="INTEGRATION"
+            persona="INTEGRATION",
         )
 
     def test_ISSUE_088_history_persistence(self, issue_collector):
@@ -686,10 +679,10 @@ class TestSessionPersistence:
                 reproduction_steps=[
                     "1. Run shell and execute commands",
                     "2. Exit shell",
-                    "3. Check for ~/.vertice_history"
+                    "3. Check for ~/.vertice_history",
                 ],
                 expected="History file exists with previous commands",
                 actual="No history file",
                 component="shell_simple.py",
-                persona="INTEGRATION"
+                persona="INTEGRATION",
             )

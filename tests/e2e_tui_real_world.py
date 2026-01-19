@@ -31,7 +31,7 @@ async def run_e2e_scenario():
         # Wait for processing
         await pilot.pause(1.0)
 
-        response_view = app.query_one("#response", ResponseView)
+        app.query_one("#response", ResponseView)
         # Check if response contains system info (e.g., "OS", "Python")
         # Note: ResponseView content is complex, checking simple text presence
         # For simplicity in this harness, we assume success if no crash and some output

@@ -24,8 +24,9 @@ logger = logging.getLogger(__name__)
 
 class CoreBlockType(str, Enum):
     """Types of core memory blocks (MIRIX spec)."""
+
     PERSONA = "persona"  # Agent identity
-    HUMAN = "human"      # User information
+    HUMAN = "human"  # User information
 
 
 @dataclass
@@ -40,6 +41,7 @@ class CoreBlock:
         created_at: When this block was created.
         updated_at: Last update timestamp.
     """
+
     block_type: CoreBlockType
     data: Dict[str, str]
     capacity: int = 100
@@ -107,7 +109,8 @@ class CoreMemory:
     def _init_db(self) -> None:
         """Initialize database schema."""
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS core_blocks (
                     agent_id TEXT,
                     block_type TEXT,
@@ -117,8 +120,10 @@ class CoreMemory:
                     updated_at TEXT,
                     PRIMARY KEY (agent_id, block_type, key)
                 )
-            """)
-            conn.execute("""
+            """
+            )
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS core_metadata (
                     agent_id TEXT,
                     block_type TEXT,
@@ -126,7 +131,8 @@ class CoreMemory:
                     created_at TEXT,
                     PRIMARY KEY (agent_id, block_type)
                 )
-            """)
+            """
+            )
 
     def _ensure_defaults(self) -> None:
         """Ensure default persona exists."""
@@ -156,14 +162,14 @@ class CoreMemory:
                 """INSERT OR REPLACE INTO core_blocks
                    (agent_id, block_type, key, value, created_at, updated_at)
                    VALUES (?, ?, ?, ?, ?, ?)""",
-                (self.agent_id, block_type.value, key, value, now, now)
+                (self.agent_id, block_type.value, key, value, now, now),
             )
             # Ensure metadata exists
             conn.execute(
                 """INSERT OR IGNORE INTO core_metadata
                    (agent_id, block_type, capacity, created_at)
                    VALUES (?, ?, 100, ?)""",
-                (self.agent_id, block_type.value, now)
+                (self.agent_id, block_type.value, now),
             )
 
         logger.debug(f"Core memory set: {block_type.value}.{key}")
@@ -189,7 +195,7 @@ class CoreMemory:
             row = conn.execute(
                 """SELECT value FROM core_blocks
                    WHERE agent_id = ? AND block_type = ? AND key = ?""",
-                (self.agent_id, block_type.value, key)
+                (self.agent_id, block_type.value, key),
             ).fetchone()
 
             return row[0] if row else default
@@ -212,7 +218,7 @@ class CoreMemory:
                 """SELECT key, value, created_at, updated_at
                    FROM core_blocks
                    WHERE agent_id = ? AND block_type = ?""",
-                (self.agent_id, block_type.value)
+                (self.agent_id, block_type.value),
             ).fetchall()
 
             data = {row["key"]: row["value"] for row in rows}
@@ -223,7 +229,7 @@ class CoreMemory:
             meta = conn.execute(
                 """SELECT capacity FROM core_metadata
                    WHERE agent_id = ? AND block_type = ?""",
-                (self.agent_id, block_type.value)
+                (self.agent_id, block_type.value),
             ).fetchone()
             capacity = meta["capacity"] if meta else 100
 
@@ -250,7 +256,7 @@ class CoreMemory:
             cursor = conn.execute(
                 """DELETE FROM core_blocks
                    WHERE agent_id = ? AND block_type = ? AND key = ?""",
-                (self.agent_id, block_type.value, key)
+                (self.agent_id, block_type.value, key),
             )
             return cursor.rowcount > 0
 
@@ -324,7 +330,7 @@ class CoreMemory:
                 """SELECT key FROM core_blocks
                    WHERE agent_id = ? AND block_type = ?
                    ORDER BY updated_at ASC""",
-                (self.agent_id, block_type.value)
+                (self.agent_id, block_type.value),
             ).fetchall()
 
             # Remove oldest 30%
@@ -335,12 +341,10 @@ class CoreMemory:
                 conn.execute(
                     """DELETE FROM core_blocks
                        WHERE agent_id = ? AND block_type = ? AND key = ?""",
-                    (self.agent_id, block_type.value, key)
+                    (self.agent_id, block_type.value, key),
                 )
 
-            logger.info(
-                f"Consolidated {block_type.value}: removed {len(keys_to_remove)} entries"
-            )
+            logger.info(f"Consolidated {block_type.value}: removed {len(keys_to_remove)} entries")
             return len(keys_to_remove)
 
     def to_context_string(self) -> str:

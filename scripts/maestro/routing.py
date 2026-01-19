@@ -9,8 +9,8 @@ import unicodedata
 
 def normalize_text(text: str) -> str:
     """Normalize text for accent-insensitive matching."""
-    nfd = unicodedata.normalize('NFD', text)
-    return ''.join(c for c in nfd if unicodedata.category(c) != 'Mn').lower()
+    nfd = unicodedata.normalize("NFD", text)
+    return "".join(c for c in nfd if unicodedata.category(c) != "Mn").lower()
 
 
 def route_to_agent(prompt: str) -> str:
@@ -25,166 +25,335 @@ def route_to_agent(prompt: str) -> str:
     # PRIORITY 1: Specific multi-word patterns (most specific first)
     testing_patterns = [
         # English
-        'unit test', 'integration test', 'test case', 'write test', 'generate test',
+        "unit test",
+        "integration test",
+        "test case",
+        "write test",
+        "generate test",
         # Portuguese
-        'teste unitario', 'teste de integracao', 'caso de teste',
-        'cria teste', 'faz teste', 'roda os testes', 'executa teste',
+        "teste unitario",
+        "teste de integracao",
+        "caso de teste",
+        "cria teste",
+        "faz teste",
+        "roda os testes",
+        "executa teste",
     ]
     if any(w in p for w in testing_patterns):
-        return 'testing'
+        return "testing"
 
     # Check for dockerfile BEFORE documentation
-    if 'dockerfile' in p or 'docker file' in p:
-        return 'devops'
+    if "dockerfile" in p or "docker file" in p:
+        return "devops"
 
     # Documentation patterns
     doc_patterns = [
         # English
-        'write doc', 'api doc', 'docstring', 'readme', 'generate doc',
+        "write doc",
+        "api doc",
+        "docstring",
+        "readme",
+        "generate doc",
         # Portuguese
-        'escreve doc', 'faz doc', 'documenta', 'gera doc', 'cria documentacao',
+        "escreve doc",
+        "faz doc",
+        "documenta",
+        "gera doc",
+        "cria documentacao",
     ]
     if any(w in p for w in doc_patterns):
-        return 'documentation'
+        return "documentation"
 
     # PRIORITY 2: Domain-specific operations (high specificity)
     data_patterns = [
         # English
-        'database', 'schema', 'query', 'sql', 'migration', 'table', 'index',
-        'postgres', 'mysql', 'db', 'mongodb', 'redis',
+        "database",
+        "schema",
+        "query",
+        "sql",
+        "migration",
+        "table",
+        "index",
+        "postgres",
+        "mysql",
+        "db",
+        "mongodb",
+        "redis",
         # Portuguese
-        'banco de dados', 'tabela', 'consulta', 'migracao',
+        "banco de dados",
+        "tabela",
+        "consulta",
+        "migracao",
     ]
     if any(w in p for w in data_patterns):
-        return 'data'
+        return "data"
 
     devops_patterns = [
         # English
-        'deploy', 'deployment', 'docker', 'container', 'kubernetes', 'k8s',
-        'pod', 'helm', 'argocd', 'ci/cd', 'pipeline', 'terraform', 'iac',
-        'infrastructure', 'incident', 'outage', 'monitor',
+        "deploy",
+        "deployment",
+        "docker",
+        "container",
+        "kubernetes",
+        "k8s",
+        "pod",
+        "helm",
+        "argocd",
+        "ci/cd",
+        "pipeline",
+        "terraform",
+        "iac",
+        "infrastructure",
+        "incident",
+        "outage",
+        "monitor",
         # Portuguese
-        'implanta', 'deploya', 'implantacao', 'incidente', 'infraestrutura',
-        'faz deploy', 'faz o deploy', 'roda deploy',
+        "implanta",
+        "deploya",
+        "implantacao",
+        "incidente",
+        "infraestrutura",
+        "faz deploy",
+        "faz o deploy",
+        "roda deploy",
     ]
     if any(w in p for w in devops_patterns):
-        return 'devops'
+        return "devops"
 
     # PRIORITY 3: Code operations (medium specificity)
     review_patterns = [
         # English
-        'review', 'audit', 'grade', 'lint', 'code review',
+        "review",
+        "audit",
+        "grade",
+        "lint",
+        "code review",
         # Portuguese
-        'revisa', 'revise', 'revisao', 'analisa codigo', 'avalia codigo',
-        'da uma olhada', 'checa o codigo',
+        "revisa",
+        "revise",
+        "revisao",
+        "analisa codigo",
+        "avalia codigo",
+        "da uma olhada",
+        "checa o codigo",
     ]
     if any(w in p for w in review_patterns):
-        return 'reviewer'
+        return "reviewer"
 
     refactor_patterns = [
         # English
-        'refactor', 'rename', 'extract', 'inline', 'modernize', 'clean up',
+        "refactor",
+        "rename",
+        "extract",
+        "inline",
+        "modernize",
+        "clean up",
         # Portuguese
-        'refatora', 'renomeia', 'extrai', 'moderniza', 'limpa',
-        'melhora o codigo', 'organiza o codigo', 'deixa mais limpo',
+        "refatora",
+        "renomeia",
+        "extrai",
+        "moderniza",
+        "limpa",
+        "melhora o codigo",
+        "organiza o codigo",
+        "deixa mais limpo",
     ]
     if any(w in p for w in refactor_patterns):
-        return 'refactorer'
+        return "refactorer"
 
     explore_patterns = [
         # English
-        'explore', 'map', 'graph', 'blast radius', 'dependencies', 'structure',
-        'find', 'search', 'locate', 'where', 'list', 'show',
+        "explore",
+        "map",
+        "graph",
+        "blast radius",
+        "dependencies",
+        "structure",
+        "find",
+        "search",
+        "locate",
+        "where",
+        "list",
+        "show",
         # Portuguese infinitive
-        'explorar', 'encontrar', 'buscar', 'localizar', 'mostrar', 'listar',
+        "explorar",
+        "encontrar",
+        "buscar",
+        "localizar",
+        "mostrar",
+        "listar",
         # Portuguese imperative
-        'mostra', 'busca', 'encontra', 'acha', 'lista', 'procura',
+        "mostra",
+        "busca",
+        "encontra",
+        "acha",
+        "lista",
+        "procura",
         # Portuguese colloquial
-        'onde', 'achar', 'onde esta', 'onde fica', 'me mostra', 'mostra ai',
-        'como ta organizado', 'estrutura do projeto',
+        "onde",
+        "achar",
+        "onde esta",
+        "onde fica",
+        "me mostra",
+        "mostra ai",
+        "como ta organizado",
+        "estrutura do projeto",
     ]
     if any(w in p for w in explore_patterns):
-        return 'explorer'
+        return "explorer"
 
     # PRIORITY 4: Design & Analysis (medium specificity)
     architect_patterns = [
         # English
-        'architecture', 'system design', 'architect', 'uml', 'diagram', 'component',
+        "architecture",
+        "system design",
+        "architect",
+        "uml",
+        "diagram",
+        "component",
         # Portuguese
-        'arquitetura', 'design do sistema', 'arquiteto', 'diagrama', 'componente',
-        'desenha arquitetura', 'projeta sistema',
+        "arquitetura",
+        "design do sistema",
+        "arquiteto",
+        "diagrama",
+        "componente",
+        "desenha arquitetura",
+        "projeta sistema",
     ]
     if any(w in p for w in architect_patterns):
-        return 'architect'
+        return "architect"
 
     security_patterns = [
         # English
-        'security', 'vulnerability', 'vulnerabilities', 'exploit', 'cve', 'owasp',
-        'injection', 'xss', 'csrf', 'penetration', 'check for', 'find security',
+        "security",
+        "vulnerability",
+        "vulnerabilities",
+        "exploit",
+        "cve",
+        "owasp",
+        "injection",
+        "xss",
+        "csrf",
+        "penetration",
+        "check for",
+        "find security",
         # Portuguese
-        'seguranca', 'vulnerabilidade', 'ataque', 'brecha',
-        'verifica seguranca', 'checa vulnerabilidade', 'analisa seguranca',
+        "seguranca",
+        "vulnerabilidade",
+        "ataque",
+        "brecha",
+        "verifica seguranca",
+        "checa vulnerabilidade",
+        "analisa seguranca",
     ]
     if any(w in p for w in security_patterns):
-        return 'security'
+        return "security"
 
     performance_patterns = [
         # English
-        'performance', 'bottleneck', 'profil', 'benchmark', 'slow', 'latency',
-        'throughput', 'memory', 'optimize',
+        "performance",
+        "bottleneck",
+        "profil",
+        "benchmark",
+        "slow",
+        "latency",
+        "throughput",
+        "memory",
+        "optimize",
         # Portuguese
-        'desempenho', 'lento', 'rapido', 'latencia', 'otimiza',
-        'ta lento', 'demora', 'muito devagar', 'melhora performance',
+        "desempenho",
+        "lento",
+        "rapido",
+        "latencia",
+        "otimiza",
+        "ta lento",
+        "demora",
+        "muito devagar",
+        "melhora performance",
     ]
     if any(w in p for w in performance_patterns):
-        return 'performance'
+        return "performance"
 
     # PRIORITY 5: Planning (lower specificity - but NOT if deployment)
     planning_patterns = [
         # English
-        'break down', 'strategy', 'roadmap', 'sop', 'how to',
+        "break down",
+        "strategy",
+        "roadmap",
+        "sop",
+        "how to",
         # Portuguese
-        'passo a passo', 'estrategia', 'como fazer', 'como implementar',
-        'faz um plano', 'planeja', 'planejamento',
+        "passo a passo",
+        "estrategia",
+        "como fazer",
+        "como implementar",
+        "faz um plano",
+        "planeja",
+        "planejamento",
     ]
     if any(w in p for w in planning_patterns):
-        return 'planner'
+        return "planner"
 
     # Check plan (generic keyword - low priority)
-    if ('plan' in p or 'plano' in p) and 'deploy' not in p:
-        return 'planner'
+    if ("plan" in p or "plano" in p) and "deploy" not in p:
+        return "planner"
 
     # PRIORITY 6: Catch-all single keywords (lowest priority - checked LAST)
     # Check test BEFORE security
-    test_keywords = ['test', 'teste', 'testa', 'pytest']
+    test_keywords = ["test", "teste", "testa", "pytest"]
     if any(w in p for w in test_keywords):
-        return 'testing'
+        return "testing"
 
     # Check document AFTER architect
     doc_keywords = [
-        'document', 'comment', 'explain',
-        'documenta', 'comenta', 'explica', 'documentacao',
+        "document",
+        "comment",
+        "explain",
+        "documenta",
+        "comenta",
+        "explica",
+        "documentacao",
     ]
     if any(w in p for w in doc_keywords):
-        return 'documentation'
+        return "documentation"
 
     # PRIORITY 7: Bash/System commands (specific commands only)
     executor_keywords = [
         # File ops
-        'ls', 'pwd', 'cd', 'mkdir', 'rm', 'cp', 'mv',
+        "ls",
+        "pwd",
+        "cd",
+        "mkdir",
+        "rm",
+        "cp",
+        "mv",
         # Process
-        'ps', 'kill', 'top', 'htop',
+        "ps",
+        "kill",
+        "top",
+        "htop",
         # Network
-        'curl', 'wget', 'ping', 'netstat',
+        "curl",
+        "wget",
+        "ping",
+        "netstat",
         # Git
-        'git status', 'git diff', 'git log',
+        "git status",
+        "git diff",
+        "git log",
         # Generic execution
-        'run', 'execute', 'command', 'bash', 'shell',
+        "run",
+        "execute",
+        "command",
+        "bash",
+        "shell",
         # Portuguese
-        'roda', 'executa', 'comando',
+        "roda",
+        "executa",
+        "comando",
     ]
     if any(keyword in p for keyword in executor_keywords):
-        return 'executor'
+        return "executor"
 
     # Default: Executor for everything else
-    return 'executor'
+    return "executor"

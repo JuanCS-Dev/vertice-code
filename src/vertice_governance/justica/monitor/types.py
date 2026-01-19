@@ -15,11 +15,11 @@ from typing import Any, Dict, List, Tuple
 class SuspicionLevel(Enum):
     """Niveis de suspeita baseado no score."""
 
-    NONE = auto()        # 0-20: Comportamento normal
-    LOW = auto()         # 21-40: Ligeiramente suspeito
-    MODERATE = auto()    # 41-60: Moderadamente suspeito
-    HIGH = auto()        # 61-80: Altamente suspeito
-    CRITICAL = auto()    # 81-100: Violacao provavel
+    NONE = auto()  # 0-20: Comportamento normal
+    LOW = auto()  # 21-40: Ligeiramente suspeito
+    MODERATE = auto()  # 41-60: Moderadamente suspeito
+    HIGH = auto()  # 61-80: Altamente suspeito
+    CRITICAL = auto()  # 81-100: Violacao provavel
 
     @classmethod
     def from_score(cls, score: float) -> SuspicionLevel:

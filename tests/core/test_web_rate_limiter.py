@@ -164,6 +164,7 @@ class TestWebRateLimiter:
     @pytest.mark.asyncio
     async def test_execute_with_retry_success(self, limiter: WebRateLimiter) -> None:
         """Execute with retry succeeds."""
+
         async def mock_func() -> str:
             return "success"
 

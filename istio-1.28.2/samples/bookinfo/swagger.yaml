@@ -241,7 +241,7 @@ definitions:
       ratings:
         type: "object"
         description: "A hashmap where keys are reviewer names, values are number of stars"
-        additionalProperties: 
+        additionalProperties:
           type: "string"
     required:
     - "id"

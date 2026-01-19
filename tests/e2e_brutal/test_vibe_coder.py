@@ -16,7 +16,6 @@ import os
 import subprocess
 
 
-
 @pytest.mark.vibe_coder
 class TestVagueInstructions:
     """Tests for handling vague, unclear instructions."""
@@ -35,7 +34,7 @@ class TestVagueInstructions:
             "create something",
             "add a python thing",
             "write some code",
-            "make it work"
+            "make it work",
         ]
 
         for request in vague_requests:
@@ -61,12 +60,12 @@ class TestVagueInstructions:
                 reproduction_steps=[
                     f"1. Send request: '{request}'",
                     "2. System should ask what file/content/location",
-                    "3. Instead it tries to guess or fails cryptically"
+                    "3. Instead it tries to guess or fails cryptically",
                 ],
                 expected="Clarifying questions: What type? What name? Where?",
                 actual="No clarification mechanism found",
                 component="agents/base.py or shell",
-                persona="VIBE_CODER"
+                persona="VIBE_CODER",
             )
 
     def test_ISSUE_019_typo_tolerance(self, test_workspace, issue_collector):
@@ -94,12 +93,12 @@ class TestVagueInstructions:
                 description="System doesn't recognize common typos",
                 reproduction_steps=[
                     f"1. Type command with '{typo}' instead of '{correct}'",
-                    "2. System doesn't offer correction"
+                    "2. System doesn't offer correction",
                 ],
                 expected=f"Did you mean '{correct}'?",
                 actual="Command fails or misinterprets",
                 component="shell input handling",
-                persona="VIBE_CODER"
+                persona="VIBE_CODER",
             )
 
     def test_ISSUE_020_incomplete_commands(self, test_workspace, issue_collector):
@@ -108,14 +107,7 @@ class TestVagueInstructions:
 
         Vibe coder: "git" (nothing else)
         """
-        incomplete_commands = [
-            "git",
-            "python",
-            "create",
-            "edit",
-            "run",
-            "test"
-        ]
+        incomplete_commands = ["git", "python", "create", "edit", "run", "test"]
 
         for cmd in incomplete_commands:
             # System should show help, not fail
@@ -127,12 +119,12 @@ class TestVagueInstructions:
                 reproduction_steps=[
                     f"1. Type just '{cmd}' in shell",
                     "2. System should show available options",
-                    "3. Instead fails or waits indefinitely"
+                    "3. Instead fails or waits indefinitely",
                 ],
                 expected=f"'{cmd}' available options: [list of subcommands]",
                 actual="Error or no response",
                 component="shell command handling",
-                persona="VIBE_CODER"
+                persona="VIBE_CODER",
             )
 
 
@@ -150,11 +142,7 @@ class TestErrorMessageClarity:
         test_file = test_workspace / "app.py"
         test_file.write_text("import nonexistent_module_xyz\n")
 
-        result = subprocess.run(
-            ["python", str(test_file)],
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run(["python", str(test_file)], capture_output=True, text=True)
 
         if "ModuleNotFoundError" in result.stderr:
             # Check if shell provides helpful context
@@ -167,12 +155,12 @@ class TestErrorMessageClarity:
                 reproduction_steps=[
                     "1. Create file with: import nonexistent_module",
                     "2. Run through shell",
-                    "3. Error message doesn't suggest 'pip install'"
+                    "3. Error message doesn't suggest 'pip install'",
                 ],
                 expected="Try: pip install nonexistent_module",
                 actual="Raw Python error only",
                 component="shell error handling",
-                persona="VIBE_CODER"
+                persona="VIBE_CODER",
             )
 
     def test_ISSUE_022_syntax_error_explanation(self, test_workspace, issue_collector):
@@ -193,9 +181,7 @@ class TestErrorMessageClarity:
             test_file.write_text(code)
 
             result = subprocess.run(
-                ["python", "-m", "py_compile", str(test_file)],
-                capture_output=True,
-                text=True
+                ["python", "-m", "py_compile", str(test_file)], capture_output=True, text=True
             )
 
             if result.returncode != 0:
@@ -208,12 +194,12 @@ class TestErrorMessageClarity:
                     reproduction_steps=[
                         f"1. Create file with syntax error: {code[:20]}...",
                         "2. Run through shell",
-                        "3. Only raw Python error shown"
+                        "3. Only raw Python error shown",
                     ],
                     expected=f"Simple explanation: {expected_explanation}",
                     actual="Raw SyntaxError message",
                     component="shell error translation",
-                    persona="VIBE_CODER"
+                    persona="VIBE_CODER",
                 )
 
     def test_ISSUE_023_permission_error_help(self, test_workspace, issue_collector):
@@ -239,12 +225,12 @@ class TestErrorMessageClarity:
                 reproduction_steps=[
                     "1. Try to write to read-only file",
                     "2. PermissionError shown",
-                    "3. No guidance on chmod or sudo"
+                    "3. No guidance on chmod or sudo",
                 ],
                 expected="File is read-only. Try: chmod u+w filename",
                 actual="Raw PermissionError",
                 component="shell error handling",
-                persona="VIBE_CODER"
+                persona="VIBE_CODER",
             )
         finally:
             os.chmod(readonly_file, 0o644)
@@ -263,12 +249,12 @@ class TestErrorMessageClarity:
             description="Connection failures don't help user debug",
             reproduction_steps=[
                 "1. LLM API call fails with connection error",
-                "2. Error shown without troubleshooting steps"
+                "2. Error shown without troubleshooting steps",
             ],
             expected="Check: 1) Internet connection 2) API key valid 3) Firewall settings",
             actual="Raw connection error",
             component="core/llm.py error handling",
-            persona="VIBE_CODER"
+            persona="VIBE_CODER",
         )
 
 
@@ -283,14 +269,16 @@ class TestMagicExpectations:
         Vibe coder expects AI to see what they're working on.
         """
         # Create a context-rich scenario
-        (test_workspace / "my_app.py").write_text('''
+        (test_workspace / "my_app.py").write_text(
+            """
 # My TODO app
 def add_task(name):
     pass  # TODO: implement
 
 def complete_task(id):
     pass  # TODO: implement
-''')
+"""
+        )
 
         # User says "make it work" - should understand from context
         issue_collector.add_issue(
@@ -301,12 +289,12 @@ def complete_task(id):
             reproduction_steps=[
                 "1. Have my_app.py open/visible in workspace",
                 "2. Say 'make it work' or 'finish this'",
-                "3. AI doesn't consider existing code context"
+                "3. AI doesn't consider existing code context",
             ],
             expected="AI reads my_app.py and understands TODOs to implement",
             actual="AI asks what to make or creates something unrelated",
             component="context awareness system",
-            persona="VIBE_CODER"
+            persona="VIBE_CODER",
         )
 
     def test_ISSUE_026_continuation_understanding(self, test_workspace, issue_collector):
@@ -321,7 +309,7 @@ def complete_task(id):
             "do that again",
             "the same thing",
             "now fix that",
-            "this one too"
+            "this one too",
         ]
 
         for phrase in vague_continuations:
@@ -333,12 +321,12 @@ def complete_task(id):
                 reproduction_steps=[
                     "1. Perform an action on file A",
                     f"2. Say '{phrase}' expecting same action on file B",
-                    "3. AI doesn't understand the reference"
+                    "3. AI doesn't understand the reference",
                 ],
                 expected="AI tracks context and resolves 'the other one'",
                 actual="AI asks 'which one?' or fails",
                 component="conversation context tracking",
-                persona="VIBE_CODER"
+                persona="VIBE_CODER",
             )
 
     def test_ISSUE_027_implicit_file_detection(self, test_workspace, issue_collector):
@@ -348,12 +336,14 @@ def complete_task(id):
         Vibe coder: "fix the bug" (should find the file with the bug)
         """
         # Create files with obvious issues
-        (test_workspace / "broken.py").write_text('''
+        (test_workspace / "broken.py").write_text(
+            """
 def divide(a, b):
     return a / b  # BUG: no zero check
 
 x = divide(10, 0)  # This will crash
-''')
+"""
+        )
 
         issue_collector.add_issue(
             severity="HIGH",
@@ -363,12 +353,12 @@ x = divide(10, 0)  # This will crash
             reproduction_steps=[
                 "1. Have broken.py in workspace",
                 "2. Say 'fix the bug'",
-                "3. AI doesn't automatically find broken.py"
+                "3. AI doesn't automatically find broken.py",
             ],
             expected="AI finds broken.py, identifies division by zero risk",
             actual="AI asks 'which file?' or 'what bug?'",
             component="intelligent file detection",
-            persona="VIBE_CODER"
+            persona="VIBE_CODER",
         )
 
 
@@ -390,12 +380,12 @@ class TestPatience:
             reproduction_steps=[
                 "1. Ask 'how do I create a file' 3 times",
                 "2. System gives same response each time",
-                "3. No offer of more detailed help or different approach"
+                "3. No offer of more detailed help or different approach",
             ],
             expected="'You've asked this before - would you like a step-by-step walkthrough?'",
             actual="Same response each time",
             component="conversation intelligence",
-            persona="VIBE_CODER"
+            persona="VIBE_CODER",
         )
 
     def test_ISSUE_029_frustration_detection(self, issue_collector):
@@ -410,7 +400,7 @@ class TestPatience:
             "HELP!!!",
             "I GIVE UP",
             "nothing works",
-            "I've tried everything"
+            "I've tried everything",
         ]
 
         for indicator in frustration_indicators:
@@ -421,12 +411,12 @@ class TestPatience:
                 description="System doesn't recognize frustrated user",
                 reproduction_steps=[
                     f"1. User types: '{indicator}'",
-                    "2. System doesn't offer extra help or empathy"
+                    "2. System doesn't offer extra help or empathy",
                 ],
                 expected="'I can see you're frustrated. Let me try a different approach...'",
                 actual="Standard response ignoring emotional context",
                 component="emotional intelligence",
-                persona="VIBE_CODER"
+                persona="VIBE_CODER",
             )
 
     def test_ISSUE_030_undo_support(self, test_workspace, issue_collector):
@@ -442,7 +432,7 @@ class TestPatience:
             "that was wrong",
             "bring it back",
             "restore",
-            "oops"
+            "oops",
         ]
 
         for phrase in undo_phrases:
@@ -454,12 +444,12 @@ class TestPatience:
                 reproduction_steps=[
                     "1. Make a change (edit file, delete, etc.)",
                     f"2. Say '{phrase}'",
-                    "3. System doesn't know how to undo"
+                    "3. System doesn't know how to undo",
                 ],
                 expected="Immediate undo of last action with confirmation",
                 actual="System doesn't track actions for undo",
                 component="action history / undo system",
-                persona="VIBE_CODER"
+                persona="VIBE_CODER",
             )
 
 
@@ -473,14 +463,6 @@ class TestCopyPasteBehavior:
 
         Vibe coder pastes entire code block.
         """
-        multiline_paste = '''def hello():
-    print("hello")
-
-def world():
-    print("world")
-
-hello()
-world()'''
 
         # System should recognize this as code, not commands
         issue_collector.add_issue(
@@ -491,12 +473,12 @@ world()'''
             reproduction_steps=[
                 "1. Paste multiline code block into shell",
                 "2. System tries to execute each line as command",
-                "3. Fails on first non-command line"
+                "3. Fails on first non-command line",
             ],
             expected="'Detected code block. Save to file or execute?'",
             actual="Tries to run 'def hello():' as shell command",
             component="shell input handling",
-            persona="VIBE_CODER"
+            persona="VIBE_CODER",
         )
 
     def test_ISSUE_032_stack_overflow_paste(self, issue_collector):
@@ -505,11 +487,6 @@ world()'''
 
         Vibe coder pastes with >>> prompts and output.
         """
-        so_paste = '''>>> import json
->>> data = {"key": "value"}
->>> json.dumps(data)
-'{"key": "value"}'
->>>'''
 
         issue_collector.add_issue(
             severity="LOW",
@@ -519,12 +496,12 @@ world()'''
             reproduction_steps=[
                 "1. Paste code from StackOverflow with >>> prompts",
                 "2. System doesn't strip the prompts",
-                "3. Execution fails"
+                "3. Execution fails",
             ],
             expected="Automatically strip >>> and output lines",
             actual="Tries to execute '>>> import json'",
             component="shell input cleaning",
-            persona="VIBE_CODER"
+            persona="VIBE_CODER",
         )
 
     def test_ISSUE_033_markdown_code_block(self, issue_collector):
@@ -533,14 +510,6 @@ world()'''
 
         Vibe coder pastes from ChatGPT with ```python blocks.
         """
-        md_paste = '''Here's the code:
-
-```python
-def greet(name):
-    return f"Hello, {name}!"
-```
-
-Just run this!'''
 
         issue_collector.add_issue(
             severity="MEDIUM",
@@ -550,12 +519,12 @@ Just run this!'''
             reproduction_steps=[
                 "1. Paste markdown with ```python block",
                 "2. System doesn't extract the code",
-                "3. Includes ``` markers in execution"
+                "3. Includes ``` markers in execution",
             ],
             expected="Extract just the Python code, offer to save/run",
             actual="Includes markdown markers in attempted execution",
             component="shell markdown handling",
-            persona="VIBE_CODER"
+            persona="VIBE_CODER",
         )
 
 
@@ -577,12 +546,12 @@ class TestProgressFeedback:
             reproduction_steps=[
                 "1. Start operation that takes >5 seconds",
                 "2. No spinner, progress bar, or status update",
-                "3. User thinks system is frozen"
+                "3. User thinks system is frozen",
             ],
             expected="Spinner or 'Working...' message with elapsed time",
             actual="Blank screen during processing",
             component="shell UI feedback",
-            persona="VIBE_CODER"
+            persona="VIBE_CODER",
         )
 
     def test_ISSUE_035_step_by_step_explanation(self, issue_collector):
@@ -599,12 +568,12 @@ class TestProgressFeedback:
             reproduction_steps=[
                 "1. Ask for complex task like 'set up a Flask app'",
                 "2. System does it silently",
-                "3. User doesn't learn anything"
+                "3. User doesn't learn anything",
             ],
             expected="Verbose mode: 'Step 1: Creating directory... Step 2: Writing app.py...'",
             actual="Silent execution, user just sees final result",
             component="verbose/learning mode",
-            persona="VIBE_CODER"
+            persona="VIBE_CODER",
         )
 
     def test_ISSUE_036_success_celebration(self, issue_collector):
@@ -621,10 +590,10 @@ class TestProgressFeedback:
             reproduction_steps=[
                 "1. Complete a task successfully",
                 "2. Output is technical or minimal",
-                "3. User unsure if it worked"
+                "3. User unsure if it worked",
             ],
             expected="✅ Success! Your file was created at ./app.py",
             actual="Minimal or no success indication",
             component="shell success feedback",
-            persona="VIBE_CODER"
+            persona="VIBE_CODER",
         )

@@ -1,7 +1,7 @@
 # 🔬 PHASE 2.2 RESEARCH: Tool Registry & Execution Patterns (2025)
 
-**Research Date:** 2025-11-17 23:15 UTC  
-**Focus:** GitHub Copilot CLI, Cursor AI, Claude Code  
+**Research Date:** 2025-11-17 23:15 UTC
+**Focus:** GitHub Copilot CLI, Cursor AI, Claude Code
 **Objective:** Learn production patterns for tool registry and execution
 
 ---
@@ -47,17 +47,17 @@ def execute_tool(tool_call, session):
     # 1. Check permissions
     if not is_allowed(tool_call, session.permissions):
         return request_approval(tool_call)
-    
+
     # 2. Validate safety
     if is_dangerous(tool_call):
         return request_explicit_confirmation(tool_call)
-    
+
     # 3. Execute with timeout
     result = run_with_sandbox(tool_call, timeout=30)
-    
+
     # 4. Track in session
     session.add_to_history(tool_call, result)
-    
+
     return result
 ```
 
@@ -77,10 +77,10 @@ class CursorToolRegistry {
     // - Project structure (package.json, Dockerfile, CI scripts)
     // - Available extensions
     // - Current context
-    
+
     async discoverTools(context: ProjectContext): Promise<Tool[]> {
         const tools = [];
-        
+
         // Dynamic discovery
         if (context.hasFile('package.json')) {
             tools.push(npmTools);
@@ -89,10 +89,10 @@ class CursorToolRegistry {
             tools.push(dockerTools);
         }
         // etc.
-        
+
         return tools;
     }
-    
+
     // Tools loaded on-demand during execution
     async executeTool(toolName: string, args: any) {
         const tool = await this.loadTool(toolName); // Lazy loading
@@ -167,25 +167,25 @@ class MCPToolRegistry:
     - Only code_executor API in prompt
     - Tools imported dynamically by agent
     """
-    
+
     def __init__(self):
         self.tools = {}  # Available tools
         self.session = None
-    
+
     async def execute_code(self, code: str, session: Session):
         """Execute agent-generated code."""
         # 1. Sandbox setup
         sandbox = create_sandbox(session)
-        
+
         # 2. Make tools importable
         sandbox.make_available(self.tools)
-        
+
         # 3. Execute with safety
         result = await sandbox.run(code, timeout=60)
-        
+
         # 4. Track in session
         session.add_history("code_exec", code, result)
-        
+
         return result
 ```
 
@@ -215,7 +215,7 @@ class HybridToolRegistry:
     - Dynamic discovery (Cursor pattern)
     - On-demand execution (Claude pattern)
     """
-    
+
     def __init__(self):
         # Core tools (always available)
         self.core_tools = {
@@ -223,52 +223,52 @@ class HybridToolRegistry:
             "write_file": WriteFileTool(),
             "bash_command": BashCommandTool(),
         }
-        
+
         # Discovered tools (context-dependent)
         self.discovered_tools = {}
-        
+
         # Lazy-loaded tools (heavy dependencies)
         self.lazy_tools = {}
-    
+
     def register_core(self, tool: Tool):
         """Register core tool (always available)."""
         self.core_tools[tool.name] = tool
-    
+
     async def discover_tools(self, context: ProjectContext):
         """Discover tools based on project (Cursor pattern)."""
         if context.has_git():
             self.discovered_tools["git_commit"] = GitCommitTool()
-        
+
         if context.has_node():
             self.discovered_tools["npm_install"] = NpmInstallTool()
-    
+
     def get_tool(self, name: str) -> Optional[Tool]:
         """Get tool by name (with lazy loading)."""
         # Check core first
         if name in self.core_tools:
             return self.core_tools[name]
-        
+
         # Check discovered
         if name in self.discovered_tools:
             return self.discovered_tools[name]
-        
+
         # Lazy load if needed
         if name in self.lazy_tools:
             return self._lazy_load(name)
-        
+
         return None
-    
+
     def get_available_tools(self, context: Optional[str] = None) -> List[Tool]:
         """Get all available tools for current context."""
         tools = list(self.core_tools.values())
-        
+
         if context:
             # Filter by context
             tools.extend([
                 t for t in self.discovered_tools.values()
                 if t.is_relevant(context)
             ])
-        
+
         return tools
 ```
 
@@ -287,7 +287,7 @@ async def execute_tool_call(
 ) -> ExecutionResult:
     """
     Execution pipeline with multi-layer checks.
-    
+
     Flow:
     1. Parse tool call
     2. Validate safety (blacklist + whitelist)
@@ -297,11 +297,11 @@ async def execute_tool_call(
     6. Track in session
     7. Return result
     """
-    
+
     # 1. Parse
     tool_name = tool_call.get("tool")
     arguments = tool_call.get("arguments", {})
-    
+
     # 2. Safety check (CRITICAL)
     is_safe, reason = safety.is_safe(tool_call)
     if not is_safe:
@@ -311,14 +311,14 @@ async def execute_tool_call(
             blocked=True,
             block_reason=reason
         )
-    
+
     # 3. Permission check (Copilot pattern)
     if not session.has_permission(tool_name):
         approval = await request_user_approval(tool_call)
         if not approval:
             return ExecutionResult(success=False, error="User denied")
         session.grant_permission(tool_name)
-    
+
     # 4. Get tool
     tool = registry.get_tool(tool_name)
     if not tool:
@@ -326,7 +326,7 @@ async def execute_tool_call(
             success=False,
             error=f"Tool not found: {tool_name}"
         )
-    
+
     # 5. Execute with timeout
     try:
         result = await asyncio.wait_for(
@@ -341,14 +341,14 @@ async def execute_tool_call(
     except Exception as e:
         logger.error(f"Tool failed: {e}")
         return ExecutionResult(success=False, error=str(e))
-    
+
     # 6. Track in session
     session.add_history("tool_call", {
         "tool": tool_name,
         "args": arguments,
         "result": result
     })
-    
+
     # 7. Return
     return ExecutionResult(success=True, result=result)
 ```
@@ -364,31 +364,31 @@ class ProductionSession:
     """
     Best practices from Claude Code + Copilot.
     """
-    
+
     def __init__(self, session_id: str):
         self.session_id = session_id
         self.cwd = os.getcwd()
-        
+
         # Context (Claude pattern)
         self.context_tokens = 0
         self.max_tokens = 200_000  # Claude Sonnet limit
-        
+
         # Permissions (Copilot pattern)
         self.granted_permissions = set()
         self.denied_permissions = set()
-        
+
         # History
         self.history = []
         self.checkpoints = []
-        
+
         # File tracking (Cursor pattern)
         self.read_files = set()
         self.modified_files = set()
-    
+
     def should_clear_context(self) -> bool:
         """Check if context should be cleared (Claude pattern)."""
         return self.context_tokens > (self.max_tokens * 0.8)
-    
+
     def create_checkpoint(self):
         """Save current state (Claude pattern)."""
         self.checkpoints.append({
@@ -396,7 +396,7 @@ class ProductionSession:
             "history": self.history[-50:],
             "permissions": self.granted_permissions.copy(),
         })
-    
+
     def has_permission(self, tool_name: str) -> bool:
         """Check if tool is allowed (Copilot pattern)."""
         if tool_name in self.denied_permissions:
@@ -479,7 +479,7 @@ class ProductionSession:
 
 ---
 
-_"Copy from one, it's plagiarism; copy from three, it's research."_  
+_"Copy from one, it's plagiarism; copy from three, it's research."_
 — Unknown
 
 **Let's build the best of all 3! 🚀**

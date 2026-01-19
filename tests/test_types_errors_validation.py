@@ -64,6 +64,7 @@ from vertice_cli.core.validation import (
 # TYPE TESTS
 # ============================================================================
 
+
 class TestTypes:
     """Test type definitions and guards."""
 
@@ -104,7 +105,7 @@ class TestTypes:
         """Test is_message_list with valid list."""
         messages = [
             {"role": "user", "content": "Hello"},
-            {"role": "assistant", "content": "Hi there"}
+            {"role": "assistant", "content": "Hi there"},
         ]
         assert is_message_list(messages)
 
@@ -125,6 +126,7 @@ class TestTypes:
 # ============================================================================
 # ERROR TESTS
 # ============================================================================
+
 
 class TestErrors:
     """Test error hierarchy."""
@@ -148,7 +150,7 @@ class TestErrors:
             category=ErrorCategory.SYNTAX,
             file="test.py",
             line=10,
-            suggestions=("Fix syntax", "Check indentation")
+            suggestions=("Fix syntax", "Check indentation"),
         )
         error = QwenError("Syntax issue", context=context, recoverable=True)
         assert error.context == context
@@ -160,10 +162,10 @@ class TestErrors:
         error = QwenError("Runtime error", context=context)
         data = error.to_dict()
 
-        assert data['type'] == 'QwenError'
-        assert data['message'] == 'Runtime error'
-        assert 'context' in data
-        assert data['context']['category'] == 'runtime'
+        assert data["type"] == "QwenError"
+        assert data["message"] == "Runtime error"
+        assert "context" in data
+        assert data["context"]["category"] == "runtime"
 
     def test_syntax_error(self):
         """Test SyntaxError."""
@@ -172,7 +174,7 @@ class TestErrors:
             file="test.py",
             line=10,
             column=5,
-            code_snippet="if x == 5\n    print('hi')"
+            code_snippet="if x == 5\n    print('hi')",
         )
         assert error.recoverable
         assert error.context is not None
@@ -184,22 +186,18 @@ class TestErrors:
         error = ImportError("Module not found", module_name="numpy", file="script.py")
         assert error.recoverable
         assert error.context is not None
-        assert error.context.metadata['module'] == 'numpy'
-        assert any('pip install' in s for s in error.context.suggestions)
+        assert error.context.metadata["module"] == "numpy"
+        assert any("pip install" in s for s in error.context.suggestions)
 
     def test_type_error(self):
         """Test TypeError."""
         error = TypeError(
-            "Type mismatch",
-            expected_type="str",
-            actual_type="int",
-            file="test.py",
-            line=5
+            "Type mismatch", expected_type="str", actual_type="int", file="test.py", line=5
         )
         assert error.recoverable
         assert error.context is not None
-        assert error.context.metadata['expected'] == 'str'
-        assert error.context.metadata['actual'] == 'int'
+        assert error.context.metadata["expected"] == "str"
+        assert error.context.metadata["actual"] == "int"
 
     def test_file_not_found_error(self):
         """Test FileNotFoundError."""
@@ -213,26 +211,22 @@ class TestErrors:
         error = PermissionError("/protected/file", "write")
         assert not error.recoverable
         assert error.context is not None
-        assert error.context.metadata['operation'] == 'write'
+        assert error.context.metadata["operation"] == "write"
 
     def test_network_error(self):
         """Test NetworkError."""
-        error = NetworkError(
-            "Connection failed",
-            url="https://api.example.com",
-            status_code=500
-        )
+        error = NetworkError("Connection failed", url="https://api.example.com", status_code=500)
         assert error.recoverable
         assert error.context is not None
-        assert error.context.metadata['url'] == 'https://api.example.com'
-        assert error.context.metadata['status_code'] == 500
+        assert error.context.metadata["url"] == "https://api.example.com"
+        assert error.context.metadata["status_code"] == 500
 
     def test_timeout_error(self):
         """Test TimeoutError."""
         error = TimeoutError("Operation timed out", timeout_seconds=30.0, operation="API call")
         assert error.recoverable
         assert error.context is not None
-        assert error.context.metadata['timeout'] == 30.0
+        assert error.context.metadata["timeout"] == 30.0
 
     def test_rate_limit_error(self):
         """Test RateLimitError."""
@@ -245,38 +239,37 @@ class TestErrors:
         error = TokenLimitError(current_tokens=5000, max_tokens=4096)
         assert error.recoverable
         assert error.context is not None
-        assert error.context.metadata['current'] == 5000
-        assert error.context.metadata['limit'] == 4096
+        assert error.context.metadata["current"] == 5000
+        assert error.context.metadata["limit"] == 4096
 
     def test_llm_error(self):
         """Test LLMError."""
         error = LLMError("API failed", provider="OpenAI", model="gpt-4")
         assert error.recoverable
         assert error.context is not None
-        assert error.context.metadata['provider'] == 'OpenAI'
-        assert error.context.metadata['model'] == 'gpt-4'
+        assert error.context.metadata["provider"] == "OpenAI"
+        assert error.context.metadata["model"] == "gpt-4"
 
     def test_llm_validation_error(self):
         """Test LLMValidationError."""
         error = LLMValidationError("No backend available")
         assert error.recoverable
-        assert any('HF_TOKEN' in s for s in error.context.suggestions)
+        assert any("HF_TOKEN" in s for s in error.context.suggestions)
 
     def test_tool_error(self):
         """Test ToolError."""
         error = ToolError(
-            "Tool execution failed",
-            tool_name="read_file",
-            arguments={"path": "/test"}
+            "Tool execution failed", tool_name="read_file", arguments={"path": "/test"}
         )
         assert error.recoverable
         assert error.context is not None
-        assert error.context.metadata['tool'] == 'read_file'
+        assert error.context.metadata["tool"] == "read_file"
 
 
 # ============================================================================
 # VALIDATION TESTS
 # ============================================================================
+
 
 class TestValidation:
     """Test validation system."""
@@ -331,7 +324,7 @@ class TestValidation:
 
     def test_pattern_validator(self):
         """Test Pattern validator."""
-        validator = Pattern(r'^[a-z]+$', "username", "lowercase letters")
+        validator = Pattern(r"^[a-z]+$", "username", "lowercase letters")
 
         assert validator.validate("hello").valid
         assert not validator.validate("Hello123").valid
@@ -358,9 +351,7 @@ class TestValidation:
     def test_and_validator(self):
         """Test And (composite) validator."""
         validator = And(
-            Required("field"),
-            TypeCheck(str, "field"),
-            Length(min_length=3, field_name="field")
+            Required("field"), TypeCheck(str, "field"), Length(min_length=3, field_name="field")
         )
 
         assert validator.validate("hello").valid
@@ -369,10 +360,7 @@ class TestValidation:
 
     def test_or_validator(self):
         """Test Or (composite) validator."""
-        validator = Or(
-            TypeCheck(str, "value"),
-            TypeCheck(int, "value")
-        )
+        validator = Or(TypeCheck(str, "value"), TypeCheck(int, "value"))
 
         assert validator.validate("hello").valid
         assert validator.validate(123).valid
@@ -388,10 +376,7 @@ class TestValidation:
 
     def test_custom_validator(self):
         """Test Custom validator."""
-        validator = Custom(
-            func=lambda x: x > 0,
-            error_message="Value must be positive"
-        )
+        validator = Custom(func=lambda x: x > 0, error_message="Value must be positive")
 
         assert validator.validate(5).valid
         assert not validator.validate(0).valid
@@ -419,10 +404,7 @@ class TestValidation:
 
     def test_validate_message_list_valid(self):
         """Test validate_message_list with valid list."""
-        messages = [
-            {"role": "user", "content": "Hello"},
-            {"role": "assistant", "content": "Hi"}
-        ]
+        messages = [{"role": "user", "content": "Hello"}, {"role": "assistant", "content": "Hi"}]
         result = validate_message_list(messages)
         assert result.valid
 
@@ -436,7 +418,7 @@ class TestValidation:
         """Test validate_message_list with invalid message."""
         messages = [
             {"role": "user", "content": "Hello"},
-            {"role": "invalid"}  # Invalid
+            {"role": "invalid"},  # Invalid
         ]
         result = validate_message_list(messages)
         assert not result.valid
@@ -446,7 +428,7 @@ class TestValidation:
         tool = {
             "name": "read_file",
             "description": "Read a file",
-            "parameters": {"path": {"type": "string"}}
+            "parameters": {"path": {"type": "string"}},
         }
         result = validate_tool_definition(tool)
         assert result.valid
@@ -463,6 +445,7 @@ class TestValidation:
 # FILE SYSTEM VALIDATION TESTS
 # ============================================================================
 
+
 class TestFileSystemValidation:
     """Test file system validators."""
 
@@ -470,6 +453,7 @@ class TestFileSystemValidation:
         """Test PathExists with existing path."""
         with tempfile.NamedTemporaryFile() as tmp:
             from vertice_cli.core.validation import PathExists
+
             validator = PathExists()
             result = validator.validate(tmp.name)
             assert result.valid
@@ -477,6 +461,7 @@ class TestFileSystemValidation:
     def test_path_exists_invalid(self):
         """Test PathExists with non-existent path."""
         from vertice_cli.core.validation import PathExists
+
         validator = PathExists()
         result = validator.validate("/this/path/does/not/exist")
         assert not result.valid
@@ -485,6 +470,7 @@ class TestFileSystemValidation:
         """Test FileExists with existing file."""
         with tempfile.NamedTemporaryFile() as tmp:
             from vertice_cli.core.validation import FileExists
+
             validator = FileExists()
             result = validator.validate(tmp.name)
             assert result.valid
@@ -493,6 +479,7 @@ class TestFileSystemValidation:
         """Test FileExists with directory (should fail)."""
         with tempfile.TemporaryDirectory() as tmpdir:
             from vertice_cli.core.validation import FileExists
+
             validator = FileExists()
             result = validator.validate(tmpdir)
             assert not result.valid
@@ -502,18 +489,20 @@ class TestFileSystemValidation:
         """Test DirectoryExists with existing directory."""
         with tempfile.TemporaryDirectory() as tmpdir:
             from vertice_cli.core.validation import DirectoryExists
+
             validator = DirectoryExists()
             result = validator.validate(tmpdir)
             assert result.valid
 
     def test_readable_file_valid(self):
         """Test ReadableFile with readable file."""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False) as tmp:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as tmp:
             tmp.write("test content")
             tmp.flush()
 
             try:
                 from vertice_cli.core.validation import ReadableFile
+
                 validator = ReadableFile()
                 result = validator.validate(tmp.name)
                 assert result.valid
@@ -525,25 +514,19 @@ class TestFileSystemValidation:
 # INTEGRATION TESTS
 # ============================================================================
 
+
 class TestIntegration:
     """Test integration between types, errors, and validation."""
 
     def test_error_with_validation_context(self):
         """Test creating error from validation failure."""
-        validator = And(
-            Required("username"),
-            Length(min_length=3, field_name="username")
-        )
+        validator = And(Required("username"), Length(min_length=3, field_name="username"))
         result = validator.validate("ab")
 
         assert not result.valid
 
         # Create error from validation result
-        error = ErrorValidationError(
-            result.errors[0],
-            field="username",
-            value="ab"
-        )
+        error = ErrorValidationError(result.errors[0], field="username", value="ab")
         assert error.recoverable
 
     def test_workflow_with_errors(self):

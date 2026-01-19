@@ -31,7 +31,7 @@ class TestRenameEdgeCases:
         engine = RefactoringEngine(tmp_path)
         result = engine.rename_symbol(file, "old_name", "new_name")
 
-        content = file.read_text()
+        file.read_text()
         assert result.success
         # NOTE: Current implementation DOES replace in strings
         # This is a known limitation
@@ -127,7 +127,7 @@ class TestMultiFileScenarios:
         file2.write_text("old_name = 2")
 
         engine = RefactoringEngine(tmp_path)
-        result = engine.rename_symbol(file1, "old_name", "new_name")
+        engine.rename_symbol(file1, "old_name", "new_name")
 
         assert "new_name" in file1.read_text()
         assert "old_name" in file2.read_text()  # Should be unchanged
@@ -143,7 +143,7 @@ class TestConstitutionalCompliance:
         file.write_text(original)
 
         engine = RefactoringEngine(tmp_path)
-        result = engine.rename_symbol(file, "y", "z")  # No match
+        engine.rename_symbol(file, "y", "z")  # No match
 
         # File should be unchanged
         assert file.read_text() == original
@@ -157,7 +157,7 @@ class TestConstitutionalCompliance:
 
         # If anything fails, file should remain readable
         try:
-            result = engine.organize_imports(file)
+            engine.organize_imports(file)
         except Exception:
             pass
 

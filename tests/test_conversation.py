@@ -238,8 +238,7 @@ class TestConversationManager:
 
         # Simulate tool error
         manager.add_tool_result(
-            turn, "bad_tool", {}, None, False,
-            error="File not found: missing.txt"
+            turn, "bad_tool", {}, None, False, error="File not found: missing.txt"
         )
 
         # State should be RECOVERING (auto-recovery enabled)
@@ -359,9 +358,7 @@ class TestConversationManager:
         for i in range(20):
             turn = manager.start_turn(f"This is a longer query number {i} to increase token count")
             manager.add_llm_response(
-                turn,
-                f"This is a detailed response number {i} with more tokens",
-                tokens_used=20
+                turn, f"This is a detailed response number {i} with more tokens", tokens_used=20
             )
             manager.transition_state(ConversationState.IDLE, "done")
 

@@ -123,6 +123,7 @@ class TestLLMFailures:
     @pytest.mark.asyncio
     async def test_llm_timeout(self):
         """LLM trava e não responde."""
+
         async def slow_llm(*args, **kwargs):
             await asyncio.sleep(100)  # Never completes
             return "too slow"
@@ -134,10 +135,7 @@ class TestLLMFailures:
 
         # Should timeout gracefully
         try:
-            result = await asyncio.wait_for(
-                shell._get_command_suggestion("test", {}),
-                timeout=2.0
-            )
+            result = await asyncio.wait_for(shell._get_command_suggestion("test", {}), timeout=2.0)
         except asyncio.TimeoutError:
             # Should handle timeout
             result = shell._fallback_suggest("test")
@@ -249,10 +247,7 @@ class TestExecutionEdgeCases:
         # This would hang forever in real shell
         # Our executor should timeout
         try:
-            result = await asyncio.wait_for(
-                shell._execute_command("sleep 1000"),
-                timeout=2.0
-            )
+            await asyncio.wait_for(shell._execute_command("sleep 1000"), timeout=2.0)
         except asyncio.TimeoutError:
             pass  # Expected
 
@@ -265,7 +260,7 @@ class TestExecutionEdgeCases:
         result = await shell._execute_command("yes | head -n 100000")
 
         # Should handle large output
-        assert result['success'] is not None
+        assert result["success"] is not None
         # Output might be truncated
 
     @pytest.mark.asyncio
@@ -275,10 +270,7 @@ class TestExecutionEdgeCases:
 
         # This would block waiting for input
         try:
-            result = await asyncio.wait_for(
-                shell._execute_command("read -p 'Enter: ' var"),
-                timeout=2.0
-            )
+            await asyncio.wait_for(shell._execute_command("read -p 'Enter: ' var"), timeout=2.0)
             # Should timeout or handle gracefully
         except asyncio.TimeoutError:
             pass  # Expected
@@ -333,10 +325,7 @@ class TestRaceConditions:
         shell = InteractiveShell(llm_client=MagicMock())
 
         # Execute 10 commands concurrently
-        tasks = [
-            shell._execute_command(f"echo 'test {i}'")
-            for i in range(10)
-        ]
+        tasks = [shell._execute_command(f"echo 'test {i}'") for i in range(10)]
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -369,7 +358,7 @@ class TestMemoryLeaks:
 
         for i in range(100):  # Reduced to 100 for speed
             result = await shell._execute_command(f"echo {i}")
-            assert result['success']
+            assert result["success"]
 
         # Context should not grow unbounded
         assert len(shell.context.history) < 200, "History growing too large"
@@ -381,10 +370,7 @@ class TestMemoryLeaks:
 
         # Generate 100 errors
         for i in range(100):
-            await shell._handle_error(
-                RuntimeError(f"Error {i}"),
-                f"command {i}"
-            )
+            await shell._handle_error(RuntimeError(f"Error {i}"), f"command {i}")
 
         # Should not accumulate all errors in memory
         # (current implementation doesn't store, so OK)
@@ -440,7 +426,7 @@ class TestJudgeScenarios:
             for i in range(10):
                 if i % 3 == 0:
                     raise KeyboardInterrupt()
-                result = shell._fallback_suggest("test")
+                shell._fallback_suggest("test")
         except KeyboardInterrupt:
             # Should be caught by REPL loop
             pass

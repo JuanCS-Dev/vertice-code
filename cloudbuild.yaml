@@ -2,9 +2,9 @@
 # Deploys: Backend, Frontend, and MCP Server (Prometheus)
 
 steps:
-  # ============================================ 
+  # ============================================
   # Step 1: Build Backend Docker Image
-  # ============================================ 
+  # ============================================
   - name: 'gcr.io/cloud-builders/docker'
     id: 'build-backend'
     args:
@@ -40,9 +40,9 @@ steps:
           -f vertice-chat-webapp/frontend/Dockerfile \
           vertice-chat-webapp/frontend
     dir: '.'
-  # ============================================ 
+  # ============================================
   # Step 3: Build MCP Server Image
-  # ============================================ 
+  # ============================================
   - name: 'gcr.io/cloud-builders/docker'
     id: 'build-mcp'
     args:
@@ -56,9 +56,9 @@ steps:
       - '.' # Build context must be root to access all modules
     dir: '.'
 
-  # ============================================ 
+  # ============================================
   # Step 4: Push Images
-  # ============================================ 
+  # ============================================
   - name: 'gcr.io/cloud-builders/docker'
     id: 'push-all'
     entrypoint: 'bash'
@@ -73,9 +73,9 @@ steps:
         docker push ${_REGION}-docker.pkg.dev/$PROJECT_ID/vertice-cloud/mcp-server:latest
     waitFor: ['build-backend', 'build-frontend', 'build-mcp']
 
-  # ============================================ 
+  # ============================================
   # Step 5: Deploy MCP Server (Must be first to get URL)
-  # ============================================ 
+  # ============================================
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'deploy-mcp'
     entrypoint: gcloud
@@ -100,9 +100,9 @@ steps:
       - '1' # Keep one warm
     waitFor: ['push-all']
 
-  # ============================================ 
+  # ============================================
   # Step 6: Deploy Backend (Depends on MCP)
-  # ============================================ 
+  # ============================================
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'deploy-backend'
     entrypoint: 'bash'
@@ -111,7 +111,7 @@ steps:
       - |
         # Get MCP URL
         MCP_URL=$(gcloud run services describe vertice-mcp --region ${_REGION} --format='value(status.url)')
-        
+
         gcloud run deploy vertice-backend \
           --image ${_REGION}-docker.pkg.dev/$PROJECT_ID/vertice-cloud/backend:$COMMIT_SHA \
           --region ${_REGION} \
@@ -145,7 +145,7 @@ steps:
           --port 8080 \
           --set-env-vars NEXT_PUBLIC_API_URL=$$BACKEND_URL,NODE_ENV=production
     waitFor: ['push-all', 'deploy-backend']
-  
+
 # Artifact Registry images
 images:
   - '${_REGION}-docker.pkg.dev/$PROJECT_ID/vertice-cloud/backend:$COMMIT_SHA'

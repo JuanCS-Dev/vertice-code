@@ -382,7 +382,6 @@ class TestUnifiedContextStateRobustness:
         ctx = UnifiedContext()
 
         # Valid transitions should work
-        original_state = ctx.state
         ctx._update_state("compacting")  # Should work
         assert ctx.state == "compacting"
 
@@ -571,8 +570,8 @@ class TestUnifiedContextErrorRecovery:
         # Current implementation may not have rollback
         # But we can test that failed operations don't corrupt state
 
-        original_vars = len(ctx.variables())
-        original_messages = len(ctx.get_messages())
+        len(ctx.variables())
+        len(ctx.get_messages())
 
         # Try a complex operation that might partially fail
         try:

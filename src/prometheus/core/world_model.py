@@ -21,6 +21,7 @@ import re
 
 class ActionType(Enum):
     """Types of actions the agent can take."""
+
     READ_FILE = "read_file"
     WRITE_FILE = "write_file"
     EDIT_FILE = "edit_file"
@@ -36,15 +37,18 @@ class ActionType(Enum):
 @dataclass
 class WorldState:
     """State of the world at a point in time."""
+
     files: Dict[str, str] = field(default_factory=dict)  # path -> content/status
     variables: Dict[str, Any] = field(default_factory=dict)
     executed_actions: List[str] = field(default_factory=list)
     errors_encountered: List[str] = field(default_factory=list)
-    resources_used: Dict[str, float] = field(default_factory=lambda: {
-        "tokens": 0,
-        "api_calls": 0,
-        "time_seconds": 0,
-    })
+    resources_used: Dict[str, float] = field(
+        default_factory=lambda: {
+            "tokens": 0,
+            "api_calls": 0,
+            "time_seconds": 0,
+        }
+    )
     success_probability: float = 1.0
     confidence: float = 1.0
 
@@ -74,6 +78,7 @@ class WorldState:
 @dataclass
 class SimulatedAction:
     """An action with its predicted consequences."""
+
     action_type: ActionType
     parameters: Dict[str, Any]
     predicted_outcome: str
@@ -97,6 +102,7 @@ class SimulatedAction:
 @dataclass
 class SimulationResult:
     """Result of a complete simulation."""
+
     initial_state: WorldState
     final_state: WorldState
     actions_taken: List[SimulatedAction]
@@ -224,7 +230,7 @@ Respond in JSON format:
                 "success_probability": 0.5,
                 "side_effects": [],
                 "risks": [f"Simulation error: {str(e)}"],
-                "state_changes": {}
+                "state_changes": {},
             }
 
         # Create simulated action
@@ -243,7 +249,9 @@ Respond in JSON format:
         self.simulation_cache[cache_key] = simulated
 
         # Apply state changes
-        new_state = self._apply_simulated_action(current_state, simulated, prediction.get("state_changes", {}))
+        new_state = self._apply_simulated_action(
+            current_state, simulated, prediction.get("state_changes", {})
+        )
 
         return simulated, new_state
 
@@ -267,9 +275,7 @@ Respond in JSON format:
         total_time = 0.0
 
         for action_type, params in plan:
-            simulated, new_state = await self.simulate_action(
-                action_type, params, current_state
-            )
+            simulated, new_state = await self.simulate_action(action_type, params, current_state)
             actions_taken.append(simulated)
             total_tokens += simulated.estimated_tokens
             total_time += simulated.estimated_time
@@ -349,9 +355,7 @@ Each plan should be a valid sequence to achieve the goal."""
             candidate_plans = self._parse_plans(response, available_actions)
         except Exception:
             # Fallback: single simple plan
-            candidate_plans = [
-                [(ActionType.THINK, {"goal": goal})]
-            ]
+            candidate_plans = [[(ActionType.THINK, {"goal": goal})]]
 
         # Simulate each plan
         results = []
@@ -447,14 +451,14 @@ Each plan should be a valid sequence to achieve the goal."""
             pass
 
         # Try to find JSON block with balanced braces
-        start = text.find('{')
+        start = text.find("{")
         if start != -1:
             depth = 0
             end = start
             for i, char in enumerate(text[start:], start):
-                if char == '{':
+                if char == "{":
                     depth += 1
-                elif char == '}':
+                elif char == "}":
                     depth -= 1
                     if depth == 0:
                         end = i + 1
@@ -467,7 +471,7 @@ Each plan should be a valid sequence to achieve the goal."""
                     pass
 
         # Try to find code block with JSON
-        code_match = re.search(r'```(?:json)?\s*(\{[\s\S]*?\})\s*```', text)
+        code_match = re.search(r"```(?:json)?\s*(\{[\s\S]*?\})\s*```", text)
         if code_match:
             try:
                 return json.loads(code_match.group(1))
@@ -486,7 +490,7 @@ Each plan should be a valid sequence to achieve the goal."""
         action_map = {a.value: a for a in available_actions}
 
         # Find all JSON arrays in response
-        json_arrays = re.findall(r'\[[\s\S]*?\]', response)
+        json_arrays = re.findall(r"\[[\s\S]*?\]", response)
 
         for arr_str in json_arrays:
             try:
@@ -497,10 +501,12 @@ Each plan should be a valid sequence to achieve the goal."""
                     if isinstance(item, dict):
                         action_name = item.get("action", "")
                         if action_name in action_map:
-                            plan.append((
-                                action_map[action_name],
-                                item.get("params", item.get("parameters", {}))
-                            ))
+                            plan.append(
+                                (
+                                    action_map[action_name],
+                                    item.get("params", item.get("parameters", {})),
+                                )
+                            )
 
                 if plan:
                     plans.append(plan)
@@ -544,7 +550,9 @@ Each plan should be a valid sequence to achieve the goal."""
         """Learn from actual execution outcomes to improve predictions."""
         current = self.learned_patterns.get(action_pattern, 0.5)
         # Exponential moving average
-        self.learned_patterns[action_pattern] = 0.8 * current + 0.2 * (1.0 if actual_success else 0.0)
+        self.learned_patterns[action_pattern] = 0.8 * current + 0.2 * (
+            1.0 if actual_success else 0.0
+        )
 
     def get_pattern_success_rate(self, action_pattern: str) -> float:
         """Get learned success rate for a pattern."""

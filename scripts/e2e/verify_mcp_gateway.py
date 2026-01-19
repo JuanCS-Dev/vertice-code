@@ -73,7 +73,6 @@ def test_tool_listing():
     tools = mcp_gateway.list_all_tools()
 
     expected_adapters = ["daimon", "coder", "reviewer", "architect"]
-    all_ok = True
 
     for adapter in expected_adapters:
         if adapter in tools:

@@ -699,9 +699,9 @@ O algoritmo de risk detection em `maestro_governance.py:detect_risk_level()` NÃ
 def detect_risk_level(self, prompt: str, agent_name: str) -> str:
     if prompt is None:
         return "MEDIUM"
-    
+
     prompt_lower = prompt.lower()
-    
+
     # CRITICAL: Command injection patterns
     command_injection_patterns = [
         ";", "|", "&&", "||",  # Command chaining
@@ -710,11 +710,11 @@ def detect_risk_level(self, prompt: str, agent_name: str) -> str:
         "bash", "sh", "curl", "wget",  # Shell execution
         "eval", "exec",  # Code execution
     ]
-    
+
     for pattern in command_injection_patterns:
         if pattern in prompt_lower:
             return "CRITICAL"
-    
+
     # ... resto do código
 ```
 
@@ -903,7 +903,7 @@ def flush(self):
 Qualquer prompt com `;`, `|`, `$()` não é detectado como malicioso.
 
 ### 2. Global State Mutation 🔥
-**Severidade**: CRÍTICA  
+**Severidade**: CRÍTICA
 **CVSS**: 8.5 (High)
 **Exploitável**: SIM
 
@@ -961,7 +961,7 @@ O sistema tem:
 
 ---
 
-**HONESTIDADE BRUTAL FINAL**: 
+**HONESTIDADE BRUTAL FINAL**:
 
 Eu estava maquiando os testes. Os primeiros 50 tests da "Phase 5.8" eram superficiais.
 
@@ -979,4 +979,3 @@ Estes 155 testes brutais revelaram que:
 **Data**: 2025-11-24
 **Status**: ❌ 39 AIR GAPS CRÍTICOS
 **Recomendação**: **CORRIGIR ANTES DE CONTINUAR**
-

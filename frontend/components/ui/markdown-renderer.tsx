@@ -21,7 +21,7 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
         code({ node, inline, className, children, ...props }: any) {
           const match = /language-(\w+)/.exec(className || "");
           const language = match ? match[1] : "";
-          
+
           if (!inline && match) {
             return (
               <CodeBlock language={language} value={String(children).replace(/\n$/, "")} />
@@ -70,13 +70,13 @@ function CodeBlock({ language, value }: { language: string; value: string }) {
 
   const onOpenInEditor = () => {
     // Generate a filename based on language and timestamp or hash
-    const ext = language === 'typescript' || language === 'ts' ? 'tsx' 
+    const ext = language === 'typescript' || language === 'ts' ? 'tsx'
               : language === 'javascript' || language === 'js' ? 'jsx'
               : language === 'python' ? 'py'
               : language === 'html' ? 'html'
               : language === 'css' ? 'css'
               : 'txt';
-    
+
     const filename = `snippet-${Date.now().toString().slice(-4)}.${ext}`;
     createOrUpdateFile(filename, value, language);
   };
@@ -89,7 +89,7 @@ function CodeBlock({ language, value }: { language: string; value: string }) {
           <Terminal className="w-3.5 h-3.5" />
           <span className="uppercase">{language || "text"}</span>
         </div>
-        
+
         <div className="flex items-center gap-2">
            <button
             onClick={onOpenInEditor}
@@ -99,7 +99,7 @@ function CodeBlock({ language, value }: { language: string; value: string }) {
             <FileCode className="w-3.5 h-3.5" />
             <span className="hidden group-hover:inline">Open</span>
           </button>
-          
+
           <div className="w-px h-3 bg-white/10" />
 
           <button

@@ -142,11 +142,8 @@ class TestEditFileTool:
         # EditFileTool expects edits as list of {search, replace} dicts
         result = await tool._execute_validated(
             path=str(file_path),
-            edits=[{
-                "search": "def hello()",
-                "replace": "def goodbye()"
-            }],
-            preview=False
+            edits=[{"search": "def hello()", "replace": "def goodbye()"}],
+            preview=False,
         )
 
         assert result.success
@@ -195,10 +192,7 @@ class TestGlobTool:
         from vertice_cli.tools.parity.file_tools import GlobTool
 
         tool = GlobTool()
-        result = await tool._execute_validated(
-            pattern="**/*.py",
-            path=str(temp_workspace)
-        )
+        result = await tool._execute_validated(pattern="**/*.py", path=str(temp_workspace))
 
         assert result.success
         paths = [str(p) for p in result.data]
@@ -212,10 +206,7 @@ class TestGlobTool:
         from vertice_cli.tools.parity.file_tools import GlobTool
 
         tool = GlobTool()
-        result = await tool._execute_validated(
-            pattern="**/*.nonexistent",
-            path=str(temp_workspace)
-        )
+        result = await tool._execute_validated(pattern="**/*.nonexistent", path=str(temp_workspace))
 
         assert result.success
         assert len(result.data) == 0
@@ -229,9 +220,7 @@ class TestGrepTool:
         import subprocess
 
         result = subprocess.run(
-            ["grep", "-r", "def", str(temp_workspace)],
-            capture_output=True,
-            text=True
+            ["grep", "-r", "def", str(temp_workspace)], capture_output=True, text=True
         )
 
         assert result.returncode == 0
@@ -243,9 +232,7 @@ class TestGrepTool:
         import subprocess
 
         result = subprocess.run(
-            ["grep", "-rE", r"def \w+\(", str(temp_workspace)],
-            capture_output=True,
-            text=True
+            ["grep", "-rE", r"def \w+\(", str(temp_workspace)], capture_output=True, text=True
         )
 
         assert result.returncode == 0
@@ -264,7 +251,7 @@ class TestMultiFileOperations:
         files = [
             temp_workspace / "test.py",
             temp_workspace / "data.json",
-            temp_workspace / "readme.md"
+            temp_workspace / "readme.md",
         ]
 
         tasks = [tool.execute(path=str(f)) for f in files]
@@ -281,18 +268,14 @@ class TestMultiFileOperations:
         # Use tree if available, otherwise ls -R
         if shutil.which("tree"):
             result = subprocess.run(
-                ["tree", "-L", "3", str(temp_workspace)],
-                capture_output=True,
-                text=True
+                ["tree", "-L", "3", str(temp_workspace)], capture_output=True, text=True
             )
             assert result.returncode == 0
             assert "test.py" in result.stdout
         else:
             # Fallback to ls -R
             result = subprocess.run(
-                ["ls", "-R", str(temp_workspace)],
-                capture_output=True,
-                text=True
+                ["ls", "-R", str(temp_workspace)], capture_output=True, text=True
             )
             assert result.returncode == 0
             assert "test.py" in result.stdout

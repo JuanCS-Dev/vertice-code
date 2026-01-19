@@ -107,12 +107,12 @@ router = APIRouter()
 async def generate_ai_sdk_stream(prompt: str):
     # Simulate LLM stream (replace with actual Vertex AI call)
     chunks = ["Hello", " ", "World", "!", " This", " is", " streaming."]
-    
+
     # 1. Stream Text Parts (0:"text")
     for chunk in chunks:
         # Protocol: 0:{JSON_STRING}\n
         yield f'0:{json.dumps(chunk)}\n'
-    
+
     # 2. Stream Data/Tool Calls (optional)
     # yield f'2:{json.dumps({"type": "tool_call", ...})}
 '
@@ -122,7 +122,7 @@ async def chat_endpoint(request: dict):
     # Extract messages from Vercel AI SDK format
     messages = request.get("messages", [])
     last_message = messages[-1]["content"]
-    
+
     return StreamingResponse(
         generate_ai_sdk_stream(last_message),
         media_type="text/plain" # Important: NOT text/event-stream for this protocol version
@@ -195,12 +195,12 @@ export function ArtifactsCanvas({ files, template = 'react' }) {
         <div className="flex-1 h-full border-r border-border">
            <MonacoEditorWrapper />
         </div>
-        
+
         {/* Live Preview */}
         <div className="flex-1 h-full">
-          <SandpackPreview 
-            showNavigator={true} 
-            showOpenInCodeSandbox={false} 
+          <SandpackPreview
+            showNavigator={true}
+            showOpenInCodeSandbox={false}
             className="h-full"
           />
         </div>
@@ -250,17 +250,17 @@ async def github_webhook(
     x_hub_signature_256: str = Header(...)
 ):
     payload = await request.body() # Read the raw body
-    
+
     # 1. Verify Signature (Security)
     verify_signature(payload, x_hub_signature_256)
-    
+
     # 2. Route by Event Type
     data = await request.json() # Parse JSON after verification
     if x_github_event == "push":
         await agent_manager.handle_push(data)
     elif x_github_event == "pull_request":
         await agent_manager.handle_pr(data)
-        
+
     return {"status": "processed"}
 ```
 

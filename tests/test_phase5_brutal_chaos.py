@@ -41,38 +41,39 @@ from vertice_cli.core.agent_identity import get_agent_identity, AGENT_IDENTITIES
 # CATEGORY 1: TYPE CONFUSION (50 tests)
 # ============================================================================
 
+
 class TestTypeConfusion:
     """Tests that send wrong types to break type assumptions."""
 
     def test_001_governance_with_none_llm(self):
         """Pass None as LLM client."""
         with pytest.raises((TypeError, AttributeError, ValueError)):
-            gov = MaestroGovernance(llm_client=None, mcp_client=Mock())
+            MaestroGovernance(llm_client=None, mcp_client=Mock())
 
     def test_002_governance_with_none_mcp(self):
         """Pass None as MCP client."""
         with pytest.raises((TypeError, AttributeError, ValueError)):
-            gov = MaestroGovernance(llm_client=Mock(), mcp_client=None)
+            MaestroGovernance(llm_client=Mock(), mcp_client=None)
 
     def test_003_governance_with_string_llm(self):
         """Pass string instead of LLM client."""
         with pytest.raises((TypeError, AttributeError)):
-            gov = MaestroGovernance(llm_client="not a client", mcp_client=Mock())
+            MaestroGovernance(llm_client="not a client", mcp_client=Mock())
 
     def test_004_governance_with_int_mcp(self):
         """Pass integer instead of MCP client."""
         with pytest.raises((TypeError, AttributeError)):
-            gov = MaestroGovernance(llm_client=Mock(), mcp_client=42)
+            MaestroGovernance(llm_client=Mock(), mcp_client=42)
 
     def test_005_governance_with_list_llm(self):
         """Pass list instead of LLM client."""
         with pytest.raises((TypeError, AttributeError)):
-            gov = MaestroGovernance(llm_client=[], mcp_client=Mock())
+            MaestroGovernance(llm_client=[], mcp_client=Mock())
 
     def test_006_governance_with_dict_mcp(self):
         """Pass dict instead of MCP client."""
         with pytest.raises((TypeError, AttributeError)):
-            gov = MaestroGovernance(llm_client=Mock(), mcp_client={"not": "client"})
+            MaestroGovernance(llm_client=Mock(), mcp_client={"not": "client"})
 
     @pytest.mark.asyncio
     async def test_007_execute_with_none_agent(self):
@@ -220,33 +221,33 @@ class TestTypeConfusion:
         """Render Sofia counsel with None data."""
         # Should not crash
         try:
-            result = render_sofia_counsel(None)
+            render_sofia_counsel(None)
             assert True  # Did not crash
-        except:
+        except Exception:
             pass  # Crashing is a finding
 
     def test_030_render_counsel_with_string_data(self):
         """Render Sofia counsel with string data."""
         try:
-            result = render_sofia_counsel("not a dict")
+            render_sofia_counsel("not a dict")
             assert True
-        except:
+        except Exception:
             pass
 
     def test_031_render_counsel_with_int_data(self):
         """Render Sofia counsel with int data."""
         try:
-            result = render_sofia_counsel(42)
+            render_sofia_counsel(42)
             assert True
-        except:
+        except Exception:
             pass
 
     def test_032_render_counsel_with_list_data(self):
         """Render Sofia counsel with list data."""
         try:
-            result = render_sofia_counsel([1, 2, 3])
+            render_sofia_counsel([1, 2, 3])
             assert True
-        except:
+        except Exception:
             pass
 
     def test_033_agent_role_with_invalid_value(self):
@@ -273,27 +274,27 @@ class TestTypeConfusion:
         identity = get_agent_identity("executor")
         # Should not crash
         try:
-            result = identity.can(None)
+            identity.can(None)
             assert True
-        except:
+        except Exception:
             pass
 
     def test_037_agent_permission_string(self):
         """Check permission with string."""
         identity = get_agent_identity("executor")
         try:
-            result = identity.can("not a permission")
+            identity.can("not a permission")
             assert True
-        except:
+        except Exception:
             pass
 
     def test_038_agent_permission_int(self):
         """Check permission with int."""
         identity = get_agent_identity("executor")
         try:
-            result = identity.can(42)
+            identity.can(42)
             assert True
-        except:
+        except Exception:
             pass
 
     def test_039_get_identity_with_none(self):
@@ -380,6 +381,7 @@ class TestTypeConfusion:
 # CATEGORY 2: NONE/NULL INJECTION (50 tests)
 # ============================================================================
 
+
 class TestNoneInjection:
     """Tests that inject None/null in every possible place."""
 
@@ -452,9 +454,11 @@ class TestNoneInjection:
         justica = JusticaIntegratedAgent(Mock(), Mock())
         # Should work - context is optional
         try:
-            await justica.evaluate_action(agent_id="executor", action_type="test", content="test", context=None)
+            await justica.evaluate_action(
+                agent_id="executor", action_type="test", content="test", context=None
+            )
             assert True
-        except:
+        except Exception:
             pass
 
     @pytest.mark.asyncio
@@ -462,16 +466,20 @@ class TestNoneInjection:
         """Sofia counsel with None action_description."""
         sofia = SofiaIntegratedAgent(Mock(), Mock())
         with pytest.raises((TypeError, AttributeError)):
-            await sofia.pre_execution_counsel(action_description=None, risk_level="HIGH", agent_id="executor")
+            await sofia.pre_execution_counsel(
+                action_description=None, risk_level="HIGH", agent_id="executor"
+            )
 
     @pytest.mark.asyncio
     async def test_061_sofia_counsel_none_risk_level(self):
         """Sofia counsel with None risk_level."""
         sofia = SofiaIntegratedAgent(Mock(), Mock())
         try:
-            await sofia.pre_execution_counsel(action_description="test", risk_level=None, agent_id="executor")
+            await sofia.pre_execution_counsel(
+                action_description="test", risk_level=None, agent_id="executor"
+            )
             assert True
-        except:
+        except Exception:
             pass
 
     @pytest.mark.asyncio
@@ -479,9 +487,11 @@ class TestNoneInjection:
         """Sofia counsel with None agent_id."""
         sofia = SofiaIntegratedAgent(Mock(), Mock())
         try:
-            await sofia.pre_execution_counsel(action_description="test", risk_level="HIGH", agent_id=None)
+            await sofia.pre_execution_counsel(
+                action_description="test", risk_level="HIGH", agent_id=None
+            )
             assert True
-        except:
+        except Exception:
             pass
 
     @pytest.mark.asyncio
@@ -489,9 +499,11 @@ class TestNoneInjection:
         """Sofia counsel with None context."""
         sofia = SofiaIntegratedAgent(Mock(), Mock())
         try:
-            await sofia.pre_execution_counsel(action_description="test", risk_level="HIGH", agent_id="executor", context=None)
+            await sofia.pre_execution_counsel(
+                action_description="test", risk_level="HIGH", agent_id="executor", context=None
+            )
             assert True
-        except:
+        except Exception:
             pass
 
     def test_064_sofia_should_trigger_none_prompt(self):
@@ -513,11 +525,12 @@ class TestNoneInjection:
     def test_067_governance_init_flags_all_none(self):
         """Initialize governance with all boolean flags as None."""
         gov = MaestroGovernance(
-            Mock(), Mock(),
+            Mock(),
+            Mock(),
             enable_governance=None,
             enable_counsel=None,
             enable_observability=None,
-            auto_risk_detection=None
+            auto_risk_detection=None,
         )
         # Should work - Python treats None as falsy
         assert gov.enable_governance is None
@@ -556,6 +569,7 @@ class TestNoneInjection:
 # CATEGORY 3: BOUNDARY VIOLATIONS (50 tests)
 # ============================================================================
 
+
 class TestBoundaryViolations:
     """Tests that violate boundaries and limits."""
 
@@ -578,9 +592,9 @@ class TestBoundaryViolations:
         gov = MaestroGovernance(Mock(), Mock())
         # detect_risk_level returns string, but what if we pass int?
         try:
-            risk = gov.detect_risk_level("test", 999)
+            gov.detect_risk_level("test", 999)
             assert True
-        except:
+        except Exception:
             pass
 
     @pytest.mark.asyncio
@@ -648,6 +662,7 @@ class TestBoundaryViolations:
 # CATEGORY 4: RACE CONDITIONS (50 tests)
 # ============================================================================
 
+
 class TestRaceConditions:
     """Tests for concurrency bugs and race conditions."""
 
@@ -659,7 +674,7 @@ class TestRaceConditions:
         async def init():
             try:
                 await gov.initialize()
-            except:
+            except Exception:
                 pass
 
         await asyncio.gather(*[init() for _ in range(100)])
@@ -677,10 +692,9 @@ class TestRaceConditions:
         agent.execute = AsyncMock(return_value=AgentResponse(success=True, reasoning="ok", data={}))
         task = AgentTask(request="test", context={})
 
-        results = await asyncio.gather(*[
-            gov.execute_with_governance(agent, task)
-            for _ in range(100)
-        ])
+        results = await asyncio.gather(
+            *[gov.execute_with_governance(agent, task) for _ in range(100)]
+        )
         assert len(results) == 100
 
     @pytest.mark.asyncio
@@ -713,10 +727,9 @@ class TestRaceConditions:
         gov.sofia.pre_execution_counsel = AsyncMock()
         gov.initialized = True
 
-        results = await asyncio.gather(*[
-            gov.ask_sofia("test question")
-            for _ in range(100)
-        ], return_exceptions=True)
+        results = await asyncio.gather(
+            *[gov.ask_sofia("test question") for _ in range(100)], return_exceptions=True
+        )
         assert len(results) == 100
 
     # Placeholder for remaining race condition tests
@@ -728,6 +741,7 @@ class TestRaceConditions:
 # ============================================================================
 # CATEGORY 5: EXCEPTION PATHS (50 tests)
 # ============================================================================
+
 
 class TestExceptionPaths:
     """Tests that trigger every exception path."""
@@ -801,6 +815,7 @@ class TestExceptionPaths:
 # CATEGORY 6: API CONTRACT VIOLATIONS (50 tests)
 # ============================================================================
 
+
 class TestAPIContractViolations:
     """Tests that violate expected API contracts."""
 
@@ -830,7 +845,7 @@ class TestAPIContractViolations:
         try:
             await pipeline.pre_execution_check(task, "executor", "CRITICAL")
             assert True
-        except:
+        except Exception:
             pass
 
     @pytest.mark.asyncio
@@ -873,23 +888,31 @@ class TestAPIContractViolations:
 # REMAINING CATEGORIES (PLACEHOLDERS for 200 more tests)
 # ============================================================================
 
+
 class TestStateCorruption:
     """Tests that corrupt internal state."""
+
     def test_301_to_350_state_placeholder(self):
         assert True
 
+
 class TestResourceExhaustion:
     """Tests that exhaust resources."""
+
     def test_351_to_400_resource_placeholder(self):
         assert True
 
+
 class TestUnicodeAttacks:
     """Tests with malicious Unicode."""
+
     def test_401_to_450_unicode_placeholder(self):
         assert True
 
+
 class TestCircularDependencies:
     """Tests for circular dependencies."""
+
     def test_451_to_500_circular_placeholder(self):
         assert True
 

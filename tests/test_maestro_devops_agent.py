@@ -15,6 +15,7 @@ import asyncio
 from vertice_cli.agents.devops import create_devops_agent
 from vertice_cli.agents.base import AgentTask
 
+
 # Mock LLM for testing (same pattern as test_maestro_data_agent.py)
 class SimpleMockLLM:
     async def generate(self, prompt, system_prompt=None, **kwargs):
@@ -28,6 +29,7 @@ class SimpleMockLLM:
         elif "pipeline" in p or "ci/cd" in p:
             return "CI/CD pipeline: GitHub Actions with automated deployment"
         return "DevOps operation completed successfully"
+
 
 async def test_devops_agent():
     print("=" * 80)
@@ -54,7 +56,7 @@ async def test_devops_agent():
     print("Step 3: Testing Dockerfile generation...")
     task = AgentTask(
         request="Generate a production-ready Dockerfile for a Python FastAPI application",
-        context={"stack": "python", "framework": "fastapi"}
+        context={"stack": "python", "framework": "fastapi"},
     )
 
     try:
@@ -63,13 +65,13 @@ async def test_devops_agent():
         print(f"Success: {response.success}")
         print(f"Data keys: {list(response.data.keys())}")
 
-        if 'dockerfile' in response.data:
-            dockerfile = response.data['dockerfile']
+        if "dockerfile" in response.data:
+            dockerfile = response.data["dockerfile"]
             print("\n📄 Dockerfile (first 200 chars):")
             print(dockerfile[:200] + "...")
 
             # Verify security features
-            security_features = response.data.get('security_features', [])
+            security_features = response.data.get("security_features", [])
             print(f"\n🔒 Security Features ({len(security_features)}):")
             for feature in security_features:
                 print(f"  ✓ {feature}")
@@ -105,6 +107,7 @@ async def test_devops_agent():
     print("\n" + "=" * 80)
     print("✅ ALL TESTS PASSED - DEVOPS AGENT v1.0 READY!")
     print("=" * 80)
+
 
 if __name__ == "__main__":
     asyncio.run(test_devops_agent())

@@ -44,6 +44,7 @@ from vertice_governance.justica import EnforcementMode
 @dataclass
 class PerformanceMetrics:
     """Métricas de performance."""
+
     total_requests: int
     successful: int
     failed: int
@@ -61,6 +62,7 @@ class PerformanceMetrics:
 
 class MockLLMClient:
     """Mock LLM with configurable delay."""
+
     def __init__(self, delay_ms: float = 10.0, fail_rate: float = 0.0):
         self.delay_ms = delay_ms
         self.fail_rate = fail_rate
@@ -76,6 +78,7 @@ class MockLLMClient:
 
 class MockMCPClient:
     """Mock MCP client."""
+
     def __init__(self):
         self.call_count = 0
 
@@ -84,9 +87,15 @@ class MockMCPClient:
         return {"success": True}
 
 
-def measure_performance(start_time: float, end_time: float, latencies: List[float],
-                       memory_samples: List[float], cpu_samples: List[float],
-                       successful: int, failed: int) -> PerformanceMetrics:
+def measure_performance(
+    start_time: float,
+    end_time: float,
+    latencies: List[float],
+    memory_samples: List[float],
+    cpu_samples: List[float],
+    successful: int,
+    failed: int,
+) -> PerformanceMetrics:
     """Calculate performance metrics."""
     total_time = end_time - start_time
     total_requests = successful + failed
@@ -180,14 +189,17 @@ class TestLoadTesting:
         except asyncio.CancelledError:
             memory_samples, cpu_samples = [], []
 
-        metrics = measure_performance(start_time, end_time, latencies, memory_samples,
-                                     cpu_samples, successful, failed)
+        metrics = measure_performance(
+            start_time, end_time, latencies, memory_samples, cpu_samples, successful, failed
+        )
 
         print("\n=== Sustained Load 1000 Requests ===")
         print(f"Throughput: {metrics.throughput:.2f} req/s")
         print(f"Avg Latency: {metrics.avg_latency*1000:.2f} ms")
         print(f"P95 Latency: {metrics.p95_latency*1000:.2f} ms")
-        print(f"Success Rate: {metrics.successful}/{metrics.total_requests} ({metrics.successful/metrics.total_requests*100:.1f}%)")
+        print(
+            f"Success Rate: {metrics.successful}/{metrics.total_requests} ({metrics.successful/metrics.total_requests*100:.1f}%)"
+        )
         print(f"Memory Peak: {metrics.memory_peak_mb:.2f} MB")
         print(f"CPU Peak: {metrics.cpu_peak_percent:.1f}%")
 
@@ -316,7 +328,9 @@ class TestStressTesting:
                 return False
 
         start_time = time.time()
-        results = await asyncio.gather(*[single_request(i) for i in range(1000)], return_exceptions=True)
+        results = await asyncio.gather(
+            *[single_request(i) for i in range(1000)], return_exceptions=True
+        )
         end_time = time.time()
 
         successful = sum(1 for r in results if r is True)
@@ -359,14 +373,17 @@ class TestSpikeTesting:
 
         # Sudden spike: 500 concurrent
         start_time = time.time()
-        results = await asyncio.gather(*[
-            agent.evaluate_action(
-                agent_id=f"agent-{i}",
-                action_type="bash_exec",
-                content=f"ls {i}",
-            )
-            for i in range(500)
-        ], return_exceptions=True)
+        results = await asyncio.gather(
+            *[
+                agent.evaluate_action(
+                    agent_id=f"agent-{i}",
+                    action_type="bash_exec",
+                    content=f"ls {i}",
+                )
+                for i in range(500)
+            ],
+            return_exceptions=True,
+        )
         end_time = time.time()
 
         successful = sum(1 for r in results if not isinstance(r, Exception))

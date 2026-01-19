@@ -15,6 +15,7 @@ from datetime import datetime
 @dataclass
 class CodeGenerationRequest:
     """Request for code generation."""
+
     description: str
     language: str = "python"
     style: str = "clean"  # clean, verbose, minimal
@@ -25,6 +26,7 @@ class CodeGenerationRequest:
 @dataclass
 class EvaluationResult:
     """Result of code self-evaluation (Darwin Gödel seed)."""
+
     valid_syntax: bool
     lint_score: float  # 0.0 to 1.0
     quality_score: float  # 0.0 to 1.0
@@ -40,6 +42,7 @@ class EvaluationResult:
 @dataclass
 class GeneratedCode:
     """Generated code result with self-evaluation."""
+
     code: str
     language: str
     explanation: str
@@ -53,6 +56,7 @@ class GeneratedCode:
 # DARWIN GÖDEL MACHINE TYPES
 # =============================================================================
 
+
 @dataclass
 class AgentVariant:
     """
@@ -61,6 +65,7 @@ class AgentVariant:
     Each variant represents a version of the agent with specific
     prompts, tools, and strategies that can be evolved.
     """
+
     id: str
     parent_id: Optional[str]
     generation: int
@@ -97,6 +102,7 @@ class AgentVariant:
 @dataclass
 class EvolutionResult:
     """Result of an evolution cycle."""
+
     new_variant: AgentVariant
     improvement: float  # Percentage improvement over parent
     modifications_made: List[str]
@@ -107,6 +113,7 @@ class EvolutionResult:
 @dataclass
 class BenchmarkTask:
     """A task for benchmarking agent performance."""
+
     id: str
     description: str
     expected_output: Optional[str] = None

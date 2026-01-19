@@ -9,9 +9,11 @@ from .shell.core import Shell
 
 # Load environment variables
 from dotenv import load_dotenv
+
 load_dotenv()
 
-__all__ = ['Orchestrator', 'Shell', 'main']
+__all__ = ["Orchestrator", "Shell", "main"]
+
 
 def main():
     """Main entry point for maestro."""
@@ -23,9 +25,10 @@ def main():
     except Exception as e:
         print(f"\n💥 Fatal error: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 
+
 if __name__ == "__main__":
     main()
-

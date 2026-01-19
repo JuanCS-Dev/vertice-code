@@ -2,6 +2,7 @@
 
 from vertice_cli.orchestration.workflows import WorkflowLibrary, WorkflowType
 
+
 def test_workflow_library_initialization():
     """Test that library initializes with default workflows."""
     lib = WorkflowLibrary()
@@ -13,6 +14,7 @@ def test_workflow_library_initialization():
     assert "add-auth" in names
     assert "migrate-fastapi" in names
 
+
 def test_get_workflow():
     """Test retrieving a specific workflow."""
     lib = WorkflowLibrary()
@@ -23,6 +25,7 @@ def test_get_workflow():
     assert workflow.type == WorkflowType.SCAFFOLD
     assert len(workflow.steps) == 4
     assert "project_name" in workflow.parameters
+
 
 def test_workflow_steps_structure():
     """Test that workflow steps have correct structure."""
@@ -41,6 +44,7 @@ def test_workflow_steps_structure():
 
     # Check params
     assert "{user_model}" in steps[1].params["task"]
+
 
 def test_get_nonexistent_workflow():
     """Test retrieving a non-existent workflow."""

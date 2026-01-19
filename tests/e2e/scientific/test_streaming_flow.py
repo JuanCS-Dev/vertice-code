@@ -21,9 +21,11 @@ import time
 # FIXTURES
 # =============================================================================
 
+
 @pytest.fixture
 def stream_processor():
     """Create stream processor mock."""
+
     class MockStreamProcessor:
         def __init__(self):
             self.chunks = []
@@ -45,6 +47,7 @@ def stream_processor():
 @pytest.fixture
 def line_buffer():
     """Create line buffer for testing."""
+
     class LineBuffer:
         def __init__(self):
             self._buffer = ""
@@ -74,6 +77,7 @@ def line_buffer():
 # =============================================================================
 # 1. CHUNK PROCESSING INTEGRITY TESTS
 # =============================================================================
+
 
 class TestChunkProcessingIntegrity:
     """Test chunk processing preserves data integrity."""
@@ -107,6 +111,7 @@ class TestChunkProcessingIntegrity:
 # =============================================================================
 # 2. LINE BUFFERING CORRECTNESS TESTS
 # =============================================================================
+
 
 class TestLineBufferingCorrectness:
     """Test line buffering handles various cases."""
@@ -166,6 +171,7 @@ class TestLineBufferingCorrectness:
 # 3. ENCODING EDGE CASES TESTS
 # =============================================================================
 
+
 class TestEncodingEdgeCases:
     """Test encoding edge cases in streaming."""
 
@@ -213,6 +219,7 @@ class TestEncodingEdgeCases:
 # 4. BACKPRESSURE HANDLING TESTS
 # =============================================================================
 
+
 class TestBackpressureHandling:
     """Test handling of slow consumers."""
 
@@ -228,6 +235,7 @@ class TestBackpressureHandling:
 
         # Consumer
         consumed = []
+
         async def consume():
             for _ in range(20):
                 item = await asyncio.wait_for(queue.get(), timeout=5.0)
@@ -258,6 +266,7 @@ class TestBackpressureHandling:
 # =============================================================================
 # 5. CALLBACK RELIABILITY TESTS
 # =============================================================================
+
 
 class TestCallbackReliability:
     """Test callback execution reliability."""
@@ -332,6 +341,7 @@ class TestCallbackReliability:
 # 6. MEMORY EFFICIENCY TESTS
 # =============================================================================
 
+
 class TestMemoryEfficiency:
     """Test memory usage during streaming."""
 
@@ -359,6 +369,7 @@ class TestMemoryEfficiency:
     @pytest.mark.asyncio
     async def test_async_generator_memory(self):
         """Async generator uses memory efficiently."""
+
         async def generate_chunks():
             for i in range(1000):
                 yield f"chunk{i}\n"
@@ -375,6 +386,7 @@ class TestMemoryEfficiency:
 # =============================================================================
 # 7. TIMING AND LATENCY TESTS
 # =============================================================================
+
 
 class TestTimingAndLatency:
     """Test timing characteristics of streaming."""
@@ -421,6 +433,7 @@ class TestTimingAndLatency:
 # =============================================================================
 # 8. CONTROL CHARACTER HANDLING TESTS
 # =============================================================================
+
 
 class TestControlCharacterHandling:
     """Test handling of control characters."""

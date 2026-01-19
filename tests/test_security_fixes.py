@@ -17,9 +17,10 @@ class TestPathValidation:
     def test_validate_output_path_within_cwd(self):
         """Test valid path within CWD is accepted."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            test_path = Path(tmpdir) / "output.txt"
+            Path(tmpdir) / "output.txt"
             # Change to temp dir for test
             import os
+
             original_cwd = os.getcwd()
             try:
                 os.chdir(tmpdir)
@@ -48,24 +49,19 @@ class TestPathValidation:
 
     def test_cli_blocks_path_traversal(self):
         """Test CLI blocks path traversal attacks."""
-        result = runner.invoke(app, [
-            "chat",
-            "--message", "test",
-            "--output", "../../../tmp/hacked.txt",
-            "--no-context"
-        ])
+        result = runner.invoke(
+            app,
+            ["chat", "--message", "test", "--output", "../../../tmp/hacked.txt", "--no-context"],
+        )
 
         assert result.exit_code == 1
         assert "Security" in result.output or "must be within current directory" in result.output
 
     def test_cli_blocks_protected_files(self):
         """Test CLI blocks writing to protected files."""
-        result = runner.invoke(app, [
-            "chat",
-            "--message", "test",
-            "--output", ".env",
-            "--no-context"
-        ])
+        result = runner.invoke(
+            app, ["chat", "--message", "test", "--output", ".env", "--no-context"]
+        )
 
         assert result.exit_code == 1
         assert "protected" in result.output.lower() or "Security" in result.output
@@ -79,12 +75,7 @@ class TestJSONOutput:
         """Test JSON output is valid and parseable."""
         import json
 
-        result = runner.invoke(app, [
-            "chat",
-            "--message", "say hello",
-            "--json",
-            "--no-context"
-        ])
+        result = runner.invoke(app, ["chat", "--message", "say hello", "--json", "--no-context"])
 
         # Should not have "Executing:" line
         assert not result.output.startswith("Executing:")
@@ -92,18 +83,14 @@ class TestJSONOutput:
         # Should be valid JSON
         try:
             data = json.loads(result.output.strip())
-            assert 'success' in data
-            assert 'output' in data
+            assert "success" in data
+            assert "output" in data
         except json.JSONDecodeError as e:
             pytest.fail(f"Invalid JSON output: {e}\nOutput: {result.output[:200]}")
 
     def test_non_json_output_has_executing_line(self):
         """Test non-JSON mode still shows 'Executing:' line."""
-        result = runner.invoke(app, [
-            "chat",
-            "--message", "test",
-            "--no-context"
-        ])
+        result = runner.invoke(app, ["chat", "--message", "test", "--no-context"])
 
         # Non-JSON mode should have "Executing:" for user feedback
         assert "Executing:" in result.output
@@ -114,12 +101,10 @@ class TestErrorHandling:
 
     def test_graceful_error_for_invalid_output_path(self):
         """Test graceful error message for invalid output path."""
-        result = runner.invoke(app, [
-            "chat",
-            "--message", "hello",
-            "--output", "nonexistent_dir/file.txt",
-            "--no-context"
-        ])
+        result = runner.invoke(
+            app,
+            ["chat", "--message", "hello", "--output", "nonexistent_dir/file.txt", "--no-context"],
+        )
 
         assert result.exit_code == 1
         # Should have clear error message, not traceback
@@ -143,12 +128,9 @@ class TestSecurityRegression:
         with tempfile.TemporaryDirectory() as tmpdir:
             output_file = Path(tmpdir) / "output.txt"
 
-            result = runner.invoke(app, [
-                "chat",
-                "--message", "hello",
-                "--output", str(output_file),
-                "--no-context"
-            ])
+            result = runner.invoke(
+                app, ["chat", "--message", "hello", "--output", str(output_file), "--no-context"]
+            )
 
             # Should succeed
             assert result.exit_code in [0, 1]  # 1 if LLM fails
@@ -162,19 +144,16 @@ class TestSecurityRegression:
         """Test JSON output can be piped to jq (CI/CD use case)."""
         import json
 
-        result = runner.invoke(app, [
-            "chat",
-            "--message", "is 5 > 3? answer only yes or no",
-            "--json",
-            "--no-context"
-        ])
+        result = runner.invoke(
+            app, ["chat", "--message", "is 5 > 3? answer only yes or no", "--json", "--no-context"]
+        )
 
         # Should produce valid JSON
         try:
             data = json.loads(result.output.strip())
             # Should have the answer in output field
-            assert 'output' in data
-            assert isinstance(data['output'], str)
+            assert "output" in data
+            assert isinstance(data["output"], str)
         except json.JSONDecodeError:
             pytest.fail(f"JSON pipeline test failed. Output: {result.output[:200]}")
 

@@ -84,7 +84,7 @@ class TestLLMSummaryCompactionLogic:
             "_generate_context_summary",
             return_value="Web app development discussion",
         ):
-            result = self.strategy.compact(ctx, self.config)
+            self.strategy.compact(ctx, self.config)
 
             messages = ctx.get_messages()
             assert len(messages) == 1
@@ -148,7 +148,7 @@ class TestLLMSummaryGeneration:
         # Mock summary generation
         mock_summary = "User asked about Python installation and received guidance."
         with patch.object(self.strategy, "_generate_context_summary", return_value=mock_summary):
-            result = self.strategy.compact(ctx, self.config)
+            self.strategy.compact(ctx, self.config)
 
             messages = ctx.get_messages()
             assert mock_summary in messages[0]["content"]

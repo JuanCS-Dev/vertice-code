@@ -3,7 +3,7 @@
 /* Force "dark" variant to trigger on .dark class */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* 
+/*
   VERTICE SOVEREIGN THEME 2026 - PROJECT NARCISSUS (DEEP VOID + ELECTRIC CYAN)
 */
 

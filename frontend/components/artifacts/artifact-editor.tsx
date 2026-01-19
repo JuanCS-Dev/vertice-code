@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react";
 export function ArtifactEditor() {
   const { files, activeFileId, createOrUpdateFile } = useArtifactStore();
   const [mounted, setMounted] = useState(false);
-  
+
   const activeFile = activeFileId ? files[activeFileId] : null;
   const monaco = useMonaco();
 

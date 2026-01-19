@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { 
-  ResizableHandle, 
-  ResizablePanel, 
-  ResizablePanelGroup 
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup
 } from "@/components/ui/resizable"; // We need to scaffold these primitives too
 import { AppSidebar } from "./app-sidebar";
 import { cn } from "@/lib/utils";
@@ -20,16 +20,16 @@ export function WorkbenchShell({
   defaultLayout = [20, 80],
 }: WorkbenchProps) {
   // We can add state persistence here later to remember layout preferences
-  
+
   return (
     <div className="h-screen w-full bg-background flex overflow-hidden">
       {/* Sidebar is fixed width for stability, but we could make it resizable too */}
       <AppSidebar />
-      
+
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-full overflow-hidden relative">
          {/* Top Bar / Header would go here */}
-         
+
          <div className="flex-1 h-full w-full">
             {children}
          </div>

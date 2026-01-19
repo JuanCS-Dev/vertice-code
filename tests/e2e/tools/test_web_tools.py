@@ -24,9 +24,10 @@ class TestWebFetchTool:
         # Test that the tool structure exists and validates input
         try:
             from vertice_cli.tools.web_ops import WebFetchTool
+
             tool = WebFetchTool()
             assert tool is not None
-            assert hasattr(tool, 'execute') or hasattr(tool, '_execute_validated')
+            assert hasattr(tool, "execute") or hasattr(tool, "_execute_validated")
         except ImportError:
             # Tool may not exist, that's OK - mark as expected
             pytest.skip("WebFetchTool not implemented")
@@ -36,10 +37,11 @@ class TestWebFetchTool:
         """Web fetch validates URL format."""
         try:
             from vertice_cli.tools.web_ops import WebFetchTool
+
             tool = WebFetchTool()
 
             # Invalid URL should fail
-            with patch.object(tool, 'execute', new_callable=AsyncMock) as mock:
+            with patch.object(tool, "execute", new_callable=AsyncMock) as mock:
                 mock.return_value = MagicMock(success=False, error="Invalid URL")
                 result = await tool.execute(url="not-a-valid-url")
                 assert not result.success
@@ -55,6 +57,7 @@ class TestWebSearchTool:
         """Web search tool is importable."""
         try:
             from vertice_cli.tools.web_ops import WebSearchTool
+
             tool = WebSearchTool()
             assert tool is not None
         except ImportError:
@@ -65,11 +68,12 @@ class TestWebSearchTool:
         """Web search requires query parameter."""
         try:
             from vertice_cli.tools.web_ops import WebSearchTool
+
             tool = WebSearchTool()
 
             # Empty query should fail validation
-            if hasattr(tool, 'schema'):
-                assert 'query' in str(tool.schema)
+            if hasattr(tool, "schema"):
+                assert "query" in str(tool.schema)
         except ImportError:
             pytest.skip("WebSearchTool not implemented")
 
@@ -113,13 +117,11 @@ class TestHTTPTools:
         """HTTP GET returns response (mocked)."""
         try:
             from vertice_cli.tools.web_ops import HTTPGetTool
+
             tool = HTTPGetTool()
 
-            with patch.object(tool, 'execute', new_callable=AsyncMock) as mock:
-                mock.return_value = MagicMock(
-                    success=True,
-                    data={"status": 200, "body": "OK"}
-                )
+            with patch.object(tool, "execute", new_callable=AsyncMock) as mock:
+                mock.return_value = MagicMock(success=True, data={"status": 200, "body": "OK"})
                 result = await tool.execute(url="https://api.example.com")
                 assert result.success
         except ImportError:
@@ -130,16 +132,13 @@ class TestHTTPTools:
         """HTTP POST sends data (mocked)."""
         try:
             from vertice_cli.tools.web_ops import HTTPPostTool
+
             tool = HTTPPostTool()
 
-            with patch.object(tool, 'execute', new_callable=AsyncMock) as mock:
-                mock.return_value = MagicMock(
-                    success=True,
-                    data={"status": 201, "body": {"id": 1}}
-                )
+            with patch.object(tool, "execute", new_callable=AsyncMock) as mock:
+                mock.return_value = MagicMock(success=True, data={"status": 201, "body": {"id": 1}})
                 result = await tool.execute(
-                    url="https://api.example.com/resource",
-                    body={"name": "test"}
+                    url="https://api.example.com/resource", body={"name": "test"}
                 )
                 assert result.success
         except ImportError:

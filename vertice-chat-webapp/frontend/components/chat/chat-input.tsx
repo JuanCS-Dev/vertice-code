@@ -35,7 +35,7 @@ export function ChatInput({ value, onChange, onSubmit, isLoading }: ChatInputPro
   return (
     <div className="relative w-full max-w-3xl mx-auto">
       <form onSubmit={onSubmit} className="relative flex items-end gap-2 bg-[#0a0a0a] border border-[#333] rounded-xl p-2 shadow-2xl transition-all duration-300 focus-within:border-primary/50 focus-within:shadow-[0_0_20px_rgba(212,255,0,0.1)]">
-        
+
         {/* Attachment Button */}
         <Button
           type="button"
@@ -76,8 +76,8 @@ export function ChatInput({ value, onChange, onSubmit, isLoading }: ChatInputPro
                 disabled={!value.trim() && !isLoading}
                 className={cn(
                 "h-10 w-10 rounded-lg transition-all duration-200",
-                isLoading 
-                    ? "bg-red-500/10 text-red-500 hover:bg-red-500/20" 
+                isLoading
+                    ? "bg-red-500/10 text-red-500 hover:bg-red-500/20"
                     : "bg-primary text-black hover:bg-primary/90"
                 )}
             >
@@ -89,7 +89,7 @@ export function ChatInput({ value, onChange, onSubmit, isLoading }: ChatInputPro
             </Button>
         </div>
       </form>
-      
+
       <div className="text-center mt-2 text-[10px] text-muted-foreground/40 font-mono">
         Vertice Sovereign AI • Phase 3.0
       </div>

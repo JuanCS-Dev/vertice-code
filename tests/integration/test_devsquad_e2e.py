@@ -24,7 +24,7 @@ from vertice_cli.orchestration.workflows import WorkflowLibrary
 # Skip if no API keys
 requires_api_key = pytest.mark.skipif(
     not (os.getenv("GEMINI_API_KEY") or os.getenv("NEBIUS_API_KEY") or os.getenv("HF_TOKEN")),
-    reason="No API key found in environment"
+    reason="No API key found in environment",
 )
 
 
@@ -50,7 +50,7 @@ def squad_with_human_gate():
 @requires_api_key
 async def test_e2e_jwt_authentication(real_squad, tmp_path):
     """Test full workflow for adding JWT authentication.
-    
+
     Validates all 5 phases execute:
     - Architecture: Architect approves
     - Exploration: Explorer gathers context
@@ -68,11 +68,11 @@ async def test_e2e_jwt_authentication(real_squad, tmp_path):
         print(f"\n🚀 E2E Test: {request}")
 
         # Mock Refactorer execution to avoid actual file changes
-        with patch('vertice_cli.agents.refactorer.RefactorerAgent.execute') as mock_refactor:
+        with patch("vertice_cli.agents.refactorer.RefactorerAgent.execute") as mock_refactor:
             mock_refactor.return_value = AsyncMock(
                 success=True,
                 data={"steps_completed": 5, "files_modified": ["app/auth.py"]},
-                reasoning="Mocked execution for testing"
+                reasoning="Mocked execution for testing",
             )
 
             result = await real_squad.execute_workflow(request)
@@ -105,7 +105,7 @@ async def test_e2e_jwt_authentication(real_squad, tmp_path):
 @requires_api_key
 async def test_e2e_setup_fastapi_project(real_squad, tmp_path):
     """Test workflow library execution for FastAPI setup.
-    
+
     Uses predefined workflow from WorkflowLibrary.
     """
     original_cwd = os.getcwd()
@@ -125,11 +125,11 @@ async def test_e2e_setup_fastapi_project(real_squad, tmp_path):
         print(f"   Steps: {len(workflow.steps)}")
 
         # Mock Refactorer to avoid actual execution
-        with patch('vertice_cli.agents.refactorer.RefactorerAgent.execute') as mock_refactor:
+        with patch("vertice_cli.agents.refactorer.RefactorerAgent.execute") as mock_refactor:
             mock_refactor.return_value = AsyncMock(
                 success=True,
                 data={"steps_completed": len(workflow.steps)},
-                reasoning="Workflow executed successfully"
+                reasoning="Workflow executed successfully",
             )
 
             result = await real_squad.execute_workflow(request)
@@ -151,7 +151,7 @@ async def test_e2e_setup_fastapi_project(real_squad, tmp_path):
 @requires_api_key
 async def test_e2e_human_gate(squad_with_human_gate):
     """Test human approval mechanism.
-    
+
     Validates workflow pauses at Human Gate and respects approval/rejection.
     """
     request = "List files in current directory"
@@ -163,10 +163,7 @@ async def test_e2e_human_gate(squad_with_human_gate):
         print("   📋 Plan received for approval")
         return True  # Approve
 
-    result = await squad_with_human_gate.execute_workflow(
-        request,
-        approval_callback=auto_approve
-    )
+    result = await squad_with_human_gate.execute_workflow(request, approval_callback=auto_approve)
 
     print(f"\n📊 Result with approval: {result.status}")
 
@@ -178,10 +175,7 @@ async def test_e2e_human_gate(squad_with_human_gate):
         print("   ❌ Plan rejected")
         return False  # Reject
 
-    result = await squad_with_human_gate.execute_workflow(
-        request,
-        approval_callback=auto_reject
-    )
+    result = await squad_with_human_gate.execute_workflow(request, approval_callback=auto_reject)
 
     print(f"\n📊 Result with rejection: {result.status}")
 
@@ -194,7 +188,7 @@ async def test_e2e_human_gate(squad_with_human_gate):
 @pytest.mark.asyncio
 async def test_e2e_self_correction():
     """Test Refactorer self-correction concept.
-    
+
     Validates that Refactorer has retry logic capability.
     Note: This is a simplified test that validates the agent structure.
     """
@@ -210,20 +204,20 @@ async def test_e2e_self_correction():
     refactorer = RefactorerAgent(mock_llm, mock_mcp)
 
     # Verify Refactorer has the expected attributes
-    assert hasattr(refactorer, 'execute'), "Should have execute method"
+    assert hasattr(refactorer, "execute"), "Should have execute method"
     assert refactorer.role.value == "refactorer", "Should be refactorer role"
 
     # Create simple task
     task = AgentTask(
         request="Test self-correction capability",
         context={"plan": {"steps": []}},
-        session_id="test-session"
+        session_id="test-session",
     )
 
     # Mock LLM to return success
-    mock_llm.generate_content = AsyncMock(return_value=MagicMock(
-        text='{"success": true, "steps_completed": 0}'
-    ))
+    mock_llm.generate_content = AsyncMock(
+        return_value=MagicMock(text='{"success": true, "steps_completed": 0}')
+    )
 
     result = await refactorer.execute(task)
 
@@ -241,7 +235,7 @@ async def test_e2e_self_correction():
 @requires_api_key
 async def test_e2e_constitutional_ai(real_squad):
     """Test Constitutional AI security validation.
-    
+
     Validates Reviewer rejects dangerous code patterns.
     """
     # Request that should trigger security concerns
@@ -251,14 +245,14 @@ async def test_e2e_constitutional_ai(real_squad):
     print(f"   Request: {request}")
 
     # Mock Refactorer to return code with eval()
-    with patch('vertice_cli.agents.refactorer.RefactorerAgent.execute') as mock_refactor:
+    with patch("vertice_cli.agents.refactorer.RefactorerAgent.execute") as mock_refactor:
         mock_refactor.return_value = AsyncMock(
             success=True,
             data={
                 "code": "user_input = input('Enter code: ')\neval(user_input)",
-                "files_modified": ["dangerous.py"]
+                "files_modified": ["dangerous.py"],
             },
-            reasoning="Created script with eval()"
+            reasoning="Created script with eval()",
         )
 
         result = await real_squad.execute_workflow(request)

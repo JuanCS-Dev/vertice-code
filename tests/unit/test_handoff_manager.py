@@ -329,9 +329,7 @@ class TestHandoffCallbacks:
         manager.set_post_handoff(post_callback)
 
         # Create handoff (this should trigger post callback if implemented)
-        result = manager.create_handoff(
-            AgentType.CHAT, AgentType.ARCHITECT, HandoffReason.TASK_COMPLETION
-        )
+        manager.create_handoff(AgentType.CHAT, AgentType.ARCHITECT, HandoffReason.TASK_COMPLETION)
 
         # Note: Current implementation doesn't call post callback
         # This test documents the expected behavior

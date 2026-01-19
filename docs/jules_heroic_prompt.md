@@ -13,7 +13,7 @@ Você é Jules, agente autônomo do Google Labs. Sua missão é VITAL: auditar A
 - ❌ Ferramentas não conectadas aos agents
 - ❌ Context management falhando
 
-**SETUP ATUAL**: 
+**SETUP ATUAL**:
 - Provedor único: **Vertex AI** (Google Cloud)
 - Modelos disponíveis: **Gemini 3 Flash** e **Gemini 3 Pro**
 - Data do conhecimento: Janeiro 2026
@@ -142,13 +142,13 @@ Para CADA caminho:
 #### 4.1 File Creation Flow
 ```python
 # Caminho completo:
-User: "criar arquivo hello.py" 
-  → CLI parser 
-  → Coder agent 
-  → Tool: write_file 
-  → Validation 
-  → Governance check 
-  → File system write 
+User: "criar arquivo hello.py"
+  → CLI parser
+  → Coder agent
+  → Tool: write_file
+  → Validation
+  → Governance check
+  → File system write
   → Confirmation to user
 
 # Verificar em cada etapa:
@@ -416,7 +416,7 @@ graph TD
     Context --> LLM[LLM Provider]
     LLM --> Response[Response Generation]
     Response --> User[User Output]
-    
+
     style CLI fill:#f9f,stroke:#333
     style Agent fill:#bbf,stroke:#333
     style Tool fill:#bfb,stroke:#333
@@ -430,7 +430,7 @@ Para cada desconexão encontrada:
 
 **Severidade**: 🔴 CRÍTICA / 🟡 MÉDIA / 🟢 BAIXA
 
-**Localização**: 
+**Localização**:
 - Arquivo: `path/to/file.py`
 - Linha: 123
 
@@ -618,7 +618,7 @@ Jules, você não é apenas um coding agent. Você é o **CIRURGIÃO** que vai o
 - ⚡ Execução paralela de testes
 - 🤖 Criar PRs com fixes se apropriado
 
-Esta não é uma auditoria comum. É uma CIRURGIA DE PRECISÃO em um sistema que DEVE funcionar fluidamente. 
+Esta não é uma auditoria comum. É uma CIRURGIA DE PRECISÃO em um sistema que DEVE funcionar fluidamente.
 
 **CONHECIMENTO CRÍTICO**: Você tem knowledge cutoff de Janeiro 2025. O repositório usa tecnologias atualizadas até essa data. Se encontrar referências a APIs/bibliotecas descontinuadas, REPORTE IMEDIATAMENTE.
 

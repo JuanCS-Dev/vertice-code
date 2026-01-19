@@ -2,6 +2,7 @@
 
 from functools import lru_cache
 
+
 @lru_cache(maxsize=None)
 def fibonacci(n: int) -> int:
     """
@@ -13,7 +14,7 @@ def fibonacci(n: int) -> int:
 
     Returns:
         The nth Fibonacci number.
-        
+
     Raises:
         ValueError: If n is not a non-negative integer.
     """
@@ -24,6 +25,7 @@ def fibonacci(n: int) -> int:
     elif n == 1:
         return 1
     return fibonacci(n - 1) + fibonacci(n - 2)
+
 
 if __name__ == "__main__":
     # Demonstrate the usage for n=10 and n=50

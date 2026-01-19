@@ -297,41 +297,41 @@ def my_function():
 class WellStructuredClass:
     """
     Class docstring (REQUIRED).
-    
+
     Attributes:
         public_attr: Description
         _private_attr: Description
     """
-    
+
     # 1. Class variables
     CLASS_CONSTANT = "value"
-    
+
     # 2. __init__
     def __init__(self, param: str):
         """Initialize (REQUIRED docstring)."""
         self.public_attr = param
         self._private_attr = None
-    
+
     # 3. Public methods (alphabetical)
     def execute(self) -> Result:
         """Execute (REQUIRED docstring)."""
         pass
-    
+
     def validate(self) -> bool:
         """Validate (REQUIRED docstring)."""
         pass
-    
+
     # 4. Private methods (alphabetical)
     def _helper(self) -> None:
         """Helper (optional docstring)."""
         pass
-    
+
     # 5. Properties (if any)
     @property
     def status(self) -> str:
         """Status property."""
         return self._status
-    
+
     # 6. Dunder methods (except __init__)
     def __repr__(self) -> str:
         return f"WellStructuredClass({self.public_attr})"
@@ -348,22 +348,22 @@ async def well_structured_function(
 ) -> Dict[str, Any]:
     """
     Brief description on first line.
-    
+
     Detailed explanation if needed.
     Can span multiple lines.
-    
+
     Args:
         required_param: Description of required param
         optional_param: Description of optional param
         keyword_only: Description of keyword-only param
-        
+
     Returns:
         Description of return value
-        
+
     Raises:
         ValueError: When validation fails
         HTTPException: When external API fails
-        
+
     Example:
         >>> result = await well_structured_function("test")
         >>> print(result["status"])
@@ -372,18 +372,18 @@ async def well_structured_function(
     # 1. Input validation
     if not required_param:
         raise ValueError("required_param cannot be empty")
-    
+
     # 2. Setup/initialization
     logger = logging.getLogger(__name__)
     config = load_config()
-    
+
     # 3. Main logic
     try:
         result = await perform_operation()
     except Exception as e:
         logger.error(f"Operation failed: {e}")
         raise
-    
+
     # 4. Return
     return {"status": "success", "data": result}
 ```
@@ -466,13 +466,13 @@ class AgentNotFoundError(AgentError):
 # 2. Usage
 async def execute_task(agent_name: str) -> Result:
     agent = await registry.get_agent(agent_name)
-    
+
     if not agent:
         raise AgentNotFoundError(
             f"Agent '{agent_name}' not registered. "
             f"Available: {list(registry.agents.keys())}"
         )
-    
+
     try:
         return await agent.execute(task)
     except AgentError:
@@ -492,10 +492,10 @@ async def execute_task(agent_name: str) -> Result:
 def validate_input(data: Dict[str, Any]) -> None:
     if "required_field" not in data:
         raise ValueError("Missing required_field")
-    
+
     if data["value"] < 0:
         raise ValueError("Value must be positive")
-    
+
     # If we get here, data is valid
 
 # Pattern 2: Try-except-finally (resource cleanup)
@@ -544,7 +544,7 @@ class GoodService:
         self.db = db
         self.cache = cache
         self.logger = logger or logging.getLogger(__name__)
-    
+
 # Usage
 service = GoodService(
     db=PostgreSQLClient(config.db_url),
@@ -582,12 +582,12 @@ from meta_orchestrator.plugins import AgentPlugin, Task
 
 class TestAgentRegistry:
     """Test suite for AgentRegistry."""
-    
+
     @pytest.fixture
     async def registry(self):
         """Create fresh registry for each test."""
         return AgentRegistry()
-    
+
     @pytest.fixture
     def mock_agent(self):
         """Create mock agent."""
@@ -598,27 +598,27 @@ class TestAgentRegistry:
         agent.can_handle = AsyncMock(return_value=True)
         agent.health_check = AsyncMock(return_value={"healthy": True})
         return agent
-    
+
     async def test_register_agent_success(self, registry, mock_agent):
         """Test successful agent registration."""
         # Given: empty registry
         # When: registering agent
         await registry.register(mock_agent)
-        
+
         # Then: agent in registry
         agent = await registry.get_agent("test_agent")
         assert agent == mock_agent
-    
+
     async def test_register_duplicate_agent_fails(self, registry, mock_agent):
         """Test duplicate registration fails."""
         # Given: agent already registered
         await registry.register(mock_agent)
-        
+
         # When: registering same agent again
         # Then: raises ValueError
         with pytest.raises(ValueError, match="already registered"):
             await registry.register(mock_agent)
-    
+
     async def test_select_agent_returns_best_match(self, registry):
         """Test agent selection chooses best candidate."""
         # Given: multiple agents with different priorities
@@ -652,31 +652,31 @@ def complex_function(
 ) -> Dict[str, Any]:
     """
     Brief one-line description.
-    
+
     Longer description with multiple paragraphs if needed.
     Explain the high-level behavior, not implementation details.
-    
+
     Args:
         param1: Description of param1. Can span
             multiple lines if needed.
         param2: Description of param2. Use None to
             indicate default behavior.
         param3: Description of param3.
-    
+
     Returns:
         Dictionary containing:
             - key1 (str): Description
             - key2 (int): Description
-    
+
     Raises:
         ValueError: If param1 is empty
         HTTPException: If external API fails
-    
+
     Example:
         >>> result = complex_function("test", param2=42)
         >>> print(result["key1"])
         "processed"
-    
+
     Note:
         This function makes external API calls.
         Use with caution in hot paths.
@@ -778,13 +778,13 @@ from pydantic import BaseModel, validator
 class UserInput(BaseModel):
     email: str
     age: int
-    
+
     @validator('email')
     def email_must_be_valid(cls, v):
         if '@' not in v:
             raise ValueError('Invalid email')
         return v
-    
+
     @validator('age')
     def age_must_be_reasonable(cls, v):
         if v < 0 or v > 150:
@@ -970,14 +970,14 @@ jobs:
             echo "❌ VETO: Placeholders detected (Padrão Pagani violation)"
             exit 1
           fi
-      
+
       - name: Enforce test coverage
         run: |
           pytest --cov --cov-fail-under=99 || {
             echo "❌ VETO: Test coverage <99% (99% Rule violation)"
             exit 1
           }
-      
+
       - name: Enforce file size limits
         run: |
           find . -name "*.py" -exec wc -l {} \; | \
@@ -1083,7 +1083,7 @@ import untyped_library  # type: ignore
 
 ---
 
-**Remember**: These standards exist to make our lives EASIER, not harder.  
+**Remember**: These standards exist to make our lives EASIER, not harder.
 Code that follows these patterns is:
 - Easier to understand
 - Easier to modify
@@ -1143,7 +1143,7 @@ If **any** answer is "no", **stop and refactor**.
 **Approved by**: Juan Carlos de Souza (Arquiteto-Chefe)
 **Enforced by**: Agentes Guardiões + CI/CD + Human Review
 **Updated**: 2026-01-06 (Tightened file size limits to 400 lines max)
-**Version**: 1.2  
+**Version**: 1.2
 
 ---
 

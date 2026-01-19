@@ -184,13 +184,13 @@ class TestMarkupHelperEdgeCases:
         for markup in markups:
             # Should have formatting: ** for bold, * for italic, [] for bracket notation, or visual indicators
             has_formatting = (
-                "**" in markup or
-                "*" in markup or
-                "[" in markup or  # Bracket notation like [SUCCESS], [EXECUTING], [ERROR]
-                markup.startswith("•") or
-                markup.startswith("✓") or
-                markup.startswith("✗") or
-                "🔀" in markup
+                "**" in markup
+                or "*" in markup
+                or "[" in markup  # Bracket notation like [SUCCESS], [EXECUTING], [ERROR]
+                or markup.startswith("•")
+                or markup.startswith("✓")
+                or markup.startswith("✗")
+                or "🔀" in markup
             )
             assert has_formatting, f"No valid formatting in: {markup}"
 
@@ -206,9 +206,8 @@ class TestMarkupHelperEdgeCases:
         visual_indicators = ["•", "✓", "✗", "🔀", "🤖", "⚡", "◆", "▸", "◐"]
         bracket_patterns = ["[SUCCESS]", "[ERROR]", "[EXECUTING]", "SUCCESS", "ERROR"]
 
-        has_visual = (
-            any(c in all_markups for c in visual_indicators) or
-            any(p in all_markups for p in bracket_patterns)
+        has_visual = any(c in all_markups for c in visual_indicators) or any(
+            p in all_markups for p in bracket_patterns
         )
         assert has_visual, "Markups should have visual indicators"
 
@@ -221,7 +220,7 @@ class TestMarkupHelperEdgeCases:
             for i in range(100):
                 results.append(tool_executing_markup(f"tool_{i}"))
                 results.append(tool_success_markup(f"tool_{i}"))
-                results.append(agent_routing_markup(f"agent_{i}", i/100))
+                results.append(agent_routing_markup(f"agent_{i}", i / 100))
             return results
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
@@ -239,17 +238,20 @@ class TestStreamingWidgetEdgeCases:
     def test_widget_import(self):
         """Widget should import without errors."""
         from vertice_tui.components.streaming_adapter import StreamingResponseWidget
+
         assert StreamingResponseWidget is not None
 
     def test_widget_initialization(self):
         """Widget should initialize with markdown enabled."""
         from vertice_tui.components.streaming_adapter import StreamingResponseWidget
+
         widget = StreamingResponseWidget(enable_markdown=True)
         assert widget._enable_markdown is True
 
     def test_widget_markdown_disabled(self):
         """Widget should work with markdown disabled."""
         from vertice_tui.components.streaming_adapter import StreamingResponseWidget
+
         widget = StreamingResponseWidget(enable_markdown=False)
         assert widget._enable_markdown is False
 
@@ -260,6 +262,7 @@ class TestBridgeStreamingSafety:
     def test_bridge_import(self):
         """Bridge should import without errors."""
         from vertice_tui.core.bridge import Bridge
+
         assert Bridge is not None
 
     def test_bridge_no_rich_in_source(self):
@@ -270,10 +273,10 @@ class TestBridgeStreamingSafety:
         source = inspect.getsource(bridge_module)
 
         # Find yield statements
-        lines = source.split('\n')
-        yield_lines = [l for l in lines if 'yield' in l and 'f"' in l]
+        lines = source.split("\n")
+        yield_lines = [line for line in lines if "yield" in line and 'f"' in line]
 
-        rich_patterns = ['[bold ', '[italic ', '[#ff', '[Colors.', '{Colors.']
+        rich_patterns = ["[bold ", "[italic ", "[#ff", "[Colors.", "{Colors."]
 
         for line in yield_lines:
             for pattern in rich_patterns:

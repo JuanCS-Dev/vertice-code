@@ -32,11 +32,11 @@ class TestShellBridgeIntegration:
         tool = bridge.registry.tools["bash_command"]
 
         # Should have limits
-        assert hasattr(tool, 'limits')
+        assert hasattr(tool, "limits")
         assert isinstance(tool.limits, ExecutionLimits)
 
         # Should have validator
-        assert hasattr(tool, 'validator')
+        assert hasattr(tool, "validator")
 
     @pytest.mark.asyncio
     async def test_bash_command_executes_via_bridge(self):
@@ -125,26 +125,17 @@ class TestEndToEndScenarios:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create file
-            test_file = Path(tmpdir) / "test.txt"
-            result = await tool.execute(
-                command="echo 'content' > test.txt",
-                cwd=tmpdir
-            )
+            Path(tmpdir) / "test.txt"
+            result = await tool.execute(command="echo 'content' > test.txt", cwd=tmpdir)
             assert result.success
 
             # Read file
-            result = await tool.execute(
-                command="cat test.txt",
-                cwd=tmpdir
-            )
+            result = await tool.execute(command="cat test.txt", cwd=tmpdir)
             assert result.success
             assert "content" in result.data["stdout"]
 
             # List directory
-            result = await tool.execute(
-                command="ls -la",
-                cwd=tmpdir
-            )
+            result = await tool.execute(command="ls -la", cwd=tmpdir)
             assert result.success
             assert "test.txt" in result.data["stdout"]
 
@@ -155,16 +146,12 @@ class TestEndToEndScenarios:
         tool = bridge.registry.tools["bash_command"]
 
         # Simple pipe
-        result = await tool.execute(
-            command="echo 'line1\nline2\nline3' | grep line2"
-        )
+        result = await tool.execute(command="echo 'line1\nline2\nline3' | grep line2")
         assert result.success
         assert "line2" in result.data["stdout"]
 
         # Multiple pipes
-        result = await tool.execute(
-            command="echo 'test' | tr 'a-z' 'A-Z' | cat"
-        )
+        result = await tool.execute(command="echo 'test' | tr 'a-z' 'A-Z' | cat")
         assert result.success
         assert "TEST" in result.data["stdout"]
 
@@ -193,10 +180,7 @@ class TestEndToEndScenarios:
         tool = bridge.registry.tools["bash_command"]
 
         # Timeout enforcement
-        result = await tool.execute(
-            command="sleep 10",
-            timeout=1
-        )
+        result = await tool.execute(command="sleep 10", timeout=1)
         assert not result.success
         assert "TIMEOUT" in result.error
 
@@ -207,18 +191,12 @@ class TestEndToEndScenarios:
         tool = bridge.registry.tools["bash_command"]
 
         # Safe env var
-        result = await tool.execute(
-            command="echo $MY_VAR",
-            env={"MY_VAR": "test_value"}
-        )
+        result = await tool.execute(command="echo $MY_VAR", env={"MY_VAR": "test_value"})
         assert result.success
         assert "test_value" in result.data["stdout"]
 
         # Dangerous env var filtered
-        result = await tool.execute(
-            command="echo $LD_PRELOAD",
-            env={"LD_PRELOAD": "/evil/lib.so"}
-        )
+        result = await tool.execute(command="echo $LD_PRELOAD", env={"LD_PRELOAD": "/evil/lib.so"})
         assert result.success
         assert result.data["stdout"].strip() == ""
 

@@ -100,11 +100,11 @@ def test_security_injection():
 
     for action in safe_inputs:
         valid, message = validate_consciousness_input(action)
-        assert valid == True, f"Safe input rejected: {message}"
+        assert valid, f"Safe input rejected: {message}"
 
     for action in malicious_inputs:
         valid, message = validate_consciousness_input(action)
-        assert valid == False, f"Malicious input accepted: {action}"
+        assert not valid, f"Malicious input accepted: {action}"
 
     print("✅ Segurança contra injeção - OK")
     return True

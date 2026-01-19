@@ -108,7 +108,7 @@ def handle_request(request_body: bytes) -> bytes:
         workspace_id = payload.get("workspace_id", "unknown")
         python_code = payload.get("python_code", "")
         input_data = payload.get("input_data", {})
-        execution_context = payload.get("execution_context", {})
+        payload.get("execution_context", {})
         limits = payload.get("limits", {})
 
         # Execute the code

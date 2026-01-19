@@ -264,10 +264,7 @@ class MaximusMockFactory:
         Returns:
             List of available tools.
         """
-        tools = [
-            FactoryResponse(tool_name=f"tool_{i}").to_dict()
-            for i in range(3)
-        ]
+        tools = [FactoryResponse(tool_name=f"tool_{i}").to_dict() for i in range(3)]
         return {"tools": tools}
 
     @staticmethod

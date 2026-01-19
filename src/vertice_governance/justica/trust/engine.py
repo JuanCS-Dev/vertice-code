@@ -295,12 +295,12 @@ class TrustEngine:
 
         # Determine required authorization level
         was_critical_suspension = (
-            trust_factor.suspension_reason and
-            "critica" in trust_factor.suspension_reason.lower()
+            trust_factor.suspension_reason and "critica" in trust_factor.suspension_reason.lower()
         )
 
         required_level = (
-            self.CRITICAL_SUSPENSION_MIN_LEVEL if was_critical_suspension
+            self.CRITICAL_SUSPENSION_MIN_LEVEL
+            if was_critical_suspension
             else self.LIFT_SUSPENSION_MIN_LEVEL
         )
 
@@ -376,11 +376,7 @@ class TrustEngine:
 
     def get_agents_by_level(self, level: TrustLevel) -> List[str]:
         """Retorna agentes em um determinado nivel de confianca."""
-        return [
-            agent_id
-            for agent_id, tf in self._trust_factors.items()
-            if tf.level == level
-        ]
+        return [agent_id for agent_id, tf in self._trust_factors.items() if tf.level == level]
 
     def get_suspended_agents(self) -> List[Tuple[str, str]]:
         """Retorna lista de (agent_id, reason) para agentes suspensos."""
@@ -411,8 +407,7 @@ class TrustEngine:
             "min_trust_factor": min(factors),
             "max_trust_factor": max(factors),
             "agents_by_level": {
-                level.name: len(self.get_agents_by_level(level))
-                for level in TrustLevel
+                level.name: len(self.get_agents_by_level(level)) for level in TrustLevel
             },
             "suspended_count": len([tf for tf in all_factors if tf.is_suspended]),
         }

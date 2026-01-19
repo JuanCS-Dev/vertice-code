@@ -60,7 +60,9 @@ class MIRIXBenchmark:
             "median_ms": statistics.median(self.results),
             "p50_ms": sorted_results[int(len(sorted_results) * 0.50)],
             "p95_ms": sorted_results[int(len(sorted_results) * 0.95)],
-            "p99_ms": sorted_results[int(len(sorted_results) * 0.99)] if len(sorted_results) >= 100 else sorted_results[-1],
+            "p99_ms": sorted_results[int(len(sorted_results) * 0.99)]
+            if len(sorted_results) >= 100
+            else sorted_results[-1],
             "stddev_ms": statistics.stdev(self.results) if len(self.results) > 1 else 0,
             "errors": len(self.errors),
         }

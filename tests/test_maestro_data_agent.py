@@ -45,7 +45,7 @@ async def main():
     orchestrator = Orchestrator(llm_client=llm, mcp_client=mcp)
 
     # Check that DataAgent is registered
-    assert 'data' in orchestrator.agents, "DataAgent not found in orchestrator!"
+    assert "data" in orchestrator.agents, "DataAgent not found in orchestrator!"
     print(f"✅ DataAgent registered: {type(orchestrator.agents['data']).__name__}")
     print()
 

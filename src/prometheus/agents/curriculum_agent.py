@@ -27,14 +27,17 @@ try:
 except ImportError:
     # Fallback if skill_registry not available
     VALID_SKILLS = set()
+
     def validate_skills(skills: List[str]) -> List[str]:
         return skills
+
     def is_valid_skill(skill: str) -> bool:
         return True
 
 
 class TaskDifficulty(Enum):
     """Task difficulty levels."""
+
     TRIVIAL = 1
     EASY = 2
     MEDIUM = 3
@@ -44,6 +47,7 @@ class TaskDifficulty(Enum):
 
 class TaskDomain(Enum):
     """Domains of tasks."""
+
     CODE = "code"
     MATH = "math"
     REASONING = "reasoning"
@@ -55,6 +59,7 @@ class TaskDomain(Enum):
 @dataclass
 class EvolutionTask:
     """A task generated for evolution training."""
+
     id: str
     description: str
     difficulty: TaskDifficulty
@@ -86,6 +91,7 @@ class EvolutionTask:
 @dataclass
 class CurriculumStats:
     """Statistics about curriculum generation."""
+
     total_tasks: int = 0
     tasks_by_difficulty: Dict[str, int] = field(default_factory=dict)
     tasks_by_domain: Dict[str, int] = field(default_factory=dict)
@@ -172,10 +178,7 @@ class CurriculumAgent:
 
         # Generate task using LLM
         task = await self._generate_task_with_llm(
-            target_difficulty,
-            domain,
-            skills_to_target,
-            executor_stats
+            target_difficulty, domain, skills_to_target, executor_stats
         )
 
         self.task_history.append(task)
@@ -250,7 +253,9 @@ Make the task specific and actionable, not vague."""
         # Create task
         task = EvolutionTask(
             id=self._generate_id(data.get("description", "")),
-            description=data.get("description", f"Complete a {difficulty.name} {domain.value} task"),
+            description=data.get(
+                "description", f"Complete a {difficulty.name} {domain.value} task"
+            ),
             difficulty=difficulty,
             domain=domain,
             expected_skills=data.get("expected_skills", target_skills),
@@ -367,30 +372,18 @@ Make the task specific and actionable, not vague."""
         """Shift distribution toward harder tasks."""
         for d in TaskDifficulty:
             if d.value > current_difficulty.value:
-                self.difficulty_distribution[d] = min(
-                    0.5,
-                    self.difficulty_distribution[d] + 0.02
-                )
+                self.difficulty_distribution[d] = min(0.5, self.difficulty_distribution[d] + 0.02)
             elif d.value < current_difficulty.value:
-                self.difficulty_distribution[d] = max(
-                    0.05,
-                    self.difficulty_distribution[d] - 0.01
-                )
+                self.difficulty_distribution[d] = max(0.05, self.difficulty_distribution[d] - 0.01)
         self._normalize_distribution()
 
     def _adjust_distribution_down(self, current_difficulty: TaskDifficulty):
         """Shift distribution toward easier tasks."""
         for d in TaskDifficulty:
             if d.value <= current_difficulty.value:
-                self.difficulty_distribution[d] = min(
-                    0.5,
-                    self.difficulty_distribution[d] + 0.02
-                )
+                self.difficulty_distribution[d] = min(0.5, self.difficulty_distribution[d] + 0.02)
             elif d.value > current_difficulty.value:
-                self.difficulty_distribution[d] = max(
-                    0.05,
-                    self.difficulty_distribution[d] - 0.01
-                )
+                self.difficulty_distribution[d] = max(0.05, self.difficulty_distribution[d] - 0.01)
         self._normalize_distribution()
 
     def _normalize_distribution(self):
@@ -411,9 +404,7 @@ Make the task specific and actionable, not vague."""
 
         # By domain
         domain_name = task.domain.value
-        self.stats.tasks_by_domain[domain_name] = (
-            self.stats.tasks_by_domain.get(domain_name, 0) + 1
-        )
+        self.stats.tasks_by_domain[domain_name] = self.stats.tasks_by_domain.get(domain_name, 0) + 1
 
         # Update solve rate
         solved = sum(1 for t in self.task_history if t.solved)
@@ -426,7 +417,7 @@ Make the task specific and actionable, not vague."""
 
     def _parse_json_response(self, text: str) -> dict:
         """Parse JSON from LLM response."""
-        json_match = re.search(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', text, re.DOTALL)
+        json_match = re.search(r"\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}", text, re.DOTALL)
         if json_match:
             try:
                 return json.loads(json_match.group())
@@ -453,8 +444,7 @@ Make the task specific and actionable, not vague."""
             "solve_rate": self.stats.avg_solve_rate,
             "frontier": self.stats.frontier_difficulty.name,
             "difficulty_distribution": {
-                d.name: round(w, 3)
-                for d, w in self.difficulty_distribution.items()
+                d.name: round(w, 3) for d, w in self.difficulty_distribution.items()
             },
             "discovered_skills": len(self.discovered_skills),
         }

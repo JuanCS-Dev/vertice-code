@@ -1,7 +1,7 @@
 # 🔧 Creating Custom Workflows
 
-**Target audience:** Advanced users  
-**Time to create workflow:** 15-30 minutes  
+**Target audience:** Advanced users
+**Time to create workflow:** 15-30 minutes
 **Prerequisite:** Understanding of DevSquad phases
 
 ---
@@ -72,7 +72,7 @@ steps:
     action: create_directory
     params:
       path: "{project_name}"
-    
+
   - name: create_main
     agent: Refactorer
     action: create_file
@@ -81,11 +81,11 @@ steps:
       content: |
         from fastapi import FastAPI
         app = FastAPI()
-        
+
         @app.get("/")
         def root():
             return {"message": "Hello World"}
-  
+
   - name: create_requirements
     agent: Refactorer
     action: create_file
@@ -94,13 +94,13 @@ steps:
       content: |
         fastapi==0.104.1
         uvicorn[standard]==0.24.0
-  
+
   - name: install_deps
     agent: Refactorer
     action: bash_command
     params:
       command: "cd {project_name} && pip install -r requirements.txt"
-  
+
   - name: run_tests
     agent: Refactorer
     action: bash_command
@@ -235,7 +235,7 @@ async def test_setup_fastapi_workflow():
         "setup-fastapi",
         params={"project_name": "test_api", "use_docker": False}
     )
-    
+
     assert result["status"] == "success"
     assert os.path.exists("test_api/main.py")
     assert os.path.exists("test_api/requirements.txt")

@@ -20,11 +20,11 @@ DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "task_pb2", _globals)
-if _descriptor._USE_C_DESCRIPTORS == False:
+if not _descriptor._USE_C_DESCRIPTORS:
     _globals["DESCRIPTOR"]._options = None
-    _globals["DESCRIPTOR"]._serialized_options = (
-        b"\n\017com.vertice.a2aB\tTaskProtoZ\034github.com/vertice/a2a/proto"
-    )
+    _globals[
+        "DESCRIPTOR"
+    ]._serialized_options = b"\n\017com.vertice.a2aB\tTaskProtoZ\034github.com/vertice/a2a/proto"
     _globals["_TASK_METADATAENTRY"]._options = None
     _globals["_TASK_METADATAENTRY"]._serialized_options = b"8\001"
     _globals["_SENDMESSAGEREQUEST_METADATAENTRY"]._options = None

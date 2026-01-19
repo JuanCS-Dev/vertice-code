@@ -52,9 +52,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
-        response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
-        )
+        response.headers[
+            "Content-Security-Policy"
+        ] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
 
         # Remove server header for security
         if "server" in response.headers:
@@ -211,13 +211,13 @@ async def authentication_middleware(
     api_key = request.headers.get("X-API-Key")
 
     # Authenticate request (human or agent)
-    
+
     # DEBUG: Pervasive Logging
     logger.info(f"[Middleware] Processing {request.method} {request.url.path}")
     if authorization:
         logger.info(f"[Middleware] Auth Header Present. Length: {len(authorization)}")
         if authorization.startswith("Bearer "):
-             logger.info(f"[Middleware] Token Prefix Valid. Sample: {authorization[:15]}...")
+            logger.info(f"[Middleware] Token Prefix Valid. Sample: {authorization[:15]}...")
     else:
         logger.warning(f"[Middleware] NO AUTH HEADER RECEIVED for {request.url.path}")
 

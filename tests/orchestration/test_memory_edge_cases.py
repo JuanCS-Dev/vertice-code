@@ -64,7 +64,10 @@ class TestSharedContextEdgeCases:
             user_request="Test",
             execution_plan=nested_plan,
         )
-        assert context.execution_plan["level1"]["level2"]["level3"]["level4"]["level5"]["data"] == "deep"
+        assert (
+            context.execution_plan["level1"]["level2"]["level3"]["level4"]["level5"]["data"]
+            == "deep"
+        )
 
     def test_context_timestamps_are_close(self) -> None:
         """Test that created_at and updated_at are initially close."""
@@ -314,7 +317,7 @@ class TestMemoryManagerConcurrencyEdgeCases:
 
     def test_concurrent_updates_same_session(self) -> None:
         """Test concurrent updates to same session.
-        
+
         NOTE: Current implementation has race condition where last update wins.
         This test verifies that concurrent updates don't corrupt state.
         Future: Add locking or merge strategy for production use.

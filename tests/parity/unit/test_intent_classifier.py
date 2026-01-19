@@ -161,18 +161,14 @@ class TestSecondaryIntents:
     @pytest.mark.unit
     async def test_mixed_intent_has_secondary(self, intent_classifier):
         """Requests with mixed intents should have secondary intents."""
-        result = await intent_classifier.classify(
-            "Review and refactor the authentication module"
-        )
+        result = await intent_classifier.classify("Review and refactor the authentication module")
 
         assert len(result.secondary_intents) > 0, "Should have secondary intents"
 
     @pytest.mark.unit
     async def test_secondary_intents_ordered_by_confidence(self, intent_classifier):
         """Secondary intents should be ordered by relevance."""
-        result = await intent_classifier.classify(
-            "Design, implement, and test the new feature"
-        )
+        result = await intent_classifier.classify("Design, implement, and test the new feature")
 
         # Should have multiple secondary intents
         assert len(result.secondary_intents) >= 1
@@ -192,9 +188,7 @@ class TestIntentClassificationEdgeCases:
     @pytest.mark.unit
     async def test_non_english_request(self, intent_classifier):
         """Non-English requests should be handled."""
-        result = await intent_classifier.classify(
-            "Implementar sistema de autenticacao"
-        )
+        result = await intent_classifier.classify("Implementar sistema de autenticacao")
 
         # Should handle gracefully (may fall back to coding)
         assert result.intent is not None
@@ -202,16 +196,16 @@ class TestIntentClassificationEdgeCases:
     @pytest.mark.unit
     async def test_special_characters(self, intent_classifier):
         """Special characters should not break classification."""
-        result = await intent_classifier.classify(
-            "Fix the bug in @user/repo#123!!!"
-        )
+        result = await intent_classifier.classify("Fix the bug in @user/repo#123!!!")
 
         assert result.intent is not None
 
     @pytest.mark.unit
     async def test_very_long_request(self, intent_classifier):
         """Very long requests should be handled."""
-        long_request = "Please implement " + " and implement ".join([f"feature{i}" for i in range(100)])
+        long_request = "Please implement " + " and implement ".join(
+            [f"feature{i}" for i in range(100)]
+        )
 
         result = await intent_classifier.classify(long_request)
 
@@ -225,20 +219,18 @@ class TestIntentClassifierVsRegex:
     async def test_semantic_understands_context(self, intent_classifier):
         """Semantic classifier should understand context."""
         # "debug" is a keyword but this is asking for docs
-        result = await intent_classifier.classify(
-            "Document how to debug the application"
-        )
+        result = await intent_classifier.classify("Document how to debug the application")
 
         # Should recognize this is about documentation, not debugging
-        assert "docs" in [result.intent] + result.secondary_intents or \
-               "debug" in [result.intent] + result.secondary_intents
+        assert (
+            "docs" in [result.intent] + result.secondary_intents
+            or "debug" in [result.intent] + result.secondary_intents
+        )
 
     @pytest.mark.unit
     async def test_handles_negation(self, intent_classifier):
         """Should handle negation properly."""
-        result = await intent_classifier.classify(
-            "Don't test this yet, just implement it"
-        )
+        result = await intent_classifier.classify("Don't test this yet, just implement it")
 
         # Primary should be coding, not testing
         assert result.intent == "coding"

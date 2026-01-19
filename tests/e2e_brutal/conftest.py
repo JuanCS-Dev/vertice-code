@@ -32,9 +32,11 @@ from vertice_cli.tools.base import ToolRegistry, ToolResult
 # ISSUE TRACKING
 # ==============================================================================
 
+
 @dataclass
 class Issue:
     """Represents a discovered issue."""
+
     id: str
     severity: str  # CRITICAL, HIGH, MEDIUM, LOW
     category: str  # SECURITY, CRASH, UX, PERFORMANCE, LOGIC, INTEGRATION
@@ -61,7 +63,7 @@ class Issue:
             "affected_component": self.affected_component,
             "user_persona": self.user_persona,
             "timestamp": self.timestamp.isoformat(),
-            "traceback": self.traceback
+            "traceback": self.traceback,
         }
 
 
@@ -88,7 +90,7 @@ class IssueCollector:
         actual: str,
         component: str,
         persona: str,
-        traceback: Optional[str] = None
+        traceback: Optional[str] = None,
     ) -> Issue:
         """Add a new issue to the collector."""
         self.issue_counter += 1
@@ -103,7 +105,7 @@ class IssueCollector:
             actual_behavior=actual,
             affected_component=component,
             user_persona=persona,
-            traceback=traceback
+            traceback=traceback,
         )
         self.issues.append(issue)
         return issue
@@ -124,7 +126,7 @@ class IssueCollector:
             "by_severity": {k: len(v) for k, v in by_severity.items()},
             "by_category": {k: len(v) for k, v in by_category.items()},
             "by_persona": {k: len(v) for k, v in by_persona.items()},
-            "issues": [i.to_dict() for i in self.issues]
+            "issues": [i.to_dict() for i in self.issues],
         }
 
     def clear(self):
@@ -143,9 +145,9 @@ def issue_collector():
     report_path = Path(__file__).parent / "BRUTAL_TEST_REPORT.json"
     with open(report_path, "w") as f:
         json.dump(report, f, indent=2)
-    print(f"\n\n{'='*60}")
+    print(f"\n\n{'=' * 60}")
     print(f"BRUTAL TEST REPORT: {report['total_issues']} ISSUES FOUND")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"By Severity: {report['by_severity']}")
     print(f"By Category: {report['by_category']}")
     print(f"By Persona: {report['by_persona']}")
@@ -155,6 +157,7 @@ def issue_collector():
 # ==============================================================================
 # USER PERSONAS
 # ==============================================================================
+
 
 class UserPersona:
     """Base class for user personas."""
@@ -178,14 +181,14 @@ class SeniorDeveloper(UserPersona):
         "Assumes tool understands complex context",
         "Uses advanced git workflows",
         "Expects atomic operations",
-        "Demands precise error messages"
+        "Demands precise error messages",
     ]
     expectations = [
         "Correct first time",
         "No data loss ever",
         "Predictable behavior",
         "Proper error handling",
-        "Transaction-like operations"
+        "Transaction-like operations",
     ]
 
     def get_prompt_style(self, intent: str) -> str:
@@ -195,7 +198,7 @@ class SeniorDeveloper(UserPersona):
             "run_tests": "Execute pytest with coverage report for {module}",
             "git_commit": "Stage {files} and commit with conventional message: {message}",
             "debug": "Trace execution of {function} with breakpoints at {lines}",
-            "refactor": "Extract method {method} from {class} preserving interface"
+            "refactor": "Extract method {method} from {class} preserving interface",
         }
         return styles.get(intent, intent)
 
@@ -210,13 +213,13 @@ class VibeCoder(UserPersona):
         "Contradictory requirements",
         "No error handling awareness",
         "Expects magic",
-        "Copy-pastes random code"
+        "Copy-pastes random code",
     ]
     expectations = [
         "Just make it work",
         "Fix my errors automatically",
         "Understand what I mean not what I say",
-        "Be patient with confusion"
+        "Be patient with confusion",
     ]
 
     def get_prompt_style(self, intent: str) -> str:
@@ -226,7 +229,7 @@ class VibeCoder(UserPersona):
             "run_tests": "test it I guess",
             "git_commit": "save my changes plz",
             "debug": "its broken fix it",
-            "refactor": "make the code better"
+            "refactor": "make the code better",
         }
         return styles.get(intent, intent)
 
@@ -241,13 +244,13 @@ class ScriptKid(UserPersona):
         "Path traversal",
         "Privilege escalation",
         "Resource exhaustion",
-        "Data exfiltration"
+        "Data exfiltration",
     ]
     expectations = [
         "Find vulnerabilities",
         "Break the system",
         "Escape sandbox",
-        "Access forbidden resources"
+        "Access forbidden resources",
     ]
 
     def get_prompt_style(self, intent: str) -> str:
@@ -257,7 +260,7 @@ class ScriptKid(UserPersona):
             "run_tests": "; rm -rf / #",
             "git_commit": "commit $(whoami > /tmp/pwned)",
             "debug": "__import__('os').system('id')",
-            "refactor": "eval(input())"
+            "refactor": "eval(input())",
         }
         return styles.get(intent, intent)
 
@@ -281,6 +284,7 @@ def script_kid():
 # TEST WORKSPACE
 # ==============================================================================
 
+
 @pytest.fixture
 def test_workspace(tmp_path):
     """Create an isolated test workspace."""
@@ -297,9 +301,7 @@ def test_workspace(tmp_path):
     (workspace / "src" / "__init__.py").write_text("")
     (workspace / "src" / "main.py").write_text("def main():\n    print('Hello')\n")
     (workspace / "tests" / "__init__.py").write_text("")
-    (workspace / "tests" / "test_main.py").write_text(
-        "def test_main():\n    assert True\n"
-    )
+    (workspace / "tests" / "test_main.py").write_text("def test_main():\n    assert True\n")
 
     # Initialize git
     os.system(f"cd {workspace} && git init -q && git add . && git commit -m 'init' -q")
@@ -316,6 +318,7 @@ def test_workspace(tmp_path):
 # MOCK LLM CLIENT
 # ==============================================================================
 
+
 class MockLLMClient:
     """Mock LLM client for testing without API calls."""
 
@@ -330,15 +333,12 @@ class MockLLMClient:
         context: str = "",
         max_tokens: int = 500,
         temperature: float = 0.7,
-        **kwargs
+        **kwargs,
     ) -> str:
         """Generate mock response."""
-        self.call_history.append({
-            "method": "generate",
-            "prompt": prompt,
-            "context": context,
-            "kwargs": kwargs
-        })
+        self.call_history.append(
+            {"method": "generate", "prompt": prompt, "context": context, "kwargs": kwargs}
+        )
 
         # Check for specific responses
         for key, response in self.responses.items():
@@ -349,11 +349,7 @@ class MockLLMClient:
 
     async def stream_chat(self, prompt: str, context: str = "", **kwargs):
         """Stream mock response."""
-        self.call_history.append({
-            "method": "stream_chat",
-            "prompt": prompt,
-            "context": context
-        })
+        self.call_history.append({"method": "stream_chat", "prompt": prompt, "context": context})
 
         response = self.default_response
         for word in response.split():
@@ -370,14 +366,17 @@ def mock_llm():
 @pytest.fixture
 def mock_llm_with_responses():
     """Create a mock LLM with configurable responses."""
+
     def _create(responses: Dict[str, str]):
         return MockLLMClient(responses)
+
     return _create
 
 
 # ==============================================================================
 # MOCK MCP CLIENT
 # ==============================================================================
+
 
 class MockMCPClient:
     """Mock MCP client for testing tool execution."""
@@ -387,16 +386,9 @@ class MockMCPClient:
         self.call_history: List[Dict[str, Any]] = []
         self.mock_results: Dict[str, ToolResult] = {}
 
-    async def call_tool(
-        self,
-        tool_name: str,
-        arguments: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def call_tool(self, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
         """Execute tool via MCP."""
-        self.call_history.append({
-            "tool": tool_name,
-            "arguments": arguments
-        })
+        self.call_history.append({"tool": tool_name, "arguments": arguments})
 
         # Check for mock result
         if tool_name in self.mock_results:
@@ -429,14 +421,11 @@ def mock_mcp():
 # SHELL SIMULATOR
 # ==============================================================================
 
+
 class ShellSimulator:
     """Simulates shell interactions for testing."""
 
-    def __init__(
-        self,
-        llm_client: Optional[Any] = None,
-        mcp_client: Optional[Any] = None
-    ):
+    def __init__(self, llm_client: Optional[Any] = None, mcp_client: Optional[Any] = None):
         self.llm = llm_client or MockLLMClient()
         self.mcp = mcp_client or MockMCPClient()
         self.history: List[Dict[str, Any]] = []
@@ -444,11 +433,7 @@ class ShellSimulator:
 
     async def send_command(self, command: str) -> Dict[str, Any]:
         """Send a command to the shell and capture result."""
-        result = {
-            "input": command,
-            "timestamp": datetime.now().isoformat(),
-            "cwd": self.cwd
-        }
+        result = {"input": command, "timestamp": datetime.now().isoformat(), "cwd": self.cwd}
 
         try:
             # Try to process command
@@ -468,13 +453,14 @@ class ShellSimulator:
                 # Execute shell command (SEC-003: use shlex.split instead of shell=True)
                 import subprocess
                 import shlex
+
                 proc = subprocess.run(
                     shlex.split(command),
                     shell=False,
                     capture_output=True,
                     text=True,
                     timeout=30,
-                    cwd=self.cwd
+                    cwd=self.cwd,
                 )
                 result["output"] = proc.stdout
                 result["stderr"] = proc.stderr
@@ -517,6 +503,7 @@ def shell_simulator(mock_llm, mock_mcp):
 # MINI-APPLICATION GENERATORS
 # ==============================================================================
 
+
 class MiniAppGenerator:
     """Generates mini-applications for testing."""
 
@@ -527,7 +514,8 @@ class MiniAppGenerator:
         app_dir.mkdir()
 
         # app.py
-        (app_dir / "app.py").write_text('''"""Minimal Flask app for testing."""
+        (app_dir / "app.py").write_text(
+            '''"""Minimal Flask app for testing."""
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
@@ -546,13 +534,15 @@ def error():
 
 if __name__ == "__main__":
     app.run(debug=True)
-''')
+'''
+        )
 
         # requirements.txt
         (app_dir / "requirements.txt").write_text("flask>=2.0.0\n")
 
         # tests
-        (app_dir / "test_app.py").write_text('''"""Tests for Flask app."""
+        (app_dir / "test_app.py").write_text(
+            '''"""Tests for Flask app."""
 import pytest
 from app import app
 
@@ -570,7 +560,8 @@ def test_index(client):
 def test_echo(client):
     rv = client.post("/echo", json={"test": "data"})
     assert rv.json["test"] == "data"
-''')
+'''
+        )
 
         return app_dir
 
@@ -581,7 +572,8 @@ def test_echo(client):
         cli_dir.mkdir()
 
         # main.py
-        (cli_dir / "main.py").write_text('''"""Minimal CLI tool for testing."""
+        (cli_dir / "main.py").write_text(
+            '''"""Minimal CLI tool for testing."""
 import argparse
 import sys
 
@@ -603,7 +595,8 @@ def main():
 
 if __name__ == "__main__":
     main()
-''')
+'''
+        )
 
         return cli_dir
 
@@ -614,7 +607,8 @@ if __name__ == "__main__":
         data_dir.mkdir()
 
         # processor.py
-        (data_dir / "processor.py").write_text('''"""Data processor for testing."""
+        (data_dir / "processor.py").write_text(
+            '''"""Data processor for testing."""
 import json
 import csv
 from pathlib import Path
@@ -652,7 +646,8 @@ class DataProcessor:
         with open(output_path, "w") as f:
             json.dump(self.data, f)
         return self
-''')
+'''
+        )
 
         # Sample data
         (data_dir / "sample.json").write_text(
@@ -672,18 +667,13 @@ def mini_app_generator():
 # ASYNC TEST HELPERS
 # ==============================================================================
 
-@pytest.fixture
-def event_loop():
-    """Create event loop for async tests."""
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
-
 
 def async_test(coro):
     """Decorator for async tests."""
+
     def wrapper(*args, **kwargs):
         return asyncio.run(coro(*args, **kwargs))
+
     return wrapper
 
 
@@ -691,14 +681,17 @@ def async_test(coro):
 # TIMEOUT AND RESOURCE HELPERS
 # ==============================================================================
 
+
 @pytest.fixture
 def with_timeout():
     """Fixture to run async code with timeout."""
+
     async def _run_with_timeout(coro, timeout=5.0):
         try:
             return await asyncio.wait_for(coro, timeout=timeout)
         except asyncio.TimeoutError:
             return {"error": "Timeout", "timeout": timeout}
+
     return _run_with_timeout
 
 
@@ -706,23 +699,12 @@ def with_timeout():
 # MARKERS
 # ==============================================================================
 
+
 def pytest_configure(config):
     """Configure custom markers."""
-    config.addinivalue_line(
-        "markers", "senior: Tests from senior developer perspective"
-    )
-    config.addinivalue_line(
-        "markers", "vibe_coder: Tests from vibe coder perspective"
-    )
-    config.addinivalue_line(
-        "markers", "script_kid: Security tests from attacker perspective"
-    )
-    config.addinivalue_line(
-        "markers", "stress: Stress tests for performance and stability"
-    )
-    config.addinivalue_line(
-        "markers", "integration: Full integration tests"
-    )
-    config.addinivalue_line(
-        "markers", "slow: Tests that take longer than 5 seconds"
-    )
+    config.addinivalue_line("markers", "senior: Tests from senior developer perspective")
+    config.addinivalue_line("markers", "vibe_coder: Tests from vibe coder perspective")
+    config.addinivalue_line("markers", "script_kid: Security tests from attacker perspective")
+    config.addinivalue_line("markers", "stress: Stress tests for performance and stability")
+    config.addinivalue_line("markers", "integration: Full integration tests")
+    config.addinivalue_line("markers", "slow: Tests that take longer than 5 seconds")

@@ -95,17 +95,14 @@ class TestLLMEdgeCases:
         """Test: Multiple LLM streams run concurrently without blocking."""
         llm = LLMClient()
 
-        prompts = [
-            "Count: 1",
-            "Count: 2",
-            "Count: 3"
-        ]
+        prompts = ["Count: 1", "Count: 2", "Count: 3"]
 
         start_time = time.time()
 
         # Run 3 streams concurrently
         tasks = []
         for prompt in prompts:
+
             async def stream_prompt(p):
                 chunks = []
                 async for chunk in llm.stream_chat(prompt=p):
@@ -137,8 +134,7 @@ class TestLLMEdgeCases:
             # Very long context that might timeout
             response = ""
             async for chunk in llm.stream_chat(
-                prompt="Explain quantum physics" * 10,
-                max_tokens=10
+                prompt="Explain quantum physics" * 10, max_tokens=10
             ):
                 response += chunk
 
@@ -190,10 +186,7 @@ class TestLLMEdgeCases:
         start = time.time()
         response = ""
         async for chunk in llm.stream_chat(
-            prompt="Quick",
-            provider="ollama",
-            enable_failover=True,
-            max_tokens=5
+            prompt="Quick", provider="ollama", enable_failover=True, max_tokens=5
         ):
             response += chunk
         elapsed = time.time() - start
@@ -215,7 +208,7 @@ class TestLLMEdgeCases:
         async for chunk in llm.stream_chat(
             prompt="Auto select",
             provider="auto",  # Let it choose
-            max_tokens=10
+            max_tokens=10,
         ):
             response += chunk
         elapsed = time.time() - start
@@ -230,7 +223,8 @@ class TestLLMEdgeCases:
 
 
 if __name__ == "__main__":
-    print("""
+    print(
+        """
 ╔═══════════════════════════════════════════════════════════╗
 ║     🧪 TUI + LLM EDGE CASES - SCIENTIFIC TESTING          ║
 ╚═══════════════════════════════════════════════════════════╝
@@ -241,6 +235,7 @@ Testing with REAL LLM providers:
   3. HuggingFace (ONLINE) - Fallback
 
 Running 8 edge case tests...
-    """)
+    """
+    )
 
     pytest.main([__file__, "-v", "-s"])

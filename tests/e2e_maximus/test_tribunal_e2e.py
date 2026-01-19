@@ -223,17 +223,13 @@ class TestTribunalResilience:
             call_count += 1
             if call_count < 2:
                 raise httpx.ConnectError("Transient error")
-            return respx.MockResponse(
-                json=mock_factory.tribunal_evaluate()
-            )
+            return respx.MockResponse(json=mock_factory.tribunal_evaluate())
 
         with respx.mock(assert_all_called=False) as router:
             router.get(f"{maximus_base_url}/health").respond(
                 json={"status": "ok", "mcp_enabled": False}
             )
-            router.post(f"{maximus_base_url}/v1/tribunal/evaluate").mock(
-                side_effect=side_effect
-            )
+            router.post(f"{maximus_base_url}/v1/tribunal/evaluate").mock(side_effect=side_effect)
 
             provider = MaximusProvider(config=maximus_config)
             try:

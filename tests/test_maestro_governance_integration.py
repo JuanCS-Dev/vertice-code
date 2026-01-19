@@ -29,11 +29,11 @@ class TestMaestroGovernanceImports:
     def test_maestro_governance_import(self):
         """Validate MaestroGovernance class imports."""
         assert MaestroGovernance is not None
-        assert hasattr(MaestroGovernance, 'initialize')
-        assert hasattr(MaestroGovernance, 'execute_with_governance')
-        assert hasattr(MaestroGovernance, 'ask_sofia')
-        assert hasattr(MaestroGovernance, 'detect_risk_level')
-        assert hasattr(MaestroGovernance, 'get_governance_status')
+        assert hasattr(MaestroGovernance, "initialize")
+        assert hasattr(MaestroGovernance, "execute_with_governance")
+        assert hasattr(MaestroGovernance, "ask_sofia")
+        assert hasattr(MaestroGovernance, "detect_risk_level")
+        assert hasattr(MaestroGovernance, "get_governance_status")
 
     def test_render_sofia_counsel_import(self):
         """Validate render_sofia_counsel function imports."""
@@ -66,7 +66,7 @@ class TestMaestroGovernanceInitialization:
             enable_governance=True,
             enable_counsel=True,
             enable_observability=True,
-            auto_risk_detection=True
+            auto_risk_detection=True,
         )
 
         assert gov.llm_client == mock_llm
@@ -91,7 +91,7 @@ class TestMaestroGovernanceInitialization:
             enable_governance=False,
             enable_counsel=False,
             enable_observability=False,
-            auto_risk_detection=False
+            auto_risk_detection=False,
         )
 
         assert gov.enable_governance is False
@@ -105,8 +105,8 @@ class TestMaestroGovernanceInitialization:
         mock_llm = Mock()
         mock_mcp = Mock()
 
-        with patch.object(JusticaIntegratedAgent, '__init__', return_value=None):
-            with patch.object(SofiaIntegratedAgent, '__init__', return_value=None):
+        with patch.object(JusticaIntegratedAgent, "__init__", return_value=None):
+            with patch.object(SofiaIntegratedAgent, "__init__", return_value=None):
                 gov = MaestroGovernance(mock_llm, mock_mcp, enable_observability=False)
 
                 # Mock the agents to avoid actual initialization
@@ -136,7 +136,7 @@ class TestRiskLevelDetection:
             "Deploy to production without tests",
             "Change root password",
             "Modify security settings",
-            "Update admin credentials"
+            "Update admin credentials",
         ]
 
         for prompt in critical_prompts:
@@ -154,7 +154,7 @@ class TestRiskLevelDetection:
             "Change API endpoints",
             "Redesign architecture",
             "Migration script for users",
-            "Breaking change in payment flow"  # Changed from "authentication" (which triggers CRITICAL)
+            "Breaking change in payment flow",  # Changed from "authentication" (which triggers CRITICAL)
         ]
 
         for prompt in high_prompts:
@@ -170,7 +170,7 @@ class TestRiskLevelDetection:
         medium_prompts = [
             "Add user profile feature",
             "Fix bug in payment flow",  # Changed from "authentication" (CRITICAL keyword)
-            "Implement caching layer"
+            "Implement caching layer",
         ]
 
         for prompt in medium_prompts:
@@ -188,7 +188,7 @@ class TestRiskLevelDetection:
             "List available tests",
             "Read configuration",
             "Document the endpoints",  # Changed from "API" (HIGH keyword)
-            "Search for TODO comments"
+            "Search for TODO comments",
         ]
 
         for prompt in low_prompts:
@@ -256,57 +256,67 @@ class TestAirGapValidation:
     def test_maestro_py_has_governance_import(self):
         """Verify maestro.py imports governance module."""
         import ast
-        with open('/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_cli/maestro.py', 'r') as f:
+
+        with open(
+            "/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_cli/maestro.py", "r"
+        ) as f:
             tree = ast.parse(f.read())
 
         # Check for governance import
         imports = [node for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)]
-        governance_imported = any(
-            imp.module == 'vertice_cli.maestro_governance'
-            for imp in imports
-        )
+        governance_imported = any(imp.module == "vertice_cli.maestro_governance" for imp in imports)
 
         assert governance_imported, "maestro.py must import maestro_governance"
 
     def test_maestro_py_has_state_governance_field(self):
         """Verify GlobalState has governance field."""
-        with open('/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_cli/maestro.py', 'r') as f:
+        with open(
+            "/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_cli/maestro.py", "r"
+        ) as f:
             content = f.read()
 
-        assert 'self.governance' in content, "GlobalState must have governance field"
-        assert 'state.governance' in content, "Code must reference state.governance"
+        assert "self.governance" in content, "GlobalState must have governance field"
+        assert "state.governance" in content, "Code must reference state.governance"
 
     def test_maestro_py_initializes_governance(self):
         """Verify ensure_initialized() creates MaestroGovernance."""
-        with open('/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_cli/maestro.py', 'r') as f:
+        with open(
+            "/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_cli/maestro.py", "r"
+        ) as f:
             content = f.read()
 
-        assert 'MaestroGovernance(' in content, "Must instantiate MaestroGovernance"
-        assert 'await state.governance.initialize()' in content, "Must call initialize()"
+        assert "MaestroGovernance(" in content, "Must instantiate MaestroGovernance"
+        assert "await state.governance.initialize()" in content, "Must call initialize()"
 
     def test_maestro_py_has_governance_hook(self):
         """Verify execute_agent_task() has governance hook."""
-        with open('/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_cli/maestro.py', 'r') as f:
+        with open(
+            "/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_cli/maestro.py", "r"
+        ) as f:
             content = f.read()
 
-        assert 'with_governance' in content, "Must have with_governance parameter"
-        assert 'execute_with_governance' in content, "Must call execute_with_governance"
+        assert "with_governance" in content, "Must have with_governance parameter"
+        assert "execute_with_governance" in content, "Must call execute_with_governance"
 
     def test_maestro_py_has_sofia_command(self):
         """Verify sofia command exists."""
-        with open('/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_cli/maestro.py', 'r') as f:
+        with open(
+            "/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_cli/maestro.py", "r"
+        ) as f:
             content = f.read()
 
         assert '@agent_app.async_command("sofia")' in content, "Must have sofia command"
-        assert 'ask_sofia' in content, "Must call ask_sofia method"
+        assert "ask_sofia" in content, "Must call ask_sofia method"
 
     def test_maestro_py_has_governance_status_command(self):
         """Verify governance status command exists."""
-        with open('/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_cli/maestro.py', 'r') as f:
+        with open(
+            "/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_cli/maestro.py", "r"
+        ) as f:
             content = f.read()
 
         assert '@agent_app.async_command("governance")' in content, "Must have governance command"
-        assert 'get_governance_status' in content, "Must call get_governance_status method"
+        assert "get_governance_status" in content, "Must call get_governance_status method"
 
     def test_all_agent_roles_have_identities(self):
         """Verify all AgentRoles used have corresponding identities."""
@@ -339,16 +349,18 @@ class TestAirGapValidation:
 
     def test_graceful_degradation_path_exists(self):
         """Test that graceful degradation code exists."""
-        with open('/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_cli/maestro.py', 'r') as f:
+        with open(
+            "/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_cli/maestro.py", "r"
+        ) as f:
             content = f.read()
 
         # Check for error handling
-        assert 'except Exception as e:' in content
-        assert 'degraded mode' in content.lower() or 'without governance' in content.lower()
+        assert "except Exception as e:" in content
+        assert "degraded mode" in content.lower() or "without governance" in content.lower()
 
         # Check for fallback execution
-        assert 'if with_governance and state.governance:' in content
-        assert 'else:' in content  # Fallback path
+        assert "if with_governance and state.governance:" in content
+        assert "else:" in content  # Fallback path
 
 
 class TestIntegrationConsistency:
@@ -356,19 +368,16 @@ class TestIntegrationConsistency:
 
     def test_governance_pipeline_uses_correct_agents(self):
         """Test GovernancePipeline uses Justiça and Sofia correctly."""
-        mock_llm = Mock()
-        mock_mcp = Mock()
+        Mock()
+        Mock()
 
-        with patch.object(JusticaIntegratedAgent, '__init__', return_value=None):
-            with patch.object(SofiaIntegratedAgent, '__init__', return_value=None):
+        with patch.object(JusticaIntegratedAgent, "__init__", return_value=None):
+            with patch.object(SofiaIntegratedAgent, "__init__", return_value=None):
                 justica = Mock(spec=JusticaIntegratedAgent)
                 sofia = Mock(spec=SofiaIntegratedAgent)
 
                 pipeline = GovernancePipeline(
-                    justica=justica,
-                    sofia=sofia,
-                    enable_governance=True,
-                    enable_counsel=True
+                    justica=justica, sofia=sofia, enable_governance=True, enable_counsel=True
                 )
 
                 assert pipeline.justica == justica
@@ -379,11 +388,7 @@ class TestIntegrationConsistency:
         mock_llm = Mock()
         mock_mcp = Mock()
 
-        gov = MaestroGovernance(
-            mock_llm, mock_mcp,
-            enable_governance=True,
-            enable_counsel=True
-        )
+        gov = MaestroGovernance(mock_llm, mock_mcp, enable_governance=True, enable_counsel=True)
 
         # Before init, should be None
         assert gov.justica is None
@@ -426,11 +431,9 @@ class TestErrorHandling:
         assert gov.pipeline is None
 
         mock_agent = Mock()
-        mock_agent.execute = AsyncMock(return_value=AgentResponse(
-            success=True,
-            reasoning="Direct execution",
-            data={}
-        ))
+        mock_agent.execute = AsyncMock(
+            return_value=AgentResponse(success=True, reasoning="Direct execution", data={})
+        )
 
         task = AgentTask(request="Test task", context={})
 
@@ -442,10 +445,7 @@ class TestErrorHandling:
 
     def test_render_sofia_counsel_handles_errors(self):
         """Test render_sofia_counsel handles error responses."""
-        error_data = {
-            "success": False,
-            "error": "Sofia unavailable"
-        }
+        error_data = {"success": False, "error": "Sofia unavailable"}
 
         # Should not crash
         try:

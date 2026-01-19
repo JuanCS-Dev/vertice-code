@@ -31,6 +31,7 @@ class TestClaudeParityHandler:
     def handler(self, mock_app):
         """Create handler instance."""
         from vertice_tui.handlers.claude_parity import ClaudeParityHandler
+
         return ClaudeParityHandler(mock_app)
 
     def test_handler_initialization(self, handler, mock_app):
@@ -57,6 +58,7 @@ class TestCompactCommand:
     @pytest.fixture
     def handler(self, mock_app):
         from vertice_tui.handlers.claude_parity import ClaudeParityHandler
+
         return ClaudeParityHandler(mock_app)
 
     @pytest.fixture
@@ -114,6 +116,7 @@ class TestTokenCommands:
     @pytest.fixture
     def handler(self, mock_app):
         from vertice_tui.handlers.claude_parity import ClaudeParityHandler
+
         return ClaudeParityHandler(mock_app)
 
     @pytest.fixture
@@ -160,6 +163,7 @@ class TestTodoCommands:
     @pytest.fixture
     def handler(self, mock_app):
         from vertice_tui.handlers.claude_parity import ClaudeParityHandler
+
         return ClaudeParityHandler(mock_app)
 
     @pytest.fixture
@@ -227,6 +231,7 @@ class TestModelCommand:
     @pytest.fixture
     def handler(self, mock_app):
         from vertice_tui.handlers.claude_parity import ClaudeParityHandler
+
         return ClaudeParityHandler(mock_app)
 
     @pytest.fixture
@@ -277,6 +282,7 @@ class TestHooksCommand:
     @pytest.fixture
     def handler(self, mock_app):
         from vertice_tui.handlers.claude_parity import ClaudeParityHandler
+
         return ClaudeParityHandler(mock_app)
 
     @pytest.fixture
@@ -333,12 +339,16 @@ class TestMCPCommand:
         }
         app.bridge.start_mcp_server = AsyncMock(return_value={"success": True, "port": 3000})
         app.bridge.stop_mcp_server = AsyncMock(return_value={"success": True})
-        app.bridge.list_mcp_tools.return_value = {"exposed": ["read_file", "write_file"], "imported": {}}
+        app.bridge.list_mcp_tools.return_value = {
+            "exposed": ["read_file", "write_file"],
+            "imported": {},
+        }
         return app
 
     @pytest.fixture
     def handler(self, mock_app):
         from vertice_tui.handlers.claude_parity import ClaudeParityHandler
+
         return ClaudeParityHandler(mock_app)
 
     @pytest.fixture
@@ -408,6 +418,7 @@ class TestRouterCommands:
     @pytest.fixture
     def handler(self, mock_app):
         from vertice_tui.handlers.claude_parity import ClaudeParityHandler
+
         return ClaudeParityHandler(mock_app)
 
     @pytest.fixture
@@ -460,6 +471,7 @@ class TestInitCommand:
     @pytest.fixture
     def handler(self, mock_app):
         from vertice_tui.handlers.claude_parity import ClaudeParityHandler
+
         return ClaudeParityHandler(mock_app)
 
     @pytest.fixture
@@ -490,18 +502,18 @@ class TestCommandParityMatrix:
         handler = ClaudeParityHandler(MagicMock())
 
         # These should be callable methods
-        assert hasattr(handler, '_handle_compact')
-        assert hasattr(handler, '_handle_cost')
-        assert hasattr(handler, '_handle_tokens')
-        assert hasattr(handler, '_handle_todos')
-        assert hasattr(handler, '_handle_todo')
-        assert hasattr(handler, '_handle_model')
-        assert hasattr(handler, '_handle_init')
-        assert hasattr(handler, '_handle_hooks')
-        assert hasattr(handler, '_handle_mcp')
-        assert hasattr(handler, '_handle_router')
-        assert hasattr(handler, '_handle_router_status')
-        assert hasattr(handler, '_handle_route')
+        assert hasattr(handler, "_handle_compact")
+        assert hasattr(handler, "_handle_cost")
+        assert hasattr(handler, "_handle_tokens")
+        assert hasattr(handler, "_handle_todos")
+        assert hasattr(handler, "_handle_todo")
+        assert hasattr(handler, "_handle_model")
+        assert hasattr(handler, "_handle_init")
+        assert hasattr(handler, "_handle_hooks")
+        assert hasattr(handler, "_handle_mcp")
+        assert hasattr(handler, "_handle_router")
+        assert hasattr(handler, "_handle_router_status")
+        assert hasattr(handler, "_handle_route")
 
     def test_handler_routes_correctly(self):
         """Test handler routes to correct methods."""
@@ -511,7 +523,7 @@ class TestCommandParityMatrix:
         handler = ClaudeParityHandler(mock_app)
 
         # Handler should have the handle method
-        assert hasattr(handler, 'handle')
+        assert hasattr(handler, "handle")
         assert callable(handler.handle)
 
     def test_task_commands_delegation(self):

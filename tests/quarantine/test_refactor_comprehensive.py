@@ -131,7 +131,8 @@ def test_refactor_agent_test_count():
 
     current_module = sys.modules[__name__]
     test_classes = [
-        obj for name, obj in inspect.getmembers(current_module)
+        obj
+        for name, obj in inspect.getmembers(current_module)
         if inspect.isclass(obj) and name.startswith("Test")
     ]
 

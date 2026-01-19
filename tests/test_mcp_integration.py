@@ -1,11 +1,6 @@
 """Tests for MCP integration."""
 import pytest
-from vertice_cli.integrations.mcp import (
-    MCPConfig,
-    ShellSession,
-    ShellManager,
-    QwenMCPServer
-)
+from vertice_cli.integrations.mcp import MCPConfig, ShellSession, ShellManager, QwenMCPServer
 from vertice_cli.tools.registry_helper import get_default_registry
 
 
@@ -15,10 +10,10 @@ class TestMCPConfig:
     def test_default_config(self):
         """Test default configuration."""
         config = MCPConfig()
-        assert config.enabled == False
+        assert not config.enabled
         assert config.host == "localhost"
         assert config.port == 8765
-        assert config.enable_shell == True
+        assert config.enable_shell
 
     def test_config_from_env(self, monkeypatch):
         """Test loading from environment."""
@@ -26,7 +21,7 @@ class TestMCPConfig:
         monkeypatch.setenv("MCP_PORT", "9000")
 
         config = MCPConfig.from_env()
-        assert config.enabled == True
+        assert config.enabled
         assert config.port == 9000
 
 
@@ -38,14 +33,14 @@ class TestShellSession:
         """Test creating shell session."""
         session = ShellSession("test_session")
         assert session.session_id == "test_session"
-        assert session._running == False
+        assert not session._running
 
     async def test_shell_execute(self):
         """Test executing command in shell."""
         session = ShellSession("test_exec")
         result = await session.execute("echo 'hello'")
 
-        assert result["success"] == True
+        assert result["success"]
         assert "hello" in result["output"]
         assert result["session_id"] == "test_exec"
 
@@ -54,9 +49,10 @@ class TestShellSession:
     async def test_shell_multiple_commands(self):
         """Test multiple commands in same session."""
         import asyncio
+
         session = ShellSession("test_multi")
 
-        result1 = await session.execute("export TEST_VAR=hello")
+        await session.execute("export TEST_VAR=hello")
         await asyncio.sleep(0.3)  # Give shell time to process export
         result2 = await session.execute("echo $TEST_VAR")
 
@@ -84,8 +80,8 @@ class TestShellManager:
         """Test managing multiple sessions."""
         manager = ShellManager()
 
-        session1 = await manager.create_session("session1")
-        session2 = await manager.create_session("session2")
+        await manager.create_session("session1")
+        await manager.create_session("session2")
 
         assert len(manager.sessions) == 2
         assert manager.get_session("session1") is not None
@@ -102,8 +98,8 @@ class TestMCPServer:
         config = MCPConfig(enabled=False)
         server = QwenMCPServer(config)
 
-        assert server.config.enabled == False
-        assert server.is_running() == False
+        assert not server.config.enabled
+        assert not server.is_running()
 
     def test_server_initialization(self):
         """Test initializing server with registry."""

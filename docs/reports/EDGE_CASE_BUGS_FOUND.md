@@ -1,7 +1,7 @@
 # 🐛 EDGE CASE BUGS DISCOVERED
 
-**Date:** 2025-11-18 01:12 UTC  
-**Method:** Adversarial edge case testing  
+**Date:** 2025-11-18 01:12 UTC
+**Method:** Adversarial edge case testing
 **Results:** 6 real bugs found! 🎯
 
 ---
@@ -9,8 +9,8 @@
 ## BUGS FOUND
 
 ### 🐛 BUG #1: ZeroDivisionError on empty context
-**Severity:** HIGH  
-**Location:** `conversation.py` - ContextWindow  
+**Severity:** HIGH
+**Location:** `conversation.py` - ContextWindow
 **Trigger:** `max_context_tokens=0`
 
 **Error:**
@@ -31,8 +31,8 @@ def get_usage_percentage(self) -> float:
 ---
 
 ### 🐛 BUG #2: Usage exceeds 100% with tiny context
-**Severity:** MEDIUM  
-**Location:** `conversation.py` - ContextWindow  
+**Severity:** MEDIUM
+**Location:** `conversation.py` - ContextWindow
 **Trigger:** `max_context_tokens=1` + long messages
 
 **Error:**
@@ -50,8 +50,8 @@ Actual: 10000% usage
 ---
 
 ### 🐛 BUG #3: Massive overflow not prevented
-**Severity:** HIGH  
-**Location:** `conversation.py` - ContextWindow  
+**Severity:** HIGH
+**Location:** `conversation.py` - ContextWindow
 **Trigger:** 100 turns with 200 tokens each on 100 token limit
 
 **Error:**
@@ -69,8 +69,8 @@ Actual: 690% usage
 ---
 
 ### 🐛 BUG #4: AttributeError on invalid state
-**Severity:** LOW  
-**Location:** `conversation.py` - ConversationState  
+**Severity:** LOW
+**Location:** `conversation.py` - ConversationState
 **Trigger:** Reference to non-existent `COMPLETED` state
 
 **Error:**
@@ -85,8 +85,8 @@ AttributeError: 'ConversationState' has no attribute 'COMPLETED'
 ---
 
 ### 🐛 BUG #5: LEI calculation incorrect for many patterns
-**Severity:** MEDIUM  
-**Location:** `workflow.py` - AutoCritique  
+**Severity:** MEDIUM
+**Location:** `workflow.py` - AutoCritique
 **Trigger:** 100 TODO comments
 
 **Error:**
@@ -110,8 +110,8 @@ But test got 10.0, suggesting:
 ---
 
 ### 🐛 BUG #6: Unbounded memory growth
-**Severity:** CRITICAL ⚠️  
-**Location:** `conversation.py` - ConversationManager  
+**Severity:** CRITICAL ⚠️
+**Location:** `conversation.py` - ConversationManager
 **Trigger:** 10,000 turns
 
 **Error:**
@@ -169,4 +169,3 @@ After fixes:
 4. Update documentation
 
 **ETA:** 1-2 hours for critical fixes
-

@@ -30,7 +30,7 @@ async def run_self_healing_session(scenario_name: str, max_retries: int = 3, mod
         setup_files = getattr(module, "SETUP_FILES", {})
         initial_prompt = getattr(module, "PROMPT", "")
         validation_rules = getattr(module, "VALIDATION_RULES", [])
-        expected_files = getattr(module, "EXPECTED_FILES", [])
+        getattr(module, "EXPECTED_FILES", [])
     except Exception as e:
         print(f"❌ Failed to load scenario: {e}")
         return
@@ -78,8 +78,6 @@ async def run_self_healing_session(scenario_name: str, max_retries: int = 3, mod
         "\nDo not use markdown code blocks or JSON blocks. Just write the function call."
     )
     current_prompt = initial_prompt + mandate
-
-    history_ctx = []  # Keep context across retries if needed, or rely on bridge history
 
     for attempt in range(1, max_retries + 1):
         print(f"\n🔄 Attempt {attempt}/{max_retries}")

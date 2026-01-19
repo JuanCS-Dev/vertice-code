@@ -14,6 +14,7 @@ from enum import Enum
 
 class ReviewSeverity(str, Enum):
     """Severity levels for review findings."""
+
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"
@@ -23,6 +24,7 @@ class ReviewSeverity(str, Enum):
 
 class DeepThinkStage(str, Enum):
     """Stages of Deep Think analysis (CodeMender pattern)."""
+
     STATIC_ANALYSIS = "static"
     DEEP_REASONING = "reasoning"
     CRITIQUE = "critique"
@@ -32,6 +34,7 @@ class DeepThinkStage(str, Enum):
 @dataclass
 class ThinkingStep:
     """A single step in the Deep Think reasoning process."""
+
     stage: DeepThinkStage
     thought: str
     confidence: float
@@ -41,6 +44,7 @@ class ThinkingStep:
 @dataclass
 class ReviewFinding:
     """A single finding from code review."""
+
     id: str
     severity: ReviewSeverity
     category: str
@@ -63,6 +67,7 @@ class DeepThinkResult:
 
     Each finding goes through reasoning → critique → validation.
     """
+
     thinking_steps: List[ThinkingStep]
     validated_findings: List[ReviewFinding]
     rejected_findings: List[ReviewFinding]
@@ -78,6 +83,7 @@ class DeepThinkResult:
 @dataclass
 class ReviewResult:
     """Complete review result."""
+
     file_path: str
     findings: List[ReviewFinding]
     summary: str

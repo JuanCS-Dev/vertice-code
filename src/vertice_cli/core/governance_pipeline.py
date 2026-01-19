@@ -244,7 +244,6 @@ class GovernancePipeline:
             "governance_pipeline.pre_execution_check",
             {"correlation_id": correlation_id, "agent_id": agent_id, "risk_level": risk_level},
         ) as span:
-
             traces = {
                 "correlation_id": correlation_id,
                 "started_at": datetime.now(timezone.utc).isoformat(),
@@ -324,7 +323,6 @@ class GovernancePipeline:
         with trace_operation(
             "governance.justica_check", {"agent": "justica", "correlation_id": correlation_id}
         ) as span:
-
             # Enforce permission (IAM pattern)
             try:
                 enforce_permission("governance", AgentPermission.EVALUATE_GOVERNANCE)
@@ -370,7 +368,6 @@ class GovernancePipeline:
         with trace_operation(
             "governance.sofia_check", {"agent": "sofia", "correlation_id": correlation_id}
         ) as span:
-
             # Enforce permission (IAM pattern)
             try:
                 enforce_permission("counselor", AgentPermission.PROVIDE_COUNSEL)
@@ -456,7 +453,6 @@ class GovernancePipeline:
                 "risk_level": risk_level,
             },
         ) as span:
-
             # PHASE 1: Pre-execution checks (PARALLEL)
             approved, reason, traces = await self.pre_execution_check(
                 task=task, agent_id=agent.role.value, risk_level=risk_level

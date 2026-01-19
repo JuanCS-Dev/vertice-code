@@ -26,11 +26,11 @@ import pytest
 # Helper: Import VertexCacheManager without triggering __init__.py chain
 # =============================================================================
 
+
 def get_cache_manager_class() -> Type:
     """Import VertexCacheManager directly to avoid protobuf conflicts."""
     spec = importlib.util.spec_from_file_location(
-        "vertex_cache",
-        "vertice_cli/core/providers/vertex_cache.py"
+        "vertex_cache", "vertice_cli/core/providers/vertex_cache.py"
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -40,6 +40,7 @@ def get_cache_manager_class() -> Type:
 # =============================================================================
 # Test Data / Fixtures
 # =============================================================================
+
 
 @pytest.fixture
 def large_context() -> str:
@@ -57,9 +58,7 @@ def system_instruction() -> str:
 @pytest.fixture
 def sample_messages() -> List[Dict[str, str]]:
     """Sample chat messages."""
-    return [
-        {"role": "user", "content": "What does this code do?"}
-    ]
+    return [{"role": "user", "content": "What does this code do?"}]
 
 
 @pytest.fixture
@@ -71,6 +70,7 @@ def cache_manager_class() -> Type:
 # =============================================================================
 # Test: Implicit Caching (Prompt Structure)
 # =============================================================================
+
 
 class TestImplicitCachingPromptStructure:
     """Test prompt structure optimization for implicit caching."""
@@ -98,12 +98,14 @@ class TestImplicitCachingPromptStructure:
         messages = [
             {"role": "system", "content": "System instruction"},
             {"role": "user", "content": "Context: Large codebase here..."},
-            {"role": "user", "content": "Question: What does function X do?"}
+            {"role": "user", "content": "Question: What does function X do?"},
         ]
 
         # Context should come before question
         context_idx = next(i for i, m in enumerate(messages) if "Context:" in m.get("content", ""))
-        question_idx = next(i for i, m in enumerate(messages) if "Question:" in m.get("content", ""))
+        question_idx = next(
+            i for i, m in enumerate(messages) if "Question:" in m.get("content", "")
+        )
 
         assert context_idx < question_idx
 
@@ -112,14 +114,12 @@ class TestImplicitCachingPromptStructure:
 # Test: VertexCacheManager - Creation
 # =============================================================================
 
+
 class TestCacheCreation:
     """Test CachedContent creation."""
 
     def test_create_cache_returns_cache_name(
-        self,
-        large_context: str,
-        system_instruction: str,
-        cache_manager_class: Type
+        self, large_context: str, system_instruction: str, cache_manager_class: Type
     ) -> None:
         """HYPOTHESIS: create_cache returns a cache resource name."""
         mock_cache = MagicMock()
@@ -129,12 +129,12 @@ class TestCacheCreation:
         manager._client = MagicMock()
         manager._client.caches.create.return_value = mock_cache
 
-        with patch.dict('sys.modules', {'google.genai.types': MagicMock()}):
+        with patch.dict("sys.modules", {"google.genai.types": MagicMock()}):
             cache_name = manager.create_cache(
                 name="test-cache",
                 content=large_context,
                 system_instruction=system_instruction,
-                ttl_seconds=3600
+                ttl_seconds=3600,
             )
 
         assert cache_name is not None
@@ -148,16 +148,13 @@ class TestCacheCreation:
         small_content = "This is too small"
 
         with pytest.raises(ValueError, match="minimum.*token"):
-            manager.create_cache(
-                name="small-cache",
-                content=small_content,
-                ttl_seconds=3600
-            )
+            manager.create_cache(name="small-cache", content=small_content, ttl_seconds=3600)
 
 
 # =============================================================================
 # Test: VertexCacheManager - Usage
 # =============================================================================
+
 
 class TestCacheUsage:
     """Test using cached content with models."""
@@ -200,6 +197,7 @@ class TestCacheUsage:
 # Test: VertexCacheManager - TTL Management
 # =============================================================================
 
+
 class TestCacheTTLManagement:
     """Test cache TTL update and extension."""
 
@@ -212,7 +210,7 @@ class TestCacheTTLManagement:
         manager._caches["test-cache"] = mock_cache
         manager._client = MagicMock()
 
-        with patch.dict('sys.modules', {'google.genai.types': MagicMock()}):
+        with patch.dict("sys.modules", {"google.genai.types": MagicMock()}):
             manager.extend_ttl("test-cache", additional_seconds=7200)
 
         # Should call update on client
@@ -229,6 +227,7 @@ class TestCacheTTLManagement:
 # =============================================================================
 # Test: VertexCacheManager - Deletion
 # =============================================================================
+
 
 class TestCacheDeletion:
     """Test cache deletion."""
@@ -262,19 +261,18 @@ class TestCacheDeletion:
 # Test: stream_chat() with cached_content
 # =============================================================================
 
+
 class TestStreamChatWithCache:
     """Test stream_chat() with cached content."""
 
     @pytest.mark.asyncio
     async def test_stream_chat_uses_cached_content(
-        self,
-        sample_messages: List[Dict[str, str]]
+        self, sample_messages: List[Dict[str, str]]
     ) -> None:
         """HYPOTHESIS: cached_content parameter is passed to model."""
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
@@ -287,14 +285,11 @@ class TestStreamChatWithCache:
 
             cache_name = "projects/123/locations/us-central1/cachedContents/abc"
 
-            with patch('vertexai.generative_models.GenerativeModel') as MockModel:
+            with patch("vertexai.generative_models.GenerativeModel") as MockModel:
                 # Set up from_cached_content to return mock model
                 MockModel.from_cached_content.return_value = mock_model
 
-                async for _ in provider.stream_chat(
-                    sample_messages,
-                    cached_content=cache_name
-                ):
+                async for _ in provider.stream_chat(sample_messages, cached_content=cache_name):
                     pass
 
                 # Should use from_cached_content
@@ -302,14 +297,12 @@ class TestStreamChatWithCache:
 
     @pytest.mark.asyncio
     async def test_stream_chat_without_cache_uses_normal_model(
-        self,
-        sample_messages: List[Dict[str, str]]
+        self, sample_messages: List[Dict[str, str]]
     ) -> None:
         """HYPOTHESIS: No cached_content uses normal model initialization."""
-        with patch.dict('sys.modules', {
-            'vertexai': MagicMock(),
-            'vertexai.generative_models': MagicMock()
-        }):
+        with patch.dict(
+            "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
+        ):
             from vertice_cli.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
@@ -320,7 +313,9 @@ class TestStreamChatWithCache:
             mock_response.__iter__ = lambda self: iter([])
             mock_model.generate_content.return_value = mock_response
 
-            with patch('vertexai.generative_models.GenerativeModel', return_value=mock_model) as MockModel:
+            with patch(
+                "vertexai.generative_models.GenerativeModel", return_value=mock_model
+            ) as MockModel:
                 async for _ in provider.stream_chat(sample_messages):
                     pass
 
@@ -331,6 +326,7 @@ class TestStreamChatWithCache:
 # =============================================================================
 # Integration Test (requires actual SDK - skip in CI)
 # =============================================================================
+
 
 @pytest.mark.skip(reason="Requires Vertex AI credentials - run manually")
 class TestVertexCachingIntegration:
@@ -353,9 +349,7 @@ class TestVertexCachingIntegration:
 
         # Create cache
         cache_name = manager.create_cache(
-            name="integration-test-cache",
-            content=large_context,
-            ttl_seconds=300
+            name="integration-test-cache", content=large_context, ttl_seconds=300
         )
         assert cache_name is not None
 
@@ -363,8 +357,7 @@ class TestVertexCachingIntegration:
             # Use cache
             chunks = []
             async for chunk in provider.stream_chat(
-                [{"role": "user", "content": "Summarize the context."}],
-                cached_content=cache_name
+                [{"role": "user", "content": "Summarize the context."}], cached_content=cache_name
             ):
                 chunks.append(chunk)
 
@@ -373,4 +366,3 @@ class TestVertexCachingIntegration:
         finally:
             # Cleanup
             manager.delete_cache("integration-test-cache")
-

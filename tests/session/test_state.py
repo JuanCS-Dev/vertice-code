@@ -32,34 +32,34 @@ class TestSessionState:
 
         data = state.to_dict()
 
-        assert data['session_id'] == "test-456"
-        assert data['cwd'] == "/home/user"
-        assert data['history'] == ["command1", "command2"]
-        assert set(data['files_read']) == {"file1.py", "file2.py"}
-        assert isinstance(data['created_at'], str)
+        assert data["session_id"] == "test-456"
+        assert data["cwd"] == "/home/user"
+        assert data["history"] == ["command1", "command2"]
+        assert set(data["files_read"]) == {"file1.py", "file2.py"}
+        assert isinstance(data["created_at"], str)
 
     def test_from_dict(self):
         """Test creating state from dictionary."""
         data = {
-            'session_id': 'test-789',
-            'cwd': '/tmp/test',
-            'history': ['cmd1', 'cmd2'],
-            'conversation': [],
-            'context': {},
-            'files_read': ['file1.py'],
-            'files_modified': [],
-            'tool_calls_count': 5,
-            'created_at': '2025-01-01T12:00:00',
-            'last_activity': '2025-01-01T12:30:00',
-            'metadata': {},
+            "session_id": "test-789",
+            "cwd": "/tmp/test",
+            "history": ["cmd1", "cmd2"],
+            "conversation": [],
+            "context": {},
+            "files_read": ["file1.py"],
+            "files_modified": [],
+            "tool_calls_count": 5,
+            "created_at": "2025-01-01T12:00:00",
+            "last_activity": "2025-01-01T12:30:00",
+            "metadata": {},
         }
 
         state = SessionState.from_dict(data)
 
-        assert state.session_id == 'test-789'
-        assert state.cwd == Path('/tmp/test')
-        assert state.history == ['cmd1', 'cmd2']
-        assert state.files_read == {'file1.py'}
+        assert state.session_id == "test-789"
+        assert state.cwd == Path("/tmp/test")
+        assert state.history == ["cmd1", "cmd2"]
+        assert state.files_read == {"file1.py"}
         assert state.tool_calls_count == 5
 
     def test_add_message(self):
@@ -70,10 +70,10 @@ class TestSessionState:
         state.add_message("assistant", "Hi there!")
 
         assert len(state.conversation) == 2
-        assert state.conversation[0]['role'] == "user"
-        assert state.conversation[0]['content'] == "Hello"
-        assert state.conversation[1]['role'] == "assistant"
-        assert 'timestamp' in state.conversation[0]
+        assert state.conversation[0]["role"] == "user"
+        assert state.conversation[0]["content"] == "Hello"
+        assert state.conversation[1]["role"] == "assistant"
+        assert "timestamp" in state.conversation[0]
 
     def test_add_file_read(self):
         """Test tracking files read."""
@@ -116,6 +116,7 @@ class TestSessionState:
 
         # Small delay to ensure timestamp changes
         import time
+
         time.sleep(0.01)
 
         state.update_activity()

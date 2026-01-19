@@ -106,8 +106,7 @@ class ConstitutionalClassifier:
             "blocked_outputs": self.blocked_outputs,
             "escalations": self.escalations,
             "block_rate": (
-                (self.blocked_inputs + self.blocked_outputs)
-                / max(1, self.total_classifications)
+                (self.blocked_inputs + self.blocked_outputs) / max(1, self.total_classifications)
             ),
             "input_classifier_stats": {
                 "classifications": self.input_classifier.classification_count,

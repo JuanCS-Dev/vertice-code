@@ -51,13 +51,11 @@ async def test_async_executor_with_streaming():
     executor = AsyncCommandExecutor()
 
     chunks = []
+
     def callback(chunk: OutputChunk):
         chunks.append(chunk)
 
-    result = await executor.execute(
-        "echo 'line 1'; echo 'line 2'",
-        stream_callback=callback
-    )
+    result = await executor.execute("echo 'line 1'; echo 'line 2'", stream_callback=callback)
 
     assert result.success
     assert len(chunks) > 0
@@ -85,10 +83,7 @@ async def test_async_executor_timeout():
     """Test execution timeout."""
     executor = AsyncCommandExecutor()
 
-    result = await executor.execute(
-        "sleep 5",
-        timeout=0.5
-    )
+    result = await executor.execute("sleep 5", timeout=0.5)
 
     assert not result.success
     assert result.exit_code != 0
@@ -102,17 +97,13 @@ async def test_reactive_renderer():
     await renderer.start()
 
     # Emit events
-    await renderer.emit(RenderEvent(
-        event_type=RenderEventType.OUTPUT,
-        content="test output\n",
-        metadata={}
-    ))
+    await renderer.emit(
+        RenderEvent(event_type=RenderEventType.OUTPUT, content="test output\n", metadata={})
+    )
 
-    await renderer.emit(RenderEvent(
-        event_type=RenderEventType.COMPLETE,
-        content="Task completed",
-        metadata={}
-    ))
+    await renderer.emit(
+        RenderEvent(event_type=RenderEventType.COMPLETE, content="Task completed", metadata={})
+    )
 
     # Give time to process
     await asyncio.sleep(0.2)
@@ -152,6 +143,7 @@ async def test_stream_processor_callbacks():
     processor = StreamProcessor()
 
     received = []
+
     def callback(chunk: OutputChunk):
         received.append(chunk.content)
 

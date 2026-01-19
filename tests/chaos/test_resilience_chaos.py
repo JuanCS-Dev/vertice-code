@@ -219,7 +219,7 @@ class TestFallbackChaos:
         # Setup fallback
         agent.setup_fallback(
             providers=["primary", "secondary"],
-            provider_funcs={"primary": primary, "secondary": secondary}
+            provider_funcs={"primary": primary, "secondary": secondary},
         )
 
         result = await agent.call_with_fallback()
@@ -244,10 +244,7 @@ class TestFallbackChaos:
         async def fail_b() -> str:
             raise TransientError("B failed")
 
-        agent.setup_fallback(
-            providers=["a", "b"],
-            provider_funcs={"a": fail_a, "b": fail_b}
-        )
+        agent.setup_fallback(providers=["a", "b"], provider_funcs={"a": fail_a, "b": fail_b})
 
         with pytest.raises(Exception):  # ResilienceError or similar
             await agent.call_with_fallback()

@@ -13,6 +13,7 @@ from app.integrations.firestore_cache import FirestoreCache
 
 logger = logging.getLogger(__name__)
 
+
 class RateLimiter:
     """Distributed rate limiter using Firestore (Fixed Window)"""
 
@@ -22,12 +23,12 @@ class RateLimiter:
     async def is_allowed(self, key: str, limit: int, window_seconds: int) -> bool:
         """
         Check if request is allowed under rate limit using Fixed Window.
-        
+
         Args:
             key: Unique identifier
             limit: Max requests
             window_seconds: Time window (e.g. 60)
-            
+
         Strategy:
             Key = limit:{key}:{window_timestamp}
             Value = count
@@ -36,68 +37,70 @@ class RateLimiter:
         """
         current_time = int(time.time())
         window_start = (current_time // window_seconds) * window_seconds
-        redis_key = f"rate_limit:{key}:{window_start}" # We keep 'rate_limit' prefix
+        redis_key = f"rate_limit:{key}:{window_start}"  # We keep 'rate_limit' prefix
 
         # Note: FirestoreCache.get returns string/int/dict
-        # We need atomic increment logic. 
+        # We need atomic increment logic.
         # Since FirestoreCache is a wrapper, we might access self.cache.db directly for atomic ops
         # if performance demands it. But for budget, let's use the wrapper if possible
-        # or expand wrapper. 
-        
+        # or expand wrapper.
+
         # Simpler reading for now (optimized for reads cost):
         # 1. Get doc.
         try:
             doc_ref = self.cache.collection.document(redis_key)
             doc = await doc_ref.get()
-            
+
             if doc.exists:
-                count = doc.to_dict().get('count', 0)
+                count = doc.to_dict().get("count", 0)
                 if count >= limit:
                     return False
-                
+
                 # Increment
                 # Use update with google.cloud.firestore.Increment(1)?
                 # Need to import it or rely on set.
                 # Just set count + 1 for now (race condition possible but acceptable for MVP)
                 # Or usage metering style.
-                await doc_ref.update({'count': count + 1})
+                await doc_ref.update({"count": count + 1})
             else:
                 # Create new window
-                await doc_ref.set({
-                    'count': 1,
-                    'expires_at': current_time + window_seconds + 10 # Buffer
-                })
-            
+                await doc_ref.set(
+                    {
+                        "count": 1,
+                        "expires_at": current_time + window_seconds + 10,  # Buffer
+                    }
+                )
+
             return True
-            
+
         except Exception as e:
             logger.error(f"Rate limit verification failed: {e}")
-            return True # Fail open to avoid blocking users on DB error
+            return True  # Fail open to avoid blocking users on DB error
 
     async def get_remaining(self, key: str, limit: int, window_seconds: int) -> int:
         """Get remaining requests"""
         current_time = int(time.time())
         window_start = (current_time // window_seconds) * window_seconds
         redis_key = f"rate_limit:{key}:{window_start}"
-        
-        val = await self.cache.get(redis_key)
+
+        await self.cache.get(redis_key)
         # Since our custom set stores a dict {count, expires}, get returns dict or None?
         # FirestoreCache.get returns `data.get('value')`.
         # Wait, FirestoreCache.set sets {'value': value}.
         # My RateLimiter above sets {'count': 1}.
         # So FirestoreCache.get will return None if it looks for 'value'.
-        
+
         # Correction: We should access the doc directly via wrapper logic if possible
         # or update FirestoreCache to support generic dicts.
         # But for now, let's just use the direct DB access pattern used in is_allowed.
-        
+
         try:
             doc = await self.cache.collection.document(redis_key).get()
             if doc.exists:
-                count = doc.to_dict().get('count', 0)
+                count = doc.to_dict().get("count", 0)
                 return max(0, limit - count)
             return limit
-        except:
+        except Exception:
             return limit
 
 
@@ -144,4 +147,3 @@ async def check_rate_limit(
                 "remaining": remaining,
             },
         )
-

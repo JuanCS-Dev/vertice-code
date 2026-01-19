@@ -61,7 +61,7 @@ const securityHeaders = {
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Content-Security-Policy': "default-src 'self'",
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
-  
+
   // 🇪🇺 EU AI ACT COMPLIANCE HEADERS (MANDATORY 2026)
   'X-AI-Generated': 'true',
   'X-Model-Version': 'gemini-2.5-pro',

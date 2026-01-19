@@ -8,7 +8,7 @@ from vertice_cli.core.llm import llm_client
 async def benchmark_performance():
     """Benchmark TTFT and throughput."""
     print("⚡ LLM Performance Benchmark\n")
-    print("="*60)
+    print("=" * 60)
 
     prompt = "Write a Python function to calculate fibonacci numbers"
 
@@ -41,7 +41,7 @@ async def benchmark_performance():
     tokens_approx = total_chars // 4  # Rough estimate
     throughput = tokens_approx / generation_time if generation_time > 0 else 0
 
-    print("\n\n" + "="*60)
+    print("\n\n" + "=" * 60)
     print("\n📊 Performance Metrics:\n")
     print(f"⚡ TTFT (Time to First Token): {ttft:.0f}ms")
     print(f"⏱️  Total Time: {total_time:.2f}s")
@@ -53,7 +53,9 @@ async def benchmark_performance():
     # Validate targets
     print("\n🎯 Target Validation:\n")
     print(f"TTFT Target: <2000ms → {'✅ PASS' if ttft < 2000 else '❌ FAIL'} ({ttft:.0f}ms)")
-    print(f"Throughput Target: >10 t/s → {'✅ PASS' if throughput > 10 else '❌ FAIL'} ({throughput:.1f} t/s)")
+    print(
+        f"Throughput Target: >10 t/s → {'✅ PASS' if throughput > 10 else '❌ FAIL'} ({throughput:.1f} t/s)"
+    )
 
 
 async def main():
@@ -64,6 +66,7 @@ async def main():
     except Exception as e:
         print(f"\n❌ Benchmark failed: {e}")
         import traceback
+
         traceback.print_exc()
 
 

@@ -211,7 +211,7 @@ async def bash_command(
             try:
                 proc.kill()
                 await proc.wait()
-            except:
+            except Exception:
                 pass
             return {"success": False, "error": f"Command timeout after {timeout}s"}
 

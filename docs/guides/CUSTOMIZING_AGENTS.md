@@ -1,6 +1,6 @@
 # 🎨 Customizing Agents
 
-**Target audience:** Advanced users  
+**Target audience:** Advanced users
 **Prerequisite:** Python knowledge, understanding of DevSquad
 
 ---
@@ -28,7 +28,7 @@ agents:
       You are a medical software architect. FDA compliance is mandatory.
       Veto any request that violates HIPAA regulations.
     temperature: 0.1  # More conservative
-    
+
   reviewer:
     min_test_coverage: 95  # Stricter than default 90
     security_rules:
@@ -46,7 +46,7 @@ from qwen_dev_cli.agents import ArchitectAgent
 
 class MedicalArchitectAgent(ArchitectAgent):
     """Architect with HIPAA compliance checks."""
-    
+
     async def execute(self, task):
         # Pre-check for PHI handling
         if self._contains_phi(task.request):
@@ -56,10 +56,10 @@ class MedicalArchitectAgent(ArchitectAgent):
                     data={"decision": "VETO"},
                     reasoning="PHI detected but no encryption plan provided"
                 )
-        
+
         # Delegate to parent
         return await super().execute(task)
-    
+
     def _contains_phi(self, request: str) -> bool:
         phi_keywords = ["patient", "medical_record", "ssn", "diagnosis"]
         return any(kw in request.lower() for kw in phi_keywords)
@@ -85,24 +85,24 @@ from qwen_dev_cli.agents.base import BaseAgent, AgentRole, AgentCapability
 
 class ComplianceCheckerAgent(BaseAgent):
     """Custom agent for regulatory compliance."""
-    
+
     role = AgentRole.REVIEWER
     capabilities = [AgentCapability.READ_ONLY]
-    
+
     SYSTEM_PROMPT = """You are a compliance checker.
     Check code against SOC2, ISO27001, and GDPR requirements."""
-    
+
     async def execute(self, task):
         # Implement compliance checks
         violations = await self._check_compliance(task.context["git_diff"])
-        
+
         if violations:
             return AgentResponse(
                 success=False,
                 data={"violations": violations},
                 reasoning="Compliance violations found"
             )
-        
+
         return AgentResponse(
             success=True,
             data={"status": "COMPLIANT"},
@@ -162,9 +162,9 @@ async def test_medical_architect_vetoes_unencrypted_phi():
         request="Add patient records to database",
         context={"encryption": None}
     )
-    
+
     response = await agent.execute(task)
-    
+
     assert response.success is False
     assert "encryption" in response.reasoning.lower()
 
@@ -175,9 +175,9 @@ async def test_medical_architect_approves_encrypted_phi():
         request="Add encrypted patient records",
         context={"encryption": "AES-256"}
     )
-    
+
     response = await agent.execute(task)
-    
+
     assert response.success is True
 ```
 
@@ -216,7 +216,7 @@ class CustomArchitect(ArchitectAgent):
         # ✅ Good: Add checks, then delegate to parent
         if self._custom_check(task):
             return await super().execute(task)
-        
+
         # ❌ Bad: Completely override parent behavior
         # return self._my_implementation(task)
 ```

@@ -10,8 +10,7 @@ from vertice_cli.agents.documentation import DocumentationAgent
 
 # Skip if no API key (CI environment)
 pytestmark = pytest.mark.skipif(
-    not os.getenv("GOOGLE_API_KEY"),
-    reason="Requires GOOGLE_API_KEY for real LLM tests"
+    not os.getenv("GOOGLE_API_KEY"), reason="Requires GOOGLE_API_KEY for real LLM tests"
 )
 
 
@@ -31,7 +30,8 @@ class TestDocumentationAgentRealLLM:
         (tmp_path / "src" / "__init__.py").write_text("")
 
         # Main module
-        (tmp_path / "src" / "calculator.py").write_text('''
+        (tmp_path / "src" / "calculator.py").write_text(
+            '''
 def add(a: int, b: int) -> int:
     """Add two numbers"""
     return a + b
@@ -42,30 +42,35 @@ def multiply(a: int, b: int) -> int:
 
 class Calculator:
     """Scientific calculator"""
-    
+
     def __init__(self):
         self.history = []
-    
+
     def calculate(self, expression: str) -> float:
         """Evaluate mathematical expression"""
         result = eval(expression)
         self.history.append((expression, result))
         return result
-''')
+'''
+        )
 
         # Tests
         (tmp_path / "tests").mkdir()
-        (tmp_path / "tests" / "test_calculator.py").write_text('''
+        (tmp_path / "tests" / "test_calculator.py").write_text(
+            """
 def test_add():
     from src.calculator import add
     assert add(2, 3) == 5
-''')
+"""
+        )
 
         # README
-        (tmp_path / "README.md").write_text('''
+        (tmp_path / "README.md").write_text(
+            """
 # Calculator Project
 Simple calculator library
-''')
+"""
+        )
 
         return tmp_path
 
@@ -103,13 +108,15 @@ Simple calculator library
     def test_detect_code_smells(self, agent, tmp_path):
         """Test detecting code quality issues"""
         bad_code = tmp_path / "bad.py"
-        bad_code.write_text('''
+        bad_code.write_text(
+            """
 def foo(x):  # No types, no docstring
     return eval(x)  # Security issue
 
 def bar(a,b,c,d,e,f,g):  # Too many params
     pass
-''')
+"""
+        )
 
         result = agent.analyze_code(str(bad_code))
 
@@ -125,12 +132,14 @@ def bar(a,b,c,d,e,f,g):  # Too many params
     def test_generate_function_docs(self, agent, tmp_path):
         """Test generating docstrings for functions"""
         code_file = tmp_path / "utils.py"
-        code_file.write_text('''
+        code_file.write_text(
+            """
 def fibonacci(n):
     if n <= 1:
         return n
     return fibonacci(n-1) + fibonacci(n-2)
-''')
+"""
+        )
 
         result = agent.generate_docs(str(code_file))
 
@@ -150,10 +159,7 @@ def fibonacci(n):
 
     def test_generate_api_reference(self, agent, temp_project):
         """Test generating API reference"""
-        result = agent.generate_docs(
-            str(temp_project / "src"),
-            doc_type="api"
-        )
+        result = agent.generate_docs(str(temp_project / "src"), doc_type="api")
 
         assert result["success"]
         docs = result["documentation"]
@@ -163,8 +169,7 @@ def fibonacci(n):
     def test_generate_tutorial(self, agent, temp_project):
         """Test generating tutorial-style docs"""
         result = agent.generate_docs(
-            str(temp_project / "src" / "calculator.py"),
-            doc_type="tutorial"
+            str(temp_project / "src" / "calculator.py"), doc_type="tutorial"
         )
 
         assert result["success"]
@@ -174,10 +179,7 @@ def fibonacci(n):
 
     def test_generate_readme(self, agent, temp_project):
         """Test generating README content"""
-        result = agent.generate_docs(
-            str(temp_project),
-            doc_type="readme"
-        )
+        result = agent.generate_docs(str(temp_project), doc_type="readme")
 
         assert result["success"]
         docs = result["documentation"]
@@ -190,10 +192,10 @@ def fibonacci(n):
     def test_update_missing_docstrings(self, agent, tmp_path):
         """Test adding missing docstrings"""
         code_file = tmp_path / "no_docs.py"
-        original = '''
+        original = """
 def calculate_area(radius):
     return 3.14159 * radius ** 2
-'''
+"""
         code_file.write_text(original)
 
         result = agent.update_docstrings(str(code_file))
@@ -260,10 +262,7 @@ def get_status():
 
     def test_generate_architecture_overview(self, agent, temp_project):
         """Test generating system architecture docs"""
-        result = agent.generate_docs(
-            str(temp_project),
-            doc_type="architecture"
-        )
+        result = agent.generate_docs(str(temp_project), doc_type="architecture")
 
         assert result["success"]
         docs = result["documentation"]
@@ -280,10 +279,7 @@ def get_status():
 
     def test_generate_component_diagram_description(self, agent, temp_project):
         """Test generating component descriptions"""
-        result = agent.generate_docs(
-            str(temp_project / "src"),
-            doc_type="components"
-        )
+        result = agent.generate_docs(str(temp_project / "src"), doc_type="components")
 
         assert result["success"]
         docs = result["documentation"]
@@ -296,8 +292,7 @@ def get_status():
     def test_generate_usage_examples(self, agent, temp_project):
         """Test generating code usage examples"""
         result = agent.generate_docs(
-            str(temp_project / "src" / "calculator.py"),
-            doc_type="examples"
+            str(temp_project / "src" / "calculator.py"), doc_type="examples"
         )
 
         assert result["success"]
@@ -306,10 +301,7 @@ def get_status():
 
     def test_generate_integration_examples(self, agent, temp_project):
         """Test generating integration examples"""
-        result = agent.generate_docs(
-            str(temp_project),
-            doc_type="integration"
-        )
+        result = agent.generate_docs(str(temp_project), doc_type="integration")
 
         assert result["success"]
         docs = result["documentation"]
@@ -329,7 +321,7 @@ def get_status():
     def test_handle_binary_file(self, agent, tmp_path):
         """Test handling binary files gracefully"""
         binary_file = tmp_path / "image.png"
-        binary_file.write_bytes(b'\x89PNG\r\n\x1a\n')
+        binary_file.write_bytes(b"\x89PNG\r\n\x1a\n")
 
         result = agent.analyze_code(str(binary_file))
 

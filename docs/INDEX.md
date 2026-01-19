@@ -1,7 +1,7 @@
 # 📚 Qwen Dev CLI - Documentation Index
 
-**Enterprise-Grade Documentation Hub**  
-**Last Updated:** 2025-11-21  
+**Enterprise-Grade Documentation Hub**
+**Last Updated:** 2025-11-21
 **Status:** 95% Complete (Hackathon Phase)
 
 ---
@@ -147,8 +147,8 @@
 
 ---
 
-**Maintained by:** Vertice-MAXIMUS (Gemini-Native)  
-**Documentation Standard:** Enterprise-Grade  
+**Maintained by:** Vertice-MAXIMUS (Gemini-Native)
+**Documentation Standard:** Enterprise-Grade
 **Compliance:** 100%
 
 *"Good documentation is a love letter to your future self."* 💌

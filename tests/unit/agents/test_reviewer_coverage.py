@@ -31,6 +31,7 @@ from vertice_cli.agents.base import (
 # REVIEW LOGIC - CRITICAL ISSUES SCENARIO
 # =============================================================================
 
+
 class TestReviewLogicCriticalIssues:
     """Tests for review logic with critical issues."""
 
@@ -38,7 +39,9 @@ class TestReviewLogicCriticalIssues:
     def mock_llm(self):
         """Create mock LLM client."""
         client = MagicMock()
-        client.generate = AsyncMock(return_value='{"summary": "Critical issues found", "additional_issues": []}')
+        client.generate = AsyncMock(
+            return_value='{"summary": "Critical issues found", "additional_issues": []}'
+        )
         return client
 
     @pytest.fixture
@@ -55,17 +58,18 @@ class TestReviewLogicCriticalIssues:
     @pytest.mark.asyncio
     async def test_review_with_critical_security_issue(self, reviewer):
         """Test review identifies critical security issues."""
-        code_with_eval = '''
+        code_with_eval = """
 import os
 def unsafe_execute(user_input):
     result = eval(user_input)  # CRITICAL: eval
     return result
-'''
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": code_with_eval
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Critical security issue", "additional_issues": []}')
+"""
+        reviewer._execute_tool = AsyncMock(
+            return_value={"success": True, "content": code_with_eval}
+        )
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Critical security issue", "additional_issues": []}'
+        )
 
         task = AgentTask(request="Review", context={"files": ["unsafe.py"]})
         response = await reviewer.execute(task)
@@ -88,7 +92,7 @@ def unsafe_execute(user_input):
     @pytest.mark.asyncio
     async def test_review_with_multiple_critical_issues(self, reviewer):
         """Test review with multiple critical issues."""
-        code = '''
+        code = """
 import subprocess
 import os
 def multiple_issues(user_cmd):
@@ -96,12 +100,11 @@ def multiple_issues(user_cmd):
     exec(user_cmd)       # CRITICAL
     subprocess.call(user_cmd, shell=True)  # HIGH
     return eval(user_cmd)  # CRITICAL
-'''
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": code
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Multiple critical", "additional_issues": []}')
+"""
+        reviewer._execute_tool = AsyncMock(return_value={"success": True, "content": code})
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Multiple critical", "additional_issues": []}'
+        )
 
         task = AgentTask(request="Review", context={"files": ["dangerous.py"]})
         response = await reviewer.execute(task)
@@ -110,8 +113,7 @@ def multiple_issues(user_cmd):
         report_data = response.data["report"]
 
         # Multiple issues
-        critical_issues = [i for i in report_data["issues"]
-                          if i["severity"] == "CRITICAL"]
+        critical_issues = [i for i in report_data["issues"] if i["severity"] == "CRITICAL"]
         assert len(critical_issues) >= 2
 
         assert report_data["approved"] is False
@@ -120,7 +122,7 @@ def multiple_issues(user_cmd):
     @pytest.mark.asyncio
     async def test_review_with_high_complexity(self, reviewer):
         """Test review identifies high cyclomatic complexity."""
-        complex_code = '''
+        complex_code = """
 def very_complex(a, b, c, d, e, f):
     if a > 0:
         if b > 0:
@@ -136,12 +138,11 @@ def very_complex(a, b, c, d, e, f):
     else:
         return 0
     return None
-'''
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": complex_code
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Complex function", "additional_issues": []}')
+"""
+        reviewer._execute_tool = AsyncMock(return_value={"success": True, "content": complex_code})
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Complex function", "additional_issues": []}'
+        )
 
         task = AgentTask(request="Review", context={"files": ["complex.py"]})
         response = await reviewer.execute(task)
@@ -158,15 +159,14 @@ def very_complex(a, b, c, d, e, f):
     @pytest.mark.asyncio
     async def test_review_score_calculation_with_issues(self, reviewer):
         """Test score is correctly calculated."""
-        code = '''
+        code = """
 def func(x):
     eval(x)  # Critical issue
-'''
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": code
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Issues", "additional_issues": []}')
+"""
+        reviewer._execute_tool = AsyncMock(return_value={"success": True, "content": code})
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Issues", "additional_issues": []}'
+        )
 
         task = AgentTask(request="Review", context={"files": ["test.py"]})
         response = await reviewer.execute(task)
@@ -184,6 +184,7 @@ def func(x):
 # REVIEW LOGIC - NO ISSUES SCENARIO
 # =============================================================================
 
+
 class TestReviewLogicNoIssues:
     """Tests for review logic with clean code."""
 
@@ -191,7 +192,9 @@ class TestReviewLogicNoIssues:
     def reviewer(self):
         """Create ReviewerAgent."""
         mock_llm = MagicMock()
-        mock_llm.generate = AsyncMock(return_value='{"summary": "Clean code", "additional_issues": []}')
+        mock_llm.generate = AsyncMock(
+            return_value='{"summary": "Clean code", "additional_issues": []}'
+        )
         mock_mcp = MagicMock()
         return ReviewerAgent(llm_client=mock_llm, mcp_client=mock_mcp)
 
@@ -207,11 +210,10 @@ def multiply(x, y):
     """Multiply two numbers."""
     return x * y
 '''
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": clean_code
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Clean code", "additional_issues": []}')
+        reviewer._execute_tool = AsyncMock(return_value={"success": True, "content": clean_code})
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Clean code", "additional_issues": []}'
+        )
 
         task = AgentTask(request="Review", context={"files": ["utils.py"]})
         response = await reviewer.execute(task)
@@ -225,8 +227,7 @@ def multiply(x, y):
         assert report_data["risk_level"] == "LOW"
 
         # No critical issues
-        critical = [i for i in report_data["issues"]
-                   if i["severity"] == "CRITICAL"]
+        critical = [i for i in report_data["issues"] if i["severity"] == "CRITICAL"]
         assert len(critical) == 0
 
     @pytest.mark.asyncio
@@ -252,11 +253,10 @@ def calculate_factorial(n: int) -> int:
         return 1
     return n * calculate_factorial(n - 1)
 '''
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": documented
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Well documented", "additional_issues": []}')
+        reviewer._execute_tool = AsyncMock(return_value={"success": True, "content": documented})
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Well documented", "additional_issues": []}'
+        )
 
         task = AgentTask(request="Review", context={"files": ["math_utils.py"]})
         response = await reviewer.execute(task)
@@ -271,23 +271,21 @@ def calculate_factorial(n: int) -> int:
     @pytest.mark.asyncio
     async def test_review_with_tests_present(self, reviewer):
         """Test review recognizes test files."""
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": "def helper(): return 42"
-        })
+        reviewer._execute_tool = AsyncMock(
+            return_value={"success": True, "content": "def helper(): return 42"}
+        )
         reviewer._call_llm = AsyncMock(return_value='{"summary": "OK", "additional_issues": []}')
 
-        task = AgentTask(request="Review", context={
-            "files": ["src/helper.py", "tests/test_helper.py"]
-        })
+        task = AgentTask(
+            request="Review", context={"files": ["src/helper.py", "tests/test_helper.py"]}
+        )
         response = await reviewer.execute(task)
 
         assert response.success is True
         report_data = response.data["report"]
 
         # Should not flag missing tests
-        test_issues = [i for i in report_data["issues"]
-                      if i["category"] == "TESTING"]
+        test_issues = [i for i in report_data["issues"] if i["category"] == "TESTING"]
         # If tests are present, should not have test coverage issues
         no_test_issues = len(test_issues) == 0
         assert no_test_issues or report_data["score"] > 60
@@ -296,6 +294,7 @@ def calculate_factorial(n: int) -> int:
 # =============================================================================
 # REVIEW LOGIC - WARNINGS SCENARIO
 # =============================================================================
+
 
 class TestReviewLogicWarnings:
     """Tests for review logic with warnings (MEDIUM/LOW severity)."""
@@ -310,7 +309,7 @@ class TestReviewLogicWarnings:
     @pytest.mark.asyncio
     async def test_review_with_medium_issues(self, reviewer):
         """Test review with medium severity issues."""
-        code = '''
+        code = """
 def process_data(items):
     # Moderately complex but not terrible
     if items:
@@ -319,12 +318,11 @@ def process_data(items):
                 if item.active:
                     print(item)
     return items
-'''
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": code
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Some improvements", "additional_issues": []}')
+"""
+        reviewer._execute_tool = AsyncMock(return_value={"success": True, "content": code})
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Some improvements", "additional_issues": []}'
+        )
 
         task = AgentTask(request="Review", context={"files": ["processor.py"]})
         response = await reviewer.execute(task)
@@ -340,15 +338,14 @@ def process_data(items):
     @pytest.mark.asyncio
     async def test_review_with_style_warnings(self, reviewer):
         """Test review identifies style issues."""
-        code = '''
+        code = """
 def my_func( x,y  ):
     return x+y
-'''
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": code
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Style issues", "additional_issues": []}')
+"""
+        reviewer._execute_tool = AsyncMock(return_value={"success": True, "content": code})
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Style issues", "additional_issues": []}'
+        )
 
         task = AgentTask(request="Review", context={"files": ["style.py"]})
         response = await reviewer.execute(task)
@@ -362,10 +359,9 @@ def my_func( x,y  ):
     @pytest.mark.asyncio
     async def test_review_risk_escalation_with_score(self, reviewer):
         """Test risk escalates with lower score."""
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": "def func(): pass"
-        })
+        reviewer._execute_tool = AsyncMock(
+            return_value={"success": True, "content": "def func(): pass"}
+        )
         reviewer._call_llm = AsyncMock(return_value='{"summary": "OK", "additional_issues": []}')
 
         task = AgentTask(request="Review", context={"files": ["test.py"]})
@@ -390,6 +386,7 @@ def my_func( x,y  ):
 # ERROR HANDLING - LLM UNAVAILABLE
 # =============================================================================
 
+
 class TestErrorHandlingLLMUnavailable:
     """Tests for handling LLM unavailability."""
 
@@ -401,10 +398,9 @@ class TestErrorHandlingLLMUnavailable:
         mock_mcp = MagicMock()
 
         reviewer = ReviewerAgent(llm_client=mock_llm, mcp_client=mock_mcp)
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": "def test(): pass"
-        })
+        reviewer._execute_tool = AsyncMock(
+            return_value={"success": True, "content": "def test(): pass"}
+        )
         reviewer._call_llm = AsyncMock(side_effect=ConnectionError("LLM down"))
 
         task = AgentTask(request="Review", context={"files": ["test.py"]})
@@ -421,10 +417,9 @@ class TestErrorHandlingLLMUnavailable:
         mock_mcp = MagicMock()
 
         reviewer = ReviewerAgent(llm_client=mock_llm, mcp_client=mock_mcp)
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": "def test(): pass"
-        })
+        reviewer._execute_tool = AsyncMock(
+            return_value={"success": True, "content": "def test(): pass"}
+        )
         reviewer._call_llm = AsyncMock(side_effect=TimeoutError("LLM timeout"))
 
         task = AgentTask(request="Review", context={"files": ["test.py"]})
@@ -440,10 +435,9 @@ class TestErrorHandlingLLMUnavailable:
         mock_mcp = MagicMock()
 
         reviewer = ReviewerAgent(llm_client=mock_llm, mcp_client=mock_mcp)
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": "def test(): pass"
-        })
+        reviewer._execute_tool = AsyncMock(
+            return_value={"success": True, "content": "def test(): pass"}
+        )
         reviewer._call_llm = AsyncMock(side_effect=RuntimeError("Rate limit exceeded"))
 
         task = AgentTask(request="Review", context={"files": ["test.py"]})
@@ -456,6 +450,7 @@ class TestErrorHandlingLLMUnavailable:
 # =============================================================================
 # ERROR HANDLING - PARSE ERRORS
 # =============================================================================
+
 
 class TestErrorHandlingParseErrors:
     """Tests for handling JSON/response parse errors."""
@@ -479,13 +474,13 @@ class TestErrorHandlingParseErrors:
 
     def test_parse_json_with_code_block(self, reviewer):
         """Test parsing JSON embedded in markdown."""
-        response = '''
+        response = """
 Here's the analysis:
 ```json
 {"summary": "Analysis complete", "additional_issues": []}
 ```
 End of analysis
-'''
+"""
         result = reviewer._parse_llm_json(response)
 
         assert result["summary"] == "Analysis complete"
@@ -511,10 +506,9 @@ End of analysis
     @pytest.mark.asyncio
     async def test_llm_response_not_json(self, reviewer):
         """Test handling LLM response that isn't JSON."""
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": "def test(): pass"
-        })
+        reviewer._execute_tool = AsyncMock(
+            return_value={"success": True, "content": "def test(): pass"}
+        )
         reviewer._call_llm = AsyncMock(return_value="This is plain text, not JSON")
 
         task = AgentTask(request="Review", context={"files": ["test.py"]})
@@ -526,10 +520,9 @@ End of analysis
     @pytest.mark.asyncio
     async def test_llm_partial_json(self, reviewer):
         """Test handling partial JSON response."""
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": "def test(): pass"
-        })
+        reviewer._execute_tool = AsyncMock(
+            return_value={"success": True, "content": "def test(): pass"}
+        )
         reviewer._call_llm = AsyncMock(return_value='{"summary": "incomplete')
 
         task = AgentTask(request="Review", context={"files": ["test.py"]})
@@ -541,6 +534,7 @@ End of analysis
 # =============================================================================
 # ERROR HANDLING - TIMEOUTS
 # =============================================================================
+
 
 class TestErrorHandlingTimeouts:
     """Tests for timeout handling."""
@@ -572,10 +566,7 @@ class TestErrorHandlingTimeouts:
         # Create code that might take long to parse
         large_code = "x = " + " + ".join(["1"] * 10000)
 
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": large_code
-        })
+        reviewer._execute_tool = AsyncMock(return_value={"success": True, "content": large_code})
         reviewer._call_llm = AsyncMock(return_value='{"summary": "OK", "additional_issues": []}')
 
         task = AgentTask(request="Review", context={"files": ["large.py"]})
@@ -588,6 +579,7 @@ class TestErrorHandlingTimeouts:
 # =============================================================================
 # EDGE CASES - EMPTY CODE
 # =============================================================================
+
 
 class TestEdgeCaseEmptyCode:
     """Tests for empty or minimal code."""
@@ -602,11 +594,10 @@ class TestEdgeCaseEmptyCode:
     @pytest.mark.asyncio
     async def test_review_empty_file(self, reviewer):
         """Test review of empty Python file."""
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": ""
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Empty file", "additional_issues": []}')
+        reviewer._execute_tool = AsyncMock(return_value={"success": True, "content": ""})
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Empty file", "additional_issues": []}'
+        )
 
         task = AgentTask(request="Review", context={"files": ["empty.py"]})
         response = await reviewer.execute(task)
@@ -620,17 +611,16 @@ class TestEdgeCaseEmptyCode:
     @pytest.mark.asyncio
     async def test_review_only_comments(self, reviewer):
         """Test review of file with only comments."""
-        code = '''
+        code = """
 # This is a comment
 # Another comment
 
 # TODO: Implement
-'''
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": code
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Only comments", "additional_issues": []}')
+"""
+        reviewer._execute_tool = AsyncMock(return_value={"success": True, "content": code})
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Only comments", "additional_issues": []}'
+        )
 
         task = AgentTask(request="Review", context={"files": ["comments.py"]})
         response = await reviewer.execute(task)
@@ -644,17 +634,16 @@ class TestEdgeCaseEmptyCode:
     @pytest.mark.asyncio
     async def test_review_only_imports(self, reviewer):
         """Test review of file with only imports."""
-        code = '''
+        code = """
 import os
 import sys
 from typing import Dict, List
 from functools import reduce
-'''
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": code
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Imports only", "additional_issues": []}')
+"""
+        reviewer._execute_tool = AsyncMock(return_value={"success": True, "content": code})
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Imports only", "additional_issues": []}'
+        )
 
         task = AgentTask(request="Review", context={"files": ["imports.py"]})
         response = await reviewer.execute(task)
@@ -669,11 +658,10 @@ from functools import reduce
         """Test review of minimal function."""
         code = "def noop(): pass"
 
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": code
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Minimal", "additional_issues": []}')
+        reviewer._execute_tool = AsyncMock(return_value={"success": True, "content": code})
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Minimal", "additional_issues": []}'
+        )
 
         task = AgentTask(request="Review", context={"files": ["minimal.py"]})
         response = await reviewer.execute(task)
@@ -688,6 +676,7 @@ from functools import reduce
 # =============================================================================
 # EDGE CASES - VERY LARGE CODE
 # =============================================================================
+
 
 class TestEdgeCaseLargeCode:
     """Tests for handling large code files."""
@@ -706,10 +695,7 @@ class TestEdgeCaseLargeCode:
         func_body = "\n".join([f"    x_{i} = {i}" for i in range(100)])
         code = f"def large_func():\n{func_body}\n    return x_99"
 
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": code
-        })
+        reviewer._execute_tool = AsyncMock(return_value={"success": True, "content": code})
         reviewer._call_llm = AsyncMock(return_value='{"summary": "Large", "additional_issues": []}')
 
         task = AgentTask(request="Review", context={"files": ["large.py"]})
@@ -728,11 +714,10 @@ class TestEdgeCaseLargeCode:
         functions = "\n".join([f"def func_{i}(): return {i}" for i in range(50)])
         code = functions
 
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": code
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Many funcs", "additional_issues": []}')
+        reviewer._execute_tool = AsyncMock(return_value={"success": True, "content": code})
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Many funcs", "additional_issues": []}'
+        )
 
         task = AgentTask(request="Review", context={"files": ["many.py"]})
         response = await reviewer.execute(task)
@@ -751,11 +736,10 @@ class TestEdgeCaseLargeCode:
             code += "    " * (i + 1) + "if True:\n"
         code += "    " * 11 + "return 42"
 
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": code
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Nested", "additional_issues": []}')
+        reviewer._execute_tool = AsyncMock(return_value={"success": True, "content": code})
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Nested", "additional_issues": []}'
+        )
 
         task = AgentTask(request="Review", context={"files": ["nested.py"]})
         response = await reviewer.execute(task)
@@ -771,6 +755,7 @@ class TestEdgeCaseLargeCode:
 # EDGE CASES - MULTIPLE LANGUAGES
 # =============================================================================
 
+
 class TestEdgeCaseMultipleLanguages:
     """Tests for handling multiple file types."""
 
@@ -784,39 +769,42 @@ class TestEdgeCaseMultipleLanguages:
     @pytest.mark.asyncio
     async def test_review_mixed_python_and_other(self, reviewer):
         """Test review with both Python and non-Python files."""
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": "def test(): pass"
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Mixed files", "additional_issues": []}')
+        reviewer._execute_tool = AsyncMock(
+            return_value={"success": True, "content": "def test(): pass"}
+        )
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Mixed files", "additional_issues": []}'
+        )
 
         # Mix of file types
-        task = AgentTask(request="Review", context={
-            "files": ["script.py", "config.json", "data.txt", "README.md"]
-        })
+        task = AgentTask(
+            request="Review",
+            context={"files": ["script.py", "config.json", "data.txt", "README.md"]},
+        )
         response = await reviewer.execute(task)
 
         assert response.success is True
-        report_data = response.data["report"]
+        response.data["report"]
 
         # Should handle mixed file types gracefully
 
     @pytest.mark.asyncio
     async def test_review_non_python_files_skipped(self, reviewer):
         """Test that non-Python files are skipped."""
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": "console.log('test')"
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Non-Python", "additional_issues": []}')
+        reviewer._execute_tool = AsyncMock(
+            return_value={"success": True, "content": "console.log('test')"}
+        )
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Non-Python", "additional_issues": []}'
+        )
 
-        task = AgentTask(request="Review", context={
-            "files": ["index.js", "style.css", "script.sh"]
-        })
+        task = AgentTask(
+            request="Review", context={"files": ["index.js", "style.css", "script.sh"]}
+        )
         response = await reviewer.execute(task)
 
         assert response.success is True
-        report_data = response.data["report"]
+        response.data["report"]
 
         # No Python metrics since no .py files
         # (or only metrics from Python files if analyzed)
@@ -824,15 +812,14 @@ class TestEdgeCaseMultipleLanguages:
     @pytest.mark.asyncio
     async def test_review_python_2_syntax(self, reviewer):
         """Test handling Python 2 syntax (should fail to parse)."""
-        py2_code = '''
+        py2_code = """
 def print_hello():
     print "Hello, World!"  # Python 2 print statement
-'''
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": py2_code
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Syntax error", "additional_issues": []}')
+"""
+        reviewer._execute_tool = AsyncMock(return_value={"success": True, "content": py2_code})
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Syntax error", "additional_issues": []}'
+        )
 
         task = AgentTask(request="Review", context={"files": ["legacy.py"]})
         response = await reviewer.execute(task)
@@ -841,14 +828,14 @@ def print_hello():
         report_data = response.data["report"]
 
         # Should have syntax error issue
-        syntax_issues = [i for i in report_data["issues"]
-                        if i["category"] == "LOGIC"]
+        [i for i in report_data["issues"] if i["category"] == "LOGIC"]
         # Should record error somehow
 
 
 # =============================================================================
 # SPECIAL CASES - ASYNC FUNCTIONS
 # =============================================================================
+
 
 class TestSpecialCasesAsyncCode:
     """Tests for handling async/await code."""
@@ -863,7 +850,7 @@ class TestSpecialCasesAsyncCode:
     @pytest.mark.asyncio
     async def test_review_async_functions(self, reviewer):
         """Test review of async functions."""
-        code = '''
+        code = """
 async def fetch_data(url):
     async with http.client() as client:
         response = await client.get(url)
@@ -872,11 +859,8 @@ async def fetch_data(url):
 async def process_many(urls):
     tasks = [fetch_data(url) for url in urls]
     return await asyncio.gather(*tasks)
-'''
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": code
-        })
+"""
+        reviewer._execute_tool = AsyncMock(return_value={"success": True, "content": code})
         reviewer._call_llm = AsyncMock(return_value='{"summary": "Async", "additional_issues": []}')
 
         task = AgentTask(request="Review", context={"files": ["async.py"]})
@@ -893,6 +877,7 @@ async def process_many(urls):
 # SPECIAL CASES - LAMBDA & COMPREHENSIONS
 # =============================================================================
 
+
 class TestSpecialCasesLambdaComprehensions:
     """Tests for lambda functions and comprehensions."""
 
@@ -906,40 +891,38 @@ class TestSpecialCasesLambdaComprehensions:
     @pytest.mark.asyncio
     async def test_review_code_with_lambdas(self, reviewer):
         """Test review of code with lambda functions."""
-        code = '''
+        code = """
 data = [1, 2, 3, 4, 5]
 squared = list(map(lambda x: x ** 2, data))
 filtered = list(filter(lambda x: x > 2, data))
 sorted_data = sorted(data, key=lambda x: -x)
-'''
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": code
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Lambdas", "additional_issues": []}')
+"""
+        reviewer._execute_tool = AsyncMock(return_value={"success": True, "content": code})
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Lambdas", "additional_issues": []}'
+        )
 
         task = AgentTask(request="Review", context={"files": ["lambda.py"]})
         response = await reviewer.execute(task)
 
         assert response.success is True
-        report_data = response.data["report"]
+        response.data["report"]
 
         # Should handle code with lambdas
 
     @pytest.mark.asyncio
     async def test_review_complex_comprehensions(self, reviewer):
         """Test review of complex comprehensions."""
-        code = '''
+        code = """
 matrix = [[i*j for j in range(5)] for i in range(5)]
 flat = [x for row in matrix for x in row if x > 5]
 dict_comp = {i: i**2 for i in range(10)}
 set_comp = {x for x in range(100) if x % 2 == 0}
-'''
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": code
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Comprehensions", "additional_issues": []}')
+"""
+        reviewer._execute_tool = AsyncMock(return_value={"success": True, "content": code})
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Comprehensions", "additional_issues": []}'
+        )
 
         task = AgentTask(request="Review", context={"files": ["comps.py"]})
         response = await reviewer.execute(task)
@@ -950,6 +933,7 @@ set_comp = {x for x in range(100) if x % 2 == 0}
 # =============================================================================
 # SPECIAL CASES - DECORATORS & CLASS METHODS
 # =============================================================================
+
 
 class TestSpecialCasesDecorators:
     """Tests for handling decorators and class methods."""
@@ -964,7 +948,7 @@ class TestSpecialCasesDecorators:
     @pytest.mark.asyncio
     async def test_review_decorated_functions(self, reviewer):
         """Test review of decorated functions."""
-        code = '''
+        code = """
 from functools import wraps
 
 def my_decorator(func):
@@ -989,18 +973,17 @@ class MyClass:
     @classmethod
     def class_method(cls):
         return cls.__name__
-'''
-        reviewer._execute_tool = AsyncMock(return_value={
-            "success": True,
-            "content": code
-        })
-        reviewer._call_llm = AsyncMock(return_value='{"summary": "Decorated", "additional_issues": []}')
+"""
+        reviewer._execute_tool = AsyncMock(return_value={"success": True, "content": code})
+        reviewer._call_llm = AsyncMock(
+            return_value='{"summary": "Decorated", "additional_issues": []}'
+        )
 
         task = AgentTask(request="Review", context={"files": ["decorators.py"]})
         response = await reviewer.execute(task)
 
         assert response.success is True
-        report_data = response.data["report"]
+        response.data["report"]
 
         # Should analyze class and its methods
 
@@ -1008,6 +991,7 @@ class MyClass:
 # =============================================================================
 # SCORING AND RISK EDGE CASES
 # =============================================================================
+
 
 class TestScoringAndRiskEdgeCases:
     """Tests for edge cases in scoring and risk calculation."""
@@ -1023,12 +1007,13 @@ class TestScoringAndRiskEdgeCases:
         """Test score calculation with zero-confidence issues."""
         issues = [
             CodeIssue(
-                file="test.py", line=1,
+                file="test.py",
+                line=1,
                 severity=IssueSeverity.HIGH,
                 category=IssueCategory.LOGIC,
                 message="Maybe an issue",
                 explanation="Not sure",
-                confidence=0.0  # No confidence
+                confidence=0.0,  # No confidence
             )
         ]
 
@@ -1041,12 +1026,13 @@ class TestScoringAndRiskEdgeCases:
         """Test score with low-confidence issues."""
         issues = [
             CodeIssue(
-                file="test.py", line=1,
+                file="test.py",
+                line=1,
                 severity=IssueSeverity.CRITICAL,
                 category=IssueCategory.SECURITY,
                 message="Maybe critical",
                 explanation="Low confidence",
-                confidence=0.1  # Low confidence
+                confidence=0.1,  # Low confidence
             )
         ]
 
@@ -1065,12 +1051,14 @@ class TestScoringAndRiskEdgeCases:
         """Test fix time with many medium issues."""
         issues = [
             CodeIssue(
-                file="test.py", line=i,
+                file="test.py",
+                line=i,
                 severity=IssueSeverity.MEDIUM,
                 category=IssueCategory.COMPLEXITY,
                 message=f"Issue {i}",
-                explanation="Medium"
-            ) for i in range(10)
+                explanation="Medium",
+            )
+            for i in range(10)
         ]
 
         time = reviewer._estimate_fix_time(issues)
@@ -1098,10 +1086,10 @@ class TestScoringAndRiskEdgeCases:
             ComplexityMetrics(
                 function_name="complex",
                 cyclomatic=25,  # Way above normal
-                cognitive=35,   # Very high
+                cognitive=35,  # Very high
                 loc=300,
                 args_count=10,
-                returns_count=8
+                returns_count=8,
             )
         ]
 
@@ -1115,6 +1103,7 @@ class TestScoringAndRiskEdgeCases:
 # GRAPH ANALYSIS EDGE CASES
 # =============================================================================
 
+
 class TestGraphAnalysisEdgeCases:
     """Tests for code graph analysis edge cases."""
 
@@ -1122,6 +1111,7 @@ class TestGraphAnalysisEdgeCases:
     def graph_agent(self):
         """Create CodeGraphAnalysisAgent."""
         from vertice_cli.agents.reviewer import CodeGraphAnalysisAgent
+
         agent = CodeGraphAnalysisAgent()
         agent.logger = MagicMock()
         return agent
@@ -1132,14 +1122,16 @@ class TestGraphAnalysisEdgeCases:
         graph = nx.DiGraph()
         graph.add_edge("recursive::factorial", "recursive::factorial")
 
-        nodes = [CodeGraphNode(
-            id="recursive::factorial",
-            type="function",
-            name="factorial",
-            file_path="math.py",
-            line_start=1,
-            line_end=10
-        )]
+        nodes = [
+            CodeGraphNode(
+                id="recursive::factorial",
+                type="function",
+                name="factorial",
+                file_path="math.py",
+                line_start=1,
+                line_end=10,
+            )
+        ]
 
         issues = await graph_agent.analyze(graph, nodes)
 
@@ -1156,14 +1148,16 @@ class TestGraphAnalysisEdgeCases:
         for i in range(100):
             node_id = f"module::func_{i}"
             graph.add_node(node_id)
-            nodes.append(CodeGraphNode(
-                id=node_id,
-                type="function",
-                name=f"func_{i}",
-                file_path="module.py",
-                line_start=i*10,
-                line_end=i*10+8
-            ))
+            nodes.append(
+                CodeGraphNode(
+                    id=node_id,
+                    type="function",
+                    name=f"func_{i}",
+                    file_path="module.py",
+                    line_start=i * 10,
+                    line_end=i * 10 + 8,
+                )
+            )
 
             # Connect to next
             if i > 0:
@@ -1179,6 +1173,7 @@ class TestGraphAnalysisEdgeCases:
 # RECOMMENDATIONS GENERATION
 # =============================================================================
 
+
 class TestRecommendationsGeneration:
     """Tests for recommendation generation logic."""
 
@@ -1193,11 +1188,12 @@ class TestRecommendationsGeneration:
         """Test recommendations include security recommendations."""
         issues = [
             CodeIssue(
-                file="test.py", line=1,
+                file="test.py",
+                line=1,
                 severity=IssueSeverity.CRITICAL,
                 category=IssueCategory.SECURITY,
                 message="SQL injection",
-                explanation="Bad"
+                explanation="Bad",
             )
         ]
 

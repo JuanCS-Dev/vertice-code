@@ -59,7 +59,7 @@ kazam &
 
 **PROMETHEUS MCP Demo - 29/Nov/2025**
 
-**Objetivo**: Vídeo 3-5min para hackathon MCP  
+**Objetivo**: Vídeo 3-5min para hackathon MCP
 **Prazo**: Upload até 18:40
 
 **Timeline**:
@@ -131,8 +131,8 @@ Você tem:
 
 # 😴 BOA NOITE!
 
-**Durma bem.**  
-**Amanhã você arrasa.**  
+**Durma bem.**
+**Amanhã você arrasa.**
 **O PROMETHEUS vai impressionar os juízes.**
 
 ## Checklist final antes de deitar:
@@ -150,7 +150,7 @@ Você tem:
 
 ---
 
-**Criado por**: Gemini 2.5 Pro  
-**Hora**: 21:04 (28/Nov/2025)  
-**Status**: 🎬 PRODUCTION READY  
+**Criado por**: Gemini 2.5 Pro
+**Hora**: 21:04 (28/Nov/2025)
+**Status**: 🎬 PRODUCTION READY
 **Próximo passo**: DORMIR → ACORDAR → EXECUTAR → VENCER! 🏆

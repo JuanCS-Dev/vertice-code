@@ -13,7 +13,7 @@ from pathlib import Path
 from vertice_cli.tools.exec_hardened import (
     BashCommandToolHardened,
     CommandValidator,
-    ExecutionLimits
+    ExecutionLimits,
 )
 
 
@@ -147,10 +147,7 @@ class TestBashCommandToolHardened:
     async def test_invalid_cwd_rejected(self):
         """Invalid working directory is rejected."""
         tool = BashCommandToolHardened()
-        result = await tool.execute(
-            command="echo test",
-            cwd="/this/path/does/not/exist"
-        )
+        result = await tool.execute(command="echo test", cwd="/this/path/does/not/exist")
 
         assert not result.success
         assert "does not exist" in result.error.lower()
@@ -158,13 +155,8 @@ class TestBashCommandToolHardened:
     @pytest.mark.asyncio
     async def test_timeout_enforced(self):
         """Timeout kills long-running commands."""
-        tool = BashCommandToolHardened(
-            limits=ExecutionLimits(timeout_seconds=2)
-        )
-        result = await tool.execute(
-            command="sleep 10",
-            timeout=1
-        )
+        tool = BashCommandToolHardened(limits=ExecutionLimits(timeout_seconds=2))
+        result = await tool.execute(command="sleep 10", timeout=1)
 
         assert not result.success
         assert "timeout" in result.error.lower()
@@ -173,9 +165,7 @@ class TestBashCommandToolHardened:
     @pytest.mark.asyncio
     async def test_output_truncation(self):
         """Large output is truncated."""
-        tool = BashCommandToolHardened(
-            limits=ExecutionLimits(max_output_bytes=1000)
-        )
+        tool = BashCommandToolHardened(limits=ExecutionLimits(max_output_bytes=1000))
         # Generate 10KB of output
         result = await tool.execute(command="yes | head -n 1000")
 
@@ -196,10 +186,7 @@ class TestBashCommandToolHardened:
     async def test_command_with_env_vars(self):
         """Environment variables can be passed."""
         tool = BashCommandToolHardened()
-        result = await tool.execute(
-            command="echo $TEST_VAR",
-            env={"TEST_VAR": "test_value"}
-        )
+        result = await tool.execute(command="echo $TEST_VAR", env={"TEST_VAR": "test_value"})
 
         assert result.success
         assert "test_value" in result.data["stdout"]
@@ -208,10 +195,7 @@ class TestBashCommandToolHardened:
     async def test_dangerous_env_vars_filtered(self):
         """Dangerous env vars (LD_PRELOAD) are filtered."""
         tool = BashCommandToolHardened()
-        result = await tool.execute(
-            command="echo $LD_PRELOAD",
-            env={"LD_PRELOAD": "/evil/lib.so"}
-        )
+        result = await tool.execute(command="echo $LD_PRELOAD", env={"LD_PRELOAD": "/evil/lib.so"})
 
         assert result.success
         # LD_PRELOAD should be filtered out, so echo returns empty
@@ -257,11 +241,7 @@ class TestResourceLimits:
     @pytest.mark.asyncio
     async def test_custom_limits_respected(self):
         """Custom limits are respected."""
-        limits = ExecutionLimits(
-            timeout_seconds=5,
-            max_output_bytes=500,
-            max_memory_mb=256
-        )
+        limits = ExecutionLimits(timeout_seconds=5, max_output_bytes=500, max_memory_mb=256)
         tool = BashCommandToolHardened(limits=limits)
 
         assert tool.limits.timeout_seconds == 5
@@ -271,12 +251,10 @@ class TestResourceLimits:
     @pytest.mark.asyncio
     async def test_timeout_cannot_exceed_limit(self):
         """User timeout cannot exceed configured limit."""
-        tool = BashCommandToolHardened(
-            limits=ExecutionLimits(timeout_seconds=5)
-        )
+        tool = BashCommandToolHardened(limits=ExecutionLimits(timeout_seconds=5))
         result = await tool.execute(
             command="sleep 1",
-            timeout=100  # Try to set 100s timeout
+            timeout=100,  # Try to set 100s timeout
         )
 
         # Should complete quickly because real timeout is clamped to 5s
@@ -292,10 +270,7 @@ class TestSecurityFeatures:
         tool = BashCommandToolHardened()
 
         # Try to execute in parent directory using ../
-        result = await tool.execute(
-            command="pwd",
-            cwd="../"
-        )
+        result = await tool.execute(command="pwd", cwd="../")
 
         # Should work but path should be sanitized
         assert result.success or not result.success  # Depends on parent existing

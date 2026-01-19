@@ -1,7 +1,7 @@
 # MIGRATION GUIDE v2.0
 
-**Date**: 2025-11-24  
-**Version**: qwen-dev-cli v2.0  
+**Date**: 2025-11-24
+**Version**: qwen-dev-cli v2.0
 **Compliance**: Vertice Constitution v3.0 - P3 (Clear Error Messages)
 
 ---
@@ -10,8 +10,8 @@
 
 This guide helps you migrate from **qwen-dev-cli v1.x** to **v2.0**.
 
-**Breaking Changes**: 2  
-**Deprecation Warnings**: 1  
+**Breaking Changes**: 2
+**Deprecation Warnings**: 1
 **New Features**: Tool Registry Factory Functions
 
 ---
@@ -248,8 +248,8 @@ print(f"Tools: {list(mcp.registry.tools.keys())}")
 **Expected Output**:
 ```
 Registered tools: 11
-Tools: ['read_file', 'write_file', 'edit_file', 'create_directory', 
-        'move_file', 'copy_file', 'bash_command', 'search_files', 
+Tools: ['read_file', 'write_file', 'edit_file', 'create_directory',
+        'move_file', 'copy_file', 'bash_command', 'search_files',
         'get_directory_tree', 'git_status', 'git_diff']
 ```
 
@@ -314,14 +314,14 @@ mcp = create_mcp_client()
 
 ### What Still Works (v1.x → v2.0)
 
-✅ **AgentTask with 'description' field** (with warning)  
-✅ **Importing from `mcp_client` module** (redirects to `mcp`)  
-✅ **All existing agents** (no API changes)  
+✅ **AgentTask with 'description' field** (with warning)
+✅ **Importing from `mcp_client` module** (redirects to `mcp`)
+✅ **All existing agents** (no API changes)
 ✅ **Tool execution** (same interface)
 
 ### What No Longer Works
 
-❌ **MCPClient() without arguments**  
+❌ **MCPClient() without arguments**
 ❌ **Empty ToolRegistry expecting agents to work**
 
 ---
@@ -372,6 +372,6 @@ Use this checklist to track your migration progress:
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: 2025-11-24  
+**Document Version**: 1.0
+**Last Updated**: 2025-11-24
 **Compliance**: Vertice Constitution v3.0 - P3 (Ceticismo Crítico)

@@ -23,13 +23,12 @@ class TestArchitectStressPart2:
     async def test_architect_sql_injection_attempt(self):
         """Test SQL injection in request."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(return_value='{\"decision\": \"VETOED\", \"reasoning\": \"SQL detected\"}')
+        llm_client.generate = AsyncMock(
+            return_value='{"decision": "VETOED", "reasoning": "SQL detected"}'
+        )
 
         architect = ArchitectAgent(llm_client, MagicMock())
-        task = AgentTask(
-            request="'; DROP TABLE users; --",
-            session_id="test"
-        )
+        task = AgentTask(request="'; DROP TABLE users; --", session_id="test")
 
         response = await architect.execute(task)
         assert response is not None
@@ -38,13 +37,10 @@ class TestArchitectStressPart2:
     async def test_architect_xss_attempt(self):
         """Test XSS in request."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(return_value='{\"decision\": \"APPROVED\", \"reasoning\": \"OK\"}')
+        llm_client.generate = AsyncMock(return_value='{"decision": "APPROVED", "reasoning": "OK"}')
 
         architect = ArchitectAgent(llm_client, MagicMock())
-        task = AgentTask(
-            request="<script>alert('XSS')</script>",
-            session_id="test"
-        )
+        task = AgentTask(request="<script>alert('XSS')</script>", session_id="test")
 
         response = await architect.execute(task)
         assert response is not None
@@ -53,7 +49,7 @@ class TestArchitectStressPart2:
     async def test_architect_repeated_calls(self):
         """Test 1000 sequential calls."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(return_value='{\"decision\": \"APPROVED\", \"reasoning\": \"OK\"}')
+        llm_client.generate = AsyncMock(return_value='{"decision": "APPROVED", "reasoning": "OK"}')
 
         architect = ArchitectAgent(llm_client, MagicMock())
 
@@ -66,13 +62,10 @@ class TestArchitectStressPart2:
     async def test_architect_mixed_encodings(self):
         """Test mixed character encodings."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(return_value='{\"decision\": \"APPROVED\", \"reasoning\": \"OK\"}')
+        llm_client.generate = AsyncMock(return_value='{"decision": "APPROVED", "reasoning": "OK"}')
 
         architect = ArchitectAgent(llm_client, MagicMock())
-        task = AgentTask(
-            request="Test ASCII + UTF-8: café 日本語",
-            session_id="test"
-        )
+        task = AgentTask(request="Test ASCII + UTF-8: café 日本語", session_id="test")
 
         response = await architect.execute(task)
         assert response is not None
@@ -81,13 +74,10 @@ class TestArchitectStressPart2:
     async def test_architect_control_characters(self):
         """Test control characters."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(return_value='{\"decision\": \"APPROVED\", \"reasoning\": \"OK\"}')
+        llm_client.generate = AsyncMock(return_value='{"decision": "APPROVED", "reasoning": "OK"}')
 
         architect = ArchitectAgent(llm_client, MagicMock())
-        task = AgentTask(
-            request="Test\r\n\t\x1b[31mRed\x1b[0m",
-            session_id="test"
-        )
+        task = AgentTask(request="Test\r\n\t\x1b[31mRed\x1b[0m", session_id="test")
 
         response = await architect.execute(task)
         assert response is not None
@@ -100,13 +90,13 @@ class TestExplorerStressPart2:
     async def test_explorer_symlink_loop(self):
         """Test symlink loop detection."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(return_value='{\"relevant_files\": []}')
+        llm_client.generate = AsyncMock(return_value='{"relevant_files": []}')
 
         explorer = ExplorerAgent(llm_client, MagicMock())
         task = AgentTask(
             request="Explore",
             session_id="test",
-            context={"files": ["/a/b/c", "/a/b/c/../../a/b/c"]}  # Loop
+            context={"files": ["/a/b/c", "/a/b/c/../../a/b/c"]},  # Loop
         )
 
         response = await explorer.execute(task)
@@ -116,13 +106,13 @@ class TestExplorerStressPart2:
     async def test_explorer_hidden_files(self):
         """Test with .git, .env, etc."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(return_value='{\"relevant_files\": []}')
+        llm_client.generate = AsyncMock(return_value='{"relevant_files": []}')
 
         explorer = ExplorerAgent(llm_client, MagicMock())
         task = AgentTask(
             request="Explore",
             session_id="test",
-            context={"files": [".git/config", ".env", ".secrets.json"]}
+            context={"files": [".git/config", ".env", ".secrets.json"]},
         )
 
         response = await explorer.execute(task)
@@ -132,15 +122,11 @@ class TestExplorerStressPart2:
     async def test_explorer_very_long_paths(self):
         """Test with 1000 char paths."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(return_value='{\"relevant_files\": []}')
+        llm_client.generate = AsyncMock(return_value='{"relevant_files": []}')
 
         explorer = ExplorerAgent(llm_client, MagicMock())
         long_path = "/".join(["a" * 50 for _ in range(20)])  # 1000+ chars
-        task = AgentTask(
-            request="Explore",
-            session_id="test",
-            context={"files": [long_path]}
-        )
+        task = AgentTask(request="Explore", session_id="test", context={"files": [long_path]})
 
         response = await explorer.execute(task)
         assert response is not None
@@ -149,13 +135,11 @@ class TestExplorerStressPart2:
     async def test_explorer_duplicate_files(self):
         """Test with 1000 duplicate files."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(return_value='{\"relevant_files\": []}')
+        llm_client.generate = AsyncMock(return_value='{"relevant_files": []}')
 
         explorer = ExplorerAgent(llm_client, MagicMock())
         task = AgentTask(
-            request="Explore",
-            session_id="test",
-            context={"files": ["same.py"] * 1000}
+            request="Explore", session_id="test", context={"files": ["same.py"] * 1000}
         )
 
         response = await explorer.execute(task)
@@ -169,8 +153,11 @@ class TestPlannerStressPart2:
     async def test_planner_nested_dependencies(self):
         """Test deeply nested dependencies."""
         llm_client = MagicMock()
-        steps = [{"id": i, "action": f"step_{i}", "dependencies": [i-1] if i > 0 else []} for i in range(100)]
-        llm_client.generate = AsyncMock(return_value=f'{{\"steps\": {steps}}}')
+        steps = [
+            {"id": i, "action": f"step_{i}", "dependencies": [i - 1] if i > 0 else []}
+            for i in range(100)
+        ]
+        llm_client.generate = AsyncMock(return_value=f'{{"steps": {steps}}}')
 
         planner = PlannerAgent(llm_client, MagicMock())
         task = AgentTask(request="Test", session_id="test")
@@ -182,7 +169,9 @@ class TestPlannerStressPart2:
     async def test_planner_duplicate_step_ids(self):
         """Test duplicate IDs."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(return_value='{\"steps\": [{\"id\": 1, \"action\": \"a\"}, {\"id\": 1, \"action\": \"b\"}]}')
+        llm_client.generate = AsyncMock(
+            return_value='{"steps": [{"id": 1, "action": "a"}, {"id": 1, "action": "b"}]}'
+        )
 
         planner = PlannerAgent(llm_client, MagicMock())
         task = AgentTask(request="Test", session_id="test")
@@ -194,7 +183,7 @@ class TestPlannerStressPart2:
     async def test_planner_missing_required_fields(self):
         """Test steps missing action."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(return_value='{\"steps\": [{\"id\": 1}]}')  # No action
+        llm_client.generate = AsyncMock(return_value='{"steps": [{"id": 1}]}')  # No action
 
         planner = PlannerAgent(llm_client, MagicMock())
         task = AgentTask(request="Test", session_id="test")
@@ -206,7 +195,7 @@ class TestPlannerStressPart2:
     async def test_planner_invalid_action_types(self):
         """Test invalid action types."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(return_value='{\"steps\": [{\"id\": 1, \"action\": \"rm -rf /\"}]}')
+        llm_client.generate = AsyncMock(return_value='{"steps": [{"id": 1, "action": "rm -rf /"}]}')
 
         planner = PlannerAgent(llm_client, MagicMock())
         task = AgentTask(request="Test", session_id="test")
@@ -228,7 +217,7 @@ class TestRefactorerStressPart2:
             task = AgentTask(
                 request=f"Test {i}",
                 session_id=f"test-{i}",
-                context={"step": {"id": i, "action": "test", "params": {}}}
+                context={"step": {"id": i, "action": "test", "params": {}}},
             )
             tasks.append(refactorer.execute(task))
 
@@ -242,11 +231,13 @@ class TestRefactorerStressPart2:
         task = AgentTask(
             request="Test",
             session_id="test",
-            context={"step": {
-                "id": 1,
-                "action": "create_file",
-                "params": {"path": "../../../etc/passwd", "content": "hack"}
-            }}
+            context={
+                "step": {
+                    "id": 1,
+                    "action": "create_file",
+                    "params": {"path": "../../../etc/passwd", "content": "hack"},
+                }
+            },
         )
 
         response = await refactorer.execute(task)
@@ -259,11 +250,13 @@ class TestRefactorerStressPart2:
         task = AgentTask(
             request="Test",
             session_id="test",
-            context={"step": {
-                "id": 1,
-                "action": "create_file",
-                "params": {"path": "test.bin", "content": "\x00\x01\x02\xff"}
-            }}
+            context={
+                "step": {
+                    "id": 1,
+                    "action": "create_file",
+                    "params": {"path": "test.bin", "content": "\x00\x01\x02\xff"},
+                }
+            },
         )
 
         response = await refactorer.execute(task)
@@ -277,14 +270,10 @@ class TestReviewerStressPart2:
     async def test_reviewer_no_diff(self):
         """Test with no changes."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(return_value='{\"approved\": true, \"grade\": \"A\"}')
+        llm_client.generate = AsyncMock(return_value='{"approved": true, "grade": "A"}')
 
         reviewer = ReviewerAgent(llm_client, MagicMock())
-        task = AgentTask(
-            request="Review",
-            session_id="test",
-            context={"diff": ""}
-        )
+        task = AgentTask(request="Review", session_id="test", context={"diff": ""})
 
         response = await reviewer.execute(task)
         assert response is not None
@@ -293,13 +282,13 @@ class TestReviewerStressPart2:
     async def test_reviewer_only_deletions(self):
         """Test with only deletions."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(return_value='{\"approved\": true, \"grade\": \"B\"}')
+        llm_client.generate = AsyncMock(return_value='{"approved": true, "grade": "B"}')
 
         reviewer = ReviewerAgent(llm_client, MagicMock())
         task = AgentTask(
             request="Review",
             session_id="test",
-            context={"diff": "\n".join([f"-line {i}" for i in range(100)])}
+            context={"diff": "\n".join([f"-line {i}" for i in range(100)])},
         )
 
         response = await reviewer.execute(task)
@@ -309,13 +298,13 @@ class TestReviewerStressPart2:
     async def test_reviewer_mixed_languages(self):
         """Test with multiple languages."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(return_value='{\"approved\": true, \"grade\": \"A\"}')
+        llm_client.generate = AsyncMock(return_value='{"approved": true, "grade": "A"}')
 
         reviewer = ReviewerAgent(llm_client, MagicMock())
         task = AgentTask(
             request="Review",
             session_id="test",
-            context={"diff": "+def foo():\\n+  pass\\n+function bar() {}\\n+class Baz {}"}
+            context={"diff": "+def foo():\\n+  pass\\n+function bar() {}\\n+class Baz {}"},
         )
 
         response = await reviewer.execute(task)
@@ -329,7 +318,7 @@ class TestSquadStressPart2:
     async def test_squad_rapid_fire_requests(self):
         """Test 50 rapid requests."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(return_value='{\"decision\": \"VETOED\", \"reasoning\": \"Test\"}')
+        llm_client.generate = AsyncMock(return_value='{"decision": "VETOED", "reasoning": "Test"}')
 
         squad = DevSquad(llm_client, MagicMock())
 
@@ -367,11 +356,12 @@ class TestPerformanceDegradation:
     async def test_architect_performance_degradation(self):
         """Test 100 calls don't slow down."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(return_value='{\"decision\": \"APPROVED\", \"reasoning\": \"OK\"}')
+        llm_client.generate = AsyncMock(return_value='{"decision": "APPROVED", "reasoning": "OK"}')
 
         architect = ArchitectAgent(llm_client, MagicMock())
 
         import time
+
         times = []
 
         for i in range(100):
@@ -394,6 +384,7 @@ class TestPerformanceDegradation:
         manager = MemoryManager()
 
         import time
+
         times = []
 
         for i in range(1000):
@@ -416,7 +407,7 @@ class TestRaceConditions:
     async def test_concurrent_architect_calls(self):
         """Test 20 concurrent Architect calls."""
         llm_client = MagicMock()
-        llm_client.generate = AsyncMock(return_value='{\"decision\": \"APPROVED\", \"reasoning\": \"OK\"}')
+        llm_client.generate = AsyncMock(return_value='{"decision": "APPROVED", "reasoning": "OK"}')
 
         architect = ArchitectAgent(llm_client, MagicMock())
 

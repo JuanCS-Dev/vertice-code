@@ -27,7 +27,9 @@ def run_tests(category: str = None, quick: bool = False) -> Dict[str, Any]:
     test_dir = Path(__file__).parent
 
     cmd = [
-        sys.executable, "-m", "pytest",
+        sys.executable,
+        "-m",
+        "pytest",
         str(test_dir),
         "-v",
         "--tb=short",
@@ -47,14 +49,10 @@ def run_tests(category: str = None, quick: bool = False) -> Dict[str, Any]:
         cmd,
         capture_output=True,
         text=True,
-        cwd=test_dir.parent.parent  # Project root
+        cwd=test_dir.parent.parent,  # Project root
     )
 
-    return {
-        "returncode": result.returncode,
-        "stdout": result.stdout,
-        "stderr": result.stderr
-    }
+    return {"returncode": result.returncode, "stdout": result.stdout, "stderr": result.stderr}
 
 
 def parse_issues_from_code() -> List[Dict[str, Any]]:
@@ -63,7 +61,6 @@ def parse_issues_from_code() -> List[Dict[str, Any]]:
     issues = []
     test_dir = Path(__file__).parent
 
-    issue_id = 0
     for test_file in test_dir.glob("test_*.py"):
         content = test_file.read_text()
 
@@ -79,16 +76,18 @@ def parse_issues_from_code() -> List[Dict[str, Any]]:
 
             # Try to find severity
             severity = "MEDIUM"
-            if 'severity="CRITICAL"' in content[match.start():match.start()+500]:
+            if 'severity="CRITICAL"' in content[match.start() : match.start() + 500]:
                 severity = "CRITICAL"
-            elif 'severity="HIGH"' in content[match.start():match.start()+500]:
+            elif 'severity="HIGH"' in content[match.start() : match.start() + 500]:
                 severity = "HIGH"
-            elif 'severity="LOW"' in content[match.start():match.start()+500]:
+            elif 'severity="LOW"' in content[match.start() : match.start() + 500]:
                 severity = "LOW"
 
             # Try to find category
             category = "UNKNOWN"
-            cat_match = re.search(r'category="([^"]+)"', content[match.start():match.start()+500])
+            cat_match = re.search(
+                r'category="([^"]+)"', content[match.start() : match.start() + 500]
+            )
             if cat_match:
                 category = cat_match.group(1)
 
@@ -105,14 +104,16 @@ def parse_issues_from_code() -> List[Dict[str, Any]]:
             elif "integration" in test_file.name:
                 persona = "INTEGRATION"
 
-            issues.append({
-                "id": f"ISSUE-{issue_num.zfill(3)}",
-                "title": title,
-                "severity": severity,
-                "category": category,
-                "persona": persona,
-                "file": test_file.name
-            })
+            issues.append(
+                {
+                    "id": f"ISSUE-{issue_num.zfill(3)}",
+                    "title": title,
+                    "severity": severity,
+                    "category": category,
+                    "persona": persona,
+                    "file": test_file.name,
+                }
+            )
 
     return sorted(issues, key=lambda x: int(x["id"].split("-")[1]))
 
@@ -187,7 +188,7 @@ Tests were designed from three user perspectives:
 
 """
 
-    for issue in by_severity.get('CRITICAL', []):
+    for issue in by_severity.get("CRITICAL", []):
         report += f"""### {issue['id']}: {issue['title']}
 - **Category:** {issue['category']}
 - **Persona:** {issue['persona']}
@@ -202,7 +203,7 @@ Tests were designed from three user perspectives:
 
 """
 
-    for issue in by_severity.get('HIGH', []):
+    for issue in by_severity.get("HIGH", []):
         report += f"""### {issue['id']}: {issue['title']}
 - **Category:** {issue['category']}
 - **Persona:** {issue['persona']}
@@ -217,7 +218,7 @@ Tests were designed from three user perspectives:
 
 """
 
-    for issue in by_severity.get('MEDIUM', []):
+    for issue in by_severity.get("MEDIUM", []):
         report += f"- **{issue['id']}**: {issue['title']} ({issue['category']})\n"
 
     report += """
@@ -227,7 +228,7 @@ Tests were designed from three user perspectives:
 
 """
 
-    for issue in by_severity.get('LOW', []):
+    for issue in by_severity.get("LOW", []):
         report += f"- **{issue['id']}**: {issue['title']} ({issue['category']})\n"
 
     report += """
@@ -240,7 +241,7 @@ Tests were designed from three user perspectives:
 """
 
     for issue in issues:
-        title_short = issue['title'][:50] + "..." if len(issue['title']) > 50 else issue['title']
+        title_short = issue["title"][:50] + "..." if len(issue["title"]) > 50 else issue["title"]
         report += f"| {issue['id']} | {title_short} | {issue['severity']} | {issue['category']} | {issue['persona']} |\n"
 
     report += f"""
@@ -299,7 +300,9 @@ def main():
     parser = argparse.ArgumentParser(description="Run brutal E2E tests")
     parser.add_argument("--quick", action="store_true", help="Quick mode - stop on first failure")
     parser.add_argument("--category", help="Run specific category")
-    parser.add_argument("--report-only", action="store_true", help="Generate report from existing tests")
+    parser.add_argument(
+        "--report-only", action="store_true", help="Generate report from existing tests"
+    )
 
     args = parser.parse_args()
 
@@ -335,7 +338,7 @@ def main():
         "generated": datetime.now().isoformat(),
         "total_issues": len(issues),
         "issues": issues,
-        "test_returncode": test_result["returncode"]
+        "test_returncode": test_result["returncode"],
     }
     json_path = Path(__file__).parent / "BRUTAL_TEST_REPORT.json"
     with open(json_path, "w") as f:

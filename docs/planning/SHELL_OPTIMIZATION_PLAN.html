@@ -4,7 +4,7 @@
     <head>
         <meta charset="utf-8">
         <title>Neuroshell Optimization Plan</title>
-        
+
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
@@ -25,7 +25,7 @@
         tr:nth-child(2n) { background-color: #f6f8fa; }
         .mermaid { text-align: center; }
     </style>
-    
+
         <script type="module">
             import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
             mermaid.initialize({ startOnLoad: true });
@@ -290,7 +290,7 @@ time neuroshell-code --version
 # Esperado: ~3-5s
 
 # Medir novo shell
-time neuroshell-fast --version  
+time neuroshell-fast --version
 # Esperado: &lt;0.5s
 
 # Comparar: Deve ser ~10x mais rápido
@@ -959,4 +959,3 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 <p><strong>Next Step:</strong> Partir para EXECUTION - Phase 1 (Core Infrastructure)</p>
     </body>
     </html>
-    

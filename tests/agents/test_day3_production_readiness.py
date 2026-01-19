@@ -20,6 +20,7 @@ class TestProductionReadinessPlannerCore:
     def test_planner_has_no_print_statements(self):
         """Não deve ter print statements"""
         import inspect
+
         source = inspect.getsource(PlannerAgent)
         assert "print(" not in source or "# print(" in source
 
@@ -100,6 +101,7 @@ class TestProductionReadinessRefactorerCore:
     def test_refactorer_has_no_print_statements(self):
         """Não deve ter print statements"""
         import inspect
+
         source = inspect.getsource(RefactorerAgent)
         assert "print(" not in source or "# print(" in source
 
@@ -179,7 +181,7 @@ class TestProductionSecurity:
             task_id="sec",
             request="Test",
             working_dir=Path("/tmp"),
-            metadata={"api_key": "secret_value"}
+            metadata={"api_key": "secret_value"},
         )
         result = await planner.execute(context)
         # Output não deve conter secrets
@@ -190,11 +192,7 @@ class TestProductionSecurity:
     async def test_agents_validate_path_traversal(self):
         """Agentes devem prevenir path traversal"""
         planner = PlannerAgent()
-        context = TaskContext(
-            task_id="path",
-            request="Test",
-            working_dir=Path("/tmp/../../../etc")
-        )
+        context = TaskContext(task_id="path", request="Test", working_dir=Path("/tmp/../../../etc"))
         result = await planner.execute(context)
         assert result is not None
 
@@ -203,9 +201,7 @@ class TestProductionSecurity:
         """Agentes devem sanitizar input"""
         refactorer = RefactorerAgent()
         context = TaskContext(
-            task_id="sanitize",
-            request="<script>alert('xss')</script>",
-            working_dir=Path("/tmp")
+            task_id="sanitize", request="<script>alert('xss')</script>", working_dir=Path("/tmp")
         )
         result = await refactorer.execute(context)
         assert result.status in [TaskStatus.SUCCESS, TaskStatus.FAILED]
@@ -214,11 +210,7 @@ class TestProductionSecurity:
     async def test_agents_respect_file_permissions(self):
         """Agentes devem respeitar permissões de arquivo"""
         planner = PlannerAgent()
-        context = TaskContext(
-            task_id="perm",
-            request="Test",
-            working_dir=Path("/root")
-        )
+        context = TaskContext(task_id="perm", request="Test", working_dir=Path("/root"))
         result = await planner.execute(context)
         assert result is not None
 
@@ -227,9 +219,7 @@ class TestProductionSecurity:
         """Agentes não devem executar código arbitrário"""
         refactorer = RefactorerAgent()
         context = TaskContext(
-            task_id="exec",
-            request="__import__('os').system('rm -rf /')",
-            working_dir=Path("/tmp")
+            task_id="exec", request="__import__('os').system('rm -rf /')", working_dir=Path("/tmp")
         )
         result = await refactorer.execute(context)
         # Deve completar sem executar comando
@@ -281,7 +271,7 @@ class TestProductionMonitoring:
         context = TaskContext(
             task_id="final_validation",
             request="Production readiness validation",
-            working_dir=Path("/tmp")
+            working_dir=Path("/tmp"),
         )
 
         planner_result = await planner.execute(context)

@@ -31,9 +31,7 @@ class LoggingExecutor:
         }
 
         level = level_map.get(action.action_type, "info")
-        getattr(self.logger, level)(
-            f"[{action.action_type.name}] {action.target}: {action.reason}"
-        )
+        getattr(self.logger, level)(f"[{action.action_type.name}] {action.target}: {action.reason}")
         return True
 
 

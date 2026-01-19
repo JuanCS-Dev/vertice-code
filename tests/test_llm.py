@@ -24,7 +24,7 @@ async def test_streaming():
     print(f"\nModel: {config.hf_model}")
     print(f"Max Tokens: {config.max_tokens}")
     print(f"Temperature: {config.temperature}")
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
 
     # Test prompt
     prompt = "Write a simple hello world function in Python with docstring"
@@ -38,7 +38,7 @@ async def test_streaming():
         print(chunk, end="", flush=True)
         full_response.append(chunk)
 
-    print("\n\n" + "="*60)
+    print("\n\n" + "=" * 60)
     print("✅ Streaming complete!")
     print(f"Total length: {len(''.join(full_response))} chars")
 
@@ -73,6 +73,7 @@ async def main():
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
 
 

@@ -13,6 +13,7 @@ from typing import Optional
 @dataclass
 class PartialResult:
     """Represents partial result before failure."""
+
     content: str
     progress: float
     error: Optional[str] = None
@@ -108,9 +109,7 @@ class TestAgentCascadeFailure:
         async def downstream_agent():
             if upstream_result is None:
                 return PartialResult(
-                    content="Used fallback",
-                    progress=0.5,
-                    error="Upstream unavailable"
+                    content="Used fallback", progress=0.5, error="Upstream unavailable"
                 )
             return PartialResult(content="Used upstream", progress=1.0)
 

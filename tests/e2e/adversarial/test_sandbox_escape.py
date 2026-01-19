@@ -26,30 +26,66 @@ import ast
 # FIXTURES
 # ==============================================================================
 
+
 @pytest.fixture
 def sandbox_validator():
     """Provide sandbox validation utilities."""
+
     class SandboxValidator:
         # Dangerous builtins that should be restricted
         DANGEROUS_BUILTINS = {
-            'eval', 'exec', 'compile', '__import__', 'open',
-            'input', 'breakpoint', 'help', 'license', 'credits',
+            "eval",
+            "exec",
+            "compile",
+            "__import__",
+            "open",
+            "input",
+            "breakpoint",
+            "help",
+            "license",
+            "credits",
         }
 
         # Dangerous modules
         DANGEROUS_MODULES = {
-            'os', 'sys', 'subprocess', 'shutil', 'socket',
-            'ctypes', 'multiprocessing', 'threading',
-            'importlib', 'pickle', 'shelve', 'marshal',
-            'code', 'codeop', 'pty', 'fcntl', 'grp', 'pwd',
-            'resource', 'signal', 'mmap', 'syslog',
+            "os",
+            "sys",
+            "subprocess",
+            "shutil",
+            "socket",
+            "ctypes",
+            "multiprocessing",
+            "threading",
+            "importlib",
+            "pickle",
+            "shelve",
+            "marshal",
+            "code",
+            "codeop",
+            "pty",
+            "fcntl",
+            "grp",
+            "pwd",
+            "resource",
+            "signal",
+            "mmap",
+            "syslog",
         }
 
         # Dangerous attributes
         DANGEROUS_ATTRS = {
-            '__code__', '__globals__', '__builtins__', '__subclasses__',
-            '__bases__', '__mro__', '__class__', '__dict__',
-            '__reduce__', '__reduce_ex__', '__getstate__', '__setstate__',
+            "__code__",
+            "__globals__",
+            "__builtins__",
+            "__subclasses__",
+            "__bases__",
+            "__mro__",
+            "__class__",
+            "__dict__",
+            "__reduce__",
+            "__reduce_ex__",
+            "__getstate__",
+            "__setstate__",
         }
 
         def check_code_safety(self, code: str) -> tuple[bool, List[str]]:
@@ -65,11 +101,11 @@ def sandbox_validator():
                 # Check for imports
                 if isinstance(node, ast.Import):
                     for alias in node.names:
-                        if alias.name.split('.')[0] in self.DANGEROUS_MODULES:
+                        if alias.name.split(".")[0] in self.DANGEROUS_MODULES:
                             issues.append(f"Dangerous import: {alias.name}")
 
                 elif isinstance(node, ast.ImportFrom):
-                    if node.module and node.module.split('.')[0] in self.DANGEROUS_MODULES:
+                    if node.module and node.module.split(".")[0] in self.DANGEROUS_MODULES:
                         issues.append(f"Dangerous import from: {node.module}")
 
                 # Check for dangerous function calls
@@ -88,27 +124,63 @@ def sandbox_validator():
         def create_restricted_globals(self) -> Dict[str, Any]:
             """Create restricted globals for code execution."""
             safe_builtins = {
-                'abs': abs, 'all': all, 'any': any, 'ascii': ascii,
-                'bin': bin, 'bool': bool, 'bytearray': bytearray,
-                'bytes': bytes, 'callable': callable, 'chr': chr,
-                'complex': complex, 'dict': dict, 'divmod': divmod,
-                'enumerate': enumerate, 'filter': filter, 'float': float,
-                'format': format, 'frozenset': frozenset, 'hasattr': hasattr,
-                'hash': hash, 'hex': hex, 'int': int, 'isinstance': isinstance,
-                'issubclass': issubclass, 'iter': iter, 'len': len,
-                'list': list, 'map': map, 'max': max, 'min': min,
-                'next': next, 'object': object, 'oct': oct, 'ord': ord,
-                'pow': pow, 'print': print, 'range': range, 'repr': repr,
-                'reversed': reversed, 'round': round, 'set': set,
-                'slice': slice, 'sorted': sorted, 'str': str,
-                'sum': sum, 'tuple': tuple, 'type': type, 'zip': zip,
-                'True': True, 'False': False, 'None': None,
+                "abs": abs,
+                "all": all,
+                "any": any,
+                "ascii": ascii,
+                "bin": bin,
+                "bool": bool,
+                "bytearray": bytearray,
+                "bytes": bytes,
+                "callable": callable,
+                "chr": chr,
+                "complex": complex,
+                "dict": dict,
+                "divmod": divmod,
+                "enumerate": enumerate,
+                "filter": filter,
+                "float": float,
+                "format": format,
+                "frozenset": frozenset,
+                "hasattr": hasattr,
+                "hash": hash,
+                "hex": hex,
+                "int": int,
+                "isinstance": isinstance,
+                "issubclass": issubclass,
+                "iter": iter,
+                "len": len,
+                "list": list,
+                "map": map,
+                "max": max,
+                "min": min,
+                "next": next,
+                "object": object,
+                "oct": oct,
+                "ord": ord,
+                "pow": pow,
+                "print": print,
+                "range": range,
+                "repr": repr,
+                "reversed": reversed,
+                "round": round,
+                "set": set,
+                "slice": slice,
+                "sorted": sorted,
+                "str": str,
+                "sum": sum,
+                "tuple": tuple,
+                "type": type,
+                "zip": zip,
+                "True": True,
+                "False": False,
+                "None": None,
             }
 
             return {
-                '__builtins__': safe_builtins,
-                '__name__': '__sandbox__',
-                '__doc__': None,
+                "__builtins__": safe_builtins,
+                "__name__": "__sandbox__",
+                "__doc__": None,
             }
 
     return SandboxValidator()
@@ -132,21 +204,25 @@ def file_jail(tmp_path):
 # TEST CLASS: Code Execution Sandbox
 # ==============================================================================
 
+
 @pytest.mark.e2e
 @pytest.mark.security
 class TestCodeExecutionSandbox:
     """Tests for code execution sandboxing."""
 
-    @pytest.mark.parametrize("dangerous_code", [
-        "import os; os.system('whoami')",
-        "__import__('os').system('id')",
-        "eval('__import__(\"os\").system(\"ls\")')",
-        "exec('import subprocess; subprocess.run([\"ls\"])')",
-        "().__class__.__bases__[0].__subclasses__()",
-        "open('/etc/passwd').read()",
-        "import socket; socket.socket()",
-        "import ctypes; ctypes.CDLL(None)",
-    ])
+    @pytest.mark.parametrize(
+        "dangerous_code",
+        [
+            "import os; os.system('whoami')",
+            "__import__('os').system('id')",
+            'eval(\'__import__("os").system("ls")\')',
+            "exec('import subprocess; subprocess.run([\"ls\"])')",
+            "().__class__.__bases__[0].__subclasses__()",
+            "open('/etc/passwd').read()",
+            "import socket; socket.socket()",
+            "import ctypes; ctypes.CDLL(None)",
+        ],
+    )
     def test_blocks_dangerous_code(self, sandbox_validator, dangerous_code):
         """Blocks execution of dangerous code patterns."""
         is_safe, issues = sandbox_validator.check_code_safety(dangerous_code)
@@ -155,7 +231,7 @@ class TestCodeExecutionSandbox:
 
     def test_allows_safe_code(self, sandbox_validator):
         """Allows execution of safe code patterns."""
-        safe_code = '''
+        safe_code = """
 def calculate(x, y):
     return x + y
 
@@ -163,7 +239,7 @@ result = calculate(1, 2)
 numbers = [1, 2, 3, 4, 5]
 total = sum(numbers)
 filtered = list(filter(lambda x: x > 2, numbers))
-'''
+"""
         is_safe, issues = sandbox_validator.check_code_safety(safe_code)
         assert is_safe, f"Should allow safe code. Issues: {issues}"
 
@@ -175,21 +251,20 @@ filtered = list(filter(lambda x: x > 2, numbers))
         restricted_locals = {}
 
         # This should work
-        exec(compile(safe_code, '<sandbox>', 'exec'),
-             restricted_globals, restricted_locals)
+        exec(compile(safe_code, "<sandbox>", "exec"), restricted_globals, restricted_locals)
 
-        assert restricted_locals['result'] == 15
+        assert restricted_locals["result"] == 15
 
         # Dangerous code should fail
         dangerous_code = "__import__('os')"
         with pytest.raises((NameError, TypeError)):
-            exec(compile(dangerous_code, '<sandbox>', 'exec'),
-                 restricted_globals, {})
+            exec(compile(dangerous_code, "<sandbox>", "exec"), restricted_globals, {})
 
 
 # ==============================================================================
 # TEST CLASS: File System Jail
 # ==============================================================================
+
 
 @pytest.mark.e2e
 @pytest.mark.security
@@ -198,6 +273,7 @@ class TestFileSystemJail:
 
     def test_allows_access_within_jail(self, file_jail):
         """Allows file operations within jail."""
+
         def jailed_read(jail_root: Path, relative_path: str) -> str:
             """Read file only if within jail."""
             full_path = (jail_root / relative_path).resolve()
@@ -214,6 +290,7 @@ class TestFileSystemJail:
 
     def test_blocks_access_outside_jail(self, file_jail):
         """Blocks file operations outside jail."""
+
         def jailed_read(jail_root: Path, relative_path: str) -> str:
             """Read file only if within jail."""
             full_path = (jail_root / relative_path).resolve()
@@ -230,6 +307,7 @@ class TestFileSystemJail:
 
     def test_blocks_symlink_escape(self, file_jail):
         """Blocks symlink-based jail escape."""
+
         def jailed_read_safe(jail_root: Path, relative_path: str) -> str:
             """Read file checking for symlink escape."""
             # Don't follow symlinks initially
@@ -263,6 +341,7 @@ class TestFileSystemJail:
 # TEST CLASS: Process Isolation
 # ==============================================================================
 
+
 @pytest.mark.e2e
 @pytest.mark.security
 class TestProcessIsolation:
@@ -272,16 +351,18 @@ class TestProcessIsolation:
         """Subprocess should inherit security restrictions."""
         # Create a script that tries to escape
         script = tmp_path / "test_script.py"
-        script.write_text('''
+        script.write_text(
+            """
 import sys
 print("PYTHON_PATH:", sys.executable)
 print("CWD:", __import__('os').getcwd())
-''')
+"""
+        )
 
         # Run with restricted PATH
         env = os.environ.copy()
-        env['PATH'] = '/usr/bin:/bin'  # Restricted PATH
-        env['HOME'] = str(tmp_path)    # Fake home
+        env["PATH"] = "/usr/bin:/bin"  # Restricted PATH
+        env["HOME"] = str(tmp_path)  # Fake home
 
         result = subprocess.run(
             [sys.executable, str(script)],
@@ -289,7 +370,7 @@ print("CWD:", __import__('os').getcwd())
             text=True,
             env=env,
             cwd=tmp_path,
-            timeout=5
+            timeout=5,
         )
 
         # Should complete but with restricted environment
@@ -298,6 +379,7 @@ print("CWD:", __import__('os').getcwd())
 
     def test_blocks_shell_execution(self):
         """Blocks shell execution from sandboxed code."""
+
         def safe_run(cmd: List[str], allowed_commands: Set[str]) -> subprocess.CompletedProcess:
             """Run command only if in allowed list."""
             if not cmd:
@@ -313,21 +395,21 @@ print("CWD:", __import__('os').getcwd())
                 capture_output=True,
                 text=True,
                 shell=False,  # CRITICAL: Never True
-                timeout=5
+                timeout=5,
             )
 
-        allowed = {'echo', 'cat', 'ls'}
+        allowed = {"echo", "cat", "ls"}
 
         # Should allow
-        result = safe_run(['echo', 'hello'], allowed)
-        assert 'hello' in result.stdout
+        result = safe_run(["echo", "hello"], allowed)
+        assert "hello" in result.stdout
 
         # Should block
         with pytest.raises(PermissionError, match="not allowed"):
-            safe_run(['rm', '-rf', '/'], allowed)
+            safe_run(["rm", "-rf", "/"], allowed)
 
         with pytest.raises(PermissionError, match="not allowed"):
-            safe_run(['sh', '-c', 'whoami'], allowed)
+            safe_run(["sh", "-c", "whoami"], allowed)
 
 
 # ==============================================================================

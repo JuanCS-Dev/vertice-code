@@ -401,7 +401,7 @@ async def agent_explore(
         console.print(
             Panel(
                 f"""[bold]Repository Map[/bold]
-            
+
 📊 Total Entities: {result.get('total_entities', 0)}
 📁 Files: {result.get('files_analyzed', 0)}
 🔥 Hotspots: {len(result.get('hotspots', []))}
@@ -419,7 +419,7 @@ async def agent_explore(
         console.print(
             Panel(
                 f"""[bold]Blast Radius Analysis[/bold]
-            
+
 🎯 Target: {target}
 ⚠️  Risk Level: {result.get('risk_level', 'UNKNOWN')}
 📦 Impacted Files: {len(result.get('impacted_files', []))}

@@ -21,7 +21,7 @@ class TestMultiToolWorkflows:
             name="search_read_edit_workflow",
             status="passed",
             duration=0.0,
-            metadata={"workflow": "search_read_edit", "tools_used": 3}
+            metadata={"workflow": "search_read_edit", "tools_used": 3},
         )
 
         try:
@@ -35,9 +35,7 @@ class TestMultiToolWorkflows:
             # Step 1: Search for "BUG" comments
             result.logs.append("Step 1: Searching for BUG comments...")
             search_result = await search_tool._execute_validated(
-                pattern="BUG",
-                path=str(sample_python_project),
-                file_pattern="*.py"
+                pattern="BUG", path=str(sample_python_project), file_pattern="*.py"
             )
 
             assert search_result.success
@@ -59,12 +57,14 @@ class TestMultiToolWorkflows:
                 if "return a / b  # BUG: no zero check" in content:
                     edit_result = await edit_tool._execute_validated(
                         path=bug_file,
-                        edits=[{
-                            "search": "return a / b  # BUG: no zero check",
-                            "replace": "if b == 0:\n        raise ZeroDivisionError('Cannot divide by zero')\n    return a / b"
-                        }],
+                        edits=[
+                            {
+                                "search": "return a / b  # BUG: no zero check",
+                                "replace": "if b == 0:\n        raise ZeroDivisionError('Cannot divide by zero')\n    return a / b",
+                            }
+                        ],
                         preview=False,
-                        create_backup=False
+                        create_backup=False,
                     )
                     assert edit_result.success
                     result.logs.append("  ✓ Fixed division by zero bug")
@@ -90,7 +90,7 @@ class TestMultiToolWorkflows:
             name="create_test_run_workflow",
             status="passed",
             duration=0.0,
-            metadata={"workflow": "create_test_verify", "tools_used": 3}
+            metadata={"workflow": "create_test_verify", "tools_used": 3},
         )
 
         try:
@@ -125,8 +125,7 @@ class Calculator:
         return a / b
 '''
             await write_tool._execute_validated(
-                path=str(temp_project / "calculator.py"),
-                content=calc_code
+                path=str(temp_project / "calculator.py"), content=calc_code
             )
             result.logs.append("  ✓ Created calculator.py")
 
@@ -168,8 +167,7 @@ class TestCalculator:
 '''
             (temp_project / "tests").mkdir(exist_ok=True)
             await write_tool._execute_validated(
-                path=str(temp_project / "tests" / "test_calculator.py"),
-                content=test_code
+                path=str(temp_project / "tests" / "test_calculator.py"), content=test_code
             )
             result.logs.append("  ✓ Created test_calculator.py")
 
@@ -210,7 +208,7 @@ class TestCalculator:
             name="git_workflow",
             status="passed",
             duration=0.0,
-            metadata={"workflow": "git_operations", "tools_used": 4}
+            metadata={"workflow": "git_operations", "tools_used": 4},
         )
 
         try:
@@ -223,9 +221,7 @@ class TestCalculator:
 
             # Step 1: Check initial git status
             result.logs.append("Step 1: Checking initial git status...")
-            status_result = await status_tool._execute_validated(
-                path=str(sample_python_project)
-            )
+            status_result = await status_tool._execute_validated(path=str(sample_python_project))
             assert status_result.success
             result.logs.append(f"  ✓ Branch: {status_result.data.get('branch', 'unknown')}")
 
@@ -233,31 +229,30 @@ class TestCalculator:
             result.logs.append("Step 2: Making a change...")
             readme_file = sample_python_project / "README.md"
             original_content = readme_file.read_text()
-            new_content = original_content + "\n\n## Updated by E2E Test\n\nThis section was added by the E2E test suite.\n"
+            new_content = (
+                original_content
+                + "\n\n## Updated by E2E Test\n\nThis section was added by the E2E test suite.\n"
+            )
 
             edit_result = await edit_tool._execute_validated(
                 path=str(readme_file),
                 edits=[{"search": original_content, "replace": new_content}],
                 preview=False,
-                create_backup=False
+                create_backup=False,
             )
             assert edit_result.success
             result.logs.append("  ✓ Modified README.md")
 
             # Step 3: Check git status again
             result.logs.append("Step 3: Checking modified status...")
-            status_result = await status_tool._execute_validated(
-                path=str(sample_python_project)
-            )
+            status_result = await status_tool._execute_validated(path=str(sample_python_project))
             assert status_result.success
             modified_files = status_result.data.get("modified", [])
             result.logs.append(f"  ✓ Modified files: {len(modified_files)}")
 
             # Step 4: Get diff
             result.logs.append("Step 4: Getting diff...")
-            diff_result = await diff_tool._execute_validated(
-                path=str(sample_python_project)
-            )
+            diff_result = await diff_tool._execute_validated(path=str(sample_python_project))
             assert diff_result.success
             diff_content = diff_result.data.get("diff", "")
             has_changes = "Updated by E2E Test" in diff_content or len(diff_content) > 0
@@ -288,7 +283,7 @@ class TestComplexScenarios:
             name="full_feature_implementation",
             status="passed",
             duration=0.0,
-            metadata={"scenario": "feature_implementation"}
+            metadata={"scenario": "feature_implementation"},
         )
 
         try:
@@ -347,8 +342,7 @@ class Session:
 '''
             (temp_project / "app" / "models").mkdir(parents=True, exist_ok=True)
             await write_tool._execute_validated(
-                path=str(temp_project / "app" / "models" / "auth.py"),
-                content=models
+                path=str(temp_project / "app" / "models" / "auth.py"), content=models
             )
             result.logs.append("  ✓ Created auth models")
 
@@ -434,8 +428,7 @@ class AuthService:
         return None
 '''
             await write_tool._execute_validated(
-                path=str(temp_project / "app" / "auth_service.py"),
-                content=service
+                path=str(temp_project / "app" / "auth_service.py"), content=service
             )
             result.logs.append("  ✓ Created auth service")
 
@@ -489,8 +482,7 @@ async def logout(token: str):
 '''
             (temp_project / "app" / "api").mkdir(exist_ok=True)
             await write_tool._execute_validated(
-                path=str(temp_project / "app" / "api" / "auth.py"),
-                content=api
+                path=str(temp_project / "app" / "api" / "auth.py"), content=api
             )
             result.logs.append("  ✓ Created API endpoints")
 
@@ -544,8 +536,7 @@ class TestAuthService:
 '''
             (temp_project / "tests").mkdir(exist_ok=True)
             await write_tool._execute_validated(
-                path=str(temp_project / "tests" / "test_auth.py"),
-                content=tests
+                path=str(temp_project / "tests" / "test_auth.py"), content=tests
             )
             result.logs.append("  ✓ Created tests")
 
@@ -575,7 +566,7 @@ class TestAuthService:
             name="codebase_analysis_and_fix",
             status="passed",
             duration=0.0,
-            metadata={"scenario": "analysis_and_fix"}
+            metadata={"scenario": "analysis_and_fix"},
         )
 
         try:
@@ -594,41 +585,32 @@ class TestAuthService:
 
             # Check for hardcoded secrets
             search_result = await search_tool._execute_validated(
-                pattern="API_KEY.*=.*['\"]sk-",
-                path=str(sample_python_project),
-                file_pattern="*.py"
+                pattern="API_KEY.*=.*['\"]sk-", path=str(sample_python_project), file_pattern="*.py"
             )
             if search_result.success and search_result.data.get("matches"):
-                issues_found.append({
-                    "type": "hardcoded_secret",
-                    "count": len(search_result.data["matches"])
-                })
-                result.logs.append(f"  ⚠️ Found {len(search_result.data['matches'])} hardcoded secrets")
+                issues_found.append(
+                    {"type": "hardcoded_secret", "count": len(search_result.data["matches"])}
+                )
+                result.logs.append(
+                    f"  ⚠️ Found {len(search_result.data['matches'])} hardcoded secrets"
+                )
 
             # Check for BUG comments
             search_result = await search_tool._execute_validated(
-                pattern="# BUG",
-                path=str(sample_python_project),
-                file_pattern="*.py"
+                pattern="# BUG", path=str(sample_python_project), file_pattern="*.py"
             )
             if search_result.success and search_result.data.get("matches"):
-                issues_found.append({
-                    "type": "marked_bugs",
-                    "count": len(search_result.data["matches"])
-                })
+                issues_found.append(
+                    {"type": "marked_bugs", "count": len(search_result.data["matches"])}
+                )
                 result.logs.append(f"  ⚠️ Found {len(search_result.data['matches'])} marked BUGs")
 
             # Check for TODO comments
             search_result = await search_tool._execute_validated(
-                pattern="# TODO",
-                path=str(sample_python_project),
-                file_pattern="*.py"
+                pattern="# TODO", path=str(sample_python_project), file_pattern="*.py"
             )
             if search_result.success and search_result.data.get("matches"):
-                issues_found.append({
-                    "type": "todos",
-                    "count": len(search_result.data["matches"])
-                })
+                issues_found.append({"type": "todos", "count": len(search_result.data["matches"])})
                 result.logs.append(f"  ℹ️ Found {len(search_result.data['matches'])} TODOs")
 
             # Phase 2: Fix critical issues
@@ -643,15 +625,15 @@ class TestAuthService:
                     if "sk-1234567890" in content:
                         fixed_content = content.replace(
                             'API_KEY = "sk-1234567890"',
-                            'API_KEY = os.getenv("API_KEY")  # Fixed: Use env var'
+                            'API_KEY = os.getenv("API_KEY")  # Fixed: Use env var',
                         )
-                        fixed_content = 'import os\n' + fixed_content
+                        fixed_content = "import os\n" + fixed_content
 
                         edit_result = await edit_tool._execute_validated(
                             path=str(config_file),
                             edits=[{"search": content, "replace": fixed_content}],
                             preview=False,
-                            create_backup=False
+                            create_backup=False,
                         )
                         if edit_result.success:
                             issues_fixed.append("hardcoded_secret")

@@ -1,15 +1,15 @@
 # 🚀 SambaNova Cloud - Research & Integration Guide
 
-**Date:** 2025-11-17T19:08 UTC  
+**Date:** 2025-11-17T19:08 UTC
 **Task:** Day 6.1 - SambaNova Research
 
 ---
 
 ## 📋 SAMBANOVA OVERVIEW
 
-**What it is:** Ultra-fast AI inference with specialized hardware  
-**API:** OpenAI-compatible format  
-**Endpoint:** `https://api.sambanova.ai/v1/chat/completions`  
+**What it is:** Ultra-fast AI inference with specialized hardware
+**API:** OpenAI-compatible format
+**Endpoint:** `https://api.sambanova.ai/v1/chat/completions`
 **Free Tier:** Yes, generous limits
 
 ### **Best Model for Our Use:**
@@ -45,7 +45,7 @@ for chunk in client.chat.completions.create(
 
 ## 📊 EXPECTED PERFORMANCE
 
-**TTFT:** 100-300ms (vs 1000ms current) = **3-10x faster**  
+**TTFT:** 100-300ms (vs 1000ms current) = **3-10x faster**
 **Throughput:** 100-200 t/s (vs 75 t/s current) = **1.3-2.7x faster**
 
 ---

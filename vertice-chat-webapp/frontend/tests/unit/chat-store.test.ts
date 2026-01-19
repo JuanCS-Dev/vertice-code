@@ -21,7 +21,7 @@ describe('useChatStore', () => {
   // Note: These tests assume the store exposes these methods.
   // If the store logic has changed significantly (e.g. moved to context),
   // these tests should be rewritten or removed.
-  
+
   it('initializes with empty state', () => {
       const state = useChatStore.getState();
       expect(state.sessions).toEqual({});

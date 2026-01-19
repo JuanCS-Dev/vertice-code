@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import Mock
 from prometheus.tools.tool_factory import ToolFactory, ToolSpec
 
+
 def test_get_tool_blocks_dangerous_code():
     """Tests that get_tool() blocks dangerous code execution."""
     # 1. Setup
@@ -16,13 +17,14 @@ def test_get_tool_blocks_dangerous_code():
         description="A tool that tries to execute a dangerous command.",
         parameters={},
         return_type="str",
-        code=malicious_code
+        code=malicious_code,
     )
     factory.register_generated(spec)
 
     # 3. Assert that getting the tool raises a ValueError
     with pytest.raises(ValueError, match="Forbidden import: os"):
         factory.get_tool("malicious_tool")
+
 
 def test_get_tool_blocks_dangerous_function_calls():
     """Tests that get_tool() blocks dangerous function calls."""
@@ -38,13 +40,14 @@ def test_get_tool_blocks_dangerous_function_calls():
         description="A tool that tries to use exec.",
         parameters={},
         return_type="None",
-        code=malicious_code
+        code=malicious_code,
     )
     factory.register_generated(spec)
 
     # 3. Assert that getting the tool raises a ValueError
     with pytest.raises(ValueError, match="Forbidden function: exec"):
         factory.get_tool("malicious_tool_2")
+
 
 def test_get_tool_allows_safe_code():
     """Tests that get_tool() allows safe code to be executed."""
@@ -60,7 +63,7 @@ def test_get_tool_allows_safe_code():
         description="A safe tool.",
         parameters={"a": {"type": "int"}, "b": {"type": "int"}},
         return_type="int",
-        code=safe_code
+        code=safe_code,
     )
     factory.register_generated(spec)
 

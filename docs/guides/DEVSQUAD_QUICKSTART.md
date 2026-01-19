@@ -1,7 +1,7 @@
 # 🚀 DevSquad Quickstart Guide
 
-**Time to first mission:** 5 minutes  
-**Prerequisites:** Python 3.9+, Git, LLM API key (Gemini/OpenAI/Anthropic)  
+**Time to first mission:** 5 minutes
+**Prerequisites:** Python 3.9+, Git, LLM API key (Gemini/OpenAI/Anthropic)
 **Skill level:** Beginner-friendly
 
 ---
@@ -123,7 +123,7 @@ Approve plan? (y/n): y
    ✅ Testing: 92/100
    ✅ Performance: 88/100
    ✅ Constitutional: 100/100 (LEI: 0.0)
-   
+
    Grade: A+ (Final score: 94.5/100)
    Status: LGTM ✅
 
@@ -463,27 +463,27 @@ $ qwen-dev workflow run setup-fastapi --project-name my_api
 
 ## ❓ FAQ
 
-**Q: How much does it cost?**  
+**Q: How much does it cost?**
 A: Depends on LLM provider. DevSquad uses 80% fewer tokens than naive approach. Estimated: $0.01-0.05 per mission (Gemini), $0.05-0.20 (GPT-4).
 
-**Q: Can I use offline/local LLMs?**  
+**Q: Can I use offline/local LLMs?**
 A: Not yet. Requires cloud API (Gemini/OpenAI/Anthropic). Local LLM support planned.
 
-**Q: Is my code sent to LLM providers?**  
+**Q: Is my code sent to LLM providers?**
 A: Yes, context is sent for analysis. Use self-hosted LLM if privacy-critical.
 
-**Q: Can DevSquad break my code?**  
+**Q: Can DevSquad break my code?**
 A: No. All changes are git-tracked. Refactorer has automatic rollback on failure. You can always `git checkout .` to revert.
 
-**Q: How long does a mission take?**  
+**Q: How long does a mission take?**
 A: Simple tasks: 2-5 minutes. Complex tasks: 10-30 minutes. Large migrations: hours (but automated).
 
-**Q: Can I customize agents?**  
+**Q: Can I customize agents?**
 A: Yes! See [Customizing Agents](./CUSTOMIZING_AGENTS.md).
 
 ---
 
-**Version:** 1.0.0  
-**Last Updated:** 2025-11-22  
-**Status:** Production-ready ✅  
+**Version:** 1.0.0
+**Last Updated:** 2025-11-22
+**Status:** Production-ready ✅
 **Success Rate:** 85%+ on real-world tasks

@@ -50,7 +50,7 @@ Built with sponsors' tech:
 ✅ Blaxel agents
 ✅ Modal compute
 
-Check it out and let me know what you think! 
+Check it out and let me know what you think!
 🔗 https://huggingface.co/spaces/MCP-1st-Birthday/prometheus-mcp
 
 #MCPHackathon #Agents #SelfEvolvingAI

@@ -23,7 +23,7 @@ class SofiaConfig:
     # Comportamento
     default_virtue: VirtueType = VirtueType.TAPEINOPHROSYNE  # Humildade
     system2_threshold: float = 0.6  # Quando ativar Sistema 2
-    socratic_ratio: float = 0.7     # % de perguntas vs respostas
+    socratic_ratio: float = 0.7  # % de perguntas vs respostas
 
     # Limites
     max_questions_per_topic: int = 5

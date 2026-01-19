@@ -50,7 +50,9 @@ class TestVertice30Compliance:
                 print(f"  {v}")
 
         assert len(violations) == 0, f"❌ P1: Found {len(violations)} placeholders"
-        print(f"✅ P1: LEI = 0.0 - Zero placeholders across {len(list(tui_dir.rglob('*.py')))} files")
+        print(
+            f"✅ P1: LEI = 0.0 - Zero placeholders across {len(list(tui_dir.rglob('*.py')))} files"
+        )
 
     def test_p3_incremental_phases(self):
         """P3: 4 phases of incremental development."""
@@ -83,7 +85,11 @@ class TestVertice30Compliance:
     def test_p5_biblical_wisdom(self):
         """P5: Biblical wisdom integration."""
 
-        from vertice_cli.tui.wisdom import get_random_verse, get_verse_for_operation, get_loading_message
+        from vertice_cli.tui.wisdom import (
+            get_random_verse,
+            get_verse_for_operation,
+            get_loading_message,
+        )
 
         # Test random verse
         verse = get_random_verse(max_width=80)
@@ -154,7 +160,11 @@ class TestRealUsability:
     def test_message_components_work(self):
         """Message components render without error."""
 
-        from vertice_cli.tui.components.message import Message, MessageRole, create_assistant_message
+        from vertice_cli.tui.components.message import (
+            Message,
+            MessageRole,
+            create_assistant_message,
+        )
 
         # Test message creation
         msg = create_assistant_message("Hello, this is a test!")
@@ -162,11 +172,7 @@ class TestRealUsability:
         assert msg.content == "Hello, this is a test!"
 
         # Test user message
-        user_msg = Message(
-            role=MessageRole.USER.value,
-            content="User input",
-            timestamp=time.time()
-        )
+        user_msg = Message(role=MessageRole.USER.value, content="User input", timestamp=time.time())
         assert user_msg.role == MessageRole.USER.value or user_msg.role == MessageRole.USER
 
         print("✅ Message components - User & Assistant messages working")
@@ -197,6 +203,7 @@ class TestRealUsability:
 
         print(f"✅ Diff viewer - {len(modes)} display modes")
 
+
 class TestIntegration:
     """Integration between components."""
 
@@ -206,9 +213,13 @@ class TestIntegration:
         from vertice_cli.tui.theme import COLORS
 
         required_colors = [
-            'bg_primary', 'bg_secondary',
-            'text_primary', 'text_secondary',
-            'accent_blue', 'accent_green', 'accent_red'
+            "bg_primary",
+            "bg_secondary",
+            "text_primary",
+            "text_secondary",
+            "accent_blue",
+            "accent_green",
+            "accent_red",
         ]
 
         for color in required_colors:
@@ -228,6 +239,7 @@ class TestIntegration:
 
         print("✅ Component theming - Consistent theme usage")
 
+
 class TestPerformance:
     """Performance characteristics."""
 
@@ -236,12 +248,12 @@ class TestPerformance:
 
         from vertice_cli.tui.components.message import create_assistant_message
 
-        console = Console(file=StringIO())
+        Console(file=StringIO())
 
         # Render 100 messages
         start = time.time()
         for i in range(100):
-            msg = create_assistant_message(f"Message {i}")
+            create_assistant_message(f"Message {i}")
         elapsed = time.time() - start
 
         per_message_ms = (elapsed / 100) * 1000
@@ -257,7 +269,7 @@ class TestPerformance:
 
         start = time.time()
         for i in range(10000):
-            color = COLORS['accent_blue']
+            COLORS["accent_blue"]
         elapsed = time.time() - start
 
         per_lookup_us = (elapsed / 10000) * 1000000

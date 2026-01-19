@@ -119,6 +119,7 @@ class OrchestratorAgent(
         # Lazy load Prometheus Meta-Agent (L4 Autonomy)
         try:
             from vertice_agents.registry import get_agent
+
             prometheus = get_agent("prometheus")
             if prometheus:
                 self.agents[AgentRole.PROMETHEUS] = prometheus
@@ -238,7 +239,7 @@ class OrchestratorAgent(
         yield f"(error factor: {route.estimated_error_factor:.1f}x)\n"
 
         # Create handoff with context (Anthropic pattern)
-        handoff = await self.handoff(task, agent_role, user_request)
+        await self.handoff(task, agent_role, user_request)
         yield f"[Orchestrator] Handoff to {agent_role.value}...\n"
 
         # Execute via agent
@@ -271,17 +272,17 @@ class OrchestratorAgent(
             # Adapt Core Task -> CLI AgentTask
             # This bridges the gap between Core and CLI agent protocols
             from vertice_cli.agents.base import AgentTask
-            
+
             agent_task = AgentTask(
                 task_id=task.id,
                 request=task.description,
                 metadata={
                     "complexity": task.complexity.value,
-                    "fast_mode": True  # Default to fast mode for integration
-                }
+                    "fast_mode": True,  # Default to fast mode for integration
+                },
             )
             response = await agent.execute(agent_task)
-            
+
             # Extract result from AgentResponse (response.data["result"])
             task_result = response.data.get("result")
             if task_result and hasattr(task_result, "output"):
@@ -318,15 +319,9 @@ class OrchestratorAgent(
         return {
             "name": self.name,
             "role": self.role.value,
-            "active_tasks": len(
-                [t for t in self.tasks.values() if t.status == "in_progress"]
-            ),
-            "completed_tasks": len(
-                [t for t in self.tasks.values() if t.status == "completed"]
-            ),
-            "failed_tasks": len(
-                [t for t in self.tasks.values() if t.status == "failed"]
-            ),
+            "active_tasks": len([t for t in self.tasks.values() if t.status == "in_progress"]),
+            "completed_tasks": len([t for t in self.tasks.values() if t.status == "completed"]),
+            "failed_tasks": len([t for t in self.tasks.values() if t.status == "failed"]),
             "handoffs": len(self.handoffs),
             "agents_registered": list(self.agents.keys()),
             "pending_approvals": len(self.pending_approvals),

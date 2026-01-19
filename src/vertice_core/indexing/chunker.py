@@ -412,7 +412,7 @@ class CodeChunker:
         Falls back to fixed-size chunks if patterns don't match.
         """
         chunks = []
-        lines = content.splitlines(keepends=True)
+        content.splitlines(keepends=True)
 
         # Language-specific patterns
         patterns = self._get_language_patterns(language)

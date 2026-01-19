@@ -80,10 +80,7 @@ class GitPlugin(Plugin):
         """Find git repository root."""
         try:
             result = subprocess.run(
-                ["git", "rev-parse", "--show-toplevel"],
-                capture_output=True,
-                text=True,
-                check=True
+                ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=True
             )
             return Path(result.stdout.strip())
         except subprocess.CalledProcessError:
@@ -127,7 +124,7 @@ class GitPlugin(Plugin):
         return {
             "type": "git_status",
             "output": result.get("output", ""),
-            "clean": not result.get("output", "").strip()
+            "clean": not result.get("output", "").strip(),
         }
 
     def _cmd_diff(self, args: List[str]) -> Dict[str, Any]:
@@ -166,7 +163,7 @@ class GitPlugin(Plugin):
             return {
                 "type": "commit_prompt",
                 "staged_changes": diff.get("output", ""),
-                "suggestion": "Please provide a commit message with -m 'message'"
+                "suggestion": "Please provide a commit message with -m 'message'",
             }
         return self._run_git_command(["commit"] + args)
 
@@ -186,35 +183,27 @@ class GitPlugin(Plugin):
                 capture_output=True,
                 text=True,
                 cwd=self._repo_root or Path.cwd(),
-                timeout=30
+                timeout=30,
             )
 
             return {
                 "success": result.returncode == 0,
                 "output": result.stdout,
                 "error": result.stderr if result.returncode != 0 else None,
-                "command": f"git {' '.join(args)}"
+                "command": f"git {' '.join(args)}",
             }
         except subprocess.TimeoutExpired:
             return {
                 "success": False,
                 "error": "Command timed out",
-                "command": f"git {' '.join(args)}"
+                "command": f"git {' '.join(args)}",
             }
         except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "command": f"git {' '.join(args)}"
-            }
+            return {"success": False, "error": str(e), "command": f"git {' '.join(args)}"}
 
     # ========== Tool Hooks ==========
 
-    def on_tool_execute(
-        self,
-        tool_name: str,
-        params: Dict[str, Any]
-    ) -> Optional[Any]:
+    def on_tool_execute(self, tool_name: str, params: Dict[str, Any]) -> Optional[Any]:
         """Intercept git-related tool calls."""
         # Could add pre-commit validation here
         if tool_name in ["write_file", "edit_file"]:
@@ -235,10 +224,7 @@ class GitPlugin(Plugin):
         """Get list of uncommitted files."""
         result = self._run_git_command(["status", "--porcelain"])
         if result.get("success"):
-            return [
-                line[3:] for line in result.get("output", "").splitlines()
-                if line.strip()
-            ]
+            return [line[3:] for line in result.get("output", "").splitlines() if line.strip()]
         return []
 
     def is_clean(self) -> bool:
@@ -246,4 +232,4 @@ class GitPlugin(Plugin):
         return not self.get_uncommitted_changes()
 
 
-__all__ = ['GitPlugin']
+__all__ = ["GitPlugin"]

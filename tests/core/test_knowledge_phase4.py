@@ -470,17 +470,11 @@ class TestKnowledgeGraph:
         for node in sample_nodes:
             graph.add_node(node)
 
-        graph.add_edge(KnowledgeEdge(
-            source_id="n1", target_id="n2", edge_type=EdgeType.RELATED_TO
-        ))
-        graph.add_edge(KnowledgeEdge(
-            source_id="n1", target_id="n3", edge_type=EdgeType.FOLLOWS
-        ))
+        graph.add_edge(KnowledgeEdge(source_id="n1", target_id="n2", edge_type=EdgeType.RELATED_TO))
+        graph.add_edge(KnowledgeEdge(source_id="n1", target_id="n3", edge_type=EdgeType.FOLLOWS))
 
         # Filter by RELATED_TO only
-        neighbors = graph.get_neighbors(
-            "n1", max_hops=1, edge_types=[EdgeType.RELATED_TO]
-        )
+        neighbors = graph.get_neighbors("n1", max_hops=1, edge_types=[EdgeType.RELATED_TO])
         assert "n2" in neighbors
         assert "n3" not in neighbors
 
@@ -870,9 +864,7 @@ class TestKnowledgeMixin:
         """Test complex query handling."""
         mixin.index_document(sample_document, "doc_1")
 
-        result = mixin.retrieve_complex(
-            "What is Python and what are its uses in ML?"
-        )
+        result = mixin.retrieve_complex("What is Python and what are its uses in ML?")
 
         assert isinstance(result, RetrievalResult)
 
@@ -945,19 +937,19 @@ class TestGraphRAGIntegration:
                 "Python is a versatile programming language. It supports "
                 "multiple paradigms including procedural, object-oriented, "
                 "and functional programming. Python has a large ecosystem "
-                "of libraries for various tasks."
+                "of libraries for various tasks.",
             ),
             (
                 "doc_ml",
                 "Machine learning is a branch of artificial intelligence. "
                 "Popular ML frameworks include TensorFlow, PyTorch, and "
-                "scikit-learn. These frameworks are primarily used with Python."
+                "scikit-learn. These frameworks are primarily used with Python.",
             ),
             (
                 "doc_web",
                 "Web development involves creating websites and web applications. "
                 "Python offers Django and Flask for backend development. "
-                "JavaScript and its frameworks handle frontend development."
+                "JavaScript and its frameworks handle frontend development.",
             ),
         ]
 
@@ -1087,7 +1079,9 @@ class TestRetrieverEdgeCases:
         mock_graph = Mock()
         mock_graph.get_neighbors.return_value = ["c2", "c3"]
         mock_graph.get_node_importance.return_value = 0.5
-        mock_graph.get_node.return_value = KnowledgeNode(id="n1", node_type=NodeType.CHUNK, content="Test")
+        mock_graph.get_node.return_value = KnowledgeNode(
+            id="n1", node_type=NodeType.CHUNK, content="Test"
+        )
         mock_graph.get_edge.return_value = None
 
         retriever = GraphRetriever(graph=mock_graph)
@@ -1201,6 +1195,7 @@ class TestKnowledgeMixinEdgeCases:
 
     def test_retrieve_no_chunks(self):
         """Test retrieve with no indexed chunks."""
+
         class TestAgent(KnowledgeMixin):
             def __init__(self):
                 super().__init__()
@@ -1211,6 +1206,7 @@ class TestKnowledgeMixinEdgeCases:
 
     def test_decompose_query(self):
         """Test decompose_query returns at least one query."""
+
         class TestAgent(KnowledgeMixin):
             def __init__(self):
                 super().__init__()
@@ -1221,6 +1217,7 @@ class TestKnowledgeMixinEdgeCases:
 
     def test_aggregate_results_empty(self):
         """Test aggregate_results with empty list."""
+
         class TestAgent(KnowledgeMixin):
             def __init__(self):
                 super().__init__()
@@ -1231,6 +1228,7 @@ class TestKnowledgeMixinEdgeCases:
 
     def test_get_knowledge_stats(self):
         """Test get_knowledge_stats returns valid stats."""
+
         class TestAgent(KnowledgeMixin):
             def __init__(self):
                 super().__init__()
@@ -1365,6 +1363,7 @@ class TestGraphEdgeTypeFilter:
 
         # Add edges with different types
         from core.knowledge.types import EdgeType
+
         graph.add_edge(KnowledgeEdge(source_id="n1", target_id="n2", edge_type=EdgeType.REFERENCES))
         graph.add_edge(KnowledgeEdge(source_id="n1", target_id="n3", edge_type=EdgeType.CONTAINS))
 
@@ -1423,6 +1422,7 @@ class TestChunkerSemanticBoundary:
     def test_chunk_finds_sentence_boundary(self):
         """Test chunker finds sentence boundaries."""
         from core.knowledge.types import KnowledgeConfig
+
         config = KnowledgeConfig(chunk_size=50, chunk_overlap=10)
         chunker = SemanticChunker(config)
 
@@ -1433,6 +1433,7 @@ class TestChunkerSemanticBoundary:
     def test_chunk_no_clear_boundary(self):
         """Test chunker handles text without clear boundaries."""
         from core.knowledge.types import KnowledgeConfig
+
         config = KnowledgeConfig(chunk_size=20, chunk_overlap=5)
         chunker = SemanticChunker(config)
 
@@ -1471,6 +1472,7 @@ class TestMixinDecomposeEmpty:
 
     def test_decompose_simple_query(self):
         """Test decompose_query with simple query returns original."""
+
         class TestAgent(KnowledgeMixin):
             def __init__(self):
                 super().__init__()
@@ -1482,6 +1484,7 @@ class TestMixinDecomposeEmpty:
 
     def test_retrieve_complex_empty(self):
         """Test retrieve_complex with no indexed documents."""
+
         class TestAgent(KnowledgeMixin):
             def __init__(self):
                 super().__init__()
@@ -1510,6 +1513,7 @@ class TestTypesToDict:
     def test_knowledge_edge_to_dict(self):
         """Test KnowledgeEdge.to_dict."""
         from core.knowledge.types import EdgeType
+
         edge = KnowledgeEdge(
             id="e1",
             source_id="n1",
@@ -1525,6 +1529,7 @@ class TestTypesToDict:
     def test_retrieval_query_to_dict(self):
         """Test RetrievalQuery.to_dict (line 182)."""
         from core.knowledge.types import RetrievalQuery, RetrievalStrategy
+
         query = RetrievalQuery(
             id="q1",
             text="test query",
@@ -1542,6 +1547,7 @@ class TestTypesToDict:
     def test_retrieval_result_to_dict(self):
         """Test RetrievalResult.to_dict (line 219)."""
         from core.knowledge.types import RetrievalResult
+
         result = RetrievalResult(
             query_id="q1",
             chunks=[],
@@ -1573,7 +1579,10 @@ class TestChunkerFixedChunkSentenceBoundary:
         chunker = SemanticChunker(config)
 
         # Content with sentences that will trigger boundary detection
-        content = "First sentence here. Second sentence here. " * 5 + "Third sentence is a longer one that should trigger chunking behavior."
+        content = (
+            "First sentence here. Second sentence here. " * 5
+            + "Third sentence is a longer one that should trigger chunking behavior."
+        )
 
         chunks = chunker.chunk_document(content, "doc1")
         assert len(chunks) >= 1
@@ -1691,12 +1700,8 @@ class TestGraphReverseAdjacencyEdgeFilter:
         graph.add_node(KnowledgeNode(id="n3", content="Node 3", node_type=NodeType.CONCEPT))
 
         # Add edges: n2->n1 (REFERENCES), n3->n1 (CONTAINS)
-        graph.add_edge(KnowledgeEdge(
-            source_id="n2", target_id="n1", edge_type=EdgeType.REFERENCES
-        ))
-        graph.add_edge(KnowledgeEdge(
-            source_id="n3", target_id="n1", edge_type=EdgeType.CONTAINS
-        ))
+        graph.add_edge(KnowledgeEdge(source_id="n2", target_id="n1", edge_type=EdgeType.REFERENCES))
+        graph.add_edge(KnowledgeEdge(source_id="n3", target_id="n1", edge_type=EdgeType.CONTAINS))
 
         # Get neighbors of n1 filtering by REFERENCES only
         # This should trigger the reverse adjacency path (lines 163-165)
@@ -1894,8 +1899,14 @@ class TestRetrieverMultiHopPath:
         from core.knowledge.embedder import HybridEmbedder
         from core.knowledge.graph import KnowledgeGraph
         from core.knowledge.types import (
-            RetrievalQuery, RetrievalStrategy, KnowledgeConfig,
-            DocumentChunk, KnowledgeNode, KnowledgeEdge, NodeType, EdgeType
+            RetrievalQuery,
+            RetrievalStrategy,
+            KnowledgeConfig,
+            DocumentChunk,
+            KnowledgeNode,
+            KnowledgeEdge,
+            NodeType,
+            EdgeType,
         )
 
         config = KnowledgeConfig()
@@ -1941,8 +1952,14 @@ class TestRetrieverMultiHopPath:
         from core.knowledge.embedder import HybridEmbedder
         from core.knowledge.graph import KnowledgeGraph
         from core.knowledge.types import (
-            RetrievalQuery, RetrievalStrategy, KnowledgeConfig,
-            DocumentChunk, KnowledgeNode, KnowledgeEdge, NodeType, EdgeType
+            RetrievalQuery,
+            RetrievalStrategy,
+            KnowledgeConfig,
+            DocumentChunk,
+            KnowledgeNode,
+            KnowledgeEdge,
+            NodeType,
+            EdgeType,
         )
 
         config = KnowledgeConfig()
@@ -2007,9 +2024,7 @@ class TestRetrieverSelfRAG:
         from core.knowledge.retriever import GraphRetriever
         from core.knowledge.embedder import HybridEmbedder
         from core.knowledge.graph import KnowledgeGraph
-        from core.knowledge.types import (
-            RetrievalQuery, KnowledgeConfig, DocumentChunk
-        )
+        from core.knowledge.types import RetrievalQuery, KnowledgeConfig, DocumentChunk
 
         config = KnowledgeConfig(
             use_self_rag=True,
@@ -2066,8 +2081,10 @@ class TestRetrieverUnknownStrategy:
         query.strategy = "invalid_strategy_xyz"
 
         # Patch _hybrid_retrieve to track if fallback is called
-        with patch.object(retriever, '_hybrid_retrieve', wraps=retriever._hybrid_retrieve) as mock_hybrid:
-            result = retriever.retrieve(query)
+        with patch.object(
+            retriever, "_hybrid_retrieve", wraps=retriever._hybrid_retrieve
+        ) as mock_hybrid:
+            retriever.retrieve(query)
             # Should call hybrid as fallback for unknown strategy
             mock_hybrid.assert_called()
 
@@ -2081,8 +2098,14 @@ class TestRetrieverMultiHopWithMocking:
         from core.knowledge.embedder import HybridEmbedder
         from core.knowledge.graph import KnowledgeGraph
         from core.knowledge.types import (
-            RetrievalQuery, RetrievalStrategy, KnowledgeConfig,
-            DocumentChunk, KnowledgeNode, KnowledgeEdge, NodeType, EdgeType
+            RetrievalQuery,
+            RetrievalStrategy,
+            KnowledgeConfig,
+            DocumentChunk,
+            KnowledgeNode,
+            KnowledgeEdge,
+            NodeType,
+            EdgeType,
         )
 
         config = KnowledgeConfig()
@@ -2100,7 +2123,9 @@ class TestRetrieverMultiHopWithMocking:
         # Set up graph - c1 -> c2
         graph.add_node(KnowledgeNode(id="chunk_1", content="initial", node_type=NodeType.CHUNK))
         graph.add_node(KnowledgeNode(id="chunk_2", content="neighbor", node_type=NodeType.CHUNK))
-        graph.add_edge(KnowledgeEdge(source_id="chunk_1", target_id="chunk_2", edge_type=EdgeType.RELATED_TO))
+        graph.add_edge(
+            KnowledgeEdge(source_id="chunk_1", target_id="chunk_2", edge_type=EdgeType.RELATED_TO)
+        )
 
         # Create query
         query = RetrievalQuery(
@@ -2118,13 +2143,13 @@ class TestRetrieverMultiHopWithMocking:
         initial_chunk.graph_score = 0.5
 
         # Mock compute_similarity to return high score for any chunk
-        with patch.object(embedder, 'compute_similarity', return_value=0.9):
+        with patch.object(embedder, "compute_similarity", return_value=0.9):
             # Mock _hybrid_retrieve to return the initial chunk
-            with patch.object(retriever, '_hybrid_retrieve', return_value=[initial_chunk]):
+            with patch.object(retriever, "_hybrid_retrieve", return_value=[initial_chunk]):
                 result = retriever._multi_hop_retrieve(query)
 
                 # Result should include the neighbor chunk (chunk_2)
-                chunk_ids = [c.id for c in result]
+                [c.id for c in result]
                 # Both initial and neighbor should be in result
                 assert len(result) >= 1
 
@@ -2134,8 +2159,14 @@ class TestRetrieverMultiHopWithMocking:
         from core.knowledge.embedder import HybridEmbedder
         from core.knowledge.graph import KnowledgeGraph
         from core.knowledge.types import (
-            RetrievalQuery, RetrievalStrategy, KnowledgeConfig,
-            DocumentChunk, KnowledgeNode, KnowledgeEdge, NodeType, EdgeType
+            RetrievalQuery,
+            RetrievalStrategy,
+            KnowledgeConfig,
+            DocumentChunk,
+            KnowledgeNode,
+            KnowledgeEdge,
+            NodeType,
+            EdgeType,
         )
 
         config = KnowledgeConfig()
@@ -2155,7 +2186,9 @@ class TestRetrieverMultiHopWithMocking:
         # Set up graph connection
         graph.add_node(KnowledgeNode(id="init", content="start", node_type=NodeType.CHUNK))
         graph.add_node(KnowledgeNode(id="neighbor", content="neighbor", node_type=NodeType.CHUNK))
-        graph.add_edge(KnowledgeEdge(source_id="init", target_id="neighbor", edge_type=EdgeType.RELATED_TO))
+        graph.add_edge(
+            KnowledgeEdge(source_id="init", target_id="neighbor", edge_type=EdgeType.RELATED_TO)
+        )
 
         # Create query
         query = RetrievalQuery(
@@ -2176,8 +2209,8 @@ class TestRetrieverMultiHopWithMocking:
             return [initial_chunk]
 
         # Mock compute_similarity to return a score above min_relevance
-        with patch.object(embedder, 'compute_similarity', return_value=0.85):
-            with patch.object(retriever, '_hybrid_retrieve', side_effect=mock_hybrid):
+        with patch.object(embedder, "compute_similarity", return_value=0.85):
+            with patch.object(retriever, "_hybrid_retrieve", side_effect=mock_hybrid):
                 result = retriever._multi_hop_retrieve(query)
 
                 # Check that neighbor was added

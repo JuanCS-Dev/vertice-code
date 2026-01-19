@@ -16,7 +16,6 @@ import asyncio
 import time
 
 
-
 @pytest.mark.stress
 class TestConcurrency:
     """Tests for concurrent operation handling."""
@@ -45,7 +44,11 @@ class TestConcurrency:
         results = asyncio.run(concurrent_reads())
         duration = time.time() - start
 
-        errors = [r for r in results if isinstance(r, Exception) or (hasattr(r, 'success') and not r.success)]
+        errors = [
+            r
+            for r in results
+            if isinstance(r, Exception) or (hasattr(r, "success") and not r.success)
+        ]
 
         if errors:
             issue_collector.add_issue(
@@ -56,12 +59,12 @@ class TestConcurrency:
                 reproduction_steps=[
                     "1. Create test file",
                     "2. Start 100 concurrent reads",
-                    f"3. {len(errors)} operations failed"
+                    f"3. {len(errors)} operations failed",
                 ],
                 expected="All 100 reads succeed",
                 actual=f"{len(errors)} failures",
                 component="tools/file_ops.py:ReadFileTool",
-                persona="STRESS_TEST"
+                persona="STRESS_TEST",
             )
 
         if duration > 5.0:
@@ -72,12 +75,12 @@ class TestConcurrency:
                 description="100 concurrent reads took too long",
                 reproduction_steps=[
                     "1. Start 100 concurrent file reads",
-                    f"2. Took {duration:.2f} seconds"
+                    f"2. Took {duration:.2f} seconds",
                 ],
                 expected="< 5 seconds for 100 reads",
                 actual=f"{duration:.2f} seconds",
                 component="tools/file_ops.py:ReadFileTool",
-                persona="STRESS_TEST"
+                persona="STRESS_TEST",
             )
 
     def test_ISSUE_058_concurrent_writes_same_file(self, test_workspace, issue_collector):
@@ -95,10 +98,11 @@ class TestConcurrency:
         async def concurrent_writes():
             tasks = []
             for i in range(10):
-                tasks.append(tool._execute_validated(
-                    path=str(test_file),
-                    content=f"Content from writer {i}\n" * 100
-                ))
+                tasks.append(
+                    tool._execute_validated(
+                        path=str(test_file), content=f"Content from writer {i}\n" * 100
+                    )
+                )
             results = await asyncio.gather(*tasks, return_exceptions=True)
             return results
 
@@ -119,7 +123,7 @@ class TestConcurrency:
                     try:
                         writer_id = int(line.split()[-1])
                         writer_ids.add(writer_id)
-                    except:
+                    except Exception:
                         pass
 
             if len(writer_ids) > 1:
@@ -131,12 +135,12 @@ class TestConcurrency:
                     reproduction_steps=[
                         "1. Start 10 concurrent writes to same file",
                         "2. Check file content",
-                        f"3. Content mixed from writers: {writer_ids}"
+                        f"3. Content mixed from writers: {writer_ids}",
                     ],
                     expected="File contains content from exactly one writer",
                     actual=f"File corrupted with content from {len(writer_ids)} writers",
                     component="tools/file_ops.py:WriteFileTool",
-                    persona="STRESS_TEST"
+                    persona="STRESS_TEST",
                 )
 
     def test_ISSUE_059_agent_concurrent_execution(self, issue_collector):
@@ -154,12 +158,12 @@ class TestConcurrency:
             reproduction_steps=[
                 "1. Start multiple agents with different tasks",
                 "2. Check for state interference",
-                "3. Verify each agent completes independently"
+                "3. Verify each agent completes independently",
             ],
             expected="Agents run in isolation without state leakage",
             actual="Not tested - needs implementation",
             component="agent orchestration",
-            persona="STRESS_TEST"
+            persona="STRESS_TEST",
         )
 
 
@@ -180,10 +184,11 @@ class TestLargeInputs:
         large_content = "x" * (50 * 1024 * 1024)  # 50MB
 
         start = time.time()
-        result = asyncio.run(tool._execute_validated(
-            path=str(test_workspace / "large_file.txt"),
-            content=large_content
-        ))
+        result = asyncio.run(
+            tool._execute_validated(
+                path=str(test_workspace / "large_file.txt"), content=large_content
+            )
+        )
         duration = time.time() - start
 
         if not result.success:
@@ -192,14 +197,11 @@ class TestLargeInputs:
                 category="PERFORMANCE",
                 title="Large file write fails",
                 description="Cannot write 50MB file",
-                reproduction_steps=[
-                    "1. Attempt to write 50MB file",
-                    f"2. Error: {result.error}"
-                ],
+                reproduction_steps=["1. Attempt to write 50MB file", f"2. Error: {result.error}"],
                 expected="File written successfully",
                 actual=f"Error: {result.error}",
                 component="tools/file_ops.py:WriteFileTool",
-                persona="STRESS_TEST"
+                persona="STRESS_TEST",
             )
 
         if duration > 30:
@@ -208,14 +210,11 @@ class TestLargeInputs:
                 category="PERFORMANCE",
                 title=f"Large file write too slow: {duration:.1f}s",
                 description="50MB write should be faster",
-                reproduction_steps=[
-                    "1. Write 50MB file",
-                    f"2. Took {duration:.1f} seconds"
-                ],
+                reproduction_steps=["1. Write 50MB file", f"2. Took {duration:.1f} seconds"],
                 expected="< 30 seconds",
                 actual=f"{duration:.1f} seconds",
                 component="tools/file_ops.py:WriteFileTool",
-                persona="STRESS_TEST"
+                persona="STRESS_TEST",
             )
 
         # Cleanup
@@ -247,12 +246,12 @@ class TestLargeInputs:
                 description="Error for too-long command doesn't explain the issue",
                 reproduction_steps=[
                     "1. Execute command > 100KB",
-                    f"2. Error: {result.stderr[:100]}"
+                    f"2. Error: {result.stderr[:100]}",
                 ],
                 expected="Clear error: Command exceeds maximum length",
                 actual=f"Error: {result.stderr[:100]}",
                 component="agents/executor.py",
-                persona="STRESS_TEST"
+                persona="STRESS_TEST",
             )
 
     def test_ISSUE_062_many_files_in_directory(self, test_workspace, issue_collector):
@@ -285,12 +284,12 @@ class TestLargeInputs:
                     description="Directory listing should be fast",
                     reproduction_steps=[
                         "1. Create directory with 1000 files",
-                        f"2. List took {duration:.2f}s"
+                        f"2. List took {duration:.2f}s",
                     ],
                     expected="< 5 seconds",
                     actual=f"{duration:.2f} seconds",
                     component="tools/file_ops.py:ListFilesTool",
-                    persona="STRESS_TEST"
+                    persona="STRESS_TEST",
                 )
 
             if result.success and result.data:
@@ -303,12 +302,12 @@ class TestLargeInputs:
                         reproduction_steps=[
                             "1. Create 1000 files",
                             "2. List directory",
-                            f"3. Only {len(result.data)} returned"
+                            f"3. Only {len(result.data)} returned",
                         ],
                         expected="All 1000 files listed",
                         actual=f"{len(result.data)} files",
                         component="tools/file_ops.py:ListFilesTool",
-                        persona="STRESS_TEST"
+                        persona="STRESS_TEST",
                     )
 
         except ImportError:
@@ -321,7 +320,7 @@ class TestLargeInputs:
                 expected="Tool exists",
                 actual="ImportError",
                 component="tools/file_ops.py",
-                persona="STRESS_TEST"
+                persona="STRESS_TEST",
             )
 
 
@@ -353,10 +352,9 @@ class TestUnicode:
             content = f"Content in {name}"
 
             # Write
-            write_result = asyncio.run(write_tool._execute_validated(
-                path=str(test_path),
-                content=content
-            ))
+            write_result = asyncio.run(
+                write_tool._execute_validated(path=str(test_path), content=content)
+            )
 
             if not write_result.success:
                 issue_collector.add_issue(
@@ -366,12 +364,12 @@ class TestUnicode:
                     description="WriteFileTool fails on unicode filename",
                     reproduction_steps=[
                         f"1. Try to write file: {name}",
-                        f"2. Error: {write_result.error}"
+                        f"2. Error: {write_result.error}",
                     ],
                     expected="File created successfully",
                     actual=f"Error: {write_result.error}",
                     component="tools/file_ops.py:WriteFileTool",
-                    persona="STRESS_TEST"
+                    persona="STRESS_TEST",
                 )
                 continue
 
@@ -386,12 +384,12 @@ class TestUnicode:
                     description="ReadFileTool fails on unicode filename",
                     reproduction_steps=[
                         f"1. Try to read file: {name}",
-                        f"2. Error: {read_result.error}"
+                        f"2. Error: {read_result.error}",
                     ],
                     expected="File read successfully",
                     actual=f"Error: {read_result.error}",
                     component="tools/file_ops.py:ReadFileTool",
-                    persona="STRESS_TEST"
+                    persona="STRESS_TEST",
                 )
 
     def test_ISSUE_064_unicode_content(self, test_workspace, issue_collector):
@@ -418,10 +416,7 @@ class TestUnicode:
             test_file = test_workspace / "unicode_test.txt"
 
             # Write
-            asyncio.run(write_tool._execute_validated(
-                path=str(test_file),
-                content=content
-            ))
+            asyncio.run(write_tool._execute_validated(path=str(test_file), content=content))
 
             # Read
             result = asyncio.run(read_tool._execute_validated(path=str(test_file)))
@@ -434,12 +429,12 @@ class TestUnicode:
                     description=f"Content corrupted: {repr(content[:20])}",
                     reproduction_steps=[
                         f"1. Write: {repr(content[:20])}",
-                        f"2. Read: {repr(result.data[:20] if result.data else None)}"
+                        f"2. Read: {repr(result.data[:20] if result.data else None)}",
                     ],
                     expected=f"Exact content: {repr(content[:20])}",
                     actual=f"Got: {repr(result.data[:20] if result.data else None)}",
                     component="tools/file_ops.py",
-                    persona="STRESS_TEST"
+                    persona="STRESS_TEST",
                 )
 
     def test_ISSUE_065_special_chars_in_path(self, test_workspace, issue_collector):
@@ -465,10 +460,7 @@ class TestUnicode:
         for name in special_paths:
             test_path = test_workspace / name
 
-            result = asyncio.run(tool._execute_validated(
-                path=str(test_path),
-                content="test"
-            ))
+            result = asyncio.run(tool._execute_validated(path=str(test_path), content="test"))
 
             if not result.success:
                 issue_collector.add_issue(
@@ -478,12 +470,12 @@ class TestUnicode:
                     description="Path with special characters fails",
                     reproduction_steps=[
                         f"1. Try to create file: {name}",
-                        f"2. Error: {result.error}"
+                        f"2. Error: {result.error}",
                     ],
                     expected="File created (or clear error about invalid char)",
                     actual=f"Error: {result.error}",
                     component="tools/file_ops.py:WriteFileTool",
-                    persona="STRESS_TEST"
+                    persona="STRESS_TEST",
                 )
 
 
@@ -505,12 +497,12 @@ class TestRecovery:
             reproduction_steps=[
                 "1. Start multi-file operation (e.g., refactor)",
                 "2. Fail on 3rd of 5 files",
-                "3. First 2 files modified, rest unchanged"
+                "3. First 2 files modified, rest unchanged",
             ],
             expected="All-or-nothing: rollback on failure",
             actual="Partial state left",
             component="multi-file operations",
-            persona="STRESS_TEST"
+            persona="STRESS_TEST",
         )
 
     def test_ISSUE_067_network_timeout_recovery(self, issue_collector):
@@ -527,12 +519,12 @@ class TestRecovery:
             reproduction_steps=[
                 "1. LLM call takes too long",
                 "2. Timeout occurs",
-                "3. Error message and no auto-retry"
+                "3. Error message and no auto-retry",
             ],
             expected="Auto-retry with 'Still working...' message",
             actual="Hard error with technical message",
             component="core/llm.py",
-            persona="STRESS_TEST"
+            persona="STRESS_TEST",
         )
 
     def test_ISSUE_068_disk_full_handling(self, issue_collector):
@@ -549,12 +541,12 @@ class TestRecovery:
             reproduction_steps=[
                 "1. Disk is nearly full",
                 "2. Start large write operation",
-                "3. Fails mid-write with poor error"
+                "3. Fails mid-write with poor error",
             ],
             expected="Pre-check disk space, clear error if insufficient",
             actual="Fails mid-operation",
             component="tools/file_ops.py:WriteFileTool",
-            persona="STRESS_TEST"
+            persona="STRESS_TEST",
         )
 
 
@@ -576,12 +568,12 @@ class TestRateLimiting:
             reproduction_steps=[
                 "1. Make many LLM calls quickly",
                 "2. Hit rate limit",
-                "3. Error with no guidance"
+                "3. Error with no guidance",
             ],
             expected="'Rate limit reached. Retrying in 30s...'",
             actual="Raw API error shown",
             component="core/llm.py",
-            persona="STRESS_TEST"
+            persona="STRESS_TEST",
         )
 
     def test_ISSUE_070_tool_call_throttling(self, issue_collector):
@@ -597,10 +589,10 @@ class TestRateLimiting:
             description="Rapid tool calls could overwhelm system",
             reproduction_steps=[
                 "1. Make 100 tool calls in 1 second",
-                "2. System attempts all simultaneously"
+                "2. System attempts all simultaneously",
             ],
             expected="Throttle to reasonable rate (e.g., 10/s)",
             actual="All attempted simultaneously",
             component="tool execution system",
-            persona="STRESS_TEST"
+            persona="STRESS_TEST",
         )

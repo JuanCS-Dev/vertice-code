@@ -179,7 +179,9 @@ class ReflectionEngine:
         recommendation = (
             "proceed"
             if confidence > 0.6
-            else "proceed_with_caution" if confidence > 0.4 else "reconsider"
+            else "proceed_with_caution"
+            if confidence > 0.4
+            else "reconsider"
         )
 
         return {

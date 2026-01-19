@@ -20,6 +20,7 @@ import os
 # FIXTURES
 # ==============================================================================
 
+
 @pytest.fixture
 def empty_workspace(tmp_path):
     """Create an empty workspace for new projects."""
@@ -37,6 +38,7 @@ def empty_workspace(tmp_path):
 # ==============================================================================
 # TEST CLASS: Python Project Creation
 # ==============================================================================
+
 
 @pytest.mark.e2e
 class TestNewPythonProject:
@@ -61,18 +63,18 @@ class TestNewPythonProject:
         (project_dir / "src").mkdir()
         (project_dir / "tests").mkdir()
 
-        (project_dir / "pyproject.toml").write_text('''[project]
+        (project_dir / "pyproject.toml").write_text(
+            """[project]
 name = "my-project"
 version = "0.1.0"
 requires-python = ">=3.10"
-''')
+"""
+        )
         (project_dir / "README.md").write_text("# My Project\n")
         (project_dir / "src" / "__init__.py").write_text("")
         (project_dir / "src" / "main.py").write_text('def main():\n    print("Hello")\n')
         (project_dir / "tests" / "__init__.py").write_text("")
-        (project_dir / "tests" / "test_main.py").write_text(
-            'def test_main():\n    assert True\n'
-        )
+        (project_dir / "tests" / "test_main.py").write_text("def test_main():\n    assert True\n")
 
         # Verify structure
         for file_path in expected_files:
@@ -85,7 +87,8 @@ requires-python = ">=3.10"
 
         # Create Flask project structure
         (project_dir / "app").mkdir()
-        (project_dir / "app" / "__init__.py").write_text('''"""Flask application factory."""
+        (project_dir / "app" / "__init__.py").write_text(
+            '''"""Flask application factory."""
 from flask import Flask
 
 def create_app():
@@ -95,8 +98,10 @@ def create_app():
     app.register_blueprint(main)
 
     return app
-''')
-        (project_dir / "app" / "routes.py").write_text('''"""API routes."""
+'''
+        )
+        (project_dir / "app" / "routes.py").write_text(
+            '''"""API routes."""
 from flask import Blueprint, jsonify
 
 main = Blueprint('main', __name__)
@@ -108,11 +113,13 @@ def index():
 @main.route('/health')
 def health():
     return jsonify({"healthy": True})
-''')
+'''
+        )
 
         (project_dir / "tests").mkdir()
         (project_dir / "tests" / "__init__.py").write_text("")
-        (project_dir / "tests" / "conftest.py").write_text('''"""Test configuration."""
+        (project_dir / "tests" / "conftest.py").write_text(
+            '''"""Test configuration."""
 import pytest
 from app import create_app
 
@@ -123,8 +130,10 @@ def app():
 @pytest.fixture
 def client(app):
     return app.test_client()
-''')
-        (project_dir / "tests" / "test_routes.py").write_text('''"""Test API routes."""
+'''
+        )
+        (project_dir / "tests" / "test_routes.py").write_text(
+            '''"""Test API routes."""
 
 def test_index(client):
     response = client.get('/')
@@ -135,7 +144,8 @@ def test_health(client):
     response = client.get('/health')
     assert response.status_code == 200
     assert response.json['healthy'] is True
-''')
+'''
+        )
 
         (project_dir / "requirements.txt").write_text("flask>=2.0\npytest>=8.0\n")
 
@@ -151,7 +161,8 @@ def test_health(client):
 
         (project_dir / "src").mkdir()
         (project_dir / "src" / "__init__.py").write_text("")
-        (project_dir / "src" / "cli.py").write_text('''"""CLI entry point."""
+        (project_dir / "src" / "cli.py").write_text(
+            '''"""CLI entry point."""
 import argparse
 
 def main():
@@ -170,16 +181,19 @@ def main():
 
 if __name__ == '__main__':
     main()
-''')
+'''
+        )
 
-        (project_dir / "pyproject.toml").write_text('''[project]
+        (project_dir / "pyproject.toml").write_text(
+            """[project]
 name = "my-cli"
 version = "0.1.0"
 requires-python = ">=3.10"
 
 [project.scripts]
 my-cli = "src.cli:main"
-''')
+"""
+        )
 
         # Verify CLI entry point is configured
         pyproject = (project_dir / "pyproject.toml").read_text()
@@ -194,19 +208,23 @@ my-cli = "src.cli:main"
         (project_dir / "src").mkdir()
         (project_dir / "tests").mkdir()
 
-        (project_dir / "pytest.ini").write_text('''[pytest]
+        (project_dir / "pytest.ini").write_text(
+            """[pytest]
 testpaths = tests
 python_files = test_*.py
 addopts = -v --tb=short
-''')
+"""
+        )
 
-        (project_dir / "tests" / "conftest.py").write_text('''"""Shared test fixtures."""
+        (project_dir / "tests" / "conftest.py").write_text(
+            '''"""Shared test fixtures."""
 import pytest
 
 @pytest.fixture
 def sample_data():
     return {"key": "value", "numbers": [1, 2, 3]}
-''')
+'''
+        )
 
         # Verify test configuration
         assert (project_dir / "pytest.ini").exists()
@@ -222,7 +240,8 @@ def sample_data():
         (project_dir / "docs" / "api.md").write_text("# API Reference\n")
         (project_dir / "docs" / "getting-started.md").write_text("# Getting Started\n")
 
-        (project_dir / "README.md").write_text('''# Documented Project
+        (project_dir / "README.md").write_text(
+            """# Documented Project
 
 ## Installation
 
@@ -240,7 +259,8 @@ main()
 ## Documentation
 
 See [docs/](docs/) for full documentation.
-''')
+"""
+        )
 
         # Verify documentation
         assert (project_dir / "docs").is_dir()
@@ -254,6 +274,7 @@ See [docs/](docs/) for full documentation.
 # TEST CLASS: Project Configuration
 # ==============================================================================
 
+
 @pytest.mark.e2e
 class TestProjectConfiguration:
     """Tests for project configuration files."""
@@ -263,7 +284,8 @@ class TestProjectConfiguration:
         project_dir = empty_workspace / "config_test"
         project_dir.mkdir()
 
-        (project_dir / "pyproject.toml").write_text('''[project]
+        (project_dir / "pyproject.toml").write_text(
+            """[project]
 name = "config-test"
 version = "1.0.0"
 description = "A test project"
@@ -283,7 +305,8 @@ dev = ["black", "ruff", "mypy"]
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
-''')
+"""
+        )
 
         content = (project_dir / "pyproject.toml").read_text()
 
@@ -297,7 +320,8 @@ build-backend = "setuptools.build_meta"
         project_dir = empty_workspace / "gitignore_test"
         project_dir.mkdir()
 
-        (project_dir / ".gitignore").write_text('''# Python
+        (project_dir / ".gitignore").write_text(
+            """# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -333,7 +357,8 @@ htmlcov/
 # OS
 .DS_Store
 Thumbs.db
-''')
+"""
+        )
 
         gitignore = (project_dir / ".gitignore").read_text()
 
@@ -348,7 +373,8 @@ Thumbs.db
         project_dir = empty_workspace / "editorconfig_test"
         project_dir.mkdir()
 
-        (project_dir / ".editorconfig").write_text('''root = true
+        (project_dir / ".editorconfig").write_text(
+            """root = true
 
 [*]
 indent_style = space
@@ -366,7 +392,8 @@ indent_size = 2
 
 [Makefile]
 indent_style = tab
-''')
+"""
+        )
 
         editorconfig = (project_dir / ".editorconfig").read_text()
 
@@ -388,7 +415,8 @@ indent_style = tab
         project_dir = empty_workspace / "precommit_test"
         project_dir.mkdir()
 
-        (project_dir / ".pre-commit-config.yaml").write_text('''repos:
+        (project_dir / ".pre-commit-config.yaml").write_text(
+            """repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
@@ -408,7 +436,8 @@ indent_style = tab
     rev: v1.7.0
     hooks:
       - id: mypy
-''')
+"""
+        )
 
         config = (project_dir / ".pre-commit-config.yaml").read_text()
 

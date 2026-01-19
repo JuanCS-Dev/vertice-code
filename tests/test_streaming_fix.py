@@ -7,12 +7,14 @@ from vertice_cli.core.mcp_client import MCPClient
 from vertice_cli.agents.executor import NextGenExecutorAgent, ExecutionMode, SecurityLevel
 from vertice_cli.agents.base import AgentTask
 
+
 async def main():
     # Initialize clients
     llm = LLMClient()
 
     # Initialize MCP with empty registry (test doesn't need real tools)
     from vertice_cli.tools.base import ToolRegistry
+
     registry = ToolRegistry()
     mcp = MCPClient(registry)
 
@@ -21,7 +23,7 @@ async def main():
         llm_client=llm,
         mcp_client=mcp,
         execution_mode=ExecutionMode.LOCAL,
-        security_level=SecurityLevel.STANDARD
+        security_level=SecurityLevel.STANDARD,
     )
 
     # Test streaming
@@ -52,6 +54,7 @@ async def main():
 
     print(f"\n✅ Test passed! Received {len(events)} events")
     print(f"   Event types: {[e['type'] for e in events]}")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

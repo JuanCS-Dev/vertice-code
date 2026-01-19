@@ -102,9 +102,7 @@ class SemanticMemory:
 
         return unique_results[:top_k]
 
-    def add_relation(
-        self, concept_a: str, concept_b: str, relation_type: str = "related"
-    ) -> None:
+    def add_relation(self, concept_a: str, concept_b: str, relation_type: str = "related") -> None:
         """Add a relation between concepts."""
         if concept_a not in self.relations:
             self.relations[concept_a] = []

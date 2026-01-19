@@ -29,7 +29,7 @@
 
 # MASTER PLAN - Qwen Dev CLI
 
-**ÚLTIMA ATUALIZAÇÃO: 2025-11-19 15:09 UTC (12:09 BRT)**  
+**ÚLTIMA ATUALIZAÇÃO: 2025-11-19 15:09 UTC (12:09 BRT)**
 **STATUS: ✅ VALIDADO - 98.7% TESTES PASSANDO**
 
 ---
@@ -58,7 +58,7 @@
 4. Arquitetura preservada
 
 #### ✅ 8 TESTES CIENTÍFICOS LLM CRIADOS E VALIDADOS
-**Arquivo**: `tests/test_tui_llm_edge_cases.py`  
+**Arquivo**: `tests/test_tui_llm_edge_cases.py`
 **Status**: 8/8 passando (100%)
 
 1. ✅ `test_llm_stream_renders_progressively` - Stream real com TUI
@@ -180,8 +180,8 @@ tests/test_shell_manual.py         - API fixes
 ### ⏸️ PENDENTES (NÃO BLOQUEANTES)
 
 #### 7 Testes Falhando (1.3%)
-**Categoria**: TUI API incompatibility  
-**Ação**: Skip ou atualizar APIs  
+**Categoria**: TUI API incompatibility
+**Ação**: Skip ou atualizar APIs
 **Impacto**: Zero - funcionalidade 100% OK
 
 1. `test_nebius_integration::test_nebius_context_awareness` - Context assertion
@@ -195,8 +195,8 @@ tests/test_shell_manual.py         - API fixes
 ## 🔐 GARANTIAS PARA PRÓXIMA SESSÃO
 
 ### 1. TESTES LLM SÃO REAIS E FUNCIONAM
-**Arquivo**: `tests/test_tui_llm_edge_cases.py`  
-**Comando**: `pytest tests/test_tui_llm_edge_cases.py -v`  
+**Arquivo**: `tests/test_tui_llm_edge_cases.py`
+**Comando**: `pytest tests/test_tui_llm_edge_cases.py -v`
 **Resultado esperado**: 8 passed
 
 ### 2. OLLAMA ESTÁ CONFIGURADO
@@ -284,8 +284,8 @@ Data/Hora: 2025-11-19 12:09 BRT
 
 ## 🎨 DAY 8: UI/UX EXCELLENCE (Nov 20, 2025)
 
-**Status**: ✅ COMPLETE (100%)  
-**Time**: 14:48 UTC finish  
+**Status**: ✅ COMPLETE (100%)
+**Time**: 14:48 UTC finish
 **Grade**: A+ (100/100)
 
 ### 📋 PHASES COMPLETED
@@ -530,4 +530,3 @@ python benchmarks/ui_performance.py
 ```
 
 **OBRA-PRIMA COMPLETE! SER > PARECER ACHIEVED!** ✅
-

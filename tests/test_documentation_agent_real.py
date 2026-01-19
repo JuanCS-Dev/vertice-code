@@ -37,31 +37,29 @@ class TestRealDocGeneration:
 
     def test_generate_function_docs_real(self, doc_agent):
         """Test generating docs for a real Python function"""
-        code = '''
+        code = """
 def calculate_fibonacci(n: int) -> int:
     if n <= 1:
         return n
     return calculate_fibonacci(n-1) + calculate_fibonacci(n-2)
-'''
-        result = doc_agent.generate_documentation(
-            code=code,
-            doc_type="function",
-            style="google"
-        )
+"""
+        result = doc_agent.generate_documentation(code=code, doc_type="function", style="google")
 
         assert result["success"]
         assert "fibonacci" in result["documentation"].lower()
-        assert "param" in result["documentation"].lower() or "args" in result["documentation"].lower()
+        assert (
+            "param" in result["documentation"].lower() or "args" in result["documentation"].lower()
+        )
 
     def test_generate_class_docs_real(self, doc_agent):
         """Test generating docs for a real Python class"""
-        code = '''
+        code = """
 class BinaryTree:
     def __init__(self, value):
         self.value = value
         self.left = None
         self.right = None
-    
+
     def insert(self, value):
         if value < self.value:
             if self.left is None:
@@ -73,12 +71,8 @@ class BinaryTree:
                 self.right = BinaryTree(value)
             else:
                 self.right.insert(value)
-'''
-        result = doc_agent.generate_documentation(
-            code=code,
-            doc_type="class",
-            style="numpy"
-        )
+"""
+        result = doc_agent.generate_documentation(code=code, doc_type="class", style="numpy")
 
         assert result["success"]
         assert "binarytree" in result["documentation"].lower()
@@ -95,11 +89,7 @@ def clean_data(data):
 def validate_email(email):
     return "@" in email and "." in email
 '''
-        result = doc_agent.generate_documentation(
-            code=code,
-            doc_type="module",
-            style="sphinx"
-        )
+        result = doc_agent.generate_documentation(code=code, doc_type="module", style="sphinx")
 
         assert result["success"]
         assert len(result["documentation"]) > 50
@@ -110,7 +100,7 @@ class TestRealAPIDocGeneration:
 
     def test_generate_rest_api_docs(self, doc_agent):
         """Test REST API documentation generation"""
-        code = '''
+        code = """
 @app.post("/users")
 async def create_user(user: UserCreate):
     db_user = User(**user.dict())
@@ -124,11 +114,8 @@ async def get_user(user_id: int):
     if not user:
         raise HTTPException(status_code=404)
     return user
-'''
-        result = doc_agent.generate_api_docs(
-            code=code,
-            api_type="rest"
-        )
+"""
+        result = doc_agent.generate_api_docs(code=code, api_type="rest")
 
         assert result["success"]
         docs = result["documentation"].lower()
@@ -150,8 +137,8 @@ class TestRealReadmeGeneration:
                 "Distributed training",
                 "Real-time monitoring",
                 "Model versioning",
-                "Auto-scaling workers"
-            ]
+                "Auto-scaling workers",
+            ],
         }
 
         result = doc_agent.generate_readme(project_info)
@@ -168,7 +155,7 @@ class TestRealDockerfileDocumentation:
 
     def test_document_dockerfile(self, doc_agent):
         """Test documenting a real Dockerfile"""
-        dockerfile = '''
+        dockerfile = """
 FROM python:3.11-slim
 WORKDIR /app
 COPY requirements.txt .
@@ -176,11 +163,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 EXPOSE 8000
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0"]
-'''
+"""
         result = doc_agent.generate_documentation(
-            code=dockerfile,
-            doc_type="dockerfile",
-            style="inline"
+            code=dockerfile, doc_type="dockerfile", style="inline"
         )
 
         assert result["success"]
@@ -193,23 +178,19 @@ class TestRealComplexScenarios:
 
     def test_document_async_context_manager(self, doc_agent):
         """Test documenting complex async code"""
-        code = '''
+        code = """
 class DatabaseConnection:
     async def __aenter__(self):
         self.conn = await asyncpg.connect(DATABASE_URL)
         return self
-    
+
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.conn.close()
-    
+
     async def execute(self, query: str, *args):
         return await self.conn.fetch(query, *args)
-'''
-        result = doc_agent.generate_documentation(
-            code=code,
-            doc_type="class",
-            style="google"
-        )
+"""
+        result = doc_agent.generate_documentation(code=code, doc_type="class", style="google")
 
         assert result["success"]
         docs = result["documentation"].lower()
@@ -218,7 +199,7 @@ class DatabaseConnection:
 
     def test_document_decorator_pattern(self, doc_agent):
         """Test documenting decorator patterns"""
-        code = '''
+        code = """
 def retry(max_attempts=3, delay=1):
     def decorator(func):
         @wraps(func)
@@ -232,12 +213,8 @@ def retry(max_attempts=3, delay=1):
                     await asyncio.sleep(delay)
         return wrapper
     return decorator
-'''
-        result = doc_agent.generate_documentation(
-            code=code,
-            doc_type="function",
-            style="numpy"
-        )
+"""
+        result = doc_agent.generate_documentation(code=code, doc_type="function", style="numpy")
 
         assert result["success"]
         docs = result["documentation"].lower()
@@ -250,26 +227,18 @@ class TestRealEdgeCases:
 
     def test_empty_code(self, doc_agent):
         """Test handling empty code"""
-        result = doc_agent.generate_documentation(
-            code="",
-            doc_type="function",
-            style="google"
-        )
+        result = doc_agent.generate_documentation(code="", doc_type="function", style="google")
 
         assert not result["success"]
         assert "error" in result
 
     def test_malformed_code(self, doc_agent):
         """Test handling malformed code"""
-        code = '''
+        code = """
 def broken_function(
     # Missing closing paren and body
-'''
-        result = doc_agent.generate_documentation(
-            code=code,
-            doc_type="function",
-            style="google"
-        )
+"""
+        result = doc_agent.generate_documentation(code=code, doc_type="function", style="google")
 
         # Should still attempt to generate docs
         assert result["success"] or "error" in result
@@ -285,14 +254,12 @@ def process_data(data):
     """
     return execute_sql(query)
 '''
-        result = doc_agent.generate_documentation(
-            code=code,
-            doc_type="function",
-            style="google"
-        )
+        result = doc_agent.generate_documentation(code=code, doc_type="function", style="google")
 
         assert result["success"]
-        assert "sql" in result["documentation"].lower() or "query" in result["documentation"].lower()
+        assert (
+            "sql" in result["documentation"].lower() or "query" in result["documentation"].lower()
+        )
 
 
 class TestRealPerformance:
@@ -301,24 +268,20 @@ class TestRealPerformance:
     def test_large_codebase_documentation(self, doc_agent):
         """Test documenting large code blocks"""
         # Generate a large class with many methods
-        code = '''
+        code = """
 class DataProcessor:
     def __init__(self, config):
         self.config = config
-    
-'''
+
+"""
         for i in range(10):
-            code += f'''
+            code += f"""
     def process_{i}(self, data):
         return data * {i}
-    
-'''
 
-        result = doc_agent.generate_documentation(
-            code=code,
-            doc_type="class",
-            style="google"
-        )
+"""
+
+        result = doc_agent.generate_documentation(code=code, doc_type="class", style="google")
 
         assert result["success"]
         assert "dataprocessor" in result["documentation"].lower()

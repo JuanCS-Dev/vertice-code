@@ -330,9 +330,9 @@ class JusticaAgent:
             result=verdict.classification.result.name if verdict.classification else "UNKNOWN",
             confidence=verdict.classification.confidence if verdict.classification else 0,
             reasoning=verdict.reasoning,
-            violations=[
-                vt.name for vt in verdict.classification.violation_types
-            ] if verdict.classification else [],
+            violations=[vt.name for vt in verdict.classification.violation_types]
+            if verdict.classification
+            else [],
         )
 
     def _update_metrics(self, verdict: JusticaVerdict) -> None:

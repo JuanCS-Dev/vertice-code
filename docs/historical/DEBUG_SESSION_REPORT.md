@@ -1,6 +1,6 @@
 # 🔧 DEBUG SESSION REPORT
-**Data:** 2024-11-24  
-**Agente:** Antigravity (Gemini 2.0 Flash Thinking)  
+**Data:** 2024-11-24
+**Agente:** Antigravity (Gemini 2.0 Flash Thinking)
 **Status:** ✅ **COMPLETO**
 
 ---

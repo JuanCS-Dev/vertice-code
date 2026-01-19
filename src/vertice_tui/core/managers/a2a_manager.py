@@ -255,8 +255,6 @@ class A2AManager:
         # 2. Use mDNS/DNS-SD for local discovery
         # 3. Query configured registries
 
-        discovered: List[DiscoveredAgent] = []
-
         # For now, check localhost on common ports
         common_ports = [50051, 50052, 50053]
 
@@ -322,7 +320,7 @@ class A2AManager:
 
             yield f"[A2A] Connecting to {agent.name} at {url}...\n"
 
-            async with grpc.aio.insecure_channel(url) as channel:
+            async with grpc.aio.insecure_channel(url):
                 # Placeholder: actual gRPC call
                 yield f"[A2A] Sending task to {agent.name}...\n"
 
