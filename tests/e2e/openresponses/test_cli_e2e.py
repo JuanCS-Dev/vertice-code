@@ -153,7 +153,7 @@ class TestOpenResponsesCLIE2E:
 
             if has_open_responses_method:
                 # Criar task de teste
-                task = AgentTask(
+                AgentTask(
                     request="Create a simple hello world function", context={"language": "python"}
                 )
 
@@ -216,19 +216,6 @@ class TestOpenResponsesCLIE2E:
             # Verificar eventos
             events = builder.get_events()
             event_types = [e.type for e in events]
-
-            expected_sequence = [
-                "response.created",
-                "response.in_progress",
-                "response.output_item.added",
-                "response.content_part.added",
-                "response.output_text.delta",
-                "response.output_text.delta",
-                "response.output_text.done",
-                "response.content_part.done",
-                "response.output_item.done",
-                "response.completed",
-            ]
 
             # Verificar que temos os eventos principais
             assert "response.created" in event_types, "Should have response.created event"

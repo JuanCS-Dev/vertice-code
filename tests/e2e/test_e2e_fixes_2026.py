@@ -26,6 +26,7 @@ from vertice_cli.agents.base import AgentTask
 # FIXTURES - Mock LLM that returns realistic responses
 # =============================================================================
 
+
 @pytest.fixture
 def mock_llm_client():
     """Create a mock LLM client that returns realistic responses."""
@@ -108,6 +109,7 @@ def mock_mcp_client():
 # TEST: Testing Agent - Inline Code Priority
 # =============================================================================
 
+
 class TestTestRunnerAgentE2E:
     """E2E tests for Testing Agent inline code fix."""
 
@@ -136,7 +138,7 @@ def calculate_sum(numbers):
 ```
 
 Make sure to test edge cases too."""
-            }
+            },
         )
 
         response = await agent.execute(task)
@@ -146,16 +148,18 @@ Make sure to test edge cases too."""
 
         # Verificar que NÃO retornou "no source code provided"
         if response.error:
-            assert "no source code" not in response.error.lower(), \
-                "FIX FAILED: Agent still says 'no source code provided'"
+            assert (
+                "no source code" not in response.error.lower()
+            ), "FIX FAILED: Agent still says 'no source code provided'"
 
         # Verificar que gerou testes reais
         assert response.data is not None, "No data returned"
 
         # O resultado deve conter testes ou referência ao código
         result_str = str(response.data).lower()
-        assert any(term in result_str for term in ["test", "assert", "calculate_sum"]), \
-            f"FIX FAILED: Response doesn't contain tests. Got: {response.data}"
+        assert any(
+            term in result_str for term in ["test", "assert", "calculate_sum"]
+        ), f"FIX FAILED: Response doesn't contain tests. Got: {response.data}"
 
         print("✓ Testing Agent processed inline code correctly")
         print(f"  Reasoning: {response.reasoning}")
@@ -167,7 +171,7 @@ Make sure to test edge cases too."""
 
         task = AgentTask(
             request="Generate tests",
-            context={}  # Empty context - should not crash
+            context={},  # Empty context - should not crash
         )
 
         response = await agent.execute(task)
@@ -180,6 +184,7 @@ Make sure to test edge cases too."""
 # =============================================================================
 # TEST: Reviewer Agent - Smart Truncation
 # =============================================================================
+
 
 class TestReviewerAgentE2E:
     """E2E tests for Reviewer Agent smart truncation fix."""
@@ -195,7 +200,8 @@ class TestReviewerAgentE2E:
         agent = ReviewerAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
 
         # Código grande - mais de 2000 chars
-        large_code = '''
+        large_code = (
+            '''
 def function_one():
     """First function."""
     result = []
@@ -243,13 +249,13 @@ class MyClass:
             processed = str(item).upper()
             results.append(processed)
         return results
-''' + "\n# More code...\n" * 50  # Make it very long
+'''
+            + "\n# More code...\n" * 50
+        )  # Make it very long
 
         task = AgentTask(
             request="Review this code for issues",
-            context={
-                "user_message": f"Please review this code:\n\n```python\n{large_code}\n```"
-            }
+            context={"user_message": f"Please review this code:\n\n```python\n{large_code}\n```"},
         )
 
         response = await agent.execute(task)
@@ -259,8 +265,9 @@ class MyClass:
 
         # Verificar que a análise foi feita
         result_str = str(response.data).lower()
-        assert any(term in result_str for term in ["review", "issue", "code", "function"]), \
-            f"FIX FAILED: No meaningful review. Got: {response.data}"
+        assert any(
+            term in result_str for term in ["review", "issue", "code", "function"]
+        ), f"FIX FAILED: No meaningful review. Got: {response.data}"
 
         print("✓ Reviewer handled large code correctly")
         print(f"  Reasoning: {response.reasoning}")
@@ -281,7 +288,7 @@ def unsafe_query(table_name):
 ```
 
 Is there any security issue?"""
-            }
+            },
         )
 
         response = await agent.execute(task)
@@ -293,6 +300,7 @@ Is there any security issue?"""
 # =============================================================================
 # TEST: Documentation Agent - File Priority
 # =============================================================================
+
 
 class TestDocumentationAgentE2E:
     """E2E tests for Documentation Agent file priority fix."""
@@ -318,7 +326,7 @@ def fibonacci(n):
         return n
     return fibonacci(n-1) + fibonacci(n-2)
 ```"""
-            }
+            },
         )
 
         response = await agent.execute(task)
@@ -328,14 +336,16 @@ def fibonacci(n):
 
         # Verificar que documentou o código
         result_str = str(response.data).lower()
-        assert any(term in result_str for term in ["fibonacci", "function", "documentation"]), \
-            f"FIX FAILED: Didn't document the inline code. Got: {response.data}"
+        assert any(
+            term in result_str for term in ["fibonacci", "function", "documentation"]
+        ), f"FIX FAILED: Didn't document the inline code. Got: {response.data}"
 
         # Verificar source
         if isinstance(response.data, dict):
             source = response.data.get("source", "")
-            assert "inline" in source.lower() or response.data.get("documentation"), \
-                "FIX FAILED: Should indicate inline code was used"
+            assert "inline" in source.lower() or response.data.get(
+                "documentation"
+            ), "FIX FAILED: Should indicate inline code was used"
 
         print("✓ Documentation Agent processed inline code")
         print(f"  Reasoning: {response.reasoning}")
@@ -344,6 +354,7 @@ def fibonacci(n):
 # =============================================================================
 # TEST: Explorer Agent - Content Snippets
 # =============================================================================
+
 
 class TestExplorerAgentE2E:
     """E2E tests for Explorer Agent content snippets fix."""
@@ -360,10 +371,7 @@ class TestExplorerAgentE2E:
 
         # Search in the actual codebase
         task = AgentTask(
-            request="Find files related to agents",
-            context={
-                "cwd": "/media/juan/DATA/Vertice-Code"
-            }
+            request="Find files related to agents", context={"cwd": "/media/juan/DATA/Vertice-Code"}
         )
 
         response = await agent.execute(task)
@@ -376,8 +384,7 @@ class TestExplorerAgentE2E:
 
         # Verificar que pelo menos alguns arquivos têm snippets
         files_with_snippets = [
-            f for f in relevant_files
-            if f.get("snippet") and len(f.get("snippet", "")) > 10
+            f for f in relevant_files if f.get("snippet") and len(f.get("snippet", "")) > 10
         ]
 
         # Não exigimos todos, mas deve ter alguns
@@ -405,9 +412,7 @@ class TestExplorerAgentE2E:
         # Query com múltiplas keywords
         task = AgentTask(
             request="deep find imports and usage of BaseAgent AgentTask AgentResponse",
-            context={
-                "cwd": "/media/juan/DATA/Vertice-Code"
-            }
+            context={"cwd": "/media/juan/DATA/Vertice-Code"},
         )
 
         response = await agent.execute(task)
@@ -428,6 +433,7 @@ class TestExplorerAgentE2E:
 # TEST: Skill Registry - Anti-Hallucination
 # =============================================================================
 
+
 class TestSkillRegistryE2E:
     """E2E tests for Skill Registry anti-hallucination."""
 
@@ -441,7 +447,7 @@ class TestSkillRegistryE2E:
         from prometheus.core.skill_registry import (
             validate_skills,
             VALID_SKILLS,
-            suggest_similar_skill
+            suggest_similar_skill,
         )
 
         # Test valid skills
@@ -452,14 +458,17 @@ class TestSkillRegistryE2E:
         # Test hallucinated skills
         hallucinated = ["super_coding", "mega_debugging", "ultra_analysis", "quantum_testing"]
         validated_hallucinated = validate_skills(hallucinated)
-        assert len(validated_hallucinated) == 0, \
-            f"FIX FAILED: Hallucinated skills accepted: {validated_hallucinated}"
+        assert (
+            len(validated_hallucinated) == 0
+        ), f"FIX FAILED: Hallucinated skills accepted: {validated_hallucinated}"
 
         # Test mixed
         mixed = ["python_basics", "hallucinated_skill", "testing", "fake_skill"]
         validated_mixed = validate_skills(mixed)
-        assert set(validated_mixed) == {"python_basics", "testing"}, \
-            f"FIX FAILED: Should only keep valid skills. Got: {validated_mixed}"
+        assert set(validated_mixed) == {
+            "python_basics",
+            "testing",
+        }, f"FIX FAILED: Should only keep valid skills. Got: {validated_mixed}"
 
         # Test suggestion
         suggestion = suggest_similar_skill("python")
@@ -489,6 +498,7 @@ class TestSkillRegistryE2E:
 # =============================================================================
 # TEST: Temperature Config
 # =============================================================================
+
 
 class TestTemperatureConfigE2E:
     """E2E tests for temperature configuration."""
@@ -524,6 +534,7 @@ class TestTemperatureConfigE2E:
 # TEST: Output Validator
 # =============================================================================
 
+
 class TestOutputValidatorE2E:
     """E2E tests for output validation."""
 
@@ -558,7 +569,7 @@ class TestOutputValidatorE2E:
         from vertice_cli.core.output_validator import validate_agent_output
         from vertice_cli.schemas.agent_outputs import ReviewOutput, ReviewDecision
 
-        valid_json = '''```json
+        valid_json = """```json
 {
     "success": true,
     "decision": "APPROVED",
@@ -566,11 +577,11 @@ class TestOutputValidatorE2E:
     "summary": "Code looks good",
     "code_analyzed": "def foo(): pass"
 }
-```'''
+```"""
 
         result = validate_agent_output(valid_json, ReviewOutput)
         assert result.decision == ReviewDecision.APPROVED
-        assert result.success == True
+        assert result.success
 
         print("✓ Schema validation works")
 
@@ -579,6 +590,7 @@ class TestOutputValidatorE2E:
 # TEST: Grounding Prompts
 # =============================================================================
 
+
 class TestGroundingPromptsE2E:
     """E2E tests for grounding prompts."""
 
@@ -586,22 +598,20 @@ class TestGroundingPromptsE2E:
         """
         VALIDATION: Grounding instructions are properly defined.
         """
-        from vertice_cli.prompts.grounding import (
-            GROUNDING_INSTRUCTION,
-            INLINE_CODE_PRIORITY
-        )
+        from vertice_cli.prompts.grounding import GROUNDING_INSTRUCTION, INLINE_CODE_PRIORITY
 
         # Must have key phrases
-        assert "investigate_before_answering" in GROUNDING_INSTRUCTION.lower() or \
-               "investigate" in GROUNDING_INSTRUCTION.lower(), \
-               "Missing investigation instruction"
+        assert (
+            "investigate_before_answering" in GROUNDING_INSTRUCTION.lower()
+            or "investigate" in GROUNDING_INSTRUCTION.lower()
+        ), "Missing investigation instruction"
 
-        assert "never" in GROUNDING_INSTRUCTION.lower() and \
-               "speculate" in GROUNDING_INSTRUCTION.lower(), \
-               "Missing anti-speculation instruction"
+        assert (
+            "never" in GROUNDING_INSTRUCTION.lower()
+            and "speculate" in GROUNDING_INSTRUCTION.lower()
+        ), "Missing anti-speculation instruction"
 
-        assert "inline" in INLINE_CODE_PRIORITY.lower(), \
-               "Missing inline code instruction"
+        assert "inline" in INLINE_CODE_PRIORITY.lower(), "Missing inline code instruction"
 
         print("✓ Grounding prompts are properly defined")
         print(f"  GROUNDING_INSTRUCTION length: {len(GROUNDING_INSTRUCTION)}")

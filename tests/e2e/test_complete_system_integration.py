@@ -44,10 +44,10 @@ from prometheus.mcp_server.config import MCPServerConfig
 from prometheus.mcp_server.manager import MCPServerManager
 
 # Vertice CLI
-# from vertice_cli.core.llm import LLMClient
-# from vertice_cli.core.mcp_client import MCPClient
-# from vertice_cli.tools.registry_helper import get_default_registry
-# from vertice_cli.orchestration.squad import DevSquad
+from vertice_cli.core.llm import LLMClient
+from vertice_cli.core.mcp_client import MCPClient
+from vertice_cli.tools.registry_helper import get_default_registry
+from vertice_cli.orchestration.squad import DevSquad
 
 # Environment requirements
 requires_api_keys = pytest.mark.skipif(
@@ -473,7 +473,7 @@ class TestCompleteSystemIntegration:
         discovery = prometheus_system["discovery_service"]
 
         # Simulate component failure and recovery
-        original_peer_count = len(discovery.known_peers)
+        len(discovery.known_peers)
 
         # Simulate network partition (remove peers)
         discovery.known_peers.clear()

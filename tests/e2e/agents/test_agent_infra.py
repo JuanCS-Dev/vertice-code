@@ -40,10 +40,12 @@ class TestAgentRouting:
         """Create agent router."""
         try:
             from vertice_tui.core.agents import AgentRouter
+
             return AgentRouter()
         except ImportError:
             try:
                 from vertice_tui.core.agents import AgentRouter
+
                 return AgentRouter()
             except ImportError:
                 return None
@@ -58,27 +60,27 @@ class TestAgentRouting:
         """Router has route method."""
         if router is None:
             pytest.skip("AgentRouter not available")
-        assert hasattr(router, 'route') or hasattr(router, 'get_agent')
+        assert hasattr(router, "route") or hasattr(router, "get_agent")
 
     def test_router_code_task(self, router):
         """Router routes code task to coder."""
         if router is None:
             pytest.skip("AgentRouter not available")
         prompt = "Write a function to sort a list"
-        if hasattr(router, 'route'):
+        if hasattr(router, "route"):
             agent = router.route(prompt)
             if agent is not None:
-                assert hasattr(agent, 'name') or hasattr(agent, 'role')
+                assert hasattr(agent, "name") or hasattr(agent, "role")
 
     def test_router_unknown_task(self, router):
         """Router handles unknown task gracefully."""
         if router is None:
             pytest.skip("AgentRouter not available")
         prompt = "Do something random"
-        if hasattr(router, 'route'):
+        if hasattr(router, "route"):
             # Should not crash with unknown task
             try:
-                agent = router.route(prompt)
+                router.route(prompt)
             except Exception:
                 pass  # Expected if not implemented
 
@@ -92,7 +94,7 @@ class TestAgentFallback:
             from vertice_cli.agents.base import BaseAgent
 
             # Check that base agent has error handling
-            assert hasattr(BaseAgent, 'execute') or True
+            assert hasattr(BaseAgent, "execute") or True
         except ImportError:
             pytest.skip("BaseAgent not available")
 
@@ -100,10 +102,11 @@ class TestAgentFallback:
         """Agent fallback chain works."""
         try:
             from vertice_tui.core.agents import AgentManager
+
             manager = AgentManager()
 
             # Manager should have fallback logic
-            assert hasattr(manager, 'get_agent') or hasattr(manager, 'route')
+            assert hasattr(manager, "get_agent") or hasattr(manager, "route")
         except ImportError:
             pytest.skip("AgentManager not available")
 
@@ -117,7 +120,7 @@ class TestAgentCapabilities:
             from vertice_cli.agents.base import BaseAgent
 
             # Check base agent has required methods
-            assert hasattr(BaseAgent, 'execute') or hasattr(BaseAgent, 'stream_execute')
+            assert hasattr(BaseAgent, "execute") or hasattr(BaseAgent, "stream_execute")
         except ImportError:
             pytest.skip("BaseAgent not available")
 
@@ -127,7 +130,7 @@ class TestAgentCapabilities:
             from vertice_cli.agents.planner.agent import PlannerAgent
 
             planner = PlannerAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
-            assert hasattr(planner, 'execute')
+            assert hasattr(planner, "execute")
         except ImportError:
             pytest.skip("PlannerAgent not available")
 
@@ -141,7 +144,7 @@ class TestAgentErrorHandling:
             from vertice_cli.agents.base import BaseAgent
 
             # BaseAgent should define error handling
-            assert hasattr(BaseAgent, 'execute') or True
+            assert hasattr(BaseAgent, "execute") or True
         except ImportError:
             pytest.skip("BaseAgent not available")
 
@@ -166,7 +169,7 @@ class TestAgentStreaming:
             from vertice_cli.agents.base import BaseAgent
 
             # Check for streaming capability
-            assert hasattr(BaseAgent, 'stream_execute') or hasattr(BaseAgent, 'execute')
+            assert hasattr(BaseAgent, "stream_execute") or hasattr(BaseAgent, "execute")
         except ImportError:
             pytest.skip("BaseAgent not available")
 

@@ -41,14 +41,13 @@ class ScenarioValidator:
         """
         # Estratégias de validação
         validators: Dict[Expectation, Callable[[], bool]] = {
-            # HAS_RESPONSE: Always True for slash commands (they don't emit events but work)
-            # TODO: Hook into ResponseView to detect actual output
-            Expectation.HAS_RESPONSE: lambda: True,
+            # HAS_RESPONSE: True if we received any events
+            Expectation.HAS_RESPONSE: lambda: len(events) > 0,
             Expectation.LATENCY_UNDER_5S: lambda: elapsed < 5.0,
             Expectation.LATENCY_UNDER_10S: lambda: elapsed < 10.0,
             Expectation.LATENCY_UNDER_30S: lambda: elapsed < 30.0,
-            Expectation.SSE_EVENTS_COMPLETE: lambda: monitor.has_event_type("response.completed")
-            or len(events) == 0,  # Pass if no events expected
+            # SSE_EVENTS_COMPLETE: Check monitor for completion event
+            Expectation.SSE_EVENTS_COMPLETE: lambda: monitor.has_event_type("response.completed"),
             Expectation.NO_CRASH: lambda: True,
             Expectation.HANDLES_ERROR: lambda: True,
             Expectation.TOOL_USE_FILE_READ: lambda: ScenarioValidator._check_tool_use(

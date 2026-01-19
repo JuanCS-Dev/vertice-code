@@ -16,6 +16,7 @@ import pytest
 # 1. INPUT ENHANCER TESTS
 # =============================================================================
 
+
 class TestInputEnhancer:
     """Test InputEnhancer component."""
 
@@ -23,12 +24,13 @@ class TestInputEnhancer:
     def enhancer(self):
         """Create InputEnhancer instance."""
         from vertice_cli.core.input_enhancer import InputEnhancer
+
         return InputEnhancer()
 
     def test_enhancer_initialization(self, enhancer):
         """Test enhancer initializes correctly."""
         assert enhancer is not None
-        assert hasattr(enhancer, 'enhance')
+        assert hasattr(enhancer, "enhance")
 
     def test_enhance_plain_text(self, enhancer):
         """Test enhancing plain text input."""
@@ -62,6 +64,7 @@ Hello"""
 
         # Should detect REPL paste
         from vertice_cli.core.input_enhancer import InputType
+
         assert result.input_type in [InputType.REPL_PASTE, InputType.CODE_BLOCK, InputType.MIXED]
 
     def test_enhance_stackoverflow_paste(self, enhancer):
@@ -95,6 +98,7 @@ Line 3"""
         result = enhancer.enhance(input_text)
 
         from vertice_cli.core.input_enhancer import InputType
+
         assert result.input_type in [InputType.MULTILINE, InputType.PLAIN_TEXT, InputType.MIXED]
 
     def test_enhance_command_input(self, enhancer):
@@ -153,6 +157,7 @@ function second() {}
 # 2. CONTEXT TRACKER TESTS
 # =============================================================================
 
+
 class TestContextTracker:
     """Test ContextTracker component."""
 
@@ -160,13 +165,14 @@ class TestContextTracker:
     def tracker(self):
         """Create ContextTracker instance."""
         from vertice_cli.core.context_tracker import ContextTracker
+
         return ContextTracker()
 
     def test_tracker_initialization(self, tracker):
         """Test tracker initializes correctly."""
         assert tracker is not None
-        assert hasattr(tracker, 'record')
-        assert hasattr(tracker, 'resolve')
+        assert hasattr(tracker, "record")
+        assert hasattr(tracker, "resolve")
 
     def test_track_file_reference(self, tracker):
         """Test tracking file references."""
@@ -189,7 +195,7 @@ class TestContextTracker:
         resolution = tracker.resolve("Fix it")
 
         assert resolution is not None
-        assert hasattr(resolution, 'value')
+        assert hasattr(resolution, "value")
 
     def test_resolve_anaphoric_reference(self, tracker):
         """Test resolving anaphoric references ('the file', 'the function')."""
@@ -202,7 +208,7 @@ class TestContextTracker:
 
         # May or may not resolve depending on implementation
         # Just verify it doesn't crash
-        assert resolution is None or hasattr(resolution, 'value')
+        assert resolution is None or hasattr(resolution, "value")
 
     def test_clarification_suggestion(self, tracker):
         """Test generating clarification suggestions for ambiguous references."""
@@ -232,7 +238,7 @@ class TestContextTracker:
         """Test resolving message with no references."""
         resolution = tracker.resolve("Hello, how are you?")
         # May return None or low-confidence match
-        assert resolution is None or hasattr(resolution, 'value')
+        assert resolution is None or hasattr(resolution, "value")
 
     def test_history_limit(self, tracker):
         """Test history doesn't grow unbounded."""
@@ -251,6 +257,7 @@ class TestContextTracker:
 # 3. ERROR PRESENTER TESTS
 # =============================================================================
 
+
 class TestErrorPresenter:
     """Test ErrorPresenter component."""
 
@@ -258,12 +265,13 @@ class TestErrorPresenter:
     def presenter(self):
         """Create ErrorPresenter instance."""
         from vertice_cli.core.error_presenter import ErrorPresenter
+
         return ErrorPresenter()
 
     def test_presenter_initialization(self, presenter):
         """Test presenter initializes correctly."""
         assert presenter is not None
-        assert hasattr(presenter, 'present')
+        assert hasattr(presenter, "present")
 
     def test_present_simple_error(self, presenter):
         """Test presenting simple error."""
@@ -327,7 +335,7 @@ class TestErrorPresenter:
         # Should suggest what to do
         assert result is not None
         # Result should have suggestions attribute or contain suggestion text
-        if hasattr(result, 'suggestions'):
+        if hasattr(result, "suggestions"):
             assert len(result.suggestions) >= 0
 
     def test_present_nested_error(self, presenter):
@@ -348,7 +356,7 @@ class TestErrorPresenter:
             result = presenter.present(None)
             # Should handle gracefully
             assert result is not None or result is None
-        except:
+        except Exception:
             # Or raise appropriate error
             pass
 
@@ -370,22 +378,26 @@ class TestErrorPresenter:
 # 4. INTEGRATION TESTS
 # =============================================================================
 
+
 class TestUXComponentsIntegration:
     """Test UX components work together."""
 
     @pytest.fixture
     def enhancer(self):
         from vertice_cli.core.input_enhancer import InputEnhancer
+
         return InputEnhancer()
 
     @pytest.fixture
     def tracker(self):
         from vertice_cli.core.context_tracker import ContextTracker
+
         return ContextTracker()
 
     @pytest.fixture
     def presenter(self):
         from vertice_cli.core.error_presenter import ErrorPresenter
+
         return ErrorPresenter()
 
     def test_pipeline_input_to_context(self, enhancer, tracker):
@@ -393,7 +405,7 @@ class TestUXComponentsIntegration:
         from vertice_cli.core.context_tracker import ContextType
 
         # Enhance input
-        enhanced = enhancer.enhance("Edit the main.py file")
+        enhancer.enhance("Edit the main.py file")
 
         # Track file mentioned in enhanced input
         tracker.record(ContextType.FILE, "main.py")
@@ -424,12 +436,14 @@ class TestUXComponentsIntegration:
         from vertice_cli.core.context_tracker import ContextType
 
         # Step 1: Enhance input
-        enhanced = enhancer.enhance("""Here's my code:
+        enhanced = enhancer.enhance(
+            """Here's my code:
 ```python
 def broken():
     return undeclared
 ```
-""")
+"""
+        )
 
         # Step 2: Track context
         if enhanced.code_blocks:
@@ -446,12 +460,14 @@ def broken():
 # 5. EDGE CASE TESTS
 # =============================================================================
 
+
 class TestUXEdgeCases:
     """Test edge cases for UX components."""
 
     @pytest.fixture
     def enhancer(self):
         from vertice_cli.core.input_enhancer import InputEnhancer
+
         return InputEnhancer()
 
     def test_unicode_input(self, enhancer):

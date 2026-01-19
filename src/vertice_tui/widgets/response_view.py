@@ -9,26 +9,26 @@ Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 
 from __future__ import annotations
 
+import os
 import time
 from typing import TYPE_CHECKING
 
 from textual.containers import VerticalScroll
 from textual.reactive import reactive
-from textual.widgets import Static
+from textual.widgets import Static, Markdown as TextualMarkdown
 
 from rich.syntax import Syntax
 from rich.panel import Panel
-from rich.markdown import Markdown
+from rich.markdown import Markdown as RichMarkdown
 from rich.text import Text
 from rich import box
 
 from vertice_tui.constants import BANNER
 from vertice_tui.widgets.selectable import SelectableStatic
 from vertice_tui.core.formatting import OutputFormatter, Colors, Icons
-from vertice_tui.components.streaming_adapter import StreamingResponseWidget
 
 if TYPE_CHECKING:
-    pass
+    from textual.widgets._markdown import MarkdownStream
 
 
 class ResponseView(VerticalScroll):
@@ -107,14 +107,44 @@ class ResponseView(VerticalScroll):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.current_response = ""
-        self._response_widget: Static | StreamingResponseWidget | None = None
+        self._response_widget: Static | TextualMarkdown | None = None
+        self._markdown_stream: MarkdownStream | None = None
         self._thinking_widget: Static | None = None
-        self._use_streaming_markdown: bool = True
+        self._use_textual_markdown_stream: bool = True
+        self._max_view_items = self._get_max_view_items()
+
+    def _get_max_view_items(self) -> int:
+        """
+        Max number of non-banner widgets kept in the scrollback.
+
+        This prevents long sessions from degrading due to mounting unbounded widgets.
+        """
+        try:
+            return int(os.getenv("VERTICE_TUI_MAX_VIEW_ITEMS", "300"))
+        except ValueError:
+            return 300
+
+    def _trim_view_items(self) -> None:
+        """Trim old widgets to keep the view responsive in long sessions."""
+        max_items = self._max_view_items
+        if max_items <= 0:
+            return
+
+        candidates = [child for child in self.children if not child.has_class("banner")]
+        excess = len(candidates) - max_items
+        if excess <= 0:
+            return
+
+        for child in candidates[:excess]:
+            if child is self._thinking_widget:
+                continue
+            child.remove()
 
     def add_banner(self) -> None:
         """Add startup banner."""
         widget = Static(BANNER, classes="banner")
         self.mount(widget)
+        self._trim_view_items()
 
     def add_user_message(self, message: str) -> None:
         """Add user message with prompt icon."""
@@ -124,6 +154,7 @@ class ResponseView(VerticalScroll):
 
         widget = SelectableStatic(content, classes="user-message")
         self.mount(widget)
+        self._trim_view_items()
         self.scroll_end(animate=False)
 
     def add_system_message(self, message: str) -> None:
@@ -133,7 +164,7 @@ class ResponseView(VerticalScroll):
             content = Text.from_markup(message)
         else:
             # Standard markdown in a styled panel
-            content = Markdown(message)
+            content = RichMarkdown(message)
 
         # Wrap in a premium panel
         panel = Panel(
@@ -145,49 +176,54 @@ class ResponseView(VerticalScroll):
 
         widget = SelectableStatic(panel, classes="system-message")
         self.mount(widget)
+        self._trim_view_items()
         self.scroll_end(animate=False)
 
     def start_thinking(self) -> None:
         """Show advanced reasoning stream indicator."""
         from vertice_tui.widgets import ReasoningStream
 
+        if self._thinking_widget is not None:
+            return
+
         self.is_thinking = True
         self._thinking_widget = ReasoningStream(id="reasoning-stream")
         self.mount(self._thinking_widget)
         self.scroll_end(animate=False)
 
-    def end_thinking(self) -> None:
+    async def end_thinking(self) -> None:
         """Remove thinking indicator and finalize response."""
         self.is_thinking = False
         if self._thinking_widget:
             self._thinking_widget.remove()
             self._thinking_widget = None
 
-        # Wrap completed response in Panel
-        if self.current_response and self._response_widget:
-            if self._use_streaming_markdown and isinstance(
-                self._response_widget, StreamingResponseWidget
-            ):
-                self._response_widget.finalize_sync()
-            else:
-                formatted_panel = OutputFormatter.format_response(
-                    self.current_response, title="Response", border_style=Colors.PRIMARY
-                )
-                self._response_widget.update(formatted_panel)
+        # Flush any pending markdown fragments.
+        if self._markdown_stream is not None:
+            try:
+                await self._markdown_stream.stop()
+            except Exception:
+                pass
+            finally:
+                self._markdown_stream = None
 
         # Reset for next response
         self.current_response = ""
         self._response_widget = None
 
-    def append_chunk(self, chunk: str) -> None:
-        """Append streaming chunk. Optimized for 60fps."""
+    async def append_chunk(self, chunk: str) -> None:
+        """Append streaming chunk. Optimized for smooth, incremental markdown updates."""
         self.current_response += chunk
 
         if self._response_widget:
-            if self._use_streaming_markdown and isinstance(
-                self._response_widget, StreamingResponseWidget
+            if self._use_textual_markdown_stream and isinstance(
+                self._response_widget, TextualMarkdown
             ):
-                self._response_widget.append_chunk(chunk)
+                if self._markdown_stream is not None:
+                    await self._markdown_stream.write(chunk)
+                else:
+                    self._markdown_stream = TextualMarkdown.get_stream(self._response_widget)
+                    await self._markdown_stream.write(chunk)
             else:
                 self._response_widget.update(self.current_response)
         else:
@@ -196,20 +232,18 @@ class ResponseView(VerticalScroll):
                 self._thinking_widget.remove()
                 self._thinking_widget = None
 
-            if self._use_streaming_markdown:
-                self._response_widget = StreamingResponseWidget(
-                    classes="ai-response", enable_markdown=True
-                )
+            if self._use_textual_markdown_stream:
+                self._response_widget = TextualMarkdown("", classes="ai-response")
+                self.mount(self._response_widget)
+                self._trim_view_items()
+                self._markdown_stream = TextualMarkdown.get_stream(self._response_widget)
+                await self._markdown_stream.write(chunk)
             else:
                 self._response_widget = SelectableStatic(
                     self.current_response, classes="ai-response"
                 )
-            self.mount(self._response_widget)
-
-            if self._use_streaming_markdown and isinstance(
-                self._response_widget, StreamingResponseWidget
-            ):
-                self._response_widget.append_chunk(chunk)
+                self.mount(self._response_widget)
+                self._trim_view_items()
 
         # Throttled scroll (max 20fps = 50ms) to prevent layout thrashing
         current_time = time.time()
@@ -220,7 +254,7 @@ class ResponseView(VerticalScroll):
             self.scroll_end(animate=False)
             self._last_scroll_time = current_time
 
-    def handle_open_responses_event(self, event) -> None:
+    async def handle_open_responses_event(self, event) -> None:
         """
         Handle Open Responses streaming event.
 
@@ -247,6 +281,7 @@ class ResponseView(VerticalScroll):
             # Start new response session
             self.start_thinking()
             self.current_response = ""
+            self._markdown_stream = None
             return
 
         match event:
@@ -260,7 +295,7 @@ class ResponseView(VerticalScroll):
                     pass
 
             case OpenResponsesOutputTextDeltaEvent(delta=delta):
-                self.append_chunk(delta)
+                await self.append_chunk(delta)
 
             case OpenResponsesReasoningContentDeltaEvent(delta=delta):
                 if self._thinking_widget and hasattr(self._thinking_widget, "append_chunk"):
@@ -287,12 +322,12 @@ class ResponseView(VerticalScroll):
                 self.current_response = text
 
             case OpenResponsesResponseCompletedEvent():
-                self.end_thinking()
+                await self.end_thinking()
 
             case OpenResponsesResponseFailedEvent(error=error):
                 error_msg = error.get("message", "Unknown error") if error else "Response failed"
                 self.add_system_message(f"[error]{Icons.ERROR} {error_msg}[/error]")
-                self.end_thinking()
+                await self.end_thinking()
 
             case OpenResponsesDoneEvent():
                 pass
@@ -341,6 +376,7 @@ class ResponseView(VerticalScroll):
 
         widget = SelectableStatic(panel, classes="code-block")
         self.mount(widget)
+        self._trim_view_items()
         self.scroll_end(animate=False)
 
     def add_diff_block(
@@ -383,6 +419,7 @@ class ResponseView(VerticalScroll):
 
         widget = SelectableStatic(panel, classes="diff-block")
         self.mount(widget)
+        self._trim_view_items()
         self.scroll_end(animate=False)
 
     def add_action(self, action: str) -> None:
@@ -392,6 +429,7 @@ class ResponseView(VerticalScroll):
             classes="action",
         )
         self.mount(widget)
+        self._trim_view_items()
         self.scroll_end(animate=False)
 
     def add_warning(self, message: str) -> None:
@@ -401,6 +439,7 @@ class ResponseView(VerticalScroll):
             classes="warning",
         )
         self.mount(widget)
+        self._trim_view_items()
         self.scroll_end(animate=False)
 
     def add_success(self, message: str) -> None:
@@ -410,6 +449,7 @@ class ResponseView(VerticalScroll):
             classes="success",
         )
         self.mount(widget)
+        self._trim_view_items()
         self.scroll_end(animate=False)
 
     def add_error(self, message: str) -> None:
@@ -418,6 +458,7 @@ class ResponseView(VerticalScroll):
             f"[bold {Colors.ERROR}]{Icons.ERROR}[/] [{Colors.ERROR}]{message}[/]", classes="error"
         )
         self.mount(widget)
+        self._trim_view_items()
         self.scroll_end(animate=False)
 
     def add_tool_result(
@@ -427,6 +468,7 @@ class ResponseView(VerticalScroll):
         panel = OutputFormatter.format_tool_result(tool_name, success, data, error)
         widget = SelectableStatic(panel, classes="tool-result")
         self.mount(widget)
+        self._trim_view_items()
         self.scroll_end(animate=False)
 
     def add_response_panel(self, text: str, title: str = "Response") -> None:
@@ -434,6 +476,7 @@ class ResponseView(VerticalScroll):
         panel = OutputFormatter.format_response(text, title)
         widget = SelectableStatic(panel, classes="ai-response")
         self.mount(widget)
+        self._trim_view_items()
         self.scroll_end(animate=False)
 
     def add_info_panel(
@@ -447,7 +490,7 @@ class ResponseView(VerticalScroll):
             icon: Emoji icon for the panel header
             border_color: Border color (from Colors constants)
         """
-        content = Markdown(message)
+        content = RichMarkdown(message)
 
         panel = Panel(
             content,
@@ -460,6 +503,7 @@ class ResponseView(VerticalScroll):
 
         widget = SelectableStatic(panel, classes="info-panel")
         self.mount(widget)
+        self._trim_view_items()
         self.scroll_end(animate=False)
 
     def add_markdown_response(self, text: str, title: str = "Response") -> None:
@@ -506,6 +550,7 @@ class ResponseView(VerticalScroll):
             panel = OutputFormatter.format_response(text, title)
             widget = SelectableStatic(panel, classes="ai-response")
             self.mount(widget)
+            self._trim_view_items()
             self.scroll_end(animate=False)
             return
 
@@ -534,6 +579,7 @@ class ResponseView(VerticalScroll):
             )
             widget = SelectableStatic(panel, classes="ai-response")
             self.mount(widget)
+            self._trim_view_items()
 
         self.scroll_end(animate=False)
 

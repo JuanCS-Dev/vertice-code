@@ -23,8 +23,10 @@ from dataclasses import dataclass
 # STATE MACHINE IMPLEMENTATION FOR TESTING
 # =============================================================================
 
+
 class Phase(Enum):
     """Workflow phases."""
+
     INIT = auto()
     ARCHITECT = auto()
     EXPLORER = auto()
@@ -39,6 +41,7 @@ class Phase(Enum):
 @dataclass
 class StateTransition:
     """Record of a state transition."""
+
     from_phase: Phase
     to_phase: Phase
     timestamp: float
@@ -48,6 +51,7 @@ class StateTransition:
 @dataclass
 class PhaseCheckpoint:
     """Checkpoint at phase boundary."""
+
     phase: Phase
     timestamp: float
     context: Dict[str, Any]
@@ -88,19 +92,15 @@ class StateMachine:
 
         # Create checkpoint before leaving
         self.checkpoints[self.current_phase] = PhaseCheckpoint(
-            phase=self.current_phase,
-            timestamp=time.time(),
-            context=self.context.copy(),
-            outputs={}
+            phase=self.current_phase, timestamp=time.time(), context=self.context.copy(), outputs={}
         )
 
         # Record transition
-        self.transitions.append(StateTransition(
-            from_phase=self.current_phase,
-            to_phase=target,
-            timestamp=time.time(),
-            success=True
-        ))
+        self.transitions.append(
+            StateTransition(
+                from_phase=self.current_phase, to_phase=target, timestamp=time.time(), success=True
+            )
+        )
 
         self.current_phase = target
         return True
@@ -134,6 +134,7 @@ class StateMachine:
 # FIXTURES
 # =============================================================================
 
+
 @pytest.fixture
 def state_machine():
     """Create state machine for testing."""
@@ -155,6 +156,7 @@ def populated_state_machine():
 # =============================================================================
 # 1. STATE TRANSITION VALIDITY TESTS
 # =============================================================================
+
 
 class TestStateTransitionValidity:
     """Test state transition rules."""
@@ -206,6 +208,7 @@ class TestStateTransitionValidity:
 # 2. CHECKPOINT PERSISTENCE TESTS
 # =============================================================================
 
+
 class TestCheckpointPersistence:
     """Test checkpoint save/restore."""
 
@@ -251,6 +254,7 @@ class TestCheckpointPersistence:
 # 3. ROLLBACK CORRECTNESS TESTS
 # =============================================================================
 
+
 class TestRollbackCorrectness:
     """Test rollback functionality."""
 
@@ -286,14 +290,13 @@ class TestRollbackCorrectness:
     def test_rollback_through_rollback_state(self, populated_state_machine):
         """Rollback transitions through ROLLBACK state."""
         sm = populated_state_machine
-        initial_transitions = len(sm.transitions)
+        len(sm.transitions)
 
         sm.rollback_to(Phase.INIT)
 
         # Should have ROLLBACK in history
         has_rollback = any(
-            t.from_phase == Phase.PLANNER and t.to_phase == Phase.ROLLBACK
-            for t in sm.transitions
+            t.from_phase == Phase.PLANNER and t.to_phase == Phase.ROLLBACK for t in sm.transitions
         )
         assert has_rollback
 
@@ -317,12 +320,14 @@ class TestRollbackCorrectness:
 # 4. CONCURRENT STATE UPDATES TESTS
 # =============================================================================
 
+
 class TestConcurrentStateUpdates:
     """Test concurrent state update handling."""
 
     @pytest.mark.asyncio
     async def test_sequential_updates_succeed(self, state_machine):
         """Sequential updates work correctly."""
+
         async def update_context(key, value, delay=0):
             await asyncio.sleep(delay)
             state_machine.context[key] = value
@@ -346,10 +351,7 @@ class TestConcurrentStateUpdates:
                 context[key] = value
 
         # Parallel updates
-        await asyncio.gather(*[
-            safe_update(f"key{i}", f"value{i}")
-            for i in range(100)
-        ])
+        await asyncio.gather(*[safe_update(f"key{i}", f"value{i}") for i in range(100)])
 
         # All updates should be present
         assert len(context) == 100
@@ -374,7 +376,7 @@ class TestConcurrentStateUpdates:
         results = await asyncio.gather(
             try_transition(Phase.ARCHITECT),
             try_transition(Phase.PLANNER),
-            try_transition(Phase.EXPLORER)
+            try_transition(Phase.EXPLORER),
         )
 
         # At least one should succeed
@@ -384,6 +386,7 @@ class TestConcurrentStateUpdates:
 # =============================================================================
 # 5. STATE MACHINE INVARIANTS TESTS
 # =============================================================================
+
 
 class TestStateMachineInvariants:
     """Test state machine invariants."""
@@ -437,6 +440,7 @@ class TestStateMachineInvariants:
 # 6. STATE SERIALIZATION TESTS
 # =============================================================================
 
+
 class TestStateSerialization:
     """Test state serialization for persistence."""
 
@@ -451,7 +455,7 @@ class TestStateSerialization:
             "boolean": True,
             "null": None,
             "list": [1, 2, 3],
-            "nested": {"key": "value"}
+            "nested": {"key": "value"},
         }
 
         # Should not raise
@@ -470,7 +474,7 @@ class TestStateSerialization:
             "phase": checkpoint.phase.name,
             "timestamp": checkpoint.timestamp,
             "context": checkpoint.context,
-            "outputs": checkpoint.outputs
+            "outputs": checkpoint.outputs,
         }
 
         json_str = json.dumps(serialized)
@@ -484,6 +488,7 @@ class TestStateSerialization:
 # 7. STATE RECOVERY TESTS
 # =============================================================================
 
+
 class TestStateRecovery:
     """Test state recovery scenarios."""
 
@@ -495,8 +500,8 @@ class TestStateRecovery:
             "context": {"key": "value"},
             "transitions": [
                 {"from": "INIT", "to": "ARCHITECT"},
-                {"from": "ARCHITECT", "to": "PLANNER"}
-            ]
+                {"from": "ARCHITECT", "to": "PLANNER"},
+            ],
         }
 
         # Recover
@@ -522,12 +527,13 @@ class TestStateRecovery:
 # 8. PHASE TIMEOUT TESTS
 # =============================================================================
 
+
 class TestPhaseTimeouts:
     """Test phase timeout handling."""
 
     def test_phase_duration_tracking(self, state_machine):
         """Phase duration is tracked."""
-        start = time.time()
+        time.time()
         state_machine.transition_to(Phase.ARCHITECT)
         time.sleep(0.01)  # Simulate work
         state_machine.transition_to(Phase.PLANNER)

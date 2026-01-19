@@ -19,6 +19,7 @@ class TestDirectHandoffs:
     def orchestrator(self):
         """Create orchestrator for handoff testing."""
         from agents import OrchestratorAgent
+
         return OrchestratorAgent()
 
     @pytest.mark.asyncio
@@ -33,9 +34,7 @@ class TestDirectHandoffs:
         )
 
         handoff = await orchestrator.handoff(
-            task=task,
-            to_agent=AgentRole.CODER,
-            context="Generate REST API endpoint"
+            task=task, to_agent=AgentRole.CODER, context="Generate REST API endpoint"
         )
 
         assert handoff.from_agent == AgentRole.ORCHESTRATOR
@@ -57,7 +56,7 @@ class TestDirectHandoffs:
         handoff = await orchestrator.handoff(
             task=task,
             to_agent=AgentRole.REVIEWER,
-            context="Security review for authentication module"
+            context="Security review for authentication module",
         )
 
         assert handoff.to_agent == AgentRole.REVIEWER
@@ -74,9 +73,7 @@ class TestDirectHandoffs:
         )
 
         handoff = await orchestrator.handoff(
-            task=task,
-            to_agent=AgentRole.ARCHITECT,
-            context="Design payment microservices"
+            task=task, to_agent=AgentRole.ARCHITECT, context="Design payment microservices"
         )
 
         assert handoff.to_agent == AgentRole.ARCHITECT
@@ -93,9 +90,7 @@ class TestDirectHandoffs:
         )
 
         handoff = await orchestrator.handoff(
-            task=task,
-            to_agent=AgentRole.DEVOPS,
-            context="Production deployment of v2.0"
+            task=task, to_agent=AgentRole.DEVOPS, context="Production deployment of v2.0"
         )
 
         assert handoff.to_agent == AgentRole.DEVOPS
@@ -118,7 +113,7 @@ class TestChainHandoffs:
             description="Design API architecture",
             complexity=TaskComplexity.COMPLEX,
         )
-        h1 = await orchestrator.handoff(task1, AgentRole.ARCHITECT, "Design phase")
+        await orchestrator.handoff(task1, AgentRole.ARCHITECT, "Design phase")
 
         # Phase 2: To Coder
         task2 = Task(
@@ -126,7 +121,7 @@ class TestChainHandoffs:
             description="Implement the designed API",
             complexity=TaskComplexity.MODERATE,
         )
-        h2 = await orchestrator.handoff(task2, AgentRole.CODER, "Implementation phase")
+        await orchestrator.handoff(task2, AgentRole.CODER, "Implementation phase")
 
         # Phase 3: To Reviewer
         task3 = Task(
@@ -134,7 +129,7 @@ class TestChainHandoffs:
             description="Review the implementation",
             complexity=TaskComplexity.MODERATE,
         )
-        h3 = await orchestrator.handoff(task3, AgentRole.REVIEWER, "Review phase")
+        await orchestrator.handoff(task3, AgentRole.REVIEWER, "Review phase")
 
         assert len(orchestrator.handoffs) == 3
         assert orchestrator.handoffs[0].to_agent == AgentRole.ARCHITECT
@@ -150,24 +145,24 @@ class TestChainHandoffs:
         orchestrator = OrchestratorAgent()
 
         # Research phase
-        h1 = await orchestrator.handoff(
+        await orchestrator.handoff(
             Task(id="r-1", description="Research best practices", complexity=TaskComplexity.SIMPLE),
             AgentRole.RESEARCHER,
-            "Research"
+            "Research",
         )
 
         # Implementation phase
-        h2 = await orchestrator.handoff(
+        await orchestrator.handoff(
             Task(id="r-2", description="Implement feature", complexity=TaskComplexity.MODERATE),
             AgentRole.CODER,
-            "Implement"
+            "Implement",
         )
 
         # Deployment phase
-        h3 = await orchestrator.handoff(
+        await orchestrator.handoff(
             Task(id="r-3", description="Deploy feature", complexity=TaskComplexity.MODERATE),
             AgentRole.DEVOPS,
-            "Deploy"
+            "Deploy",
         )
 
         assert len(orchestrator.handoffs) == 3

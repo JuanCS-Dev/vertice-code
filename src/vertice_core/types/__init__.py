@@ -43,6 +43,9 @@ from .messages import (
 from .agents import (
     AgentRole,
     AgentCapability,
+    TaskStatus,
+    PlanningMode,
+    ConfidenceLevel,
 )
 
 # Planner Types

@@ -23,6 +23,7 @@ from pathlib import Path
 # 1. HIGH-VOLUME FILE OPERATIONS
 # =============================================================================
 
+
 class TestHighVolumeFileOperations:
     """Test high-volume file operations."""
 
@@ -42,10 +43,7 @@ class TestHighVolumeFileOperations:
 
             # Execute 50 parallel reads
             start = time.time()
-            tasks = [
-                tool.execute(path=str(workspace / f"stress_read_{i}.txt"))
-                for i in range(50)
-            ]
+            tasks = [tool.execute(path=str(workspace / f"stress_read_{i}.txt")) for i in range(50)]
             results = await asyncio.gather(*tasks)
             elapsed = time.time() - start
 
@@ -74,7 +72,7 @@ class TestHighVolumeFileOperations:
             tasks = [
                 tool.execute(
                     path=str(workspace / f"stress_write_{i}.txt"),
-                    content=f"Stress write content {i} with some padding " * 10
+                    content=f"Stress write content {i} with some padding " * 10,
                 )
                 for i in range(100)
             ]
@@ -119,10 +117,11 @@ class TestHighVolumeFileOperations:
 
             # 100 writes
             for i in range(100):
-                tasks.append(write_tool.execute(
-                    path=str(workspace / f"write_{i}.txt"),
-                    content=f"Write content {i}"
-                ))
+                tasks.append(
+                    write_tool.execute(
+                        path=str(workspace / f"write_{i}.txt"), content=f"Write content {i}"
+                    )
+                )
 
             results = await asyncio.gather(*tasks)
             elapsed = time.time() - start
@@ -139,6 +138,7 @@ class TestHighVolumeFileOperations:
 # 2. HIGH-VOLUME COMMAND EXECUTION
 # =============================================================================
 
+
 class TestHighVolumeCommandExecution:
     """Test high-volume command execution."""
 
@@ -151,10 +151,7 @@ class TestHighVolumeCommandExecution:
 
         # Execute 50 parallel commands
         start = time.time()
-        tasks = [
-            tool.execute(command=f"echo 'Stress test output {i}'")
-            for i in range(50)
-        ]
+        tasks = [tool.execute(command=f"echo 'Stress test output {i}'") for i in range(50)]
         results = await asyncio.gather(*tasks)
         elapsed = time.time() - start
 
@@ -202,6 +199,7 @@ class TestHighVolumeCommandExecution:
 # =============================================================================
 # 3. SEMAPHORE-LIMITED STRESS TESTS
 # =============================================================================
+
 
 class TestSemaphoreLimitedStress:
     """Test stress with semaphore-limited concurrency."""
@@ -263,8 +261,7 @@ class TestSemaphoreLimitedStress:
             async def limited_write(i):
                 async with semaphore:
                     return await write_tool.execute(
-                        path=str(workspace / f"sem_write_{i}.txt"),
-                        content=f"Written {i}"
+                        path=str(workspace / f"sem_write_{i}.txt"), content=f"Written {i}"
                     )
 
             # 50 reads + 50 writes
@@ -282,6 +279,7 @@ class TestSemaphoreLimitedStress:
 # =============================================================================
 # 4. MEMORY STABILITY TESTS
 # =============================================================================
+
 
 class TestMemoryStability:
     """Test memory stability under load."""
@@ -301,18 +299,20 @@ class TestMemoryStability:
                 # Create and write files
                 tasks = []
                 for i in range(20):
-                    tasks.append(write_tool.execute(
-                        path=str(workspace / f"batch{batch}_file{i}.txt"),
-                        content=f"Batch {batch} content {i} " * 100
-                    ))
+                    tasks.append(
+                        write_tool.execute(
+                            path=str(workspace / f"batch{batch}_file{i}.txt"),
+                            content=f"Batch {batch} content {i} " * 100,
+                        )
+                    )
                 await asyncio.gather(*tasks)
 
                 # Read files
                 tasks = []
                 for i in range(20):
-                    tasks.append(read_tool.execute(
-                        path=str(workspace / f"batch{batch}_file{i}.txt")
-                    ))
+                    tasks.append(
+                        read_tool.execute(path=str(workspace / f"batch{batch}_file{i}.txt"))
+                    )
                 await asyncio.gather(*tasks)
 
                 # Force garbage collection
@@ -332,9 +332,7 @@ class TestMemoryStability:
         tasks = []
         for i in range(10):
             # Each command generates ~100KB of output
-            tasks.append(tool.execute(
-                command="python3 -c \"print('x' * 1000 * 100)\""
-            ))
+            tasks.append(tool.execute(command="python3 -c \"print('x' * 1000 * 100)\""))
 
         results = await asyncio.gather(*tasks)
 
@@ -345,6 +343,7 @@ class TestMemoryStability:
 # =============================================================================
 # 5. RECOVERY AFTER STRESS
 # =============================================================================
+
 
 class TestRecoveryAfterStress:
     """Test system recovery after stress."""
@@ -361,10 +360,7 @@ class TestRecoveryAfterStress:
             # Phase 1: Heavy load
             write_tool = WriteFileTool()
             tasks = [
-                write_tool.execute(
-                    path=str(workspace / f"heavy_{i}.txt"),
-                    content=f"Heavy {i}"
-                )
+                write_tool.execute(path=str(workspace / f"heavy_{i}.txt"), content=f"Heavy {i}")
                 for i in range(30)
             ]
             await asyncio.gather(*tasks)
@@ -383,8 +379,7 @@ class TestRecoveryAfterStress:
 
             # Simple write
             write_result = await write_tool.execute(
-                path=str(workspace / "recovery.txt"),
-                content="Recovery content"
+                path=str(workspace / "recovery.txt"), content="Recovery content"
             )
             assert write_result.success
 
@@ -396,10 +391,7 @@ class TestRecoveryAfterStress:
         tool = ReadFileTool()
 
         # Generate many failures
-        tasks = [
-            tool.execute(path=f"/nonexistent/path_{i}.txt")
-            for i in range(50)
-        ]
+        tasks = [tool.execute(path=f"/nonexistent/path_{i}.txt") for i in range(50)]
         results = await asyncio.gather(*tasks)
 
         # All should fail gracefully
@@ -420,6 +412,7 @@ class TestRecoveryAfterStress:
 # 6. THROUGHPUT BENCHMARKS
 # =============================================================================
 
+
 class TestThroughputBenchmarks:
     """Test throughput benchmarks."""
 
@@ -439,10 +432,7 @@ class TestThroughputBenchmarks:
 
             # Measure throughput
             start = time.time()
-            tasks = [
-                tool.execute(path=str(workspace / f"bench_{i}.txt"))
-                for i in range(100)
-            ]
+            tasks = [tool.execute(path=str(workspace / f"bench_{i}.txt")) for i in range(100)]
             results = await asyncio.gather(*tasks)
             elapsed = time.time() - start
 
@@ -463,10 +453,7 @@ class TestThroughputBenchmarks:
 
         # Measure throughput
         start = time.time()
-        tasks = [
-            tool.execute(command=f"echo 'bench {i}'")
-            for i in range(50)
-        ]
+        tasks = [tool.execute(command=f"echo 'bench {i}'") for i in range(50)]
         results = await asyncio.gather(*tasks)
         elapsed = time.time() - start
 
@@ -482,6 +469,7 @@ class TestThroughputBenchmarks:
 # =============================================================================
 # 7. QUEUE-BASED STRESS TESTS
 # =============================================================================
+
 
 class TestQueueBasedStress:
     """Test queue-based stress patterns."""
@@ -505,7 +493,7 @@ class TestQueueBasedStress:
             nonlocal consumed
             while consumed < 100:
                 try:
-                    item = await asyncio.wait_for(queue.get(), timeout=5.0)
+                    await asyncio.wait_for(queue.get(), timeout=5.0)
                     consumed += 1
                 except asyncio.TimeoutError:
                     errors.append("Timeout")
@@ -556,6 +544,7 @@ class TestQueueBasedStress:
 # =============================================================================
 # 8. LATENCY UNDER LOAD
 # =============================================================================
+
 
 class TestLatencyUnderLoad:
     """Test latency characteristics under load."""

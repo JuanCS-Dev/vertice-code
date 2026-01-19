@@ -14,7 +14,6 @@ Modelos disponíveis (2026):
 from __future__ import annotations
 
 import os
-import asyncio
 from typing import Any, Dict, List, Optional, AsyncGenerator
 import logging
 
@@ -33,7 +32,6 @@ logger = logging.getLogger(__name__)
 HAS_GENAI_SDK = False
 try:
     from google import genai
-    from google.genai import types
 
     HAS_GENAI_SDK = True
 except ImportError:
@@ -59,14 +57,14 @@ class VertexAIProvider:
     """
 
     MODELS = {
-        # Gemini 3 (Standard)
+        # Gemini 3 (Standard) - per Vertex AI docs Jan 2026
         "flash": "gemini-3-flash-preview",
         "pro": "gemini-3-pro-preview",
         "gemini-3-flash": "gemini-3-flash-preview",
         "gemini-3-pro": "gemini-3-pro-preview",
-        # Legacy Mappings (Forced Upgrade)
-        "gemini-2.5-flash": "gemini-3-flash-preview",
-        "gemini-2.5-pro": "gemini-3-pro-preview",
+        # Fallback to 2.5 if needed
+        "gemini-2.5-flash": "gemini-2.5-flash",
+        "gemini-2.5-pro": "gemini-2.5-pro",
     }
 
     def __init__(
@@ -76,8 +74,10 @@ class VertexAIProvider:
         model_name: str = "pro",
         enable_grounding: bool = False,
     ):
-        self.project = project or os.getenv("GOOGLE_CLOUD_PROJECT")
-        self.location = os.getenv("VERTEX_AI_LOCATION", location)
+        # Get project: env var first, then gcloud config, then parameter
+        self.project = project or os.getenv("GOOGLE_CLOUD_PROJECT") or self._get_gcloud_project()
+        # Location: us-central1 is the safe default for Gemini models
+        self.location = os.getenv("VERTEX_AI_LOCATION") or location or "us-central1"
         self.model_alias = model_name
         self.model_id = self.MODELS.get(model_name, model_name)
         self.enable_grounding = enable_grounding
@@ -88,6 +88,24 @@ class VertexAIProvider:
         # Private State
         self._legacy_model = None
         self._genai_client = None
+
+    def _get_gcloud_project(self) -> Optional[str]:
+        """Get default project from gcloud config."""
+        try:
+            import subprocess
+
+            result = subprocess.run(
+                ["gcloud", "config", "get-value", "project"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                return result.stdout.strip()
+        except Exception as _:
+            # Fallback to defaults if credential loading fails
+            pass
+        return None
 
     def _init_genai_client(self):
         """Lazy init for Google GenAI SDK (v3)."""
@@ -168,37 +186,37 @@ class VertexAIProvider:
                 yield chunk
 
     async def _stream_v3(self, messages, system_prompt, max_tokens, temperature, tools, **kwargs):
-        """Native SDK v3 Implementation."""
-        try:
-            config = types.GenerateContentConfig(
-                system_instruction=system_prompt,
-                temperature=temperature,
-                max_output_tokens=max_tokens,
-            )
+        """Native SDK v3 Implementation with ASYNC streaming.
 
-            # Message formatting for v3
+        Uses client.aio for native async per google-genai SDK documentation:
+        https://googleapis.github.io/python-genai/#generate-content-asynchronous-streaming
+
+        Note: gemini-3-pro-preview has a known issue where passing GenerateContentConfig
+        to async streaming returns chunk.text=None. Workaround: use model defaults.
+        """
+        try:
+            # Build contents - can use simple strings or Content objects
             contents = []
             for msg in messages:
                 if msg["role"] == "system":
+                    # Prepend system message to first user message
+                    if system_prompt is None:
+                        system_prompt = msg["content"]
                     continue
-                role = "user" if msg["role"] == "user" else "model"
-                contents.append(
-                    types.Content(role=role, parts=[types.Part.from_text(text=msg["content"])])
-                )
+                contents.append(msg["content"])
 
-            loop = asyncio.get_running_loop()
+            # Prepend system prompt if provided
+            if system_prompt and contents:
+                contents[0] = f"{system_prompt}\n\n{contents[0]}"
 
-            def _get_stream():
-                return self._genai_client.models.generate_content_stream(
-                    model=self.model_id, contents=contents, config=config
-                )
-
-            stream_iter = await loop.run_in_executor(None, _get_stream)
-
-            for chunk in stream_iter:
+            # ✅ FIX: Use native async streaming API without config
+            # Note: Passing GenerateContentConfig to gemini-3-pro-preview async causes chunk.text=None
+            # This is a known SDK limitation - use model defaults instead
+            async for chunk in await self._genai_client.aio.models.generate_content_stream(
+                model=self.model_id, contents=contents
+            ):
                 if chunk.text:
                     yield chunk.text
-                    await asyncio.sleep(0)  # Breathe
 
         except Exception as e:
             logger.error(f"Gemini 3 Stream Error: {e}")

@@ -440,7 +440,7 @@ print(calculate_fibonacci(10))
             events = builder.get_events()
             user_dict = user_message.to_dict()
             reasoning_dict = reasoning.to_dict()
-            response_dict = ai_response.to_dict()
+            ai_response.to_dict()
             schema_dict = code_suggestion_schema.to_dict()
 
             # Assertions

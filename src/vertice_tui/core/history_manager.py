@@ -16,6 +16,7 @@ Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 from datetime import datetime
@@ -77,6 +78,9 @@ class HistoryManager(CompactionMixin):
         # Initialize compaction mixin
         self._init_compaction(max_context_tokens)
 
+        # Async lock for thread-safe history saving
+        self._history_lock: asyncio.Lock | None = None
+
         # Configurable paths
         self._history_file = history_file or (Path.home() / ".vertice_tui_history")
         self._session_dir = session_dir or (Path.home() / ".vertice" / "sessions")
@@ -97,15 +101,42 @@ class HistoryManager(CompactionMixin):
             logger.debug(f"Failed to load history: {e}")
 
     def _save_history(self) -> None:
-        """Save history to file."""
+        """Save history to file (sync version - kept for backward compatibility)."""
         try:
             self._history_file.write_text("\n".join(self.commands[-self.max_commands :]))
         except Exception as e:
             logger.debug(f"Failed to save history: {e}")
 
+    async def _save_history_async(self) -> None:
+        """Save history to file WITHOUT blocking event loop.
+
+        Uses asyncio.to_thread to offload disk I/O per Python 3.12+ best practices.
+        Uses asyncio.Lock to prevent concurrent writes.
+
+        Reference: https://docs.python.org/3/library/asyncio-task.html#asyncio.to_thread
+        """
+        if self._history_lock is None:
+            self._history_lock = asyncio.Lock()
+
+        async with self._history_lock:
+            try:
+                content = "\n".join(self.commands[-self.max_commands :])
+                await asyncio.to_thread(self._history_file.write_text, content)
+            except Exception as e:
+                logger.debug(f"Failed to save history async: {e}")
+
+    async def add_command_async(self, command: str) -> None:
+        """Add command to history (non-blocking async version).
+
+        Fire-and-forget safe: can be called with asyncio.create_task().
+        """
+        if command and (not self.commands or command != self.commands[-1]):
+            self.commands.append(command)
+            await self._save_history_async()
+
     def add_command(self, command: str) -> None:
         """
-        Add command to history.
+        Add command to history (sync version).
 
         Skips duplicate of last command.
         """

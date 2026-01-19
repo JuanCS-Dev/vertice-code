@@ -223,32 +223,45 @@ def get_dynamic_context() -> Dict[str, Any]:
         "git_status": None,
     }
 
-    # Get git branch
+    # Git calls can be very slow in large repos (especially with many untracked files).
+    # Keep timeouts tight and skip untracked scanning for responsiveness.
+    git_timeout_s = float(os.getenv("VERTICE_GIT_CONTEXT_TIMEOUT_S", "0.25"))
+
+    # Get git branch (fast path)
     try:
         result = subprocess.run(
-            ["git", "branch", "--show-current"], capture_output=True, text=True, timeout=5
+            ["git", "branch", "--show-current"],
+            capture_output=True,
+            text=True,
+            timeout=git_timeout_s,
         )
         if result.returncode == 0:
             context["git_branch"] = result.stdout.strip()
     except (subprocess.SubprocessError, FileNotFoundError, OSError) as e:
         logger.debug(f"Failed to get git branch: {e}")
 
-    # Get git status summary
+    # Get git status summary (tracked changes only: -uno skips untracked)
     try:
         result = subprocess.run(
-            ["git", "status", "--porcelain"], capture_output=True, text=True, timeout=5
+            ["git", "status", "--porcelain", "-uno"],
+            capture_output=True,
+            text=True,
+            timeout=git_timeout_s,
         )
         if result.returncode == 0:
-            lines = result.stdout.strip().split("\n")
-            if lines and lines[0]:
-                modified = [
-                    line[3:] for line in lines if line.startswith(" M") or line.startswith("M ")
-                ]
-                added = [
-                    line[3:] for line in lines if line.startswith("A ") or line.startswith("??")
-                ]
-                context["modified_files"] = set(modified[:10])
-                context["git_status"] = f"{len(modified)} modified, {len(added)} untracked"
+            lines = [line for line in result.stdout.splitlines() if line.strip()]
+            modified_files: List[str] = []
+            for line in lines:
+                # porcelain v1: XY <path>
+                status = line[:2]
+                path = line[3:] if len(line) > 3 else ""
+                if not path:
+                    continue
+                if "M" in status or "A" in status or "D" in status or "R" in status:
+                    modified_files.append(path)
+
+            context["modified_files"] = set(modified_files[:10])
+            context["git_status"] = f"{len(modified_files)} modified (untracked skipped)"
     except (subprocess.SubprocessError, FileNotFoundError, OSError) as e:
         logger.debug(f"Failed to get git status: {e}")
 

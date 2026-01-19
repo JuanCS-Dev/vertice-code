@@ -113,9 +113,9 @@ class TestRealOrchestratorWorkflow:
         for description, expected_role in test_cases:
             task = Task(id="test", description=description, complexity=TaskComplexity.SIMPLE)
             actual_role = await orchestrator.route(task)
-            assert actual_role == expected_role, (
-                f"Expected {expected_role} for '{description}', got {actual_role}"
-            )
+            assert (
+                actual_role == expected_role
+            ), f"Expected {expected_role} for '{description}', got {actual_role}"
 
     @pytest.mark.asyncio
     async def test_orchestrator_streaming_output(self):
@@ -392,7 +392,7 @@ class TestCompleteWorkflow:
         # Step 2: Route and handoff
         for task in tasks:
             agent = await orchestrator.route(task)
-            handoff = await orchestrator.handoff(task, agent, "Feature impl")
+            await orchestrator.handoff(task, agent, "Feature impl")
             workflow.append(("handoff", agent.value))
 
         # Verify workflow completed

@@ -43,26 +43,25 @@ class A2ACommandHandler:
         subcommand = parts[0].lower() if parts else "status"
         subargs = parts[1] if len(parts) > 1 else ""
 
+        handlers = {
+            "status": self._handle_status,
+            "serve": lambda v: self._handle_serve(int(subargs) if subargs.isdigit() else 50051, v),
+            "stop": self._handle_stop,
+            "discover": self._handle_discover,
+            "call": lambda v: self._handle_call(subargs, v),
+            "card": self._handle_card,
+            "sign": lambda v: self._handle_sign(subargs, v),
+            "agents": self._handle_agents,
+        }
+
         try:
-            if subcommand == "status":
-                await self._handle_status(view)
-            elif subcommand == "serve":
-                port = int(subargs) if subargs.isdigit() else 50051
-                await self._handle_serve(port, view)
-            elif subcommand == "stop":
-                await self._handle_stop(view)
-            elif subcommand == "discover":
-                await self._handle_discover(view)
-            elif subcommand == "call":
-                await self._handle_call(subargs, view)
-            elif subcommand == "card":
-                await self._handle_card(view)
-            elif subcommand == "sign":
-                await self._handle_sign(subargs, view)
-            elif subcommand == "agents":
-                await self._handle_agents(view)
-            else:
-                await self._handle_help(view)
+            handler = handlers.get(subcommand, self._handle_help)
+            # Inspect handler signature to see if it takes view only or needs args wrapper
+            # Simplification: handlers lambda wrappers above handle args
+
+            # Direct dispatch if it's one of the mapped ones, else help
+            # Direct dispatch (handler is already resolved)
+            await handler(view)
         except Exception as e:
             view.add_error(f"A2A command failed: {e}")
 
@@ -131,9 +130,9 @@ class A2ACommandHandler:
                 if agent.get("description"):
                     lines.append(f"  - **Description:** {agent.get('description')}")
                 lines.append("")
-            view.append_chunk("\n".join(lines))
+            await view.append_chunk("\n".join(lines))
         else:
-            view.append_chunk("No agents discovered. Try again or check network.\n")
+            await view.append_chunk("No agents discovered. Try again or check network.\n")
 
     async def _handle_call(self, args: str, view: "ResponseView") -> None:
         """Send task to remote agent."""
@@ -152,7 +151,7 @@ class A2ACommandHandler:
         view.add_system_message(f"## 📞 Calling Agent: {agent_id}\n")
 
         async for chunk in self.bridge.call_a2a_agent(agent_id, task):
-            view.append_chunk(chunk)
+            await view.append_chunk(chunk)
 
     async def _handle_card(self, view: "ResponseView") -> None:
         """Show local agent card."""

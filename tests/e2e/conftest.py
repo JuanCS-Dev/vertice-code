@@ -9,13 +9,12 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).parents[2] / "src"))
 
-from vertice_tui.app import VerticeApp
-from vertice_tui.widgets import ResponseView, StatusBar
-from typing import AsyncIterator
+from vertice_tui.app import VerticeApp  # noqa: E402
+from vertice_tui.widgets import ResponseView, StatusBar  # noqa: E402
 
 
-from vertice_core.openresponses_stream import OpenResponsesStreamBuilder
-from vertice_core.openresponses_types import TokenUsage
+from vertice_core.openresponses_stream import OpenResponsesStreamBuilder  # noqa: E402
+from vertice_core.openresponses_types import TokenUsage  # noqa: E402
 
 
 # Mock response generator using Open Responses protocol

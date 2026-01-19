@@ -211,13 +211,13 @@ class AgentCommandHandler:
             logger.debug(
                 f"Invoking {agent_name} with {len(context['files'])} files from {context['cwd']}"
             )
-            view.append_chunk(
+            await view.append_chunk(
                 f"📁 Found **{len(context['files'])} files** in `{context['project_name']}`\n\n"
             )
 
         try:
             async for chunk in self.bridge.invoke_agent(agent_name, task, context):
-                view.append_chunk(chunk)
+                await view.append_chunk(chunk)
                 await asyncio.sleep(0)
 
             view.add_success(f"✓ {agent_name.title()}Agent complete")
@@ -229,7 +229,7 @@ class AgentCommandHandler:
         finally:
             self.app.is_processing = False
             status.mode = "READY"
-            view.end_thinking()
+            await view.end_thinking()
 
     async def _invoke_planner_v61(self, mode: str, task: str, view: "ResponseView") -> None:
         """Invoke Planner v6.1 with specific mode."""
@@ -243,15 +243,15 @@ class AgentCommandHandler:
         try:
             if mode == "multi":
                 async for chunk in self.bridge.invoke_planner_multi(task):
-                    view.append_chunk(chunk)
+                    await view.append_chunk(chunk)
                     await asyncio.sleep(0)
             elif mode == "clarify":
                 async for chunk in self.bridge.invoke_planner_clarify(task):
-                    view.append_chunk(chunk)
+                    await view.append_chunk(chunk)
                     await asyncio.sleep(0)
             elif mode == "explore":
                 async for chunk in self.bridge.invoke_planner_explore(task):
-                    view.append_chunk(chunk)
+                    await view.append_chunk(chunk)
                     await asyncio.sleep(0)
             else:
                 view.add_error(f"Unknown planner mode: {mode}")
@@ -266,4 +266,4 @@ class AgentCommandHandler:
         finally:
             self.app.is_processing = False
             status.mode = "READY"
-            view.end_thinking()
+            await view.end_thinking()

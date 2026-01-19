@@ -14,6 +14,7 @@ Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Any, AsyncIterator, Dict, List, Optional, Tuple
 
@@ -248,7 +249,7 @@ class ChatController:
             iterations_completed = iteration + 1
             # Stream from LLM
             response_chunks: List[str] = []
-            stream_filter = StreamFilter()
+            StreamFilter()
 
             # Stream using Open Responses protocol
             async for sse_event in client.stream_open_responses(
@@ -367,7 +368,11 @@ class ChatController:
             yield f"[Using {provider_name.upper()}]\n"
 
         # Add to history
-        self.history.add_command(message)
+        # ✅ FIX: Use async version to avoid blocking event loop
+        if hasattr(self.history, "add_command_async"):
+            asyncio.create_task(self.history.add_command_async(message))
+        else:
+            self.history.add_command(message)  # Fallback for tests
         self.history.add_context("user", message)
 
         # Governance observation

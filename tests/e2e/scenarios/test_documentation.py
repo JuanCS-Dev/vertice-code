@@ -19,6 +19,7 @@ import pytest
 # FIXTURES
 # ==============================================================================
 
+
 @pytest.fixture
 def code_to_document(tmp_path):
     """Create code that needs documentation."""
@@ -27,7 +28,8 @@ def code_to_document(tmp_path):
     (project_dir / "src").mkdir()
 
     # Complex module needing docs
-    (project_dir / "src" / "api_client.py").write_text('''"""API Client module."""
+    (project_dir / "src" / "api_client.py").write_text(
+        '''"""API Client module."""
 import requests
 from typing import Optional, Dict, Any, List
 from dataclasses import dataclass
@@ -96,10 +98,12 @@ class APIClient:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
-''')
+'''
+    )
 
     # Module with classes
-    (project_dir / "src" / "models.py").write_text('''"""Data models."""
+    (project_dir / "src" / "models.py").write_text(
+        '''"""Data models."""
 from dataclasses import dataclass, field
 from typing import List, Optional
 from datetime import datetime
@@ -143,7 +147,8 @@ class Order:
 
     def _recalculate_total(self) -> None:
         self.total = sum(item["price"] * item["quantity"] for item in self.items)
-''')
+'''
+    )
 
     return project_dir
 
@@ -151,6 +156,7 @@ class Order:
 # ==============================================================================
 # TEST CLASS: Docstring Generation
 # ==============================================================================
+
 
 @pytest.mark.e2e
 class TestDocstringGeneration:
@@ -161,26 +167,6 @@ class TestDocstringGeneration:
         file_path = code_to_document / "src" / "api_client.py"
 
         # Expected module docstring format
-        expected_docstring = '''"""
-API Client Module
-=================
-
-Provides a high-level HTTP client for interacting with REST APIs.
-
-Classes:
-    HTTPMethod: Enumeration of supported HTTP methods.
-    APIResponse: Data class representing an API response.
-    APIClient: Main client class for making HTTP requests.
-
-Example:
-    >>> with APIClient("https://api.example.com", api_key="secret") as client:
-    ...     response = client.get("/users")
-    ...     print(response.data)
-
-Note:
-    This module requires the `requests` library.
-"""
-'''
         content = file_path.read_text()
 
         # Verify docstring structure elements
@@ -356,6 +342,7 @@ class DataProcessor:
 # TEST CLASS: README Generation
 # ==============================================================================
 
+
 @pytest.mark.e2e
 class TestREADMEGeneration:
     """Tests for generating README files."""
@@ -364,7 +351,7 @@ class TestREADMEGeneration:
         """Generates basic README structure."""
         readme_path = code_to_document / "README.md"
 
-        readme = '''# API Client Library
+        readme = """# API Client Library
 
 A Python library for making HTTP API requests with ease.
 
@@ -417,7 +404,7 @@ APIClient(base_url, api_key=None, timeout=30)
 ## License
 
 MIT License
-'''
+"""
         readme_path.write_text(readme)
 
         content = readme_path.read_text()
@@ -435,7 +422,8 @@ MIT License
         docs_dir.mkdir()
         api_doc = docs_dir / "api.md"
 
-        api_doc.write_text('''# API Reference
+        api_doc.write_text(
+            """# API Reference
 
 ## Classes
 
@@ -508,7 +496,8 @@ Make an HTTP POST request.
 - `data`: Request body data
 
 **Returns:** APIResponse object
-''')
+"""
+        )
 
         content = api_doc.read_text()
 
@@ -522,6 +511,7 @@ Make an HTTP POST request.
 # ==============================================================================
 # TEST CLASS: Code Comments
 # ==============================================================================
+
 
 @pytest.mark.e2e
 class TestCodeComments:
@@ -673,6 +663,7 @@ def _lazy_import():
 # TEST CLASS: Documentation Updates
 # ==============================================================================
 
+
 @pytest.mark.e2e
 class TestDocumentationUpdates:
     """Tests for updating existing documentation."""
@@ -681,7 +672,8 @@ class TestDocumentationUpdates:
         """Updates CHANGELOG with new entries."""
         changelog = code_to_document / "CHANGELOG.md"
 
-        changelog.write_text('''# Changelog
+        changelog.write_text(
+            """# Changelog
 
 All notable changes to this project will be documented in this file.
 
@@ -722,7 +714,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Initial release
 - Basic HTTP methods (GET, POST, PUT, DELETE)
 - JSON serialization/deserialization
-''')
+"""
+        )
 
         content = changelog.read_text()
 
@@ -739,7 +732,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
         docs_dir.mkdir(exist_ok=True)
 
         version_doc = docs_dir / "version.md"
-        version_doc.write_text('''# Version Information
+        version_doc.write_text(
+            """# Version Information
 
 **Current Version:** 1.3.0
 
@@ -775,7 +769,8 @@ shorter timeout, explicitly set it:
 ```python
 client = APIClient(url, timeout=10)
 ```
-''')
+"""
+        )
 
         content = version_doc.read_text()
 
@@ -790,7 +785,8 @@ client = APIClient(url, timeout=10)
         docs_dir.mkdir(exist_ok=True)
 
         migration_doc = docs_dir / "migration.md"
-        migration_doc.write_text('''# Migration Guide
+        migration_doc.write_text(
+            """# Migration Guide
 
 ## Migrating from v1.x to v2.0
 
@@ -871,7 +867,8 @@ Enable deprecation warnings to find v1.x patterns:
 import warnings
 warnings.filterwarnings("default", category=DeprecationWarning)
 ```
-''')
+"""
+        )
 
         content = migration_doc.read_text()
 

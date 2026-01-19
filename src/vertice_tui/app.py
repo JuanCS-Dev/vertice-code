@@ -18,6 +18,10 @@ Soli Deo Gloria
 from __future__ import annotations
 
 import asyncio
+import json
+import os
+import time
+from dataclasses import dataclass
 from pathlib import Path
 from typing import ClassVar
 
@@ -41,6 +45,26 @@ from vertice_tui.themes import (
     ThemeManager,
 )
 from vertice_tui.app_styles import APP_CSS, detect_language
+
+
+@dataclass
+class ChatPerf:
+    request_id: str
+    prompt_chars: int
+    t_submit: float
+    t_worker_start: float | None = None
+    t_first_sse: float | None = None
+    t_first_text_delta: float | None = None
+    t_done: float | None = None
+    text_chars: int = 0
+    outcome: str = "unknown"
+    error: str | None = None
+
+
+def _append_jsonl_sync(path: Path, record: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as fp:
+        fp.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
 class VerticeApp(App):
@@ -91,6 +115,13 @@ class VerticeApp(App):
         self._router = None  # Lazy loaded
         self._pending_image = None
         self._pending_pdf = None
+        self._perf_log_path = self._resolve_perf_log_path()
+
+    def _resolve_perf_log_path(self) -> Path | None:
+        path_str = os.getenv("VERTICE_TUI_PERF_LOG_PATH", "").strip()
+        if not path_str:
+            return None
+        return Path(path_str).expanduser()
 
     @property
     def bridge(self):
@@ -225,12 +256,14 @@ class VerticeApp(App):
 
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         """Handle user input submission with robust validation and error handling."""
+        status = None
         try:
             # Input validation and sanitization
             if not event.value or not isinstance(event.value, str):
                 return
 
             user_input = event.value.strip()
+            submit_time = time.perf_counter()
 
             # Length validation
             if len(user_input) > 5000:  # Reasonable limit for terminal input
@@ -285,33 +318,37 @@ class VerticeApp(App):
             status.mode = "PROCESSING"
 
             # CRITICAL: Force UI refresh so user sees their input immediately
-            # Without this, the user message only appears after LLM response
-            await asyncio.sleep(0)  # Yield to event loop for rendering
+            # Using run_worker ensures the handler returns immediately, allowing
+            # the event loop to repaint the screen while chat processes in background.
             self.refresh()  # Request screen redraw
 
-            # Command routing with timeout protection
-            try:
-                if user_input.startswith("/"):
-                    # Add timeout to command execution
-                    await asyncio.wait_for(
-                        self.router.dispatch(user_input, response),
-                        timeout=30.0,  # 30 second timeout for commands
+            # Generate unique task ID
+            task_id = f"chat_{time.time_ns()}"
+
+            # Command routing via Worker API (Textual Best Practice)
+            # Note: Timeouts and Error handling are now managed within the workers/tasks
+            # run_worker returns a Worker object but we fire-and-forget here for speed
+            if user_input.startswith("/"):
+                self.run_worker(
+                    self._handle_command(user_input, response),
+                    name=f"cmd_{task_id}",
+                    group="chat_dispatch",
+                    exclusive=True,
+                )
+            else:
+                perf = None
+                if self._perf_log_path is not None:
+                    perf = ChatPerf(
+                        request_id=task_id,
+                        prompt_chars=len(user_input),
+                        t_submit=submit_time,
                     )
-                else:
-                    # Add timeout to chat execution
-                    await asyncio.wait_for(
-                        self._handle_chat(user_input, response),
-                        timeout=120.0,  # 2 minute timeout for chat
-                    )
-            except asyncio.TimeoutError:
-                response.current_response += "\n❌ Error: Operation timed out"
-                self.notify("Operation timed out", severity="error")
-            except Exception as op_error:
-                error_msg = str(op_error)
-                if len(error_msg) > 200:  # Truncate long error messages
-                    error_msg = error_msg[:197] + "..."
-                response.current_response += f"\n❌ Error: {error_msg}"
-                self.notify(f"Operation failed: {error_msg[:50]}...", severity="error")
+                self.run_worker(
+                    self._handle_chat_with_timeout(user_input, response, perf),
+                    name=task_id,
+                    group="chat_dispatch",
+                    exclusive=True,
+                )
 
         except Exception as e:
             # Ultimate error handler - ensure TUI remains functional
@@ -319,19 +356,13 @@ class VerticeApp(App):
                 response = self.query_one("#response", ResponseView)
                 response.current_response += f"\n💥 Critical error: {str(e)[:100]}"
                 self.notify("Critical error occurred", severity="error")
+                if status is not None:
+                    status.mode = "READY"
             except Exception as log_error:
                 # If even error reporting fails, at least log it
                 print(
                     f"CRITICAL: Unhandled error in input submission: {e}, logging failed: {log_error}"
                 )
-
-        finally:
-            # Always reset status
-            try:
-                status = self.query_one(StatusBar)
-                status.mode = "READY"
-            except Exception:
-                pass
 
     @on(Input.Changed, "#prompt")
     def on_input_changed(self, event: Input.Changed) -> None:
@@ -410,9 +441,75 @@ class VerticeApp(App):
             event.prevent_default()
             autocomplete.hide()
 
-    async def _handle_chat(self, message: str, view: ResponseView) -> None:
+    async def _handle_command(self, cmd: str, view: ResponseView) -> None:
+        """Run a slash command with timeout and UI-safe error handling."""
+        status = self.query_one(StatusBar)
+        status.mode = "PROCESSING"
+        try:
+            await asyncio.wait_for(self.router.dispatch(cmd, view), timeout=30.0)
+        except asyncio.TimeoutError:
+            view.add_error("Command timed out after 30s")
+            self.notify("Command timed out", severity="error")
+        except Exception as op_error:
+            error_msg = str(op_error)
+            if len(error_msg) > 200:
+                error_msg = error_msg[:197] + "..."
+            view.add_error(f"Command failed: {error_msg}")
+            self.notify(f"Command failed: {error_msg[:50]}...", severity="error")
+        finally:
+            status.mode = "READY"
+
+    async def _handle_chat_with_timeout(
+        self, message: str, view: ResponseView, perf: ChatPerf | None
+    ) -> None:
+        """Run chat with a hard timeout (runs in a Worker)."""
+        try:
+            await asyncio.wait_for(self._handle_chat(message, view, perf), timeout=120.0)
+        except asyncio.TimeoutError:
+            view.add_error("Chat timed out after 120s")
+            self.notify("Chat timed out", severity="error")
+
+    def _emit_chat_perf(self, perf: ChatPerf) -> None:
+        """Emit a single JSONL perf record (best-effort, non-blocking)."""
+        if self._perf_log_path is None:
+            return
+
+        def _ms(start: float | None, end: float | None) -> float | None:
+            if start is None or end is None:
+                return None
+            return (end - start) * 1000.0
+
+        record = {
+            "request_id": perf.request_id,
+            "prompt_chars": perf.prompt_chars,
+            "text_chars": perf.text_chars,
+            "outcome": perf.outcome,
+            "error": perf.error,
+            "t_submit_to_worker_ms": _ms(perf.t_submit, perf.t_worker_start),
+            "t_submit_to_first_sse_ms": _ms(perf.t_submit, perf.t_first_sse),
+            "t_submit_to_first_text_delta_ms": _ms(perf.t_submit, perf.t_first_text_delta),
+            "t_total_ms": _ms(perf.t_submit, perf.t_done),
+        }
+
+        async def _write() -> None:
+            try:
+                await asyncio.to_thread(_append_jsonl_sync, self._perf_log_path, record)
+            except Exception:
+                pass
+
+        try:
+            asyncio.get_running_loop().create_task(_write())
+        except RuntimeError:
+            pass
+
+    async def _handle_chat(
+        self, message: str, view: ResponseView, perf: ChatPerf | None = None
+    ) -> None:
         """Handle natural language chat via Gemini Open Responses streaming."""
-        from vertice_tui.core.openresponses_events import OpenResponsesParser
+        from vertice_tui.core.openresponses_events import (
+            OpenResponsesParser,
+            OpenResponsesOutputTextDeltaEvent,
+        )
 
         # Create task for operation tracking
         current_task = asyncio.current_task()
@@ -423,16 +520,46 @@ class VerticeApp(App):
         status = self.query_one(StatusBar)
         status.mode = "THINKING"
 
+        # Immediate UI feedback (don’t wait for the first SSE event).
+        view.start_thinking()
+        await asyncio.sleep(0)
+
         parser = OpenResponsesParser()
+        if perf is not None:
+            perf.t_worker_start = time.perf_counter()
 
         try:
-            # bridge.chat now yields Open Responses SSE strings
+            # bridge.chat primarily yields Open Responses SSE blocks, but some internal
+            # components may still emit plain text (e.g. tool execution summaries).
+            # Keep the UI resilient by treating non-SSE lines as text deltas.
             async for sse_chunk in self.bridge.chat(message):
+                if perf is not None and perf.t_first_sse is None:
+                    perf.t_first_sse = time.perf_counter()
+
                 # SSE chunks may contain multiple lines
                 for line in sse_chunk.splitlines(keepends=True):
                     event = parser.feed(line)
                     if event:
-                        view.handle_open_responses_event(event)
+                        if perf is not None and isinstance(
+                            event, OpenResponsesOutputTextDeltaEvent
+                        ):
+                            if perf.t_first_text_delta is None:
+                                perf.t_first_text_delta = time.perf_counter()
+                            perf.text_chars += len(event.delta)
+                        await view.handle_open_responses_event(event)
+                        continue
+
+                    # Non-SSE passthrough: allow legacy/plain text chunks to render.
+                    if line.startswith(("event: ", "data: ")):
+                        continue
+                    if not line.strip():
+                        continue
+
+                    if perf is not None:
+                        if perf.t_first_text_delta is None:
+                            perf.t_first_text_delta = time.perf_counter()
+                        perf.text_chars += len(line)
+                    await view.append_chunk(line)
 
                 # Optimized: removed unnecessary delay for better streaming performance
 
@@ -440,14 +567,26 @@ class VerticeApp(App):
         except Exception as e:
             view.add_error(f"Chat error: {e}")
             status.errors += 1
+            if perf is not None:
+                perf.outcome = "error"
+                perf.error = str(e)[:300]
         finally:
+            if perf is not None:
+                perf.t_done = time.perf_counter()
+                task = asyncio.current_task()
+                if task is not None and task.cancelling() and perf.outcome != "error":
+                    perf.outcome = "cancelled"
+                if perf.outcome == "unknown":
+                    perf.outcome = "ok"
+                self._emit_chat_perf(perf)
+
             # Clean up operation tracking
             if hasattr(self, "_active_operations") and current_task in self._active_operations:
                 self._active_operations.remove(current_task)
 
             self.is_processing = False
             status.mode = "READY"
-            view.end_thinking()
+            await view.end_thinking()
 
     async def _execute_bash(self, command: str, view: ResponseView) -> None:
         """Execute bash command SECURELY via whitelist."""
@@ -518,9 +657,23 @@ class VerticeApp(App):
         """Cancel current operation."""
         if self.is_processing:
             self.is_processing = False
-            response = self.query_one("#response", ResponseView)
-            response.end_thinking()
-            response.add_error("Operation cancelled")
+            try:
+                self.workers.cancel_group(self, "chat_dispatch")
+            except Exception:
+                pass
+
+            try:
+                status = self.query_one(StatusBar)
+                status.mode = "READY"
+            except Exception:
+                pass
+
+            try:
+                response = self.query_one("#response", ResponseView)
+                self.run_worker(response.end_thinking(), name="cancel_end_thinking", group="system")
+                response.add_error("Operation cancelled")
+            except Exception:
+                pass
 
     def action_toggle_theme(self) -> None:
         """Toggle between light and dark themes."""

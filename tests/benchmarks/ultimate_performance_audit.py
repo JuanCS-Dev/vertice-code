@@ -62,7 +62,7 @@ class UnifiedPerformanceAudit:
         # Simula importação pesada
         from providers import get_router
 
-        router = get_router()
+        get_router()
 
         end = time.perf_counter()
         latency = (end - start) * 1000
@@ -158,7 +158,7 @@ class UnifiedPerformanceAudit:
         for i in range(50):
             try:
                 os.unlink(f"{test_file}_{i}")
-            except:
+            except Exception:
                 pass
 
         self.results["benchmarks"]["tools"] = {
@@ -174,7 +174,7 @@ class UnifiedPerformanceAudit:
         from vertice_cli.core.session_manager import SessionManager
 
         manager = SessionManager(session_dir="/tmp/vertice_perf_sessions")
-        session = manager.start_session()
+        manager.start_session()
 
         # Add 100 messages to simulate a long session
         for i in range(100):
@@ -204,7 +204,7 @@ class UnifiedPerformanceAudit:
 
         try:
             shutil.rmtree("/tmp/vertice_perf_sessions")
-        except:
+        except Exception:
             pass
 
     def generate_final_report(self):

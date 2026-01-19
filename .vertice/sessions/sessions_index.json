@@ -86,5 +86,37 @@
     "message_count": 0,
     "working_directory": "/media/juan/DATA/Vertice-Code",
     "summary": "Empty session"
+  },
+  "session_20260118_213120_7399f6": {
+    "state": "active",
+    "created_at": 1768782680.4686806,
+    "updated_at": 1768782680.4686904,
+    "message_count": 0,
+    "working_directory": "/media/juan/DATA/Vertice-Code",
+    "summary": "Empty session"
+  },
+  "session_20260118_213344_03d102": {
+    "state": "active",
+    "created_at": 1768782824.3366497,
+    "updated_at": 1768782824.3366594,
+    "message_count": 0,
+    "working_directory": "/media/juan/DATA/Vertice-Code",
+    "summary": "Empty session"
+  },
+  "session_20260118_213545_01500d": {
+    "state": "active",
+    "created_at": 1768782945.6078267,
+    "updated_at": 1768782945.60784,
+    "message_count": 0,
+    "working_directory": "/media/juan/DATA/Vertice-Code",
+    "summary": "Empty session"
+  },
+  "session_20260118_213718_594265": {
+    "state": "active",
+    "created_at": 1768783038.751782,
+    "updated_at": 1768783038.7517943,
+    "message_count": 0,
+    "working_directory": "/media/juan/DATA/Vertice-Code",
+    "summary": "Empty session"
   }
 }

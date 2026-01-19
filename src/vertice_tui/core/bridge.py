@@ -114,6 +114,12 @@ class Bridge(ProtocolBridgeMixin):
         # System prompt cache init
         self._system_prompt_cache: Optional[str] = None
         self._system_prompt_time: float = 0.0
+        self._system_prompt_lock = AsyncLock("system_prompt")
+        self._system_prompt_refresh_task = None
+        try:
+            self._system_prompt_ttl_s = float(os.getenv("VERTICE_SYSTEM_PROMPT_TTL_S", "60"))
+        except ValueError:
+            self._system_prompt_ttl_s = 60.0
 
         # Import structured logging and error tracking
         from .logging import get_bridge_logger, create_operation_context
@@ -434,6 +440,13 @@ class Bridge(ProtocolBridgeMixin):
         except Exception as e:
             logger.warning(f"Warm-up: Provider init failed: {e}")
 
+        # 3. Pre-build system prompt (git context, memory, tools list) - may involve I/O
+        try:
+            await self._build_system_prompt_and_cache()
+            logger.debug("✓ System prompt cached")
+        except Exception as e:
+            logger.warning(f"Warm-up: System prompt build failed: {e}")
+
         logger.debug("Bridge warm-up complete")
 
     def _warmup_provider(self) -> None:
@@ -523,54 +536,151 @@ class Bridge(ProtocolBridgeMixin):
             self.llm.set_tools(schemas)
             self._tools_configured = True
 
-    def _get_system_prompt(self) -> str:
-        """Get system prompt for agentic interaction (Cached 5s)."""
-        import time
-
-        now = time.time()
-        if (
-            hasattr(self, "_system_prompt_cache")
-            and self._system_prompt_cache
-            and (now - self._system_prompt_time) < 5.0
-        ):
-            return self._system_prompt_cache
-        try:
-            from vertice_tui.core.agentic_prompt import (
-                build_agentic_system_prompt,
-                load_project_memory,
-                get_dynamic_context,
-            )
-
-            tool_schemas = self.tools.get_schemas_for_llm() if self.tools else []
-            context = get_dynamic_context()
-            project_memory = load_project_memory()
-            user_memory = None
-            memory_result = self.read_memory(scope="project")
-            if memory_result.get("success"):
-                user_memory = memory_result.get("content")
-            prompt = build_agentic_system_prompt(
-                tools=tool_schemas,
-                context=context,
-                project_memory=project_memory,
-                user_memory=user_memory,
-            )
-
-            # Update cache
-            self._system_prompt_cache = prompt
-            self._system_prompt_time = time.time()
-            return prompt
-        except Exception as e:
-            logger.warning(f"Agentic system prompt failed, using fallback: {e}")
-
-        # Fallback prompt
+    def _build_fallback_system_prompt(self) -> str:
+        """Build a minimal, non-agentic system prompt (always safe)."""
         tool_names = self.tools.list_tools()[:25] if self.tools else []
         tool_list = ", ".join(tool_names) if tool_names else "none loaded"
         return f"""You are PROMETHEUS, an AI coding assistant.
 Available tools: {tool_list}
 Working directory: {os.getcwd()}"""
 
+    def _build_system_prompt_sync(self) -> str:
+        """
+        Build the agentic system prompt (SYNC).
+
+        NOTE: This function may perform blocking work (file I/O, git subprocess).
+        Prefer calling via `await asyncio.to_thread(...)` from async code.
+        """
+        from vertice_tui.core.agentic_prompt import (
+            build_agentic_system_prompt,
+            load_project_memory,
+            get_dynamic_context,
+        )
+
+        try:
+            tool_schemas = self.tools.get_schemas_for_llm() if self.tools else []
+        except Exception:
+            tool_schemas = []
+
+        try:
+            context = get_dynamic_context()
+        except Exception:
+            context = {"cwd": os.getcwd()}
+
+        try:
+            project_memory = load_project_memory()
+        except Exception:
+            project_memory = None
+
+        user_memory = None
+        try:
+            memory_result = self.read_memory(scope="project")
+            if memory_result.get("success"):
+                user_memory = memory_result.get("content")
+        except Exception:
+            user_memory = None
+
+        return build_agentic_system_prompt(
+            tools=tool_schemas,
+            context=context,
+            project_memory=project_memory,
+            user_memory=user_memory,
+        )
+
+    def _maybe_schedule_system_prompt_refresh(self) -> None:
+        """Schedule a background system prompt refresh (non-blocking)."""
+        import asyncio
+
+        task = getattr(self, "_system_prompt_refresh_task", None)
+        if task is not None and not task.done():
+            return
+
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            return
+
+        refresh_task = loop.create_task(self._build_system_prompt_and_cache())
+
+        def _log_task_result(t: "asyncio.Task[str]") -> None:
+            try:
+                t.result()
+            except Exception as e:
+                logger.debug(f"System prompt refresh failed: {e}")
+
+        refresh_task.add_done_callback(_log_task_result)
+        self._system_prompt_refresh_task = refresh_task
+
+    async def _build_system_prompt_and_cache(self) -> str:
+        """Build and cache the system prompt without blocking the event loop."""
+        import asyncio
+        import time
+
+        ttl_s = self._system_prompt_ttl_s
+        async with self._system_prompt_lock:
+            now = time.time()
+            if (
+                self._system_prompt_cache
+                and self._system_prompt_time > 0.0
+                and (now - self._system_prompt_time) < ttl_s
+            ):
+                return self._system_prompt_cache
+
+            try:
+                prompt = await asyncio.to_thread(self._build_system_prompt_sync)
+            except Exception as e:
+                logger.debug(f"System prompt build failed, using fallback: {e}")
+                prompt = self._build_fallback_system_prompt()
+            self._system_prompt_cache = prompt
+            self._system_prompt_time = time.time()
+            return prompt
+
+    async def _get_system_prompt_async(self) -> str:
+        """Get system prompt for agentic interaction (non-blocking, stale-while-revalidate)."""
+        import time
+
+        now = time.time()
+        ttl_s = self._system_prompt_ttl_s
+
+        if (
+            self._system_prompt_cache
+            and self._system_prompt_time > 0.0
+            and (now - self._system_prompt_time) < ttl_s
+        ):
+            return self._system_prompt_cache
+
+        if self._system_prompt_cache:
+            # Serve stale and refresh in background to avoid UI stalls.
+            self._maybe_schedule_system_prompt_refresh()
+            return self._system_prompt_cache
+
+        # First build (no cache yet): build once in a background thread.
+        return await self._build_system_prompt_and_cache()
+
+    def _get_system_prompt(self) -> str:
+        """Get system prompt for agentic interaction (SYNC fallback)."""
+        import time
+
+        now = time.time()
+        if (
+            hasattr(self, "_system_prompt_cache")
+            and self._system_prompt_cache
+            and (now - self._system_prompt_time) < self._system_prompt_ttl_s
+        ):
+            return self._system_prompt_cache
+        try:
+            prompt = self._build_system_prompt_sync()
+            self._system_prompt_cache = prompt
+            self._system_prompt_time = time.time()
+            return prompt
+        except Exception as e:
+            logger.warning(f"Agentic system prompt failed, using fallback: {e}")
+            return self._build_fallback_system_prompt()
+
     async def chat(self, message: str, auto_route: bool = True) -> AsyncIterator[str]:
         """Handle chat message with streaming response and circuit breaker protection."""
+        import asyncio
+
         # Circuit breaker check
         if not self._check_circuit_breaker():
             yield "❌ Service temporarily unavailable. Please try again later."
@@ -601,8 +711,15 @@ Working directory: {os.getcwd()}"""
             yield f"❌ Error preparing chat: {str(e)[:100]}"
             return
 
-        # Ensuring tools are configured (fast if already done in warmup)
-        self._configure_llm_tools()
+        # Yield to the UI loop early (prevents Enter→render stalls).
+        await asyncio.sleep(0)
+
+        # Ensuring tools are configured (may be expensive on first run)
+        if not self._tools_configured:
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(None, self._configure_llm_tools)
+        else:
+            self._configure_llm_tools()
 
         # Get client (may block on first run if warmup didn't finish, but safe)
         client, provider_name = self._get_client(message)
@@ -611,7 +728,7 @@ Working directory: {os.getcwd()}"""
             auto_route and self.is_auto_routing_enabled() and not skip_routing
         )
 
-        system_prompt = self._get_system_prompt()
+        system_prompt = await self._get_system_prompt_async()
         async for chunk in self._chat_controller.chat(
             client=client,
             message=message,

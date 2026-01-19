@@ -22,19 +22,17 @@ from typing import Optional
 # FIXTURES
 # =============================================================================
 
+
 @pytest.fixture
 def circuit_breaker():
     """Create circuit breaker for testing."""
+
     class CircuitBreaker:
         CLOSED = "CLOSED"
         OPEN = "OPEN"
         HALF_OPEN = "HALF_OPEN"
 
-        def __init__(
-            self,
-            failure_threshold: int = 5,
-            recovery_timeout: float = 30.0
-        ):
+        def __init__(self, failure_threshold: int = 5, recovery_timeout: float = 30.0):
             self.failure_threshold = failure_threshold
             self.recovery_timeout = recovery_timeout
             self.state = self.CLOSED
@@ -83,13 +81,9 @@ def circuit_breaker():
 @pytest.fixture
 def retry_handler():
     """Create retry handler for testing."""
+
     class RetryHandler:
-        def __init__(
-            self,
-            max_retries: int = 3,
-            base_delay: float = 1.0,
-            exponential: bool = True
-        ):
+        def __init__(self, max_retries: int = 3, base_delay: float = 1.0, exponential: bool = True):
             self.max_retries = max_retries
             self.base_delay = base_delay
             self.exponential = exponential
@@ -116,11 +110,13 @@ def retry_handler():
 # 1. ERROR CLASSIFICATION TESTS
 # =============================================================================
 
+
 class TestErrorClassification:
     """Test error classification logic."""
 
     def test_validation_error_is_fatal(self):
         """Validation errors should be fatal (no retry)."""
+
         class ValidationError(Exception):
             is_fatal = True
 
@@ -129,6 +125,7 @@ class TestErrorClassification:
 
     def test_timeout_error_is_recoverable(self):
         """Timeout errors should be recoverable."""
+
         class TimeoutError(Exception):
             is_recoverable = True
 
@@ -137,6 +134,7 @@ class TestErrorClassification:
 
     def test_resource_error_classification(self):
         """Resource errors have specific classification."""
+
         class ResourceError(Exception):
             def __init__(self, message, is_recoverable=True):
                 super().__init__(message)
@@ -150,6 +148,7 @@ class TestErrorClassification:
 
     def test_security_error_is_fatal(self):
         """Security errors should be fatal."""
+
         class SecurityError(Exception):
             is_fatal = True
             is_recoverable = False
@@ -163,11 +162,13 @@ class TestErrorClassification:
 # 2. ERROR PROPAGATION TESTS
 # =============================================================================
 
+
 class TestErrorPropagation:
     """Test error propagation through layers."""
 
     def test_error_propagates_to_caller(self):
         """Errors propagate up the call stack."""
+
         def inner():
             raise ValueError("Inner error")
 
@@ -184,6 +185,7 @@ class TestErrorPropagation:
     @pytest.mark.asyncio
     async def test_async_error_propagation(self):
         """Errors propagate through async stack."""
+
         async def async_inner():
             raise RuntimeError("Async error")
 
@@ -199,6 +201,7 @@ class TestErrorPropagation:
 
     def test_error_chain_preserved(self):
         """Error chains are preserved."""
+
         def cause():
             raise ValueError("Root cause")
 
@@ -215,6 +218,7 @@ class TestErrorPropagation:
 
     def test_error_context_preserved(self):
         """Error context is preserved."""
+
         def problematic():
             try:
                 1 / 0
@@ -229,6 +233,7 @@ class TestErrorPropagation:
 # =============================================================================
 # 3. CIRCUIT BREAKER TESTS
 # =============================================================================
+
 
 class TestCircuitBreaker:
     """Test circuit breaker behavior."""
@@ -309,12 +314,14 @@ class TestCircuitBreaker:
 # 4. RETRY LOGIC TESTS
 # =============================================================================
 
+
 class TestRetryLogic:
     """Test retry mechanism."""
 
     @pytest.mark.asyncio
     async def test_success_on_first_try(self, retry_handler):
         """Success on first try doesn't retry."""
+
         async def succeeds():
             return "success"
 
@@ -344,6 +351,7 @@ class TestRetryLogic:
     @pytest.mark.asyncio
     async def test_max_retries_exceeded(self, retry_handler):
         """Gives up after max retries."""
+
         async def always_fails():
             raise RuntimeError("Permanent failure")
 
@@ -379,6 +387,7 @@ class TestRetryLogic:
 # =============================================================================
 # 5. RECOVERY MECHANISM TESTS
 # =============================================================================
+
 
 class TestRecoveryMechanisms:
     """Test recovery from failures."""
@@ -465,6 +474,7 @@ class TestRecoveryMechanisms:
 # 6. CASCADING FAILURE PREVENTION TESTS
 # =============================================================================
 
+
 class TestCascadingFailurePrevention:
     """Test prevention of cascading failures."""
 
@@ -524,6 +534,7 @@ class TestCascadingFailurePrevention:
     @pytest.mark.asyncio
     async def test_timeout_prevents_indefinite_wait(self):
         """Timeout prevents indefinite waiting."""
+
         async def slow_operation():
             await asyncio.sleep(10)
             return "done"
@@ -536,11 +547,13 @@ class TestCascadingFailurePrevention:
 # 7. ERROR MESSAGE QUALITY TESTS
 # =============================================================================
 
+
 class TestErrorMessageQuality:
     """Test error message quality and usefulness."""
 
     def test_error_includes_context(self):
         """Error messages include relevant context."""
+
         class ContextualError(Exception):
             def __init__(self, message, context):
                 super().__init__(f"{message}: {context}")
@@ -555,14 +568,14 @@ class TestErrorMessageQuality:
 
     def test_error_has_suggestions(self):
         """Error includes actionable suggestions."""
+
         class ActionableError(Exception):
             def __init__(self, message, suggestions):
                 super().__init__(message)
                 self.suggestions = suggestions
 
         error = ActionableError(
-            "File not found",
-            ["Check the file path", "Ensure file exists", "Verify permissions"]
+            "File not found", ["Check the file path", "Ensure file exists", "Verify permissions"]
         )
 
         assert len(error.suggestions) == 3
@@ -570,6 +583,7 @@ class TestErrorMessageQuality:
 
     def test_error_severity_indicated(self):
         """Error severity is clearly indicated."""
+
         class SeverityError(Exception):
             CRITICAL = "CRITICAL"
             WARNING = "WARNING"
@@ -590,6 +604,7 @@ class TestErrorMessageQuality:
 # =============================================================================
 # 8. RESOURCE CLEANUP TESTS
 # =============================================================================
+
 
 class TestResourceCleanup:
     """Test resource cleanup during errors."""
@@ -627,7 +642,7 @@ class TestResourceCleanup:
 
         # Exception should propagate but cleanup still happens
         with pytest.raises(RuntimeError, match="Failure"):
-            async with Resource() as r:
+            async with Resource():
                 raise RuntimeError("Failure")
 
         # Cleanup should have been called despite the exception

@@ -37,6 +37,7 @@ class Veredicto(Enum):
 @dataclass
 class AnaliseResultado:
     """Análise de um resultado de teste E2E."""
+
     teste_nome: str
     agente: str
     prompt_natural: str  # O prompt em linguagem natural
@@ -80,6 +81,7 @@ class TestesE2EInlineCode:
             return "".join(chunks)
         except Exception as e:
             import traceback
+
             return f"[ERRO]: {e}\n{traceback.format_exc()}"
 
     def analisar_fix(
@@ -91,7 +93,7 @@ class TestesE2EInlineCode:
         problema_anterior: str,
         comportamento_esperado: str,
         criterios: List[str],
-        duracao: float
+        duracao: float,
     ) -> AnaliseResultado:
         """Analisa se o fix funcionou baseado no output real."""
 
@@ -150,11 +152,15 @@ class TestesE2EInlineCode:
         if veredicto == Veredicto.EXCELENTE:
             justificativa = f"FIX VALIDADO: Todos os {len(criterios)} critérios atendidos"
         elif veredicto == Veredicto.BOM:
-            justificativa = f"FIX PARCIALMENTE VALIDADO: {len(criterios_atendidos)}/{len(criterios)} critérios"
+            justificativa = (
+                f"FIX PARCIALMENTE VALIDADO: {len(criterios_atendidos)}/{len(criterios)} critérios"
+            )
         elif "all providers exhausted" in output_lower:
             justificativa = "INCONCLUSIVO: Sem provedores LLM para testar"
         else:
-            justificativa = f"FIX NÃO VALIDADO: Apenas {len(criterios_atendidos)}/{len(criterios)} critérios"
+            justificativa = (
+                f"FIX NÃO VALIDADO: Apenas {len(criterios_atendidos)}/{len(criterios)} critérios"
+            )
 
         return AnaliseResultado(
             teste_nome=nome,
@@ -170,7 +176,7 @@ class TestesE2EInlineCode:
             criterios_nao_atendidos=criterios_nao_atendidos,
             veredicto=veredicto,
             justificativa=justificativa,
-            duracao=duracao
+            duracao=duracao,
         )
 
     # =========================================================================
@@ -183,9 +189,9 @@ class TestesE2EInlineCode:
         ANTES DO FIX: Retornava "No source code provided"
         APÓS O FIX: Deve gerar testes para o código inline
         """
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("TESTE 1: Testing Agent - Inline Code")
-        print("="*60)
+        print("=" * 60)
 
         prompt = """Gere testes unitários para esta função:
 
@@ -225,7 +231,7 @@ Inclua testes para casos base e casos de borda."""
                 "assert|assertEqual",  # Tem assertions
                 "0|1|base",  # Testa casos base
             ],
-            duracao=duracao
+            duracao=duracao,
         )
 
     # =========================================================================
@@ -238,9 +244,9 @@ Inclua testes para casos base e casos de borda."""
         ANTES DO FIX: Retornava "No files provided"
         APÓS O FIX: Deve revisar o código inline
         """
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("TESTE 2: Reviewer Agent - Inline Code")
-        print("="*60)
+        print("=" * 60)
 
         prompt = """Revise este código e identifique problemas de segurança:
 
@@ -280,7 +286,7 @@ Aponte as vulnerabilidades e sugira correções."""
                 "parameterized|prepared|parâmetro",  # Sugeriu fix SQL
                 "bcrypt|argon|sha256|scrypt",  # Sugeriu hash melhor
             ],
-            duracao=duracao
+            duracao=duracao,
         )
 
     # =========================================================================
@@ -293,9 +299,9 @@ Aponte as vulnerabilidades e sugira correções."""
         ANTES DO FIX: Usava target_path ignorando código inline
         APÓS O FIX: Deve documentar o código inline diretamente
         """
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("TESTE 3: Documentation Agent - Inline Code")
-        print("="*60)
+        print("=" * 60)
 
         prompt = """Gere documentação detalhada para esta classe:
 
@@ -342,7 +348,7 @@ Inclua docstrings no estilo Google."""
                 "Args:|Parameters:|param",  # Formato docstring
                 "Returns:|return",  # Documentou retorno
             ],
-            duracao=duracao
+            duracao=duracao,
         )
 
     # =========================================================================
@@ -355,9 +361,9 @@ Inclua docstrings no estilo Google."""
         ANTES DO FIX: Só retornava paths sem conteúdo
         APÓS O FIX: Deve incluir snippets de código real
         """
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("TESTE 4: Explorer Agent - Content Snippets")
-        print("="*60)
+        print("=" * 60)
 
         prompt = """Encontre arquivos relacionados a 'BaseAgent' e mostre o conteúdo relevante.
 Quero ver trechos de código que definem ou usam BaseAgent."""
@@ -385,7 +391,7 @@ Quero ver trechos de código que definem ou usam BaseAgent."""
                 ".py",  # Listou arquivos Python
                 "agent|Agent",  # Contexto relevante
             ],
-            duracao=duracao
+            duracao=duracao,
         )
 
     # =========================================================================
@@ -398,9 +404,9 @@ Quero ver trechos de código que definem ou usam BaseAgent."""
         ANTES DO FIX: Aceitava qualquer skill (hallucination)
         APÓS O FIX: Só aceita skills do registry
         """
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("TESTE 5: Skill Registry - Anti-Hallucination")
-        print("="*60)
+        print("=" * 60)
 
         # Este teste é unitário, não precisa de agente
         from prometheus.core.skill_registry import validate_skills, VALID_SKILLS
@@ -434,7 +440,6 @@ Skills rejeitadas (alucinadas):
         print(output)
 
         # Verificar se filtrou corretamente
-        skills_validas_esperadas = {"python_basics", "testing", "async_programming"}
         skills_rejeitadas = set(skills_detectadas) - set(validadas)
 
         criterios_atendidos = []
@@ -470,7 +475,7 @@ Skills rejeitadas (alucinadas):
             criterios_nao_atendidos=[c for c in criterios if c not in criterios_atendidos],
             veredicto=veredicto,
             justificativa=f"{'VALIDADO' if veredicto == Veredicto.EXCELENTE else 'FALHOU'}: {len(criterios_atendidos)}/4 critérios",
-            duracao=0.0
+            duracao=0.0,
         )
 
     # =========================================================================
@@ -478,10 +483,10 @@ Skills rejeitadas (alucinadas):
     # =========================================================================
     async def executar_todos(self):
         """Executa todos os testes E2E e gera relatório."""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("VERTICE E2E - VALIDAÇÃO DOS FIXES 2026")
         print("Baseado em: Claude Code + Gemini CLI 2026 patterns")
-        print("="*70)
+        print("=" * 70)
 
         # Executar testes
         self.resultados.append(await self.teste_testing_agent_inline_code())
@@ -495,9 +500,9 @@ Skills rejeitadas (alucinadas):
 
     def gerar_relatorio(self):
         """Gera relatório detalhado dos testes."""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("RELATÓRIO FINAL - VALIDAÇÃO E2E FIXES 2026")
-        print("="*70)
+        print("=" * 70)
 
         total = len(self.resultados)
         excelentes = sum(1 for r in self.resultados if r.veredicto == Veredicto.EXCELENTE)
@@ -517,9 +522,9 @@ Skills rejeitadas (alucinadas):
         taxa_sucesso = (excelentes + bons) / total * 100 if total > 0 else 0
         print(f"\n  Taxa de Sucesso: {taxa_sucesso:.1f}%")
 
-        print("\n" + "-"*70)
+        print("\n" + "-" * 70)
         print("DETALHES POR TESTE:")
-        print("-"*70)
+        print("-" * 70)
 
         for r in self.resultados:
             icon = {
@@ -541,9 +546,9 @@ Skills rejeitadas (alucinadas):
                 print(f"   Critérios faltando: {r.criterios_nao_atendidos}")
             print(f"   Duração: {r.duracao:.2f}s")
 
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("FIM DO RELATÓRIO")
-        print("="*70)
+        print("=" * 70)
 
 
 # =========================================================================
