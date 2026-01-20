@@ -49,6 +49,10 @@ dependencies = [
     "anthropic>=0.40.0",                 # Claude API
     "openai>=1.50.0",                    # OpenAI/Azure
     "groq>=0.11.0",                      # Groq (free tier)
+
+    # Observability
+    "opentelemetry-api>=1.20.0",
+    "opentelemetry-sdk>=1.20.0",
 ]
 
 [project.optional-dependencies]
