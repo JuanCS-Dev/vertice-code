@@ -13,17 +13,23 @@ from typing import List, Dict, Any
 from dataclasses import dataclass
 import psutil
 import os
+from unittest.mock import patch
 
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.panel import Panel
 from rich.tree import Tree
 
-from vertice_cli.tui.components.enhanced_progress import EnhancedProgress
-from vertice_cli.tui.components.dashboard import StatusDashboard
-from vertice_cli.tui.components.workflow_visualizer import WorkflowVisualizer
+# Corrected imports
+from vertice_cli.tui.components.enhanced_progress import (
+    EnhancedProgressDisplay,
+    WorkflowProgress,
+    StageProgress,
+)
+from vertice_cli.tui.components.dashboard import Dashboard, Operation
+from vertice_cli.tui.components.workflow_visualizer import WorkflowVisualizer, StepStatus
 from vertice_cli.tui.input_enhanced import EnhancedInput
-from vertice_cli.tui.context_awareness import ContextAwareness
+from vertice_cli.tui.components.context_awareness import ContextAwarenessEngine
 
 
 @dataclass
@@ -121,50 +127,57 @@ class UIPerformanceBenchmark:
         return result
 
     def benchmark_enhanced_progress(self) -> BenchmarkResult:
-        """Benchmark EnhancedProgress component"""
+        """Benchmark EnhancedProgressDisplay component"""
         console = Console()
-        progress = EnhancedProgress(console)
+        display = EnhancedProgressDisplay(console)
+        workflow = WorkflowProgress(
+            stages=[
+                StageProgress("Stage 1", current=50, total=100, status="running"),
+                StageProgress("Stage 2", current=0, total=100, status="pending"),
+            ]
+        )
 
         def operation():
-            progress.update(50, 100, "Processing files...")
-            console.file.write("")  # Force render
+            with console.capture() as _:
+                console.print(display.render_workflow(workflow))
 
-        return self.benchmark_operation("EnhancedProgress.update", operation)
+        return self.benchmark_operation("EnhancedProgress.render", operation)
 
     def benchmark_dashboard(self) -> BenchmarkResult:
-        """Benchmark StatusDashboard component"""
+        """Benchmark Dashboard component"""
         console = Console()
-        dashboard = StatusDashboard(console)
+        dashboard = Dashboard(console)
 
-        def operation():
-            dashboard.update(
-                status="running",
-                current_task="Analyzing code",
-                files_processed=50,
-                total_files=100,
-                errors=2,
-                warnings=5,
-            )
-            console.file.write("")  # Force render
+        # Pre-populate
+        for i in range(5):
+            dashboard.add_operation(Operation(id=f"op{i}", type="llm", description=f"Test Op {i}"))
 
-        return self.benchmark_operation("StatusDashboard.update", operation)
+        # Mock psutil to avoid 0.1s blocking delay during benchmark
+        with patch("psutil.cpu_percent", return_value=15.5):
+
+            def operation():
+                with console.capture() as _:
+                    console.print(dashboard.render())
+
+            return self.benchmark_operation("Dashboard.render", operation)
 
     def benchmark_workflow_visualizer(self) -> BenchmarkResult:
         """Benchmark WorkflowVisualizer component"""
         console = Console()
         visualizer = WorkflowVisualizer(console)
 
-        # Complex workflow
-        steps = [
-            {"id": "step1", "name": "Init", "status": "completed"},
-            {"id": "step2", "name": "Analysis", "status": "running"},
-            {"id": "step3", "name": "Code Gen", "status": "pending"},
-            {"id": "step4", "name": "Test", "status": "pending"},
-        ]
+        # Populate steps
+        visualizer.add_step("step1", "Init")
+        visualizer.update_step("step1", status=StepStatus.COMPLETED)
+        visualizer.add_step("step2", "Analysis", dependencies=["step1"])
+        visualizer.update_step("step2", status=StepStatus.RUNNING, progress=0.5)
+        visualizer.add_step("step3", "Code Gen", dependencies=["step2"])
 
         def operation():
-            visualizer.render_workflow(steps)
-            console.file.write("")  # Force render
+            # Force dirty flags to ensure full render for benchmark
+            visualizer._dirty_flags.update({"minimap", "main", "details"})
+            with console.capture() as _:
+                console.print(visualizer.render_full_view())
 
         return self.benchmark_operation("WorkflowVisualizer.render", operation)
 
@@ -178,13 +191,16 @@ class UIPerformanceBenchmark:
         return self.benchmark_operation("EnhancedInput.process", operation)
 
     def benchmark_context_awareness(self) -> BenchmarkResult:
-        """Benchmark ContextAwareness component"""
-        context = ContextAwareness()
+        """Benchmark ContextAwarenessEngine component"""
+        context = ContextAwarenessEngine()
 
         files = [f"file{i}.py" for i in range(50)]
 
         def operation():
-            context.rank_files(files, "implement authentication")
+            # Mimic rank_files behavior using score_file_relevance
+            scores = []
+            for f in files:
+                scores.append(context.score_file_relevance(f, "implement authentication"))
 
         return self.benchmark_operation("ContextAwareness.rank", operation, iterations=50)
 
@@ -198,8 +214,8 @@ class UIPerformanceBenchmark:
                 title="Test Panel",
                 border_style="blue",
             )
-            console.print(panel)
-            console.file.write("")  # Force render
+            with console.capture() as _:
+                console.print(panel)
 
         return self.benchmark_operation("Rich.Panel.render", operation)
 
@@ -213,8 +229,8 @@ class UIPerformanceBenchmark:
                 branch = tree.add(f"Branch {i}")
                 for j in range(5):
                     branch.add(f"Leaf {j}")
-            console.print(tree)
-            console.file.write("")  # Force render
+            with console.capture() as _:
+                console.print(tree)
 
         return self.benchmark_operation("Rich.Tree.render", operation)
 
@@ -242,8 +258,15 @@ class UIPerformanceBenchmark:
 
             for name, benchmark_func in benchmarks:
                 progress.update(task, description=f"Benchmarking {name}...")
-                result = benchmark_func()
-                self.console.print(result)
+                try:
+                    result = benchmark_func()
+                    self.console.print(result)
+                except Exception as e:
+                    self.console.print(f"[red]FAILED {name}: {e}[/red]")
+                    import traceback
+
+                    traceback.print_exc()
+                    self.results.append(BenchmarkResult(name, 0, 0, 0, 0, 0, 0, 0, 0, False))
                 progress.advance(task)
 
         # Summary
