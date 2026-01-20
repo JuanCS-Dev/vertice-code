@@ -23,6 +23,39 @@ from vertice_cli.tools.base import ToolResult, ToolCategory
 from vertice_cli.tools.validated import ValidatedTool
 
 
+class PrometheusGetSkillTool(ValidatedTool):
+    """Retrieve a static skill (SOP) by name."""
+
+    def __init__(self, skill_loader=None):
+        super().__init__()
+        self._loader = skill_loader
+        self.category = ToolCategory.CONTEXT
+        self.description = "Retrieve a static skill/SOP by name to guide execution."
+        self.parameters = {
+            "skill_name": {
+                "type": "string",
+                "description": "Name of the skill to retrieve (e.g., 'git-ops')",
+                "required": True,
+            }
+        }
+
+    def set_loader(self, loader):
+        self._loader = loader
+
+    async def _execute_validated(self, skill_name: str) -> ToolResult:
+        if not self._loader:
+            return ToolResult(success=False, error="Skill loader not initialized")
+
+        skill = self._loader.get_skill(skill_name)
+        if not skill:
+            available = list(self._loader.skills.keys())
+            return ToolResult(
+                success=False, error=f"Skill '{skill_name}' not found. Available: {available}"
+            )
+
+        return ToolResult(success=True, data=skill.to_prompt())
+
+
 class PrometheusExecuteTool(ValidatedTool):
     """Execute task via PROMETHEUS agent."""
 
@@ -36,10 +69,10 @@ Execute a task using PROMETHEUS self-evolving meta-agent.
 PROMETHEUS provides:
 - World model simulation (plans before acting)
 - 6-type persistent memory (learns from experience)
-- Self-reflection (improves over time)
+- Static Skills (SOPs) & Self-reflection
 - Automatic tool creation (generates tools on-demand)
 
-Use this for complex tasks that benefit from planning and learning.
+Use this for complex tasks that benefit from planning, learning, and following SOPs.
 """
         self.parameters = {
             "task": {

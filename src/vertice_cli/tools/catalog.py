@@ -162,6 +162,7 @@ class ToolCatalog:
                     logger.debug(f"PrometheusProvider auto-init failed: {e}")
                     return self
 
+            from vertice_cli.core.skill_loader import SkillLoader
             from vertice_cli.tools.prometheus_tools import (
                 PrometheusExecuteTool,
                 PrometheusMemoryQueryTool,
@@ -171,7 +172,12 @@ class ToolCatalog:
                 PrometheusCreateToolTool,
                 PrometheusGetStatusTool,
                 PrometheusBenchmarkTool,
+                PrometheusGetSkillTool,
             )
+
+            # Initialize SkillLoader
+            skill_loader = SkillLoader()
+            skill_loader.load_all()
 
             # These are instantiated with the provider
             tools = [
@@ -183,6 +189,7 @@ class ToolCatalog:
                 PrometheusCreateToolTool(provider),
                 PrometheusGetStatusTool(provider),
                 PrometheusBenchmarkTool(provider),
+                PrometheusGetSkillTool(skill_loader),
             ]
 
             for tool in tools:

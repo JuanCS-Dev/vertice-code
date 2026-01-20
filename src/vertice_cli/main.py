@@ -677,6 +677,64 @@ def cleanup_sessions(
         raise typer.Exit(1)
 
 
+# Skills management commands
+skills_app = typer.Typer(name="skills", help="Manage static skills (SOPs)")
+app.add_typer(skills_app, name="skills")
+
+
+@skills_app.command("list")
+def list_skills():
+    """List available static skills."""
+    try:
+        from vertice_cli.core.skill_loader import SkillLoader
+        from rich.table import Table
+
+        loader = SkillLoader()
+        skills = loader.load_all()
+
+        if not skills:
+            console.print("[yellow]No skills found in skills/ directory[/yellow]")
+            return
+
+        table = Table(title="Available Skills (SOPs)")
+        table.add_column("Name", style="cyan")
+        table.add_column("Description", style="white")
+        table.add_column("Path", style="dim")
+
+        for name, skill in skills.items():
+            table.add_row(name, skill.description, str(skill.path))
+
+        console.print(table)
+
+    except Exception as e:
+        console.print(f"[red]Error listing skills:[/red] {e}")
+        raise typer.Exit(1)
+
+
+@skills_app.command("show")
+def show_skill(name: str):
+    """Show detailed skill content."""
+    try:
+        from vertice_cli.core.skill_loader import SkillLoader
+        from rich.markdown import Markdown
+
+        loader = SkillLoader()
+        skills = loader.load_all()
+        skill = skills.get(name)
+
+        if not skill:
+            console.print(f"[red]Skill '{name}' not found[/red]")
+            raise typer.Exit(1)
+
+        console.print(f"\n[bold cyan]Skill: {skill.name}[/bold cyan]")
+        console.print(f"[dim]{skill.path}[/dim]\n")
+        console.print(Markdown(skill.content))
+
+    except Exception as e:
+        console.print(f"[red]Error showing skill:[/red] {e}")
+        raise typer.Exit(1)
+
+
 def cli_main():
     """CLI entry point."""
     app()

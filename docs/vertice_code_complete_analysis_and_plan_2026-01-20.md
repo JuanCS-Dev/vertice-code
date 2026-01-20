@@ -588,4 +588,19 @@ Most competitive agents converge on 6 “skill families”:
    - Created `docs/MCP_AND_TOOLS_GUIDE.md` as the definitive reference for adding tools, configuring the MCP server, and testing.
 
 ### Project Status:
-**ALL PHASES COMPLETE.** The Vertice CLI/TUI and MCP architecture have been successfully refactored, unified, and documented in accordance with the 2026-01-20 Plan.
+**ALL PHASES COMPLETE.** The Vertice CLI/TUI, MCP architecture, and Skills System have been successfully refactored, unified, and documented in accordance with the 2026-01-20 Plan.
+
+
+---
+
+## Execution Log (2026-01-20) - Phase 5 Complete
+
+**Status:** Phase 5 (Skills Integration) tasks marked as DONE.
+
+### Achievements:
+1. **Static Skill Loader:** Created `src/vertice_cli/core/skill_loader.py` to robustly parse Markdown/YAML skills from the `skills/` directory, following MCP resource patterns.
+2. **Skill Tool:** Implemented `PrometheusGetSkillTool` in `src/vertice_cli/tools/prometheus_tools.py`, enabling agents to retrieve SOPs on demand.
+3. **Registry Integration:** Updated `src/vertice_cli/tools/catalog.py` to automatically load static skills and register the skill retrieval tool.
+4. **CLI Management:** Added `vertice skills list` and `vertice skills show` commands to `src/vertice_cli/main.py`, giving users visibility into the available SOPs.
+
+**Final Result:** The "Skills Gap" identified by the user has been fully bridged. Agents can now access and follow the static SOPs defined in the `skills/` directory.
