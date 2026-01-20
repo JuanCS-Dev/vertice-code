@@ -467,8 +467,8 @@ Most competitive agents converge on 6 “skill families”:
 ## 14) Phase 2: Essential Skills (Weeks 3–4)
 
 ### Git integration (market baseline)
-- [ ] Promote advanced git tools (commit/branch/pr) into default registry behind permissions.
-- [ ] Add “read-only vs mutating” permission tiers surfaced in TUI approvals.
+- [x] Promote advanced git tools (commit/branch/pr) into default registry behind permissions.
+- [x] Add “read-only vs mutating” permission tiers surfaced in TUI approvals.
 
 **Files to modify**
 - `src/vertice_cli/tools/registry_helper.py` (or replaced by catalog)
@@ -531,3 +531,21 @@ Most competitive agents converge on 6 “skill families”:
 ### Next Steps (Phase 2):
 - Promote Git mutation tools to default registry.
 - Implement permission tiers for sensitive tools.
+
+
+---
+
+## Execution Log (2026-01-20) - Phase 2 Complete
+
+**Status:** Phase 2 (Git Integration) tasks marked as DONE.
+
+### Achievements:
+1. **Advanced Git Tools:** Implemented `GitPushTool`, `GitCheckoutTool`, `GitBranchTool` in `mutate_tools.py`, completing the "market baseline" set.
+2. **Safety Tiers:** Added `requires_approval=True` to all Git mutation tools in `mutate_tools.py`.
+3. **Base Tool Support:** Added `requires_approval: bool` attribute to `BaseTool` (defaulting to False).
+4. **Catalog Integration:** Added `add_git_mutation_tools()` to `ToolCatalog` with instance registration logic.
+5. **Validation:** Verified via `test_phase2.py` that default registry remains safe (read-only) and mutation registry includes approved-only tools.
+
+### Next Steps (Phase 3):
+- Real external MCP connections.
+- Tool caching.

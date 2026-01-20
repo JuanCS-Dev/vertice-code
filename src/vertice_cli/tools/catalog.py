@@ -194,6 +194,22 @@ class ToolCatalog:
             self.load_errors.append(f"prometheus init: {e}")
         return self
 
+    def add_git_mutation_tools(self) -> "ToolCatalog":
+        """Add git mutation tools (commit, push, checkout, branch, pr)."""
+        try:
+            from vertice_cli.tools.git.mutate_tools import get_git_mutate_tools
+
+            # get_git_mutate_tools returns instances, so we register directly
+            for tool in get_git_mutate_tools():
+                try:
+                    self.registry.register(tool)
+                except Exception as e:
+                    self.load_errors.append(f"git_mutate/{tool.name}: {e}")
+
+        except ImportError as e:
+            self.load_errors.append(f"git mutation tools: {e}")
+        return self
+
     def build(self) -> ToolRegistry:
         """Return the constructed registry."""
         if self.load_errors:
@@ -213,6 +229,7 @@ def get_catalog(
     include_web: bool = False,
     include_parity: bool = False,
     include_prometheus: bool = False,
+    include_git_mutate: bool = False,
     prometheus_provider: Optional[Any] = None,
 ) -> ToolRegistry:
     """Convenience factory function."""
@@ -223,6 +240,9 @@ def get_catalog(
 
     if include_parity:
         catalog.add_parity_tools()
+
+    if include_git_mutate:
+        catalog.add_git_mutation_tools()
 
     if include_prometheus:
         catalog.add_prometheus_tools(prometheus_provider)

@@ -38,6 +38,7 @@ class BaseTool:
     name: str = "base_tool"
     description: str = "Base tool class"
     parameters: Dict[str, Any] = {}
+    requires_approval: bool = False
 
     def execute(self, **kwargs: Any) -> ToolResult:
         """Execute the tool with given parameters."""

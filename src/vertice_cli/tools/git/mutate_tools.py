@@ -5,6 +5,9 @@ Git Mutate Tools - Write Operations with Safety
 Contains:
 - GitCommitTool: Create commits with HEREDOC support
 - GitPRCreateTool: Create GitHub PRs via gh CLI
+- GitPushTool: Push changes to remote
+- GitCheckoutTool: Checkout branches/commits
+- GitBranchTool: Create/delete branches
 
 All tools in this module modify the repository and include safety checks.
 
@@ -40,24 +43,6 @@ class GitCommitTool(Tool):
     - Respects safety protocols
     - Supports pre-commit hooks
     - Uses HEREDOC-style message passing for proper multi-line support
-
-    Commit message format:
-    ```
-    <type>(<scope>): <description>
-
-    <body>
-
-    Generated with Juan-Dev-Code
-
-    Co-Authored-By: Juan-Dev-Code <noreply@juancs.dev>
-    ```
-
-    Example:
-        result = await commit.execute(
-            message="feat(auth): add JWT token validation",
-            files=["src/auth.py"],
-            add_signature=True
-        )
     """
 
     SIGNATURE = """
@@ -71,6 +56,7 @@ Co-Authored-By: Juan-Dev-Code <noreply@juancs.dev>"""
         self.name = "git_commit"
         self.category = ToolCategory.GIT
         self.description = "Create a git commit with Claude Code conventions"
+        self.requires_approval = True
         self.parameters = {
             "message": {
                 "type": "string",
@@ -95,29 +81,12 @@ Co-Authored-By: Juan-Dev-Code <noreply@juancs.dev>"""
         }
 
     async def _execute_validated(self, **kwargs) -> ToolResult:
-        """
-        Create git commit with HEREDOC support for multi-line messages.
-
-        Claude Code Parity: Uses subprocess stdin to pass commit messages,
-        which is equivalent to HEREDOC pattern in shell:
-
-        ```bash
-        git commit -m "$(cat <<'EOF'
-        Commit message here.
-
-        Generated with Juan-Dev-Code
-
-        Co-Authored-By: Juan-Dev-Code <noreply@juancs.dev>
-        EOF
-        )"
-        ```
-        """
+        """Create git commit with HEREDOC support."""
         message = kwargs.get("message", "")
         files = kwargs.get("files", [])
         amend = kwargs.get("amend", False)
         add_signature = kwargs.get("add_signature", True)
 
-        # Validate message
         if not message:
             return ToolResult(success=False, error="Commit message is required")
 
@@ -126,7 +95,6 @@ Co-Authored-By: Juan-Dev-Code <noreply@juancs.dev>"""
             return ToolResult(success=False, error=reason)
 
         try:
-            # Safety check for amend
             if amend:
                 author_check = await self._check_authorship()
                 if not author_check["safe_to_amend"]:
@@ -134,24 +102,18 @@ Co-Authored-By: Juan-Dev-Code <noreply@juancs.dev>"""
                         success=False, error=f"Cannot amend: {author_check['reason']}"
                     )
 
-            # Stage files
             stage_result = await self._stage_files(files)
             if not stage_result.success:
                 return stage_result
 
-            # Check if there are staged changes
             diff_result = await run_git_command("diff", "--cached", "--quiet")
             if diff_result.success:
                 return ToolResult(success=False, error="No changes staged for commit")
 
-            # Build commit message
             full_message = self._build_commit_message(message, add_signature)
-
-            # Use HEREDOC-style commit via stdin
             commit_result = await self._run_git_commit_heredoc(full_message, amend)
 
             if not commit_result.success:
-                # Check if pre-commit hook modified files
                 if commit_result.error and "pre-commit" in commit_result.error.lower():
                     return ToolResult(
                         success=False,
@@ -160,7 +122,6 @@ Co-Authored-By: Juan-Dev-Code <noreply@juancs.dev>"""
                     )
                 return ToolResult(success=False, error=commit_result.error)
 
-            # Get commit hash
             hash_result = await run_git_command("rev-parse", "--short", "HEAD")
             commit_hash = hash_result.data.strip() if hash_result.success else "unknown"
 
@@ -171,7 +132,6 @@ Co-Authored-By: Juan-Dev-Code <noreply@juancs.dev>"""
                     "message": message[:100],
                     "amended": amend,
                     "files_committed": len(files) if files else "all staged",
-                    "heredoc_used": True,
                 },
                 metadata={"hash": commit_hash},
             )
@@ -184,75 +144,52 @@ Co-Authored-By: Juan-Dev-Code <noreply@juancs.dev>"""
         """Stage files for commit."""
         if files:
             for file in files:
-                # Validate file path (basic security check)
                 if ".." in file or file.startswith("/"):
                     return ToolResult(success=False, error=f"Invalid file path: {file}")
-
                 stage_result = await run_git_command("add", file)
                 if not stage_result.success:
                     return ToolResult(
                         success=False, error=f"Failed to stage {file}: {stage_result.error}"
                     )
         else:
-            # Stage all modified files
             stage_result = await run_git_command("add", "-A")
             if not stage_result.success:
                 return ToolResult(success=False, error=f"Failed to stage: {stage_result.error}")
-
         return ToolResult(success=True, data="Files staged")
 
     async def _run_git_commit_heredoc(self, message: str, amend: bool = False) -> ToolResult:
-        """
-        Run git commit with HEREDOC-style message passing.
-
-        Uses subprocess stdin to pass multi-line commit messages properly,
-        avoiding shell escaping issues. Equivalent to:
-
-        ```bash
-        git commit -F - <<'EOF'
-        <message>
-        EOF
-        ```
-        """
         try:
-            args = ["git", "commit", "-F", "-"]  # Read message from stdin
+            args = ["git", "commit", "-F", "-"]
             if amend:
                 args.append("--amend")
 
             result = subprocess.run(
                 args,
-                input=message,  # Pass message via stdin (HEREDOC equivalent)
+                input=message,
                 capture_output=True,
                 text=True,
                 timeout=60,
             )
-
             return ToolResult(
                 success=result.returncode == 0,
                 data=result.stdout,
                 error=result.stderr if result.returncode != 0 else None,
             )
-
         except subprocess.TimeoutExpired:
             return ToolResult(success=False, error="Git commit timed out")
         except Exception as e:
             return ToolResult(success=False, error=str(e))
 
     async def _check_authorship(self) -> Dict[str, Any]:
-        """Check if safe to amend previous commit."""
-        # Get last commit author
         result = await run_git_command("log", "-1", "--format=%an %ae")
         if not result.success:
             return {"safe_to_amend": False, "reason": "Could not check authorship"}
-
         author = result.data.strip()
 
-        # Check if pushed
         status_result = await run_git_command("status", "-sb")
         if status_result.success and "ahead" not in status_result.data:
             return {"safe_to_amend": False, "reason": "Commit may already be pushed"}
 
-        # Allow amend for Juan-Dev-Code-authored commits or unpushed commits
         if "claude" in author.lower() or "juan" in author.lower() or "noreply@" in author.lower():
             return {"safe_to_amend": True, "reason": "Tool-authored commit"}
 
@@ -263,11 +200,176 @@ Co-Authored-By: Juan-Dev-Code <noreply@juancs.dev>"""
         }
 
     def _build_commit_message(self, message: str, add_signature: bool) -> str:
-        """Build full commit message with optional signature."""
         if not add_signature:
             return message
-
         return message + self.SIGNATURE
+
+
+# =============================================================================
+# GIT PUSH TOOL
+# =============================================================================
+
+
+class GitPushTool(Tool):
+    """Push changes to remote repository."""
+
+    def __init__(self):
+        super().__init__()
+        self.name = "git_push"
+        self.category = ToolCategory.GIT
+        self.description = "Push changes to remote repository"
+        self.requires_approval = True
+        self.parameters = {
+            "remote": {
+                "type": "string",
+                "description": "Remote name (default: origin)",
+                "required": False,
+            },
+            "branch": {
+                "type": "string",
+                "description": "Branch name (default: current)",
+                "required": False,
+            },
+            "force": {
+                "type": "boolean",
+                "description": "Force push (requires admin approval)",
+                "required": False,
+            },
+        }
+
+    async def _execute_validated(self, **kwargs) -> ToolResult:
+        remote = kwargs.get("remote", "origin")
+        branch = kwargs.get("branch")
+        force = kwargs.get("force", False)
+
+        if not branch:
+            # Get current branch
+            res = await run_git_command("rev-parse", "--abbrev-ref", "HEAD")
+            if not res.success:
+                return ToolResult(success=False, error="Could not determine current branch")
+            branch = res.data.strip()
+
+        cmd = ["push", remote, branch]
+        if force:
+            cmd.append("--force")
+
+        result = await run_git_command(*cmd)
+        if not result.success:
+            return result
+
+        return ToolResult(
+            success=True,
+            data=f"Pushed {branch} to {remote}",
+            metadata={"remote": remote, "branch": branch},
+        )
+
+
+# =============================================================================
+# GIT CHECKOUT TOOL
+# =============================================================================
+
+
+class GitCheckoutTool(Tool):
+    """Switch branches or checkout commits."""
+
+    def __init__(self):
+        super().__init__()
+        self.name = "git_checkout"
+        self.category = ToolCategory.GIT
+        self.description = "Switch branches or restore working tree files"
+        self.requires_approval = True
+        self.parameters = {
+            "target": {
+                "type": "string",
+                "description": "Branch name, commit hash, or file path",
+                "required": True,
+            },
+            "create_branch": {
+                "type": "boolean",
+                "description": "Create new branch (-b)",
+                "required": False,
+            },
+        }
+
+    async def _execute_validated(self, **kwargs) -> ToolResult:
+        target = kwargs.get("target")
+        create = kwargs.get("create_branch", False)
+
+        if not target:
+            return ToolResult(success=False, error="Target required")
+
+        cmd = ["checkout"]
+        if create:
+            cmd.append("-b")
+        cmd.append(target)
+
+        result = await run_git_command(*cmd)
+        if not result.success:
+            return result
+
+        return ToolResult(
+            success=True,
+            data=f"Checked out {target}",
+            metadata={"target": target, "new_branch": create},
+        )
+
+
+# =============================================================================
+# GIT BRANCH TOOL
+# =============================================================================
+
+
+class GitBranchTool(Tool):
+    """Manage branches (list, create, delete)."""
+
+    def __init__(self):
+        super().__init__()
+        self.name = "git_branch"
+        self.category = ToolCategory.GIT
+        self.description = "List, create, or delete branches"
+        self.requires_approval = True
+        self.parameters = {
+            "action": {
+                "type": "string",
+                "description": "Action: list, create, delete",
+                "enum": ["list", "create", "delete"],
+                "required": True,
+            },
+            "name": {
+                "type": "string",
+                "description": "Branch name (required for create/delete)",
+                "required": False,
+            },
+        }
+
+    async def _execute_validated(self, **kwargs) -> ToolResult:
+        action = kwargs.get("action", "list")
+        name = kwargs.get("name")
+
+        if action == "list":
+            res = await run_git_command("branch", "--list")
+            return res
+
+        if not name:
+            return ToolResult(success=False, error="Branch name required for create/delete")
+
+        if action == "create":
+            res = await run_git_command("branch", name)
+            if res.success:
+                return ToolResult(success=True, data=f"Created branch {name}")
+            return res
+
+        if action == "delete":
+            # Safety check: prevent deleting main/master
+            if name in ["main", "master", "dev"]:
+                return ToolResult(success=False, error=f"Cannot delete protected branch: {name}")
+
+            res = await run_git_command("branch", "-D", name)
+            if res.success:
+                return ToolResult(success=True, data=f"Deleted branch {name}")
+            return res
+
+        return ToolResult(success=False, error=f"Unknown action: {action}")
 
 
 # =============================================================================
@@ -278,17 +380,6 @@ Co-Authored-By: Juan-Dev-Code <noreply@juancs.dev>"""
 class GitPRCreateTool(Tool):
     """
     Create GitHub Pull Request using gh CLI.
-
-    Claude Code parity: Create PRs with standard format.
-    Requires: gh CLI installed and authenticated.
-
-    Example:
-        result = await pr.execute(
-            title="feat: Add user authentication",
-            body="## Summary\\n- Added JWT token support",
-            base="main",
-            draft=True
-        )
     """
 
     SIGNATURE = "\n\nGenerated with Juan-Dev-Code"
@@ -298,6 +389,7 @@ class GitPRCreateTool(Tool):
         self.name = "git_pr_create"
         self.category = ToolCategory.GIT
         self.description = "Create a GitHub Pull Request"
+        self.requires_approval = True
         self.parameters = {
             "title": {"type": "string", "description": "PR title", "required": True},
             "body": {
@@ -326,16 +418,12 @@ class GitPRCreateTool(Tool):
         if len(title) > 256:
             return ToolResult(success=False, error="PR title too long (max 256 chars)")
 
-        # Check if gh is available
         gh_check = await self._check_gh_cli()
         if not gh_check.success:
             return gh_check
 
         try:
-            # Build PR body with signature
             full_body = self._build_pr_body(body)
-
-            # Use subprocess with stdin for body (HEREDOC equivalent)
             args = [
                 "gh",
                 "pr",
@@ -343,11 +431,10 @@ class GitPRCreateTool(Tool):
                 "--title",
                 title,
                 "--body-file",
-                "-",  # Read body from stdin
+                "-",
                 "--base",
                 base,
             ]
-
             if draft:
                 args.append("--draft")
 
@@ -358,7 +445,6 @@ class GitPRCreateTool(Tool):
             if result.returncode != 0:
                 return ToolResult(success=False, error=result.stderr)
 
-            # Extract PR URL
             pr_url = result.stdout.strip()
 
             return ToolResult(
@@ -379,21 +465,16 @@ class GitPRCreateTool(Tool):
             return ToolResult(success=False, error=str(e))
 
     async def _check_gh_cli(self) -> ToolResult:
-        """Check if gh CLI is available and authenticated."""
         try:
             result = subprocess.run(["gh", "--version"], capture_output=True, timeout=10)
             if result.returncode != 0:
                 return ToolResult(success=False, error="GitHub CLI (gh) not working properly")
-
-            # Check auth status
             auth_result = subprocess.run(["gh", "auth", "status"], capture_output=True, timeout=10)
             if auth_result.returncode != 0:
                 return ToolResult(
                     success=False, error="GitHub CLI not authenticated. Run: gh auth login"
                 )
-
             return ToolResult(success=True, data="gh CLI ready")
-
         except FileNotFoundError:
             return ToolResult(
                 success=False,
@@ -403,22 +484,18 @@ class GitPRCreateTool(Tool):
             return ToolResult(success=False, error=str(e))
 
     def _build_pr_body(self, body: str) -> str:
-        """Build PR body with Juan-Dev-Code signature."""
         if not body:
             return f"## Summary\n\n_No description provided._\n{self.SIGNATURE}"
-
         return body + self.SIGNATURE
-
-
-# =============================================================================
-# REGISTRY HELPER
-# =============================================================================
 
 
 def get_git_mutate_tools() -> List[Tool]:
     """Get all write git tools."""
     return [
         GitCommitTool(),
+        GitPushTool(),
+        GitCheckoutTool(),
+        GitBranchTool(),
         GitPRCreateTool(),
     ]
 
@@ -426,5 +503,8 @@ def get_git_mutate_tools() -> List[Tool]:
 __all__ = [
     "GitCommitTool",
     "GitPRCreateTool",
+    "GitPushTool",
+    "GitCheckoutTool",
+    "GitBranchTool",
     "get_git_mutate_tools",
 ]
