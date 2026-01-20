@@ -4,7 +4,6 @@ DEPRECATED: This module is deprecated and will be removed in v2.0.
 Please use the unified 'vertice' command instead.
 """
 
-import warnings
 from rich.console import Console
 
 console = Console()
