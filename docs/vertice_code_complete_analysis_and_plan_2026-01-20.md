@@ -480,9 +480,9 @@ Most competitive agents converge on 6 “skill families”:
 - Integration: run git status/diff against a temp repo fixture
 
 ## 15) Phase 3: Advanced Features (Weeks 5–6)
-- [ ] Real external MCP connections in `MCPManager` (or remove feature).
-- [ ] Tool caching (directory tree/search results) with invalidation hooks.
-- [ ] Observability: per-request correlation id propagated through tool calls and displayed in UI debug view.
+- [x] Real external MCP connections in `MCPManager` (or remove feature).
+- [x] Tool caching (directory tree/search results) with invalidation hooks.
+- [x] Observability: per-request correlation id propagated through tool calls and displayed in UI debug view.
 
 ## 16) Phase 4: Polish & Optimization (Weeks 7–8)
 - [ ] Consolidate legacy CLI (`cli_app.py`) vs unified CLI (`main.py`) and document “one true CLI”.
@@ -549,6 +549,26 @@ Most competitive agents converge on 6 “skill families”:
 ### Next Steps (Phase 3):
 - Real external MCP connections.
 - Tool caching.
+
+
+---
+
+## Execution Log (2026-01-20) - Phase 3 Complete
+
+**Status:** Phase 3 (Advanced Features) tasks marked as DONE.
+
+### Achievements:
+1. **Real MCP Client:** Refactored `MCPManager` to use official `mcp.client` (supporting both SSE and Stdio transports) for external connections, managed via background tasks.
+2. **Observability Architecture:**
+   - Moved `StructuredLogger` to `src/vertice_cli/core/logging.py` and refactored it to use `contextvars` for async-safe correlation ID propagation.
+   - Updated `BaseTool` to automatically wrap execution in a logging context, ensuring every tool call is traceable.
+3. **Tool Caching:**
+   - Created `src/vertice_cli/tools/caching.py` with a TTL-based `@cache_tool_result` decorator.
+   - Applied caching to `GetDirectoryTreeTool` to improve performance on large codebases.
+
+### Next Steps (Phase 4):
+- CLI consolidation.
+- Documentation updates.
 
 
 ---

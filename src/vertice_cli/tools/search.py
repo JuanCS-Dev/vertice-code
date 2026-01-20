@@ -10,6 +10,7 @@ from typing import Optional
 
 from .base import ToolResult, ToolCategory
 from .validated import ValidatedTool
+from .caching import cache_tool_result
 
 
 class SearchFilesTool(ValidatedTool):
@@ -220,6 +221,7 @@ class GetDirectoryTreeTool(ValidatedTool):
             "max_depth": lambda v: v is None or (isinstance(v, int) and 0 < v <= 10),
         }
 
+    @cache_tool_result(ttl_seconds=300)
     async def _execute_validated(self, path: str = ".", max_depth: int = 3) -> ToolResult:
         """Get directory tree."""
         try:

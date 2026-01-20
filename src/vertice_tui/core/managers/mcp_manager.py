@@ -15,11 +15,23 @@ Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 from __future__ import annotations
 
 import logging
+import asyncio
+import shlex
 from dataclasses import dataclass, field, asdict
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from vertice_cli.tools.base import ToolRegistry
+
+# MCP Imports
+try:
+    from mcp.client.stdio import stdio_client
+    from mcp.client.sse import sse_client
+    from mcp import ClientSession, StdioServerParameters
+
+    MCP_AVAILABLE = True
+except ImportError:
+    MCP_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +62,9 @@ class MCPClientConnection:
     connected: bool = False
     tools: List[str] = field(default_factory=list)
     error: Optional[str] = None
+    session: Optional[Any] = None  # ClientSession
+    task: Optional[asyncio.Task] = None
+    disconnect_event: asyncio.Event = field(default_factory=asyncio.Event)
 
 
 # =============================================================================
@@ -60,17 +75,6 @@ class MCPClientConnection:
 class MCPManager:
     """
     Manages MCP server lifecycle and external connections.
-
-    Provides:
-    - Start/stop local MCP server (via QwenMCPServer)
-    - Connect to external MCP servers
-    - List available/imported tools
-    - Status reporting
-
-    Example:
-        manager = MCPManager()
-        await manager.start_server(tool_registry, port=3000)
-        status = manager.get_status()
     """
 
     def __init__(self) -> None:
@@ -86,15 +90,17 @@ class MCPManager:
     # =========================================================================
 
     def get_status(self) -> Dict[str, Any]:
-        """
-        Get complete MCP status.
-
-        Returns:
-            Status dict with server and connection info
-        """
+        """Get complete MCP status."""
         return {
             "server": asdict(self._server_state),
-            "connections": [asdict(c) for c in self._connections.values()],
+            "connections": [
+                {
+                    k: v
+                    for k, v in asdict(c).items()
+                    if k not in ["session", "task", "disconnect_event"]
+                }
+                for c in self._connections.values()
+            ],
             "total_exposed_tools": len(self._exposed_tools),
             "total_imported_tools": sum(len(tools) for tools in self._imported_tools.values()),
         }
@@ -114,57 +120,54 @@ class MCPManager:
         host: str = "127.0.0.1",
         transport: str = "stdio",
     ) -> Dict[str, Any]:
-        """
-        Start the local MCP server.
-
-        Args:
-            tool_registry: Registry of tools to expose
-            port: Port to listen on (for SSE transport)
-            host: Host to bind to
-            transport: Transport type (stdio, sse)
-
-        Returns:
-            Result dict with success status
-        """
+        """Start the local MCP server."""
         if self._server_state.running:
             return {"success": False, "error": "Server already running"}
 
         try:
-            # Lazy import to avoid dependency issues
             from vertice_cli.integrations.mcp.server import QwenMCPServer
             from vertice_cli.integrations.mcp.config import MCPConfig
 
-            # Get default registry if not provided
             if tool_registry is None:
                 from vertice_cli.tools.registry_helper import get_default_registry
 
                 tool_registry = get_default_registry()
 
-            # Configure and initialize
             config = MCPConfig.from_env()
             config.enabled = True
             config.port = port
             config.host = host
+            config.transport = transport
 
             self._server = QwenMCPServer(config)
             self._server.initialize(tool_registry)
 
-            # Update state
+            # In stdio mode, start_server usually blocks or runs in background
+            # For TUI, we might need to handle this differently depending on transport
+            # But QwenMCPServer.run() is async.
+            # If transport is stdio, it awaits stdin/stdout loop.
+            # If transport is sse, it starts an aiohttp app.
+
+            # Since we are inside the TUI, we probably want SSE server to be backgrounded.
+            # Stdio server inside TUI is tricky (TUI owns stdio).
+            if transport == "stdio":
+                # We cannot run stdio server inside the TUI process easily as TUI uses stdio
+                return {"success": False, "error": "Cannot run stdio server inside TUI"}
+
+            # For SSE, we spawn a task
+            asyncio.create_task(self._server.run())
+
             self._server_state.running = True
             self._server_state.port = port
             self._server_state.host = host
             self._server_state.transport = transport
             self._server_state.error = None
 
-            # Track exposed tools
             all_tools = tool_registry.get_all()
             self._exposed_tools = list(all_tools.keys())
             self._server_state.exposed_tools = len(self._exposed_tools)
 
-            logger.info(
-                f"MCP server started on {host}:{port} with {len(self._exposed_tools)} tools"
-            )
-
+            logger.info(f"MCP server started on {host}:{port} ({transport})")
             return {
                 "success": True,
                 "port": port,
@@ -173,45 +176,26 @@ class MCPManager:
             }
 
         except ImportError as e:
-            error_msg = f"MCP dependencies not installed: {e}"
-            self._server_state.error = error_msg
-            logger.error(error_msg)
-            return {"success": False, "error": error_msg}
-
+            return {"success": False, "error": f"Dependencies missing: {e}"}
         except Exception as e:
-            error_msg = f"Failed to start MCP server: {e}"
-            self._server_state.error = error_msg
-            logger.error(error_msg)
-            return {"success": False, "error": error_msg}
+            logger.error(f"Failed to start server: {e}")
+            return {"success": False, "error": str(e)}
 
     async def stop_server(self) -> Dict[str, Any]:
-        """
-        Stop the local MCP server.
-
-        Returns:
-            Result dict with success status
-        """
+        """Stop the local MCP server."""
         if not self._server_state.running:
             return {"success": False, "error": "Server not running"}
 
         try:
-            if self._server is not None:
+            if self._server:
                 await self._server.stop()
 
             self._server = None
             self._server_state.running = False
-            self._server_state.error = None
             self._exposed_tools.clear()
-            self._server_state.exposed_tools = 0
-
-            logger.info("MCP server stopped")
             return {"success": True}
-
         except Exception as e:
-            error_msg = f"Error stopping server: {e}"
-            self._server_state.error = error_msg
-            logger.error(error_msg)
-            return {"success": False, "error": error_msg}
+            return {"success": False, "error": str(e)}
 
     # =========================================================================
     # EXTERNAL CONNECTIONS
@@ -222,111 +206,95 @@ class MCPManager:
         url: str,
         name: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """
-        Connect to an external MCP server.
+        """Connect to an external MCP server."""
+        if not MCP_AVAILABLE:
+            return {"success": False, "error": "mcp package not installed"}
 
-        Args:
-            url: MCP server URL
-            name: Optional connection name
-
-        Returns:
-            Result dict with success status
-        """
         conn_name = name or url
-
         if conn_name in self._connections:
-            existing = self._connections[conn_name]
-            if existing.connected:
-                return {"success": False, "error": f"Already connected to {conn_name}"}
+            return {"success": False, "error": f"Already connected to {conn_name}"}
 
+        conn = MCPClientConnection(url=url, name=conn_name)
+        self._connections[conn_name] = conn
+
+        # Spawn background task to manage connection
+        conn.task = asyncio.create_task(self._manage_connection(conn))
+
+        # Wait briefly for connection to establish
+        for _ in range(20):
+            if conn.connected:
+                return {"success": True, "name": conn_name, "tools": len(conn.tools)}
+            if conn.error:
+                del self._connections[conn_name]
+                return {"success": False, "error": conn.error}
+            await asyncio.sleep(0.1)
+
+        return {"success": True, "name": conn_name, "status": "connecting..."}
+
+    async def _manage_connection(self, conn: MCPClientConnection):
+        """Background task to manage MCP connection lifecycle."""
         try:
-            # Create connection record
-            conn = MCPClientConnection(url=url, name=conn_name)
-
-            # Placeholder: actual MCP client connection logic
-            # In production, this would use mcp.client to connect
-            conn.connected = True
-            conn.tools = []  # Would be populated from server
-
-            self._connections[conn_name] = conn
-            self._imported_tools[conn_name] = conn.tools
-
-            logger.info(f"Connected to external MCP: {conn_name}")
-            return {
-                "success": True,
-                "name": conn_name,
-                "url": url,
-                "tools": len(conn.tools),
-            }
-
+            if conn.url.startswith("http://") or conn.url.startswith("https://"):
+                async with sse_client(conn.url) as (read, write):
+                    await self._run_session(conn, read, write)
+            else:
+                # Assume command
+                args = shlex.split(conn.url)
+                server_params = StdioServerParameters(command=args[0], args=args[1:], env=None)
+                async with stdio_client(server_params) as (read, write):
+                    await self._run_session(conn, read, write)
         except Exception as e:
-            error_msg = f"Failed to connect to {url}: {e}"
-            logger.error(error_msg)
-            return {"success": False, "error": error_msg}
+            conn.error = str(e)
+            conn.connected = False
+            logger.error(f"MCP Connection error {conn.name}: {e}")
+        finally:
+            if conn.name in self._connections:
+                del self._connections[conn.name]
+
+    async def _run_session(self, conn, read, write):
+        """Run the MCP session."""
+        async with ClientSession(read, write) as session:
+            conn.session = session
+            await session.initialize()
+
+            # List tools
+            result = await session.list_tools()
+            conn.tools = [t.name for t in result.tools]
+            self._imported_tools[conn.name] = conn.tools
+
+            conn.connected = True
+            conn.error = None
+
+            # Wait until disconnect requested
+            await conn.disconnect_event.wait()
 
     async def disconnect(self, name: str) -> Dict[str, Any]:
-        """
-        Disconnect from an external MCP server.
-
-        Args:
-            name: Connection name to disconnect
-
-        Returns:
-            Result dict with success status
-        """
+        """Disconnect from an external MCP server."""
         if name not in self._connections:
             return {"success": False, "error": f"No connection named {name}"}
 
         try:
             conn = self._connections[name]
-            conn.connected = False
+            conn.disconnect_event.set()
 
-            del self._connections[name]
-            if name in self._imported_tools:
-                del self._imported_tools[name]
+            if conn.task:
+                try:
+                    await asyncio.wait_for(conn.task, timeout=2.0)
+                except asyncio.TimeoutError:
+                    conn.task.cancel()
 
-            logger.info(f"Disconnected from MCP: {name}")
             return {"success": True, "name": name}
 
         except Exception as e:
-            error_msg = f"Error disconnecting: {e}"
-            logger.error(error_msg)
-            return {"success": False, "error": error_msg}
+            return {"success": False, "error": str(e)}
 
     # =========================================================================
     # TOOL LISTING
     # =========================================================================
 
     def list_tools(self) -> Dict[str, Any]:
-        """
-        List all available MCP tools.
-
-        Returns:
-            Dict with exposed and imported tools
-        """
+        """List all available MCP tools."""
         return {
             "exposed": self._exposed_tools.copy(),
             "imported": {name: tools.copy() for name, tools in self._imported_tools.items()},
         }
-
-    def get_exposed_tools(self) -> List[str]:
-        """Get list of tools exposed by local server."""
-        return self._exposed_tools.copy()
-
-    def get_imported_tools(self) -> Dict[str, List[str]]:
-        """Get tools imported from external servers."""
-        return {name: tools.copy() for name, tools in self._imported_tools.items()}
-
-    # =========================================================================
-    # CONNECTION INFO
-    # =========================================================================
-
-    def get_connections(self) -> List[Dict[str, Any]]:
-        """Get list of active connections."""
-        return [asdict(conn) for conn in self._connections.values() if conn.connected]
-
-    def get_connection(self, name: str) -> Optional[Dict[str, Any]]:
-        """Get info for a specific connection."""
-        if name in self._connections:
-            return asdict(self._connections[name])
-        return None

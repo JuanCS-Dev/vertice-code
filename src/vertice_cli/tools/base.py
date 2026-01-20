@@ -10,6 +10,8 @@ CODE_CONSTITUTION §4: Safety First (Type Safety)
 
 from typing import Any, Dict, Optional
 
+from vertice_cli.core.logging import get_tool_logger
+
 
 class ToolResult:
     """Represents the result of a tool execution."""
@@ -49,21 +51,35 @@ class BaseTool:
         return ToolResult(success=True)
 
     async def _execute_validated(self, **kwargs: Any) -> ToolResult:
-        """Internal validated execution wrapper."""
+        """Internal validated execution wrapper with logging."""
+        logger = get_tool_logger()
+
         # 1. Validate
         validation = self.validate(**kwargs)
         if not validation.success:
+            logger.warning(
+                f"Tool validation failed: {self.name}", extra={"error": validation.error}
+            )
             return validation
 
         # 2. Execute
-        try:
-            import inspect
+        with logger.context("execute", component=self.name, metadata=kwargs):
+            try:
+                import inspect
 
-            if inspect.iscoroutinefunction(self.execute):
-                return await self.execute(**kwargs)
-            return self.execute(**kwargs)
-        except Exception as e:
-            return ToolResult(success=False, error=str(e))
+                logger.info(f"Executing tool: {self.name}")
+
+                if inspect.iscoroutinefunction(self.execute):
+                    result = await self.execute(**kwargs)
+                else:
+                    result = self.execute(**kwargs)
+
+                logger.info(f"Tool execution successful: {self.name}")
+                return result
+
+            except Exception as e:
+                logger.error(f"Tool execution failed: {self.name}", exc_info=e)
+                return ToolResult(success=False, error=str(e))
 
     def get_schema(self) -> Dict[str, Any]:
         """
