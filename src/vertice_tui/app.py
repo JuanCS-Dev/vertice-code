@@ -271,6 +271,26 @@ class VerticeApp(App):
         """Handle user input submission with robust validation and error handling."""
         status = None
         try:
+            response = self._response_view
+            if response is None:
+                response = self.query_one("#response", ResponseView)
+                self._response_view = response
+
+            autocomplete = self._autocomplete
+            if autocomplete is None:
+                autocomplete = self.query_one("#autocomplete", AutocompleteDropdown)
+                self._autocomplete = autocomplete
+
+            prompt = self._prompt
+            if prompt is None:
+                prompt = self.query_one("#prompt", Input)
+                self._prompt = prompt
+
+            status = self._status_bar
+            if status is None:
+                status = self.query_one(StatusBar)
+                self._status_bar = status
+
             # Input validation and sanitization
             if not event.value or not isinstance(event.value, str):
                 return
@@ -280,7 +300,6 @@ class VerticeApp(App):
 
             # Length validation
             if len(user_input) > 5000:  # Reasonable limit for terminal input
-                response = self.query_one("#response", ResponseView)
                 response.current_response += "\n❌ Error: Input too long (max 5000 characters)"
                 return
 
@@ -290,7 +309,6 @@ class VerticeApp(App):
             # Content validation - prevent obvious injection attempts
             dangerous_patterns = ["<script", "javascript:", "data:", "\x00", "\r\n\r\n"]
             if any(pattern in user_input.lower() for pattern in dangerous_patterns):
-                response = self.query_one("#response", ResponseView)
                 response.current_response += "\n❌ Error: Invalid input content"
                 return
 
@@ -303,10 +321,8 @@ class VerticeApp(App):
             self._last_input_time = current_time
 
             # UI updates
-            autocomplete = self.query_one("#autocomplete", AutocompleteDropdown)
             autocomplete.hide()
 
-            prompt = self.query_one("#prompt", Input)
             prompt.value = ""
 
             # History management with bounds checking and memory optimization
@@ -324,10 +340,8 @@ class VerticeApp(App):
             else:
                 self._active_operations = []
 
-            response = self.query_one("#response", ResponseView)
             response.add_user_message(user_input)
 
-            status = self.query_one(StatusBar)
             status.mode = "PROCESSING"
 
             # CRITICAL: Force UI refresh so user sees their input immediately
@@ -438,8 +452,15 @@ class VerticeApp(App):
 
     async def on_key(self, event: events.Key) -> None:
         """Handle special keys for autocomplete navigation."""
-        autocomplete = self._autocomplete or self.query_one("#autocomplete", AutocompleteDropdown)
-        prompt = self._prompt or self.query_one("#prompt", Input)
+        autocomplete = self._autocomplete
+        if autocomplete is None:
+            autocomplete = self.query_one("#autocomplete", AutocompleteDropdown)
+            self._autocomplete = autocomplete
+
+        prompt = self._prompt
+        if prompt is None:
+            prompt = self.query_one("#prompt", Input)
+            self._prompt = prompt
 
         if not autocomplete.has_class("visible"):
             # Handle history navigation when autocomplete hidden
@@ -550,7 +571,10 @@ class VerticeApp(App):
             self._active_operations.append(current_task)
 
         self.is_processing = True
-        status = self.query_one(StatusBar)
+        status = self._status_bar
+        if status is None:
+            status = self.query_one(StatusBar)
+            self._status_bar = status
         status.mode = "THINKING"
 
         # Immediate UI feedback (don’t wait for the first SSE event).
@@ -592,7 +616,7 @@ class VerticeApp(App):
                         if perf.t_first_text_delta is None:
                             perf.t_first_text_delta = time.perf_counter()
                         perf.text_chars += len(line)
-                    await view.append_chunk(line)
+                    view.append_chunk(line)
 
                 # Optimized: removed unnecessary delay for better streaming performance
 
@@ -813,7 +837,10 @@ class VerticeApp(App):
             self.bridge.cancel_all()
 
         # Update UI to reflect emergency stop
-        status = self.query_one(StatusBar)
+        status = self._status_bar
+        if status is None:
+            status = self.query_one(StatusBar)
+            self._status_bar = status
         status.mode = "EMERGENCY_STOP"
         status.errors += 1
 
@@ -834,27 +861,51 @@ class VerticeApp(App):
     # Scroll actions
     def action_scroll_up(self) -> None:
         """Scroll ResponseView up by one line."""
-        self.query_one("#response", ResponseView).scroll_up(animate=False)
+        response = self._response_view
+        if response is None:
+            response = self.query_one("#response", ResponseView)
+            self._response_view = response
+        response.scroll_up(animate=False)
 
     def action_scroll_down(self) -> None:
         """Scroll ResponseView down by one line."""
-        self.query_one("#response", ResponseView).scroll_down(animate=False)
+        response = self._response_view
+        if response is None:
+            response = self.query_one("#response", ResponseView)
+            self._response_view = response
+        response.scroll_down(animate=False)
 
     def action_scroll_up_page(self) -> None:
         """Scroll ResponseView up by one page."""
-        self.query_one("#response", ResponseView).scroll_page_up(animate=False)
+        response = self._response_view
+        if response is None:
+            response = self.query_one("#response", ResponseView)
+            self._response_view = response
+        response.scroll_page_up(animate=False)
 
     def action_scroll_down_page(self) -> None:
         """Scroll ResponseView down by one page."""
-        self.query_one("#response", ResponseView).scroll_page_down(animate=False)
+        response = self._response_view
+        if response is None:
+            response = self.query_one("#response", ResponseView)
+            self._response_view = response
+        response.scroll_page_down(animate=False)
 
     def action_scroll_home(self) -> None:
         """Scroll ResponseView to top."""
-        self.query_one("#response", ResponseView).scroll_home(animate=False)
+        response = self._response_view
+        if response is None:
+            response = self.query_one("#response", ResponseView)
+            self._response_view = response
+        response.scroll_home(animate=False)
 
     def action_scroll_end(self) -> None:
         """Scroll ResponseView to bottom."""
-        self.query_one("#response", ResponseView).scroll_end(animate=False)
+        response = self._response_view
+        if response is None:
+            response = self.query_one("#response", ResponseView)
+            self._response_view = response
+        response.scroll_end(animate=False)
 
 
 def main() -> None:

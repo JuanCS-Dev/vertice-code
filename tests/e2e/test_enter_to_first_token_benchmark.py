@@ -208,7 +208,7 @@ async def test_enter_to_first_token_benchmark():
     print("Component measured:    history.add_command_async()")
     print(f"Sample size:           {stats['sample_size']}")
     print(f"Failures:              {stats['failures']}")
-    print(f"Failure rate:          {stats['failure_rate']*100:.2f}%")
+    print(f"Failure rate:          {stats['failure_rate'] * 100:.2f}%")
     print("-" * 70)
     print(f"Mean:                  {stats['mean_ms']:.3f}ms")
     print(f"Median:                {stats['median_ms']:.3f}ms")
@@ -229,12 +229,14 @@ async def test_enter_to_first_token_benchmark():
 
     # Assertions
     assert stats["sample_size"] == 100, f"Expected 100 samples, got {stats['sample_size']}"
-    assert stats["failure_rate"] < 0.01, f"Failure rate too high: {stats['failure_rate']*100:.1f}%"
+    assert stats["failure_rate"] < 0.01, (
+        f"Failure rate too high: {stats['failure_rate'] * 100:.1f}%"
+    )
     assert stats["p99_ms"] < 50, f"p99 latency too high: {stats['p99_ms']:.1f}ms (target: <50ms)"
     assert stats["p95_ms"] < 30, f"p95 latency too high: {stats['p95_ms']:.1f}ms (target: <30ms)"
-    assert (
-        stats["median_ms"] < 10
-    ), f"Median latency too high: {stats['median_ms']:.1f}ms (target: <10ms)"
+    assert stats["median_ms"] < 10, (
+        f"Median latency too high: {stats['median_ms']:.1f}ms (target: <10ms)"
+    )
 
     print("\n✅ ALL TARGETS MET - History save is non-blocking")
 
@@ -257,6 +259,9 @@ async def test_concurrent_history_saves_dont_corrupt():
         tasks = [hm.add_command_async(f"concurrent_command_{i}") for i in range(50)]
         await asyncio.gather(*tasks)
         elapsed_ms = (time.perf_counter() - start) * 1000
+
+        if hasattr(hm, "flush_history_async"):
+            await hm.flush_history_async()
 
         # Verify file integrity
         content = history_file.read_text()

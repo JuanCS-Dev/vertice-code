@@ -213,6 +213,7 @@ class AutocompleteBridge:
         self._suggestion_cache: Dict[str, str] = {}
         self._file_cache: List[str] = []
         self._file_cache_valid = False
+        self._file_cache_root: str | None = None
         self._recent_files: List[str] = []
         # Performance: Cache completions to avoid recomputation
         self._completion_cache: Dict[str, List[Dict]] = {}
@@ -226,17 +227,36 @@ class AutocompleteBridge:
         self._recent_files.insert(0, file_path)
         self._recent_files = self._recent_files[:50]  # Keep last 50
 
-    def _scan_files(self, root: Path = None, max_files: int = None) -> List[str]:
+    def warmup_file_cache(
+        self, *, root: Path | None = None, max_files: int | None = None
+    ) -> List[str]:
+        """Warm the @ file picker cache in background threads."""
+        with self._lock:
+            return self._scan_files(root=root, max_files=max_files)
+
+    def invalidate_file_cache(self) -> None:
+        """Invalidate the @ file picker cache (e.g. if working directory changes)."""
+        with self._lock:
+            self._file_cache_valid = False
+            self._file_cache_root = None
+            self._file_cache = []
+
+    def _scan_files(self, root: Path | None = None, max_files: int | None = None) -> List[str]:
         """Scan project files for @ completion.
 
         Uses MAX_FILES and MAX_DEPTH limits to prevent TUI freeze.
         """
-        if self._file_cache_valid and self._file_cache:
+        root = root or Path.cwd()
+        try:
+            root_key = str(root.resolve())
+        except OSError:
+            root_key = str(root)
+
+        if self._file_cache_valid and self._file_cache and self._file_cache_root == root_key:
             return self._file_cache
 
         import fnmatch
 
-        root = root or Path.cwd()
         max_files = max_files or self.MAX_FILES
         files = []
 
@@ -272,6 +292,7 @@ class AutocompleteBridge:
         scan_dir(root)
         self._file_cache = files
         self._file_cache_valid = True
+        self._file_cache_root = root_key
         return files
 
     def _get_file_icon(self, filename: str) -> str:

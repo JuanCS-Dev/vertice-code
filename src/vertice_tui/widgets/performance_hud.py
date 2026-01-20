@@ -36,7 +36,6 @@ class PerformanceHUD(Widget):
         height: 3;
         background: $surface;
         border: solid $primary;
-        border-radius: 0;
         padding: 0 1;
         color: $text;
     }
@@ -90,6 +89,11 @@ class PerformanceHUD(Widget):
         self._throughput = 0.0
         self._queue_time = 0.0
         self._last_update = time.time()
+        self._latency_widget: Static | None = None
+        self._confidence_widget: Static | None = None
+        self._throughput_widget: Static | None = None
+        self._queue_widget: Static | None = None
+        self._last_rendered: dict[str, str] = {}
 
     def compose(self) -> ComposeResult:
         """Compose the HUD."""
@@ -101,6 +105,10 @@ class PerformanceHUD(Widget):
 
     def on_mount(self) -> None:
         """Initialize HUD."""
+        self._latency_widget = self.query_one("#latency-metric", Static)
+        self._confidence_widget = self.query_one("#confidence-metric", Static)
+        self._throughput_widget = self.query_one("#throughput-metric", Static)
+        self._queue_widget = self.query_one("#queue-metric", Static)
         self._update_display()
         if not self.visible:
             self.add_class("hidden")
@@ -148,6 +156,11 @@ class PerformanceHUD(Widget):
 
     def _update_display(self) -> None:
         """Update the display with current metrics."""
+        latency_widget = self._latency_widget or self.query_one("#latency-metric", Static)
+        confidence_widget = self._confidence_widget or self.query_one("#confidence-metric", Static)
+        throughput_widget = self._throughput_widget or self.query_one("#throughput-metric", Static)
+        queue_widget = self._queue_widget or self.query_one("#queue-metric", Static)
+
         # Latency with traffic light colors
         latency_class = self._get_latency_class(self._latency_ms)
         latency_text = f"⚡ {self._latency_ms:.0f}ms"
@@ -162,15 +175,25 @@ class PerformanceHUD(Widget):
         # Queue time
         queue_text = f"⏱️ {self._queue_time:.0f}ms"
 
-        # Update widgets
-        self.query_one("#latency-metric", Static).update(
-            f"[{latency_class}]{latency_text}[/{latency_class}]"
+        # Update widgets (only if changed to minimize churn).
+        self._update_metric(
+            "latency",
+            latency_widget,
+            f"[{latency_class}]{latency_text}[/{latency_class}]",
         )
-        self.query_one("#confidence-metric", Static).update(
-            f"[{confidence_class}]{confidence_text}[/{confidence_class}]"
+        self._update_metric(
+            "confidence",
+            confidence_widget,
+            f"[{confidence_class}]{confidence_text}[/{confidence_class}]",
         )
-        self.query_one("#throughput-metric", Static).update(f"[blue]{throughput_text}[/blue]")
-        self.query_one("#queue-metric", Static).update(f"[yellow]{queue_text}[/yellow]")
+        self._update_metric("throughput", throughput_widget, f"[blue]{throughput_text}[/blue]")
+        self._update_metric("queue", queue_widget, f"[yellow]{queue_text}[/yellow]")
+
+    def _update_metric(self, key: str, widget: Static, markup: str) -> None:
+        if self._last_rendered.get(key) == markup:
+            return
+        widget.update(markup)
+        self._last_rendered[key] = markup
 
     def _get_latency_class(self, latency_ms: float) -> str:
         """Get CSS class for latency based on thresholds."""

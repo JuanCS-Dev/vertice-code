@@ -12,24 +12,57 @@
 - Autocomplete: debounce + cancelamento via `run_worker(... exclusive=True)`: `src/vertice_tui/app.py:402`
 - Autocomplete: dropdown sem churn (reuso de `MAX_ITEMS` widgets + `batch_update()`): `src/vertice_tui/widgets/autocomplete.py:17`
 - Autocomplete: `asyncio.to_thread(...)` + wrapper thread-safe: `src/vertice_tui/core/ui_bridge.py:537`
+- Hot paths: cache de widgets (ResponseView/Prompt/Autocomplete/StatusBar) e uso sem `query_one(...)` em submit/chat/keys: `src/vertice_tui/app.py:270`
+- Hot paths: scroll actions usam refs cacheadas (sem `query_one(...)` por key repeat): `src/vertice_tui/app.py:862`
+- PerformanceHUD: cache de children + “update only if changed” (sem `query_one(...)` por tick; CSS corrigido): `src/vertice_tui/widgets/performance_hud.py:106`
 - StatusBar: cria `#tokens` e evita watchers antes de mount: `src/vertice_tui/widgets/status_bar.py:124`
 - pytest-asyncio: remove redefinição de `event_loop` (zera DeprecationWarning): `tests/conftest.py:1`
 - E2E: fixture em formato *factory async context manager* (cura ContextVar teardown): `tests/e2e/conftest.py:221`
+- Teste live (VertexAI streaming) é opt-in via `VERTICE_RUN_LIVE_LLM_TESTS=1` (CI offline por default): `tests/integration/test_tui_performance.py:96`
 
 ✅ P1 implementado (smoothness de streaming):
-- Streaming: coalescing de deltas por “frame” (flush periódico + `SoftBuffer` + scroll throttled): `src/vertice_tui/widgets/response_view.py:135`
+- Streaming: `append_chunk()` sync (sem milhares de `await`s por delta) + flush coalescido por “frame” (timer + `SoftBuffer` + scroll throttled): `src/vertice_tui/widgets/response_view.py:418`
 - Config: `VERTICE_TUI_STREAM_FLUSH_MS` (default 33ms; min 5ms)
+- Call sites atualizados (sem `await append_chunk(...)`): `src/vertice_tui/app.py:595`, `src/vertice_tui/handlers/agents.py:221`
+
+✅ P1/10 implementado (renderables caros em sessões longas):
+- Code/diff grandes são truncados por padrão e “materializados” sob demanda via widgets expansíveis (evita `Rich Syntax` pesado no scrollback): `src/vertice_tui/widgets/expandable_blocks.py:23`
+- Config: `VERTICE_TUI_MAX_CODE_LINES` (default 200) e `VERTICE_TUI_MAX_DIFF_LINES` (default 400): `src/vertice_tui/widgets/response_view.py:174`
+
+✅ P2/11 implementado (compaction incremental de scrollback):
+- Quando o scrollback atinge o steady-state (`VERTICE_TUI_MAX_VIEW_ITEMS`), blocos antigos são degradados incrementalmente (batch) para manter scroll/layout leves (ex.: `Panel(Syntax)` → `ExpandableCodeBlock` + auto-collapse): `src/vertice_tui/widgets/response_view.py:242`
+- Config: `VERTICE_TUI_SCROLLBACK_RICH_TAIL` (default 80) + `VERTICE_TUI_SCROLLBACK_COMPACT_BATCH` (default 5): `src/vertice_tui/widgets/response_view.py:151`
+
+✅ P2/13 implementado (warm-up de cache do @ autocomplete):
+- `Bridge.warmup()` aquece o cache de arquivos do `AutocompleteBridge` em background (executor), para o 1º `@...` já vir “instantâneo”: `src/vertice_tui/core/bridge.py:453`, `src/vertice_tui/core/ui_bridge.py:230`
 
 Provas (testes adicionados/atualizados):
-- Dropdown não monta/desmonta por tecla: `tests/integration/test_tui_performance.py:162`
-- Streaming: múltiplos deltas → 1 write coalescido (determinístico): `tests/integration/test_tui_performance.py:210`
+- Dropdown não monta/desmonta por tecla: `tests/integration/test_tui_performance.py:166`
+- Streaming: múltiplos deltas → 1 write coalescido (determinístico): `tests/integration/test_tui_performance.py:214`
+- Blocos grandes truncados + expansíveis: `tests/integration/test_tui_performance.py:268`
+- Scrollback compaction (code blocks antigos viram expansíveis): `tests/integration/test_tui_performance.py:302`
+- Scrollback compaction respeita batch (incremental): `tests/integration/test_tui_performance.py:343`
+- PerformanceHUD sem churn (`query_one(...)` só no mount): `tests/integration/test_tui_performance.py:384`
+- Sessão longa: scrollback bounded + compaction (opt-in 10k via `VERTICE_RUN_LONG_SESSION_TESTS=1`): `tests/integration/test_tui_performance.py:430`
+- Warm-up do cache de arquivos do autocomplete: `tests/unit/core/test_autocomplete_bridge_warmup.py:1`
 - `run_test()` teardown estável (anti ContextVar): `tests/e2e/test_run_test_contextvars.py:1`
 
 Validação executada (sessão atual):
-- `black src/vertice_tui/widgets/response_view.py src/vertice_tui/core/streaming/soft_buffer.py tests/integration/test_tui_performance.py`
-- `ruff check src/vertice_tui/widgets/response_view.py src/vertice_tui/core/streaming/soft_buffer.py tests/integration/test_tui_performance.py`
-- `pytest -v tests/integration/test_tui_performance.py -k ResponseViewStreamingCoalescing -x`
+- `black src/vertice_tui/widgets/expandable_blocks.py src/vertice_tui/widgets/response_view.py tests/integration/test_tui_performance.py`
+- `ruff check src/vertice_tui/widgets/expandable_blocks.py src/vertice_tui/widgets/response_view.py tests/integration/test_tui_performance.py`
+- `pytest -q tests/integration/test_tui_performance.py -k \"ResponseViewStreamingCoalescing or LargeBlocksAreTruncated or ScrollbackCompaction\" -x`
+- `black src/vertice_tui/app.py`
+- `ruff check src/vertice_tui/app.py`
+- `pytest -q tests/integration/test_tui_performance.py -k \"Autocomplete or ResponseViewStreamingCoalescing or ScrollbackCompaction\" -x`
+- `black src/vertice_tui/core/ui_bridge.py src/vertice_tui/core/bridge.py tests/unit/core/test_autocomplete_bridge_warmup.py`
+- `ruff check src/vertice_tui/core/ui_bridge.py src/vertice_tui/core/bridge.py tests/unit/core/test_autocomplete_bridge_warmup.py`
+- `pytest -q tests/unit/core/test_autocomplete_bridge_warmup.py -x`
+- `black src/vertice_tui/widgets/performance_hud.py`
+- `ruff check src/vertice_tui/widgets/performance_hud.py`
+- `pytest -q tests/integration/test_tui_performance.py -k \"ResponseViewStreamingCoalescing or LargeBlocksAreTruncated or ScrollbackCompaction or PerformanceHUDOptimizations\" -x`
+- `pytest -q tests/e2e/test_run_test_contextvars.py -x`
 - `pytest -v tests/e2e/test_basics.py -x`
+- `pytest -q tests/integration/test_tui_performance.py -k LongSessionStability -x`
 
 ---
 
@@ -58,7 +91,7 @@ Fontes oficiais usadas nesta auditoria:
 
 ### 1.2 Streaming → UI incremental
 - `src/vertice_tui/app.py` (`_handle_chat`)
-  - `async for sse_chunk in self.bridge.chat(message)` e, para cada `OutputTextDelta`, chama `await ResponseView.append_chunk(delta)`
+  - `async for sse_chunk in self.bridge.chat(message)` e, para cada `OutputTextDelta`, chama `ResponseView.append_chunk(delta)` (sync; flush coalescido por timer)
 - `src/vertice_tui/widgets/response_view.py`
   - `TextualMarkdown.get_stream()` (MarkdownStream) para streaming incremental
   - coalescing: deltas são bufferizados e flushados em cadência fixa (default 33ms) via timer
@@ -127,7 +160,7 @@ Fonte: `https://docs.python.org/3/library/asyncio-task.html#asyncio.to_thread`
 - `VERTICE_TUI_STREAM_FLUSH_MS` default `33` (30fps). Para “mais responsivo”, testar `16`; para “menos CPU”, testar `50–75`.
 
 **Prova (sem timers):**
-- `tests/integration/test_tui_performance.py:210`
+- `tests/integration/test_tui_performance.py:214`
 
 ---
 
@@ -135,6 +168,7 @@ Fonte: `https://docs.python.org/3/library/asyncio-task.html#asyncio.to_thread`
 
 **Onde:** `src/vertice_tui/widgets/response_view.py`
 **Por que importa:** mesmo com limite de 300 itens, alguns widgets são caros (Rich `Panel`, `Syntax` com `line_numbers=True` + `word_wrap=True`). Em sessões longas com muito código/diff, 300 painéis ainda podem ser pesados para scroll e layout.
+**Mitigação aplicada (P1/10 + P2/11):** truncation + expand sob demanda para code/diff grandes + compaction incremental de blocos antigos (degrada renderables caros).
 
 ---
 
@@ -161,6 +195,7 @@ Fonte: `https://docs.python.org/3/library/asyncio-task.html#asyncio.to_thread`
 3) **Cache de widgets consultados com frequência**
    - Guardar referências em `on_mount()` (`self._prompt`, `self._autocomplete`, `self._response`, `self._status`) para evitar `query_one(...)` em hot paths.
    - O ganho é pequeno por chamada, mas grande no agregado (digitação + streaming).
+   - Implementado: `VerticeApp` usa refs cacheadas em submit/chat e handlers de teclas.
 
 4) **Corrigir o `StatusBar` para não gerar exceções em watchers**
    - Ou criar `Static(id="tokens")` e usar `_format_tokens()`, ou remover o update de `#tokens` (se o MiniTokenMeter é a única UI).
@@ -169,11 +204,13 @@ Fonte: `https://docs.python.org/3/library/asyncio-task.html#asyncio.to_thread`
    - Ex.: `VerticeApp.on_input_submitted()` e ações de scroll ainda fazem múltiplos `query_one("#response")`/`query_one(StatusBar)` por evento.
    - Sugestão: usar as referências cacheadas em `on_mount()` e, quando necessário, validar `is_mounted` antes de atualizar.
    - Fonte (lifecycle + handlers): `https://textual.textualize.io/guide/app/` e `https://textual.textualize.io/guide/events/`
+   - Implementado (parcial): submit/chat/on_key + scroll actions agora usam cache; ainda vale varrer outros widgets/handlers conforme forem aparecendo hotspots.
 
 6) **HUDs/Widgets com updates frequentes: cache dos children + atualização minimalista**
    - `PerformanceHUD._update_display()` faz 4× `query_one(...).update(...)` por update; se isso rodar por token/frame vira custo constante.
    - Sugestão: capturar refs em `on_mount()` (`self._latency_widget`, etc.), e aplicar um “update only if changed”.
    - Fonte (reactivity: “watchers leves”): `https://textual.textualize.io/guide/reactivity/`
+   - Implementado: refs cacheadas em `on_mount()` + `_update_metric()` com “update only if changed”: `src/vertice_tui/widgets/performance_hud.py:106`
 
 **Prova (testes/bench):**
 - Adicionar/rodar microbenchmark de digitação: simular 200 `Input.Changed` em < X ms sob run_test.
@@ -200,8 +237,8 @@ Fonte: `https://docs.python.org/3/library/asyncio-task.html#asyncio.to_thread`
 
 10) **Renderables caros: aplicar lazy/limits e “degradação controlada”**
    - `Panel(Syntax(... line_numbers=True, word_wrap=True))` em blocos grandes tende a custar caro em scroll/render.
-   - Sugestão: limites por env/config (ex.: `MAX_CODE_LINES`, `MAX_DIFF_LINES`) + botão/ação “expand” usando `Lazy(...)` para materializar só quando necessário.
-   - Fonte: `https://textual.textualize.io/api/lazy/`
+   - Implementado: limites por env/config (`VERTICE_TUI_MAX_CODE_LINES`, `VERTICE_TUI_MAX_DIFF_LINES`) + expand sob demanda via widgets expansíveis (materializa `Syntax` apenas quando o usuário expande).
+   - Nota: optamos por widgets “expand on demand” ao invés de `Lazy(...)` (que atrasa mount, mas não é um toggle orientado ao usuário).
 
 **Prova (testes/bench):**
 - Benchmark determinístico (sem rede): gerar 10k deltas e medir tempo total + número de flushes.
@@ -212,17 +249,18 @@ Fonte: `https://docs.python.org/3/library/asyncio-task.html#asyncio.to_thread`
 ### P2 — Sessões longas: memória e scroll
 
 11) **“Compaction” de scrollback: degradar renderables antigos para formato barato**
-   - Quando `ResponseView` exceder limite, substituir blocos antigos por um “SummaryStatic” simples (texto plano / markdown já consolidado), ou migrar histórico antigo para `TextLog`.
-   - Objetivo: manter UX do “recent history” rica, mas evitar que *tudo* seja `Panel/Syntax`.
+   - Implementado: ao atingir `VERTICE_TUI_MAX_VIEW_ITEMS`, blocos antigos são degradados incrementalmente (batch) para manter scroll/layout leves:
+     - auto-collapse de blocos expandidos
+     - `Panel(Syntax)` antigo → `ExpandableCodeBlock` (materializa `Syntax` apenas quando expandido)
+   - Config: `VERTICE_TUI_SCROLLBACK_RICH_TAIL` (mantém N últimos “ricos”) + `VERTICE_TUI_SCROLLBACK_COMPACT_BATCH` (limita trabalho por tick).
+   - Objetivo: manter UX recente rica, mas evitar que *tudo* seja `Panel/Syntax` em sessões longas.
 
 12) **Limites explícitos para blocos caros**
-   - Ex.: limitar `code-block` a N linhas por padrão (config/env), com ação “expand” (lazy).
-   - Padrão: `Lazy(...)` para materializar widget pesado só quando necessário.
-   - Fonte: `https://textual.textualize.io/api/lazy/`
+   - Implementado: `VERTICE_TUI_MAX_CODE_LINES` / `VERTICE_TUI_MAX_DIFF_LINES` + expand sob demanda (ver item 10).
 
 13) **Warm-up de caches em background (autocomplete + filesystem)**
-   - O primeiro `@...` pode disparar varredura (mesmo limitada) e causar micro-lag.
-   - Sugestão: agendar worker (thread) no `on_mount()` para preencher cache de arquivos em idle, e manter invalidation quando `cwd`/root mudar.
+   - Implementado: `Bridge.warmup()` aquece o cache de arquivos do `AutocompleteBridge` em executor, evitando “micro-lag” no primeiro `@...`.
+   - Cache pode ser resetado via `AutocompleteBridge.invalidate_file_cache()` (se/quando `cwd` mudar).
    - Fonte: `https://textual.textualize.io/guide/workers/`
 
 **Prova (testes/bench):**
@@ -252,15 +290,21 @@ Fonte: `https://docs.python.org/3/library/asyncio-task.html#asyncio.to_thread`
 ## 6) Checklist “Done = provado”
 
 - [x] Autocomplete não bloqueia digitação (debounce + worker `exclusive=True`) — `src/vertice_tui/app.py:382`
-- [x] Autocomplete sem churn de widgets (reuso de children) — `tests/integration/test_tui_performance.py:162`
-- [x] Streaming mantém UX, mas reduz writes/s (coalescing) com ganho de CPU — `src/vertice_tui/widgets/response_view.py:135`
-- [ ] Sessão longa (10k mensagens) não degrada scroll de forma exponencial (memória controlada, sem leaks).
-- [ ] Testes de performance passam em CI sem rede (mocks determinísticos).
+- [x] Autocomplete sem churn de widgets (reuso de children) — `tests/integration/test_tui_performance.py:166`
+- [x] Streaming mantém UX, mas reduz writes/s (coalescing) com ganho de CPU — `src/vertice_tui/widgets/response_view.py:450`
+- [x] Blocos grandes truncados + expansíveis (evita renderables caros no scrollback) — `tests/integration/test_tui_performance.py:268`
+- [x] Scrollback compaction incremental (sessões longas) — `tests/integration/test_tui_performance.py:302`
+- [x] Warm-up do cache do `@` autocomplete (evita lag no 1º uso) — `tests/unit/core/test_autocomplete_bridge_warmup.py:1`
+- [x] Hot paths (submit/chat/keys) usam refs cacheadas (menos `query_one(...)`) — `src/vertice_tui/app.py:270`
+- [x] PerformanceHUD sem churn (cache children + update only if changed) — `tests/integration/test_tui_performance.py:384`
+- [x] Sessão longa: scrollback bounded + compaction (opt-in 10k) — `tests/integration/test_tui_performance.py:470`
+- [ ] Sessão longa: memória (tracemalloc/memray) sublinear em 10k msgs (sem leaks).
+- [ ] Testes de performance passam em CI sem rede (mocks determinísticos). (Parcial: testes live são opt-in via `VERTICE_RUN_LIVE_LLM_TESTS=1`.)
 
 ---
 
 ## 7) Próximas ações (sequência sugerida)
 
-1) Completar P1 (itens 8–10: evitar O(n²), flush worker dedicado, lazy/limits)
-2) Implementar P2 (itens 11–13: compaction + warm caches)
+1) Completar P1 (itens 8–9: evitar O(n²), flush worker dedicado)
+2) Completar P2 (sessão longa: memória/leaks + benchmarks)
 3) Consolidar benchmarks em `tests/integration/` e rodar continuamente

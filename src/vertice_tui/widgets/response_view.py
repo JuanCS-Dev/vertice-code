@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING
 
 from textual.containers import VerticalScroll
 from textual.reactive import reactive
+from textual.widget import Widget
 from textual.widgets import Static, Markdown as TextualMarkdown
 
 from rich.syntax import Syntax
@@ -26,6 +27,7 @@ from rich import box
 
 from vertice_tui.constants import BANNER
 from vertice_tui.widgets.selectable import SelectableStatic
+from vertice_tui.widgets.expandable_blocks import ExpandableCodeBlock, ExpandableDiffBlock
 from vertice_tui.core.formatting import OutputFormatter, Colors, Icons
 from vertice_tui.core.streaming.soft_buffer import SoftBuffer
 
@@ -114,6 +116,8 @@ class ResponseView(VerticalScroll):
         self._thinking_widget: Static | None = None
         self._use_textual_markdown_stream: bool = True
         self._max_view_items = self._get_max_view_items()
+        self._scrollback_rich_tail = self._get_scrollback_rich_tail()
+        self._scrollback_compact_batch = self._get_scrollback_compact_batch()
         self._pending_stream_chunks: list[str] = []
         self._soft_buffer = SoftBuffer()
         self._flush_timer = None
@@ -143,6 +147,52 @@ class ResponseView(VerticalScroll):
             return max(ms, 5) / 1000.0
         except ValueError:
             return 0.033
+
+    def _get_scrollback_rich_tail(self) -> int:
+        """
+        Number of most-recent widgets kept "rich" (not compacted).
+
+        Older renderables are degraded to cheaper equivalents to keep long-session scrollback
+        responsive without sacrificing recent UX.
+        """
+        try:
+            return int(os.getenv("VERTICE_TUI_SCROLLBACK_RICH_TAIL", "80"))
+        except ValueError:
+            return 80
+
+    def _get_scrollback_compact_batch(self) -> int:
+        """
+        Max number of widgets compacted per trim call.
+
+        This keeps compaction incremental to avoid UI jank when sessions get very long.
+        """
+        try:
+            return int(os.getenv("VERTICE_TUI_SCROLLBACK_COMPACT_BATCH", "5"))
+        except ValueError:
+            return 5
+
+    def _get_max_code_lines(self) -> int:
+        """
+        Max lines rendered for code blocks by default.
+
+        Large blocks are truncated and can be expanded interactively to avoid
+        expensive Rich Syntax rendering in long sessions.
+        """
+        try:
+            return int(os.getenv("VERTICE_TUI_MAX_CODE_LINES", "200"))
+        except ValueError:
+            return 200
+
+    def _get_max_diff_lines(self) -> int:
+        """
+        Max lines rendered for diff blocks by default.
+
+        Large blocks are truncated and can be expanded interactively.
+        """
+        try:
+            return int(os.getenv("VERTICE_TUI_MAX_DIFF_LINES", "400"))
+        except ValueError:
+            return 400
 
     def _ensure_flush_timer(self) -> None:
         if self._flush_timer is not None:
@@ -177,13 +227,117 @@ class ResponseView(VerticalScroll):
 
         candidates = [child for child in self.children if not child.has_class("banner")]
         excess = len(candidates) - max_items
-        if excess <= 0:
+        if excess > 0:
+            for child in candidates[:excess]:
+                if child is self._thinking_widget:
+                    continue
+                child.remove()
+
+        # When the view reaches its steady-state max size, compact older expensive renderables
+        # (code/diff blocks) to keep long-session scrolling responsive.
+        candidates = [child for child in self.children if not child.has_class("banner")]
+        if len(candidates) >= max_items:
+            self._compact_old_renderables(candidates)
+
+    def _compact_old_renderables(self, candidates: list[Widget]) -> None:
+        rich_tail = self._scrollback_rich_tail
+        if rich_tail <= 0:
             return
 
-        for child in candidates[:excess]:
+        compact_budget = self._scrollback_compact_batch
+        if compact_budget <= 0:
+            return
+
+        cutoff = max(len(candidates) - rich_tail, 0)
+        if cutoff <= 0:
+            return
+
+        compacted = 0
+        for child in candidates[:cutoff]:
+            if compacted >= compact_budget:
+                break
+
             if child is self._thinking_widget:
                 continue
+
+            # Auto-collapse expanded blocks to free heavy renderables.
+            if isinstance(child, ExpandableCodeBlock):
+                if child.expanded:
+                    child.expanded = False
+                    child.add_class("compacted")
+                    compacted += 1
+                continue
+
+            if isinstance(child, ExpandableDiffBlock):
+                if child.expanded:
+                    child.expanded = False
+                    child.add_class("compacted")
+                    compacted += 1
+                continue
+
+            if child.has_class("compacted"):
+                continue
+
+            # Replace expensive Syntax panels with expandable (lazy materialized) equivalents.
+            if not child.has_class("code-block"):
+                continue
+
+            if not isinstance(child, SelectableStatic):
+                continue
+
+            renderable = self._get_static_renderable(child)
+            if not isinstance(renderable, Panel):
+                continue
+
+            if not isinstance(renderable.renderable, Syntax):
+                continue
+
+            syntax = renderable.renderable
+            language = "text"
+            try:
+                lexer = getattr(syntax, "lexer", None)
+                aliases = getattr(lexer, "aliases", None) if lexer is not None else None
+                if aliases:
+                    language = aliases[0]
+                elif lexer is not None and getattr(lexer, "name", None):
+                    language = str(getattr(lexer, "name")).lower()
+            except Exception:
+                language = "text"
+
+            preview_lines = min(max(self._get_max_code_lines(), 1), 50)
+            replacement = ExpandableCodeBlock(
+                syntax.code,
+                language=language,
+                max_preview_lines=preview_lines,
+            )
+            replacement.add_class("compacted")
+
+            self.mount(replacement, before=child)
             child.remove()
+            compacted += 1
+
+    @staticmethod
+    def _get_static_renderable(widget: Widget) -> object | None:
+        """
+        Return the underlying Rich renderable for Static-derived widgets.
+
+        Textual 6.x stores the content on a private attribute; there is no public `.renderable`.
+        """
+        if not isinstance(widget, Static):
+            return None
+
+        # Fast-path for Textual 6.x: name-mangled attribute set by `Static`.
+        content = getattr(widget, "_Static__content", None)
+        if content is not None:
+            return content
+
+        # Fallback: `render()` may wrap Rich renderables in a RichVisual.
+        try:
+            visual = widget.render()
+        except Exception:
+            return None
+
+        return getattr(visual, "_renderable", visual)
 
     def add_banner(self) -> None:
         """Add startup banner."""
@@ -261,7 +415,7 @@ class ResponseView(VerticalScroll):
         self._pending_stream_chunks.clear()
         self._soft_buffer = SoftBuffer()
 
-    async def append_chunk(self, chunk: str) -> None:
+    def append_chunk(self, chunk: str) -> None:
         """Append streaming chunk (buffers + coalesces flushes for smooth rendering)."""
         self._pending_stream_chunks.append(chunk)
         self._ensure_flush_timer()
@@ -377,7 +531,7 @@ class ResponseView(VerticalScroll):
                     pass
 
             case OpenResponsesOutputTextDeltaEvent(delta=delta):
-                await self.append_chunk(delta)
+                self.append_chunk(delta)
 
             case OpenResponsesReasoningContentDeltaEvent(delta=delta):
                 if self._thinking_widget and hasattr(self._thinking_widget, "append_chunk"):
@@ -430,8 +584,25 @@ class ResponseView(VerticalScroll):
             title: Optional custom title
             file_path: Optional file path to show in header
         """
+        stripped = code.strip()
+        max_lines = self._get_max_code_lines()
+        line_count = stripped.count("\n") + 1 if stripped else 0
+
+        if max_lines > 0 and line_count > max_lines:
+            widget = ExpandableCodeBlock(
+                stripped,
+                language=language,
+                title=title,
+                file_path=file_path,
+                max_preview_lines=max_lines,
+            )
+            self.mount(widget)
+            self._trim_view_items()
+            self.scroll_end(animate=False)
+            return
+
         syntax = Syntax(
-            code.strip(),
+            stripped,
             language,
             theme="one-dark",
             line_numbers=True,
@@ -472,7 +643,23 @@ class ResponseView(VerticalScroll):
             title: Block title
             file_path: Optional file path to show
         """
-        lines = diff_content.strip().split("\n")
+        stripped = diff_content.strip()
+        max_lines = self._get_max_diff_lines()
+        line_count = stripped.count("\n") + 1 if stripped else 0
+
+        if max_lines > 0 and line_count > max_lines:
+            widget = ExpandableDiffBlock(
+                stripped,
+                title=title,
+                file_path=file_path,
+                max_preview_lines=max_lines,
+            )
+            self.mount(widget)
+            self._trim_view_items()
+            self.scroll_end(animate=False)
+            return
+
+        lines = stripped.split("\n")
         result = Text()
 
         for line in lines:

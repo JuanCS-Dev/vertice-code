@@ -130,9 +130,9 @@ class A2ACommandHandler:
                 if agent.get("description"):
                     lines.append(f"  - **Description:** {agent.get('description')}")
                 lines.append("")
-            await view.append_chunk("\n".join(lines))
+            view.append_chunk("\n".join(lines))
         else:
-            await view.append_chunk("No agents discovered. Try again or check network.\n")
+            view.append_chunk("No agents discovered. Try again or check network.\n")
 
     async def _handle_call(self, args: str, view: "ResponseView") -> None:
         """Send task to remote agent."""
@@ -151,7 +151,7 @@ class A2ACommandHandler:
         view.add_system_message(f"## 📞 Calling Agent: {agent_id}\n")
 
         async for chunk in self.bridge.call_a2a_agent(agent_id, task):
-            await view.append_chunk(chunk)
+            view.append_chunk(chunk)
 
     async def _handle_card(self, view: "ResponseView") -> None:
         """Show local agent card."""
@@ -208,7 +208,7 @@ class A2ACommandHandler:
 
         if not agents:
             view.add_system_message(
-                "## 🤖 Discovered Agents\n\n" "No agents discovered. Run `/a2a discover` first."
+                "## 🤖 Discovered Agents\n\nNo agents discovered. Run `/a2a discover` first."
             )
             return
 

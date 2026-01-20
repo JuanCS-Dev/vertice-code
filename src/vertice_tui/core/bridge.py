@@ -90,26 +90,27 @@ class Bridge(ProtocolBridgeMixin):
     MAX_PARALLEL_TOOLS = 5
     _router_lock = threading.Lock()
 
-    def _safe_init(
-        self, component_factory, component_name: str, partial_initialization: bool
-    ) -> Any:
-        """Safely initialize a component with error handling."""
-        try:
-            if callable(component_factory):
-                component = component_factory()
-            else:
-                component = component_factory
-            logger.debug(f"✓ {component_name} initialized")
-            return component
-        except Exception as e:
-            logger.warning(f"{component_name} initialization failed: {e}")
-            return None
-
     def __init__(self) -> None:
         """Initialize Bridge with all subsystems using phased approach with graceful degradation."""
-        initialization_errors = []
-        initialization_errors = []
+        initialization_errors: list[tuple[str, str]] = []
         partial_initialization = False
+
+        def _init_optional(component_key: str, component_factory) -> Any:
+            """Initialize component with error handling and graceful degradation."""
+            nonlocal partial_initialization
+
+            try:
+                component = (
+                    component_factory() if callable(component_factory) else component_factory
+                )
+                logger.debug(f"✓ {component_key} initialized")
+                return component
+            except Exception as e:
+                partial_initialization = True
+                error_msg = f"{component_key} initialization failed: {e}"
+                logger.warning(error_msg)
+                initialization_errors.append((component_key, error_msg))
+                return None
 
         # System prompt cache init
         self._system_prompt_cache: Optional[str] = None
@@ -165,215 +166,49 @@ class Bridge(ProtocolBridgeMixin):
         # Phase 2: Important components (graceful degradation)
         logger.info("Bridge initialization: Phase 2 - Important components")
 
-        try:
-            self.governance = GovernanceObserver()
-            logger.debug("✓ Governance observer initialized")
-        except Exception as e:
-            logger.warning(f"Governance initialization failed: {e}")
-            self.governance = None
-
-        try:
-            self.agents = AgentManager(self.llm)
-            logger.debug("✓ Agent manager initialized")
-        except Exception as e:
-            logger.warning(f"Agent manager initialization failed: {e}")
-            self.agents = None
-
-        try:
-            self.tools = ToolBridge()
-            logger.debug("✓ Tool bridge initialized")
-        except Exception as e:
-            logger.warning(f"Tool bridge initialization failed: {e}")
-            self.tools = None
-
-        try:
-            self.palette = CommandPaletteBridge()
-            logger.debug("✓ Command palette bridge initialized")
-        except Exception as e:
-            logger.warning(f"Command palette initialization failed: {e}")
-            self.palette = None
-
-        try:
-            self.autocomplete = AutocompleteBridge(self.tools) if self.tools else None
-            logger.debug("✓ Autocomplete bridge initialized")
-        except Exception as e:
-            logger.warning(f"Autocomplete initialization failed: {e}")
-            self.autocomplete = None
-
-        try:
-            self.history = HistoryManager()
-            logger.debug("✓ History manager initialized")
-        except Exception as e:
-            logger.warning(f"History manager initialization failed: {e}")
-            self.history = None
-
-        # Phase 3: Managers (graceful degradation)
-        logger.info("Bridge initialization: Phase 3 - Managers")
-
-        try:
-            self._todo_manager = TodoManager()
-            logger.debug("✓ Todo manager initialized")
-        except Exception as e:
-            logger.warning(f"Todo manager initialization failed: {e}")
-            self._todo_manager = None
-
-        try:
-            self._status_manager = StatusManager(
-                llm_checker=lambda: self.llm.is_available,
-                tool_counter=lambda: self.tools.get_tool_count() if self.tools else 0,
-                agent_counter=lambda: len(self.agents.available_agents) if self.agents else 0,
-            )
-            logger.debug("✓ Status manager initialized")
-        except Exception as e:
-            logger.warning(f"Status manager initialization failed: {e}")
-            self._status_manager = None
-
-        try:
-            self._pr_manager = PullRequestManager()
-            logger.debug("✓ PR manager initialized")
-        except Exception as e:
-            logger.warning(f"PR manager initialization failed: {e}")
-            self._pr_manager = None
-
-        try:
-            self._memory_manager = MemoryManager()
-            logger.debug("✓ Memory manager initialized")
-        except Exception as e:
-            logger.warning(f"Memory manager initialization failed: {e}")
-            self._memory_manager = None
-
-        try:
-            self._context_manager = ContextManager(
-                context_getter=lambda: self.history.context if self.history else {},
-                context_setter=lambda ctx: (
-                    setattr(self.history, "context", ctx) if self.history else None
-                ),
-            )
-            logger.debug("✓ Context manager initialized")
-        except Exception as e:
-            logger.warning(f"Context manager initialization failed: {e}")
-            self._context_manager = None
-        except Exception as e:
-            error_msg = f"Agent manager initialization failed: {e}"
-            logger.error(error_msg)
-            initialization_errors.append(("agents", error_msg))
-            self.agents = None
-            partial_initialization = True
-
-        try:
-            self.tools = ToolBridge()
+        self.governance = _init_optional("Governance observer", GovernanceObserver)
+        self.agents = _init_optional("Agent manager", lambda: AgentManager(self.llm))
+        self.tools = _init_optional("Tool bridge", ToolBridge)
+        if self.tools:
             logger.debug(f"✓ Tool bridge initialized with {self.tools.get_tool_count()} tools")
-        except Exception as e:
-            error_msg = f"Tool bridge initialization failed: {e}"
-            logger.error(error_msg)
-            initialization_errors.append(("tools", error_msg))
-            self.tools = None
-            partial_initialization = True
 
         # Phase 3: UI components (less critical)
         logger.info("Bridge initialization: Phase 3 - UI components")
 
-        try:
-            self.palette = CommandPaletteBridge()
-            logger.debug("✓ Command palette bridge initialized")
-        except Exception as e:
-            error_msg = f"Command palette initialization failed: {e}"
-            logger.warning(error_msg)
-            initialization_errors.append(("palette", error_msg))
-            self.palette = None
-            partial_initialization = True
-
-        try:
-            self.autocomplete = AutocompleteBridge(self.tools) if self.tools else None
-            logger.debug("✓ Autocomplete bridge initialized")
-        except Exception as e:
-            error_msg = f"Autocomplete initialization failed: {e}"
-            logger.warning(error_msg)
-            initialization_errors.append(("autocomplete", error_msg))
+        self.palette = _init_optional("Command palette bridge", CommandPaletteBridge)
+        if self.tools:
+            self.autocomplete = _init_optional(
+                "Autocomplete bridge", lambda: AutocompleteBridge(self.tools)
+            )
+        else:
             self.autocomplete = None
-            partial_initialization = True
-
-        try:
-            self.history = HistoryManager()
-            logger.debug("✓ History manager initialized")
-        except Exception as e:
-            error_msg = f"History manager initialization failed: {e}"
-            logger.warning(error_msg)
-            initialization_errors.append(("history", error_msg))
-            self.history = None
-            partial_initialization = True
+        self.history = _init_optional("History manager", HistoryManager)
 
         # Phase 4: Managers with graceful degradation
         logger.info("Bridge initialization: Phase 4 - Managers")
 
-        # Initialize managers with error handling
-        self._todo_manager = self._safe_init(TodoManager(), "Todo manager", partial_initialization)
-        self._status_manager = self._safe_init(
+        self._todo_manager = _init_optional("Todo manager", TodoManager)
+        self._status_manager = _init_optional(
+            "Status manager",
             lambda: StatusManager(
                 llm_checker=lambda: self.llm.is_available,
                 tool_counter=lambda: self.tools.get_tool_count() if self.tools else 0,
                 agent_counter=lambda: len(self.agents.available_agents) if self.agents else 0,
             ),
-            "Status manager",
-            partial_initialization,
         )
-        self._pr_manager = self._safe_init(
-            PullRequestManager(), "PR manager", partial_initialization
-        )
-        self._memory_manager = self._safe_init(
-            MemoryManager(), "Memory manager", partial_initialization
-        )
-        self._context_manager = self._safe_init(
+        self._pr_manager = _init_optional("PR manager", PullRequestManager)
+        self._memory_manager = _init_optional("Memory manager", MemoryManager)
+        self._context_manager = _init_optional(
+            "Context manager",
             lambda: ContextManager(
                 context_getter=lambda: self.history.context if self.history else {},
                 context_setter=lambda ctx: (
                     setattr(self.history, "context", ctx) if self.history else None
                 ),
             ),
-            "Context manager",
-            partial_initialization,
         )
-
-        try:
-            self._status_manager = StatusManager(
-                llm_checker=lambda: self.llm.is_available,
-                tool_counter=lambda: self.tools.get_tool_count() if self.tools else 0,
-                agent_counter=lambda: len(self.agents.available_agents) if self.agents else 0,
-            )
-            logger.debug("✓ Status manager initialized")
-        except Exception as e:
-            logger.warning(f"Status manager initialization failed: {e}")
-            self._status_manager = None
-            partial_initialization = True
-
-        try:
-            self._pr_manager = PullRequestManager()
-            logger.debug("✓ PR manager initialized")
-        except Exception as e:
-            logger.warning(f"PR manager initialization failed: {e}")
-            self._pr_manager = None
-            partial_initialization = True
-
-        try:
-            self._memory_manager = MemoryManager()
-            logger.debug("✓ Memory manager initialized")
-        except Exception as e:
-            logger.warning(f"Memory manager initialization failed: {e}")
-            self._memory_manager = None
-            partial_initialization = True
-
-        try:
-            self._context_manager = ContextManager(
-                context_getter=lambda: self.history.context if self.history else {},
-                context_setter=lambda ctx: (
-                    setattr(self.history, "context", ctx) if self.history else None
-                ),
-            )
-            logger.debug("✓ Context manager initialized")
-        except Exception as e:
-            logger.warning(f"Context manager initialization failed: {e}")
-            self._context_manager = None
-            partial_initialization = True
+        self._initialization_errors = initialization_errors
+        self._partial_initialization = partial_initialization
 
         # State
         self._tools_configured = False
@@ -446,6 +281,14 @@ class Bridge(ProtocolBridgeMixin):
             logger.debug("✓ System prompt cached")
         except Exception as e:
             logger.warning(f"Warm-up: System prompt build failed: {e}")
+
+        # 4. Warm file cache for @ autocomplete (filesystem scan) - I/O bound
+        if self.autocomplete:
+            try:
+                await loop.run_in_executor(None, self.autocomplete.warmup_file_cache)
+                logger.debug("✓ Autocomplete file cache warmed")
+            except Exception as e:
+                logger.warning(f"Warm-up: Autocomplete file cache failed: {e}")
 
         logger.debug("Bridge warm-up complete")
 

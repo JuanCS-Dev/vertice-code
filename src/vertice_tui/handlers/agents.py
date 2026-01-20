@@ -211,14 +211,17 @@ class AgentCommandHandler:
             logger.debug(
                 f"Invoking {agent_name} with {len(context['files'])} files from {context['cwd']}"
             )
-            await view.append_chunk(
+            view.append_chunk(
                 f"📁 Found **{len(context['files'])} files** in `{context['project_name']}`\n\n"
             )
 
         try:
+            yield_counter = 0
             async for chunk in self.bridge.invoke_agent(agent_name, task, context):
-                await view.append_chunk(chunk)
-                await asyncio.sleep(0)
+                view.append_chunk(chunk)
+                yield_counter += 1
+                if yield_counter % 50 == 0:
+                    await asyncio.sleep(0)
 
             view.add_success(f"✓ {agent_name.title()}Agent complete")
             status.governance_status = self.bridge.governance.get_status_emoji()
@@ -242,17 +245,26 @@ class AgentCommandHandler:
 
         try:
             if mode == "multi":
+                yield_counter = 0
                 async for chunk in self.bridge.invoke_planner_multi(task):
-                    await view.append_chunk(chunk)
-                    await asyncio.sleep(0)
+                    view.append_chunk(chunk)
+                    yield_counter += 1
+                    if yield_counter % 50 == 0:
+                        await asyncio.sleep(0)
             elif mode == "clarify":
+                yield_counter = 0
                 async for chunk in self.bridge.invoke_planner_clarify(task):
-                    await view.append_chunk(chunk)
-                    await asyncio.sleep(0)
+                    view.append_chunk(chunk)
+                    yield_counter += 1
+                    if yield_counter % 50 == 0:
+                        await asyncio.sleep(0)
             elif mode == "explore":
+                yield_counter = 0
                 async for chunk in self.bridge.invoke_planner_explore(task):
-                    await view.append_chunk(chunk)
-                    await asyncio.sleep(0)
+                    view.append_chunk(chunk)
+                    yield_counter += 1
+                    if yield_counter % 50 == 0:
+                        await asyncio.sleep(0)
             else:
                 view.add_error(f"Unknown planner mode: {mode}")
                 return

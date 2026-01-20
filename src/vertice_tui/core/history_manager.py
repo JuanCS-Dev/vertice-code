@@ -19,6 +19,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+from collections import deque
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -80,6 +81,11 @@ class HistoryManager(CompactionMixin):
 
         # Async lock for thread-safe history saving
         self._history_lock: asyncio.Lock | None = None
+        self._pending_commands: deque[str] = deque()
+        self._flush_task: asyncio.Task[None] | None = None
+        self._flush_requested: bool = False
+        self._flush_debounce_seconds: float = 0.0
+        self._history_file_line_count: int = 0
 
         # Configurable paths
         self._history_file = history_file or (Path.home() / ".vertice_tui_history")
@@ -95,7 +101,9 @@ class HistoryManager(CompactionMixin):
         """Load history from file."""
         try:
             if self._history_file.exists():
-                lines = self._history_file.read_text().strip().split("\n")
+                content = self._history_file.read_text(encoding="utf-8")
+                lines = [line for line in content.splitlines() if line.strip()]
+                self._history_file_line_count = len(lines)
                 self.commands = lines[-self.max_commands :]
         except Exception as e:
             logger.debug(f"Failed to load history: {e}")
@@ -103,27 +111,76 @@ class HistoryManager(CompactionMixin):
     def _save_history(self) -> None:
         """Save history to file (sync version - kept for backward compatibility)."""
         try:
-            self._history_file.write_text("\n".join(self.commands[-self.max_commands :]))
+            commands = self.commands[-self.max_commands :]
+            content = "\n".join(commands) + ("\n" if commands else "")
+            self._history_file.write_text(content, encoding="utf-8")
+            self._history_file_line_count = len(commands)
         except Exception as e:
             logger.debug(f"Failed to save history: {e}")
 
-    async def _save_history_async(self) -> None:
-        """Save history to file WITHOUT blocking event loop.
+    def _append_history_text(self, text: str) -> None:
+        """Append raw text to the history file (sync helper)."""
+        if not text:
+            return
+        try:
+            with self._history_file.open("a", encoding="utf-8") as f:
+                f.write(text)
+        except Exception as e:
+            logger.debug(f"Failed to append history: {e}")
 
-        Uses asyncio.to_thread to offload disk I/O per Python 3.12+ best practices.
-        Uses asyncio.Lock to prevent concurrent writes.
+    def _schedule_flush(self) -> None:
+        """Schedule a coalesced async flush (non-blocking)."""
+        self._flush_requested = True
+        if self._flush_task is None or self._flush_task.done():
+            self._flush_task = asyncio.create_task(self._flush_loop())
 
-        Reference: https://docs.python.org/3/library/asyncio-task.html#asyncio.to_thread
-        """
+    async def _flush_loop(self) -> None:
+        """Flush pending commands in bursts to minimize disk I/O."""
+        try:
+            while True:
+                self._flush_requested = False
+                await asyncio.sleep(self._flush_debounce_seconds)
+                await self.flush_history_async()
+                if not self._flush_requested:
+                    break
+        except asyncio.CancelledError:
+            return
+        finally:
+            self._flush_task = None
+
+    async def flush_history_async(self) -> None:
+        """Persist any pending command history without blocking the event loop."""
+        if not self._pending_commands:
+            return
+
         if self._history_lock is None:
             self._history_lock = asyncio.Lock()
 
         async with self._history_lock:
+            if not self._pending_commands:
+                return
+
+            pending = list(self._pending_commands)
+            self._pending_commands.clear()
+
             try:
-                content = "\n".join(self.commands[-self.max_commands :])
-                await asyncio.to_thread(self._history_file.write_text, content)
+                loop = asyncio.get_running_loop()
+                text = "\n".join(pending) + "\n"
+                await loop.run_in_executor(None, self._append_history_text, text)
+                self._history_file_line_count += len(pending)
+
+                # Keep file bounded by periodically rewriting the last max_commands.
+                if self._history_file_line_count > (self.max_commands * 2):
+                    self.commands = self.commands[-self.max_commands :]
+                    content = "\n".join(self.commands) + ("\n" if self.commands else "")
+                    await loop.run_in_executor(
+                        None, self._history_file.write_text, content, "utf-8"
+                    )
+                    self._history_file_line_count = len(self.commands)
             except Exception as e:
-                logger.debug(f"Failed to save history async: {e}")
+                for command in reversed(pending):
+                    self._pending_commands.appendleft(command)
+                logger.debug(f"Failed to flush history async: {e}")
 
     async def add_command_async(self, command: str) -> None:
         """Add command to history (non-blocking async version).
@@ -132,7 +189,10 @@ class HistoryManager(CompactionMixin):
         """
         if command and (not self.commands or command != self.commands[-1]):
             self.commands.append(command)
-            await self._save_history_async()
+            if len(self.commands) > self.max_commands:
+                self.commands = self.commands[-self.max_commands :]
+            self._pending_commands.append(command)
+            self._schedule_flush()
 
     def add_command(self, command: str) -> None:
         """
@@ -176,6 +236,8 @@ class HistoryManager(CompactionMixin):
     def clear_history(self) -> None:
         """Clear command history."""
         self.commands.clear()
+        self._pending_commands.clear()
+        self._history_file_line_count = 0
         self._save_history()
 
     # =========================================================================
@@ -408,7 +470,7 @@ class HistoryManager(CompactionMixin):
 
         if not 0 <= index < len(self._checkpoints):
             raise ValueError(
-                f"Invalid checkpoint index: {index}. Available: 0-{len(self._checkpoints)-1}"
+                f"Invalid checkpoint index: {index}. Available: 0-{len(self._checkpoints) - 1}"
             )
 
         checkpoint = self._checkpoints[index]
