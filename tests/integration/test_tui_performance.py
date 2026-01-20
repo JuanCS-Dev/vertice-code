@@ -471,9 +471,9 @@ class TestLongSessionStability:
                 if len(candidates) <= 50:
                     break
             assert len(candidates) <= 50
-            assert any(block.has_class("compacted") for block in view.query(ExpandableCodeBlock)), (
-                "Expected compaction to produce at least one compacted ExpandableCodeBlock"
-            )
+            assert any(
+                block.has_class("compacted") for block in view.query(ExpandableCodeBlock)
+            ), "Expected compaction to produce at least one compacted ExpandableCodeBlock"
 
     @pytest.mark.asyncio
     async def test_10k_messages_keeps_view_size_bounded_opt_in(self, monkeypatch) -> None:
@@ -514,9 +514,9 @@ class TestLongSessionStability:
                 if len(candidates) <= 200:
                     break
             assert len(candidates) <= 200
-            assert any(block.has_class("compacted") for block in view.query(ExpandableCodeBlock)), (
-                "Expected compaction to produce at least one compacted ExpandableCodeBlock"
-            )
+            assert any(
+                block.has_class("compacted") for block in view.query(ExpandableCodeBlock)
+            ), "Expected compaction to produce at least one compacted ExpandableCodeBlock"
 
 
 if __name__ == "__main__":
