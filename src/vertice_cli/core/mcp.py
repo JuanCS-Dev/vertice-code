@@ -192,16 +192,11 @@ class MCPClient:
 
         try:
             # Execute with timeout protection
-            # ValidatedTool.execute() handles validation internally
             timeout = self._get_tool_timeout(tool_name)
 
-            # Use execute() which does validation, or _execute_validated for direct call
-            if hasattr(tool, "execute"):
-                result = await asyncio.wait_for(tool.execute(**arguments), timeout=timeout)
-            else:
-                result = await asyncio.wait_for(
-                    tool._execute_validated(**arguments), timeout=timeout
-                )
+            # Always go through _execute_validated() so sync tools work correctly
+            # (it wraps validate() and supports both sync/async execute()).
+            result = await asyncio.wait_for(tool._execute_validated(**arguments), timeout=timeout)
 
             duration = time.time() - start_time
             self._record_tool_call(tool_name, True, duration)

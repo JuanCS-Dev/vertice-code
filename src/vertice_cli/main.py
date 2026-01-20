@@ -233,14 +233,20 @@ async def _run_headless(
 def serve(
     host: str = typer.Option("localhost", "--host", "-h", help="Host to bind"),
     port: int = typer.Option(8000, "--port", "-p", help="Port to bind"),
+    transport: str = typer.Option(
+        "sse", "--transport", "-t", help="Transport mode: sse (default) or stdio"
+    ),
 ):
     """Start as MCP server."""
-    console.print(f"[bold cyan]🔌 Starting MCP Server at {host}:{port}...[/bold cyan]")
+    console.print(
+        f"[bold cyan]🔌 Starting MCP Server at {host}:{port} ({transport})...[/bold cyan]"
+    )
 
     try:
         from vertice_cli.cli_mcp import main as mcp_main
 
-        run_async(mcp_main())
+        # NOTE: cli_mcp.main() is a sync entrypoint that internally manages asyncio.
+        mcp_main(host=host, port=port, transport=transport)
     except ImportError as e:
         console.print("[red]Error:[/red] MCP dependencies not installed")
         console.print(f"[dim]Details: {e}[/dim]")

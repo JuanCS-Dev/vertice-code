@@ -81,7 +81,7 @@ class NoesissMCPAdapter:
         noesis_tools = self._get_noesis_tools()
         for tool in noesis_tools:
             # Wrap ValidatedTool._execute_validated as MCP tool
-            async def create_handler(t):
+            def create_handler(t):
                 async def handler(**kwargs):
                     result = await t._execute_validated(**kwargs)
                     if hasattr(result, "to_dict"):
@@ -96,9 +96,7 @@ class NoesissMCPAdapter:
                 return handler
 
             # Register with MCP
-            import asyncio
-
-            handler = asyncio.get_event_loop().run_until_complete(create_handler(tool))
+            handler = create_handler(tool)
             mcp_server.tool(name=tool.name)(handler)
             self._mcp_tools[tool.name] = handler
 
@@ -106,7 +104,7 @@ class NoesissMCPAdapter:
         distributed_tools = self._get_distributed_tools()
         for tool in distributed_tools:
 
-            async def create_dist_handler(t):
+            def create_dist_handler(t):
                 async def handler(**kwargs):
                     result = await t._execute_validated(**kwargs)
                     if hasattr(result, "to_dict"):
@@ -120,9 +118,7 @@ class NoesissMCPAdapter:
 
                 return handler
 
-            import asyncio
-
-            handler = asyncio.get_event_loop().run_until_complete(create_dist_handler(tool))
+            handler = create_dist_handler(tool)
             mcp_server.tool(name=tool.name)(handler)
             self._mcp_tools[tool.name] = handler
 

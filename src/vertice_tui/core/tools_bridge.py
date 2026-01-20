@@ -44,158 +44,22 @@ class ToolBridge:
         return self._registry
 
     def _create_registry(self):
-        """Create and populate tool registry."""
+        """Create and populate tool registry via ToolCatalog."""
         try:
-            from vertice_cli.tools.base import ToolRegistry
+            from vertice_cli.tools.catalog import get_catalog
 
-            registry = ToolRegistry()
+            # TUI: Defaults + Web + Parity.
+            # Prometheus is NOT enabled by default here (might be loaded separately or on demand)
+            # or maybe it SHOULD be enabled? The old code didn't have it.
+            # I will stick to parity with old code for now: Defaults + Web + Parity.
 
-            # File Operations (12 tools)
-            try:
-                from vertice_cli.tools.file_ops import (
-                    ReadFileTool,
-                    WriteFileTool,
-                    EditFileTool,
-                    ListDirectoryTool,
-                    DeleteFileTool,
-                )
-                from vertice_cli.tools.file_mgmt import (
-                    MoveFileTool,
-                    CopyFileTool,
-                    CreateDirectoryTool,
-                    ReadMultipleFilesTool,
-                    InsertLinesTool,
-                )
+            catalog = get_catalog(include_web=True, include_parity=True, include_prometheus=False)
 
-                for tool_cls in [
-                    ReadFileTool,
-                    WriteFileTool,
-                    EditFileTool,
-                    ListDirectoryTool,
-                    DeleteFileTool,
-                    MoveFileTool,
-                    CopyFileTool,
-                    CreateDirectoryTool,
-                    ReadMultipleFilesTool,
-                    InsertLinesTool,
-                ]:
-                    try:
-                        registry.register(tool_cls())
-                    except Exception as e:
-                        self._load_errors.append(f"file_ops: {e}")
-            except ImportError as e:
-                self._load_errors.append(f"file_ops import: {e}")
+            # Since catalog builder might catch errors internally, we check if we need to surface them
+            # The catalog logs them, but we can also inspect if needed.
+            # For ToolBridge compatibility, we return the built registry.
 
-            # Terminal (9 tools)
-            try:
-                from vertice_cli.tools.terminal import (
-                    CdTool,
-                    LsTool,
-                    PwdTool,
-                    MkdirTool,
-                    RmTool,
-                    CpTool,
-                    MvTool,
-                    TouchTool,
-                    CatTool,
-                )
-
-                for tool_cls in [
-                    CdTool,
-                    LsTool,
-                    PwdTool,
-                    MkdirTool,
-                    RmTool,
-                    CpTool,
-                    MvTool,
-                    TouchTool,
-                    CatTool,
-                ]:
-                    try:
-                        registry.register(tool_cls())
-                    except Exception as e:
-                        self._load_errors.append(f"terminal: {e}")
-            except ImportError as e:
-                self._load_errors.append(f"terminal import: {e}")
-
-            # Execution (2 tools)
-            try:
-                from vertice_cli.tools.exec_hardened import BashCommandTool
-
-                registry.register(BashCommandTool())
-            except ImportError as e:
-                self._load_errors.append(f"exec import: {e}")
-
-            # Search (2 tools)
-            try:
-                from vertice_cli.tools.search import SearchFilesTool, GetDirectoryTreeTool
-
-                registry.register(SearchFilesTool())
-                registry.register(GetDirectoryTreeTool())
-            except ImportError as e:
-                self._load_errors.append(f"search import: {e}")
-
-            # Git (2 tools)
-            try:
-                from vertice_cli.tools.git_ops import GitStatusTool, GitDiffTool
-
-                registry.register(GitStatusTool())
-                registry.register(GitDiffTool())
-            except ImportError as e:
-                self._load_errors.append(f"git import: {e}")
-
-            # Context (3 tools)
-            try:
-                from vertice_cli.tools.context import (
-                    GetContextTool,
-                    SaveSessionTool,
-                    RestoreBackupTool,
-                )
-
-                registry.register(GetContextTool())
-                registry.register(SaveSessionTool())
-                registry.register(RestoreBackupTool())
-            except ImportError as e:
-                self._load_errors.append(f"context import: {e}")
-
-            # Web (6 tools)
-            try:
-                from vertice_cli.tools.web_search import WebSearchTool, SearchDocumentationTool
-                from vertice_cli.tools.web_access import (
-                    FetchURLTool,
-                    DownloadFileTool,
-                    HTTPRequestTool,
-                    PackageSearchTool,
-                )
-
-                for tool_cls in [
-                    WebSearchTool,
-                    SearchDocumentationTool,
-                    FetchURLTool,
-                    DownloadFileTool,
-                    HTTPRequestTool,
-                    PackageSearchTool,
-                ]:
-                    try:
-                        registry.register(tool_cls())
-                    except Exception as e:
-                        self._load_errors.append(f"web: {e}")
-            except ImportError as e:
-                self._load_errors.append(f"web import: {e}")
-
-            # Claude Code Parity Tools (7 tools)
-            try:
-                from vertice_cli.tools.claude_parity_tools import get_claude_parity_tools
-
-                for tool in get_claude_parity_tools():
-                    try:
-                        registry.register(tool)
-                    except Exception as e:
-                        self._load_errors.append(f"parity: {e}")
-            except ImportError as e:
-                self._load_errors.append(f"claude_parity import: {e}")
-
-            return registry
+            return catalog
 
         except ImportError:
             # Return empty registry if vertice_cli not available

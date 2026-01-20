@@ -1,10 +1,12 @@
 """MCP Tools - Auto-expose CLI tools as MCP tools."""
 
 import logging
-from typing import Optional
+from typing import TYPE_CHECKING, Any, Optional
 from vertice_cli.tools.base import ToolRegistry
 from vertice_cli.integrations.mcp.shell_handler import ShellManager
-from prometheus.integrations.mcp_adapter import PrometheusMCPAdapter
+
+if TYPE_CHECKING:
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +17,7 @@ class MCPToolsAdapter:
     def __init__(self, registry: ToolRegistry, shell_manager: ShellManager):
         self.registry = registry
         self.shell_manager = shell_manager
-        self.prometheus_adapter: Optional[PrometheusMCPAdapter] = None
+        self.prometheus_adapter: Optional[Any] = None
         self._mcp_tools = {}
 
     def register_all(self, mcp_server):

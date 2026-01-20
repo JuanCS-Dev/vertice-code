@@ -3,14 +3,12 @@
 import asyncio
 import logging
 from typing import Optional
-from fastmcp import FastMCP
 from vertice_cli.tools.base import ToolRegistry
 from vertice_cli.tools.registry_helper import get_default_registry
 from vertice_cli.integrations.mcp.config import MCPConfig
 from vertice_cli.integrations.mcp.shell_handler import ShellManager
 from vertice_cli.integrations.mcp.tools import MCPToolsAdapter
-from vertice_cli.integrations.mcp.daimon_adapter import DaimonMCPAdapter
-from prometheus.integrations.mcp_adapter import PrometheusMCPAdapter
+from vertice_cli.integrations.mcp.gateway import mcp_gateway
 
 logger = logging.getLogger(__name__)
 
@@ -20,42 +18,61 @@ class QwenMCPServer:
 
     def __init__(self, config: Optional[MCPConfig] = None):
         self.config = config or MCPConfig.from_env()
-        self.mcp = FastMCP("Qwen Dev CLI")
+        self.mcp = None
+        self._init_error: str | None = None
+        try:
+            # Lazy import: fastmcp currently configures logging on import and may break
+            # if the local rich version is incompatible. Keep the rest of the app usable.
+            from fastmcp import FastMCP  # type: ignore
+
+            self.mcp = FastMCP("Qwen Dev CLI")
+        except Exception as e:
+            self._init_error = str(e)
+            logger.warning(f"fastmcp unavailable/incompatible: {e}")
+
         self.shell_manager = ShellManager()
         self.tools_adapter: Optional[MCPToolsAdapter] = None
-        self.daimon_adapter: Optional[DaimonMCPAdapter] = None
         self._running = False
 
     def initialize(self, registry: ToolRegistry, prometheus_provider=None):
         """Initialize server with tool registry."""
+        if self.mcp is None:
+            raise RuntimeError(
+                "MCP server cannot initialize because fastmcp is unavailable/incompatible. "
+                f"Details: {self._init_error}"
+            )
+
+        # 1. Initialize MCPToolsAdapter (Shell + CLI Tools)
         self.tools_adapter = MCPToolsAdapter(registry, self.shell_manager)
 
-        # Initialize Prometheus adapter if provider available
+        # 2. Configure Gateway (Agents + Prometheus)
         if prometheus_provider:
-            self.tools_adapter.prometheus_adapter = PrometheusMCPAdapter(
-                prometheus_provider, self.shell_manager
-            )
+            try:
+                from prometheus.integrations.mcp_adapter import PrometheusMCPAdapter
 
-        # Initialize Daimon adapter (always available - passive insights)
-        self.daimon_adapter = DaimonMCPAdapter()
-        self.daimon_adapter.register_all(self.mcp)
+                # Initialize Prometheus Adapter
+                prom_adapter = PrometheusMCPAdapter(prometheus_provider, self.shell_manager)
+                # Register with Gateway
+                mcp_gateway.set_prometheus_adapter(prom_adapter)
+                # Also link to tools_adapter for backward compatibility if needed
+                self.tools_adapter.prometheus_adapter = prom_adapter
+            except Exception as e:
+                logger.warning(f"Prometheus MCP adapter unavailable: {e}")
 
+        # 3. Register EVERYTHING via Gateway
+        # Note: MCPToolsAdapter (Shell) is manually registered first
         self.tools_adapter.register_all(self.mcp)
 
-        total_tools = len(registry.get_all())
-        daimon_tools = len(self.daimon_adapter.list_registered_tools())
+        # Then all agents via Gateway
+        gateway_stats = mcp_gateway.register_all(self.mcp)
 
-        if self.tools_adapter.prometheus_adapter:
-            prometheus_tools = len(self.tools_adapter.prometheus_adapter.list_registered_tools())
-            total_tools += prometheus_tools + daimon_tools
-            logger.info(
-                f"MCP Server initialized with {len(registry.get_all())} CLI + {prometheus_tools} Prometheus + {daimon_tools} Daimon tools"
-            )
-        else:
-            total_tools += daimon_tools
-            logger.info(
-                f"MCP Server initialized with {len(registry.get_all())} CLI + {daimon_tools} Daimon tools"
-            )
+        total_cli = len(self.tools_adapter._mcp_tools)
+        total_gateway = sum(gateway_stats.values())
+
+        logger.info(
+            f"MCP Server initialized with {total_cli} CLI/Shell tools + {total_gateway} Agent tools. "
+            f"Details: {gateway_stats}"
+        )
 
     async def start(self):
         """Start MCP server."""
@@ -67,13 +84,28 @@ class QwenMCPServer:
             logger.warning("MCP server already running")
             return
 
+        if self.mcp is None:
+            raise RuntimeError(
+                "MCP server cannot start because fastmcp is unavailable/incompatible. "
+                f"Details: {self._init_error}"
+            )
+
         try:
             self._running = True
-            logger.info(f"Starting MCP server on {self.config.host}:{self.config.port}")
-
-            await self.mcp.run(
-                transport="stdio",
+            logger.info(
+                f"Starting MCP server on {self.config.host}:{self.config.port} (transport={self.config.transport})"
             )
+
+            if self.config.transport == "sse":
+                await self.mcp.run(
+                    transport="sse",
+                    host=self.config.host,
+                    port=self.config.port,
+                )
+            else:
+                await self.mcp.run(
+                    transport="stdio",
+                )
 
         except Exception as e:
             logger.error(f"MCP server error: {e}")
@@ -111,8 +143,6 @@ async def run_mcp_server(registry: ToolRegistry, config: Optional[MCPConfig] = N
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-
-    from vertice_cli.tools.base import get_default_registry
 
     config = MCPConfig.from_env()
     config.enabled = True

@@ -3,11 +3,12 @@
 import sys
 import asyncio
 import logging
-from vertice_cli.integrations.mcp import MCPConfig, run_mcp_server
+from vertice_cli.integrations.mcp.config import MCPConfig
+from vertice_cli.integrations.mcp.server import run_mcp_server
 from vertice_cli.tools.registry_helper import get_default_registry
 
 
-def main():
+def main(host: str = None, port: int = None, transport: str = None):
     """Run MCP server from command line."""
     logging.basicConfig(
         level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -15,6 +16,13 @@ def main():
 
     config = MCPConfig.from_env()
     config.enabled = True
+
+    if host:
+        config.host = host
+    if port:
+        config.port = port
+    if transport:
+        config.transport = transport
 
     registry = get_default_registry()
 
