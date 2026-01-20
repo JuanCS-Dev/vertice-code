@@ -1,11 +1,11 @@
-"""Interactive shell with tool-based architecture."""
+"Interactive shell with tool-based architecture."
 
 import asyncio
 import os
 import time
 import logging
 from datetime import datetime
-from typing import Optional, Dict, Any, TYPE_CHECKING
+from typing import Optional, Dict, Any, TYPE_CHECKING, tuple
 from pathlib import Path
 
 # =============================================================================
@@ -322,10 +322,6 @@ class InteractiveShell:
             history=FileHistory(str(history_file)),
             auto_suggest=AutoSuggestFromHistory(),
         )
-        self.session = PromptSession(
-            history=FileHistory(str(history_file)),
-            auto_suggest=AutoSuggestFromHistory(),
-        )
 
         # Initialize tool registry
         self.registry = ToolRegistry()
@@ -374,8 +370,6 @@ class InteractiveShell:
 
         # Register palette commands AFTER handlers are initialized
         self._palette_handler.register_palette_commands()
-
-        # Note: Semantic indexer moved earlier (before ContextSuggestionEngine)
 
     # ========== LAZY-LOADED PROPERTIES (Phase 1: Startup Optimization) ==========
 
@@ -434,38 +428,29 @@ class InteractiveShell:
     def _register_tools(self):
         """Register all available tools."""
         tools = [
-            # File reading (4 tools)
             ReadFileTool(),
             ReadMultipleFilesTool(),
             ListDirectoryTool(),
-            # File writing (4 tools)
             WriteFileTool(),
             EditFileTool(),
             InsertLinesTool(),
             DeleteFileTool(),
-            # File management (3 tools)
             MoveFileTool(),
             CopyFileTool(),
             CreateDirectoryTool(),
-            # Search (2 tools)
             SearchFilesTool(),
             GetDirectoryTreeTool(),
-            # Execution (1 tool)
             BashCommandTool(),
-            # Git (2 tools)
             GitStatusTool(),
             GitDiffTool(),
-            # Context (3 tools)
             GetContextTool(),
             SaveSessionTool(),
             RestoreBackupTool(),
-            # Noesis MCP Protocol (5 tools)
             GetNoesisConsciousnessTool(),
             ActivateNoesisConsciousnessTool(),
             DeactivateNoesisConsciousnessTool(),
             QueryNoesisTribunalTool(),
             ShareNoesisInsightTool(),
-            # Distributed Consciousness MCP Protocol (8 tools)
             ActivateDistributedConsciousnessTool(),
             DeactivateDistributedConsciousnessTool(),
             GetDistributedConsciousnessStatusTool(),
@@ -474,7 +459,6 @@ class InteractiveShell:
             ShareDistributedInsightTool(),
             GetCollectiveInsightsTool(),
             ConnectToDistributedNodeTool(),
-            # Terminal commands (9 tools)
             CdTool(),
             LsTool(),
             PwdTool(),
@@ -491,131 +475,147 @@ class InteractiveShell:
 
         self.console.print(f"[dim]Loaded {len(tools)} tools[/dim]")
 
-    # =========================================================================
-    # SCALE & SUSTAIN Phase 1.6: Palette - Delegated to PaletteHandler
-    # =========================================================================
-    # See: vertice_cli/handlers/palette_handler.py
+    async def _handle_palette_trigger(self) -> None:
+        """Handle Command Palette trigger."""
+        self.console.print("\n[cyan]✨ Command Palette[/cyan]\n")
+        selected = await self._show_palette_interactive()
+        if selected:
+            try:
+                self.console.print(f"\n[dim]Executing: {selected.title}[/dim]\n")
+                result = selected.action()
+                if asyncio.iscoroutine(result):
+                    await result
+            except Exception as e:
+                self.console.print(f"[red]Error executing command: {e}[/red]")
 
-    def _show_welcome(self):
-        """SCALE & SUSTAIN Phase 1.7: Delegated to UIHandler."""
-        return self._ui_handler.show_welcome()
+    async def _handle_noesis_trigger(self) -> None:
+        """Handle manual Noesis trigger."""
+        self.console.print(
+            "\n[magenta]🧠 Activating Modo Noesis - Consciência Estratégica[/magenta]\n"
+        )
+        from .modes.noesis_mode import NoesisMode
 
-    # =========================================================================
-    # TOOL EXECUTION - DELEGATED TO ToolExecutionHandler (Phase 1.4)
-    # =========================================================================
-    # The following methods delegate to self._tool_executor for maintainability.
-    # See: vertice_cli/handlers/tool_execution_handler.py
-
-    async def _execute_with_recovery(self, tool, tool_name: str, args: Dict[str, Any], turn):
-        """Execute tool with error recovery. Delegated to ToolExecutionHandler."""
-        return await self._tool_executor.execute_with_recovery(tool, tool_name, args, turn)
-
-    async def _process_tool_calls(self, user_input: str) -> str:
-        """
-        Process user input and execute tools via LLM.
-
-        SCALE & SUSTAIN Phase 1.4: Delegated to ToolExecutionHandler.
-        See: vertice_cli/handlers/tool_execution_handler.py
-        """
-        return await self._tool_executor.process_tool_calls(user_input)
-
-    async def _execute_tool_calls(self, tool_calls: list[Dict[str, Any]], turn) -> str:
-        """
-        Execute a sequence of tool calls with conversation tracking.
-
-        SCALE & SUSTAIN Phase 1.4: Delegated to ToolExecutionHandler.
-        See: vertice_cli/handlers/tool_execution_handler.py
-        """
-        return await self._tool_executor.execute_tool_calls(tool_calls, turn)
-
-    async def _handle_system_command(self, cmd: str) -> tuple[bool, Optional[str]]:
-        """
-        Handle system commands (/help, /exit, etc.).
-
-        SCALE & SUSTAIN Phase 1.2: Refactored to use CommandDispatcher
-        - Before: CC=112 (F rating - untestable)
-        - After: CC=1 (A rating - trivial delegation)
-        - Handlers: 6 specialized handlers with avg CC=2.9
-        """
-        result = await self._command_dispatcher.dispatch(cmd)
-        return result.should_exit, result.message
-
-    # ========== HELPER METHODS ==========
-    # NOTE: The old _handle_system_command implementation (CC=112, 677 lines) has been
-    # replaced with CommandDispatcher (CC=1). See vertice_cli/handlers/ for handlers.
-
-    # =========================================================================
-    # SCALE & SUSTAIN Phase 1.7: UI Operations - Delegated to UIHandler
-    # =========================================================================
-
-    def _show_metrics(self) -> None:
-        """SCALE & SUSTAIN Phase 1.7: Delegated to UIHandler."""
-        return self._ui_handler.show_metrics()
-
-    def _show_cache_stats(self) -> None:
-        """SCALE & SUSTAIN Phase 1.7: Delegated to UIHandler."""
-        return self._ui_handler.show_cache_stats()
-
-    def _on_file_changed(self, event) -> None:
-        """SCALE & SUSTAIN Phase 1.7: Delegated to UIHandler."""
-        return self._ui_handler.on_file_changed(event)
-
-    async def _handle_explain(self, command: str) -> None:
-        """SCALE & SUSTAIN Phase 1.7: Delegated to UIHandler."""
-        return await self._ui_handler.handle_explain(command)
-
-    # =========================================================================
-    # SCALE & SUSTAIN Phase 1.6: Palette Interactive - Delegated to PaletteHandler
-    # =========================================================================
-
-    async def _show_palette_interactive(self):
-        """SCALE & SUSTAIN Phase 1.6: Delegated to PaletteHandler."""
-        return await self._palette_handler.show_palette_interactive()
-
-    async def _auto_index_background(self) -> None:
-        """
-        Week 3 Day 1: Background indexing task.
-
-        Automatically indexes codebase on startup without blocking.
-        Shows progress indicator and updates cache incrementally.
-        """
         try:
-            # Wait a bit for shell to start
-            await asyncio.sleep(2.0)
+            noesis = NoesisMode()
+            if await noesis.activate():
+                self.console.print("[green]✅ Modo Noesis ativado com sucesso[/green]")
+                status = noesis.get_status()
+                self.console.print(
+                    f"[dim]📊 Tribunal: {status['tribunal_status']} | Quality: {status['quality_level']}[/dim]\n"
+                )
+            else:
+                self.console.print("[red]❌ Falha na ativação do Modo Noesis[/red]")
+        except Exception as e:
+            self.console.print(f"[red]❌ Erro ao ativar Noesis: {e}[/red]")
 
-            # Check if we need to index (cache stale or missing)
-            if self._indexer_initialized:
-                return  # Already indexed
+    async def _handle_distributed_noesis_trigger(self) -> None:
+        """Handle manual Distributed Noesis trigger."""
+        self.console.print(
+            "\n[cyan]🕸️ Activating Distributed Consciousness - Rede de Consciência Coletiva[/cyan]\n"
+        )
+        from .modes.distributed_noesis import DistributedNoesisMode
 
-            start_time = asyncio.get_event_loop().time()
+        try:
+            distributed_noesis = DistributedNoesisMode()
+            if await distributed_noesis.activate_distributed():
+                self.console.print("[green]✅ Consciência Distribuída ativada com sucesso[/green]")
+                status = distributed_noesis.get_distributed_status()
+                self.console.print(
+                    f"[dim]📊 Rede: {status['connected_nodes']} nós | Port: {status['network_port']}[/dim]\n"
+                )
+            else:
+                self.console.print("[red]❌ Falha na ativação da Consciência Distribuída[/red]")
+        except Exception as e:
+            self.console.print(f"[red]❌ Erro ao ativar Consciência Distribuída: {e}[/red]")
 
-            # Index codebase (non-blocking for cached files)
-            count = await asyncio.to_thread(self.indexer.index_codebase, force=False)
+    async def _check_auto_activation(self, user_input: str) -> None:
+        """Check and handle auto-activation of strategic modes."""
+        if user_input and user_input.strip():
+            from .modes.noesis_mode import NoesisMode
+            from .core.base_mode import ModeContext
 
-            elapsed = asyncio.get_event_loop().time() - start_time
-
-            # Get stats
-            stats = self.indexer.get_stats()
-
-            self._indexer_initialized = True
-
-            # Show completion message
-            self.console.print(
-                f"\n[green]✓ Indexed {count} files in {elapsed:.1f}s[/green] "
-                f"[dim]({stats['total_symbols']} symbols)[/dim]\n"
+            noesis = NoesisMode()
+            context = ModeContext(
+                cwd=str(Path.cwd()),
+                env=dict(os.environ),
+                session_id=self.session_state.session_id
+                if hasattr(self, "session_state")
+                else None,
             )
 
-        except Exception as e:
-            # Don't crash on indexing errors
-            import logging
+            action_data = {
+                "command": user_input.strip().split()[0] if user_input.strip() else "",
+                "prompt": user_input.strip(),
+            }
 
-            logging.error(f"Background indexing failed: {e}")
+            if noesis.should_auto_activate(action_data, context):
+                self.console.print(
+                    "\n[blue]🧠 Auto-activating Modo Noesis - Strategic moment detected[/blue]\n"
+                )
+                if await noesis.activate():
+                    self.console.print(
+                        "[green]✅ Modo Noesis auto-ativado para qualidade absoluta[/green]\n"
+                    )
+                else:
+                    self.console.print(
+                        "[yellow]⚠️ Auto-activation failed, proceeding normally[/yellow]\n"
+                    )
+
+    async def _handle_input_commands(self, user_input: str) -> tuple[bool, bool]:
+        """Handle shell input commands. Returns (should_exit, was_handled)."""
+        if user_input is None:  # Ctrl+D
+            self.console.print("[cyan]👋 Goodbye![/cyan]")
+            return True, True
+
+        input_clean = user_input.strip()
+        if not input_clean:
+            return False, True
+
+        if input_clean.lower() in ["quit", "exit", "q"]:
+            self.console.print("[cyan]👋 Goodbye![/cyan]")
+            return True, True
+
+        if input_clean.lower() == "help":
+            help_system.show_main_help()
+            return False, True
+        if input_clean.lower().startswith("help "):
+            topic = input_clean[5:].strip()
+            help_system.show_examples(topic if topic != "examples" else None)
+            return False, True
+        if input_clean.lower() == "/tutorial":
+            help_system.show_tutorial()
+            return False, True
+        if input_clean.lower().startswith("/explain "):
+            command = input_clean[9:].strip()
+            self.console.print(help_system.explain_command(command))
+            return False, True
+
+        if user_input.startswith("/"):
+            should_exit, message = await self._handle_system_command(user_input)
+            if message:
+                self.console.print(message)
+            return should_exit, True
+
+        return False, False
+
+    def _display_token_metrics(self) -> None:
+        """Display token usage metrics and warnings."""
+        if self.context_engine.window.current_output_tokens > 0:
+            self.console.print(self.context_engine.render_token_usage_realtime())
+            usage_percent = (
+                self.context_engine.window.total_tokens
+                / self.context_engine.max_context_tokens
+                * 100
+            )
+            if usage_percent >= 90:
+                self.console.print("\n[bold red]⚠️  WARNING: Context window >90% full![/bold red]")
+                self.console.print("[yellow]Consider using /clear to reset context[/yellow]\n")
+            elif usage_percent >= 80:
+                self.console.print("\n[yellow]⚠️  Context window >80% full[/yellow]\n")
 
     async def run(self):
-        """Interactive REPL with Cursor+Claude+Gemini best practices."""
-        self._show_welcome()
-
-        # Initialize suggestion engine
+        """Interactive REPL."""
+        self._ui_handler.show_welcome()
         from .intelligence.engine import SuggestionEngine
 
         suggestion_engine = SuggestionEngine()
@@ -623,332 +623,152 @@ class InteractiveShell:
 
         register_builtin_patterns(suggestion_engine)
 
-        # Start background file watcher task
         async def file_watcher_loop():
             while True:
                 self.file_watcher.check_updates()
                 await asyncio.sleep(1.0)
 
         watcher_task = asyncio.create_task(file_watcher_loop())
-
-        # Week 3 Day 1: Start background indexing task
         self._auto_index_task = asyncio.create_task(self._auto_index_background())
 
         try:
             while True:
                 try:
-                    # [IDLE] Get user input (DAY 8: Enhanced input)
                     start_time = time.time()
                     user_input = await self.enhanced_input.prompt_async()
 
-                    # Handle Command Palette (Ctrl+K) - Integration Sprint Week 1
                     if user_input == "__PALETTE__":
-                        self.console.print("\n[cyan]✨ Command Palette[/cyan]\n")
-
-                        # Show palette interactively
-                        selected = await self._show_palette_interactive()
-
-                        if selected:
-                            try:
-                                self.console.print(f"\n[dim]Executing: {selected.title}[/dim]\n")
-                                # Execute command action
-                                result = selected.action()
-                                if asyncio.iscoroutine(result):
-                                    await result
-                            except Exception as e:
-                                self.console.print(f"[red]Error executing command: {e}[/red]")
-
+                        await self._handle_palette_trigger()
                         continue
-
-                    # Handle Noesis Mode (Ctrl+N) - Consciousness activation
                     if user_input == "__NOESIS__":
-                        self.console.print(
-                            "\n[magenta]🧠 Activating Modo Noesis - Consciência Estratégica[/magenta]\n"
-                        )
-
-                        # Import and activate Noesis mode
-                        from .modes.noesis_mode import NoesisMode
-
-                        try:
-                            # Create Noesis mode instance
-                            noesis = NoesisMode()
-
-                            # Activate consciousness
-                            success = await noesis.activate()
-                            if success:
-                                self.console.print(
-                                    "[green]✅ Modo Noesis ativado com sucesso[/green]"
-                                )
-
-                                # Show tribunal status
-                                status = noesis.get_status()
-                                self.console.print(
-                                    f"[dim]📊 Tribunal: {status['tribunal_status']} | Quality: {status['quality_level']}[/dim]\n"
-                                )
-                            else:
-                                self.console.print("[red]❌ Falha na ativação do Modo Noesis[/red]")
-
-                        except Exception as e:
-                            self.console.print(f"[red]❌ Erro ao ativar Noesis: {e}[/red]")
-
+                        await self._handle_noesis_trigger()
                         continue
-
-                    # Handle Distributed Consciousness (Ctrl+Shift+N) - Networked consciousness
                     if user_input == "__DISTRIBUTED_NOESIS__":
-                        self.console.print(
-                            "\n[cyan]🕸️ Activating Distributed Consciousness - Rede de Consciência Coletiva[/cyan]\n"
-                        )
-
-                        # Import and activate distributed Noesis mode
-                        from .modes.distributed_noesis import DistributedNoesisMode
-
-                        try:
-                            # Create distributed Noesis instance
-                            distributed_noesis = DistributedNoesisMode()
-
-                            # Activate distributed consciousness
-                            success = await distributed_noesis.activate_distributed()
-                            if success:
-                                self.console.print(
-                                    "[green]✅ Consciência Distribuída ativada com sucesso[/green]"
-                                )
-
-                                # Show distributed status
-                                status = distributed_noesis.get_distributed_status()
-                                self.console.print(
-                                    f"[dim]📊 Rede: {status['connected_nodes']} nós | Port: {status['network_port']}[/dim]\n"
-                                )
-                            else:
-                                self.console.print(
-                                    "[red]❌ Falha na ativação da Consciência Distribuída[/red]"
-                                )
-
-                        except Exception as e:
-                            self.console.print(
-                                f"[red]❌ Erro ao ativar Consciência Distribuída: {e}[/red]"
-                            )
-
+                        await self._handle_distributed_noesis_trigger()
                         continue
 
-                    # Auto-activation intelligence for strategic moments
-                    if user_input and user_input.strip():
-                        from .modes.noesis_mode import NoesisMode
-                        from .core.base_mode import ModeContext
-
-                        noesis = NoesisMode()
-                        context = ModeContext(
-                            cwd=str(Path.cwd()),
-                            env=dict(os.environ),
-                            session_id=(
-                                self.session_state.session_id
-                                if hasattr(self, "session_state")
-                                else None
-                            ),
-                        )
-
-                        action_data = {
-                            "command": user_input.strip().split()[0] if user_input.strip() else "",
-                            "prompt": user_input.strip(),
-                        }
-
-                        if noesis.should_auto_activate(action_data, context):
-                            self.console.print(
-                                "\n[blue]🧠 Auto-activating Modo Noesis - Strategic moment detected[/blue]\n"
-                            )
-
-                            # Auto-activate consciousness
-                            success = await noesis.activate()
-                            if success:
-                                self.console.print(
-                                    "[green]✅ Modo Noesis auto-ativado para qualidade absoluta[/green]\n"
-                                )
-                            else:
-                                self.console.print(
-                                    "[yellow]⚠️ Auto-activation failed, proceeding normally[/yellow]\n"
-                                )
-
-                    # Handle empty input or Ctrl+D
-                    if user_input is None or not user_input.strip():
-                        if user_input is None:  # Ctrl+D
-                            self.console.print("[cyan]👋 Goodbye![/cyan]")
-                            break
-                        continue
-
-                    # Handle system commands (quit, help, etc)
-                    if user_input.strip().lower() in ["quit", "exit", "q"]:
-                        self.console.print("[cyan]👋 Goodbye![/cyan]")
-                        break
-                    elif user_input.strip().lower() == "help":
-                        # P2: Enhanced help system
-                        help_system.show_main_help()
-                        continue
-                    elif user_input.strip().lower().startswith("help "):
-                        # P2: Topic-specific help
-                        topic = user_input.strip()[5:].strip()
-                        if topic == "examples":
-                            help_system.show_examples()
-                        else:
-                            help_system.show_examples(topic)
-                        continue
-                    elif user_input.strip().lower() == "/tutorial":
-                        # P2: Interactive tutorial
-                        help_system.show_tutorial()
-                        continue
-                    elif user_input.strip().lower().startswith("/explain "):
-                        # P2: Command explanation
-                        command = user_input.strip()[9:].strip()
-                        explanation = help_system.explain_command(command)
-                        self.console.print(explanation)
-                        continue
-                    elif user_input.startswith("/"):
-                        should_exit, message = await self._handle_system_command(user_input)
-                        if message:
-                            self.console.print(message)
+                    await self._check_auto_activation(user_input)
+                    should_exit, handled = await self._handle_input_commands(user_input)
+                    if handled:
                         if should_exit:
                             break
                         continue
 
-                    # [THINKING] Process request with LLM
                     success = True
                     try:
-                        # Process with LLM (workflow viz disabled - fixing bugs)
                         await self._process_request_with_llm(user_input, suggestion_engine)
-
-                        # Show token usage after LLM response (Integration Sprint Week 1: Task 1.2)
-                        if self.context_engine.window.current_output_tokens > 0:
-                            token_panel = self.context_engine.render_token_usage_realtime()
-                            self.console.print(token_panel)
-
-                            # Warning if approaching limit
-                            usage_percent = (
-                                self.context_engine.window.total_tokens
-                                / self.context_engine.max_context_tokens
-                                * 100
-                            )
-
-                            if usage_percent >= 90:
-                                self.console.print(
-                                    "\n[bold red]⚠️  WARNING: Context window >90% full![/bold red]"
-                                )
-                                self.console.print(
-                                    "[yellow]Consider using /clear to reset context[/yellow]\n"
-                                )
-                            elif usage_percent >= 80:
-                                self.console.print(
-                                    "\n[yellow]⚠️  Context window >80% full[/yellow]\n"
-                                )
-
+                        self._display_token_metrics()
                     except Exception as proc_error:
                         success = False
                         raise proc_error
                     finally:
-                        # Track command in history (DAY 8: Phase 2)
                         duration_ms = int((time.time() - start_time) * 1000)
                         history_entry = HistoryEntry(
                             timestamp=datetime.now().isoformat(),
-                            command=user_input[:200],  # Limit to 200 chars
+                            command=user_input[:200],
                             cwd=str(Path.cwd()),
                             success=success,
                             duration_ms=duration_ms,
-                            tokens_used=0,  # Will be updated later
+                            tokens_used=0,
                             tool_calls=len(self.context.tool_calls),
                             files_modified=list(self.context.modified_files),
                             session_id=self.session_state.session_id,
                         )
                         self.cmd_history.add(history_entry)
-
-                        # Update input context
                         self.enhanced_input.update_context(
                             cwd=str(Path.cwd()),
                             recent_files=list(self.recent_files.get_recent()),
                             command_history=self.cmd_history.get_recent(limit=10),
                         )
-
                 except KeyboardInterrupt:
                     self.console.print("\n[dim]Use 'quit' to exit[/dim]")
                     continue
                 except EOFError:
                     break
                 except Exception as e:
-                    # Claude pattern: Never crash, specific error handling
                     await self._handle_error(e, user_input)
-
         finally:
-            # Auto-save session on exit (AIR GAP #2)
             try:
                 self.session_manager.save_session(self.session_state)
-                self.console.print(
-                    f"[dim]💾 Session auto-saved: {self.session_state.session_id}[/dim]"
-                )
             except Exception as e:
                 logger.warning(f"Failed to auto-save session: {e}")
-
-            # Cleanup
             self.file_watcher.stop()
             watcher_task.cancel()
-
-            # Cancel auto-index background task
             if hasattr(self, "_auto_index_task") and self._auto_index_task:
                 self._auto_index_task.cancel()
-                try:
-                    await self._auto_index_task
-                except asyncio.CancelledError:
-                    logger.debug("Auto-index task cancelled successfully")
 
-            # Stop LSP server if running
-            if self._lsp_initialized:
-                try:
-                    await self.lsp_client.stop()
-                    logger.info("LSP server stopped")
-                except Exception as e:
-                    logger.warning(f"Failed to stop LSP server: {e}")
-            try:
-                await watcher_task
-            except asyncio.CancelledError:
-                logger.debug("File watcher task cancelled successfully")
+    async def _auto_index_background(self) -> None:
+        try:
+            await asyncio.sleep(2.0)
+            if self._indexer_initialized:
+                return
+            start_time = asyncio.get_event_loop().time()
+            count = await asyncio.to_thread(self.indexer.index_codebase, force=False)
+            elapsed = asyncio.get_event_loop().time() - start_time
+            stats = self.indexer.get_stats()
+            self._indexer_initialized = True
+            self.console.print(
+                f"\n[green]✓ Indexed {count} files in {elapsed:.1f}s[/green] [dim]({stats['total_symbols']} symbols)[/dim]\n"
+            )
+        except Exception as e:
+            logger.error(f"Background indexing failed: {e}")
 
-    # =========================================================================
-    # SCALE & SUSTAIN Phase 1.5: LLM Processing - Delegated to Handler
-    # =========================================================================
+    async def _execute_with_recovery(self, tool, tool_name: str, args: Dict[str, Any], turn):
+        return await self._tool_executor.execute_with_recovery(tool, tool_name, args, turn)
+
+    async def _process_tool_calls(self, user_input: str) -> str:
+        return await self._tool_executor.process_tool_calls(user_input)
+
+    async def _execute_tool_calls(self, tool_calls: list[Dict[str, Any]], turn) -> str:
+        return await self._tool_executor.execute_tool_calls(tool_calls, turn)
+
+    async def _handle_system_command(self, cmd: str) -> tuple[bool, Optional[str]]:
+        result = await self._command_dispatcher.dispatch(cmd)
+        return result.should_exit, result.message
+
+    def _show_metrics(self) -> None:
+        return self._ui_handler.show_metrics()
+
+    def _show_cache_stats(self) -> None:
+        return self._ui_handler.show_cache_stats()
+
+    def _on_file_changed(self, event) -> None:
+        return self._ui_handler.on_file_changed(event)
+
+    async def _handle_explain(self, command: str) -> None:
+        return await self._ui_handler.handle_explain(command)
+
+    async def _show_palette_interactive(self):
+        return await self._palette_handler.show_palette_interactive()
 
     async def _process_request_with_llm(self, user_input: str, suggestion_engine):
-        """SCALE & SUSTAIN Phase 1.5: Delegated to LLMProcessingHandler."""
         return await self._llm_processor.process_request_with_llm(user_input, suggestion_engine)
 
     async def _get_command_suggestion(self, user_request: str, context: dict) -> str:
-        """SCALE & SUSTAIN Phase 1.5: Delegated to LLMProcessingHandler."""
         return await self._llm_processor.get_command_suggestion(user_request, context)
 
     def _fallback_suggest(self, user_request: str) -> str:
-        """SCALE & SUSTAIN Phase 1.5: Delegated to LLMProcessingHandler."""
         return self._llm_processor.fallback_suggest(user_request)
 
     def _extract_command(self, llm_response: str) -> str:
-        """SCALE & SUSTAIN Phase 1.5: Delegated to LLMProcessingHandler."""
         return self._llm_processor.extract_command(llm_response)
 
     def _get_safety_level(self, command: str) -> int:
-        """SCALE & SUSTAIN Phase 1.5: Delegated to LLMProcessingHandler."""
         return self._llm_processor.get_safety_level(command)
 
     async def _execute_command(self, command: str) -> dict:
-        """SCALE & SUSTAIN Phase 1.5: Delegated to LLMProcessingHandler."""
         return await self._llm_processor.execute_command(command)
 
     async def _handle_error(self, error: Exception, user_input: str):
-        """SCALE & SUSTAIN Phase 1.5: Delegated to LLMProcessingHandler."""
         return await self._llm_processor.handle_error(error, user_input)
 
     async def _palette_run_squad(self):
-        """SCALE & SUSTAIN Phase 1.6: Delegated to PaletteHandler."""
         return await self._palette_handler.palette_run_squad()
 
     def _palette_list_workflows(self):
-        """SCALE & SUSTAIN Phase 1.6: Delegated to PaletteHandler."""
         return self._palette_handler.palette_list_workflows()
 
     def _show_help(self):
-        """SCALE & SUSTAIN Phase 1.7: Delegated to UIHandler."""
         return self._ui_handler.show_help()
 
 

@@ -253,7 +253,7 @@ Vertice-Code sends rich messages using Teams Adaptive Cards:
      -d '{
        "config": {
          "app_id": "your-app-id",
-         "private_key": "-----BEGIN RSA PRIVATE KEY-----\n...",
+         "private_key": "YOUR_PRIVATE_KEY_HERE", # pragma: allowlist secret
          "installation_id": "your-installation-id",
          "webhook_secret": "your-webhook-secret",
          "repositories": ["org/repo1", "org/repo2"]

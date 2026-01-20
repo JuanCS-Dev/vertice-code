@@ -177,9 +177,9 @@ class SandboxExecutor:
                 return_value = None
                 if capture_return and "__SANDBOX_RETURN__:" in stdout:
                     try:
-                        return_line = [l for l in stdout.split("\n") if "__SANDBOX_RETURN__:" in l][
-                            -1
-                        ]
+                        return_line = [
+                            line for line in stdout.split("\n") if "__SANDBOX_RETURN__:" in line
+                        ][-1]
                         return_json = return_line.split("__SANDBOX_RETURN__:")[1].strip()
                         return_value = json.loads(return_json)
                         # Remove return line from stdout
@@ -273,40 +273,57 @@ print(f"__SANDBOX_RETURN__:{{_json.dumps(__result__)}}")
         """
         import ast
 
-        # Try to parse
         try:
             tree = ast.parse(code)
         except SyntaxError as e:
             return f"Syntax error: {e}"
 
-        # Check for blocked imports
         for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                for alias in node.names:
-                    module = alias.name.split(".")[0]
-                    if module in self.config.blocked_imports:
-                        return f"Blocked import: {module}"
+            error = self._check_node_safety(node)
+            if error:
+                return error
 
-            elif isinstance(node, ast.ImportFrom):
-                if node.module:
-                    module = node.module.split(".")[0]
-                    if module in self.config.blocked_imports:
-                        return f"Blocked import: {module}"
+        return None
 
-            # Check for dangerous builtins
-            elif isinstance(node, ast.Call):
-                if isinstance(node.func, ast.Name):
-                    if node.func.id in ["eval", "exec", "compile", "__import__", "open"]:
-                        # Allow open() for reading
-                        if node.func.id == "open":
-                            # Check if mode is 'r' or not specified
-                            if len(node.args) >= 2:
-                                mode_arg = node.args[1]
-                                if isinstance(mode_arg, ast.Constant):
-                                    if "w" in str(mode_arg.value) or "a" in str(mode_arg.value):
-                                        return "File write operations not allowed"
-                        elif node.func.id != "open":
-                            return f"Dangerous builtin: {node.func.id}"
+    def _check_node_safety(self, node: Any) -> Optional[str]:
+        """Check safety of a single AST node."""
+        import ast
+
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                module = alias.name.split(".")[0]
+                if module in self.config.blocked_imports:
+                    return f"Blocked import: {module}"
+
+        elif isinstance(node, ast.ImportFrom):
+            if node.module:
+                module = node.module.split(".")[0]
+                if module in self.config.blocked_imports:
+                    return f"Blocked import: {module}"
+
+        elif isinstance(node, ast.Call):
+            return self._check_call_safety(node)
+
+        return None
+
+    def _check_call_safety(self, node: Any) -> Optional[str]:
+        """Check safety of a call node."""
+        import ast
+
+        if not isinstance(node.func, ast.Name):
+            return None
+
+        func_id = node.func.id
+        if func_id in ["eval", "exec", "compile", "__import__"]:
+            return f"Dangerous builtin: {func_id}"
+
+        if func_id == "open":
+            if len(node.args) >= 2:
+                mode_arg = node.args[1]
+                if isinstance(mode_arg, ast.Constant):
+                    mode = str(mode_arg.value)
+                    if "w" in mode or "a" in mode or "x" in mode or "+" in mode:
+                        return "File write operations not allowed"
 
         return None
 

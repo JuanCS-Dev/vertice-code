@@ -67,17 +67,17 @@ jobs:
         run: radon cc . --min B --json > complexity-report.json || true
 
       # Upload reports
-       - name: Upload security report
-         uses: actions/upload-artifact@v4
-         with:
-           name: security-report
-           path: security-report.json
+      - name: Upload security report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report
+          path: security-report.json
 
-       - name: Upload complexity report
-         uses: actions/upload-artifact@v4
-         with:
-           name: complexity-report
-           path: complexity-report.json
+      - name: Upload complexity report
+        uses: actions/upload-artifact@v4
+        with:
+          name: complexity-report
+          path: complexity-report.json
 
   # ===== TESTING =====
   test:
@@ -191,11 +191,11 @@ jobs:
       - name: Run load tests
         run: python tests/load/test_load_performance.py
 
-       - name: Upload load test results
-         uses: actions/upload-artifact@v4
-         with:
-           name: load-test-results
-           path: load-test-results.json
+      - name: Upload load test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-test-results
+          path: load-test-results.json
 
   # ===== SECURITY SCANNING =====
   security-scan:
@@ -294,13 +294,13 @@ jobs:
           docker build -t vertice-frontend:latest -f vertice-chat-webapp/frontend/Dockerfile .
 
       # Upload artifacts
-       - name: Upload build artifacts
-         uses: actions/upload-artifact@v4
-         with:
-           name: build-artifacts
-           path: |
-             dist/
-             vertice-chat-webapp/frontend/out/
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            dist/
+            vertice-chat-webapp/frontend/out/
 
   # ===== DEPLOYMENT =====
   deploy-staging:

@@ -27,7 +27,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from vertice_cli.agents.base import AgentRole, AgentTask
+from vertice_cli.agents.base import AgentRole, AgentTask, TaskStatus
 from vertice_cli.agents.security import (
     SecurityAgent,
     SeverityLevel,

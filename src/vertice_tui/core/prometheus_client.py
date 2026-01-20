@@ -172,6 +172,7 @@ class PrometheusClient:
 
     def get_health_status(self) -> Dict[str, Any]:
         """Get health status."""
+        PROMETHEUS_AVAILABLE = _ensure_prometheus_imports()
         base_status = {
             "provider": "prometheus",
             "available": PROMETHEUS_AVAILABLE,

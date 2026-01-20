@@ -15,6 +15,7 @@ import logging
 from datetime import datetime
 
 # from vertice_core.github_agent import GitHubAgent  # Temporarily disabled
+from app.core.config import get_settings
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

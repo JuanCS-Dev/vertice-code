@@ -391,11 +391,44 @@ class ClaudeParityHandler:
         except Exception as e:
             view.add_error(f"Init failed: {e}")
 
-    async def _handle_hooks(self, args: str, view: "ResponseView") -> None:
-        try:
-            parts = args.split(maxsplit=2) if args else []
-            subcommand = parts[0].lower() if parts else ""
+    def _display_hooks_list(self, view: "ResponseView") -> None:
+        """Display list of configured hooks."""
+        hooks = self.bridge.get_hooks()
+        if not hooks:
+            view.add_system_message("## 🪝 Hooks\n\nNo hooks configured.")
+            return
 
+        lines = [
+            "## 🪝 Hooks Configuration\n",
+            "*Hooks run shell commands after file operations*\n",
+        ]
+        for hook_name, hook_info in hooks.items():
+            status = "✅" if hook_info.get("enabled") else "⬜"
+            lines.append(f"\n### {status} {hook_name}")
+            lines.append(f"*{hook_info.get('description', '')}*")
+            commands = hook_info.get("commands", [])
+            if commands:
+                lines.append("**Commands:**")
+                for cmd in commands:
+                    lines.append(f"  - `{cmd}`")
+            else:
+                lines.append("*No commands configured*")
+
+        lines.append("\n**Usage:**")
+        lines.append("- `/hooks enable <hook>` - Enable a hook")
+        lines.append("- `/hooks disable <hook>` - Disable a hook")
+        lines.append("- `/hooks add <hook> <cmd>` - Add command")
+        lines.append("- `/hooks remove <hook> <cmd>` - Remove command")
+        lines.append("- `/hooks set <hook> <cmd1,cmd2>` - Set commands")
+        lines.append("- `/hooks stats` - Show execution stats")
+        view.add_system_message("\n".join(lines))
+
+    async def _handle_hooks(self, args: str, view: "ResponseView") -> None:
+        """Handle /hooks commands."""
+        parts = args.split(maxsplit=2) if args else []
+        subcommand = parts[0].lower() if parts else "list"
+
+        try:
             if subcommand == "enable" and len(parts) >= 2:
                 hook_name = parts[1]
                 if self.bridge.enable_hook(hook_name, True):
@@ -446,34 +479,7 @@ class ClaudeParityHandler:
                 view.add_system_message("\n".join(lines))
 
             else:
-                hooks = self.bridge.get_hooks()
-                if hooks:
-                    lines = [
-                        "## 🪝 Hooks Configuration\n",
-                        "*Hooks run shell commands after file operations*\n",
-                    ]
-                    for hook_name, hook_info in hooks.items():
-                        status = "✅" if hook_info.get("enabled") else "⬜"
-                        lines.append(f"\n### {status} {hook_name}")
-                        lines.append(f"*{hook_info.get('description', '')}*")
-                        commands = hook_info.get("commands", [])
-                        if commands:
-                            lines.append("**Commands:**")
-                            for cmd in commands:
-                                lines.append(f"  - `{cmd}`")
-                        else:
-                            lines.append("*No commands configured*")
-
-                    lines.append("\n**Usage:**")
-                    lines.append("- `/hooks enable <hook>` - Enable a hook")
-                    lines.append("- `/hooks disable <hook>` - Disable a hook")
-                    lines.append("- `/hooks add <hook> <cmd>` - Add command")
-                    lines.append("- `/hooks remove <hook> <cmd>` - Remove command")
-                    lines.append("- `/hooks set <hook> <cmd1,cmd2>` - Set commands")
-                    lines.append("- `/hooks stats` - Show execution stats")
-                    view.add_system_message("\n".join(lines))
-                else:
-                    view.add_system_message("## 🪝 Hooks\n\nNo hooks configured.")
+                self._display_hooks_list(view)
         except Exception as e:
             view.add_system_message(f"## 🪝 Hooks\n\nNot available: {e}")
 

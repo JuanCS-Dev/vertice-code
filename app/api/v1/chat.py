@@ -17,6 +17,8 @@ from typing import List, Dict, Any, Optional
 import json
 import logging
 
+logger = logging.getLogger(__name__)
+
 # Check if import works
 try:
     from src.providers.vertice_router import get_router
@@ -36,7 +38,6 @@ except ImportError:
     VERTEX_AVAILABLE = False
     logger.warning("VertexAIProvider not available.")
 
-logger = logging.getLogger(__name__)
 router = APIRouter()
 
 print("DEBUG: Loading appapi/v1/chat.py - REVISION CHECK 2026-01-10-FIX-B")

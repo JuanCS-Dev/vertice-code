@@ -14,6 +14,7 @@ import time
 import statistics
 import psutil
 import os
+import random
 from typing import Dict, List, Any
 from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor
@@ -72,11 +73,16 @@ class LoadTester:
         successful_requests = 0
         failed_requests = 0
 
-        async def simulate_user(user_id: int) -> List[float]:
-            """Simulate a single user making requests."""
+        async def simulate_user(user_id: int):
+            """Simulate behavior of a single user."""
             user_response_times = []
+            local_failed_requests = 0
 
-            for request_id in range(requests_per_user):
+            for _ in range(requests_per_user):
+                # Random think time between requests
+                await asyncio.sleep(random.uniform(0.1, 0.5))
+
+                request_id = f"{user_id}-{int(time.time()*1000)}"
                 request_start = time.time()
 
                 try:
@@ -86,10 +92,10 @@ class LoadTester:
                     user_response_times.append(response_time)
 
                 except Exception as e:
-                    failed_requests += 1
+                    local_failed_requests += 1
                     print(f"❌ User {user_id} request {request_id} failed: {e}")
 
-            return user_response_times
+            return user_response_times, local_failed_requests
 
         # Start all user simulations
         tasks = [simulate_user(i) for i in range(num_concurrent_users)]
@@ -97,11 +103,13 @@ class LoadTester:
 
         # Collect results
         for result in results:
-            if isinstance(result, list):
-                all_response_times.extend(result)
-                successful_requests += len(result)
+            if isinstance(result, tuple):
+                times, fails = result
+                all_response_times.extend(times)
+                successful_requests += len(times)
+                failed_requests += fails
             else:
-                failed_requests += num_concurrent_users  # All requests from this user failed
+                failed_requests += requests_per_user  # All requests from this user failed
 
         total_requests = successful_requests + failed_requests
         end_time = time.time()

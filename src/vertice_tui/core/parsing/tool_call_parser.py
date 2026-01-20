@@ -448,6 +448,53 @@ class ToolCallParser:
         return results
 
     @staticmethod
+    def _convert_protobuf_to_dict(args_obj: Any) -> Dict[str, Any]:
+        """Helper to convert protobuf args to dictionary with multiple fallbacks."""
+        if not args_obj:
+            return {}
+        if isinstance(args_obj, dict):
+            return args_obj
+        if hasattr(args_obj, "items"):
+            return dict(args_obj)
+
+        # Strategy 1: google.protobuf MessageToDict
+        try:
+            from google.protobuf.json_format import MessageToDict
+
+            return MessageToDict(args_obj, preserving_proto_field_name=True)
+        except (ImportError, TypeError, ValueError, AttributeError):
+            pass
+
+        # Strategy 2: Direct field access (Gemini SDK specific)
+        try:
+            if hasattr(args_obj, "fields"):
+                from .protobuf_utils import extract_protobuf_value
+
+                return {k: extract_protobuf_value(v) for k, v in args_obj.fields.items()}
+        except (AttributeError, TypeError, ImportError):
+            pass
+
+        # Strategy 3: __dict__ access
+        try:
+            if hasattr(args_obj, "__dict__"):
+                return {k: v for k, v in args_obj.__dict__.items() if not k.startswith("_")}
+        except (AttributeError, TypeError):
+            pass
+
+        # Strategy 4: JSON serialization roundtrip
+        try:
+            import json
+            from google.protobuf.json_format import MessageToJson
+
+            if hasattr(args_obj, "SerializeToString"):
+                json_str = MessageToJson(args_obj)
+                return json.loads(json_str)
+        except (ImportError, TypeError, ValueError, AttributeError):
+            pass
+
+        return {}
+
+    @staticmethod
     def extract_from_native(response: Any) -> List[Tuple[str, Dict[str, Any]]]:
         """
         Extract tool calls from native Gemini API response object.
@@ -483,85 +530,15 @@ class ToolCallParser:
             for part in parts:
                 # Check for function_call attribute (Gemini SDK format)
                 fc = getattr(part, "function_call", None)
-                if fc:
-                    name = getattr(fc, "name", None)
-                    if name:
-                        # Convert args (protobuf Struct) to dict
-                        # P0 FIX: Robust protobuf conversion with multiple fallbacks
-                        args_obj = getattr(fc, "args", {})
-                        args: Dict[str, Any] = {}
+                if not fc:
+                    continue
 
-                        if isinstance(args_obj, dict):
-                            args = args_obj
-                        elif hasattr(args_obj, "items"):
-                            # Direct dict-like access
-                            args = dict(args_obj)
-                        elif args_obj is not None:
-                            # Try multiple protobuf conversion strategies
-                            conversion_succeeded = False
-
-                            # Strategy 1: google.protobuf MessageToDict
-                            try:
-                                from google.protobuf.json_format import MessageToDict
-
-                                args = MessageToDict(args_obj, preserving_proto_field_name=True)
-                                conversion_succeeded = True
-                            except (ImportError, TypeError, ValueError, AttributeError):
-                                pass
-
-                            # Strategy 2: Direct field access (Gemini SDK specific)
-                            if not conversion_succeeded:
-                                try:
-                                    # Gemini SDK Struct has .fields attribute
-                                    if hasattr(args_obj, "fields"):
-                                        args = {
-                                            k: self._extract_protobuf_value(v)
-                                            for k, v in args_obj.fields.items()
-                                        }
-                                        conversion_succeeded = True
-                                except (AttributeError, TypeError):
-                                    pass
-
-                            # Strategy 3: __dict__ access
-                            if not conversion_succeeded:
-                                try:
-                                    if hasattr(args_obj, "__dict__"):
-                                        args = {
-                                            k: v
-                                            for k, v in args_obj.__dict__.items()
-                                            if not k.startswith("_")
-                                        }
-                                        conversion_succeeded = True
-                                except (AttributeError, TypeError):
-                                    pass
-
-                            # Strategy 4: JSON serialization roundtrip
-                            if not conversion_succeeded:
-                                try:
-                                    import json
-
-                                    if hasattr(args_obj, "SerializeToString"):
-                                        # Try to serialize and parse
-                                        from google.protobuf.json_format import MessageToJson
-
-                                        json_str = MessageToJson(args_obj)
-                                        args = json.loads(json_str)
-                                        conversion_succeeded = True
-                                except (ImportError, TypeError, ValueError, AttributeError):
-                                    pass
-
-                            # CRITICAL: Log warning if all strategies failed
-                            if not conversion_succeeded:
-                                logger.warning(
-                                    f"All protobuf conversion strategies failed for tool '{name}'. "
-                                    f"Args type: {type(args_obj).__name__}. "
-                                    "Tool call will execute with empty arguments."
-                                )
-                                args = {}
-
-                        # Check if known tool (case-insensitive)
-                        if name in KNOWN_TOOLS or name.lower() in KNOWN_TOOLS:
-                            results.append((name, args))
+                name = getattr(fc, "name", None)
+                if name:
+                    # Convert args (protobuf Struct) to dict using helper
+                    args_obj = getattr(fc, "args", {})
+                    args = ToolCallParser._convert_protobuf_to_dict(args_obj)
+                    results.append((name, args))
 
         return results
 

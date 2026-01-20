@@ -24,7 +24,7 @@ import urllib.parse
 import urllib.request
 from typing import Dict, List, Optional, Tuple
 
-from vertice_cli.tools.base import ToolCategory, ToolResult
+from vertice_cli.tools.base import ToolCategory, ToolResult, Tool
 from vertice_cli.tools.validated import ValidatedTool
 from vertice_cli.tools._parity_utils import (
     HTMLConverter,

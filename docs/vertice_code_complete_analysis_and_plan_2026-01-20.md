@@ -549,3 +549,15 @@ Most competitive agents converge on 6 “skill families”:
 ### Next Steps (Phase 3):
 - Real external MCP connections.
 - Tool caching.
+
+
+---
+
+## Execution Log (2026-01-20) - Observability Fix
+
+**Status:** Observability warning resolved.
+
+### Achievements:
+1. **Dependency Resolution:** Added `opentelemetry-api` and `opentelemetry-sdk` to `pyproject.toml`.
+2. **Validation:** Verified `vertice serve` starts without warnings and traces are enabled.
+3. **Compliance:** Meets Code Constitution **Measurable Quality** principle.

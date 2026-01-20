@@ -255,45 +255,32 @@ class ToolExecutor:
         args: Dict[str, Any],
     ) -> str:
         """Format tool result for display."""
-        if tool_name == "read_file":
-            return f"✓ Read {result.metadata.get('path', 'file')} ({result.metadata.get('lines', '?')} lines)"
 
-        elif tool_name in ("write_file", "edit_file"):
+        formatters = {
+            "read_file": lambda r: f"✓ Read {r.metadata.get('path', 'file')} ({r.metadata.get('lines', '?')} lines)",
+            "search_files": lambda r: f"✓ Found {r.metadata.get('count', 0)} matches",
+            "bash_command": lambda r: f"✓ Exit code: {r.data.get('exit_code', 0)}",
+            "git_status": lambda _: "✓ Git status retrieved",
+            "git_diff": lambda r: "✓ Diff shown" if r.data else "No changes",
+            "ls": lambda r: f"✓ {r.metadata.get('count', 0)} items",
+            "pwd": lambda _: "✓ Current directory shown",
+            "cd": lambda r: f"✓ {r.data}",
+            "cat": lambda r: f"✓ Displayed {r.metadata.get('lines', '?')} lines",
+        }
+
+        if tool_name in ("write_file", "edit_file"):
             msg = f"✓ {result.data}"
             if result.metadata.get("backup"):
                 msg += f"\n  Backup: {result.metadata['backup']}"
             return msg
 
-        elif tool_name == "search_files":
-            count = result.metadata.get("count", 0)
-            return f"✓ Found {count} matches"
+        if tool_name == "list_directory":
+            f_count = result.metadata.get("file_count", 0)
+            d_count = result.metadata.get("dir_count", 0)
+            return f"✓ Listed {f_count} files, {d_count} directories"
 
-        elif tool_name == "bash_command":
-            exit_code = result.data.get("exit_code", 0)
-            return f"✓ Exit code: {exit_code}"
+        formatter = formatters.get(tool_name)
+        if formatter:
+            return formatter(result)
 
-        elif tool_name == "git_status":
-            return "✓ Git status retrieved"
-
-        elif tool_name == "git_diff":
-            return "✓ Diff shown" if result.data else "No changes"
-
-        elif tool_name == "list_directory":
-            file_count = result.metadata.get("file_count", 0)
-            dir_count = result.metadata.get("dir_count", 0)
-            return f"✓ Listed {file_count} files, {dir_count} directories"
-
-        elif tool_name == "ls":
-            return f"✓ {result.metadata.get('count', 0)} items"
-
-        elif tool_name == "pwd":
-            return "✓ Current directory shown"
-
-        elif tool_name == "cd":
-            return f"✓ {result.data}"
-
-        elif tool_name == "cat":
-            return f"✓ Displayed {result.metadata.get('lines', '?')} lines"
-
-        else:
-            return f"✓ {result.data}"
+        return f"✓ {result.data}"

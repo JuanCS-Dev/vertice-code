@@ -210,12 +210,12 @@ async def test_no_degradation_under_sustained_load():
 
     # Assertions
     assert results["errors"] == 0, f"Errors occurred: {results['raw_errors']}"
-    assert not results["has_performance_degradation"], (
-        f"Performance degraded {results['latency_degradation_pct']:.1f}% (Q1={results['q1_mean_latency_ms']:.2f}ms → Q4={results['q4_mean_latency_ms']:.2f}ms)"
-    )
-    assert not results["has_memory_leak"], (
-        f"Memory leak detected: +{results['memory_growth_mb']:.1f}MB"
-    )
+    assert not results[
+        "has_performance_degradation"
+    ], f"Performance degraded {results['latency_degradation_pct']:.1f}% (Q1={results['q1_mean_latency_ms']:.2f}ms → Q4={results['q4_mean_latency_ms']:.2f}ms)"
+    assert not results[
+        "has_memory_leak"
+    ], f"Memory leak detected: +{results['memory_growth_mb']:.1f}MB"
     assert results["is_stable"], "System is not stable under load"
 
     print("\n✅ STABLE UNDER SUSTAINED LOAD - No degradation or leaks")

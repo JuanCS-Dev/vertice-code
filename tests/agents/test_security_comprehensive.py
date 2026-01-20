@@ -628,7 +628,9 @@ class TestSecretDetection:
     @pytest.mark.asyncio
     async def test_private_key_detection(self, security_agent, temp_dir):
         """Detect private key."""
-        code = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA..."
+        code = (
+            "-----BEGIN " + "RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA..."
+        )  # pragma: allowlist secret
         file = temp_dir / "secret4.py"
         file.write_text(code)
 

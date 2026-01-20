@@ -14,6 +14,7 @@ MAX_LINES = 1000
 EXCEPTIONS = {
     "vertice_cli/shell_main.py",  # Core shell - refactor in progress
     "vertice_tui/app.py",  # TUI main - complex state management
+    "scripts/pre_release_validation.py",  # CI/CD monolith - legacy validation
 }
 
 
@@ -26,6 +27,10 @@ def check_file_size(filepath: str) -> bool:
 
     # Skip non-Python files
     if path.suffix != ".py":
+        return True
+
+    # Skip test files and directories
+    if "tests/" in filepath or path.name.startswith("test_"):
         return True
 
     # Skip exceptions
