@@ -485,8 +485,8 @@ Most competitive agents converge on 6 “skill families”:
 - [x] Observability: per-request correlation id propagated through tool calls and displayed in UI debug view.
 
 ## 16) Phase 4: Polish & Optimization (Weeks 7–8)
-- [ ] Consolidate legacy CLI (`cli_app.py`) vs unified CLI (`main.py`) and document “one true CLI”.
-- [ ] Improve docs: one “MCP & Tools Guide” that explains:
+- [x] Consolidate legacy CLI (`cli_app.py`) vs unified CLI (`main.py`) and document “one true CLI”.
+- [x] Improve docs: one “MCP & Tools Guide” that explains:
   - how to add a tool once and surface it everywhere
   - how to expose it via MCP safely
   - how to test it
@@ -573,11 +573,19 @@ Most competitive agents converge on 6 “skill families”:
 
 ---
 
-## Execution Log (2026-01-20) - Observability Fix
+## Execution Log (2026-01-20) - Phase 4 Complete
 
-**Status:** Observability warning resolved.
+**Status:** Phase 4 (Polish & Optimization) tasks marked as DONE.
 
 ### Achievements:
-1. **Dependency Resolution:** Added `opentelemetry-api` and `opentelemetry-sdk` to `pyproject.toml`.
-2. **Validation:** Verified `vertice serve` starts without warnings and traces are enabled.
-3. **Compliance:** Meets Code Constitution **Measurable Quality** principle.
+1. **Unified CLI:**
+   - Ported `explain`, `generate`, `sessions` (list/show/delete/cleanup), and `config` commands to `src/vertice_cli/main.py`.
+   - Used `Bridge` architecture for consistency across TUI and CLI.
+   - Added safety validations (`validate_output_path`) to file writing operations.
+2. **Legacy CLI Deprecation:**
+   - Updated `src/vertice_cli/cli_app.py` to display a visible deprecation warning advising users to switch to the unified `vertice` command.
+3. **Documentation:**
+   - Created `docs/MCP_AND_TOOLS_GUIDE.md` as the definitive reference for adding tools, configuring the MCP server, and testing.
+
+### Project Status:
+**ALL PHASES COMPLETE.** The Vertice CLI/TUI and MCP architecture have been successfully refactored, unified, and documented in accordance with the 2026-01-20 Plan.

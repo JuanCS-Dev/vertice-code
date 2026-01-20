@@ -1,11 +1,22 @@
-"""Command-line interface for qwen-dev-cli."""
+"""Command-line interface for qwen-dev-cli.
+
+DEPRECATED: This module is deprecated and will be removed in v2.0.
+Please use the unified 'vertice' command instead.
+"""
+
+import warnings
+from rich.console import Console
+
+console = Console()
+console.print("[bold red]WARNING: This CLI entry point is DEPRECATED.[/bold red]")
+console.print("Please use the unified [bold cyan]vertice[/bold cyan] command instead.")
+console.print("Example: [green]vertice --help[/green]\n")
 
 import asyncio
 import json
 from pathlib import Path
 from typing import Optional, List
 import typer
-from rich.console import Console
 from rich.markdown import Markdown
 
 from rich.panel import Panel
@@ -19,7 +30,7 @@ from vertice_cli.orchestration.squad import DevSquad
 
 app = typer.Typer(
     name="vertice-cli",
-    help="Vértice - Sovereign Intelligence & Tactical Execution",
+    help="Vértice - Sovereign Intelligence & Tactical Execution (DEPRECATED - use 'vertice')",
     add_completion=False,
 )
 
