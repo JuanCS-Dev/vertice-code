@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from vertice_cli.tools.base import ToolRegistry
 
 # SCALE & SUSTAIN Phase 2.1: Use canonical resilience module
-from vertice_cli.core.providers.resilience import CircuitBreaker, CircuitBreakerConfig
+from vertice_cli.providers.resilience import CircuitBreaker, CircuitBreakerConfig
 from vertice_cli.core.errors.types import CircuitState
 
 

@@ -5,8 +5,8 @@ Usa ADC (Application Default Credentials) - sem necessidade de API key.
 Inferência via Vertex AI, não Google AI Studio.
 
 Modelos disponíveis (2026):
-- gemini-2.5-pro (DEFAULT - best quality for code, 128K context)
-- gemini-2.5-flash (fast + quality balance)
+- gemini-3-pro (DEFAULT - best quality for code, 128K context)
+- gemini-3-flash (fast + quality balance)
 - gemini-3-pro-preview (FUTURE - reasoning-first, 1M context, thinking_level)
 - gemini-3-flash-preview (FUTURE - ultra-fast, 1M context, multimodal)
 """
@@ -54,7 +54,7 @@ class VertexAIProvider:
     Vertex AI Gemini Provider - Enterprise-grade inference.
 
     Hybrid Architecture:
-    - Legacy SDK (v2): gemini-2.5-* models
+    - Legacy SDK (v2): gemini-3-* models
     - Native SDK (v3): gemini-3-* models (via google-genai)
     """
 
@@ -65,8 +65,8 @@ class VertexAIProvider:
         "gemini-3-flash": "gemini-3-flash-preview",
         "gemini-3-pro": "gemini-3-pro-preview",
         # Legacy Mappings (Forced Upgrade)
-        "gemini-2.5-flash": "gemini-3-flash-preview",
-        "gemini-2.5-pro": "gemini-3-pro-preview",
+        "gemini-3-flash": "gemini-3-flash-preview",
+        "gemini-3-pro": "gemini-3-pro-preview",
     }
 
     def __init__(
@@ -185,20 +185,41 @@ class VertexAIProvider:
                 contents.append(
                     types.Content(role=role, parts=[types.Part.from_text(text=msg["content"])])
                 )
+            def _extract_text(item: Any) -> str:
+                # Prefer chunk.text if available (avoids duplication)
+                direct = getattr(item, "text", None)
+                if direct:
+                    return direct
+                # Fallback: extract from candidates.content.parts
+                candidates = getattr(item, "candidates", None)
+                if candidates:
+                    for cand in candidates:
+                        content = getattr(cand, "content", None)
+                        parts = getattr(content, "parts", None) if content else None
+                        if not parts:
+                            continue
+                        for part in parts:
+                            part_text = getattr(part, "text", None)
+                            if part_text:
+                                return part_text
+                return ""
 
-            loop = asyncio.get_running_loop()
-
-            def _get_stream():
-                return self._genai_client.models.generate_content_stream(
-                    model=self.model_id, contents=contents, config=config
+            stream = await self._genai_client.aio.models.generate_content_stream(
+                model=self.model_id,
+                contents=contents,
+                config=config,
+            )
+            if stream is None:
+                raise RuntimeError(
+                    "google-genai returned None for aio.generate_content_stream "
+                    "(likely auth/config issue)"
                 )
 
-            stream_iter = await loop.run_in_executor(None, _get_stream)
-
-            for chunk in stream_iter:
-                if chunk.text:
-                    yield chunk.text
-                    await asyncio.sleep(0)  # Breathe
+            async for chunk in stream:
+                text = _extract_text(chunk)
+                if text:
+                    yield text
+                await asyncio.sleep(0)
 
         except Exception as e:
             logger.error(f"Gemini 3 Stream Error: {e}")
@@ -252,7 +273,7 @@ class VertexAIProvider:
                     yield chunk.text
 
         except Exception as e:
-            logger.error(f"Gemini 2.5 Stream Error: {e}")
+            logger.error(f"Gemini 3 Stream Error: {e}")
             yield f"[Vertex Error: {e}]"
 
     def _convert_tools_v2(self, tools):

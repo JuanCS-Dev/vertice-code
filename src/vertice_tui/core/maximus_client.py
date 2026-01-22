@@ -11,7 +11,7 @@ from typing import AsyncIterator, Optional, Dict, Any, List
 from dataclasses import dataclass
 from datetime import datetime
 
-from vertice_cli.core.providers.maximus_provider import MaximusProvider, MaximusConfig
+from vertice_cli.providers.maximus_provider import MaximusProvider, MaximusConfig
 
 
 @dataclass

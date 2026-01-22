@@ -28,8 +28,8 @@ logger = logging.getLogger(__name__)
 MIN_TOKENS = {
     "gemini-3-pro-preview": 4096,
     "gemini-3-flash-preview": 1024,
-    "gemini-2.5-flash": 1024,
-    "gemini-2.5-pro": 4096,
+    "gemini-3-flash": 1024,
+    "gemini-3-pro": 4096,
     "default": 2048,
 }
 
@@ -38,8 +38,8 @@ MIN_TOKENS = {
 MODEL_CACHE_LIMITS = {
     "gemini-3-pro-preview": 1000000,  # 1M Context
     "gemini-3-flash-preview": 1000000,
-    "gemini-2.5-pro": 32768,
-    "gemini-2.5-flash": 8192,
+    "gemini-3-pro": 32768,
+    "gemini-3-flash": 8192,
 }
 
 

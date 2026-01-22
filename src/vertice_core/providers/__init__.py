@@ -63,7 +63,7 @@ class ProviderRegistry:
     Usage:
         # In vertice_cli (registers providers):
         from vertice_core.providers import registry
-        from vertice_cli.core.providers.groq import GroqProvider
+        from vertice_cli.providers.groq import GroqProvider
 
         registry.register("groq", GroqProvider)
 

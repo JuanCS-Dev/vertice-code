@@ -183,7 +183,7 @@ from .validation import *
 
 # PERFORMANCE OPTIMIZATION (Jan 2026):
 # Lazy load providers to avoid ~1.5s import of google.cloud.aiplatform
-# Use: from vertice_cli.core.providers import VertexAIProvider
+# Use: from vertice_cli.providers import VertexAIProvider
 # from .providers import *  # DISABLED - causes 1.5s startup delay
 
 from .governance_pipeline import *

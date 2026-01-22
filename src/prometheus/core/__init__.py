@@ -2,7 +2,7 @@
 PROMETHEUS Core Module.
 
 Contains the main orchestrator and subsystems:
-- LLM Client (Gemini 2.0 Flash)
+- LLM Client (Gemini 3 Flash)
 - World Model (SimuRA-inspired)
 - Tool Factory (AutoTools-inspired)
 - Reflection Engine (Reflexion-inspired)

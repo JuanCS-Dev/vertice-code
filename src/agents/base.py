@@ -5,10 +5,13 @@ Base class providing common functionality for all agents.
 
 Features:
 - ObservabilityMixin: OpenTelemetry-compatible tracing and metrics
+- ResilienceMixin: Retry, circuit breaker, rate limiting
+- CachingMixin: Semantic and exact-match caching
 
 References:
 - OpenTelemetry GenAI Semantic Conventions 2025
 - https://opentelemetry.io/blog/2025/ai-agent-observability/
+- AWS Architecture: Build Resilient Generative AI Agents
 """
 
 from __future__ import annotations
@@ -17,11 +20,13 @@ import logging
 from typing import Optional
 
 from vertice_core.observability import ObservabilityMixin
+from vertice_core.resilience import ResilienceMixin
+from vertice_core.caching import CachingMixin
 
 logger = logging.getLogger(__name__)
 
 
-class BaseAgent(ObservabilityMixin):
+class BaseAgent(ResilienceMixin, CachingMixin, ObservabilityMixin):
     """
     Base class for all Vertice agents.
 
@@ -29,6 +34,8 @@ class BaseAgent(ObservabilityMixin):
     - Distributed tracing (trace_operation, trace_llm_call, trace_tool)
     - Metrics collection (record_tokens, record_latency, record_error)
     - Export capabilities (export_traces, export_metrics, get_prometheus_metrics)
+    - Resilience: retry with backoff, circuit breaker, rate limiting
+    - Caching: semantic and exact-match caching for LLM responses
 
     Usage:
         class MyAgent(SpecializedMixin, BaseAgent):

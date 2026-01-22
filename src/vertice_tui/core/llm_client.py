@@ -73,7 +73,7 @@ class GeminiClient:
         max_output_tokens: Maximum response length
 
     Example:
-        client = GeminiClient(api_key="...", model="gemini-2.5-pro")
+        client = GeminiClient(api_key="...", model="gemini-3-pro")
         async for chunk in client.stream("Hello!"):
             print(chunk, end="")
     """
@@ -96,7 +96,7 @@ class GeminiClient:
 
         Args:
             api_key: API key (defaults to GEMINI_API_KEY or GOOGLE_API_KEY env var)
-            model: Model name (defaults to GEMINI_MODEL env var or gemini-2.5-pro)
+            model: Model name (defaults to GEMINI_MODEL env var or gemini-3-pro)
             temperature: Generation temperature (0-2, default 1.0)
             max_output_tokens: Maximum response tokens (default 8192)
             circuit_breaker_config: Optional circuit breaker configuration

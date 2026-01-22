@@ -29,7 +29,7 @@ class GeminiStreamer:
     Includes timeout protection and chunk stall detection.
 
     Example:
-        >>> config = GeminiStreamConfig(api_key="...", model_name="gemini-2.5-pro")
+        >>> config = GeminiStreamConfig(api_key="...", model_name="gemini-3-pro")
         >>> streamer = GeminiStreamer(config)
         await streamer.initialize()
 

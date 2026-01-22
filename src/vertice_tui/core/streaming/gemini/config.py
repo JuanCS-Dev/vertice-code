@@ -55,7 +55,7 @@ class GeminiStreamConfig:
     - reconnect_base_delay: Base delay for exponential backoff
     """
 
-    model_name: str = "gemini-2.5-pro"
+    model_name: str = "gemini-3-pro"
     api_key: str = ""
     temperature: float = 1.0
     max_output_tokens: int = 8192

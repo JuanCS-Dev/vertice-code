@@ -341,7 +341,7 @@ class ClaudeParityHandler:
                         view.add_error(
                             f"Provider `{provider_name}` not available.\n\n"
                             f"**Available providers:** {', '.join(available)}\n\n"
-                            f"**Gemini models:** gemini-2.5-pro, gemini-3-pro, etc."
+                            f"**Gemini models:** gemini-3-pro, gemini-3-pro, etc."
                         )
                         return
 

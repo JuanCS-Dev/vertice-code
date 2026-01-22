@@ -227,7 +227,7 @@ SAFETY_SECTION: str = """
 """
 
 # =============================================================================
-# SECTION 10: RESPONSE STYLE - Optimized for Gemini 2.5+ (Nov 2025)
+# SECTION 10: RESPONSE STYLE - Optimized for Gemini 3+ (Nov 2025)
 # =============================================================================
 
 STYLE_SECTION: str = """

@@ -9,7 +9,7 @@ from rich.markdown import Markdown
 from dotenv import load_dotenv
 
 from vertice_cli.shell.executor import ShellExecutor
-from vertice_cli.core.providers.gemini import GeminiProvider
+from vertice_cli.providers.gemini import GeminiProvider
 
 # Load .env
 env_path = Path(__file__).parent.parent.parent / ".env"

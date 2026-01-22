@@ -19,8 +19,8 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from vertice_cli.core.providers.gemini import GeminiProvider
-from vertice_cli.core.providers.groq import GroqProvider
+from vertice_cli.providers.gemini import GeminiProvider
+from vertice_cli.providers.groq import GroqProvider
 from vertice_cli.core.errors.types import AuthenticationError
 from vertice_tui.core.interfaces import IAuthenticationManager
 

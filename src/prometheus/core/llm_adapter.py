@@ -49,7 +49,7 @@ class PrometheusLLMAdapter:
 
     Usage:
         # In PrometheusIntegratedAgent
-        from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+        from vertice_cli.providers.vertex_ai import VertexAIProvider
         from prometheus.core.llm_adapter import PrometheusLLMAdapter
 
         vertex_provider = VertexAIProvider(model_name="flash")
@@ -269,7 +269,7 @@ async def create_prometheus_adapter(
     Returns:
         Configured PrometheusLLMAdapter instance
     """
-    from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+    from vertice_cli.providers.vertex_ai import VertexAIProvider
 
     vertex_provider = VertexAIProvider(
         project=project,

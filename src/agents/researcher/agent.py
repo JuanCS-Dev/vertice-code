@@ -22,13 +22,11 @@ import logging
 from .types import ResearchReport
 from .agentic_rag import AgenticRAGMixin
 from agents.base import BaseAgent
-from vertice_core.resilience import ResilienceMixin
-from vertice_core.caching import CachingMixin
 
 logger = logging.getLogger(__name__)
 
 
-class ResearcherAgent(ResilienceMixin, CachingMixin, AgenticRAGMixin, BaseAgent):
+class ResearcherAgent(AgenticRAGMixin, BaseAgent):
     """
     Research Specialist - The Knowledge Hunter
 

@@ -5,7 +5,11 @@
 **"The Agent That Builds Itself"**
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Gemini 2.0](https://img.shields.io/badge/LLM-Gemini%202.0%20Flash-orange.svg)](https://ai.google.dev/)
+[![Gemini 3](https://img.shields.io/badge/LLM-Gemini%203%20Pro-orange.svg)](https://ai.google.dev/)
+│   ├── llm_client.py       # Gemini API client (Vertex AI)
+export GOOGLE_API_KEY="your-gemini-api-key"
+        llm_client: Optional[GeminiClient] = None,
+- **Google DeepMind** for Gemini 3 Pro
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Hackathon](https://img.shields.io/badge/Hackathon-Blaxel%20Choice-purple.svg)](https://blaxel.ai)
 [![Tests](https://img.shields.io/badge/Tests-30%2F30%20Passing-brightgreen.svg)](#-validated-test-results)
@@ -899,7 +903,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## 🙏 Acknowledgments
 
-- **Google DeepMind** for Gemini 2.0 Flash
+- **Google DeepMind** for Gemini 3 Flash
 - **Anthropic** for multi-agent orchestration research
 - **Research community** for the foundational papers
 - **Blaxel** for the hackathon platform

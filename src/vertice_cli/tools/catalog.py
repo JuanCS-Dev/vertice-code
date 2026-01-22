@@ -151,7 +151,7 @@ class ToolCatalog:
         try:
             if provider is None:
                 # Try to auto-initialize if not provided
-                from vertice_cli.core.providers.prometheus_provider import (
+                from vertice_cli.providers.prometheus_provider import (
                     PrometheusProvider,
                 )
 

@@ -201,7 +201,7 @@ class VerticeApp(App):
             "gpt-4-turbo": 128_000,
             "claude-3": 200_000,
             "claude-3.5": 200_000,
-            "gemini-2": 1_000_000,
+            "gemini-3": 1_000_000,
             "gemini-3": 2_000_000,
         }
         # Default to 32k for unknown models

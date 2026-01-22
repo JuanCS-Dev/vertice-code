@@ -12,7 +12,7 @@ by forgetting context that doesn't help remaining tasks.
 References:
 - "The Complexity Trap: Simple Observation Masking Is as Efficient as
    LLM Summarization for Agent Context Management" (2025)
-- Tested on Gemini 2.5 Flash, Qwen 3 (480B, 32B)
+- Tested on Gemini 3 Flash, Qwen 3 (480B, 32B)
 - 4 of 5 models performed BETTER with masking vs baseline
 
 Phase 10: Sprint 4 - Context Optimization

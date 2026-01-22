@@ -26,13 +26,11 @@ from .types import (
 )
 from .deep_think import DeepThinkMixin
 from agents.base import BaseAgent
-from vertice_core.resilience import ResilienceMixin
-from vertice_core.caching import CachingMixin
 
 logger = logging.getLogger(__name__)
 
 
-class ReviewerAgent(ResilienceMixin, CachingMixin, DeepThinkMixin, BaseAgent):
+class ReviewerAgent(DeepThinkMixin, BaseAgent):
     """
     Code Review Specialist - The Quality Guardian
 

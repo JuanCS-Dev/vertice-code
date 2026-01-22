@@ -15,7 +15,7 @@ This adapter allows other agents to use Prometheus capabilities through MCP:
 import logging
 from typing import Optional
 from vertice_cli.integrations.mcp.shell_handler import ShellManager
-from vertice_cli.core.providers import PrometheusProvider
+from vertice_cli.providers import PrometheusProvider
 from vertice_cli.integrations.skills.prometheus_skills import PrometheusSkillsProvider
 
 logger = logging.getLogger(__name__)

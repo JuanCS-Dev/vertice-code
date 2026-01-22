@@ -191,16 +191,17 @@ class VertexAIDiagnostic:
 
             # Check for invalid location
             location = os.getenv("VERTEX_AI_LOCATION", "")
-            if location == "global":
-                step.status = "FAIL"
-                step.error = "VERTEX_AI_LOCATION='global' is INVALID. Use 'us-central1' or another valid region."
-                step.error_type = "InvalidLocation"
-            elif missing:
+            # Gemini 3 requires 'global', so we must allow it.
+            # Legacy assumption that global is invalid is removed.
+            if missing:
                 step.status = "FAIL"
                 step.error = f"Missing required: {', '.join(missing)}"
                 step.error_type = "MissingEnvironment"
             else:
-                step.details = {"project": self.env.get("GOOGLE_CLOUD_PROJECT")}
+                step.details = {
+                    "project": self.env.get("GOOGLE_CLOUD_PROJECT"),
+                    "location": location
+                }
 
         except Exception as e:
             step.status = "FAIL"
@@ -222,9 +223,10 @@ class VertexAIDiagnostic:
             project = os.getenv("GOOGLE_CLOUD_PROJECT")
             location = os.getenv("VERTEX_AI_LOCATION", "us-central1")
 
-            # Fix global location
-            if location == "global":
-                location = "us-central1"
+            # Legacy SDK might not support global depending on version/op,
+            # but we shouldn't force override it if user explicitly set it.
+            # if location == "global":
+            #     location = "us-central1"
 
             vertexai.init(project=project, location=location)
 
@@ -254,9 +256,9 @@ class VertexAIDiagnostic:
         step = DiagnosticStep(name="Model Availability", status="OK", duration_ms=0)
 
         models_to_test = [
-            "gemini-2.0-flash",
-            "gemini-1.5-flash",
-            "gemini-1.5-pro",
+            "gemini-3-flash",
+            "gemini-3-flash",
+            "gemini-3-pro",
         ]
 
         try:
@@ -303,8 +305,8 @@ class VertexAIDiagnostic:
 
             # Use o primeiro modelo disponível
             prev_step = self.steps[-1]
-            available = prev_step.details.get("available_models", ["gemini-1.5-flash"])
-            model_name = available[0] if available else "gemini-1.5-flash"
+            available = prev_step.details.get("available_models", ["gemini-3-flash"])
+            model_name = available[0] if available else "gemini-3-flash"
 
             model = GenerativeModel(model_name)
 
@@ -382,7 +384,7 @@ class VertexAIDiagnostic:
             elif step.name == "Inference Test":
                 if step.details.get("http_code") == 404:
                     recs.append(
-                        "🔧 Modelo não encontrado. Tente: gemini-1.5-flash ou gemini-1.5-pro"
+                        "🔧 Modelo não encontrado. Tente: gemini-3-flash ou gemini-3-pro"
                     )
                 elif step.details.get("http_code") == 403:
                     recs.append("🔧 Adicione role: `roles/aiplatform.user` ao service account")

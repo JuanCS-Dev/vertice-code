@@ -1,7 +1,7 @@
 """
 Gemini SDK Streamer - google-generativeai implementation.
 
-Optimized for Gemini 2.5+ (Nov 2025).
+Optimized for Gemini 3+ (Nov 2025).
 
 Follows CODE_CONSTITUTION: <500 lines, 100% type hints
 """
@@ -23,7 +23,7 @@ class GeminiSDKStreamer(BaseStreamer):
     """
     Streamer using google-generativeai SDK.
 
-    OPTIMIZED for Gemini 2.5+ (Nov 2025):
+    OPTIMIZED for Gemini 3+ (Nov 2025):
     - Uses native system_instruction parameter
     - Temperature locked at 1.0 to prevent looping
     - Anti-repetition instructions embedded
@@ -48,12 +48,12 @@ class GeminiSDKStreamer(BaseStreamer):
             self._genai = genai
             genai.configure(api_key=self.config.api_key)
 
-            # CRITICAL: Temperature MUST be 1.0 for Gemini 2.5+
+            # CRITICAL: Temperature MUST be 1.0 for Gemini 3+
             safe_temperature = 1.0
             if self.config.temperature != 1.0:
                 logger.warning(
                     f"Temperature {self.config.temperature} overridden to 1.0 "
-                    "to prevent Gemini 2.5+ looping behavior"
+                    "to prevent Gemini 3+ looping behavior"
                 )
 
             self._generation_config = genai.GenerationConfig(

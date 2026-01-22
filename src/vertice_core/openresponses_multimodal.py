@@ -110,7 +110,7 @@ class InputVideoContent:
     """
     Conteúdo de vídeo no input do usuário.
 
-    Suportado por modelos como Gemini 1.5/2.0/3.0.
+    Suportado por modelos como Gemini 3/2.0/3.0.
     """
 
     type: Literal["input_video"] = "input_video"

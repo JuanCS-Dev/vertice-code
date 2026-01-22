@@ -89,7 +89,7 @@ class PrometheusProvider:
 
         # Stream through PROMETHEUS orchestrator
         if self._orchestrator and hasattr(self._orchestrator, "execute"):
-            async for chunk in self._orchestrator.execute(full_prompt):
+            async for chunk in self._orchestrator.execute(full_prompt, stream=True):
                 yield chunk
         else:
             yield "Error: Prometheus Orchestrator not initialized or missing execute method."

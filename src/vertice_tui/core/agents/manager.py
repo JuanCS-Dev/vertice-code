@@ -44,7 +44,7 @@ class AgentManager:
         # CRITICAL: Register providers before any agent is created
         # This was missing and caused "Provider not available" errors
         try:
-            from vertice_cli.core.providers.register import ensure_providers_registered
+            from vertice_cli.providers.register import ensure_providers_registered
 
             ensure_providers_registered()
         except ImportError:

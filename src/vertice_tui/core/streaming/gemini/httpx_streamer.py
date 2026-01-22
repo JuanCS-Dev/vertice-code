@@ -22,7 +22,7 @@ class GeminiHTTPXStreamer(BaseStreamer):
     """
     Streamer using httpx direct API call with SSE.
 
-    OPTIMIZED for Gemini 2.5+ (Nov 2025):
+    OPTIMIZED for Gemini 3+ (Nov 2025):
     - Uses systemInstruction in API payload (native)
     - Temperature locked at 1.0 to prevent looping
     - Anti-repetition instructions embedded
@@ -80,7 +80,7 @@ class GeminiHTTPXStreamer(BaseStreamer):
         if system_prompt:
             full_system_instruction = system_prompt + GEMINI_OUTPUT_RULES
 
-        # CRITICAL: Temperature MUST be 1.0 for Gemini 2.5+
+        # CRITICAL: Temperature MUST be 1.0 for Gemini 3+
         payload: Dict[str, Any] = {
             "contents": contents,
             "generationConfig": {

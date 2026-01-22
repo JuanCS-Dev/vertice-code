@@ -40,7 +40,7 @@ class GeminiProvider:
             logger.warning("GeminiProvider: API Key ignored. Using Vertex AI (ADC).")
 
         # Map legacy model names if passed explicitly
-        if model_name == "gemini-1.5-pro":
+        if model_name == "gemini-3-pro":
             model_name = "gemini-3-pro-preview"
 
         self.model_name = model_name

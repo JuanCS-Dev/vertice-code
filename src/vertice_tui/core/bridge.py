@@ -128,7 +128,7 @@ class Bridge(ProtocolBridgeMixin):
 
         # Ensure providers are registered (dependency injection)
         try:
-            from vertice_cli.core.providers.register import ensure_providers_registered
+            from vertice_cli.providers.register import ensure_providers_registered
 
             ensure_providers_registered()
         except ImportError:
@@ -710,8 +710,8 @@ Working directory: {os.getcwd()}"""
         return [
             "gemini-3-flash-preview",
             "gemini-3-pro-preview",
-            "gemini-2.5-flash",
-            "gemini-2.5-pro",
+            "gemini-3-flash",
+            "gemini-3-pro",
         ]
 
     def get_current_model(self) -> str:

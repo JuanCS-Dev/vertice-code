@@ -462,7 +462,7 @@ class VerticeContainer(BaseContainer):
     @classmethod
     def router(cls):
         """Get router singleton."""
-        from vertice_cli.core.providers.vertice_router import get_router
+        from vertice_cli.providers.vertice_router import get_router
 
         return get_router()
 

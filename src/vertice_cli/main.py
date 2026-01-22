@@ -162,7 +162,7 @@ def main(
     """
     # Register providers with vertice_core (Dependency Injection)
     try:
-        from vertice_cli.core.providers.register import ensure_providers_registered
+        from vertice_cli.providers.register import ensure_providers_registered
 
         ensure_providers_registered()
     except ImportError:

@@ -25,13 +25,11 @@ from .types import (
 )
 from .three_loops import ThreeLoopsMixin
 from agents.base import BaseAgent
-from vertice_core.resilience import ResilienceMixin
-from vertice_core.caching import CachingMixin
 
 logger = logging.getLogger(__name__)
 
 
-class ArchitectAgent(ResilienceMixin, CachingMixin, ThreeLoopsMixin, BaseAgent):
+class ArchitectAgent(ThreeLoopsMixin, BaseAgent):
     """
     Architecture Specialist - The System Designer
 

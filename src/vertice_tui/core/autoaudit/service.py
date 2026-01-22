@@ -207,9 +207,93 @@ class AutoAuditService:
             executor.set_audit_mode(False)
         except Exception:
             pass
+        
+        # --- PROMETHEUS SELF-HEALING ---
+        if failed > 0 or critical > 0:
+             await self._trigger_self_healing(self.report)
 
         self._is_running = False
         return self.report
+
+    async def _trigger_self_healing(self, report: AuditReport) -> None:
+        """
+        Trigger Self-Healing Workflow:
+        1. Prometheus: Diagnose root cause and recommend fix.
+        2. CoderAgent: Apply the recommended fix to the codebase.
+        """
+        from vertice_tui.core.prometheus_client import PrometheusClient
+        from agents.coder.agent import CoderAgent
+        from agents.coder.types import CodeGenerationRequest
+
+        self.view.add_system_message("\n🚑 **Prometheus Self-Healing Triggered**")
+
+        # --- PHASE 1: DIAGNOSIS (Prometheus) ---
+        failures = []
+        for r in report.results:
+            if r.status != "SUCCESS" and r.status != "SKIPPED":
+                failures.append(f"- **{r.scenario_id}** ({r.status}): {r.error_message}")
+                if r.exception_trace:
+                    short_trace = "\n".join(r.exception_trace.splitlines()[-10:])
+                    failures.append(f"  Trace:\n  ```\n  {short_trace}\n  ```")
+        
+        failure_text = "\n".join(failures)
+
+        diagnostic_prompt = f"""
+AUTO-AUDIT DIAGNOSTIC REQUEST
+
+🚨 DETECTED FAILURES:
+{failure_text}
+
+TASK:
+1. Analyze the root cause.
+2. Simulate potential fixes via World Model.
+3. OUTPUT A CONCISE FIX PLAIN (No Code Yet) for the Coder Agent.
+"""
+        
+        self.view.add_response_panel(
+            "Analyzing failures via Prometheus Orchestrator...", 
+            title="🔥 Prometheus Diagnosis"
+        )
+
+        diagnosis_text = ""
+        client = PrometheusClient()
+        async for chunk in client.stream(diagnostic_prompt):
+            self.view.append_chunk(chunk)
+            diagnosis_text += chunk
+
+        # --- PHASE 2: EXECUTION (Coder Agent) ---
+        self.view.add_system_message("\n🛠️ **Coder Agent Activated**")
+        self.view.add_response_panel(
+            "Receiving diagnosis and applying fix...", 
+            title="👨‍💻 Coder Agent"
+        )
+
+        coder = CoderAgent()
+        
+        fix_task = f"""
+        CONTEXT: Auto-Audit failed.
+        
+        DIAGNOSIS FROM PROMETHEUS:
+        {diagnosis_text}
+        
+        YOUR MISSION:
+        Apply the fix recommended above.
+        - You MUST use 'edit_file' to modify existing files.
+        - Use 'write_file' only for new files.
+        - Ensure the fix is production-ready.
+        """
+
+        async for chunk in coder.generate(
+            CodeGenerationRequest(
+                description=fix_task,
+                language="python", # Coder adapts to context, but this hints style
+                style="clean",
+                include_tests=False,
+                include_docs=True
+            )
+        ):
+             self.view.append_chunk(chunk)
+
 
     async def _execute_scenario(self, scenario: AuditScenario) -> ScenarioResult:
         """Executa um cenário."""

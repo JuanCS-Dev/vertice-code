@@ -19,9 +19,7 @@ import logging
 from typing import Any, AsyncIterator, Dict, List, Optional
 
 from agents.base import BaseAgent
-from vertice_core.caching import CachingMixin
 from vertice_core.mesh.mixin import HybridMeshMixin
-from vertice_core.resilience import ResilienceMixin
 
 from .bounded_autonomy import BoundedAutonomyMixin
 from .decomposer import TaskDecomposer
@@ -38,9 +36,7 @@ from .types import (
 logger = logging.getLogger(__name__)
 
 
-class OrchestratorAgent(
-    HybridMeshMixin, ResilienceMixin, CachingMixin, BoundedAutonomyMixin, BaseAgent
-):
+class OrchestratorAgent(HybridMeshMixin, BoundedAutonomyMixin, BaseAgent):
     """
     Lead Agent - The Brain of Vertice Agency
 

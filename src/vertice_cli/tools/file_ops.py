@@ -272,32 +272,38 @@ Example: [{"search": "def old_func():", "replace": "def new_func():"}]""",
     async def _execute_validated(
         self,
         path: str,
-        edits: list[dict],
+        edits: Any,  # Use Any to handle potential string/dict variety
         create_backup: bool = True,
         replace_all: bool = False,
         strict: bool = False,
         preview: bool = True,
         console=None,
     ) -> ToolResult:
-        """Edit file with smart search/replace operations.
-
-        Uses layered matching strategy:
-        1. Exact match
-        2. Whitespace-normalized match
-        3. Indentation-flexible match
-        4. Fuzzy line match (80%+ similarity)
-        5. Fuzzy block match (70%+ similarity)
-
-        Args:
-            path: File path to edit
-            edits: List of {search, replace} operations
-            create_backup: Whether to create backup before editing
-            replace_all: If True, replace ALL occurrences (Claude Code parity)
-            strict: If True, only use exact/whitespace matching (no fuzzy)
-            preview: Whether to show preview before applying
-            console: Console for preview display
-        """
+        """Edit file with smart search/replace operations."""
         try:
+            # 1. Argument Sanitization (Boris Cherny: Resilience Pattern)
+            if isinstance(edits, str):
+                import json
+                try:
+                    # Clean the string if it contains markdown or extra whitespace
+                    clean_edits = edits.strip()
+                    if clean_edits.startswith("```json"):
+                        clean_edits = clean_edits.split("```json")[1].split("```")[0].strip()
+                    elif clean_edits.startswith("```"):
+                        clean_edits = clean_edits.split("```")[1].split("```")[0].strip()
+                    
+                    edits = json.loads(clean_edits)
+                except json.JSONDecodeError as e:
+                    logger.error(f"Failed to parse edits JSON: {edits}")
+                    return ToolResult(success=False, error=f"Invalid 'edits' JSON format: {e}")
+            
+            if not isinstance(edits, list):
+                # Handle single edit passed as dict
+                if isinstance(edits, dict):
+                    edits = [edits]
+                else:
+                    return ToolResult(success=False, error=f"Invalid 'edits' type: {type(edits)}. Expected list.")
+
             file_path = Path(path)
 
             if not file_path.exists():

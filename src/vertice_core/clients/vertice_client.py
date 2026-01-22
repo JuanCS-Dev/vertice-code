@@ -16,9 +16,9 @@ from typing import Any, AsyncIterator, Dict, List, Optional, Protocol
 
 logger = logging.getLogger(__name__)
 
-# Priority order: Vertex AI FIRST (Gemini 2.5 Pro - user's available model)
+# Priority order: Vertex AI FIRST (Gemini 3 Pro - user's available model)
 DEFAULT_PRIORITY: List[str] = [
-    "vertex-ai",  # PRIMARY - Gemini 2.5 Pro (user's only available model)
+    "vertex-ai",  # PRIMARY - Gemini 3 Pro (user's only available model)
     "groq",  # Fast free tier fallback
     "cerebras",
     "mistral",

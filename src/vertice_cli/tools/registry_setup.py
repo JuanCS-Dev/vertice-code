@@ -182,7 +182,7 @@ def setup_default_tools(
                 PrometheusGetStatusTool,
                 PrometheusBenchmarkTool,
             )
-            from vertice_cli.core.providers.prometheus_provider import PrometheusProvider
+            from vertice_cli.providers.prometheus_provider import PrometheusProvider
 
             # Initialize provider lazily
             provider = PrometheusProvider()

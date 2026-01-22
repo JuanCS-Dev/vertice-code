@@ -26,13 +26,11 @@ from .types import (
 )
 from .incident_handler import IncidentHandlerMixin
 from agents.base import BaseAgent
-from vertice_core.resilience import ResilienceMixin
-from vertice_core.caching import CachingMixin
 
 logger = logging.getLogger(__name__)
 
 
-class DevOpsAgent(ResilienceMixin, CachingMixin, IncidentHandlerMixin, BaseAgent):
+class DevOpsAgent(IncidentHandlerMixin, BaseAgent):
     """
     DevOps Specialist - The Operator
 

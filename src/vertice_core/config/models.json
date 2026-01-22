@@ -5568,34 +5568,34 @@
       "publisherModelTemplate": "projects/{project}/locations/{location}/publishers/google/models/veo-3.0-generate-preview@default"
     },
     {
-      "name": "publishers/google/models/gemini-2.5-pro",
+      "name": "publishers/google/models/gemini-3-pro",
       "versionId": "default",
       "supportedActions": {
         "openGenerationAiStudio": {
           "references": {
             "us-central1": {
-              "uri": "https://console.cloud.google.com/vertex-ai/generative/multimodal/create/text?model=gemini-2.5-pro"
+              "uri": "https://console.cloud.google.com/vertex-ai/generative/multimodal/create/text?model=gemini-3-pro"
             }
           }
         }
       },
       "launchStage": "GA",
-      "publisherModelTemplate": "projects/{project}/locations/{location}/publishers/google/models/gemini-2.5-pro@default"
+      "publisherModelTemplate": "projects/{project}/locations/{location}/publishers/google/models/gemini-3-pro@default"
     },
     {
-      "name": "publishers/google/models/gemini-2.5-flash",
+      "name": "publishers/google/models/gemini-3-flash",
       "versionId": "default",
       "supportedActions": {
         "openGenerationAiStudio": {
           "references": {
             "us-central1": {
-              "uri": "https://console.cloud.google.com/vertex-ai/generative/multimodal/create/text?model=gemini-2.5-flash"
+              "uri": "https://console.cloud.google.com/vertex-ai/generative/multimodal/create/text?model=gemini-3-flash"
             }
           }
         }
       },
       "launchStage": "GA",
-      "publisherModelTemplate": "projects/{project}/locations/{location}/publishers/google/models/gemini-2.5-flash@default"
+      "publisherModelTemplate": "projects/{project}/locations/{location}/publishers/google/models/gemini-3-flash@default"
     },
     {
       "name": "publishers/google/models/imagen-product-recontext-preview-06-30",
@@ -5649,10 +5649,10 @@
       "publisherModelTemplate": "projects/{project}/locations/{location}/publishers/google/models/veo-3.0-fast-generate-preview@default"
     },
     {
-      "name": "publishers/google/models/gemini-2.5-flash-lite",
+      "name": "publishers/google/models/gemini-3-flash-lite",
       "versionId": "default",
       "launchStage": "GA",
-      "publisherModelTemplate": "projects/{project}/locations/{location}/publishers/google/models/gemini-2.5-flash-lite@default"
+      "publisherModelTemplate": "projects/{project}/locations/{location}/publishers/google/models/gemini-3-flash-lite@default"
     },
     {
       "name": "publishers/google/models/t5gemma",
@@ -5760,22 +5760,22 @@
       "publisherModelTemplate": "projects/{project}/locations/{location}/publishers/google/models/virtual-try-on-preview-08-04@default"
     },
     {
-      "name": "publishers/google/models/gemini-2.5-flash-image-preview",
+      "name": "publishers/google/models/gemini-3-flash-image-preview",
       "versionId": "default",
       "supportedActions": {
         "openGenerationAiStudio": {
           "references": {
             "us-central1": {
-              "uri": "https://console.cloud.google.com/vertex-ai/generative/multimodal/create/text?model=gemini-2.5-flash-image-preview"
+              "uri": "https://console.cloud.google.com/vertex-ai/generative/multimodal/create/text?model=gemini-3-flash-image-preview"
             }
           }
         }
       },
       "launchStage": "PUBLIC_PREVIEW",
-      "publisherModelTemplate": "projects/{project}/locations/{location}/publishers/google/models/gemini-2.5-flash-image-preview@default"
+      "publisherModelTemplate": "projects/{project}/locations/{location}/publishers/google/models/gemini-3-flash-image-preview@default"
     },
     {
-      "name": "publishers/google/models/gemini-2.5-computer-use-preview-10-2025",
+      "name": "publishers/google/models/gemini-3-computer-use-preview-10-2025",
       "versionId": "default",
       "supportedActions": {
         "openNotebook": {
@@ -5786,7 +5786,7 @@
           },
           "resourceTitle": "Notebook",
           "resourceUseCase": "Vertex Serving",
-          "resourceDescription": "Intro to Gemini 2.5 Computer Use."
+          "resourceDescription": "Intro to Gemini 3 Computer Use."
         },
         "openNotebooks": {
           "notebooks": [
@@ -5798,13 +5798,13 @@
               },
               "resourceTitle": "Notebook",
               "resourceUseCase": "Vertex Serving",
-              "resourceDescription": "Intro to Gemini 2.5 Computer Use."
+              "resourceDescription": "Intro to Gemini 3 Computer Use."
             }
           ]
         }
       },
       "launchStage": "PUBLIC_PREVIEW",
-      "publisherModelTemplate": "projects/{project}/locations/{location}/publishers/google/models/gemini-2.5-computer-use-preview-10-2025@default"
+      "publisherModelTemplate": "projects/{project}/locations/{location}/publishers/google/models/gemini-3-computer-use-preview-10-2025@default"
     },
     {
       "name": "publishers/google/models/embeddinggemma",
@@ -5921,31 +5921,31 @@
       "launchStage": "GA"
     },
     {
-      "name": "publishers/google/models/gemini-2.5-flash-preview-09-2025",
+      "name": "publishers/google/models/gemini-3-flash-preview-09-2025",
       "versionId": "default",
       "openSourceCategory": "PROPRIETARY",
       "launchStage": "PUBLIC_PREVIEW"
     },
     {
-      "name": "publishers/google/models/gemini-2.5-flash-lite-preview-09-2025",
+      "name": "publishers/google/models/gemini-3-flash-lite-preview-09-2025",
       "versionId": "default",
       "openSourceCategory": "PROPRIETARY",
       "launchStage": "PUBLIC_PREVIEW"
     },
     {
-      "name": "publishers/google/models/gemini-2.5-flash-image",
+      "name": "publishers/google/models/gemini-3-flash-image",
       "versionId": "default",
       "supportedActions": {
         "openGenerationAiStudio": {
           "references": {
             "us-central1": {
-              "uri": "https://console.cloud.google.com/vertex-ai/generative/multimodal/create/text?model=gemini-2.5-flash-image"
+              "uri": "https://console.cloud.google.com/vertex-ai/generative/multimodal/create/text?model=gemini-3-flash-image"
             }
           }
         }
       },
       "launchStage": "GA",
-      "publisherModelTemplate": "projects/{project}/locations/{location}/publishers/google/models/gemini-2.5-flash-image@default"
+      "publisherModelTemplate": "projects/{project}/locations/{location}/publishers/google/models/gemini-3-flash-image@default"
     },
     {
       "name": "publishers/google/models/veo-3.1-generate-preview",

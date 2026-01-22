@@ -30,7 +30,7 @@ from vertice_core.types.jules_types import (
     JulesSession,
     JulesSessionState,
 )
-from vertice_cli.core.providers.jules_provider import JulesClient, get_jules_client
+from vertice_cli.providers.jules_provider import JulesClient, get_jules_client
 
 logger = logging.getLogger(__name__)
 

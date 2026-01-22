@@ -132,7 +132,7 @@ class ContextWindowInfo:
     """Context window utilization info."""
 
     current_tokens: int = 0
-    max_tokens: int = 128000  # Gemini 2.0 Flash default
+    max_tokens: int = 128000  # Gemini 3 Flash default
     warning_threshold: float = 0.8  # 80% utilization warning
 
     @property

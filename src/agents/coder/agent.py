@@ -1,21 +1,4 @@
-"""
-Vertice Coder Agent
-
-Fast code generation specialist with Darwin Gödel self-improvement.
-
-Key Features:
-- Rapid code generation (Groq for speed)
-- Self-evaluation (syntax, quality scoring)
-- Self-correction (automatic fix on failure)
-- Darwin Gödel Evolution Loop (via mixin)
-
-Primary Model: Groq (Llama 3.3 70B) - 14,400 req/day FREE
-Fallback: Cerebras, Vertex AI
-
-Reference:
-- Darwin Gödel Machine (arXiv:2505.22954, Sakana AI)
-- https://sakana.ai/dgm/
-"""
+"""Vertice Coder Agent - Code generation via Vertex AI Gemini 3 Pro."""
 
 from __future__ import annotations
 
@@ -23,82 +6,34 @@ import ast
 import re
 import subprocess
 import tempfile
-import json
 from pathlib import Path
 from typing import Dict, List, AsyncIterator
 import logging
 
-from .types import (
-    CodeGenerationRequest,
-    EvaluationResult,
-    GeneratedCode,
-)
-from vertice_cli.core.providers.vertice_router import TaskComplexity
+from .types import CodeGenerationRequest, EvaluationResult, GeneratedCode
 from .darwin_godel import DarwinGodelMixin
 from agents.base import BaseAgent
-from vertice_core.resilience import ResilienceMixin
-from vertice_core.caching import CachingMixin
-from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
 
 logger = logging.getLogger(__name__)
 
 
-class CoderAgent(ResilienceMixin, CachingMixin, DarwinGodelMixin, BaseAgent):
-    """
-    Code Generation Specialist
-
-    Capabilities:
-    - Rapid code generation (using Groq for speed)
-    - Multi-language support
-    - Test generation
-    - Code completion
-    - Refactoring suggestions
-    - Darwin Gödel self-improvement (via mixin)
-    """
+class CoderAgent(DarwinGodelMixin, BaseAgent):
+    """Code generation agent using Vertex AI Gemini 3 Pro."""
 
     name = "coder"
-    description = """
-    Fast code generation agent. Specializes in
-    clean, production-ready code with minimal latency.
-    Uses Groq (Llama 3.3 70B) for ultra-fast inference.
-    """
+    description = "Code generation agent using Gemini 3 Pro."
 
     LANGUAGES = {
-        "python": {"extension": ".py", "comment": "#", "docstring": '"""'},
-        "typescript": {"extension": ".ts", "comment": "//", "docstring": "/**"},
-        "javascript": {"extension": ".js", "comment": "//", "docstring": "/**"},
-        "rust": {"extension": ".rs", "comment": "//", "docstring": "///"},
-        "go": {"extension": ".go", "comment": "//", "docstring": "//"},
+        "python": ".py",
+        "typescript": ".ts",
+        "javascript": ".js",
+        "rust": ".rs",
+        "go": ".go",
     }
 
     SYSTEM_PROMPT = """You are an expert code generation agent.
-
-Your code MUST be:
-- Production-ready and error-free
-- Well-documented with clear comments
-- Following language best practices
-- Secure (no vulnerabilities)
-- Efficient (no unnecessary complexity)
-
-CRITICAL INSTRUCTION:
-You have access to filesystem tools.
-WHEN ASKED TO CREATE CODE:
-1. DO NOT just print the code in markdown.
-2. YOU MUST USE the 'write_file' tool to save the code to disk.
-3. AFTER writing the file, you can verify it.
-
-NEVER:
-- Use placeholder implementations
-- Skip error handling
-- Hardcode secrets
-- Use deprecated APIs
-- Hallucinate successful execution (actually execute the tools!)
-
-ALWAYS:
-- Include type hints (Python) or types (TS)
-- Handle edge cases
-- Return clean, runnable code
-"""
+Your code MUST be production-ready, well-documented, and follow best practices.
+Include type hints. Handle edge cases. Return clean, runnable code."""
 
     def __init__(self) -> None:
         super().__init__()  # Initialize BaseAgent (observability)
@@ -106,43 +41,31 @@ ALWAYS:
         self._provider = None
 
     async def _get_llm(self):
-        """Get LLM client with fallback chain."""
+        """Get LLM provider directly (simplified for reliability)."""
         if self._llm is None:
-            from providers import get_router
+            from vertice_cli.providers.vertex_ai import VertexAIProvider
 
-            router = get_router()
-            self._llm = router
+            self._llm = VertexAIProvider(project="vertice-ai", location="global", model_name="pro")
         return self._llm
 
     async def generate(
         self, request: CodeGenerationRequest, stream: bool = True
     ) -> AsyncIterator[str]:
         """
-        Generate code based on request with autonomous tool use.
-
-        Args:
-            request: Code generation request.
-            stream: Whether to stream output.
-
-        Yields:
-            Generated code chunks.
+        Generate code using Vertex AI Gemini 3 Pro directly.
+        Simplified flow without router overhead.
         """
-        llm = await self._get_llm()
-
-        # Tools available to the Coder
-        tools = [WriteFileTool(), ReadFileTool()]
+        provider = await self._get_llm()
 
         prompt = f"""
-Language: {request.language}
-Style: {request.style}
-Include Tests: {request.include_tests}
-Include Docs: {request.include_docs}
+TASK: {request.description}
+LANGUAGE: {request.language}
+STYLE: {request.style}
 
-Task: {request.description}
-
-Generate clean, production-ready code.
-You have access to tools to write files. USE THEM.
-If you need to create a file, use the 'write_file' tool.
+MISSION: 
+Provide the corrected, production-ready code.
+Use a clean Python code block.
+Include all necessary imports and type hints.
 """
 
         messages = [
@@ -150,92 +73,9 @@ If you need to create a file, use the 'write_file' tool.
             {"role": "user", "content": prompt},
         ]
 
-        # DEBUG: Print the actual prompt being sent
-        print(f"\n[DEBUG CODER PROMPT] {prompt[:200]}...\n")
-
-        # Action Loop
-        max_turns = 5
-        current_turn = 0
-
-        while current_turn < max_turns:
-            current_turn += 1
-            full_response = ""
-            tool_calls = []
-            json_buffer = ""
-            print("[DEBUG CODER] Calling llm.stream_chat")
-
-            async for chunk in llm.stream_chat(
-                messages, complexity=TaskComplexity.COMPLEX, max_tokens=4096, tools=tools
-            ):
-                # Detect API Tool Calls (JSON)
-                if '"tool_call":' in chunk:
-                    json_buffer += chunk
-                    try:
-                        start = json_buffer.find('{"tool_call":')
-                        if start != -1:
-                            data = json.loads(json_buffer[start:])
-                            tool_calls.append(data["tool_call"])
-                            json_buffer = ""
-                            continue
-                    except (json.JSONDecodeError, KeyError, TypeError):
-                        pass
-
-                full_response += chunk
-                yield chunk
-
-            # Fallback: Detect Simulated Tool Calls
-            if not tool_calls:
-                # Matches: write_file("filename", """content""")
-                # Simplified regex to avoid syntax errors
-                pattern = r'write_file\s*\(\s*["\']([^"\']+)["\']\s*,\s*(?:"""|\'\'\')((?:.|[\r\n])*?)(?:"""|\'\'\')\s*\)'
-                matches = re.findall(pattern, full_response, re.DOTALL)
-
-                # Matches: write_file("filename", "content")
-                if not matches:
-                    pattern_simple = (
-                        r'write_file\s*\(\s*["\']([^"\']+)["\']\s*,\s*["\']([^"\']*)["\']\s*\)'
-                    )
-                    matches = re.findall(pattern_simple, full_response, re.DOTALL)
-
-                for filename, content in matches:
-                    tool_calls.append(
-                        {"name": "write_file", "arguments": {"path": filename, "content": content}}
-                    )
-                    yield f"\n[System] Detected text-based tool call for {filename}...\n"
-
-            # If no tool calls, we are done
-            if not tool_calls:
-                break
-
-            # Execute Tools
-            messages.append({"role": "assistant", "content": full_response})
-
-            for call in tool_calls:
-                tool_name = call["name"]
-                args = call["arguments"]
-
-                yield f"\n\n[Executing Tool: {tool_name} with args {list(args.keys())}]...\n"
-
-                tool_instance = next((t for t in tools if t.name == tool_name), None)
-                if tool_instance:
-                    try:
-                        result = await tool_instance._execute_validated(**args)
-                        output = result.data if result.success else f"Error: {result.error}"
-
-                        # Add result to history for next turn
-                        messages.append(
-                            {"role": "user", "content": f"Tool Result [{tool_name}]: {output}"}
-                        )
-
-                        yield f"[Result: {str(output)[:200]}...]\n"
-                    except Exception as e:
-                        yield f"[Error: {e}]\n"
-                        messages.append(
-                            {"role": "user", "content": f"Error executing {tool_name}: {e}"}
-                        )
-                else:
-                    yield f"[Error: Tool {tool_name} not found]\n"
-                    messages.append({"role": "user", "content": f"Tool {tool_name} not found"})
+        # Direct call to VertexAIProvider.stream_chat
+        async for chunk in provider.stream_chat(messages, max_tokens=8192, temperature=0.7):
+            yield chunk
 
     async def refactor(
         self, code: str, instructions: str, language: str = "python"

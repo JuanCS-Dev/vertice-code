@@ -83,7 +83,7 @@ class Agency:
 
         # Initialize router
         try:
-            from vertice_cli.core.providers.vertice_router import get_router
+            from vertice_cli.providers.vertice_router import get_router
 
             self._router = get_router()
             logger.info("Router initialized")

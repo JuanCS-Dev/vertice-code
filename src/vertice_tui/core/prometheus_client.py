@@ -29,7 +29,7 @@ def _ensure_prometheus_imports():
 
     _prometheus_loaded = True
     try:
-        from vertice_cli.core.providers.prometheus_provider import (
+        from vertice_cli.providers.prometheus_provider import (
             PrometheusProvider as _PP,
             PrometheusConfig as _PC,
         )

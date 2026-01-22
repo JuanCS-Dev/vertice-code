@@ -382,6 +382,13 @@ class ResponseView(VerticalScroll):
         """Show advanced reasoning stream indicator."""
         from vertice_tui.widgets import ReasoningStream
 
+        # Safety: Check if widget already exists in DOM (even if self._thinking_widget is lost)
+        existing = self.query("#reasoning-stream").first()
+        if existing:
+            self._thinking_widget = existing
+            self.is_thinking = True
+            return
+
         if self._thinking_widget is not None:
             return
 
@@ -393,9 +400,15 @@ class ResponseView(VerticalScroll):
     async def end_thinking(self) -> None:
         """Remove thinking indicator and finalize response."""
         self.is_thinking = False
-        if self._thinking_widget:
-            self._thinking_widget.remove()
-            self._thinking_widget = None
+        
+        # Remove from DOM if exists
+        targets = self.query("#reasoning-stream")
+        if targets:
+            for t in targets:
+                t.remove()
+        
+        # Reset internal reference
+        self._thinking_widget = None
 
         self._stop_flush_timer()
         await self._flush_pending_stream_async(final=True)
