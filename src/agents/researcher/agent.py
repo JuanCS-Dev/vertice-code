@@ -16,11 +16,20 @@ Reference:
 
 from __future__ import annotations
 
+import os
 from typing import Dict, List, Optional, AsyncIterator
 import logging
 
 from .types import ResearchReport
-from .agentic_rag import AgenticRAGMixin
+
+# Use V2 (direct tools instead of sub-agents) if AGENTIC_RAG_V2=1
+_USE_V2 = os.environ.get("AGENTIC_RAG_V2", "0") == "1"
+
+if _USE_V2:
+    from .agentic_rag_v2 import AgenticRAGV2Mixin as AgenticRAGMixin
+else:
+    from .agentic_rag import AgenticRAGMixin
+
 from agents.base import BaseAgent
 
 logger = logging.getLogger(__name__)
