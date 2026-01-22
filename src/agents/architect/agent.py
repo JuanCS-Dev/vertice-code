@@ -23,7 +23,7 @@ from .types import (
     DesignProposal,
     ArchitectureReview,
 )
-from .three_loops import ThreeLoopsMixin
+from .autonomy_compat import ThreeLoopsMixin  # Deprecated, uses BoundedAutonomy internally
 from agents.base import BaseAgent
 
 logger = logging.getLogger(__name__)

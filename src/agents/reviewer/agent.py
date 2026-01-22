@@ -15,6 +15,7 @@ Reference:
 
 from __future__ import annotations
 
+import os
 import re
 from typing import Dict, List, Optional, AsyncIterator, Tuple
 import logging
@@ -24,7 +25,15 @@ from .types import (
     ReviewResult,
     ReviewSeverity,
 )
-from .deep_think import DeepThinkMixin
+
+# Use V2 (simplified 2-stage) if DEEP_THINK_V2=1
+_USE_V2 = os.environ.get("DEEP_THINK_V2", "0") == "1"
+
+if _USE_V2:
+    from .deep_think_v2 import DeepThinkV2Mixin as DeepThinkMixin
+else:
+    from .deep_think import DeepThinkMixin
+
 from agents.base import BaseAgent
 
 logger = logging.getLogger(__name__)

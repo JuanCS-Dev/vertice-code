@@ -1,9 +1,11 @@
 """
 Darwin Gödel Machine Evolution System
 
-Implements the Darwin Gödel evolution loop for agent self-improvement.
+DEPRECATED: This module is not actively used in production.
+Modern LLMs (Gemini 3, Claude 4.5) are sufficiently capable without prompt evolution.
+This code is kept for backward compatibility but will be removed in a future version.
 
-Pattern (Sakana AI, arXiv:2505.22954):
+Original Pattern (Sakana AI, arXiv:2505.22954):
 1. Sample parent from diverse archive
 2. Propose modifications (prompts, strategies, tools)
 3. Evaluate on benchmarks
@@ -42,8 +44,12 @@ logger = logging.getLogger(__name__)
 
 class DarwinGodelMixin:
     """
-    Mixin providing Darwin Gödel evolution capabilities.
-
+    DEPRECATED: Mixin providing Darwin Gödel evolution capabilities.
+    
+    This mixin is deprecated and will be removed in a future version.
+    The evolve() method is not used in production - modern LLMs don't
+    require prompt evolution for effective code generation.
+    
     Add to CoderAgent via multiple inheritance.
     """
 
@@ -144,7 +150,10 @@ class DarwinGodelMixin:
         improvement_threshold: float = 0.05,
     ) -> EvolutionResult:
         """
-        Run one Darwin Gödel evolution cycle.
+        DEPRECATED: Run one Darwin Gödel evolution cycle.
+        
+        This method is deprecated and will be removed in a future version.
+        Modern LLMs don't require prompt evolution for effective code generation.
 
         Args:
             benchmark_tasks: Tasks to evaluate performance.
@@ -153,6 +162,14 @@ class DarwinGodelMixin:
         Returns:
             EvolutionResult with new variant and scores.
         """
+        import warnings
+        warnings.warn(
+            "DarwinGodelMixin.evolve() is deprecated and will be removed. "
+            "Modern LLMs are sufficiently capable without prompt evolution.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        
         if not hasattr(self, "_archive"):
             self._init_evolution()
 
