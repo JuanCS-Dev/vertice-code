@@ -19,7 +19,7 @@ from typing import Any
 from datetime import datetime
 
 # Import production code
-from vertice_cli.agents.data_agent_production import (
+from vertice_core.agents.data_agent_production import (
     DataAgent,
     create_data_agent,
     QueryOptimization,
@@ -28,10 +28,10 @@ from vertice_cli.agents.data_agent_production import (
     DatabaseType,
 )
 
-from vertice_cli.agents.llm_adapter import LLMClientAdapter, wrap_llm_client
+from vertice_core.agents.llm_adapter import LLMClientAdapter, wrap_llm_client
 
 # Import YOUR base types
-from vertice_cli.agents.base import AgentTask, AgentResponse
+from vertice_core.agents.base import AgentTask, AgentResponse
 
 
 # ============================================================================

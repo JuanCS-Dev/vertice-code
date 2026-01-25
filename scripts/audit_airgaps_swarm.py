@@ -92,9 +92,9 @@ class ProviderAudit(AuditAgent):
 class ToolingAudit(AuditAgent):
     async def audit(self):
         # We can't easily instantiate tools without deps, but we can check files
-        tools_dir = PROJECT_ROOT / "vertice_cli" / "tools"
+        tools_dir = PROJECT_ROOT / "vertice_core" / "tools"
         if not tools_dir.exists():
-            self.report_issue("MEDIUM", "vertice_cli/tools directory not found", str(tools_dir))
+            self.report_issue("MEDIUM", "vertice_core/tools directory not found", str(tools_dir))
             return
 
         for tool_file in tools_dir.glob("*.py"):

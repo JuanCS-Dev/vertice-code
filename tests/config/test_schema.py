@@ -1,6 +1,6 @@
 """Tests for configuration schema."""
 
-from vertice_cli.config.schema import (
+from vertice_core.config.schema import (
     QwenConfig,
     ProjectConfig,
     RulesConfig,

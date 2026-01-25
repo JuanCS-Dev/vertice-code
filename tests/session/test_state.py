@@ -3,7 +3,7 @@
 from datetime import datetime
 from pathlib import Path
 
-from vertice_cli.session.state import SessionState
+from vertice_core.session.state import SessionState
 
 
 class TestSessionState:

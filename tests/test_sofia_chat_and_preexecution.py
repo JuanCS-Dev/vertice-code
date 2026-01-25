@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 from unittest.mock import Mock
 from uuid import UUID
 
-from vertice_cli.agents.sofia import (
+from vertice_core.agents.sofia import (
     SofiaChatMode,
     CounselResponse,
     create_sofia_agent,

@@ -10,7 +10,7 @@ import tempfile
 import shutil
 from pathlib import Path
 
-from vertice_cli.core.workflow import GitRollback, PartialRollback
+from vertice_core.core.workflow import GitRollback, PartialRollback
 
 
 class TestGitRollback:

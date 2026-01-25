@@ -102,7 +102,7 @@ async def quick_e2e_validation():
 
     # 7. Syntax Highlighting (Semana 1)
     try:
-        from vertice_cli.tui.components.streaming_markdown.widget import StreamingMarkdownWidget
+        from vertice_core.tui.components.streaming_markdown.widget import StreamingMarkdownWidget
 
         widget = StreamingMarkdownWidget()
         await widget.start_stream()

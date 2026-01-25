@@ -2,7 +2,7 @@
 import pytest
 from pathlib import Path
 
-from vertice_cli.tools.web_access import (
+from vertice_core.tools.web_access import (
     PackageSearchTool,
     FetchURLTool,
     DownloadFileTool,

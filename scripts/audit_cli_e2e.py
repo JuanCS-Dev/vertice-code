@@ -44,11 +44,11 @@ def test_core_imports():
     print("=" * 60)
 
     imports_to_test = [
-        ("vertice_cli.core", ["config", "providers"]),
-        ("vertice_cli.agents", ["base", "registry"]),
-        ("vertice_cli.tools", ["base", "validated"]),
-        ("vertice_cli.utils", ["error_handler"]),
-        ("vertice_cli.handlers", []),
+        ("vertice_core.core", ["config", "providers"]),
+        ("vertice_core.agents", ["base", "registry"]),
+        ("vertice_core.tools", ["base", "validated"]),
+        ("vertice_core.utils", ["error_handler"]),
+        ("vertice_core.handlers", []),
     ]
 
     for module, submodules in imports_to_test:
@@ -66,8 +66,8 @@ def test_providers():
     print("=" * 60)
 
     providers_to_test = [
-        ("VertexAIProvider", "vertice_cli.core.providers.vertex_ai"),
-        ("VerticeRouter", "vertice_cli.core.vertice_router"),
+        ("VertexAIProvider", "vertice_core.core.providers.vertex_ai"),
+        ("VerticeRouter", "vertice_core.core.vertice_router"),
     ]
 
     for name, module_path in providers_to_test:
@@ -91,7 +91,7 @@ def test_providers():
 
     # Test Vertex AI initialization (without actual API call)
     try:
-        from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+        from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
         provider = VertexAIProvider()
         log_result("providers", "VertexAI init", True, f"model={provider.model_name}")
@@ -106,7 +106,7 @@ def test_tools():
     print("=" * 60)
 
     try:
-        from vertice_cli.tools.base import ToolRegistry
+        from vertice_core.tools.base import ToolRegistry
 
         registry = ToolRegistry()
         log_result("tools", "ToolRegistry", True, "created")
@@ -124,7 +124,7 @@ def test_tools():
 
     for module, classes in tool_modules:
         try:
-            mod = __import__(f"vertice_cli.tools.{module}", fromlist=classes)
+            mod = __import__(f"vertice_core.tools.{module}", fromlist=classes)
             for cls_name in classes:
                 cls = getattr(mod, cls_name, None)
                 if cls:
@@ -152,9 +152,9 @@ def test_agents():
     print("=" * 60)
 
     try:
-        log_result("agents", "BaseAgent (vertice_cli)", True, "imported")
+        log_result("agents", "BaseAgent (vertice_core)", True, "imported")
     except Exception as e:
-        log_result("agents", "BaseAgent (vertice_cli)", False, str(e)[:60])
+        log_result("agents", "BaseAgent (vertice_core)", False, str(e)[:60])
 
     # Test agents from src/agents/ (core agents)
     agent_modules = [

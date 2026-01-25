@@ -77,8 +77,8 @@ class BrutalScenarioRunner:
 
     async def setup(self):
         """Initialize LLM and registry."""
-        from vertice_cli.core.llm_client import get_llm_client
-        from vertice_cli.tools.registry_setup import create_full_registry
+        from vertice_core.core.llm_client import get_llm_client
+        from vertice_core.tools.registry_setup import create_full_registry
 
         self.llm = await get_llm_client()
         self.registry = create_full_registry()
@@ -103,7 +103,7 @@ class BrutalScenarioRunner:
         print(f"  Request: {request[:80]}...")
 
         try:
-            from vertice_cli.prompts.system_prompts import build_enhanced_system_prompt
+            from vertice_core.prompts.system_prompts import build_enhanced_system_prompt
 
             tool_schemas = self.registry.get_schemas()
             context = {"cwd": str(self.work_dir)}

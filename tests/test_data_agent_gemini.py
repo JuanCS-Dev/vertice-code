@@ -9,8 +9,8 @@ Test DataAgent with real Gemini LLM.
 import asyncio
 from rich.console import Console
 
-from vertice_cli.core.llm import LLMClient
-from vertice_cli.agents.data_agent_production import create_data_agent
+from vertice_core.core.llm import LLMClient
+from vertice_core.agents.data_agent_production import create_data_agent
 
 console = Console()
 

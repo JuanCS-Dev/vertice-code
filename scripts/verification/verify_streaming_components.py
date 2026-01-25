@@ -11,8 +11,8 @@ from rich.console import Console
 sys.path.insert(0, str(Path(__file__).parent))
 
 from vertice_tui.core.streaming.soft_buffer import SoftBuffer
-from vertice_cli.tui.components.block_detector import BlockDetector, BlockType
-from vertice_cli.tui.components.streaming_markdown import BlockWidgetFactory
+from vertice_core.tui.components.block_detector import BlockDetector, BlockType
+from vertice_core.tui.components.streaming_markdown import BlockWidgetFactory
 
 console = Console()
 

@@ -10,7 +10,7 @@ async def test_beta_access():
     # google.genai SDK 1.x unifies this.
 
     # Try using the FULL resource name from the list
-    model_resource = "publishers/google/models/gemini-3-pro-preview"
+    model_resource = "publishers/google/models/gemini-3-flash"
 
     client = genai.Client(vertexai=True, project="vertice-ai", location="us-central1")
 

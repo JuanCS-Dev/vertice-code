@@ -16,35 +16,35 @@ class TestFileOperationToolImports:
 
     def test_read_file_tool(self):
         """Can import ReadFileTool."""
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         tool = ReadFileTool()
         assert tool.name == "read_file"
 
     def test_write_file_tool(self):
         """Can import WriteFileTool."""
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
         assert tool.name == "write_file"
 
     def test_edit_file_tool(self):
         """Can import EditFileTool."""
-        from vertice_cli.tools.file_ops import EditFileTool
+        from vertice_core.tools.file_ops import EditFileTool
 
         tool = EditFileTool()
         assert tool.name == "edit_file"
 
     def test_list_dir_tool(self):
         """Can import ListDirectoryTool."""
-        from vertice_cli.tools.file_ops import ListDirectoryTool
+        from vertice_core.tools.file_ops import ListDirectoryTool
 
         tool = ListDirectoryTool()
         assert tool.name == "list_directory"
 
     def test_delete_file_tool(self):
         """Can import DeleteFileTool."""
-        from vertice_cli.tools.file_ops import DeleteFileTool
+        from vertice_core.tools.file_ops import DeleteFileTool
 
         tool = DeleteFileTool()
         assert tool.name == "delete_file"
@@ -60,28 +60,28 @@ class TestTerminalToolImports:
 
     def test_ls_tool(self):
         """Can import LsTool."""
-        from vertice_cli.tools.terminal import LsTool
+        from vertice_core.tools.terminal import LsTool
 
         tool = LsTool()
         assert tool.name == "ls"
 
     def test_cd_tool(self):
         """Can import CdTool."""
-        from vertice_cli.tools.terminal import CdTool
+        from vertice_core.tools.terminal import CdTool
 
         tool = CdTool()
         assert tool.name == "cd"
 
     def test_mkdir_tool(self):
         """Can import MkdirTool."""
-        from vertice_cli.tools.terminal import MkdirTool
+        from vertice_core.tools.terminal import MkdirTool
 
         tool = MkdirTool()
         assert tool.name == "mkdir"
 
     def test_cat_tool(self):
         """Can import CatTool."""
-        from vertice_cli.tools.terminal import CatTool
+        from vertice_core.tools.terminal import CatTool
 
         tool = CatTool()
         assert tool.name == "cat"
@@ -97,28 +97,28 @@ class TestGitToolImports:
 
     def test_git_status_tool(self):
         """Can import GitStatusEnhancedTool."""
-        from vertice_cli.tools.git import GitStatusEnhancedTool
+        from vertice_core.tools.git import GitStatusEnhancedTool
 
         tool = GitStatusEnhancedTool()
         assert "status" in tool.name
 
     def test_git_diff_tool(self):
         """Can import GitDiffEnhancedTool."""
-        from vertice_cli.tools.git import GitDiffEnhancedTool
+        from vertice_core.tools.git import GitDiffEnhancedTool
 
         tool = GitDiffEnhancedTool()
         assert "diff" in tool.name
 
     def test_git_commit_tool(self):
         """Can import GitCommitTool."""
-        from vertice_cli.tools.git import GitCommitTool
+        from vertice_core.tools.git import GitCommitTool
 
         tool = GitCommitTool()
         assert "commit" in tool.name
 
     def test_git_log_tool(self):
         """Can import GitLogTool."""
-        from vertice_cli.tools.git import GitLogTool
+        from vertice_core.tools.git import GitLogTool
 
         tool = GitLogTool()
         assert "log" in tool.name
@@ -134,14 +134,14 @@ class TestContextToolImports:
 
     def test_get_context_tool(self):
         """Can import GetContextTool."""
-        from vertice_cli.tools.context import GetContextTool
+        from vertice_core.tools.context import GetContextTool
 
         tool = GetContextTool()
         assert "context" in tool.name
 
     def test_save_session_tool(self):
         """Can import SaveSessionTool."""
-        from vertice_cli.tools.context import SaveSessionTool
+        from vertice_core.tools.context import SaveSessionTool
 
         tool = SaveSessionTool()
         assert "session" in tool.name or "save" in tool.name
@@ -157,7 +157,7 @@ class TestToolBaseInterface:
 
     def test_tool_has_name(self):
         """Tools have name attribute."""
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         tool = ReadFileTool()
         assert hasattr(tool, "name")
@@ -165,7 +165,7 @@ class TestToolBaseInterface:
 
     def test_tool_has_description(self):
         """Tools have description."""
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         tool = ReadFileTool()
         assert hasattr(tool, "description")
@@ -222,7 +222,7 @@ class TestToolCategories:
 
     def test_file_ops_tools_exist(self):
         """File operation tools exist."""
-        from vertice_cli.tools import file_ops
+        from vertice_core.tools import file_ops
 
         assert hasattr(file_ops, "ReadFileTool")
         assert hasattr(file_ops, "WriteFileTool")
@@ -231,7 +231,7 @@ class TestToolCategories:
 
     def test_git_tools_exist(self):
         """Git tools exist."""
-        from vertice_cli.tools import git
+        from vertice_core.tools import git
 
         assert hasattr(git, "GitStatusEnhancedTool")
         assert hasattr(git, "GitDiffEnhancedTool")
@@ -240,7 +240,7 @@ class TestToolCategories:
 
     def test_terminal_tools_exist(self):
         """Terminal tools exist."""
-        from vertice_cli.tools import terminal
+        from vertice_core.tools import terminal
 
         assert hasattr(terminal, "LsTool")
         assert hasattr(terminal, "CdTool")
@@ -249,7 +249,7 @@ class TestToolCategories:
 
     def test_context_tools_exist(self):
         """Context tools exist."""
-        from vertice_cli.tools import context
+        from vertice_core.tools import context
 
         assert hasattr(context, "GetContextTool")
         assert hasattr(context, "SaveSessionTool")
@@ -265,27 +265,27 @@ class TestGitSafety:
 
     def test_safety_config_exists(self):
         """Git safety config exists."""
-        from vertice_cli.tools.git import get_safety_config
+        from vertice_core.tools.git import get_safety_config
 
         config = get_safety_config()
         assert config is not None
 
     def test_validate_git_command_exists(self):
         """Git command validation exists."""
-        from vertice_cli.tools.git import validate_git_command
+        from vertice_core.tools.git import validate_git_command
 
         assert callable(validate_git_command)
 
     def test_git_inspect_tools(self):
         """Git inspect tools function exists."""
-        from vertice_cli.tools.git import get_git_inspect_tools
+        from vertice_core.tools.git import get_git_inspect_tools
 
         tools = get_git_inspect_tools()
         assert len(tools) > 0
 
     def test_git_mutate_tools(self):
         """Git mutate tools function exists."""
-        from vertice_cli.tools.git import get_git_mutate_tools
+        from vertice_core.tools.git import get_git_mutate_tools
 
         tools = get_git_mutate_tools()
         assert len(tools) > 0

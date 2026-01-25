@@ -3,8 +3,8 @@
 import tempfile
 from pathlib import Path
 
-from vertice_cli.config.validator import ConfigValidator
-from vertice_cli.config.schema import QwenConfig
+from vertice_core.config.validator import ConfigValidator
+from vertice_core.config.schema import QwenConfig
 
 
 class TestPathValidation:

@@ -13,13 +13,13 @@ Test Coverage:
 
 import pytest
 from pathlib import Path
-from vertice_cli.tui.input_enhanced import MultiLineMode, IntelligentCompleter, InputContext
-from vertice_cli.tui.components.autocomplete import (
+from vertice_core.tui.input_enhanced import MultiLineMode, IntelligentCompleter, InputContext
+from vertice_core.tui.components.autocomplete import (
     ContextAwareCompleter,
     CompletionItem,
     CompletionType,
 )
-from vertice_cli.tui.history import CommandHistory, HistoryEntry
+from vertice_core.tui.history import CommandHistory, HistoryEntry
 from datetime import datetime
 from prompt_toolkit.document import Document
 

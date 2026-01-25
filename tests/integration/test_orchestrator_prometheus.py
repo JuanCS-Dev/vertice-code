@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock, patch
 
 from agents.orchestrator.agent import OrchestratorAgent
 from agents.orchestrator.types import Task, TaskComplexity, AgentRole
-from vertice_cli.agents.base import AgentResponse, TaskResult, TaskStatus
+from vertice_core.agents.base import AgentResponse, TaskResult, TaskStatus
 
 
 @pytest.mark.asyncio

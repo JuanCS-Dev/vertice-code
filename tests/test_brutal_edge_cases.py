@@ -9,7 +9,7 @@ Critério: Se quebrar aqui, vai quebrar na demo.
 import pytest
 import asyncio
 from unittest.mock import MagicMock, AsyncMock
-from vertice_cli.shell import InteractiveShell
+from vertice_core.shell import InteractiveShell
 
 
 class TestImpossibleInputs:

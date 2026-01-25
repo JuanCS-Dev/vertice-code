@@ -4,8 +4,8 @@ Boris Cherny: Test all public APIs, edge cases, and integrations.
 """
 
 import pytest
-from vertice_cli.explainer import ExplanationEngine, explain_command, Explanation, ExplanationLevel
-from vertice_cli.intelligence.context_enhanced import RichContext, ExpertiseLevel
+from vertice_core.explainer import ExplanationEngine, explain_command, Explanation, ExplanationLevel
+from vertice_core.intelligence.context_enhanced import RichContext, ExpertiseLevel
 
 
 class TestExplanationTypes:

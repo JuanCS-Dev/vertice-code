@@ -2,10 +2,10 @@
 """Quick test for streaming fix"""
 
 import asyncio
-from vertice_cli.core.llm import LLMClient
-from vertice_cli.core.mcp_client import MCPClient
-from vertice_cli.agents.executor import NextGenExecutorAgent, ExecutionMode, SecurityLevel
-from vertice_cli.agents.base import AgentTask
+from vertice_core.core.llm import LLMClient
+from vertice_core.core.mcp_client import MCPClient
+from vertice_core.agents.executor import NextGenExecutorAgent, ExecutionMode, SecurityLevel
+from vertice_core.agents.base import AgentTask
 
 
 async def main():
@@ -13,7 +13,7 @@ async def main():
     llm = LLMClient()
 
     # Initialize MCP with empty registry (test doesn't need real tools)
-    from vertice_cli.tools.base import ToolRegistry
+    from vertice_core.tools.base import ToolRegistry
 
     registry = ToolRegistry()
     mcp = MCPClient(registry)

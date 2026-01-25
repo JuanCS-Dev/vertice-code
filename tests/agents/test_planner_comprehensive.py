@@ -15,8 +15,8 @@ pytestmark = pytest.mark.skip(
 )
 
 from pathlib import Path
-from vertice_cli.agents.planner import PlannerAgent
-from vertice_cli.agents.base import TaskContext, TaskStatus
+from vertice_core.agents.planner import PlannerAgent
+from vertice_core.agents.base import TaskContext, TaskStatus
 
 
 class TestPlannerImplementationPlanning:

@@ -24,7 +24,7 @@ def test_adapters_initialized():
     """Test all adapters are initialized."""
     print("\n📦 Testing Adapter Initialization...")
 
-    from vertice_cli.integrations.mcp import mcp_gateway
+    from vertice_core.integrations.mcp import mcp_gateway
 
     adapters = [
         ("daimon_adapter", mcp_gateway.daimon_adapter),
@@ -49,7 +49,7 @@ def test_health_status():
     """Test gateway health endpoint."""
     print("\n🏥 Testing Health Status...")
 
-    from vertice_cli.integrations.mcp import mcp_gateway
+    from vertice_core.integrations.mcp import mcp_gateway
 
     health = mcp_gateway.get_health()
 
@@ -68,7 +68,7 @@ def test_tool_listing():
     """Test tool listing by adapter."""
     print("\n📋 Testing Tool Listing...")
 
-    from vertice_cli.integrations.mcp import mcp_gateway
+    from vertice_core.integrations.mcp import mcp_gateway
 
     tools = mcp_gateway.list_all_tools()
 

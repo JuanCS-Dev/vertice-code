@@ -40,12 +40,12 @@ async def final_agent_validation():
     agents_to_test = [
         (
             "NextGenExecutorAgent",
-            "vertice_cli.agents.executor.agent",
+            "vertice_core.agents.executor.agent",
             lambda: mock_llm,
             lambda: mock_mcp,
         ),
-        ("PlannerAgent", "vertice_cli.agents.planner.agent", lambda: mock_llm, lambda: mock_mcp),
-        ("ArchitectAgent", "vertice_cli.agents.architect", lambda: mock_llm, lambda: mock_mcp),
+        ("PlannerAgent", "vertice_core.agents.planner.agent", lambda: mock_llm, lambda: mock_mcp),
+        ("ArchitectAgent", "vertice_core.agents.architect", lambda: mock_llm, lambda: mock_mcp),
     ]
 
     print("Testing Core Agents...")
@@ -72,9 +72,9 @@ async def final_agent_validation():
 
     # Test specialized agents
     specialized_agents = [
-        ("ReviewerAgent", "vertice_cli.agents.reviewer.agent"),
-        ("ExplorerAgent", "vertice_cli.agents.explorer"),
-        ("JusticaIntegratedAgent", "vertice_cli.agents.justica_agent"),
+        ("ReviewerAgent", "vertice_core.agents.reviewer.agent"),
+        ("ExplorerAgent", "vertice_core.agents.explorer"),
+        ("JusticaIntegratedAgent", "vertice_core.agents.justica_agent"),
     ]
 
     print("\nTesting Specialized Agents...")

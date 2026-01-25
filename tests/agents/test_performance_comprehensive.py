@@ -18,8 +18,8 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from vertice_cli.agents.base import AgentTask
-from vertice_cli.agents.performance import (
+from vertice_core.agents.base import AgentTask
+from vertice_core.agents.performance import (
     PerformanceAgent,
     BottleneckType,
     ComplexityLevel,

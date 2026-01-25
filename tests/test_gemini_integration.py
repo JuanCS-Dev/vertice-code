@@ -3,14 +3,14 @@ Real integration tests for Gemini provider (Legacy Wrapper).
 
 VERIFIES:
 - GeminiProvider redirects to VertexAIProvider
-- Uses gemini-3-pro-preview
+- Uses gemini-3-flash
 - Ignores API keys (uses ADC)
 """
 
 import pytest
 
-from vertice_cli.core.providers.gemini import GeminiProvider
-from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+from vertice_core.core.providers.gemini import GeminiProvider
+from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
 # Mark as integration
 pytestmark = pytest.mark.integration
@@ -27,14 +27,14 @@ class TestGeminiProviderLegacyWrapper:
 
         # Verify delegation
         assert isinstance(provider.delegate, VertexAIProvider)
-        assert provider.model_name == "gemini-3-pro-preview"
+        assert provider.model_name == "gemini-3-flash"
 
     def test_verify_config_redirect(self):
         """Verify configuration redirects to correct Vertex defaults."""
         provider = GeminiProvider(model_name="gemini-1.5-pro")
 
         # Should upgrade 1.5 to 3.0
-        assert provider.delegate.model_alias == "gemini-3-pro-preview"
+        assert provider.delegate.model_alias == "gemini-3-flash"
         assert provider.delegate.location == "global"
 
     @pytest.mark.asyncio

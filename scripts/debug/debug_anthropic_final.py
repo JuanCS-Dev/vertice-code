@@ -1,7 +1,7 @@
 import os
 import asyncio
 import logging
-from vertice_cli.core.providers.anthropic_vertex import AnthropicVertexProvider
+from vertice_core.core.providers.anthropic_vertex import AnthropicVertexProvider
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

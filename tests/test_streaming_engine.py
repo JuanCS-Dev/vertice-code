@@ -3,7 +3,7 @@
 import pytest
 import asyncio
 import time
-from vertice_cli.core.streaming_engine import StreamingEngine
+from vertice_core.core.streaming_engine import StreamingEngine
 
 
 async def mock_generator(count: int, delay: float = 0.01):

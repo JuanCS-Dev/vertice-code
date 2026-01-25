@@ -6,7 +6,7 @@ import tempfile
 import shutil
 from pathlib import Path
 
-from vertice_cli.hooks import HookExecutor, HookEvent, HookContext
+from vertice_core.hooks import HookExecutor, HookEvent, HookContext
 
 
 class TestHooksIntegration:

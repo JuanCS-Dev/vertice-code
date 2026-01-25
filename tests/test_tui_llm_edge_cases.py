@@ -20,8 +20,8 @@ import time
 from io import StringIO
 from rich.console import Console
 
-from vertice_cli.core.llm import LLMClient
-from vertice_cli.tui.wisdom import WisdomSystem
+from vertice_core.core.llm import LLMClient
+from vertice_core.tui.wisdom import WisdomSystem
 
 
 class TestLLMEdgeCases:

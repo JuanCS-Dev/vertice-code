@@ -14,14 +14,14 @@ import pytest
 import time
 
 # Imports for session tests
-from vertice_cli.session.manager import SessionManager
+from vertice_core.session.manager import SessionManager
 
 # Imports for token tracking
-from vertice_cli.core.token_tracker import TokenTracker
-from vertice_cli.core.llm import LLMClient
+from vertice_core.core.token_tracker import TokenTracker
+from vertice_core.core.llm import LLMClient
 
 # Imports for preview
-from vertice_cli.tui.components.preview import DiffGenerator
+from vertice_core.tui.components.preview import DiffGenerator
 
 
 class TestSessionAtomicWrites:

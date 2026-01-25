@@ -8,9 +8,9 @@ This replaces the broken tool system with a clean, modular architecture.
 from clean_tool_system import BaseTool, ToolResult, ToolRegistry, CleanMCPClient
 
 # Import existing tool implementations but adapt them to the clean interface
-from vertice_cli.tools.file_ops import ReadFileTool as OldReadFileTool
-from vertice_cli.tools.file_ops import WriteFileTool as OldWriteFileTool
-from vertice_cli.tools.file_ops import EditFileTool as OldEditFileTool
+from vertice_core.tools.file_ops import ReadFileTool as OldReadFileTool
+from vertice_core.tools.file_ops import WriteFileTool as OldWriteFileTool
+from vertice_core.tools.file_ops import EditFileTool as OldEditFileTool
 
 
 # =============================================================================

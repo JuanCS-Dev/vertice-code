@@ -15,9 +15,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 def test_cli_import():
     print("Testing 'vertice' entry point...")
     try:
-        from vertice_cli.main import app
+        from vertice_core.main import app
 
-        print("✅ Successfully imported vertice_cli.main.app")
+        print("✅ Successfully imported vertice_core.main.app")
     except ImportError as e:
         print(f"❌ Failed to import CLI app: {e}")
         traceback.print_exc()
@@ -37,9 +37,9 @@ def test_tui_import():
         print(f"✅ Textual {textual.__version__} found.")
 
         # Try importing the TUI launcher
-        from vertice_cli.ui_launcher import launch_tui
+        from vertice_core.ui_launcher import launch_tui
 
-        print("✅ Successfully imported vertice_cli.ui_launcher.launch_tui")
+        print("✅ Successfully imported vertice_core.ui_launcher.launch_tui")
     except ImportError as e:
         print(f"❌ Failed to import TUI components: {e}")
         traceback.print_exc()

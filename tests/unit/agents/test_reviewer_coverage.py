@@ -12,7 +12,7 @@ import pytest
 import networkx as nx
 from unittest.mock import AsyncMock, MagicMock
 
-from vertice_cli.agents.reviewer import (
+from vertice_core.agents.reviewer import (
     IssueSeverity,
     IssueCategory,
     CodeGraphNode,
@@ -21,7 +21,7 @@ from vertice_cli.agents.reviewer import (
     RAGContext,
     ReviewerAgent,
 )
-from vertice_cli.agents.base import (
+from vertice_core.agents.base import (
     AgentTask,
     AgentResponse,
 )
@@ -1110,7 +1110,7 @@ class TestGraphAnalysisEdgeCases:
     @pytest.fixture
     def graph_agent(self):
         """Create CodeGraphAnalysisAgent."""
-        from vertice_cli.agents.reviewer import CodeGraphAnalysisAgent
+        from vertice_core.agents.reviewer import CodeGraphAnalysisAgent
 
         agent = CodeGraphAnalysisAgent()
         agent.logger = MagicMock()

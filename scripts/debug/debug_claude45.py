@@ -21,7 +21,7 @@ async def test_claude45():
     print("=" * 60)
 
     try:
-        from vertice_cli.core.providers.anthropic_vertex import AnthropicVertexProvider
+        from vertice_core.core.providers.anthropic_vertex import AnthropicVertexProvider
 
         # Force Claude 4.5 Sonnet (the newest model)
         provider = AnthropicVertexProvider(

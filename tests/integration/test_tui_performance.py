@@ -102,7 +102,7 @@ class TestVertexAIAsyncStreaming:
         if os.getenv("VERTICE_RUN_LIVE_LLM_TESTS") != "1":
             pytest.skip("Live LLM tests disabled (set VERTICE_RUN_LIVE_LLM_TESTS=1)")
 
-        from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+        from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
         provider = VertexAIProvider(model_name="pro")
 

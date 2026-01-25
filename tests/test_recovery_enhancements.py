@@ -7,7 +7,7 @@ Tests:
 
 import time
 
-from vertice_cli.core.recovery import RetryPolicy, RecoveryCircuitBreaker
+from vertice_core.core.recovery import RetryPolicy, RecoveryCircuitBreaker
 
 
 class TestRetryPolicy:

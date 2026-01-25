@@ -83,7 +83,7 @@ async def test_detailed_profiling_of_chat_flow():
 
     Identifica EXATAMENTE onde os 7s são gastos.
     """
-    from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+    from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
     profiler = DetailedProfiler()
     profiler.start()
@@ -166,7 +166,7 @@ async def test_detailed_profiling_flash():
     """
     Profile do Flash para comparação.
     """
-    from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+    from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
     profiler = DetailedProfiler()
     profiler.start()

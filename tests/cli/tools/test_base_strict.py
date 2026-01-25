@@ -17,7 +17,7 @@ from __future__ import annotations
 from typing import Any
 
 
-from vertice_cli.tools.base import Tool, ToolResult, ToolCategory, ToolRegistry
+from vertice_core.tools.base import Tool, ToolResult, ToolCategory, ToolRegistry
 
 
 # =============================================================================

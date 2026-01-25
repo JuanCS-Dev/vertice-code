@@ -49,7 +49,7 @@ class TestChatE2EVertex:
                         {"role": "user", "content": "Say 'Hello World' and nothing else."}
                     ],
                     "stream": True,
-                    "model": "gemini-3-pro-preview",
+                    "model": "gemini-3-flash",
                 },
             )
 

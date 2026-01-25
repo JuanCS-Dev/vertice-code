@@ -38,7 +38,7 @@ class ToolTestSuite:
     async def setup(self):
         """Initialize tool registry and MCP client."""
         try:
-            from vertice_cli.tools.registry_setup import setup_default_tools
+            from vertice_core.tools.registry_setup import setup_default_tools
 
             self.registry, self.mcp_client = setup_default_tools()
             print(f"Registry initialized with {len(self.registry.tools)} tools")

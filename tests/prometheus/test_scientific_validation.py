@@ -88,7 +88,7 @@ class ScientificValidator:
 
     async def setup(self):
         """Initialize PROMETHEUS components."""
-        from vertice_cli.core.providers.prometheus_provider import PrometheusProvider
+        from vertice_core.core.providers.prometheus_provider import PrometheusProvider
         from vertice_tui.core.prometheus_client import PrometheusClient
 
         self.provider = PrometheusProvider()
@@ -603,7 +603,7 @@ for i in range(10):
         """Test behavior without API key."""
         start = time.time()
         try:
-            from vertice_cli.core.providers.prometheus_provider import PrometheusProvider
+            from vertice_core.core.providers.prometheus_provider import PrometheusProvider
 
             # Create provider without key
             old_key = os.environ.pop("GEMINI_API_KEY", None)
@@ -639,7 +639,7 @@ for i in range(10):
         """Test handling of tool without provider."""
         start = time.time()
         try:
-            from vertice_cli.tools.prometheus_tools import PrometheusExecuteTool
+            from vertice_core.tools.prometheus_tools import PrometheusExecuteTool
 
             tool = PrometheusExecuteTool()  # No provider
             result = await tool._execute_validated(task="test")
@@ -665,7 +665,7 @@ for i in range(10):
         """Test status when not initialized."""
         start = time.time()
         try:
-            from vertice_cli.core.providers.prometheus_provider import PrometheusProvider
+            from vertice_core.core.providers.prometheus_provider import PrometheusProvider
 
             provider = PrometheusProvider()
             # Don't initialize
@@ -745,7 +745,7 @@ for i in range(10):
         """Benchmark initialization time."""
         start = time.time()
         try:
-            from vertice_cli.core.providers.prometheus_provider import PrometheusProvider
+            from vertice_core.core.providers.prometheus_provider import PrometheusProvider
 
             provider = PrometheusProvider()
             await provider._ensure_initialized()

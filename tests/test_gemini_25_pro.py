@@ -18,7 +18,7 @@ async def test_gemini25_pro():
     print("=" * 60)
 
     try:
-        from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+        from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
         # Set Project ID
         os.environ["GOOGLE_CLOUD_PROJECT"] = "vertice-ai"

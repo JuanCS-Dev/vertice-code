@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.abspath("src"))
 try:
     from vertice_tui.core.chat.controller import ChatController
     from vertice_tui.core.bridge import ToolBridge, AgentManager, GovernanceObserver
-    from vertice_cli.tools.base import ToolRegistry
+    from vertice_core.tools.base import ToolRegistry
 except ImportError as e:
     print(f"Import Error: {e}")
     sys.exit(1)

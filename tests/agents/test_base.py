@@ -18,7 +18,7 @@ from vertice_core.types import (
     AgentResponse,
     CapabilityViolationError,
 )
-from vertice_cli.agents.base import BaseAgent
+from vertice_core.agents.base import BaseAgent
 
 
 class TestAgentEnums:

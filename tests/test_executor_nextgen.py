@@ -8,7 +8,7 @@ import pytest
 import time
 
 # Import our agent
-from vertice_cli.agents.executor import (
+from vertice_core.agents.executor import (
     NextGenExecutorAgent,
     ExecutionMode,
     SecurityLevel,
@@ -17,9 +17,9 @@ from vertice_cli.agents.executor import (
     CodeExecutionEngine,
     CommandResult,
 )
-from vertice_cli.agents.base import AgentTask, AgentResponse
-from vertice_cli.core.llm import LLMClient
-from vertice_cli.core.mcp_client import MCPClient
+from vertice_core.agents.base import AgentTask, AgentResponse
+from vertice_core.core.llm import LLMClient
+from vertice_core.core.mcp_client import MCPClient
 
 
 # ============================================================================

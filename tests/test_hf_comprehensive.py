@@ -5,7 +5,7 @@ Tests every edge case, error condition, and real-world usage scenario
 import pytest
 import os
 import asyncio
-from vertice_cli.core.llm import LLMClient
+from vertice_core.core.llm import LLMClient
 
 # Real HF API Token
 HF_TOKEN = os.getenv("HF_TOKEN_GOD", os.getenv("HF_TOKEN"))

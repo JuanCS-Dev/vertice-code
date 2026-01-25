@@ -39,7 +39,7 @@ async def test_corrected_agent_apis():
     # Test NextGenExecutorAgent with correct API
     print("Testing NextGenExecutorAgent...")
     try:
-        from vertice_cli.agents.executor.agent import NextGenExecutorAgent
+        from vertice_core.agents.executor.agent import NextGenExecutorAgent
 
         # Use the correct API - only llm_client and mcp_client
         agent = NextGenExecutorAgent(llm_client=mock_llm, mcp_client=mock_mcp)
@@ -68,7 +68,7 @@ async def test_corrected_agent_apis():
     # Test PlannerAgent
     print("\nTesting PlannerAgent...")
     try:
-        from vertice_cli.agents.planner.agent import PlannerAgent
+        from vertice_core.agents.planner.agent import PlannerAgent
 
         agent = PlannerAgent(llm_client=mock_llm, mcp_client=mock_mcp)
 
@@ -82,7 +82,7 @@ async def test_corrected_agent_apis():
     # Test ArchitectAgent
     print("\nTesting ArchitectAgent...")
     try:
-        from vertice_cli.agents.architect import ArchitectAgent
+        from vertice_core.agents.architect import ArchitectAgent
 
         agent = ArchitectAgent(llm_client=mock_llm, mcp_client=mock_mcp)
 
@@ -210,9 +210,9 @@ class ComprehensiveAgentTestSuite:
         print("Testing Core Agents...")
 
         core_agents = [
-            ("NextGenExecutorAgent", "vertice_cli.agents.executor.agent"),
-            ("PlannerAgent", "vertice_cli.agents.planner.agent"),
-            ("ArchitectAgent", "vertice_cli.agents.architect"),
+            ("NextGenExecutorAgent", "vertice_core.agents.executor.agent"),
+            ("PlannerAgent", "vertice_core.agents.planner.agent"),
+            ("ArchitectAgent", "vertice_core.agents.architect"),
         ]
 
         for agent_name, module_path in core_agents:
@@ -245,10 +245,10 @@ class ComprehensiveAgentTestSuite:
         print("Testing Specialized Agents...")
 
         specialized_agents = [
-            ("ReviewerAgent", "vertice_cli.agents.reviewer.agent"),
-            ("ExplorerAgent", "vertice_cli.agents.explorer"),
-            ("JusticaIntegratedAgent", "vertice_cli.agents.justica_agent"),
-            ("SofiaIntegratedAgent", "vertice_cli.agents.sofia.agent"),
+            ("ReviewerAgent", "vertice_core.agents.reviewer.agent"),
+            ("ExplorerAgent", "vertice_core.agents.explorer"),
+            ("JusticaIntegratedAgent", "vertice_core.agents.justica_agent"),
+            ("SofiaIntegratedAgent", "vertice_core.agents.sofia.agent"),
         ]
 
         for agent_name, module_path in specialized_agents:

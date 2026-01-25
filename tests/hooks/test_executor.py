@@ -4,7 +4,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import Mock
 
-from vertice_cli.hooks import HookExecutor, HookEvent, HookContext, HookResult
+from vertice_core.hooks import HookExecutor, HookEvent, HookContext, HookResult
 
 
 class TestHookExecutor:

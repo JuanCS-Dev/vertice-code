@@ -65,9 +65,9 @@ def main():
         "from vertice_tui.core import Bridge, OutputFormatter, ToolCallParser",
     )
 
-    test("Import vertice_cli.tools", "from vertice_cli.tools.base import Tool, ToolRegistry")
+    test("Import vertice_core.tools", "from vertice_core.tools.base import Tool, ToolRegistry")
 
-    test("Import vertice_cli.agents", "from vertice_cli.agents.base import BaseAgent")
+    test("Import vertice_core.agents", "from vertice_core.agents.base import BaseAgent")
 
     # =========================================================================
     # 2. BRIDGE

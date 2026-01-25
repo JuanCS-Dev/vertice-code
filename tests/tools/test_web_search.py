@@ -1,7 +1,7 @@
 """Tests for web search tools."""
 import pytest
 
-from vertice_cli.tools.web_search import WebSearchTool, SearchDocumentationTool
+from vertice_core.tools.web_search import WebSearchTool, SearchDocumentationTool
 
 
 class TestWebSearchTool:

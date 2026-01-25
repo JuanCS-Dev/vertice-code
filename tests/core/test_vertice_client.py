@@ -15,7 +15,7 @@ import pytest
 from unittest.mock import patch
 from typing import AsyncIterator, Dict, List
 
-from vertice_core.clients.vertice_client import (
+from vertice_core.clients.vertice_coreent import (
     VerticeClient,
     VerticeClientConfig,
     AllProvidersExhaustedError,
@@ -326,7 +326,7 @@ class TestVerticeClientFactory:
 
     def test_get_client_singleton(self):
         """get_client returns singleton by default."""
-        from vertice_core.clients.vertice_client import get_client
+        from vertice_core.clients.vertice_coreent import get_client
 
         client1 = get_client()
         client2 = get_client()
@@ -334,7 +334,7 @@ class TestVerticeClientFactory:
 
     def test_get_client_force_new(self):
         """get_client with force_new creates new instance."""
-        from vertice_core.clients.vertice_client import get_client
+        from vertice_core.clients.vertice_coreent import get_client
 
         client1 = get_client()
         client2 = get_client(force_new=True)
@@ -342,7 +342,7 @@ class TestVerticeClientFactory:
 
     def test_get_client_custom_config(self):
         """get_client with config creates new instance."""
-        from vertice_core.clients.vertice_client import get_client
+        from vertice_core.clients.vertice_coreent import get_client
 
         config = VerticeClientConfig(priority=["azure"])
         client = get_client(config=config)

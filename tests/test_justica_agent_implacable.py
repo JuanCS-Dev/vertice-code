@@ -35,10 +35,10 @@ import pytest
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from vertice_cli.agents.justica_agent import (
+from vertice_core.agents.justica_agent import (
     JusticaIntegratedAgent,
 )
-from vertice_cli.agents.base import AgentTask, AgentResponse, AgentRole
+from vertice_core.agents.base import AgentTask, AgentResponse, AgentRole
 from vertice_governance.justica import (
     EnforcementMode,
 )
@@ -170,7 +170,7 @@ class TestInitialization:
 
     def test_init_capabilities_correct(self, justica_agent):
         """TEST 007: Capabilities devem incluir READ_ONLY e FILE_EDIT."""
-        from vertice_cli.agents.base import AgentCapability
+        from vertice_core.agents.base import AgentCapability
 
         assert AgentCapability.READ_ONLY in justica_agent.capabilities
         assert AgentCapability.FILE_EDIT in justica_agent.capabilities

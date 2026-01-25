@@ -91,7 +91,7 @@ class TestAgentFallback:
     def test_agent_fallback_on_error(self):
         """Agent falls back gracefully on error."""
         try:
-            from vertice_cli.agents.base import BaseAgent
+            from vertice_core.agents.base import BaseAgent
 
             # Check that base agent has error handling
             assert hasattr(BaseAgent, "execute") or True
@@ -117,7 +117,7 @@ class TestAgentCapabilities:
     def test_agent_capabilities_exist(self):
         """Agents have capability declarations."""
         try:
-            from vertice_cli.agents.base import BaseAgent
+            from vertice_core.agents.base import BaseAgent
 
             # Check base agent has required methods
             assert hasattr(BaseAgent, "execute") or hasattr(BaseAgent, "stream_execute")
@@ -127,7 +127,7 @@ class TestAgentCapabilities:
     def test_planner_is_planning_capable(self, mock_llm_client, mock_mcp_client):
         """Planner has planning capability."""
         try:
-            from vertice_cli.agents.planner.agent import PlannerAgent
+            from vertice_core.agents.planner.agent import PlannerAgent
 
             planner = PlannerAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
             assert hasattr(planner, "execute")
@@ -141,7 +141,7 @@ class TestAgentErrorHandling:
     def test_base_agent_has_error_handling(self):
         """Base agent has error handling method."""
         try:
-            from vertice_cli.agents.base import BaseAgent
+            from vertice_core.agents.base import BaseAgent
 
             # BaseAgent should define error handling
             assert hasattr(BaseAgent, "execute") or True
@@ -166,7 +166,7 @@ class TestAgentStreaming:
     def test_base_agent_has_stream_method(self):
         """Base agent has streaming method."""
         try:
-            from vertice_cli.agents.base import BaseAgent
+            from vertice_core.agents.base import BaseAgent
 
             # Check for streaming capability
             assert hasattr(BaseAgent, "stream_execute") or hasattr(BaseAgent, "execute")

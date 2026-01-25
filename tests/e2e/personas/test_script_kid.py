@@ -26,11 +26,11 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from vertice_cli.core.input_validator import InputValidator  # noqa: E402
-from vertice_cli.core.sandbox import SecureExecutor  # noqa: E402
-from vertice_cli.core.python_sandbox import PythonSandbox  # noqa: E402
-from vertice_cli.core.prompt_shield import PromptShield  # noqa: E402
-from vertice_cli.core.audit_logger import AuditLogger, AuditEventType  # noqa: E402
+from vertice_core.core.input_validator import InputValidator  # noqa: E402
+from vertice_core.core.sandbox import SecureExecutor  # noqa: E402
+from vertice_core.core.python_sandbox import PythonSandbox  # noqa: E402
+from vertice_core.core.prompt_shield import PromptShield  # noqa: E402
+from vertice_core.core.audit_logger import AuditLogger, AuditEventType  # noqa: E402
 
 
 # ==============================================================================

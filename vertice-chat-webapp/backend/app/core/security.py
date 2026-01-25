@@ -24,7 +24,7 @@ FALLBACK_PATTERNS = {
 }
 
 try:
-    from src.vertice_cli.agents.security.patterns import compile_security_patterns
+    from vertice_core.agents.security.patterns import compile_security_patterns
 
     SHARED_PATTERNS = compile_security_patterns()
     logger.info("Successfully loaded shared security patterns from CLI module.")

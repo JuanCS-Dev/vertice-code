@@ -53,12 +53,12 @@ class TestOpenResponsesCLIE2E:
         )
 
         try:
-            from vertice_cli.core.providers.vertice_router import get_router
+            from vertice_core.core.providers.vertice_router import get_router
 
             router = get_router()
 
             # Test routing decision for Open Responses compatible request
-            from vertice_cli.core.providers.vertice_router import TaskComplexity, SpeedRequirement
+            from vertice_core.core.providers.vertice_router import TaskComplexity, SpeedRequirement
 
             decision = router.route(complexity=TaskComplexity.MODERATE, speed=SpeedRequirement.FAST)
 
@@ -135,8 +135,8 @@ class TestOpenResponsesCLIE2E:
         )
 
         try:
-            from vertice_cli.agents.executor.agent import NextGenExecutorAgent
-            from vertice_cli.core.providers.vertice_router import get_router
+            from vertice_core.agents.executor.agent import NextGenExecutorAgent
+            from vertice_core.core.providers.vertice_router import get_router
             from vertice_core.types import AgentTask
 
             # Criar mock agent

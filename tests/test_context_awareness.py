@@ -4,8 +4,8 @@
 import os
 import pytest
 
-from vertice_cli.shell import SessionContext
-from vertice_cli.core.context import ContextBuilder
+from vertice_core.shell import SessionContext
+from vertice_core.core.context import ContextBuilder
 
 
 class TestSessionContext:

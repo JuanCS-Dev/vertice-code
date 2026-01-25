@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from datetime import datetime, timedelta
 
-from vertice_cli.session.manager import SessionManager
+from vertice_core.session.manager import SessionManager
 
 
 class TestSessionManager:

@@ -20,7 +20,7 @@ import pytest
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
-from vertice_cli.agents.base import (
+from vertice_core.agents.base import (
     AgentRole,
     AgentCapability,
     AgentTask,

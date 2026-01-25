@@ -7,8 +7,8 @@ Replaces tests 101-200 from test_500_brutal_tests.py (~1410 lines → ~50 lines)
 import pytest
 from unittest.mock import Mock, AsyncMock
 
-from vertice_cli.maestro_governance import MaestroGovernance
-from vertice_cli.agents.base import AgentTask, AgentResponse, AgentRole
+from vertice_core.maestro_governance import MaestroGovernance
+from vertice_core.agents.base import AgentTask, AgentResponse, AgentRole
 
 
 @pytest.mark.asyncio

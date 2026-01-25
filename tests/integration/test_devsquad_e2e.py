@@ -15,11 +15,11 @@ import pytest
 import os
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from vertice_cli.core.llm import LLMClient
-from vertice_cli.core.mcp_client import MCPClient
-from vertice_cli.tools.registry_helper import get_default_registry
-from vertice_cli.orchestration.squad import DevSquad, WorkflowStatus, WorkflowPhase
-from vertice_cli.orchestration.workflows import WorkflowLibrary
+from vertice_core.core.llm import LLMClient
+from vertice_core.core.mcp_client import MCPClient
+from vertice_core.tools.registry_helper import get_default_registry
+from vertice_core.orchestration.squad import DevSquad, WorkflowStatus, WorkflowPhase
+from vertice_core.orchestration.workflows import WorkflowLibrary
 
 # Skip if no API keys
 requires_api_key = pytest.mark.skipif(
@@ -68,7 +68,7 @@ async def test_e2e_jwt_authentication(real_squad, tmp_path):
         print(f"\n🚀 E2E Test: {request}")
 
         # Mock Refactorer execution to avoid actual file changes
-        with patch("vertice_cli.agents.refactorer.RefactorerAgent.execute") as mock_refactor:
+        with patch("vertice_core.agents.refactorer.RefactorerAgent.execute") as mock_refactor:
             mock_refactor.return_value = AsyncMock(
                 success=True,
                 data={"steps_completed": 5, "files_modified": ["app/auth.py"]},
@@ -125,7 +125,7 @@ async def test_e2e_setup_fastapi_project(real_squad, tmp_path):
         print(f"   Steps: {len(workflow.steps)}")
 
         # Mock Refactorer to avoid actual execution
-        with patch("vertice_cli.agents.refactorer.RefactorerAgent.execute") as mock_refactor:
+        with patch("vertice_core.agents.refactorer.RefactorerAgent.execute") as mock_refactor:
             mock_refactor.return_value = AsyncMock(
                 success=True,
                 data={"steps_completed": len(workflow.steps)},
@@ -192,8 +192,8 @@ async def test_e2e_self_correction():
     Validates that Refactorer has retry logic capability.
     Note: This is a simplified test that validates the agent structure.
     """
-    from vertice_cli.agents.refactorer import RefactorerAgent
-    from vertice_cli.agents.base import AgentTask
+    from vertice_core.agents.refactorer import RefactorerAgent
+    from vertice_core.agents.base import AgentTask
 
     print("\n🚀 E2E Test: Self-Correction")
 
@@ -245,7 +245,7 @@ async def test_e2e_constitutional_ai(real_squad):
     print(f"   Request: {request}")
 
     # Mock Refactorer to return code with eval()
-    with patch("vertice_cli.agents.refactorer.RefactorerAgent.execute") as mock_refactor:
+    with patch("vertice_core.agents.refactorer.RefactorerAgent.execute") as mock_refactor:
         mock_refactor.return_value = AsyncMock(
             success=True,
             data={

@@ -14,7 +14,7 @@ sys.path.insert(0, "/media/juan/DATA/Vertice-Code/src")
 
 async def test_sse_generation():
     """Test that stream_open_responses generates valid SSE events."""
-    from vertice_core.clients.vertice_client import VerticeClient
+    from vertice_core.clients.vertice_coreent import VerticeClient
     from vertice_tui.core.openresponses_events import (
         OpenResponsesParser,
         OpenResponsesOutputTextDeltaEvent,

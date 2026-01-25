@@ -87,7 +87,7 @@ class Calculator:
                     json={
                         "messages": [{"role": "user", "content": prompt}],
                         "stream": True,
-                        "model": "gemini-3-pro-preview",
+                        "model": "gemini-3-flash",
                     },
                 )
 

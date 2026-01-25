@@ -100,7 +100,7 @@ class TUIComprehensiveE2E:
 
     async def test_streaming_latency(self) -> E2ETestResult:
         """Test: First chunk latency should be < 5 seconds (accounts for cold start)."""
-        from vertice_cli.providers.vertex_ai import VertexAIProvider
+        from vertice_core.providers.vertex_ai import VertexAIProvider
         
         metrics = TestMetrics()
         provider = VertexAIProvider(project="vertice-ai", location="global", model_name="flash")
@@ -146,7 +146,7 @@ class TUIComprehensiveE2E:
 
     async def test_throughput(self) -> E2ETestResult:
         """Test: Should generate at least 2 tokens/second (realistic for Vertex AI cold start)."""
-        from vertice_cli.providers.vertex_ai import VertexAIProvider
+        from vertice_core.providers.vertex_ai import VertexAIProvider
         
         metrics = TestMetrics()
         provider = VertexAIProvider(project="vertice-ai", location="global", model_name="flash")
@@ -190,7 +190,7 @@ class TUIComprehensiveE2E:
 
     async def test_file_read_tool(self) -> E2ETestResult:
         """Test: File read tool should work correctly."""
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
         
         metrics = TestMetrics()
         start = time.perf_counter()
@@ -224,7 +224,7 @@ class TUIComprehensiveE2E:
 
     async def test_shell_tool(self) -> E2ETestResult:
         """Test: Shell command execution should work."""
-        from vertice_cli.tools.exec_hardened import BashCommandTool
+        from vertice_core.tools.exec_hardened import BashCommandTool
         
         metrics = TestMetrics()
         start = time.perf_counter()
@@ -459,7 +459,7 @@ class TUIComprehensiveE2E:
 
     async def test_plan_generation_quality(self) -> E2ETestResult:
         """Test: Generated plans should be actionable and clear."""
-        from vertice_cli.providers.vertex_ai import VertexAIProvider
+        from vertice_core.providers.vertex_ai import VertexAIProvider
         
         metrics = TestMetrics()
         quality = QualityScore(max_score=100)

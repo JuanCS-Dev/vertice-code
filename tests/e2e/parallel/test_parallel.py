@@ -21,7 +21,7 @@ class TestParallelToolExecution:
     @pytest.mark.asyncio
     async def test_parallel_file_reads(self):
         """Test multiple file reads in parallel."""
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace = Path(tmpdir)
@@ -49,7 +49,7 @@ class TestParallelToolExecution:
     @pytest.mark.asyncio
     async def test_parallel_file_writes(self):
         """Test multiple file writes in parallel."""
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace = Path(tmpdir)
@@ -75,7 +75,7 @@ class TestParallelToolExecution:
     @pytest.mark.asyncio
     async def test_parallel_bash_commands(self):
         """Test multiple bash commands in parallel."""
-        from vertice_cli.tools.exec_hardened import BashCommandToolHardened
+        from vertice_core.tools.exec_hardened import BashCommandToolHardened
 
         tool = BashCommandToolHardened()
 
@@ -98,7 +98,7 @@ class TestParallelToolExecution:
     @pytest.mark.asyncio
     async def test_parallel_mixed_success_failure(self):
         """Test parallel execution with mixed success/failure."""
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         tool = ReadFileTool()
 
@@ -210,7 +210,7 @@ class TestConcurrencyPatterns:
     @pytest.mark.asyncio
     async def test_semaphore_limited_concurrency(self):
         """Test limited concurrency with semaphore."""
-        from vertice_cli.tools.exec_hardened import BashCommandToolHardened
+        from vertice_core.tools.exec_hardened import BashCommandToolHardened
 
         tool = BashCommandToolHardened()
         semaphore = asyncio.Semaphore(3)  # Max 3 concurrent
@@ -228,7 +228,7 @@ class TestConcurrencyPatterns:
     @pytest.mark.asyncio
     async def test_timeout_handling(self):
         """Test timeout handling in parallel execution."""
-        from vertice_cli.tools.exec_hardened import BashCommandToolHardened
+        from vertice_core.tools.exec_hardened import BashCommandToolHardened
 
         tool = BashCommandToolHardened()
 
@@ -258,7 +258,7 @@ class TestParallelPerformance:
     async def test_parallel_faster_than_sequential(self):
         """Test that parallel is faster than sequential."""
         import time
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace = Path(tmpdir)
@@ -293,7 +293,7 @@ class TestRaceConditions:
     @pytest.mark.asyncio
     async def test_concurrent_writes_to_different_files(self):
         """Test concurrent writes to different files (should be safe)."""
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace = Path(tmpdir)
@@ -316,7 +316,7 @@ class TestRaceConditions:
     @pytest.mark.asyncio
     async def test_concurrent_reads_same_file(self):
         """Test concurrent reads of the same file (should be safe)."""
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace = Path(tmpdir)
@@ -339,7 +339,7 @@ class TestParallelErrorHandling:
     @pytest.mark.asyncio
     async def test_gather_with_return_exceptions(self):
         """Test gather with return_exceptions for graceful failure handling."""
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         tool = ReadFileTool()
 
@@ -360,7 +360,7 @@ class TestParallelErrorHandling:
     @pytest.mark.asyncio
     async def test_partial_failure_continues(self):
         """Test that partial failures don't stop other tasks."""
-        from vertice_cli.tools.exec_hardened import BashCommandToolHardened
+        from vertice_core.tools.exec_hardened import BashCommandToolHardened
 
         tool = BashCommandToolHardened()
 

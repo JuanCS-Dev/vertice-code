@@ -25,7 +25,7 @@ class TestSecurityAudit:
         )
 
         try:
-            from vertice_cli.tools.search import SearchFilesTool
+            from vertice_core.tools.search import SearchFilesTool
 
             search_tool = SearchFilesTool()
 
@@ -92,8 +92,8 @@ class TestSecurityAudit:
         )
 
         try:
-            from vertice_cli.tools.file_ops import WriteFileTool
-            from vertice_cli.tools.search import SearchFilesTool
+            from vertice_core.tools.file_ops import WriteFileTool
+            from vertice_core.tools.search import SearchFilesTool
 
             write_tool = WriteFileTool()
             search_tool = SearchFilesTool()
@@ -211,8 +211,8 @@ class TestCodeQualityAudit:
         )
 
         try:
-            from vertice_cli.tools.file_ops import WriteFileTool
-            from vertice_cli.tools.search import SearchFilesTool
+            from vertice_core.tools.file_ops import WriteFileTool
+            from vertice_core.tools.search import SearchFilesTool
 
             write_tool = WriteFileTool()
             search_tool = SearchFilesTool()
@@ -385,7 +385,7 @@ OLD_CONSTANT = "not used"
         )
 
         try:
-            from vertice_cli.tools.search import SearchFilesTool
+            from vertice_core.tools.search import SearchFilesTool
 
             search_tool = SearchFilesTool()
 
@@ -464,8 +464,8 @@ class TestComplianceAudit:
         )
 
         try:
-            from vertice_cli.tools.file_ops import WriteFileTool
-            from vertice_cli.tools.search import SearchFilesTool
+            from vertice_core.tools.file_ops import WriteFileTool
+            from vertice_core.tools.search import SearchFilesTool
 
             write_tool = WriteFileTool()
             SearchFilesTool()
@@ -560,7 +560,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
         )
 
         try:
-            from vertice_cli.tools.search import SearchFilesTool
+            from vertice_core.tools.search import SearchFilesTool
 
             search_tool = SearchFilesTool()
 

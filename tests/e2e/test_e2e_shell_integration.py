@@ -41,7 +41,7 @@ class TestToolRegistry:
 
     def test_registry_loads_all_tools(self):
         """Test that all expected tools are registered."""
-        from vertice_cli.tools.registry_setup import create_full_registry
+        from vertice_core.tools.registry_setup import create_full_registry
 
         registry = create_full_registry()
         schemas = registry.get_schemas()
@@ -59,7 +59,7 @@ class TestToolRegistry:
 
     def test_registry_includes_think_tool(self):
         """Test that think tool is registered."""
-        from vertice_cli.tools.registry_setup import create_full_registry
+        from vertice_core.tools.registry_setup import create_full_registry
 
         registry = create_full_registry(include_think=True)
         tool = registry.get("think")
@@ -68,7 +68,7 @@ class TestToolRegistry:
 
     def test_tool_schemas_valid(self):
         """Test that all tool schemas are valid."""
-        from vertice_cli.tools.registry_setup import create_full_registry
+        from vertice_core.tools.registry_setup import create_full_registry
 
         registry = create_full_registry()
         schemas = registry.get_schemas()
@@ -83,14 +83,14 @@ class TestIntentClassification:
 
     @pytest.fixture
     def classifier(self):
-        from vertice_cli.core.intent_classifier import SemanticIntentClassifier
+        from vertice_core.core.intent_classifier import SemanticIntentClassifier
 
         return SemanticIntentClassifier()
 
     @pytest.mark.asyncio
     async def test_portuguese_intent_accuracy(self, classifier):
         """Test Portuguese intent classification accuracy."""
-        from vertice_cli.core.intent_classifier import Intent
+        from vertice_core.core.intent_classifier import Intent
 
         test_cases = [
             ("mostra o arquivo main.py", Intent.EXPLORE),
@@ -115,7 +115,7 @@ class TestIntentClassification:
     @pytest.mark.asyncio
     async def test_english_intent_accuracy(self, classifier):
         """Test English intent classification accuracy."""
-        from vertice_cli.core.intent_classifier import Intent
+        from vertice_core.core.intent_classifier import Intent
 
         test_cases = [
             ("show me the file main.py", Intent.EXPLORE),
@@ -142,7 +142,7 @@ class TestRequestAmplifier:
     @pytest.mark.asyncio
     async def test_amplification_adds_context(self):
         """Test that amplification adds relevant context."""
-        from vertice_cli.core.request_amplifier import RequestAmplifier
+        from vertice_core.core.request_amplifier import RequestAmplifier
 
         context = {
             "cwd": "/project/src",
@@ -160,7 +160,7 @@ class TestRequestAmplifier:
     @pytest.mark.asyncio
     async def test_vagueness_detection(self):
         """Test vagueness detection for short requests."""
-        from vertice_cli.core.request_amplifier import RequestAmplifier
+        from vertice_core.core.request_amplifier import RequestAmplifier
 
         amplifier = RequestAmplifier()
 
@@ -173,7 +173,7 @@ class TestRequestAmplifier:
     @pytest.mark.asyncio
     async def test_missing_details_detection(self):
         """Test missing details detection by intent."""
-        from vertice_cli.core.request_amplifier import RequestAmplifier
+        from vertice_core.core.request_amplifier import RequestAmplifier
 
         amplifier = RequestAmplifier()
 
@@ -187,7 +187,7 @@ class TestComplexityAnalyzer:
 
     def test_simple_requests_low_complexity(self):
         """Test that simple requests have low complexity."""
-        from vertice_cli.core.complexity_analyzer import analyze_complexity
+        from vertice_core.core.complexity_analyzer import analyze_complexity
 
         simple_requests = [
             "mostra o readme",
@@ -202,8 +202,8 @@ class TestComplexityAnalyzer:
 
     def test_complex_requests_high_complexity(self):
         """Test that complex requests trigger thinking."""
-        from vertice_cli.core.complexity_analyzer import ComplexityAnalyzer
-        from vertice_cli.core.intent_classifier import Intent
+        from vertice_core.core.complexity_analyzer import ComplexityAnalyzer
+        from vertice_core.core.intent_classifier import Intent
 
         # Adjust threshold for testing
         analyzer = ComplexityAnalyzer()
@@ -285,7 +285,7 @@ class TestToolExecution:
     @pytest.mark.asyncio
     async def test_readfile_tool(self, temp_dir):
         """Test readfile tool execution."""
-        from vertice_cli.tools.registry_setup import create_full_registry
+        from vertice_core.tools.registry_setup import create_full_registry
 
         # Create test file
         test_file = temp_dir / "test.txt"
@@ -303,7 +303,7 @@ class TestToolExecution:
     @pytest.mark.asyncio
     async def test_writefile_tool(self, temp_dir):
         """Test writefile tool execution."""
-        from vertice_cli.tools.registry_setup import create_full_registry
+        from vertice_core.tools.registry_setup import create_full_registry
 
         registry = create_full_registry()
 
@@ -319,7 +319,7 @@ class TestToolExecution:
     @pytest.mark.asyncio
     async def test_think_tool(self):
         """Test think tool execution."""
-        from vertice_cli.tools.think_tool import ThinkTool
+        from vertice_core.tools.think_tool import ThinkTool
 
         tool = ThinkTool()
         result = await tool.execute(
@@ -341,7 +341,7 @@ class TestConversationContext:
 
     def test_context_tracks_files(self):
         """Test that context tracks file operations."""
-        from vertice_cli.core.session_context import SessionContext
+        from vertice_core.core.session_context import SessionContext
 
         context = SessionContext()
 
@@ -351,7 +351,7 @@ class TestConversationContext:
 
     def test_context_tracks_modified(self):
         """Test that context tracks modified files."""
-        from vertice_cli.core.session_context import SessionContext
+        from vertice_core.core.session_context import SessionContext
 
         context = SessionContext()
 
@@ -364,7 +364,7 @@ class TestPromptGeneration:
 
     def test_enhanced_prompt_includes_sections(self):
         """Test that enhanced prompt includes all PTCF sections."""
-        from vertice_cli.prompts.system_prompts import build_enhanced_system_prompt
+        from vertice_core.prompts.system_prompts import build_enhanced_system_prompt
 
         tool_schemas = [
             {"name": "readfile", "description": "Read file", "parameters": {}, "category": "file"},
@@ -394,7 +394,7 @@ class TestPromptGeneration:
 
     def test_prompt_includes_multilingual(self):
         """Test that prompt includes multilingual support section."""
-        from vertice_cli.prompts.system_prompts import build_enhanced_system_prompt
+        from vertice_core.prompts.system_prompts import build_enhanced_system_prompt
 
         prompt = build_enhanced_system_prompt([], {})
 
@@ -406,7 +406,7 @@ class TestFewShotExamples:
 
     def test_portuguese_examples_exist(self):
         """Test that Portuguese examples are available."""
-        from vertice_cli.prompts.few_shot_examples import FEW_SHOT_EXAMPLES_PTBR
+        from vertice_core.prompts.few_shot_examples import FEW_SHOT_EXAMPLES_PTBR
 
         assert len(FEW_SHOT_EXAMPLES_PTBR) >= 5, "Expected at least 5 Portuguese examples"
 
@@ -417,7 +417,7 @@ class TestFewShotExamples:
 
     def test_bilingual_example_selection(self):
         """Test bilingual example selection."""
-        from vertice_cli.prompts.few_shot_examples import get_bilingual_examples
+        from vertice_core.prompts.few_shot_examples import get_bilingual_examples
 
         # Portuguese input should get Portuguese examples
         pt_examples = get_bilingual_examples("mostra o arquivo main.py")
@@ -433,7 +433,7 @@ class TestErrorMessages:
 
     def test_error_messages_bilingual(self):
         """Test that error messages are bilingual."""
-        from vertice_cli.core.error_messages import ERROR_MESSAGES
+        from vertice_core.core.error_messages import ERROR_MESSAGES
 
         # Check that messages have both languages
         for key, messages in ERROR_MESSAGES.items():
@@ -442,7 +442,7 @@ class TestErrorMessages:
 
     def test_get_error_message_formatting(self):
         """Test error message formatting."""
-        from vertice_cli.core.error_messages import get_error_message
+        from vertice_core.core.error_messages import get_error_message
 
         # English
         en_msg = get_error_message("file_not_found", "en", path="/test.py")
@@ -463,7 +463,7 @@ class TestCLIExecution:
 
     @pytest.fixture
     def temp_dir(self):
-        d = tempfile.mkdtemp(prefix="vertice_cli_test_")
+        d = tempfile.mkdtemp(prefix="vertice_core_test_")
         yield Path(d)
         import shutil
 
@@ -502,7 +502,7 @@ class TestStress:
     @pytest.mark.asyncio
     async def test_rapid_classification(self):
         """Test rapid intent classification."""
-        from vertice_cli.core.intent_classifier import SemanticIntentClassifier
+        from vertice_core.core.intent_classifier import SemanticIntentClassifier
 
         classifier = SemanticIntentClassifier()
 
@@ -524,7 +524,7 @@ class TestStress:
     @pytest.mark.asyncio
     async def test_rapid_amplification(self):
         """Test rapid request amplification."""
-        from vertice_cli.core.request_amplifier import RequestAmplifier
+        from vertice_core.core.request_amplifier import RequestAmplifier
 
         context = {"cwd": "/project"}
         amplifier = RequestAmplifier(context=context)

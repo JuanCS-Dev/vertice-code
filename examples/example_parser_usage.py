@@ -8,8 +8,8 @@ Demonstrates:
 """
 
 import asyncio
-from vertice_cli.core.parser import ResponseParser
-from vertice_cli.core.llm import LLMClient
+from vertice_core.core.parser import ResponseParser
+from vertice_core.core.llm import LLMClient
 
 
 async def main():

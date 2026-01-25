@@ -72,7 +72,7 @@ class E2ETester:
         print("📦 Testing Component Imports...")
 
         components = [
-            ("vertice_cli", "CLI"),
+            ("vertice_core", "CLI"),
             ("vertice_tui", "TUI"),
             ("vertice_core", "Core"),
             ("prometheus", "Prometheus"),
@@ -212,7 +212,7 @@ class E2ETester:
 
             run_cli = functools.partial(
                 subprocess.run,
-                [sys.executable, "-m", "vertice_cli.main", "--help"],
+                [sys.executable, "-m", "vertice_core.main", "--help"],
                 capture_output=True,
                 text=True,
                 timeout=10,

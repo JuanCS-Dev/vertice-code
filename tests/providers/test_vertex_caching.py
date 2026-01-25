@@ -30,7 +30,7 @@ import pytest
 def get_cache_manager_class() -> Type:
     """Import VertexCacheManager directly to avoid protobuf conflicts."""
     spec = importlib.util.spec_from_file_location(
-        "vertex_cache", "vertice_cli/core/providers/vertex_cache.py"
+        "vertex_cache", "vertice_core/core/providers/vertex_cache.py"
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -273,7 +273,7 @@ class TestStreamChatWithCache:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
             provider._client = True
@@ -303,7 +303,7 @@ class TestStreamChatWithCache:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
             provider._client = True
@@ -335,8 +335,8 @@ class TestVertexCachingIntegration:
     @pytest.mark.asyncio
     async def test_real_cache_lifecycle(self) -> None:
         """Integration test: Create, use, and delete cache."""
-        from vertice_cli.core.providers.vertex_cache import VertexCacheManager
-        from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+        from vertice_core.core.providers.vertex_cache import VertexCacheManager
+        from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
         manager = VertexCacheManager()
         provider = VertexAIProvider()

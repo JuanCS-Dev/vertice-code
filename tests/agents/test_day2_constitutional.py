@@ -14,9 +14,9 @@ import pytest
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from vertice_cli.agents.testing import TestRunnerAgent
-from vertice_cli.agents.refactor import RefactorAgent
-from vertice_cli.agents.base import AgentTask, AgentRole, AgentCapability
+from vertice_core.agents.testing import TestRunnerAgent
+from vertice_core.agents.refactor import RefactorAgent
+from vertice_core.agents.base import AgentTask, AgentRole, AgentCapability
 
 
 # ============================================================================
@@ -33,7 +33,7 @@ class TestConstitutionalCompliance:
         TestRunnerAgent(model=MagicMock())
 
         # Check source code
-        source_file = Path("vertice_cli/agents/testing.py")
+        source_file = Path("vertice_core/agents/testing.py")
         if source_file.exists():
             content = source_file.read_text()
             assert "TODO" not in content
@@ -45,7 +45,7 @@ class TestConstitutionalCompliance:
         """Art. II: Zero placeholders in RefactorAgent."""
         RefactorAgent(llm_client=MagicMock(), mcp_client=MagicMock())
 
-        source_file = Path("vertice_cli/agents/refactor.py")
+        source_file = Path("vertice_core/agents/refactor.py")
         if source_file.exists():
             content = source_file.read_text()
             assert "TODO" not in content

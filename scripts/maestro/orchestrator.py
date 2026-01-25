@@ -2,21 +2,21 @@
 from datetime import datetime
 from typing import Dict
 
-from vertice_cli.core.llm import LLMClient
-from vertice_cli.core.mcp_client import MCPClient
-from vertice_cli.agents.base import AgentTask, AgentResponse
-from vertice_cli.agents.planner import PlannerAgent
-from vertice_cli.agents.reviewer import ReviewerAgent
-from vertice_cli.agents.refactorer import RefactorerAgent
-from vertice_cli.agents.explorer import ExplorerAgent
-from vertice_cli.agents.executor import NextGenExecutorAgent, ExecutionMode, SecurityLevel
-from vertice_cli.agents.architect import ArchitectAgent
-from vertice_cli.agents.security import SecurityAgent
-from vertice_cli.agents.performance import PerformanceAgent
-from vertice_cli.agents.testing import TestRunnerAgent
-from vertice_cli.agents.documentation import DocumentationAgent
-from vertice_cli.agents.data_agent_production import create_data_agent
-from vertice_cli.agents.devops import create_devops_agent
+from vertice_core.core.llm import LLMClient
+from vertice_core.core.mcp_client import MCPClient
+from vertice_core.agents.base import AgentTask, AgentResponse
+from vertice_core.agents.planner import PlannerAgent
+from vertice_core.agents.reviewer import ReviewerAgent
+from vertice_core.agents.refactorer import RefactorerAgent
+from vertice_core.agents.explorer import ExplorerAgent
+from vertice_core.agents.executor import NextGenExecutorAgent, ExecutionMode, SecurityLevel
+from vertice_core.agents.architect import ArchitectAgent
+from vertice_core.agents.security import SecurityAgent
+from vertice_core.agents.performance import PerformanceAgent
+from vertice_core.agents.testing import TestRunnerAgent
+from vertice_core.agents.documentation import DocumentationAgent
+from vertice_core.agents.data_agent_production import create_data_agent
+from vertice_core.agents.devops import create_devops_agent
 
 from .routing import route_to_agent
 

@@ -17,7 +17,7 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from dataclasses import asdict
 
-from vertice_cli.agents.executor import (
+from vertice_core.agents.executor import (
     ExecutionMode,
     SecurityLevel,
     CommandCategory,
@@ -27,13 +27,13 @@ from vertice_cli.agents.executor import (
     CodeExecutionEngine,
     NextGenExecutorAgent,
 )
-from vertice_cli.agents.base import (
+from vertice_core.agents.base import (
     AgentRole,
     AgentCapability,
     AgentTask,
     AgentResponse,
 )
-from vertice_cli.permissions import PermissionLevel
+from vertice_core.permissions import PermissionLevel
 
 
 # =============================================================================

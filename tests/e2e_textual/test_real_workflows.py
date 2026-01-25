@@ -25,7 +25,7 @@ class TestFileOperations:
         )
 
         try:
-            from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
+            from vertice_core.tools.file_ops import WriteFileTool, ReadFileTool
 
             write_tool = WriteFileTool()
             read_tool = ReadFileTool()
@@ -85,7 +85,7 @@ if __name__ == "__main__":
         )
 
         try:
-            from vertice_cli.tools.file_ops import WriteFileTool, EditFileTool, ReadFileTool
+            from vertice_core.tools.file_ops import WriteFileTool, EditFileTool, ReadFileTool
 
             write_tool = WriteFileTool()
             edit_tool = EditFileTool()
@@ -148,7 +148,7 @@ class TestSearchOperations:
         )
 
         try:
-            from vertice_cli.tools.search import SearchFilesTool
+            from vertice_core.tools.search import SearchFilesTool
 
             search_tool = SearchFilesTool()
 
@@ -197,7 +197,7 @@ class TestSearchOperations:
         )
 
         try:
-            from vertice_cli.tools.search import SearchFilesTool
+            from vertice_core.tools.search import SearchFilesTool
 
             search_tool = SearchFilesTool()
 
@@ -243,7 +243,7 @@ class TestProjectCreation:
         )
 
         try:
-            from vertice_cli.tools.file_ops import WriteFileTool
+            from vertice_core.tools.file_ops import WriteFileTool
 
             write_tool = WriteFileTool()
 
@@ -363,7 +363,7 @@ class TestGitOperations:
         )
 
         try:
-            from vertice_cli.tools.git_ops import GitStatusTool
+            from vertice_core.tools.git_ops import GitStatusTool
 
             status_tool = GitStatusTool()
 
@@ -411,7 +411,7 @@ class TestPlanMode:
         )
 
         try:
-            from vertice_cli.tools.plan_mode import (
+            from vertice_core.tools.plan_mode import (
                 EnterPlanModeTool,
                 ExitPlanModeTool,
                 get_plan_state,
@@ -485,8 +485,8 @@ class TestCombinedWorkflow:
         )
 
         try:
-            from vertice_cli.tools.search import SearchFilesTool
-            from vertice_cli.tools.file_ops import ReadFileTool, EditFileTool
+            from vertice_core.tools.search import SearchFilesTool
+            from vertice_core.tools.file_ops import ReadFileTool, EditFileTool
 
             search_tool = SearchFilesTool()
             read_tool = ReadFileTool()

@@ -1,0 +1,344 @@
+"""
+ArchitectAgent: The Visionary Skeptic
+
+This agent performs feasibility analysis on user requests. It is the first
+gate in the DevSquad workflow - cautious, skeptical, and production-focused.
+
+Philosophy (Boris Cherny):
+    "Better to reject early than fail late."
+    - Veto impossible requests
+    - Identify risks before execution
+    - Provide clear reasoning
+    - No false positives (don't approve bad ideas)
+
+Capabilities: READ_ONLY only (no execution, no modification)
+"""
+
+from typing import Any, AsyncIterator, Dict
+
+from vertice_core.agents.base import (
+    AgentCapability,
+    AgentRole,
+    AgentTask,
+    AgentResponse,
+    BaseAgent,
+)
+
+
+ARCHITECT_SYSTEM_PROMPT = """You are the Architect Agent - a pragmatic visionary who analyzes software feasibility for Claude-powered development.
+
+ROLE: Senior Software Architect & Technical Feasibility Consultant
+CAPABILITIES: READ_ONLY analysis (you can examine code and architecture, but never modify anything)
+
+YOUR MISSION:
+Analyze user requests for technical feasibility and provide clear architectural guidance. You're the first line of defense against bad decisions, but your goal is to enable great software, not block progress.
+
+DECISION FRAMEWORK:
+Think step-by-step through each request:
+
+1. **Technical Feasibility**: Can this be implemented with available tools and reasonable effort?
+2. **Architectural Fit**: Does this align with current system design principles?
+3. **Risk Assessment**: What are the potential failure points and mitigation strategies?
+4. **Implementation Path**: Is there a clear, safe way to execute this?
+
+APPROVE when the request has a viable technical path forward. VETO only when it's genuinely impossible or dangerously risky.
+
+APPROVAL CRITERIA:
+✅ APPROVE requests that are:
+- Technically achievable with current stack
+- Architecturally sound or can be made sound
+- Have manageable risks with proper planning
+- Provide clear business/technical value
+- Can be implemented safely (even if complex)
+
+VETO CRITERIA:
+❌ VETO requests that:
+- Require dependencies we cannot legally/practically add
+- Fundamentally violate core architectural constraints
+- Create irreversible damage with no recovery path
+- Have unacceptable risk/reward ratios
+- Are technically impossible given our constraints
+
+EXAMPLES:
+
+APPROVED:
+• "Add user authentication with JWT" → APPROVED: Standard pattern, well-supported libraries available
+• "Implement file upload with progress tracking" → APPROVED: Common feature, clear implementation path
+• "Add comprehensive logging and monitoring" → APPROVED: Essential for production, low risk
+• "Refactor large function into smaller modules" → APPROVED: Code quality improvement, safe refactoring
+
+VETOED:
+• "Delete all user data from production" → VETOED: Irreversible destructive action
+• "Rewrite entire app in new framework overnight" → VETOED: Impossible timeline, high risk
+• "Remove all input validation for speed" → VETOED: Creates critical security vulnerabilities
+• "Store passwords in plain text" → VETOED: Fundamental security violation
+
+RESPONSE FORMAT:
+Provide your analysis in this exact JSON structure:
+
+{
+    "decision": "APPROVED" | "VETOED",
+    "reasoning": "Step-by-step explanation of your analysis and decision",
+    "architecture": {
+        "approach": "High-level implementation strategy (2-3 sentences)",
+        "risks": ["Specific risk 1", "Specific risk 2"],
+        "constraints": ["Technical constraint 1", "Business constraint 1"],
+        "estimated_complexity": "LOW" | "MEDIUM" | "HIGH"
+    },
+    "recommendations": [
+        "Specific actionable recommendation 1",
+        "Specific actionable recommendation 2"
+    ]
+}
+
+GUIDELINES:
+- Be constructive and solution-oriented
+- Focus on enabling success, not creating roadblocks
+- Provide specific, actionable advice
+- Acknowledge valid concerns but emphasize mitigations
+- Default to APPROVE when there's any reasonable path forward
+- Use clear, technical language that developers understand
+
+Remember: You're a senior architect guiding a high-performing team. Help them build amazing software safely and efficiently.
+"""
+
+
+class ArchitectAgent(BaseAgent):
+    """Architect Agent - Feasibility analysis and risk assessment.
+
+    The Architect is the first agent in the DevSquad workflow. It analyzes
+    user requests for technical feasibility and either approves or vetoes them.
+
+    This agent has READ_ONLY capabilities - it can read code and analyze
+    structure, but cannot modify anything.
+
+    Usage:
+        architect = ArchitectAgent(llm_client, mcp_client)
+        task = AgentTask(
+            request="Add JWT authentication",
+            session_id="session-123"
+        )
+        response = await architect.execute(task)
+
+        if response.success:
+            decision = response.data["decision"]  # "APPROVED" or "VETOED"
+    """
+
+    def __init__(
+        self,
+        llm_client: Any,
+        mcp_client: Any,
+    ) -> None:
+        """Initialize Architect agent.
+
+        Args:
+            llm_client: LLM client for analysis
+            mcp_client: MCP client for file operations
+        """
+        super().__init__(
+            role=AgentRole.ARCHITECT,
+            capabilities=[AgentCapability.READ_ONLY],
+            llm_client=llm_client,
+            mcp_client=mcp_client,
+            system_prompt=ARCHITECT_SYSTEM_PROMPT,
+        )
+
+    async def execute(self, task: AgentTask) -> AgentResponse:
+        """Analyze request feasibility and return approval/veto decision.
+
+        Args:
+            task: Task with user request and context
+
+        Returns:
+            AgentResponse with decision and architecture analysis
+
+        Process:
+            1. Read relevant project files (from task context)
+            2. Analyze feasibility with LLM
+            3. Parse decision (APPROVED/VETOED)
+            4. Return structured response
+        """
+        try:
+            # Build analysis prompt
+            analysis_prompt = self._build_analysis_prompt(task)
+
+            # Call LLM for analysis
+            llm_response = await self._call_llm(analysis_prompt)
+
+            # Parse JSON response
+            import json
+
+            try:
+                decision_data = json.loads(llm_response)
+            except json.JSONDecodeError:
+                # LLM didn't return valid JSON, extract decision manually
+                decision_data = self._extract_decision_fallback(llm_response)
+
+            # Validate decision format
+            if "decision" not in decision_data:
+                return AgentResponse(
+                    success=False,
+                    reasoning="LLM response missing 'decision' field",
+                    error="Invalid LLM response format",
+                )
+
+            decision = decision_data["decision"].upper()
+
+            # Normalize variations
+            if decision == "APPROVE":
+                decision = "APPROVED"
+            elif decision == "VETO":
+                decision = "VETOED"
+
+            if decision not in ("APPROVED", "VETOED"):
+                return AgentResponse(
+                    success=False,
+                    reasoning=f"Invalid decision: {decision}",
+                    error="Decision must be APPROVED or VETOED",
+                )
+
+            # Return successful analysis
+            # Note: data already contains decision and architecture info
+            # metrics field is for numeric values only
+            return AgentResponse(
+                success=True,
+                data=decision_data,
+                reasoning=decision_data.get("reasoning", "Decision made"),
+            )
+
+        except Exception as e:
+            return AgentResponse(
+                success=False,
+                reasoning=f"Architect analysis failed: {str(e)}",
+                error=str(e),
+            )
+
+    async def execute_streaming(self, task: AgentTask) -> AsyncIterator[Dict[str, Any]]:
+        """Stream architecture analysis with progressive feedback.
+
+        Yields status updates and reasoning chunks as the analysis progresses.
+
+        Args:
+            task: Task with user request and context
+
+        Yields:
+            StreamingChunk dicts with type and data
+        """
+        from vertice_core.agents.protocol import StreamingChunk, StreamingChunkType
+
+        try:
+            # Phase 1: Announce start
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS, data="🏗️ Architect analyzing request..."
+            ).to_dict()
+
+            # Phase 2: Build analysis prompt
+            analysis_prompt = self._build_analysis_prompt(task)
+            yield StreamingChunk(
+                type=StreamingChunkType.STATUS,
+                data="📋 Context loaded, starting feasibility analysis...",
+            ).to_dict()
+
+            # Phase 3: Stream LLM response
+            yield StreamingChunk(
+                type=StreamingChunkType.REASONING, data="## Architecture Analysis\n\n"
+            ).to_dict()
+
+            # Call LLM (ideally stream, but use blocking call and simulate chunks)
+            llm_response = await self._call_llm(analysis_prompt)
+
+            # Stream the response in chunks
+            for i in range(0, len(llm_response), 100):
+                chunk = llm_response[i : i + 100]
+                yield StreamingChunk(type=StreamingChunkType.THINKING, data=chunk).to_dict()
+
+            # Phase 4: Parse decision
+            import json
+
+            try:
+                decision_data = json.loads(llm_response)
+            except json.JSONDecodeError:
+                decision_data = self._extract_decision_fallback(llm_response)
+
+            decision = decision_data.get("decision", "UNKNOWN").upper()
+            if decision == "APPROVE":
+                decision = "APPROVED"
+            elif decision == "VETO":
+                decision = "VETOED"
+
+            # Phase 5: Announce verdict
+            verdict_emoji = "✅" if decision == "APPROVED" else "❌"
+            yield StreamingChunk(
+                type=StreamingChunkType.VERDICT,
+                data=f"\n\n{verdict_emoji} **Decision: {decision}**",
+            ).to_dict()
+
+            # Final result
+            yield StreamingChunk(type=StreamingChunkType.RESULT, data=decision_data).to_dict()
+
+        except Exception as e:
+            yield StreamingChunk(
+                type=StreamingChunkType.ERROR, data=f"Architect analysis failed: {str(e)}"
+            ).to_dict()
+
+    def _build_analysis_prompt(self, task: AgentTask) -> str:
+        """Build prompt for LLM analysis.
+
+        Args:
+            task: Task with request and context
+
+        Returns:
+            Formatted prompt string
+        """
+        prompt = f"""Analyze this request for technical feasibility:
+
+REQUEST: {task.request}
+
+CONTEXT:
+"""
+        # Add context files if provided (FIX 1.5: expanded from 5 to 20 files)
+        if "files" in task.context:
+            prompt += f"\nProject files available: {len(task.context['files'])} files\n"
+            for file_info in task.context.get("files", [])[:20]:  # FIX 1.5: First 20 files
+                prompt += f"- {file_info}\n"
+
+        # Add constraints if provided
+        if "constraints" in task.context:
+            prompt += f"\nConstraints: {task.context['constraints']}\n"
+
+        prompt += """
+Analyze and respond with your decision in JSON format.
+Remember: Be skeptical. Better to veto early than fail late.
+"""
+        return prompt
+
+    def _extract_decision_fallback(self, llm_response: str) -> Dict[str, Any]:
+        """Extract decision from non-JSON LLM response (fallback).
+
+        Args:
+            llm_response: Raw LLM text response
+
+        Returns:
+            Dictionary with extracted decision
+        """
+        # Simple heuristic extraction
+        response_lower = llm_response.lower()
+
+        if "approved" in response_lower or "approve" in response_lower:
+            decision = "APPROVED"
+        elif "veto" in response_lower or "rejected" in response_lower:
+            decision = "VETOED"
+        else:
+            decision = "UNKNOWN"
+
+        return {
+            "decision": decision,
+            "reasoning": llm_response[:500],  # First 500 chars
+            "architecture": {
+                "approach": "Not provided (fallback extraction)",
+                "risks": [],
+                "constraints": [],
+                "estimated_complexity": "UNKNOWN",
+            },
+            "recommendations": [],
+        }

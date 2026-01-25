@@ -103,7 +103,7 @@ class TestConvertTools:
 
     def test_convert_tools_returns_none_when_no_tools(self) -> None:
         """HYPOTHESIS: Returns None when tools is None or empty."""
-        from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+        from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
         provider = VertexAIProvider()
 
@@ -115,7 +115,7 @@ class TestConvertTools:
         result = provider._convert_tools([])
         assert result is None
 
-    @patch("vertice_cli.core.providers.vertex_ai.VertexAIProvider._ensure_client")
+    @patch("vertice_core.core.providers.vertex_ai.VertexAIProvider._ensure_client")
     def test_convert_tools_from_schema_dict(
         self, mock_ensure: MagicMock, sample_tool_schema: Dict[str, Any]
     ) -> None:
@@ -124,7 +124,7 @@ class TestConvertTools:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             # Create mock FunctionDeclaration and Tool
             mock_func_decl = MagicMock()
@@ -151,7 +151,7 @@ class TestConvertTools:
                     assert result is not None
                     assert len(result) == 1
 
-    @patch("vertice_cli.core.providers.vertex_ai.VertexAIProvider._ensure_client")
+    @patch("vertice_core.core.providers.vertex_ai.VertexAIProvider._ensure_client")
     def test_convert_tools_multiple_tools(
         self, mock_ensure: MagicMock, multiple_tool_schemas: List[Dict[str, Any]]
     ) -> None:
@@ -159,7 +159,7 @@ class TestConvertTools:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             mock_func_decl = MagicMock()
             mock_tool = MagicMock()
@@ -186,7 +186,7 @@ class TestConvertTools:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             mock_func_decl = MagicMock()
             mock_tool = MagicMock()
@@ -225,7 +225,7 @@ class TestStreamChatWithTools:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
             provider._client = True  # Skip initialization
@@ -256,7 +256,7 @@ class TestStreamChatWithTools:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
             provider._client = True
@@ -297,7 +297,7 @@ class TestFunctionCallResponseParsing:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
             provider._client = True
@@ -420,7 +420,7 @@ class TestVertexFunctionCallingIntegration:
     @pytest.mark.asyncio
     async def test_real_function_call(self) -> None:
         """Integration test: Real function call with Vertex AI."""
-        from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+        from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
         provider = VertexAIProvider()
 

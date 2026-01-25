@@ -4,8 +4,8 @@ Constitutional compliance: P2 (Validação), P3 (Correção)
 """
 
 import pytest
-from vertice_cli.tui.components.preview import UndoRedoStack
-from vertice_cli.tui.components.execution_timeline import ExecutionTimeline, TimelinePlayback
+from vertice_core.tui.components.preview import UndoRedoStack
+from vertice_core.tui.components.execution_timeline import ExecutionTimeline, TimelinePlayback
 
 
 class TestUndoRedoStack:

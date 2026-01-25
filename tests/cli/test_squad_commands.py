@@ -3,8 +3,8 @@
 import pytest
 from unittest.mock import MagicMock, patch, AsyncMock
 from typer.testing import CliRunner
-from vertice_cli.cli import app
-from vertice_cli.orchestration.squad import WorkflowResult, WorkflowStatus
+from vertice_core.cli import app
+from vertice_core.orchestration.squad import WorkflowResult, WorkflowStatus
 
 runner = CliRunner()
 
@@ -12,7 +12,7 @@ runner = CliRunner()
 @pytest.fixture
 def mock_squad():
     # Patch where get_squad is called (in cli_app), not where it's imported (in cli)
-    with patch("vertice_cli.cli_app.get_squad") as mock:
+    with patch("vertice_core.cli_app.get_squad") as mock:
         squad_instance = MagicMock()
         # Mock execute_workflow to return a dummy result
         result = WorkflowResult(request="test", status=WorkflowStatus.COMPLETED)

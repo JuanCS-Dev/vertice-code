@@ -13,7 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from vertice_cli.core.llm import llm_client
+from vertice_core.core.llm import llm_client
 
 
 async def test_basic_generation():
@@ -157,7 +157,7 @@ async def test_context_builder():
     print("🧪 TEST 5: CONTEXT BUILDER")
     print("=" * 80)
 
-    from vertice_cli.core.context import context_builder
+    from vertice_core.core.context import context_builder
 
     try:
         # Test stats

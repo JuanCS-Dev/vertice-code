@@ -11,9 +11,9 @@ Boris Cherny: Type-safe dashboard integration testing
 
 import pytest
 from unittest.mock import Mock, AsyncMock
-from vertice_cli.shell import InteractiveShell, SessionContext
-from vertice_cli.tools.base import ToolResult
-from vertice_cli.tui.components.dashboard import OperationStatus
+from vertice_core.shell import InteractiveShell, SessionContext
+from vertice_core.tools.base import ToolResult
+from vertice_core.tui.components.dashboard import OperationStatus
 
 
 class TestDashboardIntegration:

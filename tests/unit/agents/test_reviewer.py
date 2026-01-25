@@ -17,7 +17,7 @@ import ast
 import networkx as nx
 from unittest.mock import AsyncMock, MagicMock
 
-from vertice_cli.agents.reviewer import (
+from vertice_core.agents.reviewer import (
     IssueSeverity,
     IssueCategory,
     CodeGraphNode,
@@ -30,7 +30,7 @@ from vertice_cli.agents.reviewer import (
     SecurityAgent,
     ReviewerAgent,
 )
-from vertice_cli.agents.base import (
+from vertice_core.agents.base import (
     AgentRole,
     AgentCapability,
     AgentTask,
@@ -1239,7 +1239,7 @@ class TestPerformanceAgent:
     @pytest.fixture
     def perf_agent(self):
         """Create PerformanceAgent instance."""
-        from vertice_cli.agents.reviewer import PerformanceAgent
+        from vertice_core.agents.reviewer import PerformanceAgent
 
         return PerformanceAgent()
 
@@ -1321,7 +1321,7 @@ class TestTestCoverageAgent:
     @pytest.fixture
     def test_agent(self):
         """Create TestCoverageAgent instance."""
-        from vertice_cli.agents.reviewer import TestCoverageAgent
+        from vertice_core.agents.reviewer import TestCoverageAgent
 
         return TestCoverageAgent()
 
@@ -1367,7 +1367,7 @@ class TestCodeGraphAnalysisAgent:
     @pytest.fixture
     def graph_agent(self):
         """Create CodeGraphAnalysisAgent instance."""
-        from vertice_cli.agents.reviewer import CodeGraphAnalysisAgent
+        from vertice_core.agents.reviewer import CodeGraphAnalysisAgent
 
         agent = CodeGraphAnalysisAgent()
         agent.logger = MagicMock()  # Mock logger to avoid AttributeError

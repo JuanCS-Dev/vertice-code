@@ -2,8 +2,8 @@
 
 import asyncio
 from dotenv import load_dotenv
-from vertice_cli.core.llm import llm_client
-from vertice_cli.core.config import config
+from vertice_core.core.llm import llm_client
+from vertice_core.core.config import config
 
 # Load environment variables
 load_dotenv()

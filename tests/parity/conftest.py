@@ -539,6 +539,6 @@ def mock_user_input():
 
 
 @pytest.fixture
-def vertice_client():
+def vertice_coreent():
     """Provide full mock Vertice client."""
     return MockVerticeClient()

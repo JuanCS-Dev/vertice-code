@@ -27,8 +27,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from vertice_cli.agents.base import AgentRole, AgentTask, TaskStatus
-from vertice_cli.agents.security import (
+from vertice_core.agents.base import AgentRole, AgentTask, TaskStatus
+from vertice_core.agents.security import (
     SecurityAgent,
     SeverityLevel,
     VulnerabilityType,
@@ -646,7 +646,7 @@ class TestSecurityAgentIntegration:
     @pytest.mark.asyncio
     async def test_agent_capabilities(self, security_agent):
         """Test agent has READ_ONLY + BASH_EXEC capabilities."""
-        from vertice_cli.agents.base import AgentCapability
+        from vertice_core.agents.base import AgentCapability
 
         assert AgentCapability.READ_ONLY in security_agent.capabilities
         assert AgentCapability.BASH_EXEC in security_agent.capabilities

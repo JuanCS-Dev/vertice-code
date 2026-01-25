@@ -67,7 +67,7 @@ class MockBridge:
         self.autocomplete = type(
             "MockAutocomplete", (), {"get_completions": lambda text, max_results=15: []}
         )()
-        self.llm = type("MockLLM", (), {"_vertice_client": None})()
+        self.llm = type("MockLLM", (), {"_vertice_coreent": None})()
 
     def chat(self, request: str, stream: bool = True):
         self.called_with.append(request)

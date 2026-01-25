@@ -6,8 +6,8 @@ import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from vertice_cli.commands.sandbox import handle_sandbox
-from vertice_cli.integration.sandbox import SandboxResult
+from vertice_core.commands.sandbox import handle_sandbox
+from vertice_core.integration.sandbox import SandboxResult
 
 
 @pytest.mark.asyncio
@@ -22,7 +22,7 @@ class TestSandboxCommand:
         assert "Usage:" in result
         assert "/sandbox" in result
 
-    @patch("vertice_cli.commands.sandbox.get_sandbox")
+    @patch("vertice_core.commands.sandbox.get_sandbox")
     async def test_sandbox_not_available(self, mock_get_sandbox):
         """Test when Docker is not available."""
         mock_sandbox = Mock()
@@ -34,7 +34,7 @@ class TestSandboxCommand:
 
         assert "not available" in result.lower()
 
-    @patch("vertice_cli.commands.sandbox.get_sandbox")
+    @patch("vertice_core.commands.sandbox.get_sandbox")
     async def test_successful_execution(self, mock_get_sandbox):
         """Test successful command execution."""
         mock_sandbox = Mock()
@@ -56,7 +56,7 @@ class TestSandboxCommand:
         assert "Hello World" in result
         assert "123ms" in result or "123.0ms" in result
 
-    @patch("vertice_cli.commands.sandbox.get_sandbox")
+    @patch("vertice_core.commands.sandbox.get_sandbox")
     async def test_failed_execution(self, mock_get_sandbox):
         """Test failed command execution."""
         mock_sandbox = Mock()
@@ -77,7 +77,7 @@ class TestSandboxCommand:
         assert "Failed" in result
         assert "Command failed" in result
 
-    @patch("vertice_cli.commands.sandbox.get_sandbox")
+    @patch("vertice_core.commands.sandbox.get_sandbox")
     async def test_timeout_flag(self, mock_get_sandbox):
         """Test --timeout flag parsing."""
         mock_sandbox = Mock()
@@ -94,7 +94,7 @@ class TestSandboxCommand:
         call_args = mock_sandbox.execute.call_args
         assert call_args.kwargs["timeout"] == 60
 
-    @patch("vertice_cli.commands.sandbox.get_sandbox")
+    @patch("vertice_core.commands.sandbox.get_sandbox")
     async def test_readonly_flag(self, mock_get_sandbox):
         """Test --readonly flag parsing."""
         mock_sandbox = Mock()
@@ -111,7 +111,7 @@ class TestSandboxCommand:
         call_args = mock_sandbox.execute.call_args
         assert call_args.kwargs["readonly"] is True
 
-    @patch("vertice_cli.commands.sandbox.get_sandbox")
+    @patch("vertice_core.commands.sandbox.get_sandbox")
     async def test_context_cwd(self, mock_get_sandbox):
         """Test that cwd from context is used."""
         mock_sandbox = Mock()
@@ -129,7 +129,7 @@ class TestSandboxCommand:
         call_args = mock_sandbox.execute.call_args
         assert call_args.kwargs["cwd"] == test_cwd
 
-    @patch("vertice_cli.commands.sandbox.get_sandbox")
+    @patch("vertice_core.commands.sandbox.get_sandbox")
     async def test_execution_exception(self, mock_get_sandbox):
         """Test handling of execution exceptions."""
         mock_sandbox = Mock()
@@ -142,8 +142,8 @@ class TestSandboxCommand:
 
         assert "Error" in result or "failed" in result.lower()
 
-    @patch("vertice_cli.commands.sandbox.get_sandbox")
-    @patch("vertice_cli.commands.sandbox.safety_validator")
+    @patch("vertice_core.commands.sandbox.get_sandbox")
+    @patch("vertice_core.commands.sandbox.safety_validator")
     async def test_safety_validation_warning(self, mock_validator, mock_get_sandbox):
         """Test that dangerous commands show safety warning."""
         mock_sandbox = Mock()
@@ -163,8 +163,8 @@ class TestSandboxCommand:
         assert mock_validator.is_safe.called
         assert mock_sandbox.execute.called
 
-    @patch("vertice_cli.commands.sandbox.get_sandbox")
-    @patch("vertice_cli.commands.sandbox.safety_validator")
+    @patch("vertice_core.commands.sandbox.get_sandbox")
+    @patch("vertice_core.commands.sandbox.safety_validator")
     async def test_safety_validation_safe_command(self, mock_validator, mock_get_sandbox):
         """Test that safe commands pass validation."""
         mock_sandbox = Mock()

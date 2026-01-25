@@ -36,11 +36,11 @@ import sys  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from vertice_cli.core.input_validator import InputValidator  # noqa: E402
-from vertice_cli.core.atomic_ops import AtomicFileOps  # noqa: E402
-from vertice_cli.core.error_presenter import ErrorPresenter  # noqa: E402
-from vertice_cli.core.session_manager import SessionManager  # noqa: E402
-from vertice_cli.core.audit_logger import AuditLogger, AuditEventType  # noqa: E402
+from vertice_core.core.input_validator import InputValidator  # noqa: E402
+from vertice_core.core.atomic_ops import AtomicFileOps  # noqa: E402
+from vertice_core.core.error_presenter import ErrorPresenter  # noqa: E402
+from vertice_core.core.session_manager import SessionManager  # noqa: E402
+from vertice_core.core.audit_logger import AuditLogger, AuditEventType  # noqa: E402
 
 
 # ==============================================================================

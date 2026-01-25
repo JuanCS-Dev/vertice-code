@@ -10,8 +10,8 @@ Constitutional Compliance:
 import pytest
 from unittest.mock import patch
 
-from vertice_cli.tui.accessibility import AccessibilityManager
-from vertice_cli.tui.input_enhanced import EnhancedInput
+from vertice_core.tui.accessibility import AccessibilityManager
+from vertice_core.tui.input_enhanced import EnhancedInput
 
 
 class TestAccessibility:

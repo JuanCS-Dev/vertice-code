@@ -18,7 +18,7 @@ async def test_opus45():
     print("=" * 60)
 
     try:
-        from vertice_cli.core.providers.anthropic_vertex import AnthropicVertexProvider
+        from vertice_core.core.providers.anthropic_vertex import AnthropicVertexProvider
 
         # Initialize provider with opus-4.5
         provider = AnthropicVertexProvider(

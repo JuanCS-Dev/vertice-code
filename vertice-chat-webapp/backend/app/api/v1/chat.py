@@ -47,7 +47,7 @@ router = APIRouter()
 
 # Configuration
 STREAM_TIMEOUT_SECONDS = 120
-DEFAULT_MODEL = "gemini-3-pro-preview"
+DEFAULT_MODEL = "gemini-3-flash"
 FALLBACK_MODEL = "gemini-3-flash-preview"
 
 # Rate limiting configuration

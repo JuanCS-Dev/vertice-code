@@ -19,7 +19,7 @@ class TestGeminiIntegration:
     async def test_prometheus_execute_with_real_gemini(self):
         """Test prometheus_execute with real Gemini API."""
         try:
-            from vertice_cli.core.providers import PrometheusProvider
+            from vertice_core.core.providers import PrometheusProvider
 
             # Initialize real provider
             provider = PrometheusProvider()
@@ -39,7 +39,7 @@ class TestGeminiIntegration:
     async def test_prometheus_memory_with_real_gemini(self):
         """Test memory operations with real Gemini."""
         try:
-            from vertice_cli.core.providers import PrometheusProvider
+            from vertice_core.core.providers import PrometheusProvider
 
             provider = PrometheusProvider()
             await provider._ensure_initialized()
@@ -65,7 +65,7 @@ class TestClaudeIntegration:
     async def test_prometheus_evolution_with_real_claude(self):
         """Test evolution cycle with real Claude API."""
         try:
-            from vertice_cli.core.providers import PrometheusProvider
+            from vertice_core.core.providers import PrometheusProvider
 
             provider = PrometheusProvider()
             await provider._ensure_initialized()
@@ -121,7 +121,7 @@ class TestPerformanceBenchmarks:
     async def test_execution_time_benchmarks(self):
         """Benchmark execution times for various operations."""
         try:
-            from vertice_cli.core.providers import PrometheusProvider
+            from vertice_core.core.providers import PrometheusProvider
             import time
 
             provider = PrometheusProvider()
@@ -146,7 +146,7 @@ class TestPerformanceBenchmarks:
     async def test_memory_operations_performance(self):
         """Test memory operation performance."""
         try:
-            from vertice_cli.core.providers import PrometheusProvider
+            from vertice_core.core.providers import PrometheusProvider
             import time
 
             provider = PrometheusProvider()

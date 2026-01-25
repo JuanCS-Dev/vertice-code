@@ -5,7 +5,7 @@ import os
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from vertice_cli.core.lazy_loader import LazyLoader
+from vertice_core.core.lazy_loader import LazyLoader
 
 
 async def verify_plugins():

@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock
 from prometheus.core.orchestrator import PrometheusOrchestrator
 from prometheus.core.governance import GovernanceVerdict
 from prometheus.core.llm_adapter import PrometheusLLMAdapter
-from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
 
 @pytest.mark.asyncio

@@ -5,7 +5,7 @@ import sys
 # Add src to path to emulate TUI environment
 sys.path.append(os.path.join(os.getcwd(), "src"))
 
-from vertice_cli.agents.devops.agent import create_devops_agent
+from vertice_core.agents.devops.agent import create_devops_agent
 
 
 # Mock MCP Client that actually works (since we don't have the full MCP server running)

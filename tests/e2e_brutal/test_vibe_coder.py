@@ -27,7 +27,7 @@ class TestVagueInstructions:
         Vibe coder says: "make a python file"
         """
         # Simulate vague request through executor
-        from vertice_cli.agents.base import AgentTask
+        from vertice_core.agents.base import AgentTask
 
         vague_requests = [
             "make a file",

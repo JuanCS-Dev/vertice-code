@@ -22,7 +22,7 @@ async def run_e2e_tests():
 
     # Test 1: Component Imports
     print("📦 Testing Component Imports...")
-    for component in ["vertice_cli", "vertice_tui", "vertice_core", "prometheus"]:
+    for component in ["vertice_core", "vertice_tui", "vertice_core", "prometheus"]:
         try:
             __import__(component)
             results[f"{component}_import"] = "PASS"
@@ -57,7 +57,7 @@ async def run_e2e_tests():
     print("💻 Testing CLI...")
     try:
         result = subprocess.run(
-            [sys.executable, "-m", "vertice_cli.main", "--help"],
+            [sys.executable, "-m", "vertice_core.main", "--help"],
             capture_output=True,
             text=True,
             timeout=10,

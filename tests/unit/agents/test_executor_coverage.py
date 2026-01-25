@@ -16,17 +16,17 @@ import pytest
 import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from vertice_cli.agents.executor import (
+from vertice_core.agents.executor import (
     ExecutionMode,
     SecurityLevel,
     CommandResult,
     CodeExecutionEngine,
     NextGenExecutorAgent,
 )
-from vertice_cli.agents.base import (
+from vertice_core.agents.base import (
     AgentTask,
 )
-from vertice_cli.permissions import PermissionLevel
+from vertice_core.permissions import PermissionLevel
 
 
 # =============================================================================

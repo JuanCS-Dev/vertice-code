@@ -20,7 +20,7 @@ import httpx
 import pytest
 import respx
 
-from vertice_cli.core.providers.maximus_provider import MaximusProvider
+from vertice_core.core.providers.maximus_provider import MaximusProvider
 
 
 class TestMemoryStore:

@@ -61,7 +61,7 @@ async def test_test_api_key_success(mock_get_client):
 @pytest.mark.asyncio
 @patch("vertice_tui.core.managers.auth_manager.get_client")
 async def test_test_api_key_auth_error(mock_get_client):
-    from vertice_cli.core.errors.types import AuthenticationError
+    from vertice_core.core.errors.types import AuthenticationError
 
     mock_client = AsyncMock()
     mock_client.generate.side_effect = AuthenticationError("test auth error")

@@ -5,8 +5,8 @@ import tempfile
 from pathlib import Path
 from typer.testing import CliRunner
 
-from vertice_cli.cli import app
-from vertice_cli.core.single_shot import SingleShotExecutor, execute_single_shot
+from vertice_core.cli import app
+from vertice_core.core.single_shot import SingleShotExecutor, execute_single_shot
 
 
 runner = CliRunner()

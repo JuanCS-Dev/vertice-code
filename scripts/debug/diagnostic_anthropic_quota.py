@@ -18,7 +18,7 @@ async def test_model(model_alias, location):
     print("-" * 40)
 
     try:
-        from vertice_cli.core.providers.anthropic_vertex import AnthropicVertexProvider
+        from vertice_core.core.providers.anthropic_vertex import AnthropicVertexProvider
 
         provider = AnthropicVertexProvider(
             location=location,

@@ -25,13 +25,13 @@ class TestCriticalImports:
         errors = []
 
         modules = [
-            "vertice_cli",
-            "vertice_cli.core",
-            "vertice_cli.core.llm",
-            "vertice_cli.agents",
-            "vertice_cli.agents.base",
-            "vertice_cli.tools",
-            "vertice_cli.tools.base",
+            "vertice_core",
+            "vertice_core.core",
+            "vertice_core.core.llm",
+            "vertice_core.agents",
+            "vertice_core.agents.base",
+            "vertice_core.tools",
+            "vertice_core.tools.base",
         ]
 
         for module in modules:
@@ -47,8 +47,8 @@ class TestCriticalImports:
         errors = []
 
         modules = [
-            "vertice_cli.tui",
-            "vertice_cli.tui.components",
+            "vertice_core.tui",
+            "vertice_core.tui.components",
         ]
 
         for module in modules:
@@ -70,7 +70,7 @@ class TestLLMClient:
 
     def test_llm_client_instantiation(self):
         """LLMClient deve instanciar mesmo sem API key."""
-        from vertice_cli.core.llm import LLMClient
+        from vertice_core.core.llm import LLMClient
 
         # Deve instanciar (pode estar desconectado)
         client = LLMClient()
@@ -78,7 +78,7 @@ class TestLLMClient:
 
     def test_llm_client_has_required_methods(self):
         """LLMClient deve ter métodos essenciais."""
-        from vertice_cli.core.llm import LLMClient
+        from vertice_core.core.llm import LLMClient
 
         client = LLMClient()
 
@@ -90,7 +90,7 @@ class TestLLMClient:
     @pytest.mark.asyncio
     async def test_llm_handles_missing_api_key_gracefully(self):
         """LLM deve falhar graciosamente sem API key."""
-        from vertice_cli.core.llm import LLMClient
+        from vertice_core.core.llm import LLMClient
 
         # Backup e remove API key
         original_key = os.environ.get("GEMINI_API_KEY")
@@ -122,7 +122,7 @@ class TestToolRegistry:
 
     def test_tool_registry_exists(self):
         """ToolRegistry class deve existir."""
-        from vertice_cli.tools.base import ToolRegistry
+        from vertice_core.tools.base import ToolRegistry
 
         # Deve ser possível criar uma instância
         registry = ToolRegistry()
@@ -130,7 +130,7 @@ class TestToolRegistry:
 
     def test_tool_registry_has_methods(self):
         """ToolRegistry deve ter métodos essenciais."""
-        from vertice_cli.tools.base import ToolRegistry
+        from vertice_core.tools.base import ToolRegistry
 
         registry = ToolRegistry()
 
@@ -142,14 +142,14 @@ class TestToolRegistry:
 
     def test_tool_base_class_exists(self):
         """Tool base class deve existir."""
-        from vertice_cli.tools.base import Tool, ToolResult
+        from vertice_core.tools.base import Tool, ToolResult
 
         assert Tool is not None
         assert ToolResult is not None
 
     def test_tool_result_creation(self):
         """ToolResult deve ser criável."""
-        from vertice_cli.tools.base import ToolResult
+        from vertice_core.tools.base import ToolResult
 
         # Sucesso
         success = ToolResult(success=True, data="test data")
@@ -172,7 +172,7 @@ class TestAgents:
 
     def test_base_agent_imports(self):
         """BaseAgent e classes relacionadas devem importar."""
-        from vertice_cli.agents.base import (
+        from vertice_core.agents.base import (
             BaseAgent,
             AgentTask,
             AgentResponse,
@@ -184,7 +184,7 @@ class TestAgents:
 
     def test_agent_task_creation(self):
         """AgentTask deve ser criável com dados válidos."""
-        from vertice_cli.agents.base import AgentTask
+        from vertice_core.agents.base import AgentTask
 
         task = AgentTask(request="Test request", session_id="test-session")
 
@@ -193,7 +193,7 @@ class TestAgents:
 
     def test_agent_response_creation(self):
         """AgentResponse deve ser criável."""
-        from vertice_cli.agents.base import AgentResponse
+        from vertice_core.agents.base import AgentResponse
 
         response = AgentResponse(success=True, data={"result": "test"}, reasoning="Test reasoning")
 
@@ -205,9 +205,9 @@ class TestAgents:
         errors = []
 
         agents = [
-            ("vertice_cli.agents.planner", "PlannerAgent"),
-            ("vertice_cli.agents.executor", "ExecutorAgent"),
-            ("vertice_cli.agents.explorer", "ExplorerAgent"),
+            ("vertice_core.agents.planner", "PlannerAgent"),
+            ("vertice_core.agents.executor", "ExecutorAgent"),
+            ("vertice_core.agents.explorer", "ExplorerAgent"),
         ]
 
         for module_name, class_name in agents:
@@ -233,7 +233,7 @@ class TestInputValidation:
 
     def test_path_traversal_blocked(self):
         """Path traversal deve ser bloqueado."""
-        from vertice_cli.core.input_validator import validate_file_path
+        from vertice_core.core.input_validator import validate_file_path
 
         dangerous_paths = [
             "../../../etc/passwd",
@@ -248,7 +248,7 @@ class TestInputValidation:
 
     def test_command_injection_blocked(self):
         """Command injection deve ser bloqueado."""
-        from vertice_cli.core.input_validator import validate_command
+        from vertice_core.core.input_validator import validate_command
 
         dangerous_commands = [
             "ls; rm -rf /",
@@ -264,7 +264,7 @@ class TestInputValidation:
 
     def test_safe_commands_allowed(self):
         """Comandos seguros devem ser permitidos."""
-        from vertice_cli.core.input_validator import validate_command
+        from vertice_core.core.input_validator import validate_command
 
         safe_commands = [
             "ls -la",
@@ -289,7 +289,7 @@ class TestErrorHandling:
 
     def test_tool_result_has_error_field(self):
         """ToolResult deve ter campo de erro."""
-        from vertice_cli.tools.base import ToolResult
+        from vertice_core.tools.base import ToolResult
 
         # Resultado de sucesso
         success = ToolResult(success=True, data="ok")
@@ -303,7 +303,7 @@ class TestErrorHandling:
 
     def test_agent_response_has_error_field(self):
         """AgentResponse deve ter campo de erro."""
-        from vertice_cli.agents.base import AgentResponse
+        from vertice_core.agents.base import AgentResponse
 
         # Resposta de erro
         response = AgentResponse(
@@ -325,13 +325,13 @@ class TestStreamingComponents:
 
     def test_block_detector_imports(self):
         """BlockDetector deve importar."""
-        from vertice_cli.tui.components.block_detector import BlockDetector
+        from vertice_core.tui.components.block_detector import BlockDetector
 
         assert BlockDetector is not None
 
     def test_block_detector_processes_chunks(self):
         """BlockDetector deve processar chunks corretamente."""
-        from vertice_cli.tui.components.block_detector import BlockDetector
+        from vertice_core.tui.components.block_detector import BlockDetector
 
         detector = BlockDetector()
 
@@ -351,7 +351,7 @@ class TestStreamingComponents:
 
     def test_block_detector_detects_code_fence(self):
         """BlockDetector deve detectar code fences."""
-        from vertice_cli.tui.components.block_detector import BlockDetector, BlockType
+        from vertice_core.tui.components.block_detector import BlockDetector, BlockType
 
         detector = BlockDetector()
 
@@ -374,13 +374,13 @@ class TestConfiguration:
 
     def test_config_loader_exists(self):
         """ConfigLoader deve existir."""
-        from vertice_cli.config.loader import ConfigLoader
+        from vertice_core.config.loader import ConfigLoader
 
         assert ConfigLoader is not None
 
     def test_config_has_defaults(self):
         """Configuração deve ter defaults sensatos."""
-        from vertice_cli.config.loader import ConfigLoader
+        from vertice_core.config.loader import ConfigLoader
 
         loader = ConfigLoader()
         config = loader.config
@@ -399,8 +399,8 @@ class TestSmokeTest:
 
     def test_can_create_basic_workflow(self):
         """Deve ser possível criar um workflow básico."""
-        from vertice_cli.agents.base import AgentTask, AgentResponse
-        from vertice_cli.tools.base import ToolResult
+        from vertice_core.agents.base import AgentTask, AgentResponse
+        from vertice_core.tools.base import ToolResult
 
         # 1. Criar task
         AgentTask(request="test", session_id="smoke")
@@ -422,7 +422,7 @@ class TestSmokeTest:
 
         # Verifica se o comando existe (não precisa rodar)
         result = subprocess.run(
-            ["python", "-c", "from vertice_cli.main import cli_main"],
+            ["python", "-c", "from vertice_core.main import cli_main"],
             capture_output=True,
             text=True,
         )

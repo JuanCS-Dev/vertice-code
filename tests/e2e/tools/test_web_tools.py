@@ -23,7 +23,7 @@ class TestWebFetchTool:
         """Web fetch returns content (mocked)."""
         # Test that the tool structure exists and validates input
         try:
-            from vertice_cli.tools.web_ops import WebFetchTool
+            from vertice_core.tools.web_ops import WebFetchTool
 
             tool = WebFetchTool()
             assert tool is not None
@@ -36,7 +36,7 @@ class TestWebFetchTool:
     async def test_web_fetch_validates_url(self):
         """Web fetch validates URL format."""
         try:
-            from vertice_cli.tools.web_ops import WebFetchTool
+            from vertice_core.tools.web_ops import WebFetchTool
 
             tool = WebFetchTool()
 
@@ -56,7 +56,7 @@ class TestWebSearchTool:
     async def test_web_search_exists(self):
         """Web search tool is importable."""
         try:
-            from vertice_cli.tools.web_ops import WebSearchTool
+            from vertice_core.tools.web_ops import WebSearchTool
 
             tool = WebSearchTool()
             assert tool is not None
@@ -67,7 +67,7 @@ class TestWebSearchTool:
     async def test_web_search_requires_query(self):
         """Web search requires query parameter."""
         try:
-            from vertice_cli.tools.web_ops import WebSearchTool
+            from vertice_core.tools.web_ops import WebSearchTool
 
             tool = WebSearchTool()
 
@@ -116,7 +116,7 @@ class TestHTTPTools:
     async def test_http_get_mock(self):
         """HTTP GET returns response (mocked)."""
         try:
-            from vertice_cli.tools.web_ops import HTTPGetTool
+            from vertice_core.tools.web_ops import HTTPGetTool
 
             tool = HTTPGetTool()
 
@@ -131,7 +131,7 @@ class TestHTTPTools:
     async def test_http_post_mock(self):
         """HTTP POST sends data (mocked)."""
         try:
-            from vertice_cli.tools.web_ops import HTTPPostTool
+            from vertice_core.tools.web_ops import HTTPPostTool
 
             tool = HTTPPostTool()
 

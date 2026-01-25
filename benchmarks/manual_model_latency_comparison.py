@@ -33,7 +33,7 @@ class ModelLatencyComparison:
                 'sample_size': int,
             }
         """
-        from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+        from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
         provider = VertexAIProvider(model_name=model_name)
 
@@ -97,7 +97,7 @@ async def test_latency_comparison_pro_vs_flash():
     comparison = ModelLatencyComparison()
 
     # Medir Gemini Pro
-    print("\n🔬 Medindo Gemini Pro (gemini-3-pro-preview)...")
+    print("\n🔬 Medindo Gemini Pro (gemini-3-flash)...")
     pro_results = await comparison.measure_model_latency("pro", iterations=10)
 
     # Medir Gemini Flash

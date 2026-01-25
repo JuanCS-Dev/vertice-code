@@ -5,9 +5,9 @@ from google.genai import types
 
 async def test_v3_access():
     configurations = [
-        {"model": "gemini-3-pro-preview", "location": "us-central1"},
-        {"model": "gemini-3-pro-preview", "location": "us-west1"},  # Try another region
-        # {"model": "gemini-3-pro-preview", "location": "global"}, # SDK 1.2 might not support global for vertexai=True, but worth a try if supported
+        {"model": "gemini-3-flash", "location": "us-central1"},
+        {"model": "gemini-3-flash", "location": "us-west1"},  # Try another region
+        # {"model": "gemini-3-flash", "location": "global"}, # SDK 1.2 might not support global for vertexai=True, but worth a try if supported
         {"model": "gemini-3-flash-preview", "location": "us-central1"},
     ]
 

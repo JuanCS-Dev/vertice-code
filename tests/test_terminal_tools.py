@@ -6,7 +6,7 @@ import tempfile
 import os
 from pathlib import Path
 
-from vertice_cli.tools.terminal import (
+from vertice_core.tools.terminal import (
     CdTool,
     LsTool,
     PwdTool,

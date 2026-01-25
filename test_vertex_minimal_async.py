@@ -6,7 +6,7 @@ from google.genai import types
 
 project_id = os.getenv("GOOGLE_CLOUD_PROJECT") or "vertice-ai"
 location = os.getenv("VERTEX_AI_LOCATION") or "global"
-model_id = "gemini-3-pro-preview"
+model_id = "gemini-3-flash"
 
 print(f"Testing Vertex AI ASYNC STREAM with:")
 print(f"Project: {project_id}")

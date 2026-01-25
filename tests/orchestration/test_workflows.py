@@ -1,6 +1,6 @@
 """Tests for WorkflowLibrary."""
 
-from vertice_cli.orchestration.workflows import WorkflowLibrary, WorkflowType
+from vertice_core.orchestration.workflows import WorkflowLibrary, WorkflowType
 
 
 def test_workflow_library_initialization():

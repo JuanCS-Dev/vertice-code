@@ -15,7 +15,7 @@ import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from vertice_cli.agents.planner import (
+from vertice_core.agents.planner import (
     ExecutionMonitor,
     ExecutionEvent,
     ExecutionStrategy,
@@ -24,8 +24,8 @@ from vertice_cli.agents.planner import (
     SOPStep,
     ExecutionStage,
 )
-from vertice_cli.agents.planner.dependency import DependencyAnalyzer
-from vertice_cli.agents.planner.optimization import estimate_duration
+from vertice_core.agents.planner.dependency import DependencyAnalyzer
+from vertice_core.agents.planner.optimization import estimate_duration
 
 
 # =============================================================================

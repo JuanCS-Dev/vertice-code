@@ -7,7 +7,7 @@ Replaces tests 001-100 from test_500_brutal_tests.py (~1210 lines → ~40 lines)
 import pytest
 from unittest.mock import Mock
 
-from vertice_cli.maestro_governance import MaestroGovernance
+from vertice_core.maestro_governance import MaestroGovernance
 
 
 @pytest.mark.parametrize("test_id", range(1, 101))

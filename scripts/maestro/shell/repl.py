@@ -6,7 +6,7 @@ from pathlib import Path
 from rich.panel import Panel
 from rich.text import Text
 from rich.table import Table
-from vertice_cli.agents.base import AgentResponse
+from vertice_core.agents.base import AgentResponse
 
 
 class ReplMixin:

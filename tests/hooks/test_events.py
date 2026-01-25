@@ -1,6 +1,6 @@
 """Tests for hook events enumeration."""
 
-from vertice_cli.hooks import HookEvent, HookPriority
+from vertice_core.hooks import HookEvent, HookPriority
 
 
 class TestHookEvent:

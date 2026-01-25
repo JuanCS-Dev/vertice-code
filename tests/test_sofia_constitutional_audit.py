@@ -29,7 +29,7 @@
 """
 
 import pytest
-from vertice_cli.agents.sofia import create_sofia_agent
+from vertice_core.agents.sofia import create_sofia_agent
 
 
 # ════════════════════════════════════════════════════════════════════════════════

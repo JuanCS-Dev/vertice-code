@@ -32,7 +32,7 @@ class TestFileToolsE2E:
     @pytest.mark.asyncio
     async def test_read_file_tool(self, temp_workspace):
         """Test read_file tool reads correctly."""
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         tool = ReadFileTool()
         result = await tool.execute(path=str(temp_workspace / "test.py"))
@@ -43,7 +43,7 @@ class TestFileToolsE2E:
     @pytest.mark.asyncio
     async def test_write_file_tool(self, temp_workspace):
         """Test write_file creates file correctly."""
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
         new_file = temp_workspace / "new_file.py"
@@ -58,7 +58,7 @@ class TestFileToolsE2E:
     @pytest.mark.asyncio
     async def test_list_directory_tool(self, temp_workspace):
         """Test list_directory shows files."""
-        from vertice_cli.tools.parity.file_tools import LSTool
+        from vertice_core.tools.parity.file_tools import LSTool
 
         tool = LSTool()
         result = await tool._execute_validated(path=str(temp_workspace))
@@ -72,7 +72,7 @@ class TestFileToolsE2E:
     @pytest.mark.asyncio
     async def test_glob_tool(self, temp_workspace):
         """Test glob pattern matching."""
-        from vertice_cli.tools.parity.file_tools import GlobTool
+        from vertice_core.tools.parity.file_tools import GlobTool
 
         tool = GlobTool()
         result = await tool._execute_validated(pattern="**/*.py", path=str(temp_workspace))
@@ -105,7 +105,7 @@ class TestGitToolsE2E:
     @pytest.mark.asyncio
     async def test_git_status_tool(self, git_repo):
         """Test git_status shows repo state."""
-        from vertice_cli.tools.git_ops import GitStatusTool
+        from vertice_core.tools.git_ops import GitStatusTool
 
         tool = GitStatusTool()
         result = await tool.execute(path=str(git_repo))
@@ -116,7 +116,7 @@ class TestGitToolsE2E:
     @pytest.mark.asyncio
     async def test_git_diff_tool(self, git_repo):
         """Test git_diff shows changes."""
-        from vertice_cli.tools.git_ops import GitDiffTool
+        from vertice_core.tools.git_ops import GitDiffTool
 
         # Make a change
         (git_repo / "README.md").write_text("# Modified Project")
@@ -147,7 +147,7 @@ class TestShellToolsE2E:
     @pytest.mark.asyncio
     async def test_bash_echo(self):
         """Test bash executes echo command."""
-        from vertice_cli.tools.exec_hardened import BashCommandToolHardened
+        from vertice_core.tools.exec_hardened import BashCommandToolHardened
 
         tool = BashCommandToolHardened()
         result = await tool.execute(command="echo 'hello world'")
@@ -158,7 +158,7 @@ class TestShellToolsE2E:
     @pytest.mark.asyncio
     async def test_bash_pwd(self):
         """Test bash executes pwd command."""
-        from vertice_cli.tools.exec_hardened import BashCommandToolHardened
+        from vertice_core.tools.exec_hardened import BashCommandToolHardened
 
         tool = BashCommandToolHardened()
         result = await tool.execute(command="pwd")
@@ -169,7 +169,7 @@ class TestShellToolsE2E:
     @pytest.mark.asyncio
     async def test_bash_blocks_dangerous(self):
         """Test bash blocks dangerous commands."""
-        from vertice_cli.tools.exec_hardened import BashCommandToolHardened
+        from vertice_core.tools.exec_hardened import BashCommandToolHardened
 
         tool = BashCommandToolHardened()
         result = await tool.execute(command="rm -rf /")
@@ -180,7 +180,7 @@ class TestShellToolsE2E:
     @pytest.mark.asyncio
     async def test_bash_timeout(self):
         """Test bash enforces timeout."""
-        from vertice_cli.tools.exec_hardened import BashCommandToolHardened
+        from vertice_core.tools.exec_hardened import BashCommandToolHardened
 
         tool = BashCommandToolHardened()
         result = await tool.execute(command="sleep 10", timeout=1)
@@ -228,7 +228,7 @@ class TestParallelToolExecution:
     @pytest.mark.asyncio
     async def test_parallel_file_reads(self):
         """Test multiple file reads in parallel."""
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace = Path(tmpdir)
@@ -248,7 +248,7 @@ class TestParallelToolExecution:
     @pytest.mark.asyncio
     async def test_parallel_bash_commands(self):
         """Test multiple bash commands in parallel."""
-        from vertice_cli.tools.exec_hardened import BashCommandToolHardened
+        from vertice_core.tools.exec_hardened import BashCommandToolHardened
 
         tool = BashCommandToolHardened()
         commands = ["echo 'test1'", "echo 'test2'", "echo 'test3'"]
@@ -267,7 +267,7 @@ class TestToolErrorHandling:
     @pytest.mark.asyncio
     async def test_read_nonexistent_file(self):
         """Test reading file that doesn't exist."""
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         tool = ReadFileTool()
         result = await tool.execute(path="/nonexistent/path/file.txt")
@@ -277,7 +277,7 @@ class TestToolErrorHandling:
     @pytest.mark.asyncio
     async def test_write_invalid_path(self):
         """Test writing to invalid path."""
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
         result = await tool.execute(path="/nonexistent/path/file.txt", content="test")
@@ -290,8 +290,8 @@ class TestToolsSummary:
 
     def test_file_tools_exist(self):
         """Verify file tools are importable."""
-        from vertice_cli.tools.file_ops import ReadFileTool, WriteFileTool
-        from vertice_cli.tools.parity.file_tools import LSTool, GlobTool
+        from vertice_core.tools.file_ops import ReadFileTool, WriteFileTool
+        from vertice_core.tools.parity.file_tools import LSTool, GlobTool
 
         assert ReadFileTool is not None
         assert WriteFileTool is not None
@@ -300,13 +300,13 @@ class TestToolsSummary:
 
     def test_git_tools_exist(self):
         """Verify git tools are importable."""
-        from vertice_cli.tools.git_ops import GitStatusTool, GitDiffTool
+        from vertice_core.tools.git_ops import GitStatusTool, GitDiffTool
 
         assert GitStatusTool is not None
         assert GitDiffTool is not None
 
     def test_bash_tool_exists(self):
         """Verify bash tool is importable."""
-        from vertice_cli.tools.exec_hardened import BashCommandToolHardened
+        from vertice_core.tools.exec_hardened import BashCommandToolHardened
 
         assert BashCommandToolHardened is not None

@@ -12,9 +12,9 @@ import string
 import random
 from unittest.mock import MagicMock, AsyncMock
 
-from vertice_cli.agents.planner import PlannerAgent
-from vertice_cli.agents.refactorer import RefactorerAgent
-from vertice_cli.agents.base import AgentTask
+from vertice_core.agents.planner import PlannerAgent
+from vertice_core.agents.refactorer import RefactorerAgent
+from vertice_core.agents.base import AgentTask
 
 
 class TestExtremeInputSizes:

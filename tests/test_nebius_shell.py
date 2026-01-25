@@ -4,7 +4,7 @@ import sys
 
 sys.path.insert(0, "/home/maximus/qwen-dev-cli")
 
-from vertice_cli.core.llm import llm_client
+from vertice_core.core.llm import llm_client
 
 
 async def test_nebius():

@@ -132,7 +132,7 @@ def mock_llm_with_responses():
 @pytest.fixture(scope="function")
 def mock_config():
     """Mock configuration for testing."""
-    from vertice_cli.core.config import Config
+    from vertice_core.core.config import Config
 
     config = Config()
     config.model_name = "test-model"

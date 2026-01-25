@@ -14,9 +14,9 @@ import os
 import time
 from pathlib import Path
 from dotenv import load_dotenv
-from vertice_cli.agents.planner import PlannerAgent
-from vertice_cli.agents.refactorer import RefactorerAgent
-from vertice_cli.agents.base import TaskContext, TaskStatus
+from vertice_core.agents.planner import PlannerAgent
+from vertice_core.agents.refactorer import RefactorerAgent
+from vertice_core.agents.base import TaskContext, TaskStatus
 
 # Skip all tests in this module until rewritten for v8.0 API
 pytestmark = pytest.mark.skip(

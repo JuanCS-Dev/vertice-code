@@ -23,7 +23,7 @@ class TestInputEnhancer:
     @pytest.fixture
     def enhancer(self):
         """Create InputEnhancer instance."""
-        from vertice_cli.core.input_enhancer import InputEnhancer
+        from vertice_core.core.input_enhancer import InputEnhancer
 
         return InputEnhancer()
 
@@ -63,7 +63,7 @@ Hello"""
         result = enhancer.enhance(input_text)
 
         # Should detect REPL paste
-        from vertice_cli.core.input_enhancer import InputType
+        from vertice_core.core.input_enhancer import InputType
 
         assert result.input_type in [InputType.REPL_PASTE, InputType.CODE_BLOCK, InputType.MIXED]
 
@@ -81,7 +81,7 @@ Hello"""
 
     def test_typo_correction_suggestion(self, enhancer):
         """Test typo correction suggestions."""
-        from vertice_cli.core.input_enhancer import levenshtein_distance
+        from vertice_core.core.input_enhancer import levenshtein_distance
 
         # Test distance calculation using module-level function
         dist = levenshtein_distance("hello", "helo")
@@ -97,7 +97,7 @@ Line 2
 Line 3"""
         result = enhancer.enhance(input_text)
 
-        from vertice_cli.core.input_enhancer import InputType
+        from vertice_core.core.input_enhancer import InputType
 
         assert result.input_type in [InputType.MULTILINE, InputType.PLAIN_TEXT, InputType.MIXED]
 
@@ -164,7 +164,7 @@ class TestContextTracker:
     @pytest.fixture
     def tracker(self):
         """Create ContextTracker instance."""
-        from vertice_cli.core.context_tracker import ContextTracker
+        from vertice_core.core.context_tracker import ContextTracker
 
         return ContextTracker()
 
@@ -176,7 +176,7 @@ class TestContextTracker:
 
     def test_track_file_reference(self, tracker):
         """Test tracking file references."""
-        from vertice_cli.core.context_tracker import ContextType
+        from vertice_core.core.context_tracker import ContextType
 
         tracker.record(ContextType.FILE, "main.py")
         tracker.record(ContextType.FILE, "test.py")
@@ -187,7 +187,7 @@ class TestContextTracker:
 
     def test_resolve_demonstrative_pronoun(self, tracker):
         """Test resolving 'this', 'that', 'it' references."""
-        from vertice_cli.core.context_tracker import ContextType
+        from vertice_core.core.context_tracker import ContextType
 
         tracker.record(ContextType.FILE, "main.py")
 
@@ -199,7 +199,7 @@ class TestContextTracker:
 
     def test_resolve_anaphoric_reference(self, tracker):
         """Test resolving anaphoric references ('the file', 'the function')."""
-        from vertice_cli.core.context_tracker import ContextType
+        from vertice_core.core.context_tracker import ContextType
 
         tracker.record(ContextType.FILE, "test.py")
 
@@ -212,7 +212,7 @@ class TestContextTracker:
 
     def test_clarification_suggestion(self, tracker):
         """Test generating clarification suggestions for ambiguous references."""
-        from vertice_cli.core.context_tracker import ContextType
+        from vertice_core.core.context_tracker import ContextType
 
         tracker.record(ContextType.FILE, "file.py")
         tracker.record(ContextType.FILE, "other.py")
@@ -225,7 +225,7 @@ class TestContextTracker:
 
     def test_track_empty_value(self, tracker):
         """Test tracking empty value."""
-        from vertice_cli.core.context_tracker import ContextType
+        from vertice_core.core.context_tracker import ContextType
 
         # Should handle gracefully
         try:
@@ -242,7 +242,7 @@ class TestContextTracker:
 
     def test_history_limit(self, tracker):
         """Test history doesn't grow unbounded."""
-        from vertice_cli.core.context_tracker import ContextType
+        from vertice_core.core.context_tracker import ContextType
 
         # Record many items
         for i in range(100):
@@ -264,7 +264,7 @@ class TestErrorPresenter:
     @pytest.fixture
     def presenter(self):
         """Create ErrorPresenter instance."""
-        from vertice_cli.core.error_presenter import ErrorPresenter
+        from vertice_core.core.error_presenter import ErrorPresenter
 
         return ErrorPresenter()
 
@@ -284,7 +284,7 @@ class TestErrorPresenter:
 
     def test_present_beginner_level(self, presenter):
         """Test beginner-level error presentation."""
-        from vertice_cli.core.error_presenter import AudienceLevel
+        from vertice_core.core.error_presenter import AudienceLevel
 
         presenter.audience = AudienceLevel.BEGINNER
         error = ValueError("Invalid input")
@@ -296,7 +296,7 @@ class TestErrorPresenter:
 
     def test_present_intermediate_level(self, presenter):
         """Test intermediate-level error presentation."""
-        from vertice_cli.core.error_presenter import AudienceLevel
+        from vertice_core.core.error_presenter import AudienceLevel
 
         presenter.audience = AudienceLevel.INTERMEDIATE
         error = ValueError("Invalid input")
@@ -307,7 +307,7 @@ class TestErrorPresenter:
 
     def test_present_developer_level(self, presenter):
         """Test developer-level error presentation."""
-        from vertice_cli.core.error_presenter import AudienceLevel
+        from vertice_core.core.error_presenter import AudienceLevel
 
         presenter.audience = AudienceLevel.DEVELOPER
         error = ValueError("Invalid input")
@@ -384,25 +384,25 @@ class TestUXComponentsIntegration:
 
     @pytest.fixture
     def enhancer(self):
-        from vertice_cli.core.input_enhancer import InputEnhancer
+        from vertice_core.core.input_enhancer import InputEnhancer
 
         return InputEnhancer()
 
     @pytest.fixture
     def tracker(self):
-        from vertice_cli.core.context_tracker import ContextTracker
+        from vertice_core.core.context_tracker import ContextTracker
 
         return ContextTracker()
 
     @pytest.fixture
     def presenter(self):
-        from vertice_cli.core.error_presenter import ErrorPresenter
+        from vertice_core.core.error_presenter import ErrorPresenter
 
         return ErrorPresenter()
 
     def test_pipeline_input_to_context(self, enhancer, tracker):
         """Test input enhancement feeds into context tracking."""
-        from vertice_cli.core.context_tracker import ContextType
+        from vertice_core.core.context_tracker import ContextType
 
         # Enhance input
         enhancer.enhance("Edit the main.py file")
@@ -417,7 +417,7 @@ class TestUXComponentsIntegration:
 
     def test_error_with_context(self, tracker, presenter):
         """Test error presentation uses tracked context."""
-        from vertice_cli.core.context_tracker import ContextType
+        from vertice_core.core.context_tracker import ContextType
 
         # Build context
         tracker.record(ContextType.FILE, "main.py")
@@ -433,7 +433,7 @@ class TestUXComponentsIntegration:
 
     def test_full_pipeline(self, enhancer, tracker, presenter):
         """Test full input → context → error pipeline."""
-        from vertice_cli.core.context_tracker import ContextType
+        from vertice_core.core.context_tracker import ContextType
 
         # Step 1: Enhance input
         enhanced = enhancer.enhance(
@@ -466,7 +466,7 @@ class TestUXEdgeCases:
 
     @pytest.fixture
     def enhancer(self):
-        from vertice_cli.core.input_enhancer import InputEnhancer
+        from vertice_core.core.input_enhancer import InputEnhancer
 
         return InputEnhancer()
 

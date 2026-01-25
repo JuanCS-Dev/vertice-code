@@ -5,7 +5,7 @@ import sys
 # Add src to path
 sys.path.append(os.path.join(os.getcwd(), "src"))
 
-from vertice_cli.agents.devops.agent import DevOpsAgent
+from vertice_core.agents.devops.agent import DevOpsAgent
 
 
 # Mock LLM Client

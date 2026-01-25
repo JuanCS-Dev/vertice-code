@@ -8,7 +8,7 @@ Testa as novas implementações de performance para 60fps.
 
 import asyncio
 import time
-from vertice_cli.tui.components.streaming_markdown.widget import StreamingMarkdownWidget
+from vertice_core.tui.components.streaming_markdown.widget import StreamingMarkdownWidget
 
 
 async def test_performance_improvements():

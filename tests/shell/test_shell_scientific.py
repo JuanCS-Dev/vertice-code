@@ -20,8 +20,8 @@ import tempfile
 import os
 from pathlib import Path
 
-from vertice_cli.shell_main import InteractiveShell
-from vertice_cli.tools.exec_hardened import BashCommandToolHardened as BashCommandTool
+from vertice_core.shell_main import InteractiveShell
+from vertice_core.tools.exec_hardened import BashCommandToolHardened as BashCommandTool
 
 
 @pytest.fixture(autouse=True)

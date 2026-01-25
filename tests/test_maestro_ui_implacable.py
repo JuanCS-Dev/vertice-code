@@ -27,18 +27,18 @@ import gc
 import tracemalloc
 
 # Import components to test
-from vertice_cli.tui.components.maestro_shell_ui import MaestroShellUI
-from vertice_cli.tui.components.agent_stream_panel import AgentStreamPanel
-from vertice_cli.tui.components.file_operations_panel import FileOperationsPanel
-from vertice_cli.tui.components.metrics_dashboard import MetricsDashboard
-from vertice_cli.tui.components.maestro_data_structures import (
+from vertice_core.tui.components.maestro_shell_ui import MaestroShellUI
+from vertice_core.tui.components.agent_stream_panel import AgentStreamPanel
+from vertice_core.tui.components.file_operations_panel import FileOperationsPanel
+from vertice_core.tui.components.metrics_dashboard import MetricsDashboard
+from vertice_core.tui.components.maestro_data_structures import (
     AgentState,
     AgentStatus,
     FileOperation,
     FileStatus,
     MetricsData,
 )
-from vertice_cli.tui.theme import COLORS
+from vertice_core.tui.theme import COLORS
 
 from rich.console import Console
 from rich.text import Text

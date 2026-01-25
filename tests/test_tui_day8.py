@@ -18,7 +18,7 @@ from io import StringIO
 
 from rich.console import Console
 
-from vertice_cli.tui.components.enhanced_progress import (
+from vertice_core.tui.components.enhanced_progress import (
     EnhancedProgressDisplay,
     WorkflowProgress,
     StageProgress,
@@ -26,7 +26,7 @@ from vertice_cli.tui.components.enhanced_progress import (
     OperationType,
     ThinkingIndicator,
 )
-from vertice_cli.tui.components.dashboard import (
+from vertice_core.tui.components.dashboard import (
     Dashboard,
     Operation,
     OperationStatus,
@@ -34,7 +34,7 @@ from vertice_cli.tui.components.dashboard import (
     SystemMetrics,
     ContextWindowInfo,
 )
-from vertice_cli.tui.components.markdown_enhanced import (
+from vertice_core.tui.components.markdown_enhanced import (
     EnhancedMarkdown,
     CodeBlock,
     DiffViewer,

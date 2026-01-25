@@ -46,7 +46,7 @@ async def verify_tui_integration():
 
     except ImportError as e:
         print(f"Import Error (Environment issue?): {e}")
-        # If vertice_cli is missing, ToolBridge returns MinimalRegistry, which has 0 tools.
+        # If vertice_core is missing, ToolBridge returns MinimalRegistry, which has 0 tools.
         # This is expected behavior for 'safe' degradation.
     except Exception as e:
         print(f"CRITICAL FAILURE: {e}")

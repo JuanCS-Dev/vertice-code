@@ -7,7 +7,7 @@ Scientific Validation - Boris Cherny
 """
 
 from pathlib import Path
-from vertice_cli.intelligence.context_suggestions import ContextSuggestionEngine
+from vertice_core.intelligence.context_suggestions import ContextSuggestionEngine
 
 
 class TestRealProjectIntegration:
@@ -18,7 +18,7 @@ class TestRealProjectIntegration:
         project_root = Path(__file__).parent.parent.parent
         engine = ContextSuggestionEngine(project_root=project_root)
 
-        shell_py = project_root / "vertice_cli" / "shell_main.py"
+        shell_py = project_root / "vertice_core" / "shell_main.py"
         assert shell_py.exists(), "shell_main.py not found"
 
         # Get recommendations
@@ -46,7 +46,7 @@ class TestRealProjectIntegration:
         project_root = Path(__file__).parent.parent.parent
         engine = ContextSuggestionEngine(project_root=project_root)
 
-        lsp_client = project_root / "vertice_cli" / "intelligence" / "lsp_client.py"
+        lsp_client = project_root / "vertice_core" / "intelligence" / "lsp_client.py"
         assert lsp_client.exists(), "lsp_client.py not found"
 
         recommendations = engine.suggest_related_files(lsp_client, max_suggestions=10)
@@ -63,7 +63,7 @@ class TestRealProjectIntegration:
         engine = ContextSuggestionEngine(project_root=project_root)
 
         # Pick a file that might have issues
-        shell_py = project_root / "vertice_cli" / "shell_main.py"
+        shell_py = project_root / "vertice_core" / "shell_main.py"
 
         suggestions = engine.suggest_edits(shell_py)
 
@@ -81,7 +81,7 @@ class TestRealProjectIntegration:
         project_root = Path(__file__).parent.parent.parent
         engine = ContextSuggestionEngine(project_root=project_root)
 
-        shell_py = project_root / "vertice_cli" / "shell_main.py"
+        shell_py = project_root / "vertice_core" / "shell_main.py"
         context = engine.analyze_file_context(shell_py)
 
         # Validate context structure

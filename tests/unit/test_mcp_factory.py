@@ -13,8 +13,8 @@ import pytest
 from unittest.mock import Mock, patch, MagicMock
 import warnings
 
-from vertice_cli.core.mcp import create_mcp_client, MCPClient
-from vertice_cli.tools.base import ToolRegistry, ToolResult
+from vertice_core.core.mcp import create_mcp_client, MCPClient
+from vertice_core.tools.base import ToolRegistry, ToolResult
 
 
 class TestCreateMCPClient:
@@ -79,7 +79,7 @@ class TestCreateMCPClient:
         # Should be same object, not a copy
         assert mcp.registry is custom_registry
 
-    @patch("vertice_cli.tools.registry_setup.setup_default_tools")
+    @patch("vertice_core.tools.registry_setup.setup_default_tools")
     def test_create_calls_setup_default_tools_when_auto_setup(self, mock_setup):
         """create_mcp_client() should call setup_default_tools() for auto-setup."""
         mock_registry = ToolRegistry()
@@ -316,7 +316,7 @@ class TestBackwardsCompatibility:
 
     def test_import_from_mcp_module(self):
         """Should be able to import from mcp module."""
-        from vertice_cli.core.mcp import MCPClient, create_mcp_client
+        from vertice_core.core.mcp import MCPClient, create_mcp_client
 
         assert MCPClient is not None
         assert create_mcp_client is not None
@@ -324,7 +324,7 @@ class TestBackwardsCompatibility:
     def test_import_from_mcp_client_module(self):
         """Should be able to import from mcp_client module (backwards compat)."""
         try:
-            from vertice_cli.core.mcp_client import MCPClient
+            from vertice_core.core.mcp_client import MCPClient
 
             assert MCPClient is not None
         except ImportError:
@@ -332,10 +332,10 @@ class TestBackwardsCompatibility:
 
     def test_both_modules_provide_same_class(self):
         """Both modules should provide the same MCPClient class."""
-        from vertice_cli.core.mcp import MCPClient as MCPFromMcp
+        from vertice_core.core.mcp import MCPClient as MCPFromMcp
 
         try:
-            from vertice_cli.core.mcp_client import MCPClient as MCPFromClient
+            from vertice_core.core.mcp_client import MCPClient as MCPFromClient
 
             assert MCPFromMcp is MCPFromClient
         except ImportError:
@@ -347,13 +347,13 @@ class TestIntegrationWithAgents:
 
     def test_factory_creates_usable_mcp_for_agents(self):
         """MCP from factory should be usable by agents."""
-        from vertice_cli.core.llm import LLMClient
+        from vertice_core.core.llm import LLMClient
 
         llm = LLMClient()
         mcp = create_mcp_client()
 
         # Create an agent that requires MCP
-        from vertice_cli.agents.explorer import ExplorerAgent
+        from vertice_core.agents.explorer import ExplorerAgent
 
         agent = ExplorerAgent(llm, mcp)
 
@@ -362,17 +362,17 @@ class TestIntegrationWithAgents:
 
     def test_factory_with_custom_tools_for_agents(self):
         """Custom tool setup should work with agents."""
-        from vertice_cli.core.llm import LLMClient
+        from vertice_core.core.llm import LLMClient
 
         llm = LLMClient()
 
         # Setup with only minimal tools
-        from vertice_cli.tools.registry_setup import setup_minimal_tools
+        from vertice_core.tools.registry_setup import setup_minimal_tools
 
         registry, mcp = setup_minimal_tools()
 
         # Agent should still initialize
-        from vertice_cli.agents.explorer import ExplorerAgent
+        from vertice_core.agents.explorer import ExplorerAgent
 
         agent = ExplorerAgent(llm, mcp)
 
@@ -380,8 +380,8 @@ class TestIntegrationWithAgents:
 
     def test_empty_registry_agent_will_fail_gracefully(self):
         """Agent with empty registry should fail with clear error."""
-        from vertice_cli.core.llm import LLMClient
-        from vertice_cli.agents.explorer import ExplorerAgent
+        from vertice_core.core.llm import LLMClient
+        from vertice_core.agents.explorer import ExplorerAgent
 
         llm = LLMClient()
         empty_registry = ToolRegistry()

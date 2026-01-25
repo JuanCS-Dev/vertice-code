@@ -63,22 +63,22 @@ orchestration:
 agents:
   orchestrator:
     role: "lead"
-    model: "claude-opus-4"
+    model: "anthropic-vertex/opus"
     description: "Strategic planning, task decomposition, agent coordination"
 
   coder:
     role: "specialist"
-    model: "groq-llama-70b"
+    model: "vertex-ai/gemini-3-pro"
     description: "Fast code generation, bulk operations"
 
   reviewer:
     role: "specialist"
-    model: "vertex-gemini-flash"
+    model: "vertex-ai/gemini-3-flash"
     description: "Code review, security audit, quality assurance"
 
   architect:
     role: "specialist"
-    model: "claude-sonnet-4"
+    model: "anthropic-vertex/sonnet-4.5"
     description: "System design, architecture decisions"
 
   researcher:

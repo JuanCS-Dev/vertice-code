@@ -8,7 +8,7 @@ import asyncio
 import pytest
 from unittest.mock import Mock
 
-from vertice_cli.maestro_governance import MaestroGovernance
+from vertice_core.maestro_governance import MaestroGovernance
 
 
 @pytest.mark.asyncio

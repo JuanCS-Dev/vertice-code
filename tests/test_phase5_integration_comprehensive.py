@@ -21,10 +21,10 @@ from unittest.mock import Mock, AsyncMock
 from concurrent.futures import ThreadPoolExecutor
 
 # Real imports - no mocks
-from vertice_cli.maestro_governance import MaestroGovernance
-from vertice_cli.agents.base import AgentTask, AgentResponse, BaseAgent, AgentRole
-from vertice_cli.core.agent_identity import get_agent_identity, AgentPermission
-from vertice_cli.core.llm import LLMClient
+from vertice_core.maestro_governance import MaestroGovernance
+from vertice_core.agents.base import AgentTask, AgentResponse, BaseAgent, AgentRole
+from vertice_core.core.agent_identity import get_agent_identity, AgentPermission
+from vertice_core.core.llm import LLMClient
 
 
 # ============================================================================
@@ -710,7 +710,7 @@ class TestIntegrationAirGaps:
     @pytest.mark.asyncio
     async def test_airgap_02_permission_completeness(self):
         """Verify all agent identities have meaningful permissions."""
-        from vertice_cli.core.agent_identity import AGENT_IDENTITIES
+        from vertice_core.core.agent_identity import AGENT_IDENTITIES
 
         for agent_id, identity in AGENT_IDENTITIES.items():
             # Each identity should have at least one permission
@@ -719,7 +719,7 @@ class TestIntegrationAirGaps:
     @pytest.mark.asyncio
     async def test_airgap_03_executor_role_exists(self):
         """Verify EXECUTOR role exists and is used correctly."""
-        from vertice_cli.agents.base import AgentRole
+        from vertice_core.agents.base import AgentRole
 
         # Must have EXECUTOR role
         assert hasattr(AgentRole, "EXECUTOR")
@@ -772,7 +772,7 @@ class TestIntegrationAirGaps:
     @pytest.mark.asyncio
     async def test_airgap_08_all_roles_have_string_values(self):
         """Verify all AgentRoles have valid string values."""
-        from vertice_cli.agents.base import AgentRole
+        from vertice_core.agents.base import AgentRole
 
         for role in AgentRole:
             assert isinstance(role.value, str)

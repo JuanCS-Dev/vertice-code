@@ -47,7 +47,7 @@ class TestReadFileTool:
     @pytest.mark.asyncio
     async def test_read_file_success(self, temp_workspace):
         """Read existing file returns content."""
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         tool = ReadFileTool()
         result = await tool.execute(path=str(temp_workspace / "test.py"))
@@ -58,7 +58,7 @@ class TestReadFileTool:
     @pytest.mark.asyncio
     async def test_read_file_preserves_encoding(self, temp_workspace):
         """Read file preserves UTF-8 content."""
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         # Write file with unicode
         (temp_workspace / "unicode.txt").write_text("Olá mundo! 日本語 🚀")
@@ -73,7 +73,7 @@ class TestReadFileTool:
     @pytest.mark.asyncio
     async def test_read_nonexistent_file(self, temp_workspace):
         """Read nonexistent file returns error."""
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         tool = ReadFileTool()
         result = await tool.execute(path=str(temp_workspace / "nonexistent.txt"))
@@ -87,7 +87,7 @@ class TestWriteFileTool:
     @pytest.mark.asyncio
     async def test_write_new_file(self, temp_workspace):
         """Write creates new file."""
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
         new_file = temp_workspace / "new_file.py"
@@ -102,7 +102,7 @@ class TestWriteFileTool:
     @pytest.mark.asyncio
     async def test_write_rejects_existing(self, temp_workspace):
         """Write rejects overwriting existing file (use edit instead)."""
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
         existing_file = temp_workspace / "test.py"
@@ -117,7 +117,7 @@ class TestWriteFileTool:
     @pytest.mark.asyncio
     async def test_write_creates_parent_dirs(self, temp_workspace):
         """Write creates parent directories if needed."""
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
         deep_file = temp_workspace / "a" / "b" / "c" / "file.txt"
@@ -134,7 +134,7 @@ class TestEditFileTool:
     @pytest.mark.asyncio
     async def test_edit_simple_replace(self, temp_workspace):
         """Edit replaces text correctly."""
-        from vertice_cli.tools.file_ops import EditFileTool
+        from vertice_core.tools.file_ops import EditFileTool
 
         tool = EditFileTool()
         file_path = temp_workspace / "test.py"
@@ -158,7 +158,7 @@ class TestLSTool:
     @pytest.mark.asyncio
     async def test_ls_lists_files(self, temp_workspace):
         """LS shows directory contents."""
-        from vertice_cli.tools.parity.file_tools import LSTool
+        from vertice_core.tools.parity.file_tools import LSTool
 
         tool = LSTool()
         result = await tool._execute_validated(path=str(temp_workspace))
@@ -172,7 +172,7 @@ class TestLSTool:
     @pytest.mark.asyncio
     async def test_ls_shows_types(self, temp_workspace):
         """LS shows file types."""
-        from vertice_cli.tools.parity.file_tools import LSTool
+        from vertice_core.tools.parity.file_tools import LSTool
 
         tool = LSTool()
         result = await tool._execute_validated(path=str(temp_workspace))
@@ -189,7 +189,7 @@ class TestGlobTool:
     @pytest.mark.asyncio
     async def test_glob_finds_python_files(self, temp_workspace):
         """Glob **/*.py finds all Python files."""
-        from vertice_cli.tools.parity.file_tools import GlobTool
+        from vertice_core.tools.parity.file_tools import GlobTool
 
         tool = GlobTool()
         result = await tool._execute_validated(pattern="**/*.py", path=str(temp_workspace))
@@ -203,7 +203,7 @@ class TestGlobTool:
     @pytest.mark.asyncio
     async def test_glob_no_matches(self, temp_workspace):
         """Glob returns empty for no matches."""
-        from vertice_cli.tools.parity.file_tools import GlobTool
+        from vertice_core.tools.parity.file_tools import GlobTool
 
         tool = GlobTool()
         result = await tool._execute_validated(pattern="**/*.nonexistent", path=str(temp_workspace))
@@ -245,7 +245,7 @@ class TestMultiFileOperations:
     @pytest.mark.asyncio
     async def test_read_multiple_files_parallel(self, temp_workspace):
         """Read multiple files in parallel."""
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         tool = ReadFileTool()
         files = [

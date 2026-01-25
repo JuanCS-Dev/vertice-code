@@ -9,7 +9,7 @@ import time
 from pathlib import Path
 import tempfile
 
-from vertice_cli.core.conversation import (
+from vertice_core.core.conversation import (
     ConversationManager,
     ConversationState,
     ConversationTurn,

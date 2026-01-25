@@ -27,7 +27,7 @@ class TestPathTraversalProtection:
 
     @pytest.fixture
     def validator(self):
-        from vertice_cli.core.input_validator import InputValidator
+        from vertice_core.core.input_validator import InputValidator
 
         return InputValidator()
 
@@ -108,7 +108,7 @@ class TestCommandInjectionProtection:
 
     @pytest.fixture
     def validator(self):
-        from vertice_cli.core.input_validator import InputValidator
+        from vertice_core.core.input_validator import InputValidator
 
         return InputValidator()
 
@@ -217,7 +217,7 @@ class TestResourceExhaustionProtection:
 
     def test_agent_task_blocks_huge_context(self):
         """AgentTask deve bloquear contexto gigante (memory bomb)."""
-        from vertice_cli.agents.base import AgentTask
+        from vertice_core.agents.base import AgentTask
 
         # Tenta criar contexto de 100MB
         huge_context = {"data": "x" * (100 * 1024 * 1024)}
@@ -233,7 +233,7 @@ class TestResourceExhaustionProtection:
 
     def test_agent_task_blocks_too_many_keys(self):
         """AgentTask deve bloquear contexto com muitas keys."""
-        from vertice_cli.agents.base import AgentTask
+        from vertice_core.agents.base import AgentTask
 
         # Contexto com 20000 keys
         huge_keys = {f"key_{i}": i for i in range(20000)}
@@ -258,20 +258,20 @@ class TestSandboxIsolation:
 
     def test_sandbox_exists(self):
         """Sandbox module deve existir."""
-        from vertice_cli.core.sandbox import SecureExecutor
+        from vertice_core.core.sandbox import SecureExecutor
 
         assert SecureExecutor is not None
 
     def test_sandbox_has_safe_commands(self):
         """Sandbox deve ter lista de comandos seguros."""
-        from vertice_cli.core.sandbox import SecureExecutor
+        from vertice_core.core.sandbox import SecureExecutor
 
         # Deve ter SAFE_COMMANDS definido na classe
         assert hasattr(SecureExecutor, "SAFE_COMMANDS"), "SecureExecutor missing SAFE_COMMANDS list"
 
     def test_sandbox_validates_commands(self):
         """Sandbox deve validar comandos antes de executar."""
-        from vertice_cli.core.sandbox import SecureExecutor
+        from vertice_core.core.sandbox import SecureExecutor
 
         executor = SecureExecutor()
 
@@ -306,7 +306,7 @@ class TestEnvironmentProtection:
 
     def test_sensitive_env_vars_sanitized(self):
         """Variáveis sensíveis devem ser sanitizadas."""
-        from vertice_cli.core.sandbox import SecureExecutor
+        from vertice_core.core.sandbox import SecureExecutor
 
         executor = SecureExecutor()
 
@@ -329,13 +329,13 @@ class TestFileOperationSafety:
 
     def test_write_tool_validates_path(self):
         """Write tool deve validar path antes de escrever."""
-        from vertice_cli.tools.base import ToolRegistry
+        from vertice_core.tools.base import ToolRegistry
 
         registry = ToolRegistry()
         write_tool = registry.get("write_file")
         if write_tool is None:
             # Tool pode não estar registrada - verificar via input_validator
-            from vertice_cli.core.input_validator import validate_file_path
+            from vertice_core.core.input_validator import validate_file_path
 
             result = validate_file_path("/etc/passwd")
             assert not result.is_valid, "Path validation should block /etc/passwd"
@@ -350,13 +350,13 @@ class TestFileOperationSafety:
 
     def test_read_tool_validates_path(self):
         """Read tool deve validar path antes de ler."""
-        from vertice_cli.tools.base import ToolRegistry
+        from vertice_core.tools.base import ToolRegistry
 
         registry = ToolRegistry()
         read_tool = registry.get("read_file")
         if read_tool is None:
             # Tool pode não estar registrada - verificar via input_validator
-            from vertice_cli.core.input_validator import validate_file_path
+            from vertice_core.core.input_validator import validate_file_path
 
             result = validate_file_path("~/.ssh/id_rsa")
             assert not result.is_valid, "Path validation should block ~/.ssh/id_rsa"
@@ -381,8 +381,8 @@ class TestSecuritySmokeTest:
     def test_all_security_modules_import(self):
         """Todos os módulos de segurança devem importar."""
         modules = [
-            "vertice_cli.core.input_validator",
-            "vertice_cli.core.sandbox",
+            "vertice_core.core.input_validator",
+            "vertice_core.core.sandbox",
         ]
 
         for module in modules:
@@ -396,7 +396,7 @@ class TestSecuritySmokeTest:
         import ast
         from pathlib import Path
 
-        core_path = Path("vertice_cli/core")
+        core_path = Path("vertice_core/core")
         if not core_path.exists():
             pytest.skip("Core path not found")
 

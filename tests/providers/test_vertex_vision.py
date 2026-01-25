@@ -124,7 +124,7 @@ class TestFormatContentParts:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
 
@@ -144,7 +144,7 @@ class TestFormatContentParts:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
 
@@ -168,7 +168,7 @@ class TestFormatContentParts:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
 
@@ -196,7 +196,7 @@ class TestFormatContentParts:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
 
@@ -220,7 +220,7 @@ class TestStreamChatMultimodal:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
             provider._client = True
@@ -249,7 +249,7 @@ class TestStreamChatMultimodal:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
             provider._client = True
@@ -289,7 +289,7 @@ class TestImageReadToolContentBlock:
         )
         test_image.write_bytes(png_data)
 
-        from vertice_cli.tools.media_tools import ImageReadTool
+        from vertice_core.tools.media_tools import ImageReadTool
 
         tool = ImageReadTool()
         result = await tool._execute_validated(
@@ -317,8 +317,8 @@ class TestVertexVisionIntegration:
     @pytest.mark.asyncio
     async def test_real_image_analysis(self, tmp_path) -> None:
         """Integration test: Analyze a real image."""
-        from vertice_cli.core.providers.vertex_ai import VertexAIProvider
-        from vertice_cli.tools.media_tools import ImageReadTool
+        from vertice_core.core.providers.vertex_ai import VertexAIProvider
+        from vertice_core.tools.media_tools import ImageReadTool
 
         provider = VertexAIProvider()
 

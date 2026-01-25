@@ -45,7 +45,7 @@ except ImportError as e:
 print("-" * 50)
 print("Testing Register.py...")
 try:
-    from vertice_cli.core.providers.register import ensure_providers_registered, registry
+    from vertice_core.core.providers.register import ensure_providers_registered, registry
 
     ensure_providers_registered()
     print("Registration run.")

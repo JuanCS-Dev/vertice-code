@@ -32,7 +32,7 @@ async def trace_full_pipeline():
     print("-" * 70)
 
     try:
-        from vertice_core.clients.vertice_client import VerticeClient
+        from vertice_core.clients.vertice_coreent import VerticeClient
 
         client = VerticeClient()
         print(f"   Priority order: {client.config.priority}")
@@ -53,7 +53,7 @@ async def trace_full_pipeline():
         from vertice_tui.core.llm_client import GeminiClient
 
         gemini = GeminiClient()
-        print(f"   VerticeClient available: {gemini._vertice_client is not None}")
+        print(f"   VerticeClient available: {gemini._vertice_coreent is not None}")
         print(f"   Current provider: {gemini.get_current_provider_name()}")
     except Exception as e:
         print(f"   ❌ GeminiClient failed: {e}")

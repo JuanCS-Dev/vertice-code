@@ -10,8 +10,8 @@ Date: 2025-11-21
 import pytest
 from pathlib import Path
 
-from vertice_cli.integration.shell_bridge import ShellBridge
-from vertice_cli.tools.exec_hardened import BashCommandTool, ExecutionLimits
+from vertice_core.integration.shell_bridge import ShellBridge
+from vertice_core.tools.exec_hardened import BashCommandTool, ExecutionLimits
 
 
 class TestShellBridgeIntegration:
@@ -67,7 +67,7 @@ class TestCLIIntegration:
     @pytest.mark.asyncio
     async def test_shell_loads_hardened_bash(self):
         """Shell loads hardened bash tool."""
-        from vertice_cli.shell import InteractiveShell
+        from vertice_core.shell import InteractiveShell
 
         # This should not raise
         shell = InteractiveShell()
@@ -78,7 +78,7 @@ class TestCLIIntegration:
     @pytest.mark.asyncio
     async def test_single_shot_uses_hardened_bash(self):
         """Single-shot commands use hardened bash."""
-        from vertice_cli.core.single_shot import SingleShotExecutor
+        from vertice_core.core.single_shot import SingleShotExecutor
 
         executor = SingleShotExecutor()
 
@@ -207,7 +207,7 @@ class TestBackwardCompatibility:
     @pytest.mark.asyncio
     async def test_old_import_style_works(self):
         """Old import style still works via alias."""
-        from vertice_cli.tools.exec_hardened import BashCommandTool
+        from vertice_core.tools.exec_hardened import BashCommandTool
 
         tool = BashCommandTool()
         result = await tool.execute(command="echo 'backward compat'")
@@ -217,8 +217,8 @@ class TestBackwardCompatibility:
 
     def test_tool_registry_compatibility(self):
         """Tool registry still recognizes bash_command."""
-        from vertice_cli.tools.base import ToolRegistry
-        from vertice_cli.tools.exec_hardened import BashCommandTool
+        from vertice_core.tools.base import ToolRegistry
+        from vertice_core.tools.exec_hardened import BashCommandTool
 
         registry = ToolRegistry()
         tool = BashCommandTool()

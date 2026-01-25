@@ -7,7 +7,7 @@ import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock, patch
 
-from vertice_cli.core.recovery import ErrorRecoveryEngine, RecoveryContext, ErrorCategory
+from vertice_core.core.recovery import ErrorRecoveryEngine, RecoveryContext, ErrorCategory
 
 
 class TestRecoveryEngineIntegration:

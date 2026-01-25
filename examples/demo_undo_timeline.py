@@ -6,8 +6,8 @@ Showcase das features que elevam nosso CLI ao nível Cursor
 
 import time
 from rich.console import Console
-from vertice_cli.tui.components.preview import UndoRedoStack
-from vertice_cli.tui.components.execution_timeline import ExecutionTimeline, TimelinePlayback
+from vertice_core.tui.components.preview import UndoRedoStack
+from vertice_core.tui.components.execution_timeline import ExecutionTimeline, TimelinePlayback
 
 
 def demo_undo_redo():

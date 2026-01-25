@@ -12,7 +12,7 @@ The agent currently only supports file-based refactoring operations.
 import pytest
 from unittest.mock import MagicMock
 
-from vertice_cli.agents.refactor import RefactorAgent
+from vertice_core.agents.refactor import RefactorAgent
 
 
 # Skip reason for all tests in this module

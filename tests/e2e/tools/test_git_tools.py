@@ -57,7 +57,7 @@ class TestGitStatusTool:
     @pytest.mark.asyncio
     async def test_git_status_clean(self, git_repo):
         """Status shows clean working tree."""
-        from vertice_cli.tools.git_ops import GitStatusTool
+        from vertice_core.tools.git_ops import GitStatusTool
 
         tool = GitStatusTool()
         result = await tool.execute(path=str(git_repo))
@@ -68,7 +68,7 @@ class TestGitStatusTool:
     @pytest.mark.asyncio
     async def test_git_status_modified(self, git_repo):
         """Status shows modified files."""
-        from vertice_cli.tools.git_ops import GitStatusTool
+        from vertice_core.tools.git_ops import GitStatusTool
 
         # Modify a file
         (git_repo / "README.md").write_text("# Modified\n")
@@ -81,7 +81,7 @@ class TestGitStatusTool:
     @pytest.mark.asyncio
     async def test_git_status_untracked(self, git_repo):
         """Status shows untracked files."""
-        from vertice_cli.tools.git_ops import GitStatusTool
+        from vertice_core.tools.git_ops import GitStatusTool
 
         # Create untracked file
         (git_repo / "new_file.txt").write_text("new content")
@@ -98,7 +98,7 @@ class TestGitDiffTool:
     @pytest.mark.asyncio
     async def test_git_diff_empty(self, git_repo):
         """Diff empty when no changes."""
-        from vertice_cli.tools.git_ops import GitDiffTool
+        from vertice_core.tools.git_ops import GitDiffTool
 
         tool = GitDiffTool()
         result = await tool.execute(path=str(git_repo))
@@ -108,7 +108,7 @@ class TestGitDiffTool:
     @pytest.mark.asyncio
     async def test_git_diff_shows_changes(self, git_repo):
         """Diff shows file modifications."""
-        from vertice_cli.tools.git_ops import GitDiffTool
+        from vertice_core.tools.git_ops import GitDiffTool
 
         # Make a change
         (git_repo / "main.py").write_text("def main():\n    print('hello')\n")

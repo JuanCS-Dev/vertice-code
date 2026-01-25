@@ -8,7 +8,7 @@ sys.path.append(os.getcwd())
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-from vertice_cli.core.providers.anthropic_vertex import AnthropicVertexProvider
+from vertice_core.core.providers.anthropic_vertex import AnthropicVertexProvider
 
 
 async def main():

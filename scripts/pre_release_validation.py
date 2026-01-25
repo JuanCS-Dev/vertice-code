@@ -47,7 +47,7 @@ PROJECT_ROOT = Path(__file__).parent.parent
 REPORT_PATH = PROJECT_ROOT / "PRE_RELEASE_REPORT.md"
 
 PACKAGES = [
-    "vertice_cli",
+    "vertice_core",
     "vertice_tui",
     "vertice_core",
     "prometheus",
@@ -58,16 +58,16 @@ PACKAGES = [
 ]
 
 CRITICAL_MODULES = [
-    "vertice_cli.main",
-    "vertice_cli.cli_app",
+    "vertice_core.main",
+    "vertice_core.cli_app",
     "vertice_tui.__init__",
     "vertice_core.types",
 ]
 
 ENTRY_POINTS = [
-    ("vtc", "vertice_cli.main:cli_main"),
-    ("vertice", "vertice_cli.main:cli_main"),
-    ("vertice-cli", "vertice_cli.main:cli_main"),
+    ("vtc", "vertice_core.main:cli_main"),
+    ("vertice", "vertice_core.main:cli_main"),
+    ("vertice-cli", "vertice_core.main:cli_main"),
 ]
 
 TEST_CATEGORIES = [
@@ -891,7 +891,7 @@ class CircularImportValidator(Validator):
 
         # Simple check: try importing main modules
         test_imports = [
-            "vertice_cli",
+            "vertice_core",
             "vertice_tui",
             "vertice_core",
         ]

@@ -48,7 +48,7 @@ class TestPlannerAgent:
     def planner(self, mock_llm_client, mock_mcp_client):
         """Create planner agent with mocked dependencies."""
         try:
-            from vertice_cli.agents.planner.agent import PlannerAgent
+            from vertice_core.agents.planner.agent import PlannerAgent
 
             return PlannerAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
         except ImportError:
@@ -73,7 +73,7 @@ class TestExecutorAgent:
     def executor(self, mock_llm_client, mock_mcp_client):
         """Create executor agent with mocked dependencies."""
         try:
-            from vertice_cli.agents.executor import NextGenExecutorAgent
+            from vertice_core.agents.executor import NextGenExecutorAgent
 
             return NextGenExecutorAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
         except ImportError:
@@ -96,7 +96,7 @@ class TestExplorerAgent:
     def explorer(self, mock_llm_client, mock_mcp_client):
         """Create explorer agent with mocked dependencies."""
         try:
-            from vertice_cli.agents.explorer import ExplorerAgent
+            from vertice_core.agents.explorer import ExplorerAgent
 
             return ExplorerAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
         except ImportError:
@@ -119,7 +119,7 @@ class TestArchitectAgent:
     def architect(self, mock_llm_client, mock_mcp_client):
         """Create architect agent with mocked dependencies."""
         try:
-            from vertice_cli.agents.architect import ArchitectAgent
+            from vertice_core.agents.architect import ArchitectAgent
 
             return ArchitectAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
         except ImportError:
@@ -141,7 +141,7 @@ class TestReviewerAgent:
     def reviewer(self, mock_llm_client, mock_mcp_client):
         """Create reviewer agent with mocked dependencies."""
         try:
-            from vertice_cli.agents.reviewer import ReviewerAgent
+            from vertice_core.agents.reviewer import ReviewerAgent
 
             return ReviewerAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
         except ImportError:
@@ -163,7 +163,7 @@ class TestRefactorerAgent:
     def refactorer(self, mock_llm_client, mock_mcp_client):
         """Create refactorer agent with mocked dependencies."""
         try:
-            from vertice_cli.agents.refactorer import RefactorerAgent
+            from vertice_core.agents.refactorer import RefactorerAgent
 
             return RefactorerAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
         except ImportError:
@@ -185,7 +185,7 @@ class TestSecurityAgent:
     def security(self, mock_llm_client, mock_mcp_client):
         """Create security agent with mocked dependencies."""
         try:
-            from vertice_cli.agents.security import SecurityAgent
+            from vertice_core.agents.security import SecurityAgent
 
             return SecurityAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
         except ImportError:
@@ -207,7 +207,7 @@ class TestTestRunnerAgent:
     def testing(self, mock_llm_client, mock_mcp_client):
         """Create testing agent with mocked dependencies."""
         try:
-            from vertice_cli.agents.testing import TestRunnerAgent
+            from vertice_core.agents.testing import TestRunnerAgent
 
             return TestRunnerAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
         except ImportError:
@@ -231,7 +231,7 @@ class TestPerformanceAgent:
     def performance(self, mock_llm_client, mock_mcp_client):
         """Create performance agent with mocked dependencies."""
         try:
-            from vertice_cli.agents.performance import PerformanceAgent
+            from vertice_core.agents.performance import PerformanceAgent
 
             return PerformanceAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
         except ImportError:
@@ -253,7 +253,7 @@ class TestDocumentationAgent:
     def documentation(self, mock_llm_client, mock_mcp_client):
         """Create documentation agent with mocked dependencies."""
         try:
-            from vertice_cli.agents.documentation import DocumentationAgent
+            from vertice_core.agents.documentation import DocumentationAgent
 
             return DocumentationAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
         except ImportError:
@@ -271,7 +271,7 @@ class TestDataAgent:
     def data_agent(self, mock_llm_client, mock_mcp_client):
         """Create data agent with mocked dependencies."""
         try:
-            from vertice_cli.agents.data_agent_production import DataAgent
+            from vertice_core.agents.data_agent_production import DataAgent
 
             return DataAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
         except ImportError:
@@ -289,7 +289,7 @@ class TestDevOpsAgent:
     def devops(self, mock_llm_client, mock_mcp_client):
         """Create devops agent with mocked dependencies."""
         try:
-            from vertice_cli.agents.devops import DevOpsAgent
+            from vertice_core.agents.devops import DevOpsAgent
 
             return DevOpsAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
         except ImportError:
@@ -307,7 +307,7 @@ class TestJusticaAgent:
     def justica(self, mock_llm_client, mock_mcp_client):
         """Create justica agent with mocked dependencies."""
         try:
-            from vertice_cli.agents.justica_agent import JusticaIntegratedAgent
+            from vertice_core.agents.justica_agent import JusticaIntegratedAgent
 
             return JusticaIntegratedAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
         except ImportError:
@@ -329,7 +329,7 @@ class TestSofiaAgent:
     def sofia(self, mock_llm_client, mock_mcp_client):
         """Create sofia agent with mocked dependencies."""
         try:
-            from vertice_cli.agents.sofia import SofiaIntegratedAgent
+            from vertice_core.agents.sofia import SofiaIntegratedAgent
 
             return SofiaIntegratedAgent(llm_client=mock_llm_client, mcp_client=mock_mcp_client)
         except ImportError:

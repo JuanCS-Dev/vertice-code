@@ -3,7 +3,7 @@ Edge Case Tests for Refactoring - Week 4 Day 2
 Scientific Validation - Boris Cherny
 """
 
-from vertice_cli.refactoring.engine import RefactoringEngine
+from vertice_core.refactoring.engine import RefactoringEngine
 
 
 class TestRenameEdgeCases:

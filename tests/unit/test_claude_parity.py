@@ -24,14 +24,14 @@ class TestMemorySystem:
 
     def test_memory_manager_import(self):
         """Test MemoryManager can be imported."""
-        from vertice_cli.core.memory import MemoryManager, get_memory_manager
+        from vertice_core.core.memory import MemoryManager, get_memory_manager
 
         assert MemoryManager is not None
         assert get_memory_manager is not None
 
     def test_memory_manager_creation(self):
         """Test MemoryManager can be created."""
-        from vertice_cli.core.memory import MemoryManager
+        from vertice_core.core.memory import MemoryManager
 
         manager = MemoryManager()
         assert manager is not None
@@ -39,7 +39,7 @@ class TestMemorySystem:
 
     def test_memory_manager_load_no_file(self):
         """Test loading when no CLAUDE.md exists."""
-        from vertice_cli.core.memory import MemoryManager
+        from vertice_core.core.memory import MemoryManager
 
         with tempfile.TemporaryDirectory() as tmpdir:
             manager = MemoryManager(project_root=Path(tmpdir))
@@ -50,7 +50,7 @@ class TestMemorySystem:
 
     def test_memory_manager_load_with_file(self):
         """Test loading when JUAN.md exists."""
-        from vertice_cli.core.memory import MemoryManager
+        from vertice_core.core.memory import MemoryManager
 
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir = Path(tmpdir)
@@ -84,7 +84,7 @@ class TestMemorySystem:
 
     def test_memory_context_generation(self):
         """Test context generation for LLM."""
-        from vertice_cli.core.memory import MemoryManager
+        from vertice_core.core.memory import MemoryManager
 
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir = Path(tmpdir)
@@ -107,7 +107,7 @@ class TestMemorySystem:
 
     def test_session_memory(self):
         """Test session memory tracking."""
-        from vertice_cli.core.memory import MemoryManager
+        from vertice_core.core.memory import MemoryManager
 
         manager = MemoryManager()
         manager.add_session_entry("User prefers dark mode")
@@ -129,13 +129,13 @@ class TestAskUserQuestion:
 
     def test_tool_import(self):
         """Test tool can be imported."""
-        from vertice_cli.tools.claude_parity_tools import AskUserQuestionTool
+        from vertice_core.tools.claude_parity_tools import AskUserQuestionTool
 
         assert AskUserQuestionTool is not None
 
     def test_tool_creation(self):
         """Test tool creation."""
-        from vertice_cli.tools.claude_parity_tools import AskUserQuestionTool
+        from vertice_core.tools.claude_parity_tools import AskUserQuestionTool
 
         tool = AskUserQuestionTool()
         assert tool.name == "ask_user_question"
@@ -144,7 +144,7 @@ class TestAskUserQuestion:
     @pytest.mark.asyncio
     async def test_ask_question(self):
         """Test asking a question."""
-        from vertice_cli.tools.claude_parity_tools import AskUserQuestionTool
+        from vertice_core.tools.claude_parity_tools import AskUserQuestionTool
 
         tool = AskUserQuestionTool()
 
@@ -169,7 +169,7 @@ class TestAskUserQuestion:
     @pytest.mark.asyncio
     async def test_max_questions_limit(self):
         """Test max 4 questions limit."""
-        from vertice_cli.tools.claude_parity_tools import AskUserQuestionTool
+        from vertice_core.tools.claude_parity_tools import AskUserQuestionTool
 
         tool = AskUserQuestionTool()
 
@@ -199,7 +199,7 @@ class TestEditReplaceAll:
 
     def test_tool_has_replace_all(self):
         """Test replace_all parameter exists."""
-        from vertice_cli.tools.file_ops import EditFileTool
+        from vertice_core.tools.file_ops import EditFileTool
 
         tool = EditFileTool()
         assert "replace_all" in tool.parameters
@@ -208,7 +208,7 @@ class TestEditReplaceAll:
     @pytest.mark.asyncio
     async def test_replace_single_occurrence(self):
         """Test default behavior replaces only first occurrence."""
-        from vertice_cli.tools.file_ops import EditFileTool
+        from vertice_core.tools.file_ops import EditFileTool
 
         tool = EditFileTool()
 
@@ -231,7 +231,7 @@ class TestEditReplaceAll:
     @pytest.mark.asyncio
     async def test_replace_all_occurrences(self):
         """Test replace_all=True replaces all occurrences."""
-        from vertice_cli.tools.file_ops import EditFileTool
+        from vertice_core.tools.file_ops import EditFileTool
 
         tool = EditFileTool()
 
@@ -263,7 +263,7 @@ class TestPlanMode:
 
     def test_tools_import(self):
         """Test tools can be imported."""
-        from vertice_cli.tools.plan_mode import (
+        from vertice_core.tools.plan_mode import (
             EnterPlanModeTool,
             ExitPlanModeTool,
         )
@@ -274,7 +274,7 @@ class TestPlanMode:
     @pytest.mark.asyncio
     async def test_enter_plan_mode(self):
         """Test entering plan mode."""
-        from vertice_cli.tools.plan_mode import (
+        from vertice_core.tools.plan_mode import (
             EnterPlanModeTool,
             get_plan_state,
             reset_plan_state,
@@ -298,7 +298,7 @@ class TestPlanMode:
     @pytest.mark.asyncio
     async def test_exit_plan_mode_without_entry(self):
         """Test exiting plan mode when not active."""
-        from vertice_cli.tools.plan_mode import ExitPlanModeTool, reset_plan_state
+        from vertice_core.tools.plan_mode import ExitPlanModeTool, reset_plan_state
 
         reset_plan_state()
 
@@ -311,7 +311,7 @@ class TestPlanMode:
     @pytest.mark.asyncio
     async def test_full_plan_cycle(self):
         """Test full enter -> exit cycle."""
-        from vertice_cli.tools.plan_mode import (
+        from vertice_core.tools.plan_mode import (
             EnterPlanModeTool,
             ExitPlanModeTool,
             reset_plan_state,
@@ -345,14 +345,14 @@ class TestNotebookEdit:
 
     def test_tool_import(self):
         """Test tool can be imported."""
-        from vertice_cli.tools.claude_parity_tools import NotebookEditTool
+        from vertice_core.tools.claude_parity_tools import NotebookEditTool
 
         assert NotebookEditTool is not None
 
     @pytest.mark.asyncio
     async def test_edit_nonexistent_notebook(self):
         """Test editing nonexistent notebook."""
-        from vertice_cli.tools.claude_parity_tools import NotebookEditTool
+        from vertice_core.tools.claude_parity_tools import NotebookEditTool
 
         tool = NotebookEditTool()
         result = await tool.execute(
@@ -373,7 +373,7 @@ class TestTaskResume:
 
     def test_tool_has_resume(self):
         """Test resume parameter exists."""
-        from vertice_cli.tools.claude_parity_tools import TaskTool
+        from vertice_core.tools.claude_parity_tools import TaskTool
 
         tool = TaskTool()
         assert "resume" in tool.parameters
@@ -381,7 +381,7 @@ class TestTaskResume:
     @pytest.mark.asyncio
     async def test_create_and_resume_task(self):
         """Test creating and resuming a task."""
-        from vertice_cli.tools.claude_parity_tools import TaskTool
+        from vertice_core.tools.claude_parity_tools import TaskTool
 
         tool = TaskTool()
 
@@ -416,7 +416,7 @@ class TestClaudeParityIntegration:
 
     def test_all_tools_registered(self):
         """Test all parity tools are registered in __init__."""
-        from vertice_cli.tools import (
+        from vertice_core.tools import (
             EditFileTool,
             EnterPlanModeTool,
             ExitPlanModeTool,

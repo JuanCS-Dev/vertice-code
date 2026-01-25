@@ -4,7 +4,7 @@ Boris Cherny: Tests are documentation. They show how the code should be used.
 """
 
 import pytest
-from vertice_cli.intelligence.types import (
+from vertice_core.intelligence.types import (
     Suggestion,
     SuggestionType,
     SuggestionConfidence,
@@ -12,8 +12,8 @@ from vertice_cli.intelligence.types import (
     SuggestionPattern,
     SuggestionResult,
 )
-from vertice_cli.intelligence.engine import SuggestionEngine
-from vertice_cli.intelligence.patterns import register_builtin_patterns
+from vertice_core.intelligence.engine import SuggestionEngine
+from vertice_core.intelligence.patterns import register_builtin_patterns
 
 
 class TestTypes:

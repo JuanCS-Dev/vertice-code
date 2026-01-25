@@ -16,7 +16,7 @@ async def test_gemini_vertex():
     print("=" * 60)
 
     try:
-        from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+        from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
         provider = VertexAIProvider(
             location="us-central1",

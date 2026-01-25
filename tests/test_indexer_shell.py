@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Test indexer integration with shell."""
 
-from vertice_cli.intelligence.indexer import SemanticIndexer
+from vertice_core.intelligence.indexer import SemanticIndexer
 import time
 
 print("🔍 Testing Indexer Integration\n")

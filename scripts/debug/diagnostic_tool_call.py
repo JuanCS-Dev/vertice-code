@@ -45,7 +45,7 @@ async def run_diagnostic():
 
     # Import provider
     try:
-        from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+        from vertice_core.core.providers.vertex_ai import VertexAIProvider
     except ImportError as e:
         print(f"❌ Import failed: {e}")
         return

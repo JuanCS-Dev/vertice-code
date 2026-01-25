@@ -9,7 +9,7 @@ from unittest.mock import Mock, AsyncMock
 from pathlib import Path
 import tempfile
 
-from vertice_cli.core.workflow import (
+from vertice_core.core.workflow import (
     WorkflowEngine,
     WorkflowStep,
     ThoughtPath,

@@ -18,7 +18,7 @@ from typing import Any
 import pytest
 
 from core.agents import Agent, AgentConfig, Handoff
-from vertice_cli.tools.base import Tool, ToolResult
+from vertice_core.tools.base import Tool, ToolResult
 
 
 # =============================================================================

@@ -13,7 +13,7 @@ import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock
 
-from vertice_cli.agents.refactorer import (
+from vertice_core.agents.refactorer import (
     RefactorerAgent,
     RefactoringType,
     ChangeStatus,
@@ -21,7 +21,7 @@ from vertice_cli.agents.refactorer import (
     RefactoringPlan,
     TransactionalSession,
 )
-from vertice_cli.agents.base import AgentTask, AgentCapability, AgentRole
+from vertice_core.agents.base import AgentTask, AgentCapability, AgentRole
 
 
 class TestRefactorerBasic:

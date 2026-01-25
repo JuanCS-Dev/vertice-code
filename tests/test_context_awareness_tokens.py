@@ -5,7 +5,7 @@ Real-time token usage and optimization tests
 
 import pytest
 from datetime import datetime
-from vertice_cli.tui.components.context_awareness import ContextAwarenessEngine, TokenUsageSnapshot
+from vertice_core.tui.components.context_awareness import ContextAwarenessEngine, TokenUsageSnapshot
 
 
 class TestTokenTracking:

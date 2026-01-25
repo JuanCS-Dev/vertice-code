@@ -7,8 +7,8 @@ async def test_generation():
     client = genai.Client(vertexai=True, project="vertice-ai", location="us-central1")
 
     models_to_test = [
-        "gemini-3-pro-preview",
-        "publishers/google/models/gemini-3-pro-preview",
+        "gemini-3-flash",
+        "publishers/google/models/gemini-3-flash",
         "gemini-3.0-pro-preview",  # Just in case
     ]
 

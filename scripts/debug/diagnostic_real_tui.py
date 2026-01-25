@@ -64,9 +64,9 @@ async def trace_real_tui_pipeline():
     print("-" * 70)
 
     llm = bridge.llm
-    print(f"   Has VerticeClient: {llm._vertice_client is not None}")
-    if llm._vertice_client:
-        print(f"   VerticeClient priority: {llm._vertice_client.config.priority}")
+    print(f"   Has VerticeClient: {llm._vertice_coreent is not None}")
+    if llm._vertice_coreent:
+        print(f"   VerticeClient priority: {llm._vertice_coreent.config.priority}")
     print(f"   Current provider: {llm.get_current_provider_name()}")
 
     print()

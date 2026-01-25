@@ -14,7 +14,7 @@ async def test_lsp_features():
     print("🧪 Testing LSP features...")
 
     # Test file
-    test_file = Path("vertice_cli/intelligence/lsp_client.py")
+    test_file = Path("vertice_core/intelligence/lsp_client.py")
 
     if not test_file.exists():
         print(f"❌ Test file not found: {test_file}")
@@ -24,13 +24,13 @@ async def test_lsp_features():
     print(f"   Lines: {len(test_file.read_text().splitlines())}")
 
     # Test language detection
-    from vertice_cli.intelligence.lsp_client import Language
+    from vertice_core.intelligence.lsp_client import Language
 
     lang = Language.detect(test_file)
     print(f"✅ Language detected: {lang.value}")
 
     # Test LSP client initialization
-    from vertice_cli.intelligence.lsp_client import LSPClient
+    from vertice_core.intelligence.lsp_client import LSPClient
 
     client = LSPClient(root_path=Path.cwd())
     print(f"✅ LSP client created for language: {client.language.value}")
@@ -42,7 +42,7 @@ async def test_refactoring():
     """Test refactoring engine."""
     print("\n🧪 Testing refactoring engine...")
 
-    from vertice_cli.refactoring.engine import RefactoringEngine
+    from vertice_core.refactoring.engine import RefactoringEngine
 
     engine = RefactoringEngine(project_root=Path.cwd())
 
@@ -79,14 +79,14 @@ async def test_context_suggestions():
     """Test context suggestions."""
     print("\n🧪 Testing context suggestions...")
 
-    from vertice_cli.intelligence.context_suggestions import ContextSuggestionEngine
-    from vertice_cli.intelligence.indexer import SemanticIndexer
+    from vertice_core.intelligence.context_suggestions import ContextSuggestionEngine
+    from vertice_core.intelligence.indexer import SemanticIndexer
 
     indexer = SemanticIndexer(root_path=Path.cwd())
     engine = ContextSuggestionEngine(project_root=Path.cwd(), indexer=indexer)
 
     # Use absolute path
-    test_file = (Path.cwd() / "vertice_cli" / "shell.py").resolve()
+    test_file = (Path.cwd() / "vertice_core" / "shell.py").resolve()
     if test_file.exists():
         suggestions = engine.suggest_related_files(test_file, max_suggestions=3)
         print(f"✅ Got {len(suggestions)} related file suggestions")
@@ -102,7 +102,7 @@ async def test_indexer():
     """Test semantic indexer."""
     print("\n🧪 Testing semantic indexer...")
 
-    from vertice_cli.intelligence.indexer import SemanticIndexer
+    from vertice_core.intelligence.indexer import SemanticIndexer
 
     indexer = SemanticIndexer(root_path=Path.cwd())
 
@@ -120,7 +120,7 @@ async def test_consolidated_context():
     """Test consolidated context manager."""
     print("\n🧪 Testing consolidated context manager...")
 
-    from vertice_cli.core.context_manager_consolidated import ConsolidatedContextManager
+    from vertice_core.core.context_manager_consolidated import ConsolidatedContextManager
 
     manager = ConsolidatedContextManager(max_tokens=100_000)
 

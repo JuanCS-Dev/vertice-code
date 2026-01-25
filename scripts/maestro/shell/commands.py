@@ -2,7 +2,7 @@
 from rich.panel import Panel
 from rich.table import Table
 from rich.tree import Tree
-from vertice_cli.ui.command_palette import Command, CommandCategory
+from vertice_core.ui.command_palette import Command, CommandCategory
 
 
 class CommandsMixin:
@@ -94,7 +94,7 @@ class CommandsMixin:
                 "  "database..."    → DataAgent v1.0 (Schema + Query optimization)\n"
                 "  "run/exec..."    → Executor (bash commands)\n"
                 "\n[bold]Examples:[/bold]\n"
-                "  review vertice_cli/agents/base.py\n"
+                "  review vertice_core/agents/base.py\n"
                 "  plan implement user authentication\n"
                 "  refactor extract method from process_payment\n"
                 "  explore map the codebase\n"

@@ -3,7 +3,7 @@
 from pathlib import Path
 from datetime import datetime
 
-from vertice_cli.hooks import HookContext
+from vertice_core.hooks import HookContext
 
 
 class TestHookContext:

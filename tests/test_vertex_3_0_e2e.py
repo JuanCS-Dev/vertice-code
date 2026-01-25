@@ -1,5 +1,5 @@
 import pytest
-from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
 # Mark as integration test
 pytestmark = pytest.mark.integration
@@ -13,9 +13,9 @@ class TestVertexGemini3:
         """Verify we can initialize the mandated model."""
         # Force global location if not set (though .env has it)
         provider = VertexAIProvider(
-            project="vertice-ai", location="global", model_name="gemini-3-pro-preview"
+            project="vertice-ai", location="global", model_name="gemini-3-flash"
         )
-        assert provider.model_id == "gemini-3-pro-preview"
+        assert provider.model_id == "gemini-3-flash"
         assert provider.location == "global"
 
         # Test availability checks (lazy load)
@@ -25,7 +25,7 @@ class TestVertexGemini3:
     async def test_vertex_3_0_inference(self):
         """Verify actual inference logic with Gemini 3.0."""
         provider = VertexAIProvider(
-            project="vertice-ai", location="global", model_name="gemini-3-pro-preview"
+            project="vertice-ai", location="global", model_name="gemini-3-flash"
         )
 
         # Simple math test
@@ -42,7 +42,7 @@ class TestVertexGemini3:
     async def test_vertex_3_0_streaming(self):
         """Verify streaming works on Gemini 3.0."""
         provider = VertexAIProvider(
-            project="vertice-ai", location="global", model_name="gemini-3-pro-preview"
+            project="vertice-ai", location="global", model_name="gemini-3-flash"
         )
 
         chunks = []

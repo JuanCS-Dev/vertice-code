@@ -171,7 +171,7 @@ class UnifiedPerformanceAudit:
 
     async def benchmark_session_management(self):
         print("💾 Benchmarking Session & Memory Dataflow...")
-        from vertice_cli.core.session_manager import SessionManager
+        from vertice_core.core.session_manager import SessionManager
 
         manager = SessionManager(session_dir="/tmp/vertice_perf_sessions")
         manager.start_session()

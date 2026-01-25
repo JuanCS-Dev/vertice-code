@@ -17,9 +17,9 @@ pytestmark = pytest.mark.skip(
 
 from pathlib import Path
 from unittest.mock import patch
-from vertice_cli.agents.planner import PlannerAgent
-from vertice_cli.agents.refactorer import RefactorerAgent
-from vertice_cli.agents.base import TaskContext, TaskStatus
+from vertice_core.agents.planner import PlannerAgent
+from vertice_core.agents.refactorer import RefactorerAgent
+from vertice_core.agents.base import TaskContext, TaskStatus
 
 
 class TestPlannerRefactorerCollaboration:

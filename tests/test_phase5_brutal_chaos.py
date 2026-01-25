@@ -29,12 +29,12 @@ import asyncio
 from unittest.mock import Mock, AsyncMock
 
 # Import everything that could break
-from vertice_cli.maestro_governance import MaestroGovernance, render_sofia_counsel
-from vertice_cli.core.governance_pipeline import GovernancePipeline
-from vertice_cli.agents.justica_agent import JusticaIntegratedAgent
-from vertice_cli.agents.sofia import SofiaIntegratedAgent
-from vertice_cli.agents.base import AgentTask, AgentResponse, AgentRole
-from vertice_cli.core.agent_identity import get_agent_identity, AGENT_IDENTITIES
+from vertice_core.maestro_governance import MaestroGovernance, render_sofia_counsel
+from vertice_core.core.governance_pipeline import GovernancePipeline
+from vertice_core.agents.justica_agent import JusticaIntegratedAgent
+from vertice_core.agents.sofia import SofiaIntegratedAgent
+from vertice_core.agents.base import AgentTask, AgentResponse, AgentRole
+from vertice_core.core.agent_identity import get_agent_identity, AGENT_IDENTITIES
 
 
 # ============================================================================

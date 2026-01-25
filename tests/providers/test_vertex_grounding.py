@@ -72,7 +72,7 @@ class TestGetGroundingTool:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             mock_tool = MagicMock()
 
@@ -91,7 +91,7 @@ class TestGetGroundingTool:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             with patch("vertexai.generative_models.Tool") as MockTool:
                 MockTool.from_google_search_retrieval.side_effect = ImportError("SDK not found")
@@ -119,7 +119,7 @@ class TestStreamChatWithGrounding:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
             provider._client = True  # Skip initialization
@@ -156,7 +156,7 @@ class TestStreamChatWithGrounding:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
             provider._client = True
@@ -182,7 +182,7 @@ class TestStreamChatWithGrounding:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
             provider._client = True
@@ -231,7 +231,7 @@ class TestGroundingMetadataParsing:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
             provider._client = True
@@ -286,7 +286,7 @@ class TestGroundingToggle:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             provider = VertexAIProvider()
 
@@ -306,7 +306,7 @@ class TestGroundingToggle:
         with patch.dict(
             "sys.modules", {"vertexai": MagicMock(), "vertexai.generative_models": MagicMock()}
         ):
-            from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+            from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
             # Create with grounding enabled by default
             provider = VertexAIProvider(enable_grounding=True)
@@ -325,7 +325,7 @@ class TestVertexGroundingIntegration:
     @pytest.mark.asyncio
     async def test_real_grounding_query(self) -> None:
         """Integration test: Real query with Google Search grounding."""
-        from vertice_cli.core.providers.vertex_ai import VertexAIProvider
+        from vertice_core.core.providers.vertex_ai import VertexAIProvider
 
         provider = VertexAIProvider()
 

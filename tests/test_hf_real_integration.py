@@ -1,8 +1,8 @@
 """Real-world integration tests using HuggingFace API - PRODUCTION VALIDATION"""
 import pytest
 import os
-from vertice_cli.core.llm import LLMClient
-from vertice_cli.core.context import ContextBuilder
+from vertice_core.core.llm import LLMClient
+from vertice_core.core.context import ContextBuilder
 
 
 class TestHFRealIntegration:

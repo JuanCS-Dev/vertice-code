@@ -10,9 +10,9 @@ import shutil
 from pathlib import Path
 from unittest.mock import Mock
 
-from vertice_cli.tools.file_ops import WriteFileTool, EditFileTool
-from vertice_cli.hooks import HookExecutor
-from vertice_cli.config.schema import QwenConfig, HooksConfig
+from vertice_core.tools.file_ops import WriteFileTool, EditFileTool
+from vertice_core.hooks import HookExecutor
+from vertice_core.config.schema import QwenConfig, HooksConfig
 
 
 class TestFileOpsHooksIntegration:

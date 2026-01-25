@@ -14,14 +14,14 @@ import pytest
 import time
 from unittest.mock import Mock, AsyncMock
 
-from vertice_cli.core.recovery import (
+from vertice_core.core.recovery import (
     ErrorRecoveryEngine,
     RecoveryContext,
     ErrorCategory,
     RetryPolicy,
     RecoveryCircuitBreaker,
 )
-from vertice_cli.core.workflow import GitRollback, PartialRollback
+from vertice_core.core.workflow import GitRollback, PartialRollback
 
 
 class TestRealWorldScenarios:
@@ -288,7 +288,7 @@ class TestConstitutionalCompliance:
     def test_p1_completude_no_placeholders(self):
         """P1: Code must be complete, no TODOs or placeholders."""
         import inspect
-        from vertice_cli.core import recovery, workflow
+        from vertice_core.core import recovery, workflow
 
         # Check recovery module
         source_recovery = inspect.getsource(recovery)
@@ -324,8 +324,8 @@ class TestConstitutionalCompliance:
 
     def test_p4_rastreabilidade_full_docstrings(self):
         """P4: Traceability - all public functions documented."""
-        from vertice_cli.core.recovery import RetryPolicy, RecoveryCircuitBreaker
-        from vertice_cli.core.workflow import GitRollback, PartialRollback
+        from vertice_core.core.recovery import RetryPolicy, RecoveryCircuitBreaker
+        from vertice_core.core.workflow import GitRollback, PartialRollback
 
         # Check key classes have docstrings
         assert RetryPolicy.__doc__ is not None

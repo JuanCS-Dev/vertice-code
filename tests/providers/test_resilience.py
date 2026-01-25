@@ -13,7 +13,7 @@ from typing import Any, Dict
 import httpx
 import pytest
 
-from vertice_cli.core.providers.resilience import (
+from vertice_core.core.providers.resilience import (
     CircuitBreaker,
     CircuitBreakerConfig,
     CircuitBreakerOpen,

@@ -1,5 +1,5 @@
 """Consolidated Context Tests - Week 4 Day 1"""
-from vertice_cli.tui.components.context_awareness import ContextAwarenessEngine, ContentType
+from vertice_core.tui.components.context_awareness import ContextAwarenessEngine, ContentType
 
 
 class TestConsolidation:

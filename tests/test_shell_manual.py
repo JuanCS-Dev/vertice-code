@@ -8,7 +8,7 @@ from pathlib import Path
 # Add project to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from vertice_cli.shell import InteractiveShell
+from vertice_core.shell import InteractiveShell
 
 
 async def test_basic_functionality():
@@ -115,7 +115,7 @@ async def test_with_mock_llm():
 
     # Test tool execution
     print("\n2. Testing tool execution...")
-    from vertice_cli.tools.exec import BashCommandTool
+    from vertice_core.tools.exec import BashCommandTool
 
     bash_tool = BashCommandTool()
     result = await bash_tool.execute(command="echo 'test'")
@@ -143,7 +143,7 @@ async def test_real_command():
     print("TESTE 3: EXECUÇÃO REAL DE COMANDO")
     print("=" * 60)
 
-    from vertice_cli.tools.exec import BashCommandTool
+    from vertice_core.tools.exec import BashCommandTool
 
     bash_tool = BashCommandTool()
 

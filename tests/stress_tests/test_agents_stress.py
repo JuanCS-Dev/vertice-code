@@ -4,11 +4,11 @@ from pathlib import Path
 from unittest.mock import MagicMock, AsyncMock
 
 from vertice_tui.core.agents.manager import AgentManager
-from vertice_cli.agents.base import AgentTask
-from vertice_cli.agents.explorer import ExplorerAgent
-from vertice_cli.agents.refactorer import RefactorerAgent
-from vertice_cli.agents.devops import DevOpsAgent
-from vertice_cli.agents.documentation import DocumentationAgent
+from vertice_core.agents.base import AgentTask
+from vertice_core.agents.explorer import ExplorerAgent
+from vertice_core.agents.refactorer import RefactorerAgent
+from vertice_core.agents.devops import DevOpsAgent
+from vertice_core.agents.documentation import DocumentationAgent
 
 
 # MOCK LLM Client for Stress Testing to avoid API costs/latency
@@ -32,7 +32,7 @@ def agent_manager():
     # Patch ensure_providers_registered to avoid CLI dependency issues in test env
     from unittest.mock import patch
 
-    with patch("vertice_cli.core.providers.register.ensure_providers_registered"):
+    with patch("vertice_core.core.providers.register.ensure_providers_registered"):
         manager = AgentManager(llm_client=MockLLMClient())
         return manager
 

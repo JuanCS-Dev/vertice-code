@@ -38,7 +38,7 @@ def test_auto_detect():
 def test_mcp_tools():
     print("\n--- Testing MCP Tools Registration ---")
     try:
-        from vertice_cli.tools.registry_setup import setup_default_tools
+        from vertice_core.tools.registry_setup import setup_default_tools
 
         registry, _ = setup_default_tools(include_prometheus=True)
 

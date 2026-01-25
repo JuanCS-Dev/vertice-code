@@ -7,12 +7,12 @@ from pathlib import Path
 # Setup path
 sys.path.append(str(Path.cwd() / "src"))
 
-from vertice_core.clients.vertice_client import VerticeClient  # noqa: E402
-from vertice_cli.core.providers.vertex_ai import VertexAIProvider  # noqa: E402
+from vertice_core.clients.vertice_coreent import VerticeClient  # noqa: E402
+from vertice_core.core.providers.vertex_ai import VertexAIProvider  # noqa: E402
 
 
 class TestTUIFixes(unittest.IsolatedAsyncioTestCase):
-    async def test_01_vertice_client_tool_routing(self):
+    async def test_01_vertice_coreent_tool_routing(self):
         """Verify handling of set_tools and kwargs tool routing."""
         print("\n🧪 TEST 1: VerticeClient Tool Routing")
 
@@ -98,7 +98,7 @@ class TestTUIFixes(unittest.IsolatedAsyncioTestCase):
         provider.is_gemini_3 = False  # Test Legacy Path first
 
         # Mock internal deps
-        with patch("vertice_cli.core.providers.vertex_ai.GenerativeModel") as MockModel:
+        with patch("vertice_core.core.providers.vertex_ai.GenerativeModel") as MockModel:
             mock_model_instance = MockModel.return_value
             mock_model_instance.generate_content_async = AsyncMock()
             mock_model_instance.generate_content_async.return_value = []

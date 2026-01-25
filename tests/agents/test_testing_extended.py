@@ -20,10 +20,10 @@ Philosophy: "If it's not tested with real code, it's not validated."
 import pytest
 from unittest.mock import MagicMock
 
-from vertice_cli.agents.testing import (
+from vertice_core.agents.testing import (
     TestRunnerAgent,
 )
-from vertice_cli.agents.base import AgentTask
+from vertice_core.agents.base import AgentTask
 
 
 # ============================================================================

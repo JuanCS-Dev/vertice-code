@@ -110,7 +110,7 @@ class TestLanguageDetection:
 
     def test_html_detection(self):
         """Test HTML/XML language detection."""
-        from vertice_cli.tui.components.block_detector import BlockDetector
+        from vertice_core.tui.components.block_detector import BlockDetector
 
         detector = BlockDetector()
 
@@ -124,7 +124,7 @@ class TestLanguageDetection:
 
     def test_python_detection(self):
         """Test Python language detection."""
-        from vertice_cli.tui.components.block_detector import BlockDetector
+        from vertice_core.tui.components.block_detector import BlockDetector
 
         detector = BlockDetector()
 
@@ -135,7 +135,7 @@ class TestLanguageDetection:
 
     def test_javascript_detection(self):
         """Test JavaScript language detection."""
-        from vertice_cli.tui.components.block_detector import BlockDetector
+        from vertice_core.tui.components.block_detector import BlockDetector
 
         detector = BlockDetector()
 
@@ -145,7 +145,7 @@ class TestLanguageDetection:
 
     def test_bash_detection(self):
         """Test Bash/Shell language detection."""
-        from vertice_cli.tui.components.block_detector import BlockDetector
+        from vertice_core.tui.components.block_detector import BlockDetector
 
         detector = BlockDetector()
 
@@ -157,7 +157,7 @@ class TestLanguageDetection:
 
     def test_json_detection(self):
         """Test JSON language detection."""
-        from vertice_cli.tui.components.block_detector import BlockDetector
+        from vertice_core.tui.components.block_detector import BlockDetector
 
         detector = BlockDetector()
 
@@ -166,7 +166,7 @@ class TestLanguageDetection:
 
     def test_sql_detection(self):
         """Test SQL language detection."""
-        from vertice_cli.tui.components.block_detector import BlockDetector
+        from vertice_core.tui.components.block_detector import BlockDetector
 
         detector = BlockDetector()
 
@@ -179,7 +179,7 @@ class TestBlockDetectorCodeFence:
 
     def test_flexible_code_fence_pattern(self):
         """Test that code fence pattern is more flexible."""
-        from vertice_cli.tui.components.block_detector import BlockDetector, BlockType
+        from vertice_core.tui.components.block_detector import BlockDetector, BlockType
 
         pattern = BlockDetector.PATTERNS[BlockType.CODE_FENCE]
 

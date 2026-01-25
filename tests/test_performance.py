@@ -6,9 +6,9 @@ import tempfile
 from pathlib import Path
 import time
 
-from vertice_cli.core.cache import LRUCache, DiskCache, PerformanceCache, cache_key
-from vertice_cli.core.async_executor import AsyncExecutor, ToolCall, detect_dependencies
-from vertice_cli.core.file_watcher import FileWatcher, RecentFilesTracker
+from vertice_core.core.cache import LRUCache, DiskCache, PerformanceCache, cache_key
+from vertice_core.core.async_executor import AsyncExecutor, ToolCall, detect_dependencies
+from vertice_core.core.file_watcher import FileWatcher, RecentFilesTracker
 
 
 class TestLRUCache:

@@ -21,7 +21,7 @@ class _MockBridge:
             (),
             {"get_completions": staticmethod(lambda _text, max_results=15: [])},
         )()
-        self.llm = type("_LLM", (), {"_vertice_client": None})()
+        self.llm = type("_LLM", (), {"_vertice_coreent": None})()
 
     async def warmup(self) -> None:
         return None

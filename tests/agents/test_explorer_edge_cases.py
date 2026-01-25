@@ -22,8 +22,8 @@ pytestmark = pytest.mark.skip(
 import json
 from unittest.mock import AsyncMock, MagicMock
 
-from vertice_cli.agents.explorer import ExplorerAgent
-from vertice_cli.agents.base import AgentTask
+from vertice_core.agents.explorer import ExplorerAgent
+from vertice_core.agents.base import AgentTask
 
 
 class TestExplorerTokenBudgetEdgeCases:

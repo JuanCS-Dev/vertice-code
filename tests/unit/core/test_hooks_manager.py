@@ -571,7 +571,7 @@ class TestExecuteHook:
         """Test graceful handling when hooks module unavailable."""
         hooks_manager.set_hook("post_write", ["echo test"])
 
-        with patch.dict("sys.modules", {"vertice_cli.hooks": None}):
+        with patch.dict("sys.modules", {"vertice_core.hooks": None}):
             # Force reimport error
             hooks_manager._hooks_executor = None
             result = await hooks_manager.execute_hook("post_write", "/path/to/file.py")
@@ -613,7 +613,7 @@ class TestExecuteHook:
                 with patch.dict(
                     "sys.modules",
                     {
-                        "vertice_cli.hooks": MagicMock(
+                        "vertice_core.hooks": MagicMock(
                             HookEvent=mock_hook_event,
                             HookContext=mock_hook_context,
                             HookExecutor=MagicMock,

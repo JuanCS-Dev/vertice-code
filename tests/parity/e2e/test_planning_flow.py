@@ -17,11 +17,11 @@ class TestPlanningFlowE2E:
     """End-to-end tests for planning functionality."""
 
     @pytest.mark.e2e
-    async def test_multi_task_decomposition(self, vertice_client):
+    async def test_multi_task_decomposition(self, vertice_coreent):
         """Verify complex requests are decomposed into multiple tasks."""
         request = "Create a user authentication system with login, logout, password reset, and session management"
 
-        response = await vertice_client.process(request, mode="plan_only")
+        response = await vertice_coreent.process(request, mode="plan_only")
 
         # Should decompose into at least 4 tasks
         assert (
@@ -37,13 +37,13 @@ class TestPlanningFlowE2E:
         ), "Should have login-related task"
 
     @pytest.mark.e2e
-    async def test_plan_gating(self, vertice_client, mock_user_input):
+    async def test_plan_gating(self, vertice_coreent, mock_user_input):
         """Verify plan is shown before execution."""
-        vertice_client.user_input = mock_user_input
+        vertice_coreent.user_input = mock_user_input
         mock_user_input.set_response("Y")
 
         request = "Refactor the database module"
-        response = await vertice_client.process(request)
+        response = await vertice_coreent.process(request)
 
         # Should have shown plan before execution
         assert response["plan_displayed"], "Plan should be displayed"
@@ -51,30 +51,30 @@ class TestPlanningFlowE2E:
         assert response["execution_started_after_approval"], "Execution should start after approval"
 
     @pytest.mark.e2e
-    async def test_plan_rejection(self, vertice_client, mock_user_input):
+    async def test_plan_rejection(self, vertice_coreent, mock_user_input):
         """Verify rejected plans are not executed."""
-        vertice_client.user_input = mock_user_input
+        vertice_coreent.user_input = mock_user_input
         mock_user_input.set_response("N")
 
         request = "Delete all test files"
-        response = await vertice_client.process(request)
+        response = await vertice_coreent.process(request)
 
         assert response["plan_displayed"], "Plan should be displayed"
         assert not response["user_approved"], "User should not have approved"
         assert not response["execution_started"], "Execution should not start"
 
     @pytest.mark.e2e
-    async def test_simple_request_single_task(self, vertice_client):
+    async def test_simple_request_single_task(self, vertice_coreent):
         """Simple requests should create fewer tasks."""
         request = "Fix typo in README"
 
-        response = await vertice_client.process(request, mode="plan_only")
+        response = await vertice_coreent.process(request, mode="plan_only")
 
         # Simple request = fewer tasks
         assert len(response["tasks"]) <= 2, "Simple request should have few tasks"
 
     @pytest.mark.e2e
-    async def test_complex_request_many_tasks(self, vertice_client):
+    async def test_complex_request_many_tasks(self, vertice_coreent):
         """Complex requests should create multiple tasks."""
         request = """Build a complete e-commerce system including:
         - Product catalog with categories
@@ -84,7 +84,7 @@ class TestPlanningFlowE2E:
         - User accounts and authentication
         - Admin dashboard for inventory"""
 
-        response = await vertice_client.process(request, mode="plan_only")
+        response = await vertice_coreent.process(request, mode="plan_only")
 
         # Complex request = many tasks
         assert (
@@ -96,11 +96,11 @@ class TestPlanningQuality:
     """Tests for plan quality."""
 
     @pytest.mark.e2e
-    async def test_tasks_are_ordered_logically(self, vertice_client):
+    async def test_tasks_are_ordered_logically(self, vertice_coreent):
         """Tasks should be in a logical order."""
         request = "Design, implement, and test a new API endpoint"
 
-        response = await vertice_client.process(request, mode="plan_only")
+        response = await vertice_coreent.process(request, mode="plan_only")
 
         if len(response["tasks"]) >= 3:
             task_descriptions = [t.description.lower() for t in response["tasks"]]
@@ -116,11 +116,11 @@ class TestPlanningQuality:
                 assert impl_idx < test_idx, "Implementation should come before testing"
 
     @pytest.mark.e2e
-    async def test_dependencies_are_valid(self, vertice_client):
+    async def test_dependencies_are_valid(self, vertice_coreent):
         """Task dependencies should be valid."""
         request = "Create a REST API with database models and tests"
 
-        response = await vertice_client.process(request, mode="plan_only")
+        response = await vertice_coreent.process(request, mode="plan_only")
 
         task_ids = {t.id for t in response["tasks"]}
 
@@ -130,11 +130,11 @@ class TestPlanningQuality:
                 assert dep != task.id, f"Task cannot depend on itself: {task.id}"
 
     @pytest.mark.e2e
-    async def test_no_duplicate_tasks(self, vertice_client):
+    async def test_no_duplicate_tasks(self, vertice_coreent):
         """Plan should not have duplicate tasks."""
         request = "Implement login and signup with validation"
 
-        response = await vertice_client.process(request, mode="plan_only")
+        response = await vertice_coreent.process(request, mode="plan_only")
 
         descriptions = [t.description for t in response["tasks"]]
         unique_descriptions = set(descriptions)
@@ -147,26 +147,26 @@ class TestPlanningUserInteraction:
     """Tests for user interaction during planning."""
 
     @pytest.mark.e2e
-    async def test_plan_can_be_modified(self, vertice_client, mock_user_input):
+    async def test_plan_can_be_modified(self, vertice_coreent, mock_user_input):
         """User should be able to modify the plan."""
-        vertice_client.user_input = mock_user_input
+        vertice_coreent.user_input = mock_user_input
         mock_user_input.set_responses(["E", "Y"])  # Edit, then approve
 
         # This test validates the interface exists
         # Actual edit functionality depends on implementation
         request = "Implement user profile"
-        response = await vertice_client.process(request)
+        response = await vertice_coreent.process(request)
 
         assert response["plan_displayed"]
 
     @pytest.mark.e2e
-    async def test_multiple_approval_attempts(self, vertice_client, mock_user_input):
+    async def test_multiple_approval_attempts(self, vertice_coreent, mock_user_input):
         """User can reject and re-approve."""
-        vertice_client.user_input = mock_user_input
+        vertice_coreent.user_input = mock_user_input
         mock_user_input.set_responses(["N"])  # Just reject
 
         request = "Create new feature"
-        response = await vertice_client.process(request)
+        response = await vertice_coreent.process(request)
 
         assert not response["execution_started"]
 
@@ -175,39 +175,39 @@ class TestPlanningEdgeCases:
     """Edge case tests for planning."""
 
     @pytest.mark.e2e
-    async def test_empty_request(self, vertice_client):
+    async def test_empty_request(self, vertice_coreent):
         """Empty requests should be handled gracefully."""
-        response = await vertice_client.process("", mode="plan_only")
+        response = await vertice_coreent.process("", mode="plan_only")
 
         # Should not crash
         assert "tasks" in response
 
     @pytest.mark.e2e
-    async def test_very_long_request(self, vertice_client):
+    async def test_very_long_request(self, vertice_coreent):
         """Very long requests should be handled."""
         request = "Implement " + ", ".join([f"feature_{i}" for i in range(100)])
 
-        response = await vertice_client.process(request, mode="plan_only")
+        response = await vertice_coreent.process(request, mode="plan_only")
 
         # Should produce reasonable number of tasks
         assert len(response["tasks"]) <= 50, "Too many tasks generated"
 
     @pytest.mark.e2e
-    async def test_ambiguous_request(self, vertice_client):
+    async def test_ambiguous_request(self, vertice_coreent):
         """Ambiguous requests should produce something."""
         request = "Make it better"
 
-        response = await vertice_client.process(request, mode="plan_only")
+        response = await vertice_coreent.process(request, mode="plan_only")
 
         # Should at least create one task
         assert len(response["tasks"]) >= 1
 
     @pytest.mark.e2e
-    async def test_conflicting_requirements(self, vertice_client):
+    async def test_conflicting_requirements(self, vertice_coreent):
         """Conflicting requirements should be handled."""
         request = "Make the code faster and also more readable with more comments"
 
-        response = await vertice_client.process(request, mode="plan_only")
+        response = await vertice_coreent.process(request, mode="plan_only")
 
         # Should produce tasks for both
         assert len(response["tasks"]) >= 1
@@ -218,19 +218,19 @@ class TestPlanningPerformance:
 
     @pytest.mark.e2e
     @pytest.mark.slow
-    async def test_planning_completes_in_time(self, vertice_client):
+    async def test_planning_completes_in_time(self, vertice_coreent):
         """Planning should complete within reasonable time."""
         request = "Create a complete user management system"
 
         start = asyncio.get_event_loop().time()
-        await vertice_client.process(request, mode="plan_only")
+        await vertice_coreent.process(request, mode="plan_only")
         duration = asyncio.get_event_loop().time() - start
 
         # Planning should be fast (no execution)
         assert duration < 10, f"Planning took too long: {duration}s"
 
     @pytest.mark.e2e
-    async def test_concurrent_planning_requests(self, vertice_client):
+    async def test_concurrent_planning_requests(self, vertice_coreent):
         """Multiple planning requests should be handled."""
         requests = [
             "Plan feature A",
@@ -239,7 +239,7 @@ class TestPlanningPerformance:
         ]
 
         # Execute concurrently
-        tasks = [vertice_client.process(r, mode="plan_only") for r in requests]
+        tasks = [vertice_coreent.process(r, mode="plan_only") for r in requests]
         responses = await asyncio.gather(*tasks)
 
         # All should succeed

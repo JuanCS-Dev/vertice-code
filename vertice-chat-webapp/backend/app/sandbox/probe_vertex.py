@@ -34,7 +34,7 @@ def probe():
 
     # 4. Model Probe
     models_to_check = [
-        "gemini-3-pro-preview",
+        "gemini-3-flash",
         "gemini-3-flash-preview",
     ]
 

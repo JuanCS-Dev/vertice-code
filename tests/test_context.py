@@ -1,6 +1,6 @@
 """Test script for ContextBuilder."""
 
-from vertice_cli.core.context import ContextBuilder
+from vertice_core.core.context import ContextBuilder
 
 
 def test_context_builder():

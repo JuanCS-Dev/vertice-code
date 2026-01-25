@@ -2,7 +2,7 @@
 
 import pytest
 import asyncio
-from vertice_cli.streaming import (
+from vertice_core.streaming import (
     AsyncCommandExecutor,
     ReactiveRenderer,
     RenderEvent,

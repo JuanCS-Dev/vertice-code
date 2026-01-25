@@ -2,7 +2,7 @@
 
 import tempfile
 from pathlib import Path
-from vertice_cli.core.context import ContextBuilder, context_builder
+from vertice_core.core.context import ContextBuilder, context_builder
 
 
 class TestContextBuilderBasics:

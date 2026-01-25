@@ -15,9 +15,9 @@ pytestmark = pytest.mark.skip(
     reason="Tests require rewrite for v8.0 API (async execute, AgentTask, AgentResponse)"
 )
 from pathlib import Path
-from vertice_cli.agents.planner import PlannerAgent
-from vertice_cli.agents.refactorer import RefactorerAgent
-from vertice_cli.agents.base import TaskContext, TaskStatus, AgentRole
+from vertice_core.agents.planner import PlannerAgent
+from vertice_core.agents.refactorer import RefactorerAgent
+from vertice_core.agents.base import TaskContext, TaskStatus, AgentRole
 import time
 import os
 

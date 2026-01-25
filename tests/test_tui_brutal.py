@@ -3,7 +3,7 @@
 
 import asyncio
 import time
-from vertice_cli.streaming import (
+from vertice_core.streaming import (
     AsyncCommandExecutor,
     ReactiveRenderer,
     ConcurrentRenderer,

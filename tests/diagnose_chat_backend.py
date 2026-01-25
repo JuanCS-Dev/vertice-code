@@ -8,7 +8,7 @@ import traceback
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 src_dir = os.path.join(root_dir, "src")
 
-# Prioritize src to pick up the correct 'vertice_cli' package
+# Prioritize src to pick up the correct 'vertice_core' package
 if src_dir not in sys.path:
     sys.path.insert(0, src_dir)
 if root_dir not in sys.path:
@@ -31,10 +31,10 @@ async def diagnose():
     # DEBUG IMPORT
     print("\n🔍 Debugging 'src.providers.vertice_router' import...")
     try:
-        # Check which vertice_cli is being picked up
-        import vertice_cli
+        # Check which vertice_core is being picked up
+        import vertice_core
 
-        print(f"ℹ️  'vertice_cli' imported from: {vertice_cli.__file__}")
+        print(f"ℹ️  'vertice_core' imported from: {vertice_core.__file__}")
 
         print("✅ Successfully imported src.providers.vertice_router directly.")
     except Exception:

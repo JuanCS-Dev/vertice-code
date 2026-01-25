@@ -13,7 +13,7 @@ sys.path.insert(0, os.getcwd())
 async def test_anthropic():
     print("Testing AnthropicVertexProvider...")
     try:
-        from vertice_cli.core.providers.anthropic_vertex import AnthropicVertexProvider
+        from vertice_core.core.providers.anthropic_vertex import AnthropicVertexProvider
 
         provider = AnthropicVertexProvider(
             location="us-central1",

@@ -10,8 +10,8 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from vertice_cli.agents.documentation import DocumentationAgent
-from vertice_cli.core.llm import LLMClient
+from vertice_core.agents.documentation import DocumentationAgent
+from vertice_core.core.llm import LLMClient
 import os
 
 

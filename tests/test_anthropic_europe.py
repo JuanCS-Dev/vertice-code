@@ -20,7 +20,7 @@ async def test_europe():
     os.environ["GOOGLE_CLOUD_PROJECT"] = "vertice-ai"
 
     try:
-        from vertice_cli.core.providers.anthropic_vertex import AnthropicVertexProvider
+        from vertice_core.core.providers.anthropic_vertex import AnthropicVertexProvider
 
         # Try Sonnet 3.5 (stable) in europe-west1
         provider = AnthropicVertexProvider(

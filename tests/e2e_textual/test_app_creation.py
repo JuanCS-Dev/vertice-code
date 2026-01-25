@@ -25,7 +25,7 @@ class TestAppCreation:
 
         try:
             # Import tools
-            from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
+            from vertice_core.tools.file_ops import WriteFileTool, ReadFileTool
 
             write_tool = WriteFileTool()
             read_tool = ReadFileTool()
@@ -254,7 +254,7 @@ pytest tests/
         )
 
         try:
-            from vertice_cli.tools.file_ops import WriteFileTool
+            from vertice_core.tools.file_ops import WriteFileTool
 
             write_tool = WriteFileTool()
 
@@ -347,7 +347,7 @@ if __name__ == "__main__":
         )
 
         try:
-            from vertice_cli.tools.file_ops import WriteFileTool
+            from vertice_core.tools.file_ops import WriteFileTool
 
             write_tool = WriteFileTool()
 
@@ -510,7 +510,7 @@ class TestMultiFileCreation:
         )
 
         try:
-            from vertice_cli.tools.file_ops import WriteFileTool
+            from vertice_core.tools.file_ops import WriteFileTool
 
             write_tool = WriteFileTool()
 

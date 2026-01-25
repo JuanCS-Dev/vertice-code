@@ -12,7 +12,7 @@ Tests cover:
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from vertice_cli.agents.base import (
+from vertice_core.agents.base import (
     AgentCapability,
     AgentRole,
     AgentTask,

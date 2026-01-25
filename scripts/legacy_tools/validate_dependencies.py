@@ -21,7 +21,7 @@ class DependencyValidator:
 
     def validate_imports(self) -> bool:
         """Validate that all main modules can be imported."""
-        modules_to_test = ["vertice_cli", "vertice_tui", "vertice_core", "prometheus"]
+        modules_to_test = ["vertice_core", "vertice_tui", "vertice_core", "prometheus"]
 
         success = True
         for module in modules_to_test:
@@ -77,8 +77,8 @@ class DependencyValidator:
 
         # Check common circular import patterns
         circular_patterns = [
-            ("vertice_core", "vertice_cli"),
-            ("prometheus", "vertice_cli"),
+            ("vertice_core", "vertice_core"),
+            ("prometheus", "vertice_core"),
             ("vertice_tui", "vertice_core"),
         ]
 

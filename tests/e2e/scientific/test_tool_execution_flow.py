@@ -36,7 +36,7 @@ def temp_workspace():
 @pytest.fixture
 def bash_tool():
     """Create hardened bash tool."""
-    from vertice_cli.tools.exec_hardened import BashCommandToolHardened
+    from vertice_core.tools.exec_hardened import BashCommandToolHardened
 
     return BashCommandToolHardened()
 

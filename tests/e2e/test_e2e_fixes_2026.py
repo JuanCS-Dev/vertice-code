@@ -15,11 +15,11 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock
 
 # Import agents
-from vertice_cli.agents.testing import TestRunnerAgent
-from vertice_cli.agents.reviewer import ReviewerAgent
-from vertice_cli.agents.documentation import DocumentationAgent
-from vertice_cli.agents.explorer import ExplorerAgent
-from vertice_cli.agents.base import AgentTask
+from vertice_core.agents.testing import TestRunnerAgent
+from vertice_core.agents.reviewer import ReviewerAgent
+from vertice_core.agents.documentation import DocumentationAgent
+from vertice_core.agents.explorer import ExplorerAgent
+from vertice_core.agents.base import AgentTask
 
 
 # =============================================================================
@@ -511,7 +511,7 @@ class TestTemperatureConfigE2E:
         - Generation tasks: 0.3-0.5 (creative)
         - Exploration tasks: 0.2-0.3 (balanced)
         """
-        from vertice_cli.core.temperature_config import get_temperature
+        from vertice_core.core.temperature_config import get_temperature
 
         # Analysis tasks should be low (deterministic)
         assert get_temperature("reviewer") <= 0.2, "Reviewer should be deterministic"
@@ -542,7 +542,7 @@ class TestOutputValidatorE2E:
         """
         VALIDATION: JSON extraction handles all common LLM output formats.
         """
-        from vertice_cli.core.output_validator import extract_json, is_valid_json
+        from vertice_core.core.output_validator import extract_json, is_valid_json
 
         # Format 1: Markdown code block
         text1 = '```json\n{"key": "value"}\n```'
@@ -566,8 +566,8 @@ class TestOutputValidatorE2E:
 
     def test_validates_against_schema(self):
         """Test schema validation works."""
-        from vertice_cli.core.output_validator import validate_agent_output
-        from vertice_cli.schemas.agent_outputs import ReviewOutput, ReviewDecision
+        from vertice_core.core.output_validator import validate_agent_output
+        from vertice_core.schemas.agent_outputs import ReviewOutput, ReviewDecision
 
         valid_json = """```json
 {
@@ -598,7 +598,7 @@ class TestGroundingPromptsE2E:
         """
         VALIDATION: Grounding instructions are properly defined.
         """
-        from vertice_cli.prompts.grounding import GROUNDING_INSTRUCTION, INLINE_CODE_PRIORITY
+        from vertice_core.prompts.grounding import GROUNDING_INSTRUCTION, INLINE_CODE_PRIORITY
 
         # Must have key phrases
         assert (

@@ -14,7 +14,7 @@ import pytest
 from pathlib import Path
 import tempfile
 
-from vertice_cli.integration.sandbox import SandboxExecutor, SandboxResult, get_sandbox
+from vertice_core.integration.sandbox import SandboxExecutor, SandboxResult, get_sandbox
 
 
 # Skip tests if Docker is not available

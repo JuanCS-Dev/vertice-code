@@ -6,7 +6,7 @@ Validates LEI, HRI, CPI calculations per Constituicao Vertice v3.0.
 import pytest
 import tempfile
 import os
-from vertice_cli.core.constitutional_metrics import (
+from vertice_core.core.constitutional_metrics import (
     calculate_lei,
     calculate_hri,
     calculate_cpi,

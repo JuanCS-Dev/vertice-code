@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from vertice_cli.agents.base import AgentRole, AgentTask
-from vertice_cli.agents.security import SecurityAgent
+from vertice_core.agents.base import AgentRole, AgentTask
+from vertice_core.agents.security import SecurityAgent
 
 
 @pytest.fixture

@@ -30,7 +30,7 @@ class TestHighVolumeFileOperations:
     @pytest.mark.asyncio
     async def test_stress_50_parallel_reads(self):
         """Stress test: 50 concurrent file reads."""
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace = Path(tmpdir)
@@ -61,7 +61,7 @@ class TestHighVolumeFileOperations:
     @pytest.mark.asyncio
     async def test_stress_100_parallel_writes(self):
         """Stress test: 100 concurrent file writes."""
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace = Path(tmpdir)
@@ -95,7 +95,7 @@ class TestHighVolumeFileOperations:
     @pytest.mark.asyncio
     async def test_stress_200_mixed_file_ops(self):
         """Stress test: 200 mixed read/write operations."""
-        from vertice_cli.tools.file_ops import ReadFileTool, WriteFileTool
+        from vertice_core.tools.file_ops import ReadFileTool, WriteFileTool
 
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace = Path(tmpdir)
@@ -145,7 +145,7 @@ class TestHighVolumeCommandExecution:
     @pytest.mark.asyncio
     async def test_stress_50_parallel_commands(self):
         """Stress test: 50 concurrent bash commands."""
-        from vertice_cli.tools.exec_hardened import BashCommandToolHardened
+        from vertice_core.tools.exec_hardened import BashCommandToolHardened
 
         tool = BashCommandToolHardened()
 
@@ -169,7 +169,7 @@ class TestHighVolumeCommandExecution:
     @pytest.mark.asyncio
     async def test_stress_mixed_commands(self):
         """Stress test: Mixed safe and blocked commands."""
-        from vertice_cli.tools.exec_hardened import BashCommandToolHardened
+        from vertice_core.tools.exec_hardened import BashCommandToolHardened
 
         tool = BashCommandToolHardened()
 
@@ -207,7 +207,7 @@ class TestSemaphoreLimitedStress:
     @pytest.mark.asyncio
     async def test_semaphore_5_limit_100_tasks(self):
         """Stress test: 100 tasks with 5 concurrent limit."""
-        from vertice_cli.tools.exec_hardened import BashCommandToolHardened
+        from vertice_core.tools.exec_hardened import BashCommandToolHardened
 
         tool = BashCommandToolHardened()
         semaphore = asyncio.Semaphore(5)
@@ -241,7 +241,7 @@ class TestSemaphoreLimitedStress:
     @pytest.mark.asyncio
     async def test_semaphore_10_limit_file_ops(self):
         """Stress test: File operations with 10 concurrent limit."""
-        from vertice_cli.tools.file_ops import ReadFileTool, WriteFileTool
+        from vertice_core.tools.file_ops import ReadFileTool, WriteFileTool
 
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace = Path(tmpdir)
@@ -287,7 +287,7 @@ class TestMemoryStability:
     @pytest.mark.asyncio
     async def test_memory_stable_after_many_operations(self):
         """Test memory remains stable after many operations."""
-        from vertice_cli.tools.file_ops import ReadFileTool, WriteFileTool
+        from vertice_core.tools.file_ops import ReadFileTool, WriteFileTool
 
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace = Path(tmpdir)
@@ -324,7 +324,7 @@ class TestMemoryStability:
     @pytest.mark.asyncio
     async def test_large_output_handling(self):
         """Test handling of large command outputs."""
-        from vertice_cli.tools.exec_hardened import BashCommandToolHardened
+        from vertice_core.tools.exec_hardened import BashCommandToolHardened
 
         tool = BashCommandToolHardened()
 
@@ -351,8 +351,8 @@ class TestRecoveryAfterStress:
     @pytest.mark.asyncio
     async def test_operations_work_after_heavy_load(self):
         """Test normal operations work after heavy load."""
-        from vertice_cli.tools.file_ops import ReadFileTool, WriteFileTool
-        from vertice_cli.tools.exec_hardened import BashCommandToolHardened
+        from vertice_core.tools.file_ops import ReadFileTool, WriteFileTool
+        from vertice_core.tools.exec_hardened import BashCommandToolHardened
 
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace = Path(tmpdir)
@@ -386,7 +386,7 @@ class TestRecoveryAfterStress:
     @pytest.mark.asyncio
     async def test_cleanup_after_failures(self):
         """Test cleanup after many failures."""
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         tool = ReadFileTool()
 
@@ -419,7 +419,7 @@ class TestThroughputBenchmarks:
     @pytest.mark.asyncio
     async def test_reads_per_second(self):
         """Measure read operations per second."""
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace = Path(tmpdir)
@@ -447,7 +447,7 @@ class TestThroughputBenchmarks:
     @pytest.mark.asyncio
     async def test_commands_per_second(self):
         """Measure command operations per second."""
-        from vertice_cli.tools.exec_hardened import BashCommandToolHardened
+        from vertice_core.tools.exec_hardened import BashCommandToolHardened
 
         tool = BashCommandToolHardened()
 
@@ -552,7 +552,7 @@ class TestLatencyUnderLoad:
     @pytest.mark.asyncio
     async def test_latency_distribution(self):
         """Test latency distribution under load."""
-        from vertice_cli.tools.exec_hardened import BashCommandToolHardened
+        from vertice_core.tools.exec_hardened import BashCommandToolHardened
 
         tool = BashCommandToolHardened()
         latencies = []

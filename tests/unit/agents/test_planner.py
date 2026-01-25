@@ -15,7 +15,7 @@ import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock
 
-from vertice_cli.agents.planner import (
+from vertice_core.agents.planner import (
     WorldState,
     GoalState,
     Action,
@@ -31,7 +31,7 @@ from vertice_cli.agents.planner import (
     PlanValidator,
     ExecutionEvent,
 )
-from vertice_cli.agents.base import (
+from vertice_core.agents.base import (
     AgentRole,
     AgentCapability,
     AgentTask,

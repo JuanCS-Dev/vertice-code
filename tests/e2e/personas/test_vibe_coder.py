@@ -31,9 +31,9 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from vertice_cli.core.input_enhancer import InputEnhancer
-from vertice_cli.core.error_presenter import ErrorPresenter
-from vertice_cli.core.context_tracker import ContextTracker
+from vertice_core.core.input_enhancer import InputEnhancer
+from vertice_core.core.error_presenter import ErrorPresenter
+from vertice_core.core.context_tracker import ContextTracker
 
 
 # ==============================================================================

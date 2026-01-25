@@ -10,7 +10,7 @@ Tests all resilience patterns:
 
 import pytest
 import time
-from vertice_cli.core.llm import (
+from vertice_core.core.llm import (
     LLMClient,
     CircuitBreaker,
     CircuitState,

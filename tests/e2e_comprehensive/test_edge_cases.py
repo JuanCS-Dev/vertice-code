@@ -20,7 +20,7 @@ class TestFileSizeEdgeCases:
     @pytest.mark.asyncio
     async def test_write_empty_file(self, temp_project):
         """Test writing completely empty file."""
-        from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
+        from vertice_core.tools.file_ops import WriteFileTool, ReadFileTool
 
         write_tool = WriteFileTool()
         read_tool = ReadFileTool()
@@ -40,7 +40,7 @@ class TestFileSizeEdgeCases:
     @pytest.mark.asyncio
     async def test_write_single_character(self, temp_project):
         """Test writing single character file."""
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
         result = await tool._execute_validated(path=str(temp_project / "single.txt"), content="x")
@@ -51,7 +51,7 @@ class TestFileSizeEdgeCases:
     @pytest.mark.asyncio
     async def test_write_only_whitespace(self, temp_project):
         """Test writing file with only whitespace."""
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
         result = await tool._execute_validated(
@@ -63,7 +63,7 @@ class TestFileSizeEdgeCases:
     @pytest.mark.asyncio
     async def test_write_many_newlines(self, temp_project):
         """Test writing file with many newlines."""
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
         content = "\n" * 10000
@@ -78,7 +78,7 @@ class TestFileSizeEdgeCases:
     @pytest.mark.asyncio
     async def test_read_line_range_edge_cases(self, temp_project):
         """Test reading edge case line ranges."""
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         test_file = temp_project / "lines.txt"
         test_file.write_text("line1\nline2\nline3")
@@ -107,7 +107,7 @@ class TestPathEdgeCases:
     @pytest.mark.asyncio
     async def test_path_with_spaces(self, temp_project):
         """Test file with spaces in path."""
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
         file_path = temp_project / "path with spaces" / "file with spaces.txt"
@@ -122,7 +122,7 @@ class TestPathEdgeCases:
     @pytest.mark.asyncio
     async def test_very_long_filename(self, temp_project):
         """Test very long filename (approaching OS limit)."""
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
         # Most systems limit filenames to 255 chars
@@ -135,7 +135,7 @@ class TestPathEdgeCases:
     @pytest.mark.asyncio
     async def test_deep_nesting(self, temp_project):
         """Test deeply nested directory structure."""
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
         deep_path = temp_project / "/".join([f"dir{i}" for i in range(20)]) / "deep.txt"
@@ -150,7 +150,7 @@ class TestPathEdgeCases:
     @pytest.mark.asyncio
     async def test_relative_path_components(self, temp_project):
         """Test paths with . and .. components."""
-        from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
+        from vertice_core.tools.file_ops import WriteFileTool, ReadFileTool
 
         (temp_project / "subdir").mkdir()
 
@@ -172,7 +172,7 @@ class TestConcurrentAccess:
     @pytest.mark.asyncio
     async def test_concurrent_reads_same_file(self, temp_project):
         """Test multiple concurrent reads of same file."""
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         test_file = temp_project / "concurrent.txt"
         test_file.write_text("shared content")
@@ -190,7 +190,7 @@ class TestConcurrentAccess:
     @pytest.mark.asyncio
     async def test_concurrent_writes_different_files(self, temp_project):
         """Test concurrent writes to different files."""
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         tool = WriteFileTool()
 
@@ -211,7 +211,7 @@ class TestSearchEdgeCases:
     @pytest.mark.asyncio
     async def test_search_empty_string(self, temp_project):
         """Test searching for empty string."""
-        from vertice_cli.tools.search import SearchFilesTool
+        from vertice_core.tools.search import SearchFilesTool
 
         (temp_project / "test.txt").write_text("content")
 
@@ -224,7 +224,7 @@ class TestSearchEdgeCases:
     @pytest.mark.asyncio
     async def test_search_regex_special_chars(self, temp_project):
         """Test searching for regex special characters."""
-        from vertice_cli.tools.search import SearchFilesTool
+        from vertice_core.tools.search import SearchFilesTool
 
         (temp_project / "special.txt").write_text("price: $100.50")
 
@@ -239,7 +239,7 @@ class TestSearchEdgeCases:
     @pytest.mark.asyncio
     async def test_search_multiline_pattern(self, temp_project):
         """Test searching with multiline context."""
-        from vertice_cli.tools.search import SearchFilesTool
+        from vertice_core.tools.search import SearchFilesTool
 
         (temp_project / "multi.txt").write_text("line1\nline2\nline3")
 
@@ -253,7 +253,7 @@ class TestSearchEdgeCases:
     @pytest.mark.asyncio
     async def test_search_binary_files(self, temp_project):
         """Test searching in binary files."""
-        from vertice_cli.tools.search import SearchFilesTool
+        from vertice_core.tools.search import SearchFilesTool
 
         # Create a binary file
         binary_file = temp_project / "binary.bin"
@@ -268,7 +268,7 @@ class TestSearchEdgeCases:
     @pytest.mark.asyncio
     async def test_search_no_files(self, temp_project):
         """Test searching in empty directory."""
-        from vertice_cli.tools.search import SearchFilesTool
+        from vertice_core.tools.search import SearchFilesTool
 
         empty_dir = temp_project / "empty"
         empty_dir.mkdir()
@@ -282,7 +282,7 @@ class TestSearchEdgeCases:
     @pytest.mark.asyncio
     async def test_search_very_long_lines(self, temp_project):
         """Test searching in file with very long lines."""
-        from vertice_cli.tools.search import SearchFilesTool
+        from vertice_core.tools.search import SearchFilesTool
 
         # Create file with 10KB line
         long_line = "x" * 10000 + "target" + "y" * 10000
@@ -302,7 +302,7 @@ class TestEditEdgeCases:
     @pytest.mark.asyncio
     async def test_edit_replace_with_empty(self, temp_project):
         """Test replacing text with empty string (deletion)."""
-        from vertice_cli.tools.file_ops import EditFileTool
+        from vertice_core.tools.file_ops import EditFileTool
 
         test_file = temp_project / "delete.txt"
         test_file.write_text("remove_this content")
@@ -321,7 +321,7 @@ class TestEditEdgeCases:
     @pytest.mark.asyncio
     async def test_edit_empty_with_content(self, temp_project):
         """Test replacing empty string (insertion at start)."""
-        from vertice_cli.tools.file_ops import EditFileTool
+        from vertice_core.tools.file_ops import EditFileTool
 
         test_file = temp_project / "insert.txt"
         test_file.write_text("world")
@@ -342,7 +342,7 @@ class TestEditEdgeCases:
     @pytest.mark.asyncio
     async def test_edit_overlapping_ranges(self, temp_project):
         """Test edits with overlapping text ranges."""
-        from vertice_cli.tools.file_ops import EditFileTool
+        from vertice_core.tools.file_ops import EditFileTool
 
         test_file = temp_project / "overlap.txt"
         test_file.write_text("abcdefgh")
@@ -370,7 +370,7 @@ class TestEditEdgeCases:
     @pytest.mark.asyncio
     async def test_edit_newline_handling(self, temp_project):
         """Test editing across newlines."""
-        from vertice_cli.tools.file_ops import EditFileTool
+        from vertice_core.tools.file_ops import EditFileTool
 
         test_file = temp_project / "newlines.txt"
         test_file.write_text("line1\nline2\nline3")
@@ -394,7 +394,7 @@ class TestGitEdgeCases:
     @pytest.mark.asyncio
     async def test_git_status_not_a_repo(self, temp_project):
         """Test git status on non-git directory."""
-        from vertice_cli.tools.git_ops import GitStatusTool
+        from vertice_core.tools.git_ops import GitStatusTool
 
         tool = GitStatusTool()
         result = await tool._execute_validated(path=str(temp_project))
@@ -405,7 +405,7 @@ class TestGitEdgeCases:
     @pytest.mark.asyncio
     async def test_git_status_empty_repo(self, temp_project):
         """Test git status on empty initialized repo."""
-        from vertice_cli.tools.git_ops import GitStatusTool
+        from vertice_core.tools.git_ops import GitStatusTool
         import subprocess
 
         subprocess.run(["git", "init"], cwd=temp_project, capture_output=True)
@@ -421,7 +421,7 @@ class TestGitEdgeCases:
     @pytest.mark.asyncio
     async def test_git_diff_empty_repo(self, temp_project):
         """Test git diff on repo with no commits."""
-        from vertice_cli.tools.git_ops import GitDiffTool
+        from vertice_core.tools.git_ops import GitDiffTool
         import subprocess
 
         subprocess.run(["git", "init"], cwd=temp_project, capture_output=True)
@@ -441,7 +441,7 @@ class TestErrorRecovery:
     @pytest.mark.asyncio
     async def test_write_readonly_location(self, temp_project):
         """Test writing to read-only location."""
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         # Create read-only directory
         readonly_dir = temp_project / "readonly"
@@ -460,7 +460,7 @@ class TestErrorRecovery:
     @pytest.mark.asyncio
     async def test_read_permission_denied(self, temp_project):
         """Test reading file without read permission."""
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         test_file = temp_project / "noperm.txt"
         test_file.write_text("secret")
@@ -477,7 +477,7 @@ class TestErrorRecovery:
     @pytest.mark.asyncio
     async def test_edit_nonexistent_file(self, temp_project):
         """Test editing file that doesn't exist."""
-        from vertice_cli.tools.file_ops import EditFileTool
+        from vertice_core.tools.file_ops import EditFileTool
 
         tool = EditFileTool()
         result = await tool._execute_validated(
@@ -497,7 +497,7 @@ class TestBoundaryValues:
     @pytest.mark.asyncio
     async def test_max_file_size_10mb(self, temp_project):
         """Test handling 10MB file."""
-        from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
+        from vertice_core.tools.file_ops import WriteFileTool, ReadFileTool
 
         large_content = "x" * (10 * 1024 * 1024)
 
@@ -515,7 +515,7 @@ class TestBoundaryValues:
     @pytest.mark.asyncio
     async def test_max_search_results_limit(self, temp_project):
         """Test search with exact max_results limit."""
-        from vertice_cli.tools.search import SearchFilesTool
+        from vertice_core.tools.search import SearchFilesTool
 
         # Create file with 100 matches
         content = "\n".join([f"match line {i}" for i in range(100)])
@@ -544,7 +544,7 @@ class TestBoundaryValues:
     @pytest.mark.asyncio
     async def test_zero_max_results(self, temp_project):
         """Test search with max_results=0."""
-        from vertice_cli.tools.search import SearchFilesTool
+        from vertice_core.tools.search import SearchFilesTool
 
         (temp_project / "test.txt").write_text("match")
 

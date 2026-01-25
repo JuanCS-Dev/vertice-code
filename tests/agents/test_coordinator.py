@@ -150,7 +150,7 @@ class TestCoordinatorInit:
         coordinator = AgencyCoordinator()
 
         assert coordinator is not None
-        assert coordinator._vertice_client is None
+        assert coordinator._vertice_coreent is None
         assert coordinator._mcp_client is None
         assert coordinator._approval_callback is None
         assert coordinator._notify_callback is None
@@ -161,11 +161,11 @@ class TestCoordinatorInit:
         mock_mcp = MagicMock()
 
         coordinator = AgencyCoordinator(
-            vertice_client=mock_vertice,
+            vertice_coreent=mock_vertice,
             mcp_client=mock_mcp,
         )
 
-        assert coordinator._vertice_client is mock_vertice
+        assert coordinator._vertice_coreent is mock_vertice
         assert coordinator._mcp_client is mock_mcp
 
     def test_create_with_callbacks(self) -> None:
@@ -478,9 +478,9 @@ class TestClientManagement:
         mock_vertice = MagicMock()
         mock_mcp = MagicMock()
 
-        coordinator.set_clients(vertice_client=mock_vertice, mcp_client=mock_mcp)
+        coordinator.set_clients(vertice_coreent=mock_vertice, mcp_client=mock_mcp)
 
-        assert coordinator._vertice_client is mock_vertice
+        assert coordinator._vertice_coreent is mock_vertice
         assert coordinator._mcp_client is mock_mcp
 
     def test_set_clients_resets_squad(self) -> None:
@@ -488,7 +488,7 @@ class TestClientManagement:
         coordinator = AgencyCoordinator()
         coordinator._squad_orchestrator = MagicMock()  # Fake cached
 
-        coordinator.set_clients(vertice_client=MagicMock())
+        coordinator.set_clients(vertice_coreent=MagicMock())
 
         # Should be reset to pick up new client
         assert coordinator._squad_orchestrator is None
@@ -512,9 +512,9 @@ class TestConvenienceFunctions:
         """get_coordinator passes kwargs."""
         mock_vertice = MagicMock()
 
-        coordinator = get_coordinator(vertice_client=mock_vertice)
+        coordinator = get_coordinator(vertice_coreent=mock_vertice)
 
-        assert coordinator._vertice_client is mock_vertice
+        assert coordinator._vertice_coreent is mock_vertice
 
 
 # =============================================================================

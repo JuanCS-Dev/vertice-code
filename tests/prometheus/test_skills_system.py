@@ -16,7 +16,7 @@ from datetime import datetime
 
 from prometheus.skills.registry import PrometheusSkillsRegistry
 from prometheus.memory.system import MemorySystem
-from vertice_cli.integrations.skills.prometheus_skills import PrometheusSkillsProvider
+from vertice_core.integrations.skills.prometheus_skills import PrometheusSkillsProvider
 
 
 class TestPrometheusSkillsRegistry:

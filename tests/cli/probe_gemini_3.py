@@ -11,7 +11,7 @@ async def probe_gemini_3():
     print("=" * 60)
 
     candidates = [
-        "gemini-3-pro-preview",
+        "gemini-3-flash",
         "gemini-3.0-pro-preview",
         "gemini-3-flash-preview",
         "gemini-3.0-flash-preview",

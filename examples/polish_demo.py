@@ -24,24 +24,24 @@ from rich.panel import Panel
 from rich.text import Text
 from rich.table import Table
 
-from vertice_cli.tui.feedback import (
+from vertice_core.tui.feedback import (
     MicroInteraction,
     LoadingState,
     StateTransition,
     HapticFeedback,
 )
-from vertice_cli.tui.animations import (
+from vertice_core.tui.animations import (
     Animator,
     AnimationConfig,
     LoadingAnimation,
 )
-from vertice_cli.tui.accessibility import (
+from vertice_core.tui.accessibility import (
     generate_accessibility_report,
     KeyboardNavigation,
     ScreenReaderText,
 )
-from vertice_cli.tui.theme import COLORS
-from vertice_cli.tui.wisdom import get_random_verse
+from vertice_core.tui.theme import COLORS
+from vertice_core.tui.wisdom import get_random_verse
 
 
 def demo_micro_interactions(console: Console):

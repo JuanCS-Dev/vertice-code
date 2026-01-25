@@ -9,8 +9,8 @@ Validates:
 """
 
 import pytest
-from vertice_cli.core.metrics import MetricsCollector
-from vertice_cli.core.defense import PromptInjectionDefender, AutoCritic, ContextCompactor
+from vertice_core.core.metrics import MetricsCollector
+from vertice_core.core.defense import PromptInjectionDefender, AutoCritic, ContextCompactor
 
 
 # ============================================================================

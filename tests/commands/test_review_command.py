@@ -7,7 +7,7 @@ from pathlib import Path
 from datetime import datetime
 from unittest.mock import Mock, patch
 
-from vertice_cli.commands.review import handle_review
+from vertice_core.commands.review import handle_review
 
 
 @pytest.mark.asyncio
@@ -74,7 +74,7 @@ class TestReviewCommand:
         assert "Files Read (20)" in result
         assert "... and" in result  # Truncation message
 
-    @patch("vertice_cli.commands.review.subprocess.run")
+    @patch("vertice_core.commands.review.subprocess.run")
     async def test_stats_flag(self, mock_run):
         """Test --stats flag."""
         # Mock git diff --numstat
@@ -97,7 +97,7 @@ class TestReviewCommand:
         assert "Lines Added" in result
         assert "Lines Removed" in result
 
-    @patch("vertice_cli.commands.review._export_review")
+    @patch("vertice_core.commands.review._export_review")
     async def test_export_flag(self, mock_export):
         """Test --export flag."""
         mock_export.return_value = Path("/tmp/review.txt")
@@ -115,7 +115,7 @@ class TestReviewCommand:
         assert "exported" in result.lower()
         mock_export.assert_called_once()
 
-    @patch("vertice_cli.commands.review.subprocess.run")
+    @patch("vertice_core.commands.review.subprocess.run")
     async def test_git_status(self, mock_run):
         """Test git status integration."""
         mock_result = Mock()
@@ -147,7 +147,7 @@ class TestReviewHelpers:
 
     def test_file_type_analysis(self):
         """Test file type analysis."""
-        from vertice_cli.commands.review import _analyze_file_types
+        from vertice_core.commands.review import _analyze_file_types
 
         files = {"file1.py", "file2.py", "test.js", "data.json"}
         types = _analyze_file_types(files)

@@ -3,7 +3,7 @@ Unit tests for the DangerDetector.
 """
 
 import pytest
-from vertice_cli.core.danger_detector import DangerDetector, DangerLevel
+from vertice_core.core.danger_detector import DangerDetector, DangerLevel
 
 
 @pytest.fixture

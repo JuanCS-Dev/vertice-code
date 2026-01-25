@@ -24,7 +24,7 @@ class TestToolRegistry:
 
     def test_registry_has_tools(self):
         """Test that registry contains tools after setup."""
-        from vertice_cli.tools.registry_setup import setup_default_tools
+        from vertice_core.tools.registry_setup import setup_default_tools
 
         registry, _ = setup_default_tools()
         tool_count = len(registry.tools)

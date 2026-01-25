@@ -44,10 +44,10 @@ from prometheus.mcp_server.config import MCPServerConfig
 from prometheus.mcp_server.manager import MCPServerManager
 
 # Vertice CLI
-from vertice_cli.core.llm import LLMClient
-from vertice_cli.core.mcp_client import MCPClient
-from vertice_cli.tools.registry_helper import get_default_registry
-from vertice_cli.orchestration.squad import DevSquad
+from vertice_core.core.llm import LLMClient
+from vertice_core.core.mcp_client import MCPClient
+from vertice_core.tools.registry_helper import get_default_registry
+from vertice_core.orchestration.squad import DevSquad
 
 # Environment requirements
 requires_api_keys = pytest.mark.skipif(
@@ -123,7 +123,7 @@ class TestCompleteSystemIntegration:
         await discovery_service.stop()
 
     @pytest.fixture
-    async def vertice_cli_system(self):
+    async def vertice_core_system(self):
         """Initialize Vertice CLI system."""
         # LLM Client
         llm_client = LLMClient(enable_telemetry=False)
@@ -273,9 +273,9 @@ class TestCompleteSystemIntegration:
 
     @pytest.mark.asyncio
     @requires_api_keys
-    async def test_vertice_cli_prometheus_integration(self, vertice_cli_system, prometheus_system):
+    async def test_vertice_core_prometheus_integration(self, vertice_core_system, prometheus_system):
         """Test Vertice CLI integration with Prometheus."""
-        dev_squad = vertice_cli_system["dev_squad"]
+        dev_squad = vertice_core_system["dev_squad"]
         prometheus_orchestrator = prometheus_system["orchestrator"]
 
         # Create a task that would benefit from Prometheus skills
@@ -364,9 +364,9 @@ class TestCompleteSystemIntegration:
             await mcp_manager.stop()
 
     @pytest.mark.asyncio
-    async def test_complete_workflow_integration(self, prometheus_system, vertice_cli_system):
+    async def test_complete_workflow_integration(self, prometheus_system, vertice_core_system):
         """Test complete workflow: CLI -> Prometheus -> MCP -> Skills."""
-        dev_squad = vertice_cli_system["dev_squad"]
+        dev_squad = vertice_core_system["dev_squad"]
         prometheus_orchestrator = prometheus_system["orchestrator"]
         mcp_server = prometheus_system["mcp_server"]
 
@@ -421,9 +421,9 @@ class TestCompleteSystemIntegration:
         assert governance_check is not None
 
     @pytest.mark.asyncio
-    async def test_error_handling_integration(self, prometheus_system, vertice_cli_system):
+    async def test_error_handling_integration(self, prometheus_system, vertice_core_system):
         """Test error handling across all integrated components."""
-        dev_squad = vertice_cli_system["dev_squad"]
+        dev_squad = vertice_core_system["dev_squad"]
         prometheus_orchestrator = prometheus_system["orchestrator"]
 
         # Test with invalid task
@@ -592,9 +592,9 @@ class TestComplianceAndSecurityIntegration:
         assert isinstance(audit_logs, list)
 
     @pytest.mark.asyncio
-    async def test_security_validation_integration(self, prometheus_system, vertice_cli_system):
+    async def test_security_validation_integration(self, prometheus_system, vertice_core_system):
         """Test security validation integration."""
-        dev_squad = vertice_cli_system["dev_squad"]
+        dev_squad = vertice_core_system["dev_squad"]
 
         # Test with potentially unsafe task
         unsafe_task = AgentTask(

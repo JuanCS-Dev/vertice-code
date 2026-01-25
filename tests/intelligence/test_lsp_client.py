@@ -6,7 +6,7 @@ Boris Cherny Implementation - Week 3 Day 3 + Week 4 Day 3 Enhancement
 
 import pytest
 from pathlib import Path
-from vertice_cli.intelligence.lsp_client import (
+from vertice_core.intelligence.lsp_client import (
     LSPClient,
     Position,
     Range,

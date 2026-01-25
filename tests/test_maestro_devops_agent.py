@@ -12,8 +12,8 @@ Quick test to verify:
 """
 
 import asyncio
-from vertice_cli.agents.devops import create_devops_agent
-from vertice_cli.agents.base import AgentTask
+from vertice_core.agents.devops import create_devops_agent
+from vertice_core.agents.base import AgentTask
 
 
 # Mock LLM for testing (same pattern as test_maestro_data_agent.py)

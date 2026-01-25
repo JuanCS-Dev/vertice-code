@@ -37,11 +37,11 @@ from typing import List
 from unittest.mock import Mock, AsyncMock
 from dataclasses import dataclass
 
-from vertice_cli.maestro_governance import MaestroGovernance
-from vertice_cli.core.governance_pipeline import GovernancePipeline
-from vertice_cli.agents.justica_agent import JusticaIntegratedAgent
-from vertice_cli.agents.sofia import SofiaIntegratedAgent
-from vertice_cli.agents.base import AgentTask, AgentResponse, AgentRole
+from vertice_core.maestro_governance import MaestroGovernance
+from vertice_core.core.governance_pipeline import GovernancePipeline
+from vertice_core.agents.justica_agent import JusticaIntegratedAgent
+from vertice_core.agents.sofia import SofiaIntegratedAgent
+from vertice_core.agents.base import AgentTask, AgentResponse, AgentRole
 
 
 @dataclass
@@ -149,8 +149,8 @@ def mock_governance():
     # Disable verbose logging for clean benchmark output
     import logging
 
-    logging.getLogger("vertice_cli.maestro_governance").setLevel(logging.CRITICAL)
-    logging.getLogger("vertice_cli.core.governance_pipeline").setLevel(logging.CRITICAL)
+    logging.getLogger("vertice_core.maestro_governance").setLevel(logging.CRITICAL)
+    logging.getLogger("vertice_core.core.governance_pipeline").setLevel(logging.CRITICAL)
 
     gov = MaestroGovernance(
         llm_client=mock_llm,

@@ -19,8 +19,8 @@ class TestCompleteFeatureImplementation:
     @pytest.mark.asyncio
     async def test_implement_crud_api(self, temp_project):
         """Test implementing complete CRUD API."""
-        from vertice_cli.tools.file_ops import WriteFileTool
-        from vertice_cli.tools.search import SearchFilesTool
+        from vertice_core.tools.file_ops import WriteFileTool
+        from vertice_core.tools.search import SearchFilesTool
 
         write_tool = WriteFileTool()
         search_tool = SearchFilesTool()
@@ -138,7 +138,7 @@ def test_delete_product():
     @pytest.mark.asyncio
     async def test_refactor_duplicate_code(self, temp_project):
         """Test complete refactoring workflow."""
-        from vertice_cli.tools.file_ops import WriteFileTool, EditFileTool, ReadFileTool
+        from vertice_core.tools.file_ops import WriteFileTool, EditFileTool, ReadFileTool
 
         write_tool = WriteFileTool()
         EditFileTool()
@@ -195,8 +195,8 @@ class TestSecurityWorkflows:
     @pytest.mark.asyncio
     async def test_find_and_fix_hardcoded_secrets(self, sample_python_project):
         """Test finding and fixing hardcoded secrets."""
-        from vertice_cli.tools.search import SearchFilesTool
-        from vertice_cli.tools.file_ops import ReadFileTool, EditFileTool
+        from vertice_core.tools.search import SearchFilesTool
+        from vertice_core.tools.file_ops import ReadFileTool, EditFileTool
 
         search_tool = SearchFilesTool()
         read_tool = ReadFileTool()
@@ -234,7 +234,7 @@ class TestSecurityWorkflows:
     @pytest.mark.asyncio
     async def test_add_input_validation(self, temp_project):
         """Test adding input validation to unsafe code."""
-        from vertice_cli.tools.file_ops import WriteFileTool, EditFileTool
+        from vertice_core.tools.file_ops import WriteFileTool, EditFileTool
 
         write_tool = WriteFileTool()
         edit_tool = EditFileTool()
@@ -281,8 +281,8 @@ class TestGitWorkflows:
     @pytest.mark.asyncio
     async def test_complete_git_workflow(self, temp_project):
         """Test: init -> add -> commit -> status -> diff."""
-        from vertice_cli.tools.git_ops import GitStatusTool, GitDiffTool
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.git_ops import GitStatusTool, GitDiffTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         # Setup git
         subprocess.run(["git", "init"], cwd=temp_project, capture_output=True)
@@ -328,7 +328,7 @@ class TestProjectGenerationWorkflows:
     @pytest.mark.asyncio
     async def test_generate_python_package(self, temp_project):
         """Test generating complete Python package structure."""
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         write_tool = WriteFileTool()
 
@@ -358,7 +358,7 @@ class TestProjectGenerationWorkflows:
     @pytest.mark.asyncio
     async def test_generate_fastapi_project(self, temp_project):
         """Test generating FastAPI project."""
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         write_tool = WriteFileTool()
 
@@ -405,8 +405,8 @@ class TestDataTransformationWorkflows:
     @pytest.mark.asyncio
     async def test_search_and_transform(self, sample_python_project):
         """Test searching and transforming code patterns."""
-        from vertice_cli.tools.search import SearchFilesTool
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.search import SearchFilesTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         search_tool = SearchFilesTool()
         read_tool = ReadFileTool()
@@ -428,7 +428,7 @@ class TestDataTransformationWorkflows:
     @pytest.mark.asyncio
     async def test_batch_file_processing(self, temp_project):
         """Test processing multiple files in batch."""
-        from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool, EditFileTool
+        from vertice_core.tools.file_ops import WriteFileTool, ReadFileTool, EditFileTool
 
         write_tool = WriteFileTool()
         read_tool = ReadFileTool()
@@ -465,7 +465,7 @@ class TestComplexDependencyChains:
     @pytest.mark.asyncio
     async def test_multi_stage_pipeline(self, temp_project):
         """Test multi-stage data processing pipeline."""
-        from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool, EditFileTool
+        from vertice_core.tools.file_ops import WriteFileTool, ReadFileTool, EditFileTool
 
         write_tool = WriteFileTool()
         read_tool = ReadFileTool()
@@ -506,7 +506,7 @@ class TestErrorRecoveryWorkflows:
     @pytest.mark.asyncio
     async def test_partial_failure_recovery(self, temp_project):
         """Test recovering from partial failures."""
-        from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
+        from vertice_core.tools.file_ops import WriteFileTool, ReadFileTool
 
         write_tool = WriteFileTool()
         ReadFileTool()

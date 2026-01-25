@@ -10,9 +10,9 @@ from unittest.mock import Mock, AsyncMock
 from pathlib import Path
 import tempfile
 
-from vertice_cli.core.conversation import ConversationManager, ConversationState
-from vertice_cli.core.recovery import ErrorRecoveryEngine, ErrorCategory, RecoveryContext
-from vertice_cli.core.workflow import (
+from vertice_core.core.conversation import ConversationManager, ConversationState
+from vertice_core.core.recovery import ErrorRecoveryEngine, ErrorCategory, RecoveryContext
+from vertice_core.core.workflow import (
     WorkflowStep,
     DependencyGraph,
     AutoCritique,

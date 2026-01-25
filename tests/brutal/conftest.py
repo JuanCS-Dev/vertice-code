@@ -12,7 +12,7 @@ from unittest.mock import Mock
 @pytest.fixture
 def gov_mock():
     """Create MaestroGovernance mock for basic tests."""
-    from vertice_cli.maestro_governance import MaestroGovernance
+    from vertice_core.maestro_governance import MaestroGovernance
 
     return MaestroGovernance(llm_client=Mock(), mcp_client=Mock())
 
@@ -20,7 +20,7 @@ def gov_mock():
 @pytest.fixture
 def gov_with_detect_risk():
     """Create MaestroGovernance with mocked detect_risk_level."""
-    from vertice_cli.maestro_governance import MaestroGovernance
+    from vertice_core.maestro_governance import MaestroGovernance
 
     gov = MaestroGovernance(llm_client=Mock(), mcp_client=Mock())
     return gov

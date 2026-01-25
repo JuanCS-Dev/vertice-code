@@ -15,11 +15,11 @@ import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock
 
-from vertice_cli.agents.architect import (
+from vertice_core.agents.architect import (
     ARCHITECT_SYSTEM_PROMPT,
     ArchitectAgent,
 )
-from vertice_cli.agents.base import (
+from vertice_core.agents.base import (
     AgentRole,
     AgentCapability,
     AgentTask,

@@ -13,7 +13,7 @@ os.environ["VERTEX_AI_LOCATION"] = "us-central1"
 
 from vertice_tui.core.bridge import get_bridge
 from vertice_tui.core.chat.controller import ChatController
-from vertice_cli.modes.noesis_mode import NoesisMode, ConsciousnessState
+from vertice_core.modes.noesis_mode import NoesisMode, ConsciousnessState
 
 
 async def run_self_healing_session(scenario_name: str, max_retries: int = 3, model: str = None):

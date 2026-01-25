@@ -45,14 +45,14 @@ class TestRealProviderInitialization:
 
     def test_provider_router_available(self):
         """Test provider router is importable."""
-        from vertice_cli.core.providers.vertice_router import get_router
+        from vertice_core.core.providers.vertice_router import get_router
 
         router = get_router()
         assert router is not None
 
     def test_provider_has_available_providers(self):
         """Test that some providers are available."""
-        from vertice_cli.core.providers.vertice_router import get_router
+        from vertice_core.core.providers.vertice_router import get_router
 
         router = get_router()
         # Should have at least one provider configured

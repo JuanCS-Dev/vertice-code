@@ -8,19 +8,19 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.history import FileHistory
 
-from vertice_cli.core.llm import LLMClient
-from vertice_cli.core.mcp_client import MCPClient
-from vertice_cli.tools.base import ToolRegistry
-from vertice_cli.core.file_tracker import FileOperationTracker
-from vertice_cli.tui.maestro_layout import MaestroLayout
-from vertice_cli.tui.components.agent_routing import AgentRoutingDisplay
-from vertice_cli.tui.components.streaming_display import StreamingResponseDisplay
-from vertice_cli.tui.performance import PerformanceMonitor, FPSCounter
-from vertice_cli.ui.command_palette import CommandPalette
-from vertice_cli.tui.components.autocomplete import create_completer
-from vertice_cli.tui.components.slash_completer import CombinedCompleter
-from vertice_cli.tui.components.maestro_shell_ui import MaestroShellUI
-from vertice_cli.tui.landing import show_landing_screen
+from vertice_core.core.llm import LLMClient
+from vertice_core.core.mcp_client import MCPClient
+from vertice_core.tools.base import ToolRegistry
+from vertice_core.core.file_tracker import FileOperationTracker
+from vertice_core.tui.maestro_layout import MaestroLayout
+from vertice_core.tui.components.agent_routing import AgentRoutingDisplay
+from vertice_core.tui.components.streaming_display import StreamingResponseDisplay
+from vertice_core.tui.performance import PerformanceMonitor, FPSCounter
+from vertice_core.ui.command_palette import CommandPalette
+from vertice_core.tui.components.autocomplete import create_completer
+from vertice_core.tui.components.slash_completer import CombinedCompleter
+from vertice_core.tui.components.maestro_shell_ui import MaestroShellUI
+from vertice_core.tui.landing import show_landing_screen
 
 from ..orchestrator import Orchestrator
 from .approval import ApprovalMixin
@@ -75,8 +75,8 @@ class Shell(ApprovalMixin, CommandsMixin, ReplMixin):
             tool_registry = ToolRegistry()
 
             # Register filesystem tools (use existing implementations)
-            from vertice_cli.tools.file_ops import ReadFileTool, WriteFileTool, EditFileTool
-            from vertice_cli.tools.file_mgmt import CreateDirectoryTool, MoveFileTool, CopyFileTool
+            from vertice_core.tools.file_ops import ReadFileTool, WriteFileTool, EditFileTool
+            from vertice_core.tools.file_mgmt import CreateDirectoryTool, MoveFileTool, CopyFileTool
 
             tool_registry.register(ReadFileTool())
             tool_registry.register(WriteFileTool())
@@ -86,18 +86,18 @@ class Shell(ApprovalMixin, CommandsMixin, ReplMixin):
             tool_registry.register(CopyFileTool())
 
             # Register execution tools (use existing)
-            from vertice_cli.tools.exec import BashCommandTool
+            from vertice_core.tools.exec import BashCommandTool
 
             tool_registry.register(BashCommandTool())
 
             # Register search tools (use existing)
-            from vertice_cli.tools.search import SearchFilesTool, GetDirectoryTreeTool
+            from vertice_core.tools.search import SearchFilesTool, GetDirectoryTreeTool
 
             tool_registry.register(SearchFilesTool())
             tool_registry.register(GetDirectoryTreeTool())
 
             # Register git tools (use existing)
-            from vertice_cli.tools.git_ops import GitStatusTool, GitDiffTool
+            from vertice_core.tools.git_ops import GitStatusTool, GitDiffTool
 
             tool_registry.register(GitStatusTool())
             tool_registry.register(GitDiffTool())

@@ -16,7 +16,7 @@ def profile_performance():
     print("📦 Import Times...")
     import_times = {}
 
-    modules = ["vertice_cli", "vertice_tui", "vertice_core", "prometheus"]
+    modules = ["vertice_core", "vertice_tui", "vertice_core", "prometheus"]
     for module in modules:
         start = time.time()
         __import__(module)

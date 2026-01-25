@@ -12,8 +12,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from vertice_cli.core.providers.maximus_provider import MaximusProvider
-from vertice_cli.core.providers.maximus_config import MaximusConfig, TransportMode
+from vertice_core.core.providers.maximus_provider import MaximusProvider
+from vertice_core.core.providers.maximus_config import MaximusConfig, TransportMode
 
 
 class TestMaximusProviderInit:
@@ -304,7 +304,7 @@ class TestMaximusProviderInitialization:
         """HYPOTHESIS: _ensure_initialized creates HTTP client."""
         provider: MaximusProvider = MaximusProvider()
 
-        with patch("vertice_cli.core.providers.maximus_provider.create_http_client") as mock_create:
+        with patch("vertice_core.core.providers.maximus_provider.create_http_client") as mock_create:
             mock_client: AsyncMock = AsyncMock()
             mock_response: MagicMock = MagicMock()
             mock_response.json.return_value = {"status": "ok"}
@@ -323,7 +323,7 @@ class TestMaximusProviderInitialization:
         provider: MaximusProvider = MaximusProvider()
         provider._initialized = True
 
-        with patch("vertice_cli.core.providers.maximus_provider.create_http_client") as mock_create:
+        with patch("vertice_core.core.providers.maximus_provider.create_http_client") as mock_create:
             await provider._ensure_initialized()
 
             mock_create.assert_not_called()

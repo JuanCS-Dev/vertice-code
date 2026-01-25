@@ -5,7 +5,7 @@ Tests 60fps target and render optimization
 
 import pytest
 import time
-from vertice_cli.tui.components.workflow_visualizer import WorkflowVisualizer, StepStatus
+from vertice_core.tui.components.workflow_visualizer import WorkflowVisualizer, StepStatus
 from rich.console import Console
 
 

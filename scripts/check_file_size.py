@@ -12,7 +12,7 @@ MAX_LINES = 1000
 
 # Files that are allowed to exceed the limit (legacy, with justification)
 EXCEPTIONS = {
-    "vertice_cli/shell_main.py",  # Core shell - refactor in progress
+    "vertice_core/shell_main.py",  # Core shell - refactor in progress
     "vertice_tui/app.py",  # TUI main - complex state management
     "scripts/pre_release_validation.py",  # CI/CD monolith - legacy validation
 }

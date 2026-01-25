@@ -20,7 +20,7 @@ async def main():
             self.governance = type("MockGovernance", (), {"get_status_emoji": lambda: "🟢"})()
             self.history = type("MockHistory", (), {"clear_context": lambda self: None})()
             self.autocomplete = type("MockAutocomplete", (), {"get_completions": lambda t, m: []})()
-            self.llm = type("MockLLM", (), {"_vertice_client": None})()
+            self.llm = type("MockLLM", (), {"_vertice_coreent": None})()
 
         async def warmup(self):
             pass

@@ -21,15 +21,15 @@ from rich.panel import Panel
 from rich.tree import Tree
 
 # Corrected imports
-from vertice_cli.tui.components.enhanced_progress import (
+from vertice_core.tui.components.enhanced_progress import (
     EnhancedProgressDisplay,
     WorkflowProgress,
     StageProgress,
 )
-from vertice_cli.tui.components.dashboard import Dashboard, Operation
-from vertice_cli.tui.components.workflow_visualizer import WorkflowVisualizer, StepStatus
-from vertice_cli.tui.input_enhanced import EnhancedInput
-from vertice_cli.tui.components.context_awareness import ContextAwarenessEngine
+from vertice_core.tui.components.dashboard import Dashboard, Operation
+from vertice_core.tui.components.workflow_visualizer import WorkflowVisualizer, StepStatus
+from vertice_core.tui.input_enhanced import EnhancedInput
+from vertice_core.tui.components.context_awareness import ContextAwarenessEngine
 
 
 @dataclass

@@ -74,12 +74,12 @@ class VerticeE2ETestRunner:
         self.files_before = set(self.work_dir.rglob("*"))
 
         # Initialize LLM client
-        from vertice_cli.core.llm_client import get_llm_client
+        from vertice_core.core.llm_client import get_llm_client
 
         self.llm = await get_llm_client()
 
         # Initialize tool registry
-        from vertice_cli.tools.registry_setup import create_full_registry
+        from vertice_core.tools.registry_setup import create_full_registry
 
         self.registry = create_full_registry()
 
@@ -106,7 +106,7 @@ class VerticeE2ETestRunner:
 
         try:
             # Build system prompt
-            from vertice_cli.prompts.system_prompts import build_enhanced_system_prompt
+            from vertice_core.prompts.system_prompts import build_enhanced_system_prompt
 
             tool_schemas = self.registry.get_schemas()
 
@@ -823,9 +823,9 @@ class TestIntegration:
     @pytest.mark.timeout(180)
     async def test_nlu_to_tool_execution(self, runner):
         """Test the full NLU to tool execution pipeline."""
-        from vertice_cli.core.intent_classifier import SemanticIntentClassifier, Intent
-        from vertice_cli.core.request_amplifier import RequestAmplifier
-        from vertice_cli.core.complexity_analyzer import analyze_complexity
+        from vertice_core.core.intent_classifier import SemanticIntentClassifier, Intent
+        from vertice_core.core.request_amplifier import RequestAmplifier
+        from vertice_core.core.complexity_analyzer import analyze_complexity
 
         request = "mostra os arquivos Python no diretorio atual"
 

@@ -2,13 +2,13 @@
 
 import pytest
 from unittest.mock import MagicMock, patch, AsyncMock
-from vertice_cli.shell_main import InteractiveShell
-from vertice_cli.orchestration.squad import WorkflowResult, WorkflowStatus
+from vertice_core.shell_main import InteractiveShell
+from vertice_core.orchestration.squad import WorkflowResult, WorkflowStatus
 
 
 @pytest.fixture
 def mock_squad_class():
-    with patch("vertice_cli.shell_main.DevSquad") as mock_class:
+    with patch("vertice_core.shell_main.DevSquad") as mock_class:
         squad_instance = MagicMock()
         result = WorkflowResult(request="test", status=WorkflowStatus.COMPLETED)
         squad_instance.execute_workflow = AsyncMock(return_value=result)
@@ -21,7 +21,7 @@ def mock_squad_class():
 async def test_shell_squad_command(mock_squad_class):
     """Test /squad command in shell."""
     # Mock MCPClient to avoid real init
-    with patch("vertice_cli.shell_main.MCPClient"):
+    with patch("vertice_core.shell_main.MCPClient"):
         shell = InteractiveShell()
     shell.console = MagicMock()
     # Mock status context manager to avoid Rich rendering issues
@@ -44,7 +44,7 @@ async def test_shell_squad_command(mock_squad_class):
 async def test_shell_workflow_list_command():
     """Test /workflow list command in shell."""
     # Mock MCPClient and DevSquad
-    with patch("vertice_cli.shell_main.MCPClient"), patch("vertice_cli.shell_main.DevSquad"):
+    with patch("vertice_core.shell_main.MCPClient"), patch("vertice_core.shell_main.DevSquad"):
         shell = InteractiveShell()
 
     # Create mock console and set on shell AND handlers that cached it
@@ -75,7 +75,7 @@ async def test_shell_workflow_list_command():
 async def test_shell_workflow_run_command(mock_squad_class):
     """Test /workflow run command in shell."""
     # Mock MCPClient
-    with patch("vertice_cli.shell_main.MCPClient"):
+    with patch("vertice_core.shell_main.MCPClient"):
         shell = InteractiveShell()
     shell.console = MagicMock()
     # Mock status context manager to avoid Rich rendering issues

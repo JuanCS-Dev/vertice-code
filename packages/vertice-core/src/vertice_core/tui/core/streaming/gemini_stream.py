@@ -1,0 +1,51 @@
+"""
+Gemini Streaming - Backward Compatibility Shim.
+
+DEPRECATED: Use vertice_core.tui.core.streaming.gemini module directly.
+
+This module re-exports from the new gemini/ package for
+backward compatibility. All functionality has been moved to:
+
+- vertice_core.tui.core.streaming.gemini.config  → GeminiStreamConfig, GEMINI_OUTPUT_RULES
+- vertice_core.tui.core.streaming.gemini.base    → BaseStreamer
+- vertice_core.tui.core.streaming.gemini.sdk     → GeminiSDKStreamer
+- vertice_core.tui.core.streaming.gemini.httpx_streamer → GeminiHTTPXStreamer
+- vertice_core.tui.core.streaming.gemini.unified → GeminiStreamer
+
+Migration:
+    # Old:
+    from vertice_core.tui.core.streaming.gemini_stream import GeminiStreamer
+
+    # New:
+    from vertice_core.tui.core.streaming.gemini import GeminiStreamer
+"""
+
+from __future__ import annotations
+
+import warnings
+
+# Re-export everything from the new module
+from .gemini import (
+    GEMINI_OUTPUT_RULES,
+    GeminiStreamConfig,
+    BaseStreamer,
+    GeminiSDKStreamer,
+    GeminiHTTPXStreamer,
+    GeminiStreamer,
+)
+
+# Emit deprecation warning on import
+warnings.warn(
+    "vertice_core.tui.core.streaming.gemini_stream is deprecated. Use vertice_core.tui.core.streaming.gemini instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
+__all__ = [
+    "GEMINI_OUTPUT_RULES",
+    "GeminiStreamConfig",
+    "BaseStreamer",
+    "GeminiSDKStreamer",
+    "GeminiHTTPXStreamer",
+    "GeminiStreamer",
+]

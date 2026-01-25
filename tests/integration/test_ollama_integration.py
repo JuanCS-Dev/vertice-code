@@ -1,8 +1,8 @@
 """Comprehensive Ollama integration tests."""
 
 import pytest
-from vertice_cli.core.llm import LLMClient
-from vertice_cli.core.config import config
+from vertice_core.core.llm import LLMClient
+from vertice_core.core.config import config
 
 pytestmark = pytest.mark.asyncio
 

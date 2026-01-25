@@ -99,7 +99,7 @@ class TestDevSquadWorkflow:
         Phase 1: Architecture decisions.
         """
         try:
-            from vertice_cli.agents.architect import ArchitectAgent
+            from vertice_core.agents.architect import ArchitectAgent
 
             # Check if it has required methods
             required_methods = ["execute", "design_architecture", "validate_constraints"]
@@ -383,7 +383,7 @@ class TestGovernanceIntegration:
         Security: Justiça constitutional checks.
         """
         try:
-            from vertice_cli.maestro_governance import MaestroGovernance
+            from vertice_core.maestro_governance import MaestroGovernance
 
             issue_collector.add_issue(
                 severity="MEDIUM",
@@ -420,7 +420,7 @@ class TestGovernanceIntegration:
         Wisdom: Ethical guidance system.
         """
         try:
-            from vertice_cli.agents.sofia import SofiaIntegratedAgent as SofiaAgent
+            from vertice_core.agents.sofia import SofiaIntegratedAgent as SofiaAgent
 
             # Check Sofia has wisdom methods
             wisdom_methods = ["counsel", "ask_question", "reflect"]
@@ -490,7 +490,7 @@ class TestToolChaining:
         test_file.write_text("original line 1\noriginal line 2\n")
 
         # Simulate read-modify-write
-        from vertice_cli.tools.file_ops import ReadFileTool, WriteFileTool
+        from vertice_core.tools.file_ops import ReadFileTool, WriteFileTool
 
         read_tool = ReadFileTool()
         write_tool = WriteFileTool()

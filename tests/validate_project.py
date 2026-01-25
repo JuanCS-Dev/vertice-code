@@ -111,7 +111,7 @@ def validate_configuration(report: ValidationReport) -> None:
     report.add_section("2. CONFIGURATION VALIDATION")
 
     try:
-        from vertice_cli.core.config import config
+        from vertice_core.core.config import config
 
         # Check required API keys
         has_hf_key = bool(config.hf_token)
@@ -148,7 +148,7 @@ def validate_llm_system(report: ValidationReport) -> None:
     report.add_section("3. LLM SYSTEM VALIDATION")
 
     try:
-        from vertice_cli.core.llm import llm_client
+        from vertice_core.core.llm import llm_client
 
         # Test available providers
         providers = llm_client.get_available_providers()
@@ -194,7 +194,7 @@ def validate_context_system(report: ValidationReport) -> None:
     report.add_section("4. CONTEXT MANAGEMENT VALIDATION")
 
     try:
-        from vertice_cli.core.context import context_builder
+        from vertice_core.core.context import context_builder
 
         # Test context builder methods
         report.add_test(
@@ -221,7 +221,7 @@ def validate_mcp_system(report: ValidationReport) -> None:
     report.add_section("5. MCP SYSTEM VALIDATION")
 
     try:
-        from vertice_cli.core.mcp import mcp_manager
+        from vertice_core.core.mcp import mcp_manager
 
         # Check MCP manager
         report.add_test(
@@ -247,7 +247,7 @@ def validate_ui_system(report: ValidationReport) -> None:
     report.add_section("6. UI SYSTEM VALIDATION")
 
     try:
-        from vertice_cli.ui import create_ui
+        from vertice_core.ui import create_ui
 
         # Test UI creation
         ui = create_ui()
@@ -267,13 +267,13 @@ def validate_file_structure(report: ValidationReport) -> None:
     base_path = Path(__file__).parent
 
     required_files = [
-        "vertice_cli/__init__.py",
-        "vertice_cli/core/__init__.py",
-        "vertice_cli/core/config.py",
-        "vertice_cli/core/llm.py",
-        "vertice_cli/core/context.py",
-        "vertice_cli/core/mcp.py",
-        "vertice_cli/ui.py",
+        "vertice_core/__init__.py",
+        "vertice_core/core/__init__.py",
+        "vertice_core/core/config.py",
+        "vertice_core/core/llm.py",
+        "vertice_core/core/context.py",
+        "vertice_core/core/mcp.py",
+        "vertice_core/ui.py",
         "requirements.txt",
         "README.md",
         "MASTER_PLAN.md",
@@ -307,7 +307,7 @@ def validate_constitutional_compliance(report: ValidationReport) -> None:
 
     # Article 3: Eficiência de Tokens
     try:
-        from vertice_cli.core.llm import llm_client
+        from vertice_core.core.llm import llm_client
 
         has_streaming = hasattr(llm_client, "stream_chat")
         report.add_test(
@@ -319,7 +319,7 @@ def validate_constitutional_compliance(report: ValidationReport) -> None:
     # Article 4: Composabilidade Hierárquica
     report.add_test(
         "Art. 4: Composabilidade - Modular structure",
-        (base_path / "vertice_cli" / "core").is_dir(),
+        (base_path / "vertice_core" / "core").is_dir(),
         "Hierarchical architecture",
     )
 
@@ -351,7 +351,7 @@ def validate_air_gaps(report: ValidationReport) -> None:
     report.add_section("9. AIR GAPS & ERROR HANDLING")
 
     try:
-        from vertice_cli.core.llm import llm_client
+        from vertice_core.core.llm import llm_client
 
         # Test graceful degradation (multi-provider system)
         providers = llm_client.get_available_providers()
@@ -370,7 +370,7 @@ def validate_air_gaps(report: ValidationReport) -> None:
         )
 
         # Test context safety
-        from vertice_cli.core.context import context_builder
+        from vertice_core.core.context import context_builder
 
         try:
             context_builder.clear()
@@ -395,7 +395,7 @@ def validate_performance(report: ValidationReport) -> None:
 
         # Test UI creation speed
         start = time.time()
-        from vertice_cli.ui import create_ui
+        from vertice_core.ui import create_ui
 
         create_ui()
         ui_time = (time.time() - start) * 1000

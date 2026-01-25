@@ -18,7 +18,7 @@ pytestmark = pytest.mark.skip(
 )
 from pathlib import Path
 from unittest.mock import MagicMock, AsyncMock
-from vertice_cli.agents.documentation import DocumentationAgent
+from vertice_core.agents.documentation import DocumentationAgent
 
 
 # ============================================================================

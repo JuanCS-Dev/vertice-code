@@ -7,8 +7,8 @@ Boris Cherny: "Tests or it didn't happen."
 import pytest
 from typing import Any, Dict
 
-from vertice_cli.core.integration_coordinator import Coordinator, SimpleEventBus
-from vertice_cli.core.integration_types import (
+from vertice_core.core.integration_coordinator import Coordinator, SimpleEventBus
+from vertice_core.core.integration_types import (
     AgentResponse,
     Event,
     EventType,
@@ -38,13 +38,13 @@ def coordinator(event_bus, tmp_path):
 @pytest.fixture
 def mock_context():
     """Create mock rich context (uses existing dataclass structure)."""
-    from vertice_cli.intelligence.context_enhanced import (
+    from vertice_core.intelligence.context_enhanced import (
         RichContext,
         GitStatus,
         WorkspaceInfo,
         TerminalInfo,
     )
-    from vertice_cli.intelligence.types import Context
+    from vertice_core.intelligence.types import Context
 
     # Create base context
     Context(

@@ -10,7 +10,7 @@ Testa todas as implementações da Semana 1:
 """
 
 import asyncio
-from vertice_cli.tui.components.streaming_markdown.widget import StreamingMarkdownWidget
+from vertice_core.tui.components.streaming_markdown.widget import StreamingMarkdownWidget
 from vertice_tui.widgets.fuzzy_search_modal import FuzzySearchModal, SearchResult
 from vertice_tui.widgets.session_tabs import SessionTabs
 

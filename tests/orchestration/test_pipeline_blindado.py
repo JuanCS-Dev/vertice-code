@@ -17,16 +17,16 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
 
-from vertice_cli.orchestration.squad import (
+from vertice_core.orchestration.squad import (
     DevSquad,
     WorkflowPhase,
     WorkflowStatus,
     PhaseResult,
 )
-from vertice_cli.orchestration.state_machine import (
+from vertice_core.orchestration.state_machine import (
     Phase,
 )
-from vertice_cli.agents.base import AgentResponse
+from vertice_core.agents.base import AgentResponse
 
 
 # =============================================================================

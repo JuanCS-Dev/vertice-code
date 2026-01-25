@@ -6,7 +6,7 @@ Author: Boris Cherny (Senior Engineer, Claude Code Team)
 
 import pytest
 import os
-from vertice_cli.agents.documentation import DocumentationAgent
+from vertice_core.agents.documentation import DocumentationAgent
 
 # Skip if no API key (CI environment)
 pytestmark = pytest.mark.skipif(

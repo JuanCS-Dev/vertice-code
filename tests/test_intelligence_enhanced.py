@@ -4,9 +4,9 @@ Testing: Risk assessment, workflows, rich context.
 """
 
 import pytest
-from vertice_cli.intelligence.risk import assess_risk, RiskLevel, get_risk_warning
-from vertice_cli.intelligence.context_enhanced import RichContext, GitStatus, WorkspaceInfo
-from vertice_cli.intelligence.workflows import GitWorkflow, NpmWorkflow, WorkflowOrchestrator
+from vertice_core.intelligence.risk import assess_risk, RiskLevel, get_risk_warning
+from vertice_core.intelligence.context_enhanced import RichContext, GitStatus, WorkspaceInfo
+from vertice_core.intelligence.workflows import GitWorkflow, NpmWorkflow, WorkflowOrchestrator
 
 
 class TestRiskAssessment:
@@ -193,7 +193,7 @@ class TestIntegration:
 
     def test_full_git_workflow_with_risk(self):
         """Test complete git workflow with risk assessment."""
-        from vertice_cli.intelligence.risk import assess_risk
+        from vertice_core.intelligence.risk import assess_risk
 
         # Scenario: User wants to commit and push with force
         ctx = RichContext(

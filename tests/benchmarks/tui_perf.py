@@ -8,7 +8,7 @@ sys.path.append(str(Path.cwd() / "src"))
 
 from vertice_tui.core.ui_bridge import AutocompleteBridge  # noqa: E402
 from vertice_tui.core.bridge import Bridge  # noqa: E402
-from vertice_core.clients.vertice_client import VerticeClient  # noqa: E402
+from vertice_core.clients.vertice_coreent import VerticeClient  # noqa: E402
 
 
 async def benchmark_input_latency():

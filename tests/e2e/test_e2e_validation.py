@@ -11,7 +11,7 @@ from pathlib import Path
 # Test 1: Shell can initialize
 def test_shell_initialization():
     print("🧪 Test 1: Shell Initialization...")
-    from vertice_cli.shell import InteractiveShell
+    from vertice_core.shell import InteractiveShell
 
     try:
         shell = InteractiveShell()
@@ -30,7 +30,7 @@ def test_shell_initialization():
 # Test 2: LSP multi-language detection
 def test_lsp_language_detection():
     print("\n🧪 Test 2: LSP Language Detection...")
-    from vertice_cli.intelligence.lsp_client import Language
+    from vertice_core.intelligence.lsp_client import Language
 
     tests = [
         (Path("test.py"), Language.PYTHON),
@@ -60,7 +60,7 @@ def test_lsp_language_detection():
 # Test 3: Refactoring engine
 def test_refactoring_engine():
     print("\n🧪 Test 3: Refactoring Engine...")
-    from vertice_cli.refactoring.engine import RefactoringEngine
+    from vertice_core.refactoring.engine import RefactoringEngine
 
     engine = RefactoringEngine(project_root=Path.cwd())
 
@@ -97,7 +97,7 @@ def test_refactoring_engine():
 # Test 4: LSP completion data structures
 def test_lsp_completion_structures():
     print("\n🧪 Test 4: LSP Completion Structures...")
-    from vertice_cli.intelligence.lsp_client import (
+    from vertice_core.intelligence.lsp_client import (
         CompletionItem,
         SignatureHelp,
         SignatureInformation,
@@ -143,7 +143,7 @@ def test_lsp_completion_structures():
 # Test 5: Edge cases
 def test_edge_cases():
     print("\n🧪 Test 5: Edge Cases...")
-    from vertice_cli.refactoring.engine import RefactoringEngine
+    from vertice_core.refactoring.engine import RefactoringEngine
 
     engine = RefactoringEngine(project_root=Path.cwd())
 
@@ -181,7 +181,7 @@ def test_constitutional_compliance():
     print("\n🧪 Test 6: Constitutional Compliance (P3 - Ceticismo)...")
 
     # Test error handling exists
-    from vertice_cli.refactoring.engine import RefactoringEngine
+    from vertice_core.refactoring.engine import RefactoringEngine
 
     engine = RefactoringEngine(project_root=Path.cwd())
 

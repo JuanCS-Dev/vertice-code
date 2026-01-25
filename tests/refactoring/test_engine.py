@@ -1,5 +1,5 @@
 """Tests for Refactoring Engine - Week 4 Day 2"""
-from vertice_cli.refactoring.engine import RefactoringEngine
+from vertice_core.refactoring.engine import RefactoringEngine
 
 
 def test_rename(tmp_path):

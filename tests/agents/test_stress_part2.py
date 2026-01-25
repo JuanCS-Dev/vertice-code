@@ -7,13 +7,13 @@ import pytest
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
-from vertice_cli.agents.architect import ArchitectAgent
-from vertice_cli.agents.explorer import ExplorerAgent
-from vertice_cli.agents.planner import PlannerAgent
-from vertice_cli.agents.refactorer import RefactorerAgent
-from vertice_cli.agents.reviewer import ReviewerAgent
-from vertice_cli.agents.base import AgentTask
-from vertice_cli.orchestration.squad import DevSquad
+from vertice_core.agents.architect import ArchitectAgent
+from vertice_core.agents.explorer import ExplorerAgent
+from vertice_core.agents.planner import PlannerAgent
+from vertice_core.agents.refactorer import RefactorerAgent
+from vertice_core.agents.reviewer import ReviewerAgent
+from vertice_core.agents.base import AgentTask
+from vertice_core.orchestration.squad import DevSquad
 
 
 class TestArchitectStressPart2:
@@ -379,7 +379,7 @@ class TestPerformanceDegradation:
     @pytest.mark.asyncio
     async def test_memory_manager_performance(self):
         """Test MemoryManager doesn't degrade."""
-        from vertice_cli.orchestration.memory import MemoryManager
+        from vertice_core.orchestration.memory import MemoryManager
 
         manager = MemoryManager()
 
@@ -423,7 +423,7 @@ class TestRaceConditions:
     @pytest.mark.asyncio
     async def test_concurrent_memory_access(self):
         """Test concurrent memory access."""
-        from vertice_cli.orchestration.memory import MemoryManager
+        from vertice_core.orchestration.memory import MemoryManager
 
         manager = MemoryManager()
         session_id = manager.create_session("test")

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from vertice_cli.integrations.mcp.config import MCPConfig
-from vertice_cli.integrations.mcp.server import QwenMCPServer
-from vertice_cli.tools.registry_helper import get_default_registry
+from vertice_core.integrations.mcp.config import MCPConfig
+from vertice_core.integrations.mcp.server import QwenMCPServer
+from vertice_core.tools.registry_helper import get_default_registry
 
 
 def test_mcp_server_initialize_smoke() -> None:

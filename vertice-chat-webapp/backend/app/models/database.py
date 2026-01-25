@@ -327,7 +327,7 @@ class ChatSession(Base):
     user_id: Mapped[Optional[uuid.UUID]] = Column(SQLUUID(as_uuid=True), ForeignKey("users.id"))
 
     title: Mapped[Optional[str]] = Column(String(255))
-    model_used: Mapped[str] = Column(String(100), default="gemini-3-pro-preview")
+    model_used: Mapped[str] = Column(String(100), default="gemini-3-flash")
 
     # Metadata
     created_at: Mapped[datetime] = Column(DateTime(timezone=True), server_default=text("NOW()"))

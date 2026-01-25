@@ -8,7 +8,7 @@ async def test_generation():
 
     models_to_test = [
         "gemini-2.0-flash-exp",  # Control: Should work
-        "gemini-3-pro-preview",  # Target: Failing
+        "gemini-3-flash",  # Target: Failing
     ]
 
     print("🧪 Comparative Model Test (us-central1)...")

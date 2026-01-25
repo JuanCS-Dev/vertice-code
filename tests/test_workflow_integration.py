@@ -12,9 +12,9 @@ Boris Cherny: Type-safe integration testing
 
 import pytest
 from unittest.mock import Mock, AsyncMock
-from vertice_cli.shell import InteractiveShell, SessionContext
-from vertice_cli.tools.base import ToolResult
-from vertice_cli.tui.components.workflow_visualizer import StepStatus
+from vertice_core.shell import InteractiveShell, SessionContext
+from vertice_core.tools.base import ToolResult
+from vertice_core.tui.components.workflow_visualizer import StepStatus
 
 # Note: StepStatus values are PENDING, RUNNING, COMPLETED, FAILED, SKIPPED, BLOCKED
 

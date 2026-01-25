@@ -21,7 +21,7 @@ class TestParallelToolExecution:
     async def test_parallel_independent_reads(self, sample_python_project):
         """Test parallel execution of independent read operations."""
         from vertice_tui.core.parallel_executor import ParallelToolExecutor
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         read_tool = ReadFileTool()
 
@@ -49,7 +49,7 @@ class TestParallelToolExecution:
     async def test_parallel_independent_searches(self, sample_python_project):
         """Test parallel execution of independent searches."""
         from vertice_tui.core.parallel_executor import ParallelToolExecutor
-        from vertice_cli.tools.search import SearchFilesTool
+        from vertice_core.tools.search import SearchFilesTool
 
         search_tool = SearchFilesTool()
 
@@ -79,7 +79,7 @@ class TestParallelToolExecution:
             ParallelToolExecutor,
             detect_tool_dependencies,
         )
-        from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
+        from vertice_core.tools.file_ops import WriteFileTool, ReadFileTool
 
         write_tool = WriteFileTool()
         read_tool = ReadFileTool()
@@ -111,7 +111,7 @@ class TestParallelToolExecution:
     async def test_sequential_write_edit_read(self, temp_project):
         """Test sequential execution of write->edit->read chain."""
         from vertice_tui.core.parallel_executor import ParallelToolExecutor
-        from vertice_cli.tools.file_ops import WriteFileTool, EditFileTool, ReadFileTool
+        from vertice_core.tools.file_ops import WriteFileTool, EditFileTool, ReadFileTool
 
         write_tool = WriteFileTool()
         edit_tool = EditFileTool()
@@ -150,7 +150,7 @@ class TestParallelToolExecution:
     async def test_parallel_writes_different_files(self, temp_project):
         """Test parallel writes to different files."""
         from vertice_tui.core.parallel_executor import ParallelToolExecutor
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         write_tool = WriteFileTool()
 
@@ -175,7 +175,7 @@ class TestParallelToolExecution:
     async def test_mixed_parallel_sequential(self, temp_project):
         """Test mixed parallel and sequential execution."""
         from vertice_tui.core.parallel_executor import ParallelToolExecutor
-        from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
+        from vertice_core.tools.file_ops import WriteFileTool, ReadFileTool
 
         write_tool = WriteFileTool()
         read_tool = ReadFileTool()
@@ -229,7 +229,7 @@ class TestParallelToolExecution:
     async def test_max_parallel_limit(self, temp_project):
         """Test that parallel execution respects max limit."""
         from vertice_tui.core.parallel_executor import ParallelToolExecutor
-        from vertice_cli.tools.file_ops import WriteFileTool
+        from vertice_core.tools.file_ops import WriteFileTool
 
         write_tool = WriteFileTool()
 
@@ -252,7 +252,7 @@ class TestParallelToolExecution:
     async def test_error_in_parallel_execution(self, temp_project):
         """Test error handling in parallel execution."""
         from vertice_tui.core.parallel_executor import ParallelToolExecutor
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         read_tool = ReadFileTool()
 
@@ -361,7 +361,7 @@ class TestConcurrentStressTest:
     async def test_many_parallel_reads(self, sample_python_project):
         """Test many parallel reads (50+)."""
         from vertice_tui.core.parallel_executor import ParallelToolExecutor
-        from vertice_cli.tools.file_ops import ReadFileTool
+        from vertice_core.tools.file_ops import ReadFileTool
 
         read_tool = ReadFileTool()
 
@@ -384,7 +384,7 @@ class TestConcurrentStressTest:
     async def test_many_sequential_writes(self, temp_project):
         """Test many writes to same file (sequential)."""
         from vertice_tui.core.parallel_executor import ParallelToolExecutor
-        from vertice_cli.tools.file_ops import WriteFileTool, EditFileTool
+        from vertice_core.tools.file_ops import WriteFileTool, EditFileTool
 
         write_tool = WriteFileTool()
         edit_tool = EditFileTool()
@@ -422,7 +422,7 @@ class TestConcurrentStressTest:
     async def test_complex_dependency_graph(self, temp_project):
         """Test complex dependency graph with multiple chains."""
         from vertice_tui.core.parallel_executor import ParallelToolExecutor
-        from vertice_cli.tools.file_ops import WriteFileTool, ReadFileTool
+        from vertice_core.tools.file_ops import WriteFileTool, ReadFileTool
 
         write_tool = WriteFileTool()
         read_tool = ReadFileTool()

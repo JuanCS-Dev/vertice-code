@@ -6,8 +6,8 @@ import pytest
 from unittest.mock import MagicMock, AsyncMock
 
 # Assuming the handlers are in these locations
-from vertice_cli.handlers.llm_processing_handler import LLMProcessingHandler
-from vertice_cli.handlers.tool_execution_handler import ToolExecutionHandler
+from vertice_core.handlers.llm_processing_handler import LLMProcessingHandler
+from vertice_core.handlers.tool_execution_handler import ToolExecutionHandler
 
 import sys
 
@@ -26,11 +26,11 @@ class TestLLMProcessingHandlerErrors:
         streaming_mock.stream_llm_response = AsyncMock(
             side_effect=RuntimeError("Connection failed")
         )
-        sys.modules["vertice_cli.shell.streaming_integration"] = streaming_mock
+        sys.modules["vertice_core.shell.streaming_integration"] = streaming_mock
 
         ai_patterns_mock = MagicMock()
         ai_patterns_mock.build_rich_context = MagicMock()
-        sys.modules["vertice_cli.core.ai_patterns"] = ai_patterns_mock
+        sys.modules["vertice_core.core.ai_patterns"] = ai_patterns_mock
 
         handler = LLMProcessingHandler(mock_shell)
 
@@ -41,8 +41,8 @@ class TestLLMProcessingHandlerErrors:
         mock_shell.console.print.assert_any_call("[red]❌ LLM failed: Connection failed[/red]")
 
         # Cleanup
-        del sys.modules["vertice_cli.shell.streaming_integration"]
-        del sys.modules["vertice_cli.core.ai_patterns"]
+        del sys.modules["vertice_core.shell.streaming_integration"]
+        del sys.modules["vertice_core.core.ai_patterns"]
 
     @pytest.mark.asyncio
     async def test_get_command_suggestion_invalid_response(self, mock_shell):

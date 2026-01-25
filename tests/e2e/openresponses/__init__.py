@@ -88,7 +88,7 @@ class OpenResponsesE2ETester:
         try:
             payload = {
                 "messages": [{"role": "user", "content": "Olá, como você está?"}],
-                "model": "gemini-3-pro-preview",
+                "model": "gemini-3-flash",
             }
 
             # Usar Open Responses protocol
@@ -171,7 +171,7 @@ class OpenResponsesE2ETester:
         """Testar integração Open Responses na CLI."""
         try:
             # Testar se os providers suportam stream_open_responses
-            from vertice_cli.core.providers.vertice_router import get_router
+            from vertice_core.core.providers.vertice_router import get_router
 
             router = get_router()
             available_providers = router.get_available_providers()

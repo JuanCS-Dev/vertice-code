@@ -7,8 +7,8 @@ Focus: Core functionality validation with real agent integration.
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from vertice_cli.agents.base import AgentResponse
-from vertice_cli.orchestration.squad import DevSquad, WorkflowStatus
+from vertice_core.agents.base import AgentResponse
+from vertice_core.orchestration.squad import DevSquad, WorkflowStatus
 
 
 @pytest.fixture

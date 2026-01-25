@@ -11,8 +11,8 @@ import asyncio
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock
-from vertice_cli.shell import InteractiveShell
-from vertice_cli.intelligence.indexer import SemanticIndexer
+from vertice_core.shell import InteractiveShell
+from vertice_core.intelligence.indexer import SemanticIndexer
 
 
 class TestAutoIndexing:

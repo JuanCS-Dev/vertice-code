@@ -16,11 +16,11 @@ import pytest
 from unittest.mock import Mock, AsyncMock, patch
 
 # Validate all imports work
-from vertice_cli.maestro_governance import MaestroGovernance, render_sofia_counsel
-from vertice_cli.core.governance_pipeline import GovernancePipeline
-from vertice_cli.agents.justica_agent import JusticaIntegratedAgent
-from vertice_cli.agents.sofia import SofiaIntegratedAgent
-from vertice_cli.agents.base import AgentTask, AgentResponse
+from vertice_core.maestro_governance import MaestroGovernance, render_sofia_counsel
+from vertice_core.core.governance_pipeline import GovernancePipeline
+from vertice_core.agents.justica_agent import JusticaIntegratedAgent
+from vertice_core.agents.sofia import SofiaIntegratedAgent
+from vertice_core.agents.base import AgentTask, AgentResponse
 
 
 class TestMaestroGovernanceImports:
@@ -43,8 +43,8 @@ class TestMaestroGovernanceImports:
     def test_all_dependencies_import(self):
         """Validate all dependency imports work."""
         # These should not raise ImportError
-        from vertice_cli.core.observability import setup_observability, trace_operation
-        from vertice_cli.core.agent_identity import get_agent_identity, AGENT_IDENTITIES
+        from vertice_core.core.observability import setup_observability, trace_operation
+        from vertice_core.core.agent_identity import get_agent_identity, AGENT_IDENTITIES
 
         assert setup_observability is not None
         assert trace_operation is not None
@@ -258,20 +258,20 @@ class TestAirGapValidation:
         import ast
 
         with open(
-            "/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_cli/maestro.py", "r"
+            "/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_core/maestro.py", "r"
         ) as f:
             tree = ast.parse(f.read())
 
         # Check for governance import
         imports = [node for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)]
-        governance_imported = any(imp.module == "vertice_cli.maestro_governance" for imp in imports)
+        governance_imported = any(imp.module == "vertice_core.maestro_governance" for imp in imports)
 
         assert governance_imported, "maestro.py must import maestro_governance"
 
     def test_maestro_py_has_state_governance_field(self):
         """Verify GlobalState has governance field."""
         with open(
-            "/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_cli/maestro.py", "r"
+            "/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_core/maestro.py", "r"
         ) as f:
             content = f.read()
 
@@ -281,7 +281,7 @@ class TestAirGapValidation:
     def test_maestro_py_initializes_governance(self):
         """Verify ensure_initialized() creates MaestroGovernance."""
         with open(
-            "/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_cli/maestro.py", "r"
+            "/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_core/maestro.py", "r"
         ) as f:
             content = f.read()
 
@@ -291,7 +291,7 @@ class TestAirGapValidation:
     def test_maestro_py_has_governance_hook(self):
         """Verify execute_agent_task() has governance hook."""
         with open(
-            "/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_cli/maestro.py", "r"
+            "/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_core/maestro.py", "r"
         ) as f:
             content = f.read()
 
@@ -301,7 +301,7 @@ class TestAirGapValidation:
     def test_maestro_py_has_sofia_command(self):
         """Verify sofia command exists."""
         with open(
-            "/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_cli/maestro.py", "r"
+            "/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_core/maestro.py", "r"
         ) as f:
             content = f.read()
 
@@ -311,7 +311,7 @@ class TestAirGapValidation:
     def test_maestro_py_has_governance_status_command(self):
         """Verify governance status command exists."""
         with open(
-            "/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_cli/maestro.py", "r"
+            "/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_core/maestro.py", "r"
         ) as f:
             content = f.read()
 
@@ -320,8 +320,8 @@ class TestAirGapValidation:
 
     def test_all_agent_roles_have_identities(self):
         """Verify all AgentRoles used have corresponding identities."""
-        from vertice_cli.core.agent_identity import AGENT_IDENTITIES
-        from vertice_cli.agents.base import AgentRole
+        from vertice_core.core.agent_identity import AGENT_IDENTITIES
+        from vertice_core.agents.base import AgentRole
 
         # Check that key roles have identities
         critical_roles = ["maestro", "governance", "counselor", "executor"]
@@ -336,7 +336,7 @@ class TestAirGapValidation:
 
     def test_governance_pipeline_accepts_all_roles(self):
         """Test that governance pipeline can handle all agent roles."""
-        from vertice_cli.agents.base import AgentRole
+        from vertice_core.agents.base import AgentRole
 
         mock_llm = Mock()
         mock_mcp = Mock()
@@ -350,7 +350,7 @@ class TestAirGapValidation:
     def test_graceful_degradation_path_exists(self):
         """Test that graceful degradation code exists."""
         with open(
-            "/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_cli/maestro.py", "r"
+            "/media/juan/DATA/projects/GEMINI-CLI-2/qwen-dev-cli/vertice_core/maestro.py", "r"
         ) as f:
             content = f.read()
 
@@ -397,7 +397,7 @@ class TestIntegrationConsistency:
 
     def test_permissions_consistency(self):
         """Test that permissions are consistently defined."""
-        from vertice_cli.core.agent_identity import AgentPermission, get_agent_identity
+        from vertice_core.core.agent_identity import AgentPermission, get_agent_identity
 
         # Governance should have evaluation permissions
         governance = get_agent_identity("governance")

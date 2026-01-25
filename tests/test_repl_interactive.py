@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 sys.path.insert(0, ".")
 
-from vertice_cli.shell import InteractiveShell
+from vertice_core.shell import InteractiveShell
 
 
 async def test_repl_flow():
@@ -81,7 +81,7 @@ async def test_repl_flow():
     print("  ✓ Error handling")
     print()
     print("Ready for interactive testing!")
-    print("Run: qwen  (or python -m vertice_cli)")
+    print("Run: qwen  (or python -m vertice_core)")
     print("=" * 70)
 
 

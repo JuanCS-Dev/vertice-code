@@ -25,7 +25,7 @@ def validate_model_info(model_info: dict, provider_name: str) -> str:
     """
     Validation logic extracted from VerticeRouter.route().
 
-    This matches the implementation in vertice_cli/core/providers/vertice_router.py
+    This matches the implementation in vertice_core/core/providers/vertice_router.py
     """
     try:
         model_name = model_info["model"]
@@ -42,7 +42,7 @@ class TestModelInfoValidation:
     def test_valid_model_info_returns_model_name(self):
         """Valid model_info should return the model name."""
         model_info = ModelInfo(
-            model="gemini-3-pro-preview",
+            model="gemini-3-flash",
             provider="vertex-ai",
             cost_tier="enterprise",
             speed_tier="fast",
@@ -50,7 +50,7 @@ class TestModelInfoValidation:
 
         result = validate_model_info(model_info, "vertex-ai")
 
-        assert result == "gemini-3-pro-preview"
+        assert result == "gemini-3-flash"
 
     def test_missing_model_key_raises_value_error(self):
         """Missing 'model' key should raise ValueError with clear message."""

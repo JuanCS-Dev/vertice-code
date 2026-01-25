@@ -1,9 +1,9 @@
 import os
 import sys
 
-# Simulation of the logic in vertice_cli/core/providers/prometheus_provider.py
-# File path: /media/juan/DATA/Vertice-Code/vertice_cli/core/providers/prometheus_provider.py
-file_path = os.path.join(os.getcwd(), "vertice_cli/core/providers/prometheus_provider.py")
+# Simulation of the logic in vertice_core/core/providers/prometheus_provider.py
+# File path: /media/juan/DATA/Vertice-Code/vertice_core/core/providers/prometheus_provider.py
+file_path = os.path.join(os.getcwd(), "vertice_core/core/providers/prometheus_provider.py")
 root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(file_path))))
 print(f"File Path: {file_path}")
 print(f"Calculated Root: {root_path}")

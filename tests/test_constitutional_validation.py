@@ -15,7 +15,7 @@ class TestConstitutionalCompliance:
 
     def test_prompt_engineering_exists(self):
         """P1: System prompts devem existir."""
-        prompts_dir = Path("vertice_cli/prompts")
+        prompts_dir = Path("vertice_core/prompts")
         assert prompts_dir.exists(), "Prompts directory missing"
 
         assert (prompts_dir / "system_prompts.py").exists()
@@ -23,7 +23,7 @@ class TestConstitutionalCompliance:
 
     def test_defense_layer_exists(self):
         """P2: Defense layer deve existir."""
-        from vertice_cli.core.defense import PromptDefense
+        from vertice_core.core.defense import PromptDefense
 
         defense = PromptDefense()
 
@@ -33,7 +33,7 @@ class TestConstitutionalCompliance:
 
     def test_safety_validator(self):
         """P3: Safety validator deve prevenir comandos perigosos."""
-        from vertice_cli.intelligence.risk import assess_risk
+        from vertice_core.intelligence.risk import assess_risk
 
         # Dangerous commands
         risk = assess_risk("rm -rf /")
@@ -53,7 +53,7 @@ class TestDeliberation:
     @pytest.mark.asyncio
     async def test_conversation_manager_exists(self):
         """P4: Conversation manager deve existir."""
-        from vertice_cli.core.conversation import ConversationManager
+        from vertice_core.core.conversation import ConversationManager
 
         conv = ConversationManager(session_id="test")
         assert conv is not None
@@ -61,7 +61,7 @@ class TestDeliberation:
     @pytest.mark.asyncio
     async def test_multi_turn_context(self):
         """P5: Multi-turn deve manter contexto."""
-        from vertice_cli.core.conversation import ConversationManager
+        from vertice_core.core.conversation import ConversationManager
 
         conv = ConversationManager(session_id="test")
 
@@ -82,7 +82,7 @@ class TestStateManagement:
 
     def test_context_builder_exists(self):
         """P6: Context builder deve existir."""
-        from vertice_cli.core.context import ContextBuilder
+        from vertice_core.core.context import ContextBuilder
 
         builder = ContextBuilder()
         context = builder.build_context()
@@ -91,7 +91,7 @@ class TestStateManagement:
 
     def test_session_persistence(self):
         """P7: Session deve persistir estado."""
-        from vertice_cli.shell import SessionContext
+        from vertice_core.shell import SessionContext
 
         ctx = SessionContext()
         ctx.track_tool_call("read_file", {"path": "test.txt"}, {"success": True})
@@ -106,7 +106,7 @@ class TestExecution:
     @pytest.mark.asyncio
     async def test_error_recovery_exists(self):
         """P8: Error recovery deve existir."""
-        from vertice_cli.core.recovery import ErrorRecoveryEngine
+        from vertice_core.core.recovery import ErrorRecoveryEngine
 
         engine = ErrorRecoveryEngine(llm_client=None, max_attempts=2)
         assert engine is not None
@@ -114,7 +114,7 @@ class TestExecution:
     @pytest.mark.asyncio
     async def test_verify_before_execute(self):
         """P9: Deve verificar antes de executar."""
-        from vertice_cli.shell import InteractiveShell
+        from vertice_core.shell import InteractiveShell
         from unittest.mock import MagicMock
 
         shell = InteractiveShell(llm_client=MagicMock())
@@ -129,14 +129,14 @@ class TestIncentives:
 
     def test_metrics_exist(self):
         """P10: Metrics devem existir."""
-        from vertice_cli.core.metrics import MetricsCollector
+        from vertice_core.core.metrics import MetricsCollector
 
         metrics = MetricsCollector()
         assert hasattr(metrics, "track_execution")
 
     def test_lei_calculation(self):
         """P11: LEI < 1.0 (não lazy)."""
-        from vertice_cli.core.metrics import MetricsCollector
+        from vertice_core.core.metrics import MetricsCollector
 
         metrics = MetricsCollector()
 
@@ -149,7 +149,7 @@ class TestIncentives:
 
 def test_all_layers_integrated():
     """P12: Todas as 5 layers devem estar integradas."""
-    from vertice_cli.shell import InteractiveShell
+    from vertice_core.shell import InteractiveShell
 
     shell = InteractiveShell()
 

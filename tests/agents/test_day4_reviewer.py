@@ -21,8 +21,8 @@ pytestmark = pytest.mark.skip(
 )
 from unittest.mock import AsyncMock, MagicMock
 
-from vertice_cli.agents.base import AgentTask
-from vertice_cli.agents.reviewer import ReviewerAgent
+from vertice_core.agents.base import AgentTask
+from vertice_core.agents.reviewer import ReviewerAgent
 # QualityGate was removed from reviewer module - these tests need updating
 
 
