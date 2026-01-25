@@ -61,14 +61,13 @@ Migrate from manual builds to **Firebase App Hosting**. This natively supports N
 **New `firebase.json`:**
 ```json
 {
-  "hosting": {
-    "site": "vertice-ai-2026",
-    "apphosting": {
-      "source": ".",
-      "nodeVersion": "20",
-      "environmentVariables": {
-        "NEXT_PUBLIC_API_URL": "https://api-gateway-xyz.run.app"
-      }
+  "apphosting": {
+    "rootDirectory": "vertice-chat-webapp/frontend",
+    "buildCommand": "npm run build",
+    "outputDirectory": ".next",
+    "environmentVariables": {
+      "NEXT_PUBLIC_API_URL": "",
+      "NEXT_PUBLIC_FIREBASE_PROJECT_ID": "vertice-ai"
     }
   }
 }
@@ -104,12 +103,12 @@ Move from `src/agents/orchestrator` to **Vertex AI Reasoning Engine**.
 ## 5. Immediate Next Steps
 
 1.  **Run:** `rm vertice-chat-webapp/backend/app/sandbox/executor.py`
-2.  **Create:** `firebase.json` in `vertice-chat-webapp/` root.
+2.  **Confirm:** `firebase.json` (repo root) is using **App Hosting** (no legacy rewrites).
 3.  **Refactor:** Update `backend/app/api/v1/chat.py` to call `vertexai.reasoning_engines` instead of local agent classes.
 4.  **Deploy:**
     ```bash
     # Frontend
-    firebase deploy --only hosting
+    firebase deploy --only apphosting
 
     # Backend
     gcloud run deploy vertice-api --source ./backend
@@ -140,12 +139,17 @@ Entregue (backend-only):
 - Runtime SSE: `GET /agui/stream` em `apps/agent-gateway/app/main.py`
 - Contrato MVP (schema estável): `packages/vertice-core/src/vertice_core/agui/protocol.py`
   - Tipos: `delta|final|tool|error`
+- Adapter ADK->AG-UI: `packages/vertice-core/src/vertice_core/agui/ag_ui_adk.py`
+- Task API: `POST /agui/tasks` + `GET /agui/tasks/{task_id}` + `GET /agui/tasks/{task_id}/stream`
 
 Validação executada (offline):
 ```bash
 pytest tests/unit/test_agui_protocol.py -v -x
+pytest tests/unit/test_agui_adk_adapter.py -v -x
 pytest tests/integration/test_agent_gateway_agui_stream.py -v -x
 python -m compileall -q apps/agent-gateway/app/main.py packages/vertice-core/src/vertice_core/agui
 ```
 
 Próximo passo (fora desta PR): wiring do frontend (CopilotKit) para consumir o runtime do gateway.
+
+Detalhes completos (Fase 3.1): `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`

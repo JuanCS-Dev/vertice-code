@@ -109,3 +109,10 @@ Critérios de aceite:
 ## Perguntas que ainda precisam de resposta (para não travar no meio)
 - Qual serviço vai hospedar o Next.js: **Firebase App Hosting** é obrigatório já na primeira etapa, ou pode entrar após `agent-gateway` estabilizar?
 - “AG‑UI”: vocês querem aderência estrita a um schema específico (se existir internamente) ou basta um MVP compatível com CopilotKit primeiro?
+
+## Status (25 JAN 2026)
+
+- Next.js: `firebase.json` consolidado para **Firebase App Hosting** (sem rewrites do backend antigo).
+- AG‑UI: MVP estável implementado com `delta|final|tool|error`, SSE e API de tasks (`/agui/tasks/*`).
+
+Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`

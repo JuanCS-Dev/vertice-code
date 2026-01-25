@@ -15,6 +15,7 @@ from .protocol import (
     AGUIDeltaData,
     sse_encode_event,
 )
+from .ag_ui_adk import adk_event_to_agui, adk_events_to_agui
 
 __all__ = [
     "AGUIEvent",
@@ -24,4 +25,6 @@ __all__ = [
     "AGUIToolData",
     "AGUIDeltaData",
     "sse_encode_event",
+    "adk_event_to_agui",
+    "adk_events_to_agui",
 ]

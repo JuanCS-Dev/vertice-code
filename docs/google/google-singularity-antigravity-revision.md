@@ -88,3 +88,13 @@ Update `vertice-chat-webapp/backend/requirements.txt`.
 **Signed,**
 *Antigravity*
 *Google Deepmind Agent*
+
+---
+
+## Update de Execução (25 JAN 2026) — Fase 3.1 (AG‑UI)
+
+Implementado (backend-only):
+- Adapter ADK->AG-UI + API de tasks (`/agui/tasks/*`) no `apps/agent-gateway`
+- `firebase.json` consolidado para App Hosting (sem rewrites do backend antigo)
+
+Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`

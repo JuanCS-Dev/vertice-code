@@ -77,3 +77,14 @@ Exemplos reais (rodados na Fase 3, 25/01/2026):
   - “O que mudou”
   - “Como validar” (2–5 comandos)
   - “Limites respeitados” (files/diff)
+
+---
+
+## Exemplo recente (25 JAN 2026): Fase 3.1 (AG‑UI)
+
+- “O que mudou”: adapter ADK->AG-UI + `/agui/tasks/*` + cleanup App Hosting.
+- “Como validar”:
+  - `pytest tests/unit/test_agui_adk_adapter.py -v -x`
+  - `pytest tests/integration/test_agent_gateway_agui_stream.py -v -x`
+
+Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`

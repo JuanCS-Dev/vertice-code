@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import importlib.util
 import json
+import sys
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
@@ -19,6 +20,7 @@ def _load_agent_gateway_app():
     assert spec is not None
     module = importlib.util.module_from_spec(spec)
     assert spec.loader is not None
+    sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module.app
 
@@ -152,3 +154,31 @@ async def test_agui_stream_completes_and_closes() -> None:
     assert body
     events = [_parse_sse_block(b) for b in body.decode("utf-8").split("\n\n") if b.strip()]
     assert events[-1][1]["type"] == AGUIEventType.FINAL.value
+
+
+@pytest.mark.asyncio
+async def test_agui_tasks_create_status_and_stream() -> None:
+    app = _load_agent_gateway_app()
+    transport = httpx.ASGITransport(app=app)
+
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        created = await client.post(
+            "/agui/tasks",
+            json={"prompt": "hello world", "session_id": "s10", "tool": "search"},
+        )
+        assert created.status_code == 201
+        task = created.json()
+        assert task["status"] == "running"
+        task_id = task["task_id"]
+
+        status = await client.get(f"/agui/tasks/{task_id}")
+        assert status.status_code == 200
+        assert status.json()["task_id"] == task_id
+
+        async with client.stream("GET", f"/agui/tasks/{task_id}/stream") as resp:
+            assert resp.status_code == 200
+            events = await _collect_sse_events(resp)
+
+    types = [payload["type"] for _, payload in events]
+    assert AGUIEventType.TOOL.value in types
+    assert types[-1] == AGUIEventType.FINAL.value

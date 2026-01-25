@@ -149,3 +149,12 @@ pytest tests/integration/test_orchestrator_prometheus.py -v -x
 pytest tests/agents/test_registry.py -v -x
 pytest tests/agents/test_coordinator.py -v -x
 ```
+
+## Update de Execução (25 JAN 2026) — Fase 3.1 (AG‑UI)
+
+Implementado (backend-only):
+- Adapter ADK->AG-UI: `packages/vertice-core/src/vertice_core/agui/ag_ui_adk.py`
+- Task API: `POST /agui/tasks` + `GET /agui/tasks/{task_id}` + `GET /agui/tasks/{task_id}/stream` em `apps/agent-gateway/app/main.py`
+- Hosting: `firebase.json` agora no padrão App Hosting (sem rewrites do backend antigo)
+
+Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`

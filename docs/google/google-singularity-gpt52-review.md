@@ -111,3 +111,13 @@ Dia 5–7 (PoC Google Native)
 2. O “gateway” deve se chamar **`api-gateway`** ou **`agent-gateway`**? (escolha 1)
 3. O requisito é **zero execução de código local** no backend (só remoto/Vertex), ou precisa manter execução local (bem isolada) para dev?
 4. Preferência para gestão de chaves: **Secret Manager** (simples) agora e KMS depois, ou KMS desde o dia 1?
+
+---
+
+## Update de Execução (25 JAN 2026) — Fase 3.1 (AG‑UI)
+
+Entregue (backend-only):
+- Adapter ADK->AG-UI + API de tasks (`/agui/tasks/*`) no `apps/agent-gateway`.
+- `firebase.json` consolidado para App Hosting (sem rewrites do backend antigo).
+
+Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`

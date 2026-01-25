@@ -101,3 +101,13 @@ We keep the **Speed** of a Monorepo but gain the **Sanity** of Microservices.
 
 *Signed,*
 **Vertice-MAXIMUS**
+
+---
+
+## Update de Execução (25 JAN 2026) — Fase 3.1 (AG‑UI)
+
+Entregue (backend-only) para consolidar o “sistema nervoso”:
+- Adapter ADK->AG-UI: `packages/vertice-core/src/vertice_core/agui/ag_ui_adk.py`
+- Task API + streams: `apps/agent-gateway/app/main.py` (`/agui/tasks/*`)
+
+Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`

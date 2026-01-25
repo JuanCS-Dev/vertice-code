@@ -233,3 +233,14 @@ python -m compileall -q packages/vertice-core/src/agents packages/vertice-core/s
 3. Agendar sessão com equipe frontend para alinhar CopilotKit/AG-UI (Fase 3) e revisar `docs/planning/CLAUDE_CODE_WEB_RENDERING.md`.
 
 **ESTE PLANO SUBSTITUI qualquer blueprint anterior. Todas as implementações devem seguir as fases descritas acima.**
+
+---
+
+## Update de Execução (25 JAN 2026) — Fase 3.1 (AG‑UI)
+
+Fase 3.1 (backend-only) concluída para destravar o wiring do frontend depois:
+- Adapter ADK->AG-UI: `packages/vertice-core/src/vertice_core/agui/ag_ui_adk.py`
+- Task API + streams SSE: `apps/agent-gateway/app/main.py` (`/agui/tasks/*`)
+- Hosting: `firebase.json` no padrão App Hosting (sem rewrites do backend antigo)
+
+Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`

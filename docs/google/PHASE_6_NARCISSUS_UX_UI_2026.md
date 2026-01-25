@@ -71,11 +71,18 @@ Painel `advanced_command_center` para governança.
 Para a UI Narcissus consumir o “Cérebro” via streaming, o repo já possui:
 - `apps/agent-gateway/config/engines.json` (registry local de engines).
 - `tools/deploy_brain.py` (gera/atualiza o registry; `--dry-run` offline).
-- `apps/agent-gateway/app/main.py` com `GET /agui/stream` (SSE) + contrato MVP `delta|final|tool|error` em `packages/vertice-core/src/vertice_core/agui/protocol.py`.
+- `apps/agent-gateway/app/main.py` com:
+  - `GET /agui/stream` (SSE)
+  - `POST /agui/tasks` + `GET /agui/tasks/{task_id}` + `GET /agui/tasks/{task_id}/stream`
+- Contrato MVP `delta|final|tool|error`: `packages/vertice-core/src/vertice_core/agui/protocol.py`
+- Adapter ADK->AG-UI: `packages/vertice-core/src/vertice_core/agui/ag_ui_adk.py`
 
 Smoke checks executados (offline):
 ```bash
 pytest tests/integration/test_vertex_deploy.py -v -x
 pytest tests/integration/test_agent_gateway_agui_stream.py -v -x
 pytest tests/unit/test_agui_protocol.py -v -x
+pytest tests/unit/test_agui_adk_adapter.py -v -x
 ```
+
+Detalhes completos (Fase 3.1): `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`

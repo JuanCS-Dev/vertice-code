@@ -105,3 +105,18 @@ Regra: cada item abaixo vira **uma PR pequena** (ideal 1–2h) e respeita `docs/
 ## Stop conditions (para evitar travar)
 - Se a PR tocar **>25 arquivos** ou tiver **>600 linhas**: dividir.
 - Se aparecer necessidade de rename/move massivo: criar “Epic” separada (não fazer no Jules).
+
+---
+
+## PR-3.1: AG‑UI adapter + `/agui/tasks` (backend-only) — concluída (25 JAN 2026)
+
+- Entregue:
+  - `packages/vertice-core/src/vertice_core/agui/ag_ui_adk.py`
+  - `apps/agent-gateway/app/main.py` (`/agui/tasks/*` + SSE)
+  - `tests/unit/test_agui_adk_adapter.py`
+  - `tests/integration/test_agent_gateway_agui_stream.py` (inclui tasks)
+- Como validar (rápido):
+  - `pytest tests/unit/test_agui_adk_adapter.py -v -x`
+  - `pytest tests/integration/test_agent_gateway_agui_stream.py -v -x`
+
+Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`

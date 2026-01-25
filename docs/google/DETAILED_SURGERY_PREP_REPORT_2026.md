@@ -125,15 +125,22 @@ Decisões travadas implementadas:
 3. Escopo backend-only nesta PR: gateway + core protocol + testes
 
 Entregáveis:
-- `apps/agent-gateway/app/main.py` (`/healthz` + `/agui/stream`)
+- `apps/agent-gateway/app/main.py` (`/healthz`, `/agui/stream`, `/agui/tasks`)
 - `packages/vertice-core/src/vertice_core/agui/protocol.py` (+ `packages/vertice-core/src/vertice_core/agui/__init__.py`)
+- `packages/vertice-core/src/vertice_core/agui/ag_ui_adk.py` (adapter ADK-ish -> AG-UI)
 - Testes:
   - `tests/unit/test_agui_protocol.py`
+  - `tests/unit/test_agui_adk_adapter.py`
   - `tests/integration/test_agent_gateway_agui_stream.py`
+ - Infra:
+  - `firebase.json` (App Hosting; rewrites do backend antigo removidos)
 
 Validação executada (offline):
 ```bash
 pytest tests/unit/test_agui_protocol.py -v -x
+pytest tests/unit/test_agui_adk_adapter.py -v -x
 pytest tests/integration/test_agent_gateway_agui_stream.py -v -x
 python -m compileall -q apps/agent-gateway/app/main.py packages/vertice-core/src/vertice_core/agui
 ```
+
+Detalhes completos (Fase 3.1): `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`

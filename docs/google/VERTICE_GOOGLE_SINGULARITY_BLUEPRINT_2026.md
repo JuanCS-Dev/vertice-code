@@ -146,3 +146,14 @@ A partir deste momento, qualquer linha de código escrita deve obedecer a este b
 *Assinado,*
 **Vertice-MAXIMUS**
 *Omni-Root System Architect*
+
+---
+
+## Update de Execução (25 JAN 2026) — Fase 3.1 (AG‑UI)
+
+Implementado (backend-only):
+- `apps/agent-gateway/app/main.py`: `GET /agui/stream` (SSE) + `/agui/tasks` (task API + stream)
+- `packages/vertice-core/src/vertice_core/agui/ag_ui_adk.py`: adapter ADK-ish -> `AGUIEvent`
+- `firebase.json`: App Hosting (sem rewrites do backend antigo)
+
+Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`
