@@ -153,3 +153,12 @@ python -m compileall -q apps/agent-gateway/app/main.py packages/vertice-core/src
 Próximo passo (fora desta PR): wiring do frontend (CopilotKit) para consumir o runtime do gateway.
 
 Detalhes completos (Fase 3.1): `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`
+
+---
+
+## Update (25 JAN 2026) — PR‑0/PR‑1 (Security Hardening)
+
+- **RCE:** sandbox local do backend desabilitado (fail‑closed). Execução de código deve ser via **Vertex AI Code Interpreter**.
+- **GDPR/KMS:** master key obrigatória via env var ou via KMS (sem chaves efêmeras).
+
+Comandos de validação: `docs/google/DETAILED_SURGERY_PREP_REPORT_2026.md`.

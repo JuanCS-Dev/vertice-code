@@ -21,6 +21,19 @@ pytest tests/integration/test_agent_gateway_agui_stream.py -v -x
 python -m compileall -q apps/agent-gateway/app/main.py packages/vertice-core/src/vertice_core/agui
 ```
 
+## Update (25 JAN 2026) — PR‑0/PR‑1 (Security Hardening) ✅
+
+**PR‑0 (RCE):** execução local de código no backend foi desabilitada (fail‑closed) e a tool `execute_python` retorna erro explícito. Regressão adicionada para impedir `exec(`/`eval(` no código do backend.
+
+**PR‑1 (GDPR/KMS):** geração de chave efêmera removida; master key passa a ser obrigatória via `GDPR_MASTER_KEY` ou via KMS (`KMS_KEY_NAME` + `GDPR_MASTER_KEY_CIPHERTEXT`).
+
+Validação executada:
+```bash
+pytest vertice-chat-webapp/backend/tests/unit/test_sandbox_executor.py -v -x
+pytest vertice-chat-webapp/backend/tests/unit/test_no_local_rce.py -v -x
+pytest vertice-chat-webapp/backend/tests/unit/test_gdpr_crypto.py -v -x
+```
+
 ## 1. THE LIBERATION MANIFESTO
 **The Problem:** You want to create code, but you are currently managing a distributed system (Docker, Networks, Volumes, Sandboxes). Every time you want to "just run" an app, you have to spin up an orchestrator.
 **The Solution:** We shift the weight of the world to Google's shoulders. We stop *hosting* software and start *composing* services.

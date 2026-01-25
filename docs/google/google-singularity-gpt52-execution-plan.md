@@ -116,3 +116,12 @@ Critérios de aceite:
 - AG‑UI: MVP estável implementado com `delta|final|tool|error`, SSE e API de tasks (`/agui/tasks/*`).
 
 Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`
+
+---
+
+## Update (25 JAN 2026) — PR‑0/PR‑1 (Security Hardening)
+
+- **RCE:** execução local de Python desabilitada (fail‑closed) no backend SaaS.
+- **GDPR/KMS:** criptografia exige master key configurada; suporte a KMS via ciphertext.
+
+Detalhes: `docs/google/DETAILED_SURGERY_PREP_REPORT_2026.md`.

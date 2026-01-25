@@ -9,7 +9,6 @@ from __future__ import annotations
 import base64
 import hashlib
 import logging
-import secrets
 from datetime import datetime
 from typing import Optional
 
@@ -19,10 +18,43 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from sqlalchemy import select, update
 
 from app.core.config import settings
+from app.core.kms_client import CloudKmsClient
 from app.core.database import get_db_session
 from app.models.database import Workspace
 
 logger = logging.getLogger(__name__)
+
+
+def _decode_master_key_b64(key_b64: str) -> bytes:
+    try:
+        raw = base64.urlsafe_b64decode(key_b64)
+    except Exception as exc:
+        raise ValueError("Invalid GDPR master key: not valid base64url") from exc
+
+    if len(raw) != 32:
+        raise ValueError("Invalid GDPR master key: must decode to 32 bytes")
+    return raw
+
+
+def _load_master_key(override_key_b64: Optional[str]) -> bytes:
+    if override_key_b64:
+        return _decode_master_key_b64(override_key_b64)
+
+    if settings.GDPR_MASTER_KEY:
+        return _decode_master_key_b64(settings.GDPR_MASTER_KEY)
+
+    if settings.KMS_KEY_NAME and settings.GDPR_MASTER_KEY_CIPHERTEXT:
+        plaintext = CloudKmsClient(settings.KMS_KEY_NAME).decrypt_b64(
+            settings.GDPR_MASTER_KEY_CIPHERTEXT
+        )
+        if len(plaintext) != 32:
+            raise ValueError("KMS-decrypted GDPR master key must be 32 bytes")
+        return plaintext
+
+    raise RuntimeError(
+        "GDPR master key is not configured. Set GDPR_MASTER_KEY (base64url 32-byte) or "
+        "KMS_KEY_NAME + GDPR_MASTER_KEY_CIPHERTEXT."
+    )
 
 
 class CryptoShreddingService:
@@ -40,16 +72,7 @@ class CryptoShreddingService:
         Args:
             master_key: Base64 encoded 32-byte master key.
         """
-        key_str = master_key or settings.GDPR_MASTER_KEY
-        if not key_str:
-            logger.warning("No GDPR_MASTER_KEY provided. Generating ephemeral key.")
-            self.master_key = secrets.token_bytes(32)
-        else:
-            try:
-                self.master_key = base64.urlsafe_b64decode(key_str)
-            except Exception as e:
-                logger.error(f"Invalid master key format: {e}")
-                self.master_key = secrets.token_bytes(32)
+        self.master_key = _load_master_key(master_key)
 
     def derive_workspace_key(self, workspace_id: str, key_version: int = 1) -> bytes:
         """Derive workspace-specific encryption key from master key."""

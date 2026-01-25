@@ -121,3 +121,12 @@ Entregue (backend-only):
 - `firebase.json` consolidado para App Hosting (sem rewrites do backend antigo).
 
 Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`
+
+---
+
+## Update (25 JAN 2026) — PR‑0/PR‑1 (Security Hardening)
+
+- **PR‑0 (RCE):** execução local desabilitada (fail‑closed) + teste de regressão contra `exec(`/`eval(`.
+- **PR‑1 (GDPR/KMS):** removida geração de chaves efêmeras; master key obrigatória (env var ou KMS).
+
+Detalhes: `docs/google/DETAILED_SURGERY_PREP_REPORT_2026.md`.

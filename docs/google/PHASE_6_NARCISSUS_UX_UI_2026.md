@@ -86,3 +86,13 @@ pytest tests/unit/test_agui_adk_adapter.py -v -x
 ```
 
 Detalhes completos (Fase 3.1): `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`
+
+---
+
+## Pré‑requisito de Segurança (25 JAN 2026) — PR‑0/PR‑1
+
+O frontend Narcissus assume backend blindado:
+- Execução local de código desabilitada (RCE fail‑closed).
+- Chaves GDPR/LGPD obrigatórias via env var ou KMS (sem fallback efêmero).
+
+Detalhes: `docs/google/DETAILED_SURGERY_PREP_REPORT_2026.md`.

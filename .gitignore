@@ -189,6 +189,7 @@ README.old.md
 .ruff_cache/
 htmlcov/
 .hypothesis/
+.cache/
 
 # Temporary directories
 .trash/

@@ -98,38 +98,30 @@ python -m compileall -q packages/vertice-core/src/agents packages/vertice-core/s
 - `tests/e2e/parity/test_claude_parity.py` atualizado roda sem skips para comandos que dependem do agente.
 - Métricas de custo agora usam Vertex billing (substituir `MODEL_PRICING` hardcoded).
 
-### Fase 3 — Reconexão Nervosa (Semanas 5-6)
+### Fase 3 — Reconexão Nervosa & Face Soberana (Semanas 5-6)
 
-**Objetivo:** abandonar WebSocket/SSE ad-hoc e adotar AG-UI + CopilotKit do blueprint.
+**Objetivo:** abandonar WebSocket/SSE ad-hoc e adotar AG-UI + CopilotKit com a identidade visual Narcissus.
 
-1. **Backend Runtime (apps/agent-gateway/)**
-   - FastAPI minimal que converte eventos do ADK em eventos AG-UI (`ag_ui_adk` wrapper).
+**Status (25/01/2026):**
+- MVP backend concluído (Fase 3.0 e 3.1).
+- Plano detalhado de wiring imersivo pronto: `docs/google/PHASE_3_2_WIRING_NARCISSUS.md`.
+
+1. **Backend Runtime (apps/agent-gateway/)** — ✅ **DONE**
+   - FastAPI minimal que converte eventos do ADK em eventos AG-UI.
    - Endpoints: `/agui/stream`, `/agui/tasks`, `/healthz`.
-   - Autenticação via Google IAM + Service Accounts.
 
-2. **Frontend (apps/web-console/)**
-   - Atualizar para Next.js 16 + CopilotKit (`@copilotkit/react-core`, `@copilotkit/react-ui`).
-   - Substituir `chat-interface.tsx` por `<CopilotSidebar>` + `<CopilotTextarea>` consumindo runtime `/api/copilot`.
-   - Implementar middleware `src/app/api/copilot/route.ts` que proxia para agent-gateway (Cloud Run).
+2. **Frontend Wiring & Narcissus (apps/web-console/)** — 🔄 **NEXT STEP**
+   - Implementar `PR 3.2-A (Foundation)`: Next.js 16 + CopilotKit + Tailwind v4 Obsidian Theme.
+   - Implementar `PR 3.2-B (Immersive Entry)`: Landing Page e Direct Command baseados no Google Stitch.
+   - Implementar `PR 3.2-C (Stream Dashboard)`: Visualização de CoT (Chain of Thought) e progresso de tarefas AG-UI.
 
 3. **Streaming Markdown (TUI)**
-   - Seguir plano `docs/planning/CLAUDE_CODE_WEB_RENDERING.md`: atualizar dependency `textual>=4.0.0`, criar widgets `StreamingMarkdownWidget`, `BlockDetector`, etc.
-   - Garantir parity visual com Claude Code desktop.
-
-4. **Protocol Compliance**
-   - Definir contrato AG-UI (schemas JSON) em `packages/vertice-core/src/vertice_core/agui/protocol.py`.
-   - Adicionar testes de contrato (`tests/e2e/agui/test_protocol_conformance.py`).
-
-**Status (25/01/2026, backend-only MVP entregue):**
-- `GET /agui/stream` (SSE) implementado em `apps/agent-gateway/app/main.py` com eventos `delta|final|tool|error`.
-- Contrato MVP em `packages/vertice-core/src/vertice_core/agui/protocol.py` + testes:
-  - `pytest tests/unit/test_agui_protocol.py -v -x`
-  - `pytest tests/integration/test_agent_gateway_agui_stream.py -v -x`
+   - Seguir plano `docs/planning/CLAUDE_CODE_WEB_RENDERING.md` para paridade visual com o web-console.
 
 **Critérios de aceite**
 - Frontend CopilotKit streaming sem fallback manual.
-- TUI roda 30 FPS com fallback automático <25 FPS.
-- Documentação AG-UI publicada (`docs/agui-runtime.md`).
+- Interface Next.js 16 reflete 100% dos rascunhos do Stitch (Narcissus Vision).
+- Handshake `/api/copilot` -> `agent-gateway` funcional.
 
 ### Fase 4 — Eternidade dos Dados (Semanas 7-8)
 
@@ -244,3 +236,17 @@ Fase 3.1 (backend-only) concluída para destravar o wiring do frontend depois:
 - Hosting: `firebase.json` no padrão App Hosting (sem rewrites do backend antigo)
 
 Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`
+
+---
+
+## Update de Execução (25 JAN 2026) — PR‑0/PR‑1 (Security Hardening)
+
+- **PR‑0 (RCE):** execução local de código no backend SaaS foi desabilitada fail‑closed; tool `execute_python` retorna erro explícito e não há fallback local.
+- **PR‑1 (GDPR/KMS):** removida geração de chaves efêmeras; master key obrigatória via `GDPR_MASTER_KEY` ou via KMS (`KMS_KEY_NAME` + `GDPR_MASTER_KEY_CIPHERTEXT`).
+
+Validação executada:
+```bash
+pytest vertice-chat-webapp/backend/tests/unit/test_sandbox_executor.py -v -x
+pytest vertice-chat-webapp/backend/tests/unit/test_no_local_rce.py -v -x
+pytest vertice-chat-webapp/backend/tests/unit/test_gdpr_crypto.py -v -x
+```

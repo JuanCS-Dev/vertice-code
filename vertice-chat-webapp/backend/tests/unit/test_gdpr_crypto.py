@@ -44,3 +44,57 @@ class TestCryptoShredding:
         key2 = crypto_service.derive_workspace_key(workspace_id)
 
         assert key1 == key2
+
+
+def test_crypto_service_requires_key_configuration(monkeypatch):
+    from app.core import gdpr_crypto
+
+    monkeypatch.setattr(gdpr_crypto.settings, "GDPR_MASTER_KEY", None, raising=False)
+    monkeypatch.setattr(gdpr_crypto.settings, "KMS_KEY_NAME", None, raising=False)
+    monkeypatch.setattr(gdpr_crypto.settings, "GDPR_MASTER_KEY_CIPHERTEXT", None, raising=False)
+
+    with pytest.raises(RuntimeError, match="GDPR master key is not configured"):
+        gdpr_crypto.CryptoShreddingService(master_key=None)
+
+
+def test_crypto_service_can_load_master_key_from_kms(monkeypatch):
+    from app.core import gdpr_crypto
+
+    class _FakeResp:
+        def __init__(self, plaintext: bytes):
+            self.plaintext = plaintext
+
+    class _FakeKms:
+        def decrypt(self, request):
+            assert request["name"] == "projects/p/locations/l/keyRings/r/cryptoKeys/k"
+            assert request["ciphertext"] == b"ciphertext"
+            return _FakeResp(b"01234567890123456789012345678901")
+
+    class _FakeCloudKmsClient:
+        def __init__(self, key_name: str):
+            self._inner = _FakeKms()
+            self.key_name = key_name
+
+        def decrypt_b64(self, ciphertext_b64: str) -> bytes:
+            assert ciphertext_b64 == base64.b64encode(b"ciphertext").decode("utf-8")
+            return self._inner.decrypt(
+                {"name": self.key_name, "ciphertext": base64.b64decode(ciphertext_b64)}
+            ).plaintext
+
+    monkeypatch.setattr(gdpr_crypto.settings, "GDPR_MASTER_KEY", None, raising=False)
+    monkeypatch.setattr(
+        gdpr_crypto.settings,
+        "KMS_KEY_NAME",
+        "projects/p/locations/l/keyRings/r/cryptoKeys/k",
+        raising=False,
+    )
+    monkeypatch.setattr(
+        gdpr_crypto.settings,
+        "GDPR_MASTER_KEY_CIPHERTEXT",
+        base64.b64encode(b"ciphertext").decode("utf-8"),
+        raising=False,
+    )
+    monkeypatch.setattr(gdpr_crypto, "CloudKmsClient", _FakeCloudKmsClient)
+
+    svc = gdpr_crypto.CryptoShreddingService(master_key=None)
+    assert svc.master_key == b"01234567890123456789012345678901"

@@ -111,3 +111,12 @@ Entregue (backend-only) para consolidar o “sistema nervoso”:
 - Task API + streams: `apps/agent-gateway/app/main.py` (`/agui/tasks/*`)
 
 Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`
+
+---
+
+## Update (25 JAN 2026) — PR‑0/PR‑1 (Security Hardening)
+
+- **PR‑0 (RCE):** o backend SaaS não executa mais código Python localmente (fail‑closed).
+- **PR‑1 (GDPR/KMS):** criptografia GDPR/LGPD agora exige master key configurada; sem fallback efêmero.
+
+Detalhes e comandos de validação em `docs/google/DETAILED_SURGERY_PREP_REPORT_2026.md`.

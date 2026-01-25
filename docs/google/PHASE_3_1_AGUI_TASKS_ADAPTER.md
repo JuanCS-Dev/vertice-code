@@ -61,3 +61,12 @@
 ### Observação (ambiente)
 - `FastAPI/Starlette TestClient` travou neste ambiente; os testes usam `httpx.ASGITransport` para evitar deadlock e garantir fechamento do stream SSE.
 
+---
+
+## Nota de Segurança (25 JAN 2026) — PR‑0/PR‑1
+
+Antes de conectar frontend (CopilotKit), o backend SaaS foi blindado:
+- Execução local de código (RCE) desabilitada (fail‑closed).
+- GDPR crypto exige master key configurada (env var ou KMS).
+
+Detalhes e comandos: `docs/google/DETAILED_SURGERY_PREP_REPORT_2026.md`.

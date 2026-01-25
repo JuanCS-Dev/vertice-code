@@ -8,6 +8,11 @@ Este backlog assume as decisões travadas em `docs/google/google-singularity-gpt
 
 Regra: cada item abaixo vira **uma PR pequena** (ideal 1–2h) e respeita `docs/google/JULES_WORKFLOW.md`.
 
+## Status de Execução (25 JAN 2026)
+
+- **PR‑0 (RCE sandbox):** ✅ implementado (bloqueio fail‑closed + regressão `exec(`/`eval(`).
+- **PR‑1 (KMS/GDPR):** ✅ implementado (master key obrigatória via env var ou KMS; sem chave efêmera).
+
 ## PR-0 — Bloquear RCE (sandbox)
 
 ### PR-0A: Remover fallback `exec()` (fail-closed)
@@ -16,10 +21,13 @@ Regra: cada item abaixo vira **uma PR pequena** (ideal 1–2h) e respeita `docs/
 - **Aceite:**
   - `rg -n "exec\\(open\\(" vertice-chat-webapp/backend/app/sandbox/executor.py` retorna vazio
   - execução “sem isolamento” retorna erro explícito (mensagem clara)
+ - **Status:** ✅ DONE (25/01/2026)
 
 ### PR-0B: Ajustar testes do sandbox (sem execução local)
 - **Arquivos-alvo (sugestão):** `vertice-chat-webapp/backend/tests/unit/test_sandbox_executor.py`
 - **Aceite:** `pytest vertice-chat-webapp/backend/tests/unit/test_sandbox_executor.py -v -x`
+ - **Status:** ✅ DONE (25/01/2026)
+ - **Validação adicional:** `pytest vertice-chat-webapp/backend/tests/unit/test_no_local_rce.py -v -x`
 
 ## PR-1 — KMS desde o início (GDPR crypto)
 
@@ -28,11 +36,13 @@ Regra: cada item abaixo vira **uma PR pequena** (ideal 1–2h) e respeita `docs/
 - **Aceite:**
   - iniciar app sem `GDPR_MASTER_KEY`/config equivalente falha (modo normal)
   - teste unitário atualizado cobre o comportamento
+ - **Status:** ✅ DONE (25/01/2026)
 
 ### PR-1B: Interface de Key Provider (KMS) + stub de teste
 - **Arquivos-alvo:** `vertice-chat-webapp/backend/app/core/gdpr_crypto.py` (ou novo módulo pequeno em `app/core/`)
 - **Não fazer:** integrar SDK GCP completo se isso explodir escopo; criar somente interface e “plug point”
 - **Aceite:** testes unitários passam e o código não gera key efêmera em runtime normal
+ - **Status:** ✅ DONE (25/01/2026)
 
 ## PR-2 — Desacoplamento SaaS↔CLI (core instalável)
 

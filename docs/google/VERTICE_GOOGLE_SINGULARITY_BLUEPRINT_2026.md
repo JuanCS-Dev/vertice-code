@@ -157,3 +157,15 @@ Implementado (backend-only):
 - `firebase.json`: App Hosting (sem rewrites do backend antigo)
 
 Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`
+
+## Update de Execução (25 JAN 2026) — PR‑0/PR‑1 (Security Hardening)
+
+- **PR‑0 (RCE):** desabilitada execução local de Python no backend SaaS (fail‑closed). Caminho suportado: **Vertex AI Code Interpreter** (managed).
+- **PR‑1 (GDPR/KMS):** master key agora é **obrigatória** (sem fallback efêmero). Opções: `GDPR_MASTER_KEY` (32 bytes base64url) ou KMS (`KMS_KEY_NAME` + `GDPR_MASTER_KEY_CIPHERTEXT`).
+
+Validação executada (unit):
+```bash
+pytest vertice-chat-webapp/backend/tests/unit/test_sandbox_executor.py -v -x
+pytest vertice-chat-webapp/backend/tests/unit/test_no_local_rce.py -v -x
+pytest vertice-chat-webapp/backend/tests/unit/test_gdpr_crypto.py -v -x
+```

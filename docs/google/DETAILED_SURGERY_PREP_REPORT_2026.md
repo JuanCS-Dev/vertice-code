@@ -54,8 +54,8 @@ Esta operação deve ser executada com precisão milimétrica. Não há margem p
 
 **Procedimento 2.1: Remoção do Tumor RCE**
 -   **Alvo:** `vertice-chat-webapp/backend/app/sandbox/executor.py`
--   **Ação:** `rm vertice-chat-webapp/backend/app/sandbox/executor.py`
--   **Substituição:** O arquivo será substituído por um *Proxy* para o **Vertex AI Code Interpreter** (Extension). Não executaremos mais código Python localmente no container da API.
+-   **Ação:** remover qualquer execução local de código (bloqueio total de RCE).
+-   **Substituição:** o executor vira um *stub fail-closed* (erro explícito) e o caminho recomendado passa a ser o **Vertex AI Code Interpreter** (managed). Não executamos mais Python localmente no container da API.
 
 **Procedimento 2.2: Limpeza de Orquestração Manual**
 -   **Alvo:** `vertice-chat-webapp/backend/app/api/v1/chat.py` (Lógica antiga de LangChain manual)
@@ -69,7 +69,7 @@ Esta operação deve ser executada com precisão milimétrica. Não há margem p
 
 **Procedimento 3.2: Implante Neurológico (Google Cloud KMS)**
 -   **Alvo:** `vertice-chat-webapp/backend/app/core/gdpr_crypto.py`
--   **Código Novo:**
+-   **Código Novo (direção):**
     ```python
     from google.cloud import kms
     # Substituir geração de chave aleatória por chamada ao KMS
@@ -144,3 +144,28 @@ python -m compileall -q apps/agent-gateway/app/main.py packages/vertice-core/src
 ```
 
 Detalhes completos (Fase 3.1): `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`
+
+## Pós‑Op: Validação Executada (25 JAN 2026) — PR‑0 (RCE) + PR‑1 (KMS/GDPR)
+
+### PR‑0 — Bloqueio total de RCE (Sandbox)
+Mudança aplicada:
+- Execução local de Python no backend foi **desabilitada fail‑closed** em `vertice-chat-webapp/backend/app/sandbox/executor.py`.
+- Integração MCP retorna erro explícito quando a tool `execute_python` é chamada (sem fallback local).
+- Regra de regressão adicionada: código do backend não pode conter `exec(` / `eval(`.
+
+Validação executada:
+```bash
+pytest vertice-chat-webapp/backend/tests/unit/test_sandbox_executor.py -v -x
+pytest vertice-chat-webapp/backend/tests/unit/test_no_local_rce.py -v -x
+```
+
+### PR‑1 — Interface Cloud KMS para GDPR (fail‑closed)
+Mudança aplicada:
+- Removida geração de chaves efêmeras (sem “fallback em RAM”).
+- Fonte da master key agora é **obrigatória**: `GDPR_MASTER_KEY` **ou** `KMS_KEY_NAME` + `GDPR_MASTER_KEY_CIPHERTEXT` (decripta via KMS).
+- Wrapper `CloudKmsClient` introduzido em `vertice-chat-webapp/backend/app/core/kms_client.py` (error claro se `google-cloud-kms` não estiver instalado).
+
+Validação executada:
+```bash
+pytest vertice-chat-webapp/backend/tests/unit/test_gdpr_crypto.py -v -x
+```

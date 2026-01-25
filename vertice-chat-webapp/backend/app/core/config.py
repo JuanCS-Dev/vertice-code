@@ -80,7 +80,14 @@ class Settings(BaseSettings):
     # Encryption (GDPR)
     # Master key for deriving workspace encryption keys
     # MUST be a 32-byte base64 encoded string
-    GDPR_MASTER_KEY: Optional[str] = "y6WjP6n_S8C1ZkL2yVvGzX9W_K3M1N4O5P6Q7R8S9T0="
+    GDPR_MASTER_KEY: Optional[str] = None
+
+    # Google Cloud KMS (GDPR master key protection)
+    # KMS_KEY_NAME example:
+    #   projects/<project>/locations/<location>/keyRings/<ring>/cryptoKeys/<key>
+    KMS_KEY_NAME: Optional[str] = None
+    # Base64 ciphertext blob that decrypts to the 32-byte master key.
+    GDPR_MASTER_KEY_CIPHERTEXT: Optional[str] = None
 
     # Billing Plans (Stripe Price IDs)
     STRIPE_PRICE_FREEMIUM: str = "price_freemium_monthly"

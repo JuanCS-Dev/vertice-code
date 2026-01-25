@@ -65,6 +65,11 @@ Exemplos reais (rodados na Fase 3, 25/01/2026):
 - `pytest tests/unit/test_agui_protocol.py -v -x`
 - `pytest tests/integration/test_agent_gateway_agui_stream.py -v -x`
 
+Exemplos reais (rodados em hardening de segurança, 25/01/2026):
+- `pytest vertice-chat-webapp/backend/tests/unit/test_sandbox_executor.py -v -x`
+- `pytest vertice-chat-webapp/backend/tests/unit/test_no_local_rce.py -v -x`
+- `pytest vertice-chat-webapp/backend/tests/unit/test_gdpr_crypto.py -v -x`
+
 ## Setup (evitar tempo morto)
 - Se o Jules permitir: usar **setup script** no repo para padronizar ambiente.
 - Se precisar de segredos/keys: preferir variáveis configuradas no **repositório** e habilitadas na task (não hardcode).
