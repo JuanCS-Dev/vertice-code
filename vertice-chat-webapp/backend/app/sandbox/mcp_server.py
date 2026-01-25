@@ -18,6 +18,7 @@ from mcp.server import Server
 import mcp.types as types
 
 from app.sandbox.executor import SandboxExecutor, SandboxConfig
+from app.sandbox.executor import LocalCodeExecutionDisabledError
 
 logger = logging.getLogger(__name__)
 
@@ -63,9 +64,21 @@ class CodeExecutionServer:
             working_dir = arguments.get("working_dir")
 
             # Execute code in sandbox
-            result = await self.executor.execute_python(
-                code=code, working_dir=working_dir, timeout=float(timeout)
-            )
+            try:
+                result = await self.executor.execute_python(
+                    code=code, working_dir=working_dir, timeout=float(timeout)
+                )
+            except LocalCodeExecutionDisabledError as exc:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=(
+                            "Execution disabled (RCE hard-block).\n"
+                            "Use Vertex AI Code Interpreter for managed execution.\n\n"
+                            f"Details: {exc}"
+                        ),
+                    )
+                ]
 
             # Format response
             response_parts = []
@@ -160,7 +173,10 @@ class CodeExecutionServer:
             return [
                 types.Tool(
                     name="execute_python",
-                    description="Execute Python code in a secure sandboxed environment",
+                    description=(
+                        "Execute Python code (DISABLED - RCE hard-block). "
+                        "Use Vertex AI Code Interpreter instead."
+                    ),
                     inputSchema={
                         "type": "object",
                         "properties": {

@@ -3,7 +3,7 @@ Unit tests for Sandbox Executor
 """
 
 import pytest
-from app.sandbox.executor import SandboxExecutor, SandboxConfig, ExecutionResult
+from app.sandbox.executor import LocalCodeExecutionDisabledError, SandboxConfig, SandboxExecutor
 
 
 class TestSandboxExecutor:
@@ -28,64 +28,46 @@ class TestSandboxExecutor:
         return SandboxExecutor(config)
 
     @pytest.mark.asyncio
-    async def test_execute_python_simple_code(self, executor):
-        """Test execution of simple Python code."""
+    async def test_execute_python_is_disabled(self, executor):
+        """Local execution must be disabled (RCE hard-block)."""
         code = """
 print("Hello, World!")
 result = 2 + 2
 print(f"2 + 2 = {result}")
 """
-
-        result = await executor.execute_python(code)
-
-        assert result.exit_code == 0
-        assert "Hello, World!" in result.stdout
-        assert "2 + 2 = 4" in result.stdout
-        assert result.stderr == ""
-        assert result.error is None
-        assert result.execution_time > 0
+        with pytest.raises(LocalCodeExecutionDisabledError):
+            await executor.execute_python(code)
 
     @pytest.mark.asyncio
-    async def test_execute_python_with_error(self, executor):
-        """Test execution of code that raises an exception."""
+    async def test_execute_python_with_error_is_disabled(self, executor):
+        """Even erroring code must not run locally."""
         code = """
 raise ValueError("Test error")
 """
-
-        result = await executor.execute_python(code)
-
-        assert result.exit_code != 0
-        assert "ValueError" in result.stderr or "ValueError" in result.stdout
-        assert result.error is None  # Should be clean exit
+        with pytest.raises(LocalCodeExecutionDisabledError):
+            await executor.execute_python(code)
 
     @pytest.mark.asyncio
-    async def test_execute_python_timeout(self, executor):
-        """Test execution timeout."""
+    async def test_execute_python_timeout_is_disabled(self, executor):
+        """Timeouts are irrelevant if execution is disabled."""
         code = """
 import time
 time.sleep(10)  # Sleep longer than timeout
 """
-
-        result = await executor.execute_python(code, timeout=1.0)
-
-        assert result.exit_code != 0
-        assert result.error == "Timeout after 1.0s"
-        assert result.execution_time >= 1.0
+        with pytest.raises(LocalCodeExecutionDisabledError):
+            await executor.execute_python(code, timeout=1.0)
 
     @pytest.mark.asyncio
-    async def test_execute_python_with_working_dir(self, executor, tmp_path):
-        """Test execution with custom working directory."""
+    async def test_execute_python_with_working_dir_is_disabled(self, executor, tmp_path):
+        """Working dir should not matter when disabled."""
         working_dir = str(tmp_path)
 
         code = """
 import os
 print(f"Current dir: {os.getcwd()}")
 """
-
-        result = await executor.execute_python(code, working_dir=working_dir)
-
-        assert result.exit_code == 0
-        assert working_dir in result.stdout
+        with pytest.raises(LocalCodeExecutionDisabledError):
+            await executor.execute_python(code, working_dir=working_dir)
 
     def test_config_validation(self):
         """Test sandbox config validation."""
@@ -132,15 +114,9 @@ print(f"Current dir: {os.getcwd()}")
             SandboxExecutor(config)
 
     @pytest.mark.asyncio
-    async def test_execution_result_structure(self, executor):
-        """Test that execution results have correct structure."""
+    async def test_execution_result_structure_is_disabled(self, executor):
+        """No ExecutionResult is produced when disabled; we raise instead."""
         code = "print('test')"
 
-        result = await executor.execute_python(code)
-
-        assert isinstance(result, ExecutionResult)
-        assert isinstance(result.stdout, str)
-        assert isinstance(result.stderr, str)
-        assert isinstance(result.exit_code, (int, type(None)))
-        assert isinstance(result.execution_time, float)
-        assert isinstance(result.error, (str, type(None)))
+        with pytest.raises(LocalCodeExecutionDisabledError):
+            await executor.execute_python(code)
