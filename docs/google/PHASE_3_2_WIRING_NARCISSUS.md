@@ -69,3 +69,17 @@ Antes do wiring do frontend, foi aplicado hardening no backend SaaS:
 - **PR‑1 (GDPR/KMS):** master key obrigatória (sem geração efêmera).
 
 Detalhes e validação: `docs/google/DETAILED_SURGERY_PREP_REPORT_2026.md`.
+
+## Pré‑requisito de Memória (25 JAN 2026) — PR‑4 (AlloyDB)
+
+Antes do frontend Narcissus “persistir consciência”, foi entregue a fundação de memória (Episodic MVP) no `vertice-core`.
+
+Detalhes e validação: `docs/google/PR_4_ALLOYDB_MEMORY_FOUNDATION_2026.md`
+
+---
+
+## Update (25 JAN 2026) — Phase 4 (AlloyDB AI Cutover)
+
+- Memória agora default AlloyDB AI (fallback local sem DSN) + embeddings in-db (pré‑req para “consciência persistente”).
+- Validação (offline): `pytest tests/unit/test_alloydb_migration.py tests/unit/test_alloydb_cutover_behavior.py -v -x` → `14 passed in 0.53s`.
+- Detalhes: `docs/google/PHASE_4_ALLOYDB_AI_CUTOVER_2026.md`.

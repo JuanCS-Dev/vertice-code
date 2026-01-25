@@ -118,5 +118,16 @@ Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`
 
 - **PR‑0 (RCE):** o backend SaaS não executa mais código Python localmente (fail‑closed).
 - **PR‑1 (GDPR/KMS):** criptografia GDPR/LGPD agora exige master key configurada; sem fallback efêmero.
+- **PR‑4 (AlloyDB):** fundação de memória (Episodic MVP) entregue no `vertice-core` (pool + schema + smoke tests).
 
 Detalhes e comandos de validação em `docs/google/DETAILED_SURGERY_PREP_REPORT_2026.md`.
+Detalhes memória: `docs/google/PR_4_ALLOYDB_MEMORY_FOUNDATION_2026.md`
+
+---
+
+## Update (25 JAN 2026) — Phase 4 (AlloyDB AI Cutover)
+
+- Cutover: AlloyDB AI como default (fallback para SQLite apenas sem DSN).
+- Migração real: `tools/migrate_memory.py` (`.prometheus/prometheus.db` → AlloyDB).
+- Validação (offline): `pytest tests/unit/test_alloydb_migration.py tests/unit/test_alloydb_cutover_behavior.py -v -x` → `14 passed in 0.53s`.
+- Detalhes: `docs/google/PHASE_4_ALLOYDB_AI_CUTOVER_2026.md`.

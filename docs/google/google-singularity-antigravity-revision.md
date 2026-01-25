@@ -107,3 +107,21 @@ Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`
 - **PR‑1 (GDPR/KMS):** master key obrigatória; suporte a KMS via ciphertext.
 
 Detalhes: `docs/google/DETAILED_SURGERY_PREP_REPORT_2026.md`.
+
+---
+
+## Update (25 JAN 2026) — PR‑4 (AlloyDB Memory Foundation — Episodic MVP)
+
+Implementado (config-driven, sem infra real):
+- Conector AlloyDB com pool + schema mínimo + `EpisodicMemory` com backend `alloydb`.
+
+Detalhes e validação: `docs/google/PR_4_ALLOYDB_MEMORY_FOUNDATION_2026.md`
+
+---
+
+## Update (25 JAN 2026) — Phase 4 (AlloyDB AI Cutover)
+
+- Cutover: AlloyDB AI como default (fallback local sem DSN) + embeddings in-db via `google_ml_integration`.
+- Migração real: `tools/migrate_memory.py` (`.prometheus/prometheus.db` → AlloyDB).
+- Validação (offline): `pytest tests/unit/test_alloydb_migration.py tests/unit/test_alloydb_cutover_behavior.py -v -x` → `14 passed in 0.53s`.
+- Detalhes: `docs/google/PHASE_4_ALLOYDB_AI_CUTOVER_2026.md`.

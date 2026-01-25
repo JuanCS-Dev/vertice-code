@@ -24,7 +24,7 @@ class DeployedEngine:
 
 
 AGENT_IMPORTS: Dict[str, Dict[str, str]] = {
-    "coder": {"module": "agents.coder.agent", "symbol": "CoderAgent"},
+    "coder": {"module": "agents.coder.reasoning_engine_app", "symbol": "CoderReasoningEngineApp"},
     "reviewer": {"module": "agents.reviewer.agent", "symbol": "ReviewerAgent"},
     "architect": {"module": "agents.architect.agent", "symbol": "ArchitectAgent"},
     "orchestrator": {"module": "agents.orchestrator.agent", "symbol": "OrchestratorAgent"},

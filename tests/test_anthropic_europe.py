@@ -2,6 +2,7 @@ import asyncio
 import os
 import sys
 import logging
+import pytest
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -13,6 +14,9 @@ sys.path.insert(0, os.getcwd())
 
 async def test_europe():
     """Test Claude in europe-west1."""
+    if os.getenv("RUN_VERTEX_LIVE_TESTS", "").strip().lower() not in {"1", "true", "yes"}:
+        pytest.skip("Live Vertex test disabled. Set RUN_VERTEX_LIVE_TESTS=1 to enable.")
+
     print("=" * 60)
     print("🧪 Testing Claude on europe-west1")
     print("=" * 60)
@@ -20,12 +24,12 @@ async def test_europe():
     os.environ["GOOGLE_CLOUD_PROJECT"] = "vertice-ai"
 
     try:
-        from vertice_core.core.providers.anthropic_vertex import AnthropicVertexProvider
+        from vertice_core.providers.anthropic_vertex import AnthropicVertexProvider
 
-        # Try Sonnet 3.5 (stable) in europe-west1
+        # Sonnet 4.5 via Vertex AI
         provider = AnthropicVertexProvider(
             location="europe-west1",
-            model_name="sonnet-3.5",
+            model_name="sonnet-4.5",
         )
 
         print(f"📋 Model: {provider.model_name} @ {provider.location}")

@@ -1,7 +1,7 @@
 # Phase 3.1 (Backend-Only): `ag_ui_adk` adapter + `/agui/tasks`
 
-**Date:** January 25, 2026  
-**Scope:** Backend-only (Gateway + Core Protocol + Tests)  
+**Date:** January 25, 2026
+**Scope:** Backend-only (Gateway + Core Protocol + Tests)
 **Decisions locked:**
 - SSE em `GET /agui/stream` e `GET /agui/tasks/{task_id}/stream`
 - Schema MVP estável com eventos `delta|final|tool|error`
@@ -70,3 +70,19 @@ Antes de conectar frontend (CopilotKit), o backend SaaS foi blindado:
 - GDPR crypto exige master key configurada (env var ou KMS).
 
 Detalhes e comandos: `docs/google/DETAILED_SURGERY_PREP_REPORT_2026.md`.
+
+---
+
+## Nota de Memória (25 JAN 2026) — PR‑4 (AlloyDB)
+
+Fundação entregue no `vertice-core` (Episodic MVP + conector/pool + schema + smoke tests).
+
+Detalhes e validação: `docs/google/PR_4_ALLOYDB_MEMORY_FOUNDATION_2026.md`
+
+---
+
+## Update (25 JAN 2026) — Phase 4 (AlloyDB AI Cutover)
+
+- Memória agora default AlloyDB AI (fallback local sem DSN) — garante persistência antes de conectar frontend.
+- Validação (offline): `pytest tests/unit/test_alloydb_migration.py tests/unit/test_alloydb_cutover_behavior.py -v -x` → `14 passed in 0.53s`.
+- Detalhes: `docs/google/PHASE_4_ALLOYDB_AI_CUTOVER_2026.md`.

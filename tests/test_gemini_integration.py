@@ -7,10 +7,11 @@ VERIFIES:
 - Ignores API keys (uses ADC)
 """
 
+import os
 import pytest
 
-from vertice_core.core.providers.gemini import GeminiProvider
-from vertice_core.core.providers.vertex_ai import VertexAIProvider
+from vertice_core.providers.gemini import GeminiProvider
+from vertice_core.providers.vertex_ai import VertexAIProvider
 
 # Mark as integration
 pytestmark = pytest.mark.integration
@@ -21,6 +22,9 @@ class TestGeminiProviderLegacyWrapper:
 
     def test_provider_initialization(self):
         """Should initialize wrapper and delegate to Vertex."""
+        if os.getenv("RUN_VERTEX_LIVE_TESTS", "").strip().lower() not in {"1", "true", "yes"}:
+            pytest.skip("Live Vertex test disabled. Set RUN_VERTEX_LIVE_TESTS=1 to enable.")
+
         # API key should be ignored but allowed in init
         provider = GeminiProvider(api_key="fake-key")
         assert provider.is_available() is True
@@ -31,15 +35,18 @@ class TestGeminiProviderLegacyWrapper:
 
     def test_verify_config_redirect(self):
         """Verify configuration redirects to correct Vertex defaults."""
-        provider = GeminiProvider(model_name="gemini-1.5-pro")
+        provider = GeminiProvider(model_name="gemini-3-pro")
 
-        # Should upgrade 1.5 to 3.0
+        # Wrapper forces a default for compatibility
         assert provider.delegate.model_alias == "gemini-3-flash"
         assert provider.delegate.location == "global"
 
     @pytest.mark.asyncio
     async def test_generate_simple(self):
         """Should generate response via Vertex delegate."""
+        if os.getenv("RUN_VERTEX_LIVE_TESTS", "").strip().lower() not in {"1", "true", "yes"}:
+            pytest.skip("Live Vertex test disabled. Set RUN_VERTEX_LIVE_TESTS=1 to enable.")
+
         provider = GeminiProvider()
 
         result = await provider.generate(
@@ -55,6 +62,9 @@ class TestGeminiProviderLegacyWrapper:
     @pytest.mark.asyncio
     async def test_stream_generate(self):
         """Should stream response chunks via Vertex delegate."""
+        if os.getenv("RUN_VERTEX_LIVE_TESTS", "").strip().lower() not in {"1", "true", "yes"}:
+            pytest.skip("Live Vertex test disabled. Set RUN_VERTEX_LIVE_TESTS=1 to enable.")
+
         provider = GeminiProvider()
 
         chunks = []

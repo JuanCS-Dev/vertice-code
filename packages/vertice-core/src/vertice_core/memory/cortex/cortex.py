@@ -21,17 +21,18 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .core import CoreMemory
 from .economy import ContributionLedger
-from .episodic import EpisodicMemory
+from .episodic import EpisodicBackendConfig, EpisodicMemory
 from .procedural import ProceduralMemory, Procedure, ProcedureType
 from .resource import ResourceMemory
 from .retrieval import ActiveRetrieval
 from .connection_pool import get_connection_pool
-from .semantic import SemanticMemory
+from .semantic import SemanticBackendConfig, SemanticMemory
 from .vault import KnowledgeVault
 from .working import WorkingMemory
 
@@ -60,6 +61,7 @@ class MemoryCortex:
         self.base_path.mkdir(parents=True, exist_ok=True)
         self.agent_id = agent_id
         self._pool = get_connection_pool()
+        self._alloydb_dsn = os.getenv("VERTICE_ALLOYDB_DSN") or os.getenv("ALLOYDB_DSN")
 
         # Lazy-loaded properties
         self._working: Optional[WorkingMemory] = None
@@ -89,13 +91,20 @@ class MemoryCortex:
     @property
     def episodic(self) -> EpisodicMemory:
         if self._episodic is None:
-            self._episodic = EpisodicMemory(self.base_path / "episodic.db", self._pool)
+            self._episodic = EpisodicMemory(
+                self.base_path / "episodic.db",
+                self._pool,
+                config=EpisodicBackendConfig(alloydb_dsn=self._alloydb_dsn),
+            )
         return self._episodic
 
     @property
     def semantic(self) -> SemanticMemory:
         if self._semantic is None:
-            self._semantic = SemanticMemory(self.base_path / "semantic")
+            self._semantic = SemanticMemory(
+                self.base_path / "semantic",
+                config=SemanticBackendConfig(alloydb_dsn=self._alloydb_dsn),
+            )
         return self._semantic
 
     @property

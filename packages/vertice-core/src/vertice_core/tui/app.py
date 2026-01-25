@@ -199,8 +199,11 @@ class VerticeApp(App):
         model_limits = {
             "gpt-4": 128_000,
             "gpt-4-turbo": 128_000,
-            "claude-3": 200_000,
-            "claude-3.5": 200_000,
+            # Claude 4.5 via Vertex AI
+            "sonnet-4.5": 200_000,
+            "opus-4.5": 200_000,
+            "claude-sonnet-4-5@20250929": 200_000,
+            "claude-opus-4-5@20251101": 200_000,
             "gemini-3": 2_000_000,
         }
         # Default to 32k for unknown models

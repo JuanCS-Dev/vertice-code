@@ -93,3 +93,14 @@ Exemplos reais (rodados em hardening de segurança, 25/01/2026):
   - `pytest tests/integration/test_agent_gateway_agui_stream.py -v -x`
 
 Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`
+
+---
+
+## Exemplo recente (25 JAN 2026): Phase 4 (AlloyDB AI Cutover)
+
+- “O que mudou”: cutover AlloyDB AI (default) + embeddings in-db + migração `.prometheus/prometheus.db` → AlloyDB.
+- “Como validar”:
+  - `pytest tests/unit/test_alloydb_migration.py tests/unit/test_alloydb_cutover_behavior.py -v -x`
+  - Resultado esperado: `14 passed` (offline)
+
+Detalhes completos: `docs/google/PHASE_4_ALLOYDB_AI_CUTOVER_2026.md`

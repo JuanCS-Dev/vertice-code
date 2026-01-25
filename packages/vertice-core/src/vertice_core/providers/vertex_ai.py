@@ -4,11 +4,11 @@ Vertex AI Gemini Provider
 Usa ADC (Application Default Credentials) - sem necessidade de API key.
 Inferência via Vertex AI, não Google AI Studio.
 
-Modelos disponíveis (2026):
-- gemini-3-pro (DEFAULT - best quality for code, 128K context)
-- gemini-3-flash (fast + quality balance)
-- gemini-3-flash (FUTURE - reasoning-first, 1M context, thinking_level)
-- gemini-3-flash-preview (FUTURE - ultra-fast, 1M context, multimodal)
+Modelos suportados (2026, Vertex AI):
+- gemini-3-pro
+- gemini-3-flash
+- gemini-3-pro-preview
+- gemini-3-flash-preview
 """
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ from vertice_core.openresponses_stream import OpenResponsesStreamBuilder
 # Configure Logging
 logger = logging.getLogger(__name__)
 
-# --- SDK HYBRID IMPORTS ---
+# --- Google Gen AI SDK (Vertex AI) ---
 HAS_GENAI_SDK = False
 try:
     from google import genai
@@ -39,23 +39,10 @@ try:
 except ImportError:
     pass
 
-HAS_LEGACY_SDK = False
-try:
-    import vertexai
-    from vertexai.generative_models import GenerativeModel
-
-    HAS_LEGACY_SDK = True
-except ImportError:
-    pass
-
 
 class VertexAIProvider:
     """
     Vertex AI Gemini Provider - Enterprise-grade inference.
-
-    Hybrid Architecture:
-    - Legacy SDK (v2): gemini-3-* models
-    - Native SDK (v3): gemini-3-* models (via google-genai)
     """
 
     MODELS = {
@@ -64,7 +51,7 @@ class VertexAIProvider:
         "gemini-3-flash": "gemini-3-flash",
         "gemini-3-pro": "gemini-3-pro",
         "gemini-3-flash-preview": "gemini-3-flash-preview",
-        "gen3": "gemini-3-flash",
+        "gemini-3-pro-preview": "gemini-3-pro-preview",
     }
 
     def __init__(
@@ -80,41 +67,42 @@ class VertexAIProvider:
         self.model_id = self.MODELS.get(model_name, model_name)
         self.enable_grounding = enable_grounding
 
-        # Determine SDK Mode
-        self.is_gemini_3 = "gemini-3" in self.model_id
-
-        # Private State
-        self._legacy_model = None
         self._genai_client = None
+        self._validate_model_id()
+
+    def _validate_model_id(self) -> None:
+        allowed = {
+            "gemini-3-pro",
+            "gemini-3-flash",
+            "gemini-3-pro-preview",
+            "gemini-3-flash-preview",
+        }
+        if self.model_id not in allowed:
+            raise ValueError(
+                "Unsupported Vertex AI model_id for 2026 Google-native mode. "
+                f"Got: {self.model_id!r}. Allowed: {sorted(allowed)}"
+            )
 
     def _init_genai_client(self):
         """Lazy init for Google GenAI SDK (v3)."""
-        if not self._genai_client and HAS_GENAI_SDK:
-            # Gemini 3 Preview requires 'global' location currently
-            loc = "global" if "preview" in self.model_id else self.location
-            try:
-                self._genai_client = genai.Client(vertexai=True, project=self.project, location=loc)
-                logger.info(f"✅ GenAI Client (v3) active: {self.model_id} @ {loc}")
-            except Exception as e:
-                logger.error(f"GenAI Init Failed: {e}")
-                raise
-
-    def _init_legacy_model(self):
-        """Lazy init for Vertex AI Legacy SDK (v2)."""
-        if not self._legacy_model and HAS_LEGACY_SDK:
-            try:
-                vertexai.init(project=self.project, location=self.location)
-                self._legacy_model = GenerativeModel(self.model_id)
-                logger.info(f"✅ Legacy SDK (v2) active: {self.model_id} @ {self.location}")
-            except Exception as e:
-                logger.error(f"Legacy SDK Init Failed: {e}")
-                raise
+        if self._genai_client is not None:
+            return
+        if not HAS_GENAI_SDK:
+            raise RuntimeError("google-genai SDK not installed (required for Vertex AI Gemini 3).")
+        try:
+            self._genai_client = genai.Client(
+                vertexai=True,
+                project=self.project,
+                location=self.location,
+            )
+            logger.info(f"✅ GenAI Client active: {self.model_id} @ {self.location}")
+        except Exception as e:
+            logger.error(f"GenAI Init Failed: {e}")
+            raise
 
     def is_available(self) -> bool:
         """Check if any SDK is capable."""
-        if self.is_gemini_3:
-            return HAS_GENAI_SDK
-        return HAS_LEGACY_SDK
+        return HAS_GENAI_SDK
 
     async def generate(
         self,
@@ -142,28 +130,12 @@ class VertexAIProvider:
         enable_grounding: Optional[bool] = None,
         **kwargs,
     ) -> AsyncGenerator[str, None]:
-        """Unified Hybrid Streamer."""
-
-        # 1. Routing
-        if self.is_gemini_3:
-            self._init_genai_client()
-            async for chunk in self._stream_v3(
-                messages, system_prompt, max_tokens, temperature, tools, **kwargs
-            ):
-                yield chunk
-        else:
-            self._init_legacy_model()
-            async for chunk in self._stream_v2(
-                messages,
-                system_prompt,
-                max_tokens,
-                temperature,
-                tools,
-                tool_config,
-                enable_grounding,
-                **kwargs,
-            ):
-                yield chunk
+        """Unified streamer (Google Gen AI SDK on Vertex AI)."""
+        self._init_genai_client()
+        async for chunk in self._stream_v3(
+            messages, system_prompt, max_tokens, temperature, tools, **kwargs
+        ):
+            yield chunk
 
     async def _stream_v3(self, messages, system_prompt, max_tokens, temperature, tools, **kwargs):
         """Native SDK v3 Implementation."""
@@ -224,85 +196,13 @@ class VertexAIProvider:
             logger.error(f"Gemini 3 Stream Error: {e}")
             yield f"[Vertex Error: {e}]"
 
-    async def _stream_v2(
-        self,
-        messages,
-        system_prompt,
-        max_tokens,
-        temperature,
-        tools,
-        tool_config,
-        enable_grounding,
-        **kwargs,
-    ):
-        """Legacy SDK v2 Implementation (supports Grounding)."""
-        # (This is a simplified merge of the previous enterprise logic)
-        try:
-            from vertexai.generative_models import GenerationConfig, GenerativeModel, Content, Part
-
-            # Grounding logic
-            # use_grounding = enable_grounding if enable_grounding is not None else self.enable_grounding
-            vertex_tools = self._convert_tools_v2(tools)
-
-            # Re-init model for this specific call to ensure system prompt/tools
-            model = GenerativeModel(
-                self.model_id,
-                system_instruction=system_prompt,
-                tools=vertex_tools,  # Grounding would be added here if needed
-            )
-
-            # Format contents
-            contents = []
-            for msg in messages:
-                if msg["role"] == "system":
-                    continue
-                gemini_role = "user" if msg["role"] == "user" else "model"
-                contents.append(Content(role=gemini_role, parts=[Part.from_text(msg["content"])]))
-
-            responses = await model.generate_content_async(
-                contents,
-                generation_config=GenerationConfig(
-                    max_output_tokens=max_tokens, temperature=temperature
-                ),
-                stream=True,
-            )
-
-            async for chunk in responses:
-                if chunk.text:
-                    yield chunk.text
-
-        except Exception as e:
-            logger.error(f"Gemini 3 Stream Error: {e}")
-            yield f"[Vertex Error: {e}]"
-
-    def _convert_tools_v2(self, tools):
-        """Legacy Tooling."""
-        if not tools or not HAS_LEGACY_SDK:
-            return None
-        try:
-            from vertexai.generative_models import Tool, FunctionDeclaration
-
-            declarations = []
-            for tool in tools:
-                schema = tool.get_schema() if hasattr(tool, "get_schema") else tool
-                declarations.append(
-                    FunctionDeclaration(
-                        name=schema["name"],
-                        description=schema["description"],
-                        parameters=schema["parameters"],
-                    )
-                )
-            return [Tool(function_declarations=declarations)]
-        except Exception as _:
-            return None
-
     def get_model_info(self) -> Dict[str, Any]:
         """Metadata for Router."""
         return {
             "provider": "vertex-ai",
             "model": self.model_id,
-            "sdk": "native-v3" if self.is_gemini_3 else "legacy-v2",
-            "context_window": 1000000 if self.is_gemini_3 else 128000,
+            "sdk": "google-genai",
+            "context_window": 1000000,
             "supports_streaming": True,
         }
 

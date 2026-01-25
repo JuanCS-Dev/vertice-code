@@ -710,7 +710,7 @@ Working directory: {os.getcwd()}"""
         return [
             "gemini-3-flash-preview",
             "gemini-3-flash",
-            "gemini-3-flash",
+            "gemini-3-pro-preview",
             "gemini-3-pro",
         ]
 

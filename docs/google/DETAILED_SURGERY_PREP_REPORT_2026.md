@@ -143,6 +143,20 @@ pytest tests/integration/test_agent_gateway_agui_stream.py -v -x
 python -m compileall -q apps/agent-gateway/app/main.py packages/vertice-core/src/vertice_core/agui
 ```
 
+## Pós‑Op: Validação Executada (25 JAN 2026) — PR‑5 (Google Managed Vertex AI)
+
+Objetivo: garantir que a execução local permaneça bloqueada (fail‑closed) e que os novos adapters/provedores
+“Google‑native 2026” estejam cobertos por testes offline.
+
+Validação executada:
+```bash
+pytest vertice-chat-webapp/backend/tests/unit/test_sandbox_executor.py -v -x
+pytest tests/unit/test_coder_reasoning_engine_app.py -v -x
+pytest tests/integration/test_vertex_deploy.py -v -x
+```
+
+Detalhes: `docs/google/PR_5_GOOGLE_MANAGED_VERTEX_2026.md`
+
 Detalhes completos (Fase 3.1): `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`
 
 ## Pós‑Op: Validação Executada (25 JAN 2026) — PR‑0 (RCE) + PR‑1 (KMS/GDPR)
@@ -169,3 +183,41 @@ Validação executada:
 ```bash
 pytest vertice-chat-webapp/backend/tests/unit/test_gdpr_crypto.py -v -x
 ```
+
+### PR‑4 — AlloyDB desde o início (fundação de memória — Episodic MVP)
+Mudança aplicada:
+- Conector AlloyDB com pool em `packages/vertice-core/src/vertice_core/memory/alloydb_connector.py`.
+- Schema SQL mínimo em `packages/vertice-core/src/vertice_core/memory/schema.sql`.
+- `EpisodicMemory` aceita `backend="alloydb"` via `EpisodicBackendConfig` (mantém SQLite como default).
+
+Validação executada (offline, sem infra real):
+```bash
+ruff check --fix packages/vertice-core/src/vertice_core/memory/alloydb_connector.py \
+  packages/vertice-core/src/vertice_core/memory/cortex/episodic.py \
+  tests/unit/test_alloydb_migration.py
+
+ruff format packages/vertice-core/src/vertice_core/memory/alloydb_connector.py \
+  packages/vertice-core/src/vertice_core/memory/cortex/episodic.py \
+  tests/unit/test_alloydb_migration.py
+
+pytest tests/unit/test_alloydb_migration.py -v -x
+```
+
+Detalhes completos: `docs/google/PR_4_ALLOYDB_MEMORY_FOUNDATION_2026.md`
+
+---
+
+## Update (25 JAN 2026) — Phase 4 (AlloyDB AI Cutover)
+
+Mudança aplicada:
+- Cutover: AlloyDB AI como default (fallback para SQLite somente sem DSN).
+- Memória semântica: embeddings nativos via `google_ml_integration` (sem overhead em Python).
+- Migração real: `tools/migrate_memory.py` (`.prometheus/prometheus.db` → AlloyDB).
+
+Validação executada (offline):
+```bash
+pytest tests/unit/test_alloydb_migration.py tests/unit/test_alloydb_cutover_behavior.py -v -x
+```
+Resultado: `14 passed in 0.53s`.
+
+Detalhes: `docs/google/PHASE_4_ALLOYDB_AI_CUTOVER_2026.md`.

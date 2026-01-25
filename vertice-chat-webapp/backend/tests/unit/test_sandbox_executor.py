@@ -3,7 +3,12 @@ Unit tests for Sandbox Executor
 """
 
 import pytest
-from app.sandbox.executor import LocalCodeExecutionDisabledError, SandboxConfig, SandboxExecutor
+from app.sandbox.executor import (
+    ExecutionResult,
+    LocalCodeExecutionDisabledError,
+    SandboxConfig,
+    SandboxExecutor,
+)
 
 
 class TestSandboxExecutor:
@@ -120,3 +125,36 @@ print(f"Current dir: {os.getcwd()}")
 
         with pytest.raises(LocalCodeExecutionDisabledError):
             await executor.execute_python(code)
+
+    @pytest.mark.asyncio
+    async def test_execute_python_uses_vertex_when_enabled(self, monkeypatch):
+        """Remote execution path uses managed sandbox when explicitly enabled."""
+
+        async def _fake_remote(**_):
+            return ExecutionResult(
+                stdout="ok\n",
+                stderr="",
+                exit_code=0,
+                execution_time=0.01,
+                error=None,
+            )
+
+        monkeypatch.setattr(
+            "app.sandbox.vertex_code_execution.execute_python_via_vertex_code_execution",
+            _fake_remote,
+        )
+
+        config = SandboxConfig(
+            allowed_read_dirs=["/tmp"],
+            allowed_write_dirs=["/tmp"],
+            allowed_hosts=[],
+            remote_executor="vertex_code_execution",
+            vertex_project="test-project",
+            vertex_location="global",
+            vertex_model="gemini-3-flash-preview",
+        )
+        executor = SandboxExecutor(config)
+
+        result = await executor.execute_python("print('hi')")
+        assert result.stdout == "ok\n"
+        assert result.exit_code == 0

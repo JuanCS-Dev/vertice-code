@@ -1,8 +1,7 @@
 """
 Anthropic Claude via Google Vertex AI Provider
 
-Permite usar os modelos da Anthropic (Claude 3 Opus/Sonnet/Haiku)
-dentro da infraestrutura do Google Cloud Vertex AI.
+Permite usar modelos Claude 4.5 (Sonnet/Opus) via Google Cloud Vertex AI.
 
 Requer: `pip install "anthropic[vertex]"`
 """
@@ -26,21 +25,13 @@ class AnthropicVertexProvider:
     """
 
     MODELS = {
-        # Current Stable (2025-2026)
-        "sonnet": "claude-3-5-sonnet-v2@20241022",
-        "sonnet-3.5": "claude-3-5-sonnet-v2@20241022",
-        "sonnet-3.5-v2": "claude-3-5-sonnet-v2@20241022",
-        "haiku-3.5": "claude-3-5-haiku@20241022",
-        # Next-Gen (If available in project)
         "sonnet-4.5": "claude-sonnet-4-5@20250929",
         "opus-4.5": "claude-opus-4-5@20251101",
-        "haiku-4.5": "claude-haiku-4-5@20251001",
         # Aliases
+        "sonnet": "claude-sonnet-4-5@20250929",
         "opus": "claude-opus-4-5@20251101",
-        "claude-3-opus": "claude-3-opus@20240229",
-        "claude-3.5": "claude-3-5-sonnet-v2@20241022",
-        "claude-4.5": "claude-sonnet-4-5@20250929",
     }
+    _ALLOWED_MODEL_IDS = set(MODELS.values())
 
     def __init__(
         self,
@@ -60,6 +51,11 @@ class AnthropicVertexProvider:
         self.project = project or os.getenv("GOOGLE_CLOUD_PROJECT")
         self.location = location
         self.model_name = self.MODELS.get(model_name, model_name)
+        if self.model_name not in self._ALLOWED_MODEL_IDS:
+            raise ValueError(
+                "Unsupported Claude model for 2026 Google-native mode. "
+                f"Got: {self.model_name!r}. Allowed: {sorted(self._ALLOWED_MODEL_IDS)}"
+            )
         self.enable_caching = enable_caching
         self._client = None
 

@@ -34,6 +34,32 @@ pytest vertice-chat-webapp/backend/tests/unit/test_no_local_rce.py -v -x
 pytest vertice-chat-webapp/backend/tests/unit/test_gdpr_crypto.py -v -x
 ```
 
+## Update (25 JAN 2026) — PR‑4 (AlloyDB Memory Foundation — Episodic MVP) ✅
+
+Entregue no `vertice-core` (sem exigir infraestrutura real):
+- Conector AlloyDB com pool: `packages/vertice-core/src/vertice_core/memory/alloydb_connector.py`
+- Schema mínimo: `packages/vertice-core/src/vertice_core/memory/schema.sql`
+- `EpisodicMemory` com backend `alloydb` via config: `packages/vertice-core/src/vertice_core/memory/cortex/episodic.py`
+- Smoke tests: `tests/unit/test_alloydb_migration.py`
+
+Detalhes e validação: `docs/google/PR_4_ALLOYDB_MEMORY_FOUNDATION_2026.md`
+
+## Update (25 JAN 2026) — PR‑5 (Google Managed Vertex AI) ✅
+
+Entregue (backend + core, sem frontend):
+- **Code Execution:** caminho remoto via Vertex AI (sandbox gerenciado) com postura *fail‑closed* (sem execução local).
+- **Model policy (hard allowlist):** Gemini 3 e Claude 4.5 via Vertex AI.
+- **Reasoning Engines (staging):** app mínimo do Coder para integração progressiva ao runtime gerenciado.
+
+Validação executada (offline):
+```bash
+pytest vertice-chat-webapp/backend/tests/unit/test_sandbox_executor.py -v -x
+pytest tests/unit/test_coder_reasoning_engine_app.py -v -x
+pytest tests/integration/test_vertex_deploy.py -v -x
+```
+
+Detalhes: `docs/google/PR_5_GOOGLE_MANAGED_VERTEX_2026.md`
+
 ## 1. THE LIBERATION MANIFESTO
 **The Problem:** You want to create code, but you are currently managing a distributed system (Docker, Networks, Volumes, Sandboxes). Every time you want to "just run" an app, you have to spin up an orchestrator.
 **The Solution:** We shift the weight of the world to Google's shoulders. We stop *hosting* software and start *composing* services.
@@ -171,3 +197,12 @@ Implementado (backend-only):
 - Hosting: `firebase.json` agora no padrão App Hosting (sem rewrites do backend antigo)
 
 Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`
+
+---
+
+## Update (25 JAN 2026) — Phase 4 (AlloyDB AI Cutover)
+
+- Memória agora default **AlloyDB AI** (com fallback local sem DSN) + embeddings **in-db** via `google_ml_integration`.
+- Migração real: `tools/migrate_memory.py` (`.prometheus/prometheus.db` → AlloyDB).
+- Validação (offline): `pytest tests/unit/test_alloydb_migration.py tests/unit/test_alloydb_cutover_behavior.py -v -x` → `14 passed in 0.53s`.
+- Detalhes completos: `docs/google/PHASE_4_ALLOYDB_AI_CUTOVER_2026.md`.

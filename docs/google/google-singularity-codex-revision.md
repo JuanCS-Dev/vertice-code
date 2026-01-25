@@ -250,3 +250,24 @@ pytest vertice-chat-webapp/backend/tests/unit/test_sandbox_executor.py -v -x
 pytest vertice-chat-webapp/backend/tests/unit/test_no_local_rce.py -v -x
 pytest vertice-chat-webapp/backend/tests/unit/test_gdpr_crypto.py -v -x
 ```
+
+---
+
+## Update de Execução (25 JAN 2026) — PR‑4 (AlloyDB Memory Foundation — Episodic MVP)
+
+Implementado e validado offline no `vertice-core`:
+- `packages/vertice-core/src/vertice_core/memory/alloydb_connector.py` (pool)
+- `packages/vertice-core/src/vertice_core/memory/schema.sql` (schema mínimo)
+- `packages/vertice-core/src/vertice_core/memory/cortex/episodic.py` (backend `sqlite|alloydb`)
+- `tests/unit/test_alloydb_migration.py`
+
+Detalhes: `docs/google/PR_4_ALLOYDB_MEMORY_FOUNDATION_2026.md`
+
+---
+
+## Update (25 JAN 2026) — Phase 4 (AlloyDB AI Cutover)
+
+- Cutover: AlloyDB AI como default (fallback local sem DSN) + embeddings in-db via `google_ml_integration`.
+- Migração real: `tools/migrate_memory.py` (`.prometheus/prometheus.db` → AlloyDB).
+- Validação (offline): `pytest tests/unit/test_alloydb_migration.py tests/unit/test_alloydb_cutover_behavior.py -v -x` → `14 passed in 0.53s`.
+- Detalhes: `docs/google/PHASE_4_ALLOYDB_AI_CUTOVER_2026.md`.

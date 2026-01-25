@@ -219,10 +219,10 @@ class TestModelCommand:
     def mock_app(self):
         app = MagicMock()
         app.bridge = MagicMock()
-        app.bridge.get_current_model.return_value = "claude-3-opus"
+        app.bridge.get_current_model.return_value = "opus-4.5"
         app.bridge.get_available_models.return_value = [
-            "claude-3-opus",
-            "claude-3-sonnet",
+            "opus-4.5",
+            "sonnet-4.5",
             "gpt-4",
         ]
         app.bridge.set_model = MagicMock()
@@ -248,7 +248,7 @@ class TestModelCommand:
 
         msg = mock_view.add_system_message.call_args[0][0]
         assert "Model Selection" in msg
-        assert "claude-3-opus" in msg
+        assert "opus-4.5" in msg
 
     @pytest.mark.asyncio
     async def test_model_change(self, handler, mock_view):

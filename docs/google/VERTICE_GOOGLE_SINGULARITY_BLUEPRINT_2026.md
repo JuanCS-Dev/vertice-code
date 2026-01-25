@@ -88,8 +88,13 @@ pytest tests/integration/test_agent_gateway_agui_stream.py -v -x
 2.  **Frontend Wiring:** Instalar `@copilotkit/react-core` e `@copilotkit/react-ui`. Substituir o `chat-interface.tsx` manual pelos componentes CopilotKit.
 
 ### FASE 4: A ETERNIDADE (Dados)
-1.  **Migração SQL:** Script para mover dados do SQLite local (`prometheus.db`) para AlloyDB Omni (Dev) ou AlloyDB Google Cloud (Prod).
-2.  **Auto-Embedding:** Configurar triggers no AlloyDB para gerar embeddings automaticamente quando novo código for inserido na base.
+**Status (25/01/2026):** cutover de memória entregue (AlloyDB AI como default + fallback local sem DSN).
+```bash
+pytest tests/unit/test_alloydb_migration.py tests/unit/test_alloydb_cutover_behavior.py -v -x
+```
+1.  **Migração real (DONE):** `tools/migrate_memory.py` move o histórico do SQLite legado (`.prometheus/prometheus.db`) → AlloyDB.
+2.  **Embeddings nativos (DONE):** `SemanticMemory` gera embeddings dentro do banco via `google_ml_integration` (`embedding(:model, :text)`).
+3.  **Cutover (DONE):** `EpisodicMemory` e `SemanticMemory` default `backend="alloydb"`, com failover para SQLite (dev/local sem DSN).
 
 ### FASE 5: GOVERNANÇA E DEVEX (Otimização)
 1.  **Orquestração Turbo:** Configuração de monorepo com `turbo.json` para builds paralelos e cache em GCS.
@@ -136,7 +141,7 @@ pytest tests/integration/test_agent_gateway_agui_stream.py -v -x
 | **Latência** | Alta (Python processando tudo) | **Baixa** (Streaming via AG-UI) |
 | **Manutenção** | Pesadelo (DevOps manual) | **Zero** (Managed Services) |
 | **Custo Ocioso** | 100% (VM sempre ligada) | **Perto de Zero** (Scale to Zero) |
-| **Inteligência** | Gemini 1.5 via API | **Gemini 3 Nativo + Grounding** |
+| **Inteligência** | LLM legacy (pré‑Google‑native) | **Gemini 3 (Pro/Flash) via Vertex AI + Grounding** |
 
 ---
 
@@ -169,3 +174,30 @@ pytest vertice-chat-webapp/backend/tests/unit/test_sandbox_executor.py -v -x
 pytest vertice-chat-webapp/backend/tests/unit/test_no_local_rce.py -v -x
 pytest vertice-chat-webapp/backend/tests/unit/test_gdpr_crypto.py -v -x
 ```
+
+## Update de Execução (25 JAN 2026) — PR‑4 (AlloyDB Memory Foundation — Episodic MVP)
+
+Implementado (config-driven, sem infra real):
+- `packages/vertice-core/src/vertice_core/memory/alloydb_connector.py` (pool/engine)
+- `packages/vertice-core/src/vertice_core/memory/schema.sql` (schema mínimo)
+- `packages/vertice-core/src/vertice_core/memory/cortex/episodic.py` (toggle `sqlite|alloydb`)
+
+Detalhes e validação: `docs/google/PR_4_ALLOYDB_MEMORY_FOUNDATION_2026.md`
+
+## Update de Execução (25 JAN 2026) — PR‑5 (Google Managed Vertex AI)
+
+Entregue (backend + core, sem frontend):
+- Execução de código **somente via Vertex AI** (sandbox gerenciado) — sem RCE local.
+- Providers em modo “Google‑native 2026” com allowlist estrita:
+  - Gemini 3 (Pro/Flash + preview)
+  - Claude 4.5 (Sonnet/Opus via Vertex AI)
+- Staging do app do Coder para Reasoning Engines (sem exigir `google.adk` instalado).
+
+Validação executada (offline):
+```bash
+pytest vertice-chat-webapp/backend/tests/unit/test_sandbox_executor.py -v -x
+pytest tests/unit/test_coder_reasoning_engine_app.py -v -x
+pytest tests/integration/test_vertex_deploy.py -v -x
+```
+
+Detalhes: `docs/google/PR_5_GOOGLE_MANAGED_VERTEX_2026.md`

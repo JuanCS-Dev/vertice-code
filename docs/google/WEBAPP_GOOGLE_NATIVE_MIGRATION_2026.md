@@ -156,9 +156,43 @@ Detalhes completos (Fase 3.1): `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`
 
 ---
 
+## Update (25 JAN 2026) — PR‑4 (AlloyDB Memory Foundation — Episodic MVP)
+
+Entregue (sem infra real, config-driven) no `vertice-core`:
+- `packages/vertice-core/src/vertice_core/memory/alloydb_connector.py` (pool)
+- `packages/vertice-core/src/vertice_core/memory/schema.sql` (schema mínimo)
+- `packages/vertice-core/src/vertice_core/memory/cortex/episodic.py` (toggle `sqlite|alloydb`)
+
+Validação: `pytest tests/unit/test_alloydb_migration.py -v -x`
+Detalhes: `docs/google/PR_4_ALLOYDB_MEMORY_FOUNDATION_2026.md`
+
 ## Update (25 JAN 2026) — PR‑0/PR‑1 (Security Hardening)
 
 - **RCE:** sandbox local do backend desabilitado (fail‑closed). Execução de código deve ser via **Vertex AI Code Interpreter**.
 - **GDPR/KMS:** master key obrigatória via env var ou via KMS (sem chaves efêmeras).
 
 Comandos de validação: `docs/google/DETAILED_SURGERY_PREP_REPORT_2026.md`.
+
+## Update (25 JAN 2026) — PR‑5 (Google Managed Vertex AI)
+
+Entregue:
+- Execução de código via **Vertex AI Code Execution** (sandbox gerenciado), com execução local bloqueada (fail‑closed).
+- Providers em modo “Google‑native 2026” com modelos permitidos: **Gemini 3 (Pro/Flash)** e **Claude 4.5 (Sonnet/Opus via Vertex AI)**.
+
+Validação executada (offline):
+```bash
+pytest vertice-chat-webapp/backend/tests/unit/test_sandbox_executor.py -v -x
+pytest tests/unit/test_coder_reasoning_engine_app.py -v -x
+pytest tests/integration/test_vertex_deploy.py -v -x
+```
+
+Detalhes: `docs/google/PR_5_GOOGLE_MANAGED_VERTEX_2026.md`
+
+---
+
+## Update (25 JAN 2026) — Phase 4 (AlloyDB AI Cutover)
+
+- Memória agora default AlloyDB AI (fallback local sem DSN) + embeddings in-db.
+- Migração real: `tools/migrate_memory.py` (`.prometheus/prometheus.db` → AlloyDB).
+- Validação (offline): `pytest tests/unit/test_alloydb_migration.py tests/unit/test_alloydb_cutover_behavior.py -v -x` → `14 passed in 0.53s`.
+- Detalhes: `docs/google/PHASE_4_ALLOYDB_AI_CUTOVER_2026.md`.

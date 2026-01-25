@@ -31,12 +31,10 @@ def list_models():
     # in the high-level SDK without iterating PublisherModel.
 
     candidates = [
-        "gemini-2.5-pro",
-        "gemini-1.5-pro-002",
-        "gemini-1.5-pro",
-        "gemini-1.5-pro-preview-0409",
-        "gemini-1.0-pro",
-        "gemini-experimental",
+        "gemini-3-flash",
+        "gemini-3-pro",
+        "gemini-3-flash-preview",
+        "gemini-3-pro-preview",
     ]
 
     print("\nVerifying Foundation Model Availability:")

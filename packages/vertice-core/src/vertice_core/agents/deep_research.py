@@ -28,7 +28,7 @@ class DeepResearchConfig:
     enable_thinking_trace: bool = True
     safety_checks: bool = True
     audit_enabled: bool = True
-    synthesis_model: str = "claude-3-5-sonnet"  # Would use Vertex AI in production
+    synthesis_model: str = "sonnet-4.5"  # Claude 4.5 via Vertex AI (2026 Google-native)
 
 
 @dataclass
@@ -173,7 +173,7 @@ class VertexDeepResearchAgent:
             yield {"type": "thinking", "data": f"Generated {len(initial_queries)} search queries\n"}
 
             for i, query in enumerate(initial_queries[:3]):
-                yield {"type": "thinking", "data": f"  {i+1}. {query[:60]}...\n"}
+                yield {"type": "thinking", "data": f"  {i + 1}. {query[:60]}...\n"}
 
             # Phase 2: Execute searches
             yield {"type": "status", "data": "🌐 Performing web searches..."}
@@ -184,7 +184,7 @@ class VertexDeepResearchAgent:
             for i, query in enumerate(initial_queries[: self.config.max_iterations]):
                 yield {
                     "type": "status",
-                    "data": f"📊 Iteration {i+1}/{len(initial_queries[:self.config.max_iterations])}...",
+                    "data": f"📊 Iteration {i + 1}/{len(initial_queries[: self.config.max_iterations])}...",
                 }
 
                 iteration = ResearchIteration(iteration=i + 1, query=query)

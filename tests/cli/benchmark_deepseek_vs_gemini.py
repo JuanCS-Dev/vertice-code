@@ -41,7 +41,7 @@ async def run_single_provider(name, provider_cls, **kwargs):
 
 
 async def run_benchmark():
-    print("🚀 Starting Concurrent Benchmark: DeepSeek V3 vs Gemini 2.5 Pro")
+    print("🚀 Starting Concurrent Benchmark: DeepSeek V3 vs Gemini 3 Pro")
     print("=" * 60)
 
     from src.providers.nebius import NebiusProvider
@@ -51,7 +51,7 @@ async def run_benchmark():
     tasks = [
         run_single_provider("Nebius (DeepSeek)", NebiusProvider),
         run_single_provider(
-            "Vertex (Gemini)", VertexAIProvider, model_name="gemini-2.5-pro", location="us-central1"
+            "Vertex (Gemini)", VertexAIProvider, model_name="gemini-3-pro", location="us-central1"
         ),
     ]
 

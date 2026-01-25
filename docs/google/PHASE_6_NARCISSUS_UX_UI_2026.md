@@ -96,3 +96,18 @@ O frontend Narcissus assume backend blindado:
 - Chaves GDPR/LGPD obrigatórias via env var ou KMS (sem fallback efêmero).
 
 Detalhes: `docs/google/DETAILED_SURGERY_PREP_REPORT_2026.md`.
+
+## Pré‑requisito de Memória (25 JAN 2026) — PR‑4 (AlloyDB)
+
+Fundação entregue no `vertice-core` (Episodic MVP) para substituir o SQLite legado de forma incremental.
+
+Detalhes: `docs/google/PR_4_ALLOYDB_MEMORY_FOUNDATION_2026.md`
+
+---
+
+## Update (25 JAN 2026) — Phase 4 (AlloyDB AI Cutover)
+
+- Memória agora default AlloyDB AI (fallback local sem DSN) + embeddings in-db (sem overhead em Python).
+- Migração real: `tools/migrate_memory.py` (`.prometheus/prometheus.db` → AlloyDB).
+- Validação (offline): `pytest tests/unit/test_alloydb_migration.py tests/unit/test_alloydb_cutover_behavior.py -v -x` → `14 passed in 0.53s`.
+- Detalhes: `docs/google/PHASE_4_ALLOYDB_AI_CUTOVER_2026.md`.

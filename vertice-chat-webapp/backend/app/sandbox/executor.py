@@ -29,6 +29,12 @@ class SandboxConfig:
     max_execution_time: int = 30  # seconds
     max_memory_mb: int = 512
     max_cpu_percent: int = 50
+    # Remote managed execution (optional; fail-closed by default).
+    # Set to "vertex_code_execution" to enable Vertex AI managed sandbox execution.
+    remote_executor: Optional[str] = None
+    vertex_project: Optional[str] = None
+    vertex_location: str = "global"
+    vertex_model: str = "gemini-3-flash-preview"
 
 
 @dataclass
@@ -62,6 +68,26 @@ class SandboxExecutor:
     async def execute_python(
         self, code: str, working_dir: Optional[str] = None, timeout: Optional[float] = None
     ) -> ExecutionResult:
+        if self.config.remote_executor == "vertex_code_execution":
+            if not self.config.vertex_project:
+                raise ValueError("vertex_project must be set when remote_executor is enabled")
+
+            from app.sandbox.vertex_code_execution import (
+                VertexCodeExecutionConfig,
+                execute_python_via_vertex_code_execution,
+            )
+
+            effective_timeout = float(timeout or self.config.max_execution_time)
+            return await execute_python_via_vertex_code_execution(
+                code=code,
+                timeout=effective_timeout,
+                config=VertexCodeExecutionConfig(
+                    project=self.config.vertex_project,
+                    location=self.config.vertex_location,
+                    model=self.config.vertex_model,
+                ),
+            )
+
         raise LocalCodeExecutionDisabledError(
-            "Local code execution is disabled. Use Vertex AI Code Interpreter (managed) instead."
+            "Local code execution is disabled. Configure remote execution via Vertex AI Code Interpreter."
         )

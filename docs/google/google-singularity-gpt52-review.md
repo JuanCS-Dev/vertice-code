@@ -60,6 +60,14 @@ pytest tests/unit/test_agui_protocol.py -v -x
 pytest tests/integration/test_agent_gateway_agui_stream.py -v -x
 ```
 
+## Update (25 JAN 2026) — PR‑4 (AlloyDB Memory Foundation — Episodic MVP)
+
+Implementado e validado offline:
+- Conector AlloyDB com pool + schema mínimo + `EpisodicMemory` com backend `alloydb` via config.
+- Smoke tests sem infraestrutura real: `pytest tests/unit/test_alloydb_migration.py -v -x`
+
+Detalhes: `docs/google/PR_4_ALLOYDB_MEMORY_FOUNDATION_2026.md`
+
 ## Convergência entre os documentos (o núcleo está alinhado)
 Os 7 docs apontam para a mesma sequência macro:
 - **Fase 1 (Saneamento):** eliminar diretório fantasma `src/vertice-chat-webapp`, desacoplar imports e criar `packages/vertice-core`.
@@ -71,7 +79,7 @@ Os 7 docs apontam para a mesma sequência macro:
 - **Nome do serviço backend:** `apps/api-gateway` (Deep Dive) vs `apps/agent-gateway` (Blueprint/Codex). Escolher 1 e manter.
 - **Status dos docs:** o `google-singularity-codex-revision.md` diz “substitui qualquer blueprint anterior”, mas o `BLUEPRINT_2026` se declara “a lei”. Definir oficialmente qual é o canonical (minha recomendação: **Codex Revision** como canonical e o Blueprint como “visão”).
 - **Estratégia de migração do WebApp:** alguns trechos assumem manter `vertice-chat-webapp/` por um tempo; outros assumem mover para `apps/web-console/` cedo. Definir *quando* vira rename.
-- **Memória “AlloyDB vs Firestore”:** o plano alterna. Escolher com base no requisito: “indexar todo repo” → AlloyDB; “histórico simples” → Firestore.
+- **Memória “AlloyDB vs Firestore”:** ✅ decisão fechada: **AlloyDB obrigatório** (PR‑4 foundation entregue). Firestore pode existir apenas como auxiliar/opcional (não “fonte de verdade”).
 
 ## Lacunas que impedem execução segura (antes de “mexer em tudo”)
 - **Threat model e boundary:** quais capacidades de execução de código existirão após remover `executor.py`? (nenhuma local? execução remota? whitelists?)
@@ -107,7 +115,7 @@ Dia 5–7 (PoC Google Native)
 - **Risco:** AlloyDB triggers/embeddings virarem gargalo. **Mitigação:** pipeline assíncrono (batch) e benchmark antes de produção.
 
 ## Perguntas rápidas (se você responder, eu fecho o plano com precisão)
-1. Quer **AlloyDB como obrigatório** (repo-index total) ou aceita começar com Firestore e migrar depois?
+1. (Respondida) **AlloyDB obrigatório** (repo-index total); Firestore não é o caminho principal.
 2. O “gateway” deve se chamar **`api-gateway`** ou **`agent-gateway`**? (escolha 1)
 3. O requisito é **zero execução de código local** no backend (só remoto/Vertex), ou precisa manter execução local (bem isolada) para dev?
 4. Preferência para gestão de chaves: **Secret Manager** (simples) agora e KMS depois, ou KMS desde o dia 1?
@@ -130,3 +138,13 @@ Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`
 - **PR‑1 (GDPR/KMS):** removida geração de chaves efêmeras; master key obrigatória (env var ou KMS).
 
 Detalhes: `docs/google/DETAILED_SURGERY_PREP_REPORT_2026.md`.
+Detalhes memória: `docs/google/PR_4_ALLOYDB_MEMORY_FOUNDATION_2026.md`
+
+---
+
+## Update (25 JAN 2026) — Phase 4 (AlloyDB AI Cutover)
+
+- Cutover: AlloyDB AI como default (fallback local sem DSN) + embeddings in-db via `google_ml_integration`.
+- Migração real: `tools/migrate_memory.py` (`.prometheus/prometheus.db` → AlloyDB).
+- Validação (offline): `pytest tests/unit/test_alloydb_migration.py tests/unit/test_alloydb_cutover_behavior.py -v -x` → `14 passed in 0.53s`.
+- Detalhes: `docs/google/PHASE_4_ALLOYDB_AI_CUTOVER_2026.md`.

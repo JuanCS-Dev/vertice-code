@@ -2,6 +2,7 @@ import asyncio
 import os
 import sys
 import logging
+import pytest
 
 # Configure logging to see what's happening
 logging.basicConfig(level=logging.DEBUG)
@@ -13,12 +14,15 @@ sys.path.insert(0, os.getcwd())
 
 async def test_opus45():
     """Test Claude 3 Opus 4.5 on Vertex AI."""
+    if os.getenv("RUN_VERTEX_LIVE_TESTS", "").strip().lower() not in {"1", "true", "yes"}:
+        pytest.skip("Live Vertex test disabled. Set RUN_VERTEX_LIVE_TESTS=1 to enable.")
+
     print("=" * 60)
     print("🧪 Testing Claude Opus 4.5 on Vertex AI Model Garden")
     print("=" * 60)
 
     try:
-        from vertice_core.core.providers.anthropic_vertex import AnthropicVertexProvider
+        from vertice_core.providers.anthropic_vertex import AnthropicVertexProvider
 
         # Initialize provider with opus-4.5
         provider = AnthropicVertexProvider(

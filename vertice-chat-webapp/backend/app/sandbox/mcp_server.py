@@ -34,6 +34,11 @@ class CodeExecutionServer:
 
     def _create_executor(self) -> SandboxExecutor:
         """Create sandbox executor with secure configuration"""
+        enable_remote = os.getenv("VERTEX_CODE_EXECUTION_ENABLED", "").strip().lower() in {
+            "1",
+            "true",
+            "yes",
+        }
         config = SandboxConfig(
             allowed_read_dirs=["/tmp/workspace"],
             allowed_write_dirs=["/tmp/workspace"],
@@ -42,6 +47,10 @@ class CodeExecutionServer:
             max_execution_time=30,
             max_memory_mb=512,
             max_cpu_percent=50,
+            remote_executor="vertex_code_execution" if enable_remote else None,
+            vertex_project=os.getenv("GOOGLE_CLOUD_PROJECT"),
+            vertex_location=os.getenv("VERTEX_AI_LOCATION", "global"),
+            vertex_model=os.getenv("VERTEX_CODE_EXECUTION_MODEL", "gemini-3-flash-preview"),
         )
         return SandboxExecutor(config)
 
@@ -90,7 +99,7 @@ class CodeExecutionServer:
                 response_parts.append(f"STDERR:\n{result.stderr}")
 
             response_parts.append(f"Exit Code: {result.exit_code}")
-            response_parts.append(".2f")
+            response_parts.append(f"Execution Time: {result.execution_time:.2f}s")
 
             if result.error:
                 response_parts.append(f"Error: {result.error}")
@@ -170,12 +179,19 @@ class CodeExecutionServer:
         @self.server.list_tools()  # type: ignore
         async def handle_list_tools() -> List[types.Tool]:
             """List available tools"""
+            remote_enabled = os.getenv("VERTEX_CODE_EXECUTION_ENABLED", "").strip().lower() in {
+                "1",
+                "true",
+                "yes",
+            }
             return [
                 types.Tool(
                     name="execute_python",
                     description=(
-                        "Execute Python code (DISABLED - RCE hard-block). "
-                        "Use Vertex AI Code Interpreter instead."
+                        "Execute Python code via managed sandbox (Vertex AI Code Interpreter). "
+                        if remote_enabled
+                        else "Execute Python code (DISABLED - RCE hard-block). "
+                        "Enable Vertex AI Code Interpreter via env/config."
                     ),
                     inputSchema={
                         "type": "object",

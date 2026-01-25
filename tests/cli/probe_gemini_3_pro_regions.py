@@ -1,6 +1,5 @@
 import asyncio
-import vertexai
-from vertexai.generative_models import GenerativeModel
+import os
 
 PROJECT_ID = "vertice-ai"
 
@@ -13,21 +12,27 @@ REGIONS_TO_TEST = [
 
 
 async def test_regions():
-    print(f"🚀 Testing 'gemini-2.5-pro' availability across regions for {PROJECT_ID}")
+    print(f"🚀 Testing 'gemini-3-pro' availability across regions for {PROJECT_ID}")
     print("=" * 60)
+
+    if os.getenv("RUN_VERTEX_LIVE_TESTS", "").strip().lower() not in {"1", "true", "yes"}:
+        print("Live Vertex test disabled. Set RUN_VERTEX_LIVE_TESTS=1 to enable.")
+        return
 
     success = False
 
     for region in REGIONS_TO_TEST:
         print(f"\n📍 Checking {region}...", end=" ")
         try:
-            # Re-init for each region
-            vertexai.init(project=PROJECT_ID, location=region)
-            model = GenerativeModel("gemini-2.5-pro")
+            from google import genai
 
-            # Simple inference
-            res = model.generate_content("Ping", stream=False)
-            print(f"✅ SUCCESS! Response: {res.text.strip()}")
+            client = genai.Client(vertexai=True, project=PROJECT_ID, location=region)
+
+            res = await asyncio.to_thread(
+                lambda: client.models.generate_content(model="gemini-3-pro", contents="Ping")
+            )
+            text = getattr(res, "text", "") or ""
+            print(f"✅ SUCCESS! Response: {text.strip()}")
             print(f"   >>> RECOMMENDATION: Use '{region}' context!")
             success = True
             break
@@ -43,7 +48,7 @@ async def test_regions():
 
     print("\n" + "=" * 60)
     if not success:
-        print("💥 CRITICAL: gemini-2.5-pro failed in ALL tested regions.")
+        print("💥 CRITICAL: gemini-3-pro failed in ALL tested regions.")
     else:
         print("✨ Valid region found. Update configuration.")
 

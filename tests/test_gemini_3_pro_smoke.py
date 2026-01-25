@@ -2,6 +2,7 @@ import asyncio
 import os
 import sys
 import logging
+import pytest
 
 # Configure logging to see what's happening
 logging.basicConfig(level=logging.INFO)
@@ -12,21 +13,24 @@ sys.path.insert(0, os.getcwd())
 
 
 async def test_gemini25_pro():
-    """Test Gemini 2.5 Pro on Vertex AI."""
+    """Live smoke test: Gemini 3 Pro on Vertex AI."""
+    if os.getenv("RUN_VERTEX_LIVE_TESTS", "").strip().lower() not in {"1", "true", "yes"}:
+        pytest.skip("Live Vertex test disabled. Set RUN_VERTEX_LIVE_TESTS=1 to enable.")
+
     print("=" * 60)
-    print("🧪 Testing Gemini 2.5 Pro on Vertex AI")
+    print("🧪 Testing Gemini 3 Pro on Vertex AI")
     print("=" * 60)
 
     try:
-        from vertice_core.core.providers.vertex_ai import VertexAIProvider
+        from vertice_core.providers.vertex_ai import VertexAIProvider
 
         # Set Project ID
         os.environ["GOOGLE_CLOUD_PROJECT"] = "vertice-ai"
 
-        # Initialize provider with gemini-2.5-pro
+        # Initialize provider with Gemini 3 Pro
         provider = VertexAIProvider(
             location="us-central1",
-            model_name="pro",  # This maps to gemini-2.5-pro in vertex_ai.py
+            model_name="pro",
         )
 
         print(f"📋 Model: {provider.model_name}")
@@ -40,7 +44,7 @@ async def test_gemini25_pro():
 
         print("\n🚀 Attempting generation...")
         messages = [
-            {"role": "user", "content": "Hello Gemini 2.5 Pro. Please confirm you are operational."}
+            {"role": "user", "content": "Hello Gemini 3 Pro. Please confirm you are operational."}
         ]
 
         # Try generation

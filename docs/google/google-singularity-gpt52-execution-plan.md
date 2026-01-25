@@ -89,8 +89,14 @@ Entregáveis:
 - Documentar tuning/índices e um caminho de migração incremental (batch embeddings).
 
 Critérios de aceite:
-- Conexão estabelecida + operações CRUD básicas com latência aceitável local/dev.
-- Sem dependência em SQLite para “memória oficial”.
+- Conector com pool (config-driven) e schema mínimo (sem infra real na CI).
+- `EpisodicMemory` aceita AlloyDB como backend via config, com smoke tests offline.
+
+Status (25 JAN 2026):
+- ✅ Fundação entregue (Episodic MVP + conector + schema + smoke tests).
+- ⏳ Cutover total (remover SQLite como “memória oficial”) fica para uma etapa posterior.
+
+Detalhes: `docs/google/PR_4_ALLOYDB_MEMORY_FOUNDATION_2026.md`
 
 ### PR-5 — Troca real para Google gerenciado (Vertex AI)
 Entregáveis:
@@ -100,6 +106,19 @@ Entregáveis:
 
 Critérios de aceite:
 - “Execução de código” só existe via capacidade gerenciada (Vertex), nunca local.
+
+Status (25 JAN 2026):
+- ✅ PR‑5A entregue: adapter de execução remota (Code Execution) no backend (fail‑closed; sem RCE local).
+- ✅ PR‑5B entregue (staging): app mínimo para Reasoning Engines (sem exigir `google.adk` instalado).
+
+Validação executada (offline):
+```bash
+pytest vertice-chat-webapp/backend/tests/unit/test_sandbox_executor.py -v -x
+pytest tests/unit/test_coder_reasoning_engine_app.py -v -x
+pytest tests/integration/test_vertex_deploy.py -v -x
+```
+
+Detalhes: `docs/google/PR_5_GOOGLE_MANAGED_VERTEX_2026.md`
 
 ## Checklists de verificação rápida (baratos)
 - Acoplamento: `rg -n "src\\.vertice_cli" vertice-chat-webapp/backend` deve retornar vazio.
@@ -114,8 +133,10 @@ Critérios de aceite:
 
 - Next.js: `firebase.json` consolidado para **Firebase App Hosting** (sem rewrites do backend antigo).
 - AG‑UI: MVP estável implementado com `delta|final|tool|error`, SSE e API de tasks (`/agui/tasks/*`).
+- Memória: PR‑4 (AlloyDB foundation — Episodic MVP) ✅
 
 Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`
+Detalhes memória: `docs/google/PR_4_ALLOYDB_MEMORY_FOUNDATION_2026.md`
 
 ---
 
@@ -125,3 +146,12 @@ Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`
 - **GDPR/KMS:** criptografia exige master key configurada; suporte a KMS via ciphertext.
 
 Detalhes: `docs/google/DETAILED_SURGERY_PREP_REPORT_2026.md`.
+
+---
+
+## Update (25 JAN 2026) — Phase 4 (AlloyDB AI Cutover)
+
+- Cutover: AlloyDB AI como default (fallback local sem DSN) + embeddings in-db via `google_ml_integration`.
+- Migração real: `tools/migrate_memory.py` (`.prometheus/prometheus.db` → AlloyDB).
+- Validação (offline): `pytest tests/unit/test_alloydb_migration.py tests/unit/test_alloydb_cutover_behavior.py -v -x` → `14 passed in 0.53s`.
+- Detalhes: `docs/google/PHASE_4_ALLOYDB_AI_CUTOVER_2026.md`.

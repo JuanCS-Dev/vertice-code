@@ -96,21 +96,46 @@ Regra: cada item abaixo vira **uma PR pequena** (ideal 1–2h) e respeita `docs/
 
 ### PR-4A: Config + conector AlloyDB (sem triggers pesadas)
 - **Arquivos-alvo (preferência):** `packages/vertice-core/src/vertice_core/memory/` (novos módulos pequenos)
-- **Aceite:** teste/“smoke import” do conector + validação de config (sem rede)
+- **Status:** ✅ DONE (25/01/2026)
+- **Entregue:**
+  - `packages/vertice-core/src/vertice_core/memory/alloydb_connector.py`
+- **Aceite (executado):** `pytest tests/unit/test_alloydb_migration.py -v -x` (sem rede)
 
 ### PR-4B: Schema mínimo (migrations ou SQL inicial)
 - **Arquivos-alvo:** `packages/vertice-core/.../schema.sql` (ou migrations leves)
-- **Aceite:** doc de “como aplicar” + checagem de consistência (lint/format do arquivo)
+- **Status:** ✅ DONE (25/01/2026)
+- **Entregue:**
+  - `packages/vertice-core/src/vertice_core/memory/schema.sql`
+  - `docs/google/PR_4_ALLOYDB_MEMORY_FOUNDATION_2026.md` (como aplicar + validação)
+- **Aceite (executado):** `pytest tests/unit/test_alloydb_migration.py -v -x`
 
 ## PR-5 — Troca para Google gerenciado (Vertex)
 
 ### PR-5A: Adapter de execução remota (Code Interpreter) — interface
 - **Objetivo:** formalizar a capacidade “executar código” sem implementação local
 - **Aceite:** nenhuma dependência do executor local permanece no caminho principal
+- **Status:** ✅ DONE (25/01/2026)
+- **Entregue:**
+  - `vertice-chat-webapp/backend/app/sandbox/vertex_code_execution.py`
+  - `vertice-chat-webapp/backend/app/sandbox/executor.py` (fail‑closed + caminho remoto opcional)
+  - `vertice-chat-webapp/backend/app/sandbox/mcp_server.py` (flag por env)
+- **Validação executada (offline):**
+  - `pytest vertice-chat-webapp/backend/tests/unit/test_sandbox_executor.py -v -x`
 
 ### PR-5B: Integração real com Vertex (mínimo viável)
 - **Pré‑req:** credenciais e permissões já alinhadas fora do repo
 - **Aceite:** um comando/documento para “smoke test” que prova que o agente responde via Google gerenciado
+- **Status:** ✅ DONE (25/01/2026)
+- **Entregue:**
+  - `packages/vertice-core/src/agents/coder/reasoning_engine_app.py`
+  - `packages/vertice-core/src/vertice_core/agents/coder/reasoning_engine_app.py`
+  - `tests/unit/test_coder_reasoning_engine_app.py`
+  - `tools/deploy_brain.py` (mapping `coder`)
+- **Validação executada (offline):**
+  - `pytest tests/unit/test_coder_reasoning_engine_app.py -v -x`
+  - `pytest tests/integration/test_vertex_deploy.py -v -x`
+
+Detalhes completos (PR‑5): `docs/google/PR_5_GOOGLE_MANAGED_VERTEX_2026.md`
 
 ## Stop conditions (para evitar travar)
 - Se a PR tocar **>25 arquivos** ou tiver **>600 linhas**: dividir.
@@ -130,3 +155,18 @@ Regra: cada item abaixo vira **uma PR pequena** (ideal 1–2h) e respeita `docs/
   - `pytest tests/integration/test_agent_gateway_agui_stream.py -v -x`
 
 Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`
+
+---
+
+## Phase 4: AlloyDB AI Cutover (Eternidade dos Dados) — concluída (25 JAN 2026)
+
+- Entregue:
+  - `tools/migrate_memory.py` (migração `.prometheus/prometheus.db` → AlloyDB)
+  - `packages/vertice-core/src/vertice_core/memory/cortex/episodic.py` (default AlloyDB + fallback sem DSN)
+  - `packages/vertice-core/src/vertice_core/memory/cortex/semantic.py` (pgvector + embeddings in-db)
+  - `tests/unit/test_alloydb_cutover_behavior.py` (testes adicionais)
+- Como validar (rápido):
+  - `pytest tests/unit/test_alloydb_migration.py tests/unit/test_alloydb_cutover_behavior.py -v -x`
+  - Resultado esperado: `14 passed` (offline)
+
+Detalhes completos: `docs/google/PHASE_4_ALLOYDB_AI_CUTOVER_2026.md`
