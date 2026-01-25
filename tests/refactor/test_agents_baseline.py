@@ -178,14 +178,14 @@ from typing import List, Optional
 
 class Calculator:
     """A simple calculator class."""
-    
+
     def __init__(self, precision: int = 2):
         self.precision = precision
-    
+
     def add(self, a: float, b: float) -> float:
         """Add two numbers."""
         return round(a + b, self.precision)
-    
+
     def divide(self, a: float, b: float) -> Optional[float]:
         """Divide two numbers safely."""
         if b == 0:
@@ -242,11 +242,11 @@ class TestReviewerBaseline:
         from agents import reviewer
 
         # Pattern requires + (concatenation) or shell=True
-        code = '''
+        code = """
 import subprocess
 def run(cmd):
     subprocess.run("echo " + cmd, shell=True)
-'''
+"""
         issues = reviewer._quick_security_scan(code)
         assert len(issues) > 0
         assert any("injection" in i.lower() for i in issues)
@@ -256,11 +256,11 @@ def run(cmd):
         from agents import reviewer
 
         # Pattern: f-string with SELECT or execute with +
-        code = '''
+        code = """
 def query(user_input):
     sql = f"SELECT * FROM users WHERE name = {user_input}"
     cursor.execute("SELECT * FROM users WHERE id = " + user_input)
-'''
+"""
         issues = reviewer._quick_security_scan(code)
         assert len(issues) > 0
 
@@ -268,10 +268,10 @@ def query(user_input):
         """Reviewer não reporta falsos positivos em código limpo."""
         from agents import reviewer
 
-        code = '''
+        code = """
 def add(a: int, b: int) -> int:
     return a + b
-'''
+"""
         issues = reviewer._quick_security_scan(code)
         # Código limpo não deve ter issues críticas
         assert len(issues) == 0
@@ -406,9 +406,7 @@ class TestAllAgentsMixins:
 
         for agent in [orchestrator, coder, reviewer, architect, researcher, devops]:
             assert hasattr(agent, "resilient_call"), f"{agent.name} missing resilient_call"
-            assert hasattr(
-                agent, "_init_resilience"
-            ), f"{agent.name} missing _init_resilience"
+            assert hasattr(agent, "_init_resilience"), f"{agent.name} missing _init_resilience"
 
     def test_all_agents_have_status(self):
         """Todos agentes têm get_status()."""
@@ -501,15 +499,15 @@ def fibonacci(n: int) -> int:
         """Benchmark: scan de segurança."""
         from agents import reviewer
 
-        code = '''
+        code = """
 import os
 def run_command(cmd):
     os.system(cmd)
-    
+
 def query(user_input):
     sql = f"SELECT * FROM users WHERE id = {user_input}"
     return execute(sql)
-'''
+"""
 
         start = time.time()
         for _ in range(100):

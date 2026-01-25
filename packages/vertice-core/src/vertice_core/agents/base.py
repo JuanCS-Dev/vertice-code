@@ -19,6 +19,9 @@ from __future__ import annotations
 import logging
 from typing import Optional
 
+from vertice_core.types.agents import AgentCapability, AgentRole, TaskStatus
+from vertice_core.types.models import AgentResponse, AgentTask, TaskResult
+
 from vertice_core.observability import ObservabilityMixin
 from vertice_core.resilience import ResilienceMixin
 from vertice_core.caching import CachingMixin
@@ -66,3 +69,14 @@ class BaseAgent(ResilienceMixin, CachingMixin, ObservabilityMixin):
         """Ensure observability is initialized (call before tracing)."""
         if not hasattr(self, "_observability_initialized"):
             self._init_observability()
+
+
+__all__ = [
+    "BaseAgent",
+    "AgentCapability",
+    "AgentRole",
+    "TaskStatus",
+    "AgentTask",
+    "AgentResponse",
+    "TaskResult",
+]

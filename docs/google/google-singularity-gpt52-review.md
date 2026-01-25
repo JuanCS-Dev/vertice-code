@@ -27,6 +27,24 @@ Escopo analisado:
 - **Risco de “crypto-shredding acidental”:** `vertice-chat-webapp/backend/app/core/gdpr_crypto.py` gera chave efêmera quando `GDPR_MASTER_KEY` não existe.
 - **Evidência de dependência em `src` fora do SaaS:** existem testes/scripts com `sys.path.append("/media/juan/DATA/Vertice-Code/src")` (isso vira dívida técnica quando tentar empacotar/migrar).
 
+---
+
+## Update (25 JAN 2026) — Validação do “plumbing” (Fase 2)
+
+Implementado e validado offline:
+- `tools/deploy_brain.py` + `apps/agent-gateway/config/engines.json` (registry local de engines; `--dry-run`).
+- Pacotes importáveis para manter compatibilidade durante a migração:
+  - `agents.*` (em `packages/vertice-core/src/agents/`).
+  - `vertice_agents.*` (em `packages/vertice-core/src/vertice_agents/`).
+
+Comandos executados:
+```bash
+pytest tests/integration/test_vertex_deploy.py -v -x
+pytest tests/integration/test_orchestrator_prometheus.py -v -x
+pytest tests/agents/test_registry.py -v -x
+pytest tests/agents/test_coordinator.py -v -x
+```
+
 ## Convergência entre os documentos (o núcleo está alinhado)
 Os 7 docs apontam para a mesma sequência macro:
 - **Fase 1 (Saneamento):** eliminar diretório fantasma `src/vertice-chat-webapp`, desacoplar imports e criar `packages/vertice-core`.

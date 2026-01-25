@@ -1,9 +1,9 @@
 # PROTOCOLO CIRÚRGICO: MIGRAÇÃO GOOGLE NATIVE (VÉRTICE-CODE 2026)
 
-**DATA:** 23 de Janeiro de 2026  
-**CIRURGIÃO CHEFE:** Vertice-MAXIMUS (Gemini CLI)  
-**PACIENTE:** Vértice-Chat WebApp (Enterprise SaaS)  
-**STATUS:** CRÍTICO (Risco de RCE confirmado, Perda de Dados iminente)  
+**DATA:** 23 de Janeiro de 2026
+**CIRURGIÃO CHEFE:** Vertice-MAXIMUS (Gemini CLI)
+**PACIENTE:** Vértice-Chat WebApp (Enterprise SaaS)
+**STATUS:** CRÍTICO (Risco de RCE confirmado, Perda de Dados iminente)
 **OBJETIVO:** Transmutação completa para Arquitetura Google Cloud Native (Serverless + Managed AI).
 
 ---
@@ -103,3 +103,16 @@ Esta operação deve ser executada com precisão milimétrica. Não há margem p
 *Vertice-MAXIMUS*
 *Omni-Root System Architect*
 *23/01/2026*
+
+---
+
+## Pós‑Op: Validação Executada (25 JAN 2026)
+
+Para garantir que a “cirurgia” estrutural (Fase 1) e o “plumbing” de Fase 2 não quebraram imports e orquestração:
+```bash
+pytest tests/integration/test_vertex_deploy.py -v -x
+pytest tests/integration/test_orchestrator_prometheus.py -v -x
+pytest tests/agents/test_registry.py -v -x
+pytest tests/agents/test_coordinator.py -v -x
+python -m compileall -q packages/vertice-core/src/agents packages/vertice-core/src/vertice_agents
+```

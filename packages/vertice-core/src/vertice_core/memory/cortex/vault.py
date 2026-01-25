@@ -39,7 +39,7 @@ class VaultEntryType(str, Enum):
     CREDENTIAL = "credential"
     BOOKMARK = "bookmark"
     CONTACT_INFO = "contact_info"
-    API_KEY = "api_key"
+    API_KEY = "api_key"  # pragma: allowlist secret  # pragma: allowlist secret
     CONFIG = "config"
     NOTE = "note"
 

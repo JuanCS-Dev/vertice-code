@@ -917,7 +917,7 @@ class TestRefactorerVariations:
             "import os\nimport sys",
             "x = 1\ny = 2",
             "def func(a, b): return a + b",
-            "try:\n    pass\nexcept:\n    pass",
+            "try:\n    pass\nexcept Exception:\n    pass",
             "if True:\n    pass\nelse:\n    pass",
             "for i in range(10):\n    print(i)",
             "while True:\n    break",

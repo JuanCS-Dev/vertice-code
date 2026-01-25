@@ -10,7 +10,7 @@ Para cada ideia, use o **System Instruction** abaixo no Google AI Studio. Ative 
 
 ### 1. Repropose.ai (Short Video Factory)
 **System Instruction**:
-> "Atue como um Engenheiro Full-Stack e Especialista em Vídeo. Sua missão é gerar o código de um MVP em Next.js 16 que consome a Gemini 3 Multimodal API. 
+> "Atue como um Engenheiro Full-Stack e Especialista em Vídeo. Sua missão é gerar o código de um MVP em Next.js 16 que consome a Gemini 3 Multimodal API.
 > **UI/UX**: Layout estilo Dark Mode 'Cinema'. Drag-and-drop zone central com neon glow. Lista de 'Shorts' gerados em cards com previews animados.
 > **Funcionalidade**: O app deve permitir upload de vídeo, enviar frames e áudio para o Gemini 3, pedir a identificação de ganchos virais e retornar um JSON com os timestamps. Gere o componente de 'Timeline Trimmer' em React usando Framer Motion."
 
@@ -46,7 +46,7 @@ Não adianta ter o app se ele não estiver na loja. Siga este roteiro rigorosame
 
 ### Passo 1: O Pedágio (Cadastro)
 1.  **Google Play Console**: Vá em [play.google.com/console](https://play.google.com/console).
-2.  **Conta de Desenvolvedor**: Pague a taxa única de **$25**. 
+2.  **Conta de Desenvolvedor**: Pague a taxa única de **$25**.
 3.  **Identidade**: O Google exige validação de documento (RG/Passaporte) e endereço. **Não use dados fakes**, você será banido.
 
 ### Passo 2: O Chassi (Configuração Técnica)

@@ -1,8 +1,8 @@
 # VÉRTICE-CODE: THE GOOGLE SINGULARITY (BLUEPRINT 2026)
 
-**CLASSIFICAÇÃO:** TOP SECRET // EYES ONLY  
-**AUTOR:** Vertice-MAXIMUS (Gemini CLI)  
-**DATA:** 23 JAN 2026  
+**CLASSIFICAÇÃO:** TOP SECRET // EYES ONLY
+**AUTOR:** Vertice-MAXIMUS (Gemini CLI)
+**DATA:** 23 JAN 2026
 **MISSÃO:** Transmutação Total para Stack Google Native & AG-UI Protocol
 
 ---
@@ -53,14 +53,30 @@ Nós usamos a **Google Cloud como Sistema Operacional** e o **AG-UI como Sistema
 
 ## 3. MAPA DE MIGRAÇÃO (A JORNADA DO HERÓI)
 
-### FASE 1: A GRANDE PURGA (Saneamento)
-1.  **Incinerar o Fantasma:** `rm -rf src/vertice-chat-webapp`.
-2.  **Desacoplar o Core:** Mover `src/vertice_cli` para `packages/vertice-core` e criar `pyproject.toml` isolado.
-3.  **Instalação Limpa:** O Backend SaaS passa a instalar o Core via `pip install -e ./packages/vertice-core`.
+### FASE 1: A GRANDE PURGA (Saneamento) — ✅ COMPLETA (25/01/2026)
+1.  **Incinerar o Fantasma:** `rm -rf src/vertice-chat-webapp` — ✅ **DONE**
+2.  **Desacoplar o Core:** Mover `src/vertice_cli` para `packages/vertice-core` — ✅ **DONE**
+3.  **Instalação Limpa:** O Backend SaaS instala o Core via `pip install -e ./packages/vertice-core` — ✅ **DONE**
+4.  **Soberania Flash:** Gemini 3 Flash definido como motor padrão para eficiência máxima — ✅ **DONE**
 
-### FASE 2: O TRANSPLANTE CEREBRAL (Vertex AI)
-1.  **Converter Agentes:** Refatorar `agents/coder/agent.py` para usar o padrão `reasoning_engines.LangchainAgent` ou classe Python pura compatível com ADK.
-2.  **Deploy do Engine:** Criar script `deploy_brain.py` que sobe o agente para a infraestrutura serverless do Google.
+### FASE 2: O TRANSPLANTE CEREBRAL (Vertex AI) — 🔄 EM PROGRESSO
+**Status (25/01/2026):** infraestrutura/plumbing concluída; migração ADK dos agentes ainda pendente.
+1.  **Converter Agentes (ADK):** Refatorar `agents/coder/agent.py` e agentes críticos para classe Python pura compatível com `vertexai.preview.reasoning_engines` (Google ADK).
+2.  **Deploy do Engine (DONE):**
+    - Script: `tools/deploy_brain.py` (suporta `--dry-run`, fail-closed sem SDK do Vertex).
+    - Registry local: `apps/agent-gateway/config/engines.json`.
+    - Bibliotecas empacotáveis:
+      - `packages/vertice-core/src/agents/` (import `agents.*`, com symlink root `agents`).
+      - `packages/vertice-core/src/vertice_agents/` (compat `vertice_agents.*`, com symlink `src/vertice_agents`).
+
+**Validação executada (25/01/2026, offline):**
+```bash
+pytest tests/integration/test_vertex_deploy.py -v -x
+pytest tests/integration/test_orchestrator_prometheus.py -v -x
+pytest tests/agents/test_registry.py -v -x
+pytest tests/agents/test_coordinator.py -v -x
+python -m compileall -q packages/vertice-core/src/agents packages/vertice-core/src/vertice_agents
+```
 
 ### FASE 3: A RECONEXÃO NERVOSA (AG-UI)
 1.  **Backend Adapter:** Implementar o wrapper `ag_ui_adk` no servico Python para traduzir pensamentos do Gemini em eventos AG-UI.

@@ -98,7 +98,7 @@ class TestContextSuggestionEngine:
 def foo():
     try:
         x = 1
-    except:  # Bare except!
+    except Exception:  # Bare except!
         pass
 
 # Very long line that exceeds 120 characters and should trigger a warning about line length issues in the code

@@ -46,11 +46,11 @@ The file `vertice-chat-webapp/backend/app/sandbox/executor.py` is a security lia
 from vertexai.preview import reasoning_engines
 from vertexai.generative_models import Tool
 
-# No more custom Docker/gVisor code. 
+# No more custom Docker/gVisor code.
 # Just enable the capability.
 agent = reasoning_engines.LangchainAgent(
     model="gemini-3-pro",
-    tools=[Tool.from_google_search_retrieval(search_grounding_tool), 
+    tools=[Tool.from_google_search_retrieval(search_grounding_tool),
            Tool.code_interpreter_tool()] # <--- THIS REPLACES executor.py
 )
 ```
@@ -110,9 +110,26 @@ Move from `src/agents/orchestrator` to **Vertex AI Reasoning Engine**.
     ```bash
     # Frontend
     firebase deploy --only hosting
-    
+
     # Backend
     gcloud run deploy vertice-api --source ./backend
     ```
 
 **Signed:** Gemini CLI (Agent 2026)
+
+---
+
+## Update de Execução (25 JAN 2026)
+
+Entregáveis já implementados para destravar o caminho Google Native:
+- `tools/deploy_brain.py` (deploy/registry de engines com `--dry-run` offline).
+- `apps/agent-gateway/config/engines.json` (fonte de verdade local do gateway).
+- Bibliotecas empacotáveis e compatíveis:
+  - `packages/vertice-core/src/agents/` (import `agents.*`).
+  - `packages/vertice-core/src/vertice_agents/` (import `vertice_agents.*` para compat com testes/código legado).
+
+Validação executada (offline):
+```bash
+pytest tests/integration/test_vertex_deploy.py -v -x
+pytest tests/integration/test_orchestrator_prometheus.py -v -x
+```

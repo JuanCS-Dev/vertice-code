@@ -31,4 +31,4 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/vertice_core"]
+packages = ["src/vertice_core", "src/agents", "src/vertice_agents"]

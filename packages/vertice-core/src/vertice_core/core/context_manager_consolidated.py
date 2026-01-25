@@ -5,7 +5,10 @@ Boris Cherny Implementation.
 """
 
 from typing import Dict
-from vertice_core.tui.components.context_awareness import ContextAwarenessEngine, OptimizationMetrics
+from vertice_core.tui.components.context_awareness import (
+    ContextAwarenessEngine,
+    OptimizationMetrics,
+)
 
 
 class ConsolidatedContextManager:

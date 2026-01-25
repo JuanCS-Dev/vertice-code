@@ -55,6 +55,12 @@ Se a mudança for Python (preferir):
 - `ruff check <alvo> --fix` e `ruff format <alvo>` (quando disponível)
 - `pytest <teste_específico> -v -x`
 
+Exemplos reais (rodados na Fase 2, 25/01/2026):
+- `pytest tests/integration/test_vertex_deploy.py -v -x`
+- `pytest tests/integration/test_orchestrator_prometheus.py -v -x`
+- `pytest tests/agents/test_registry.py -v -x`
+- `pytest tests/agents/test_coordinator.py -v -x`
+
 ## Setup (evitar tempo morto)
 - Se o Jules permitir: usar **setup script** no repo para padronizar ambiente.
 - Se precisar de segredos/keys: preferir variáveis configuradas no **repositório** e habilitadas na task (não hardcode).
@@ -67,4 +73,3 @@ Se a mudança for Python (preferir):
   - “O que mudou”
   - “Como validar” (2–5 comandos)
   - “Limites respeitados” (files/diff)
-

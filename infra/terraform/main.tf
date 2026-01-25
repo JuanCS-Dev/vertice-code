@@ -36,7 +36,7 @@ resource "google_project_service" "apis" {
     "cloudbuild.googleapis.com",      # CI/CD
     "artifactregistry.googleapis.com" # Python Packages
   ])
-  
+
   service            = each.key
   disable_on_destroy = false
 }

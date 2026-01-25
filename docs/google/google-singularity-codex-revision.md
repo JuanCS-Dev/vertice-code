@@ -27,38 +27,51 @@ Este documento descreve, com granularidade de implementação, como executar a t
 
 Cada fase termina com entregáveis verificáveis. As atividades dependem entre si; não avance sem checklist concluída.
 
-### Fase 1 — Saneamento Estrutural (Semana 1)
+### Fase 1 — Saneamento Estrutural (Semana 1) — ✅ CONCLUÍDA (25 JAN 2026)
 
-**Objetivo:** parar o sangramento. Remover acoplamentos óbvios e preparar o repo para migração controlada.
+**Objetivo:** Parar o sangramento e preparar o monorepo.
 
-1. **Incinerar Fantasma**
-   - Remover `src/vertice-chat-webapp/` (confirmar ausência em CI).
-   - Atualizar `.gitmodules`/scripts que referenciem o diretório.
+1. **Incinerar Fantasma** — ✅ **DONE**
+   - `src/vertice-chat-webapp/` removido.
+   - Referências legadas em builds limpas.
 
-2. **Packages Core**
-   - Mover `src/vertice_cli/` → `packages/vertice-core/src/vertice_core/`.
-   - Criar `packages/vertice-core/pyproject.toml` (hatch/poetry) com export de `vertice_core`.
-   - Ajustar imports: `src.vertice_cli.*` → `vertice_core.*`. Priorizar módulos citados em `project_structure.txt` (agents, memory, governance, tools).
-   - Atualizar `setup.cfg`/`pyproject.toml` raiz para usar editable install (`pip install -e packages/vertice-core`).
+2. **Packages Core** — ✅ **DONE**
+   - `packages/vertice-core/` criado e funcional.
+   - Módulos `agents`, `memory`, `governance`, `tools`, `providers` e `tui` unificados no core.
+   - `pip install -e packages/vertice-core` configurado.
 
-3. **CLI/TUI como Apps**
-   - Criar `apps/cli-tool/` contendo entrypoint Typer que importa `vertice_core.cli`.
-   - Criar `apps/tui/` (Textual) com wrapper leve que consome `vertice_core.tui`.
-   - Atualizar pipelines de testes (commands em AGENTS.md) para apontar para novos caminhos.
+3. **CLI/TUI como Apps** — ✅ **DONE**
+   - `apps/cli/` e `apps/tui/` estabelecidos como pontos de entrada leves.
+   - Wrapper da TUI delegando para o core.
 
-4. **SaaS isolado**
-   - Em `vertice-chat-webapp/backend/requirements.txt`, substituir `../src` por `-e ../../packages/vertice-core`.
-   - Remover `sys.path.append("../../src")` e equivalentes.
-   - Validar imports: rotas `app/llm/*.py` devem usar `vertice_core.interfaces.*`.
+4. **SaaS isolado** — ✅ **DONE**
+   - `vertice-chat-webapp/backend/requirements.txt` atualizado para usar o core instalado.
+   - Imports normalizados (prefixo `src.` removido).
 
-**Critérios de aceite**
-- `pip install -e packages/vertice-core` funciona isoladamente.
-- `pytest tests/unit -v` roda sem acessar `src/` legado.
-- Nenhum arquivo do SaaS referencia `src.vertice_cli`.
+**Marcos Adicionais (Extra-Scope):**
+- **Soberania Flash:** Gemini 3 Flash estabelecido como motor padrão (95% das tasks).
+- **Resiliência Git:** Índice corrompido restaurado e repositório sincronizado.
+- **Ponte de Amor:** Links simbólicos em `src/` garantem que nada quebre durante a transição.
 
-### Fase 2 — Transplante Cerebral (Semanas 2-4)
+### Fase 2 — Transplante Cerebral (Semanas 2-4) — 🔄 NEXT STEP
 
 **Objetivo:** migrar agentes críticos para Vertex AI Reasoning Engine usando ADK.
+
+**Status (25 JAN 2026):**
+- Biblioteca `agents.*` reintroduzida em `packages/vertice-core/src/agents/` e symlink root `agents` corrigido.
+- Script `tools/deploy_brain.py` criado + registry `apps/agent-gateway/config/engines.json` (com teste de fumaça `tests/integration/test_vertex_deploy.py`).
+- Compatibilidade `vertice_agents.*` adicionada (`packages/vertice-core/src/vertice_agents/` + symlink `src/vertice_agents`) para manter testes/código legado funcionando durante a migração.
+- Compatibilidade de tipos em `vertice_core.agents.base` (reexports `AgentTask`, `AgentResponse`, `TaskResult`, `TaskStatus`, `AgentRole`, `AgentCapability`).
+- Execução offline segura: `vertice_core.agents.coordinator.AgencyCoordinator.execute()` evita chamar orquestradores “reais” quando não há clientes configurados.
+
+**Validação executada (25 JAN 2026, offline):**
+```bash
+pytest tests/integration/test_vertex_deploy.py -v -x
+pytest tests/integration/test_orchestrator_prometheus.py -v -x
+pytest tests/agents/test_registry.py -v -x
+pytest tests/agents/test_coordinator.py -v -x
+python -m compileall -q packages/vertice-core/src/agents packages/vertice-core/src/vertice_agents
+```
 
 1. **Biblioteca de Agentes (ADK)**
    - Converter `agents/coder/agent.py`, `agents/reviewer/*`, `agents/orchestrator/*` para classes puras (sem dependências de CLI/TUI).

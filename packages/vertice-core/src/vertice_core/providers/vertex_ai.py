@@ -64,7 +64,6 @@ class VertexAIProvider:
         "gemini-3-flash": "gemini-3-flash",
         "gemini-3-pro": "gemini-3-pro",
         "gemini-3-flash-preview": "gemini-3-flash-preview",
-        "gemini-3-flash": "gemini-3-flash",
         "gen3": "gemini-3-flash",
     }
 
@@ -184,6 +183,7 @@ class VertexAIProvider:
                 contents.append(
                     types.Content(role=role, parts=[types.Part.from_text(text=msg["content"])])
                 )
+
             def _extract_text(item: Any) -> str:
                 # Prefer chunk.text if available (avoids duplication)
                 direct = getattr(item, "text", None)

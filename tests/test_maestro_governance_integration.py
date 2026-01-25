@@ -264,7 +264,9 @@ class TestAirGapValidation:
 
         # Check for governance import
         imports = [node for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)]
-        governance_imported = any(imp.module == "vertice_core.maestro_governance" for imp in imports)
+        governance_imported = any(
+            imp.module == "vertice_core.maestro_governance" for imp in imports
+        )
 
         assert governance_imported, "maestro.py must import maestro_governance"
 

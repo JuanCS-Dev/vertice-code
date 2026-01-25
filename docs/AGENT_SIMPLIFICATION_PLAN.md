@@ -1,7 +1,7 @@
 # Plano de Simplificação dos Agentes MCP - Implementação Segura
 
-**Data**: 22 Janeiro 2026  
-**Objetivo**: Simplificar agentes sem quebrar funcionalidades  
+**Data**: 22 Janeiro 2026
+**Objetivo**: Simplificar agentes sem quebrar funcionalidades
 **Metodologia**: Fases incrementais com testes e benchmarks
 
 ---
@@ -74,7 +74,7 @@ class TestAgentBaseline:
         self.results["duration"] = duration
 
     # ========== ORCHESTRATOR ==========
-    
+
     def test_orchestrator_instantiation(self):
         """Orchestrator pode ser instanciado."""
         from agents import OrchestratorAgent
@@ -105,7 +105,7 @@ class TestAgentBaseline:
         assert tasks[0].id.startswith("task-")
 
     # ========== CODER ==========
-    
+
     def test_coder_instantiation(self):
         """Coder pode ser instanciado."""
         from agents import CoderAgent
@@ -134,7 +134,7 @@ class TestAgentBaseline:
         assert result.valid_syntax is False
 
     # ========== REVIEWER ==========
-    
+
     def test_reviewer_instantiation(self):
         """Reviewer pode ser instanciado."""
         from agents import ReviewerAgent
@@ -159,7 +159,7 @@ class TestAgentBaseline:
         assert "Command injection" in issues[0]
 
     # ========== ARCHITECT ==========
-    
+
     def test_architect_instantiation(self):
         """Architect pode ser instanciado."""
         from agents import ArchitectAgent
@@ -180,7 +180,7 @@ class TestAgentBaseline:
         assert context.risk is not None
 
     # ========== RESEARCHER ==========
-    
+
     def test_researcher_instantiation(self):
         """Researcher pode ser instanciado."""
         from agents import ResearcherAgent
@@ -194,7 +194,7 @@ class TestAgentBaseline:
         assert hasattr(researcher, "_retrieval_agents") or hasattr(researcher, "_init_retrieval_agents")
 
     # ========== DEVOPS ==========
-    
+
     def test_devops_instantiation(self):
         """DevOps pode ser instanciado."""
         from agents import DevOpsAgent
@@ -208,7 +208,7 @@ class TestAgentBaseline:
         assert hasattr(devops, "build_topology")
 
     # ========== MIXINS COMUNS ==========
-    
+
     def test_all_agents_have_resilience(self):
         """Todos agentes têm ResilienceMixin."""
         from agents import coder, reviewer, architect, researcher, devops
@@ -236,21 +236,21 @@ class TestBenchmarkBaseline:
     async def test_benchmark_orchestrator_plan(self, benchmark_results):
         """Benchmark: tempo de planejamento."""
         from agents import OrchestratorAgent
-        
+
         orch = OrchestratorAgent()
-        
+
         start = time.time()
         for _ in range(10):
             await orch.plan("Create a function")
         duration = time.time() - start
-        
+
         benchmark_results["orchestrator_plan_10x"] = duration
         assert duration < 5.0  # Deve completar em menos de 5s
 
     def test_benchmark_coder_evaluate(self, benchmark_results):
         """Benchmark: avaliação de código."""
         from agents import coder
-        
+
         code = '''
 def fibonacci(n: int) -> int:
     """Calculate fibonacci number."""
@@ -258,30 +258,30 @@ def fibonacci(n: int) -> int:
         return n
     return fibonacci(n-1) + fibonacci(n-2)
 '''
-        
+
         start = time.time()
         for _ in range(100):
             coder.evaluate_code(code, "python")
         duration = time.time() - start
-        
+
         benchmark_results["coder_evaluate_100x"] = duration
         assert duration < 2.0  # Deve completar em menos de 2s
 
     def test_benchmark_reviewer_scan(self, benchmark_results):
         """Benchmark: scan de segurança."""
         from agents import reviewer
-        
+
         code = '''
 import os
 def run_command(cmd):
     os.system(cmd)
 '''
-        
+
         start = time.time()
         for _ in range(100):
             reviewer._quick_security_scan(code)
         duration = time.time() - start
-        
+
         benchmark_results["reviewer_scan_100x"] = duration
         assert duration < 1.0
 
@@ -297,11 +297,11 @@ def save_baseline_results():
             "total_types": 67,
         }
     }
-    
+
     BASELINE_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(BASELINE_FILE, "w") as f:
         json.dump(results, f, indent=2)
-    
+
     return results
 ```
 
@@ -351,20 +351,20 @@ from vertice_core.caching import CachingMixin
 class BaseAgent(ResilienceMixin, CachingMixin, ObservabilityMixin):
     """
     Base class for all Vertice agents.
-    
+
     Provides:
     - Distributed tracing (ObservabilityMixin)
     - Resilience: retry, circuit breaker, rate limiting (ResilienceMixin)
     - Caching: semantic and exact match (CachingMixin)
     """
-    
+
     name: str = "base"
     agent_id: Optional[str] = None
 
     def __init__(self) -> None:
         if self.agent_id is None:
             self.agent_id = getattr(self, "name", "unknown")
-    
+
     def get_status(self) -> Dict[str, Any]:
         """Get agent status. Override in subclasses."""
         return {
@@ -462,7 +462,7 @@ Consolidar dois sistemas que implementam o mesmo conceito (InfoQ Three Loops).
 
 ### 2.2 Decisão de Design
 
-**Manter**: `BoundedAutonomy` (mais completo, com L0-L3)  
+**Manter**: `BoundedAutonomy` (mais completo, com L0-L3)
 **Deprecar**: `ThreeLoops` (criar wrapper de compatibilidade)
 
 ### 2.3 Mudanças
@@ -493,10 +493,10 @@ class ArchitectLoop:
 class ThreeLoopsCompatMixin(BoundedAutonomyMixin):
     """
     Compatibility mixin that provides ThreeLoops API on top of BoundedAutonomy.
-    
+
     Deprecated: Migrate to BoundedAutonomyMixin directly.
     """
-    
+
     def select_loop(self, context):
         """Map ThreeLoops select_loop to BoundedAutonomy."""
         import warnings
@@ -586,7 +586,7 @@ class DarwinGodelMixin:
     """
     DEPRECATED: Darwin Gödel evolution capabilities.
     """
-    
+
     def evolve(self, *args, **kwargs):
         warnings.warn(
             "DarwinGodelMixin.evolve() is deprecated and will be removed. "
@@ -638,7 +638,7 @@ Stage 1: Analysis (Static + Reasoning)
     - Pattern matching
     - AST inspection
     - Context-aware confidence adjustment
-    
+
 Stage 2: Validation (Critique + Filter)
     - Generate suggestions
     - Filter false positives
@@ -663,24 +663,24 @@ class DeepThinkV2Mixin:
     1. Analysis: static + reasoning
     2. Validation: critique + filter
     """
-    
+
     async def deep_think_review(self, code: str, file_path: str, language: str = None):
         """Perform Deep Think security review (V2)."""
         # Stage 1: Analysis
         findings, steps = self._stage_analysis(code, file_path, language)
-        
+
         # Stage 2: Validation
         validated, rejected = self._stage_validation(findings)
-        
+
         return ReviewResult(...)
-    
+
     def _stage_analysis(self, code, file_path, language):
         """Combined static analysis + reasoning."""
         # Merge logic from:
         # - _stage_static_analysis
         # - _stage_deep_reasoning
         ...
-    
+
     def _stage_validation(self, findings):
         """Combined critique + validation."""
         # Merge logic from:
@@ -709,7 +709,7 @@ else:
 # 1. Testar V1 (default)
 pytest tests/e2e/test_all_agents.py::TestReviewerAgentE2E -v
 
-# 2. Testar V2 
+# 2. Testar V2
 DEEP_THINK_V2=1 pytest tests/e2e/test_all_agents.py::TestReviewerAgentE2E -v
 
 # 3. Comparar resultados
@@ -746,7 +746,7 @@ class DocumentationSearchTool(BaseTool):
     """Search local documentation."""
     name = "doc_search"
     description = "Search local docs/ and README files"
-    
+
     async def _execute(self, query: str, limit: int = 5):
         # Logic from DocumentationAgent.retrieve()
         ...
@@ -755,7 +755,7 @@ class WebSearchTool(BaseTool):
     """Search the web."""
     name = "web_search"
     description = "Search the web using DuckDuckGo"
-    
+
     async def _execute(self, query: str, limit: int = 5):
         # Logic from WebSearchAgent.retrieve()
         ...
@@ -764,7 +764,7 @@ class CodebaseSearchTool(BaseTool):
     """Search the codebase."""
     name = "code_search"
     description = "Search codebase using grep"
-    
+
     async def _execute(self, query: str, limit: int = 5):
         # Logic from CodebaseAgent.retrieve()
         ...
@@ -791,7 +791,7 @@ class ResearcherAgent(BaseAgent):
             WebSearchTool(),
             CodebaseSearchTool(),
         ]
-    
+
     async def research(self, query: str):
         """Research using tools instead of sub-agents."""
         results = []
@@ -867,29 +867,29 @@ async def run_benchmarks():
         "timestamp": datetime.now().isoformat(),
         "version": "post-simplification",
     }
-    
+
     # 1. Instantiation time
     from agents import orchestrator, coder, reviewer, architect, researcher, devops
-    
+
     start = time.time()
     for _ in range(100):
         from agents import OrchestratorAgent
         OrchestratorAgent()
     results["instantiation_100x"] = time.time() - start
-    
+
     # 2. Plan time
     start = time.time()
     for _ in range(10):
         await orchestrator.plan("Create a function")
     results["plan_10x"] = time.time() - start
-    
+
     # 3. Evaluate time
     code = "def f(): pass"
     start = time.time()
     for _ in range(100):
         coder.evaluate_code(code, "python")
     results["evaluate_100x"] = time.time() - start
-    
+
     # 4. LOC count
     import subprocess
     loc = subprocess.check_output(
@@ -897,7 +897,7 @@ async def run_benchmarks():
         shell=True
     ).decode().strip().split()[0]
     results["total_loc"] = int(loc)
-    
+
     return results
 
 
@@ -906,11 +906,11 @@ def compare_results():
         baseline = json.load(f)
     with open(FINAL_FILE) as f:
         final = json.load(f)
-    
+
     print("=" * 60)
     print("BENCHMARK COMPARISON: BEFORE vs AFTER")
     print("=" * 60)
-    
+
     for key in final:
         if key in baseline and isinstance(final[key], (int, float)):
             before = baseline[key]
@@ -921,10 +921,10 @@ def compare_results():
 
 if __name__ == "__main__":
     results = asyncio.run(run_benchmarks())
-    
+
     with open(FINAL_FILE, "w") as f:
         json.dump(results, f, indent=2)
-    
+
     compare_results()
 ```
 

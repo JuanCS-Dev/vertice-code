@@ -2,12 +2,11 @@ import asyncio
 import sys
 import os
 import tempfile
-from pathlib import Path
 
 # Add src to path
 sys.path.append("/media/juan/DATA/Vertice-Code/src")
 
-from vertice_tui.core.autoaudit.service import AutoAuditService, ScenarioResult, AuditReport
+from vertice_tui.core.autoaudit.service import AutoAuditService, ScenarioResult
 from vertice_tui.core.autoaudit.scenarios import AuditScenario, Expectation, ScenarioCategory
 
 

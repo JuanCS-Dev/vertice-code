@@ -115,7 +115,9 @@ async def test_search_functionality():
     from vertice_core.tools.search import SearchFilesTool
 
     search_tool = SearchFilesTool()
-    result = await search_tool.execute(pattern="def", path="vertice_core/tools", file_pattern="*.py")
+    result = await search_tool.execute(
+        pattern="def", path="vertice_core/tools", file_pattern="*.py"
+    )
 
     assert result.success, f"Search failed: {result.error}"
     assert len(result.data) > 0, "No results found"

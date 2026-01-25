@@ -1,8 +1,8 @@
 # Blueprint de Implementação: Vértice-Code AI SaaS (ESPECIFICAÇÃO TÉCNICA 2026)
 
-**Data**: 22 Janeiro 2026  
-**Status**: **MASTER PLAN PARA TRANSIÇÃO GOOGLE NATIVE**  
-**Analista**: Vertice-MAXIMUS (Omni-Root)  
+**Data**: 22 Janeiro 2026
+**Status**: **MASTER PLAN PARA TRANSIÇÃO GOOGLE NATIVE**
+**Analista**: Vertice-MAXIMUS (Omni-Root)
 **Objetivo**: Documento autocontido para planejamento de implementação sem necessidade de acesso prévio ao codebase.
 
 ---
@@ -45,7 +45,7 @@ O plano de implementação deve seguir a lógica de **"Deletar & Conectar"**.
 
 ### 3.1 Orquestração Gerenciada (Vertex AI Agent Engine)
 -   **Serviço**: `reasoning_engines` do Vertex AI.
--   **O que morre**: 
+-   **O que morre**:
     -   `vertice-chat-webapp/backend/app/api/v1/chat.py` (Lógica de stream manual)
     -   `src/agents/orchestrator/` (Orquestração manual)
 -   **Blueprint**:
@@ -65,7 +65,7 @@ O plano de implementação deve seguir a lógica de **"Deletar & Conectar"**.
 
 ### 3.3 Banco de Dados Híbrido (AlloyDB AI)
 -   **Serviço**: AlloyDB AI com ScaNN.
--   **O que morre**: 
+-   **O que morre**:
     -   `vertice-chat-webapp/backend/app/core/database.py` (MockSession)
     -   `src/prometheus/memory/vault/` (Se existir)
 -   **Ação**: Unificar metadados de usuários e vetores de memória MIRIX em uma única instância AlloyDB.

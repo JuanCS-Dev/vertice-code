@@ -54,6 +54,17 @@ Regra: cada item abaixo vira **uma PR pequena** (ideal 1–2h) e respeita `docs/
   - `rg -n "from src\\.|import src\\." vertice-chat-webapp/backend` retorna vazio
   - backend ainda mantém fallback patterns local (não quebra segurança)
 
+### PR-2D: Plumbing da Fase 2 (deploy/registry + compat imports) — ✅ DONE (25/01/2026)
+- **Entregáveis:**
+  - `tools/deploy_brain.py` + `apps/agent-gateway/config/engines.json`
+  - `packages/vertice-core/src/agents/` (import `agents.*`)
+  - `packages/vertice-core/src/vertice_agents/` (import `vertice_agents.*`)
+- **Aceite (executado):**
+  - `pytest tests/integration/test_vertex_deploy.py -v -x`
+  - `pytest tests/integration/test_orchestrator_prometheus.py -v -x`
+  - `pytest tests/agents/test_registry.py -v -x`
+  - `pytest tests/agents/test_coordinator.py -v -x`
+
 ## PR-3 — `apps/agent-gateway` (MVP) + contrato de streaming
 
 ### PR-3A: Criar `apps/agent-gateway` com `/healthz`
@@ -91,4 +102,3 @@ Regra: cada item abaixo vira **uma PR pequena** (ideal 1–2h) e respeita `docs/
 ## Stop conditions (para evitar travar)
 - Se a PR tocar **>25 arquivos** ou tiver **>600 linhas**: dividir.
 - Se aparecer necessidade de rename/move massivo: criar “Epic” separada (não fazer no Jules).
-

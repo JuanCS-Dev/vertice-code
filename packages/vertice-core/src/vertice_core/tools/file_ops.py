@@ -284,6 +284,7 @@ Example: [{"search": "def old_func():", "replace": "def new_func():"}]""",
             # 1. Argument Sanitization (Boris Cherny: Resilience Pattern)
             if isinstance(edits, str):
                 import json
+
                 try:
                     # Clean the string if it contains markdown or extra whitespace
                     clean_edits = edits.strip()
@@ -291,18 +292,20 @@ Example: [{"search": "def old_func():", "replace": "def new_func():"}]""",
                         clean_edits = clean_edits.split("```json")[1].split("```")[0].strip()
                     elif clean_edits.startswith("```"):
                         clean_edits = clean_edits.split("```")[1].split("```")[0].strip()
-                    
+
                     edits = json.loads(clean_edits)
                 except json.JSONDecodeError as e:
                     logger.error(f"Failed to parse edits JSON: {edits}")
                     return ToolResult(success=False, error=f"Invalid 'edits' JSON format: {e}")
-            
+
             if not isinstance(edits, list):
                 # Handle single edit passed as dict
                 if isinstance(edits, dict):
                     edits = [edits]
                 else:
-                    return ToolResult(success=False, error=f"Invalid 'edits' type: {type(edits)}. Expected list.")
+                    return ToolResult(
+                        success=False, error=f"Invalid 'edits' type: {type(edits)}. Expected list."
+                    )
 
             file_path = Path(path)
 

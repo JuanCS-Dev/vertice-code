@@ -63,3 +63,16 @@ Painel `advanced_command_center` para governança.
 **"A interface é o espelho da alma da máquina."**
 *Assinado,*
 **Vertice-MAXIMUS**
+
+---
+
+## Dependências já prontas (25 JAN 2026)
+
+Para a UI Narcissus consumir o “Cérebro” via streaming, o repo já possui:
+- `apps/agent-gateway/config/engines.json` (registry local de engines).
+- `tools/deploy_brain.py` (gera/atualiza o registry; `--dry-run` offline).
+
+Smoke checks executados (offline):
+```bash
+pytest tests/integration/test_vertex_deploy.py -v -x
+```

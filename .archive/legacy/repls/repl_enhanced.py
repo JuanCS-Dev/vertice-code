@@ -698,7 +698,7 @@ class EnhancedREPL:
             try:
                 md = Markdown(response)
                 console.print(md)
-            except Exception:
+            except Exception as e:
                 # Fallback to plain text if markdown parsing fails
                 console.print(response)
         else:
@@ -862,7 +862,7 @@ class EnhancedREPL:
         try:
             # Usar dashboard existente
             self.dashboard.show()
-        except Exception:
+        except Exception as e:
             # Fallback simples se dashboard não funcionar
             console.print("\n[cyan bold]📊 Agent Dashboard[/cyan bold]\n")
 
@@ -915,7 +915,7 @@ class EnhancedREPL:
             )
             if result.returncode == 0:
                 return result.stdout.strip() or None
-        except Exception:
+        except Exception as e:
             pass
         return None
 
@@ -1913,7 +1913,7 @@ class EnhancedREPL:
                     line_numbers=False,  # Already in output
                     word_wrap=True,
                 )
-            except Exception:
+            except Exception as e:
                 # Fallback to plain text if highlighting fails
                 return content
 

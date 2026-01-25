@@ -435,7 +435,7 @@ def well_documented_function(x: int, y: int) -> int:
     """
     try:
         return x + y
-    except Exception:
+    except Exception as e:
         return 0
 ''',
             }

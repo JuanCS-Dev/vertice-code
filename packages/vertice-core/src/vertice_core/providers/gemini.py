@@ -26,9 +26,7 @@ class GeminiProvider:
     is transparently upgraded to Vertex AI Enterprise (Gemini 3.0).
     """
 
-    def __init__(
-        self, api_key: Optional[str] = None, model_name: str = "gemini-3-flash", **kwargs
-    ):
+    def __init__(self, api_key: Optional[str] = None, model_name: str = "gemini-3-flash", **kwargs):
         """
         Initialize Adapter.
 

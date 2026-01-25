@@ -207,10 +207,10 @@ class AutoAuditService:
             executor.set_audit_mode(False)
         except Exception:
             pass
-        
+
         # --- PROMETHEUS SELF-HEALING ---
         if failed > 0 or critical > 0:
-             await self._trigger_self_healing(self.report)
+            await self._trigger_self_healing(self.report)
 
         self._is_running = False
         return self.report
@@ -235,7 +235,7 @@ class AutoAuditService:
                 if r.exception_trace:
                     short_trace = "\n".join(r.exception_trace.splitlines()[-10:])
                     failures.append(f"  Trace:\n  ```\n  {short_trace}\n  ```")
-        
+
         failure_text = "\n".join(failures)
 
         diagnostic_prompt = f"""
@@ -249,10 +249,9 @@ TASK:
 2. Simulate potential fixes via World Model.
 3. OUTPUT A CONCISE FIX PLAIN (No Code Yet) for the Coder Agent.
 """
-        
+
         self.view.add_response_panel(
-            "Analyzing failures via Prometheus Orchestrator...", 
-            title="🔥 Prometheus Diagnosis"
+            "Analyzing failures via Prometheus Orchestrator...", title="🔥 Prometheus Diagnosis"
         )
 
         diagnosis_text = ""
@@ -264,18 +263,17 @@ TASK:
         # --- PHASE 2: EXECUTION (Coder Agent) ---
         self.view.add_system_message("\n🛠️ **Coder Agent Activated**")
         self.view.add_response_panel(
-            "Receiving diagnosis and applying fix...", 
-            title="👨‍💻 Coder Agent"
+            "Receiving diagnosis and applying fix...", title="👨‍💻 Coder Agent"
         )
 
         coder = CoderAgent()
-        
+
         fix_task = f"""
         CONTEXT: Auto-Audit failed.
-        
+
         DIAGNOSIS FROM PROMETHEUS:
         {diagnosis_text}
-        
+
         YOUR MISSION:
         Apply the fix recommended above.
         - You MUST use 'edit_file' to modify existing files.
@@ -286,14 +284,13 @@ TASK:
         async for chunk in coder.generate(
             CodeGenerationRequest(
                 description=fix_task,
-                language="python", # Coder adapts to context, but this hints style
+                language="python",  # Coder adapts to context, but this hints style
                 style="clean",
                 include_tests=False,
-                include_docs=True
+                include_docs=True,
             )
         ):
-             self.view.append_chunk(chunk)
-
+            self.view.append_chunk(chunk)
 
     async def _execute_scenario(self, scenario: AuditScenario) -> ScenarioResult:
         """Executa um cenário."""

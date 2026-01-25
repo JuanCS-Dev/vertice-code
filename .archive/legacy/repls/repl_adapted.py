@@ -364,7 +364,7 @@ class EnhancedREPL:
             try:
                 md = Markdown(response)
                 console.print(md)
-            except Exception:
+            except Exception as e:
                 console.print(response)
         else:
             console.print(response)

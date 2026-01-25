@@ -84,7 +84,7 @@ class InputArea(Widget):
 
     # Language detection patterns
     LANGUAGE_HINTS = {
-        "python": ["def ", "import ", "class ", "from ", "async def", "elif ", "except:"],
+        "python": ["def ", "import ", "class ", "from ", "async def", "elif ", "except Exception:"],
         "javascript": ["const ", "let ", "function ", "=> ", "async ", "await "],
         "typescript": ["interface ", "type ", ": string", ": number", ": boolean"],
         "rust": ["fn ", "let mut", "impl ", "pub fn", "use ", "mod "],

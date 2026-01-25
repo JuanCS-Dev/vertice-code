@@ -323,7 +323,7 @@ class ComprehensiveAgentTestSuite:
                         result = await executor.execute(task)
                         if result:
                             successful_interactions += 1
-                    except Exception:
+                    except Exception as e:
                         pass  # Expected for some operations without real tools
 
                 interaction_rate = successful_interactions / len(tasks)

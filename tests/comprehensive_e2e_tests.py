@@ -165,7 +165,9 @@ class ComprehensiveE2ETestSuite:
     async def test_syntax_highlighting_performance(self):
         """Test syntax highlighting and double buffering performance."""
         try:
-            from vertice_core.tui.components.streaming_markdown.widget import StreamingMarkdownWidget
+            from vertice_core.tui.components.streaming_markdown.widget import (
+                StreamingMarkdownWidget,
+            )
 
             widget = StreamingMarkdownWidget(target_fps=60)
 

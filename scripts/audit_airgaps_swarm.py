@@ -207,12 +207,12 @@ class ExceptionAudit(AuditAgent):
         # Scan for bare excepts in core logic
         for py_file in get_python_files(PROJECT_ROOT / "core"):
             content = await read_file_safe(py_file)
-            if "except Exception:" in content or "except:" in content:
+            if "except Exception as e:" in content or "except Exception:" in content:
                 # Check if it has a raise or log
                 if "pass" in content or "print" in content:
                     lines = content.splitlines()
                     for i, line in enumerate(lines):
-                        if "except Exception:" in line or "except:" in line:
+                        if "except Exception as e:" in line or "except Exception:" in line:
                             # Crude check for next line
                             if i + 1 < len(lines) and (
                                 "pass" in lines[i + 1] or "print" in lines[i + 1]

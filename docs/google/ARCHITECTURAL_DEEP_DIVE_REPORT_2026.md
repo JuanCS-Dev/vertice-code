@@ -117,3 +117,20 @@ agent = reasoning_engines.LangchainAgent(
 By executing this plan, you shift from being a **System Administrator** to being a **System Architect**. You stop worrying about "How do I run this safely?" and start asking "What should this build?".
 
 **Ready for implementation.**
+
+---
+
+## Implementation Status (25 JAN 2026)
+
+Já aplicado no código (e validado offline):
+- `packages/vertice-core/src/agents/` (lib deployável `agents.*`) + symlink root `agents`.
+- `packages/vertice-core/src/vertice_agents/` (compat `vertice_agents.*`) + symlink `src/vertice_agents`.
+- `tools/deploy_brain.py` + `apps/agent-gateway/config/engines.json` (registry local de Reasoning Engines).
+
+Validação executada:
+```bash
+pytest tests/integration/test_vertex_deploy.py -v -x
+pytest tests/integration/test_orchestrator_prometheus.py -v -x
+pytest tests/agents/test_registry.py -v -x
+pytest tests/agents/test_coordinator.py -v -x
+```

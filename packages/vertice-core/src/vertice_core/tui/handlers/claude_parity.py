@@ -315,7 +315,10 @@ class ClaudeParityHandler:
             provider_name = args.strip().lower()
             try:
                 # Try to switch provider via VerticeClient first
-                if hasattr(self.bridge.llm, "_vertice_coreent") and self.bridge.llm._vertice_coreent:
+                if (
+                    hasattr(self.bridge.llm, "_vertice_coreent")
+                    and self.bridge.llm._vertice_coreent
+                ):
                     client = self.bridge.llm._vertice_coreent
                     available = client.get_available_providers()
 

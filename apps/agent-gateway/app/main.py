@@ -3,13 +3,16 @@ from pydantic import BaseModel
 
 app = FastAPI(title="Vertice Agent Gateway", version="2026.1.0")
 
+
 class PromptRequest(BaseModel):
     prompt: str
     session_id: str
 
+
 @app.get("/healthz")
 async def health():
     return {"status": "ok", "service": "agent-gateway", "runtime": "cloud-run"}
+
 
 @app.post("/agui/chat")
 async def chat(request: PromptRequest):
@@ -19,5 +22,5 @@ async def chat(request: PromptRequest):
     """
     return {
         "thought": "Architecture Initialized. Waiting for core logic transplant.",
-        "response": f"Echo: {request.prompt}"
+        "response": f"Echo: {request.prompt}",
     }

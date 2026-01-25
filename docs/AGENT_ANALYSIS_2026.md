@@ -1,7 +1,7 @@
 # Análise Completa dos Agentes MCP - Vertice-Code
 
-**Data**: 22 Janeiro 2026  
-**Autor**: Análise Automatizada  
+**Data**: 22 Janeiro 2026
+**Autor**: Análise Automatizada
 **Metodologia**: Leitura completa de todos os arquivos + pesquisa Google ADK 2026
 
 ---
@@ -198,7 +198,7 @@ research_assistant = LlmAgent(
 
 **O que implementa**:
 ```
-Stage 1: Static Analysis (regex + AST) 
+Stage 1: Static Analysis (regex + AST)
     ↓
 Stage 2: Deep Reasoning (ajuste de confiança)
     ↓

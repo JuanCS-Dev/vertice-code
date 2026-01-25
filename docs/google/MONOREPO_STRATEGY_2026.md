@@ -79,6 +79,23 @@ We don't need new Git repos. We need **fences**.
     *   OLD: `from src.vertice_agents import Coder`
     *   NEW: `from vertice_core.agents import Coder`
 
+---
+
+## Atualização de Implementação (25 JAN 2026)
+
+Entregáveis concretos já aplicados no repo:
+- `packages/vertice-core/src/agents/` incluído no build (importável como `agents.*`) e symlink root `agents`.
+- `packages/vertice-core/src/vertice_agents/` criado como compatibilidade (importável como `vertice_agents.*`) e symlink `src/vertice_agents`.
+- `tools/deploy_brain.py` + `apps/agent-gateway/config/engines.json` como registry de Reasoning Engines.
+
+Validação executada (offline):
+```bash
+pytest tests/integration/test_vertex_deploy.py -v -x
+pytest tests/integration/test_orchestrator_prometheus.py -v -x
+pytest tests/agents/test_registry.py -v -x
+pytest tests/agents/test_coordinator.py -v -x
+```
+
 **Conclusion:**
 We keep the **Speed** of a Monorepo but gain the **Sanity** of Microservices.
 

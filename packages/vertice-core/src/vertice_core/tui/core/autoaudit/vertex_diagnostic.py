@@ -200,7 +200,7 @@ class VertexAIDiagnostic:
             else:
                 step.details = {
                     "project": self.env.get("GOOGLE_CLOUD_PROJECT"),
-                    "location": location
+                    "location": location,
                 }
 
         except Exception as e:
@@ -383,9 +383,7 @@ class VertexAIDiagnostic:
 
             elif step.name == "Inference Test":
                 if step.details.get("http_code") == 404:
-                    recs.append(
-                        "🔧 Modelo não encontrado. Tente: gemini-3-flash ou gemini-3-pro"
-                    )
+                    recs.append("🔧 Modelo não encontrado. Tente: gemini-3-flash ou gemini-3-pro")
                 elif step.details.get("http_code") == 403:
                     recs.append("🔧 Adicione role: `roles/aiplatform.user` ao service account")
                 elif step.details.get("http_code") == 429:

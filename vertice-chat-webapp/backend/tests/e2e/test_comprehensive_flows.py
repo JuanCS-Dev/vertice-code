@@ -7,7 +7,6 @@ import pytest
 import httpx
 import os
 import uuid
-import json
 from typing import Dict
 
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
@@ -26,7 +25,7 @@ class TestChatFlows:
     async def test_complete_chat_session(self, dev_auth_headers):
         """Test a complete chat session from start to finish."""
         session_id = str(uuid.uuid4())
-        
+
         async with httpx.AsyncClient(timeout=120.0) as client:
             # First message
             response1 = await client.post(
@@ -39,7 +38,7 @@ class TestChatFlows:
                 },
             )
             assert response1.status_code == 200
-            
+
             # Second message in same session
             response2 = await client.post(
                 f"{BACKEND_URL}/api/v1/chat",
@@ -55,7 +54,7 @@ class TestChatFlows:
                 },
             )
             assert response2.status_code == 200
-            
+
             # Verify response contains context
             content = response2.text
             # Should have some response (not empty)
@@ -78,10 +77,10 @@ class TestChatFlows:
                     "stream": True,
                 },
             )
-            
+
             assert response.status_code == 200
             content = response.text
-            
+
             # Should have text chunks
             assert "0:" in content
             # Should have finish signal
@@ -101,7 +100,7 @@ class TestChatFlows:
                 },
             )
             assert response1.status_code == 200
-            
+
             # Turn 2 - reference previous context
             response2 = await client.post(
                 f"{BACKEND_URL}/api/v1/chat",
@@ -109,8 +108,14 @@ class TestChatFlows:
                 json={
                     "messages": [
                         {"role": "user", "content": "I like Python programming"},
-                        {"role": "assistant", "content": "That's great! Python is a versatile language."},
-                        {"role": "user", "content": "Can you suggest a good library for data analysis?"},
+                        {
+                            "role": "assistant",
+                            "content": "That's great! Python is a versatile language.",
+                        },
+                        {
+                            "role": "user",
+                            "content": "Can you suggest a good library for data analysis?",
+                        },
                     ],
                     "stream": True,
                 },
@@ -129,7 +134,7 @@ class TestBillingFlows:
                 f"{BACKEND_URL}/api/v1/billing/subscriptions",
                 headers=dev_auth_headers,
             )
-            
+
             # Should return subscription info (even if free tier)
             assert response.status_code == 200
             data = response.json()
@@ -144,7 +149,7 @@ class TestBillingFlows:
                 f"{BACKEND_URL}/api/v1/billing/usage",
                 headers=dev_auth_headers,
             )
-            
+
             # Should return usage data
             assert response.status_code in [200, 404, 500]  # Might not be implemented
 
@@ -156,7 +161,7 @@ class TestBillingFlows:
                 f"{BACKEND_URL}/api/v1/billing/limits",
                 headers=dev_auth_headers,
             )
-            
+
             # Should return limits info
             assert response.status_code in [200, 404, 500]  # Might not be implemented
 
@@ -172,7 +177,7 @@ class TestAgentFlows:
                 f"{BACKEND_URL}/api/v1/agents",
                 headers=dev_auth_headers,
             )
-            
+
             # Should return agents list or 404 if not implemented
             assert response.status_code in [200, 404]
 
@@ -192,16 +197,16 @@ class TestStreamingBehavior:
                     "stream": True,
                 },
             )
-            
+
             assert response.status_code == 200
-            
+
             # Verify content type
             content_type = response.headers.get("content-type", "")
             assert "text/plain" in content_type or "text/event-stream" in content_type
-            
+
             content = response.text
             lines = [line for line in content.strip().split("\n") if line]
-            
+
             # Verify protocol format
             valid_prefixes = ["0:", "2:", "3:", "8:", "9:", "a:", "d:", "e:"]
             for line in lines:
@@ -248,13 +253,18 @@ class TestStreamingBehavior:
                     },
                 )
                 tasks.append(task)
-            
+
             # All should succeed
             import asyncio
+
             responses = await asyncio.gather(*tasks, return_exceptions=True)
-            
-            success_count = sum(1 for r in responses if not isinstance(r, Exception) and r.status_code == 200)
-            assert success_count >= 2, f"Expected at least 2 successful responses, got {success_count}"
+
+            success_count = sum(
+                1 for r in responses if not isinstance(r, Exception) and r.status_code == 200
+            )
+            assert (
+                success_count >= 2
+            ), f"Expected at least 2 successful responses, got {success_count}"
 
 
 class TestErrorRecovery:
@@ -273,7 +283,7 @@ class TestErrorRecovery:
                     "model": "nonexistent-model-xyz",
                 },
             )
-            
+
             # Should either fallback to default or return error
             assert response.status_code in [200, 400, 422]
 
@@ -289,7 +299,7 @@ class TestErrorRecovery:
                     "stream": True,
                 },
             )
-            
+
             # Should reject or handle gracefully
             assert response.status_code in [200, 400, 422]
 
@@ -301,7 +311,7 @@ class TestPerformance:
     async def test_response_time_acceptable(self, dev_auth_headers):
         """Test that response time is acceptable."""
         import time
-        
+
         async with httpx.AsyncClient(timeout=30.0) as client:
             start = time.time()
             response = await client.post(
@@ -313,7 +323,7 @@ class TestPerformance:
                 },
             )
             elapsed = time.time() - start
-            
+
             assert response.status_code == 200
             # First chunk should arrive within 10 seconds
             assert elapsed < 10, f"Response took {elapsed:.2f}s, expected < 10s"
@@ -322,12 +332,12 @@ class TestPerformance:
     async def test_health_endpoint_fast(self):
         """Test that health endpoint responds quickly."""
         import time
-        
+
         async with httpx.AsyncClient(timeout=5.0) as client:
             start = time.time()
             response = await client.get(f"{BACKEND_URL}/health")
             elapsed = time.time() - start
-            
+
             assert response.status_code == 200
             assert elapsed < 1.0, f"Health check took {elapsed:.2f}s, expected < 1s"
 

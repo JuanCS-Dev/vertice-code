@@ -1,8 +1,8 @@
 # VERTICE-CODE: GOOGLE SINGULARITY (ANTIGRAVITY REVISION)
 
-**AUTHOR:** Antigravity (Google Deepmind) vs. Vertice-MAXIMUS  
-**DATE:** 23 JAN 2026  
-**STATUS:** EXECUTION READY  
+**AUTHOR:** Antigravity (Google Deepmind) vs. Vertice-MAXIMUS
+**DATE:** 23 JAN 2026
+**STATUS:** EXECUTION READY
 **CONTEXT:** Synthesis of Blueprint 2026, Codex Revision, and Deep Dive Report.
 
 ---
@@ -46,6 +46,13 @@ We execute in **3 Phases**. No "Weeks". We measure in "Impact".
 
 1.  **ALLOYDB SETUP:** Provision AlloyDB Omni for local dev (replacing SQLite).
 2.  **DEPLOYMENT SCRIPT:** Create `tools/deploy_brain.py` using the Google Cloud SDK to "uplift" the python agents to Vertex AI.
+
+**Status (25 JAN 2026):** `tools/deploy_brain.py` + `apps/agent-gateway/config/engines.json` já implementados (com `--dry-run` offline).
+
+Validação executada:
+```bash
+pytest tests/integration/test_vertex_deploy.py -v -x
+```
 
 ---
 

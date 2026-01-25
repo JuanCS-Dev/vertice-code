@@ -1,7 +1,7 @@
 # 🔥 PLANO DE REFATORAÇÃO BRUTAL - Vertice TUI/CLI
 
-**Data:** 2026-01-22  
-**Análise:** Completa e Brutalmente Honesta  
+**Data:** 2026-01-22
+**Análise:** Completa e Brutalmente Honesta
 **Autor:** Cascade AI
 
 ---
@@ -81,7 +81,7 @@ src/vertice_cli/agents/security.py     + src/vertice_cli/agents/security/
 
 ```
 src/vertice_core/     ← 41,639 linhas - "Domain kernel"
-src/vertice_cli/core/ ← 31,596 linhas - "CLI core" 
+src/vertice_cli/core/ ← 31,596 linhas - "CLI core"
 src/vertice_tui/core/ ← 23,584 linhas - "TUI core"
 ```
 
@@ -264,7 +264,7 @@ Este codebase tem **SINTOMAS CLÁSSICOS** de:
 3. **Copy-paste** em vez de abstração
 4. **Medo de deletar** código antigo
 
-A boa notícia: **O CORE FUNCIONA**. O Coder Agent simplificado prova isso.  
+A boa notícia: **O CORE FUNCIONA**. O Coder Agent simplificado prova isso.
 A má notícia: **60% do código pode ser deletado** sem perda de funcionalidade.
 
 **PRIORIDADE IMEDIATA:** Fase 1 (providers duplicados) - maior impacto, menor risco.
@@ -317,7 +317,7 @@ src/vertice_tui/core/prometheus_client.py
 
 ```
 ✅ VertexAIProvider funciona
-✅ Router funciona  
+✅ Router funciona
 ✅ Coder Agent funciona
 ✅ E2E Tests: 6/8 passando (75%)
 ✅ Code Quality: 100/100 A+

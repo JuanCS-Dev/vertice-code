@@ -273,7 +273,9 @@ class TestCompleteSystemIntegration:
 
     @pytest.mark.asyncio
     @requires_api_keys
-    async def test_vertice_core_prometheus_integration(self, vertice_core_system, prometheus_system):
+    async def test_vertice_core_prometheus_integration(
+        self, vertice_core_system, prometheus_system
+    ):
         """Test Vertice CLI integration with Prometheus."""
         dev_squad = vertice_core_system["dev_squad"]
         prometheus_orchestrator = prometheus_system["orchestrator"]

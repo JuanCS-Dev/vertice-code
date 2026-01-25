@@ -37,18 +37,35 @@ Critérios de aceite:
 - Iniciar backend sem KMS configurado falha com mensagem clara (exceto modo teste).
 - Dados criptografados não se tornam irrecuperáveis por restart.
 
-### PR-2 — Desacoplamento mínimo SaaS↔CLI (pacote core instalável)
+### PR-2 — Desacoplamento SaaS↔CLI (pacote core instalável) — ✅ CONCLUÍDA
 Entregáveis:
-- Criar `packages/vertice-core/` com `pyproject.toml` e `src/vertice_core/`.
-- Mover o mínimo necessário para destravar o backend (começar por `agents.security.patterns` e interfaces).
-- Alterar `vertice-chat-webapp/backend` para depender de `-e ../../packages/vertice-core` e remover hacks de `sys.path`.
-- Atualizar `vertice-chat-webapp/backend/app/core/security.py` para importar `vertice_core.*` (sem `src.*`).
+- Criar `packages/vertice-core/` com `pyproject.toml` e `src/vertice_core/`. — ✅ **DONE**
+- Mover a inteligência unificada para o core. — ✅ **DONE**
+- Backend passa a importar `vertice_core.*` via link simbólico e instalação editável. — ✅ **DONE**
+- **Extra:** Implementação da Soberania do Gemini 3 Flash. — ✅ **DONE**
 
 Critérios de aceite:
-- `rg -n "from src\\.|import src\\." vertice-chat-webapp/backend` retorna vazio.
-- Backend roda com `pip install -e ../../packages/vertice-core` sem PYTHONPATH manual.
+- `rg -n "from src\\.|import src\\." vertice-chat-webapp/backend` retorna vazio. — ✅ **DONE**
+- Backend roda com `pip install -e ../../packages/vertice-core`. — ✅ **DONE**
 
-### PR-3 — `apps/agent-gateway` (runtime) com contrato de streaming
+### PR-2B — Plumbing da Fase 2 (deploy/registry + compat imports) — ✅ CONCLUÍDA (25 JAN 2026)
+Entregáveis:
+- `tools/deploy_brain.py` (suporta `--dry-run`; fail-closed sem Vertex SDK).
+- `apps/agent-gateway/config/engines.json` (registry local).
+- Bibliotecas importáveis:
+  - `agents.*` em `packages/vertice-core/src/agents/` (symlink root `agents`).
+  - `vertice_agents.*` em `packages/vertice-core/src/vertice_agents/` (symlink `src/vertice_agents`).
+- Compat de tipos em `vertice_core.agents.base` (reexports `AgentResponse`, `TaskResult`, `TaskStatus`, etc).
+
+Critérios de aceite (executados offline):
+```bash
+pytest tests/integration/test_vertex_deploy.py -v -x
+pytest tests/integration/test_orchestrator_prometheus.py -v -x
+pytest tests/agents/test_registry.py -v -x
+pytest tests/agents/test_coordinator.py -v -x
+```
+
+### PR-0 — Guardrails de segurança (bloqueio imediato) — 🔄 NEXT
 Entregáveis:
 - Criar `apps/agent-gateway/` (FastAPI) com endpoints mínimos: `/healthz` e `/agui/stream`.
 - Definir contrato de eventos AG‑UI (mínimo viável) em `packages/vertice-core/agui/protocol.py`.
@@ -85,4 +102,3 @@ Critérios de aceite:
 ## Perguntas que ainda precisam de resposta (para não travar no meio)
 - Qual serviço vai hospedar o Next.js: **Firebase App Hosting** é obrigatório já na primeira etapa, ou pode entrar após `agent-gateway` estabilizar?
 - “AG‑UI”: vocês querem aderência estrita a um schema específico (se existir internamente) ou basta um MVP compatível com CopilotKit primeiro?
-

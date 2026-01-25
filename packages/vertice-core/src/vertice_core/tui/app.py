@@ -201,7 +201,6 @@ class VerticeApp(App):
             "gpt-4-turbo": 128_000,
             "claude-3": 200_000,
             "claude-3.5": 200_000,
-            "gemini-3": 1_000_000,
             "gemini-3": 2_000_000,
         }
         # Default to 32k for unknown models
@@ -227,7 +226,10 @@ class VerticeApp(App):
             if self.bridge.is_connected:
                 # Get provider info dynamically
                 provider_name = "LLM"
-                if hasattr(self.bridge.llm, "_vertice_coreent") and self.bridge.llm._vertice_coreent:
+                if (
+                    hasattr(self.bridge.llm, "_vertice_coreent")
+                    and self.bridge.llm._vertice_coreent
+                ):
                     providers = self.bridge.llm._vertice_coreent.get_available_providers()
                     current = self.bridge.llm._vertice_coreent.current_provider
                     if current:

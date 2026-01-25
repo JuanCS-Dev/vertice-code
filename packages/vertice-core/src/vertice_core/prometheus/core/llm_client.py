@@ -107,10 +107,7 @@ class GeminiClient:
         """Standardized Generate with Automatic Tool Use."""
         full_response = ""
         async for chunk in self.generate_stream(
-            prompt=prompt,
-            system_prompt=system_prompt,
-            include_history=include_history,
-            tools=tools
+            prompt=prompt, system_prompt=system_prompt, include_history=include_history, tools=tools
         ):
             if not chunk.startswith("\n[Executing") and not chunk.startswith("[Result:"):
                 full_response += chunk
@@ -152,20 +149,25 @@ class GeminiClient:
                     name = getattr(t, "name", None) or schema.get("name", "unknown_tool")
                     name = name.replace("-", "_")
                     tool_instances[name] = t
-                    functions.append(types.FunctionDeclaration(
-                        name=name,
-                        description=schema.get("description", ""),
-                        parameters=types.Schema(
-                            type="OBJECT",
-                            properties={
-                                k: types.Schema(
-                                    type=v.get("type", "string").upper(),
-                                    description=v.get("description", "")
-                                ) for k, v in schema.get("parameters", {}).get("properties", {}).items()
-                            },
-                            required=schema.get("parameters", {}).get("required", [])
+                    functions.append(
+                        types.FunctionDeclaration(
+                            name=name,
+                            description=schema.get("description", ""),
+                            parameters=types.Schema(
+                                type="OBJECT",
+                                properties={
+                                    k: types.Schema(
+                                        type=v.get("type", "string").upper(),
+                                        description=v.get("description", ""),
+                                    )
+                                    for k, v in schema.get("parameters", {})
+                                    .get("properties", {})
+                                    .items()
+                                },
+                                required=schema.get("parameters", {}).get("required", []),
+                            ),
                         )
-                    ))
+                    )
             if functions:
                 vertex_tools = [types.Tool(function_declarations=functions)]
 
@@ -198,38 +200,50 @@ class GeminiClient:
                         if hasattr(part, "text") and part.text:
                             full_text_acc += part.text
                             yield part.text
-                        
+
                         # Handle Tool Call
                         f_call = getattr(part, "function_call", None)
                         if f_call:
                             has_tool_call = True
                             tool_name = f_call.name
-                            
+
                             args = {}
                             if f_call.args:
                                 for k, v in f_call.args.items():
                                     args[k] = v
-                            
+
                             yield f"\n[Executing Tool: {tool_name}]...\n"
-                            
+
                             if tool_name in tool_instances:
                                 try:
-                                    t_res = await tool_instances[tool_name]._execute_validated(**args)
-                                    output = t_res.data if t_res.success else f"Error: {t_res.error}"
-                                    contents.append(types.Content(
-                                        role="user",
-                                        parts=[types.Part.from_function_response(
-                                            name=tool_name, response={"result": output}
-                                        )]
-                                    ))
+                                    t_res = await tool_instances[tool_name]._execute_validated(
+                                        **args
+                                    )
+                                    output = (
+                                        t_res.data if t_res.success else f"Error: {t_res.error}"
+                                    )
+                                    contents.append(
+                                        types.Content(
+                                            role="user",
+                                            parts=[
+                                                types.Part.from_function_response(
+                                                    name=tool_name, response={"result": output}
+                                                )
+                                            ],
+                                        )
+                                    )
                                     yield f"[Result: {str(output)[:100]}...]\n"
                                 except Exception as e:
-                                    contents.append(types.Content(
-                                        role="user",
-                                        parts=[types.Part.from_function_response(
-                                            name=tool_name, response={"error": str(e)}
-                                        )]
-                                    ))
+                                    contents.append(
+                                        types.Content(
+                                            role="user",
+                                            parts=[
+                                                types.Part.from_function_response(
+                                                    name=tool_name, response={"error": str(e)}
+                                                )
+                                            ],
+                                        )
+                                    )
                                     yield f"[Error: {e}]\n"
                             else:
                                 yield f"[Error: Tool {tool_name} not found]\n"

@@ -400,13 +400,13 @@ class ResponseView(VerticalScroll):
     async def end_thinking(self) -> None:
         """Remove thinking indicator and finalize response."""
         self.is_thinking = False
-        
+
         # Remove from DOM if exists
         targets = self.query("#reasoning-stream")
         if targets:
             for t in targets:
                 t.remove()
-        
+
         # Reset internal reference
         self._thinking_widget = None
 

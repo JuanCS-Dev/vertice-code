@@ -129,13 +129,23 @@ def format_response_in_progress(response_id: str) -> str:
 
 def format_response_failed(response_id: str, error: dict, sequence: int) -> str:
     """Format response.failed event."""
-    data = {"type": "response.failed", "response_id": response_id, "error": error, "sequence": sequence}
+    data = {
+        "type": "response.failed",
+        "response_id": response_id,
+        "error": error,
+        "sequence": sequence,
+    }
     return f"event: response.failed\ndata: {json.dumps(data)}\n\n"
 
 
 def format_response_completed(response_id: str, usage: dict, sequence: int) -> str:
     """Format response.completed event."""
-    data = {"type": "response.completed", "response_id": response_id, "usage": usage, "sequence": sequence}
+    data = {
+        "type": "response.completed",
+        "response_id": response_id,
+        "usage": usage,
+        "sequence": sequence,
+    }
     return f"event: response.completed\ndata: {json.dumps(data)}\n\n"
 
 

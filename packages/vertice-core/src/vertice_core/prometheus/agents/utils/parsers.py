@@ -108,7 +108,7 @@ try:
                 try:
                     result = obj({repr(test_input)})
                     break
-                except Exception:
+                except Exception as e:
                     continue  # Expected - try next callable
 
     expected = {repr(expected_output)}

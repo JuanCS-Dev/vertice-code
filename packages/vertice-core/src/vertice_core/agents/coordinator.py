@@ -32,6 +32,7 @@ Soli Deo Gloria
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from dataclasses import dataclass, field
 from enum import Enum, auto
@@ -441,6 +442,11 @@ class AgencyCoordinator:
         context: Optional[Dict[str, Any]] = None,
     ) -> AsyncIterator[str]:
         """Execute via OrchestratorAgent."""
+        if self._vertice_coreent is None and self._mcp_client is None:
+            yield "[Core] OrchestratorAgent requires configured clients (llm_client and/or mcp_client)\n"
+            yield f"[Fallback] Processing: {request[:100]}...\n"
+            return
+
         orch = self._get_core_orchestrator()
 
         if orch is None:

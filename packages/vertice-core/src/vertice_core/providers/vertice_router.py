@@ -134,14 +134,14 @@ class VerticeRouter:
         "azure-openai": 3,  # Enterprise GPT-4 via Azure
         "groq": 4,  # Ultra-fast fallback
         "cerebras": 5,  # Fastest fallback
-        "mistral": 6,  
+        "mistral": 6,
         "openrouter": 7,
         "gemini": 8,  # Legacy API
     }
 
     PROVIDER_PRIORITY_FREE = {
         "vertex-ai": 1,  # Now preferred even in "free" contexts due to efficiency
-        "groq": 2,  
+        "groq": 2,
         "cerebras": 3,
         "mistral": 4,
         "openrouter": 5,
@@ -214,7 +214,10 @@ class VerticeRouter:
             "gemini": (GeminiProvider, {}),  # Legacy - prefer vertex-ai
             # Enterprise Providers (Your Infrastructure)
             "anthropic-vertex": (AnthropicVertexProvider, {"model_name": "sonnet-4.5"}),
-            "vertex-ai": (VertexAIProvider, {"model_name": "flash"}),  # Gemini 3 Flash (Sovereign Default)
+            "vertex-ai": (
+                VertexAIProvider,
+                {"model_name": "flash"},
+            ),  # Gemini 3 Flash (Sovereign Default)
             "azure-openai": (AzureOpenAIProvider, {"deployment": "gpt4o-mini"}),
         }
 
