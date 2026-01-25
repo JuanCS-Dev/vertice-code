@@ -65,15 +65,22 @@ pytest tests/agents/test_registry.py -v -x
 pytest tests/agents/test_coordinator.py -v -x
 ```
 
-### PR-0 — Guardrails de segurança (bloqueio imediato) — 🔄 NEXT
+### PR-3 — AG‑UI Backend‑Only MVP (SSE) — ✅ CONCLUÍDA (25 JAN 2026)
 Entregáveis:
-- Criar `apps/agent-gateway/` (FastAPI) com endpoints mínimos: `/healthz` e `/agui/stream`.
-- Definir contrato de eventos AG‑UI (mínimo viável) em `packages/vertice-core/agui/protocol.py`.
-- Implementar um adapter `ag_ui_adk` (mesmo que inicialmente com “mock agent”) para estabilizar o streaming.
+- Core protocol (schema estável MVP):
+  - `packages/vertice-core/src/vertice_core/agui/protocol.py` (`delta|final|tool|error` + encoder SSE).
+  - `packages/vertice-core/src/vertice_core/agui/__init__.py` (exports).
+- Gateway (mock runtime):
+  - `apps/agent-gateway/app/main.py`: `GET /agui/stream` (SSE) + `GET /healthz`.
+- Testes:
+  - `tests/unit/test_agui_protocol.py` (contrato/serialização SSE).
+  - `tests/integration/test_agent_gateway_agui_stream.py` (stream + validação Pydantic do envelope).
 
-Critérios de aceite:
-- Um cliente (web/tui) consegue consumir `/agui/stream` e renderizar um stream consistente.
-- Teste de contrato básico para o schema (unit).
+Critérios de aceite (executados offline):
+```bash
+pytest tests/unit/test_agui_protocol.py -v -x
+pytest tests/integration/test_agent_gateway_agui_stream.py -v -x
+```
 
 ### PR-4 — AlloyDB desde o início (fundação de memória)
 Entregáveis:

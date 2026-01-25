@@ -31,7 +31,7 @@ We will reorganize the codebase into **3 Sovereign Territories**:
 *   **Content:**
     *   `/agents` (The Brains: Security, Coder, Architect logic).
     *   `/memory` (AlloyDB/Vector connectors).
-    *   `/protocol` (The AG-UI Definitions).
+    *   `/protocol` (The AG-UI Definitions) — hoje em `packages/vertice-core/src/vertice_core/agui/`.
 *   **Rule:** Can only import external PyPI libs. Cannot import *anything* else from the repo.
 
 ### 🚀 TERRITORY 2: `apps/` (The Deployables)

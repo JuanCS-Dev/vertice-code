@@ -116,3 +116,24 @@ pytest tests/agents/test_registry.py -v -x
 pytest tests/agents/test_coordinator.py -v -x
 python -m compileall -q packages/vertice-core/src/agents packages/vertice-core/src/vertice_agents
 ```
+
+## Pós‑Op: Validação Executada (25 JAN 2026) — Fase 3 (AG‑UI) Backend‑Only MVP
+
+Decisões travadas implementadas:
+1. SSE em `GET /agui/stream`
+2. Schema MVP estável: `delta|final|tool|error`
+3. Escopo backend-only nesta PR: gateway + core protocol + testes
+
+Entregáveis:
+- `apps/agent-gateway/app/main.py` (`/healthz` + `/agui/stream`)
+- `packages/vertice-core/src/vertice_core/agui/protocol.py` (+ `packages/vertice-core/src/vertice_core/agui/__init__.py`)
+- Testes:
+  - `tests/unit/test_agui_protocol.py`
+  - `tests/integration/test_agent_gateway_agui_stream.py`
+
+Validação executada (offline):
+```bash
+pytest tests/unit/test_agui_protocol.py -v -x
+pytest tests/integration/test_agent_gateway_agui_stream.py -v -x
+python -m compileall -q apps/agent-gateway/app/main.py packages/vertice-core/src/vertice_core/agui
+```

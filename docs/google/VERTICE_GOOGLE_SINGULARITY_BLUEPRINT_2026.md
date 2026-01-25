@@ -79,6 +79,11 @@ python -m compileall -q packages/vertice-core/src/agents packages/vertice-core/s
 ```
 
 ### FASE 3: A RECONEXÃO NERVOSA (AG-UI)
+**Status (25/01/2026):** MVP backend-only entregue (SSE `GET /agui/stream` + contrato `delta|final|tool|error`).
+```bash
+pytest tests/unit/test_agui_protocol.py -v -x
+pytest tests/integration/test_agent_gateway_agui_stream.py -v -x
+```
 1.  **Backend Adapter:** Implementar o wrapper `ag_ui_adk` no servico Python para traduzir pensamentos do Gemini em eventos AG-UI.
 2.  **Frontend Wiring:** Instalar `@copilotkit/react-core` e `@copilotkit/react-ui`. Substituir o `chat-interface.tsx` manual pelos componentes CopilotKit.
 

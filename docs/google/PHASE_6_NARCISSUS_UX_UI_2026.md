@@ -71,8 +71,11 @@ Painel `advanced_command_center` para governança.
 Para a UI Narcissus consumir o “Cérebro” via streaming, o repo já possui:
 - `apps/agent-gateway/config/engines.json` (registry local de engines).
 - `tools/deploy_brain.py` (gera/atualiza o registry; `--dry-run` offline).
+- `apps/agent-gateway/app/main.py` com `GET /agui/stream` (SSE) + contrato MVP `delta|final|tool|error` em `packages/vertice-core/src/vertice_core/agui/protocol.py`.
 
 Smoke checks executados (offline):
 ```bash
 pytest tests/integration/test_vertex_deploy.py -v -x
+pytest tests/integration/test_agent_gateway_agui_stream.py -v -x
+pytest tests/unit/test_agui_protocol.py -v -x
 ```

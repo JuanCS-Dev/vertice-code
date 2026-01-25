@@ -68,16 +68,19 @@ Regra: cada item abaixo vira **uma PR pequena** (ideal 1–2h) e respeita `docs/
 ## PR-3 — `apps/agent-gateway` (MVP) + contrato de streaming
 
 ### PR-3A: Criar `apps/agent-gateway` com `/healthz`
-- **Arquivos-alvo (novos):** `apps/agent-gateway/main.py` (+ `pyproject.toml`/`requirements.txt` mínimos)
-- **Aceite:** rodar localmente e responder `200` em `/healthz` (comando/documentado)
+- **Arquivos-alvo:** `apps/agent-gateway/app/main.py`
+- **Status:** ✅ DONE (25/01/2026)
+- **Aceite (executado):** `pytest tests/integration/test_agent_gateway_agui_stream.py -v -x` (valida `/healthz` via ASGI)
 
 ### PR-3B: Contrato AG‑UI mínimo (schemas) no `vertice_core`
 - **Arquivos-alvo:** `packages/vertice-core/src/vertice_core/agui/protocol.py`
-- **Aceite:** teste unitário de schema/serialização (arquivo único)
+- **Status:** ✅ DONE (25/01/2026)
+- **Aceite (executado):** `pytest tests/unit/test_agui_protocol.py -v -x`
 
 ### PR-3C: Endpoint `/agui/stream` com “mock agent” (sem Vertex ainda)
-- **Arquivos-alvo:** `apps/agent-gateway/main.py` + `packages/vertice-core/...`
-- **Aceite:** curl/cliente recebe stream com eventos estáveis (documentar 1 comando)
+- **Arquivos-alvo:** `apps/agent-gateway/app/main.py` + `packages/vertice-core/src/vertice_core/agui/protocol.py`
+- **Status:** ✅ DONE (25/01/2026)
+- **Aceite (executado):** `pytest tests/integration/test_agent_gateway_agui_stream.py -v -x`
 
 ## PR-4 — AlloyDB desde o início (fundação)
 

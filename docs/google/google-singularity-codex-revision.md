@@ -117,8 +117,14 @@ python -m compileall -q packages/vertice-core/src/agents packages/vertice-core/s
    - Garantir parity visual com Claude Code desktop.
 
 4. **Protocol Compliance**
-   - Definir contrato AG-UI (schemas JSON) em `packages/vertice-core/agui/protocol.py`.
+   - Definir contrato AG-UI (schemas JSON) em `packages/vertice-core/src/vertice_core/agui/protocol.py`.
    - Adicionar testes de contrato (`tests/e2e/agui/test_protocol_conformance.py`).
+
+**Status (25/01/2026, backend-only MVP entregue):**
+- `GET /agui/stream` (SSE) implementado em `apps/agent-gateway/app/main.py` com eventos `delta|final|tool|error`.
+- Contrato MVP em `packages/vertice-core/src/vertice_core/agui/protocol.py` + testes:
+  - `pytest tests/unit/test_agui_protocol.py -v -x`
+  - `pytest tests/integration/test_agent_gateway_agui_stream.py -v -x`
 
 **Critérios de aceite**
 - Frontend CopilotKit streaming sem fallback manual.

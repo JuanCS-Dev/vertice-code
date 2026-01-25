@@ -133,3 +133,19 @@ Validação executada (offline):
 pytest tests/integration/test_vertex_deploy.py -v -x
 pytest tests/integration/test_orchestrator_prometheus.py -v -x
 ```
+
+## Update de Execução (25 JAN 2026) — Fase 3 (AG‑UI) Backend‑Only MVP
+
+Entregue (backend-only):
+- Runtime SSE: `GET /agui/stream` em `apps/agent-gateway/app/main.py`
+- Contrato MVP (schema estável): `packages/vertice-core/src/vertice_core/agui/protocol.py`
+  - Tipos: `delta|final|tool|error`
+
+Validação executada (offline):
+```bash
+pytest tests/unit/test_agui_protocol.py -v -x
+pytest tests/integration/test_agent_gateway_agui_stream.py -v -x
+python -m compileall -q apps/agent-gateway/app/main.py packages/vertice-core/src/vertice_core/agui
+```
+
+Próximo passo (fora desta PR): wiring do frontend (CopilotKit) para consumir o runtime do gateway.

@@ -54,6 +54,14 @@ Validação executada:
 pytest tests/integration/test_vertex_deploy.py -v -x
 ```
 
+**Status (25 JAN 2026):** Fase 3 (AG‑UI) backend-only MVP entregue (SSE `GET /agui/stream` + schema estável `delta|final|tool|error`).
+
+Validação executada (offline):
+```bash
+pytest tests/unit/test_agui_protocol.py -v -x
+pytest tests/integration/test_agent_gateway_agui_stream.py -v -x
+```
+
 ---
 
 ## 3. IMMEDIATE EXECUTION STEPS

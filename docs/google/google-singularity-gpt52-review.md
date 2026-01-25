@@ -45,6 +45,21 @@ pytest tests/agents/test_registry.py -v -x
 pytest tests/agents/test_coordinator.py -v -x
 ```
 
+## Update (25 JAN 2026) — Fase 3 (AG‑UI) Backend‑Only MVP
+
+Implementado e validado offline:
+- `GET /agui/stream` (SSE) em `apps/agent-gateway/app/main.py` com eventos MVP estáveis: `delta|final|tool|error`.
+- Contrato de protocolo em `packages/vertice-core/src/vertice_core/agui/protocol.py` (+ exports em `packages/vertice-core/src/vertice_core/agui/__init__.py`).
+- Testes:
+  - `tests/unit/test_agui_protocol.py`
+  - `tests/integration/test_agent_gateway_agui_stream.py`
+
+Comandos executados:
+```bash
+pytest tests/unit/test_agui_protocol.py -v -x
+pytest tests/integration/test_agent_gateway_agui_stream.py -v -x
+```
+
 ## Convergência entre os documentos (o núcleo está alinhado)
 Os 7 docs apontam para a mesma sequência macro:
 - **Fase 1 (Saneamento):** eliminar diretório fantasma `src/vertice-chat-webapp`, desacoplar imports e criar `packages/vertice-core`.

@@ -6,6 +6,21 @@
 
 ---
 
+## Update (25 JAN 2026) — Fase 3 (AG‑UI) Backend‑Only MVP ✅
+
+Entregue no repo (sem frontend/CopilotKit nesta etapa):
+- SSE em `GET /agui/stream` (Cloud Run gateway): `apps/agent-gateway/app/main.py`
+- Contrato MVP do protocolo (schema estável): `packages/vertice-core/src/vertice_core/agui/protocol.py`
+  - Tipos: `delta|final|tool|error`
+  - Encoder SSE: `sse_encode_event()`
+
+Validação executada (offline):
+```bash
+pytest tests/unit/test_agui_protocol.py -v -x
+pytest tests/integration/test_agent_gateway_agui_stream.py -v -x
+python -m compileall -q apps/agent-gateway/app/main.py packages/vertice-core/src/vertice_core/agui
+```
+
 ## 1. THE LIBERATION MANIFESTO
 **The Problem:** You want to create code, but you are currently managing a distributed system (Docker, Networks, Volumes, Sandboxes). Every time you want to "just run" an app, you have to spin up an orchestrator.
 **The Solution:** We shift the weight of the world to Google's shoulders. We stop *hosting* software and start *composing* services.
