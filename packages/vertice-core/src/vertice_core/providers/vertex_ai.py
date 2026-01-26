@@ -5,10 +5,8 @@ Usa ADC (Application Default Credentials) - sem necessidade de API key.
 Inferência via Vertex AI, não Google AI Studio.
 
 Modelos suportados (2026, Vertex AI):
-- gemini-3-pro
-- gemini-3-flash
-- gemini-3-pro-preview
-- gemini-3-flash-preview
+- gemini-3-pro-preview (global endpoint)
+- gemini-3-flash-preview (global endpoint)
 """
 
 from __future__ import annotations
@@ -46,10 +44,12 @@ class VertexAIProvider:
     """
 
     MODELS = {
-        "flash": "gemini-3-flash",
-        "pro": "gemini-3-pro",
-        "gemini-3-flash": "gemini-3-flash",
-        "gemini-3-pro": "gemini-3-pro",
+        # Gemini 3 (Preview) on Vertex AI:
+        # Docs 2026: Gemini 3 Pro/Flash Preview are only available on the global endpoint.
+        "flash": "gemini-3-flash-preview",
+        "pro": "gemini-3-pro-preview",
+        "gemini-3-flash": "gemini-3-flash-preview",
+        "gemini-3-pro": "gemini-3-pro-preview",
         "gemini-3-flash-preview": "gemini-3-flash-preview",
         "gemini-3-pro-preview": "gemini-3-pro-preview",
     }
@@ -77,8 +77,6 @@ class VertexAIProvider:
 
     def _validate_model_id(self) -> None:
         allowed = {
-            "gemini-3-pro",
-            "gemini-3-flash",
             "gemini-3-pro-preview",
             "gemini-3-flash-preview",
         }

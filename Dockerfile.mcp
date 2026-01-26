@@ -5,17 +5,18 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    curl \
+    git \
+    ripgrep \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
-COPY requirements.txt requirements.txt
-COPY pyproject.toml ./
+# Copy vertice-core + MCP runtime deps (keep image small and cache-friendly)
+COPY packages/vertice-core/ packages/vertice-core/
+COPY scripts/mcp/requirements.txt scripts/mcp/requirements.txt
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy project files
-COPY . .
+# Install dependencies
+RUN pip install --no-cache-dir -r scripts/mcp/requirements.txt \
+    && pip install --no-cache-dir -e packages/vertice-core
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
@@ -28,4 +29,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:$PORT/health || exit 1
 
 # Run the MCP server
-ENTRYPOINT ["python", "scripts/mcp/simple_mcp_server.py"]
+ENTRYPOINT ["python", "-m", "vertice_core.prometheus.mcp_server.run_server"]

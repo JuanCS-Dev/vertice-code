@@ -16,8 +16,8 @@ from datetime import datetime
 from aiohttp import web, WSMsgType
 import aiohttp_cors
 
-from prometheus.mcp_server.server import PrometheusMCPServer
-from prometheus.mcp_server.config import MCPServerConfig
+from .server import PrometheusMCPServer
+from .config import MCPServerConfig
 
 logger = logging.getLogger(__name__)
 
@@ -154,14 +154,7 @@ class MCPHTTPServer:
         http_stats = {
             "http_requests": self.http_requests,
             "http_errors": self.http_errors,
-            "uptime_seconds": (
-                datetime.now()
-                - datetime.fromisoformat(
-                    server_stats["config"]["instance_id"].split("-")[-1]
-                    if "-" in server_stats["config"]["instance_id"]
-                    else "2024-01-01"
-                )
-            ).total_seconds(),
+            "uptime_seconds": server_stats.get("uptime_seconds", 0),
         }
 
         status_info = {

@@ -41,18 +41,18 @@ echo -e "\n${YELLOW}[2/5] Deploying Backend (FastAPI) to Cloud Run...${NC}"
 cd vertice-chat-webapp/backend
 
 # Create Artifact Registry if needed
-gcloud artifacts repositories create vertice-repo \
+gcloud artifacts repositories create vertice-cloud \
     --repository-format=docker \
     --location=$REGION \
     --description="Vertice AI Docker Repository" \
     --quiet || true
 
 echo "Building and Pushing Container..."
-gcloud builds submit --tag $REGION-docker.pkg.dev/$PROJECT_ID/vertice-repo/$BACKEND_SERVICE:latest .
+gcloud builds submit --tag $REGION-docker.pkg.dev/$PROJECT_ID/vertice-cloud/$BACKEND_SERVICE:latest .
 
 echo "Deploying to Cloud Run..."
 gcloud run deploy $BACKEND_SERVICE \
-    --image $REGION-docker.pkg.dev/$PROJECT_ID/vertice-repo/$BACKEND_SERVICE:latest \
+    --image $REGION-docker.pkg.dev/$PROJECT_ID/vertice-cloud/$BACKEND_SERVICE:latest \
     --platform managed \
     --region $REGION \
     --allow-unauthenticated \

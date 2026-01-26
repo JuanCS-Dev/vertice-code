@@ -10,13 +10,14 @@ May 2026 - JuanCS Dev & Claude Opus 4.5
 
 import json
 import logging
+import importlib
 from typing import Dict, Optional, Any, Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 import uuid
 
-from prometheus.mcp_server.config import MCPServerConfig
-from prometheus.mcp_server.tools.registry import get_tool_registry
+from .config import MCPServerConfig
+from .tools.registry import get_tool_registry
 
 # Import tools to register them
 
@@ -82,8 +83,70 @@ class PrometheusMCPServer:
 
         # Initialize handlers
         self._register_handlers()
+        self._bootstrap_tools()
 
         self.logger.info(f"Initialized MCP Server {config.instance_id}")
+
+    def _bootstrap_tools(self) -> None:
+        """
+        Import tool modules to populate the global ToolRegistry.
+
+        Tools self-register at import-time via tools.registry.register_tool(...).
+        This keeps the server usable out-of-the-box for Cloud Run.
+        """
+        tools_pkg = f"{__package__}.tools"
+        modules: list[str] = []
+
+        if self.config.enable_system_tools:
+            modules.append(f"{tools_pkg}.system_tools")
+        if self.config.enable_context_tools:
+            modules.append(f"{tools_pkg}.context_tools")
+
+        if self.config.enable_file_tools:
+            modules.extend(
+                [
+                    f"{tools_pkg}.file_dir_tools",
+                    f"{tools_pkg}.file_rw_tools",
+                    f"{tools_pkg}.file_mgmt_tools",
+                    f"{tools_pkg}.multi_edit_tools",
+                    f"{tools_pkg}.file_tools",
+                ]
+            )
+
+        if self.config.enable_git_tools:
+            modules.append(f"{tools_pkg}.git_tools")
+
+        if self.config.enable_web_tools:
+            modules.append(f"{tools_pkg}.web_tools")
+
+        if self.config.enable_search_tools:
+            modules.append(f"{tools_pkg}.search_tools")
+
+        if self.config.enable_media_tools:
+            modules.append(f"{tools_pkg}.media_tools")
+
+        if self.config.enable_notebook_tools:
+            modules.append(f"{tools_pkg}.notebook_tools")
+
+        if self.config.enable_prometheus_tools:
+            modules.append(f"{tools_pkg}.prometheus_tools")
+
+        if self.config.enable_advanced_tools:
+            modules.append(f"{tools_pkg}.agent_tools")
+            modules.append(f"{tools_pkg}.plan_mode_tools")
+            modules.append(f"{tools_pkg}.advanced_tools")
+
+        if self.config.enable_execution_tools:
+            modules.append(f"{tools_pkg}.execution_tools")
+
+        for module in modules:
+            try:
+                importlib.import_module(module)
+            except Exception:
+                self.logger.warning(f"Tool module failed to import: {module}", exc_info=True)
+
+        tool_count = get_tool_registry().get_tool_count()
+        self.logger.info(f"ToolRegistry ready: {tool_count} tool(s) loaded")
 
     def _register_handlers(self):
         """Register MCP method handlers."""

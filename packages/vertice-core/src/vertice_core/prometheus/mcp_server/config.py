@@ -13,6 +13,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 
+def _env_bool(name: str, default: bool) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
 @dataclass
 class MCPServerConfig:
     """
@@ -43,7 +50,7 @@ class MCPServerConfig:
     enable_web_tools: bool = True
     enable_media_tools: bool = True
     enable_prometheus_tools: bool = True
-    enable_execution_tools: bool = True  # Security-sensitive
+    enable_execution_tools: bool = False  # Security-sensitive (explicit opt-in via env)
     enable_notebook_tools: bool = True
     enable_context_tools: bool = True
     enable_search_tools: bool = True
@@ -96,12 +103,13 @@ class MCPServerConfig:
     def from_env(cls) -> "MCPServerConfig":
         """Create configuration from environment variables."""
         return cls(
-            host=os.getenv("MCP_HOST", "localhost"),
-            port=int(os.getenv("MCP_PORT", "3000")),
+            host=os.getenv("MCP_HOST") or os.getenv("HOST") or "localhost",
+            port=int(os.getenv("MCP_PORT") or os.getenv("PORT") or "3000"),
             log_level=os.getenv("MCP_LOG_LEVEL", "INFO"),
             log_file=os.getenv("MCP_LOG_FILE"),
             require_auth=os.getenv("MCP_REQUIRE_AUTH", "false").lower() == "true",
             api_keys=os.getenv("MCP_API_KEYS", "").split(",") if os.getenv("MCP_API_KEYS") else [],
+            enable_execution_tools=_env_bool("MCP_ENABLE_EXECUTION_TOOLS", False),
             enable_distributed_features=os.getenv("MCP_DISTRIBUTED", "false").lower() == "true",
             discovery_endpoints=(
                 os.getenv("MCP_DISCOVERY_ENDPOINTS", "").split(",")

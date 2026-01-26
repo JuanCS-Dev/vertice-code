@@ -130,9 +130,9 @@ def _create_reasoning_engine(
 
         default_requirements = [
             # Best practice (Google): pin key deps for reproducible builds.
-            "google-cloud-aiplatform==1.115.0",
+            "google-cloud-aiplatform==1.130.0",
             "cloudpickle==3.1.1",
-            "google-genai==1.2.0",
+            "google-genai==1.60.0",
             "google-cloud-alloydb-connector",
             "pydantic>=2.5.0",
             "async-lru",
@@ -199,6 +199,13 @@ def deploy_brain(
     sys_version: Optional[str] = None,
 ) -> DeployedEngine:
     _ensure_src_on_path()
+
+    if location.strip().lower() == "global":
+        raise DeployBrainError(
+            "Invalid location='global' for Reasoning Engine runtime. "
+            "Reasoning Engines are regional resources (e.g. us-central1). "
+            "Keep model inference on the global endpoint separately."
+        )
 
     agent_class = _load_agent_class(agent)
     final_display_name = display_name or f"vertice-{agent}"

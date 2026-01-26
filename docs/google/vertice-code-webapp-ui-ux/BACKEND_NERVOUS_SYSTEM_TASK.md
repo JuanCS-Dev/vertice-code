@@ -40,6 +40,8 @@ Segurança:
 Status: ✅ Implementado
 - Provider: `packages/vertice-core/src/vertice_core/providers/vertex_ai.py`
   - Quando thinking está habilitado e o SDK suporta, thought parts são emitidas como `"<thought>...</thought>"`.
+  - Model IDs (Vertex, 2026): defaults para `gemini-3-pro-preview` / `gemini-3-flash-preview` com `location="global"`,
+    evitando 404 por usar IDs sem `-preview`.
 - Gateway: `apps/agent-gateway/api/stream.py`
   - Split incremental por tags `<thought>` (tolerante a “chunk boundaries”).
   - Final sempre remove blocos de thought do `final.text` (`strip_thought_blocks()`), evitando “vazamento” no output funcional.
@@ -89,3 +91,29 @@ Risco/controlos:
 **Assinado,**
 *Vertice-MAXIMUS*
 *Garantindo que o stream não seja apenas rápido, mas inteligente.*
+
+---
+
+# 5. MCP ON CLOUD RUN (Infra Nervosa 100% Google)
+
+Objetivo: colocar o **MCP Server real** (Prometheus interno) em Cloud Run com build reprodutível, empacotamento
+packaging-safe e tool registry funcional, sem confundir com “Prometheus” comercial.
+
+Status: ✅ Infra corrigida + validação local
+
+Entregas:
+- `Dockerfile.mcp` agora sobe o server real: `python -m vertice_core.prometheus.mcp_server.run_server`
+- `cloudbuild.mcp.yaml` corrigido para usar `Dockerfile.mcp` no contexto `.` (raiz do monorepo)
+- MCP server agora é **packaging-safe** (sem `sys.path.insert` e sem imports `prometheus.mcp_server.*`)
+- ToolRegistry passa a carregar tools automaticamente (bootstrap no startup)
+- Segurança: `enable_execution_tools` agora é **opt-in** via `MCP_ENABLE_EXECUTION_TOOLS=1`
+
+Testes (offline, sem sockets neste ambiente):
+- ✅ `pytest tests/unit/prometheus/test_mcp_server_http_smoke.py -v -x` (1 passed)
+
+Relatório detalhado (audit + checklist Cloud Build/Run/Observability):
+- `docs/google/MCP_CLOUD_RUN_INFRA_AUDIT_2026.md`
+
+Pendências (testes “real cloud”, bloqueadas por DNS neste ambiente):
+- Build/Push via Cloud Build + deploy em Cloud Run (dependem de DNS para APIs Google).
+- Smoke tests online (`/health`, JSON-RPC `initialize`, `tools/list`) e verificação de logs/métricas no Cloud Monitoring.

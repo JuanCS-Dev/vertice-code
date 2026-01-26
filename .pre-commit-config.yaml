@@ -39,6 +39,28 @@ repos:
   # Local custom hooks - Tech Debt Prevention
   - repo: local
     hooks:
+      - id: gcp-deploy-preflight
+        name: GCP deploy preflight (fast)
+        entry: python scripts/gcp_deploy_preflight.py --stage commit
+        language: system
+        pass_filenames: true
+        types: [text]
+        stages: [commit]
+
+      - id: gcp-deploy-preflight-push
+        name: GCP deploy preflight (push)
+        entry: python scripts/gcp_deploy_preflight.py --stage push --full
+        language: system
+        pass_filenames: false
+        stages: [push]
+
+      - id: gcp-deploy-smoke-tests
+        name: GCP deploy smoke tests (push)
+        entry: pytest -q tests/unit/test_gcp_deploy_guardrails.py
+        language: system
+        pass_filenames: false
+        stages: [push]
+
       - id: file-size-check
         name: Check file size (<1000 lines)
         entry: python scripts/check_file_size.py

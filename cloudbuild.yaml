@@ -52,7 +52,7 @@ steps:
       - '-t'
       - '${_REGION}-docker.pkg.dev/$PROJECT_ID/vertice-cloud/mcp-server:latest'
       - '-f'
-      - 'prometheus/Dockerfile'
+      - 'Dockerfile.mcp'
       - '.' # Build context must be root to access all modules
     dir: '.'
 
@@ -91,7 +91,7 @@ steps:
       - 'managed'
       - '--allow-unauthenticated'
       - '--port'
-      - '3000'
+      - '8080'
       - '--memory'
       - '2Gi'
       - '--cpu'
@@ -112,17 +112,16 @@ steps:
         # Get MCP URL
         MCP_URL=$(gcloud run services describe vertice-mcp --region ${_REGION} --format='value(status.url)')
 
-        gcloud run deploy vertice-backend \
+        gcloud run deploy vertice-agent-gateway \
           --image ${_REGION}-docker.pkg.dev/$PROJECT_ID/vertice-cloud/backend:$COMMIT_SHA \
           --region ${_REGION} \
           --platform managed \
           --allow-unauthenticated \
-          --port 8000 \
+          --port 8080 \
           --network default \
           --subnet default \
           --vpc-egress private-ranges-only \
-          --set-env-vars NODE_ENV=production,MCP_SERVER_URL=$$MCP_URL \
-          --set-secrets DATABASE_URL=DATABASE_URL:latest,REDIS_URL=REDIS_URL:latest
+          --set-env-vars ENVIRONMENT=production,MAXIMUS_MCP_URL=$$MCP_URL/mcp
     waitFor: ['deploy-mcp']
 
   # ============================================
@@ -135,7 +134,7 @@ steps:
       - '-c'
       - |
         # Get Backend URL
-        BACKEND_URL=$(gcloud run services describe vertice-backend --region ${_REGION} --format='value(status.url)')
+        BACKEND_URL=$(gcloud run services describe vertice-agent-gateway --region ${_REGION} --format='value(status.url)')
 
         gcloud run deploy vertice-frontend \
           --image ${_REGION}-docker.pkg.dev/$PROJECT_ID/vertice-cloud/frontend:$COMMIT_SHA \
@@ -159,7 +158,7 @@ images:
 
 substitutions:
   _REGION: 'us-central1'
-  _API_URL: 'https://vertice-backend-xxxxxxx-uc.a.run.app'
+  _API_URL: 'https://vertice-agent-gateway-xxxxxxx-uc.a.run.app'
   _FIREBASE_API_KEY: 'MUST_BE_PROVIDED'
   _FIREBASE_AUTH_DOMAIN: 'MUST_BE_PROVIDED'
   _FIREBASE_PROJECT_ID: 'MUST_BE_PROVIDED'

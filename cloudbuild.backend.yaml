@@ -3,12 +3,12 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'us-central1-docker.pkg.dev/vertice-ai/cloud-run-source-deploy/vertice-backend:latest'
+      - 'us-central1-docker.pkg.dev/vertice-ai/vertice-cloud/backend:latest'
       - '-f'
       - 'Dockerfile.backend'
       - '.'
 
 images:
-  - 'us-central1-docker.pkg.dev/vertice-ai/cloud-run-source-deploy/vertice-backend:latest'
+  - 'us-central1-docker.pkg.dev/vertice-ai/vertice-cloud/backend:latest'
 
 timeout: 1200s

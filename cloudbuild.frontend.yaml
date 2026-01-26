@@ -3,7 +3,7 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'us-central1-docker.pkg.dev/vertice-ai/cloud-run-source-deploy/vertice-frontend:latest'
+      - 'us-central1-docker.pkg.dev/vertice-ai/vertice-cloud/frontend:latest'
       - '-f'
       - 'vertice-chat-webapp/frontend/Dockerfile'
       - '--build-arg'
@@ -23,6 +23,6 @@ steps:
       - 'vertice-chat-webapp/frontend'
 
 images:
-  - 'us-central1-docker.pkg.dev/vertice-ai/cloud-run-source-deploy/vertice-frontend:latest'
+  - 'us-central1-docker.pkg.dev/vertice-ai/vertice-cloud/frontend:latest'
 
 timeout: 1200s

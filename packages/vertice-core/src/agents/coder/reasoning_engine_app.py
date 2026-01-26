@@ -4,7 +4,7 @@ Implements the minimal `Queryable` protocol expected by:
 `vertexai.preview.reasoning_engines.ReasoningEngine.create(...)`.
 
 No local code execution is performed. Inference is delegated to Vertex AI
-via the Google Gen AI SDK (Gemini 3 only).
+via the Google Gen AI SDK (Gemini 3 only, global endpoint).
 """
 
 from __future__ import annotations

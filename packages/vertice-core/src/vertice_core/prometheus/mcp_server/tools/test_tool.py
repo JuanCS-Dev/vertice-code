@@ -2,7 +2,7 @@
 Test tool for MCP Universal Gateway integration
 """
 
-from prometheus.mcp_server.tools.base import BaseTool, ToolDefinition, ToolResult, ToolCategory
+from .base import BaseTool, ToolCategory, ToolDefinition, ToolResult
 
 
 class TestTool(BaseTool):

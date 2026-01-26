@@ -52,7 +52,7 @@ steps:
       - '-t'
       - 'us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/mcp-server:latest'
       - '-f'
-      - 'prometheus/Dockerfile'
+      - 'Dockerfile.mcp'
       - '.' # Build context must be root to access all modules
     dir: '.'
 
@@ -91,7 +91,7 @@ steps:
       - 'managed'
       - '--allow-unauthenticated'
       - '--port'
-      - '3000'
+      - '8080'
       - '--memory'
       - '2Gi'
       - '--cpu'

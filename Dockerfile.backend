@@ -7,15 +7,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential curl \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy local packages for dependency resolution
+COPY packages/ packages/
+
 # Install python dependencies from the correct path
-COPY vertice-chat-webapp/backend/requirements.txt .
+COPY apps/agent-gateway/requirements.txt .
+# Install dependencies, including local vertice-core
+# We use --no-cache-dir to keep image small
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy backend application code from the correct path
-COPY vertice-chat-webapp/backend/ .
+COPY apps/agent-gateway/ .
 
 ENV PORT=8080
 ENV PYTHONUNBUFFERED=1
 
 # Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port \"${PORT:-8080}\""]

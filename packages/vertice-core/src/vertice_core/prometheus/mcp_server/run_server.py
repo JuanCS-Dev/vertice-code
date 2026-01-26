@@ -10,15 +10,11 @@ import asyncio
 import logging
 import argparse
 import sys
-from pathlib import Path
+from typing import Optional
 
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
-# Import diretamente do mcp_server (evita prometheus/__init__.py)
-from prometheus.mcp_server.config import MCPServerConfig
-from prometheus.mcp_server.server import PrometheusMCPServer
-from prometheus.mcp_server.transport import MCPHTTPServer
+from .config import MCPServerConfig
+from .server import PrometheusMCPServer
+from .transport import MCPHTTPServer
 
 logger = logging.getLogger(__name__)
 
@@ -26,26 +22,35 @@ logger = logging.getLogger(__name__)
 async def run_mcp_server():
     """Run the MCP server standalone."""
     parser = argparse.ArgumentParser(description="Prometheus MCP Server")
-    parser.add_argument("--host", default="0.0.0.0", help="Server host")
-    parser.add_argument("--port", type=int, default=3000, help="Server port")
-    parser.add_argument("--log-level", default="INFO", help="Logging level")
+    parser.add_argument(
+        "--host",
+        default=None,
+        help="Server host (default: MCP_HOST/HOST env var, fallback: localhost)",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=None,
+        help="Server port (default: MCP_PORT/PORT env var, fallback: 3000)",
+    )
+    parser.add_argument(
+        "--log-level",
+        default=None,
+        help="Logging level (default: MCP_LOG_LEVEL env var, fallback: INFO)",
+    )
 
     args = parser.parse_args()
 
     # Setup logging
     logging.basicConfig(
-        level=getattr(logging, args.log_level.upper()),
+        level=getattr(logging, (args.log_level or "INFO").upper()),
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
-    # Create configuration
-    config = MCPServerConfig(
-        host=args.host,
-        port=args.port,
-        log_level=args.log_level.upper(),
-    )
+    config = MCPServerConfig.from_env()
+    _apply_cli_overrides(config, host=args.host, port=args.port, log_level=args.log_level)
 
-    logger.info(f"Starting MCP Server on {args.host}:{args.port}...")
+    logger.info(f"Starting MCP Server on {config.host}:{config.port}...")
 
     try:
         # Initialize MCP server
@@ -77,6 +82,21 @@ async def run_mcp_server():
         except Exception:
             pass
         logger.info("Server stopped")
+
+
+def _apply_cli_overrides(
+    config: MCPServerConfig,
+    *,
+    host: Optional[str],
+    port: Optional[int],
+    log_level: Optional[str],
+) -> None:
+    if host:
+        config.host = host
+    if port is not None:
+        config.port = port
+    if log_level:
+        config.log_level = log_level.upper()
 
 
 if __name__ == "__main__":

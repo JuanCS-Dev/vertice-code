@@ -14,9 +14,9 @@ from typing import Dict, Optional, Any
 from contextlib import asynccontextmanager
 from datetime import datetime
 
-from prometheus.mcp_server.config import MCPServerConfig
-from prometheus.mcp_server.server import PrometheusMCPServer
-from prometheus.mcp_server.transport import MCPHTTPServer, MCPWebSocketServer
+from .config import MCPServerConfig
+from .server import PrometheusMCPServer
+from .transport import MCPHTTPServer, MCPWebSocketServer
 
 logger = logging.getLogger(__name__)
 

@@ -1,14 +1,16 @@
+substitutions:
+  _REGION: 'us-central1'
 steps:
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
       - '-t'
-      - 'us-central1-docker.pkg.dev/protovolt-studio/vertice/mcp-server:latest'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/vertice-cloud/mcp-server:latest'
       - '-f'
-      - 'prometheus/Dockerfile'
+      - 'Dockerfile.mcp'
       - '.'
 
 images:
-  - 'us-central1-docker.pkg.dev/protovolt-studio/vertice/mcp-server:latest'
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/vertice-cloud/mcp-server:latest'
 
 timeout: 1200s
