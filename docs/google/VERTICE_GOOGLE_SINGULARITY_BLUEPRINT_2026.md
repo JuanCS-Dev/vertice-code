@@ -25,6 +25,9 @@ Nós usamos a **Google Cloud como Sistema Operacional** e o **AG-UI como Sistema
 *   **Implementação:**
     *   Os agentes (Security, Coder, Architect) são definidos como classes Python puras usando o **Google ADK (Agent Development Kit)**.
     *   Deploy é atômico: `ReasoningEngine.create(AgentClass)`. O Google gerencia a escala, a memória e a execução de ferramentas.
+*   **Nota de runtime (2026):**
+    *   O recurso Reasoning/Agent Engine é **regional** (ex.: `us-central1`) e não aceita `location=global` para o runtime.
+    *   O “global endpoint” (`GOOGLE_CLOUD_LOCATION=global`) permanece válido para inferência de modelos puros.
 
 ### 2.2 O Sistema Nervoso (AG-UI Protocol & CopilotKit)
 *   **Tecnologia:** **AG-UI Protocol** (Open Standard) + **CopilotKit**.
@@ -158,6 +161,20 @@ A partir deste momento, qualquer linha de código escrita deve obedecer a este b
 
 Implementado (backend-only):
 - `apps/agent-gateway/app/main.py`: `GET /agui/stream` (SSE) + `/agui/tasks` (task API + stream)
+
+---
+
+## Update de Execução (25 JAN 2026) — PR‑6 (Cutover de Streaming Real Vertex → AG‑UI)
+
+Implementado (backend-only):
+- `packages/vertice-core/src/vertice_core/agui/vertex_agent_engine.py`: adapter de streaming do Vertex Agent Engine.
+- `apps/agent-gateway/app/main.py`: feature flag `VERTEX_AGENT_ENGINE_ENABLED=1` + lookup do engine via `apps/agent-gateway/config/engines.json`.
+- Contrato preservado: `delta|tool|final|error` (AG‑UI) como interface estável.
+
+Validação (offline):
+```bash
+pytest tests/unit/test_vertex_agent_engine_adapter.py -v -x
+```
 - `packages/vertice-core/src/vertice_core/agui/ag_ui_adk.py`: adapter ADK-ish -> `AGUIEvent`
 - `firebase.json`: App Hosting (sem rewrites do backend antigo)
 

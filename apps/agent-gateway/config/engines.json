@@ -1,4 +1,12 @@
 {
-  "engines": {},
-  "updated_at": "2026-01-25T00:00:00+00:00"
+  "engines": {
+    "coder": {
+      "deployed_at": "2026-01-26T00:03:30.472282+00:00",
+      "display_name": "vertice-coder",
+      "engine_id": "projects/239800439060/locations/us-central1/reasoningEngines/3912534062115323904",
+      "location": "us-central1",
+      "project": "vertice-ai"
+    }
+  },
+  "updated_at": "2026-01-26T00:03:30.472299+00:00"
 }

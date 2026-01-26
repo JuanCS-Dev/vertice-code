@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from importlib import import_module
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Sequence
 
 
 class DeployBrainError(RuntimeError):
@@ -24,12 +25,24 @@ class DeployedEngine:
 
 
 AGENT_IMPORTS: Dict[str, Dict[str, str]] = {
-    "coder": {"module": "agents.coder.reasoning_engine_app", "symbol": "CoderReasoningEngineApp"},
-    "reviewer": {"module": "agents.reviewer.agent", "symbol": "ReviewerAgent"},
-    "architect": {"module": "agents.architect.agent", "symbol": "ArchitectAgent"},
-    "orchestrator": {"module": "agents.orchestrator.agent", "symbol": "OrchestratorAgent"},
-    "researcher": {"module": "agents.researcher.agent", "symbol": "ResearcherAgent"},
-    "devops": {"module": "agents.devops.agent", "symbol": "DevOpsAgent"},
+    "coder": {
+        "module": "vertice_core.agents.coder.reasoning_engine_app",
+        "symbol": "CoderReasoningEngineApp",
+    },
+    "reviewer": {
+        "module": "vertice_core.agents.reviewer.reasoning_engine_app",
+        "symbol": "ReviewerReasoningEngineApp",
+    },
+    "architect": {
+        "module": "vertice_core.agents.architect.reasoning_engine_app",
+        "symbol": "ArchitectReasoningEngineApp",
+    },
+    "orchestrator": {
+        "module": "vertice_core.agents.orchestrator.agent",
+        "symbol": "OrchestratorAgent",
+    },
+    "researcher": {"module": "vertice_core.agents.researcher.agent", "symbol": "ResearcherAgent"},
+    "devops": {"module": "vertice_core.agents.devops.agent", "symbol": "DevOpsAgent"},
 }
 
 
@@ -67,6 +80,10 @@ def _create_reasoning_engine(
     display_name: str,
     project: str,
     location: str,
+    staging_bucket: Optional[str],
+    requirements: Optional[Sequence[str]],
+    extra_packages: Optional[Sequence[str]],
+    sys_version: Optional[str],
 ) -> str:
     """
     Create a Vertex AI Reasoning Engine and return the engine resource id/name.
@@ -76,6 +93,7 @@ def _create_reasoning_engine(
     """
     try:
         from vertexai.preview import reasoning_engines  # type: ignore
+        import vertexai
     except Exception as e:  # pragma: no cover
         raise DeployBrainError(
             "Vertex AI SDK not available. Install/enable `google-cloud-aiplatform` "
@@ -85,19 +103,69 @@ def _create_reasoning_engine(
     # NOTE: Google manages scaling and tool execution. The agent_class must be
     # compatible with the Reasoning Engine runtime (Phase 2 requirement).
     try:
+        repo_root = Path(__file__).resolve().parents[1]
+        core_src = repo_root / "packages" / "vertice-core" / "src"
+        cwd_before = os.getcwd()
+
+        # Contract (Google 2026): package resolution should be stable and not depend on repo-root symlinks.
+        # Always deploy from `packages/vertice-core/src` so extra_packages can refer to real directories.
+        os.chdir(str(core_src))
+
+        # Pass a stable, explicit list by default. If the caller provides `extra_packages`,
+        # use it as-is (but still from core_src cwd).
+        extra_packages_to_use = (
+            list(extra_packages) if extra_packages else ["agents", "vertice_core", "vertice_agents"]
+        )
+
+        missing: list[str] = []
+        for rel in ["agents", "vertice_core", "vertice_agents"]:
+            if not (core_src / rel).exists():
+                missing.append(str(core_src / rel))
+        if missing:
+            raise DeployBrainError(
+                "extra_packages preflight failed; missing paths: " + ", ".join(missing)
+            )
+
+        vertexai.init(project=project, location=location, staging_bucket=staging_bucket)
+
+        default_requirements = [
+            # Best practice (Google): pin key deps for reproducible builds.
+            "google-cloud-aiplatform==1.115.0",
+            "cloudpickle==3.1.1",
+            "google-genai==1.2.0",
+            "google-cloud-alloydb-connector",
+            "pydantic>=2.5.0",
+            "async-lru",
+            "sqlalchemy",
+            "asyncpg",
+            "pgvector",
+            "structlog",
+        ]
+
         engine = reasoning_engines.ReasoningEngine.create(
             agent_class(),
             display_name=display_name,
-            project=project,
-            location=location,
+            requirements=list(requirements) if requirements else default_requirements,
+            extra_packages=extra_packages_to_use,
+            sys_version=sys_version,
         )
     except Exception as e:  # pragma: no cover
+        try:
+            os.chdir(cwd_before)
+        except Exception:
+            pass
         raise DeployBrainError(
-            "Failed to create ReasoningEngine. Verify ADC credentials, project/location, "
+            f"Failed to create ReasoningEngine: {e}. Verify ADC credentials, project/location, "
             "and required Vertex APIs are enabled."
         ) from e
+    finally:
+        try:
+            os.chdir(cwd_before)
+        except Exception:
+            pass
 
-    engine_id = getattr(engine, "name", None) or getattr(engine, "resource_name", None)
+    # Prefer fully-qualified resource name for downstream consumers (gateway SDK clients).
+    engine_id = getattr(engine, "resource_name", None) or getattr(engine, "name", None)
     if not engine_id:
         raise DeployBrainError("ReasoningEngine.create returned an object without an id/name")
     return str(engine_id)
@@ -125,6 +193,10 @@ def deploy_brain(
     display_name: Optional[str],
     engines_config_path: Path,
     dry_run: bool,
+    staging_bucket: Optional[str] = None,
+    requirements: Optional[Sequence[str]] = None,
+    extra_packages: Optional[Sequence[str]] = None,
+    sys_version: Optional[str] = None,
 ) -> DeployedEngine:
     _ensure_src_on_path()
 
@@ -139,6 +211,10 @@ def deploy_brain(
             display_name=final_display_name,
             project=project,
             location=location,
+            staging_bucket=staging_bucket,
+            requirements=requirements,
+            extra_packages=extra_packages,
+            sys_version=sys_version,
         )
 
     payload = _read_json(engines_config_path)
@@ -168,8 +244,31 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--agent", required=True, choices=sorted(AGENT_IMPORTS.keys()))
     p.add_argument("--project", required=True)
-    p.add_argument("--location", default="global")
+    # Reasoning Engine resources are regional (not 'global').
+    p.add_argument("--location", default="us-central1")
     p.add_argument("--display-name", default=None)
+    p.add_argument(
+        "--staging-bucket",
+        default=None,
+        help="Optional GCS bucket for packaging/staging (e.g. gs://... in the same region).",
+    )
+    p.add_argument(
+        "--requirement",
+        action="append",
+        default=[],
+        help="Extra pip requirement(s) to install in the managed runtime (repeatable).",
+    )
+    p.add_argument(
+        "--extra-package",
+        action="append",
+        default=[],
+        help="Extra local package(s) to ship to the runtime (dir or wheel). Default: packages/vertice-core/src",
+    )
+    p.add_argument(
+        "--sys-version",
+        default=None,
+        help="Optional Python runtime version string for Reasoning Engine.",
+    )
     p.add_argument(
         "--engines-config",
         default="apps/agent-gateway/config/engines.json",
@@ -190,6 +289,10 @@ def main(argv: Optional[list[str]] = None) -> int:
         display_name=args.display_name,
         engines_config_path=Path(args.engines_config),
         dry_run=bool(args.dry_run),
+        staging_bucket=args.staging_bucket,
+        requirements=args.requirement or None,
+        extra_packages=args.extra_package or None,
+        sys_version=args.sys_version,
     )
     print(deployed.engine_id)
     return 0

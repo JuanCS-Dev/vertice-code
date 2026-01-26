@@ -9,7 +9,7 @@ via the Google Gen AI SDK (Gemini 3 only).
 
 from __future__ import annotations
 
-import asyncio
+from collections.abc import Mapping
 from typing import Any, Dict, Optional
 
 from vertice_core.providers.vertex_ai import VertexAIProvider
@@ -33,34 +33,43 @@ class CoderReasoningEngineApp:
     ) -> None:
         self._provider = VertexAIProvider(project=project, location=location, model_name=model)
 
-    def query(self, **kwargs) -> Dict[str, Any]:
-        """Reasoning Engines entrypoint (sync)."""
-        description = kwargs.get("description") or kwargs.get("prompt") or ""
+    async def query(self, *, input: str | Mapping[str, Any], **kwargs: Any) -> Dict[str, Any]:
+        """
+        Reasoning Engines entrypoint (async).
+
+        Contract (Google 2026):
+          - Primary argument is named `input`
+          - `input` may be a `str` (prompt) or a `dict`-like payload
+        """
+
+        if isinstance(input, str):
+            description = input
+        elif isinstance(input, Mapping):
+            # Accept the most common keys used across SDK/runtimes.
+            description = str(
+                input.get("description") or input.get("prompt") or input.get("message") or ""
+            )
+        else:
+            description = str(input)
+
         language = kwargs.get("language") or "python"
         style = kwargs.get("style") or ""
 
         if not isinstance(description, str) or not description.strip():
-            raise ValueError("query requires non-empty 'description' (or 'prompt').")
+            raise ValueError("query requires non-empty input (description/prompt/message).")
 
-        async def _run() -> Dict[str, Any]:
-            prompt = (
-                f"TASK: {description}\n"
-                f"LANGUAGE: {language}\n"
-                f"STYLE: {style}\n\n"
-                "MISSION:\n"
-                "Provide the corrected, production-ready code.\n"
-                "Use a clean code block for the chosen language.\n"
-                "Include all necessary imports and type hints.\n"
-            )
-            messages = [
-                {"role": "system", "content": self.SYSTEM_PROMPT},
-                {"role": "user", "content": prompt},
-            ]
-            text = await self._provider.generate(messages, max_tokens=8192, temperature=0.7)
-            return {"output": text}
-
-        try:
-            asyncio.get_running_loop()
-        except RuntimeError:
-            return asyncio.run(_run())
-        raise RuntimeError("CoderReasoningEngineApp.query must be called from a non-async context.")
+        prompt = (
+            f"TASK: {description}\n"
+            f"LANGUAGE: {language}\n"
+            f"STYLE: {style}\n\n"
+            "MISSION:\n"
+            "Provide the corrected, production-ready code.\n"
+            "Use a clean code block for the chosen language.\n"
+            "Include all necessary imports and type hints.\n"
+        )
+        messages = [
+            {"role": "system", "content": self.SYSTEM_PROMPT},
+            {"role": "user", "content": prompt},
+        ]
+        text = await self._provider.generate(messages, max_tokens=8192, temperature=0.7)
+        return {"output": text}

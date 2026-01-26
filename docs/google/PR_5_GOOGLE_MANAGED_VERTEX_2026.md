@@ -51,7 +51,8 @@ Esta etapa consolida o modo **Google‑managed**: inferência via **Vertex AI** 
 ## 3) Configuração (global endpoint)
 
 Defaults e overrides:
-- `VERTEX_AI_LOCATION=global` (default)
+- `GOOGLE_CLOUD_LOCATION=global` (preferencial)
+- `VERTEX_AI_LOCATION=global` (compat legada)
 - `GOOGLE_CLOUD_PROJECT=<project_id>`
 
 **Code Execution (sandbox gerenciado):**
@@ -99,3 +100,23 @@ Os testes “live” com Vertex AI devem ser habilitados explicitamente (evita t
 - Migração real: `tools/migrate_memory.py` (`.prometheus/prometheus.db` → AlloyDB).
 - Validação (offline): `pytest tests/unit/test_alloydb_migration.py tests/unit/test_alloydb_cutover_behavior.py -v -x` → `14 passed in 0.53s`.
 - Detalhes: `docs/google/PHASE_4_ALLOYDB_AI_CUTOVER_2026.md`.
+
+---
+
+## Update (25 JAN 2026) — PR‑6 (Vertex AI Integration Cutover)
+
+- `agent-gateway` agora suporta streaming **real** via **Vertex Agent Engine** (feature‑flagged).
+- Tradução em tempo real: Vertex stream dict events → envelope “ADK‑ish” → schema **AG‑UI** (`delta|tool|final|error`).
+- **Fallback ReasoningEngine:** quando o recurso não expõe streaming, usa `query(input=...)` e sintetiza `delta|final`.
+- Config principal:
+  - `VERTEX_AGENT_ENGINE_ENABLED=1`
+  - `GOOGLE_CLOUD_LOCATION=global` (ou `VERTEX_AI_LOCATION=global` para compat)
+  - `apps/agent-gateway/config/engines.json` preenchido por `tools/deploy_brain.py`
+- Validação (offline):
+  - `pytest tests/unit/test_vertex_agent_engine_adapter.py -v -x` → `2 passed`
+  - `pytest tests/unit/test_reasoning_engine_app_query_input.py -v -x` → `3 passed`
+  - `pytest tests/unit/test_vertex_ai_provider_location.py -v -x` → `2 passed`
+  - `pytest tests/unit/test_vertex_reasoning_engine_fallback.py -v -x` → `1 passed`
+- Smoke test (live, opt-in): `pytest tests/integration/test_vertex_reasoning_engine_live_smoke.py -v -x` com
+  `RUN_VERTEX_LIVE_TESTS=1`.
+- Detalhes: `docs/google/PR_6_VERTEX_AI_INTEGRATION_CUTOVER_2026.md`.

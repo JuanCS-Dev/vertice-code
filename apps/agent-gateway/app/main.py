@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import asyncio
+import json
+import os
 import uuid
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException
@@ -13,8 +16,14 @@ from pydantic import BaseModel
 
 from vertice_core.agui.ag_ui_adk import adk_event_to_agui
 from vertice_core.agui.protocol import AGUIEvent, sse_encode_event
+from vertice_core.agui.vertex_agent_engine import (
+    VertexAgentEngineSpec,
+    stream_vertex_agent_engine_adk_events,
+)
 
 app = FastAPI(title="Vertice Agent Gateway", version="2026.1.0")
+
+ENGINES_CONFIG_PATH = Path(__file__).resolve().parents[2] / "config" / "engines.json"
 
 
 class PromptRequest(BaseModel):
@@ -25,6 +34,7 @@ class PromptRequest(BaseModel):
 class CreateTaskRequest(BaseModel):
     prompt: str
     session_id: str = "default"
+    agent: str = "coder"
     tool: Optional[str] = None
 
 
@@ -54,6 +64,40 @@ _TASKS_LOCK = asyncio.Lock()
 
 def _utc_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _vertex_enabled() -> bool:
+    return os.getenv("VERTEX_AGENT_ENGINE_ENABLED", "0").strip() in {"1", "true", "yes", "on"}
+
+
+def _load_engine_spec(agent: str) -> VertexAgentEngineSpec:
+    try:
+        raw = json.loads(ENGINES_CONFIG_PATH.read_text(encoding="utf-8"))
+    except FileNotFoundError as exc:
+        raise RuntimeError(f"missing engines config at {ENGINES_CONFIG_PATH}") from exc
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"invalid JSON in engines config at {ENGINES_CONFIG_PATH}") from exc
+
+    engines = raw.get("engines")
+    if not isinstance(engines, dict) or agent not in engines:
+        raise RuntimeError(f"engine not configured for agent={agent!r} in engines.json")
+
+    spec = engines[agent]
+    if not isinstance(spec, dict):
+        raise RuntimeError(f"invalid engine entry for agent={agent!r}")
+
+    engine_id = spec.get("engine_id")
+    project = spec.get("project")
+    # Runtime (Agent/Reasoning Engine) is regional. Do not default to "global" here.
+    location = spec.get("location") or "us-central1"
+    if not isinstance(engine_id, str) or not engine_id:
+        raise RuntimeError(f"missing engine_id for agent={agent!r}")
+    if not isinstance(project, str) or not project:
+        raise RuntimeError(f"missing project for agent={agent!r}")
+    if not isinstance(location, str) or not location:
+        location = "us-central1"
+
+    return VertexAgentEngineSpec(engine_id=engine_id, project=project, location=location)
 
 
 async def _mock_adk_events(prompt: str, *, tool: Optional[str] = None) -> AsyncIterator[dict]:
@@ -93,9 +137,37 @@ async def _mock_adk_events(prompt: str, *, tool: Optional[str] = None) -> AsyncI
     }
 
 
-async def _run_task(task: TaskState, *, prompt: str, tool: Optional[str]) -> None:
+async def _upstream_adk_events(
+    *,
+    prompt: str,
+    session_id: str,
+    agent: str,
+    tool: Optional[str],
+) -> AsyncIterator[dict]:
+    if not _vertex_enabled():
+        async for ev in _mock_adk_events(prompt, tool=tool):
+            yield ev
+        return
+
     try:
-        async for raw in _mock_adk_events(prompt, tool=tool):
+        spec = _load_engine_spec(agent)
+    except Exception as exc:
+        yield {"type": "error", "message": str(exc), "code": "engine_config_error", "details": {}}
+        return
+
+    async for ev in stream_vertex_agent_engine_adk_events(
+        spec=spec,
+        prompt=prompt,
+        session_id=session_id,
+    ):
+        yield ev
+
+
+async def _run_task(task: TaskState, *, prompt: str, tool: Optional[str], agent: str) -> None:
+    try:
+        async for raw in _upstream_adk_events(
+            prompt=prompt, session_id=task.session_id, agent=agent, tool=tool
+        ):
             event = adk_event_to_agui(raw, session_id=task.session_id)
             async with task.condition:
                 task.events.append(event)
@@ -130,18 +202,26 @@ async def health():
 
 
 @app.get("/agui/stream")
-async def agui_stream(prompt: str, session_id: str = "default", tool: Optional[str] = None):
+async def agui_stream(
+    prompt: str,
+    session_id: str = "default",
+    agent: str = "coder",
+    tool: Optional[str] = None,
+):
     """
     MVP AG-UI SSE stream.
 
     Query params:
       - prompt: user prompt (required)
       - session_id: stable session identifier
+      - agent: agent key to resolve in engines.json when Vertex streaming is enabled
       - tool: optional tool name to simulate a tool event (MVP only)
     """
 
     async def _gen() -> AsyncIterator[bytes]:
-        async for raw in _mock_adk_events(prompt, tool=tool):
+        async for raw in _upstream_adk_events(
+            prompt=prompt, session_id=session_id, agent=agent, tool=tool
+        ):
             yield sse_encode_event(adk_event_to_agui(raw, session_id=session_id)).encode("utf-8")
 
     return StreamingResponse(
@@ -169,7 +249,7 @@ async def create_task(req: CreateTaskRequest) -> TaskResponse:
     async with _TASKS_LOCK:
         _TASKS[task_id] = task
 
-    asyncio.create_task(_run_task(task, prompt=req.prompt, tool=req.tool))
+    asyncio.create_task(_run_task(task, prompt=req.prompt, tool=req.tool, agent=req.agent))
     return TaskResponse(
         task_id=task_id,
         session_id=req.session_id,

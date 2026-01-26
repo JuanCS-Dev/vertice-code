@@ -62,7 +62,12 @@ class VertexAIProvider:
         enable_grounding: bool = False,
     ):
         self.project = project or os.getenv("GOOGLE_CLOUD_PROJECT")
-        self.location = os.getenv("VERTEX_AI_LOCATION", location)
+        # IMPORTANT (2026): inference for top-tier models is commonly "global".
+        #
+        # Respect an explicit `location` argument. Use env vars only as fallback
+        # (keeps legacy compatibility while allowing call-sites to force global).
+        location_from_env = os.getenv("GOOGLE_CLOUD_LOCATION") or os.getenv("VERTEX_AI_LOCATION")
+        self.location = location if location else (location_from_env or "global")
         self.model_alias = model_name
         self.model_id = self.MODELS.get(model_name, model_name)
         self.enable_grounding = enable_grounding
