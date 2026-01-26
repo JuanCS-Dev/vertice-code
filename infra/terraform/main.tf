@@ -6,6 +6,10 @@ terraform {
       version = "~> 5.0"
     }
   }
+  backend "gcs" {
+    bucket = "vertice-tf-state"
+    prefix = "terraform/state"
+  }
 }
 
 provider "google" {
@@ -25,16 +29,24 @@ variable "region" {
   default     = "us-central1"
 }
 
+variable "alloydb_initial_password" {
+  description = "Initial password for the AlloyDB cluster primary user."
+  type        = string
+  sensitive   = true
+}
+
 # The Foundation: APIs
 resource "google_project_service" "apis" {
   for_each = toset([
-    "aiplatform.googleapis.com",      # Vertex AI
-    "run.googleapis.com",             # Cloud Run
-    "alloydb.googleapis.com",         # AlloyDB
-    "compute.googleapis.com",         # Networking
-    "secretmanager.googleapis.com",   # Secrets
-    "cloudbuild.googleapis.com",      # CI/CD
-    "artifactregistry.googleapis.com" # Python Packages
+    "aiplatform.googleapis.com",        # Vertex AI
+    "run.googleapis.com",               # Cloud Run
+    "alloydb.googleapis.com",           # AlloyDB
+    "compute.googleapis.com",           # Networking
+    "servicenetworking.googleapis.com", # Private Service Access (PSA)
+    "vpcaccess.googleapis.com",         # Serverless VPC Access Connector
+    "secretmanager.googleapis.com",     # Secrets
+    "cloudbuild.googleapis.com",        # CI/CD
+    "artifactregistry.googleapis.com"   # Python Packages
   ])
 
   service            = each.key

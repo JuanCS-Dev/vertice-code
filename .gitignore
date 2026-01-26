@@ -158,6 +158,11 @@ uploads/
 maestro.log
 streaming-fix-package.tar.gz
 
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+
 # Scripts are now in scripts/ directory and should be tracked
 logs/
 

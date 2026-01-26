@@ -27,4 +27,3 @@ tmp/
 *.jpg
 Dockerfile
 cloudbuild*.yaml
-deploy*.sh
