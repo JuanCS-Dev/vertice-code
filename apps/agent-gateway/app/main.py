@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import sys
 import json
 import os
 import uuid
@@ -14,7 +15,6 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from vertice_core.agui.ag_ui_adk import adk_event_to_agui
 from vertice_core.agui.protocol import AGUIEvent, sse_encode_event
 from vertice_core.agui.vertex_agent_engine import (
     VertexAgentEngineSpec,
@@ -24,6 +24,11 @@ from vertice_core.agui.vertex_agent_engine import (
 app = FastAPI(title="Vertice Agent Gateway", version="2026.1.0")
 
 ENGINES_CONFIG_PATH = Path(__file__).resolve().parents[2] / "config" / "engines.json"
+GATEWAY_ROOT = Path(__file__).resolve().parents[1]
+if str(GATEWAY_ROOT) not in sys.path:
+    sys.path.insert(0, str(GATEWAY_ROOT))
+
+from api.stream import STREAM_HEADERS, AGUIStreamTranslator, stream_agui_sse_bytes  # noqa: E402
 
 
 class PromptRequest(BaseModel):
@@ -165,16 +170,24 @@ async def _upstream_adk_events(
 
 async def _run_task(task: TaskState, *, prompt: str, tool: Optional[str], agent: str) -> None:
     try:
+        translator = AGUIStreamTranslator(session_id=task.session_id, prompt=prompt, agent=agent)
+        # Understanding frame for task streams as well.
+        async with task.condition:
+            task.events.append(translator._intent_event())
+            task.updated_at = _utc_iso()
+            task.condition.notify_all()
+
         async for raw in _upstream_adk_events(
             prompt=prompt, session_id=task.session_id, agent=agent, tool=tool
         ):
-            event = adk_event_to_agui(raw, session_id=task.session_id)
             async with task.condition:
-                task.events.append(event)
+                for ev in translator.translate(raw):
+                    task.events.append(ev)
                 task.updated_at = _utc_iso()
                 task.condition.notify_all()
-                if event.type.value in {"final", "error"}:
-                    task.status = "completed" if event.type.value == "final" else "error"
+                if task.events and task.events[-1].type.value in {"final", "error"}:
+                    last = task.events[-1]
+                    task.status = "completed" if last.type.value == "final" else "error"
                     task.updated_at = _utc_iso()
                     task.condition.notify_all()
                     return
@@ -219,18 +232,18 @@ async def agui_stream(
     """
 
     async def _gen() -> AsyncIterator[bytes]:
-        async for raw in _upstream_adk_events(
-            prompt=prompt, session_id=session_id, agent=agent, tool=tool
+        async for chunk in stream_agui_sse_bytes(
+            _upstream_adk_events(prompt=prompt, session_id=session_id, agent=agent, tool=tool),
+            session_id=session_id,
+            prompt=prompt,
+            agent=agent,
         ):
-            yield sse_encode_event(adk_event_to_agui(raw, session_id=session_id)).encode("utf-8")
+            yield chunk
 
     return StreamingResponse(
         _gen(),
         media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "X-Accel-Buffering": "no",
-        },
+        headers=STREAM_HEADERS,
     )
 
 
@@ -304,8 +317,5 @@ async def stream_task(task_id: str) -> StreamingResponse:
     return StreamingResponse(
         _gen(),
         media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "X-Accel-Buffering": "no",
-        },
+        headers=STREAM_HEADERS,
     )

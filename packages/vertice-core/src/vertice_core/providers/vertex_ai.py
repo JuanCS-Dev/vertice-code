@@ -145,11 +145,25 @@ class VertexAIProvider:
     async def _stream_v3(self, messages, system_prompt, max_tokens, temperature, tools, **kwargs):
         """Native SDK v3 Implementation."""
         try:
+            include_thoughts = bool(kwargs.pop("include_thoughts", False)) or (
+                os.getenv("VERTICE_VERTEX_INCLUDE_THOUGHTS", "0").strip().lower()
+                in {"1", "true", "yes", "on"}
+            )
+
             config = types.GenerateContentConfig(
                 system_instruction=system_prompt,
                 temperature=temperature,
                 max_output_tokens=max_tokens,
             )
+
+            # Thinking / "inner voice" (2026):
+            # google-genai streams thought parts with `part.thought == True`.
+            if include_thoughts and hasattr(types, "ThinkingConfig"):
+                try:
+                    config.thinking_config = types.ThinkingConfig(include_thoughts=True)  # type: ignore[attr-defined]
+                except Exception:
+                    # Older SDKs may not accept thinking_config; keep streaming functional output only.
+                    include_thoughts = False
 
             # Message formatting for v3
             contents = []
@@ -161,12 +175,20 @@ class VertexAIProvider:
                     types.Content(role=role, parts=[types.Part.from_text(text=msg["content"])])
                 )
 
-            def _extract_text(item: Any) -> str:
-                # Prefer chunk.text if available (avoids duplication)
+            def _extract_parts(item: Any) -> list[tuple[bool, str]]:
+                """
+                Extract (is_thought, text) parts from a streamed chunk.
+
+                When thinking is enabled, Gemini may stream thought parts separately
+                (part.thought==True). We keep them distinct so callers can route them.
+                """
+                out: list[tuple[bool, str]] = []
+
                 direct = getattr(item, "text", None)
-                if direct:
-                    return direct
-                # Fallback: extract from candidates.content.parts
+                if isinstance(direct, str) and direct:
+                    out.append((False, direct))
+                    return out
+
                 candidates = getattr(item, "candidates", None)
                 if candidates:
                     for cand in candidates:
@@ -176,9 +198,12 @@ class VertexAIProvider:
                             continue
                         for part in parts:
                             part_text = getattr(part, "text", None)
-                            if part_text:
-                                return part_text
-                return ""
+                            if not isinstance(part_text, str) or not part_text:
+                                continue
+                            is_thought = bool(getattr(part, "thought", False))
+                            out.append((is_thought, part_text))
+
+                return out
 
             stream = await self._genai_client.aio.models.generate_content_stream(
                 model=self.model_id,
@@ -192,9 +217,11 @@ class VertexAIProvider:
                 )
 
             async for chunk in stream:
-                text = _extract_text(chunk)
-                if text:
-                    yield text
+                for is_thought, text in _extract_parts(chunk):
+                    if is_thought and include_thoughts:
+                        yield f"<thought>{text}</thought>"
+                    elif not is_thought:
+                        yield text
                 await asyncio.sleep(0)
 
         except Exception as e:

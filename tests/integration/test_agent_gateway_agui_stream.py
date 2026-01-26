@@ -102,6 +102,8 @@ async def test_agui_stream_tool_event() -> None:
 
     types = [payload["type"] for _, payload in events]
     assert AGUIEventType.TOOL.value in types
+    tool_names = [payload.get("data", {}).get("name") for _, payload in events if payload.get("type") == "tool"]
+    assert "search" in tool_names
 
 
 @pytest.mark.asyncio
@@ -116,8 +118,8 @@ async def test_agui_stream_error_event() -> None:
             assert resp.status_code == 200
             events = await _collect_sse_events(resp)
 
-    assert len(events) == 1
-    assert events[0][1]["type"] == AGUIEventType.ERROR.value
+    assert len(events) >= 2
+    assert events[-1][1]["type"] == AGUIEventType.ERROR.value
 
 
 @pytest.mark.asyncio
@@ -157,6 +159,50 @@ async def test_agui_stream_completes_and_closes() -> None:
 
 
 @pytest.mark.asyncio
+async def test_agui_stream_code_delta_frame(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("VERTICE_PERSIST_CODE_DELTAS", "0")
+
+    app = _load_agent_gateway_app()
+    transport = httpx.ASGITransport(app=app)
+
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        async with client.stream(
+            "GET",
+            "/agui/stream",
+            params={"prompt": "write something", "session_id": "s4", "tool": "write_file"},
+        ) as resp:
+            assert resp.status_code == 200
+            events = await _collect_sse_events(resp)
+
+    tool_events = [payload for _, payload in events if payload.get("type") == "tool"]
+    assert any(e.get("data", {}).get("frame") == "code_delta" for e in tool_events)
+
+
+@pytest.mark.asyncio
+async def test_agui_stream_thought_frame_and_final_strips_thought(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("VERTICE_STREAM_THOUGHTS", "1")
+
+    app = _load_agent_gateway_app()
+    transport = httpx.ASGITransport(app=app)
+
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        async with client.stream(
+            "GET",
+            "/agui/stream",
+            params={"prompt": "<thought>secret</thought> world", "session_id": "s5"},
+        ) as resp:
+            assert resp.status_code == 200
+            events = await _collect_sse_events(resp)
+
+    delta_events = [payload for _, payload in events if payload.get("type") == "delta"]
+    assert any(e.get("data", {}).get("frame") == "thought" for e in delta_events)
+
+    final = events[-1][1]
+    assert final["type"] == AGUIEventType.FINAL.value
+    assert final["data"]["text"] == "Echo: world"
+
+
+@pytest.mark.asyncio
 async def test_agui_tasks_create_status_and_stream() -> None:
     app = _load_agent_gateway_app()
     transport = httpx.ASGITransport(app=app)
@@ -180,5 +226,6 @@ async def test_agui_tasks_create_status_and_stream() -> None:
             events = await _collect_sse_events(resp)
 
     types = [payload["type"] for _, payload in events]
-    assert AGUIEventType.TOOL.value in types
+    tool_names = [payload.get("data", {}).get("name") for _, payload in events if payload.get("type") == "tool"]
+    assert "search" in tool_names
     assert types[-1] == AGUIEventType.FINAL.value
