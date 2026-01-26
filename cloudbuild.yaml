@@ -120,6 +120,7 @@ steps:
           --port 8080 \
           --network default \
           --subnet default \
+          --clear-vpc-connector \
           --vpc-egress private-ranges-only \
           --set-env-vars ENVIRONMENT=production,MAXIMUS_MCP_URL=$$MCP_URL/mcp
     waitFor: ['deploy-mcp']
