@@ -2,6 +2,8 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Optimize for Docker/Cloud Run
+  output: "standalone",
   // Prevent Next.js from inferring an incorrect workspace root in monorepo layouts.
   outputFileTracingRoot: __dirname,
   transpilePackages: ["lucide-react"],

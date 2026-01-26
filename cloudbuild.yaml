@@ -37,8 +37,8 @@ steps:
           --build-arg NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${_FIREBASE_STORAGE_BUCKET} \
           --build-arg NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${_FIREBASE_MESSAGING_SENDER_ID} \
           --build-arg NEXT_PUBLIC_FIREBASE_APP_ID=${_FIREBASE_APP_ID} \
-          -f vertice-chat-webapp/frontend/Dockerfile \
-          vertice-chat-webapp/frontend
+          -f apps/web-console/Dockerfile \
+          apps/web-console
     dir: '.'
   # ============================================
   # Step 3: Build MCP Server Image
