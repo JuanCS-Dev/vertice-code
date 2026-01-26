@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { getFirebaseAuth, getGoogleProvider } from "../../lib/firebaseClient";
 import { signInWithPopup } from "firebase/auth";
 
-export default function LoginPage() {
+function LoginContent() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const search = useSearchParams();
@@ -37,21 +37,29 @@ export default function LoginPage() {
   }, [nextPath]);
 
   return (
+    <div className="w-full max-w-md bg-panel/70 border border-border-dim/50 rounded-2xl p-6">
+      <h1 className="text-xl font-bold tracking-tight">Sign in</h1>
+      <p className="text-sm text-gray-400 mt-1">Google-only authentication.</p>
+
+      <button
+        onClick={onLogin}
+        disabled={loading}
+        className="mt-6 w-full rounded-lg bg-primary text-panel py-2 text-sm font-semibold hover:bg-primary/90 disabled:opacity-60"
+      >
+        {loading ? "Signing in..." : "Continue with Google"}
+      </button>
+
+      {error ? <p className="mt-4 text-sm text-red-400">{error}</p> : null}
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
     <div className="min-h-screen bg-obsidian text-white flex items-center justify-center p-6">
-      <div className="w-full max-w-md bg-panel/70 border border-border-dim/50 rounded-2xl p-6">
-        <h1 className="text-xl font-bold tracking-tight">Sign in</h1>
-        <p className="text-sm text-gray-400 mt-1">Google-only authentication.</p>
-
-        <button
-          onClick={onLogin}
-          disabled={loading}
-          className="mt-6 w-full rounded-lg bg-primary text-panel py-2 text-sm font-semibold hover:bg-primary/90 disabled:opacity-60"
-        >
-          {loading ? "Signing in..." : "Continue with Google"}
-        </button>
-
-        {error ? <p className="mt-4 text-sm text-red-400">{error}</p> : null}
-      </div>
+      <Suspense fallback={<div className="text-gray-400">Loading login...</div>}>
+        <LoginContent />
+      </Suspense>
     </div>
   );
 }

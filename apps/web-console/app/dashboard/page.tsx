@@ -5,6 +5,7 @@ import DashboardClient from "../../components/dashboard/DashboardClient";
 import { MeResponse } from "../../lib/types/org";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 // Server Component
 export default async function DashboardPage() {
