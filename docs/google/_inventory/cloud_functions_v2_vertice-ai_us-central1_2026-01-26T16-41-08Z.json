@@ -1,0 +1,63 @@
+[
+  {
+    "buildConfig": {
+      "automaticUpdatePolicy": {},
+      "build": "projects/239800439060/locations/us-central1/builds/47a3923c-0560-4579-a144-24f459b970fa",
+      "dockerRegistry": "ARTIFACT_REGISTRY",
+      "dockerRepository": "projects/vertice-ai/locations/us-central1/repositories/gcf-artifacts",
+      "entryPoint": "ssrverticeai",
+      "environmentVariables": {
+        "GOOGLE_NODE_RUN_SCRIPTS": ""
+      },
+      "runtime": "nodejs22",
+      "serviceAccount": "projects/vertice-ai/serviceAccounts/239800439060-compute@developer.gserviceaccount.com",
+      "source": {
+        "storageSource": {
+          "bucket": "gcf-v2-sources-239800439060-us-central1",
+          "generation": "1768586839132959",
+          "object": "ssrverticeai/function-source.zip"
+        }
+      },
+      "sourceProvenance": {
+        "resolvedStorageSource": {
+          "bucket": "gcf-v2-sources-239800439060-us-central1",
+          "generation": "1768586839132959",
+          "object": "ssrverticeai/function-source.zip"
+        }
+      }
+    },
+    "createTime": "2026-01-10T15:25:18.279861210Z",
+    "environment": "GEN_2",
+    "labels": {
+      "deployment-tool": "cli-firebase",
+      "firebase-functions-codebase": "firebase-frameworks-vertice-ai",
+      "firebase-functions-hash": "f9f8b1e3f41190175285e85fc8e00d511d66872a"
+    },
+    "name": "projects/vertice-ai/locations/us-central1/functions/ssrverticeai",
+    "satisfiesPzi": true,
+    "serviceConfig": {
+      "availableCpu": "1",
+      "availableMemory": "256Mi",
+      "environmentVariables": {
+        "EVENTARC_CLOUD_EVENT_SOURCE": "[REDACTED]",
+        "FIREBASE_CONFIG": "[REDACTED]",
+        "FUNCTION_TARGET": "[REDACTED]",
+        "GCLOUD_PROJECT": "[REDACTED]",
+        "LOG_EXECUTION_ID": "[REDACTED]",
+        "VERCEL_URL": "[REDACTED]",
+        "__FIREBASE_DEFAULTS__": "[REDACTED]",
+        "__FIREBASE_FRAMEWORKS_ENTRY__": "[REDACTED]"
+      },
+      "ingressSettings": "ALLOW_ALL",
+      "maxInstanceCount": 3,
+      "maxInstanceRequestConcurrency": 80,
+      "service": "projects/vertice-ai/locations/us-central1/services/ssrverticeai",
+      "serviceAccountEmail": "cr-ssrverticeai@vertice-ai.iam.gserviceaccount.com",
+      "timeoutSeconds": 60,
+      "uri": "https://ssrverticeai-nrpngfmr6a-uc.a.run.app"
+    },
+    "state": "ACTIVE",
+    "updateTime": "2026-01-16T18:11:55.232316952Z",
+    "url": "https://us-central1-vertice-ai.cloudfunctions.net/ssrverticeai"
+  }
+]

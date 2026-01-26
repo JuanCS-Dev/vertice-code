@@ -26,7 +26,6 @@ gcloud run deploy ${SERVICE_NAME} \
   --concurrency=80 \
   --timeout=300 \
   --set-secrets=STRIPE_SECRET_KEY=stripe-secret-key:latest \
-  --set-secrets=VERTEX_AI_KEY=vertex-ai-key:latest \
   --set-env-vars=NODE_ENV=production \
   --set-env-vars=GOOGLE_CLOUD_PROJECT=${PROJECT_ID} \
   --set-env-vars=PRIMARY_REGION=true
@@ -46,7 +45,6 @@ gcloud run deploy ${SERVICE_NAME}-eu \
   --concurrency=80 \
   --timeout=300 \
   --set-secrets=STRIPE_SECRET_KEY=stripe-secret-key:latest \
-  --set-secrets=VERTEX_AI_KEY=vertex-ai-key:latest \
   --set-env-vars=NODE_ENV=production \
   --set-env-vars=GOOGLE_CLOUD_PROJECT=${PROJECT_ID} \
   --set-env-vars=DR_REGION=true

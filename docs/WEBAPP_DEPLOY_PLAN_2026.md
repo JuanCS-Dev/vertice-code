@@ -92,7 +92,7 @@ Após pesquisa web das versões estáveis atuais:
        'Authorization': `Bearer ${token}`,
        'Content-Type': 'application/json',
      },
-     body: JSON.stringify({ messages, model: 'gemini-2.5-pro' }),
+     body: JSON.stringify({ messages, model: 'gemini-1.5-pro' }),
    });
    ```
 
@@ -122,9 +122,16 @@ Após pesquisa web das versões estáveis atuais:
    gcloud run services update vertice-backend \
      --set-env-vars GOOGLE_CLOUD_PROJECT=vertice-ai \
      --set-env-vars FIREBASE_PROJECT_ID=vertice-ai \
-     --set-secrets GOOGLE_API_KEY=vertex-ai-key:latest \
      --set-secrets FIREBASE_SERVICE_ACCOUNT_KEY=firebase-sa-key:latest
    ```
+
+   **Padrão Google (recomendado): ADC/IAM, sem API key**
+   - ADC (doc oficial): https://cloud.google.com/docs/authentication/provide-credentials-adc
+   - Service identity no Cloud Run (doc oficial): https://cloud.google.com/run/docs/securing/service-identity
+   - Vertex AI IAM (doc oficial): https://cloud.google.com/vertex-ai/docs/general/access-control
+
+   Em produção, prefira remover `GOOGLE_API_KEY` e usar o Service Account do Cloud Run com permissões IAM.
+   `FIREBASE_SERVICE_ACCOUNT_KEY` também pode ser omitido se o Service Account tiver permissões adequadas.
 
 5. **Corrigir API Routing**
    ```typescript
@@ -270,7 +277,7 @@ Após pesquisa web das versões estáveis atuais:
     export default function () {
       let response = http.post('https://vertice-backend-url/api/v1/chat', {
         messages: [{role: 'user', content: 'Hello'}],
-        model: 'gemini-2.5-pro'
+        model: 'gemini-1.5-pro'
       });
       check(response, { 'status is 200': (r) => r.status === 200 });
     }

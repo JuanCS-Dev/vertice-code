@@ -1,0 +1,261 @@
+{
+  "bindings": [
+    {
+      "members": [
+        "serviceAccount:vertex-express@vertice-ai.iam.gserviceaccount.com"
+      ],
+      "role": "roles/aiplatform.expressUser"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
+      ],
+      "role": "roles/aiplatform.reasoningEngineServiceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@gcp-sa-aiplatform.iam.gserviceaccount.com"
+      ],
+      "role": "roles/aiplatform.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:cr-vertice-agent-gateway@vertice-ai.iam.gserviceaccount.com",
+        "serviceAccount:cr-vertice-backend@vertice-ai.iam.gserviceaccount.com",
+        "serviceAccount:cr-vertice-mcp@vertice-ai.iam.gserviceaccount.com"
+      ],
+      "role": "roles/aiplatform.user"
+    },
+    {
+      "members": [
+        "serviceAccount:239800439060@cloudbuild.gserviceaccount.com"
+      ],
+      "role": "roles/alloydb.admin"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@gcp-sa-alloydb.iam.gserviceaccount.com"
+      ],
+      "role": "roles/alloydb.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@gcp-sa-artifactregistry.iam.gserviceaccount.com"
+      ],
+      "role": "roles/artifactregistry.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@gcp-sa-cloudaicompanion.iam.gserviceaccount.com"
+      ],
+      "role": "roles/cloudaicompanion.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:239800439060@cloudbuild.gserviceaccount.com"
+      ],
+      "role": "roles/cloudbuild.builds.builder"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+      ],
+      "role": "roles/cloudbuild.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@gcf-admin-robot.iam.gserviceaccount.com"
+      ],
+      "role": "roles/cloudfunctions.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:239800439060-compute@developer.gserviceaccount.com",
+        "serviceAccount:239800439060@cloudbuild.gserviceaccount.com",
+        "serviceAccount:service-239800439060@service-networking.iam.gserviceaccount.com"
+      ],
+      "role": "roles/compute.networkAdmin"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@compute-system.iam.gserviceaccount.com"
+      ],
+      "role": "roles/compute.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@gcp-sa-gkenode.iam.gserviceaccount.com"
+      ],
+      "role": "roles/container.defaultNodeServiceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@container-engine-robot.iam.gserviceaccount.com"
+      ],
+      "role": "roles/container.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@containerregistry.iam.gserviceaccount.com"
+      ],
+      "role": "roles/containerregistry.ServiceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@dataflow-service-producer-prod.iam.gserviceaccount.com"
+      ],
+      "role": "roles/dataflow.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:firebase-app-hosting-compute@vertice-ai.iam.gserviceaccount.com"
+      ],
+      "role": "roles/developerconnect.readTokenAccessor"
+    },
+    {
+      "members": [
+        "serviceAccount:239800439060-compute@developer.gserviceaccount.com",
+        "serviceAccount:239800439060@cloudservices.gserviceaccount.com",
+        "serviceAccount:vertice-ai@appspot.gserviceaccount.com"
+      ],
+      "role": "roles/editor"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@gcp-sa-firebase.iam.gserviceaccount.com"
+      ],
+      "role": "roles/firebase.managementServiceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:firebase-adminsdk-fbsvc@vertice-ai.iam.gserviceaccount.com",
+        "serviceAccount:firebase-app-hosting-compute@vertice-ai.iam.gserviceaccount.com"
+      ],
+      "role": "roles/firebase.sdkAdminServiceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:firebase-app-hosting-compute@vertice-ai.iam.gserviceaccount.com"
+      ],
+      "role": "roles/firebaseapphosting.computeRunner"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@gcp-sa-firebaseapphosting.iam.gserviceaccount.com"
+      ],
+      "role": "roles/firebaseapphosting.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:firebase-adminsdk-fbsvc@vertice-ai.iam.gserviceaccount.com"
+      ],
+      "role": "roles/firebaseauth.admin"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@gcp-sa-firebasemods.iam.gserviceaccount.com"
+      ],
+      "role": "roles/firebasemods.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@firebase-rules.iam.gserviceaccount.com"
+      ],
+      "role": "roles/firebaserules.system"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@gcp-sa-firestore.iam.gserviceaccount.com"
+      ],
+      "role": "roles/firestore.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@gcp-sa-gkebackup.iam.gserviceaccount.com"
+      ],
+      "role": "roles/gkebackup.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:firebase-adminsdk-fbsvc@vertice-ai.iam.gserviceaccount.com"
+      ],
+      "role": "roles/iam.serviceAccountTokenCreator"
+    },
+    {
+      "members": [
+        "serviceAccount:239800439060@cloudbuild.gserviceaccount.com"
+      ],
+      "role": "roles/iam.serviceAccountUser"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@gcp-sa-networkconnectivity.iam.gserviceaccount.com"
+      ],
+      "role": "roles/networkconnectivity.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@gcp-sa-notebooks.iam.gserviceaccount.com"
+      ],
+      "role": "roles/notebooks.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:239800439060@cloudbuild.gserviceaccount.com",
+        "user:juancs.d3v@gmail.com"
+      ],
+      "role": "roles/owner"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@cloud-redis.iam.gserviceaccount.com"
+      ],
+      "role": "roles/redis.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@serverless-robot-prod.iam.gserviceaccount.com"
+      ],
+      "role": "roles/run.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:239800439060-compute@developer.gserviceaccount.com"
+      ],
+      "role": "roles/secretmanager.secretAccessor"
+    },
+    {
+      "members": [
+        "serviceAccount:239800439060-compute@developer.gserviceaccount.com",
+        "serviceAccount:239800439060@cloudbuild.gserviceaccount.com"
+      ],
+      "role": "roles/servicenetworking.networksAdmin"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@service-networking.iam.gserviceaccount.com"
+      ],
+      "role": "roles/servicenetworking.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:239800439060@cloudbuild.gserviceaccount.com"
+      ],
+      "role": "roles/serviceusage.serviceUsageAdmin"
+    },
+    {
+      "members": [
+        "serviceAccount:firebase-app-hosting-compute@vertice-ai.iam.gserviceaccount.com"
+      ],
+      "role": "roles/storage.objectViewer"
+    },
+    {
+      "members": [
+        "serviceAccount:service-239800439060@gcp-sa-vpcaccess.iam.gserviceaccount.com"
+      ],
+      "role": "roles/vpcaccess.serviceAgent"
+    }
+  ],
+  "etag": "BwZJTMrsyMk=",
+  "version": 1
+}

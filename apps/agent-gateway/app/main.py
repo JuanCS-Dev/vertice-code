@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import asyncio
-import sys
 import json
 import os
+import sys
 import uuid
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
@@ -25,10 +25,30 @@ app = FastAPI(title="Vertice Agent Gateway", version="2026.1.0")
 
 ENGINES_CONFIG_PATH = Path(__file__).resolve().parents[2] / "config" / "engines.json"
 GATEWAY_ROOT = Path(__file__).resolve().parents[1]
-if str(GATEWAY_ROOT) not in sys.path:
-    sys.path.insert(0, str(GATEWAY_ROOT))
+_gateway_root = str(GATEWAY_ROOT)
+if _gateway_root in sys.path:
+    sys.path.remove(_gateway_root)
+sys.path.insert(0, _gateway_root)
 
-from api.stream import STREAM_HEADERS, AGUIStreamTranslator, stream_agui_sse_bytes  # noqa: E402
+_app_dir = str(Path(__file__).resolve().parent)
+if _app_dir in sys.path:
+    sys.path.remove(_app_dir)
+sys.path.insert(1 if len(sys.path) > 0 else 0, _app_dir)
+
+from api.stream import STREAM_HEADERS, AGUIStreamTranslator  # noqa: E402
+import auth as _auth_mod  # noqa: E402
+import store as _store_mod  # noqa: E402
+import tenancy as _tenancy_mod  # noqa: E402
+
+AuthContext = _auth_mod.AuthContext
+get_auth_context = _auth_mod.get_auth_context
+
+Run = _store_mod.Run
+Store = _store_mod.Store
+build_store = _store_mod.build_store
+
+TenantContext = _tenancy_mod.TenantContext
+resolve_tenant = _tenancy_mod.resolve_tenant
 
 
 class PromptRequest(BaseModel):
@@ -52,6 +72,36 @@ class TaskResponse(BaseModel):
     updated_at: str
 
 
+class OrgResponse(BaseModel):
+    org_id: str
+    name: str
+    created_at: str
+    owner_uid: str
+    role: str
+
+
+class CreateOrgRequest(BaseModel):
+    name: str
+
+
+class MeResponse(BaseModel):
+    uid: str
+    default_org_id: str
+    orgs: list[OrgResponse]
+
+
+class RunResponse(BaseModel):
+    run_id: str
+    org_id: str
+    session_id: str
+    agent: str
+    prompt: str
+    status: str
+    created_at: str
+    updated_at: str
+    final_text: str | None = None
+
+
 @dataclass(slots=True)
 class TaskState:
     task_id: str
@@ -65,6 +115,7 @@ class TaskState:
 
 _TASKS: dict[str, TaskState] = {}
 _TASKS_LOCK = asyncio.Lock()
+_STORE: Store = build_store()
 
 
 def _utc_iso() -> str:
@@ -73,6 +124,25 @@ def _utc_iso() -> str:
 
 def _vertex_enabled() -> bool:
     return os.getenv("VERTEX_AGENT_ENGINE_ENABLED", "0").strip() in {"1", "true", "yes", "on"}
+
+
+@app.get("/healthz/", include_in_schema=False)
+async def healthz() -> dict[str, str]:
+    return {"status": "ok", "time": _utc_iso(), "version": str(app.version)}
+
+
+@app.get("/readyz/", include_in_schema=False)
+async def readyz() -> dict[str, str]:
+    if os.getenv("VERTICE_HEALTHCHECK_DEEP", "0").strip() not in {"1", "true", "yes", "on"}:
+        return {"status": "ok", "mode": "shallow", "time": _utc_iso(), "version": str(app.version)}
+
+    try:
+        # Deep probe is opt-in: verify the backing store is reachable without mutating state.
+        await _STORE.get_default_org_id(uid="__vertice_healthcheck__")
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=f"store_unavailable: {exc}") from exc
+
+    return {"status": "ok", "mode": "deep", "time": _utc_iso(), "version": str(app.version)}
 
 
 def _load_engine_spec(agent: str) -> VertexAgentEngineSpec:
@@ -103,6 +173,13 @@ def _load_engine_spec(agent: str) -> VertexAgentEngineSpec:
         location = "us-central1"
 
     return VertexAgentEngineSpec(engine_id=engine_id, project=project, location=location)
+
+
+async def get_tenant_context(
+    auth: AuthContext = Depends(get_auth_context),
+    x_vertice_org: str | None = Header(default=None, alias="X-Vertice-Org"),
+) -> TenantContext:
+    return await resolve_tenant(_STORE, uid=auth.uid, org_id=x_vertice_org)
 
 
 async def _mock_adk_events(prompt: str, *, tool: Optional[str] = None) -> AsyncIterator[dict]:
@@ -209,9 +286,115 @@ async def _run_task(task: TaskState, *, prompt: str, tool: Optional[str], agent:
             task.condition.notify_all()
 
 
-@app.get("/healthz")
-async def health():
-    return {"status": "ok", "service": "agent-gateway", "runtime": "cloud-run"}
+@app.get("/v1/me")
+async def me(auth: AuthContext = Depends(get_auth_context)) -> MeResponse:
+    default_org = await _STORE.ensure_default_org(uid=auth.uid)
+    await _STORE.set_default_org(uid=auth.uid, org_id=default_org.org_id)
+    orgs = await _STORE.list_orgs(uid=auth.uid)
+    resp_orgs: list[OrgResponse] = []
+    for o in orgs:
+        membership = await _STORE.get_membership(uid=auth.uid, org_id=o.org_id)
+        resp_orgs.append(
+            OrgResponse(
+                org_id=o.org_id,
+                name=o.name,
+                created_at=o.created_at,
+                owner_uid=o.owner_uid,
+                role=(membership.role if membership else "member"),
+            )
+        )
+    return MeResponse(uid=auth.uid, default_org_id=default_org.org_id, orgs=resp_orgs)
+
+
+@app.get("/v1/orgs")
+async def list_orgs(auth: AuthContext = Depends(get_auth_context)) -> list[OrgResponse]:
+    default_org = await _STORE.ensure_default_org(uid=auth.uid)
+    orgs = await _STORE.list_orgs(uid=auth.uid)
+    out: list[OrgResponse] = []
+    for o in orgs:
+        membership = await _STORE.get_membership(uid=auth.uid, org_id=o.org_id)
+        out.append(
+            OrgResponse(
+                org_id=o.org_id,
+                name=o.name,
+                created_at=o.created_at,
+                owner_uid=o.owner_uid,
+                role=(membership.role if membership else "member"),
+            )
+        )
+    if not any(o.org_id == default_org.org_id for o in orgs):
+        membership = await _STORE.get_membership(uid=auth.uid, org_id=default_org.org_id)
+        out.insert(
+            0,
+            OrgResponse(
+                org_id=default_org.org_id,
+                name=default_org.name,
+                created_at=default_org.created_at,
+                owner_uid=default_org.owner_uid,
+                role=(membership.role if membership else "member"),
+            ),
+        )
+    return out
+
+
+@app.post("/v1/orgs", status_code=201)
+async def create_org(
+    req: CreateOrgRequest, auth: AuthContext = Depends(get_auth_context)
+) -> OrgResponse:
+    org = await _STORE.create_org(uid=auth.uid, name=req.name)
+    await _STORE.set_default_org(uid=auth.uid, org_id=org.org_id)
+    membership = await _STORE.get_membership(uid=auth.uid, org_id=org.org_id)
+    return OrgResponse(
+        org_id=org.org_id,
+        name=org.name,
+        created_at=org.created_at,
+        owner_uid=org.owner_uid,
+        role=(membership.role if membership else "owner"),
+    )
+
+
+@app.get("/v1/runs")
+async def list_runs(
+    auth: AuthContext = Depends(get_auth_context),
+    tenant: TenantContext = Depends(get_tenant_context),
+) -> list[RunResponse]:
+    runs = await _STORE.list_runs(uid=auth.uid, org_id=tenant.org.org_id, limit=50)
+    return [
+        RunResponse(
+            run_id=r.run_id,
+            org_id=r.org_id,
+            session_id=r.session_id,
+            agent=r.agent,
+            prompt=r.prompt,
+            status=r.status,
+            created_at=r.created_at,
+            updated_at=r.updated_at,
+            final_text=r.final_text,
+        )
+        for r in runs
+    ]
+
+
+@app.get("/v1/runs/{run_id}")
+async def get_run(
+    run_id: str,
+    auth: AuthContext = Depends(get_auth_context),
+    tenant: TenantContext = Depends(get_tenant_context),
+) -> RunResponse:
+    run = await _STORE.get_run(uid=auth.uid, org_id=tenant.org.org_id, run_id=run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="run not found")
+    return RunResponse(
+        run_id=run.run_id,
+        org_id=run.org_id,
+        session_id=run.session_id,
+        agent=run.agent,
+        prompt=run.prompt,
+        status=run.status,
+        created_at=run.created_at,
+        updated_at=run.updated_at,
+        final_text=run.final_text,
+    )
 
 
 @app.get("/agui/stream")
@@ -220,6 +403,8 @@ async def agui_stream(
     session_id: str = "default",
     agent: str = "coder",
     tool: Optional[str] = None,
+    auth: AuthContext = Depends(get_auth_context),
+    tenant: TenantContext = Depends(get_tenant_context),
 ):
     """
     MVP AG-UI SSE stream.
@@ -231,19 +416,83 @@ async def agui_stream(
       - tool: optional tool name to simulate a tool event (MVP only)
     """
 
+    run: Run = await _STORE.create_run(
+        uid=auth.uid,
+        org_id=tenant.org.org_id,
+        session_id=session_id,
+        agent=agent,
+        prompt=prompt,
+    )
+
     async def _gen() -> AsyncIterator[bytes]:
-        async for chunk in stream_agui_sse_bytes(
-            _upstream_adk_events(prompt=prompt, session_id=session_id, agent=agent, tool=tool),
-            session_id=session_id,
-            prompt=prompt,
-            agent=agent,
-        ):
-            yield chunk
+        translator = AGUIStreamTranslator(session_id=session_id, prompt=prompt, agent=agent)
+        # Emit intent immediately (includes run/org context for richer UI).
+        intent = translator._intent_event()  # noqa: SLF001
+        intent.data.setdefault("frame", "intent")
+        intent.data.setdefault("run_id", run.run_id)
+        intent.data.setdefault("org_id", tenant.org.org_id)
+        yield sse_encode_event(intent).encode("utf-8")
+
+        final_text_accum: list[str] = []
+        status = "running"
+        try:
+            async for raw in _upstream_adk_events(
+                prompt=prompt, session_id=session_id, agent=agent, tool=tool
+            ):
+                for ev in translator.translate(raw):
+                    if ev.type.value == "delta":
+                        t = str(ev.data.get("text") or "")
+                        if t:
+                            final_text_accum.append(t)
+                    if ev.type.value in {"final"}:
+                        final_text_accum.append(str(ev.data.get("text") or ""))
+                        status = "completed"
+                    if ev.type.value in {"error"}:
+                        status = "error"
+                    yield sse_encode_event(ev).encode("utf-8")
+                    if ev.type.value in {"final", "error"}:
+                        break
+                if status in {"completed", "error"}:
+                    break
+        except Exception as exc:
+            status = "error"
+            err = AGUIEvent.error(
+                "stream crashed",
+                session_id=session_id,
+                code="stream_crashed",
+                details={"error": repr(exc), "run_id": run.run_id},
+            )
+            yield sse_encode_event(err).encode("utf-8")
+
+        final_text = "".join(final_text_accum).strip() or None
+        await _STORE.update_run(
+            run_id=run.run_id,
+            org_id=tenant.org.org_id,
+            status=status,
+            final_text=final_text,
+        )
 
     return StreamingResponse(
         _gen(),
         media_type="text/event-stream",
         headers=STREAM_HEADERS,
+    )
+
+
+@app.post("/agui/stream")
+async def agui_stream_post(
+    req: CreateTaskRequest,
+    auth: AuthContext = Depends(get_auth_context),
+    tenant: TenantContext = Depends(get_tenant_context),
+):
+    # Reuse the GET handler semantics; POST avoids long query strings and is friendlier to proxies.
+    return await agui_stream(
+        prompt=req.prompt,
+        session_id=req.session_id,
+        agent=req.agent,
+        tool=req.tool,
+        auth=auth,
+        tenant=tenant,
     )
 
 

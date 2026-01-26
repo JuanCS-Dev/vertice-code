@@ -1,0 +1,13 @@
+{
+  "bindings": [
+    {
+      "members": [
+        "serviceAccount:cr-vertice-agent-gateway@vertice-ai.iam.gserviceaccount.com",
+        "serviceAccount:cr-vertice-backend@vertice-ai.iam.gserviceaccount.com"
+      ],
+      "role": "roles/run.invoker"
+    }
+  ],
+  "etag": "BwZJTvmH8L4=",
+  "version": 1
+}

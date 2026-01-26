@@ -143,6 +143,45 @@ Detalhes completos (PR‑5): `docs/google/PR_5_GOOGLE_MANAGED_VERTEX_2026.md`
 
 ---
 
+## PRs de Manutenção (Google Cloud / SRE) — backlog sugerido
+
+Objetivo: preparar manutenção automatizável (pós-frontend) seguindo padrões oficiais do Google Cloud
+(Architecture Framework + Cloud Operations), com PRs pequenas e verificáveis.
+
+### PR-M1: Runbook “Manutenção Google Cloud 2026” (docs)
+- **Arquivos-alvo (novos):**
+  - `docs/google/GOOGLE_CLOUD_MAINTENANCE_BEST_PRACTICES_2026.md`
+- **Aceite:** arquivo publicado com checklist “diário/semanal/mensal” + links oficiais.
+
+### PR-M2: Playbook do Jules para manutenção automatizada (docs)
+- **Arquivos-alvo (novos):**
+  - `docs/google/jules_integration/JULES_GCP_MAINTENANCE_AUTOMATION_2026.md`
+- **Aceite:** contém prompts prontos + guardrails (read-only first, sem chaves long-lived).
+
+### PR-M3: Checklist de “GCP inventory” (scripts read-only)
+- **Arquivos-alvo (novos):**
+  - `tools/gcloud/inventory_cloud_run.sh`
+  - `tools/gcloud/inventory_gke.sh`
+  - `tools/gcloud/inventory_iam.sh`
+- **Não fazer:** comandos `create/update/delete`.
+- **Aceite:**
+  - scripts rodam sem erro com `gcloud auth application-default login` (local)
+  - outputs redigidos (não imprimir secrets)
+
+### PR-M4: “Operações” para Cloud Run (docs + validação)
+- **Arquivos-alvo (novos ou update mínimo):**
+  - doc curto com como configurar: logs/metrics, alertas, SLO, rollbacks, traffic splitting
+- **Aceite:** checklist “antes do deploy” e “pós-deploy”.
+
+### PR-M5: Modelo de SLO + alertas (Infra-as-Code recomendado)
+- **Arquivos-alvo:** Terraform/Config (se já existir) OU doc para criação manual
+- **Aceite:** 1 SLO exemplo (latência/erro) + 1 alerta (burn rate).
+
+### PR-M6: Política “sem basic roles” + service accounts por serviço (docs)
+- **Arquivos-alvo:** doc e tabela de IAM mínimo por serviço
+- **Aceite:** checklist aplicável às recomendações do Recommender (least privilege).
+
+
 ## PR-3.1: AG‑UI adapter + `/agui/tasks` (backend-only) — concluída (25 JAN 2026)
 
 - Entregue:
@@ -170,3 +209,34 @@ Detalhes completos: `docs/google/PHASE_3_1_AGUI_TASKS_ADAPTER.md`
   - Resultado esperado: `14 passed` (offline)
 
 Detalhes completos: `docs/google/PHASE_4_ALLOYDB_AI_CUTOVER_2026.md`
+
+---
+
+## PR-L (Launch) — wiring + produção (26 JAN 2026)
+
+Objetivo: fechar o lançamento com Cloud Run canônico e hardening (sem drift, sem serviços públicos desnecessários).
+
+### PR-L0: Documentar e executar correção de drift do `vertice-agent-gateway`
+- **Contexto:** no GCP, o `vertice-agent-gateway` responde `/openapi.json` 200 mas `/healthz` 404 (drift de imagem).
+- **Entregáveis (docs):**
+  - atualizar `docs/google/LAUNCH_ROADMAP_GOOGLE_STACK_2026.md` (M0.1) com comandos exatos de build/deploy.
+  - registrar evidências em `docs/google/EXECUTION_REPORT_WIRING_FRONTEND_BACKEND_2026-01-26.md`.
+- **Aceite (read-only):**
+  - `curl $AG_URL/openapi.json` = 200
+  - `curl $AG_URL/healthz` = 200
+
+### PR-L1: Hardening IAM do Cloud Run (gateway privado, frontend público)
+- **Regra:** não executar sem aprovação explícita do owner.
+- **Entregáveis (docs):**
+  - comandos `gcloud run services add/remove-iam-policy-binding` + rollback.
+- **Aceite:** `/dashboard` e `/artifacts` funcionam via `vertice-frontend` com `vertice-agent-gateway` privado.
+
+### PR-L2: Pipeline do frontend canônico (`apps/web-console`)
+- **Problema atual:** configs de Cloud Build apontam para frontends legados (`vertice-chat-webapp/frontend`).
+- **Entregáveis:**
+  - `apps/web-console/Dockerfile` (Next.js production)
+  - `cloudbuild.web-console.yaml` (build/push)
+  - doc curto em `docs/google/` com comandos de deploy para `vertice-frontend`.
+- **Aceite:**
+  - build Cloud Build gera imagem
+  - `vertice-frontend` serve rotas do `apps/web-console`

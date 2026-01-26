@@ -96,9 +96,8 @@ gcloud ai endpoints create \
 gcloud iam service-accounts create firebase-admin \
   --display-name="Firebase Admin"
 
-# Secrets para AI e Firebase
+# Secrets para Firebase (e outros segredos do app)
 gcloud secrets create firebase-service-account-key --data-file=firebase-admin-key.json
-gcloud secrets create vertex-ai-key --data-file=vertex-ai-key.json
 gcloud secrets create firebase-config --data-file=firebase-config.json
 ```
 
@@ -162,7 +161,6 @@ gcloud run deploy vertice-backend \
   --memory 2Gi \
   --cpu 2 \
   --set-secrets FIREBASE_SA=firebase-service-account-key:latest \
-  --set-secrets VERTEX_AI_KEY=vertex-ai-key:latest \
   --set-env-vars NODE_ENV=production \
   --set-env-vars GOOGLE_CLOUD_PROJECT=vertice-chat-webapp
 ```
@@ -222,7 +220,7 @@ export async function POST(request: Request) {
   const { messages } = await request.json()
 
   const vertexAI = new VertexAI({ project: 'vertice-chat-webapp' })
-  const model = vertexAI.getGenerativeModel({ model: 'gemini-2.5-pro' })
+  const model = vertexAI.getGenerativeModel({ model: 'gemini-3-pro' })
 
   const result = await model.generateContentStream({
     contents: messages,
@@ -403,7 +401,7 @@ gcloud compute firewall-rules create allow-cloud-run \
 **Erro: Streaming não funciona**
 ```bash
 # Verificar Vertex AI quota
-gcloud ai models describe gemini-2.5-pro --region=us-central1
+gcloud ai models describe gemini-3-pro --region=us-central1
 
 # Check App Hosting logs
 firebase apphosting:backends:list-builds us-central1
@@ -418,13 +416,27 @@ firebase apphosting:backends:describe us-central1
 node --version  # Deve ser 18+
 ```
 
-**Erro: Vertex AI authentication**
+**Erro: Vertex AI authentication (padrão Google: ADC/IAM, sem API key)**
 ```bash
-# Verificar service account
-gcloud iam service-accounts describe firebase-admin@vertice-chat-webapp.iam.gserviceaccount.com
+# O Vertex AI usa Application Default Credentials (ADC):
+# https://cloud.google.com/docs/authentication/provide-credentials-adc
+#
+# Em Cloud Run, a identidade é o Service Account do serviço:
+# https://cloud.google.com/run/docs/securing/service-identity
+#
+# Garanta permissões IAM para Vertex AI:
+# https://cloud.google.com/vertex-ai/docs/general/access-control
 
-# Check secrets
-gcloud secrets versions list vertex-ai-key
+# Verificar qual Service Account o Cloud Run está usando:
+gcloud run services describe vertice-backend --region us-central1 \
+  --format='value(spec.template.spec.serviceAccountName)'
+
+# (Se necessário) conceder permissão mínima ao SA:
+PROJECT_ID="vertice-ai"
+SA_EMAIL="239800439060-compute@developer.gserviceaccount.com"
+gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
+  --member="serviceAccount:${SA_EMAIL}" \
+  --role="roles/aiplatform.user"
 ```
 
 **Erro: Cold starts afetando streaming**

@@ -1,0 +1,728 @@
+[
+  {
+    "apiVersion": "serving.knative.dev/v1",
+    "kind": "Service",
+    "metadata": {
+      "annotations": {
+        "cloudfunctions.googleapis.com/function-id": "ssrverticeai",
+        "run.googleapis.com/build-base-image": "us-central1-docker.pkg.dev/serverless-runtimes/google-22-full/runtimes/nodejs22",
+        "run.googleapis.com/build-enable-automatic-updates": "true",
+        "run.googleapis.com/build-environment-variables": "{\"GOOGLE_NODE_RUN_SCRIPTS\":\"\"}",
+        "run.googleapis.com/build-function-target": "ssrverticeai",
+        "run.googleapis.com/build-image-uri": "us-central1-docker.pkg.dev/vertice-ai/gcf-artifacts/vertice--ai__us--central1__ssrverticeai:version_1",
+        "run.googleapis.com/build-name": "projects/239800439060/locations/us-central1/builds/47a3923c-0560-4579-a144-24f459b970fa",
+        "run.googleapis.com/build-service-account": "projects/vertice-ai/serviceAccounts/239800439060-compute@developer.gserviceaccount.com",
+        "run.googleapis.com/build-source-location": "gs://gcf-v2-sources-239800439060-us-central1/ssrverticeai/function-source.zip#1768586839132959",
+        "run.googleapis.com/client-name": "gcloud",
+        "run.googleapis.com/client-version": "540.0.0",
+        "run.googleapis.com/custom-audiences": "[\"https://us-central1-vertice-ai.cloudfunctions.net/ssrverticeai\"]",
+        "run.googleapis.com/ingress": "all",
+        "run.googleapis.com/ingress-status": "all",
+        "run.googleapis.com/maxScale": "3",
+        "run.googleapis.com/operation-id": "cd0e1c4c-c884-490e-9724-356d5c506465",
+        "run.googleapis.com/urls": "[\"https://ssrverticeai-239800439060.us-central1.run.app\",\"https://us-central1-vertice-ai.cloudfunctions.net/ssrverticeai\",\"https://ssrverticeai-nrpngfmr6a-uc.a.run.app\"]",
+        "serving.knative.dev/creator": "service-239800439060@gcf-admin-robot.iam.gserviceaccount.com",
+        "serving.knative.dev/lastModifier": "juancs.d3v@gmail.com"
+      },
+      "creationTimestamp": "2026-01-10T15:28:08.100303Z",
+      "generation": 18,
+      "labels": {
+        "cloud.googleapis.com/location": "us-central1",
+        "firebase-functions-codebase": "firebase-frameworks-vertice-ai",
+        "firebase-functions-hash": "f9f8b1e3f41190175285e85fc8e00d511d66872a",
+        "goog-cloudfunctions-runtime": "nodejs22",
+        "goog-drz-cloudfunctions-id": "ssrverticeai",
+        "goog-drz-cloudfunctions-location": "us-central1",
+        "goog-managed-by": "cloudfunctions"
+      },
+      "name": "ssrverticeai",
+      "namespace": "239800439060",
+      "resourceVersion": "AAZJTN1kV6A",
+      "selfLink": "/apis/serving.knative.dev/v1/namespaces/239800439060/services/ssrverticeai",
+      "uid": "60645001-dbc0-4b58-a25b-0769abed8f2c"
+    },
+    "spec": {
+      "template": {
+        "metadata": {
+          "annotations": {
+            "autoscaling.knative.dev/maxScale": "3",
+            "cloudfunctions.googleapis.com/trigger-type": "HTTP_TRIGGER",
+            "run.googleapis.com/base-images": "{\"worker\":\"us-central1-docker.pkg.dev/serverless-runtimes/google-22-full/runtimes/nodejs22\"}",
+            "run.googleapis.com/client-name": "gcloud",
+            "run.googleapis.com/client-version": "540.0.0",
+            "run.googleapis.com/startup-cpu-boost": "true"
+          },
+          "labels": {
+            "client.knative.dev/nonce": "jttvsliihc",
+            "firebase-functions-codebase": "firebase-frameworks-vertice-ai",
+            "firebase-functions-hash": "f9f8b1e3f41190175285e85fc8e00d511d66872a",
+            "goog-drz-cloudfunctions-id": "ssrverticeai",
+            "goog-drz-cloudfunctions-location": "us-central1",
+            "run.googleapis.com/startupProbeType": "Default"
+          }
+        },
+        "spec": {
+          "containerConcurrency": 80,
+          "containers": [
+            {
+              "env": [
+                {
+                  "name": "VERCEL_URL",
+                  "valueRedacted": true
+                },
+                {
+                  "name": "__FIREBASE_FRAMEWORKS_ENTRY__",
+                  "valueRedacted": true
+                },
+                {
+                  "name": "__FIREBASE_DEFAULTS__",
+                  "valueRedacted": true
+                },
+                {
+                  "name": "FIREBASE_CONFIG",
+                  "valueRedacted": true
+                },
+                {
+                  "name": "GCLOUD_PROJECT",
+                  "valueRedacted": true
+                },
+                {
+                  "name": "EVENTARC_CLOUD_EVENT_SOURCE",
+                  "valueRedacted": true
+                },
+                {
+                  "name": "FUNCTION_TARGET",
+                  "valueRedacted": true
+                },
+                {
+                  "name": "LOG_EXECUTION_ID",
+                  "valueRedacted": true
+                }
+              ],
+              "image": "us-central1-docker.pkg.dev/vertice-ai/gcf-artifacts/vertice--ai__us--central1__ssrverticeai@sha256:86dd310443879ced6751eab3171a73830f02e3366848a765316cc03b71a4d02e",
+              "name": "worker",
+              "ports": [
+                {
+                  "containerPort": 8080,
+                  "name": "http1"
+                }
+              ],
+              "resources": {
+                "limits": {
+                  "cpu": "1",
+                  "memory": "256Mi"
+                }
+              },
+              "startupProbe": {
+                "failureThreshold": 1,
+                "periodSeconds": 240,
+                "tcpSocket": {
+                  "port": 8080
+                },
+                "timeoutSeconds": 240
+              }
+            }
+          ],
+          "runtimeClassName": "run.googleapis.com/linux-base-image-update",
+          "serviceAccountName": "cr-ssrverticeai@vertice-ai.iam.gserviceaccount.com",
+          "timeoutSeconds": 60
+        }
+      },
+      "traffic": [
+        {
+          "percent": 100,
+          "revisionName": "ssrverticeai-00014-vun"
+        },
+        {
+          "revisionName": "ssrverticeai-00003-soz",
+          "tag": "fh-65a312dc0f5c2d46"
+        },
+        {
+          "revisionName": "ssrverticeai-00005-8tf",
+          "tag": "fh-185ae241b53f79ac"
+        },
+        {
+          "revisionName": "ssrverticeai-00008-rer",
+          "tag": "fh-4c34817e54ca2422"
+        },
+        {
+          "revisionName": "ssrverticeai-00010-soc",
+          "tag": "fh-30c16996ea5a3ba6"
+        },
+        {
+          "revisionName": "ssrverticeai-00012-lig",
+          "tag": "fh-4715b3a79f82bbc7"
+        },
+        {
+          "revisionName": "ssrverticeai-00014-vun",
+          "tag": "fh-8da716f18391aecf"
+        }
+      ]
+    },
+    "status": {
+      "address": {
+        "url": "https://ssrverticeai-nrpngfmr6a-uc.a.run.app"
+      },
+      "conditions": [
+        {
+          "lastTransitionTime": "2026-01-26T16:18:21.760632Z",
+          "message": "Image 'us-central1-docker.pkg.dev/vertice-ai/gcf-artifacts/vertice--ai__us--central1__ssrverticeai@sha256:86dd310443879ced6751eab3171a73830f02e3366848a765316cc03b71a4d02e' not found.",
+          "status": "False",
+          "type": "Ready"
+        },
+        {
+          "severity": "Info",
+          "status": "True",
+          "type": "BaseImageValidated"
+        },
+        {
+          "lastTransitionTime": "2026-01-26T16:18:21.760632Z",
+          "message": "Image 'us-central1-docker.pkg.dev/vertice-ai/gcf-artifacts/vertice--ai__us--central1__ssrverticeai@sha256:86dd310443879ced6751eab3171a73830f02e3366848a765316cc03b71a4d02e' not found.",
+          "status": "False",
+          "type": "ConfigurationsReady"
+        },
+        {
+          "lastTransitionTime": "2026-01-26T16:19:00.913324Z",
+          "status": "True",
+          "type": "RoutesReady"
+        }
+      ],
+      "latestCreatedRevisionName": "ssrverticeai-00011-2wt",
+      "latestReadyRevisionName": "ssrverticeai-00014-vun",
+      "observedGeneration": 18,
+      "traffic": [
+        {
+          "revisionName": "ssrverticeai-00003-soz",
+          "tag": "fh-65a312dc0f5c2d46",
+          "url": "https://fh-65a312dc0f5c2d46---ssrverticeai-nrpngfmr6a-uc.a.run.app"
+        },
+        {
+          "revisionName": "ssrverticeai-00005-8tf",
+          "tag": "fh-185ae241b53f79ac",
+          "url": "https://fh-185ae241b53f79ac---ssrverticeai-nrpngfmr6a-uc.a.run.app"
+        },
+        {
+          "revisionName": "ssrverticeai-00008-rer",
+          "tag": "fh-4c34817e54ca2422",
+          "url": "https://fh-4c34817e54ca2422---ssrverticeai-nrpngfmr6a-uc.a.run.app"
+        },
+        {
+          "revisionName": "ssrverticeai-00010-soc",
+          "tag": "fh-30c16996ea5a3ba6",
+          "url": "https://fh-30c16996ea5a3ba6---ssrverticeai-nrpngfmr6a-uc.a.run.app"
+        },
+        {
+          "revisionName": "ssrverticeai-00012-lig",
+          "tag": "fh-4715b3a79f82bbc7",
+          "url": "https://fh-4715b3a79f82bbc7---ssrverticeai-nrpngfmr6a-uc.a.run.app"
+        },
+        {
+          "percent": 100,
+          "revisionName": "ssrverticeai-00014-vun",
+          "tag": "fh-8da716f18391aecf",
+          "url": "https://fh-8da716f18391aecf---ssrverticeai-nrpngfmr6a-uc.a.run.app"
+        }
+      ],
+      "url": "https://ssrverticeai-nrpngfmr6a-uc.a.run.app"
+    }
+  },
+  {
+    "apiVersion": "serving.knative.dev/v1",
+    "kind": "Service",
+    "metadata": {
+      "annotations": {
+        "run.googleapis.com/client-name": "gcloud",
+        "run.googleapis.com/client-version": "540.0.0",
+        "run.googleapis.com/ingress": "all",
+        "run.googleapis.com/ingress-status": "all",
+        "run.googleapis.com/maxScale": "3",
+        "run.googleapis.com/operation-id": "1d47af9c-bc83-479f-af29-c43363bb999b",
+        "run.googleapis.com/urls": "[\"https://vertice-agent-gateway-239800439060.us-central1.run.app\",\"https://vertice-agent-gateway-nrpngfmr6a-uc.a.run.app\"]",
+        "serving.knative.dev/creator": "juancs.d3v@gmail.com",
+        "serving.knative.dev/lastModifier": "juancs.d3v@gmail.com"
+      },
+      "creationTimestamp": "2026-01-26T04:49:06.380089Z",
+      "generation": 4,
+      "labels": {
+        "cloud.googleapis.com/location": "us-central1"
+      },
+      "name": "vertice-agent-gateway",
+      "namespace": "239800439060",
+      "resourceVersion": "AAZJTM1A8go",
+      "selfLink": "/apis/serving.knative.dev/v1/namespaces/239800439060/services/vertice-agent-gateway",
+      "uid": "83d4266d-e3c0-4432-906b-a0f593435872"
+    },
+    "spec": {
+      "template": {
+        "metadata": {
+          "annotations": {
+            "autoscaling.knative.dev/maxScale": "3",
+            "run.googleapis.com/client-name": "gcloud",
+            "run.googleapis.com/client-version": "540.0.0",
+            "run.googleapis.com/startup-cpu-boost": "true",
+            "run.googleapis.com/vpc-access-connector": "vertice-vpc-conn",
+            "run.googleapis.com/vpc-access-egress": "private-ranges-only"
+          },
+          "labels": {
+            "client.knative.dev/nonce": "knjbiozzvm",
+            "run.googleapis.com/startupProbeType": "Default"
+          }
+        },
+        "spec": {
+          "containerConcurrency": 80,
+          "containers": [
+            {
+              "env": [
+                {
+                  "name": "VERTEX_AGENT_ENGINE_ENABLED",
+                  "valueRedacted": true
+                },
+                {
+                  "name": "VERTICE_ALLOYDB_DSN",
+                  "valueFrom": {
+                    "secretKeyRef": {
+                      "key": "1",
+                      "name": "vertice-alloydb-dsn"
+                    }
+                  }
+                }
+              ],
+              "image": "us-central1-docker.pkg.dev/vertice-ai/vertice-cloud/backend:latest",
+              "ports": [
+                {
+                  "containerPort": 8080,
+                  "name": "http1"
+                }
+              ],
+              "resources": {
+                "limits": {
+                  "cpu": "1000m",
+                  "memory": "512Mi"
+                }
+              },
+              "startupProbe": {
+                "failureThreshold": 1,
+                "periodSeconds": 240,
+                "tcpSocket": {
+                  "port": 8080
+                },
+                "timeoutSeconds": 240
+              }
+            }
+          ],
+          "serviceAccountName": "cr-vertice-agent-gateway@vertice-ai.iam.gserviceaccount.com",
+          "timeoutSeconds": 300
+        }
+      },
+      "traffic": [
+        {
+          "latestRevision": true,
+          "percent": 100
+        }
+      ]
+    },
+    "status": {
+      "address": {
+        "url": "https://vertice-agent-gateway-nrpngfmr6a-uc.a.run.app"
+      },
+      "conditions": [
+        {
+          "lastTransitionTime": "2026-01-26T16:14:30.191626Z",
+          "status": "True",
+          "type": "Ready"
+        },
+        {
+          "lastTransitionTime": "2026-01-26T16:14:08.651974Z",
+          "status": "True",
+          "type": "ConfigurationsReady"
+        },
+        {
+          "lastTransitionTime": "2026-01-26T16:14:30.157431Z",
+          "status": "True",
+          "type": "RoutesReady"
+        }
+      ],
+      "latestCreatedRevisionName": "vertice-agent-gateway-00004-dlm",
+      "latestReadyRevisionName": "vertice-agent-gateway-00004-dlm",
+      "observedGeneration": 4,
+      "traffic": [
+        {
+          "latestRevision": true,
+          "percent": 100,
+          "revisionName": "vertice-agent-gateway-00004-dlm"
+        }
+      ],
+      "url": "https://vertice-agent-gateway-nrpngfmr6a-uc.a.run.app"
+    }
+  },
+  {
+    "apiVersion": "serving.knative.dev/v1",
+    "kind": "Service",
+    "metadata": {
+      "annotations": {
+        "run.googleapis.com/client-name": "gcloud",
+        "run.googleapis.com/client-version": "540.0.0",
+        "run.googleapis.com/ingress": "all",
+        "run.googleapis.com/ingress-status": "all",
+        "run.googleapis.com/maxScale": "3",
+        "run.googleapis.com/operation-id": "ca70dc9e-ef99-4beb-aa79-66fef38f0a2b",
+        "run.googleapis.com/urls": "[\"https://vertice-backend-239800439060.us-central1.run.app\",\"https://vertice-backend-nrpngfmr6a-uc.a.run.app\"]",
+        "serving.knative.dev/creator": "juancs.d3v@gmail.com",
+        "serving.knative.dev/lastModifier": "juancs.d3v@gmail.com"
+      },
+      "creationTimestamp": "2026-01-09T21:48:58.688513Z",
+      "generation": 47,
+      "labels": {
+        "cloud.googleapis.com/location": "us-central1"
+      },
+      "name": "vertice-backend",
+      "namespace": "239800439060",
+      "resourceVersion": "AAZJTNUf3I8",
+      "selfLink": "/apis/serving.knative.dev/v1/namespaces/239800439060/services/vertice-backend",
+      "uid": "4d9024a1-e27f-4e3c-a0c1-271dea35e72c"
+    },
+    "spec": {
+      "template": {
+        "metadata": {
+          "annotations": {
+            "autoscaling.knative.dev/maxScale": "10",
+            "autoscaling.knative.dev/minScale": "1",
+            "run.googleapis.com/client-name": "gcloud",
+            "run.googleapis.com/client-version": "540.0.0",
+            "run.googleapis.com/network-interfaces": "[{\"network\":\"default\",\"subnetwork\":\"default\"}]",
+            "run.googleapis.com/startup-cpu-boost": "true",
+            "run.googleapis.com/vpc-access-egress": "private-ranges-only"
+          },
+          "labels": {
+            "client.knative.dev/nonce": "jxzqvzryfw",
+            "run.googleapis.com/startupProbeType": "Default"
+          }
+        },
+        "spec": {
+          "containerConcurrency": 80,
+          "containers": [
+            {
+              "env": [
+                {
+                  "name": "STRIPE_SECRET_KEY",
+                  "valueFrom": {
+                    "secretKeyRef": {
+                      "key": "latest",
+                      "name": "stripe-secret-key"
+                    }
+                  }
+                },
+                {
+                  "name": "NODE_ENV",
+                  "valueRedacted": true
+                },
+                {
+                  "name": "MCP_SERVER_URL",
+                  "valueRedacted": true
+                }
+              ],
+              "image": "us-central1-docker.pkg.dev/vertice-ai/vertice-cloud/backend:5845f20",
+              "ports": [
+                {
+                  "containerPort": 8080,
+                  "name": "http1"
+                }
+              ],
+              "resources": {
+                "limits": {
+                  "cpu": "2",
+                  "memory": "2Gi"
+                }
+              },
+              "startupProbe": {
+                "failureThreshold": 1,
+                "periodSeconds": 240,
+                "tcpSocket": {
+                  "port": 8080
+                },
+                "timeoutSeconds": 240
+              }
+            }
+          ],
+          "serviceAccountName": "cr-vertice-backend@vertice-ai.iam.gserviceaccount.com",
+          "timeoutSeconds": 300
+        }
+      },
+      "traffic": [
+        {
+          "latestRevision": true,
+          "percent": 100
+        }
+      ]
+    },
+    "status": {
+      "address": {
+        "url": "https://vertice-backend-nrpngfmr6a-uc.a.run.app"
+      },
+      "conditions": [
+        {
+          "lastTransitionTime": "2026-01-26T16:16:42.241167Z",
+          "status": "True",
+          "type": "Ready"
+        },
+        {
+          "lastTransitionTime": "2026-01-26T16:14:36.736957Z",
+          "status": "True",
+          "type": "ConfigurationsReady"
+        },
+        {
+          "lastTransitionTime": "2026-01-26T16:16:42.199756Z",
+          "status": "True",
+          "type": "RoutesReady"
+        }
+      ],
+      "latestCreatedRevisionName": "vertice-backend-00047-czf",
+      "latestReadyRevisionName": "vertice-backend-00047-czf",
+      "observedGeneration": 47,
+      "traffic": [
+        {
+          "latestRevision": true,
+          "percent": 100,
+          "revisionName": "vertice-backend-00047-czf"
+        }
+      ],
+      "url": "https://vertice-backend-nrpngfmr6a-uc.a.run.app"
+    }
+  },
+  {
+    "apiVersion": "serving.knative.dev/v1",
+    "kind": "Service",
+    "metadata": {
+      "annotations": {
+        "run.googleapis.com/client-name": "gcloud",
+        "run.googleapis.com/client-version": "540.0.0",
+        "run.googleapis.com/ingress": "all",
+        "run.googleapis.com/ingress-status": "all",
+        "run.googleapis.com/maxScale": "10",
+        "run.googleapis.com/operation-id": "4841159a-6233-4bde-a881-eb8e0213cb21",
+        "run.googleapis.com/urls": "[\"https://vertice-frontend-239800439060.us-central1.run.app\",\"https://vertice-frontend-nrpngfmr6a-uc.a.run.app\"]",
+        "serving.knative.dev/creator": "juancs.d3v@gmail.com",
+        "serving.knative.dev/lastModifier": "juancs.d3v@gmail.com"
+      },
+      "creationTimestamp": "2026-01-10T15:43:52.106346Z",
+      "generation": 29,
+      "labels": {
+        "cloud.googleapis.com/location": "us-central1"
+      },
+      "name": "vertice-frontend",
+      "namespace": "239800439060",
+      "resourceVersion": "AAZJTNdZK+g",
+      "selfLink": "/apis/serving.knative.dev/v1/namespaces/239800439060/services/vertice-frontend",
+      "uid": "8a1cfd56-1018-4c63-8f76-10030991e4c2"
+    },
+    "spec": {
+      "template": {
+        "metadata": {
+          "annotations": {
+            "autoscaling.knative.dev/maxScale": "20",
+            "run.googleapis.com/client-name": "gcloud",
+            "run.googleapis.com/client-version": "540.0.0",
+            "run.googleapis.com/startup-cpu-boost": "true"
+          },
+          "labels": {
+            "client.knative.dev/nonce": "uxctydrehf",
+            "run.googleapis.com/startupProbeType": "Default"
+          }
+        },
+        "spec": {
+          "containerConcurrency": 100,
+          "containers": [
+            {
+              "env": [
+                {
+                  "name": "NEXT_PUBLIC_API_URL",
+                  "valueRedacted": true
+                },
+                {
+                  "name": "NODE_ENV",
+                  "valueRedacted": true
+                }
+              ],
+              "image": "us-central1-docker.pkg.dev/vertice-ai/vertice-cloud/frontend:home-v2",
+              "ports": [
+                {
+                  "containerPort": 8080,
+                  "name": "http1"
+                }
+              ],
+              "resources": {
+                "limits": {
+                  "cpu": "1",
+                  "memory": "1Gi"
+                }
+              },
+              "startupProbe": {
+                "failureThreshold": 1,
+                "periodSeconds": 240,
+                "tcpSocket": {
+                  "port": 8080
+                },
+                "timeoutSeconds": 240
+              }
+            }
+          ],
+          "serviceAccountName": "cr-vertice-frontend@vertice-ai.iam.gserviceaccount.com",
+          "timeoutSeconds": 60
+        }
+      },
+      "traffic": [
+        {
+          "latestRevision": true,
+          "percent": 100
+        }
+      ]
+    },
+    "status": {
+      "address": {
+        "url": "https://vertice-frontend-nrpngfmr6a-uc.a.run.app"
+      },
+      "conditions": [
+        {
+          "lastTransitionTime": "2026-01-26T16:17:19.551464Z",
+          "status": "True",
+          "type": "Ready"
+        },
+        {
+          "lastTransitionTime": "2026-01-26T16:17:04.665140Z",
+          "status": "True",
+          "type": "ConfigurationsReady"
+        },
+        {
+          "lastTransitionTime": "2026-01-26T16:17:19.502916Z",
+          "status": "True",
+          "type": "RoutesReady"
+        }
+      ],
+      "latestCreatedRevisionName": "vertice-frontend-00029-cfg",
+      "latestReadyRevisionName": "vertice-frontend-00029-cfg",
+      "observedGeneration": 29,
+      "traffic": [
+        {
+          "latestRevision": true,
+          "percent": 100,
+          "revisionName": "vertice-frontend-00029-cfg"
+        }
+      ],
+      "url": "https://vertice-frontend-nrpngfmr6a-uc.a.run.app"
+    }
+  },
+  {
+    "apiVersion": "serving.knative.dev/v1",
+    "kind": "Service",
+    "metadata": {
+      "annotations": {
+        "run.googleapis.com/client-name": "gcloud",
+        "run.googleapis.com/client-version": "540.0.0",
+        "run.googleapis.com/ingress": "all",
+        "run.googleapis.com/ingress-status": "all",
+        "run.googleapis.com/maxScale": "3",
+        "run.googleapis.com/operation-id": "fc92ca98-ef8a-4d73-80ad-81e014d5c06c",
+        "run.googleapis.com/urls": "[\"https://vertice-mcp-239800439060.us-central1.run.app\",\"https://vertice-mcp-nrpngfmr6a-uc.a.run.app\"]",
+        "serving.knative.dev/creator": "239800439060-compute@developer.gserviceaccount.com",
+        "serving.knative.dev/lastModifier": "juancs.d3v@gmail.com"
+      },
+      "creationTimestamp": "2026-01-16T16:48:46.011654Z",
+      "generation": 6,
+      "labels": {
+        "cloud.googleapis.com/location": "us-central1"
+      },
+      "name": "vertice-mcp",
+      "namespace": "239800439060",
+      "resourceVersion": "AAZJTNYY68o",
+      "selfLink": "/apis/serving.knative.dev/v1/namespaces/239800439060/services/vertice-mcp",
+      "uid": "5efb0493-0392-411a-812e-3e6f17340d23"
+    },
+    "spec": {
+      "template": {
+        "metadata": {
+          "annotations": {
+            "autoscaling.knative.dev/maxScale": "3",
+            "autoscaling.knative.dev/minScale": "1",
+            "run.googleapis.com/client-name": "gcloud",
+            "run.googleapis.com/client-version": "540.0.0",
+            "run.googleapis.com/startup-cpu-boost": "true"
+          },
+          "labels": {
+            "client.knative.dev/nonce": "evdiepicuv",
+            "run.googleapis.com/startupProbeType": "Default"
+          }
+        },
+        "spec": {
+          "containerConcurrency": 160,
+          "containers": [
+            {
+              "image": "us-central1-docker.pkg.dev/vertice-ai/vertice-cloud/mcp-server:latest",
+              "ports": [
+                {
+                  "containerPort": 8080,
+                  "name": "http1"
+                }
+              ],
+              "resources": {
+                "limits": {
+                  "cpu": "2",
+                  "memory": "2Gi"
+                }
+              },
+              "startupProbe": {
+                "failureThreshold": 1,
+                "periodSeconds": 240,
+                "tcpSocket": {
+                  "port": 8080
+                },
+                "timeoutSeconds": 240
+              },
+              "env": []
+            }
+          ],
+          "serviceAccountName": "cr-vertice-mcp@vertice-ai.iam.gserviceaccount.com",
+          "timeoutSeconds": 300
+        }
+      },
+      "traffic": [
+        {
+          "latestRevision": true,
+          "percent": 100
+        }
+      ]
+    },
+    "status": {
+      "address": {
+        "url": "https://vertice-mcp-nrpngfmr6a-uc.a.run.app"
+      },
+      "conditions": [
+        {
+          "lastTransitionTime": "2026-01-26T16:16:58.563530Z",
+          "status": "True",
+          "type": "Ready"
+        },
+        {
+          "lastTransitionTime": "2026-01-26T16:16:47.490142Z",
+          "status": "True",
+          "type": "ConfigurationsReady"
+        },
+        {
+          "lastTransitionTime": "2026-01-26T16:16:58.528183Z",
+          "status": "True",
+          "type": "RoutesReady"
+        }
+      ],
+      "latestCreatedRevisionName": "vertice-mcp-00006-rxq",
+      "latestReadyRevisionName": "vertice-mcp-00006-rxq",
+      "observedGeneration": 6,
+      "traffic": [
+        {
+          "latestRevision": true,
+          "percent": 100,
+          "revisionName": "vertice-mcp-00006-rxq"
+        }
+      ],
+      "url": "https://vertice-mcp-nrpngfmr6a-uc.a.run.app"
+    }
+  }
+]

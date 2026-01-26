@@ -1,0 +1,22 @@
+# Cloud Build: agent-gateway (apps/agent-gateway) image
+#
+# Builds the monorepo gateway image from `Dockerfile.backend`.
+#
+# Output:
+#   us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/agent-gateway:latest
+
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    id: "build-agent-gateway"
+    args:
+      - "build"
+      - "-t"
+      - "us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/agent-gateway:latest"
+      - "-f"
+      - "Dockerfile.backend"
+      - "."
+
+images:
+  - "us-central1-docker.pkg.dev/$PROJECT_ID/vertice-cloud/agent-gateway:latest"
+
+timeout: 1200s

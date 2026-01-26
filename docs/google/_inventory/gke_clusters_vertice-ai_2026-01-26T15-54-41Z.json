@@ -1,0 +1,1235 @@
+[
+  {
+    "addonsConfig": {
+      "dnsCacheConfig": {
+        "enabled": true
+      },
+      "gcePersistentDiskCsiDriverConfig": {
+        "enabled": true
+      },
+      "gcpFilestoreCsiDriverConfig": {
+        "enabled": true
+      },
+      "gcsFuseCsiDriverConfig": {
+        "enabled": true
+      },
+      "kubernetesDashboard": {
+        "disabled": true
+      },
+      "networkPolicyConfig": {
+        "disabled": true
+      },
+      "parallelstoreCsiDriverConfig": {
+        "enabled": true
+      },
+      "statefulHaConfig": {
+        "enabled": true
+      }
+    },
+    "anonymousAuthenticationConfig": {
+      "mode": "ENABLED"
+    },
+    "autopilot": {
+      "enabled": true
+    },
+    "autoscaling": {
+      "autoprovisioningNodePoolDefaults": {
+        "imageType": "COS_CONTAINERD",
+        "management": {
+          "autoRepair": true,
+          "autoUpgrade": true
+        },
+        "oauthScopes": [
+          "https://www.googleapis.com/auth/devstorage.read_only",
+          "https://www.googleapis.com/auth/logging.write",
+          "https://www.googleapis.com/auth/monitoring",
+          "https://www.googleapis.com/auth/service.management.readonly",
+          "https://www.googleapis.com/auth/servicecontrol",
+          "https://www.googleapis.com/auth/trace.append"
+        ],
+        "serviceAccount": "default",
+        "upgradeSettings": {
+          "maxSurge": 1,
+          "strategy": "SURGE"
+        }
+      },
+      "autoscalingProfile": "OPTIMIZE_UTILIZATION",
+      "enableNodeAutoprovisioning": true,
+      "resourceLimits": [
+        {
+          "maximum": "1000000000",
+          "resourceType": "cpu"
+        },
+        {
+          "maximum": "1000000000",
+          "resourceType": "memory"
+        },
+        {
+          "maximum": "1000000000",
+          "resourceType": "nvidia-tesla-t4"
+        },
+        {
+          "maximum": "1000000000",
+          "resourceType": "nvidia-tesla-a100"
+        }
+      ]
+    },
+    "clusterIpv4Cidr": "10.12.128.0/17",
+    "controlPlaneEndpointsConfig": {
+      "dnsEndpointConfig": {
+        "allowExternalTraffic": false,
+        "enableK8sCertsViaDns": false,
+        "enableK8sTokensViaDns": false,
+        "endpoint": "gke-9ad27e72745441c98db79afe6df29ee20b5d-239800439060.us-central1.gke.goog"
+      },
+      "ipEndpointsConfig": {
+        "authorizedNetworksConfig": {},
+        "enablePublicEndpoint": true,
+        "enabled": true,
+        "privateEndpoint": "10.128.0.2",
+        "publicEndpoint": "136.115.153.209"
+      }
+    },
+    "createTime": "2026-01-10T14:53:30+00:00",
+    "currentMasterVersion": "1.33.5-gke.2072000",
+    "currentNodeCount": 2,
+    "currentNodeVersion": "1.33.5-gke.1308000",
+    "databaseEncryption": {
+      "currentState": "CURRENT_STATE_DECRYPTED",
+      "state": "DECRYPTED"
+    },
+    "defaultMaxPodsConstraint": {
+      "maxPodsPerNode": "110"
+    },
+    "endpoint": "136.115.153.209",
+    "enterpriseConfig": {
+      "clusterTier": "STANDARD"
+    },
+    "etag": "ac9ad0fd-ee6b-43df-bd7c-bf65cd1a1726",
+    "id": "9ad27e72745441c98db79afe6df29ee20b5d8996660d49c091c9f6cc7af062b0",
+    "initialClusterVersion": "1.33.5-gke.1308000",
+    "instanceGroupUrls": [
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-f/instanceGroupManagers/gk3-vertice-cluster-default-pool-1f42caca-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-a/instanceGroupManagers/gk3-vertice-cluster-pool-1-b1c4125f-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-b/instanceGroupManagers/gk3-vertice-cluster-pool-1-649978f7-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-c/instanceGroupManagers/gk3-vertice-cluster-pool-1-2aa87c30-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-f/instanceGroupManagers/gk3-vertice-cluster-pool-1-b60ec65a-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-a/instanceGroupManagers/gk3-vertice-cluster-pool-2-c4226b44-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-b/instanceGroupManagers/gk3-vertice-cluster-pool-2-53cee15f-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-c/instanceGroupManagers/gk3-vertice-cluster-pool-2-8180852f-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-f/instanceGroupManagers/gk3-vertice-cluster-pool-2-548726ed-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-a/instanceGroupManagers/gk3-vertice-cluster-pool-3-e45c7a45-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-b/instanceGroupManagers/gk3-vertice-cluster-pool-3-a8ca901a-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-c/instanceGroupManagers/gk3-vertice-cluster-pool-3-55e682c5-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-f/instanceGroupManagers/gk3-vertice-cluster-pool-3-b11c29b8-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-a/instanceGroupManagers/gk3-vertice-cluster-pool-4-1fd39036-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-b/instanceGroupManagers/gk3-vertice-cluster-pool-4-b04bad10-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-c/instanceGroupManagers/gk3-vertice-cluster-pool-4-dc8b2810-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-f/instanceGroupManagers/gk3-vertice-cluster-pool-4-cc3d5191-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-a/instanceGroupManagers/gk3-vertice-cluster-pool-5-095f1ee6-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-b/instanceGroupManagers/gk3-vertice-cluster-pool-5-2ac812c9-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-c/instanceGroupManagers/gk3-vertice-cluster-pool-5-c49b9d17-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-f/instanceGroupManagers/gk3-vertice-cluster-pool-5-a9e63134-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-a/instanceGroupManagers/gk3-vertice-cluster-pool-6-94cc4bc0-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-b/instanceGroupManagers/gk3-vertice-cluster-pool-6-f46898fc-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-c/instanceGroupManagers/gk3-vertice-cluster-pool-6-ed40fff9-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-f/instanceGroupManagers/gk3-vertice-cluster-pool-6-d745a49a-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-a/instanceGroupManagers/gk3-vertice-cluster-pool-7-f6a7bffe-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-b/instanceGroupManagers/gk3-vertice-cluster-pool-7-176e6ec0-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-c/instanceGroupManagers/gk3-vertice-cluster-pool-7-b2b3e63c-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-f/instanceGroupManagers/gk3-vertice-cluster-pool-7-7ad5a16f-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-a/instanceGroupManagers/gk3-vertice-cluster-pool-8-8dd89e12-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-b/instanceGroupManagers/gk3-vertice-cluster-pool-8-6ba0be6d-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-c/instanceGroupManagers/gk3-vertice-cluster-pool-8-f2460939-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-f/instanceGroupManagers/gk3-vertice-cluster-pool-8-7f0468f5-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-a/instanceGroupManagers/gk3-vertice-cluster-pool-9-96e46d30-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-b/instanceGroupManagers/gk3-vertice-cluster-pool-9-0ec279cf-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-c/instanceGroupManagers/gk3-vertice-cluster-pool-9-f223a32a-grp",
+      "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-f/instanceGroupManagers/gk3-vertice-cluster-pool-9-b3f5ea6d-grp"
+    ],
+    "ipAllocationPolicy": {
+      "clusterIpv4Cidr": "10.12.128.0/17",
+      "clusterIpv4CidrBlock": "10.12.128.0/17",
+      "clusterSecondaryRangeName": "gke-vertice-cluster-pods-9ad27e72",
+      "defaultPodIpv4RangeUtilization": 0.0039,
+      "networkTierConfig": {
+        "networkTier": "NETWORK_TIER_DEFAULT"
+      },
+      "podCidrOverprovisionConfig": {},
+      "servicesIpv4Cidr": "34.118.224.0/20",
+      "servicesIpv4CidrBlock": "34.118.224.0/20",
+      "stackType": "IPV4",
+      "useIpAliases": true
+    },
+    "labelFingerprint": "a9dc16a7",
+    "legacyAbac": {},
+    "location": "us-central1",
+    "locations": [
+      "us-central1-a",
+      "us-central1-b",
+      "us-central1-c",
+      "us-central1-f"
+    ],
+    "loggingConfig": {
+      "componentConfig": {
+        "enableComponents": [
+          "SYSTEM_COMPONENTS",
+          "WORKLOADS"
+        ]
+      }
+    },
+    "loggingService": "logging.googleapis.com/kubernetes",
+    "maintenancePolicy": {
+      "resourceVersion": "e3b0c442"
+    },
+    "masterAuth": {
+      "clientCertificateConfig": {},
+      "clusterCaCertificate": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUVMVENDQXBXZ0F3SUJBZ0lSQUlQUnJ0Ukh4ekp6N1lPTitpTXdPell3RFFZSktvWklodmNOQVFFTEJRQXcKTHpFdE1Dc0dBMVVFQXhNa01qQXlZakkwWWpFdE9UUmtZeTAwWVRBNUxXSmpORFV0T0dJNE1UY3paVGhsTkRreApNQ0FYRFRJMk1ERXhNREV6TlRNek9Gb1lEekl3TlRZd01UQXpNVFExTXpNNFdqQXZNUzB3S3dZRFZRUURFeVF5Ck1ESmlNalJpTVMwNU5HUmpMVFJoTURrdFltTTBOUzA0WWpneE56TmxPR1UwT1RFd2dnR2lNQTBHQ1NxR1NJYjMKRFFFQkFRVUFBNElCandBd2dnR0tBb0lCZ1FDWXpwREFrY05EbHV0ZzFna2lrNFJQcXM1NnFLTzY1SGltMDNJcApvWTJpb2ZnMDhpMFJ2aGpKeWRQTDl2QnM2NHJLWXJLUndSdDJiZVp1USsyWlUxR09JYnpxNndPRHJoOEg4YmpHCnhVUG00ZGlxRUIyYUU4dVpqY3ZtNXhWZzRnNnB6ekhXbzlSZit4YktGUURZQWtqN2ovVmwydXJiS2Y5YXhoRU4KOFFtSmRNN0t6MFVvUndKdGMvK1Zwd1h6bmUreVdPUnAzRmIzcVZYVy9CaHNub242ZTQ1VDVSWmgzVjg3TVFKegp2ajYrWUN1SkFYL1c3dmN1Z2NTMHNuMTNSL3BUNmo4bmpYTjdheEg0VjRBVWR5MEFoWGhZWVNwOW9UUlZuR3NnCjN3OXBKSHM5YUJkTTV2dFVRMC9QR1lMNS96VjZiQTFPeGpwdktNclh0SlN4OEkyeVV0d1NsK25iZmVvcVdlVnAKelExRmdDaGMwYUdsZWxUS0pOODhNMXhwbUVRR0VMaW50ZzB1VEM4M3k2YVI2NWtCZHVrV3k5SHVLdHI1UkI3MQpPSmRVNE5LOGFRSGtXMDl4QmZMbFgwSlBCMlBJWFhsa3ZoZ2ttbk5iM3p4eFBlNExNbTJTSTFqT1J6MHpLR1BUCjdnSjd5Y1Y0MWFZazlDcVM0dWtuY204WVk4RUNBd0VBQWFOQ01FQXdEZ1lEVlIwUEFRSC9CQVFEQWdJRU1BOEcKQTFVZEV3RUIvd1FGTUFNQkFmOHdIUVlEVlIwT0JCWUVGSXhkK2RSakFTVmMxeHV4NnBNOHh1cG02SkJITUEwRwpDU3FHU0liM0RRRUJDd1VBQTRJQmdRQkxhaEpxQXBSRjZGYmE3UTBkeFZ6NEZpb0J1c203YVA2eDZ0b1cwWXlOCkxGT2dzY1lsN1BzaDErNEExLzZmSVdqNTA3cTI1ZmwwZlE0ZFA5VFdVUllicDhWV1hJTmF5MWJHVXBtWkh0RXQKemJ3S2lJT3JBaFJOajZnNHZXM2FBeEtSTTRHUnpiNG83eTZTQ3NXWStQbXJHTHBhSm1RbjVZVHg2d05jZFNwegptUDkwTzRDR3lDc1F0OWZlVVFjUUhmYVhKUWdKZDl2MVIxY2lSelpRZGZjeGxMYWtDT0paYVVjQVQwS0pPUHFQCmdvbDIzL0VmUzd0dUo2V09wTSs2UW4yVEd3YnRibjIydVhrSHNvSnVGVXk5dGIyWkh1K0s4dndpNm1kNmNSdDUKUngzWGIwdmpsTWlwLzhaTUpaWGJBKzhPTnhLaUNRaFhCMzEwb3hzTTk3aFZuVmxCMkdaRU9CemZQcmJYa0QwZgpFODJCejQ2Z1ZMbU51alVJckhwYy8zK255b0NrRnlKL20rdEdYdWlMY1oxaEtuZ0dneE1Md3lJUFpxVWZFWnNXClRBNGxZN1YzZjVyUlh1ekF5RXNsS2lOY2g5amNJVVd0UzhUa2RqK1BzRVNKa1J0VDgyaXE2ZVo1c215MVVJQUwKS1JyM21rcDJsVkdCYXd2RWFnRG1BSjQ9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K"
+    },
+    "masterAuthorizedNetworksConfig": {},
+    "monitoringConfig": {
+      "advancedDatapathObservabilityConfig": {
+        "enableMetrics": true
+      },
+      "componentConfig": {
+        "enableComponents": [
+          "SYSTEM_COMPONENTS",
+          "JOBSET",
+          "STORAGE",
+          "HPA",
+          "POD",
+          "DAEMONSET",
+          "DEPLOYMENT",
+          "STATEFULSET",
+          "CADVISOR",
+          "KUBELET",
+          "DCGM"
+        ]
+      },
+      "managedPrometheusConfig": {
+        "enabled": true
+      }
+    },
+    "monitoringService": "monitoring.googleapis.com/kubernetes",
+    "name": "vertice-cluster",
+    "network": "default",
+    "networkConfig": {
+      "datapathProvider": "ADVANCED_DATAPATH",
+      "dnsConfig": {
+        "clusterDns": "CLOUD_DNS",
+        "clusterDnsDomain": "cluster.local",
+        "clusterDnsScope": "CLUSTER_SCOPE"
+      },
+      "enableIntraNodeVisibility": true,
+      "gatewayApiConfig": {
+        "channel": "CHANNEL_STANDARD"
+      },
+      "network": "projects/vertice-ai/global/networks/default",
+      "serviceExternalIpsConfig": {},
+      "subnetwork": "projects/vertice-ai/regions/us-central1/subnetworks/default"
+    },
+    "nodeConfig": {
+      "bootDisk": {
+        "diskType": "pd-balanced",
+        "sizeGb": "100"
+      },
+      "diskSizeGb": 100,
+      "diskType": "pd-balanced",
+      "effectiveCgroupMode": "EFFECTIVE_CGROUP_MODE_V2",
+      "gvnic": {
+        "enabled": true
+      },
+      "imageType": "COS_CONTAINERD",
+      "kubeletConfig": {
+        "insecureKubeletReadonlyPortEnabled": false,
+        "maxParallelImagePulls": 2
+      },
+      "machineType": "ek-standard-8",
+      "metadata": {
+        "disable-legacy-endpoints": "true"
+      },
+      "oauthScopes": [
+        "https://www.googleapis.com/auth/devstorage.read_only",
+        "https://www.googleapis.com/auth/logging.write",
+        "https://www.googleapis.com/auth/monitoring",
+        "https://www.googleapis.com/auth/service.management.readonly",
+        "https://www.googleapis.com/auth/servicecontrol",
+        "https://www.googleapis.com/auth/trace.append"
+      ],
+      "reservationAffinity": {
+        "consumeReservationType": "NO_RESERVATION"
+      },
+      "resourceLabels": {
+        "goog-gke-node-pool-provisioning-model": "on-demand"
+      },
+      "serviceAccount": "default",
+      "shieldedInstanceConfig": {
+        "enableIntegrityMonitoring": true,
+        "enableSecureBoot": true
+      },
+      "taints": [
+        {
+          "effect": "NO_SCHEDULE",
+          "key": "cloud.google.com/gke-quick-remove",
+          "value": "true"
+        }
+      ],
+      "windowsNodeConfig": {},
+      "workloadMetadataConfig": {
+        "mode": "GKE_METADATA"
+      }
+    },
+    "nodePoolAutoConfig": {
+      "nodeKubeletConfig": {
+        "insecureKubeletReadonlyPortEnabled": false
+      }
+    },
+    "nodePoolDefaults": {
+      "nodeConfigDefaults": {
+        "gcfsConfig": {
+          "enabled": true
+        },
+        "loggingConfig": {
+          "variantConfig": {
+            "variant": "DEFAULT"
+          }
+        },
+        "nodeKubeletConfig": {
+          "insecureKubeletReadonlyPortEnabled": false
+        }
+      }
+    },
+    "nodePools": [
+      {
+        "autoscaling": {
+          "enabled": true,
+          "locationPolicy": "BALANCED",
+          "maxNodeCount": 1000
+        },
+        "config": {
+          "bootDisk": {
+            "diskType": "pd-balanced",
+            "sizeGb": "100"
+          },
+          "diskSizeGb": 100,
+          "diskType": "pd-balanced",
+          "effectiveCgroupMode": "EFFECTIVE_CGROUP_MODE_V2",
+          "gvnic": {
+            "enabled": true
+          },
+          "imageType": "COS_CONTAINERD",
+          "kubeletConfig": {
+            "insecureKubeletReadonlyPortEnabled": false,
+            "maxParallelImagePulls": 2
+          },
+          "machineType": "ek-standard-8",
+          "metadata": {
+            "disable-legacy-endpoints": "true"
+          },
+          "oauthScopes": [
+            "https://www.googleapis.com/auth/devstorage.read_only",
+            "https://www.googleapis.com/auth/logging.write",
+            "https://www.googleapis.com/auth/monitoring",
+            "https://www.googleapis.com/auth/service.management.readonly",
+            "https://www.googleapis.com/auth/servicecontrol",
+            "https://www.googleapis.com/auth/trace.append"
+          ],
+          "reservationAffinity": {
+            "consumeReservationType": "NO_RESERVATION"
+          },
+          "resourceLabels": {
+            "goog-gke-node-pool-provisioning-model": "on-demand"
+          },
+          "serviceAccount": "default",
+          "shieldedInstanceConfig": {
+            "enableIntegrityMonitoring": true,
+            "enableSecureBoot": true
+          },
+          "taints": [
+            {
+              "effect": "NO_SCHEDULE",
+              "key": "cloud.google.com/gke-quick-remove",
+              "value": "true"
+            }
+          ],
+          "windowsNodeConfig": {},
+          "workloadMetadataConfig": {
+            "mode": "GKE_METADATA"
+          }
+        },
+        "etag": "8f45bd29-572b-4ba5-90b2-90d43f46b20a",
+        "initialNodeCount": 1,
+        "instanceGroupUrls": [
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-f/instanceGroupManagers/gk3-vertice-cluster-default-pool-1f42caca-grp"
+        ],
+        "locations": [
+          "us-central1-f"
+        ],
+        "management": {
+          "autoRepair": true,
+          "autoUpgrade": true
+        },
+        "maxPodsConstraint": {
+          "maxPodsPerNode": "32"
+        },
+        "name": "default-pool",
+        "networkConfig": {
+          "networkTierConfig": {
+            "networkTier": "NETWORK_TIER_DEFAULT"
+          },
+          "podIpv4CidrBlock": "10.12.128.0/17",
+          "podIpv4RangeUtilization": 0.0039,
+          "podRange": "gke-vertice-cluster-pods-9ad27e72",
+          "subnetwork": "projects/vertice-ai/regions/us-central1/subnetworks/default"
+        },
+        "podIpv4CidrSize": 26,
+        "selfLink": "https://container.googleapis.com/v1/projects/vertice-ai/locations/us-central1/clusters/vertice-cluster/nodePools/default-pool",
+        "status": "RUNNING",
+        "upgradeSettings": {
+          "maxSurge": 1,
+          "strategy": "SURGE"
+        },
+        "version": "1.33.5-gke.2072000"
+      },
+      {
+        "autoscaling": {
+          "enabled": true,
+          "locationPolicy": "BALANCED",
+          "maxNodeCount": 1000
+        },
+        "config": {
+          "bootDisk": {
+            "diskType": "pd-balanced",
+            "sizeGb": "100"
+          },
+          "diskSizeGb": 100,
+          "diskType": "pd-balanced",
+          "effectiveCgroupMode": "EFFECTIVE_CGROUP_MODE_V2",
+          "gvnic": {
+            "enabled": true
+          },
+          "imageType": "COS_CONTAINERD",
+          "kubeletConfig": {
+            "insecureKubeletReadonlyPortEnabled": false,
+            "maxParallelImagePulls": 2
+          },
+          "machineType": "ek-standard-8",
+          "metadata": {
+            "disable-legacy-endpoints": "true"
+          },
+          "oauthScopes": [
+            "https://www.googleapis.com/auth/devstorage.read_only",
+            "https://www.googleapis.com/auth/logging.write",
+            "https://www.googleapis.com/auth/monitoring",
+            "https://www.googleapis.com/auth/service.management.readonly",
+            "https://www.googleapis.com/auth/servicecontrol",
+            "https://www.googleapis.com/auth/trace.append"
+          ],
+          "reservationAffinity": {
+            "consumeReservationType": "NO_RESERVATION"
+          },
+          "resourceLabels": {
+            "goog-gke-node-pool-provisioning-model": "on-demand"
+          },
+          "serviceAccount": "default",
+          "shieldedInstanceConfig": {
+            "enableIntegrityMonitoring": true,
+            "enableSecureBoot": true
+          },
+          "windowsNodeConfig": {},
+          "workloadMetadataConfig": {
+            "mode": "GKE_METADATA"
+          }
+        },
+        "etag": "fe143e55-8c08-4f6a-9d6c-ce45b2a321fe",
+        "instanceGroupUrls": [
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-a/instanceGroupManagers/gk3-vertice-cluster-pool-1-b1c4125f-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-b/instanceGroupManagers/gk3-vertice-cluster-pool-1-649978f7-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-c/instanceGroupManagers/gk3-vertice-cluster-pool-1-2aa87c30-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-f/instanceGroupManagers/gk3-vertice-cluster-pool-1-b60ec65a-grp"
+        ],
+        "locations": [
+          "us-central1-a",
+          "us-central1-b",
+          "us-central1-c",
+          "us-central1-f"
+        ],
+        "management": {
+          "autoRepair": true,
+          "autoUpgrade": true
+        },
+        "maxPodsConstraint": {
+          "maxPodsPerNode": "32"
+        },
+        "name": "pool-1",
+        "networkConfig": {
+          "networkTierConfig": {
+            "networkTier": "NETWORK_TIER_DEFAULT"
+          },
+          "podIpv4CidrBlock": "10.12.128.0/17",
+          "podIpv4RangeUtilization": 0.0039,
+          "podRange": "gke-vertice-cluster-pods-9ad27e72",
+          "subnetwork": "projects/vertice-ai/regions/us-central1/subnetworks/default"
+        },
+        "podIpv4CidrSize": 26,
+        "selfLink": "https://container.googleapis.com/v1/projects/vertice-ai/locations/us-central1/clusters/vertice-cluster/nodePools/pool-1",
+        "status": "RUNNING",
+        "upgradeSettings": {
+          "maxSurge": 1,
+          "strategy": "SURGE"
+        },
+        "version": "1.33.5-gke.2072000"
+      },
+      {
+        "autoscaling": {
+          "enabled": true,
+          "locationPolicy": "BALANCED",
+          "maxNodeCount": 1000
+        },
+        "config": {
+          "bootDisk": {
+            "diskType": "pd-balanced",
+            "sizeGb": "100"
+          },
+          "diskSizeGb": 100,
+          "diskType": "pd-balanced",
+          "effectiveCgroupMode": "EFFECTIVE_CGROUP_MODE_V2",
+          "gvnic": {
+            "enabled": true
+          },
+          "imageType": "COS_CONTAINERD",
+          "kubeletConfig": {
+            "insecureKubeletReadonlyPortEnabled": false,
+            "maxParallelImagePulls": 2
+          },
+          "machineType": "ek-standard-16",
+          "metadata": {
+            "disable-legacy-endpoints": "true"
+          },
+          "oauthScopes": [
+            "https://www.googleapis.com/auth/devstorage.read_only",
+            "https://www.googleapis.com/auth/logging.write",
+            "https://www.googleapis.com/auth/monitoring",
+            "https://www.googleapis.com/auth/service.management.readonly",
+            "https://www.googleapis.com/auth/servicecontrol",
+            "https://www.googleapis.com/auth/trace.append"
+          ],
+          "reservationAffinity": {
+            "consumeReservationType": "NO_RESERVATION"
+          },
+          "resourceLabels": {
+            "goog-gke-node-pool-provisioning-model": "on-demand"
+          },
+          "serviceAccount": "default",
+          "shieldedInstanceConfig": {
+            "enableIntegrityMonitoring": true,
+            "enableSecureBoot": true
+          },
+          "windowsNodeConfig": {},
+          "workloadMetadataConfig": {
+            "mode": "GKE_METADATA"
+          }
+        },
+        "etag": "417243ff-39cb-457c-8b25-255d32da64d0",
+        "instanceGroupUrls": [
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-a/instanceGroupManagers/gk3-vertice-cluster-pool-2-c4226b44-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-b/instanceGroupManagers/gk3-vertice-cluster-pool-2-53cee15f-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-c/instanceGroupManagers/gk3-vertice-cluster-pool-2-8180852f-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-f/instanceGroupManagers/gk3-vertice-cluster-pool-2-548726ed-grp"
+        ],
+        "locations": [
+          "us-central1-a",
+          "us-central1-b",
+          "us-central1-c",
+          "us-central1-f"
+        ],
+        "management": {
+          "autoRepair": true,
+          "autoUpgrade": true
+        },
+        "maxPodsConstraint": {
+          "maxPodsPerNode": "32"
+        },
+        "name": "pool-2",
+        "networkConfig": {
+          "networkTierConfig": {
+            "networkTier": "NETWORK_TIER_DEFAULT"
+          },
+          "podIpv4CidrBlock": "10.12.128.0/17",
+          "podIpv4RangeUtilization": 0.0039,
+          "podRange": "gke-vertice-cluster-pods-9ad27e72",
+          "subnetwork": "projects/vertice-ai/regions/us-central1/subnetworks/default"
+        },
+        "podIpv4CidrSize": 26,
+        "selfLink": "https://container.googleapis.com/v1/projects/vertice-ai/locations/us-central1/clusters/vertice-cluster/nodePools/pool-2",
+        "status": "RUNNING",
+        "upgradeSettings": {
+          "maxSurge": 1,
+          "strategy": "SURGE"
+        },
+        "version": "1.33.5-gke.2072000"
+      },
+      {
+        "autoscaling": {
+          "enabled": true,
+          "locationPolicy": "BALANCED",
+          "maxNodeCount": 1000
+        },
+        "config": {
+          "bootDisk": {
+            "diskType": "pd-balanced",
+            "sizeGb": "100"
+          },
+          "diskSizeGb": 100,
+          "diskType": "pd-balanced",
+          "effectiveCgroupMode": "EFFECTIVE_CGROUP_MODE_V2",
+          "gvnic": {
+            "enabled": true
+          },
+          "imageType": "COS_CONTAINERD",
+          "kubeletConfig": {
+            "insecureKubeletReadonlyPortEnabled": false,
+            "maxParallelImagePulls": 2
+          },
+          "machineType": "ek-standard-32",
+          "metadata": {
+            "disable-legacy-endpoints": "true"
+          },
+          "oauthScopes": [
+            "https://www.googleapis.com/auth/devstorage.read_only",
+            "https://www.googleapis.com/auth/logging.write",
+            "https://www.googleapis.com/auth/monitoring",
+            "https://www.googleapis.com/auth/service.management.readonly",
+            "https://www.googleapis.com/auth/servicecontrol",
+            "https://www.googleapis.com/auth/trace.append"
+          ],
+          "reservationAffinity": {
+            "consumeReservationType": "NO_RESERVATION"
+          },
+          "resourceLabels": {
+            "goog-gke-node-pool-provisioning-model": "on-demand"
+          },
+          "serviceAccount": "default",
+          "shieldedInstanceConfig": {
+            "enableIntegrityMonitoring": true,
+            "enableSecureBoot": true
+          },
+          "windowsNodeConfig": {},
+          "workloadMetadataConfig": {
+            "mode": "GKE_METADATA"
+          }
+        },
+        "etag": "f6e0341a-6e8c-471f-9515-ff60b7936e3c",
+        "instanceGroupUrls": [
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-a/instanceGroupManagers/gk3-vertice-cluster-pool-3-e45c7a45-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-b/instanceGroupManagers/gk3-vertice-cluster-pool-3-a8ca901a-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-c/instanceGroupManagers/gk3-vertice-cluster-pool-3-55e682c5-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-f/instanceGroupManagers/gk3-vertice-cluster-pool-3-b11c29b8-grp"
+        ],
+        "locations": [
+          "us-central1-a",
+          "us-central1-b",
+          "us-central1-c",
+          "us-central1-f"
+        ],
+        "management": {
+          "autoRepair": true,
+          "autoUpgrade": true
+        },
+        "maxPodsConstraint": {
+          "maxPodsPerNode": "32"
+        },
+        "name": "pool-3",
+        "networkConfig": {
+          "networkTierConfig": {
+            "networkTier": "NETWORK_TIER_DEFAULT"
+          },
+          "podIpv4CidrBlock": "10.12.128.0/17",
+          "podIpv4RangeUtilization": 0.0039,
+          "podRange": "gke-vertice-cluster-pods-9ad27e72",
+          "subnetwork": "projects/vertice-ai/regions/us-central1/subnetworks/default"
+        },
+        "podIpv4CidrSize": 26,
+        "selfLink": "https://container.googleapis.com/v1/projects/vertice-ai/locations/us-central1/clusters/vertice-cluster/nodePools/pool-3",
+        "status": "RUNNING",
+        "upgradeSettings": {
+          "maxSurge": 1,
+          "strategy": "SURGE"
+        },
+        "version": "1.33.5-gke.2072000"
+      },
+      {
+        "autoscaling": {
+          "enabled": true,
+          "locationPolicy": "BALANCED",
+          "maxNodeCount": 1000
+        },
+        "config": {
+          "bootDisk": {
+            "diskType": "pd-balanced",
+            "sizeGb": "100"
+          },
+          "diskSizeGb": 100,
+          "diskType": "pd-balanced",
+          "effectiveCgroupMode": "EFFECTIVE_CGROUP_MODE_V2",
+          "gvnic": {
+            "enabled": true
+          },
+          "imageType": "COS_CONTAINERD",
+          "kubeletConfig": {
+            "insecureKubeletReadonlyPortEnabled": false,
+            "maxParallelImagePulls": 2
+          },
+          "machineType": "e2-medium",
+          "metadata": {
+            "disable-legacy-endpoints": "true"
+          },
+          "oauthScopes": [
+            "https://www.googleapis.com/auth/devstorage.read_only",
+            "https://www.googleapis.com/auth/logging.write",
+            "https://www.googleapis.com/auth/monitoring",
+            "https://www.googleapis.com/auth/service.management.readonly",
+            "https://www.googleapis.com/auth/servicecontrol",
+            "https://www.googleapis.com/auth/trace.append"
+          ],
+          "reservationAffinity": {
+            "consumeReservationType": "NO_RESERVATION"
+          },
+          "resourceLabels": {
+            "goog-gke-node-pool-provisioning-model": "on-demand"
+          },
+          "serviceAccount": "default",
+          "shieldedInstanceConfig": {
+            "enableIntegrityMonitoring": true,
+            "enableSecureBoot": true
+          },
+          "windowsNodeConfig": {},
+          "workloadMetadataConfig": {
+            "mode": "GKE_METADATA"
+          }
+        },
+        "etag": "df9fb511-395e-462c-8013-23d10b587358",
+        "instanceGroupUrls": [
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-a/instanceGroupManagers/gk3-vertice-cluster-pool-4-1fd39036-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-b/instanceGroupManagers/gk3-vertice-cluster-pool-4-b04bad10-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-c/instanceGroupManagers/gk3-vertice-cluster-pool-4-dc8b2810-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-f/instanceGroupManagers/gk3-vertice-cluster-pool-4-cc3d5191-grp"
+        ],
+        "locations": [
+          "us-central1-a",
+          "us-central1-b",
+          "us-central1-c",
+          "us-central1-f"
+        ],
+        "management": {
+          "autoRepair": true,
+          "autoUpgrade": true
+        },
+        "maxPodsConstraint": {
+          "maxPodsPerNode": "32"
+        },
+        "name": "pool-4",
+        "networkConfig": {
+          "networkTierConfig": {
+            "networkTier": "NETWORK_TIER_DEFAULT"
+          },
+          "podIpv4CidrBlock": "10.12.128.0/17",
+          "podIpv4RangeUtilization": 0.0039,
+          "podRange": "gke-vertice-cluster-pods-9ad27e72",
+          "subnetwork": "projects/vertice-ai/regions/us-central1/subnetworks/default"
+        },
+        "podIpv4CidrSize": 26,
+        "selfLink": "https://container.googleapis.com/v1/projects/vertice-ai/locations/us-central1/clusters/vertice-cluster/nodePools/pool-4",
+        "status": "RUNNING",
+        "upgradeSettings": {
+          "maxSurge": 1,
+          "strategy": "SURGE"
+        },
+        "version": "1.33.5-gke.1308000"
+      },
+      {
+        "autoscaling": {
+          "enabled": true,
+          "locationPolicy": "BALANCED",
+          "maxNodeCount": 1000
+        },
+        "config": {
+          "bootDisk": {
+            "diskType": "pd-balanced",
+            "sizeGb": "100"
+          },
+          "diskSizeGb": 100,
+          "diskType": "pd-balanced",
+          "effectiveCgroupMode": "EFFECTIVE_CGROUP_MODE_V2",
+          "gvnic": {
+            "enabled": true
+          },
+          "imageType": "COS_CONTAINERD",
+          "kubeletConfig": {
+            "insecureKubeletReadonlyPortEnabled": false,
+            "maxParallelImagePulls": 2
+          },
+          "machineType": "e2-standard-2",
+          "metadata": {
+            "disable-legacy-endpoints": "true"
+          },
+          "oauthScopes": [
+            "https://www.googleapis.com/auth/devstorage.read_only",
+            "https://www.googleapis.com/auth/logging.write",
+            "https://www.googleapis.com/auth/monitoring",
+            "https://www.googleapis.com/auth/service.management.readonly",
+            "https://www.googleapis.com/auth/servicecontrol",
+            "https://www.googleapis.com/auth/trace.append"
+          ],
+          "reservationAffinity": {
+            "consumeReservationType": "NO_RESERVATION"
+          },
+          "resourceLabels": {
+            "goog-gke-node-pool-provisioning-model": "on-demand"
+          },
+          "serviceAccount": "default",
+          "shieldedInstanceConfig": {
+            "enableIntegrityMonitoring": true,
+            "enableSecureBoot": true
+          },
+          "windowsNodeConfig": {},
+          "workloadMetadataConfig": {
+            "mode": "GKE_METADATA"
+          }
+        },
+        "etag": "6a0c9a3d-eedd-481d-9a31-b772d79a2102",
+        "instanceGroupUrls": [
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-a/instanceGroupManagers/gk3-vertice-cluster-pool-5-095f1ee6-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-b/instanceGroupManagers/gk3-vertice-cluster-pool-5-2ac812c9-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-c/instanceGroupManagers/gk3-vertice-cluster-pool-5-c49b9d17-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-f/instanceGroupManagers/gk3-vertice-cluster-pool-5-a9e63134-grp"
+        ],
+        "locations": [
+          "us-central1-a",
+          "us-central1-b",
+          "us-central1-c",
+          "us-central1-f"
+        ],
+        "management": {
+          "autoRepair": true,
+          "autoUpgrade": true
+        },
+        "maxPodsConstraint": {
+          "maxPodsPerNode": "32"
+        },
+        "name": "pool-5",
+        "networkConfig": {
+          "networkTierConfig": {
+            "networkTier": "NETWORK_TIER_DEFAULT"
+          },
+          "podIpv4CidrBlock": "10.12.128.0/17",
+          "podIpv4RangeUtilization": 0.0039,
+          "podRange": "gke-vertice-cluster-pods-9ad27e72",
+          "subnetwork": "projects/vertice-ai/regions/us-central1/subnetworks/default"
+        },
+        "podIpv4CidrSize": 26,
+        "selfLink": "https://container.googleapis.com/v1/projects/vertice-ai/locations/us-central1/clusters/vertice-cluster/nodePools/pool-5",
+        "status": "RUNNING",
+        "upgradeSettings": {
+          "maxSurge": 1,
+          "strategy": "SURGE"
+        },
+        "version": "1.33.5-gke.2019000"
+      },
+      {
+        "autoscaling": {
+          "enabled": true,
+          "locationPolicy": "BALANCED",
+          "maxNodeCount": 1000
+        },
+        "config": {
+          "bootDisk": {
+            "diskType": "pd-balanced",
+            "sizeGb": "100"
+          },
+          "diskSizeGb": 100,
+          "diskType": "pd-balanced",
+          "effectiveCgroupMode": "EFFECTIVE_CGROUP_MODE_V2",
+          "gvnic": {
+            "enabled": true
+          },
+          "imageType": "COS_CONTAINERD",
+          "kubeletConfig": {
+            "insecureKubeletReadonlyPortEnabled": false,
+            "maxParallelImagePulls": 2
+          },
+          "machineType": "e2-standard-4",
+          "metadata": {
+            "disable-legacy-endpoints": "true"
+          },
+          "oauthScopes": [
+            "https://www.googleapis.com/auth/devstorage.read_only",
+            "https://www.googleapis.com/auth/logging.write",
+            "https://www.googleapis.com/auth/monitoring",
+            "https://www.googleapis.com/auth/service.management.readonly",
+            "https://www.googleapis.com/auth/servicecontrol",
+            "https://www.googleapis.com/auth/trace.append"
+          ],
+          "reservationAffinity": {
+            "consumeReservationType": "NO_RESERVATION"
+          },
+          "resourceLabels": {
+            "goog-gke-node-pool-provisioning-model": "on-demand"
+          },
+          "serviceAccount": "default",
+          "shieldedInstanceConfig": {
+            "enableIntegrityMonitoring": true,
+            "enableSecureBoot": true
+          },
+          "windowsNodeConfig": {},
+          "workloadMetadataConfig": {
+            "mode": "GKE_METADATA"
+          }
+        },
+        "etag": "1510a6ed-fac0-4969-ae9f-8383c979f3d2",
+        "instanceGroupUrls": [
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-a/instanceGroupManagers/gk3-vertice-cluster-pool-6-94cc4bc0-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-b/instanceGroupManagers/gk3-vertice-cluster-pool-6-f46898fc-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-c/instanceGroupManagers/gk3-vertice-cluster-pool-6-ed40fff9-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-f/instanceGroupManagers/gk3-vertice-cluster-pool-6-d745a49a-grp"
+        ],
+        "locations": [
+          "us-central1-a",
+          "us-central1-b",
+          "us-central1-c",
+          "us-central1-f"
+        ],
+        "management": {
+          "autoRepair": true,
+          "autoUpgrade": true
+        },
+        "maxPodsConstraint": {
+          "maxPodsPerNode": "32"
+        },
+        "name": "pool-6",
+        "networkConfig": {
+          "networkTierConfig": {
+            "networkTier": "NETWORK_TIER_DEFAULT"
+          },
+          "podIpv4CidrBlock": "10.12.128.0/17",
+          "podIpv4RangeUtilization": 0.0039,
+          "podRange": "gke-vertice-cluster-pods-9ad27e72",
+          "subnetwork": "projects/vertice-ai/regions/us-central1/subnetworks/default"
+        },
+        "podIpv4CidrSize": 26,
+        "selfLink": "https://container.googleapis.com/v1/projects/vertice-ai/locations/us-central1/clusters/vertice-cluster/nodePools/pool-6",
+        "status": "RUNNING",
+        "upgradeSettings": {
+          "maxSurge": 1,
+          "strategy": "SURGE"
+        },
+        "version": "1.33.5-gke.1308000"
+      },
+      {
+        "autoscaling": {
+          "enabled": true,
+          "locationPolicy": "BALANCED",
+          "maxNodeCount": 1000
+        },
+        "config": {
+          "bootDisk": {
+            "diskType": "pd-balanced",
+            "sizeGb": "100"
+          },
+          "diskSizeGb": 100,
+          "diskType": "pd-balanced",
+          "effectiveCgroupMode": "EFFECTIVE_CGROUP_MODE_V2",
+          "gvnic": {
+            "enabled": true
+          },
+          "imageType": "COS_CONTAINERD",
+          "kubeletConfig": {
+            "insecureKubeletReadonlyPortEnabled": false,
+            "maxParallelImagePulls": 2
+          },
+          "machineType": "e2-standard-8",
+          "metadata": {
+            "disable-legacy-endpoints": "true"
+          },
+          "oauthScopes": [
+            "https://www.googleapis.com/auth/devstorage.read_only",
+            "https://www.googleapis.com/auth/logging.write",
+            "https://www.googleapis.com/auth/monitoring",
+            "https://www.googleapis.com/auth/service.management.readonly",
+            "https://www.googleapis.com/auth/servicecontrol",
+            "https://www.googleapis.com/auth/trace.append"
+          ],
+          "reservationAffinity": {
+            "consumeReservationType": "NO_RESERVATION"
+          },
+          "resourceLabels": {
+            "goog-gke-node-pool-provisioning-model": "on-demand"
+          },
+          "serviceAccount": "default",
+          "shieldedInstanceConfig": {
+            "enableIntegrityMonitoring": true,
+            "enableSecureBoot": true
+          },
+          "windowsNodeConfig": {},
+          "workloadMetadataConfig": {
+            "mode": "GKE_METADATA"
+          }
+        },
+        "etag": "8e86b42c-7c4c-44b3-b5ff-647f952c2a58",
+        "instanceGroupUrls": [
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-a/instanceGroupManagers/gk3-vertice-cluster-pool-7-f6a7bffe-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-b/instanceGroupManagers/gk3-vertice-cluster-pool-7-176e6ec0-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-c/instanceGroupManagers/gk3-vertice-cluster-pool-7-b2b3e63c-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-f/instanceGroupManagers/gk3-vertice-cluster-pool-7-7ad5a16f-grp"
+        ],
+        "locations": [
+          "us-central1-a",
+          "us-central1-b",
+          "us-central1-c",
+          "us-central1-f"
+        ],
+        "management": {
+          "autoRepair": true,
+          "autoUpgrade": true
+        },
+        "maxPodsConstraint": {
+          "maxPodsPerNode": "32"
+        },
+        "name": "pool-7",
+        "networkConfig": {
+          "networkTierConfig": {
+            "networkTier": "NETWORK_TIER_DEFAULT"
+          },
+          "podIpv4CidrBlock": "10.12.128.0/17",
+          "podIpv4RangeUtilization": 0.0039,
+          "podRange": "gke-vertice-cluster-pods-9ad27e72",
+          "subnetwork": "projects/vertice-ai/regions/us-central1/subnetworks/default"
+        },
+        "podIpv4CidrSize": 26,
+        "selfLink": "https://container.googleapis.com/v1/projects/vertice-ai/locations/us-central1/clusters/vertice-cluster/nodePools/pool-7",
+        "status": "RUNNING",
+        "upgradeSettings": {
+          "maxSurge": 1,
+          "strategy": "SURGE"
+        },
+        "version": "1.33.5-gke.1308000"
+      },
+      {
+        "autoscaling": {
+          "enabled": true,
+          "locationPolicy": "BALANCED",
+          "maxNodeCount": 1000
+        },
+        "config": {
+          "bootDisk": {
+            "diskType": "pd-balanced",
+            "sizeGb": "100"
+          },
+          "diskSizeGb": 100,
+          "diskType": "pd-balanced",
+          "effectiveCgroupMode": "EFFECTIVE_CGROUP_MODE_V2",
+          "gvnic": {
+            "enabled": true
+          },
+          "imageType": "COS_CONTAINERD",
+          "kubeletConfig": {
+            "insecureKubeletReadonlyPortEnabled": false,
+            "maxParallelImagePulls": 2
+          },
+          "machineType": "e2-standard-16",
+          "metadata": {
+            "disable-legacy-endpoints": "true"
+          },
+          "oauthScopes": [
+            "https://www.googleapis.com/auth/devstorage.read_only",
+            "https://www.googleapis.com/auth/logging.write",
+            "https://www.googleapis.com/auth/monitoring",
+            "https://www.googleapis.com/auth/service.management.readonly",
+            "https://www.googleapis.com/auth/servicecontrol",
+            "https://www.googleapis.com/auth/trace.append"
+          ],
+          "reservationAffinity": {
+            "consumeReservationType": "NO_RESERVATION"
+          },
+          "resourceLabels": {
+            "goog-gke-node-pool-provisioning-model": "on-demand"
+          },
+          "serviceAccount": "default",
+          "shieldedInstanceConfig": {
+            "enableIntegrityMonitoring": true,
+            "enableSecureBoot": true
+          },
+          "windowsNodeConfig": {},
+          "workloadMetadataConfig": {
+            "mode": "GKE_METADATA"
+          }
+        },
+        "etag": "123b8818-d31e-4f56-ab9b-c6061635bae6",
+        "instanceGroupUrls": [
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-a/instanceGroupManagers/gk3-vertice-cluster-pool-8-8dd89e12-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-b/instanceGroupManagers/gk3-vertice-cluster-pool-8-6ba0be6d-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-c/instanceGroupManagers/gk3-vertice-cluster-pool-8-f2460939-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-f/instanceGroupManagers/gk3-vertice-cluster-pool-8-7f0468f5-grp"
+        ],
+        "locations": [
+          "us-central1-a",
+          "us-central1-b",
+          "us-central1-c",
+          "us-central1-f"
+        ],
+        "management": {
+          "autoRepair": true,
+          "autoUpgrade": true
+        },
+        "maxPodsConstraint": {
+          "maxPodsPerNode": "32"
+        },
+        "name": "pool-8",
+        "networkConfig": {
+          "networkTierConfig": {
+            "networkTier": "NETWORK_TIER_DEFAULT"
+          },
+          "podIpv4CidrBlock": "10.12.128.0/17",
+          "podIpv4RangeUtilization": 0.0039,
+          "podRange": "gke-vertice-cluster-pods-9ad27e72",
+          "subnetwork": "projects/vertice-ai/regions/us-central1/subnetworks/default"
+        },
+        "podIpv4CidrSize": 26,
+        "selfLink": "https://container.googleapis.com/v1/projects/vertice-ai/locations/us-central1/clusters/vertice-cluster/nodePools/pool-8",
+        "status": "RUNNING",
+        "upgradeSettings": {
+          "maxSurge": 1,
+          "strategy": "SURGE"
+        },
+        "version": "1.33.5-gke.1308000"
+      },
+      {
+        "autoscaling": {
+          "enabled": true,
+          "locationPolicy": "BALANCED",
+          "maxNodeCount": 1000
+        },
+        "config": {
+          "bootDisk": {
+            "diskType": "pd-balanced",
+            "sizeGb": "100"
+          },
+          "diskSizeGb": 100,
+          "diskType": "pd-balanced",
+          "effectiveCgroupMode": "EFFECTIVE_CGROUP_MODE_V2",
+          "gvnic": {
+            "enabled": true
+          },
+          "imageType": "COS_CONTAINERD",
+          "kubeletConfig": {
+            "insecureKubeletReadonlyPortEnabled": false,
+            "maxParallelImagePulls": 2
+          },
+          "machineType": "e2-standard-32",
+          "metadata": {
+            "disable-legacy-endpoints": "true"
+          },
+          "oauthScopes": [
+            "https://www.googleapis.com/auth/devstorage.read_only",
+            "https://www.googleapis.com/auth/logging.write",
+            "https://www.googleapis.com/auth/monitoring",
+            "https://www.googleapis.com/auth/service.management.readonly",
+            "https://www.googleapis.com/auth/servicecontrol",
+            "https://www.googleapis.com/auth/trace.append"
+          ],
+          "reservationAffinity": {
+            "consumeReservationType": "NO_RESERVATION"
+          },
+          "resourceLabels": {
+            "goog-gke-node-pool-provisioning-model": "on-demand"
+          },
+          "serviceAccount": "default",
+          "shieldedInstanceConfig": {
+            "enableIntegrityMonitoring": true,
+            "enableSecureBoot": true
+          },
+          "windowsNodeConfig": {},
+          "workloadMetadataConfig": {
+            "mode": "GKE_METADATA"
+          }
+        },
+        "etag": "942747ec-8841-4d89-912f-690bdb7155b5",
+        "instanceGroupUrls": [
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-a/instanceGroupManagers/gk3-vertice-cluster-pool-9-96e46d30-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-b/instanceGroupManagers/gk3-vertice-cluster-pool-9-0ec279cf-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-c/instanceGroupManagers/gk3-vertice-cluster-pool-9-f223a32a-grp",
+          "https://www.googleapis.com/compute/v1/projects/vertice-ai/zones/us-central1-f/instanceGroupManagers/gk3-vertice-cluster-pool-9-b3f5ea6d-grp"
+        ],
+        "locations": [
+          "us-central1-a",
+          "us-central1-b",
+          "us-central1-c",
+          "us-central1-f"
+        ],
+        "management": {
+          "autoRepair": true,
+          "autoUpgrade": true
+        },
+        "maxPodsConstraint": {
+          "maxPodsPerNode": "32"
+        },
+        "name": "pool-9",
+        "networkConfig": {
+          "networkTierConfig": {
+            "networkTier": "NETWORK_TIER_DEFAULT"
+          },
+          "podIpv4CidrBlock": "10.12.128.0/17",
+          "podIpv4RangeUtilization": 0.0039,
+          "podRange": "gke-vertice-cluster-pods-9ad27e72",
+          "subnetwork": "projects/vertice-ai/regions/us-central1/subnetworks/default"
+        },
+        "podIpv4CidrSize": 26,
+        "selfLink": "https://container.googleapis.com/v1/projects/vertice-ai/locations/us-central1/clusters/vertice-cluster/nodePools/pool-9",
+        "status": "RUNNING",
+        "upgradeSettings": {
+          "maxSurge": 1,
+          "strategy": "SURGE"
+        },
+        "version": "1.33.5-gke.1308000"
+      }
+    ],
+    "notificationConfig": {
+      "pubsub": {}
+    },
+    "podAutoscaling": {
+      "hpaProfile": "PERFORMANCE"
+    },
+    "privateClusterConfig": {
+      "privateEndpoint": "10.128.0.2",
+      "publicEndpoint": "136.115.153.209"
+    },
+    "rbacBindingConfig": {
+      "enableInsecureBindingSystemAuthenticated": false,
+      "enableInsecureBindingSystemUnauthenticated": false
+    },
+    "releaseChannel": {
+      "channel": "REGULAR"
+    },
+    "satisfiesPzi": false,
+    "satisfiesPzs": false,
+    "securityPostureConfig": {
+      "mode": "BASIC",
+      "vulnerabilityMode": "VULNERABILITY_MODE_UNSPECIFIED"
+    },
+    "selfLink": "https://container.googleapis.com/v1/projects/vertice-ai/locations/us-central1/clusters/vertice-cluster",
+    "servicesIpv4Cidr": "34.118.224.0/20",
+    "shieldedNodes": {
+      "enabled": true
+    },
+    "status": "RUNNING",
+    "subnetwork": "default",
+    "userManagedKeysConfig": {},
+    "verticalPodAutoscaling": {
+      "enabled": true
+    },
+    "workloadIdentityConfig": {
+      "workloadPool": "vertice-ai.svc.id.goog"
+    },
+    "zone": "us-central1"
+  }
+]

@@ -72,7 +72,15 @@ Exemplos reais (rodados em hardening de segurança, 25/01/2026):
 
 ## Setup (evitar tempo morto)
 - Se o Jules permitir: usar **setup script** no repo para padronizar ambiente.
-- Se precisar de segredos/keys: preferir variáveis configuradas no **repositório** e habilitadas na task (não hardcode).
+- Se precisar de segredos/keys: **não hardcode** e **não commitar**. Preferir:
+  - **Google Cloud ADC** (Application Default Credentials) para rodar localmente; e
+  - **Workload Identity Federation (OIDC)** para CI/CD (evitar chaves long-lived).
+- Se a tarefa pedir qualquer mudança em GCP (IAM/Cloud Run/GKE/etc): o Jules deve operar em modo **read-only primeiro**
+  (inventário/describe/list) e só executar `create/update/delete` com confirmação explícita.
+
+Referências (oficiais):
+- ADC: https://cloud.google.com/docs/authentication/provide-credentials-adc
+- Workload Identity Federation: https://cloud.google.com/iam/docs/workload-identity-federation
 
 ## Política de branches/PR
 - Nome da branch: `jules/<tema-curto>-<yyyy-mm-dd>`
@@ -82,6 +90,7 @@ Exemplos reais (rodados em hardening de segurança, 25/01/2026):
   - “O que mudou”
   - “Como validar” (2–5 comandos)
   - “Limites respeitados” (files/diff)
+  - “Impacto GCP” (se existir): `read-only` / `update` e o(s) comando(s) `gcloud` usados
 
 ---
 

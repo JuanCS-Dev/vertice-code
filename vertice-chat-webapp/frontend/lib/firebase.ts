@@ -2,14 +2,22 @@ import { initializeApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// Firebase config - with fallback for build time
+const requiredEnv = (name: string): string => {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required env var: ${name}`);
+  }
+  return value;
+};
+
+// Firebase client config (do not hardcode credentials/keys)
 const firebaseConfig = {
-  apiKey: "AQ.Ab8RN6KEdIApACMC2Ozz95OJTOZyAWe6AZhMhTbD0qSD7CG_hA",
-  authDomain: "vertice-ai.firebaseapp.com",
-  projectId: "vertice-ai",
-  storageBucket: "vertice-ai.firebasestorage.app",
-  messagingSenderId: "239800439060",
-  appId: "1:239800439060:web:4f6c41b817c16260a7f201",
+  apiKey: requiredEnv('NEXT_PUBLIC_FIREBASE_API_KEY'),
+  authDomain: requiredEnv('NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN'),
+  projectId: requiredEnv('NEXT_PUBLIC_FIREBASE_PROJECT_ID'),
+  storageBucket: requiredEnv('NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET'),
+  messagingSenderId: requiredEnv('NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID'),
+  appId: requiredEnv('NEXT_PUBLIC_FIREBASE_APP_ID'),
 };
 
 // Initialize Firebase (Singleton pattern)

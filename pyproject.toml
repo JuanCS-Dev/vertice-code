@@ -101,7 +101,6 @@ strict = true
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-ignore = ["E402"]
 exclude = [
     ".git",
     ".ruff_cache",
@@ -111,7 +110,10 @@ exclude = [
     "build",
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint]
+ignore = ["E402"]
+
+[tool.ruff.lint.per-file-ignores]
 "scripts/**" = ["E402", "F401"]
 "examples/**" = ["E402", "F401"]
 "tests/**" = ["E402", "F401", "F811", "E741"]

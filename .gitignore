@@ -222,3 +222,5 @@ tests/e2e_textual/*.md
 **/node_modules/
 **/.next/
 out/
+apps/web-console/tsconfig.tsbuildinfo
+docs/google/_inventory/
