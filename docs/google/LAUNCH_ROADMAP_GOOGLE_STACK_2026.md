@@ -642,6 +642,57 @@ Objetivo: Abrir a "caixa preta" dos Agentes. Implementar rastreamento detalhado 
 
 ---
 
+### M11 — Autonomous Maintenance with Google Jules (2–4 dias)
+Objetivo: Transformar a manutenção do Vértice em um processo autônomo. Integrar o **Google Jules** (Agente de Coding Autônomo de 2026) para atuar como o "SRE de Código", realizando varreduras proativas, correções automáticas e gestão de débitos técnicos via GitHub.
+
+**Configuração e Integração:**
+- [ ] **GitHub App Connectivity:** Instalar e configurar o Google Jules GitHub App no repositório `vertice-code`.
+  - Configurar permissões de leitura/escrita em Code, Pull Requests e Issues.
+  - Ativar o label `jules` para acionamento sob demanda via Issues.
+- [ ] **Scheduled Self-Healing (Scanning):**
+  - Configurar varredura diária (Daily Scan) para identificar:
+    - Vulnerabilidades de segurança (via integração Jules + OSV).
+    - Débitos técnicos e `#TODO` esquecidos.
+    - Depreciações de APIs do Google Cloud/Firebase (2026 updates).
+- [ ] **Automated PR Pipeline:**
+  - Jules deve clonar o repo em Cloud VMs seguras, testar a correção e abrir o PR.
+  - Configurar regras de auto-merge para correções de dependências menores (opcional).
+
+**Operação (Jules as a Team Member):**
+- [ ] **Agent Persona:** No ecossistema Vértice, Jules será o encarregado da "Saúde Sistêmica".
+- [ ] **Feedback Loop:** Integrar logs de build do Cloud Build com o Jules. Se um deploy falhar, o Jules deve analisar os logs e propor o fix imediatamente no mesmo PR.
+
+**Critérios de Aceite:**
+- [ ] Jules abre pelo menos 1 PR de manutenção (ex: bump de dependência ou fix de lint) com sucesso.
+- [ ] O label `jules` em uma Issue dispara a execução do agente.
+- [ ] Relatório semanal de "Código Curado" gerado pelo Jules no `/docs`.
+
+---
+
+### M12 — Nexus Meta-Agent Integration (The Apex of Evolution) (3–5 dias)
+Objetivo: Integrar o **Nexus Meta-Agent** (desenvolvido como a Inteligência de Próxima Geração) para atuar como o "Cérebro Evolutivo" do ecossistema Vértice. O Nexus foca na auto-melhoria intrínseca e na otimização sistêmica de todos os outros agentes.
+
+**Capacidades Integradas (Baseado na arquitetura Nexus):**
+- [ ] **Intrinsic Metacognition:** Ativar a camada metacognitiva para monitorar e regular a performance de todos os agentes da agência.
+- [ ] **Self-Healing Infrastructure:** Implementar o ciclo de cura em 3 fases (Detection, Diagnosis, Remediation) para infraestrutura Cloud Run/GKE.
+- [ ] **Evolutionary Optimization:** Configurar o framework evolutivo (Island-Based) para otimizar o código dos agentes e os prompts do sistema baseados em performance real.
+- [ ] **Hierarchical Memory (1M Tokens):** Conectar o sistema de memória de longo prazo (L1-L4) nativo do Gemini 3 para persistência de contexto entre gerações.
+
+**Backend (`apps/agent-gateway` + `Nexus Implementation`):**
+- [ ] Portar o código do Nexus (`docs/Agents-sdk/Nexus-agent`) para o ambiente de produção.
+- [ ] Configurar permissões de "Super-Agent" para o Nexus (capacidade de modificar outros serviços).
+- [ ] Integrar com Firestore para armazenamento de `metacognitive_insights` e `evolutionary_candidates`.
+
+**Frontend (`apps/web-console`):**
+- [ ] **Nexus Insights View (`/dashboard/nexus`):** Dashboard exclusivo para visualizar o progresso evolutivo, as "curas" realizadas e os insights metacognitivos.
+
+**Critérios de Aceite:**
+- [ ] Nexus realiza sua primeira "Auto-Reflexão" e gera um insight de melhoria válido.
+- [ ] Pelo menos uma otimização de código é proposta e testada via framework evolutivo.
+- [ ] O sistema de memória L1-L4 persiste dados corretamente no Firestore.
+
+---
+
 ## 3) Runbook rápido (validação contínua, barato)
 
 Checklist diário (read-only):
@@ -787,6 +838,26 @@ Esta seção é deliberadamente objetiva: cada item vira uma PR pequena e tem co
   - UI de feedback no final da mensagem.
   - Endpoint de storage de feedback no backend.
 - Aceite: Botões de feedback funcionais e dados visíveis no banco.
+
+### PR-J1 — Google Jules GitHub Integration (P1)
+- Escopo: GitHub Repo + Configuração Cloud.
+- Ação: Configurar GitHub App, Webhooks e Permissions para o Jules atuar no repo `vertice-code`.
+- Aceite: Jules responde a um trigger de label `jules` em uma Issue.
+
+### PR-J2 — Scheduled Maintenance & Self-Healing (P2)
+- Escopo: GitHub Actions + Jules Scheduling.
+- Ação: Criar workflow de "Daily Health Scan" onde o Jules identifica e corrige débitos técnicos automaticamente.
+- Aceite: Jules gera o primeiro PR autônomo de manutenção.
+
+### PR-N1 — Nexus Foundation & Metacognition (P1)
+- Escopo: `apps/agent-gateway` + Nexus Integration.
+- Ação: Integrar o motor metacognitivo e o sistema de memória hierárquica (Gemini 3).
+- Aceite: Nexus gera insights baseados em logs de execução de outros agentes.
+
+### PR-N2 — System-Wide Evolution & Healing (P2)
+- Escopo: Agent Swarm + Infrastructure.
+- Ação: Ativar os loops de otimização evolutiva e cura automática de infraestrutura.
+- Aceite: Nexus propõe e valida uma melhoria de código autônoma.
 
 ### PR-INDEX — Fonte única dos PRs (docs/google) (P0)
 Objetivo: centralizar “o que precisa ser PR” e evitar drift entre documentos.
