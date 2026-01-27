@@ -293,7 +293,7 @@ def load_custom_scenarios(yaml_path: Path) -> List[AuditScenario]:
                 )
             )
         return scenarios
-    except Exception:
+    except Exception as e:
         return []
 
 

@@ -263,7 +263,7 @@ class StatusBar(Horizontal):
             meter = self.query_one("#mini-meter", MiniTokenMeter)
             meter.used = self.token_used
             meter.limit = self.token_limit
-        except Exception:
+        except Exception as e:
             pass
 
     def update_tokens(self, used: int, limit: int) -> None:

@@ -56,12 +56,12 @@ def validate_safe_path(path: str, allow_root: bool = False) -> bool:
                 target = abs_path.readlink()
                 if any(pattern in str(target) for pattern in dangerous_patterns):
                     return False
-            except Exception:
+            except Exception as e:
                 return False
 
         return True
 
-    except Exception:
+    except Exception as e:
         return False
 
 

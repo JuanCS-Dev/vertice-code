@@ -229,13 +229,13 @@ class MCPServerManager:
         if self.http_server:
             try:
                 await self.http_server.stop()
-            except Exception:
+            except Exception as e:
                 pass
 
         if self.mcp_server:
             try:
                 await self.mcp_server.stop()
-            except Exception:
+            except Exception as e:
                 pass
 
     def get_status(self) -> Dict[str, Any]:

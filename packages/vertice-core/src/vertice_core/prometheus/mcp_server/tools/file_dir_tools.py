@@ -44,7 +44,7 @@ def validate_safe_path(path: str, allow_root: bool = False) -> bool:
 
         return True
 
-    except Exception:
+    except Exception as e:
         return False
 
 

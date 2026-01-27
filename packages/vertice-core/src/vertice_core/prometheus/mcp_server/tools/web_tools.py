@@ -70,7 +70,7 @@ def is_ssrf_safe(url: str) -> tuple[bool, Optional[str]]:
             for blocked_range in BLOCKED_IP_RANGES:
                 if ip in blocked_range:
                     return False, f"SSRF blocked: {hostname} resolves to private IP {ip}"
-        except Exception:
+        except Exception as e:
             pass  # DNS resolution failed, allow (might be a valid hostname)
 
         return True, None
@@ -323,7 +323,7 @@ def _parse_ddg_results(html: str, max_results: int) -> List[Dict[str, str]]:
                 if title and url:
                     results.append({"title": title, "url": url, "snippet": snippet})
 
-            except Exception:
+            except Exception as e:
                 continue  # Skip malformed results
 
     except ImportError:

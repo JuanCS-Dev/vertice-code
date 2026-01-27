@@ -371,7 +371,7 @@ class ErrorTracker:
 
         try:
             return "".join(traceback.format_exception(type(error), error, error.__traceback__))
-        except Exception:
+        except Exception as e:
             return None
 
 

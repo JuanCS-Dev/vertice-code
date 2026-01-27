@@ -301,7 +301,7 @@ class ResponseView(VerticalScroll):
                     language = aliases[0]
                 elif lexer is not None and getattr(lexer, "name", None):
                     language = str(getattr(lexer, "name")).lower()
-            except Exception:
+            except Exception as e:
                 language = "text"
 
             preview_lines = min(max(self._get_max_code_lines(), 1), 50)
@@ -334,7 +334,7 @@ class ResponseView(VerticalScroll):
         # Fallback: `render()` may wrap Rich renderables in a RichVisual.
         try:
             visual = widget.render()
-        except Exception:
+        except Exception as e:
             return None
 
         return getattr(visual, "_renderable", visual)
@@ -417,7 +417,7 @@ class ResponseView(VerticalScroll):
         if self._markdown_stream is not None:
             try:
                 await self._markdown_stream.stop()
-            except Exception:
+            except Exception as e:
                 pass
             finally:
                 self._markdown_stream = None

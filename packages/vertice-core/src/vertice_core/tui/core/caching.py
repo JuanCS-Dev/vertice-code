@@ -112,7 +112,7 @@ class IntelligentCache(Generic[T]):
                 return sum(len(str(k)) + self._estimate_size(v) for k, v in value.items())
             else:
                 return len(str(value).encode("utf-8"))
-        except Exception:
+        except Exception as e:
             return 1024  # Default estimate
 
     def _cleanup_expired(self):

@@ -146,7 +146,7 @@ class HTTPConnectionPool:
 
             parsed = urlparse(url)
             return parsed.netloc or parsed.path
-        except Exception:
+        except Exception as e:
             return url
 
     @backoff.on_exception(

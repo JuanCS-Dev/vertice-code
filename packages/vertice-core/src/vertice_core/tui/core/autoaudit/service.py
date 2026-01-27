@@ -127,7 +127,7 @@ class AutoAuditService:
 
             executor = get_safe_executor()
             executor.set_audit_mode(True)
-        except Exception:
+        except Exception as e:
             pass  # Safe executor may not exist
 
         # Filtra por categoria
@@ -205,7 +205,7 @@ class AutoAuditService:
 
             executor = get_safe_executor()
             executor.set_audit_mode(False)
-        except Exception:
+        except Exception as e:
             pass
 
         # --- PROMETHEUS SELF-HEALING ---
@@ -379,13 +379,13 @@ TASK:
                 "tools": self.bridge.tools.get_tool_count(),
                 "context_size": len(self.bridge.history.get_context()),
             }
-        except Exception:
+        except Exception as e:
             return {}
 
     def _get_context(self) -> List[Dict[str, Any]]:
         try:
             return self.bridge.history.get_context()[-5:]  # type: ignore[no-any-return]
-        except Exception:
+        except Exception as e:
             return []
 
     async def _run_vertex_diagnostic(self, scenario: AuditScenario) -> ScenarioResult:

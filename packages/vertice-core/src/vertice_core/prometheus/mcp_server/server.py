@@ -142,7 +142,7 @@ class PrometheusMCPServer:
         for module in modules:
             try:
                 importlib.import_module(module)
-            except Exception:
+            except Exception as e:
                 self.logger.warning(f"Tool module failed to import: {module}", exc_info=True)
 
         tool_count = get_tool_registry().get_tool_count()

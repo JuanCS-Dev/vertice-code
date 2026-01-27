@@ -84,7 +84,7 @@ def get_current_branch(path: str = ".") -> str:
         if result.returncode == 0:
             return result.stdout.strip()
         return "unknown"
-    except Exception:
+    except Exception as e:
         return "unknown"
 
 
@@ -97,7 +97,7 @@ def is_repo_clean(path: str = ".") -> bool:
             ["git", "status", "--porcelain"], cwd=path, capture_output=True, text=True, timeout=10
         )
         return result.returncode == 0 and not result.stdout.strip()
-    except Exception:
+    except Exception as e:
         return False
 
 

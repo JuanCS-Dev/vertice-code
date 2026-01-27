@@ -50,12 +50,12 @@ def validate_safe_path(path: str, allow_root: bool = False) -> bool:
                 target = abs_path.readlink()
                 if any(pattern in str(target) for pattern in dangerous_patterns):
                     return False
-            except Exception:
+            except Exception as e:
                 return False
 
         return True
 
-    except Exception:
+    except Exception as e:
         return False
 
 
@@ -296,7 +296,7 @@ async def edit_file(
                     backup_content = backup_path.read_text(encoding=encoding)
                     file_path.write_text(backup_content, encoding=encoding)
                     backup_path.unlink()
-                except Exception:
+                except Exception as e:
                     pass  # Backup restoration failed
             raise e
 

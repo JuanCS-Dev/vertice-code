@@ -402,17 +402,17 @@ Working directory: {os.getcwd()}"""
 
         try:
             tool_schemas = self.tools.get_schemas_for_llm() if self.tools else []
-        except Exception:
+        except Exception as e:
             tool_schemas = []
 
         try:
             context = get_dynamic_context()
-        except Exception:
+        except Exception as e:
             context = {"cwd": os.getcwd()}
 
         try:
             project_memory = load_project_memory()
-        except Exception:
+        except Exception as e:
             project_memory = None
 
         user_memory = None
@@ -420,7 +420,7 @@ Working directory: {os.getcwd()}"""
             memory_result = self.read_memory(scope="project")
             if memory_result.get("success"):
                 user_memory = memory_result.get("content")
-        except Exception:
+        except Exception as e:
             user_memory = None
 
         return build_agentic_system_prompt(

@@ -353,7 +353,7 @@ Each plan should be a valid sequence to achieve the goal."""
         try:
             response = await self.llm.generate(planning_prompt)
             candidate_plans = self._parse_plans(response, available_actions)
-        except Exception:
+        except Exception as e:
             # Fallback: single simple plan
             candidate_plans = [[(ActionType.THINK, {"goal": goal})]]
 

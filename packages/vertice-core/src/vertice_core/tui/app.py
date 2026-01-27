@@ -443,7 +443,7 @@ class VerticeApp(App):
                 completer, "get_completions_threadsafe", completer.get_completions
             )
             completions = await asyncio.to_thread(get_completions, text, 15)
-        except Exception:
+        except Exception as e:
             autocomplete.hide()
             return
 
@@ -553,7 +553,7 @@ class VerticeApp(App):
         async def _write() -> None:
             try:
                 await asyncio.to_thread(_append_jsonl_sync, self._perf_log_path, record)
-            except Exception:
+            except Exception as e:
                 pass
 
         try:
@@ -721,20 +721,20 @@ class VerticeApp(App):
             self.is_processing = False
             try:
                 self.workers.cancel_group(self, "chat_dispatch")
-            except Exception:
+            except Exception as e:
                 pass
 
             try:
                 status = self.query_one(StatusBar)
                 status.mode = "READY"
-            except Exception:
+            except Exception as e:
                 pass
 
             try:
                 response = self.query_one("#response", ResponseView)
                 self.run_worker(response.end_thinking(), name="cancel_end_thinking", group="system")
                 response.add_error("Operation cancelled")
-            except Exception:
+            except Exception as e:
                 pass
 
     def action_toggle_theme(self) -> None:
@@ -817,7 +817,7 @@ class VerticeApp(App):
             try:
                 # This would get current session ID
                 current_session_id = getattr(self.session_manager, "current_session_id", None)
-            except Exception:
+            except Exception as e:
                 pass
 
         # Create and mount fuzzy search modal

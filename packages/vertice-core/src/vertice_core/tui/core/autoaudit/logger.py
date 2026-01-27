@@ -33,7 +33,7 @@ class BlackBoxLogger:
         self.output_dir = output_dir or (root_dir / "logs" / "autoaudit")
         try:
             self.output_dir.mkdir(parents=True, exist_ok=True)
-        except Exception:
+        except Exception as e:
             # Fallback to tmp if permissions fail
             self.output_dir = Path("/tmp/vertice_logs/autoaudit")
             self.output_dir.mkdir(parents=True, exist_ok=True)

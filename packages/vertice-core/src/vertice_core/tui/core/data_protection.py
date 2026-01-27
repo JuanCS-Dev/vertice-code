@@ -308,7 +308,7 @@ def _get_master_key() -> bytes:
         # Decode from base64 if provided
         try:
             return base64.b64decode(env_key)
-        except Exception:
+        except Exception as e:
             logger.warning("Invalid VERTICE_MASTER_KEY format, using generated key")
 
     # Generate and log warning about missing key

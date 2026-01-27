@@ -79,7 +79,7 @@ async def run_mcp_server():
         try:
             await http_server.stop()
             await mcp_server.stop()
-        except Exception:
+        except Exception as e:
             pass
         logger.info("Server stopped")
 

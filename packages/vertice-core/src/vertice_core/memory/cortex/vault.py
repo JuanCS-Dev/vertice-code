@@ -201,7 +201,7 @@ class KnowledgeVault:
             if ":" in decoded:
                 return decoded.split(":", 1)[1]
             return decoded
-        except Exception:
+        except Exception as e:
             # If it fails, it's likely not base64. It might be an unencrypted value.
             return obfuscated
 

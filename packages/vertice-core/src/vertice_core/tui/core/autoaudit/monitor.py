@@ -82,7 +82,7 @@ class StateMonitor:
         for hook in self._hooks:
             try:
                 hook(event_type, payload)
-            except Exception:
+            except Exception as e:
                 pass  # Hooks não devem quebrar o monitor
 
     def record_sse_event(self, event: Any) -> None:

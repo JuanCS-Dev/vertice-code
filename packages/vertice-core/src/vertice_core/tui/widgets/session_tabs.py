@@ -335,7 +335,7 @@ class SessionTabs(Widget):
                     # the actual rendered content snapshot
                     session.viewport_content = f"Content snapshot at {datetime.now().isoformat()}"
 
-        except Exception:
+        except Exception as e:
             # Silently fail if visual state can't be saved
             pass
 
@@ -355,7 +355,7 @@ class SessionTabs(Widget):
                     # Restore scroll position
                     content_widget.scroll_y = session.scroll_position
 
-        except Exception:
+        except Exception as e:
             # Silently fail if visual state can't be restored
             pass
 

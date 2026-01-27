@@ -159,7 +159,7 @@ class VertexAIProvider:
             if include_thoughts and hasattr(types, "ThinkingConfig"):
                 try:
                     config.thinking_config = types.ThinkingConfig(include_thoughts=True)  # type: ignore[attr-defined]
-                except Exception:
+                except Exception as e:
                     # Older SDKs may not accept thinking_config; keep streaming functional output only.
                     include_thoughts = False
 

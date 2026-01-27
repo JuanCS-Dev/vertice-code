@@ -143,7 +143,7 @@ class PerformanceHUD(Widget):
         # Only update display if widget is mounted
         try:
             self._update_display()
-        except Exception:
+        except Exception as e:
             pass  # Silently fail if not mounted yet
 
     def toggle_visibility(self) -> None:

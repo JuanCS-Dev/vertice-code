@@ -19,7 +19,7 @@ from textual.message import Message
 from textual.binding import Binding
 
 try:
-    from rapidfuzz import fuzz, process
+    from rapidfuzz import fuzz
 
     FUZZY_AVAILABLE = True
 except ImportError:
@@ -237,7 +237,7 @@ class FuzzySearchModal(Widget):
         try:
             # This would call session_manager.get_session_messages(session_id)
             return []  # Placeholder
-        except Exception:
+        except Exception as e:
             return []
 
     async def _get_recent_sessions(self, limit: int) -> List[str]:
@@ -246,7 +246,7 @@ class FuzzySearchModal(Widget):
         try:
             # This would call session_manager.get_recent_sessions(limit)
             return []  # Placeholder
-        except Exception:
+        except Exception as e:
             return []
 
     def _extract_context(self, content: str, query: str) -> str:

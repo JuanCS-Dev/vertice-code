@@ -9,3 +9,17 @@ async-lru>=2.0.4
 firebase-admin>=6.5.0
 google-cloud-firestore>=2.16.0
 vertice-core @ file:///app/packages/vertice-core
+# Observability (M10)
+opentelemetry-api>=1.25.0
+opentelemetry-sdk>=1.25.0
+opentelemetry-exporter-otlp>=1.25.0
+opentelemetry-instrumentation-fastapi>=0.46b0
+opentelemetry-instrumentation-logging>=0.46b0
+python-json-logger>=2.0.7
+# Privacy (M9)
+google-cloud-kms>=2.21.0
+cryptography>=42.0.0
+# Billing (M7)
+stripe>=8.0.0
+# Jules (M11)
+httpx>=0.27.0

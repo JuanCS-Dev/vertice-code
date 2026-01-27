@@ -42,9 +42,25 @@ import auth as _auth_mod  # noqa: E402
 import store as _store_mod  # noqa: E402
 import tenancy as _tenancy_mod  # noqa: E402
 from nexus.router import router as nexus_router  # noqa: E402
+from observability.router import router as observability_router  # noqa: E402
+from privacy.router import router as privacy_router  # noqa: E402
+from billing.router import router as billing_router  # noqa: E402
+from jules.router import router as jules_router  # noqa: E402
 
 # Include NEXUS Meta-Agent router (Gemini 3 Pro powered)
 app.include_router(nexus_router)
+
+# Include Observability router (M10: Feedback, Cost Tracking)
+app.include_router(observability_router)
+
+# Include Privacy router (M9: GDPR/LGPD Compliance)
+app.include_router(privacy_router)
+
+# Include Billing router (M7: Monetization & Stripe)
+app.include_router(billing_router)
+
+# Include Jules router (M11: Autonomous Maintenance)
+app.include_router(jules_router)
 
 AuthContext = _auth_mod.AuthContext
 get_auth_context = _auth_mod.get_auth_context

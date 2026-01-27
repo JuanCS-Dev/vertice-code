@@ -114,7 +114,7 @@ class AuthenticationManager(IAuthenticationManager):
             return True
         except AuthenticationError:
             return False
-        except Exception:
+        except Exception as e:
             # Catch other exceptions during client initialization or API call
             return False
 
