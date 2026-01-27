@@ -23,6 +23,8 @@ from vertice_core.agui.vertex_agent_engine import (
 
 app = FastAPI(title="Vertice Agent Gateway", version="2026.1.0")
 
+# NEXUS Meta-Agent router will be included after imports (see below)
+
 ENGINES_CONFIG_PATH = Path(__file__).resolve().parents[2] / "config" / "engines.json"
 GATEWAY_ROOT = Path(__file__).resolve().parents[1]
 _gateway_root = str(GATEWAY_ROOT)
@@ -39,6 +41,10 @@ from api.stream import STREAM_HEADERS, AGUIStreamTranslator  # noqa: E402
 import auth as _auth_mod  # noqa: E402
 import store as _store_mod  # noqa: E402
 import tenancy as _tenancy_mod  # noqa: E402
+from nexus.router import router as nexus_router  # noqa: E402
+
+# Include NEXUS Meta-Agent router (Gemini 3 Pro powered)
+app.include_router(nexus_router)
 
 AuthContext = _auth_mod.AuthContext
 get_auth_context = _auth_mod.get_auth_context

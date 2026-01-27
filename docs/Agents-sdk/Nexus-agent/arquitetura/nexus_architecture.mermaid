@@ -1,0 +1,145 @@
+```mermaid
+graph TB
+    subgraph "NEXUS Meta-Agent Architecture"
+        direction TB
+
+        subgraph "Core Intelligence Layer"
+            NEXUS[🧬 NEXUS Meta-Agent<br/>Self-Evolving Intelligence]
+
+            subgraph "Metacognitive Engine"
+                ME[🧠 Metacognitive Engine<br/>Intrinsic Learning]
+                REFLECT[💭 Reflection System<br/>Bi-Level Architecture]
+                INSIGHTS[💡 Insight Generator<br/>Pattern Abstraction]
+                CLUSTER[🔍 Insight Clustering<br/>Semantic Analysis]
+            end
+
+            subgraph "Self-Healing Orchestrator"
+                SH[🏥 Self-Healing System<br/>Autonomous Recovery]
+                MONITOR[👁️ Health Monitor<br/>Real-Time Metrics]
+                DIAGNOSE[🔬 Diagnostic Engine<br/>Causal Analysis]
+                HEAL[🔧 Healing Executor<br/>Auto-Remediation]
+            end
+
+            subgraph "Evolutionary Optimizer"
+                EVO[🧬 Evolutionary Engine<br/>Genetic Algorithms]
+                ISLANDS[🏝️ Island Populations<br/>5 Parallel Islands]
+                MUTATE[🎲 Mutation Engine<br/>LLM-Guided Changes]
+                CROSSOVER[🔀 Crossover System<br/>Inspiration-Based]
+                FITNESS[📊 Fitness Evaluator<br/>Multi-Objective]
+            end
+        end
+
+        subgraph "AI Foundation"
+            GEMINI[⚡ Gemini 3 Pro<br/>1M Token Context<br/>Deep Think Mode]
+            FLASH[⚡ Gemini 3 Flash<br/>Fast Operations]
+        end
+
+        subgraph "Memory Architecture"
+            direction LR
+            L1[💾 L1: Working Memory<br/>128K tokens<br/>Current context]
+            L2[💾 L2: Episodic Memory<br/>512K tokens<br/>Recent history]
+            L3[💾 L3: Semantic Memory<br/>256K tokens<br/>Patterns & principles]
+            L4[💾 L4: Procedural Memory<br/>104K tokens<br/>Skills & workflows]
+        end
+
+        subgraph "GCP Infrastructure"
+            FS[(🗄️ Firestore<br/>Persistent State)]
+            MON[📈 Cloud Monitoring<br/>System Metrics]
+            LOG[📝 Cloud Logging<br/>Audit Trail]
+            VA[🎯 Vertex AI<br/>Model Serving]
+        end
+
+        subgraph "Vertice MCP Ecosystem"
+            MCP[🌐 MCP Server<br/>Collective Intelligence]
+            AGENTS[🤖 Agent Swarm<br/>Coder • Architect<br/>DevOps • Security]
+            SKILLS[🧠 Shared Skills<br/>Collective Knowledge]
+        end
+
+        subgraph "System State"
+            STATE[📊 System State<br/>Health • Tasks • Metrics]
+            HISTORY[📜 Evolution History<br/>Generations • Fitness]
+        end
+    end
+
+    %% Core Intelligence Flow
+    NEXUS --> ME
+    NEXUS --> SH
+    NEXUS --> EVO
+
+    %% Metacognitive Engine Flow
+    ME --> REFLECT
+    REFLECT --> INSIGHTS
+    INSIGHTS --> CLUSTER
+    CLUSTER --> ME
+
+    %% Self-Healing Flow
+    SH --> MONITOR
+    MONITOR --> DIAGNOSE
+    DIAGNOSE --> HEAL
+    HEAL --> SH
+
+    %% Evolutionary Flow
+    EVO --> ISLANDS
+    ISLANDS --> MUTATE
+    ISLANDS --> CROSSOVER
+    MUTATE --> FITNESS
+    CROSSOVER --> FITNESS
+    FITNESS --> ISLANDS
+
+    %% AI Foundation Connections
+    GEMINI --> ME
+    GEMINI --> DIAGNOSE
+    GEMINI --> FITNESS
+    FLASH --> MUTATE
+    FLASH --> CROSSOVER
+
+    %% Memory Connections
+    ME -.-> L1
+    L1 -.-> L2
+    L2 -.-> L3
+    L3 -.-> L4
+    L4 -.-> FS
+
+    %% GCP Infrastructure
+    NEXUS --> FS
+    MONITOR --> MON
+    NEXUS --> LOG
+    GEMINI --> VA
+    FLASH --> VA
+
+    %% MCP Ecosystem
+    NEXUS <--> MCP
+    MCP <--> AGENTS
+    MCP <--> SKILLS
+
+    %% State Management
+    NEXUS --> STATE
+    EVO --> HISTORY
+    STATE --> FS
+    HISTORY --> FS
+
+    %% Feedback Loops
+    HEAL -.->|Learning| INSIGHTS
+    FITNESS -.->|Performance Data| MONITOR
+    INSIGHTS -.->|Improvements| EVO
+    AGENTS -.->|Task Outcomes| REFLECT
+
+    %% Styling
+    classDef coreNode fill:#667eea,stroke:#764ba2,stroke-width:3px,color:#fff
+    classDef metacogNode fill:#f093fb,stroke:#f5576c,stroke-width:2px,color:#fff
+    classDef healingNode fill:#4facfe,stroke:#00f2fe,stroke-width:2px,color:#fff
+    classDef evolutionNode fill:#43e97b,stroke:#38f9d7,stroke-width:2px,color:#fff
+    classDef aiNode fill:#fa709a,stroke:#fee140,stroke-width:2px,color:#fff
+    classDef memoryNode fill:#a8edea,stroke:#fed6e3,stroke-width:2px,color:#333
+    classDef gcpNode fill:#fbc2eb,stroke:#a6c1ee,stroke-width:2px,color:#333
+    classDef mcpNode fill:#fdcbf1,stroke:#e6dee9,stroke-width:2px,color:#333
+
+    class NEXUS coreNode
+    class ME,REFLECT,INSIGHTS,CLUSTER metacogNode
+    class SH,MONITOR,DIAGNOSE,HEAL healingNode
+    class EVO,ISLANDS,MUTATE,CROSSOVER,FITNESS evolutionNode
+    class GEMINI,FLASH aiNode
+    class L1,L2,L3,L4 memoryNode
+    class FS,MON,LOG,VA gcpNode
+    class MCP,AGENTS,SKILLS,STATE,HISTORY mcpNode
+```

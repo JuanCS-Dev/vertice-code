@@ -1,0 +1,107 @@
+```mermaid
+sequenceDiagram
+    participant User as 👤 User/System
+    participant NEXUS as 🧬 NEXUS
+    participant Meta as 🧠 Metacognitive
+    participant Heal as 🏥 Self-Healing
+    participant Evol as 🧬 Evolution
+    participant Gemini as ⚡ Gemini 3
+    participant MCP as 🌐 MCP Collective
+    participant GCP as ☁️ GCP Storage
+
+    Note over NEXUS: Autonomous Operation Loop
+
+    %% Task Monitoring
+    rect rgb(240, 147, 251)
+        Note over User,MCP: Task Execution Phase
+        MCP->>NEXUS: Task completed (outcome data)
+        NEXUS->>Meta: Reflect on outcome
+        Meta->>Gemini: Deep Think analysis
+        Gemini-->>Meta: Causal insights
+        Meta->>GCP: Store insight
+        Meta-->>NEXUS: Learning + Action plan
+    end
+
+    %% Health Monitoring
+    rect rgb(79, 172, 254)
+        Note over NEXUS,GCP: Continuous Health Monitoring
+        loop Every 60 seconds
+            NEXUS->>Heal: Check system health
+            Heal->>GCP: Query metrics
+            GCP-->>Heal: System metrics
+            Heal->>Heal: Detect anomalies
+
+            alt Anomaly Detected
+                Heal->>Gemini: Diagnose root cause
+                Gemini-->>Heal: Diagnosis + fix
+                Heal->>MCP: Execute healing action
+                MCP-->>Heal: Healing result
+                Heal->>GCP: Record healing
+                Heal->>Meta: Learn from healing
+            end
+        end
+    end
+
+    %% Metacognitive Reflection
+    rect rgb(102, 126, 234)
+        Note over Meta,GCP: Hourly Reflection Cycle
+        loop Every hour
+            Meta->>GCP: Retrieve recent insights
+            Meta->>Meta: Cluster similar insights
+            Meta->>Gemini: Identify patterns
+            Gemini-->>Meta: Improvement opportunities
+
+            alt High-Priority Opportunity
+                Meta->>NEXUS: Queue for evolution
+                NEXUS->>Evol: Optimize target agent
+            end
+        end
+    end
+
+    %% Evolutionary Optimization
+    rect rgb(67, 233, 123)
+        Note over Evol,GCP: Daily Evolution Cycle
+        loop Every 24 hours
+            NEXUS->>Evol: Evolve agent code
+
+            loop 50 Generations
+                Evol->>Evol: Create population
+
+                par Parallel Island Evolution
+                    Evol->>Gemini: Evaluate Island 1
+                    Evol->>Gemini: Evaluate Island 2
+                    Evol->>Gemini: Evaluate Island 3
+                    Evol->>Gemini: Evaluate Island 4
+                    Evol->>Gemini: Evaluate Island 5
+                end
+
+                Gemini-->>Evol: Fitness scores
+                Evol->>Evol: Select + Crossover
+                Evol->>Gemini: Mutate offspring
+                Gemini-->>Evol: Mutated code
+
+                opt Every 5 generations
+                    Evol->>Evol: Migrate best candidates
+                end
+            end
+
+            Evol->>GCP: Store best solution
+            Evol->>MCP: Deploy evolved agent
+            MCP-->>NEXUS: Deployment success
+            NEXUS->>Meta: Learn from evolution
+        end
+    end
+
+    %% Self-Improvement Loop
+    rect rgb(250, 112, 154)
+        Note over Meta,Evol: Meta-Evolution
+        Meta->>Meta: Analyze own performance
+        Meta->>Evol: Evolve evolution strategy
+        Evol->>Gemini: Generate improved algorithm
+        Gemini-->>Evol: New strategy
+        Evol->>Evol: Self-modify approach
+        Note over NEXUS: System becomes better<br/>at becoming better
+    end
+
+    Note over NEXUS: Continuous Self-Evolution Active
+```

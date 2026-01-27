@@ -1,0 +1,145 @@
+```mermaid
+graph LR
+    subgraph "Data Flow: Self-Evolution Cycle"
+        subgraph "Input Sources"
+            T[📋 Task Outcomes]
+            M[📊 System Metrics]
+            E[⚠️ Error Events]
+            P[📈 Performance Data]
+        end
+
+        subgraph "Memory Ingestion"
+            L1[💾 Working Memory<br/>128K tokens]
+            L2[💾 Episodic Memory<br/>512K tokens]
+            L3[💾 Semantic Memory<br/>256K tokens]
+            L4[💾 Procedural Memory<br/>104K tokens]
+        end
+
+        subgraph "Metacognitive Processing"
+            direction TB
+            OBS[👁️ Observation<br/>What happened?]
+            ANA[🔬 Analysis<br/>Why happened?]
+            LEA[💡 Learning<br/>What learned?]
+            ACT[🎯 Action<br/>What to do?]
+
+            OBS --> ANA
+            ANA --> LEA
+            LEA --> ACT
+        end
+
+        subgraph "Knowledge Synthesis"
+            INS[(💎 Insight Store<br/>Firestore)]
+            CLU[🔍 Clustering<br/>Pattern Detection]
+            OPP[🎯 Opportunities<br/>Prioritized]
+        end
+
+        subgraph "Evolution Engine"
+            direction TB
+            POP[👥 Population<br/>50 candidates]
+            EVAL[📊 Evaluation<br/>Multi-objective]
+            SEL[🎯 Selection<br/>Tournament]
+            GEN[🧬 Genetic Ops<br/>Crossover + Mutate]
+
+            POP --> EVAL
+            EVAL --> SEL
+            SEL --> GEN
+            GEN --> POP
+        end
+
+        subgraph "Healing System"
+            direction TB
+            ANO[⚠️ Anomaly<br/>Detection]
+            DIA[🔬 Diagnosis<br/>Root Cause]
+            REM[🔧 Remediation<br/>Auto-Fix]
+            VAL[✅ Validation<br/>Test Fix]
+
+            ANO --> DIA
+            DIA --> REM
+            REM --> VAL
+        end
+
+        subgraph "Output Actions"
+            DEP[🚀 Deploy<br/>Evolved Code]
+            FIX[🔧 Apply Fix<br/>System Heal]
+            SKL[🧠 New Skill<br/>To Collective]
+            MOD[⚙️ Modify Agent<br/>Behavior]
+        end
+
+        subgraph "Feedback Collection"
+            RES[📊 Results<br/>Monitoring]
+            IMP[📈 Impact<br/>Measurement]
+            MET[🎯 Metrics<br/>Updated]
+        end
+
+        %% Data Flow Connections
+        T --> L1
+        M --> L1
+        E --> L1
+        P --> L1
+
+        L1 --> L2
+        L2 --> L3
+        L3 --> L4
+
+        L1 --> OBS
+        L2 --> OBS
+        L3 --> ANA
+        L4 --> LEA
+
+        ACT --> INS
+        INS --> CLU
+        CLU --> OPP
+
+        OPP -->|Evolution Request| POP
+        OPP -->|Healing Request| ANO
+
+        M --> ANO
+        E --> ANO
+
+        GEN -->|Best Solution| DEP
+        VAL -->|Validated Fix| FIX
+        LEA -->|New Knowledge| SKL
+        ACT -->|Improvement| MOD
+
+        DEP --> RES
+        FIX --> RES
+        SKL --> RES
+        MOD --> RES
+
+        RES --> IMP
+        IMP --> MET
+        MET -->|New Data| T
+        MET -->|New Data| M
+
+        %% Gemini Integration
+        GEM[⚡ Gemini 3<br/>1M Context<br/>Deep Think]
+
+        ANA -.->|Deep Reasoning| GEM
+        GEN -.->|Code Generation| GEM
+        DIA -.->|Causal Analysis| GEM
+
+        GEM -.->|Insights| ANA
+        GEM -.->|Mutations| GEN
+        GEM -.->|Diagnosis| DIA
+    end
+
+    classDef inputNode fill:#ffeaa7,stroke:#fdcb6e,stroke-width:2px,color:#333
+    classDef memoryNode fill:#a8edea,stroke:#fed6e3,stroke-width:2px,color:#333
+    classDef processNode fill:#f093fb,stroke:#f5576c,stroke-width:2px,color:#fff
+    classDef knowledgeNode fill:#667eea,stroke:#764ba2,stroke-width:2px,color:#fff
+    classDef evolutionNode fill:#43e97b,stroke:#38f9d7,stroke-width:2px,color:#333
+    classDef healingNode fill:#4facfe,stroke:#00f2fe,stroke-width:2px,color:#fff
+    classDef outputNode fill:#fa709a,stroke:#fee140,stroke-width:2px,color:#fff
+    classDef feedbackNode fill:#a8edea,stroke:#fed6e3,stroke-width:2px,color:#333
+    classDef aiNode fill:#764ba2,stroke:#667eea,stroke-width:3px,color:#fff
+
+    class T,M,E,P inputNode
+    class L1,L2,L3,L4 memoryNode
+    class OBS,ANA,LEA,ACT processNode
+    class INS,CLU,OPP knowledgeNode
+    class POP,EVAL,SEL,GEN evolutionNode
+    class ANO,DIA,REM,VAL healingNode
+    class DEP,FIX,SKL,MOD outputNode
+    class RES,IMP,MET feedbackNode
+    class GEM aiNode
+```

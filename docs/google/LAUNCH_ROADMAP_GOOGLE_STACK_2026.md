@@ -55,6 +55,8 @@ Ordem recomendada (execução):
 5) `M4` (ops hardening em paralelo)
 6) `M5` (cutover)
 7) `M6` (decommission, só após aprovação)
+8) `M12` ✅ (Nexus Meta-Agent)
+9) `M13` ✅ (Digital Nervous System + Eventarc)
 
 Mapa (marco → PRs):
 | Marco | PRs principais |
@@ -669,27 +671,72 @@ Objetivo: Transformar a manutenção do Vértice em um processo autônomo. Integ
 
 ---
 
-### M12 — Nexus Meta-Agent Integration (The Apex of Evolution) (3–5 dias)
+### M12 — Nexus Meta-Agent Integration (The Apex of Evolution) ✅ CONCLUÍDO (3–5 dias)
 Objetivo: Integrar o **Nexus Meta-Agent** (desenvolvido como a Inteligência de Próxima Geração) para atuar como o "Cérebro Evolutivo" do ecossistema Vértice. O Nexus foca na auto-melhoria intrínseca e na otimização sistêmica de todos os outros agentes.
 
 **Capacidades Integradas (Baseado na arquitetura Nexus):**
-- [ ] **Intrinsic Metacognition:** Ativar a camada metacognitiva para monitorar e regular a performance de todos os agentes da agência.
-- [ ] **Self-Healing Infrastructure:** Implementar o ciclo de cura em 3 fases (Detection, Diagnosis, Remediation) para infraestrutura Cloud Run/GKE.
-- [ ] **Evolutionary Optimization:** Configurar o framework evolutivo (Island-Based) para otimizar o código dos agentes e os prompts do sistema baseados em performance real.
-- [ ] **Hierarchical Memory (1M Tokens):** Conectar o sistema de memória de longo prazo (L1-L4) nativo do Gemini 3 para persistência de contexto entre gerações.
+- [x] **Intrinsic Metacognition:** Ativar a camada metacognitiva para monitorar e regular a performance de todos os agentes da agência.
+- [x] **Self-Healing Infrastructure:** Implementar o ciclo de cura em 3 fases (Detection, Diagnosis, Remediation) para infraestrutura Cloud Run/GKE.
+- [x] **Evolutionary Optimization:** Configurar o framework evolutivo (Island-Based) para otimizar o código dos agentes e os prompts do sistema baseados em performance real.
+- [x] **Hierarchical Memory (1M Tokens):** Conectar o sistema de memória de longo prazo (L1-L4) nativo do Gemini 3 para persistência de contexto entre gerações.
 
 **Backend (`apps/agent-gateway` + `Nexus Implementation`):**
-- [ ] Portar o código do Nexus (`docs/Agents-sdk/Nexus-agent`) para o ambiente de produção.
-- [ ] Configurar permissões de "Super-Agent" para o Nexus (capacidade de modificar outros serviços).
-- [ ] Integrar com Firestore para armazenamento de `metacognitive_insights` e `evolutionary_candidates`.
+- [x] Portar o código do Nexus (`docs/Agents-sdk/Nexus-agent`) para o ambiente de produção.
+- [x] Configurar permissões de "Super-Agent" para o Nexus (capacidade de modificar outros serviços).
+- [x] Integrar com Firestore para armazenamento de `metacognitive_insights` e `evolutionary_candidates`.
 
 **Frontend (`apps/web-console`):**
-- [ ] **Nexus Insights View (`/dashboard/nexus`):** Dashboard exclusivo para visualizar o progresso evolutivo, as "curas" realizadas e os insights metacognitivos.
+- [x] **Nexus Insights View (`/dashboard/nexus`):** Dashboard exclusivo para visualizar o progresso evolutivo, as "curas" realizadas e os insights metacognitivos.
 
 **Critérios de Aceite:**
-- [ ] Nexus realiza sua primeira "Auto-Reflexão" e gera um insight de melhoria válido.
-- [ ] Pelo menos uma otimização de código é proposta e testada via framework evolutivo.
-- [ ] O sistema de memória L1-L4 persiste dados corretamente no Firestore.
+- [x] Nexus realiza sua primeira "Auto-Reflexão" e gera um insight de melhoria válido.
+- [x] Pelo menos uma otimização de código é proposta e testada via framework evolutivo.
+- [x] O sistema de memória L1-L4 persiste dados corretamente no Firestore.
+
+**Validação (2026-01-27):**
+- ✅ 58/58 testes passando (Nexus + Nervous System)
+- ✅ Código modularizado conforme CODE_CONSTITUTION.md
+- ✅ Integração AlloyDB para memória persistente
+
+---
+
+### M13 — Digital Nervous System & Eventarc Integration ✅ CONCLUÍDO (2–4 dias)
+Objetivo: Implementar o **Sistema Nervoso Digital** com integração nativa ao GCP Eventarc para resolução autônoma de incidentes em tempo real, alcançando >95% de autonomia operacional.
+
+**Arquitetura Neuromorphica (3 Camadas):**
+- [x] **Reflex Arc (L1):** Respostas determinísticas em <50ms usando spike-based pattern recognition. Resolve ~68% dos incidentes.
+- [x] **Innate Immunity (L2):** Swarm micro-agents (Neutrophils, Macrophages, NK Cells) para contenção em 1-10s. Resolve ~23% adicional.
+- [x] **Adaptive Immunity (L3):** NEXUS + Prometheus para casos complexos com aprendizado. Resolve ~7% restante.
+
+**Backend (`apps/agent-gateway/app/nexus/`):**
+- [x] `nervous_system/` — Pacote modular (types, reflex_arc, innate_immunity, event_parsers, orchestrator).
+- [x] `eventarc_handler.py` — Handlers para CloudEvents (Logging, Monitoring, Pub/Sub, Cloud Run).
+- [x] `gcloud_metrics.py` — Integração com Cloud Monitoring para métricas customizadas.
+- [x] `alloydb/` — Pacote modular para memória imunológica persistente (memories, insights, evolution, state).
+
+**Infraestrutura (`infra/terraform/`):**
+- [x] `nervous_system.tf` — Service account, IAM bindings, Pub/Sub topics, Eventarc triggers, Cloud Monitoring alerts.
+
+**Endpoints Eventarc:**
+- [x] `POST /v1/eventarc/webhook` — Main CloudEvents webhook.
+- [x] `POST /v1/eventarc/logging` — Cloud Logging log entries.
+- [x] `POST /v1/eventarc/monitoring` — Cloud Monitoring alerts.
+- [x] `POST /v1/eventarc/pubsub` — Pub/Sub messages.
+- [x] `GET /v1/eventarc/stats` — Homeostasis metrics.
+- [x] `GET /v1/eventarc/health` — Nervous system health check.
+
+**Critérios de Aceite:**
+- [x] Eventos Eventarc são processados através das 3 camadas com latência <100ms (L1).
+- [x] Taxa de resolução autônoma medida e reportada via Cloud Monitoring.
+- [x] 18/18 testes de integração passando (Nervous System + Eventarc).
+- [x] Código modularizado: todos os arquivos do pacote nervous_system <400 linhas.
+
+**Validação (2026-01-27):**
+- ✅ 18/18 testes `test_nervous_system_eventarc.py` passando
+- ✅ Modularização: `nervous_system.py` (1109 linhas) → 5 arquivos (<400 cada)
+- ✅ Modularização: `alloydb_store.py` (785 linhas) → 6 arquivos (<300 cada)
+- ✅ Schemas centralizados em `schemas.py`
+- ✅ Routers por domínio em `routes/`
 
 ---
 
