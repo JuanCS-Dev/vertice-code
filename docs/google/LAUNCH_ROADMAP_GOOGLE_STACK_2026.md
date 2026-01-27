@@ -523,6 +523,125 @@ Plano seguro de remoção:
 
 ---
 
+### M7 — Monetization & Billing (Stripe Hybrid Model) (2–4 dias)
+Objetivo: Implementar cobrança real (SaaS) com modelo híbrido (Assinatura Base + Usage-based para AI compute).
+
+**Estratégia de Pricing (2026):**
+- **Modelo:** Híbrido. "Start Cheap" para reduzir barreira de entrada.
+- **Tiers:**
+  - **Free/Hobby:** Acesso limitado (ex: 50 requests/dia, modelos Flash).
+  - **Pro ($19/mês):** Acesso prioritário, modelos Pro/Ultra, armazenamento estendido + Usage Overage (se passar da cota inclusa).
+- **Tech Stack:** Stripe Checkout (Hosted) para segurança + Webhooks para provisionamento.
+
+**Backend (`apps/agent-gateway`):**
+- [ ] Dependência: `stripe` (Python SDK).
+- [ ] Config: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` (Secret Manager).
+- [ ] Endpoints:
+  - `POST /v1/billing/checkout`: Cria sessão do Stripe Checkout (mode=subscription) e retorna URL.
+  - `POST /v1/billing/portal`: Cria sessão do Customer Portal (para cancelar/upgradear).
+  - `POST /v1/webhooks/stripe`: Recebe eventos (`checkout.session.completed`, `customer.subscription.updated`).
+- [ ] Persistência: Tabela `subscriptions` no Firestore (org_id, stripe_sub_id, status, current_period_end).
+- [ ] Gating: Middleware `SubscriptionGuard` que checa `subscriptions` antes de liberar acesso a modelos caros.
+
+**Frontend (`apps/web-console`):**
+- [ ] Página `/pricing` (Pública & Autenticada):
+  - Design "Obsidian/Neon": Cards escuros (`surface-card`) com bordas sutis (`border-dim`).
+  - Destaque no plano "Pro" com `box-shadow: glow-cyan`.
+  - Toggle Mensal/Anual (desconto no anual).
+- [ ] Integração:
+  - Botão "Upgrade" chama `/v1/billing/checkout`.
+  - Redirecionamento automático para Stripe.
+- [ ] Settings > Billing:
+  - Mostrar status da assinatura atual.
+  - Botão "Manage Subscription" (abre Stripe Customer Portal).
+
+**Critérios de Aceite:**
+- [ ] Usuário consegue assinar plano Pro via cartão de crédito (Test Mode).
+- [ ] Webhook atualiza Firestore em < 5s.
+- [ ] Usuário Free é bloqueado ao tentar usar recurso Pro.
+- [ ] Portal do Cliente funciona para cancelamento.
+
+---
+
+### M8 — Documentation Portal & DevEx (Docs-as-Code) (2–3 dias)
+Objetivo: Criar uma área de documentação **integrada, interativa e bonita** (`/docs`) para educar usuários e desenvolvedores sobre como criar Agentes e usar o SDK.
+
+**Conceito (Docs 2026):**
+- **Nada de PDF ou Wiki separada:** A doc vive dentro do `apps/web-console` (Next.js).
+- **Interactive:** Exemplos de código que podem ser copiados ou até executados (se possível).
+- **Design:** Mesma identidade "Obsidian" do app (dark mode, code blocks com syntax highlighting neon).
+
+**Frontend (`apps/web-console`):**
+- [ ] Engine: Configurar `@next/mdx` ou `next-mdx-remote` para renderizar markdown.
+- [ ] Styling: Usar `rehype-pretty-code` para blocos de código com tema "One Dark" ou similar ao Obsidian.
+- [ ] Estrutura (`/docs` layout):
+  - Sidebar de navegação (resiliência em mobile).
+  - Table of Contents (ToC) flutuante na direita.
+  - Breadcrumbs.
+- [ ] Conteúdo Inicial (Migrar de `docs/Agents-sdk`):
+  - **Getting Started:** Instalação do SDK (`pip install vertice-mcp`), Autenticação.
+  - **Core Concepts:** O que é um Agente, Tool, MCP.
+  - **Tutorials:** "Building your first Analyst Agent".
+  - **API Reference:** Detalhes dos endpoints (gerado ou manual).
+- [ ] Integração:
+  - Adicionar link "Docs" no Header principal (`DashboardClient` / Layout).
+
+**Critérios de Aceite:**
+- [ ] Rota `/docs` acessível publicamente (SEO-friendly).
+- [ ] Code blocks têm syntax highlighting e botão de cópia.
+- [ ] Link "Docs" visível no Header da aplicação.
+- [ ] Mobile view da documentação é navegável.
+
+---
+
+### M9 — Data Protection & Privacy (GDPR/LGPD) (1–2 dias)
+Objetivo: Implementar criptografia de dados sensíveis e controles de privacidade (Direito ao Esquecimento / Exportação), reaproveitando a lógica robusta de criptografia validada na fase de transição.
+
+**Backend (`apps/agent-gateway` + `packages/vertice-core`):**
+- [ ] **Crypto Engine:** Portar/Ativar `gdpr_crypto` (AES-GCM + Key Rotation) para o novo gateway.
+  - Campos a encriptar no Firestore: `prompt`, `final_text`, `artifacts` (se sensível).
+  - Integração com Google Cloud KMS (opcional para M9, mas recomendado).
+- [ ] **Data Erasure (Right to be Forgotten):**
+  - Endpoint `POST /v1/me/erasure`: Soft-delete imediato, hard-delete agendado (30 dias).
+  - Limpar logs associados ao `uid` (onde possível).
+- [ ] **Data Export (Portability):**
+  - Endpoint `GET /v1/me/export`: Gera JSON com todos os dados do usuário (Runs, Orgs, Artifacts).
+
+**Frontend (`apps/web-console`):**
+- [ ] **Privacy Dashboard (`/settings/privacy`):**
+  - Botão "Download My Data" (chama `/export`).
+  - Botão "Delete Account" (zona de perigo, confirmação dupla).
+  - Toggles para "Allow AI Training" (se aplicável).
+
+**Critérios de Aceite:**
+- [ ] Dados sensíveis aparecem encriptados no console do Firestore (mas legíveis via API).
+- [ ] Export gera um JSON válido e completo.
+- [ ] Delete remove acesso imediatamente.
+
+---
+
+### M10 — Agentic Observability & Feedback Loop (2–3 dias)
+Objetivo: Abrir a "caixa preta" dos Agentes. Implementar rastreamento detalhado de chamadas de LLM, custos em tempo real e permitir que usuários avaliem as respostas para melhoria contínua (RLHF).
+
+**Backend (`apps/agent-gateway` + `vertice-core`):**
+- [ ] **Tracing:** Integrar OpenTelemetry / Cloud Trace para cada "Run".
+  - Logar latência de cada etapa (Thinking, Tool Call, Rendering).
+  - Rastrear tokens usados e custo estimado em USD por request.
+- [ ] **Feedback API:** Endpoint `POST /v1/runs/{run_id}/feedback`.
+  - Armazenar `score` (1/-1), `comment` e `metadata` (qual modelo/prompt foi usado).
+
+**Frontend (`apps/web-console`):**
+- [ ] **Telemetry View:** No Dashboard, mostrar um pequeno indicador de "Tokens/sec" e "Cost" da run atual.
+- [ ] **Feedback UI:** Adicionar botões de 👍/👎 no final de cada resposta do agente.
+- [ ] **Stats Page (`/dashboard/stats`):** Gráficos simples de uso (requests por dia, custo acumulado no mês).
+
+**Critérios de Aceite:**
+- [ ] Logs no Cloud Logging mostram o "Trace ID" correlacionando Frontend e Backend.
+- [ ] Usuário consegue avaliar uma resposta e o dado é salvo no Firestore.
+- [ ] Dashboard mostra o custo da última operação.
+
+---
+
 ## 3) Runbook rápido (validação contínua, barato)
 
 Checklist diário (read-only):
@@ -600,6 +719,74 @@ Esta seção é deliberadamente objetiva: cada item vira uma PR pequena e tem co
 - Ação: incorporar o resultado de `docs/google/FRONTEND_UX_DRAFTS_IMPLEMENTATION_AUDIT_2026-01-26.md` como checklist
   de PRs (front-only) nesta roadmap, para evitar “UI mock” em produção.
 - Aceite: roadmap contém uma seção “UX Drafts → Wiring” com tarefas PR-sized para `/dashboard`, `/cot`, `/command-center`.
+
+### PR-L6 — Backend Billing Foundation (Stripe) (P1)
+- Escopo: `apps/agent-gateway`.
+- Implementação:
+  - Adicionar `stripe` ao `requirements.txt`.
+  - Criar `app/core/billing.py` (serviço Stripe wrapper).
+  - Implementar endpoints `/v1/billing/*` e webhook handler.
+  - Testes de integração com `stripe-mock` ou fixtures.
+- Aceite: Webhook processa `checkout.session.completed` e grava no Firestore (emulador).
+
+### PR-L7 — Frontend Pricing & Plan Cards (P1)
+- Escopo: `apps/web-console`.
+- Implementação:
+  - Página `/pricing` com design system Obsidian (Cards, Toggles, Checkmarks).
+  - Integração com endpoint de checkout (`/v1/billing/checkout`).
+  - Tratamento de estados de retorno (`/dashboard?success=true`).
+- Aceite: UI renderiza planos corretamente e botão inicia fluxo de redirect.
+
+### PR-L8 — Subscription Gating & Usage Limits (P1)
+- Escopo: `apps/agent-gateway` (middleware) e `apps/web-console` (UI feedback).
+- Implementação:
+  - Middleware que verifica role/subscription antes de processar requests caros.
+  - UI indicators para usuários Free (ex: "Upgrade to use GPT-5").
+- Aceite: Usuário sem flag `is_pro` recebe erro/aviso ao tentar features Pro.
+
+### PR-D1 — Docs Engine (MDX + Syntax Highlighting) (P1)
+- Escopo: `apps/web-console`.
+- Implementação:
+  - Configurar MDX no Next.js 16.
+  - Criar layout dedicado `/app/docs/layout.tsx` (Sidebar + Content).
+  - Implementar componentes MDX (CodeBlock, Callout, Cards).
+- Aceite: Renderização de `.mdx` funciona com estilo "Obsidian".
+
+### PR-D2 — Docs Content & Navigation (P1)
+- Escopo: `apps/web-console`.
+- Implementação:
+  - Escrever guias iniciais (baseado no SDK Python).
+  - Adicionar link "Docs" no Navbar principal.
+- Aceite: Navegação fluida entre páginas da doc e volta ao Dashboard.
+
+### PR-S1 — Privacy Foundation (Crypto & Erasure) (P0)
+- Escopo: `apps/agent-gateway`, `packages/vertice-core`.
+- Implementação:
+  - Migrar `gdpr_crypto.py` para `vertice-core/src/vertice_core/core/security.py` (se ainda não estiver).
+  - Aplicar criptografia automática no `Store` (Firestore) para campos de texto.
+  - Implementar endpoint `/v1/me/erasure`.
+- Aceite: Firestore mostra dados encriptados; API retorna dados decriptados.
+
+### PR-S2 — User Data Controls (Export & UI) (P1)
+- Escopo: `apps/web-console`, `apps/agent-gateway`.
+- Implementação:
+  - Backend: Endpoint `/v1/me/export` (stream de JSONl).
+  - Frontend: Página `/settings/privacy` com botões de ação.
+- Aceite: Download de dados funciona e exclusão de conta redireciona para login.
+
+### PR-O1 — Agentic Telemetry (Traces & Costs) (P1)
+- Escopo: `apps/agent-gateway`, `packages/vertice-core`.
+- Implementação:
+  - Middlewares de telemetria e tracking de tokens (Vertex AI).
+  - Exportar para Cloud Trace.
+- Aceite: Cada run gera um Trace completo no Google Cloud Console.
+
+### PR-O2 — Feedback Loop (👍/👎 & RLHF Storage) (P2)
+- Escopo: `apps/web-console`, `apps/agent-gateway`.
+- Implementação:
+  - UI de feedback no final da mensagem.
+  - Endpoint de storage de feedback no backend.
+- Aceite: Botões de feedback funcionais e dados visíveis no banco.
 
 ### PR-INDEX — Fonte única dos PRs (docs/google) (P0)
 Objetivo: centralizar “o que precisa ser PR” e evitar drift entre documentos.
